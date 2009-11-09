@@ -1,0 +1,251 @@
+.el-finder {
+	width:100%; 
+	border:1px solid #ccc;
+	background-color:#fff;
+	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
+
+}
+
+.ui-dialog .el-finder { width:99%; margin:1px auto; }
+
+.el-finder a { color : #444; }
+.el-finder .disabled { opacity:0.35; filter:Alpha(Opacity=35);}
+
+ul.el-finder-toolbar {
+	padding:5px 7px;
+	background:#eee;
+	margin:0;
+	list-style:none;
+	display:block;
+}
+
+ul.el-finder-toolbar li {
+	display:inline-block; 
+	display: -moz-inline-stack;
+    display: inline-block;
+	height:22px; 
+	width:22px;
+    vertical-align: top;
+    zoom: 1;
+    *display: inline;
+	margin:1px 1px;
+	background:url('../images/elfinder-toolbar.png') no-repeat; 
+	border:1px solid #ccc;	
+}
+/*подсветка при наведение */
+ul.el-finder-toolbar li:hover { border:1px solid #54b9bf; }
+/*Кнопки */
+
+ul.el-finder-toolbar li.button-hover   { border:1px solid #54b9bf;}
+ul.el-finder-toolbar li.button-delim   { background-position: -4px 1px; border:none;  width:3px;}
+ul.el-finder-toolbar li.button-back    { background-position: 0 -23px;}
+ul.el-finder-toolbar li.button-reload  { background-position: 0 -44px;}
+ul.el-finder-toolbar li.button-info    { background-position: 0 -297px;}
+ul.el-finder-toolbar li.button-select  { background-position: 0 -341px;}
+ul.el-finder-toolbar li.button-open    { background-position: 0 -394px;}
+ul.el-finder-toolbar li.button-edit    { background-position: -1px -367px;}
+ul.el-finder-toolbar li.button-rename  { background-position: 0 -317px;}
+ul.el-finder-toolbar li.button-mkdir   { background-position: 0 -66px;}
+ul.el-finder-toolbar li.button-upload  { background-position: 0 -108px;}
+ul.el-finder-toolbar li.button-rm      { background-position: 0 -86px;}
+ul.el-finder-toolbar li.button-copy    { background-position: 0 -130px;}
+ul.el-finder-toolbar li.button-cut     { background-position: 0 -154px;}
+ul.el-finder-toolbar li.button-paste   { background-position: 0 -176px;}
+ul.el-finder-toolbar li.button-ibig    { background-position: 0 -196px;}
+ul.el-finder-toolbar li.button-ismall  { background-position: 0 -215px;}
+ul.el-finder-toolbar li.button-list    { background-position: 0 -235px;}
+ul.el-finder-toolbar li.button-reports { background-position: 0 -255px;}
+ul.el-finder-toolbar li.button-help    { background-position: 0 -275px;}
+
+.el-finder-workzone {
+	clear:both;
+	border-top:1px solid #ccc;
+	border-bottom:1px solid #ccc;
+	
+}
+
+.el-finder-nav {
+	float: left;
+	width : 170px;
+	padding:3px 5px;
+	overflow:auto;
+}
+
+.el-finder-cwd {
+	border-left:1px solid #ccc;
+	overflow:auto;
+	min-height:300px;
+}
+
+.el-finder-statusbar {
+	background:#eee;
+	
+	text-align:right;
+	font-size:10px;
+	vertical-align:middle;
+	padding: 3px 15px;
+}
+/* -------------- */
+
+
+/* вид - список */
+.el-finder table.view-list { width:100%; }
+
+.el-finder table.view-list th {
+	background:#fbf9ee;
+	border: 1px solid #fcefa1;
+	padding:1px 5px;
+	color:#555;
+}
+
+.el-finder table.view-list td {
+	border: 1px solid #eee;
+	padding:0px 5px 2px 5px;
+	vertical-align:middle;
+}
+.el-finder table.view-list .size { text-align:right; }
+
+.el-finder table.view-list tr.odd {
+	background: #EEF5FD;
+}
+
+.el-finder table.view-list td div.icon {
+	width:18px;
+	height:18px;
+	float:left;
+	margin-right:5px;
+	background:url(../images/elfinder-icons-small.png) no-repeat;
+	background-position: 0 -450px;
+}
+
+.el-finder table.view-list td div.icon-unknown {background-position: 0 -450px; }
+.el-finder table.view-list td div.icon-directory {background-position: 0 -157px; }
+.el-finder table.view-list td div.icon-image {background-position: 0 -228px; }
+.el-finder table.view-list td div.icon-audio { background-position: 0 -21px; }
+.el-finder table.view-list td div.icon-video { background-position: 0 -42px; }
+.el-finder table.view-list td div.icon-plain { background-position: 0 -137px; }
+.el-finder table.view-list td div.icon-x-shellscript { background-position: 0 -425px; }
+.el-finder table.view-list td div.icon-x-php { background-position: 0 -380px; }
+.el-finder table.view-list td div.icon-rtf { background-position: 0 -404px; }
+.el-finder table.view-list td div.icon-x-c { background-position: 0 -114px; }
+.el-finder table.view-list td div.icon-x-shockwave-flash { background-position: 0 -356px; }
+.el-finder table.view-list td div.icon-octet-stream { background-position: 0 1px; }
+
+.el-finder table.view-list td div.basename { padding-top:5px; }
+.el-finder table.view-list td div.basename input { width: 70%;}
+.el-finder table.view-list tr.selected { background:#eee;}
+
+/*  вид - маленькие иконки  */
+.el-finder .view-ismall {}
+.el-finder .view-ismall .item {
+/*	display:inline-block; */
+	display: -moz-inline-stack;
+    display: inline-block;
+	height:48px; 
+	width:75px;
+    vertical-align: top;
+    zoom: 1;
+    *display: inline;
+	margin:1px 1px;
+	overflow:hidden;
+	font-size: 11px;
+	text-align:center;
+}
+.el-finder .view-ismall .basename, 
+.el-finder .view-ibig .basename { 
+	text-align:center; 
+	cursor: default; 
+	white-space:nowrap; 
+	padding:1px 0;
+}
+.el-finder  .basename input { width:98%; border:1px solid #ccc;}
+.el-finder .view-ismall div.icon {
+	width:32px;
+	height:24px;
+	margin:2px auto;
+	background:url(../images/elfinder-icons-small.png) no-repeat;
+	background-position: 8px -450px;
+}
+
+.el-finder .view-ismall div.icon-unknown           { background-position: 8px -450px; }
+.el-finder .view-ismall div.icon-directory         { background-position: 8px -157px; }
+.el-finder .view-ismall div.icon-image             { background-position: 8px -228px; }
+.el-finder .view-ismall div.icon-audio             { background-position: 8px -21px; }
+.el-finder .view-ismall div.icon-video             { background-position: 8px -42px; }
+.el-finder .view-ismall div.icon-archive           { background-position: 8px -64px; }
+.el-finder .view-ismall div.icon-plain             { background-position: 8px -137px; }
+.el-finder .view-ismall div.icon-x-shellscript     { background-position: 8px -425px; }
+.el-finder .view-ismall div.icon-x-php             { background-position: 8px -380px; }
+.el-finder .view-ismall div.icon-rtf               { background-position: 8px -404px; }
+.el-finder .view-ismall div.icon-x-c               { background-position: 8px -114px; }
+.el-finder .view-ismall div.icon-x-shockwave-flash { background-position: 8px -356px; }
+.el-finder .view-ismall div.icon-octet-stream      { background-position: 8px 1px; }
+
+.el-finder .selected div.icon, .el-finder .selected .basename { background-color:#eee;}
+
+/*  вид - большие иконки  */
+.el-finder .view-ibig {}
+.el-finder .view-ibig .item {
+	display:inline-block; 
+	display: -moz-inline-stack;
+    display: inline-block;
+	height:73px; 
+	width:120px;
+    vertical-align: top;
+    zoom: 1;
+    *display: inline;
+	margin:1px 1px;
+	overflow:hidden;
+	font-size: 12px;
+	text-align:center;
+}
+
+.el-finder .view-ibig div.icon {
+	width:55px;
+	height:50px;
+	margin:2px auto;
+	background:url(../images/elfinder-icons-big.png) 2px -992px no-repeat;
+}
+
+.el-finder .view-ibig div.icon-unknown           { background-position: 4px -992px; }
+.el-finder .view-ibig div.icon-directory         { background-position: 4px -371px; }
+.el-finder .view-ibig div.icon-image             { background-position: 4px -496px; }
+.el-finder .view-ibig div.icon-audio             { background-position: 4px -75px; }
+.el-finder .view-ibig div.icon-video             { background-position: 4px -127px; }
+.el-finder .view-ibig div.icon-archive           { background-position: 4px -189px; }
+.el-finder .view-ibig div.icon-plain             { background-position: 4px -313px; }
+.el-finder .view-ibig div.icon-x-shellscript     { background-position: 4px -929px; }
+.el-finder .view-ibig div.icon-x-php             { background-position: 4px -806px; }
+.el-finder .view-ibig div.icon-rtf               { background-position: 4px -866px; }
+.el-finder .view-ibig div.icon-x-c               { background-position: 4px -253px; }
+.el-finder .view-ibig div.icon-x-shockwave-flash { background-position: 4px -127px; }
+.el-finder .view-ibig div.icon-octet-stream      { background-position: 4px 2px; }
+
+.el-finder .view-ibig .selected .icon { background-color:#eee; }
+
+
+/* add icons to context menu */
+.el-contextmenu .icon {
+	display:inline-block; 
+	display: -moz-inline-stack;
+    display: inline-block;
+	height:18px; 
+	width:18px;
+    vertical-align: top;
+    zoom: 1;
+    *display: inline;
+	margin:-0.3em .7em 0 .2em;
+	background:url('../images/elfinder-toolbar.png') no-repeat; 
+}
+.el-contextmenu .icon-open   { background-position: -1px -394px; }
+.el-contextmenu .icon-rename { background-position: -2px -319px; }
+.el-contextmenu .icon-rm     { background-position: -1px -88px;  }
+.el-contextmenu .icon-copy   { background-position: -1px -132px; }
+.el-contextmenu .icon-cut    { background-position: -1px -156px; }
+.el-contextmenu .icon-info   { background-position: -1px -298px; }
+.el-contextmenu .icon-select { background-position: -1px -341px; }
+.el-contextmenu .icon-reload { background-position: -2px -44px; }
+.el-contextmenu .icon-mkdir  { background-position: -2px -66px; }
+.el-contextmenu .icon-upload { background-position: -2px -109px; }
+.el-contextmenu .icon-paste  { background-position: -2px -177px; }
+

@@ -1,0 +1,29 @@
+@charset "UTF-8";
+a { outline: none; }
+
+/*************  clearfix  **********************/
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  font-size:0;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.clearfix { display: block; }
+
+.rounded-2 { -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; }
+.rounded-3 { -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; }
+.rounded-4 { -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; }
+.rounded-5 { -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; }
+.rounded-6 { -moz-border-radius: 6px; -webkit-border-radius: 5px; border-radius: 6px; }
+.rounded-7 { -moz-border-radius: 7px; -webkit-border-radius: 7px; border-radius: 7px; }
+.rounded-left-3 { -moz-border-radius-topleft: 3px; -webkit-border-top-left-radius: 3px; -moz-border-radius-bottomleft: 3px; -webkit-border-bottom-left-radius: 3px; }
+.rounded-bottom-7 { -moz-border-radius-bottomleft:7px; -moz-border-radius-bottomright:7px; -webkit-border-bottom-left-radius: 7px;-webkit-border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px;}	
+
+
+.ui-widget { font-size:.9em;}
+.ui-dialog .ui-dialog-buttonpane button { padding: .1em .6em .2em .6em; }
+

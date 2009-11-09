@@ -1,0 +1,70 @@
+/* dialog container */
+.ui-widget .el-dialogform {
+	padding:5px 3px;
+}
+.el-dialogform div.tab:hover { background:transparent; }
+.ui-dialog .ui-dialog-title, .ui-dialog .ui-dialog-content {
+	font-size:.9em;
+}
+
+/* tabs nav */
+.ui-tabs .ui-tabs-nav li a {
+	padding:.2em .7em;
+}
+
+/* tab container */
+.el-dialogform .tab {
+	padding:5px 0 12px 0;
+	border:none;
+}
+/* line separator */
+.el-dialogform .separator {
+	border-top:1px solid #ccc;
+	margin: 5px 2px;
+}
+
+/* table in dialog or in tab */
+.el-dialogform table {
+	width:100%;
+	border: none;
+}
+
+.el-dialogform  table td {
+	padding: 2px;
+}
+
+.el-dialogform input, .el-dialogform textarea {
+	border:1px solid #ccc;
+}
+
+.el-dialogform select {
+	padding:0;
+/*	font-size:11px;*/
+}
+
+.el-dialogform .spinner {
+	background:url(../images/loading.gif) 50% 50% no-repeat;
+	text-align:center;
+	width:150px;
+	height:50px;
+	margin:10px auto;
+	padding-top:33px;
+	font-weight:bold;
+}
+.el-dialogform-error {
+	background: #fee; color:#ff0000; border: 2px #844 solid; padding: 10px; margin-bottom: 1em 0;
+	
+}
+.el-dialogform-message {
+	background: #efe; color: #040; border: 2px #484 solid; padding: 10px; margin-bottom: 1em 0;
+}
+
+
+.el-dialogform  table td .el-borderselect table {
+	width:auto;
+}
+
+.el-dialogform  table td .el-borderselect table td {
+	padding-left :0;
+	padding-right:2px;
+}

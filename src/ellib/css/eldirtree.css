@@ -1,0 +1,59 @@
+ul.el-dir-tree, ul.el-dir-tree ul, ul.el-dir-tree li  {
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+ul.el-dir-tree li {
+	list-style:none;
+	cursor: default;
+	white-space:nowrap;
+	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
+	
+}
+/* nested directory */
+ul.el-dir-tree li ul {
+	padding: 0 0 0 16px;
+	margin: 0;
+}
+/* inserted div before link */
+ul.el-dir-tree li div {
+	float:left;
+	width:10px;
+	height:22px;
+	cursor: default;
+	
+}
+/* collapsed folder and arrow */
+ul.el-dir-tree li .el-dir-collapsed {
+	background:url('../images/eldirtree.png') 0 0 no-repeat; 
+}
+/* collapsed arrow */
+ul.el-dir-tree li div.el-dir-collapsed {
+	background-position: -3px 7px; 
+}
+/* expanded arrow */
+ul.el-dir-tree li div.el-dir-expanded {
+	background-position: -3px -9px; 
+}
+/* collapsed folder */
+ul.el-dir-tree li a.el-dir-collapsed {
+	background-position:3px -29px; 
+}
+/* expanded folder */
+ul.el-dir-tree li a.el-dir-expanded {
+	background-position: 3px -53px;
+}
+
+ul.el-dir-tree li a {
+	line-height:22px;
+	vertical-align:bottom;
+	padding: 4px 23px 2px 23px;
+	color:#444;
+	text-decoration:none;
+	cursor: default;
+	
+}
+/* selected dir */
+ul.el-dir-tree li a.selected {
+	background-color:#eee;
+}

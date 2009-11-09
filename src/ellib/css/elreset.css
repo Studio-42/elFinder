@@ -1,0 +1,49 @@
+@charset "UTF-8";
+
+* { margin:0; padding: 0; }
+
+html, body, div, span,
+applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, ins, kbd, q, s, samp,
+small, strike, strong, tt, var,
+dd, dl, dt, li, ol, ul,
+fieldset, form, label, legend, caption
+{
+	margin:0; padding: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	text-align: left;
+	vertical-align: baseline;
+}
+
+
+html, body, div, span,
+applet, object, iframe,
+fieldset, form, label, legend {	border: 0 solid; }
+
+
+/*  IE5 & IE6 likes it  */
+* html body *   { overflow:visible; }
+* html iframe, 
+* html frame    { overflow:auto; }
+
+/*  Включаем вертикальный скролл в FF & Safari  */
+html { height: 100%; margin-bottom: 1px; }
+
+/** Default body  **/
+body {
+    font-size: 100.01%; /* Fix for font size in old Opera  */
+    color: #000;
+    background: #fff;
+    text-align: left; 
+  }                               
+/*  Исправляем слишком мелкий select  */
+option { padding-left: 0.4em; } 
+select { padding: 1px; }
+/*  No image borders  */
+img, a img, :link img, :visited img { border: 0; }
+a { outline: none; }

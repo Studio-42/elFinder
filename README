@@ -1,0 +1,101 @@
+        _   _____    _______   ______ 
+       | | |  __ \  |__   __| |  ____|
+  ___  | | | |__) |    | |    | |__   
+ / _ \ | | |  _  /     | |    |  __|  
+|  __/ | | | | \ \     | |    | |____ 
+ \___| |_| |_|  \_\    |_|    |______|
+
+
+
+Description
+===========
+
+www.elrte.ru / dev@std42.ru
+
+elRTE is an open-source WYSIWYG HTML-editor written in JavaScript using
+jQuery UI. It allows easy editing HTML-pages on your site. You can use it in 
+any commercial or non-commercial projects.
+
+Features:
+ * Rich text editing, change its appearance and style
+ * Insert and manage various HTML elements with formatting (images, tables,
+   lists and etc.)
+ * View and edit HTML-code
+ * Normal and full screen mode
+
+elRTE was developed for ELDORADO.CMS, but now it is standalone and can be 
+easily integrated into other content management systems.
+
+Other features:
+ * Advanced work with CSS
+   - Set indentation (margins, paddings) for images and table cells (seperate 
+     for each direction)
+   - Control border properties (width, style, color) with convenient dialogs
+   - Write element properties as CSS-style always when possible
+ * Lightweight (139Kb - elRTE+elFinder in one file), easy to integrate
+ * Interface appearance is configured from one CSS file
+ * No templates used
+ * i18n. The editor can be easily localized to any language. Currently
+   available in English (default), Russian, German and Ukrainian languages
+ * elRTE comes with web file manager elFinder, but can also be used with any 
+   other
+ * Flexible for extensions
+
+elRTE tested in Firefox 3.5, Internet Explorer 7 and 8, Safari 4, Opera 10 and 
+Chrome.
+File manager elFinder requires connector, currently available only in PHP.
+
+
+Documentation
+=============
+
+http://www.elrte.ru/en/doc/
+Documentation for developers will be available shortly.
+
+
+Authors
+=======
+
+Programming: Dmitry "dio" Levashov <dio@std42.ru>
+Techsupport, make file and testing: Troex Nevelin <troex@fury.scancode.ru>
+Design: Valentin Razumnih
+
+We hope our tools will be helpful for you.
+
+
+License:
+========
+
+elRTE and elFinder is issued under a BSD license.
+elRTE and elFInder uses jQuery, jQuery-UI, jQuery.form и jQuery.metadata, 
+witch is issued under MIT and GPL licenses.
+MIT and GPL licenses applies to jQuery, jQuery-UI and jQuery plugins that are 
+distributed with elRTE and elFinder.
+
+
+This software is available under a 3 clauses BSD license:
+
+Copyright (c) 2009, Studio 42 Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the Studio 42 Ltd. nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY Studio 42 Ltd. ''AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL Studio 42 Ltd. BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

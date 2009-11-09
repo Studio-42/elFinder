@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>elRTE</title>
+	<!-- jQuery and plugins -->
+	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery.form.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery.metadata.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="js/ui-themes/base/ui.all.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<!-- elRTE & elFinder css -->
+	<link rel="stylesheet" href="css/elrtefinder.full.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<!-- elRTE & elFinder -->
+	<script src="js/elrtefinder.min.js" type="text/javascript" charset="utf-8"></script>
+	<!-- russian message -->
+	<script src="js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elrte.ru.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" charset="utf-8">
+		$().ready(function() {
+
+			var opts = {
+				cssClass : 'el-rte',
+				// lang     : 'ru',
+				height   : 600,
+				toolbar  : 'eldorado',
+				cssfiles : ['css/elrte-inner.css'],
+				fmAllow  : true,
+				fmOpen   : function(callback) {
+					$('<div />').elfinder({
+						url : 'connectors/php/connector.php',
+						dialog : { width : 900, modal : true, title : 'Files' },
+						editorCallback : callback
+					})
+				}
+			}
+			$('#editor').elrte(opts);
+		})
+	</script>
+	<style type="text/css" media="screen">
+		body { padding:20px;}
+	</style>
+	
+</head>
+<body>
+	<div id="editor">
+		<h2>ДУГЛАС АДАМС - Путеводитель "Автостопом по Галактике"<br>
+				DOUGLAS ADAMS - The Hitchhiker's Guide to the Galaxy</h2><img src="http://upload.wikimedia.org/wikipedia/en/1/1c/Hitchhiker%27s_Guide_%28book_cover%29.jpg" style="float: left; margin-top: 0px; margin-right: 20px; margin-left: 20px;" title="" alt="" height="229" width="140"><h3>Вот что сообщает Галактический Путеводитель на предмет <span style="background-color: rgb(255, 255, 153);">полотенец</span>:</h3><div style="text-align: justify; padding-left: 0px;">&nbsp;&nbsp;<span style="background-color: rgb(255, 255, 153);">Полотенце</span>, возможно, самый необходимый предмет для межзвездного путешественника. Оно имеет некоторую практическую ценность - вы можете: завернуться в него, чтобы согреться, прыгая по холодным лунам Джаглан-Беты; использовать его, как подстилку, лежа на мраморном песке пляжей Сантрагинуса V, и вдыхая пьянящий &nbsp;морской воздух; спать на нем под огненно-красными звездами на пустынной планете Какрафун; сделать из него парус, чтобы спуститься на плоту по ленивой реке Мотт; намочить его и завязать узлом, чтобы использовать, как оружие в рукопашной; обвязать им голову, чтобы избежать ядовитого дыма или взгляда Прожорного Заглотозавера с Трааля (умопомрачительно глупое животное: оно считает, что раз вы его не видите, то и оно вас не видит; тупое, как сапог от скафандра, но очень, очень прожорливое); <span style="background-color: rgb(255, 255, 153);">полотенцем</span> можно размахивать, подавая сигнал бедствия; и, разумеется, вытираться, если оно все еще чистое.</div><br><br><hr style="width: 100%; height: 1px;" noshade="true"><br>
+<div style="padding: 15px; margin-left: 10px; float: right; width: 150px; background-color: rgb(255, 255, 153); color: rgb(255, 51, 0); text-align: center; font-size: xx-large;"><strong>DON'T<br>PANIC</strong></div><div style="text-align: justify;">&nbsp;&nbsp;In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the <span class="" style="text-decoration: underline;">Hitch-Hiker's Guide</span> has already supplanted the great Encyclopaedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects. First, it is slightly cheaper; and secondly it has the words <i>DON'T PANIC</i> inscribed in large friendly letters on its cover.<br><br></div>
+				<p style="padding-left: 40px; color: rgb(0, 51, 102);">"And the wheel," <span style="color: rgb(0, 0, 0);">said the Captain,</span> "What about this wheel thingy? It sounds a terribly interesting project."</p>
+				<p style="padding-left: 40px; color: rgb(153, 51, 51);">"Ah," <span style="color: rgb(0, 0, 0);">said the marketing girl, </span>"Well, we're having a little difficulty there."</p>
+				<p style="padding-left: 40px; color: rgb(0, 51, 102);">"Difficulty?"&nbsp;<span style="color: rgb(0, 0, 0);">exclaimed Ford.</span> "Difficulty? What do you mean, difficulty? It's the single simplest machine in the entire Universe!"</p>
+				<p style="padding-left: 40px;">The marketing girl soured him with a look.</p>
+				<p style="padding-left: 40px;"><span style="color: rgb(153, 51, 51);">"Alright, Mr. Wiseguy,"</span> she said, <span style="color: rgb(153, 51, 51);">"if you're so clever, you tell us what colour it should be."</span></p>
+				<br>
+	</div>
+</body>
+</html>

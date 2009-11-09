@@ -1,0 +1,50 @@
+/* colorpicker "button" */
+.el-colorpicker {
+	width  : 16px;
+	height : 16px;
+	border:1px solid #ccc;
+	position:relative;
+	cursor:default;
+}
+
+/* colors palette */
+.el-palette {
+	width: 182px;
+	border:1px solid #ccc;
+	background:#fff;
+	padding:3px 2px 3px 3px;
+	z-index:10000; /* fight with ui.dialog 0_o */
+	position:absolute;
+	top:16px;
+	left:0;
+}
+
+/* color cell in palette */
+.el-palette .color {
+	float:left;
+	width:14px;
+	height:14px;
+	line-height:1px;
+	border-top: 1px solid #eee;
+	border-left:1px solid #eee;
+}
+
+/* side below color cells */
+.el-palette .panel {
+	border-top:1px solid #ccc;
+	margin-top:7px;
+	padding:5px 3px 5px 3px;
+}
+
+/* "window" with selected color */
+.el-palette .panel .preview {
+	float:right;
+	width:18px;
+	height:18px;
+	border:1px solid #ccc;
+}
+
+/* color value text field */
+.el-palette .panel input {
+	border:1px solid #ccc;
+}

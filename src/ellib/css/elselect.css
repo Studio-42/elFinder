@@ -1,0 +1,56 @@
+/* container for elselect */
+.el-select {
+	height:17px;
+	width : 110px;
+	border:1px solid #ccc;
+	cursor: default;
+	position:relative;
+}
+.el-select.hover {
+	background-color:#eee;
+}
+
+/* selected element */
+.el-select label {
+	height:17px;
+	line-height:17px;
+/*	font-size:.92em;*/
+	padding: 0 5px;
+	margin: 0 12px 0 0;
+	display:block;
+	white-space:nowrap;
+	overflow:hidden;
+	background: #fff;
+	border-right:1px solid #ccc;
+}
+/* drop-down list */
+.el-select .list {
+	border:1px solid #ccc;
+	display:block;
+	position:absolute;
+	overflow:auto;
+	background:#fff;
+	z-index:1000;
+}
+/* drop-down list item */
+.el-select .list div {
+	position:relative;
+	padding:3px 25px 3px 7px;
+	border-bottom:1px solid #eee;
+}
+/* drop-down list item hovered */
+.el-select .list .hover {
+	background:#efefef;
+}
+/* drop-down list item selected */
+.el-select .list .active {
+	background-color:#c3dbef;
+}
+/* any elements in drop-down list item */
+.el-select .list div * {
+	padding:0;
+	margin:0;
+	border:none;
+	white-space:nowrap;
+	display:block;
+}
