@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>elfinder2-src</title>
+	<link rel="stylesheet" href="js/ui-themes/base/ui.all.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="src/elfinder2/css/elfinder2.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="src/elfinder2/js/elFinder.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/elfinder2/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
+	
+
+	<script type="text/javascript" charset="utf-8">
+		$().ready(function() {
+			// var f = new elFinder($('#finder').get(0), {})
+			
+			var f = $('#finder').elfinder({
+				url : 'src/elfinder2/connectors/php/connector.php',
+				lang : 'ru'
+			})
+			// $('#finder').elfinder('open')
+			// window.console.log(f.get(0).test)
+			// window.console.log($('#finder').get(0).elfinder.options)
+			
+		})
+	</script>
+
+</head>
+<body>
+
+	<div id="finder">finder</div>
+
+
+	<div style="clear:both">
+		<hr />
+	</div>
+	<div class="el-finder rounded-5" style="display:none">
+		<div class="el-finder-toolbar">
+			
+		</div>
+		<div class="el-finder-workzone" >
+			<div class="el-finder-nav">
+				<ul>
+					<li><a href="#" class="root selected">root</a>
+						<ul>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#" class="selected rounded-3">directory</a></li>
+							<li><div class="dir-handler dir-collapsed"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler dir-collapsed"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler dir-expanded"></div><a href="#">directory</a>
+								<ul>
+									<li><div class="dir-handler"></div><a href="#" class="selected">directory</a></li>
+									<li><div class="dir-handler"></div><a href="#">directory</a></li>
+								</ul>
+							</li>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+			<div class="el-finder-cwd">
+				<ul>
+					<li class="rounded-5"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">Folder</div></li>
+					<li class="rounded-5 selected"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">Folder</div></li>
+					<li class="rounded-5 selected"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">File with very log name</div></li>
+					<li class="rounded-5"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">File</div></li>
+				</ul>
+			</div>
+			<div style="clear:both;"></div>
+		</div>
+		<div class="el-finder-statusbar">
+			
+		</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,292 @@
+.rounded-3 { border-radius:3px; -moz-border-radius:3px; -webkit-border-radius:3px; }
+.rounded-5 { border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; }
+
+/* file manager window */
+.el-finder {
+	width:100%; 
+	border:1px solid #ccc;
+	background-color:#eee;
+	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
+}
+
+.el-finder a {
+	color:#444;
+	text-decoration:none;
+}
+
+/* disabled and ajax spinner */
+.el-finder-disabled .el-finder-toolbar li,
+.el-finder-disabled .el-finder-nav,
+.el-finder-disabled .el-finder-cwd { 
+	opacity:0.35; filter:Alpha(Opacity=35);
+}
+
+.el-finder-spinner {
+	position:absolute;
+	top:40%;
+	left:45%;
+	width:50px;
+	height:50px;
+	background:#fff url(../images/spinner.gif) 50% 50% no-repeat;
+	border:1px solid #ccc;
+	display:none;
+}
+
+/* fatal error message under file manager */
+p.el-finder-fatal {
+	position:absolute;
+	top:20%;
+	left:31%;
+	background: #fee; 
+	color: #400; 
+	border: 2px #844 solid; 
+	padding: 10px; 
+	margin-bottom: .5em;
+	color:red;
+	text-align:center;
+}
+
+/* toolbar */
+.el-finder-toolbar {
+	height:36px;
+}
+
+.el-finder-toolbar ul {
+	padding:5px 7px;
+	background:#eee;
+	margin:0;
+	list-style:none;
+	display:block;
+}
+
+.el-finder-toolbar ul li {
+	display:inline-block; 
+	display: -moz-inline-stack;
+    display: inline-block;
+	height:22px; 
+	width:22px;
+    vertical-align: top;
+    zoom: 1;
+    *display: inline;
+	margin:1px 1px;
+	background:url('../images/sprite.png') no-repeat; 
+	border:1px solid #ccc;
+}
+.el-finder-toolbar ul li.back    { background-position: 3px -99px;}
+.el-finder-toolbar ul li.reload    { background-position: 3px -120px;}
+.el-finder-toolbar ul li.open    { background-position: 0 -394px;}
+
+.el-finder-toolbar ul li.info    { background-position: 3px -350px; }
+.el-finder-toolbar ul li.copy    { background-position: 3px -225px; }
+.el-finder-toolbar ul li.paste   { background-position: 3px -284px; }
+.el-finder-toolbar ul li.mkdir   { background-position: 3px -142px; }
+.el-finder-toolbar ul li.upload   { background-position: 3px -184px; }
+.el-finder-toolbar ul li.rm   { background-position: 3px -162px; }
+.el-finder-toolbar ul li.list   { background-position: 3px -268px; }
+.el-finder-toolbar ul li.icons   { background-position: 3px -248px; }
+
+.el-finder-toolbar ul li.disabled { opacity:0.35; filter:Alpha(Opacity=35); }
+
+/* workzone, contains left folders tree and current folder */
+.el-finder-workzone {
+	position:relative;
+	background-color:#fff;
+	border-top:1px solid #ccc;
+	border-bottom:1px solid #ccc;
+}
+
+/* left folders tree and current directory */
+.el-finder-nav, .el-finder-cwd {
+	float:left;
+	overflow:auto;
+	height:350px;
+}
+/* navigation */
+.el-finder-nav {
+	width : 170px;
+}
+/* current directory */
+.el-finder-cwd {
+	float:none;
+	border-left:1px solid #ccc;
+}
+
+/* current directory: view - icons */
+.el-finder-cwd ul {
+	list-style:none;
+	padding:0;
+	margin:3px;
+}
+
+.el-finder-cwd ul li {
+/*	display:inline-block; */
+	display: -moz-inline-stack;
+    display: inline-block;
+	zoom: 1;
+    *display: inline;
+/*	height:73px; */
+	width:83px;
+    vertical-align: top;
+	margin:1px 1px 1px 0;
+	padding:0;
+/*	overflow:hidden;*/
+/*	background:url('../images/elfinder-toolbar.png') no-repeat; */
+	border:1px solid #ccc;
+	position:relative;
+}
+
+.el-finder-cwd ul li.selected {
+	background-color:#ccc;
+}
+
+.el-finder-cwd ul li div {
+	width:48px;
+	height:48px;
+	margin:1px auto;
+/*	border:1px solid #eee;*/
+	background:url(../images/icons.png) 0 0 no-repeat;
+}
+
+.el-finder-cwd ul li.dir div { background-position: 0 -47px;}
+.el-finder-cwd ul li.text div { background-position: 0 -99px;}
+.el-finder-cwd ul li.image div { background-position: 0 -150px;}
+.el-finder-cwd ul li.audio div { background-position: 0 -201px;}
+.el-finder-cwd ul li.video div { background-position: 0 -252px;}
+.el-finder-cwd ul li.application div { background-position: 0 -304px;}
+.el-finder-cwd ul li.broken div { background-position: 0 -356px;}
+
+
+.el-finder-cwd ul li em {
+/*	border:1px solid #ccc;*/
+	cursor:default;
+	display: block;
+	font-style:normal;
+	height:30px;
+	text-align:center;
+	font-size:11px;
+	margin:3px 1px 0px 1px;
+	overflow:hidden;
+	
+/*	background-color:#fff;*/
+}
+
+.el-finder-cwd ul li span {
+/*	border:1px solid #ccc;*/
+	position:absolute;
+	display:block;
+	width:20px;
+	height:20px;
+	top:37px;
+	left:9px;
+	z-index:2;
+	background:url(../images/icons.png) -12px -415px no-repeat;
+}
+
+/*  view - list */
+
+.el-finder-cwd table {
+	width:100%;
+/*	border:1px solid #ccc;*/
+}
+
+.el-finder-cwd table tr th {
+	border:1px solid #ccc;
+	text-align:left;
+	background:#fbf9ee;
+	font-size:11px;
+}
+
+.el-finder-cwd table tr td {
+	border:1px solid #ccc;
+}
+
+.el-finder-cwd table tr td.icons {
+	width:16px;
+	height:16px;
+	background:url(../images/elfinder-icons-small.png) 0 0 no-repeat;
+}
+
+.el-finder-cwd table tr td.directory { background-position:0 160px; }
+
+
+/* folders navigation on left side */
+.el-finder-nav ul {
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+
+.el-finder-nav ul li ul li ul {
+	margin-left:15px;
+}
+
+.el-finder-nav li {
+	padding:1px;
+}
+
+.el-finder-nav li div.dir-handler {
+	width:9px;
+	height:20px;
+	float:left;
+}
+
+.el-finder-nav li div.dir-collapsed,
+.el-finder-nav li div.dir-expanded {
+	background:url(../images/sprite.png) -4px 7px no-repeat;
+}
+.el-finder-nav li div.dir-expanded {
+	background-position: -4px -9px;
+}
+
+.el-finder-nav li a.selected {
+	background-color:#ccc;
+}
+
+.el-finder-nav li a {
+	display: block;
+	line-height:20px;
+	margin-left:9px;
+	padding:0 0 0 21px;
+	background:url(../images/sprite.png) 3px -55px no-repeat;
+	cursor:default;
+	text-decoration:none;
+	outline:none;
+}
+
+.el-finder-nav li a.selected {
+	background-color:#ccc;
+	background-position: 3px -80px;
+}
+
+.el-finder-nav li a.root,
+.el-finder-nav li a.root.selected { 
+	background-position: 1px -30px; 
+	margin-left:0;
+}
+
+/* statusbar on bottom */
+.el-finder-statusbar {
+	height:20px;
+}
+
+.el-finder-statusbar .path,
+.el-finder-statusbar .stat,
+.el-finder-statusbar .selected-files {
+	padding:3px 9px 1px 9px;
+	font-size:11px;
+	color:#555;
+}
+/* current directory path */
+.el-finder-statusbar .path {
+	float:left;
+}
+/* number folders/files in current directory and size */
+.el-finder-statusbar .stat {
+	float:right;
+}
+/* info about selected files */
+.el-finder-statusbar .selected-files {
+	text-align:center;
+}
+
+
