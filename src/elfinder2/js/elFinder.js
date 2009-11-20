@@ -101,13 +101,15 @@
 			 * Display fatal error
 			 */
 			this.fatal = function(t) {
-				fm.unlock();
+				
 				self.error(t.status != '404' ? 'Invalid data recieved! Check backend configuration!' : 'Unable to connect to backend!');
 			}
 		
 			this.error = function(m) {
+				fm.unlock();
 				var e = $('<p />').addClass('el-finder-fatal rounded-5').text(i18n('Error')+': '+i18n(m)).appendTo(self.wz);
-				setTimeout(function() { e.fadeOut('slow') }, 5000);
+				setTimeout(function() { e.fadeOut('slow') }, 4000);
+				
 			}
 
 			this.warning = function(m) {
@@ -120,19 +122,17 @@
 			 * Update navigation panel
 			 */
 			this.updateNav = function(tree) {
-				this.nav.html('<ul style="margin-top:3px"><li><a href="#" id="nav'+fm.cwd.hash+'" class="root selected rounded-3">'
-								+fm.cwd.name+'</a>'+traverse(tree)+'</li></ul>');
+				this.nav.html(traverse(tree, true));
 
-				function traverse(tree) {
-					var html = '<ul>';
+				function traverse(tree, root) {
+					var html = '<ul>', dirs = false;
 					for (var i in tree) {
-						var p      = i.indexOf(':'), 
-							hash   = i.substr(0, p), 
-							name   = i.substr(p+1),
-							childs = typeof(tree[i]) == 'object';
-
-						html += '<li><div class="dir-handler'+(childs ? ' dir-collapsed' : '')+'"></div>'+
-								'<a href="#" class="rounded-3" id="nav'+hash+'">'+name+'</a>'+(childs ? traverse(tree[i]) : '')+'</li>';
+						dirs = typeof(tree[i].dirs.length) == 'undefined';
+						html += '<li>'+(!root ? '<div class="dir-handler'+(dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="rounded-3'+(root ? ' root selected' : '')+'" id="nav'+i+'">'+tree[i].name+'</a>';
+						if (dirs) {
+							html += traverse(tree[i].dirs);
+						}
+						html += '</li>';
 					}
 					return html +'</ul>';
 				}
@@ -262,7 +262,7 @@
 					fm.lock();
 					$.ajax({
 						url      : options.url,
-						data     : { target: fm.cwd.hash||0 },
+						data     : { target: fm.cwd.hash, tree : true },
 						dataType : 'json',
 						error    : fm.view.fatal,
 						success  : function(data) {
@@ -270,11 +270,9 @@
 								return fm.view.error(data.error);
 							}
 							fm.unlock();
-							fm.cwd   = data.cwd;
-							fm.files = data.files;
+							fm.updateCwd(data.cwd, data.files);
 							fm.updateNav(data.tree);
-							fm.updateCwd();
-							fm.commands.updateButtons();
+							ui.update();
 							data.debug && log(data.debug);
 						}
 					});
@@ -291,20 +289,20 @@
 						fm.lock();
 
 						$.ajax({
-							url : options.url,
-							data : { target : id },
+							url      : options.url,
+							data     : { target : id },
 							dataType : 'json',
-							error : fm.view.fatal,
-							success : function(data) {
-								fm.unlock();
+							error    : fm.view.fatal,
+							success  : function(data) {
 								if (data.error) {
 									return fm.view.error(data.error);
 								}
 								if (data.warning) {
-									fm.view.warning(data.warning)
+									fm.view.warning(data.warning);
 								}
-								log(data)
-								fm.updateCwd(data.cwd, data.files)
+								fm.unlock();
+								fm.updateCwd(data.cwd, data.files);
+								ui.update();
 							}
 						})
 						
@@ -500,23 +498,6 @@
 				}
 			}
 
-			this.list = new function() {
-				this.button = true;
-				
-				this.exec = function() {
-					fm.viewMode = 'list';
-					cookie('elfinder-view', 'list');
-					fm.commands.reload.exec();
-				}
-				
-				this.update = function() {
-					if (fm.viewMode != 'list') {
-						this.button.removeClass('disabled');
-					} else {
-						this.button.addClass('disabled');
-					}
-				}
-			}
 	
 	
 			this.icons = new function() {
@@ -525,15 +506,16 @@
 				this.exec = function() {
 					fm.viewMode = 'icons';
 					cookie('elfinder-view', 'icons');
-					fm.commands.reload.exec();
+					fm.updateCwd(fm.cwd, fm.files)
 				}
 				
 				this.update = function() {
-					// log(fm.viewMode)
-					if (fm.viewMode != 'icons') {
-						this.button.removeClass('disabled');
-					} else {
+
+					if (fm.viewMode == 'icons') {
 						this.button.addClass('disabled');
+					} else {
+						this.button.removeClass('disabled');
+						
 					}
 				}
 			}
@@ -547,6 +529,28 @@
 					}
 				}
 			}
+			
+			this.list = new function() {
+				this.button = true;
+				
+				this.exec = function() {
+					fm.viewMode = 'list';
+					cookie('elfinder-view', 'list');
+					fm.updateCwd(fm.cwd, fm.files)
+					// fm.commands.reload.exec();
+				}
+				
+				this.update = function() {
+					if (fm.viewMode == 'list' || !fm.viewMode) {
+						this.button.addClass('disabled');
+					} else {
+						this.button.removeClass('disabled');
+						
+						
+					}
+				}
+			}
+			
 			
 			this.update = function() {
 				$.each(this, function() {
@@ -587,7 +591,7 @@
 			/**
 			 * View mode (icons/list)
 			 */
-			this.viewMode = 'list';
+			this.viewMode = 'icons';
 			/**
 			 * Object. Info about current directory
 			 */
@@ -638,12 +642,13 @@
 			if (!this.view) {
 				
 				this.viewMode = cookie('elfinder-view');
-				// log(this.viewMode)
+				log(this.viewMode)
 				
 				this.view = new view(this);
 				this.lock();
 				$.ajax({
 					url      : options.url,
+					data     : { tree : true, init : true },
 					dataType : 'json',
 					error    : self.view.fatal,
 					success  : function(data) {
@@ -717,6 +722,7 @@
 					if (!$(this).hasClass('selected')) {
 						tree.find('a').removeClass('selected');
 						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
+						log($(this).parents('li:has(ul)'))
 					}
 				})
 				.end()
@@ -726,6 +732,8 @@
 							$(this).toggleClass('dir-expanded').nextAll('ul').toggle(300);
 						});
 				});
+
+				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
 			}
 			
 
@@ -734,7 +742,7 @@
 				self.files = files;
 
 				this.view.updateCwd();
-				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
+				
 				
 			}
 

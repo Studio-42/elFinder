@@ -220,8 +220,9 @@ class elFinder {
 		if (!empty($this->_commands[$cmd]) && method_exists($this, $this->_commands[$cmd])) {
 			$result = $this->{$this->_commands[$cmd]}();
 		} else {
-			$result = empty($_GET['target']) ? $this->_init() : $this->_open();
-			// echo '<pre>'; print_r($result); exit();
+			// $result = empty($_GET['target']) ? $this->_init() : $this->_open();
+			$result = $this->_open();
+			// echo '<pre>'; print_r($result['tree']); exit();
 		}
 		
 		if ($this->_options['debug']) {
@@ -335,6 +336,18 @@ class elFinder {
 				'rm'     => $write && $this->_isAllowed($path, 'rm'),
 				'rmdir'  => $write && $this->_isAllowed($path, 'rmdir')
 				);
+				
+			if (!empty($_GET['tree'])) {
+				$result['tree'] = array(
+					crc32($this->_options['root']) => array(
+						'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
+						'dirs' => $this->_tree()
+						)
+					);
+				if (!empty($_GET['init'])) {
+					$result['disabled'] = $this->_options['disabled'];
+				}
+			}
 				
 			$dirs = $files = array();
 			
@@ -475,20 +488,16 @@ class elFinder {
 			while($entr = $d->read()) {
 				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 				if ('.' != $entr && '..' != $entr && is_dir($p) && $this->_isAllowed($p, 'read')) {
-					$dirs = is_readable($p) ? $this->_tree($p) : null;
-					$tree[crc32($p).':'.$entr] = !empty($dirs) ? $dirs : false;
+					$tree[crc32($p)] = array(
+						'name' => $entr,
+						'dirs' => is_readable($p) ? $this->_tree($p) : array()
+						);
+					// $dirs = is_readable($p) ? $this->_tree($p) : null;
+					// $tree[crc32($p).':'.$entr] = !empty($dirs) ? $dirs : false;
 				}
 			}
 			$d->close();
 		}
-
-		
-		// $len  = mb_strlen($path)+1; 
-		// // $g = glob($path.DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR);
-		// foreach(glob($path.DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR) as $d) {
-		// 	$dirs = $this->_tree($d);
-		// 	$tree[crc32($d).':'.mb_substr($d, $len)] = !empty($dirs) ? $dirs : false;
-		// }
 		return $tree;
 	}
 	
@@ -537,7 +546,7 @@ class elFinder {
 				return $info;
 			}
 			$mime = $this->_mimetype($path);
-			$info['kind'] = 'Alias';
+
 		} else {
 			$mime = $this->_mimetype($path);
 			$info['kind'] = isset($this->_kinds[$mime]) ? $this->_kinds[$mime] : 'Unknown';
