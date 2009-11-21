@@ -171,7 +171,7 @@
 				this.st.text(num+' '+i18n('items')+', '+fm.formatSize(size));
 				
 				function render(f) {
-					var el, d, n, p;
+					var el, d, n;
 					if (fm.viewMode == 'icons') {
 						n = f.name;
 						if (n.length > 28) {
@@ -189,12 +189,11 @@
 						}
 					} else {
 						d = f.mdate.replace(/([a-z]+)\s/i, function(arg1, arg2) { return i18n(arg2)+' '; });
-						p = [f.read ? 'read' : '', f.write ? 'write' : ''];
 						el = $('<tr />')
 								.addClass(f.css)
 								.append($('<td />').text('').addClass('icons'))
 								.append($('<td />').text(f.name+' / '+f.css))
-								.append($('<td />').text(i18n(p.join('/'))))
+								.append($('<td />').text(fm.formatPermissions(f)))
 								.append($('<td />').text(d))
 								.append($('<td />').text(fm.formatSize(f.size)))
 								.append($('<td />').text(i18n(f.kind)))
@@ -217,10 +216,18 @@
 			/**
 			 * Update number of selected files/folders and size in statusbar
 			 */
-			this.updateSelected = function(num, size) {
-				this.sl.text(num>0 ? i18n('selected')+': '+num+', '+fm.formatSize(size): '');
+			this.updateSelected = function() {
+				
+				this.sl.text(fm.selected.length>0 ? i18n('selected')+': '+fm.selected.length+', '+countSize() : '');
+				
+				function countSize() {
+					var s = i = 0;
+					for (i=0; i<fm.selected.length; i++) {
+						s += fm.files[fm.selected[i]].size;
+					}
+					return fm.formatSize(s);	
+				}
 			}
-			
 				
 		}
 		
@@ -235,18 +242,14 @@
 			
 			this.back = new function() {
 				this.button = true;
-				var self = this;
 
 				this.exec = function() {
-
-					if (!self.button.hasClass('disabled') && fm.history.length) {
-						// log(fm.history.pop())
-						fm.commands.open.exec(fm.history.pop(), true);
+					if (!ui.back.button.hasClass('disabled') && fm.history.length) {
+						fm.ui.open.exec(fm.history.pop(), true);
 					}
 				}
 				
 				this.update = function() {
-					// log(fm.history)
 					if (fm.history.length) {
 						this.button.removeClass('disabled');
 					} else {
@@ -272,6 +275,7 @@
 							fm.unlock();
 							fm.updateCwd(data.cwd, data.files);
 							fm.updateNav(data.tree);
+							fm.view.nav.find('a#nav'+fm.cwd.hash).trigger('select');
 							ui.update();
 							data.debug && log(data.debug);
 						}
@@ -282,12 +286,10 @@
 			this.open = new function() {
 				var self = this;
 				
-				this.exec = function(id) {
+				this.exec = function(id, noHistory) {
 					
 					if (!fm.files[id] || fm.files[id].css == 'dir') {
-
 						fm.lock();
-
 						$.ajax({
 							url      : options.url,
 							data     : { target : id },
@@ -301,109 +303,92 @@
 									fm.view.warning(data.warning);
 								}
 								fm.unlock();
+								!noHistory && fm.history.push(fm.cwd.hash);
 								fm.updateCwd(data.cwd, data.files);
 								ui.update();
 							}
 						})
 						
 					} else {
-						log('open file')
-					}
-					
-					return;
-					
-					
-					
-					if (!fm.files[id] || fm.files[id].mime == 'directory') {
-						fm.lock();
-						$.ajax({
-							url      : options.url,
-							data     : { cmd : 'cd', target : id },
-							dataType : 'json',
-							error    : fm.view.fatal,
-							success  : function(data) {
-								if (data.error) {
-									return fm.view.error(data.error);
-								}
-								fm.unlock();
-								!n && fm.history.push(fm.cwd.hash)
-								fm.cwd   = data.cwd;
-								fm.files = data.files;
-								fm.updateCwd();
-								fm.commands.updateButtons();
-								data.debug && log(data.debug);
-							}
-						});
-					} else {
-						var size = '',
-							url = fm.files[id].url ? fm.files[id].url : options.url+'?cmd=open&current='+fm.cwd.hash+'&target='+id;
+						if (!fm.files[id].read) {
+							return fm.view.warning('File is not readable');
+						}
+						var ws = '', s,
+							url = fm.files[id].url ? fm.files[id].url : options.url+'?current='+fm.cwd.hash+'&target='+id;
 						if (fm.files[id].dimensions) {
 							var s = fm.files[id].dimensions.split('x');
-							size = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
+							ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 						} 
-						window.open(url, null, 'top=50,left=50,'+size+'scrollbars=yes,resizable=yes');
+						window.open(url, null, 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes');
 					}
-					
-					
 				}
 			}
 			
 			this.info = new function() {
 				this.button = true;
-				// var self = this;
 				
 				this.exec = function() {
-					if (fm.selected.length && fm.files[fm.selected[0]] && !fm._lock) {
-						fm._lock = true;
-						var f = fm.files[fm.selected[0]], 
-							perm = !f.read && !f.write ? 'no access' : (f.read ? i18n('read') : '')+' '+(f.write ? i18n('write') : '');
-						$('<div/>').append(
-							$('<table style="width:100%;border:1px solid #ccc" />')
-								.append(
+					if (fm.selected.length) {
+						for (var i=0; i<fm.selected.length; i++) {
+							var id = fm.selected[i];
+							info(fm.files[id])
+						}
+					}
+					
+					function info(f) {
+						var tb = $('<table cellspacing="0" />')
+							.append(
+								$('<tr/>')
+									.append($('<td/>').css('width', '40%').append(i18n('File name')))
+									.append($('<td/>').css('width', '60%').append(f.name.length>33 ? f.name.replace(/(.{33})/g, "$1 ") : f.name))
+							).append(
+								$('<tr/>')
+									.append($('<td/>').append(i18n('Kind')))
+									.append($('<td/>').append(i18n(f.kind)))	
+							).append(
+								$('<tr/>')
+									.append($('<td/>').append(i18n('Size')))
+									.append($('<td/>').append(fm.formatSize(f.size)))	
+							).append(
+								$('<tr/>')
+									.append($('<td/>').append(i18n('Modified')))
+									.append($('<td/>').append(fm.formatDate(f.mdate)))	
+							).append(
+								$('<tr/>')
+									.append($('<td/>').append(i18n('Last opened')))
+									.append($('<td/>').append(fm.formatDate(f.adate)))
+							).append(
+								$('<tr/>')
+									.append($('<td/>').append(i18n('Permissions')))
+									.append($('<td/>').append(fm.formatPermissions(f)))
+							);
+						
+							if (f.dimensions) {
+								tb.append(
 									$('<tr/>')
-										.append($('<td/>').css('width', '40%').append(i18n('File name')))
-										.append($('<td/>').css('width', '60%').append(f.name))
-								).append(
-									$('<tr/>')
-										.append($('<td/>').append(i18n('Kind')))
-										.append($('<td/>').append(i18n(f.kind)))	
-								).append(
-									$('<tr/>')
-										.append($('<td/>').append(i18n('Size')))
-										.append($('<td/>').append(fm.formatSize(f.size)))	
-								).append(
-									$('<tr/>')
-										.append($('<td/>').append(i18n('Modified')))
-										.append($('<td/>').append(f.mtime))	
-								).append(
-									$('<tr/>')
-										.append($('<td/>').append(i18n('Last opened')))
-										.append($('<td/>').append(f.atime))
-								).append(
-									$('<tr/>')
-										.append($('<td/>').append(i18n('Permissions')))
-										.append($('<td/>').append(perm))
-								)
-							).dialog({
+										.append($('<td/>').append(i18n('Dimensions')))
+										.append($('<td/>').append(f.dimensions))
+								);
+							}
+							$('<div/>').append(tb).dialog({
 								title   : i18n('File info'),
-								modal : true,
-								buttons : { Ok : function() { $(this).dialog('close'); fm._lock = false; } }
+								width   : 350,
+								buttons : { Ok : function() { $(this).dialog('close'); } }
 							});
 					}
+					
+					
 				}
 			}
 			
 			this.copy = new function() {
 				this.button = true;
-				var self = this;
 				
 				this.exec = function() {
-					// log(fm.selected)
 					if (fm.selected.length) {
 						fm.buffer = fm.selected;
-						com.paste && com.paste.update();
+						ui.paste && ui.paste.update();
 					}
-					log(fm.selected)
 				}
 				
 				this.update = function() {
@@ -506,19 +491,38 @@
 				this.exec = function() {
 					fm.viewMode = 'icons';
 					cookie('elfinder-view', 'icons');
-					fm.updateCwd(fm.cwd, fm.files)
+					fm.updateCwd(fm.cwd, fm.files);
+					ui.update();
 				}
 				
 				this.update = function() {
-
 					if (fm.viewMode == 'icons') {
 						this.button.addClass('disabled');
 					} else {
 						this.button.removeClass('disabled');
-						
 					}
 				}
 			}
+			
+			this.list = new function() {
+				this.button = true;
+				
+				this.exec = function() {
+					fm.viewMode = 'list';
+					cookie('elfinder-view', 'list');
+					fm.updateCwd(fm.cwd, fm.files);
+					ui.update();
+				}
+				
+				this.update = function() {
+					if (fm.viewMode == 'list' || !fm.viewMode) {
+						this.button.addClass('disabled');
+					} else {
+						this.button.removeClass('disabled');
+					}
+				}
+			}
+			
 			
 			for (var i in this) {
 				if (typeof(this[i]) == 'object') {
@@ -530,26 +534,7 @@
 				}
 			}
 			
-			this.list = new function() {
-				this.button = true;
-				
-				this.exec = function() {
-					fm.viewMode = 'list';
-					cookie('elfinder-view', 'list');
-					fm.updateCwd(fm.cwd, fm.files)
-					// fm.commands.reload.exec();
-				}
-				
-				this.update = function() {
-					if (fm.viewMode == 'list' || !fm.viewMode) {
-						this.button.addClass('disabled');
-					} else {
-						this.button.removeClass('disabled');
-						
-						
-					}
-				}
-			}
+			
 			
 			
 			this.update = function() {
@@ -642,7 +627,7 @@
 			if (!this.view) {
 				
 				this.viewMode = cookie('elfinder-view');
-				log(this.viewMode)
+				// log(this.viewMode)
 				
 				this.view = new view(this);
 				this.lock();
@@ -667,47 +652,48 @@
 						self.ui.update();
 					}
 				})
-				// this.commands = new commands(this);
-				// this.commands.reload.exec(0);
-				// 
-				// this.view.cwd
-				// 	.bind(window.opera?'click':'contextmenu', function(e) {
-				// 		log(e.target)
-				// 
-				// 	})
-				// 	.bind('dblclick', function(e) {
-				// 		e.stopPropagation();
-				// 
-				// 		if (e.target != self.view.cwd.get(0)) {
-				// 			var t = e.target.nodeName == 'LI' ? $(e.target) : $(e.target).parents('li').eq(0);
-				// 			self.commands.open.exec(t.attr('id'));
-				// 		}
-				// 	})
-				// 	.bind('click', function(e) {
-				// 		e.preventDefault()
-				// 		e.stopPropagation();
-				// 		if (e.target == self.view.cwd.get(0)) {
-				// 
-				// 			self.view.cwd.children('ul').children('li').removeClass('selected');
-				// 			self.selected = [];
-				// 		} else {
-				// 			var t = e.target.nodeName == 'LI' ? $(e.target) : $(e.target).parents('li').eq(0);
-				// 			if (e.ctrlKey || e.metaKey) {
-				// 				t.toggleClass('selected');
-				// 			} else if (e.shiftKey) {
-				// 
-				// 			} else {
-				// 				t.toggleClass('selected').siblings('li').removeClass('selected');
-				// 			}
-				// 			self.selected = [];
-				// 			self.view.cwd.children('ul').children('li').each(function() {
-				// 				if ($(this).hasClass('selected')) {
-				// 					self.selected.push($(this).attr('id'));
-				// 				}
-				// 			});
-				// 		}
-				// 		self.commands.updateButtons();
-				// 	});
+				this.view.cwd
+					.bind(window.opera?'click':'contextmenu', function(e) {
+						log(e.target)
+				
+					})
+					.bind('dblclick', function(e) {
+						e.stopPropagation();
+				
+						if (e.target != self.view.cwd.get(0)) {
+							var tag = self.viewMode == 'icons' ? 'LI' : 'TR',
+								t = e.target.nodeName == tag ? $(e.target) : $(e.target).parents(tag).eq(0);
+							self.ui.open.exec(t.attr('id'));
+						}
+					})
+					.bind('click', function(e) {
+						e.preventDefault()
+						e.stopPropagation();
+						var tag = fm.viewMode == 'icons' ? 'LI' : 'TR';
+						if (e.target == self.view.cwd.get(0)) {
+				
+							self.view.cwd.children('ul').children('li').removeClass('selected');
+							self.selected = [];
+						} else {
+							var t = e.target.nodeName == 'LI' ? $(e.target) : $(e.target).parents('li').eq(0);
+							if (e.ctrlKey || e.metaKey) {
+								t.toggleClass('selected');
+							} else if (e.shiftKey) {
+				
+							} else {
+								t.toggleClass('selected').siblings('li').removeClass('selected');
+							}
+							self.selected = [];
+							self.view.cwd.children('ul').children('li').each(function() {
+								if ($(this).hasClass('selected')) {
+									self.selected.push($(this).attr('id'));
+								}
+							});
+							// log(self.selected)
+						}
+						self.view.updateSelected();
+						self.ui.update();
+					});
 			}
 
 			this.updateNav = function(tree) {
@@ -722,7 +708,6 @@
 					if (!$(this).hasClass('selected')) {
 						tree.find('a').removeClass('selected');
 						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
-						log($(this).parents('li:has(ul)'))
 					}
 				})
 				.end()
@@ -733,17 +718,15 @@
 						});
 				});
 
-				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
+				
 			}
 			
 
 			this.updateCwd = function(cwd, files) {
 				self.cwd   = cwd;
 				self.files = files;
-
 				this.view.updateCwd();
-				
-				
+				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
 			}
 
 			this.formatSize = function(s) {
@@ -761,6 +744,20 @@
 		        return parseInt(s/n)+' '+u;
 			}
 
+			this.formatDate = function(d) {
+				return d.replace(/([a-z]+)\s/i, function(arg1, arg2) { return i18n(arg2)+' '; })
+			}
+			
+			this.formatPermissions = function(f) {
+				var p = [];
+				if (f.read) {
+					p.push('read');
+				}
+				if (f.write) {
+					p.push('write');
+				}
+				return i18n(p.join('/'))
+			}
 			
 			this.type = function(id) {
 				

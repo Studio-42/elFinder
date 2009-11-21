@@ -564,6 +564,10 @@ class elFinder {
 				$info['cmd'] = 'edit';
 			} elseif (isset($this->_commands['extract']) && $this->_canExtract($parts[1])) {
 				$info['cmd'] = 'extract';
+			} elseif ($parts[0] == 'image' 
+			&& ($parts[1] == 'jpeg' || $parts[1] == 'gif' || $parts[1] == 'png') 
+			&& false != ($s = getimagesize($path))) {
+				$info['dimensions'] = $s[0].'x'.$s[1];
 			}
 		}		
 		return $info;

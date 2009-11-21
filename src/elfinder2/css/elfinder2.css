@@ -289,4 +289,28 @@ p.el-finder-fatal {
 	text-align:center;
 }
 
+/* table (info) in dialog window */
+.ui-dialog { font-size:.9em; }
+.ui-dialog .ui-dialog-titlebar { 
+	padding: .3em .1em .1em .8em; 
+}
+.ui-dialog .ui-dialog-buttonpane {
+	padding: .1em 1em .1em .4em; 
+}
+.ui-dialog .ui-dialog-content {
+	padding:3px;
+	font-size:12px;
+}
+.ui-dialog table {
+	
+	width : 100%;
+	
+}
+
+.ui-dialog table td {
+
+	padding:3px 1px;
+/*	border:1px solid #ccc;*/
+}
+
 
