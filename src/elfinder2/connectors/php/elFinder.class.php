@@ -235,9 +235,11 @@ class elFinder {
 				);
 		}
 		
-		echo json_encode($result);
-		// $this->_dump($result['files']);
-		
+		if (isset($_GET['debug']))
+			$this->_dump($result);
+		else
+			echo json_encode($result);
+
 		exit();
 
 	}
