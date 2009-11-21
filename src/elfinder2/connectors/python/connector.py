@@ -1,8 +1,13 @@
 #!/usr/bin/env python
+#
+# Connector for elFinder File Manager
+# author Troex Nevelin <troex@fury.scancode.ru>
+
 
 import binascii
 import cgi
 import cgitb
+import mimetypes
 import os
 import os.path
 import sys
@@ -10,9 +15,7 @@ import simplejson
 from datetime import datetime, date, time
 
 print "Content-type: text/html\n"
-#print """
-#{"cwd":{"hash":1829952014,"name":"Home","rel":"\/Home","write":true,"upload":true,"mkdir":true,"rm":true,"rmdir":true},"files":{"-1702046772":{"name":"black_mosaic_by_seikq.jpg","size":40100,"read":true,"write":true,"mdate":"11 Nov 2009 21:00","adate":"20 Nov 2009 21:23","css":"file image jpeg","cmd":"","kind":"JPEG image","url":"http:\/\/php5.localhost:8001\/git\/elrte\/files\/black_mosaic_by_seikq.jpg"},"1760046576":{"name":"logo.png","size":18782,"read":true,"write":true,"mdate":"11 Nov 2009 21:57","adate":"20 Nov 2009 21:23","css":"file image png","cmd":"","kind":"PNG image","url":"http:\/\/php5.localhost:8001\/git\/elrte\/files\/logo.png"},"-2100665865":{"name":"smislovie_galliucinacii_-_razum_kogda-nibud_pobedit.mp3","size":5052416,"read":true,"write":true,"mdate":"12 Sep 2009 01:54","adate":"20 Nov 2009 21:23","css":"file audio mpeg","cmd":"","kind":"MPEG audio","url":"http:\/\/php5.localhost:8001\/git\/elrte\/files\/smislovie_galliucinacii_-_razum_kogda-nibud_pobedit.mp3"},"-1706455333":{"name":"you&me-strips23.jpg","size":340766,"read":true,"write":true,"mdate":"17 Nov 2009 04:48","adate":"20 Nov 2009 21:23","css":"file image jpeg","cmd":"","kind":"JPEG image","url":"http:\/\/php5.localhost:8001\/git\/elrte\/files\/you&me-strips23.jpg"}},"tree":[],"disabled":[],"debug":{"time":0.10094904899597,"mimeTypeDetect":"finfo","du":true,"tasks":{"dirs":[],"images":[]},"utime":1258742072}}
-#"""
+
 cgitb.enable()
 
 class elFinder():
@@ -47,26 +50,65 @@ class elFinder():
 		},
 		'perms': []
 	}
-	
+
 	_commands = {
-		'cd': '_cd',
-		'open': '_open',
-		'mkdir': '_mkdir',
-		'mkfile': '_mkfile',
-		'rename': '_rename',
-		'upload': '_upload',
-		'rm': '_rm',
-		'edit': '_edit',
-		'extract': '_extract'
+		'mkdir': '__mkdir',
+		'mkfile': '__mkfile',
+		'rename': '__rename',
+		'upload': '__upload',
+		'paste': '__paste',
+		'rm': '__rm',
+		'edit': '__edit',
+		'extract': '__extract'
 	}
-	
+
+	_kinds = {
+		'directory': 'Directory',
+		'link': 'Alias',
+		'text/plain': 'Plain text',
+		'text/x-php': 'PHP source',
+		'text/javascript': 'Javascript source',
+		'text/css': 'CSS style sheet',
+		'text/html': 'HTML document',
+		'text/x-c': 'C source',
+		'text/x-c++': 'C++ source',
+		'text/x-shellscript': 'Unix shell script',
+		'text/rtf': 'Rich Text Format (RTF)',
+		'text/rtfd': 'RTF with attachments (RTFD)',
+		'text/xml': 'XML document',
+		'application/xml': 'XML document',
+		'application/x-tar': 'TAR archive',
+		'application/x-gzip': 'GZIP archive',
+		'application/x-bzip2': 'BZIP archive',
+		'application/x-zip': 'ZIP archive',
+		'application/zip': 'ZIP archive',
+		'application/x-rar': 'RAR archive',
+		'image/jpeg': 'JPEG image',
+		'image/gif': 'GIF Image',
+		'image/png': 'PNG image',
+		'image/tiff': 'TIFF image',
+		'image/vnd.adobe.photoshop': 'Adobe Photoshop image',
+		'application/pdf': 'Portable Document Format (PDF)',
+		'application/msword': 'Microsoft Word document',
+		'application/vnd.ms-office': 'Microsoft Office document',
+		'application/vnd.ms-word': 'Microsoft Word document',
+		'application/msexel': 'Microsoft Excel document',
+		'application/vnd.ms-excel': 'Microsoft Excel document',
+		'application/octet-stream': 'Application',
+		'audio/mpeg': 'MPEG audio',
+		'video/mpeg': 'MPEG video',
+		'video/x-msvideo': 'AVI video',
+		'application/x-shockwave-flash': 'Flash application',
+		'video/x-flv': 'Flash video'
+	}
+
 	_request = {}
 	
 	def __init__(self, opts):
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
-			# self._options[]
-	
+
+
 	def run(self):
 		possible_fields = ['cmd', 'init', 'tree', 'target', 'current']
 		form = cgi.FieldStorage()
@@ -74,17 +116,11 @@ class elFinder():
 			if field in form:
 				self._request[field] = form[field].value
 		
-		#print self._request
-		#print simplejson.dumps(http)
-				
-		response = self._open()
-		# response['tree'] = {}
-		response['disabled'] = []
-		# response['files'] = {}
+		response = self.__open()
 		print simplejson.dumps(response)
 	
 
-	def _open(self):
+	def __open(self):
 		# try to open file
 		if 'current' in self._request:
 			pass
@@ -93,25 +129,43 @@ class elFinder():
 			response = {}
 			path = self._options['root']
 			
-			if self._options['rootAlias']:
+			if 'target' in self._request:
+				target = self.__findDir(int(self._request['target']), None)
+				if not target:
+					response['warning'] = 'Directory does not exists'
+				elif not (os.access(target, os.R_OK) and self.__isAllowed(target, 'read')):
+					response['warning'] = 'Access denied'
+				else:
+					path = target
+
+			name = os.path.basename(path)
+			if path == self._options['root']:
 				name = self._options['rootAlias']
+
+			if self._options['rootAlias']:
+				basename = self._options['rootAlias']
 			else:
-				name = os.path.basename(path)
-			
-			rel = '/' + name + path[len(self._options['root']):]
-			
-			write = os.access(path, os.W_OK) and self._isAllowed(path, 'write')
+				basename = os.path.basename(self._options['root'])
+			basename = '/' + basename;
+
+			rel = basename + path[len(self._options['root']):]
+
+			write = os.access(path, os.W_OK) and self.__isAllowed(path, 'write')
 			response['cwd'] = {
 				'hash': binascii.crc32(path),
 				'name': name,
 				'rel': rel,
+				'kind': 'Directory',
+				'size': 0,
+				'mdate': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
+				'read': True,
 				'write': write,
-				'upload': write and self._isAllowed(path, 'upload'),
-				'mkdir': write and self._isAllowed(path, 'mkdir'),
-				'rm': write and self._isAllowed(path, 'rm'),
-				'rmdir': write and self._isAllowed(path, 'rmdir')
+				'upload': write and self.__isAllowed(path, 'upload'),
+				'mkdir': write and self.__isAllowed(path, 'mkdir'),
+				'rm': write and self.__isAllowed(path, 'rm'),
+				'rmdir': write and self.__isAllowed(path, 'rmdir')
 			}
-			
+
 			if 'tree' in self._request:
 				fhash = binascii.crc32(self._options['root'])
 				if self._options['rootAlias']:
@@ -121,102 +175,187 @@ class elFinder():
 				response['tree'] = {
 					fhash: {
 						'name': name,
-						'dirs': self._tree(None)
+						'read': True,
+						'dirs': self.__tree(self._options['root'])
 					}
 				}
-			
-			files = {}
-			dirs = {}
-			
+				if 'init' in self._request:
+					response['disabled'] = self._options['disabled']
+
+			files = []
+			dirs = []
+
 			for f in os.listdir(path):
 				if f[0] == '.': continue
 				pf = os.path.join(path, f)
 				info = {}
-				info = self._info(pf, write)
-				fhash = binascii.crc32(pf)
+				info = self.__info(pf, write)
+				info['hash'] = binascii.crc32(pf)
 				if info['css'] == 'dir':
-					dirs[fhash] = info
+					dirs.append(info)
 				else:
-					files[fhash] = info
-			
-			dirs.update(files)
+					files.append(info)
+
+			dirs.extend(files)
 			response['files'] = dirs
-			
+
 			return response
 		pass
 	
 
-
-	def _tree(self, path):
-		tree = {}
-		
+	def __findDir(self, fhash, path):
+		"""Find directory by hash (crc32)
+		FULL
+		"""
 		if not path:
 			path = self._options['root']
-		
+			if fhash == binascii.crc32(path):
+				return path
+
 		if not os.path.isdir(path):
-			return tree
-		
+			return None
+
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and self._isAllowed(pd, 'read'):
-				fhash = binascii.crc32(pd)
-				if os.access(pd, os.R_OK):
-					dirs = self._tree(pd)
+			if os.path.isdir(pd) and not os.path.islink(pd):
+				if fhash == binascii.crc32(pd):
+					return pd
 				else:
-					dirs = []
+					ret = self.__findDir(fhash, pd)
+					if ret:
+						return ret
+
+		return None
+
+
+	def __tree(self, path):
+		"""Return directory tree starting from path
+		FULL
+		"""
+		tree = {}
+		
+		if not os.path.isdir(path):
+			return ''
+		if os.path.islink(path):
+			return ''
+
+		for d in os.listdir(path):
+			pd = os.path.join(path, d)
+			if os.path.isdir(pd) and not os.path.islink(pd):
+				fhash = binascii.crc32(pd)
+				read = os.access(pd, os.R_OK) and self.__isAllowed(pd, 'read')
+				if read:
+					dirs = self.__tree(pd)
+				else:
+					dirs = ''
 				tree[fhash] = {
 					'name': d,
+					'read': read,
 					'dirs': dirs
 				}
-		
-		return tree
-		
+
+		if len(tree) == 0:
+			return ''
+		else:
+			return tree
 	
 
-	def _info(self, path, parentWrite):
+	def __info(self, path, parentWrite):
+		mime = ''
+		filetype = 'file'
 		if os.path.isfile(path):
 			filetype = 'file'
-		elif os.path.isdir(path):
+		if os.path.isdir(path):
 			filetype = 'dir'
-		elif os.path.islink(path):
+		if os.path.islink(path):
 			filetype = 'link'
-		else:
-			pass
 		
-		stat = os.stat(path)
+		stat = os.lstat(path)
+
 		info = {
 			'name': os.path.basename(path),
 			'size': stat.st_size,
 			'read': os.access(path, os.R_OK),
 			'write': os.access(path, os.W_OK),
 			'mdate': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
-			'adate': datetime.fromtimestamp(stat.st_atime).strftime("%d %b %Y %H:%M"),
-			'css': filetype,
+			'css': '',
 			'cmd': ''
 		}
 		
 		if filetype == 'dir':
 			info['kind'] = 'Directory'
-			info['read'] = info['read'] and self._isAllowed(path, 'read');
-			info['write'] = info['write'] and self._isAllowed(path, 'write');
+			info['css'] = 'dir';
+			info['size'] = self.__dirSize(path)
+			info['read'] = info['read'] and self.__isAllowed(path, 'read');
+			info['write'] = info['write'] and self.__isAllowed(path, 'write');
 		elif filetype == 'link':
 			info['kind'] = 'Alias'
+			path = self.__readlink(path)
+			if not path:
+				info['css'] = 'broken'
+				info['write'] = info['write'] and parentWrite
+				return info
+			info['link'] = binascii.crc32(path)
+			if os.path.isdir(path):
+				info['css'] = 'dir'
+				info['read'] = info['read'] and self.__isAllowed(path, 'read')
+				info['write'] = info['write'] and self.__isAllowed(path, 'write')
+				return info
+			# mimetype here
+			mime = self.__mimetype(path)
 		else:
-			pass
+			mime = self.__mimetype(path)
+			if mime in self._kinds:
+				info['kind'] = self._kinds[mime]
+			else:
+				info['kind'] = 'Unknown'
+
+		if mime:
+			mime = mime.split('/', 2)
+			c = mime[0] # class
+			s = mime[1] # subclass
+			info['css'] += " %s %s" % (c, s)
+			# more actions here
+			# image sizes
 		
 		return info
 	
+
+	def __mimetype(self, path):
+		return mimetypes.guess_type(path)[0]
 	
-	def _isAllowed(self, path, action):
+
+	def __readlink(self, path):
+		"""Read link and return real path if not broken
+		FULL
+		"""
+		target = os.readlink(path);
+		if not target[0] == '/':
+			target = os.path.join(os.path.dirname(path), target)
+		target = os.path.normpath(target)
+		if os.path.exists(target):
+			if not target.find(self._options['root']) == -1:
+				return target
+		return False
+
+
+	def __dirSize(self, path):
+		total_size = 0
+		for dirpath, dirnames, filenames in os.walk(path):
+			for f in filenames:
+				fp = os.path.join(dirpath, f)
+				if os.path.exists(fp):
+					total_size += os.stat(fp).st_size
+		return total_size
+
+
+	def __isAllowed(self, path, action):
 		return True
-	
 
 
-
-options = {
-	'root': '/Users/troex/Sites/git/elrte/files'
-}
-fm = elFinder(options)
-fm.run()
+elFinder({
+	'root': '/Users/troex/Sites/git/elrte/files',
+	'rootAlias': ''
+}).run()
 
 #print os.environ
