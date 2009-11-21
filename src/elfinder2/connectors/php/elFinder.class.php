@@ -42,12 +42,11 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_commands = array(
-		'cd'      => '_cd',
-		'open'    => '_open',
 		'mkdir'   => '_mkdir',
 		'mkfile'  => '_mkfile',
 		'rename'  => '_rename',
 		'upload'  => '_upload',
+		'paste'   => '_paste',
 		'rm'      => '_rm',
 		'edit'    => '_edit',
 		'extract' => '_extract'
@@ -317,6 +316,10 @@ class elFinder {
 				'hash'   => crc32($path),
 				'name'   => $name,
 				'rel'    => DIRECTORY_SEPARATOR.$rel,
+				'kind'   => 'Directory',
+				'size'   => 0,
+				'mdate'  => date('j M Y H:i', filemtime($path)),
+				'read'   => true,
 				'write'  => $write,
 				'upload' => $write && $this->_isAllowed($path, 'upload'),
 				'mkdir'  => $write && $this->_isAllowed($path, 'mkdir'),
@@ -328,7 +331,8 @@ class elFinder {
 				$result['tree'] = array(
 					crc32($this->_options['root']) => array(
 						'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
-						'dirs' => $this->_tree()
+						'read' => true,
+						'dirs' => $this->_tree($this->_options['root'])
 						)
 					);
 				if (!empty($_GET['init'])) {
@@ -362,10 +366,6 @@ class elFinder {
 		
 		
 	}
-	
-	
-
-	
 	
 	
 	/************************************************************/
@@ -421,26 +421,25 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return directory tree (multidimensional array)
 	 *
-	 * @return void
-	 * @author dio
+	 * @param  string  $path  directory path
+	 * @return array
 	 **/
-	private function _tree($path = null)
+	private function _tree($path)
 	{
-		if (!$path) {
-			$path = $this->_options['root'];
-		}
 		$tree = array();
 		
 		if (false != ($d = dir($path))) {
 			
 			while($entr = $d->read()) {
 				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
-				if ('.' != $entr && '..' != $entr && is_dir($p) && $this->_isAllowed($p, 'read')) {
-					$dirs = is_readable($p) ? $this->_tree($p) : null;
+				if ('.' != substr($entr, 0, 1) && !is_link($p) && is_dir($p) ) {
+					$read = is_readable($p) && $this->_isAllowed($p, 'read');
+					$dirs = $read ? $this->_tree($p) : '';
 					$tree[crc32($p)] = array(
 						'name' => $entr,
+						'read' => $read,
 						'dirs' => $dirs ? $dirs : ''
 						);
 				}
@@ -470,7 +469,6 @@ class elFinder {
 			'write' => is_writable($path),
 			'size'  => $stat['size'],
 			'mdate' => date('j M Y H:i', $stat['mtime']),
-			'adate' => date('j M Y H:i', $stat['atime']),
 			'css'   => 'file',
 			'cmd'   => ''
 			);
@@ -478,6 +476,7 @@ class elFinder {
 		if ($type == 'dir') {
 			$info['kind']  = 'Directory';
 			$info['css']   = 'dir';
+			$info['size']  = $this->_dirSize($path);
 			$info['read']  = $info['read']  && $this->_isAllowed($path, 'read');
 			$info['write'] = $info['write'] && $this->_isAllowed($path, 'write');
 			return $info;
@@ -489,6 +488,7 @@ class elFinder {
 				$info['write'] = $info['write'] && $parentWrite;
 				return $info;
 			}
+			$info['link'] = crc32($path);
 			if (is_dir($path)) {
 				$info['css']   = 'dir';
 				$info['read']  = $info['read']  && $this->_isAllowed($path, 'read');

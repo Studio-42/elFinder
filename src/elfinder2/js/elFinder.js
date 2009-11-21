@@ -61,7 +61,7 @@
 		var view = function(fm) {
 			this.fm  = fm;
 			var self = this;
-			
+			this.tree =null;
 			this.tb  = $('<ul />');
 			this.nav = $('<div />').addClass('el-finder-nav');
 			this.cwd = $('<div />').addClass('el-finder-cwd');
@@ -108,13 +108,13 @@
 			this.error = function(m) {
 				fm.unlock();
 				var e = $('<p />').addClass('el-finder-fatal rounded-5').text(i18n('Error')+': '+i18n(m)).appendTo(self.wz);
-				setTimeout(function() { e.fadeOut('slow') }, 4000);
+				setTimeout(function() { e.fadeOut('slow') }, 3000);
 				
 			}
 
 			this.warning = function(m) {
 				var e = $('<p />').addClass('el-finder-fatal rounded-5').text(i18n('Warning')+': '+i18n(m)).appendTo(self.wz);
-				setTimeout(function() { e.fadeOut('slow') }, 3000);
+				setTimeout(function() { e.fadeOut('slow') }, 2000);
 			}
 
 		
@@ -127,6 +127,7 @@
 				function traverse(tree, root) {
 					var html = '<ul>', dirs = false;
 					for (var i in tree) {
+						fm.dirs[i] = {read : tree[i].read };
 						dirs = typeof(tree[i].dirs.length) == 'undefined';
 						html += '<li>'+(!root ? '<div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="rounded-3'+(root ? ' root selected' : '')+'" id="nav'+i+'">'+tree[i].name+'</a>';
 						if (tree[i].dirs) {
@@ -233,18 +234,109 @@
 		
 		var contextmenu = function(fm) {
 			this.fm = fm;
+			var self = this;
+			// this.menu = null;
+			
+			this.zindex = 2;
+			$('*', document.body).each(function() {
+				var z = $(this).css('z-index');
+				if (z > self.zindex) {
+					self.zindex = z+1;
+				}
+			})
+			
+			// log('zindex: '+this.zindex)
+			
+			this.menu = $('<div />').addClass('el-finder-contextmenu rounded-5').css('z-index', this.zindex).appendTo(document.body).hide()
+			
+			this.create = function(e) {
+				log(e)
+				this.remove()
+				var t = fm.view.cwd, tag = fm.viewMode == 'icons' ? 'LI' : 'TR', p;
+				
+				if (e.target != fm.view.cwd.get(0)) {
+					if(e.target.nodeName == tag) {
+						t = $(e.target);
+					} else if((p = $(e.target).parents(tag)) && p.length) {
+						t = p.eq(0);
+					}
+				}
+
+				if (t == fm.view.cwd) {
+					cwdMenu();
+				} else {
+					elemMenu(t);
+				}
+				
+				var size = {
+			      'height' : $(window).height(),
+			      'width'  : $(window).width(),
+			      'sT'     : $(window).scrollTop(),
+			      'cW'     : $(this.menu).width(),
+			      'cH'     : $(this.menu).height()
+			    };
+				// log(size)
+				$(this.menu).css({
+						'left' : ((e.clientX + size.cW) > size.width ? ( e.clientX - size.cW) : e.clientX),
+						'top'  : ((e.clientY + size.cH) > size.height && e.clientY > size.cH ? (e.clientY + size.sT - size.cH) : e.clientY + size.sT)
+					})
+					.show()
+					.children('div:not([class="delim"])')
+					.hover(
+						function() { $(this).addClass('hover'); }, 
+						function() { $(this).removeClass('hover'); }
+					)
+					.click(function() {
+						// log($(this).removeClass('hover').attr('class'))
+						var cmd = $.trim($(this).attr('class').replace('hover', ''))
+						log(cmd)
+						self.remove();
+						if (cmd == 'open') {
+							fm.ui.open.exec(t.attr('id'));
+						} else {
+							fm.ui[cmd].exec();
+						}
+						
+					});
+				
+				function cwdMenu() {
+					fm.view.cwd.find('li,tr').removeClass('selected');
+					fm.selected = [];
+					fm.cwd.mkdir && fm.ui.mkdir && self.menu.append($('<div class="mkdir" />').text(i18n('New folder')));
+					fm.cwd.upload && fm.ui.upload && self.menu.append($('<div class="upload" />').text(i18n('Upload files')));
+					fm.cwd.write && fm.buffer.length && self.menu.append($('<div class="paste" />').text(i18n('Paste')));
+					self.menu.children().length && self.menu.append($('<div class="delim" />'));
+					self.menu.append($('<div class="info" />').text(i18n('Get info')));
+					self.menu.append($('<div class="delim" />'));
+					self.menu.append($('<div class="reload" />').text(i18n('Reload')));
+				}
+				
+				function elemMenu(t) {
+					if (!t.hasClass('selected')) {
+						t.addClass('selected');
+						fm.selected.push(t.attr('id'))
+					}
+					self.menu.append($('<div class="info" />').text(i18n('Get info')));
+				}
+			}
+			
+			this.remove = function() {
+				this.menu.hide().empty();
+			}
 			
 		}
 		
 		
-		var ui =function(fm, disabled) {
+		var ui =function(fm) {
 			var ui = this;
 			
 			this.back = new function() {
 				this.button = true;
 
 				this.exec = function() {
+					
 					if (!ui.back.button.hasClass('disabled') && fm.history.length) {
+						log(fm.history) 
 						fm.ui.open.exec(fm.history.pop(), true);
 					}
 				}
@@ -272,10 +364,9 @@
 							if (data.error) {
 								return fm.view.error(data.error);
 							}
+							fm.setNav(data.tree);
+							fm.setCwd(data.cwd, data.files);
 							fm.unlock();
-							fm.updateCwd(data.cwd, data.files);
-							fm.updateNav(data.tree);
-							fm.view.nav.find('a#nav'+fm.cwd.hash).trigger('select');
 							ui.update();
 							data.debug && log(data.debug);
 						}
@@ -283,12 +374,43 @@
 				}
 			}
 			
+			/**
+			 * @class  
+			 * Open file/folder
+			 */
 			this.open = new function() {
 				var self = this;
 				
-				this.exec = function(id, noHistory) {
+				this.exec = function(id, nh) {
+
+					if (fm.dirs[id]) {
+						if (!fm.dirs[id].read) {
+							fm.view.error('Access denied!');
+						} else {
+							openDir(id);
+						}
+					} else if (fm.files[id]) {
+						var f = fm.files[id];
+						
+						if (f.kind == 'Alias') {
+							if (!f.link || !fm.files[f.link]) {
+								return fm.view.error('Broken link!');
+							} 
+							id = f.link;
+							f  = fm.files[id];
+						}
+						
+						if (!f.read) {
+							return fm.view.error('Access denied!');
+						} 
+						if (f.css == 'dir') {
+							openDir(id);
+						} else {
+							openFile(f);
+						}
+					}
 					
-					if (!fm.files[id] || fm.files[id].css == 'dir') {
+					function openDir(id) {
 						fm.lock();
 						$.ajax({
 							url      : options.url,
@@ -302,24 +424,22 @@
 								if (data.warning) {
 									fm.view.warning(data.warning);
 								}
+								!nh && fm.history.push(fm.cwd.hash);
+								fm.setCwd(data.cwd, data.files);
+								fm.updateCwd();
 								fm.unlock();
-								!noHistory && fm.history.push(fm.cwd.hash);
-								fm.updateCwd(data.cwd, data.files);
 								ui.update();
 							}
-						})
-						
-					} else {
-						if (!fm.files[id].read) {
-							return fm.view.warning('File is not readable');
-						}
-						var ws = '', s,
-							url = fm.files[id].url ? fm.files[id].url : options.url+'?current='+fm.cwd.hash+'&target='+id;
+						});
+					}
+					
+					function openFile(f) {
+						var ws = '', s;
 						if (fm.files[id].dimensions) {
-							var s = fm.files[id].dimensions.split('x');
+							s  = fm.files[id].dimensions.split('x');
 							ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 						} 
-						window.open(url, null, 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes');
+						window.open(f.url || options.url+'?current='+fm.cwd.hash+'&target='+f.hash, null, 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes');
 					}
 				}
 			}
@@ -328,10 +448,11 @@
 				this.button = true;
 				
 				this.exec = function() {
-					if (fm.selected.length) {
+					if (!fm.selected.length) {
+						info(fm.cwd)
+					} else {
 						for (var i=0; i<fm.selected.length; i++) {
-							var id = fm.selected[i];
-							info(fm.files[id])
+							info(fm.files[fm.selected[i]]);
 						}
 					}
 					
@@ -355,10 +476,6 @@
 									.append($('<td/>').append(fm.formatDate(f.mdate)))	
 							).append(
 								$('<tr/>')
-									.append($('<td/>').append(i18n('Last opened')))
-									.append($('<td/>').append(fm.formatDate(f.adate)))
-							).append(
-								$('<tr/>')
 									.append($('<td/>').append(i18n('Permissions')))
 									.append($('<td/>').append(fm.formatPermissions(f)))
 							);
@@ -370,13 +487,20 @@
 										.append($('<td/>').append(f.dimensions))
 								);
 							}
+							if (f.url) {
+								tb.append(
+									$('<tr/>')
+										.append($('<td/>').append(i18n('URL')))
+										.append($('<td/>').append(f.url))
+								);
+							}
+							
 							$('<div/>').append(tb).dialog({
 								title   : i18n('File info'),
 								width   : 350,
 								buttons : { Ok : function() { $(this).dialog('close'); } }
 							});
 					}
-					
 					
 				}
 			}
@@ -420,8 +544,6 @@
 				}
 			}
 			
-			
-			
 			this.mkdir = new function() {
 				this.button = true;
 				// var self = this;
@@ -437,6 +559,20 @@
 					} else {
 						this.button.addClass('disabled');
 					}
+				}
+			}
+
+			this.mkfile = new function() {
+				
+				this.exec = function() {
+					
+				}
+			}
+
+			this.rename = new function() {
+				
+				this.exec = function() {
+					
 				}
 			}
 
@@ -462,8 +598,6 @@
 				}
 			}
 
-			
-
 			this.rm = new function() {
 				this.button = true;
 				// var self = this;
@@ -482,8 +616,6 @@
 					}
 				}
 			}
-
-	
 	
 			this.icons = new function() {
 				this.button = true;
@@ -524,18 +656,19 @@
 			}
 			
 			
-			for (var i in this) {
-				if (typeof(this[i]) == 'object') {
-					if (disabled.length && $.inArray(i, disabled) != -1) {
-						delete this[i];
-					} else if (this[i].button) {
-						this[i].button = $('<li/>').addClass(i+' rounded-3 '+(this[i].update ? 'disabled' : '')).appendTo(fm.view.tb).bind('click', this[i].exec);
+			
+			this.init = function(disabled) {
+				for (var i in this) {
+					if (typeof(this[i]) == 'object') {
+						if (disabled.length && $.inArray(i, disabled) != -1) {
+							delete this[i];
+						} else if (this[i].button) {
+							this[i].button = $('<li/>').addClass(i+' rounded-3 '+(this[i].update ? 'disabled' : '')).appendTo(fm.view.tb).bind('click', this[i].exec);
+						}
 					}
 				}
+				
 			}
-			
-			
-			
 			
 			this.update = function() {
 				$.each(this, function() {
@@ -581,6 +714,7 @@
 			 * Object. Info about current directory
 			 */
 			this.cwd   = {};
+			this.dirs = {};
 			/**
 			 * Object. Folders/files in current directory
 			 */
@@ -619,43 +753,95 @@
 				this.view.spinner();
 			}
 
+			/**
+			 * Set value of cwd (current working directory) and files/folders in cwd
+			 * @param  Object  cwd
+			 * @param  Object  files
+			 */
+			this.setCwd = function(cwd, files) {
+				this.cwd   = cwd;
+				this.files = {};
 
+				for (var i=0; i< files.length; i++) {
+					this.files[files[i].hash] = files[i];
+					this.cwd.size += files[i].size;
+				}
+				this.updateCwd();
+			}
+			
+			/**
+			 * Redraw cwd and set current dir in navigation panel opened 
+			 */
+			this.updateCwd = function() {
+				this.view.updateCwd();
+				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
+			}
+
+			/**
+			 * Set navigation panel content and redraw it
+			 * @param  Object  folders tree
+			 */
+			this.setNav = function(tree) {
+				this.view.updateNav(tree);
+				
+				var tree = this.view.nav.children('ul');
+				tree.find('a').bind('click', function(e) {
+					e.preventDefault();
+					self.ui.open.exec($(this).trigger('select').attr('id').replace('nav', ''));
+				})
+				.bind('select', function() {
+					if (!$(this).hasClass('selected')) {
+						tree.find('a').removeClass('selected');
+						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
+					}
+				})
+				.end()
+				.children('li').find('li:has(ul)').each(function() {
+					$(this).children('ul').hide().end()
+						.children('div').click(function() {
+							$(this).toggleClass('dir-expanded').nextAll('ul').toggle(300);
+						});
+				});
+				
+			}
 
 			/**
 			 * Init file manager
 			 */
 			if (!this.view) {
 				
-				this.viewMode = cookie('elfinder-view');
-				// log(this.viewMode)
+				this.viewMode    = cookie('elfinder-view');
+				this.view        = new view(this);
+				this.ui          = new ui(this);
+				this.contextmenu = new contextmenu(this);
 				
-				this.view = new view(this);
 				this.lock();
+				
 				$.ajax({
 					url      : options.url,
 					data     : { tree : true, init : true },
 					dataType : 'json',
 					error    : self.view.fatal,
 					success  : function(data) {
-						log(data)
-						self.unlock();
 						if (data.error) {
 							return self.view.error(data.error);
 						}
+						self.setNav(data.tree);
+						self.setCwd(data.cwd, data.files);
+						// self.view.updateCwd();
 						
-						// log(data.files)
-						
-						self.updateCwd(data.cwd, data.files);
-						self.updateNav(data.tree)
-						
-						self.ui = new ui(self, data.disabled);
-						self.ui.update();
+						self.unlock();
+						self.view.nav.find('a#nav'+self.cwd.hash).trigger('select');
+						self.ui.init(data.disabled);
 					}
-				})
+				});
+				
 				this.view.cwd
 					.bind(window.opera?'click':'contextmenu', function(e) {
-						log(e.target)
-				
+						// log(e.target)
+						e.stopPropagation();
+						e.preventDefault();
+						self.contextmenu.create(e)
 					})
 					.bind('dblclick', function(e) {
 						e.stopPropagation();
@@ -669,6 +855,7 @@
 					.bind('click', function(e) {
 						e.preventDefault()
 						e.stopPropagation();
+						self.contextmenu.remove();
 						var tag = self.viewMode == 'icons' ? 'LI' : 'TR';
 						
 						if (e.target == self.view.cwd.get(0)) {
@@ -697,41 +884,11 @@
 					});
 			}
 
-			this.updateNav = function(tree) {
-				this.view.updateNav(tree);
-				
-				var tree = this.view.nav.children('ul');
-				tree.find('a').bind('click', function(e) {
-					e.preventDefault();
-					self.ui.open.exec($(this).trigger('select').attr('id').replace('nav', ''));
-				})
-				.bind('select', function() {
-					if (!$(this).hasClass('selected')) {
-						tree.find('a').removeClass('selected');
-						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
-					}
-				})
-				.end()
-				.children('li').find('li:has(ul)').each(function() {
-					$(this).children('ul').hide().end()
-						.children('div').click(function() {
-							$(this).toggleClass('dir-expanded').nextAll('ul').toggle(300);
-						});
-				});
-
-				
-			}
 			
-
-			this.updateCwd = function(cwd, files) {
-				this.cwd   = cwd;
-				this.files = {};
-				for (var i in files) {
-					this.files[files[i].hash] = files[i];
-				}
-				this.view.updateCwd();
-				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
-			}
+			
+			
+			
+			
 
 			this.formatSize = function(s) {
 				var n = 1, u = '';

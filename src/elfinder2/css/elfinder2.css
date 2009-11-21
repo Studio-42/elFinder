@@ -313,4 +313,31 @@ p.el-finder-fatal {
 /*	border:1px solid #ccc;*/
 }
 
+/* contextmenu */
 
+.el-finder-contextmenu { 
+	position:absolute;
+	background:#fff; 
+	cursor:default; 
+	border:1px solid #ccc;  
+
+	padding:5px 0;
+}
+
+.el-finder-contextmenu div { 
+	display:block;
+/*	border:1px solid #ccc;  */
+	margin:0;
+	padding:.5em 7em .3em 29px;
+	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
+	background:url('../images/sprite.png') 0 0 no-repeat;
+}
+.el-finder-contextmenu div.info   { background-position: 7px -350px; }
+.el-finder-contextmenu div.back   { background-position: 7px  -97px; }
+.el-finder-contextmenu div.reload { background-position: 7px -119px; }
+.el-finder-contextmenu div.mkdir  { background-position: 7px -140px; }
+.el-finder-contextmenu div.upload { background-position: 7px -182px; }
+.el-finder-contextmenu div.paste  { background-position: 7px -287px; }
+
+.el-finder-contextmenu div.delim { margin:0; padding:0; height:1px; border-top:1px solid #eee; background:transparent; display:block;}
+.el-finder-contextmenu div.hover { background-color:#99ccff; }
