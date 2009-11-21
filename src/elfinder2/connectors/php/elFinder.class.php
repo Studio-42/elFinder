@@ -243,21 +243,7 @@ class elFinder {
 		exit();
 
 	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _init()
-	{
-		$result = $this->_open();
-		$result['tree'] = $this->_tree();
-		$result['disabled'] = $this->_options['disabled'];
-			
-		return $result;
-	}
+
 	
 	/************************************************************/
 	/**                   elFinder commands                    **/
@@ -273,7 +259,6 @@ class elFinder {
 	 **/
 	private function _open()
 	{
-		
 		if (isset($_GET['current'])) { // read file
 			if (empty($_GET['current']) 
 			||  empty($_GET['target'])
@@ -355,20 +340,22 @@ class elFinder {
 			
 			if (false != ($d = dir($path))) {
 				while ($entr = $d->read()) {
-					if ('..' != $entr && '.' != substr($entr, 0, 1)) {
+					if ('.' != substr($entr, 0, 1)) {
 						$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 						$info = $this->_info($p, $write);
-						$hash = crc32($p);
+						// $hash = crc32($p);
 						if ($info['css'] == 'dir') {
-							$dirs[$hash] = $info;
+							$dirs[] = $info;
 						} else {
-							$files[$hash] = $info;
+							$files[] = $info;
 						}
 					}
 				}
 			}
-			$result['files'] = $dirs+$files;
-			// $result['files'] = array_merge($dirs, $files);
+			usort($dirs, 'elFinderCmp');
+			usort($files, 'elFinderCmp');
+			// $result['files'] = $dirs+$files;
+			$result['files'] = array_merge($dirs, $files);
 			return $result;
 		}
 		
@@ -379,45 +366,6 @@ class elFinder {
 	
 
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function __open()
-	{
-		if (empty($_GET['current']) 
-		||  empty($_GET['target'])
-		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
-		||  false == ($file = $this->_find(trim($_GET['target']), $dir))
-		) {
-			header('HTTP/1.x 404 Not Found'); 
-			exit('File not found');
-		}
-		$info = $this->_info($file);
-		if ($info['type'] == 'dir') {
-			header('HTTP/1.x 404 Not Found'); 
-			exit('File not found');
-		}
-		if ($info['type'] == 'link') {
-			if (!$info['original']) {
-				header('HTTP/1.x 404 Not Found'); 
-				exit('File not found');
-			} else {
-				$file = $info['original'];
-				$info['size'] = filesize($file);
-			}
-		}
-
-		header("Content-Type: ".$info['mime']);
-		header("Content-Disposition: ".(substr($info['mime'], 0, 5) == 'image' || substr($info['mime'], 0, 4) == 'text' ? 'inline' : 'attacments')."; filename=".$info['name']);
-		header("Content-Location: ".str_replace($this->_options['root'], '', $file));
-		header('Content-Transfer-Encoding: binary');
-		header("Content-Length: " .$info['size']);
-		header("Connection:close");
-		readfile($file);
-	}
 	
 	
 	/************************************************************/
@@ -490,12 +438,11 @@ class elFinder {
 			while($entr = $d->read()) {
 				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 				if ('.' != $entr && '..' != $entr && is_dir($p) && $this->_isAllowed($p, 'read')) {
+					$dirs = is_readable($p) ? $this->_tree($p) : null;
 					$tree[crc32($p)] = array(
 						'name' => $entr,
-						'dirs' => is_readable($p) ? $this->_tree($p) : array()
+						'dirs' => $dirs ? $dirs : ''
 						);
-					// $dirs = is_readable($p) ? $this->_tree($p) : null;
-					// $tree[crc32($p).':'.$entr] = !empty($dirs) ? $dirs : false;
 				}
 			}
 			$d->close();
@@ -516,6 +463,7 @@ class elFinder {
 		$stat = $type == 'link' ? lstat($path) : stat($path);
 		
 		$info = array(
+			'hash'  => crc32($path),
 			'name'  => basename($path),
 			'size'  => $stat['size'],
 			'read'  => is_readable($path),
@@ -756,6 +704,10 @@ class elFinder {
 		return (double)$time[1] + (double)$time[0];
 	}
 		
+}
+
+function elFinderCmp($a, $b) {
+	return strcmp($a['name'], $b['name']);
 }
 
 ?>

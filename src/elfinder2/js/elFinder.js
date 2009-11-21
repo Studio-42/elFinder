@@ -128,8 +128,8 @@
 					var html = '<ul>', dirs = false;
 					for (var i in tree) {
 						dirs = typeof(tree[i].dirs.length) == 'undefined';
-						html += '<li>'+(!root ? '<div class="dir-handler'+(dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="rounded-3'+(root ? ' root selected' : '')+'" id="nav'+i+'">'+tree[i].name+'</a>';
-						if (dirs) {
+						html += '<li>'+(!root ? '<div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="rounded-3'+(root ? ' root selected' : '')+'" id="nav'+i+'">'+tree[i].name+'</a>';
+						if (tree[i].dirs) {
 							html += traverse(tree[i].dirs);
 						}
 						html += '</li>';
@@ -669,7 +669,8 @@
 					.bind('click', function(e) {
 						e.preventDefault()
 						e.stopPropagation();
-						var tag = fm.viewMode == 'icons' ? 'LI' : 'TR';
+						var tag = self.viewMode == 'icons' ? 'LI' : 'TR';
+						
 						if (e.target == self.view.cwd.get(0)) {
 				
 							self.view.cwd.children('ul').children('li').removeClass('selected');
@@ -723,8 +724,11 @@
 			
 
 			this.updateCwd = function(cwd, files) {
-				self.cwd   = cwd;
-				self.files = files;
+				this.cwd   = cwd;
+				this.files = {};
+				for (var i in files) {
+					this.files[files[i].hash] = files[i];
+				}
 				this.view.updateCwd();
 				this.view.nav.find('a#nav'+this.cwd.hash).trigger('select');
 			}
