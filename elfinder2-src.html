@@ -11,8 +11,10 @@
 	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="src/elfinder2/js/elFinder.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/elfinder2/js/elFinder2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/elfinder2/js/elFinder.view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/elfinder2/js/elFinder.ui.js" type="text/javascript" charset="utf-8"></script>
+	
 	
 
 	<script type="text/javascript" charset="utf-8">
@@ -32,16 +34,33 @@
 
 </head>
 <body>
-
+<!-- <img src="src/elfinder2/images/htmlSafari1.png" width="24" height="24" alt="HtmlSafari1"> -->
 	<div id="finder">finder</div>
 
 
 	<div style="clear:both">
 		<hr />
 	</div>
-	<div class="el-finder rounded-5" style="display:none">
+	<div class="el-finder" style="display:none">
 		<div class="el-finder-toolbar">
-			
+			<ul>
+				<li class="back"></li>
+				<li class="reload"></li>
+				<li class="delim"></li>
+				<li class="copy"></li>
+				<li class="paste"></li>
+				<li class="rm"></li>
+				<li class="delim"></li>
+				<li class="mkfile"></li>
+				<li class="mkdir"></li>
+				<li class="upload"></li>
+				<li class="delim"></li>
+				<li class="icons"></li>
+				<li class="list"></li>
+				<li class="delim"></li>
+				<li class="help"></li>
+				<!-- <li class=""></li> -->
+			</ul>
 		</div>
 		<div class="el-finder-workzone" >
 			<div class="el-finder-nav">
@@ -49,7 +68,7 @@
 					<li><a href="#" class="root selected">root</a>
 						<ul>
 							<li><div class="dir-handler"></div><a href="#">directory</a></li>
-							<li><div class="dir-handler"></div><a href="#" class="selected rounded-3">directory</a></li>
+							<li><div class="dir-handler"></div><a href="#" class="selected">directory</a></li>
 							<li><div class="dir-handler dir-collapsed"></div><a href="#">directory</a></li>
 							<li><div class="dir-handler dir-collapsed"></div><a href="#">directory</a></li>
 							<li><div class="dir-handler dir-expanded"></div><a href="#">directory</a>
@@ -61,21 +80,83 @@
 							<li><div class="dir-handler"></div><a href="#">directory</a></li>
 							<li><div class="dir-handler"></div><a href="#">directory</a></li>
 							<li><div class="dir-handler"></div><a href="#">directory</a></li>
-							<li><div class="dir-handler"></div><a href="#">directory</a></li>
-							<li><div class="dir-handler"></div><a href="#">directory</a></li>
+							<!-- <li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li>
+														<li><div class="dir-handler"></div><a href="#">directory</a></li> -->
 						</ul>
 					</li>
 				</ul>
+				<div class="el-finder-places">
+					<label>Places</label>
+					<ul>
+						<li><a href="#" >directory</a></li>
+						<li><a href="#">directory</a></li>
+					</ul>
+				</div>
 			</div>
 			<div class="el-finder-cwd">
-				<ul>
-					<li class="rounded-5"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">Folder</div></li>
-					<li class="rounded-5 selected"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">Folder</div></li>
-					<li class="rounded-5 selected"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">File with very log name</div></li>
-					<li class="rounded-5"><div class="el-finder-icon"></div><div class="el-finder-filename rounded-3">File</div></li>
-				</ul>
+				<div class="dir">
+					<p></p>
+					<em>Folder 1</em>
+				</div>
+				<div class="dir ui-selected">
+					<p></p>
+					<em>Folder with very very very long name</em>
+					<label></label>
+				</div>
+				<div class="">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="text">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="image">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="application">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="audio">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="video">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="broken">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="">
+					<p></p>
+					<em>File</em>
+				</div>
+				<div class="">
+					<p></p>
+					<em>File</em>
+				</div>
+				
 			</div>
+			
 			<div style="clear:both;"></div>
+			<p class="el-finder-info" ><label></label>Error: Access denied!</p>
 		</div>
 		<div class="el-finder-statusbar">
 			

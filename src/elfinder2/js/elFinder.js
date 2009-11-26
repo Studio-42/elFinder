@@ -63,13 +63,16 @@
 			var self = this;
 			this.tree =null;
 			this.tb  = $('<ul />');
+			
 			this.nav = $('<div />').addClass('el-finder-nav');
 			this.cwd = $('<div />').addClass('el-finder-cwd');
-			this.sp  = $('<div />').addClass('el-finder-spinner rounded-5');
+			this.sp  = $('<div />').addClass('el-finder-spinner');
+			this.msg = $('<p />').addClass('el-finder-info');
 			this.wz  = $('<div />').addClass('el-finder-workzone')
 				.append(this.nav)
 				.append(this.cwd)
 				.append(this.sp)
+				.append(this.msg)
 				.append('<div style="clear:both" />');
 			this.st = $('<div />').addClass('stat');
 			this.p  = $('<div />').addClass('path');
@@ -78,7 +81,7 @@
 				.append(this.p)
 				.append(this.st)
 				.append(this.sl);
-			this.win = $(fm).empty().addClass('el-finder rounded-5')
+			this.win = $(fm).empty().addClass('el-finder')
 				.append($('<div />').addClass('el-finder-toolbar').append(this.tb))
 				.append(this.wz)
 				.append(this.sb);
@@ -128,8 +131,8 @@
 					var html = '<ul>', dirs = false;
 					for (var i in tree) {
 						fm.dirs[i] = {read : tree[i].read };
-						dirs = typeof(tree[i].dirs.length) == 'undefined';
-						html += '<li>'+(!root ? '<div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="rounded-3'+(root ? ' root selected' : '')+'" id="nav'+i+'">'+tree[i].name+'</a>';
+
+						html += '<li>'+(!root ? '<div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div>' : '')+'<a href="#" class="'+(root ? ' root selected' : '')+'" hash="'+i+'">'+tree[i].name+'</a>';
 						if (tree[i].dirs) {
 							html += traverse(tree[i].dirs);
 						}
@@ -143,12 +146,9 @@
 			 * Update current working directory content
 			 */
 			this.updateCwd = function() {
-				
-				
 				this.cwd.empty();
-				// log(fm.files);
 				
-				var num = 0, size =0, h = 0, container = $(fm.viewMode == 'icons' ? '<ul />' : '<table />').appendTo(this.cwd)
+				var num = 0, size =0, container = fm.viewMode == 'icons' ? this.cwd : $('<table />').appendTo(this.cwd);
 
 				if (fm.viewMode == 'list') {
 					$('<tr/>')
@@ -164,30 +164,26 @@
 					// log(fm.files[hash])
 					num++;
 					size += fm.files[hash].size;
-					render(fm.files[hash]).attr('id', hash).appendTo(container);
+					render(fm.files[hash]).attr('hash', hash).appendTo(container);
 
 				}
 				
-				this.updatePath(fm.cwd.rel);
-				this.st.text(num+' '+i18n('items')+', '+fm.formatSize(size));
+				this.p.text(fm.cwd.rel);
+				this.st.text(i18n('items')+': '+num+', '+fm.formatSize(size));
 				
 				function render(f) {
 					var el, d, n;
+
 					if (fm.viewMode == 'icons') {
 						n = f.name;
-						if (n.length > 28) {
-							n = n.substr(0, 14)+' '+n.substr(14, 7)+'..'+n.substr(n.length-5);
+						if (n.length > 24) {
+							n = n.substr(0, 12)+' '+n.substr(12, 7)+'..'+n.substr(n.length-3);
 						} else if (n.length > 14) {
 							n = n.substr(0, 14)+' '+n.substr(14);
 						} 
-						// log(n)
-						el = $('<li/>').attr('title', f.name)
-							.addClass(f.css+' rounded-5')
-							.append($('<div />'))
-							.append($('<em />').text(n));
-						if (f.kind == 'Alias') {
-							el.append($('<span />').addClass('alias'))
-						}
+
+						el = $('<div />').addClass(f.css).append('<p />').append($('<em />').text(n).attr('title', f.name));
+						f.kind == 'Alias' && el.append('<label />');
 					} else {
 						d = f.mdate.replace(/([a-z]+)\s/i, function(arg1, arg2) { return i18n(arg2)+' '; });
 						el = $('<tr />')
@@ -199,9 +195,9 @@
 								.append($('<td />').text(fm.formatSize(f.size)))
 								.append($('<td />').text(i18n(f.kind)))
 					}
-					if (f.kind == 'Alias') {
-						el.addClass('alias');
-					}
+					// if (f.kind == 'Alias') {
+					// 	el.addClass('alias');
+					// }
 					return el;
 				}
 				
@@ -210,10 +206,10 @@
 			/**
 			 * Update current working directory path in statusbar
 			 */
-			this.updatePath = function(path) {
-				this.p.text(path);
-			}
-			
+			// this.updatePath = function(path) {
+			// 			this.p.text(path);
+			// 		}
+			// 		
 			/**
 			 * Update number of selected files/folders and size in statusbar
 			 */
@@ -249,9 +245,9 @@
 			
 			this.menu = $('<div />').addClass('el-finder-contextmenu rounded-5').css('z-index', this.zindex).appendTo(document.body).hide()
 			
-			this.create = function(e) {
+			this.show = function(e) {
 				log(e)
-				this.remove()
+				this.hide()
 				var t = fm.view.cwd, tag = fm.viewMode == 'icons' ? 'LI' : 'TR', p;
 				
 				if (e.target != fm.view.cwd.get(0)) {
@@ -290,7 +286,7 @@
 						// log($(this).removeClass('hover').attr('class'))
 						var cmd = $.trim($(this).attr('class').replace('hover', ''))
 						log(cmd)
-						self.remove();
+						self.hide();
 						if (cmd == 'open') {
 							fm.ui.open.exec(t.attr('id'));
 						} else {
@@ -320,7 +316,7 @@
 				}
 			}
 			
-			this.remove = function() {
+			this.hide = function() {
 				this.menu.hide().empty();
 			}
 			
@@ -810,7 +806,7 @@
 			 */
 			if (!this.view) {
 				
-				this.viewMode    = cookie('elfinder-view');
+				// this.viewMode    = cookie('elfinder-view');
 				this.view        = new view(this);
 				this.ui          = new ui(this);
 				this.contextmenu = new contextmenu(this);
@@ -841,21 +837,22 @@
 						// log(e.target)
 						e.stopPropagation();
 						e.preventDefault();
-						self.contextmenu.create(e)
+						self.contextmenu.show(e)
 					})
 					.bind('dblclick', function(e) {
 						e.stopPropagation();
-				
+
 						if (e.target != self.view.cwd.get(0)) {
 							var tag = self.viewMode == 'icons' ? 'LI' : 'TR',
 								t = e.target.nodeName == tag ? $(e.target) : $(e.target).parents(tag).eq(0);
 							self.ui.open.exec(t.attr('id'));
 						}
+						
 					})
 					.bind('click', function(e) {
-						e.preventDefault()
+						e.preventDefault();
 						e.stopPropagation();
-						self.contextmenu.remove();
+						
 						var tag = self.viewMode == 'icons' ? 'LI' : 'TR';
 						
 						if (e.target == self.view.cwd.get(0)) {
@@ -882,6 +879,9 @@
 						self.view.updateSelected();
 						self.ui.update();
 					});
+					$(document).click(function() {
+						self.contextmenu.hide();
+					})
 			}
 
 			

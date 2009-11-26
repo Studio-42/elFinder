@@ -23,11 +23,14 @@ class elFinder {
 		'denyExts'   => array(),   
 		'allowURLs'  => true,
 		'disabled'   => array(),
+		'sort'       => true,
+		'dateFormat' => 'j M Y H:i',
 		'aclObj'     => null,
 		'aclRole'    => 'user',
 		'defaults'   => array(
 			'read'   => true,
 			'write'  => true,
+			'mkfile' => true,
 			'mkdir'  => true,
 			'upload' => true,
 			'rm'     => true,
@@ -42,6 +45,8 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_commands = array(
+		'open'    => '_open',
+		'reload'  => '_reload',
 		'mkdir'   => '_mkdir',
 		'mkfile'  => '_mkfile',
 		'rename'  => '_rename',
@@ -220,8 +225,9 @@ class elFinder {
 			$result = $this->{$this->_commands[$cmd]}();
 		} else {
 			// $result = empty($_GET['target']) ? $this->_init() : $this->_open();
-			$result = $this->_open();
-			// echo '<pre>'; print_r($result['tree']); exit();
+			$result = $this->_reload();
+			$result['disabled'] = $this->_options['disabled'];
+			// echo '<pre>'; print_r($result); exit();
 		}
 		
 		if ($this->_options['debug']) {
@@ -262,13 +268,12 @@ class elFinder {
 			if (empty($_GET['current']) 
 			||  empty($_GET['target'])
 			||  false == ($dir = $this->_findDir(trim($_GET['current'])))
-			||  false == ($file = $this->_find(trim($_GET['target']), $dir)
-			||  is_dir($file))
+			||  false == ($file = $this->_find(trim($_GET['target']), $dir))
+			||  is_dir($file)
 			) {
 				header('HTTP/1.x 404 Not Found'); 
 				exit('File not found');
 			}
-
 			if (filetype($file) == 'link') {
 				$file = $this->_readlink($file);
 				if (!$file || is_dir($file)) {
@@ -316,29 +321,16 @@ class elFinder {
 				'hash'   => crc32($path),
 				'name'   => $name,
 				'rel'    => DIRECTORY_SEPARATOR.$rel,
-				'kind'   => 'Directory',
 				'size'   => 0,
-				'mdate'  => date('j M Y H:i', filemtime($path)),
+				'mdate'  => date($this->_options['dateFormat'], filemtime($path)),
 				'read'   => true,
 				'write'  => $write,
 				'upload' => $write && $this->_isAllowed($path, 'upload'),
 				'mkdir'  => $write && $this->_isAllowed($path, 'mkdir'),
+				'mkfile'  => $write && $this->_isAllowed($path, 'mkdir'),
 				'rm'     => $write && $this->_isAllowed($path, 'rm'),
 				'rmdir'  => $write && $this->_isAllowed($path, 'rmdir')
 				);
-				
-			if (!empty($_GET['tree'])) {
-				$result['tree'] = array(
-					crc32($this->_options['root']) => array(
-						'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
-						'read' => true,
-						'dirs' => $this->_tree($this->_options['root'])
-						)
-					);
-				if (!empty($_GET['init'])) {
-					$result['disabled'] = $this->_options['disabled'];
-				}
-			}
 				
 			$dirs = $files = array();
 			
@@ -347,8 +339,7 @@ class elFinder {
 					if ('.' != substr($entr, 0, 1)) {
 						$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 						$info = $this->_info($p, $write);
-						// $hash = crc32($p);
-						if ($info['css'] == 'dir') {
+						if ($info['type'] == 'dir') {
 							$dirs[] = $info;
 						} else {
 							$files[] = $info;
@@ -356,10 +347,12 @@ class elFinder {
 					}
 				}
 			}
-			usort($dirs, 'elFinderCmp');
-			usort($files, 'elFinderCmp');
-			// $result['files'] = $dirs+$files;
-			$result['files'] = array_merge($dirs, $files);
+			if ($this->_options['sort']) {
+				usort($dirs, 'elFinderCmp');
+				usort($files, 'elFinderCmp');
+			}
+
+			$result['cdc'] = array_merge($dirs, $files);
 			return $result;
 		}
 		
@@ -367,6 +360,25 @@ class elFinder {
 		
 	}
 	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _reload()
+	{
+		$result = $this->_open();
+		$result['tree'] = array(
+			crc32($this->_options['root']) => array(
+				'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
+				'read' => true,
+				'dirs' => $this->_tree($this->_options['root'])
+				)
+			);
+		return $result;
+	}
 	
 	/************************************************************/
 	/**                      fs methods                        **/
@@ -386,7 +398,7 @@ class elFinder {
 				return $path;
 			}
 		}
-		if (false != ($d = dir($path))) {
+		if (is_readable($path) && false != ($d = dir($path))) {
 			while ($entr = $d->read()) {
 				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 				if ('.' != $entr && '..' != $entr && is_dir($p)) {
@@ -411,7 +423,7 @@ class elFinder {
 		if (false != ($d = dir($parent))) {
 			while ($entr = $d->read()) {
 				if ('.' != $entr && '..' != $entr) {
-					$path = $parent.DIRECTORY_SEPARATOR.$entr;
+					$path = $parent.DIRECTORY_SEPARATOR.$entr; 
 					if (crc32($path) == $hash) {
 						return $path;
 					}
@@ -431,16 +443,16 @@ class elFinder {
 		$tree = array();
 		
 		if (false != ($d = dir($path))) {
-			
 			while($entr = $d->read()) {
 				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
 				if ('.' != substr($entr, 0, 1) && !is_link($p) && is_dir($p) ) {
 					$read = is_readable($p) && $this->_isAllowed($p, 'read');
 					$dirs = $read ? $this->_tree($p) : '';
 					$tree[crc32($p)] = array(
-						'name' => $entr,
-						'read' => $read,
-						'dirs' => $dirs ? $dirs : ''
+						'name'  => $entr,
+						'read'  => $read,
+						'write' => $read && is_writable($p) && $this->_isAllowed($p, 'write'),
+						'dirs'  => $dirs ? $dirs : ''
 						);
 				}
 			}
@@ -459,69 +471,58 @@ class elFinder {
 	private function _info($path, $parentWrite)
 	{
 		$type = filetype($path);
-		$stat = $type == 'link' ? lstat($path) : stat($path);
+		$stat =  $type == 'link' ? lstat($path) : stat($path);
 		
 		$info = array(
-			'hash'  => crc32($path),
 			'name'  => basename($path),
-			'size'  => $stat['size'],
-			'read'  => is_readable($path),
-			'write' => is_writable($path),
-			'size'  => $stat['size'],
-			'mdate' => date('j M Y H:i', $stat['mtime']),
-			'css'   => 'file',
-			'cmd'   => ''
+			'hash'  => crc32($path),
+			'type'  => $type,
+			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
+			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
+			'read'  => is_readable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'read')  : true),
+			'write' => is_writable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'write') : $parentWrite)
 			);
-			
-		if ($type == 'dir') {
-			$info['kind']  = 'Directory';
-			$info['css']   = 'dir';
-			$info['size']  = $this->_dirSize($path);
-			$info['read']  = $info['read']  && $this->_isAllowed($path, 'read');
-			$info['write'] = $info['write'] && $this->_isAllowed($path, 'write');
-			return $info;
-		} elseif ($type == 'link') {
-			$info['kind'] = 'Alias';
+		
+		if ($type == 'link') {
 			$path = $this->_readlink($path);
 			if (!$path) {
-				$info['css']   = 'broken';
-				$info['write'] = $info['write'] && $parentWrite;
+				$info['mime'] = 'unknown';
 				return $info;
 			}
-			$info['link'] = crc32($path);
+			$info['link']   = crc32($path);
+			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
 			if (is_dir($path)) {
-				$info['css']   = 'dir';
-				$info['read']  = $info['read']  && $this->_isAllowed($path, 'read');
-				$info['write'] = $info['write'] && $this->_isAllowed($path, 'write');
-				return $info;
+				$info['mime']  = 'directory';
+				$info['read']  = is_readable($path) && $this->_isAllowed($path, 'read');
+				$info['write'] = is_writable($path) && $this->_isAllowed($path, 'write');
+			} else {
+				$parent         = dirname($path);
+				$info['parent'] = crc32($parent);
+				$info['mime']   = $this->_mimetype($path);
+				$info['read']   = is_readable($path) && is_readable($parent) && $this->_isAllowed($parent, 'read');
+				$info['write']  = is_writable($path) && is_writable($parent) && $this->_isAllowed($parent, 'write');
 			}
-			$mime = $this->_mimetype($path);
-
 		} else {
-			$mime = $this->_mimetype($path);
-			$info['kind'] = isset($this->_kinds[$mime]) ? $this->_kinds[$mime] : 'Unknown';
+			$info['mime']  = $type == 'dir' ? 'directory' : $this->_mimetype($path);
+			$info['read']  = is_readable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'read')  : true);
+			$info['write'] = is_writable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'write') : $parentWrite);
 		}
 		
-		if ($this->_options['allowURLs']) {
-			$info['url'] = $this->_path2url($path);
-		}	
-		
-		$parts = explode('/', $mime);
-
-		if (sizeof($parts) == 2) {
-			$info['css'] .= ' '.$parts[0].' '.$parts[1];
-			if ($parts[0] == 'text' && isset($this->_commands['edit'])) {
-				$info['cmd'] = 'edit';
-			} elseif (isset($this->_commands['extract']) && $this->_canExtract($parts[1])) {
-				$info['cmd'] = 'extract';
-			} elseif ($parts[0] == 'image' 
-			&& ($parts[1] == 'jpeg' || $parts[1] == 'gif' || $parts[1] == 'png') 
-			&& false != ($s = getimagesize($path))) {
-				$info['dimensions'] = $s[0].'x'.$s[1];
+		if ($info['mime'] != 'directory') {
+			if ($this->_options['allowURLs']) {
+				$info['url'] = $this->_path2url($path);
 			}
-		}		
+			if (($info['mime'] == 'image/jpeg' || $info['mime'] == 'image/png' || $info['mime'] == 'image/gif') 
+			&& false != ($s = getimagesize($path))) {
+				$info['dim'] = $s[0].'x'.$s[1];
+			}
+		}
+		
 		return $info;
 	}
+	
+	
+
 	
 	/**
 	 * undocumented function
@@ -538,17 +539,7 @@ class elFinder {
 		$target = realpath($target);
 		return $target && file_exists($target) && 0 === strpos($target, $this->_options['root']) ? $target : false;
 	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _canExtract($type)
-	{
-		return false;
-	}
+
 	
 	
 	
@@ -688,9 +679,9 @@ class elFinder {
 	 **/
 	private function _path2url($path)
 	{
-		$path = str_replace($this->_options['root'].DIRECTORY_SEPARATOR, '', $path);
-		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
-		return $this->_options['URL'].$path;
+		$dir  = substr(dirname($path), strlen($this->_options['root'])+1);
+		$file = rawurlencode(basename($path));
+		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
 	
 	
