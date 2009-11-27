@@ -3,7 +3,7 @@ elFinder.prototype.view = function(fm, el) {
 	this.fm = fm;
 	
 	this.kinds = {
-		'directory'                     : 'Directory',
+		'directory'                     : 'Folder',
 		'symlink'                       : 'Alias',
 		'unknown'                       : 'Unknown',
 		'text/plain'                    : 'Plain text',
@@ -162,14 +162,15 @@ elFinder.prototype.view = function(fm, el) {
 				c=f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-');
 
 			if (vm == 'icons') {
-				n = f.name;
-				if (n.length > 24) {
-					n = n.substr(0, 12)+' '+n.substr(12, 7)+'..'+n.substr(n.length-3);
-				} else if (n.length > 14) {
-					n = n.substr(0, 14)+' '+n.substr(14);
-				} 
-				
-				el = $('<div />').addClass(c).append('<p />').append($('<label />').text(n).attr('title', f.name));
+				// n = f.name;
+				// if (n.length > 24) {
+				// 	n = n.substr(0, 12)+' '+n.substr(12, 7)+'..'+n.substr(n.length-3);
+				// } else if (n.length > 14) {
+				// 	n = n.substr(0, 14)+' '+n.substr(14);
+				// } 
+				// n = self.formatName(f.name)
+				// self.fm.log(f)
+				el = $('<div />').addClass(c).append('<p />').append($('<label />').text(f.brief||f.name).attr('title', f.name));
 				
 				f.type == 'link' && el.append('<em />');
 				if (!f.read) {
@@ -186,7 +187,7 @@ elFinder.prototype.view = function(fm, el) {
 						.append($('<td />').text(self.formatPermissions(f.read, f.write)))
 						.append($('<td />').text(self.formatDate(f.date)))
 						.append($('<td />').text(self.formatSize(f.size)))
-						.append($('<td />').text(self.mimeToKind(f.type == 'link' ? 'symlink' : f.mime)));
+						.append($('<td />').text(self.kind(f)));
 				f.type == 'link' && p.append('<em/>');
 				if (!f.read) {
 					p.append('<em class="noaccess" />');
@@ -199,6 +200,19 @@ elFinder.prototype.view = function(fm, el) {
 		
 		
 		
+	}
+
+	this.formatName = function(n) {
+		// self.fm.log(unescape(escape(n)))
+		self.fm.log(n.slice(0, num))
+		var num = this.fm.options.charsNum
+		if (n.length > num*2) {
+			return n.substr(0, num)+"\n"+n.substr(num, num-5)+'..'+n.substr(n.length-3);
+		} else if (n.length > num) {
+			// return 
+			 return n.substr(0, num)+"\n"+n.substr(num);
+		}
+		return n;
 	}
 
 	this.formatDate = function(d) {
@@ -227,8 +241,8 @@ elFinder.prototype.view = function(fm, el) {
 		return p.join('/');
 	}
 	
-	this.mimeToKind = function(m) {
-		return this.fm.i18n(this.kinds[m]||'unknown');
+	this.kind = function(f) {
+		return this.fm.i18n(f.type=='link' ? 'Alias' : this.kinds[f.mime]||'unknown');
 	}
 	
 }

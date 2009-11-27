@@ -1,4 +1,9 @@
 <?php
+if (function_exists('date_default_timezone_set')) {
+	date_default_timezone_set('Europe/Moscow');
+}
+
+
 // setlocale(LC_ALL, 'ru_RU');
 class elFinder {
 	
@@ -17,6 +22,7 @@ class elFinder {
 		'dirUmask'   => 0777,
 		'tmbDir'     => '.tmb',
 		'tmbSize'    => 48,
+		'charsNum'   => 14,
 		'allowTypes' => array(),
 		'allowExts'  => array(),
 		'denyTypes'  => array(),
@@ -146,6 +152,13 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
+	private $_mb = false;
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
 	private $_du = false;
 		
 	/**
@@ -198,6 +211,11 @@ class elFinder {
 		
 		$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
 		$this->_du = $s == 0 && $test>0;
+		if (function_exists('mb_internal_encoding')) {
+			$this->_mb = true;
+			mb_internal_encoding("UTF-8");
+		}
+		
 	}
 
 	/**
@@ -380,9 +398,80 @@ class elFinder {
 		return $result;
 	}
 	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _rename()
+	{
+		$result = array();
+		
+		if (empty($_GET['current']) 
+		||  empty($_GET['target'])
+		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		||  false == ($file = $this->_find(trim($_GET['target']), $dir))
+		) {
+			$result['error'] = 'File does not exists';
+			return $result;
+		} elseif (empty($_GET['name']) || false == ($name = $this->_checkName($_GET['name'])) ) {
+			$result['error'] = 'Invalid name';
+		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
+			$result['error'] = 'File or folder with the same name already exists';
+		} elseif (!rename($file, $dir.DIRECTORY_SEPARATOR.$name)) {
+			$result['error'] = 'Unable to rename file';
+		} else {
+			$result['hash'] = crc32($dir.DIRECTORY_SEPARATOR.$name);
+			$result['brief'] = $this->_briefName($name);
+			if ($this->_options['allowURLs'] && is_file($dir.DIRECTORY_SEPARATOR.$name)) {
+				$result['url'] = $this->_path2url($dir.DIRECTORY_SEPARATOR.$name);
+			}
+		}
+		return $result;
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _mkdir()
+	{
+		if (empty($_GET['current']) 
+		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		) {
+			$result['error'] = 'Directory does not exists';
+			return $result;
+		} elseif (empty($_GET['name']) || false == ($name = $this->_checkName($_GET['name'])) ) {
+			$result['error'] = 'Invalid name';
+		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
+			$result['error'] = 'File or folder with the same name already exists';
+		} elseif (!mkdir($dir.DIRECTORY_SEPARATOR.$name, $this->_options['dirUmask'])) {
+			$result['error'] = 'Unable to create folder';
+		} else {
+			$result['dir'] = $this->_info($dir.DIRECTORY_SEPARATOR.$name, $this->_isAllowed($dir, 'mkdir'));
+		}
+		return $result;
+	}
 	/************************************************************/
 	/**                      fs methods                        **/
 	/************************************************************/
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _checkName($n)
+	{
+		$n = trim($n);
+		return preg_match('/^[^\.\\/\<\>][^\\/\<\>]*$/', $n) ? $n : false;
+	}
 	
 	/**
 	 * undocumented function
@@ -483,6 +572,18 @@ class elFinder {
 			'write' => is_writable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'write') : $parentWrite)
 			);
 		
+		if (false != ($b = $this->_briefName($info['name']))) {
+			$info['brief'] = $b;
+		}
+		
+		// if (strlen($info['name']) > $n*2) {
+		// 	
+		// 	$info['brief'] = mb_substr($info['name'], 0, $n)
+		// 		.' '.(mb_substr($info['name'], $n-5).'..'.mb_substr($info['name'], 0, -3));
+		// } elseif (strlen($info['name']) > $n) {
+		// 	$info['brief'] = mb_substr($info['name'], 0, $n).' + '.mb_substr($info['name'], $n);
+		// }
+		
 		if ($type == 'link') {
 			$path = $this->_readlink($path);
 			if (!$path) {
@@ -521,7 +622,30 @@ class elFinder {
 		return $info;
 	}
 	
-	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _briefName($name)
+	{
+		if ($this->_mb) {
+			$len = 'mb_strlen';
+			$sub = 'mb_strcut';
+		} else {
+			$len = 'strlen';
+			$sub = 'substr';
+		}
+		$l = $len($name);
+		if ($l > $this->_options['charsNum']) {
+			$n = $this->_options['charsNum'];
+			return $l > $n*2 
+				? $sub($name, 0, $n)."\n".$sub($name, $n, $n-5).'..'.$sub($name, -3)
+				: $sub($name, 0, $n)."\n".$sub($name, $n);
+		}
+		return '';
+	}
 
 	
 	/**
