@@ -829,6 +829,8 @@
 						self.unlock();
 						self.view.nav.find('a#nav'+self.cwd.hash).trigger('select');
 						self.ui.init(data.disabled);
+						// data.debug && 
+
 					}
 				});
 				

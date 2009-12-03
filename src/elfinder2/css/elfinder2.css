@@ -186,6 +186,7 @@ p.el-finder-warning label {
 
 .el-finder-nav li a {
 	display: block;
+	white-space:nowrap;
 	line-height:20px;
 	margin-left:9px;
 	padding:0 0 0 21px;
@@ -208,6 +209,7 @@ p.el-finder-warning label {
 .el-finder-nav li a.root.selected { 
 	background-position: 1px -30px; 
 	margin-left:0;
+	font-weight:bold;
 }
 
 .el-finder-nav li a.noaccess {
@@ -216,6 +218,17 @@ p.el-finder-warning label {
 .el-finder-nav li a.ro {
 	background-position: 1px -104px; 
 }
+
+.el-finder-nav li.places { 
+	background:url(../images/toolbar.png) 1px -152px no-repeat;
+	margin-left:0;
+	white-space:nowrap;
+	line-height:20px;
+	padding:0 0 0 21px;
+	font-weight:bold;
+	cursor:default;
+}
+
 /************************************/
 /*     current working directory    */
 /************************************/

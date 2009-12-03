@@ -81,12 +81,12 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.error = function(m) {
 		this.fm.lock();
-		this.msg.empty().removeClass('el-finder-warning').addClass('el-finder-error').text(self.fm.i18n(m)).show();
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 2000);
+		this.msg.empty().removeClass('el-finder-warning').addClass('el-finder-error').html(self.fm.i18n(m)).show();
+		setTimeout(function() { self.msg.fadeOut('slow'); }, 3000);
 	}
 	
 	this.warning = function(m) {
-		this.msg.empty().removeClass('el-finder-error').addClass('el-finder-warning').text(self.fm.i18n(m)).show();
+		this.msg.empty().removeClass('el-finder-error').addClass('el-finder-warning').html(self.fm.i18n(m)).show();
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 2000);
 	}
 	
@@ -97,18 +97,23 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.renderNav = function(tree) {
 		
-		this.tree = this.nav.html(traverse(tree, true)).children('ul');
+		this.tree = this.nav.html(traverse(tree, true)).children('ul').eq(0);
+
+		var html = '<ul ><li class="places">Places</li><ul></ul></ul>';
+		this.places = this.nav.append(html).children('ul').eq(1);
 
 		function traverse(tree, root) {
 			var i, c, html = '<ul>';
 			for (i in tree) {
 				fm.dirs[i] = {
+					hash  : i,
 					name  : tree[i].name,
 					read  : tree[i].read,
 					write : tree[i].write
 				};
 
 				if (root) {
+					html = '<ul class="el-finder-tree">';
 					c = 'root selected';
 				} else if (!tree[i].read) {
 					c = 'noaccess';
@@ -130,11 +135,11 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.renderCwd = function() {
 		this.cwd.empty();
-
+		// self.fm.log(self.fm.cdc)
 		var num  = 0, 
 			size = 0, 
 			vm   = this.fm.viewMode(),
-			container = vm == 'icons' 
+			cnt = vm == 'icons' 
 				? this.cwd 
 				: $('<table />').append(
 					$('<tr/>')
@@ -147,31 +152,35 @@ elFinder.prototype.view = function(fm, el) {
 				
 
 		for (var hash in fm.cdc) {
-
 			num++;
 			size += fm.cdc[hash].size;
-			render(fm.cdc[hash]).attr('key', hash).appendTo(container);
-
+			// render(fm.cdc[hash]).attr('key', hash).appendTo(container);
+			cnt.append(render(fm.cdc[hash]))
+			// this.updateFile($(vm=='icons' ? '<div/>' : '<tr/>'), fm.cdc[hash]).appendTo(cnt);
 		}
 		
 		this.pth.text(fm.cwd.rel);
 		this.nfo.text(fm.i18n('items')+': '+num+', '+this.formatSize(size));
+		this.sel.empty();
 		
 		function render(f) {
-			var el, p, n, 
-				c=f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-');
+			var p,  
+				c = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-'),
+				el = $(vm=='icons' ? '<div/>' : '<tr/>').addClass(c).attr('key', f.hash)
+				w = self.fm.options.wrap;
 
 			if (vm == 'icons') {
-				// n = f.name;
-				// if (n.length > 24) {
-				// 	n = n.substr(0, 12)+' '+n.substr(12, 7)+'..'+n.substr(n.length-3);
-				// } else if (n.length > 14) {
-				// 	n = n.substr(0, 14)+' '+n.substr(14);
-				// } 
-				// n = self.formatName(f.name)
-				// self.fm.log(f)
-				el = $('<div />').addClass(c).append('<p />').append($('<label />').text(f.brief||f.name).attr('title', f.name));
+				var n = f.name;
 				
+				if (w) {
+					if (f.name.length > w*2) {
+						n = f.name.substr(0, w)+"&shy;"+f.name.substr(w, w-5)+"&hellip;"+f.name.substr(f.name.length-3);
+					} else if (f.name.length > w) {
+						n = f.name.substr(0, w)+"&shy;"+f.name.substr(w);
+					}
+				}
+
+				el.append('<p/>').append($('<label/>').html(n).attr('title', f.name));
 				f.type == 'link' && el.append('<em />');
 				if (!f.read) {
 					el.append('<em class="noaccess" />');
@@ -180,14 +189,12 @@ elFinder.prototype.view = function(fm, el) {
 				}
 			} else {
 				p  = $('<p />');
-				el = $('<tr />')
-						.addClass(c)
-						.append($('<td />').addClass('icon').append(p))
-						.append($('<td />').text(f.name))
-						.append($('<td />').text(self.formatPermissions(f.read, f.write)))
-						.append($('<td />').text(self.formatDate(f.date)))
-						.append($('<td />').text(self.formatSize(f.size)))
-						.append($('<td />').text(self.kind(f)));
+				el.append($('<td />').addClass('icon').append(p))
+					.append($('<td />').text(f.name))
+					.append($('<td />').text(self.formatPermissions(f.read, f.write, f.rm)))
+					.append($('<td />').text(self.formatDate(f.date)))
+					.append($('<td />').text(self.formatSize(f.size)))
+					.append($('<td />').text(self.kind(f)));
 				f.type == 'link' && p.append('<em/>');
 				if (!f.read) {
 					p.append('<em class="noaccess" />');
@@ -197,22 +204,18 @@ elFinder.prototype.view = function(fm, el) {
 			}
 			return el;
 		}
-		
-		
-		
 	}
 
-	this.formatName = function(n) {
-		// self.fm.log(unescape(escape(n)))
-		self.fm.log(n.slice(0, num))
-		var num = this.fm.options.charsNum
-		if (n.length > num*2) {
-			return n.substr(0, num)+"\n"+n.substr(num, num-5)+'..'+n.substr(n.length-3);
-		} else if (n.length > num) {
-			// return 
-			 return n.substr(0, num)+"\n"+n.substr(num);
+
+	this.updateSelected = function() {
+		var i, s = 0, sel = this.fm.getSelected();
+		this.sel.empty();
+		if (sel.length) {
+			for (i=0; i<sel.length; i++) {
+				s += sel[i].size;
+			}
+			this.sel.text(this.fm.i18n('selected')+': '+sel.length+', '+this.formatSize(s));
 		}
-		return n;
 	}
 
 	this.formatDate = function(d) {
@@ -234,10 +237,11 @@ elFinder.prototype.view = function(fm, el) {
         return parseInt(s/n)+' '+u;
 	}
 
-	this.formatPermissions = function(r, w) {
+	this.formatPermissions = function(r, w, rm) {
 		var p = [];
-		r && p.push(self.fm.i18n('read'));
-		w && p.push(self.fm.i18n('write'));
+		r  && p.push(self.fm.i18n('read'));
+		w  && p.push(self.fm.i18n('write'));
+		rm && p.push(self.fm.i18n('remove'));
 		return p.join('/');
 	}
 	

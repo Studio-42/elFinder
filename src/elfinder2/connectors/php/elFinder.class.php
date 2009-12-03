@@ -13,7 +13,7 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_options = array(
-		'root'       => './',
+		'root'       => '',
 		'URL'        => '',
 		'rootAlias'  => 'Home',
 		'debug'      => true,
@@ -22,7 +22,7 @@ class elFinder {
 		'dirUmask'   => 0777,
 		'tmbDir'     => '.tmb',
 		'tmbSize'    => 48,
-		'charsNum'   => 14,
+		'charsNum'   => 13,
 		'allowTypes' => array(),
 		'allowExts'  => array(),
 		'denyTypes'  => array(),
@@ -36,11 +36,7 @@ class elFinder {
 		'defaults'   => array(
 			'read'   => true,
 			'write'  => true,
-			'mkfile' => true,
-			'mkdir'  => true,
-			'upload' => true,
-			'rm'     => true,
-			'rmdir'  => true
+			'rm'     => true
 			),
 		'perms' => array()
 		);
@@ -51,16 +47,17 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_commands = array(
-		'open'    => '_open',
-		'reload'  => '_reload',
-		'mkdir'   => '_mkdir',
-		'mkfile'  => '_mkfile',
-		'rename'  => '_rename',
-		'upload'  => '_upload',
-		'paste'   => '_paste',
-		'rm'      => '_rm',
-		'edit'    => '_edit',
-		'extract' => '_extract'
+		'open'      => '_open',
+		'reload'    => '_reload',
+		'mkdir'     => '_mkdir',
+		'mkfile'    => '_mkfile',
+		'rename'    => '_rename',
+		'upload'    => '_upload',
+		'paste'     => '_paste',
+		'rm'        => '_rm',
+		'duplicate' => '_duplicate',
+		'edit'      => '_edit',
+		'extract'   => '_extract'
 		);
 		
 	/**
@@ -95,50 +92,6 @@ class elFinder {
 		'exe'  => 'application/octet-stream'
 		);
 	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_kinds = array(
-		'directory'                     => 'Directory',
-		'link'                          => 'Alias',
-		'text/plain'                    => 'Plain text',
-	    'text/x-php'                    => 'PHP source',
-		'text/javascript'               => 'Javascript source',
-		'text/css'                      => 'CSS style sheet',  
-	    'text/html'                     => 'HTML document', 
-		'text/x-c'                      => 'C source', 
-		'text/x-c++'                    => 'C++ source', 
-		'text/x-shellscript'            => 'Unix shell script',
-	    'text/rtf'                      => 'Rich Text Format (RTF)',
-		'text/rtfd'                     => 'RTF with attachments (RTFD)', 
-	    'text/xml'                      => 'XML document', 
-		'application/xml'               => 'XML document', 
-		'application/x-tar'             => 'TAR archive', 
-	    'application/x-gzip'            => 'GZIP archive', 
-	    'application/x-bzip2'           => 'BZIP archive', 
-	    'application/x-zip'             => 'ZIP archive',  
-	    'application/zip'               => 'ZIP archive',  
-	    'application/x-rar'             => 'RAR archive',  
-	    'image/jpeg'                    => 'JPEG image',   
-	    'image/gif'                     => 'GIF Image',    
-	    'image/png'                     => 'PNG image',    
-	    'image/tiff'                    => 'TIFF image',   
-	    'image/vnd.adobe.photoshop'     => 'Adobe Photoshop image',
-	    'application/pdf'               => 'Portable Document Format (PDF)',
-	    'application/msword'            => 'Microsoft Word document',  
-		'application/vnd.ms-office'     => 'Microsoft Office document',
-		'application/vnd.ms-word'       => 'Microsoft Word document',  
-	    'application/msexel'            => 'Microsoft Excel document', 
-	    'application/vnd.ms-excel'      => 'Microsoft Excel document', 
-		'application/octet-stream'      => 'Application', 
-		'audio/mpeg'                    => 'MPEG audio',  
-		'video/mpeg'                    => 'MPEG video',  
-		'video/x-msvideo'               => 'AVI video',   
-		'application/x-shockwave-flash' => 'Flash application', 
-		'video/x-flv'                   => 'Flash video'
-		);
 		
 	/**
 	 * undocumented class variable
@@ -186,6 +139,34 @@ class elFinder {
 		);
 		
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_errMsg = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_errFile = '';
+		
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_errorData = array();
+		
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_fakeRoot = '';
+		
+	/**
 	 * constructor
 	 *
 	 * @param  array object options
@@ -198,10 +179,14 @@ class elFinder {
 				$this->_options[$k] = is_array($this->_options[$k]) ? array_merge($this->_options[$k], $options[$k]) : $options[$k];
 			}
 		}
-		$this->_options['root'] = realpath($this->_options['root'] ? $this->_options['root'] : '.');
+
+		$this->_fakeRoot = !$this->_options['rootAlias'] 
+			? $this->_options['root'] 
+			: dirname($this->_options['root']).DIRECTORY_SEPARATOR.$this->_options['rootAlias'];
+			
 		if (!empty($this->_options['disabled'])) {
 			foreach ($this->_options['disabled'] as $c) {
-				if (isset($this->_commands[$c])) {
+				if (isset($this->_commands[$c]) && $c != 'open' && $c != 'reload' ) {
 					unset($this->_commands[$c]);
 				}
 			}
@@ -224,8 +209,8 @@ class elFinder {
 	 * @return void
 	 **/
 	public function run() {
-		if (!is_dir($this->_options['root'])) {
-			exit(json_encode(array('error' => 'Root directory does not exists!')));
+		if (empty($this->_options['root']) || !is_dir($this->_options['root'])) {
+			exit(json_encode(array('error' => 'Invalid backend configuration!')));
 		}
 		if (!is_readable($this->_options['root']) 
 		||  !$this->_isAllowed($this->_options['root'], 'read')) {
@@ -239,10 +224,13 @@ class elFinder {
 			$cmd = trim($_GET['cmd']);
 		}
 		
-		if (!empty($this->_commands[$cmd]) && method_exists($this, $this->_commands[$cmd])) {
+		if ($cmd && (empty($this->_commands[$cmd]) || !method_exists($this, $this->_commands[$cmd]))) {
+			exit(json_encode(array('error' => 'Unknown command!')));
+		}
+		
+		if ($cmd) {
 			$result = $this->{$this->_commands[$cmd]}();
 		} else {
-			// $result = empty($_GET['target']) ? $this->_init() : $this->_open();
 			$result = $this->_reload();
 			$result['disabled'] = $this->_options['disabled'];
 			// echo '<pre>'; print_r($result); exit();
@@ -253,7 +241,7 @@ class elFinder {
 				'time' => $this->_utime() - $this->_time,
 				'mimeTypeDetect' => $this->_mimetypeDetect,
 				'du' => $this->_du,
-				'tasks' => $this->_tasks,
+				// 'tasks' => $this->_tasks,
 				'utime' => time()
 				);
 		}
@@ -280,7 +268,7 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _open()
+	private function _open($incTree=false)
 	{
 		if (isset($_GET['current'])) { // read file
 			if (empty($_GET['current']) 
@@ -324,58 +312,9 @@ class elFinder {
 				} else {
 					$path = $p;
 				}
-				
 			}
-			if ($path == $this->_options['root']) {
-				$name = $rel = $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path);
-			} else {
-				$name = basename($path);
-				$rel = ($rel = $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']))
-					.DIRECTORY_SEPARATOR
-					.substr($path, strlen($this->_options['root'])+1);
-			}
-			$write = is_writable($path) && $this->_isAllowed($path, 'write');
-			$result['cwd'] = array(
-				'hash'   => crc32($path),
-				'name'   => $name,
-				'rel'    => DIRECTORY_SEPARATOR.$rel,
-				'size'   => 0,
-				'mdate'  => date($this->_options['dateFormat'], filemtime($path)),
-				'read'   => true,
-				'write'  => $write,
-				'upload' => $write && $this->_isAllowed($path, 'upload'),
-				'mkdir'  => $write && $this->_isAllowed($path, 'mkdir'),
-				'mkfile'  => $write && $this->_isAllowed($path, 'mkdir'),
-				'rm'     => $write && $this->_isAllowed($path, 'rm'),
-				'rmdir'  => $write && $this->_isAllowed($path, 'rmdir')
-				);
-				
-			$dirs = $files = array();
-			
-			if (false != ($d = dir($path))) {
-				while ($entr = $d->read()) {
-					if ('.' != substr($entr, 0, 1)) {
-						$p = $d->path.DIRECTORY_SEPARATOR.$entr;
-						$info = $this->_info($p, $write);
-						if ($info['type'] == 'dir') {
-							$dirs[] = $info;
-						} else {
-							$files[] = $info;
-						}
-					}
-				}
-			}
-			if ($this->_options['sort']) {
-				usort($dirs, 'elFinderCmp');
-				usort($files, 'elFinderCmp');
-			}
-
-			$result['cdc'] = array_merge($dirs, $files);
-			return $result;
+			return $result+$this->_content($path, $incTree);
 		}
-		
-		
-		
 	}
 	
 	
@@ -387,15 +326,7 @@ class elFinder {
 	 **/
 	private function _reload()
 	{
-		$result = $this->_open();
-		$result['tree'] = array(
-			crc32($this->_options['root']) => array(
-				'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
-				'read' => true,
-				'dirs' => $this->_tree($this->_options['root'])
-				)
-			);
-		return $result;
+		return $this->_open(true);
 	}
 	
 	
@@ -415,19 +346,16 @@ class elFinder {
 		||  false == ($file = $this->_find(trim($_GET['target']), $dir))
 		) {
 			$result['error'] = 'File does not exists';
-			return $result;
-		} elseif (empty($_GET['name']) || false == ($name = $this->_checkName($_GET['name'])) ) {
+		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$result['error'] = 'Invalid name';
+		} elseif (!$this->_isAllowed($dir, 'write')) {
+			$result['error'] = 'Access denied!';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$result['error'] = 'File or folder with the same name already exists';
 		} elseif (!rename($file, $dir.DIRECTORY_SEPARATOR.$name)) {
 			$result['error'] = 'Unable to rename file';
 		} else {
-			$result['hash'] = crc32($dir.DIRECTORY_SEPARATOR.$name);
-			$result['brief'] = $this->_briefName($name);
-			if ($this->_options['allowURLs'] && is_file($dir.DIRECTORY_SEPARATOR.$name)) {
-				$result['url'] = $this->_path2url($dir.DIRECTORY_SEPARATOR.$name);
-			}
+			$result = $this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 		return $result;
 	}
@@ -441,25 +369,438 @@ class elFinder {
 	 **/
 	private function _mkdir()
 	{
-		if (empty($_GET['current']) 
-		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
-		) {
-			$result['error'] = 'Directory does not exists';
-			return $result;
-		} elseif (empty($_GET['name']) || false == ($name = $this->_checkName($_GET['name'])) ) {
+		$result = array();
+		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
+			$result['error'] = 'Invalid parameters';
+		} elseif (!$this->_isAllowed($dir, 'write')) {
+			$result['error'] = 'Access denied!';
+		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$result['error'] = 'Invalid name';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$result['error'] = 'File or folder with the same name already exists';
 		} elseif (!mkdir($dir.DIRECTORY_SEPARATOR.$name, $this->_options['dirUmask'])) {
 			$result['error'] = 'Unable to create folder';
 		} else {
-			$result['dir'] = $this->_info($dir.DIRECTORY_SEPARATOR.$name, $this->_isAllowed($dir, 'mkdir'));
+			$result = $this->_content($dir, true);
 		}
 		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _mkfile()
+	{
+		$result = array();
+		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
+			$result['error'] = 'Invalid parameters';
+		} elseif (!$this->_isAllowed($dir, 'write')) {
+			$result['error'] = 'Access denied!';
+		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
+			$result['error'] = 'Invalid name';
+		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
+			$result['error'] = 'File or folder with the same name already exists';
+		} else {
+			$f = $dir.DIRECTORY_SEPARATOR.$name;
+			if (false != ($fp = fopen($f, 'wb'))) {
+				fwrite($fp, "text\n");
+				fclose($fp);
+				$result = $this->_content($dir);
+			} else {
+				$result['error'] = 'Unable to create file';
+			}
+		} 
+		return $result;
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _rm()
+	{
+		$result = array();
+		if (empty($_GET['current']) 
+		||  false == ($dir = $this->_findDir(trim($_GET['current']))) 
+		|| (empty($_GET['rm']) || !is_array($_GET['rm']))) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		} 
+		
+		foreach ($_GET['rm'] as $hash) {
+			if (false == ($f = $this->_find($hash, $dir))) {
+				$result['error'] = 'File not found!';
+				return $result+$this->_content($dir, true);
+			}
+			if (!$this->_remove($f)) {
+				$result['error'] = 'Remove failed!';
+				$result['errorData'] = array($this->_errFile => $this->_errMsg ? $this->_errMsg : 'Unable to remove');
+				return $result+$this->_content($dir, true);
+			}
+			
+		}
+		return $result+$this->_content($dir, true);
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _upload()
+	{
+		$result = array('ok' => '');
+
+		if (empty($_POST['current']) || false == ($dir = $this->_findDir(trim($_POST['current'])))) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		} 
+		if (!$this->_isAllowed($dir, 'write')) {
+			$result['error'] = 'Access denied!';
+			return $result;
+		}
+		if (empty($_FILES['fm-file']))
+		{
+			$result['error'] = 'Select at least one file to upload';
+			return $result;
+		}
+
+		$total  = count($_FILES['fm-file']['name']);
+		$failed = array();
+		for ($i=0; $i < $total; $i++) { 
+			if (!empty($_FILES['fm-file']['name'][$i])) {
+				if ($_FILES['fm-file']['error'][$i] > 0) {
+					switch ($_FILES['fm-file']['error'][$i]) {
+						case UPLOAD_ERR_INI_SIZE:
+						case UPLOAD_ERR_FORM_SIZE:
+							$error = 'File exceeds the maximum allowed filesize';
+							break;
+						case UPLOAD_ERR_PARTIAL:
+							$error = 'File was only partially uploaded';
+							break;
+						case UPLOAD_ERR_NO_FILE:
+							$error = 'No file was uploaded';
+							break;
+						case UPLOAD_ERR_NO_TMP_DIR:
+							$error = 'Missing a temporary folder';
+							break;
+						case UPLOAD_ERR_CANT_WRITE:
+							$error = 'Failed to write file to disk';
+							break;
+						case UPLOAD_ERR_EXTENSION:
+							$error = 'Not allowed file type';
+					}
+					$failed[$_FILES['fm-file']['name'][$i]] = $error;
+				} elseif (false == ($name = $this->_checkName($_FILES['fm-file']['name'][$i]))) {
+					$failed[$_FILES['fm-file']['name'][$i]] = 'Invalid name';
+				} elseif (!$this->_isAllowedUpload($_FILES['fm-file']['name'][$i], $_FILES['fm-file']['tmp_name'][$i])) {
+					$failed[$_FILES['fm-file']['name'][$i]] = 'Not allowed file type';
+				} else {
+					$file = $dir.DIRECTORY_SEPARATOR.$_FILES['fm-file']['name'][$i];
+					if (!@move_uploaded_file($_FILES['fm-file']['tmp_name'][$i], $file)) {
+						$failed[$_FILES['fm-file']['name'][$i]] = 'Unable to save uploaded file';
+					} else {
+						@chmod($file, $this->_options['fileUmask']);
+					}
+				}
+			}
+		}
+		if (!empty($failed)) {
+			if (count($failed) == $total) {
+				$result['error'] = 'Unable to upload files';
+			} else {
+				$result['warning'] = 'Some files was not uploaded';
+			}
+			$result['errorData'] = $failed;
+		}
+		if (empty($result['error'])) {
+			$result += $this->_content($dir);
+		}
+		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _paste()
+	{
+		$result = array();
+		if (empty($_GET['current']) 
+		|| false == ($dir = $this->_findDir(trim($_GET['current'])))
+		|| empty($_GET['src'])
+		|| false == ($src = $this->_findDir(trim($_GET['src'])))
+		|| empty($_GET['files']) || !is_array($_GET['files'])
+		) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		}
+		
+		if (!$this->_isAllowed($dir, 'write') || !$this->_isAllowed($src, 'read')) {
+			$result['error'] = 'Access denied!';
+			return $result;
+		}
+
+		$cut = !empty($_GET['cut']);
+		foreach ($_GET['files'] as $hash) {
+			if (false == ($f = $this->_find($hash, $src))) {
+				$result['error'] = 'File not found!';
+				break;
+			}
+			
+			$trg = $dir.DIRECTORY_SEPARATOR.basename($f);
+
+			if (0 === strpos($trg, $f)) {
+				$result['error'] = 'Unable to copy into itself!';
+				return $result;
+			}
+			
+			if ($cut) {
+				if ((file_exists($trg) && !$this->_remove($trg)) || !@rename($f, $trg) ) {
+					$result['error'] = 'Unable to complite request!';
+					$this->_setErrorData($f, 'Unable to move!');
+					$result['errorData'] = $result['errorData'] = $this->_errorData;
+					break;
+				}
+			} else {
+				if (!$this->_copy($f, $trg)) {
+					$result['error'] = 'Unable to complite request!';
+					$result['errorData'] = $this->_errorData;
+					break;
+				}
+			}
+		}
+		return $result+$this->_content($dir, true);
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _duplicate()
+	{
+		if (empty($_GET['current']) 
+		|| false == ($current = $this->_findDir(trim($_GET['current'])))
+		|| empty($_GET['file'])
+		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		}
+		
+		if (!$this->_copy($file, $this->_uniqueName($file))) {
+			$result['error'] = $this->_errMsg;
+			return $result;
+		}
+		return $this->_content($current);
 	}
 	/************************************************************/
 	/**                      fs methods                        **/
 	/************************************************************/
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _uniqueName($f)
+	{
+		$dir = dirname($f);
+		$name = basename($f);
+		$ext = '';
+		if (!is_dir($f) && false != ($p = strrpos($name, '.'))) {
+			$ext = substr($name, $p);
+			$name = substr($name, 0, $p);
+		}
+		
+		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext)) {
+			return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext;
+		}
+		$i = 1;
+		while ($i++<=1000) {
+			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext)) {
+				return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext;
+			}	
+		}
+		return $dir.DIRECTORY_SEPARATOR.$name.md5($f).$ext;
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _content($path, $tree=false)
+	{
+		$ret = array(
+			'cwd' => $this->_cwd($path),
+			'cdc' => $this->_cdc($path)
+			);
+		
+		if ($tree) {
+			$ret['tree'] = array(
+				crc32($this->_options['root']) => array(
+					'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
+					'read' => true,
+					'dirs' => $this->_tree($this->_options['root'])
+					)
+				);
+		}
+		return $ret;
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _cwd($path)
+	{
+		if ($path == $this->_options['root']) {
+			$name = $rel = $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path);
+		} else {
+			$name = basename($path);
+			$rel  = $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']);
+			$rel .= DIRECTORY_SEPARATOR.substr($path, strlen($this->_options['root'])+1);
+		}
+		return array(
+			'hash'       => crc32($path),
+			'name'       => $name,
+			'rel'        => $rel,
+			'size'       => 0,
+			'date'       => date($this->_options['dateFormat'], filemtime($path)),
+			'read'       => true,
+			'write'      => is_writable($path) && $this->_isAllowed($path, 'write'),
+			'rm'         => $path == $this->_options['root'] ? false : $this->_isAllowed($path, 'rm'),
+			'uplMaxSize' => ini_get('upload_max_filesize')
+			);
+	}
+
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _cdc($path)
+	{
+		$dirs = $files = array();
+		$ls = scandir($path);
+		for ($i=0; $i < count($ls); $i++) { 
+			if ('.' != substr($ls[$i], 0, 1)) {
+				$info = $this->_info($path.DIRECTORY_SEPARATOR.$ls[$i]);
+				if ($info['type'] == 'dir') {
+					$dirs[] = $info;
+				} else {
+					$files[] = $info;
+				}
+				
+			}
+		}
+		return array_merge($dirs, $files);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _remove($path)
+	{
+		if (!$this->_isAllowed($path, 'rm')) {
+			$this->_errMsg = 'Access denied!';
+			$this->_errFile = $path;
+			return false;
+		}
+		if (!is_dir($path)) {
+			return @unlink($path);
+		}
+		
+		$ls = scandir($path);
+		for ($i=0; $i < count($ls); $i++) { 
+			if ('.' != $ls[$i] && '..' != $ls[$i]) {
+				if (!$this->_remove($path.DIRECTORY_SEPARATOR.$ls[$i])) {
+					return false;
+				}
+			}
+		}
+		return @rmdir($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _copy($src, $trg)
+	{
+		if (!$this->_isAllowed($src, 'read')) {
+			return $this->_setErrorData($src, 'Access denied!');
+		}
+		
+		$dir = dirname($trg);
+		
+		if (!$this->_isAllowed($dir, 'write')) {
+			return $this->_setErrorData($dir, 'Access denied!');
+		}
+		// echo "$src $trg<br />";
+		// return true;
+		if (!is_dir($src)) {
+			if (!@copy($src, $trg)) {
+				return $this->_setErrorData($src, 'Unable to copy!');
+			} 
+			@chmod($trg, $this->_options['fileUmask']);
+		} else {
+			
+			if (is_dir($trg) && !$this->_remove($trg)) {
+				return $this->_setErrorData($src, 'Unable to copy!');
+			}
+			if (!@mkdir($trg, $this->_options['dirUmask'])) {
+				return $this->_setErrorData($src, 'Unable to copy!');
+			}
+			
+			$ls = scandir($src);
+			
+			for ($i=0; $i < count($ls); $i++) { 
+				if ('.' != $ls[$i] && '..' != $ls[$i]) {
+					$_src = $src.DIRECTORY_SEPARATOR.$ls[$i];
+					$_trg = $trg.DIRECTORY_SEPARATOR.$ls[$i];
+					if (is_dir($_src)) {
+						if (!$this->_copy($_src, $_trg)) {
+							return $this->_setErrorData($_src, 'Unable to copy!');
+						}
+					} else {
+						if (!@copy($_src, $_trg)) {
+							return $this->_setErrorData($_src, 'Unable to copy!');
+						}
+						@chmod($_trg, $this->_options['fileUmask']);
+					}
+				}
+			}
+			
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * undocumented function
@@ -469,7 +810,7 @@ class elFinder {
 	 **/
 	private function _checkName($n)
 	{
-		$n = trim($n);
+		$n = strip_tags(trim($n));
 		return preg_match('/^[^\.\\/\<\>][^\\/\<\>]*$/', $n) ? $n : false;
 	}
 	
@@ -540,7 +881,7 @@ class elFinder {
 					$tree[crc32($p)] = array(
 						'name'  => $entr,
 						'read'  => $read,
-						'write' => $read && is_writable($p) && $this->_isAllowed($p, 'write'),
+						'write' => is_writable($p) && $this->_isAllowed($p, 'write'),
 						'dirs'  => $dirs ? $dirs : ''
 						);
 				}
@@ -557,7 +898,7 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _info($path, $parentWrite)
+	private function _info($path)
 	{
 		$type = filetype($path);
 		$stat =  $type == 'link' ? lstat($path) : stat($path);
@@ -566,24 +907,15 @@ class elFinder {
 			'name'  => basename($path),
 			'hash'  => crc32($path),
 			'type'  => $type,
+			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
 			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
-			'read'  => is_readable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'read')  : true),
-			'write' => is_writable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'write') : $parentWrite)
+			'read'  => is_readable($path) && $this->_isAllowed($path, 'read'),
+			'write' => is_writable($path) && $this->_isAllowed($path, 'write'),
+			'rm'    => $this->_isAllowed($path, 'rm'),
 			);
 		
-		if (false != ($b = $this->_briefName($info['name']))) {
-			$info['brief'] = $b;
-		}
-		
-		// if (strlen($info['name']) > $n*2) {
-		// 	
-		// 	$info['brief'] = mb_substr($info['name'], 0, $n)
-		// 		.' '.(mb_substr($info['name'], $n-5).'..'.mb_substr($info['name'], 0, -3));
-		// } elseif (strlen($info['name']) > $n) {
-		// 	$info['brief'] = mb_substr($info['name'], 0, $n).' + '.mb_substr($info['name'], $n);
-		// }
-		
+				
 		if ($type == 'link') {
 			$path = $this->_readlink($path);
 			if (!$path) {
@@ -592,22 +924,16 @@ class elFinder {
 			}
 			$info['link']   = crc32($path);
 			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
+			$info['read']   = is_readable($path) && $this->_isAllowed($path, 'read');
+			$info['write']  = is_writable($path) && $this->_isAllowed($path, 'write');
+			$info['rm']     = $this->_isAllowed($path, 'rm');
 			if (is_dir($path)) {
 				$info['mime']  = 'directory';
-				$info['read']  = is_readable($path) && $this->_isAllowed($path, 'read');
-				$info['write'] = is_writable($path) && $this->_isAllowed($path, 'write');
 			} else {
-				$parent         = dirname($path);
-				$info['parent'] = crc32($parent);
+				$info['parent'] = crc32(dirname($path));
 				$info['mime']   = $this->_mimetype($path);
-				$info['read']   = is_readable($path) && is_readable($parent) && $this->_isAllowed($parent, 'read');
-				$info['write']  = is_writable($path) && is_writable($parent) && $this->_isAllowed($parent, 'write');
 			}
-		} else {
-			$info['mime']  = $type == 'dir' ? 'directory' : $this->_mimetype($path);
-			$info['read']  = is_readable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'read')  : true);
-			$info['write'] = is_writable($path) && ($type == 'dir' ? $this->_isAllowed($path, 'write') : $parentWrite);
-		}
+		} 
 		
 		if ($info['mime'] != 'directory') {
 			if ($this->_options['allowURLs']) {
@@ -621,33 +947,7 @@ class elFinder {
 		
 		return $info;
 	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _briefName($name)
-	{
-		if ($this->_mb) {
-			$len = 'mb_strlen';
-			$sub = 'mb_strcut';
-		} else {
-			$len = 'strlen';
-			$sub = 'substr';
-		}
-		$l = $len($name);
-		if ($l > $this->_options['charsNum']) {
-			$n = $this->_options['charsNum'];
-			return $l > $n*2 
-				? $sub($name, 0, $n)."\n".$sub($name, $n, $n-5).'..'.$sub($name, -3)
-				: $sub($name, 0, $n)."\n".$sub($name, $n);
-		}
-		return '';
-	}
-
-	
+		
 	/**
 	 * undocumented function
 	 *
@@ -729,7 +1029,16 @@ class elFinder {
 		return $type[0];
 	}
 	
-	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _isAllowedUpload($name, $tmpName)
+	{
+		return true;
+	}
 
 	/************************************************************/
 	/**                     cache methods                      **/
@@ -767,7 +1076,7 @@ class elFinder {
 		if ($this->_options['dirSize']) {
 			return $this->_du ? intval(exec('du -k '.escapeshellarg($path)))*1024 : $this->_calcDirSize($path);
 		}
-		return 0;
+		return filesize($path);
 	}
 	
 	/**
@@ -819,6 +1128,21 @@ class elFinder {
 		return (double)$time[1] + (double)$time[0];
 	}
 		
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _setErrorData($path, $msg)
+	{
+		$path = preg_replace('|^'.preg_quote($this->_options['root']).'|', $this->_fakeRoot, $path);
+		$this->_errorData[$path] = $msg;
+		return false;
+	}	
+	
+		
+	
 }
 
 function elFinderCmp($a, $b) {
