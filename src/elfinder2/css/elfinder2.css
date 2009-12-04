@@ -148,7 +148,6 @@ p.el-finder-warning label {
 .el-finder-nav {
 	float:left;
 	width : 190px;
-/*	z-index:1;*/
 }
 
 /* folders tree */
@@ -158,12 +157,17 @@ p.el-finder-warning label {
 	padding:0;
 }
 
-.el-finder-nav ul li ul li ul {
+.el-finder-nav ul.el-finder-tree,
+.el-finder-nav ul.el-finder-places {
+	margin-bottom:1em;
+}
+
+.el-finder-nav ul li ul {
 	margin-left:15px;
 }
 
 .el-finder-nav li {
-	padding:1px;
+	clear:both;
 }
 
 .el-finder-nav li div.dir-handler {
@@ -172,9 +176,9 @@ p.el-finder-warning label {
 	float:left;
 }
 
+.el-finder-nav li a,
 .el-finder-nav li div.dir-collapsed,
-.el-finder-nav li div.dir-expanded,
-.el-finder-nav li a {
+.el-finder-nav li div.dir-expanded {
 	background:url(../images/toolbar.png) 3px -56px no-repeat;
 }
 .el-finder-nav li div.dir-collapsed {
@@ -189,8 +193,7 @@ p.el-finder-warning label {
 	white-space:nowrap;
 	line-height:20px;
 	margin-left:9px;
-	padding:0 0 0 21px;
-/*	background:url(../images/sprite.png) 3px -55px no-repeat;*/
+	padding:0 0 0 22px;
 	border-radius:3px; 
 	-moz-border-radius:3px; 
 	-webkit-border-radius:3px;
@@ -207,29 +210,40 @@ p.el-finder-warning label {
 
 .el-finder-nav li a.root,
 .el-finder-nav li a.root.selected { 
-	background-position: 1px -30px; 
-	margin-left:0;
+	background-position: 3px -30px; 
 	font-weight:bold;
 }
 
-.el-finder-nav li a.noaccess {
-	background-position: 1px -80px; 
+.el-finder-nav li a.wo {
+	background-position: 3px -80px; 
 }
 .el-finder-nav li a.ro {
-	background-position: 1px -104px; 
+	background-position: 3px -104px; 
 }
 
-.el-finder-nav li.places { 
-	background:url(../images/toolbar.png) 1px -152px no-repeat;
-	margin-left:0;
+.el-finder-nav li strong {
+	display:block;
 	white-space:nowrap;
 	line-height:20px;
-	padding:0 0 0 21px;
-	font-weight:bold;
+	margin-left:9px;
+	padding:0 0 0 22px;
+	background:url(../images/toolbar.png) 3px -152px no-repeat;
 	cursor:default;
 }
 
-/************************************/
+.el-finder-nav ul.el-finder-tree .el-finder-droppable {
+	background-color:#99ccff;
+	background-position: 3px -237px; 
+}
+
+.el-finder-nav ul.hover {
+	border-radius:3px; 
+	-moz-border-radius:3px; 
+	-webkit-border-radius:3px;
+	background-color:#99ccff;
+}
+
+/***********************************/
 /*     current working directory    */
 /************************************/
 
@@ -237,9 +251,8 @@ p.el-finder-warning label {
 	border-left:1px solid #ccc;
 	padding:3px;
 	z-index:50;
-/*	float:left;*/
-/*	margin-left:190px;*/
 }
+
 
 
 /********** view: icons  ************/
@@ -255,7 +268,7 @@ p.el-finder-warning label {
 	margin:0 3px 3px 0;
 	padding:0;
 	text-align:center;
-	border: 1px solid #ccc;
+/*	border: 1px solid #ccc;*/
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
@@ -273,9 +286,10 @@ p.el-finder-warning label {
 	border-radius:3px; 
 	-moz-border-radius:3px; 
 	-webkit-border-radius:3px;
-/*	border:1px solid #ccc;*/
 	background:url('../images/icons-big.png') 0 1px no-repeat;
 }
+
+
 
 .el-finder-cwd div.directory p   { background-position: 0  -51px; }
 .el-finder-cwd div.text p        { background-position: 0 -169px; }
@@ -285,21 +299,33 @@ p.el-finder-warning label {
 .el-finder-cwd div.application p { background-position: 0 -371px; }
 .el-finder-cwd div.broken p      { background-position: 0 -422px; }
 
-.el-finder-cwd div.drag-over { background-color:yellow;}
+.el-finder-cwd div.el-finder-droppable { 
+/*	background-color:#eee;*/
+}
+
+.el-finder-cwd div.el-finder-droppable p {
+	background-position: 0 -100px;
+}
 
 .el-finder-cwd div label {
 	display:block;
-	font-style:normal;
-/*	font: .86em 'monaco', 'andale mono', 'lucida console', monospace;*/
 	font-size:.86em;
 	line-height:.9em;
 	padding:1px 1px;
 	margin:0;
-	height:22px;
+	height:20px;
 	overflow:hidden;
 	cursor:default;
 }
 
+/*.el-finder-cwd div.ui-selected label {
+	background-color:#ccc;
+}
+
+.el-finder-cwd div.ui-selected p {
+	background-color:#ccc;
+}
+*/
 .el-finder-cwd div label input { 
 	background:#fff; 
 	width:81px;
@@ -310,7 +336,6 @@ p.el-finder-warning label {
 }
 
 .el-finder-cwd div em {
-	
 	position:absolute;
 	left:14px;
 	top:35px;
@@ -319,7 +344,7 @@ p.el-finder-warning label {
 	background:url(../images/icons-big.png) -17px -150px no-repeat;
 }
 
-.el-finder-cwd div em.noaccess {
+.el-finder-cwd div em.wo {
 	top:32px;
 	left:45px;	
 	background-position: -2px -152px;
@@ -340,6 +365,10 @@ p.el-finder-warning label {
 
 .el-finder-cwd table tr.ui-selected {
 	background-color:#ccc;
+}
+
+.el-finder-cwd table tr.el-finder-droppable {
+/*	background-color:#eee;*/
 }
 
 .el-finder-cwd table tr th {
@@ -371,15 +400,15 @@ p.el-finder-warning label {
 	position:relative;
 }
 
-.el-finder-cwd table tr.directory td p   { background-position:4px  -16px; }
-.el-finder-cwd table tr.text td p        { background-position:5px  -34px; }
-.el-finder-cwd table tr.image td p       { background-position:4px  -51px; }
-.el-finder-cwd table tr.audio td p       { background-position:4px  -70px; }
-.el-finder-cwd table tr.video td p       { background-position:6px  -89px; }
-.el-finder-cwd table tr.application td p { background-position:4px -108px; }
-.el-finder-cwd table tr.broken td p      { background-position:5px -127px; }
+.el-finder-cwd table tr.directory p   { background-position:4px  -16px; }
+.el-finder-cwd table tr.text  p       { background-position:5px  -34px; }
+.el-finder-cwd table tr.image p       { background-position:4px  -51px; }
+.el-finder-cwd table tr.audio p       { background-position:4px  -70px; }
+.el-finder-cwd table tr.video p       { background-position:6px  -89px; }
+.el-finder-cwd table tr.application p { background-position:4px -108px; }
+.el-finder-cwd table tr.broken p      { background-position:5px -127px; }
 
-
+.el-finder-cwd table tr.el-finder-droppable p { background-position:5px -450px; }
 
 .el-finder-cwd table tr td p em {
 	position:absolute;
@@ -396,7 +425,7 @@ p.el-finder-warning label {
 	background-position:0px -433px;
 }
 
-.el-finder-cwd table tr td p em.noaccess {
+.el-finder-cwd table tr td p em.wo {
 	left:12px;
 	background-position:0px -418px;
 }
@@ -490,6 +519,7 @@ p.el-finder-warning label {
 .el-finder-contextmenu div.upload     { background-position: 5px -305px; }
 .el-finder-contextmenu div.rm         { background-position: 5px -330px; }
 .el-finder-contextmenu div.copy       { background-position: 5px -356px; }
+.el-finder-contextmenu div.cut        { background-position: 5px -631px; }
 .el-finder-contextmenu div.duplicate  { background-position: 5px -356px; }
 .el-finder-contextmenu div.paste      { background-position: 5px -381px; }
 .el-finder-contextmenu div.rename     { background-position: 5px -407px; }
@@ -522,7 +552,44 @@ p.el-finder-warning label {
 	background:url(../images/sprite.png) 0 -421px no-repeat;
 }
 
+div.el-finder-drag-helper {
+	padding:0;
+/*	border:1px solid #111;*/
+	cursor:move;
+	width:auto;
+}
 
+div.el-finder-drag-copy {
+	background:url('../images/toolbar.png') 0 -665px no-repeat;
+}
 
+.el-finder-drag-helper .el-finder-cwd { 
+	float:none;
+	border: none; 
+	height:auto; 
+	width:auto;
+	max-width:300px;
+	overflow:hidden;
+	padding:0;
+	padding-left:60px;
+/*	border:1px solid #ccc;*/
+}
 
+.el-finder-drag-helper .el-finder-cwd div {
+	margin-left:-60px;
+}
+
+div.el-finder-drag-helper label { 
+	background-color:#fff; 
+	border:1px solid #ccc; 
+	background-color:#eee;
+	text-align:left;
+	border-radius:5px; 
+	-moz-border-radius:5px; 
+	-webkit-border-radius:5px;
+}
+
+.el-finder-droppable {
+	background-color:#99ccff;
+}
 

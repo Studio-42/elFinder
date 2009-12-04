@@ -194,8 +194,11 @@ class elFinder {
 		
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 		
-		$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
-		$this->_du = $s == 0 && $test>0;
+		if ($this->_options['dirSize'] && function_exists('exec')) {
+			$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
+			$this->_du = $s == 0 && $test>0;
+		}
+		
 		if (function_exists('mb_internal_encoding')) {
 			$this->_mb = true;
 			mb_internal_encoding("UTF-8");
@@ -537,16 +540,18 @@ class elFinder {
 	{
 		$result = array();
 		if (empty($_GET['current']) 
-		|| false == ($dir = $this->_findDir(trim($_GET['current'])))
+		|| false == ($current = $this->_findDir(trim($_GET['current'])))
 		|| empty($_GET['src'])
 		|| false == ($src = $this->_findDir(trim($_GET['src'])))
+		|| empty($_GET['target'])
+		|| false == ($target = $this->_findDir(trim($_GET['target'])))
 		|| empty($_GET['files']) || !is_array($_GET['files'])
 		) {
 			$result['error'] = 'Invalid parameters';
 			return $result;
 		}
 		
-		if (!$this->_isAllowed($dir, 'write') || !$this->_isAllowed($src, 'read')) {
+		if (!$this->_isAllowed($target, 'write') || !$this->_isAllowed($src, 'read')) {
 			$result['error'] = 'Access denied!';
 			return $result;
 		}
@@ -558,7 +563,7 @@ class elFinder {
 				break;
 			}
 			
-			$trg = $dir.DIRECTORY_SEPARATOR.basename($f);
+			$trg = $target.DIRECTORY_SEPARATOR.basename($f);
 
 			if (0 === strpos($trg, $f)) {
 				$result['error'] = 'Unable to copy into itself!';
@@ -566,6 +571,12 @@ class elFinder {
 			}
 			
 			if ($cut) {
+				if (!$this->_isAllowed($f, 'rm')) {
+					$result['error'] = 'Unable to complite request!';
+					$this->_setErrorData($f, 'Access denied!');
+					$result['errorData'] = $result['errorData'] = $this->_errorData;
+					break;
+				}
 				if ((file_exists($trg) && !$this->_remove($trg)) || !@rename($f, $trg) ) {
 					$result['error'] = 'Unable to complite request!';
 					$this->_setErrorData($f, 'Unable to move!');
@@ -580,7 +591,7 @@ class elFinder {
 				}
 			}
 		}
-		return $result+$this->_content($dir, true);
+		return $result+$this->_content($current, true);
 	}
 	
 	
@@ -657,6 +668,7 @@ class elFinder {
 				crc32($this->_options['root']) => array(
 					'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
 					'read' => true,
+					'write' => is_writable($this->_options['root']) && $this->_isAllowed($this->_options['root'], 'write'),
 					'dirs' => $this->_tree($this->_options['root'])
 					)
 				);
