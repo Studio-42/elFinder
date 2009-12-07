@@ -87,6 +87,7 @@ elFinder.prototype.ui = function(fm) {
 			self.isCmdAllowed('open') && self.menu.append($('<div class="open" />').text(self.fm.i18n('Open')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
 			self.isCmdAllowed('rename') && self.menu.append($('<div class="rename" />').text(self.fm.i18n('Rename')));
+			self.isCmdAllowed('resize') && self.menu.append($('<div class="resize" />').text(self.fm.i18n('Resize')));
 			self.isCmdAllowed('copy') && self.menu.append($('<div class="copy" />').text(self.fm.i18n('Copy')));
 			self.isCmdAllowed('cut') && self.menu.append($('<div class="cut" />').text(self.fm.i18n('Cut')));
 			self.isCmdAllowed('duplicate') && self.menu.append($('<div class="duplicate" />').text(self.fm.i18n('Duplicate')));
@@ -733,8 +734,7 @@ elFinder.prototype.ui.prototype.commands = {
 				beforeSubmit : function() {
 					var error, num=0, n;
 					f.find(':file').each(function() {
-						// var n = $(this).val();
-						if (( n = $(this).val())) {
+						if ((n = $(this).val())) {
 							if (!self.fm.isValidName(n)) {
 								error = 'One of files has invalid name';
 							} else {
@@ -826,6 +826,73 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 			
+		}
+	},
+	
+	resize : function(fm) {
+		var self = this;
+		this.fm = fm;
+		
+		this.exec = function() {
+			var s = this.fm.getSelected();
+			if (s[0] && s[0].write && s[0].dim) {
+				var size = s[0].dim.split('x'), w = parseInt(size[0]), h = parseInt(size[1]), rel = w/h;
+				
+				var iw = $('<input type="text" size="9" value="'+w+'" name="width"/>')
+				var ih = $('<input type="text" size="9" value="'+h+'" name="height"/>')
+				self.fm.log(w + ' ' + h+' '+rel)
+				var f = $('<form/>').append('Image size: ').append(iw).append(ih)
+				iw.add(ih).bind('change', calc)
+				
+				var d = $('<div/>').append(f).dialog({
+					modal : true,
+					buttons : {
+						Cancel : function() { $(this).dialog('close'); },
+						Ok     : function() {
+							var _w = parseInt(iw.val()) || 0,
+								_h = parseInt(ih.val()) || 0;
+							if (_w>0 && _w != w && _h>0 && _h != h) {
+								self.fm.ajax({
+									cmd : 'resize',
+									current : self.fm.cwd.hash,
+									file : s[0].hash,
+									width : _w,
+									height : _h
+								},
+								function (data) {
+									self.fm.log(data)
+									data.cwd && self.fm.setCwd(data.cwd, data.cdc);
+								}
+								);
+							}
+							$(this).dialog('close');
+						}
+					}
+				})
+				
+			} 
+			
+			function calc() {
+				self.fm.log(this)
+				var _w = parseInt(iw.val()) || 0,
+					_h = parseInt(ih.val()) || 0;
+					
+				if (_w<=0 || _h<=0) {
+					_w = w;
+					_h = h;
+				} else if (this == iw.get(0)) {
+					_h = parseInt(_w/rel);
+				} else {
+					_w = parseInt(_h*rel);
+				}
+				iw.val(_w);
+				ih.val(_h);
+			}
+			
+		}
+		
+		this.isAllowed = function() {
+			return this.fm.selected.length == 1 && this.fm.cdc[this.fm.selected[0]].write && this.fm.cdc[this.fm.selected[0]].dim;
 		}
 	},
 	

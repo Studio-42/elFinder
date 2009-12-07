@@ -39,7 +39,7 @@
 		 */
 		this.ajax = function(data, callback) {
 			this.lock(true);
-			data.view = this.viewMode();
+
 			$.ajax({
 				url      : this.options.url,
 				data     : data,
@@ -56,16 +56,24 @@
 					}
 					callback(data);
 					data.debug && self.log(data.debug);
-					self.log(data.tmb)
+					
+					/* tell to connector to generate thumbnails */
 					if (data.tmb) {
 						$.ajax({
 							url      : self.options.url,
 							data     : {cmd : 'tmb', current : self.cwd.hash},
 							dataType : 'json',
 							success  : function(data) {
-								self.log(data)
+								if (self.viewMode() == 'icons' && data.images) {
+									var i, el;
+									for (i in data.images) {
+										el = self.view.cwd.find('div[key="'+i+'"]:has(:not(span))').children('p');
+										el.length && self.view.tmb(el, data.images[i]);
+									}
+								}
+								data.debug && self.log(data.debug);
 							}
-						})
+						});
 					}
 				}
 			});

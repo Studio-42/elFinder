@@ -13,31 +13,34 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_options = array(
-		'root'           => '',
-		'URL'            => '',
-		'rootAlias'      => 'Home',
-		'ignoreDotFiles' => true,
-		'debug'      => true,
-		'dirSize'    => true,
-		'fileUmask'  => 0666,
-		'dirUmask'   => 0777,
-		'imgLib'     => 'gd',
-		'tmbDir'     => '_tmb',
-		'allowTypes' => array(),
-		'allowExts'  => array(),
-		'denyTypes'  => array(),
-		'denyExts'   => array(),   
-		'denyURLs'   => true,
-		'disabled'   => array(),
-		'dateFormat' => 'j M Y H:i',
-		'aclObj'     => null,
-		'aclRole'    => 'user',
-		'defaults'   => array(
+		'root'           => '',          // path to root directory
+		'URL'            => '',          // root directory URL
+		'rootAlias'      => 'Home',      // display this instead root directory name
+		'ignoreDotFiles' => true,        // do not display dot files
+		'cntDirSize'     => true,        // count total directories sizes
+		'fileUmask'      => 0666,        // permission for new files
+		'dirUmask'       => 0777,        // permission for new directories
+		'mimeDetect'     => 'auto',      // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
+		'imgLib'         => 'auto',      // image manipulation library
+		'tmbDir'         => '_tmb',      // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbSize'        => 48,          // images thumbnails size (px)
+		'allowTypes'     => array(),     // mimetypes which allowed to upload
+		'allowExts'      => array(),     // file extensions which allowed to upload
+		'denyTypes'      => array(),     // mimetypes which not allowed to upload
+		'denyExts'       => array(),     // file extensions which not allowed to upload
+		'denyURLs'       => true,        // do not display file URL in "get info"
+		'disabled'       => array(),     // list of not allowed commands
+		'dateFormat'     => 'j M Y H:i', // file modification date format
+		'aclObj'         => null,        // acl object
+		'aclRole'        => 'user',      // role for acl
+		'defaults'       => array(       // default permisions
 			'read'   => true,
 			'write'  => true,
 			'rm'     => true
 			),
-		'perms' => array()
+		'perms'         => array(),      // individual folders/files permisions     
+		'gzip'          => false,     
+		'debug'         => true          // send debug to client
 		);
 	
 	/**
@@ -57,12 +60,13 @@ class elFinder {
 		'duplicate' => '_duplicate',
 		'edit'      => '_edit',
 		'extract'   => '_extract',
+		'resize'    => '_resize',
 		'geturl'    => '_geturl',
-		'tmb'       => '_createTmb'
+		'tmb'       => '_thumbnails'
 		);
 		
 	/**
-	 * массив расширений файлов/mime types для _method = 'internal' (когда недоступны все прочие методы)
+	 * extensions/mimetypes for _mimetypeDetect = 'internal' 
 	 *
 	 * @var array
 	 **/
@@ -93,16 +97,9 @@ class elFinder {
 		'exe'  => 'application/octet-stream'
 		);
 	
-		
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_mimetypeDetect = '';	
 	
 	/**
-	 * undocumented class variable
+	 * image manipulation library (imagick | mogrify | gd)
 	 *
 	 * @var string
 	 **/
@@ -185,13 +182,12 @@ class elFinder {
 		
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 		
-		if ($this->_options['dirSize'] && function_exists('exec')) {
+		if ($this->_options['cntDirSize'] && function_exists('exec')) {
 			$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
 			$this->_du = $s == 0 && $test>0;
 		}
 		
-		
-		
+		// find image manipulation library
 		if ($this->_options['tmbDir'] && (empty($this->_options['imgLib']) || $this->_options['imgLib'] == 'auto')) {
 			if (extension_loaded('imagick')) {
 				$this->_options['imgLib'] = 'imagick';
@@ -210,11 +206,11 @@ class elFinder {
 		if (!in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
 			$this->_options['imgLib'] = '';
 			$this->_options['tmbDir'] = '';
-		}
-		
-		if (function_exists('mb_internal_encoding')) {
-			$this->_mb = true;
-			mb_internal_encoding("UTF-8");
+		} else {
+			$this->_options['tmbSize'] = intval($this->_options['tmbSize']);
+			if ($this->_options['tmbSize'] < 12) {
+				$this->_options['tmbSize'] = 48;
+			}
 		}
 		
 	}
@@ -251,48 +247,33 @@ class elFinder {
 			$result['disabled'] = $this->_options['disabled'];
 			// echo '<pre>'; print_r($result); exit();
 		}
-		// $result['warning'] = "warning message";
+
 		if ($this->_options['debug']) {
 			$result['debug'] = array(
-				'time' => $this->_utime() - $this->_time,
-				'mimeTypeDetect' => $this->_mimetypeDetect,
-				'imgLib' => $this->_options['imgLib'],
-				'du' => $this->_du,
-				'utime' => time()
+				'time'       => $this->_utime() - $this->_time,
+				'mimeDetect' => $this->_options['mimeDetect'],
+				'imgLib'     => $this->_options['imgLib'],
+				'du'         => $this->_du
 				);
 		}
 		
 		$result['tmb'] = $this->_createTmb && $this->_tmbDir;
 		
-		if (isset($_GET['debug']))
-			$this->_dump($result);
-		else
-			$j = json_encode($result);
-			header("Content-Length: " .strlen($j));
-			header("Connection: close");
-			// ob_start("ob_gzhandler");
-			ob_start();
+		$j = json_encode($result);
+		if (!$this->_options['gzip']) {
 			echo $j;
-			// echo json_encode($result);
+		} else {
+			ob_start("ob_gzhandler");
+			echo $j;
 			ob_end_flush();
-		flush();
-
-		// if ($this->_tasks['images']) {
-		// 	foreach ($this->_tasks['images'] as $path) {
-		// 			$this->_tmb($path);
-		// 	}
-		// }
-
+		}
 		exit();
-
 	}
 
 	
 	/************************************************************/
 	/**                   elFinder commands                    **/
 	/************************************************************/
-	
-	
 	
 	/**
 	 * undocumented function
@@ -659,6 +640,32 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
+	private function _resize()
+	{
+		$result = array();
+		if (empty($_GET['current']) 
+		|| false == ($current = $this->_findDir(trim($_GET['current'])))
+		|| empty($_GET['file'])
+		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		|| empty($_GET['width']) || 0 >= ($width = intval($_GET['width']))
+		|| empty($_GET['height']) || 0 >= ($height = intval($_GET['height']))
+		) {
+			$result['error'] = 'Invalid parameters';
+		} elseif (!$this->_resizeImg($file, $width, $height)) {
+			$result['error'] = 'Unable to resize image';
+		} else {
+			$result = $this->_content($current);
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
 	private function _geturl()
 	{
 		if (empty($_GET['current']) 
@@ -672,141 +679,11 @@ class elFinder {
 		return array('url' => $this->_path2url($file));
 	}
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _createTmb()
-	{
-		$result = array();
-		if (empty($_GET['current']) 
-		|| false == ($current = $this->_findDir(trim($_GET['current'])))
-		) {
-			$result['error'] = 'Invalid parameters';
-			return $result;
-		}
-		$result['images'] = array();
-		
-		
-		echo $current."\n";
-		$ls = scandir($current);
-		for ($i=0; $i < count($ls); $i++) { 
-			if ('.' != substr($ls[$i], 0, 1)) {
-				$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
-				if (is_file($path) && 0 === strpos($this->_mimetype($path), 'image')) {
-					
-					$tmb = $tmbDir.DIRECTORY_SEPARATOR.$ls[$i];
-					echo $path.' : '.$tmb."\n";
-					// if (!file_exists($tmb) && $this->_tmb($path, $tmb)) {
-					// 	$result['images'][crc32($path)] = $this->_path2url($tmb); 
-					// }
-				}
-			}
-		}
-		return $result;
-	}
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _tmb($img, $tmb)
-	{
-		
-		if (false == ($s = getimagesize($img))) {
-			return false;
-		}
-		switch ($this->_options['imgLib']) {
-			case 'imagick':
-				$_img = new imagick($img);
-				$_img->contrastImage(1);
-				return $_img->cropThumbnailImage(48, 48) && $_img->writeImage($tmb);
-				break;
-				
-			case 'mogrify':
-				if (@copy($img, $tmb)) {
-					$x = $y = 0;
-					if ($s[0] > $s[1]) {
-						$size = $s[1];
-						$x = ceil(($s[0] - $s[1])/2);
-					} else {
-						$y = ceil(($s[1] - $s[0])/2);
-						$size = $s[0];
-					}
-					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale 48x48! '.escapeshellarg($tmb), $o, $c);
-					return $c == 0;	
-				}
-				break;
-			
-			case 'gd':
-				if ($s['mime'] == 'image/jpeg') {
-					$_img = imagecreatefromjpeg($img);
-				} elseif ($s['mime'] = 'image/png') {
-					$_img = imagecreatefrompng($img);
-				} elseif ($s['mime'] = 'image/gif') {
-					$_img = imagecreatefromgif($img);
-				} 
-				if (!$_img || false == ($_tmb = imagecreatetruecolor(48, 48))) {
-					return false;
-				}
-				list($x, $y, $size) = $this->_imgGeometry($s[0], $s[1]);
-				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, 48, 48, $size, $size)) {
-					return false;
-				}
-				if ($s['mime'] == 'image/jpeg') {
-					$r = imagejpeg($_tmb, $tmb, 100);
-				} else if ($s['mime'] = 'image/png') {
-					$r = imagepng($_tmb, $tmb, 7);
-				} else {
-					$r = imagegif($_tmb, $tmb, 7);
-				}
-				imagedestroy($_img);
-				imagedestroy($_tmb);
-				return $r;
-				break;
-		}
-		
-	}
-	
 	
 	
 	/************************************************************/
-	/**                      fs methods                        **/
+	/**                    "content" methods                   **/
 	/************************************************************/
-
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _uniqueName($f)
-	{
-		$dir = dirname($f);
-		$name = basename($f);
-		$ext = '';
-		if (!is_dir($f) && false != ($p = strrpos($name, '.'))) {
-			$ext = substr($name, $p);
-			$name = substr($name, 0, $p);
-		}
-		
-		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext)) {
-			return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext;
-		}
-		$i = 1;
-		while ($i++<=1000) {
-			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext)) {
-				return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext;
-			}	
-		}
-		return $dir.DIRECTORY_SEPARATOR.$name.md5($f).$ext;
-	}
-
 	/**
 	 * undocumented function
 	 *
@@ -886,6 +763,130 @@ class elFinder {
 		return array_merge($dirs, $files);
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _info($path)
+	{
+		$type = filetype($path);
+		$stat =  $type == 'link' ? lstat($path) : stat($path);
+		
+		$info = array(
+			'name'  => basename($path),
+			'hash'  => crc32($path),
+			'type'  => $type,
+			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
+			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
+			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
+			'read'  => is_readable($path) && $this->_isAllowed($path, 'read'),
+			'write' => is_writable($path) && $this->_isAllowed($path, 'write'),
+			'rm'    => $this->_isAllowed($path, 'rm'),
+			);
+		
+				
+		if ($type == 'link') {
+			$path = $this->_readlink($path);
+			if (!$path) {
+				$info['mime'] = 'unknown';
+				return $info;
+			}
+			$info['link']   = crc32($path);
+			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
+			$info['read']   = is_readable($path) && $this->_isAllowed($path, 'read');
+			$info['write']  = is_writable($path) && $this->_isAllowed($path, 'write');
+			$info['rm']     = $this->_isAllowed($path, 'rm');
+			if (is_dir($path)) {
+				$info['mime']  = 'directory';
+			} else {
+				$info['parent'] = crc32(dirname($path));
+				$info['mime']   = $this->_mimetype($path);
+			}
+		} 
+		
+		if ($info['mime'] != 'directory') {
+			if (!$this->_options['denyURLs']) {
+				$info['url'] = $this->_path2url($path);
+			}
+			if (0 === ($p = strpos($info['mime'], 'image')) && false != ($s = getimagesize($path))) {
+				$info['dim'] = $s[0].'x'.$s[1];
+				if (false != ($tmbDir = $this->_tmbDir($path))) {
+					$tmb = $tmbDir.DIRECTORY_SEPARATOR.basename($path);
+					if (file_exists($tmb)) {
+						$info['tmb']  = $this->_path2url($tmb);
+					} else {
+						$this->_createTmb = true;
+					}
+				}
+				
+			}
+		}
+		
+		return $info;
+	}
+	
+	/**
+	 * Return directory tree (multidimensional array)
+	 *
+	 * @param  string  $path  directory path
+	 * @return array
+	 **/
+	private function _tree($path)
+	{
+		$tree = array();
+		
+		if (false != ($d = dir($path))) {
+			while($entr = $d->read()) {
+				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
+				if ('.' != substr($entr, 0, 1) && !is_link($p) && is_dir($p) ) {
+					$read = is_readable($p) && $this->_isAllowed($p, 'read');
+					$dirs = $read ? $this->_tree($p) : '';
+					$tree[crc32($p)] = array(
+						'name'  => $entr,
+						'read'  => $read,
+						'write' => is_writable($p) && $this->_isAllowed($p, 'write'),
+						'dirs'  => $dirs ? $dirs : ''
+						);
+				}
+			}
+			$d->close();
+		}
+		return $tree;
+	}
+	/************************************************************/
+	/**                      fs methods                        **/
+	/************************************************************/
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _uniqueName($f)
+	{
+		$dir = dirname($f);
+		$name = basename($f);
+		$ext = '';
+		if (!is_dir($f) && false != ($p = strrpos($name, '.'))) {
+			$ext = substr($name, $p);
+			$name = substr($name, 0, $p);
+		}
+		
+		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext)) {
+			return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext;
+		}
+		$i = 1;
+		while ($i++<=1000) {
+			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext)) {
+				return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext;
+			}	
+		}
+		return $dir.DIRECTORY_SEPARATOR.$name.md5($f).$ext;
+	}
+
 	/**
 	 * undocumented function
 	 *
@@ -1031,41 +1032,113 @@ class elFinder {
 		}
 	}
 	
-	/**
-	 * Return directory tree (multidimensional array)
-	 *
-	 * @param  string  $path  directory path
-	 * @return array
-	 **/
-	private function _tree($path)
-	{
-		$tree = array();
-		
-		if (false != ($d = dir($path))) {
-			while($entr = $d->read()) {
-				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
-				if ('.' != substr($entr, 0, 1) && !is_link($p) && is_dir($p) ) {
-					$read = is_readable($p) && $this->_isAllowed($p, 'read');
-					$dirs = $read ? $this->_tree($p) : '';
-					$tree[crc32($p)] = array(
-						'name'  => $entr,
-						'read'  => $read,
-						'write' => is_writable($p) && $this->_isAllowed($p, 'write'),
-						'dirs'  => $dirs ? $dirs : ''
-						);
-				}
-			}
-			$d->close();
-		}
-		return $tree;
-	}
-	
 	
 	/**
 	 * undocumented function
 	 *
 	 * @return void
 	 * @author dio
+	 **/
+	private function _readlink($path)
+	{
+		$target = readlink($path);
+		if ('/' != substr($target, 0, 1)) {
+			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
+		}
+		$target = realpath($target);
+		return $target && file_exists($target) && 0 === strpos($target, $this->_options['root']) ? $target : false;
+	}
+	
+	/**
+	 * Count total directory size if this allowed in options
+	 *
+	 * @param  string  $path  directory path
+	 * @return int
+	 **/
+	private function _dirSize($path)
+	{
+		$size = 0;
+		if (!$this->_options['cntDirSize']) {
+			$size = filesize($size);
+		} else {
+			if ($this->_du) {
+				$size = intval(exec('du -k '.escapeshellarg($path)))*1024;
+			} else {
+				$ls = scandir($path);
+				for ($i=0; $i < count($ls); $i++) { 
+					if ('.' != $ls[$i] && '..' != $ls[$i] && (!$this->_options['ignoreDotFiles'] || '.' != substr($ls[$i], 0, 1) )) {
+						$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+						$size += is_dir($p) && is_readable($p) ? $this->_dirSize($p) : filesize($p);
+					}
+				}
+			}
+		} 
+		return $size;
+	}
+	
+	/**
+	 * return file mimetype
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 **/
+	private function _mimetype($path)
+	{
+		if (!$this->_options['mimeDetect'] || $this->_options['mimeDetect'] == 'auto') {
+			$this->_options['mimeDetect'] = 'internal';
+			if (class_exists('finfo')) {
+				$this->_options['mimeDetect'] = 'finfo';
+			} elseif (function_exists('mime_content_type') && (mime_content_type(__FILE__) == 'text/x-php' || mime_content_type(__FILE__) == 'text/x-c++')) {
+				$this->_options['mimeDetect'] = 'mime_content_type';
+			} elseif (function_exists('exec')) {
+				$type = exec('file -ib '.escapeshellarg(__FILE__));
+				if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
+				{
+					$this->_options['mimeDetect'] = 'linux';
+				} else {
+					$type = exec('file -Ib '.escapeshellarg(__FILE__)); 
+					if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
+					{
+						$this->_options['mimeDetect'] = 'bsd';
+					}
+				}
+			}
+		}
+		
+		switch ($this->_options['mimeDetect']) {
+			case 'finfo':
+				$finfo = finfo_open(FILEINFO_MIME);
+				$type = finfo_file($finfo, $path);
+				break;
+			case 'php':   
+			 	$type = mime_content_type($path);
+				break;
+			case 'linux':  
+				$type = exec('file -ib '.escapeshellarg($path));
+				break;
+			case 'bsd':   
+				$type = exec('file -Ib '.escapeshellarg($path));
+				break;
+			default:
+				$ext  = false !== ($p = strrpos($path, '.')) ? strtolower(substr($path, $p+1)) : '';
+				$type = isset($this->_mimeTypes[$ext]) ? $this->_mimeTypes[$ext] : 'unknown;';
+		}
+		$type = explode(';', $type); 
+		return $type[0];
+	}
+	
+	
+	
+	/************************************************************/
+	/**                   image manipulation                   **/
+	/************************************************************/
+	
+	
+	/**
+	 * set/get thumbnails path for current directory (set once for request)
+	 *
+	 * @param  string path to image
+	 * @return string
 	 **/
 	private function _tmbDir($path)
 	{
@@ -1085,69 +1158,93 @@ class elFinder {
 	}
 	
 	/**
+	 * Create image thumbnail
+	 *
+	 * @param
+	 * @param	
+	 * @return void
+	 **/
+	private function _tmb($img, $tmb)
+	{
+		if (false == ($s = getimagesize($img))) {
+			return false;
+		}
+		$tmbSize = $this->_options['tmbSize'];
+		switch ($this->_options['imgLib']) {
+			case 'imagick':
+				$_img = new imagick($img);
+				$_img->contrastImage(1);
+				return $_img->cropThumbnailImage($tmbSize, $tmbSize) && $_img->writeImage($tmb);
+				break;
+				
+			case 'mogrify':
+				if (@copy($img, $tmb)) {
+					list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
+					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
+					return $c == 0;	
+				}
+				break;
+			
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$_img = imagecreatefromjpeg($img);
+				} elseif ($s['mime'] = 'image/png') {
+					$_img = imagecreatefrompng($img);
+				} elseif ($s['mime'] = 'image/gif') {
+					$_img = imagecreatefromgif($img);
+				} 
+				if (!$_img || false == ($_tmb = imagecreatetruecolor($tmbSize, $tmbSize))) {
+					return false;
+				}
+				list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
+				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+					return false;
+				}
+				if ($s['mime'] == 'image/jpeg') {
+					$r = imagejpeg($_tmb, $tmb, 100);
+				} else if ($s['mime'] = 'image/png') {
+					$r = imagepng($_tmb, $tmb, 7);
+				} else {
+					$r = imagegif($_tmb, $tmb, 7);
+				}
+				imagedestroy($_img);
+				imagedestroy($_tmb);
+				return $r;
+				break;
+		}
+	}
+	
+	
+	/**
 	 * undocumented function
 	 *
 	 * @return void
 	 * @author dio
 	 **/
-	private function _info($path)
+	private function _thumbnails()
 	{
-		$type = filetype($path);
-		$stat =  $type == 'link' ? lstat($path) : stat($path);
-		
-		$info = array(
-			'name'  => basename($path),
-			'hash'  => crc32($path),
-			'type'  => $type,
-			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
-			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
-			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
-			'read'  => is_readable($path) && $this->_isAllowed($path, 'read'),
-			'write' => is_writable($path) && $this->_isAllowed($path, 'write'),
-			'rm'    => $this->_isAllowed($path, 'rm'),
-			);
-		
-				
-		if ($type == 'link') {
-			$path = $this->_readlink($path);
-			if (!$path) {
-				$info['mime'] = 'unknown';
-				return $info;
-			}
-			$info['link']   = crc32($path);
-			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
-			$info['read']   = is_readable($path) && $this->_isAllowed($path, 'read');
-			$info['write']  = is_writable($path) && $this->_isAllowed($path, 'write');
-			$info['rm']     = $this->_isAllowed($path, 'rm');
-			if (is_dir($path)) {
-				$info['mime']  = 'directory';
-			} else {
-				$info['parent'] = crc32(dirname($path));
-				$info['mime']   = $this->_mimetype($path);
-			}
-		} 
-		
-		if ($info['mime'] != 'directory') {
-			if (!$this->_options['denyURLs']) {
-				$info['url'] = $this->_path2url($path);
-			}
-			if (0 === ($p = strpos($info['mime'], 'image')) && false != ($s = getimagesize($path))) {
-				$info['dim'] = $s[0].'x'.$s[1];
-				if (false != ($tmbDir = $this->_tmbDir($path))) {
-					$tmb = $tmbDir.DIRECTORY_SEPARATOR.basename($path);
-					if (file_exists($tmb)) {
-						$info['bg']  = $this->_path2url($tmb);
-					} else {
-						$this->_createTmb = true;
+		$result = array();
+		if (!empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
+			$result['images'] = array();
+			$ls = scandir($current);
+			for ($i=0; $i < count($ls); $i++) { 
+				if ('.' != substr($ls[$i], 0, 1)) {
+					$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
+					if (is_file($path) && 0 === strpos($this->_mimetype($path), 'image')) {
+						if (!isset($tmbDir)) {
+							$tmbDir = $this->_tmbDir($path);
+						}
+						$tmb = $tmbDir.DIRECTORY_SEPARATOR.$ls[$i];
+						if (!file_exists($tmb) && is_readable($path) && $this->_tmb($path, $tmb)) {
+							$result['images'][crc32($path)] = $this->_path2url($tmb); 
+						}
 					}
 				}
-				
 			}
 		}
-		
-		return $info;
+		return $result;
 	}
-		
+	
 	
 		
 	/**
@@ -1156,48 +1253,16 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _readlink($path)
+	private function _cropPos($w, $h)
 	{
-		$target = readlink($path);
-		if ('/' != substr($target, 0, 1)) {
-			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
+		$x = $y = 0;
+		$size = min($w, $h);
+		if ($w > $h) {
+			$x = ceil(($w - $h)/2);
+		} else {
+			$y = ceil(($h - $w)/2);
 		}
-		$target = realpath($target);
-		return $target && file_exists($target) && 0 === strpos($target, $this->_options['root']) ? $target : false;
-	}
-
-	
-	
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _checkMimetypeDetect()
-	{
-		if (!$this->_mimetypeDetect) {
-			if (class_exists('finfo')) {
-				return $this->_mimetypeDetect = 'finfo';
-			} 
-			if ( function_exists('mime_content_type') 
-			&& (mime_content_type(__FILE__) == 'text/x-php' || mime_content_type(__FILE__) == 'text/x-c++') ) {
-				return $this->_mimetypeDetect = 'php';
-			}
-			$type = exec('file -ib '.escapeshellarg(__FILE__)); 
-			if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
-			{
-				return $this->_mimetypeDetect = 'linux';
-			}
-			$type = exec('file -Ib '.escapeshellarg(__FILE__)); 
-			if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
-			{
-				return $this->_mimetypeDetect = 'bsd';
-			}
-			$this->_mimetypeDetect = 'internal';
-		}
+		return array($x, $y, $size);
 	}
 	
 	/**
@@ -1206,30 +1271,28 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _mimetype($path)
+	private function _resizeImg($img, $w, $h)
 	{
-		!$this->_mimetypeDetect && $this->_checkMimetypeDetect();
-		switch ($this->_mimetypeDetect) {
-			case 'finfo':
-				$finfo = finfo_open(FILEINFO_MIME);
-				$type = finfo_file($finfo, $path);
-				break;
-			case 'php':   
-			 	$type = mime_content_type($path);
-				break;
-			case 'linux':  
-				$type = exec('file -ib '.escapeshellarg($path));
-				break;
-			case 'bsd':   
-				$type = exec('file -Ib '.escapeshellarg($path));
-				break;
-			default:
-				$ext  = false !== ($p = strrpos($path, '.')) ? substr($path, $p+1) : '';
-				$type = isset($this->_mimeTypes[$ext]) ? $this->_mimeTypes[$ext] : 'unknown;';
+		if (false == ($s = getimagesize($img))) {
+			return false;
 		}
-		$type = explode(';', $type); 
-		return $type[0];
+		
+		switch ($this->_options['imgLib']) {
+			case 'imagick':
+				if (false != ($_img = new imagick($img))) {
+					return $_img->cropThumbnailImage($w, $h) && $_img->writeImage($img);
+				}
+				break;
+			case 'mogrify':
+				exec('mogrify -scale '.$w.'x'.$h.'! '.escapeshellarg($img), $o, $c);
+				return 0 == $c;
+				break;
+		}
 	}
+	
+	/************************************************************/
+	/**                       access control                   **/
+	/************************************************************/
 	
 	/**
 	 * undocumented function
@@ -1243,38 +1306,6 @@ class elFinder {
 	}
 
 
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _imgGeometry($w, $h)
-	{
-		$x = $y = 0;
-		$size = min($w, $h);
-		if ($w > $h) {
-			$x = ceil(($w - $h)/2);
-		} else {
-			$y = ceil(($h - $w)/2);
-		}
-		return array($x, $y, $size);
-	}
-
-	/************************************************************/
-	/**                     cache methods                      **/
-	/************************************************************/
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _cache($key, $val=null) {
-		return false;
-	}
-	
 	
 	/**
 	 * undocumented function
@@ -1286,44 +1317,9 @@ class elFinder {
 		return isset($this->_options['defaults'][$action]) ? $this->_options['defaults'][$action] : false;
 	}
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _dirSize($path)
-	{
-		if ($this->_options['dirSize']) {
-			return $this->_du ? intval(exec('du -k '.escapeshellarg($path)))*1024 : $this->_calcDirSize($path);
-		}
-		return filesize($path);
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _calcDirSize($path)
-	{
-		$s = 0;
-		if (false != ($d = dir($path))) {
-			while ($entr = $d->read()) {
-				if ('.' != $entr && '..' != $entr) {
-					$f = $d->path.DIRECTORY_SEPARATOR.$entr;
-					if (is_dir($f)) {
-						$s += $this->_calcDirSize($f);
-					} elseif (is_file($f)) {
-						$s += filesize($f);
-					}
-				}
-			}
-			$d->close();
-		}
-		return $s;
-	}
+	/************************************************************/
+	/**                          utilites                      **/
+	/************************************************************/
 	
 	/**
 	 * undocumented function
@@ -1338,10 +1334,6 @@ class elFinder {
 		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
 	
-	
-	private function _dump($o) {
-		echo '<pre>'; print_r($o); echo '</pre>';
-	}
 	
 	private function _utime()
 	{
@@ -1366,8 +1358,5 @@ class elFinder {
 	
 }
 
-function elFinderCmp($a, $b) {
-	return strcmp($a['name'], $b['name']);
-}
 
 ?>

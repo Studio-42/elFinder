@@ -229,15 +229,12 @@ elFinder.prototype.view = function(fm, el) {
 		} else if (!f.write) {
 			el.append('<em class="ro" />');
 		}
-		// f.bg && p.css('background', 'transparent url('+f.bg+') 0 0 no-repeat');
-		if (f.bg) {
-			p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+f.bg+'?'+Math.random()+'") 0 0 no-repeat'))
-			// p.append($('<img/>').hide().attr('src', f.bg+'?'+Math.random()).load(function() {
-			// 	self.fm.log('load '+f.bg)
-			// 	$(this).show();
-			// }))
-		}
+		f.tmb && this.tmb(p, f.tmb);
 		return el;
+	}
+
+	this.tmb = function(p, url) {
+		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'));
 	}
 
 	this.updateSelected = function() {
