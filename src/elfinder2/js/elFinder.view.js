@@ -49,7 +49,7 @@ elFinder.prototype.view = function(fm, el) {
 	this.nav  = $('<div />').addClass('el-finder-nav');
 	this.cwd  = $('<div />').addClass('el-finder-cwd');
 	this.spn  = $('<div />').addClass('el-finder-spinner');
-	this.msg  = $('<p />').addClass('el-finder-info');
+	this.msg  = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>');
 	this.nfo  = $('<div />').addClass('stat');
 	this.pth  = $('<div />').addClass('path');
 	this.sel  = $('<div />').addClass('selected-files');
@@ -78,17 +78,21 @@ elFinder.prototype.view = function(fm, el) {
 			this.spn.hide();
 		}
 	}
+
+	this.fatal = function(t) {
+		self.error(t.status != '404' ? 'Invalid backend configuration!' : 'Unable to connect to backend!')
+	}
 	
 	this.error = function(err, data) {
 		this.fm.lock();
 		err = this.fm.i18n(err)+this.formatErrorData(data);
-		this.msg.empty().removeClass('el-finder-warning').addClass('el-finder-error').html(err).show();
+		this.msg.removeClass('el-finder-warn').show().children('strong').empty().html(err);
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 3000);
 	}
 	
 	this.warning = function(warn, data) {
 		warn = this.fm.i18n(warn)+this.formatErrorData(data);
-		this.msg.empty().removeClass('el-finder-error').addClass('el-finder-warning').html(warn).show();
+		this.msg.addClass('el-finder-warn').show().children('strong').empty().html(warn)
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 2000);
 	}
 	
@@ -208,7 +212,8 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.renderIcon = function(f) {
 		var c  = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-'),
-			el = $('<div/>').addClass(c).attr('key', f.hash)
+			el = $('<div/>').addClass(c).attr('key', f.hash),
+			p  = $('<p/>'),
 			w  = self.fm.options.wrap,
 			n  = f.name;
 			
@@ -217,12 +222,20 @@ elFinder.prototype.view = function(fm, el) {
 		} else if (f.name.length > w) {
 			n = f.name.substr(0, w)+"&shy;"+f.name.substr(w);
 		}
-		el.append('<p/>').append($('<label/>').html(n).attr('title', f.name));
+		el.append(p).append($('<label/>').html(n).attr('title', f.name));
 		f.type == 'link' && el.append('<em />');
 		if (!f.read) {
 			el.append('<em class="wo" />');
 		} else if (!f.write) {
 			el.append('<em class="ro" />');
+		}
+		// f.bg && p.css('background', 'transparent url('+f.bg+') 0 0 no-repeat');
+		if (f.bg) {
+			p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+f.bg+'?'+Math.random()+'") 0 0 no-repeat'))
+			// p.append($('<img/>').hide().attr('src', f.bg+'?'+Math.random()).load(function() {
+			// 	self.fm.log('load '+f.bg)
+			// 	$(this).show();
+			// }))
 		}
 		return el;
 	}

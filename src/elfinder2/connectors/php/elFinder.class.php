@@ -13,23 +13,22 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_options = array(
-		'root'       => '',
-		'URL'        => '',
-		'rootAlias'  => 'Home',
+		'root'           => '',
+		'URL'            => '',
+		'rootAlias'      => 'Home',
+		'ignoreDotFiles' => true,
 		'debug'      => true,
 		'dirSize'    => true,
 		'fileUmask'  => 0666,
 		'dirUmask'   => 0777,
-		'tmbDir'     => '.tmb',
-		'tmbSize'    => 48,
-		'charsNum'   => 13,
+		'imgLib'     => 'gd',
+		'tmbDir'     => '_tmb',
 		'allowTypes' => array(),
 		'allowExts'  => array(),
 		'denyTypes'  => array(),
 		'denyExts'   => array(),   
-		'allowURLs'  => true,
+		'denyURLs'   => true,
 		'disabled'   => array(),
-		'sort'       => true,
 		'dateFormat' => 'j M Y H:i',
 		'aclObj'     => null,
 		'aclRole'    => 'user',
@@ -57,7 +56,9 @@ class elFinder {
 		'rm'        => '_rm',
 		'duplicate' => '_duplicate',
 		'edit'      => '_edit',
-		'extract'   => '_extract'
+		'extract'   => '_extract',
+		'geturl'    => '_geturl',
+		'tmb'       => '_createTmb'
 		);
 		
 	/**
@@ -105,6 +106,13 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
+	private $_imgLib = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
 	private $_mb = false;
 	
 	/**
@@ -126,31 +134,14 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	private $_cwd = array();
+	private $_tmbDir = null;
 		
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
-	private $_tasks = array(
-		'dirs' => array(),
-		'images' => array()
-		);
-		
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_errMsg = '';
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_errFile = '';
+	private $_createTmb = false;
 		
 	/**
 	 * undocumented class variable
@@ -186,7 +177,7 @@ class elFinder {
 			
 		if (!empty($this->_options['disabled'])) {
 			foreach ($this->_options['disabled'] as $c) {
-				if (isset($this->_commands[$c]) && $c != 'open' && $c != 'reload' ) {
+				if (isset($this->_commands[$c]) && $c != 'open' && $c != 'reload' && $c != 'select' ) {
 					unset($this->_commands[$c]);
 				}
 			}
@@ -197,6 +188,28 @@ class elFinder {
 		if ($this->_options['dirSize'] && function_exists('exec')) {
 			$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
 			$this->_du = $s == 0 && $test>0;
+		}
+		
+		
+		
+		if ($this->_options['tmbDir'] && (empty($this->_options['imgLib']) || $this->_options['imgLib'] == 'auto')) {
+			if (extension_loaded('imagick')) {
+				$this->_options['imgLib'] = 'imagick';
+			} elseif (function_exists('exec')) {
+				exec('mogrify --version', $o, $c); 
+				if ($c == 0 && !empty($o))
+				{
+					$this->_options['imgLib'] = 'mogrify';
+				}
+			}
+			if (!$this->_options['imgLib'] && function_exists('gd_info')) {
+				$this->_options['imgLib'] = 'mogrify';
+			}
+		}
+		
+		if (!in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
+			$this->_options['imgLib'] = '';
+			$this->_options['tmbDir'] = '';
 		}
 		
 		if (function_exists('mb_internal_encoding')) {
@@ -238,21 +251,37 @@ class elFinder {
 			$result['disabled'] = $this->_options['disabled'];
 			// echo '<pre>'; print_r($result); exit();
 		}
-		
+		// $result['warning'] = "warning message";
 		if ($this->_options['debug']) {
 			$result['debug'] = array(
 				'time' => $this->_utime() - $this->_time,
 				'mimeTypeDetect' => $this->_mimetypeDetect,
+				'imgLib' => $this->_options['imgLib'],
 				'du' => $this->_du,
-				// 'tasks' => $this->_tasks,
 				'utime' => time()
 				);
 		}
 		
+		$result['tmb'] = $this->_createTmb && $this->_tmbDir;
+		
 		if (isset($_GET['debug']))
 			$this->_dump($result);
 		else
-			echo json_encode($result);
+			$j = json_encode($result);
+			header("Content-Length: " .strlen($j));
+			header("Connection: close");
+			// ob_start("ob_gzhandler");
+			ob_start();
+			echo $j;
+			// echo json_encode($result);
+			ob_end_flush();
+		flush();
+
+		// if ($this->_tasks['images']) {
+		// 	foreach ($this->_tasks['images'] as $path) {
+		// 			$this->_tmb($path);
+		// 	}
+		// }
 
 		exit();
 
@@ -271,7 +300,7 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _open($incTree=false)
+	private function _open($tree=false)
 	{
 		if (isset($_GET['current'])) { // read file
 			if (empty($_GET['current']) 
@@ -300,7 +329,7 @@ class elFinder {
 			header("Content-Location: ".str_replace($this->_options['root'], '', $file));
 			header('Content-Transfer-Encoding: binary');
 			header("Content-Length: " .filesize($file));
-			header("Connection:close");
+			header("Connection: close");
 			readfile($file);
 			exit();
 			
@@ -316,7 +345,7 @@ class elFinder {
 					$path = $p;
 				}
 			}
-			return $result+$this->_content($path, $incTree);
+			return $result+$this->_content($path, $tree);
 		}
 	}
 	
@@ -512,6 +541,10 @@ class elFinder {
 						$failed[$_FILES['fm-file']['name'][$i]] = 'Unable to save uploaded file';
 					} else {
 						@chmod($file, $this->_options['fileUmask']);
+						// if (false != ($s = getimagesize($file))) {
+						// 	$result['warning'] = 'Image '+$file;
+						// 	$this->_tmb($file);
+						// }
 					}
 				}
 			}
@@ -618,6 +651,130 @@ class elFinder {
 		}
 		return $this->_content($current);
 	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _geturl()
+	{
+		if (empty($_GET['current']) 
+		|| false == ($current = $this->_findDir(trim($_GET['current'])))
+		|| empty($_GET['file'])
+		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		}
+		return array('url' => $this->_path2url($file));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _createTmb()
+	{
+		$result = array();
+		if (empty($_GET['current']) 
+		|| false == ($current = $this->_findDir(trim($_GET['current'])))
+		) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		}
+		$result['images'] = array();
+		
+		
+		echo $current."\n";
+		$ls = scandir($current);
+		for ($i=0; $i < count($ls); $i++) { 
+			if ('.' != substr($ls[$i], 0, 1)) {
+				$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
+				if (is_file($path) && 0 === strpos($this->_mimetype($path), 'image')) {
+					
+					$tmb = $tmbDir.DIRECTORY_SEPARATOR.$ls[$i];
+					echo $path.' : '.$tmb."\n";
+					// if (!file_exists($tmb) && $this->_tmb($path, $tmb)) {
+					// 	$result['images'][crc32($path)] = $this->_path2url($tmb); 
+					// }
+				}
+			}
+		}
+		return $result;
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _tmb($img, $tmb)
+	{
+		
+		if (false == ($s = getimagesize($img))) {
+			return false;
+		}
+		switch ($this->_options['imgLib']) {
+			case 'imagick':
+				$_img = new imagick($img);
+				$_img->contrastImage(1);
+				return $_img->cropThumbnailImage(48, 48) && $_img->writeImage($tmb);
+				break;
+				
+			case 'mogrify':
+				if (@copy($img, $tmb)) {
+					$x = $y = 0;
+					if ($s[0] > $s[1]) {
+						$size = $s[1];
+						$x = ceil(($s[0] - $s[1])/2);
+					} else {
+						$y = ceil(($s[1] - $s[0])/2);
+						$size = $s[0];
+					}
+					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale 48x48! '.escapeshellarg($tmb), $o, $c);
+					return $c == 0;	
+				}
+				break;
+			
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$_img = imagecreatefromjpeg($img);
+				} elseif ($s['mime'] = 'image/png') {
+					$_img = imagecreatefrompng($img);
+				} elseif ($s['mime'] = 'image/gif') {
+					$_img = imagecreatefromgif($img);
+				} 
+				if (!$_img || false == ($_tmb = imagecreatetruecolor(48, 48))) {
+					return false;
+				}
+				list($x, $y, $size) = $this->_imgGeometry($s[0], $s[1]);
+				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, 48, 48, $size, $size)) {
+					return false;
+				}
+				if ($s['mime'] == 'image/jpeg') {
+					$r = imagejpeg($_tmb, $tmb, 100);
+				} else if ($s['mime'] = 'image/png') {
+					$r = imagepng($_tmb, $tmb, 7);
+				} else {
+					$r = imagegif($_tmb, $tmb, 7);
+				}
+				imagedestroy($_img);
+				imagedestroy($_tmb);
+				return $r;
+				break;
+		}
+		
+	}
+	
+	
+	
 	/************************************************************/
 	/**                      fs methods                        **/
 	/************************************************************/
@@ -862,7 +1019,7 @@ class elFinder {
 	 **/
 	private function _find($hash, $parent)
 	{
-		if (false != ($d = dir($parent))) {
+		if (false != ($d = @dir($parent))) {
 			while ($entr = $d->read()) {
 				if ('.' != $entr && '..' != $entr) {
 					$path = $parent.DIRECTORY_SEPARATOR.$entr; 
@@ -910,6 +1067,29 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
+	private function _tmbDir($path)
+	{
+		if (is_null($this->_tmbDir)) {
+			if (!$this->_options['tmbDir']) {
+				$this->_tmbDir = '';
+			} else {
+				$d = dirname($path).DIRECTORY_SEPARATOR.$this->_options['tmbDir']; 
+				if (is_dir($d) || mkdir($d, $this->_options['dirUmask'])) {
+					$this->_tmbDir = $d;
+				} else {
+					$this->_tmbDir = '';
+				}
+			}
+		}
+		return $this->_tmbDir;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
 	private function _info($path)
 	{
 		$type = filetype($path);
@@ -948,17 +1128,27 @@ class elFinder {
 		} 
 		
 		if ($info['mime'] != 'directory') {
-			if ($this->_options['allowURLs']) {
+			if (!$this->_options['denyURLs']) {
 				$info['url'] = $this->_path2url($path);
 			}
-			if (($info['mime'] == 'image/jpeg' || $info['mime'] == 'image/png' || $info['mime'] == 'image/gif') 
-			&& false != ($s = getimagesize($path))) {
+			if (0 === ($p = strpos($info['mime'], 'image')) && false != ($s = getimagesize($path))) {
 				$info['dim'] = $s[0].'x'.$s[1];
+				if (false != ($tmbDir = $this->_tmbDir($path))) {
+					$tmb = $tmbDir.DIRECTORY_SEPARATOR.basename($path);
+					if (file_exists($tmb)) {
+						$info['bg']  = $this->_path2url($tmb);
+					} else {
+						$this->_createTmb = true;
+					}
+				}
+				
 			}
 		}
 		
 		return $info;
 	}
+		
+	
 		
 	/**
 	 * undocumented function
@@ -1050,6 +1240,25 @@ class elFinder {
 	private function _isAllowedUpload($name, $tmpName)
 	{
 		return true;
+	}
+
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _imgGeometry($w, $h)
+	{
+		$x = $y = 0;
+		$size = min($w, $h);
+		if ($w > $h) {
+			$x = ceil(($w - $h)/2);
+		} else {
+			$y = ceil(($h - $w)/2);
+		}
+		return array($x, $y, $size);
 	}
 
 	/************************************************************/

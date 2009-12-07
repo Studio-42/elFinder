@@ -1,3 +1,47 @@
+.rnd-3 {
+	border-radius:3px; 
+	-moz-border-radius:3px; 
+	-webkit-border-radius:3px;
+}
+
+.rnd-5 {
+	border-radius:5px; 
+	-moz-border-radius:5px; 
+	-webkit-border-radius:5px;
+}
+
+/* error/warning/question messages */
+p.el-finder-err {
+	padding: 15px;
+	text-align:center;
+	background: #fee; 
+	color: #cc0509; 
+	border: 2px #844 solid;
+}
+
+p.el-finder-err div {
+	float:left;
+	width:20px;
+	height:20px;
+	margin:auto 7px auto 0;
+	background:url(../images/toolbar.png) 0 -514px no-repeat;
+}
+
+p.el-finder-warn {
+	background: #ffe; 
+	color: #cc0509; 
+}
+
+p.el-finder-quest {
+	background: #d6eeff;
+	border-color:#2c47a5;
+	color: #444; 
+}
+
+p.el-finder-quest div {
+	background-position:0 -491px;
+}
+
 
 /* file manager window */
 .el-finder {
@@ -9,14 +53,16 @@
 	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
 }
 
-/* disabled and ajax spinner */
+/* disabled */
 .el-finder-disabled .el-finder-toolbar li,
 .el-finder-disabled .el-finder-nav,
 .el-finder-disabled .el-finder-cwd { 
 	opacity:0.35; filter:Alpha(Opacity=35);
 }
 
-
+.el-finder-droppable {
+	background-color:#99ccff;
+}
 
 /************************************/
 /*             toolbar              */
@@ -69,8 +115,10 @@
 .el-finder-toolbar ul li.list       { background-position: 3px -557px; }
 .el-finder-toolbar ul li.uncompress { background-position: 3px -583px; }
 
+/**********************************************************/
+/*  workzone, container for navigation and current folder */
+/**********************************************************/
 
-/* workzone, container for navigation and current folder */
 .el-finder-workzone {
 	background-color:#fff;
 	border-top:1px solid #ccc;
@@ -89,56 +137,19 @@
 	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
 	display:none;
 }
-
-/* error/warning/info messages */
-p.el-finder-error,
-p.el-finder-warning,
-p.el-finder-info {
+/* error in workzone */
+.el-finder-workzone p.el-finder-err {
+	display:none;
 	position:absolute;
 	left:37%;
 	top:20px;
-	border-radius:5px; 
-	-moz-border-radius:5px; 
-	-webkit-border-radius:5px;
-	padding: 10px;
-	text-align:center;
-	display:none;
-	background: #efe; 
-	color: #040; 
-	border: 2px #484 solid;
 }
-
-p.el-finder-error {
-	background: #fee; 
-	color: #cc0509; 
-	border: 2px #844 solid; 
-}
-
-p.el-finder-warning {
-	background: #ffe; 
-	color: #cc0509; 
-	border: 2px #884 solid;
-}
-
-p.el-finder-info label {
-	float:left;
-	width:22px;
-	height:16px;
-	background:url(../images/toolbar.png) 0 -355px no-repeat;
-}
-
-p.el-finder-error   label,
-p.el-finder-warning label {
-	background-position: 0 -312px;
-}
-
 
 /* navigation and current directory */
 .el-finder-nav, .el-finder-cwd {
 	height:350px;
 	overflow:auto;
 	padding:3px 1px;
-/*	position:relative;*/
 }
 
 /************************************/
@@ -289,6 +300,13 @@ p.el-finder-warning label {
 	background:url('../images/icons-big.png') 0 1px no-repeat;
 }
 
+.el-finder-cwd div p span {
+	display:block;
+	width:48px;
+	height:48px;
+	padding:0;
+	margin:0;
+}
 
 
 .el-finder-cwd div.directory p   { background-position: 0  -51px; }
@@ -461,28 +479,69 @@ p.el-finder-warning label {
 /************************************/
 /*           dialog window          */
 /************************************/
-/* table (info) in dialog window */
-.ui-dialog { font-size:.86em; }
-.ui-dialog .ui-dialog-titlebar { 
+
+.el-finder-dialog {
+	font-size:.86em;
+}
+.el-finder-dialog .ui-dialog-titlebar { 
 	padding: .3em .1em .1em .8em; 
 }
-.ui-dialog .ui-dialog-buttonpane {
+.el-finder-dialog .ui-dialog-buttonpane {
 	padding: .1em 1em .1em .4em; 
+	font-size:.9em;
 }
-.ui-dialog .ui-dialog-content {
+.el-finder-dialog .ui-dialog-content {
 	padding:3px;
-	font-size:12px;
+	font-size:.9em;
 }
-.ui-dialog table {
+.el-finder-dialog hr {
+	border:0;
+	border-bottom: 1px #ccc solid;
+}
+
+.el-finder-dialog .ui-state-error {
+	margin: 5px 0; 
+	padding:.7em;
+	clear:both;
+}
+
+.el-finder-dialog .ui-state-error .ui-icon {
+	float: left; 
+	margin-right: .3em;
+}
+
+.el-finder-dialog form {
+	border-top:1px solid #ccc;
+	border-bottom:1px solid #ccc;
+	padding: .5em 0;
+	margin: .3em 0;
+}
+
+.el-finder-dialog form div {
+	font-size:.9em;
+	padding:.1em 0;
+}
+
+.el-finder-add-field {
+	cursor:pointer;
+}
+
+.el-finder-add-field span {
+	float:left;margin-right:.7em
+}
+
+
+
+.el-finder-dialog table {
 	width : 100%;
 /*	border:1px solid #ccc;*/
 }
 
-.ui-dialog table td {
+.el-finder-dialog table td {
 	padding:3px;
-/*	border:1px solid #ccc;*/
+
 }
-.ui-dialog table a { outline: none;}
+.el-finder-dialog table a { outline: none;}
 
 /************************************/
 /*            contextmenu           */
@@ -589,7 +648,5 @@ div.el-finder-drag-helper label {
 	-webkit-border-radius:5px;
 }
 
-.el-finder-droppable {
-	background-color:#99ccff;
-}
+
 
