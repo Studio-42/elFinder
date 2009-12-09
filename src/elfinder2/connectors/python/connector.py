@@ -20,16 +20,16 @@ print "Content-type: text/html\n"
 cgitb.enable()
 
 class elFinder():
-	
 	"""Connector for elFinder"""
 
 	_options = {
 		'root': './',
 		'URL': '',
 		'rootAlias': 'Home',
+		'ignoreDotFiles': True, # TODO
 		'debug': True,
 		'dirSize': True,
-		'fileUmask': '0666',
+		'fileUmask': 0666,
 		'dirUmask': 0755,
 		'tmbDir': '.tmb',
 		'tmbSize': 48,
@@ -70,19 +70,21 @@ class elFinder():
 	}
 
 	_request = {}
-	
+	_errorData = {}
+
+
 	def __init__(self, opts):
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name']
+		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]']
 		form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in form:
-				self._request[field] = form[field].value
-		
+				self._request[field] = form.getvalue(field)
+
 		response = {}		
 		# print self._request
 		if 'cmd' in self._request:
@@ -109,7 +111,7 @@ class elFinder():
 		if 'name' in self._request and 'current' in self._request:
 			name = self._request['name']
 			current = self._request['current']
-			curDir = self.__findDir(int(current), None)
+			curDir = self.__findDir(current, None)
 			newFile = os.path.join(curDir, name)
 
 		if not curDir or not name:
@@ -131,9 +133,72 @@ class elFinder():
 
 
 
+	def __rm(self):
+		response = {}
+		current = rmList = None
+		curDir = rmFile = None
+		if 'current' in self._request and 'rm[]' in self._request:
+			current = self._request['current']
+			rmList = self._request['rm[]']
+			curDir = self.__findDir(current, None)
+
+		if not rmList or not curDir:
+			response['error'] = 'Invalid parameters'
+			return response
+
+		if not isinstance(rmList, list):
+			rmList = [rmList]
+
+		for rm in rmList:
+			rmFile = self.__find(rm, curDir)
+			if not rmFile: continue
+			self.__remove(rmFile)
+
+		if self._errorData: response['errorData'] = self._errorData
+		response.update(self.__content(curDir, True))
+
+		return response
+
+
+	def __remove(self, target):
+		if not self.__isAllowed(target, 'rm'):
+			self.__setErrorData(target, 'Access denied!')
+
+		if not os.path.isdir(target):
+			try:
+				os.unlink(target)
+				return True
+			except:
+				self.__setErrorData(target, 'Remove failed')
+				return False
+		else:
+			try:
+				for i in os.listdir(target):
+					if self.__isAccepted(i):
+						self.__remove(i)
+			except:
+				pass
+
+			try:
+				os.rmdir(target)
+				return True
+			except:
+				self.__setErrorData(target, 'Remove failed')
+				return False
+		pass
+
+
+	def __isAccepted(self, target):
+		if target == '.' or target == '..':
+			return False
+		if self._options['ignoreDotFiles'] and target[0:1] == '.':
+			return False
+		return True
+
 
 	def __find(self, fhash, parent):
 		"""Find file/dir by hash"""
+		fhash = str(fhash)
 		if os.path.isdir(parent):
 			for i in os.listdir(parent):
 				path = os.path.join(parent, i)
@@ -151,8 +216,8 @@ class elFinder():
 			name = self._request['name']
 			current = self._request['current']
 			target = self._request['target']
-			curDir = self.__findDir(int(current), None)
-			curName = self.__find(int(target), curDir)
+			curDir = self.__findDir(current, None)
+			curName = self.__find(target, curDir)
 			newName = os.path.join(curDir, name)
 
 		if not curDir or not curName:
@@ -182,7 +247,7 @@ class elFinder():
 		if 'name' in self._request and 'current' in self._request:
 			name = self._request['name']
 			current = self._request['current']
-			path = self.__findDir(int(current), None)
+			path = self.__findDir(current, None)
 			newDir = os.path.join(path, name)
 
 		if not path:
@@ -299,7 +364,7 @@ class elFinder():
 		dirs = []
 
 		for f in os.listdir(path):
-			if f[0] == '.': continue
+			if not self.__isAccepted(f): continue
 			pf = os.path.join(path, f)
 			info = {}
 			info = self.__info(pf)
@@ -315,18 +380,18 @@ class elFinder():
 
 	def __hash(self, input):
 		"""Hash of path can be any uniq"""
-		return binascii.crc32(input)
+		return str(binascii.crc32(input))
 
 
 	def __findDir(self, fhash, path):
 		"""Find directory by hash"""
+		fhash = str(fhash)
 		if not path:
 			path = self._options['root']
 			if fhash == self.__hash(path):
 				return path
 
-		if not os.path.isdir(path):
-			return None
+		if not os.path.isdir(path): return None
 
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
@@ -347,14 +412,12 @@ class elFinder():
 		"""
 		tree = []
 		
-		if not os.path.isdir(path):
-			return ''
-		if os.path.islink(path):
-			return ''
+		if not os.path.isdir(path): return ''
+		if os.path.islink(path): return ''
 
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd):
+			if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
 				fhash = self.__hash(pd)
 				read = os.access(pd, os.R_OK) and self.__isAllowed(pd, 'read')
 				write = os.access(pd, os.W_OK) and self.__isAllowed(pd, 'write')
@@ -371,21 +434,16 @@ class elFinder():
 				}
 				tree.append(element)
 
-		if len(tree) == 0:
-			return ''
-		else:
-			return tree
+		if len(tree) == 0: return ''
+		else: return tree
 	
 
 	def __info(self, path):
 		mime = ''
 		filetype = 'file'
-		if os.path.isfile(path):
-			filetype = 'file'
-		if os.path.isdir(path):
-			filetype = 'dir'
-		if os.path.islink(path):
-			filetype = 'link'
+		if os.path.isfile(path): filetype = 'file'
+		if os.path.isdir(path):  filetype = 'dir'
+		if os.path.islink(path): filetype = 'link'
 		
 		stat = os.lstat(path)
 
@@ -423,20 +481,18 @@ class elFinder():
 			info['write'] = info['write'] and self.__isAllowed(path, 'write')
 			info['rm'] = self.__isAllowed(path, 'rm')
 			
-			# more actions here
-			# image sizes
+			# TODO more actions here
+			# TODO image sizes
 		
 		return info
 
 
 	def __mimetype(self, path):
 		return mimetypes.guess_type(path)[0]
-	
+
 
 	def __readlink(self, path):
-		"""Read link and return real path if not broken
-		FULL
-		"""
+		"""Read link and return real path if not broken"""
 		target = os.readlink(path);
 		if not target[0] == '/':
 			target = os.path.join(os.path.dirname(path), target)
@@ -459,6 +515,11 @@ class elFinder():
 
 	def __isAllowed(self, path, action):
 		return True
+
+
+	def __setErrorData(self, path, msg):
+		"""Collect error/warning messages"""
+		self._errorData[path] = msg
 
 
 elFinder({
