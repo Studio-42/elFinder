@@ -252,13 +252,14 @@ class elFinder():
 				name = self._options['rootAlias']
 			else:
 				name = os.path.basename(self._options['root'])
-			response['tree'] = {
-				fhash: {
+			response['tree'] = [
+				{
+					'hash': fhash,
 					'name': name,
 					'read': True,
 					'dirs': self.__tree(self._options['root'])
 				}
-			}		
+			]
 		return response
 
 
@@ -344,7 +345,7 @@ class elFinder():
 		"""Return directory tree starting from path
 		FULL
 		"""
-		tree = {}
+		tree = []
 		
 		if not os.path.isdir(path):
 			return ''
@@ -361,12 +362,14 @@ class elFinder():
 					dirs = self.__tree(pd)
 				else:
 					dirs = ''
-				tree[fhash] = {
+				element = {
+					'hash': fhash,
 					'name': d,
 					'read': read,
 					'write': write,
 					'dirs': dirs
 				}
+				tree.append(element)
 
 		if len(tree) == 0:
 			return ''
