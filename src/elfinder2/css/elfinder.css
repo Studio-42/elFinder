@@ -297,7 +297,7 @@ p.el-finder-quest div {
 	border-radius:3px; 
 	-moz-border-radius:3px; 
 	-webkit-border-radius:3px;
-	background:url('../images/icons-big2.png') -1px 1px no-repeat;
+	background:url('../images/icons-big.png') -1px 1px no-repeat;
 }
 
 .el-finder-cwd div p span {
@@ -399,7 +399,7 @@ p.el-finder-quest div {
 	top:35px;
 	width:15px;
 	height:16px;
-	background:url(../images/icons-big2.png) -17px -1290px no-repeat;
+	background:url(../images/icons-big.png) -17px -1290px no-repeat;
 }
 
 .el-finder-cwd div em.dropbox {
