@@ -271,7 +271,7 @@
 					}
 				})
 				.draggable('disable').removeClass('ui-state-disabled')
-				.filter('.directory:not(:has(em[class="ro"],em[class=""]))')
+				.filter('.directory:not(.noaccess:has(em[class="readonly"],em[class=""]))')
 				.droppable({
 					over : function() { $(this).addClass('el-finder-droppable'); },
 					out  : function() { $(this).removeClass('el-finder-droppable'); },
@@ -285,7 +285,7 @@
 				return self.view.error('Unable to copy into itself!');
 			}
 			var ids = [];
-			ui.helper.find('div:has(>label):not(:has(em[class="wo"],em[class=""]))').each(function() {
+			ui.helper.find('div:not(.noaccess):has(>label):not(:has(em[class="readonly"],em[class=""]))').each(function() {
 				ids.push($(this).hide().attr('key'));
 			});
 		

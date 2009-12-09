@@ -6,40 +6,56 @@ elFinder.prototype.view = function(fm, el) {
 		'directory'                     : 'Folder',
 		'symlink'                       : 'Alias',
 		'unknown'                       : 'Unknown',
-		'text/plain'                    : 'Plain text',
-	    'text/x-php'                    : 'PHP source',
-		'text/javascript'               : 'Javascript source',
-		'text/css'                      : 'CSS style sheet',  
-	    'text/html'                     : 'HTML document', 
-		'text/x-c'                      : 'C source', 
-		'text/x-c++'                    : 'C++ source', 
-		'text/x-shellscript'            : 'Unix shell script',
-	    'text/rtf'                      : 'Rich Text Format (RTF)',
-		'text/rtfd'                     : 'RTF with attachments (RTFD)', 
-	    'text/xml'                      : 'XML document', 
+		'application/postscript'        : 'Postscript document',
+		'application/octet-stream'      : 'Application',
+		'application/vnd.ms-office'     : 'Microsoft Office document',
+		'application/vnd.ms-word'       : 'Microsoft Word document',  
+	    'application/vnd.ms-excel'      : 'Microsoft Excel document',
+		'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
+		'application/pdf'               : 'Portable Document Format (PDF)',
+		'application/vnd.oasis.opendocument.text' : 'Open Office document',
+		'application/x-shockwave-flash' : 'Flash application',
 		'application/xml'               : 'XML document', 
+		'application/x-bittorrent'      : 'Bittorrent file',
 		'application/x-tar'             : 'TAR archive', 
 	    'application/x-gzip'            : 'GZIP archive', 
 	    'application/x-bzip2'           : 'BZIP archive', 
 	    'application/x-zip'             : 'ZIP archive',  
 	    'application/zip'               : 'ZIP archive',  
-	    'application/x-rar'             : 'RAR archive',  
+	    'application/x-rar'             : 'RAR archive',
+		'application/javascript'        : 'Javascript apllication',
+		'text/plain'                    : 'Plain text',
+	    'text/x-php'                    : 'PHP source',
+		'text/html'                     : 'HTML document', 
+		'text/javascript'               : 'Javascript source',
+		'text/css'                      : 'CSS style sheet',  
+	    'text/rtf'                      : 'Rich Text Format (RTF)',
+		'text/rtfd'                     : 'RTF with attachments (RTFD)',
+		'text/x-c'                      : 'C source', 
+		'text/x-c++'                    : 'C++ source', 
+		'text/x-shellscript'            : 'Unix shell script',
+	    'text/x-python'                 : 'Python source',
+		'text/x-java'                   : 'Java source',
+		'text/x-ruby'                   : 'Ruby source',
+		'text/x-perl'                   : 'Perl script',
+	    'text/xml'                      : 'XML document', 
+		'image/x-ms-bmp'                : 'BMP image',
 	    'image/jpeg'                    : 'JPEG image',   
 	    'image/gif'                     : 'GIF Image',    
 	    'image/png'                     : 'PNG image',    
 	    'image/tiff'                    : 'TIFF image',   
 	    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-	    'application/pdf'               : 'Portable Document Format (PDF)',
-	    'application/msword'            : 'Microsoft Word document',  
-		'application/vnd.ms-office'     : 'Microsoft Office document',
-		'application/vnd.ms-word'       : 'Microsoft Word document',  
-	    'application/msexel'            : 'Microsoft Excel document', 
-	    'application/vnd.ms-excel'      : 'Microsoft Excel document', 
-		'application/octet-stream'      : 'Application', 
 		'audio/mpeg'                    : 'MPEG audio',  
+		'audio/midi'                    : 'MIDI audio',
+		'audio/ogg'                     : 'Ogg Vorbis audio',
+		'audio/mp4'                     : 'MP4 audio',
+		'audio/wav'                     : 'WAV audio',
+		'video/x-dv'                    : 'DV video',
+		'video/mp4'                     : 'MP4 video',
 		'video/mpeg'                    : 'MPEG video',  
-		'video/x-msvideo'               : 'AVI video',   
-		'application/x-shockwave-flash' : 'Flash application', 
+		'video/x-msvideo'               : 'AVI video',
+		'video/quicktime'               : 'Quicktime video',
+		'video/x-ms-wmv'                : 'WM video',   
 		'video/x-flv'                   : 'Flash video'
 	}
 	
@@ -103,7 +119,7 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.renderNav = function(tree) {
 		this.tree = $(traverse(tree, true)).appendTo(this.nav.empty()).addClass('el-finder-tree');
-		
+		self.fm.log(self.fm.dirs)
 		if (this.fm.options.places) {
 			this.places = $('<ul class="el-finder-places"><li><div class="dir-handler"></div><strong>'+this.fm.i18n(this.fm.options.places)+'</strong></li></ul>');
 			if (this.fm.options.placesFirst) {
@@ -122,18 +138,18 @@ elFinder.prototype.view = function(fm, el) {
 					read  : tree[i].read,
 					write : tree[i].write
 				};
-
+				c = '';
 				if (root) {
 					c = 'root selected';
-				} else if (!tree[i].read) {
+				} else if (!tree[i].read && !tree[i].write) {
 					c = 'noaccess';
+				} else if (!tree[i].read) {
+					c = 'dropbox';
 				} else if (!tree[i].write) {
-					c = 'ro';
-				} else {
-					c = '';
-				}
-				html += '<li><div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+'" key="'+i+'">'+tree[i].name+'</a>'
-
+					c = 'readonly';
+				} 
+				html += '<li><div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+i+'">'+tree[i].name+'</a>'
+				// self.fm.log(tree[i].name+' '+typeof(tree[i].dirs))
 				if (tree[i].dirs) {
 					html += traverse(tree[i].dirs);
 				}
@@ -211,7 +227,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.renderIcon = function(f) {
-		var c  = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-'),
+		var c  = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace(/\./g, '-'),
 			el = $('<div/>').addClass(c).attr('key', f.hash),
 			p  = $('<p/>'),
 			w  = self.fm.options.wrap,
@@ -224,10 +240,12 @@ elFinder.prototype.view = function(fm, el) {
 		}
 		el.append(p).append($('<label/>').html(n).attr('title', f.name));
 		f.type == 'link' && el.append('<em />');
-		if (!f.read) {
-			el.append('<em class="wo" />');
+		if (!f.read && !f.write) {
+			el.addClass('noaccess')
+		} else if (!f.read) {
+			el.append('<em class="dropbox" />');
 		} else if (!f.write) {
-			el.append('<em class="ro" />');
+			el.append('<em class="readonly" />');
 		}
 		f.tmb && this.tmb(p, f.tmb);
 		return el;
@@ -264,7 +282,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.formatSize = function(s) {
-		var n = 1, u = '';
+		var n = 1, u = 'b';
 		if (s > 1073741824) {
 			n = 1073741824;
 			u = 'Gb';

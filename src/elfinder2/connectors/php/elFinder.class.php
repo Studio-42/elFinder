@@ -15,14 +15,14 @@ class elFinder {
 	private $_options = array(
 		'root'           => '',          // path to root directory
 		'URL'            => '',          // root directory URL
-		'rootAlias'      => 'Home',      // display this instead root directory name
+		'rootAlias'      => 'Home',      // display this instead of root directory name
 		'ignoreDotFiles' => true,        // do not display dot files
 		'cntDirSize'     => true,        // count total directories sizes
 		'fileUmask'      => 0666,        // permission for new files
 		'dirUmask'       => 0777,        // permission for new directories
 		'mimeDetect'     => 'auto',      // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
 		'imgLib'         => 'auto',      // image manipulation library
-		'tmbDir'         => '_tmb',      // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbDir'         => '.tmb',      // directory name for image thumbnails. Set to "" to avoid thumbnails generation
 		'tmbSize'        => 48,          // images thumbnails size (px)
 		'allowTypes'     => array(),     // mimetypes which allowed to upload
 		'allowExts'      => array(),     // file extensions which allowed to upload
@@ -71,30 +71,67 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_mimeTypes = array(
-		'txt'  => 'plain/text',
-	    'php'  => 'text/x-php',
-	    'html' => 'text/html',
-	 	'js'   => 'text/javascript',
-		'css'  => 'text/css',
-	    'rtf'  => 'text/rtf',
-	    'xml'  => 'application/xml',
-	    'gz'   => 'application/x-gzip',
-	    'tgz'  => 'application/x-gzip',
-	    'bz'   => 'application/x-bzip2',
-		'bz2'  => 'application/x-bzip2',
-	    'tbz'  => 'application/x-bzip2',
-	    'zip'  => 'application/x-zip',
-	    'rar'  => 'application/x-rar',
-	    'jpg'  => 'image/jpeg',
-	    'jpeg' => 'image/jpeg',
-	    'gif'  => 'image/gif',
-	    'png'  => 'image/png',
-	    'tif'  => 'image/tif',
-	    'psd'  => 'image/psd',
-	    'pdf'  => 'application/pdf',
-	    'doc'  => 'application/msword',
-	    'xls'  => 'application/msexel',
-		'exe'  => 'application/octet-stream'
+		//applications
+		'ai'    => 'application/postscript',
+		'eps'   => 'application/postscript',
+		'exe'   => 'application/octet-stream',
+		'doc'   => 'application/vnd.ms-word',
+		'xls'   => 'application/vnd.ms-excel',
+		'ppt'   => 'application/vnd.ms-powerpoint',
+		'pps'   => 'application/vnd.ms-powerpoint',
+		'pdf'   => 'application/pdf',
+	    'xml'   => 'application/xml',
+		'odt'   => 'application/vnd.oasis.opendocument.text',
+		'swf'   => 'application/x-shockwave-flash',
+		
+		// archives
+	    'gz'    => 'application/x-gzip',
+	    'tgz'   => 'application/x-gzip',
+	    'bz'    => 'application/x-bzip2',
+		'bz2'   => 'application/x-bzip2',
+	    'tbz'   => 'application/x-bzip2',
+	    'zip'   => 'application/x-zip',
+	    'rar'   => 'application/x-rar',
+		'tar'   => 'application/x-tar',
+		// texts
+		'txt'   => 'plain/text',
+	    'php'   => 'text/x-php',
+	    'html'  => 'text/html',
+		'htm'   => 'text/html',
+	 	'js'    => 'text/javascript',
+		'css'   => 'text/css',
+	    'rtf'   => 'text/rtf',
+		'rtfd'  => 'text/rtfd',
+		'py'    => 'text/x-python',
+		'java'  => 'text/x-java-source',
+		'rb'    => 'text/x-ruby',
+		'sh'    => 'text/x-shellscript',
+		'pl'    => 'text/x-perl',
+		'sql'   => 'text/x-sql',
+	    // images
+		'bmp'   => 'image/x-ms-bmp',
+	    'jpg'   => 'image/jpeg',
+	    'jpeg'  => 'image/jpeg',
+	    'gif'   => 'image/gif',
+	    'png'   => 'image/png',
+	    'tif'   => 'image/tiff',
+	    'psd'   => 'image/vnd.adobe.photoshop',
+	    //audio
+		'mp3'   => 'audio/mpeg',
+		'mid'   => 'audio/midi',
+		'ogg'   => 'audio/ogg',
+		'mp4a'  => 'audio/mp4',
+		'wav'   => 'audio/wav',
+		'wma'   => 'audio/x-ms-wma',
+		// video
+		'avi'   => 'video/x-msvideo',
+		'dv'    => 'video/x-dv',
+		'mp4'   => 'video/mp4',
+		'mpeg'  => 'video/mpeg',
+		'mpg'   => 'video/mpeg',
+		'mov'   => 'video/quicktime',
+		'wm'    => 'video/x-ms-wmv',
+		'flv'   => 'video/x-flv',
 		);
 	
 	
@@ -319,7 +356,7 @@ class elFinder {
 			$path   = $this->_options['root'];
 			if (!empty($_GET['target'])) {
 				if (false == ($p = $this->_findDir(trim($_GET['target'])))) {
-					$result['warning'] = 'Directory does not exists';
+					$result['warning'] = 'Invalid parameters';
 				} elseif (!is_readable($p) || !$this->_isAllowed($p, 'read')) {
 					$result['warning'] = 'Access denied';
 				} else {
@@ -362,7 +399,7 @@ class elFinder {
 		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$result['error'] = 'Invalid name';
 		} elseif (!$this->_isAllowed($dir, 'write')) {
-			$result['error'] = 'Access denied!';
+			$result['error'] = 'Access denied';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$result['error'] = 'File or folder with the same name already exists';
 		} elseif (!rename($file, $dir.DIRECTORY_SEPARATOR.$name)) {
@@ -386,7 +423,7 @@ class elFinder {
 		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
 			$result['error'] = 'Invalid parameters';
 		} elseif (!$this->_isAllowed($dir, 'write')) {
-			$result['error'] = 'Access denied!';
+			$result['error'] = 'Access denied';
 		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$result['error'] = 'Invalid name';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
@@ -411,7 +448,7 @@ class elFinder {
 		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
 			$result['error'] = 'Invalid parameters';
 		} elseif (!$this->_isAllowed($dir, 'write')) {
-			$result['error'] = 'Access denied!';
+			$result['error'] = 'Access denied';
 		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$result['error'] = 'Invalid name';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
@@ -448,11 +485,11 @@ class elFinder {
 		
 		foreach ($_GET['rm'] as $hash) {
 			if (false == ($f = $this->_find($hash, $dir))) {
-				$result['error'] = 'File not found!';
+				$result['error'] = 'File not found';
 				return $result+$this->_content($dir, true);
 			}
 			if (!$this->_remove($f)) {
-				$result['error'] = 'Remove failed!';
+				$result['error'] = 'Remove failed';
 				$result['errorData'] = array($this->_errFile => $this->_errMsg ? $this->_errMsg : 'Unable to remove');
 				return $result+$this->_content($dir, true);
 			}
@@ -477,7 +514,7 @@ class elFinder {
 			return $result;
 		} 
 		if (!$this->_isAllowed($dir, 'write')) {
-			$result['error'] = 'Access denied!';
+			$result['error'] = 'Access denied';
 			return $result;
 		}
 		if (empty($_FILES['fm-file']))
@@ -625,7 +662,10 @@ class elFinder {
 			$result['error'] = 'Invalid parameters';
 			return $result;
 		}
-		
+		if (!$this->_isAllowed($current, 'write') || !$this->_isAllowed($file, 'read')) {
+			$result['error'] = 'Access denied';
+			return $result;
+		}
 		if (!$this->_copy($file, $this->_uniqueName($file))) {
 			$result['error'] = $this->_errMsg;
 			return $result;
@@ -680,7 +720,6 @@ class elFinder {
 	}
 	
 	
-	
 	/************************************************************/
 	/**                    "content" methods                   **/
 	/************************************************************/
@@ -726,7 +765,7 @@ class elFinder {
 			$rel .= DIRECTORY_SEPARATOR.substr($path, strlen($this->_options['root'])+1);
 		}
 		return array(
-			'hash'       => crc32($path),
+			'hash'       => $this->_hash($path),
 			'name'       => $name,
 			'rel'        => $rel,
 			'size'       => 0,
@@ -750,14 +789,13 @@ class elFinder {
 		$dirs = $files = array();
 		$ls = scandir($path);
 		for ($i=0; $i < count($ls); $i++) { 
-			if ('.' != substr($ls[$i], 0, 1)) {
+			if ($this->_isAccepted($ls[$i])) {
 				$info = $this->_info($path.DIRECTORY_SEPARATOR.$ls[$i]);
-				if ($info['type'] == 'dir') {
+				if ($info['mime'] == 'directory') {
 					$dirs[] = $info;
 				} else {
 					$files[] = $info;
 				}
-				
 			}
 		}
 		return array_merge($dirs, $files);
@@ -776,7 +814,7 @@ class elFinder {
 		
 		$info = array(
 			'name'  => basename($path),
-			'hash'  => crc32($path),
+			'hash'  => $this->_hash($path),
 			'type'  => $type,
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
@@ -793,7 +831,7 @@ class elFinder {
 				$info['mime'] = 'unknown';
 				return $info;
 			}
-			$info['link']   = crc32($path);
+			$info['link']   = $this->_hash($path);
 			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
 			$info['read']   = is_readable($path) && $this->_isAllowed($path, 'read');
 			$info['write']  = is_writable($path) && $this->_isAllowed($path, 'write');
@@ -801,7 +839,7 @@ class elFinder {
 			if (is_dir($path)) {
 				$info['mime']  = 'directory';
 			} else {
-				$info['parent'] = crc32(dirname($path));
+				$info['parent'] = $this->_hash(dirname($path));
 				$info['mime']   = $this->_mimetype($path);
 			}
 		} 
@@ -837,24 +875,26 @@ class elFinder {
 	{
 		$tree = array();
 		
-		if (false != ($d = dir($path))) {
-			while($entr = $d->read()) {
-				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
-				if ('.' != substr($entr, 0, 1) && !is_link($p) && is_dir($p) ) {
+		if (false != ($ls = scandir($path))) {
+			
+			for ($i=0; $i < count($ls); $i++) {
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
+				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {
 					$read = is_readable($p) && $this->_isAllowed($p, 'read');
 					$dirs = $read ? $this->_tree($p) : '';
-					$tree[crc32($p)] = array(
-						'name'  => $entr,
+					$tree[$this->_hash($p)] = array(
+						'name'  => $ls[$i],
 						'read'  => $read,
 						'write' => is_writable($p) && $this->_isAllowed($p, 'write'),
-						'dirs'  => $dirs ? $dirs : ''
+						'dirs'  => !empty($dirs) ? $dirs : ''
 						);
 				}
 			}
-			$d->close();
 		}
 		return $tree;
 	}
+	
+	
 	/************************************************************/
 	/**                      fs methods                        **/
 	/************************************************************/
@@ -906,7 +946,7 @@ class elFinder {
 		
 		$ls = scandir($path);
 		for ($i=0; $i < count($ls); $i++) { 
-			if ('.' != $ls[$i] && '..' != $ls[$i]) {
+			if ($this->_isAccepted($ls[$i])) {
 				if (!$this->_remove($path.DIRECTORY_SEPARATOR.$ls[$i])) {
 					return false;
 				}
@@ -998,13 +1038,12 @@ class elFinder {
 				return $path;
 			}
 		}
-		if (is_readable($path) && false != ($d = dir($path))) {
-			while ($entr = $d->read()) {
-				$p = $d->path.DIRECTORY_SEPARATOR.$entr;
-				if ('.' != $entr && '..' != $entr && is_dir($p)) {
-					if (crc32($p) == $hash) {
-						return $p;
-					} elseif (false != ($p = $this->_findDir($hash, $p))) {
+		
+		if (false != ($ls = scandir($path))) {
+			for ($i=0; $i < count($ls); $i++) { 
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				if ($this->_isAccepted($ls[$i]) && is_dir($p)) {
+					if (crc32($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
 						return $p;
 					}
 				}
@@ -1018,14 +1057,14 @@ class elFinder {
 	 * @return void
 	 * @author dio
 	 **/
-	private function _find($hash, $parent)
+	private function _find($hash, $path)
 	{
-		if (false != ($d = @dir($parent))) {
-			while ($entr = $d->read()) {
-				if ('.' != $entr && '..' != $entr) {
-					$path = $parent.DIRECTORY_SEPARATOR.$entr; 
-					if (crc32($path) == $hash) {
-						return $path;
+		if (false != ($ls = scandir($path))) {
+			for ($i=0; $i < count($ls); $i++) { 
+				if ($this->_isAccepted($ls[$i])) {
+					$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+					if (crc32($p) == $hash) {
+						return $p;
 					}
 				}
 			}
@@ -1046,7 +1085,8 @@ class elFinder {
 			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
 		}
 		$target = realpath($target);
-		return $target && file_exists($target) && 0 === strpos($target, $this->_options['root']) ? $target : false;
+		$root   = realpath($this->_options['root']);
+		return $target && file_exists($target) && 0 === strpos($target, $root) ? $target : false;
 	}
 	
 	/**
@@ -1058,21 +1098,19 @@ class elFinder {
 	private function _dirSize($path)
 	{
 		$size = 0;
-		if (!$this->_options['cntDirSize']) {
-			$size = filesize($size);
+		if (!$this->_options['cntDirSize'] || !is_readable($path) || !$this->_isAllowed($path, 'read')) {
+			$size = filesize($path);
+		} elseif ($this->_du) {
+			$size = intval(exec('du -k '.escapeshellarg($path)))*1024;
 		} else {
-			if ($this->_du) {
-				$size = intval(exec('du -k '.escapeshellarg($path)))*1024;
-			} else {
-				$ls = scandir($path);
-				for ($i=0; $i < count($ls); $i++) { 
-					if ('.' != $ls[$i] && '..' != $ls[$i] && (!$this->_options['ignoreDotFiles'] || '.' != substr($ls[$i], 0, 1) )) {
-						$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-						$size += is_dir($p) && is_readable($p) ? $this->_dirSize($p) : filesize($p);
-					}
+			$ls = scandir($path);
+			for ($i=0; $i < count($ls); $i++) { 
+				if ($this->_isAccepted($ls[$i])) {
+					$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+					$size += filetype($p) == 'dir' && is_readable($p) && $this->_isAllowed($p, 'read') ? $this->_dirSize($p) : filesize($p);
 				}
 			}
-		} 
+		}
 		return $size;
 	}
 	
@@ -1287,7 +1325,34 @@ class elFinder {
 				exec('mogrify -scale '.$w.'x'.$h.'! '.escapeshellarg($img), $o, $c);
 				return 0 == $c;
 				break;
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$_img = imagecreatefromjpeg($img);
+				} elseif ($s['mime'] = 'image/png') {
+					$_img = imagecreatefrompng($img);
+				} elseif ($s['mime'] = 'image/gif') {
+					$_img = imagecreatefromgif($img);
+				} 
+				if (!$_img || false == ($_out = imagecreatetruecolor($w, $h))) {
+					return false;
+				}
+				if (!imagecopyresampled($_out, $_img, 0, 0, 0, 0, $w, $h, $s[0], $s[1])) {
+					return false;
+				}
+				if ($s['mime'] == 'image/jpeg') {
+					$r = imagejpeg($_out, $img, 100);
+				} else if ($s['mime'] = 'image/png') {
+					$r = imagepng($_out, $img, 7);
+				} else {
+					$r = imagegif($_out, $img, 7);
+				}
+				imagedestroy($_img);
+				imagedestroy($_out);
+				return $r;
+				break;
 		}
+				
+		
 	}
 	
 	/************************************************************/
@@ -1302,9 +1367,59 @@ class elFinder {
 	 **/
 	private function _isAllowedUpload($name, $tmpName)
 	{
+		$mime = $this->_mimetype($tmpName);
+		if ($this->_options['mimeDetect'] == 'internal') {
+			$mime = $this->_mimetype($name);
+		}
+	
+		$ext = '';
+		if (false != ($p = strrpos($name, '.'))) {
+			$ext = substr($name, $p);
+		}
+	
+		if (!empty($this->_options['denyTypes'])) {
+			foreach ($this->_options['denyTypes'] as $type) {
+				if (0 === strpos($mime, $type)) {
+					return false;
+				}
+			}
+		}
+		if (!empty($this->_options['denyExts']) && in_array($ext, $this->_options['denyExts'])) {
+			return false;
+		}
+		
+		if (!empty($this->_options['allowTypes'])) {
+			foreach ($this->_options['allowTypes'] as $type) {
+				if (0 === strpos($mime, $type)) {
+					return true;
+				}
+			}
+			return !empty($this->_options['allowExts']) && in_array($ext, $this->_options['allowExts']);
+		}
+		
+		if (!empty($this->_options['allowExts'])) {
+			return in_array($ext, $this->_options['allowExts']);
+		}
+		
 		return true;
 	}
 
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _isAccepted($file)
+	{
+		if ('.' == $file || '..' == $file) {
+			return false;
+		}
+		if ($this->_options['ignoreDotFiles'] && '.' == substr($file, 0, 1)) {
+			return false;
+		}
+		return true;
+	}
 
 	
 	/**
@@ -1313,13 +1428,34 @@ class elFinder {
 	 * @return void
 	 **/
 	private function _isAllowed($path, $action) {
-		// echo "$path, $action<br />";
+		if ($this->_options['aclObj']) {
+			
+		}
+		
+		foreach ($this->_options['perms'] as $regex => $rules) {
+			if (preg_match($regex, $path)) {
+				if (isset($rules[$action])) {
+					return $rules[$action];
+				}
+			}
+		}
 		return isset($this->_options['defaults'][$action]) ? $this->_options['defaults'][$action] : false;
 	}
 	
 	/************************************************************/
 	/**                          utilites                      **/
 	/************************************************************/
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _hash($path)
+	{
+		return crc32($path);
+	}
 	
 	/**
 	 * undocumented function

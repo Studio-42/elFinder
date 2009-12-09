@@ -17,6 +17,10 @@ elFinder.prototype.ui = function(fm) {
 		}
 	}
 	
+	this.cmdName = function(cmd) {
+		return this.cmd[cmd] && this.cmd[cmd].name ? this.fm.i18n(this.cmd[cmd].name) : '';
+	}
+	
 	this.isCmdAllowed = function(cmd) {
 		return self.cmd[cmd] && self.cmd[cmd].isAllowed();
 	}
@@ -27,7 +31,6 @@ elFinder.prototype.ui = function(fm) {
 		if (!self.fm.selected.length) {
 			cwdMenu();
 		} else if (self.fm.selected.length == 1 && self.fm.cdc[self.fm.selected[0]]) {
-			// id = self.fm.cdc[self.fm.selected[0]].hash;
 			fileMenu();
 		} else {
 			groupMenu();
@@ -50,52 +53,47 @@ elFinder.prototype.ui = function(fm) {
 				function() { $(this).addClass('hover'); }, 
 				function() { $(this).removeClass('hover'); }
 			).click(function() {
-				var cmd = $.trim($(this).attr('class').replace('hover', ''));
-				// self.fm.log(cmd+' '+id)
-				self.exec(cmd);
+				self.exec($.trim($(this).attr('class').replace('hover', '')));
 				self.hideMenu();
 			})
 		
-		// self.fm.log(self.fm.cwd)
-		
 		function cwdMenu() {
-			self.isCmdAllowed('mkdir') && self.menu.append($('<div class="mkdir" />').text(self.fm.i18n('New folder')));
-			self.isCmdAllowed('mkfile') && self.menu.append($('<div class="mkfile" />').text(self.fm.i18n('New text files')));
+			self.isCmdAllowed('mkdir')  && self.menu.append($('<div class="mkdir" />').text(self.cmdName('mkdir')));
+			self.isCmdAllowed('mkfile') && self.menu.append($('<div class="mkfile" />').text(self.cmdName('mkfile')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.isCmdAllowed('upload') && self.menu.append($('<div class="upload" />').text(self.fm.i18n('Upload files')));
-			self.isCmdAllowed('paste') && self.menu.append($('<div class="paste" />').text(self.fm.i18n('Paste')));
+			self.isCmdAllowed('upload') && self.menu.append($('<div class="upload" />').text(self.cmdName('upload')));
+			self.isCmdAllowed('paste')  && self.menu.append($('<div class="paste" />').text(self.cmdName('paste')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.menu.append($('<div class="reload" />').text(self.fm.i18n('Reload')));
+			self.menu.append($('<div class="reload" />').text(self.cmdName('reload')));
 			self.menu.append($('<div class="delim" />'));
-			self.menu.append($('<div class="info" />').text(self.fm.i18n('Get info')));
+			self.menu.append($('<div class="info" />').text(self.cmdName('info')));
 		}
 		
 		function groupMenu() {
-			self.menu.append($('<div class="compress" />').text(self.fm.i18n('Compress')));
-			self.menu.append($('<div class="copy" />').text(self.fm.i18n('Copy')));
-			self.menu.append($('<div class="cut" />').text(self.fm.i18n('Cut')));
-			self.menu.append($('<div class="rm" />').text(self.fm.i18n('Remove')));
+			self.isCmdAllowed('compress') && self.menu.append($('<div class="compress" />').text(self.cmdName('compress')));
+			self.isCmdAllowed('copy') && self.menu.append($('<div class="copy" />').text(self.cmdName('copy')));
+			self.isCmdAllowed('cut') && self.menu.append($('<div class="cut" />').text(self.cmdName('cut')));
+			self.isCmdAllowed('rm') && self.menu.append($('<div class="rm" />').text(self.cmdName('rm')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.menu.append($('<div class="info" />').text(self.fm.i18n('Get info')));
+			self.menu.append($('<div class="info" />').text(self.cmdName('info')));
 		}
 		
 		function fileMenu() {
 			var f = self.fm.cdc[self.fm.selected[0]];
 			
-			self.fm.log(f)
-			self.isCmdAllowed('select') && self.menu.append($('<div class="select" />').text(self.fm.i18n('Select file')));
-			self.isCmdAllowed('open') && self.menu.append($('<div class="open" />').text(self.fm.i18n('Open')));
+			self.isCmdAllowed('select') && self.menu.append($('<div class="select" />').text(self.cmdName('select')));
+			self.isCmdAllowed('open') && self.menu.append($('<div class="open" />').text(self.cmdName('open')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.isCmdAllowed('rename') && self.menu.append($('<div class="rename" />').text(self.fm.i18n('Rename')));
-			self.isCmdAllowed('resize') && self.menu.append($('<div class="resize" />').text(self.fm.i18n('Resize')));
-			self.isCmdAllowed('copy') && self.menu.append($('<div class="copy" />').text(self.fm.i18n('Copy')));
-			self.isCmdAllowed('cut') && self.menu.append($('<div class="cut" />').text(self.fm.i18n('Cut')));
-			self.isCmdAllowed('duplicate') && self.menu.append($('<div class="duplicate" />').text(self.fm.i18n('Duplicate')));
-			self.isCmdAllowed('rm') && self.menu.append($('<div class="rm" />').text(self.fm.i18n('Remove')));
+			self.isCmdAllowed('rename') && self.menu.append($('<div class="rename" />').text(self.cmdName('rename')));
+			self.isCmdAllowed('resize') && self.menu.append($('<div class="resize" />').text(self.cmdName('resize')));
+			self.isCmdAllowed('copy') && self.menu.append($('<div class="copy" />').text(self.cmdName('copy')));
+			self.isCmdAllowed('cut')  && self.menu.append($('<div class="cut" />').text(self.cmdName('cut')));
+			self.isCmdAllowed('duplicate') && self.menu.append($('<div class="duplicate" />').text(self.cmdName('duplicate')));
+			self.isCmdAllowed('rm') && self.menu.append($('<div class="rm" />').text(self.cmdName('rm')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.isCmdAllowed('edit') && self.menu.append($('<div class="edit" />').text(self.fm.i18n('Edit')));
+			self.isCmdAllowed('edit') && self.menu.append($('<div class="edit" />').text(self.cmdName('edit')));
 			self.menu.children().length && self.menu.append($('<div class="delim" />'));
-			self.menu.append($('<div class="info" />').text(self.fm.i18n('Get info')));
+			self.menu.append($('<div class="info" />').text(self.cmdName('info')));
 		}
 	}
 	
@@ -112,7 +110,6 @@ elFinder.prototype.ui = function(fm) {
 			}
 		}
 	}
-	
 	
 	this.init = function(disabled) {
 		var i, j, n, c=false, t = this.fm.options.toolbar;
@@ -136,13 +133,14 @@ elFinder.prototype.ui = function(fm) {
 				n = t[i][j];
 				if (this.cmd[n]) {
 					c = true;
-					this.buttons[n] = $('<li />').addClass(n).appendTo(this.fm.view.tlb)
+					this.buttons[n] = $('<li />').addClass(n).attr('title', this.cmdName(n))
+						.appendTo(this.fm.view.tlb)
 						.bind('click', (function(ui){ return function() {  
 								if (!$(this).hasClass('disabled')) {
 									// ui.fm.log($(this).attr('class'))
 									ui.exec($.trim($(this).attr('class')));
 								}
-							} })(this) 
+							} })(this)
 						);
 				}
 			}
@@ -161,6 +159,7 @@ elFinder.prototype.ui = function(fm) {
 }
 
 elFinder.prototype.ui.prototype.command = function(fm) {  }
+
 
 elFinder.prototype.ui.prototype.command.prototype.isAllowed = function(f) {
 	return true;
@@ -199,6 +198,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	back : function(fm) {
 		var self = this;
+		this.name = 'Back';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -221,6 +221,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	reload : function(fm) {
 		var self = this;
+		this.name = 'Reload';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -237,6 +238,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	open : function(fm) {
 		var self = this;
+		this.name = 'Open';
 		this.fm = fm;
 		
 		/**
@@ -293,6 +295,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	select : function(fm) {
 		var self = this;
+		this.name = 'Select file';
 		this.fm  = fm;
 		
 		this.exec = function() { 
@@ -322,6 +325,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	info : function(fm) {
 		var self = this;
+		this.name = 'Get info';
 		this.fm  = fm;
 		
 		/**
@@ -384,6 +388,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	rename : function(fm) {
 		var self = this;
+		this.name = 'Rename';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -453,6 +458,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	copy : function(fm) {
 		var self = this;
+		this.name = 'Copy';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -467,6 +473,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	cut : function(fm) {
 		var self = this;
+		this.name = 'Cut';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -481,6 +488,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	paste : function(fm) {
 		var self = this;
+		this.name = 'Paste';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -535,6 +543,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	rm : function(fm) {
 		var self = this;
+		this.name = 'Remove';
 		this.fm  = fm;
 		
 		this.exec = function() {
@@ -546,12 +555,27 @@ elFinder.prototype.ui.prototype.commands = {
 				ids.push(s[i].hash);
 			};
 			if (ids.length) {
-				this.ajax({ cmd : 'rm', current : this.fm.cwd.hash, 'rm[]' : ids}, function(data) {
-					if (data.tree) {
-						self.fm.setNav(data.tree);
-						self.fm.setCwd(data.cwd, data.cdc);
-					}
-				});
+				
+				$('<div/>').append($('<p/>').addClass('el-finder-err el-finder-warn')
+						.append('<div/>').append(this.fm.i18n('Are you shure you want to remove files?<br /> This cannot be undone!'))
+					)
+					.dialog({
+						title       : this.fm.i18n('Confirmation required'),
+						dialogClass : 'el-finder-dialog',
+						width       : 370,
+						buttons     : {
+							Cancel : function() { $(this).dialog('close'); },
+							Ok : function() { 
+								$(this).dialog('close'); 
+								self.ajax({ cmd : 'rm', current : self.fm.cwd.hash, 'rm[]' : ids}, function(data) {
+									if (data.tree) {
+										self.fm.setNav(data.tree);
+										self.fm.setCwd(data.cwd, data.cdc);
+									}
+								});
+							}
+						}
+					});
 			}
 		}
 		
@@ -566,6 +590,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	mkdir : function(fm) {
 		var self = this;
+		this.name = 'New folder';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -633,6 +658,7 @@ elFinder.prototype.ui.prototype.commands = {
 	 **/
 	mkfile : function(fm) {
 		var self = this;
+		this.name = 'New text file';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -696,6 +722,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	upload : function(fm) {
 		var self = this;
+		this.name = 'Upload files';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -772,6 +799,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	duplicate : function(fm) {
 		var self = this;
+		this.name = 'Duplicate';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -797,6 +825,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	edit : function(fm) {
 		var self = this;
+		this.name = 'Edit text file';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -811,6 +840,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	compress : function(fm) {
 		var self = this;
+		this.name = 'Create archive';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -822,6 +852,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	uncompress : function(fm) {
 		var self = this;
+		this.name = 'Uncompress archive';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -831,20 +862,27 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	resize : function(fm) {
 		var self = this;
+		this.name = 'Resize image';
 		this.fm = fm;
 		
 		this.exec = function() {
 			var s = this.fm.getSelected();
 			if (s[0] && s[0].write && s[0].dim) {
-				var size = s[0].dim.split('x'), w = parseInt(size[0]), h = parseInt(size[1]), rel = w/h;
+				var size = s[0].dim.split('x'), 
+					w = parseInt(size[0]), 
+					h = parseInt(size[1]), rel = w/h;
 				
 				var iw = $('<input type="text" size="9" value="'+w+'" name="width"/>')
 				var ih = $('<input type="text" size="9" value="'+h+'" name="height"/>')
 				self.fm.log(w + ' ' + h+' '+rel)
-				var f = $('<form/>').append('Image size: ').append(iw).append(ih)
+				var f = $('<form/>')
+					.append(iw).append(' x ').append(ih).append(' px')
 				iw.add(ih).bind('change', calc)
 				
-				var d = $('<div/>').append(f).dialog({
+				var d = $('<div/>').append($('<div/>').text(self.fm.i18n('New image dimensions')+':')).append(f).dialog({
+					title : self.fm.i18n('Resize image'),
+					dialogClass : 'el-finder-dialog',
+					width : 230,
 					modal : true,
 					buttons : {
 						Cancel : function() { $(this).dialog('close'); },
@@ -898,6 +936,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	icons : function(fm) {
 		var self = this;
+		this.name = 'View as icons';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -912,6 +951,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	list : function(fm) {
 		var self = this;
+		this.name = 'View as list';
 		this.fm = fm;
 		
 		this.exec = function() {
@@ -926,6 +966,7 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	help : function(fm) {
 		var self = this;
+		this.name = 'Help';
 		this.fm = fm;
 		
 		this.exec = function() {

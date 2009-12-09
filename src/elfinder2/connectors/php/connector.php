@@ -16,10 +16,31 @@ $opts = array(
 	'root'   => $rootDir,
 	'URL'    => $rootURL,
 	'lang'   => 'ru',
+	'mimeDetect' => 'auto',
+	// 'cntDirSize' => false,
+	// 'tmbDir' => '',
 	'defaults' => array(
 		'read'  => true,
-		'write' => true
-		)
+		'write' => true,
+		// 'rm'    => false
+		),
+		'perms' => array(
+			'|'.preg_quote($rootDir.DIRECTORY_SEPARATOR).'_tmb|i' => array(
+				'read' => false,
+				'write' => false,
+				'rm'    => true
+				),
+			// '/untitle/' => array(
+			// 	'write' => false
+			// 	),
+			'/Read_only/' => array(
+				'write' => false
+				),
+			'/Dropbox/' => array(
+				'read' => false
+				)
+			
+			)
 	);
 // echo '<pre>';
 // print_r($opts);
