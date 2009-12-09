@@ -52,54 +52,20 @@ class elFinder():
 	}
 
 	_commands = {
-		'mkdir': '__mkdir',
-		'mkfile': '__mkfile',
-		'rename': '__rename',
-		'upload': '__upload',
-		'paste': '__paste',
-		'rm': '__rm',
-		'edit': '__edit',
-		'extract': '__extract'
-	}
-
-	_kinds = {
-		'directory': 'Directory',
-		'link': 'Alias',
-		'text/plain': 'Plain text',
-		'text/x-php': 'PHP source',
-		'text/javascript': 'Javascript source',
-		'text/css': 'CSS style sheet',
-		'text/html': 'HTML document',
-		'text/x-c': 'C source',
-		'text/x-c++': 'C++ source',
-		'text/x-shellscript': 'Unix shell script',
-		'text/rtf': 'Rich Text Format (RTF)',
-		'text/rtfd': 'RTF with attachments (RTFD)',
-		'text/xml': 'XML document',
-		'application/xml': 'XML document',
-		'application/x-tar': 'TAR archive',
-		'application/x-gzip': 'GZIP archive',
-		'application/x-bzip2': 'BZIP archive',
-		'application/x-zip': 'ZIP archive',
-		'application/zip': 'ZIP archive',
-		'application/x-rar': 'RAR archive',
-		'image/jpeg': 'JPEG image',
-		'image/gif': 'GIF Image',
-		'image/png': 'PNG image',
-		'image/tiff': 'TIFF image',
-		'image/vnd.adobe.photoshop': 'Adobe Photoshop image',
-		'application/pdf': 'Portable Document Format (PDF)',
-		'application/msword': 'Microsoft Word document',
-		'application/vnd.ms-office': 'Microsoft Office document',
-		'application/vnd.ms-word': 'Microsoft Word document',
-		'application/msexel': 'Microsoft Excel document',
-		'application/vnd.ms-excel': 'Microsoft Excel document',
-		'application/octet-stream': 'Application',
-		'audio/mpeg': 'MPEG audio',
-		'video/mpeg': 'MPEG video',
-		'video/x-msvideo': 'AVI video',
-		'application/x-shockwave-flash': 'Flash application',
-		'video/x-flv': 'Flash video'
+		'open':    '__open',
+		'reload':  '__reload',
+		'mkdir':   '__mkdir',
+		'mkfile':  '__mkfile',
+		'rename':  '__rename',
+		'upload':  '__upload',
+		'paste':   '__paste',
+		'rm':      '__rm',
+		'duplicate': '__duplicate',
+		'edit':    '__edit',
+		'extract': '__extract',
+		'resize':  '__resize',
+		'geturl':  '__geturl',
+		'tmb':     '__thumbnails'
 	}
 
 	_request = {}
@@ -110,17 +76,35 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'init', 'tree', 'target', 'current']
+		possible_fields = ['cmd', 'target', 'current']
 		form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in form:
 				self._request[field] = form[field].value
 		
-		response = self.__open()
+		response = {}		
+		# print self._request
+		if 'cmd' in self._request:
+			if self._request['cmd'] in self._commands:
+				cmd = self._commands[self._request['cmd']]
+				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
+				if callable(func):
+					if cmd == '__open':
+						response = func(False)
+					else:
+						response = func()
+		else:
+			response['disabled'] = self._options['disabled']
+			response.update(self.__reload())
+		
 		print simplejson.dumps(response)
-	
 
-	def __open(self):
+
+	def __reload(self):
+		return self.__open(True)
+
+
+	def __open(self, tree):
 		# try to open file
 		if 'current' in self._request:
 			pass
@@ -138,78 +122,91 @@ class elFinder():
 				else:
 					path = target
 
-			name = os.path.basename(path)
-			if path == self._options['root']:
-				name = self._options['rootAlias']
-
-			if self._options['rootAlias']:
-				basename = self._options['rootAlias']
-			else:
-				basename = os.path.basename(self._options['root'])
-			basename = '/' + basename;
-
-			rel = basename + path[len(self._options['root']):]
-
-			write = os.access(path, os.W_OK) and self.__isAllowed(path, 'write')
-			response['cwd'] = {
-				'hash': binascii.crc32(path),
-				'name': name,
-				'rel': rel,
-				'kind': 'Directory',
-				'size': 0,
-				'mdate': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
-				'read': True,
-				'write': write,
-				'upload': write and self.__isAllowed(path, 'upload'),
-				'mkdir': write and self.__isAllowed(path, 'mkdir'),
-				'rm': write and self.__isAllowed(path, 'rm'),
-				'rmdir': write and self.__isAllowed(path, 'rmdir')
-			}
-
-			if 'tree' in self._request:
-				fhash = binascii.crc32(self._options['root'])
-				if self._options['rootAlias']:
-					name = self._options['rootAlias']
-				else:
-					name = os.path.basename(self._options['root'])
-				response['tree'] = {
-					fhash: {
-						'name': name,
-						'read': True,
-						'dirs': self.__tree(self._options['root'])
-					}
-				}
-				if 'init' in self._request:
-					response['disabled'] = self._options['disabled']
-
-			files = []
-			dirs = []
-
-			for f in os.listdir(path):
-				if f[0] == '.': continue
-				pf = os.path.join(path, f)
-				info = {}
-				info = self.__info(pf, write)
-				info['hash'] = binascii.crc32(pf)
-				if info['css'] == 'dir':
-					dirs.append(info)
-				else:
-					files.append(info)
-
-			dirs.extend(files)
-			response['files'] = dirs
-
+			response.update(self.__content(path, tree))
+			
 			return response
 		pass
-	
+
+
+	def __content(self, path, tree):
+		response = {}
+		response['cwd'] = self.__cwd(path)
+		response['cdc'] = self.__cdc(path)
+		if tree:
+			fhash = self.__hash(self._options['root'])
+			if self._options['rootAlias']:
+				name = self._options['rootAlias']
+			else:
+				name = os.path.basename(self._options['root'])
+			response['tree'] = {
+				fhash: {
+					'name': name,
+					'read': True,
+					'dirs': self.__tree(self._options['root'])
+				}
+			}		
+		return response
+
+
+	def __cwd(self, path):
+		name = os.path.basename(path)
+		if path == self._options['root']:
+			name = self._options['rootAlias']
+			root = True
+		else:
+			root = False
+
+		if self._options['rootAlias']:
+			basename = self._options['rootAlias']
+		else:
+			basename = os.path.basename(self._options['root'])
+		
+		rel = basename + path[len(self._options['root']):]
+
+		response = {
+			'hash': self.__hash(path),
+			'name': name,
+			'rel': rel,
+			'size': 0,
+			'date': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
+			'read': True,
+			'write': os.access(path, os.W_OK) and self.__isAllowed(path, 'write'),
+			'rm': not root and self.__isAllowed(path, 'rm'),
+			'uplMaxSize': '128M' # TODO
+		}
+		return response
+
+
+	def __cdc(self, path):
+		files = []
+		dirs = []
+
+		for f in os.listdir(path):
+			if f[0] == '.': continue
+			pf = os.path.join(path, f)
+			info = {}
+			info = self.__info(pf)
+			info['hash'] = self.__hash(pf)
+			if info['type'] == 'dir':
+				dirs.append(info)
+			else:
+				files.append(info)
+
+		dirs.extend(files)
+		return dirs
+
+
+	def __hash(self, input):
+		return binascii.crc32(input)
+
 
 	def __findDir(self, fhash, path):
-		"""Find directory by hash (crc32)
+		"""Find directory by hash
 		FULL
 		"""
 		if not path:
 			path = self._options['root']
-			if fhash == binascii.crc32(path):
+			if fhash == self.__hash(path):
 				return path
 
 		if not os.path.isdir(path):
@@ -218,7 +215,7 @@ class elFinder():
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
 			if os.path.isdir(pd) and not os.path.islink(pd):
-				if fhash == binascii.crc32(pd):
+				if fhash == self.__hash(pd):
 					return pd
 				else:
 					ret = self.__findDir(fhash, pd)
@@ -242,8 +239,9 @@ class elFinder():
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
 			if os.path.isdir(pd) and not os.path.islink(pd):
-				fhash = binascii.crc32(pd)
+				fhash = self.__hash(pd)
 				read = os.access(pd, os.R_OK) and self.__isAllowed(pd, 'read')
+				write = os.access(pd, os.W_OK) and self.__isAllowed(pd, 'write')
 				if read:
 					dirs = self.__tree(pd)
 				else:
@@ -251,6 +249,7 @@ class elFinder():
 				tree[fhash] = {
 					'name': d,
 					'read': read,
+					'write': write,
 					'dirs': dirs
 				}
 
@@ -260,7 +259,7 @@ class elFinder():
 			return tree
 	
 
-	def __info(self, path, parentWrite):
+	def __info(self, path):
 		mime = ''
 		filetype = 'file'
 		if os.path.isfile(path):
@@ -274,52 +273,43 @@ class elFinder():
 
 		info = {
 			'name': os.path.basename(path),
-			'size': stat.st_size,
+			'hash': self.__hash(path),
+			'type': filetype,
+			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
+			'date': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
+			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
 			'read': os.access(path, os.R_OK),
 			'write': os.access(path, os.W_OK),
-			'mdate': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
-			'css': '',
-			'cmd': ''
+			'rm': self.__isAllowed(path, 'rm')
 		}
 		
-		if filetype == 'dir':
-			info['kind'] = 'Directory'
-			info['css'] = 'dir';
-			info['size'] = self.__dirSize(path)
-			info['read'] = info['read'] and self.__isAllowed(path, 'read');
-			info['write'] = info['write'] and self.__isAllowed(path, 'write');
-		elif filetype == 'link':
-			info['kind'] = 'Alias'
+		if filetype == 'link':
 			path = self.__readlink(path)
 			if not path:
-				info['css'] = 'broken'
-				info['write'] = info['write'] and parentWrite
+				info['mime'] = 'unknown'
 				return info
-			info['link'] = binascii.crc32(path)
-			if os.path.isdir(path):
-				info['css'] = 'dir'
-				info['read'] = info['read'] and self.__isAllowed(path, 'read')
-				info['write'] = info['write'] and self.__isAllowed(path, 'write')
-				return info
-			# mimetype here
-			mime = self.__mimetype(path)
-		else:
-			mime = self.__mimetype(path)
-			if mime in self._kinds:
-				info['kind'] = self._kinds[mime]
-			else:
-				info['kind'] = 'Unknown'
 
-		if mime:
-			mime = mime.split('/', 2)
-			c = mime[0] # class
-			s = mime[1] # subclass
-			info['css'] += " %s %s" % (c, s)
+			if os.path.isdir(path):
+				info['mime'] = 'directory'
+			else:
+				info['mime'] = self.__mimetype(path)
+
+			if self._options['rootAlias']:
+				basename = self._options['rootAlias']
+			else:
+				basename = os.path.basename(self._options['root'])
+			
+			info['linkTo'] = basename + path[len(self._options['root']):]
+			info['link'] = self.__hash(path)
+			info['read'] = info['read'] and self.__isAllowed(path, 'read')
+			info['write'] = info['write'] and self.__isAllowed(path, 'write')
+			info['rm'] = self.__isAllowed(path, 'rm')
+			
 			# more actions here
 			# image sizes
 		
 		return info
-	
+
 
 	def __mimetype(self, path):
 		return mimetypes.guess_type(path)[0]
