@@ -10,6 +10,7 @@ import cgitb
 import mimetypes
 import os
 import os.path
+import re
 import sys
 import simplejson
 from datetime import datetime, date, time
@@ -29,7 +30,7 @@ class elFinder():
 		'debug': True,
 		'dirSize': True,
 		'fileUmask': '0666',
-		'dirUmask': '0777',
+		'dirUmask': 0755,
 		'tmbDir': '.tmb',
 		'tmbSize': 48,
 		'allowTypes': [],
@@ -76,7 +77,7 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current']
+		possible_fields = ['cmd', 'target', 'current', 'name']
 		form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in form:
@@ -100,11 +101,122 @@ class elFinder():
 		print simplejson.dumps(response)
 
 
+	def __mkfile(self):
+		"""Create new file"""
+		response = {}
+		name = current = None
+		curDir = newFile = None
+		if 'name' in self._request and 'current' in self._request:
+			name = self._request['name']
+			current = self._request['current']
+			curDir = self.__findDir(int(current), None)
+			newFile = os.path.join(curDir, name)
+
+		if not curDir or not name:
+			response['error'] = 'Invalid parameters'
+		elif not self.__isAllowed(curDir, 'write'):
+			response['error'] = 'Access denied!'
+		elif not self.__checkName(name):
+			response['error'] = 'Invalid name'
+		elif os.path.exists(newFile):
+			response['error'] = 'File or folder with the same name already exists'
+		else:
+			try:
+				open(newFile, 'w').close()
+				response = self.__content(curDir, False)
+			except:
+				response['error'] = 'Unable to create file'
+
+		return response
+
+
+
+
+	def __find(self, fhash, parent):
+		"""Find file/dir by hash"""
+		if os.path.isdir(parent):
+			for i in os.listdir(parent):
+				path = os.path.join(parent, i)
+				if fhash == self.__hash(path):
+					return path
+		return None
+
+
+	def __rename(self):
+		"""Rename file or dir"""
+		response = {}
+		current = name = target = None
+		curDir = curName = newName = None
+		if 'name' in self._request and 'current' in self._request and 'target' in self._request:
+			name = self._request['name']
+			current = self._request['current']
+			target = self._request['target']
+			curDir = self.__findDir(int(current), None)
+			curName = self.__find(int(target), curDir)
+			newName = os.path.join(curDir, name)
+
+		if not curDir or not curName:
+			response['error'] = 'File does not exists'
+		elif not self.__isAllowed(curDir, 'write'):
+			response['error'] = 'Access denied!'
+		elif not self.__checkName(name):
+			response['error'] = 'Invalid name'
+		elif os.path.exists(newName):
+			response['error'] = 'File or folder with the same name already exists'
+		else:
+			try:
+				os.rename(curName, newName)
+				response = self.__content(curDir, os.path.isdir(newName))
+			except:
+				response['error'] = 'Unable to rename file'
+
+		return response
+
+
+	def __mkdir(self):
+		"""Create new directory"""
+		response = {}
+		current = None
+		path = None
+		newDir = None
+		if 'name' in self._request and 'current' in self._request:
+			name = self._request['name']
+			current = self._request['current']
+			path = self.__findDir(int(current), None)
+			newDir = os.path.join(path, name)
+
+		if not path:
+			response['error'] = 'Invalid parameters'
+		elif not self.__isAllowed(path, 'write'):
+			response['error'] = 'Access denied!'
+		elif not self.__checkName(name):
+			response['error'] = 'Invalid name'
+		elif os.path.exists(newDir):
+			response['error'] = 'File or folder with the same name already exists'
+		else:
+			try:
+				os.mkdir(newDir, int(self._options['dirUmask']))
+				response = self.__content(path, True)
+			except:
+				response['error'] = 'Unable to create folder'
+
+		return response
+
+
+	def __checkName(self, name):
+		"""Check for valid file/dir name"""
+		pattern = r'[\/\\\:\<\>]'
+		if re.search(pattern, name):
+			return False
+		return True
+
+
 	def __reload(self):
 		return self.__open(True)
 
 
 	def __open(self, tree):
+		"""Open file or directory"""
 		# try to open file
 		if 'current' in self._request:
 			pass
@@ -129,9 +241,11 @@ class elFinder():
 
 
 	def __content(self, path, tree):
+		"""CWD + CDC + maybe(TREE)"""
 		response = {}
 		response['cwd'] = self.__cwd(path)
 		response['cdc'] = self.__cdc(path)
+
 		if tree:
 			fhash = self.__hash(self._options['root'])
 			if self._options['rootAlias']:
@@ -149,6 +263,7 @@ class elFinder():
 
 
 	def __cwd(self, path):
+		"""Current Working Directory"""
 		name = os.path.basename(path)
 		if path == self._options['root']:
 			name = self._options['rootAlias']
@@ -178,6 +293,7 @@ class elFinder():
 
 
 	def __cdc(self, path):
+		"""Current Directory Content"""
 		files = []
 		dirs = []
 
@@ -197,13 +313,12 @@ class elFinder():
 
 
 	def __hash(self, input):
+		"""Hash of path can be any uniq"""
 		return binascii.crc32(input)
 
 
 	def __findDir(self, fhash, path):
-		"""Find directory by hash
-		FULL
-		"""
+		"""Find directory by hash"""
 		if not path:
 			path = self._options['root']
 			if fhash == self.__hash(path):
