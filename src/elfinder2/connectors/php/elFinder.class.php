@@ -738,7 +738,8 @@ class elFinder {
 		
 		if ($tree) {
 			$ret['tree'] = array(
-				crc32($this->_options['root']) => array(
+				array(
+					'hash' => $this->_hash($this->_options['root']),
 					'name' => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
 					'read' => true,
 					'write' => is_writable($this->_options['root']) && $this->_isAllowed($this->_options['root'], 'write'),
@@ -882,7 +883,8 @@ class elFinder {
 				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {
 					$read = is_readable($p) && $this->_isAllowed($p, 'read');
 					$dirs = $read ? $this->_tree($p) : '';
-					$tree[$this->_hash($p)] = array(
+					$tree[] = array(
+						'hash'  => $this->_hash($p),
 						'name'  => $ls[$i],
 						'read'  => $read,
 						'write' => is_writable($p) && $this->_isAllowed($p, 'write'),

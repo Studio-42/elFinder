@@ -130,14 +130,11 @@ elFinder.prototype.view = function(fm, el) {
 		}
 		
 		function traverse(tree, root) {
-			var i, c, html = '<ul>';
-			for (i in tree) {
-				fm.dirs[i] = {
-					hash  : i,
-					name  : tree[i].name,
-					read  : tree[i].read,
-					write : tree[i].write
-				};
+			var i, hash, c, html = '<ul>';
+			for (i=0; i < tree.length; i++) {
+				hash = tree[i].hash;
+				fm.dirs[hash] = tree[i];
+			
 				c = '';
 				if (root) {
 					c = 'root selected';
@@ -148,8 +145,8 @@ elFinder.prototype.view = function(fm, el) {
 				} else if (!tree[i].write) {
 					c = 'readonly';
 				} 
-				html += '<li><div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+i+'">'+tree[i].name+'</a>'
-				// self.fm.log(tree[i].name+' '+typeof(tree[i].dirs))
+				html += '<li><div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+hash+'">'+tree[i].name+'</a>'
+
 				if (tree[i].dirs) {
 					html += traverse(tree[i].dirs);
 				}
