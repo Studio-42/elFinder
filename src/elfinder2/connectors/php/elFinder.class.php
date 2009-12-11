@@ -16,13 +16,14 @@ class elFinder {
 		'root'           => '',          // path to root directory
 		'URL'            => '',          // root directory URL
 		'rootAlias'      => 'Home',      // display this instead of root directory name
-		'ignoreDotFiles' => true,        // do not display dot files
+		'dotFiles' => false,        // do not display dot files
 		'cntDirSize'     => true,        // count total directories sizes
 		'fileUmask'      => 0666,        // permission for new files
 		'dirUmask'       => 0777,        // permission for new directories
 		'mimeDetect'     => 'auto',      // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
 		'imgLib'         => 'auto',      // image manipulation library
 		'tmbDir'         => '.tmb',      // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbAtOnce'      => 3,
 		'tmbSize'        => 48,          // images thumbnails size (px)
 		'allowTypes'     => array(),     // mimetypes which allowed to upload
 		'allowExts'      => array(),     // file extensions which allowed to upload
@@ -83,7 +84,6 @@ class elFinder {
 	    'xml'   => 'application/xml',
 		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
-		
 		// archives
 	    'gz'    => 'application/x-gzip',
 	    'tgz'   => 'application/x-gzip',
@@ -224,29 +224,40 @@ class elFinder {
 			$this->_du = $s == 0 && $test>0;
 		}
 		
-		// find image manipulation library
-		if ($this->_options['tmbDir'] && (empty($this->_options['imgLib']) || $this->_options['imgLib'] == 'auto')) {
-			if (extension_loaded('imagick')) {
-				$this->_options['imgLib'] = 'imagick';
-			} elseif (function_exists('exec')) {
-				exec('mogrify --version', $o, $c); 
-				if ($c == 0 && !empty($o))
-				{
-					$this->_options['imgLib'] = 'mogrify';
-				}
-			}
-			if (!$this->_options['imgLib'] && function_exists('gd_info')) {
-				$this->_options['imgLib'] = 'mogrify';
+		if (!empty($this->_options['tmbDir'])) {
+			$tmbDir = $this->_options['root'].DIRECTORY_SEPARATOR.$this->_options['tmbDir'];
+			if (is_dir($tmbDir) || @mkdir($tmbDir, $this->_options['dirUmask'])) {
+				$this->_options['tmbDir'] = $tmbDir;
+			} else {
+				$this->_options['tmbDir'] = '';
 			}
 		}
 		
-		if (!in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
-			$this->_options['imgLib'] = '';
-			$this->_options['tmbDir'] = '';
-		} else {
-			$this->_options['tmbSize'] = intval($this->_options['tmbSize']);
-			if ($this->_options['tmbSize'] < 12) {
-				$this->_options['tmbSize'] = 48;
+		// find image manipulation library
+		if ($this->_options['tmbDir']) {
+			if (empty($this->_options['imgLib']) || $this->_options['imgLib'] == 'auto') {
+				if (extension_loaded('imagick')) {
+					$this->_options['imgLib'] = 'imagick';
+				} elseif (function_exists('exec')) {
+					exec('mogrify --version', $o, $c); 
+					if ($c == 0 && !empty($o))
+					{
+						$this->_options['imgLib'] = 'mogrify';
+					}
+				}
+				if (!$this->_options['imgLib'] && function_exists('gd_info')) {
+					$this->_options['imgLib'] = 'mogrify';
+				}
+			}
+			
+			if (!in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
+				$this->_options['imgLib'] = '';
+				$this->_options['tmbDir'] = '';
+			} else {
+				$this->_options['tmbSize'] = intval($this->_options['tmbSize']);
+				if ($this->_options['tmbSize'] < 12) {
+					$this->_options['tmbSize'] = 48;
+				}
 			}
 		}
 		
@@ -282,6 +293,7 @@ class elFinder {
 		} else {
 			$result = $this->_reload();
 			$result['disabled'] = $this->_options['disabled'];
+			$result['dotFiles'] = $this->_options['dotFiles'];
 			// echo '<pre>'; print_r($result); exit();
 		}
 
@@ -294,7 +306,11 @@ class elFinder {
 				);
 		}
 		
-		$result['tmb'] = $this->_createTmb && $this->_tmbDir;
+		if ($this->_errorData) {
+			$result['errorData'] = $this->_errorData;
+		}
+		
+		$result['tmb'] = $this->_createTmb && !empty($this->_options['tmbDir']);
 		
 		$j = json_encode($result);
 		if (!$this->_options['gzip']) {
@@ -455,8 +471,8 @@ class elFinder {
 			$result['error'] = 'File or folder with the same name already exists';
 		} else {
 			$f = $dir.DIRECTORY_SEPARATOR.$name;
-			if (false != ($fp = fopen($f, 'wb'))) {
-				fwrite($fp, "text\n");
+			if (false != ($fp = @fopen($f, 'wb'))) {
+				fwrite($fp, "");
 				fclose($fp);
 				$result = $this->_content($dir);
 			} else {
@@ -484,16 +500,12 @@ class elFinder {
 		} 
 		
 		foreach ($_GET['rm'] as $hash) {
-			if (false == ($f = $this->_find($hash, $dir))) {
-				$result['error'] = 'File not found';
-				return $result+$this->_content($dir, true);
+			if (false != ($f = $this->_find($hash, $dir))) {
+				$this->_remove($f);
 			}
-			if (!$this->_remove($f)) {
-				$result['error'] = 'Remove failed';
-				$result['errorData'] = array($this->_errFile => $this->_errMsg ? $this->_errMsg : 'Unable to remove');
-				return $result+$this->_content($dir, true);
-			}
-			
+		}
+		if (!empty($this->_errorData)) {
+			$result['error'] = 'Remove failed';
 		}
 		return $result+$this->_content($dir, true);
 	}
@@ -559,10 +571,6 @@ class elFinder {
 						$failed[$_FILES['fm-file']['name'][$i]] = 'Unable to save uploaded file';
 					} else {
 						@chmod($file, $this->_options['fileUmask']);
-						// if (false != ($s = getimagesize($file))) {
-						// 	$result['warning'] = 'Image '+$file;
-						// 	$this->_tmb($file);
-						// }
 					}
 				}
 			}
@@ -625,19 +633,16 @@ class elFinder {
 				if (!$this->_isAllowed($f, 'rm')) {
 					$result['error'] = 'Unable to complite request!';
 					$this->_setErrorData($f, 'Access denied!');
-					$result['errorData'] = $result['errorData'] = $this->_errorData;
 					break;
 				}
 				if ((file_exists($trg) && !$this->_remove($trg)) || !@rename($f, $trg) ) {
 					$result['error'] = 'Unable to complite request!';
 					$this->_setErrorData($f, 'Unable to move!');
-					$result['errorData'] = $result['errorData'] = $this->_errorData;
 					break;
 				}
 			} else {
 				if (!$this->_copy($f, $trg)) {
 					$result['error'] = 'Unable to complite request!';
-					$result['errorData'] = $this->_errorData;
 					break;
 				}
 			}
@@ -719,6 +724,79 @@ class elFinder {
 		return array('url' => $this->_path2url($file));
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _thumbnails()
+	{
+		$result = array();
+		
+		if (!empty($this->_options['tmbDir']) && !empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
+			
+			$result['images'] = array();
+			$ls = scandir($current);
+			$cnt = 0;
+			$max = $this->_options['tmbAtOnce'] > 0 ? intval($this->_options['tmbAtOnce']) : 100;
+			for ($i=0; $i < count($ls); $i++) { 
+				if ($this->_isAccepted($ls[$i])) {
+					$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
+					if ($this->_canCreateTmb($path) && is_readable($path)) {
+						$tmb = $this->_tmbPath($path);
+						if (!file_exists($tmb)) {
+							if ($cnt>=$max) {
+								$this->_createTmb = true; 
+								return $result;
+							} elseif ($this->_tmb($path, $tmb)) {
+								$result['images'][$this->_hash($path)] = $this->_path2url($tmb);
+								$cnt++;
+							}
+						}
+					}
+				}
+			}
+		} 
+		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _edit()
+	{
+		$result = array();
+		if (empty($_POST['current']) 
+		|| false == ($current = $this->_findDir(trim($_POST['current'])))
+		|| empty($_POST['file'])
+		|| false == ($file = $this->_find(trim($_POST['file']), $current))
+		) {
+			$result['error'] = 'Invalid parameters';
+			return $result;
+		}
+		if (!$this->_isAllowed($file, 'write')) {
+			$result['error'] = 'Access denied!';
+			return $result;
+		}
+		
+		if (!isset($_POST['content'])) {
+			$result['content'] = @file_get_contents($file);
+		} else {
+			if (false === file_put_contents($file, trim($_POST['content']))) {
+				$result['error'] = 'Unable to write to file';
+				return $result;
+			}
+			$result['file'] = $this->_info($file);
+		}
+		
+		
+		return $result;
+		
+	}
 	
 	/************************************************************/
 	/**                    "content" methods                   **/
@@ -849,17 +927,17 @@ class elFinder {
 			if (!$this->_options['denyURLs']) {
 				$info['url'] = $this->_path2url($path);
 			}
-			if (0 === ($p = strpos($info['mime'], 'image')) && false != ($s = getimagesize($path))) {
+			if (0 === ($p = strpos($this->_mimetype($path), 'image')) && false != ($s = getimagesize($path))) {
 				$info['dim'] = $s[0].'x'.$s[1];
-				if (false != ($tmbDir = $this->_tmbDir($path))) {
-					$tmb = $tmbDir.DIRECTORY_SEPARATOR.basename($path);
+				if ($this->_canCreateTmb($path)) {
+					$info['resize'] = true;
+					$tmb = $this->_tmbPath($path);
 					if (file_exists($tmb)) {
 						$info['tmb']  = $this->_path2url($tmb);
 					} else {
 						$this->_createTmb = true;
 					}
 				}
-				
 			}
 		}
 		
@@ -938,23 +1016,25 @@ class elFinder {
 	private function _remove($path)
 	{
 		if (!$this->_isAllowed($path, 'rm')) {
-			$this->_errMsg = 'Access denied!';
-			$this->_errFile = $path;
-			return false;
+			return $this->_setErrorData($path, 'Access denied!');
 		}
 		if (!is_dir($path)) {
-			return @unlink($path);
-		}
-		
-		$ls = scandir($path);
-		for ($i=0; $i < count($ls); $i++) { 
-			if ($this->_isAccepted($ls[$i])) {
-				if (!$this->_remove($path.DIRECTORY_SEPARATOR.$ls[$i])) {
-					return false;
+			if (!@unlink($path)) {
+				$this->_setErrorData($path, 'Unable to remove file!');
+			} else {
+				$this->_rmTmb($path);
+			}
+		} else {
+			$ls = scandir($path);
+			for ($i=0; $i < count($ls); $i++) { 
+				if ('.' != $ls[$i] && '..' != $ls[$i]) {
+					$this->_remove($path.DIRECTORY_SEPARATOR.$ls[$i]);
 				}
 			}
+			if (!@rmdir($path)) {
+				$this->_setErrorData($path, 'Unable to remove file!');
+			}
 		}
-		return @rmdir($path);
 	}
 	
 	/**
@@ -1023,7 +1103,7 @@ class elFinder {
 	private function _checkName($n)
 	{
 		$n = strip_tags(trim($n));
-		return preg_match('/^[^\.\\/\<\>][^\\/\<\>]*$/', $n) ? $n : false;
+		return preg_match($this->_options['dotFiles'] ? '|^[^\\/\<\>]+$|' : '/^[^\.\\/\<\>][^\\/\<\>]*$/', $n) ? $n : false;
 	}
 	
 	/**
@@ -1167,36 +1247,24 @@ class elFinder {
 		return $type[0];
 	}
 	
-	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _rmTmb($path)
+	{
+		$tmb = $this->_tmbPath($path);
+		if (file_exists($tmb)) {
+			@unlink($tmb);
+		}
+	}
 	
 	/************************************************************/
 	/**                   image manipulation                   **/
 	/************************************************************/
-	
-	
-	/**
-	 * set/get thumbnails path for current directory (set once for request)
-	 *
-	 * @param  string path to image
-	 * @return string
-	 **/
-	private function _tmbDir($path)
-	{
-		if (is_null($this->_tmbDir)) {
-			if (!$this->_options['tmbDir']) {
-				$this->_tmbDir = '';
-			} else {
-				$d = dirname($path).DIRECTORY_SEPARATOR.$this->_options['tmbDir']; 
-				if (is_dir($d) || mkdir($d, $this->_options['dirUmask'])) {
-					$this->_tmbDir = $d;
-				} else {
-					$this->_tmbDir = '';
-				}
-			}
-		}
-		return $this->_tmbDir;
-	}
-	
+
 	/**
 	 * Create image thumbnail
 	 *
@@ -1240,13 +1308,14 @@ class elFinder {
 				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
 					return false;
 				}
-				if ($s['mime'] == 'image/jpeg') {
-					$r = imagejpeg($_tmb, $tmb, 100);
-				} else if ($s['mime'] = 'image/png') {
-					$r = imagepng($_tmb, $tmb, 7);
-				} else {
-					$r = imagegif($_tmb, $tmb, 7);
-				}
+				// if ($s['mime'] == 'image/jpeg') {
+				// 	$r = imagejpeg($_tmb, $tmb, 100);
+				// } else if ($s['mime'] = 'image/png') {
+				// 	$r = imagepng($_tmb, $tmb, 7);
+				// } else {
+				// 	$r = imagegif($_tmb, $tmb, 7);
+				// }
+				$r = imagepng($_tmb, $tmb, 7);
 				imagedestroy($_img);
 				imagedestroy($_tmb);
 				return $r;
@@ -1254,39 +1323,6 @@ class elFinder {
 		}
 	}
 	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _thumbnails()
-	{
-		$result = array();
-		if (!empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
-			$result['images'] = array();
-			$ls = scandir($current);
-			for ($i=0; $i < count($ls); $i++) { 
-				if ('.' != substr($ls[$i], 0, 1)) {
-					$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
-					if (is_file($path) && 0 === strpos($this->_mimetype($path), 'image')) {
-						if (!isset($tmbDir)) {
-							$tmbDir = $this->_tmbDir($path);
-						}
-						$tmb = $tmbDir.DIRECTORY_SEPARATOR.$ls[$i];
-						if (!file_exists($tmb) && is_readable($path) && $this->_tmb($path, $tmb)) {
-							$result['images'][crc32($path)] = $this->_path2url($tmb); 
-						}
-					}
-				}
-			}
-		}
-		return $result;
-	}
-	
-	
-		
 	/**
 	 * undocumented function
 	 *
@@ -1417,7 +1453,7 @@ class elFinder {
 		if ('.' == $file || '..' == $file) {
 			return false;
 		}
-		if ($this->_options['ignoreDotFiles'] && '.' == substr($file, 0, 1)) {
+		if (!$this->_options['dotFiles'] && '.' == substr($file, 0, 1)) {
 			return false;
 		}
 		return true;
@@ -1430,6 +1466,25 @@ class elFinder {
 	 * @return void
 	 **/
 	private function _isAllowed($path, $action) {
+		
+		switch ($action) {
+			case 'read':
+				if (!is_readable($path)) {
+					return false;
+				}
+				break;
+			case 'write':
+				if (!is_writable($path)) {
+					return false;
+				}
+				break;
+			case 'rm':
+				if (!is_writable(dirname($path))) {
+					return false;
+				}
+				break;
+		}
+		
 		if ($this->_options['aclObj']) {
 			
 		}
@@ -1437,6 +1492,7 @@ class elFinder {
 		foreach ($this->_options['perms'] as $regex => $rules) {
 			if (preg_match($regex, $path)) {
 				if (isset($rules[$action])) {
+					// echo $path.': '.$action.' : '.intval($rules[$action])."\n";
 					return $rules[$action];
 				}
 			}
@@ -1472,6 +1528,35 @@ class elFinder {
 		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _canCreateTmb($path)
+	{
+		$mime = $this->_mimetype($path);
+		if ($this->_options['tmbDir']) {
+			if ('gd' == $this->_options['imgLib']) {
+				return $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif';
+			} elseif ('mogrify' == $this->_options['imgLib']) {
+				return 0 === strpos($mime, 'image') && $mime != 'image/vnd.adobe.photoshop';
+			} 
+			return 0 === strpos($mime, 'image');
+		}
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _tmbPath($path)
+	{
+		return $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png';
+	}
 	
 	private function _utime()
 	{

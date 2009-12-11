@@ -17,39 +17,19 @@ $opts = array(
 	'URL'    => $rootURL,
 	'lang'   => 'ru',
 	'mimeDetect' => 'auto',
+	// 'imgLib' => 'gd',
+	// 'dotFiles' => true,
 	// 'cntDirSize' => false,
-	// 'tmbDir' => '',
+	'tmbDir' => '_tmb',
 	'defaults' => array(
 		'read'  => true,
 		'write' => true,
 		// 'rm'    => false
 		),
-		'perms' => array(
-			'|'.preg_quote($rootDir.DIRECTORY_SEPARATOR).'_tmb|i' => array(
-				'read' => false,
-				'write' => false,
-				'rm'    => true
-				),
-			// '/untitle/' => array(
-			// 	'write' => false
-			// 	),
-			'/Read_only/' => array(
-				'write' => false
-				),
-			'/Dropbox/' => array(
-				'read' => false
-				)
-			
+	'perms' => array(
 			)
-	);
-// echo '<pre>';
-// print_r($opts);
-//$translator = new elTranslator();
-//$translator->loadMessages('ru', dirname(__FILE__).DIRECTORY_SEPARATOR.'i18n'.DIRECTORY_SEPARATOR.'ru.php', 'elMsg');
+);
 
 $fm = new elFinder($opts); 
 $fm->run();
-//$fm->setTranslator($translator);
-
-//$fm->autorun();
 ?>

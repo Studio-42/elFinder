@@ -313,7 +313,8 @@ p.el-finder-quest div {
 .el-finder-cwd div.application p { background-position: -1px  -134px; }
 .el-finder-cwd div.audio p       { background-position: -1px -1082px; }
 .el-finder-cwd div.image p       { background-position: -1px -1132px; }
-.el-finder-cwd div.text p        { background-position: -1px  -524px; }
+.el-finder-cwd div.text p,
+.el-finder-cwd div.x-empty p     { background-position: -1px  -524px; }
 .el-finder-cwd div.video p       { background-position: -1px -1032px; }
 /* images */
 .el-finder-cwd div.gif p         { background-position: 0 -1183px; }
@@ -571,8 +572,6 @@ p.el-finder-quest div {
 	float:left;margin-right:.7em
 }
 
-
-
 .el-finder-dialog table {
 	width : 100%;
 /*	border:1px solid #ccc;*/
@@ -582,7 +581,9 @@ p.el-finder-quest div {
 	padding:3px;
 
 }
-.el-finder-dialog table a { outline: none;}
+.el-finder-dialog a { outline: none;}
+
+.el-finder-dialog textarea { width:100%; height:400px; outline:none; border:1px solid #ccc;}
 
 /************************************/
 /*            contextmenu           */
