@@ -37,47 +37,61 @@
 		 * @param  callback Function  
 		 *
 		 */
-		this.ajax = function(data, callback) {
+		this.ajax = function(data, callback, continueOnErr, post) {
 			this.lock(true);
 
 			$.ajax({
 				url      : this.options.url,
+				type     : post ? 'POST' : 'GET',
 				data     : data,
 				dataType : 'json',
 				cache    : false,
 				error    : self.view.fatal,
 				success  : function(data) {
 					self.lock();
+
 					if (data.error) {
-						return self.view.error(data.error, data.errorData);
+						self.view.error(data.error, data.errorData) 
+						if (continueOnErr) {
+							callback(data);
+						} else {
+							return;
+						}
 					}
 					if (data.warning) {
 						self.view.warning(data.warning, data.errorData);
 					}
+					// self.log(data)
 					callback(data);
 					data.debug && self.log(data.debug);
-					
-					/* tell to connector to generate thumbnails */
-					if (data.tmb) {
-						$.ajax({
-							url      : self.options.url,
-							data     : {cmd : 'tmb', current : self.cwd.hash},
-							dataType : 'json',
-							success  : function(data) {
-								if (self.viewMode() == 'icons' && data.images) {
-									var i, el;
-									for (i in data.images) {
-										el = self.view.cwd.find('div[key="'+i+'"]:has(:not(span))').children('p');
-										el.length && self.view.tmb(el, data.images[i]);
-									}
-								}
-								data.debug && self.log(data.debug);
-							}
-						});
-					}
+					/* tell connector to generate thumbnails */
+					data.tmb && self.tmb();
+
 				}
 			});
 		}
+		
+		this.tmb = function() {
+			if (!self.locked && self.viewMode() == 'icons') {
+				$.ajax({
+					url      : self.options.url,
+					data     : {cmd : 'tmb', current : self.cwd.hash},
+					dataType : 'json',
+					success  : function(data) {
+						if (self.viewMode() == 'icons' && data.images) {
+							var i, el;
+							for (i in data.images) {
+								el = self.view.cwd.find('div[key="'+i+'"]').children('p:not(:has(span))');
+								el.length && el.append($('<span/>').addClass('rnd-5').css('background', ' url("'+data.images[i]+'") 0 0 no-repeat'));
+							}
+							data.debug && self.log(data.debug);
+							data.tmb && self.tmb();
+						}
+					}
+				});
+			}
+		}
+		
 		
 		this.cookie = function(name, value, opts) {
 			if (typeof value == 'undefined') {
@@ -132,34 +146,41 @@
 			
 		}
 		
+		/**
+		 * Create directory tree, and bind click and drop events
+		 * @param  Array  tree
+		 */
 		this.setNav = function(tree) {
 			this.view.renderNav(tree);
 
-			this.view.tree.find('a').bind('click', function(e) {
-				e.preventDefault();
-				self.ui.exec('open', $(this).trigger('select').attr('key'));
-			})
-			.bind('select', function() {
-				if (!$(this).hasClass('selected')) {
-					self.view.tree.find('a').removeClass('selected');
-					$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
-				}
-			})
-			.filter(':not([class="ro"])')
-			.droppable({
-				over : function() { $(this).addClass('el-finder-droppable'); },
-				out  : function() { $(this).removeClass('el-finder-droppable'); },
-				drop : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.drop(e, ui, $(this).attr('key')); }
-			})
-			.end().end()
-			.find('li:has(ul)').each(function() {
-				$(this).children('ul').hide().end()
-					.children('div').click(function() {
-						$(this).toggleClass('dir-expanded').nextAll('ul').toggle(300);
+			this.view.tree
+				.find('li').children('ul').each(function(i) {
+					var ul = $(this);
+					i>0 && ul.hide();
+					ul.parent().children('div').click(function() {
+						$(this).toggleClass('dir-expanded');
+						ul.toggle(300);
 					});
-			})
-			.end()
-			.children('li').children('div').addClass('dir-expanded').next().next().show();
+				}).end().end()
+				.find('a')
+					.bind('click', function(e) {
+						e.preventDefault();
+						var t = $(this), id = t.attr('key'); 
+						if (id != self.cwd.hash && !t.hasClass('noaccess') && !t.hasClass('dropbox') ) {
+							t.trigger('select');
+							self.ui.exec('open', id);
+						}
+					})
+					.bind('select', function() {
+						self.view.tree.find('a').removeClass('selected');
+						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
+					})
+					.filter(':not(.noaccess,.readonly)')
+					.droppable({
+						over : function() { $(this).addClass('el-finder-droppable'); },
+						out  : function() { $(this).removeClass('el-finder-droppable'); },
+						drop : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.drop(e, ui, $(this).attr('key')); }
+					});
 			
 			if (this.view.places) {
 				/* bind click once, when places created */
@@ -227,8 +248,8 @@
 		/**
 		 * Set current working directory data and current directory content and redraw its
 		 *
-		 * @param Object cwd
-		 * @param Object cdc
+		 * @param Object cwd  - Current Working Directory data
+		 * @param Object cdc  - Current Directory Content
 		 */
 		this.setCwd = function(cwd, cdc) {
 			this.cwd = cwd;
@@ -351,6 +372,8 @@
 		}
 		
 		this.isValidName = function(n) {
+			self.log(self.dotFiles)
+			return self.dotFiles ? n.match(/^[^\\\/\<\>]+$/) : n.match(/^[^\.\\\/\<\>][^\\\/\<\>]*$/);
 			return n.match(/^[^\.\\\/\<\>][^\\\/\<\>]/g);
 		}
 		
@@ -387,7 +410,7 @@
 			if (p.length) {
 				this.places = p.indexOf(':')!=-1 ? p.split(':') : [p];	
 			}
-
+		
 			this.loaded = true;
 			this.lock(true);
 
@@ -397,6 +420,8 @@
 				self.setCwd(data.cwd, data.cdc);
 				self.lock();
 				self.ui.init(data.disabled);
+				self.dotFiles = data.dotFiles;
+				
 				
 				self.view.cwd
 					.bind('click', function(e) {
@@ -521,7 +546,7 @@
 	}
 	
 	elFinder.prototype.i18n = function(m) {
-		return m;
+		return this.options.i18n[this.options.lang] && this.options.i18n[this.options.lang][m] ? this.options.i18n[this.options.lang][m] :  m;
 	}
 	
 	elFinder.prototype.options = {
@@ -532,6 +557,7 @@
 		places : 'Places',
 		placesFirst : true,
 		editorCallback : null,
+		i18n : {},
 		toolbar : [
 			['back', 'reload'],
 			['select', 'open'],
@@ -539,10 +565,8 @@
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
 			['info', 'help'],
-			
-			
 			['icons', 'list'],
-			['help'], ['uncompress']
+			['help']
 		]
 		
 	}

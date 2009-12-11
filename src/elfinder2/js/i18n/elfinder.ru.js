@@ -1,6 +1,6 @@
 (function($) {
-if ($.fn.elfinder && $.fn.elfinder.i18Messages) 
-	$.fn.elfinder.i18Messages.ru = {
+if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
+	elFinder.prototype.options.i18n.ru = {
 		'Root directory does not exists!' : 'Корневая директория не существует',
 		'Access denied!'                : 'Доступ запрещен!',
 		'Unable to connect to backend!' : 'Не удалось соединиться с сервером',

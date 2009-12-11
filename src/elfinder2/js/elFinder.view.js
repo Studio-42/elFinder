@@ -6,6 +6,7 @@ elFinder.prototype.view = function(fm, el) {
 		'directory'                     : 'Folder',
 		'symlink'                       : 'Alias',
 		'unknown'                       : 'Unknown',
+		'application/x-empty'           : 'Plain text',
 		'application/postscript'        : 'Postscript document',
 		'application/octet-stream'      : 'Application',
 		'application/vnd.ms-office'     : 'Microsoft Office document',
@@ -65,7 +66,7 @@ elFinder.prototype.view = function(fm, el) {
 	this.nav  = $('<div />').addClass('el-finder-nav');
 	this.cwd  = $('<div />').addClass('el-finder-cwd');
 	this.spn  = $('<div />').addClass('el-finder-spinner');
-	this.msg  = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>');
+	this.msg  = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>').click(function() { $(this).hide(); });
 	this.nfo  = $('<div />').addClass('stat');
 	this.pth  = $('<div />').addClass('path');
 	this.sel  = $('<div />').addClass('selected-files');
@@ -103,7 +104,7 @@ elFinder.prototype.view = function(fm, el) {
 		this.fm.lock();
 		err = this.fm.i18n(err)+this.formatErrorData(data);
 		this.msg.removeClass('el-finder-warn').show().children('strong').empty().html(err);
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 3000);
+		setTimeout(function() { self.msg.fadeOut('slow'); }, 5000);
 	}
 	
 	this.warning = function(warn, data) {
@@ -235,7 +236,7 @@ elFinder.prototype.view = function(fm, el) {
 		} else if (f.name.length > w) {
 			n = f.name.substr(0, w)+"&shy;"+f.name.substr(w);
 		}
-		el.append(p).append($('<label/>').html(n).attr('title', f.name));
+		el.append(p).append($('<label/>').html(n).attr('title', f.name+' '+f.mime));
 		f.type == 'link' && el.append('<em />');
 		if (!f.read && !f.write) {
 			el.addClass('noaccess')
@@ -249,7 +250,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.tmb = function(p, url) {
-		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'));
+		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'))
 	}
 
 	this.updateSelected = function() {

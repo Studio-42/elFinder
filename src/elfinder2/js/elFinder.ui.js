@@ -165,29 +165,7 @@ elFinder.prototype.ui.prototype.command.prototype.isAllowed = function(f) {
 	return true;
 }
 
-elFinder.prototype.ui.prototype.command.prototype.ajax = function(data, callback) {
-	var self = this;
-	this.fm.lock(true);
-	$.ajax({
-		url      : this.fm.options.url,
-		data     : data,
-		dataType : 'json',
-		error    : function(t) { self.fm.view.error(t.status != '404' ? 'Invalid backend configuration!' : 'Unable to connect to backend!'); },
-		success  : function(data) {
-			self.fm.log(data)
-			self.fm.lock();
-			if (data.error) {
-				return self.fm.view.error(data.error+self.fm.ui.errorData(data.errorData));
-			}
-			if (data.warning) {
-				self.fm.view.warning(data.warning+self.fm.ui.errorData(data.errorData));
-			}
-			callback(data);
-			data.debug && self.fm.log(data.debug);
-		}
-	});
 
-}
 
 
 elFinder.prototype.ui.prototype.commands = {
@@ -396,15 +374,21 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			if (s.length == 1) {
 				f  = s[0];
-				el = this.fm.view.cwd.find('[key="'+f.hash+'"]')
+				el = this.fm.view.cwd.find('[key="'+f.hash+'"]');
 				c  = this.fm.viewMode() == 'icons' ? el.children('label') : el.find('td').eq(1);
 				n  = c.html();
 				input = $('<input type="text" />').val(f.name).appendTo(c.empty())
 					.bind('change blur', rename)
 					.keyup(function(e) {
-						if (e.keyCode == 27 || (e.keyCode == 13 && f.name == input.val())) {
+						if (e.keyCode == 27) {
 							restore();
-						} 
+						} else if (e.keyCode == 13) {
+							if (f.name == input.val()) {
+								restore();
+							} else {
+								$(this).trigger('change');
+							}
+						}
 					})
 					.keydown(function(e) {
 						e.stopPropagation();
@@ -436,6 +420,7 @@ elFinder.prototype.ui.prototype.commands = {
 					if (err) {
 						self.fm.lock();
 						self.fm.view.error(err);
+						el.addClass('ui-selected')
 						return input.select().focus();
 					}
 					
@@ -451,8 +436,12 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 		}
 		
+		/**
+		 * Return true if only one file selected and has write perms and current dir has write perms
+		 * @return Boolean
+		 */
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.cwd.write;
+			return this.fm.selected.length == 1 && this.fm.cwd.write && this.fm.cdc[this.fm.selected[0]].write;
 		}
 	},
 	
@@ -565,14 +554,19 @@ elFinder.prototype.ui.prototype.commands = {
 						width       : 370,
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
-							Ok : function() { 
+							Ok     : function() { 
 								$(this).dialog('close'); 
-								self.ajax({ cmd : 'rm', current : self.fm.cwd.hash, 'rm[]' : ids}, function(data) {
-									if (data.tree) {
-										self.fm.setNav(data.tree);
-										self.fm.setCwd(data.cwd, data.cdc);
-									}
-								});
+								self.fm.ajax({ 
+									cmd     : 'rm', 
+									current : self.fm.cwd.hash, 
+									'rm[]'  : ids
+									}, 
+									function(data) {
+										if (data.tree) {
+											self.fm.setNav(data.tree);
+											self.fm.setCwd(data.cwd, data.cdc);
+										}
+								}, true);
 							}
 						}
 					});
@@ -609,19 +603,15 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			input.select().focus()
 				.click(function(e) { e.stopPropagation(); })
-				.bind('change blur', mkdir);
+				.bind('change blur', mkdir)
+				.keydown(function(e) {
+					if (e.keyCode == 27) {
+						el.remove();
+					} else if (e.keyCode == 13) {
+						mkdir();
+					}
+				});
 
-			$(document.body).bind('keyup', keyup);
-		
-			function keyup(e) {
-				if (e.keyCode == 27) {
-					el.remove();
-					$(document.body).bind('keyup', keyup);
-				} else if (e.keyCode == 13) {
-					input.trigger('change');
-				}
-			}
-		
 			function mkdir() {
 				if (!self.fm.locked) {
 					var err, name = input.val();
@@ -632,6 +622,7 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						el.addClass('ui-selected');
 						return input.select().focus();
 					}
 					
@@ -639,7 +630,6 @@ elFinder.prototype.ui.prototype.commands = {
 						if (data.error) {
 							return input.select().focus();
 						}
-						$(document.body).unbind('keyup', keyup);
 						self.fm.setNav(data.tree);
 						self.fm.setCwd(data.cwd, data.cdc);
 					});
@@ -677,19 +667,14 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			input.select().focus()
 				.bind('change blur', mkfile)
-				.click(function(e) { e.stopPropagation(); });
-			
-			$(document.body).bind('keyup', keyup);
-
-
-			function keyup(e) {
-				if (e.keyCode == 27) {
-					el.remove();
-					$(document.body).bind('keyup', keyup);
-				} else if (e.keyCode == 13) {
-					input.trigger('change');
-				}
-			}
+				.click(function(e) { e.stopPropagation(); })
+				.keydown(function(e) {
+					if (e.keyCode == 27) {
+						el.remove();
+					} else if (e.keyCode == 13) {
+						mkfile();
+					}
+				});
 			
 			function mkfile() {
 				if (!self.fm.locked) {
@@ -701,15 +686,16 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						el.addClass('ui-selected');
 						return input.select().focus();
 					}
-					self.ajax({cmd : 'mkfile', current : self.fm.cwd.hash, name : name}, function(data) {
+					self.fm.ajax({cmd : 'mkfile', current : self.fm.cwd.hash, name : name}, function(data) {
 						if (data.error) {
+							el.addClass('ui-selected');
 							return input.select().focus();
 						}
-						$(document.body).unbind('keyup', keyup);
 						self.fm.setCwd(data.cwd, data.cdc);
-					});
+					}, true);
 				}
 			}
 			
@@ -788,6 +774,7 @@ elFinder.prototype.ui.prototype.commands = {
 					self.fm.setCwd(data.cwd, data.cdc);
 
 					data.debug && self.fm.log(data.debug);
+					data.tmb && self.fm.tmb();
 				}
 			});
 		}
@@ -829,12 +816,44 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm = fm;
 		
 		this.exec = function() {
+			var f = this.fm.getSelected()[0];
 			
+			this.fm.ajax({
+				cmd     : 'edit',
+				current : this.fm.cwd.hash,
+				file    : f.hash
+			}, function(data) {
+				var ta= $('<textarea/>').val(data.content||'').keydown(function(e) { e.stopPropagation(); });
+				$('<div/>').append(ta)
+					.dialog({
+						dialogClass : 'el-finder-dialog',
+						title   : self.fm.i18n(self.name),
+						modal   : true,
+						width   : 500,
+						buttons : {
+							Cancel : function() { $(this).dialog('close'); },
+							Ok     : function() {
+								var c = ta.val();
+								$(this).dialog('close');
+								self.fm.ajax({
+									cmd     : 'edit',
+									current : self.fm.cwd.hash,
+									file    : f.hash,
+									content : c
+								}, function(data) {
+									if (data.file) {
+										self.fm.cdc[data.file.hash] = data.file;
+									}
+								}, false, true);
+							}
+						}
+					});
+			}, false, true);
 		}
 		
 		this.isAllowed = function() {
 			var f = this.fm.getSelected();
-			return f.length == 1 && f[0].write && f[0].type != 'dir' && f[0].mime.indexOf('text') == 0;
+			return f.length == 1 && f[0].write && f[0].type != 'dir' && (f[0].mime.indexOf('text') == 0 || f[0].mime == 'application/xml' || f[0].mime == 'application/x-empty');
 		}
 	},
 	
@@ -844,9 +863,11 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm = fm;
 		
 		this.exec = function() {
-			this.ajax({
-				cmd : 'compress'
-			}, function(data) {})
+
+		}
+		
+		this.isAllowed = function() {
+			return false;
 		}
 	},
 	
@@ -930,7 +951,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.cdc[this.fm.selected[0]].write && this.fm.cdc[this.fm.selected[0]].dim;
+			return this.fm.selected.length == 1 && this.fm.cdc[this.fm.selected[0]].write && this.fm.cdc[this.fm.selected[0]].resize;
 		}
 	},
 	
