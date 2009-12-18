@@ -32,16 +32,6 @@ p.el-finder-warn {
 	color: #cc0509; 
 }
 
-p.el-finder-quest {
-	background: #d6eeff;
-	border-color:#2c47a5;
-	color: #444; 
-}
-
-p.el-finder-quest div {
-	background-position:0 -491px;
-}
-
 
 /* file manager window */
 .el-finder {
@@ -130,15 +120,14 @@ p.el-finder-quest div {
 
 .el-finder-spinner {
 	position:absolute;
-	top:40%;
-	left:45%;
-	width:50px;
+	top:37%;
+	left:37%;
+	width:250px;
 	height:50px;
 	background:#fff url(../images/spinner.gif) 50% 50% no-repeat;
-	border:1px solid #ccc;
-	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
 	display:none;
 }
+
 /* error in workzone */
 .el-finder-workzone p.el-finder-err {
 	display:none;
@@ -692,4 +681,80 @@ div.el-finder-drag-helper label {
 }
 
 
+/************************************/
+/*             QuickLook            */
+/************************************/
+
+.el-finder-ql, 
+.el-finder-ql-bg {
+	position:absolute;
+	z-index:10;	
+	border-radius:12px; 
+	-moz-border-radius:12px; 
+	-webkit-border-radius:12px;
+}
+
+.el-finder-ql-bg {
+	background-color:#000;
+}
+
+.el-finder-ql {
+	z-index:12;
+
+	color:#fff;
+	text-align:center;
+	font:.9em trebuchet ms,lucida grande,verdana,sans-serif;
+/*	border:1px solid #000;*/
+}
+
+.el-finder-ql strong, .el-finder-ql img {
+	display:block;
+}
+
+.el-finder-ql img {
+	margin:12px auto;
+	border-radius:3px; 
+	-moz-border-radius:5px; 
+	-webkit-border-radius:5px;
+/*	border:1px solid #fff;*/
+/*	position:absolute;*/
+}
+
+.el-finder-ql-info {
+/*	border:1px solid #fff;*/
+	height:100px;
+}
+
+.el-finder-ql-info a {
+	color: #fff;
+}
+
+.el-finder-ql-info div { font-size:12px; font-weight:bold;}
+
+.el-finder-icon {
+	width:48px;
+	height:48px;
+	margin:12px auto;
+/*	border:1px solid #fff;*/
+}
+
+.el-finder-icon p {
+	width:48px;
+	height:48px;
+	border-radius:3px; 
+	-moz-border-radius:5px; 
+	-webkit-border-radius:5px;
+/*	border:1px solid #fff;*/
+	background: url('../images/icons-big.png') -1px 1px no-repeat;
+	padding:0;
+	margin:0;
+}
+
+.el-finder-icon .directory   { background-position:  0     -45px; }
+.el-finder-icon .application { background-position: -1px  -134px; }
+.el-finder-icon .audio       { background-position: -1px -1082px; }
+.el-finder-icon .image       { background-position: -1px -1132px; }
+.el-finder-icon .text ,
+.el-finder-icon .x-empty     { background-position: -1px  -524px; }
+.el-finder-icon .video       { background-position: -1px -1032px; }
 

@@ -25,6 +25,10 @@ elFinder.prototype.ui = function(fm) {
 		return self.cmd[cmd] && self.cmd[cmd].isAllowed();
 	}
 	
+	this.execIfAllowed = function(cmd) {
+		this.isCmdAllowed(cmd) && this.exec(cmd);
+	}
+	
 	this.showMenu = function(e) {
 		this.hideMenu();
 		var id = '';
@@ -114,12 +118,11 @@ elFinder.prototype.ui = function(fm) {
 	this.init = function(disabled) {
 		var i, j, n, c=false, t = this.fm.options.toolbar;
 		if (!this.fm.options.editorCallback) {
-			disabled.push('select')
+			disabled.push('select');
 		}
 		for (i in this.commands) {
 			if ($.inArray(i, disabled) == -1) {
 				this.commands[i].prototype = this.command.prototype;
-				// this.commands[i].prototype = elFinderUI.prototype.command.prototype;
 				this.cmd[i] = new this.commands[i](this.fm);
 			}
 		}
@@ -137,7 +140,6 @@ elFinder.prototype.ui = function(fm) {
 						.appendTo(this.fm.view.tlb)
 						.bind('click', (function(ui){ return function() {  
 								if (!$(this).hasClass('disabled')) {
-									// ui.fm.log($(this).attr('class'))
 									ui.exec($.trim($(this).attr('class')));
 								}
 							} })(this)
@@ -153,7 +155,7 @@ elFinder.prototype.ui = function(fm) {
 				zindex = z+1;
 			}
 		})
-		this.menu.css('z-index', zindex)
+		this.menu.css('z-index', zindex);
 	}
 
 }
@@ -268,32 +270,21 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class. Call this.fm.options.editorCallback with argument = selected file url
+	 * @ class. Return file url
 	 * @ param Object  elFinder
 	 **/
 	select : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Select file';
-		this.fm  = fm;
+		this.fm   = fm;
 		
 		this.exec = function() { 
-			var s = this.fm.getSelected();
-			if (this.fm.options.editorCallback && s[0]) {
-				if (s[0].url) {
-					this.fm.options.editorCallback(s[0].url);
-				} else if (s[0].type == 'link' && !s[0].link) {
-					this.fm.options.editorCallback('');
-				} else {
-					this.fm.ajax({ cmd: 'geturl', current : this.fm.cwd.hash, file : s[0].hash}, function(data) {
-						self.fm.options.editorCallback(data.url||'');
-					});
-				}
-			}
+			this.fm.options.editorCallback(this.fm.fileURL());
 		}
 				
 		this.isAllowed = function() {
 			var s = this.fm.getSelected();
-			return s.length == 1 && s[0].type != 'dir';
+			return s.length == 1 && s[0].mime != 'directory' && !s[0].broken;
 		}
 	},
 	
@@ -302,16 +293,17 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @ param Object  elFinder
 	 **/
 	info : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Get info';
-		this.fm  = fm;
+		this.fm   = fm;
 		
 		/**
 		 * Open dialog windows for each selected file/folder or for current folder
 		 **/
 		this.exec = function() {
-			var f, s;
-			if (!this.fm.selected.length) {
+			var f, s, cnt = this.fm.selected.length;
+			self.fm.keydown = false;
+			if (!cnt) {
 				/** nothing selected - show cwd info **/
 				f      = self.fm.cwd;
 				f.type = 'dir';
@@ -325,7 +317,6 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function info(f) {
-
 				var tb = $('<table cellspacing="0" />')
 					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Name'))).append($('<td />').text(f.name)))
 					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Kind'))).append($('<td />').text(self.fm.view.kind(f))));
@@ -352,9 +343,9 @@ elFinder.prototype.ui.prototype.commands = {
 				}	
 				$('<div />').append(tb).dialog({
 					dialogClass : 'el-finder-dialog',
-					title   : self.fm.i18n(f.type == 'dir' ? 'Folder info' : 'File info'),
-					// width   : 450,
-					buttons : { Ok : function() { $(this).dialog('close'); }}
+					title       : self.fm.i18n(f.type == 'dir' ? 'Folder info' : 'File info'),
+					close       : function() { if (--cnt <= 0) { self.fm.keydown = true; } },
+					buttons     : { Ok : function() { $(this).dialog('close'); }}
 				});
 			}
 		}
@@ -362,12 +353,12 @@ elFinder.prototype.ui.prototype.commands = {
 	
 	/**
 	 * @ class Rename file/folder
-	 * @ param Object  elFinder
+	 * @ param Object elFinder
 	 **/
 	rename : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Rename';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 			var s = this.fm.getSelected(), el, c, input, f, n;
@@ -379,7 +370,8 @@ elFinder.prototype.ui.prototype.commands = {
 				n  = c.html();
 				input = $('<input type="text" />').val(f.name).appendTo(c.empty())
 					.bind('change blur', rename)
-					.keyup(function(e) {
+					.keydown(function(e) {
+						e.stopPropagation();
 						if (e.keyCode == 27) {
 							restore();
 						} else if (e.keyCode == 13) {
@@ -389,9 +381,6 @@ elFinder.prototype.ui.prototype.commands = {
 								$(this).trigger('change');
 							}
 						}
-					})
-					.keydown(function(e) {
-						e.stopPropagation();
 					})
 					.click(function(e) { e.stopPropagation(); })
 					.select()
@@ -483,17 +472,17 @@ elFinder.prototype.ui.prototype.commands = {
 		this.exec = function() {
 			var i, f, r, msg = '';
 			
-			if (!this.fm.buffer.target) {
-				this.fm.buffer.target = this.fm.cwd.hash;
+			if (!this.fm.buffer.dst) {
+				this.fm.buffer.dst = this.fm.cwd.hash;
 			}
-			if (!this.fm.dirs[this.fm.buffer.target].write) {
-				return this.fm.view.error('Access denied!');
+			if (!this.fm.dirs[this.fm.buffer.dst].write) {
+				return this.fm.view.error('Access denied');
 			}
-			if (this.fm.buffer.src == this.fm.buffer.target) {
-				return this.fm.view.error('Unable to copy files into himselves!');
+			if (this.fm.buffer.src == this.fm.buffer.dst) {
+				return this.fm.view.error('Unable to copy into itself');
 			}
 			/* check for files with same names and propmt to overwrite (not for dragndrop moving) */
-			if (this.fm.buffer.target == this.fm.cwd.hash) {
+			if (this.fm.buffer.dst == this.fm.cwd.hash) {
 				for (i=0; i<this.fm.buffer.names.length; i++) {
 					f = this.fm.buffer.names[i];
 					if (this.fm.fileExists(f)) {
@@ -502,7 +491,7 @@ elFinder.prototype.ui.prototype.commands = {
 				}
 
 				if (msg) {
-					r = confirm(this.fm.i18n('Following files/folders already exists in this location:')+"\n\n"+msg+"\n"+this.fm.i18n('Do you want to replace it with the one you’re moving?')) 
+					r = confirm(this.fm.i18n('Following files/folders already exists in this location:')+"\n\n"+msg+"\n"+this.fm.i18n('Do you want to replace it with the one you’re moving?')); 
 					if (!r) {
 						return;
 					}
@@ -514,14 +503,14 @@ elFinder.prototype.ui.prototype.commands = {
 				current   : this.fm.cwd.hash,
 				'files[]' : this.fm.buffer.files,
 				src       : this.fm.buffer.src,
-				target    : this.fm.buffer.target,
+				dst       : this.fm.buffer.dst,
 				cut       : this.fm.buffer.cut
 			}, function(data) {
 				if (data.tree) {
 					self.fm.setNav(data.tree);
 					self.fm.setCwd(data.cwd, data.cdc);
 				}
-			});
+			}, true);
 		}
 		
 		
@@ -544,14 +533,15 @@ elFinder.prototype.ui.prototype.commands = {
 				ids.push(s[i].hash);
 			};
 			if (ids.length) {
-				
+				this.fm.keydown = false;
 				$('<div/>').append($('<p/>').addClass('el-finder-err el-finder-warn')
 						.append('<div/>').append(this.fm.i18n('Are you shure you want to remove files?<br /> This cannot be undone!'))
 					)
 					.dialog({
 						title       : this.fm.i18n('Confirmation required'),
 						dialogClass : 'el-finder-dialog',
-						width       : 370,
+						width       : 350,
+						close       : function() { self.fm.keydown = true; },
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
 							Ok     : function() { 
@@ -605,6 +595,7 @@ elFinder.prototype.ui.prototype.commands = {
 				.click(function(e) { e.stopPropagation(); })
 				.bind('change blur', mkdir)
 				.keydown(function(e) {
+					e.stopPropagation();
 					if (e.keyCode == 27) {
 						el.remove();
 					} else if (e.keyCode == 13) {
@@ -647,9 +638,9 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @ param Object  elFinder
 	 **/
 	mkfile : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'New text file';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 			var n     = this.fm.uniqueName('untitled file', '.txt'),
@@ -669,6 +660,7 @@ elFinder.prototype.ui.prototype.commands = {
 				.bind('change blur', mkfile)
 				.click(function(e) { e.stopPropagation(); })
 				.keydown(function(e) {
+					e.stopPropagation();
 					if (e.keyCode == 27) {
 						el.remove();
 					} else if (e.keyCode == 13) {
@@ -707,9 +699,9 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	upload : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Upload files';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 
@@ -725,11 +717,13 @@ elFinder.prototype.ui.prototype.commands = {
 						$('<div><input type="file" name="fm-file[]"/></div>').appendTo(f);
 					});
 
+			this.fm.keydown = false;
 			d.append(err.hide()).append(f).append(b).dialog({
 				dialogClass : 'el-finder-dialog',
 				title     : self.fm.i18n('Upload files'),
 				modal     : true,
 				resizable : false,
+				close     : function() { self.fm.keydown = true; },
 				buttons   : {
 					Cancel : function() { $(this).dialog('close'); },
 					Ok     : function() { f.submit(); }
@@ -819,7 +813,7 @@ elFinder.prototype.ui.prototype.commands = {
 			var f = this.fm.getSelected()[0];
 			
 			this.fm.ajax({
-				cmd     : 'edit',
+				cmd     : 'read',
 				current : this.fm.cwd.hash,
 				file    : f.hash
 			}, function(data) {
@@ -848,7 +842,7 @@ elFinder.prototype.ui.prototype.commands = {
 							}
 						}
 					});
-			}, false, true);
+			});
 		}
 		
 		this.isAllowed = function() {
@@ -882,29 +876,27 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	resize : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Resize image';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 			var s = this.fm.getSelected();
 			if (s[0] && s[0].write && s[0].dim) {
 				var size = s[0].dim.split('x'), 
-					w = parseInt(size[0]), 
-					h = parseInt(size[1]), rel = w/h;
-				
-				var iw = $('<input type="text" size="9" value="'+w+'" name="width"/>')
-				var ih = $('<input type="text" size="9" value="'+h+'" name="height"/>')
-				self.fm.log(w + ' ' + h+' '+rel)
-				var f = $('<form/>')
-					.append(iw).append(' x ').append(ih).append(' px')
-				iw.add(ih).bind('change', calc)
-				
+					w  = parseInt(size[0]), 
+					h  = parseInt(size[1]), rel = w/h
+					iw = $('<input type="text" size="9" value="'+w+'" name="width"/>'),
+					ih = $('<input type="text" size="9" value="'+h+'" name="height"/>'),
+					f  = $('<form/>').append(iw).append(' x ').append(ih).append(' px');
+				iw.add(ih).bind('change', calc);
+				this.fm.keydown = false;
 				var d = $('<div/>').append($('<div/>').text(self.fm.i18n('New image dimensions')+':')).append(f).dialog({
 					title : self.fm.i18n('Resize image'),
 					dialogClass : 'el-finder-dialog',
 					width : 230,
 					modal : true,
+					close : function() { self.fm.keydown = true; },
 					buttons : {
 						Cancel : function() { $(this).dialog('close'); },
 						Ok     : function() {
@@ -912,23 +904,20 @@ elFinder.prototype.ui.prototype.commands = {
 								_h = parseInt(ih.val()) || 0;
 							if (_w>0 && _w != w && _h>0 && _h != h) {
 								self.fm.ajax({
-									cmd : 'resize',
+									cmd     : 'resize',
 									current : self.fm.cwd.hash,
-									file : s[0].hash,
-									width : _w,
-									height : _h
+									file    : s[0].hash,
+									width   : _w,
+									height  : _h
 								},
 								function (data) {
-									self.fm.log(data)
 									data.cwd && self.fm.setCwd(data.cwd, data.cdc);
-								}
-								);
+								});
 							}
 							$(this).dialog('close');
 						}
 					}
-				})
-				
+				});
 			} 
 			
 			function calc() {
