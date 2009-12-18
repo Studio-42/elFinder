@@ -13,11 +13,12 @@
 		this.vm = '';
 		this.loaded = false;
 		this.locked = false;
+		this.keydown = true;
 		
 		this.options = $.extend({}, this.options, o);
 		
 		if (!this.options.url) {
-			alert('Invalid configuration! You need to set url option.');
+			alert('Invalid configuration! You need to set URL option.');
 			return;
 		}
 		
@@ -37,10 +38,11 @@
 		 * @param  callback Function  
 		 *
 		 */
-		this.ajax = function(data, callback, continueOnErr, post) {
+		this.ajax = function(data, callback, continueOnErr, post, sync) {
 			this.lock(true);
 
 			$.ajax({
+				async    : !sync,
 				url      : this.options.url,
 				type     : post ? 'POST' : 'GET',
 				data     : data,
@@ -52,21 +54,14 @@
 
 					if (data.error) {
 						self.view.error(data.error, data.errorData) 
-						if (continueOnErr) {
-							callback(data);
-						} else {
+						if (!continueOnErr) {
 							return;
 						}
 					}
-					if (data.warning) {
-						self.view.warning(data.warning, data.errorData);
-					}
-					// self.log(data)
 					callback(data);
 					data.debug && self.log(data.debug);
 					/* tell connector to generate thumbnails */
 					data.tmb && self.tmb();
-
 				}
 			});
 		}
@@ -126,7 +121,9 @@
 		
 		this.lock = function(lock) {
 			this.view.spinner( (this.locked = lock) );
+			this.keydown = !lock; 
 		}
+		
 		
 		this.viewMode = function(m) {
 			if (!m) {
@@ -140,10 +137,7 @@
 					this.cookie('el-finder-view', m, {expires : 1, path : '/'});
 				}
 			}
-			
 			return this.vm;
-			
-			
 		}
 		
 		/**
@@ -152,7 +146,7 @@
 		 */
 		this.setNav = function(tree) {
 			this.view.renderNav(tree);
-
+			
 			this.view.tree
 				.find('li').children('ul').each(function(i) {
 					var ul = $(this);
@@ -323,13 +317,12 @@
 			}
 		}
 		
-		this.getSelected = function() {
+		this.getSelected = function(ndx) {
 			var i, s = [];
 			for (i=0; i<this.selected.length; i++) {
-				var f = this.cdc[this.selected[i]];
-				f && s.push(f);
+				this.cdc[this.selected[i]] && s.push(this.cdc[this.selected[i]]);
 			}
-			return s;
+			return ndx>=0 && ndx<s.length ? s[ndx] : s;
 		}
 		
 		this.updateSelected = function() {
@@ -348,13 +341,13 @@
 			self.view.cwd.find('[class*="ui-selected"]').removeClass('ui-selected');
 		}
 		
-		this.setBuffer = function(files, cut, target) {
+		this.setBuffer = function(files, cut, dst) {
 			this.buffer = {
-				src    : this.cwd.hash,
-				target : target,
-				files  : [],
-				names  : [],
-				cut    : cut||0
+				src   : this.cwd.hash,
+				dst   : dst,
+				files : [],
+				names : [],
+				cut   : cut||0
 			};
 			
 			for (var i=0; i<files.length; i++) {
@@ -372,9 +365,7 @@
 		}
 		
 		this.isValidName = function(n) {
-			self.log(self.dotFiles)
 			return self.dotFiles ? n.match(/^[^\\\/\<\>]+$/) : n.match(/^[^\.\\\/\<\>][^\\\/\<\>]*$/);
-			return n.match(/^[^\.\\\/\<\>][^\\\/\<\>]/g);
 		}
 		
 		this.fileExists = function(n) {
@@ -384,6 +375,21 @@
 				}
 			}
 			return false;
+		}
+		
+		this.fileURL = function() {
+			var url = '', s = this.getSelected();
+			
+			if (s.length == 1 && s[0].mime != 'directory' && !s['broken']) {
+				if (s[0].url) {
+					url = s[0].url;
+				} else {
+					this.ajax({cmd : 'geturl', current : self.cwd.hash, file : s[0].hash}, function(data) {
+						url = data.url||'';
+					}, true, false, true);
+				}
+			}
+			return url;		
 		}
 		
 		this.uniqueName = function(n, ext) {
@@ -402,6 +408,19 @@
 			return name.replace('100', '')+Math.random()+ext;
 		}
 		
+		this.checkSelectedPos = function(last) {
+			if (self.selected.length) {
+				var s = self.view.cwd.find('.ui-selected:'+(last ? 'last' : 'first')).eq(0),
+					p = s.position(),
+					h = s.outerHeight(),
+					ph = self.view.cwd.height();
+				if (p.top < 0) {
+					self.view.cwd.scrollTop(p.top+self.view.cwd.scrollTop()-2);
+				} else if (ph - p.top < h) {
+					self.view.cwd.scrollTop(p.top+h-ph+self.view.cwd.scrollTop());
+				}
+			}
+		}
 		
 		if (!this.loaded) {
 			// this.cookie('el-finder-places', '', {expires : -1, path : '/'});
@@ -415,7 +434,7 @@
 			this.lock(true);
 
 			this.ajax({}, function(data) {
-				self.log(data)
+				// self.log(data)
 				self.setNav(data.tree)
 				self.setCwd(data.cwd, data.cdc);
 				self.lock();
@@ -458,8 +477,8 @@
 						stop   : function() { self.updateSelected(); }
 					})
 					.find('(div,tr)[key]').live('dblclick', function(e) {
-						/* if editorCallback is set and dblclick on file */
-						if (self.options.editorCallback && !$(this).hasClass('directory')) {
+						/* if editorCallback is set, dblclick on file call select command */
+						if (self.ui.isCmdAllowed('select')) {
 							self.ui.exec('select');
 						} else {
 							self.ui.exec('open');
@@ -467,70 +486,156 @@
 					});
 					
 					/* bind shortcuts */
-					$(document).keydown(function(e) {
-
-						if ((e.ctrlKey || e.metaKey)) {
-							self.log(e.keyCode)
-							switch (e.keyCode) {
-								case 67:
-									self.ui.isCmdAllowed('copy') && self.ui.exec('copy');
-									break;
-								case 88:
-									self.ui.isCmdAllowed('cut') && self.ui.exec('cut');
-									break;
-								case 86:
-									self.ui.isCmdAllowed('paste') && self.ui.exec('paste');
-									break;
-								case 73:
+					$(document).bind('keydown', function(e) {
+						if (!self.keydown) {
+							return;
+						}
+						// self.log(e.keyCode);
+						var meta = e.ctrlKey||e.metaKey;
+						switch (e.keyCode) {
+							/* command+backspace - delete */
+							case 8:
+								if (meta && self.ui.isCmdAllowed('rm')) {
 									e.preventDefault();
-									self.ui.exec('info');
-									break;
-								case 65:
+									self.ui.exec('rm');
+								} 
+								break;
+							/* Enter - exec "select" command if enabled, otherwise exec "open" */	
+							case 13:
+								if (self.ui.isCmdAllowed('select')) {
+									return self.ui.exec('select');
+								}
+								self.ui.execIfAllowed('open');
+								break;
+								
+							case 32:
+								if (self.selected.length == 1) {
+									self.view.quickLook();
+									// var s = self.getSelected();
+									// var f = s[0];
+									// 
+									// self.checkSelectedPos(true)
+									// 
+									// var el = self.view.cwd.find('[key="'+f.hash+'"]').eq(0);
+									// var p = el.position()
+									// // self.log(el)
+									// self.log(p)
+									// self.log(el.height())
+									// self.log(self.view.cwd.height())
+									// self.view.cwd.scrollTop(p.top+el.height()-self.view.cwd.height())
+									// self.log(f.mime)
+									// if (!f.mime.match(/image\/(jpeg|png|gif)/)) {
+									// 	return
+									// }
+									// var url = self.fileURL()
+									// self.log(url)
+									// var img = new Image();
+									// $(img).bind('load', function() {
+									// 	self.log('load')
+									// 	$(document.body).append($(this).css({position : 'absolute', left : 0, top : 0}))
+									// }).attr('src', url);
+									
+									
+								}
+								break;
+								
+							/* arrows left/up. with Ctrl - command "back", w/o - move selection */
+							case 37:
+							case 38:
+								if (e.keyCode == 37 && meta) {
+									return self.ui.execIfAllowed('back');
+								}
+								if (!self.selected.length) {
+									self.view.cwd.find('[key]:last').addClass('ui-selected');
+								} else {
+									var id = self.selected[0],
+										el = self.view.cwd.find('[key="'+id+'"]:first'),
+										p  = el.prev();
+									if (!e.shiftKey) {
+										self.view.cwd.find('[key]').removeClass('ui-selected');
+									}
+									if (p.length) {
+										p.addClass('ui-selected');
+									} else {
+										el.addClass('ui-selected');
+									}
+								}
+								self.updateSelected();
+								self.checkSelectedPos();
+								self.view.updateQuickLook();
+								break;
+							/* arrows right/down. with Ctrl - command "open", w/o - move selection  */
+							case 39:
+							case 40:
+								if (meta) {
+									return self.ui.execIfAllowed('open');
+								}
+								if (!self.selected.length) {
+									self.view.cwd.find('[key]:first').addClass('ui-selected');
+								} else {
+									var id = self.selected[self.selected.length-1],
+										el = self.view.cwd.find('[key="'+id+'"]:last'),
+										n  = el.next();
+									if (!e.shiftKey) {
+										self.view.cwd.find('[key]').removeClass('ui-selected');
+									}
+									if (n.length) {
+										n.addClass('ui-selected');
+									} else {
+										el.addClass('ui-selected');
+									}
+								}
+								self.updateSelected();
+								self.checkSelectedPos(true);
+								self.view.updateQuickLook();
+								break;
+							/* Delete */
+							case 46:
+								self.ui.execIfAllowed('rm');
+								break;
+							/* Ctrl+A */
+							case 65:
+								if (meta) {
 									e.preventDefault();
 									self.view.cwd.find('(div,tr)[key]').addClass('ui-selected');
 									self.updateSelected();
-									break;
-								case 8:
-									e.preventDefault();
-									self.ui.isCmdAllowed('rm') && self.ui.exec('rm');
-									break;
-								case 37:
-									e.preventDefault();
-									self.history.length && self.ui.exec('back');
-									break;
-								case 85:
-									if (self.ui.isCmdAllowed('upload')) {
-										e.preventDefault();
-										self.ui.exec('upload');
-									}
-									break;
-								case 40:
-									self.selected.length == 1 && self.ui.exec('open');
-									break;
-							} 
-						} else {
-							if ((e.keyCode == 37 || e.keyCode == 38) && self.selected.length == 1) {
-								var p, e = self.view.cwd.find('[key="'+self.selected[0]+'"]');
-								if (e) {
-									p = e.prev('[key]');
-									if (p.length) {
-										e.removeClass('ui-selected');
-										p.addClass('ui-selected');
-										self.updateSelected();
-									}
 								}
-							} else if ((e.keyCode == 39 || e.keyCode == 40) && self.selected.length == 1) {
-								var n, e = self.view.cwd.find('[key="'+self.selected[0]+'"]');
-								if (e) {
-									n = e.next('[key]');
-									if (n.length) {
-										e.removeClass('ui-selected');
-										n.addClass('ui-selected');
-										self.updateSelected();
-									}
+								break;
+							/* Ctrl+C */
+							case 67:
+								meta && self.ui.execIfAllowed('copy');
+								break;
+							/* Ctrl+I - get info */	
+							case 73:
+								if (meta) {
+									e.preventDefault();
+									e.stopPropagation();
+									self.ui.exec('info');
 								}
-							}
+								break;
+							case 78:
+								if (meta) {
+									e.preventDefault();
+									self.ui.execIfAllowed('mkdir');
+								}
+								break;
+							/* Ctrl+U - upload files */
+							case 85:
+								if (meta) {
+									e.preventDefault();
+									self.ui.execIfAllowed('upload');
+								}
+								break;
+							/* Ctrl+V */
+							case 86:
+								meta && self.ui.execIfAllowed('paste');
+								break;
+							/* Ctrl+X */
+							case 88:
+								meta && self.ui.execIfAllowed('cut');
+								break;
 						}
+						
 					});
 				
 			});

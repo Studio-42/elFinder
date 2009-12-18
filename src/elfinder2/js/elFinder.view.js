@@ -85,6 +85,12 @@ elFinder.prototype.view = function(fm, el) {
 		.append(this.wrz)
 		.append(this.stb);
 
+	this.qlNfo = $('<p class="el-finder-ql-info"/>')
+	this.qlIco = $('<div class="el-finder-icon"/>').append('<p/>').hide()
+	this.qlImg = $('<img/>').hide()
+	this.ql = $('<div class="el-finder-ql"/>').hide().append(this.qlImg).append(this.qlIco).append(this.qlNfo).appendTo(document.body);
+	this.qlBg = $('<div class="el-finder-ql-bg"/>').hide().appendTo(document.body);	
+
 
 	this.spinner = function(show) {
 		if (show) {
@@ -107,20 +113,9 @@ elFinder.prototype.view = function(fm, el) {
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 5000);
 	}
 	
-	this.warning = function(warn, data) {
-		warn = this.fm.i18n(warn)+this.formatErrorData(data);
-		this.msg.addClass('el-finder-warn').show().children('strong').empty().html(warn)
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 2000);
-	}
-	
-	this.message = function(m) {
-		this.msg.empty().removeClass('el-finder-error').removeClass('el-finder-warning').text(self.fm.i18n(m)).show();
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 2000);
-	}
-
 	this.renderNav = function(tree) {
 		this.tree = $(traverse(tree, true)).appendTo(this.nav.empty()).addClass('el-finder-tree');
-		self.fm.log(self.fm.dirs)
+
 		if (this.fm.options.places) {
 			this.places = $('<ul class="el-finder-places"><li><div class="dir-handler"></div><strong>'+this.fm.i18n(this.fm.options.places)+'</strong></li></ul>');
 			if (this.fm.options.placesFirst) {
@@ -146,9 +141,9 @@ elFinder.prototype.view = function(fm, el) {
 				} else if (!tree[i].write) {
 					c = 'readonly';
 				} 
-				html += '<li><div class="dir-handler'+(tree[i].dirs ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+hash+'">'+tree[i].name+'</a>'
+				html += '<li><div class="dir-handler'+(tree[i].dirs.length ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+hash+'">'+tree[i].name+'</a>'
 
-				if (tree[i].dirs) {
+				if (tree[i].dirs.length) {
 					html += traverse(tree[i].dirs);
 				}
 				html += '</li>';
@@ -251,6 +246,171 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.tmb = function(p, url) {
 		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'))
+	}
+
+	this.quickLook = function() {
+		
+		// self.fm.log(this.ql.css('display'))
+		var w, h, l, t, f, el, o;
+		if (this.ql.css('display') == 'none') {
+			/* open quickLook */
+			el = self.cwd.find('.ui-selected:first');
+			o = el.offset();
+			w = 350;
+			h = 300;
+			l = ($(window).width() - w)/2;
+			t = ($(window).height() - h)/2;
+			
+			self.updateQuickLook(true);
+			this.ql.add(this.qlBg).css({
+				width : el.width(),
+				height : el.height(),
+				left : o.left,
+				top : o.top,
+				opacity : 0
+			}).animate({
+				width : 350,
+				height:200,
+				left : ($(window).width() - w)/2,
+				top : ($(window).height() - h)/2,
+				opacity : .8
+			}, 300, function() {   })
+			
+		} else {
+			/* close quickLook */
+			this.closeQuickLook();
+		}
+	}
+
+	this.updateQuickLook = function(force) {
+		var f = self.fm.getSelected(0);
+		
+		if (!this.ql.is(':visible') && !force) {
+			// self.fm.log('emty')
+			return;
+		}
+		
+		if (this.ql.is(':visible')) {
+			this.qlBg.animate({height : 200}, 200)
+			this.ql.fadeOut(300, function() {
+				load();
+				setTimeout(prev, 300);
+				// prev()
+			})
+		} else {
+			load()
+			setTimeout(prev, 400); //prev()
+		}
+		
+		function prev() {
+			self.fm.log(self.ql.is(':animated') )
+			if (!self.ql.is(':animated') && f.mime.match(/^image\/(jpeg|png|gif)$/)) {
+				var url = self.fm.fileURL();
+				if (url) {
+					self.qlImg.attr('src', url).unbind('load').load(function() {
+						var iw = $(this).width(),
+							ih = $(this).height(),
+							r = Math.min(Math.min(300, iw)/iw, Math.min(200, ih)/ih),
+							w = Math.round(r*iw),
+							h = Math.round(r*ih);
+						self.qlIco.hide();
+						$(this).css({
+							width : 48,
+							height : 48,
+							opacity : .8,
+							border: '1px solid #fff',
+						}).show().animate({
+							width : w,
+							height : h,
+							border : '0px solid',
+							opacity : 1
+						}, 400);
+						self.qlBg.animate({
+							height : h+self.qlNfo.height()+42
+						}, 430);
+					})
+				}
+			}
+		}
+		
+		function load() {
+			
+			var c = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace(/\./g, '-');
+
+			self.qlNfo.empty()
+				.append($('<strong/>').text(f.name))
+				.append($('<div/>').text(self.kind(f)))
+				.append($('<div/>').text(self.formatSize(f.size)))
+				.append($('<div/>').text(self.fm.i18n('Modified')+': '+self.formatDate(f.date)));
+			f.dim && self.qlNfo.append($('<div/>').text(f.dim));
+			f.url && self.qlNfo.append($('<div/>').append($('<a/>').attr('href', f.url).text(f.url)));
+			self.qlImg.hide().attr('src', '').css({width : '', height: ''});
+			self.qlIco.show().children('p').attr('class', c).css({'background' : '', 'border' : ''});
+			f.tmb && self.qlIco.children('p').css('background', 'url("'+f.tmb+'") 0 0 no-repeat').css('border', '1px solid #fff');
+			self.ql.show()
+		}
+		
+		return;
+		
+		
+		this.qlPrev.hide().attr('src', '').css({width : '', height: ''})
+		this.qlIco.show().children('p').attr('class', c).css({'background' : '', 'border' : ''})
+		if (f.tmb) {
+			this.qlIco.children('p').css('background', 'url("'+f.tmb+'") 0 0 no-repeat').css('border', '1px solid #fff')
+		}
+		if (f.mime.match(/^image\/(jpeg|png|gif)$/)) {
+			// self.fm.log('image')
+			var url = this.fm.fileURL();
+			this.fm.log(url)
+			if (url) {
+				this.qlPrev.attr('src', url).unbind('load').load(function() {
+					self.fm.log($(this).width()+' '+$(this).height())
+					var imageWidth = $(this).width();
+					var imageHeight = $(this).height();
+					var r = Math.min(Math.min(300, imageWidth) / imageWidth, Math.min(200, imageHeight) / imageHeight);
+					var w = Math.round(r * imageWidth);
+					var h = Math.round(r * imageHeight)
+					self.qlIco.hide();
+					$(this).css({width : 48, height: 48}).show().animate({
+						width : w,
+						height : h,
+					}, 500)
+					self.qlBg.animate({
+						height : h+self.qlNfo.height()+42
+					}, 450)
+				})
+				
+			}
+			// this.qlPrev.attr('src', )
+		}
+
+		
+
+	}
+
+	this.closeQuickLook = function() {
+		if (this.ql.css('display') != 'none') {
+			var o, w, h, t, l, el = this.cwd.find('.ui-selected:first');
+			if (el.length) {
+				w = el.width();
+				h = el.height();
+				o = el.offset();
+				t = o.top;
+				l = o.left;
+			} else {
+				w = h = 74;
+				l = ($(window).width()-74)/2;
+				t = ($(window).height()-74)/2;
+			}
+
+			this.ql.add(this.qlBg).animate({
+				width : w,
+				height : h,
+				left : l,
+				top : t,
+				opacity : 0
+			}, 400, function() { self.ql.hide(); self.qlNfo.empty(); self.qlIco.children('p').css({'background' : '', 'border' : ''}); self.qlIco.hide(); self.qlImg.hide().attr('src', '');  })
+		}
 	}
 
 	this.updateSelected = function() {
