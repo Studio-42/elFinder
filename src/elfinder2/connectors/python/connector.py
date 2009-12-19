@@ -69,6 +69,7 @@ class elFinder():
 	}
 
 	_request = {}
+	_response = {}
 	_errorData = {}
 
 
@@ -84,7 +85,6 @@ class elFinder():
 			if field in form:
 				self._request[field] = form.getvalue(field)
 
-		response = {}		
 		# print self._request
 		if 'cmd' in self._request:
 			if self._request['cmd'] in self._commands:
@@ -92,19 +92,19 @@ class elFinder():
 				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
 				if callable(func):
 					if cmd == '__open':
-						response = func(False)
+						func(False)
 					else:
-						response = func()
+						func()
 		else:
-			response['disabled'] = self._options['disabled']
-			response.update(self.__reload())
-			# print self.__reload()
+			self._response['disabled'] = self._options['disabled']
+			# response.update(self.__reload())
+			self.__reload()
 		
 		if self._errorData:
-			response['errorData'] = self._errorData
+			self._response['errorData'] = self._errorData
 
 		print "Content-type: text/html\n"
-		print simplejson.dumps(response)
+		print simplejson.dumps(self._response)
 
 
 	def __open(self, tree):
@@ -146,21 +146,18 @@ class elFinder():
 			sys.exit(0);
 		# try dir
 		else:
-			response = {}
 			path = self._options['root']
 
 			if 'target' in self._request:
 				target = self.__findDir(self._request['target'], None)
 				if not target:
-					response['warning'] = 'Directory does not exists'
+					self._response['error'] = 'Invalid parameters'
 				elif not self.__isAllowed(target, 'read'):
-					response['warning'] = 'Access denied!'
+					self._response['error'] = 'Access denied!'
 				else:
 					path = target
 
-			response.update(self.__content(path, tree))
-
-			return response
+			self.__content(path, tree)
 		pass
 
 
@@ -170,7 +167,6 @@ class elFinder():
 
 	def __rename(self):
 		"""Rename file or dir"""
-		response = {}
 		current = name = target = None
 		curDir = curName = newName = None
 		if 'name' in self._request and 'current' in self._request and 'target' in self._request:
@@ -182,26 +178,23 @@ class elFinder():
 			newName = os.path.join(curDir, name)
 
 		if not curDir or not curName:
-			response['error'] = 'File does not exists'
+			self._response['error'] = 'File does not exists'
 		elif not self.__isAllowed(curDir, 'write'):
-			response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
+			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newName):
-			response['error'] = 'File or folder with the same name already exists'
+			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
 				os.rename(curName, newName)
-				response = self.__content(curDir, os.path.isdir(newName))
+				self.__content(curDir, os.path.isdir(newName))
 			except:
-				response['error'] = 'Unable to rename file'
-
-		return response
+				self._response['error'] = 'Unable to rename file'
 
 
 	def __mkdir(self):
 		"""Create new directory"""
-		response = {}
 		current = None
 		path = None
 		newDir = None
@@ -212,26 +205,23 @@ class elFinder():
 			newDir = os.path.join(path, name)
 
 		if not path:
-			response['error'] = 'Invalid parameters'
+			self._response['error'] = 'Invalid parameters'
 		elif not self.__isAllowed(path, 'write'):
-			response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
+			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newDir):
-			response['error'] = 'File or folder with the same name already exists'
+			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
-				response = self.__content(path, True)
+				self.__content(path, True)
 			except:
-				response['error'] = 'Unable to create folder'
-
-		return response
+				self._response['error'] = 'Unable to create folder'
 
 
 	def __mkfile(self):
 		"""Create new file"""
-		response = {}
 		name = current = None
 		curDir = newFile = None
 		if 'name' in self._request and 'current' in self._request:
@@ -241,25 +231,22 @@ class elFinder():
 			newFile = os.path.join(curDir, name)
 
 		if not curDir or not name:
-			response['error'] = 'Invalid parameters'
+			self._response['error'] = 'Invalid parameters'
 		elif not self.__isAllowed(curDir, 'write'):
-			response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
+			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newFile):
-			response['error'] = 'File or folder with the same name already exists'
+			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
 				open(newFile, 'w').close()
-				response = self.__content(curDir, False)
+				self.__content(curDir, False)
 			except:
-				response['error'] = 'Unable to create file'
-
-		return response
+				self._response['error'] = 'Unable to create file'
 
 
 	def __rm(self):
-		response = {}
 		current = rmList = None
 		curDir = rmFile = None
 		if 'current' in self._request and 'rm[]' in self._request:
@@ -268,8 +255,8 @@ class elFinder():
 			curDir = self.__findDir(current, None)
 
 		if not rmList or not curDir:
-			response['error'] = 'Invalid parameters'
-			return response
+			self._response['error'] = 'Invalid parameters'
+			return False
 
 		if not isinstance(rmList, list):
 			rmList = [rmList]
@@ -279,9 +266,7 @@ class elFinder():
 			if not rmFile: continue
 			self.__remove(rmFile)
 
-		response.update(self.__content(curDir, True))
-
-		return response
+		self.__content(curDir, True)
 
 
 	def __remove(self, target):
@@ -333,9 +318,8 @@ class elFinder():
 
 	def __content(self, path, tree):
 		"""CWD + CDC + maybe(TREE)"""
-		response = {}
-		response['cwd'] = self.__cwd(path)
-		response['cdc'] = self.__cdc(path)
+		self.__cwd(path)
+		self.__cdc(path)
 
 		if tree:
 			fhash = self.__hash(self._options['root'])
@@ -343,7 +327,7 @@ class elFinder():
 				name = self._options['rootAlias']
 			else:
 				name = os.path.basename(self._options['root'])
-			response['tree'] = [
+			self._response['tree'] = [
 				{
 					'hash': fhash,
 					'name': name,
@@ -351,7 +335,6 @@ class elFinder():
 					'dirs': self.__tree(self._options['root'])
 				}
 			]
-		return response
 
 
 	def __cwd(self, path):
@@ -370,7 +353,7 @@ class elFinder():
 		
 		rel = basename + path[len(self._options['root']):]
 
-		response = {
+		self._response['cwd'] = {
 			'hash': self.__hash(path),
 			'name': name,
 			'rel': rel,
@@ -381,7 +364,6 @@ class elFinder():
 			'rm': not root and self.__isAllowed(path, 'rm'),
 			'uplMaxSize': '128M' # TODO
 		}
-		return response
 
 
 	def __cdc(self, path):
@@ -401,7 +383,7 @@ class elFinder():
 				files.append(info)
 
 		dirs.extend(files)
-		return dirs
+		self._response['cdc'] = dirs
 
 
 	def __findDir(self, fhash, path):
