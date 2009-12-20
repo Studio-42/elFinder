@@ -12,6 +12,7 @@ elFinder.prototype.ui = function(fm) {
 			if (cmd != 'open' && !this.cmd[cmd].isAllowed()) {
 				return this.fm.view.warning('Command not allowed!');
 			}
+			this.fm.quickLook.hide();
 			this.cmd[cmd].exec(arg);
 			this.update();
 		}

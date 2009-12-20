@@ -382,7 +382,7 @@ class elFinder {
 			
 			$mime  = $this->_mimetype($file);
 			$parts = explode('/', $mime);
-			$disp  = $parts[0] == 'image' || $parts[0] == 'text' ? 'inline' : 'attacments';
+			$disp  = $parts[0] == 'image' || $parts[0] == 'text' ? 'inline' : 'attachments';
 			
 			header("Content-Type: ".$mime);
 			header("Content-Disposition: ".$disp."; filename=".basename($file));
@@ -546,7 +546,7 @@ class elFinder {
 		}
 		if (empty($_FILES['fm-file']))
 		{
-			return $this->_result['error'] = 'No one file to upload';
+			return $this->_result['error'] = 'No file to upload';
 		}
 		$this->_logContext['files'] = array();
 		$total = 0;

@@ -26,6 +26,8 @@
 		
 		this.view = new this.view(this, el);
 		
+		this.quickLook = new this.quickLook(this, el);
+		
 		this.ui = new this.ui(this)
 		
 		this.log = function(m) {
@@ -335,6 +337,7 @@
 				});
 			this.ui.update();
 			this.view.updateSelected();
+			this.quickLook.update()
 		}
 		
 		this.unselectAll = function() {
@@ -445,6 +448,7 @@
 				self.view.cwd
 					.bind('click', function(e) {
 						self.ui.hideMenu();
+						// self.view.quickLook('close');
 						var tag = self.vm == 'icons' ? 'DIV' : 'TR';
 						if (e.target == self.view.cwd.get(0)) {
 							/* click on empty space */
@@ -456,6 +460,7 @@
 							(t.attr('key') ? t : t.parents('[key]').eq(0)).addClass('ui-selected');
 						}
 						self.updateSelected();
+						self.view.quickLook(self.selected.length == 1 ? 'upd' : 'close')
 						/* if other element editing */
 						self.view.cwd.find('input').trigger('blur');
 					})
@@ -507,35 +512,13 @@
 								}
 								self.ui.execIfAllowed('open');
 								break;
-								
+							case 27:
+								self.quickLook.hide()
+								break;
 							case 32:
 								if (self.selected.length == 1) {
-									self.view.quickLook();
-									// var s = self.getSelected();
-									// var f = s[0];
-									// 
-									// self.checkSelectedPos(true)
-									// 
-									// var el = self.view.cwd.find('[key="'+f.hash+'"]').eq(0);
-									// var p = el.position()
-									// // self.log(el)
-									// self.log(p)
-									// self.log(el.height())
-									// self.log(self.view.cwd.height())
-									// self.view.cwd.scrollTop(p.top+el.height()-self.view.cwd.height())
-									// self.log(f.mime)
-									// if (!f.mime.match(/image\/(jpeg|png|gif)/)) {
-									// 	return
-									// }
-									// var url = self.fileURL()
-									// self.log(url)
-									// var img = new Image();
-									// $(img).bind('load', function() {
-									// 	self.log('load')
-									// 	$(document.body).append($(this).css({position : 'absolute', left : 0, top : 0}))
-									// }).attr('src', url);
-									
-									
+									e.preventDefault();
+									self.quickLook.toggle();
 								}
 								break;
 								
@@ -562,7 +545,6 @@
 								}
 								self.updateSelected();
 								self.checkSelectedPos();
-								self.view.updateQuickLook();
 								break;
 							/* arrows right/down. with Ctrl - command "open", w/o - move selection  */
 							case 39:
@@ -587,7 +569,6 @@
 								}
 								self.updateSelected();
 								self.checkSelectedPos(true);
-								self.view.updateQuickLook();
 								break;
 							/* Delete */
 							case 46:

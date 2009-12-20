@@ -685,57 +685,49 @@ div.el-finder-drag-helper label {
 /*             QuickLook            */
 /************************************/
 
-.el-finder-ql, 
-.el-finder-ql-bg {
+.el-finder-ql {
 	position:absolute;
 	z-index:10;	
+	width:auto;
+	height:auto;
+	padding:12px;
+	color:#fff;
+	text-align:center;
 	border-radius:12px; 
 	-moz-border-radius:12px; 
 	-webkit-border-radius:12px;
+	background:url(../images/ql.png);
 }
 
-.el-finder-ql-bg {
-	background-color:#000;
-}
-
-.el-finder-ql {
-	z-index:12;
-
-	color:#fff;
-	text-align:center;
-	font:.9em trebuchet ms,lucida grande,verdana,sans-serif;
-/*	border:1px solid #000;*/
-}
-
-.el-finder-ql strong, .el-finder-ql img {
-	display:block;
+.el-finder-ql iframe {
+	background:#fff;
+	width:600px;
+	height:400px;
 }
 
 .el-finder-ql img {
-	margin:12px auto;
-	border-radius:3px; 
-	-moz-border-radius:5px; 
-	-webkit-border-radius:5px;
-/*	border:1px solid #fff;*/
-/*	position:absolute;*/
+	margin:0 auto;
+	border:1px solid #fff;
 }
 
 .el-finder-ql-info {
-/*	border:1px solid #fff;*/
-	height:100px;
+	margin:9px 0 0 0;
+	font:.82em/1.3em trebuchet ms,lucida grande,verdana,sans-serif;
+}
+.el-finder-ql strong {
+	display:block;
+	margin-bottom:7px;
 }
 
 .el-finder-ql-info a {
+	display:block;
 	color: #fff;
 }
-
-.el-finder-ql-info div { font-size:12px; font-weight:bold;}
 
 .el-finder-icon {
 	width:48px;
 	height:48px;
-	margin:12px auto;
-/*	border:1px solid #fff;*/
+	margin:0 auto;
 }
 
 .el-finder-icon p {
