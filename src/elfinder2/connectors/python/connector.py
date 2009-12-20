@@ -69,6 +69,7 @@ class elFinder():
 		'paste': '__paste',
 		'rm': '__rm',
 		'duplicate': '__duplicate',
+		'read': '__fread',
 		'edit': '__edit',
 		'extract': '__extract',
 		'resize': '__resize',
@@ -87,7 +88,7 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file']
+		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -110,6 +111,10 @@ class elFinder():
 		
 		if self._errorData:
 			self._response['errorData'] = self._errorData
+
+		# f = open('/Users/troex/my.log', 'w')
+		# f.write(str(self._form))
+		# f.close()
 
 		print "Content-type: text/html\n"
 		print simplejson.dumps(self._response)
@@ -562,11 +567,49 @@ class elFinder():
 			curDir = self.__findDir(self._request['current'], None)
 			curFile = self.__find(self._request['file'], curDir)
 			if curDir and curFile:
-				response['url'] = self.__path2url(curFile)
-				return response
+				self._response['url'] = self.__path2url(curFile)
+				return
 		
-		response['error'] = 'Invalid parameters'
-		return response
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __fread(self):
+		if 'current' in self._request and 'file' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			if curDir and curFile:
+				if self.__isAllowed(curFile, 'read'):
+					self._response['content'] = open(curFile, 'r').read()
+				else:
+					self._response['error'] = 'Access denied'
+				return
+
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __edit(self):
+		error = ''
+		if 'current' in self._request and 'file' in self._request and 'content' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			error = curFile
+			if curFile and curDir:
+				if self.__isAllowed(curFile, 'write'):
+					try:
+						f = open(curFile, 'w+')
+						f.write(self._request['content'])
+						f.close()
+						self._response['info'] = self.__info(curFile)
+					except:
+						self._response['error'] = 'Unable to write to file'
+				else:
+					self._response['error'] = 'Access denied'
+			return
+
+		self._response['error'] = error + ' Invalid parameters'
+		return
 
 
 	def __mimetype(self, path):
