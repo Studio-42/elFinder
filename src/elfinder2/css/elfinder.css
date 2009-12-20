@@ -693,10 +693,36 @@ div.el-finder-drag-helper label {
 	padding:12px;
 	color:#fff;
 	text-align:center;
-	border-radius:12px; 
-	-moz-border-radius:12px; 
-	-webkit-border-radius:12px;
+	border-radius:9px; 
+	-moz-border-radius:9px; 
+	-webkit-border-radius:9px;
 	background:url(../images/ql.png);
+	overflow:hidden;
+}
+
+.el-finder-ql-toolbar {
+	height:18px;
+	font-size:14px;
+	background-color:#777;
+	margin:-12px -12px 12px -12px;
+	padding:3px 0 0 3px;
+	opacity:.8;
+	text-align:center;
+	-moz-border-radius-topleft:9px; 
+	-moz-border-radius-topright:9px; 
+	-webkit-border-top-left-radius: 9px;
+	-webkit-border-top-right-radius: 9px; 
+	border-top-left-radius: 9px; 
+	border-top-right-radius: 9px;
+}
+
+.el-finder-ql-toolbar span {
+	float:left;
+}
+
+.el-finder-ql-toolbar strong {
+	line-height:18px;
+	margin-left:-17px;
 }
 
 .el-finder-ql iframe {
@@ -714,10 +740,6 @@ div.el-finder-drag-helper label {
 	margin:9px 0 0 0;
 	font:.82em/1.3em trebuchet ms,lucida grande,verdana,sans-serif;
 }
-.el-finder-ql strong {
-	display:block;
-	margin-bottom:7px;
-}
 
 .el-finder-ql-info a {
 	display:block;
@@ -733,7 +755,7 @@ div.el-finder-drag-helper label {
 .el-finder-icon p {
 	width:48px;
 	height:48px;
-	border-radius:3px; 
+	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
 /*	border:1px solid #fff;*/

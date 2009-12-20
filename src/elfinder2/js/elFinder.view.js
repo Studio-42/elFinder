@@ -62,7 +62,7 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.tree = null;
 	this.tlb  = $('<ul />');
-	this.plc  = $('<div />').addClass('el-finder-places').append($('<label />').text('Places'));
+	this.plc  = null;
 	this.nav  = $('<div />').addClass('el-finder-nav');
 	this.cwd  = $('<div />').addClass('el-finder-cwd');
 	this.spn  = $('<div />').addClass('el-finder-spinner');
@@ -84,6 +84,8 @@ elFinder.prototype.view = function(fm, el) {
 		.append($('<div />').addClass('el-finder-toolbar').append(this.tlb))
 		.append(this.wrz)
 		.append(this.stb);
+
+
 
 	this.spinner = function(show) {
 		if (show) {
@@ -107,16 +109,8 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderNav = function(tree) {
-		this.tree = $(traverse(tree, true)).appendTo(this.nav.empty()).addClass('el-finder-tree');
-
-		if (this.fm.options.places) {
-			this.places = $('<ul class="el-finder-places"><li><div class="dir-handler"></div><strong>'+this.fm.i18n(this.fm.options.places)+'</strong></li></ul>');
-			if (this.fm.options.placesFirst) {
-				this.nav.prepend(this.places);
-			} else {
-				this.nav.append(this.places);
-			}
-		}
+		this.tree && this.tree.remove();
+		this.tree = $(traverse(tree, true)).appendTo(this.nav).addClass('el-finder-tree');
 		
 		function traverse(tree, root) {
 			var i, hash, c, html = '<ul>';
@@ -145,20 +139,23 @@ elFinder.prototype.view = function(fm, el) {
 		}
 	}
 	
-	this.updatePlaces = function() {
+	this.renderPlaces = function() {
+		var i, ul, d, pl = this.fm.getPlaces(); 
+		if (!this.plc) {
+			this.plc = $('<ul class="el-finder-places"><li><div class="dir-handler"></div><strong>'+this.fm.i18n(this.fm.options.places)+'</strong></li></ul>');
+			ul = $('<ul/>').hide().appendTo(this.plc.children('li'));
+			this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
+		} else {
+			ul = this.plc.children('li').children('ul').empty();
+			ul.prev().prev().removeClass('dir-collapsed dir-expanded');
+		}
 		
-		this.places.children('li').children('ul').remove().end().children('div').removeClass('dir-collapsed').removeClass('dir-expanded');
-		
-		if (this.fm.places.length) {
-			var i, ul = $('<ul/>').appendTo(this.places.children('li').eq(0));
-			this.places.children('li').children('div').addClass('dir-collapsed dir-expanded');
-
-			for (i=0; i<this.fm.places.length; i++) {
-				var d = this.fm.dirs[this.fm.places[i]];
-				if (d) {
-					$('<li><div class="dir-handler"></div><a href="#" class="'+(!d.write ? 'ro' : '')+'" key="'+this.fm.places[i]+'">'+d.name+'</a></li>').appendTo(ul);
-				}
-			}
+		if (pl.length) {
+			for (i=0; i < pl.length; i++) {
+				d = this.fm.dirs[pl[i]];
+				$('<li><div class="dir-handler"></div><a href="#" '+(!d.write ? 'class="readonly"' : '')+' key="'+pl[i]+'">'+d.name+'</a></li>').appendTo(ul);
+			};
+			ul.children().length && this.plc.children('li:first').children('div').addClass('dir-collapsed');
 		}
 	}
 	
@@ -167,8 +164,7 @@ elFinder.prototype.view = function(fm, el) {
 
 		var num  = 0, 
 			size = 0, 
-			vm   = this.fm.viewMode(),
-			cnt = vm == 'icons' 
+			cnt = this.fm.options.view == 'icons' 
 				? this.cwd 
 				: $('<table />').append(
 					$('<tr/>')
@@ -184,7 +180,7 @@ elFinder.prototype.view = function(fm, el) {
 		for (var hash in this.fm.cdc) {
 			num++;
 			size += this.fm.cdc[hash].size;
-			cnt.append(vm == 'icons' ? this.renderIcon(this.fm.cdc[hash]) : render(this.fm.cdc[hash]))
+			cnt.append(this.fm.options.view == 'icons' ? this.renderIcon(this.fm.cdc[hash]) : render(this.fm.cdc[hash]))
 		}
 		
 		this.pth.text(fm.cwd.rel);
@@ -293,7 +289,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.kind = function(f) {
-		return this.fm.i18n(f.type=='link' ? 'Alias' : this.kinds[f.mime]||'unknown');
+		return this.fm.i18n(f.type=='link' ? 'symlink' : this.kinds[f.mime]||'unknown');
 	}
 	
 }

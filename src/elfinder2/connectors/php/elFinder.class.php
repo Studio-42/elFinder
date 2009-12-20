@@ -1286,7 +1286,7 @@ class elFinder {
 				if (@copy($img, $tmb)) {
 					list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
 					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-					return $c == 0;	
+					return file_exists($tmb);	
 				}
 				break;
 			

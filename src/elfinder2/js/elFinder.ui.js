@@ -184,9 +184,13 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 			if (this.fm.history.length) {
-				this.fm.ajax({ cmd : 'open', target : this.fm.history.pop()}, function(data) {
-					self.fm.setCwd(data.cwd, data.cdc);
-				});
+				this.fm.ajax({
+					cmd : 'open', 
+					target : this.fm.history.pop()
+					}, 
+					function(data) {
+						self.fm.setCwd(data.cwd, data.cdc);
+					});
 			}
 		}
 		
@@ -218,9 +222,9 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @ param Object  elFinder
 	 **/
 	open : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Open';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		/**
 		 * Open file/folder
@@ -367,7 +371,7 @@ elFinder.prototype.ui.prototype.commands = {
 			if (s.length == 1) {
 				f  = s[0];
 				el = this.fm.view.cwd.find('[key="'+f.hash+'"]');
-				c  = this.fm.viewMode() == 'icons' ? el.children('label') : el.find('td').eq(1);
+				c  = this.fm.options.view == 'icons' ? el.children('label') : el.find('td').eq(1);
 				n  = c.html();
 				input = $('<input type="text" />').val(f.name).appendTo(c.empty())
 					.bind('change blur', rename)
@@ -410,7 +414,7 @@ elFinder.prototype.ui.prototype.commands = {
 					if (err) {
 						self.fm.lock();
 						self.fm.view.error(err);
-						el.addClass('ui-selected')
+						el.addClass('ui-selected');
 						return input.select().focus();
 					}
 					
@@ -582,14 +586,14 @@ elFinder.prototype.ui.prototype.commands = {
 			var n     = this.fm.uniqueName('untitled folder');
 				input = $('<input type="text"/>').val(n);
 				prev  = this.fm.view.cwd.find('[key][class*="directory"]:last');
-				el    = this.fm.viewMode() == 'icons' 
+				el    = this.fm.options.view == 'icons' 
 					? $('<div/>').append('<p/>').append($('<label/>').append(input))
 					: $('<tr/>').append('<td class="icon"><p/></td>').append($('<td colspan="5"/>').append(input));
 			el.addClass('directory ui-selected');
 			if (prev.length) {
 				el.insertAfter(prev);
 			} else {
-				el.appendTo(this.fm.viewMode() == 'icons' ? this.fm.view.cwd : this.fm.view.cwd.children('table'));
+				el.appendTo(this.fm.options.view == 'icons' ? this.fm.view.cwd : this.fm.view.cwd.children('table'));
 			}
 			
 			input.select().focus()
@@ -647,14 +651,14 @@ elFinder.prototype.ui.prototype.commands = {
 			var n     = this.fm.uniqueName('untitled file', '.txt'),
 				input = $('<input type="text"/>').val(n), 
 				prev  = this.fm.view.cwd.find('[key][class*="directory"]:last'),
-				el    = this.fm.viewMode() == 'icons' 
+				el    = this.fm.options.view == 'icons' 
 					? $('<div/>').append('<p/>').append($('<label/>').append(input))
 					: $('<tr/>').append('<td class="icon"><p/></td>').append($('<td colspan="5"/>').append(input));
 			el.addClass('text ui-selected');
 			if (prev.length) {
 				el.insertAfter(prev);
 			} else {
-				el.appendTo(this.fm.viewMode() == 'icons' ? this.fm.view.cwd : this.fm.view.cwd.children('table'));
+				el.appendTo(this.fm.options.view == 'icons' ? this.fm.view.cwd : this.fm.view.cwd.children('table'));
 			}
 			
 			input.select().focus()
@@ -839,7 +843,7 @@ elFinder.prototype.ui.prototype.commands = {
 									if (data.file) {
 										self.fm.cdc[data.file.hash] = data.file;
 									}
-								}, false, true);
+								}, false, {type : 'POST'});
 							}
 						}
 					});
@@ -946,32 +950,33 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	icons : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'View as icons';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
-			this.fm.viewMode('icons');
+			this.fm.setView('icons');
 			this.fm.updateCwd();
+			
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.viewMode() != 'icons';
+			return this.fm.options.view != 'icons';
 		}
 	},
 	
 	list : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'View as list';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
-			this.fm.viewMode('list');
+			this.fm.setView('list');
 			this.fm.updateCwd();
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.viewMode() != 'list';
+			return this.fm.options.view != 'list';
 		}
 	},
 	

@@ -1,24 +1,22 @@
 (function($) {
 
 	elFinder = function(el, o) {
-		var self = this;
-		this.cwd = {};
-		this.dirs = {};
-		this.cdc = {};
-		this.places = [];
-		this.buffer = {}
-		this.places = [];
+		var self      = this;
+		this.cwd      = {};
+		this.dirs     = {};
+		this.cdc      = {};
+		this.places   = [];
+		this.buffer   = {};
 		this.selected = [];
-		this.history = [];
-		this.vm = '';
-		this.loaded = false;
-		this.locked = false;
-		this.keydown = true;
+		this.history  = [];
+		this.loaded   = false;
+		this.locked   = false;
+		this.keydown  = true;
 		
 		this.options = $.extend({}, this.options, o);
 		
 		if (!this.options.url) {
-			alert('Invalid configuration! You need to set URL option.');
+			alert('Invalid configuration! You have to set URL option.');
 			return;
 		}
 		
@@ -26,9 +24,11 @@
 		
 		this.view = new this.view(this, el);
 		
-		this.quickLook = new this.quickLook(this, el);
+		this.quickLook = new this.quickLook(this);
 		
 		this.ui = new this.ui(this)
+		
+		this.eventsManager = new this.eventsManager(this);
 		
 		this.log = function(m) {
 			window.console && window.console.log && window.console.log(m)
@@ -36,17 +36,20 @@
 		
 		/**
 		 * make ajax request, show message on error, call callback on success
+		 *
 		 * @param  data  Object  data for ajax request
 		 * @param  callback Function  
-		 *
+		 * @param  boolean  call callback on error?
+		 * @param  Object   overrwrite some ajax options (type/async)
+		 * @param  Boolean  do not lock fm before ajax?
 		 */
-		this.ajax = function(data, callback, continueOnErr, post, sync) {
-			this.lock(true);
+		this.ajax = function(data, callback, force, options, dontLock) {
+			!dontLock && this.lock(true);
 
-			$.ajax({
-				async    : !sync,
+			var opts = {
 				url      : this.options.url,
-				type     : post ? 'POST' : 'GET',
+				async    : true,
+				type     : 'GET',
 				data     : data,
 				dataType : 'json',
 				cache    : false,
@@ -56,68 +59,72 @@
 
 					if (data.error) {
 						self.view.error(data.error, data.errorData) 
-						if (!continueOnErr) {
+						if (!force) {
 							return;
 						}
 					}
 					callback(data);
 					data.debug && self.log(data.debug);
 					/* tell connector to generate thumbnails */
-					data.tmb && self.tmb();
-				}
-			});
-		}
-		
-		this.tmb = function() {
-			if (!self.locked && self.viewMode() == 'icons') {
-				$.ajax({
-					url      : self.options.url,
-					data     : {cmd : 'tmb', current : self.cwd.hash},
-					dataType : 'json',
-					success  : function(data) {
-						if (self.viewMode() == 'icons' && data.images) {
-							var i, el;
-							for (i in data.images) {
-								el = self.view.cwd.find('div[key="'+i+'"]').children('p:not(:has(span))');
-								el.length && el.append($('<span/>').addClass('rnd-5').css('background', ' url("'+data.images[i]+'") 0 0 no-repeat'));
-							}
-							data.debug && self.log(data.debug);
-							data.tmb && self.tmb();
-						}
+					if (!self.locked && self.options.view == 'icons') {
+						data.tmb && self.tmb();
 					}
-				});
+				}
 			}
+			if (typeof(options) == 'object') {
+				opts = $.extend({}, opts, options);
+			}
+			
+			$.ajax(opts);
 		}
 		
+		/**
+		 * Load generated thumbnails in background
+		 *
+		 **/
+		this.tmb = function() {
+			this.ajax({cmd : 'tmb', current : self.cwd.hash}, function(data) {
+				if (self.options.view == 'icons' && data.images) {
+					var i, el;
+					for (i in data.images) {
+						el = self.view.cwd.find('div[key="'+i+'"]').children('p:not(:has(span))');
+						el.length && el.append($('<span/>').addClass('rnd-5').css('background', ' url("'+data.images[i]+'") 0 0 no-repeat'));
+					}
+				}
+			}, false, null, true);
+		}
 		
-		this.cookie = function(name, value, opts) {
+		/**
+		 * Set/get cookie value
+		 *
+		 * @param  String  name  cookie name
+		 * @param  String  value cookie value, null to unset
+		 **/
+		this.cookie = function(name, value) {
 			if (typeof value == 'undefined') {
 				if (document.cookie && document.cookie != '') {
-					var cookies = document.cookie.split(';');
-					var test = name+'=';
-					for (var i=0; i<cookies.length; i++) {
-						var c = $.trim(cookies[i]);
-						if (c.substring(0, name.length+1) == test) {
-							return decodeURIComponent(c.substring(name.length+1));
+					var i, c = document.cookie.split(';');
+					name += '=';
+					for (i=0; i<c.length; i++) {
+						c[i] = $.trim(c[i]);
+						if (c[i].substring(0, name.length) == name) {
+							return decodeURIComponent(c[i].substring(name.length));
 						}
 					}
 				}
 				return '';
 			} else {
-				opts = $.extend({expires : '', path : '', domain : '', secure : false}, opts);
+				var d, o = $.extend({}, this.options.cookie);
 				if (value===null) {
 					value = '';
-					opts.expires = -1;
+					o.expires = -1;
 				}
-				var expires = '';
-				if (opts.expires) {
-					var d = opts.expires.toUTCString ? opts.expires : new Date();
-					if (typeof opts.expires == 'number') {
-						d.setTime(d.getTime() + (opts.expires * 24 * 60 * 60 * 1000));
-					}
-					expires = '; expires='+d.toUTCString();
+				if (typeof(o.expires) == 'number') {
+					d = new Date();
+					d.setTime(d.getTime()+(o.expires * 24 * 60 * 60 * 1000));
+					o.expires = d;
 				}
-				document.cookie = name+'='+encodeURIComponent(value)+expires+(opts.path ? '; path='+opts.path : '')+(opts.domain ? '; domain='+opts.domain : '')+(opts.secure ? '; secure' : '');
+				document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
 			}
 		}
 		
@@ -126,120 +133,65 @@
 			this.keydown = !lock; 
 		}
 		
-		
-		this.viewMode = function(m) {
-			if (!m) {
-				if (!this.vm) {
-					m = this.cookie('el-finder-view');
-					this.vm = m == 'list' || m == 'icons' ? m : 'list';
-				}
-			} else {
-				if (m  == 'list' || m == 'icons') {
-					this.vm = m;
-					this.cookie('el-finder-view', m, {expires : 1, path : '/'});
-				}
+		/**
+		 * Set file manager view (list|icons)
+		 *
+		 * @param  String  v  view name
+		 **/
+		this.setView = function(v) {
+			if (v == 'list' || v == 'icons') {
+				this.options.view = v;
+				this.cookie('el-finder-view', v);
 			}
-			return this.vm;
 		}
 		
 		/**
-		 * Create directory tree, and bind click and drop events
+		 * Create directory tree and places
 		 * @param  Array  tree
 		 */
 		this.setNav = function(tree) {
 			this.view.renderNav(tree);
+			this.eventsManager.updateNav();
 			
-			this.view.tree
-				.find('li').children('ul').each(function(i) {
-					var ul = $(this);
-					i>0 && ul.hide();
-					ul.parent().children('div').click(function() {
-						$(this).toggleClass('dir-expanded');
-						ul.toggle(300);
-					});
-				}).end().end()
-				.find('a')
-					.bind('click', function(e) {
-						e.preventDefault();
-						var t = $(this), id = t.attr('key'); 
-						if (id != self.cwd.hash && !t.hasClass('noaccess') && !t.hasClass('dropbox') ) {
-							t.trigger('select');
-							self.ui.exec('open', id);
-						}
-					})
-					.bind('select', function() {
-						self.view.tree.find('a').removeClass('selected');
-						$(this).addClass('selected').parents('li:has(ul)').children('ul').show().end().children('div').addClass('dir-expanded');
-					})
-					.filter(':not(.noaccess,.readonly)')
-					.droppable({
-						over : function() { $(this).addClass('el-finder-droppable'); },
-						out  : function() { $(this).removeClass('el-finder-droppable'); },
-						drop : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.drop(e, ui, $(this).attr('key')); }
-					});
-			
-			if (this.view.places) {
-				/* bind click once, when places created */
-				this.view.places.click(function(e) {
-					e.preventDefault();
-					if (e.target.nodeName == 'A') {
-						self.ui.exec('open', $(e.target).attr('key'));
-					} else if (e.target.nodeName == 'STRONG') {
-						$(e.target).prev('.dir-collapsed').toggleClass('dir-expanded').nextAll('ul').toggle(300);
-					} else if ($(e.target).hasClass('dir-collapsed')) {
-						$(e.target).toggleClass('dir-expanded').nextAll('ul').toggle(300);
-					}
-				})
-				.droppable({
-					accept : 'div',
-					over   : function() { $(this).addClass('hover'); },
-					out    : function() { $(this).removeClass('hover'); },
-					drop   : function(e, ui) {
-						var upd = false;
-						$(this).removeClass('hover');
-						/* only readable dirs appends to places */
-						ui.helper.children('div.el-finder-cwd').children('div.directory').each(function() {
-							var id = $(this).attr('key');
-							if (self.dirs[id] && self.dirs[id].read && $.inArray(id, self.places) == -1) {
-								self.places.push(id);
-								upd = true;
-								$(this).hide();
-							}
-						});
-						/* update places id's and view */
-						if (upd) {
-							self.cookie('el-finder-places', self.places.join(':'), {expires : 1, path : '/'});
-							self.updatePlaces();
-						}
-						/* hide helper if empty */
-						if (!ui.helper.children('div.el-finder-cwd').children('div:visible').length) {
-							ui.helper.hide();
-						}
-					}
-				});
-				
-				this.updatePlaces();
-				
+			if (this.options.places) {
+				this.view.renderPlaces();
+				this.eventsManager.updatePlaces();
 			}
-			
 		}
 		
-		/**
-		 * Redraw places, make folders in it draggable
-		 *
-		 */
-		this.updatePlaces = function() {
-			this.view.updatePlaces();
-			$('li>ul>li', this.view.places).draggable({
-				scroll : false,
-				stop   : function() {
-					var id = $(this).children('a').attr('key');
-					self.places = $.map(self.places, function(o) { return o == id ? null : o; })
-					self.cookie('el-finder-places', self.places.join(':'), {expires : 1, path : '/'});
-					$(this).remove();
+		this.getPlaces = function() {
+			var pl = [], p = this.cookie('el-finder-places');
+			if (p.length) {
+				if (p.indexOf(':')!=-1) {
+					pl = p.split(':');
+				} else {
+					pl.push(p);
 				}
-			});
+			}
+			return pl;
 		}
+		
+		this.addPlace = function(id) {
+			var p = this.getPlaces();
+			if ($.inArray(id, p) == -1) {
+				p.push(id);
+				this.savePlaces(p);
+				return true;
+			}
+		}
+		
+		this.removePlace = function(id) {
+			var p = this.getPlaces();
+			if ($.inArray(id, p) != -1) {
+				this.savePlaces($.map(p, function(o) { return o == id?null:o; }));
+				return true;
+			}
+		}
+		
+		this.savePlaces = function(p) {
+			this.cookie('el-finder-places', p.join(':'));
+		}
+		
 		
 		/**
 		 * Set current working directory data and current directory content and redraw its
@@ -387,9 +339,13 @@
 				if (s[0].url) {
 					url = s[0].url;
 				} else {
-					this.ajax({cmd : 'geturl', current : self.cwd.hash, file : s[0].hash}, function(data) {
-						url = data.url||'';
-					}, true, false, true);
+					this.ajax({
+							cmd     : 'geturl', 
+							current : self.cwd.hash, 
+							file    : s[0].hash
+						}, 
+						function(data) { url = data.url||''; }, 
+						true, {async : false });
 				}
 			}
 			return url;		
@@ -426,201 +382,19 @@
 		}
 		
 		if (!this.loaded) {
-			// this.cookie('el-finder-places', '', {expires : -1, path : '/'});
-			/* load places id's from cookie */
-			var p = this.cookie('el-finder-places');
-			if (p.length) {
-				this.places = p.indexOf(':')!=-1 ? p.split(':') : [p];	
-			}
-		
+			
+			/* load view and places id's from cookie */
+			this.setView(this.cookie('el-finder-view'));
+
 			this.loaded = true;
-			this.lock(true);
 
 			this.ajax({}, function(data) {
-				// self.log(data)
+				self.dotFiles = data.dotFiles;
 				self.setNav(data.tree)
 				self.setCwd(data.cwd, data.cdc);
-				self.lock();
 				self.ui.init(data.disabled);
-				self.dotFiles = data.dotFiles;
-				
-				
-				self.view.cwd
-					.bind('click', function(e) {
-						self.ui.hideMenu();
-						// self.view.quickLook('close');
-						var tag = self.vm == 'icons' ? 'DIV' : 'TR';
-						if (e.target == self.view.cwd.get(0)) {
-							/* click on empty space */
-							self.unselectAll() ;
-						} else {
-							/* click on folder/file */
-							!e.ctrlKey && !e.metaKey && self.unselectAll();
-							var t = $(e.target);
-							(t.attr('key') ? t : t.parents('[key]').eq(0)).addClass('ui-selected');
-						}
-						self.updateSelected();
-						self.view.quickLook(self.selected.length == 1 ? 'upd' : 'close')
-						/* if other element editing */
-						self.view.cwd.find('input').trigger('blur');
-					})
-					.bind(window.opera?'click':'contextmenu', function(e) {
-						e.preventDefault();
-						
-						if (e.target == self.view.cwd.get(0)) {
-							self.unselectAll();
-						} else {
-							var t = $(e.target);
-							(t.attr('key') ? t : t.parents('[key]').eq(0)).addClass('ui-selected');
-						}
-						self.updateSelected();
-						self.ui.showMenu(e);
-					})
-					.selectable({
-						filter : 'div,tr',
-						delay  : 1,
-						stop   : function() { self.updateSelected(); }
-					})
-					.find('(div,tr)[key]').live('dblclick', function(e) {
-						/* if editorCallback is set, dblclick on file call select command */
-						if (self.ui.isCmdAllowed('select')) {
-							self.ui.exec('select');
-						} else {
-							self.ui.exec('open');
-						}
-					});
-					
-					/* bind shortcuts */
-					$(document).bind('keydown', function(e) {
-						if (!self.keydown) {
-							return;
-						}
-						// self.log(e.keyCode);
-						var meta = e.ctrlKey||e.metaKey;
-						switch (e.keyCode) {
-							/* command+backspace - delete */
-							case 8:
-								if (meta && self.ui.isCmdAllowed('rm')) {
-									e.preventDefault();
-									self.ui.exec('rm');
-								} 
-								break;
-							/* Enter - exec "select" command if enabled, otherwise exec "open" */	
-							case 13:
-								if (self.ui.isCmdAllowed('select')) {
-									return self.ui.exec('select');
-								}
-								self.ui.execIfAllowed('open');
-								break;
-							case 27:
-								self.quickLook.hide()
-								break;
-							case 32:
-								if (self.selected.length == 1) {
-									e.preventDefault();
-									self.quickLook.toggle();
-								}
-								break;
-								
-							/* arrows left/up. with Ctrl - command "back", w/o - move selection */
-							case 37:
-							case 38:
-								if (e.keyCode == 37 && meta) {
-									return self.ui.execIfAllowed('back');
-								}
-								if (!self.selected.length) {
-									self.view.cwd.find('[key]:last').addClass('ui-selected');
-								} else {
-									var id = self.selected[0],
-										el = self.view.cwd.find('[key="'+id+'"]:first'),
-										p  = el.prev();
-									if (!e.shiftKey) {
-										self.view.cwd.find('[key]').removeClass('ui-selected');
-									}
-									if (p.length) {
-										p.addClass('ui-selected');
-									} else {
-										el.addClass('ui-selected');
-									}
-								}
-								self.updateSelected();
-								self.checkSelectedPos();
-								break;
-							/* arrows right/down. with Ctrl - command "open", w/o - move selection  */
-							case 39:
-							case 40:
-								if (meta) {
-									return self.ui.execIfAllowed('open');
-								}
-								if (!self.selected.length) {
-									self.view.cwd.find('[key]:first').addClass('ui-selected');
-								} else {
-									var id = self.selected[self.selected.length-1],
-										el = self.view.cwd.find('[key="'+id+'"]:last'),
-										n  = el.next();
-									if (!e.shiftKey) {
-										self.view.cwd.find('[key]').removeClass('ui-selected');
-									}
-									if (n.length) {
-										n.addClass('ui-selected');
-									} else {
-										el.addClass('ui-selected');
-									}
-								}
-								self.updateSelected();
-								self.checkSelectedPos(true);
-								break;
-							/* Delete */
-							case 46:
-								self.ui.execIfAllowed('rm');
-								break;
-							/* Ctrl+A */
-							case 65:
-								if (meta) {
-									e.preventDefault();
-									self.view.cwd.find('(div,tr)[key]').addClass('ui-selected');
-									self.updateSelected();
-								}
-								break;
-							/* Ctrl+C */
-							case 67:
-								meta && self.ui.execIfAllowed('copy');
-								break;
-							/* Ctrl+I - get info */	
-							case 73:
-								if (meta) {
-									e.preventDefault();
-									e.stopPropagation();
-									self.ui.exec('info');
-								}
-								break;
-							case 78:
-								if (meta) {
-									e.preventDefault();
-									self.ui.execIfAllowed('mkdir');
-								}
-								break;
-							/* Ctrl+U - upload files */
-							case 85:
-								if (meta) {
-									e.preventDefault();
-									self.ui.execIfAllowed('upload');
-								}
-								break;
-							/* Ctrl+V */
-							case 86:
-								meta && self.ui.execIfAllowed('paste');
-								break;
-							/* Ctrl+X */
-							case 88:
-								meta && self.ui.execIfAllowed('cut');
-								break;
-						}
-						
-					});
-				
+				self.eventsManager.init();
 			});
-
 			
 		}
 		
@@ -636,15 +410,22 @@
 	}
 	
 	elFinder.prototype.options = {
-		url  : '',
-		lang : 'en',
-		cssClass : '',
-		wrap : 14,
-		places : 'Places',
-		placesFirst : true,
+		url            : '',
+		lang           : 'en',
+		cssClass       : '',
+		wrap           : 14,
+		places         : 'Places',
+		placesFirst    : true,
 		editorCallback : null,
-		i18n : {},
-		toolbar : [
+		i18n           : {},
+		view           : 'icons',
+		cookie         : {
+			expires : 30,
+			domain  : '',
+			path    : '/',
+			secure  : false
+		},
+		toolbar        : [
 			['back', 'reload'],
 			['select', 'open'],
 			['mkdir', 'mkfile', 'upload'],

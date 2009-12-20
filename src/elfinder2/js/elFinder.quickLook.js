@@ -1,29 +1,30 @@
 elFinder.prototype.quickLook = function(fm, el) {
-	var self = this;
-	this.fm = fm;
-	this._img = false;
-	this._hash = '';
-	this.img  = $('<img/>');
+	var self    = this;
+	this.fm     = fm;
+	this._img   = false;
+	this._hash  = '';
+	this.title  = $('<strong/>');
+	this.img    = $('<img/>');
 	this.iframe = $('<iframe/>');
-	this.ico  = $('<div class="el-finder-icon"/>').append('<p/>');
-	this.info = $('<p class="el-finder-ql-info"/>');
-	this.ql   = $('<div class="el-finder-ql"/>').hide()
+	this.ico    = $('<div class="el-finder-icon"/>').append('<p/>');
+	this.info   = $('<p class="el-finder-ql-info"/>');
+	this.ql     = $('<div class="el-finder-ql"/>').hide()
+		.append($('<div class="el-finder-ql-toolbar"/>')
+			.append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
 		.append(this.iframe)
 		.append(this.img)
 		.append(this.ico)
 		.append(this.info)
-		.appendTo(document.body)
-		.click(function() {	self.hide(); });
+		.appendTo(document.body).draggable();
 	
 	this.show = function() {
 		if (this.ql.is(':hidden') && self.fm.selected.length == 1) {
 			update();
-			var id =self.fm.selected[0],
+			var id = self.fm.selected[0],
 			 	el = self.fm.view.cwd.find('[key="'+id+'"]'),
 				o  = el.offset(),
 				w  = Math.max(this.ql.width(), 350),
 				h  = this.ql.height();
-
 			self.fm.keydown = false;
 			
 			this.ql.css({
@@ -42,7 +43,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 				left     : ($(window).width()-w)/2-42
 			}, 400, function() { 
 				self.fm.keydown = true;
-				self.ql.css('height', 'auto').css('width', 'auto');
+				self.ql.css({height: 'auto', width: 'auto'});
 				if (self._img) {
 					preview();
 					self._img = false;
@@ -68,16 +69,16 @@ elFinder.prototype.quickLook = function(fm, el) {
 					opacity  : 0
 				}, 350, function() {
 					self.fm.keydown = true;
+					reset();
 					self.ql.hide().css({
 						width    : 'auto',
-						minWidth : 'auto',
+						minWidth : 350,
 						height   : 'auto'
 					});
-					reset();
-				})
+				});
 			} else {
 				this.ql.fadeOut(200);
-				reset()
+				reset();
 			}
 		}
 	}
@@ -94,6 +95,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.img.hide().unbind('load').removeAttr('src').removeAttr('load').css({width:'', height:''});
 		self.iframe.hide();
 		self.info.empty();
+		self.title.empty();
 		self.ico.show().children('p').attr('class', '').css({background: '', border: ''});
 		self._hash = '';
 	}
@@ -101,11 +103,12 @@ elFinder.prototype.quickLook = function(fm, el) {
 	function update() {
 		var f = self.fm.getSelected(0);
 		reset();
-		self._hash = f.hash
+		self._hash = f.hash;
+		self.title.text(f.name);
 		self.ico.children('p').attr('class', f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace(/\./g, '-'));
 		f.tmb && self.ico.children('p').css({background: 'url("'+f.tmb+'") 0 0 no-repeat', border: '1px solid #fff'});
-		self.info.append($('<strong/>').text(f.name))
-			.append(self.fm.view.kind(f)+'<br/>'+self.fm.view.formatSize(f.size)+'<br/>'+self.fm.i18n('Modified')+': '+self.fm.view.formatDate(f.date));
+		
+		self.info.append('<strong>'+f.name+'</strong><br/>'+self.fm.view.kind(f)+'<br/>'+self.fm.view.formatSize(f.size)+'<br/>'+self.fm.i18n('Modified')+': '+self.fm.view.formatDate(f.date));
 		f.dim && self.info.append('<br/>'+self.fm.i18n('Dimesions')+': '+f.dim);
 		f.url && self.info.append($('<a/>').attr('href', f.url).text(f.url).click(function(e) {
 			e.preventDefault();
@@ -124,14 +127,14 @@ elFinder.prototype.quickLook = function(fm, el) {
 			});
 		} else if((0 == f.mime.indexOf('text') && f.mime != 'text/rtf') || f.mime.match(/application\/(pdf|xml)/)) {
 			self.ico.hide();
-			self.iframe.attr('src', self.fm.fileURL()).show();
+			self.iframe.removeAttr('src').attr('src', self.fm.fileURL()).show();
 		}
 	}
 
 	function preview() {
 		var iw = self.img.width(),
 			ih = self.img.height(),
-			r = Math.min(Math.min(400, iw) / iw, Math.min(300, ih) / ih);
+			r  = Math.min(Math.min(400, iw) / iw, Math.min(300, ih) / ih);
 
 		self.ico.hide();
 		self.fm.keydown = false;
@@ -139,8 +142,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 			width:self.ico.width(),
 			height:self.ico.height()
 		}).animate({
-			width:Math.round(r * iw),
-			height:Math.round(r * ih)
+			width:Math.round(r*iw),
+			height:Math.round(r*ih)
 		}, 350, function() { self.fm.keydown = true; });
 	}
 	
