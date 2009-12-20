@@ -15,6 +15,14 @@ import sys
 import simplejson
 from datetime import datetime, date, time
 
+# try: # Windows needs stdio set for binary mode.
+# 	import msvcrt
+# 	msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
+# 	msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+# except ImportError:
+# 	pass
+
+
 cgitb.enable()
 
 class elFinder():
@@ -71,7 +79,7 @@ class elFinder():
 	_request = {}
 	_response = {}
 	_errorData = {}
-
+	_form = {}
 
 	def __init__(self, opts):
 		for opt in opts:
@@ -80,10 +88,10 @@ class elFinder():
 
 	def run(self):
 		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file']
-		form = cgi.FieldStorage()
+		self._form = cgi.FieldStorage()
 		for field in possible_fields:
-			if field in form:
-				self._request[field] = form.getvalue(field)
+			if field in self._form:
+				self._request[field] = self._form.getvalue(field)
 
 		# print self._request
 		if 'cmd' in self._request:
@@ -269,16 +277,72 @@ class elFinder():
 		self.__content(curDir, True)
 
 
+	def __upload(self):
+		#print cgi.FieldStorage()
+		if 'current' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			if not curDir:
+				self._response['error'] = 'Invalid parameters'
+				return
+			if not self.__isAllowed(curDir, 'write'):
+				self._response['error'] = 'Access denied'
+				return
+			if not self._form['fm-file[]']:
+				self._response['error'] = 'No file to upload'
+				return
+
+			upFiles = self._form['fm-file[]']
+			if not isinstance(upFiles, list):
+				upFiles = [upFiles]
+
+			total = 0
+			for up in upFiles:
+				name = up.filename
+				if name:
+					total += 1
+					name = os.path.basename(name)
+					if not self.__checkName(name):
+						self.__errorData(name, 'Invalid name')
+					elif not self.__isUploadAllow(up.file):
+						self.__errorData(name, 'Not allowed file type')
+					else:
+						name = os.path.join(curDir, name)
+						try:
+							f = open(name, 'wb', 8192)
+							for chunk in self.__fbuffer(up.file):
+								f.write(chunk)
+							f.close()
+							os.chmod(name, self._options['fileUmask'])
+						except:
+							self.__errorData(name, 'Unable to save uploaded file')
+
+			if self._errorData:
+				if len(self._errorData) == total:
+					self._response['error'] = 'Unable to upload files'
+				else:
+					self._response['error'] = 'Some files was not uploaded'
+
+			self.__content(curDir, False)
+			return
+
+
+	def __fbuffer(self, f, chunk_size=8192):
+		while True:
+			chunk = f.read(chunk_size)
+			if not chunk: break
+			yield chunk
+
+
 	def __remove(self, target):
 		if not self.__isAllowed(target, 'rm'):
-			self.__setErrorData(target, 'Access denied!')
+			self.__errorData(target, 'Access denied!')
 
 		if not os.path.isdir(target):
 			try:
 				os.unlink(target)
 				return True
 			except:
-				self.__setErrorData(target, 'Remove failed')
+				self.__errorData(target, 'Remove failed')
 				return False
 		else:
 			try:
@@ -292,7 +356,7 @@ class elFinder():
 				os.rmdir(target)
 				return True
 			except:
-				self.__setErrorData(target, 'Remove failed')
+				self.__errorData(target, 'Remove failed')
 				return False
 		pass
 
@@ -531,6 +595,11 @@ class elFinder():
 		return total_size
 
 
+	def __isUploadAllow(self, file):
+		# TODO
+		return True
+
+
 	def __isAccepted(self, target):
 		if target == '.' or target == '..':
 			return False
@@ -543,15 +612,15 @@ class elFinder():
 	def __isAllowed(self, path, access):
 		if access == 'read':
 			if not os.access(path, os.R_OK):
-				self.__setErrorData(path, access)
+				self.__errorData(path, access)
 				return False
 		elif access == 'write':
 			if not os.access(path, os.W_OK):
-				self.__setErrorData(path, access)
+				self.__errorData(path, access)
 				return False
 		elif access == 'rm':
 			if not os.access(os.path.dirname(path), os.W_OK):
-				self.__setErrorData(path, access)
+				self.__errorData(path, access)
 				return False
 		return True
 		# TODO _perms here
@@ -569,7 +638,7 @@ class elFinder():
 		return url
 
 
-	def __setErrorData(self, path, msg):
+	def __errorData(self, path, msg):
 		"""Collect error/warning messages"""
 		self._errorData[path] = msg
 
