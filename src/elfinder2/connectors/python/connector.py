@@ -15,24 +15,31 @@ import sys
 import simplejson
 from datetime import datetime, date, time
 
-print "Content-type: text/html\n"
+# try: # Windows needs stdio set for binary mode.
+# 	import msvcrt
+# 	msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
+# 	msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+# except ImportError:
+# 	pass
+
 
 cgitb.enable()
 
 class elFinder():
-	
 	"""Connector for elFinder"""
 
 	_options = {
 		'root': './',
 		'URL': '',
 		'rootAlias': 'Home',
+		'dotFiles': True, # TODO
 		'debug': True,
 		'dirSize': True,
-		'fileUmask': '0666',
+		'fileUmask': 0666,
 		'dirUmask': 0755,
 		'tmbDir': '.tmb',
 		'tmbSize': 48,
+		'fileURL': True,
 		'allowTypes': [],
 		'allowExts': [],
 		'denyTypes': [],
@@ -53,37 +60,40 @@ class elFinder():
 	}
 
 	_commands = {
-		'open':    '__open',
-		'reload':  '__reload',
-		'mkdir':   '__mkdir',
-		'mkfile':  '__mkfile',
-		'rename':  '__rename',
-		'upload':  '__upload',
-		'paste':   '__paste',
-		'rm':      '__rm',
+		'open':	'__open',
+		'reload': '__reload',
+		'mkdir': '__mkdir',
+		'mkfile': '__mkfile',
+		'rename': '__rename',
+		'upload': '__upload',
+		'paste': '__paste',
+		'rm': '__rm',
 		'duplicate': '__duplicate',
-		'edit':    '__edit',
+		'read': '__fread',
+		'edit': '__edit',
 		'extract': '__extract',
-		'resize':  '__resize',
-		'geturl':  '__geturl',
-		'tmb':     '__thumbnails'
+		'resize': '__resize',
+		'geturl': '__geturl',
+		'tmb': '__thumbnails'
 	}
 
 	_request = {}
-	
+	_response = {}
+	_errorData = {}
+	_form = {}
+
 	def __init__(self, opts):
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name']
-		form = cgi.FieldStorage()
+		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content']
+		self._form = cgi.FieldStorage()
 		for field in possible_fields:
-			if field in form:
-				self._request[field] = form[field].value
-		
-		response = {}		
+			if field in self._form:
+				self._request[field] = self._form.getvalue(field)
+
 		# print self._request
 		if 'cmd' in self._request:
 			if self._request['cmd'] in self._commands:
@@ -91,116 +101,280 @@ class elFinder():
 				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
 				if callable(func):
 					if cmd == '__open':
-						response = func(False)
+						func(False)
 					else:
-						response = func()
+						func()
 		else:
-			response['disabled'] = self._options['disabled']
-			response.update(self.__reload())
+			self._response['disabled'] = self._options['disabled']
+			# response.update(self.__reload())
+			self.__reload()
 		
-		print simplejson.dumps(response)
+		if self._errorData:
+			self._response['errorData'] = self._errorData
+
+		# f = open('/Users/troex/my.log', 'w')
+		# f.write(str(self._form))
+		# f.close()
+
+		print "Content-type: text/html\n"
+		print simplejson.dumps(self._response)
 
 
-	def __mkfile(self):
-		"""Create new file"""
-		response = {}
-		name = current = None
-		curDir = newFile = None
-		if 'name' in self._request and 'current' in self._request:
-			name = self._request['name']
-			current = self._request['current']
-			curDir = self.__findDir(int(current), None)
-			newFile = os.path.join(curDir, name)
+	def __open(self, tree):
+		"""Open file or directory"""
+		# try to open file
+		if 'current' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['target'], curDir)
+			
+			if not curDir or not curFile or os.path.isdir(curFile):
+				print 'HTTP/1.x 404 Not Found\n\n'
+				sys.exit('File not found')
+			if not self.__isAllowed(curDir, 'read') or not self.__isAllowed(curFile, 'read'):
+				print 'HTTP/1.x 403 Access Denied\n\n'
+				sys.exit('Access Denied')
 
-		if not curDir or not name:
-			response['error'] = 'Invalid parameters'
-		elif not self.__isAllowed(curDir, 'write'):
-			response['error'] = 'Access denied!'
-		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
-		elif os.path.exists(newFile):
-			response['error'] = 'File or folder with the same name already exists'
+			if os.path.islink(curFile):
+				curFile = self.__readlink(curFile)
+				if not curFile or os.path.isdir(curFile):
+					print 'HTTP/1.x 404 Not Found\n\n'
+					sys.exit('File not found')
+				if not self.__isAllowed(os.path.dirname(curFile), 'read') or not self.__isAllowed(curFile, 'read'):
+					print 'HTTP/1.x 403 Access Denied\n\n'
+					sys.exit('Access Denied')
+
+			mime = self.__mimetype(curFile)
+			parts = mime.split('/', 2)
+			if parts[0] == 'image': disp = 'image'
+			elif parts[0] == 'text': disp = 'inline'
+			else: disp = 'attachments'
+
+			print 'Content-Type: ' + mime
+			print 'Content-Disposition: ' + disp + '; filename=' + os.path.basename(curFile)
+			print 'Content-Location: ' + curFile.replace(self._options['root'], '')
+			print 'Content-Transfer-Encoding: binary'
+			print 'Content-Length: ' + str(os.lstat(curFile).st_size)
+			print 'Connection: close\n'
+			print open(curFile, 'r').read()
+			sys.exit(0);
+		# try dir
 		else:
-			try:
-				open(newFile, 'w').close()
-				response = self.__content(curDir, False)
-			except:
-				response['error'] = 'Unable to create file'
+			path = self._options['root']
 
-		return response
+			if 'target' in self._request:
+				target = self.__findDir(self._request['target'], None)
+				if not target:
+					self._response['error'] = 'Invalid parameters'
+				elif not self.__isAllowed(target, 'read'):
+					self._response['error'] = 'Access denied!'
+				else:
+					path = target
+
+			self.__content(path, tree)
+		pass
 
 
-
-
-	def __find(self, fhash, parent):
-		"""Find file/dir by hash"""
-		if os.path.isdir(parent):
-			for i in os.listdir(parent):
-				path = os.path.join(parent, i)
-				if fhash == self.__hash(path):
-					return path
-		return None
+	def __reload(self):
+		return self.__open(True)
 
 
 	def __rename(self):
 		"""Rename file or dir"""
-		response = {}
 		current = name = target = None
 		curDir = curName = newName = None
 		if 'name' in self._request and 'current' in self._request and 'target' in self._request:
 			name = self._request['name']
 			current = self._request['current']
 			target = self._request['target']
-			curDir = self.__findDir(int(current), None)
-			curName = self.__find(int(target), curDir)
+			curDir = self.__findDir(current, None)
+			curName = self.__find(target, curDir)
 			newName = os.path.join(curDir, name)
 
 		if not curDir or not curName:
-			response['error'] = 'File does not exists'
+			self._response['error'] = 'File does not exists'
 		elif not self.__isAllowed(curDir, 'write'):
-			response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
+			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newName):
-			response['error'] = 'File or folder with the same name already exists'
+			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
 				os.rename(curName, newName)
-				response = self.__content(curDir, os.path.isdir(newName))
+				self.__content(curDir, os.path.isdir(newName))
 			except:
-				response['error'] = 'Unable to rename file'
-
-		return response
+				self._response['error'] = 'Unable to rename file'
 
 
 	def __mkdir(self):
 		"""Create new directory"""
-		response = {}
 		current = None
 		path = None
 		newDir = None
 		if 'name' in self._request and 'current' in self._request:
 			name = self._request['name']
 			current = self._request['current']
-			path = self.__findDir(int(current), None)
+			path = self.__findDir(current, None)
 			newDir = os.path.join(path, name)
 
 		if not path:
-			response['error'] = 'Invalid parameters'
+			self._response['error'] = 'Invalid parameters'
 		elif not self.__isAllowed(path, 'write'):
-			response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
-			response['error'] = 'Invalid name'
+			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newDir):
-			response['error'] = 'File or folder with the same name already exists'
+			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
-				response = self.__content(path, True)
+				self.__content(path, True)
 			except:
-				response['error'] = 'Unable to create folder'
+				self._response['error'] = 'Unable to create folder'
 
-		return response
+
+	def __mkfile(self):
+		"""Create new file"""
+		name = current = None
+		curDir = newFile = None
+		if 'name' in self._request and 'current' in self._request:
+			name = self._request['name']
+			current = self._request['current']
+			curDir = self.__findDir(current, None)
+			newFile = os.path.join(curDir, name)
+
+		if not curDir or not name:
+			self._response['error'] = 'Invalid parameters'
+		elif not self.__isAllowed(curDir, 'write'):
+			self._response['error'] = 'Access denied!'
+		elif not self.__checkName(name):
+			self._response['error'] = 'Invalid name'
+		elif os.path.exists(newFile):
+			self._response['error'] = 'File or folder with the same name already exists'
+		else:
+			try:
+				open(newFile, 'w').close()
+				self.__content(curDir, False)
+			except:
+				self._response['error'] = 'Unable to create file'
+
+
+	def __rm(self):
+		current = rmList = None
+		curDir = rmFile = None
+		if 'current' in self._request and 'rm[]' in self._request:
+			current = self._request['current']
+			rmList = self._request['rm[]']
+			curDir = self.__findDir(current, None)
+
+		if not rmList or not curDir:
+			self._response['error'] = 'Invalid parameters'
+			return False
+
+		if not isinstance(rmList, list):
+			rmList = [rmList]
+
+		for rm in rmList:
+			rmFile = self.__find(rm, curDir)
+			if not rmFile: continue
+			self.__remove(rmFile)
+
+		self.__content(curDir, True)
+
+
+	def __upload(self):
+		#print cgi.FieldStorage()
+		if 'current' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			if not curDir:
+				self._response['error'] = 'Invalid parameters'
+				return
+			if not self.__isAllowed(curDir, 'write'):
+				self._response['error'] = 'Access denied'
+				return
+			if not self._form['fm-file[]']:
+				self._response['error'] = 'No file to upload'
+				return
+
+			upFiles = self._form['fm-file[]']
+			if not isinstance(upFiles, list):
+				upFiles = [upFiles]
+
+			total = 0
+			for up in upFiles:
+				name = up.filename
+				if name:
+					total += 1
+					name = os.path.basename(name)
+					if not self.__checkName(name):
+						self.__errorData(name, 'Invalid name')
+					elif not self.__isUploadAllow(up.file):
+						self.__errorData(name, 'Not allowed file type')
+					else:
+						name = os.path.join(curDir, name)
+						try:
+							f = open(name, 'wb', 8192)
+							for chunk in self.__fbuffer(up.file):
+								f.write(chunk)
+							f.close()
+							os.chmod(name, self._options['fileUmask'])
+						except:
+							self.__errorData(name, 'Unable to save uploaded file')
+
+			if self._errorData:
+				if len(self._errorData) == total:
+					self._response['error'] = 'Unable to upload files'
+				else:
+					self._response['error'] = 'Some files was not uploaded'
+
+			self.__content(curDir, False)
+			return
+
+
+	def __fbuffer(self, f, chunk_size=8192):
+		while True:
+			chunk = f.read(chunk_size)
+			if not chunk: break
+			yield chunk
+
+
+	def __remove(self, target):
+		if not self.__isAllowed(target, 'rm'):
+			self.__errorData(target, 'Access denied!')
+
+		if not os.path.isdir(target):
+			try:
+				os.unlink(target)
+				return True
+			except:
+				self.__errorData(target, 'Remove failed')
+				return False
+		else:
+			try:
+				for i in os.listdir(target):
+					if self.__isAccepted(i):
+						self.__remove(i)
+			except:
+				pass
+
+			try:
+				os.rmdir(target)
+				return True
+			except:
+				self.__errorData(target, 'Remove failed')
+				return False
+		pass
+
+
+	def __find(self, fhash, parent):
+		"""Find file/dir by hash"""
+		fhash = str(fhash)
+		if os.path.isdir(parent):
+			for i in os.listdir(parent):
+				path = os.path.join(parent, i)
+				if fhash == self.__hash(path):
+					return path
+		return None
 
 
 	def __checkName(self, name):
@@ -211,40 +385,10 @@ class elFinder():
 		return True
 
 
-	def __reload(self):
-		return self.__open(True)
-
-
-	def __open(self, tree):
-		"""Open file or directory"""
-		# try to open file
-		if 'current' in self._request:
-			pass
-		# try dir
-		else:
-			response = {}
-			path = self._options['root']
-			
-			if 'target' in self._request:
-				target = self.__findDir(int(self._request['target']), None)
-				if not target:
-					response['warning'] = 'Directory does not exists'
-				elif not (os.access(target, os.R_OK) and self.__isAllowed(target, 'read')):
-					response['warning'] = 'Access denied'
-				else:
-					path = target
-
-			response.update(self.__content(path, tree))
-			
-			return response
-		pass
-
-
 	def __content(self, path, tree):
 		"""CWD + CDC + maybe(TREE)"""
-		response = {}
-		response['cwd'] = self.__cwd(path)
-		response['cdc'] = self.__cdc(path)
+		self.__cwd(path)
+		self.__cdc(path)
 
 		if tree:
 			fhash = self.__hash(self._options['root'])
@@ -252,7 +396,7 @@ class elFinder():
 				name = self._options['rootAlias']
 			else:
 				name = os.path.basename(self._options['root'])
-			response['tree'] = [
+			self._response['tree'] = [
 				{
 					'hash': fhash,
 					'name': name,
@@ -260,7 +404,6 @@ class elFinder():
 					'dirs': self.__tree(self._options['root'])
 				}
 			]
-		return response
 
 
 	def __cwd(self, path):
@@ -279,18 +422,17 @@ class elFinder():
 		
 		rel = basename + path[len(self._options['root']):]
 
-		response = {
+		self._response['cwd'] = {
 			'hash': self.__hash(path),
 			'name': name,
 			'rel': rel,
 			'size': 0,
 			'date': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
 			'read': True,
-			'write': os.access(path, os.W_OK) and self.__isAllowed(path, 'write'),
+			'write': self.__isAllowed(path, 'write'),
 			'rm': not root and self.__isAllowed(path, 'rm'),
 			'uplMaxSize': '128M' # TODO
 		}
-		return response
 
 
 	def __cdc(self, path):
@@ -299,7 +441,7 @@ class elFinder():
 		dirs = []
 
 		for f in os.listdir(path):
-			if f[0] == '.': continue
+			if not self.__isAccepted(f): continue
 			pf = os.path.join(path, f)
 			info = {}
 			info = self.__info(pf)
@@ -310,16 +452,12 @@ class elFinder():
 				files.append(info)
 
 		dirs.extend(files)
-		return dirs
-
-
-	def __hash(self, input):
-		"""Hash of path can be any uniq"""
-		return binascii.crc32(input)
+		self._response['cdc'] = dirs
 
 
 	def __findDir(self, fhash, path):
 		"""Find directory by hash"""
+		fhash = str(fhash)
 		if not path:
 			path = self._options['root']
 			if fhash == self.__hash(path):
@@ -342,22 +480,18 @@ class elFinder():
 
 
 	def __tree(self, path):
-		"""Return directory tree starting from path
-		FULL
-		"""
+		"""Return directory tree starting from path"""
 		tree = []
 		
-		if not os.path.isdir(path):
-			return ''
-		if os.path.islink(path):
-			return ''
+		if not os.path.isdir(path): return ''
+		if os.path.islink(path): return ''
 
 		for d in os.listdir(path):
 			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd):
+			if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
 				fhash = self.__hash(pd)
-				read = os.access(pd, os.R_OK) and self.__isAllowed(pd, 'read')
-				write = os.access(pd, os.W_OK) and self.__isAllowed(pd, 'write')
+				read = self.__isAllowed(pd, 'read')
+				write = self.__isAllowed(pd, 'write')
 				if read:
 					dirs = self.__tree(pd)
 				else:
@@ -371,21 +505,16 @@ class elFinder():
 				}
 				tree.append(element)
 
-		if len(tree) == 0:
-			return ''
-		else:
-			return tree
+		if len(tree) == 0: return ''
+		else: return tree
 	
 
 	def __info(self, path):
 		mime = ''
 		filetype = 'file'
-		if os.path.isfile(path):
-			filetype = 'file'
-		if os.path.isdir(path):
-			filetype = 'dir'
-		if os.path.islink(path):
-			filetype = 'link'
+		if os.path.isfile(path): filetype = 'file'
+		if os.path.isdir(path): filetype = 'dir'
+		if os.path.islink(path): filetype = 'link'
 		
 		stat = os.lstat(path)
 
@@ -396,8 +525,8 @@ class elFinder():
 			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
 			'date': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
 			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
-			'read': os.access(path, os.R_OK),
-			'write': os.access(path, os.W_OK),
+			'read': self.__isAllowed(path, 'read'),
+			'write': self.__isAllowed(path, 'write'),
 			'rm': self.__isAllowed(path, 'rm')
 		}
 		
@@ -422,21 +551,73 @@ class elFinder():
 			info['read'] = info['read'] and self.__isAllowed(path, 'read')
 			info['write'] = info['write'] and self.__isAllowed(path, 'write')
 			info['rm'] = self.__isAllowed(path, 'rm')
-			
-			# more actions here
-			# image sizes
+		
+		if not info['mime'] == 'directory':
+			if self._options['fileURL']:
+				info['url'] = self.__path2url(path)
+			# TODO more actions here
+			# TODO image sizes
 		
 		return info
 
 
+	def __geturl(self):
+		response = {}
+		if 'current' in self._request and 'file' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			if curDir and curFile:
+				self._response['url'] = self.__path2url(curFile)
+				return
+		
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __fread(self):
+		if 'current' in self._request and 'file' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			if curDir and curFile:
+				if self.__isAllowed(curFile, 'read'):
+					self._response['content'] = open(curFile, 'r').read()
+				else:
+					self._response['error'] = 'Access denied'
+				return
+
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __edit(self):
+		error = ''
+		if 'current' in self._request and 'file' in self._request and 'content' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			error = curFile
+			if curFile and curDir:
+				if self.__isAllowed(curFile, 'write'):
+					try:
+						f = open(curFile, 'w+')
+						f.write(self._request['content'])
+						f.close()
+						self._response['info'] = self.__info(curFile)
+					except:
+						self._response['error'] = 'Unable to write to file'
+				else:
+					self._response['error'] = 'Access denied'
+			return
+
+		self._response['error'] = error + ' Invalid parameters'
+		return
+
+
 	def __mimetype(self, path):
-		return mimetypes.guess_type(path)[0]
-	
+		return mimetypes.guess_type(path)[0] or 'unknown'
+
 
 	def __readlink(self, path):
-		"""Read link and return real path if not broken
-		FULL
-		"""
+		"""Read link and return real path if not broken"""
 		target = os.readlink(path);
 		if not target[0] == '/':
 			target = os.path.join(os.path.dirname(path), target)
@@ -457,13 +638,57 @@ class elFinder():
 		return total_size
 
 
-	def __isAllowed(self, path, action):
+	def __isUploadAllow(self, file):
+		# TODO
 		return True
+
+
+	def __isAccepted(self, target):
+		if target == '.' or target == '..':
+			return False
+		if target[0:1] == '.':
+			if not self._options['dotFiles']:
+				return False
+		return True
+
+
+	def __isAllowed(self, path, access):
+		if access == 'read':
+			if not os.access(path, os.R_OK):
+				self.__errorData(path, access)
+				return False
+		elif access == 'write':
+			if not os.access(path, os.W_OK):
+				self.__errorData(path, access)
+				return False
+		elif access == 'rm':
+			if not os.access(os.path.dirname(path), os.W_OK):
+				self.__errorData(path, access)
+				return False
+		return True
+		# TODO _perms here
+
+
+	def __hash(self, input):
+		"""Hash of path can be any uniq"""
+		return str(binascii.crc32(input))
+
+
+	def __path2url(self, path):
+		curDir = path
+		length = len(self._options['root'])
+		url = str(self._options['URL'] + curDir[length:]).replace(os.sep, '/')
+		return url
+
+
+	def __errorData(self, path, msg):
+		"""Collect error/warning messages"""
+		self._errorData[path] = msg
 
 
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files',
-	'rootAlias': ''
+	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files'
 }).run()
 
 #print os.environ
