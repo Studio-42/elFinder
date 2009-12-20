@@ -15,12 +15,12 @@ import sys
 import simplejson
 from datetime import datetime, date, time
 
-# try: # Windows needs stdio set for binary mode.
-# 	import msvcrt
-# 	msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
-# 	msvcrt.setmode (1, os.O_BINARY) # stdout = 1
-# except ImportError:
-# 	pass
+try: # Windows needs stdio set for binary mode.
+	import msvcrt
+	msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
+	msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+except ImportError:
+	pass
 
 
 cgitb.enable()
@@ -40,6 +40,8 @@ class elFinder():
 		'tmbDir': '.tmb',
 		'tmbSize': 48,
 		'fileURL': True,
+		'uplMaxSize': 1,
+		'uplWriteChunk': 8192,
 		'allowTypes': [],
 		'allowExts': [],
 		'denyTypes': [],
@@ -88,7 +90,7 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content']
+		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -115,7 +117,7 @@ class elFinder():
 		# f = open('/Users/troex/my.log', 'w')
 		# f.write(str(self._form))
 		# f.close()
-
+		# self._response['debug'] = {}
 		print "Content-type: text/html\n"
 		print simplejson.dumps(self._response)
 
@@ -292,7 +294,7 @@ class elFinder():
 			if not self.__isAllowed(curDir, 'write'):
 				self._response['error'] = 'Access denied'
 				return
-			if not self._form['fm-file[]']:
+			if not 'fm-file[]' in self._form:
 				self._response['error'] = 'No file to upload'
 				return
 
@@ -301,10 +303,15 @@ class elFinder():
 				upFiles = [upFiles]
 
 			total = 0
+			upSize = 0
+			maxSize = self._options['uplMaxSize'] * 1024 * 1024
 			for up in upFiles:
 				name = up.filename
 				if name:
 					total += 1
+					self._response['debug'] = {
+					# name: up.file
+					}
 					name = os.path.basename(name)
 					if not self.__checkName(name):
 						self.__errorData(name, 'Invalid name')
@@ -313,13 +320,21 @@ class elFinder():
 					else:
 						name = os.path.join(curDir, name)
 						try:
-							f = open(name, 'wb', 8192)
+							f = open(name, 'wb', self._options['uplWriteChunk'])
 							for chunk in self.__fbuffer(up.file):
 								f.write(chunk)
 							f.close()
+							upSize += os.lstat(name).st_size
 							os.chmod(name, self._options['fileUmask'])
 						except:
 							self.__errorData(name, 'Unable to save uploaded file')
+						if upSize > maxSize:
+							try:
+								os.unlink(name)
+								self.__errorData(name, 'File exceeds the maximum allowed filesize')
+							except:
+								self.__errorData(name, 'File was only partially uploaded')
+							break
 
 			if self._errorData:
 				if len(self._errorData) == total:
@@ -331,11 +346,68 @@ class elFinder():
 			return
 
 
-	def __fbuffer(self, f, chunk_size=8192):
-		while True:
-			chunk = f.read(chunk_size)
-			if not chunk: break
-			yield chunk
+	def __paste(self):
+		if 'current' in self._request and 'src' in self._request and 'dst' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			src = self.__findDir(self._request['src'], None)
+			dst = self.__findDir(self._request['dst'], None)
+			if not curDir or not src or not dst or not 'files[]' in self._request:
+				self._response['error'] = 'Invalid parameters'
+				return
+			files = self._request['files[]']
+			if not isinstance(files, list):
+				files = [files]
+
+			cut = False
+			if 'cut' in self._request:
+				if self._request['cut'] == '1':
+					cut = True
+
+			self._response['debug'] = {
+				'files': files,
+				'cut': cut
+			}
+
+			if not self.__isAllowed(src, 'read') or not self.__isAllowed(dst, 'write'):
+				self._response['error'] = 'Access denied'
+				return
+
+			for fhash in files:
+				f = self.__find(fhash, src)
+				if not f:
+					self._response['error'] = 'File not found'
+					return
+				newDst = os.path.join(dst, os.path.basename(f))
+				if dst.find(f) == 0:
+					self._response['error'] = 'Unable to copy into itself'
+					return
+
+				if cut:
+					if not self.__isAllowed(f, 'rm'):
+						self._response['error'] = 'Move failed'
+						self._errorData(f, 'Access denied')
+						return
+					# TODO thumbs
+					if os.path.exists(newDst):
+						self._response['error'] = 'Move failed'
+						self._errorData(f, 'File already exists')
+						continue
+					try:
+						os.rename(f, newDst)
+						continue
+					except:
+						self._response['error'] = 'Move failed'
+						self._errorData(f, 'Unable to move')
+						return
+				else:
+					if not self.__copy(f, newDst):
+						self._response['error'] = 'Copy failed'
+					continue
+			self.__content(curDir, True)
+		else:
+			self._response['error'] = 'Invalid parameters'
+
+		return
 
 
 	def __remove(self, target):
@@ -365,6 +437,9 @@ class elFinder():
 				return False
 		pass
 
+
+	def __copy(self, src, dst):
+		return True
 
 	def __find(self, fhash, parent):
 		"""Find file/dir by hash"""
@@ -431,7 +506,7 @@ class elFinder():
 			'read': True,
 			'write': self.__isAllowed(path, 'write'),
 			'rm': not root and self.__isAllowed(path, 'rm'),
-			'uplMaxSize': '128M' # TODO
+			'uplMaxSize': str(self._options['uplMaxSize']) + 'M'
 		}
 
 
@@ -636,6 +711,13 @@ class elFinder():
 				if os.path.exists(fp):
 					total_size += os.stat(fp).st_size
 		return total_size
+
+
+	def __fbuffer(self, f, chunk_size = _options['uplWriteChunk']):
+		while True:
+			chunk = f.read(chunk_size)
+			if not chunk: break
+			yield chunk
 
 
 	def __isUploadAllow(self, file):
