@@ -11,6 +11,7 @@ import mimetypes
 import os
 import os.path
 import re
+import shutil
 import sys
 import simplejson
 from datetime import datetime, date, time
@@ -40,7 +41,7 @@ class elFinder():
 		'tmbDir': '.tmb',
 		'tmbSize': 48,
 		'fileURL': True,
-		'uplMaxSize': 1,
+		'uplMaxSize': 15,
 		'uplWriteChunk': 8192,
 		'allowTypes': [],
 		'allowExts': [],
@@ -390,7 +391,7 @@ class elFinder():
 					# TODO thumbs
 					if os.path.exists(newDst):
 						self._response['error'] = 'Move failed'
-						self._errorData(f, 'File already exists')
+						self._errorData(f, 'File or folder with the same name already exists')
 						continue
 					try:
 						os.rename(f, newDst)
@@ -402,6 +403,7 @@ class elFinder():
 				else:
 					if not self.__copy(f, newDst):
 						self._response['error'] = 'Copy failed'
+						return
 					continue
 			self.__content(curDir, True)
 		else:
@@ -422,12 +424,9 @@ class elFinder():
 				self.__errorData(target, 'Remove failed')
 				return False
 		else:
-			try:
-				for i in os.listdir(target):
-					if self.__isAccepted(i):
-						self.__remove(i)
-			except:
-				pass
+			for i in os.listdir(target):
+				if self.__isAccepted(i):
+					self.__remove(os.path.join(target, i))
 
 			try:
 				os.rmdir(target)
@@ -439,7 +438,42 @@ class elFinder():
 
 
 	def __copy(self, src, dst):
+		dstDir = os.path.dirname(dst)
+		if not self.__isAllowed(src, 'read'):
+			self.__errorData(src, 'Access denied')
+			return False
+		if not self.__isAllowed(dstDir, 'write'):
+			self.__errorData(dstDir, 'Access denied')
+			return False
+		if os.path.exists(dst):
+			self.__errorData(dst, 'File or folder with the same name already exists')
+			return False
+
+		if not os.path.isdir(src):
+			try:
+				shutil.copyfile(src, dst)
+				shutil.copymode(src, dst)
+				return True
+			except:
+				self.__errorData(src, 'Unable to copy')
+				return False
+		else:
+			try:
+				os.mkdir(dst)
+				shutil.copymode(src, dst)
+			except:
+				self.__errorData(src, 'Unable to copy')
+				return False
+
+			for i in os.listdir(src):
+				newSrc = os.path.join(src, i)
+				newDst = os.path.join(dst, i)
+				if not self.__copy(newSrc, newDst):
+					self.__errorData(newSrc, 'Unable to copy')
+					return False
+
 		return True
+
 
 	def __find(self, fhash, parent):
 		"""Find file/dir by hash"""
