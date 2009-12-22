@@ -149,7 +149,11 @@ p.el-finder-warn {
 
 .el-finder-nav {
 	float:left;
-	width : 190px;
+	width : 200px;
+}
+
+.el-finder-nav .ui-resizable-e {
+	right:0;
 }
 
 /* folders tree */
@@ -172,21 +176,21 @@ p.el-finder-warn {
 	clear:both;
 }
 
-.el-finder-nav li div.dir-handler {
+.el-finder-nav li div {
 	width:9px;
 	height:20px;
 	float:left;
+/*	border:1px solid #444;*/
 }
 
 .el-finder-nav li a,
-.el-finder-nav li div.dir-collapsed,
-.el-finder-nav li div.dir-expanded {
+.el-finder-nav li div.collapsed {
 	background:url(../images/toolbar.png) 3px -56px no-repeat;
 }
-.el-finder-nav li div.dir-collapsed {
+.el-finder-nav li div.collapsed {
 	background-position: -4px 7px;
 }
-.el-finder-nav li div.dir-expanded {
+.el-finder-nav li div.expanded {
 	background-position: -4px -9px;
 }
 

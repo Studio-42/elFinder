@@ -11,7 +11,6 @@
 		this.history  = [];
 		this.loaded   = false;
 		this.locked   = false;
-		this.keydown  = true;
 		
 		this.options = $.extend({}, this.options, o);
 		
@@ -128,11 +127,15 @@
 			}
 		}
 		
-		this.lock = function(lock) {
-			this.view.spinner( (this.locked = lock) );
-			this.keydown = !lock; 
+		this.lock = function(l) {
+			// this.locked = l||false;
+			this.view.spinner((this.locked = l||false));
+			this.eventsManager.lock = this.locked;
 		}
-		
+
+		this.lockShortcuts = function(l) {
+			this.eventsManager.lock = l;
+		}
 		/**
 		 * Set file manager view (list|icons)
 		 *
@@ -142,20 +145,6 @@
 			if (v == 'list' || v == 'icons') {
 				this.options.view = v;
 				this.cookie('el-finder-view', v);
-			}
-		}
-		
-		/**
-		 * Create directory tree and places
-		 * @param  Array  tree
-		 */
-		this.setNav = function(tree) {
-			this.view.renderNav(tree);
-			this.eventsManager.updateNav();
-			
-			if (this.options.places) {
-				this.view.renderPlaces();
-				this.eventsManager.updatePlaces();
 			}
 		}
 		
@@ -192,61 +181,41 @@
 			this.cookie('el-finder-places', p.join(':'));
 		}
 		
-		
-		/**
-		 * Set current working directory data and current directory content and redraw its
-		 *
-		 * @param Object cwd  - Current Working Directory data
-		 * @param Object cdc  - Current Directory Content
-		 */
-		this.setCwd = function(cwd, cdc) {
-			this.cwd = cwd;
+		this.reload = function(data) {
+			if (data.tree) {
+				this.view.renderNav(data.tree);
+				this.eventsManager.updateNav();
+			}
+			this.cwd = data.cwd;
 			this.cdc = {};
-			
-			for (var i=0; i< cdc.length; i++) {
-				this.cdc[''+cdc[i].hash] = cdc[i];
-				this.cwd.size += cdc[i].size;
+			var l = data.cdc.length;
+			for (var i=0; i<l ; i++) {
+				this.cdc[''+data.cdc[i].hash] = data.cdc[i];
+				this.cwd.size += data.cdc[i].size;
+				delete data.cdc[i]; // ?????
 			}
 			this.updateCwd();
-			/* open current dir and all parents in nav  */
-			this.view.nav.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 		}
+		
 		
 		/**
 		 * Redraw current directory and make files/folders draggable
 		 *
 		 */
 		this.updateCwd = function() {
-			this.view.renderCwd();
+			this.lockShortcuts();
 			this.selected = [];
-
-			this.view.cwd.find('(div,tr)[key]')
-				.draggable({
-					drag : function(e, ui) {
-						if (e.shiftKey) {
-							ui.helper.addClass('el-finder-drag-copy');
-						} else {
-							ui.helper.removeClass('el-finder-drag-copy');
-						}
-					},
-					addClasses : false,
-					revert     : true,
-					helper     : function() {
-						var h = $('<div/>').addClass('el-finder-cwd')
-						self.view.cwd.find('.ui-selected').each(function(i) {
-							h.append(self.vm == 'icons' ? $(this).clone().removeClass('ui-selected') : self.view.renderIcon(self.cdc[$(this).attr('key')]));
-						})
-						return $('<div/>').addClass('el-finder-drag-helper').append(h);
-					}
-				})
-				.draggable('disable').removeClass('ui-state-disabled')
-				.filter('.directory:not(.noaccess:has(em[class="readonly"],em[class=""]))')
-				.droppable({
-					over : function() { $(this).addClass('el-finder-droppable'); },
-					out  : function() { $(this).removeClass('el-finder-droppable'); },
-					drop : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.drop(e, ui, $(this).attr('key')); }
-				});
-
+			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
+			this.view.renderCwd();
+			this.eventsManager.updateCwd();
+		}
+		
+		this.updateElement = function(id, f) {
+			delete this.cdc[id];
+			this.cdc[f.hash] = f;
+			this.view.updateElement(id, f);
+			this.updateSelected();
+			this.ui.update();
 		}
 		
 		this.drop = function(e, ui, target) {
@@ -288,12 +257,12 @@
 					self.selected.push($(this).draggable('enable').attr('key'));
 				});
 			this.ui.update();
-			this.view.updateSelected();
-			this.quickLook.update()
+			this.view.selectedInfo();
+			this.quickLook.update();
 		}
 		
 		this.unselectAll = function() {
-			self.view.cwd.find('[class*="ui-selected"]').removeClass('ui-selected');
+			self.view.cwd.find('.ui-selected').removeClass('ui-selected');
 		}
 		
 		this.setBuffer = function(files, cut, dst) {
@@ -383,17 +352,17 @@
 		
 		if (!this.loaded) {
 			
-			/* load view and places id's from cookie */
+			/* load view from cookie */
 			this.setView(this.cookie('el-finder-view'));
 
 			this.loaded = true;
-
+			this.id = $(el).attr('id')||Math.random();
+			// this.log(this.id)
 			this.ajax({}, function(data) {
-				self.dotFiles = data.dotFiles;
-				self.setNav(data.tree)
-				self.setCwd(data.cwd, data.cdc);
-				self.ui.init(data.disabled);
 				self.eventsManager.init();
+				self.dotFiles = data.dotFiles;
+				self.reload(data)
+				self.ui.init(data.disabled);
 			});
 			
 		}

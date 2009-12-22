@@ -60,32 +60,37 @@ elFinder.prototype.view = function(fm, el) {
 		'video/x-flv'                   : 'Flash video'
 	}
 	
-	this.tree = null;
-	this.tlb  = $('<ul />');
-	this.plc  = null;
-	this.nav  = $('<div />').addClass('el-finder-nav');
-	this.cwd  = $('<div />').addClass('el-finder-cwd');
-	this.spn  = $('<div />').addClass('el-finder-spinner');
-	this.msg  = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>').click(function() { $(this).hide(); });
-	this.nfo  = $('<div />').addClass('stat');
-	this.pth  = $('<div />').addClass('path');
-	this.sel  = $('<div />').addClass('selected-files');
-	this.stb  = $('<div />').addClass('el-finder-statusbar')
+	this.tlb = $('<ul />');
+	this.plc = null;
+
+	this.nav = $('<div />').addClass('el-finder-nav').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: '500'});
+	this.cwd = $('<div />').addClass('el-finder-cwd');
+	this.spn = $('<div />').addClass('el-finder-spinner');
+	this.msg = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>').click(function() { $(this).hide(); });
+	this.nfo = $('<div />').addClass('stat');
+	this.pth = $('<div />').addClass('path');
+	this.sel = $('<div />').addClass('selected-files');
+	this.stb = $('<div />').addClass('el-finder-statusbar')
 		.append(this.pth)
 		.append(this.nfo)
 		.append(this.sel);
-	this.wrz  = $('<div />').addClass('el-finder-workzone')
+	this.wrz = $('<div />').addClass('el-finder-workzone')
 		.append(this.nav)
 		.append(this.cwd)
 		.append(this.spn)
 		.append(this.msg)
 		.append('<div style="clear:both" />');
-	this.win  = $(el).empty().addClass('el-finder').addClass(fm.options.cssClass||'')
+	this.win = $(el).empty().addClass('el-finder').addClass(fm.options.cssClass||'')
 		.append($('<div />').addClass('el-finder-toolbar').append(this.tlb))
 		.append(this.wrz)
 		.append(this.stb);
 
+	this.tree = $('<ul class="el-finder-tree"><li><div></div><a href="#" class="root selected rnd-3">root</a></li></ul>').appendTo(this.nav);
 
+
+	this.plc = $('<ul class="el-finder-places"/>').append($('<li/>').append('<div/>').append('<strong>'+this.fm.i18n(this.fm.options.places)+'</strong>').append($('<ul/>').hide()))
+
+	this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
 
 	this.spinner = function(show) {
 		if (show) {
@@ -109,26 +114,30 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderNav = function(tree) {
-		this.tree && this.tree.remove();
-		this.tree = $(traverse(tree, true)).appendTo(this.nav).addClass('el-finder-tree');
+		var li = this.tree.children('li');
+		li.children('div').removeClass('collapsed expanded').next('a').text(tree[0].name).attr('key', tree[0].hash).next('ul').remove();
+		this.fm.dirs = {};
+		this.fm.dirs[tree[0].hash] = tree[0];
+		if (tree[0].dirs.length) {
+			li.children('div').addClass('collapsed expanded').end().append(traverse(tree[0].dirs));
+			li.find('ul>li ul').hide();
+		}
 		
-		function traverse(tree, root) {
-			var i, hash, c, html = '<ul>';
+		if (this.fm.options.places) {
+			this.renderPlaces();
+		}
+		
+		function traverse(tree) {
+			var i, hash, c='', html = '<ul>';
 			for (i=0; i < tree.length; i++) {
-				hash = tree[i].hash;
-				fm.dirs[hash] = tree[i];
-			
-				c = '';
-				if (root) {
-					c = 'root selected';
-				} else if (!tree[i].read && !tree[i].write) {
+				if (!tree[i].read && !tree[i].write) {
 					c = 'noaccess';
 				} else if (!tree[i].read) {
 					c = 'dropbox';
 				} else if (!tree[i].write) {
 					c = 'readonly';
 				} 
-				html += '<li><div class="dir-handler'+(tree[i].dirs.length ? ' dir-collapsed' : '')+'"></div><a href="#" class="'+c+' rnd-3" key="'+hash+'">'+tree[i].name+'</a>'
+				html += '<li><div '+(tree[i].dirs.length ? 'class="collapsed"' : '')+'></div><a href="#" class="'+c+' rnd-3" key="'+tree[i].hash+'">'+tree[i].name+'</a>';
 
 				if (tree[i].dirs.length) {
 					html += traverse(tree[i].dirs);
@@ -140,22 +149,20 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderPlaces = function() {
-		var i, ul, d, pl = this.fm.getPlaces(); 
-		if (!this.plc) {
-			this.plc = $('<ul class="el-finder-places"><li><div class="dir-handler"></div><strong>'+this.fm.i18n(this.fm.options.places)+'</strong></li></ul>');
-			ul = $('<ul/>').hide().appendTo(this.plc.children('li'));
-			this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
-		} else {
-			ul = this.plc.children('li').children('ul').empty();
-			ul.prev().prev().removeClass('dir-collapsed dir-expanded');
-		}
-		
+		var i, d, pl = this.fm.getPlaces(),	ul = this.plc.show().children('li').children('ul').empty().hide();
+		ul.prev().prev().removeClass('collapsed expanded');
+
 		if (pl.length) {
 			for (i=0; i < pl.length; i++) {
-				d = this.fm.dirs[pl[i]];
-				$('<li><div class="dir-handler"></div><a href="#" '+(!d.write ? 'class="readonly"' : '')+' key="'+pl[i]+'">'+d.name+'</a></li>').appendTo(ul);
+				d = this.tree.find('[key="'+pl[i]+'"]').parent('li');
+				if (d.length) {
+					d.children('div').removeClass('collapsed expanded');
+					ul.append(d.clone());
+				} else {
+					this.fm.removePlace(pl[i]);
+				}
 			};
-			ul.children().length && this.plc.children('li:first').children('div').addClass('dir-collapsed');
+			ul.children().length && this.plc.children('li:first').children('div').addClass('collapsed');
 		}
 	}
 	
@@ -188,9 +195,8 @@ elFinder.prototype.view = function(fm, el) {
 		this.sel.empty();
 		
 		function render(f) {
-			var p = $('<p />'),  
-				c = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace('.', '-'),
-				el = $('<tr/>').addClass(c).attr('key', f.hash)
+			var p  = $('<p />'),  
+				el = $('<tr/>').addClass(self.mime2class(f.mime)).attr('key', f.hash)
 
 			el.append($('<td />').addClass('icon').append(p))
 				.append($('<td />').text(f.name))
@@ -208,19 +214,23 @@ elFinder.prototype.view = function(fm, el) {
 		}
 	}
 
-	this.renderIcon = function(f) {
-		var c  = f.type == 'link' && !f.link ? 'broken' : f.mime.replace('/' , ' ').replace(/\./g, '-'),
-			el = $('<div/>').addClass(c).attr('key', f.hash),
-			p  = $('<p/>'),
-			w  = self.fm.options.wrap,
-			n  = f.name;
-			
-		if (f.name.length > w*2) {
-			n = f.name.substr(0, w)+"&shy;"+f.name.substr(w, w-5)+"&hellip;"+f.name.substr(f.name.length-3);
-		} else if (f.name.length > w) {
-			n = f.name.substr(0, w)+"&shy;"+f.name.substr(w);
+	this.formatName = function(n) {
+		var w = self.fm.options.wrap;
+		if (w>0) {
+			if (n.length > w*2) {
+				return n.substr(0, w)+"&shy;"+n.substr(w, w-5)+"&hellip;"+n.substr(n.length-3);
+			} else if (n.length > w) {
+				return n.substr(0, w)+"&shy;"+n.substr(w);
+			}
 		}
-		el.append(p).append($('<label/>').html(n).attr('title', f.name+' '+f.mime));
+		return n;
+	}
+
+	this.renderIcon = function(f) {
+		var el = $('<div/>').addClass(this.mime2class(f.mime)).attr('key', f.hash),
+			p  = $('<p/>');
+
+		el.append(p).append($('<label/>').html(this.formatName(f.name)).attr('title', f.name));
 		f.type == 'link' && el.append('<em />');
 		if (!f.read && !f.write) {
 			el.addClass('noaccess')
@@ -233,13 +243,24 @@ elFinder.prototype.view = function(fm, el) {
 		return el;
 	}
 
+	this.updateElement = function(hash, f) {
+		this.tree.find('a[key="'+hash+'"]').text(f.name).attr('key', f.hash);
+		var el = this.cwd.find('[key="'+hash+'"]').attr('key', f.hash).addClass(this.mime2class(f.mime));
+		if (this.fm.options.view == 'list') {
+			el.children('td').next().text(f.name).next().text(self.formatPermissions(f.read, f.write, f.rm)).next().text(self.formatDate(f.date)).next().text(self.formatSize(f.size)).next().text(self.kind(f));
+		} else {
+			el.find('label').html(this.formatName(f.name)).attr('title', f.name);
+		}
+		this.plc.find('a[key="'+hash+'"]').text(f.name).attr('key', f.hash)
+	}
+
 	this.tmb = function(p, url) {
 		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'))
 	}
 
 	
 
-	this.updateSelected = function() {
+	this.selectedInfo = function() {
 		var i, s = 0, sel = this.fm.getSelected();
 		this.sel.empty();
 		if (sel.length) {
@@ -259,6 +280,10 @@ elFinder.prototype.view = function(fm, el) {
 			}
 		}
 		return err;
+	}
+
+	this.mime2class = function(mime) {
+		return mime.replace('/' , ' ').replace(/\./g, '-');
 	}
 
 	this.formatDate = function(d) {
