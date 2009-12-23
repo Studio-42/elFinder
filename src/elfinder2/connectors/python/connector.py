@@ -14,15 +14,8 @@ import re
 import shutil
 import sys
 import simplejson
-from datetime import datetime, date, time
-
-try: # Windows needs stdio set for binary mode.
-	import msvcrt
-	msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
-	msvcrt.setmode (1, os.O_BINARY) # stdout = 1
-except ImportError:
-	pass
-
+import time
+from datetime import datetime
 
 cgitb.enable()
 
@@ -38,7 +31,9 @@ class elFinder():
 		'dirSize': True,
 		'fileUmask': 0666,
 		'dirUmask': 0755,
+		'imgLib': False,
 		'tmbDir': '.tmb',
+		'tmbAtOnce': 3,
 		'tmbSize': 48,
 		'fileURL': True,
 		'uplMaxSize': 15,
@@ -80,14 +75,31 @@ class elFinder():
 		'tmb': '__thumbnails'
 	}
 
+	_time = 0
 	_request = {}
 	_response = {}
 	_errorData = {}
 	_form = {}
+	_im = None
+
 
 	def __init__(self, opts):
+		if self._options['debug']:
+			self._response['debug'] = {}
+			self._time = time.time()
+
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
+
+		self._options['URL'] = self._options['URL'].rstrip('/')
+		self._options['root'] = self._options['root'].rstrip(os.sep)
+		self.__debug('URL', self._options['URL'])
+		self.__debug('root', self._options['root'])
+
+		if self._options['tmbDir']:
+			self._options['tmbDir'] = os.path.join(self._options['root'], self._options['tmbDir'])
+			if not os.path.exists(self._options['tmbDir']):
+				self._options['tmbDir'] = False
 
 
 	def run(self):
@@ -109,7 +121,6 @@ class elFinder():
 						func()
 		else:
 			self._response['disabled'] = self._options['disabled']
-			# response.update(self.__reload())
 			self.__reload()
 		
 		if self._errorData:
@@ -119,8 +130,17 @@ class elFinder():
 		# f.write(str(self._form))
 		# f.close()
 		# self._response['debug'] = {}
-		print "Content-type: text/html\n"
-		print simplejson.dumps(self._response)
+
+		if self._options['debug']:
+			self.__debug('time', (time.time() - self._time))
+		else:
+			if 'debug' in self._response:
+				del self._response['debug']
+
+		# print 'Content-type: application/json\n'
+		print 'Content-type: text/html\n'
+		print simplejson.dumps(self._response, indent = bool(self._options['debug']))
+		sys.exit(0)
 
 
 	def __open(self, tree):
@@ -204,7 +224,7 @@ class elFinder():
 		else:
 			try:
 				os.rename(curName, newName)
-				self.__content(curDir, os.path.isdir(newName))
+				self._response['target'] = self.__info(newName)
 			except:
 				self._response['error'] = 'Unable to rename file'
 
@@ -286,7 +306,13 @@ class elFinder():
 
 
 	def __upload(self):
-		#print cgi.FieldStorage()
+		try: # Windows needs stdio set for binary mode.
+			import msvcrt
+			msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
+			msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+		except ImportError:
+			pass
+
 		if 'current' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			if not curDir:
@@ -310,9 +336,6 @@ class elFinder():
 				name = up.filename
 				if name:
 					total += 1
-					self._response['debug'] = {
-					# name: up.file
-					}
 					name = os.path.basename(name)
 					if not self.__checkName(name):
 						self.__errorData(name, 'Invalid name')
@@ -364,11 +387,6 @@ class elFinder():
 				if self._request['cut'] == '1':
 					cut = True
 
-			self._response['debug'] = {
-				'files': files,
-				'cut': cut
-			}
-
 			if not self.__isAllowed(src, 'read') or not self.__isAllowed(dst, 'write'):
 				self._response['error'] = 'Access denied'
 				return
@@ -412,29 +430,71 @@ class elFinder():
 		return
 
 
-	def __remove(self, target):
-		if not self.__isAllowed(target, 'rm'):
-			self.__errorData(target, 'Access denied!')
+	def __duplicate(self):
+		if 'current' in self._request and 'file' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			target = self.__find(self._request['file'], curDir)
+			if not curDir or not target:
+				self._response['error'] = 'Invalid parameters'
+				return
+			if not self.__isAllowed(target, 'read') or not self.__isAllowed(curDir, 'write'):
+				self._response['error'] = 'Access denied!'
+			newName = self.__uniqueName(target)
+			if not self.__copy(target, newName):
+				self._response['error'] = 'Duplicate failed'
+				return
 
-		if not os.path.isdir(target):
-			try:
-				os.unlink(target)
-				return True
-			except:
-				self.__errorData(target, 'Remove failed')
+		self.__content(curDir, True)
+		return
+
+
+	def __geturl(self):
+		response = {}
+		if 'current' in self._request and 'file' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			curFile = self.__find(self._request['file'], curDir)
+			if curDir and curFile:
+				self._response['url'] = self.__path2url(curFile)
+				return
+
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __thumbnails(self):
+		if 'current' in self._request:
+			curDir = self.__findDir(self._request['current'], None)
+			if not curDir or curDir == self._options['tmbDir']:
 				return False
 		else:
-			for i in os.listdir(target):
-				if self.__isAccepted(i):
-					self.__remove(os.path.join(target, i))
+			return False
 
-			try:
-				os.rmdir(target)
-				return True
-			except:
-				self.__errorData(target, 'Remove failed')
-				return False
-		pass
+		self.__initImgLib()
+		if self.__canCreateTmb():
+			if self._options['tmbAtOnce'] > 0:
+				tmbMax = self._options['tmbAtOnce']
+			else:
+				tmbMax = 100
+			self._response['images'] = {}
+			i = 0
+			for f in os.listdir(curDir):
+				path = os.path.join(curDir, f)
+				fhash = self.__hash(path)
+				if self.__canCreateTmb(path) and self.__isAllowed(path, 'read'):
+					tmb = os.path.join(self._options['tmbDir'], fhash + '.png')
+					if not os.path.exists(tmb):
+						if self.__tmb(path, tmb):
+							self._response['images'].update({
+								fhash: self.__path2url(tmb)
+							})
+							self._response['tmb'] = True
+							i += 1
+				if i >= tmbMax:
+					break
+		else:
+			return False
+
+		return
 
 
 	def __copy(self, src, dst):
@@ -473,6 +533,30 @@ class elFinder():
 					return False
 
 		return True
+
+
+	def __findDir(self, fhash, path):
+		"""Find directory by hash"""
+		fhash = str(fhash)
+		if not path:
+			path = self._options['root']
+			if fhash == self.__hash(path):
+				return path
+
+		if not os.path.isdir(path):
+			return None
+
+		for d in os.listdir(path):
+			pd = os.path.join(path, d)
+			if os.path.isdir(pd) and not os.path.islink(pd):
+				if fhash == self.__hash(pd):
+					return pd
+				else:
+					ret = self.__findDir(fhash, pd)
+					if ret:
+						return ret
+
+		return None
 
 
 	def __find(self, fhash, parent):
@@ -564,30 +648,6 @@ class elFinder():
 		self._response['cdc'] = dirs
 
 
-	def __findDir(self, fhash, path):
-		"""Find directory by hash"""
-		fhash = str(fhash)
-		if not path:
-			path = self._options['root']
-			if fhash == self.__hash(path):
-				return path
-
-		if not os.path.isdir(path):
-			return None
-
-		for d in os.listdir(path):
-			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd):
-				if fhash == self.__hash(pd):
-					return pd
-				else:
-					ret = self.__findDir(fhash, pd)
-					if ret:
-						return ret
-
-		return None
-
-
 	def __tree(self, path):
 		"""Return directory tree starting from path"""
 		tree = []
@@ -616,7 +676,81 @@ class elFinder():
 
 		if len(tree) == 0: return ''
 		else: return tree
-	
+
+
+	def __uniqueName(self, path):
+		curDir = os.path.dirname(path)
+		curName = os.path.basename(path)
+		lastDot = curName.rfind('.')
+		copy = ' copy'
+		ext = newName = ''
+
+		if re.search(r'\..{3}\.(gz|bz|bz2)$', curName):
+			pos = -7
+			if curName[-1:] == '2': pos -= 1
+			ext = curName[pos:]
+			oldName = curName[0:pos]
+			newName = oldName + copy
+		elif lastDot <= 0:
+			oldName = curName
+			newName = oldName + copy
+			pass
+		else:
+			ext = curName[lastDot:]
+			oldName = curName[0:lastDot]
+			newName = oldName + copy
+
+		pos = 0
+
+		if oldName[-len(copy):] == copy:
+			newName = oldName
+		elif re.search(r'' + copy +'\s\d+$', oldName):
+			pos = oldName.rfind(copy) + len(copy)
+			newName = oldName[0:pos]
+		else:
+			newPath = os.path.join(curDir, newName + ext)
+			if not os.path.exists(newPath):
+				return newPath
+
+		# if we are here then copy already exists or making copy of copy
+		# we will make new indexed copy *black magic*
+		idx = 1
+		if pos > 0: idx = int(oldName[pos:])
+		while True:
+			idx += 1
+			newNameExt = newName + ' ' + str(idx) + ext
+			newPath = os.path.join(curDir, newNameExt)
+			if not os.path.exists(newPath):
+				return newPath
+			# if idx >= 1000: break # possible loop
+
+		return
+
+
+	def __remove(self, target):
+		if not self.__isAllowed(target, 'rm'):
+			self.__errorData(target, 'Access denied!')
+
+		if not os.path.isdir(target):
+			try:
+				os.unlink(target)
+				return True
+			except:
+				self.__errorData(target, 'Remove failed')
+				return False
+		else:
+			for i in os.listdir(target):
+				if self.__isAccepted(i):
+					self.__remove(os.path.join(target, i))
+
+			try:
+				os.rmdir(target)
+				return True
+			except:
+				self.__errorData(target, 'Remove failed')
+				return False
+		pass
+
 
 	def __info(self, path):
 		mime = ''
@@ -624,7 +758,7 @@ class elFinder():
 		if os.path.isfile(path): filetype = 'file'
 		if os.path.isdir(path): filetype = 'dir'
 		if os.path.islink(path): filetype = 'link'
-		
+
 		stat = os.lstat(path)
 
 		info = {
@@ -654,33 +788,37 @@ class elFinder():
 				basename = self._options['rootAlias']
 			else:
 				basename = os.path.basename(self._options['root'])
-			
+
 			info['linkTo'] = basename + path[len(self._options['root']):]
 			info['link'] = self.__hash(path)
 			info['read'] = info['read'] and self.__isAllowed(path, 'read')
 			info['write'] = info['write'] and self.__isAllowed(path, 'write')
 			info['rm'] = self.__isAllowed(path, 'rm')
-		
+
 		if not info['mime'] == 'directory':
 			if self._options['fileURL']:
 				info['url'] = self.__path2url(path)
-			# TODO more actions here
-			# TODO image sizes
-		
+			if info['mime'][0:5] == 'image':
+				if self.__canCreateTmb():
+					dim = self.__getImgSize(path)
+					if dim:
+						info['dim'] = dim
+						info['resize'] = True
+
+					# if we are in tmb dir, files are thumbs itself
+					if os.path.dirname(path) == self._options['tmbDir']:
+						info['tmb'] = self.__path2url(path)
+						return info
+
+					tmb = os.path.join(self._options['tmbDir'], info['hash'] + '.png')
+
+					if os.path.exists(tmb):
+						tmbUrl = self.__path2url(tmb)
+						info['tmb'] = tmbUrl
+					else:
+						self._response['tmb'] = True
+
 		return info
-
-
-	def __geturl(self):
-		response = {}
-		if 'current' in self._request and 'file' in self._request:
-			curDir = self.__findDir(self._request['current'], None)
-			curFile = self.__find(self._request['file'], curDir)
-			if curDir and curFile:
-				self._response['url'] = self.__path2url(curFile)
-				return
-		
-		self._response['error'] = 'Invalid parameters'
-		return
 
 
 	def __fread(self):
@@ -725,6 +863,41 @@ class elFinder():
 		return mimetypes.guess_type(path)[0] or 'unknown'
 
 
+	def __tmb(self, path, tmb):
+		try:
+			im = self._im.open(path).copy()
+			size = self._options['tmbSize'], self._options['tmbSize']
+			box = self.__cropTuple(im.size)
+			if box:
+				im = im.crop(box)
+			im.thumbnail(size, self._im.ANTIALIAS)
+			im.save(tmb, 'PNG')
+		except Exception, e:
+			self.__debug('tmbFailed_' + path, str(e))
+			return False
+		return True
+
+
+	def __cropTuple(self, size):
+		w, h = size
+		if (w > h): # landscape
+			l = int((w - h) / 2)
+			u = 0
+			r = l + h
+			d = h
+			return (l, u, r, d)
+		elif (h > w): # portrait
+			l = 0
+			u = int((h - w) / 2)
+			r = w
+			d = u + w
+			return (l, u, r, d)
+		else: # cube
+			pass
+
+		return False
+
+
 	def __readlink(self, path):
 		"""Read link and return real path if not broken"""
 		target = os.readlink(path);
@@ -754,6 +927,17 @@ class elFinder():
 			yield chunk
 
 
+	def __canCreateTmb(self, path = None):
+		if self._options['imgLib'] and self._options['tmbDir']:
+			if path is not None:
+				mime = self.__mimetype(path)
+				if not mime[0:5] == 'image':
+					return False
+			return True
+		else:
+			return False
+
+
 	def __isUploadAllow(self, file):
 		# TODO
 		return True
@@ -762,9 +946,8 @@ class elFinder():
 	def __isAccepted(self, target):
 		if target == '.' or target == '..':
 			return False
-		if target[0:1] == '.':
-			if not self._options['dotFiles']:
-				return False
+		if target[0:1] == '.' and not self._options['dotFiles']:
+			return False
 		return True
 
 
@@ -794,6 +977,11 @@ class elFinder():
 		curDir = path
 		length = len(self._options['root'])
 		url = str(self._options['URL'] + curDir[length:]).replace(os.sep, '/')
+		try:
+			import urllib
+			url = urllib.quote(url, '/:~')
+		except:
+			pass
 		return url
 
 
@@ -802,9 +990,46 @@ class elFinder():
 		self._errorData[path] = msg
 
 
+	def __initImgLib(self):
+		if not self._options['imgLib'] is False and self._im is None:
+			try:
+				import Image
+				Image
+				self._im = Image
+				self._options['imgLib'] = 'PIL'
+			except:
+				self._options['imgLib'] = False
+				self._im = False
+
+		self.__debug('imgLib', self._options['imgLib'])
+		return self._options['imgLib']
+
+
+	def __getImgSize(self, path):
+		self.__initImgLib();
+		if self.__canCreateTmb():
+			try:
+				im = self._im.open(path)
+				return str(im.size[0]) + 'x' + str(im.size[1])
+			except:
+				pass
+
+		return False
+
+
+	def __debug(self, k, v):
+		if self._options['debug']:
+			self._response['debug'].update({k: v})
+		return
+
+
+
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files',
-	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files'
+	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/',
+	# 'root': '/Users/troex/Sites/',
+	# 'URL': 'http://php5.localhost:8001/~troex/',
+	'imgLib': 'auto'
 }).run()
 
 #print os.environ
