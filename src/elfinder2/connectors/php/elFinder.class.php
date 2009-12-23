@@ -430,7 +430,7 @@ class elFinder {
 		if (empty($_GET['current']) 
 		||  empty($_GET['target'])
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
-		||  false == ($file = $this->_find(trim($_GET['target']), $dir))
+		||  false == ($target = $this->_find(trim($_GET['target']), $dir))
 		) {
 			$this->_result['error'] = 'File does not exists';
 		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
@@ -439,12 +439,13 @@ class elFinder {
 			$this->_result['error'] = 'Access denied';
 		} elseif (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_result['error'] = 'File or folder with the same name already exists';
-		} elseif (!rename($file, $dir.DIRECTORY_SEPARATOR.$name)) {
+		} elseif (!rename($target, $dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_result['error'] = 'Unable to rename file';
 		} else {
-			$this->_logContext['from'] = $file;
+			$this->_logContext['from'] = $target;
 			$this->_logContext['to']   = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
+			$this->_result['target']   = $this->_info($dir.DIRECTORY_SEPARATOR.$name);
+			// $this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 	}
 	
@@ -661,7 +662,6 @@ class elFinder {
 		$this->_content($current, true);
 	}
 	
-	
 	/**
 	 * Create file/folder copy with suffix - "copy"
 	 *
@@ -683,7 +683,7 @@ class elFinder {
 		if (!$this->_copy($file, $this->_uniqueName($file))) {
 			return $this->_result['error'] = 'Duplicate failed';
 		}
-		$this->_content($current);
+		$this->_content($current, is_dir($file));
 	}
 	
 	/**
@@ -919,7 +919,7 @@ class elFinder {
 		if ($type == 'link') {
 			if (false == ($path = $this->_readlink($path))) {
 				$info['mime'] = 'unknown';
-				$info['broken'] = true;
+				// $info['broken'] = true;
 				return $info;
 			}
 			$info['link']   = $this->_hash($path);

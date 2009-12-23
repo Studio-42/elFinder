@@ -55,6 +55,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this.hide = function() {
 
 		if (this.ql.is(':visible')) {
+			self.fm.lockShortcuts();
 			var o, w, el = self.fm.view.cwd.find('[key="'+this._hash+'"]');
 			if (el) {
 				o = el.offset();
@@ -68,7 +69,6 @@ elFinder.prototype.quickLook = function(fm, el) {
 					top      : o.top,
 					opacity  : 0
 				}, 350, function() {
-					self.fm.keydown = true;
 					reset();
 					self.ql.hide().css({
 						width    : 'auto',
@@ -138,13 +138,14 @@ elFinder.prototype.quickLook = function(fm, el) {
 
 		self.ico.hide();
 		self.fm.keydown = false;
+		self.fm.lockShortcuts(true);
 		self.img.css({
 			width:self.ico.width(),
 			height:self.ico.height()
 		}).animate({
 			width:Math.round(r*iw),
 			height:Math.round(r*ih)
-		}, 350, function() { self.fm.keydown = true; });
+		}, 350, function() { self.fm.lockShortcuts(); });
 	}
 	
 	this.update = function() {
