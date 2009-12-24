@@ -1,3 +1,7 @@
+/**
+ * @class  Bind events
+ * @author dio dio@std42.ru
+ **/
 elFinder.prototype.eventsManager = function(fm, el) {
 	var self   = this;
 	this.lock  = false;
@@ -5,31 +9,53 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	this.ui    = fm.ui;
 	this.tree  = fm.view.tree
 	this.cwd   = fm.view.cwd;
+	this.pointer = ''
 	
+	/**
+	 * Initial events binding
+	 *
+	 **/
 	this.init = function() {
-
-		/* click on current dir */
-		this.cwd.bind('click', function(e) {
-			self.fm.ui.hideMenu();
-			select(e, true);
-		}) 
-		.bind(window.opera?'click':'contextmenu', function(e) {
-				e.preventDefault();
-				select(e);
-				self.fm.ui.showMenu(e);
-		})
-		.selectable({
-			filter : '[key]',
-			delay  : 1,
-			start  : function() { self.fm.ui.hideMenu(); },
-			stop   : function() { self.fm.updateSelected(); }
-		})
-		.find('[key]')
-		.live('dblclick', function(e) {
-			/* if editorCallback is set, dblclick on file call select command */
-			self.ui.exec(self.ui.isCmdAllowed('select') ? 'select' : 'open');
-		});
 		
+		// this.fm.startBench()
+		
+		this.cwd
+			.bind('click', function(e) {
+				var t = $(e.target);
+				if (t.hasClass('ui-selected')) {
+					self.fm.unselectAll();
+				} else {
+					if (!t.attr('key')) {
+						t = t.parent('[key]');
+					}
+					if (e.ctrlKey || e.metaKey) {
+						self.fm.toggleSelect(t);
+					} else {
+						self.fm.select(t, true);
+					}
+				}
+			})
+			.bind(window.opera?'click':'contextmenu', function(e) {
+				var t = $(e.target);
+				e.preventDefault();
+				if (t.hasClass('el-finder-cwd')) {
+					self.fm.unselectAll();
+				} else {
+					self.fm.select(t.attr('key') ? t : t.parent('[key]'));
+				}
+				self.fm.quickLook.hide();
+				self.fm.ui.showMenu(e);
+			})
+			.selectable({
+				filter : '[key]',
+				delay  : 300,
+				stop : function() { self.fm.updateSelect() }
+			});
+			
+		$(document).bind('click', function() { 
+			self.fm.ui.hideMenu(); 
+			$('input', self.cwd).trigger('change'); 
+		});
 		/* click on tree or places */
 		this.fm.view.nav.find('a').live('click', function(e) {
 			e.preventDefault();
@@ -55,18 +81,19 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			self.tree.find('a').removeClass('selected');
 			$(e.target).addClass('selected').prev('div').addClass('expanded').parents('li:has(ul)').children('div').addClass('expanded').next().next('ul').show();
 		});
+		
 		/* make places droppable */
 		if (this.fm.options.places) {
 			this.fm.view.plc.droppable({
 				accept    : 'div',
 				tolerance : 'pointer',
-				over      : function() { $(this).addClass('hover'); },
-				out       : function() { $(this).removeClass('hover'); },
+				over      : function() { $(this).addClass('el-finder-droppable'); },
+				out       : function() { $(this).removeClass('el-finder-droppable'); },
 				drop      : function(e, ui) {
-					$(this).removeClass('hover');
+					$(this).removeClass('el-finder-droppable');
 					var upd = false;
 					/* accept only folders with read access */
-					ui.helper.children('div.el-finder-cwd').children('div.directory:not(.noaccess,.dropbox)').each(function() {
+					ui.helper.children('.directory:not(.noaccess,.dropbox)').each(function() {
 						if (self.fm.addPlace($(this).attr('key'))) {
 							upd = true;
 							$(this).hide();
@@ -115,10 +142,10 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					self.fm.quickLook.hide()
 					break;
 				case 32:
-					if (self.fm.selected.length == 1) {
+					// if (self.fm.selected.length == 1) {
 						e.preventDefault();
 						self.fm.quickLook.toggle();
-					}
+					// }
 					break;
 					
 				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
@@ -149,8 +176,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				case 65:
 					if (meta) {
 						e.preventDefault();
-						self.cwd.find('[key]').addClass('ui-selected');
-						self.fm.updateSelected();
+						self.fm.selectAll();
 					}
 					break;
 				/* Ctrl+C */
@@ -189,6 +215,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			
 		});
 		
+		// self.fm.log('em init :'+self.fm.stopBench())
 	}
 	
 	/**
@@ -196,8 +223,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.updateNav = function() {
-
-		this.tree.find('a:not(.noaccess,.readonly)').droppable({
+		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',
 			accept : 'div',
 			over   : function() { $(this).addClass('el-finder-droppable'); },
@@ -207,6 +233,10 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		this.fm.options.places && this.updatePlaces();
 	}
 	
+	/**
+	 * Update places draggable
+	 *
+	 **/
 	this.updatePlaces = function() {
 		this.fm.view.plc.find('ul>li').draggable({
 			scroll : false,
@@ -225,55 +255,44 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 * Update folders droppable & files/folders draggable
 	 **/
 	this.updateCwd = function() {
-		this.cwd.find('(div,tr)[key]')
+		// this.fm.startBench()
+		
+		$('[key]', this.cwd)
+			.bind('dblclick', function(e) {
+				self.fm.select($(this), true);
+				self.ui.exec(self.ui.isCmdAllowed('select') ? 'select' : 'open');
+			})
 			.draggable({
-				drag : function(e, ui) {
-					if (e.shiftKey) {
-						ui.helper.addClass('el-finder-drag-copy');
-					} else {
-						ui.helper.removeClass('el-finder-drag-copy');
-					}
-				},
+				delay      : 2,
 				addClasses : false,
 				revert     : true,
+				drag       : function(e, ui) {
+					ui.helper.toggleClass('el-finder-drag-copy', e.shiftKey);
+				},
 				helper     : function() {
-					var h = $('<div/>').addClass('el-finder-cwd')
+					var t = $(this),
+						h = $('<div/>').addClass('el-finder-drag-helper');
+					if (!t.hasClass('ui-selected')) {
+						self.fm.select(t, true);
+					}
+
 					self.cwd.find('.ui-selected').each(function(i) {
-						h.append(self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.view.renderIcon(self.cdc[$(this).attr('key')]));
-					})
-					return $('<div/>').addClass('el-finder-drag-helper').append(h);
+						h.append(self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]));
+					});
+
+					return h;
 				}
 			})
-			.draggable('disable').removeClass('ui-state-disabled')
-			.filter('.directory:not(.noaccess:has(em[class="readonly"],em[class=""]))')
+			.filter('.directory')
 			.droppable({
 				tolerance : 'pointer',
-				accept    : 'div',
-				over      : function() { $(this).addClass('el-finder-droppable'); },
+				accept    : 'div,tr',
+				over      : function() { $(this).addClass('el-finder-droppable');  },
 				out       : function() { $(this).removeClass('el-finder-droppable'); },
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
 			});
-	}
-	
-	/**
-	 * Select/unselect files
-	 *
-	 * @param Events   click/right click event
-	 * @param Boolean  is it right click?
-	 **/
-	function select(e, click) {
-		if (e.target == self.cwd.get(0)) {
-			/* click on empty space */
-			self.fm.unselectAll() ;
-		} else {
-			/* click on folder/file */
-			click && !e.ctrlKey && !e.metaKey && self.fm.unselectAll();
-			var t = $(e.target);
-			(t.attr('key') ? t : t.parents('[key]').eq(0)).addClass('ui-selected');
-		}
-		/* if any element editing */
-		self.cwd.find('input').trigger('blur');
-		self.fm.updateSelected();
+			
+		// self.fm.log('updateCwd: '+self.fm.stopBench())
 	}
 	
 	/**
@@ -283,15 +302,54 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 * @param Boolean  clear current selection?
 	 **/
 	function moveSelection(forward, reset) {
-		if (!self.fm.selected.length) {
-			self.cwd.find('[key]:'+(forward?'first':'last')).addClass('ui-selected');
-		} else {
-			var el = self.cwd.find('[key="'+self.fm.selected[forward?self.fm.selected.length-1:0]+'"]:'+(forward?'last':'first')),
-				n  = forward ? el.next() : el.prev();
-			reset && self.fm.unselectAll();
-			(n.length?n:el).addClass('ui-selected');
+		var p, _p, cur//, l = $('.ui-selected', self.cwd).length;
+		
+		if (!$('[key]', self.cwd).length) {
+			return;
 		}
-		self.fm.updateSelected();
+		
+		if (self.fm.selected.length == 0) {
+			p = $('[key]:'+(forward ? 'first' : 'last'), self.cwd);
+			self.fm.select(p);
+		} else if (reset) {
+			p  = $('.ui-selected:'+(forward ? 'last' : 'first'), self.cwd);
+			_p = p[forward ? 'next' : 'prev']('[key]');
+			if (_p.length) {
+				p = _p;
+			}
+			self.fm.select(p, true);
+		} else {
+			if (self.pointer) {
+				cur = $('[key="'+self.pointer+'"].ui-selected', self.cwd);
+			}
+			if (!cur || !cur.length) {
+				cur = $('.ui-selected:'+(forward ? 'last' : 'first'), self.cwd);
+			}
+			p = cur[forward ? 'next' : 'prev']('[key]');
+
+			if (!p.length) {
+				p = cur;
+			} else {
+				if (!p.hasClass('ui-selected')) {
+					self.fm.select(p);
+				} else {
+					if (!cur.hasClass('ui-selected')) {
+						self.fm.unselect(p);
+					} else {
+						_p = cur[forward ? 'prev' : 'next']('[key]')
+						if (!_p.length || !_p.hasClass('ui-selected')) {
+							self.fm.unselect(cur);
+						} else {
+							while ((_p = forward ? p.next('[key]') : p.prev('[key]')) && p.hasClass('ui-selected')) {
+								p = _p;
+							}
+							self.fm.select(p);
+						}
+					}
+				}
+			} 
+		}
+		self.pointer = p.attr('key');
 		self.fm.checkSelectedPos(forward);
 	}
 	

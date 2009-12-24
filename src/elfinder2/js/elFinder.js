@@ -1,24 +1,48 @@
 (function($) {
 
+	/**
+	 * @class  File manager (main controller)
+	 * @author dio dio@std42.ru
+	 **/
 	elFinder = function(el, o) {
 		var self      = this;
+		/**
+		 * Object. Current Working Dir info
+		 **/
 		this.cwd      = {};
-		this.dirs     = {};
+		/**
+		 * Object. Current Dir Content. Files/folders info
+		 **/
 		this.cdc      = {};
-		this.places   = [];
+		/**
+		 * Object. Buffer for copied files
+		 **/
 		this.buffer   = {};
+		/**
+		 * Array. Selected files IDs
+		 **/
 		this.selected = [];
+		/**
+		 * Array. Folder navigation history
+		 **/
 		this.history  = [];
+		/**
+		 * Boolean. File manager init?
+		 **/
 		this.loaded   = false;
+		/**
+		 * Boolean. Enable/disable actions
+		 **/
 		this.locked   = false;
-		
+		/**
+		 * Object. File manager configuration
+		 **/
 		this.options = $.extend({}, this.options, o);
 		
 		if (!this.options.url) {
 			alert('Invalid configuration! You have to set URL option.');
 			return;
 		}
-		
 		
 		
 		this.view = new this.view(this, el);
@@ -32,18 +56,85 @@
 		this.log = function(m) {
 			window.console && window.console.log && window.console.log(m)
 		}
+
+		/**
+		 * Set/get cookie value
+		 *
+		 * @param  String  name  cookie name
+		 * @param  String  value cookie value, null to unset
+		 **/
+		this.cookie = function(name, value) {
+			if (typeof value == 'undefined') {
+				if (document.cookie && document.cookie != '') {
+					var i, c = document.cookie.split(';');
+					name += '=';
+					for (i=0; i<c.length; i++) {
+						c[i] = $.trim(c[i]);
+						if (c[i].substring(0, name.length) == name) {
+							return decodeURIComponent(c[i].substring(name.length));
+						}
+					}
+				}
+				return '';
+			} else {
+				var d, o = $.extend({}, this.options.cookie);
+				if (value===null) {
+					value = '';
+					o.expires = -1;
+				}
+				if (typeof(o.expires) == 'number') {
+					d = new Date();
+					d.setTime(d.getTime()+(o.expires * 24 * 60 * 60 * 1000));
+					o.expires = d;
+				}
+				document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
+			}
+		}
+
+		
+
+		/**
+		 * Set/unset this.locked flag
+		 *
+		 * @param  Boolean  state
+		 **/
+		this.lock = function(l) {
+			this.view.spinner((this.locked = l||false));
+			this.eventsManager.lock = this.locked;
+		}
+
+		/**
+		 * Set/unset lock for keyboard shortcuts
+		 *
+		 * @param  Boolean  state
+		 **/
+		this.lockShortcuts = function(l) {
+			this.eventsManager.lock = l;
+		}
+		
+		/**
+		 * Set file manager view type (list|icons)
+		 *
+		 * @param  String  v  view name
+		 **/
+		this.setView = function(v) {
+			if (v == 'list' || v == 'icons') {
+				this.options.view = v;
+				this.cookie('el-finder-view', v);
+			}
+		}
 		
 		/**
 		 * make ajax request, show message on error, call callback on success
 		 *
-		 * @param  data  Object  data for ajax request
-		 * @param  callback Function  
-		 * @param  boolean  call callback on error?
+		 * @param  Object.  data for ajax request
+		 * @param  Function  
+		 * @param  Boolean  call callback on error?
 		 * @param  Object   overrwrite some ajax options (type/async)
 		 * @param  Boolean  do not lock fm before ajax?
 		 */
-		this.ajax = function(data, callback, force, options, dontLock) {
-			!dontLock && this.lock(true);
+		this.ajax = function(data, callback, force, options, noLock) {
+			!noLock && this.lock(true);
 
 			var opts = {
 				url      : this.options.url,
@@ -86,68 +177,17 @@
 				if (self.options.view == 'icons' && data.images) {
 					var i, el;
 					for (i in data.images) {
-						el = self.view.cwd.find('div[key="'+i+'"]').children('p:not(:has(span))');
-						el.length && el.append($('<span/>').addClass('rnd-5').css('background', ' url("'+data.images[i]+'") 0 0 no-repeat'));
+						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
 					}
 				}
 			}, false, null, true);
 		}
 		
 		/**
-		 * Set/get cookie value
+		 * Return folders in places IDs
 		 *
-		 * @param  String  name  cookie name
-		 * @param  String  value cookie value, null to unset
+		 * @return Array
 		 **/
-		this.cookie = function(name, value) {
-			if (typeof value == 'undefined') {
-				if (document.cookie && document.cookie != '') {
-					var i, c = document.cookie.split(';');
-					name += '=';
-					for (i=0; i<c.length; i++) {
-						c[i] = $.trim(c[i]);
-						if (c[i].substring(0, name.length) == name) {
-							return decodeURIComponent(c[i].substring(name.length));
-						}
-					}
-				}
-				return '';
-			} else {
-				var d, o = $.extend({}, this.options.cookie);
-				if (value===null) {
-					value = '';
-					o.expires = -1;
-				}
-				if (typeof(o.expires) == 'number') {
-					d = new Date();
-					d.setTime(d.getTime()+(o.expires * 24 * 60 * 60 * 1000));
-					o.expires = d;
-				}
-				document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
-			}
-		}
-		
-		this.lock = function(l) {
-			// this.locked = l||false;
-			this.view.spinner((this.locked = l||false));
-			this.eventsManager.lock = this.locked;
-		}
-
-		this.lockShortcuts = function(l) {
-			this.eventsManager.lock = l;
-		}
-		/**
-		 * Set file manager view (list|icons)
-		 *
-		 * @param  String  v  view name
-		 **/
-		this.setView = function(v) {
-			if (v == 'list' || v == 'icons') {
-				this.options.view = v;
-				this.cookie('el-finder-view', v);
-			}
-		}
-		
 		this.getPlaces = function() {
 			var pl = [], p = this.cookie('el-finder-places');
 			if (p.length) {
@@ -160,6 +200,12 @@
 			return pl;
 		}
 		
+		/**
+		 * Add new folder to places
+		 *
+		 * @param  String  Folder ID
+		 * @return Boolean
+		 **/
 		this.addPlace = function(id) {
 			var p = this.getPlaces();
 			if ($.inArray(id, p) == -1) {
@@ -169,6 +215,12 @@
 			}
 		}
 		
+		/**
+		 * Remove folder from places
+		 *
+		 * @param  String  Folder ID
+		 * @return Boolean
+		 **/
 		this.removePlace = function(id) {
 			var p = this.getPlaces();
 			if ($.inArray(id, p) != -1) {
@@ -177,29 +229,42 @@
 			}
 		}
 		
+		/**
+		 * Save new places data in cookie
+		 *
+		 * @param  Array  Folders IDs
+		 **/
 		this.savePlaces = function(p) {
 			this.cookie('el-finder-places', p.join(':'));
 		}
 		
+	
+		
+		/**
+		 * Update file manager content
+		 *
+		 * @param  Object  Data from server
+		 **/
 		this.reload = function(data) {
 			if (data.tree) {
 				this.view.renderNav(data.tree);
 				this.eventsManager.updateNav();
+				
 			}
 			this.cwd = data.cwd;
 			this.cdc = {};
 			var l = data.cdc.length;
 			for (var i=0; i<l ; i++) {
-				this.cdc[''+data.cdc[i].hash] = data.cdc[i];
+				data.cdc[i].hash += ''
+				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 				delete data.cdc[i]; // ?????
 			}
 			this.updateCwd();
 		}
 		
-		
 		/**
-		 * Redraw current directory and make files/folders draggable
+		 * Redraw current directory
 		 *
 		 */
 		this.updateCwd = function() {
@@ -210,14 +275,15 @@
 			this.eventsManager.updateCwd();
 		}
 		
-		this.updateElement = function(id, f) {
-			delete this.cdc[id];
-			this.cdc[f.hash] = f;
-			this.view.updateElement(id, f);
-			this.updateSelected();
-			this.ui.update();
-		}
 		
+		
+		/**
+		 * Execute after files was dropped onto folder
+		 *
+		 * @param  Object  drop event
+		 * @param  Object  drag helper object
+		 * @param  String  target folder ID
+		 */
 		this.drop = function(e, ui, target) {
 			if (ui.helper.find('[key="'+target+'"]').length) {
 				return self.view.error('Unable to copy into itself!');
@@ -233,6 +299,7 @@
 			if (ids.length) {
 				self.setBuffer(ids, e.shiftKey?0:1, target);
 				if (self.buffer.files) {
+					/* some strange jquery ui bug (in list view) */
 					setTimeout(function() {self.ui.exec('paste'); self.buffer = {}}, 500);
 				}
 			} else {
@@ -240,32 +307,106 @@
 			}
 		}
 		
+		/**
+		 * Return selected files data
+		 *
+		 * @param  Number  if set, returns only element with this index or empty object 
+		 * @return Array|Object
+		 */
 		this.getSelected = function(ndx) {
 			var i, s = [];
+			if (ndx>=0) {
+				return this.cdc[this.selected[ndx]]||{};
+			}
 			for (i=0; i<this.selected.length; i++) {
 				this.cdc[this.selected[i]] && s.push(this.cdc[this.selected[i]]);
 			}
-			return ndx>=0 && ndx<s.length ? s[ndx] : s;
+			return s;
 		}
 		
-		this.updateSelected = function() {
+		this.select = function(el, reset) {
+			reset && $('[key]', self.view.cwd).removeClass('ui-selected');
+			el.addClass('ui-selected');
+			this.updateSelect();
+		}
+
+		this.selectById = function(id) {
+			var el = $('[key="'+id+'"]', this.view.cwd);
+			el.length && this.select(el)
+		}
+
+		this.unselect = function(el) {
+			el.removeClass('ui-selected');
+			this.updateSelect();
+		}
+
+		this.toggleSelect = function(el) {
+			if (el.hasClass('ui-selected')) {
+				this.unselect(el);
+			} else {
+				this.select(el);
+			}
+		}
+
+		this.selectAll = function() {
+			$('[key]', self.view.cwd).addClass('ui-selected')
+			this.updateSelect();
+		}
+
+		this.unselectAll = function() {
+			$('[key]', self.view.cwd).removeClass('ui-selected');
+			this.updateSelect();
+		}
+
+		this.updateSelect = function() {
 			this.selected = [];
-			this.view.cwd.find('(div,tr)[key]')
-				.draggable('disable')
-				.removeClass('ui-state-disabled')
-				.filter('.ui-selected').each(function() {
-					self.selected.push($(this).draggable('enable').attr('key'));
-				});
+			$('.ui-selected', self.view.cwd).each(function() {
+				self.selected.push($(this).attr('key'));
+			});
 			this.ui.update();
 			this.view.selectedInfo();
 			this.quickLook.update();
 		}
+
+		/**
+		 * Scroll selected element in visible position
+		 *
+		 * @param  Boolean  check last or first selected element?
+		 */
+		this.checkSelectedPos = function(last) {
+			var s = self.view.cwd.find('.ui-selected:'+(last ? 'last' : 'first')).eq(0),
+				p = s.position(),
+				h = s.outerHeight(),
+				ph = self.view.cwd.height();
+			if (p.top < 0) {
+				self.view.cwd.scrollTop(p.top+self.view.cwd.scrollTop()-2);
+			} else if (ph - p.top < h) {
+				self.view.cwd.scrollTop(p.top+h-ph+self.view.cwd.scrollTop());
+			}
+		}
+
 		
-		this.unselectAll = function() {
-			self.view.cwd.find('.ui-selected').removeClass('ui-selected');
+		
+		this.startBench = function() {
+			var d = new Date()
+			this.point = d.getMilliseconds();
 		}
 		
+		this.stopBench = function() {
+			var d = new Date();
+			return d.getMilliseconds() - this.point;
+		}
+		
+		
+		/**
+		 * Add files to clipboard buffer
+		 *
+		 * @param  Array   files IDs
+		 * @param  Boolean copy or cut files?
+		 * @param  String  destination folder ID
+		 */
 		this.setBuffer = function(files, cut, dst) {
+			var i, id, f;
 			this.buffer = {
 				src   : this.cwd.hash,
 				dst   : dst,
@@ -274,8 +415,9 @@
 				cut   : cut||0
 			};
 			
-			for (var i=0; i<files.length; i++) {
-				var id = files[i], f = this.cdc[id];
+			for (i=0; i<files.length; i++) {
+				id = files[i]; 
+				f = this.cdc[id];
 				if (f && f.read && f.type != 'link') {
 					this.buffer.files.push(f.hash);
 					this.buffer.names.push(f.name);
@@ -285,13 +427,27 @@
 			if (!this.buffer.files.length) {
 				this.buffer = {};
 			}
-			
 		}
 		
+		/**
+		 * Return true if file name is acceptable
+		 *
+		 * @param  String  file/folder name
+		 * @return Boolean
+		 */
 		this.isValidName = function(n) {
-			return self.dotFiles ? n.match(/^[^\\\/\<\>]+$/) : n.match(/^[^\.\\\/\<\>][^\\\/\<\>]*$/);
+			if (!this.cwd.dotFiles && n.indexOf('.') == 0) {
+				return false;
+			}
+			return n.match(/^[^\\\/\<\>:]+$/);
 		}
 		
+		/**
+		 * Return true if file with this name exists
+		 *
+		 * @param  String  file/folder name
+		 * @return Boolean
+		 */
 		this.fileExists = function(n) {
 			for (var i in this.cdc) {
 				if (this.cdc[i].name == n) {
@@ -301,6 +457,11 @@
 			return false;
 		}
 		
+		/**
+		 * Return file URL. If URL is not set, make sync ajax request to get it.
+		 *
+		 * @return String
+		 */
 		this.fileURL = function() {
 			var url = '', s = this.getSelected();
 			
@@ -320,6 +481,13 @@
 			return url;		
 		}
 		
+		/**
+		 * Return name for new file/folder
+		 *
+		 * @param  String  base name (i18n)
+		 * @param  String  extension for file
+		 * @return String
+		 */
 		this.uniqueName = function(n, ext) {
 			n = self.i18n(n);
 			var name = n, i = 0, ext = ext||'';
@@ -336,31 +504,14 @@
 			return name.replace('100', '')+Math.random()+ext;
 		}
 		
-		this.checkSelectedPos = function(last) {
-			if (self.selected.length) {
-				var s = self.view.cwd.find('.ui-selected:'+(last ? 'last' : 'first')).eq(0),
-					p = s.position(),
-					h = s.outerHeight(),
-					ph = self.view.cwd.height();
-				if (p.top < 0) {
-					self.view.cwd.scrollTop(p.top+self.view.cwd.scrollTop()-2);
-				} else if (ph - p.top < h) {
-					self.view.cwd.scrollTop(p.top+h-ph+self.view.cwd.scrollTop());
-				}
-			}
-		}
-		
+		/* here we init file manager */
 		if (!this.loaded) {
 			
-			/* load view from cookie */
 			this.setView(this.cookie('el-finder-view'));
-
 			this.loaded = true;
-			this.id = $(el).attr('id')||Math.random();
-			// this.log(this.id)
-			this.ajax({}, function(data) {
+			this.ajax({ tree: true }, function(data) {
 				self.eventsManager.init();
-				self.dotFiles = data.dotFiles;
+				// self.dotFiles = data.dotFiles;
 				self.reload(data)
 				self.ui.init(data.disabled);
 			});
@@ -374,10 +525,20 @@
 		this.close = function() {}
 	}
 	
+	/**
+	 * Translate message into selected language
+	 *
+	 * @param  String  message in english
+	 * @param  String  translated or original message
+	 */
 	elFinder.prototype.i18n = function(m) {
 		return this.options.i18n[this.options.lang] && this.options.i18n[this.options.lang][m] ? this.options.i18n[this.options.lang][m] :  m;
 	}
 	
+	/**
+	 * Default config
+	 *
+	 */
 	elFinder.prototype.options = {
 		url            : '',
 		lang           : 'en',
@@ -401,9 +562,13 @@
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
 			['info', 'help'],
-			['icons', 'list'],
-			['help']
-		]
+			['icons', 'list']
+		],
+		contextmenu : {
+			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
+			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'compress', 'delim', 'info'],
+			'group' : ['copy', 'cut', 'rm', 'delim', 'compress', 'delim', 'info']
+		}
 		
 	}
 

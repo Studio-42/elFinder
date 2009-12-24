@@ -310,9 +310,9 @@ class elFinder {
 		if ($cmd) {
 			$this->{$this->_commands[$cmd]}();
 		} else {
-			$this->_reload();
+			$this->_open();
 			$this->_result['disabled'] = $this->_options['disabled'];
-			$this->_result['dotFiles'] = $this->_options['dotFiles'];
+			// $this->_result['dotFiles'] = $this->_options['dotFiles'];
 			// echo '<pre>'; print_r($this->_result); exit();
 		}
 
@@ -351,7 +351,7 @@ class elFinder {
 	 * @param  bool  $tree  add dirs tree to result? (used by reload command)
 	 * @return void
 	 **/
-	private function _open($tree=false)
+	private function _open()
 	{
 		if (isset($_GET['current'])) { // read file
 			if (empty($_GET['current']) 
@@ -404,19 +404,8 @@ class elFinder {
 					$path = $p;
 				}
 			}
-			$this->_content($path, $tree);
+			$this->_content($path, isset($_GET['tree']));
 		}
-	}
-	
-	
-	/**
-	 * Reload fm in current directory
-	 *
-	 * @return void
-	 **/
-	private function _reload()
-	{
-		return $this->_open(true);
 	}
 	
 	
@@ -444,8 +433,8 @@ class elFinder {
 		} else {
 			$this->_logContext['from'] = $target;
 			$this->_logContext['to']   = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['target']   = $this->_info($dir.DIRECTORY_SEPARATOR.$name);
-			// $this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
+			$this->_result['target']   = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 	}
 	
@@ -471,6 +460,7 @@ class elFinder {
 			$this->_result['error'] = 'Unable to create folder';
 		} else {
 			$this->_logContext['dir'] = $dir.DIRECTORY_SEPARATOR.$name;
+			$this->_result['target'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 			$this->_content($dir, true);
 		}
 	}
@@ -498,6 +488,7 @@ class elFinder {
 			if (false != ($fp = @fopen($f, 'wb'))) {
 				fwrite($fp, "");
 				fclose($fp);
+				$this->_result['target'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 				$this->_content($dir);
 			} else {
 				$this->_result['error'] = 'Unable to create file';
@@ -828,15 +819,7 @@ class elFinder {
 		$this->_cwd($path);
 		$this->_cdc($path);
 		if ($tree) {
-			$this->_result['tree'] = array(
-				array(
-					'hash'  => $this->_hash($this->_options['root']),
-					'name'  => $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']),
-					'read'  => true,
-					'write' => $this->_isAllowed($this->_options['root'], 'write'),
-					'dirs'  => $this->_tree($this->_options['root'])
-					)
-				);
+			$this->_result['tree'] = $this->_tree($this->_options['root']);
 		}
 	}
 
@@ -864,7 +847,8 @@ class elFinder {
 			'read'       => true,
 			'write'      => $this->_isAllowed($path, 'write'),
 			'rm'         => $path == $this->_options['root'] ? false : $this->_isAllowed($path, 'rm'),
-			'uplMaxSize' => ini_get('upload_max_filesize')
+			'uplMaxSize' => ini_get('upload_max_filesize'),
+			'dotFiles'   => $this->_options['dotFiles']
 			);
 	}
 
@@ -906,7 +890,7 @@ class elFinder {
 		$info = array(
 			'name'  => basename($path),
 			'hash'  => $this->_hash($path),
-			'type'  => $type,
+			// 'type'  => $type,
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
 			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
@@ -918,21 +902,20 @@ class elFinder {
 				
 		if ($type == 'link') {
 			if (false == ($path = $this->_readlink($path))) {
-				$info['mime'] = 'unknown';
-				// $info['broken'] = true;
+				$info['mime'] = 'broken';
 				return $info;
 			}
-			$info['link']   = $this->_hash($path);
-			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
-			$info['read']   = $this->_isAllowed($path, 'read');
-			$info['write']  = $this->_isAllowed($path, 'write');
-			$info['rm']     = $this->_isAllowed($path, 'rm');
 			if (is_dir($path)) {
 				$info['mime']  = 'directory';
 			} else {
 				$info['parent'] = $this->_hash(dirname($path));
 				$info['mime']   = $this->_mimetype($path);
 			}
+			$info['link']   = $this->_hash($path);
+			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
+			$info['read']   = $this->_isAllowed($path, 'read');
+			$info['write']  = $this->_isAllowed($path, 'write');
+			$info['rm']     = $this->_isAllowed($path, 'rm');
 		} 
 		
 		if ($info['mime'] != 'directory') {
@@ -963,28 +946,24 @@ class elFinder {
 	 **/
 	private function _tree($path)
 	{
-		$tree = array();
+		$dir = array(
+			'hash'  => $this->_hash($path),
+			'name'  => $path == $this->_options['root'] && $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path),
+			'read'  => $this->_isAllowed($path, 'read'),
+			'write' => $this->_isAllowed($path, 'write')
+			);
 		
-		if (false != ($ls = scandir($path))) {
-			
+		if ($dir['read'] && false != ($ls = scandir($path))) {
+			$dir['dirs'] = array();
 			for ($i=0; $i < count($ls); $i++) {
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
 				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {
-					$read = $this->_isAllowed($p, 'read');
-					$dirs = $read ? $this->_tree($p) : '';
-					$tree[] = array(
-						'hash'  => $this->_hash($p),
-						'name'  => $ls[$i],
-						'read'  => $read,
-						'write' => $this->_isAllowed($p, 'write'),
-						'dirs'  => !empty($dirs) ? $dirs : ''
-						);
+					$dir['dirs'][] = $this->_tree($p);
 				}
 			}
 		}
-		return $tree;
+		return $dir;
 	}
-	
 	
 	/************************************************************/
 	/**                      fs methods                        **/
@@ -1112,7 +1091,10 @@ class elFinder {
 	private function _checkName($n)
 	{
 		$n = strip_tags(trim($n));
-		return preg_match($this->_options['dotFiles'] ? '|^[^\\/\<\>]+$|' : '/^[^\.\\/\<\>][^\\/\<\>]*$/', $n) ? $n : false;
+		if (!$this->_options['dotFiles'] && '.' == substr($n, 0, 1)) {
+			return false;
+		}
+		return preg_match('|^[^\\/\<\>:]+$|', $n) ? $n : false;
 	}
 	
 	/**
@@ -1237,7 +1219,7 @@ class elFinder {
 		switch ($this->_options['mimeDetect']) {
 			case 'finfo':
 				$finfo = finfo_open(FILEINFO_MIME);
-				$type = finfo_file($finfo, $path);
+				$type = @finfo_file($finfo, $path);
 				break;
 			case 'php':   
 			 	$type = mime_content_type($path);
