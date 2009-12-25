@@ -17,8 +17,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 **/
 	this.init = function() {
 		
-		// this.fm.startBench()
-		
 		this.cwd
 			.bind('click', function(e) {
 				var t = $(e.target);
@@ -85,7 +83,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		/* make places droppable */
 		if (this.fm.options.places) {
 			this.fm.view.plc.droppable({
-				accept    : 'div',
+				accept    : '(div,tr)[key]',
 				tolerance : 'pointer',
 				over      : function() { $(this).addClass('el-finder-droppable'); },
 				out       : function() { $(this).removeClass('el-finder-droppable'); },
@@ -225,7 +223,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	this.updateNav = function() {
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',
-			accept : 'div',
+			accept : '(div,tr)[key]',
 			over   : function() { $(this).addClass('el-finder-droppable'); },
 			out    : function() { $(this).removeClass('el-finder-droppable'); },
 			drop   : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
@@ -271,22 +269,20 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				},
 				helper     : function() {
 					var t = $(this),
-						h = $('<div/>').addClass('el-finder-drag-helper');
+						h = $('<div class="el-finder-drag-helper"/>');
 					if (!t.hasClass('ui-selected')) {
 						self.fm.select(t, true);
 					}
-
 					self.cwd.find('.ui-selected').each(function(i) {
 						h.append(self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]));
 					});
-
 					return h;
 				}
 			})
 			.filter('.directory')
 			.droppable({
 				tolerance : 'pointer',
-				accept    : 'div,tr',
+				accept    : '(div,tr)[key]',
 				over      : function() { $(this).addClass('el-finder-droppable');  },
 				out       : function() { $(this).removeClass('el-finder-droppable'); },
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }

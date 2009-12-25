@@ -4,7 +4,7 @@ elFinder.prototype.ui = function(fm) {
 	this.fm      = fm;
 	this.cmd     = {};
 	this.buttons = {};
-	this.menu    = $('<div />').addClass('el-finder-contextmenu rounded-5').appendTo(document.body).hide();
+	this.menu    = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
 	
 	
 	this.exec = function(cmd, arg) {
@@ -16,13 +16,12 @@ elFinder.prototype.ui = function(fm) {
 				this.fm.quickLook.hide();
 				this.cmd[cmd].exec(arg);
 				this.update();
-				
 			}
 		}
 	}
 	
 	this.cmdName = function(cmd) {
-		return this.cmd[cmd] && this.cmd[cmd].name ? this.fm.i18n(this.cmd[cmd].name) : '';
+		return this.cmd[cmd] && this.cmd[cmd].name ? this.fm.i18n(this.cmd[cmd].name)+(cmd == 'archive' ? ' ('+self.fm.cwd.arc+')' : '') : '';
 	}
 	
 	this.isCmdAllowed = function(cmd) {
@@ -62,23 +61,23 @@ elFinder.prototype.ui = function(fm) {
 				'top'  : ((e.clientY + size.cH) > size.height && e.clientY > size.cH ? (e.clientY + size.sT - size.cH) : e.clientY + size.sT)
 			})
 			.show()
-			.children('div:not([class="delim"])')
+			.children('div:not(.delim)')
 			.hover(
 				function() { $(this).addClass('hover'); }, 
 				function() { $(this).removeClass('hover'); }
 			).click(function(e) {
 				e.stopPropagation();
-				self.exec($.trim($(this).attr('class').replace('hover', '')));
 				self.hideMenu();
+				self.exec($(this).attr('name'));
 			});
 		
 		function menu(t) {
 			var i, l, src = self.fm.options.contextmenu[t]||[];
 			for (i=0; i < src.length; i++) {
 				if (src[i] == 'delim') {
-					self.menu.children().length && !self.menu.children(':last').hasClass('delim') && self.menu.append($('<div class="delim" />'));
+					self.menu.children().length && !self.menu.children(':last').hasClass('delim') && self.menu.append('<div class="delim" />');
 				} else if (self.fm.ui.includeInCm(src[i], t)) {
-					self.menu.append($('<div />').addClass(src[i]).text(self.cmdName(src[i])));
+					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+self.cmdName(src[i])+'</div>');
 				}
 			};
 		}
@@ -90,18 +89,18 @@ elFinder.prototype.ui = function(fm) {
 	
 	this.update = function() {
 		for (var i in this.buttons) {
-			if (this.cmd[i].isAllowed()) {
-				this.buttons[i].removeClass('disabled');
-			} else {
-				this.buttons[i].addClass('disabled');
-			}
+			this.buttons[i].toggleClass('disabled', !this.cmd[i].isAllowed());
 		}
 	}
 	
 	this.init = function(disabled) {
-		var i, j, n, c=false, t = this.fm.options.toolbar;
+		var i, j, n, c=false, zindex = 2, z, t = this.fm.options.toolbar;
+		
 		if (!this.fm.options.editorCallback) {
 			disabled.push('select');
+		}
+		if (!this.fm.cwd.arc && $.inArray('archive', disabled) != -1) {
+			disabled.push('archive');
 		}
 		for (i in this.commands) {
 			if ($.inArray(i, disabled) == -1) {
@@ -112,32 +111,34 @@ elFinder.prototype.ui = function(fm) {
 
 		for (i=0; i<t.length; i++) {
 			if (c) {
-				this.fm.view.tlb.append($('<li />').addClass('delim'));
+				this.fm.view.tlb.append('<li class="delim" />');
 			}
 			c = false;
 			for (j=0; j<t[i].length; j++) {
 				n = t[i][j];
 				if (this.cmd[n]) {
 					c = true;
-					this.buttons[n] = $('<li />').addClass(n).attr('title', this.cmdName(n))
+					this.buttons[n] = $('<li class="'+n+'" title="'+this.cmdName(n)+'" name="'+n+'" />')
 						.appendTo(this.fm.view.tlb)
+						.click(function(e) { e.stopPropagation()})
 						.bind('click', (function(ui){ return function() {  
-								if (!$(this).hasClass('disabled')) {
-									ui.exec($.trim($(this).attr('class')));
-								}
+								!$(this).hasClass('disabled') && ui.exec($(this).attr('name'));
 							} })(this)
+						).hover(
+							function() { !$(this).hasClass('disabled') && $(this).addClass('el-finder-tb-hover')},
+							function() { $(this).removeClass('el-finder-tb-hover')}
 						);
 				}
 			}
 		}
 		this.update();
-		var zindex = 2;
-		$('*', document.body).each(function() {
-			var z = $(this).css('z-index');
-			if (z > zindex) {
+
+		$(':visible', document.body).each(function() {
+			z = parseInt($(this).css('z-index'));
+			if (z >= zindex) {
 				zindex = z+1;
 			}
-		})
+		});
 		this.menu.css('z-index', zindex);
 	}
 
@@ -318,29 +319,18 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function info(f) {
-				var tb = $('<table cellspacing="0" />')
-					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Name'))).append($('<td />').text(f.name)))
-					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Kind'))).append($('<td />').text(self.fm.view.kind(f))));
+				var tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.kind(f)+'</td></tr></table>');
 				
 				if (f.link) {
-					tb.append($('<tr/>')
-						.append($('<td/>').text(self.fm.i18n('Link to')))
-						.append($('<td/>').text(f.linkTo)));
+					tb.append('<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>');
 				}
-					
-				tb.append($('<tr/>').append($('<td />').text(self.fm.i18n('Size'))).append($('<td />').text(self.fm.view.formatSize(f.size))))
-					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Modified'))).append($('<td />').text(self.fm.view.formatDate(f.date))))
-					.append($('<tr/>').append($('<td />').text(self.fm.i18n('Permissions'))).append($('<td />').text(self.fm.view.formatPermissions(f.read, f.write, f.rm))));
+				tb.append('<tr><td>'+self.fm.i18n('Size')+'</td><td>'+self.fm.view.formatSize(f.size)+'</td></tr><tr><td>'+self.fm.i18n('Modified')+'</td><td>'+self.fm.view.formatDate(f.date)+'</td></tr><tr><td>'+self.fm.i18n('Permissions')+'</td><td>'+self.fm.view.formatPermissions(f.read, f.write, f.rm)+'</td></tr>');
 				
 				if (f.dim) {
-					tb.append($('<tr/>')
-						.append($('<td/>').text(self.fm.i18n('Dimensions')))
-						.append($('<td/>').text(f.dim+' px.')));
+					tb.append('<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>');
 				}
 				if (f.url) {
-					tb.append($('<tr/>')
-						.append($('<td/>').text(self.fm.i18n('URL')))
-						.append($('<td/>').html($('<a/>').attr({href : f.url, target : '_blank'}).text(f.url))));
+					tb.append('<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>');
 				}	
 				$('<div />').append(tb).dialog({
 					dialogClass : 'el-finder-dialog',
@@ -606,8 +596,8 @@ elFinder.prototype.ui.prototype.commands = {
 				prev  = this.fm.view.cwd.find('.directory:last');
 				f     = {name : n, hash : '', mime :'directory', read : true, write : true, date : '', size : 0},
 				el    = this.fm.options.view == 'list' 
-						? this.fm.view.renderRow(f).children('td').eq(1).empty().append(input).end().end()
-						: this.fm.view.renderIcon(f).children('label').empty().append(input).end()
+						? $(this.fm.view.renderRow(f)).children('td').eq(1).empty().append(input).end().end()
+						: $(this.fm.view.renderIcon(f)).children('label').empty().append(input).end()
 			el.addClass('directory ui-selected');
 			if (prev.length) {
 				el.insertAfter(prev);
@@ -683,8 +673,10 @@ elFinder.prototype.ui.prototype.commands = {
 				input = $('<input type="text"/>').val(n), 
 				f     = {name : n, hash : '', mime :'text/plain', read : true, write : true, date : '', size : 0},
 				el    = this.fm.options.view == 'list' 
-					? this.fm.view.renderRow(f).children('td').eq(1).empty().append(input).end().end()
-					: this.fm.view.renderIcon(f).children('label').empty().append(input).end();
+					? $(this.fm.view.renderRow(f)).children('td').eq(1).empty().append(input).end().end()
+					: $(this.fm.view.renderIcon(f)).children('label').empty().append(input).end();
+					
+				
 			el.addClass('text ui-selected').appendTo(this.fm.options.view == 'list' ? self.fm.view.cwd.children('table') : self.fm.view.cwd);
 			
 			input.select().focus()
@@ -910,13 +902,22 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
-	compress : function(fm) {
-		var self = this;
+	archive : function(fm) {
+		var self  = this;
 		this.name = 'Create archive';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 
+			this.fm.ajax({
+				cmd        : 'archive',
+				current    : this.fm.cwd.hash,
+				'target[]' : this.fm.selected,
+				name       : 'Archive'
+			}, function(data) {
+				self.fm.reload(data);
+				self.fm.selectById(data.target);
+			});
 		}
 		
 		this.isAllowed = function() {
@@ -928,7 +929,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
-	uncompress : function(fm) {
+	extract : function(fm) {
 		var self = this;
 		this.name = 'Uncompress archive';
 		this.fm = fm;
@@ -1026,8 +1027,10 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm   = fm;
 		
 		this.exec = function() {
+			self.fm.view.win.addClass('el-finder-disabled');
 			this.fm.setView('icons');
 			this.fm.updateCwd();
+			self.fm.view.win.removeClass('el-finder-disabled');
 		}
 		
 		this.isAllowed = function() {
@@ -1045,8 +1048,10 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm   = fm;
 		
 		this.exec = function() {
+			self.fm.view.win.addClass('el-finder-disabled')
 			this.fm.setView('list');
 			this.fm.updateCwd();
+			self.fm.view.win.removeClass('el-finder-disabled')
 		}
 		
 		this.isAllowed = function() {

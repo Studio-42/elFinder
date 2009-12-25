@@ -159,6 +159,7 @@
 					if (!self.locked && self.options.view == 'icons') {
 						data.tmb && self.tmb();
 					}
+					delete data
 				}
 			}
 			if (typeof(options) == 'object') {
@@ -246,19 +247,18 @@
 		 * @param  Object  Data from server
 		 **/
 		this.reload = function(data) {
-			if (data.tree) {
-				this.view.renderNav(data.tree);
-				this.eventsManager.updateNav();
-				
-			}
 			this.cwd = data.cwd;
+			self.log(self.cwd)
 			this.cdc = {};
-			var l = data.cdc.length;
-			for (var i=0; i<l ; i++) {
+			for (var i=0; i<data.cdc.length ; i++) {
 				data.cdc[i].hash += ''
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
-				delete data.cdc[i]; // ?????
+			}
+			
+			if (data.tree) {
+				this.view.renderNav(data.tree);
+				this.eventsManager.updateNav();
 			}
 			this.updateCwd();
 		}
@@ -270,8 +270,9 @@
 		this.updateCwd = function() {
 			this.lockShortcuts();
 			this.selected = [];
-			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
+			
 			this.view.renderCwd();
+			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 			this.eventsManager.updateCwd();
 		}
 		
@@ -325,47 +326,44 @@
 		}
 		
 		this.select = function(el, reset) {
-			reset && $('[key]', self.view.cwd).removeClass('ui-selected');
+			reset && $('.ui-selected', self.view.cwd).removeClass('ui-selected');
 			el.addClass('ui-selected');
-			this.updateSelect();
+			self.updateSelect();
 		}
 
 		this.selectById = function(id) {
-			var el = $('[key="'+id+'"]', this.view.cwd);
-			el.length && this.select(el)
+			var el = $('[key="'+id+'"]', self.view.cwd);
+			el.length && self.select(el)
 		}
 
 		this.unselect = function(el) {
 			el.removeClass('ui-selected');
-			this.updateSelect();
+			self.updateSelect();
 		}
 
 		this.toggleSelect = function(el) {
-			if (el.hasClass('ui-selected')) {
-				this.unselect(el);
-			} else {
-				this.select(el);
-			}
+			el.toggleClass('ui-selected');
+			this.updateSelect();
 		}
 
 		this.selectAll = function() {
 			$('[key]', self.view.cwd).addClass('ui-selected')
-			this.updateSelect();
+			self.updateSelect();
 		}
 
 		this.unselectAll = function() {
-			$('[key]', self.view.cwd).removeClass('ui-selected');
-			this.updateSelect();
+			$('.ui-selected', self.view.cwd).removeClass('ui-selected');
+			self.updateSelect();
 		}
 
 		this.updateSelect = function() {
-			this.selected = [];
+			self.selected = [];
 			$('.ui-selected', self.view.cwd).each(function() {
 				self.selected.push($(this).attr('key'));
 			});
-			this.ui.update();
-			this.view.selectedInfo();
-			this.quickLook.update();
+			self.view.selectedInfo();
+			self.ui.update();
+			self.quickLook.update();
 		}
 
 		/**
@@ -385,18 +383,10 @@
 			}
 		}
 
-		
-		
-		this.startBench = function() {
+		this.time = function() {
 			var d = new Date()
-			this.point = d.getMilliseconds();
+			return d.getMilliseconds();
 		}
-		
-		this.stopBench = function() {
-			var d = new Date();
-			return d.getMilliseconds() - this.point;
-		}
-		
 		
 		/**
 		 * Add files to clipboard buffer
@@ -509,9 +499,9 @@
 			
 			this.setView(this.cookie('el-finder-view'));
 			this.loaded = true;
+			self.eventsManager.init();
 			this.ajax({ tree: true }, function(data) {
-				self.eventsManager.init();
-				// self.dotFiles = data.dotFiles;
+				
 				self.reload(data)
 				self.ui.init(data.disabled);
 			});
@@ -566,8 +556,8 @@
 		],
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
-			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'compress', 'delim', 'info'],
-			'group' : ['copy', 'cut', 'rm', 'delim', 'compress', 'delim', 'info']
+			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'compress', 'delim', 'info'],
+			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'delim', 'info']
 		}
 		
 	}

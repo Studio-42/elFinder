@@ -32,11 +32,12 @@ elFinder.prototype.quickLook = function(fm, el) {
 			 	el = self.fm.view.cwd.find('[key="'+id+'"]'),
 				o  = el.offset(),
 				w  = Math.max(this.ql.width(), 350),
-				h  = this.ql.height();
+				h  = this.ql.height(),
+				ew = el.width()-20;
 			self.fm.lockShortcuts(true);
 			this.ql.css({
-				width    : el.width()-20,
-				minWidth : el.width()-20,
+				width    : ew,
+				minWidth : ew,
 				height   : el.height(),
 				left     : o.left,
 				top      : o.top,
@@ -63,9 +64,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 * Close quickLook window
 	 **/
 	this.hide = function() {
-
 		if (this.ql.is(':visible')) {
-			
 			var o, w, el = self.fm.view.cwd.find('[key="'+this._hash+'"]');
 			if (el) {
 				o = el.offset();
@@ -179,8 +178,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 			width:self.ico.width(),
 			height:self.ico.height()
 		}).animate({
-			width:Math.round(r*iw),
-			height:Math.round(r*ih)
+			width:Math.round(r*(iw>400?iw:400)),
+			height:Math.round(r*(ih>300?ih:300))
 		}, 350, function() { self.fm.lockShortcuts(); });
 	}
 	

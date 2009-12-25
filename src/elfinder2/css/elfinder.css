@@ -1,4 +1,4 @@
-.rnd-3 {
+/*.rnd-3 {
 	border-radius:3px; 
 	-moz-border-radius:3px; 
 	-webkit-border-radius:3px;
@@ -9,28 +9,7 @@
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
 }
-
-/* error/warning/question messages */
-p.el-finder-err {
-	padding: 15px;
-	text-align:center;
-	background: #fee; 
-	color: #cc0509; 
-	border: 2px #844 solid;
-}
-
-p.el-finder-err div {
-	float:left;
-	width:20px;
-	height:20px;
-	margin:auto 7px auto 0;
-	background:url(../images/toolbar.png) 0 -514px no-repeat;
-}
-
-p.el-finder-warn {
-	background: #ffe; 
-	color: #cc0509; 
-}
+*/
 
 
 /* file manager window */
@@ -40,6 +19,16 @@ p.el-finder-warn {
 	border:1px solid #ccc;
 	background-color:#eee;
 	font:.8em trebuchet ms,lucida grande,verdana,sans-serif;
+	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
+}
+
+/* error/warning/question messages */
+.el-finder-err {
+	padding: 15px;
+	text-align:center;
+	background: #fee; 
+	color: #cc0509; 
+	border: 2px #844 solid;
 	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
 }
 
@@ -58,7 +47,7 @@ p.el-finder-warn {
 	background-color:#ccc;
 }
 
-.el-finder-nav .ui-resizable-e { height:100%; }
+.el-finder-nav .ui-resizable-e { height:100%; width:30px; right:-20px;}
 
 .el-finder .ui-state-disabled {
 	opacity:1;
@@ -94,6 +83,11 @@ p.el-finder-warn {
 	border:none;
 	width:3px;
 	background-position: 1px -610px;
+}
+
+.el-finder-toolbar ul li.el-finder-tb-hover {
+	border:1px solid #fff;
+	background-color:#ccc;
 }
 
 .el-finder-toolbar ul li.disabled { opacity:0.35; filter:Alpha(Opacity=35); }
@@ -190,7 +184,6 @@ p.el-finder-warn {
 	width:9px;
 	height:20px;
 	float:left;
-/*	border:1px solid #444;*/
 }
 
 .el-finder-nav  a,
@@ -436,6 +429,7 @@ div.x-gzip p { background-position: -1px -477px; }
 	position:relative;
 }
 
+
 .el-finder-cwd table td.icon p {
 	width:24px;
 	height:16px;
@@ -445,11 +439,15 @@ div.x-gzip p { background-position: -1px -477px; }
 	position:relative;
 }
 
-tr.directory td.icon  p   { background-position:4px  -16px; }
+.el-finder-cwd table .size {
+	text-align:right;
+}
+
+tr.directory td.icon  p  { background-position:4px  -16px; }
 tr.text td.icon  p       { background-position:5px  -34px; }
-tr.image td.icon  p       { background-position:4px  -51px; }
-tr.audio td.icon  p       { background-position:4px  -70px; }
-tr.video td.icon  p       { background-position:6px  -89px; }
+tr.image td.icon  p      { background-position:4px  -51px; }
+tr.audio td.icon  p      { background-position:4px  -70px; }
+tr.video td.icon  p      { background-position:6px  -89px; }
 tr.application td.icon p { background-position:4px -108px; }
 
 tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
@@ -460,17 +458,17 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	display:block;
 	width:10px;
 	height:12px;
-	left:1px;
+	left:0;
 	top:4px;
 	background:url(../images/icons-small.png) 0px -405px no-repeat;
 }
 
-.el-finder-cwd table p em.ro {
+.el-finder-cwd table p em.readonly {
 	left:12px;
 	background-position:0px -433px;
 }
 
-.el-finder-cwd table p em.wo {
+.el-finder-cwd table p em.dropbox {
 	left:12px;
 	background-position:0px -418px;
 }
@@ -483,23 +481,23 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	height:20px;
 }
 
-.el-finder-statusbar .path,
-.el-finder-statusbar .stat,
-.el-finder-statusbar .selected-files {
+.el-finder-stat,
+.el-finder-path,
+.el-finder-sel {
 	padding:3px 9px 1px 9px;
 	font-size:11px;
 	color:#555;
 }
 /* current directory path */
-.el-finder-statusbar .path {
+.el-finder-path {
 	float:left;
 }
 /* number folders/files in current directory and size */
-.el-finder-statusbar .stat {
+.el-finder-stat {
 	float:right;
 }
 /* info about selected files */
-.el-finder-statusbar .selected-files {
+.el-finder-sel {
 	text-align:center;
 }
 
@@ -559,11 +557,10 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-dialog table {
 	width : 100%;
-/*	border:1px solid #ccc;*/
 }
 
 .el-finder-dialog table td {
-	padding:3px;
+	padding:2px 5px;
 
 }
 .el-finder-dialog a { outline: none;}
@@ -587,15 +584,11 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-contextmenu div { 
 	display:block;
-/*	border:1px solid #ccc;  */
 	margin:0;
-
 	padding:5px 7em 5px 29px;
 	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	background:url('../images/toolbar.png') 0 0 no-repeat;
 }
-
-
 
 .el-finder-contextmenu div.reload     { background-position: 5px -192px; }
 .el-finder-contextmenu div.select     { background-position: 5px -214px; }
@@ -614,8 +607,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-contextmenu div.help       { background-position: 5px -487px; }
 .el-finder-contextmenu div.icons      { background-position: 5px -537px; }
 .el-finder-contextmenu div.list       { background-position: 5px -557px; }
-.el-finder-contextmenu div.compress   { background-position: 5px -583px; }
-.el-finder-contextmenu div.uncompress { background-position: 5px -583px; }
+.el-finder-contextmenu div.archive    { background-position: 5px -583px; }
+.el-finder-contextmenu div.extract    { background-position: 5px -583px; }
 .el-finder-contextmenu div.resize     { background-position: 5px -655px; }
 
 .el-finder-contextmenu div.delim { 
@@ -633,19 +626,19 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 
-div.el-finder-drag-helper {
+.el-finder-drag-helper {
 	padding:0 0 0 57px;
 	cursor:move;
 	width:auto;
 }
 
-div.el-finder-drag-copy {
-	background:url('../images/toolbar.png') 0 -685px no-repeat;
-}
-
 .el-finder-drag-helper div {
 	margin-left:-57px;
 	
+}
+
+.el-finder-drag-copy {
+	background:url('../images/toolbar.png') 0 -685px no-repeat;
 }
 
 div.el-finder-drag-helper label { 

@@ -27,7 +27,8 @@ class elFinder {
 		'uploadOrder' => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'      => 'auto',       // image manipulation library
 		'tmbDir'      => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbAtOnce'   => 3,            // number of thumbnails to generate per request
+		'arc'         => 'tgz',
+		'tmbAtOnce'   => 5,            // number of thumbnails to generate per request
 		'tmbSize'     => 48,           // images thumbnails size (px)
 		'fileURL'     => true,         // display file URL in "get info"
 		'dateFormat'  => 'j M Y H:i',  // file modification date format
@@ -61,6 +62,7 @@ class elFinder {
 		'duplicate' => '_duplicate',
 		'read'      => '_fread',
 		'edit'      => '_edit',
+		'archive'   => '_archive',
 		'extract'   => '_extract',
 		'resize'    => '_resize',
 		'geturl'    => '_geturl',
@@ -206,6 +208,12 @@ class elFinder {
 	 **/
 	private $_result = array();
 	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_arc = array('create' => array(), 'extract' => array());
 		
 	/**
 	 * constructor
@@ -235,7 +243,7 @@ class elFinder {
 				}
 			}
 		}
-		
+		// print_R($this->_commands);
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 		
 		if ($this->_options['cntDirSize'] && function_exists('exec')) {
@@ -280,6 +288,70 @@ class elFinder {
 			}
 		}
 		
+		if ((isset($this->_commands['archive']) || isset($this->_commands['extract'])) && function_exists('exec')) {
+			$tar = exec('tar --version', $o, $ctar);
+			$gzip = exec('gzip --version', $o, $cgzip);
+			$bzip = exec('bzip2 --version', $o, $cbzip);
+			if ($tar && $gzip && $ctar == 0 && $cgzip == 0) {
+				$this->_arc['create']['tgz']  = true;
+				$this->_arc['extract']['tgz'] = true;
+			}
+			if ($tar && $bzip && $ctar == 0 && $cbzip == 0) {
+				$this->_arc['create']['tbz']  = true;
+				$this->_arc['extract']['tbz'] = true;
+			}
+			$zip = exec('zip --version', $o, $c);
+			if ($zip && $c == 0) {
+				$this->_arc['create']['zip']  = true;
+				$this->_arc['extract']['zip'] = true;
+			} else {
+				$unzip = exec('unzip --version', $o, $c);
+				if ($unzip && $c == 0) {
+					$this->_arc['extract']['unzip'] = true;
+				} else {
+					$gunzip = exec('gunzip --version', $o, $c);
+					if ($gunzip && $c == 0) {
+						$this->_arc['extract']['gunzip'] = true;
+					}
+				}
+			}
+			$rar = exec('rar --version', $o, $c);
+			if ($rar && $c == 0) {
+				$this->_arc['create']['rar']  = true;
+				$this->_arc['extract']['rar'] = true;
+			} else {
+				$unrar = exec('unrar', $o, $c);
+				if ($unrar && ($c==0 || $c == 7)) {
+					$this->_arc['extract']['unrar'] = true;
+				}
+			}
+			
+			$test = exec('7za --help', $o, $c);
+			if ($test && $c == 0) {
+				$this->_arc['create']['7za']  = true;
+				$this->_arc['extract']['7za'] = true;
+			}
+			// echo '<pre>'; print_r($this->_arc); echo '</pre>';
+			
+			if (!isset($this->_commands['extract'])) {
+				$this->_arc['extract'] = array();
+				if (isset($this->_commands['extract'])) {
+					unset($this->_commands['extract']);
+				}
+				
+			}
+			
+			if (isset($this->_commands['archive']) && !empty($this->_arc['create'])) {
+				if (empty($this->_options['arc']) || empty($this->_arc['create'][$this->_options['arc']])) {
+					$tmp = array_keys($this->_arc['create']);
+					$this->_options['arc'] = $tmp[0];
+				}
+			} else {
+				$this->_arc['create'] = array();
+				$this->_options['arc'] = '';
+			}
+		}
+		
 	}
 
 	/**
@@ -312,8 +384,6 @@ class elFinder {
 		} else {
 			$this->_open();
 			$this->_result['disabled'] = $this->_options['disabled'];
-			// $this->_result['dotFiles'] = $this->_options['dotFiles'];
-			// echo '<pre>'; print_r($this->_result); exit();
 		}
 
 		if ($this->_options['debug']) {
@@ -804,6 +874,39 @@ class elFinder {
 		$this->_result['file'] = $this->_info($file);
 	}
 	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _archive()
+	{
+		if (empty($_GET['current']) 
+		||  empty($_GET['target'])
+		|| !is_array($_GET['target'])
+		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		) {
+			return $this->_result['error'] = 'File does not exists';
+		}
+		
+		$files = array();
+		foreach ($_GET['target'] as $hash) {
+			if (false == ($f = $this->_find($hash, $dir))) {
+				return $this->_result['error'] = 'File does not exists';
+			}
+			$files[] = $f;
+		}
+
+		if (false != ($arc = $this->_createArchive($files, !empty($_GET['name']) ? $_GET['name'] : 'Archive' ))) {
+			$this->_content($dir);
+			$this->_result['target'] = $this->_hash($arc);
+		} else {
+			$this->_result['error'] = 'Unable to create archive';
+		}
+	}
+	
 	/************************************************************/
 	/**                    "content" methods                   **/
 	/************************************************************/
@@ -848,7 +951,8 @@ class elFinder {
 			'write'      => $this->_isAllowed($path, 'write'),
 			'rm'         => $path == $this->_options['root'] ? false : $this->_isAllowed($path, 'rm'),
 			'uplMaxSize' => ini_get('upload_max_filesize'),
-			'dotFiles'   => $this->_options['dotFiles']
+			'dotFiles'   => $this->_options['dotFiles'],
+			'arc'        => $this->_options['arc']        
 			);
 	}
 
@@ -975,7 +1079,7 @@ class elFinder {
 	 * @param  string  $f  file/folder name
 	 * @return string
 	 **/
-	private function _uniqueName($f)
+	private function _uniqueName($f, $suffix='-copy')
 	{
 		$dir = dirname($f);
 		$name = basename($f);
@@ -985,13 +1089,13 @@ class elFinder {
 			$name = substr($name, 0, $p);
 		}
 		
-		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext)) {
-			return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$ext;
+		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.$suffix.$ext)) {
+			return $dir.DIRECTORY_SEPARATOR.$name.$suffix.$ext;
 		}
 		$i = 1;
 		while ($i++<=1000) {
-			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext)) {
-				return $dir.DIRECTORY_SEPARATOR.$name.'-copy'.$i.$ext;
+			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.$suffix.$i.$ext)) {
+				return $dir.DIRECTORY_SEPARATOR.$name.$suffix.$i.$ext;
 			}	
 		}
 		return $dir.DIRECTORY_SEPARATOR.$name.md5($f).$ext;
@@ -1239,6 +1343,77 @@ class elFinder {
 	}
 	
 	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author dio
+	 **/
+	private function _createArchive($files, $name)
+	{
+		if (empty($this->_options['arc'])) {
+			return false;
+		}
+
+		switch ($this->_options['arc']) {
+			case 'tgz':
+			case 'tbz':
+				$dir = getcwd();
+				chdir(dirname($files[0]));
+				if ($this->_options['arc'] == 'tgz') {
+					$arg = 'czf';
+					$ext = 'tgz';
+				} else {
+					$arg = 'cjf';
+					$ext = 'tbz';
+				}
+				$name = $this->_uniqueName($name.'.'.$ext, '');
+				$str = '';
+				foreach($files as $f) {
+					$str .= escapeshellarg(basename($f)).' ';
+				}
+				$cmd = 'tar -'.$arg.' '.escapeshellarg($name).' '.$str;
+				exec($cmd);
+
+				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
+				chdir($dir);
+				return $res;
+				break;
+			
+			case 'zip':
+				$dir = getcwd();
+				chdir(dirname($files[0]));
+				$name = $this->_uniqueName($name.'.zip', '');
+				$str = '';
+				foreach($files as $f) {
+					$str .= escapeshellarg(basename($f)).' ';
+				}
+				$cmd = 'zip -r9 '.escapeshellarg($name).' '.$str;
+				exec($cmd);
+				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
+				chdir($dir);
+				return $res;
+				break;
+				
+			case '7za':
+				$dir = getcwd();
+				chdir(dirname($files[0]));
+				$name = $this->_uniqueName($name.'.7z', '');
+				$str = '';
+				foreach($files as $f) {
+					$str .= escapeshellarg(basename($f)).' ';
+				}
+				
+				$cmd = '7za a '.escapeshellarg($name).' '.$str;
+				exec($cmd);
+				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
+				chdir($dir);
+				return $res;
+				break;
+			
+		}
+	}
 	
 	/************************************************************/
 	/**                   image manipulation                   **/

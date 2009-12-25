@@ -5,6 +5,7 @@ elFinder.prototype.view = function(fm, el) {
 	this.kinds = {
 		'directory'                     : 'Folder',
 		'symlink'                       : 'Alias',
+		'broken'                        : 'Broken alias',
 		'unknown'                       : 'Unknown',
 		'application/x-empty'           : 'Plain text',
 		'application/postscript'        : 'Postscript document',
@@ -61,45 +62,37 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.tlb = $('<ul />');
-	this.plc = null;
 
-	this.nav = $('<div />').addClass('el-finder-nav').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: '500'});
-	this.cwd = $('<div />').addClass('el-finder-cwd');
-	this.spn = $('<div />').addClass('el-finder-spinner');
-	this.msg = $('<p />').addClass('el-finder-err rnd-5').append('<div />').append('<strong/>').click(function() { $(this).hide(); });
-	this.nfo = $('<div />').addClass('stat');
-	this.pth = $('<div />').addClass('path');
-	this.sel = $('<div />').addClass('selected-files');
-	this.stb = $('<div />').addClass('el-finder-statusbar')
+	this.nav = $('<div class="el-finder-nav" />').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: 500});
+	this.cwd = $('<div class="el-finder-cwd"/>');
+	this.spn = $('<div class="el-finder-spinner" />');
+	this.msg = $('<p class="el-finder-err"><strong/></p>').click(function() { $(this).hide(); });
+	this.nfo = $('<div class="el-finder-stat" />');
+	this.pth = $('<div class="el-finder-path" />');
+	this.sel = $('<div class="el-finder-sel"/>');
+	this.stb = $('<div class="el-finder-statusbar"/>')
 		.append(this.pth)
 		.append(this.nfo)
 		.append(this.sel);
-	this.wrz = $('<div />').addClass('el-finder-workzone')
+	this.wrz = $('<div class="el-finder-workzone" />')
 		.append(this.nav)
 		.append(this.cwd)
 		.append(this.spn)
 		.append(this.msg)
 		.append('<div style="clear:both" />');
 	this.win = $(el).empty().addClass('el-finder').addClass(fm.options.cssClass||'')
-		.append($('<div />').addClass('el-finder-toolbar').append(this.tlb))
+		.append($('<div class="el-finder-toolbar" />').append(this.tlb))
 		.append(this.wrz)
 		.append(this.stb);
 
 	this.tree = $('<ul class="el-finder-tree"><li><div></div><a href="#" class="root selected">root</a></li></ul>').appendTo(this.nav);
-
-
-	this.plc = $('<ul class="el-finder-places"/>').append($('<li/>').append('<div/>').append('<strong>'+this.fm.i18n(this.fm.options.places)+'</strong>').append($('<ul/>').hide()))
+	this.plc  = $('<ul class="el-finder-places"><li><div/><strong>'+this.fm.i18n(this.fm.options.places)+'</strong><ul/></li></ul>').hide()
 
 	this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
 
 	this.spinner = function(show) {
-		if (show) {
-			this.win.addClass('el-finder-disabled');
-			this.spn.show();
-		} else {
-			this.win.removeClass('el-finder-disabled');
-			this.spn.hide();
-		}
+		this.win.toggleClass('el-finder-disabled', show);
+		this.spn.toggle(show);
 	}
 
 	this.fatal = function(t) {
@@ -108,9 +101,8 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.error = function(err, data) {
 		this.fm.lock();
-		err = this.fm.i18n(err)+this.formatErrorData(data);
-		this.msg.removeClass('el-finder-warn').show().children('strong').empty().html(err);
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 5000);
+		this.msg.show().children('strong').html(this.fm.i18n(err)+this.formatErrorData(data));
+		setTimeout(function() { self.msg.fadeOut('slow'); }, 6000);
 	}
 	
 	this.renderNav = function(tree) {
@@ -152,14 +144,14 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderPlaces = function() {
-		var i, d, pl = this.fm.getPlaces(),	ul = this.plc.show().children('li').children('ul').empty().hide();
-		ul.prev().prev().removeClass('collapsed expanded');
+		var i, c, pl = this.fm.getPlaces(),	ul = this.plc.show().children('li').children('ul').empty().hide();
+		this.plc.children('li').children('div').removeClass('collapsed expanded');
 		if (pl.length) {
 			for (i=0; i < pl.length; i++) {
-				d = this.tree.find('[key="'+pl[i]+'"]').parent('li');
-				if (d.length) {
-					d.children('div').removeClass('collapsed expanded');
-					ul.append(d.clone());
+				if ((c = this.tree.find('a[key="'+pl[i]+'"]:not(.dropbox)').parent()) && c.length) {
+					c = c.clone()
+					c.children('div').removeClass('collapsed').next().next('ul').remove();
+					ul.append(c);
 				} else {
 					this.fm.removePlace(pl[i]);
 				}
@@ -169,77 +161,62 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderCwd = function() {
-		self.fm.startBench()
 		this.cwd.empty();
-
-		var num  = 0, 
-			size = 0, 
-			cnt = this.fm.options.view == 'icons' 
-				? this.cwd 
-				: this.cwd.append('<table><tr><th colspan="2">'+this.fm.i18n('Name')+'</th><th>'+this.fm.i18n('Permissions')+'</th><th>'+this.fm.i18n('Modified')+'</th><th>'+this.fm.i18n('Size')+'</th><th>'+this.fm.i18n('Kind')+'</th></tr></table>').children('table');
-
+		
+		var num  = 0, size = 0, html = '';
 		for (var hash in this.fm.cdc) {
 			num++;
 			size += this.fm.cdc[hash].size;
-			cnt.append(this[this.fm.options.view == 'icons' ? 'renderIcon' : 'renderRow'](this.fm.cdc[hash])); 
+			html += this.fm.options.view == 'icons'
+				? this.renderIcon(this.fm.cdc[hash])
+				: this.renderRow(this.fm.cdc[hash], num%2);
+		}
+		if (this.fm.options.view == 'icons') {
+			this.cwd.append(html);
+		} else {
+			this.cwd.append('<table><tr><th colspan="2">'+this.fm.i18n('Name')+'</th><th>'+this.fm.i18n('Permissions')+'</th><th>'+this.fm.i18n('Modified')+'</th><th class="size">'+this.fm.i18n('Size')+'</th><th>'+this.fm.i18n('Kind')+'</th></tr>'+html+'</table>');
 		}
 		
 		this.pth.text(fm.cwd.rel);
 		this.nfo.text(fm.i18n('items')+': '+num+', '+this.formatSize(size));
 		this.sel.empty();
-		if (this.fm.options.view == 'list') {
-			cnt.find('tr:odd').addClass('el-finder-row-odd');
-		}
-		self.fm.log('renderCwd: '+self.fm.stopBench())
 	}
 
-	
+
 
 	this.renderIcon = function(f) {
-		var el= $('<div class="'+this.mime2class(f.mime)+'" key="'+f.hash+'"></div>'),
-			p  = $('<p/>');
-
-		el.append(p).append($('<label>'+this.formatName(f.name)+'</label>'));
-		f.type == 'link' && el.append('<em />');
-		if (!f.read && !f.write) {
-			el.addClass('noaccess')
-		} else if (!f.read) {
-			el.append('<em class="dropbox" />');
-		} else if (!f.write) {
-			el.append('<em class="readonly" />');
+		var str = '<p'+(f.tmb ? ' style="'+"background:url('"+f.tmb+"') 0 0 no-repeat"+'"' : '')+'/><label>'+this.formatName(f.name)+'</label>';
+		if (f.link || f.mime == 'broken') {
+			str += '<em/>';
 		}
-		f.tmb && p.css('background', 'url("'+f.tmb+'") 0 0 no-repeat');
-		return el;
-	}
-
-	this.renderRow = function(f) {
-		var p  = $('<p />'),  
-			el = $('<tr/>').addClass(self.mime2class(f.mime)).attr('key', f.hash)
-				.append('<td class="icon"><p></p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td>'+self.formatSize(f.size)+'</td><td>'+self.kind(f)+'</td>');
-		f.type == 'link' && p.append('<em/>');
-		if (!f.read) {
-			p.append('<em class="wo" />');
-		} else if (!f.write) {
-			p.append('<em class="ro" />');
+		if (!f.read && f.write) {
+			str += '<em class="dropbox" />';
+		} else if (!f.write && f.read) {
+			str += '<em class="readonly" />';
 		}
-		return el;
-	}
-	
-	this.tmb = function(p, url) {
-		p.append($('<span/>').addClass('rnd-5').css('background', ' url("'+url+'") 0 0 no-repeat'))
+		return '<div class="'+this.mime2class(f.mime)+(!f.read && !f.write ? ' noaccess' : '')+'" key="'+f.hash+'">'+str+'</div>';
 	}
 
-	
+	this.renderRow = function(f, odd) {
+		var str = f.link || f.mime =='broken' ? '<em/>' : '';
+		if (!f.read && f.write) {
+			str += '<em class="readonly" />';
+		} else if (!f.write && f.read) {
+			str += '<em class="dropbox" />';
+		}
+		return '<tr key="'+f.hash+'" class="'+self.mime2class(f.mime)+(odd ? ' el-finder-row-odd' : '')+'"><td class="icon"><p>'+str+'</p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td class="size">'+self.formatSize(f.size)+'</td><td>'+self.kind(f)+'</td></tr>';
+	}
 
 	this.selectedInfo = function() {
-		var i, s = 0, sel = this.fm.getSelected();
-		this.sel.empty();
-		if (sel.length) {
+		var i, s = 0, sel;
+		
+		if (self.fm.selected.length) {
+			sel = this.fm.getSelected();
 			for (i=0; i<sel.length; i++) {
 				s += sel[i].size;
 			}
-			this.sel.text(this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s));
 		}
+		this.sel.text(s ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
 	}
 
 	this.formatName = function(n) {
@@ -255,10 +232,10 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.formatErrorData = function(data) {
-		var err = ''
+		var i, err = ''
 		if (typeof(data) == 'object') {
 			err = '<br />';
-			for (var i in data) {
+			for (i in data) {
 				err += i+' '+self.fm.i18n(data[i])+'<br />';
 			}
 		}
@@ -274,7 +251,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.formatSize = function(s) {
-		var n = 1, u = 'b';
+		var n = 1, u = '';
 		if (s > 1073741824) {
 			n = 1073741824;
 			u = 'Gb';
@@ -297,7 +274,7 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.kind = function(f) {
-		return this.fm.i18n(f.type=='link' ? 'symlink' : this.kinds[f.mime]||'unknown');
+		return this.fm.i18n(this.kinds[f.link ? 'symlink' : f.mime]||'unknown');
 	}
 	
 }
