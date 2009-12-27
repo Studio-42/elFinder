@@ -58,6 +58,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		this.fm.view.nav.find('a').live('click', function(e) {
 			e.preventDefault();
 			if ($(this).attr('key') != self.fm.cwd.hash) {
+				$(this).trigger('select');
 				self.ui.exec('open', this);
 			}
 		});

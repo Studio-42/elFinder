@@ -345,7 +345,7 @@ div.x-shockwave-flash p { background-position: 0 -1032px;}
 /* archives */
 div.x-bzip p, 
 div.x-bzip2 p,
-div.x-zip p,
+div.zip p,
 div.x-rar p, 
 div.x-tar p,  
 div.x-7z-compressed p { background-position: -1px -430px; }
@@ -583,15 +583,41 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
 	padding:5px 0;
+	
 }
 
 .el-finder-contextmenu div { 
+	position:relative;
 	display:block;
 	margin:0;
 	padding:5px 7em 5px 29px;
+	white-space:nowrap;
 	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	background:url('../images/toolbar.png') 0 0 no-repeat;
 }
+
+.el-finder-contextmenu div span {
+	float:right;
+	width:9px;
+	height:18px;
+	margin-right:-6.5em;
+	background:url(../images/toolbar.png) -4px 5px no-repeat;
+}
+
+.el-finder-contextmenu  div.el-finder-contextmenu-sub {
+	position:absolute;
+	top:0;
+	display:none;
+	margin:0;
+	padding:5px 0;
+	background:#fff; 
+	cursor:default; 
+	border:1px solid #ccc;  
+	border-radius:5px; 
+	-moz-border-radius:5px; 
+	-webkit-border-radius:5px;
+}
+
 
 .el-finder-contextmenu div.reload     { background-position: 5px -192px; }
 .el-finder-contextmenu div.select     { background-position: 5px -214px; }

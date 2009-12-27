@@ -560,8 +560,8 @@
 		],
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
-			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'compress', 'delim', 'info'],
-			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'delim', 'info']
+			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
+			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 		}
 		
 	}

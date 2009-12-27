@@ -23,7 +23,7 @@ elFinder.prototype.view = function(fm, el) {
 		'application/x-tar'             : 'TAR archive', 
 	    'application/x-gzip'            : 'GZIP archive', 
 	    'application/x-bzip2'           : 'BZIP archive', 
-	    'application/x-zip'             : 'ZIP archive',  
+	    'application/zip'               : 'ZIP archive',  
 	    'application/x-rar'             : 'RAR archive',
 		'application/javascript'        : 'Javascript application',
 		'text/plain'                    : 'Plain text',

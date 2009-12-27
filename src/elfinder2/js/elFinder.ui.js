@@ -6,7 +6,6 @@ elFinder.prototype.ui = function(fm) {
 	this.buttons = {};
 	this.menu    = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
 	
-	
 	this.exec = function(cmd, arg) {
 		if (this.cmd[cmd]) {
 			if (cmd != 'open' && !this.cmd[cmd].isAllowed()) {
@@ -42,8 +41,10 @@ elFinder.prototype.ui = function(fm) {
 	}
 	
 	this.showMenu = function(e) {
+		var t, win, size, id = '';
 		this.hideMenu();
-		var t, id = '';
+
+		
 		if (!self.fm.selected.length) {
 			t = 'cwd';
 		} else if (self.fm.selected.length == 1) {
@@ -54,35 +55,59 @@ elFinder.prototype.ui = function(fm) {
 		
 		menu(t);
 		
-		var size = {
-	      'height' : $(window).height(),
-	      'width'  : $(window).width(),
-	      'sT'     : $(window).scrollTop(),
-	      'cW'     : $(this.menu).width(),
-	      'cH'     : $(this.menu).height()
+		win = $(window);
+		size = {
+	    	height : win.height(),
+      		width  : win.width(),
+      		sT     : win.scrollTop(),
+      		cW     : this.menu.width(),
+      		cH     : this.menu.height()
 	    };
-		$(this.menu).css({
-				'left' : ((e.clientX + size.cW) > size.width ? ( e.clientX - size.cW) : e.clientX),
-				'top'  : ((e.clientY + size.cH) > size.height && e.clientY > size.cH ? (e.clientY + size.sT - size.cH) : e.clientY + size.sT)
+		this.menu.css({
+				left : ((e.clientX + size.cW) > size.width ? ( e.clientX - size.cW) : e.clientX),
+				top  : ((e.clientY + size.cH) > size.height && e.clientY > size.cH ? (e.clientY + size.sT - size.cH) : e.clientY + size.sT)
 			})
 			.show()
-			.children('div:not(.delim)')
+			.find('div[name]')
 			.hover(
-				function() { $(this).addClass('hover'); }, 
-				function() { $(this).removeClass('hover'); }
+				function() { 
+					var t = $(this), s = t.children('div'), w;
+					t.addClass('hover');
+					if (s.length) {
+						if (!s.attr('pos')) {
+							w  = t.outerWidth();
+							s.css($(window).width() - w - t.offset().left > s.width() ? 'left' : 'right', w-5).attr('pos', true);
+						}
+						s.show();
+					}
+				}, 
+				function() { $(this).removeClass('hover').children('div').hide(); }
 			).click(function(e) {
 				e.stopPropagation();
-				self.hideMenu();
-				self.exec($(this).attr('name'));
+				var t = $(this);
+				if (!t.children('div').length) {
+					self.hideMenu();
+					self.exec(t.attr('name'), t.attr('argc'));
+				}
 			});
 		
 		function menu(t) {
-			var i, l, src = self.fm.options.contextmenu[t]||[];
+			var i, j, a, html, l, src = self.fm.options.contextmenu[t]||[];
 			for (i=0; i < src.length; i++) {
 				if (src[i] == 'delim') {
 					self.menu.children().length && !self.menu.children(':last').hasClass('delim') && self.menu.append('<div class="delim" />');
 				} else if (self.fm.ui.includeInCm(src[i], t)) {
-					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+self.cmdName(src[i])+'</div>');
+					a = self.cmd[src[i]].argc();
+					html = '';
+
+					if (a.length) {
+						html = '<span/><div class="el-finder-contextmenu-sub" style="z-index:'+(parseInt(self.menu.css('z-index'))+1)+'">';
+						for (var j=0; j < a.length; j++) {
+							html += '<div name="'+src[i]+'" argc="'+a[j].argc+'" class="'+a[j]['class']+'">'+a[j].text+'</div>';
+						};
+						html += '</div>';
+					}
+					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+self.cmdName(src[i])+html+'</div>');
 				}
 			};
 		}
@@ -159,6 +184,10 @@ elFinder.prototype.ui.prototype.command.prototype.isAllowed = function(f) {
 
 elFinder.prototype.ui.prototype.command.prototype.cm = function(t) {
 	return false;
+}
+
+elFinder.prototype.ui.prototype.command.prototype.argc = function(t) {
+	return [];
 }
 
 
@@ -894,28 +923,17 @@ elFinder.prototype.ui.prototype.commands = {
 		this.name = 'Create archive';
 		this.fm   = fm;
 		
-		this.exec = function() {
-
-			self.fm.log('here')
-			if (this.fm.params.archives.length == 1) {
-				create(this.fm.params.archives[0]);
-			}
-
-			function create(type) {
-				self.fm.ajax({
-					cmd        : 'archive',
-					current    : self.fm.cwd.hash,
-					'files[]'  : self.fm.selected,
-					type       : type,
-					name       : 'Archive'
-				}, function(data) {
-					self.fm.reload(data);
-					self.fm.log(data)
-					self.fm.selectById(data.select);
-				});
-			}
-
-			
+		this.exec = function(t) {
+			self.fm.ajax({
+				cmd        : 'archive',
+				current    : self.fm.cwd.hash,
+				'files[]'  : self.fm.selected,
+				type       : $.inArray(t, this.fm.params.archives) != -1 ? t : this.fm.params.archives[0],
+				name       : self.fm.i18n('Archive')
+			}, function(data) {
+				self.fm.reload(data);
+				self.fm.selectById(data.select);
+			});
 		}
 		
 		this.isAllowed = function() {
@@ -925,20 +943,37 @@ elFinder.prototype.ui.prototype.commands = {
 		this.cm = function(t) {
 			return t != 'cwd';
 		}
+		
+		this.argc = function() {
+			var i, v = [];
+			for (i=0; i < self.fm.params.archives.length; i++) {
+				v.push({
+					'class' : 'archive',
+					'argc'  : self.fm.params.archives[i],
+					'text'  : self.fm.view.mime2kind(self.fm.params.archives[i])
+				});
+			};
+			return v;
+		}
 	},
 	
 	extract : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Uncompress archive';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
-			
+			this.fm.ajax({
+				cmd     : 'extract',
+				current : this.fm.cwd.hash,
+				target  : this.fm.getSelected(0).hash
+			}, function(data) {
+				self.fm.reload(data);
+			})
 		}
 		
 		this.isAllowed = function() {
-			var s = this.fm.getSelected(0);
-			return this.fm.selected.length == 1 && s && s.mime.match(/\.(gz|bz|zip)$/i);
+			return this.fm.selected.length == 1 && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
 		}
 		
 		this.cm = function(t) {
