@@ -280,7 +280,7 @@
 	background:#ccc;
 }
 
-.el-finder-cwd div p, .el-finder-ql p {
+.el-finder-cwd  p, .el-finder-ql p {
 	width:48px;
 	height:48px;
 	margin:1px auto;
@@ -301,8 +301,9 @@
 }
 
 /* mimetypes */
-div.directory p   { background-position:  0     -45px; }
-div.application p { background-position: -1px  -134px; }
+
+.directory p   { background-position:  0     -45px; }
+.application p { background-position: -1px  -134px; }
 div.audio p       { background-position: -1px -1082px; }
 div.image p       { background-position: -1px -1132px; }
 div.text p,
@@ -329,6 +330,7 @@ div.x-php p         { background-position: 0 -726px; }
 div.x-perl p        { background-position: 0 -675px; }
 div.x-ruby p        { background-position: 0 -877px; }
 /* applications */
+.x-symlink-broken p { background-position:  -1px     1px; }
 div.vnd-ms-office p, 
 div.vnd-ms-word p, 
 div.vnd-oasis-opendocument-text p {background-position: -1px -232px;}
@@ -345,7 +347,8 @@ div.x-bzip p,
 div.x-bzip2 p,
 div.x-zip p,
 div.x-rar p, 
-div.x-tar p  { background-position: -1px -430px; }
+div.x-tar p,  
+div.x-7z-compressed p { background-position: -1px -430px; }
 div.x-gzip p { background-position: -1px -477px; }
 
 

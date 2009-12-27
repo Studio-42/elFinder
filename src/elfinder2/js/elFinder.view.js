@@ -3,10 +3,10 @@ elFinder.prototype.view = function(fm, el) {
 	this.fm = fm;
 	
 	this.kinds = {
+		'unknown'                       : 'Unknown',
 		'directory'                     : 'Folder',
 		'symlink'                       : 'Alias',
-		'broken'                        : 'Broken alias',
-		'unknown'                       : 'Unknown',
+		'symlink-broken'                : 'Broken alias',
 		'application/x-empty'           : 'Plain text',
 		'application/postscript'        : 'Postscript document',
 		'application/octet-stream'      : 'Application',
@@ -19,13 +19,13 @@ elFinder.prototype.view = function(fm, el) {
 		'application/x-shockwave-flash' : 'Flash application',
 		'application/xml'               : 'XML document', 
 		'application/x-bittorrent'      : 'Bittorrent file',
+		'application/x-7z-compressed'   : 'Archive 7z',
 		'application/x-tar'             : 'TAR archive', 
 	    'application/x-gzip'            : 'GZIP archive', 
 	    'application/x-bzip2'           : 'BZIP archive', 
 	    'application/x-zip'             : 'ZIP archive',  
-	    'application/zip'               : 'ZIP archive',  
 	    'application/x-rar'             : 'RAR archive',
-		'application/javascript'        : 'Javascript apllication',
+		'application/javascript'        : 'Javascript application',
 		'text/plain'                    : 'Plain text',
 	    'text/x-php'                    : 'PHP source',
 		'text/html'                     : 'HTML document', 
@@ -186,7 +186,7 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.renderIcon = function(f) {
 		var str = '<p'+(f.tmb ? ' style="'+"background:url('"+f.tmb+"') 0 0 no-repeat"+'"' : '')+'/><label>'+this.formatName(f.name)+'</label>';
-		if (f.link || f.mime == 'broken') {
+		if (f.link || f.mime == 'symlink-broken') {
 			str += '<em/>';
 		}
 		if (!f.read && f.write) {
@@ -198,13 +198,13 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.renderRow = function(f, odd) {
-		var str = f.link || f.mime =='broken' ? '<em/>' : '';
+		var str = f.link || f.mime =='symlink-broken' ? '<em/>' : '';
 		if (!f.read && f.write) {
 			str += '<em class="readonly" />';
 		} else if (!f.write && f.read) {
 			str += '<em class="dropbox" />';
 		}
-		return '<tr key="'+f.hash+'" class="'+self.mime2class(f.mime)+(odd ? ' el-finder-row-odd' : '')+'"><td class="icon"><p>'+str+'</p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td class="size">'+self.formatSize(f.size)+'</td><td>'+self.kind(f)+'</td></tr>';
+		return '<tr key="'+f.hash+'" class="'+self.mime2class(f.mime)+(odd ? ' el-finder-row-odd' : '')+'"><td class="icon"><p>'+str+'</p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td class="size">'+self.formatSize(f.size)+'</td><td>'+self.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr>';
 	}
 
 	this.selectedInfo = function() {
@@ -271,6 +271,10 @@ elFinder.prototype.view = function(fm, el) {
 		w  && p.push(self.fm.i18n('write'));
 		rm && p.push(self.fm.i18n('remove'));
 		return p.join('/');
+	}
+	
+	this.mime2kind = function(mime) {
+		return this.fm.i18n(this.kinds[mime]||'unknown');
 	}
 	
 	this.kind = function(f) {

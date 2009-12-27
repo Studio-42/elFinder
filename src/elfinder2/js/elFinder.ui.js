@@ -21,7 +21,12 @@ elFinder.prototype.ui = function(fm) {
 	}
 	
 	this.cmdName = function(cmd) {
-		return this.cmd[cmd] && this.cmd[cmd].name ? this.fm.i18n(this.cmd[cmd].name)+(cmd == 'archive' ? ' ('+self.fm.cwd.arc+')' : '') : '';
+		if (this.cmd[cmd] && this.cmd[cmd].name) {
+			return cmd == 'archive' && this.fm.params.archives.length == 1
+				? this.fm.i18n('Create')+' '+this.fm.view.mime2kind(this.fm.params.archives[0]).toLowerCase()
+				: this.fm.i18n(this.cmd[cmd].name);
+		}
+		return cmd;
 	}
 	
 	this.isCmdAllowed = function(cmd) {
@@ -95,11 +100,12 @@ elFinder.prototype.ui = function(fm) {
 	
 	this.init = function(disabled) {
 		var i, j, n, c=false, zindex = 2, z, t = this.fm.options.toolbar;
-		
+		/* disable select command if there is no callback for it */
 		if (!this.fm.options.editorCallback) {
 			disabled.push('select');
 		}
-		if (!this.fm.cwd.arc && $.inArray('archive', disabled) != -1) {
+		/* disable archive command if no archivator enabled  */
+		if (!self.fm.params.archives.length && $.inArray('archive', disabled) == -1) {
 			disabled.push('archive');
 		}
 		for (i in this.commands) {
@@ -120,7 +126,7 @@ elFinder.prototype.ui = function(fm) {
 					c = true;
 					this.buttons[n] = $('<li class="'+n+'" title="'+this.cmdName(n)+'" name="'+n+'" />')
 						.appendTo(this.fm.view.tlb)
-						.click(function(e) { e.stopPropagation()})
+						.click(function(e) { e.stopPropagation(); })
 						.bind('click', (function(ui){ return function() {  
 								!$(this).hasClass('disabled') && ui.exec($(this).attr('name'));
 							} })(this)
@@ -132,7 +138,7 @@ elFinder.prototype.ui = function(fm) {
 			}
 		}
 		this.update();
-
+		/* set z-index for context menu */
 		$(':visible', document.body).each(function() {
 			z = parseInt($(this).css('z-index'));
 			if (z >= zindex) {
@@ -308,9 +314,7 @@ elFinder.prototype.ui.prototype.commands = {
 			this.fm.lockShortcuts(true);
 			if (!cnt) {
 				/** nothing selected - show cwd info **/
-				f      = self.fm.cwd;
-				f.mime = 'directory';
-				info(f);
+				info(self.fm.cwd);
 			} else {
 				/** show info for each selected obj **/
 				$.each(this.fm.getSelected(), function() {
@@ -319,21 +323,15 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function info(f) {
-				var tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.kind(f)+'</td></tr></table>');
-				
-				if (f.link) {
-					tb.append('<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>');
-				}
+				var tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr></table>');
+				f.link && tb.append('<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>');
 				tb.append('<tr><td>'+self.fm.i18n('Size')+'</td><td>'+self.fm.view.formatSize(f.size)+'</td></tr><tr><td>'+self.fm.i18n('Modified')+'</td><td>'+self.fm.view.formatDate(f.date)+'</td></tr><tr><td>'+self.fm.i18n('Permissions')+'</td><td>'+self.fm.view.formatPermissions(f.read, f.write, f.rm)+'</td></tr>');
-				
-				if (f.dim) {
-					tb.append('<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>');
-				}
-				if (f.url) {
-					tb.append('<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>');
-				}	
+				f.dim && tb.append('<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>');
+				f.url && tb.append('<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>');
+
 				$('<div />').append(tb).dialog({
 					dialogClass : 'el-finder-dialog',
+					width       : 330,
 					title       : self.fm.i18n(f.mime == 'directory' ? 'Folder info' : 'File info'),
 					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } },
 					buttons     : { Ok : function() { $(this).dialog('close'); }}
@@ -742,35 +740,24 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 
-			var err = $('<div class="ui-state-error ui-corner-all"/>').append('<span class="ui-icon ui-icon-alert"/>').append('<strong/>'),
-				d = $('<div/>'), 
-				f = $('<form method="post" enctype="multipart/form-data" />')
-					.append('<div><input type="file" name="fm-file[]"/></div>')
-					.append('<div><input type="file" name="fm-file[]"/></div>')
-					.append('<div><input type="file" name="fm-file[]"/></div>'),
-				b = $('<div/>').addClass('el-finder-add-field').text(this.fm.i18n('Add field'))
-					.append($('<span class="ui-state-default ui-corner-all"/>').append('<em class="ui-icon ui-icon-circle-plus"/>'))
-					.click(function() {
-						$('<div><input type="file" name="fm-file[]"/></div>').appendTo(f);
+			var err = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
+				m = this.fm.params.uplMaxSize ? '<div>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</div>' : '',
+				f = $('<form method="post" enctype="multipart/form-data"><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
+				b = $('<div class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</div>')
+					.click(function() { f.append('<div><input type="file" name="fm-file[]"/></div>'); }),
+				d = $('<div/>').append(err.hide()).append(m).append(f).append(b).dialog({
+						dialogClass : 'el-finder-dialog',
+						title       : self.fm.i18n('Upload files'),
+						modal       : true,
+						resizable   : false,
+						close       : function() { self.fm.lockShortcuts(); },
+						buttons     : {
+							Cancel : function() { $(this).dialog('close'); },
+							Ok     : function() { f.submit(); }
+						}
 					});
-					
-			self.fm.lockShortcuts(true);
-			
-			d.append(err.hide()).append(f).append(b).dialog({
-				dialogClass : 'el-finder-dialog',
-				title       : self.fm.i18n('Upload files'),
-				modal       : true,
-				resizable   : false,
-				close       : function() { self.fm.lockShortcuts(); },
-				buttons     : {
-					Cancel : function() { $(this).dialog('close'); },
-					Ok     : function() { f.submit(); }
-				}
-			});
 
-			if (this.fm.cwd.uplMaxSize) {
-				$('<div />').text(this.fm.i18n('Maximum allowed files size')+': '+this.fm.cwd.uplMaxSize).insertBefore(f);
-			}
+			self.fm.lockShortcuts(true);
 
 			f.ajaxForm({
 				url          : this.fm.options.url,
@@ -909,15 +896,26 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 
-			this.fm.ajax({
-				cmd        : 'archive',
-				current    : this.fm.cwd.hash,
-				'target[]' : this.fm.selected,
-				name       : 'Archive'
-			}, function(data) {
-				self.fm.reload(data);
-				self.fm.selectById(data.target);
-			});
+			self.fm.log('here')
+			if (this.fm.params.archives.length == 1) {
+				create(this.fm.params.archives[0]);
+			}
+
+			function create(type) {
+				self.fm.ajax({
+					cmd        : 'archive',
+					current    : self.fm.cwd.hash,
+					'files[]'  : self.fm.selected,
+					type       : type,
+					name       : 'Archive'
+				}, function(data) {
+					self.fm.reload(data);
+					self.fm.log(data)
+					self.fm.selectById(data.select);
+				});
+			}
+
+			
 		}
 		
 		this.isAllowed = function() {

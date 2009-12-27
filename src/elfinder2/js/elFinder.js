@@ -34,6 +34,8 @@
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
+		
+		this.params = { dotFiles : false, arc : '', uplMaxSize : '' }
 		/**
 		 * Object. File manager configuration
 		 **/
@@ -137,6 +139,7 @@
 			!noLock && this.lock(true);
 
 			var opts = {
+				cmd      : '',
 				url      : this.options.url,
 				async    : true,
 				type     : 'GET',
@@ -248,7 +251,7 @@
 		 **/
 		this.reload = function(data) {
 			this.cwd = data.cwd;
-			self.log(self.cwd)
+			// self.log(self.cwd)
 			this.cdc = {};
 			for (var i=0; i<data.cdc.length ; i++) {
 				data.cdc[i].hash += ''
@@ -500,9 +503,10 @@
 			this.setView(this.cookie('el-finder-view'));
 			this.loaded = true;
 			self.eventsManager.init();
-			this.ajax({ tree: true }, function(data) {
-				
-				self.reload(data)
+			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
+				self.log(data)
+				self.reload(data);
+				self.params = data.params;
 				self.ui.init(data.disabled);
 			});
 			

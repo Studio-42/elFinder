@@ -27,7 +27,7 @@ class elFinder {
 		'uploadOrder' => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'      => 'auto',       // image manipulation library
 		'tmbDir'      => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'arc'         => 'tgz',
+		'archive'     => 'tgz',
 		'tmbAtOnce'   => 5,            // number of thumbnails to generate per request
 		'tmbSize'     => 48,           // images thumbnails size (px)
 		'fileURL'     => true,         // display file URL in "get info"
@@ -42,7 +42,31 @@ class elFinder {
 			),
 		'perms'       => array(),      // individual folders/files permisions     
 		'gzip'        => false,        // gzip output
-		'debug'       => true          // send debug to client
+		'debug'       => true,          // send debug to client
+		'cacheTime' => 86400,
+		'archiveMimes' => array(),
+		'archivators' => array()
+		// 'archivators' => array(
+		// 	'create' => array(
+		// 		'application/x-gzip' => array(
+		// 			'cmd' => 'tar',
+		// 			'argc' => '-czf',
+		// 			'ext'  => 'tar.gz'
+		// 			)
+		// 		),
+		// 	'extract' => array(
+		// 		'application/x-gzip' => array(
+		// 			'cmd'  => 'tar',
+		// 			'argc' => '-xzf',
+		// 			'ext'  => 'tar.gz'
+		// 			),
+		// 		'application/x-bzip2' => array(
+		// 			'cmd'  => 'tar',
+		// 			'argc' => '-xjf',
+		// 			'ext'  => 'tar.bz'
+		// 			)
+		// 		)
+		// 	)
 		);
 	
 	/**
@@ -110,8 +134,9 @@ class elFinder {
 	    'zip'   => 'application/x-zip',
 	    'rar'   => 'application/x-rar',
 		'tar'   => 'application/x-tar',
+		'7z'    => 'application/x-7z-compressed',
 		// texts
-		'txt'   => 'plain/text',
+		'txt'   => 'text/plain',
 	    'php'   => 'text/x-php',
 	    'html'  => 'text/html',
 		'htm'   => 'text/html',
@@ -206,7 +231,7 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	private $_result = array();
+	private $_result = array('debug' => array());
 	
 	/**
 	 * undocumented class variable
@@ -214,6 +239,13 @@ class elFinder {
 	 * @var string
 	 **/
 	private $_arc = array('create' => array(), 'extract' => array());
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_arcMimes = array();
 		
 	/**
 	 * constructor
@@ -243,116 +275,89 @@ class elFinder {
 				}
 			}
 		}
-		// print_R($this->_commands);
+
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
-		
-		if ($this->_options['cntDirSize'] && function_exists('exec')) {
-			$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
-			$this->_du = $s == 0 && $test>0;
+				
+		// cache some data in session
+		if (!session_id()) {
+			session_start();
 		}
 		
-		if (!empty($this->_options['tmbDir'])) {
-			$tmbDir = $this->_options['root'].DIRECTORY_SEPARATOR.$this->_options['tmbDir'];
-			if (is_dir($tmbDir) || @mkdir($tmbDir, $this->_options['dirMode'])) {
-				$this->_options['tmbDir'] = $tmbDir;
-			} else {
-				$this->_options['tmbDir'] = '';
+		if (!isset($_SESSION['elFinder']['ts']) || $_SESSION['elFinder']['ts'] < time()-$this->_options['cacheTime']) {
+			$_SESSION['elFinder'] = array( 'ts' => time());
+			$this->_result['debug']['sessionCreate'] = true;
+		} else {
+			$_SESSION['elFinder']['ts'] = time();
+		}
+		
+		if (!empty($_SESSION['elFinder']['mimeDetect'])) {
+			$this->_options['mimeDetect'] = $_SESSION['elFinder']['mimeDetect'];
+		} else {
+			if (empty($this->_options['mimeDetect']) || $this->_options['mimeDetect'] == 'auto') {
+				$this->_options['mimeDetect'] = $this->_getMimeDetect();
+			}
+			$_SESSION['elFinder']['mimeDetect'] = $this->_options['mimeDetect'];
+		}
+		
+		if ($this->_options['cntDirSize']) {
+			if (isset($_SESSION['elFinder']['du'])) {
+				$this->_options['du'] = $_SESSION['elFinder']['du'];
+			} elseif (function_exists('exec')) {
+				$test = exec('du -h '.escapeshellarg(__FILE__), $o, $s); 
+				$this->_options['du'] = $s == 0 && $test>0;
+				$_SESSION['elFinder']['du'] = $this->_options['du'];
 			}
 		}
 		
-		// find image manipulation library
 		if ($this->_options['tmbDir']) {
-			if (empty($this->_options['imgLib']) || $this->_options['imgLib'] == 'auto') {
-				if (extension_loaded('imagick')) {
-					$this->_options['imgLib'] = 'imagick';
-				} elseif (function_exists('exec')) {
-					exec('mogrify --version', $o, $c); 
-					if ($c == 0 && !empty($o))
-					{
-						$this->_options['imgLib'] = 'mogrify';
-					}
-				}
-				if (!$this->_options['imgLib'] && function_exists('gd_info')) {
-					$this->_options['imgLib'] = 'mogrify';
-				}
-			}
-			
-			if (!in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
-				$this->_options['imgLib'] = '';
-				$this->_options['tmbDir'] = '';
+			if (isset($_SESSION['elFinder']['imLib']) && isset($_SESSION['elFinder']['tmbDir'])) {
+				$this->_options['imgLib'] = $_SESSION['elFinder']['imgLib'];
+				$this->_options['tmbDir'] = $_SESSION['elFinder']['tmbDir'];
 			} else {
-				$this->_options['tmbSize'] = intval($this->_options['tmbSize']);
-				if ($this->_options['tmbSize'] < 12) {
-					$this->_options['tmbSize'] = 48;
+				$tmbDir = $this->_options['root'].DIRECTORY_SEPARATOR.$this->_options['tmbDir'];
+				$this->_options['tmbDir'] = is_dir($tmbDir) || @mkdir($tmbDir, $this->_options['dirMode']) ? $tmbDir : '';
+				
+				if ($this->_options['tmbDir'] && !in_array($this->_options['imgLib'], array('imagick', 'mogrify', 'gd'))) {
+					$this->_options['imgLib'] = $this->_getImgLib();
 				}
+				if (!$this->_options['tmbDir'] || !$this->_options['imgLib']) {
+					$this->_options['imgLib'] = $this->_options['tmbDir'] = '';
+				}
+				$_SESSION['elFinder']['imgLib'] = $this->_options['imgLib'];
+				$_SESSION['elFinder']['tmbDir'] = $this->_options['tmbDir'];
+			}
+			if ($this->_options['tmbDir']) {
+				$this->_options['tmbSize'] = $this->_options['tmbSize'] > 12 ? intval($this->_options['tmbSize']) : 48;
 			}
 		}
 		
-		if ((isset($this->_commands['archive']) || isset($this->_commands['extract'])) && function_exists('exec')) {
-			$tar = exec('tar --version', $o, $ctar);
-			$gzip = exec('gzip --version', $o, $cgzip);
-			$bzip = exec('bzip2 --version', $o, $cbzip);
-			if ($tar && $gzip && $ctar == 0 && $cgzip == 0) {
-				$this->_arc['create']['tgz']  = true;
-				$this->_arc['extract']['tgz'] = true;
-			}
-			if ($tar && $bzip && $ctar == 0 && $cbzip == 0) {
-				$this->_arc['create']['tbz']  = true;
-				$this->_arc['extract']['tbz'] = true;
-			}
-			$zip = exec('zip --version', $o, $c);
-			if ($zip && $c == 0) {
-				$this->_arc['create']['zip']  = true;
-				$this->_arc['extract']['zip'] = true;
+		if ((isset($this->_commands['archive']) || isset($this->_commands['extract']))) {
+			if (isset($_SESSION['elFinder']['archivators'])) {
+				$this->_options['archivators'] = $_SESSION['elFinder']['archivators'];
 			} else {
-				$unzip = exec('unzip --version', $o, $c);
-				if ($unzip && $c == 0) {
-					$this->_arc['extract']['unzip'] = true;
-				} else {
-					$gunzip = exec('gunzip --version', $o, $c);
-					if ($gunzip && $c == 0) {
-						$this->_arc['extract']['gunzip'] = true;
-					}
-				}
-			}
-			$rar = exec('rar --version', $o, $c);
-			if ($rar && $c == 0) {
-				$this->_arc['create']['rar']  = true;
-				$this->_arc['extract']['rar'] = true;
-			} else {
-				$unrar = exec('unrar', $o, $c);
-				if ($unrar && ($c==0 || $c == 7)) {
-					$this->_arc['extract']['unrar'] = true;
-				}
-			}
-			
-			$test = exec('7za --help', $o, $c);
-			if ($test && $c == 0) {
-				$this->_arc['create']['7za']  = true;
-				$this->_arc['extract']['7za'] = true;
-			}
-			// echo '<pre>'; print_r($this->_arc); echo '</pre>';
-			
-			if (!isset($this->_commands['extract'])) {
-				$this->_arc['extract'] = array();
-				if (isset($this->_commands['extract'])) {
-					unset($this->_commands['extract']);
+				if (empty($this->_options['archivators'])) {
+					$this->_options['archivators'] = $this->_getArchivators();
 				}
 				
-			}
-			
-			if (isset($this->_commands['archive']) && !empty($this->_arc['create'])) {
-				if (empty($this->_options['arc']) || empty($this->_arc['create'][$this->_options['arc']])) {
-					$tmp = array_keys($this->_arc['create']);
-					$this->_options['arc'] = $tmp[0];
-				}
-			} else {
-				$this->_arc['create'] = array();
-				$this->_options['arc'] = '';
+				if (!empty($this->_options['archivators']['create'])) {
+					if (!empty($this->_options['archiveMimes'])) {
+						foreach ($this->_options['archiveMimes'] as $mime) {
+							if (!empty($this->_options['archivators']['create'][$mime])) {
+								$this->_arcMimes[] = $mime;
+							}
+						}
+					} 
+					if (empty($this->_arcMimes)) {
+						$this->_arcMimes = array_keys($this->_options['archivators']['create']);
+					}
+				} 
 			}
 		}
-		
 	}
+
+
+	
+
 
 	/**
 	 * Proccess client request and output json
@@ -383,16 +388,23 @@ class elFinder {
 			$this->{$this->_commands[$cmd]}();
 		} else {
 			$this->_open();
+		}
+
+		if (isset($_GET['init'])) {
 			$this->_result['disabled'] = $this->_options['disabled'];
+			$this->_result['params'] = array(
+				'dotFiles'   => $this->_options['dotFiles'],
+				'uplMaxSize' => ini_get('upload_max_filesize'),
+				'archives'   => $this->_arcMimes,
+				'extract'    => !empty($this->_options['archivators']['extract']) ? array_keys($this->_options['archivators']['extract']) : array()
+				);
 		}
 
 		if ($this->_options['debug']) {
-			$this->_result['debug'] = array(
-				'time'       => $this->_utime() - $this->_time,
-				'mimeDetect' => $this->_options['mimeDetect'],
-				'imgLib'     => $this->_options['imgLib'],
-				'du'         => $this->_du
-				);
+			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
+			$this->_result['debug']['mimeDetect'] = $this->_options['mimeDetect'];
+			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
+			$this->_result['debug']['du'] = $this->_options['du'];
 		}
 		
 		$j = json_encode($this->_result);
@@ -884,24 +896,37 @@ class elFinder {
 	private function _archive()
 	{
 		if (empty($_GET['current']) 
-		||  empty($_GET['target'])
-		|| !is_array($_GET['target'])
+		||  empty($_GET['files'])
+		|| !is_array($_GET['files'])
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		||  empty($_GET['type'])
+		||  !in_array($_GET['type'], $this->_arcMimes)
+		||  empty($this->_options['archivators']['create'][$_GET['type']])
 		) {
-			return $this->_result['error'] = 'File does not exists';
+			return $this->_result['error'] = 'Invalid parameters';
 		}
 		
 		$files = array();
-		foreach ($_GET['target'] as $hash) {
+		$argc = '';
+		foreach ($_GET['files'] as $hash) {
 			if (false == ($f = $this->_find($hash, $dir))) {
 				return $this->_result['error'] = 'File does not exists';
 			}
 			$files[] = $f;
+			$argc .= escapeshellarg(basename($f)).' ';
 		}
-
-		if (false != ($arc = $this->_createArchive($files, !empty($_GET['name']) ? $_GET['name'] : 'Archive' ))) {
+		$arc  = $this->_options['archivators']['create'][$_GET['type']];
+		$name = count($files) == 1 ? basename($files[0]) : $_GET['name'];
+		$name = basename($this->_uniqueName($name.'.'.$arc['ext'], ''));
+		
+		$cwd = getcwd();
+		chdir($dir);
+		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.$argc;
+		exec($cmd, $o, $c);
+		chdir($cwd);
+		if (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_content($dir);
-			$this->_result['target'] = $this->_hash($arc);
+			$this->_result['select'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 		} else {
 			$this->_result['error'] = 'Unable to create archive';
 		}
@@ -944,15 +969,13 @@ class elFinder {
 		$this->_result['cwd'] = array(
 			'hash'       => $this->_hash($path),
 			'name'       => $name,
+			'mime'       => 'directory',
 			'rel'        => $rel,
 			'size'       => 0,
 			'date'       => date($this->_options['dateFormat'], filemtime($path)),
 			'read'       => true,
 			'write'      => $this->_isAllowed($path, 'write'),
-			'rm'         => $path == $this->_options['root'] ? false : $this->_isAllowed($path, 'rm'),
-			'uplMaxSize' => ini_get('upload_max_filesize'),
-			'dotFiles'   => $this->_options['dotFiles'],
-			'arc'        => $this->_options['arc']        
+			'rm'         => $path == $this->_options['root'] ? false : $this->_isAllowed($path, 'rm')
 			);
 	}
 
@@ -994,7 +1017,6 @@ class elFinder {
 		$info = array(
 			'name'  => basename($path),
 			'hash'  => $this->_hash($path),
-			// 'type'  => $type,
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
 			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
@@ -1006,7 +1028,7 @@ class elFinder {
 				
 		if ($type == 'link') {
 			if (false == ($path = $this->_readlink($path))) {
-				$info['mime'] = 'broken';
+				$info['mime'] = 'symlink-broken';
 				return $info;
 			}
 			if (is_dir($path)) {
@@ -1291,6 +1313,8 @@ class elFinder {
 		return $size;
 	}
 	
+	
+	
 	/**
 	 * return file mimetype
 	 *
@@ -1299,27 +1323,6 @@ class elFinder {
 	 **/
 	private function _mimetype($path)
 	{
-		if (!$this->_options['mimeDetect'] || $this->_options['mimeDetect'] == 'auto') {
-			$this->_options['mimeDetect'] = 'internal';
-			if (class_exists('finfo')) {
-				$this->_options['mimeDetect'] = 'finfo';
-			} elseif (function_exists('mime_content_type') && (mime_content_type(__FILE__) == 'text/x-php' || mime_content_type(__FILE__) == 'text/x-c++')) {
-				$this->_options['mimeDetect'] = 'mime_content_type';
-			} elseif (function_exists('exec')) {
-				$type = exec('file -ib '.escapeshellarg(__FILE__));
-				if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
-				{
-					$this->_options['mimeDetect'] = 'linux';
-				} else {
-					$type = exec('file -Ib '.escapeshellarg(__FILE__)); 
-					if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
-					{
-						$this->_options['mimeDetect'] = 'bsd';
-					}
-				}
-			}
-		}
-		
 		switch ($this->_options['mimeDetect']) {
 			case 'finfo':
 				$finfo = finfo_open(FILEINFO_MIME);
@@ -1720,6 +1723,148 @@ class elFinder {
 	/************************************************************/
 	/**                          utilites                      **/
 	/************************************************************/
+	
+	/**
+	 * Return image manipalation library name
+	 *
+	 * @return string
+	 **/
+	private function _getImgLib()
+	{
+		if (extension_loaded('imagick2')) {
+			return 'imagick';
+		} elseif (function_exists('exec')) {
+			exec('mogrify --version', $o, $c);
+			if ($c == 0) {
+				return 'mogrify';
+			}
+		}
+		return function_exists('gd_info') ? 'gd' : '';
+	}
+	
+	/**
+	 * Return list of available archivators
+	 *
+	 * @return array
+	 **/
+	private function _getArchivators()
+	{
+		$arcs = array(
+			'create'  => array(),
+			'extract' => array()
+			);
+			
+		if (!function_exists('exec')) {
+			return $arc;
+		}
+			
+		$tar  = exec('tar --version', $o, $ctar);
+		
+		if ($tar && $ctar == 0) {
+			$test = exec('gzip --version', $o, $c);
+			if ($test && $c == 0) {
+				$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
+				$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz');
+			}
+			$test = exec('bzip2 --version', $o, $c);
+			if ($test && $c == 0) {
+				$arcs['create']['application/x-bzip2']  = array('cmd' => 'tar', 'argc' => '-cjf', 'ext' => 'tbz');
+				$arcs['extract']['application/x-bzip2'] = array('cmd' => 'tar', 'argc' => '-xjf', 'ext' => 'tbz');
+			}
+		}
+		
+		$test = exec('zip --version', $o, $c);
+		if ($test && $c == 0) {
+			$arcs['create']['application/x-zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
+			$arcs['extract']['application/x-zip'] = array('cmd' => 'zip', 'argc' => '-o',  'ext' => 'zip');
+		} else {
+			$test = exec('unzip --version', $o, $c);
+			if ($test && $c == 0) {
+				$arcs['extract']['application/x-zip'] = array('cmd' => 'unzip', 'argc' => '',  'ext' => 'zip');
+			} else {
+				$test = exec('gunzip --version', $o, $c);
+				if ($test && $c == 0) {
+					$arcs['extract']['application/x-zip'] = array('cmd' => 'gunzip', 'argc' => '-d',  'ext' => 'zip');
+				}
+			}
+		}
+		
+		$test = exec('rar --version', $o, $c);
+		if ($test && $c == 0) {
+			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => '-a inul', 'ext' => 'rar');
+			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x',       'ext' => 'rar');
+		} else {
+			$test = exec('unrar', $o, $c);
+			if ($test && ($c==0 || $c == 7)) {
+				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x', 'ext' => 'rar');
+			}
+		}
+		
+		if ($tar && $ctar == 0) {
+			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
+			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
+		}
+		
+		$test = exec('7za --help', $o, $c);
+		if ($test && $c == 0) {
+			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a', 'ext' => '7z');
+			$arcs['extract']['application/x-7z-compressed'] = array('cmd' => '7za', 'argc' => 'e', 'ext' => 'rar');
+			
+			if (empty($arcs['create']['application/x-gzip'])) {
+				$arcs['create']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'a -tgzip', 'ext' => 'tar.gz');
+			}
+			if (empty($arcs['extract']['application/x-gzip'])) {
+				$arcs['extract']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'e -tgzip', 'ext' => 'tar.gz');
+			}
+			if (empty($arcs['create']['application/x-bzip2'])) {
+				$arcs['create']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2', 'ext' => 'tar.bz');
+			}
+			if (empty($arcs['extract']['application/x-bzip2'])) {
+				$arcs['extract']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2', 'ext' => 'tar.bz');
+			}
+			if (empty($arcs['create']['application/x-zip'])) {
+				$arcs['create']['application/x-zip'] = array('cmd' => '7za', 'argc' => 'a -tzip', 'ext' => 'zip');
+			}
+			if (empty($arcs['extract']['application/x-zip'])) {
+				$arcs['extract']['application/x-zip'] = array('cmd' => '7za', 'argc' => 'e -tzip', 'ext' => 'zip');
+			}
+			if (empty($arcs['create']['application/x-tar'])) {
+				$arcs['create']['application/x-tar'] = array('cmd' => '7za', 'argc' => 'a -ttar', 'ext' => 'tar');
+			}
+			if (empty($arcs['extract']['application/x-tar'])) {
+				$arcs['extract']['application/x-tar'] = array('cmd' => '7za', 'argc' => 'e -ttar', 'ext' => 'tar');
+			}
+		}
+		return $arcs;
+	}
+	
+	
+	/**
+	 * Return mimetype detect method name
+	 *
+	 * @return string
+	 **/
+	private function _getMimeDetect()
+	{
+		if (class_exists('finfo')) {
+			return 'finfo';
+		} elseif (function_exists('mime_content_type') && (mime_content_type(__FILE__) == 'text/x-php' || mime_content_type(__FILE__) == 'text/x-c++')) {
+			return 'mime_content_type';
+		} elseif (function_exists('exec')) {
+			$type = exec('file -ib '.escapeshellarg(__FILE__));
+			if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
+			{
+				return 'linux';
+			}
+			$type = exec('file -Ib '.escapeshellarg(__FILE__));
+			if (0 === strpos($type, 'text/x-php') || 0 === strpos($type, 'text/x-c++'))
+			{
+				return 'bsd';
+			}
+		}
+		return 'internal';
+	}
+	
 	
 	/**
 	 * Return file path hash (crc32)
