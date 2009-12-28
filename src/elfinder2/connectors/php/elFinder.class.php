@@ -1026,14 +1026,12 @@ class elFinder {
 				if (false != ($s = getimagesize($path))) {
 					$info['dim'] = $s[0].'x'.$s[1];
 				}
-				if ($this->_canCreateTmb($info['mime'])) {
-					$info['resize'] = true;
-					$tmb = $this->_tmbPath($path);
-					if (file_exists($tmb)) {
-						$info['tmb']  = $this->_path2url($tmb);
-					} else {
-						$this->_result['tmb'] = true;
-					}
+				$info['resize'] = $this->_canCreateTmb($info['mime']);
+				$tmb = $this->_tmbPath($path);
+				if (file_exists($tmb)) {
+					$info['tmb']  = $this->_path2url($tmb);
+				} elseif ($info['resize']) {
+					$this->_result['tmb'] = true;
 				}
 			}
 		}
@@ -1609,7 +1607,12 @@ class elFinder {
 	private function _tmbPath($path)
 	{
 		$tmb = '';
-		return $this->_options['tmbDir'] ? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png' : '';
+		if ($this->_options['tmbDir']) {
+			$tmb = dirname($path) != $this->_options['tmbDir']
+				? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png'
+				: $path;
+		}
+		return $tmb;
 	}
 	
 	/************************************************************/
