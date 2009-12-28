@@ -656,9 +656,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 
 .el-finder-drag-helper {
-	padding:0 0 0 57px;
+	padding:0;
 	cursor:move;
-	width:auto;
 }
 
 .el-finder-drag-helper div {

@@ -270,14 +270,19 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				},
 				helper     : function() {
 					var t = $(this),
-						h = $('<div class="el-finder-drag-helper"/>');
+						h = $('<div class="el-finder-drag-helper"/>'),
+						c = 0;
 					if (!t.hasClass('ui-selected')) {
 						self.fm.select(t, true);
 					}
 					self.cwd.find('.ui-selected').each(function(i) {
-						h.append(self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]));
+						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')])
+						if (c++ == 0 || c%13 == 0) {
+							el.css('margin-left', 0);
+						}
+						h.append(el);
 					});
-					return h;
+					return h.css('width', (c<=12 ? 85+(c-1)*27 : 387)+'px');
 				}
 			})
 			.filter('.directory')
