@@ -67,7 +67,7 @@ class elFinder():
 		'paste': '__paste',
 		'rm': '__rm',
 		'duplicate': '__duplicate',
-		'read': '__fread',
+		'read': '__read',
 		'edit': '__edit',
 		'extract': '__extract',
 		'resize': '__resize',
@@ -103,7 +103,7 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut']
+		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -115,21 +115,23 @@ class elFinder():
 				cmd = self._commands[self._request['cmd']]
 				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
 				if callable(func):
-					if cmd == '__open':
-						func(False)
-					else:
+					try:
 						func()
+						# if self._request['cmd'] == 'edit':
+						# 	f = open('/Users/troex/my.log', 'w')
+						# 	f.write(str(self._form))
+						# 	f.close()
+					except:
+						self._response['error'] = 'Unknown command'
+			else:
+				self._response['error'] = 'Unknown command'
 		else:
 			self._response['disabled'] = self._options['disabled']
-			self.__reload()
-		
+			self.__open()
+
 		if self._errorData:
 			self._response['errorData'] = self._errorData
-
-		# f = open('/Users/troex/my.log', 'w')
-		# f.write(str(self._form))
-		# f.close()
-		# self._response['debug'] = {}
+		
 
 		if self._options['debug']:
 			self.__debug('time', (time.time() - self._time))
@@ -143,7 +145,7 @@ class elFinder():
 		sys.exit(0)
 
 
-	def __open(self, tree):
+	def __open(self):
 		"""Open file or directory"""
 		# try to open file
 		if 'current' in self._request:
@@ -193,12 +195,8 @@ class elFinder():
 				else:
 					path = target
 
-			self.__content(path, tree)
+			self.__content(path, 'tree' in self._request)
 		pass
-
-
-	def __reload(self):
-		return self.__open(True)
 
 
 	def __rename(self):
@@ -224,7 +222,8 @@ class elFinder():
 		else:
 			try:
 				os.rename(curName, newName)
-				self._response['target'] = self.__info(newName)
+				self._response['target'] = self.__hash(newName)
+				self.__content(curDir, os.path.isdir(newName))
 			except:
 				self._response['error'] = 'Unable to rename file'
 
@@ -251,6 +250,7 @@ class elFinder():
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
+				self._response['target'] = self.__hash(newDir)
 				self.__content(path, True)
 			except:
 				self._response['error'] = 'Unable to create folder'
@@ -277,6 +277,7 @@ class elFinder():
 		else:
 			try:
 				open(newFile, 'w').close()
+				self._response['target'] = self.__hash(newFile)
 				self.__content(curDir, False)
 			except:
 				self._response['error'] = 'Unable to create file'
@@ -584,19 +585,7 @@ class elFinder():
 		self.__cdc(path)
 
 		if tree:
-			fhash = self.__hash(self._options['root'])
-			if self._options['rootAlias']:
-				name = self._options['rootAlias']
-			else:
-				name = os.path.basename(self._options['root'])
-			self._response['tree'] = [
-				{
-					'hash': fhash,
-					'name': name,
-					'read': True,
-					'dirs': self.__tree(self._options['root'])
-				}
-			]
+			self._response['tree'] = self.__tree(self._options['root'])
 
 
 	def __cwd(self, path):
@@ -624,7 +613,8 @@ class elFinder():
 			'read': True,
 			'write': self.__isAllowed(path, 'write'),
 			'rm': not root and self.__isAllowed(path, 'rm'),
-			'uplMaxSize': str(self._options['uplMaxSize']) + 'M'
+			'uplMaxSize': str(self._options['uplMaxSize']) + 'M',
+			'dotFiles': self._options['dotFiles']
 		}
 
 
@@ -639,7 +629,7 @@ class elFinder():
 			info = {}
 			info = self.__info(pf)
 			info['hash'] = self.__hash(pf)
-			if info['type'] == 'dir':
+			if info['mime'] == 'directory':
 				dirs.append(info)
 			else:
 				files.append(info)
@@ -650,39 +640,33 @@ class elFinder():
 
 	def __tree(self, path):
 		"""Return directory tree starting from path"""
-		tree = []
-		
+
 		if not os.path.isdir(path): return ''
 		if os.path.islink(path): return ''
 
-		for d in os.listdir(path):
-			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
-				fhash = self.__hash(pd)
-				read = self.__isAllowed(pd, 'read')
-				write = self.__isAllowed(pd, 'write')
-				if read:
-					dirs = self.__tree(pd)
-				else:
-					dirs = ''
-				element = {
-					'hash': fhash,
-					'name': d,
-					'read': read,
-					'write': write,
-					'dirs': dirs
-				}
-				tree.append(element)
-
-		if len(tree) == 0: return ''
-		else: return tree
+		if (path == self._options['root']) and self._options['rootAlias']:
+			name = self._options['rootAlias']
+		else:
+			name = os.path.basename(path)
+		tree = {
+			'hash': self.__hash(path),
+			'name': name,
+			'read': self.__isAllowed(path, 'read'),
+			'write': self.__isAllowed(path, 'write'),
+			'dirs': []
+		}
+		if self.__isAllowed(path, 'read'):
+			for d in os.listdir(path):
+				pd = os.path.join(path, d)
+				if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
+					tree['dirs'].append(self.__tree(pd))
+		return tree
 
 
-	def __uniqueName(self, path):
+	def __uniqueName(self, path, copy = ' copy'):
 		curDir = os.path.dirname(path)
 		curName = os.path.basename(path)
 		lastDot = curName.rfind('.')
-		copy = ' copy'
 		ext = newName = ''
 
 		if re.search(r'\..{3}\.(gz|bz|bz2)$', curName):
@@ -764,7 +748,7 @@ class elFinder():
 		info = {
 			'name': os.path.basename(path),
 			'hash': self.__hash(path),
-			'type': filetype,
+			# 'type': filetype,
 			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
 			'date': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
 			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
@@ -776,12 +760,13 @@ class elFinder():
 		if filetype == 'link':
 			path = self.__readlink(path)
 			if not path:
-				info['mime'] = 'unknown'
+				info['mime'] = 'broken'
 				return info
 
 			if os.path.isdir(path):
 				info['mime'] = 'directory'
 			else:
+				info['parent'] = self.__hash(os.path.dirname(path))
 				info['mime'] = self.__mimetype(path)
 
 			if self._options['rootAlias']:
@@ -789,8 +774,8 @@ class elFinder():
 			else:
 				basename = os.path.basename(self._options['root'])
 
-			info['linkTo'] = basename + path[len(self._options['root']):]
 			info['link'] = self.__hash(path)
+			info['linkTo'] = basename + path[len(self._options['root']):]
 			info['read'] = info['read'] and self.__isAllowed(path, 'read')
 			info['write'] = info['write'] and self.__isAllowed(path, 'write')
 			info['rm'] = self.__isAllowed(path, 'rm')
@@ -821,7 +806,7 @@ class elFinder():
 		return info
 
 
-	def __fread(self):
+	def __read(self):
 		if 'current' in self._request and 'file' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			curFile = self.__find(self._request['file'], curDir)
@@ -848,7 +833,7 @@ class elFinder():
 						f = open(curFile, 'w+')
 						f.write(self._request['content'])
 						f.close()
-						self._response['info'] = self.__info(curFile)
+						self._response['file'] = self.__info(curFile)
 					except:
 						self._response['error'] = 'Unable to write to file'
 				else:
@@ -1025,8 +1010,8 @@ class elFinder():
 
 
 elFinder({
-	'root': '/Users/troex/Sites/git/elrte/files',
-	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/',
+	'root': '/Users/troex/Sites/git/elrte/files/TEST',
+	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/TEST',
 	# 'root': '/Users/troex/Sites/',
 	# 'URL': 'http://php5.localhost:8001/~troex/',
 	'imgLib': 'auto'
