@@ -3,8 +3,6 @@ if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
 
-
-// setlocale(LC_ALL, 'ru_RU');
 class elFinder {
 	
 	/**
@@ -27,6 +25,7 @@ class elFinder {
 		'uploadOrder' => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'      => 'auto',       // image manipulation library
 		'tmbDir'      => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbCleanProb' => 10,
 		'archive'     => 'tgz',
 		'tmbAtOnce'   => 5,            // number of thumbnails to generate per request
 		'tmbSize'     => 48,           // images thumbnails size (px)
@@ -41,9 +40,7 @@ class elFinder {
 			'rm'     => true
 			),
 		'perms'       => array(),      // individual folders/files permisions     
-		'gzip'        => false,        // gzip output
 		'debug'       => true,          // send debug to client
-		'cacheTime' => 86400,
 		'archiveMimes' => array(),
 		'archivators' => array()
 		// 'archivators' => array(
@@ -274,10 +271,6 @@ class elFinder {
 		}
 	}
 
-
-	
-
-
 	/**
 	 * Proccess client request and output json
 	 *
@@ -302,14 +295,9 @@ class elFinder {
 			exit(json_encode(array('error' => 'Unknown command')));
 		}
 		
-		
-		if ($cmd) {
-			$this->{$this->_commands[$cmd]}();
-		} else {
-			$this->_open();
-		}
-
 		if (isset($_GET['init'])) {
+			
+			$ts = $this->_utime();
 			$this->_result['disabled'] = $this->_options['disabled'];
 			
 			$this->_result['params'] = array(
@@ -328,7 +316,29 @@ class elFinder {
 				}
 				// echo '<pre>'; print_R($this->_options['archivators']);
 			}
+			if ($this->_options['tmbDir']) {
+				srand((double) microtime() * 1000000);
+				if (rand(1, 100) < $this->_options['tmbCleanProb']) {
+					$ts2 = $this->_utime();
+					$ls = scandir($this->_options['tmbDir']);
+					for ($i=0, $s = count($ls); $i < $s; $i++) { 
+						if ('.' != $ls[$i] && '..' != $ls[$i]) {
+							@unlink($this->_options['tmbDir'].DIRECTORY_SEPARATOR.$ls[$i]);
+						}
+					}
+					$this->_result['debug']['cleanTmbTime'] = $this->_utime() - $ts2;
+				}
+			}
+			
+			$this->_result['debug']['initTime'] = $this->_utime() - $ts;
 		}
+		
+		if ($cmd) {
+			$this->{$this->_commands[$cmd]}();
+		} else {
+			$this->_open();
+		}
+
 
 		if ($this->_options['debug']) {
 			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
@@ -1598,6 +1608,7 @@ class elFinder {
 	 **/
 	private function _tmbPath($path)
 	{
+		$tmb = '';
 		return $this->_options['tmbDir'] ? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png' : '';
 	}
 	
