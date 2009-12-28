@@ -25,7 +25,7 @@ class elFinder {
 		'uploadOrder' => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'      => 'auto',       // image manipulation library
 		'tmbDir'      => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbCleanProb' => 10,
+		'tmbCleanProb' => 1,
 		'archive'     => 'tgz',
 		'tmbAtOnce'   => 5,            // number of thumbnails to generate per request
 		'tmbSize'     => 48,           // images thumbnails size (px)
@@ -119,27 +119,27 @@ class elFinder {
 		'ppt'   => 'application/vnd.ms-powerpoint',
 		'pps'   => 'application/vnd.ms-powerpoint',
 		'pdf'   => 'application/pdf',
-	    'xml'   => 'application/xml',
+		'xml'   => 'application/xml',
 		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
 		// archives
-	    'gz'    => 'application/x-gzip',
-	    'tgz'   => 'application/x-gzip',
-	    'bz'    => 'application/x-bzip2',
+		'gz'    => 'application/x-gzip',
+		'tgz'   => 'application/x-gzip',
+		'bz'    => 'application/x-bzip2',
 		'bz2'   => 'application/x-bzip2',
-	    'tbz'   => 'application/x-bzip2',
-	    'zip'   => 'application/zip',
-	    'rar'   => 'application/x-rar',
+		'tbz'   => 'application/x-bzip2',
+		'zip'   => 'application/zip',
+		'rar'   => 'application/x-rar',
 		'tar'   => 'application/x-tar',
 		'7z'    => 'application/x-7z-compressed',
 		// texts
 		'txt'   => 'text/plain',
-	    'php'   => 'text/x-php',
-	    'html'  => 'text/html',
+		'php'   => 'text/x-php',
+		'html'  => 'text/html',
 		'htm'   => 'text/html',
-	 	'js'    => 'text/javascript',
+		'js'    => 'text/javascript',
 		'css'   => 'text/css',
-	    'rtf'   => 'text/rtf',
+		'rtf'   => 'text/rtf',
 		'rtfd'  => 'text/rtfd',
 		'py'    => 'text/x-python',
 		'java'  => 'text/x-java-source',
@@ -147,15 +147,15 @@ class elFinder {
 		'sh'    => 'text/x-shellscript',
 		'pl'    => 'text/x-perl',
 		'sql'   => 'text/x-sql',
-	    // images
+		// images
 		'bmp'   => 'image/x-ms-bmp',
-	    'jpg'   => 'image/jpeg',
-	    'jpeg'  => 'image/jpeg',
-	    'gif'   => 'image/gif',
-	    'png'   => 'image/png',
-	    'tif'   => 'image/tiff',
-	    'psd'   => 'image/vnd.adobe.photoshop',
-	    //audio
+		'jpg'   => 'image/jpeg',
+		'jpeg'  => 'image/jpeg',
+		'gif'   => 'image/gif',
+		'png'   => 'image/png',
+		'tif'   => 'image/tiff',
+		'psd'   => 'image/vnd.adobe.photoshop',
+		//audio
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
@@ -316,9 +316,10 @@ class elFinder {
 				}
 				// echo '<pre>'; print_R($this->_options['archivators']);
 			}
+			// clean thumbnails dir
 			if ($this->_options['tmbDir']) {
 				srand((double) microtime() * 1000000);
-				if (rand(1, 100) < $this->_options['tmbCleanProb']) {
+				if (rand(1, 100) <= $this->_options['tmbCleanProb']) {
 					$ts2 = $this->_utime();
 					$ls = scandir($this->_options['tmbDir']);
 					for ($i=0, $s = count($ls); $i < $s; $i++) { 
@@ -641,28 +642,20 @@ class elFinder {
 
 			if (0 === strpos($dst, $f)) {
 				return $this->_result['error'] = 'Unable to copy into itself';
+			} elseif (file_exists($_dst)) {
+				return $this->_result['error'] = 'File or folder with the same name already exists';
+			} elseif ($cut && !$this->_isAllowed($f, 'rm')) {
+				return $this->_result['error'] = 'Access denied';
 			}
 
 			if ($cut) {
-				if (!$this->_isAllowed($f, 'rm')) {
-					$this->_result['error'] = 'Move failed';
-					return $this->_errorData($f, 'Access denied');
-				}
-				if (is_dir($f)) {
-					$this->_recRmTmb($f);
-				} else {
+				if (!@rename($f, $_dst)) {
+					return $this->_result['error'] = 'Move failed';
+				} elseif (!is_dir($f)) {
 					$this->_rmTmb($f);
 				}
-				if ((file_exists($_dst) && !$this->_remove($_dst)) || !@rename($f, $_dst) ) {
-					$this->_result['error'] = 'Move failed';
-					$this->_errorData($f, 'Unable to move');
-					break;
-				}
-			} else {
-				if (!$this->_copy($f, $_dst)) {
-					$this->_result['error'] = 'Move failed';
-					break;
-				}
+			} elseif (!$this->_copy($f, $_dst)) {
+				return $this->_result['error'] = 'Move failed';
 			}
 		}
 		$this->_content($current, true);
@@ -686,9 +679,11 @@ class elFinder {
 		if (!$this->_isAllowed($current, 'write') || !$this->_isAllowed($file, 'read')) {
 			return $this->_result['error'] = 'Access denied';
 		}
-		if (!$this->_copy($file, $this->_uniqueName($file))) {
+		$dup = $this->_uniqueName($file);
+		if (!$this->_copy($file, $dup)) {
 			return $this->_result['error'] = 'Duplicate failed';
 		}
+		$this->_result['select'] = $this->_hash($dup);
 		$this->_content($current, is_dir($file));
 	}
 	
@@ -1146,6 +1141,10 @@ class elFinder {
 		if (!$this->_isAllowed($dir, 'write')) {
 			return $this->_errorData($dir, 'Access denied');
 		}
+		if (file_exists($trg)) {
+			return $this->_errorData($src, 'File or folder with the same name already exists');
+		}
+		
 		if (!is_dir($src)) {
 			if (!@copy($src, $trg)) {
 				return $this->_errorData($src, 'Unable to copy');
@@ -1153,15 +1152,11 @@ class elFinder {
 			@chmod($trg, $this->_options['fileMode']);
 		} else {
 			
-			if (is_dir($trg) && !$this->_remove($trg)) {
-				return $this->_errorData($src, 'Unable to copy');
-			}
 			if (!@mkdir($trg, $this->_options['dirMode'])) {
 				return $this->_errorData($src, 'Unable to copy');
 			}
 			
 			$ls = scandir($src);
-			
 			for ($i=0; $i < count($ls); $i++) { 
 				if ('.' != $ls[$i] && '..' != $ls[$i]) {
 					$_src = $src.DIRECTORY_SEPARATOR.$ls[$i];
@@ -1327,79 +1322,6 @@ class elFinder {
 		return $type[0];
 	}
 	
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author dio
-	 **/
-	private function _createArchive($files, $name)
-	{
-		if (empty($this->_options['arc'])) {
-			return false;
-		}
-
-		switch ($this->_options['arc']) {
-			case 'tgz':
-			case 'tbz':
-				$dir = getcwd();
-				chdir(dirname($files[0]));
-				if ($this->_options['arc'] == 'tgz') {
-					$arg = 'czf';
-					$ext = 'tgz';
-				} else {
-					$arg = 'cjf';
-					$ext = 'tbz';
-				}
-				$name = $this->_uniqueName($name.'.'.$ext, '');
-				$str = '';
-				foreach($files as $f) {
-					$str .= escapeshellarg(basename($f)).' ';
-				}
-				$cmd = 'tar -'.$arg.' '.escapeshellarg($name).' '.$str;
-				exec($cmd);
-
-				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
-				chdir($dir);
-				return $res;
-				break;
-			
-			case 'zip':
-				$dir = getcwd();
-				chdir(dirname($files[0]));
-				$name = $this->_uniqueName($name.'.zip', '');
-				$str = '';
-				foreach($files as $f) {
-					$str .= escapeshellarg(basename($f)).' ';
-				}
-				$cmd = 'zip -r9 '.escapeshellarg($name).' '.$str;
-				exec($cmd);
-				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
-				chdir($dir);
-				return $res;
-				break;
-				
-			case '7za':
-				$dir = getcwd();
-				chdir(dirname($files[0]));
-				$name = $this->_uniqueName($name.'.7z', '');
-				$str = '';
-				foreach($files as $f) {
-					$str .= escapeshellarg(basename($f)).' ';
-				}
-				
-				$cmd = '7za a '.escapeshellarg($name).' '.$str;
-				exec($cmd);
-				$res = file_exists($name) ? dirname($files[0]).DIRECTORY_SEPARATOR.$name : false;
-				chdir($dir);
-				return $res;
-				break;
-			
-		}
-	}
-	
 	/************************************************************/
 	/**                   image manipulation                   **/
 	/************************************************************/
@@ -1474,33 +1396,6 @@ class elFinder {
 			$tmb = $this->_tmbPath($img);
 			if (file_exists($tmb)) {
 				@unlink($tmb);
-			}
-		}
-	}
-	
-	/**
-	 * Remove all thumbnails for images in folder
-	 *
-	 * @param  string  $path  folder path
-	 * @return void
-	 **/
-	private function _recRmTmb($path)
-	{
-		if (!$this->_options['tmbDir'] || !is_dir($path)) {
-			return;
-		}
-		$ls = scandir($path);
-		for ($i=0; $i < count($ls); $i++) { 
-			if ('.' != $ls[$i] && '..' != $ls[$i]) {
-				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				if (is_dir($p)) {
-					$this->_recRmTmb($p);
-				} else {
-					$tmb = $this->_tmbPath($path.DIRECTORY_SEPARATOR.$ls[$i]);
-					if (file_exists($tmb)) {
-						@unlink($tmb);
-					}
-				}
 			}
 		}
 	}
@@ -1747,50 +1642,47 @@ class elFinder {
 			'extract' => array()
 			);
 		
-		$tar  = exec('tar --version', $o, $ctar);
-		if ($tar && $ctar == 0) {
+		exec('tar --version', $o, $ctar);
+		if ($ctar == 0) {
+			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
+			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
 			$test = exec('gzip --version', $o, $c);
-			if ($test && $c == 0) {
+			if ($c == 0) {
 				$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
 				$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz');
 			}
 			$test = exec('bzip2 --version', $o, $c);
-			if ($test && $c == 0) {
+			if ($c == 0) {
 				$arcs['create']['application/x-bzip2']  = array('cmd' => 'tar', 'argc' => '-cjf', 'ext' => 'tbz');
 				$arcs['extract']['application/x-bzip2'] = array('cmd' => 'tar', 'argc' => '-xjf', 'ext' => 'tbz');
 			}
 		}
 		
-		$test = exec('zip --version', $o, $c);
-		if ($test && $c == 0) {
+		exec('zip --version', $o, $c);
+		if ($c == 0) {
 			$arcs['create']['application/zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
 		}
 		
-		$test = exec('unzip --help', $o, $c);
-		if ($test && $c == 0) {
+		exec('unzip --help', $o, $c);
+		if ($c == 0) {
 			$arcs['extract']['application/zip'] = array('cmd' => 'unzip', 'argc' => '',  'ext' => 'zip');
 		} 
 		
-		$test = exec('rar --version', $o, $c);
-		if ($test && $c == 0) {
-			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => '-a inul', 'ext' => 'rar');
-			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x',       'ext' => 'rar');
+		exec('rar --version', $o, $c);
+		if ($c == 0) {
+			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a inul', 'ext' => 'rar');
+			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x',      'ext' => 'rar');
 		} else {
 			$test = exec('unrar', $o, $c);
-			if ($test && ($c==0 || $c == 7)) {
+			if ($c==0 || $c == 7) {
 				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x', 'ext' => 'rar');
 			}
 		}
 		
-		if ($tar && $ctar == 0) {
-			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
-			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
-		}
-		
-		$test = exec('7za --help', $o, $c);
-		if ($test && $c == 0) {
+		exec('7za --help', $o, $c);
+		if ($c == 0) {
 			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a -l', 'ext' => '7z');
-			$arcs['extract']['application/x-7z-compressed'] = array('cmd' => '7za', 'argc' => 'e -y', 'ext' => 'rar');
+			$arcs['extract']['application/x-7z-compressed'] = array('cmd' => '7za', 'argc' => 'e -y', 'ext' => '7z');
 			
 			if (empty($arcs['create']['application/x-gzip'])) {
 				$arcs['create']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'a -tgzip -l', 'ext' => 'tar.gz');

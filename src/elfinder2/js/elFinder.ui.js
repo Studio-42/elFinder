@@ -43,7 +43,6 @@ elFinder.prototype.ui = function(fm) {
 	this.showMenu = function(e) {
 		var t, win, size, id = '';
 		this.hideMenu();
-
 		
 		if (!self.fm.selected.length) {
 			t = 'cwd';
@@ -518,22 +517,6 @@ elFinder.prototype.ui.prototype.commands = {
 			if (this.fm.buffer.src == this.fm.buffer.dst) {
 				return this.fm.view.error('Unable to copy into itself');
 			}
-			/* check for files with same names and propmt to overwrite (not for dragndrop moving) */
-			if (this.fm.buffer.dst == this.fm.cwd.hash) {
-				for (i=0; i<this.fm.buffer.names.length; i++) {
-					f = this.fm.buffer.names[i];
-					if (this.fm.fileExists(f)) {
-						msg += f+"\n";
-					}
-				}
-
-				if (msg) {
-					r = confirm(this.fm.i18n('Following files/folders already exists in this location:')+"\n\n"+msg+"\n"+this.fm.i18n('Do you want to replace it with the one you’re moving?')); 
-					if (!r) {
-						return;
-					}
-				}
-			}
 			
 			this.fm.ajax({
 				cmd       : 'paste',
@@ -853,12 +836,12 @@ elFinder.prototype.ui.prototype.commands = {
 			},
 			function(data) {
 				self.fm.reload(data);
+				self.fm.selectById(data['select']);
 			});
 		}
 		
 		this.isAllowed = function() {
-			var s = this.fm.getSelected();
-			return this.fm.cwd.write && s.length == 1 && s[0].read;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected()[0].read;
 		}
 		
 		this.cm = function(t) {
