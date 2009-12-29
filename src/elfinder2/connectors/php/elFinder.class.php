@@ -11,39 +11,38 @@ class elFinder {
 	 * @var array
 	 **/
 	private $_options = array(
-		'root'        => '',           // path to root directory
-		'URL'         => '',           // root directory URL
-		'rootAlias'   => 'Home',       // display this instead of root directory name
-		'disabled'    => array(),      // list of not allowed commands
-		'dotFiles'    => false,        // display dot files
-		'cntDirSize'  => true,         // count total directories sizes
-		'fileMode'    => 0666,         // new files mode
-		'dirMode'     => 0777,         // new folders mode
-		'mimeDetect'  => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
-		'uploadAllow' => array(),      // mimetypes which allowed to upload
-		'uploadDeny'  => array(),      // mimetypes which not allowed to upload
-		'uploadOrder' => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
-		'imgLib'      => 'auto',       // image manipulation library
-		'tmbDir'      => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbCleanProb' => 1,
-		'archive'     => 'tgz',
-		'tmbAtOnce'   => 5,            // number of thumbnails to generate per request
-		'tmbSize'     => 48,           // images thumbnails size (px)
-		'fileURL'     => true,         // display file URL in "get info"
-		'dateFormat'  => 'j M Y H:i',  // file modification date format
-		'logger'      => null,
-		'aclObj'      => null,         // acl object
-		'aclRole'     => 'user',       // role for acl
-		'defaults'    => array(        // default permisions
+		'root'         => '',           // path to root directory
+		'URL'          => '',           // root directory URL
+		'rootAlias'    => 'Home',       // display this instead of root directory name
+		'disabled'     => array(),      // list of not allowed commands
+		'dotFiles'     => false,        // display dot files
+		'cntDirSize'   => true,         // count total directories sizes
+		'fileMode'     => 0666,         // new files mode
+		'dirMode'      => 0777,         // new folders mode
+		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
+		'uploadAllow'  => array(),      // mimetypes which allowed to upload
+		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
+		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
+		'imgLib'       => 'auto',       // image manipulation library (imagick, mogrify, gd)
+		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
+		'tmbSize'      => 48,           // images thumbnails size (px)
+		'fileURL'      => true,         // display file URL in "get info"
+		'dateFormat'   => 'j M Y H:i',  // file modification date format
+		'logger'       => null,         // object logger
+		'aclObj'       => null,         // acl object (not implemented yet)
+		'aclRole'      => 'user',       // role for acl
+		'defaults'     => array(        // default permisions
 			'read'   => true,
 			'write'  => true,
 			'rm'     => true
 			),
-		'perms'       => array(),      // individual folders/files permisions     
-		'debug'       => true,          // send debug to client
-		'archiveMimes' => array(),
-		'archivators' => array()
-		// 'archivators' => array(
+		'perms'        => array(),      // individual folders/files permisions     
+		'debug'        => true,         // send debug to client
+		'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
+		'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect
+		// 'archivers' => array(
 		// 	'create' => array(
 		// 		'application/x-gzip' => array(
 		// 			'cmd' => 'tar',
@@ -91,14 +90,14 @@ class elFinder {
 		);
 		
 	/**
-	 * undocumented class variable
+	 * List of commands to log
 	 *
 	 * @var string
 	 **/
 	public $_loggedCommands = array('mkdir', 'mkfile', 'rename', 'upload', 'paste', 'rm', 'duplicate', 'edit', 'resize');
 	
 	/**
-	 * undocumented class variable
+	 * Context to log command
 	 *
 	 * @var string
 	 **/
@@ -179,25 +178,11 @@ class elFinder {
 	 * @var string
 	 **/
 	private $_time = 0;
-		
+				
 	/**
-	 * undocumented class variable
+	 * Additional data about error
 	 *
-	 * @var string
-	 **/
-	private $_tmbDir = null;
-		
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_createTmb = false;
-		
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
+	 * @var array
 	 **/
 	private $_errorData = array();
 		
@@ -209,26 +194,26 @@ class elFinder {
 	private $_fakeRoot = '';
 	
 	/**
-	 * undocumented class variable
+	 * Command result to send to client
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	private $_result = array('debug' => array());
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_arc = array('create' => array(), 'extract' => array());
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	private $_arcMimes = array();
 		
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_today = 0;
+			
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	private $_yesterday = 0;
+			
 	/**
 	 * constructor
 	 *
@@ -239,9 +224,16 @@ class elFinder {
 		
 		foreach ($this->_options as $k=>$v) {
 			if (isset($options[$k])) {
-				$this->_options[$k] = is_array($this->_options[$k]) ? array_merge($this->_options[$k], $options[$k]) : $options[$k];
+				$this->_options[$k] = is_array($this->_options[$k]) 
+					? array_merge($this->_options[$k], $options[$k]) 
+					: $options[$k];
 			}
 		}
+
+		if (substr($this->_options['root'], -1) == DIRECTORY_SEPARATOR) {
+			$this->_options['root'] = substr($this->_options['root'], 0, -1);
+		}
+		
 
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 
@@ -269,6 +261,8 @@ class elFinder {
 				$this->_options['imgLib'] = $this->_getImgLib();
 			}
 		}
+		$this->_today = mktime(0,0,0, date('m'), date('d'), date('Y'));
+		$this->_yesterday = $this->_today-86400;
 	}
 
 	/**
@@ -307,14 +301,13 @@ class elFinder {
 				'extract'    => array()
 				);
 			if (isset($this->_commands['archive']) || isset($this->_commands['extract'])) {
-				$this->_checkArchivators();
+				$this->_checkArchivers();
 				if (isset($this->_commands['archive'])) {
 					$this->_result['params']['archives'] = $this->_options['archiveMimes'];
 				}
 				if (isset($this->_commands['extract'])) {
-					$this->_result['params']['extract'] = array_keys($this->_options['archivators']['extract']);
+					$this->_result['params']['extract'] = array_keys($this->_options['archivers']['extract']);
 				}
-				// echo '<pre>'; print_R($this->_options['archivators']);
 			}
 			// clean thumbnails dir
 			if ($this->_options['tmbDir']) {
@@ -348,6 +341,7 @@ class elFinder {
 			$this->_result['debug']['du'] = @$this->_options['du'];
 		}
 		
+		header("Content-Type: application/json");
 		echo json_encode($this->_result);
 		
 		if (!empty($this->_options['logger']) && in_array($cmd, $this->_loggedCommands)) {
@@ -364,7 +358,6 @@ class elFinder {
 	/**
 	 * Return current dir content to client or output file content to browser
 	 *
-	 * @param  bool  $tree  add dirs tree to result? (used by reload command)
 	 * @return void
 	 **/
 	private function _open()
@@ -381,7 +374,7 @@ class elFinder {
 			}
 			if (!$this->_isAllowed($dir, 'read') || !$this->_isAllowed($file, 'read')) {
 				header('HTTP/1.x 403 Access Denied'); 
-				exit('Access Denied');
+				exit('Access denied');
 			}
 			
 			if (filetype($file) == 'link') {
@@ -392,7 +385,7 @@ class elFinder {
 				}
 				if (!$this->_isAllowed(dirname($file), 'read') || !$this->_isAllowed($file, 'read')) {
 					header('HTTP/1.x 403 Access Denied'); 
-					exit('Access Denied');
+					exit('Access denied');
 				}
 			}
 			
@@ -437,7 +430,7 @@ class elFinder {
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
 		||  false == ($target = $this->_find(trim($_GET['target']), $dir))
 		) {
-			$this->_result['error'] = 'File does not exists';
+			$this->_result['error'] = 'File not found';
 		} elseif (false == ($name = $this->_checkName($_GET['name'])) ) {
 			$this->_result['error'] = 'Invalid name';
 		} elseif (!$this->_isAllowed($dir, 'write')) {
@@ -447,9 +440,10 @@ class elFinder {
 		} elseif (!rename($target, $dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_result['error'] = 'Unable to rename file';
 		} else {
+			$this->_rmTmb($target);
 			$this->_logContext['from'] = $target;
 			$this->_logContext['to']   = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['target']   = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_result['select']   = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 			$this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 	}
@@ -476,7 +470,7 @@ class elFinder {
 			$this->_result['error'] = 'Unable to create folder';
 		} else {
 			$this->_logContext['dir'] = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['target'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_result['select']  = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 			$this->_content($dir, true);
 		}
 	}
@@ -488,7 +482,8 @@ class elFinder {
 	 **/
 	private function _mkfile()
 	{
-		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
+		if (empty($_GET['current']) 
+		||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
 			return $this->_result['error'] = 'Invalid parameters';
 		} 
 		$this->_logContext['file'] = $dir.DIRECTORY_SEPARATOR.$_GET['name'];
@@ -504,14 +499,13 @@ class elFinder {
 			if (false != ($fp = @fopen($f, 'wb'))) {
 				fwrite($fp, "");
 				fclose($fp);
-				$this->_result['target'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+				$this->_result['select'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
 				$this->_content($dir);
 			} else {
 				$this->_result['error'] = 'Unable to create file';
 			}
 		} 
 	}
-	
 	
 	/**
 	 * Remove files/folders
@@ -533,11 +527,10 @@ class elFinder {
 			}
 		}
 		if (!empty($this->_result['errorData'])) {
-			$this->_result['error'] = 'Remove failed';
+			$this->_result['error'] = 'Unable to remove file';
 		}
 		$this->_content($dir, true);
 	}
-	
 	
 	/**
 	 * Upload files
@@ -568,20 +561,11 @@ class elFinder {
 						case UPLOAD_ERR_FORM_SIZE:
 							$error = 'File exceeds the maximum allowed filesize';
 							break;
-						case UPLOAD_ERR_PARTIAL:
-							$error = 'File was only partially uploaded';
-							break;
-						case UPLOAD_ERR_NO_FILE:
-							$error = 'No file was uploaded';
-							break;
-						case UPLOAD_ERR_NO_TMP_DIR:
-							$error = 'Missing a temporary folder';
-							break;
-						case UPLOAD_ERR_CANT_WRITE:
-							$error = 'Failed to write file to disk';
-							break;
 						case UPLOAD_ERR_EXTENSION:
 							$error = 'Not allowed file type';
+							break;
+						default :
+							$error = 'Unable to upload file';
 					}
 					$this->_errorData($_FILES['fm-file']['name'][$i], $error);
 				} elseif (false == ($name = $this->_checkName($_FILES['fm-file']['name'][$i]))) {
@@ -650,12 +634,12 @@ class elFinder {
 
 			if ($cut) {
 				if (!@rename($f, $_dst)) {
-					return $this->_result['error'] = 'Move failed';
+					return $this->_result['error'] = 'Unable to move files';
 				} elseif (!is_dir($f)) {
 					$this->_rmTmb($f);
 				}
 			} elseif (!$this->_copy($f, $_dst)) {
-				return $this->_result['error'] = 'Move failed';
+				return $this->_result['error'] = 'Unable to copy files';
 			}
 		}
 		$this->_content($current, true);
@@ -681,7 +665,7 @@ class elFinder {
 		}
 		$dup = $this->_uniqueName($file);
 		if (!$this->_copy($file, $dup)) {
-			return $this->_result['error'] = 'Duplicate failed';
+			return $this->_result['error'] = 'Unable to create file copy';
 		}
 		$this->_result['select'] = $this->_hash($dup);
 		$this->_content($current, is_dir($file));
@@ -814,23 +798,20 @@ class elFinder {
 		$this->_result['file'] = $this->_info($file);
 	}
 	
-	
 	/**
-	 * undocumented function
+	 * Create archive of selected type
 	 *
 	 * @return void
-	 * @author dio
 	 **/
 	private function _archive()
 	{
-		$this->_checkArchivators();
-		if (empty($this->_options['archivators']['create']) 
+		$this->_checkArchivers();
+		if (empty($this->_options['archivers']['create']) 
 		|| empty($_GET['type']) 
-		|| empty($this->_options['archivators']['create'][$_GET['type']])
+		|| empty($this->_options['archivers']['create'][$_GET['type']])
 		|| !in_array($_GET['type'], $this->_options['archiveMimes'])) {
-			return $this->_result['error'] = 'Unable to create archive';
+			return $this->_result['error'] = 'Invalid parameters';
 		}
-		
 		
 		if (empty($_GET['current']) 
 		||  empty($_GET['files'])
@@ -841,15 +822,15 @@ class elFinder {
 		}
 		
 		$files = array();
-		$argc = '';
+		$argc  = '';
 		foreach ($_GET['files'] as $hash) {
 			if (false == ($f = $this->_find($hash, $dir))) {
-				return $this->_result['error'] = 'File does not exists';
+				return $this->_result['error'] = 'File not found';
 			}
 			$files[] = $f;
 			$argc .= escapeshellarg(basename($f)).' ';
 		}
-		$arc  = $this->_options['archivators']['create'][$_GET['type']];
+		$arc  = $this->_options['archivers']['create'][$_GET['type']];
 		$name = count($files) == 1 ? basename($files[0]) : $_GET['name'];
 		$name = basename($this->_uniqueName($name.'.'.$arc['ext'], ''));
 		
@@ -866,12 +847,10 @@ class elFinder {
 		}
 	}
 	
-	
 	/**
-	 * undocumented function
+	 * Extract files from archive
 	 *
 	 * @return void
-	 * @author dio
 	 **/
 	private function _extract()
 	{
@@ -882,13 +861,13 @@ class elFinder {
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
-		$this->_checkArchivators();
+		$this->_checkArchivers();
 		$mime = $this->_mimetype($file);
-		if (empty($this->_options['archivators']['extract'][$mime])) {
-			return $this->_result['error'] = 'Unable to extract files from archive';
+		if (empty($this->_options['archivers']['extract'][$mime])) {
+			return $this->_result['error'] = 'Invalid parameters';
 		}
 		$cwd = getcwd();
-		$arc = $this->_options['archivators']['extract'][$mime];
+		$arc = $this->_options['archivers']['extract'][$mime];
 		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg(basename($file));
 		chdir(dirname($file));
 		exec($cmd, $o, $c);
@@ -982,11 +961,19 @@ class elFinder {
 		$type = filetype($path);
 		$stat =  $type == 'link' ? lstat($path) : stat($path);
 		
+		if ($stat['mtime'] > $this->_today) {
+			$d = 'Today '.date('H:i', $stat['mtime']);
+		} elseif ($stat['mtime'] > $this->_yesterday) {
+			$d = 'Yesterday '.date('H:i', $stat['mtime']);
+		} else {
+			$d = date($this->_options['dateFormat'], $stat['mtime']);
+		}
+		
 		$info = array(
 			'name'  => basename($path),
 			'hash'  => $this->_hash($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
-			'date'  => date($this->_options['dateFormat'], $stat['mtime']),
+			'date'  => $d, 
 			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
 			'read'  => $this->_isAllowed($path, 'read'),
 			'write' => $this->_isAllowed($path, 'write'),
@@ -1065,9 +1052,10 @@ class elFinder {
 	/************************************************************/
 
 	/**
-	 * Return name for duplicated file/folder
+	 * Return name for duplicated file/folder or new archive
 	 *
-	 * @param  string  $f  file/folder name
+	 * @param  string  $f       file/folder name
+	 * @param  string  $suffix  file name suffix
 	 * @return string
 	 **/
 	private function _uniqueName($f, $suffix=' copy')
@@ -1159,13 +1147,13 @@ class elFinder {
 		
 		if (!is_dir($src)) {
 			if (!@copy($src, $trg)) {
-				return $this->_errorData($src, 'Unable to copy');
+				return $this->_errorData($src, 'Unable to copy files');
 			} 
 			@chmod($trg, $this->_options['fileMode']);
 		} else {
 			
 			if (!@mkdir($trg, $this->_options['dirMode'])) {
-				return $this->_errorData($src, 'Unable to copy');
+				return $this->_errorData($src, 'Unable to copy files');
 			}
 			
 			$ls = scandir($src);
@@ -1175,11 +1163,11 @@ class elFinder {
 					$_trg = $trg.DIRECTORY_SEPARATOR.$ls[$i];
 					if (is_dir($_src)) {
 						if (!$this->_copy($_src, $_trg)) {
-							return $this->_errorData($_src, 'Unable to copy');
+							return $this->_errorData($_src, 'Unable to copy files');
 						}
 					} else {
 						if (!@copy($_src, $_trg)) {
-							return $this->_errorData($_src, 'Unable to copy');
+							return $this->_errorData($_src, 'Unable to copy files');
 						}
 						@chmod($_trg, $this->_options['fileMode']);
 					}
@@ -1190,10 +1178,10 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Check new file name for invalid simbols. Return name if valid
 	 *
-	 * @return void
-	 * @author dio
+	 * @return string  $n  file name
+	 * @return string
 	 **/
 	private function _checkName($n)
 	{
@@ -1205,10 +1193,11 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Find folder by hash in required folder and subfolders
 	 *
-	 * @return void
-	 * @author dio
+	 * @param  string  $hash  folder hash
+	 * @param  string  $path  folder path to search in
+	 * @return string
 	 **/
 	private function _findDir($hash, $path='')
 	{
@@ -1232,10 +1221,10 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Find file/folder by hash in required folder
 	 *
-	 * @return void
-	 * @author dio
+	 * @param  string  $hash  file/folder hash
+	 * @param  string  $path  folder path to search in
 	 **/
 	private function _find($hash, $path)
 	{
@@ -1253,10 +1242,10 @@ class elFinder {
 	
 	
 	/**
-	 * undocumented function
+	 * Return path of file on which link point to, if exists in root directory
 	 *
-	 * @return void
-	 * @author dio
+	 * @param  string  $path  symlink path
+	 * @return string
 	 **/
 	private function _readlink($path)
 	{
@@ -1301,7 +1290,7 @@ class elFinder {
 	}
 	
 	/**
-	 * return file mimetype
+	 * Return file mimetype
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -1381,13 +1370,6 @@ class elFinder {
 				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
 					return false;
 				}
-				// if ($s['mime'] == 'image/jpeg') {
-				// 	$r = imagejpeg($_tmb, $tmb, 100);
-				// } else if ($s['mime'] = 'image/png') {
-				// 	$r = imagepng($_tmb, $tmb, 7);
-				// } else {
-				// 	$r = imagegif($_tmb, $tmb, 7);
-				// }
 				$r = imagepng($_tmb, $tmb, 7);
 				imagedestroy($_img);
 				imagedestroy($_tmb);
@@ -1404,11 +1386,8 @@ class elFinder {
 	 **/
 	private function _rmTmb($img)
 	{
-		if ($this->_options['tmbDir']) {
-			$tmb = $this->_tmbPath($img);
-			if (file_exists($tmb)) {
-				@unlink($tmb);
-			}
+		if ($this->_options['tmbDir'] && false != ($tmb = $this->_tmbPath($img)) && file_exists($tmb)) {
+			@unlink($tmb);
 		}
 	}
 	
@@ -1486,9 +1465,9 @@ class elFinder {
 	}
 	
 	/**
-	 * Return true if we can create thumbnail for image
+	 * Return true if we can create thumbnail for file with this mimetype
 	 *
-	 * @param  string  $path  image path
+	 * @param  string  $mime  file mimetype
 	 * @return bool
 	 **/
 	private function _canCreateTmb($mime)
@@ -1506,7 +1485,7 @@ class elFinder {
 	}
 	
 	/**
-	 * Return image thumbnail path
+	 * Return image thumbnail path. For thumbnail return itself 
 	 *
 	 * @param  string  $path  image path
 	 * @return string
@@ -1639,14 +1618,14 @@ class elFinder {
 	}
 	
 	/**
-	 * Return list of available archivators
+	 * Return list of available archivers
 	 *
 	 * @return array
 	 **/
-	private function _checkArchivators()
+	private function _checkArchivers()
 	{
 		if (!function_exists('exec')) {
-			$this->_options['archivators'] = $this->_options['archive'] = array();
+			$this->_options['archivers'] = $this->_options['archive'] = array();
 			return;
 		}
 		$arcs = array(
@@ -1693,17 +1672,17 @@ class elFinder {
 		
 		exec('7za --help', $o, $c);
 		if ($c == 0) {
-			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a -l', 'ext' => '7z');
+			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a', 'ext' => '7z');
 			$arcs['extract']['application/x-7z-compressed'] = array('cmd' => '7za', 'argc' => 'e -y', 'ext' => '7z');
 			
 			if (empty($arcs['create']['application/x-gzip'])) {
-				$arcs['create']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'a -tgzip -l', 'ext' => 'tar.gz');
+				$arcs['create']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'a -tgzip', 'ext' => 'tar.gz');
 			}
 			if (empty($arcs['extract']['application/x-gzip'])) {
 				$arcs['extract']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'e -tgzip -y', 'ext' => 'tar.gz');
 			}
 			if (empty($arcs['create']['application/x-bzip2'])) {
-				$arcs['create']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2 -l', 'ext' => 'tar.bz');
+				$arcs['create']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2', 'ext' => 'tar.bz');
 			}
 			if (empty($arcs['extract']['application/x-bzip2'])) {
 				$arcs['extract']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2 -y', 'ext' => 'tar.bz');
@@ -1722,14 +1701,14 @@ class elFinder {
 			}
 		}
 		
-		$this->_options['archivators'] = $arcs;
+		$this->_options['archivers'] = $arcs;
 		foreach ($this->_options['archiveMimes'] as $k=>$mime) {
-			if (!isset($this->_options['archivators']['create'][$mime])) {
+			if (!isset($this->_options['archivers']['create'][$mime])) {
 				unset($this->_options['archiveMimes'][$k]);
 			}
 		}
 		if (empty($this->_options['archiveMimes'])) {
-			$this->_options['archiveMimes'] = array_keys($this->_options['archivators']['create']);
+			$this->_options['archiveMimes'] = array_keys($this->_options['archivers']['create']);
 		}
 	}
 	
@@ -1785,18 +1764,12 @@ class elFinder {
 		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
 	
-		
-	private function _utime()
-	{
-		$time = explode(" ", microtime());
-		return (double)$time[1] + (double)$time[0];
-	}
-		
 	/**
-	 * undocumented function
+	 * Paack error message in $this->_result['errorData']
 	 *
-	 * @return void
-	 * @author dio
+	 * @param string  $path  path to file
+	 * @param string  $msg   error message
+	 * @return bool always false
 	 **/
 	private function _errorData($path, $msg)
 	{
@@ -1808,7 +1781,11 @@ class elFinder {
 		return false;
 	}	
 	
-		
+	private function _utime()
+	{
+		$time = explode(" ", microtime());
+		return (double)$time[1] + (double)$time[0];
+	}	
 	
 }
 

@@ -6,6 +6,7 @@
 	 **/
 	elFinder = function(el, o) {
 		var self      = this;
+		this.version  = '1.1 beta2';
 		/**
 		 * Object. Current Working Dir info
 		 **/
@@ -162,7 +163,10 @@
 					if (!self.locked && self.options.view == 'icons') {
 						data.tmb && self.tmb();
 					}
-					delete data
+					delete data;
+					if (data.select && self.cdc[data.select]) {
+						self.selectById(data.select);
+					}
 				}
 			}
 			if (typeof(options) == 'object') {
@@ -290,7 +294,7 @@
 		 */
 		this.drop = function(e, ui, target) {
 			if (ui.helper.find('[key="'+target+'"]').length) {
-				return self.view.error('Unable to copy into itself!');
+				return self.view.error('Unable to copy into itself');
 			}
 			var ids = [];
 			ui.helper.find('div:not(.noaccess):has(>label):not(:has(em[class="readonly"],em[class=""]))').each(function() {
@@ -335,8 +339,11 @@
 		}
 
 		this.selectById = function(id) {
-			var el = $('[key="'+id+'"]', self.view.cwd);
-			el.length && self.select(el)
+			var el = $('[key="'+id+'"]', this.view.cwd);
+			if (el.length) {
+				this.select(el);
+				this.checkSelectedPos();
+			}
 		}
 
 		this.unselect = function(el) {

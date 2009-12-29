@@ -34,8 +34,12 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				}
 			})
 			.bind(window.opera?'click':'contextmenu', function(e) {
+				if (window.opera && !e.ctrlKey) {
+					return;
+				}
 				var t = $(e.target);
 				e.preventDefault();
+				e.stopPropagation()
 				if (t.hasClass('el-finder-cwd')) {
 					self.fm.unselectAll();
 				} else {
@@ -140,13 +144,12 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				case 27:
 					self.fm.quickLook.hide()
 					break;
+				/* Space - QuickLook */
 				case 32:
-					// if (self.fm.selected.length == 1) {
-						e.preventDefault();
-						self.fm.quickLook.toggle();
-					// }
+					e.preventDefault();
+					e.stopPropagation();
+					self.fm.quickLook.toggle();
 					break;
-					
 				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
 				case 37:
 				case 38:
@@ -175,6 +178,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				case 65:
 					if (meta) {
 						e.preventDefault();
+						e.stopPropagation();
 						self.fm.selectAll();
 					}
 					break;

@@ -96,17 +96,16 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.fatal = function(t) {
-		self.error(t.status != '404' ? 'Invalid backend configuration!' : 'Unable to connect to backend!')
+		self.error(t.status != '404' ? 'Invalid backend configuration' : 'Unable to connect to backend')
 	}
 	
 	this.error = function(err, data) {
 		this.fm.lock();
-		this.msg.show().children('strong').html(this.fm.i18n(err)+this.formatErrorData(data));
+		this.msg.show().children('strong').html(this.fm.i18n(err)+'!'+this.formatErrorData(data));
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 6000);
 	}
 	
 	this.renderNav = function(tree) {
-		// self.fm.startBench()
 		var li = this.tree.children('li');
 		li.children('div').removeClass('collapsed expanded').next('a').text(tree.name).attr('key', tree.hash).next('ul').remove();
 
@@ -114,8 +113,6 @@ elFinder.prototype.view = function(fm, el) {
 			li.children('div').addClass('collapsed expanded').end().append(traverse(tree.dirs));
 			li.find('ul>li ul').hide();
 		}
-		
-		// self.fm.log('renderNav: '+self.fm.stopBench())
 		
 		if (this.fm.options.places) {
 			this.renderPlaces();

@@ -150,7 +150,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		
 		if (f.mime.match(/image\/(jpeg|png|gif)/)) {
 			var url = self.fm.fileURL();
-			self.img.attr('src', url).load(function() {
+			self.img.attr('src', url+(window.opera ? '?'+Math.random() : '')).load(function() {
 				if (self.ql.is(':hidden') || self.ql.is(':animated')) {
 					self._img = true;
 				} else {

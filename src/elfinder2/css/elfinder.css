@@ -541,11 +541,6 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	margin: .3em 0;
 }
 
-.el-finder-dialog p {
-	border:1px solid #ccc;
-	margin-top:.1em;
-}
-
 .el-finder-dialog form div {
 	padding:.1em 0;
 }
@@ -569,6 +564,18 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-dialog a { outline: none;}
 
 .el-finder-dialog textarea { width:100%; height:400px; outline:none; border:1px solid #ccc;}
+
+.el-finder-dialog .ui-tabs div {
+	padding:0 .5em;
+	
+}
+.el-finder-dialog .ui-tabs-nav li a {
+	padding:.2em 1em;
+}
+#el-finder-help-a p {
+	line-height:2em;
+}
+
 
 /************************************/
 /*            contextmenu           */
