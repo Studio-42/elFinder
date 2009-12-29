@@ -1070,24 +1070,36 @@ class elFinder {
 	 * @param  string  $f  file/folder name
 	 * @return string
 	 **/
-	private function _uniqueName($f, $suffix='-copy')
+	private function _uniqueName($f, $suffix=' copy')
 	{
-		$dir = dirname($f);
+		$dir  = dirname($f);
 		$name = basename($f);
 		$ext = '';
-		if (!is_dir($f) && false != ($p = strrpos($name, '.'))) {
-			$ext = substr($name, $p);
-			$name = substr($name, 0, $p);
+		
+		if (!is_dir($f)) {
+			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$ext = '.'.$m[1];
+				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+			}
 		}
 		
-		if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.$suffix.$ext)) {
-			return $dir.DIRECTORY_SEPARATOR.$name.$suffix.$ext;
+		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
+			$i = (int)$m[2];
+			$name = substr($name, 0, strlen($name)-strlen($m[2]));
+		} else {
+			$name .= $suffix;
+			$i = 0;
+			$n = $dir.DIRECTORY_SEPARATOR.$name.$ext;
+			if (!file_exists($n)) {
+				return $n;
+			}
 		}
-		$i = 1;
-		while ($i++<=1000) {
-			if (!file_exists($dir.DIRECTORY_SEPARATOR.$name.$suffix.$i.$ext)) {
-				return $dir.DIRECTORY_SEPARATOR.$name.$suffix.$i.$ext;
-			}	
+		
+		while ($i++ <= 10000) {
+			$n = $dir.DIRECTORY_SEPARATOR.$name.$i.$ext;
+			if (!file_exists($n)) {
+				return $n;
+			}
 		}
 		return $dir.DIRECTORY_SEPARATOR.$name.md5($f).$ext;
 	}
