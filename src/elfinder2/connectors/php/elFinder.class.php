@@ -340,8 +340,11 @@ class elFinder {
 			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
 			$this->_result['debug']['du'] = @$this->_options['du'];
 		}
+		// any problem in jquery.form ?
+		if ($cmd != 'upload') {
+			header("Content-Type: application/json");
+		}
 		
-		header("Content-Type: application/json");
 		echo json_encode($this->_result);
 		
 		if (!empty($this->_options['logger']) && in_array($cmd, $this->_loggedCommands)) {
@@ -539,7 +542,8 @@ class elFinder {
 	 **/
 	private function _upload()
 	{
-		if (empty($_POST['current']) || false == ($dir = $this->_findDir(trim($_POST['current'])))) {
+		if (empty($_POST['current']) 
+		|| false == ($dir = $this->_findDir(trim($_POST['current'])))) {
 			return $this->_result['error'] = 'Invalid parameters';
 		} 
 		if (!$this->_isAllowed($dir, 'write')) {
@@ -549,6 +553,7 @@ class elFinder {
 		{
 			return $this->_result['error'] = 'No file to upload';
 		}
+		
 		$this->_logContext['files'] = array();
 		$total = 0;
 		for ($i=0, $s = count($_FILES['fm-file']['name']); $i < $s; $i++) { 
@@ -556,6 +561,7 @@ class elFinder {
 				$total++;
 				$this->_logContext['files'][] = $_FILES['fm-file']['name'][$i];
 				if ($_FILES['fm-file']['error'][$i] > 0) {
+					$error = 'Unable to upload file';
 					switch ($_FILES['fm-file']['error'][$i]) {
 						case UPLOAD_ERR_INI_SIZE:
 						case UPLOAD_ERR_FORM_SIZE:
@@ -564,8 +570,6 @@ class elFinder {
 						case UPLOAD_ERR_EXTENSION:
 							$error = 'Not allowed file type';
 							break;
-						default :
-							$error = 'Unable to upload file';
 					}
 					$this->_errorData($_FILES['fm-file']['name'][$i], $error);
 				} elseif (false == ($name = $this->_checkName($_FILES['fm-file']['name'][$i]))) {
@@ -582,11 +586,13 @@ class elFinder {
 				}
 			}
 		}
+		
 		if (!empty($this->_result['errorData'])) {
 			$this->_result['error'] = count($this->_result['errorData']) == $total
 				? 'Unable to upload files'
 				: 'Some files was not uploaded';
 		}
+		
 		$this->_content($dir);
 	}
 	
