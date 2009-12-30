@@ -802,7 +802,6 @@ elFinder.prototype.ui.prototype.commands = {
 				dataType     : 'json',
 				data         : {cmd : 'upload', current : this.fm.cwd.hash},
 				beforeSubmit : function() {
-					self.fm.log('before submit')
 					var error, num=0, n;
 					f.find(':file').each(function() {
 						if ((n = $(this).val())) {
@@ -822,7 +821,7 @@ elFinder.prototype.ui.prototype.commands = {
 					d.dialog('close');
 					return true;
 				},
-				error   : function() { alert('error') }, //self.fm.view.fatal,
+				error   : self.fm.view.fatal,
 				success : function(data) {
 					self.fm.lock();
 					if (data.error) {

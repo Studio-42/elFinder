@@ -114,17 +114,54 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					}
 				}
 			});
-			// this.updatePlaces();
 		}
+		
+		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
+			var meta = e.ctrlKey||e.metaKey
+			switch(e.keyCode) {
+				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
+				case 37:
+				case 38:
+					e.stopPropagation();
+					e.preventDefault();
+					if (e.keyCode == 37 && meta) {
+						self.ui.execIfAllowed('back');
+					} else {
+						moveSelection(false, !e.shiftKey);
+					}
+					break;
+				/* arrows right/down. with Ctrl - exec "open", w/o - move selection  */
+				case 39:
+				case 40:
+					e.stopPropagation();
+					e.preventDefault();
+					if (meta) {
+						self.ui.execIfAllowed('open');
+					} else {
+						moveSelection(true, !e.shiftKey);
+					}
+					break;
+			}
+		});
+		
+		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
+			/* Space - QuickLook */
+			if (e.keyCode == 32) {
+				e.preventDefault();
+				e.stopPropagation();
+				self.fm.quickLook.toggle();
+			}
+		});
+		
 		
 		/* bind shortcuts */
 		$(document).bind('keydown', function(e) {
 			if (self.lock) {
 				return;
 			}
-			
+
 			var meta = e.ctrlKey||e.metaKey;
-			// self.fm.log(e.keyCode+' '+meta);
+
 			switch (e.keyCode) {
 				/* command+backspace - delete */
 				case 8:
@@ -143,32 +180,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				/* Esc */
 				case 27:
 					self.fm.quickLook.hide()
-					break;
-				/* Space - QuickLook */
-				case 32:
-					e.preventDefault();
-					e.stopPropagation();
-					self.fm.quickLook.toggle();
-					break;
-				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
-				case 37:
-				case 38:
-					e.preventDefault();
-					if (e.keyCode == 37 && meta) {
-						self.ui.execIfAllowed('back');
-					} else {
-						moveSelection(false, !e.shiftKey);
-					}
-					break;
-				/* arrows right/down. with Ctrl - exec "open", w/o - move selection  */
-				case 39:
-				case 40:
-					e.preventDefault();
-					if (meta) {
-						self.ui.execIfAllowed('open');
-					} else {
-						moveSelection(true, !e.shiftKey);
-					}
 					break;
 				/* Delete */
 				case 46:
@@ -193,6 +204,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 						self.ui.exec('info');
 					}
 					break;
+				/* Ctrl+N - new folder */
 				case 78:
 					if (meta) {
 						e.preventDefault();
@@ -217,8 +229,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			}
 			
 		});
-		
-		// self.fm.log('em init :'+self.fm.stopBench())
 	}
 	
 	/**

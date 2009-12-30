@@ -29,7 +29,12 @@
 				url : 'src/elfinder2/connectors/php/connector.php',
 				lang : 'ru',
 				editorCallback : function(url) {
-					window.console.log(url);
+					if (window.console && window.console.log) {
+						window.console.log(url);
+					} else {
+						alert(url);
+					}
+					
 				}
 			})
 			// $('#finder').elfinder('open')
