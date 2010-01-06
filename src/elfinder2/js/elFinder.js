@@ -6,6 +6,9 @@
 	 **/
 	elFinder = function(el, o) {
 		var self      = this;
+		/**
+		 * String. Version number;
+		 **/
 		this.version  = '1.1 beta2';
 		/**
 		 * Object. Current Working Dir info
@@ -35,8 +38,10 @@
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
-		
-		this.params = { dotFiles : false, arc : '', uplMaxSize : '' }
+		/**
+		 * Object. Some options get from server
+		 **/
+		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		/**
 		 * Object. File manager configuration
 		 **/
@@ -140,7 +145,7 @@
 			!noLock && this.lock(true);
 
 			var opts = {
-				cmd      : '',
+				// cmd      : '',
 				url      : this.options.url,
 				async    : true,
 				type     : 'GET',
@@ -152,7 +157,7 @@
 					self.lock();
 
 					if (data.error) {
-						self.view.error(data.error, data.errorData) 
+						self.view.error(data.error, data.errorData);
 						if (!force) {
 							return;
 						}
@@ -255,7 +260,7 @@
 		 **/
 		this.reload = function(data) {
 			this.cwd = data.cwd;
-			// self.log(self.cwd)
+			// self.log(data.cdc)
 			this.cdc = {};
 			for (var i=0; i<data.cdc.length ; i++) {
 				data.cdc[i].hash += ''
@@ -511,7 +516,6 @@
 			this.loaded = true;
 			self.eventsManager.init();
 			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
-				self.log(data)
 				self.reload(data);
 				self.params = data.params;
 				self.ui.init(data.disabled);
@@ -578,12 +582,21 @@
 		
 		return this.each(function() {
 			
-			
+			var cmd = typeof(o) == 'string' ? o : '';
 			if (!this.elfinder) {
-				this.elfinder = new elFinder(this, o||{})
+				this.elfinder = new elFinder(this, typeof(o) == 'object' ? o : {})
 			}
 			
-			// log(this.elfinder)
+			switch(cmd) {
+				case 'close':
+					this.elfinder.view.win.hide();
+					break;
+					
+				case 'open':
+					this.elfinder.view.win.show();
+					break;
+			}
+			
 		})
 	}
 	

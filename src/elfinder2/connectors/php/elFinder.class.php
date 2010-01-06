@@ -283,6 +283,9 @@ class elFinder {
 			$cmd = trim($_POST['cmd']);
 		} elseif (!empty($_GET['cmd'])) {
 			$cmd = trim($_GET['cmd']);
+			if ($cmd == 'ping') {
+				exit(header("Connection: close"));
+			}
 		}
 		
 		if ($cmd && (empty($this->_commands[$cmd]) || !method_exists($this, $this->_commands[$cmd]))) {
@@ -340,11 +343,8 @@ class elFinder {
 			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
 			$this->_result['debug']['du'] = @$this->_options['du'];
 		}
-		// any problem in jquery.form ?
-		if ($cmd != 'upload') {
-			header("Content-Type: application/json");
-		}
-		
+		header("Content-Type: ".($cmd == 'upload' ? 'text/html' : 'application/json'));
+		header("Connection: close");
 		echo json_encode($this->_result);
 		
 		if (!empty($this->_options['logger']) && in_array($cmd, $this->_loggedCommands)) {
@@ -587,13 +587,33 @@ class elFinder {
 			}
 		}
 		
-		if (!empty($this->_result['errorData'])) {
-			$this->_result['error'] = count($this->_result['errorData']) == $total
-				? 'Unable to upload files'
-				: 'Some files was not uploaded';
+		$errCnt = count($this->_result['errorData']);
+		
+		if ($errCnt == $total) {
+			$this->_result['error'] = 'Unable to upload files';
+		} else {
+			if ($errCnt>0) {
+				$this->_result['error'] = 'Some files was not uploaded';	
+			}
+			$this->_content($dir);
 		}
 		
-		$this->_content($dir);
+		// if (!empty($this->_result['errorData'])) {
+		// 	if (count($this->_result['errorData']) == $total) {
+		// 		$this->_result['error'] = 'Unable to upload files';
+		// 		$this->_result['upload'] = false;
+		// 	} else {
+		// 		$this->_result['error'] = 'Some files was not uploaded';
+		// 		$this->_result['upload'] = true;
+		// 	}
+		// 	// $this->_result['error'] = count($this->_result['errorData']) == $total
+		// 	// 	? 'Unable to upload files'
+		// 	// 	: 'Some files was not uploaded';
+		// } else {
+		// 	$this->_result['upload'] = true;
+		// }
+		
+		// $this->_content($dir);
 	}
 	
 	/**
@@ -976,7 +996,7 @@ class elFinder {
 		}
 		
 		$info = array(
-			'name'  => basename($path),
+			'name'  => htmlspecialchars(basename($path)),
 			'hash'  => $this->_hash($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => $d, 
@@ -1069,7 +1089,7 @@ class elFinder {
 		$dir  = dirname($f);
 		$name = basename($f);
 		$ext = '';
-		
+
 		if (!is_dir($f)) {
 			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|[a-z0-9]{1,4})$/i', $name, $m)) {
 				$ext = '.'.$m[1];

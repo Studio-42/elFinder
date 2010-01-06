@@ -48,7 +48,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Copy'               : 'Копировать',
 		'Cut'                : 'Вырезать',
 		'Paste'              : 'Вставить',
-		'Duplicate'          : 'Копия',
+		'Duplicate'          : 'Дублировать',
 		'Remove'             : 'Удалить',
 		'Rename'             : 'Переименовать',
 		'Edit text files'    : 'Редактировать файл',

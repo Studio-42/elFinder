@@ -117,7 +117,10 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		}
 		
 		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
-			var meta = e.ctrlKey||e.metaKey
+			var meta = e.ctrlKey||e.metaKey;
+			if (self.lock || !self.fm.view.win.is(':visible')) {
+				return;
+			}
 			switch(e.keyCode) {
 				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
 				case 37:
@@ -145,6 +148,9 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		});
 		
 		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
+			if (self.lock || !self.fm.view.win.is(':visible')) {
+				return;
+			}
 			/* Space - QuickLook */
 			if (e.keyCode == 32) {
 				e.preventDefault();
@@ -156,11 +162,11 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 		/* bind shortcuts */
 		$(document).bind('keydown', function(e) {
-			if (self.lock) {
+			var meta = e.ctrlKey||e.metaKey;
+
+			if (self.lock || !self.fm.view.win.is(':visible')) {
 				return;
 			}
-
-			var meta = e.ctrlKey||e.metaKey;
 
 			switch (e.keyCode) {
 				/* command+backspace - delete */

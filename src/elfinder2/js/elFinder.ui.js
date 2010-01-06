@@ -778,12 +778,17 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 
-			var err = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
+			var id = 'el-finder-target',
+				$io = $('<iframe id="'+id+'" name="'+id+'" src="about:blank" />'),
+				io = $io[0],
+				xhr,
+				tryCnt = 50,
+				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
 				m = this.fm.params.uplMaxSize ? '<div>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</div>' : '',
-				f = $('<form method="post" enctype="multipart/form-data"><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
+				f = $('<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" /><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
 				b = $('<div class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</div>')
 					.click(function() { f.append('<div><input type="file" name="fm-file[]"/></div>'); }),
-				d = $('<div/>').append(err.hide()).append(m).append(f).append(b).dialog({
+				d = $('<div/>').append(e.hide()).append(m).append(f).append(b).dialog({
 						dialogClass : 'el-finder-dialog',
 						title       : self.fm.i18n('Upload files'),
 						modal       : true,
@@ -791,49 +796,112 @@ elFinder.prototype.ui.prototype.commands = {
 						close       : function() { self.fm.lockShortcuts(); },
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
-							Ok     : function() { f.submit(); }
+							Ok     : upload
 						}
 					});
 
 			self.fm.lockShortcuts(true);
 
-			f.ajaxForm({
-				url          : this.fm.options.url,
-				dataType     : 'json',
-				data         : {cmd : 'upload', current : this.fm.cwd.hash},
-				beforeSubmit : function() {
-					var error, num=0, n;
-					f.find(':file').each(function() {
-						if ((n = $(this).val())) {
-							if (!self.fm.isValidName(n)) {
-								error = 'One of files has invalid name';
-							} else {
-								num++;
-							}
-						}
-					});
-					if (!num || error) {
-						err.show().find('strong').empty().text(self.fm.i18n(error||'Select at least one file to upload'));
-						return false;
-					}
-					
-					self.fm.lock(true);
-					d.dialog('close');
-					return true;
-				},
-				error   : self.fm.view.fatal,
-				success : function(data) {
-					self.fm.lock();
-					if (data.error) {
-						return self.fm.view.error(data.error, data.errorData);
-					}
-					data.warning && self.fm.view.warning(data.warning, data.errorData);
-					self.fm.reload(data);
 
-					data.debug && self.fm.log(data.debug);
-					data.tmb && self.fm.tmb();
+			function upload() {
+				var files = $(':file[value]', f);
+				
+				function error(err) {
+					e.show().find('strong').empty().text(err);
 				}
-			});
+				
+				function submit() {
+					self.fm.lock(true);
+					$io.bind('load', result);
+					f.submit();
+					d.dialog('close');
+				}
+				
+				if (!files.length) {
+					return error(self.fm.i18n('Select at least one file to upload'));
+				}
+
+				xhr = { 
+					aborted: 0,
+					responseText: null,
+					responseXML: null,
+					status: 0,
+					statusText: 'n/a',
+					getAllResponseHeaders: function() {},
+					getResponseHeader:  function(header){
+						var headers = {'content-type': 'json'};
+						return headers[header];
+					},
+					setRequestHeader: function() {},
+					abort: function() {
+						this.aborted = 1;
+						$io.attr('src','about:blank'); 
+					}
+				}
+				
+				
+				if (!$.active++) {
+					$.event.trigger("ajaxStart");
+				}
+				$.event.trigger("ajaxSend", [xhr, {}]);
+				
+				if (xhr.aborted) {
+					return;
+				}
+				
+				$io.css({ position: 'absolute', top: '-1000px', left: '-1000px' }).appendTo('body');	
+				
+				
+				
+
+				setTimeout(function() {
+					/* hack to fix safari bug http://www.webmasterworld.com/macintosh_webmaster/3300569.htm */
+					if ($.browser.safari) {
+						$.ajax({
+							url     : self.fm.options.url,
+							data    : {cmd : 'ping'},
+							error   : submit,
+							success : submit
+						});
+					} else {
+						submit();
+					}
+				}, 10);
+			}
+
+
+			function result() {
+				var doc, data, pre, ok = true;
+				$io.unbind('load');
+
+				try {
+					doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
+					/* opera */
+					if (doc.body == null || doc.body.innerHTML == '') {
+						if (--tryCnt) {
+							return setTimeout(result, 100);
+						}
+						return self.fm.view.error('Unable to access iframe DOM after 50 tries');
+					}
+					pre = doc.getElementsByTagName('pre')[0]
+					xhr.responseText = pre ? pre.innerHTML : doc.body ? doc.body.innerHTML : null;
+					data = $.httpData(xhr, 'json');
+				} catch(e) {
+					self.fm.view.error('Unable to upload files', {Error : 'Unable to parse server response'});
+					ok = false;
+				}
+				self.fm.lock();
+				
+				if (ok) {
+					$.event.trigger("ajaxSuccess", [xhr, {}]);
+					data.error && self.fm.view.error(data.error, data.errorData);
+					data.cwd && self.fm.reload(data);
+				}
+
+				$.event.trigger("ajaxComplete", [xhr, {}]);
+				if (!--$.active) { $.event.trigger("ajaxStop"); }
+				setTimeout(function() { $io.remove(); }, 100);
+			}
 		}
 		
 		this.isAllowed = function() {
