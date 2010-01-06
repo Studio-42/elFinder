@@ -213,7 +213,7 @@ elFinder.prototype.view = function(fm, el) {
 				s += sel[i].size;
 			}
 		}
-		this.sel.text(s ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
+		this.sel.text(i>0 ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
 	}
 
 	this.formatName = function(n) {

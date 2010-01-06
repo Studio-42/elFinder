@@ -132,7 +132,7 @@ elFinder.prototype.ui = function(fm) {
 		if (!this.fm.options.editorCallback) {
 			disabled.push('select');
 		}
-		/* disable archive command if no archivator enabled  */
+		/* disable archive command if no archivers enabled  */
 		if (!self.fm.params.archives.length && $.inArray('archive', disabled) == -1) {
 			disabled.push('archive');
 		}
@@ -167,13 +167,14 @@ elFinder.prototype.ui = function(fm) {
 		}
 		this.update();
 		/* set z-index for context menu */
-		$(':visible', document.body).each(function() {
-			z = parseInt($(this).css('z-index'));
-			if (z >= zindex) {
-				zindex = z+1;
-			}
-		});
-		this.menu.css('z-index', zindex);
+		// $(':visible', document.body).each(function() {
+		// 	z = parseInt($(this).css('z-index'));
+		// 	if (z >= zindex) {
+		// 		zindex = z+1;
+		// 	
+		// 	}
+		// });
+		this.menu.css('z-index', this.fm.zIndex);
 	}
 
 }

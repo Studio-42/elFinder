@@ -86,7 +86,8 @@ class elFinder {
 		'extract'   => '_extract',
 		'resize'    => '_resize',
 		'geturl'    => '_geturl',
-		'tmb'       => '_thumbnails'
+		'tmb'       => '_thumbnails',
+		'ping'      => '_ping'
 		);
 		
 	/**
@@ -242,7 +243,7 @@ class elFinder {
 			: dirname($this->_options['root']).DIRECTORY_SEPARATOR.$this->_options['rootAlias'];
 			
 		if (!empty($this->_options['disabled'])) {
-			$no = array('open', 'reload', 'tmb', 'geturl');
+			$no = array('open', 'reload', 'tmb', 'geturl', 'ping');
 			foreach ($this->_options['disabled'] as $k => $c) {
 				if (!isset($this->_commands[$c]) || in_array($c, $no)) {
 					unset($this->_options['disabled'][$k]);
@@ -283,9 +284,6 @@ class elFinder {
 			$cmd = trim($_POST['cmd']);
 		} elseif (!empty($_GET['cmd'])) {
 			$cmd = trim($_GET['cmd']);
-			if ($cmd == 'ping') {
-				exit(header("Connection: close"));
-			}
 		}
 		
 		if ($cmd && (empty($this->_commands[$cmd]) || !method_exists($this, $this->_commands[$cmd]))) {
@@ -905,6 +903,16 @@ class elFinder {
 		}
 	}
 	
+	
+	/**
+	 * Send header Connection: close. Required by safari to fix bug http://www.webmasterworld.com/macintosh_webmaster/3300569.htm
+	 *
+	 * @return void
+	 **/
+	private function _ping()
+	{
+		exit(header("Connection: close"));
+	}
 	/************************************************************/
 	/**                    "content" methods                   **/
 	/************************************************************/

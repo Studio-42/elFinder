@@ -1,15 +1,3 @@
-/*.rnd-3 {
-	border-radius:3px; 
-	-moz-border-radius:3px; 
-	-webkit-border-radius:3px;
-}
-
-.rnd-5 {
-	border-radius:5px; 
-	-moz-border-radius:5px; 
-	-webkit-border-radius:5px;
-}
-*/
 
 
 /* file manager window */
@@ -302,8 +290,8 @@
 
 /* mimetypes */
 
-.directory p   { background-position:  0     -45px; }
-.application p { background-position: -1px  -134px; }
+.directory p      { background-position:  0     -44px; }
+.application p    { background-position: -1px  -134px; }
 div.audio p       { background-position: -1px -1082px; }
 div.image p       { background-position: -1px -1132px; }
 div.text p,
@@ -508,7 +496,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 /*           dialog window          */
 /************************************/
 
-.el-finder-dialog .ui-dialog-titlebar { 
+.el-finder-dialog .ui-dialog-titlebar,
+.el-finder-outer-dialog .ui-dialog-titlebar { 
 	padding: .3em .1em .1em .8em; 
 	font-size:.8em;
 }
@@ -520,6 +509,10 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	padding:3px;
 	font-size:.72em;
 }
+.el-finder-outer-dialog .ui-dialog-content {
+	padding:3px;
+}
+
 .el-finder-dialog hr {
 	border:0;
 	border-bottom: 1px #ccc solid;
@@ -550,7 +543,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 .el-finder-add-field span {
-	float:left;margin-right:.7em
+	float:left;
+	margin-right:.7em
 }
 
 .el-finder-dialog table {
@@ -691,7 +685,7 @@ div.el-finder-drag-helper label {
 
 .el-finder-ql {
 	position:absolute;
-	z-index:10;	
+/*	z-index:10;	*/
 	width:auto;
 	height:auto;
 	padding:12px;
@@ -701,7 +695,7 @@ div.el-finder-drag-helper label {
 	-moz-border-radius:9px; 
 	-webkit-border-radius:9px;
 	background:url(../images/ql.png);
-	overflow:hidden;
+	overflow: inherit !important;
 }
 /* toolbar */
 .el-finder-ql div {

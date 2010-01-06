@@ -38,6 +38,9 @@
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
+		this.zIndex = 2;
+		this.dialog = null;
+		this.anchor = null;
 		/**
 		 * Object. Some options get from server
 		 **/
@@ -60,6 +63,8 @@
 		this.ui = new this.ui(this)
 		
 		this.eventsManager = new this.eventsManager(this);
+		self.eventsManager.init();
+		
 		
 		this.log = function(m) {
 			window.console && window.console.log && window.console.log(m)
@@ -260,7 +265,6 @@
 		 **/
 		this.reload = function(data) {
 			this.cwd = data.cwd;
-			// self.log(data.cdc)
 			this.cdc = {};
 			for (var i=0; i<data.cdc.length ; i++) {
 				data.cdc[i].hash += ''
@@ -510,24 +514,82 @@
 		}
 		
 		/* here we init file manager */
-		if (!this.loaded) {
-			
+		// if (!this.loaded) {
+
 			this.setView(this.cookie('el-finder-view'));
 			this.loaded = true;
-			self.eventsManager.init();
+			
+			if (this.options.dialog) {
+
+				if (this.options.dialog.width != 'auto' && isNaN(parseInt(this.options.dialog.width))) {
+					this.options.dialog.width = 570;
+				}
+				if (!this.options.dialog.dialogClass) {
+					this.options.dialog.dialogClass = '';
+				}
+				this.options.dialog.dialogClass += 'el-finder-outer-dialog';
+				if (!this.options.docked) {
+					this.dialog = $('<div/>').append(el).dialog(this.options.dialog);
+				} 
+			}
+			
+			$('*', document.body).each(function() {
+				z = parseInt($(this).css('z-index'));
+				if (z >= self.zIndex) {
+					self.zIndex = z+1;
+
+				}
+			});
+			self.log(this.zIndex)
 			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
 				self.reload(data);
 				self.params = data.params;
 				self.ui.init(data.disabled);
 			});
 			
+			
+			
+		// }
+		
+		
+		
+		this.open = function() {
+			if (this.dialog) {
+				this.dialog.dialog('open');
+			} else {
+				this.view.win.show();
+			}
+			
 		}
 		
+		this.close = function() {
+			if (this.dialog) {
+				this.dialog.dialog('close');
+			} else {
+				this.view.win.hide();
+			}
+		}
 		
+		this.dock = function() {
+			if (this.options.docked && this.anchor) {
+				$(el).insertAfter(this.anchor);
+				this.anchor.remove();
+				this.anchor = null;
+				this.dialog.dialog('destroy')
+			}
+		}
 		
-		this.open = function() {}
+		this.undock = function() {
+			if (this.options.docked && !this.anchor) {
+				this.anchor = $('<div/>').hide().insertBefore(el);
+				this.dialog = $('<div/>').append(el).dialog({
+					dialogClass : 'el-finder-outer-dialog',
+					width : 570,
+					close : function() { self.dock() }
+				})
+			} 
+		}
 		
-		this.close = function() {}
 	}
 	
 	/**
@@ -573,8 +635,9 @@
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
 			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
-		}
-		
+		},
+		dialog : null,
+		docked : false
 	}
 
 	
@@ -589,11 +652,19 @@
 			
 			switch(cmd) {
 				case 'close':
-					this.elfinder.view.win.hide();
+					this.elfinder.close();
 					break;
 					
 				case 'open':
-					this.elfinder.view.win.show();
+					this.elfinder.open();
+					break;
+				
+				case 'dock':
+					this.elfinder.dock();
+					break;
+					
+				case 'undock':
+					this.elfinder.undock();
 					break;
 			}
 			

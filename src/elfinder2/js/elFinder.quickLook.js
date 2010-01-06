@@ -121,7 +121,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 * Clean quickLook window DOM elements
 	 **/
 	function reset() {
-		self.ql.attr('class', 'el-finder-ql');
+		self.ql.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
 		self.img.hide().unbind('load').removeAttr('src').removeAttr('load').css({width:'', height:''});
 		self.iframe.hide();
 		self.info.empty();
