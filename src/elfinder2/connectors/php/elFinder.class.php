@@ -585,7 +585,7 @@ class elFinder {
 			}
 		}
 		
-		$errCnt = count($this->_result['errorData']);
+		$errCnt = !empty($this->_result['errorData']) ? count($this->_result['errorData']) : 0;
 		
 		if ($errCnt == $total) {
 			$this->_result['error'] = 'Unable to upload files';
@@ -1237,7 +1237,7 @@ class elFinder {
 	{
 		if (!$path) {
 			$path = $this->_options['root'];
-			if (crc32($path) == $hash) {
+			if ($this->_hash($path) == $hash) {
 				return $path;
 			}
 		}
@@ -1246,7 +1246,7 @@ class elFinder {
 			for ($i=0; $i < count($ls); $i++) { 
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
 				if ($this->_isAccepted($ls[$i]) && is_dir($p)) {
-					if (crc32($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
+					if ($this->_hash($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
 						return $p;
 					}
 				}
@@ -1266,7 +1266,7 @@ class elFinder {
 			for ($i=0; $i < count($ls); $i++) { 
 				if ($this->_isAccepted($ls[$i])) {
 					$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-					if (crc32($p) == $hash) {
+					if ($this->_hash($p) == $hash) {
 						return $p;
 					}
 				}
@@ -1782,7 +1782,7 @@ class elFinder {
 	 **/
 	private function _hash($path)
 	{
-		return crc32($path);
+		return md5($path);
 	}
 	
 	/**

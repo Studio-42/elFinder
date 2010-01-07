@@ -267,7 +267,8 @@
 			this.cwd = data.cwd;
 			this.cdc = {};
 			for (var i=0; i<data.cdc.length ; i++) {
-				data.cdc[i].hash += ''
+				// data.cdc[i].hash += ''
+				// data.cdc[i].hash.toString()
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 			}
@@ -542,7 +543,9 @@
 			});
 			self.log(this.zIndex)
 			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
+				
 				self.reload(data);
+				self.log(self.cdc)
 				self.params = data.params;
 				self.ui.init(data.disabled);
 			});
@@ -576,6 +579,7 @@
 				this.anchor.remove();
 				this.anchor = null;
 				this.dialog.dialog('destroy')
+				this.dialog = null
 			}
 		}
 		
