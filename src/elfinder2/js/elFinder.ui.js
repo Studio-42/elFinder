@@ -452,6 +452,7 @@ elFinder.prototype.ui.prototype.commands = {
 					if (err) {
 						self.fm.view.error(err);
 						el.addClass('ui-selected');
+						self.fm.lockShortcuts(true);
 						return input.select().focus();
 					}
 					
@@ -462,7 +463,7 @@ elFinder.prototype.ui.prototype.commands = {
 							f.mime == 'directory' && self.fm.removePlace(f.hash) && self.fm.addPlace(data.target);
 							self.fm.reload(data); 
 						}
-					}, true);
+					}, { force : true });
 				}
 			}
 		}
@@ -558,7 +559,7 @@ elFinder.prototype.ui.prototype.commands = {
 				cut       : this.fm.buffer.cut
 			}, function(data) {
 				data.tree && self.fm.reload(data);
-			}, true);
+			}, {force : true});
 		}
 		
 		
@@ -607,7 +608,7 @@ elFinder.prototype.ui.prototype.commands = {
 									}, 
 									function(data) {
 										data.tree && self.fm.reload(data);
-								}, true);
+								}, {force : true});
 							}
 						}
 					});
@@ -675,6 +676,7 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						self.fm.lockShortcuts(true);
 						el.addClass('ui-selected');
 						return input.select().focus();
 					}
@@ -685,7 +687,7 @@ elFinder.prototype.ui.prototype.commands = {
 							return input.select().focus();
 						}
 						self.fm.reload(data);
-					}, true);
+					}, {force : true});
 				}
 			}
 		}
@@ -744,6 +746,7 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						self.fm.lockShortcuts(true);
 						el.addClass('ui-selected');
 						return input.select().focus();
 					}
@@ -753,7 +756,7 @@ elFinder.prototype.ui.prototype.commands = {
 							return input.select().focus();
 						}
 						self.fm.reload(data);
-					}, true);
+					}, {force : true });
 				}
 			}
 			
@@ -874,6 +877,7 @@ elFinder.prototype.ui.prototype.commands = {
 			function result() {
 				var doc, data, pre, ok = true;
 				$io.unbind('load');
+				self.fm.lock();
 
 				try {
 					doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
@@ -891,7 +895,7 @@ elFinder.prototype.ui.prototype.commands = {
 					self.fm.view.error('Unable to upload files', {Error : 'Unable to parse server response'});
 					ok = false;
 				}
-				self.fm.lock();
+				
 				
 				if (ok) {
 					$.event.trigger("ajaxSuccess", [xhr, {}]);
@@ -953,7 +957,8 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm   = fm;
 		
 		this.exec = function() {
-			var f = this.fm.getSelected()[0];
+			var f = this.fm.getSelected(0);
+			self.fm.log(f)
 			this.fm.lockShortcuts(true);
 			this.fm.ajax({
 				cmd     : 'read',
@@ -983,7 +988,7 @@ elFinder.prototype.ui.prototype.commands = {
 										self.fm.cdc[data.file.hash] = data.file;
 										self.fm.selectById(data.file.hash);
 									}
-								}, false, {type : 'POST'});
+								}, {type : 'POST'});
 							}
 						}
 					});

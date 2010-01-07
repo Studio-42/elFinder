@@ -25,7 +25,7 @@ class elFinder {
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'       => 'auto',       // image manipulation library (imagick, mogrify, gd)
 		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+		'tmbCleanProb' => 100,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'fileURL'      => true,         // display file URL in "get info"
@@ -596,22 +596,6 @@ class elFinder {
 			$this->_content($dir);
 		}
 		
-		// if (!empty($this->_result['errorData'])) {
-		// 	if (count($this->_result['errorData']) == $total) {
-		// 		$this->_result['error'] = 'Unable to upload files';
-		// 		$this->_result['upload'] = false;
-		// 	} else {
-		// 		$this->_result['error'] = 'Some files was not uploaded';
-		// 		$this->_result['upload'] = true;
-		// 	}
-		// 	// $this->_result['error'] = count($this->_result['errorData']) == $total
-		// 	// 	? 'Unable to upload files'
-		// 	// 	: 'Some files was not uploaded';
-		// } else {
-		// 	$this->_result['upload'] = true;
-		// }
-		
-		// $this->_content($dir);
 	}
 	
 	/**
@@ -753,7 +737,7 @@ class elFinder {
 	private function _thumbnails()
 	{
 		if (!empty($this->_options['tmbDir']) && !empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
-			
+			$this->_result['current'] = $this->_hash($current);
 			$this->_result['images'] = array();
 			$ls = scandir($current);
 			$cnt = 0;
@@ -1775,7 +1759,7 @@ class elFinder {
 	
 	
 	/**
-	 * Return file path hash (crc32)
+	 * Return file path hash
 	 *
 	 * @param  string  $path 
 	 * @return string

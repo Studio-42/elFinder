@@ -38,6 +38,7 @@
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
+		this._tmb = 0;
 		this.zIndex = 2;
 		this.dialog = null;
 		this.anchor = null;
@@ -142,47 +143,50 @@
 		 *
 		 * @param  Object.  data for ajax request
 		 * @param  Function  
-		 * @param  Boolean  call callback on error?
-		 * @param  Object   overrwrite some ajax options (type/async)
-		 * @param  Boolean  do not lock fm before ajax?
+		 * @param  Object   overrwrite some options 
 		 */
-		this.ajax = function(data, callback, force, options, noLock) {
-			!noLock && this.lock(true);
+		this.ajax = function(data, callback, options) {
 
 			var opts = {
-				// cmd      : '',
 				url      : this.options.url,
 				async    : true,
 				type     : 'GET',
 				data     : data,
 				dataType : 'json',
 				cache    : false,
-				error    : self.view.fatal,
-				success  : function(data) {
-					self.lock();
-
-					if (data.error) {
-						self.view.error(data.error, data.errorData);
-						if (!force) {
-							return;
-						}
-					}
-					callback(data);
-					data.debug && self.log(data.debug);
-					/* tell connector to generate thumbnails */
-					if (!self.locked && self.options.view == 'icons') {
-						data.tmb && self.tmb();
-					}
-					delete data;
-					if (data.select && self.cdc[data.select]) {
-						self.selectById(data.select);
-					}
-				}
+				lock     : true,
+				force    : false,
+				silent   : false
 			}
 			if (typeof(options) == 'object') {
 				opts = $.extend({}, opts, options);
 			}
-			
+			self.log(opts)
+			if (!opts.silent) {
+				opts.error = self.view.fatal;
+			}
+			opts.success = function(data) {
+				opts.lock && self.lock();
+
+				if (data.error) {
+					!opts.silent && self.view.error(data.error, data.errorData);
+					if (!opts.force) {
+						return;
+					}
+				}
+				callback(data);
+				data.debug && self.log(data.debug);
+				/* tell connector to generate thumbnails */
+				if (!self.locked && self.options.view == 'icons' && data.tmb) {
+					self.tmb();
+				}
+				
+				if (data.select && self.cdc[data.select]) {
+					self.selectById(data.select);
+				}
+				delete data;
+			}
+			opts.lock && this.lock(true);
 			$.ajax(opts);
 		}
 		
@@ -192,13 +196,12 @@
 		 **/
 		this.tmb = function() {
 			this.ajax({cmd : 'tmb', current : self.cwd.hash}, function(data) {
-				if (self.options.view == 'icons' && data.images) {
-					var i, el;
-					for (i in data.images) {
+				if (self.options.view == 'icons' && data.images && data.current == self.cwd.hash) {
+					for (var i in data.images) {
 						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
 					}
 				}
-			}, false, null, true);
+			}, {lock : false, silent : true});
 		}
 		
 		/**
@@ -256,8 +259,6 @@
 			this.cookie('el-finder-places', p.join(':'));
 		}
 		
-	
-		
 		/**
 		 * Update file manager content
 		 *
@@ -267,8 +268,6 @@
 			this.cwd = data.cwd;
 			this.cdc = {};
 			for (var i=0; i<data.cdc.length ; i++) {
-				// data.cdc[i].hash += ''
-				// data.cdc[i].hash.toString()
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 			}
@@ -292,8 +291,6 @@
 			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 			this.eventsManager.updateCwd();
 		}
-		
-		
 		
 		/**
 		 * Execute after files was dropped onto folder
@@ -479,13 +476,9 @@
 				if (s[0].url) {
 					url = s[0].url;
 				} else {
-					this.ajax({
-							cmd     : 'geturl', 
-							current : self.cwd.hash, 
-							file    : s[0].hash
-						}, 
+					this.ajax({ cmd : 'geturl', current : self.cwd.hash, file : s[0].hash }, 
 						function(data) { url = data.url||''; }, 
-						true, {async : false });
+						{async : false, lock : false });
 				}
 			}
 			return url;		
@@ -541,11 +534,10 @@
 
 				}
 			});
-			self.log(this.zIndex)
+
 			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
 				
 				self.reload(data);
-				self.log(self.cdc)
 				self.params = data.params;
 				self.ui.init(data.disabled);
 			});
