@@ -9,6 +9,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this._hash  = '';
 	this.title  = $('<strong/>');
 	this.img    = $('<img/>');
+	this.swf    = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="" type="application/x-shockwave-flash"></embed></object>')
 	this.iframe = $('<iframe/>');
 	this.ico    = $('<p/>');
 	this.info   = $('<label/>');
@@ -17,6 +18,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 			.append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
 		.append(this.iframe)
 		.append(this.img)
+		.append(this.swf)
 		.append(this.ico)
 		.append(this.info)
 		.appendTo(document.body).draggable();
@@ -69,7 +71,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 			if (el) {
 				o = el.offset();
 				w = el.width();
-				
+				this.img.fadeOut(100);
+				this.swf.fadeOut(100);
 				this.ql.animate({
 					width    : w-20,
 					minWidth : w-20,
@@ -122,6 +125,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 **/
 	function reset() {
 		self.ql.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
+		self.swf.hide();
 		self.img.hide().unbind('load').removeAttr('src').removeAttr('load').css({width:'', height:''});
 		self.iframe.hide();
 		self.info.empty();
@@ -160,6 +164,12 @@ elFinder.prototype.quickLook = function(fm, el) {
 		} else if((0 == f.mime.indexOf('text') && f.mime != 'text/rtf') || f.mime.match(/application\/(pdf|xml)/)) {
 			self.ico.hide();
 			self.iframe.removeAttr('src').attr('src', self.fm.fileURL()).show();
+		} else if (f.mime == 'application/x-shockwave-flash') {
+			var url = self.fm.fileURL();
+			if (url) {
+				self.ico.hide();
+				self.swf.children('embed').attr('src', url).prev().attr('value', url).end().end().show();
+			}
 		}
 	}
 
@@ -169,7 +179,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	function preview() {
 		var iw = self.img.width(),
 			ih = self.img.height(),
-			r  = Math.min(Math.min(400, iw) / iw, Math.min(300, ih) / ih);
+			r  = Math.min(Math.min(400, iw)/iw, Math.min(300, ih)/ih);
 		self._img = false;
 		self.ico.hide();
 

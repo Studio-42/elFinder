@@ -4,11 +4,12 @@
  **/
 elFinder.prototype.ui = function(fm) {
 	
-	var self     = this;
-	this.fm      = fm;
-	this.cmd     = {};
-	this.buttons = {};
-	this.menu    = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
+	var self        = this;
+	this.fm         = fm;
+	this.cmd        = {};
+	this.buttons    = {};
+	this.menu       = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
+	this.dockButton = $('<div class="el-finder-dock-button" title="'+self.fm.i18n('Dock/undock filemanger window')+'" />');
 	
 	this.exec = function(cmd, arg) {
 		if (this.cmd[cmd]) {
@@ -167,14 +168,28 @@ elFinder.prototype.ui = function(fm) {
 		}
 		this.update();
 		/* set z-index for context menu */
-		// $(':visible', document.body).each(function() {
-		// 	z = parseInt($(this).css('z-index'));
-		// 	if (z >= zindex) {
-		// 		zindex = z+1;
-		// 	
-		// 	}
-		// });
 		this.menu.css('z-index', this.fm.zIndex);
+		
+		if (this.fm.options.docked) {
+			this.dockButton
+			.hover(
+				function() { $(this).addClass('el-finder-dock-button-hover')},
+				function() { $(this).removeClass('el-finder-dock-button-hover')}
+			)
+			.click(function() { 
+				var t = $(this).trigger('mouseout');
+				if (t.hasClass('undocked')) {
+					t.removeClass('undocked');
+					self.fm.dock()
+				} else {
+					t.addClass('undocked');
+					self.fm.undock() 
+				}
+				
+				})
+				.prependTo(this.fm.view.tlb)
+		}
+		
 	}
 
 }

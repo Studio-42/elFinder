@@ -56,6 +56,7 @@
 			return;
 		}
 		
+		this.anchor = this.options.docked ? $('<div/>').hide().insertBefore(el) : null;
 		
 		this.view = new this.view(this, el);
 		
@@ -161,7 +162,6 @@
 			if (typeof(options) == 'object') {
 				opts = $.extend({}, opts, options);
 			}
-			self.log(opts)
 			if (!opts.silent) {
 				opts.error = self.view.fatal;
 			}
@@ -506,83 +506,71 @@
 			}
 			return name.replace('100', '')+Math.random()+ext;
 		}
+
+		function resize(w, h) {
+			w && self.view.win.width(w);
+			h && self.view.nav.add(self.view.cwd).height(h);
+		}
 		
+		function dialogResize() {
+			resize(null, self.dialog.height()-self.view.tlb.parent().height()-32)
+		}
 		/* here we init file manager */
 		// if (!this.loaded) {
 
-			this.setView(this.cookie('el-finder-view'));
-			this.loaded = true;
-			
-			if (this.options.dialog) {
-
-				if (this.options.dialog.width != 'auto' && isNaN(parseInt(this.options.dialog.width))) {
-					this.options.dialog.width = 570;
-				}
-				if (!this.options.dialog.dialogClass) {
-					this.options.dialog.dialogClass = '';
-				}
-				this.options.dialog.dialogClass += 'el-finder-outer-dialog';
-				if (!this.options.docked) {
-					this.dialog = $('<div/>').append(el).dialog(this.options.dialog);
-				} 
+		this.setView(this.cookie('el-finder-view'));
+		
+		resize(self.options.width, self.options.height);
+		
+		if (typeof(this.options.dialog) == 'object' || this.options.docked) {
+			this.options.dialog = $.extend({width : 570, dialogClass : '', minWidth : 480, minHeight: 330}, this.options.dialog || {});
+			this.options.dialog.dialogClass += 'el-finder-dialog';
+			this.options.dialog.resize = dialogResize;
+			if (this.options.docked) {
+				this.options.dialog.close = function() { self.dock(); self.ui.dockButton.trigger('click') };
+				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()})
+			} else {
+				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
-			
-			$('*', document.body).each(function() {
-				z = parseInt($(this).css('z-index'));
-				if (z >= self.zIndex) {
-					self.zIndex = z+1;
-
-				}
-			});
-
-			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
-				
-				self.reload(data);
-				self.params = data.params;
-				self.ui.init(data.disabled);
-			});
-			
-			
-			
-		// }
+		}
 		
-		
+		$('*', document.body).each(function() {
+			var z = parseInt($(this).css('z-index'));
+			if (z >= self.zIndex) {
+				self.zIndex = z+1;
+			}
+		});
+
+		this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
+			self.reload(data);
+			self.params = data.params;
+			self.ui.init(data.disabled);
+		});
+			
 		
 		this.open = function() {
-			if (this.dialog) {
-				this.dialog.dialog('open');
-			} else {
-				this.view.win.show();
-			}
-			
+			this.dialog ? this.dialog.dialog('open') : this.view.win.show();
 		}
 		
 		this.close = function() {
-			if (this.dialog) {
-				this.dialog.dialog('close');
-			} else {
-				this.view.win.hide();
-			}
+			this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
 		}
 		
+		
+		
 		this.dock = function() {
-			if (this.options.docked && this.anchor) {
-				$(el).insertAfter(this.anchor);
-				this.anchor.remove();
-				this.anchor = null;
-				this.dialog.dialog('destroy')
-				this.dialog = null
+			if (this.options.docked && this.view.win.attr('undocked')) {
+				var s =this.view.win.data('size');
+				this.view.win.insertAfter(this.anchor).removeAttr('undocked');
+				resize(s.width, s.height);
+				this.dialog.dialog('destroy');
 			}
 		}
 		
 		this.undock = function() {
-			if (this.options.docked && !this.anchor) {
-				this.anchor = $('<div/>').hide().insertBefore(el);
-				this.dialog = $('<div/>').append(el).dialog({
-					dialogClass : 'el-finder-outer-dialog',
-					width : 570,
-					close : function() { self.dock() }
-				})
+			if (this.options.docked && !this.view.win.attr('undocked')) {
+				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true)).dialog(this.options.dialog);
+				dialogResize();
 			} 
 		}
 		
@@ -612,6 +600,8 @@
 		editorCallback : null,
 		i18n           : {},
 		view           : 'icons',
+		width          : '75%',
+		height         : 300,
 		cookie         : {
 			expires : 30,
 			domain  : '',

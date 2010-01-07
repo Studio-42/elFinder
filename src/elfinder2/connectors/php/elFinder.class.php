@@ -25,7 +25,7 @@ class elFinder {
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'       => 'auto',       // image manipulation library (imagick, mogrify, gd)
 		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbCleanProb' => 100,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'fileURL'      => true,         // display file URL in "get info"
