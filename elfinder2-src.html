@@ -27,7 +27,7 @@
 		$().ready(function() {
 			// var f = new elFinder($('#finder').get(0), {})
 			
-			var f = $('.finder').elfinder({
+			var f = $('#finder').elfinder({
 				url : 'src/elfinder2/connectors/php/connector.php',
 				lang : 'ru',
 				editorCallback : function(url) {
@@ -70,7 +70,7 @@
 </head>
 <body>
 
-	<div class="finder">finder</div>
+	<div id="finder">finder</div>
 
 	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 

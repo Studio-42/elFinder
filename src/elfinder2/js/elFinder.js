@@ -575,10 +575,12 @@
 		
 		this.open = function() {
 			this.dialog ? this.dialog.dialog('open') : this.view.win.show();
+			this.eventsManager.lock = false;
 		}
 		
 		this.close = function() {
 			this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+			this.eventsManager.lock = true;
 		}
 		
 		
@@ -627,6 +629,7 @@
 		view           : 'icons',
 		width          : '75%',
 		height         : 300,
+		disableShortcuts : false,
 		cookie         : {
 			expires : 30,
 			domain  : '',

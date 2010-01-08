@@ -119,9 +119,11 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			});
 		}
 		
+		/* bind shortcuts */
+		
 		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
 			var meta = e.ctrlKey||e.metaKey;
-			if (self.lock || !self.fm.view.win.is(':visible')) {
+			if (self.lock) {
 				return;
 			}
 			switch(e.keyCode) {
@@ -150,94 +152,99 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			}
 		});
 		
+
 		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
-			if (self.lock || !self.fm.view.win.is(':visible')) {
+			if (self.lock) {
 				return;
 			}
-			/* Space - QuickLook */
-			if (e.keyCode == 32) {
-				e.preventDefault();
-				e.stopPropagation();
-				self.fm.quickLook.toggle();
-			}
-		});
-		
-		
-		/* bind shortcuts */
-		$(document).bind('keydown', function(e) {
-			var meta = e.ctrlKey||e.metaKey;
-
-			if (self.lock || !self.fm.view.win.is(':visible')) {
-				return;
-			}
-
-			switch (e.keyCode) {
-				/* command+backspace - delete */
-				case 8:
-					if (meta && self.ui.isCmdAllowed('rm')) {
-						e.preventDefault();
-						self.ui.exec('rm');
-					} 
+			switch(e.keyCode) {
+				/* Space - QuickLook */
+				case 32:
+					e.preventDefault();
+					e.stopPropagation();
+					self.fm.quickLook.toggle();
 					break;
-				/* Enter - exec "select" command if enabled, otherwise exec "open" */	
-				case 13:
-					if (self.ui.isCmdAllowed('select')) {
-						return self.ui.exec('select');
-					}
-					self.ui.execIfAllowed('open');
-					break;
-				/* Esc */
+				/* Esc */	
 				case 27:
-					self.fm.quickLook.hide()
-					break;
-				/* Delete */
-				case 46:
-					self.ui.execIfAllowed('rm');
-					break;
-				/* Ctrl+A */
-				case 65:
-					if (meta) {
-						e.preventDefault();
-						e.stopPropagation();
-						self.fm.selectAll();
-					}
-					break;
-				/* Ctrl+C */
-				case 67:
-					meta && self.ui.execIfAllowed('copy');
-					break;
-				/* Ctrl+I - get info */	
-				case 73:
-					if (meta) {
-						e.preventDefault();
-						self.ui.exec('info');
-					}
-					break;
-				/* Ctrl+N - new folder */
-				case 78:
-					if (meta) {
-						e.preventDefault();
-						self.ui.execIfAllowed('mkdir');
-					}
-					break;
-				/* Ctrl+U - upload files */
-				case 85:
-					if (meta) {
-						e.preventDefault();
-						self.ui.execIfAllowed('upload');
-					}
-					break;
-				/* Ctrl+V */
-				case 86:
-					meta && self.ui.execIfAllowed('paste');
-					break;
-				/* Ctrl+X */
-				case 88:
-					meta && self.ui.execIfAllowed('cut');
+					self.fm.quickLook.hide();
 					break;
 			}
-			
 		});
+		
+		if (!this.fm.options.disableShortcuts) {
+			$(document).bind('keydown', function(e) {
+				var meta = e.ctrlKey||e.metaKey;
+
+				if (self.lock) {
+					return;
+				}
+
+				switch (e.keyCode) {
+					/* command+backspace - delete */
+					case 8:
+						if (meta && self.ui.isCmdAllowed('rm')) {
+							e.preventDefault();
+							self.ui.exec('rm');
+						} 
+						break;
+					/* Enter - exec "select" command if enabled, otherwise exec "open" */	
+					case 13:
+						if (self.ui.isCmdAllowed('select')) {
+							return self.ui.exec('select');
+						}
+						self.ui.execIfAllowed('open');
+						break;
+					/* Delete */
+					case 46:
+						self.ui.execIfAllowed('rm');
+						break;
+					/* Ctrl+A */
+					case 65:
+						if (meta) {
+							e.preventDefault();
+							e.stopPropagation();
+							self.fm.selectAll();
+						}
+						break;
+					/* Ctrl+C */
+					case 67:
+						meta && self.ui.execIfAllowed('copy');
+						break;
+					/* Ctrl+I - get info */	
+					case 73:
+						if (meta) {
+							e.preventDefault();
+							self.ui.exec('info');
+						}
+						break;
+					/* Ctrl+N - new folder */
+					case 78:
+						if (meta) {
+							e.preventDefault();
+							self.ui.execIfAllowed('mkdir');
+						}
+						break;
+					/* Ctrl+U - upload files */
+					case 85:
+						if (meta) {
+							e.preventDefault();
+							self.ui.execIfAllowed('upload');
+						}
+						break;
+					/* Ctrl+V */
+					case 86:
+						meta && self.ui.execIfAllowed('paste');
+						break;
+					/* Ctrl+X */
+					case 88:
+						meta && self.ui.execIfAllowed('cut');
+						break;
+				}
+
+			});
+			
+		}
+		/* bind shortcuts */
 	}
 	
 	/**
