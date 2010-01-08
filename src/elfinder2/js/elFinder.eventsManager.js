@@ -58,16 +58,18 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			self.fm.ui.hideMenu(); 
 			$('input', self.cwd).trigger('change'); 
 		});
+
 		/* click on tree or places */
-		this.fm.view.nav.find('a').live('click', function(e) {
+		$('#'+this.fm.id+' .el-finder-nav a').live('click', function(e) {
 			e.preventDefault();
 			if ($(this).attr('key') != self.fm.cwd.hash) {
 				$(this).trigger('select');
 				self.ui.exec('open', this);
 			}
 		});
+		
 		/* click on collapsed arrow or places */
-		$('div.collapsed,strong', this.fm.view.nav).live('click', function(e) {
+		$('#'+this.fm.id+' .el-finder-nav div.collapsed,strong').live('click', function(e) {
 			var t = $(this), div, ul;
 			if (this.nodeName == 'DIV') {
 				div = t;
@@ -79,6 +81,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			div.toggleClass('expanded');
 			ul.toggle(300)
 		});
+		
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
 			self.tree.find('a').removeClass('selected');

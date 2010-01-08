@@ -5,7 +5,30 @@
 	 * @author dio dio@std42.ru
 	 **/
 	elFinder = function(el, o) {
-		var self      = this;
+		var self = this, id, z;
+		
+		this.log = function(m) {
+			window.console && window.console.log && window.console.log(m)
+		}
+		/**
+		 * Object. File manager configuration
+		 **/
+		this.options = $.extend({}, this.options, o||{});
+		
+		if (!this.options.url) {
+			alert('Invalid configuration! You have to set URL option.');
+			return;
+		}
+		/**
+		 * String. element id, create random if not set;
+		 **/
+		this.id = '';
+		if ((id = $(el).attr('id'))) {
+			this.id = id;
+		} else {
+			this.id = 'el-finder-'+Math.random().toString().substring(2);
+		}
+		
 		/**
 		 * String. Version number;
 		 **/
@@ -31,46 +54,50 @@
 		 **/
 		this.history  = [];
 		/**
-		 * Boolean. File manager init?
-		 **/
-		this.loaded   = false;
-		/**
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
-		this._tmb = 0;
+		/**
+		 * Number. Max z-index on page + 1, need for contextmenu and quicklook
+		 **/
 		this.zIndex = 2;
+		$('*', document.body).each(function() {
+			z = parseInt($(this).css('z-index'));
+			if (z >= self.zIndex) {
+				self.zIndex = z+1;
+			}
+		});
+		/**
+		 * DOMElement. jQueryUI dialog
+		 **/
 		this.dialog = null;
-		this.anchor = null;
+		/**
+		 * DOMElement. For docked mode - place where fm is docked
+		 **/
+		this.anchor = this.options.docked ? $('<div/>').hide().insertBefore(el) : null;
 		/**
 		 * Object. Some options get from server
 		 **/
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		/**
-		 * Object. File manager configuration
+		 * Object. View. After init we can accessel as this.view.win
 		 **/
-		this.options = $.extend({}, this.options, o);
-		
-		if (!this.options.url) {
-			alert('Invalid configuration! You have to set URL option.');
-			return;
-		}
-		
-		this.anchor = this.options.docked ? $('<div/>').hide().insertBefore(el) : null;
-		
 		this.view = new this.view(this, el);
+		/**
+		 * Object. User Iterface. Controller for commands/buttons/contextmenu
+		 **/
+		this.ui = new this.ui(this);
+		
+		
+		
 		
 		this.quickLook = new this.quickLook(this);
 		
-		this.ui = new this.ui(this)
-		
 		this.eventsManager = new this.eventsManager(this);
-		self.eventsManager.init();
 		
 		
-		this.log = function(m) {
-			window.console && window.console.log && window.console.log(m)
-		}
+		
+		
 
 		/**
 		 * Set/get cookie value
@@ -177,7 +204,7 @@
 				callback(data);
 				data.debug && self.log(data.debug);
 				/* tell connector to generate thumbnails */
-				if (!self.locked && self.options.view == 'icons' && data.tmb) {
+				if (data.tmb && !self.locked && self.options.view == 'icons') {
 					self.tmb();
 				}
 				
@@ -518,6 +545,7 @@
 		/* here we init file manager */
 		// if (!this.loaded) {
 
+
 		this.setView(this.cookie('el-finder-view'));
 		
 		resize(self.options.width, self.options.height);
@@ -527,23 +555,20 @@
 			this.options.dialog.dialogClass += 'el-finder-dialog';
 			this.options.dialog.resize = dialogResize;
 			if (this.options.docked) {
+				/* docked mode - create dialog and store size */
 				this.options.dialog.close = function() { self.dock(); self.ui.dockButton.trigger('click') };
-				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()})
+				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
 			} else {
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
 		
-		$('*', document.body).each(function() {
-			var z = parseInt($(this).css('z-index'));
-			if (z >= self.zIndex) {
-				self.zIndex = z+1;
-			}
-		});
+		
 
 		this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
 			self.reload(data);
 			self.params = data.params;
+			self.eventsManager.init();
 			self.ui.init(data.disabled);
 		});
 			

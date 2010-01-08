@@ -80,7 +80,7 @@ elFinder.prototype.view = function(fm, el) {
 		.append(this.spn)
 		.append(this.msg)
 		.append('<div style="clear:both" />');
-	this.win = $(el).empty().addClass('el-finder').addClass(fm.options.cssClass||'')
+	this.win = $(el).empty().attr('id', this.fm.id).addClass('el-finder '+(fm.options.cssClass||''))
 		.append($('<div class="el-finder-toolbar" />').append(this.tlb))
 		.append(this.wrz)
 		.append(this.stb);

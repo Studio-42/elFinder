@@ -9,19 +9,19 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this._hash  = '';
 	this.title  = $('<strong/>');
 	this.img    = $('<img/>');
-	this.swf    = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="" type="application/x-shockwave-flash"></embed></object>')
+	this.swf    = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="" type="application/x-shockwave-flash" width="100%" height="350"></embed></object>')
 	this.iframe = $('<iframe/>');
 	this.ico    = $('<p/>');
 	this.info   = $('<label/>');
 	this.ql     = $('<div class="el-finder-ql"/>').hide()
-		.append($('<div/>')
+		.append($('<div class="el-finder-ql-drag-handle"/>')
 			.append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
 		.append(this.iframe)
 		.append(this.img)
 		.append(this.swf)
 		.append(this.ico)
 		.append(this.info)
-		.appendTo(document.body).draggable();
+		.appendTo(document.body).draggable({handle : '.el-finder-ql-drag-handle'});
 	
 	/**
 	 * Open quickLook window
@@ -179,7 +179,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 	function preview() {
 		var iw = self.img.width(),
 			ih = self.img.height(),
-			r  = Math.min(Math.min(400, iw)/iw, Math.min(300, ih)/ih);
+			r  = Math.min(Math.min(400, iw)/iw, Math.min(350, ih)/ih);
+			
 		self._img = false;
 		self.ico.hide();
 
@@ -188,8 +189,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 			width:self.ico.width(),
 			height:self.ico.height()
 		}).animate({
-			width:Math.round(r*(iw>400?iw:400)),
-			height:Math.round(r*(ih>300?ih:300))
+			width:Math.round(r*iw),
+			height:Math.round(r*ih)
 		}, 350, function() { self.fm.lockShortcuts(); });
 	}
 	
