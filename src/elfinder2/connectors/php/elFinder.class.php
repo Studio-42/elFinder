@@ -398,7 +398,7 @@ class elFinder {
 			header("Content-Disposition: ".$disp."; filename=".basename($file));
 			header("Content-Location: ".str_replace($this->_options['root'], '', $file));
 			header('Content-Transfer-Encoding: binary');
-			header("Content-Length: " .filesize($file));
+			header("Content-Length: ".filesize($file));
 			header("Connection: close");
 			readfile($file);
 			exit();
@@ -407,9 +407,13 @@ class elFinder {
 			$path = $this->_options['root'];
 			if (!empty($_GET['target'])) {
 				if (false == ($p = $this->_findDir(trim($_GET['target'])))) {
-					$this->_result['error'] = 'Invalid parameters';
+					if (!isset($_GET['init'])) {
+						$this->_result['error'] = 'Invalid parameters';
+					}
 				} elseif (!$this->_isAllowed($p, 'read')) {
-					$this->_result['error'] = 'Access denied';
+					if (!isset($_GET['init'])) {
+						$this->_result['error'] = 'Access denied';
+					}
 				} else {
 					$path = $p;
 				}

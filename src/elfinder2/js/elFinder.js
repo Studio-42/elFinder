@@ -32,7 +32,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 beta2';
+		this.version  = '1.1 beta3';
 		/**
 		 * Object. Current Working Dir info
 		 **/
@@ -61,7 +61,6 @@
 		 * Number. Max z-index on page + 1, need for contextmenu and quicklook
 		 **/
 		this.zIndex = 2;
-		
 		/**
 		 * DOMElement. jQueryUI dialog
 		 **/
@@ -74,6 +73,9 @@
 		 * Object. Some options get from server
 		 **/
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
+		this.vCookie = 'el-finder-view-'+this.id;
+		this.pCookie = 'el-finder-places-'+this.id;
+		this.lCookie = 'el-finder-last-'+this.id;
 		/**
 		 * Object. View. After init we can accessel as this.view.win
 		 **/
@@ -152,7 +154,7 @@
 		this.setView = function(v) {
 			if (v == 'list' || v == 'icons') {
 				this.options.view = v;
-				this.cookie('el-finder-view', v);
+				this.cookie(this.vCookie, v);
 			}
 		}
 		
@@ -193,16 +195,6 @@
 				}
 				callback(data);
 				data.debug && self.log(data.debug);
-				/* tell connector to generate thumbnails */
-				// if (data.tmb && !self.locked && self.options.view == 'icons') {
-				// 	self.tmb();
-				// }
-				
-				
-
-				// if (data.select && self.cdc[data.select]) {
-				// 	self.selectById(data.select);
-				// }
 				delete data;
 			}
 			opts.lock && this.lock(true);
@@ -229,7 +221,7 @@
 		 * @return Array
 		 **/
 		this.getPlaces = function() {
-			var pl = [], p = this.cookie('el-finder-places');
+			var pl = [], p = this.cookie(this.pCookie);
 			if (p.length) {
 				if (p.indexOf(':')!=-1) {
 					pl = p.split(':');
@@ -275,7 +267,7 @@
 		 * @param  Array  Folders IDs
 		 **/
 		this.savePlaces = function(p) {
-			this.cookie('el-finder-places', p.join(':'));
+			this.cookie(this.pCookie, p.join(':'));
 		}
 		
 		/**
@@ -543,9 +535,9 @@
 		 */
 		this.lastDir = function(dir) {
 			if (!dir) {
-				return this.cookie('el-finder-last');
+				return this.cookie(this.lCookie);
 			} else {
-				this.cookie('el-finder-last', dir);
+				this.cookie(this.lCookie);
 			}
 		}
 
@@ -574,23 +566,23 @@
 
 		/* here we init file manager */
 		
-		this.setView(this.cookie('el-finder-view'));
+		this.setView(this.cookie(this.vCookie));
 		resize(self.options.width, self.options.height);
 		
 		/* dialog or docked mode */
-		if (typeof(this.options.dialog) == 'object' || this.options.docked) {
+		if (this.options.dialog || this.options.docked) {
 			this.options.dialog = $.extend({width : 570, dialogClass : '', minWidth : 480, minHeight: 330}, this.options.dialog || {});
 			this.options.dialog.dialogClass += 'el-finder-dialog';
 			this.options.dialog.resize = dialogResize;
 			if (this.options.docked) {
 				/* docked mode - create dialog and store size */
-				this.options.dialog.close = function() { self.dock(); self.ui.dockButton.trigger('click') };
+				this.options.dialog.close = function() { self.dock(); };
 				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
 			} else {
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
-		
+
 		this.ajax({ 
 			cmd    : 'open', 
 			target : this.lastDir()||'', 
@@ -598,17 +590,20 @@
 			tree   : true 
 			}, 
 			function(data) {
-				self.eventsManager.init();
-				self.reload(data);
-				self.params = data.params;
-				$('*', document.body).each(function() {
-					var z = parseInt($(this).css('z-index'));
-					if (z >= self.zIndex) {
-						self.zIndex = z+1;
-					}
-				});
-				self.ui.init(data.disabled);
-		});
+				if (data.cwd) {
+					self.eventsManager.init();
+					self.reload(data);
+					self.params = data.params;
+					$('*', document.body).each(function() {
+						var z = parseInt($(this).css('z-index'));
+						if (z >= self.zIndex) {
+							self.zIndex = z+1;
+						}
+					});
+					self.ui.init(data.disabled);
+				}
+				
+		}, {force : true});
 			
 		
 		this.open = function() {
