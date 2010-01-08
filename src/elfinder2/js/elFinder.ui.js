@@ -172,21 +172,13 @@ elFinder.prototype.ui = function(fm) {
 		this.menu.css('z-index', this.fm.zIndex);
 		
 		if (this.fm.options.docked) {
-			this.dockButton
-			.hover(
+			this.dockButton.hover(
 				function() { $(this).addClass('el-finder-dock-button-hover')},
 				function() { $(this).removeClass('el-finder-dock-button-hover')}
-			)
-			.click(function() { 
-				var t = $(this).trigger('mouseout');
-				if (self.fm.view.win.attr('undocked')) {
-					self.fm.dock();
-				} else {
-					self.fm.undock() 
-				}
-				
-				})
-				.prependTo(this.fm.view.tlb)
+			).click(function() { 
+				self.fm.view.win.attr('undocked') ? self.fm.dock() : self.fm.undock();
+				$(this).trigger('mouseout');
+			}).prependTo(this.fm.view.tlb);
 		}
 		
 	}

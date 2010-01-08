@@ -637,11 +637,10 @@
 		
 		this.undock = function() {
 			if (this.options.docked && !this.view.win.attr('undocked')) {
-				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true)).dialog(this.options.dialog);
+				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true).show()).dialog(this.options.dialog);
 				dialogResize();
 			} 
 		}
-		
 	}
 	
 	/**
