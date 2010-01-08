@@ -617,7 +617,11 @@
 		}
 		
 		this.close = function() {
-			this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+			if (this.options.docked && this.view.win.attr('undocked')) {
+				this.dock();
+			} else {
+				this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+			}
 			this.eventsManager.lock = true;
 		}
 		
@@ -627,6 +631,7 @@
 				this.view.win.insertAfter(this.anchor).removeAttr('undocked');
 				resize(s.width, s.height);
 				this.dialog.dialog('destroy');
+				this.dialog = null;
 			}
 		}
 		
@@ -673,9 +678,9 @@
 		/* fm view (icons|list) */
 		view           : 'icons',
 		/* width to overwrite css options */
-		width          : '75%',
+		// width          : '100%',
 		/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-		height         : 300,
+		// height         : 300,
 		/* disable shortcuts exclude arrows/space */
 		disableShortcuts : false,
 		/* cookie options */
@@ -719,10 +724,12 @@
 			
 			switch(cmd) {
 				case 'close':
+				case 'hide':
 					this.elfinder.close();
 					break;
 					
 				case 'open':
+				case 'show':
 					this.elfinder.open();
 					break;
 				

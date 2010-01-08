@@ -22,7 +22,19 @@
 	<script src="src/elfinder2/js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/elfinder2/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
 	
-	
+	<style type="text/css">
+		#close, #open, #dock, #undock {
+			display : inline-block;
+			border:1px solid #ccc;
+			background-color:#eee;
+			margin:1em .5em;
+			padding:.3em .7em;
+			border-radius:5px; 
+			-moz-border-radius:5px; 
+			-webkit-border-radius:5px;
+			cursor:pointer;
+		}
+	</style>
 	
 
 	<script type="text/javascript" charset="utf-8">
@@ -44,38 +56,32 @@
 				dialog : {
 					title : 'File manager',
 					height : 500
-					// modal : true,
-					// width : 'auto',
-					// autoOpen : false
 				}
 			})
-			// $('#finder').elfinder('open')
-			// window.console.log(f.get(0).test)
-			// window.console.log($('#finder').get(0).elfinder.options)
 			
-			$('#close').click(function() {
-				$('#finder').elfinder('close')
+			$('#close,#open,#dock,#undock').click(function() {
+				$('#finder').elfinder($(this).attr('id'))
 			})
-			$('#open').click(function() {
-				$('#finder').elfinder('open')
-			})
-			$('#dock').click(function() {
-				$('#finder').elfinder('dock')
-			})
-			$('#undock').click(function() {
-				$('#finder').elfinder('undock')
-			})
+			// $('#open').click(function() {
+			// 	$('#finder').elfinder('open')
+			// })
+			// $('#dock').click(function() {
+			// 	$('#finder').elfinder('dock')
+			// })
+			// $('#undock').click(function() {
+			// 	$('#finder').elfinder('undock')
+			// })
 			
 		})
 	</script>
 
 </head>
 <body>
-
+	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
 
-	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
-
-<a href="http://ya.ru">ya.ru</a>
+	
+<br/><br/><hr/>
+<a href="http://www.eldorado-cms.ru/forum/topic/20/32/1/#159">Changelog</a>
 </body>
 </html>

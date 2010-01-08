@@ -119,7 +119,7 @@
 	background:url('../images/toolbar.png') 2px -705px no-repeat; 
 }
 
-.undocked {
+.ui-dialog .el-finder-dock-button {
 	background-position:2px -681px;
 }
 

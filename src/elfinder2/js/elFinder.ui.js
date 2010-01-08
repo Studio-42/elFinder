@@ -179,11 +179,9 @@ elFinder.prototype.ui = function(fm) {
 			)
 			.click(function() { 
 				var t = $(this).trigger('mouseout');
-				if (t.hasClass('undocked')) {
-					t.removeClass('undocked');
-					self.fm.dock()
+				if (self.fm.view.win.attr('undocked')) {
+					self.fm.dock();
 				} else {
-					t.addClass('undocked');
 					self.fm.undock() 
 				}
 				
