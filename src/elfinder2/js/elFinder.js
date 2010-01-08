@@ -29,6 +29,7 @@
 			this.id = 'el-finder-'+Math.random().toString().substring(2);
 		}
 		
+		
 		/**
 		 * String. Version number;
 		 **/
@@ -61,12 +62,7 @@
 		 * Number. Max z-index on page + 1, need for contextmenu and quicklook
 		 **/
 		this.zIndex = 2;
-		$('*', document.body).each(function() {
-			z = parseInt($(this).css('z-index'));
-			if (z >= self.zIndex) {
-				self.zIndex = z+1;
-			}
-		});
+		
 		/**
 		 * DOMElement. jQueryUI dialog
 		 **/
@@ -87,17 +83,14 @@
 		 * Object. User Iterface. Controller for commands/buttons/contextmenu
 		 **/
 		this.ui = new this.ui(this);
-		
-		
-		
-		
-		this.quickLook = new this.quickLook(this);
-		
+		/**
+		 * Object. Set/update events
+		 **/
 		this.eventsManager = new this.eventsManager(this);
-		
-		
-		
-		
+		/**
+		 * Object. Quick Look like in MacOS X :)
+		 **/
+		this.quickLook = new this.quickLook(this);
 
 		/**
 		 * Set/get cookie value
@@ -132,8 +125,6 @@
 				document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
 			}
 		}
-
-		
 
 		/**
 		 * Set/unset this.locked flag
@@ -304,6 +295,7 @@
 				this.eventsManager.updateNav();
 			}
 			this.updateCwd();
+			this.lastDir(this.cwd.hash);
 		}
 		
 		/**
@@ -313,10 +305,9 @@
 		this.updateCwd = function() {
 			this.lockShortcuts();
 			this.selected = [];
-			
 			this.view.renderCwd();
-			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 			this.eventsManager.updateCwd();
+			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 		}
 		
 		/**
@@ -427,11 +418,6 @@
 			}
 		}
 
-		this.time = function() {
-			var d = new Date()
-			return d.getMilliseconds();
-		}
-		
 		/**
 		 * Add files to clipboard buffer
 		 *
@@ -534,22 +520,49 @@
 			return name.replace('100', '')+Math.random()+ext;
 		}
 
+		/**
+		 * Get/set last opened dir
+		 *
+		 * @param  String  dir hash
+		 * @return String
+		 */
+		this.lastDir = function(dir) {
+			if (!dir) {
+				return this.cookie('el-finder-last');
+			} else {
+				this.cookie('el-finder-last', dir);
+			}
+		}
+
+		/**
+		 * Resize file manager
+		 *
+		 * @param  Number  width
+		 * @param  Number  height
+		 */
 		function resize(w, h) {
 			w && self.view.win.width(w);
 			h && self.view.nav.add(self.view.cwd).height(h);
 		}
 		
+		/**
+		 * Resize file manager in dialog window while it resize
+		 *
+		 */
 		function dialogResize() {
 			resize(null, self.dialog.height()-self.view.tlb.parent().height()-32)
 		}
+
+		this.time = function() {
+			return new Date().getMilliseconds();
+		}
+
 		/* here we init file manager */
-		// if (!this.loaded) {
-
-
-		this.setView(this.cookie('el-finder-view'));
 		
+		this.setView(this.cookie('el-finder-view'));
 		resize(self.options.width, self.options.height);
 		
+		/* dialog or docked mode */
 		if (typeof(this.options.dialog) == 'object' || this.options.docked) {
 			this.options.dialog = $.extend({width : 570, dialogClass : '', minWidth : 480, minHeight: 330}, this.options.dialog || {});
 			this.options.dialog.dialogClass += 'el-finder-dialog';
@@ -563,13 +576,24 @@
 			}
 		}
 		
-		
-
-		this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
-			self.reload(data);
-			self.params = data.params;
-			self.eventsManager.init();
-			self.ui.init(data.disabled);
+		this.ajax({ 
+			cmd    : 'open', 
+			target : this.lastDir()||'', 
+			init   : true, 
+			tree   : true 
+			}, 
+			function(data) {
+				self.eventsManager.init();
+				self.reload(data);
+				self.params = data.params;
+				$('*', document.body).each(function() {
+					z = parseInt($(this).css('z-index'));
+					if (z >= self.zIndex) {
+						self.zIndex = z+1;
+					}
+				});
+				self.log(self.zIndex)
+				self.ui.init(data.disabled);
 		});
 			
 		
@@ -582,8 +606,6 @@
 			this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
 			this.eventsManager.lock = true;
 		}
-		
-		
 		
 		this.dock = function() {
 			if (this.options.docked && this.view.win.attr('undocked')) {
@@ -618,24 +640,38 @@
 	 *
 	 */
 	elFinder.prototype.options = {
+		/* connector url. Required! */
 		url            : '',
+		/* interface language */
 		lang           : 'en',
+		/* additional css class for filemanager container */
 		cssClass       : '',
+		/* characters number to wrap file name in icons view. set to 0 to disable wrap */
 		wrap           : 14,
+		/* Name for places/favorites (i18n), set to '' to disable places */
 		places         : 'Places',
+		/* show places before navigation? */
 		placesFirst    : true,
+		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
+		/* i18 messages. not set manually! */
 		i18n           : {},
+		/* fm view (icons|list) */
 		view           : 'icons',
+		/* width to overwrite css options */
 		width          : '75%',
+		/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
 		height         : 300,
+		/* disable shortcuts exclude arrows/space */
 		disableShortcuts : false,
+		/* cookie options */
 		cookie         : {
 			expires : 30,
 			domain  : '',
 			path    : '/',
 			secure  : false
 		},
+		/* buttons on toolbar */
 		toolbar        : [
 			['back', 'reload'],
 			['select', 'open'],
@@ -645,12 +681,15 @@
 			['info', 'help'],
 			['icons', 'list']
 		],
+		/* contextmenu commands */
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
 			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 		},
+		/* jqueryUI dialog options */
 		dialog : null,
+		/* docked mode */
 		docked : false
 	}
 
