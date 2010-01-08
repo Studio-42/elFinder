@@ -553,6 +553,7 @@ class elFinder {
 		}
 		
 		$this->_logContext['files'] = array();
+		$this->_result['select'] = array();
 		$total = 0;
 		for ($i=0, $s = count($_FILES['fm-file']['name']); $i < $s; $i++) { 
 			if (!empty($_FILES['fm-file']['name'][$i])) {
@@ -580,6 +581,7 @@ class elFinder {
 						$this->_errorData($_FILES['fm-file']['name'][$i], 'Unable to save uploaded file');	
 					} else {
 						@chmod($file, $this->_options['fileMode']);
+						$this->_result['select'][] = $this->_hash($file);
 					}
 				}
 			}

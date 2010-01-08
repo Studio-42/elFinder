@@ -5,7 +5,7 @@
 	 * @author dio dio@std42.ru
 	 **/
 	elFinder = function(el, o) {
-		var self = this, id, z;
+		var self = this, id;
 		
 		this.log = function(m) {
 			window.console && window.console.log && window.console.log(m)
@@ -28,7 +28,6 @@
 		} else {
 			this.id = 'el-finder-'+Math.random().toString().substring(2);
 		}
-		
 		
 		/**
 		 * String. Version number;
@@ -195,13 +194,15 @@
 				callback(data);
 				data.debug && self.log(data.debug);
 				/* tell connector to generate thumbnails */
-				if (data.tmb && !self.locked && self.options.view == 'icons') {
-					self.tmb();
-				}
+				// if (data.tmb && !self.locked && self.options.view == 'icons') {
+				// 	self.tmb();
+				// }
 				
-				if (data.select && self.cdc[data.select]) {
-					self.selectById(data.select);
-				}
+				
+
+				// if (data.select && self.cdc[data.select]) {
+				// 	self.selectById(data.select);
+				// }
 				delete data;
 			}
 			opts.lock && this.lock(true);
@@ -283,18 +284,32 @@
 		 * @param  Object  Data from server
 		 **/
 		this.reload = function(data) {
+			var i;
 			this.cwd = data.cwd;
 			this.cdc = {};
-			for (var i=0; i<data.cdc.length ; i++) {
+			for (i=0; i<data.cdc.length ; i++) {
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 			}
-			
 			if (data.tree) {
 				this.view.renderNav(data.tree);
 				this.eventsManager.updateNav();
 			}
 			this.updateCwd();
+			/* tell connector to generate thumbnails */
+			if (data.tmb && !self.locked && self.options.view == 'icons') {
+				self.tmb();
+			}
+			/* have to select some files */
+			if (data.select) {
+				if (typeof(data.select) == 'string') {
+					this.cdc[data.select] && this.selectById(data.select);
+				} else if (typeof(data.select) == 'object') {
+					for (i = data.select.length - 1; i >= 0; i--){
+						this.cdc[data.select[i]] && this.selectById(data.select[i]);
+					};
+				}
+			}
 			this.lastDir(this.cwd.hash);
 		}
 		
@@ -587,12 +602,11 @@
 				self.reload(data);
 				self.params = data.params;
 				$('*', document.body).each(function() {
-					z = parseInt($(this).css('z-index'));
+					var z = parseInt($(this).css('z-index'));
 					if (z >= self.zIndex) {
 						self.zIndex = z+1;
 					}
 				});
-				self.log(self.zIndex)
 				self.ui.init(data.disabled);
 		});
 			

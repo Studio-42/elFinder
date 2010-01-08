@@ -1,3 +1,4 @@
+(function($) {
 elFinder.prototype.view = function(fm, el) {
 	var self = this;
 	this.fm = fm;
@@ -279,3 +280,5 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 }
+
+})(jQuery);

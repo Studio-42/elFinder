@@ -2,6 +2,7 @@
  * @class Create quick look window (similar to MacOS X Quick Look)
  * @author dio dio@std42.ru
  **/
+(function($) {
 elFinder.prototype.quickLook = function(fm, el) {
 	var self    = this;
 	this.fm     = fm;
@@ -196,3 +197,4 @@ elFinder.prototype.quickLook = function(fm, el) {
 	
 
 }
+})(jQuery);

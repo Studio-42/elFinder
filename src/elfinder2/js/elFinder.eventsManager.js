@@ -1,7 +1,8 @@
 /**
- * @class  Bind events
+ * @class  Bind/update events
  * @author dio dio@std42.ru
  **/
+(function($) {
 elFinder.prototype.eventsManager = function(fm, el) {
 	var self   = this;
 	this.lock  = false;
@@ -9,7 +10,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	this.ui    = fm.ui;
 	this.tree  = fm.view.tree
 	this.cwd   = fm.view.cwd;
-	this.pointer = ''
+	this.pointer = '';
 	
 	/**
 	 * Initial events binding
@@ -324,7 +325,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
 			});
 			
-		// self.fm.log('updateCwd: '+self.fm.stopBench())
 	}
 	
 	/**
@@ -386,3 +386,5 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	}
 	
 }
+
+})(jQuery);

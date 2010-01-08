@@ -2,6 +2,7 @@
  * @class elFinder user Interface. 
  * @author dio dio@std42.ru
  **/
+(function($) {
 elFinder.prototype.ui = function(fm) {
 	
 	var self        = this;
@@ -1282,4 +1283,5 @@ elFinder.prototype.ui.prototype.commands = {
 	}
 }
 
+})(jQuery);
 
