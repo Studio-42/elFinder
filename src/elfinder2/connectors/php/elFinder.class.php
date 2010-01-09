@@ -407,9 +407,9 @@ class elFinder {
 			$path = $this->_options['root'];
 			if (!empty($_GET['target'])) {
 				if (false == ($p = $this->_findDir(trim($_GET['target'])))) {
-					if (!isset($_GET['init'])) {
+					// if (!isset($_GET['init'])) {
 						$this->_result['error'] = 'Invalid parameters';
-					}
+					// }
 				} elseif (!$this->_isAllowed($p, 'read')) {
 					if (!isset($_GET['init'])) {
 						$this->_result['error'] = 'Access denied';

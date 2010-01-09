@@ -535,10 +535,11 @@
 		 * @return String
 		 */
 		this.lastDir = function(dir) {
+			self.log(this.lCookie+' '+dir)
 			if (!dir) {
 				return this.cookie(this.lCookie);
 			} else {
-				this.cookie(this.lCookie);
+				this.cookie(this.lCookie, dir);
 			}
 		}
 
@@ -583,7 +584,7 @@
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
-
+		self.log('init: '+self.lastDir())
 		this.ajax({ 
 			cmd    : 'open', 
 			target : this.lastDir()||'', 
