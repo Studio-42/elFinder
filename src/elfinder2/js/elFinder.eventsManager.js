@@ -307,7 +307,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 						self.fm.select(t, true);
 					}
 					self.cwd.find('.ui-selected').each(function(i) {
-						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')])
+						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : $(self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]))
 						if (c++ == 0 || c%13 == 0) {
 							el.css('margin-left', 0);
 						}

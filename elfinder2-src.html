@@ -24,7 +24,7 @@
 	
 	<style type="text/css">
 		#close, #open, #dock, #undock {
-			display : inline-block;
+			display : inline;
 			border:1px solid #ccc;
 			background-color:#eee;
 			margin:1em .5em;
@@ -62,15 +62,6 @@
 			$('#close,#open,#dock,#undock').click(function() {
 				$('#finder').elfinder($(this).attr('id'))
 			})
-			// $('#open').click(function() {
-			// 	$('#finder').elfinder('open')
-			// })
-			// $('#dock').click(function() {
-			// 	$('#finder').elfinder('dock')
-			// })
-			// $('#undock').click(function() {
-			// 	$('#finder').elfinder('undock')
-			// })
 			
 		})
 	</script>
@@ -81,7 +72,6 @@
 	<div id="finder">finder</div>
 
 	
-<br/><br/><hr/>
-<a href="http://www.eldorado-cms.ru/forum/topic/20/32/1/#159">Changelog</a>
+
 </body>
 </html>

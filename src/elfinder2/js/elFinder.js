@@ -211,6 +211,7 @@
 					for (var i in data.images) {
 						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
 					}
+					data.tmb && self.tmb();
 				}
 			}, {lock : false, silent : true});
 		}

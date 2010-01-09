@@ -281,7 +281,7 @@ elFinder.prototype.ui.prototype.commands = {
 				t = {
 					hash : $(dir).attr('key'),
 					mime : 'directory',
-					read : !$(dir).hasClass('noaccess') && !$(dir).hasClass('dropbox'),
+					read : !$(dir).hasClass('noaccess') && !$(dir).hasClass('dropbox')
 				}
 			} else {
 				t = this.fm.getSelected(0);
