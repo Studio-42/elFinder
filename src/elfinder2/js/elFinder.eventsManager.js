@@ -1,7 +1,8 @@
 /**
- * @class  Bind events
+ * @class  Bind/update events
  * @author dio dio@std42.ru
  **/
+(function($) {
 elFinder.prototype.eventsManager = function(fm, el) {
 	var self   = this;
 	this.lock  = false;
@@ -9,7 +10,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	this.ui    = fm.ui;
 	this.tree  = fm.view.tree
 	this.cwd   = fm.view.cwd;
-	this.pointer = ''
+	this.pointer = '';
 	
 	/**
 	 * Initial events binding
@@ -34,8 +35,12 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				}
 			})
 			.bind(window.opera?'click':'contextmenu', function(e) {
+				if (window.opera && !e.ctrlKey) {
+					return;
+				}
 				var t = $(e.target);
 				e.preventDefault();
+				e.stopPropagation()
 				if (t.hasClass('el-finder-cwd')) {
 					self.fm.unselectAll();
 				} else {
@@ -47,38 +52,45 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.selectable({
 				filter : '[key]',
 				delay  : 300,
-				stop : function() { self.fm.updateSelect() }
+				stop   : function() { self.fm.updateSelect() }
 			});
 			
 		$(document).bind('click', function() { 
 			self.fm.ui.hideMenu(); 
 			$('input', self.cwd).trigger('change'); 
 		});
+
 		/* click on tree or places */
-		this.fm.view.nav.find('a').live('click', function(e) {
-			e.preventDefault();
-			if ($(this).attr('key') != self.fm.cwd.hash) {
-				$(this).trigger('select');
-				self.ui.exec('open', this);
-			}
-		});
-		/* click on collapsed arrow or places */
-		$('div.collapsed,strong', this.fm.view.nav).live('click', function(e) {
-			var t = $(this), div, ul;
-			if (this.nodeName == 'DIV') {
-				div = t;
-				ul  = div.next().next('ul');
-			} else {
-				div = t.prev('div.collapsed');
-				ul  = t.next('ul');
-			}
-			div.toggleClass('expanded');
-			ul.toggle(300)
-		});
+		// $('#'+this.fm.id+' .el-finder-nav a').live('click', function(e) {
+		// 	self.fm.log('click link')
+		// 	e.preventDefault();
+		// 	if ($(this).attr('key') != self.fm.cwd.hash) {
+		// 		$(this).trigger('select');
+		// 		self.ui.exec('open', this);
+		// 	}
+		// });
+		// 
+		// /* click on collapsed arrow or places */
+		// $('#'+this.fm.id+' .el-finder-nav div.collapsed,strong').live('click', function(e) {
+		// 	var t = $(this), div, ul;
+		// 	self.fm.log('click div')
+		// 	e.stopPropagation()
+		// 	e.preventDefault();
+		// 	if (this.nodeName == 'DIV') {
+		// 		div = t;
+		// 		ul  = div.next().next('ul');
+		// 	} else {
+		// 		div = t.prev('div.collapsed');
+		// 		ul  = t.next('ul');
+		// 	}
+		// 	div.toggleClass('expanded');
+		// 	ul.toggle(300)
+		// });
+		
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
 			self.tree.find('a').removeClass('selected');
-			$(e.target).addClass('selected').prev('div').addClass('expanded').parents('li:has(ul)').children('div').addClass('expanded').next().next('ul').show();
+			$(e.target).addClass('selected').parents('li:has(ul)').children('ul').show().prev().children('div').addClass('expanded');
 		});
 		
 		/* make places droppable */
@@ -110,46 +122,20 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					}
 				}
 			});
-			// this.updatePlaces();
 		}
 		
 		/* bind shortcuts */
-		$(document).bind('keydown', function(e) {
+		
+		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
+			var meta = e.ctrlKey||e.metaKey;
 			if (self.lock) {
 				return;
 			}
-			
-			var meta = e.ctrlKey||e.metaKey;
-			// self.fm.log(e.keyCode+' '+meta);
-			switch (e.keyCode) {
-				/* command+backspace - delete */
-				case 8:
-					if (meta && self.ui.isCmdAllowed('rm')) {
-						e.preventDefault();
-						self.ui.exec('rm');
-					} 
-					break;
-				/* Enter - exec "select" command if enabled, otherwise exec "open" */	
-				case 13:
-					if (self.ui.isCmdAllowed('select')) {
-						return self.ui.exec('select');
-					}
-					self.ui.execIfAllowed('open');
-					break;
-				/* Esc */
-				case 27:
-					self.fm.quickLook.hide()
-					break;
-				case 32:
-					// if (self.fm.selected.length == 1) {
-						e.preventDefault();
-						self.fm.quickLook.toggle();
-					// }
-					break;
-					
+			switch(e.keyCode) {
 				/* arrows left/up. with Ctrl - exec "back", w/o - move selection */
 				case 37:
 				case 38:
+					e.stopPropagation();
 					e.preventDefault();
 					if (e.keyCode == 37 && meta) {
 						self.ui.execIfAllowed('back');
@@ -160,6 +146,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				/* arrows right/down. with Ctrl - exec "open", w/o - move selection  */
 				case 39:
 				case 40:
+					e.stopPropagation();
 					e.preventDefault();
 					if (meta) {
 						self.ui.execIfAllowed('open');
@@ -167,54 +154,102 @@ elFinder.prototype.eventsManager = function(fm, el) {
 						moveSelection(true, !e.shiftKey);
 					}
 					break;
-				/* Delete */
-				case 46:
-					self.ui.execIfAllowed('rm');
-					break;
-				/* Ctrl+A */
-				case 65:
-					if (meta) {
-						e.preventDefault();
-						self.fm.selectAll();
-					}
-					break;
-				/* Ctrl+C */
-				case 67:
-					meta && self.ui.execIfAllowed('copy');
-					break;
-				/* Ctrl+I - get info */	
-				case 73:
-					if (meta) {
-						e.preventDefault();
-						self.ui.exec('info');
-					}
-					break;
-				case 78:
-					if (meta) {
-						e.preventDefault();
-						self.ui.execIfAllowed('mkdir');
-					}
-					break;
-				/* Ctrl+U - upload files */
-				case 85:
-					if (meta) {
-						e.preventDefault();
-						self.ui.execIfAllowed('upload');
-					}
-					break;
-				/* Ctrl+V */
-				case 86:
-					meta && self.ui.execIfAllowed('paste');
-					break;
-				/* Ctrl+X */
-				case 88:
-					meta && self.ui.execIfAllowed('cut');
-					break;
 			}
-			
 		});
 		
-		// self.fm.log('em init :'+self.fm.stopBench())
+
+		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
+			if (self.lock) {
+				return;
+			}
+			switch(e.keyCode) {
+				/* Space - QuickLook */
+				case 32:
+					e.preventDefault();
+					e.stopPropagation();
+					self.fm.quickLook.toggle();
+					break;
+				/* Esc */	
+				case 27:
+					self.fm.quickLook.hide();
+					break;
+			}
+		});
+		
+		if (!this.fm.options.disableShortcuts) {
+			$(document).bind('keydown', function(e) {
+				var meta = e.ctrlKey||e.metaKey;
+
+				if (self.lock) {
+					return;
+				}
+
+				switch (e.keyCode) {
+					/* command+backspace - delete */
+					case 8:
+						if (meta && self.ui.isCmdAllowed('rm')) {
+							e.preventDefault();
+							self.ui.exec('rm');
+						} 
+						break;
+					/* Enter - exec "select" command if enabled, otherwise exec "open" */	
+					case 13:
+						if (self.ui.isCmdAllowed('select')) {
+							return self.ui.exec('select');
+						}
+						self.ui.execIfAllowed('open');
+						break;
+					/* Delete */
+					case 46:
+						self.ui.execIfAllowed('rm');
+						break;
+					/* Ctrl+A */
+					case 65:
+						if (meta) {
+							e.preventDefault();
+							e.stopPropagation();
+							self.fm.selectAll();
+						}
+						break;
+					/* Ctrl+C */
+					case 67:
+						meta && self.ui.execIfAllowed('copy');
+						break;
+					/* Ctrl+I - get info */	
+					case 73:
+						if (meta) {
+							e.preventDefault();
+							self.ui.exec('info');
+						}
+						break;
+					/* Ctrl+N - new folder */
+					case 78:
+						if (meta) {
+							e.preventDefault();
+							self.ui.execIfAllowed('mkdir');
+						}
+						break;
+					/* Ctrl+U - upload files */
+					case 85:
+						if (meta) {
+							e.preventDefault();
+							self.ui.execIfAllowed('upload');
+						}
+						break;
+					/* Ctrl+V */
+					case 86:
+						meta && self.ui.execIfAllowed('paste');
+						break;
+					/* Ctrl+X */
+					case 88:
+						meta && self.ui.execIfAllowed('cut');
+						break;
+				}
+
+			});
+			
+		}
+		
 	}
 	
 	/**
@@ -222,6 +257,23 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.updateNav = function() {
+		
+		$('a', this.fm.view.nav).click(function(e) {
+			e.preventDefault();
+			var hash = $(this).attr('key');
+			if (!hash) {
+				$(this).children('div').toggleClass('expanded').end().next('ul').toggle(300);
+			} else if (hash && hash != self.fm.cwd.hash) {
+				self.ui.exec('open', $(this).trigger('select').get(0));
+			} 
+		})
+		
+		$('a div.collapsed', this.fm.view.nav).click(function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			$(this).toggleClass('expanded').parent().next('ul').toggle(300);
+		})
+		
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',
 			accept : '(div,tr)[key]',
@@ -254,7 +306,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 * Update folders droppable & files/folders draggable
 	 **/
 	this.updateCwd = function() {
-		// this.fm.startBench()
 		
 		$('[key]', this.cwd)
 			.bind('dblclick', function(e) {
@@ -264,20 +315,26 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.draggable({
 				delay      : 2,
 				addClasses : false,
+				appendTo : '.el-finder-cwd',
 				revert     : true,
 				drag       : function(e, ui) {
-					ui.helper.toggleClass('el-finder-drag-copy', e.shiftKey);
+					ui.helper.toggleClass('el-finder-drag-copy', e.shiftKey||e.ctrlKey);
 				},
 				helper     : function() {
 					var t = $(this),
-						h = $('<div class="el-finder-drag-helper"/>');
+						h = $('<div class="el-finder-drag-helper"/>'),
+						c = 0;
 					if (!t.hasClass('ui-selected')) {
 						self.fm.select(t, true);
 					}
 					self.cwd.find('.ui-selected').each(function(i) {
-						h.append(self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]));
+						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : $(self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]))
+						if (c++ == 0 || c%12 == 0) {
+							el.css('margin-left', 0);
+						}
+						h.append(el);
 					});
-					return h;
+					return h.css('width', (c<=12 ? 85+(c-1)*29 : 387)+'px');
 				}
 			})
 			.filter('.directory')
@@ -289,7 +346,13 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
 			});
 			
-		// self.fm.log('updateCwd: '+self.fm.stopBench())
+		if ($.browser.msie) {
+			$('*', this.cwd).attr('unselectable', 'on')
+				.filter('[key]')
+					.bind('dragstart', function() { self.cwd.selectable('disable').removeClass('ui-state-disabled ui-selectable-disabled'); })
+					.bind('dragstop', function() { self.cwd.selectable('enable'); });
+		}
+
 	}
 	
 	/**
@@ -351,3 +414,5 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	}
 	
 }
+
+})(jQuery);

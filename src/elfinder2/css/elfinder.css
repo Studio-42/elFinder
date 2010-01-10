@@ -1,15 +1,3 @@
-/*.rnd-3 {
-	border-radius:3px; 
-	-moz-border-radius:3px; 
-	-webkit-border-radius:3px;
-}
-
-.rnd-5 {
-	border-radius:5px; 
-	-moz-border-radius:5px; 
-	-webkit-border-radius:5px;
-}
-*/
 
 
 /* file manager window */
@@ -18,8 +6,17 @@
 	min-width:400px;
 	border:1px solid #ccc;
 	background-color:#eee;
-	font:.8em trebuchet ms,lucida grande,verdana,sans-serif;
+	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
+
+}
+
+.el-finder-undocked {
+	position:absolute;
+/*	overflow:auto;*/
+	min-width:400px;
+	border:1px solid #ccc;
+	padding:5px;
 }
 
 /* error/warning/question messages */
@@ -33,7 +30,7 @@
 }
 
 /* disabled */
-.noaccess, 
+.el-finder .noaccess, 
 .el-finder-disabled .el-finder-toolbar li,
 .el-finder-disabled .el-finder-nav,
 .el-finder-disabled .el-finder-cwd { 
@@ -47,12 +44,6 @@
 	background-color:#ccc;
 }
 
-.el-finder-nav .ui-resizable-e { height:100%; width:30px; right:-20px;}
-
-.el-finder .ui-state-disabled {
-	opacity:1;
-	filter:Alpha(Opacity=100);
-}
 
 /************************************/
 /*             toolbar              */
@@ -111,6 +102,27 @@
 .el-finder-toolbar ul li.uncompress { background-position: 3px -583px; }
 .el-finder-toolbar ul li.resize { background-position: 3px -647px; }
 
+.el-finder-dock-button {
+	width:19px;
+	height:19px;
+	float:right;
+	margin: 2px;
+	border:1px solid #ccc;
+	border-radius:3px; 
+	-moz-border-radius:3px; 
+	-webkit-border-radius:3px;
+	background:url('../images/toolbar.png') 2px -705px no-repeat; 
+}
+
+.ui-dialog .el-finder-dock-button {
+	background-position:2px -681px;
+}
+
+.el-finder-dock-button-hover {
+	background-color:#ccc;
+	border:1px solid #fff;
+}
+
 /**********************************************************/
 /*  workzone, container for navigation and current folder */
 /**********************************************************/
@@ -167,42 +179,40 @@
 	padding:0;
 }
 
-.el-finder-nav ul.el-finder-tree,
-.el-finder-nav ul.el-finder-places {
+.el-finder-nav ul li {
+	clear:both;
+}
+
+ul.el-finder-tree, ul.el-finder-places {
 	margin-bottom:1em;
 }
 
 .el-finder-nav ul li ul {
-	margin-left:15px;
+	margin-left:12px;
 }
 
-.el-finder-nav li {
-	clear:both;
-}
-
-.el-finder-nav div {
-	width:9px;
+.el-finder-nav ul div {
+	width:12px;
 	height:20px;
 	float:left;
+	margin-right:23px;
 }
 
-.el-finder-nav  a,
-.el-finder-nav  div.collapsed {
-	background:url(../images/toolbar.png) 3px -56px no-repeat;
+.el-finder-nav  a, .el-finder-nav  div.collapsed {
+	background-image:url(../images/toolbar.png);
+	background-repeat:no-repeat;
 }
 .el-finder-nav  div.collapsed {
-	background-position: -4px 7px;
+	background-position: -1px 7px;
 }
 .el-finder-nav div.expanded {
-	background-position: -4px -9px;
+	background-position: -1px -9px;
 }
 
 .el-finder-nav a {
 	display: block;
 	white-space:nowrap;
 	line-height:20px;
-	margin-left:9px;
-	padding:0 0 0 22px;
 	color:#444;
 	cursor:default;
 	text-decoration:none;
@@ -210,38 +220,33 @@
 	border-radius:3px; 
 	-moz-border-radius:3px; 
 	-webkit-border-radius:3px;
-}
-
-.el-finder-nav a.root,
-.el-finder-nav a.root.selected { 
-	background-position: 3px -30px; 
-	font-weight:bold;
+	background-position: 15px -56px;
 }
 
 .el-finder-nav a.dropbox {
-	background-position: 3px -80px; 
+	background-position: 15px -80px; 
 }
 .el-finder-nav a.readonly {
-	background-position: 3px -104px; 
+	background-position: 15px -104px; 
 }
 
 .el-finder-nav a.selected {
 	background-color:#ccc;
-	background-position: 3px -128px;
+	background-position: 15px -128px;
 }
 
-.el-finder-nav strong {
-	display:block;
-	white-space:nowrap;
-	line-height:20px;
-	margin-left:9px;
-	padding:0 0 0 22px;
-	background:url(../images/toolbar.png) 3px -152px no-repeat;
-	cursor:default;
+.el-finder-nav a.el-finder-tree-root { 
+	background-position: 15px -30px; 
+	font-weight:bold;
+}
+
+.el-finder-nav a.el-finder-places-root {
+	background-position: 15px -152px; 
+	font-weight:bold;
 }
 
 .el-finder-nav ul.el-finder-tree .el-finder-droppable {
-	background-position: 3px -237px; 
+	background-position: 15px -237px; 
 }
 
 
@@ -252,14 +257,12 @@
 .el-finder-cwd {
 	border-left:1px solid #ccc;
 	padding:3px;
-	z-index:50;
 }
 
 /********** view: icons  ************/
 
 .el-finder-cwd div {
 	width: 81px;
-	position:relative;
 	display: -moz-inline-stack;
 	display: inline-block;
 	vertical-align: top;
@@ -275,12 +278,8 @@
 }
 
 
-
-.el-finder-cwd div.ui-selected {
-	background:#ccc;
-}
-
-.el-finder-cwd  p, .el-finder-ql p {
+.el-finder-cwd p, 
+.el-finder-ql p {
 	width:48px;
 	height:48px;
 	margin:1px auto;
@@ -289,21 +288,13 @@
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
-	background:url('../images/icons-big.png') -1px 1px no-repeat;
-}
-
-.el-finder-cwd div p span {
-	display:block;
-	width:48px;
-	height:48px;
-	padding:0;
-	margin:0;
+	background:transparent url('../images/icons-big.png') -1px 1px no-repeat;
 }
 
 /* mimetypes */
 
-.directory p   { background-position:  0     -45px; }
-.application p { background-position: -1px  -134px; }
+.directory p      { background-position:  0     -44px; }
+.application p    { background-position: -1px  -134px; }
 div.audio p       { background-position: -1px -1082px; }
 div.image p       { background-position: -1px -1132px; }
 div.text p,
@@ -351,28 +342,22 @@ div.x-tar p,
 div.x-7z-compressed p { background-position: -1px -430px; }
 div.x-gzip p { background-position: -1px -477px; }
 
-
-
-.el-finder-cwd div.el-finder-droppable { 
-/*	background-color:#eee;*/
-}
-
 .el-finder-cwd div.el-finder-droppable p {
 	background-position: 0 -87px;
 }
 
-.el-finder-cwd div label {
+.el-finder-cwd label {
 	display:block;
-	font-size:.86em;
-	line-height:.9em;
-	padding:1px 1px;
+	font-size:11px;
+	line-height:13px;
+	padding:0 1px;
 	margin:0;
-	height:20px;
+	height:25px;
 	overflow:hidden;
 	cursor:default;
 }
 
-.el-finder-cwd div label input { 
+.el-finder-cwd div input { 
 	background:#fff; 
 	width:81px;
 	margin-left:-2px; 
@@ -382,22 +367,22 @@ div.x-gzip p { background-position: -1px -477px; }
 }
 
 .el-finder-cwd div em {
-	position:absolute;
-	left:12px;
-	top:35px;
+	float:left;
+	margin-top:-40px;
+	margin-left:9px;
 	width:15px;
 	height:16px;
 	background:url(../images/icons-big.png) -17px -1290px no-repeat;
 }
 
 .el-finder-cwd div em.dropbox {
-	top:35px;
-	left:45px;	
+	float:right;
+	margin-right:9px;
 	background-position: 0px -1290px;
 }
 .el-finder-cwd div em.readonly {
-	top:33px;
-	left:45px;	
+	float:right;
+	margin-right:9px;
 	background-position: -34px -1287px;
 }
 
@@ -405,9 +390,11 @@ div.x-gzip p { background-position: -1px -477px; }
 
 .el-finder-cwd table {
 	width:100%;
+	*width:99%;
 	border-collapse: collapse;	
 	border-spacing: 0;
 	border:1px solid #ccc;
+	margin:-3px -3px;
 }
 
 .el-finder-row-odd {
@@ -419,6 +406,7 @@ div.x-gzip p { background-position: -1px -477px; }
 	padding:3px 5px;
 	border-left:1px solid #ccc;
 	cursor:default;
+	white-space:nowrap;
 }
 
 .el-finder-cwd table th {
@@ -429,7 +417,6 @@ div.x-gzip p { background-position: -1px -477px; }
 
 .el-finder-cwd table td.icon {
 	width:24px;
-	position:relative;
 }
 
 
@@ -439,7 +426,6 @@ div.x-gzip p { background-position: -1px -477px; }
 	margin:0;
 	padding:0;
 	background:url(../images/icons-small.png) 3px 0 no-repeat;
-	position:relative;
 }
 
 .el-finder-cwd table .size {
@@ -457,22 +443,19 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 
 .el-finder-cwd table td p em {
-	position:absolute;
-	display:block;
+	float:left;
 	width:10px;
 	height:12px;
-	left:0;
-	top:4px;
+	margin-top:5px;
+	border:1px solid #ccc;
 	background:url(../images/icons-small.png) 0px -405px no-repeat;
 }
 
 .el-finder-cwd table p em.readonly {
-	left:12px;
 	background-position:0px -433px;
 }
 
 .el-finder-cwd table p em.dropbox {
-	left:12px;
 	background-position:0px -418px;
 }
 
@@ -507,19 +490,19 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 /************************************/
 /*           dialog window          */
 /************************************/
-
 .el-finder-dialog .ui-dialog-titlebar { 
 	padding: .3em .1em .1em .8em; 
-	font-size:.8em;
+	font-size:.72em;
 }
 .el-finder-dialog .ui-dialog-buttonpane {
 	padding: .1em 1em .1em .4em; 
-	font-size:.76em;
-}
-.el-finder-dialog .ui-dialog-content {
-	padding:3px;
 	font-size:.72em;
 }
+.el-finder-dialog .ui-dialog-content {
+	padding:2px;
+	font-size:.72em;
+}
+
 .el-finder-dialog hr {
 	border:0;
 	border-bottom: 1px #ccc solid;
@@ -541,11 +524,6 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	margin: .3em 0;
 }
 
-.el-finder-dialog p {
-	border:1px solid #ccc;
-	margin-top:.1em;
-}
-
 .el-finder-dialog form div {
 	padding:.1em 0;
 }
@@ -555,7 +533,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 .el-finder-add-field span {
-	float:left;margin-right:.7em
+	float:left;
+	margin-right:.7em
 }
 
 .el-finder-dialog table {
@@ -570,12 +549,25 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-dialog textarea { width:100%; height:400px; outline:none; border:1px solid #ccc;}
 
+.el-finder-dialog .ui-tabs div {
+	padding:0 .5em;
+	
+}
+.el-finder-dialog .ui-tabs-nav li a {
+	padding:.2em 1em;
+}
+#el-finder-help-a p {
+	line-height:2em;
+}
+
+
 /************************************/
 /*            contextmenu           */
 /************************************/
 
 .el-finder-contextmenu { 
 	position:absolute;
+	width:200px;
 	background:#fff; 
 	cursor:default; 
 	border:1px solid #ccc;  
@@ -589,18 +581,20 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-contextmenu div { 
 	position:relative;
 	display:block;
+/*	width:191px;*/
+/*	border:1px solid #ccc;*/
 	margin:0;
-	padding:5px 7em 5px 29px;
+	padding:4px 29px 4px 29px;
 	white-space:nowrap;
 	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	background:url('../images/toolbar.png') 0 0 no-repeat;
 }
 
-.el-finder-contextmenu div span {
+.el-finder-contextmenu  span {
 	float:right;
 	width:9px;
 	height:18px;
-	margin-right:-6.5em;
+	margin-right:-27px;
 	background:url(../images/toolbar.png) -4px 5px no-repeat;
 }
 
@@ -611,7 +605,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	margin:0;
 	padding:5px 0;
 	background:#fff; 
-	cursor:default; 
+/*	cursor:default; */
 	border:1px solid #ccc;  
 	border-radius:5px; 
 	-moz-border-radius:5px; 
@@ -656,9 +650,9 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 
 .el-finder-drag-helper {
-	padding:0 0 0 57px;
+	padding:0;
 	cursor:move;
-	width:auto;
+	zoom:1;
 }
 
 .el-finder-drag-helper div {
@@ -667,12 +661,12 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 .el-finder-drag-copy {
-	background:url('../images/toolbar.png') 0 -685px no-repeat;
+	background:url('../images/toolbar.png') 0 -731px no-repeat;
 }
 
-div.el-finder-drag-helper label { 
-	border:1px solid #777; 
-	background-color:#ccc;
+.el-finder-drag-helper label { 
+	border:1px solid #ccc; 
+	background-color:#eee;
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
@@ -685,24 +679,24 @@ div.el-finder-drag-helper label {
 
 .el-finder-ql {
 	position:absolute;
-	z-index:10;	
-	width:auto;
+	width:420px;
 	height:auto;
-	padding:12px;
+	padding:12px 9px;
 	color:#fff;
 	text-align:center;
 	border-radius:9px; 
 	-moz-border-radius:9px; 
 	-webkit-border-radius:9px;
 	background:url(../images/ql.png);
-	overflow:hidden;
+	overflow: inherit !important;
 }
+
 /* toolbar */
 .el-finder-ql div {
 	height:18px;
 	font-size:14px;
 	background-color:#777;
-	margin:-12px -12px 12px -12px;
+	margin:-12px -9px 12px -9px;
 	padding:3px 0 0 3px;
 	opacity:.8;
 	text-align:center;
@@ -725,7 +719,7 @@ div.el-finder-drag-helper label {
 /* text files preview */
 .el-finder-ql iframe {
 	background:#fff;
-	width:600px;
+	width:400px;
 	height:400px;
 }
 /* images preview */
@@ -744,5 +738,4 @@ div.el-finder-drag-helper label {
 	display:block;
 	color: #fff;
 }
-
 

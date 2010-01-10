@@ -1,3 +1,4 @@
+(function($) {
 elFinder.prototype.view = function(fm, el) {
 	var self = this;
 	this.fm = fm;
@@ -19,7 +20,7 @@ elFinder.prototype.view = function(fm, el) {
 		'application/x-shockwave-flash' : 'Flash application',
 		'application/xml'               : 'XML document', 
 		'application/x-bittorrent'      : 'Bittorrent file',
-		'application/x-7z-compressed'   : 'Archive 7z',
+		'application/x-7z-compressed'   : '7z archive',
 		'application/x-tar'             : 'TAR archive', 
 	    'application/x-gzip'            : 'GZIP archive', 
 	    'application/x-bzip2'           : 'BZIP archive', 
@@ -64,7 +65,7 @@ elFinder.prototype.view = function(fm, el) {
 	this.tlb = $('<ul />');
 
 	this.nav = $('<div class="el-finder-nav" />').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: 500});
-	this.cwd = $('<div class="el-finder-cwd"/>');
+	this.cwd = $('<div class="el-finder-cwd"/>').attr('unselectable', 'on');
 	this.spn = $('<div class="el-finder-spinner" />');
 	this.msg = $('<p class="el-finder-err"><strong/></p>').click(function() { $(this).hide(); });
 	this.nfo = $('<div class="el-finder-stat" />');
@@ -80,13 +81,13 @@ elFinder.prototype.view = function(fm, el) {
 		.append(this.spn)
 		.append(this.msg)
 		.append('<div style="clear:both" />');
-	this.win = $(el).empty().addClass('el-finder').addClass(fm.options.cssClass||'')
+	this.win = $(el).empty().attr('id', this.fm.id).addClass('el-finder '+(fm.options.cssClass||''))
 		.append($('<div class="el-finder-toolbar" />').append(this.tlb))
 		.append(this.wrz)
 		.append(this.stb);
 
-	this.tree = $('<ul class="el-finder-tree"><li><div></div><a href="#" class="root selected">root</a></li></ul>').appendTo(this.nav);
-	this.plc  = $('<ul class="el-finder-places"><li><div/><strong>'+this.fm.i18n(this.fm.options.places)+'</strong><ul/></li></ul>').hide()
+	this.tree = $('<ul class="el-finder-tree"><li><a href="#" class="el-finder-tree-root selected"><div/>root</a></li></ul>').appendTo(this.nav);
+	this.plc  = $('<ul class="el-finder-places"><li><a href="#" class="el-finder-places-root"><div/>'+this.fm.i18n(this.fm.options.places)+'</a><ul/></li></ul>').hide()
 
 	this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
 
@@ -96,34 +97,31 @@ elFinder.prototype.view = function(fm, el) {
 	}
 
 	this.fatal = function(t) {
-		self.error(t.status != '404' ? 'Invalid backend configuration!' : 'Unable to connect to backend!')
+		self.error(t.status != '404' ? 'Invalid backend configuration' : 'Unable to connect to backend')
 	}
 	
 	this.error = function(err, data) {
 		this.fm.lock();
-		this.msg.show().children('strong').html(this.fm.i18n(err)+this.formatErrorData(data));
+		this.msg.show().children('strong').html(this.fm.i18n(err)+'!'+this.formatErrorData(data));
 		setTimeout(function() { self.msg.fadeOut('slow'); }, 6000);
 	}
 	
 	this.renderNav = function(tree) {
-		// self.fm.startBench()
 		var li = this.tree.children('li');
-		li.children('div').removeClass('collapsed expanded').next('a').text(tree.name).attr('key', tree.hash).next('ul').remove();
+		li.children('a').html('<div/>'+tree.name).attr('key', tree.hash).next('ul').remove();
 
 		if (tree.dirs.length) {
-			li.children('div').addClass('collapsed expanded').end().append(traverse(tree.dirs));
-			li.find('ul>li ul').hide();
+			li.append(traverse(tree.dirs)).children('a').children('div').addClass('collapsed expanded');
 		}
-		
-		// self.fm.log('renderNav: '+self.fm.stopBench())
 		
 		if (this.fm.options.places) {
 			this.renderPlaces();
 		}
 		
 		function traverse(tree) {
-			var i, hash, c='', html = '<ul>';
+			var i, hash, c, html = '<ul style="display:none">';
 			for (i=0; i < tree.length; i++) {
+				c = '';
 				if (!tree[i].read && !tree[i].write) {
 					c = 'noaccess';
 				} else if (!tree[i].read) {
@@ -132,7 +130,7 @@ elFinder.prototype.view = function(fm, el) {
 					c = 'readonly';
 				} 
 				
-				html += '<li><div'+(tree[i].dirs.length ? ' class="collapsed"' : '')+'></div><a href="#" class="'+c+'" key="'+tree[i].hash+'">'+tree[i].name+'</a>';
+				html += '<li><a href="#" class="'+c+'" key="'+tree[i].hash+'"><div'+(tree[i].dirs.length ? ' class="collapsed"' : '')+'/>'+tree[i].name+'</a>';
 
 				if (tree[i].dirs.length) {
 					html += traverse(tree[i].dirs);
@@ -144,19 +142,26 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderPlaces = function() {
-		var i, c, pl = this.fm.getPlaces(),	ul = this.plc.show().children('li').children('ul').empty().hide();
-		this.plc.children('li').children('div').removeClass('collapsed expanded');
+		var i, c, 
+			pl = this.fm.getPlaces(),	
+			ul = this.plc.show().children('li').children('ul').empty().hide();
+		
+
 		if (pl.length) {
 			for (i=0; i < pl.length; i++) {
 				if ((c = this.tree.find('a[key="'+pl[i]+'"]:not(.dropbox)').parent()) && c.length) {
-					c = c.clone()
-					c.children('div').removeClass('collapsed').next().next('ul').remove();
-					ul.append(c);
+					ul.append(c.clone().children('ul').remove().end());
 				} else {
 					this.fm.removePlace(pl[i]);
 				}
 			};
-			ul.children().length && this.plc.children('li:first').children('div').addClass('collapsed');
+			
+		}
+		if (ul.children().length) {
+			$('div', ul).removeClass('collapsed expanded');
+			$('div:first', this.plc).addClass('collapsed');
+		} else {
+			$('div:first', this.plc).removeClass('collapsed expanded');
 		}
 	}
 	
@@ -216,7 +221,7 @@ elFinder.prototype.view = function(fm, el) {
 				s += sel[i].size;
 			}
 		}
-		this.sel.text(s ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
+		this.sel.text(i>0 ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
 	}
 
 	this.formatName = function(n) {
@@ -282,3 +287,5 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 }
+
+})(jQuery);

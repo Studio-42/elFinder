@@ -1,15 +1,21 @@
+/**
+ * @class elFinder user Interface. 
+ * @author dio dio@std42.ru
+ **/
+(function($) {
 elFinder.prototype.ui = function(fm) {
 	
-	var self     = this;
-	this.fm      = fm;
-	this.cmd     = {};
-	this.buttons = {};
-	this.menu    = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
+	var self        = this;
+	this.fm         = fm;
+	this.cmd        = {};
+	this.buttons    = {};
+	this.menu       = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
+	this.dockButton = $('<div class="el-finder-dock-button" title="'+self.fm.i18n('Dock/undock filemanger window')+'" />');
 	
 	this.exec = function(cmd, arg) {
 		if (this.cmd[cmd]) {
 			if (cmd != 'open' && !this.cmd[cmd].isAllowed()) {
-				return this.fm.view.warning('Command not allowed!');
+				return this.fm.view.warning('Command not allowed');
 			}
 			if (!this.fm.locked) {
 				this.fm.quickLook.hide();
@@ -43,7 +49,6 @@ elFinder.prototype.ui = function(fm) {
 	this.showMenu = function(e) {
 		var t, win, size, id = '';
 		this.hideMenu();
-
 		
 		if (!self.fm.selected.length) {
 			t = 'cwd';
@@ -90,7 +95,7 @@ elFinder.prototype.ui = function(fm) {
 					self.exec(t.attr('name'), t.attr('argc'));
 				}
 			});
-		
+		// self.fm.log(self.menu.html())
 		function menu(t) {
 			var i, j, a, html, l, src = self.fm.options.contextmenu[t]||[];
 			for (i=0; i < src.length; i++) {
@@ -107,7 +112,7 @@ elFinder.prototype.ui = function(fm) {
 						};
 						html += '</div>';
 					}
-					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+self.cmdName(src[i])+html+'</div>');
+					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+html+self.cmdName(src[i])+'</div>');
 				}
 			};
 		}
@@ -129,7 +134,7 @@ elFinder.prototype.ui = function(fm) {
 		if (!this.fm.options.editorCallback) {
 			disabled.push('select');
 		}
-		/* disable archive command if no archivator enabled  */
+		/* disable archive command if no archivers enabled  */
 		if (!self.fm.params.archives.length && $.inArray('archive', disabled) == -1) {
 			disabled.push('archive');
 		}
@@ -164,28 +169,49 @@ elFinder.prototype.ui = function(fm) {
 		}
 		this.update();
 		/* set z-index for context menu */
-		$(':visible', document.body).each(function() {
-			z = parseInt($(this).css('z-index'));
-			if (z >= zindex) {
-				zindex = z+1;
-			}
-		});
-		this.menu.css('z-index', zindex);
+		this.menu.css('z-index', this.fm.zIndex);
+		
+		if (this.fm.options.docked) {
+			this.dockButton.hover(
+				function() { $(this).addClass('el-finder-dock-button-hover')},
+				function() { $(this).removeClass('el-finder-dock-button-hover')}
+			).click(function() { 
+				self.fm.view.win.attr('undocked') ? self.fm.dock() : self.fm.undock();
+				$(this).trigger('mouseout');
+			}).prependTo(this.fm.view.tlb);
+		}
+		
 	}
 
 }
 
+/**
+ * @class elFinder user Interface Command. 
+ * @author dio dio@std42.ru
+ **/
 elFinder.prototype.ui.prototype.command = function(fm) {  }
 
-
-elFinder.prototype.ui.prototype.command.prototype.isAllowed = function(f) {
+/**
+ * Return true if command can be applied now 
+ * @return Boolean
+ **/
+elFinder.prototype.ui.prototype.command.prototype.isAllowed = function() {
 	return true;
 }
 
+/**
+ * Return true if command can be included in contextmenu of required type
+ * @param  String  contextmenu type (cwd|group|file)
+ * @return Boolean
+ **/
 elFinder.prototype.ui.prototype.command.prototype.cm = function(t) {
 	return false;
 }
 
+/**
+ * Return not empty array if command required submenu in contextmenu
+ * @return Array
+ **/
 elFinder.prototype.ui.prototype.command.prototype.argc = function(t) {
 	return [];
 }
@@ -194,8 +220,8 @@ elFinder.prototype.ui.prototype.command.prototype.argc = function(t) {
 elFinder.prototype.ui.prototype.commands = {
 	
 	/**
-	 * @ class Go into previous folder
-	 * @ param Object  elFinder
+	 * @class Go into previous folder
+	 * @param Object  elFinder
 	 **/
 	back : function(fm) {
 		var self = this;
@@ -217,8 +243,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Reload current directory and navigation panel
-	 * @ param Object  elFinder
+	 * @class Reload current directory and navigation panel
+	 * @param Object  elFinder
 	 **/
 	reload : function(fm) {
 		var self  = this;
@@ -237,8 +263,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Open file/folder
-	 * @ param Object  elFinder
+	 * @class Open file/folder
+	 * @param Object  elFinder
 	 **/
 	open : function(fm) {
 		var self  = this;
@@ -255,7 +281,7 @@ elFinder.prototype.ui.prototype.commands = {
 				t = {
 					hash : $(dir).attr('key'),
 					mime : 'directory',
-					read : !$(dir).hasClass('noaccess') && !$(dir).hasClass('dropbox'),
+					read : !$(dir).hasClass('noaccess') && !$(dir).hasClass('dropbox')
 				}
 			} else {
 				t = this.fm.getSelected(0);
@@ -265,10 +291,10 @@ elFinder.prototype.ui.prototype.commands = {
 				return; 
 			}
 			if (!t.read) {
-				return this.fm.view.error('Access denied!');
+				return this.fm.view.error('Access denied');
 			}
 			if (t.type == 'link' && !t.link) {
-				return this.fm.view.error('Broken link!');
+				return this.fm.view.error('Unable to open broken link');
 			}
 			if (t.mime == 'directory') {
 				openDir(t.link||t.hash);
@@ -305,8 +331,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class. Return file url
-	 * @ param Object  elFinder
+	 * @class. Return file url
+	 * @param Object  elFinder
 	 **/
 	select : function(fm) {
 		var self  = this;
@@ -327,8 +353,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Display files/folders info in dialog window
-	 * @ param Object  elFinder
+	 * @class Display files/folders info in dialog window
+	 * @param Object  elFinder
 	 **/
 	info : function(fm) {
 		var self  = this;
@@ -360,7 +386,7 @@ elFinder.prototype.ui.prototype.commands = {
 
 				$('<div />').append(tb).dialog({
 					dialogClass : 'el-finder-dialog',
-					width       : 330,
+					width       : 350,
 					title       : self.fm.i18n(f.mime == 'directory' ? 'Folder info' : 'File info'),
 					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } },
 					buttons     : { Ok : function() { $(this).dialog('close'); }}
@@ -374,8 +400,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Rename file/folder
-	 * @ param Object elFinder
+	 * @class Rename file/folder
+	 * @param Object elFinder
 	 **/
 	rename : function(fm) {
 		var self  = this;
@@ -432,6 +458,7 @@ elFinder.prototype.ui.prototype.commands = {
 					if (err) {
 						self.fm.view.error(err);
 						el.addClass('ui-selected');
+						self.fm.lockShortcuts(true);
 						return input.select().focus();
 					}
 					
@@ -441,10 +468,8 @@ elFinder.prototype.ui.prototype.commands = {
 						} else {
 							f.mime == 'directory' && self.fm.removePlace(f.hash) && self.fm.addPlace(data.target);
 							self.fm.reload(data); 
-							self.fm.selectById(data.target);
-							self.fm.checkSelectedPos();
 						}
-					}, true);
+					}, { force : true });
 				}
 			}
 		}
@@ -462,6 +487,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Copy file/folder to "clipboard"
+	 * @param Object elFinder
+	 **/
 	copy : function(fm) {
 		var self = this;
 		this.name = 'Copy';
@@ -481,6 +510,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Cut file/folder to "clipboard"
+	 * @param Object elFinder
+	 **/
 	cut : function(fm) {
 		var self = this;
 		this.name = 'Cut';
@@ -500,6 +533,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Paste file/folder from "clipboard"
+	 * @param Object elFinder
+	 **/
 	paste : function(fm) {
 		var self  = this;
 		this.name = 'Paste';
@@ -518,22 +555,6 @@ elFinder.prototype.ui.prototype.commands = {
 			if (this.fm.buffer.src == this.fm.buffer.dst) {
 				return this.fm.view.error('Unable to copy into itself');
 			}
-			/* check for files with same names and propmt to overwrite (not for dragndrop moving) */
-			if (this.fm.buffer.dst == this.fm.cwd.hash) {
-				for (i=0; i<this.fm.buffer.names.length; i++) {
-					f = this.fm.buffer.names[i];
-					if (this.fm.fileExists(f)) {
-						msg += f+"\n";
-					}
-				}
-
-				if (msg) {
-					r = confirm(this.fm.i18n('Following files/folders already exists in this location:')+"\n\n"+msg+"\n"+this.fm.i18n('Do you want to replace it with the one you’re moving?')); 
-					if (!r) {
-						return;
-					}
-				}
-			}
 			
 			this.fm.ajax({
 				cmd       : 'paste',
@@ -544,7 +565,7 @@ elFinder.prototype.ui.prototype.commands = {
 				cut       : this.fm.buffer.cut
 			}, function(data) {
 				data.tree && self.fm.reload(data);
-			}, true);
+			}, {force : true});
 		}
 		
 		
@@ -557,6 +578,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Remove files/folders
+	 * @param Object elFinder
+	 **/
 	rm : function(fm) {
 		var self  = this;
 		this.name = 'Remove';
@@ -566,20 +591,18 @@ elFinder.prototype.ui.prototype.commands = {
 			var i, ids = [], s =this.fm.getSelected();
 			for (var i=0; i < s.length; i++) {
 				if (!s[i].rm) {
-					return this.fm.view.error(s[i].name+': '+this.fm.i18n('Access denied!'));
+					return this.fm.view.error(s[i].name+': '+this.fm.i18n('Access denied'));
 				}
 				ids.push(s[i].hash);
 			};
 			if (ids.length) {
-				this.fm.keydown = false;
-				$('<div/>').append($('<p/>').addClass('el-finder-err el-finder-warn')
-						.append('<div/>').append(this.fm.i18n('Are you shure you want to remove files?<br /> This cannot be undone!'))
-					)
+				this.fm.lockShortcuts(true);
+				$('<div><div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong>'+this.fm.i18n('Are you shure you want to remove files?<br /> This cannot be undone!')+'</strong></div></div>')
 					.dialog({
 						title       : this.fm.i18n('Confirmation required'),
 						dialogClass : 'el-finder-dialog',
 						width       : 350,
-						close       : function() { self.fm.keydown = true; },
+						close       : function() { self.fm.lockShortcuts(); },
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
 							Ok     : function() { 
@@ -591,7 +614,7 @@ elFinder.prototype.ui.prototype.commands = {
 									}, 
 									function(data) {
 										data.tree && self.fm.reload(data);
-								}, true);
+								}, {force : true});
 							}
 						}
 					});
@@ -608,8 +631,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Create new folder
-	 * @ param Object  elFinder
+	 * @class Create new folder
+	 * @param Object  elFinder
 	 **/
 	mkdir : function(fm) {
 		var self  = this;
@@ -659,6 +682,7 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						self.fm.lockShortcuts(true);
 						el.addClass('ui-selected');
 						return input.select().focus();
 					}
@@ -669,9 +693,7 @@ elFinder.prototype.ui.prototype.commands = {
 							return input.select().focus();
 						}
 						self.fm.reload(data);
-						self.fm.selectById(data.target);
-						self.fm.checkSelectedPos();
-					}, true);
+					}, {force : true});
 				}
 			}
 		}
@@ -686,8 +708,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Create new text file
-	 * @ param Object  elFinder
+	 * @class Create new text file
+	 * @param Object  elFinder
 	 **/
 	mkfile : function(fm) {
 		var self  = this;
@@ -720,8 +742,6 @@ elFinder.prototype.ui.prototype.commands = {
 				});
 			self.fm.lockShortcuts(true);
 			
-			// $(document).bind('click', function() { self.fm.log('click') })
-			
 			function mkfile() {
 				if (!self.fm.locked) {
 					var err, name = input.val();
@@ -732,6 +752,7 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 					if (err) {
 						self.fm.view.error(err);
+						self.fm.lockShortcuts(true);
 						el.addClass('ui-selected');
 						return input.select().focus();
 					}
@@ -741,9 +762,7 @@ elFinder.prototype.ui.prototype.commands = {
 							return input.select().focus();
 						}
 						self.fm.reload(data);
-						self.fm.selectById(data.target);
-						self.fm.checkSelectedPos();
-					}, true);
+					}, {force : true });
 				}
 			}
 			
@@ -759,8 +778,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Upload files
-	 * @ param Object  elFinder
+	 * @class Upload files
+	 * @param Object  elFinder
 	 **/
 	upload : function(fm) {
 		var self  = this;
@@ -769,12 +788,17 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 
-			var err = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
+			var id = 'el-finder-target',
+				$io = $('<iframe id="'+id+'" name="'+id+'" src="about:blank" />'),
+				io = $io[0],
+				xhr,
+				tryCnt = 50,
+				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
 				m = this.fm.params.uplMaxSize ? '<div>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</div>' : '',
-				f = $('<form method="post" enctype="multipart/form-data"><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
+				f = $('<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" /><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
 				b = $('<div class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</div>')
 					.click(function() { f.append('<div><input type="file" name="fm-file[]"/></div>'); }),
-				d = $('<div/>').append(err.hide()).append(m).append(f).append(b).dialog({
+				d = $('<div/>').append(e.hide()).append(m).append(f).append(b).dialog({
 						dialogClass : 'el-finder-dialog',
 						title       : self.fm.i18n('Upload files'),
 						modal       : true,
@@ -782,49 +806,113 @@ elFinder.prototype.ui.prototype.commands = {
 						close       : function() { self.fm.lockShortcuts(); },
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
-							Ok     : function() { f.submit(); }
+							Ok     : upload
 						}
 					});
 
 			self.fm.lockShortcuts(true);
 
-			f.ajaxForm({
-				url          : this.fm.options.url,
-				dataType     : 'json',
-				data         : {cmd : 'upload', current : this.fm.cwd.hash},
-				beforeSubmit : function() {
-					var error, num=0, n;
-					f.find(':file').each(function() {
-						if ((n = $(this).val())) {
-							if (!self.fm.isValidName(n)) {
-								error = 'One of files has invalid name';
-							} else {
-								num++;
-							}
-						}
-					});
-					if (!num || error) {
-						err.show().find('strong').empty().text(self.fm.i18n(error||'Select at least one file to upload'));
-						return false;
-					}
-					
-					self.fm.lock(true);
-					d.dialog('close');
-					return true;
-				},
-				error   : self.fm.view.fatal,
-				success : function(data) {
-					self.fm.lock();
-					if (data.error) {
-						return self.fm.view.error(data.error, data.errorData);
-					}
-					data.warning && self.fm.view.warning(data.warning, data.errorData);
-					self.fm.reload(data);
 
-					data.debug && self.fm.log(data.debug);
-					data.tmb && self.fm.tmb();
+			function upload() {
+				var files = $(':file[value]', f);
+				
+				function error(err) {
+					e.show().find('strong').empty().text(err);
 				}
-			});
+				
+				function submit() {
+					self.fm.lock(true);
+					$io.bind('load', result);
+					f.submit();
+					d.dialog('close');
+				}
+				
+				if (!files.length) {
+					return error(self.fm.i18n('Select at least one file to upload'));
+				}
+
+				xhr = { 
+					aborted: 0,
+					responseText: null,
+					responseXML: null,
+					status: 0,
+					statusText: 'n/a',
+					getAllResponseHeaders: function() {},
+					getResponseHeader:  function(header){
+						var headers = {'content-type': 'json'};
+						return headers[header];
+					},
+					setRequestHeader: function() {},
+					abort: function() {
+						this.aborted = 1;
+						$io.attr('src','about:blank'); 
+					}
+				}
+				
+				
+				if (!$.active++) {
+					$.event.trigger("ajaxStart");
+				}
+				$.event.trigger("ajaxSend", [xhr, {}]);
+				
+				if (xhr.aborted) {
+					return;
+				}
+				
+				$io.css({ position: 'absolute', top: '-1000px', left: '-1000px' }).appendTo('body');	
+				
+				
+				
+
+				setTimeout(function() {
+					/* hack to fix safari bug http://www.webmasterworld.com/macintosh_webmaster/3300569.htm */
+					if ($.browser.safari) {
+						$.ajax({
+							url     : self.fm.options.url,
+							data    : {cmd : 'ping'},
+							error   : submit,
+							success : submit
+						});
+					} else {
+						submit();
+					}
+				}, 10);
+			}
+
+
+			function result() {
+				var doc, data, pre, ok = true;
+				$io.unbind('load');
+				self.fm.lock();
+
+				try {
+					doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
+					/* opera */
+					if (doc.body == null || doc.body.innerHTML == '') {
+						if (--tryCnt) {
+							return setTimeout(result, 100);
+						}
+						return self.fm.view.error('Unable to access iframe DOM after 50 tries');
+					}
+					pre = doc.getElementsByTagName('pre')[0]
+					xhr.responseText = pre ? pre.innerHTML : doc.body ? doc.body.innerHTML : null;
+					data = $.httpData(xhr, 'json');
+				} catch(e) {
+					self.fm.view.error('Unable to upload files', {Error : 'Unable to parse server response'});
+					ok = false;
+				}
+				
+				
+				if (ok) {
+					$.event.trigger("ajaxSuccess", [xhr, {}]);
+					data.error && self.fm.view.error(data.error, data.errorData);
+					data.cwd && self.fm.reload(data);
+				}
+
+				$.event.trigger("ajaxComplete", [xhr, {}]);
+				if (!--$.active) { $.event.trigger("ajaxStop"); }
+				setTimeout(function() { $io.remove(); }, 100);
+			}
 		}
 		
 		this.isAllowed = function() {
@@ -837,8 +925,8 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
-	 * @ class Make file/folder copy
-	 * @ param Object  elFinder
+	 * @class Make file/folder copy
+	 * @param Object  elFinder
 	 **/
 	duplicate : function(fm) {
 		var self  = this;
@@ -857,8 +945,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			var s = this.fm.getSelected();
-			return this.fm.cwd.write && s.length == 1 && s[0].read;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected()[0].read;
 		}
 		
 		this.cm = function(t) {
@@ -866,13 +953,18 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Edit text file
+	 * @param Object  elFinder
+	 **/
 	edit : function(fm) {
 		var self  = this;
 		this.name = 'Edit text file';
 		this.fm   = fm;
 		
 		this.exec = function() {
-			var f = this.fm.getSelected()[0];
+			var f = this.fm.getSelected(0);
+			self.fm.log(f)
 			this.fm.lockShortcuts(true);
 			this.fm.ajax({
 				cmd     : 'read',
@@ -900,8 +992,9 @@ elFinder.prototype.ui.prototype.commands = {
 								}, function(data) {
 									if (data.file) {
 										self.fm.cdc[data.file.hash] = data.file;
+										self.fm.selectById(data.file.hash);
 									}
-								}, false, {type : 'POST'});
+								}, {type : 'POST'});
 							}
 						}
 					});
@@ -909,8 +1002,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			var f = this.fm.getSelected();
-			return f.length == 1 && f[0].write && f[0].type != 'dir' && (f[0].mime.indexOf('text') == 0 || f[0].mime == 'application/xml' || f[0].mime == 'application/x-empty');
+			if (self.fm.selected.length == 1) {
+				var f = this.fm.getSelected()[0];
+				return f.write && (f.mime.indexOf('text') == 0 || f.mime == 'application/x-empty' || f.mime == 'application/xml');
+			}
 		}
 		
 		this.cm = function(t) {
@@ -918,6 +1013,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Create archive
+	 * @param Object  elFinder
+	 **/
 	archive : function(fm) {
 		var self  = this;
 		this.name = 'Create archive';
@@ -957,6 +1056,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Extract files from archive
+	 * @param Object  elFinder
+	 **/
 	extract : function(fm) {
 		var self  = this;
 		this.name = 'Uncompress archive';
@@ -981,6 +1084,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Resize image
+	 * @param Object  elFinder
+	 **/
 	resize : function(fm) {
 		var self  = this;
 		this.name = 'Resize image';
@@ -1054,6 +1161,10 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Switch elFinder into icon view
+	 * @param Object  elFinder
+	 **/
 	icons : function(fm) {
 		var self  = this;
 		this.name = 'View as icons';
@@ -1075,16 +1186,20 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 	},
 	
+	/**
+	 * @class Switch elFinder into list view
+	 * @param Object  elFinder
+	 **/
 	list : function(fm) {
 		var self  = this;
 		this.name = 'View as list';
 		this.fm   = fm;
 		
 		this.exec = function() {
-			self.fm.view.win.addClass('el-finder-disabled')
+			self.fm.view.win.addClass('el-finder-disabled');
 			this.fm.setView('list');
 			this.fm.updateCwd();
-			self.fm.view.win.removeClass('el-finder-disabled')
+			self.fm.view.win.removeClass('el-finder-disabled');
 		}
 		
 		this.isAllowed = function() {
@@ -1097,12 +1212,59 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	help : function(fm) {
-		var self = this;
+		var self  = this;
 		this.name = 'Help';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
+			var h, ht = this.fm.i18n('helpText'), a, s, tabs; 
 			
+			h = '<strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br/><br/>';
+			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click). <br /> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
+			h += '<br/>'
+				+ this.fm.i18n('Ctrl+A - Select all files')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+C/Ctrl+X/Ctrl+V - Copy/Cut/Paste files')+'<br/>'
+			 	+ this.fm.i18n('Enter - Open selected file/folder')+'<br/>'
+				+ this.fm.i18n('Space - Open/close QuickLook window')+'<br/>'
+			 	+ this.fm.i18n('Delete/Cmd+Backspace - Remove selected files')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+I - Selected files or current directory info')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+N - Create new directory')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+U - Open upload files form')+'<br/>'
+			 	+ this.fm.i18n('Left arrow - Select previous file')+'<br/>'
+			 	+ this.fm.i18n('Right arrow - Select next file')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+Right arrow - Open selected file/folder')+'<br/>'
+			 	+ this.fm.i18n('Ctrl+Left arrow - Return into previous folder')+'<br/>'
+			 	+ this.fm.i18n('Shift+arrows - Increase/decreasefile selection')+'<br/><br/>'
+			 	+ '<a href="http://www.elrte.ru/elfinder/" target="_blank">'+this.fm.i18n('elFinder details and documentation')+'</a><br/>'
+			 	+ this.fm.i18n('Donate')+'<br/>'
+			 	+ this.fm.i18n('Contacts us if you need elFinder integration in you products');
+
+			a = this.fm.i18n('Javascripts/php programming: Dmitry (dio) Levashov, dio@std42.ru')+'<br/>'
+				+this.fm.i18n('Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru')+'<br/>'
+				+this.fm.i18n('Design: Valentin Razumnih')+'<br/>'
+				+this.fm.i18n('Copyright: <a href="http://www.std42" target="_blank">Studio 42 LTD</a>')+'<br/>'
+				+this.fm.i18n('License: BSD License')+'<br/>'
+				+this.fm.i18n('Web site: <a href="http://www.elrte.ru/elfinder/" target="_blank">elrte.ru</a>');
+			
+			s = this.fm.i18n('')
+			
+			tabs = '<ul><li><a href="#el-finder-help-h">'+this.fm.i18n('Help')+'</a></li><li><a href="#el-finder-help-a">'+this.fm.i18n('Authors')+'</a><li><a href="#el-finder-help-sp">'+this.fm.i18n('Sponsors')+'</a></li></ul>'
+					+'<div id="el-finder-help-h"><p>'+h+'</p></div>'
+					+'<div id="el-finder-help-a"><p>'+a+'</p></div>'
+					+'<div id="el-finder-help-sp"><p></p></div>';
+			
+			
+			
+			$('<div/>').append(tabs).dialog({
+				width : 600,
+				// title : self.fm.i18n('Help'),
+				title : false,
+				dialogClass : 'el-finder-dialog',
+				modal : true,
+				buttons : {
+					Ok : function() { $(this).dialog('close'); }
+				}
+			}).tabs()
 		}
 		
 		this.cm = function(t) {
@@ -1111,4 +1273,5 @@ elFinder.prototype.ui.prototype.commands = {
 	}
 }
 
+})(jQuery);
 

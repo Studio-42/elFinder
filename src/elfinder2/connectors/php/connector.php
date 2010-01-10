@@ -46,9 +46,9 @@ $opts = array(
 	// 'imgLib' => '',
 	// 'dotFiles' => true,
 	// 'cntDirSize' => false,
-	'uploadAllow' => array('text', 'image'),
-	'uploadDeny' => array('image/png'),
-	'uploadOrder' => 'allow,deny',
+	// 'uploadAllow' => array('text', 'image'),
+	// 'uploadDeny' => array('image/png'),
+	// 'uploadOrder' => 'deny,allow',
 	// 'disabled' => array('upload', 'reload'),
 	'tmbDir' => '.tmb',
 	'archiveMimes' => array(),
@@ -58,6 +58,11 @@ $opts = array(
 		'rm'    => true
 		),
 	'perms' => array(
+		'/icons$/' => array(
+			'read' => false,
+			// 'write' => false,
+			'rm' => false
+			)
 			)
 );
 

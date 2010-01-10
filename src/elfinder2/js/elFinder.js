@@ -5,7 +5,34 @@
 	 * @author dio dio@std42.ru
 	 **/
 	elFinder = function(el, o) {
-		var self      = this;
+		var self = this, id;
+		
+		this.log = function(m) {
+			window.console && window.console.log && window.console.log(m)
+		}
+		/**
+		 * Object. File manager configuration
+		 **/
+		this.options = $.extend({}, this.options, o||{});
+		
+		if (!this.options.url) {
+			alert('Invalid configuration! You have to set URL option.');
+			return;
+		}
+		/**
+		 * String. element id, create random if not set;
+		 **/
+		this.id = '';
+		if ((id = $(el).attr('id'))) {
+			this.id = id;
+		} else {
+			this.id = 'el-finder-'+Math.random().toString().substring(2);
+		}
+		
+		/**
+		 * String. Version number;
+		 **/
+		this.version  = '1.1 beta3';
 		/**
 		 * Object. Current Working Dir info
 		 **/
@@ -27,37 +54,44 @@
 		 **/
 		this.history  = [];
 		/**
-		 * Boolean. File manager init?
-		 **/
-		this.loaded   = false;
-		/**
 		 * Boolean. Enable/disable actions
 		 **/
 		this.locked   = false;
-		
-		this.params = { dotFiles : false, arc : '', uplMaxSize : '' }
 		/**
-		 * Object. File manager configuration
+		 * Number. Max z-index on page + 1, need for contextmenu and quicklook
 		 **/
-		this.options = $.extend({}, this.options, o);
-		
-		if (!this.options.url) {
-			alert('Invalid configuration! You have to set URL option.');
-			return;
-		}
-		
-		
+		this.zIndex = 2;
+		/**
+		 * DOMElement. jQueryUI dialog
+		 **/
+		this.dialog = null;
+		/**
+		 * DOMElement. For docked mode - place where fm is docked
+		 **/
+		this.anchor = this.options.docked ? $('<div/>').hide().insertBefore(el) : null;
+		/**
+		 * Object. Some options get from server
+		 **/
+		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
+		this.vCookie = 'el-finder-view-'+this.id;
+		this.pCookie = 'el-finder-places-'+this.id;
+		this.lCookie = 'el-finder-last-'+this.id;
+		/**
+		 * Object. View. After init we can accessel as this.view.win
+		 **/
 		this.view = new this.view(this, el);
-		
-		this.quickLook = new this.quickLook(this);
-		
-		this.ui = new this.ui(this)
-		
+		/**
+		 * Object. User Iterface. Controller for commands/buttons/contextmenu
+		 **/
+		this.ui = new this.ui(this);
+		/**
+		 * Object. Set/update events
+		 **/
 		this.eventsManager = new this.eventsManager(this);
-		
-		this.log = function(m) {
-			window.console && window.console.log && window.console.log(m)
-		}
+		/**
+		 * Object. Quick Look like in MacOS X :)
+		 **/
+		this.quickLook = new this.quickLook(this);
 
 		/**
 		 * Set/get cookie value
@@ -93,8 +127,6 @@
 			}
 		}
 
-		
-
 		/**
 		 * Set/unset this.locked flag
 		 *
@@ -122,7 +154,7 @@
 		this.setView = function(v) {
 			if (v == 'list' || v == 'icons') {
 				this.options.view = v;
-				this.cookie('el-finder-view', v);
+				this.cookie(this.vCookie, v);
 			}
 		}
 		
@@ -131,44 +163,41 @@
 		 *
 		 * @param  Object.  data for ajax request
 		 * @param  Function  
-		 * @param  Boolean  call callback on error?
-		 * @param  Object   overrwrite some ajax options (type/async)
-		 * @param  Boolean  do not lock fm before ajax?
+		 * @param  Object   overrwrite some options 
 		 */
-		this.ajax = function(data, callback, force, options, noLock) {
-			!noLock && this.lock(true);
+		this.ajax = function(data, callback, options) {
 
 			var opts = {
-				cmd      : '',
 				url      : this.options.url,
 				async    : true,
 				type     : 'GET',
 				data     : data,
 				dataType : 'json',
 				cache    : false,
-				error    : self.view.fatal,
-				success  : function(data) {
-					self.lock();
-
-					if (data.error) {
-						self.view.error(data.error, data.errorData) 
-						if (!force) {
-							return;
-						}
-					}
-					callback(data);
-					data.debug && self.log(data.debug);
-					/* tell connector to generate thumbnails */
-					if (!self.locked && self.options.view == 'icons') {
-						data.tmb && self.tmb();
-					}
-					delete data
-				}
+				lock     : true,
+				force    : false,
+				silent   : false
 			}
 			if (typeof(options) == 'object') {
 				opts = $.extend({}, opts, options);
 			}
-			
+			if (!opts.silent) {
+				opts.error = self.view.fatal;
+			}
+			opts.success = function(data) {
+				opts.lock && self.lock();
+
+				if (data.error) {
+					!opts.silent && self.view.error(data.error, data.errorData);
+					if (!opts.force) {
+						return;
+					}
+				}
+				callback(data);
+				data.debug && self.log(data.debug);
+				delete data;
+			}
+			opts.lock && this.lock(true);
 			$.ajax(opts);
 		}
 		
@@ -178,13 +207,13 @@
 		 **/
 		this.tmb = function() {
 			this.ajax({cmd : 'tmb', current : self.cwd.hash}, function(data) {
-				if (self.options.view == 'icons' && data.images) {
-					var i, el;
-					for (i in data.images) {
+				if (self.options.view == 'icons' && data.images && data.current == self.cwd.hash) {
+					for (var i in data.images) {
 						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
 					}
+					data.tmb && self.tmb();
 				}
-			}, false, null, true);
+			}, {lock : false, silent : true});
 		}
 		
 		/**
@@ -193,7 +222,7 @@
 		 * @return Array
 		 **/
 		this.getPlaces = function() {
-			var pl = [], p = this.cookie('el-finder-places');
+			var pl = [], p = this.cookie(this.pCookie);
 			if (p.length) {
 				if (p.indexOf(':')!=-1) {
 					pl = p.split(':');
@@ -239,10 +268,8 @@
 		 * @param  Array  Folders IDs
 		 **/
 		this.savePlaces = function(p) {
-			this.cookie('el-finder-places', p.join(':'));
+			this.cookie(this.pCookie, p.join(':'));
 		}
-		
-	
 		
 		/**
 		 * Update file manager content
@@ -250,20 +277,33 @@
 		 * @param  Object  Data from server
 		 **/
 		this.reload = function(data) {
+			var i;
 			this.cwd = data.cwd;
-			// self.log(self.cwd)
 			this.cdc = {};
-			for (var i=0; i<data.cdc.length ; i++) {
-				data.cdc[i].hash += ''
+			for (i=0; i<data.cdc.length ; i++) {
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 			}
-			
 			if (data.tree) {
 				this.view.renderNav(data.tree);
 				this.eventsManager.updateNav();
 			}
 			this.updateCwd();
+			/* tell connector to generate thumbnails */
+			if (data.tmb && !self.locked && self.options.view == 'icons') {
+				self.tmb();
+			}
+			/* have to select some files */
+			if (data.select) {
+				if (typeof(data.select) == 'string') {
+					this.cdc[data.select] && this.selectById(data.select);
+				} else if (typeof(data.select) == 'object') {
+					for (i = data.select.length - 1; i >= 0; i--){
+						this.cdc[data.select[i]] && this.selectById(data.select[i]);
+					};
+				}
+			}
+			this.lastDir(this.cwd.hash);
 		}
 		
 		/**
@@ -273,13 +313,10 @@
 		this.updateCwd = function() {
 			this.lockShortcuts();
 			this.selected = [];
-			
 			this.view.renderCwd();
-			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 			this.eventsManager.updateCwd();
+			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
 		}
-		
-		
 		
 		/**
 		 * Execute after files was dropped onto folder
@@ -290,7 +327,7 @@
 		 */
 		this.drop = function(e, ui, target) {
 			if (ui.helper.find('[key="'+target+'"]').length) {
-				return self.view.error('Unable to copy into itself!');
+				return self.view.error('Unable to copy into itself');
 			}
 			var ids = [];
 			ui.helper.find('div:not(.noaccess):has(>label):not(:has(em[class="readonly"],em[class=""]))').each(function() {
@@ -335,8 +372,11 @@
 		}
 
 		this.selectById = function(id) {
-			var el = $('[key="'+id+'"]', self.view.cwd);
-			el.length && self.select(el)
+			var el = $('[key="'+id+'"]', this.view.cwd);
+			if (el.length) {
+				this.select(el);
+				this.checkSelectedPos();
+			}
 		}
 
 		this.unselect = function(el) {
@@ -386,11 +426,6 @@
 			}
 		}
 
-		this.time = function() {
-			var d = new Date()
-			return d.getMilliseconds();
-		}
-		
 		/**
 		 * Add files to clipboard buffer
 		 *
@@ -462,13 +497,9 @@
 				if (s[0].url) {
 					url = s[0].url;
 				} else {
-					this.ajax({
-							cmd     : 'geturl', 
-							current : self.cwd.hash, 
-							file    : s[0].hash
-						}, 
+					this.ajax({ cmd : 'geturl', current : self.cwd.hash, file : s[0].hash }, 
 						function(data) { url = data.url||''; }, 
-						true, {async : false });
+						{async : false, lock : false });
 				}
 			}
 			return url;		
@@ -496,27 +527,116 @@
 			}
 			return name.replace('100', '')+Math.random()+ext;
 		}
-		
-		/* here we init file manager */
-		if (!this.loaded) {
-			
-			this.setView(this.cookie('el-finder-view'));
-			this.loaded = true;
-			self.eventsManager.init();
-			this.ajax({ cmd: 'open', init : true, tree: true }, function(data) {
-				self.log(data)
-				self.reload(data);
-				self.params = data.params;
-				self.ui.init(data.disabled);
-			});
-			
+
+		/**
+		 * Get/set last opened dir
+		 *
+		 * @param  String  dir hash
+		 * @return String
+		 */
+		this.lastDir = function(dir) {
+			if (!dir) {
+				return this.cookie(this.lCookie);
+			} else {
+				this.cookie(this.lCookie, dir);
+			}
+		}
+
+		/**
+		 * Resize file manager
+		 *
+		 * @param  Number  width
+		 * @param  Number  height
+		 */
+		function resize(w, h) {
+			w && self.view.win.width(w);
+			h && self.view.nav.add(self.view.cwd).height(h);
 		}
 		
+		/**
+		 * Resize file manager in dialog window while it resize
+		 *
+		 */
+		function dialogResize() {
+			resize(null, self.dialog.height()-self.view.tlb.parent().height()-($.browser.msie ? 47 : 32))
+		}
+
+		this.time = function() {
+			return new Date().getMilliseconds();
+		}
+
+		/* here we init file manager */
 		
+		this.setView(this.cookie(this.vCookie));
+		resize(self.options.width, self.options.height);
 		
-		this.open = function() {}
+		/* dialog or docked mode */
+		if (this.options.dialog || this.options.docked) {
+			this.options.dialog = $.extend({width : 570, dialogClass : '', minWidth : 480, minHeight: 330}, this.options.dialog || {});
+			this.options.dialog.dialogClass += 'el-finder-dialog';
+			this.options.dialog.resize = dialogResize;
+			if (this.options.docked) {
+				/* docked mode - create dialog and store size */
+				this.options.dialog.close = function() { self.dock(); };
+				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
+			} else {
+				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
+			}
+		}
+
+		this.ajax({ 
+			cmd    : 'open', 
+			target : this.lastDir()||'', 
+			init   : true, 
+			tree   : true 
+			}, 
+			function(data) {
+				if (data.cwd) {
+					self.eventsManager.init();
+					self.reload(data);
+					self.params = data.params;
+					$('*', document.body).each(function() {
+						var z = parseInt($(this).css('z-index'));
+						if (z >= self.zIndex) {
+							self.zIndex = z+1;
+						}
+					});
+					self.ui.init(data.disabled);
+				}
+				
+		}, {force : true});
+			
 		
-		this.close = function() {}
+		this.open = function() {
+			this.dialog ? this.dialog.dialog('open') : this.view.win.show();
+			this.eventsManager.lock = false;
+		}
+		
+		this.close = function() {
+			if (this.options.docked && this.view.win.attr('undocked')) {
+				this.dock();
+			} else {
+				this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+			}
+			this.eventsManager.lock = true;
+		}
+		
+		this.dock = function() {
+			if (this.options.docked && this.view.win.attr('undocked')) {
+				var s =this.view.win.data('size');
+				this.view.win.insertAfter(this.anchor).removeAttr('undocked');
+				resize(s.width, s.height);
+				this.dialog.dialog('destroy');
+				this.dialog = null;
+			}
+		}
+		
+		this.undock = function() {
+			if (this.options.docked && !this.view.win.attr('undocked')) {
+				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true).show()).dialog(this.options.dialog);
+				dialogResize();
+			} 
+		}
 	}
 	
 	/**
@@ -534,21 +654,38 @@
 	 *
 	 */
 	elFinder.prototype.options = {
+		/* connector url. Required! */
 		url            : '',
+		/* interface language */
 		lang           : 'en',
+		/* additional css class for filemanager container */
 		cssClass       : '',
+		/* characters number to wrap file name in icons view. set to 0 to disable wrap */
 		wrap           : 14,
+		/* Name for places/favorites (i18n), set to '' to disable places */
 		places         : 'Places',
+		/* show places before navigation? */
 		placesFirst    : true,
+		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
+		/* i18 messages. not set manually! */
 		i18n           : {},
+		/* fm view (icons|list) */
 		view           : 'icons',
+		/* width to overwrite css options */
+		// width          : '100%',
+		/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
+		// height         : 300,
+		/* disable shortcuts exclude arrows/space */
+		disableShortcuts : false,
+		/* cookie options */
 		cookie         : {
 			expires : 30,
 			domain  : '',
 			path    : '/',
 			secure  : false
 		},
+		/* buttons on toolbar */
 		toolbar        : [
 			['back', 'reload'],
 			['select', 'open'],
@@ -558,12 +695,16 @@
 			['info', 'help'],
 			['icons', 'list']
 		],
+		/* contextmenu commands */
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
 			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
-		}
-		
+		},
+		/* jqueryUI dialog options */
+		dialog : null,
+		/* docked mode */
+		docked : false
 	}
 
 	
@@ -571,12 +712,31 @@
 		
 		return this.each(function() {
 			
-			
+			var cmd = typeof(o) == 'string' ? o : '';
 			if (!this.elfinder) {
-				this.elfinder = new elFinder(this, o||{})
+				this.elfinder = new elFinder(this, typeof(o) == 'object' ? o : {})
 			}
 			
-			// log(this.elfinder)
+			switch(cmd) {
+				case 'close':
+				case 'hide':
+					this.elfinder.close();
+					break;
+					
+				case 'open':
+				case 'show':
+					this.elfinder.open();
+					break;
+				
+				case 'dock':
+					this.elfinder.dock();
+					break;
+					
+				case 'undock':
+					this.elfinder.undock();
+					break;
+			}
+			
 		})
 	}
 	
