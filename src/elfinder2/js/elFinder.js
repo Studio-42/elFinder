@@ -535,7 +535,6 @@
 		 * @return String
 		 */
 		this.lastDir = function(dir) {
-			self.log(this.lCookie+' '+dir)
 			if (!dir) {
 				return this.cookie(this.lCookie);
 			} else {
@@ -559,7 +558,7 @@
 		 *
 		 */
 		function dialogResize() {
-			resize(null, self.dialog.height()-self.view.tlb.parent().height()-32)
+			resize(null, self.dialog.height()-self.view.tlb.parent().height()-($.browser.msie ? 47 : 32))
 		}
 
 		this.time = function() {
@@ -584,7 +583,7 @@
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
-		self.log('init: '+self.lastDir())
+
 		this.ajax({ 
 			cmd    : 'open', 
 			target : this.lastDir()||'', 

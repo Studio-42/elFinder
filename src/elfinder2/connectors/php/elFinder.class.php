@@ -1056,11 +1056,11 @@ class elFinder {
 			'hash'  => $this->_hash($path),
 			'name'  => $path == $this->_options['root'] && $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path),
 			'read'  => $this->_isAllowed($path, 'read'),
-			'write' => $this->_isAllowed($path, 'write')
+			'write' => $this->_isAllowed($path, 'write'),
+			'dirs'  => array()
 			);
 		
 		if ($dir['read'] && false != ($ls = scandir($path))) {
-			$dir['dirs'] = array();
 			for ($i=0; $i < count($ls); $i++) {
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
 				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {

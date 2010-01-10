@@ -58,6 +58,11 @@ $opts = array(
 		'rm'    => true
 		),
 	'perms' => array(
+		'/icons$/' => array(
+			'read' => false,
+			// 'write' => false,
+			'rm' => false
+			)
 			)
 );
 

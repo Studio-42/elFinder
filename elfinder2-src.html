@@ -24,7 +24,16 @@
 	
 	<style type="text/css">
 		#close, #open, #dock, #undock {
-			display : inline;
+			width: 100px;
+			position:relative;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			margin:0 3px 3px 0;
+			padding:1px 0;
+			text-align:center;
 			border:1px solid #ccc;
 			background-color:#eee;
 			margin:1em .5em;

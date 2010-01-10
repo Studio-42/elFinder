@@ -52,7 +52,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.selectable({
 				filter : '[key]',
 				delay  : 300,
-				stop : function() { self.fm.updateSelect() }
+				stop   : function() { self.fm.updateSelect() }
 			});
 			
 		$(document).bind('click', function() { 
@@ -61,32 +61,36 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		});
 
 		/* click on tree or places */
-		$('#'+this.fm.id+' .el-finder-nav a').live('click', function(e) {
-			e.preventDefault();
-			if ($(this).attr('key') != self.fm.cwd.hash) {
-				$(this).trigger('select');
-				self.ui.exec('open', this);
-			}
-		});
-		
-		/* click on collapsed arrow or places */
-		$('#'+this.fm.id+' .el-finder-nav div.collapsed,strong').live('click', function(e) {
-			var t = $(this), div, ul;
-			if (this.nodeName == 'DIV') {
-				div = t;
-				ul  = div.next().next('ul');
-			} else {
-				div = t.prev('div.collapsed');
-				ul  = t.next('ul');
-			}
-			div.toggleClass('expanded');
-			ul.toggle(300)
-		});
+		// $('#'+this.fm.id+' .el-finder-nav a').live('click', function(e) {
+		// 	self.fm.log('click link')
+		// 	e.preventDefault();
+		// 	if ($(this).attr('key') != self.fm.cwd.hash) {
+		// 		$(this).trigger('select');
+		// 		self.ui.exec('open', this);
+		// 	}
+		// });
+		// 
+		// /* click on collapsed arrow or places */
+		// $('#'+this.fm.id+' .el-finder-nav div.collapsed,strong').live('click', function(e) {
+		// 	var t = $(this), div, ul;
+		// 	self.fm.log('click div')
+		// 	e.stopPropagation()
+		// 	e.preventDefault();
+		// 	if (this.nodeName == 'DIV') {
+		// 		div = t;
+		// 		ul  = div.next().next('ul');
+		// 	} else {
+		// 		div = t.prev('div.collapsed');
+		// 		ul  = t.next('ul');
+		// 	}
+		// 	div.toggleClass('expanded');
+		// 	ul.toggle(300)
+		// });
 		
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
 			self.tree.find('a').removeClass('selected');
-			$(e.target).addClass('selected').prev('div').addClass('expanded').parents('li:has(ul)').children('div').addClass('expanded').next().next('ul').show();
+			$(e.target).addClass('selected').parents('li:has(ul)').children('ul').show().prev().children('div').addClass('expanded');
 		});
 		
 		/* make places droppable */
@@ -245,7 +249,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			});
 			
 		}
-		/* bind shortcuts */
+		
 	}
 	
 	/**
@@ -253,6 +257,23 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.updateNav = function() {
+		
+		$('a', this.fm.view.nav).click(function(e) {
+			e.preventDefault();
+			var hash = $(this).attr('key');
+			if (!hash) {
+				$(this).children('div').toggleClass('expanded').end().next('ul').toggle(300);
+			} else if (hash && hash != self.fm.cwd.hash) {
+				self.ui.exec('open', $(this).trigger('select').get(0));
+			} 
+		})
+		
+		$('a div.collapsed', this.fm.view.nav).click(function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			$(this).toggleClass('expanded').parent().next('ul').toggle(300);
+		})
+		
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',
 			accept : '(div,tr)[key]',
@@ -285,7 +306,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 * Update folders droppable & files/folders draggable
 	 **/
 	this.updateCwd = function() {
-		// this.fm.startBench()
 		
 		$('[key]', this.cwd)
 			.bind('dblclick', function(e) {
@@ -295,9 +315,10 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.draggable({
 				delay      : 2,
 				addClasses : false,
+				appendTo : '.el-finder-cwd',
 				revert     : true,
 				drag       : function(e, ui) {
-					ui.helper.toggleClass('el-finder-drag-copy', e.shiftKey);
+					ui.helper.toggleClass('el-finder-drag-copy', e.shiftKey||e.ctrlKey);
 				},
 				helper     : function() {
 					var t = $(this),
@@ -308,12 +329,12 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					}
 					self.cwd.find('.ui-selected').each(function(i) {
 						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : $(self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]))
-						if (c++ == 0 || c%13 == 0) {
+						if (c++ == 0 || c%12 == 0) {
 							el.css('margin-left', 0);
 						}
 						h.append(el);
 					});
-					return h.css('width', (c<=12 ? 85+(c-1)*27 : 387)+'px');
+					return h.css('width', (c<=12 ? 85+(c-1)*29 : 387)+'px');
 				}
 			})
 			.filter('.directory')
@@ -325,6 +346,13 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
 			});
 			
+		if ($.browser.msie) {
+			$('*', this.cwd).attr('unselectable', 'on')
+				.filter('[key]')
+					.bind('dragstart', function() { self.cwd.selectable('disable').removeClass('ui-state-disabled ui-selectable-disabled'); })
+					.bind('dragstop', function() { self.cwd.selectable('enable'); });
+		}
+
 	}
 	
 	/**
