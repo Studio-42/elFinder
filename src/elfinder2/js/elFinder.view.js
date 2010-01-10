@@ -20,7 +20,7 @@ elFinder.prototype.view = function(fm, el) {
 		'application/x-shockwave-flash' : 'Flash application',
 		'application/xml'               : 'XML document', 
 		'application/x-bittorrent'      : 'Bittorrent file',
-		'application/x-7z-compressed'   : 'Archive 7z',
+		'application/x-7z-compressed'   : '7z archive',
 		'application/x-tar'             : 'TAR archive', 
 	    'application/x-gzip'            : 'GZIP archive', 
 	    'application/x-bzip2'           : 'BZIP archive', 

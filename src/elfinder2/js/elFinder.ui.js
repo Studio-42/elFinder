@@ -95,7 +95,7 @@ elFinder.prototype.ui = function(fm) {
 					self.exec(t.attr('name'), t.attr('argc'));
 				}
 			});
-		
+		// self.fm.log(self.menu.html())
 		function menu(t) {
 			var i, j, a, html, l, src = self.fm.options.contextmenu[t]||[];
 			for (i=0; i < src.length; i++) {
@@ -112,7 +112,7 @@ elFinder.prototype.ui = function(fm) {
 						};
 						html += '</div>';
 					}
-					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+self.cmdName(src[i])+html+'</div>');
+					self.menu.append('<div class="'+src[i]+'" name="'+src[i]+'">'+html+self.cmdName(src[i])+'</div>');
 				}
 			};
 		}

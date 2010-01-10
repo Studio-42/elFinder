@@ -12,7 +12,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this.img    = $('<img/>');
 	this.swf    = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="" type="application/x-shockwave-flash" width="100%" height="350"></embed></object>')
 	this.iframe = $('<iframe/>');
-	this.ico    = $('<p/>');
+	this.ico    = $('<p style="border:1px solid #fff"/>');
 	this.info   = $('<label/>');
 	this.ql     = $('<div class="el-finder-ql"/>').hide()
 		.append($('<div class="el-finder-ql-drag-handle"/>')
@@ -22,6 +22,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		.append(this.swf)
 		.append(this.ico)
 		.append(this.info)
+
 		.appendTo(document.body).draggable({handle : '.el-finder-ql-drag-handle'});
 	
 	/**
@@ -34,26 +35,23 @@ elFinder.prototype.quickLook = function(fm, el) {
 			var id = self.fm.selected[0],
 			 	el = self.fm.view.cwd.find('[key="'+id+'"]'),
 				o  = el.offset(),
-				w  = Math.max(this.ql.width(), 350),
-				h  = this.ql.height(),
 				ew = el.width()-20;
+				
 			self.fm.lockShortcuts(true);
 			this.ql.css({
 				width    : ew,
-				minWidth : ew,
 				height   : el.height(),
 				left     : o.left,
 				top      : o.top,
 				opacity  : 0
 			}).animate({
-				width    : w,
-				minWidth : 350,
-				height   : h,
+				width    : 420,
+				height   : 150,
 				opacity  : 1,
 				top      : Math.round($(window).height()/5),
-				left     : ($(window).width()-w)/2-42
+				left     : $(window).width()/2-210
 			}, 400, function() { 
-				self.ql.css({height: 'auto', width: 'auto'});
+				self.ql.css({height: 'auto'});
 				if (self._img) {
 					preview();
 				} else {
@@ -84,7 +82,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 				}, 350, function() {
 					reset();
 					self.ql.hide().css({
-						width    : 'auto',
+						width    : 350,
 						minWidth : 350,
 						height   : 'auto'
 					});
@@ -131,7 +129,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.iframe.hide();
 		self.info.empty();
 		self.title.empty();
-		self.ico.show().css({background: '', border: ''});
+		self.ico.show();
 		self._hash = '';
 	}
 	
@@ -155,7 +153,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		
 		if (f.mime.match(/image\/(jpeg|png|gif)/)) {
 			var url = self.fm.fileURL();
-			self.img.attr('src', url+(window.opera ? '?'+Math.random() : '')).load(function() {
+			self.img.attr('src', url+($.browser.opera || $.browser.msie ? '?'+Math.random() : '')).load(function() {
 				if (self.ql.is(':hidden') || self.ql.is(':animated')) {
 					self._img = true;
 				} else {
@@ -181,7 +179,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		var iw = self.img.width(),
 			ih = self.img.height(),
 			r  = Math.min(Math.min(400, iw)/iw, Math.min(350, ih)/ih);
-			
+		self.img.unbind('load');	
 		self._img = false;
 		self.ico.hide();
 

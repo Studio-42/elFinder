@@ -279,7 +279,7 @@ ul.el-finder-tree, ul.el-finder-places {
 
 
 .el-finder-cwd p, 
-.el-finder-ql  p {
+.el-finder-ql p {
 	width:48px;
 	height:48px;
 	margin:1px auto;
@@ -567,6 +567,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-contextmenu { 
 	position:absolute;
+	width:200px;
 	background:#fff; 
 	cursor:default; 
 	border:1px solid #ccc;  
@@ -580,18 +581,20 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-contextmenu div { 
 	position:relative;
 	display:block;
+/*	width:191px;*/
+/*	border:1px solid #ccc;*/
 	margin:0;
-	padding:5px 7em 5px 29px;
+	padding:4px 29px 4px 29px;
 	white-space:nowrap;
 	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	background:url('../images/toolbar.png') 0 0 no-repeat;
 }
 
-.el-finder-contextmenu div span {
+.el-finder-contextmenu  span {
 	float:right;
 	width:9px;
 	height:18px;
-	margin-right:-6.5em;
+	margin-right:-27px;
 	background:url(../images/toolbar.png) -4px 5px no-repeat;
 }
 
@@ -602,7 +605,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	margin:0;
 	padding:5px 0;
 	background:#fff; 
-	cursor:default; 
+/*	cursor:default; */
 	border:1px solid #ccc;  
 	border-radius:5px; 
 	-moz-border-radius:5px; 
@@ -649,10 +652,6 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-drag-helper {
 	padding:0;
 	cursor:move;
-/*	z-index:100000;*/
-/*	position:relative;*/
-/*	border:1px solid #000;*/
-/*	background:#fff;*/
 	zoom:1;
 }
 
@@ -680,10 +679,9 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-ql {
 	position:absolute;
-/*	z-index:10;	*/
-	width:auto;
+	width:420px;
 	height:auto;
-	padding:12px;
+	padding:12px 9px;
 	color:#fff;
 	text-align:center;
 	border-radius:9px; 
@@ -692,12 +690,13 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	background:url(../images/ql.png);
 	overflow: inherit !important;
 }
+
 /* toolbar */
 .el-finder-ql div {
 	height:18px;
 	font-size:14px;
 	background-color:#777;
-	margin:-12px -12px 12px -12px;
+	margin:-12px -9px 12px -9px;
 	padding:3px 0 0 3px;
 	opacity:.8;
 	text-align:center;
@@ -720,7 +719,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 /* text files preview */
 .el-finder-ql iframe {
 	background:#fff;
-	width:600px;
+	width:400px;
 	height:400px;
 }
 /* images preview */

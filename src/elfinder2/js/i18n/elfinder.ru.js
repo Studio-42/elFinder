@@ -107,7 +107,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Flash application'                 : 'Приложение Flash',
 		'XML document'                      : 'Документ XML',
 		'Bittorrent file'                   : 'Bittorrent файл',
-		'Archive 7z'                        : 'Архив 7z',
+		'7z archive'                        : 'Архив 7z',
 		'TAR archive'                       : 'Архив TAR',
 		'GZIP archive'                      : 'Архив GZIP',
 		'BZIP archive'                      : 'Архив BZIP',
