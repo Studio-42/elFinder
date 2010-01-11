@@ -60,33 +60,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			$('input', self.cwd).trigger('change'); 
 		});
 
-		/* click on tree or places */
-		// $('#'+this.fm.id+' .el-finder-nav a').live('click', function(e) {
-		// 	self.fm.log('click link')
-		// 	e.preventDefault();
-		// 	if ($(this).attr('key') != self.fm.cwd.hash) {
-		// 		$(this).trigger('select');
-		// 		self.ui.exec('open', this);
-		// 	}
-		// });
-		// 
-		// /* click on collapsed arrow or places */
-		// $('#'+this.fm.id+' .el-finder-nav div.collapsed,strong').live('click', function(e) {
-		// 	var t = $(this), div, ul;
-		// 	self.fm.log('click div')
-		// 	e.stopPropagation()
-		// 	e.preventDefault();
-		// 	if (this.nodeName == 'DIV') {
-		// 		div = t;
-		// 		ul  = div.next().next('ul');
-		// 	} else {
-		// 		div = t.prev('div.collapsed');
-		// 		ul  = t.next('ul');
-		// 	}
-		// 	div.toggleClass('expanded');
-		// 	ul.toggle(300)
-		// });
-		
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
 			self.tree.find('a').removeClass('selected');

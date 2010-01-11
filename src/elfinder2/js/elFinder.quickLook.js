@@ -10,7 +10,6 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this._hash  = '';
 	this.title  = $('<strong/>');
 	this.img    = $('<img/>');
-	this.swf    = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="" type="application/x-shockwave-flash" width="100%" height="350"></embed></object>')
 	this.iframe = $('<iframe/>');
 	this.ico    = $('<p style="border:1px solid #fff"/>');
 	this.info   = $('<label/>');
@@ -19,10 +18,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 			.append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
 		.append(this.iframe)
 		.append(this.img)
-		.append(this.swf)
 		.append(this.ico)
 		.append(this.info)
-
 		.appendTo(document.body).draggable({handle : '.el-finder-ql-drag-handle'});
 	
 	/**
@@ -34,12 +31,11 @@ elFinder.prototype.quickLook = function(fm, el) {
 			update();
 			var id = self.fm.selected[0],
 			 	el = self.fm.view.cwd.find('[key="'+id+'"]'),
-				o  = el.offset(),
-				ew = el.width()-20;
+				o  = el.offset();
 				
 			self.fm.lockShortcuts(true);
 			this.ql.css({
-				width    : ew,
+				width    : el.width()-20,
 				height   : el.height(),
 				left     : o.left,
 				top      : o.top,
@@ -66,27 +62,21 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 **/
 	this.hide = function() {
 		if (this.ql.is(':visible')) {
-			var o, w, el = self.fm.view.cwd.find('[key="'+this._hash+'"]');
+			var o, el = self.fm.view.cwd.find('[key="'+this._hash+'"]');
 			if (el) {
 				o = el.offset();
-				w = el.width();
 				this.img.fadeOut(100);
-				this.swf.fadeOut(100);
+				this.ql.children('object').hide()
 				this.ql.animate({
-					width    : w-20,
-					minWidth : w-20,
+					width    : el.width()-20,
 					height   : el.height(),
 					left     : o.left,
 					top      : o.top,
 					opacity  : 0
 				}, 350, function() {
-					reset();
-					self.ql.hide().css({
-						width    : 350,
-						minWidth : 350,
-						height   : 'auto'
-					});
 					self.fm.lockShortcuts();
+					reset();
+					self.ql.hide();
 				});
 			} else {
 				this.ql.fadeOut(200);
@@ -124,7 +114,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 **/
 	function reset() {
 		self.ql.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
-		self.swf.hide();
+		self.ql.children('object').remove();
 		self.img.hide().unbind('load').removeAttr('src').removeAttr('load').css({width:'', height:''});
 		self.iframe.hide();
 		self.info.empty();
@@ -137,8 +127,9 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 * Update quickLook window content
 	 **/
 	function update() {
-		var f = self.fm.getSelected(0);
+		var f = self.fm.getSelected(0), url, ok=true;
 		reset();
+
 		self._hash = f.hash;
 		self.title.text(f.name);
 		self.ql.addClass(self.fm.view.mime2class(f.mime));
@@ -152,7 +143,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		}));
 		
 		if (f.mime.match(/image\/(jpeg|png|gif)/)) {
-			var url = self.fm.fileURL();
+			url = self.fm.fileURL();
 			self.img.attr('src', url+($.browser.opera || $.browser.msie ? '?'+Math.random() : '')).load(function() {
 				if (self.ql.is(':hidden') || self.ql.is(':animated')) {
 					self._img = true;
@@ -164,10 +155,10 @@ elFinder.prototype.quickLook = function(fm, el) {
 			self.ico.hide();
 			self.iframe.removeAttr('src').attr('src', self.fm.fileURL()).show();
 		} else if (f.mime == 'application/x-shockwave-flash') {
-			var url = self.fm.fileURL();
-			if (url) {
+			if ((url = self.fm.fileURL())) {
 				self.ico.hide();
-				self.swf.children('embed').attr('src', url).prev().attr('value', url).end().end().show();
+				$('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="'+url+'" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" type="application/x-shockwave-flash" width="100%" height="350"></embed></object>')
+					.hide().insertAfter(self.img).fadeIn(200);
 			}
 		}
 	}
