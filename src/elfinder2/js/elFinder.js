@@ -304,6 +304,19 @@
 				}
 			}
 			this.lastDir(this.cwd.hash);
+			if (this.options.autoReload>0) {
+				if (this.iID) {
+					clearInterval(this.iID);
+					this.log('clear');
+				}
+				this.iID = setInterval(function() {
+					if (!self.locked) {
+						self.log('reload');
+						self.ui.exec('reload');
+					}
+						
+				}, this.options.autoReload*60000);
+			}
 		}
 		
 		/**
@@ -602,6 +615,7 @@
 						}
 					});
 					self.ui.init(data.disabled);
+					
 				}
 				
 		}, {force : true});
@@ -704,7 +718,9 @@
 		/* jqueryUI dialog options */
 		dialog : null,
 		/* docked mode */
-		docked : false
+		docked : false,
+		/* auto reload time (min) */
+		autoReload : 1
 	}
 
 	
