@@ -341,6 +341,10 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() { 
 			this.fm.options.editorCallback(this.fm.fileURL());
+			if (this.fm.options.closeOnEditorCallback) {
+				this.fm.dock();
+				this.fm.close();
+			}
 		}
 				
 		this.isAllowed = function() {

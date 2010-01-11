@@ -32,7 +32,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 beta3';
+		this.version  = '1.1 beta4';
 		/**
 		 * Object. Current Working Dir info
 		 **/
@@ -682,6 +682,8 @@
 		placesFirst    : true,
 		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
+		/* close elfinder after editorCallback */
+		closeOnEditorCallback : true,
 		/* i18 messages. not set manually! */
 		i18n           : {},
 		/* fm view (icons|list) */
