@@ -54,6 +54,8 @@ class elFinder():
 			'rm': True,
 			'rmdir': True
 		},
+		'archiveMimes': {},
+		'archivers': {},
 		'perms': []
 	}
 
@@ -67,9 +69,10 @@ class elFinder():
 		'paste': '__paste',
 		'rm': '__rm',
 		'duplicate': '__duplicate',
-		'read': '__fread',
+		'read': '__read',
 		'edit': '__edit',
 		'extract': '__extract',
+		'archive': '__archive',
 		'resize': '__resize',
 		'geturl': '__geturl',
 		'tmb': '__thumbnails'
@@ -81,6 +84,7 @@ class elFinder():
 	_errorData = {}
 	_form = {}
 	_im = None
+	_sp = None
 
 
 	def __init__(self, opts):
@@ -103,7 +107,7 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut']
+		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -115,21 +119,35 @@ class elFinder():
 				cmd = self._commands[self._request['cmd']]
 				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
 				if callable(func):
-					if cmd == '__open':
-						func(False)
-					else:
+					try:
 						func()
+						# if self._request['cmd'] == 'edit':
+						# 	f = open('/Users/troex/my.log', 'w')
+						# 	f.write(str(self._form))
+						# 	f.close()
+					except Exception, e:
+						# print 'Content-type: text/html\n'
+						# print e
+						self._response['error'] = 'Unknown command'
+			else:
+				self._response['error'] = 'Unknown command'
 		else:
+			self.__open()
+
+		if 'init' in self._request:
+			self.__checkArchivers()
 			self._response['disabled'] = self._options['disabled']
-			self.__reload()
-		
+			self._response['params'] = {
+				'dotFiles': self._options['dotFiles'],
+				'uplMaxSize': str(self._options['uplMaxSize']) + 'M',
+				'archives': self._options['archiveMimes'],
+				'extract': self._options['archivers']['extract'].keys()
+			}
+
+
 		if self._errorData:
 			self._response['errorData'] = self._errorData
-
-		# f = open('/Users/troex/my.log', 'w')
-		# f.write(str(self._form))
-		# f.close()
-		# self._response['debug'] = {}
+		
 
 		if self._options['debug']:
 			self.__debug('time', (time.time() - self._time))
@@ -139,11 +157,12 @@ class elFinder():
 
 		# print 'Content-type: application/json\n'
 		print 'Content-type: text/html\n'
+
 		print simplejson.dumps(self._response, indent = bool(self._options['debug']))
 		sys.exit(0)
 
 
-	def __open(self, tree):
+	def __open(self):
 		"""Open file or directory"""
 		# try to open file
 		if 'current' in self._request:
@@ -193,12 +212,8 @@ class elFinder():
 				else:
 					path = target
 
-			self.__content(path, tree)
+			self.__content(path, 'tree' in self._request)
 		pass
-
-
-	def __reload(self):
-		return self.__open(True)
 
 
 	def __rename(self):
@@ -215,7 +230,7 @@ class elFinder():
 
 		if not curDir or not curName:
 			self._response['error'] = 'File does not exists'
-		elif not self.__isAllowed(curDir, 'write'):
+		elif not self.__isAllowed(curDir, 'write') and self.__isAllowed(curName, 'rm'):
 			self._response['error'] = 'Access denied!'
 		elif not self.__checkName(name):
 			self._response['error'] = 'Invalid name'
@@ -224,7 +239,8 @@ class elFinder():
 		else:
 			try:
 				os.rename(curName, newName)
-				self._response['target'] = self.__info(newName)
+				self._response['target'] = self.__hash(newName)
+				self.__content(curDir, os.path.isdir(newName))
 			except:
 				self._response['error'] = 'Unable to rename file'
 
@@ -251,6 +267,7 @@ class elFinder():
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
+				self._response['target'] = self.__hash(newDir)
 				self.__content(path, True)
 			except:
 				self._response['error'] = 'Unable to create folder'
@@ -277,6 +294,7 @@ class elFinder():
 		else:
 			try:
 				open(newFile, 'w').close()
+				self._response['target'] = self.__hash(newFile)
 				self.__content(curDir, False)
 			except:
 				self._response['error'] = 'Unable to create file'
@@ -584,19 +602,7 @@ class elFinder():
 		self.__cdc(path)
 
 		if tree:
-			fhash = self.__hash(self._options['root'])
-			if self._options['rootAlias']:
-				name = self._options['rootAlias']
-			else:
-				name = os.path.basename(self._options['root'])
-			self._response['tree'] = [
-				{
-					'hash': fhash,
-					'name': name,
-					'read': True,
-					'dirs': self.__tree(self._options['root'])
-				}
-			]
+			self._response['tree'] = self.__tree(self._options['root'])
 
 
 	def __cwd(self, path):
@@ -618,13 +624,13 @@ class elFinder():
 		self._response['cwd'] = {
 			'hash': self.__hash(path),
 			'name': name,
+			'mime': 'directory',
 			'rel': rel,
 			'size': 0,
 			'date': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
 			'read': True,
 			'write': self.__isAllowed(path, 'write'),
-			'rm': not root and self.__isAllowed(path, 'rm'),
-			'uplMaxSize': str(self._options['uplMaxSize']) + 'M'
+			'rm': not root and self.__isAllowed(path, 'rm')
 		}
 
 
@@ -639,7 +645,7 @@ class elFinder():
 			info = {}
 			info = self.__info(pf)
 			info['hash'] = self.__hash(pf)
-			if info['type'] == 'dir':
+			if info['mime'] == 'directory':
 				dirs.append(info)
 			else:
 				files.append(info)
@@ -650,48 +656,43 @@ class elFinder():
 
 	def __tree(self, path):
 		"""Return directory tree starting from path"""
-		tree = []
-		
+
 		if not os.path.isdir(path): return ''
 		if os.path.islink(path): return ''
 
-		for d in os.listdir(path):
-			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
-				fhash = self.__hash(pd)
-				read = self.__isAllowed(pd, 'read')
-				write = self.__isAllowed(pd, 'write')
-				if read:
-					dirs = self.__tree(pd)
-				else:
-					dirs = ''
-				element = {
-					'hash': fhash,
-					'name': d,
-					'read': read,
-					'write': write,
-					'dirs': dirs
-				}
-				tree.append(element)
-
-		if len(tree) == 0: return ''
-		else: return tree
+		if (path == self._options['root']) and self._options['rootAlias']:
+			name = self._options['rootAlias']
+		else:
+			name = os.path.basename(path)
+		tree = {
+			'hash': self.__hash(path),
+			'name': name,
+			'read': self.__isAllowed(path, 'read'),
+			'write': self.__isAllowed(path, 'write'),
+			'dirs': []
+		}
+		if self.__isAllowed(path, 'read'):
+			for d in os.listdir(path):
+				pd = os.path.join(path, d)
+				if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
+					tree['dirs'].append(self.__tree(pd))
+		return tree
 
 
-	def __uniqueName(self, path):
+	def __uniqueName(self, path, copy = ' copy'):
 		curDir = os.path.dirname(path)
 		curName = os.path.basename(path)
 		lastDot = curName.rfind('.')
-		copy = ' copy'
 		ext = newName = ''
 
-		if re.search(r'\..{3}\.(gz|bz|bz2)$', curName):
+		if not os.path.isdir(path) and re.search(r'\..{3}\.(gz|bz|bz2)$', curName):
 			pos = -7
-			if curName[-1:] == '2': pos -= 1
+			if curName[-1:] == '2':
+				pos -= 1
 			ext = curName[pos:]
 			oldName = curName[0:pos]
 			newName = oldName + copy
-		elif lastDot <= 0:
+		elif os.path.isdir(path) or lastDot <= 0:
 			oldName = curName
 			newName = oldName + copy
 			pass
@@ -764,7 +765,6 @@ class elFinder():
 		info = {
 			'name': os.path.basename(path),
 			'hash': self.__hash(path),
-			'type': filetype,
 			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
 			'date': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
 			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
@@ -776,12 +776,13 @@ class elFinder():
 		if filetype == 'link':
 			path = self.__readlink(path)
 			if not path:
-				info['mime'] = 'unknown'
+				info['mime'] = 'symlink-broken'
 				return info
 
 			if os.path.isdir(path):
 				info['mime'] = 'directory'
 			else:
+				info['parent'] = self.__hash(os.path.dirname(path))
 				info['mime'] = self.__mimetype(path)
 
 			if self._options['rootAlias']:
@@ -789,8 +790,8 @@ class elFinder():
 			else:
 				basename = os.path.basename(self._options['root'])
 
-			info['linkTo'] = basename + path[len(self._options['root']):]
 			info['link'] = self.__hash(path)
+			info['linkTo'] = basename + path[len(self._options['root']):]
 			info['read'] = info['read'] and self.__isAllowed(path, 'read')
 			info['write'] = info['write'] and self.__isAllowed(path, 'write')
 			info['rm'] = self.__isAllowed(path, 'rm')
@@ -821,7 +822,7 @@ class elFinder():
 		return info
 
 
-	def __fread(self):
+	def __read(self):
 		if 'current' in self._request and 'file' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			curFile = self.__find(self._request['file'], curDir)
@@ -848,14 +849,112 @@ class elFinder():
 						f = open(curFile, 'w+')
 						f.write(self._request['content'])
 						f.close()
-						self._response['info'] = self.__info(curFile)
+						self._response['file'] = self.__info(curFile)
 					except:
 						self._response['error'] = 'Unable to write to file'
 				else:
 					self._response['error'] = 'Access denied'
 			return
 
-		self._response['error'] = error + ' Invalid parameters'
+		self._response['error'] = 'Invalid parameters'
+		return
+
+
+	def __archive(self):
+		self.__checkArchivers()
+
+		if (
+			not self._options['archivers']['create'] or not 'type' in self._request
+			or not 'current' in self._request
+			or not 'files[]' in self._request
+			or not 'name' in self._request
+			):
+			self._response['error'] = 'Invalid parameters'
+			return
+
+		curDir = self.__findDir(self._request['current'], None)
+		archiveType = self._request['type']
+		if (
+			not archiveType in self._options['archivers']['create']
+			or not archiveType in self._options['archiveMimes']
+			or not curDir
+			):
+			self._response['error'] = 'Unable to create archive'
+			return
+
+		files = self._request['files[]']
+		if not isinstance(files, list):
+			files = [files]
+
+		realFiles = []
+		for fhash in files:
+			curFile = self.__find(fhash, curDir)
+			if not curFile:
+				self._response['error'] = 'File does not exist'
+				return
+			realFiles.append(os.path.basename(curFile))
+
+		arc = self._options['archivers']['create'][archiveType]
+		if len(realFiles) > 1:
+			archiveName = self._request['name']
+		else:
+			archiveName = realFiles[0]
+		archiveName += '.' + arc['ext']
+		archiveName = self.__uniqueName(archiveName, '')
+		archivePath = os.path.join(curDir, archiveName)
+
+		cmd = [arc['cmd']]
+		for a in arc['argc'].split():
+			cmd.append(a)
+		cmd.append(archiveName)
+		for f in realFiles:
+			cmd.append(f)
+
+		curCwd = os.getcwd()
+		os.chdir(curDir)
+		self.__runSubProcess(cmd)
+		os.chdir(curCwd)
+
+		if (os.path.exists(archivePath)):
+			self.__content(curDir, False)
+			self._response['select'] = self.__hash(archivePath)
+		else:
+			self._response['error'] = 'Unable to create archive'
+
+		return
+
+
+	def __extract(self):
+		if not 'current' in self._request or not 'target' in self._request:
+			self._response['error'] = 'Invalid parameters'
+			return
+
+		curDir = self.__findDir(self._request['current'], None)
+		curFile = self.__find(self._request['target'], curDir)
+		mime = self.__mimetype(curFile)
+		self.__checkArchivers()
+
+		if not mime in self._options['archivers']['extract'] or not curDir or not curFile:
+			self._response['error'] = 'Unable to extract files from archive'
+			return
+
+		arc = self._options['archivers']['extract'][mime]
+
+		cmd = [arc['cmd']]
+		for a in arc['argc'].split():
+			cmd.append(a)
+		cmd.append(curFile)
+
+		curCwd = os.getcwd()
+		os.chdir(curDir)
+		ret = self.__runSubProcess(cmd)
+		os.chdir(curCwd)
+
+		if ret:
+			self.__content(curDir, True)
+		else:
+			self._response['error'] = 'Unable to extract files from archive'
+
 		return
 
 
@@ -1023,10 +1122,128 @@ class elFinder():
 		return
 
 
+	def __checkArchivers(self):
+		# import subprocess
+		# sp = subprocess.Popen(['tar', '--version'], shell = False, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+		# out, err = sp.communicate()
+		# print 'out:', out, '\nerr:', err, '\n'
+		archive = { 'create': {}, 'extract': {} }
+		c = archive['create']
+		e = archive['extract']
+
+		tar = self.__runSubProcess(['tar', '--version'])
+		gzip = self.__runSubProcess(['gzip', '--version'])
+		bzip2 = self.__runSubProcess(['bzip2', '--version'])
+		zipc = self.__runSubProcess(['zip', '--version'])
+		unzip = self.__runSubProcess(['unzip', '--help'])
+		rar = self.__runSubProcess(['rar', '--version'], validReturn = [0, 7])
+		unrar = self.__runSubProcess(['unrar'], validReturn = [0, 7])
+		p7z = self.__runSubProcess(['7z', '--help'])
+		p7za = self.__runSubProcess(['7za', '--help'])
+		p7zr = self.__runSubProcess(['7zr', '--help'])
+
+		# tar = False
+		tar = gzip = bzip2 = zipc = unzip = rar = unrar = False
+		# print tar, gzip, bzip2, zipc, unzip, rar, unrar, p7z, p7za, p7zr
+
+		if tar:
+			mime = 'application/x-tar'
+			c.update({mime: {'cmd': 'tar', 'argc': '-cf', 'ext': 'tar'}})
+			e.update({mime: {'cmd': 'tar', 'argc': '-xf', 'ext': 'tar'}})
+
+		if tar and gzip:
+			mime = 'application/x-gzip'
+			c.update({mime: {'cmd': 'tar', 'argc': '-czf', 'ext': 'tar.gz'}})
+			e.update({mime: {'cmd': 'tar', 'argc': '-xzf', 'ext': 'tar.gz'}})
+
+		if tar and bzip2:
+			mime = 'application/x-bzip2'
+			c.update({mime: {'cmd': 'tar', 'argc': '-cjf', 'ext': 'tar.bz2'}})
+			e.update({mime: {'cmd': 'tar', 'argc': '-xjf', 'ext': 'tar.bz2'}})
+
+		mime = 'application/zip'
+		if zipc:
+			c.update({mime: {'cmd': 'zip', 'argc': '-r9', 'ext': 'zip'}})
+		if unzip:
+			e.update({mime: {'cmd': 'unzip', 'argc': '', 'ext': 'zip'}})
+
+		mime = 'application/x-rar'
+		if rar:
+			c.update({mime: {'cmd': 'rar', 'argc': 'a', 'ext': 'rar'}})
+			e.update({mime: {'cmd': 'rar', 'argc': 'x', 'ext': 'rar'}})
+		elif unrar:
+			e.update({mime: {'cmd': 'unrar', 'argc': 'x', 'ext': 'rar'}})
+
+		p7zip = None
+		if p7z:
+			p7zip = '7z'
+		elif p7za:
+			p7zip = '7za'
+		elif p7zr:
+			p7zip = '7zr'
+
+		if p7zip:
+			mime = 'application/x-7z-compressed'
+			c.update({mime: {'cmd': p7zip, 'argc': 'a -t7z', 'ext': '7z'}})
+			e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': '7z'}})
+
+			mime = 'application/x-tar'
+			if not mime in c:
+				c.update({mime: {'cmd': p7zip, 'argc': 'a -ttar', 'ext': 'tar'}})
+			if not mime in e:
+				e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': 'tar'}})
+
+			mime = 'application/x-gzip'
+			if not mime in c:
+				c.update({mime: {'cmd': p7zip, 'argc': 'a -tgzip', 'ext': 'gz'}})
+			if not mime in e:
+				e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': 'tar.gz'}})
+
+			mime = 'application/x-bzip2'
+			if not mime in c:
+				c.update({mime: {'cmd': p7zip, 'argc': 'a -tbzip2', 'ext': 'bz2'}})
+			if not mime in e:
+				e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': 'tar.bz2'}})
+
+			mime = 'application/zip'
+			if not mime in c:
+				c.update({mime: {'cmd': p7zip, 'argc': 'a -tzip', 'ext': 'zip'}})
+			if not mime in e:
+				e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': 'zip'}})
+
+		# print archive, '\n\n'
+		# print c, '\n\n'
+		if not self._options['archiveMimes']:
+			self._options['archiveMimes'] = c.keys()
+		else:
+			pass
+
+		self._options['archivers'] = archive
+		pass
+
+
+	def __runSubProcess(self, cmd, validReturn = [0]):
+		if self._sp is None:
+			import subprocess
+			self._sp = subprocess
+
+		try:
+			sp = self._sp.Popen(cmd, shell = False, stdout = self._sp.PIPE, stderr = self._sp.PIPE)
+			out, err = sp.communicate()
+			ret = sp.returncode
+			# print cmd, ret, out, err
+		except:
+			return False
+
+		if not ret in validReturn:
+			return False
+
+		return True
+
 
 elFinder({
-	'root': '/Users/troex/Sites/git/elrte/files',
-	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/',
+	'root': '/Users/troex/Sites/git/elrte/files/TEST',
+	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/TEST',
 	# 'root': '/Users/troex/Sites/',
 	# 'URL': 'http://php5.localhost:8001/~troex/',
 	'imgLib': 'auto'
