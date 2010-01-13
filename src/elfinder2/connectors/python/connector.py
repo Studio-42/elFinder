@@ -75,7 +75,8 @@ class elFinder():
 		'archive': '__archive',
 		'resize': '__resize',
 		'geturl': '__geturl',
-		'tmb': '__thumbnails'
+		'tmb': '__thumbnails',
+		'ping': '__ping'
 	}
 
 	_time = 0
@@ -85,12 +86,16 @@ class elFinder():
 	_form = {}
 	_im = None
 	_sp = None
-
+	_today = 0
+	_yesterday = 0
 
 	def __init__(self, opts):
 		if self._options['debug']:
 			self._response['debug'] = {}
 			self._time = time.time()
+			t = datetime.fromtimestamp(self._time)
+			self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
+			self._yesterday = self._today - 86400
 
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
@@ -107,13 +112,15 @@ class elFinder():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]', 'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type']
+		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]',
+			'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
 				self._request[field] = self._form.getvalue(field)
 
-		# print self._request
+		# TODO disable commands here
+
 		if 'cmd' in self._request:
 			if self._request['cmd'] in self._commands:
 				cmd = self._commands[self._request['cmd']]
@@ -155,6 +162,7 @@ class elFinder():
 			if 'debug' in self._response:
 				del self._response['debug']
 
+		# TODO if upload send text/html else /json
 		# print 'Content-type: application/json\n'
 		print 'Content-type: text/html\n'
 
@@ -174,7 +182,7 @@ class elFinder():
 				sys.exit('File not found')
 			if not self.__isAllowed(curDir, 'read') or not self.__isAllowed(curFile, 'read'):
 				print 'HTTP/1.x 403 Access Denied\n\n'
-				sys.exit('Access Denied')
+				sys.exit('Access denied')
 
 			if os.path.islink(curFile):
 				curFile = self.__readlink(curFile)
@@ -183,7 +191,7 @@ class elFinder():
 					sys.exit('File not found')
 				if not self.__isAllowed(os.path.dirname(curFile), 'read') or not self.__isAllowed(curFile, 'read'):
 					print 'HTTP/1.x 403 Access Denied\n\n'
-					sys.exit('Access Denied')
+					sys.exit('Access denied')
 
 			mime = self.__mimetype(curFile)
 			parts = mime.split('/', 2)
@@ -208,7 +216,7 @@ class elFinder():
 				if not target:
 					self._response['error'] = 'Invalid parameters'
 				elif not self.__isAllowed(target, 'read'):
-					self._response['error'] = 'Access denied!'
+					self._response['error'] = 'Access denied'
 				else:
 					path = target
 
@@ -229,9 +237,9 @@ class elFinder():
 			newName = os.path.join(curDir, name)
 
 		if not curDir or not curName:
-			self._response['error'] = 'File does not exists'
+			self._response['error'] = 'File not found'
 		elif not self.__isAllowed(curDir, 'write') and self.__isAllowed(curName, 'rm'):
-			self._response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied'
 		elif not self.__checkName(name):
 			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newName):
@@ -239,7 +247,8 @@ class elFinder():
 		else:
 			try:
 				os.rename(curName, newName)
-				self._response['target'] = self.__hash(newName)
+				# TODO clean tmb
+				self._response['select'] = self.__hash(newName)
 				self.__content(curDir, os.path.isdir(newName))
 			except:
 				self._response['error'] = 'Unable to rename file'
@@ -259,7 +268,7 @@ class elFinder():
 		if not path:
 			self._response['error'] = 'Invalid parameters'
 		elif not self.__isAllowed(path, 'write'):
-			self._response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied'
 		elif not self.__checkName(name):
 			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newDir):
@@ -267,7 +276,7 @@ class elFinder():
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
-				self._response['target'] = self.__hash(newDir)
+				self._response['select'] = self.__hash(newDir)
 				self.__content(path, True)
 			except:
 				self._response['error'] = 'Unable to create folder'
@@ -286,7 +295,7 @@ class elFinder():
 		if not curDir or not name:
 			self._response['error'] = 'Invalid parameters'
 		elif not self.__isAllowed(curDir, 'write'):
-			self._response['error'] = 'Access denied!'
+			self._response['error'] = 'Access denied'
 		elif not self.__checkName(name):
 			self._response['error'] = 'Invalid name'
 		elif os.path.exists(newFile):
@@ -294,7 +303,7 @@ class elFinder():
 		else:
 			try:
 				open(newFile, 'w').close()
-				self._response['target'] = self.__hash(newFile)
+				self._response['select'] = self.__hash(newFile)
 				self.__content(curDir, False)
 			except:
 				self._response['error'] = 'Unable to create file'
@@ -319,7 +328,7 @@ class elFinder():
 			rmFile = self.__find(rm, curDir)
 			if not rmFile: continue
 			self.__remove(rmFile)
-
+		# TODO if errorData not empty return error
 		self.__content(curDir, True)
 
 
@@ -347,6 +356,7 @@ class elFinder():
 			if not isinstance(upFiles, list):
 				upFiles = [upFiles]
 
+			self._response['select'] = []
 			total = 0
 			upSize = 0
 			maxSize = self._options['uplMaxSize'] * 1024 * 1024
@@ -368,6 +378,7 @@ class elFinder():
 							f.close()
 							upSize += os.lstat(name).st_size
 							os.chmod(name, self._options['fileUmask'])
+							self._response['select'].append(self.__hash(name))
 						except:
 							self.__errorData(name, 'Unable to save uploaded file')
 						if upSize > maxSize:
@@ -375,6 +386,8 @@ class elFinder():
 								os.unlink(name)
 								self.__errorData(name, 'File exceeds the maximum allowed filesize')
 							except:
+								pass
+								# TODO ?
 								self.__errorData(name, 'File was only partially uploaded')
 							break
 
@@ -426,19 +439,20 @@ class elFinder():
 						return
 					# TODO thumbs
 					if os.path.exists(newDst):
-						self._response['error'] = 'Move failed'
+						self._response['error'] = 'Unable to move files'
 						self._errorData(f, 'File or folder with the same name already exists')
 						continue
 					try:
 						os.rename(f, newDst)
+						# TODO remove tmb
 						continue
 					except:
-						self._response['error'] = 'Move failed'
+						self._response['error'] = 'Unable to move files'
 						self._errorData(f, 'Unable to move')
 						return
 				else:
 					if not self.__copy(f, newDst):
-						self._response['error'] = 'Copy failed'
+						self._response['error'] = 'Unable to copy files'
 						return
 					continue
 			self.__content(curDir, True)
@@ -456,10 +470,10 @@ class elFinder():
 				self._response['error'] = 'Invalid parameters'
 				return
 			if not self.__isAllowed(target, 'read') or not self.__isAllowed(curDir, 'write'):
-				self._response['error'] = 'Access denied!'
+				self._response['error'] = 'Access denied'
 			newName = self.__uniqueName(target)
 			if not self.__copy(target, newName):
-				self._response['error'] = 'Duplicate failed'
+				self._response['error'] = 'Unable to create file copy'
 				return
 
 		self.__content(curDir, True)
@@ -493,6 +507,7 @@ class elFinder():
 				tmbMax = self._options['tmbAtOnce']
 			else:
 				tmbMax = 100
+			self._response['current'] = self.__hash(curDir)
 			self._response['images'] = {}
 			i = 0
 			for f in os.listdir(curDir):
@@ -513,87 +528,6 @@ class elFinder():
 			return False
 
 		return
-
-
-	def __copy(self, src, dst):
-		dstDir = os.path.dirname(dst)
-		if not self.__isAllowed(src, 'read'):
-			self.__errorData(src, 'Access denied')
-			return False
-		if not self.__isAllowed(dstDir, 'write'):
-			self.__errorData(dstDir, 'Access denied')
-			return False
-		if os.path.exists(dst):
-			self.__errorData(dst, 'File or folder with the same name already exists')
-			return False
-
-		if not os.path.isdir(src):
-			try:
-				shutil.copyfile(src, dst)
-				shutil.copymode(src, dst)
-				return True
-			except:
-				self.__errorData(src, 'Unable to copy')
-				return False
-		else:
-			try:
-				os.mkdir(dst)
-				shutil.copymode(src, dst)
-			except:
-				self.__errorData(src, 'Unable to copy')
-				return False
-
-			for i in os.listdir(src):
-				newSrc = os.path.join(src, i)
-				newDst = os.path.join(dst, i)
-				if not self.__copy(newSrc, newDst):
-					self.__errorData(newSrc, 'Unable to copy')
-					return False
-
-		return True
-
-
-	def __findDir(self, fhash, path):
-		"""Find directory by hash"""
-		fhash = str(fhash)
-		if not path:
-			path = self._options['root']
-			if fhash == self.__hash(path):
-				return path
-
-		if not os.path.isdir(path):
-			return None
-
-		for d in os.listdir(path):
-			pd = os.path.join(path, d)
-			if os.path.isdir(pd) and not os.path.islink(pd):
-				if fhash == self.__hash(pd):
-					return pd
-				else:
-					ret = self.__findDir(fhash, pd)
-					if ret:
-						return ret
-
-		return None
-
-
-	def __find(self, fhash, parent):
-		"""Find file/dir by hash"""
-		fhash = str(fhash)
-		if os.path.isdir(parent):
-			for i in os.listdir(parent):
-				path = os.path.join(parent, i)
-				if fhash == self.__hash(path):
-					return path
-		return None
-
-
-	def __checkName(self, name):
-		"""Check for valid file/dir name"""
-		pattern = r'[\/\\\:\<\>]'
-		if re.search(pattern, name):
-			return False
-		return True
 
 
 	def __content(self, path, tree):
@@ -652,6 +586,84 @@ class elFinder():
 
 		dirs.extend(files)
 		self._response['cdc'] = dirs
+
+
+	def __info(self, path):
+		mime = ''
+		filetype = 'file'
+		if os.path.isfile(path): filetype = 'file'
+		if os.path.isdir(path): filetype = 'dir'
+		if os.path.islink(path): filetype = 'link'
+
+		stat = os.lstat(path)
+		statDate = datetime.fromtimestamp(stat.st_mtime)
+
+		fdate = ''
+		if stat.st_mtime >= self._today:
+			fdate = 'Today ' + statDate.strftime("%H:%M")
+		elif stat.st_mtime >= self._yesterday and stat.st_mtime < self._today:
+			fdate = 'Yesterday ' + statDate.strftime("%H:%M")
+		else:
+			fdate = statDate.strftime("%d %b %Y %H:%M")
+
+		info = {
+			'name': os.path.basename(path),
+			'hash': self.__hash(path),
+			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
+			'date': fdate,
+			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
+			'read': self.__isAllowed(path, 'read'),
+			'write': self.__isAllowed(path, 'write'),
+			'rm': self.__isAllowed(path, 'rm')
+		}
+		
+		if filetype == 'link':
+			path = self.__readlink(path)
+			if not path:
+				info['mime'] = 'symlink-broken'
+				return info
+
+			if os.path.isdir(path):
+				info['mime'] = 'directory'
+			else:
+				info['parent'] = self.__hash(os.path.dirname(path))
+				info['mime'] = self.__mimetype(path)
+
+			if self._options['rootAlias']:
+				basename = self._options['rootAlias']
+			else:
+				basename = os.path.basename(self._options['root'])
+
+			info['link'] = self.__hash(path)
+			info['linkTo'] = basename + path[len(self._options['root']):]
+			info['read'] = info['read'] and self.__isAllowed(path, 'read')
+			info['write'] = info['write'] and self.__isAllowed(path, 'write')
+			info['rm'] = self.__isAllowed(path, 'rm')
+
+		if not info['mime'] == 'directory':
+			if self._options['fileURL']:
+				info['url'] = self.__path2url(path)
+			if info['mime'][0:5] == 'image':
+				if self.__canCreateTmb():
+					dim = self.__getImgSize(path)
+					if dim:
+						info['dim'] = dim
+						info['resize'] = True
+
+					# if we are in tmb dir, files are thumbs itself
+					if os.path.dirname(path) == self._options['tmbDir']:
+						info['tmb'] = self.__path2url(path)
+						return info
+
+					tmb = os.path.join(self._options['tmbDir'], info['hash'] + '.png')
+
+					if os.path.exists(tmb):
+						tmbUrl = self.__path2url(tmb)
+						info['tmb'] = tmbUrl
+					else:
+						self._response['tmb'] = True
+
+		return info
 
 
 	def __tree(self, path):
@@ -730,7 +742,7 @@ class elFinder():
 
 	def __remove(self, target):
 		if not self.__isAllowed(target, 'rm'):
-			self.__errorData(target, 'Access denied!')
+			self.__errorData(target, 'Access denied')
 
 		if not os.path.isdir(target):
 			try:
@@ -753,73 +765,85 @@ class elFinder():
 		pass
 
 
-	def __info(self, path):
-		mime = ''
-		filetype = 'file'
-		if os.path.isfile(path): filetype = 'file'
-		if os.path.isdir(path): filetype = 'dir'
-		if os.path.islink(path): filetype = 'link'
+	def __copy(self, src, dst):
+		dstDir = os.path.dirname(dst)
+		if not self.__isAllowed(src, 'read'):
+			self.__errorData(src, 'Access denied')
+			return False
+		if not self.__isAllowed(dstDir, 'write'):
+			self.__errorData(dstDir, 'Access denied')
+			return False
+		if os.path.exists(dst):
+			self.__errorData(dst, 'File or folder with the same name already exists')
+			return False
 
-		stat = os.lstat(path)
+		if not os.path.isdir(src):
+			try:
+				shutil.copyfile(src, dst)
+				shutil.copymode(src, dst)
+				return True
+			except:
+				self.__errorData(src, 'Unable to copy files')
+				return False
+		else:
+			try:
+				os.mkdir(dst)
+				shutil.copymode(src, dst)
+			except:
+				self.__errorData(src, 'Unable to copy files')
+				return False
 
-		info = {
-			'name': os.path.basename(path),
-			'hash': self.__hash(path),
-			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
-			'date': datetime.fromtimestamp(stat.st_mtime).strftime("%d %b %Y %H:%M"),
-			'size': self.__dirSize(path) if filetype == 'dir' else stat.st_size,
-			'read': self.__isAllowed(path, 'read'),
-			'write': self.__isAllowed(path, 'write'),
-			'rm': self.__isAllowed(path, 'rm')
-		}
-		
-		if filetype == 'link':
-			path = self.__readlink(path)
-			if not path:
-				info['mime'] = 'symlink-broken'
-				return info
+			for i in os.listdir(src):
+				newSrc = os.path.join(src, i)
+				newDst = os.path.join(dst, i)
+				if not self.__copy(newSrc, newDst):
+					self.__errorData(newSrc, 'Unable to copy files')
+					return False
 
-			if os.path.isdir(path):
-				info['mime'] = 'directory'
-			else:
-				info['parent'] = self.__hash(os.path.dirname(path))
-				info['mime'] = self.__mimetype(path)
+		return True
 
-			if self._options['rootAlias']:
-				basename = self._options['rootAlias']
-			else:
-				basename = os.path.basename(self._options['root'])
 
-			info['link'] = self.__hash(path)
-			info['linkTo'] = basename + path[len(self._options['root']):]
-			info['read'] = info['read'] and self.__isAllowed(path, 'read')
-			info['write'] = info['write'] and self.__isAllowed(path, 'write')
-			info['rm'] = self.__isAllowed(path, 'rm')
+	def __checkName(self, name):
+		"""Check for valid file/dir name"""
+		pattern = r'[\/\\\:\<\>]'
+		if re.search(pattern, name):
+			return False
+		return True
 
-		if not info['mime'] == 'directory':
-			if self._options['fileURL']:
-				info['url'] = self.__path2url(path)
-			if info['mime'][0:5] == 'image':
-				if self.__canCreateTmb():
-					dim = self.__getImgSize(path)
-					if dim:
-						info['dim'] = dim
-						info['resize'] = True
 
-					# if we are in tmb dir, files are thumbs itself
-					if os.path.dirname(path) == self._options['tmbDir']:
-						info['tmb'] = self.__path2url(path)
-						return info
+	def __findDir(self, fhash, path):
+		"""Find directory by hash"""
+		fhash = str(fhash)
+		if not path:
+			path = self._options['root']
+			if fhash == self.__hash(path):
+				return path
 
-					tmb = os.path.join(self._options['tmbDir'], info['hash'] + '.png')
+		if not os.path.isdir(path):
+			return None
 
-					if os.path.exists(tmb):
-						tmbUrl = self.__path2url(tmb)
-						info['tmb'] = tmbUrl
-					else:
-						self._response['tmb'] = True
+		for d in os.listdir(path):
+			pd = os.path.join(path, d)
+			if os.path.isdir(pd) and not os.path.islink(pd):
+				if fhash == self.__hash(pd):
+					return pd
+				else:
+					ret = self.__findDir(fhash, pd)
+					if ret:
+						return ret
 
-		return info
+		return None
+
+
+	def __find(self, fhash, parent):
+		"""Find file/dir by hash"""
+		fhash = str(fhash)
+		if os.path.isdir(parent):
+			for i in os.listdir(parent):
+				path = os.path.join(parent, i)
+				if fhash == self.__hash(path):
+					return path
+		return None
 
 
 	def __read(self):
@@ -890,7 +914,7 @@ class elFinder():
 		for fhash in files:
 			curFile = self.__find(fhash, curDir)
 			if not curFile:
-				self._response['error'] = 'File does not exist'
+				self._response['error'] = 'File not found'
 				return
 			realFiles.append(os.path.basename(curFile))
 
@@ -935,7 +959,7 @@ class elFinder():
 		self.__checkArchivers()
 
 		if not mime in self._options['archivers']['extract'] or not curDir or not curFile:
-			self._response['error'] = 'Unable to extract files from archive'
+			self._response['error'] = 'Invalid parameters'
 			return
 
 		arc = self._options['archivers']['extract'][mime]
@@ -958,6 +982,11 @@ class elFinder():
 		return
 
 
+	def __ping(self):
+		print 'Connection: close\n'
+		sys.exit(0)
+
+
 	def __mimetype(self, path):
 		return mimetypes.guess_type(path)[0] or 'unknown'
 
@@ -975,6 +1004,16 @@ class elFinder():
 			self.__debug('tmbFailed_' + path, str(e))
 			return False
 		return True
+
+
+	def __rmTmb(self, img):
+		if self._options['tmbDir'] and os.path.exists(img):
+			tmb = self.__tmbPath(img)
+			if tmb:
+				try:
+					os.path.unlink(tmb)
+				except:
+					pass
 
 
 	def __cropTuple(self, size):
@@ -1035,6 +1074,16 @@ class elFinder():
 			return True
 		else:
 			return False
+
+
+	def __tmbPath(self, path):
+		tmb = False
+		if self._options['tmbDir']:
+			if not os.path.dirname(path) == self._options['tmbDir']:
+				tmb = os.path.join(self._options['tmbDir'], self._hash(path) + '.png')
+			else:
+				tmb = path
+		return tmb
 
 
 	def __isUploadAllow(self, file):
