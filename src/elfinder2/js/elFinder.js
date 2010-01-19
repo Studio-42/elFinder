@@ -209,7 +209,11 @@
 			this.ajax({cmd : 'tmb', current : self.cwd.hash}, function(data) {
 				if (self.options.view == 'icons' && data.images && data.current == self.cwd.hash) {
 					for (var i in data.images) {
-						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
+						if (self.cdc[i]) {
+							self.cdc[i].tmb = data.images[i];
+							$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
+						}
+						
 					}
 					data.tmb && self.tmb();
 				}
@@ -546,10 +550,12 @@
 		 * @return String
 		 */
 		this.lastDir = function(dir) {
-			if (!dir) {
-				return this.cookie(this.lCookie);
-			} else {
-				this.cookie(this.lCookie, dir);
+			if (this.options.rememberLastDir) {
+				if (!dir) {
+					return this.cookie(this.lCookie);
+				} else {
+					this.cookie(this.lCookie, dir);
+				}
 			}
 		}
 
@@ -686,11 +692,13 @@
 		/* fm view (icons|list) */
 		view           : 'icons',
 		/* width to overwrite css options */
-		// width          : '100%',
+		width          : '',
 		/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-		// height         : 300,
+		height         : '',
 		/* disable shortcuts exclude arrows/space */
 		disableShortcuts : false,
+		/* open last visited dir after reload page or close and open browser */
+		rememberLastDir : true,
 		/* cookie options */
 		cookie         : {
 			expires : 30,

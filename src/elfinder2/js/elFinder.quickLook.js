@@ -6,11 +6,8 @@
 elFinder.prototype.quickLook = function(fm, el) {
 	var self    = this;
 	this.fm     = fm;
-	this._img   = false;
 	this._hash  = '';
 	this.title  = $('<strong/>');
-	// this.img    = $('<img/>');
-	// this.iframe = $('<iframe/>');
 	this.ico    = $('<p class="icon"/>');
 	this.info   = $('<label/>');
 	this.media  = $('<div class="el-finder-ql-media"/>').hide()
@@ -24,7 +21,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		window.open($(this).attr('href'));
 		self.hide();
 	});
-	// this.dim = $('<span class="el-finder-ql-dim"/>')
+
 	this.add = $('<div class="add"/>')
 	this.content = $('<div class="el-finder-ql-content"/>')
 	this.win     = $('<div class="el-finder-ql"/>').hide()
@@ -80,12 +77,14 @@ elFinder.prototype.quickLook = function(fm, el) {
 	}
 	
 	if (($.browser.safari && navigator.platform.indexOf('Mac') != -1) || $.browser.msie) {
+		
 		this.mimes['application/pdf'] = 'pdf';
 	} else {
 		for (var n=0; n < navigator.plugins.length; n++) {
 			for (var m=0; m < navigator.plugins[n].length; m++) {
 				var e = navigator.plugins[n][m].description.toLowerCase();
 				if (e.substring(0, e.indexOf(" ")) == 'pdf') {
+					alert('here')
 					this.mimes['application/pdf'] = 'pdf';
 					break;
 				}
@@ -96,7 +95,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	if (this.mimes['image/x-bmp']) {
 		this.mimes['image/x-ms-bmp'] = 'bmp';
 	}
-	
+
 	/**
 	 * Open quickLook window
 	 **/
