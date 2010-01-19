@@ -79,6 +79,30 @@ class elFinder():
 		'ping': '__ping'
 	}
 
+	_mimeType = {
+		# text
+		'txt': 'text/plain',
+		'php': 'text/x-php',
+		'html': 'text/html',
+		'htm': 'text/html',
+		'js' : 'text/javascript',
+		'css': 'text/css',
+		'rtf': 'text/rtf',
+		'rtfd': 'text/rtfd',
+		'py' : 'text/x-python',
+		'java': 'text/x-java-source',
+		'rb' : 'text/x-ruby',
+		'sh' : 'text/x-shellscript',
+		'pl' : 'text/x-perl',
+		'sql': 'text/x-sql',
+		# apps
+		'doc': 'application/msword',
+		'ogg': 'application/ogg',
+		# video
+		'ogm': 'appllication/ogm',
+		'mkv': 'video/x-matroska'
+	}
+
 	_time = 0
 	_request = {}
 	_response = {}
@@ -135,7 +159,7 @@ class elFinder():
 					except Exception, e:
 						# print 'Content-type: text/html\n'
 						# print e
-						self._response['error'] = 'Unknown command'
+						self._response['error'] = 'Command Failed'
 			else:
 				self._response['error'] = 'Unknown command'
 		else:
@@ -189,7 +213,10 @@ class elFinder():
 				if not curFile or os.path.isdir(curFile):
 					print 'HTTP/1.x 404 Not Found\n\n'
 					sys.exit('File not found')
-				if not self.__isAllowed(os.path.dirname(curFile), 'read') or not self.__isAllowed(curFile, 'read'):
+				if (
+					not self.__isAllowed(os.path.dirname(curFile), 'read')
+					or not self.__isAllowed(curFile, 'read')
+					):
 					print 'HTTP/1.x 403 Access Denied\n\n'
 					sys.exit('Access denied')
 
@@ -245,9 +272,9 @@ class elFinder():
 		elif os.path.exists(newName):
 			self._response['error'] = 'File or folder with the same name already exists'
 		else:
+			self.__rmTmb(curName)
 			try:
 				os.rename(curName, newName)
-				# TODO clean tmb
 				self._response['select'] = self.__hash(newName)
 				self.__content(curDir, os.path.isdir(newName))
 			except:
@@ -481,7 +508,6 @@ class elFinder():
 
 
 	def __geturl(self):
-		response = {}
 		if 'current' in self._request and 'file' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			curFile = self.__find(self._request['file'], curDir)
@@ -672,7 +698,7 @@ class elFinder():
 		if not os.path.isdir(path): return ''
 		if os.path.islink(path): return ''
 
-		if (path == self._options['root']) and self._options['rootAlias']:
+		if path == self._options['root'] and self._options['rootAlias']:
 			name = self._options['rootAlias']
 		else:
 			name = os.path.basename(path)
@@ -939,7 +965,7 @@ class elFinder():
 		self.__runSubProcess(cmd)
 		os.chdir(curCwd)
 
-		if (os.path.exists(archivePath)):
+		if os.path.exists(archivePath):
 			self.__content(curDir, False)
 			self._response['select'] = self.__hash(archivePath)
 		else:
@@ -988,7 +1014,25 @@ class elFinder():
 
 
 	def __mimetype(self, path):
-		return mimetypes.guess_type(path)[0] or 'unknown'
+		mime =  mimetypes.guess_type(path)[0] or 'unknown'
+		ext = path[path.rfind('.') + 1:]
+
+		if mime == 'text/plain' and ext == 'pl':
+			mime = self._mimeType[ext]
+
+		if mime == 'application/vnd.ms-office' and ext == 'doc':
+			mime = self._mimeType[ext]
+
+		if mime == 'unknown':
+			if os.path.basename(path) == 'README':
+				mime = 'text/plain'
+			else:
+				if ext in self._mimeType:
+					mime = self._mimeType[ext]
+
+		self.__debug(path, ext + ' ' + mime)
+
+		return mime
 
 
 	def __tmb(self, path, tmb):
@@ -1006,25 +1050,25 @@ class elFinder():
 		return True
 
 
-	def __rmTmb(self, img):
-		if self._options['tmbDir'] and os.path.exists(img):
-			tmb = self.__tmbPath(img)
-			if tmb:
+	def __rmTmb(self, path):
+		tmb = self.__tmbPath(path)
+		if self._options['tmbDir']:
+			if os.path.exists(tmb):
 				try:
-					os.path.unlink(tmb)
+					os.unlink(tmb)
 				except:
 					pass
 
 
 	def __cropTuple(self, size):
 		w, h = size
-		if (w > h): # landscape
+		if w > h: # landscape
 			l = int((w - h) / 2)
 			u = 0
 			r = l + h
 			d = h
 			return (l, u, r, d)
-		elif (h > w): # portrait
+		elif h > w: # portrait
 			l = 0
 			u = int((h - w) / 2)
 			r = w
@@ -1080,9 +1124,7 @@ class elFinder():
 		tmb = False
 		if self._options['tmbDir']:
 			if not os.path.dirname(path) == self._options['tmbDir']:
-				tmb = os.path.join(self._options['tmbDir'], self._hash(path) + '.png')
-			else:
-				tmb = path
+				tmb = os.path.join(self._options['tmbDir'], self.__hash(path) + '.png')
 		return tmb
 
 
@@ -1173,7 +1215,8 @@ class elFinder():
 
 	def __checkArchivers(self):
 		# import subprocess
-		# sp = subprocess.Popen(['tar', '--version'], shell = False, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+		# sp = subprocess.Popen(['tar', '--version'], shell = False,
+		# stdout = subprocess.PIPE, stderr=subprocess.PIPE)
 		# out, err = sp.communicate()
 		# print 'out:', out, '\nerr:', err, '\n'
 		archive = { 'create': {}, 'extract': {} }
