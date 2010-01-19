@@ -24,14 +24,14 @@ elFinder.prototype.quickLook = function(fm, el) {
 		window.open($(this).attr('href'));
 		self.hide();
 	});
-	this.dim = $('<span class="el-finder-ql-dim"/>')
+	// this.dim = $('<span class="el-finder-ql-dim"/>')
 	this.add = $('<div class="add"/>')
 	this.content = $('<div class="el-finder-ql-content"/>')
 	this.win     = $('<div class="el-finder-ql"/>').hide()
 		.append($('<div class="el-finder-ql-drag-handle"/>').append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
 		.append(this.ico)
 		.append(this.media)
-		.append(this.content.append(this.name).append(this.kind).append(this.size).append(this.date).append(this.url).append(this.dim))
+		.append(this.content.append(this.name).append(this.kind).append(this.size).append(this.date).append(this.url).append(this.add))
 		.appendTo(document.body)
 		.draggable({handle : '.el-finder-ql-drag-handle'})
 		.resizable({
@@ -195,9 +195,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.media.hide().empty();
 		self.win.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
 		self.title.empty();
-		self.dim.hide();
-		self.ico.show();
-		self.add.empty();
+		self.ico.css('background', '').show();
+		self.add.hide().empty();
 		self._hash = '';
 	}
 	
@@ -237,14 +236,16 @@ elFinder.prototype.quickLook.prototype.plugins = {
 	
 	image : new function() {
 
-		this.test = function(mime, mimes, name) {
-			return mime.match(/^image\//) && mimes[mime];
+		this.test = function(mime, mimes) {
+			return mime.match(/^image\//)// && mimes[mime];
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL(), t;
-			ql.dim.text(f.dim+' px').show();
-			if (url && f.hash == ql._hash) {
+			var url, t;
+			// ql.fm.log('image')
+			f.dim && ql.add.append('<span>'+f.dim+' px</span>').show();
+			f.tmb && ql.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat')
+			if (ql.mimes[f.mime] && (url = ql.fm.fileURL()) && f.hash == ql._hash) {
 				$('<img/>').hide().appendTo(ql.media.show()).attr('src', url+'?'+Math.random()).load(function() {
 					t = $(this).unbind('load');
 					if (f.hash == ql._hash) { 
@@ -281,8 +282,8 @@ elFinder.prototype.quickLook.prototype.plugins = {
 	
 	text : new function() {
 
-		this.test = function(mime, mimes, name) {
-			return (0 == mime.indexOf('text') && mime != 'text/rtf') || mime.match(/application\/(xml|javascript|json)/);
+		this.test = function(mime, mimes) {
+			return (mime.indexOf('text') == 0 && mime.indexOf('rtf') == -1) || mime.match(/application\/(xml|javascript|json)/);
 		}
 		
 		this.show = function(ql, f) {
@@ -330,8 +331,8 @@ elFinder.prototype.quickLook.prototype.plugins = {
 	
 	video : new function() {
 		
-		this.test = function(mime, mimes, name) {
-			return (mime.indexOf('video') == 0 && mimes[mime]) || (name.match(/\.mov$/i) && mimes['video/quicktime']);
+		this.test = function(mime, mimes) {
+			return mime.indexOf('video') == 0 && mimes[mime];
 		}
 		
 		this.show = function(ql, f) {
@@ -347,7 +348,7 @@ elFinder.prototype.quickLook.prototype.plugins = {
 	
 	pdf : new function() {
 		
-		this.test = function(mime, mimes, name) {
+		this.test = function(mime, mimes) {
 			return mime == 'application/pdf' && mimes[mime];
 		}
 		

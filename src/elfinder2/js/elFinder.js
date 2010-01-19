@@ -186,7 +186,7 @@
 			}
 			opts.success = function(data) {
 				opts.lock && self.lock();
-
+				data.debug && self.log(data.debug);
 				if (data.error) {
 					!opts.silent && self.view.error(data.error, data.errorData);
 					if (!opts.force) {
@@ -194,7 +194,7 @@
 					}
 				}
 				callback(data);
-				data.debug && self.log(data.debug);
+				
 				delete data;
 			}
 			opts.lock && this.lock(true);
@@ -307,11 +307,9 @@
 			if (this.options.autoReload>0) {
 				if (this.iID) {
 					clearInterval(this.iID);
-					this.log('clear');
 				}
 				this.iID = setInterval(function() {
 					if (!self.locked) {
-						self.log('reload');
 						self.ui.exec('reload');
 					}
 						
@@ -615,7 +613,6 @@
 						}
 					});
 					self.ui.init(data.disabled);
-					
 				}
 				
 		}, {force : true});

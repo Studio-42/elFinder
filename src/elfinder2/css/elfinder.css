@@ -428,44 +428,74 @@ div.x-gzip p { background-position: -1px -477px; }
 }
 
 
-.el-finder-cwd table td.icon p {
+.el-finder-cwd table  p {
 	width:24px;
 	height:16px;
 	margin:0;
 	padding:0;
-	background:url(../images/icons-small.png) 3px 0 no-repeat;
+	background:url(../images/icons-small.png) 4px 0 no-repeat;
 }
 
 .el-finder-cwd table .size {
 	text-align:right;
 }
 
-tr.directory td.icon  p  { background-position:4px  -16px; }
-tr.text td.icon  p       { background-position:5px  -34px; }
-tr.image td.icon  p      { background-position:4px  -51px; }
-tr.audio td.icon  p      { background-position:4px  -70px; }
-tr.video td.icon  p      { background-position:6px  -89px; }
-tr.application td.icon p { background-position:4px -108px; }
+tr.directory   p { background-position:4px  -16px; }
+tr.text        p { background-position:5px  -34px; }
+tr.image       p { background-position:4px  -51px; }
+tr.audio       p { background-position:4px  -70px; }
+tr.video       p { background-position:5px  -89px; }
+tr.application p { background-position:4px -108px; }
+/* text */
+tr.html          p  { background-position:5px  -188px; }
+tr.javascript    p,
+tr.x-javascript  p,
+tr.css   		 p,
+tr.x-sql   		 p,
+tr.xml   		 p,
+tr.x-python   	 p,
+tr.x-java-source p,
+tr.x-perl        p,
+tr.x-ruby        p  { background-position:5px  -228px; }
+tr.x-php         p  { background-position:5px  -247px; }
+tr.x-c           p  { background-position:5px  -208px; }
+tr.x-shellscript p, 
+tr.x-sh          p  { background-position:5px  -168px; }
+tr.rtf p, tr.rtfd p { background-position:5px  -148px; }
+/* application */
+tr.x-shockwave-flash p { background-position:4px  -266px; }
+tr.pdf               p { background-position:4px  -285px; }
+tr.vnd-ms-office     p { background-position:4px  -325px; }
+tr.msword p,
+tr.vnd-oasis-opendocument-text  p,
+tr.vnd-ms-word p { background-position:4px -346px; }
+tr.vnd-ms-excel p,
+tr.ms-excel p,
+tr.vnd-oasis-opendocument-spreadsheet { background-position:4px -365px; }
+tr.vnd-ms-powerpoint p,
+tr.vnd-oasis-opendocument-presentation { background-position:4px -385px; }
+/* archives */
+tr.x-tar   p,
+tr.x-gzip  p,
+tr.x-bzip  p,
+tr.x-bzip2 p,
+tr.zip     p,
+tr.x-rar   p,
+tr.x-rar-compressed p,
+tr.x-7z-compressed  p { background-position:4px -305px; }
 
 tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
-
 
 .el-finder-cwd table td p em {
 	float:left;
 	width:10px;
 	height:12px;
 	margin-top:5px;
-	border:1px solid #ccc;
 	background:url(../images/icons-small.png) 0px -405px no-repeat;
 }
 
-.el-finder-cwd table p em.readonly {
-	background-position:0px -433px;
-}
-
-.el-finder-cwd table p em.dropbox {
-	background-position:0px -418px;
-}
+.el-finder-cwd table p em.readonly { background-position:0px -418px; }
+.el-finder-cwd table p em.dropbox  { background-position:0px -433px; }
 
 /************************************/
 /*              statusbar           */
