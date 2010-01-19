@@ -722,7 +722,7 @@
 		/* docked mode */
 		docked : false,
 		/* auto reload time (min) */
-		autoReload : 1
+		autoReload : 0
 	}
 
 	

@@ -316,7 +316,7 @@ elFinder.prototype.ui.prototype.commands = {
 					ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 				}
 				o = 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes';
-				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), f.name, o);
+				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, o);
 			}
 		}
 	
