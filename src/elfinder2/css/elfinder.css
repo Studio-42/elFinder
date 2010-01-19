@@ -305,10 +305,15 @@ div.gif p         { background-position: 0 -1183px; }
 div.jpeg p        { background-position: 0 -1234px; }
 div.vnd-adobe-photoshop p,
 div.postscript p  { background-position: 0 -1132px; }
+/* video */
+div.ogg p         { background-position: -1px -1032px; }
+/* audio */
+div.ogm p         { background-position: -1px -1082px; }
 /* texts */
 div.rtf p,
 div.rtfd p          { background-position: 0 -573px; }
-div.javascript p    { background-position: 0 -184px; }
+div.javascript p,
+div.x-javascript p    { background-position: 0 -184px; }
 div.x-c p, 
 div.css p, 
 div.x-sql p, 
@@ -316,28 +321,31 @@ div.x-python p,
 div.x-java-source p { background-position: 0 -624px; }
 div.html p          { background-position: 0 -777px; }
 div.x-java p        { background-position: 0 -827px; }
-div.x-shellscript p { background-position: 0 -930px; }
 div.x-php p         { background-position: 0 -726px; }
 div.x-perl p        { background-position: 0 -675px; }
 div.x-ruby p        { background-position: 0 -877px; }
+div.x-shellscript p { background-position: 0 -930px; }
 /* applications */
 .x-symlink-broken p { background-position:  -1px     1px; }
 div.vnd-ms-office p, 
+div.msword p, 
 div.vnd-ms-word p, 
-div.vnd-oasis-opendocument-text p {background-position: -1px -232px;}
+div.vnd-oasis-opendocument-text p { background-position: -1px -232px; }
 div.ms-excel p,
 div.vnd-ms-excel p,
 div.vnd-oasis-opendocument-spreadsheet p { background-position: -1px -330px; }
 div.vnd-ms-powerpoint p,
 div.vnd-oasis-opendocument-presentation p { background-position: -1px -380px; }
-div.pdf p { background-position: -1px -282px;}
-div.xml p { background-position: 0 -980px;}
-div.x-shockwave-flash p { background-position: 0 -1032px;}
+div.pdf p { background-position: -1px -282px; }
+div.xml p { background-position: 0 -980px; }
+div.x-shockwave-flash p { background-position: 0 -1032px; }
+div.x-sh p { background-position: 0 -930px; }
 /* archives */
 div.x-bzip p, 
 div.x-bzip2 p,
 div.zip p,
-div.x-rar p, 
+div.x-rar p,
+div.x-rar-compressed p, 
 div.x-tar p,  
 div.x-7z-compressed p { background-position: -1px -430px; }
 div.x-gzip p { background-position: -1px -477px; }
