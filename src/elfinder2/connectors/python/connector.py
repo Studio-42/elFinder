@@ -36,8 +36,11 @@ class elFinder():
 		'tmbAtOnce': 3,
 		'tmbSize': 48,
 		'fileURL': True,
-		'uplMaxSize': 15,
-		'uplWriteChunk': 8192,
+		'uploadMaxSize': 15,
+		'uploadWriteChunk': 8192,
+		'uploadAllow': [],
+		'uploadDeny': [],
+		'uploadOrder': ['allow', 'deny'],
 		'allowTypes': [],
 		'allowExts': [],
 		'denyTypes': [],
@@ -98,6 +101,7 @@ class elFinder():
 		# apps
 		'doc': 'application/msword',
 		'ogg': 'application/ogg',
+		'7z': 'application/x-7z-compressed',
 		# video
 		'ogm': 'appllication/ogm',
 		'mkv': 'video/x-matroska'
@@ -170,7 +174,7 @@ class elFinder():
 			self._response['disabled'] = self._options['disabled']
 			self._response['params'] = {
 				'dotFiles': self._options['dotFiles'],
-				'uplMaxSize': str(self._options['uplMaxSize']) + 'M',
+				'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
 				'archives': self._options['archiveMimes'],
 				'extract': self._options['archivers']['extract'].keys()
 			}
@@ -386,7 +390,7 @@ class elFinder():
 			self._response['select'] = []
 			total = 0
 			upSize = 0
-			maxSize = self._options['uplMaxSize'] * 1024 * 1024
+			maxSize = self._options['uploadMaxSize'] * 1024 * 1024
 			for up in upFiles:
 				name = up.filename
 				if name:
@@ -394,18 +398,23 @@ class elFinder():
 					name = os.path.basename(name)
 					if not self.__checkName(name):
 						self.__errorData(name, 'Invalid name')
-					elif not self.__isUploadAllow(up.file):
-						self.__errorData(name, 'Not allowed file type')
 					else:
 						name = os.path.join(curDir, name)
 						try:
-							f = open(name, 'wb', self._options['uplWriteChunk'])
+							f = open(name, 'wb', self._options['uploadWriteChunk'])
 							for chunk in self.__fbuffer(up.file):
 								f.write(chunk)
 							f.close()
 							upSize += os.lstat(name).st_size
-							os.chmod(name, self._options['fileUmask'])
-							self._response['select'].append(self.__hash(name))
+							if self.__isUploadAllow(name):
+								os.chmod(name, self._options['fileUmask'])
+								self._response['select'].append(self.__hash(name))
+							else:
+								self.__errorData(name, 'Not allowed file type')
+								try:
+									os.unlink(name)
+								except:
+									pass
 						except:
 							self.__errorData(name, 'Unable to save uploaded file')
 						if upSize > maxSize:
@@ -1014,8 +1023,11 @@ class elFinder():
 
 
 	def __mimetype(self, path):
-		mime =  mimetypes.guess_type(path)[0] or 'unknown'
+		mime = mimetypes.guess_type(path)[0] or 'unknown'
 		ext = path[path.rfind('.') + 1:]
+
+		if mime == 'unknown' and ('.' + ext) in mimetypes.types_map:
+			mime = mimetypes.types_map['.' + ext]
 
 		if mime == 'text/plain' and ext == 'pl':
 			mime = self._mimeType[ext]
@@ -1024,13 +1036,13 @@ class elFinder():
 			mime = self._mimeType[ext]
 
 		if mime == 'unknown':
-			if os.path.basename(path) == 'README':
+			if os.path.basename(path) in ['README', 'ChangeLog']:
 				mime = 'text/plain'
 			else:
 				if ext in self._mimeType:
 					mime = self._mimeType[ext]
 
-		self.__debug(path, ext + ' ' + mime)
+		self.__debug('mime ' + os.path.basename(path), ext + ' ' + mime)
 
 		return mime
 
@@ -1094,15 +1106,18 @@ class elFinder():
 
 	def __dirSize(self, path):
 		total_size = 0
-		for dirpath, dirnames, filenames in os.walk(path):
-			for f in filenames:
-				fp = os.path.join(dirpath, f)
-				if os.path.exists(fp):
-					total_size += os.stat(fp).st_size
+		if self._options['dirSize']:
+			for dirpath, dirnames, filenames in os.walk(path):
+				for f in filenames:
+					fp = os.path.join(dirpath, f)
+					if os.path.exists(fp):
+						total_size += os.stat(fp).st_size
+		else:
+			total_size = os.lstat(path).st_size
 		return total_size
 
 
-	def __fbuffer(self, f, chunk_size = _options['uplWriteChunk']):
+	def __fbuffer(self, f, chunk_size = _options['uploadWriteChunk']):
 		while True:
 			chunk = f.read(chunk_size)
 			if not chunk: break
@@ -1128,9 +1143,32 @@ class elFinder():
 		return tmb
 
 
-	def __isUploadAllow(self, file):
-		# TODO
-		return True
+	def __isUploadAllow(self, name):
+		allow = False
+		deny = False
+		mime = self.__mimetype(name)
+
+		if 'all' in self._options['uploadAllow']:
+			allow = True
+		else:
+			for a in self._options['uploadAllow']:
+				if mime.find(a) == 0:
+					allow = True
+
+		if 'all' in self._options['uploadDeny']:
+			deny = True
+		else:
+			for d in self._options['uploadDeny']:
+				if mime.find(d) == 0:
+					deny = True
+
+		if self._options['uploadOrder'][0] == 'allow':
+			return allow or not deny
+		else:
+			if deny:
+				return False
+			else:
+				return True
 
 
 	def __isAccepted(self, target):
@@ -1336,9 +1374,13 @@ class elFinder():
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files/TEST',
 	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/TEST',
+	'uploadDeny': ['image'],
+	'uploadAllow': ['all'],
+	'uploadOrder': ['deny', 'allow'],
 	# 'root': '/Users/troex/Sites/',
 	# 'URL': 'http://php5.localhost:8001/~troex/',
-	'imgLib': 'auto'
+	'imgLib': 'auto',
+	'dirSize': False
 }).run()
 
 #print os.environ
