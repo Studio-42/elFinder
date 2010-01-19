@@ -1009,26 +1009,28 @@ class elFinder {
 		
 				
 		if ($type == 'link') {
-			if (false == ($path = $this->_readlink($path))) {
+			if (false == ($lpath = $this->_readlink($path))) {
 				$info['mime'] = 'symlink-broken';
 				return $info;
 			}
-			if (is_dir($path)) {
+			if (is_dir($lpath)) {
 				$info['mime']  = 'directory';
 			} else {
-				$info['parent'] = $this->_hash(dirname($path));
-				$info['mime']   = $this->_mimetype($path);
+				$info['parent'] = $this->_hash(dirname($lpath));
+				$info['mime']   = $this->_mimetype($lpath);
 			}
-			$info['link']   = $this->_hash($path);
-			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
-			$info['read']   = $this->_isAllowed($path, 'read');
-			$info['write']  = $this->_isAllowed($path, 'write');
-			$info['rm']     = $this->_isAllowed($path, 'rm');
-		} 
+			$info['link']   = $this->_hash($lpath);
+			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($lpath, strlen($this->_options['root']));
+			$info['read']   = $this->_isAllowed($lpath, 'read');
+			$info['write']  = $this->_isAllowed($lpath, 'write');
+			$info['rm']     = $this->_isAllowed($lpath, 'rm');
+		} else {
+			$lpath = '';
+		}
 		
 		if ($info['mime'] != 'directory') {
 			if ($this->_options['fileURL']) {
-				$info['url'] = $this->_path2url($path);
+				$info['url'] = $this->_path2url($lpath ? $lpath : $path);
 			}
 			
 			if (0 === ($p = strpos($info['mime'], 'image'))) {
@@ -1038,6 +1040,7 @@ class elFinder {
 
 				$info['resize'] = isset($info['dim']) && $this->_canCreateTmb($info['mime']);
 				$tmb = $this->_tmbPath($path);
+				
 				if (file_exists($tmb)) {
 					$info['tmb']  = $this->_path2url($tmb);
 				} elseif ($info['resize']) {
@@ -1551,7 +1554,6 @@ class elFinder {
 		if ($this->_options['tmbDir']) {
 			$tmb = dirname($path) != $this->_options['tmbDir']
 				? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png'
-				// ? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.str_replace('/', '_', $path).'.png'
 				: $path;
 		}
 		return $tmb;

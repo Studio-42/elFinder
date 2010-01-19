@@ -97,7 +97,6 @@ elFinder.prototype.quickLook = function(fm, el) {
 		this.mimes['image/x-ms-bmp'] = 'bmp';
 	}
 	
-	self.fm.log(this.mimes)
 	/**
 	 * Open quickLook window
 	 **/
@@ -237,16 +236,15 @@ elFinder.prototype.quickLook.prototype.plugins = {
 	image : new function() {
 
 		this.test = function(mime, mimes) {
-			return mime.match(/^image\//)// && mimes[mime];
+			return mime.match(/^image\//);
 		}
 		
 		this.show = function(ql, f) {
 			var url, t;
-			// ql.fm.log('image')
 			f.dim && ql.add.append('<span>'+f.dim+' px</span>').show();
 			f.tmb && ql.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat')
 			if (ql.mimes[f.mime] && (url = ql.fm.fileURL()) && f.hash == ql._hash) {
-				$('<img/>').hide().appendTo(ql.media.show()).attr('src', url+'?'+Math.random()).load(function() {
+				$('<img/>').hide().appendTo(ql.media.show()).attr('src', url+($.browser.msie || $.browser.opera ? '?'+Math.random() : '')).load(function() {
 					t = $(this).unbind('load');
 					if (f.hash == ql._hash) { 
 						ql.win.is(':animated') ? setTimeout(function() { preview(t); }, 330) : preview(t);
