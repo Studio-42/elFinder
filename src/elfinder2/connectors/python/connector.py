@@ -26,10 +26,10 @@ class elFinder():
 		'root': './',
 		'URL': '',
 		'rootAlias': 'Home',
-		'dotFiles': True, # TODO
+		'dotFiles': True,
 		'debug': True,
 		'dirSize': True,
-		'fileUmask': 0666,
+		'fileUmask': 0644,
 		'dirUmask': 0755,
 		'imgLib': False,
 		'tmbDir': '.tmb',
@@ -47,15 +47,12 @@ class elFinder():
 		'denyExts': [],   
 		'allowURLs': [],
 		'disabled': [],
-		'aclObj': None,
-		'aclRole': 'user',
+		# 'aclObj': None, # TODO
+		# 'aclRole': 'user', # TODO
 		'defaults': {
 			'read': True,
 			'write': True,
-			'mkdir': True,
-			'upload': True,
-			'rm': True,
-			'rmdir': True
+			'rm': True
 		},
 		'archiveMimes': {},
 		'archivers': {},
@@ -141,7 +138,8 @@ class elFinder():
 
 	def run(self):
 		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]',
-			'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type']
+			'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type',
+			'width', 'height']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -513,6 +511,44 @@ class elFinder():
 				return
 
 		self.__content(curDir, True)
+		return
+
+
+	def __resize(self):
+		if not (
+			'current' in self._request and 'file' in self._request
+			and 'width' in self._request and 'height' in self._request
+			):
+			self._response['error'] = 'Invalid parameters'
+			return
+
+		width = int(self._request['width'])
+		height = int(self._request['height'])
+		curDir = self.__findDir(self._request['current'], None)
+		curFile = self.__find(self._request['file'], curDir)
+
+		if width < 1 or height < 1 or not curDir or not curFile:
+			self._response['error'] = 'Invalid parameters'
+			return
+		if not self.__isAllowed(curFile, 'write'):
+			self._response['error'] = 'Access denied'
+			return
+		if not self.__mimetype(curFile).find('image') == 0:
+			self._response['error'] = 'File is not an image'
+			return
+
+		self.__debug('resize ' + curFile, str(width) + ':' + str(height))
+		self.__initImgLib()
+		try:
+			im = self._im.open(curFile)
+			imResized = im.resize((width, height), self._im.ANTIALIAS)
+			imResized.save(curFile)
+		except Exception, e:
+			self.__debug('resizeFailed_' + path, str(e))
+			self._response['error'] = 'Unable to resize image'
+			return
+
+		self.__content(curDir, False)
 		return
 
 
@@ -1018,6 +1054,7 @@ class elFinder():
 
 
 	def __ping(self):
+		"""Workaround for Safari"""
 		print 'Connection: close\n'
 		sys.exit(0)
 
@@ -1374,7 +1411,7 @@ class elFinder():
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files/TEST',
 	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/TEST',
-	'uploadDeny': ['image'],
+	'uploadDeny': [],
 	'uploadAllow': ['all'],
 	'uploadOrder': ['deny', 'allow'],
 	# 'root': '/Users/troex/Sites/',
