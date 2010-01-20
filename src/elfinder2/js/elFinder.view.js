@@ -45,7 +45,8 @@ elFinder.prototype.view = function(fm, el) {
 		'image/x-ms-bmp'                : 'BMP image',
 	    'image/jpeg'                    : 'JPEG image',   
 	    'image/gif'                     : 'GIF Image',    
-	    'image/png'                     : 'PNG image',    
+	    'image/png'                     : 'PNG image',
+		'image/x-targa'                 : 'TGA image',
 	    'image/tiff'                    : 'TIFF image',   
 	    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
 		'audio/mpeg'                    : 'MPEG audio',  
@@ -59,7 +60,8 @@ elFinder.prototype.view = function(fm, el) {
 		'video/x-msvideo'               : 'AVI video',
 		'video/quicktime'               : 'Quicktime video',
 		'video/x-ms-wmv'                : 'WM video',   
-		'video/x-flv'                   : 'Flash video'
+		'video/x-flv'                   : 'Flash video',
+		'video/x-matroska'              : 'Matroska video'
 	}
 	
 	this.tlb = $('<ul />');

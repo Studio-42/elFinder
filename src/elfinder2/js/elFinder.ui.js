@@ -316,7 +316,7 @@ elFinder.prototype.ui.prototype.commands = {
 					ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 				}
 				o = 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes';
-				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), f.name, o);
+				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, o);
 			}
 		}
 	
@@ -353,6 +353,28 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.cm = function(t) {
 			return t == 'file';
+		}
+	},
+	
+	/**
+	 * @class. Open/close quickLook window
+	 * @param Object  elFinder
+	 **/
+	quicklook : function(fm) {
+		var self  = this;
+		this.name = 'Preview with Quick Look';
+		this.fm   = fm;
+		
+		this.exec = function() {
+			self.fm.quickLook.toggle();
+		}
+		
+		this.isAllowed = function() {
+			return this.fm.selected.length == 1;
+		}
+		
+		this.cm = function() {
+			return true;
 		}
 	},
 	

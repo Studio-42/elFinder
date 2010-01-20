@@ -1,0 +1,69 @@
+1. CKEditor
+
+Диалог для вставки ссылки/изображения открывается в том же окне, а файловый менеджер в новом
+
+При создании CKEditor, указыаем путь к странице с elFinder
+
+
+
+CKEDITOR.replace('textarea_id', {
+	filebrowserBrowseUrl : 'elfinder.html'
+})
+
+elfinder.html
+
+	подключаем файлы
+	
+	создаем файловый менеджер с колбэком редактора:
+	$().ready(function() {
+		
+		var funcNum = window.location.search.replace(/^.*CKEditorFuncNum=(\d+).*$/, "$1");
+		var langCode = window.location.search.replace(/^.*langCode=([a-z]{2}).*$/, "$1");
+		
+		$('#finder').elfinder({
+			url : 'src/elfinder2/connectors/php/connector.php',
+			lang : langCode,
+			editorCallback : function(url) {
+				window.opener.CKEDITOR.tools.callFunction(funcNum, url);
+				window.close();
+			}
+		})
+		
+
+	})
+
+2. TinyMCE
+
+	Тут ситуация немного хуже - и диалог для вставки ссылки/изображения и файловый менеджер открываются в новых окнах.
+	
+	Создаем редактор
+	tinyMCE.init({
+        // General options
+        mode : "textareas",
+        .... any options
+		file_browser_callback : function(field_name, url, type, win) {
+			var w = window.open(Абсолютный URL к файловому менеджеру (elfinder.html), null, 'width=600,height=500');
+			// Сохраняем необходимые параметры в глобальных переменных окна (некошерно, но это самое простое решение для их идиотской архитектуры)
+			//  можете передавать параметры в get и потом парсить их. It's up to you!
+			w.tinymceFileField = field_name;
+			w.tinymceFileWin = win;
+		}
+	})
+	
+	elfinder.html
+
+		подключаем файлы
+
+		создаем файловый менеджер с колбэком редактора:
+	
+		$('#finder').elfinder({
+			url : 'src/elfinder2/connectors/php/connector.php',
+			lang : 'ru',
+			editorCallback : function(url) {
+				window.tinymceFileWin.document.forms[0].elements[window.tinymceFileField].value = url;
+				window.tinymceFileWin.focus();
+				window.close();
+			}
+		})
+		
+		

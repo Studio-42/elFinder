@@ -186,7 +186,7 @@
 			}
 			opts.success = function(data) {
 				opts.lock && self.lock();
-
+				data.debug && self.log(data.debug);
 				if (data.error) {
 					!opts.silent && self.view.error(data.error, data.errorData);
 					if (!opts.force) {
@@ -194,7 +194,7 @@
 					}
 				}
 				callback(data);
-				data.debug && self.log(data.debug);
+				
 				delete data;
 			}
 			opts.lock && this.lock(true);
@@ -209,7 +209,11 @@
 			this.ajax({cmd : 'tmb', current : self.cwd.hash}, function(data) {
 				if (self.options.view == 'icons' && data.images && data.current == self.cwd.hash) {
 					for (var i in data.images) {
-						$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
+						if (self.cdc[i]) {
+							self.cdc[i].tmb = data.images[i];
+							$('div[key="'+i+'"]>p', self.view.cwd).css('background', ' url("'+data.images[i]+'") 0 0 no-repeat');
+						}
+						
 					}
 					data.tmb && self.tmb();
 				}
@@ -307,11 +311,9 @@
 			if (this.options.autoReload>0) {
 				if (this.iID) {
 					clearInterval(this.iID);
-					this.log('clear');
 				}
 				this.iID = setInterval(function() {
 					if (!self.locked) {
-						self.log('reload');
 						self.ui.exec('reload');
 					}
 						
@@ -548,10 +550,12 @@
 		 * @return String
 		 */
 		this.lastDir = function(dir) {
-			if (!dir) {
-				return this.cookie(this.lCookie);
-			} else {
-				this.cookie(this.lCookie, dir);
+			if (this.options.rememberLastDir) {
+				if (!dir) {
+					return this.cookie(this.lCookie);
+				} else {
+					this.cookie(this.lCookie, dir);
+				}
 			}
 		}
 
@@ -615,7 +619,6 @@
 						}
 					});
 					self.ui.init(data.disabled);
-					
 				}
 				
 		}, {force : true});
@@ -689,11 +692,13 @@
 		/* fm view (icons|list) */
 		view           : 'icons',
 		/* width to overwrite css options */
-		// width          : '100%',
+		width          : '',
 		/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-		// height         : 300,
+		height         : '',
 		/* disable shortcuts exclude arrows/space */
 		disableShortcuts : false,
+		/* open last visited dir after reload page or close and open browser */
+		rememberLastDir : true,
 		/* cookie options */
 		cookie         : {
 			expires : 30,
@@ -708,13 +713,13 @@
 			['mkdir', 'mkfile', 'upload'],
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
-			['info', 'help'],
+			['info', 'quicklook', 'help'],
 			['icons', 'list']
 		],
 		/* contextmenu commands */
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
-			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
+			'file'  : ['select', 'open', 'quicklook', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 		},
 		/* jqueryUI dialog options */
@@ -722,7 +727,7 @@
 		/* docked mode */
 		docked : false,
 		/* auto reload time (min) */
-		autoReload : 1
+		autoReload : 0
 	}
 
 	

@@ -150,6 +150,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		});
 		
 		if (!this.fm.options.disableShortcuts) {
+			
 			$(document).bind('keydown', function(e) {
 				var meta = e.ctrlKey||e.metaKey;
 
@@ -158,7 +159,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				}
 
 				switch (e.keyCode) {
-					/* command+backspace - delete */
+					/* Meta+Backspace - delete */
 					case 8:
 						if (meta && self.ui.isCmdAllowed('rm')) {
 							e.preventDefault();
@@ -180,7 +181,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					case 65:
 						if (meta) {
 							e.preventDefault();
-							e.stopPropagation();
 							self.fm.selectAll();
 						}
 						break;

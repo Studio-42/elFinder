@@ -16,7 +16,7 @@ class elFinder {
 		'rootAlias'    => 'Home',       // display this instead of root directory name
 		'disabled'     => array(),      // list of not allowed commands
 		'dotFiles'     => false,        // display dot files
-		'cntDirSize'   => true,         // count total directories sizes
+		'cntDirSize'   => false,         // count total directories sizes
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new folders mode
 		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
@@ -154,6 +154,8 @@ class elFinder {
 		'gif'   => 'image/gif',
 		'png'   => 'image/png',
 		'tif'   => 'image/tiff',
+		'tiff'  => 'image/tiff',
+		'tga'   => 'image/x-targa',
 		'psd'   => 'image/vnd.adobe.photoshop',
 		//audio
 		'mp3'   => 'audio/mpeg',
@@ -171,6 +173,7 @@ class elFinder {
 		'mov'   => 'video/quicktime',
 		'wm'    => 'video/x-ms-wmv',
 		'flv'   => 'video/x-flv',
+		'mkv'   => 'video/x-matroska'
 		);
 	
 	/**
@@ -313,7 +316,7 @@ class elFinder {
 			// clean thumbnails dir
 			if ($this->_options['tmbDir']) {
 				srand((double) microtime() * 1000000);
-				if (rand(1, 100) <= $this->_options['tmbCleanProb']) {
+				if (rand(1, 200) <= $this->_options['tmbCleanProb']) {
 					$ts2 = $this->_utime();
 					$ls = scandir($this->_options['tmbDir']);
 					for ($i=0, $s = count($ls); $i < $s; $i++) { 
@@ -339,7 +342,11 @@ class elFinder {
 			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
 			$this->_result['debug']['mimeDetect'] = $this->_options['mimeDetect'];
 			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
-			$this->_result['debug']['du'] = @$this->_options['du'];
+			if ($this->_options['cntDirSize']) {
+				$this->_result['debug']['cntDirSize'] = true;
+				$this->_result['debug']['du'] = @$this->_options['du'];
+			}
+			
 		}
 		header("Content-Type: ".($cmd == 'upload' ? 'text/html' : 'application/json'));
 		header("Connection: close");
@@ -1006,34 +1013,38 @@ class elFinder {
 		
 				
 		if ($type == 'link') {
-			if (false == ($path = $this->_readlink($path))) {
+			if (false == ($lpath = $this->_readlink($path))) {
 				$info['mime'] = 'symlink-broken';
 				return $info;
 			}
-			if (is_dir($path)) {
+			if (is_dir($lpath)) {
 				$info['mime']  = 'directory';
 			} else {
-				$info['parent'] = $this->_hash(dirname($path));
-				$info['mime']   = $this->_mimetype($path);
+				$info['parent'] = $this->_hash(dirname($lpath));
+				$info['mime']   = $this->_mimetype($lpath);
 			}
-			$info['link']   = $this->_hash($path);
-			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($path, strlen($this->_options['root']));
-			$info['read']   = $this->_isAllowed($path, 'read');
-			$info['write']  = $this->_isAllowed($path, 'write');
-			$info['rm']     = $this->_isAllowed($path, 'rm');
-		} 
+			$info['link']   = $this->_hash($lpath);
+			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($lpath, strlen($this->_options['root']));
+			$info['read']   = $this->_isAllowed($lpath, 'read');
+			$info['write']  = $this->_isAllowed($lpath, 'write');
+			$info['rm']     = $this->_isAllowed($lpath, 'rm');
+		} else {
+			$lpath = '';
+		}
 		
 		if ($info['mime'] != 'directory') {
 			if ($this->_options['fileURL']) {
-				$info['url'] = $this->_path2url($path);
+				$info['url'] = $this->_path2url($lpath ? $lpath : $path);
 			}
 			
 			if (0 === ($p = strpos($info['mime'], 'image'))) {
 				if (false != ($s = getimagesize($path))) {
 					$info['dim'] = $s[0].'x'.$s[1];
 				}
-				$info['resize'] = $this->_canCreateTmb($info['mime']);
+
+				$info['resize'] = isset($info['dim']) && $this->_canCreateTmb($info['mime']);
 				$tmb = $this->_tmbPath($path);
+				
 				if (file_exists($tmb)) {
 					$info['tmb']  = $this->_path2url($tmb);
 				} elseif ($info['resize']) {
@@ -1327,8 +1338,10 @@ class elFinder {
 		
 		switch ($this->_options['mimeDetect']) {
 			case 'finfo':
-				$finfo = finfo_open(FILEINFO_MIME);
-				$type = @finfo_file($finfo, $path);
+				if (empty($this->_finfo)) {
+					$this->_finfo = finfo_open(FILEINFO_MIME);
+				}
+				$type = @finfo_file($this->_finfo, $path);
 				break;
 			case 'php':   
 			 	$type = mime_content_type($path);
@@ -1340,10 +1353,20 @@ class elFinder {
 				$type = exec('file -Ib '.escapeshellarg($path));
 				break;
 			default:
-				$ext  = false !== ($p = strrpos($path, '.')) ? strtolower(substr($path, $p+1)) : '';
+				$pinfo = pathinfo($path); 
+				$ext = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
 				$type = isset($this->_mimeTypes[$ext]) ? $this->_mimeTypes[$ext] : 'unknown;';
 		}
 		$type = explode(';', $type); 
+		
+		if ($this->_options['mimeDetect'] != 'internal' && $type[0] == 'application/octet-stream') {
+			$pinfo = pathinfo($path); 
+			$ext = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+			if (!empty($ext) && !empty($this->_mimeTypes[$ext])) {
+				$type[0] = $this->_mimeTypes[$ext];
+			}
+		}
+		
 		return $type[0];
 	}
 	
@@ -1366,7 +1389,12 @@ class elFinder {
 		$tmbSize = $this->_options['tmbSize'];
 		switch ($this->_options['imgLib']) {
 			case 'imagick':
-				$_img = new imagick($img);
+				try {
+					$_img = new imagick($img);
+				} catch (Exception $e) {
+					return false;
+				}
+				
 				$_img->contrastImage(1);
 				return $_img->cropThumbnailImage($tmbSize, $tmbSize) && $_img->writeImage($tmb);
 				break;
@@ -1374,8 +1402,22 @@ class elFinder {
 			case 'mogrify':
 				if (@copy($img, $tmb)) {
 					list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
-					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-					return file_exists($tmb);	
+					// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
+					exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
+					
+					if (file_exists($tmb)) {
+						return true;
+					} elseif ($c == 0) {
+						// find tmb for psd and animated gif
+						$mime = $this->_mimetype($img);
+						if ($mime == 'image/vnd.adobe.photoshop' || $mime = 'image/gif') {
+							$pinfo = pathinfo($tmb);
+							$test = $pinfo['dirname'].DIRECTORY_SEPARATOR.$pinfo['filename'].'-0.'.$pinfo['extension'];
+							if (file_exists($test)) {
+								return rename($test, $tmb);
+							}
+						}
+					}
 				}
 				break;
 			
@@ -1496,15 +1538,11 @@ class elFinder {
 	 **/
 	private function _canCreateTmb($mime)
 	{
-		if ($this->_options['tmbDir'] && $this->_options['imgLib']) {
-			if (0 === strpos($mime, 'image')) {
-				if ('gd' == $this->_options['imgLib']) {
-					return $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif';
-				} elseif ('mogrify' == $this->_options['imgLib']) {
-					return $mime != 'image/vnd.adobe.photoshop';
-				}
-				return true;
+		if ($this->_options['tmbDir'] && $this->_options['imgLib'] && 0 === strpos($mime, 'image')) {
+			if ('gd' == $this->_options['imgLib']) {
+				return $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif';
 			}
+			return true;
 		}
 	}
 	
