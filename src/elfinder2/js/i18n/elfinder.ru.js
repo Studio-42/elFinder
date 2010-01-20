@@ -130,6 +130,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'GIF Image'                         : 'Изображение GIF',
 		'PNG Image'                         : 'Изображение PNG',
 		'TIFF image'                        : 'Изображение TIFF',
+		'TGA image'                         : 'Изображение TGA',
 		'Adobe Photoshop image'             : 'Изображение Adobe Photoshop',
 		'MPEG audio'                        : 'Аудио MPEG',
 		'MIDI audio'                        : 'Аудио MIDI',
@@ -143,12 +144,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Quicktime video'                   : 'Видео Quicktime',
 		'WM video'                          : 'Видео WM',
 		'Flash video'                       : 'Видео Flash',
-		
-		
-		
-		
-		
-		
+		'Matroska video'                    : 'Видео Matroska',
 		'Shortcuts' : 'Клавиши',		
 		'Authors'                       : 'Авторы',
 		'Sponsors'  : 'Спонсоры',

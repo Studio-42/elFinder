@@ -16,7 +16,7 @@ class elFinder {
 		'rootAlias'    => 'Home',       // display this instead of root directory name
 		'disabled'     => array(),      // list of not allowed commands
 		'dotFiles'     => false,        // display dot files
-		'cntDirSize'   => true,         // count total directories sizes
+		'cntDirSize'   => false,         // count total directories sizes
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new folders mode
 		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
@@ -342,7 +342,11 @@ class elFinder {
 			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
 			$this->_result['debug']['mimeDetect'] = $this->_options['mimeDetect'];
 			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
-			$this->_result['debug']['du'] = @$this->_options['du'];
+			if ($this->_options['cntDirSize']) {
+				$this->_result['debug']['cntDirSize'] = true;
+				$this->_result['debug']['du'] = @$this->_options['du'];
+			}
+			
 		}
 		header("Content-Type: ".($cmd == 'upload' ? 'text/html' : 'application/json'));
 		header("Connection: close");

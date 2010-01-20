@@ -713,13 +713,13 @@
 			['mkdir', 'mkfile', 'upload'],
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
-			['info', 'help'],
+			['info', 'quicklook', 'help'],
 			['icons', 'list']
 		],
 		/* contextmenu commands */
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
-			'file'  : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
+			'file'  : ['select', 'open', 'quicklook', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 		},
 		/* jqueryUI dialog options */

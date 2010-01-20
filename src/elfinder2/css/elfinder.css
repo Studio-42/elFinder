@@ -100,7 +100,8 @@
 .el-finder-toolbar ul li.icons      { background-position: 3px -537px; }
 .el-finder-toolbar ul li.list       { background-position: 3px -557px; }
 .el-finder-toolbar ul li.uncompress { background-position: 3px -583px; }
-.el-finder-toolbar ul li.resize { background-position: 3px -647px; }
+.el-finder-toolbar ul li.resize     { background-position: 3px -647px; }
+.el-finder-toolbar ul li.quicklook  { background-position: 3px -726px; }
 
 .el-finder-dock-button {
 	width:19px;
@@ -288,67 +289,66 @@ ul.el-finder-tree, ul.el-finder-places {
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
-	background:transparent url('../images/icons-big.png') -1px 1px no-repeat;
+	background: url('../images/icons-big.png') -1px 1px no-repeat;
 }
 
 /* mimetypes */
 
 .directory p      { background-position:  0     -44px; }
 .application p    { background-position: -1px  -134px; }
-div.audio p       { background-position: -1px -1082px; }
-div.image p       { background-position: -1px -1132px; }
-div.text p,
-div.x-empty p     { background-position: -1px  -524px; }
-div.video p       { background-position: -1px -1032px; }
+.audio p       { background-position: -1px -1082px; }
+.image p       { background-position: -1px -1132px; }
+.text p,
+.x-empty p     { background-position: -1px  -524px; }
+.video p       { background-position: -1px -1032px; }
 /* images */
-div.gif p         { background-position: 0 -1183px; }
-div.jpeg p        { background-position: 0 -1234px; }
-div.vnd-adobe-photoshop p,
-div.postscript p  { background-position: 0 -1132px; }
+.gif p         { background-position: 0 -1183px; }
+.jpeg p        { background-position: 0 -1234px; }
+.vnd-adobe-photoshop p,
+.postscript p  { background-position: 0 -1132px; }
 /* video */
-div.ogg p         { background-position: -1px -1032px; }
+.ogg p         { background-position: -1px -1032px; }
 /* audio */
-div.ogm p         { background-position: -1px -1082px; }
+.ogm p         { background-position: -1px -1082px; }
 /* texts */
-div.rtf p,
-div.rtfd p          { background-position: 0 -573px; }
-div.javascript p,
-div.x-javascript p    { background-position: 0 -184px; }
-div.x-c p, 
-div.css p, 
-div.x-sql p, 
-div.x-python p,
-div.x-java-source p { background-position: 0 -624px; }
-div.html p          { background-position: 0 -777px; }
-div.x-java p        { background-position: 0 -827px; }
-div.x-php p         { background-position: 0 -726px; }
-div.x-perl p        { background-position: 0 -675px; }
-div.x-ruby p        { background-position: 0 -877px; }
-div.x-shellscript p { background-position: 0 -930px; }
+.rtf p,
+.rtfd p          { background-position: 0 -573px; }
+.javascript p,
+.x-javascript p    { background-position: 0 -184px; }
+.x-c p, 
+.css p, 
+.x-sql p, 
+.x-python p,
+.x-java-source p { background-position: 0 -624px; }
+.html p          { background-position: 0 -777px; }
+.x-java p        { background-position: 0 -827px; }
+.x-php p         { background-position: 0 -726px; }
+.x-perl p        { background-position: 0 -675px; }
+.x-ruby p        { background-position: 0 -877px; }
+.x-shellscript p { background-position: 0 -930px; }
 /* applications */
-.x-symlink-broken p { background-position:  -1px     1px; }
-div.vnd-ms-office p, 
-div.msword p, 
-div.vnd-ms-word p, 
-div.vnd-oasis-opendocument-text p { background-position: -1px -232px; }
-div.ms-excel p,
-div.vnd-ms-excel p,
-div.vnd-oasis-opendocument-spreadsheet p { background-position: -1px -330px; }
-div.vnd-ms-powerpoint p,
-div.vnd-oasis-opendocument-presentation p { background-position: -1px -380px; }
-div.pdf p { background-position: -1px -282px; }
-div.xml p { background-position: 0 -980px; }
-div.x-shockwave-flash p { background-position: 0 -1032px; }
-div.x-sh p { background-position: 0 -930px; }
+.vnd-ms-office p, 
+.msword p, 
+.vnd-ms-word p, 
+.vnd-oasis-opendocument-text p { background-position: -1px -232px; }
+.ms-excel p,
+.vnd-ms-excel p,
+.vnd-oasis-opendocument-spreadsheet p { background-position: -1px -330px; }
+.vnd-ms-powerpoint p,
+.vnd-oasis-opendocument-presentation p { background-position: -1px -380px; }
+.pdf p { background-position: -1px -282px; }
+.xml p { background-position: 0 -980px; }
+.x-shockwave-flash p { background-position: 0 -1032px; }
+.x-sh p { background-position: 0 -930px; }
 /* archives */
-div.x-bzip p, 
-div.x-bzip2 p,
-div.zip p,
-div.x-rar p,
-div.x-rar-compressed p, 
-div.x-tar p,  
-div.x-7z-compressed p { background-position: -1px -430px; }
-div.x-gzip p { background-position: -1px -477px; }
+.x-bzip p, 
+.x-bzip2 p,
+.zip p,
+.x-rar p,
+.x-rar-compressed p, 
+.x-tar p,  
+.x-7z-compressed p { background-position: -1px -430px; }
+.x-gzip p { background-position: -1px -477px; }
 
 .el-finder-cwd div.el-finder-droppable p {
 	background-position: 0 -87px;
@@ -671,6 +671,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-contextmenu div.archive    { background-position: 5px -583px; }
 .el-finder-contextmenu div.extract    { background-position: 5px -583px; }
 .el-finder-contextmenu div.resize     { background-position: 5px -655px; }
+.el-finder-contextmenu div.quicklook  { background-position: 5px -727px; }
 
 .el-finder-contextmenu div.delim { 
 	margin:0; 

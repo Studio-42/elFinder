@@ -357,6 +357,28 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	/**
+	 * @class. Open/close quickLook window
+	 * @param Object  elFinder
+	 **/
+	quicklook : function(fm) {
+		var self  = this;
+		this.name = 'Preview with Quick Look';
+		this.fm   = fm;
+		
+		this.exec = function() {
+			self.fm.quickLook.toggle();
+		}
+		
+		this.isAllowed = function() {
+			return this.fm.selected.length == 1;
+		}
+		
+		this.cm = function() {
+			return true;
+		}
+	},
+	
+	/**
 	 * @class Display files/folders info in dialog window
 	 * @param Object  elFinder
 	 **/

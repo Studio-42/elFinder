@@ -8,7 +8,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 	this.fm     = fm;
 	this._hash  = '';
 	this.title  = $('<strong/>');
-	this.ico    = $('<p class="icon"/>');
+	this.ico    = $('<p/>');
 	this.info   = $('<label/>');
 	this.media  = $('<div class="el-finder-ql-media"/>').hide()
 	
@@ -22,7 +22,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.hide();
 	});
 
-	this.add = $('<div class="add"/>')
+	this.add = $('<div/>')
 	this.content = $('<div class="el-finder-ql-content"/>')
 	this.win     = $('<div class="el-finder-ql"/>').hide()
 		.append($('<div class="el-finder-ql-drag-handle"/>').append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { self.hide(); })).append(this.title))
@@ -63,10 +63,11 @@ elFinder.prototype.quickLook = function(fm, el) {
 		});
 	
 	this.th = parseInt(this.win.children(':first').css('height'))||18;
-
+	/* All browsers do it, but some is shy to says about it. baka da ne! */
 	this.mimes = {
 		'image/jpeg' : 'jpg',
-		'image/gif'  : 'gif'
+		'image/gif'  : 'gif',
+		'image/png'  : 'png'
 		};
 
 	for (var i=0; i<navigator.mimeTypes.length; i++) {
@@ -77,14 +78,13 @@ elFinder.prototype.quickLook = function(fm, el) {
 	}
 	
 	if (($.browser.safari && navigator.platform.indexOf('Mac') != -1) || $.browser.msie) {
-		
+		/* not booletproof, but better then nothing */
 		this.mimes['application/pdf'] = 'pdf';
 	} else {
 		for (var n=0; n < navigator.plugins.length; n++) {
 			for (var m=0; m < navigator.plugins[n].length; m++) {
 				var e = navigator.plugins[n][m].description.toLowerCase();
 				if (e.substring(0, e.indexOf(" ")) == 'pdf') {
-					alert('here')
 					this.mimes['application/pdf'] = 'pdf';
 					break;
 				}
@@ -95,7 +95,13 @@ elFinder.prototype.quickLook = function(fm, el) {
 	if (this.mimes['image/x-bmp']) {
 		this.mimes['image/x-ms-bmp'] = 'bmp';
 	}
-
+	
+	if ($.browser.msie && !this.mimes['application/x-shockwave-flash']) {
+		this.mimes['application/x-shockwave-flash'] = 'swf';
+	}
+	
+	// self.fm.log(this.mimes)
+	
 	/**
 	 * Open quickLook window
 	 **/
@@ -193,7 +199,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.media.hide().empty();
 		self.win.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
 		self.title.empty();
-		self.ico.css('background', '').show();
+		self.ico.removeAttr('style').show();
 		self.add.hide().empty();
 		self._hash = '';
 	}
@@ -208,9 +214,8 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self._hash = f.hash;
 		self.title.text(f.name);
 		self.win.addClass(self.fm.view.mime2class(f.mime));
-		
 		self.name.text(f.name);
-		self.kind.text(self.fm.view.mime2kind(f.link ? 'symlink' : f.mime));
+		self.kind.text(self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)); 
 		self.size.text(self.fm.view.formatSize(f.size));
 		self.date.text(self.fm.i18n('Modified')+': '+self.fm.view.formatDate(f.date));
 		f.url ? self.url.text(f.url).attr('href', f.url).show() : self.url.hide();
@@ -241,7 +246,8 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		this.show = function(ql, f) {
 			var url, t;
 			f.dim && ql.add.append('<span>'+f.dim+' px</span>').show();
-			f.tmb && ql.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat')
+			f.tmb && ql.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat');
+
 			if (ql.mimes[f.mime] && (url = ql.fm.fileURL()) && f.hash == ql._hash) {
 				$('<img/>').hide().appendTo(ql.media.show()).attr('src', url+($.browser.msie || $.browser.opera ? '?'+Math.random() : '')).load(function() {
 					t = $(this).unbind('load');
@@ -299,12 +305,17 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL();
+			var url = ql.fm.fileURL(), e;
 			if (url && f.hash == ql._hash) {
 				ql.ico.hide();
 				// ql.media.append('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="'+url+'" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" type="application/x-shockwave-flash" style="width:100%;height:'+ql.mediaHeight()+'px"></embed></object>')
 					// .slideDown(400);
-				ql.media.append('<embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" style="width:100%;height:'+ql.mediaHeight()+'px" type="application/x-shockwave-flash" />').slideDown(400);
+				e = ql.media.append('<embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" style="width:100%;height:'+ql.mediaHeight()+'px" type="application/x-shockwave-flash" />'); //.slideDown(400);
+				if (ql.win.is(':animated')) {
+					e.slideDown(450)
+				} else {
+					e.show()
+				}
 			}
 		}
 	},
