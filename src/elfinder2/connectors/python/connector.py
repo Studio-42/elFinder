@@ -40,7 +40,7 @@ class elFinder():
 		'uploadWriteChunk': 8192,
 		'uploadAllow': [],
 		'uploadDeny': [],
-		'uploadOrder': ['allow', 'deny'],
+		'uploadOrder': ['deny', 'allow'],
 		'allowTypes': [],
 		'allowExts': [],
 		'denyTypes': [],
@@ -689,31 +689,36 @@ class elFinder():
 		}
 		
 		if filetype == 'link':
-			path = self.__readlink(path)
-			if not path:
+			lpath = self.__readlink(path)
+			if not lpath:
 				info['mime'] = 'symlink-broken'
 				return info
 
-			if os.path.isdir(path):
+			if os.path.isdir(lpath):
 				info['mime'] = 'directory'
 			else:
-				info['parent'] = self.__hash(os.path.dirname(path))
-				info['mime'] = self.__mimetype(path)
+				info['parent'] = self.__hash(os.path.dirname(lpath))
+				info['mime'] = self.__mimetype(lpath)
 
 			if self._options['rootAlias']:
 				basename = self._options['rootAlias']
 			else:
 				basename = os.path.basename(self._options['root'])
 
-			info['link'] = self.__hash(path)
-			info['linkTo'] = basename + path[len(self._options['root']):]
-			info['read'] = info['read'] and self.__isAllowed(path, 'read')
-			info['write'] = info['write'] and self.__isAllowed(path, 'write')
-			info['rm'] = self.__isAllowed(path, 'rm')
+			info['link'] = self.__hash(lpath)
+			info['linkTo'] = basename + lpath[len(self._options['root']):]
+			info['read'] = info['read'] and self.__isAllowed(lpath, 'read')
+			info['write'] = info['write'] and self.__isAllowed(lpath, 'write')
+			info['rm'] = self.__isAllowed(lpath, 'rm')
+		else:
+			lpath = False
 
 		if not info['mime'] == 'directory':
 			if self._options['fileURL']:
-				info['url'] = self.__path2url(path)
+				if lpath:
+					info['url'] = self.__path2url(lpath)
+				else:
+					info['url'] = self.__path2url(path)
 			if info['mime'][0:5] == 'image':
 				if self.__canCreateTmb():
 					dim = self.__getImgSize(path)
@@ -1199,10 +1204,17 @@ class elFinder():
 				if mime.find(d) == 0:
 					deny = True
 
-		if self._options['uploadOrder'][0] == 'allow':
-			return allow or not deny
-		else:
-			if deny:
+		if self._options['uploadOrder'][0] == 'allow': # ,deny
+			if deny is True:
+				return False
+			elif allow is True:
+				return True
+			else:
+				return False
+		else: # deny,allow
+			if allow is True:
+				return True
+			elif deny is True:
 				return False
 			else:
 				return True
@@ -1410,10 +1422,10 @@ class elFinder():
 
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files/TEST',
-	'URL': 'http://php5.localhost:8001/~troex/git/elrte/files/TEST',
-	'uploadDeny': [],
-	'uploadAllow': ['all'],
-	'uploadOrder': ['deny', 'allow'],
+	'URL': 'http://localhost:8001/~troex/git/elrte/files/TEST',
+	# 'uploadDeny': ['image'],
+	# 'uploadAllow': ['image/png'],
+	# 'uploadOrder': ['deny', 'allow'],
 	# 'root': '/Users/troex/Sites/',
 	# 'URL': 'http://php5.localhost:8001/~troex/',
 	'imgLib': 'auto',
