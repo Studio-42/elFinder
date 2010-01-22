@@ -1241,8 +1241,13 @@ class elFinder():
 			if not os.access(os.path.dirname(path), os.W_OK):
 				self.__errorData(path, access)
 				return False
+
+		for ppath in self._options['perms']:
+			regex = r'' + ppath
+			if re.search(regex, path) and access in self._options['perms'][ppath]:
+				return self._options['perms'][ppath][access]
+
 		return True
-		# TODO _perms here
 
 
 	def __hash(self, input):
@@ -1423,6 +1428,16 @@ class elFinder():
 elFinder({
 	'root': '/Users/troex/Sites/git/elrte/files/TEST',
 	'URL': 'http://localhost:8001/~troex/git/elrte/files/TEST',
+	'perms': {
+		'aaa': {
+			'read': False,
+			'write': False,
+			'rm': False
+		},
+		'upload': {
+			'write': False
+		}
+	},
 	# 'uploadDeny': ['image'],
 	# 'uploadAllow': ['image/png'],
 	# 'uploadOrder': ['deny', 'allow'],
