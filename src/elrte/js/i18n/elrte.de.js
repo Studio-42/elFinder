@@ -1,5 +1,5 @@
 // German language
-
+(function($) {
 elRTE.prototype.i18Messages.de = {
 	'Editor' : 'Editor',
 	'Source' : 'Quellcode',
@@ -161,3 +161,4 @@ elRTE.prototype.i18Messages.de = {
 	
 	
 }
+})(jQuery);

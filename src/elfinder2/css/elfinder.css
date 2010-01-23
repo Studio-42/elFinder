@@ -595,7 +595,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	padding:.2em 1em;
 }
 #el-finder-help-a p {
-	line-height:2em;
+/*	line-height:2em;*/
 }
 
 
@@ -795,3 +795,16 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 
+.el-finder-help-std {
+	background: url(../images/icons-big.png) 0 -1315px no-repeat;
+	width:48px;
+	height:48px;
+	float:right;
+}
+
+.el-finder-logo {
+	background: url(../images/icons-big.png) 0 -1365px no-repeat;
+	width:48px;
+	height:48px;
+	float:left;
+}

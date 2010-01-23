@@ -34,6 +34,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  *
  **/
+
 function elDialogForm(o) {
 	var self = this;
 	
@@ -58,24 +59,24 @@ function elDialogForm(o) {
 		}
 	};
 
-	this.opts = $.extend(true, defaults, o, {dialog : { autoOpen : false, close : function() { self.close(); } }});
+	this.opts = jQuery.extend(true, defaults, o, {dialog : { autoOpen : false, close : function() { self.close(); } }});
 	if (o && o.dialog && o.dialog.buttons && typeof(o.dialog.buttons) == 'object') {
 		this.opts.dialog.buttons = o.dialog.buttons;
 	}
 	this.ul     = null;
 	this.tabs   = {};
 	this._table = null;
-	this.dialog = $('<div />').addClass(this.opts['class']).dialog(this.opts.dialog);
-	this.message = $('<div class="el-dialogform-message rounded-5" />').hide().appendTo(this.dialog);
-	this.error   = $('<div class="el-dialogform-error rounded-5" />').hide().appendTo(this.dialog);
-	this.spinner = $('<div class="spinner" />').hide().appendTo(this.dialog);
-	this.content = $('<div class="el-dialogform-content" />').appendTo(this.dialog)
-	this.form   = $('<form />').attr(this.opts.form).appendTo(this.content);
+	this.dialog = jQuery('<div />').addClass(this.opts['class']).dialog(this.opts.dialog);
+	this.message = jQuery('<div class="el-dialogform-message rounded-5" />').hide().appendTo(this.dialog);
+	this.error   = jQuery('<div class="el-dialogform-error rounded-5" />').hide().appendTo(this.dialog);
+	this.spinner = jQuery('<div class="spinner" />').hide().appendTo(this.dialog);
+	this.content = jQuery('<div class="el-dialogform-content" />').appendTo(this.dialog)
+	this.form   = jQuery('<form />').attr(this.opts.form).appendTo(this.content);
 
 	if (this.opts.submit) {
 		this.form.bind('submit', function(e) { self.opts.submit(e, self) })
 	}
-	if (this.opts.ajaxForm && $.fn.ajaxForm) {
+	if (this.opts.ajaxForm && jQuery.fn.ajaxForm) {
 		this.form.ajaxForm(this.opts.ajaxForm);
 	}
 	if (this.opts.validate) {
@@ -139,10 +140,10 @@ function elDialogForm(o) {
 		id = this.opts.tabPrefix+id;
 		
 		if (!this.ul) {
-			this.ul = $('<ul />').prependTo(this.form);
+			this.ul = jQuery('<ul />').prependTo(this.form);
 		}
-		$('<li />').append($('<a />').attr('href', '#'+id).html(title)).appendTo(this.ul);
-		this.tabs[id] = {tab : $('<div />').attr('id', id).addClass('tab').appendTo(this.form), table : null};
+		jQuery('<li />').append(jQuery('<a />').attr('href', '#'+id).html(title)).appendTo(this.ul);
+		this.tabs[id] = {tab : jQuery('<div />').attr('id', id).addClass('tab').appendTo(this.form), table : null};
 		return this;
 	}
 	
@@ -154,9 +155,9 @@ function elDialogForm(o) {
 	this.table = function(id) {
 		id = id && id.indexOf(this.opts.tabPrefix) == -1 ? this.opts.tabPrefix+id : id;
 		if (id && this.tabs && this.tabs[id]) {
-			this.tabs[id].table = $('<table />').appendTo(this.tabs[id].tab);
+			this.tabs[id].table = jQuery('<table />').appendTo(this.tabs[id].tab);
 		} else {
-			this._table = $('<table />').appendTo(this.form); 
+			this._table = jQuery('<table />').appendTo(this.form); 
 		}
 		return this;
 	}
@@ -178,16 +179,16 @@ function elDialogForm(o) {
 		if (tid && this.tabs[tid]) {
 			if (t) {
 				!this.tabs[tid].table && this.table(tid);
-				var tr = $('<tr />').appendTo(this.tabs[tid].table);
+				var tr = jQuery('<tr />').appendTo(this.tabs[tid].table);
 				if (!$.isArray(data)) {
-					tr.append($('<td />').append(data));
+					tr.append(jQuery('<td />').append(data));
 				} else {
 					for (var i=0; i < data.length; i++) {
-						tr.append($('<td />').append(data[i]));
+						tr.append(jQuery('<td />').append(data[i]));
 					};
 				}
 			} else {
-				if (!$.isArray(data)) {
+				if (!jQuery.isArray(data)) {
 					this.tabs[tid].tab.append(data)
 				} else {
 					for (var i=0; i < data.length; i++) {
@@ -198,7 +199,7 @@ function elDialogForm(o) {
 			
 		} else {
 			if (!t) {
-				if (!$.isArray(data)) {
+				if (!jQuery.isArray(data)) {
 					this.form.append(data);
 				} else {
 					for (var i=0; i < data.length; i++) {
@@ -209,12 +210,12 @@ function elDialogForm(o) {
 				if (!this._table) {
 					this.table();
 				}
-				var tr = $('<tr />').appendTo(this._table);
-				if (!$.isArray(data)) {
-					tr.append($('<td />').append(data));
+				var tr = jQuery('<tr />').appendTo(this._table);
+				if (!jQuery.isArray(data)) {
+					tr.append(jQuery('<td />').append(data));
 				} else {
 					for (var i=0; i < data.length; i++) {
-						tr.append($('<td />').append(data[i]));
+						tr.append(jQuery('<td />').append(data[i]));
 					};
 				}
 			}
@@ -230,10 +231,10 @@ function elDialogForm(o) {
 	this.separator = function(tid) {
 		tid = 'el-df-tab-'+tid;
 		if (this.tabs && this.tabs[tid]) {
-			this.tabs[tid].tab.append($('<div />').addClass('separator'));
+			this.tabs[tid].tab.append(jQuery('<div />').addClass('separator'));
 			this.tabs[tid].table && this.table(tid);
 		} else {
-			this.form.append($('<div />').addClass('separator'));
+			this.form.append(jQuery('<div />').addClass('separator'));
 		}
 		return this;
 	}
@@ -264,3 +265,4 @@ function elDialogForm(o) {
 	}
 	
 }
+

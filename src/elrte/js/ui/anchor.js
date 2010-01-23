@@ -6,6 +6,7 @@
  *
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  **/
+(function($) {
 elRTE.prototype.ui.prototype.buttons.anchor = function(rte, name) {
 	this.constructor.prototype.constructor.call(this, rte, name);
 	this.input = $('<input type="text" />').attr('name', 'anchor').attr('size', '16')
@@ -54,4 +55,4 @@ elRTE.prototype.ui.prototype.buttons.anchor = function(rte, name) {
 		}
 	}
 }
-
+})(jQuery);

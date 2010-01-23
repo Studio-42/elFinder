@@ -7,6 +7,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  * @copyright: Studio 42, http://www.std42.ru
  **/
+(function($) {
 elRTE.prototype.ui.prototype.buttons.formatblock = function(rte, name) {
 	this.constructor.prototype.constructor.call(this, rte, name);
 
@@ -96,4 +97,4 @@ elRTE.prototype.ui.prototype.buttons.formatblock = function(rte, name) {
 		this.select.val(n ? n.nodeName.toLowerCase() : 'span');
 	}
 }
-
+})(jQuery);

@@ -151,9 +151,10 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'elFinder: Web file manager'    : 'elFinder: Файловый менеджер для Web',
 		'Version'                       : 'Версия',
 		'Copyright: Studio 42 LTD'      : 'Copyright: Студия 42',
-		'Javascripts/php programming: Dmitry (dio) Levashov, dio@std42.ru' : 'Программирование Javascripts/php: Дмитрий (dio) Левашов, dio@std42.ru',
+		'Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru' : 'Программирование Javascripts/php: Дмитрий (dio) Левашов, dio@std42.ru',
 		'Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru' : 'Программирование Python, техподдержка: Troex Nevelin, troex@fury.scancode.ru',
 		'Design: Valentin Razumnih'     : 'Дизайн: Валентин Разумных',
+		'Icons' : 'Иконки',
 		'License: BSD License'          : 'Лицензия: BSD License',
 		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели или контекстного меню. Скопировать/переместить файлы можно, перетащив их в нужную папку. Если при перетаскивании файлов нажата клавиша Shift - файлы будут скопированы, в противном случае - перемещены.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
 		

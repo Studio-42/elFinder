@@ -5,12 +5,18 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>elRTE from source</title>
+	<!--
+	
+	-->
 	<!-- jQuery and plugins -->
 	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery.form.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery.metadata.js" type="text/javascript" charset="utf-8"></script>
 	<link rel="stylesheet" href="js/ui-themes/base/ui.all.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<script src="../../mootools-1.2.4-core-yc.js" type="text/javascript" charset="utf-8"></script>
+	
 	<!-- css for widgets -->
 	<link rel="stylesheet" href="src/ellib/css/elcommon.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="src/ellib/css/elcolorpicker.css" type="text/css" media="screen" title="no title" charset="utf-8">
@@ -79,8 +85,10 @@
 	<script src="src/elrte/js/ui/tbrowrm.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/elrte/js/ui/unlink.js" type="text/javascript" charset="utf-8"></script>
 	
+	
+	
 	<script type="text/javascript" charset="utf-8">
-		$().ready(function() {
+		jQuery().ready(function() {
 
 			var opts = {
 				cssClass : 'el-rte',
@@ -90,14 +98,16 @@
 				cssfiles : ['src/elrte/css/elrte-inner.css'],
 				fmAllow  : true,
 				fmOpen   : function(callback) {
-					$('<div />').elfinder({
+					jQuery('<div />').elfinder({
 						url : 'connectors/php/connector.php',
 						dialog : { width : 900, modal : true, title : 'Files' },
 						editorCallback : callback
 					})
 				}
 			}
-			$('#editor').elrte(opts);
+			
+			jQuery('#editor').elrte(opts);
+			
 		})
 	</script>
 	

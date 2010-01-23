@@ -6,6 +6,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  * Copyright: Studio 42, http://www.std42.ru
  **/
+(function($) {
 elRTE.prototype.w3cRange = function(rte) {
 	var self                     = this;
 	this.rte                     = rte;
@@ -326,4 +327,4 @@ elRTE.prototype.w3cRange = function(rte) {
 	}
 	
 }
-
+})(jQuery);

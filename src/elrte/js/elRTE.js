@@ -15,11 +15,11 @@
  * Copyright: Studio 42, http://www.std42.ru
  */
 (function($) {
-	
+
 elRTE = function(target, opts) {
 	var self     = this;
 	this.version = '1.0 RC1';
-	this.options = $.extend(true, {}, this.options, opts);
+	this.options = jQuery.extend(true, {}, this.options, opts);
 	this.browser = $.browser;
 	
 	this.editor    = $('<div />').addClass(this.options.cssClass);

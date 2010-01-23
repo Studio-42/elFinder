@@ -6,6 +6,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  * Copyright: Studio 42, http://www.std42.ru
  **/
+(function($) {
 elRTE.prototype.ui = function(rte) {
 	var self      = this;
 	this.rte      = rte;
@@ -18,20 +19,20 @@ elRTE.prototype.ui = function(rte) {
 	}
 	
 	// создаем панели и кнопки
-	var toolbar = rte.options.toolbar && rte.options.toolbars[rte.options.toolbar] ? rte.options.toolbar : 'normal';
-	var panels  = this.rte.options.toolbars[toolbar];
-	for (var i in panels) {
-		var name = panels[i];
-		
-		var panel = $('<ul />').addClass('panel-'.name).appendTo(this.rte.toolbar);
-		if (i == 0) {
-			panel.addClass('first');
-		}
-		for (var j in this.rte.options.panels[name]) {
-			var n = this.rte.options.panels[name][j];
-			var c = this.buttons[n] || this.buttons.button; 
-			var b = new c(this.rte, n);
-			panel.append(b.domElem);
+	var toolbar = rte.options.toolbar && rte.options.toolbars[rte.options.toolbar] ? rte.options.toolbar : 'normal',
+		panels  = this.rte.options.toolbars[toolbar],
+		_p = panels.length,
+		panel, pn, _k;
+	
+	while (_p--) {
+		pn = panels[_p];
+		panel = $('<ul />').addClass('panel-'.pn+(_p == 0 ? ' first' : '')).prependTo(this.rte.toolbar);
+		_k = this.rte.options.panels[pn].length;
+		while (_k--) {
+			var n = this.rte.options.panels[pn][_k],
+				c = this.buttons[n] || this.buttons.button,
+				b = new c(this.rte, n);
+			panel.prepend(b.domElem);
 			this._buttons.push(b);
 		}
 	}
@@ -156,3 +157,4 @@ elRTE.prototype.ui.prototype.buttons.button.prototype.update = function() {
 	} catch (e) { }
 }
 
+})(jQuery);

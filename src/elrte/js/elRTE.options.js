@@ -21,6 +21,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  * Copyright: Studio 42, http://www.std42.ru
  */
+(function($) {
 elRTE.prototype.options   = {
 	doctype         : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">',
 	cssClass        : 'el-rte',
@@ -133,3 +134,4 @@ elRTE.prototype.options   = {
 		elfinder  : 'File manager (elFinder)'
 	}
 };
+})(jQuery);

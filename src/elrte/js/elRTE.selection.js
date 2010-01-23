@@ -5,7 +5,7 @@
  *
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  **/
-
+(function($) {
 elRTE.prototype.selection = function(rte) {
 	this.rte      = rte;
 	var self      = this;
@@ -637,3 +637,4 @@ elRTE.prototype.selection = function(rte) {
 	
 }
 
+})(jQuery);

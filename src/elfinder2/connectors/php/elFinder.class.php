@@ -16,7 +16,7 @@ class elFinder {
 		'rootAlias'    => 'Home',       // display this instead of root directory name
 		'disabled'     => array(),      // list of not allowed commands
 		'dotFiles'     => false,        // display dot files
-		'cntDirSize'   => false,         // count total directories sizes
+		'dirSize'      => false,        // count total directories sizes
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new folders mode
 		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
@@ -25,7 +25,7 @@ class elFinder {
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'       => 'auto',       // image manipulation library (imagick, mogrify, gd)
 		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
-		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 200 - every init request)
 		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'fileURL'      => true,         // display file URL in "get info"
@@ -342,8 +342,8 @@ class elFinder {
 			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
 			$this->_result['debug']['mimeDetect'] = $this->_options['mimeDetect'];
 			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
-			if ($this->_options['cntDirSize']) {
-				$this->_result['debug']['cntDirSize'] = true;
+			if ($this->_options['dirSize']) {
+				$this->_result['debug']['dirSize'] = true;
 				$this->_result['debug']['du'] = @$this->_options['du'];
 			}
 			
@@ -1302,7 +1302,7 @@ class elFinder {
 	private function _dirSize($path)
 	{
 		$size = 0;
-		if (!$this->_options['cntDirSize'] || !$this->_isAllowed($path, 'read')) {
+		if (!$this->_options['dirSize'] || !$this->_isAllowed($path, 'read')) {
 			return filesize($path);
 		} 
 		if (!isset($this->_options['du'])) {
@@ -1579,23 +1579,42 @@ class elFinder {
 		$mime  = $this->_mimetype($this->_options['mimeDetect'] != 'internal' ? $tmpName : $name);
 		$allow = false;
 		$deny  = false;
-		
-		foreach ($this->_options['uploadAllow'] as $type) {
-			if (0 === strpos($mime, $type)) {
-				$allow = true;
+
+		if (in_array('all', $this->_options['uploadAllow'])) {
+			$allow = true;
+		} else {
+			foreach ($this->_options['uploadAllow'] as $type) {
+				if (0 === strpos($mime, $type)) {
+					$allow = true;
+					break;
+				}
 			}
 		}
-		foreach ($this->_options['uploadDeny'] as $type) {
-			if (0 === strpos($mime, $type)) {
-				$deny = true;
+		
+		if (in_array('all', $this->_options['uploadDeny'])) {
+			$deny = true;
+		} else {
+			foreach ($this->_options['uploadDeny'] as $type) {
+				if (0 === strpos($mime, $type)) {
+					$deny = true;
+					break;
+				}
 			}
 		}
 
-		if (0 === strpos($this->_options['uploadOrder'], 'allow')) {
-			return $allow && !$deny;
-		} else {
-			return !$deny || $allow;
-		}
+		// if (0 === strpos($this->_options['uploadOrder'], 'allow')) {
+		// 	return $allow && !$deny;
+		// } else {
+		// 	$this->_result['test'] = array('allow' => $this->_options['uploadAllow'], 'deny' => $deny);
+		// 	if ($allow) {
+		// 		return true;
+		// 	} elseif ($deny) {
+		// 		return false;
+		// 	}
+		// 	return true;
+		// }
+
+		return 0 === strpos($this->_options['uploadOrder'], 'allow') ? $allow && !$deny : $allow || !$deny;
 	}
 
 	/**

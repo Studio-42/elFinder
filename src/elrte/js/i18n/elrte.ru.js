@@ -1,3 +1,4 @@
+(function($) {
 elRTE.prototype.i18Messages.ru = {
 	'Editor' : 'Редактор',
 	'Source' : 'Исходник',
@@ -172,3 +173,4 @@ elRTE.prototype.i18Messages.ru = {
 	
 	
 }
+})(jQuery);

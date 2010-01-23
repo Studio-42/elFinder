@@ -7,6 +7,7 @@
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  * Copyright: Studio 42, http://www.std42.ru
  */
+(function($) {
 elRTE.prototype.utils = function(rte) {
 	this.rte     = rte;
 	this.url     = null;
@@ -112,3 +113,4 @@ elRTE.prototype.utils = function(rte) {
 	
 }
 
+})(jQuery);

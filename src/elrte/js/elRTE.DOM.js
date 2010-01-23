@@ -3,6 +3,7 @@
  *
  * @author:    Dmitry Levashov (dio) dio@std42.ru
  */
+(function($) {
 elRTE.prototype.dom = function(rte) {
 	this.rte = rte;
 	var self = this;
@@ -609,3 +610,4 @@ elRTE.prototype.dom = function(rte) {
 	}
 }
 
+})(jQuery);

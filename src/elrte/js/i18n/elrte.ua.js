@@ -1,3 +1,4 @@
+(function($) {
 elRTE.prototype.i18Messages.ua = {
 	'Editor' : 'Редактор',
 	'Source' : 'Джерело',
@@ -173,3 +174,4 @@ elRTE.prototype.i18Messages.ua = {
 	'All cells in column' : 'Все ячейки в столбце',
 	'All cells in table' : 'Все ячейки таблицы'
 };
+})(jQuery);
