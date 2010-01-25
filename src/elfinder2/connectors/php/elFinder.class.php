@@ -414,9 +414,9 @@ class elFinder {
 			$path = $this->_options['root'];
 			if (!empty($_GET['target'])) {
 				if (false == ($p = $this->_findDir(trim($_GET['target'])))) {
-					// if (!isset($_GET['init'])) {
+					if (!isset($_GET['init'])) {
 						$this->_result['error'] = 'Invalid parameters';
-					// }
+					}
 				} elseif (!$this->_isAllowed($p, 'read')) {
 					if (!isset($_GET['init'])) {
 						$this->_result['error'] = 'Access denied';
@@ -1601,19 +1601,6 @@ class elFinder {
 				}
 			}
 		}
-
-		// if (0 === strpos($this->_options['uploadOrder'], 'allow')) {
-		// 	return $allow && !$deny;
-		// } else {
-		// 	$this->_result['test'] = array('allow' => $this->_options['uploadAllow'], 'deny' => $deny);
-		// 	if ($allow) {
-		// 		return true;
-		// 	} elseif ($deny) {
-		// 		return false;
-		// 	}
-		// 	return true;
-		// }
-
 		return 0 === strpos($this->_options['uploadOrder'], 'allow') ? $allow && !$deny : $allow || !$deny;
 	}
 

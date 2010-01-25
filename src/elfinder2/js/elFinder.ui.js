@@ -1247,7 +1247,7 @@ elFinder.prototype.ui.prototype.commands = {
 			var h, ht = this.fm.i18n('helpText'), a, s, tabs; 
 			
 			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>';
-			h += '<strong>Donate to support project development</strong><br /><br />'
+			h += '<strong>'+this.fm.i18n('Donate to support project development')+'</strong><br /><br />'
 			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click). <br /> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
 			h += '<br/>'
 				+ this.fm.i18n('<strong>Ctrl+A</strong> - Select all files')+'<br/>'

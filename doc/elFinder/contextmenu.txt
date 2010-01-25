@@ -2,14 +2,17 @@
 
 	За панель инструментов отвечает опция "contextmenu" (Object)
 	
-	$(selector).elfinder({
-		....
-		contextmenu : {
-			cwd : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'], // Команды, исолняемые для текущей директории
-			file : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', ...], // Команды для одного выбраного файла
-			group : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info'] // команды для группы файлов
-		},
-		...
-	}) 
+$(selector).elfinder({
+	....
+	contextmenu : {
+		// Команды, исполняемые для текущей директории
+		cwd : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'], 
+		// Команды для одного выбраного файла
+		file : ['select', 'open', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', ...], 
+		// команды для группы файлов
+		group : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info'] 
+	},
+	...
+}) 
 	
 	При добавлении команды в неподходящую группу (например rename в group), она будет показана в контекстном меню, но не будет выполнена

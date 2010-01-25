@@ -151,6 +151,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'elFinder: Web file manager'    : 'elFinder: Файловый менеджер для Web',
 		'Version'                       : 'Версия',
 		'Copyright: Studio 42 LTD'      : 'Copyright: Студия 42',
+		'Donate to support project development' : 'Поддержите разработку',
 		'Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru' : 'Программирование Javascripts/php: Дмитрий (dio) Левашов, dio@std42.ru',
 		'Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru' : 'Программирование Python, техподдержка: Troex Nevelin, troex@fury.scancode.ru',
 		'Design: Valentin Razumnih'     : 'Дизайн: Валентин Разумных',

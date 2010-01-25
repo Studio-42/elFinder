@@ -9,16 +9,16 @@
 
 Пример:
 
-	$(selector).elfinder({
-		....
-		toolbar : [
-			['back', 'reload'],
-			['select', 'open'],
-			['mkdir', 'mkfile', 'upload'],
-			......
-		],
-	
-		....
+$(selector).elfinder({
+	....
+	toolbar : [
+		['back', 'reload'],
+		['select', 'open'],
+		['mkdir', 'mkfile', 'upload'],
+		......
+	],
 
-	})
+	....
+
+})
 
