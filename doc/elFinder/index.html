@@ -133,7 +133,8 @@
 			<li><a href="#upl">Настройка загрузки файлов</a></li>
 			<li><a href="#perms">Настройка прав доступа</a></li>
 			<li><a href="#disable">Ограничение доступа к командам</a></li>
-			<li><a href="#ck">Интеграция с CKEditor</a></li>												
+			<li><a href="#elrte">Интеграция с elRTE</a></li>
+			<li><a href="#ck">Интеграция с CKEditor</a></li>													
 			<li><a href="#mce">Интеграция с TinyMCE</a></li>
 			<li><a href="#proto">Описание протокола клиент-сервер</a></li>
 			<li><a href="#comm-client">Список команд клиента</a></li>
@@ -298,6 +299,17 @@
 			Запрещаем переименовывать все файлы и редактировать текстовые.
 			<blockquote><code><font size="2" face="Courier New" color="black">disabled =&#62; array(<font color="#A31515">'rename'</font>, <font color="#A31515">'edit'</font>)</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
 		</p>
+		
+		<hr/>
+		<a name="elrte"></a>
+		<h3>Интеграция с elRTE</h3>
+		<p>
+			При инициализации elRTE, передаем ему функцию, который откроет файловый менеджер в диалоговом окне 
+			и передаст в editorCallback функцию, принимающую URL выбраного файла в качестве единственного аргумента.
+			
+			<blockquote><code><font size="2" face="Courier New" color="black">$(<font color="#A31515">'selector'</font>).elrte({<br>&nbsp;&nbsp;... <font color="#008000">//options</font><br>&nbsp;&nbsp;fmOpen : function(callback) {<br>&nbsp;&nbsp;&nbsp;&nbsp;$(<font color="#A31515">'&#60;div/&#62;'</font>).elfinder({<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lang : <font color="#A31515">'ru'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dialog : { width : 900, modal : <font color="#0000ff">true</font>, title : <font color="#A31515">'Files'</font> }, <font color="#008000">// открываем в диалоговом окне</font><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;closeOnEditorCallback : <font color="#0000ff">true</font>, <font color="#008000">// закрываем после выбора файла</font><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;editorCallback : callback <font color="#008000">// передаем callback файловому менеджеру</font><br>&nbsp;&nbsp;&nbsp;&nbsp;})<br>&nbsp;&nbsp;}<br>})</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
 		
 		<hr/>
 		<a name="ck"></a>
@@ -571,6 +583,76 @@
 			<blockquote><code><font size="2" face="Courier New" color="black">content : содержимое текстового файла</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
 		</p>
 
+		<h4>edit</h4>
+		<p>сохраняет текст в файл</p>
+		<p>
+			<em>Аргументы (передаются методом POST): </em>
+			<ul>
+				<li><strong>cmd</strong> : edit</li>
+				<li><strong>current</strong> : hash папки, в которой сохраняем файл</li>
+				<li><strong>file</strong> : hash файла</li>
+				<li><strong>content</strong> : новое содержимое файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">file : {<font color="#008000">// объект, аналогичный объекту, описывающему файл в cdc команды open</font><br>&nbsp;&nbsp;<font color="#A31515">'name'</font>&nbsp; : Имя файла,<br>&nbsp;&nbsp;<font color="#A31515">'hash'</font>&nbsp; : hash пути,<br>&nbsp;&nbsp;<font color="#A31515">'mime'</font>&nbsp; : mime-тип<br>&nbsp;&nbsp;<font color="#A31515">'date'</font>&nbsp; : отформатированая дата изменения файла, <br>&nbsp;&nbsp;<font color="#A31515">'size'</font>&nbsp; : размер,<br>&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; : права на чтение,<br>&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;: права на запись,<br>&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp;&nbsp; : права для удаления,<br>&nbsp;&nbsp;<font color="#A31515">'resize'</font> : <font color="#0000ff">true</font> (только для картинок, которые можно ресайзить)<br>}<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>geturl</h4>
+		<p>возвращает URL файла. Используется, когда запрещена передача URL клиенту (опция коннектора "fileURL").</p>
+		<p>
+			<em>Аргументы: </em>
+			<ul>
+				<li><strong>cmd</strong> : geturl</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">url : URL файла</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>extract</h4>
+		<p>распаковывает архив</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : extract</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash файла архива</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black">tree : дерево директорий</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>archive</h4>
+		<p>упаковывает папки/файлы в архив</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : archive</li>
+				<li><strong>type</strong> : mime-тип создаваемого архива</li>
+				<li><strong>current</strong> : hash папки, в которой находятся добавляемые в архив папки/файлы</li>
+				<li><strong>files</strong> : массив хэшей папок/файлов</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : hash нового архива</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>resize</h4>
+		<p>изменяет размер изображения</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : resize</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash пути картинки</li>
+				<li><strong>width</strong> : новая ширина картинки</li>
+				<li><strong>height</strong> : новая высота картинки</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open
+		</p>
 	</div>
 
 </div><!-- #wrapper -->
