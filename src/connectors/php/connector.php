@@ -25,7 +25,7 @@ class elFinderLogger implements elFinderILogger {
 }
 
 $path = str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__FILE__));
-$path = str_replace('/src/elfinder2/connectors/php', '', $path);
+$path = str_replace('/src/connectors/php', '', $path);
 
 $rootDir = $_SERVER['DOCUMENT_ROOT'].$path.DIRECTORY_SEPARATOR.'files';
 $rootURL = 'http://'.$_SERVER['HTTP_HOST'].$path.'/files/';

@@ -9,18 +9,18 @@
 	<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
 	-->
 	<link rel="stylesheet" href="js/ui-themes/base/ui.all.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	<link rel="stylesheet" href="src/elfinder2/css/elfinder.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="src/css/elfinder.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
 
 	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="src/elfinder2/js/elFinder.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/elFinder.view.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/elFinder.ui.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/elFinder.quickLook.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/elfinder2/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/elFinder.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/elFinder.view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/elFinder.ui.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/elFinder.quickLook.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
 	
 	<style type="text/css">
 		#close, #open, #dock, #undock {
@@ -51,7 +51,7 @@
 			// var f = new elFinder($('#finder').get(0), {})
 			
 			var f = $('#finder').elfinder({
-				url : 'src/elfinder2/connectors/php/connector.php',
+				url : 'src/connectors/php/connector.php',
 				lang : 'ru',
 				editorCallback : function(url) {
 					if (window.console && window.console.log) {
