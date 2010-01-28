@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Документация elFinder</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="title" content="" />
+	<style type="text/css" media="screen">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		html {height: 100%}
+		body {
+			font: .8em Arial, Tahoma, Verdana, sans-serif;
+			width: 100%;
+			height: 100%;
+		}
+		a {
+			color: blue;
+			outline: none;
+			text-decoration: underline;
+		}
+		a:hover {
+			text-decoration: none;
+		}
+		p {margin: 12px 0}
+		img {
+			border: none;
+		}
+		input {vertical-align: middle}
+		#wrapper {
+			width: 960px;
+			margin: 0 auto;
+			min-height: 100%;
+			height: auto !important;
+			height: 100%;
+		}
+
+		h1 { font-size:2.5em;   margin:0.5em 0;  line-height:1em;}
+		h2 { font-size:1.7em;   margin:0.5em 0; }
+		h3 { font-size:1.3em;   margin:1em 0;    line-height:1em;}
+		h4 { font-size:1.1em;   margin:1em 0;    line-height:1em;}
+
+		ul, ol, dl { line-height: 1.5em; margin: 0 0 1em 1em; }
+		ul      { list-style-type: disc; }
+		ul ul    { list-style-type: circle; }
+		ol li      { list-style-type: decimal; }
+		ol ol li   { list-style-type: lower-latin; }
+		li         { margin-left: 0.8em; line-height: 1.5em; }
+		dt         { font-weight: bold; }
+		dd         { margin: 0 0 1em 0.8em; }
+
+		hr {
+		  color: #fff;
+		  background:transparent;
+		  margin:  0 0 0.5em 0;
+		  padding: 0 0 0.5em 0;
+		  border:0;
+		  border-bottom: 1px #eee solid;
+		}
+
+		#header {
+			background: #FFE680;
+			padding:.5em;
+		}
+
+		h1 { text-align: center; }
+
+		blockquote {
+			display:block;
+			padding:.5em;
+			margin:.3em 0 1em 0;
+			border-left:3px solid #ccc
+		}
+		
+		table {
+			width:100%;
+			border-collapse: collapse;	border-spacing: 0;
+		}
+		
+		table th { text-align:left; padding:.3em;}
+		
+		table td {
+			padding:.3em;
+			border:1px solid #ccc;
+		}
+		table td.var {
+			width:200px;
+			font-weight:bold;
+		}
+		table td.type {
+			width:100px;
+			font-style:italic;
+		}
+		#content { padding: 0 0 100px;	}
+
+		#footer {
+			width: 960px;
+			margin: -100px auto 0;
+			height: 100px;
+			background: #BFF08E;
+		}
+	</style>
+</head>
+
+<body>
+
+<div id="wrapper">
+
+	<div id="header">
+		<h1>Документация elFinder</h1>
+	</div>
+
+	<div id="content">
+		<h2>Оглавление</h2>
+		<ul>
+			<li><a href="#inc">Подключение</a></li>
+			<li><a href="#client">Опции клиента</a></li>
+			<li><a href="#conn-php">Опции коннектора (php)</a></li>
+			<li><a href="#con-py">Опции коннектора (python)</a></li>
+			<li><a href="#toolbar">Настройка панели инструментов</a></li>
+			<li><a href="#cm">Настройка контекстного меню</a></li>
+			<li><a href="#upl">Настройка загрузки файлов</a></li>
+			<li><a href="#perms">Настройка прав доступа</a></li>
+			<li><a href="#disable">Ограничение доступа к командам</a></li>
+			<li><a href="#elrte">Интеграция с elRTE</a></li>
+			<li><a href="#ck">Интеграция с CKEditor</a></li>													
+			<li><a href="#mce">Интеграция с TinyMCE</a></li>
+			<li><a href="#proto">Описание протокола клиент-сервер</a></li>
+			<li><a href="#comm-client">Список команд клиента</a></li>
+		</ul>
+		
+		<hr />
+		
+		<a name="inc"></a>
+		<h3>Подключение</h3>
+		<p>
+			Подключаем jQuery и jQuery UI:
+			<blockquote><code><font size="2" face="Courier New" color="black">&#60;script src=<font color="#A31515">"js/jquery.js"</font> type=<font color="#A31515">"text/javascript"</font> charset=<font color="#A31515">"utf-8"</font>&#62;&#60;/script&#62;<br>&#60;script src=<font color="#A31515">"js/jquery-ui-1.7.2.custom.min.js"</font> type=<font color="#A31515">"text/javascript"</font> charset=<font color="#A31515">"utf-8"</font>&#62;&#60;/script&#62;<br>&#60;link rel=<font color="#A31515">"stylesheet"</font> href=<font color="#A31515">"js/ui-themes/base/ui.all.css"</font> type=<font color="#A31515">"text/css"</font> media=<font color="#A31515">"screen"</font> charset=<font color="#A31515">"utf-8"</font>&#62;</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			<strong>Замечание</strong>: Если вы самостоятельно собираете jQuery UI, убедитесь, что включены следующие компоненты:
+			dialog, tabs, selectable, draggable, droppable
+		</p>
+		<p>
+			Подключаем elFinder:
+			<blockquote><code><font size="2" face="Courier New" color="black">&#60;script src=<font color="#A31515">"js/elfinder.min.js"</font> type=<font color="#A31515">"text/javascript"</font> charset=<font color="#A31515">"utf-8"</font>&#62;&#60;/script&#62;<br>&#60;link rel=<font color="#A31515">"stylesheet"</font> href=<font color="#A31515">"css/elfinder.css"</font> type=<font color="#A31515">"text/css"</font> media=<font color="#A31515">"screen"</font> charset=<font color="#A31515">"utf-8"</font>&#62; </font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		<p>
+			Создаем файловый менеджер.<br />
+			1. С помощью jQuery plugin:
+			<blockquote><code><font size="2" face="Courier New" color="black">&#60;script type=<font color="#A31515">"text/javascript"</font> charset=<font color="#A31515">"utf-8"</font>&#62;<br>&nbsp;&nbsp;$().ready({<br>&nbsp;&nbsp;&nbsp;&nbsp;$(<font color="#A31515">'#my-div'</font>).elfinder({<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lang : <font color="#A31515">'ru'</font><br>&nbsp;&nbsp;&nbsp;&nbsp;})<br>&nbsp;&nbsp;})<br>&#60;/script&#62;<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			2. Или через конструктор
+			<blockquote><code><font size="2" face="Courier New" color="black">&#60;script type=<font color="#A31515">"text/javascript"</font> charset=<font color="#A31515">"utf-8"</font>&#62;<br>&nbsp;$().ready({<br>&nbsp;&nbsp;&nbsp;<font color="#0000ff">var</font> fm = <font color="#0000ff">new</font> elFinder(<font color="#0000ff">document</font>.getElementById(<font color="#A31515">'my-div'</font>), {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lang : <font color="#A31515">'ru'</font><br>&nbsp;&nbsp;&nbsp;});<br>&nbsp;})<br>&#60;/script&#62;</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<hr/>
+		<a name="client"></a>
+		<h3>Опции клиента</h3>
+		
+		<table cellspacing="0">
+			<tr><th>Параметр</th><th>Тип</th><th>Описание</th></tr>
+			<tr><td class="var">url</td><td class="type">String</td><td>URL коннектора. Единственный обязательный параметр</td></tr>
+			<tr><td class="var">lang</td><td class="type">String</td><td>Язык интерфейса. Двухбуквенное обозначение языка. Требует подключения файла i18n/elfinder.язык.js</td></tr>
+			<tr><td class="var">cssClass</td><td class="type">String</td><td>Дополнительный css класс для контейнера</td></tr>
+			<tr><td class="var">width</td><td class="type">Number</td><td> Ширина окна файлового менеджера. По умолчанию не задана, указана в css файле</td></tr>
+			<tr><td class="var">height</td><td class="type">Number</td><td>Высота окна файлового менеджера. По умолчанию не задана, указана в css файле</td></tr>
+			<tr><td class="var">view</td><td class="type">String</td><td>Внешний вид текущей директории по умолчанию. Возможные значения: icons||list. По умолчанию - icons.</td></tr>
+			<tr><td class="var">docked</td><td class="type">Boolean</td><td> Разрешить "отстегивание" elFinder в диалоговое окно (может упоминаться в документации, как docked mode). По умолчинию: false</td></tr>
+			<tr><td class="var">dialog</td><td class="type">Object</td><td>Открыть elFinder в диалоговом окне с заданными параметрами. Если опция docked == true, открыть elFinder на странице и "отстегивать" в диалоговое окно с указаными параметрами.</td></tr>
+			<tr><td class="var">wrap</td><td class="type">Number</td><td>Кол-во символов на которые разбивается длинные имена файлов в режиме отображения "иконки". По умолчанию: 14. Чтобы не разбивать имена файлов, установите wrap=0.</td></tr>
+			<tr><td class="var">places</td><td class="type">String</td><td>Название папки избранное. Локализуется. По умолчанию - "Places". Укажите "", чтобы не использовать places</td></tr>
+			<tr><td class="var">placesFirst</td><td class="type">Boolean</td><td>Поместить places перед деревом файлов в панели навигации? По умолчанию - true</td></tr>
+			<tr><td class="var">toolbar</td><td class="type">Array</td><td>Группы кнопок на панели инструментов. По умолчанию: все доступные кнопки/команды. Настройка - см соответствующий раздел документации.</td></tr>
+			<tr><td class="var">contextmenu</td><td class="type">Object</td><td>Содержимое контекстного меню. По умолчанию: все доступные команды. Настройка - см соответствующий раздел документации.</td></tr>
+			<tr><td class="var">cookie</td><td class="type">Object</td><td>Параметры cookie. По умолчанию: {expires : 30, domain  : '', path    : '/', secure  : false}. В cookie сохраняются: вид текущей директории, последняя открытая директория, places. </td></tr>
+			<tr><td class="var">disableShortcuts</td><td class="type">Boolean</td><td>Отключить сочетания клавиш (кроме стрелок и пробела). По умолчанию - false.</td></tr>
+			<tr><td class="var">rememberLastDir</td><td class="type">Boolean</td><td>Открывать последнюю посещенную директорию после обновления страницы или закрытии/открытии окна браузера</td></tr>
+			<tr><td class="var">autoReload</td><td class="type">Number</td><td>Количество минут, через которое содержимое текущей директории и дерева директории обновляется. По умолчанию: 0 (отключено) </td></tr>
+			<tr><td class="var">editorCallback</td><td class="type">Function</td><td>Функция обратного вызова для wswing редактора (CKEditor, TinyMCE, elRTE и тд). Ожидает один аргумент (String) - URL выбранного файла.</td></tr>
+			<tr><td class="var">closeOnEditorCallback</td><td class="type">Boolean</td><td>Закрыть редактор после вызова editorCallback? По умолчанию - true. (Не имеет смысла при подключении к CKEditor, TinyMCE)</td></tr>
+		</table>
+		
+		<hr/>
+		<a name="conn-php"></a>
+		<h3>Опции коннектора (php)</h3>
+		<table cellspacing="0">
+			<tr><th>Параметр</th><th>Тип</th><th>Описание</th></tr>
+			<tr><td class="var">root</td><td class="type">String</td><td>Путь к корневой директории. Обязательный параметр.</td></tr>
+			<tr><td class="var">URL</td><td class="type">String</td><td>URL корневой директории. Обязательный параметр.</td></tr>
+			<tr><td class="var">rootAlias</td><td class="type">String</td><td>Алиас для корневой директории</td></tr>
+			<tr><td class="var">disabled</td><td class="type">Array</td><td>Список отключенных команд</td></tr>
+			<tr><td class="var">dotFiles</td><td class="type">Boolean</td><td>Показывать файлы, начинающиеся с точки. По умолчанию: true</td></tr>
+			<tr><td class="var">dirSize</td><td class="type">Boolean</td><td>Считать размер, занимаемый директориями</td></tr>
+			<tr><td class="var">fileMode</td><td class="type">octal</td><td>mode для новых файлов</td></tr>
+			<tr><td class="var">dirMode</td><td class="type">octal</td><td>mode для новых директорий</td></tr>
+			<tr><td class="var">mimeDetect</td><td class="type">String</td><td>Способ определения mime-типов файлов (варианты значений: finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (по расширению))</td></tr>
+			<tr><td class="var">uploadAllow</td><td class="type">Array</td><td>Список разрешенных типов файлов для загрузки. Можно задать точный mimetype (image/jpeg) или группу типов (application)</td></tr>
+			<tr><td class="var">uploadDeny</td><td class="type">Array</td><td>Список запрещенных типов файлов для загрузки</td></tr>
+			<tr><td class="var">uploadOrder</td><td class="type">String</td><td>Порядок применения ограничивающих загрузку правил. <br/>
+				- allow,deny  Только то, что разрешено, кроме того, что запрещено. (AND)<br/>
+				- deny,allow  То, что не запрещено или разрешено. (OR)
+			</td></tr>
+			<tr><td class="var">imgLib</td><td class="type">String</td><td>Библиотека для создания превьюшек (только php коннектор. Варианты: imagick, mogrify, gd). Если не указан, пытается определить доступную.</td></tr>
+			<tr><td class="var">tmbDir</td><td class="type">String</td><td>Папка для превьюшек. Если не заданна - превьюшки не будут создаваться</td></tr>
+			<tr><td class="var">tmbCleanProb</td><td class="type">Integer</td><td>Частота очистки папки с превьюшками. Варианты - от 0 до 200. 0 - не очищать, 200 - при каждом запросе инициализации файлового менеджера</td></tr>
+			<tr><td class="var">tmbAtOnce</td><td class="type">Integer</td><td>Сколько превьюшек создавать в одном фоновом запросе. По умолчанию: 5</td></tr>
+			<tr><td class="var">tmbSize</td><td class="type">Integer</td><td>Рамер превьюшек в px</td></tr>
+			<tr><td class="var">fileURL</td><td class="type">Boolean</td><td>Отдавать URL файлов клиенту. По умолчанию: true</td></tr>
+			<tr><td class="var">dateFormat</td><td class="type">String</td><td>Формат даты изменения файлов. По умолчанию "j M Y H:i"</td></tr>
+			<tr><td class="var">logger</td><td class="type">Object</td><td>Объект-логгер</td></tr>
+			<tr><td class="var">defaults</td><td class="type">Array</td><td>
+				Права доступа к файлам/папками по умолчанию.<br/> Значение по умолчанию: 
+					array(
+						'read'   => true,
+						'write'  => true,
+						'rm'     => true
+					)
+			</td></tr>
+			<tr><td class="var">perms</td><td class="type">Array</td><td>Права доступа к папкам/файлам. Подробнее см соответствующий раздел</td></tr>
+			<tr><td class="var">archiveMimes</td><td class="type">Array</td><td>Список типов архивов, разрешенных для создания. Если не задан, будут разрешены все доступные типы</td></tr>
+			<tr><td class="var">archivers</td><td class="type">Array</td><td>Информация об архиваторах. Если не задана, коннектор попытается найти и использовать все доступные архиваторы.</td></tr>
+			<tr><td class="var">debug</td><td class="type">Boolean</td><td>Отсылать отладочную информацию клиенту</td></tr>
+		</table>
+		
+		<hr/>
+		<a name="conn-py"></a>
+		<h3>Опции коннектора (python)</h3>
+		<table cellspacing="0">
+			<tr><th>Параметр</th><th>Тип</th><th>Описание</th></tr>
+			<tr><td class="var">root</td><td class="type">String</td><td>Путь к корневой директории. Обязательный параметр.</td></tr>
+			<tr><td class="var">URL</td><td class="type">String</td><td>URL корневой директории. Обязательный параметр.</td></tr>
+		</table>
+		
+		<hr/>
+		<a name="toolbar"></a>
+		<h3>Настройка панели инструментов</h3>
+		По умолчанию на панели инструментов включены все кнопки/команды. Если команда отключена в коннекторе, оне не будет показана в панели инструментов даже если указана в конфиге клиента.<br/>
+
+		Опция "toolbar" (Array) - двухмерный массив. Первый уровень - группы кнопок, визуально разделенные на панели инструментов. Второй - кнопки внутри группы.
+
+		Группы кнопок и кнопки внутри группы будут отрисованы в порядке, указаном в конфиге.<br/>
+		Пример:
+		<blockquote><code><font size="2" face="Courier New" color="black">$(selector).elfinder({<br>&nbsp;&nbsp;....<br>&nbsp;&nbsp;toolbar : [<br>&nbsp;&nbsp;&nbsp;&nbsp;[<font color="#A31515">'back'</font>, <font color="#A31515">'reload'</font>],<br>&nbsp;&nbsp;&nbsp;&nbsp;[<font color="#A31515">'select'</font>, <font color="#A31515">'open'</font>],<br>&nbsp;&nbsp;&nbsp;&nbsp;[<font color="#A31515">'mkdir'</font>, <font color="#A31515">'mkfile'</font>, <font color="#A31515">'upload'</font>],<br>&nbsp;&nbsp;&nbsp;&nbsp;......<br>&nbsp;&nbsp;],<br><br>&nbsp;&nbsp;....<br><br>})<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+	
+		<hr/>
+		<a name="cm"></a>
+		<h3>Настройка контекстного меню</h3>
+		За панель инструментов отвечает опция "contextmenu" (Object).<br/>
+		<blockquote><code><font size="2" face="Courier New" color="black">$(selector).elfinder({<br>&nbsp;&nbsp;....<br>&nbsp;&nbsp;contextmenu : {<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">// Команды, исполняемые для текущей директории</font><br>&nbsp;&nbsp;&nbsp;&nbsp;cwd : [<font color="#A31515">'reload'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'mkdir'</font>, <font color="#A31515">'mkfile'</font>, <font color="#A31515">'upload'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'paste'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'info'</font>], <br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">// Команды для одного выбраного файла</font><br>&nbsp;&nbsp;&nbsp;&nbsp;file : [<font color="#A31515">'select'</font>, <font color="#A31515">'open'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'copy'</font>, <font color="#A31515">'cut'</font>, <font color="#A31515">'rm'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'duplicate'</font>, <font color="#A31515">'rename'</font>, ...], <br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">// команды для группы файлов</font><br>&nbsp;&nbsp;&nbsp;&nbsp;group : [<font color="#A31515">'copy'</font>, <font color="#A31515">'cut'</font>, <font color="#A31515">'rm'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'archive'</font>, <font color="#A31515">'extract'</font>, <font color="#A31515">'delim'</font>, <font color="#A31515">'info'</font>] <br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;...<br>}) </font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+
+		<hr/>
+		<a name="upl"></a>
+		<h3>Настройка загрузки файлов</h3>
+		Разрешение/запрет загрузки файлов производится в коннекторе по mime-типам файлов.<br/>
+		Настроить загрузку файлов можно 2-я способами:<br/><br/>
+
+		 <strong>1. Только те типы файлов, которые разрешены, кроме, тех которые запрещены.</strong><br/> Типы не указаные в uploadAllow загружены не будут.<br/>
+			Например: Разрешаем загружать все текстовые файлы, кроме rtf и разрешаем загружать xml
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#A31515">'uploadAllow'</font> =&#62; array(<font color="#A31515">'text'</font>, <font color="#A31515">'application/xml'</font>),<br><font color="#A31515">'uploadDeny'</font>&nbsp;=&#62; array(<font color="#A31515">'text/rtf'</font>),<br><font color="#A31515">'uploadOrder'</font> =&#62; <font color="#A31515">'allow,deny'</font></font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		<strong>2. Файлы, которые не запрещены, или разрешены.</strong><br/>
+			Запрещаем загружать приложения, за исключением xml
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#A31515">'uploadAllow'</font> =&#62; array(<font color="#A31515">'application/xml'</font>),<br><font color="#A31515">'uploadDeny'</font>&nbsp;=&#62; array(<font color="#A31515">'application'</font>),<br><font color="#A31515">'uploadOrder'</font> =&#62; <font color="#A31515">'deny,allow'</font><br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>			
+	
+		<hr/>
+		<a name="perms"></a>
+		<h3>Настройка прав доступа</h3>
+		<p>
+		За настройки прав доступа по умолчанию отвечает параметр коннектора "defaults"
+		<blockquote><code><font size="2" face="Courier New" color="black">array(<br>&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; =&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;=&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp; =&#62; <font color="#0000ff">true</font><br>)</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+	
+		За настройки прав доступа к отдельным папкам/файлам отвечает параметр коннектора "perms".<br/>
+		Массив, ключи - регэкспы для путей к папкам/файлам, значения - массивы прав доступа.<br/><br/>
+		Примеры:<br/><br/>
+		<strong>1. Запретить удалять jpeg/png/gif</strong><br/>
+		<blockquote><code><font size="2" face="Courier New" color="black"><font color="#A31515">'perms'</font> =&#62; array(<br>&nbsp;&nbsp;<font color="#A31515">'/\.(jpg|gif|png)$/i'</font> =&#62; array(<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; =&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;=&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp; =&#62; <font color="#0000ff">false</font><br>&nbsp;&nbsp;)<br>)<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+	
+		<strong>2. Запретить переименовывать и писать в текстовые файлы</strong>
+		<blockquote><code><font size="2" face="Courier New" color="black"><font color="#A31515">'perms'</font> =&#62; array(<br>&nbsp;&nbsp;<font color="#A31515">'/\.(txt|html|php|py|pl|sh|xml)$/i'</font> =&#62; array(<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; =&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;=&#62; <font color="#0000ff">false</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp;&nbsp;=&#62; <font color="#0000ff">true</font><br>&nbsp;&nbsp;)<br>)<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+
+		<strong>3. Пользовательская папка. Читать - все, писать/удалять - только в своей папке.</strong>
+		<blockquote><code><font size="2" face="Courier New" color="black"><font color="#A31515">'defaults'</font> =&#62; array(<br>&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; =&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;=&#62; <font color="#0000ff">false</font>,<br>&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp; =&#62; <font color="#0000ff">false</font><br>&nbsp;&nbsp;),<br><font color="#A31515">'perms'</font> =&#62; array(<br>&nbsp;&nbsp;<font color="#A31515">'/^user_dir\/.*/'</font> =&#62; array(<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; =&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;=&#62; <font color="#0000ff">true</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp; =&#62; <font color="#0000ff">true</font><br>&nbsp;&nbsp;&nbsp;&nbsp;)<br>&nbsp;&nbsp;)<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<hr/>
+		<a name="disable"></a>
+		<h3>Ограничение доступа к командам</h3>
+		<p>
+			Опция коннектора "disabled" позволяет отключить практически любые команды за исключением базовых, необходимых для нормальной работы файлового менеджера.<br/>
+			Пример:<br/>
+			Запрещаем переименовывать все файлы и редактировать текстовые.
+			<blockquote><code><font size="2" face="Courier New" color="black">disabled =&#62; array(<font color="#A31515">'rename'</font>, <font color="#A31515">'edit'</font>)</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<hr/>
+		<a name="elrte"></a>
+		<h3>Интеграция с elRTE</h3>
+		<p>
+			При инициализации elRTE, передаем ему функцию, который откроет файловый менеджер в диалоговом окне 
+			и передаст в editorCallback функцию, принимающую URL выбраного файла в качестве единственного аргумента.
+			
+			<blockquote><code><font size="2" face="Courier New" color="black">$(<font color="#A31515">'selector'</font>).elrte({<br>&nbsp;&nbsp;... <font color="#008000">//options</font><br>&nbsp;&nbsp;fmOpen : function(callback) {<br>&nbsp;&nbsp;&nbsp;&nbsp;$(<font color="#A31515">'&#60;div/&#62;'</font>).elfinder({<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lang : <font color="#A31515">'ru'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dialog : { width : 900, modal : <font color="#0000ff">true</font>, title : <font color="#A31515">'Files'</font> }, <font color="#008000">// открываем в диалоговом окне</font><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;closeOnEditorCallback : <font color="#0000ff">true</font>, <font color="#008000">// закрываем после выбора файла</font><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;editorCallback : callback <font color="#008000">// передаем callback файловому менеджеру</font><br>&nbsp;&nbsp;&nbsp;&nbsp;})<br>&nbsp;&nbsp;}<br>})</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		
+		<hr/>
+		<a name="ck"></a>
+		<h3>Интеграция с CKEditor</h3>
+		<p>
+			Диалог для вставки ссылки/изображения открывается в том же окне, а файловый менеджер в новом.
+			<blockquote><code><font size="2" face="Courier New" color="black">CKEDITOR.replace(<font color="#A31515">'textarea_id'</font>, {<br>&nbsp;&nbsp;filebrowserBrowseUrl : <font color="#A31515">'elfinder.html'</font><br>})</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		
+			В elfinder.html после подключения jQuery, jQueryUI и elFinder
+			<blockquote><code><font size="2" face="Courier New" color="black">$().ready(function() {<br>&nbsp;&nbsp;<br>&nbsp;&nbsp;<font color="#0000ff">var</font> funcNum = window.location.search.replace(/^.*CKEditorFuncNum=(\d+).*$/, <font color="#A31515">"$1"</font>);<br>&nbsp;&nbsp;<font color="#0000ff">var</font> langCode = window.location.search.replace(/^.*langCode=([a-z]{2}).*$/, <font color="#A31515">"$1"</font>);<br>&nbsp;&nbsp;<br>&nbsp;&nbsp;$(<font color="#A31515">'#finder'</font>).elfinder({<br>&nbsp;&nbsp;&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;lang : langCode,<br>&nbsp;&nbsp;&nbsp;&nbsp;editorCallback : function(url) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.opener.CKEDITOR.tools.callFunction(funcNum, url);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.close();<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;})<br>&nbsp;&nbsp;<br>})<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			
+		</p>
+		
+		<hr/>
+		<a name="mce"></a>
+		<h3>Интеграция с TinyMCE</h3>
+		<p>
+			Тут ситуация немного хуже - и диалог для вставки ссылки/изображения и файловый менеджер открываются в новых окнах.<br/>
+			Создаем редактор:
+
+			<blockquote><code><font size="2" face="Courier New" color="black">tinyMCE.init({<br>&nbsp;&nbsp;<font color="#008000">// General options</font><br>&nbsp;&nbsp;mode : <font color="#A31515">"textareas"</font>,<br>&nbsp;&nbsp;.... any options<br>&nbsp;&nbsp;file_browser_callback : function(field_name, url, type, win) {<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#0000ff">var</font> w = window.open(Абсолютный URL к файловому менеджеру (elfinder.html), <font color="#0000ff">null</font>, <font color="#A31515">'width=600,height=500'</font>);<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">// Сохраняем необходимые параметры в глобальных переменных окна (некошерно, но это самое простое решение для их идиотской архитектуры),</font><br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">// или можете передавать параметры в get и потом парсить их. It's up to you!</font><br>&nbsp;&nbsp;&nbsp;&nbsp;w.tinymceFileField = field_name;<br>&nbsp;&nbsp;&nbsp;&nbsp;w.tinymceFileWin = win;<br>&nbsp;&nbsp;}<br>})</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		
+			В elfinder.html после подключения jQuery, jQueryUI и elFinder:
+			<blockquote><code><font size="2" face="Courier New" color="black">$(<font color="#A31515">'#finder'</font>).elfinder({<br>&nbsp;&nbsp;url : <font color="#A31515">'connectors/php/connector.php'</font>,<br>&nbsp;&nbsp;lang : <font color="#A31515">'ru'</font>,<br>&nbsp;&nbsp;editorCallback : function(url) {<br>&nbsp;&nbsp;&nbsp;&nbsp;window.tinymceFileWin.document.forms[0].elements[window.tinymceFileField].<font color="#0000ff">value</font> = url;<br>&nbsp;&nbsp;&nbsp;&nbsp;window.tinymceFileWin.focus();<br>&nbsp;&nbsp;&nbsp;&nbsp;window.close();<br>&nbsp;&nbsp;}<br>})<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<hr/>
+		<a name="proto"></a>
+		<h3>Описание протокола клиент-сервер</h3>
+		<p>
+			Коннектор получает данные через GET (только при upload файлов/редактировании текстовых файлов - через POST).<br/>
+			Возвращает всегда объект JSON.
+		</p>
+		<p>
+			Обязятельный параметр, всегда ожидаемый сервером:
+			<ul>
+				<li><strong>cmd</strong> : имя команды</li>
+			</ul>
+		</p>
+		<p>
+			Для любой команды ответ может содержать следующие параметры
+			<ul>
+				<li><strong>error</strong> : Строка с сообщением об ошибке</li>
+				<li><strong>errorData</strong> : Массив с сообщениями о нефатальных ошибках</li>
+				<li><strong>select</strong> : массив хэшей файлов, которые необходимо выделить после перерисовки контента (upload, mkdir, mkfile и тд)</li>
+				<li><strong>debug</strong> : массив с отладочной информацией</li>
+			</ul>
+		</p>
+		<p>
+			Команды клиентской части не полностью совпадают с командами коннектора:<br/>
+			<ul>
+				<li><strong>reload, back</strong> - реализуются серверной командой open</li>
+				<li><strong>list, icons, quicklook, copy, cut</strong> - работают только на клиенте и не обращаются к коннектору</li>
+			</ul>
+		</p>
+		<p>
+			Любая команда, получившая некорректные аргументы, прекращает дальнейшее выполнение и возвращает:
+			<ul>
+				<li><strong>error</strong> : сообщение об ошибке</li>
+			</ul>
+			<strong>Исключение</strong>: open. Возвращает сообщение об ошибке и контент корневой директории.<br/>
+			<strong>Внимание!</strong> Пути к файлам не передаются в чистом виде, только hash от пути (md5).<br/>
+		</p>
+		<h4>Список команд:</h4>
+			<ul>
+				<li><strong>open</strong> - открыть директорию или вывести содержимое файла в браузер</li>
+				<li><strong>tmb</strong> - создать превьюшки для картинок, не имеющих их</li>
+				<li><strong>mkdir</strong> - создать папку</li>
+				<li><strong>mkfile</strong> - создать текстовый файл</li>
+				<li><strong>rename</strong> - переименовать папку или файл</li>
+				<li><strong>rm</strong> - удалить папки/файлы</li>
+				<li><strong>upload</strong> - загрузить файлы</li>
+				<li><strong>paste</strong> - скопировать или переместить файлы/папки в указанную директорию</li>
+				<li><strong>duplicate</strong> - сделать копию папки/файла</li>
+				<li><strong>geturl</strong> - вернуть урл файла</li>
+				<li><strong>read</strong> - вернуть содержимое текстового файла</li>
+				<li><strong>edit</strong> - сохранить текст в файл</li>
+				<li><strong>extract</strong> - распаковать архив</li>
+				<li><strong>archive</strong> - сжать папки/файлы в архив </li>
+				<li><strong>resize</strong> - Изменить размер изображения</li>
+				<li><strong>ping</strong> - Служебная команда. Необходима для Safari (загрузка файлов)</li>
+			</ul>
+		
+		
+		<h4>Инициализация файлового менеджера:</h4>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : open</li>
+				<li><strong>init</strong> : true</li>
+				<li><strong>tree</strong> : true</li>
+			</ul>
+			<em>Ответ:</em> См. описание команды open. <br/>
+			Дополнительно ответ включает:
+			<ul>
+				<li><strong>disabled</strong> : (Array) список отключенных команд</li>
+				<li><strong>dotFiles</strong> : (Boolean) разрешено ли показывать скрытые файлы, начинающиеся с точки</li>
+				<li><strong>uplMaxSize</strong> : (String) макимальный разрешенный размер загружаемых файлов (например: 128M)</li>
+				<li><strong>archives</strong> : (Array) Список mime-типов архивов, которые могут быть созданы коннектором</li>
+				<li><strong>extract</strong> : (Array) Список mime-типов архивов, которые коннектор может распаковать</li>
+			</ul>
+		</p>
+		
+		<h4>Описание команд</h4>
+		<h4>open</h4>
+		<p>Возвращает содержимое директории или выводит файл в браузер</p>
+		<p>
+			<u>1. Открытие директории:</u><br/>
+			<em>Аргументы</em>:
+			<ul>
+				<li><strong>cmd</strong> : open</li>
+				<li><strong>target</strong> : hash пути директории</li>
+				<li><strong>tree</strong> : Не обязательный параметр. Если задан - дополнительно вернуть дерево директорий</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">{<br>&nbsp;&nbsp;cwd : { <font color="#008000">// Current Working Directory. Инф о текущей директории</font><br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'hash'</font> : hash пути,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'name'</font> : Имя папки,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'mime'</font> : <font color="#A31515">'directory'</font>,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rel'</font>&nbsp;: Путь относительно корневой директории,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'size'</font> : размер дир,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'date'</font> : дата изменения,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font> : права на чтение,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font>: права на запись,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp; : права для удаления<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;cdc : [ <font color="#008000">// Current Directory Content. Инф о папках/файлах в текущей директории</font><br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'name'</font>&nbsp; : Имя папки/файла,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'hash'</font>&nbsp; : hash пути,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'mime'</font>&nbsp; : mime-тип, (для директории должно быть: directory, для битой ссылки: symlink-broken, для нормальной ссылки - mimetype файла на который она указывает)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'date'</font>&nbsp; : отформатированая дата изменения файла, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'size'</font>&nbsp; : размер,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; : права на чтение,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;: права на запись,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp; : права для удаления,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'resize'</font> : <font color="#0000ff">true</font> (только для картинок, которые можно ресайзить)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'parent'</font> : hash родительской директории (только для ссылок)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'link'</font>&nbsp; : hash файла, на который указывает ссылка (только для ссылок)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'linkTo'</font> : относительный путь к файлу, на который указывает ссылка (только для ссылок)<br>&nbsp;&nbsp;&nbsp;&nbsp;},<br>&nbsp;&nbsp;&nbsp;&nbsp;{ ... }, ...<br>&nbsp;&nbsp;],<br>&nbsp;&nbsp;tree : [ <font color="#008000">// Дерево директорий. Не обязательный параметр. Только если был передан аргумент "tree"</font><br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'hash'</font>&nbsp;: hash пути корневой директории,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'name'</font>&nbsp;: Имя папки,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp;: права на чтение,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'write'</font> : права на запись,<br>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#A31515">'dirs'</font>&nbsp;: [ массив дочерних директории ]<br>&nbsp;&nbsp;]<br>}</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			<strong>Внимание! </strong>Если передан некорректный аргумент target, возвращает контент корневой директории и сообщение об ошибке
+		</p>
+		<p>
+			<u>2. Открытие файла (вывод содержимого в браузер):</u><br/>
+			<em>Аргументы</em>:
+			<ul>
+				<li><strong>cmd</strong> : open</li>
+				<li><strong>target</strong> : hash пути файла</li>
+				<li><strong>current</strong> : hash пути к папке, гда находится файл</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Файл выводится в браузер с соответствующими заголовками
+		</p>
+		<h4>tmb</h4>
+		<p>Фоновая команда. Создает превьюшки для картинок, не имеющих их. Кол-во создаваемых за раз превьюшек, указывается в конфиге коннектора. По умолчанию - 5.</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : tmb</li>
+				<li><strong>current</strong> : hash пути к директории, в которой создаем превьюшки</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">{<br>&nbsp;&nbsp;current : hash пути к директории, в которой создали превьюшки,<br>&nbsp;&nbsp;images : {<br>&nbsp;&nbsp;&nbsp;&nbsp;hash пути файла : url миниатюрки,<br>&nbsp;&nbsp;&nbsp;&nbsp;.....<br>&nbsp;&nbsp;}<br>}</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		<h4>mkdir</h4>
+		<p>
+			Создать новую папку.
+		</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : mkdir</li>
+				<li><strong>current</strong> : hash папки, в которой создаем новую папку</li>
+				<li><strong>name</strong> : имя новой папки</li>
+			</ul>
+			<em>Ответ:</em>
+			Такой же как у open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : hash новой папки,<br>tree&nbsp; : дерево директорий<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>mkfile</h4>
+		<p>
+			Создать новый файл.
+		</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : mkfile</li>
+				<li><strong>current</strong> : hash папки, в которой создаем файл</li>
+				<li><strong>name</strong> : имя нового файла</li>
+			</ul>
+			<em>Ответ:</em>
+			Такой же как у open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : hash новой папки<br><br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+
+		</p>
+		
+		<h4>rename</h4>
+		<p>Переименование папки/файла</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : rename</li>
+				<li><strong>current</strong> : hash папки, где файл находится</li>
+				<li><strong>target</strong> : hash папки/файла для переименования</li>
+				<li><strong>name</strong> : новое имя папки/файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : hash переименованого файла,<br>tree : если переименовали папку, дополнительно возвращаем дерево директорий</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>upload</h4>
+		<p>Загрузка файлов</p>
+		<p>
+			<em>Аргументы (передаются методом POST):</em>
+			<ul>
+				<li><strong>cmd</strong> : upload</li>
+				<li><strong>current</strong> : hash папки, в которую загружаем файлы</li>
+				<li><strong>files</strong> : массив файлов</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Если ни одного файла не удалось загрузить, возвращаем только
+			<blockquote><code><font size="2" face="Courier New" color="black">error : <font color="#A31515">"Unable to upload files"</font></font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			Если хотя бы один файл был загружен, ответ такой же как у open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : массив hash путей загруженых файлов,<br>error : <font color="#A31515">"Some files was not uploaded"</font>, <font color="#008000">// если не все файлы были загружены,</font><br>errorData : { <font color="#008000">// инф о файлах, которые не удалось загрузить. Ключ - имя файла, значение - сообщение об ошибке</font><br>&nbsp;&nbsp;<font color="#A31515">'some-file.exe'</font> : <font color="#A31515">'Not allowed file type'</font>,<br>&nbsp;&nbsp;.....<br>}</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>ping</h4>
+		<p>Служебная команда. Необходима для исправления бага Safari при загрузке файлов http://www.webmasterworld.com/macintosh_webmaster/3300569.htm</p>
+		<p>
+			<em>Аргументы: </em>
+			<ul>
+				<li><strong>cmd</strong> : ping</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Отсылает пустую страницу с заголовком Connection: close
+		</p>
+		
+		<h4>paste</h4>
+		<p>скопировать/переместить папки/файлы</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : paste</li>
+				<li><strong>src</strong> : hash папки, из которой перемещаем/копируем файлы</li>
+				<li><strong>dst</strong> : hash папки, в которую перемещаем/копируем файлы</li>
+				<li><strong>files</strong> : массив hash'ей копируемых папок/файлов</li>
+				<li><strong>cut</strong> : true, если файлы перемещаем</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Если не удалось скопировать/переместить хотя бы один файл
+			<blockquote><code><font size="2" face="Courier New" color="black">error : сообщение об ошибке</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			Если копирование/перемещение прошло успешно, возвращаем то же, что и open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black">tree : дерево директорий</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+			<strong>Внимание!</strong> Команда должна прекращать копирование при первой же ошибке. Не допускается перезапись файлов/папок с одинаковыми именами
+		</p>
+		<h4>rm</h4>
+		<p>Удаление файлов/ рекурсивное удаление папок</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : rm</li>
+				<li><strong>current</strong> : hash папки, из которой удалем файлы</li>
+				<li><strong>files</strong> : массив hash'ей удаляемых папок/файлов</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Всегда такой же как у open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black">tree : дерево директорий<br>error : <font color="#A31515">"Unable to remove file"</font>, <font color="#008000">//если была ошибка удаления</font><br>errorData : {} //если была ошибка удаления - инф о файлах, который не удалось удалить (аналогично ошибке в upload)</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>duplicate</h4>
+		<p>Создает копию папки/файла. Имя копии формируется следующим образом:
+			базовое_имя_файла copy+порядковый номер.расширение(если есть)</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : duplicate</li>
+				<li><strong>current</strong> : hash папки, в которой создаем дубликат</li>
+				<li><strong>file</strong> : hash папки/файла, для которого создаем дубликат</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">tree : дерево директорий, <font color="#008000">// если создали дубликат для папки</font><br><font color="#0000ff">select</font> : hash пути дубликата</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>read</h4>
+		<p>возвращает содержимое текстового файла. 	</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : edit</li>
+				<li><strong>current</strong> : hash папки, в которой читаем файл</li>
+				<li><strong>file</strong> : hash файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">content : содержимое текстового файла</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>edit</h4>
+		<p>сохраняет текст в файл</p>
+		<p>
+			<em>Аргументы (передаются методом POST): </em>
+			<ul>
+				<li><strong>cmd</strong> : edit</li>
+				<li><strong>current</strong> : hash папки, в которой сохраняем файл</li>
+				<li><strong>file</strong> : hash файла</li>
+				<li><strong>content</strong> : новое содержимое файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">file : {<font color="#008000">// объект, аналогичный объекту, описывающему файл в cdc команды open</font><br>&nbsp;&nbsp;<font color="#A31515">'name'</font>&nbsp; : Имя файла,<br>&nbsp;&nbsp;<font color="#A31515">'hash'</font>&nbsp; : hash пути,<br>&nbsp;&nbsp;<font color="#A31515">'mime'</font>&nbsp; : mime-тип<br>&nbsp;&nbsp;<font color="#A31515">'date'</font>&nbsp; : отформатированая дата изменения файла, <br>&nbsp;&nbsp;<font color="#A31515">'size'</font>&nbsp; : размер,<br>&nbsp;&nbsp;<font color="#A31515">'read'</font>&nbsp; : права на чтение,<br>&nbsp;&nbsp;<font color="#A31515">'write'</font>&nbsp;: права на запись,<br>&nbsp;&nbsp;<font color="#A31515">'rm'</font>&nbsp;&nbsp;&nbsp; : права для удаления,<br>&nbsp;&nbsp;<font color="#A31515">'resize'</font> : <font color="#0000ff">true</font> (только для картинок, которые можно ресайзить)<br>}<br></font><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>geturl</h4>
+		<p>возвращает URL файла. Используется, когда запрещена передача URL клиенту (опция коннектора "fileURL").</p>
+		<p>
+			<em>Аргументы: </em>
+			<ul>
+				<li><strong>cmd</strong> : geturl</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash файла</li>
+			</ul>
+			<em>Ответ:</em>
+			<blockquote><code><font size="2" face="Courier New" color="black">url : URL файла</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+
+		<h4>extract</h4>
+		<p>распаковывает архив</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : extract</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash файла архива</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black">tree : дерево директорий</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>archive</h4>
+		<p>упаковывает папки/файлы в архив</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : archive</li>
+				<li><strong>type</strong> : mime-тип создаваемого архива</li>
+				<li><strong>current</strong> : hash папки, в которой находятся добавляемые в архив папки/файлы</li>
+				<li><strong>files</strong> : массив хэшей папок/файлов</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open, плюс
+			<blockquote><code><font size="2" face="Courier New" color="black"><font color="#0000ff">select</font> : hash нового архива</font><br><br><font size="1" color="gray">* This source code was highlighted with <a href="http://virtser.net/blog/post/source-code-highlighter.aspx"><font size="1" color="gray">Source Code Highlighter</font></a>.</font></code></blockquote>
+		</p>
+		
+		<h4>resize</h4>
+		<p>изменяет размер изображения</p>
+		<p>
+			<em>Аргументы:</em>
+			<ul>
+				<li><strong>cmd</strong> : resize</li>
+				<li><strong>current</strong> : hash папки, в которой находится файл</li>
+				<li><strong>file</strong> : hash пути картинки</li>
+				<li><strong>width</strong> : новая ширина картинки</li>
+				<li><strong>height</strong> : новая высота картинки</li>
+			</ul>
+			<em>Ответ:</em><br/>
+			Такой же как у команды open
+		</p>
+	</div>
+
+</div><!-- #wrapper -->
+
+<div id="footer">
+
+</div><!-- #footer -->
+
+</body>
+</html>
