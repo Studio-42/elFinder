@@ -19,7 +19,7 @@ elFinder.prototype.ui = function(fm) {
 			}
 			if (!this.fm.locked) {
 				this.fm.quickLook.hide();
-				$('.ui-dialog').remove();
+				$('.el-finder-info').remove();
 				this.cmd[cmd].exec(arg);
 				this.update();
 			}
@@ -341,7 +341,8 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm   = fm;
 		
 		this.exec = function() { 
-			this.fm.options.editorCallback(this.fm.fileURL());
+			var url = this.fm.fileURL();
+			this.fm.options.editorCallback(self.fm.options.absURL && self.fm.params.url ? url : url.substr(self.fm.params.url.length));
 			if (this.fm.options.closeOnEditorCallback) {
 				this.fm.dock();
 				this.fm.close();
@@ -406,14 +407,20 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			function info(f) {
 				var p = ['50%', '50%'], x, y, d, 
-					tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr></table>');
-				f.link && tb.append('<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>');
-				tb.append('<tr><td>'+self.fm.i18n('Size')+'</td><td>'+self.fm.view.formatSize(f.size)+'</td></tr><tr><td>'+self.fm.i18n('Modified')+'</td><td>'+self.fm.view.formatDate(f.date)+'</td></tr><tr><td>'+self.fm.i18n('Permissions')+'</td><td>'+self.fm.view.formatPermissions(f.read, f.write, f.rm)+'</td></tr>');
-				f.dim && tb.append('<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>');
-				f.url && tb.append('<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>');
+					tb = '<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr><tr><td>'+self.fm.i18n('Size')+'</td><td>'+self.fm.view.formatSize(f.size)+'</td></tr><tr><td>'+self.fm.i18n('Modified')+'</td><td>'+self.fm.view.formatDate(f.date)+'</td></tr><tr><td>'+self.fm.i18n('Permissions')+'</td><td>'+self.fm.view.formatPermissions(f.read, f.write, f.rm)+'</td></tr>';
+				
+				if (f.link) {
+					tb += '<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>';
+				}
+				if (f.dim) {
+					tb += '<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>';
+				}
+				if (f.url) {
+					tb += '<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>';
+				}
 
 				if (cnt>1) {
-					d = $('.ui-dialog:last');
+					d = $('.el-finder-dialog-info:last');
 					if (!d.length) {
 						x = Math.round(((w-350)/2)-(cnt*10));
 						y = Math.round(((h-300)/2)-(cnt*10));
@@ -425,10 +432,10 @@ elFinder.prototype.ui.prototype.commands = {
 					}
 				}
 
-				$('<div />').append(tb).dialog({
-					dialogClass : 'el-finder-dialog',
+				$('<div />').append(tb+'</table>').dialog({
+					dialogClass : 'el-finder-dialog el-finder-dialog-info',
 					width       : 350,
-					position : p,
+					position    : p,
 					title       : self.fm.i18n(f.mime == 'directory' ? 'Folder info' : 'File info'),
 					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } $(this).dialog('destroy'); },
 					buttons     : { Ok : function() { $(this).dialog('close'); }}

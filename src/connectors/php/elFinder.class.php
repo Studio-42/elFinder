@@ -302,7 +302,8 @@ class elFinder {
 				'dotFiles'   => $this->_options['dotFiles'],
 				'uplMaxSize' => ini_get('upload_max_filesize'),
 				'archives'   => array(),
-				'extract'    => array()
+				'extract'    => array(),
+				'url'        => $this->_options['URL']
 				);
 			if (isset($this->_commands['archive']) || isset($this->_commands['extract'])) {
 				$this->_checkArchivers();

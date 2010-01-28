@@ -607,6 +607,7 @@
 					self.eventsManager.init();
 					self.reload(data);
 					self.params = data.params;
+					// self.log(self.params)
 					$('*', document.body).each(function() {
 						var z = parseInt($(this).css('z-index'));
 						if (z >= self.zIndex) {
@@ -680,6 +681,8 @@
 		placesFirst    : true,
 		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
+		/* pass to editorCallback absolute or relative URL */
+		absURL         : true,
 		/* close elfinder after editorCallback */
 		closeOnEditorCallback : true,
 		/* i18 messages. not set manually! */
