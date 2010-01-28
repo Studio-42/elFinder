@@ -176,6 +176,7 @@
 			<tr><td class="var">rememberLastDir</td><td class="type">Boolean</td><td>Открывать последнюю посещенную директорию после обновления страницы или закрытии/открытии окна браузера</td></tr>
 			<tr><td class="var">autoReload</td><td class="type">Number</td><td>Количество минут, через которое содержимое текущей директории и дерева директории обновляется. По умолчанию: 0 (отключено) </td></tr>
 			<tr><td class="var">editorCallback</td><td class="type">Function</td><td>Функция обратного вызова для wswing редактора (CKEditor, TinyMCE, elRTE и тд). Ожидает один аргумент (String) - URL выбранного файла.</td></tr>
+			<tr><td class="var">absURL</td><td class="type">Boolean</td><td>Передавать в editorCallback абсолютный (по умолчанию) или относительный путь</td></tr>
 			<tr><td class="var">closeOnEditorCallback</td><td class="type">Boolean</td><td>Закрыть редактор после вызова editorCallback? По умолчанию - true. (Не имеет смысла при подключении к CKEditor, TinyMCE)</td></tr>
 		</table>
 		
@@ -396,6 +397,7 @@
 			Дополнительно ответ включает:
 			<ul>
 				<li><strong>disabled</strong> : (Array) список отключенных команд</li>
+				<li><strong>url</strong> : (String) базовый URL директории с файлами</li>
 				<li><strong>dotFiles</strong> : (Boolean) разрешено ли показывать скрытые файлы, начинающиеся с точки</li>
 				<li><strong>uplMaxSize</strong> : (String) макимальный разрешенный размер загружаемых файлов (например: 128M)</li>
 				<li><strong>archives</strong> : (Array) Список mime-типов архивов, которые могут быть созданы коннектором</li>
