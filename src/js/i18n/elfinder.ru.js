@@ -52,7 +52,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Duplicate'          : 'Дублировать',
 		'Remove'             : 'Удалить',
 		'Rename'             : 'Переименовать',
-		'Edit text files'    : 'Редактировать файл',
+		'Edit text file'     : 'Редактировать файл',
 		'View as icons'      : 'Иконки',
 		'View as list'       : 'Список',
 		'Resize image'       : 'Размер изображения',

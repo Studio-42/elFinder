@@ -994,13 +994,13 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 			var f = this.fm.getSelected(0);
-			self.fm.log(f)
 			this.fm.lockShortcuts(true);
 			this.fm.ajax({
 				cmd     : 'read',
 				current : this.fm.cwd.hash,
 				file    : f.hash
 			}, function(data) {
+				self.fm.lockShortcuts(true);
 				var ta= $('<textarea/>').val(data.content||'').keydown(function(e) { e.stopPropagation(); });
 				$('<div/>').append(ta)
 					.dialog({
