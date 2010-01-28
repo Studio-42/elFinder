@@ -32,7 +32,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 RC1';
+		this.version  = '1.1 RC2';
 		
 		this.jquery = $.fn.jquery.split('.').join('');
 
