@@ -12,8 +12,18 @@
 	<link rel="stylesheet" href="src/css/elfinder.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
 
+	
+	
+
+<!--	
 	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery-ui-1.8b1.min.js" type="text/javascript" charset="utf-8"></script>
+-->
+
+	<script src="js/jquery-1.4.1.min.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript" charset="utf-8"></script>
+
+	
 
 	<script src="src/js/elFinder.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/js/elFinder.view.js" type="text/javascript" charset="utf-8"></script>
@@ -53,6 +63,7 @@
 			var f = $('#finder').elfinder({
 				url : 'src/connectors/php/connector.php',
 				lang : 'ru',
+				// rememberLastDir : false,
 				editorCallback : function(url) {
 					if (window.console && window.console.log) {
 						window.console.log(url);

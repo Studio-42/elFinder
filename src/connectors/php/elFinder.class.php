@@ -531,6 +531,7 @@ class elFinder {
 		|| (empty($_GET['rm']) || !is_array($_GET['rm']))) {
 			return $this->_result['error'] = 'Invalid parameters';
 		} 
+		// print_r($_GET['rm']);
 		$this->_logContext['rm'] = array();
 		foreach ($_GET['rm'] as $hash) {
 			if (false != ($f = $this->_find($hash, $dir))) {
@@ -722,6 +723,7 @@ class elFinder {
 		if (!$this->_resizeImg($file, $width, $height)) {
 			return $this->_result['error'] = 'Unable to resize image';
 		} 
+		$this->_result['select'] = $this->_hash($file);
 		$this->_content($current);
 	}
 	

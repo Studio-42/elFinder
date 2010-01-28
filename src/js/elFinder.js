@@ -32,7 +32,10 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 beta4';
+		this.version  = '1.1 RC1';
+		
+		this.jquery = $.fn.jquery.split('.').join('');
+
 		/**
 		 * Object. Current Working Dir info
 		 **/
@@ -288,11 +291,14 @@
 				this.cdc[data.cdc[i].hash] = data.cdc[i];
 				this.cwd.size += data.cdc[i].size;
 			}
+
 			if (data.tree) {
 				this.view.renderNav(data.tree);
 				this.eventsManager.updateNav();
 			}
+
 			this.updateCwd();
+			
 			/* tell connector to generate thumbnails */
 			if (data.tmb && !self.locked && self.options.view == 'icons') {
 				self.tmb();
@@ -309,15 +315,8 @@
 			}
 			this.lastDir(this.cwd.hash);
 			if (this.options.autoReload>0) {
-				if (this.iID) {
-					clearInterval(this.iID);
-				}
-				this.iID = setInterval(function() {
-					if (!self.locked) {
-						self.ui.exec('reload');
-					}
-						
-				}, this.options.autoReload*60000);
+				this.iID && clearInterval(this.iID);
+				this.iID = setInterval(function() {	!self.locked && self.ui.exec('reload'); }, this.options.autoReload*60000);
 			}
 		}
 		
@@ -356,7 +355,7 @@
 				self.setBuffer(ids, e.shiftKey?0:1, target);
 				if (self.buffer.files) {
 					/* some strange jquery ui bug (in list view) */
-					setTimeout(function() {self.ui.exec('paste'); self.buffer = {}}, 500);
+					setTimeout(function() {self.ui.exec('paste'); self.buffer = {}}, 300);
 				}
 			} else {
 				$(this).removeClass('el-finder-droppable');
@@ -551,11 +550,7 @@
 		 */
 		this.lastDir = function(dir) {
 			if (this.options.rememberLastDir) {
-				if (!dir) {
-					return this.cookie(this.lCookie);
-				} else {
-					this.cookie(this.lCookie, dir);
-				}
+				return dir ? this.cookie(this.lCookie, dir) : this.cookie(this.lCookie);
 			}
 		}
 

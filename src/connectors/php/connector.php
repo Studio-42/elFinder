@@ -56,13 +56,6 @@ $opts = array(
 		'write' => true,
 		'rm'    => true
 		),
-	'perms' => array(
-		'/icons$/' => array(
-			'read' => false,
-			// 'write' => false,
-			'rm' => false
-			)
-			)
 );
 
 $fm = new elFinder($opts); 

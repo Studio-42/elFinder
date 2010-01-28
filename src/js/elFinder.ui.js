@@ -15,7 +15,7 @@ elFinder.prototype.ui = function(fm) {
 	this.exec = function(cmd, arg) {
 		if (this.cmd[cmd]) {
 			if (cmd != 'open' && !this.cmd[cmd].isAllowed()) {
-				return this.fm.view.warning('Command not allowed');
+				return this.fm.view.error('Command not allowed');
 			}
 			if (!this.fm.locked) {
 				this.fm.quickLook.hide();
@@ -581,15 +581,19 @@ elFinder.prototype.ui.prototype.commands = {
 			if (this.fm.buffer.src == this.fm.buffer.dst) {
 				return this.fm.view.error('Unable to copy into itself');
 			}
-			
-			this.fm.ajax({
+			var o = {
 				cmd       : 'paste',
 				current   : this.fm.cwd.hash,
-				'files[]' : this.fm.buffer.files,
 				src       : this.fm.buffer.src,
 				dst       : this.fm.buffer.dst,
 				cut       : this.fm.buffer.cut
-			}, function(data) {
+			};
+			if (this.fm.jquery>132) {
+				o.files = this.fm.buffer.files;
+			} else {
+				o['files[]'] = this.fm.buffer.files;
+			}
+			this.fm.ajax(o, function(data) {
 				data.tree && self.fm.reload(data);
 			}, {force : true});
 		}
@@ -633,14 +637,13 @@ elFinder.prototype.ui.prototype.commands = {
 							Cancel : function() { $(this).dialog('close'); },
 							Ok     : function() { 
 								$(this).dialog('close'); 
-								self.fm.ajax({ 
-									cmd     : 'rm', 
-									current : self.fm.cwd.hash, 
-									'rm[]'  : ids
-									}, 
-									function(data) {
-										data.tree && self.fm.reload(data);
-								}, {force : true});
+								var o = { cmd : 'rm', current : self.fm.cwd.hash };
+								if (self.fm.jquery > 132) {
+									o.rm = ids;
+								} else {
+									o['rm[]'] = ids;
+								}
+								self.fm.ajax(o, function(data) { data.tree && self.fm.reload(data); }, {force : true});
 							}
 						}
 					});
@@ -1050,16 +1053,19 @@ elFinder.prototype.ui.prototype.commands = {
 		this.fm   = fm;
 		
 		this.exec = function(t) {
-			self.fm.ajax({
-				cmd        : 'archive',
-				current    : self.fm.cwd.hash,
-				'files[]'  : self.fm.selected,
-				type       : $.inArray(t, this.fm.params.archives) != -1 ? t : this.fm.params.archives[0],
-				name       : self.fm.i18n('Archive')
-			}, function(data) {
-				self.fm.reload(data);
-				self.fm.selectById(data.select);
-			});
+			var o = {
+				cmd     : 'archive',
+				current : self.fm.cwd.hash,
+				type    : $.inArray(t, this.fm.params.archives) != -1 ? t : this.fm.params.archives[0],
+				name    : self.fm.i18n('Archive')
+			};
+			if (this.fm.jquery>132) {
+				o.files = self.fm.selected;
+			} else {
+				o['files[]'] = self.fm.selected;
+			}
+			
+			self.fm.ajax(o, function(data) { self.fm.reload(data); });
 		}
 		
 		this.isAllowed = function() {
@@ -1131,7 +1137,7 @@ elFinder.prototype.ui.prototype.commands = {
 					f  = $('<form/>').append(iw).append(' x ').append(ih).append(' px');
 				iw.add(ih).bind('change', calc);
 				self.fm.lockShortcuts(true);
-				var d = $('<div/>').append($('<div/>').text(self.fm.i18n('New image dimensions')+':')).append(f).dialog({
+				var d = $('<div/>').append($('<div/>').text(self.fm.i18n('Dimensions')+':')).append(f).dialog({
 					title : self.fm.i18n('Resize image'),
 					dialogClass : 'el-finder-dialog',
 					width : 230,

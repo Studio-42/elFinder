@@ -60,6 +60,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			$('input', self.cwd).trigger('change'); 
 		});
 
+
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
 			self.tree.find('a').removeClass('selected');
@@ -68,8 +69,25 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 		/* make places droppable */
 		if (this.fm.options.places) {
+
+			this.fm.view.plc.click(function(e) {
+				e.preventDefault();
+				var t = $(e.target),
+					h = t.attr('key'), ul;
+				
+				if (h) {
+					h != self.fm.cwd.hash && self.ui.exec('open', e.target)
+				} else if (e.target.nodeName == 'A' || e.target.nodeName == 'DIV') {
+					ul = self.fm.view.plc.find('ul');
+					if (ul.children().length) {
+						ul.toggle(300);
+						self.fm.view.plc.children('li').find('div').toggleClass('expanded');
+					}
+				}
+			});
+			
 			this.fm.view.plc.droppable({
-				accept    : '(div,tr)[key]',
+				accept    : '(div,tr).directory',
 				tolerance : 'pointer',
 				over      : function() { $(this).addClass('el-finder-droppable'); },
 				out       : function() { $(this).removeClass('el-finder-droppable'); },
@@ -90,7 +108,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 						self.fm.view.plc.children('li').children('div').trigger('click');
 					}
 					/* hide helper if empty */
-					if (!ui.helper.children('div.el-finder-cwd').children('div:visible').length) {
+					if (!ui.helper.children('div:visible').length) {
 						ui.helper.hide();
 					}
 				}
@@ -230,21 +248,20 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.updateNav = function() {
-		
-		$('a', this.fm.view.nav).click(function(e) {
+		$('a', this.tree).click(function(e) {
 			e.preventDefault();
-			var hash = $(this).attr('key');
-			if (!hash) {
-				$(this).children('div').toggleClass('expanded').end().next('ul').toggle(300);
-			} else if (hash && hash != self.fm.cwd.hash) {
-				self.ui.exec('open', $(this).trigger('select').get(0));
-			} 
-		})
-		
-		$('a div.collapsed', this.fm.view.nav).click(function(e) {
-			e.stopPropagation();
-			e.preventDefault();
-			$(this).toggleClass('expanded').parent().next('ul').toggle(300);
+			var t = $(this), c;
+			if (e.target.nodeName == 'DIV' && $(e.target).hasClass('collapsed')) {
+				$(e.target).toggleClass('expanded').parent().next('ul').toggle(300);
+			} else if (t.attr('key') != self.fm.cwd.hash) {
+				self.ui.exec('open', t.trigger('select')[0]);
+			} else {
+				c = t.children('.collapsed');
+				if (c.length) {
+					c.toggleClass('expanded');
+					t.next('ul').toggle(300);
+				}
+			}
 		})
 		
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
@@ -262,13 +279,13 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.updatePlaces = function() {
-		this.fm.view.plc.find('ul>li').draggable({
+		this.fm.view.plc.children('li').find('li').draggable({
 			scroll : false,
 			stop   : function() {
 				if (self.fm.removePlace($(this).children('a').attr('key'))) {
 					$(this).remove();
-					if (!self.fm.view.plc.children('li').children('ul').children('li').length) {
-						self.fm.view.plc.children('li').children('div').removeClass('collapsed expanded').next().next('ul').hide();
+					if (!$('li', self.fm.view.plc.children('li')).length) {
+						self.fm.view.plc.children('li').find('div').removeClass('collapsed expanded').end().children('ul').hide();
 					}
 				}
 			}
@@ -286,7 +303,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				self.ui.exec(self.ui.isCmdAllowed('select') ? 'select' : 'open');
 			})
 			.draggable({
-				delay      : 2,
+				delay      : 3,
 				addClasses : false,
 				appendTo : '.el-finder-cwd',
 				revert     : true,
@@ -297,9 +314,8 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					var t = $(this),
 						h = $('<div class="el-finder-drag-helper"/>'),
 						c = 0;
-					if (!t.hasClass('ui-selected')) {
-						self.fm.select(t, true);
-					}
+					!t.hasClass('ui-selected') && self.fm.select(t, true);
+
 					self.cwd.find('.ui-selected').each(function(i) {
 						var el = self.fm.options.view == 'icons' ? $(this).clone().removeClass('ui-selected') : $(self.fm.view.renderIcon(self.fm.cdc[$(this).attr('key')]))
 						if (c++ == 0 || c%12 == 0) {
@@ -335,7 +351,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 * @param Boolean  clear current selection?
 	 **/
 	function moveSelection(forward, reset) {
-		var p, _p, cur//, l = $('.ui-selected', self.cwd).length;
+		var p, _p, cur;
 		
 		if (!$('[key]', self.cwd).length) {
 			return;

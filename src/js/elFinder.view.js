@@ -88,8 +88,8 @@ elFinder.prototype.view = function(fm, el) {
 		.append(this.wrz)
 		.append(this.stb);
 
-	this.tree = $('<ul class="el-finder-tree"><li><a href="#" class="el-finder-tree-root selected"><div/>root</a></li></ul>').appendTo(this.nav);
-	this.plc  = $('<ul class="el-finder-places"><li><a href="#" class="el-finder-places-root"><div/>'+this.fm.i18n(this.fm.options.places)+'</a><ul/></li></ul>').hide()
+	this.tree = $('<ul class="el-finder-tree"></ul>').appendTo(this.nav);
+	this.plc  = $('<ul class="el-finder-places"><li><a href="#" class="el-finder-places-root"><div/>'+this.fm.i18n(this.fm.options.places)+'</a><ul/></li></ul>').hide();
 
 	this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
 
@@ -109,16 +109,11 @@ elFinder.prototype.view = function(fm, el) {
 	}
 	
 	this.renderNav = function(tree) {
-		var li = this.tree.children('li');
-		li.children('a').html('<div/>'+tree.name).attr('key', tree.hash).next('ul').remove();
-
-		if (tree.dirs.length) {
-			li.append(traverse(tree.dirs)).children('a').children('div').addClass('collapsed expanded');
-		}
+		var d = tree.dirs.length ? traverse(tree.dirs) : '',
+			li = '<li><a href="#" class="el-finder-tree-root" key="'+tree.hash+'"><div'+(d ? ' class="collapsed expanded"' : '')+'/>'+tree.name+'</a>'+d+'</li>';
+		this.tree.html(li);
 		
-		if (this.fm.options.places) {
-			this.renderPlaces();
-		}
+		this.fm.options.places && this.renderPlaces();
 		
 		function traverse(tree) {
 			var i, hash, c, html = '<ul style="display:none">';
@@ -146,24 +141,24 @@ elFinder.prototype.view = function(fm, el) {
 	this.renderPlaces = function() {
 		var i, c, 
 			pl = this.fm.getPlaces(),	
-			ul = this.plc.show().children('li').children('ul').empty().hide();
-		
+			ul = this.plc.show().find('ul').empty().hide();
+		$('div:first', this.plc).removeClass('collapsed expanded');
 
 		if (pl.length) {
+			pl.sort(function(a, b) {
+				var _a = self.tree.find('a[key="'+a+'"]').text()||'',
+					_b = self.tree.find('a[key="'+b+'"]').text()||'';
+				return _a.localeCompare(_b);
+			});
+			
 			for (i=0; i < pl.length; i++) {
 				if ((c = this.tree.find('a[key="'+pl[i]+'"]:not(.dropbox)').parent()) && c.length) {
-					ul.append(c.clone().children('ul').remove().end());
+					ul.append(c.clone().children('ul').remove().end().find('div').removeClass('collapsed expanded').end());
 				} else {
 					this.fm.removePlace(pl[i]);
 				}
 			};
-			
-		}
-		if (ul.children().length) {
-			$('div', ul).removeClass('collapsed expanded');
-			$('div:first', this.plc).addClass('collapsed');
-		} else {
-			$('div:first', this.plc).removeClass('collapsed expanded');
+			ul.children().length && $('div:first', this.plc).addClass('collapsed');
 		}
 	}
 	
