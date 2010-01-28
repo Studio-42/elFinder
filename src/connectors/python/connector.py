@@ -548,6 +548,7 @@ class elFinder():
 			self._response['error'] = 'Unable to resize image'
 			return
 
+		self._response['select'] = self.__hash(curFile)
 		self.__content(curDir, False)
 		return
 
@@ -1426,8 +1427,8 @@ class elFinder():
 
 
 elFinder({
-	'root': '/Users/troex/Sites/git/elrte/files/TEST',
-	'URL': 'http://localhost:8001/~troex/git/elrte/files/TEST',
+	'root': '/Users/troex/Sites/git/elfinder/files',
+	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
 	'perms': {
 		'aaa': {
 			'read': False,
