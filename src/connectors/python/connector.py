@@ -174,7 +174,8 @@ class elFinder():
 				'dotFiles': self._options['dotFiles'],
 				'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
 				'archives': self._options['archiveMimes'],
-				'extract': self._options['archivers']['extract'].keys()
+				'extract': self._options['archivers']['extract'].keys(),
+				'url': self._options['URL']
 			}
 
 
