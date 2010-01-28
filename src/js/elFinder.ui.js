@@ -19,6 +19,7 @@ elFinder.prototype.ui = function(fm) {
 			}
 			if (!this.fm.locked) {
 				this.fm.quickLook.hide();
+				$('.ui-dialog').remove();
 				this.cmd[cmd].exec(arg);
 				this.update();
 			}
@@ -391,7 +392,7 @@ elFinder.prototype.ui.prototype.commands = {
 		 * Open dialog windows for each selected file/folder or for current folder
 		 **/
 		this.exec = function() {
-			var f, s, cnt = this.fm.selected.length;
+			var f, s, cnt = this.fm.selected.length, w = $(window).width(), h = $(window).height();
 			this.fm.lockShortcuts(true);
 			if (!cnt) {
 				/** nothing selected - show cwd info **/
@@ -404,17 +405,32 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function info(f) {
-				var tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr></table>');
+				var p = ['50%', '50%'], x, y, d, 
+					tb = $('<table cellspacing="0"><tr><td>'+self.fm.i18n('Name')+'</td><td>'+f.name+'</td></tr><tr><td>'+self.fm.i18n('Kind')+'</td><td>'+self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr></table>');
 				f.link && tb.append('<tr><td>'+self.fm.i18n('Link to')+'</td><td>'+f.linkTo+'</td></tr>');
 				tb.append('<tr><td>'+self.fm.i18n('Size')+'</td><td>'+self.fm.view.formatSize(f.size)+'</td></tr><tr><td>'+self.fm.i18n('Modified')+'</td><td>'+self.fm.view.formatDate(f.date)+'</td></tr><tr><td>'+self.fm.i18n('Permissions')+'</td><td>'+self.fm.view.formatPermissions(f.read, f.write, f.rm)+'</td></tr>');
 				f.dim && tb.append('<tr><td>'+self.fm.i18n('Dimensions')+'</td><td>'+f.dim+' px.</td></tr>');
 				f.url && tb.append('<tr><td>'+self.fm.i18n('URL')+'</td><td><a href="'+f.url+'" target="_blank">'+f.url+'</a></td></tr>');
 
+				if (cnt>1) {
+					d = $('.ui-dialog:last');
+					if (!d.length) {
+						x = Math.round(((w-350)/2)-(cnt*10));
+						y = Math.round(((h-300)/2)-(cnt*10));
+						p = [x>20?x:20, y>20?y:20];
+					} else {
+						x = d.offset().left+10;
+						y = d.offset().top+10;
+						p = [x<w-350 ? x : 20, y<h-300 ? y : 20];
+					}
+				}
+
 				$('<div />').append(tb).dialog({
 					dialogClass : 'el-finder-dialog',
 					width       : 350,
+					position : p,
 					title       : self.fm.i18n(f.mime == 'directory' ? 'Folder info' : 'File info'),
-					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } },
+					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } $(this).dialog('destroy'); },
 					buttons     : { Ok : function() { $(this).dialog('close'); }}
 				});
 			}
