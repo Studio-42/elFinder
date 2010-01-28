@@ -3,11 +3,10 @@ error_reporting(E_ALL);
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 
-interface elFinderILogger {
-	
-	public function log($cmd, $ok, $context, $err='', $errorData = array());
-}
 
+/**
+ * Simple example how to use logger with elFinder
+ **/
 class elFinderLogger implements elFinderILogger {
 	
 	public function log($cmd, $ok, $context, $err='', $errorData = array()) {
@@ -29,7 +28,7 @@ $path = str_replace('/src/connectors/php', '', $path);
 
 $rootDir = $_SERVER['DOCUMENT_ROOT'].$path.DIRECTORY_SEPARATOR.'files';
 $rootURL = 'http://'.$_SERVER['HTTP_HOST'].$path.'/files/';
-// echo $rootDir.'<br>'.$rootURL;
+
 
 $dir = $rootDir.DIRECTORY_SEPARATOR.'Documents';
 

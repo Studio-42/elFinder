@@ -711,8 +711,9 @@
 			['mkdir', 'mkfile', 'upload'],
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
-			['info', 'quicklook', 'help'],
-			['icons', 'list']
+			['info', 'quicklook'],
+			['icons', 'list'],
+			['help']
 		],
 		/* contextmenu commands */
 		contextmenu : {

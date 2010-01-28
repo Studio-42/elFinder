@@ -1275,56 +1275,62 @@ elFinder.prototype.ui.prototype.commands = {
 		this.exec = function() {
 			var h, ht = this.fm.i18n('helpText'), a, s, tabs; 
 			
-			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>';
-			h += '<strong>'+this.fm.i18n('Donate to support project development')+'</strong><br /><br />'
-			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click). <br /> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
+			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>'
+				+'<strong><a href="http://www.elrte.ru" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong><br/>'
+				+ '<a href="http://www.elrte.ru/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a><br/><br/>';
+			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click).<br/> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
 			h += '<br/>'
-				+ this.fm.i18n('<strong>Ctrl+A</strong> - Select all files')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+C/Ctrl+X/Ctrl+V</strong> - Copy/Cut/Paste files')+'<br/>'
-			 	+ this.fm.i18n('<strong>Enter</strong> - Open selected file/folder')+'<br/>'
-				+ this.fm.i18n('<strong>Space</strong> - Open/close QuickLook window')+'<br/>'
-			 	+ this.fm.i18n('<strong>Delete/Cmd+Backspace</strong> - Remove selected files')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+I</strong> - Selected files or current directory info')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+N</strong> - Create new directory')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+U</strong> - Open upload files form')+'<br/>'
-			 	+ this.fm.i18n('<strong>Left arrow</strong> - Select previous file')+'<br/>'
-			 	+ this.fm.i18n('<strong>Right arrow </strong>- Select next file')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+Right arrow</strong> - Open selected file/folder')+'<br/>'
-			 	+ this.fm.i18n('<strong>Ctrl+Left arrow</strong> - Return into previous folder')+'<br/>'
-			 	+ this.fm.i18n('<strong>Shift+arrows</strong> - Increase/decreasefile selection')+'<br/><br/>'
-			 	+ '<a href="http://www.elrte.ru/elfinder/" target="_blank">'+this.fm.i18n('elFinder details and documentation')+'</a><br/>'
-			 	+ this.fm.i18n('Contacts us if you need elFinder integration in you products');
+				+ '<strong>Ctrl+A</strong> - '+this.fm.i18n('Select all files')+'<br/>'
+			 	+ '<strong>Ctrl+C/Ctrl+X/Ctrl+V</strong> - '+this.fm.i18n('Copy/Cut/Paste files')+'<br/>'
+			 	+ '<strong>Enter</strong> - '+this.fm.i18n('Open selected file/folder')+'<br/>'
+				+ '<strong>Space</strong> - '+this.fm.i18n('Open/close QuickLook window')+'<br/>'
+			 	+ '<strong>Delete/Cmd+Backspace</strong> - '+this.fm.i18n('Remove selected files')+'<br/>'
+			 	+ '<strong>Ctrl+I</strong> - '+this.fm.i18n('Selected files or current directory info')+'<br/>'
+			 	+ '<strong>Ctrl+N</strong> - '+this.fm.i18n('Create new directory')+'<br/>'
+			 	+ '<strong>Ctrl+U</strong> - '+this.fm.i18n('Open upload files form')+'<br/>'
+			 	+ '<strong>Left arrow</strong> - '+this.fm.i18n('Select previous file')+'<br/>'
+			 	+ '<strong>Right arrow </strong> - '+this.fm.i18n('Select next file')+'<br/>'
+			 	+ '<strong>Ctrl+Right arrow</strong> - '+this.fm.i18n('Open selected file/folder')+'<br/>'
+			 	+ '<strong>Ctrl+Left arrow</strong> - '+this.fm.i18n('Return into previous folder')+'<br/>'
+			 	+ '<strong>Shift+arrows</strong> - '+this.fm.i18n('Increase/decrease files selection')+'<br/>'
+			 	+ '<hr/>'
+			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products');
 
 			a = '<div class="el-finder-help-std"/>'
 				+'<p>'+this.fm.i18n('Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Design: Valentin Razumnih')+'</p>'
 				+'<p>'+this.fm.i18n('Icons')+': <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank">Famfam silk icons</a>, <a href="http://www.fatcow.com/free-icons/" target="_blank">Fatcow icons</a>'+'</p>'
-				+'<p>'+this.fm.i18n('Copyright: <a href="http://www.std42" target="_blank">Studio 42 LTD</a>')+'</p>'
+				+'<p>'+this.fm.i18n('Copyright: <a href="http://www.std42.ru" target="_blank">Studio 42 LTD</a>')+'</p>'
 				+'<p>'+this.fm.i18n('License: BSD License')+'</p>'
 				+'<p>'+this.fm.i18n('Web site: <a href="http://www.elrte.ru/elfinder/" target="_blank">elrte.ru</a>')+'</p>';
 			
-			s = this.fm.i18n('')
+			s = '<div class="el-finder-logo"/><strong><a href="http://www.eldorado-cms.ru" target="_blank">ELDORADO.CMS</a></strong><br/>'
+				+this.fm.i18n('Simple and usefull Content Management System')
+				+'<hr style="clear:both"/>'
+				+ this.fm.i18n('Support project development and we will place here info about you');
 			
 			tabs = '<ul><li><a href="#el-finder-help-h">'+this.fm.i18n('Help')+'</a></li><li><a href="#el-finder-help-a">'+this.fm.i18n('Authors')+'</a><li><a href="#el-finder-help-sp">'+this.fm.i18n('Sponsors')+'</a></li></ul>'
 					+'<div id="el-finder-help-h"><p>'+h+'</p></div>'
 					+'<div id="el-finder-help-a"><p>'+a+'</p></div>'
-					+'<div id="el-finder-help-sp"><p></p></div>';
+					+'<div id="el-finder-help-sp"><p>'+s+'</p></div>';
 			
 			
 			
-			$('<div/>').append(tabs).dialog({
+			var d = $('<div/>').html(tabs).dialog({
 				width : 617,
 				// title : self.fm.i18n('Help'),
 				title : false,
 				dialogClass : 'el-finder-dialog',
 				modal : true,
+				close : function() { d.tabs('destroy').dialog('destroy').remove() },
 				buttons : {
 					Ok : function() { $(this).dialog('close'); }
 				}
 			}).tabs()
 		}
-		
+
+
 		this.cm = function(t) {
 			return t == 'cwd';
 		}

@@ -148,7 +148,19 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'WM video'                          : 'Видео WM',
 		'Flash video'                       : 'Видео Flash',
 		'Matroska video'                    : 'Видео Matroska',
-		'Shortcuts' : 'Клавиши',		
+		// 'Shortcuts' : 'Клавиши',		
+		'Select all files' : 'Выделить все файлы',
+		'Copy/Cut/Paste files' : 'Копировать/Вырезать/Вставить файлы',
+		'Open selected file/folder' : 'Открыть папку/файл',
+		'Open/close QuickLook window' : 'Открыть/закрыть окно быстрого просмотра',
+		'Remove selected files' : 'Удалить выделеные файлы',
+		'Selected files or current directory info' : 'Информация о выделеных файлах или текущей папке',
+		'Create new directory' : 'Новая папка',
+		'Open upload files form' : 'Открыть окно загрузки файлов',
+		'Select previous file' : 'Выбрать предыдущий файл',
+		'Select next file' : 'Выбрать следующий файл',
+		'Return into previous folder' : 'Вернуться в предыдущую папку',
+		'Increase/decrease files selection' : 'Увеличить/уменьшить выделение файлов',
 		'Authors'                       : 'Авторы',
 		'Sponsors'  : 'Спонсоры',
 		'elFinder: Web file manager'    : 'elFinder: Файловый менеджер для Web',
@@ -160,7 +172,11 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Design: Valentin Razumnih'     : 'Дизайн: Валентин Разумных',
 		'Icons' : 'Иконки',
 		'License: BSD License'          : 'Лицензия: BSD License',
-		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели или контекстного меню. Скопировать/переместить файлы можно, перетащив их в нужную папку. Если при перетаскивании файлов нажата клавиша Shift - файлы будут скопированы, в противном случае - перемещены.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
+		'elFinder documentation'        : 'Документация elFinder',
+		'Simple and usefull Content Management System' : 'Простая и удобная Система Управления Сайтами',
+		'Support project development and we will place here info about you' : 'Поддержите разработку продукта и мы разместим здесь информацию о вас.',
+		'Contacts us if you need help integrating elFinder in you products' : 'Если вы хотите интегрировать elFinder в свой продукт, обращайтесь к нам',
+		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели, контекстного меню или сочетания клавишь. Чтобы переместить файлы/папки, просто перенесите их на иконку нужной папки. Если будет зажата клавиша Shift файлы будут скопированы.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
 		
 	};
 	

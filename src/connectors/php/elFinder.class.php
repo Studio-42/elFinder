@@ -3,6 +3,10 @@ if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
 
+interface elFinderILogger {
+	public function log($cmd, $ok, $context, $err='', $errorData = array());
+}
+
 class elFinder {
 	
 	/**
