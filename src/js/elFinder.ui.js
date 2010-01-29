@@ -1231,6 +1231,7 @@ elFinder.prototype.ui.prototype.commands = {
 			this.fm.setView('icons');
 			this.fm.updateCwd();
 			self.fm.view.win.removeClass('el-finder-disabled');
+			$('div.image', this.fm.view.cwd).length && this.fm.tmb();
 		}
 		
 		this.isAllowed = function() {

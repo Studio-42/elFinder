@@ -31,7 +31,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'File is not an image'                 : 'Файл не является изображением',
 		'Unable to resize image'               : 'Не удалось изменить размеры изображения',
 		'Unable to write to file'              : 'Не удалось записать файл',
-		'Unable to create archive'             : 'Не удлось создать архив',
+		'Unable to create archive'             : 'Не удалось создать архив',
 		'Unable to extract files from archive' : 'Не удалось извлечь файлы из архива',
 		'Unable to open broken link'           : 'Невозможно открыть битую ссылку',
 		/* statusbar */
@@ -176,7 +176,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Simple and usefull Content Management System' : 'Простая и удобная Система Управления Сайтами',
 		'Support project development and we will place here info about you' : 'Поддержите разработку продукта и мы разместим здесь информацию о вас.',
 		'Contacts us if you need help integrating elFinder in you products' : 'Если вы хотите интегрировать elFinder в свой продукт, обращайтесь к нам',
-		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели, контекстного меню или сочетания клавишь. Чтобы переместить файлы/папки, просто перенесите их на иконку нужной папки. Если будет зажата клавиша Shift файлы будут скопированы.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
+		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели, контекстного меню или сочетания клавиш. Чтобы переместить файлы/папки, просто перенесите их на иконку нужной папки. Если будет зажата клавиша Shift файлы будут скопированы.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
 		
 	};
 	
