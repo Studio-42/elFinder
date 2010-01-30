@@ -3,10 +3,8 @@
 # Connector for elFinder File Manager
 # author Troex Nevelin <troex@fury.scancode.ru>
 
-
-import binascii
 import cgi
-import cgitb
+import hashlib
 import mimetypes
 import os
 import os.path
@@ -16,8 +14,6 @@ import sys
 import simplejson
 import time
 from datetime import datetime
-
-cgitb.enable()
 
 class elFinder():
 	"""Connector for elFinder"""
@@ -121,6 +117,8 @@ class elFinder():
 			t = datetime.fromtimestamp(self._time)
 			self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
 			self._yesterday = self._today - 86400
+			import cgitb
+			cgitb.enable()
 
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
@@ -129,6 +127,10 @@ class elFinder():
 		self._options['root'] = self._options['root'].rstrip(os.sep)
 		self.__debug('URL', self._options['URL'])
 		self.__debug('root', self._options['root'])
+
+		for cmd in self._options['disabled']:
+			if cmd in self._commands:
+				del self._commands[cmd]
 
 		if self._options['tmbDir']:
 			self._options['tmbDir'] = os.path.join(self._options['root'], self._options['tmbDir'])
@@ -144,8 +146,6 @@ class elFinder():
 		for field in possible_fields:
 			if field in self._form:
 				self._request[field] = self._form.getvalue(field)
-
-		# TODO disable commands here
 
 		if 'cmd' in self._request:
 			if self._request['cmd'] in self._commands:
@@ -1252,9 +1252,11 @@ class elFinder():
 		return True
 
 
-	def __hash(self, input):
-		"""Hash of path can be any uniq"""
-		return str(binascii.crc32(input))
+	def __hash(self, path):
+		"""Hash of the path"""
+		m = hashlib.md5()
+		m.update(path)
+		return str(m.hexdigest())
 
 
 	def __path2url(self, path):
@@ -1428,8 +1430,8 @@ class elFinder():
 
 
 elFinder({
-	'root': '/Users/troex/Sites/git/elfinder/files',
-	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
+	'root': '/Users/troex/Sites/git/elfinder/files/wiki',
+	'URL': 'http://localhost:8001/~troex/git/elfinder/files/wiki',
 	'perms': {
 		'aaa': {
 			'read': False,
