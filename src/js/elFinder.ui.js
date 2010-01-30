@@ -1295,12 +1295,13 @@ elFinder.prototype.ui.prototype.commands = {
 			 	+ '<strong>Ctrl+Left arrow</strong> - '+this.fm.i18n('Return into previous folder')+'<br/>'
 			 	+ '<strong>Shift+arrows</strong> - '+this.fm.i18n('Increase/decrease files selection')+'<br/>'
 			 	+ '<hr/>'
-			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products');
+			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products')+' dev@std42.ru';
 
 			a = '<div class="el-finder-help-std"/>'
 				+'<p>'+this.fm.i18n('Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Design: Valentin Razumnih')+'</p>'
+				+'<p>'+this.fm.i18n('Spanish localization')+': Alex (xand) Vavilin, xand@xand.es, <a href="xand.es" target="_blank">http://xand.es</a></p>'
 				+'<p>'+this.fm.i18n('Icons')+': <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank">Famfam silk icons</a>, <a href="http://www.fatcow.com/free-icons/" target="_blank">Fatcow icons</a>'+'</p>'
 				+'<p>'+this.fm.i18n('Copyright: <a href="http://www.std42.ru" target="_blank">Studio 42 LTD</a>')+'</p>'
 				+'<p>'+this.fm.i18n('License: BSD License')+'</p>'

@@ -170,6 +170,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru' : 'Programación Javascripts/php: Dmitry (dio) Levashov, dio@std42.ru',
 		'Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru' : 'Programación Python, soporte técnico: Troex Nevelin, troex@fury.scancode.ru',
 		'Design: Valentin Razumnih'     : 'Diseño: Valentin Razumnyh',
+		'Spanish localization'          : 'Traducción al español',
 		'Icons' : 'Iconos',
 		'License: BSD License'          : 'Licencia: BSD License',
 		'elFinder documentation'        : 'Documentación elFinder',
