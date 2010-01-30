@@ -40,7 +40,7 @@ class connector():
 		'allowTypes': [],
 		'allowExts': [],
 		'denyTypes': [],
-		'denyExts': [],   
+		'denyExts': [],
 		'allowURLs': [],
 		'disabled': [],
 		# 'aclObj': None, # TODO
@@ -181,7 +181,6 @@ class connector():
 
 		if self._errorData:
 			self._response['errorData'] = self._errorData
-		
 
 		if self._options['debug']:
 			self.__debug('time', (time.time() - self._time))
@@ -203,7 +202,7 @@ class connector():
 		if 'current' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			curFile = self.__find(self._request['target'], curDir)
-			
+
 			if not curDir or not curFile or os.path.isdir(curFile):
 				print 'HTTP/1.x 404 Not Found\n\n'
 				sys.exit('File not found')
@@ -625,7 +624,7 @@ class connector():
 			basename = self._options['rootAlias']
 		else:
 			basename = os.path.basename(self._options['root'])
-		
+
 		rel = basename + path[len(self._options['root']):]
 
 		self._response['cwd'] = {
@@ -689,7 +688,7 @@ class connector():
 			'write': self.__isAllowed(path, 'write'),
 			'rm': self.__isAllowed(path, 'rm')
 		}
-		
+
 		if filetype == 'link':
 			lpath = self.__readlink(path)
 			if not lpath:
