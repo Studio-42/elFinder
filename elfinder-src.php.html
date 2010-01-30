@@ -56,7 +56,7 @@
 			
 			var f = $('#finder').elfinder({
 				url : 'src/connectors/php/connector.php',
-				lang : 'es',
+				lang : 'ru',
 				absURL : false,
 
 				editorCallback : function(url) {
@@ -74,7 +74,7 @@
 					height : 500
 				}
 			})
-			
+			// window.console.log(f)
 			$('#close,#open,#dock,#undock').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
 			})

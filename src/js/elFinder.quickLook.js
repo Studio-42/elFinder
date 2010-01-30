@@ -293,7 +293,7 @@ elFinder.prototype.quickLook.prototype.plugins = {
 			var url = ql.fm.fileURL();
 			if (url && f.hash == ql._hash) {
 				ql.ico.hide();
-				ql.media.append('<iframe src="'+f.url+'" style="height:'+ql.mediaHeight()+'px" />').show();
+				ql.media.append('<iframe src="'+url+'" style="height:'+ql.mediaHeight()+'px" />').show();
 			}
 		}
 	},
