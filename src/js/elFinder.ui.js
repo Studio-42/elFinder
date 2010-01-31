@@ -1045,7 +1045,9 @@ elFinder.prototype.ui.prototype.commands = {
 								}, function(data) {
 									if (data.file) {
 										self.fm.cdc[data.file.hash] = data.file;
+										self.fm.view.updateFile(data.file);
 										self.fm.selectById(data.file.hash);
+										
 									}
 								}, {type : 'POST'});
 							}
@@ -1317,12 +1319,9 @@ elFinder.prototype.ui.prototype.commands = {
 					+'<div id="el-finder-help-a"><p>'+a+'</p></div>'
 					+'<div id="el-finder-help-sp"><p>'+s+'</p></div>';
 			
-			
-			
 			var d = $('<div/>').html(tabs).dialog({
 				width : 617,
-				// title : self.fm.i18n('Help'),
-				title : false,
+				title : self.fm.i18n('Help'),
 				dialogClass : 'el-finder-dialog',
 				modal : true,
 				close : function() { d.tabs('destroy').dialog('destroy').remove() },
