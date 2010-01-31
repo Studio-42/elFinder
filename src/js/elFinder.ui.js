@@ -311,13 +311,12 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function openFile(f) {
-				var s, ws = '', o;
+				var s, ws = '';
 				if (f.dim) {
 					s  = f.dim.split('x');
 					ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 				}
-				o = 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes';
-				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, o);
+				window.open(f.url||self.fm.options.url+'?cmd=open&current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes');
 			}
 		}
 	
@@ -336,13 +335,15 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object  elFinder
 	 **/
 	select : function(fm) {
-		var self  = this;
 		this.name = 'Select file';
 		this.fm   = fm;
 		
 		this.exec = function() { 
-			var url = this.fm.fileURL();
-			this.fm.options.editorCallback(self.fm.options.absURL && self.fm.params.url ? url : url.substr(self.fm.params.url.length));
+			var f = this.fm.getSelected(0);
+			if (!f.url) {
+				return this.fm.view.error('File URL disabled by connector config');
+			} 
+			this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
 			if (this.fm.options.closeOnEditorCallback) {
 				this.fm.dock();
 				this.fm.close();
@@ -350,7 +351,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 				
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.getSelected(0).mime != 'directory';
+			return this.fm.selected.length == 1 && !/(symlink\-broken|directory)/.test(this.fm.getSelected(0).mime);
 		}
 		
 		this.cm = function(t) {
@@ -1224,15 +1225,14 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object  elFinder
 	 **/
 	icons : function(fm) {
-		var self  = this;
 		this.name = 'View as icons';
 		this.fm   = fm;
 		
 		this.exec = function() {
-			self.fm.view.win.addClass('el-finder-disabled');
+			this.fm.view.win.addClass('el-finder-disabled');
 			this.fm.setView('icons');
 			this.fm.updateCwd();
-			self.fm.view.win.removeClass('el-finder-disabled');
+			this.fm.view.win.removeClass('el-finder-disabled');
 			$('div.image', this.fm.view.cwd).length && this.fm.tmb();
 		}
 		

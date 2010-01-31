@@ -89,7 +89,6 @@ class elFinder {
 		'archive'   => '_archive',
 		'extract'   => '_extract',
 		'resize'    => '_resize',
-		'geturl'    => '_geturl',
 		'tmb'       => '_thumbnails',
 		'ping'      => '_ping'
 		);
@@ -307,7 +306,7 @@ class elFinder {
 				'uplMaxSize' => ini_get('upload_max_filesize'),
 				'archives'   => array(),
 				'extract'    => array(),
-				'url'        => $this->_options['URL']
+				'url'        => $this->_options['fileURL'] ? $this->_options['URL'] : ''
 				);
 			if (isset($this->_commands['archive']) || isset($this->_commands['extract'])) {
 				$this->_checkArchivers();
@@ -731,24 +730,7 @@ class elFinder {
 		$this->_result['select'] = $this->_hash($file);
 		$this->_content($current);
 	}
-	
-	/**
-	 * Return file URL
-	 *
-	 * @return void
-	 **/
-	private function _geturl()
-	{
-		if (empty($_GET['current']) 
-		|| false == ($current = $this->_findDir(trim($_GET['current'])))
-		|| empty($_GET['file'])
-		|| false == ($file = $this->_find(trim($_GET['file']), $current))
-		) {
-			return $this->_result['error'] = 'Invalid parameters';
-		}
-		$this->_result['url'] = $this->_path2url($file);
-	}
-	
+		
 	/**
 	 * Create images thumbnails 
 	 *
