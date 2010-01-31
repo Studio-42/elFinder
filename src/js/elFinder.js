@@ -661,7 +661,7 @@
 		placesFirst    : true,
 		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
-		/* string to cut from file url begin before pass itto editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */
+		/* string to cut from file url begin before pass it to editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */
 		cutURL         : '',
 		/* close elfinder after editorCallback */
 		closeOnEditorCallback : true,
