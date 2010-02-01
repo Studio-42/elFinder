@@ -29,7 +29,7 @@ class connector():
 		'dirUmask': 0755,
 		'imgLib': False,
 		'tmbDir': '.tmb',
-		'tmbAtOnce': 3,
+		'tmbAtOnce': 5,
 		'tmbSize': 48,
 		'fileURL': True,
 		'uploadMaxSize': 15,
@@ -37,11 +37,6 @@ class connector():
 		'uploadAllow': [],
 		'uploadDeny': [],
 		'uploadOrder': ['deny', 'allow'],
-		'allowTypes': [],
-		'allowExts': [],
-		'denyTypes': [],
-		'denyExts': [],
-		'allowURLs': [],
 		'disabled': [],
 		# 'aclObj': None, # TODO
 		# 'aclRole': 'user', # TODO
@@ -70,7 +65,6 @@ class connector():
 		'extract': '__extract',
 		'archive': '__archive',
 		'resize': '__resize',
-		'geturl': '__geturl',
 		'tmb': '__thumbnails',
 		'ping': '__ping'
 	}
@@ -170,12 +164,16 @@ class connector():
 		if 'init' in self._request:
 			self.__checkArchivers()
 			self._response['disabled'] = self._options['disabled']
+			if not self._options['fileURL']:
+				url = ''
+			else:
+				url = self._options['URL']
 			self._response['params'] = {
 				'dotFiles': self._options['dotFiles'],
 				'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
 				'archives': self._options['archiveMimes'],
 				'extract': self._options['archivers']['extract'].keys(),
-				'url': self._options['URL']
+				'url': url
 			}
 
 
@@ -553,18 +551,6 @@ class connector():
 		return
 
 
-	def __geturl(self):
-		if 'current' in self._request and 'file' in self._request:
-			curDir = self.__findDir(self._request['current'], None)
-			curFile = self.__find(self._request['file'], curDir)
-			if curDir and curFile:
-				self._response['url'] = self.__path2url(curFile)
-				return
-
-		self._response['error'] = 'Invalid parameters'
-		return
-
-
 	def __thumbnails(self):
 		if 'current' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
@@ -578,7 +564,7 @@ class connector():
 			if self._options['tmbAtOnce'] > 0:
 				tmbMax = self._options['tmbAtOnce']
 			else:
-				tmbMax = 100
+				tmbMax = 5
 			self._response['current'] = self.__hash(curDir)
 			self._response['images'] = {}
 			i = 0
@@ -592,9 +578,9 @@ class connector():
 							self._response['images'].update({
 								fhash: self.__path2url(tmb)
 							})
-							self._response['tmb'] = True
 							i += 1
 				if i >= tmbMax:
+					self._response['tmb'] = True
 					break
 		else:
 			return False
@@ -1085,8 +1071,7 @@ class connector():
 				if ext in self._mimeType:
 					mime = self._mimeType[ext]
 
-		self.__debug('mime ' + os.path.basename(path), ext + ' ' + mime)
-
+		# self.__debug('mime ' + os.path.basename(path), ext + ' ' + mime)
 		return mime
 
 
