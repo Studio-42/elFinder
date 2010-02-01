@@ -209,6 +209,11 @@ elFinder.prototype.view = function(fm, el) {
 		return '<tr key="'+f.hash+'" class="'+self.mime2class(f.mime)+(odd ? ' el-finder-row-odd' : '')+'"><td class="icon"><p>'+str+'</p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td class="size">'+self.formatSize(f.size)+'</td><td>'+self.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr>';
 	}
 
+	this.updateFile = function(f) {
+		var e = this.cwd.find('[key="'+f.hash+'"]');
+		e.replaceWith(e[0].nodeName == 'DIV' ? this.renderIcon(f) : this.renderRow(f));
+	}
+
 	this.selectedInfo = function() {
 		var i, s = 0, sel;
 		

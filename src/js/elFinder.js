@@ -500,26 +500,6 @@
 		}
 		
 		/**
-		 * Return file URL. If URL is not set, make sync ajax request to get it.
-		 *
-		 * @return String
-		 */
-		this.fileURL = function() {
-			var url = '', s = this.getSelected();
-			
-			if (s.length == 1 && s[0].mime != 'directory' && !s['broken']) {
-				if (s[0].url) {
-					url = s[0].url;
-				} else {
-					this.ajax({ cmd : 'geturl', current : self.cwd.hash, file : s[0].hash }, 
-						function(data) { url = data.url||''; }, 
-						{async : false, lock : false });
-				}
-			}
-			return url;		
-		}
-		
-		/**
 		 * Return name for new file/folder
 		 *
 		 * @param  String  base name (i18n)
@@ -681,8 +661,8 @@
 		placesFirst    : true,
 		/* callback to get file url (for wswing editors) */
 		editorCallback : null,
-		/* pass to editorCallback absolute or relative URL */
-		absURL         : true,
+		/* string to cut from file url begin before pass it to editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */
+		cutURL         : '',
 		/* close elfinder after editorCallback */
 		closeOnEditorCallback : true,
 		/* i18 messages. not set manually! */

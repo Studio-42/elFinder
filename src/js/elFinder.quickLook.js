@@ -218,13 +218,18 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.kind.text(self.fm.view.mime2kind(f.link ? 'symlink' : f.mime)); 
 		self.size.text(self.fm.view.formatSize(f.size));
 		self.date.text(self.fm.i18n('Modified')+': '+self.fm.view.formatDate(f.date));
-		f.url ? self.url.text(f.url).attr('href', f.url).show() : self.url.hide();
-		
-		for (var i in self.plugins) {
-			if (self.plugins[i].test && self.plugins[i].test(f.mime, self.mimes, f.name)) {
-				self.plugins[i].show(self, f);
-				return;
+		f.dim && self.add.append('<span>'+f.dim+' px</span>').show();
+		f.tmb && self.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat');
+		if (f.url) {
+			self.url.text(f.url).attr('href', f.url).show();
+			for (var i in self.plugins) {
+				if (self.plugins[i].test && self.plugins[i].test(f.mime, self.mimes, f.name)) {
+					self.plugins[i].show(self, f);
+					return;
+				}
 			}
+		} else {
+			self.url.hide();
 		}
 		
 		self.win.css({
@@ -245,11 +250,9 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		
 		this.show = function(ql, f) {
 			var url, t;
-			f.dim && ql.add.append('<span>'+f.dim+' px</span>').show();
-			f.tmb && ql.ico.css('background', 'url("'+f.tmb+'") 0 0 no-repeat');
 
-			if (ql.mimes[f.mime] && (url = ql.fm.fileURL()) && f.hash == ql._hash) {
-				$('<img/>').hide().appendTo(ql.media.show()).attr('src', url+($.browser.msie || $.browser.opera ? '?'+Math.random() : '')).load(function() {
+			if (ql.mimes[f.mime] && f.hash == ql._hash) {
+				$('<img/>').hide().appendTo(ql.media.show()).attr('src', f.url+($.browser.msie || $.browser.opera ? '?'+Math.random() : '')).load(function() {
 					t = $(this).unbind('load');
 					if (f.hash == ql._hash) { 
 						ql.win.is(':animated') ? setTimeout(function() { preview(t); }, 330) : preview(t);
@@ -290,8 +293,7 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL();
-			if (url && f.hash == ql._hash) {
+			if (f.hash == ql._hash) {
 				ql.ico.hide();
 				ql.media.append('<iframe src="'+f.url+'" style="height:'+ql.mediaHeight()+'px" />').show();
 			}
@@ -305,12 +307,11 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL(), e;
-			if (url && f.hash == ql._hash) {
+			if (f.hash == ql._hash) {
 				ql.ico.hide();
 				// ql.media.append('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="quality" value="high" /><param name="movie" value="'+url+'" /><embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" type="application/x-shockwave-flash" style="width:100%;height:'+ql.mediaHeight()+'px"></embed></object>')
 					// .slideDown(400);
-				e = ql.media.append('<embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+url+'" style="width:100%;height:'+ql.mediaHeight()+'px" type="application/x-shockwave-flash" />'); //.slideDown(400);
+				var e = ql.media.append('<embed pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="'+f.url+'" style="width:100%;height:'+ql.mediaHeight()+'px" type="application/x-shockwave-flash" />'); 
 				if (ql.win.is(':animated')) {
 					e.slideDown(450)
 				} else {
@@ -327,12 +328,10 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL(), h;
-			if (url && f.hash == ql._hash) {
+			if (f.hash == ql._hash) {
 				ql.ico.hide();
-				h = ql.win.is(':animated') || ql.win.css('height') == 'auto' ? 100 : ql.win.height()-ql.content.height()-ql.th;
-				ql.media.append('<embed src="'+url+'" style="width:100%;height:'+h+'px" />').show();
-				// ql.media.append('<iframe src="'+f.url+'" style="height:'+(ql.win.is(':animated') || ql.win.css('height') == 'auto' ? 100 : ql.win.height()-ql.content.height()-ql.th)+'px" />').show();
+				var h = ql.win.is(':animated') || ql.win.css('height') == 'auto' ? 100 : ql.win.height()-ql.content.height()-ql.th;
+				ql.media.append('<embed src="'+f.url+'" style="width:100%;height:'+h+'px" />').show();
 			}
 		}
 	},
@@ -344,11 +343,9 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL();
-			if (url && f.hash == ql._hash) {
+			if (f.hash == ql._hash) {
 				ql.ico.hide();
-				ql.media.append('<embed src="'+url+'" style="width:100%;height:'+ql.mediaHeight()+'px" />').show();
-				// ql.media.append('<iframe src="'+f.url+'" style="height:'+ql.mediaHeight()+'px" />').show();
+				ql.media.append('<embed src="'+f.url+'" style="width:100%;height:'+ql.mediaHeight()+'px" />').show();
 			}
 		}
 		
@@ -361,11 +358,9 @@ elFinder.prototype.quickLook.prototype.plugins = {
 		}
 		
 		this.show = function(ql, f) {
-			var url = ql.fm.fileURL();
-			if (url && f.hash == ql._hash) {
+			if (f.hash == ql._hash) {
 				ql.ico.hide();
-				ql.media.append('<embed src="'+url+'" style="width:100%;height:'+ql.mediaHeight()+'px" />').show();
-				// ql.media.append('<iframe src="'+f.url+'" style="height:'+ql.mediaHeight()+'px" />').show();
+				ql.media.append('<embed src="'+f.url+'" style="width:100%;height:'+ql.mediaHeight()+'px" />').show();
 			}
 		}
 	}

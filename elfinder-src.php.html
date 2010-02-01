@@ -25,7 +25,7 @@
 	<script src="src/js/elFinder.quickLook.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
-	<!--<script src="src/js/i18n/elfinder.es.js" type="text/javascript" charset="utf-8"></script>-->
+	<script src="src/js/i18n/elfinder.es.js" type="text/javascript" charset="utf-8"></script>
 	
 	<style type="text/css">
 		#close, #open, #dock, #undock {
@@ -74,7 +74,7 @@
 					height : 500
 				}
 			})
-			
+			// window.console.log(f)
 			$('#close,#open,#dock,#undock').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
 			})

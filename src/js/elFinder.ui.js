@@ -311,13 +311,12 @@ elFinder.prototype.ui.prototype.commands = {
 			}
 			
 			function openFile(f) {
-				var s, ws = '', o;
+				var s, ws = '';
 				if (f.dim) {
 					s  = f.dim.split('x');
 					ws = 'width='+(parseInt(s[0])+20)+',height='+(parseInt(s[1])+20)+',';
 				}
-				o = 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes';
-				window.open(f.url||self.fm.options.url+'?current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, o);
+				window.open(f.url||self.fm.options.url+'?cmd=open&current='+(f.parent||self.fm.cwd.hash)+'&target='+(f.link||f.hash), false, 'top=50,left=50,'+ws+'scrollbars=yes,resizable=yes');
 			}
 		}
 	
@@ -336,13 +335,15 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object  elFinder
 	 **/
 	select : function(fm) {
-		var self  = this;
 		this.name = 'Select file';
 		this.fm   = fm;
 		
 		this.exec = function() { 
-			var url = this.fm.fileURL();
-			this.fm.options.editorCallback(self.fm.options.absURL && self.fm.params.url ? url : url.substr(self.fm.params.url.length));
+			var f = this.fm.getSelected(0);
+			if (!f.url) {
+				return this.fm.view.error('File URL disabled by connector config');
+			} 
+			this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
 			if (this.fm.options.closeOnEditorCallback) {
 				this.fm.dock();
 				this.fm.close();
@@ -350,7 +351,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 				
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.getSelected(0).mime != 'directory';
+			return this.fm.selected.length == 1 && !/(symlink\-broken|directory)/.test(this.fm.getSelected(0).mime);
 		}
 		
 		this.cm = function(t) {
@@ -1045,7 +1046,9 @@ elFinder.prototype.ui.prototype.commands = {
 								}, function(data) {
 									if (data.file) {
 										self.fm.cdc[data.file.hash] = data.file;
+										self.fm.view.updateFile(data.file);
 										self.fm.selectById(data.file.hash);
+										
 									}
 								}, {type : 'POST'});
 							}
@@ -1222,15 +1225,14 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object  elFinder
 	 **/
 	icons : function(fm) {
-		var self  = this;
 		this.name = 'View as icons';
 		this.fm   = fm;
 		
 		this.exec = function() {
-			self.fm.view.win.addClass('el-finder-disabled');
+			this.fm.view.win.addClass('el-finder-disabled');
 			this.fm.setView('icons');
 			this.fm.updateCwd();
-			self.fm.view.win.removeClass('el-finder-disabled');
+			this.fm.view.win.removeClass('el-finder-disabled');
 			$('div.image', this.fm.view.cwd).length && this.fm.tmb();
 		}
 		
@@ -1295,12 +1297,13 @@ elFinder.prototype.ui.prototype.commands = {
 			 	+ '<strong>Ctrl+Left arrow</strong> - '+this.fm.i18n('Return into previous folder')+'<br/>'
 			 	+ '<strong>Shift+arrows</strong> - '+this.fm.i18n('Increase/decrease files selection')+'<br/>'
 			 	+ '<hr/>'
-			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products');
+			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products')+' dev@std42.ru';
 
 			a = '<div class="el-finder-help-std"/>'
 				+'<p>'+this.fm.i18n('Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Design: Valentin Razumnih')+'</p>'
+				+'<p>'+this.fm.i18n('Spanish localization')+': Alex (xand) Vavilin, xand@xand.es, <a href="xand.es" target="_blank">http://xand.es</a></p>'
 				+'<p>'+this.fm.i18n('Icons')+': <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank">Famfam silk icons</a>, <a href="http://www.fatcow.com/free-icons/" target="_blank">Fatcow icons</a>'+'</p>'
 				+'<p>'+this.fm.i18n('Copyright: <a href="http://www.std42.ru" target="_blank">Studio 42 LTD</a>')+'</p>'
 				+'<p>'+this.fm.i18n('License: BSD License')+'</p>'
@@ -1316,12 +1319,9 @@ elFinder.prototype.ui.prototype.commands = {
 					+'<div id="el-finder-help-a"><p>'+a+'</p></div>'
 					+'<div id="el-finder-help-sp"><p>'+s+'</p></div>';
 			
-			
-			
 			var d = $('<div/>').html(tabs).dialog({
 				width : 617,
-				// title : self.fm.i18n('Help'),
-				title : false,
+				title : self.fm.i18n('Help'),
 				dialogClass : 'el-finder-dialog',
 				modal : true,
 				close : function() { d.tabs('destroy').dialog('destroy').remove() },
