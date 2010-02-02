@@ -542,17 +542,15 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object elFinder
 	 **/
 	copy : function(fm) {
-		var self = this;
 		this.name = 'Copy';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 			this.fm.setBuffer(this.fm.selected);
-			this.fm.log(this.fm.buffer)
 		}
 		
 		this.isAllowed = function() {
-			return self.fm.selected.length;
+			return this.fm.selected.length;
 		}
 		
 		this.cm = function(t) {
@@ -565,17 +563,15 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object elFinder
 	 **/
 	cut : function(fm) {
-		var self = this;
 		this.name = 'Cut';
-		this.fm = fm;
+		this.fm   = fm;
 		
 		this.exec = function() {
 			this.fm.setBuffer(this.fm.selected, 1);
-			this.fm.log(this.fm.buffer)
 		}
 		
 		this.isAllowed = function() {
-			return self.fm.selected.length;
+			return this.fm.selected.length;
 		}
 		
 		this.cm = function(t) {
@@ -621,7 +617,6 @@ elFinder.prototype.ui.prototype.commands = {
 				data.tree && self.fm.reload(data);
 			}, {force : true});
 		}
-		
 		
 		this.isAllowed = function() {
 			return this.fm.buffer.files;
@@ -913,9 +908,6 @@ elFinder.prototype.ui.prototype.commands = {
 				}
 				
 				$io.css({ position: 'absolute', top: '-1000px', left: '-1000px' }).appendTo('body');	
-				
-				
-				
 
 				setTimeout(function() {
 					/* hack to fix safari bug http://www.webmasterworld.com/macintosh_webmaster/3300569.htm */

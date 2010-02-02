@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+error_reporting(E_ALL);
 
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');

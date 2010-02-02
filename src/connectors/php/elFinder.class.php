@@ -456,7 +456,7 @@ class elFinder {
 			$this->_rmTmb($target);
 			$this->_logContext['from'] = $target;
 			$this->_logContext['to']   = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['select']   = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_result['select']   = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
 			$this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 	}
@@ -483,7 +483,7 @@ class elFinder {
 			$this->_result['error'] = 'Unable to create folder';
 		} else {
 			$this->_logContext['dir'] = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['select']  = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_result['select']  = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
 			$this->_content($dir, true);
 		}
 	}
@@ -512,7 +512,7 @@ class elFinder {
 			if (false != ($fp = @fopen($f, 'wb'))) {
 				fwrite($fp, "");
 				fclose($fp);
-				$this->_result['select'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+				$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
 				$this->_content($dir);
 			} else {
 				$this->_result['error'] = 'Unable to create file';
@@ -690,7 +690,7 @@ class elFinder {
 		if (!$this->_copy($file, $dup)) {
 			return $this->_result['error'] = 'Unable to create file copy';
 		}
-		$this->_result['select'] = $this->_hash($dup);
+		$this->_result['select'] = array($this->_hash($dup));
 		$this->_content($current, is_dir($file));
 	}
 	
@@ -724,7 +724,7 @@ class elFinder {
 		if (!$this->_resizeImg($file, $width, $height)) {
 			return $this->_result['error'] = 'Unable to resize image';
 		} 
-		$this->_result['select'] = $this->_hash($file);
+		$this->_result['select'] = array($this->_hash($file));
 		$this->_content($current);
 	}
 		
@@ -803,6 +803,7 @@ class elFinder {
 			return $this->_result['error'] = 'Unable to write to file';
 		}
 		$this->_result['file'] = $this->_info($file);
+		$this->_result['select'] = array($this->_hash($file));
 	}
 	
 	/**
@@ -848,7 +849,7 @@ class elFinder {
 		chdir($cwd);
 		if (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_content($dir);
-			$this->_result['select'] = $this->_hash($dir.DIRECTORY_SEPARATOR.$name);
+			$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
 		} else {
 			$this->_result['error'] = 'Unable to create archive';
 		}

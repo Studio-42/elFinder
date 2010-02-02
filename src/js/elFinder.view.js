@@ -2,7 +2,9 @@
 elFinder.prototype.view = function(fm, el) {
 	var self = this;
 	this.fm = fm;
-	
+	/**
+	 * Object. Mimetypes to kinds mapping
+	 **/
 	this.kinds = {
 		'unknown'                       : 'Unknown',
 		'directory'                     : 'Folder',
@@ -66,12 +68,12 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.tlb = $('<ul />');
 
-	this.nav = $('<div class="el-finder-nav" />').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: 500});
+	this.nav = $('<div class="el-finder-nav"/>').resizable({handles : 'e', autoHide : true, minWidth : 200, maxWidth: 500});
 	this.cwd = $('<div class="el-finder-cwd"/>').attr('unselectable', 'on');
-	this.spn = $('<div class="el-finder-spinner" />');
-	this.msg = $('<p class="el-finder-err"><strong/></p>').click(function() { $(this).hide(); });
-	this.nfo = $('<div class="el-finder-stat" />');
-	this.pth = $('<div class="el-finder-path" />');
+	this.spn = $('<div class="el-finder-spinner"/>');
+	this.err = $('<p class="el-finder-err"><strong/></p>').click(function() { $(this).hide(); });
+	this.nfo = $('<div class="el-finder-stat"/>');
+	this.pth = $('<div class="el-finder-path"/>');
 	this.sel = $('<div class="el-finder-sel"/>');
 	this.stb = $('<div class="el-finder-statusbar"/>')
 		.append(this.pth)
@@ -81,7 +83,7 @@ elFinder.prototype.view = function(fm, el) {
 		.append(this.nav)
 		.append(this.cwd)
 		.append(this.spn)
-		.append(this.msg)
+		.append(this.err)
 		.append('<div style="clear:both" />');
 	this.win = $(el).empty().attr('id', this.fm.id).addClass('el-finder '+(fm.options.cssClass||''))
 		.append($('<div class="el-finder-toolbar" />').append(this.tlb))
@@ -104,8 +106,8 @@ elFinder.prototype.view = function(fm, el) {
 	
 	this.error = function(err, data) {
 		this.fm.lock();
-		this.msg.show().children('strong').html(this.fm.i18n(err)+'!'+this.formatErrorData(data));
-		setTimeout(function() { self.msg.fadeOut('slow'); }, 6000);
+		this.err.show().children('strong').html(this.fm.i18n(err)+'!'+this.formatErrorData(data));
+		setTimeout(function() { self.err.fadeOut('slow'); }, 4000);
 	}
 	
 	this.renderNav = function(tree) {

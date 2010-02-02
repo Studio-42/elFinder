@@ -8,7 +8,7 @@
 		var self = this, id;
 		
 		this.log = function(m) {
-			window.console && window.console.log && window.console.log(m)
+			window.console && window.console.log && window.console.log(m);
 		}
 		/**
 		 * Object. File manager configuration
@@ -33,7 +33,9 @@
 		 * String. Version number;
 		 **/
 		this.version  = '1.1 RC2';
-		
+		/**
+		 * String. jQuery version;
+		 **/
 		this.jquery = $.fn.jquery.split('.').join('');
 
 		/**
@@ -304,13 +306,10 @@
 				self.tmb();
 			}
 			/* have to select some files */
-			if (data.select) {
-				if (typeof(data.select) == 'string') {
-					this.cdc[data.select] && this.selectById(data.select);
-				} else if (typeof(data.select) == 'object') {
-					for (i = data.select.length - 1; i >= 0; i--){
-						this.cdc[data.select[i]] && this.selectById(data.select[i]);
-					};
+			if (data.select && data.select.length) {
+				var l = data.select.length;
+				while (l--) {
+					this.cdc[data.select[l]] && this.selectById(data.select[l]);
 				}
 			}
 			this.lastDir(this.cwd.hash);
