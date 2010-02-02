@@ -53,7 +53,7 @@ $opts = array(
 	// 	'rm'     => true
 	// 	),
 	// 'perms'        => array(),      // individual folders/files permisions     
-	// 'debug'        => true,         // send debug to client
+	'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect
 	// 'archivers' => array(

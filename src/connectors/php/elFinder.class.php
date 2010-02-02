@@ -17,7 +17,7 @@ class elFinder {
 		'rootAlias'    => 'Home',       // display this instead of root directory name
 		'disabled'     => array(),      // list of not allowed commands
 		'dotFiles'     => false,        // display dot files
-		'dirSize'      => false,        // count total directories sizes
+		'dirSize'      => true,         // count total directories sizes
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new folders mode
 		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
@@ -202,7 +202,7 @@ class elFinder {
 	 *
 	 * @var array
 	 **/
-	private $_result = array('debug' => array());
+	private $_result = array();
 		
 	/**
 	 * undocumented class variable
@@ -325,11 +325,9 @@ class elFinder {
 							@unlink($this->_options['tmbDir'].DIRECTORY_SEPARATOR.$ls[$i]);
 						}
 					}
-					$this->_result['debug']['cleanTmbTime'] = $this->_utime() - $ts2;
 				}
 			}
 			
-			$this->_result['debug']['initTime'] = $this->_utime() - $ts;
 		}
 		
 		if ($cmd) {
@@ -340,9 +338,11 @@ class elFinder {
 
 
 		if ($this->_options['debug']) {
-			$this->_result['debug']['time'] = $this->_utime() - $this->_time;
-			$this->_result['debug']['mimeDetect'] = $this->_options['mimeDetect'];
-			$this->_result['debug']['imgLib'] = $this->_options['imgLib'];
+			$this->_result['debug'] = array(
+				'time'       => $this->_utime() - $this->_time,
+				'mimeDetect' => $this->_options['mimeDetect'],
+				'imgLib'     => $this->_options['imgLib']
+				);
 			if ($this->_options['dirSize']) {
 				$this->_result['debug']['dirSize'] = true;
 				$this->_result['debug']['du'] = @$this->_options['du'];
@@ -529,15 +529,15 @@ class elFinder {
 	{
 		if (empty($_GET['current']) 
 		||  false == ($dir = $this->_findDir(trim($_GET['current']))) 
-		|| (empty($_GET['rm']) || !is_array($_GET['rm']))) {
+		|| (empty($_GET['targets']) || !is_array($_GET['targets']))) {
 			return $this->_result['error'] = 'Invalid parameters';
 		} 
-		// print_r($_GET['rm']);
-		$this->_logContext['rm'] = array();
-		foreach ($_GET['rm'] as $hash) {
+
+		$this->_logContext['targets'] = array();
+		foreach ($_GET['targets'] as $hash) {
 			if (false != ($f = $this->_find($hash, $dir))) {
 				$this->_remove($f);
-				$this->_logContext['rm'][] = $f;
+				$this->_logContext['targets'][] = $f;
 			}
 		}
 		if (!empty($this->_result['errorData'])) {
@@ -560,21 +560,21 @@ class elFinder {
 		if (!$this->_isAllowed($dir, 'write')) {
 			return $this->_result['error'] = 'Access denied';
 		}
-		if (empty($_FILES['fm-file']))
+		if (empty($_FILES['upload']))
 		{
 			return $this->_result['error'] = 'No file to upload';
 		}
 		
-		$this->_logContext['files'] = array();
+		$this->_logContext['upload'] = array();
 		$this->_result['select'] = array();
 		$total = 0;
-		for ($i=0, $s = count($_FILES['fm-file']['name']); $i < $s; $i++) { 
-			if (!empty($_FILES['fm-file']['name'][$i])) {
+		for ($i=0, $s = count($_FILES['upload']['name']); $i < $s; $i++) { 
+			if (!empty($_FILES['upload']['name'][$i])) {
 				$total++;
-				$this->_logContext['files'][] = $_FILES['fm-file']['name'][$i];
-				if ($_FILES['fm-file']['error'][$i] > 0) {
+				$this->_logContext['files'][] = $_FILES['upload']['name'][$i];
+				if ($_FILES['upload']['error'][$i] > 0) {
 					$error = 'Unable to upload file';
-					switch ($_FILES['fm-file']['error'][$i]) {
+					switch ($_FILES['upload']['error'][$i]) {
 						case UPLOAD_ERR_INI_SIZE:
 						case UPLOAD_ERR_FORM_SIZE:
 							$error = 'File exceeds the maximum allowed filesize';
@@ -583,15 +583,15 @@ class elFinder {
 							$error = 'Not allowed file type';
 							break;
 					}
-					$this->_errorData($_FILES['fm-file']['name'][$i], $error);
-				} elseif (false == ($name = $this->_checkName($_FILES['fm-file']['name'][$i]))) {
-					$this->_errorData($_FILES['fm-file']['name'][$i], 'Invalid name');
-				} elseif (!$this->_isUploadAllow($_FILES['fm-file']['name'][$i], $_FILES['fm-file']['tmp_name'][$i])) {
-					$this->_errorData($_FILES['fm-file']['name'][$i], 'Not allowed file type');					
+					$this->_errorData($_FILES['upload']['name'][$i], $error);
+				} elseif (false == ($name = $this->_checkName($_FILES['upload']['name'][$i]))) {
+					$this->_errorData($_FILES['upload']['name'][$i], 'Invalid name');
+				} elseif (!$this->_isUploadAllow($_FILES['upload']['name'][$i], $_FILES['upload']['tmp_name'][$i])) {
+					$this->_errorData($_FILES['upload']['name'][$i], 'Not allowed file type');					
 				} else {
-					$file = $dir.DIRECTORY_SEPARATOR.$_FILES['fm-file']['name'][$i];
-					if (!@move_uploaded_file($_FILES['fm-file']['tmp_name'][$i], $file)) {
-						$this->_errorData($_FILES['fm-file']['name'][$i], 'Unable to save uploaded file');	
+					$file = $dir.DIRECTORY_SEPARATOR.$_FILES['upload']['name'][$i];
+					if (!@move_uploaded_file($_FILES['upload']['tmp_name'][$i], $file)) {
+						$this->_errorData($_FILES['upload']['name'][$i], 'Unable to save uploaded file');	
 					} else {
 						@chmod($file, $this->_options['fileMode']);
 						$this->_result['select'][] = $this->_hash($file);
@@ -677,21 +677,21 @@ class elFinder {
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
-		|| empty($_GET['file'])
-		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		|| empty($_GET['target'])
+		|| false == ($target = $this->_find(trim($_GET['target']), $current))
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
-		$this->_logContext['file'] = $file;
-		if (!$this->_isAllowed($current, 'write') || !$this->_isAllowed($file, 'read')) {
+		$this->_logContext['target'] = $target;
+		if (!$this->_isAllowed($current, 'write') || !$this->_isAllowed($target, 'read')) {
 			return $this->_result['error'] = 'Access denied';
 		}
-		$dup = $this->_uniqueName($file);
-		if (!$this->_copy($file, $dup)) {
+		$dup = $this->_uniqueName($target);
+		if (!$this->_copy($target, $dup)) {
 			return $this->_result['error'] = 'Unable to create file copy';
 		}
 		$this->_result['select'] = array($this->_hash($dup));
-		$this->_content($current, is_dir($file));
+		$this->_content($current, is_dir($target));
 	}
 	
 	/**
@@ -703,28 +703,28 @@ class elFinder {
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
-		|| empty($_GET['file'])
-		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		|| empty($_GET['target'])
+		|| false == ($target = $this->_find(trim($_GET['target']), $current))
 		|| empty($_GET['width'])  || 0 >= ($width  = intval($_GET['width']))
 		|| empty($_GET['height']) || 0 >= ($height = intval($_GET['height']))
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
 		$this->_logContext = array(
-			'file'   => $file,
+			'target' => $target,
 			'width'  => $width,
 			'height' => $height
 			);
-		if (!$this->_isAllowed($file, 'write')) {
+		if (!$this->_isAllowed($target, 'write')) {
 			return $this->_result['error'] = 'Access denied';
 		} 
-		if (0 !== strpos($this->_mimetype($file), 'image')) {
+		if (0 !== strpos($this->_mimetype($target), 'image')) {
 			return $this->_result['error'] = 'File is not an image';
 		}
-		if (!$this->_resizeImg($file, $width, $height)) {
+		if (!$this->_resizeImg($target, $width, $height)) {
 			return $this->_result['error'] = 'Unable to resize image';
 		} 
-		$this->_result['select'] = array($this->_hash($file));
+		$this->_result['select'] = array($this->_hash($target));
 		$this->_content($current);
 	}
 		
@@ -769,15 +769,15 @@ class elFinder {
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
-		|| empty($_GET['file'])
-		|| false == ($file = $this->_find(trim($_GET['file']), $current))
+		|| empty($_GET['target'])
+		|| false == ($target = $this->_find(trim($_GET['target']), $current))
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
-		if (!$this->_isAllowed($file, 'read')) {
+		if (!$this->_isAllowed($target, 'read')) {
 			return $this->_result['error'] = 'Access denied';
 		}
-		$this->_result['content'] = @file_get_contents($file);
+		$this->_result['content'] = @file_get_contents($target);
 	}
 	
 	/**
@@ -789,21 +789,21 @@ class elFinder {
 	{
 		if (empty($_POST['current']) 
 		|| false == ($current = $this->_findDir(trim($_POST['current'])))
-		|| empty($_POST['file'])
-		|| false == ($file = $this->_find(trim($_POST['file']), $current))
+		|| empty($_POST['target'])
+		|| false == ($target = $this->_find(trim($_POST['target']), $current))
 		|| !isset($_POST['content'])
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
-		$this->_logContext['file'] = $file;
-		if (!$this->_isAllowed($file, 'write')) {
+		$this->_logContext['target'] = $target;
+		if (!$this->_isAllowed($target, 'write')) {
 			return $this->_result['error'] = 'Access denied';
 		}
-		if (false === file_put_contents($file, trim($_POST['content']))) {
+		if (false === file_put_contents($target, trim($_POST['content']))) {
 			return $this->_result['error'] = 'Unable to write to file';
 		}
-		$this->_result['file'] = $this->_info($file);
-		$this->_result['select'] = array($this->_hash($file));
+		$this->_result['target'] = $this->_info($target);
+		// $this->_result['select'] = array($this->_hash($target));
 	}
 	
 	/**
@@ -822,8 +822,8 @@ class elFinder {
 		}
 		
 		if (empty($_GET['current']) 
-		||  empty($_GET['files'])
-		|| !is_array($_GET['files'])
+		||  empty($_GET['targets'])
+		|| !is_array($_GET['targets'])
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
@@ -831,7 +831,7 @@ class elFinder {
 		
 		$files = array();
 		$argc  = '';
-		foreach ($_GET['files'] as $hash) {
+		foreach ($_GET['targets'] as $hash) {
 			if (false == ($f = $this->_find($hash, $dir))) {
 				return $this->_result['error'] = 'File not found';
 			}
