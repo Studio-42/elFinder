@@ -3,8 +3,8 @@
 import elFinder
 
 elFinder.connector({
-	'root': '/Users/troex/Sites/git/elfinder/files/wiki',
-	'URL': 'http://localhost:8001/~troex/git/elfinder/files/wiki',
+	'root': '/Users/troex/Sites/git/elfinder/files',
+	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
 	'perms': {
 		'aaa': {
 			'read': False,

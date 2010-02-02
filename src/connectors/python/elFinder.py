@@ -275,7 +275,7 @@ class connector():
 			self.__rmTmb(curName)
 			try:
 				os.rename(curName, newName)
-				self._response['select'] = self.__hash(newName)
+				self._response['select'] = [self.__hash(newName)]
 				self.__content(curDir, os.path.isdir(newName))
 			except:
 				self._response['error'] = 'Unable to rename file'
@@ -303,7 +303,7 @@ class connector():
 		else:
 			try:
 				os.mkdir(newDir, int(self._options['dirUmask']))
-				self._response['select'] = self.__hash(newDir)
+				self._response['select'] = [self.__hash(newDir)]
 				self.__content(path, True)
 			except:
 				self._response['error'] = 'Unable to create folder'
@@ -330,7 +330,7 @@ class connector():
 		else:
 			try:
 				open(newFile, 'w').close()
-				self._response['select'] = self.__hash(newFile)
+				self._response['select'] = [self.__hash(newFile)]
 				self.__content(curDir, False)
 			except:
 				self._response['error'] = 'Unable to create file'
@@ -546,7 +546,7 @@ class connector():
 			self._response['error'] = 'Unable to resize image'
 			return
 
-		self._response['select'] = self.__hash(curFile)
+		self._response['select'] = [self.__hash(curFile)]
 		self.__content(curDir, False)
 		return
 
@@ -1004,7 +1004,7 @@ class connector():
 
 		if os.path.exists(archivePath):
 			self.__content(curDir, False)
-			self._response['select'] = self.__hash(archivePath)
+			self._response['select'] = [self.__hash(archivePath)]
 		else:
 			self._response['error'] = 'Unable to create archive'
 
