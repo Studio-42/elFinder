@@ -133,9 +133,8 @@ class connector():
 
 
 	def run(self):
-		possible_fields = ['cmd', 'target', 'current', 'tree', 'name', 'rm[]',
-			'file', 'content', 'files[]', 'src', 'dst', 'cut', 'init', 'type',
-			'width', 'height']
+		possible_fields = ['cmd', 'target', 'targets[]', 'current', 'tree', 'name', 
+			'content', 'src', 'dst', 'cut', 'init', 'type', 'width', 'height']
 		self._form = cgi.FieldStorage()
 		for field in possible_fields:
 			if field in self._form:
@@ -339,9 +338,9 @@ class connector():
 	def __rm(self):
 		current = rmList = None
 		curDir = rmFile = None
-		if 'current' in self._request and 'rm[]' in self._request:
+		if 'current' in self._request and 'targets[]' in self._request:
 			current = self._request['current']
-			rmList = self._request['rm[]']
+			rmList = self._request['targets[]']
 			curDir = self.__findDir(current, None)
 
 		if not rmList or not curDir:
@@ -375,11 +374,11 @@ class connector():
 			if not self.__isAllowed(curDir, 'write'):
 				self._response['error'] = 'Access denied'
 				return
-			if not 'fm-file[]' in self._form:
+			if not 'upload[]' in self._form:
 				self._response['error'] = 'No file to upload'
 				return
 
-			upFiles = self._form['fm-file[]']
+			upFiles = self._form['upload[]']
 			if not isinstance(upFiles, list):
 				upFiles = [upFiles]
 
@@ -438,10 +437,10 @@ class connector():
 			curDir = self.__findDir(self._request['current'], None)
 			src = self.__findDir(self._request['src'], None)
 			dst = self.__findDir(self._request['dst'], None)
-			if not curDir or not src or not dst or not 'files[]' in self._request:
+			if not curDir or not src or not dst or not 'targets[]' in self._request:
 				self._response['error'] = 'Invalid parameters'
 				return
-			files = self._request['files[]']
+			files = self._request['targets[]']
 			if not isinstance(files, list):
 				files = [files]
 
@@ -495,9 +494,9 @@ class connector():
 
 
 	def __duplicate(self):
-		if 'current' in self._request and 'file' in self._request:
+		if 'current' in self._request and 'target' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
-			target = self.__find(self._request['file'], curDir)
+			target = self.__find(self._request['target'], curDir)
 			if not curDir or not target:
 				self._response['error'] = 'Invalid parameters'
 				return
@@ -514,7 +513,7 @@ class connector():
 
 	def __resize(self):
 		if not (
-			'current' in self._request and 'file' in self._request
+			'current' in self._request and 'target' in self._request
 			and 'width' in self._request and 'height' in self._request
 			):
 			self._response['error'] = 'Invalid parameters'
@@ -523,7 +522,7 @@ class connector():
 		width = int(self._request['width'])
 		height = int(self._request['height'])
 		curDir = self.__findDir(self._request['current'], None)
-		curFile = self.__find(self._request['file'], curDir)
+		curFile = self.__find(self._request['target'], curDir)
 
 		if width < 1 or height < 1 or not curDir or not curFile:
 			self._response['error'] = 'Invalid parameters'
@@ -910,9 +909,9 @@ class connector():
 
 
 	def __read(self):
-		if 'current' in self._request and 'file' in self._request:
+		if 'current' in self._request and 'target' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
-			curFile = self.__find(self._request['file'], curDir)
+			curFile = self.__find(self._request['target'], curDir)
 			if curDir and curFile:
 				if self.__isAllowed(curFile, 'read'):
 					self._response['content'] = open(curFile, 'r').read()
@@ -926,9 +925,9 @@ class connector():
 
 	def __edit(self):
 		error = ''
-		if 'current' in self._request and 'file' in self._request and 'content' in self._request:
+		if 'current' in self._request and 'target' in self._request and 'content' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
-			curFile = self.__find(self._request['file'], curDir)
+			curFile = self.__find(self._request['target'], curDir)
 			error = curFile
 			if curFile and curDir:
 				if self.__isAllowed(curFile, 'write'):
@@ -936,7 +935,7 @@ class connector():
 						f = open(curFile, 'w+')
 						f.write(self._request['content'])
 						f.close()
-						self._response['file'] = self.__info(curFile)
+						self._response['target'] = self.__info(curFile)
 					except:
 						self._response['error'] = 'Unable to write to file'
 				else:
@@ -953,7 +952,7 @@ class connector():
 		if (
 			not self._options['archivers']['create'] or not 'type' in self._request
 			or not 'current' in self._request
-			or not 'files[]' in self._request
+			or not 'targets[]' in self._request
 			or not 'name' in self._request
 			):
 			self._response['error'] = 'Invalid parameters'
@@ -969,7 +968,7 @@ class connector():
 			self._response['error'] = 'Unable to create archive'
 			return
 
-		files = self._request['files[]']
+		files = self._request['targets[]']
 		if not isinstance(files, list):
 			files = [files]
 
