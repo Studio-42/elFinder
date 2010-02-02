@@ -5,13 +5,13 @@
 
 import cgi
 import hashlib
+import json
 import mimetypes
 import os
 import os.path
 import re
 import shutil
 import sys
-import simplejson
 import time
 from datetime import datetime
 
@@ -190,7 +190,7 @@ class connector():
 		# print 'Content-type: application/json\n'
 		print 'Content-type: text/html\n'
 
-		print simplejson.dumps(self._response, indent = bool(self._options['debug']))
+		print json.dumps(self._response, indent = bool(self._options['debug']))
 		sys.exit(0)
 
 
