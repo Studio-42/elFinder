@@ -1,7 +1,4 @@
 <?php
-if (function_exists('date_default_timezone_set')) {
-	date_default_timezone_set('Europe/Moscow');
-}
 
 interface elFinderILogger {
 	public function log($cmd, $ok, $context, $err='', $errorData = array());
@@ -43,7 +40,7 @@ class elFinder {
 			'rm'     => true
 			),
 		'perms'        => array(),      // individual folders/files permisions     
-		'debug'        => true,         // send debug to client
+		'debug'        => false,        // send debug to client
 		'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 		'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect
 		// 'archivers' => array(
@@ -743,7 +740,7 @@ class elFinder {
 			$this->_result['images'] = array();
 			$ls = scandir($current);
 			$cnt = 0;
-			$max = $this->_options['tmbAtOnce'] > 0 ? intval($this->_options['tmbAtOnce']) : 100;
+			$max = $this->_options['tmbAtOnce'] > 0 ? intval($this->_options['tmbAtOnce']) : 5;
 			for ($i=0; $i < count($ls); $i++) { 
 				if ($this->_isAccepted($ls[$i])) {
 					$path = $current.DIRECTORY_SEPARATOR.$ls[$i];
