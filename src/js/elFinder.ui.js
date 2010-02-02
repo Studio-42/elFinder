@@ -658,9 +658,9 @@ elFinder.prototype.ui.prototype.commands = {
 								$(this).dialog('close'); 
 								var o = { cmd : 'rm', current : self.fm.cwd.hash };
 								if (self.fm.jquery > 132) {
-									o.rm = ids;
+									o.targets = ids;
 								} else {
-									o['rm[]'] = ids;
+									o['targets[]'] = ids;
 								}
 								self.fm.ajax(o, function(data) { data.tree && self.fm.reload(data); }, {force : true});
 							}
@@ -773,7 +773,6 @@ elFinder.prototype.ui.prototype.commands = {
 					? $(this.fm.view.renderRow(f)).children('td').eq(1).empty().append(input).end().end()
 					: $(this.fm.view.renderIcon(f)).children('label').empty().append(input).end();
 					
-				
 			el.addClass('text ui-selected').appendTo(this.fm.options.view == 'list' ? self.fm.view.cwd.children('table') : self.fm.view.cwd);
 			
 			input.select().focus()
@@ -843,9 +842,9 @@ elFinder.prototype.ui.prototype.commands = {
 				tryCnt = 50,
 				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
 				m = this.fm.params.uplMaxSize ? '<div>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</div>' : '',
-				f = $('<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" /><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div><div><input type="file" name="fm-file[]"/></div></form>'),
+				f = $('<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" /><div><input type="file" name="upload[]"/></div><div><input type="file" name="upload[]"/></div><div><input type="file" name="upload[]"/></div></form>'),
 				b = $('<div class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</div>')
-					.click(function() { f.append('<div><input type="file" name="fm-file[]"/></div>'); }),
+					.click(function() { f.append('<div><input type="file" name="upload[]"/></div>'); }),
 				d = $('<div/>').append(e.hide()).append(m).append(f).append(b).dialog({
 						dialogClass : 'el-finder-dialog',
 						title       : self.fm.i18n('Upload files'),
@@ -871,6 +870,7 @@ elFinder.prototype.ui.prototype.commands = {
 				function submit() {
 					self.fm.lock(true);
 					$io.bind('load', result);
+					self.fm.log(f)
 					f.submit();
 					d.dialog('close');
 				}
@@ -983,7 +983,7 @@ elFinder.prototype.ui.prototype.commands = {
 			this.fm.ajax({
 				cmd     : 'duplicate',
 				current : this.fm.cwd.hash,
-				file    : this.fm.selected[0]
+				target  : this.fm.selected[0]
 			},
 			function(data) {
 				self.fm.reload(data);
@@ -1014,7 +1014,7 @@ elFinder.prototype.ui.prototype.commands = {
 			this.fm.ajax({
 				cmd     : 'read',
 				current : this.fm.cwd.hash,
-				file    : f.hash
+				target    : f.hash
 			}, function(data) {
 				self.fm.lockShortcuts(true);
 				var ta= $('<textarea/>').val(data.content||'').keydown(function(e) { e.stopPropagation(); });
@@ -1033,13 +1033,13 @@ elFinder.prototype.ui.prototype.commands = {
 								self.fm.ajax({
 									cmd     : 'edit',
 									current : self.fm.cwd.hash,
-									file    : f.hash,
+									target  : f.hash,
 									content : c
 								}, function(data) {
-									if (data.file) {
-										self.fm.cdc[data.file.hash] = data.file;
-										self.fm.view.updateFile(data.file);
-										self.fm.selectById(data.file.hash);
+									if (data.target) {
+										self.fm.cdc[data.target.hash] = data.target;
+										self.fm.view.updateFile(data.target);
+										self.fm.selectById(data.target.hash);
 										
 									}
 								}, {type : 'POST'});
@@ -1078,12 +1078,12 @@ elFinder.prototype.ui.prototype.commands = {
 				name    : self.fm.i18n('Archive')
 			};
 			if (this.fm.jquery>132) {
-				o.files = self.fm.selected;
+				o.targets = self.fm.selected;
 			} else {
-				o['files[]'] = self.fm.selected;
+				o['targets[]'] = self.fm.selected;
 			}
 			
-			self.fm.ajax(o, function(data) { self.fm.reload(data); });
+			this.fm.ajax(o, function(data) { self.fm.reload(data); });
 		}
 		
 		this.isAllowed = function() {
@@ -1170,7 +1170,7 @@ elFinder.prototype.ui.prototype.commands = {
 								self.fm.ajax({
 									cmd     : 'resize',
 									current : self.fm.cwd.hash,
-									file    : s[0].hash,
+									target  : s[0].hash,
 									width   : _w,
 									height  : _h
 								},
@@ -1185,7 +1185,6 @@ elFinder.prototype.ui.prototype.commands = {
 			} 
 			
 			function calc() {
-				self.fm.log(this)
 				var _w = parseInt(iw.val()) || 0,
 					_h = parseInt(ih.val()) || 0;
 					
@@ -1242,15 +1241,14 @@ elFinder.prototype.ui.prototype.commands = {
 	 * @param Object  elFinder
 	 **/
 	list : function(fm) {
-		var self  = this;
 		this.name = 'View as list';
 		this.fm   = fm;
 		
 		this.exec = function() {
-			self.fm.view.win.addClass('el-finder-disabled');
+			this.fm.view.win.addClass('el-finder-disabled');
 			this.fm.setView('list');
 			this.fm.updateCwd();
-			self.fm.view.win.removeClass('el-finder-disabled');
+			this.fm.view.win.removeClass('el-finder-disabled');
 		}
 		
 		this.isAllowed = function() {
@@ -1263,7 +1261,6 @@ elFinder.prototype.ui.prototype.commands = {
 	},
 	
 	help : function(fm) {
-		var self  = this;
 		this.name = 'Help';
 		this.fm   = fm;
 		
@@ -1272,7 +1269,7 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>'
 				+'<strong><a href="http://www.elrte.ru" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong><br/>'
-				+ '<a href="http://www.elrte.ru/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a><br/><br/>';
+				+ '<a href="http://dev.std42.ru/redmine/wiki/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a><br/><br/>';
 			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click).<br/> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
 			h += '<br/>'
 				+ '<strong>Ctrl+A</strong> - '+this.fm.i18n('Select all files')+'<br/>'
@@ -1312,12 +1309,12 @@ elFinder.prototype.ui.prototype.commands = {
 					+'<div id="el-finder-help-sp"><p>'+s+'</p></div>';
 			
 			var d = $('<div/>').html(tabs).dialog({
-				width : 617,
-				title : self.fm.i18n('Help'),
+				width       : 617,
+				title       : this.fm.i18n('Help'),
 				dialogClass : 'el-finder-dialog',
-				modal : true,
-				close : function() { d.tabs('destroy').dialog('destroy').remove() },
-				buttons : {
+				modal       : true,
+				close       : function() { d.tabs('destroy').dialog('destroy').remove() },
+				buttons     : {
 					Ok : function() { $(this).dialog('close'); }
 				}
 			}).tabs()
