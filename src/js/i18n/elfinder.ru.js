@@ -18,6 +18,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'No file to upload'                    : 'Нет файлов для загрузки',
 		'Select at least one file to upload'   : 'Выберите, как минимум, один файл для загрузки',
 		'File exceeds the maximum allowed filesize' : 'Размер файла превышает максимально разрешенный размер',
+		'Data exceeds the maximum allowed size' : 'Данные превысили максимально разрешенный размер',
 		'Not allowed file type'                 : 'Неразрешенный тип файла',
 		'Unable to upload file'                 : 'Не удалось загрузить файл',
 		'Unable to upload files'                : 'Не удалось загрузить файлы',
