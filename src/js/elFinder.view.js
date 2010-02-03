@@ -95,21 +95,33 @@ elFinder.prototype.view = function(fm, el) {
 
 	this.nav[this.fm.options.placesFirst ? 'prepend' : 'append'](this.plc);
 
+	/*
+	 * Render ajax spinner
+	*/
 	this.spinner = function(show) {
 		this.win.toggleClass('el-finder-disabled', show);
 		this.spn.toggle(show);
 	}
-
+	
+	/*
+	 * Display ajax error
+	*/
 	this.fatal = function(t) {
 		self.error(t.status != '404' ? 'Invalid backend configuration' : 'Unable to connect to backend')
 	}
 	
+	/*
+	 * Render error
+	*/
 	this.error = function(err, data) {
 		this.fm.lock();
 		this.err.show().children('strong').html(this.fm.i18n(err)+'!'+this.formatErrorData(data));
 		setTimeout(function() { self.err.fadeOut('slow'); }, 4000);
 	}
 	
+	/*
+	 * Render navigation panel with dirs tree
+	*/
 	this.renderNav = function(tree) {
 		var d = tree.dirs.length ? traverse(tree.dirs) : '',
 			li = '<li><a href="#" class="el-finder-tree-root" key="'+tree.hash+'"><div'+(d ? ' class="collapsed expanded"' : '')+'/>'+tree.name+'</a>'+d+'</li>';
@@ -140,6 +152,9 @@ elFinder.prototype.view = function(fm, el) {
 		}
 	}
 	
+	/*
+	 * Render places
+	*/
 	this.renderPlaces = function() {
 		var i, c, 
 			pl = this.fm.getPlaces(),	
@@ -164,6 +179,9 @@ elFinder.prototype.view = function(fm, el) {
 		}
 	}
 	
+	/*
+	 * Render current directory
+	*/
 	this.renderCwd = function() {
 		this.cwd.empty();
 		
@@ -186,8 +204,9 @@ elFinder.prototype.view = function(fm, el) {
 		this.sel.empty();
 	}
 
-
-
+	/*
+	 * Render one file as icon
+	*/
 	this.renderIcon = function(f) {
 		var str = '<p'+(f.tmb ? ' style="'+"background:url('"+f.tmb+"') 0 0 no-repeat"+'"' : '')+'/><label>'+this.formatName(f.name)+'</label>';
 		if (f.link || f.mime == 'symlink-broken') {
@@ -201,6 +220,9 @@ elFinder.prototype.view = function(fm, el) {
 		return '<div class="'+this.mime2class(f.mime)+(!f.read && !f.write ? ' noaccess' : '')+'" key="'+f.hash+'">'+str+'</div>';
 	}
 
+	/*
+	 * Render one file as table row
+	*/
 	this.renderRow = function(f, odd) {
 		var str = f.link || f.mime =='symlink-broken' ? '<em/>' : '';
 		if (!f.read && f.write) {
@@ -211,11 +233,17 @@ elFinder.prototype.view = function(fm, el) {
 		return '<tr key="'+f.hash+'" class="'+self.mime2class(f.mime)+(odd ? ' el-finder-row-odd' : '')+'"><td class="icon"><p>'+str+'</p></td><td>'+f.name+'</td><td>'+self.formatPermissions(f.read, f.write, f.rm)+'</td><td>'+self.formatDate(f.date)+'</td><td class="size">'+self.formatSize(f.size)+'</td><td>'+self.mime2kind(f.link ? 'symlink' : f.mime)+'</td></tr>';
 	}
 
+	/*
+	 * Re-render file (after editing)
+	*/
 	this.updateFile = function(f) {
 		var e = this.cwd.find('[key="'+f.hash+'"]');
 		e.replaceWith(e[0].nodeName == 'DIV' ? this.renderIcon(f) : this.renderRow(f));
 	}
 
+	/*
+	 * Update info about selected files
+	*/
 	this.selectedInfo = function() {
 		var i, s = 0, sel;
 		
@@ -228,6 +256,9 @@ elFinder.prototype.view = function(fm, el) {
 		this.sel.text(i>0 ? this.fm.i18n('selected items')+': '+sel.length+', '+this.formatSize(s) : '');
 	}
 
+	/*
+	 * Return wraped file name if needed
+	*/
 	this.formatName = function(n) {
 		var w = self.fm.options.wrap;
 		if (w>0) {
@@ -240,6 +271,9 @@ elFinder.prototype.view = function(fm, el) {
 		return n;
 	}
 
+	/*
+	 * Return error message
+	*/
 	this.formatErrorData = function(data) {
 		var i, err = ''
 		if (typeof(data) == 'object') {
@@ -251,14 +285,23 @@ elFinder.prototype.view = function(fm, el) {
 		return err;
 	}
 
+	/*
+	 * Convert mimetype into css class
+	*/
 	this.mime2class = function(mime) {
 		return mime.replace('/' , ' ').replace(/\./g, '-');
 	}
 
+	/*
+	 * Return localized date
+	*/
 	this.formatDate = function(d) {
 		return d.replace(/([a-z]+)\s/i, function(a1, a2) { return self.fm.i18n(a2)+' '; });
 	}
 
+	/*
+	 * Return formated file size
+	*/
 	this.formatSize = function(s) {
 		var n = 1, u = '';
 		if (s > 1073741824) {
@@ -271,9 +314,12 @@ elFinder.prototype.view = function(fm, el) {
             n = 1024;
             u = 'Kb';
         }
-        return parseInt(s/n)+' '+u;
+        return Math.round(s/n)+' '+u;
 	}
 
+	/*
+	 * Return localized string with file permissions
+	*/
 	this.formatPermissions = function(r, w, rm) {
 		var p = [];
 		r  && p.push(self.fm.i18n('read'));
@@ -282,12 +328,11 @@ elFinder.prototype.view = function(fm, el) {
 		return p.join('/');
 	}
 	
+	/*
+	 * Return kind of file
+	*/
 	this.mime2kind = function(mime) {
 		return this.fm.i18n(this.kinds[mime]||'unknown');
-	}
-	
-	this.kind = function(f) {
-		return this.fm.i18n(this.kinds[f.link ? 'symlink' : f.mime]||'unknown');
 	}
 	
 }

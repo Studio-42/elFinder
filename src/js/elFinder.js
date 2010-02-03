@@ -32,7 +32,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 RC2';
+		this.version  = '1.1 RC3';
 		/**
 		 * String. jQuery version;
 		 **/
