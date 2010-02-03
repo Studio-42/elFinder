@@ -614,7 +614,7 @@ elFinder.prototype.ui.prototype.commands = {
 				o['files[]'] = this.fm.buffer.files;
 			}
 			this.fm.ajax(o, function(data) {
-				data.tree && self.fm.reload(data);
+				data.cdc && self.fm.reload(data);
 			}, {force : true});
 		}
 		
