@@ -926,9 +926,10 @@ elFinder.prototype.ui.prototype.commands = {
 					} catch(e) {
 						data = { error : 'Unable to parse server response' };
 					}
+					complite();
 					data.error && self.fm.view.error(data.error, data.errorData);
 					data.cwd && self.fm.reload(data);
-					complite();
+					data.tmb && self.fm.tmb();
 				}
 				
 				function complite() {
