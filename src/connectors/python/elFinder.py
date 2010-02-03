@@ -32,7 +32,7 @@ class connector():
 		'tmbAtOnce': 5,
 		'tmbSize': 48,
 		'fileURL': True,
-		'uploadMaxSize': 15,
+		'uploadMaxSize': 256,
 		'uploadWriteChunk': 8192,
 		'uploadAllow': [],
 		'uploadDeny': [],
@@ -475,7 +475,7 @@ class connector():
 						continue
 					try:
 						os.rename(f, newDst)
-						# TODO remove tmb
+						self.__rmTmb(f)
 						continue
 					except:
 						self._response['error'] = 'Unable to move files'
@@ -484,6 +484,7 @@ class connector():
 				else:
 					if not self.__copy(f, newDst):
 						self._response['error'] = 'Unable to copy files'
+						self.__content(curDir, True)
 						return
 					continue
 			self.__content(curDir, True)
