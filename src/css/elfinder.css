@@ -1,5 +1,3 @@
-
-
 /* file manager window */
 .el-finder {
 	width:100%; 
@@ -8,18 +6,16 @@
 	background-color:#eee;
 	font:12px trebuchet ms,lucida grande,verdana,sans-serif;
 	border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;
-
 }
 
 .el-finder-undocked {
 	position:absolute;
-/*	overflow:auto;*/
 	min-width:400px;
 	border:1px solid #ccc;
 	padding:5px;
 }
 
-/* error/warning/question messages */
+/* error messages */
 .el-finder-err {
 	padding: 15px;
 	text-align:center;
@@ -272,7 +268,6 @@ ul.el-finder-tree, ul.el-finder-places {
 	margin:0 3px 3px 0;
 	padding:1px 0;
 	text-align:center;
-/*	border: 1px solid #ccc;*/
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
@@ -285,7 +280,6 @@ ul.el-finder-tree, ul.el-finder-places {
 	height:48px;
 	margin:1px auto;
 	padding:0;
-/*	border: 1px solid #ccc;*/
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
@@ -294,27 +288,27 @@ ul.el-finder-tree, ul.el-finder-places {
 
 /* mimetypes */
 
-.directory p      { background-position:  0     -45px; }
-.application p    { background-position: -1px  -134px; }
+.directory p   { background-position:  0     -45px; }
+.application p { background-position: -1px  -134px; }
 .audio p       { background-position: -1px -1082px; }
 .image p       { background-position: -1px -1132px; }
 .text p,
-.x-empty p     { background-position: -1px  -524px; }
-.video p       { background-position: -1px -1032px; }
+.x-empty p { background-position: -1px  -524px; }
+.video p   { background-position: -1px -1032px; }
 /* images */
-.gif p         { background-position: 0 -1183px; }
-.jpeg p        { background-position: 0 -1234px; }
+.gif p  { background-position: 0 -1183px; }
+.jpeg p { background-position: 0 -1234px; }
 .vnd-adobe-photoshop p,
-.postscript p  { background-position: 0 -1132px; }
+.postscript p { background-position: 0 -1132px; }
 /* video */
-.ogg p         { background-position: -1px -1032px; }
+.ogg p { background-position: -1px -1032px; }
 /* audio */
-.ogm p         { background-position: -1px -1082px; }
+.ogm p { background-position: -1px -1082px; }
 /* texts */
 .rtf p,
-.rtfd p          { background-position: 0 -573px; }
+.rtfd p { background-position: 0 -573px; }
 .javascript p,
-.x-javascript p    { background-position: 0 -184px; }
+.x-javascript p  { background-position: 0 -184px; }
 .x-c p, 
 .css p, 
 .x-sql p, 
@@ -528,27 +522,45 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 /************************************/
 /*           dialog window          */
 /************************************/
+.el-finder-dialog {
+	font-size:.84em;
+}
+.el-finder-dialog p {
+	margin:.5em;
+}
 .el-finder-dialog .ui-dialog-titlebar { 
-	padding: .3em .1em .1em .8em; 
-	font-size:.72em;
+	padding: .2em .1em .1em .8em; 
 }
 .el-finder-dialog .ui-dialog-buttonpane {
 	padding: .1em 1em .1em .4em; 
-	font-size:.72em;
+	font-size:.9em;
 }
 .el-finder-dialog .ui-dialog-content {
-	padding:2px;
-	font-size:.72em;
+	padding:5px;
 }
 
 .el-finder-dialog hr {
 	border:0;
 	border-bottom: 1px #ccc solid;
+	clear:both
+}
+.el-finder-dialog ul {
+	margin-top:0;
 }
 
-.el-finder-dialog .ui-state-error {
+.el-finder-dialog kbd { font-size:1.2em;}
+.el-finder-dialog a { outline: none;}
+
+.el-finder-dialog textarea { 
+	width:100%; 
+	height:400px; 
+	outline:none; 
+	border:1px solid #ccc;
+}
+
+.ui-state-error {
 	margin: 5px 0; 
-	padding:.7em;
+	padding:.5em;
 	clear:both;
 }
 
@@ -557,22 +569,13 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	margin-right: .3em;
 }
 
-.el-finder-dialog form {
-	padding: .5em 0;
-	margin: .3em 0;
-}
-
-.el-finder-dialog form div {
-	padding:.1em 0;
-}
-
 .el-finder-add-field {
 	cursor:pointer;
 }
 
 .el-finder-add-field span {
 	float:left;
-	margin-right:.7em
+	margin-right:.7em;
 }
 
 .el-finder-dialog table {
@@ -583,21 +586,17 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	padding:2px 5px;
 
 }
-.el-finder-dialog a { outline: none;}
 
-.el-finder-dialog textarea { width:100%; height:400px; outline:none; border:1px solid #ccc;}
+.el-finder-dialog .ui-tabs { 
+	font-size:.98em;
+}
 
 .el-finder-dialog .ui-tabs div {
 	padding:0 .5em;
-	
 }
 .el-finder-dialog .ui-tabs-nav li a {
 	padding:.2em 1em;
 }
-#el-finder-help-a p {
-/*	line-height:2em;*/
-}
-
 
 /************************************/
 /*            contextmenu           */

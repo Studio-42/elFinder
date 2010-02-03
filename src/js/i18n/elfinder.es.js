@@ -18,6 +18,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'No file to upload'                     : 'No hay ficheros para subir',
 		'Select at least one file to upload'    : 'Seleccione, como mínimo un fichero, para subir',
 		'File exceeds the maximum allowed filesize' : 'El tamaño del fichero es más grande que el tamaño máximo autorizado',
+		'Data exceeds the maximum allowed size' : '',
 		'Not allowed file type'                 : 'Tipo de fichero no permitido',
 		'Unable to upload file'                 : 'No se ha podido subir el fichero',
 		'Unable to upload files'                : 'No se han podido subir los ficheros',
@@ -178,7 +179,8 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Simple and usefull Content Management System' : 'Un CMS sencillo y cómodo',
 		'Support project development and we will place here info about you' : 'Ayude al desarrollo del producto y la información sobre usted aparecerá aqui.',
 		'Contacts us if you need help integrating elFinder in you products' : 'Pregúntenos si quiere integrar elFinder en su producto.',
-		'helpText' : 'elFinder funciona igual que el gestor de ficheros de su PC. <br />Puede manipular los ficheros con la ayuda del panel superior, el menu o bien con atajos de teclado. Para mover fichero/carpetas simplemente arrastrelos a la carpeta deseada.	Si simultáneamente presiona la tecla Shift los ficheros se copiarán.<br/><br/>	elFinder soporta los siguientes atajos de teclado:'	
+		'elFinder support following shortcuts' : 'elFinder soporta los siguientes atajos de teclado',
+		'helpText' : 'elFinder funciona igual que el gestor de ficheros de su PC. <br />Puede manipular los ficheros con la ayuda del panel superior, el menu o bien con atajos de teclado. Para mover fichero/carpetas simplemente arrastrelos a la carpeta deseada.	Si simultáneamente presiona la tecla Shift los ficheros se copiarán.'	
 		};
 	
 })(jQuery);

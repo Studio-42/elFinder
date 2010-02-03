@@ -175,7 +175,6 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				if (self.lock) {
 					return;
 				}
-
 				switch (e.keyCode) {
 					/* Meta+Backspace - delete */
 					case 8:
@@ -222,6 +221,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 						break;
 					/* Ctrl+U - upload files */
 					case 85:
+					
 						if (meta) {
 							e.preventDefault();
 							self.ui.execIfAllowed('upload');

@@ -288,6 +288,11 @@ class elFinder {
 		} elseif (!empty($_GET['cmd'])) {
 			$cmd = trim($_GET['cmd']);
 		}
+		if (!$cmd && $_SERVER["REQUEST_METHOD"] == 'POST') {
+			header("Content-Type: text/html");
+			$this->_result['error'] = 'Data exceeds the maximum allowed size';
+			exit(json_encode($this->_result));
+		}
 		
 		if ($cmd && (empty($this->_commands[$cmd]) || !method_exists($this, $this->_commands[$cmd]))) {
 			exit(json_encode(array('error' => 'Unknown command')));
@@ -335,7 +340,6 @@ class elFinder {
 		} else {
 			$this->_open();
 		}
-
 
 		if ($this->_options['debug']) {
 			$this->_result['debug'] = array(
@@ -553,6 +557,7 @@ class elFinder {
 	 **/
 	private function _upload()
 	{
+
 		if (empty($_POST['current']) 
 		|| false == ($dir = $this->_findDir(trim($_POST['current'])))) {
 			return $this->_result['error'] = 'Invalid parameters';
@@ -571,7 +576,7 @@ class elFinder {
 		for ($i=0, $s = count($_FILES['upload']['name']); $i < $s; $i++) { 
 			if (!empty($_FILES['upload']['name'][$i])) {
 				$total++;
-				$this->_logContext['files'][] = $_FILES['upload']['name'][$i];
+				$this->_logContext['upload'][] = $_FILES['upload']['name'][$i];
 				if ($_FILES['upload']['error'][$i] > 0) {
 					$error = 'Unable to upload file';
 					switch ($_FILES['upload']['error'][$i]) {

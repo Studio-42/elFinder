@@ -435,7 +435,7 @@ elFinder.prototype.ui.prototype.commands = {
 
 				$('<div />').append(tb+'</table>').dialog({
 					dialogClass : 'el-finder-dialog el-finder-dialog-info',
-					width       : 350,
+					width       : 390,
 					position    : p,
 					title       : self.fm.i18n(f.mime == 'directory' ? 'Folder info' : 'File info'),
 					close       : function() { if (--cnt <= 0) { self.fm.lockShortcuts(); } $(this).dialog('destroy'); },
@@ -835,17 +835,19 @@ elFinder.prototype.ui.prototype.commands = {
 		
 		this.exec = function() {
 
-			var id = 'el-finder-target',
-				$io = $('<iframe id="'+id+'" name="'+id+'" src="about:blank" />'),
-				io = $io[0],
-				xhr,
-				tryCnt = 50,
-				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong/></div>'),
-				m = this.fm.params.uplMaxSize ? '<div>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</div>' : '',
-				f = $('<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" /><div><input type="file" name="upload[]"/></div><div><input type="file" name="upload[]"/></div><div><input type="file" name="upload[]"/></div></form>'),
-				b = $('<div class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</div>')
-					.click(function() { f.append('<div><input type="file" name="upload[]"/></div>'); }),
-				d = $('<div/>').append(e.hide()).append(m).append(f).append(b).dialog({
+			var id = 'el-finder-io-'+(new Date().getTime()),
+				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><div/></div>'),
+				m = this.fm.params.uplMaxSize ? '<p>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</p>' : '',
+				b = $('<p class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</p>')
+					.click(function() { f.append('<p><input type="file" name="upload[]"/></p>'); }),
+				f = '<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" />',
+				d = $('<div/>'),
+				i = 3;
+
+				while (i--) { f += '<p><input type="file" name="upload[]"/></p>'; }
+				f = $(f+'</form>');
+				
+				d.append(e.hide()).append(m).append(f).append(b).dialog({
 						dialogClass : 'el-finder-dialog',
 						title       : self.fm.i18n('Upload files'),
 						modal       : true,
@@ -853,112 +855,89 @@ elFinder.prototype.ui.prototype.commands = {
 						close       : function() { self.fm.lockShortcuts(); },
 						buttons     : {
 							Cancel : function() { $(this).dialog('close'); },
-							Ok     : upload
+							Ok     : function() {
+								if (!$(':file[value]', f).length) {
+									return error(self.fm.i18n('Select at least one file to upload'));
+								}
+								setTimeout(function() {
+									self.fm.lock();
+									if ($.browser.safari) {
+										$.ajax({
+											url     : self.fm.options.url,
+											data    : {cmd : 'ping'},
+											error   : submit,
+											success : submit
+										});
+									} else {
+										submit();
+									}
+								});
+								$(this).dialog('close');
+							}
 						}
 					});
 
 			self.fm.lockShortcuts(true);
 
-
-			function upload() {
-				var files = $(':file[value]', f);
-				
-				function error(err) {
-					e.show().find('strong').empty().text(err);
-				}
-				
-				function submit() {
-					self.fm.lock(true);
-					$io.bind('load', result);
-					self.fm.log(f)
-					f.submit();
-					d.dialog('close');
-				}
-				
-				if (!files.length) {
-					return error(self.fm.i18n('Select at least one file to upload'));
-				}
-
-				xhr = { 
-					aborted: 0,
-					responseText: null,
-					responseXML: null,
-					status: 0,
-					statusText: 'n/a',
-					getAllResponseHeaders: function() {},
-					getResponseHeader:  function(header){
-						var headers = {'content-type': 'json'};
-						return headers[header];
-					},
-					setRequestHeader: function() {},
-					abort: function() {
-						this.aborted = 1;
-						$io.attr('src','about:blank'); 
-					}
-				}
-				
-				
-				if (!$.active++) {
-					$.event.trigger("ajaxStart");
-				}
-				$.event.trigger("ajaxSend", [xhr, {}]);
-				
-				if (xhr.aborted) {
-					return;
-				}
-				
-				$io.css({ position: 'absolute', top: '-1000px', left: '-1000px' }).appendTo('body');	
-
-				setTimeout(function() {
-					/* hack to fix safari bug http://www.webmasterworld.com/macintosh_webmaster/3300569.htm */
-					if ($.browser.safari) {
-						$.ajax({
-							url     : self.fm.options.url,
-							data    : {cmd : 'ping'},
-							error   : submit,
-							success : submit
-						});
-					} else {
-						submit();
-					}
-				}, 10);
+			function error(err) {
+				e.show().find('div').empty().text(err);
 			}
 
-
-			function result() {
-				var doc, data, pre, ok = true;
-				$io.unbind('load');
-				self.fm.lock();
-
-				try {
-					doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
-					/* opera */
-					if (doc.body == null || doc.body.innerHTML == '') {
-						if (--tryCnt) {
-							return setTimeout(result, 100);
+			function submit() {
+				var $io = $('<iframe name="'+id+'" name="'+id+'" src="about:blank"/>'),
+					io  = $io[0],
+					cnt = 50,
+					doc, html, data;
+					
+				$io.css({ position: 'absolute', top: '-1000px', left: '-1000px' })
+				.appendTo('body').bind('load', function() {
+					$io.unbind('load');
+					result();
+				});
+				
+				self.fm.lock(true);
+				f.submit();
+				
+				function result() {
+					try {
+						doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
+						/* opera */
+						if (doc.body == null || doc.body.innerHTML == '') {
+							if (--cnt) {
+								return setTimeout(result, 100);
+							} else {
+								complite();
+								return self.fm.view.error('Unable to access iframe DOM after 50 tries');
+							}
 						}
-						return self.fm.view.error('Unable to access iframe DOM after 50 tries');
+						/* get server response */
+						html = $(doc.body).html();
+						if (self.fm.jquery>=141) {
+							data = $.parseJSON(html);
+						} else if ( /^[\],:{}\s]*$/.test(html.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
+							.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]")
+							.replace(/(?:^|:|,)(?:\s*\[)+/g, "")) ) {
+								/* get from jQuery 1.4 */
+							data = window.JSON && window.JSON.parse ? window.JSON.parse(html) : (new Function("return " + html))();
+						} else {
+							data = { error : 'Unable to parse server response' };
+						}
+						
+					} catch(e) {
+						data = { error : 'Unable to parse server response' };
 					}
-					pre = doc.getElementsByTagName('pre')[0]
-					xhr.responseText = pre ? pre.innerHTML : doc.body ? doc.body.innerHTML : null;
-					data = $.httpData(xhr, 'json');
-				} catch(e) {
-					self.fm.view.error('Unable to upload files', {Error : 'Unable to parse server response'});
-					ok = false;
-				}
-				
-				
-				if (ok) {
-					$.event.trigger("ajaxSuccess", [xhr, {}]);
 					data.error && self.fm.view.error(data.error, data.errorData);
 					data.cwd && self.fm.reload(data);
-					self.fm.log(data);
+					complite();
 				}
-
-				$.event.trigger("ajaxComplete", [xhr, {}]);
-				if (!--$.active) { $.event.trigger("ajaxStop"); }
-				setTimeout(function() { $io.remove(); }, 100);
+				
+				function complite() {
+					self.fm.lock();
+					$io.remove();
+				}
+					
 			}
+
 		}
 		
 		this.isAllowed = function() {
@@ -1268,31 +1247,32 @@ elFinder.prototype.ui.prototype.commands = {
 			var h, ht = this.fm.i18n('helpText'), a, s, tabs; 
 			
 			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>'
-				+'<strong><a href="http://www.elrte.ru" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong><br/>'
-				+ '<a href="http://dev.std42.ru/redmine/wiki/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a><br/><br/>';
-			h += ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click).<br/> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.';
-			h += '<br/>'
-				+ '<strong>Ctrl+A</strong> - '+this.fm.i18n('Select all files')+'<br/>'
-			 	+ '<strong>Ctrl+C/Ctrl+X/Ctrl+V</strong> - '+this.fm.i18n('Copy/Cut/Paste files')+'<br/>'
-			 	+ '<strong>Enter</strong> - '+this.fm.i18n('Open selected file/folder')+'<br/>'
-				+ '<strong>Space</strong> - '+this.fm.i18n('Open/close QuickLook window')+'<br/>'
-			 	+ '<strong>Delete/Cmd+Backspace</strong> - '+this.fm.i18n('Remove selected files')+'<br/>'
-			 	+ '<strong>Ctrl+I</strong> - '+this.fm.i18n('Selected files or current directory info')+'<br/>'
-			 	+ '<strong>Ctrl+N</strong> - '+this.fm.i18n('Create new directory')+'<br/>'
-			 	+ '<strong>Ctrl+U</strong> - '+this.fm.i18n('Open upload files form')+'<br/>'
-			 	+ '<strong>Left arrow</strong> - '+this.fm.i18n('Select previous file')+'<br/>'
-			 	+ '<strong>Right arrow </strong> - '+this.fm.i18n('Select next file')+'<br/>'
-			 	+ '<strong>Ctrl+Right arrow</strong> - '+this.fm.i18n('Open selected file/folder')+'<br/>'
-			 	+ '<strong>Ctrl+Left arrow</strong> - '+this.fm.i18n('Return into previous folder')+'<br/>'
-			 	+ '<strong>Shift+arrows</strong> - '+this.fm.i18n('Increase/decrease files selection')+'<br/>'
-			 	+ '<hr/>'
-			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products')+' dev@std42.ru';
+				+'<p><strong><a href="http://www.elrte.ru" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong></p>'
+				+ '<p><a href="http://dev.std42.ru/redmine/wiki/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a></p>';
+			h += '<p>'+(ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click).<br/> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.')+'</p>';
+			h += '<p>'
+				+ '<strong>'+this.fm.i18n('elFinder support following shortcuts')+':</strong><ul>'
+				+ '<li><kbd>Ctrl+A</kbd> - '+this.fm.i18n('Select all files')+'</li>'
+			 	+ '<li><kbd>Ctrl+C/Ctrl+X/Ctrl+V</kbd> - '+this.fm.i18n('Copy/Cut/Paste files')+'</li>'
+			 	+ '<li><kbd>Enter</kbd> - '+this.fm.i18n('Open selected file/folder')+'</li>'
+				+ '<li><kbd>Space</kbd> - '+this.fm.i18n('Open/close QuickLook window')+'</li>'
+			 	+ '<li><kbd>Delete/Cmd+Backspace</kbd> - '+this.fm.i18n('Remove selected files')+'</li>'
+			 	+ '<li><kbd>Ctrl+I</kbd> - '+this.fm.i18n('Selected files or current directory info')+'</li>'
+			 	+ '<li><kbd>Ctrl+N</kbd> - '+this.fm.i18n('Create new directory')+'</li>'
+			 	+ '<li><kbd>Ctrl+U</kbd> - '+this.fm.i18n('Open upload files form')+'</li>'
+			 	+ '<li><kbd>Left arrow</kbd> - '+this.fm.i18n('Select previous file')+'</li>'
+			 	+ '<li><kbd>Right arrow </kbd> - '+this.fm.i18n('Select next file')+'</li>'
+			 	+ '<li><kbd>Ctrl+Right arrow</kbd> - '+this.fm.i18n('Open selected file/folder')+'</li>'
+			 	+ '<li><kbd>Ctrl+Left arrow</kbd> - '+this.fm.i18n('Return into previous folder')+'</li>'
+			 	+ '<li><kbd>Shift+arrows</kbd> - '+this.fm.i18n('Increase/decrease files selection')+'</li></ul>'
+			 	+ '</p><p>'
+			 	+ this.fm.i18n('Contacts us if you need help integrating elFinder in you products')+': dev@std42.ru</p>';
 
 			a = '<div class="el-finder-help-std"/>'
 				+'<p>'+this.fm.i18n('Javascripts/PHP programming: Dmitry (dio) Levashov, dio@std42.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Python programming, techsupport: Troex Nevelin, troex@fury.scancode.ru')+'</p>'
 				+'<p>'+this.fm.i18n('Design: Valentin Razumnih')+'</p>'
-				+'<p>'+this.fm.i18n('Spanish localization')+': Alex (xand) Vavilin, xand@xand.es, <a href="xand.es" target="_blank">http://xand.es</a></p>'
+				+'<p>'+this.fm.i18n('Spanish localization')+': Alex (xand) Vavilin, xand@xand.es, <a href="http://xand.es" target="_blank">http://xand.es</a></p>'
 				+'<p>'+this.fm.i18n('Icons')+': <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank">Famfam silk icons</a>, <a href="http://www.fatcow.com/free-icons/" target="_blank">Fatcow icons</a>'+'</p>'
 				+'<p>'+this.fm.i18n('Copyright: <a href="http://www.std42.ru" target="_blank">Studio 42 LTD</a>')+'</p>'
 				+'<p>'+this.fm.i18n('License: BSD License')+'</p>'
@@ -1300,7 +1280,7 @@ elFinder.prototype.ui.prototype.commands = {
 			
 			s = '<div class="el-finder-logo"/><strong><a href="http://www.eldorado-cms.ru" target="_blank">ELDORADO.CMS</a></strong><br/>'
 				+this.fm.i18n('Simple and usefull Content Management System')
-				+'<hr style="clear:both"/>'
+				+'<hr/>'
 				+ this.fm.i18n('Support project development and we will place here info about you');
 			
 			tabs = '<ul><li><a href="#el-finder-help-h">'+this.fm.i18n('Help')+'</a></li><li><a href="#el-finder-help-a">'+this.fm.i18n('Authors')+'</a><li><a href="#el-finder-help-sp">'+this.fm.i18n('Sponsors')+'</a></li></ul>'

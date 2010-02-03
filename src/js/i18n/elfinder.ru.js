@@ -18,6 +18,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'No file to upload'                    : 'Нет файлов для загрузки',
 		'Select at least one file to upload'   : 'Выберите, как минимум, один файл для загрузки',
 		'File exceeds the maximum allowed filesize' : 'Размер файла превышает максимально разрешенный размер',
+		'Data exceeds the maximum allowed size' : 'Данные превысили максимально разрешенный размер',
 		'Not allowed file type'                 : 'Неразрешенный тип файла',
 		'Unable to upload file'                 : 'Не удалось загрузить файл',
 		'Unable to upload files'                : 'Не удалось загрузить файлы',
@@ -177,8 +178,9 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'elFinder documentation'        : 'Документация elFinder',
 		'Simple and usefull Content Management System' : 'Простая и удобная Система Управления Сайтами',
 		'Support project development and we will place here info about you' : 'Поддержите разработку продукта и мы разместим здесь информацию о вас.',
-		'Contacts us if you need help integrating elFinder in you products' : 'Если вы хотите интегрировать elFinder в свой продукт, обращайтесь к нам',
-		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели, контекстного меню или сочетания клавиш. Чтобы переместить файлы/папки, просто перенесите их на иконку нужной папки. Если будет зажата клавиша Shift файлы будут скопированы.<br/><br/>elFinder поддерживает следующие сочетания клавиш:'
+		'Contacts us if you need help integrating elFinder in you products' : 'Если необходима помощь в интеграции elFinder с ваши продуктами, обращайтесь к нам',
+		'elFinder support following shortcuts' : 'elFinder поддерживает следующие сочетания клавиш',
+		'helpText' : 'elFinder работает аналогично файловому менеджеру в вашем компьютере.<br />Манипулировать файлами можно с помощью кнопок на верхней панели, контекстного меню или сочетания клавиш. Чтобы переместить файлы/папки, просто перенесите их на иконку нужной папки. Если будет зажата клавиша Shift файлы будут скопированы.'
 		
 	};
 	
