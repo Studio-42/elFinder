@@ -839,7 +839,7 @@ elFinder.prototype.ui.prototype.commands = {
 				e = $('<div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><div/></div>'),
 				m = this.fm.params.uplMaxSize ? '<p>'+this.fm.i18n('Maximum allowed files size')+': '+this.fm.params.uplMaxSize+'</p>' : '',
 				b = $('<p class="el-finder-add-field"><span class="ui-state-default ui-corner-all"><em class="ui-icon ui-icon-circle-plus"/></span>'+this.fm.i18n('Add field')+'</p>')
-					.click(function() { f.append('<p><input type="file" name="upload[]"/></p>'); }),
+					.click(function() { $(this).before('<p><input type="file" name="upload[]"/></p>'); }),
 				f = '<form method="post" enctype="multipart/form-data" action="'+self.fm.options.url+'" target="'+id+'"><input type="hidden" name="cmd" value="upload" /><input type="hidden" name="current" value="'+self.fm.cwd.hash+'" />',
 				d = $('<div/>'),
 				i = 3;
@@ -847,7 +847,7 @@ elFinder.prototype.ui.prototype.commands = {
 				while (i--) { f += '<p><input type="file" name="upload[]"/></p>'; }
 				f = $(f+'</form>');
 				
-				d.append(e.hide()).append(m).append(f).append(b).dialog({
+				d.append(f.append(e.hide()).prepend(m).append(b)).dialog({
 						dialogClass : 'el-finder-dialog',
 						title       : self.fm.i18n('Upload files'),
 						modal       : true,
