@@ -467,12 +467,14 @@ class connector():
 					if not self.__isAllowed(f, 'rm'):
 						self._response['error'] = 'Move failed'
 						self._errorData(f, 'Access denied')
+						self.__content(curDir, True)
 						return
 					# TODO thumbs
 					if os.path.exists(newDst):
 						self._response['error'] = 'Unable to move files'
 						self._errorData(f, 'File or folder with the same name already exists')
-						continue
+						self.__content(curDir, True)
+						return
 					try:
 						os.rename(f, newDst)
 						self.__rmTmb(f)
@@ -480,6 +482,7 @@ class connector():
 					except:
 						self._response['error'] = 'Unable to move files'
 						self._errorData(f, 'Unable to move')
+						self.__content(curDir, True)
 						return
 				else:
 					if not self.__copy(f, newDst):
