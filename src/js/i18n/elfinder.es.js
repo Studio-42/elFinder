@@ -18,7 +18,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'No file to upload'                     : 'No hay ficheros para subir',
 		'Select at least one file to upload'    : 'Seleccione, como mínimo un fichero, para subir',
 		'File exceeds the maximum allowed filesize' : 'El tamaño del fichero es más grande que el tamaño máximo autorizado',
-		'Data exceeds the maximum allowed size' : '',
+		'Data exceeds the maximum allowed size' : 'Los datos exceden el tamaño máximo permitido',
 		'Not allowed file type'                 : 'Tipo de fichero no permitido',
 		'Unable to upload file'                 : 'No se ha podido subir el fichero',
 		'Unable to upload files'                : 'No se han podido subir los ficheros',
@@ -35,7 +35,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Unable to create archive'              : 'No se ha podido crear el archivo',
 		'Unable to extract files from archive'  : 'No se ha podido extraer fichero desde archivo',
 		'Unable to open broken link'            : 'No se puede abrir un enlace roto',
-		'File URL disabled by connector config' : '',
+		'File URL disabled by connector config' : 'El acceso a las rutas de los ficheros está prohibido en la configuración del conector',
 		/* statusbar */
 		'items'          : 'objetos',
 		'selected items' : 'objetos seleccionados',

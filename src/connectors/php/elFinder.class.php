@@ -647,27 +647,27 @@ class elFinder {
 
 		foreach ($_GET['files'] as $hash) {
 			if (false == ($f = $this->_find($hash, $src))) {
-				return $this->_result['error'] = 'File not found';
+				return $this->_result['error'] = 'File not found' && $this->_content($current, true);
 			}
 			$this->_logContext['src'][] = $f;
 			$_dst = $dst.DIRECTORY_SEPARATOR.basename($f);
 
 			if (0 === strpos($dst, $f)) {
-				return $this->_result['error'] = 'Unable to copy into itself';
+				return $this->_result['error'] = 'Unable to copy into itself' && $this->_content($current, true);
 			} elseif (file_exists($_dst)) {
-				return $this->_result['error'] = 'File or folder with the same name already exists';
+				return $this->_result['error'] = 'File or folder with the same name already exists' && $this->_content($current, true);
 			} elseif ($cut && !$this->_isAllowed($f, 'rm')) {
-				return $this->_result['error'] = 'Access denied';
+				return $this->_result['error'] = 'Access denied' && $this->_content($current, true);
 			}
 
 			if ($cut) {
 				if (!@rename($f, $_dst)) {
-					return $this->_result['error'] = 'Unable to move files';
+					return $this->_result['error'] = 'Unable to move files' && $this->_content($current, true);
 				} elseif (!is_dir($f)) {
 					$this->_rmTmb($f);
 				}
 			} elseif (!$this->_copy($f, $_dst)) {
-				return $this->_result['error'] = 'Unable to copy files';
+				return $this->_result['error'] = 'Unable to copy files' && $this->_content($current, true);
 			}
 		}
 		$this->_content($current, true);

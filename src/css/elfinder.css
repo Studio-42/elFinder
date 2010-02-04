@@ -257,7 +257,6 @@ ul.el-finder-tree, ul.el-finder-places {
 }
 
 /********** view: icons  ************/
-
 .el-finder-cwd div {
 	width: 81px;
 	display: -moz-inline-stack;
@@ -525,7 +524,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-dialog {
 	font-size:.84em;
 }
-.el-finder-dialog p {
+.el-finder-dialog form p, .el-finder-dialog .ui-tabs p {
 	margin:.5em;
 }
 .el-finder-dialog .ui-dialog-titlebar { 
