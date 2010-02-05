@@ -19,15 +19,14 @@ class connector():
 	"""Connector for elFinder"""
 
 	_options = {
-		'root': './',
+		'root': '',
 		'URL': '',
 		'rootAlias': 'Home',
-		'dotFiles': True,
-		'debug': True,
+		'dotFiles': False,
 		'dirSize': True,
-		'fileUmask': 0644,
-		'dirUmask': 0755,
-		'imgLib': False,
+		'fileMode': 0644,
+		'dirMode': 0755,
+		'imgLib': 'auto',
 		'tmbDir': '.tmb',
 		'tmbAtOnce': 5,
 		'tmbSize': 48,
@@ -37,7 +36,6 @@ class connector():
 		'uploadAllow': [],
 		'uploadDeny': [],
 		'uploadOrder': ['deny', 'allow'],
-		'disabled': [],
 		# 'aclObj': None, # TODO
 		# 'aclRole': 'user', # TODO
 		'defaults': {
@@ -45,9 +43,11 @@ class connector():
 			'write': True,
 			'rm': True
 		},
+		'perms': {},
 		'archiveMimes': {},
 		'archivers': {},
-		'perms': []
+		'disabled': [],
+		'debug': False
 	}
 
 	_commands = {
@@ -105,8 +105,8 @@ class connector():
 	_yesterday = 0
 
 	def __init__(self, opts):
+		self._response['debug'] = {}
 		if self._options['debug']:
-			self._response['debug'] = {}
 			self._time = time.time()
 			t = datetime.fromtimestamp(self._time)
 			self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
@@ -133,6 +133,14 @@ class connector():
 
 
 	def run(self):
+		rootOk = True
+		if not os.path.exists(self._options['root']) or self._options['root'] == '':
+			rootOk = False
+			self._response['error'] = 'Invalid backend configuration'
+		elif not self.__isAllowed(self._options['root'], 'read'):
+			rootOk = False
+			self._response['error'] = 'Access denied'
+
 		possible_fields = ['cmd', 'target', 'targets[]', 'current', 'tree', 'name', 
 			'content', 'src', 'dst', 'cut', 'init', 'type', 'width', 'height']
 		self._form = cgi.FieldStorage()
@@ -140,40 +148,36 @@ class connector():
 			if field in self._form:
 				self._request[field] = self._form.getvalue(field)
 
-		if 'cmd' in self._request:
-			if self._request['cmd'] in self._commands:
-				cmd = self._commands[self._request['cmd']]
-				func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
-				if callable(func):
-					try:
-						func()
-						# if self._request['cmd'] == 'edit':
-						# 	f = open('/Users/troex/my.log', 'w')
-						# 	f.write(str(self._form))
-						# 	f.close()
-					except Exception, e:
-						# print 'Content-type: text/html\n'
-						# print e
-						self._response['error'] = 'Command Failed'
+		if rootOk is True:
+			if 'cmd' in self._request:
+				if self._request['cmd'] in self._commands:
+					cmd = self._commands[self._request['cmd']]
+					func = getattr(self, '_' + self.__class__.__name__ + cmd, None)
+					if callable(func):
+						try:
+							func()
+						except Exception, e:
+							self._response['error'] = 'Command Failed'
+							self.__debug('exception', e)
+				else:
+					self._response['error'] = 'Unknown command'
 			else:
-				self._response['error'] = 'Unknown command'
-		else:
-			self.__open()
+				self.__open()
 
-		if 'init' in self._request:
-			self.__checkArchivers()
-			self._response['disabled'] = self._options['disabled']
-			if not self._options['fileURL']:
-				url = ''
-			else:
-				url = self._options['URL']
-			self._response['params'] = {
-				'dotFiles': self._options['dotFiles'],
-				'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
-				'archives': self._options['archiveMimes'],
-				'extract': self._options['archivers']['extract'].keys(),
-				'url': url
-			}
+			if 'init' in self._request:
+				self.__checkArchivers()
+				self._response['disabled'] = self._options['disabled']
+				if not self._options['fileURL']:
+					url = ''
+				else:
+					url = self._options['URL']
+				self._response['params'] = {
+					'dotFiles': self._options['dotFiles'],
+					'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
+					'archives': self._options['archiveMimes'],
+					'extract': self._options['archivers']['extract'].keys(),
+					'url': url
+				}
 
 
 		if self._errorData:
@@ -185,12 +189,13 @@ class connector():
 			if 'debug' in self._response:
 				del self._response['debug']
 
-		# TODO if upload send text/html else /json
-		# print 'Content-type: application/json\n'
-		print 'Content-type: text/html\n'
+		if ('cmd' in self._request and self._request['cmd'] == 'upload') or self._options['debug']:
+			print 'Content-type: text/html\n'
+		else:
+			print 'Content-type: application/json\n'
 
 		print json.dumps(self._response, indent = bool(self._options['debug']))
-		sys.exit(0)
+		return  # sys.exit(0)
 
 
 	def __open(self):
@@ -301,7 +306,7 @@ class connector():
 			self._response['error'] = 'File or folder with the same name already exists'
 		else:
 			try:
-				os.mkdir(newDir, int(self._options['dirUmask']))
+				os.mkdir(newDir, int(self._options['dirMode']))
 				self._response['select'] = [self.__hash(newDir)]
 				self.__content(path, True)
 			except:
@@ -402,7 +407,7 @@ class connector():
 							f.close()
 							upSize += os.lstat(name).st_size
 							if self.__isUploadAllow(name):
-								os.chmod(name, self._options['fileUmask'])
+								os.chmod(name, self._options['fileMode'])
 								self._response['select'].append(self.__hash(name))
 							else:
 								self.__errorData(name, 'Not allowed file type')
@@ -704,7 +709,7 @@ class connector():
 			lpath = False
 
 		if not info['mime'] == 'directory':
-			if self._options['fileURL']:
+			if self._options['fileURL'] and info['read'] is True:
 				if lpath:
 					info['url'] = self.__path2url(lpath)
 				else:
@@ -1218,6 +1223,9 @@ class connector():
 
 
 	def __isAllowed(self, path, access):
+		if not os.path.exists(path):
+			return False
+
 		if access == 'read':
 			if not os.access(path, os.R_OK):
 				self.__errorData(path, access)
@@ -1230,13 +1238,16 @@ class connector():
 			if not os.access(os.path.dirname(path), os.W_OK):
 				self.__errorData(path, access)
 				return False
+		else:
+			return False
 
+		path = path[len(os.path.normpath(self._options['root'])):]
 		for ppath in self._options['perms']:
 			regex = r'' + ppath
 			if re.search(regex, path) and access in self._options['perms'][ppath]:
 				return self._options['perms'][ppath][access]
 
-		return True
+		return self._options['defaults'][access]
 
 
 	def __hash(self, path):
