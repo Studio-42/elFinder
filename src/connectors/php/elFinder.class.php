@@ -237,7 +237,6 @@ class elFinder {
 		if (substr($this->_options['root'], -1) == DIRECTORY_SEPARATOR) {
 			$this->_options['root'] = substr($this->_options['root'], 0, -1);
 		}
-		
 
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 
@@ -1033,14 +1032,16 @@ class elFinder {
 				if (false != ($s = getimagesize($path))) {
 					$info['dim'] = $s[0].'x'.$s[1];
 				}
+				if ($info['read']) {
+					$info['resize'] = isset($info['dim']) && $this->_canCreateTmb($info['mime']);
+					$tmb = $this->_tmbPath($path);
 
-				$info['resize'] = isset($info['dim']) && $this->_canCreateTmb($info['mime']);
-				$tmb = $this->_tmbPath($path);
-				
-				if (file_exists($tmb)) {
-					$info['tmb']  = $this->_path2url($tmb);
-				} elseif ($info['resize']) {
-					$this->_result['tmb'] = true;
+					if (file_exists($tmb)) {
+						$info['tmb']  = $this->_path2url($tmb);
+					} elseif ($info['resize']) {
+						$this->_result['tmb'] = true;
+					}
+					
 				}
 			}
 		}
@@ -1641,11 +1642,13 @@ class elFinder {
 				break;
 		}
 		
-		if ($this->_options['aclObj']) {
-			
-		}
-		
+		// if ($this->_options['aclObj']) {
+		// 	
+		// }
+		$path = substr($path, strlen($this->_options['root'])+1);
+		// echo "$path\n";
 		foreach ($this->_options['perms'] as $regex => $rules) {
+			
 			if (preg_match($regex, $path)) {
 				if (isset($rules[$action])) {
 					return $rules[$action];

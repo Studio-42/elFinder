@@ -53,13 +53,14 @@ $opts = array(
 	// 	'rm'     => true
 	// 	),
 	// 'perms'        => array(),      // individual folders/files permisions    
-	'perms' => array(
-		'/.+\.pdf$/' => array(
-			'read' => false,
-			'rm' => false
-			)
-		), 
-	'debug'        => true,         // send debug to client
+	// 'perms' => array(
+	// 	'/.+\.pdf$/' => array(
+	// 		'read' => false,
+	// 		'rm' => false
+	// 		),
+	// 	'/^Images\/.+/' => array('read' => false)
+	// 	), 
+	// 'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect
 	// 'archivers' => array(
