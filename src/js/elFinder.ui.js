@@ -609,9 +609,9 @@ elFinder.prototype.ui.prototype.commands = {
 				cut       : this.fm.buffer.cut
 			};
 			if (this.fm.jquery>132) {
-				o.files = this.fm.buffer.files;
+				o.target = this.fm.buffer.files;
 			} else {
-				o['files[]'] = this.fm.buffer.files;
+				o['target[]'] = this.fm.buffer.files;
 			}
 			this.fm.ajax(o, function(data) {
 				data.cdc && self.fm.reload(data);
