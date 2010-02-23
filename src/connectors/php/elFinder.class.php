@@ -246,7 +246,7 @@ class elFinder {
 			: dirname($this->_options['root']).DIRECTORY_SEPARATOR.$this->_options['rootAlias'];
 			
 		if (!empty($this->_options['disabled'])) {
-			$no = array('open', 'reload', 'tmb', 'geturl', 'ping');
+			$no = array('open', 'reload', 'tmb', 'ping');
 			foreach ($this->_options['disabled'] as $k => $c) {
 				if (!isset($this->_commands[$c]) || in_array($c, $no)) {
 					unset($this->_options['disabled'][$k]);
@@ -1416,9 +1416,9 @@ class elFinder {
 			case 'gd':
 				if ($s['mime'] == 'image/jpeg') {
 					$_img = imagecreatefromjpeg($img);
-				} elseif ($s['mime'] = 'image/png') {
+				} elseif ($s['mime'] == 'image/png') {
 					$_img = imagecreatefrompng($img);
-				} elseif ($s['mime'] = 'image/gif') {
+				} elseif ($s['mime'] == 'image/gif') {
 					$_img = imagecreatefromgif($img);
 				} 
 				if (!$_img || false == ($_tmb = imagecreatetruecolor($tmbSize, $tmbSize))) {
