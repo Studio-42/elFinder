@@ -3,23 +3,30 @@
 import elFinder
 
 elFinder.connector({
-	'root': '/Users/troex/Sites/git/elfinder/files',
-	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
-	'perms': {
-		'aaa': {
-			'read': False,
-			'write': False,
-			'rm': False
-		},
-		'upload': {
-			'write': False
-		}
-	},
-	# 'uploadDeny': ['image'],
-	# 'uploadAllow': ['image/png'],
-	# 'uploadOrder': ['deny', 'allow'],
-	# 'root': '/Users/troex/Sites/',
-	# 'URL': 'http://php5.localhost:8001/~troex/',
-	'imgLib': 'auto',
-	'dirSize': False
+	'root': '',
+	'URL': ''
+	## other options
+	# 'debug': True,
+	# 'dirSize': True,
+	# 'dotFiles': True,
+	# 'perms': {
+	# 	'^/upload/.*': {
+	# 		'read': False,
+	# 		'write': False,
+	# 		'rm': False
+	# 	},
+	# 	'backup': {
+	# 		'read': True,
+	# 		'write': False,
+	# 		'rm': False
+	# 	},
+	# 	'^/pics': {
+	# 		'read': True,
+	# 		'write': False,
+	# 		'rm': False
+	# 	}
+	# },
+	# 'uploadDeny': ['image', 'application'],
+	# 'uploadAllow': ['image/png', 'image/jpeg'],
+	# 'uploadOrder': ['deny', 'allow']
 }).run()
