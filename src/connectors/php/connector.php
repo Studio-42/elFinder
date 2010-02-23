@@ -52,7 +52,12 @@ $opts = array(
 	// 	'write'  => true,
 	// 	'rm'     => true
 	// 	),
-	// 'perms'        => array(),      // individual folders/files permisions     
+	// 'perms'        => array(),      // individual folders/files permisions    
+	'perms' => array(
+		'/.+\.pdf$/' => array(
+			'read' => false
+			)
+		), 
 	'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect

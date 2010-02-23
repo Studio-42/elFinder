@@ -1025,7 +1025,7 @@ class elFinder {
 		}
 		
 		if ($info['mime'] != 'directory') {
-			if ($this->_options['fileURL']) {
+			if ($this->_options['fileURL'] && $info['read']) {
 				$info['url'] = $this->_path2url($lpath ? $lpath : $path);
 			}
 			
