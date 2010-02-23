@@ -55,7 +55,8 @@ $opts = array(
 	// 'perms'        => array(),      // individual folders/files permisions    
 	'perms' => array(
 		'/.+\.pdf$/' => array(
-			'read' => false
+			'read' => false,
+			'rm' => false
 			)
 		), 
 	'debug'        => true,         // send debug to client
