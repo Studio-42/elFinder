@@ -639,7 +639,7 @@ class connector():
 		files = []
 		dirs = []
 
-		for f in os.listdir(path):
+		for f in sorted(os.listdir(path)):
 			if not self.__isAccepted(f): continue
 			pf = os.path.join(path, f)
 			info = {}
@@ -755,10 +755,11 @@ class connector():
 			'dirs': []
 		}
 		if self.__isAllowed(path, 'read'):
-			for d in os.listdir(path):
+			for d in sorted(os.listdir(path)):
 				pd = os.path.join(path, d)
 				if os.path.isdir(pd) and not os.path.islink(pd) and self.__isAccepted(d):
 					tree['dirs'].append(self.__tree(pd))
+
 		return tree
 
 
@@ -1397,8 +1398,6 @@ class connector():
 			if not mime in e:
 				e.update({mime: {'cmd': p7zip, 'argc': 'e -y', 'ext': 'zip'}})
 
-		# print archive, '\n\n'
-		# print c, '\n\n'
 		if not self._options['archiveMimes']:
 			self._options['archiveMimes'] = c.keys()
 		else:
@@ -1425,3 +1424,4 @@ class connector():
 			return False
 
 		return True
+
