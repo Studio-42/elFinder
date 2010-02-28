@@ -1,5 +1,8 @@
 <?php
 
+// set locale to UTF8 to correct multibyte characters 
+setlocale(LC_ALL, 'en_US.UTF8');
+
 interface elFinderILogger {
 	public function log($cmd, $ok, $context, $err='', $errorData = array());
 }
