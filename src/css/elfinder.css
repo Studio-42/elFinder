@@ -561,6 +561,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	height:400px; 
 	outline:none; 
 	border:1px solid #ccc;
+	font-family: "Monaco", "Andale Mono", "Lucida Console", monospace;
 }
 
 .ui-state-error {
