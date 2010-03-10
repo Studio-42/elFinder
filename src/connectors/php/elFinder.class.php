@@ -633,7 +633,7 @@ class elFinder {
 		|| false == ($src = $this->_findDir(trim($_GET['src'])))
 		|| empty($_GET['dst'])
 		|| false == ($dst = $this->_findDir(trim($_GET['dst'])))
-		|| empty($_GET['target']) || !is_array($_GET['target'])
+		|| empty($_GET['targets']) || !is_array($_GET['targets'])
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
@@ -647,7 +647,7 @@ class elFinder {
 			return $this->_result['error'] = 'Access denied';
 		}
 
-		foreach ($_GET['target'] as $hash) {
+		foreach ($_GET['targets'] as $hash) {
 			if (false == ($f = $this->_find($hash, $src))) {
 				return $this->_result['error'] = 'File not found' && $this->_content($current, true);
 			}

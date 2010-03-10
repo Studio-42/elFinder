@@ -627,7 +627,7 @@ elFinder.prototype.ui.prototype.commands = {
 			if (this.fm.jquery>132) {
 				o.target = this.fm.buffer.files;
 			} else {
-				o['target[]'] = this.fm.buffer.files;
+				o['targets[]'] = this.fm.buffer.files;
 			}
 			this.fm.ajax(o, function(data) {
 				data.cdc && self.fm.reload(data);
