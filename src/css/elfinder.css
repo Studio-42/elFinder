@@ -492,7 +492,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	background:url(../images/icons-small.png) 0px -405px no-repeat;
 }
 
-.el-finder-cwd table p em.readonly { background-position:0px -423px; }
+.el-finder-cwd table p em.readonly { background-position:0px -433px; }
 .el-finder-cwd table p em.dropbox  { background-position:0px -418px; }
 .el-finder-cwd table p em.noread  { background-position:0px -470px; }
 
