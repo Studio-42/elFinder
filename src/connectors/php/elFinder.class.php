@@ -832,6 +832,7 @@ class elFinder {
 		||  empty($_GET['targets'])
 		|| !is_array($_GET['targets'])
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		|| !$this->_isAllowed($dir, 'write')
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
@@ -873,6 +874,7 @@ class elFinder {
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
 		|| empty($_GET['target'])
 		|| false == ($file = $this->_find(trim($_GET['target']), $current))
+		|| !$this->_isAllowed($current, 'write')
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}

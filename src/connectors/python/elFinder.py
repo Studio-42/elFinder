@@ -974,6 +974,7 @@ class connector():
 			not archiveType in self._options['archivers']['create']
 			or not archiveType in self._options['archiveMimes']
 			or not curDir
+			or not self.__isAllowed(curDir, 'write')
 			):
 			self._response['error'] = 'Unable to create archive'
 			return
@@ -1030,7 +1031,12 @@ class connector():
 		mime = self.__mimetype(curFile)
 		self.__checkArchivers()
 
-		if not mime in self._options['archivers']['extract'] or not curDir or not curFile:
+		if (
+			not mime in self._options['archivers']['extract']
+			or not curDir
+			or not curFile
+			or not self.__isAllowed(curDir, 'write')
+			):
 			self._response['error'] = 'Invalid parameters'
 			return
 
