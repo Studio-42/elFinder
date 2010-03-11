@@ -1,4 +1,6 @@
+
 /* file manager window */
+
 .el-finder {
 	width:100%; 
 	min-width:400px;
@@ -26,7 +28,6 @@
 }
 
 /* disabled */
-/*.el-finder .noaccess, */
 .el-finder-disabled .el-finder-toolbar li,
 .el-finder-disabled .el-finder-nav,
 .el-finder-disabled .el-finder-cwd { 
@@ -40,6 +41,12 @@
 	background-color:#ccc;
 }
 
+.el-finder input {
+	margin:0;
+	padding:0;
+	outline:none;
+	border:1px solid #ccc;
+}
 
 /************************************/
 /*             toolbar              */
@@ -60,6 +67,7 @@
 	height:22px; 
 	width:23px;
 	margin:0 2px;
+	padding:0;
 	background:url('../images/toolbar.png') no-repeat; 
 	border:1px solid #ccc;
 	border-radius:3px; 
@@ -137,7 +145,7 @@
 	left:37%;
 	width:250px;
 	height:50px;
-	background:#fff url(../images/spinner.gif) 50% 50% no-repeat;
+	background:transparent url(../images/spinner.gif) 50% 50% no-repeat;
 	display:none;
 }
 
@@ -163,6 +171,7 @@
 .el-finder-nav {
 	float:left;
 	width : 200px;
+	background:#fff;
 }
 
 .el-finder-nav .ui-resizable-e {
@@ -273,6 +282,8 @@ ul.el-finder-tree, ul.el-finder-places {
 	border-radius:5px; 
 	-moz-border-radius:5px; 
 	-webkit-border-radius:5px;
+	color:#000;
+	background-color:transparent;
 }
 
 
@@ -368,6 +379,7 @@ ul.el-finder-tree, ul.el-finder-places {
 
 .el-finder-cwd div input { 
 	background:#fff; 
+	color:#000;
 	width:81px;
 	margin-left:-2px; 
 	outline:none; 
@@ -410,15 +422,25 @@ ul.el-finder-tree, ul.el-finder-places {
 
 .el-finder-cwd table {
 	width:100%;
-	*width:99%;
+/*	*width:99%;*/
 	border-collapse: collapse;	
 	border-spacing: 0;
 	border:1px solid #ccc;
+	border-top:0 solid;
+	border-left:0 solid;
 	margin:-3px -3px;
 }
 
-.el-finder-row-odd {
+.el-finder-cwd table tr {
+	background:transparent;
+}
+
+.el-finder-cwd table tr.el-finder-row-odd {
 	background-color:#eee;
+}
+
+.el-finder-cwd table tr.ui-selected {
+	background-color:#ccc;
 }
 
 .el-finder-cwd table th,
@@ -427,6 +449,8 @@ ul.el-finder-tree, ul.el-finder-places {
 	border-left:1px solid #ccc;
 	cursor:default;
 	white-space:nowrap;
+	color:#000;
+	
 }
 
 .el-finder-cwd table th {
@@ -438,7 +462,6 @@ ul.el-finder-tree, ul.el-finder-places {
 .el-finder-cwd table td.icon {
 	width:24px;
 }
-
 
 .el-finder-cwd table  p {
 	width:24px;
@@ -627,6 +650,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	position:absolute;
 	width:200px;
 	background:#fff; 
+	color:#000;
 	cursor:default; 
 	border:1px solid #ccc;  
 	border-radius:5px; 
@@ -712,6 +736,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 .el-finder-drag-helper div {
+	border:0 solid;
 	margin-left:-57px;
 	
 }

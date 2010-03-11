@@ -625,7 +625,7 @@ elFinder.prototype.ui.prototype.commands = {
 				cut       : this.fm.buffer.cut
 			};
 			if (this.fm.jquery>132) {
-				o.target = this.fm.buffer.files;
+				o.targets = this.fm.buffer.files;
 			} else {
 				o['targets[]'] = this.fm.buffer.files;
 			}
