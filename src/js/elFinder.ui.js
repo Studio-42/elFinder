@@ -1091,7 +1091,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			if (this.fm.selected.length) {
+			if (this.fm.cwd.write && this.fm.selected.length) {
 				var s = this.fm.getSelected(), l = s.length;
 				while (l--) {
 					if (s[l].read) {
@@ -1139,7 +1139,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.getSelected(0).read && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
 		}
 		
 		this.cm = function(t) {
