@@ -1,0 +1,31 @@
+2010-03-11  Troex Nevelin  <troex@fury.scancode.ru>
+
+	* elFinder (1.1):
+		- Total rewrite from scratch.
+		- New PHP connector.
+		- Python connector.
+		- Create/Extract archives.
+		- QuickLook.
+		- "Places" for favorites.
+		- Background thumbnails creation.
+		- Exteneded configuration options of connector and client.
+		- Spanish localization.
+		- JSON API description.
+		- Full documentation in English, Russian and Spanish.
+		- No more use of jquery plugins.
+		- Website update.
+		- [bugfix] All known bugs fixed.
+
+
+2009-11-09  Dmitry Levashov  <dio@std42.ru>
+
+	* elFinder (1.0.1):
+		- In directory tree panel added arrows to open/close directories
+		  without entering in.
+		- Added shortcut support for copy/cut/paste/delete files and
+		  folders. For Mac users added Command+Backspace support.
+		- Added context menu to current directory.
+		- Added help.
+		- [bugfix] invalid determing files/folders permissions using
+		  "perms" options in php connector
+
