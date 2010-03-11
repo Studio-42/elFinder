@@ -26,7 +26,7 @@
 }
 
 /* disabled */
-.el-finder .noaccess, 
+/*.el-finder .noaccess, */
 .el-finder-disabled .el-finder-toolbar li,
 .el-finder-disabled .el-finder-nav,
 .el-finder-disabled .el-finder-cwd { 
@@ -226,6 +226,9 @@ ul.el-finder-tree, ul.el-finder-places {
 .el-finder-nav a.readonly {
 	background-position: 15px -104px; 
 }
+.el-finder-nav a.noaccess {
+	background-position: 15px -750px; 
+}
 
 .el-finder-nav a.selected {
 	background-color:#ccc;
@@ -287,25 +290,25 @@ ul.el-finder-tree, ul.el-finder-places {
 
 /* mimetypes */
 
-.directory p   { background-position:  0     -45px; }
-.application p { background-position: -1px  -134px; }
-.audio p       { background-position: -1px -1082px; }
-.image p       { background-position: -1px -1132px; }
+.directory p     { background-position:  0     -45px; }
+.application p   { background-position: -1px  -134px; }
+.audio p         { background-position: -1px -1082px; }
+.image p         { background-position: -1px -1132px; }
 .text p,
-.x-empty p { background-position: -1px  -524px; }
-.video p   { background-position: -1px -1032px; }
+.x-empty p       { background-position: -1px  -524px; }
+.video p         { background-position: -1px -1032px; }
 /* images */
-.gif p  { background-position: 0 -1183px; }
-.jpeg p { background-position: 0 -1234px; }
+.gif p           { background-position: 0 -1183px; }
+.jpeg p          { background-position: 0 -1234px; }
 .vnd-adobe-photoshop p,
-.postscript p { background-position: 0 -1132px; }
+.postscript p    { background-position: 0 -1132px; }
 /* video */
-.ogg p { background-position: -1px -1032px; }
+.ogg p           { background-position: -1px -1032px; }
 /* audio */
-.ogm p { background-position: -1px -1082px; }
+.ogm p           { background-position: -1px -1082px; }
 /* texts */
 .rtf p,
-.rtfd p { background-position: 0 -573px; }
+.rtfd p          { background-position: 0 -573px; }
 .javascript p,
 .x-javascript p  { background-position: 0 -184px; }
 .x-c p, 
@@ -323,16 +326,20 @@ ul.el-finder-tree, ul.el-finder-places {
 .vnd-ms-office p, 
 .msword p, 
 .vnd-ms-word p, 
-.vnd-oasis-opendocument-text p { background-position: -1px -232px; }
+.vnd-oasis-opendocument-text p 
+                 { background-position: -1px -232px; }
 .ms-excel p,
 .vnd-ms-excel p,
-.vnd-oasis-opendocument-spreadsheet p { background-position: -1px -330px; }
+.vnd-oasis-opendocument-spreadsheet p 
+                 { background-position: -1px -330px; }
 .vnd-ms-powerpoint p,
-.vnd-oasis-opendocument-presentation p { background-position: -1px -380px; }
-.pdf p { background-position: -1px -282px; }
-.xml p { background-position: 0 -980px; }
-.x-shockwave-flash p { background-position: 0 -1032px; }
-.x-sh p { background-position: 0 -930px; }
+.vnd-oasis-opendocument-presentation p 
+                 { background-position: -1px -380px; }
+.pdf p           { background-position: -1px -282px; }
+.xml p           { background-position: 0 -980px; }
+.x-shockwave-flash p 
+                 { background-position: 0 -1032px; }
+.x-sh p          { background-position: 0 -930px; }
 /* archives */
 .x-bzip p, 
 .x-bzip2 p,
@@ -340,8 +347,9 @@ ul.el-finder-tree, ul.el-finder-places {
 .x-rar p,
 .x-rar-compressed p, 
 .x-tar p,  
-.x-7z-compressed p { background-position: -1px -430px; }
-.x-gzip p { background-position: -1px -477px; }
+.x-7z-compressed p 
+                 { background-position: -1px -430px; }
+.x-gzip p        { background-position: -1px -477px; }
 
 .el-finder-cwd div.el-finder-droppable p {
 	background-position: 0 -87px;
@@ -379,17 +387,23 @@ ul.el-finder-tree, ul.el-finder-places {
 .el-finder-cwd div em.dropbox {
 	float:right;
 	margin-right:9px;
-	background-position: 0px -1290px;
+	background-position: 0 -1290px;
 }
 .el-finder-cwd div em.noread {
 	float:right;
 	margin-right:9px;
-	background-position: 0px -1415px;
+	background-position: 0 -1415px;
 }
 .el-finder-cwd div em.readonly {
 	float:right;
 	margin-right:9px;
 	background-position: -34px -1287px;
+}
+
+.el-finder-cwd div em.noaccess {
+	float:right;
+	margin-right:9px;
+	background-position: 0 -1415px;
 }
 
 /********** view: list  ************/
@@ -494,7 +508,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 .el-finder-cwd table p em.readonly { background-position:0px -433px; }
 .el-finder-cwd table p em.dropbox  { background-position:0px -418px; }
-.el-finder-cwd table p em.noread  { background-position:0px -470px; }
+.el-finder-cwd table p em.noread, 
+.el-finder-cwd table p em.noaccess { background-position:0px -470px; }
 
 /************************************/
 /*              statusbar           */
@@ -702,7 +717,7 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 }
 
 .el-finder-drag-copy {
-	background:url('../images/toolbar.png') 0 -751px no-repeat;
+	background:url('../images/toolbar.png') 0 -771px no-repeat;
 }
 
 .el-finder-drag-helper label { 
