@@ -119,6 +119,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
 			var meta = e.ctrlKey||e.metaKey;
+			
 			if (self.lock) {
 				return;
 			}
@@ -150,6 +151,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 
 		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
+
 			if (self.lock) {
 				return;
 			}
@@ -235,6 +237,11 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					case 88:
 						meta && self.ui.execIfAllowed('cut');
 						break;
+						
+					case 113:
+						self.ui.execIfAllowed('rename');
+						break;
+						
 				}
 
 			});
