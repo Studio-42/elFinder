@@ -3,18 +3,13 @@
 import elFinder
 
 elFinder.connector({
-	'root': '',
-	'URL': ''
+	'root': '/home/user/Sites/elfinder/files',
+	'URL': 'http://localhost/~user/elfinder/files',
 	## other options
 	# 'debug': True,
 	# 'dirSize': True,
 	# 'dotFiles': True,
 	# 'perms': {
-	# 	'^/upload/.*': {
-	# 		'read': False,
-	# 		'write': False,
-	# 		'rm': False
-	# 	},
 	# 	'backup': {
 	# 		'read': True,
 	# 		'write': False,
