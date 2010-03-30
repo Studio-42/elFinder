@@ -26,7 +26,7 @@
 		if ((id = $(el).attr('id'))) {
 			this.id = id;
 		} else {
-			this.id = 'el-finder-'+Math.random().toString().substring(2);
+			// this.id = 'el-finder-'+Math.random().toString().substring(2);
 		}
 		
 		/**
@@ -607,16 +607,17 @@
 		}
 		
 		this.close = function() {
+			this.quickLook.hide();
 			if (this.options.docked && this.view.win.attr('undocked')) {
 				this.dock();
 			} else {
-
 				this.dialog ? this.dialog.dialog('destroy') : this.view.win.hide();
 			}
 			this.eventsManager.lock = true;
 		}
 		
 		this.destroy = function() {
+			this.quickLook.hide();
 			if (this.dialog) {
 				this.dialog.dialog('destroy');
 				this.view.win.parent().remove();
@@ -628,6 +629,7 @@
 		
 		this.dock = function() {
 			if (this.options.docked && this.view.win.attr('undocked')) {
+				this.quickLook.hide();
 				var s =this.view.win.data('size');
 				this.view.win.insertAfter(this.anchor).removeAttr('undocked');
 				resize(s.width, s.height);
@@ -638,6 +640,7 @@
 		
 		this.undock = function() {
 			if (this.options.docked && !this.view.win.attr('undocked')) {
+				this.quickLook.hide();
 				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true).show()).dialog(this.options.dialog);
 				dialogResize();
 			} 
