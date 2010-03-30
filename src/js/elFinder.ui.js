@@ -345,8 +345,7 @@ elFinder.prototype.ui.prototype.commands = {
 			} 
 			this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
 			if (this.fm.options.closeOnEditorCallback) {
-				this.fm.dock();
-				this.fm.close();
+				this.fm.destroy();
 			}
 		}
 				

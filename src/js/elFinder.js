@@ -571,6 +571,9 @@
 				this.options.dialog.close = function() { self.dock(); };
 				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
 			} else {
+				this.options.dialog.close = function() { 
+					self.destroy();
+				}
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
@@ -586,7 +589,6 @@
 					self.eventsManager.init();
 					self.reload(data);
 					self.params = data.params;
-					// self.log(self.params)
 					$('*', document.body).each(function() {
 						var z = parseInt($(this).css('z-index'));
 						if (z >= self.zIndex) {
@@ -608,9 +610,20 @@
 			if (this.options.docked && this.view.win.attr('undocked')) {
 				this.dock();
 			} else {
-				this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+
+				this.dialog ? this.dialog.dialog('destroy') : this.view.win.hide();
 			}
 			this.eventsManager.lock = true;
+		}
+		
+		this.destroy = function() {
+			if (this.dialog) {
+				this.dialog.dialog('destroy');
+				this.view.win.parent().remove();
+			} else {
+				this.view.win.remove();
+			}
+			this.ui.menu.remove();
 		}
 		
 		this.dock = function() {
