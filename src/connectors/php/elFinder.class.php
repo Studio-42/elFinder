@@ -1068,14 +1068,10 @@ class elFinder {
 			'dirs'  => array()
 			);
 
-		if (
-			($dir['read'])
-			&& (false != ($ls = scandir($path)))
-			&& (!is_link($path))
-		) {
+		if ($dir['read'] && (false != ($ls = scandir($path)))) {
 			for ($i=0; $i < count($ls); $i++) {
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
-				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {
+				if ($this->_isAccepted($ls[$i]) && is_dir($p) && !is_link($p)) {
 					$dir['dirs'][] = $this->_tree($p);
 				}
 			}
