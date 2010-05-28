@@ -72,6 +72,8 @@ class connector():
 	_mimeType = {
 		# text
 		'txt': 'text/plain',
+		'conf': 'text/plain',
+		'ini': 'text/plain',
 		'php': 'text/x-php',
 		'html': 'text/html',
 		'htm': 'text/html',
@@ -1362,10 +1364,10 @@ class connector():
 
 		mime = 'application/x-rar'
 		if rar:
-			c.update({mime: {'cmd': 'rar', 'argc': 'a', 'ext': 'rar'}})
-			e.update({mime: {'cmd': 'rar', 'argc': 'x', 'ext': 'rar'}})
+			c.update({mime: {'cmd': 'rar', 'argc': 'a -inul', 'ext': 'rar'}})
+			e.update({mime: {'cmd': 'rar', 'argc': 'x -y', 'ext': 'rar'}})
 		elif unrar:
-			e.update({mime: {'cmd': 'unrar', 'argc': 'x', 'ext': 'rar'}})
+			e.update({mime: {'cmd': 'unrar', 'argc': 'x -y', 'ext': 'rar'}})
 
 		p7zip = None
 		if p7z:

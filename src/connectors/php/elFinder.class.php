@@ -1732,13 +1732,13 @@ class elFinder {
 		} 
 		
 		exec('rar --version', $o, $c);
-		if ($c == 0) {
-			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a inul', 'ext' => 'rar');
-			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x',      'ext' => 'rar');
+		if ($c == 0 || $c == 7) {
+			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
+			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
 		} else {
 			$test = exec('unrar', $o, $c);
 			if ($c==0 || $c == 7) {
-				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x', 'ext' => 'rar');
+				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar');
 			}
 		}
 		
