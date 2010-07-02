@@ -3,15 +3,12 @@
 # Connector for elFinder File Manager
 # author Troex Nevelin <troex@fury.scancode.ru>
 
-import cgi
 import hashlib
-import json
 import mimetypes
 import os
 import os.path
 import re
 import shutil
-import sys
 import time
 from datetime import datetime
 
@@ -106,15 +103,21 @@ class connector():
 	_today = 0
 	_yesterday = 0
 
+	# public variables
+	httpAllowedParameters = ('cmd', 'target', 'targets[]', 'current', 'tree', 'name',
+		'content', 'src', 'dst', 'cut', 'init', 'type', 'width', 'height', 'upload[]')
+	# return variables
+	httpStatusCode = 0
+	httpHeader = {}
+	httpResponse = None
+
 	def __init__(self, opts):
+		self._time = time.time()
+		t = datetime.fromtimestamp(self._time)
+		self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
+		self._yesterday = self._today - 86400
+
 		self._response['debug'] = {}
-		if self._options['debug']:
-			self._time = time.time()
-			t = datetime.fromtimestamp(self._time)
-			self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
-			self._yesterday = self._today - 86400
-			import cgitb
-			cgitb.enable()
 
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
@@ -134,7 +137,8 @@ class connector():
 				self._options['tmbDir'] = False
 
 
-	def run(self):
+	def run(self, httpRequest = []):
+		"""main function"""
 		rootOk = True
 		if not os.path.exists(self._options['root']) or self._options['root'] == '':
 			rootOk = False
@@ -143,12 +147,9 @@ class connector():
 			rootOk = False
 			self._response['error'] = 'Access denied'
 
-		possible_fields = ['cmd', 'target', 'targets[]', 'current', 'tree', 'name', 
-			'content', 'src', 'dst', 'cut', 'init', 'type', 'width', 'height']
-		self._form = cgi.FieldStorage()
-		for field in possible_fields:
-			if field in self._form:
-				self._request[field] = self._form.getvalue(field)
+		for field in self.httpAllowedParameters:
+			if field in httpRequest:
+				self._request[field] = httpRequest[field]
 
 		if rootOk is True:
 			if 'cmd' in self._request:
@@ -160,7 +161,7 @@ class connector():
 							func()
 						except Exception, e:
 							self._response['error'] = 'Command Failed'
-							self.__debug('exception', e)
+							self.__debug('exception', str(e))
 				else:
 					self._response['error'] = 'Unknown command'
 			else:
@@ -191,13 +192,18 @@ class connector():
 			if 'debug' in self._response:
 				del self._response['debug']
 
-		if ('cmd' in self._request and self._request['cmd'] == 'upload') or self._options['debug']:
-			print 'Content-type: text/html\n'
-		else:
-			print 'Content-type: application/json\n'
+		if self.httpStatusCode < 100:
+			self.httpStatusCode = 200
 
-		print json.dumps(self._response, indent = bool(self._options['debug']))
-		return  # sys.exit(0)
+		if not 'Content-type' in self.httpHeader:
+			if ('cmd' in self._request and self._request['cmd'] == 'upload') or self._options['debug']:
+				self.httpHeader['Content-type'] = 'text/html'
+			else:
+				self.httpHeader['Content-type'] = 'application/json'
+
+		self.httpResponse = self._response
+
+		return self.httpStatusCode, self.httpHeader, self.httpResponse
 
 
 	def __open(self):
@@ -208,23 +214,31 @@ class connector():
 			curFile = self.__find(self._request['target'], curDir)
 
 			if not curDir or not curFile or os.path.isdir(curFile):
-				print 'HTTP/1.x 404 Not Found\n\n'
-				sys.exit('File not found')
+				self.httpStatusCode = 404
+				self.httpHeader['Content-type'] = 'text/html'
+				self.httpResponse = 'File not found'
+				return
 			if not self.__isAllowed(curDir, 'read') or not self.__isAllowed(curFile, 'read'):
-				print 'HTTP/1.x 403 Access Denied\n\n'
-				sys.exit('Access denied')
+				self.httpStatusCode = 403
+				self.httpHeader['Content-type'] = 'text/html'
+				self.httpResponse = 'Access denied'
+				return
 
 			if os.path.islink(curFile):
 				curFile = self.__readlink(curFile)
 				if not curFile or os.path.isdir(curFile):
-					print 'HTTP/1.x 404 Not Found\n\n'
-					sys.exit('File not found')
+					self.httpStatusCode = 404
+					self.httpHeader['Content-type'] = 'text/html'
+					self.httpResponse = 'File not found'
+					return
 				if (
 					not self.__isAllowed(os.path.dirname(curFile), 'read')
 					or not self.__isAllowed(curFile, 'read')
 					):
-					print 'HTTP/1.x 403 Access Denied\n\n'
-					sys.exit('Access denied')
+					self.httpStatusCode = 403
+					self.httpHeader['Content-type'] = 'text/html'
+					self.httpResponse = 'Access denied'
+					return
 
 			mime = self.__mimetype(curFile)
 			parts = mime.split('/', 2)
@@ -232,14 +246,15 @@ class connector():
 			elif parts[0] == 'text': disp = 'inline'
 			else: disp = 'attachments'
 
-			print 'Content-Type: ' + mime
-			print 'Content-Disposition: ' + disp + '; filename=' + os.path.basename(curFile)
-			print 'Content-Location: ' + curFile.replace(self._options['root'], '')
-			print 'Content-Transfer-Encoding: binary'
-			print 'Content-Length: ' + str(os.lstat(curFile).st_size)
-			print 'Connection: close\n'
-			print open(curFile, 'r').read()
-			sys.exit(0);
+			self.httpStatusCode = 200
+			self.httpHeader['Content-type'] = mime
+			self.httpHeader['Content-Disposition'] = disp + '; filename=' + os.path.basename(curFile)
+			self.httpHeader['Content-Location'] = curFile.replace(self._options['root'], '')
+			self.httpHeader['Content-Transfer-Encoding'] = 'binary'
+			self.httpHeader['Content-Length'] = str(os.lstat(curFile).st_size)
+			self.httpHeader['Connection'] = 'close'
+			self._response['file'] = open(curFile, 'r')
+			return
 		# try dir
 		else:
 			path = self._options['root']
@@ -343,6 +358,7 @@ class connector():
 
 
 	def __rm(self):
+		"""Delete files and directories"""
 		current = rmList = None
 		curDir = rmFile = None
 		if 'current' in self._request and 'targets[]' in self._request:
@@ -366,6 +382,7 @@ class connector():
 
 
 	def __upload(self):
+		"""Upload files"""
 		try: # Windows needs stdio set for binary mode.
 			import msvcrt
 			msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
@@ -381,20 +398,22 @@ class connector():
 			if not self.__isAllowed(curDir, 'write'):
 				self._response['error'] = 'Access denied'
 				return
-			if not 'upload[]' in self._form:
+			if not 'upload[]' in self._request:
 				self._response['error'] = 'No file to upload'
 				return
 
-			upFiles = self._form['upload[]']
-			if not isinstance(upFiles, list):
-				upFiles = [upFiles]
+			upFiles = self._request['upload[]']
+			# invalid format
+			# must be dict('filename1': 'filedescriptor1', 'filename2': 'filedescriptor2', ...)
+			if not isinstance(upFiles, dict):
+				self._response['error'] = 'Invalid parameters'
+				return
 
 			self._response['select'] = []
 			total = 0
 			upSize = 0
 			maxSize = self._options['uploadMaxSize'] * 1024 * 1024
-			for up in upFiles:
-				name = up.filename
+			for name, data in upFiles.iteritems():
 				if name:
 					total += 1
 					name = os.path.basename(name)
@@ -404,7 +423,7 @@ class connector():
 						name = os.path.join(curDir, name)
 						try:
 							f = open(name, 'wb', self._options['uploadWriteChunk'])
-							for chunk in self.__fbuffer(up.file):
+							for chunk in self.__fbuffer(data):
 								f.write(chunk)
 							f.close()
 							upSize += os.lstat(name).st_size
@@ -440,6 +459,7 @@ class connector():
 
 
 	def __paste(self):
+		"""Copy or cut files/directories"""
 		if 'current' in self._request and 'src' in self._request and 'dst' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			src = self.__findDir(self._request['src'], None)
@@ -505,6 +525,7 @@ class connector():
 
 
 	def __duplicate(self):
+		"""Create copy of files/directories"""
 		if 'current' in self._request and 'target' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			target = self.__find(self._request['target'], curDir)
@@ -523,6 +544,7 @@ class connector():
 
 
 	def __resize(self):
+		"""Scale image size"""
 		if not (
 			'current' in self._request and 'target' in self._request
 			and 'width' in self._request and 'height' in self._request
@@ -562,6 +584,7 @@ class connector():
 
 
 	def __thumbnails(self):
+		"""Create previews for images"""
 		if 'current' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
 			if not curDir or curDir == self._options['tmbDir']:
@@ -766,6 +789,7 @@ class connector():
 
 
 	def __uniqueName(self, path, copy = ' copy'):
+		"""Generate unique name for file copied file"""
 		curDir = os.path.dirname(path)
 		curName = os.path.basename(path)
 		lastDot = curName.rfind('.')
@@ -815,6 +839,7 @@ class connector():
 
 
 	def __remove(self, target):
+		"""Internal remove procedure"""
 		if not self.__isAllowed(target, 'rm'):
 			self.__errorData(target, 'Access denied')
 
@@ -840,6 +865,7 @@ class connector():
 
 
 	def __copy(self, src, dst):
+		"""Internal copy procedure"""
 		dstDir = os.path.dirname(dst)
 		if not self.__isAllowed(src, 'read'):
 			self.__errorData(src, 'Access denied')
@@ -936,6 +962,7 @@ class connector():
 
 
 	def __edit(self):
+		"""Save content in file"""
 		error = ''
 		if 'current' in self._request and 'target' in self._request and 'content' in self._request:
 			curDir = self.__findDir(self._request['current'], None)
@@ -959,6 +986,7 @@ class connector():
 
 
 	def __archive(self):
+		"""Compress files/directories to archive"""
 		self.__checkArchivers()
 
 		if (
@@ -1024,6 +1052,7 @@ class connector():
 
 
 	def __extract(self):
+		"""Uncompress archive"""
 		if not 'current' in self._request or not 'target' in self._request:
 			self._response['error'] = 'Invalid parameters'
 			return
@@ -1064,11 +1093,13 @@ class connector():
 
 	def __ping(self):
 		"""Workaround for Safari"""
-		print 'Connection: close\n'
-		sys.exit(0)
+		self.httpStatusCode = 200
+		self.httpHeader['Connection'] = 'close'
+		return
 
 
 	def __mimetype(self, path):
+		"""Detect mimetype of file"""
 		mime = mimetypes.guess_type(path)[0] or 'unknown'
 		ext = path[path.rfind('.') + 1:]
 
@@ -1093,6 +1124,7 @@ class connector():
 
 
 	def __tmb(self, path, tmb):
+		"""Internal thumbnail create procedure"""
 		try:
 			im = self._im.open(path).copy()
 			size = self._options['tmbSize'], self._options['tmbSize']
