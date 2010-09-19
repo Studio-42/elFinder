@@ -19,6 +19,7 @@
 			alert('Invalid configuration! You have to set URL option.');
 			return;
 		}
+		
 		/**
 		 * String. element id, create random if not set;
 		 **/
@@ -148,7 +149,7 @@
 		 * @param  Boolean  state
 		 **/
 		this.lockShortcuts = function(l) {
-			this.eventsManager.lock = l;
+			this.eventsManager.lock = !!l;
 		}
 		
 		/**
@@ -191,16 +192,19 @@
 			}
 			opts.success = function(data) {
 				opts.lock && self.lock();
-				data.debug && self.log(data.debug);
-				if (data.error) {
-					!opts.silent && self.view.error(data.error, data.errorData);
-					if (!opts.force) {
-						return;
+				if (data) {
+					data.debug && self.log(data.debug);
+					if (data.error) {
+						!opts.silent && self.view.error(data.error, data.errorData);
+						if (!opts.force) {
+							return;
+						}
 					}
+					callback(data);
+
+					delete data;
 				}
-				callback(data);
 				
-				delete data;
 			}
 			opts.lock && this.lock(true);
 			$.ajax(opts);
@@ -324,11 +328,12 @@
 		 *
 		 */
 		this.updateCwd = function() {
-			this.lockShortcuts();
+			this.lockShortcuts(true);
 			this.selected = [];
 			this.view.renderCwd();
 			this.eventsManager.updateCwd();
 			this.view.tree.find('a[key="'+this.cwd.hash+'"]').trigger('select');
+			this.lockShortcuts();
 		}
 		
 		/**
@@ -588,10 +593,7 @@
 				if (data.cwd) {
 					self.eventsManager.init();
 					self.reload(data);
-					// self.params = data.params;
 					$.extend(self.params, data.params||{});
-					// self.log(self.params)
-					// self.params = data.params;
 
 					$('*', document.body).each(function() {
 						var z = parseInt($(this).css('z-index'));
@@ -755,6 +757,10 @@
 					
 				case 'undock':
 					this.elfinder.undock();
+					break;
+					
+				case'destroy':
+					this.elfinder.destroy();
 					break;
 			}
 			

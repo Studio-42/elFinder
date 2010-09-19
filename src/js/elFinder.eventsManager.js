@@ -11,12 +11,15 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	this.tree  = fm.view.tree
 	this.cwd   = fm.view.cwd;
 	this.pointer = '';
-	
+
 	/**
 	 * Initial events binding
 	 *
 	 **/
 	this.init = function() {
+		var self = this;
+		
+		self.lock = false;
 		
 		this.cwd
 			.bind('click', function(e) {
@@ -52,14 +55,23 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.selectable({
 				filter : '[key]',
 				delay  : 300,
-				stop   : function() { self.fm.updateSelect() }
+				stop   : function() { self.fm.updateSelect(); self.fm.log('mouseup') }
 			});
 			
-		$(document).bind('click', function() { 
+		$(document).bind('click', function(e) { 
 			self.fm.ui.hideMenu(); 
 			$('input', self.cwd).trigger('change'); 
+
+			if (!$(e.target).is('input,textarea,select')) {
+				$('input,textarea').blur();
+			}
 		});
 
+		$('input,textarea').live('focus', function(e) {
+			self.lock = true;
+		}).live('blur', function(e) {
+			self.lock = false;
+		});
 
 		/* open parents dir in tree */
 		this.tree.bind('select', function(e) {
