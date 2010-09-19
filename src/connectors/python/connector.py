@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python:q
+
 
 import cgi
 import json
@@ -11,7 +12,7 @@ opts = {
 	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
 	## other options
 	'debug': True,
-	'fileURL': False,  # download files using connector, no direct urlsto files
+	'fileURL': False,  # download files using connector, no direct urls to files
 	# 'dirSize': True,
 	# 'dotFiles': True,
 	# 'perms': {
@@ -92,14 +93,16 @@ if not response is None and status == 200:
 #	print 'HTTP/1.x 403 Access Denied'
 #elif elf.httpStatusCode == 404:
 #	print 'HTTP/1.x 404 Not Found'
+#
 #if len(elf.httpHeader) >= 1:
 #	for header, value in elf.httpHeader.iteritems():
 #		print header + ': ' + value
 #	print
 #
 #if not elf.httpResponse is None:
-#	if isinstance(elf.httpResponse, file):
-#		print elf.httpResponse.read()
-#		elf.httpResponse.close()
+#	if isinstance(elf.httpResponse['file'], file):
+#		print elf.httpResponse['file'].read()
+#		elf.httpResponse['file'].close()
 #	else:
-#		print elf.httpResponse
+#		print json.dumps(elf.httpResponse, indent = True)
+#
