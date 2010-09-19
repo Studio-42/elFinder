@@ -1370,7 +1370,7 @@ class connector():
 		p7zr = self.__runSubProcess(['7zr', '--help'])
 
 		# tar = False
-		tar = gzip = bzip2 = zipc = unzip = rar = unrar = False
+		# tar = gzip = bzip2 = zipc = unzip = rar = unrar = False
 		# print tar, gzip, bzip2, zipc, unzip, rar, unrar, p7z, p7za, p7zr
 
 		if tar:

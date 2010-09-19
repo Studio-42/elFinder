@@ -1,3 +1,8 @@
+/*
+ * Ukranian lozalization
+ * @author Artem
+ * @version 2010-09-19
+ */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
 	elFinder.prototype.options.i18n.ua = {
