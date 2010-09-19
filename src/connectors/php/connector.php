@@ -39,12 +39,12 @@ $opts = array(
 	// 'dirSize'      => true,         // count total directories sizes
 	// 'fileMode'     => 0666,         // new files mode
 	// 'dirMode'      => 0777,         // new folders mode
-	// 'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
+	// 'mimeDetect'   => 'internal',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
 	// 'uploadAllow'  => array(),      // mimetypes which allowed to upload
 	// 'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 	// 'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 	// 'imgLib'       => 'mogrify',       // image manipulation library (imagick, mogrify, gd)
-	// 'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+	'tmbDir'       => '',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
 	// 'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 	// 'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 	// 'tmbSize'      => 48,           // images thumbnails size (px)
@@ -57,6 +57,13 @@ $opts = array(
 	// 	'rm'     => true
 	// 	),
 	// 'perms'        => array(),      // individual folders/files permisions    
+	'perms' => array(
+		'/mimes/' => array(
+			'read' => false,
+			'write' => false,
+			'rm' => false
+			)
+		)
 	// 'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect

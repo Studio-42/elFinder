@@ -38,7 +38,8 @@
 	background-color:#99ccff;
 }
 .el-finder .ui-selected {
-	background-color:#ccc;
+/*	background-color:#ccc;*/
+	background-color:#c5e4f9;
 }
 
 .el-finder input {
@@ -240,7 +241,8 @@ ul.el-finder-tree, ul.el-finder-places {
 }
 
 .el-finder-nav a.selected {
-	background-color:#ccc;
+/*	background-color:#ccc;*/
+	background-color:#c5e4f9;
 	background-position: 15px -128px;
 }
 
@@ -301,69 +303,46 @@ ul.el-finder-tree, ul.el-finder-places {
 
 /* mimetypes */
 
-.directory p     { background-position:  0     -45px; }
-.application p   { background-position: -1px  -134px; }
-.audio p         { background-position: -1px -1082px; }
-.image p         { background-position: -1px -1132px; }
-.text p,
-.x-empty p       { background-position: -1px  -524px; }
-.video p         { background-position: -1px -1032px; }
-/* images */
-.gif p           { background-position: 0 -1183px; }
-.jpeg p          { background-position: 0 -1234px; }
-.vnd-adobe-photoshop p,
-.postscript p    { background-position: 0 -1132px; }
-/* video */
-.ogg p           { background-position: -1px -1032px; }
-/* audio */
-.ogm p           { background-position: -1px -1082px; }
+.directory p { background-position:  0     -50px; }
+.application p,.x-java p { background-position: -1px  -150px; }
+.audio p { background-position: -1px -300px; }
+.image p { background-position: -1px -250px;  }
+.text p, .x-empty p { background-position: -1px  -200px; }
+.video p  { background-position: -1px -350px; }
+.vnd-adobe-photoshop p, .postscript p    { background-position: 0 -250px; }
 /* texts */
-.rtf p,
-.rtfd p          { background-position: 0 -573px; }
-.javascript p,
-.x-javascript p  { background-position: 0 -184px; }
-.x-c p, 
-.css p, 
-.x-sql p, 
-.x-python p,
-.x-java-source p { background-position: 0 -624px; }
-.html p          { background-position: 0 -777px; }
-.x-java p        { background-position: 0 -827px; }
-.x-php p         { background-position: 0 -726px; }
-.x-perl p        { background-position: 0 -675px; }
-.x-ruby p        { background-position: 0 -877px; }
-.x-shellscript p { background-position: 0 -930px; }
+.rtf p, .rtfd p { background-position: 0 -400px; }
+.html p { background-position: 0 -550px; }
+.css p { background-position: 0 -600px; }
+.javascript p, .x-javascript p  { background-position: 0 -650px; }
+.x-perl p { background-position: 0 -700px; }
+.x-python p { background-position: 0 -750px; }
+.x-ruby p { background-position: 0 -800px; }
+.x-sh p, .x-shellscript p { background-position: 0 -850px; }
+.x-c p, .x-java-source p { background-position: 0 -900px; }
+.x-php p  { background-position: 0 -950px; }
+.xml p           { background-position: 0 -1000px; }
 /* applications */
 .vnd-ms-office p, 
 .msword p, 
 .vnd-ms-word p, 
-.vnd-oasis-opendocument-text p 
-                 { background-position: -1px -232px; }
+.vnd-oasis-opendocument-text p,
 .ms-excel p,
 .vnd-ms-excel p,
-.vnd-oasis-opendocument-spreadsheet p 
-                 { background-position: -1px -330px; }
+.vnd-oasis-opendocument-spreadsheet p,
 .vnd-ms-powerpoint p,
-.vnd-oasis-opendocument-presentation p 
-                 { background-position: -1px -380px; }
-.pdf p           { background-position: -1px -282px; }
-.xml p           { background-position: 0 -980px; }
-.x-shockwave-flash p 
-                 { background-position: 0 -1032px; }
-.x-sh p          { background-position: 0 -930px; }
+.vnd-oasis-opendocument-presentation p { background-position: 0 -500px; }
+.pdf p { background-position: 0 -450px; }
+.x-shockwave-flash p { background-position: 0 -1250px; }
 /* archives */
-.x-bzip p, 
-.x-bzip2 p,
-.zip p,
-.x-rar p,
-.x-rar-compressed p, 
-.x-tar p,  
-.x-7z-compressed p 
-                 { background-position: -1px -430px; }
-.x-gzip p        { background-position: -1px -477px; }
+.zip p, .x-7z-compressed p { background-position: 0 -1050px; }
+.x-gzip p, .x-tar p  { background-position: 0 -1100px; }
+.x-bzip p, .x-bzip2 p { background-position: 0 -1150px; }
+.x-rar p, .x-rar-compressed p { background-position: 0 -1200px; }
+
 
 .el-finder-cwd div.el-finder-droppable p {
-	background-position: 0 -87px;
+	background-position: 0 -98px;
 }
 
 .el-finder-cwd label {
@@ -393,29 +372,29 @@ ul.el-finder-tree, ul.el-finder-places {
 	margin-left:9px;
 	width:15px;
 	height:16px;
-	background:url(../images/icons-big.png) -17px -1290px no-repeat;
+	background:url(../images/icons-big.png) -17px -1310px no-repeat;
 }
 
 .el-finder-cwd div em.dropbox {
 	float:right;
 	margin-right:9px;
-	background-position: 0 -1290px;
+	background-position: 0 -1308px;
 }
 .el-finder-cwd div em.noread {
 	float:right;
 	margin-right:9px;
-	background-position: 0 -1415px;
+	background-position: 0 -1310px;
 }
 .el-finder-cwd div em.readonly {
 	float:right;
 	margin-right:9px;
-	background-position: -34px -1287px;
+	background-position: -34px -1306px;
 }
 
 .el-finder-cwd div em.noaccess {
 	float:right;
 	margin-right:9px;
-	background-position: 0 -1415px;
+	background-position: 0 -1430px;
 }
 
 /********** view: list  ************/
@@ -839,14 +818,14 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 
 /* button help */
 .el-finder-help-std {
-	background: url(../images/icons-big.png) 0 -1315px no-repeat;
+	background: url(../images/icons-big.png) 0 -1380px no-repeat;
 	width:48px;
 	height:48px;
 	float:right;
 }
 
 .el-finder-logo {
-	background: url(../images/icons-big.png) 0 -1365px no-repeat;
+	background: url(../images/icons-big.png) 0 -1329px no-repeat;
 	width:48px;
 	height:48px;
 	float:left;
