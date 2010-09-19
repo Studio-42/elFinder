@@ -585,7 +585,8 @@
 				if (data.cwd) {
 					self.eventsManager.init();
 					self.reload(data);
-					self.params = data.params;
+					// self.params = data.params;
+					$.extend(self.params, data.params||{});
 					// self.log(self.params)
 					$('*', document.body).each(function() {
 						var z = parseInt($(this).css('z-index'));

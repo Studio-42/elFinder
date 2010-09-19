@@ -26,7 +26,7 @@
 	<script src="src/js/elFinder.quickLook.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/js/i18n/elfinder.es.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/js/i18n/elfinder.fr.js" type="text/javascript" charset="utf-8"></script>
 	
 	<style type="text/css">
 		#close, #open, #dock, #undock {
@@ -57,7 +57,7 @@
 			
 			var f = $('#finder').elfinder({
 				url : 'src/connectors/php/connector.php',
-				lang : 'ru',
+				lang : 'fr',
 
 				editorCallback : function(url) {
 					if (window.console && window.console.log) {
@@ -86,6 +86,7 @@
 <body>
 	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
+	<input type="text" value="123" />
 
 	
 

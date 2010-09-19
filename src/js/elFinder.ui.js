@@ -136,7 +136,7 @@ elFinder.prototype.ui = function(fm) {
 			disabled.push('select');
 		}
 		/* disable archive command if no archivers enabled  */
-		if (!self.fm.params.archives.length && $.inArray('archive', disabled) == -1) {
+		if (!this.fm.params.archives.length && $.inArray('archive', disabled) == -1) {
 			disabled.push('archive');
 		}
 		for (i in this.commands) {
