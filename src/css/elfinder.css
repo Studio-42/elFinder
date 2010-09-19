@@ -38,7 +38,8 @@
 	background-color:#99ccff;
 }
 .el-finder .ui-selected {
-	background-color:#ccc;
+/*	background-color:#ccc;*/
+	background-color:#c5e4f9;
 }
 
 .el-finder input {
@@ -240,7 +241,8 @@ ul.el-finder-tree, ul.el-finder-places {
 }
 
 .el-finder-nav a.selected {
-	background-color:#ccc;
+/*	background-color:#ccc;*/
+	background-color:#c5e4f9;
 	background-position: 15px -128px;
 }
 
