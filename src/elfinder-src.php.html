@@ -12,23 +12,23 @@
 	<link rel="stylesheet" href="../js/ui-themes/smoothness/jquery-ui-1.8.5.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="css/elfinder.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
-	<script src="js/elFinder.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.view.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.ui.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.quickLook.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.js"               type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.view.js"          type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.ui.js"            type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.quickLook.js"     type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.cs.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.el.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.es.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.fr.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.hu.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.it.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.lv.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.nl.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.pl.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.ua.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ru.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.cs.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.el.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.es.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.fr.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.hu.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.it.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.lv.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.nl.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.pl.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ua.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.zh_TW.js" type="text/javascript" charset="utf-8"></script>
 	
 	<style type="text/css">
@@ -57,36 +57,27 @@
 
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
-			
 			var f = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-				lang : 'ua',
-				editorCallback : function(url) {
-					if (window.console && window.console.log) {
-						window.console.log(url);
-					} else {
-						alert(url);
-					}
-					
-				},
-				closeOnEditorCallback : true,
+				lang : 'ru',
 				docked : true,
 				dialog : {
 					title : 'File manager',
 					height : 500
 				}
 			})
+
 			// window.console.log(f)
+
 			$('#close,#open,#dock,#undock,#destroy').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
 			})
-			
 		})
 	</script>
 
 </head>
 <body>
-	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div><div id="destroy">destroy</div>
+	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
 	<input type="text" value="123" />
 
