@@ -62,15 +62,6 @@
 			var f = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
 				lang : 'ru',
-				editorCallback : function(url) {
-					if (window.console && window.console.log) {
-						window.console.log(url);
-					} else {
-						alert(url);
-					}
-					
-				},
-				closeOnEditorCallback : true,
 				docked : true,
 				dialog : {
 					title : 'File manager',
@@ -87,7 +78,7 @@
 
 </head>
 <body>
-	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div><div id="destroy">destroy</div>
+	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
 	<input type="text" value="123" />
 
