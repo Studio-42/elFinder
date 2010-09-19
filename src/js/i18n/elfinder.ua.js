@@ -8,14 +8,14 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 	elFinder.prototype.options.i18n.ua = {
 		/* errors */
 		'Root directory does not exists'       : 'Коренева директорія не існує',
-		'Unable to connect to backend'         : 'Не вдалося з&rsquo;єднатися з сервером',
+		'Unable to connect to backend'         : 'Не вдалося з\'єднатися з сервером',
 		'Access denied'                        : 'Доступ заборонено',
 		'Invalid backend configuration'        : 'Помилки у відповідь сервера',
 		'Unknown command'                      : 'Невідома команда',
 		'Command not allowed'                  : 'Виконання команди заборонено',
 		'Invalid parameters'                   : 'Хибний параметри',
 		'File not found'                       : 'Файл не знайдено',
-		'Invalid name'                         : 'Некоректний ім&rsquo;я',
+		'Invalid name'                         : 'Некоректний ім\'я',
 		'File or folder with the same name already exists' : 'Файл або папка з такою назвою вже існує',
 		'Unable to rename file'                : 'Не вдалося перейменувати файл',
 		'Unable to create folder'              : 'Не вдалося створити папку',
@@ -41,8 +41,8 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Unable to open broken link'            : 'Неможливо відкрити биту посилання',
 		'File URL disabled by connector config' : 'Доступ до адрес файлів заборонений налаштуваннями коннектора',
 		/* statusbar */
-		'items'          : 'об&rsquo;єктів',
-		'selected items' : 'вибрано об&rsquo;єктів',
+		'items'          : 'об\'єктів',
+		'selected items' : 'вибрано об\'єктів',
 		/* commands/buttons */
 		'Back'                    : 'Назад',
 		'Reload'                  : 'Оновити',
@@ -66,7 +66,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Розпакувати архів',
 		'Get info'                : 'Властивості',
 		'Help'                    : 'Допомога',
-		'Dock/undock filemanger window' : 'Від&rsquo;єднати/приєднати Менеджер файлів до сторінки',
+		'Dock/undock filemanger window' : 'Від\'єднати/приєднати Менеджер файлів до сторінки',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Максимальний розмір файлів',
 		'Add field'   : 'Додати поле',
@@ -183,7 +183,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Simple and usefull Content Management System' : 'Проста і зручна Система Управління Сайтами',
 		'Support project development and we will place here info about you' : 'Підтримайте розробку продукту і ми розмістимо тут інформацію про вас.',
 		'Contacts us if you need help integrating elFinder in you products' : 'Якщо ви хочете інтегрувати elFinder в свій продукт, звертайтеся до нас',
-		'helpText' : 'elFinder працює аналогічно до файлового менеджера у вашому комп&rsquo;ютері. <br /> Маніпулювати файлами можна за допомогою кнопок на верхній панелі, контекстного меню або сполучення клавіш. Щоб перемістити файли/папки, просто перенесіть їх на іконку потрібної папки. Якщо буде затиснута клавіша Shift файли будуть скопійовані. <br/> <br/> ElFinder підтримує наступні сполучення клавіш:'
+		'helpText' : 'elFinder працює аналогічно до файлового менеджера у вашому комп\'ютері. <br /> Маніпулювати файлами можна за допомогою кнопок на верхній панелі, контекстного меню або сполучення клавіш. Щоб перемістити файли/папки, просто перенесіть їх на іконку потрібної папки. Якщо буде затиснута клавіша Shift файли будуть скопійовані. <br/> <br/> ElFinder підтримує наступні сполучення клавіш:'
 		
 	};
 	
