@@ -1,5 +1,6 @@
 <?php
-error_reporting(E_ALL);
+
+error_reporting(0); // Set E_ALL for debuging
 
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
@@ -27,12 +28,12 @@ class elFinderLogger implements elFinderILogger {
 }
 
 $opts = array(
-	'root'   => '../../../files',         // path to root directory
-	'URL'    => 'http://localhost/git/elfinder/files/', // root directory URL
-	'rootAlias'    => 'Home',          // display this instead of root directory name
-	'uploadAllow' => array("jpg","jpeg","gif","png","zip"),
-	'uploadDeny' => array('all'),
-	'uploadOrder' => 'deny,allow'
+	'root'            => '../../../files',                       // path to root directory
+	'URL'             => 'http://localhost/git/elfinder/files/', // root directory URL
+	'rootAlias'       => 'Home',       // display this instead of root directory name
+	//'uploadAllow'   => array('images/*'),
+	//'uploadDeny'    => array('all'),
+	//'uploadOrder'   => 'deny,allow'
 	// 'disabled'     => array(),      // list of not allowed commands
 	// 'dotFiles'     => false,        // display dot files
 	// 'dirSize'      => true,         // count total directories sizes
@@ -56,13 +57,6 @@ $opts = array(
 	// 	'rm'     => true
 	// 	),
 	// 'perms'        => array(),      // individual folders/files permisions    
-	// 'perms' => array(
-	// 	'/.+\.pdf$/' => array(
-	// 		'read' => false,
-	// 		'rm' => false
-	// 		),
-	// 	'/^Images\/.+/' => array('read' => false)
-	// 	), 
 	// 'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect

@@ -337,12 +337,6 @@ class elFinder {
 			
 		}
 		
-		if ($cmd) {
-			$this->{$this->_commands[$cmd]}();
-		} else {
-			$this->_open();
-		}
-
 		if ($this->_options['debug']) {
 			$this->_result['debug'] = array(
 				'time'       => $this->_utime() - $this->_time,
@@ -353,8 +347,14 @@ class elFinder {
 				$this->_result['debug']['dirSize'] = true;
 				$this->_result['debug']['du'] = @$this->_options['du'];
 			}
-			
 		}
+
+		if ($cmd) {
+			$this->{$this->_commands[$cmd]}();
+		} else {
+			$this->_open();
+		}
+
 		header("Content-Type: ".($cmd == 'upload' ? 'text/html' : 'application/json'));
 		header("Connection: close");
 		echo json_encode($this->_result);
@@ -435,8 +435,8 @@ class elFinder {
 			$this->_content($path, isset($_GET['tree']));
 		}
 	}
-	
-	
+
+
 	/**
 	 * Rename file/folder
 	 *
@@ -633,7 +633,7 @@ class elFinder {
 		|| false == ($src = $this->_findDir(trim($_GET['src'])))
 		|| empty($_GET['dst'])
 		|| false == ($dst = $this->_findDir(trim($_GET['dst'])))
-		|| empty($_GET['target']) || !is_array($_GET['target'])
+		|| empty($_GET['targets']) || !is_array($_GET['targets'])
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
@@ -647,7 +647,7 @@ class elFinder {
 			return $this->_result['error'] = 'Access denied';
 		}
 
-		foreach ($_GET['target'] as $hash) {
+		foreach ($_GET['targets'] as $hash) {
 			if (false == ($f = $this->_find($hash, $src))) {
 				return $this->_result['error'] = 'File not found' && $this->_content($current, true);
 			}
@@ -832,6 +832,7 @@ class elFinder {
 		||  empty($_GET['targets'])
 		|| !is_array($_GET['targets'])
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))
+		|| !$this->_isAllowed($dir, 'write')
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
@@ -873,6 +874,7 @@ class elFinder {
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
 		|| empty($_GET['target'])
 		|| false == ($file = $this->_find(trim($_GET['target']), $current))
+		|| !$this->_isAllowed($current, 'write')
 		) {
 			return $this->_result['error'] = 'Invalid parameters';
 		}
@@ -1004,8 +1006,7 @@ class elFinder {
 			'write' => $this->_isAllowed($path, 'write'),
 			'rm'    => $this->_isAllowed($path, 'rm'),
 			);
-		
-				
+
 		if ($type == 'link') {
 			if (false == ($lpath = $this->_readlink($path))) {
 				$info['mime'] = 'symlink-broken';
@@ -1066,11 +1067,11 @@ class elFinder {
 			'write' => $this->_isAllowed($path, 'write'),
 			'dirs'  => array()
 			);
-		
-		if ($dir['read'] && false != ($ls = scandir($path))) {
+
+		if ($dir['read'] && (false != ($ls = scandir($path)))) {
 			for ($i=0; $i < count($ls); $i++) {
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
-				if ($this->_isAccepted($ls[$i]) && filetype($p) == 'dir') {
+				if ($this->_isAccepted($ls[$i]) && is_dir($p) && !is_link($p)) {
 					$dir['dirs'][] = $this->_tree($p);
 				}
 			}
@@ -1242,7 +1243,12 @@ class elFinder {
 		if (false != ($ls = scandir($path))) {
 			for ($i=0; $i < count($ls); $i++) { 
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				if ($this->_isAccepted($ls[$i]) && is_dir($p)) {
+				if (is_link($p))
+				{
+					$link = $this->_readlink($p);
+					$this->_result['debug']['findDir_'.$p] = 'link to '.$link;
+				}
+				if ($this->_isAccepted($ls[$i]) && is_dir($p) && (!is_link($p))) {
 					if ($this->_hash($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
 						return $p;
 					}
@@ -1284,11 +1290,11 @@ class elFinder {
 		if ('/' != substr($target, 0, 1)) {
 			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
 		}
-		$target = realpath($target);
-		$root   = realpath($this->_options['root']);
+		$target = $this->_normpath($target);
+		$root   = $this->_normpath($this->_options['root']);
 		return $target && file_exists($target) && 0 === strpos($target, $root) ? $target : false;
 	}
-	
+
 	/**
 	 * Count total directory size if this allowed in options
 	 *
@@ -1726,13 +1732,13 @@ class elFinder {
 		} 
 		
 		exec('rar --version', $o, $c);
-		if ($c == 0) {
-			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a inul', 'ext' => 'rar');
-			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x',      'ext' => 'rar');
+		if ($c == 0 || $c == 7) {
+			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
+			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
 		} else {
 			$test = exec('unrar', $o, $c);
 			if ($c==0 || $c == 7) {
-				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x', 'ext' => 'rar');
+				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar');
 			}
 		}
 		
@@ -1829,9 +1835,57 @@ class elFinder {
 		$file = rawurlencode(basename($path));
 		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
-	
+
 	/**
-	 * Paack error message in $this->_result['errorData']
+	 * Return normalized path, this works the same as os.path.normpath() in Python
+	 *
+	 * @param  string  $path  path
+	 * @return string
+	 **/
+	private function _normpath($path)
+	{
+		if (empty($path))
+			return '.';
+
+		if (strpos($path, '/') === 0)
+			$initial_slashes = true;
+		else
+			$initial_slashes = false;
+		if (
+			($initial_slashes) &&
+			(strpos($path, '//') === 0) &&
+			(strpos($path, '///') === false)
+		)
+			$initial_slashes = 2;
+		$initial_slashes = (int) $initial_slashes;
+
+		$comps = explode('/', $path);
+		$new_comps = array();
+		foreach ($comps as $comp)
+		{
+			if (in_array($comp, array('', '.')))
+				continue;
+			if (
+				($comp != '..') ||
+				(!$initial_slashes && !$new_comps) ||
+				($new_comps && (end($new_comps) == '..'))
+			)
+				array_push($new_comps, $comp);
+			elseif ($new_comps)
+				array_pop($new_comps);
+		}
+		$comps = $new_comps;
+		$path = implode('/', $comps);
+		if ($initial_slashes)
+			$path = str_repeat('/', $initial_slashes) . $path;
+		if ($path)
+			return $path;
+		else
+			return '.';
+	}
+
+	/**
+	 * Pack error message in $this->_result['errorData']
 	 *
 	 * @param string  $path  path to file
 	 * @param string  $msg   error message

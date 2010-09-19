@@ -29,7 +29,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		.append(this.ico)
 		.append(this.media)
 		.append(this.content.append(this.name).append(this.kind).append(this.size).append(this.date).append(this.url).append(this.add))
-		.appendTo(document.body)
+		.appendTo(this.fm.view.win)
 		.draggable({handle : '.el-finder-ql-drag-handle'})
 		.resizable({
 			minWidth  : 420,

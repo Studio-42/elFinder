@@ -119,6 +119,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 		$(document).bind($.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown', function(e) {
 			var meta = e.ctrlKey||e.metaKey;
+			
 			if (self.lock) {
 				return;
 			}
@@ -150,6 +151,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 
 		$(document).bind($.browser.opera ? 'keypress' : 'keydown', function(e) {
+
 			if (self.lock) {
 				return;
 			}
@@ -235,6 +237,11 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					case 88:
 						meta && self.ui.execIfAllowed('cut');
 						break;
+						
+					case 113:
+						self.ui.execIfAllowed('rename');
+						break;
+						
 				}
 
 			});
@@ -254,7 +261,11 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			if (e.target.nodeName == 'DIV' && $(e.target).hasClass('collapsed')) {
 				$(e.target).toggleClass('expanded').parent().next('ul').toggle(300);
 			} else if (t.attr('key') != self.fm.cwd.hash) {
-				self.ui.exec('open', t.trigger('select')[0]);
+				if (t.hasClass('noaccess') || t.hasClass('dropbox')) {
+					self.fm.view.error('Access denied');
+				} else {
+					self.ui.exec('open', t.trigger('select')[0]);
+				}
 			} else {
 				c = t.children('.collapsed');
 				if (c.length) {
@@ -262,7 +273,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 					t.next('ul').toggle(300);
 				}
 			}
-		})
+		});
 		
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',

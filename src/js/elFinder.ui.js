@@ -345,8 +345,7 @@ elFinder.prototype.ui.prototype.commands = {
 			} 
 			this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
 			if (this.fm.options.closeOnEditorCallback) {
-				this.fm.dock();
-				this.fm.close();
+				this.fm.destroy();
 			}
 		}
 				
@@ -625,9 +624,9 @@ elFinder.prototype.ui.prototype.commands = {
 				cut       : this.fm.buffer.cut
 			};
 			if (this.fm.jquery>132) {
-				o.target = this.fm.buffer.files;
+				o.targets = this.fm.buffer.files;
 			} else {
-				o['target[]'] = this.fm.buffer.files;
+				o['targets[]'] = this.fm.buffer.files;
 			}
 			this.fm.ajax(o, function(data) {
 				data.cdc && self.fm.reload(data);
@@ -1091,7 +1090,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			if (this.fm.selected.length) {
+			if (this.fm.cwd.write && this.fm.selected.length) {
 				var s = this.fm.getSelected(), l = s.length;
 				while (l--) {
 					if (s[l].read) {
@@ -1139,7 +1138,7 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.selected.length == 1 && this.fm.getSelected(0).read && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
 		}
 		
 		this.cm = function(t) {
@@ -1280,8 +1279,8 @@ elFinder.prototype.ui.prototype.commands = {
 			var h, ht = this.fm.i18n('helpText'), a, s, tabs; 
 			
 			h = '<div class="el-finder-logo"/><strong>'+this.fm.i18n('elFinder: Web file manager')+'</strong><br/>'+this.fm.i18n('Version')+': '+this.fm.version+'<br clear="all"/>'
-				+'<p><strong><a href="http://www.elrte.ru" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong></p>'
-				+ '<p><a href="http://dev.std42.ru/redmine/wiki/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a></p>';
+				+'<p><strong><a href="http://elrte.ru/donate?prod=elfinder&lang='+this.fm.options.lang+'" target="_blank">'+this.fm.i18n('Donate to support project development')+'</a></strong></p>'
+				+ '<p><a href="http://elrte.ru/redmine/wiki/elfinder/" target="_blank">'+this.fm.i18n('elFinder documentation')+'</a></p>';
 			h += '<p>'+(ht != 'helpText' ? ht : 'elFinder works similar to file manager on your computer. <br /> To make actions on files/folders use icons on top panel. If icon action it is not clear for you, hold mouse cursor over it to see the hint. <br /> Manipulations with existing files/folders can be done through the context menu (mouse right-click).<br/> To copy/delete a group of files/folders, select them using Shift/Alt(Command) + mouse left-click.')+'</p>';
 			h += '<p>'
 				+ '<strong>'+this.fm.i18n('elFinder support following shortcuts')+':</strong><ul>'

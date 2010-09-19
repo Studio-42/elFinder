@@ -26,7 +26,7 @@
 		if ((id = $(el).attr('id'))) {
 			this.id = id;
 		} else {
-			this.id = 'el-finder-'+Math.random().toString().substring(2);
+			// this.id = 'el-finder-'+Math.random().toString().substring(2);
 		}
 		
 		/**
@@ -571,6 +571,9 @@
 				this.options.dialog.close = function() { self.dock(); };
 				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
 			} else {
+				this.options.dialog.close = function() { 
+					self.destroy();
+				}
 				this.dialog = $('<div/>').append(this.view.win).dialog(this.options.dialog);
 			}
 		}
@@ -588,6 +591,8 @@
 					// self.params = data.params;
 					$.extend(self.params, data.params||{});
 					// self.log(self.params)
+					// self.params = data.params;
+
 					$('*', document.body).each(function() {
 						var z = parseInt($(this).css('z-index'));
 						if (z >= self.zIndex) {
@@ -606,16 +611,29 @@
 		}
 		
 		this.close = function() {
+			this.quickLook.hide();
 			if (this.options.docked && this.view.win.attr('undocked')) {
 				this.dock();
 			} else {
-				this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
+				this.dialog ? this.dialog.dialog('destroy') : this.view.win.hide();
 			}
 			this.eventsManager.lock = true;
 		}
 		
+		this.destroy = function() {
+			this.quickLook.hide();
+			if (this.dialog) {
+				this.dialog.dialog('destroy');
+				this.view.win.parent().remove();
+			} else {
+				this.view.win.remove();
+			}
+			this.ui.menu.remove();
+		}
+		
 		this.dock = function() {
 			if (this.options.docked && this.view.win.attr('undocked')) {
+				this.quickLook.hide();
 				var s =this.view.win.data('size');
 				this.view.win.insertAfter(this.anchor).removeAttr('undocked');
 				resize(s.width, s.height);
@@ -626,6 +644,7 @@
 		
 		this.undock = function() {
 			if (this.options.docked && !this.view.win.attr('undocked')) {
+				this.quickLook.hide();
 				this.dialog = $('<div/>').append(this.view.win.css('width', '100%').attr('undocked', true).show()).dialog(this.options.dialog);
 				dialogResize();
 			} 
