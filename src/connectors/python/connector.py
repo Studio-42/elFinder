@@ -1,4 +1,4 @@
-#!/usr/bin/env python:q
+#!/usr/bin/env python
 
 
 import cgi
