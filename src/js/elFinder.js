@@ -720,14 +720,16 @@
 		contextmenu : {
 			'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
 			'file'  : ['select', 'open', 'quicklook', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
-			'group' : ['copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
+			'group' : ['select', 'copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 		},
 		/* jqueryUI dialog options */
 		dialog : null,
 		/* docked mode */
 		docked : false,
 		/* auto reload time (min) */
-		autoReload : 0
+		autoReload : 0,
+		/* set to true if you need to select several files at once from editorCallback */
+		selectMultiple : false
 	}
 
 	
