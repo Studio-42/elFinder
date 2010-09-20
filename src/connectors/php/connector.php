@@ -60,7 +60,7 @@ $opts = array(
 	'perms' => array(
 		'/mimes/' => array(
 			'read' => false,
-			'write' => false,
+			'write' => true,
 			'rm' => false
 			)
 		)
