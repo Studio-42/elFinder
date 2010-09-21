@@ -1,3 +1,8 @@
+/*
+ * Hungarian translation
+ * @author Viktor Tamas <tamas.viktor@totalstudio.hu>
+ * @version 2010-09-22
+ */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
     elFinder.prototype.options.i18n.hu = {

@@ -1,3 +1,8 @@
+/*
+ * Spanish translation
+ * @author Alex Vavilin <xand@xand.es>
+ * @version 2010-09-22
+ */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
 	elFinder.prototype.options.i18n.es = {

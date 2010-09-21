@@ -1,8 +1,7 @@
 /**
- * Dutch Translation
- * ---
- * @author     Kurt Aerts
- * @link       http://ilabsolutions.net/
+ * Dutch translation
+ * @author Kurt Aerts
+ * @version 2010-09-22
  */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 

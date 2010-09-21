@@ -1,3 +1,8 @@
+/**
+ * Chinese (traditional) translation
+ * @author Tad <tad0616@gmail.com>
+ * @version 2010-09-22
+ */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
 	elFinder.prototype.options.i18n.zh_TW = {

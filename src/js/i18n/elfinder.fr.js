@@ -1,3 +1,8 @@
+/*
+ * French translation
+ * @author William Bessat
+ * @version 2010-09-22
+ */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
 	elFinder.prototype.options.i18n.fr = {

@@ -1,6 +1,6 @@
 /*
- * Ukranian lozalization
- * @author Artem
+ * Ukranian translation
+ * @author Artem Vasilyev
  * @version 2010-09-19
  */
 (function($) {

@@ -1,6 +1,7 @@
 /**
  * Latvian translation
  * @author Uldis Plotiņš <uldis.plotins@gmail.com>
+ * @version 2010-09-22
  */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
