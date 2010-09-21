@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
         'Uncompress archive'      : 'Kitömörítés',
         'Get info'                : 'Info megtekintése',
         'Help'                    : 'Segítség',
-        'Dock/undock filemanger window' : 'Fájlkezelő ablak dokkolása/levlálasztása',
+        'Dock/undock filemanager window' : 'Fájlkezelő ablak dokkolása/levlálasztása',
         /* upload/get info dialogs */
         'Maximum allowed files size' : 'Megengedett maximum fájl méret',
         'Add field'   : 'Fájl hozzáadása',

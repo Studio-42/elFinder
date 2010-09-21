@@ -10,7 +10,7 @@ elFinder.prototype.ui = function(fm) {
 	this.cmd        = {};
 	this.buttons    = {};
 	this.menu       = $('<div class="el-finder-contextmenu" />').appendTo(document.body).hide();
-	this.dockButton = $('<div class="el-finder-dock-button" title="'+self.fm.i18n('Dock/undock filemanger window')+'" />');
+	this.dockButton = $('<div class="el-finder-dock-button" title="'+self.fm.i18n('Dock/undock filemanager window')+'" />');
 	
 	this.exec = function(cmd, arg) {
 		if (this.cmd[cmd]) {

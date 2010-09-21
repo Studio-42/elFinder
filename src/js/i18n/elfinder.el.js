@@ -66,7 +66,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Αποσυμπίεση',
 		'Get info'                : 'Πληροφορίες',
 		'Help'                    : 'Βοήθεια',
-		'Dock/undock filemanger window' : 'Ελεύθερο/Αγκιστρωμένο παράθυρο',
+		'Dock/undock filemanager window' : 'Ελεύθερο/Αγκιστρωμένο παράθυρο',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Μέγιστο επιτρεπόμενο μέγεθος αρχείων',
 		'Add field'   : 'Προσθήκη πεδίου',

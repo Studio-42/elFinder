@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Odkopiuj z archiwum',
 		'Get info'                : 'Pokaż informacje',
 		'Help'                    : 'Pomoc',
-		'Dock/undock filemanger window' : 'Zminimalizuj/Ukryj menedżera plików',
+		'Dock/undock filemanager window' : 'Zminimalizuj/Ukryj menedżera plików',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Maksymalny rozmiar',
 		'Add field'   : 'Dodaj pozycję',

@@ -66,7 +66,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Розпакувати архів',
 		'Get info'                : 'Властивості',
 		'Help'                    : 'Допомога',
-		'Dock/undock filemanger window' : 'Від\'єднати/приєднати Менеджер файлів до сторінки',
+		'Dock/undock filemanager window' : 'Від\'єднати/приєднати Менеджер файлів до сторінки',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Максимальний розмір файлів',
 		'Add field'   : 'Додати поле',

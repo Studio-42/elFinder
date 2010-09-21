@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : '解壓縮',
 		'Get info'                : '取得資訊',
 		'Help'                    : '協助',
-		'Dock/undock filemanger window' : '整合/脫離 檔案管理視窗',
+		'Dock/undock filemanager window' : '整合/脫離 檔案管理視窗',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : '上傳檔案大小上限',
 		'Add field'   : '再多一個上傳欄位',

@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Estrai archivio',
 		'Get info'                : 'Propriet&agrave;',
 		'Help'                    : 'Aiuto',
-		'Dock/undock filemanger window' : 'Separa/unisci la finestra del filemanager',
+		'Dock/undock filemanager window' : 'Separa/unisci la finestra del filemanager',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Dimensione massima consentita per il file',
 		'Add field'   : 'Aggiungi campo',

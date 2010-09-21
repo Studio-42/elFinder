@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Atvērt arhīvu',
 		'Get info'                : 'Saņemt informāciju',
 		'Help'                    : 'Palīdzība',
-		'Dock/undock filemanger window' : 'Atvienot/pievienot failu pārvaldnieku lapai',
+		'Dock/undock filemanager window' : 'Atvienot/pievienot failu pārvaldnieku lapai',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Maksimālais atļautais failu izmērs',
 		'Add field'   : 'Pievienot lauku',

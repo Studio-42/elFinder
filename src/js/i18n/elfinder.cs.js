@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'Extrahovat archiv',
 		'Get info'                : 'Vlastnosti',
 		'Help'                    : 'Nápověda',
-		'Dock/undock filemanger window' : 'Ukotvit/uvolnit okno prohlížeče',
+		'Dock/undock filemanager window' : 'Ukotvit/uvolnit okno prohlížeče',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'Maximální povolená velikost souboru',
 		'Add field'   : 'Přidat další',

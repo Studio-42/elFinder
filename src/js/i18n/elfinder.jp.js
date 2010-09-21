@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : '解凍',
 		'Get info'                : 'プロパティ',
 		'Help'                    : 'ヘルプ',
-		'Dock/undock filemanger window' : 'ファイルマネージャを出す/しまう',
+		'Dock/undock filemanager window' : 'ファイルマネージャを出す/しまう',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : '最大許容ファイルサイズ',
 		'Add field'   : 'フィールドを加える',

@@ -70,7 +70,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : '',
 		'Get info'                : '',
 		'Help'                    : '',
-		'Dock/undock filemanger window' : '',
+		'Dock/undock filemanager window' : '',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : '',
 		'Add field'   : '',
