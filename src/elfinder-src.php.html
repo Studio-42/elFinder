@@ -75,6 +75,33 @@
 			$('#close,#open,#dock,#undock,#destroy').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
 			})
+			
+			// var opts = {
+			// 	url : 'connectors/php/connector.php',
+			// 	lang : 'ru',
+			// 	// editorCallback : function(url) { window.console.log(url) },
+			// 	closeOnEditorCallback : true,
+			// 	dialog : {
+			// 		title : 'File manager',
+			// 		height : 500
+			// 	}
+			// }
+			// 
+			// $('#i1,#i2').click(function() {
+			// 	var t = $(this),
+			// 		id = t.attr('id')+'_elfinder',
+			// 		f = $('#'+id);
+			// 		
+			// 	$('.my-elfinder').elfinder('close')	
+			// 		
+			// 	if (f.length) {
+			// 		f.elfinder('open')
+			// 	} else {
+			// 		$('<div class="my-elfinder" id="'+id+'"/>').elfinder($.extend({}, opts, { editorCallback : function(url) { t.val(url).focus() } }))
+			// 	}
+			// 		
+			// })
+			
 		})
 	</script>
 
@@ -83,6 +110,10 @@
 	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
 	<input type="text" value="123" />
+	
+	
+	<!-- <div><input type="text" id="i1"></div> -->
+	<!-- <div><input type="text" id="i2"></div> -->
 
 	
 

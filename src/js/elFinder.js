@@ -617,12 +617,14 @@
 			if (this.options.docked && this.view.win.attr('undocked')) {
 				this.dock();
 			} else {
-				this.dialog ? this.dialog.dialog('destroy') : this.view.win.hide();
+				this.dialog ? this.dialog.dialog('close') : this.view.win.hide();
 			}
 			this.eventsManager.lock = true;
 		}
 		
 		this.destroy = function() {
+
+			this.eventsManager.lock = true;
 			this.quickLook.hide();
 			if (this.dialog) {
 				this.dialog.dialog('destroy');
