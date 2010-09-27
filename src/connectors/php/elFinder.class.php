@@ -1246,7 +1246,7 @@ class elFinder {
 				if (is_link($p))
 				{
 					$link = $this->_readlink($p);
-					$this->_result['debug']['findDir_'.$p] = 'link to '.$link;
+					//$this->_result['debug']['findDir_'.$p] = 'link to '.$link;
 				}
 				if ($this->_isAccepted($ls[$i]) && is_dir($p) && (!is_link($p))) {
 					if ($this->_hash($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
@@ -1578,9 +1578,9 @@ class elFinder {
 	 **/
 	private function _isUploadAllow($name, $tmpName)
 	{
-		$mime  = $this->_mimetype($this->_options['mimeDetect'] != 'internal' ? $tmpName : $name);
 		$allow = false;
 		$deny  = false;
+		$mime  = $this->_mimetype($this->_options['mimeDetect'] != 'internal' ? $tmpName : $name);
 
 		if (in_array('all', $this->_options['uploadAllow'])) {
 			$allow = true;
@@ -1588,22 +1588,37 @@ class elFinder {
 			foreach ($this->_options['uploadAllow'] as $type) {
 				if (0 === strpos($mime, $type)) {
 					$allow = true;
-					break;
 				}
 			}
 		}
-		
+
 		if (in_array('all', $this->_options['uploadDeny'])) {
 			$deny = true;
 		} else {
 			foreach ($this->_options['uploadDeny'] as $type) {
 				if (0 === strpos($mime, $type)) {
 					$deny = true;
-					break;
 				}
 			}
 		}
-		return 0 === strpos($this->_options['uploadOrder'], 'allow') ? $allow && !$deny : $allow || !$deny;
+
+		if (0 === strpos($this->_options['uploadOrder'], 'allow')) { // ,deny
+			if ($deny == true) {
+				return false;
+			} elseif ($allow == true) {
+				return true;
+			} else {
+				return false;
+			}
+		} else { // deny,allow
+			if ($allow == true) {
+				return true;
+			} elseif ($deny == true) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	}
 
 	/**
