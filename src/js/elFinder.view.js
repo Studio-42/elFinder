@@ -307,7 +307,7 @@ elFinder.prototype.view = function(fm, el) {
 	 * Return formated file size
 	*/
 	this.formatSize = function(s) {
-		var n = 1, u = '';
+		var n = 1, u = 'bytes';
 		if (s > 1073741824) {
 			n = 1073741824;
 			u = 'Gb';

@@ -901,6 +901,14 @@ elFinder.prototype.ui.prototype.commands = {
 				i = 3;
 
 				while (i--) { f += '<p><input type="file" name="upload[]"/></p>'; }
+
+				// Rails csrf meta tag (for XSS protection), see #256
+				var rails_csrf_token = $('meta[name=csrf-token]').attr('content');
+				var rails_csrf_param = $('meta[name=csrf-param]').attr('content');
+				if (rails_csrf_param != null && rails_csrf_token != null) {
+					f += '<input name="'+rails_csrf_param+'" value="'+rails_csrf_token+'" type="hidden" />';
+				}
+
 				f = $(f+'</form>');
 				
 				d.append(f.append(e.hide()).prepend(m).append(b)).dialog({
