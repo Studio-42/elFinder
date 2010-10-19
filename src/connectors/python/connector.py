@@ -30,6 +30,7 @@ opts = {
 	# 'uploadDeny': ['image', 'application'],
 	# 'uploadAllow': ['image/png', 'image/jpeg'],
 	# 'uploadOrder': ['deny', 'allow']
+	# 'disabled': ['rename', 'quicklook', 'upload']
 }
 
 # init connector and pass options

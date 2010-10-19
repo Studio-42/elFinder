@@ -277,6 +277,9 @@ class elFinder {
 	 * @return void
 	 **/
 	public function run() {
+		if (!function_exists('json_encode')) {
+			exit('{"error":"PHP JSON module not installed"}');
+		}
 		if (empty($this->_options['root']) || !is_dir($this->_options['root'])) {
 			exit(json_encode(array('error' => 'Invalid backend configuration')));
 		}
@@ -987,7 +990,7 @@ class elFinder {
 	{
 		$type = filetype($path);
 		$stat =  $type == 'link' ? lstat($path) : stat($path);
-		
+
 		if ($stat['mtime'] > $this->_today) {
 			$d = 'Today '.date('H:i', $stat['mtime']);
 		} elseif ($stat['mtime'] > $this->_yesterday) {
@@ -995,7 +998,7 @@ class elFinder {
 		} else {
 			$d = date($this->_options['dateFormat'], $stat['mtime']);
 		}
-		
+
 		$info = array(
 			'name'  => htmlspecialchars(basename($path)),
 			'hash'  => $this->_hash($path),
@@ -1601,6 +1604,8 @@ class elFinder {
 				}
 			}
 		}
+
+		$this->_result['debug']['_isUploadAllow'][$name] = $mime;
 
 		if (0 === strpos($this->_options['uploadOrder'], 'allow')) { // ,deny
 			if ($deny == true) {
