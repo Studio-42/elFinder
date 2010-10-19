@@ -67,7 +67,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Uncompress archive'      : 'แตกไฟล์บีบอัด',
 		'Get info'                : 'คุณสมบัติ',
 		'Help'                    : 'ช่วยเหลือ',
-		'Dock/undock filemanger window' : 'ล๊อค/ปลอดล็อค หน้าต่างการจัดการไฟล์',
+		'Dock/undock filemanager window' : 'ล๊อค/ปลอดล็อค หน้าต่างการจัดการไฟล์',
 		/* upload/get info dialogs */
 		'Maximum allowed files size' : 'ขนาดไฟล์สูงสุดที่อนุญาต',
 		'Add field'   : 'เพิ่มช่องอัพโหลด',
