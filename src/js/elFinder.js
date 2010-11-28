@@ -292,6 +292,7 @@
 		this.reload = function(data) {
 			var i;
 			this.cwd = data.cwd;
+			
 			this.cdc = {};
 			for (i=0; i<data.cdc.length ; i++) {
 				if (data.cdc[i].hash && data.cdc[i].name) {
