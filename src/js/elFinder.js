@@ -294,8 +294,10 @@
 			this.cwd = data.cwd;
 			this.cdc = {};
 			for (i=0; i<data.cdc.length ; i++) {
-				this.cdc[data.cdc[i].hash] = data.cdc[i];
-				this.cwd.size += data.cdc[i].size;
+				if (data.cdc[i].hash && data.cdc[i].name) {
+					this.cdc[data.cdc[i].hash] = data.cdc[i];
+					this.cwd.size += data.cdc[i].size;
+				}
 			}
 
 			if (data.tree) {
