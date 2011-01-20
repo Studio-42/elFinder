@@ -295,7 +295,7 @@
 			
 			this.cdc = {};
 			for (i=0; i<data.cdc.length ; i++) {
-				if (data.cdc[i].name) {
+				if (data.cdc[i].hash && data.cdc[i].name) {
 					this.cdc[data.cdc[i].hash] = data.cdc[i];
 					this.cwd.size += data.cdc[i].size;
 				}

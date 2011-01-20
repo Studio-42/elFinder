@@ -14,7 +14,7 @@ class elFinder {
 	 *
 	 * @var array
 	 **/
-	private $_options = array(
+	protected $_options = array(
 		'root'         => '',           // path to root directory
 		'URL'          => '',           // root directory URL
 		'rootAlias'    => 'Home',       // display this instead of root directory name
@@ -74,7 +74,7 @@ class elFinder {
 	 *
 	 * @var array
 	 **/
-	private $_commands = array(
+	protected $_commands = array(
 		'open'      => '_open',
 		'reload'    => '_reload',
 		'mkdir'     => '_mkdir',
@@ -105,14 +105,14 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	private $_logContext = array();
+	protected $_logContext = array();
 		
 	/**
 	 * extensions/mimetypes for _mimetypeDetect = 'internal' 
 	 *
 	 * @var array
 	 **/
-	private $_mimeTypes = array(
+	protected $_mimeTypes = array(
 		//applications
 		'ai'    => 'application/postscript',
 		'eps'   => 'application/postscript',
@@ -184,42 +184,42 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	private $_time = 0;
+	protected $_time = 0;
 				
 	/**
 	 * Additional data about error
 	 *
 	 * @var array
 	 **/
-	private $_errorData = array();
+	protected $_errorData = array();
 		
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
-	private $_fakeRoot = '';
+	protected $_fakeRoot = '';
 	
 	/**
 	 * Command result to send to client
 	 *
 	 * @var array
 	 **/
-	private $_result = array();
+	protected $_result = array();
 		
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
-	private $_today = 0;
+	protected $_today = 0;
 			
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
-	private $_yesterday = 0;
+	protected $_yesterday = 0;
 			
 	/**
 	 * constructor
@@ -228,7 +228,6 @@ class elFinder {
 	 * @return void
 	 **/
 	public function __construct($options=array()) {
-		
 		foreach ($this->_options as $k=>$v) {
 			if (isset($options[$k])) {
 				$this->_options[$k] = is_array($this->_options[$k]) 
@@ -378,7 +377,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _open()
+	protected function _open()
 	{
 		if (isset($_GET['current'])) { // read file
 			if (empty($_GET['current']) 
@@ -445,7 +444,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _rename()
+	protected function _rename()
 	{
 		if (empty($_GET['current']) 
 		||  empty($_GET['target'])
@@ -476,7 +475,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _mkdir()
+	protected function _mkdir()
 	{
 		if (empty($_GET['current']) ||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
 			return $this->_result['error'] = 'Invalid parameters';
@@ -502,7 +501,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _mkfile()
+	protected function _mkfile()
 	{
 		if (empty($_GET['current']) 
 		||  false == ($dir = $this->_findDir(trim($_GET['current'])))) {
@@ -534,7 +533,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _rm()
+	protected function _rm()
 	{
 		if (empty($_GET['current']) 
 		||  false == ($dir = $this->_findDir(trim($_GET['current']))) 
@@ -560,7 +559,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _upload()
+	protected function _upload()
 	{
 
 		if (empty($_POST['current']) 
@@ -628,7 +627,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _paste()
+	protected function _paste()
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
@@ -683,7 +682,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _duplicate()
+	protected function _duplicate()
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
@@ -709,7 +708,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _resize()
+	protected function _resize()
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
@@ -743,7 +742,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _thumbnails()
+	protected function _thumbnails()
 	{
 		if (!empty($this->_options['tmbDir']) && !empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
 			$this->_result['current'] = $this->_hash($current);
@@ -775,7 +774,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _fread()
+	protected function _fread()
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
@@ -795,7 +794,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _edit()
+	protected function _edit()
 	{
 		if (empty($_POST['current']) 
 		|| false == ($current = $this->_findDir(trim($_POST['current'])))
@@ -821,7 +820,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _archive()
+	protected function _archive()
 	{
 		$this->_checkArchivers();
 		if (empty($this->_options['archivers']['create']) 
@@ -871,7 +870,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _extract()
+	protected function _extract()
 	{
 		if (empty($_GET['current']) 
 		|| false == ($current = $this->_findDir(trim($_GET['current'])))
@@ -905,7 +904,7 @@ class elFinder {
 	 *
 	 * @return void
 	 **/
-	private function _ping()
+	protected function _ping()
 	{
 		exit(header("Connection: close"));
 	}
@@ -919,7 +918,7 @@ class elFinder {
 	 * @param  bool    $tree  set dirs tree?
 	 * @return void
 	 **/
-	private function _content($path, $tree=false)
+	protected function _content($path, $tree=false)
 	{
 		$this->_cwd($path);
 		$this->_cdc($path);
@@ -934,7 +933,7 @@ class elFinder {
 	 * @param  string  $path  current dir path
 	 * @return void
 	 **/
-	private function _cwd($path)
+	protected function _cwd($path)
 	{
 		$rel  = $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root']);
 		if ($path == $this->_options['root']) {
@@ -963,7 +962,7 @@ class elFinder {
 	 * @param  string  $path  current dir path
 	 * @return void
 	 **/
-	private function _cdc($path)
+	protected function _cdc($path)
 	{
 		$dirs = $files = array();
 		$ls = scandir($path);
@@ -986,7 +985,7 @@ class elFinder {
 	 * @param  string  $path  file path
 	 * @return array
 	 **/
-	private function _info($path)
+	protected function _info($path)
 	{
 		$type = filetype($path);
 		$stat =  $type == 'link' ? lstat($path) : stat($path);
@@ -1061,7 +1060,7 @@ class elFinder {
 	 * @param  string  $path  directory path
 	 * @return array
 	 **/
-	private function _tree($path)
+	protected function _tree($path)
 	{
 		$dir = array(
 			'hash'  => $this->_hash($path),
@@ -1093,7 +1092,7 @@ class elFinder {
 	 * @param  string  $suffix  file name suffix
 	 * @return string
 	 **/
-	private function _uniqueName($f, $suffix=' copy')
+	protected function _uniqueName($f, $suffix=' copy')
 	{
 		$dir  = dirname($f);
 		$name = basename($f);
@@ -1133,7 +1132,7 @@ class elFinder {
 	 * @param  string  $path  fole/folder path
 	 * @return void
 	 **/
-	private function _remove($path)
+	protected function _remove($path)
 	{
 		if (!$this->_isAllowed($path, 'rm')) {
 			return $this->_errorData($path, 'Access denied');
@@ -1165,7 +1164,7 @@ class elFinder {
 	 * @param  string  $trg  destination name
 	 * @return bool
 	 **/
-	private function _copy($src, $trg)
+	protected function _copy($src, $trg)
 	{
 		if (!$this->_isAllowed($src, 'read')) {
 			return $this->_errorData($src, 'Access denied');
@@ -1218,7 +1217,7 @@ class elFinder {
 	 * @return string  $n  file name
 	 * @return string
 	 **/
-	private function _checkName($n)
+	protected function _checkName($n)
 	{
 		$n = strip_tags(trim($n));
 		if (!$this->_options['dotFiles'] && '.' == substr($n, 0, 1)) {
@@ -1234,7 +1233,7 @@ class elFinder {
 	 * @param  string  $path  folder path to search in
 	 * @return string
 	 **/
-	private function _findDir($hash, $path='')
+	protected function _findDir($hash, $path='')
 	{
 		if (!$path) {
 			$path = $this->_options['root'];
@@ -1266,7 +1265,7 @@ class elFinder {
 	 * @param  string  $hash  file/folder hash
 	 * @param  string  $path  folder path to search in
 	 **/
-	private function _find($hash, $path)
+	protected function _find($hash, $path)
 	{
 		if (false != ($ls = scandir($path))) {
 			for ($i=0; $i < count($ls); $i++) { 
@@ -1287,7 +1286,7 @@ class elFinder {
 	 * @param  string  $path  symlink path
 	 * @return string
 	 **/
-	private function _readlink($path)
+	protected function _readlink($path)
 	{
 		$target = readlink($path);
 		if ('/' != substr($target, 0, 1)) {
@@ -1304,7 +1303,7 @@ class elFinder {
 	 * @param  string  $path  directory path
 	 * @return int
 	 **/
-	private function _dirSize($path)
+	protected function _dirSize($path)
 	{
 		$size = 0;
 		if (!$this->_options['dirSize'] || !$this->_isAllowed($path, 'read')) {
@@ -1335,7 +1334,7 @@ class elFinder {
 	 * @param  string  $path  file path
 	 * @return string
 	 **/
-	private function _mimetype($path)
+	protected function _mimetype($path)
 	{
 		if (empty($this->_options['mimeDetect']) || $this->_options['mimeDetect'] == 'auto') {
 			$this->_options['mimeDetect'] = $this->_getMimeDetect();
@@ -1386,7 +1385,7 @@ class elFinder {
 	 * @param  string  $tmb  thumbnail name
 	 * @return bool
 	 **/
-	private function _tmb($img, $tmb)
+	protected function _tmb($img, $tmb)
 	{
 		if (false == ($s = getimagesize($img))) {
 			return false;
@@ -1455,7 +1454,7 @@ class elFinder {
 	 * @param  string  $img  image file
 	 * @return void
 	 **/
-	private function _rmTmb($img)
+	protected function _rmTmb($img)
 	{
 		if ($this->_options['tmbDir'] && false != ($tmb = $this->_tmbPath($img)) && file_exists($tmb)) {
 			@unlink($tmb);
@@ -1469,7 +1468,7 @@ class elFinder {
 	 * @param  int  $h  image height	
 	 * @return array
 	 **/
-	private function _cropPos($w, $h)
+	protected function _cropPos($w, $h)
 	{
 		$x = $y = 0;
 		$size = min($w, $h);
@@ -1489,7 +1488,7 @@ class elFinder {
 	 * @param  int     $h    image height
 	 * @return bool
 	 **/
-	private function _resizeImg($img, $w, $h)
+	protected function _resizeImg($img, $w, $h)
 	{
 		if (false == ($s = getimagesize($img))) {
 			return false;
@@ -1541,7 +1540,7 @@ class elFinder {
 	 * @param  string  $mime  file mimetype
 	 * @return bool
 	 **/
-	private function _canCreateTmb($mime)
+	protected function _canCreateTmb($mime)
 	{
 		if ($this->_options['tmbDir'] && $this->_options['imgLib'] && 0 === strpos($mime, 'image')) {
 			if ('gd' == $this->_options['imgLib']) {
@@ -1557,7 +1556,7 @@ class elFinder {
 	 * @param  string  $path  image path
 	 * @return string
 	 **/
-	private function _tmbPath($path)
+	protected function _tmbPath($path)
 	{
 		$tmb = '';
 		if ($this->_options['tmbDir']) {
@@ -1579,7 +1578,7 @@ class elFinder {
 	 * @param  string  $tmpName uploaded file tmp name
 	 * @return bool
 	 **/
-	private function _isUploadAllow($name, $tmpName)
+	protected function _isUploadAllow($name, $tmpName)
 	{
 		$allow = false;
 		$deny  = false;
@@ -1633,7 +1632,7 @@ class elFinder {
 	 * @param  string  $file  file name
 	 * @return bool
 	 **/
-	private function _isAccepted($file)
+	protected function _isAccepted($file)
 	{
 		if ('.' == $file || '..' == $file) {
 			return false;
@@ -1651,7 +1650,7 @@ class elFinder {
 	 * @param  string  $action  action name (read/write/rm)
 	 * @return void
 	 **/
-	private function _isAllowed($path, $action) {
+	protected function _isAllowed($path, $action) {
 		
 		switch ($action) {
 			case 'read':
@@ -1696,7 +1695,7 @@ class elFinder {
 	 *
 	 * @return string
 	 **/
-	private function _getImgLib()
+	protected function _getImgLib()
 	{
 		if (extension_loaded('imagick')) {
 			return 'imagick';
@@ -1714,7 +1713,7 @@ class elFinder {
 	 *
 	 * @return array
 	 **/
-	private function _checkArchivers()
+	protected function _checkArchivers()
 	{
 		if (!function_exists('exec')) {
 			$this->_options['archivers'] = $this->_options['archive'] = array();
@@ -1810,7 +1809,7 @@ class elFinder {
 	 *
 	 * @return string
 	 **/
-	private function _getMimeDetect()
+	protected function _getMimeDetect()
 	{
 		if (class_exists('finfo')) {
 			return 'finfo';
@@ -1838,7 +1837,7 @@ class elFinder {
 	 * @param  string  $path 
 	 * @return string
 	 **/
-	private function _hash($path)
+	protected function _hash($path)
 	{
 		return md5($path);
 	}
@@ -1849,7 +1848,7 @@ class elFinder {
 	 * @param  string  $path 
 	 * @return string
 	 **/
-	private function _path2url($path)
+	protected function _path2url($path)
 	{
 		$dir  = substr(dirname($path), strlen($this->_options['root'])+1);
 		$file = rawurlencode(basename($path));
@@ -1862,7 +1861,7 @@ class elFinder {
 	 * @param  string  $path  path
 	 * @return string
 	 **/
-	private function _normpath($path)
+	protected function _normpath($path)
 	{
 		if (empty($path))
 			return '.';
@@ -1911,7 +1910,7 @@ class elFinder {
 	 * @param string  $msg   error message
 	 * @return bool always false
 	 **/
-	private function _errorData($path, $msg)
+	protected function _errorData($path, $msg)
 	{
 		$path = preg_replace('|^'.preg_quote($this->_options['root']).'|', $this->_fakeRoot, $path);
 		if (!isset($this->_result['errorData'])) {
@@ -1921,7 +1920,7 @@ class elFinder {
 		return false;
 	}	
 	
-	private function _utime()
+	protected function _utime()
 	{
 		$time = explode(" ", microtime());
 		return (double)$time[1] + (double)$time[0];

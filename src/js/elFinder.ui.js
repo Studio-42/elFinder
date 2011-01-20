@@ -1061,7 +1061,22 @@ elFinder.prototype.ui.prototype.commands = {
 				target    : f.hash
 			}, function(data) {
 				self.fm.lockShortcuts(true);
-				var ta= $('<textarea/>').val(data.content||'').keydown(function(e) { e.stopPropagation(); });
+				var ta = $('<textarea/>').val(data.content||'').keydown(function(e) {
+					e.stopPropagation();
+					if (e.keyCode == 9) {
+						e.preventDefault();
+						if ($.browser.msie) {
+							var r = document.selection.createRange();
+							r.text = "\t"+r.text;
+							this.focus();
+						} else {
+							var before = this.value.substr(0, this.selectionStart),
+							after = this.value.substr(this.selectionEnd);
+							this.value = before+"\t"+after;
+							this.setSelectionRange(before.length+1, before.length+1);
+						}
+					}
+				});
 				$('<div/>').append(ta)
 					.dialog({
 						dialogClass : 'el-finder-dialog',

@@ -132,6 +132,9 @@ elFinder.prototype.view = function(fm, el) {
 		function traverse(tree) {
 			var i, hash, c, html = '<ul style="display:none">';
 			for (i=0; i < tree.length; i++) {
+				if (!tree[i].name || !tree[i].hash) {
+					continue;
+				}
 				c = '';
 				if (!tree[i].read && !tree[i].write) {
 					c = 'noaccess';
