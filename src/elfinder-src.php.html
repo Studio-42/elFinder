@@ -70,10 +70,18 @@
 				}
 			})
 
-			// window.console.log(f)
+			window.console.log(f)
 
 			$('#close,#open,#dock,#undock,#destroy').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
+			})
+			
+			$('#mkdir').click(function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				
+				window.console.log(f[0].elfinder)
+				f[0].elfinder.ui.exec('mkdir')
 			})
 			
 			// var opts = {
@@ -107,6 +115,7 @@
 
 </head>
 <body>
+	<a href="#" id="mkdir">mkdir</a>
 	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
 	<div id="finder">finder</div>
 	<input type="text" value="123" />
