@@ -1,0 +1,154 @@
+
+/* common container */
+.elfinder { padding:2px; }
+
+
+
+/************************************/
+/*              TOOLBAR             */
+/************************************/
+.elfinder-toolbar { padding:.2em; }
+
+/* container for button's group */
+.elfinder-buttonset {
+	float:left;
+	padding-left:10px;
+	background:url('../images/toolbar.png') 4px  -610px  no-repeat; ;
+}
+
+/* button */
+.elfinder-button {
+	float:left;
+	margin:0 1px;
+}
+
+/* rtl/ltr fixes */
+.elfinder-rtl .elfinder-buttonset,
+.elfinder-rtl .elfinder-button { float:right; }
+
+.elfinder-ltr .elfinder-buttonset:first-child,
+.elfinder-rtl .elfinder-buttonset:last-child {
+	padding-left:0;
+	background:transparent;
+}
+
+/* icon inside button */
+.elfinder-button-icon {
+	width:22px;
+	height:22px;
+	float:left;
+	background:url('../images/toolbar.png')  no-repeat; 
+}
+/* buttons icons */
+.elfinder-button-icon-back       { background-position: 3px -171px; }
+.elfinder-button-icon-reload     { background-position: 3px -192px; }
+.elfinder-button-icon-select     { background-position: 3px -214px; }
+.elfinder-button-icon-open       { background-position: 4px -235px; }
+.elfinder-button-icon-mkdir      { background-position: 3px -258px; }
+.elfinder-button-icon-mkfile     { background-position: 3px -280px; }
+.elfinder-button-icon-upload     { background-position: 3px -305px; }
+.elfinder-button-icon-rm         { background-position: 3px -330px; }
+.elfinder-button-icon-copy       { background-position: 3px -356px; }
+.elfinder-button-icon-paste      { background-position: 3px -381px; }
+.elfinder-button-icon-rename     { background-position: 3px -407px; }
+.elfinder-button-icon-edit       { background-position: 4px -435px; }
+.elfinder-button-icon-info       { background-position: 3px -462px; }
+.elfinder-button-icon-help       { background-position: 3px -487px; }
+.elfinder-button-icon-icons      { background-position: 3px -537px; }
+.elfinder-button-icon-list       { background-position: 3px -557px; }
+.elfinder-button-icon-uncompress { background-position: 3px -583px; }
+.elfinder-button-icon-resize     { background-position: 3px -647px; }
+.elfinder-button-icon-quicklook  { background-position: 3px -726px; }
+
+/* extended toolbar */
+.elfinder-toolbar-ext .elfinder-buttonset { background:transparent; }
+
+.elfinder-toolbar-ext .elfinder-button { margin:0; }
+
+/************************************/
+/*              WORKZONE             */
+/************************************/
+/* nav and cwd container */
+.elfinder-workzone {
+	padding:2px 0;
+/*	border:1px solid #111; */
+}
+
+/************************************/
+/*              NAVIGATION PANEL             */
+/************************************/
+/* navigation panel with dirs tree */
+.elfinder .elfinder-nav {
+	height:350px;
+	width:220px;
+	background-image:none;
+	padding:3px;
+	font-size:.76em;
+}
+
+.elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
+.elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
+
+.elfinder-nav ul { margin:0; padding:0; list-style:none; }
+
+
+
+
+.elfinder-ltr .elfinder-nav ul li ul { margin-left:20px; }
+.elfinder-rtl .elfinder-nav ul li ul  {	margin-right:20px; }
+.elfinder-rtl .elfinder-nav ul { text-align:right; }
+
+/*************************************************/
+/*          CURRENT WORKING DIRECTORY            */
+/*************************************************/
+/* current working directory */
+.elfinder-cwd { 
+	height:350px;
+/*	border:1px solid red; */
+	padding:3px;
+}
+
+/***** ICONS VIEW *****/
+/* file/dir */
+.elfinder-cwd a {
+	width:80px;
+	height:80px;
+	border:1px solid #111;
+	text-decoration:none;
+	cursor:default;
+}
+
+.elfinder-ltr .elfinder-cwd a { float:left;  margin:0 3px 3px 0; }
+.elfinder-rtl .elfinder-cwd a { float:right; margin:0 0 3px 3px; }
+
+.elfinder-big-icon, 
+.elfinder-filename {
+	display:block;
+	margin:5px auto;
+}
+
+/* icon inside file/dir */
+.elfinder-big-icon {
+	width:48px;
+	height:48px;
+	background: url('../images/icons-big.png') -1px 1px no-repeat;
+}
+
+/* filename */
+.elfinder-filename {
+	overflow:hidden;
+	font-size:.7em;
+	text-align:center;
+	text-overflow:ellipsis;
+    -o-text-overflow:ellipsis;
+}
+/************************************/
+/*             STATUSBAR            */
+/************************************/
+.elfinder-statusbar {
+	padding:.2em .5em;
+	font-size:.8em;
+	font-weight:normal;
+}
+
+
