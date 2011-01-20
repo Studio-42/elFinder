@@ -33,7 +33,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.1 RC3';
+		this.version  = '1.2 beta';
 		/**
 		 * String. jQuery version;
 		 **/
