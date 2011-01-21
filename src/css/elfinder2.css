@@ -89,9 +89,10 @@
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
 .elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
 
+
 .elfinder-nav ul { margin:0; padding:0; list-style:none; }
 
-
+.elfinder-nav li { position:relative; padding:3px 0 3px 20px; }
 
 
 .elfinder-ltr .elfinder-nav ul li ul { margin-left:20px; }
