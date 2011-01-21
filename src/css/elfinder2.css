@@ -76,6 +76,7 @@
 /* nav and cwd container */
 .elfinder-workzone {
 	padding:2px 0;
+/*	position:relative;*/
 /*	border:1px solid #111; */
 }
 
@@ -89,6 +90,7 @@
 	background-image:none;
 	padding:3px;
 	font-size:.76em;
+	overflow:auto;
 }
 
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
@@ -160,9 +162,10 @@
 .elfinder-cwd { 
 	height:350px;
 	padding:0 3px;
+	overflow:auto;
 }
 
-/***** ICONS VIEW *****/
+/************** ICONS VIEW *************/
 /* file/dir */
 .elfinder-cwd a {
 	width:80px;
@@ -170,28 +173,61 @@
 	border:1px solid #111;
 	text-decoration:none;
 	cursor:default;
+	overflow:hidden;
 }
 
 .elfinder-ltr .elfinder-cwd a { float:left;  margin:0 3px 3px 0; }
-.elfinder-rtl .elfinder-cwd a { float:right; margin:0 0 3px 3px; }
-
-.elfinder-big-icon, .elfinder-filename { display:block; margin:5px auto; }
+.elfinder-rtl .elfinder-cwd a { float:right; margin:0 0   3px 3px; }
 
 /* icon inside file/dir */
 .elfinder-big-icon {
 	width:48px;
 	height:48px;
+	display:block; 
+	margin:4px auto;
 	background: url('../images/icons-big.png') -1px 1px no-repeat;
 }
 
 /* filename */
 .elfinder-filename {
+	white-space:nowrap;
 	overflow:hidden;
-	font-size:.7em;
-	text-align:center;
 	text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
 }
+
+/* filename in icon view */
+.elfinder-cwd a .elfinder-filename {
+	display:block; margin:5px auto;
+	font-size:.7em;
+	text-align:center;
+	
+}
+
+.elfinder-cwd a input {
+	font-size:.7em;
+}
+
+/**********  LIST VIEW ***************/
+.elfinder-cwd table { 
+	width:100%; 
+	border-collapse:collapse; 
+}
+.elfinder-cwd table td { 
+	font-size:.72em;
+	padding:.2em .3em;
+}
+
+.elfinder-small-icon {
+	width:16px;
+	height:16px;
+	float:left;
+	margin-right:.3em;
+	background:url(../images/icons-small.png) 1px 0 no-repeat;
+}
+
+.elfinder-cwd table td input { width:80%; }
+
 /************************************/
 /*             STATUSBAR            */
 /************************************/
@@ -200,6 +236,7 @@
 	font-size:.76em;
 	font-weight:normal;
 }
+
 /* selected/total files info */
 .elfinder-statusbar-info {
 	float:right;
