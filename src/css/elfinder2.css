@@ -1,7 +1,6 @@
 
 /* common container */
-.elfinder { padding:2px; }
-
+.elfinder { padding:2px; position:relative; }
 
 
 /************************************/
@@ -76,9 +75,35 @@
 /* nav and cwd container */
 .elfinder-workzone {
 	padding:2px 0;
-/*	position:relative;*/
-/*	border:1px solid #111; */
 }
+
+.elfinder-spinner {
+	position:absolute;
+	width:250px;
+	height:50px;
+	top:50%;
+	left:50%;
+	margin-top:-25px;
+	margin-left:-125px;
+	background:transparent url(../images/spinner.gif) 50% 50% no-repeat;
+	display:none;
+}
+
+.elfinder-error {
+	position:absolute;
+	width:250px;
+	height:100px;
+	top:50%;
+	left:50%;
+	margin-top:-25px;
+	margin-left:-125px;
+	padding:.4em;
+	font-size:.8em;
+	display:none;
+}
+.elfinder-error div { clear:both;}
+.elfinder-error .ui-icon-alert { float:left; margin:.2em; }
+.elfinder-error .ui-icon-close { float:right; margin:.2em; }
 
 /************************************/
 /*              NAVIGATION PANEL             */

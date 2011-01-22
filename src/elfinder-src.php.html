@@ -9,11 +9,14 @@
 	<script src="../js/jquery-1.4.4.min.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../js/jquery-ui-1.8.8.custom.min.js" type="text/javascript" charset="utf-8"></script>
 
-	<link rel="stylesheet" href="../js/ui-themes/smoothness/jquery-ui-1.8.8.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="../js/ui-themes/smoothness/jquery-ui-1.8.9.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	 
-	<link rel="stylesheet" href="css/elfinder.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/elfinder2.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
 	<script src="js/elFinder.js"               type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.view.js"          type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.options.js"       type="text/javascript" charset="utf-8"></script>
+	<!--
 	<script src="js/elFinder.view.js"          type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.ui.js"            type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.quickLook.js"     type="text/javascript" charset="utf-8"></script>
@@ -31,7 +34,7 @@
 	<script src="js/i18n/elfinder.pl.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.ua.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.zh_TW.js" type="text/javascript" charset="utf-8"></script>
-	
+	-->
 	<style type="text/css">
 		#close, #open, #dock, #undock, #destroy {
 			width: 100px;
@@ -70,8 +73,6 @@
 					height : 500
 				}
 			})
-
-			window.console.log(f)
 
 			$('#close,#open,#dock,#undock,#destroy').click(function() {
 				$('#finder').elfinder($(this).attr('id'));
