@@ -102,6 +102,7 @@
 				l = this.listeners[e.type]||[], i;
 
 			this.debug('event', e.type+', listeners - '+l.length);
+			d && this.debug('event-data', d);
 
 			for (i = 0; i < l.length; i++) {
 				if (e.isPropagationStopped()) {
@@ -120,37 +121,30 @@
 			
 		}
 		
-		this.ajax = function(data, success, error, opts) {
-			var o = {
-				url      : this.options.url,
-				async    : true,
-				type     : 'get',
-				data     : data,
-				dataType : 'json',
-				cache    : false,
-				error    : function(r) {
-					self.trigger('ajaxerror', { status : r.status });
-				},
-				success  : function(d) {
-					self.trigger('ajaxstop').debug('ajax-data', d);
-					if (d.error) {
-						if (error) {
-							if (!error(d.error)) {
-								return;
-							}
-						} else {
-							self.trigger('error', d);
+		this.ajax = function(opts) {
+			var error = opts.error || function(m) { self.trigger('error', { error : m}) },
+				o = {
+					url      : this.options.url,
+					async    : true,
+					type     : 'get',
+					data     : opts.data,
+					dataType : 'json',
+					cache    : false,
+					error    : function(r) { self.trigger('ajaxerror', { status : r.status }); },
+					success  : opts.success || function(d) {
+						self.trigger('ajaxstop').debug('ajax-data', d);
+						if (d.error && !error(d.error)) {
+							return;
 						}
+						opts.success && opts.success(d);
 					}
-					success && success(d);
-				}
-			}
-			
-			$.extend(o, opts);
-			
-			$.ajax(o)
-			
+				};
+				
+			$.extend(o, opts.options);
+			!opts.silent && this.trigger('ajaxstart', o);
+			$.ajax(o);
 		}
+		
 		
 		this.lock = function(o) {
 			if (o === void(0)) {
@@ -205,19 +199,14 @@
 		}
 		
 		this.view = new this.view(this, $el);
-		// this.log(this.dir)
 		
 		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		})
 
-		this.ajax({
-			cmd    : 'open', 
-			target : this.last() || '', 
-			init   : true, 
-			tree   : true
-		})
+		this.ajax({ data : { cmd : 'open', target : this.last() || '', init : true, tree : true } });
+
 		
 	}
 	

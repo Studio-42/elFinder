@@ -101,6 +101,13 @@
 	font-size:.8em;
 	display:none;
 }
+
+.elfinder-overlay {
+/*	position:absolute;*/
+/*	border:2px solid red;*/
+/*	display:none;*/
+}
+
 .elfinder-error div { clear:both;}
 .elfinder-error .ui-icon-alert { float:left; margin:.2em; }
 .elfinder-error .ui-icon-close { float:right; margin:.2em; }
