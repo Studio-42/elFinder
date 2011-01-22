@@ -1,14 +1,27 @@
 (function($) {
 	
 	elFinder.prototype.view = function(fm, el) {
-		var self = this;
+		var self = this,
+			lock = function(s) {
+				self.toolbar.add(self.workzone).add(self.statusbar)[s ? 'addClass' : 'addClremoveClassass']('ui-state-disabled');
+			},
+			error = function(m) {
+				self.errorMsg.text(fm.i18n(m));
+				self.error.fadeIn('slow');
+				setTimeout(function() { 
+					self.error.fadeOut('slow');
+				}, 4000);
+			},
+			spinner = function(s) {
+				self.spinner[s ? 'show' : 'hide']();
+			};
 		
 		this.fm = fm;
 		
 		
 		this.toolbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar"/>');
 		
-		this.workzone = $('<div class="ui-helper-clearfix ui-state-disabled elfinder-workzone"/>')
+		this.workzone = $('<div class="ui-helper-clearfix elfinder-workzone"/>')
 		
 		this.nav = $('<div class="ui-state-default elfinder-nav"/>');
 		
@@ -22,7 +35,7 @@
 			.prepend($('<span class="ui-icon ui-icon-close"/>').click(function() { self.error.hide() }))
 			.append(this.errorMsg);
 		
-		this.statusbar = $('<div class="ui-widget-header  ui-corner-all elfinder-statusbar"/>')
+		this.statusbar = $('<div class="ui-widget-header ui-corner-all elfinder-statusbar"/>')
 		
 		this.viewport = el.empty()
 			.attr('id', fm.id)
@@ -33,27 +46,15 @@
 			.append(this.error)
 			.append(this.statusbar.hide());
 	
-		fm.bind('lock', function() {
-			var s = !fm.lock().ui;
-				
-			self.toolbar.add(self.workzone).add(self.statusbar)[s ? 'removeClass' : 'addClass']('ui-state-disabled');
-			self.spinner[s ? 'hide' : 'show']();
-		})
-		.bind('error', function(e) {
-			if (e.data.error) {
-				self.errorMsg.text(e.data.error);
-				self.error.fadeIn('slow');
-				setTimeout(function() {
-					self.error.fadeOut('slow');
-				}, 4000);
-			}
+		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+			var s = e.type != 'ajaxstop';
+			lock(s);
+			spinner(s);
+			e.type == 'ajaxerror' && error(e.data.state == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration');
 		});
-	
-		// fm.bind('lock', function() { fm.log('here lock'); fm.log(fm.lock()) })//.trigger('load')
-	
-		fm.lock({ui:false})
-		fm.lock({ shortcuts : false})
-		// fm.log(fm.lock())
+
+		lock(true);
+
 	}
 	
 })(jQuery);

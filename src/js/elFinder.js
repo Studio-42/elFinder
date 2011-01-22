@@ -56,6 +56,9 @@
 			cd     : [],
 			select : [],
 			error  : [],
+			ajaxstart : [],
+			ajaxstop : [],
+			ajaxerror : [],
 			lock   : []
 		};
 		
@@ -77,7 +80,7 @@
 		
 		this.bind = function(e, c) {
 			if (typeof(c) == 'function') {
-				$.each(e.split(/\s+/), function(i, e) {
+				$.each(e.toLowerCase().split(/\s+/), function(i, e) {
 					if (self.listeners[e] === void(0)) {
 						self.listeners[e] = [];
 					}
@@ -126,10 +129,10 @@
 				dataType : 'json',
 				cache    : false,
 				error    : function(r) {
-					self.trigger('error', { error : r.status == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' });
+					self.trigger('ajaxerror', { status : r.status });
 				},
 				success  : function(d) {
-					self.debug('ajax-data', d);
+					self.trigger('ajaxstop').debug('ajax-data', d);
 					if (d.error) {
 						if (error) {
 							if (!error(d.error)) {
@@ -145,10 +148,6 @@
 			
 			$.extend(o, opts);
 			
-			
-			
-			this.debug('ajax', o);
-			
 			$.ajax(o)
 			
 		}
@@ -158,7 +157,7 @@
 				return this.locks;
 			}
 			$.extend(this.locks, o);
-			this.trigger('lock')
+			this.trigger('lock', { locks : this.locks });
 		}
 	
 		this.get = function(key) {
@@ -170,9 +169,7 @@
 		}
 	
 		this.last = function(key) {
-			if (this.options.rememberLastDir) {
-				return this.cookie(this.cookies.last, key);
-			}
+			return this.options.rememberLastDir ? this.cookie(this.cookies.last, key) : void(0);
 		}
 		
 		this.resize = function(w, h) {
@@ -210,6 +207,10 @@
 		this.view = new this.view(this, $el);
 		// this.log(this.dir)
 		
+		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
+			var l = e.type != 'ajaxstop';
+			self.lock({ ui : l, shortcuts : l });
+		})
 
 		this.ajax({
 			cmd    : 'open', 
@@ -236,6 +237,7 @@
 			}
 			
 		} 
+		return this;
 	}
 	
 	elFinder.prototype.time = function(l) {
