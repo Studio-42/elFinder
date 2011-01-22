@@ -66,7 +66,8 @@ elFinder.prototype.options = {
 	/* auto reload time (min) */
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
-	selectMultiple : false
+	selectMultiple : false,
+	debug : true
 }
 
 })(jQuery);

@@ -31,6 +31,7 @@
 		this.cdc      = {};
 		this.selected = [];
 		this.history  = [];
+		this.buffer   = [];
 		
 		this.locks = { 
 			ui        : true, 
@@ -52,7 +53,7 @@
 			load   : [],
 			focus  : [],
 			blur   : [],
-			reload : [],
+			cd     : [],
 			select : [],
 			error  : [],
 			lock   : []
@@ -97,6 +98,8 @@
 			var e = this.event(e, d),
 				l = this.listeners[e.type]||[], i;
 
+			this.debug('event', e.type+', listeners - '+l.length);
+
 			for (i = 0; i < l.length; i++) {
 				if (e.isPropagationStopped()) {
 					break;
@@ -108,6 +111,10 @@
 				}
 			}
 			return this;
+		}
+		
+		this.shortcut = function() {
+			
 		}
 		
 		this.ajax = function(data, success, error, opts) {
@@ -126,6 +133,10 @@
 			
 		}
 	
+		this.getByName = function(name) {
+			
+		}
+	
 		this.last = function(key) {
 			
 		}
@@ -134,16 +145,58 @@
 			
 		}
 		
-		this.select = function(key) {
+		this.select = function(keys, reset) {
 			
+		}
+		
+		this.cd = function(key) {
+			
+		}
+		
+		this.reload = function() {
+			
+		}
+		
+		this.copy = function(keys, cut) {
+			
+		}
+		
+		this.cut = function(keys) {
+			return this.copy(keys, true);
+		}
+		
+		this.paste = function(keys) {
+			
+		}
+		
+		this.i18n = function(m) {
+			return this.messages[m] || m;
 		}
 		
 		this.view = new this.view(this, $el);
 		// this.log(this.dir)
+		
+		
 	}
 	
 	elFinder.prototype.log = function(m) {
 		window.console && window.console.log && window.console.log(m);
+	}
+	
+	elFinder.prototype.debug = function(type, m) {
+		var d = this.options.debug;
+		
+		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
+			this.log('elfinder debug: ['+type+'] '+m);
+		} 
+	}
+	
+	elFinder.prototype.time = function(l) {
+		window.console && window.console.time && window.console.time(l);
+	}
+	
+	elFinder.prototype.timeEnd = function(l) {
+		window.console && window.console.timeEnd && window.console.timeEnd(l);
 	}
 	
 	elFinder.prototype.cookie = function(name, value) {

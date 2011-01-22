@@ -18,7 +18,7 @@
 		
 		this.errorMsg = $('<div/>');
 		
-		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-alert"/><strong>Error!</strong></div>')
+		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-alert"/><strong>'+fm.i18n('Error')+'!</strong></div>')
 			.prepend($('<span class="ui-icon ui-icon-close"/>').click(function() { self.error.hide() }))
 			.append(this.errorMsg);
 		
@@ -33,15 +33,12 @@
 			.append(this.error)
 			.append(this.statusbar.hide());
 	
-	
 		fm.bind('lock', function() {
-			var e = self.toolbar.add(self.workzone).add(self.statusbar),
-				s = !fm.lock().ui;
+			var s = !fm.lock().ui;
 				
-			e[s ? 'removeClass' : 'addClass']('ui-state-disabled');
+			self.toolbar.add(self.workzone).add(self.statusbar)[s ? 'removeClass' : 'addClass']('ui-state-disabled');
 			self.spinner[s ? 'hide' : 'show']();
-
-		})
+		});
 	
 		// fm.bind('lock', function() { fm.log('here lock'); fm.log(fm.lock()) })//.trigger('load')
 	
