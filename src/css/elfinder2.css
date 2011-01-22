@@ -89,7 +89,7 @@
 	width:220px;
 	background-image:none;
 	padding:3px;
-	font-size:.76em;
+	font-size:.72em;
 	overflow:auto;
 }
 
@@ -107,13 +107,14 @@
 .elfinder-nav a.ui-state-hover,
 .elfinder-nav a.ui-state-active { margin:-1px; }
 
-.elfinder-ltr .elfinder-nav ul li ul { margin-left:20px; }
-.elfinder-rtl .elfinder-nav ul li ul  {	margin-right:20px; }
+.elfinder-ltr .elfinder-nav ul li ul { margin-left:15px; }
+.elfinder-rtl .elfinder-nav ul li ul  {	margin-right:15px; }
 .elfinder-rtl .elfinder-nav ul { text-align:right; }
 
 .elfinder-ltr .elfinder-nav a { padding-left:35px;  }
 .elfinder-rtl .elfinder-nav a { padding-right:35px; direction:rtl; }
 
+/* arrow before dir */
 .elfinder-nav-collapsed {
 	width:12px;
 	height:12px;
@@ -122,7 +123,6 @@
 	margin-top:-6px;
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
-/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-collapsed { left:0; background-position:0 2px; }
@@ -131,8 +131,10 @@
 .elfinder-ltr .elfinder-nav-expanded { background-position:0 -23px;}
 .elfinder-rtl .elfinder-nav-expanded { background-position:-1px -23px; }
 
+/* no arrow for empty dir */
 .elfinder-nav-empty { background-image:none; }
 
+/* nav dir icon */
 .elfinder-nav-icon {
 	width:16px;
 	height:16px;
@@ -141,28 +143,27 @@
 	margin-top:-8px;
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
-/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
 .elfinder-rtl .elfinder-nav-icon { right:14px; }
 
-.elfinder-nav-icon-home { background-position:0 -35px;}
-.elfinder-nav-icon-folder { background-position:0 -51px; }
-.elfinder-nav-icon-folder-open { background-position:0 -66px;}
-.elfinder-nav-icon-folder-ro { background-position:0 -82px;}
-.elfinder-nav-icon-folder-dropbox { background-position:0 -98px;}
+/* dir types */
+.elfinder-nav-icon-home            { background-position:0 -35px;}
+.elfinder-nav-icon-folder          { background-position:0 -51px; }
+.elfinder-nav-icon-folder-open     { background-position:0 -66px;}
+.elfinder-nav-icon-folder-ro       { background-position:0 -82px;}
+.elfinder-nav-icon-folder-dropbox  { background-position:0 -98px;}
 .elfinder-nav-icon-folder-noaccess { background-position:0 -116px;}
-.elfinder-nav-icon-places { background-position:0 -134px;}
+.elfinder-nav-icon-places          { background-position:0 -134px;}
 
 /*************************************************/
 /*          CURRENT WORKING DIRECTORY            */
 /*************************************************/
-/* current working directory */
 .elfinder-cwd { 
-	height:350px;
-	padding:0 3px;
-	overflow:auto;
+	height: 350px;
+	padding: 0 3px;
+	overflow: auto;
 }
 
 /************** ICONS VIEW *************/
@@ -204,6 +205,7 @@
 	
 }
 
+/* textfield inside icon */
 .elfinder-cwd a input {
 	font-size:.7em;
 }
@@ -217,7 +219,7 @@
 	font-size:.72em;
 	padding:.2em .3em;
 }
-
+/* file icon */
 .elfinder-small-icon {
 	width:16px;
 	height:16px;
