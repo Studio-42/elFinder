@@ -76,11 +76,19 @@
 		
 		this.toolbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar"/>');
 		
-		this.workzone = $('<div class="ui-helper-clearfix elfinder-workzone"/>')
 		
-		this.nav = $('<div class="ui-state-default elfinder-nav"/>');
+		
+		
+		
+		this.tree = $('<ul class="elfinder-tree"/>');
+		
+		this.places = $('<ul class="elfinder-tree"/>');
+		
+		this.nav = $('<div class="ui-state-default elfinder-nav"/>').append(this.tree);
 		
 		this.cwd = $('<div class="elfinder-cwd"/>');
+		
+		this.workzone = $('<div class="ui-helper-clearfix elfinder-workzone"/>').append(this.nav).append(this.cwd)
 		
 		this.spinner = $('<div class="elfinder-spinner"/>');
 		
@@ -98,7 +106,7 @@
 			.attr('id', fm.id)
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+fm.dir+' '+(fm.options.cssClass||''))
 			.append(this.toolbar.hide())
-			.append(this.workzone.append(this.nav).append(this.cwd))
+			.append(this.workzone)
 			.append(this.overlay.hide())
 			.append(this.spinner)
 			.append(this.error)
@@ -114,19 +122,56 @@
 			self.overlay[fm.locks.ui ? 'show' : 'hide']();
 		})
 		.bind('reload', function(e) {
-			
-			self.renderCdc();
+			self.renderNav(e.data.tree).renderCdc();
+
 		})
 		;
 
 
 		this.renderNav = function(tree) {
+			var html = '';
 			
+			if (tree.length) {
+				
+			} else {
+				html = '<li><a href="#'+tree.hash+'" class="ui-state-active ui-corner-all"><span class="elfinder-nav-collapsed"/><span class="elfinder-nav-icon elfinder-nav-icon-home"/>'+"\n"+tree.name+'</a>'+traverse(tree.dirs)+'</li>'
+
+			}
+			
+			function traverse(tree) {
+				var html = '<ul style="display:none">',
+					i, c, o;
+				
+				for (i=0; i < tree.length; i++) {
+					o = tree[i];
+					if (!o.name || !o.hash) {
+						continue;
+					}
+					c = '';
+					if (!o.read && !o.write) {
+						c = '-noaccess';
+					} else if (!o.read) {
+						c = '-dropbox';
+					} else if (!o.write) {
+						c = '-ro';
+					} 
+
+					html += '<li><a href="#'+o.hash+'" class="ui-corner-all"><span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/><span class="elfinder-nav-icon elfinder-nav-icon-folder'+c+'"/>'+o.name+'</a></li>'
+
+					if (o.dirs.length) {
+						html += traverse(o.dirs);
+					}
+					html += '</li>';
+				}
+				return html +'</ul>';
+			}
+			
+			this.tree.html(html)
+			return this;
 		}
 		
 		this.renderCdc = function() {
-			var fm   = this.fm,
-				l    = this.fm.viewType() == 'list',
+			var l    = this.fm.viewType() == 'list',
 				c    = 'ui-widget-header',
 				html = l ? '<table><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr>' : '',
 				r    = l ? 'rowHtml' : 'iconHtml';
@@ -136,11 +181,12 @@
 			});
 			
 			this.cwd.html(html + (l ? '</table>' : ''));
+			return this;
 		}
 
 		this.iconHtml = function(o) {
 			return '<a href="#'+o.hash+'" class="ui-corner-all">'
-					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"></span>'
+					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
 					+'</a>';
 			

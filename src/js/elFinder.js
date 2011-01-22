@@ -41,7 +41,7 @@
 		};
 		
 		this._view = this.viewType(this.cookie(this.cookies.view) || 'icons');
-		this.viewType('icons')
+		// this.viewType('icons')
 		// this.log('viewType: '+this.viewType())
 		
 		
@@ -223,7 +223,7 @@
 					self.cwd.size += d.cdc[i].size;
 				}
 				// self.log(self.cwd)
-				self.trigger('reload', { tree : d.tree });
+				self.trigger('reload', { tree : d.tree, cwd : d.cwd });
 			}
 		});
 		
