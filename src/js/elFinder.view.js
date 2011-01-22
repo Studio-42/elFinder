@@ -9,9 +9,19 @@
 					self.error.fadeOut('slow');
 				}, 4000);
 			};
-		
+
+		/**
+		 * elFinder instance
+		 * 
+		 * @type  elFinder
+		 */
 		this.fm = fm;
 		
+		/**
+		 * File mimetype to kind mapping
+		 * 
+		 * @type  Object
+		 */
 		this.kinds = {
 			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
@@ -73,35 +83,90 @@
 			'video/x-matroska'              : 'Matroska video'
 		}
 		
-		
+		/**
+		 * Tolbar
+		 * 
+		 * @type  jQuery
+		 */
 		this.toolbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar"/>');
 		
-		
-		
-		
-		
+		/**
+		 * Directories tree
+		 * 
+		 * @type  jQuery
+		 */
 		this.tree = $('<ul class="elfinder-tree"/>');
 		
+		/**
+		 * Places
+		 * 
+		 * @type  jQuery
+		 */
 		this.places = $('<ul class="elfinder-tree"/>');
 		
+		/**
+		 * Navigation panel
+		 * 
+		 * @type  jQuery
+		 */
 		this.nav = $('<div class="ui-state-default elfinder-nav"/>').append(this.tree);
 		
+		/**
+		 * Current working directory panel
+		 * 
+		 * @type  jQuery
+		 */
 		this.cwd = $('<div class="elfinder-cwd"/>');
 		
+		/**
+		 * Nav and cwd container
+		 * 
+		 * @type  jQuery
+		 */
 		this.workzone = $('<div class="ui-helper-clearfix elfinder-workzone"/>').append(this.nav).append(this.cwd)
 		
+		/**
+		 * Ajax spinner
+		 * 
+		 * @type  jQuery
+		 */
 		this.spinner = $('<div class="elfinder-spinner"/>');
 		
+		/**
+		 * Overlay
+		 * 
+		 * @type  jQuery
+		 */
 		this.overlay = $('<div class="ui-widget-overlay elfinder-overlay"/>');
 		
+		/**
+		 * Error message place
+		 * 
+		 * @type  jQuery
+		 */
 		this.errorMsg = $('<div/>');
 		
+		/**
+		 * Error message container
+		 * 
+		 * @type  jQuery
+		 */
 		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-alert"/><strong>'+fm.i18n('Error')+'!</strong></div>')
 			.prepend($('<span class="ui-icon ui-icon-close"/>').click(function() { self.error.hide() }))
 			.append(this.errorMsg);
 		
+		/**
+		 * Statusbar
+		 * 
+		 * @type  jQuery
+		 */
 		this.statusbar = $('<div class="ui-widget-header ui-corner-all elfinder-statusbar"/>')
 		
+		/**
+		 * Common elFinder container
+		 * 
+		 * @type  jQuery
+		 */
 		this.viewport = el.empty()
 			.attr('id', fm.id)
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+fm.dir+' '+(fm.options.cssClass||''))

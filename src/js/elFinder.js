@@ -3,48 +3,113 @@
 	elFinder = function(el, o) {
 		var self = this,
 			$el = $(el);
-		
+		/**
+		 * Application version
+		 *
+		 * @type String
+		 **/
 		this.version = '1.2 beta';
 		
+		/**
+		 * Configuration options
+		 *
+		 * @type Object
+		 **/
 		this.options = $.extend({}, this.options, o||{});
+		
 		if (!this.options.url) {
 			alert('Invalid configuration! You have to set URL option.');
 			return;
 		}
 		
+		/**
+		 * Some options from connector
+		 *
+		 * @type Object
+		 **/
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		
+		/**
+		 * ID. Requeried to get/set elfinder instance cookies
+		 *
+		 * @type String
+		 **/
 		this.id = $el.attr('id') || '';
 		
-		
+		/**
+		 * Interface language
+		 *
+		 * @type String
+		 * @default "en"
+		 **/
 		this.lang = this.i18[this.options.lang] ? this.options.lang : 'en';
 		
+		/**
+		 * Interface direction
+		 *
+		 * @type String
+		 * @default "ltr"
+		 **/
 		this.dir = this.i18[this.lang].dir;
 		
+		/**
+		 * i18 messages
+		 *
+		 * @type Object
+		 **/
 		this.messages = this.i18[this.lang].messages;
 		
+		/**
+		 * Current working directory info
+		 *
+		 * @type Object
+		 **/
 		this.cwd      = {};
+		
+		/**
+		 * Current directory content
+		 *
+		 * @type Object
+		 **/
 		this.cdc      = {};
 		this.selected = [];
 		this.history  = [];
 		this.buffer   = [];
 		
+		/**
+		 * Flags indicates what functionality disabled now
+		 *
+		 * @type Object
+		 **/
 		this.locks = { 
 			ui        : true, 
 			shortcuts : true 
 		};
 		
+		/**
+		 * Cookies names
+		 *
+		 * @type Object
+		 **/
 		this.cookies = {
 			view   : 'el-finder-view-'+this.id,
 			places : 'el-finder-places-'+this.id,
 			last   : 'el-finder-last-'+this.id
 		};
 		
+		/**
+		 * Cwd view type
+		 *
+		 * @type String
+		 **/
 		this._view = this.viewType(this.cookie(this.cookies.view) || 'icons');
 		// this.viewType('icons')
-		// this.log('viewType: '+this.viewType())
 		
-		
+		/**
+		 * Events listeners
+		 *
+		 * @type Object
+		 **/
 		this.listeners = {
 			load   : [],
 			focus  : [],
@@ -61,9 +126,9 @@
 		
 		/**
 		 * Create/normalize event - add event.data object if not exists and
-		 * event.data.id - document id on wich event is fired
-		 * event.data.elrte - current editor instance
+		 * event.data.elfinder - current elfinder instance
 		 * 
+		 * @param  jQuery.Event|String  event or event name
 		 * @return jQuery.Event
 		 */
 		this.event = function(e, data) {
@@ -74,6 +139,13 @@
 			return e;
 		}
 		
+		/**
+		 * Add event listener
+		 * 
+		 * @param  jQuery.Event|String  event or event name
+		 * @param  Object  event handler
+		 * @return elFinder
+		 */
 		this.bind = function(e, c) {
 			if (typeof(c) == 'function') {
 				$.each(e.toLowerCase().split(/\s+/), function(i, e) {
@@ -89,9 +161,9 @@
 		/**
 		 * Send notification to all event subscribers
 		 *
-		 * @param  Event|String  event or event type
+		 * @param  jQuery.Event|String  event or event type
 		 * @param  Object        extra parameters
-		 * @return elRTE
+		 * @return elFinder
 		 */
 		this.trigger = function(e, d) {
 			var e = this.event(e, d),
@@ -117,6 +189,12 @@
 			
 		}
 		
+		/**
+		 * Produce ajax request
+		 * 
+		 * @param  Object  options
+		 * @return elFinder
+		 */
 		this.ajax = function(opts) {
 			var error = opts.error || function(m) { self.trigger('error', { error : m}) },
 				o = {
@@ -139,10 +217,16 @@
 			$.extend(o, opts.options);
 			!opts.silent && this.trigger('ajaxstart', o);
 			$.ajax(o);
+			return this;
 		}
 		
 
-		
+		/**
+		 * Lock/unlock some functionality
+		 * 
+		 * @param  Object  options
+		 * @return elFinder
+		 */
 		this.lock = function(o) {
 			if (o === void(0)) {
 				return this.locks;
@@ -159,6 +243,12 @@
 			
 		}
 	
+		/**
+		 * Get/set last opened directory
+		 * 
+		 * @param  String  dir hash
+		 * @return String|undefined
+		 */
 		this.last = function(key) {
 			return this.options.rememberLastDir ? this.cookie(this.cookies.last, key) : void(0);
 		}
