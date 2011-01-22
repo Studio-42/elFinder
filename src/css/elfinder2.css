@@ -250,7 +250,13 @@
 .elfinder-cwd table td { 
 	font-size:.72em;
 	padding:.2em .3em;
+	white-space:nowrap;
+	overflow:hidden;
+	text-align:right;
 }
+
+.elfinder-cwd table td:first-child { text-align:left;}
+
 /* file icon */
 .elfinder-small-icon {
 	width:16px;

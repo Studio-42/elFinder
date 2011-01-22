@@ -14,11 +14,7 @@
 		
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		
-		this.id = (function() {
-			var id = $el.attr('id');
-			return id || 'elfinder-' + Math.round(Math.random()*1000000);
-		})();
-		
+		this.id = $el.attr('id') || '';
 		
 		
 		this.lang = this.i18[this.options.lang] ? this.options.lang : 'en';
@@ -44,10 +40,10 @@
 			last   : 'el-finder-last-'+this.id
 		};
 		
-		this.viewType = (function() {
-			var v = self.cookie(self.cookies.view);
-			return /^view|list$/i.test(v) ? v : 'icons';
-		})();
+		this._view = this.viewType(this.cookie(this.cookies.view) || 'icons');
+		this.viewType('icons')
+		// this.log('viewType: '+this.viewType())
+		
 		
 		this.listeners = {
 			load   : [],
@@ -108,11 +104,11 @@
 				if (e.isPropagationStopped()) {
 					break;
 				}
-				try {
+				// try {
 					l[i](e);
-				} catch (ex) {
+				// } catch (ex) {
 					
-				}
+				// }
 			}
 			return this;
 		}
@@ -131,7 +127,7 @@
 					dataType : 'json',
 					cache    : false,
 					error    : function(r) { self.trigger('ajaxerror', { status : r.status }); },
-					success  : opts.success || function(d) {
+					success  : function(d) {
 						self.trigger('ajaxstop').debug('ajax-data', d);
 						if (d.error && !error(d.error)) {
 							return;
@@ -145,6 +141,7 @@
 			$.ajax(o);
 		}
 		
+
 		
 		this.lock = function(o) {
 			if (o === void(0)) {
@@ -205,9 +202,32 @@
 			self.lock({ ui : l, shortcuts : l });
 		})
 
-		this.ajax({ data : { cmd : 'open', target : this.last() || '', init : true, tree : true } });
-
+		// this.viewType('list')
 		
+
+		this.ajax({ 
+			data : { 
+				cmd : 'open', 
+				target : this.last() || '', 
+				init : true, 
+				tree : true 
+			},
+			success : function(d) {
+				var l = d.cdc.length;
+				
+				$.extend(self.params, d.params||{});
+				self.cwd = d.cwd;
+				self.cdc = {};
+				for (var i = 0; i < d.cdc.length; i++) {
+					self.cdc[d.cdc[i].hash] = d.cdc[i];
+					self.cwd.size += d.cdc[i].size;
+				}
+				// self.log(self.cwd)
+				self.trigger('reload', { tree : d.tree });
+			}
+		});
+		
+		// cookie(this.cookies.view, 'list')
 	}
 	
 	elFinder.prototype.log = function(m) {
@@ -235,6 +255,15 @@
 	
 	elFinder.prototype.timeEnd = function(l) {
 		window.console && window.console.timeEnd && window.console.timeEnd(l);
+	}
+	
+	elFinder.prototype.viewType = function(t) {
+		if (t !== void(0)) {
+			this._view = /^view|list$/i.test(t) ? t : 'icons';
+			this.cookie(this.cookies.view, this._view);
+			
+		}
+		return this._view;
 	}
 	
 	elFinder.prototype.cookie = function(name, value) {
