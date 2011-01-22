@@ -92,12 +92,12 @@
 .elfinder-error {
 	position:absolute;
 	width:250px;
-	height:100px;
+/*	height:100px;*/
 	top:50%;
 	left:50%;
-	margin-top:-25px;
+	margin-top:-50px;
 	margin-left:-125px;
-	padding:.4em;
+	padding:.5em .5em 1em .5em;
 	font-size:.8em;
 	display:none;
 }

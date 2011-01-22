@@ -118,6 +118,38 @@
 		}
 		
 		this.ajax = function(data, success, error, opts) {
+			var o = {
+				url      : this.options.url,
+				async    : true,
+				type     : 'get',
+				data     : data,
+				dataType : 'json',
+				cache    : false,
+				error    : function(r) {
+					self.trigger('error', { error : r.status == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' });
+				},
+				success  : function(d) {
+					self.debug('ajax-data', d);
+					if (d.error) {
+						if (error) {
+							if (!error(d.error)) {
+								return;
+							}
+						} else {
+							self.trigger('error', d);
+						}
+					}
+					success && success(d);
+				}
+			}
+			
+			$.extend(o, opts);
+			
+			
+			
+			this.debug('ajax', o);
+			
+			$.ajax(o)
 			
 		}
 		
@@ -138,7 +170,9 @@
 		}
 	
 		this.last = function(key) {
-			
+			if (this.options.rememberLastDir) {
+				return this.cookie(this.cookies.last, key);
+			}
 		}
 		
 		this.resize = function(w, h) {
@@ -176,6 +210,13 @@
 		this.view = new this.view(this, $el);
 		// this.log(this.dir)
 		
+
+		this.ajax({
+			cmd    : 'open', 
+			target : this.last() || '', 
+			init   : true, 
+			tree   : true
+		})
 		
 	}
 	
@@ -187,7 +228,13 @@
 		var d = this.options.debug;
 		
 		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
-			this.log('elfinder debug: ['+type+'] '+m);
+			if (typeof(m) == 'string') {
+				this.log('elfinder debug: ['+type+'] '+m);
+			} else {
+				this.log('elfinder debug: ['+type+'] ->');
+				this.log(m)
+			}
+			
 		} 
 	}
 	
@@ -200,7 +247,7 @@
 	}
 	
 	elFinder.prototype.cookie = function(name, value) {
-		if (typeof value == 'undefined') {
+		if (value === void(0)) {
 			if (document.cookie && document.cookie != '') {
 				var i, c = document.cookie.split(';');
 				name += '=';

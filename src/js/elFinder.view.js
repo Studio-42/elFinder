@@ -38,6 +38,15 @@
 				
 			self.toolbar.add(self.workzone).add(self.statusbar)[s ? 'removeClass' : 'addClass']('ui-state-disabled');
 			self.spinner[s ? 'hide' : 'show']();
+		})
+		.bind('error', function(e) {
+			if (e.data.error) {
+				self.errorMsg.text(e.data.error);
+				self.error.fadeIn('slow');
+				setTimeout(function() {
+					self.error.fadeOut('slow');
+				}, 4000);
+			}
 		});
 	
 		// fm.bind('lock', function() { fm.log('here lock'); fm.log(fm.lock()) })//.trigger('load')
