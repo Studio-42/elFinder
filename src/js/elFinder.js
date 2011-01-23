@@ -214,7 +214,9 @@
 					data     : opts.data,
 					dataType : 'json',
 					cache    : false,
-					error    : function(r) {  self.trigger('ajaxerror', { status : r.status }); },
+					error    : function(r) {  
+						self.trigger('ajaxerror', { status : r.status, error : r.status == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' }); 
+					},
 					success  : function(d) {
 
 						self.trigger('ajaxstop', d);
@@ -379,7 +381,7 @@
 
 		// this.viewType('icons')
 		
-		this.reload(this.last() || '', true)
+		this.reload(this.last() || '', true);
 		
 		// cookie(this.cookies.view, 'list')
 	}

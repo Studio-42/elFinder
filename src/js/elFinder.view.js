@@ -182,7 +182,7 @@
 			
 			self.spinner[s ? 'show' : 'hide']();
 			self.error.hide();
-			e.type == 'ajaxerror' && error(e.data.state == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration');
+			e.type == 'ajaxerror' && error(e.data.error);
 		})
 		.bind('lock', function(e) {
 			self.overlay[fm.locks.ui ? 'show' : 'hide']();
