@@ -211,7 +211,7 @@
 		})
 		.bind('cd', function(e) {
 			self.renderCdc();
-			e.data.tree && self.renderNav(e.data.tree)
+			e.data.tree && self.renderNav(e.data.tree);
 		})
 		;
 

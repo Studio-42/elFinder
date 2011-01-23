@@ -3,6 +3,8 @@
 	elFinder = function(el, o) {
 		var self = this,
 			$el = $(el),
+			slideToggle = $.browser.msie ? 'toggle' : 'slideToggle',
+			slideDown   = $.browser.msie ? 'show'   : 'slideDown',
 			update = function(d) {
 				var l = d.cdc.length;
 
@@ -304,7 +306,7 @@
 						dir = self.view.tree.find('[key="'+self.cwd.hash+'"]');
 						dir.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
 						dir.addClass('ui-state-active').parents('ul').show();
-						dir.next('ul').slideDown();
+						dir.next('ul')[slideDown]();
 						dir.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
 						
 						self.timeEnd('cd');
@@ -357,7 +359,7 @@
 				$(this).toggleClass('ui-state-hover');
 			})
 			.delegate('a', 'toggle', function() {
-				$(this).next('ul').slideToggle().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
+				$(this).next('ul')[slideToggle]().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
 			})
 			.delegate('.elfinder-nav-collapsed', 'click', function(e) {
 				e.stopPropagation();
