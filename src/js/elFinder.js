@@ -278,40 +278,30 @@
 		}
 		
 		
-		this.cd = function(key) {
+		this.cd = function(key, tree, init) {
 			if (!this.locks.ui) {
 				this.ajax({ 
 					data : {
 						cmd    : 'open',
-						target : key
+						target : key,
+						init   : !!init, 
+						tree   : !!init
 					}, 
 					success : function(d) {
+						self.time('cd')
 						update(d);
-						self.trigger('cd', { cwd : self.cwd });
+						init ? self.trigger('reload', { tree : d.tree, cwd : d.cwd }) : self.trigger('cd', { cwd : self.cwd });
+						// self.trigger(init ? 'reload' : 'cd', d)
 						self.view.tree.find('[key="'+self.cwd.hash+'"]').change();
+						self.timeEnd('cd')
+						delete d
 					}
 				});
 			}
 		}
 		
-		this.reload = function(key, init) {
-			
-			this.ajax({ 
-				data : { 
-					cmd : 'open', 
-					target : key, 
-					init : !!init, 
-					tree : true 
-				},
-				success : function(d) {
-					self.time('reload')
-					update(d);
-					// d.params && $.extend(self.params, d.params);
-					self.trigger('reload', { tree : d.tree, cwd : d.cwd });
-					self.timeEnd('reload')
-				}
-			});
-			
+		this.reload = function(key) {
+			return this.open(key, true);
 		}
 		
 		this.copy = function(keys, cut) {
@@ -333,6 +323,7 @@
 		this.view = new this.view(this, $el);
 		
 		// bind nav tree events handlers
+		// @TODO - IE toggle
 		this.view.tree
 			.delegate('a', 'click', function(e) {
 				var $this = $(this),
@@ -381,7 +372,7 @@
 
 		// this.viewType('icons')
 		
-		this.reload(this.last() || '', true);
+		this.cd(this.last() || '', true, true);
 		
 		// cookie(this.cookies.view, 'list')
 	}

@@ -8,7 +8,26 @@
 				setTimeout(function() { 
 					self.error.fadeOut('slow');
 				}, 4000);
-			};
+			},
+			perms = function(o) {
+				var c = '', e = '';
+			
+				if (!o.read && !o.write) {
+					c = 'elfinder-na';
+					e = '<span class="elfinder-perms"/>';
+				} else if (!o.read) {
+					c = 'elfinder-wo';
+					e = '<span class="elfinder-perms"/>';
+				} else if (!o.write) {
+					c = 'elfinder-ro';
+					e = '<span class="elfinder-perms"/>';
+				}
+				return { cssclass : c, element : e };
+			},
+			symlink = function(o) {
+				return o.link || o.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : ''
+			}
+			;
 
 		/**
 		 * elFinder instance
@@ -202,21 +221,6 @@
 
 		this.renderNav = function(tree) {
 			var html = '',
-				perms = function(o) {
-					var c = '', e = '';
-				
-					if (!o.read && !o.write) {
-						c = 'elfinder-na';
-						e = '<span class="elfinder-perms"/>';
-					} else if (!o.read) {
-						c = 'elfinder-wo';
-						e = '<span class="elfinder-perms"/>';
-					} else if (!o.write) {
-						c = 'elfinder-ro';
-						e = '<span class="elfinder-perms"/>';
-					}
-					return { cssclass : c, element : e };
-				},
 				traverse = function(tree) {
 					var html = '<ul style="display:none">',	i, o, p;
 
@@ -251,7 +255,7 @@
 						+p.element+tree.name+'</a>' + traverse(tree.dirs) + '</li>';
 			}
 			
-			this.tree.html(html).children('li:first').children('a').change();
+			this.tree.html(html)//.children('li:first').children('a').change();
 			return this;
 		}
 		
@@ -271,28 +275,22 @@
 
 		this.iconHtml = function(o) {
 			var style = o.tmb ? ' style="background:url(\''+o.tmb+'\') 0 0 no-repeat"' : '',
-				add = o.link || o.mime == 'symlink-broken' ? '<span class="elfinder-simlink"/>' : ''
+				p = perms(o)
 			;
-
-			if (!o.read && !o.write) {
-				add += '<span class="elfinder-noaccess"/>';
-			} else if (o.read && !o.write) {
-				add += '<span class="elfinder-readonly"/>';
-			} else if (!o.read && o.write) {
-				add += '<em class="elfinder-'+(o.mime == 'directory' ? 'dropbox' :'noread')+'" />';
-			}
-
-			return '<a href="#'+o.hash+'" class="ui-corner-all">'
+			o.tmb && fm.log(o.tmb)
+			return '<a href="#" key="'+o.hash+'" class="ui-corner-all '+p.cssclass+'">'
 					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"'+style+'/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
-					+ add
-					+'</a>';
-			
+					+ p.element
+					+ symlink(o)
+					+ '</a>'
+
 		}
 		
 		this.rowHtml = function(o) {
-			return '<tr>'
-					+ '<td class="ui-widget-content"><span class="elfinder-small-icon elfinder-small-icon-'+this.mime2class(o.mime)+'"></span><span class="elfinder-filename">'+o.name+'</span></td>'
+			var p = perms(o);
+			return '<tr key="'+o.hash+'" class="'+p.cssclass+'">'
+					+ '<td class="ui-widget-content"><div><span class="elfinder-small-icon elfinder-small-icon-'+this.mime2class(o.mime)+'"/>'+p.element + symlink(o) + '<span class="elfinder-filename">'+o.name+'</span></div></td>'
 					+ '<td class="ui-widget-content">'+this.formatPermissions(o.read, o.write, o.rm)+'</td>'
 					+ '<td class="ui-widget-content">'+this.formatDate(o.date)+'</td>'
 					+ '<td class="ui-widget-content">'+this.mime2kind(o.mime)+'</td>'

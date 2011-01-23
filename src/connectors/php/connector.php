@@ -33,7 +33,7 @@ $opts = array(
 	'rootAlias'       => 'Home',       // display this instead of root directory name
 	'perms' => array(
 		'/123/' => array(
-			'read'   => false,
+			'read'   => true,
 			'write'   => false,
 			'rm'   => true
 		)
@@ -50,7 +50,7 @@ $opts = array(
 	// 'uploadAllow'  => array(),      // mimetypes which allowed to upload
 	// 'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 	// 'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
-	// 'imgLib'       => 'mogrify',       // image manipulation library (imagick, mogrify, gd)
+	// 'imgLib'       => 'imagick',       // image manipulation library (imagick, mogrify, gd)
 	// 'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
 	// 'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 	// 'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
@@ -64,7 +64,7 @@ $opts = array(
 	// 	'rm'     => true
 	// 	),
 	// 'perms'        => array(),      // individual folders/files permisions    
-	// 'debug'        => true,         // send debug to client
+	'debug'        => true,         // send debug to client
 	// 'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
 	// 'archivers'    => array()       // info about archivers to use. See example below. Leave empty for auto detect
 	// 'archivers' => array(

@@ -1,3 +1,24 @@
+/************************************/
+/*            COMMON STUFFS         */
+/************************************/
+/* dir/file permissions marker */
+.elfinder-perms,
+/* symlink marker */
+.elfinder-symlink {
+	position:absolute;
+	width:16px;
+	height:16px;
+	background-image:url(../images/toolbar.png);
+	background-repeat:no-repeat;
+	background-position:0 -570px;
+/*	border:1px solid #111;*/
+}
+/* noaccess */
+.elfinder-na .elfinder-perms { background-position:0 -116px; }
+/* read only */
+.elfinder-ro .elfinder-perms { background-position:0 -82px;}
+/* write only */
+.elfinder-wo .elfinder-perms { background-position:0 -98px;}
 
 /* common container */
 .elfinder { padding:2px; position:relative; }
@@ -92,7 +113,6 @@
 .elfinder-error {
 	position:absolute;
 	width:250px;
-/*	height:100px;*/
 	top:50%;
 	left:50%;
 	margin-top:-50px;
@@ -102,13 +122,7 @@
 	display:none;
 }
 
-.elfinder-overlay {
-/*	position:absolute;*/
-/*	border:2px solid red;*/
-/*	display:none;*/
-}
-
-.elfinder-error div { clear:both;}
+.elfinder-error div { clear:both; }
 .elfinder-error .ui-icon-alert { float:left; margin:.2em; }
 .elfinder-error .ui-icon-close { float:right; margin:.2em; }
 
@@ -138,16 +152,11 @@
 	position:relative; 
 	display:block; 
 	overflow:hidden; 
-/*	height:1.5em; */
 	padding:3px 1px;
-/*	margin:0;*/
 	outline:0 solid;
 }
 
-/*.elfinder-nav a.ui-state-hover { margin:-1px; }*/
 .elfinder-nav a.ui-state-active.ui-state-hover { margin:0; }
-
-/*.elfinder-nav a.ui-state-active { border:0 solid;}*/
 
 .elfinder-nav a.ui-state-hover { margin:-1px;}
 
@@ -200,30 +209,24 @@
 .elfinder-nav-icon-folder          { background-position:0 -51px; }
 .elfinder-nav-icon-folder-open     { background-position:0 -66px;}
 
+
+/* permissions marker in nav */
 .elfinder-nav .elfinder-perms {
-	position:absolute;
-	width:16px;
-	height:16px;
 	top:50%;
 	margin-top:-8px;
 	margin-left:-18px;
-	background-image:url(../images/toolbar.png);
-	background-repeat:no-repeat;
-	
-/*	border:1px solid #111;*/
 }
 
-.elfinder-nav .elfinder-na .elfinder-perms { background-position:0 -116px; }
-.elfinder-nav .elfinder-ro .elfinder-perms { background-position:0 -82px;}
-.elfinder-nav .elfinder-wo .elfinder-perms { background-position:0 -98px;}
+
 
 /*************************************************/
 /*          CURRENT WORKING DIRECTORY            */
 /*************************************************/
 .elfinder-cwd { 
-	height: 350px;
+	height: 356px;
 	padding: 0 3px;
 	overflow: auto;
+/*	border:1px solid #111;*/
 }
 
 /************** ICONS VIEW *************/
@@ -252,34 +255,10 @@
 
 .elfinder-big-icon-directory { background-position:0 -50px; }
 
-/*.elfinder-simlink, 
-.elfinder-noaccess, 
-.elfinder-readonly, 
-.elfinder-dropbox, 
-.elfinder-noread {
-	position:absolute;
-	width:14px;
-	height:16px;
-}
-*/
-.elfinder-cwd a .elfinder-simlink,
-.elfinder-cwd a .elfinder-noaccess, 
-.elfinder-cwd a .elfinder-readonly,
-.elfinder-cwd a .elfinder-dropbox,
-.elfinder-cwd a .elfinder-noread {
-	position:absolute;
-	width:14px;
-	height:16px;
-	top:35px;
-	left:50px;
-	background:url(../images/icons-big.png) -17px -1310px no-repeat;
-}
-
-.elfinder-cwd a .elfinder-simlink  { left:12px; }
-.elfinder-cwd a .elfinder-noaccess { background-position: 0 -1430px; }
-.elfinder-cwd a .elfinder-readonly { background-position: -34px -1306px; }
-.elfinder-cwd a .elfinder-dropbox  { background-position: 0 -1308px; }
-.elfinder-cwd a .elfinder-noread   { background-position: 0 -1310px; }
+/* permissions marker */
+.elfinder-cwd a .elfinder-perms { top:32px; right:17px; }
+/* symlink marker */
+.elfinder-cwd a .elfinder-symlink { top:32px; left:12px;}
 
 /* filename */
 .elfinder-filename {
@@ -315,17 +294,32 @@
 	text-align:right;
 }
 
-.elfinder-cwd table td:first-child { text-align:left;}
+.elfinder-cwd table td:first-child { text-align:left; }
+
+.elfinder-cwd table td div {
+/*	border:1px solid #111;*/
+	position:relative;
+	padding-left:23px;
+}
 
 /* file icon */
 .elfinder-small-icon {
 	width:16px;
 	height:16px;
-	float:left;
-	margin-right:.3em;
+	position:absolute;
+	left:0;
+	top:50%;
+	margin-top:-8px;
 	background:url(../images/icons-small.png) 1px 0 no-repeat;
 }
 
+.elfinder-cwd table .elfinder-perms {
+
+	left:5px;
+	right:0;
+}
+
+.elfinder-cwd table .elfinder-symlink { top:0; left:-7px; }
 .elfinder-cwd table td input { width:80%; }
 
 /************************************/
