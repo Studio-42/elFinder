@@ -2,7 +2,17 @@
 	
 	elFinder = function(el, o) {
 		var self = this,
-			$el = $(el);
+			$el = $(el),
+			update = function(d) {
+				var l = d.cdc.length;
+
+				self.cwd = d.cwd;
+				self.cdc = {};
+				for (var i = 0; i < d.cdc.length; i++) {
+					self.cdc[d.cdc[i].hash] = d.cdc[i];
+					self.cwd.size += d.cdc[i].size;
+				}
+			};
 		/**
 		 * Application version
 		 *
@@ -261,11 +271,36 @@
 			
 		}
 		
+		
 		this.cd = function(key) {
 			
+			this.ajax({ 
+				data : {
+					cmd : 'open',
+					target : key
+				}, 
+				success : function(d) {
+					update(d);
+					self.trigger('cd', { cwd : self.cwd })
+					// self.log(self.cdc)
+				}
+			});
 		}
 		
-		this.reload = function() {
+		this.reload = function(key, init) {
+			this.ajax({ 
+				data : { 
+					cmd : 'open', 
+					target : key, 
+					init : !!init, 
+					tree : true 
+				},
+				success : function(d) {
+					update(d);
+					d.params && $.extend(self.params, d.params);
+					self.trigger('reload', { tree : d.tree, cwd : d.cwd });
+				}
+			});
 			
 		}
 		
@@ -287,35 +322,60 @@
 		
 		this.view = new this.view(this, $el);
 		
+		// bind nav tree events handlers
+		this.view.tree
+			.delegate('a', 'click', function(e) {
+				var $this = $(this),
+					key   = $(this).attr('href').substr(1);
+			
+				e.preventDefault();
+			
+				if (key == self.cwd.hash) {
+					$(this).trigger('toggle');
+				} else {
+					$this.change();
+					self.cd(key);
+				}
+			})
+			.delegate('a', 'hover', function() {
+				$(this).toggleClass('ui-state-hover');
+			})
+			.delegate('a', 'change', function() {
+				var $this = $(this);
+			
+				if (!$this.children('.elfinder-nav-icon-folder-dropbox').length 
+				&& !$this.children('.elfinder-nav-icon-folder-noaccess').length) {
+					self.view.tree
+						.find('.ui-state-active')
+						.removeClass('ui-state-active')
+						.children('.elfinder-nav-icon')
+						.removeClass('elfinder-nav-icon-folder-open');
+					
+					if (!$this.children('.elfinder-nav-icon-home').length) {
+						$this.children('.elfinder-nav-icon').addClass('elfinder-nav-icon-folder-open');
+					}
+					$this.addClass('ui-state-active').parents('ul').show();
+					$this.next('ul').slideDown();
+					$this.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
+				}
+			})
+			.delegate('a', 'toggle', function() {
+				$(this).next('ul').slideToggle().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
+			})
+			.delegate('.elfinder-nav-collapsed', 'click', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				$(this).parent().trigger('toggle');
+			});
+		
 		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		})
 
-		// this.viewType('list')
+		// this.viewType('icons')
 		
-
-		this.ajax({ 
-			data : { 
-				cmd : 'open', 
-				target : this.last() || '', 
-				init : true, 
-				tree : true 
-			},
-			success : function(d) {
-				var l = d.cdc.length;
-				
-				$.extend(self.params, d.params||{});
-				self.cwd = d.cwd;
-				self.cdc = {};
-				for (var i = 0; i < d.cdc.length; i++) {
-					self.cdc[d.cdc[i].hash] = d.cdc[i];
-					self.cwd.size += d.cdc[i].size;
-				}
-				// self.log(self.cwd)
-				self.trigger('reload', { tree : d.tree, cwd : d.cwd });
-			}
-		});
+		this.reload(this.last() || '', true)
 		
 		// cookie(this.cookies.view, 'list')
 	}

@@ -186,9 +186,15 @@
 		.bind('lock', function(e) {
 			self.overlay[fm.locks.ui ? 'show' : 'hide']();
 		})
+		.bind('error', function(e) {
+			error(e.data.error);
+		})
 		.bind('reload', function(e) {
 			self.renderNav(e.data.tree).renderCdc();
 
+		})
+		.bind('cd', function() {
+			self.renderCdc();
 		})
 		;
 
@@ -200,7 +206,6 @@
 				
 			} else {
 				html = '<li><a href="#'+tree.hash+'" class="ui-state-active ui-corner-all"><span class="elfinder-nav-collapsed"/><span class="elfinder-nav-icon elfinder-nav-icon-home"/>'+"\n"+tree.name+'</a>'+traverse(tree.dirs)+'</li>'
-
 			}
 			
 			function traverse(tree) {
@@ -221,7 +226,7 @@
 						c = '-ro';
 					} 
 
-					html += '<li><a href="#'+o.hash+'" class="ui-corner-all"><span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/><span class="elfinder-nav-icon elfinder-nav-icon-folder'+c+'"/>'+o.name+'</a></li>'
+					html += '<li><a href="#'+o.hash+'" class="ui-corner-all"><span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/><span class="elfinder-nav-icon elfinder-nav-icon-folder'+c+'"/>'+o.name+'</a>'
 
 					if (o.dirs.length) {
 						html += traverse(o.dirs);
@@ -231,7 +236,7 @@
 				return html +'</ul>';
 			}
 			
-			this.tree.html(html)
+			this.tree.html(html).children('li:first').children('a').click();
 			return this;
 		}
 		
@@ -250,9 +255,22 @@
 		}
 
 		this.iconHtml = function(o) {
+			var style = o.tmb ? ' style="background:url(\''+o.tmb+'\') 0 0 no-repeat"' : '',
+				add = o.link || o.mime == 'symlink-broken' ? '<span class="elfinder-simlink"/>' : ''
+			;
+
+			if (!o.read && !o.write) {
+				add += '<span class="elfinder-noaccess"/>';
+			} else if (o.read && !o.write) {
+				add += '<span class="elfinder-readonly"/>';
+			} else if (!o.read && o.write) {
+				add += '<em class="elfinder-'+(o.mime == 'directory' ? 'dropbox' :'noread')+'" />';
+			}
+
 			return '<a href="#'+o.hash+'" class="ui-corner-all">'
-					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"/>'
+					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"'+style+'/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
+					+ add
 					+'</a>';
 			
 		}

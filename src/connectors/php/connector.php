@@ -31,6 +31,13 @@ $opts = array(
 	'root'            => '../../../files',                       // path to root directory
 	'URL'             => 'http://localhost/git/elfinder/files/', // root directory URL
 	'rootAlias'       => 'Home',       // display this instead of root directory name
+	'perms' => array(
+		'/123/' => array(
+			'read'   => false,
+			'write'   => false,
+			'rm'   => true
+		)
+	),
 	//'uploadAllow'   => array('images/*'),
 	//'uploadDeny'    => array('all'),
 	//'uploadOrder'   => 'deny,allow'
