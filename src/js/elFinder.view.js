@@ -209,12 +209,13 @@
 		.bind('error', function(e) {
 			error(e.data.error);
 		})
-		.bind('reload', function(e) {
-			self.renderNav(e.data.tree).renderCdc();
-
-		})
-		.bind('cd', function() {
+		// .bind('reload', function(e) {
+		// 	self.renderNav(e.data.tree).renderCdc();
+		// 
+		// })
+		.bind('cd', function(e) {
 			self.renderCdc();
+			e.data.tree && self.renderNav(e.data.tree)
 		})
 		;
 

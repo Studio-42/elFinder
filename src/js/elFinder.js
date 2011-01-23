@@ -279,6 +279,8 @@
 		
 		
 		this.cd = function(key, tree, init) {
+			var dir;
+			
 			if (!this.locks.ui) {
 				this.ajax({ 
 					data : {
@@ -290,11 +292,23 @@
 					success : function(d) {
 						self.time('cd')
 						update(d);
-						init ? self.trigger('reload', { tree : d.tree, cwd : d.cwd }) : self.trigger('cd', { cwd : self.cwd });
-						// self.trigger(init ? 'reload' : 'cd', d)
-						self.view.tree.find('[key="'+self.cwd.hash+'"]').change();
-						self.timeEnd('cd')
-						delete d
+						// init ? self.trigger('reload', { tree : d.tree, cwd : d.cwd }) : self.trigger('cd', { cwd : self.cwd });
+						self.trigger('cd', d);
+						
+						// open current dir parents/children in nav panel
+						self.view.tree
+							.find('.ui-state-active')
+							.removeClass('ui-state-active')
+							.children('.elfinder-nav-icon-folder')
+							.removeClass('elfinder-nav-icon-folder-open');
+						dir = self.view.tree.find('[key="'+self.cwd.hash+'"]');
+						dir.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
+						dir.addClass('ui-state-active').parents('ul').show();
+						dir.next('ul').slideDown();
+						dir.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
+						
+						self.timeEnd('cd');
+						delete d;
 					}
 				});
 			}
@@ -341,20 +355,6 @@
 			})
 			.delegate('a', 'hover', function() {
 				$(this).toggleClass('ui-state-hover');
-			})
-			.delegate('a', 'change', function() {
-				var $this = $(this);
-			
-				self.view.tree
-					.find('.ui-state-active')
-					.removeClass('ui-state-active')
-					.children('.elfinder-nav-icon-folder')
-					.removeClass('elfinder-nav-icon-folder-open');
-				
-				$this.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
-				$this.addClass('ui-state-active').parents('ul').show();
-				$this.next('ul').slideDown();
-				$this.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
 			})
 			.delegate('a', 'toggle', function() {
 				$(this).next('ul').slideToggle().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
