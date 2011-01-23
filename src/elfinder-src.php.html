@@ -5,10 +5,13 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>elFinder Source PHP</title>
-
+	<!-- 
+	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
+-->
 	<script src="../js/jquery-1.4.4.min.js" type="text/javascript" charset="utf-8"></script>
+	<!-- 
 	<script src="../js/jquery-ui-1.8.8.custom.min.js" type="text/javascript" charset="utf-8"></script>
-
+ -->
 	<link rel="stylesheet" href="../js/ui-themes/smoothness/jquery-ui-1.8.9.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	 
 	<link rel="stylesheet" href="css/elfinder2.css" type="text/css" media="screen" title="no title" charset="utf-8">
@@ -63,15 +66,15 @@
 		$().ready(function() {
 			var f = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-				lang : 'ru',
-				docked : true,
-				editorCallback : function(url) { window.console.log(url) },
-				closeOnEditorCallback : false,
-				selectMultiple : true,
-				dialog : {
-					title : 'File manager',
-					height : 500
-				}
+				lang : 'ru'
+				// docked : true,
+				// editorCallback : function(url) { window.console.log(url) },
+				// closeOnEditorCallback : false,
+				// selectMultiple : true,
+				// dialog : {
+				// 	title : 'File manager',
+				// 	height : 500
+				// }
 			})
 
 			$('#close,#open,#dock,#undock,#destroy').click(function() {
@@ -85,32 +88,6 @@
 				window.console.log(f[0].elfinder)
 				f[0].elfinder.ui.exec('mkdir')
 			})
-			
-			// var opts = {
-			// 	url : 'connectors/php/connector.php',
-			// 	lang : 'ru',
-			// 	// editorCallback : function(url) { window.console.log(url) },
-			// 	closeOnEditorCallback : true,
-			// 	dialog : {
-			// 		title : 'File manager',
-			// 		height : 500
-			// 	}
-			// }
-			// 
-			// $('#i1,#i2').click(function() {
-			// 	var t = $(this),
-			// 		id = t.attr('id')+'_elfinder',
-			// 		f = $('#'+id);
-			// 		
-			// 	$('.my-elfinder').elfinder('close')	
-			// 		
-			// 	if (f.length) {
-			// 		f.elfinder('open')
-			// 	} else {
-			// 		$('<div class="my-elfinder" id="'+id+'"/>').elfinder($.extend({}, opts, { editorCallback : function(url) { t.val(url).focus() } }))
-			// 	}
-			// 		
-			// })
 			
 		})
 	</script>

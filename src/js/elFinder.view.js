@@ -181,6 +181,7 @@
 			var s = e.type == 'ajaxstart';
 			
 			self.spinner[s ? 'show' : 'hide']();
+			self.error.hide();
 			e.type == 'ajaxerror' && error(e.data.state == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration');
 		})
 		.bind('lock', function(e) {
@@ -200,43 +201,57 @@
 
 
 		this.renderNav = function(tree) {
-			var html = '';
-			
+			var html = '',
+				perms = function(o) {
+					var c = '', e = '';
+				
+					if (!o.read && !o.write) {
+						c = 'elfinder-na';
+						e = '<span class="elfinder-perms"/>';
+					} else if (!o.read) {
+						c = 'elfinder-wo';
+						e = '<span class="elfinder-perms"/>';
+					} else if (!o.write) {
+						c = 'elfinder-ro';
+						e = '<span class="elfinder-perms"/>';
+					}
+					return { cssclass : c, element : e };
+				},
+				traverse = function(tree) {
+					var html = '<ul style="display:none">',	i, o, p;
+
+					for (i=0; i < tree.length; i++) {
+						o = tree[i];
+						if (o.name && o.hash) {
+							p = perms(o);
+
+							html += '<li><a href="#" key="'+o.hash+'" class="ui-corner-all '+p.cssclass+'">'
+									+ '<span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/>'
+									+ '<span class="elfinder-nav-icon elfinder-nav-icon-folder"/>'
+									+ p.element + o.name + '</a>';
+
+							if (o.dirs.length) {
+								html += traverse(o.dirs);
+							}
+							html += '</li>'
+						}
+						
+					}
+					return html + '</ul>';
+				},
+				p = perms(tree);
+				
 			if (tree.length) {
 				
 			} else {
-				html = '<li><a href="#'+tree.hash+'" class="ui-state-active ui-corner-all"><span class="elfinder-nav-collapsed"/><span class="elfinder-nav-icon elfinder-nav-icon-home"/>'+"\n"+tree.name+'</a>'+traverse(tree.dirs)+'</li>'
+				p = perms(tree);
+				html = '<li><a href="#" key="'+tree.hash+'" class="ui-corner-all '+p.cssclass+'">'
+						+'<span class="elfinder-nav-'+(tree.dirs.length ? 'collapsed' : 'empty')+'"/>'
+						+'<span class="elfinder-nav-icon elfinder-nav-icon-home"/>'
+						+p.element+tree.name+'</a>' + traverse(tree.dirs) + '</li>';
 			}
 			
-			function traverse(tree) {
-				var html = '<ul style="display:none">',
-					i, c, o;
-				
-				for (i=0; i < tree.length; i++) {
-					o = tree[i];
-					if (!o.name || !o.hash) {
-						continue;
-					}
-					c = '';
-					if (!o.read && !o.write) {
-						c = '-noaccess';
-					} else if (!o.read) {
-						c = '-dropbox';
-					} else if (!o.write) {
-						c = '-ro';
-					} 
-
-					html += '<li><a href="#'+o.hash+'" class="ui-corner-all"><span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/><span class="elfinder-nav-icon elfinder-nav-icon-folder'+c+'"/>'+o.name+'</a>'
-
-					if (o.dirs.length) {
-						html += traverse(o.dirs);
-					}
-					html += '</li>';
-				}
-				return html +'</ul>';
-			}
-			
-			this.tree.html(html).children('li:first').children('a').click();
+			this.tree.html(html).children('li:first').children('a').change();
 			return this;
 		}
 		

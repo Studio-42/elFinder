@@ -139,13 +139,17 @@
 	display:block; 
 	overflow:hidden; 
 /*	height:1.5em; */
-	padding:3px 0;
-	margin:1px 0;
+	padding:3px 1px;
+/*	margin:0;*/
 	outline:0 solid;
 }
 
-.elfinder-nav a.ui-state-hover,
-.elfinder-nav a.ui-state-active { margin:-1px; }
+/*.elfinder-nav a.ui-state-hover { margin:-1px; }*/
+.elfinder-nav a.ui-state-active.ui-state-hover { margin:0; }
+
+/*.elfinder-nav a.ui-state-active { border:0 solid;}*/
+
+.elfinder-nav a.ui-state-hover { margin:-1px;}
 
 .elfinder-ltr .elfinder-nav ul li ul { margin-left:12px; }
 .elfinder-rtl .elfinder-nav ul li ul  {	margin-right:15px; }
@@ -184,6 +188,7 @@
 	margin-top:-8px;
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
+/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
@@ -191,12 +196,26 @@
 
 /* dir types */
 .elfinder-nav-icon-home            { background-position:0 -35px;}
+.elfinder-nav-icon-places          { background-position:0 -134px;}
 .elfinder-nav-icon-folder          { background-position:0 -51px; }
 .elfinder-nav-icon-folder-open     { background-position:0 -66px;}
-.elfinder-nav-icon-folder-ro       { background-position:0 -82px;}
-.elfinder-nav-icon-folder-dropbox  { background-position:0 -98px;}
-.elfinder-nav-icon-folder-noaccess { background-position:0 -116px;}
-.elfinder-nav-icon-places          { background-position:0 -134px;}
+
+.elfinder-nav .elfinder-perms {
+	position:absolute;
+	width:16px;
+	height:16px;
+	top:50%;
+	margin-top:-8px;
+	margin-left:-18px;
+	background-image:url(../images/toolbar.png);
+	background-repeat:no-repeat;
+	
+/*	border:1px solid #111;*/
+}
+
+.elfinder-nav .elfinder-na .elfinder-perms { background-position:0 -116px; }
+.elfinder-nav .elfinder-ro .elfinder-perms { background-position:0 -82px;}
+.elfinder-nav .elfinder-wo .elfinder-perms { background-position:0 -98px;}
 
 /*************************************************/
 /*          CURRENT WORKING DIRECTORY            */
@@ -233,7 +252,7 @@
 
 .elfinder-big-icon-directory { background-position:0 -50px; }
 
-.elfinder-simlink, 
+/*.elfinder-simlink, 
 .elfinder-noaccess, 
 .elfinder-readonly, 
 .elfinder-dropbox, 
@@ -242,12 +261,15 @@
 	width:14px;
 	height:16px;
 }
-
+*/
 .elfinder-cwd a .elfinder-simlink,
 .elfinder-cwd a .elfinder-noaccess, 
 .elfinder-cwd a .elfinder-readonly,
 .elfinder-cwd a .elfinder-dropbox,
 .elfinder-cwd a .elfinder-noread {
+	position:absolute;
+	width:14px;
+	height:16px;
 	top:35px;
 	left:50px;
 	background:url(../images/icons-big.png) -17px -1310px no-repeat;

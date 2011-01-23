@@ -92,8 +92,8 @@
 		 * @type Object
 		 **/
 		this.locks = { 
-			ui        : true, 
-			shortcuts : true 
+			ui        : false, 
+			shortcuts : false
 		};
 		
 		/**
@@ -179,18 +179,18 @@
 			var e = this.event(e, d),
 				l = this.listeners[e.type]||[], i;
 
-			this.debug('event', e.type+', listeners - '+l.length);
-			d && this.debug('event-data', d);
+			this.debug('event-'+e.type, d);
+			// d && this.debug('event-data', d);
 
 			for (i = 0; i < l.length; i++) {
 				if (e.isPropagationStopped()) {
 					break;
 				}
-				// try {
+				try {
 					l[i](e);
-				// } catch (ex) {
-					
-				// }
+				} catch (ex) {
+					window.console && window.console.error && window.console.error(ex);
+				}
 			}
 			return this;
 		}
@@ -214,19 +214,23 @@
 					data     : opts.data,
 					dataType : 'json',
 					cache    : false,
-					error    : function(r) { self.trigger('ajaxerror', { status : r.status }); },
+					error    : function(r) {  self.trigger('ajaxerror', { status : r.status }); },
 					success  : function(d) {
-						self.trigger('ajaxstop').debug('ajax-data', d);
+
+						self.trigger('ajaxstop', d);
+
 						if (d.error && !error(d.error)) {
 							return;
 						}
 						opts.success && opts.success(d);
 					}
 				};
-				
-			$.extend(o, opts.options);
-			!opts.silent && this.trigger('ajaxstart', o);
-			$.ajax(o);
+			
+			if (!this.locks.ui) {
+				$.extend(o, opts.options);
+				!opts.silent && this.trigger('ajaxstart', o);
+				$.ajax(o);
+			}
 			return this;
 		}
 		
@@ -273,21 +277,23 @@
 		
 		
 		this.cd = function(key) {
-			
-			this.ajax({ 
-				data : {
-					cmd : 'open',
-					target : key
-				}, 
-				success : function(d) {
-					update(d);
-					self.trigger('cd', { cwd : self.cwd })
-					// self.log(self.cdc)
-				}
-			});
+			if (!this.locks.ui) {
+				this.ajax({ 
+					data : {
+						cmd    : 'open',
+						target : key
+					}, 
+					success : function(d) {
+						update(d);
+						self.trigger('cd', { cwd : self.cwd });
+						self.view.tree.find('[key="'+self.cwd.hash+'"]').change();
+					}
+				});
+			}
 		}
 		
 		this.reload = function(key, init) {
+			
 			this.ajax({ 
 				data : { 
 					cmd : 'open', 
@@ -296,9 +302,11 @@
 					tree : true 
 				},
 				success : function(d) {
+					self.time('reload')
 					update(d);
-					d.params && $.extend(self.params, d.params);
+					// d.params && $.extend(self.params, d.params);
 					self.trigger('reload', { tree : d.tree, cwd : d.cwd });
+					self.timeEnd('reload')
 				}
 			});
 			
@@ -326,14 +334,15 @@
 		this.view.tree
 			.delegate('a', 'click', function(e) {
 				var $this = $(this),
-					key   = $(this).attr('href').substr(1);
+					key   = $this.attr('key');
 			
 				e.preventDefault();
 			
 				if (key == self.cwd.hash) {
-					$(this).trigger('toggle');
+					$this.trigger('toggle');
+				} else if ($this.hasClass('elfinder-na') || $this.hasClass('elfinder-wo')) {
+					self.trigger('error', { error : 'Access denied' });
 				} else {
-					$this.change();
 					self.cd(key);
 				}
 			})
@@ -343,21 +352,16 @@
 			.delegate('a', 'change', function() {
 				var $this = $(this);
 			
-				if (!$this.children('.elfinder-nav-icon-folder-dropbox').length 
-				&& !$this.children('.elfinder-nav-icon-folder-noaccess').length) {
-					self.view.tree
-						.find('.ui-state-active')
-						.removeClass('ui-state-active')
-						.children('.elfinder-nav-icon')
-						.removeClass('elfinder-nav-icon-folder-open');
-					
-					if (!$this.children('.elfinder-nav-icon-home').length) {
-						$this.children('.elfinder-nav-icon').addClass('elfinder-nav-icon-folder-open');
-					}
-					$this.addClass('ui-state-active').parents('ul').show();
-					$this.next('ul').slideDown();
-					$this.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
-				}
+				self.view.tree
+					.find('.ui-state-active')
+					.removeClass('ui-state-active')
+					.children('.elfinder-nav-icon-folder')
+					.removeClass('elfinder-nav-icon-folder-open');
+				
+				$this.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
+				$this.addClass('ui-state-active').parents('ul').show();
+				$this.next('ul').slideDown();
+				$this.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
 			})
 			.delegate('a', 'toggle', function() {
 				$(this).next('ul').slideToggle().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
@@ -388,13 +392,7 @@
 		var d = this.options.debug;
 		
 		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
-			if (typeof(m) == 'string') {
-				this.log('elfinder debug: ['+type+'] '+m);
-			} else {
-				this.log('elfinder debug: ['+type+'] ->');
-				this.log(m)
-			}
-			
+			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ', m);
 		} 
 		return this;
 	}
