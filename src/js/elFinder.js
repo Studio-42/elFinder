@@ -2,19 +2,13 @@
 	
 	elFinder = function(el, o) {
 		var self = this,
-			$el = $(el),
-			slideToggle = $.browser.msie ? 'toggle' : 'slideToggle',
-			slideDown   = $.browser.msie ? 'show'   : 'slideDown',
-			update = function(d) {
-				var l = d.cdc.length;
-
-				self.cwd = d.cwd;
-				self.cdc = {};
-				for (var i = 0; i < d.cdc.length; i++) {
-					self.cdc[d.cdc[i].hash] = d.cdc[i];
-					self.cwd.size += d.cdc[i].size;
-				}
-			};
+			/**
+			 * Target node
+			 *
+			 * @type jQuery
+			 **/
+			$el = $(el);
+			
 		/**
 		 * Application version
 		 *
@@ -281,38 +275,21 @@
 		
 		
 		this.cd = function(key, tree, init) {
-			var dir;
+			var o = {
+					data : {cmd : 'open', target : key},
+					success : function(d) { self.time('cd'); self.trigger('cd', d); delete d; self.timeEnd('cd'); }
+			};
 			
 			if (!this.locks.ui) {
-				this.ajax({ 
-					data : {
-						cmd    : 'open',
-						target : key,
-						init   : !!init, 
-						tree   : !!init
-					}, 
-					success : function(d) {
-						self.time('cd')
-						update(d);
-						// init ? self.trigger('reload', { tree : d.tree, cwd : d.cwd }) : self.trigger('cd', { cwd : self.cwd });
-						self.trigger('cd', d);
-						
-						// open current dir parents/children in nav panel
-						self.view.tree
-							.find('.ui-state-active')
-							.removeClass('ui-state-active')
-							.children('.elfinder-nav-icon-folder')
-							.removeClass('elfinder-nav-icon-folder-open');
-						dir = self.view.tree.find('[key="'+self.cwd.hash+'"]');
-						dir.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
-						dir.addClass('ui-state-active').parents('ul').show();
-						dir.next('ul')[slideDown]();
-						dir.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
-						
-						self.timeEnd('cd');
-						delete d;
-					}
-				});
+				
+				if (tree) {
+					o.data.tree = true;
+				}
+				if (init) {
+					o.data.init = true;
+				}
+				
+				this.ajax(o);
 			}
 		}
 		
@@ -336,42 +313,30 @@
 			return this.messages[m] || m;
 		}
 		
-		this.view = new this.view(this, $el);
-		
-		// bind nav tree events handlers
-		// @TODO - IE toggle
-		this.view.tree
-			.delegate('a', 'click', function(e) {
-				var $this = $(this),
-					key   = $this.attr('key');
-			
-				e.preventDefault();
-			
-				if (key == self.cwd.hash) {
-					$this.trigger('toggle');
-				} else if ($this.hasClass('elfinder-na') || $this.hasClass('elfinder-wo')) {
-					self.trigger('error', { error : 'Access denied' });
-				} else {
-					self.cd(key);
+		this.bind('cd', function(e) {
+			var l;
+			if (e.data.cdc) {
+
+				self.cwd = e.data.cwd;
+				self.cdc = {};
+				l = e.data.cdc;
+				while (l--) {
+					self.cdc[e.data.cdc[l].hash] = e.data.cdc[l];
+					self.cwd.size += e.data.cdc[l].size;
 				}
-			})
-			.delegate('a', 'hover', function() {
-				$(this).toggleClass('ui-state-hover');
-			})
-			.delegate('a', 'toggle', function() {
-				$(this).next('ul')[slideToggle]().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
-			})
-			.delegate('.elfinder-nav-collapsed', 'click', function(e) {
-				e.stopPropagation();
-				e.preventDefault();
-				$(this).parent().trigger('toggle');
-			});
+
+			}
+		});
+		
+		
+		
 		
 		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		})
 
+		this.view = new this.view(this, $el);
 		// this.viewType('icons')
 		
 		this.cd(this.last() || '', true, true);

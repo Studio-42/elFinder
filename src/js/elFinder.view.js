@@ -2,13 +2,6 @@
 	
 	elFinder.prototype.view = function(fm, el) {
 		var self = this,
-			error = function(m) {
-				self.errorMsg.text(fm.i18n(m));
-				self.error.fadeIn('slow');
-				setTimeout(function() { 
-					self.error.fadeOut('slow');
-				}, 4000);
-			},
 			perms = function(o) {
 				var c = '', e = '';
 			
@@ -170,16 +163,16 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-alert"/><strong>'+fm.i18n('Error')+'!</strong></div>')
-			.prepend($('<span class="ui-icon ui-icon-close"/>').click(function() { self.error.hide() }))
-			.append(this.errorMsg);
+		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-close"/><span class="ui-icon ui-icon-alert"/><strong>'+fm.i18n('Error')+'!</strong></div>')
+			.append(this.errorMsg)
+			.click(function() { self.error.hide() });
 		
 		/**
 		 * Statusbar
 		 * 
 		 * @type  jQuery
 		 */
-		this.statusbar = $('<div class="ui-widget-header ui-corner-all elfinder-statusbar"/>')
+		this.statusbar = $('<div class="ui-widget-header ui-corner-all elfinder-statusbar"/>');
 		
 		/**
 		 * Common elFinder container
@@ -197,24 +190,28 @@
 			.append(this.statusbar.hide());
 	
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
-			var s = e.type == 'ajaxstart';
-			
-			self.spinner[s ? 'show' : 'hide']();
+			self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 			self.error.hide();
-			e.type == 'ajaxerror' && error(e.data.error);
 		})
 		.bind('lock', function(e) {
 			self.overlay[fm.locks.ui ? 'show' : 'hide']();
 		})
-		.bind('error', function(e) {
-			error(e.data.error);
+		.bind('error ajaxerror', function(e) {
+			self.errorMsg.text(fm.i18n(e.data.error));
+			self.error.fadeIn('slow');
+			setTimeout(function() { 
+				self.error.fadeOut('slow');
+			}, 4000);
 		})
 		.bind('cd', function(e) {
-			self.renderCdc();
-			e.data.tree && self.renderNav(e.data.tree);
+			if (e.data.cdc) {
+				self.renderCdc(e.data.cdc);
+				e.data.tree && self.renderNav(e.data.tree);
+			}
 		})
 		;
 
+		this.tree.elfindertree(fm);
 
 		this.renderNav = function(tree) {
 			var html = '',
@@ -256,13 +253,13 @@
 			return this;
 		}
 		
-		this.renderCdc = function() {
+		this.renderCdc = function(cdc) {
 			var l    = this.fm.viewType() == 'list',
 				c    = 'ui-widget-header',
 				html = l ? '<table><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr>' : '',
 				r    = l ? 'rowHtml' : 'iconHtml';
 			
-			$.each(this.fm.cdc, function(k, o) {
+			$.each(cdc, function(k, o) {
 				html += self[r](o);
 			});
 			
