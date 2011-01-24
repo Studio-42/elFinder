@@ -130,7 +130,7 @@
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType('list');
+		this._view = this.viewType('icons');
 
 		/**
 		 * Events listeners
@@ -378,35 +378,34 @@
 			self.trigger('blur');
 		});
 		
-		this.view.cwd.delegate('a, div', 'click', function(e) {
-			// self.log(this)
-			e.preventDefault();
-			// e.stopPropagation()
-			// e.stopImmediatePropagation()
-		})
-		.delegate('a, tr', 'dblckick', function(e) {
-			self.log('dblckick')
-		})
+		this.view.cwd
+			.delegate('div', 'click', function(e) {
+				e.stopImmediatePropagation();
+				self.locks.shortcuts = false;
+				self.log('file')
+			})
+			.delegate('div', 'dblclick', function(e) {
+				self.log('dblclick')
+			})
 		
-		// this.view.cwd.click(function(e) {
-		// 	self.log('cwd')
-		// })
+		this.view.cwd.click(function(e) {
+			self.log('cwd')
+		})
 		this.view.cwd.selectable({
-			filter : '[key]',
-			// delay  : 300,
+			filter : '[id]',
 			stop : function(d) { 
 				self.view.cwd.find('.ui-selected').addClass('ui-state-hover')
 			}
-			// stop   : function() { self.fm.updateSelect(); self.fm.log('mouseup') }
 		})
 		
 		this.bind('cd', function() {
-			var cwd = self.view.cwd,
+			var cwd  = self.view.cwd,
 				list = self._view == 'list',
-				drag = list ? cwd.find('div') : cwd.children(),
-				drop = list ? cwd.find('div.directory') : cwd.children('.directory')
-				;
-			drag.not('.elfinder-na,.elfinder-wo').draggable({ revert : true})
+				not  = '.elfinder-na,.elfinder-wo',
+				drag = cwd[list ? 'find' : 'children']('div'),
+				drop = cwd[list ? 'find' : 'children']('div.directory');
+				
+			drag.not(not).draggable({ revert : true});
 				
 			drop.not('.elfinder-na,.elfinder-wo').droppable({
 				over : function(e, ui) {
@@ -414,9 +413,12 @@
 				},
 				out : function(e) {
 					$(e.target).removeClass('directory-opened');
+				},
+				drop : function(e, ui) {
+					$(e.target).removeClass('directory-opened');
 				}
-			})
-		})
+			});
+		});
 		
 		// this.view.cwd.selectable()
 		
