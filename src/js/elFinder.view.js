@@ -271,7 +271,7 @@
 			var style = o.tmb ? ' style="background:url(\''+o.tmb+'\') 0 0 no-repeat"' : '',
 				p = perms(o)
 			;
-			o.tmb && fm.log(o.tmb)
+
 			return '<a href="#" key="'+o.hash+'" class="ui-corner-all '+p.cssclass+'">'
 					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"'+style+'/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
@@ -290,6 +290,14 @@
 					+ '<td class="ui-widget-content">'+this.mime2kind(o.mime)+'</td>'
 					+ '<td class="ui-widget-content">'+this.formatSize(o.size)+'</td>'
 					+ '</tr>'
+		}
+
+		this.tmb = function(tmb) {
+			var s = '.elfinder-'+(this.fm.viewType() == 'list' ? 'small' : 'big')+'-icon';
+			
+			$.each(tmb, function(k, t) {
+				self.cwd.find('[key="'+k+'"]').find(s).css('background', 'url("'+t+'") center center no-repeat');
+			})
 		}
 
 		/*

@@ -7,7 +7,39 @@
 			 *
 			 * @type jQuery
 			 **/
-			$el = $(el);
+			$el = $(el),
+			/**
+			 * Load images thumbnails in background
+			 *
+			 * @param String  current dir hash
+			 * @return void
+			 */
+			tmb = function(key) {
+					self.ajax({
+							// do not trigger ajaxstart event
+							silent : true,
+							data : {cmd : 'tmb', current : key},
+							ajax : {
+									// ajax error handler
+									error : function(r) {
+										self.debug('error', r.status);
+									},
+									// request handler
+									success : function(d) {
+										if (!d || d.error) {
+											return self.debug('error', d ? d.error : 'Uknown error');
+										}
+
+										if (d.images && d.current == self.cwd.hash && self._view == 'icons') {
+											d.tmb && tmb(self.cwd.hash);
+											self.view.tmb(d.images);
+											self.debug('tmb', d);
+										}
+									}
+								}
+						});
+				}
+			;
 			
 		/**
 		 * Application version
@@ -202,8 +234,7 @@
 		 * @return elFinder
 		 */
 		this.ajax = function(opts) {
-			var error = opts.error || function(m) { self.trigger('error', { error : m}) },
-				o = {
+			var o = {
 					url      : this.options.url,
 					async    : true,
 					type     : 'get',
@@ -214,18 +245,26 @@
 						self.trigger('ajaxerror', { status : r.status, error : r.status == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' }); 
 					},
 					success  : function(d) {
+						var err = d ? d.error : 'Unknown error';
+						
+						!opts.silent && self.trigger('ajaxstop', d);
 
-						self.trigger('ajaxstop', d);
-
-						if (d.error && !error(d.error)) {
+						if (err && !(opts.error || function(m) { self.trigger('error', {error : m}); })(err)) {
+							// by default do not proccess data on error
 							return;
 						}
-						opts.success && opts.success(d);
+						
+						// if connector die we get null instead of json
+						// so check it
+						if (d) {
+							d.tmb && d.cwd && tmb(d.cwd.hash);
+							opts.success && opts.success(d);
+						}
 					}
 				};
 			
 			if (!this.locks.ui) {
-				$.extend(o, opts.options);
+				$.extend(o, opts.ajax);
 				!opts.silent && this.trigger('ajaxstart', o);
 				$.ajax(o);
 			}
