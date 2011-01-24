@@ -34,7 +34,7 @@ $opts = array(
 	'perms' => array(
 		'/123/' => array(
 			'read'   => false,
-			'write'   => false,
+			'write'   => true,
 			'rm'   => true
 		)
 	),

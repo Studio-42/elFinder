@@ -245,15 +245,17 @@
 .elfinder-rtl .elfinder-cwd a { float:right; margin:0 0   3px 3px; }
 
 /* icon inside file/dir */
-.elfinder-big-icon {
+a .elfinder-cwd-icon {
 	width:48px;
 	height:48px;
 	display:block; 
 	margin:4px auto;
-	background: url('../images/icons-big.png') -1px 1px no-repeat;
+	background: url('../images/icons-big.png') 0 0 no-repeat;
+/*	background-repeat:no-repeat;*/
 }
 
-.elfinder-big-icon-directory { background-position:0 -50px; }
+a.directory .elfinder-cwd-icon { background-position:0 -50px; }
+a.directory-opened .elfinder-cwd-icon { background-position: 0 -98px; }
 
 /* permissions marker */
 .elfinder-cwd a .elfinder-perms { top:32px; right:17px; }
@@ -294,6 +296,8 @@
 	text-align:right;
 }
 
+/*.elfinder-cwd table tr { position:relative;}*/
+
 .elfinder-cwd table td:first-child { text-align:left; }
 
 .elfinder-cwd table td div {
@@ -302,8 +306,19 @@
 	padding-left:23px;
 }
 
+tr .elfinder-cwd-icon {
+	width:16px;
+	height:16px;
+	position:absolute;
+	left:0;
+	top:50%;
+	margin-top:-8px;
+	background:url(../images/icons-small.png) 1px 0 no-repeat;
+/*	background-repeat:;*/
+}
+
 /* file icon */
-.elfinder-small-icon {
+/*.elfinder-small-icon {
 	width:16px;
 	height:16px;
 	position:absolute;
@@ -312,7 +327,7 @@
 	margin-top:-8px;
 	background:url(../images/icons-small.png) 1px 0 no-repeat;
 }
-
+*/
 .elfinder-cwd table .elfinder-perms {
 
 	left:5px;

@@ -256,24 +256,25 @@
 		this.renderCdc = function(cdc) {
 			var l    = this.fm.viewType() == 'list',
 				c    = 'ui-widget-header',
-				html = l ? '<table><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr>' : '',
+				html = l ? '<table><thead><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr></thead><tbody>' : '',
 				r    = l ? 'rowHtml' : 'iconHtml';
 			
 			$.each(cdc, function(k, o) {
 				html += self[r](o);
 			});
 			
-			this.cwd.html(html + (l ? '</table>' : ''));
+			this.cwd.html(html + (l ? '</tbody></table>' : ''));
 			return this;
 		}
 
 		this.iconHtml = function(o) {
 			var style = o.tmb ? ' style="background:url(\''+o.tmb+'\') 0 0 no-repeat"' : '',
-				p = perms(o)
+				p = perms(o),
+				c = this.mime2class(o.mime)
 			;
 
-			return '<a href="#" key="'+o.hash+'" class="ui-corner-all '+p.cssclass+'">'
-					+ '<span class="elfinder-big-icon elfinder-big-icon-'+this.mime2class(o.mime)+'"'+style+'/>'
+			return '<a href="#" id="'+o.hash+'" class="ui-corner-all '+p.cssclass+' '+c+'">'
+					+ '<span class="ui-corner-all elfinder-cwd-icon"'+style+'/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
 					+ p.element
 					+ symlink(o)
@@ -283,8 +284,8 @@
 		
 		this.rowHtml = function(o) {
 			var p = perms(o);
-			return '<tr key="'+o.hash+'" class="'+p.cssclass+'">'
-					+ '<td class="ui-widget-content"><div><span class="elfinder-small-icon elfinder-small-icon-'+this.mime2class(o.mime)+'"/>'+p.element + symlink(o) + '<span class="elfinder-filename">'+o.name+'</span></div></td>'
+			return '<tr >'
+					+ '<td class="ui-widget-content"><div id="'+o.hash+'" class="'+p.cssclass+' '+this.mime2class(o.mime)+'"><span class="elfinder-cwd-icon"/>'+p.element + symlink(o) + '<span class="elfinder-filename">'+o.name+'</span></div></td>'
 					+ '<td class="ui-widget-content">'+this.formatPermissions(o.read, o.write, o.rm)+'</td>'
 					+ '<td class="ui-widget-content">'+this.formatDate(o.date)+'</td>'
 					+ '<td class="ui-widget-content">'+this.mime2kind(o.mime)+'</td>'
@@ -292,12 +293,16 @@
 					+ '</tr>'
 		}
 
+		/**
+		 * Add thumbnails for icons view
+		 * 
+		 * @param  Object  thumbnails
+		 * @return void
+		 */
 		this.tmb = function(tmb) {
-			var s = '.elfinder-'+(this.fm.viewType() == 'list' ? 'small' : 'big')+'-icon';
-			
 			$.each(tmb, function(k, t) {
-				self.cwd.find('[key="'+k+'"]').find(s).css('background', 'url("'+t+'") center center no-repeat');
-			})
+				self.cwd.find('[key="'+k+'"]').children('.elfinder-big-icon').css('background', 'url("'+t+'") center center no-repeat');
+			});
 		}
 
 		/*

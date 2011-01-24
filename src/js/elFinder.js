@@ -15,6 +15,7 @@
 			 * @return void
 			 */
 			tmb = function(key) {
+				
 					self.ajax({
 							// do not trigger ajaxstart event
 							silent : true,
@@ -125,24 +126,12 @@
 		};
 		
 		/**
-		 * Cookies names
-		 *
-		 * @type Object
-		 **/
-		this.cookies = {
-			view   : 'el-finder-view-'+this.id,
-			places : 'el-finder-places-'+this.id,
-			last   : 'el-finder-last-'+this.id
-		};
-		
-		/**
 		 * Cwd view type
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType(this.cookie(this.cookies.view) || 'icons');
-		// this.viewType('icons')
-		
+		this._view = this.viewType();
+
 		/**
 		 * Events listeners
 		 *
@@ -301,7 +290,7 @@
 		 * @return String|undefined
 		 */
 		this.last = function(key) {
-			return this.options.rememberLastDir ? this.cookie(this.cookies.last, key) : void(0);
+			return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : void(0);
 		}
 		
 		this.resize = function(w, h) {
@@ -378,6 +367,59 @@
 		this.view = new this.view(this, $el);
 		// this.viewType('icons')
 		
+		this.view.viewport.click(function(e) {
+			e.stopPropagation();
+			self.locks.shortcuts = false;
+			self.trigger('focus');
+		});
+		
+		$(document).click(function() {
+			self.locks.shortcuts = true;
+			self.trigger('blur');
+		});
+		
+		this.view.cwd.delegate('a, tr', 'click', function(e) {
+			// self.log(this)
+			e.preventDefault();
+			// e.stopPropagation()
+			// e.stopImmediatePropagation()
+		})
+		.delegate('a, tr', 'dblckick', function(e) {
+			self.log('dblckick')
+		})
+		
+		// this.view.cwd.click(function(e) {
+		// 	self.log('cwd')
+		// })
+		this.view.cwd.selectable({
+			filter : '[key]',
+			// delay  : 300,
+			stop : function(d) { 
+				self.view.cwd.find('.ui-selected').addClass('ui-state-hover')
+			}
+			// stop   : function() { self.fm.updateSelect(); self.fm.log('mouseup') }
+		})
+		
+		this.bind('cd', function() {
+			var cwd = self.view.cwd,
+				list = self._view == 'list',
+				drag = list ? cwd.find('div') : cwd.children(),
+				drop = list ? cwd.find('div.directory') : cwd.children('.directory')
+				;
+			drag.not('.elfinder-na,.elfinder-wo').draggable({ revert : true})
+				
+			drop.not('.elfinder-na,.elfinder-wo').droppable({
+				over : function(e, ui) {
+					$(e.target).addClass('directory-opened');
+				},
+				out : function(e) {
+					$(e.target).removeClass('directory-opened');
+				}
+			})
+		})
+		
+		// this.view.cwd.selectable()
+		
 		this.cd(this.last() || '', true, true);
 		
 		// cookie(this.cookies.view, 'list')
@@ -405,10 +447,13 @@
 	}
 	
 	elFinder.prototype.viewType = function(t) {
-		if (t !== void(0)) {
-			this._view = /^view|list$/i.test(t) ? t : 'icons';
-			this.cookie(this.cookies.view, this._view);
-			
+		var c = 'el-finder-view';
+		
+		if (t && /^icons|list$/i.test(t)) {
+			this.cookie(c, (this._view = t));
+		} else if (!this._view) {
+			t = this.cookie(c);
+			return /^icons|list$/i.test(t) ? t : 'icons'
 		}
 		return this._view;
 	}
