@@ -263,7 +263,7 @@
 				html += self[r](o);
 			});
 			
-			this.cwd.html(html + (l ? '</tbody></table>' : ''));
+			this.cwd.removeClass('elfinder-cwd-' + (l ? 'icons' : 'list')).addClass('elfinder-cwd-' + (l ? 'list' : 'icons')).html(html + (l ? '</tbody></table>' : ''));
 			return this;
 		}
 
@@ -273,19 +273,19 @@
 				c = this.mime2class(o.mime)
 			;
 
-			return '<a href="#" id="'+o.hash+'" class="ui-corner-all '+p.cssclass+' '+c+'">'
+			return '<div id="'+o.hash+'" class="ui-corner-all elfinder-file '+p.cssclass+' '+c+'">'
 					+ '<span class="ui-corner-all elfinder-cwd-icon"'+style+'/>'
 					+ '<span class="elfinder-filename">'+o.name+'</span>'
 					+ p.element
 					+ symlink(o)
-					+ '</a>'
+					+ '</div>'
 
 		}
 		
 		this.rowHtml = function(o) {
 			var p = perms(o);
 			return '<tr >'
-					+ '<td class="ui-widget-content"><div id="'+o.hash+'" class="'+p.cssclass+' '+this.mime2class(o.mime)+'"><span class="elfinder-cwd-icon"/>'+p.element + symlink(o) + '<span class="elfinder-filename">'+o.name+'</span></div></td>'
+					+ '<td class="ui-widget-content"><div id="'+o.hash+'" class="elfinder-file '+p.cssclass+' '+this.mime2class(o.mime)+'"><span class="elfinder-cwd-icon"/>'+p.element + symlink(o) + '<span class="elfinder-filename">'+o.name+'</span></div></td>'
 					+ '<td class="ui-widget-content">'+this.formatPermissions(o.read, o.write, o.rm)+'</td>'
 					+ '<td class="ui-widget-content">'+this.formatDate(o.date)+'</td>'
 					+ '<td class="ui-widget-content">'+this.mime2kind(o.mime)+'</td>'

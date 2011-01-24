@@ -90,7 +90,7 @@
 		 * @default "ltr"
 		 **/
 		this.dir = this.i18[this.lang].dir;
-		
+		// this.dir = 'rtl'
 		/**
 		 * i18 messages
 		 *
@@ -130,7 +130,7 @@
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType();
+		this._view = this.viewType('list');
 
 		/**
 		 * Events listeners
@@ -378,7 +378,7 @@
 			self.trigger('blur');
 		});
 		
-		this.view.cwd.delegate('a, tr', 'click', function(e) {
+		this.view.cwd.delegate('a, div', 'click', function(e) {
 			// self.log(this)
 			e.preventDefault();
 			// e.stopPropagation()
