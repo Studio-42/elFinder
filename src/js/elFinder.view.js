@@ -123,12 +123,69 @@
 		 */
 		this.nav = $('<div class="ui-state-default elfinder-nav"/>').append(this.tree);
 		
+		var button = false;
+		
+		$(document).mouseup(function() {
+			button = false;
+		})
+		
 		/**
 		 * Current working directory panel
 		 * 
 		 * @type  jQuery
 		 */
-		this.cwd = $('<div class="elfinder-cwd"/>');
+		this.cwd = $('<div class="elfinder-cwd"/>')
+			// .delegate('tr', 'mousedown', function(e) {
+			// 	e.stopImmediatePropagation();
+			// 	self.select(false, true)
+			// 	button = true;
+			// 	$(this).children().addClass('ui-state-hover')
+			// 	// fm.log('tr')
+			// })
+			// .delegate('tr', 'mouseup', function(e) {
+			// 	// fm.log(e.button)
+			// })
+			// .delegate('tr', 'click', function(e) {
+			// 	if (button) {
+			// 		// fm.log(this)
+			// 		e.preventDefault()
+			// 		e.stopPropagation()
+			// 		$(this).children().addClass('ui-state-hover')
+			// 	}
+			// 	// fm.log(e.which)
+			// })
+			.delegate('div', 'click', function(e) {
+				// e.stopImmediatePropagation();
+				
+				if (e.shiftKey || e.metaKey || e.ctrlKey) {
+					$(this).toggleClass('ui-selected');
+				} else {
+					self.select(false, true)
+					$(this).addClass('ui-selected');
+				}
+				fm.trigger('focus').trigger('select');
+			})
+			
+			.selectable({
+				filter : '[id]',
+				start  : function() { fm.trigger('focus'); },
+				stop   : function() { fm.trigger('select'); }
+			})
+			
+			;
+		
+		this.select = function(keys, silent) {
+			if (keys == 'all') {
+				self.cwd.find('div[id]').addClass('ui-selected');
+			} else if (!keys || keys == 'none') {
+				self.cwd.find('div.ui-selected').removeClass('ui-selected');
+			} else {
+				$.each($.isArray(keys) ? keys : [keys], function(i, id) {
+					self.cwd.find('#'+id).addClass('ui-selected')
+				})
+			}
+			!silent && fm.trigger('select')
+		}
 		
 		/**
 		 * Nav and cwd container
@@ -187,7 +244,12 @@
 			.append(this.overlay.hide())
 			.append(this.spinner)
 			.append(this.error)
-			.append(this.statusbar.hide());
+			.append(this.statusbar.hide())
+			.click(function(e) {
+				e.stopPropagation();
+				fm.trigger('focus');
+			})
+			;
 	
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
 			self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
@@ -209,9 +271,22 @@
 				e.data.tree && self.renderNav(e.data.tree);
 			}
 		})
+		.bind('select', function() {
+			self.cwd.find('div,tr').filter('.ui-state-hover').not('.ui-selected').removeClass('ui-state-hover')
+
+			$.each(self.fm.selected, function(i, o) {
+				var e = self.cwd.find('#'+o.hash);
+
+				e.addClass('ui-state-hover')
+			})
+		})
 		;
 
 		this.tree.elfindertree(fm);
+
+		this.selected = function() {
+			return this.cwd.find('div[id].ui-selected');
+		}
 
 		this.renderNav = function(tree) {
 			var html = '',

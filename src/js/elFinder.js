@@ -115,6 +115,7 @@
 		this.history  = [];
 		this.buffer   = [];
 		
+		
 		/**
 		 * Flags indicates what functionality disabled now
 		 *
@@ -139,8 +140,8 @@
 		 **/
 		this.listeners = {
 			load   : [],
-			focus  : [],
-			blur   : [],
+			focus  : [ function() { self.locks.shortcuts = false; } ],
+			blur   : [ function() { self.locks.shortcuts = true; } ],
 			cd     : [],
 			select : [],
 			error  : [],
@@ -297,10 +298,7 @@
 			
 		}
 		
-		this.select = function(keys, reset) {
-			
-		}
-		
+
 		
 		this.cd = function(key, tree, init) {
 			var o = {
@@ -344,10 +342,9 @@
 		this.bind('cd', function(e) {
 			var l;
 			if (e.data.cdc) {
-
 				self.cwd = e.data.cwd;
 				self.cdc = {};
-				l = e.data.cdc;
+				l = e.data.cdc.length;
 				while (l--) {
 					self.cdc[e.data.cdc[l].hash] = e.data.cdc[l];
 					self.cwd.size += e.data.cdc[l].size;
@@ -362,41 +359,52 @@
 		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
+		}).bind('select', function() {
+			self.selected = [];
+
+			$.each(self.view.selected(), function(i, n) {
+				self.cdc[n.id] && self.selected.push(self.cdc[n.id]);
+			});
 		})
 
 		this.view = new this.view(this, $el);
 		// this.viewType('icons')
 		
-		this.view.viewport.click(function(e) {
-			e.stopPropagation();
-			self.locks.shortcuts = false;
-			self.trigger('focus');
-		});
 		
 		$(document).click(function() {
-			self.locks.shortcuts = true;
 			self.trigger('blur');
 		});
 		
-		this.view.cwd
-			.delegate('div', 'click', function(e) {
-				e.stopImmediatePropagation();
-				self.locks.shortcuts = false;
-				self.log('file')
-			})
-			.delegate('div', 'dblclick', function(e) {
-				self.log('dblclick')
-			})
+		// this.view.cwd
+		// 	.delegate('div', 'click', function(e) {
+		// 		
+		// 		e.stopImmediatePropagation();
+		// 		e.stopPropagation()
+		// 		self.log('div')
+		// 		if (e.shiftKey) {
+		// 			// select group
+		// 		} else if (e.metaKey) {
+		// 			// self.log('here')
+		// 			$(this).toggleClass('ui-selected');
+		// 		} else {
+		// 			// self.view.cwd.click()
+		// 			$(this).addClass('ui-selected');
+		// 		}
+		// 		// self.triger('focus');
+		// 		self.trigger('select')
+		// 		
+		// 	})
+		// 	.delegate('div', 'dblclick', function(e) {
+		// 		self.log('dblclick')
+		// 	})
 		
-		this.view.cwd.click(function(e) {
-			self.log('cwd')
-		})
-		this.view.cwd.selectable({
-			filter : '[id]',
-			stop : function(d) { 
-				self.view.cwd.find('.ui-selected').addClass('ui-state-hover')
-			}
-		})
+
+		// this.view.cwd.selectable({
+		// 	filter : '[id]',
+		// 	stop : function(e, ui) { 
+		// 		self.trigger('select')
+		// 	}
+		// })
 		
 		this.bind('cd', function(e) {
 			var cwd  = self.view.cwd,
@@ -404,7 +412,20 @@
 				drag = cwd[list ? 'find' : 'children']('div'),
 				drop = cwd[list ? 'find' : 'children']('div.directory');
 				
-			drag.not('.elfinder-na,.elfinder-wo').draggable({ revert : true});
+			drag//.not('.elfinder-na,.elfinder-wo')
+				.draggable({ 
+					revert : true,
+					start : function(e, ui) {
+						self.log(e)
+						if (!$(e.target).hasClass('ui-selected')) {
+							if (!e.shiftKey && !e.metaKey) {
+								self.view.select(false, true)
+							}
+							$(e.target).addClass('ui-selected')
+							self.trigger('select')
+						}
+					}
+				});
 				
 			drop.not('.elfinder-na,.elfinder-ro').droppable({
 				over : function(e, ui) {
@@ -419,7 +440,6 @@
 			});
 			
 			if (e.data.tree) {
-				self.log('tree')
 				self.view.tree.find('a').droppable({
 					over : function(e, ui) {
 						$(e.target).children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
@@ -548,5 +568,16 @@
 			
 		})
 	}
+	
+	$.fn.elfinderallattr = function(attr) {
+		var a = [];
+		
+		this.each(function() {
+			a.push($(this).attr(attr));
+		});
+		
+		return a;
+	}
+	
 	
 })(jQuery);
