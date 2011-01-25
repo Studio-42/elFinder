@@ -398,16 +398,15 @@
 			}
 		})
 		
-		this.bind('cd', function() {
+		this.bind('cd', function(e) {
 			var cwd  = self.view.cwd,
 				list = self._view == 'list',
-				not  = '.elfinder-na,.elfinder-wo',
 				drag = cwd[list ? 'find' : 'children']('div'),
 				drop = cwd[list ? 'find' : 'children']('div.directory');
 				
-			drag.not(not).draggable({ revert : true});
+			drag.not('.elfinder-na,.elfinder-wo').draggable({ revert : true});
 				
-			drop.not('.elfinder-na,.elfinder-wo').droppable({
+			drop.not('.elfinder-na,.elfinder-ro').droppable({
 				over : function(e, ui) {
 					$(e.target).addClass('directory-opened');
 				},
@@ -418,6 +417,22 @@
 					$(e.target).removeClass('directory-opened');
 				}
 			});
+			
+			if (e.data.tree) {
+				self.log('tree')
+				self.view.tree.find('a').droppable({
+					over : function(e, ui) {
+						$(e.target).children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
+					},
+					out : function(e) {
+						$(e.target).children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open');
+					},
+					drop : function(e, ui) {
+						$(e.target).children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open');
+					}
+				})
+			}
+			
 		});
 		
 		// this.view.cwd.selectable()
