@@ -355,7 +355,7 @@
 		this.renderCdc = function(cdc) {
 			var l    = this.fm.viewType() == 'list',
 				c    = 'ui-widget-header',
-				html = l ? '<table cellspacing="0" rules="cols"><thead><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr></thead><tbody>' : '',
+				html = l ? '<table><thead><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr></thead><tbody>' : '',
 				r    = l ? 'rowHtml' : 'iconHtml';
 			
 			$.each(cdc, function(k, o) {
@@ -364,7 +364,7 @@
 			
 			this.cwd.removeClass('elfinder-cwd-' + (l ? 'icons' : 'list')).addClass('elfinder-cwd-' + (l ? 'list' : 'icons')).html(html + (l ? '</tbody></table>' : ''));
 			
-			this.cwd.children('table').find('tr:odd').children().addClass('odd')
+			l && this.cwd.children('table').find('tr:odd').children().addClass('elfinder-odd-row')
 			return this;
 		}
 

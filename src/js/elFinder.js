@@ -131,7 +131,7 @@
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType('icons');
+		this._view = this.viewType('list');
 
 		/**
 		 * Events listeners

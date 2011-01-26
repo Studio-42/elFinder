@@ -281,7 +281,7 @@
 /**********  LIST VIEW ***************/
 .elfinder-cwd table { 
 	width:100%; 
-/*	border-collapse:collapse; */
+	border-collapse:collapse; 
 }
 
 .elfinder-cwd table td { 
@@ -290,9 +290,10 @@
 	white-space:nowrap;
 	overflow:hidden;
 	text-align:right;
+	cursor:default;
 }
 
-td.odd { background:#eee; }
+.elfinder-odd-row { background:#eee; }
 
 /* filename container */
 .elfinder-cwd-list div {
