@@ -276,10 +276,12 @@
 	font-size:.7em;
 }
 
+/*.elfinder .ui-state-disabaled, .elfinder .ui-draggable-disabaled { opacity:1; }*/
+
 /**********  LIST VIEW ***************/
 .elfinder-cwd table { 
 	width:100%; 
-	border-collapse:collapse; 
+/*	border-collapse:collapse; */
 }
 
 .elfinder-cwd table td { 
@@ -290,8 +292,10 @@
 	text-align:right;
 }
 
+td.odd { background:#eee; }
+
 /* filename container */
-.elfinder-cwd-list .elfinder-file {
+.elfinder-cwd-list div {
 	text-align:left;
 	padding-left:23px;
 	position:relative;
