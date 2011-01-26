@@ -121,7 +121,7 @@
 		this.selected = [];
 		this.history  = [];
 		this.buffer   = [];
-		this.shortcuts = [];
+		this.shortcuts = {};
 		
 		
 		/**
@@ -148,8 +148,8 @@
 		 **/
 		this.listeners = {
 			load   : [],
-			focus  : [ function() { self.locks.shortcuts = false; } ],
-			blur   : [ function() { self.locks.shortcuts = true; } ],
+			focus  : [  ],
+			blur   : [  ],
 			cd     : [],
 			select : [],
 			error  : [],
@@ -233,23 +233,18 @@
 		this.shortcut = function(pt, ds, cb) {
 			var p = pt.toUpperCase().split('+'),
 				l = p.length, 
-				k = { keyCode : 0, ctrlKey : false, altKey : false, shiftKey : false, metaKey : false };
-			
-			while (l--) {
-				switch (p[l]) {
-					case 'CTRL'  : k.ctrlKey  = true; break;
-					case 'SHIFT' : k.shiftKey = true; break;
-					case 'META'  : k[this.macos ? 'metaKey' : 'altKey']  = true; break;
-					default      : k.keyCode  = p[l] > 0 ? parseInt(p[l]) : p[l].charCodeAt(0);
-				}
-			}
-
-			if (k.keyCode>0 && typeof(cb) == 'function') {
-				this.shortcuts[pt] = {
-					pattern     : k, 
-					callback    : cb, 
-					description : this.i18n(ds)
+				s = { 
+					keyCode : parseInt(p[p.length-1]) || p[p.length-1].charCodeAt(0), 
+					ctrlKey : $.inArray('CTRL', p) != -1, 
+					altKey : $.inArray('ALT', p) != -1, 
+					shiftKey : $.inArray('SHIFT', p) != -1,
+					description : ds,
+					callback : cb
 				};
+			
+
+			if (s.keyCode>0 && typeof(cb) == 'function') {
+				this.shortcuts[pt] = s;
 				this.debug('shortcut', 'add '+pt);
 			}
 			return this;
@@ -389,12 +384,7 @@
 				}
 
 			}
-		});
-		
-		
-		
-		
-		this.bind('ajaxstart ajaxerror ajaxstop', function(e) {
+		}).bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		}).bind('select', function() {
@@ -403,7 +393,41 @@
 			$.each(self.view.selected(), function(i, n) {
 				self.cdc[n.id] && self.selected.push(self.cdc[n.id]);
 			});
+		}).bind('focus', function() {
+			self.locks.shortcuts = false;
+			$('texarea,:text').blur()
+		}).bind('blur', function() {
+			self.locks.shortcuts = true;
 		})
+
+		$(document).bind('keydown', function(e) {
+			var c = e.keyCode,
+				ctrlKey = this.macos ? e.metaKey : e.ctrlKey;
+
+			$.each(self.shortcuts, function(i, s) {
+				
+				if (c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == (e.ctrlKey||e.metaKey) && s.altKey == e.altKey) {
+					self.debug('shortcut', s.description)
+					// self.log(c)
+					s.callback(e)
+				}
+			})
+			
+			// self.log(self.shortcuts)
+		})
+
+		// $('body').keydown(function(e) {
+		// 	var c = e.keyCode;
+		// 	self.log(c)
+		// 	if (!self.locks.shortcuts) {
+		// 		$.each(self.shortcuts, function(i, s) {
+		// 			self.log(s)
+		// 			// if (c == s.pattern.keyCode) {
+		// 			// 	s.callback()
+		// 			// }
+		// 		})
+		// 	}
+		// })
 
 		this.view = new this.view(this, $el);
 		// this.viewType('icons')
@@ -416,7 +440,7 @@
 		
 		
 		this.cd(this.last() || '', true, true);
-		
+		this.trigger('focus')
 		// cookie(this.cookies.view, 'list')
 	}
 	

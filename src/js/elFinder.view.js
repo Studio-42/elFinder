@@ -306,8 +306,31 @@
 		})
 		;
 
-		fm.shortcut('65', 'arrow up', function() {
-			fm.log('shortcut')
+		fm.shortcut('ctrl+40', 'open', function(e) {
+			fm.log('open')
+		})
+		.shortcut('40', 'arrow down', function() {
+
+			var s = self.cwd.find('[id].ui-selected:last').removeClass('ui-selected'), 
+				n = s.next('[id]').eq(0),
+				t, h, ph, st;
+			
+			if (n.length) {
+				n.addClass('ui-selected');
+				t = n.position().top;
+				h = n.outerHeight(true);
+				ph = self.cwd.innerHeight();
+				st = self.cwd.scrollTop();
+				
+				if (t < 0) {
+					self.cwd.scrollTop(Math.ceil(t + st)-9)
+				} else if (t + h > ph) {
+					self.cwd.scrollTop(Math.ceil(t + h - ph + st))
+				}
+			}
+			
+			
+			fm.trigger('select')
 		})
 
 		this.tree.elfindertree(fm);
