@@ -69,6 +69,13 @@
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		
 		/**
+		 * Is browser on Mac OS?
+		 * 
+		 * @type Boolean
+		 */
+		this.macos = navigator.userAgent.indexOf('Mac') != -1;
+		
+		/**
 		 * ID. Requeried to get/set elfinder instance cookies
 		 *
 		 * @type String
@@ -114,6 +121,7 @@
 		this.selected = [];
 		this.history  = [];
 		this.buffer   = [];
+		this.shortcuts = [];
 		
 		
 		/**
@@ -213,8 +221,38 @@
 			return this;
 		}
 		
-		this.shortcut = function() {
+		/**
+		 * Bind keybord shortcut to keydown event
+		 *
+		 * @param  String    shortcut pattern in form: "ctrl+shift+z"
+		 * @param  String    command name for exec trigger
+		 * @param  String    shortcut description
+		 * @param  Function  callback
+		 * @return elRTE
+		 */
+		this.shortcut = function(pt, ds, cb) {
+			var p = pt.toUpperCase().split('+'),
+				l = p.length, 
+				k = { keyCode : 0, ctrlKey : false, altKey : false, shiftKey : false, metaKey : false };
 			
+			while (l--) {
+				switch (p[l]) {
+					case 'CTRL'  : k.ctrlKey  = true; break;
+					case 'SHIFT' : k.shiftKey = true; break;
+					case 'META'  : k[this.macos ? 'metaKey' : 'altKey']  = true; break;
+					default      : k.keyCode  = p[l] > 0 ? parseInt(p[l]) : p[l].charCodeAt(0);
+				}
+			}
+
+			if (k.keyCode>0 && typeof(cb) == 'function') {
+				this.shortcuts[pt] = {
+					pattern     : k, 
+					callback    : cb, 
+					description : this.i18n(ds)
+				};
+				this.debug('shortcut', 'add '+pt);
+			}
+			return this;
 		}
 		
 		/**

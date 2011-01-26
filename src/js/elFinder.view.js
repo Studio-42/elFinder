@@ -306,6 +306,10 @@
 		})
 		;
 
+		fm.shortcut('65', 'arrow up', function() {
+			fm.log('shortcut')
+		})
+
 		this.tree.elfindertree(fm);
 
 		this.selected = function() {
