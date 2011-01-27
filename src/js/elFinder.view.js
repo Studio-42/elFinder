@@ -2,6 +2,90 @@
 	
 	elFinder.prototype.view = function(fm, el) {
 		var self = this,
+			/**
+			 * Bind some shortcuts to keypress instead of keydown
+			 * Required for procces repeated key in ff and for opera 
+			 *
+			 * @type Boolean
+			 */
+			keypress = $.browser.mozilla || $.browser.opera,
+			/**
+			 * Shortcuts config
+			 *
+			 * @type Array
+			 */
+			shortcuts = [
+				{
+					pattern     : 'arrowLeft',
+					description : 'Select file on left or last file',
+					callback    : function() { move('left'); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'arrowUp',
+					description : 'Select file upside then current',
+					callback    : function() { move('up'); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'arrowRight',
+					description : 'Select file on right or first file',
+					callback    : function() { move('right'); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'arrowDown',
+					description : 'Select file downside then current',
+					callback    : function() { move('down'); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'shift+arrowLeft',
+					description : 'Append file on left to selected',
+					callback    : function() { move('left', true); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'shift+arrowUp',
+					description : 'Append upside file to selected',
+					callback    : function() { move('up', true); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'shift+arrowRight',
+					description : 'Append file on right to selected',
+					callback    : function() { move('right', true); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'shift+arrowDown',
+					description : 'Append downside file to selected',
+					callback    : function() { move('down', true); },
+					keypress    : keypress
+				},
+				{
+					pattern     : 'ctrl+arrowDown',
+					description : 'Open directory or file',
+					callback    : function() { 
+							if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
+								fm.cd(fm.selected[0].hash)
+							} else if (fm.selected.length) {
+								fm.exec('open', fm.selected)
+							}
+						}
+				},
+				{
+					pattern     : 'ctrl+arrowLeft',
+					description : 'Return to previous directory',
+					callback    : function() { fm.back(); }
+				}
+			],
+			/**
+			 * Return css class and element to display permissions, based on object permissions
+			 *
+			 * @param Object  file/dir object
+			 * @return void
+			 */
 			perms = function(o) {
 				var c = '', e = '';
 			
@@ -17,8 +101,107 @@
 				}
 				return { cssclass : c, element : e };
 			},
+			/**
+			 * Return element to display what file is simplink
+			 *
+			 * @param Object  file/dir object
+			 * @return String
+			 */
 			symlink = function(o) {
 				return o.link || o.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : ''
+			},
+			/**
+			 * Move selection to prev/next file
+			 *
+			 * @param String  move direction
+			 8 @param Boolean append to current selection
+			 * @return String
+			 * @rise select			
+			 */
+			move = function(dir, append) {
+				var cwd = self.cwd,
+					prev = dir == 'left' || dir == 'up',
+					selector = prev ? 'first' : 'last',
+					list = fm._view == 'list',
+					s, n, top, left;
+				
+				if (fm.selected.length) {
+					// find fist/last selected file
+					s = cwd.find('[id].ui-selected:'+(prev ? 'first' : 'last'));
+					
+					if (!s[prev ? 'prev' : 'next']('[id]').length) {
+						// there is no sibling on required side - do not move selection
+						n = s;
+					} else if (list || dir == 'left' || dir == 'right') {
+						// find real prevoius file
+						n = s[prev ? 'prev' : 'next']('[id]');
+					} else {
+						// find up/down side file in icons view
+						top = s.position().top;
+						left = s.position().left;
+
+						n = s;
+						if (prev) {
+							do {
+								n = n.prev('[id]');
+							} while (n.length && !(n.position().top < top && n.position().left <= left))
+							
+						} else {
+							do {
+								n = n.next('[id]');
+							} while (n.length && !(n.position().top > top && n.position().left >= left))
+							// there is row before last one - select last file
+							if (!n.length && cwd.find('[id]:last').position().top > top) {
+								n = cwd.find('[id]:last');
+							}
+						}
+					}
+					
+				} else {
+					// there are no selected file - select first/last one
+					n = cwd.find('[id]:'+(prev ? 'last' : 'first'))
+				}
+				
+				// new file to select exists
+				if (n && n.length) {
+
+					if (append) {
+						// append new files to selected
+						// found strange bug in ff - prevUntil/nextUntil by id not always returns correct set >_< wtf?
+						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']($.browser.mozilla ? '[id="'+n.attr('id')+'"]' : '#'+n.attr('id'))).add(n);
+					} else {
+						// unselect selected files
+						$.each(fm.selected, function() {
+							cwd.find('#'+this.hash).removeClass('ui-selected');
+						});
+					}
+					// select file(s)
+					n.addClass('ui-selected');
+					// set its visible
+					scrollToView(n.filter(prev ? ':first' : ':last'));
+					// update cache/view
+					fm.trigger('select');
+				}
+				
+			},
+			/**
+			 * Scroll file to be visible if not
+			 *
+			 * @param DOMElement  file/dir node
+			 * @return void
+			 */
+			scrollToView = function(o) {
+				var cwd = self.cwd,
+					t   = o.position().top;
+					h   = o.outerHeight(true);
+					ph  = cwd.innerHeight();
+					st  = cwd.scrollTop();
+				
+				if (t < 0) {
+					cwd.scrollTop(Math.ceil(t + st) - 9);
+				} else if (t + h > ph) {
+					cwd.scrollTop(Math.ceil(t + h - ph + st));
+				}
 			}
 			;
 
@@ -122,12 +305,6 @@
 		 * @type  jQuery
 		 */
 		this.nav = $('<div class="ui-state-default elfinder-nav"/>').append(this.tree);
-		
-		var button = false;
-		
-		$(document).mouseup(function() {
-			button = false;
-		})
 		
 		/**
 		 * Current working directory panel
@@ -306,32 +483,84 @@
 		})
 		;
 
-		fm.shortcut('ctrl+40', 'open', function(e) {
-			fm.log('open')
-		})
-		.shortcut('40', 'arrow down', function() {
 
-			var s = self.cwd.find('[id].ui-selected:last').removeClass('ui-selected'), 
-				n = s.next('[id]').eq(0),
-				t, h, ph, st;
-			
-			if (n.length) {
-				n.addClass('ui-selected');
-				t = n.position().top;
-				h = n.outerHeight(true);
-				ph = self.cwd.innerHeight();
-				st = self.cwd.scrollTop();
-				
-				if (t < 0) {
-					self.cwd.scrollTop(Math.ceil(t + st)-9)
-				} else if (t + h > ph) {
-					self.cwd.scrollTop(Math.ceil(t + h - ph + st))
-				}
-			}
-			
-			
-			fm.trigger('select')
+
+		$.each(shortcuts, function(i, s) {
+			fm.shortcut(s);
 		})
+
+		// fm.shortcut('ctrl+40', 'open', function(e) {
+		// 	fm.log('open')
+		// 
+		// 	if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
+		// 		fm.cd(fm.selected[0].hash)
+		// 	} else if (fm.selected.length) {
+		// 		fm.exec('open', fm.selected)
+		// 	}
+		// })
+		// .shortcut('37', 'arrow left', function(e) {
+		// 	select('left', e.shiftKey);
+		// }, $.browser.mozilla || $.browser.opera)
+		// .shortcut('38', 'arrow up', function(e) {
+		// 	select('up', e.shiftKey);
+		// }, false)
+		// .shortcut('39', 'arrow right', function(e) {
+		// 	select('right', e.shiftKey);
+		// }, false)
+		// .shortcut('40', 'arrow down', function(e) {
+		// 	select('down', e.shiftKey);
+		// }, false)
+		// .shortcut('shift+37', 'arrow left', function(e) {
+		// 	select('left', true);
+		// }, true)
+		// .shortcut('shift+38', 'arrow up', function(e) {
+		// 	select('up', true);
+		// }, false)
+		// .shortcut('shift+39', 'arrow right', function(e) {
+		// 	select('right', true);
+		// }, true)
+		// .shortcut('shift+40', 'arrow down', function(e) {
+		// 	select('down', true);
+		// }, false)
+		// .shortcut('400', 'arrow down', function() {
+		// 	var s = self.cwd.find('[id].ui-selected:last'), n;
+		// 	
+		// 	if (s.length) {
+		// 		n = s.next('[id]').length ? s.next('[id]').eq(0) : s;
+		// 		self.cwd.find('[id].ui-selected').removeClass('ui-selected')
+		// 	} else {
+		// 		n = self.cwd.find('[id]:first');
+		// 	}
+		// 	
+		// 	if (n.length) {
+		// 		n.addClass('ui-selected')
+		// 	}
+		// 	
+		// 	fm.trigger('select')
+		// 	return
+		// 	
+		// 	fm.log('arrow down')
+		// 	var s = self.cwd.find('[id].ui-selected:last').removeClass('ui-selected'), 
+		// 		n = s.next('[id]').eq(0),
+		// 		t, h, ph, st;
+		// 	
+		// 	if (n.length) {
+		// 		n.addClass('ui-selected');
+		// 		t = n.position().top;
+		// 		h = n.outerHeight(true);
+		// 		ph = self.cwd.innerHeight();
+		// 		st = self.cwd.scrollTop();
+		// 		
+		// 		if (t < 0) {
+		// 			self.cwd.scrollTop(Math.ceil(t + st)-9)
+		// 		} else if (t + h > ph) {
+		// 			self.cwd.scrollTop(Math.ceil(t + h - ph + st))
+		// 		}
+		// 	}
+		// 	
+		// 	
+		// 	fm.trigger('select')
+		// })
 
 		this.tree.elfindertree(fm);
 

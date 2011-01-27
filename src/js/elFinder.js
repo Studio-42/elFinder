@@ -9,6 +9,20 @@
 			 **/
 			$el = $(el),
 			/**
+			 * Key codes for special keys
+			 *
+			 * @type Object
+			 **/
+			codes = {
+				'ARROWLEFT'  : 37,
+				'ARROWUP'    : 38,
+				'ARROWRIGHT' : 39,
+				'ARROWDOWN'  : 40,
+				'ESC'        : 27,
+				'ENTER'      : 13,
+				'SPACE'      : 32
+			},
+			/**
 			 * Load images thumbnails in background
 			 *
 			 * @param String  current dir hash
@@ -139,7 +153,7 @@
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType('list');
+		this._view = this.viewType('icons');
 
 		/**
 		 * Events listeners
@@ -224,30 +238,41 @@
 		/**
 		 * Bind keybord shortcut to keydown event
 		 *
-		 * @param  String    shortcut pattern in form: "ctrl+shift+z"
-		 * @param  String    command name for exec trigger
-		 * @param  String    shortcut description
-		 * @param  Function  callback
-		 * @return elRTE
+		 * @example
+		 *    elfinder.shortcut({ pattern : 'ctrl+a', 'Select all files', callback : function(e) { ... }, keypress : true|false (bind to keypress instead of keydown) })
+		 *
+		 * @param  Object  shortcut config
+		 * @return elFinder
 		 */
-		this.shortcut = function(pt, ds, cb) {
-			var p = pt.toUpperCase().split('+'),
-				l = p.length, 
-				s = { 
-					keyCode : parseInt(p[p.length-1]) || p[p.length-1].charCodeAt(0), 
-					ctrlKey : $.inArray('CTRL', p) != -1, 
-					altKey : $.inArray('ALT', p) != -1, 
-					shiftKey : $.inArray('SHIFT', p) != -1,
-					description : ds,
-					callback : cb
-				};
-			
-
-			if (s.keyCode>0 && typeof(cb) == 'function') {
-				this.shortcuts[pt] = s;
-				this.debug('shortcut', 'add '+pt);
+		this.shortcut = function(s) {
+			var p, c;
+			var codes = {
+				'ARROWLEFT' : 37,
+				'ARROWUP'   : 38,
+				'ARROWRIGHT' : 39,
+				'ARROWDOWN' : 40,
+				'ESC' : 27,
+				'ENTER' : 13
 			}
-			return this;
+			if (!this.options.disableShortcuts && s.pattern && typeof(s.callback) == 'function') {
+				s.pattern = s.pattern.toUpperCase();
+				
+				if (!this.shortcut[s.pattern]) {
+					p = s.pattern.split('+');
+					c = p.pop();
+					
+					s.keyCode = codes[c] || c.charCodeAt(0);
+					if (s) {
+						s.altKey = $.inArray('ALT', p) != -1;
+						s.ctrlKey = $.inArray('CTRL', p) != -1;
+						s.shiftKey = $.inArray('SHIFT', p) != -1;
+						s.type = s.keypress ? 'keypress' : 'keydown';
+						this.shortcuts[s.pattern] = s;
+						this.debug('shortcat-add', s)
+					}
+				}
+			}
+			return this
 		}
 		
 		/**
@@ -317,6 +342,10 @@
 			
 		}
 	
+		this.exec = function(cmd) {
+			
+		}
+	
 		/**
 		 * Get/set last opened directory
 		 * 
@@ -347,9 +376,13 @@
 				if (init) {
 					o.data.init = true;
 				}
-				
+				this.selected = [];
 				this.ajax(o);
 			}
+		}
+		
+		this.back = function() {
+			
 		}
 		
 		this.reload = function(key) {
@@ -398,36 +431,27 @@
 			$('texarea,:text').blur()
 		}).bind('blur', function() {
 			self.locks.shortcuts = true;
-		})
+		});
 
-		$(document).bind('keydown', function(e) {
-			var c = e.keyCode,
-				ctrlKey = this.macos ? e.metaKey : e.ctrlKey;
 
-			$.each(self.shortcuts, function(i, s) {
-				
-				if (c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == (e.ctrlKey||e.metaKey) && s.altKey == e.altKey) {
-					self.debug('shortcut', s.description)
-					// self.log(c)
-					s.callback(e)
-				}
-			})
-			
-			// self.log(self.shortcuts)
-		})
+		// bind to keydown/keypress if shortcuts allowed
+		if (!this.options.disableShortcuts) {
+			$(document).bind('keydown keypress', function(e) {
+				var c = e.keyCode,
+					ctrlKey = e.ctrlKey||e.metaKey;
 
-		// $('body').keydown(function(e) {
-		// 	var c = e.keyCode;
-		// 	self.log(c)
-		// 	if (!self.locks.shortcuts) {
-		// 		$.each(self.shortcuts, function(i, s) {
-		// 			self.log(s)
-		// 			// if (c == s.pattern.keyCode) {
-		// 			// 	s.callback()
-		// 			// }
-		// 		})
-		// 	}
-		// })
+				$.each(self.shortcuts, function(i, s) {
+					if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
+						self.debug('shortcut', s.pattern)
+						s.callback(e);
+						e.preventDefault();
+						return false;
+					}
+				});
+			});
+		}
+		
+		
 
 		this.view = new this.view(this, $el);
 		// this.viewType('icons')
