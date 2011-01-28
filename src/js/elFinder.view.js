@@ -78,7 +78,23 @@
 					pattern     : 'ctrl+arrowLeft',
 					description : 'Return to previous directory',
 					callback    : function() { fm.back(); }
-				}
+				},
+				{
+					pattern     : 'enter',
+					description : 'Open directory or file',
+					callback    : function() { 
+							if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
+								fm.cd(fm.selected[0].hash)
+							} else if (fm.selected.length) {
+								fm.exec('open', fm.selected)
+							}
+						}
+				},
+				{
+					pattern     : 'ctrl+arrowLeft',
+					description : 'Return to previous directory',
+					callback    : function() { fm.back(); }
+				},
 			],
 			/**
 			 * Return css class and element to display permissions, based on object permissions

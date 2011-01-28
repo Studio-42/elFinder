@@ -364,29 +364,40 @@
 		
 		this.cd = function(key, tree, init) {
 			var o = {
-					data : {cmd : 'open', target : key},
-					success : function(d) { self.time('cd'); self.trigger('cd', d); delete d; self.timeEnd('cd'); }
+					data    : {cmd : 'open', target : key},
+					success : function(d) { 
+						self.time('cd'); 
+						self.trigger('cd', d); 
+						delete d; 
+						self.timeEnd('cd'); 
+					}
 			};
 			
 			if (!this.locks.ui) {
-				
-				if (tree) {
-					o.data.tree = true;
+				if (this.cdc[key] && !this.cdc[key].read) {
+					this.trigger('error', {error : 'Access denied'});
+				} else {
+					if (tree) {
+						o.data.tree = true;
+					}
+					if (init) {
+						o.data.init = true;
+					}
+					this.selected = [];
+					this.ajax(o);
 				}
-				if (init) {
-					o.data.init = true;
-				}
-				this.selected = [];
-				this.ajax(o);
 			}
+			return this;
+		}
+		
+
+		
+		this.reload = function(key) {
+			return this.open(key, true);
 		}
 		
 		this.back = function() {
 			
-		}
-		
-		this.reload = function(key) {
-			return this.open(key, true);
 		}
 		
 		this.copy = function(keys, cut) {
@@ -398,6 +409,10 @@
 		}
 		
 		this.paste = function(keys) {
+			
+		}
+		
+		this.delete = function() {
 			
 		}
 		
@@ -442,9 +457,11 @@
 
 				$.each(self.shortcuts, function(i, s) {
 					if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
-						self.debug('shortcut', s.pattern)
-						s.callback(e);
 						e.preventDefault();
+						e.data = {elfinder : self};
+						s.callback(e);
+						
+						self.debug('shortcut', s.pattern);
 						return false;
 					}
 				});
