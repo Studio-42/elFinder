@@ -25,37 +25,52 @@
 				'BACKSPACE'  : 8
 			},
 			/**
+			 * Default error handler for paste/delete etc methods
+			 * Display error message and return true to call success method
+			 *
+			 * @param String error message
+			 * @type Boolean  always true
+			 **/
+			error = function(m) { self.trigger('error', {error : m}); return true; },
+			/**
+			 * Default ajax handler for paste/delete etc methods
+			 * Trigger "cd" event
+			 *
+			 * @param Object  data recievied from ajax request
+			 * @type void
+			 **/
+			success = function(d) { self.trigger('cd', d); },
+			/**
 			 * Load images thumbnails in background
 			 *
 			 * @param String  current dir hash
 			 * @return void
 			 */
 			tmb = function(key) {
-				
-					self.ajax({
-							// do not trigger ajaxstart event
-							silent : true,
-							data : {cmd : 'tmb', current : key},
-							ajax : {
-									// ajax error handler
-									error : function(r) {
-										self.debug('error', r.status);
-									},
-									// request handler
-									success : function(d) {
-										if (!d || d.error) {
-											return self.debug('error', d ? d.error : 'Uknown error');
-										}
+				self.ajax({
+						// do not trigger ajaxstart event
+						silent : true,
+						data : {cmd : 'tmb', current : key},
+						ajax : {
+								// ajax error handler
+								error : function(r) {
+									self.debug('error', r.status);
+								},
+								// request handler
+								success : function(d) {
+									if (!d || d.error) {
+										return self.debug('error', d ? d.error : 'Uknown error');
+									}
 
-										if (d.images && d.current == self.cwd.hash && self._view == 'icons') {
-											d.tmb && tmb(self.cwd.hash);
-											self.view.tmb(d.images);
-											self.debug('tmb', d);
-										}
+									if (d.images && d.current == self.cwd.hash && self._view == 'icons') {
+										d.tmb && tmb(self.cwd.hash);
+										self.view.tmb(d.images);
+										self.debug('tmb', d);
 									}
 								}
-						});
-				}
+							}
+					});
+			}
 			;
 			
 		/**
@@ -83,13 +98,6 @@
 		 * @type Object
 		 **/
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
-		
-		/**
-		 * Is browser on Mac OS?
-		 * 
-		 * @type Boolean
-		 */
-		this.macos = navigator.userAgent.indexOf('Mac') != -1;
 		
 		/**
 		 * ID. Requeried to get/set elfinder instance cookies
@@ -134,29 +142,43 @@
 		 * @type Object
 		 **/
 		this.cdc      = {};
+		/**
+		 * Cach of selected files
+		 * Contains objects from this.cdc
+		 *
+		 * @type Array
+		 **/
 		this.selected = [];
+		/**
+		 * History, contains hashs of last opened directories
+		 *
+		 * @type Array
+		 **/
 		this.history  = [];
+		/**
+		 * Buffer for copied files
+		 *
+		 * @type Object
+		 **/
 		this.buffer   = {files : [], cut : false};
+		/**
+		 * Registered shortcuts
+		 *
+		 * @type Object
+		 **/
 		this.shortcuts = {};
-		
-		
 		/**
 		 * Flags indicates what functionality disabled now
 		 *
 		 * @type Object
 		 **/
-		this.locks = { 
-			ui        : false, 
-			shortcuts : false
-		};
-		
+		this.locks = {ui : false, shortcuts : false};
 		/**
 		 * Cwd view type
 		 *
 		 * @type String
 		 **/
 		this._view = this.viewType('icons');
-
 		/**
 		 * Events listeners
 		 *
@@ -241,7 +263,12 @@
 		 * Bind keybord shortcut to keydown event
 		 *
 		 * @example
-		 *    elfinder.shortcut({ pattern : 'ctrl+a', 'Select all files', callback : function(e) { ... }, keypress : true|false (bind to keypress instead of keydown) })
+		 *    elfinder.shortcut({ 
+		 *       pattern : 'ctrl+a', 
+		 *       description : 'Select all files', 
+		 *       callback : function(e) { ... }, 
+		 *       keypress : true|false (bind to keypress instead of keydown) 
+		 *    })
 		 *
 		 * @param  Object  shortcut config
 		 * @return elFinder
@@ -249,7 +276,7 @@
 		this.shortcut = function(s) {
 			var p, c;
 
-			if (!this.options.disableShortcuts && s.pattern && typeof(s.callback) == 'function') {
+			if (this.options.allowShortcuts && s.pattern && typeof(s.callback) == 'function') {
 				s.pattern = s.pattern.toUpperCase();
 				
 				if (!this.shortcut[s.pattern]) {
@@ -258,10 +285,10 @@
 					
 					s.keyCode = codes[c] || c.charCodeAt(0);
 					if (s) {
-						s.altKey = $.inArray('ALT', p) != -1;
-						s.ctrlKey = $.inArray('CTRL', p) != -1;
+						s.altKey   = $.inArray('ALT', p) != -1;
+						s.ctrlKey  = $.inArray('CTRL', p) != -1;
 						s.shiftKey = $.inArray('SHIFT', p) != -1;
-						s.type = s.keypress ? 'keypress' : 'keydown';
+						s.type     = s.keypress ? 'keypress' : 'keydown';
 						this.shortcuts[s.pattern] = s;
 						this.debug('shortcat-add', s)
 					}
@@ -272,6 +299,18 @@
 		
 		/**
 		 * Produce ajax request
+		 * Argment:
+		 * { 
+		 *     data : {}, data to send
+		 *     error : function(message) { return true|false }, hadlers for connector sended error (ajax request in this case is ok).
+		 *			return false - for fatal errors, true - for non fatal
+		 *     success : function(data) { }, response data handler,
+		 *     ajax : { if set - overwrite default ajax settings
+		 *         error : function(r) {}, ajax error handler
+		 *         success : function(data) { } response handler
+		 *         etc...
+		 *     }
+		 * }
 		 * 
 		 * @param  Object  options
 		 * @return elFinder
@@ -334,6 +373,12 @@
 			this.trigger('lock', { locks : this.locks });
 		}
 	
+		/**
+		 * Return file/dir from current dir by it's hash
+		 * 
+		 * @param  String  file hash
+		 * @return Object
+		 */
 		this.get = function(key) {
 			return this.cdc[key];
 		}
@@ -361,7 +406,14 @@
 		}
 		
 
-		
+		/**
+		 * Change current directory
+		 * 
+		 * @param  String   dir hash
+		 * @param  Boolean  update nav dire tree?
+		 * @param  Boolean  send init flag?
+		 * @return elFinder
+		 */
 		this.cd = function(key, tree, init) {
 			var o = {
 					data    : {cmd : 'open', target : key},
@@ -391,12 +443,21 @@
 		}
 		
 
-		
+		/**
+		 * Reload current directory
+		 * 
+		 * @return elFinder
+		 */
 		this.reload = function() {
 			this.buffer = {};
 			return this.cd(this.cwd.hash, true);
 		}
 		
+		/**
+		 * Go to previous opened directory
+		 * 
+		 * @return elFinder
+		 */
 		this.back = function() {
 			if (this.history.length > 1) {
 				// drop current dir
@@ -406,6 +467,14 @@
 			return this;
 		}
 		
+		/**
+		 * Copy files
+		 * If files not set - copy currently selected files
+		 * 
+		 * @param  Array|Object  files hashes array or object like this.cdc
+		 * @param  Boolean       cut files?
+		 * @return elFinder
+		 */
 		this.copy = function(files, cut) {
 			this.buffer   = {
 				src   : this.cwd.hash,
@@ -413,7 +482,7 @@
 				cut   : !!cut && this.cwd.write //&& this.cwd.rm
 			};
 			
-			$.each(files||[], function(i, f) {
+			$.each(files||this.selected, function(i, f) {
 				f = self.cdc[f && f.hash ? f.hash : f];
 				
 				if (f && f.read && f.type != 'link') {
@@ -423,10 +492,23 @@
 			return this;
 		}
 		
+		/**
+		 * Cut files
+		 * Wrapper for copy method
+		 * 
+		 * @param  Array|Object  files hashes array or object like this.cdc
+		 * @return elFinder
+		 */
 		this.cut = function(files) {
 			return this.copy(files, true);
 		}
 		
+		/**
+		 * Paste copied files in directory
+		 * 
+		 * @param  String - directory hash, if not set - paste in current working directory
+		 * @return elFinder
+		 */
 		this.paste = function(dst) {
 			var b = this.buffer, o;
 			
@@ -438,13 +520,13 @@
 				this.trigger('error', {error : 'Unable to copy into itself'});
 			} else if (b.files && b.files.length) {
 				o = {
-					error   : function(m) { self.trigger('error', {error : m}); return true; },
-					success : function(d) { self.trigger('cd', d); },
+					error   : error,
+					success : success,
 					data    : {
 						cmd     : 'paste',
 						current : this.cwd.hash,
 						src     : b.src,
-						dst     : dst || this.cwd.hash,
+						dst     : dst,
 						cut     : b.cut,
 						targets : []
 					}
@@ -458,13 +540,19 @@
 			}
 			
 			return this;
-
 		}
 		
+		/**
+		 * Paste copied files in directory
+		 * Wrapper for copy method
+		 * 
+		 * @param  String - directory hash, if not set - paste in current working directory
+		 * @return elFinder
+		 */
 		this.delete = function(files) {
 			var o = {
-				error : function(m) { self.trigger('error', {error : m}); return true; },
-				success : function(d) { self.trigger('cd', d); },
+				error : error,
+				success : success,
 				data : {cmd : 'rm', current : this.cwd.hash, targets : []}
 			};
 			
@@ -502,8 +590,6 @@
 					self.cwd.size += d.cdc[l].size;
 				}
 				if (d.customData) {
-					// @TODO extend ?
-					// self.options.customData = d.customData;
 					self.options.customData = $.extend({}, self.options.customData, d.customData);
 				}
 				self.last(d.cwd.hash);
@@ -533,7 +619,7 @@
 
 
 		// bind to keydown/keypress if shortcuts allowed
-		if (!this.options.disableShortcuts) {
+		if (this.options.allowShortcuts) {
 			$(document).bind('keydown keypress', function(e) {
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;

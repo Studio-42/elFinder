@@ -455,6 +455,7 @@
 			})
 			;
 	
+		// bind events handlers
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
 			self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 			self.error.hide();
@@ -505,7 +506,6 @@
 			}
 		})
 		.bind('select', function() {
-			fm.time('select')
 			var not = self.cwd.find('[id]').not('.ui-selected').draggable('destroy'),
 				list = fm._view == 'list',
 				hc = 'ui-state-hover';
@@ -522,95 +522,18 @@
 						}
 					});
 
-				if (fm._view == 'list') {
-					e.children().addClass(hc);
-				} else {
-					e.addClass(hc);
-				}
+				(fm._view == 'list' ? e.children() : e).addClass(hc);
 			});
-			fm.timeEnd('select')
 		})
 		;
 
 
-
+		// register shortcuts
 		$.each(shortcuts, function(i, s) {
 			fm.shortcut(s);
-		})
+		});
 
-		// fm.shortcut('ctrl+40', 'open', function(e) {
-		// 	fm.log('open')
-		// 
-		// 	if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
-		// 		fm.cd(fm.selected[0].hash)
-		// 	} else if (fm.selected.length) {
-		// 		fm.exec('open', fm.selected)
-		// 	}
-		// })
-		// .shortcut('37', 'arrow left', function(e) {
-		// 	select('left', e.shiftKey);
-		// }, $.browser.mozilla || $.browser.opera)
-		// .shortcut('38', 'arrow up', function(e) {
-		// 	select('up', e.shiftKey);
-		// }, false)
-		// .shortcut('39', 'arrow right', function(e) {
-		// 	select('right', e.shiftKey);
-		// }, false)
-		// .shortcut('40', 'arrow down', function(e) {
-		// 	select('down', e.shiftKey);
-		// }, false)
-		// .shortcut('shift+37', 'arrow left', function(e) {
-		// 	select('left', true);
-		// }, true)
-		// .shortcut('shift+38', 'arrow up', function(e) {
-		// 	select('up', true);
-		// }, false)
-		// .shortcut('shift+39', 'arrow right', function(e) {
-		// 	select('right', true);
-		// }, true)
-		// .shortcut('shift+40', 'arrow down', function(e) {
-		// 	select('down', true);
-		// }, false)
-		// .shortcut('400', 'arrow down', function() {
-		// 	var s = self.cwd.find('[id].ui-selected:last'), n;
-		// 	
-		// 	if (s.length) {
-		// 		n = s.next('[id]').length ? s.next('[id]').eq(0) : s;
-		// 		self.cwd.find('[id].ui-selected').removeClass('ui-selected')
-		// 	} else {
-		// 		n = self.cwd.find('[id]:first');
-		// 	}
-		// 	
-		// 	if (n.length) {
-		// 		n.addClass('ui-selected')
-		// 	}
-		// 	
-		// 	fm.trigger('select')
-		// 	return
-		// 	
-		// 	fm.log('arrow down')
-		// 	var s = self.cwd.find('[id].ui-selected:last').removeClass('ui-selected'), 
-		// 		n = s.next('[id]').eq(0),
-		// 		t, h, ph, st;
-		// 	
-		// 	if (n.length) {
-		// 		n.addClass('ui-selected');
-		// 		t = n.position().top;
-		// 		h = n.outerHeight(true);
-		// 		ph = self.cwd.innerHeight();
-		// 		st = self.cwd.scrollTop();
-		// 		
-		// 		if (t < 0) {
-		// 			self.cwd.scrollTop(Math.ceil(t + st)-9)
-		// 		} else if (t + h > ph) {
-		// 			self.cwd.scrollTop(Math.ceil(t + h - ph + st))
-		// 		}
-		// 	}
-		// 	
-		// 	
-		// 	fm.trigger('select')
-		// })
-
+		// init tree plugin
 		this.tree.elfindertree(fm);
 
 		this.selected = function() {
