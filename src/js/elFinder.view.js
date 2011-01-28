@@ -118,6 +118,16 @@
 					description : 'Paste',
 					callback    : function() { fm.paste(); }
 				},
+				{
+					pattern     : 'delete',
+					description : 'Delete files',
+					callback    : function() { fm.delete(); }
+				},
+				{
+					pattern     : 'ctrl+backspace',
+					description : 'Delete files',
+					callback    : function() { fm.delete(); }
+				},
 			],
 			/**
 			 * Return css class and element to display permissions, based on object permissions

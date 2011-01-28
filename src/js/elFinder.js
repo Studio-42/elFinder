@@ -20,7 +20,9 @@
 				'ARROWDOWN'  : 40,
 				'ESC'        : 27,
 				'ENTER'      : 13,
-				'SPACE'      : 32
+				'SPACE'      : 32,
+				'DELETE'     : 46,
+				'BACKSPACE'  : 8
 			},
 			/**
 			 * Load images thumbnails in background
@@ -246,14 +248,7 @@
 		 */
 		this.shortcut = function(s) {
 			var p, c;
-			var codes = {
-				'ARROWLEFT' : 37,
-				'ARROWUP'   : 38,
-				'ARROWRIGHT' : 39,
-				'ARROWDOWN' : 40,
-				'ESC' : 27,
-				'ENTER' : 13
-			}
+
 			if (!this.options.disableShortcuts && s.pattern && typeof(s.callback) == 'function') {
 				s.pattern = s.pattern.toUpperCase();
 				
@@ -489,10 +484,14 @@
 					self.cwd.size += d.cdc[l].size;
 				}
 				if (d.customData) {
+					// @TODO extend ?
 					self.options.customData = d.customData;
 				}
+				self.last(d.cwd.hash);
+				// self.history
 			}
-		}).bind('ajaxstart ajaxerror ajaxstop', function(e) {
+		})
+		.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		}).bind('select', function() {
