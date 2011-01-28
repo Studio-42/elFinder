@@ -75,6 +75,14 @@
 						}
 				},
 				{
+					pattern     : 'ctrl+a',
+					description : 'Select all files',
+					callback    : function() { 
+							self.cwd.find('[id]').addClass('ui-selected');
+							fm.trigger('select');
+						}
+				},
+				{
 					pattern     : 'ctrl+arrowLeft',
 					description : 'Return to previous directory',
 					callback    : function() { fm.back(); }
