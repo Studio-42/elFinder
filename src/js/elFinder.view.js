@@ -106,9 +106,17 @@
 				{
 					pattern     : 'ctrl+c',
 					description : 'Copy',
-					callback    : function() { 
-							fm.copy(fm.selected); 
-						}
+					callback    : function() { fm.copy(fm.selected); }
+				},
+				{
+					pattern     : 'ctrl+x',
+					description : 'Cut',
+					callback    : function() { fm.cut(fm.selected); }
+				},
+				{
+					pattern     : 'ctrl+v',
+					description : 'Paste',
+					callback    : function() { fm.paste(); }
 				},
 			],
 			/**

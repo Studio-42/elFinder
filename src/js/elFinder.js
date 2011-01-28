@@ -134,7 +134,7 @@
 		this.cdc      = {};
 		this.selected = [];
 		this.history  = [];
-		this.buffer   = [];
+		this.buffer   = {files : [], cut : false};
 		this.shortcuts = {};
 		
 		
@@ -340,7 +340,7 @@
 		}
 	
 		this.get = function(key) {
-			
+			return this.cdc[key];
 		}
 	
 		this.getByName = function(name) {
@@ -398,6 +398,7 @@
 
 		
 		this.reload = function() {
+			this.buffer = {};
 			return this.cd(this.cwd.hash, true);
 		}
 		
@@ -405,19 +406,70 @@
 			
 		}
 		
-		this.copy = function(keys, cut) {
-			self.log(keys)
+		this.copy = function(files, cut) {
+			this.buffer   = {
+				src   : this.cwd.hash,
+				files : [], 
+				cut   : !!cut && this.cwd.write //&& this.cwd.rm
+			};
+			
+			$.each(files||[], function(i, f) {
+				f = self.cdc[f && f.hash ? f.hash : f];
+				
+				if (f && f.read && f.type != 'link') {
+					self.buffer.files.push(f);
+				}
+			});
+			return this;
 		}
 		
-		this.cut = function(keys) {
-			return this.copy(keys, true);
+		this.cut = function(files) {
+			return this.copy(files, true);
 		}
 		
-		this.paste = function(keys) {
+		this.paste = function(dst) {
+			var b = this.buffer, o;
+			
+			dst = dst || this.cwd.hash;
+			
+			if (!this.cwd.write) {
+				this.trigger('error', {error : 'Access denied'});
+			} else if (b.src == dst) {
+				this.trigger('error', {error : 'Unable to copy into itself'});
+			} else if (b.files && b.files.length) {
+				o = {
+					error   : function(m) { self.trigger('error', {error : m}); return true; },
+					success : function(d) { self.trigger('cd', d); },
+					data    : {
+						cmd     : 'paste',
+						current : this.cwd.hash,
+						src     : b.src,
+						dst     : dst || this.cwd.hash,
+						cut     : b.cut,
+						targets : []
+					}
+				};
+				
+				$.each(b.files, function(i, f) {
+					o.data.targets.push(f.hash);
+				})
+				
+				this.ajax(o);
+			}
+			
+			return this;
+
+		}
+		
+		this.delete = function(files) {
 			
 		}
 		
-		this.delete = function() {
+		this.rename = function(file, name) {
+			
+		}
+		
+		this.duplicate = function(file) {
 			
 		}
 		
