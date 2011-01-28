@@ -401,8 +401,9 @@
 			if (this.history.length > 1) {
 				// drop current dir
 				this.history.pop();
-				this.cd(this.history.pop())
+				this.cd(this.history.pop());
 			}
+			return this;
 		}
 		
 		this.copy = function(files, cut) {
@@ -453,7 +454,7 @@
 					o.data.targets.push(f.hash);
 				})
 				
-				this.ajax(o);
+				o.data.targets.length && this.ajax(o);
 			}
 			
 			return this;
@@ -461,7 +462,20 @@
 		}
 		
 		this.delete = function(files) {
+			var o = {
+				error : function(m) { self.trigger('error', {error : m}); return true; },
+				success : function(d) { self.trigger('cd', d); },
+				data : {cmd : 'rm', current : this.cwd.hash, targets : []}
+			};
 			
+			
+			if (!this.locks.ui) {
+				$.each(files||this.selected, function(i, f) {
+					o.data.targets.push(f.hash);
+				});
+				
+				o.data.targets.length && this.ajax(o);
+			}
 		}
 		
 		this.rename = function(file, name) {
@@ -489,10 +503,15 @@
 				}
 				if (d.customData) {
 					// @TODO extend ?
-					self.options.customData = d.customData;
+					// self.options.customData = d.customData;
+					self.options.customData = $.extend({}, self.options.customData, d.customData);
 				}
 				self.last(d.cwd.hash);
-				self.history.push(d.cwd.hash);
+				// update history if its empty or this event is not reload current dir
+				if (!self.history.length || self.history[self.history.length-1] != d.cwd.hash) {
+					self.history.push(d.cwd.hash);
+				}
+				
 				self.log(self.history)
 			}
 		})
