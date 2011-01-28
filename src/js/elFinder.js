@@ -371,7 +371,7 @@
 						delete d; 
 						self.timeEnd('cd'); 
 					}
-			};
+				};
 			
 			if (!this.locks.ui) {
 				if (this.cdc[key] && !this.cdc[key].read) {
@@ -398,7 +398,11 @@
 		}
 		
 		this.back = function() {
-			
+			if (this.history.length > 1) {
+				// drop current dir
+				this.history.pop();
+				this.cd(this.history.pop())
+			}
 		}
 		
 		this.copy = function(files, cut) {
@@ -488,7 +492,8 @@
 					self.options.customData = d.customData;
 				}
 				self.last(d.cwd.hash);
-				// self.history
+				self.history.push(d.cwd.hash);
+				self.log(self.history)
 			}
 		})
 		.bind('ajaxstart ajaxerror ajaxstop', function(e) {
