@@ -99,9 +99,16 @@
 						}
 				},
 				{
-					pattern     : 'ctrl+arrowLeft',
-					description : 'Return to previous directory',
-					callback    : function() { fm.back(); }
+					pattern : 'ctrl+shift+r',
+					description : 'Reload current directory',
+					callback : function() { fm.reload(); }
+				},
+				{
+					pattern     : 'ctrl+c',
+					description : 'Copy',
+					callback    : function() { 
+							fm.copy(fm.selected); 
+						}
 				},
 			],
 			/**

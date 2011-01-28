@@ -35,6 +35,7 @@ elFinder.prototype.options = {
 	disableShortcuts : false,
 	/* open last visited dir after reload page or close and open browser */
 	rememberLastDir : true,
+	customData : { test : 'this-is-test'},
 	/* cookie options */
 	cookie         : {
 		expires : 30,

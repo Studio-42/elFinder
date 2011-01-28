@@ -286,7 +286,7 @@
 					url      : this.options.url,
 					async    : true,
 					type     : 'get',
-					data     : opts.data,
+					data     : $.extend({}, this.options.customData, opts.data),//opts.data,
 					dataType : 'json',
 					cache    : false,
 					error    : function(r) {  
@@ -392,8 +392,8 @@
 		
 
 		
-		this.reload = function(key) {
-			return this.open(key, true);
+		this.reload = function() {
+			return this.cd(this.cwd.hash, true);
 		}
 		
 		this.back = function() {
@@ -401,7 +401,7 @@
 		}
 		
 		this.copy = function(keys, cut) {
-			
+			self.log(keys)
 		}
 		
 		this.cut = function(keys) {
