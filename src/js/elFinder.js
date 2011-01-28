@@ -286,11 +286,16 @@
 					url      : this.options.url,
 					async    : true,
 					type     : 'get',
-					data     : $.extend({}, this.options.customData, opts.data),//opts.data,
+					data     : $.extend({}, this.options.customData, opts.data),
 					dataType : 'json',
 					cache    : false,
 					error    : function(r) {  
-						self.trigger('ajaxerror', { status : r.status, error : r.status == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' }); 
+						var s = r && r.status ? r.status : 0;
+						
+						self.trigger('ajaxerror', { 
+							status : s, 
+							error : s == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' 
+						}); 
 					},
 					success  : function(d) {
 						var err = d ? d.error : 'Unknown error';
@@ -421,16 +426,19 @@
 		}
 		
 		this.bind('cd', function(e) {
-			var l;
-			if (e.data.cdc) {
-				self.cwd = e.data.cwd;
+			var d = e.data, l;
+			
+			if (d.cdc) {
+				self.cwd = d.cwd;
 				self.cdc = {};
-				l = e.data.cdc.length;
+				l = d.cdc.length;
 				while (l--) {
-					self.cdc[e.data.cdc[l].hash] = e.data.cdc[l];
-					self.cwd.size += e.data.cdc[l].size;
+					self.cdc[d.cdc[l].hash] = d.cdc[l];
+					self.cwd.size += d.cdc[l].size;
 				}
-
+				if (d.customData) {
+					self.options.customData = d.customData;
+				}
 			}
 		}).bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
