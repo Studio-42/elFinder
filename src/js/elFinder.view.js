@@ -121,12 +121,12 @@
 				{
 					pattern     : 'delete',
 					description : 'Delete files',
-					callback    : function() { fm.delete(); }
+					callback    : function() { fm.rm(); }
 				},
 				{
 					pattern     : 'ctrl+backspace',
 					description : 'Delete files',
-					callback    : function() { fm.delete(); }
+					callback    : function() { fm.rm(); }
 				},
 			],
 			/**
@@ -250,6 +250,30 @@
 					cwd.scrollTop(Math.ceil(t + st) - 9);
 				} else if (t + h > ph) {
 					cwd.scrollTop(Math.ceil(t + h - ph + st));
+				}
+			},
+			/**
+			 * Copy/cut files and paste after drag&drop
+			 *
+			 * @param Event  file/dir node
+			 * @param Object ui object
+			 * @param String destination dir hash
+			 * @return void
+			 */
+			drop = function(e, ui, dst) {
+				var files = ui.helper.data('files') || [],
+					l = files.length,
+					cut = !e.shiftKey;
+					
+				if (l) {
+					fm.copy(files, cut);
+					fm.paste(dst);
+					while (l--) {
+						if (!files[l].read || (cut && !files[l].rm)) {
+							return;
+						}
+					}
+					ui.helper.hide();
 				}
 			}
 			;
@@ -473,36 +497,12 @@
 		.bind('cd', function(e) {
 			if (e.data.cdc) {
 				
-				if (e.data.tree) {
-					// render tree and add events handlers
-					e.data.tree && self.renderNav(e.data.tree);
-					self.tree.find('a').droppable({
-						over : function(e, ui) {
-							$(e.target).children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
-						},
-						out : function(e) {
-							$(e.target).children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open');
-						},
-						drop : function(e, ui) {
-							$(e.target).children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open');
-						}
-					})
-				}
+				// render tree and add events handlers
+				e.data.tree && self.renderNav(e.data.tree);
 				
 				// render directory and add events handlers
 				self.renderCdc(e.data.cdc);
-				self.cwd[fm._view == 'list' ? 'children' : 'find']('[id]')
-					.not('.elfinder-na,.elfinder-ro').droppable({
-						over : function(e, ui) {
-							$(e.target).addClass('directory-opened');
-						},
-						out : function(e) {
-							$(e.target).removeClass('directory-opened');
-						},
-						drop : function(e, ui) {
-							$(e.target).removeClass('directory-opened');
-						}
-					});
+				
 			}
 		})
 		.bind('select', function() {
@@ -510,19 +510,22 @@
 				list = fm._view == 'list',
 				hc = 'ui-state-hover';
 			
-			list ? not.children().removeClass(hc) : not.removeClass(hc);
+			// list ? not.children().removeClass(hc) : not.removeClass(hc);
+			
+			(list ? not.children() : not).removeClass(hc);
 			
 			$.each(self.fm.selected, function(i, o) {
 				var e = self.cwd.find('#'+o.hash)
 					.draggable({
 						revert : true,
 						helper : function() {
+							return $('<div class="elfinder-drag-helper"/>').data('files', fm.selected)
 							var h = '<div style="border:1px solid #111;width:50px;height:50px"/>'
 							return h
 						}
 					});
 
-				(fm._view == 'list' ? e.children() : e).addClass(hc);
+				(list ? e.children() : e).addClass(hc);
 			});
 		})
 		;
@@ -564,7 +567,10 @@
 					}
 					return html + '</ul>';
 				},
-				p = perms(tree);
+				p = perms(tree),
+				fc = '.elfinder-nav-icon-folder',
+				hc = 'ui-state-highlited',
+				oc = 'elfinder-nav-icon-folder-open';
 				
 			if (tree.length) {
 				
@@ -576,13 +582,30 @@
 						+p.element+tree.name+'</a>' + traverse(tree.dirs) + '</li>';
 			}
 			
-			this.tree.html(html);
+			this.tree.html(html)
+				.find('a')
+				.not('.elfinder-na,.elfinder-ro')
+				.droppable({
+					tolerance : 'pointer',
+					over : function(e, ui) {
+						$(e.target).addClass(hc).children(fc).addClass(oc);	
+					},
+					out : function(e) {
+						$(e.target).removeClass(hc).children(fc).removeClass(oc);
+					},
+					drop : function(e, ui) {
+						$(e.target).removeClass(hc).children(fc).removeClass(oc);
+						drop(e, ui, $(e.target).attr('key'));
+					}
+				});
+			
 			return this;
 		}
 		
 		this.renderCdc = function(cdc) {
 			var l    = this.fm.viewType() == 'list',
 				c    = 'ui-widget-header',
+				oc   = 'directory-opened',
 				html = l ? '<table><thead><tr><td class="'+c+'">'+fm.i18n('Name')+'</td><td class="'+c+'">'+fm.i18n('Permissions')+'</td><td class="'+c+'">'+fm.i18n('Modified')+'</td><td class="'+c+'">'+fm.i18n('Size')+'</td><td class="'+c+'">'+fm.i18n('Kind')+'</td></tr></thead><tbody>' : '',
 				r    = l ? 'rowHtml' : 'iconHtml';
 			
@@ -592,7 +615,24 @@
 			
 			this.cwd.removeClass('elfinder-cwd-' + (l ? 'icons' : 'list')).addClass('elfinder-cwd-' + (l ? 'list' : 'icons')).html(html + (l ? '</tbody></table>' : ''));
 			
-			l && this.cwd.children('table').find('tr:odd').children().addClass('elfinder-odd-row')
+			l && this.cwd.children('table').find('tr:odd').children().addClass('elfinder-odd-row');
+			
+			this.cwd[l ? 'children' : 'find']('[id].directory')
+				.not('.elfinder-na,.elfinder-ro')
+				.droppable({
+					tolerance : 'pointer',
+					over : function(e, ui) {
+						$(e.target).addClass(oc);
+					},
+					out : function(e) {
+						$(e.target).removeClass(oc);
+					},
+					drop : function(e, ui) {
+						$(e.target).removeClass(oc);
+						drop(e, ui, $(e.target).attr('id'));
+					}
+				});
+			
 			return this;
 		}
 

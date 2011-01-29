@@ -527,14 +527,14 @@
 						current : this.cwd.hash,
 						src     : b.src,
 						dst     : dst,
-						cut     : b.cut,
+						cut     : b.cut ? 1 : 0,
 						targets : []
 					}
 				};
 				
 				$.each(b.files, function(i, f) {
 					o.data.targets.push(f.hash);
-				})
+				});
 				
 				o.data.targets.length && this.ajax(o);
 			}
@@ -549,7 +549,7 @@
 		 * @param  String - directory hash, if not set - paste in current working directory
 		 * @return elFinder
 		 */
-		this.delete = function(files) {
+		this.rm = function(files) {
 			var o = {
 				error : error,
 				success : success,
