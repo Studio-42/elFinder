@@ -598,7 +598,7 @@
 					self.history.push(d.cwd.hash);
 				}
 				
-				self.log(self.history)
+				// self.log(self.history)
 			}
 		})
 		.bind('ajaxstart ajaxerror ajaxstop', function(e) {

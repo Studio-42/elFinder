@@ -267,7 +267,10 @@
 					
 				if (l) {
 					fm.copy(files, cut);
-					fm.paste(dst);
+					// to avoid jquery.ui bug when drop folder from nav tree
+					setTimeout(function() {
+						fm.paste(dst);
+					}, 300);
 					while (l--) {
 						if (!files[l].read || (cut && !files[l].rm)) {
 							return;
@@ -515,6 +518,7 @@
 			(list ? not.children() : not).removeClass(hc);
 			
 			$.each(self.fm.selected, function(i, o) {
+				// fm.log(o.hash)
 				var e = self.cwd.find('#'+o.hash)
 					.draggable({
 						revert : true,
@@ -585,6 +589,13 @@
 			this.tree.html(html)
 				.find('a')
 				.not('.elfinder-na,.elfinder-ro')
+				.draggable({
+					revert : true,
+					helper : function() {
+						fm.log(this)
+						return $('<div class="elfinder-drag-helper"/>').data('files', [{ hash : $(this).attr('key'), read : true, write : true, rm: true }])
+					}
+				})
 				.droppable({
 					tolerance : 'pointer',
 					over : function(e, ui) {
@@ -597,7 +608,8 @@
 						$(e.target).removeClass(hc).children(fc).removeClass(oc);
 						drop(e, ui, $(e.target).attr('key'));
 					}
-				});
+				})
+				;
 			
 			return this;
 		}
