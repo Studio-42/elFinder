@@ -522,6 +522,8 @@
 				var e = self.cwd.find('#'+o.hash)
 					.draggable({
 						revert : true,
+						addClasses : false,
+						refreshPositions : true,
 						helper : function() {
 							return $('<div class="elfinder-drag-helper"/>').data('files', fm.selected)
 							var h = '<div style="border:1px solid #111;width:50px;height:50px"/>'
@@ -573,7 +575,7 @@
 				},
 				p = perms(tree),
 				fc = '.elfinder-nav-icon-folder',
-				hc = 'ui-state-highlited',
+				hc = 'ui-state-hover',
 				oc = 'elfinder-nav-icon-folder-open';
 				
 			if (tree.length) {
@@ -591,6 +593,10 @@
 				.not('.elfinder-na,.elfinder-ro')
 				.draggable({
 					revert : true,
+					addClasses : false,
+					
+					appendTo : self.workzone,
+					cursorAt : { left : 1, top : 1},
 					helper : function() {
 						fm.log(this)
 						return $('<div class="elfinder-drag-helper"/>').data('files', [{ hash : $(this).attr('key'), read : true, write : true, rm: true }])
@@ -599,6 +605,7 @@
 				.droppable({
 					tolerance : 'pointer',
 					over : function(e, ui) {
+						fm.log('over')
 						$(e.target).addClass(hc).children(fc).addClass(oc);	
 					},
 					out : function(e) {

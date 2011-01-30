@@ -17,8 +17,15 @@
 		
 		return this.each(function() {
 			var $this = $(this)
-					.delegate('a', 'hover', function() {
-						$(this).toggleClass('ui-state-hover');
+					// .delegate('a', 'hover', function() {
+					// 	fm.log('hover')
+					// 	$(this).toggleClass('ui-state-hover');
+					// })
+					.delegate('a', 'mouseenter', function() {
+						$(this).addClass('ui-state-hover');
+					})
+					.delegate('a', 'mouseleave', function() {
+						$(this).removeClass('ui-state-hover');
 					})
 					.delegate('a', 'click', function(e) {
 						var $this = $(this),
