@@ -161,11 +161,12 @@
 	overflow:hidden; 
 	padding:3px 1px;
 	outline:0 solid;
+	margin:1px;
 }
 
-.elfinder-nav a.ui-state-active.ui-state-hover { margin:0; }
+.elfinder-nav a.ui-state-active { margin:-1px 0; }
 
-.elfinder-nav a.ui-state-hover { margin:-1px;}
+.elfinder-nav a.ui-state-hover { margin:-1px 0px;}
 
 .elfinder-ltr .elfinder-nav ul li ul { margin-left:12px; }
 .elfinder-rtl .elfinder-nav ul li ul  {	margin-right:15px; }

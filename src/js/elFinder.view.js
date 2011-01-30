@@ -575,6 +575,8 @@
 				},
 				p = perms(tree),
 				fc = '.elfinder-nav-icon-folder',
+				cc = '.elfinder-nav-collapsed',
+				ec = 'elfinder-nav-expanded',
 				hc = 'ui-state-hover',
 				oc = 'elfinder-nav-icon-folder-open';
 				
@@ -605,10 +607,24 @@
 				.droppable({
 					tolerance : 'pointer',
 					over : function(e, ui) {
-						fm.log('over')
-						$(e.target).addClass(hc).children(fc).addClass(oc);	
+						var f = $(e.target).addClass(hc),
+							i = f.children(fc),
+							a = f.children(cc);
+						// fm.log('over')
+						// fm.log(f[0])
+						i.addClass(oc);	
+						a.length && setTimeout(function() {
+							if (!a.hasClass(ec)) {
+								a.click();
+							}
+						}, 1000)
+						// if (!$(e.target).children('.elfinder-nav-collapsed').hasClass('elfinder-nav-expanded')) {
+						// 	$(e.target).children('.elfinder-nav-collapsed').click()
+						// }
 					},
 					out : function(e) {
+						// fm.log('out')
+						// fm.log(e.target)
 						$(e.target).removeClass(hc).children(fc).removeClass(oc);
 					},
 					drop : function(e, ui) {
