@@ -610,30 +610,7 @@
 			}
 			
 			this.tree.html(html)
-				.find('a')
-				.not('.elfinder-na,.elfinder-ro')
-				.draggable({
-					revert : true,
-					addClasses : false,
-					
-					appendTo : self.workzone,
-					cursorAt : { left : 1, top : 1},
-					helper : function() {
-						var h =  $('<div class="elfinder-drag-helper"/>').data('files', [{ hash : $(this).attr('key'), read : true, write : true, rm: true }])
-						
-						var data = {
-							hash : $(this).attr('key'),
-							name : $(this).text(),
-							read : true,
-							write : true,
-							rm : true,
-							mime : 'directory'
-						}
-						fm.log(self.iconHtml(data))
-						h.append('<span class="elfinder-drag-icon directory"/>')
-						return h;
-					}
-				})
+				.find('a:not(.elfinder-na,.elfinder-ro)')
 				.droppable({
 					tolerance : 'pointer',
 					over : function(e, ui) {
@@ -653,6 +630,33 @@
 						drop(e, ui, $(e.target).attr('key'));
 					}
 				})
+				.draggable({
+					revert : true,
+					addClasses : false,
+					start : function(e) {
+						if ($(e.target).hasClass('elfinder-nav-home')) {
+							e.preventDefault();
+						}
+					},
+					appendTo : self.workzone,
+					cursorAt : { left : 1, top : 1},
+					helper : function() {
+						var h =  $('<div class="elfinder-drag-helper"/>').data('files', [{ hash : $(this).attr('key'), read : true, write : true, rm: true }])
+						
+						var data = {
+							hash : $(this).attr('key'),
+							name : $(this).text(),
+							read : true,
+							write : true,
+							rm : true,
+							mime : 'directory'
+						}
+						// fm.log(self.iconHtml(data))
+						h.append('<span class="elfinder-drag-icon directory"/>')
+						return h;
+					}
+				})
+				
 				;
 			
 			return this;
