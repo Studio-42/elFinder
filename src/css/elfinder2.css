@@ -24,7 +24,7 @@
 .elfinder { padding:2px; position:relative; }
 
 .elfinder-rtl  { text-align:right; direction:rtl; }
-
+/* drag helper */
 .elfinder-drag-helper {
 	width:100px;
 	height:50px;
@@ -34,6 +34,23 @@
 
 .elfinder-drag-helper-plus {
 	background:url('../images/toolbar.png') 0 -591px no-repeat;
+}
+/* icons in drag helper */
+.elfinder-drag-icon { float:left; margin-left:-30px;}
+.elfinder-drag-icon:first-child { margin-left:0; }
+/* files num in drag helper */
+.elfinder-drag-num {
+	padding:1px 5px 3px 5px;
+	font-size:.7em;
+	font-weight:bold;
+	color:#fff;
+	position:absolute;
+	top:0;
+	left:57px;
+	background-color:red;
+	-moz-border-radius: 8px; 
+	-webkit-border-radius: 8px; 
+	border-radius: 8px;
 }
 
 /************************************/
@@ -212,7 +229,6 @@
 	margin-top:-8px;
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
-/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
@@ -266,25 +282,52 @@
 	margin:4px auto;
 	background: url('../images/icons-big.png') 0 0 no-repeat;
 }
-
+/* files types */
 .elfinder .directory .elfinder-cwd-icon { background-position:0 -50px; }
 .elfinder .directory-opened .elfinder-cwd-icon { background-position: 0 -98px; }
-
-.elfinder-drag-icon { float:left; margin-left:-30px;}
-.elfinder-drag-icon:first-child { margin-left:0; }
-.elfinder-drag-num {
-	padding:1px 5px 3px 5px;
-	font-size:.7em;
-	font-weight:bold;
-	color:#fff;
-	position:absolute;
-	top:0;
-	left:57px;
-	background-color:red;
-	-moz-border-radius: 8px; 
-	-webkit-border-radius: 8px; 
-	border-radius: 8px;
-}
+.elfinder .application .elfinder-cwd-icon,
+.elfinder .x-java .elfinder-cwd-icon { background-position:0 -150px; }
+.elfinder .audio .elfinder-cwd-icon{ background-position:0 -300px; }
+.elfinder .image .elfinder-cwd-icon, 
+.elfinder .vnd-adobe-photoshop .elfinder-cwd-icon,
+.elfinder .postscript .elfinder-cwd-icon { background-position:0 -250px;  }
+.elfinder .text .elfinder-cwd-icon,
+.elfinder .x-empty .elfinder-cwd-icon { background-position:0  -200px; }
+.elfinder .video .elfinder-cwd-icon{ background-position:0 -350px; }
+.elfinder .rtf .elfinder-cwd-icon,
+.elfinder .rtfd .elfinder-cwd-icon { background-position: 0 -400px; }
+.elfinder .html .elfinder-cwd-icon { background-position: 0 -550px; }
+.elfinder .css .elfinder-cwd-icon { background-position: 0 -600px; }
+.elfinder .javascript .elfinder-cwd-icon,
+.elfinder .x-javascript .elfinder-cwd-icon { background-position: 0 -650px; }
+.elfinder .x-perl .elfinder-cwd-icon { background-position: 0 -700px; }
+.elfinder .x-python .elfinder-cwd-icon { background-position: 0 -750px; }
+.elfinder .x-ruby .elfinder-cwd-icon { background-position: 0 -800px; }
+.elfinder .x-sh .elfinder-cwd-icon,
+.elfinder .x-shellscript .elfinder-cwd-icon { background-position: 0 -850px; }
+.elfinder .x-c .elfinder-cwd-icon,
+.elfinder .x-java-source .elfinder-cwd-icon { background-position: 0 -900px; }
+.elfinder .x-php .elfinder-cwd-icon { background-position: 0 -950px; }
+.elfinder .xml .elfinder-cwd-icon{ background-position: 0 -1000px; }
+.elfinder .pdf .elfinder-cwd-icon { background-position: 0 -450px; }
+.elfinder .x-shockwave-flash .elfinder-cwd-icon { background-position: 0 -1250px; }
+.elfinder .zip .elfinder-cwd-icon, 
+.elfinder .x-7z-compressed .elfinder-cwd-icon { background-position: 0 -1050px; }
+.elfinder .x-gzip .elfinder-cwd-icon, 
+.elfinder .x-tar .elfinder-cwd-icon { background-position: 0 -1100px; }
+.elfinder .x-bzip .elfinder-cwd-icon, 
+.elfinder .x-bzip2 .elfinder-cwd-icon{ background-position: 0 -1150px; }
+.elfinder .x-rar .elfinder-cwd-icon, 
+.elfinder .x-rar-compressed .elfinder-cwd-icon { background-position: 0 -1200px; }
+.elfinder .vnd-ms-office .elfinder-cwd-icon, 
+.elfinder .msword .elfinder-cwd-icon, 
+.elfinder .vnd-ms-word .elfinder-cwd-icon, 
+.elfinder .vnd-oasis-opendocument-text .elfinder-cwd-icon, 
+.elfinder .ms-excel .elfinder-cwd-icon, 
+.elfinder .vnd-ms-excel .elfinder-cwd-icon, 
+.elfinder .vnd-oasis-opendocument-spreadsheet .elfinder-cwd-icon, 
+.elfinder .vnd-ms-powerpoint .elfinder-cwd-icon, 
+.elfinder .vnd-oasis-opendocument-presentation .elfinder-cwd-icon { background-position: 0 -500px; }
 
 /* permissions marker */
 .elfinder-cwd-icons .elfinder-perms { top:35px; right:17px; }

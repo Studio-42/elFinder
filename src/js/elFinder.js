@@ -405,7 +405,13 @@
 			
 		}
 		
-
+		/**
+		 * Set required files selected, update selected cache
+		 * Alias for elFinder.view.select()
+		 *
+		 * @param String|Array|void  - what to select
+		 * @return elFinder
+		 */
 		this.select = function(keys) {
 			this.view.select(keys);
 			return this;
