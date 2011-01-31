@@ -26,9 +26,14 @@
 .elfinder-rtl  { text-align:right; direction:rtl; }
 
 .elfinder-drag-helper {
-	width:50px;
+	width:100px;
 	height:50px;
 	border:1px solid #111;
+	padding:0 0 0 12px;
+}
+
+.elfinder-drag-helper-plus {
+	background:url('../images/toolbar.png') 0 -591px no-repeat;
 }
 
 /************************************/
@@ -167,6 +172,8 @@
 .elfinder-nav a.ui-state-active { margin:-1px 0; }
 
 .elfinder-nav a.ui-state-hover { margin:-1px 0px;}
+.elfinder-nav a.elfinder-nav-home.ui-state-hover { margin-top:0; }
+
 
 .elfinder-ltr .elfinder-nav ul li ul { margin-left:12px; }
 .elfinder-rtl .elfinder-nav ul li ul  {	margin-right:15px; }
@@ -236,7 +243,7 @@
 
 /************** ICONS VIEW *************/
 /* file/dir */
-.elfinder-cwd-icons .elfinder-file {
+.elfinder-cwd-icons .elfinder-file, .elfinder-cwd-icons .elfinder-file-wrapper {
 	width:80px;
 	height:80px;
 	border:1px solid #111;
@@ -246,11 +253,13 @@
 	position:relative;
 }
 
+.elfinder-file-wrapper { border:1px solid green; }
+
 .elfinder-ltr .elfinder-cwd-icons .elfinder-file { float:left;  margin:0 3px 3px 0; }
 .elfinder-rtl .elfinder-cwd-icons .elfinder-file { float:right; margin:0 0   3px 3px; }
 
 /* icon inside file/dir */
-.elfinder-cwd-icons .elfinder-cwd-icon {
+.elfinder .elfinder-cwd-icon {
 	width:48px;
 	height:48px;
 	display:block; 
@@ -258,13 +267,29 @@
 	background: url('../images/icons-big.png') 0 0 no-repeat;
 }
 
-.elfinder-cwd-icons .directory        .elfinder-cwd-icon { background-position:0 -50px; }
-.elfinder-cwd-icons .directory-opened .elfinder-cwd-icon { background-position: 0 -98px; }
+.elfinder .directory .elfinder-cwd-icon { background-position:0 -50px; }
+.elfinder .directory-opened .elfinder-cwd-icon { background-position: 0 -98px; }
+
+.elfinder-drag-icon { float:left; margin-left:-30px;}
+.elfinder-drag-icon:first-child { margin-left:0; }
+.elfinder-drag-num {
+	padding:1px 5px 3px 5px;
+	font-size:.7em;
+	font-weight:bold;
+	color:#fff;
+	position:absolute;
+	top:0;
+	left:57px;
+	background-color:red;
+	-moz-border-radius: 8px; 
+	-webkit-border-radius: 8px; 
+	border-radius: 8px;
+}
 
 /* permissions marker */
-.elfinder-cwd-icons .elfinder-perms { top:32px; right:17px; }
+.elfinder-cwd-icons .elfinder-perms { top:35px; right:17px; }
 /* symlink marker */
-.elfinder-cwd-icons .elfinder-symlink { top:32px; left:12px;}
+.elfinder-cwd-icons .elfinder-symlink { top:22px; left:12px;}
 
 /* filename in icon view */
 .elfinder-cwd-icons .elfinder-filename {

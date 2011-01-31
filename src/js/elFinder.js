@@ -406,6 +406,11 @@
 		}
 		
 
+		this.select = function(keys) {
+			this.view.select(keys);
+			return this;
+		}
+
 		/**
 		 * Change current directory
 		 * 
@@ -604,12 +609,6 @@
 		.bind('ajaxstart ajaxerror ajaxstop', function(e) {
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
-		}).bind('select', function() {
-			self.selected = [];
-
-			$.each(self.view.selected(), function(i, n) {
-				self.cdc[n.id] && self.selected.push(self.cdc[n.id]);
-			});
 		}).bind('focus', function() {
 			self.locks.shortcuts = false;
 			$('texarea,:text').blur()
