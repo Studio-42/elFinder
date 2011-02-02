@@ -20,7 +20,7 @@ class elFinder {
 		'rootAlias'    => 'Home',       // display this instead of root directory name
 		'disabled'     => array(),      // list of not allowed commands
 		'dotFiles'     => false,        // display dot files
-		'dirSize'      => true,         // count total directories sizes
+		'dirSize'      => false,        // count total directories sizes
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new folders mode
 		'mimeDetect'   => 'auto',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
@@ -236,9 +236,8 @@ class elFinder {
 			}
 		}
 
-		if (substr($this->_options['root'], -1) == DIRECTORY_SEPARATOR) {
-			$this->_options['root'] = substr($this->_options['root'], 0, -1);
-		}
+		$this->_options['root'] = $this->_normpath($this->_options['root']);
+		$this->_options['URL'] = rtrim($this->_options['URL'], '/'); // remove trailing slash
 
 		$this->_time = $this->_options['debug'] ? $this->_utime() : 0;
 
@@ -464,7 +463,7 @@ class elFinder {
 			$this->_rmTmb($target);
 			$this->_logContext['from'] = $target;
 			$this->_logContext['to']   = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['select']   = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
+			$this->_result['select']   = array($this->_crypt($dir.DIRECTORY_SEPARATOR.$name));
 			$this->_content($dir, is_dir($dir.DIRECTORY_SEPARATOR.$name));
 		}
 	}
@@ -491,7 +490,7 @@ class elFinder {
 			$this->_result['error'] = 'Unable to create folder';
 		} else {
 			$this->_logContext['dir'] = $dir.DIRECTORY_SEPARATOR.$name;
-			$this->_result['select']  = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
+			$this->_result['select']  = array($this->_crypt($dir.DIRECTORY_SEPARATOR.$name));
 			$this->_content($dir, true);
 		}
 	}
@@ -520,7 +519,7 @@ class elFinder {
 			if (false != ($fp = @fopen($f, 'wb'))) {
 				fwrite($fp, "");
 				fclose($fp);
-				$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
+				$this->_result['select'] = array($this->_crypt($dir.DIRECTORY_SEPARATOR.$name));
 				$this->_content($dir);
 			} else {
 				$this->_result['error'] = 'Unable to create file';
@@ -604,7 +603,7 @@ class elFinder {
 						$this->_errorData($_FILES['upload']['name'][$i], 'Unable to save uploaded file');	
 					} else {
 						@chmod($file, $this->_options['fileMode']);
-						$this->_result['select'][] = $this->_hash($file);
+						$this->_result['select'][] = $this->_crypt($file);
 					}
 				}
 			}
@@ -700,7 +699,7 @@ class elFinder {
 		if (!$this->_copy($target, $dup)) {
 			return $this->_result['error'] = 'Unable to create file copy';
 		}
-		$this->_result['select'] = array($this->_hash($dup));
+		$this->_result['select'] = array($this->_crypt($dup));
 		$this->_content($current, is_dir($target));
 	}
 	
@@ -734,7 +733,7 @@ class elFinder {
 		if (!$this->_resizeImg($target, $width, $height)) {
 			return $this->_result['error'] = 'Unable to resize image';
 		} 
-		$this->_result['select'] = array($this->_hash($target));
+		$this->_result['select'] = array($this->_crypt($target));
 		$this->_content($current);
 	}
 		
@@ -746,7 +745,7 @@ class elFinder {
 	protected function _thumbnails()
 	{
 		if (!empty($this->_options['tmbDir']) && !empty($_GET['current']) && false != ($current = $this->_findDir(trim($_GET['current'])))) {
-			$this->_result['current'] = $this->_hash($current);
+			$this->_result['current'] = $this->_crypt($current);
 			$this->_result['images'] = array();
 			$ls = scandir($current);
 			$cnt = 0;
@@ -760,7 +759,7 @@ class elFinder {
 							if ($cnt>=$max) {
 								return $this->_result['tmb'] = true; 
 							} elseif ($this->_tmb($path, $tmb)) {
-								$this->_result['images'][$this->_hash($path)] = $this->_path2url($tmb);
+								$this->_result['images'][$this->_crypt($path)] = $this->_path2url($tmb);
 								$cnt++;
 							}
 						}
@@ -813,7 +812,7 @@ class elFinder {
 			return $this->_result['error'] = 'Unable to write to file';
 		}
 		$this->_result['target'] = $this->_info($target);
-		// $this->_result['select'] = array($this->_hash($target));
+		// $this->_result['select'] = array($this->_crypt($target));
 	}
 	
 	/**
@@ -860,7 +859,7 @@ class elFinder {
 		chdir($cwd);
 		if (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
 			$this->_content($dir);
-			$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
+			$this->_result['select'] = array($this->_crypt($dir.DIRECTORY_SEPARATOR.$name));
 		} else {
 			$this->_result['error'] = 'Unable to create archive';
 		}
@@ -944,7 +943,7 @@ class elFinder {
 			$rel .= DIRECTORY_SEPARATOR.substr($path, strlen($this->_options['root'])+1);
 		}
 		$this->_result['cwd'] = array(
-			'hash'       => $this->_hash($path),
+			'hash'       => $this->_crypt($path),
 			'name'       => $name,
 			'mime'       => 'directory',
 			'rel'        => $rel,
@@ -1001,7 +1000,7 @@ class elFinder {
 
 		$info = array(
 			'name'  => htmlspecialchars(basename($path)),
-			'hash'  => $this->_hash($path),
+			'hash'  => $this->_crypt($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->_mimetype($path),
 			'date'  => $d, 
 			'size'  => $type == 'dir' ? $this->_dirSize($path) : $stat['size'],
@@ -1018,10 +1017,10 @@ class elFinder {
 			if (is_dir($lpath)) {
 				$info['mime']  = 'directory';
 			} else {
-				$info['parent'] = $this->_hash(dirname($lpath));
+				$info['parent'] = $this->_crypt(dirname($lpath));
 				$info['mime']   = $this->_mimetype($lpath);
 			}
-			$info['link']   = $this->_hash($lpath);
+			$info['link']   = $this->_crypt($lpath);
 			$info['linkTo'] = ($this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($this->_options['root'])).substr($lpath, strlen($this->_options['root']));
 			$info['read']   = $this->_isAllowed($lpath, 'read');
 			$info['write']  = $this->_isAllowed($lpath, 'write');
@@ -1064,7 +1063,7 @@ class elFinder {
 	protected function _tree($path)
 	{
 		$dir = array(
-			'hash'  => $this->_hash($path),
+			'hash'  => $this->_crypt($path),
 			'name'  => $path == $this->_options['root'] && $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path),
 			'read'  => $this->_isAllowed($path, 'read'),
 			'write' => $this->_isAllowed($path, 'write'),
@@ -1234,30 +1233,31 @@ class elFinder {
 	 * @param  string  $path  folder path to search in
 	 * @return string
 	 **/
-	protected function _findDir($hash, $path='')
+	protected function _findDir($hash, $dir = '')
 	{
-		if (!$path) {
-			$path = $this->_options['root'];
-			if ($this->_hash($path) == $hash) {
-				return $path;
+		$path = $this->_uncrypt($hash);
+		if (!$dir) {
+			$dir = $this->_options['root'];
+			if ($path == $dir) {
+				return $dir;
 			}
 		}
 		
-		if (false != ($ls = scandir($path))) {
-			for ($i=0; $i < count($ls); $i++) { 
-				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				if (is_link($p))
-				{
-					$link = $this->_readlink($p);
-					//$this->_result['debug']['findDir_'.$p] = 'link to '.$link;
-				}
-				if ($this->_isAccepted($ls[$i]) && is_dir($p) && (!is_link($p))) {
-					if ($this->_hash($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
-						return $p;
-					}
-				}
-			}
-		}
+		$this->_result['debug']['findDir_hash_'.$hash] = 'in path '.$path;
+		return $path;
+		
+		
+#		if (false != ($ls = scandir($dir))) {
+#			for ($i=0; $i < count($ls); $i++) { 
+#				$p = $dir.DIRECTORY_SEPARATOR.$ls[$i];
+#				if ($this->_isAccepted($ls[$i]) && is_dir($p) && (!is_link($p))) {
+#					if ($this->_crypt($p) == $hash || false != ($p = $this->_findDir($hash, $p))) {
+#						$this->_result['debug']['findDir_hash_'.$hash] = 'in path '.$dir;
+#						return $p;
+#					}
+#				}
+#			}
+#		}
 	}
 	
 	/**
@@ -1268,11 +1268,13 @@ class elFinder {
 	 **/
 	protected function _find($hash, $path)
 	{
+		$this->_result['debug']['find_hash_'.$hash] = 'in path '.$path;
+	  //$hash = _uncrypt($hash);
 		if (false != ($ls = scandir($path))) {
 			for ($i=0; $i < count($ls); $i++) { 
 				if ($this->_isAccepted($ls[$i])) {
 					$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-					if ($this->_hash($p) == $hash) {
+					if ($this->_crypt($p) == $hash) {
 						return $p;
 					}
 				}
@@ -1562,7 +1564,7 @@ class elFinder {
 		$tmb = '';
 		if ($this->_options['tmbDir']) {
 			$tmb = dirname($path) != $this->_options['tmbDir']
-				? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_hash($path).'.png'
+				? $this->_options['tmbDir'].DIRECTORY_SEPARATOR.$this->_crypt($path).'.png'
 				: $path;
 		}
 		return $tmb;
@@ -1838,11 +1840,37 @@ class elFinder {
 	 * @param  string  $path 
 	 * @return string
 	 **/
-	protected function _hash($path)
+	protected function _crypt($path)
 	{
-		return md5($path);
+		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
+		$cutRoot = substr($path, strlen($this->_options['root']));
+		//$this->_result['debug']['crypt_path_'.$path] = $cutRoot; // this debug cause problems with invalid symbols
+
+		// TODO crypt path and return hash
+		$hash = $cutRoot;
+
+		return $hash;
 	}
-	
+
+
+	/**
+	 * Return uncrypted path
+	 *
+	 * @param  string  $hash
+	 * @return string  $path
+	 **/
+	protected function _uncrypt($hash)
+	{
+		// TODO uncrypt hash and return path
+		$path = $hash;
+
+		// append ROOT to path after it was cut in _crypt
+		$path = $this->_options['root'].$path;
+
+		return $path;
+	}
+
+
 	/**
 	 * Return file URL
 	 *
