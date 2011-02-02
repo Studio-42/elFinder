@@ -28,7 +28,7 @@ class elFinder {
 		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'imgLib'       => 'auto',       // image manipulation library (imagick, mogrify, gd)
-		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+		'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to disable thumbnails generation
 		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 200 - every init request)
 		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
@@ -113,7 +113,7 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $_mimeTypes = array(
-		//applications
+		// applications
 		'ai'    => 'application/postscript',
 		'eps'   => 'application/postscript',
 		'exe'   => 'application/octet-stream',
@@ -160,7 +160,7 @@ class elFinder {
 		'tiff'  => 'image/tiff',
 		'tga'   => 'image/x-targa',
 		'psd'   => 'image/vnd.adobe.photoshop',
-		//audio
+		// audio
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
@@ -1235,6 +1235,7 @@ class elFinder {
 	 **/
 	protected function _findDir($hash, $dir = '')
 	{
+		// TODO optimize it
 		$path = $this->_uncrypt($hash);
 		if (!$dir) {
 			$dir = $this->_options['root'];
@@ -1311,7 +1312,8 @@ class elFinder {
 		$size = 0;
 		if (!$this->_options['dirSize'] || !$this->_isAllowed($path, 'read')) {
 			return filesize($path);
-		} 
+		}
+		// TODO this options is not documentated!
 		if (!isset($this->_options['du'])) {
 			$this->_options['du'] = function_exists('exec')
 				? exec('du -h '.escapeshellarg(__FILE__), $o, $s) > 0 && $s == 0
@@ -1846,6 +1848,12 @@ class elFinder {
 		$cutRoot = substr($path, strlen($this->_options['root']));
 		//$this->_result['debug']['crypt_path_'.$path] = $cutRoot; // this debug cause problems with invalid symbols
 
+		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
+		if (!$cutRoot)
+		{
+			$cutRoot = '/';
+		}
+
 		// TODO crypt path and return hash
 		$hash = $cutRoot;
 
@@ -1865,6 +1873,11 @@ class elFinder {
 		$path = $hash;
 
 		// append ROOT to path after it was cut in _crypt
+		if ($path == '/')
+		{
+			return $this->_options['root'];
+		}
+
 		$path = $this->_options['root'].$path;
 
 		return $path;
@@ -1879,9 +1892,9 @@ class elFinder {
 	 **/
 	protected function _path2url($path)
 	{
-		$dir  = substr(dirname($path), strlen($this->_options['root'])+1);
+		$dir  = substr(dirname($path), strlen($this->_options['root']));
 		$file = rawurlencode(basename($path));
-		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
+		return $this->_options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '/').$file;
 	}
 
 	/**
