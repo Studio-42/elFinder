@@ -64,7 +64,7 @@
 
 									if (d.images && d.current == self.cwd.hash && self._view == 'icons') {
 										d.tmb && tmb(self.cwd.hash);
-										self.view.tmb(d.images);
+										self.ui.tmb(d.images);
 										self.debug('tmb', d);
 									}
 								}
@@ -178,7 +178,7 @@
 		 *
 		 * @type String
 		 **/
-		this._view = this.viewType('icons');
+		this.view = this.viewType('list');
 		/**
 		 * Events listeners
 		 *
@@ -405,16 +405,15 @@
 			
 		}
 		
-		/**
-		 * Set required files selected, update selected cache
-		 * Alias for elFinder.view.select()
-		 *
-		 * @param String|Array|void  - what to select
-		 * @return elFinder
-		 */
-		this.select = function(keys) {
-			this.view.select(keys);
-			return this;
+		this.getSelected = function() {
+			var s = [], l = this.selected.length;
+			
+			while (l--) {
+				if (this.cdc[this.selected[l]]) {
+					s.unshift(this.cdc[this.selected[l]])
+				}
+			}
+			return s;
 		}
 
 		/**
@@ -429,10 +428,8 @@
 			var o = {
 					data    : {cmd : 'open', target : key},
 					success : function(d) { 
-						self.time('cd'); 
 						self.trigger('cd', d); 
 						delete d; 
-						self.timeEnd('cd'); 
 					}
 				};
 			
@@ -486,20 +483,12 @@
 		 * @param  Boolean       cut files?
 		 * @return elFinder
 		 */
-		this.copy = function(files, cut) {
+		this.copy = function(files, src, cut) {
 			this.buffer   = {
-				src   : this.cwd.hash,
-				files : [], 
-				cut   : !!cut && this.cwd.write //&& this.cwd.rm
+				src   : src || this.cwd.hash,
+				cut   : cut,
+				files : files
 			};
-			
-			$.each(files||this.selected, function(i, f) {
-				f = self.cdc[f && f.hash ? f.hash : f];
-				
-				if (f && f.read && f.type != 'link') {
-					self.buffer.files.push(f);
-				}
-			});
 			return this;
 		}
 		
@@ -510,8 +499,8 @@
 		 * @param  Array|Object  files hashes array or object like this.cdc
 		 * @return elFinder
 		 */
-		this.cut = function(files) {
-			return this.copy(files, true);
+		this.cut = function(files, src) {
+			return this.copy(files, src, true);
 		}
 		
 		/**
@@ -524,7 +513,7 @@
 			var b = this.buffer, o;
 			
 			dst = dst || this.cwd.hash;
-			
+			this.log(b)
 			if (!this.cwd.write) {
 				this.trigger('error', {error : 'Access denied'});
 			} else if (b.src == dst) {
@@ -546,7 +535,7 @@
 				$.each(b.files, function(i, f) {
 					o.data.targets.push(f.hash);
 				});
-				
+
 				o.data.targets.length && this.ajax(o);
 			}
 			
@@ -616,8 +605,10 @@
 			var l = e.type != 'ajaxstop';
 			self.lock({ ui : l, shortcuts : l });
 		}).bind('focus', function() {
-			self.locks.shortcuts = false;
-			$('texarea,:text').blur()
+			if (self.locks.shortcuts) {
+				self.locks.shortcuts = false;
+				$('texarea,:text').blur();
+			}
 		}).bind('blur', function() {
 			self.locks.shortcuts = true;
 		});
@@ -644,7 +635,7 @@
 		
 		
 
-		this.view = new this.view(this, $el);
+		this.ui = new this.ui(this, $el);
 		// this.viewType('icons')
 		
 		

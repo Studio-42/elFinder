@@ -1,6 +1,6 @@
 (function($) {
 	
-	elFinder.prototype.view = function(fm, el) {
+	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
 			/**
 			 * Bind some shortcuts to keypress instead of keydown
@@ -290,11 +290,12 @@
 				drag : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey); }
 			},
 			draggableCwd = $.extend({}, draggable, {
+				start : function() { fm.log('start') },
 				helper : function() {
 					var s = fm.selected,
 						l = s.length,
 						h = $('<div class="elfinder-drag-helper"/>').data('files', s);
-					
+					fm.log('helper')
 					function icon(f) {
 						return $('<span class="elfinder-drag-icon '+self.mime2class(f.mime)+'">')
 							.append(
@@ -340,6 +341,8 @@
 		 * @type  elFinder
 		 */
 		this.fm = fm;
+		
+
 		
 		/**
 		 * File mimetype to kind mapping
@@ -419,7 +422,7 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.tree = $('<ul class="elfinder-tree"/>');
+		this.tree = $('<ul/>').elfindertree(fm);
 		
 		/**
 		 * Places
@@ -440,17 +443,17 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.cwd = $('<div class="elfinder-cwd"/>')
-			.selectable({
-				filter : '[id]',
-				start  : function() { fm.trigger('focus'); },
-				stop   : function() { self.select(); }
-			})
-			.bind('contextmenu', function(e) {
-				
-				fm.log(e.target)
-				
-			})
+		this.cwd = $('<div/>').elfindercwd(fm);
+			// .selectable({
+			// 	filter : '[id]',
+			// 	start  : function() { fm.trigger('focus'); },
+			// 	stop   : function() { self.select(); }
+			// })
+			// .bind('contextmenu', function(e) {
+			// 	
+			// 	fm.log(e.target)
+			// 	
+			// })
 			;
 		
 		
@@ -460,6 +463,7 @@
 		 * @type  jQuery
 		 */
 		this.workzone = $('<div class="ui-helper-clearfix elfinder-workzone"/>').append(this.nav).append(this.cwd)
+		
 		
 		/**
 		 * Ajax spinner
@@ -518,6 +522,36 @@
 			})
 			;
 	
+		
+		this.draggable = {
+			revert     : true,
+			addClasses : false,
+			appendTo : self.cwd,
+			cursor     : 'move',
+			cursorAt   : {left : 50, top : 47},
+			refreshPositions : true,
+			drag : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey); },
+			// stop : function() { fm.log('stop') },
+			helper : function(e, ui) {
+				var nav = this.id.indexOf('nav-') === 0,
+					src = nav ? $(this).parent('li').parent('ul').prev('a').attr('id').substr(4) : fm.cwd.hash,
+					f = nav 
+						? [{hash : this.id.substr(4), name : $.trim($(this).text()), mime : 'directory', read : true, write : true, rm : true}] 
+						: self.fm.selected,
+					l = f.length,
+					h = $('<div class="elfinder-drag-helper"/>').data('files', f).data('src', src),
+					icon = function(f) {
+						return $('<span class="elfinder-drag-icon '+self.mime2class(f.mime)+'"><span class="elfinder-cwd-icon"/></span>')
+					};
+				
+				l > 0 && h.append(icon(f[0]));
+				l > 1 && h.append(icon(f[l-1])).append('<span class="elfinder-drag-num">'+l+'</span>');	
+
+				return h;
+			}
+		}
+		
+	
 		// bind events handlers
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
 			self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
@@ -536,9 +570,9 @@
 		.bind('cd', function(e) {
 			if (e.data.cdc) {
 				// render tree and add events handlers
-				e.data.tree && self.renderNav(e.data.tree);
+				// e.data.tree && self.renderNav(e.data.tree);
 				// render directory and add events handlers
-				self.renderCdc(e.data.cdc);
+				// self.renderCdc(e.data.cdc);
 			}
 		})
 		;
@@ -550,7 +584,8 @@
 		});
 
 		// init tree plugin
-		this.tree.elfindertree(fm);
+		// this.tree.elfindertree(fm);
+
 
 		/**
 		 * Set required files selected, update selected cache
@@ -602,79 +637,6 @@
 			return this;
 		}
 		
-		/**
-		 * Render naviagation panel
-		 *
-		 * @param Array  directories tree
-		 * @return elFinder.view
-		 */
-		this.renderNav = function(tree) {
-			var html = '',
-				traverse = function(tree) {
-					var html = '<ul style="display:none">',	i, o, p;
-
-					for (i=0; i < tree.length; i++) {
-						o = tree[i];
-						if (o.name && o.hash) {
-							p = perms(o);
-
-							html += '<li><a href="#" key="'+o.hash+'" class="ui-corner-all '+p.cssclass+'">'
-									+ '<span class="elfinder-nav-'+(o.dirs.length ? 'collapsed' : 'empty')+'"/>'
-									+ '<span class="elfinder-nav-icon elfinder-nav-icon-folder"/>'
-									+ p.element + o.name + '</a>';
-
-							if (o.dirs.length) {
-								html += traverse(o.dirs);
-							}
-							html += '</li>'
-						}
-						
-					}
-					return html + '</ul>';
-				},
-				p = perms(tree),
-				fc = '.elfinder-nav-icon-folder',
-				cc = '.elfinder-nav-collapsed',
-				ec = 'elfinder-nav-expanded',
-				oc = 'elfinder-nav-icon-folder-open';
-				
-			if (tree.length) {
-				// for multi-roots
-			} else {
-				p = perms(tree);
-				html = '<li><a href="#" key="'+tree.hash+'" class="ui-corner-all '+p.cssclass+' elfinder-nav-home">'
-						+'<span class="elfinder-nav-'+(tree.dirs.length ? 'collapsed' : 'empty')+'"/>'
-						+'<span class="elfinder-nav-icon elfinder-nav-icon-home"/>'
-						+p.element+tree.name+'</a>' + traverse(tree.dirs) + '</li>';
-			}
-			
-			this.tree.html(html)
-				.find('a:not(.elfinder-na,.elfinder-ro)')
-				.draggable(draggableNav)
-				.droppable({
-					tolerance : 'pointer',
-					over : function(e, ui) {
-						var f = $(e.target).addClass(hclass),
-							a = f.children(cc);
-
-						f.children(fc).addClass(oc);
-						if (a.length && !a.hasClass(ec)) {
-							setTimeout(function() {
-								a.click();
-							}, 1000);
-						}	
-					},
-					out : function(e) {
-						$(e.target).removeClass(hclass).children(fc).removeClass(oc);
-					},
-					drop : function(e, ui) {
-						$(e.target).removeClass(hclass).children(fc).removeClass(oc);
-						drop(e, ui, $(e.target).attr('key'));
-					}
-				});
-			
-			return this;
-		}
 		
 		/**
 		 * Render current directory
@@ -780,8 +742,9 @@
 		/*
 		 * Convert mimetype into css class
 		*/
-		this.mime2class = function(mime) {
-			return mime.replace('/' , ' ').replace(/\./g, '-');
+		this.mime2class = function(mime, prefix) {
+			// fm.log(mime+' elfinder-'+mime.replace('/' , ' elfinder-').replace(/\./g, '-'))
+			return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/\./g, '-');
 		}
 
 		/*
@@ -801,12 +764,28 @@
 		/*
 		 * Return localized string with file permissions
 		*/
-		this.formatPermissions = function(r, w, rm) {
-			var p = [];
+		this.formatPermissions = function(f) {
+			var r = !!f.read,
+				w = !!f.read,
+				rm = !!f.rm,
+				p = [];
 			r  && p.push(self.fm.i18n('read'));
 			w  && p.push(self.fm.i18n('write'));
 			rm && p.push(self.fm.i18n('remove'));
 			return p.join('/');
+		}
+
+		this.perms2class = function(o) {
+			var c = '';
+			
+			if (!o.read && !o.write) {
+				c = 'elfinder-na';
+			} else if (!o.read) {
+				c = 'elfinder-wo';
+			} else if (!o.write) {
+				c = 'elfinder-ro';
+			}
+			return c;
 		}
 
 		/*

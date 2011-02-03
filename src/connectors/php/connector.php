@@ -36,6 +36,11 @@ $opts = array(
 			'read'   => false,
 			'write'   => false,
 			'rm'   => true
+		),
+		'/print\.png/' => array(
+			'read'   => true,
+			'write'   => false,
+			'rm'   => true
 		)
 	),
 	//'uploadAllow'   => array('images/*'),
@@ -51,7 +56,7 @@ $opts = array(
 	// 'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 	// 'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 	'imgLib'       => 'gd',       // image manipulation library (imagick, mogrify, gd)
-	'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+	'tmbDir'       => '', //'.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
 	// 'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 	// 'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 	// 'tmbSize'      => 48,           // images thumbnails size (px)

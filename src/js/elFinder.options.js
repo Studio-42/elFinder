@@ -35,7 +35,35 @@ elFinder.prototype.options = {
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
 	rememberLastDir : true,
-	customData : { test : 'this-is-test'},
+	/**
+	 * Data to append to all ajax request
+	 *
+	 * @type Object
+	 * @default  {}
+	 */
+	customData : {},
+	/**
+	 * Show toolbar?
+	 *
+	 * @type Boolean
+	 * @default  true
+	 */
+	allowToolbar : true,
+	/**
+	 * Show navbar?
+	 * If set to false - navbar does not shown and dir tree doesnot created
+	 *
+	 * @type Boolean
+	 * @default  true
+	 */
+	allowNavbar : true,
+	/**
+	 * Show statusbar?
+	 *
+	 * @type Boolean
+	 * @default  true
+	 */
+	allowStatusbar : true,
 	/* cookie options */
 	cookie         : {
 		expires : 30,

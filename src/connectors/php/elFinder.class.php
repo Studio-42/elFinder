@@ -160,6 +160,7 @@ class elFinder {
 		'tiff'  => 'image/tiff',
 		'tga'   => 'image/x-targa',
 		'psd'   => 'image/vnd.adobe.photoshop',
+		'ai'    => 'image/vnd.adobe.photoshop',
 		//audio
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
