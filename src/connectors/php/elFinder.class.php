@@ -390,6 +390,7 @@ class elFinder {
 				header('HTTP/1.x 404 Not Found'); 
 				exit('File not found');
 			}
+
 			if (!$this->_isAllowed($dir, 'read') || !$this->_isAllowed($file, 'read')) {
 				header('HTTP/1.x 403 Access Denied'); 
 				exit('Access denied');
@@ -1681,7 +1682,7 @@ class elFinder {
 		// 	
 		// }
 		$path = substr($path, strlen($this->_options['root'])+1);
-		// echo "$path\n";
+
 		foreach ($this->_options['perms'] as $regex => $rules) {
 			
 			if (preg_match($regex, $path)) {
@@ -1848,7 +1849,6 @@ class elFinder {
 	{
 		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
 		$cutRoot = substr($path, strlen($this->_options['root']));
-		//$this->_result['debug']['crypt_path_'.$path] = $cutRoot; // this debug cause problems with invalid symbols
 
 		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
 		if (!$cutRoot)
@@ -1858,6 +1858,12 @@ class elFinder {
 
 		// TODO crypt path and return hash
 		$hash = $cutRoot;
+
+		// hash is used as id in HTML that means it must contain vaild chars
+		// make base64 html safe and append 'a' in begining
+		$hash = 'a'.strtr(base64_encode($hash), '+/=', '-_.');
+
+		$this->_result['debug']['crypt_'.$hash] = $cutRoot;
 
 		return $hash;
 	}
@@ -1871,6 +1877,9 @@ class elFinder {
 	 **/
 	protected function _uncrypt($hash)
 	{
+		// replace HTML safe base64 to normal and remove first char than debase64
+		$hash = base64_decode(substr(strtr($hash, '-_.', '+/='), 1));
+
 		// TODO uncrypt hash and return path
 		$path = $hash;
 
@@ -1879,6 +1888,8 @@ class elFinder {
 		{
 			return $this->_options['root'];
 		}
+
+		$this->_result['debug']['uncrypt_'.$hash] = $path;
 
 		$path = $this->_options['root'].$path;
 
