@@ -128,13 +128,17 @@
 			fm.bind('cd', function(e) {
 				var t = e.data.tree, dir, pc;
 				
+				if (e.data.error) {
+					return
+				}
+				
 				if (t) {
 					// create tree
 					tree.find('a').remove();
 					tree.html(traverse([t], true))
 						.find('a')
 						.not(':has(.elfinder-nav-icon-home),.elfinder-na')
-						.draggable(fm.ui.draggable)
+						// .draggable(fm.ui.draggable)
 						.end()
 						.not('.elfinder-na,.elfinder-ro')
 						.droppable({
@@ -165,8 +169,9 @@
 				}
 				
 				// find current dir
-				dir = tree.find('#nav-'+e.data.cwd.hash);
-				
+				// dir = tree.find('#nav-'+e.data.cwd.hash);
+				dir = tree.find('[id="nav-'+e.data.cwd.hash+'"]')
+				// fm.log(dir)
 				// remove active state from prevoiusly active dir
 				tree.find('.'+aclass)
 					.removeClass(aclass)
