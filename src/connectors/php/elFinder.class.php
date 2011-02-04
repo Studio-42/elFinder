@@ -1862,6 +1862,7 @@ class elFinder {
 		// hash is used as id in HTML that means it must contain vaild chars
 		// make base64 html safe and append 'a' in begining
 		$hash = 'a'.strtr(base64_encode($hash), '+/=', '-_.');
+		$hash = rtrim($hash, '.'); // remove dots '.' at the end, before it was '=' in base64
 
 		$this->_result['debug']['crypt_'.$hash] = $cutRoot;
 
