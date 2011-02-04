@@ -527,7 +527,7 @@
 						dst     : dst,
 						cut     : b.cut ? 1 : 0,
 						targets : b.files
-					});
+					}});
 			}
 			
 			return this;
