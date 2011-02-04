@@ -138,7 +138,7 @@
 					tree.html(traverse([t], true))
 						.find('a')
 						.not(':has(.elfinder-nav-icon-home),.elfinder-na')
-						.draggable(fm.ui.draggable)
+						// .draggable(fm.ui.draggable)
 						.end()
 						.not('.elfinder-na,.elfinder-ro')
 						.droppable({

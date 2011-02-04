@@ -80,9 +80,37 @@ $.fn.elfindercwd = function(fm) {
 				stop       : function() { fm.trigger('select'); },
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
-			});
+			}),
+			draggable = $.extend({}, fm.ui.draggable, {
+				appendTo : cwd,
+				helper : function(e, ui) {
+					var p = this.id ? $(this) : $(this).parents('[id]:first'),
+						h = $('<div class="elfinder-drag-helper"/>'),
+						icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
+						f, l;
+					
+					// select dragged file if no selected
+					if (!p.is('.ui-selected')) {
+						p.trigger('select.elfinder');
+					}
+						
+					f = fm.get(cwd.find('.ui-selected:first').attr('id'));
+					l = fm.get(cwd.find('.ui-selected:last').attr('id'));
+					// append icons [and number of files]	
+					h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
+						.data('files', fm.selected)
+						.data('src', fm.cwd.hash);
+					if (f !== l) {
+						h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+					}
+			
+					return h;
+					
+				}
+			})
+			;
 		
-		
+		// fm.log(fm.ui.draggable)
 		fm.bind('cd', function(e) {
 			var list = fm.view == 'list',
 				t = tpl[fm.view] || tpl.icons,
@@ -112,39 +140,40 @@ $.fn.elfindercwd = function(fm) {
 			
 			fm.time('cwd-events')
 			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
-				.draggable({
-					addClasses : false,
-					delay      : 20,
-					appendTo   : cwd,
-					revert     : true,
-					cursor     : 'move',
-					cursorAt   : {left : 52, top : 47},
-					refreshPositions : true,
-					drag   : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
-					helper : function() {
-						var p = this.id ? $(this) : $(this).parents('[id]:first'),
-							h = $('<div class="elfinder-drag-helper"/>'),
-							icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
-							f, l;
-						
-						// select dragged file if no selected
-						if (!p.is('.ui-selected')) {
-							p.trigger('select.elfinder');
-						}
-							
-						f = fm.get(cwd.find('.ui-selected:first').attr('id'));
-						l = fm.get(cwd.find('.ui-selected:last').attr('id'));
-						// append icons [and number of files]	
-						h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
-							.data('files', fm.selected)
-							.data('src', fm.cwd.hash);
-						if (f !== l) {
-							h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
-						}
-
-						return h;
-					}
-				})
+				.draggable(draggable)
+				// .draggable({
+				// 	addClasses : false,
+				// 	delay      : 20,
+				// 	appendTo   : cwd,
+				// 	revert     : true,
+				// 	cursor     : 'move',
+				// 	cursorAt   : {left : 52, top : 47},
+				// 	refreshPositions : true,
+				// 	drag   : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+				// 	helper : function() {
+				// 		var p = this.id ? $(this) : $(this).parents('[id]:first'),
+				// 			h = $('<div class="elfinder-drag-helper"/>'),
+				// 			icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
+				// 			f, l;
+				// 		
+				// 		// select dragged file if no selected
+				// 		if (!p.is('.ui-selected')) {
+				// 			p.trigger('select.elfinder');
+				// 		}
+				// 			
+				// 		f = fm.get(cwd.find('.ui-selected:first').attr('id'));
+				// 		l = fm.get(cwd.find('.ui-selected:last').attr('id'));
+				// 		// append icons [and number of files]	
+				// 		h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
+				// 			.data('files', fm.selected)
+				// 			.data('src', fm.cwd.hash);
+				// 		if (f !== l) {
+				// 			h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+				// 		}
+				// 
+				// 		return h;
+				// 	}
+				// })
 				.click(function(e) {
 					var p = this.id ? $(this) : $(this).parents('[id]:first'), 
 						m = $.browser.mozilla, 

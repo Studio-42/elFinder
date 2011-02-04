@@ -1,6 +1,7 @@
 (function($) {
 	
 	elFinder = function(el, o) {
+		window.console.time('create')
 		var self = this,
 			/**
 			 * Target node
@@ -178,7 +179,7 @@
 		 *
 		 * @type String
 		 **/
-		this.view = this.viewType('icons');
+		this.view = this.viewType();
 		/**
 		 * Events listeners
 		 *
@@ -627,6 +628,7 @@
 		
 
 		this.ui = new this.ui(this, $el);
+		this.ui.init()
 		// this.viewType('icons')
 		
 		
@@ -639,6 +641,7 @@
 		this.cd(this.last() || '', true, true);
 		this.trigger('focus')
 		// cookie(this.cookies.view, 'list')
+		window.console.timeEnd('create')
 	}
 	
 	elFinder.prototype.log = function(m) {
