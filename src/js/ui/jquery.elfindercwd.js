@@ -105,12 +105,11 @@ $.fn.elfindercwd = function(fm) {
 					}
 			
 					return h;
-					
 				}
 			})
 			;
 		
-		// fm.log(fm.ui.draggable)
+
 		fm.bind('cd', function(e) {
 			var list = fm.view == 'list',
 				t = tpl[fm.view] || tpl.icons,
@@ -121,105 +120,80 @@ $.fn.elfindercwd = function(fm) {
 				return
 			}
 
-			fm.selected = [];
-
-			fm.time('cwd')
-			for (i = 0; i < e.data.cdc.length; i++) {
-				f = e.data.cdc[i];
-				if (f && f.name && f.hash) {
-					html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
+			if (e.data.cdc) {
+				fm.time('cwd-render');
+				
+				fm.selected = [];
+				// create html code
+				for (i = 0; i < e.data.cdc.length; i++) {
+					f = e.data.cdc[i];
+					if (f && f.name && f.hash) {
+						html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
+					}
 				}
+				
+				// required to avoid drag/drop conflict
+				cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename').remove();
+				// set new content
+				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+					.html(t.container.replace('%content', html));
+				
+				fm.timeEnd('cwd-render')
+				
+				fm.time('cwd-events')
+				// make rows or icons/filenames draggable
+				// and add suport for shift|meta + click select
+				cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
+					.draggable(draggable)
+					.click(function(e) {
+						var p = this.id ? $(this) : $(this).parents('[id]:first'), 
+							m = $.browser.mozilla, 
+							prev, next, id, s, f;
+
+						if (e.shiftKey) {
+							prev = p.prevAll('.ui-selected:first');
+							next = p.nextAll('.ui-selected:first');
+							if (next.length && !prev.length) {
+								f = 'nextUntil';
+								id = next.attr('id')
+							} else {
+								id = prev.attr('id');
+								f = 'prevUntil'
+							}
+							p[f]('[id="'+id+'"]').add(p).trigger('select.elfinder');
+							// p[f]('#'+id).add(p).trigger('select.elfinder');
+						} else if (e.ctrlKey || e.metaKey) {
+							p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
+						} else {
+							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+							p.trigger('select.elfinder')
+						}
+
+						fm.trigger('focus').trigger('select');
+
+					});
+					
+				// make writable dirs droppable
+				cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable({
+					tolerance : 'pointer',
+					over : function() {
+						$(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
+					},
+					out : function() {
+						$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+					},
+					drop : function(e, ui) {
+						$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+						ui.helper.hide();
+						fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+						fm.paste(this.id);
+						fm.buffer = [];
+					}
+				});
+				fm.timeEnd('cwd-events')
 			}
 
-			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename').remove();
-
-			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
-				.html(t.container.replace('%content', html));
-			fm.timeEnd('cwd')
-			
-			fm.time('cwd-events')
-			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
-				.draggable(draggable)
-				// .draggable({
-				// 	addClasses : false,
-				// 	delay      : 20,
-				// 	appendTo   : cwd,
-				// 	revert     : true,
-				// 	cursor     : 'move',
-				// 	cursorAt   : {left : 52, top : 47},
-				// 	refreshPositions : true,
-				// 	drag   : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
-				// 	helper : function() {
-				// 		var p = this.id ? $(this) : $(this).parents('[id]:first'),
-				// 			h = $('<div class="elfinder-drag-helper"/>'),
-				// 			icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
-				// 			f, l;
-				// 		
-				// 		// select dragged file if no selected
-				// 		if (!p.is('.ui-selected')) {
-				// 			p.trigger('select.elfinder');
-				// 		}
-				// 			
-				// 		f = fm.get(cwd.find('.ui-selected:first').attr('id'));
-				// 		l = fm.get(cwd.find('.ui-selected:last').attr('id'));
-				// 		// append icons [and number of files]	
-				// 		h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
-				// 			.data('files', fm.selected)
-				// 			.data('src', fm.cwd.hash);
-				// 		if (f !== l) {
-				// 			h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
-				// 		}
-				// 
-				// 		return h;
-				// 	}
-				// })
-				.click(function(e) {
-					var p = this.id ? $(this) : $(this).parents('[id]:first'), 
-						m = $.browser.mozilla, 
-						prev, next, id, s, f;
-				
-				
-					if (e.shiftKey) {
-						prev = p.prevAll('.ui-selected:first');
-						next = p.nextAll('.ui-selected:first');
-						if (next.length && !prev.length) {
-							f = 'nextUntil';
-							id = next.attr('id')
-						} else {
-							id = prev.attr('id');
-							f = 'prevUntil'
-						}
-						p[f]('[id="'+id+'"]').add(p).trigger('select.elfinder');
-						// p[f]('#'+id).add(p).trigger('select.elfinder');
-					} else if (e.ctrlKey || e.metaKey) {
-						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
-					} else {
-						cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-						p.trigger('select.elfinder')
-					}
-				
-					fm.trigger('focus').trigger('select');
-					
-				});
-				
-			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable({
-				tolerance : 'pointer',
-				over : function() {
-					$(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
-				},
-				out : function() {
-					$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-				},
-				drop : function(e, ui) {
-					$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-					ui.helper.hide();
-					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-					fm.paste(this.id);
-					fm.buffer = [];
-				}
-			})
-			fm.timeEnd('cwd-events')
 			
 		})
 		
