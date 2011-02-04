@@ -38,9 +38,9 @@ $opts = array(
 			'rm'   => true
 		),
 		'/print\.png/' => array(
-			'read'   => true,
-			'write'   => false,
-			'rm'   => true
+			'read'   => false,
+			'write'   => true,
+			'rm'   => false
 		)
 	),
 	//'uploadAllow'   => array('images/*'),

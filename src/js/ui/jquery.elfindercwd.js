@@ -6,7 +6,7 @@ $.fn.elfindercwd = function(fm) {
 				container : '%content',
 				file : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all">'
 						+'<div class="elfinder-cwd-file-wrapper ui-corner-all">'
-						+'<div class="elfinder-cwd-icon %mime ui-corner-all"/>%marker'
+						+'<div class="elfinder-cwd-icon %mime ui-corner-all" %style/>%marker'
 						+'</div>'
 						+'<div class="elfinder-cwd-filename ui-corner-all">%name</div>'
 						+'</div>'
@@ -35,6 +35,9 @@ $.fn.elfindercwd = function(fm) {
 			mime : function(f) {
 				return fm.ui.mime2class(f.mime);
 			},
+			style : function(f) {
+				return f.tmb ? 'style="background:url(\''+f.tmb+'\') 0 0 no-repeat"' : '';
+			},
 			size : function(f) {
 				return fm.ui.formatSize(f.size);
 			},
@@ -45,6 +48,7 @@ $.fn.elfindercwd = function(fm) {
 				return fm.ui.mime2kind(f.mime);
 			},
 			marker : function(f) {
+				// fm.log(f)
 				return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 			},
 			oddclass : function(f, i) {
@@ -71,16 +75,11 @@ $.fn.elfindercwd = function(fm) {
 				}
 			})
 			.selectable({
-				filter : '[id]',
-				start  : function() { fm.trigger('focus'); },
-				stop   : function() { fm.trigger('select'); },
-				selected : function(e, ui) {
-					// fm.log(ui)
-					$(ui.selected).trigger('select.elfinder')
-				},
-				unselected : function(e, ui) {
-					$(ui.unselected).trigger('unselect.elfinder')
-				}
+				filter     : '[id]',
+				start      : function() { fm.trigger('focus'); },
+				stop       : function() { fm.trigger('select'); },
+				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
+				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			});
 		
 		
@@ -89,6 +88,10 @@ $.fn.elfindercwd = function(fm) {
 				t = tpl[fm.view] || tpl.icons,
 				html = '',
 				i, f;
+
+			if (e.data.error) {
+				return
+			}
 
 			fm.selected = [];
 
@@ -99,6 +102,8 @@ $.fn.elfindercwd = function(fm) {
 					html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
 				}
 			}
+
+			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename').remove();
 
 			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
@@ -130,7 +135,9 @@ $.fn.elfindercwd = function(fm) {
 						f = fm.get(cwd.find('.ui-selected:first').attr('id'));
 						l = fm.get(cwd.find('.ui-selected:last').attr('id'));
 						// append icons [and number of files]	
-						h.append(icon.replace('%class', fm.ui.mime2class(f.mime))).data('files', fm.selected);
+						h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
+							.data('files', fm.selected)
+							.data('src', fm.cwd.hash);
 						if (f !== l) {
 							h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
 						}
@@ -154,7 +161,8 @@ $.fn.elfindercwd = function(fm) {
 							id = prev.attr('id');
 							f = 'prevUntil'
 						}
-						p[f](m ? '[id="'+id+'"]' : '#'+id).add(p).trigger('select.elfinder');
+						p[f]('[id="'+id+'"]').add(p).trigger('select.elfinder');
+						// p[f]('#'+id).add(p).trigger('select.elfinder');
 					} else if (e.ctrlKey || e.metaKey) {
 						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
 					} else {
@@ -172,7 +180,14 @@ $.fn.elfindercwd = function(fm) {
 					$(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
 				},
 				out : function() {
-					$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened')
+					$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+				},
+				drop : function(e, ui) {
+					$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+					ui.helper.hide();
+					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+					fm.paste(this.id);
+					fm.buffer = [];
 				}
 			})
 			fm.timeEnd('cwd-events')

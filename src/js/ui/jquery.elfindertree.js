@@ -128,6 +128,10 @@
 			fm.bind('cd', function(e) {
 				var t = e.data.tree, dir, pc;
 				
+				if (e.data.error) {
+					return
+				}
+				
 				if (t) {
 					// create tree
 					tree.find('a').remove();
@@ -165,8 +169,9 @@
 				}
 				
 				// find current dir
-				dir = tree.find('#nav-'+e.data.cwd.hash);
-				
+				// dir = tree.find('#nav-'+e.data.cwd.hash);
+				dir = tree.find('[id="nav-'+e.data.cwd.hash+'"]')
+				// fm.log(dir)
 				// remove active state from prevoiusly active dir
 				tree.find('.'+aclass)
 					.removeClass(aclass)

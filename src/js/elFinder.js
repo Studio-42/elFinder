@@ -178,7 +178,7 @@
 		 *
 		 * @type String
 		 **/
-		this.view = this.viewType('list');
+		this.view = this.viewType('icons');
 		/**
 		 * Events listeners
 		 *
@@ -476,11 +476,11 @@
 		}
 		
 		/**
-		 * Copy files
-		 * If files not set - copy currently selected files
+		 * Copy files into buffer
 		 * 
-		 * @param  Array|Object  files hashes array or object like this.cdc
-		 * @param  Boolean       cut files?
+		 * @param  Array    files hashes array
+		 * @param  String   files parent dir hash
+		 * @param  Boolean  cut files?
 		 * @return elFinder
 		 */
 		this.copy = function(files, src, cut) {
@@ -493,10 +493,10 @@
 		}
 		
 		/**
-		 * Cut files
+		 * Copy files into buffer and mark for delete after paste
 		 * Wrapper for copy method
 		 * 
-		 * @param  Array|Object  files hashes array or object like this.cdc
+		 * @param  Array  files hashes array
 		 * @return elFinder
 		 */
 		this.cut = function(files, src) {
@@ -504,7 +504,7 @@
 		}
 		
 		/**
-		 * Paste copied files in directory
+		 * Paste files from buffer into required directory
 		 * 
 		 * @param  String - directory hash, if not set - paste in current working directory
 		 * @return elFinder
@@ -513,13 +513,11 @@
 			var b = this.buffer, o;
 			
 			dst = dst || this.cwd.hash;
-			this.log(b)
-			if (!this.cwd.write) {
-				this.trigger('error', {error : 'Access denied'});
-			} else if (b.src == dst) {
+			
+			if (b.src == dst) {
 				this.trigger('error', {error : 'Unable to copy into itself'});
 			} else if (b.files && b.files.length) {
-				o = {
+				this.ajax({
 					error   : error,
 					success : success,
 					data    : {
@@ -528,15 +526,8 @@
 						src     : b.src,
 						dst     : dst,
 						cut     : b.cut ? 1 : 0,
-						targets : []
-					}
-				};
-				
-				$.each(b.files, function(i, f) {
-					o.data.targets.push(f.hash);
-				});
-
-				o.data.targets.length && this.ajax(o);
+						targets : b.files
+					});
 			}
 			
 			return this;
@@ -597,7 +588,7 @@
 				if (!self.history.length || self.history[self.history.length-1] != d.cwd.hash) {
 					self.history.push(d.cwd.hash);
 				}
-				self.log(self.cwd)
+				// self.log(self.cwd)
 				// self.log(self.history)
 			}
 		})
