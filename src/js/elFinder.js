@@ -597,7 +597,7 @@
 				if (!self.history.length || self.history[self.history.length-1] != d.cwd.hash) {
 					self.history.push(d.cwd.hash);
 				}
-				
+				self.log(self.cwd)
 				// self.log(self.history)
 			}
 		})

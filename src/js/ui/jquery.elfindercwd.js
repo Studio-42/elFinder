@@ -54,36 +54,34 @@ $.fn.elfindercwd = function(fm) {
 	
 	
 	return this.each(function() {
-		var cwd = $(this).addClass('elfinder-cwd');
-		
-		cwd.delegate('[id]', 'select.elfinder', function(e) {
-			var id = $(this).addClass('ui-selected').children().addClass('ui-state-hover').end().attr('id');
+		var cwd = $(this).addClass('elfinder-cwd')
+			.delegate('[id]', 'select.elfinder', function(e) {
+				var id = $(this).addClass('ui-selected').children().addClass('ui-state-hover').end().attr('id');
 			
-			if ($.inArray(id, fm.selected) === -1) {
-				fm.selected.push(id);
-			}
-		})
-		.delegate('[id]', 'unselect.elfinder', function(e) {
-			var id = $(this).removeClass('ui-selected').children().removeClass('ui-state-hover').end().attr('id'),
-				ndx = $.inArray(id, fm.selected);
+				if ($.inArray(id, fm.selected) === -1) {
+					fm.selected.push(id);
+				}
+			})
+			.delegate('[id]', 'unselect.elfinder', function(e) {
+				var id = $(this).removeClass('ui-selected').children().removeClass('ui-state-hover').end().attr('id'),
+					ndx = $.inArray(id, fm.selected);
 			
-			if (ndx !== -1) {
-				fm.selected.splice(ndx, 1)
-			}
-		})
-		
-		cwd.selectable({
-			filter : '[id]',
-			start  : function() { fm.trigger('focus'); },
-			stop   : function() { fm.trigger('select'); },
-			selected : function(e, ui) {
-				// fm.log(ui)
-				$(ui.selected).trigger('select.elfinder')
-			},
-			unselected : function(e, ui) {
-				$(ui.unselected).trigger('unselect.elfinder')
-			}
-		})
+				if (ndx !== -1) {
+					fm.selected.splice(ndx, 1)
+				}
+			})
+			.selectable({
+				filter : '[id]',
+				start  : function() { fm.trigger('focus'); },
+				stop   : function() { fm.trigger('select'); },
+				selected : function(e, ui) {
+					// fm.log(ui)
+					$(ui.selected).trigger('select.elfinder')
+				},
+				unselected : function(e, ui) {
+					$(ui.unselected).trigger('unselect.elfinder')
+				}
+			});
 		
 		
 		fm.bind('cd', function(e) {
@@ -91,6 +89,8 @@ $.fn.elfindercwd = function(fm) {
 				t = tpl[fm.view] || tpl.icons,
 				html = '',
 				i, f;
+
+			fm.selected = [];
 
 			fm.time('cwd')
 			for (i = 0; i < e.data.cdc.length; i++) {
@@ -104,24 +104,38 @@ $.fn.elfindercwd = function(fm) {
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
 				.html(t.container.replace('%content', html));
 			fm.timeEnd('cwd')
+			
 			fm.time('cwd-events')
 			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
 				.draggable({
 					addClasses : false,
-					delay : 20,
-					appendTo : cwd,
-					revert : true,
-					start : function() {
-						var p = this.id ? $(this) : $(this).parents('[id]:first');
-						if (!p.is('.ui-selected')) {
-							p.trigger('select.elfinder')
-						}
-						// fm.log(p)
-					},
+					delay      : 20,
+					appendTo   : cwd,
+					revert     : true,
+					cursor     : 'move',
+					cursorAt   : {left : 52, top : 47},
+					refreshPositions : true,
+					drag   : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
 					helper : function() {
-						var h = $('<div class="elfinder-drag-helper"/>')
-						fm.log('helper')
-						return h
+						var p = this.id ? $(this) : $(this).parents('[id]:first'),
+							h = $('<div class="elfinder-drag-helper"/>'),
+							icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
+							f, l;
+						
+						// select dragged file if no selected
+						if (!p.is('.ui-selected')) {
+							p.trigger('select.elfinder');
+						}
+							
+						f = fm.get(cwd.find('.ui-selected:first').attr('id'));
+						l = fm.get(cwd.find('.ui-selected:last').attr('id'));
+						// append icons [and number of files]	
+						h.append(icon.replace('%class', fm.ui.mime2class(f.mime))).data('files', fm.selected);
+						if (f !== l) {
+							h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+						}
+
+						return h;
 					}
 				})
 				.click(function(e) {
