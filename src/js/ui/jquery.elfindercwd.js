@@ -80,6 +80,18 @@ $.fn.elfindercwd = function(fm) {
 				stop       : function() { fm.trigger('select'); },
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
+			})
+			.droppable({
+				accept : 'a[id]',
+				drop : function(e, ui) {
+					var src = ui.helper.data('src');
+					
+					if (src != fm.cwd.hash && fm.cwd.write) {
+						fm.copy(ui.helper.data('files'), src, !(e.shiftKey || e.ctrlKey || e.metaKey));
+						fm.paste();
+						fm.buffer = [];
+					}
+				}
 			}),
 			draggable = $.extend({}, fm.ui.draggable, {
 				appendTo : cwd,
@@ -106,8 +118,7 @@ $.fn.elfindercwd = function(fm) {
 			
 					return h;
 				}
-			})
-			;
+			});
 		
 
 		fm.bind('cd', function(e) {
@@ -116,87 +127,70 @@ $.fn.elfindercwd = function(fm) {
 				html = '',
 				i, f;
 
-			if (e.data.error) {
-				return
+			if (!e.data.cdc) {
+				return;
 			}
 
-			if (e.data.cdc) {
-				fm.time('cwd-render');
-				
-				fm.selected = [];
-				// create html code
-				for (i = 0; i < e.data.cdc.length; i++) {
-					f = e.data.cdc[i];
-					if (f && f.name && f.hash) {
-						html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
-					}
+
+			fm.time('cwd-render');
+			
+			fm.selected = [];
+			// create html code
+			for (i = 0; i < e.data.cdc.length; i++) {
+				f = e.data.cdc[i];
+				if (f && f.name && f.hash) {
+					html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
 				}
-				
-				// required to avoid drag/drop conflict
-				cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename').remove();
-				// set new content
-				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
-					.html(t.container.replace('%content', html));
-				
-				fm.timeEnd('cwd-render')
-				
-				fm.time('cwd-events')
-				// make rows or icons/filenames draggable
-				// and add suport for shift|meta + click select
-				cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
-					.draggable(draggable)
-					.click(function(e) {
-						var p = this.id ? $(this) : $(this).parents('[id]:first'), 
-							m = $.browser.mozilla, 
-							prev, next, id, s, f;
-
-						if (e.shiftKey) {
-							prev = p.prevAll('.ui-selected:first');
-							next = p.nextAll('.ui-selected:first');
-							if (next.length && !prev.length) {
-								f = 'nextUntil';
-								id = next.attr('id')
-							} else {
-								id = prev.attr('id');
-								f = 'prevUntil'
-							}
-							p[f]('[id="'+id+'"]').add(p).trigger('select.elfinder');
-							// p[f]('#'+id).add(p).trigger('select.elfinder');
-						} else if (e.ctrlKey || e.metaKey) {
-							p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
-						} else {
-							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-							p.trigger('select.elfinder')
-						}
-
-						fm.trigger('focus').trigger('select');
-
-					});
-					
-				// make writable dirs droppable
-				cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable({
-					tolerance : 'pointer',
-					over : function() {
-						$(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
-					},
-					out : function() {
-						$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-					},
-					drop : function(e, ui) {
-						$(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-						ui.helper.hide();
-						fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-						fm.paste(this.id);
-						fm.buffer = [];
-					}
-				});
-				fm.timeEnd('cwd-events')
 			}
+			
+			// required to avoid drag/drop conflict
+			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename').remove();
+			// set new content
+			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+				.html(t.container.replace('%content', html));
+			
+			fm.timeEnd('cwd-render')
+			
+			fm.time('cwd-events')
+			// make rows or icons/filenames draggable
+			// and add suport for shift|meta + click select
+			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
+				.draggable(draggable)
+				.click(function(e) {
+					var p = this.id ? $(this) : $(this).parents('[id]:first'), 
+						m = $.browser.mozilla, 
+						prev, next, id, s, f;
+
+					if (e.shiftKey) {
+						prev = p.prevAll('.ui-selected:first');
+						next = p.nextAll('.ui-selected:first');
+						if (next.length && !prev.length) {
+							f = 'nextUntil';
+							id = next.attr('id')
+						} else {
+							id = prev.attr('id');
+							f = 'prevUntil'
+						}
+						p[f]('#'+id).add(p).trigger('select.elfinder');
+					} else if (e.ctrlKey || e.metaKey) {
+						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
+					} else {
+						cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+						p.trigger('select.elfinder')
+					}
+
+					fm.trigger('focus').trigger('select');
+				});
+				
+			// make writable dirs droppable
+			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable(fm.ui.droppable);
+			fm.timeEnd('cwd-events')
+
 
 			
-		})
+		});
 		
-	})
+	});
 	
 }

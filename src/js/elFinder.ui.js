@@ -475,6 +475,33 @@
 			refreshPositions : true,
 			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
 		},
+		
+		droppable : {
+			tolerance : 'pointer',
+			over : function() {
+				this.id.indexOf('nav-') === 0
+					? $(this).addClass('ui-state-hover').children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open')
+					: $(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
+			},
+			out : function() {
+				this.id.indexOf('nav-') === 0
+					? $(this).removeClass('ui-state-hover').children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open')
+					: $(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+			},
+			drop : function(e, ui) {
+				var fm = $(this).parents('.elfinder')[0].elfinder,
+					nav = this.id.indexOf('nav-') === 0;
+				
+				nav	? $(this).removeClass('ui-state-hover').children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open')
+					: $(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
+				
+				ui.helper.hide();
+				fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+				fm.paste(nav ? this.id.substr(4) : this.id);
+				fm.buffer = [];
+			}
+		},
+		
 		/**
 		 * File mimetype to kind mapping
 		 * 

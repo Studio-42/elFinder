@@ -14,54 +14,14 @@
 			 * @type String
 			 **/
 			slideDown = $.browser.msie ? 'show'   : 'slideDown'
-			/**
-			 * Active state class name
-			 *
-			 * @type String
-			 **/
-			aclass = 'ui-state-active',
-			/**
-			 * Hover state class name
-			 *
-			 * @type String
-			 **/
-			hclass = 'ui-state-hover',
-			/**
-			 * Folder class name for dir except root one
-			 *
-			 * @type String
-			 **/
-			fclass = 'elfinder-nav-icon-folder',
-			/**
-			 * Opened folder class name for dir except root one
-			 *
-			 * @type String
-			 **/
-			oclass = 'elfinder-nav-icon-folder-open',
-			/**
-			 * Colapsed arrow icon class name
-			 *
-			 * @type String
-			 **/
-			cclass = 'elfinder-nav-collapsed',
-			/**
-			 * Expanded arrow icon class name
-			 *
-			 * @type String
-			 **/
-			exclass = 'elfinder-nav-expanded',
-			/**
-			 * No arrow icon class name
-			 *
-			 * @type String
-			 **/
-			emclass = 'elfinder-nav-empty',
+
 			/**
 			 * Dir template
 			 *
 			 * @type String
 			 **/
 			tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
+			
 			/**
 			 * Traverse through dirs tree and return html code
 			 *
@@ -81,21 +41,20 @@
 						pc = fm.ui.perms2class(o);
 						html += tpl.replace('%id', o.hash)
 							.replace('%pclass', pc)
-							.replace('%arrow',  o.dirs.length ? cclass : emclass)
+							.replace('%arrow',  o.dirs.length ? 'elfinder-nav-collapsed' : 'elfinder-nav-empty')
 							.replace('%icon', icon)
 							.replace('%perms',  pc ? '<span class="elfinder-perms"/>' : '')
 							.replace('%name',   o.name)
-							.replace('%childs', o.dirs.length ? traverse(o.dirs) : '');
+							.replace('%childs', o.dirs && o.dirs.length ? traverse(o.dirs) : '');
 					}
 				}
 				return html + '</ul>';
-			}
-			;
+			};
 		
 		return this.each(function() {
 			var tree = $(this).addClass('elfinder-tree')
 					.delegate('a', 'hover', function(e) {
-						$(this).toggleClass(hclass, e.type == 'mouseenter');
+						$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 					})
 					.delegate('a', 'click', function(e) {
 						var dir = $(this),
@@ -115,77 +74,57 @@
 						}
 					})
 					.delegate('a', 'toggle', function() {
-						$(this).next('ul')[slideToggle]().end().children('.'+cclass).toggleClass(exclass);
+						$(this).next('ul')[slideToggle]().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
 					})
-					.delegate('.'+cclass, 'click', function(e) {
+					.delegate('.elfinder-nav-collapsed', 'click', function(e) {
 						// click on arrow - toggle subdirs
 						e.stopPropagation();
 						e.preventDefault();
 						$(this).parent().trigger('toggle');
-					});
+					}),
+				draggable = $.extend({}, fm.ui.draggable, {
+					appendTo : fm.ui.cwd,
+					helper : function() {
+						return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
+							.data('files', [this.id.substr(4)])
+							.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));
+					}
+				});
 			
 			// set current dir visible and actve and show subdirs		
 			fm.bind('cd', function(e) {
-				var t = e.data.tree, dir, pc;
-				
-				if (e.data.error) {
-					return
-				}
+				var t = e.data.tree, dir;
 				
 				if (t) {
-					// create tree
+					// required to avoid drag/drop conflict
 					tree.find('a').remove();
+					// create tree
 					tree.html(traverse([t], true))
 						.find('a')
 						.not(':has(.elfinder-nav-icon-home),.elfinder-na')
-						// .draggable(fm.ui.draggable)
+						.draggable(draggable)
 						.end()
 						.not('.elfinder-na,.elfinder-ro')
-						.droppable({
-							tolerance : 'pointer',
-							over : function(e, ui) {
-								var f = $(this).addClass(hclass),
-									a = f.children('.'+cclass);
-								// show open folder icon
-								f.children('.'+fclass).addClass(oclass);
-								// show subdirs
-								if (a.length && !a.hasClass(exclass)) {
-									setTimeout(function() {
-										a.parent().hasClass(hclass) && a.click();
-									}, 1000);
-								}	
-							},
-							out : function(e) {
-								$(this).removeClass(hclass).children('.'+fclass).removeClass(oclass);
-							},
-							drop : function(e, ui) {
-								$(this).removeClass(hclass).children(fclass).removeClass(oclass);
-								ui.draggable.draggable('disable').removeClass('ui-state-disabled');
-								ui.helper.hide();
-								fm.copy(ui.helper.data('files')||[], ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey)).paste(this.id.substr(4));	
-							}
-						})
-					;
+						.droppable(fm.ui.droppable);
 				}
 				
 				// find current dir
-				// dir = tree.find('#nav-'+e.data.cwd.hash);
-				dir = tree.find('[id="nav-'+e.data.cwd.hash+'"]')
-				// fm.log(dir)
+				dir = tree.find('[id="nav-'+fm.cwd.hash+'"]')
+
 				// remove active state from prevoiusly active dir
-				tree.find('.'+aclass)
-					.removeClass(aclass)
-					.children('.'+fclass)
-					.removeClass(oclass);
+				tree.find('.ui-state-active')
+					.removeClass('ui-state-active')
+					.children('.elfinder-nav-icon-folder')
+					.removeClass('elfinder-nav-icon-folder-open');
 				
-				// show folder opened icon
-				dir.children('.'+fclass).addClass(oclass);
+				// show open folder icon
+				dir.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
 				// set active and show all parents
-				dir.addClass(aclass).parents('ul:hidden').prev('a').trigger('toggle');
+				dir.addClass('ui-state-active').parents('ul:hidden').prev('a').trigger('toggle');
 				// show subdirs
 				dir.next('ul').show();
 				// show expanded arrow
-				dir.children('.'+cclass).addClass(exclass);
+				dir.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
 			});
 		});
 	}

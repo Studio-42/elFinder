@@ -33,7 +33,7 @@ $opts = array(
 	'rootAlias'       => 'Home',       // display this instead of root directory name
 	'perms' => array(
 		'/123/' => array(
-			'read'   => false,
+			'read'   => true,
 			'write'   => false,
 			'rm'   => true
 		),

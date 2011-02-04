@@ -179,7 +179,7 @@
 		 *
 		 * @type String
 		 **/
-		this.view = this.viewType();
+		this.view = this.viewType('icons');
 		/**
 		 * Events listeners
 		 *
@@ -512,7 +512,7 @@
 		 */
 		this.paste = function(dst) {
 			var b = this.buffer, o;
-			
+			this.log(dst)
 			dst = dst || this.cwd.hash;
 			
 			if (b.src == dst) {
