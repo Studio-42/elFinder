@@ -1,5 +1,10 @@
 (function($) {
-	
+	/**
+	 * @class elFinder ui - main controller to interact with user
+	 * Create filemanager view and ui-widgets.
+	 * Add some events handlers
+	 * 
+	 */
 	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
 			/**
@@ -231,7 +236,7 @@
 		this.fm = fm;
 		
 		/**
-		 * Tolbar
+		 * Toolbar
 		 * 
 		 * @type  jQuery
 		 */
@@ -325,6 +330,7 @@
 			.append(this.statusbar.hide())
 			.click(function(e) {
 				e.stopPropagation();
+				// fire event to enable fm shortcuts
 				fm.trigger('focus');
 			});
 	
@@ -340,12 +346,14 @@
 
 
 		this.init = function() {
+			// init dirs tree view and events
 			this.tree.elfindertree(this.fm);
 			
+			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
 			
 			// bind events handlers
-			fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+			fm.bind('ajaxstart ajaxstop', function(e) {
 				self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 				self.error.hide();
 			})
@@ -388,6 +396,7 @@
 		mime2class : function(mime) {
 			return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/\./g, '-');
 		},
+		
 		/**
 		 * Return localized kind of file
 		 * 
@@ -397,6 +406,7 @@
 		mime2kind : function(mime) {
 			return this.fm.i18n(this.kinds[mime]||'unknown');
 		},
+		
 		/**
 		 * Return localized date
 		 * 
@@ -407,6 +417,7 @@
 			var fm = this.fm;
 			return d.replace(/([a-z]+)\s/i, function(a1, a2) { return fm.i18n(a2)+' '; });
 		},
+		
 		/**
 		 * Return localized string with file permissions
 		 * 
@@ -414,15 +425,17 @@
 		 * @return String
 		 */
 		formatPermissions : function(f) {
-			var r = !!f.read,
-				w = !!f.read,
+			var r  = !!f.read,
+				w  = !!f.read,
 				rm = !!f.rm,
-				p = [];
+				p  = [];
+				
 			r  && p.push(this.fm.i18n('read'));
 			w  && p.push(this.fm.i18n('write'));
 			rm && p.push(this.fm.i18n('remove'));
 			return p.join('/');
 		},
+		
 		/**
 		 * Return css class marks file permissions
 		 * 
@@ -441,6 +454,7 @@
 			}
 			return c;
 		},
+		
 		/**
 		 * Return formated file size
 		 * 
@@ -449,6 +463,7 @@
 		 */
 		formatSize : function(s) {
 			var n = 1, u = 'bytes';
+			
 			if (s > 1073741824) {
 				n = 1073741824;
 				u = 'Gb';
@@ -461,6 +476,7 @@
 	        }
 	        return Math.round(s/n)+' '+u;
 		},
+		
 		/**
 		 * Default options for jquery-ui draggable
 		 * 
@@ -476,6 +492,11 @@
 			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
 		},
 		
+		/**
+		 * Default options for jquery-ui droppable
+		 * 
+		 * @type  Object
+		 */
 		droppable : {
 			tolerance : 'pointer',
 			over : function() {

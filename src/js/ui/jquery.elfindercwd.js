@@ -186,8 +186,6 @@ $.fn.elfindercwd = function(fm) {
 			// make writable dirs droppable
 			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable(fm.ui.droppable);
 			fm.timeEnd('cwd-events')
-
-
 			
 		});
 		

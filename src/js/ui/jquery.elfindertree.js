@@ -16,13 +16,6 @@
 			slideDown = $.browser.msie ? 'show'   : 'slideDown'
 
 			/**
-			 * Dir template
-			 *
-			 * @type String
-			 **/
-			tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
-			
-			/**
 			 * Traverse through dirs tree and return html code
 			 *
 			 * @param  Object  tree
@@ -30,7 +23,8 @@
 			 * @return String
 			 **/
 			traverse = function(tree, root) {
-				var html = root ? '' : '<ul style="display:none">',	
+				var tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
+					html = root ? '' : '<ul style="display:none">',	
 					end  = root ? '' : '</ul>',
 					icon   = root ? 'elfinder-nav-icon-home' : 'elfinder-nav-icon-folder',
 					i, o, pc;
@@ -91,6 +85,7 @@
 					}
 				});
 			
+			// recreate tree if required and
 			// set current dir visible and actve and show subdirs		
 			fm.bind('cd', function(e) {
 				var t = e.data.tree, dir;
