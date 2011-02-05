@@ -1,5 +1,4 @@
 $.fn.elfindercwd = function(fm) {
-	// var ui = fm.ui;
 	
 	var tpl = {
 			icons : {
@@ -48,7 +47,6 @@ $.fn.elfindercwd = function(fm) {
 				return fm.ui.mime2kind(f.mime);
 			},
 			marker : function(f) {
-				// fm.log(f)
 				return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 			},
 			oddclass : function(f, i) {
@@ -121,7 +119,107 @@ $.fn.elfindercwd = function(fm) {
 			
 					return h;
 				}
-			});
+			}),
+			/**
+			 * Bind some shortcuts to keypress instead of keydown
+			 * Required for procces repeated key in ff and opera 
+			 *
+			 * @type Boolean
+			 */
+			keypress = $.browser.mozilla || $.browser.opera,
+			/**
+			 * Move selection to prev/next file
+			 *
+			 * @param String  move direction
+			 8 @param Boolean append to current selection
+			 * @return void
+			 * @rise select			
+			 */
+			select = function(dir, append) {
+				var 
+					prev = dir == 'left' || dir == 'up',
+					selector = prev ? 'first' : 'last',
+					list = fm.view == 'list',
+					s, n, top, left;
+				
+				if (fm.selected.length) {
+					// find fist/last selected file
+					s = cwd.find('[id].ui-selected:'+(prev ? 'first' : 'last'));
+					
+					if (!s[prev ? 'prev' : 'next']('[id]').length) {
+						// there is no sibling on required side - do not move selection
+						n = s;
+					} else if (list || dir == 'left' || dir == 'right') {
+						// find real prevoius file
+						n = s[prev ? 'prev' : 'next']('[id]');
+					} else {
+						// find up/down side file in icons view
+						top = s.position().top;
+						left = s.position().left;
+
+						n = s;
+						if (prev) {
+							do {
+								n = n.prev('[id]');
+							} while (n.length && !(n.position().top < top && n.position().left <= left))
+							
+						} else {
+							do {
+								n = n.next('[id]');
+							} while (n.length && !(n.position().top > top && n.position().left >= left))
+							// there is row before last one - select last file
+							if (!n.length && cwd.find('[id]:last').position().top > top) {
+								n = cwd.find('[id]:last');
+							}
+						}
+					}
+					
+				} else {
+					// there are no selected file - select first/last one
+					n = cwd.find('[id]:'+(prev ? 'last' : 'first'))
+				}
+				
+				// new file to select exists
+				if (n && n.length) {
+
+					if (append) {
+						// append new files to selected
+						// found strange bug in ff - prevUntil/nextUntil by id not always returns correct set >_< wtf?
+						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
+					} else {
+						// unselect selected files
+						cwd.find('.ui-selected').trigger('unselect.elfinder')
+					}
+					// select file(s)
+					n.trigger('select.elfinder');
+					// set its visible
+					scrollToView(n.filter(prev ? ':first' : ':last'));
+					// update cache/view
+					fm.trigger('select');
+				}
+			},
+			/**
+			 * Scroll file to set it visible
+			 *
+			 * @param DOMElement  file/dir node
+			 * @return void
+			 */
+			scrollToView = function(o) {
+				var t   = o.position().top;
+					h   = o.outerHeight(true);
+					ph  = cwd.innerHeight();
+					st  = cwd.scrollTop();
+				
+				if (t < 0) {
+					cwd.scrollTop(Math.ceil(t + st) - 9);
+				} else if (t + h > ph) {
+					cwd.scrollTop(Math.ceil(t + h - ph + st));
+				}
+			}
+			
+			
+			
+			;
 		
 
 		fm.bind('cd', function(e) {
@@ -190,7 +288,64 @@ $.fn.elfindercwd = function(fm) {
 			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable(fm.ui.droppable);
 			fm.timeEnd('cwd-events')
 			
-		});
+		})
+		.shortcut({
+			pattern     :'ctrl+a', 
+			description : 'Select all files',
+			callback    : function() { 
+				cwd.find('[id]:not(.ui-selected)').trigger('select.elfinder'); 
+				fm.trigger('select'); 
+			}
+		})
+		.shortcut({
+			pattern     : 'arrowLeft',
+			description : 'Select file on left or last file',
+			keypress    : keypress,
+			callback    : function() { select('left'); }
+		})
+		.shortcut({
+			pattern     : 'arrowUp',
+			description : 'Select file upside',
+			keypress    : keypress,
+			callback    : function() { select('up'); }
+		})
+		.shortcut({
+			pattern     : 'arrowRight',
+			description : 'Select file on right or last file',
+			keypress    : keypress,
+			callback    : function() { select('right'); }
+		})
+		.shortcut({
+			pattern     : 'arrowDown',
+			description : 'Select file downside',
+			keypress    : keypress,
+			callback    : function() { select('down'); }
+		})
+		.shortcut({
+			pattern     : 'shift+arrowLeft',
+			description : 'Append file on left to selected',
+			keypress    : keypress,
+			callback    : function() { select('left', true); }
+		})
+		.shortcut({
+			pattern     : 'shift+arrowUp',
+			description : 'Append upside file to selected',
+			keypress    : keypress,
+			callback    : function() { select('up', true); }
+		})
+		.shortcut({
+			pattern     : 'shift+arrowRight',
+			description : 'Append file on right to selected',
+			keypress    : keypress,
+			callback    : function() { select('right', true); }
+		})
+		.shortcut({
+			pattern     : 'shift+arrowDown',
+			description : 'Append downside file to selected',
+			keypress    : keypress,
+			callback    : function() { select('down', true); }
+		})
+		;
 		
 	});
 	

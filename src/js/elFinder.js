@@ -295,7 +295,7 @@
 					}
 				}
 			}
-			return this
+			return this;
 		}
 		
 		/**
@@ -462,6 +462,12 @@
 			return this.cd(this.cwd.hash, true);
 		}
 		
+		/**
+		 * Open file or directory
+		 * 
+		 * @param  String  file/dir hash
+		 * @return elFinder
+		 */
 		this.open = function(hash) {
 			if (!this.locks.ui) {
 				if (this.cdc[hash] && this.cdc[hash].mime != 'directory') {

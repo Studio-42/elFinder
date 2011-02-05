@@ -21,54 +21,6 @@
 			 */
 			shortcuts = [
 				{
-					pattern     : 'arrowLeft',
-					description : 'Select file on left or last file',
-					callback    : function() { move('left'); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'arrowUp',
-					description : 'Select file upside then current',
-					callback    : function() { move('up'); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'arrowRight',
-					description : 'Select file on right or first file',
-					callback    : function() { move('right'); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'arrowDown',
-					description : 'Select file downside then current',
-					callback    : function() { move('down'); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'shift+arrowLeft',
-					description : 'Append file on left to selected',
-					callback    : function() { move('left', true); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'shift+arrowUp',
-					description : 'Append upside file to selected',
-					callback    : function() { move('up', true); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'shift+arrowRight',
-					description : 'Append file on right to selected',
-					callback    : function() { move('right', true); },
-					keypress    : keypress
-				},
-				{
-					pattern     : 'shift+arrowDown',
-					description : 'Append downside file to selected',
-					callback    : function() { move('down', true); },
-					keypress    : keypress
-				},
-				{
 					pattern     : 'ctrl+arrowDown',
 					description : 'Open directory or file',
 					callback    : function() { 
@@ -77,13 +29,6 @@
 							} else if (fm.selected.length) {
 								fm.exec('open', fm.selected)
 							}
-						}
-				},
-				{
-					pattern     : 'ctrl+a',
-					description : 'Select all files',
-					callback    : function() { 
-							self.select('all')
 						}
 				},
 				{
@@ -132,100 +77,7 @@
 					description : 'Delete files',
 					callback    : function() { fm.rm(); }
 				},
-			],
-			/**
-			 * Move selection to prev/next file
-			 *
-			 * @param String  move direction
-			 8 @param Boolean append to current selection
-			 * @return String
-			 * @rise select			
-			 */
-			move = function(dir, append) {
-				var cwd = self.cwd,
-					prev = dir == 'left' || dir == 'up',
-					selector = prev ? 'first' : 'last',
-					list = fm._view == 'list',
-					s, n, top, left;
-				
-				if (fm.selected.length) {
-					// find fist/last selected file
-					s = cwd.find('[id].ui-selected:'+(prev ? 'first' : 'last'));
-					
-					if (!s[prev ? 'prev' : 'next']('[id]').length) {
-						// there is no sibling on required side - do not move selection
-						n = s;
-					} else if (list || dir == 'left' || dir == 'right') {
-						// find real prevoius file
-						n = s[prev ? 'prev' : 'next']('[id]');
-					} else {
-						// find up/down side file in icons view
-						top = s.position().top;
-						left = s.position().left;
-
-						n = s;
-						if (prev) {
-							do {
-								n = n.prev('[id]');
-							} while (n.length && !(n.position().top < top && n.position().left <= left))
-							
-						} else {
-							do {
-								n = n.next('[id]');
-							} while (n.length && !(n.position().top > top && n.position().left >= left))
-							// there is row before last one - select last file
-							if (!n.length && cwd.find('[id]:last').position().top > top) {
-								n = cwd.find('[id]:last');
-							}
-						}
-					}
-					
-				} else {
-					// there are no selected file - select first/last one
-					n = cwd.find('[id]:'+(prev ? 'last' : 'first'))
-				}
-				
-				// new file to select exists
-				if (n && n.length) {
-
-					if (append) {
-						// append new files to selected
-						// found strange bug in ff - prevUntil/nextUntil by id not always returns correct set >_< wtf?
-						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']($.browser.mozilla ? '[id="'+n.attr('id')+'"]' : '#'+n.attr('id'))).add(n);
-					} else {
-						// unselect selected files
-						$.each(fm.selected, function() {
-							cwd.find('#'+this.hash).removeClass('ui-selected');
-						});
-					}
-					// select file(s)
-					n.addClass('ui-selected');
-					// set its visible
-					scrollToView(n.filter(prev ? ':first' : ':last'));
-					// update cache/view
-					self.select();
-				}
-				
-			},
-			/**
-			 * Scroll file to set it visible
-			 *
-			 * @param DOMElement  file/dir node
-			 * @return void
-			 */
-			scrollToView = function(o) {
-				var cwd = self.cwd,
-					t   = o.position().top;
-					h   = o.outerHeight(true);
-					ph  = cwd.innerHeight();
-					st  = cwd.scrollTop();
-				
-				if (t < 0) {
-					cwd.scrollTop(Math.ceil(t + st) - 9);
-				} else if (t + h > ph) {
-					cwd.scrollTop(Math.ceil(t + h - ph + st));
-				}
-			}
+			]
 			;
 
 		/**
