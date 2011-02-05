@@ -8,45 +8,11 @@
 	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
 			/**
-			 * Bind some shortcuts to keypress instead of keydown
-			 * Required for procces repeated key in ff and for opera 
-			 *
-			 * @type Boolean
-			 */
-			keypress = $.browser.mozilla || $.browser.opera,
-			/**
 			 * Shortcuts config
 			 *
 			 * @type Array
 			 */
 			shortcuts = [
-				{
-					pattern     : 'ctrl+arrowDown',
-					description : 'Open directory or file',
-					callback    : function() { 
-							if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
-								fm.cd(fm.selected[0].hash)
-							} else if (fm.selected.length) {
-								fm.exec('open', fm.selected)
-							}
-						}
-				},
-				{
-					pattern     : 'ctrl+arrowLeft',
-					description : 'Return to previous directory',
-					callback    : function() { fm.back(); }
-				},
-				{
-					pattern     : 'enter',
-					description : 'Open directory or file',
-					callback    : function() { 
-							if (fm.selected.length == 1 && fm.selected[0].mime == 'directory') {
-								fm.cd(fm.selected[0].hash)
-							} else if (fm.selected.length) {
-								fm.exec('open', fm.selected)
-							}
-						}
-				},
 				{
 					pattern : 'ctrl+shift+r',
 					description : 'Reload current directory',
@@ -186,16 +152,6 @@
 				fm.trigger('focus');
 			});
 	
-		
-	
-		
-
-
-		// register shortcuts
-		$.each(shortcuts, function(i, s) {
-			// fm.shortcut(s);
-		});
-
 
 		this.init = function() {
 			// init dirs tree view and events
@@ -219,6 +175,7 @@
 					self.error.fadeOut('slow');
 				}, 4000);
 			})
+			
 
 			;
 		}

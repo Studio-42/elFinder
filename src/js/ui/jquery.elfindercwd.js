@@ -215,6 +215,19 @@ $.fn.elfindercwd = function(fm) {
 				} else if (t + h > ph) {
 					cwd.scrollTop(Math.ceil(t + h - ph + st));
 				}
+			},
+			open = function() {
+				var s = cwd.find('.ui-selected');
+				
+				if (s.length == 1 && s.eq(0).is('.directory')) {
+					// only one directory selected - cd into it
+					fm.cd(s[0].id);
+				} else {
+					// open all selected files
+					s.not('.directory').each(function() {
+						fm.open(this.id);
+					});
+				}
 			}
 			
 			
@@ -344,6 +357,19 @@ $.fn.elfindercwd = function(fm) {
 			description : 'Append downside file to selected',
 			keypress    : keypress,
 			callback    : function() { select('down', true); }
+		})
+		.shortcut({
+			pattern     : 'ctrl+arrowDown',
+			description : 'Open directory or files',
+			callback    : open
+		})
+		.shortcut({
+			pattern     : 'enter',
+			description : 'Open directory or files',
+			callback    : function() {
+				// @TODO  add open/select support
+				open();
+			}
 		})
 		;
 		
