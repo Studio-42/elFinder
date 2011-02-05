@@ -1,5 +1,9 @@
 <?php
 
+// sleep(120);
+// echo 'abr';
+// exit();
+
 error_reporting(0); // Set E_ALL for debuging
 
 if (function_exists('date_default_timezone_set')) {

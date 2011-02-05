@@ -1,7 +1,6 @@
 (function($) {
 	
 	elFinder = function(el, o) {
-		window.console.time('create')
 		var self = this,
 			/**
 			 * Target node
@@ -9,38 +8,6 @@
 			 * @type jQuery
 			 **/
 			$el = $(el),
-			/**
-			 * Key codes for special keys
-			 *
-			 * @type Object
-			 **/
-			codes = {
-				'ARROWLEFT'  : 37,
-				'ARROWUP'    : 38,
-				'ARROWRIGHT' : 39,
-				'ARROWDOWN'  : 40,
-				'ESC'        : 27,
-				'ENTER'      : 13,
-				'SPACE'      : 32,
-				'DELETE'     : 46,
-				'BACKSPACE'  : 8
-			},
-			/**
-			 * Default error handler for paste/delete etc methods
-			 * Display error message and return true to call success method
-			 *
-			 * @param String error message
-			 * @type Boolean  always true
-			 **/
-			error = function(m) { self.trigger('error', {error : m}); return true; },
-			/**
-			 * Default ajax handler for paste/delete etc methods
-			 * Trigger "cd" event
-			 *
-			 * @param Object  data recievied from ajax request
-			 * @type void
-			 **/
-			success = function(d) { self.trigger('cd', d); },
 			/**
 			 * Load images thumbnails in background
 			 *
@@ -173,7 +140,12 @@
 		 *
 		 * @type Object
 		 **/
-		this.locks = {ui : false, shortcuts : false};
+		this.locks = {
+			// user actions and comands execution disabled (while ajax request)
+			ui : false, 
+			// shortcuts disabled
+			shortcuts : false
+		};
 		/**
 		 * Cwd view type
 		 *
@@ -186,335 +158,65 @@
 		 * @type Object
 		 **/
 		this.listeners = {
-			load   : [],
-			focus  : [  ],
-			blur   : [  ],
-			cd     : [],
-			select : [],
-			error  : [],
+			load      : [],
+			focus     : [],
+			blur      : [],
+			lock      : [],
 			ajaxstart : [],
-			ajaxstop : [],
+			ajaxstop  : [],
 			ajaxerror : [],
-			lock   : []
+			error     : [],
+			cd        : [],
+			select    : []
 		};
 		
 		
-
-		
-		
-		
-		
-		
-		/**
-		 * Produce ajax request
-		 * Argment:
-		 * { 
-		 *     data : {}, data to send
-		 *     error : function(message) { return true|false }, hadlers for connector sended error (ajax request in this case is ok).
-		 *			return false - for fatal errors, true - for non fatal
-		 *     success : function(data) { }, response data handler,
-		 *     ajax : { if set - overwrite default ajax settings
-		 *         error : function(r) {}, ajax error handler
-		 *         success : function(data) { } response handler
-		 *         etc...
-		 *     }
-		 * }
-		 * 
-		 * @param  Object  options
-		 * @return elFinder
-		 */
-		this.ajax = function(opts) {
-			var o = {
-					url      : this.options.url,
-					async    : true,
-					type     : 'get',
-					data     : $.extend({}, this.options.customData, opts.data),
-					dataType : 'json',
-					cache    : false,
-					error    : function(r) {  
-						var s = r && r.status ? r.status : 0;
-						
-						self.trigger('ajaxerror', { 
-							status : s, 
-							error : s == '404' ? 'Unable to connect to backend' : 'Invalid backend configuration' 
-						}); 
-					},
-					success  : function(d) {
-						var err = d ? d.error : 'Unknown error';
-						
-						!opts.silent && self.trigger('ajaxstop', d);
-
-						if (err && !(opts.error || function(m) { self.trigger('error', {error : m}); })(err)) {
-							// by default do not proccess data on error
-							return;
-						}
-						
-						// if connector die we get null instead of json
-						// so check it
-						if (d) {
-							d.tmb && d.cwd && tmb(d.cwd.hash);
-							opts.success && opts.success(d);
-						}
-					}
-				};
-			
-			if (!this.locks.ui) {
-				$.extend(o, opts.ajax);
-				!opts.silent && this.trigger('ajaxstart', o);
-				$.ajax(o);
-			}
-			return this;
-		}
-		
-
-		/**
-		 * Lock/unlock some functionality
-		 * 
-		 * @param  Object  options
-		 * @return elFinder
-		 */
-		this.lock = function(o) {
-			if (o === void(0)) {
-				return this.locks;
-			}
-			$.extend(this.locks, o);
-			this.trigger('lock', { locks : this.locks });
-		}
-	
-		/**
-		 * Return file/dir from current dir by it's hash
-		 * 
-		 * @param  String  file hash
-		 * @return Object
-		 */
-		this.get = function(key) {
-			return this.cdc[key];
-		}
-	
-		this.getByName = function(name) {
-			
-		}
-	
-		this.exec = function(cmd) {
-			
-		}
-	
-
-		
-		this.resize = function(w, h) {
-			
-		}
-		
-		this.getSelected = function() {
-			var s = [], l = this.selected.length;
-			
-			while (l--) {
-				if (this.cdc[this.selected[l]]) {
-					s.unshift(this.cdc[this.selected[l]])
+		this.bind('focus', function() {
+				if (self.locks.shortcuts && !self.locks.ui) {
+					self.locks.shortcuts = false;
+					$('texarea,:text').blur();
 				}
-			}
-			return s;
-		}
-
-		/**
-		 * Change current directory
-		 * 
-		 * @param  String   dir hash
-		 * @param  Boolean  update nav dire tree?
-		 * @param  Boolean  send init flag?
-		 * @return elFinder
-		 */
-		this.cd = function(key, tree, init) {
-			var o = {
-					data    : {cmd : 'open', target : key},
-					success : function(d) { 
-						self.trigger('cd', d); 
-						delete d; 
-					}
-				};
-			
-			if (!this.locks.ui) {
-				if (this.cdc[key] && !this.cdc[key].read) {
-					this.trigger('error', {error : 'Access denied'});
-				} else {
-					if (tree) {
-						o.data.tree = true;
-					}
-					if (init) {
-						o.data.init = true;
-					}
-					this.selected = [];
-					this.ajax(o);
-				}
-			}
-			return this;
-		}
-		
-
-		/**
-		 * Reload current directory
-		 * 
-		 * @return elFinder
-		 */
-		this.reload = function() {
-			this.buffer = {};
-			return this.cd(this.cwd.hash, true);
-		}
-		
-		
-		/**
-		 * Go to previous opened directory
-		 * 
-		 * @return elFinder
-		 */
-		this.back = function() {
-			if (this.history.length > 1) {
-				// drop current dir
-				this.history.pop();
-				this.cd(this.history.pop());
-			}
-			return this;
-		}
-		
-		/**
-		 * Copy files into buffer
-		 * 
-		 * @param  Array    files hashes array
-		 * @param  String   files parent dir hash
-		 * @param  Boolean  cut files?
-		 * @return elFinder
-		 */
-		this.copy = function(files, src, cut) {
-			this.buffer   = {
-				src   : src || this.cwd.hash,
-				cut   : cut,
-				files : files
-			};
-			return this;
-		}
-		
-		/**
-		 * Copy files into buffer and mark for delete after paste
-		 * Wrapper for copy method
-		 * 
-		 * @param  Array  files hashes array
-		 * @return elFinder
-		 */
-		this.cut = function(files, src) {
-			return this.copy(files, src, true);
-		}
-		
-		/**
-		 * Paste files from buffer into required directory
-		 * 
-		 * @param  String - directory hash, if not set - paste in current working directory
-		 * @return elFinder
-		 */
-		this.paste = function(dst) {
-			var b = this.buffer, o;
-
-			dst = dst || this.cwd.hash;
-			
-			if (b.src == dst) {
-				this.trigger('error', {error : 'Unable to copy into itself'});
-			} else if (b.files && b.files.length) {
-				this.ajax({
-					error   : error,
-					success : success,
-					data    : {
-						cmd     : 'paste',
-						current : this.cwd.hash,
-						src     : b.src,
-						dst     : dst,
-						cut     : b.cut ? 1 : 0,
-						targets : b.files
-					}});
-			}
-			
-			return this;
-		}
-		
-		/**
-		 * Remove directories / files
-		 * 
-		 * @param  Array  files hashes
-		 * @return elFinder
-		 */
-		this.rm = function(files) {
-			if (files.length && !this.locks.ui) {
-				this.ajax({
-					error : error,
-					success : success,
-					data : {
-						cmd : 'rm', 
-						current : this.cwd.hash, 
-						targets : files
-					}	
-				});
-			}
-			return this;
-		}
-		
-		this.rename = function(file, name) {
-			
-		}
-		
-		this.duplicate = function(file) {
-			
-		}
-		
-		this.i18n = function(m) {
-			return this.messages[m] || m;
-		}
-		
-		this.bind('cd', function(e) {
-			var d = e.data, l;
-			
-			if (d.cdc) {
-				self.cwd = d.cwd;
+			})
+			.bind('blur', function() {
+				self.locks.shortcuts = true;
+			})
+			.one('cd', function(e, fm) {
+				// @TODO - disabled
+				$.extend(self.params, e.data.params);
+			})
+			.bind('cd', function(e) {
+				var cdc = e.data.cdc,
+					l   = cdc.length,
+					h   = self.history,
+					hl  = h.length;
+				
+				// update curent dir info and content	
+				self.cwd = e.data.cwd;
 				self.cdc = {};
-				l = d.cdc.length;
 				while (l--) {
-					self.cdc[d.cdc[l].hash] = d.cdc[l];
-					self.cwd.size += d.cdc[l].size;
+					self.cdc[cdc[l].hash] = cdc[l];
+					self.cwd.size += cdc[l].size;
 				}
-				if (d.customData) {
-					self.options.customData = $.extend({}, self.options.customData, d.customData);
+				
+				// remember last dir
+				self.last(self.cwd.hash);
+				
+				// update history if required
+				if (!hl || h[hl - 1] != self.cwd.hash) {
+					h.push(self.cwd.hash);
 				}
-				self.last(d.cwd.hash);
-				// update history if its empty or this event is not reload current dir
-				if (!self.history.length || self.history[self.history.length-1] != d.cwd.hash) {
-					self.history.push(d.cwd.hash);
-				}
-				// self.log(self.cwd)
-				// self.log(self.history)
-			}
-		})
-		.bind('ajaxstart ajaxerror ajaxstop', function(e) {
-			var l = e.type != 'ajaxstop';
-			self.lock({ ui : l, shortcuts : l });
-		}).bind('focus', function() {
-			if (self.locks.shortcuts) {
-				self.locks.shortcuts = false;
-				$('texarea,:text').blur();
-			}
-		}).bind('blur', function() {
-			self.locks.shortcuts = true;
-		});
-
-
+			});
+			
 		// bind to keydown/keypress if shortcuts allowed
 		if (this.options.allowShortcuts) {
 			$(document).bind('keydown keypress', function(e) {
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
-
+		
 				$.each(self.shortcuts, function(i, s) {
 					if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
 						e.preventDefault();
-						e.data = {elfinder : self};
-						s.callback(e);
-						
+						s.callback(e, self);
 						self.debug('shortcut', s.pattern);
 						return false;
 					}
@@ -522,23 +224,13 @@
 			});
 		}
 		
-		
-
 		this.ui = new this.ui(this, $el);
-		this.ui.init()
-		// this.viewType('icons')
-		
-		
-		$(document).click(function() {
-			self.trigger('blur');
-		});
-		
+		this.ui.init();
 		
 		
 		this.cd(this.last() || '', true, true);
-		this.trigger('focus')
-		// cookie(this.cookies.view, 'list')
-		this.timeEnd('create')
+		// this.trigger('focus')
+
 	}
 	
 	
@@ -607,20 +299,17 @@
 		last : function(key) { return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : void(0); },
 		
 		/**
-		 * Open file or directory
+		 * Lock/unlock some functionality
 		 * 
-		 * @param  String  file/dir hash
+		 * @param  Object  options { ui : true|false, shortcuts : true|false }
 		 * @return elFinder
 		 */
-		open : function(hash) {
-			if (!this.locks.ui) {
-				if (this.cdc[hash] && this.cdc[hash].mime != 'directory') {
-					this.log('open file')
-				} else {
-					this.cd(hash);
-				}
+		lock : function(o) {
+			if (o === void(0)) {
+				return this.locks;
 			}
-			return this;
+			$.extend(this.locks, o);
+			this.trigger('lock', { locks : this.locks });
 		},
 		
 		/**
@@ -634,7 +323,7 @@
 			if (!e.type) {
 				e = $.Event(e.toLowerCase());
 			}
-			e.data = $.extend(e.data, data, { elfinder : this });
+			e.data = $.extend(e.data, data);
 			return e;
 		},
 		
@@ -709,7 +398,7 @@
 					break;
 				}
 				try {
-					l[i](e);
+					l[i](e, this);
 				} catch (ex) {
 					window.console && window.console.error && window.console.error(ex);
 				}
@@ -755,7 +444,211 @@
 			return this;
 		},
 		
+		ajax : function(data, opts) {
+			var self = this,
+				o = {
+					url      : this.options.url,
+					async    : true,
+					type     : 'get',
+					dataType : 'json',
+					cache    : false,
+					timeout  : 1000,
+					error    : function(xhr, status) { 
+						var msg = status == 'timeout' || status == 'abort' || (xhr ? parseInt(xhr.status) : 0) > 400
+								? 'Unable to connect to backend' 
+								: 'Invalid backend configuration';
+						
+						self.trigger('ajaxerror', {error : msg}).debug('ajaxerror', xhr);
+					},
+					success  : function(data) {
+						self.trigger('ajaxstop', data);
+
+						if (!data || data.error) {
+							return self.trigger('error', {error : data ? data.error : 'Unknown error'});
+						}
+						
+						self.trigger('cd', data);
+					}
+				};
+				
+			if (!this.locks.ui) {
+				o = $.extend(o, opts, {data : data});
+				self.trigger('ajaxstart', o);
+				$.ajax(o);
+			}
+			
+			return this;
+		},
 		
+		/**
+		 * Return file/dir from current dir by it's hash
+		 * 
+		 * @param  String  file hash
+		 * @return Object
+		 */
+		get : function(hash) { return this.cdc[hash]; },
+		
+		
+		getSelected : function() {
+			var s = [], 
+				l = this.selected.length;
+			
+			while (l--) {
+				if (this.cdc[this.selected[l]]) {
+					s.unshift(this.cdc[this.selected[l]]);
+				}
+			}
+			return s;
+		},
+		
+		/**
+		 * Change current directory
+		 * 
+		 * @param  String   dir hash
+		 * @param  Boolean  update nav dire tree?
+		 * @param  Boolean  send init flag?
+		 * @return elFinder
+		 */
+		cd : function(hash, tree, init) {
+			var data = {cmd : 'open', target : hash};
+			
+			if (!this.locks.ui) {
+				
+				if (this.cdc[hash] && !this.cdc[hash].read) {
+					return this.trigger('error', {error : 'Access denied'});
+				} 
+				if (tree) {
+					data.tree = true;
+				}
+				if (init) {
+					data.init = true;
+				}
+
+				this.ajax(data);
+				
+			}
+			return this;
+		},
+		
+		/**
+		 * Open file or directory
+		 * 
+		 * @param  String  file/dir hash
+		 * @return elFinder
+		 */
+		open : function(hash) {
+			if (!this.locks.ui) {
+				if (this.cdc[hash] && this.cdc[hash].mime != 'directory') {
+					this.log('open file')
+				} else {
+					this.cd(hash);
+				}
+			}
+			return this;
+		},
+		
+		/**
+		 * Reload current directory
+		 * 
+		 * @return elFinder
+		 */
+		reload : function() {
+			this.buffer = {};
+			return this.cd(this.cwd.hash, true);
+		},
+		
+		/**
+		 * Go to previous opened directory
+		 * 
+		 * @return elFinder
+		 */
+		back : function() {
+			if (this.history.length > 1) {
+				// drop current dir
+				this.history.pop();
+				this.cd(this.history.pop());
+			}
+			return this;
+		},
+		
+		/**
+		 * Copy files into buffer
+		 * 
+		 * @param  Array    files hashes array
+		 * @param  String   files parent dir hash
+		 * @param  Boolean  cut files?
+		 * @return elFinder
+		 */
+		copy : function(files, src, cut) {
+			this.buffer   = {
+				src   : src || this.cwd.hash,
+				cut   : cut,
+				files : files
+			};
+			return this;
+		},
+		
+		/**
+		 * Copy files into buffer and mark for delete after paste
+		 * Wrapper for copy method
+		 * 
+		 * @param  Array  files hashes array
+		 * @return elFinder
+		 */
+		cut : function(files, src) { return this.copy(files, src, true); },
+		
+		/**
+		 * Paste files from buffer into required directory
+		 * 
+		 * @param  String - directory hash, if not set - paste in current working directory
+		 * @return elFinder
+		 */
+		paste : function(dst) {
+			var b = this.buffer, o;
+
+			dst = dst || this.cwd.hash;
+			
+			if (b.src == dst) {
+				this.trigger('error', {error : 'Unable to copy into itself'});
+			} else if (b.files && b.files.length) {
+				this.ajax({
+					error   : error,
+					success : success,
+					data    : {
+						cmd     : 'paste',
+						current : this.cwd.hash,
+						src     : b.src,
+						dst     : dst,
+						cut     : b.cut ? 1 : 0,
+						targets : b.files
+					}});
+			}
+			
+			return this;
+		},
+		
+		/**
+		 * Remove directories / files
+		 * 
+		 * @param  Array  files hashes
+		 * @return elFinder
+		 */
+		rm : function(files) {
+			if (files.length && !this.locks.ui) {
+				this.ajax({
+					error : error,
+					success : success,
+					data : {
+						cmd : 'rm', 
+						current : this.cwd.hash, 
+						targets : files
+					}	
+				});
+			}
+			return this;
+		},
+		
+		i18n : function(m) { return this.messages[m] || m; },
 		
 		/**
 		 * Key codes for non alfanum keys

@@ -107,7 +107,11 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.overlay = $('<div class="ui-widget-overlay elfinder-overlay"/>');
+		this.overlay = $('<div class="ui-widget-overlay elfinder-overlay"/>')
+			.click(function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			});
 		
 		/**
 		 * Error message place
@@ -123,7 +127,15 @@
 		 */
 		this.error = $('<div class="ui-state-error ui-corner-all elfinder-error"><span class="ui-icon ui-icon-close"/><span class="ui-icon ui-icon-alert"/><strong>'+fm.i18n('Error')+'!</strong></div>')
 			.append(this.errorMsg)
-			.click(function() { self.error.hide() });
+			.click(function() { self.error.hide() })
+			.bind('show.elfinder', function() {
+				var $this = $(this).fadeIn('slow');
+				
+				setTimeout(function() {
+					$this.fadeOut('slow');
+				}, 4000);
+				
+			});
 		
 		/**
 		 * Statusbar
@@ -160,52 +172,68 @@
 			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
 			
-			// bind events handlers
-			fm.bind('ajaxstart ajaxstop', function(e) {
-				self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
-				self.error.hide();
-			})
-			.bind('lock', function(e) {
-				self.overlay[fm.locks.ui ? 'show' : 'hide']();
-			})
-			.bind('error ajaxerror', function(e) {
-				self.errorMsg.text(fm.i18n(e.data.error));
-				self.error.fadeIn('slow');
-				setTimeout(function() { 
-					self.error.fadeOut('slow');
-				}, 4000);
-			})
-			.shortcut({
-				pattern     : 'ctrl+shift+r',
-				description : 'Reload current directory',
-				callback    : function() { fm.reload(); }
-			})
-			.shortcut({
-				pattern     : 'ctrl+c',
-				description : 'Copy',
-				callback    : function() { fm.copy(fm.selected); }
-			})
-			.shortcut({
-				pattern     : 'ctrl+x',
-				description : 'Cut',
-				callback    : function() { fm.cut(fm.selected); }
-			})
-			.shortcut({
-				pattern     : 'ctrl+v',
-				description : 'Paste',
-				callback    : function() { fm.paste(); }
-			})
-			// @TODO  Move into rm command
-			// .shortcut({
-			// 	pattern     : 'delete',
-			// 	description : 'Delete files',
-			// 	callback    : function() { fm.rm(fm.selected); }
-			// })
-			// .shortcut({
-			// 	pattern     : 'ctrl+backspace',
-			// 	description : 'Delete files',
-			// 	callback    : function() { fm.rm(fm.selected); }
-			// })
+			// click outside elfinder disable shortcuts
+			$(document).click(function() {
+					// disable fm shortcuts
+					fm.trigger('blur');
+				})
+				.keydown(function(e) {
+					if (!fm.locks.shortcuts && e.keyCode == 9) {
+						// prevent fm loosing "focus"
+						e.preventDefault();
+					}
+				});
+			
+			// bind fm events handlers and shortcuts
+			fm.bind('lock', function() {
+					self.overlay[fm.locks.ui ? 'show' : 'hide']();
+				})
+				.one('ajaxstop', function(e) {
+					if (!e.data.cwd) {
+						e.stopPropagation()
+						self.spinner.hide();
+					}
+				})
+				.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+					var l = e.type != 'ajaxstop';
+					fm.lock({ui : l, shortcuts : l});
+					self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
+				})
+				.bind('ajaxerror error', function(e) {
+					self.errorMsg.text(fm.i18n(e.data.error));
+					self.error.trigger('show.elfinder');
+				})
+				.shortcut({
+					pattern     : 'ctrl+shift+r',
+					description : 'Reload current directory',
+					callback    : function() { fm.reload(); }
+				})
+				.shortcut({
+					pattern     : 'ctrl+c',
+					description : 'Copy',
+					callback    : function() { fm.copy(fm.selected); }
+				})
+				.shortcut({
+					pattern     : 'ctrl+x',
+					description : 'Cut',
+					callback    : function() { fm.cut(fm.selected); }
+				})
+				.shortcut({
+					pattern     : 'ctrl+v',
+					description : 'Paste',
+					callback    : function() { fm.paste(); }
+				})
+				// @TODO  Move into rm command
+				// .shortcut({
+				// 	pattern     : 'delete',
+				// 	description : 'Delete files',
+				// 	callback    : function() { fm.rm(fm.selected); }
+				// })
+				// .shortcut({
+				// 	pattern     : 'ctrl+backspace',
+				// 	description : 'Delete files',
+				// 	callback    : function() { fm.rm(fm.selected); }
+				// })
 			;
 			
 		}
