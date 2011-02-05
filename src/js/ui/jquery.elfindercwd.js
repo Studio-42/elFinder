@@ -74,6 +74,9 @@ $.fn.elfindercwd = function(fm) {
 					fm.selected.splice(ndx, 1)
 				}
 			})
+			.delegate('[id]', 'dblclick', function(e) {
+				fm.open(this.id);
+			})
 			.selectable({
 				filter     : '[id]',
 				start      : function() { fm.trigger('focus'); },

@@ -462,6 +462,17 @@
 			return this.cd(this.cwd.hash, true);
 		}
 		
+		this.open = function(hash) {
+			if (!this.locks.ui) {
+				if (this.cdc[hash] && this.cdc[hash].mime != 'directory') {
+					this.log('open file')
+				} else {
+					this.cd(hash);
+				}
+			}
+			return this;
+		}
+		
 		/**
 		 * Go to previous opened directory
 		 * 
