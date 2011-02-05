@@ -529,7 +529,7 @@
 		 */
 		this.paste = function(dst) {
 			var b = this.buffer, o;
-			this.log(dst)
+
 			dst = dst || this.cwd.hash;
 			
 			if (b.src == dst) {
@@ -552,27 +552,24 @@
 		}
 		
 		/**
-		 * Paste copied files in directory
-		 * Wrapper for copy method
+		 * Remove directories / files
 		 * 
-		 * @param  String - directory hash, if not set - paste in current working directory
+		 * @param  Array  files hashes
 		 * @return elFinder
 		 */
 		this.rm = function(files) {
-			var o = {
-				error : error,
-				success : success,
-				data : {cmd : 'rm', current : this.cwd.hash, targets : []}
-			};
-			
-			
-			if (!this.locks.ui) {
-				$.each(files||this.selected, function(i, f) {
-					o.data.targets.push(f.hash);
+			if (files.length && !this.locks.ui) {
+				this.ajax({
+					error : error,
+					success : success,
+					data : {
+						cmd : 'rm', 
+						current : this.cwd.hash, 
+						targets : files
+					}	
 				});
-				
-				o.data.targets.length && this.ajax(o);
 			}
+			return this;
 		}
 		
 		this.rename = function(file, name) {

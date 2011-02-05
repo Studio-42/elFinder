@@ -175,9 +175,39 @@
 					self.error.fadeOut('slow');
 				}, 4000);
 			})
-			
-
+			.shortcut({
+				pattern     : 'ctrl+shift+r',
+				description : 'Reload current directory',
+				callback    : function() { fm.reload(); }
+			})
+			.shortcut({
+				pattern     : 'ctrl+c',
+				description : 'Copy',
+				callback    : function() { fm.copy(fm.selected); }
+			})
+			.shortcut({
+				pattern     : 'ctrl+x',
+				description : 'Cut',
+				callback    : function() { fm.cut(fm.selected); }
+			})
+			.shortcut({
+				pattern     : 'ctrl+v',
+				description : 'Paste',
+				callback    : function() { fm.paste(); }
+			})
+			// @TODO  Move into rm command
+			// .shortcut({
+			// 	pattern     : 'delete',
+			// 	description : 'Delete files',
+			// 	callback    : function() { fm.rm(fm.selected); }
+			// })
+			// .shortcut({
+			// 	pattern     : 'ctrl+backspace',
+			// 	description : 'Delete files',
+			// 	callback    : function() { fm.rm(fm.selected); }
+			// })
 			;
+			
 		}
 
 
