@@ -271,8 +271,8 @@
 .elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file { float:right; margin:0 0 3px 3px; }
 
 .elfinder-cwd-view-icons .elfinder-cwd-file-wrapper {
-	width:51px;
-	height:51px;
+	width:52px;
+	height:52px;
 /*	border:1px solid #ccc;*/
 	margin:1px auto 1px auto;
 	padding:2px;
@@ -286,9 +286,8 @@
 	text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
 	margin:3px 1px 0 1px;
+	padding:1px 2px;
 }
-
-
 
 .elfinder-cwd-view-icons .ui-state-hover { border:0 solid;}
 /*.elfinder-cwd-iv-file-wrapper.ui-state-hover { margin:0 auto;  }*/
@@ -300,9 +299,11 @@
 .elfinder-cwd-view-icons .elfinder-symlink { top:50%; left:0px; }
 
 .elfinder-cwd-icon {
+	display:block;
 	width:48px;
 	height:48px;
 	margin:0 auto;
+/*	border:1px solid #111;*/
 	background: url('../images/icons-big.png') 0 0 no-repeat;
 /*	background-position:0 0;*/
 /*	background-repeat:no-repeat;*/

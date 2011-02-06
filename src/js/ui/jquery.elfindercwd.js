@@ -216,7 +216,30 @@ $.fn.elfindercwd = function(fm) {
 				} else if (t + h > ph) {
 					cwd.scrollTop(Math.ceil(t + h - ph + st));
 				}
-			};
+			},
+			/**
+			 * Load images thumbnails in background
+			 *
+			 * @return void
+			 */
+			tmb = function() {
+				fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, {
+						error : function(xhr) { fm.debug('ajaxerror', xhr) },
+						success : function(data) {
+							if (!data || data.error) {
+								return fm.debug('error', data ? data.error : 'Unknown error');
+							}
+						
+							if (data.images && data.current == fm.cwd.hash && fm.view == 'icons') {
+								data.tmb && tmb();
+								$.each(data.images, function(hash, url) {
+									cwd.find('#'+hash+' .elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
+								});
+							}
+						}
+				}, true);
+			}
+			;
 		
 
 		fm.bind('cd', function(e) {
@@ -225,13 +248,6 @@ $.fn.elfindercwd = function(fm) {
 				html = '',
 				i, f;
 
-			if (!e.data.cdc) {
-				return;
-			}
-
-
-			// fm.time('cwd-render');
-			
 
 			// create html code
 			for (i = 0; i < e.data.cdc.length; i++) {
@@ -248,9 +264,6 @@ $.fn.elfindercwd = function(fm) {
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
 				.html(t.container.replace('%content', html));
 			
-			// fm.timeEnd('cwd-render')
-			
-			// fm.time('cwd-events')
 			// make rows or icons/filenames draggable
 			// and add suport for shift|meta + click select
 			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
@@ -295,7 +308,8 @@ $.fn.elfindercwd = function(fm) {
 						cwd.droppable('enable');
 					}
 				});
-			// fm.timeEnd('cwd-events')
+			
+			e.data.tmb && !list && tmb();
 			
 		})
 		.shortcut({

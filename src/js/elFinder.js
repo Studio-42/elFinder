@@ -454,7 +454,15 @@
 			return this;
 		},
 		
-		ajax : function(data, opts) {
+		/**
+		 * Proccess ajax request
+		 *
+		 * @param  Object  data to send to connector
+		 * @param  Object  ajax options
+		 * @param  Boolean if set - "ajaxstart" event not fired
+		 * @return elFinder
+		 */
+		ajax : function(data, opts, silent) {
 			var self = this,
 				o = {
 					url      : this.options.url,
@@ -483,7 +491,7 @@
 				
 			if (!this.locks.ui) {
 				o = $.extend(o, opts, {data : data});
-				self.trigger('ajaxstart', o);
+				!silent && self.trigger('ajaxstart', o);
 				$.ajax(o);
 			}
 			
