@@ -452,7 +452,7 @@
 					type     : 'get',
 					dataType : 'json',
 					cache    : false,
-					timeout  : 1000,
+					// timeout  : 1000,
 					error    : function(xhr, status) { 
 						var msg = status == 'timeout' || status == 'abort' || (xhr ? parseInt(xhr.status) : 0) > 400
 								? 'Unable to connect to backend' 

@@ -204,6 +204,22 @@
 					self.error.trigger('show.elfinder');
 				})
 				.shortcut({
+					pattern     : 'ctrl+arrowLeft',
+					description : 'See folders you viewed previously',
+					callback    : function() { fm.back(); }
+				})
+				.shortcut({
+					pattern     : 'ctrl+arrowUp',
+					description : 'Go into parent directory',
+					callback    : function() {
+						var p = self.tree.find('#nav-'+fm.cwd.hash).parent('li').parent('ul').prev('a[id]');
+						
+						if (p.length) {
+							fm.cd(p.attr('id').substr(4));
+						}
+					}
+				})
+				.shortcut({
 					pattern     : 'ctrl+shift+r',
 					description : 'Reload current directory',
 					callback    : function() { fm.reload(); }
