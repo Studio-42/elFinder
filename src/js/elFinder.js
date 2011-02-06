@@ -205,6 +205,8 @@
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
+				
+				self.selected = [];
 			});
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -226,6 +228,14 @@
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
+		
+		// $.each(this.listeners, function(e, c) {
+		// 	// self.log(e)
+		// 	self.bind(e, function() {
+		// 		self.log(e)
+		// 		self.log(self.buffer.files)
+		// 	})
+		// })
 		
 		
 		this.cd(this.last() || '', true, true);
@@ -580,11 +590,16 @@
 		 * @return elFinder
 		 */
 		copy : function(files, src, cut) {
-			this.buffer   = {
-				src   : src || this.cwd.hash,
-				cut   : cut,
-				files : files
-			};
+			files = ($.isArray(files) ? files : this.selected).slice(0);
+
+			this.cleanBuffer();			
+			if (files.length) {
+				this.buffer = {
+					src   : src || this.cwd.hash,
+					cut   : !!cut,
+					files : files
+				};
+			}
 			return this;
 		},
 		
@@ -600,10 +615,11 @@
 		/**
 		 * Paste files from buffer into required directory
 		 * 
-		 * @param  String - directory hash, if not set - paste in current working directory
+		 * @param  String   directory hash, if not set - paste in current working directory
+		 * @clean  Boolean  clean buffer after paste - required by drag&drop
 		 * @return elFinder
 		 */
-		paste : function(dst) {
+		paste : function(dst, clean) {
 			var b = this.buffer, o;
 
 			dst = dst || this.cwd.hash;
@@ -612,18 +628,25 @@
 				this.trigger('error', {error : 'Unable to copy into itself'});
 			} else if (b.files && b.files.length) {
 				this.ajax({
-					error   : error,
-					success : success,
-					data    : {
 						cmd     : 'paste',
 						current : this.cwd.hash,
 						src     : b.src,
 						dst     : dst,
 						cut     : b.cut ? 1 : 0,
 						targets : b.files
-					}});
+				});
+				clean && this.cleanBuffer();
 			}
-			
+			return this;
+		},
+		
+		/**
+		 * Reset files buffer
+		 * 
+		 * @return elFinder
+		 */
+		cleanBuffer : function() {
+			this.buffer = { files : [], cut : false };
 			return this;
 		},
 		

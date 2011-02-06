@@ -100,7 +100,15 @@
 						.draggable(draggable)
 						.end()
 						.not('.elfinder-na,.elfinder-ro')
-						.droppable(fm.ui.droppable);
+						.droppable({
+							tolerance  : 'pointer',
+							hoverClass : 'elfinder-dropable-active ui-state-hover',
+							drop : function(e, ui) {
+								ui.helper.hide();
+								fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+								fm.paste(this.id.substr(4));
+							}
+						});
 				}
 				
 				// find current dir

@@ -235,8 +235,8 @@
 .elfinder-nav-icon-home            { background-position:0 -35px;}
 .elfinder-nav-icon-places          { background-position:0 -134px;}
 .elfinder-nav-icon-folder          { background-position:0 -51px; }
-.elfinder-nav-icon-folder-open     { background-position:0 -66px;}
-
+/*.elfinder-nav-icon-folder-open     { background-position:0 -66px;}*/
+.elfinder-tree .elfinder-dropable-active .elfinder-nav-icon { background-position:0 -66px;}
 
 /* permissions marker in nav */
 .elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
@@ -320,9 +320,9 @@
 */}
 
 /* icon inside file/dir */
-
+.elfinder-cwd .elfinder-dropable-active .elfinder-cwd-icon { background-position: 0 -100px; }
 .elfinder-cwd-icon-directory { background-position:0 -50px; }
-.elfinder-cwd-icon-directory-opened { background-position: 0 -100px; }
+/*.elfinder-cwd-icon-directory-opened { background-position: 0 -100px; }*/
 
 .elfinder-cwd-icon-application { background-position:0 -150px; }
 .elfinder-cwd-icon-x-empty, 

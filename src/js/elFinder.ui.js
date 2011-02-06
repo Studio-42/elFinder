@@ -7,43 +7,19 @@
 	 */
 	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
-			/**
-			 * Shortcuts config
-			 *
-			 * @type Array
-			 */
-			shortcuts = [
-				{
-					pattern : 'ctrl+shift+r',
-					description : 'Reload current directory',
-					callback : function() { fm.reload(); }
-				},
-				{
-					pattern     : 'ctrl+c',
-					description : 'Copy',
-					callback    : function() { fm.copy(fm.selected); }
-				},
-				{
-					pattern     : 'ctrl+x',
-					description : 'Cut',
-					callback    : function() { fm.cut(fm.selected); }
-				},
-				{
-					pattern     : 'ctrl+v',
-					description : 'Paste',
-					callback    : function() { fm.paste(); }
-				},
-				{
-					pattern     : 'delete',
-					description : 'Delete files',
-					callback    : function() { fm.rm(); }
-				},
-				{
-					pattern     : 'ctrl+backspace',
-					description : 'Delete files',
-					callback    : function() { fm.rm(); }
-				},
-			]
+			open = function() {
+				var s = fm.selected, l;
+				
+				if (s.length == 1) {
+					fm.open(s[0]);
+				} else {
+					for (i = 0; i < s.length; i++) {
+						if (fm.cdc[s[i]] && fm.cdc[s[i]].mime != 'directory') {
+							fm.open(s[i]);
+						}
+					}
+				}
+			}
 			;
 
 		/**
@@ -220,6 +196,19 @@
 					}
 				})
 				.shortcut({
+					pattern     : 'ctrl+arrowDown',
+					description : 'Open directory or files',
+					callback    : open
+				})
+				.shortcut({
+					pattern     : 'enter',
+					description : 'Open directory or files',
+					callback    : function() {
+						// @TODO  add open/select support
+						open();
+					}
+				})
+				.shortcut({
 					pattern     : 'ctrl+shift+r',
 					description : 'Reload current directory',
 					callback    : function() { fm.reload(); }
@@ -375,36 +364,6 @@
 			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
 		},
 		
-		/**
-		 * Default options for jquery-ui droppable
-		 * 
-		 * @type  Object
-		 */
-		droppable : {
-			tolerance : 'pointer',
-			over : function() {
-				this.id.indexOf('nav-') === 0
-					? $(this).addClass('ui-state-hover').children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open')
-					: $(this).find('.elfinder-cwd-icon').addClass('elfinder-cwd-icon-directory-opened')
-			},
-			out : function() {
-				this.id.indexOf('nav-') === 0
-					? $(this).removeClass('ui-state-hover').children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open')
-					: $(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-			},
-			drop : function(e, ui) {
-				var fm = $(this).parents('.elfinder')[0].elfinder,
-					nav = this.id.indexOf('nav-') === 0;
-				
-				nav	? $(this).removeClass('ui-state-hover').children('.elfinder-nav-icon-folder').removeClass('elfinder-nav-icon-folder-open')
-					: $(this).find('.elfinder-cwd-icon').removeClass('elfinder-cwd-icon-directory-opened');
-				
-				ui.helper.hide();
-				fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-				fm.paste(nav ? this.id.substr(4) : this.id);
-				fm.buffer = [];
-			}
-		},
 		
 		/**
 		 * File mimetype to kind mapping

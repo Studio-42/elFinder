@@ -84,16 +84,17 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.droppable({
 				accept : 'a[id]',
-				drop : function(e, ui) {
+				drop   : function(e, ui) {
 					var src = ui.helper.data('src');
-					
+
 					if (src != fm.cwd.hash && fm.cwd.write) {
+						ui.helper.hide();
 						fm.copy(ui.helper.data('files'), src, !(e.shiftKey || e.ctrlKey || e.metaKey));
-						fm.paste();
-						fm.buffer = [];
-					}
+						fm.paste(fm.cwd.hash, true);
+					} 
 				}
 			}),
+			
 			draggable = $.extend({}, fm.ui.draggable, {
 				appendTo : cwd,
 				helper : function(e, ui) {
@@ -215,29 +216,12 @@ $.fn.elfindercwd = function(fm) {
 				} else if (t + h > ph) {
 					cwd.scrollTop(Math.ceil(t + h - ph + st));
 				}
-			},
-			open = function() {
-				var s = cwd.find('.ui-selected');
-				
-				if (s.length == 1 && s.eq(0).is('.directory')) {
-					// only one directory selected - cd into it
-					fm.cd(s[0].id);
-				} else {
-					// open all selected files
-					s.not('.directory').each(function() {
-						fm.open(this.id);
-					});
-				}
-			}
-			
-			
-			
-			;
+			};
 		
 
 		fm.bind('cd', function(e) {
 			var list = fm.view == 'list',
-				t = tpl[fm.view] || tpl.icons,
+				t    = tpl[fm.view] || tpl.icons,
 				html = '',
 				i, f;
 
@@ -246,9 +230,9 @@ $.fn.elfindercwd = function(fm) {
 			}
 
 
-			fm.time('cwd-render');
+			// fm.time('cwd-render');
 			
-			fm.selected = [];
+
 			// create html code
 			for (i = 0; i < e.data.cdc.length; i++) {
 				f = e.data.cdc[i];
@@ -264,9 +248,9 @@ $.fn.elfindercwd = function(fm) {
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
 				.html(t.container.replace('%content', html));
 			
-			fm.timeEnd('cwd-render')
+			// fm.timeEnd('cwd-render')
 			
-			fm.time('cwd-events')
+			// fm.time('cwd-events')
 			// make rows or icons/filenames draggable
 			// and add suport for shift|meta + click select
 			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
@@ -298,8 +282,20 @@ $.fn.elfindercwd = function(fm) {
 				});
 				
 			// make writable dirs droppable
-			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable(fm.ui.droppable);
-			fm.timeEnd('cwd-events')
+			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)')
+				.droppable({
+					tolerance : 'pointer',
+					hoverClass : 'elfinder-dropable-active',
+					over : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
+					out  : function() { cwd.droppable('enable'); },
+					drop : function(e, ui) {
+						ui.helper.hide();
+						fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+						fm.paste(this.id, true);
+						cwd.droppable('enable');
+					}
+				});
+			// fm.timeEnd('cwd-events')
 			
 		})
 		.shortcut({
@@ -357,19 +353,6 @@ $.fn.elfindercwd = function(fm) {
 			description : 'Append downside file to selected',
 			keypress    : keypress,
 			callback    : function() { select('down', true); }
-		})
-		.shortcut({
-			pattern     : 'ctrl+arrowDown',
-			description : 'Open directory or files',
-			callback    : open
-		})
-		.shortcut({
-			pattern     : 'enter',
-			description : 'Open directory or files',
-			callback    : function() {
-				// @TODO  add open/select support
-				open();
-			}
 		})
 		;
 		
