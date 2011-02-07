@@ -244,6 +244,15 @@
 .elfinder-ltr .elfinder-nav .elfinder-perms { left: 18px; }
 .elfinder-rtl .elfinder-nav .elfinder-perms { right:18px; }
 
+.elfinder-nav-spinner {
+	position:absolute;
+	left:0;
+	margin-left:-2px;
+	width:16px;
+	height:16px;
+	background:url(../images/spinner-mini.gif) 0 0 no-repeat;
+}
+
 
 /*************************************************/
 /*          CURRENT WORKING DIRECTORY            */

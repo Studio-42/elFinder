@@ -183,6 +183,7 @@
 			.one('cd', function(e, fm) {
 				// @TODO - disabled
 				$.extend(self.params, e.data.params);
+				// self.log(e.data.tree2)
 			})
 			.bind('cd', function(e) {
 				var cdc = e.data.cdc,

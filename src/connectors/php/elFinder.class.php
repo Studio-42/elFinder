@@ -90,7 +90,8 @@ class elFinder {
 		'extract'   => '_extract',
 		'resize'    => '_resize',
 		'tmb'       => '_thumbnails',
-		'ping'      => '_ping'
+		'ping'      => '_ping',
+		'subdirs'   => '_subdirs'
 		);
 		
 	/**
@@ -337,6 +338,7 @@ class elFinder {
 					}
 				}
 			}
+			$this->_result['tree2'] = $this->_tree2($this->_options['root']);
 			
 		}
 		
@@ -368,6 +370,99 @@ class elFinder {
 		exit();
 	}
 
+	protected function _hasSubdirs($path) {
+		if (is_dir($path) && $this->_isAllowed($path, 'read')) {
+
+			$ls = scandir($path);
+			if ($ls) {
+				for ($i = 0, $s = count($ls); $i < $s; $i++) {
+					$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+					if ($this->_isAccepted($ls[$i]) && is_dir($p)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	protected function _tree2($path) {
+		
+		$dirs = array();
+		$hash = $this->_crypt($path); 
+		$dirs[] = array(
+			'hash'  => $hash,
+			'phash' => $path == $this->_options['root'] ? null : dirname($path),
+			'name'  => $path == $this->_options['root'] && $this->_options['rootAlias'] ? $this->_options['rootAlias'] : basename($path),
+			'read'  => $this->_isAllowed($path, 'read'),
+			'write' => $this->_isAllowed($path, 'write'),
+			'childs' => $this->_hasSubdirs($path)
+		);
+
+		if ($this->_isAllowed($path, 'read') && (false != ($ls = scandir($path)))) {
+			$cnt = count($ls);
+			
+			
+			for ($i = 0; $i < $cnt; $i++) {
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				
+				if ($this->_isAccepted($ls[$i]) && is_dir($p) && !is_link($p)) {
+					// $dirs[$hash]['childs'] = true;
+					$h = $this->_crypt($p);
+					$dirs[] = array(
+						'hash' => $h,
+						'phash' => $hash,
+						'name' => basename($p),
+						'read' => $this->_isAllowed($p, 'read'),
+						'write' => $this->_isAllowed($p, 'write'),
+						'childs' => $this->_hasSubdirs($p)
+					);
+					
+				}
+				
+			}
+		}
+
+		// if ($this->_isAllowed($path, 'read') && (false != ($ls = scandir($path)))) {
+		// 	for ($i=0; $i < count($ls); $i++) {
+		// 		$p = $path.DIRECTORY_SEPARATOR.$ls[$i]; 
+		// 		if ($this->_isAccepted($ls[$i]) && is_dir($p) && !is_link($p)) {
+		// 			$dir['dirs'][] = $this->_tree($p);
+		// 		}
+		// 	}
+		// }
+		return $dirs;
+	}
+	
+	protected function _subdirs() {
+		$this->_result['subdirs'] = array();
+		$path = $this->_uncrypt($_GET['dir']);
+		$this->_result['dir'] = $this->_uncrypt($_GET['dir']);
+		
+		if ($this->_isAllowed($path, 'read') && (false != ($ls = scandir($path)))) {
+			$cnt = count($ls);
+			
+			
+			for ($i = 0; $i < $cnt; $i++) {
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				
+				if ($this->_isAccepted($ls[$i]) && is_dir($p) && !is_link($p)) {
+					// $dirs[$hash]['childs'] = true;
+					$h = $this->_crypt($p);
+					$this->_result['subdirs'][] = array(
+						'hash' => $h,
+						'phash' => $this->_crypt(dirname($p)),
+						'name' => basename($p),
+						'read' => $this->_isAllowed($p, 'read'),
+						'write' => $this->_isAllowed($p, 'write'),
+						'childs' => $this->_hasSubdirs($p)
+					);
+					
+				}
+				
+			}
+		}
+	}
 	
 	/************************************************************/
 	/**                   elFinder commands                    **/
