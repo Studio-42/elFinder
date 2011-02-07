@@ -183,7 +183,7 @@
 			.one('cd', function(e, fm) {
 				// @TODO - disabled
 				$.extend(self.params, e.data.params);
-				// self.log(e.data.tree2)
+				self.log(e.data)
 			})
 			.bind('cd', function(e) {
 				var cdc = e.data.cdc,
@@ -524,7 +524,7 @@
 		 * Change current directory
 		 * 
 		 * @param  String   dir hash
-		 * @param  Boolean  update nav dire tree?
+		 * @param  Boolean  update nav dir tree?
 		 * @param  Boolean  send init flag?
 		 * @return elFinder
 		 */
