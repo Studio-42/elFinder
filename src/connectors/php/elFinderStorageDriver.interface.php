@@ -19,6 +19,15 @@ interface elFinderStorageDriver {
 	public function load(array $opts);
 	
 	/**
+	 * Return true if root dir is readable
+	 * Required by elFinder to set first readable root as default
+	 *
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isReadable();
+	
+	/**
 	 * Return directory/file info
 	 *
 	 * @param  string  directory hash

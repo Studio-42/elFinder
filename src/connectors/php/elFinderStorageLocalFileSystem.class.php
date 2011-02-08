@@ -135,19 +135,42 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 		$this->options['path'] = $this->normpath($this->options['path']);
 		
-		if (!is_dir($this->options['path']) || !is_readable($this->options['path'])) {
+		if (!is_dir($this->options['path'])) {
 			return false;
 		}
 		
-		$this->options['dirname'] = dirname($this->options['path']);
+		$this->options['read']  = $this->options['read']  && is_readable($this->options['path']);
+		$this->options['write'] = $this->options['write'] && is_writable($this->options['path']);
+		
+		if (!$this->options['read'] && !$this->options['write']) {
+			return false;
+		}
+		
+		$this->options['dirname']  = dirname($this->options['path']);
 		$this->options['basename'] = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
 		
 		debug($this->options['path']);
 		debug($this->options['dirname']);
 		
+		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
+		debug($this->options['mimeDetect'] );
 		return true;
 	}
 	
+	/**
+	 * Return true if root dir is readable
+	 * Required by elFinder to set first readable root as default
+	 *
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isReadable() {
+		return $this->options['read'];
+	}
+	
+
+	
+
 	/**
 	 * Return directory/file info
 	 *
@@ -383,6 +406,10 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 	}
 
+	/***************************************************************************/
+	/*                                utilites                                 */
+	/***************************************************************************/
+	
 	
 	/**
 	 * Return normalized path, this works the same as os.path.normpath() in Python
@@ -432,6 +459,74 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 		
 		return $path ? $path : '.';
+	}
+	
+	/**
+	 * Return file mimetype
+	 *
+	 * @param  string  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function mimetype($path) {
+		switch ($this->options['mimeDetect']) {
+			case 'finfo':
+				if (empty($this->_finfo)) {
+					$this->_finfo = finfo_open(FILEINFO_MIME);
+				}
+				$type = @finfo_file($this->_finfo, $path);
+				break;
+			case 'mime_content_type':   
+			 	$type = mime_content_type($path);
+				break;
+			default:
+				$pinfo = pathinfo($path); 
+				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
+		}
+		$type = explode(';', $type); 
+		
+		// if ($this->_options['mimeDetect'] != 'internal' && $type[0] == 'application/octet-stream') {
+		// 	$pinfo = pathinfo($path); 
+		// 	$ext = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+		// 	if (!empty($ext) && !empty($this->_mimeTypes[$ext])) {
+		// 		$type[0] = $this->_mimeTypes[$ext];
+		// 	}
+		// }
+		
+		return $type[0];
+		
+	}
+	
+	
+	/**
+	 * Return mime detect available method
+	 *
+	 * @param  string  mimetype detect method to test
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function mimeDetect($type) {
+		$mime = '';
+		
+		switch ($type) {
+			case 'finfo':
+				if (class_exists('finfo')) {
+					$finfo = finfo_open(FILEINFO_MIME);
+					$mime = @finfo_file($finfo, __FILE__);
+				}
+				break;
+			case 'mime_content_type':
+				if (function_exists('mime_content_type')) {
+					$mime = mime_content_type(__FILE__);
+				}
+				break;
+			default:
+				$type = 'internal';
+				$mime = 'text/x-php;';
+		}
+		$mime = explode(';', $mime);
+		return $mime[0] == 'text/x-php' || $mime[0] == 'text/x-c++' ? $type : 'internal';
 	}
 	
 }

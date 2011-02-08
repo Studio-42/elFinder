@@ -23,7 +23,9 @@ $opts = array(
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
-			'mimeDetect'   => 'internal',
+			'mimeDetect'   => 'finfo',
+			'read' => true,
+			'write' => false,
 			'debug' => true
 		),
 		array(
