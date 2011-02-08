@@ -175,10 +175,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 	
 	/**
-	 * Return true if path is readable
-	 * To check root dir call isReadable("/")
+	 * Return true if file is readable
 	 *
-	 * @param  string  dir/file hash
+	 * @param  string  file hash (use "/" to test root dir)
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -186,7 +185,27 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return !$hash || $hash == '/' ? $this->options['read'] : false;
 	}
 	
+	/**
+	 * Return true if file is writable
+	 *
+	 * @param  string  file hash (use "/" to test root dir)
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isWritable($hash) {
+		
+	}
 	
+	/**
+	 * Return true if file can be removed
+	 *
+	 * @param  string  file hash (use "/" to test root dir)
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isRemovable($hash) {
+		
+	}
 	
 
 	/**

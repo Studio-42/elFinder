@@ -20,13 +20,31 @@ interface elFinderStorageDriver {
 	public function load(array $opts, $key);
 	
 	/**
-	 * Return true if root dir is readable
-	 * Required by elFinder to set first readable root as default
+	 * Return true if file is readable
 	 *
+	 * @param  string  file hash (use "/" to test root dir)
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isReadable($hash);
+	
+	/**
+	 * Return true if file is writable
+	 *
+	 * @param  string  file hash (use "/" to test root dir)
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isWritable($hash);
+	
+	/**
+	 * Return true if file can be removed
+	 *
+	 * @param  string  file hash (use "/" to test root dir)
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isRemovable($hash);
 	
 	/**
 	 * Return directory/file info
