@@ -13,10 +13,11 @@ interface elFinderStorageDriver {
 	 * Return true if storage available
 	 *
 	 * @param  array  object configuration
+	 * @param  string  unique key to use as prefix in files hashes
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function load(array $opts);
+	public function load(array $opts, $key);
 	
 	/**
 	 * Return true if root dir is readable
@@ -25,7 +26,7 @@ interface elFinderStorageDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function isReadable();
+	public function isReadable($hash);
 	
 	/**
 	 * Return directory/file info

@@ -29,6 +29,13 @@ class elFinder {
 	);
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $default = '';
+	
+	/**
 	 * Load storages (roots)
 	 * Return true if at least one storage available
 	 *
@@ -46,17 +53,21 @@ class elFinder {
 			return false;
 		}
 
-		foreach ($opts['roots'] as $o) {
+		foreach ($opts['roots'] as $i => $o) {
 			$class = 'elFinderStorage'.$o['driver'];
 
 			if (class_exists($class)) {
 				$root = new $class();
-				
-				if ($root->load($o)) {
-					$this->roots[] = $root;
+				$key = strtolower(substr($o['driver'], 0, 1)).$i.'f';
+				if ($root->load($o, $key)) {
+					$this->roots[$key] = $root;
+					if (!$this->default && $root->isReadable('/')) {
+						$this->default = $key;
+					}
 				}
 			}
 		}
+		echo $this->default;
 		// debug($this->roots);
 		return !empty($this->roots);
 	}

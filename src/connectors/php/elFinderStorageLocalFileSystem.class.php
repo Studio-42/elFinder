@@ -15,6 +15,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'dirSize'      => false,        // count directories size?
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new dir mode 
+		'cryptLib'     => 'auto',
 		'fileURL'      => true,         // allow send files urls to frontend?
 		'uploadAllow'  => array(),      // mimetypes which allowed to upload
 		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
@@ -42,6 +43,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @var string
 	 **/
 	protected $error = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $prefix = '';
 	
 	/**
 	 * extensions/mimetypes for _mimetypeDetect = 'internal' 
@@ -117,16 +125,20 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'mkv'   => 'video/x-matroska'
 		);
 	
+
+	
 	
 	/**
 	 * Init storage.
 	 * Return true if storage available
 	 *
-	 * @param  array  object configuration
+	 * @param  array   object configuration
+	 * @param  string  unique key to use as prefix in files hashes
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function load(array $opts) {
+	public function load(array $opts, $key) {
+		$this->prefix = $key;
 		$this->options = array_merge($this->options, $opts);
 		
 		if (empty($this->options['path'])) {
@@ -146,9 +158,10 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return false;
 		}
 		
-		$this->options['dirname']  = dirname($this->options['path']);
-		$this->options['basename'] = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
+		$this->options['dirname']    = dirname($this->options['path']);
+		$this->options['basename']   = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
 		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
+		$this->options['cryptLib']   = $this->cryptLib($this->options['cryptLib']);
 
 		if ($this->options['tmbDir']) {
 			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'];
@@ -156,24 +169,24 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			if ($this->options['tmbDir']) {
 				$this->options['imgLib'] = $this->imageLib($this->options['imgLib']);
 			}
+			// @TODO  clean tmb dir
 		}
-
-		debug($this->options );
 		return true;
 	}
 	
 	/**
-	 * Return true if root dir is readable
-	 * Required by elFinder to set first readable root as default
+	 * Return true if path is readable
+	 * To check root dir call isReadable("/")
 	 *
+	 * @param  string  dir/file hash
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function isReadable() {
-		return $this->options['read'];
+	public function isReadable($hash) {
+		return !$hash || $hash == '/' ? $this->options['read'] : false;
 	}
 	
-
+	
 	
 
 	/**
@@ -505,6 +518,77 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function encode($path) {
+		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
+		$path = substr($path, strlen($this->options['path']));
+		// $cutRoot = substr($path, strlen($this->_options['root']));
+
+		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
+		if (!$path)	{
+			$path = '/';
+		}
+
+		// TODO crypt path and return hash
+		$hash = $this->crypt($path);
+
+		// hash is used as id in HTML that means it must contain vaild chars
+		// make base64 html safe and append prefix in begining
+		$hash = $this->prefix.strtr(base64_encode($hash), '+/=', '-_.');
+		$hash = rtrim($hash, '.'); // remove dots '.' at the end, before it was '=' in base64
+
+		// $this->_result['debug']['crypt_'.$hash] = $cutRoot;
+
+		return $hash;
+		
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function decode($hash) {
+		// remove prefix
+		$hash = substr($hash, strlen($this->prefix));
+		// replace HTML safe base64 to normal
+		$hash = base64_decode(strtr($hash, '-_.', '+/='));
+
+		// TODO uncrypt hash and return path
+		$path = $this->uncrypt($hash);
+
+		// append ROOT to path after it was cut in _crypt
+		return $this->options['path'].($path == '/' ? '' : $path);
+	}
+	
+	/**
+	 * Return crypted path 
+	 *
+	 * @param  string  path
+	 * @return mixed
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function crypt($path) {
+		return $path;
+	}
+	
+	/**
+	 * Return uncrypted path 
+	 *
+	 * @param  mixed  hash
+	 * @return mixed
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function uncrypt($hash) {
+		return $hash;
+	}
+	
+	/**
 	 * Return mime detect available method
 	 *
 	 * @param  string  required mimetype detect method
@@ -570,6 +654,16 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return '';
 	}
 	
+	/**
+	 * Return available crypt lib - not implemented yet
+	 *
+	 * @param  string  required lib
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function cryptLib($lib) {
+		return '';
+	}
 }
 
 
