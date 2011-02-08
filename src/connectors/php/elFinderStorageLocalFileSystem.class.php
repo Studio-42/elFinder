@@ -148,11 +148,16 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 		$this->options['dirname']  = dirname($this->options['path']);
 		$this->options['basename'] = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
-		
-		debug($this->options['path']);
-		debug($this->options['dirname']);
-		
 		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
+
+		if ($this->options['tmbDir']) {
+			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir']
+			$this->options['tmbDir'] = is_dir($dir) || @mkdir($dir, $this->options['dirMode']) ? $dir : '';
+			if ($this->options['tmbDir']) {
+				$this->options['imgLib'] = $this->imageLib($this->options['tmbDir']);
+			}
+		}
+
 		debug($this->options['mimeDetect'] );
 		return true;
 	}
@@ -507,7 +512,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimeDetect($type) {
-		$mime = '';
 		
 		switch ($type) {
 			case 'finfo':
@@ -522,11 +526,39 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				}
 				break;
 			default:
-				$type = 'internal';
-				$mime = 'text/x-php;';
+				if (class_exists('finfo')) {
+					$finfo = finfo_open(FILEINFO_MIME);
+					$mime = @finfo_file($finfo, __FILE__);
+				} else 	if (function_exists('mime_content_type')) {
+					$mime = mime_content_type(__FILE__);
+				} else {
+					$type = 'internal';
+					$mime = 'text/x-php;';
+				}
 		}
 		$mime = explode(';', $mime);
 		return $mime[0] == 'text/x-php' || $mime[0] == 'text/x-c++' ? $type : 'internal';
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function imageLib($lib) {
+		
+		if ($lib == 'imagick' && extension_loaded('imagick')) {
+			return $lib;
+		}
+		if ($lib == )
+		
+		switch ($lib) {
+			case 'imagick':
+			
+			
+		}
+		
 	}
 	
 }
