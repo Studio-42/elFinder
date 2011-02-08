@@ -20,6 +20,33 @@ interface elFinderStorageDriver {
 	public function load(array $opts, $key);
 	
 	/**
+	 * Return true if file exists
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fileExists($hash);
+	
+	/**
+	 * Return true if file is ordinary file
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isFile($hash);
+	
+	/**
+	 * Return true if file is directory
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isDir($hash);
+	
+	/**
 	 * Return true if file is readable
 	 *
 	 * @param  string  file hash (use "/" to test root dir)

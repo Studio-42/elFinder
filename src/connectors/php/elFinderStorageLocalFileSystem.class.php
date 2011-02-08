@@ -175,6 +175,40 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 	
 	/**
+	 * Return true if file exists
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fileExists($hash) {
+		return file_exists($this->decode($hash));
+	}
+	
+	/**
+	 * Return true if file is ordinary file
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isFile($hash) {
+		return is_file($this->decode($hash));
+	}
+	
+	/**
+	 * Return true if file is directory
+	 *
+	 * @param  string  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isDir($hash) {
+		return is_dir($this->decode($hash));
+	}
+	
+	
+	/**
 	 * Return true if file is readable
 	 *
 	 * @param  string  file hash (use "/" to test root dir)
