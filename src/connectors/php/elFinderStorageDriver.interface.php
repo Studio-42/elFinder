@@ -80,7 +80,7 @@ interface elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function info($hash);
+	public function fileInfo($hash);
 	
 	/**
 	 * Return directory content

@@ -44,6 +44,7 @@ class elFinderConnector {
 		
 		$result = $this->elFinder->exec($cmd, $args);
 		
+		debug($result);
 	}
 	
 	

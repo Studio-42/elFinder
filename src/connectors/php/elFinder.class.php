@@ -33,7 +33,7 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	protected $default = '';
+	protected $defaultRoot = null;
 	
 	/**
 	 * Load storages (roots)
@@ -61,13 +61,14 @@ class elFinder {
 				$key = strtolower(substr($o['driver'], 0, 1)).$i.'f';
 				if ($root->load($o, $key)) {
 					$this->roots[$key] = $root;
-					if (!$this->default && $root->isReadable('/')) {
-						$this->default = $key;
+					if (!$this->defaultRoot && $root->isReadable('/')) {
+						$this->defaultRoot = & $this->roots[$key];
+						// echo $key.'<br>';
 					}
 				}
 			}
 		}
-		echo $this->default;
+		// echo $this->default;
 		// debug($this->roots);
 		return !empty($this->roots);
 	}
@@ -81,9 +82,11 @@ class elFinder {
 	}
 	
 	public function exec($cmd, $args) {
-		
+		return $this->$cmd($args);
 	}
 	
+	
+
 	
 	/**
 	 * undocumented function
@@ -91,8 +94,51 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function open()
-	{
+	protected function open($args) {
+		$result = array();
+		$target = $args['target'];
+		$root   = $this->fileRoot($target);
+		
+		if (!$root) {
+			if ($args['init']) {
+				$root   = $this->defaultRoot;
+				$target = $root->rootHash();
+			} else {
+				return array('error' => 'Invalid parameters');
+			}
+		}
+		
+		if (!$root->isDir($target)) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		if (false == ($cwd = $root->fileInfo($target))) {
+			return array('error' => $root->error());
+		}
+		
+		debug($cwd);
+		
+		$cdc = $root->ls($target, '');
+		// debug($root);
+		// debug($this->defaultRoot);
+	}
+	
+	
+	
+	/**
+	 * Return root - file's owner
+	 *
+	 * @param  string  file hash
+	 * @return elFinderStorageDriver
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function fileRoot($hash) {
+		foreach ($this->roots as $key => $root) {
+			if (strpos($hash, $key) === 0 && $root->fileExists($hash)) {
+				return $root;
+			}
+		}
+		return false;
 	}
 	
 }

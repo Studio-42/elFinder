@@ -2,6 +2,20 @@
 
 class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
+	static $SORT_NAME_DIRS_FIRST = 1;
+	static $SORT_KIND_DIRS_FIRST = 2;
+	static $SORT_SIZE_DIRS_FIRST = 3;
+	static $SORT_NAME            = 4;
+	static $SORT_KIND            = 5;
+	static $SORT_SIZE            = 6;
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $sort = 1;
+	
 	/**
 	 * Object configuration
 	 *
@@ -50,6 +64,20 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @var string
 	 **/
 	protected $prefix = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $today = 0;
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $yesterday = 0;
 	
 	/**
 	 * extensions/mimetypes for _mimetypeDetect = 'internal' 
@@ -171,6 +199,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			}
 			// @TODO  clean tmb dir
 		}
+		
+		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
+		$this->yesterday = $this->today-86400;
 		return true;
 	}
 	
@@ -207,7 +238,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return is_dir($this->decode($hash));
 	}
 	
-	
 	/**
 	 * Return true if file is readable
 	 *
@@ -242,15 +272,37 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function rootHash() {
+		return $this->encode($this->options['path']);
+	}
+
+	/**
 	 * Return directory/file info
 	 *
 	 * @param  string  directory hash
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function info($hash) {
+	public function fileInfo($hash) {
+		$path = $this->decode($hash);
+		
+		if (!file_exists($path) || !is_dir($path)) {
+			return $this->_error('Invalid parameters');
+		}
+		
+		if (!$this->allowed($path, 'read')) {
+			return $this->_error('Access denied');
+		}
+		
+		return $this->info($path);
 		
 	}
+	
 	
 	/**
 	 * Return directory content
@@ -261,7 +313,23 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function ls($hash, $sort) {
+		$files = array();
+		$path = $this->decode($hash);
 		
+		if (!$path || !is_dir($path)) {
+			return $this->_error('Invalid parameters');
+		}
+		if (!$this->allowed($path, 'read')) {
+			return $this->_error('Access denied');
+		}
+		
+		foreach ($this->scandir($path, '') as $file) {
+			$files[] = $this->info($file);
+		}
+		
+		// $files = $this->scandir($path, '');
+		usort($files, array($this, 'compare'));
+		debug($files);
 	}
 
 	/**
@@ -463,7 +531,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function error() {
-		return $this->$error;
+		return $this->error;
 	}
 	
 	/**
@@ -490,7 +558,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function accepted($path) {
-		$filename = filename($path);
+		$filename = basename($path);
 		return '.' != $filename && '..' != $filename && ($this->options['dotFiles'] || '.' != substr($filename, 0, 1));
 	}
 	
@@ -527,6 +595,59 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 	
 
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function info($path) {
+		$root = $path == $this->options['path'];
+		$name = $root ? $this->options['basename'] : basename($path);
+		$rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
+		$type = filetype($path);
+		$stat = $type == 'link' ? lstat($path) : stat($path);
+		
+		if ($stat['mtime'] > $this->today) {
+			$date = 'Today '.date('H:i', $stat['mtime']);
+		} elseif ($stat['mtime'] > $this->yesterday) {
+			$date = 'Yesterday '.date('H:i', $stat['mtime']);
+		} else {
+			$date = date($this->options['dateFormat'], $stat['mtime']);
+		}
+
+		$info = array(
+			'name'  => htmlspecialchars($name),
+			'hash'  => $this->decode($path),
+			'mime'  => $type == 'dir' ? 'directory' : $this->mimetype($path),
+			'rel'   => $rel,
+			'date'  => $date, 
+			'size'  => $type == 'dir' ? 0 : $stat['size'],
+			'read'  => $this->allowed($path, 'read'),
+			'write' => $this->allowed($path, 'write'),
+			'rm'    => $this->allowed($path, 'rm'),
+			);
+			
+		return $info;
+	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function scandir($path, $filter) {
+		$ret = array();
+		$ls = scandir($path);
+		for ($i=0, $s = count($ls); $i < $s; $i++) { 
+			if ($this->accepted($ls[$i])) {
+				$ret[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
+			}
+		}
+		return $ret;
+	}
 	/***************************************************************************/
 	/*                                utilites                                 */
 	/***************************************************************************/
@@ -657,11 +778,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function decode($hash) {
+		// echo $hash.'<br>';
 		// remove prefix
 		$hash = substr($hash, strlen($this->prefix));
+		// echo $hash.'<br>';
 		// replace HTML safe base64 to normal
 		$hash = base64_decode(strtr($hash, '-_.', '+/='));
-
+		// echo $hash.'<br>';
 		// TODO uncrypt hash and return path
 		$path = $this->uncrypt($hash);
 
@@ -767,6 +890,41 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	protected function cryptLib($lib) {
 		return '';
 	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _error($msg)	{
+		$this->error = $msg;
+		return false;
+	}
+	
+	function compare($f1, $f2) {
+
+		
+
+		if ($f1['mime'] == 'directory' && $f2['mime'] != 'directory') {
+			return -1;
+		}
+		if ($f1['mime'] != 'directory' && $f2['mime'] == 'directory') {
+			return 1;
+		}
+		if ($f1['mime'] == 'directory' && $f2['mime'] == 'directory') {
+			return strcmp($f1['name'], $f2['name']);
+		}
+
+		if ($f1['mime'] == $f2['mime']) {
+			return strcmp($f1['name'], $f2['name']);
+		}
+		return strcmp($f1['mime'], $f2['mime']);
+		if ($f1['mime'] != 'directory' && $f2['mime'] != 'directory') {
+			return strcmp($f1['name'], $f2['name']);
+		}
+	}
+	
 }
 
 

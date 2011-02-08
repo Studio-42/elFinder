@@ -26,7 +26,7 @@ $opts = array(
 			'mimeDetect'   => 'finfo',
 			'imgLib' => 'mogrify',
 			'read' => true,
-			'write' => false,
+			'write' => true,
 			'debug' => true
 		),
 		array(
