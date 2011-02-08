@@ -92,12 +92,33 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
 	
 	/**
-	 * undocumented function
+	 * Init storage.
+	 * Return true if storage available
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  object configuration
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
-	public function __construct($opts) {
+	public function load(array $opts) {
+		$this->options = array_merge($this->options, $opts);
+		
+		if (empty($this->options['path'])) {
+			return false;
+		}
+		
+		$this->options['path'] = $this->normpath($this->options['path']);
+		
+		if (!is_dir($this->options['path']) || !is_readable($this->options['path'])) {
+			return false;
+		}
+		
+		$this->options['dirname'] = dirname($this->options['path']);
+		$this->options['basename'] = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
+		
+		debug($this->options['path']);
+		debug($this->options['dirname']);
+		
+		return true;
 	}
 	
 	/**

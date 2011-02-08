@@ -9,6 +9,16 @@
 interface elFinderStorageDriver {
 	
 	/**
+	 * Init storage.
+	 * Return true if storage available
+	 *
+	 * @param  array  object configuration
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function load(array $opts);
+	
+	/**
 	 * Return directory/file info
 	 *
 	 * @param  string  directory hash

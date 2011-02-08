@@ -19,20 +19,46 @@ class elFinder {
 			)
 	);
 	
-	private function __constructs($opts) {
-		
-	}
+	/**
+	 * Configuration
+	 *
+	 * @var array
+	 **/
+	protected $options = array(
+		'debug' => false
+	);
 	
 	/**
-	 * undocumented function
+	 * Load storages (roots)
+	 * Return true if at least one storage available
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  elFinder and storages configuration
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
-	public function load() {
+	public function load(array $opts) {
 		
-		return true;
-		// return !empty($this->roots);
+		if (isset($opts['defaults']) && is_array($opts['defaults'])) {
+			$this->options = array_merge($this->options, $opts['defaults']);
+		}
+
+		if (empty($opts['roots']) || !is_array($opts['roots'])) {
+			return false;
+		}
+
+		foreach ($opts['roots'] as $o) {
+			$class = 'elFinderStorage'.$o['driver'];
+
+			if (class_exists($class)) {
+				$root = new $class();
+				
+				if ($root->load($o)) {
+					$this->roots[] = $root;
+				}
+			}
+		}
+		// debug($this->roots);
+		return !empty($this->roots);
 	}
 	
 	public function commandExists($cmd) {

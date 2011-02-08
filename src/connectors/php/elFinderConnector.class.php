@@ -15,9 +15,9 @@ class elFinderConnector {
 			exit('{"error":"PHP JSON module not installed"}');
 		}
 		
-		$this->elFinder = new elFinder($opts);
+		$this->elFinder = new elFinder();
 		
-		if (!$this->elFinder->load()) {
+		if (!$this->elFinder->load($opts)) {
 			$this->output(array('error' => 'Invalid backend configuration'));
 		}
 			

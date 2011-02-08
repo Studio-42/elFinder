@@ -10,8 +10,13 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriver.interface.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageLocalFileSystem.class.php';
 
+function debug($o) {
+	echo '<pre>';
+	print_r($o);
+}
+
 $opts = array(
-	'defaults' => array(),
+	'defaults' => array('debug' => true),
 	'roots' => array(
 		array(
 			'path'   => '../../../files',
