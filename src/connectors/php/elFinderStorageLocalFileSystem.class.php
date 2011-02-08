@@ -151,14 +151,14 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
 
 		if ($this->options['tmbDir']) {
-			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir']
+			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'];
 			$this->options['tmbDir'] = is_dir($dir) || @mkdir($dir, $this->options['dirMode']) ? $dir : '';
 			if ($this->options['tmbDir']) {
-				$this->options['imgLib'] = $this->imageLib($this->options['tmbDir']);
+				$this->options['imgLib'] = $this->imageLib($this->options['imgLib']);
 			}
 		}
 
-		debug($this->options['mimeDetect'] );
+		debug($this->options );
 		return true;
 	}
 	
@@ -507,58 +507,67 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	/**
 	 * Return mime detect available method
 	 *
-	 * @param  string  mimetype detect method to test
+	 * @param  string  required mimetype detect method
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimeDetect($type) {
+		$regexp = '/text\/x\-(php|c\+\+)/';
+		$mimes  = array(
+			'finfo' => '',
+			'mime_content_type' => '',
+			'internal' => 'text/x-c++'
+		);
 		
-		switch ($type) {
-			case 'finfo':
-				if (class_exists('finfo')) {
-					$finfo = finfo_open(FILEINFO_MIME);
-					$mime = @finfo_file($finfo, __FILE__);
-				}
-				break;
-			case 'mime_content_type':
-				if (function_exists('mime_content_type')) {
-					$mime = mime_content_type(__FILE__);
-				}
-				break;
-			default:
-				if (class_exists('finfo')) {
-					$finfo = finfo_open(FILEINFO_MIME);
-					$mime = @finfo_file($finfo, __FILE__);
-				} else 	if (function_exists('mime_content_type')) {
-					$mime = mime_content_type(__FILE__);
-				} else {
-					$type = 'internal';
-					$mime = 'text/x-php;';
-				}
+		if (class_exists('finfo')) {
+			$finfo = finfo_open(FILEINFO_MIME);
+			$mime  = @finfo_file($finfo, __FILE__);
+			$mime  = explode(';', $mime);
+			$mimes['finfo']  = $mime[0];
 		}
-		$mime = explode(';', $mime);
-		return $mime[0] == 'text/x-php' || $mime[0] == 'text/x-c++' ? $type : 'internal';
+		
+		if (function_exists('mime_content_type')) {
+			$mime = mime_content_type(__FILE__);
+			$mime = explode(';', $mime);
+			$mimes['mime_content_type']  = $mime[0];
+		}
+		
+		// test required type
+		if (!empty($mimes[$type]) && preg_match($regexp, $mimes[$type])) {
+			return $type;
+		}
+		// find best available type
+		foreach ($mimes as $type => $mime) {
+			if (preg_match($regexp, $mime)) {
+				return $type;
+			}
+		}
 	}
 	
 	/**
-	 * undocumented function
+	 * Return available image manipulations lib
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  required lib
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function imageLib($lib) {
+		$libs = array(
+			'imagick' => extension_loaded('imagick'),
+			'mogrify' => false,
+			'gd'      => function_exists('gd_info')
+		);
 		
-		if ($lib == 'imagick' && extension_loaded('imagick')) {
+		if (!empty($libs[$lib])) {
 			return $lib;
 		}
-		if ($lib == )
 		
-		switch ($lib) {
-			case 'imagick':
-			
-			
+		foreach ($libs as $lib => $exists) {
+			if ($exists) {
+				return $lib;
+			}
 		}
-		
+		return '';
 	}
 	
 }

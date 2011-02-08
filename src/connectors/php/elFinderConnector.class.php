@@ -39,8 +39,8 @@ class elFinderConnector {
 			$args[$name] = $arg;
 		}
 		
-		echo '<pre>';
-		print_r($args);
+		// echo '<pre>';
+		// print_r($args);
 		
 		$result = $this->elFinder->exec($cmd, $args);
 		

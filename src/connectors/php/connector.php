@@ -24,6 +24,7 @@ $opts = array(
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
 			'mimeDetect'   => 'finfo',
+			'imgLib' => 'mogrify',
 			'read' => true,
 			'write' => false,
 			'debug' => true
@@ -33,7 +34,7 @@ $opts = array(
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			'alias'  => 'Home2',
 			'driver' => 'LocalFileSystem',
-			'mimeDetect'   => 'internal',
+			'mimeDetect'   => 'auto',
 			'debug' => true
 		)
 		
