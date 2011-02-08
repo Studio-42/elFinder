@@ -7,7 +7,34 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 *
 	 * @var array
 	 **/
-	protected $options = array();
+	protected $options = array(
+		'path'         => '',           // directory path
+		'url'          => '',           // root url
+		'alias'        => '',           // alias to replace root dir name
+		'dotFiles'     => false,        // allow dot files?
+		'dirSize'      => false,        // count directories size?
+		'fileMode'     => 0666,         // new files mode
+		'dirMode'      => 0777,         // new dir mode 
+		'fileURL'      => true,         // allow send files urls to frontend?
+		'uploadAllow'  => array(),      // mimetypes which allowed to upload
+		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
+		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
+		'dateFormat'   => 'j M Y H:i',  // files dates format
+		'mimeDetect'   => 'auto',       // how to detect mimetype
+		'imgLib'       => 'auto',       // image manipulations lib name
+		'tmbDir'       => '.tmb',       // directory for thumbnails
+		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
+		'tmbSize'      => 48,           // images thumbnails size (px)
+		'read'         => true,         // read permission for root dir itself
+		'write'        => true,         // write permission for root dir itself
+		'defaults'     => array(        // default permissions 
+			'read'  => true,
+			'write' => true,
+			'rm'    => true
+		),
+		'perms'        => array()      // individual folders/files permisions    
+	);
 	
 	/**
 	 * Error message from last failed action
