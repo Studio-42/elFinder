@@ -182,7 +182,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isReadable($hash) {
-		return !$hash || $hash == '/' ? $this->options['read'] : false;
+		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'read');
 	}
 	
 	/**
@@ -193,7 +193,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isWritable($hash) {
-		
+		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'write');
 	}
 	
 	/**
@@ -204,9 +204,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isRemovable($hash) {
-		
+		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'rm');
 	}
-	
 
 	/**
 	 * Return directory/file info
@@ -442,6 +441,57 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	public function debug() {
 		
 	}
+
+
+	/***************************************************************************/
+	/*                                protected                                */
+	/***************************************************************************/
+	
+	/**
+	 * Return true if file name is not . or ..
+	 * If file name begins with . return value according to $this->options['dotFiles']
+	 *
+	 * @param  string  $file  file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function accepted($path) {
+		$filename = filename($path);
+		return '.' != $filename && '..' != $filename && ($this->options['dotFiles'] || '.' != substr($filename, 0, 1));
+	}
+	
+	/**
+	 * Return true if required action available for file
+	 *
+	 * @param  string  file path
+	 * @param  string  action (read|write|rm)
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function allowed($path, $action) {
+		
+		if ($path == $this->options['path']) {
+			return $action == 'read' ? $this->options['read'] : ($action == 'write' ? $this->options['write'] : false);
+		}
+		
+		if (($action == 'read'  && !is_readable($path))
+		||  ($action == 'write' && !is_writable($path))
+		||  ($action == 'rm'    && !is_writable(dirname($path)))) {
+			return false;
+		}
+		
+		$path = substr($path, strlen($this->options['path'])+1);
+
+		foreach ($this->options['perms'] as $regexp => $rules) {
+			if (preg_match($regexp, $path)) {
+				if (isset($rules[$action])) {
+					return $rules[$action];
+				}
+			}
+		}
+		return isset($this->options['defaults'][$action]) ? $this->options['defaults'][$action] : false;
+	}
+	
 
 	/***************************************************************************/
 	/*                                utilites                                 */
