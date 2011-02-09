@@ -7,7 +7,8 @@ class elFinder {
 		'open'   => array(
 			'target' => false, 
 			'tree' => false, 
-			'init' => false
+			'init' => false,
+			'sort' => false
 			),
 		'mkdir'  => array(
 			'current' => true, 
@@ -34,6 +35,13 @@ class elFinder {
 	 * @var string
 	 **/
 	protected $defaultRoot = null;
+	
+	public static $SORT_NAME_DIRS_FIRST = 1;
+	public static $SORT_KIND_DIRS_FIRST = 2;
+	public static $SORT_SIZE_DIRS_FIRST = 3;
+	public static $SORT_NAME            = 4;
+	public static $SORT_KIND            = 5;
+	public static $SORT_SIZE            = 6;
 	
 	/**
 	 * Load storages (roots)
@@ -117,8 +125,11 @@ class elFinder {
 		}
 		
 		debug($cwd);
-		
-		$cdc = $root->ls($target, '');
+		$sort = (int)$args['sort'];
+		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort >self::$SORT_SIZE) {
+			$sort = self::$SORT_KIND_DIRS_FIRST;
+		}
+		$cdc = $root->ls($target, $sort);
 		// debug($root);
 		// debug($this->defaultRoot);
 	}

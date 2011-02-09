@@ -2,12 +2,7 @@
 
 class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
-	static $SORT_NAME_DIRS_FIRST = 1;
-	static $SORT_KIND_DIRS_FIRST = 2;
-	static $SORT_SIZE_DIRS_FIRST = 3;
-	static $SORT_NAME            = 4;
-	static $SORT_KIND            = 5;
-	static $SORT_SIZE            = 6;
+
 	
 	/**
 	 * undocumented class variable
@@ -327,7 +322,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			$files[] = $this->info($file);
 		}
 		
-		// $files = $this->scandir($path, '');
+		$this->sort = $sort;
 		usort($files, array($this, 'compare'));
 		debug($files);
 	}
@@ -902,27 +897,35 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return false;
 	}
 	
-	function compare($f1, $f2) {
-
+	/**
+	 * Method to sort files 
+	 *
+	 * @param  object  file to compare
+	 * @param  object  file to compare
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function compare($f1, $f2) {
+		$d1 = $f1['mime'] == 'directory';
+		$d2 = $f2['mime'] == 'directory';
+		$m1 = $f1['mime'];
+		$m2 = $f2['mime'];
+		$s1 = $f1['size'];
+		$s2 = $f2['size'];
 		
-
-		if ($f1['mime'] == 'directory' && $f2['mime'] != 'directory') {
-			return -1;
+		if ($this->sort <= elFInder::$SORT_SIZE_DIRS_FIRST && $d1 != $d2) {
+			return $d1 ? -1 : 1;
 		}
-		if ($f1['mime'] != 'directory' && $f2['mime'] == 'directory') {
-			return 1;
+		
+		if (($this->sort == elFInder::$SORT_KIND_DIRS_FIRST || $this->sort == elFInder::$SORT_KIND) && $m1 != $m2) {
+			return strcmp($m1, $m2);
 		}
-		if ($f1['mime'] == 'directory' && $f2['mime'] == 'directory') {
-			return strcmp($f1['name'], $f2['name']);
+		
+		if (($this->sort == elFInder::$SORT_SIZE_DIRS_FIRST || $this->sort == elFInder::$SORT_SIZE) && $s1 != $s2) {
+			return $s1 < $s2 ? -1 : 1;
 		}
-
-		if ($f1['mime'] == $f2['mime']) {
-			return strcmp($f1['name'], $f2['name']);
-		}
-		return strcmp($f1['mime'], $f2['mime']);
-		if ($f1['mime'] != 'directory' && $f2['mime'] != 'directory') {
-			return strcmp($f1['name'], $f2['name']);
-		}
+		
+		return strcmp($f1['name'], $f2['name']);
 	}
 	
 }
