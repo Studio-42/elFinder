@@ -1,19 +1,42 @@
 <?php
 
 class elFinder {
+	/**
+	 * Storages (root dirs)
+	 *
+	 * @var array
+	 **/
 	protected $roots = array();
 	
+	/**
+	 * Default root (storage)
+	 *
+	 * @var elFinderStorageDriver
+	 **/
+	protected $defaultRoot = null;
+	
+	/**
+	 * Commands and required arguments list
+	 *
+	 * @var array
+	 **/
 	protected $commands = array(
 		'open'   => array(
 			'target' => false, 
-			'tree' => false, 
-			'init' => false,
-			'sort' => false
+			'tree'   => false, 
+			'init'   => false,
+			'sort'   => false
 			),
+		'tmb' => array(),
 		'mkdir'  => array(
 			'current' => true, 
 			'name' => true
 			),
+		'mkfile' => array(),
+		'rename' => array(),
+		'duplicate' => array(),
+		'rm' => array(),
+		'paste' => array(),
 		'upload' => array(
 			'current' => true, 
 			'FILES' => true
@@ -26,21 +49,46 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $options = array(
-		'debug' => false
+		'disabled' => array(), // list commands to disable
+		'debug'    => false
 	);
 	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $defaultRoot = null;
 	
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_NAME_DIRS_FIRST = 1;
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_KIND_DIRS_FIRST = 2;
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_SIZE_DIRS_FIRST = 3;
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_NAME            = 4;
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_KIND            = 5;
+	/**
+	 * Directory content sort rule
+	 *
+	 * @var int
+	 **/
 	public static $SORT_SIZE            = 6;
 	
 	/**
@@ -61,46 +109,89 @@ class elFinder {
 			return false;
 		}
 
+		// disable requied commands
+		$this->options['disabled'] = $this->disabled($this->options['disabled']);
+		foreach ($this->options['disabled'] as $cmd) {
+			unset($this->commands[$cmd]);
+		}
+
+		// load storages
 		foreach ($opts['roots'] as $i => $o) {
 			$class = 'elFinderStorage'.$o['driver'];
 
 			if (class_exists($class)) {
 				$root = new $class();
-				$key = strtolower(substr($o['driver'], 0, 1)).$i.'f';
+				// storage id - used as prefix to files hash
+				$key  = strtolower(substr($o['driver'], 0, 1)).$i.'f';
+				// check disabled commands fo storage
+				$o['disabled'] = $this->disabled(@$o['disabled']);
 				if ($root->load($o, $key)) {
 					$this->roots[$key] = $root;
 					if (!$this->defaultRoot && $root->isReadable('/')) {
+						// first readable root is default root
 						$this->defaultRoot = & $this->roots[$key];
-						// echo $key.'<br>';
 					}
 				}
 			}
 		}
-		// echo $this->default;
-		// debug($this->roots);
+
 		return !empty($this->roots);
 	}
 	
+	/**
+	 * Return true if command exists
+	 *
+	 * @param  string  command name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
 	public function commandExists($cmd) {
 		return isset($this->commands[$cmd]) && method_exists($this, $cmd);
 	}
 	
+	/**
+	 * Return command required arguments info
+	 *
+	 * @param  string  command name
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
 	public function commandArgsList($cmd) {
 		return $this->commandExists($cmd) ? $this->commands[$cmd] : array();
 	}
 	
+	/**
+	 * Exec command and return result
+	 *
+	 * @param  string  command name
+	 * @param  array   command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
 	public function exec($cmd, $args) {
-		return $this->$cmd($args);
+		list($result, $header) = $this->$cmd($args);
+		$result['debug'] = array();
+		if ($this->options['debug']) {
+			foreach ($this->roots as $key => $root) {
+				$result['debug'][$key] = $root->debug();
+			}
+		}
+		
+		return array($result, '');
 	}
 	
-	
+	/***************************************************************************/
+	/*                                 commands                                */
+	/***************************************************************************/
 
 	
 	/**
-	 * undocumented function
+	 * "Open" directory
+	 * Return cwd,cdc,[tree, params] for client
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function open($args) {
 		$result = array();
@@ -120,31 +211,42 @@ class elFinder {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false === ($cwd = $root->dirInfo($target))) {
+		if (false === ($result['cwd'] = $root->dirInfo($target, isset($args['init'])))) {
 			return array('error' => $root->error());
 		}
-		
-		debug($cwd);
+
 		$sort = (int)$args['sort'];
 		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort >self::$SORT_SIZE) {
 			$sort = self::$SORT_KIND_DIRS_FIRST;
 		}
 		
-		if (false === ($cdc = $root->dirContent($target, $sort))) {
+		if (false === ($result['cdc'] = $root->dirContent($target, $sort))) {
 			return array('error' => $root->error());
 		}
 		
-		if ($args['tree'] && false === ($tree = $root->tree($root->rootHash(), $target))) {
-			return array('error' => $root->error());
+		if ($args['tree']) {
+			$result['tree'] = array();
+			
+			foreach ($this->roots as $r) {
+				$hash = $r->rootHash();
+				$result['tree'] = array_merge($result['tree'], $r->tree($hash, $r === $root ? $target : null));
+			}
 		}
 		
-		// echo intval(is_dir(''));
-		// debug($root);
-		// debug($this->defaultRoot);
+		if ($args['init']) {
+			$result['params'] = array(
+				'disabled'   => $this->options['disabled'],
+				'uplMaxSize' => ini_get('upload_max_filesize')
+			);
+		}
+		
+		return array($result, '');
 	}
 	
 	
-	
+	/***************************************************************************/
+	/*                                   misc                                  */
+	/***************************************************************************/
 	/**
 	 * Return root - file's owner
 	 *
@@ -160,6 +262,27 @@ class elFinder {
 		}
 		return false;
 	}
+	
+	/**
+	 * Check commands names to be disabled and fix if required
+	 *
+	 * @param  array  commands names
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function disabled($cmds) {
+		$disabled = array();
+		if (is_array($cmds)) {
+			foreach ($cmds as $cmd) {
+				if (isset($this->commands[$cmd]) && !preg_match('/^(open|tree|tmb|ping)$/', $cmd)) {
+					$disabled[] = $cmd;
+				}
+			}
+		}
+		return $disabled;
+	}
+	
+	
 	
 }
 

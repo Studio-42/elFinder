@@ -16,13 +16,14 @@ function debug($o) {
 }
 
 $opts = array(
-	'defaults' => array('debug' => true),
+	'defaults' => array('debug' => true, 'disabled' => array('mkdir', 'mkfile', 'mk')),
 	'roots' => array(
 		array(
 			'path'   => '../../../files',
 			'URL'    => 'http://localhost/git/elfinder/files',
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
+			'disabled' => array('rename'),
 			'mimeDetect'   => 'finfo',
 			'imgLib' => 'mogrify',
 			'read' => true,

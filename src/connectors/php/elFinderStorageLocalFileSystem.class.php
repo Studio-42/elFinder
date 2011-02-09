@@ -34,9 +34,11 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'path'         => '',           // directory path
 		'URL'          => '',           // root url
 		'alias'        => '',           // alias to replace root dir name
+		'disabled'     => array(),
+		'copyFrom'     => true,
+		'copyTo'       => true,
 		'treeDeep'     => 1,
 		'dotFiles'     => false,        // allow dot files?
-		'dirSize'      => false,        // count directories size?
 		'fileMode'     => 0666,         // new files mode
 		'dirMode'      => 0777,         // new dir mode 
 		'cryptLib'     => 'auto',
@@ -60,6 +62,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		),
 		'perms'        => array()      // individual folders/files permisions    
 	);
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $params = array();
 	
 	/**
 	 * Error message from last failed action
@@ -213,6 +222,14 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			// @TODO  clean tmb dir
 		}
 		
+		$this->params = array(
+			'dotFiles'   => $this->options['dotFiles'],
+			'disabled'   => $this->options['disabled'],
+			'archives'   => array(),
+			'extract'    => array(),
+			'url'        => $this->options['fileURL'] ? $this->options['URL'] : ''
+		);
+		
 		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
 		$this->yesterday = $this->today-86400;
 		return true;
@@ -320,6 +337,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			$info['phash'] = $this->decode(dirname($path));
 		}
 		
+		$info['params'] = $this->params;
+		
 		return $info;
 	}
 	
@@ -377,49 +396,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function getTree($path, $level) {
-		$hash   = $this->encode($path);
-		$root   = $path == $this->options['path'];
-		$read   = $this->allowed($path, 'read');
-		$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
-		
-		$tree = array(
-			array(
-				'hash'   => $hash,
-				'phash'  => $root ? null : $this->encode(dirname($path)),
-				'name'   => $root ? $this->options['basename'] : basename($path),
-				'read'   => $read,
-				'write'  => $this->allowed($path, 'write'),
-				'childs' => count($childs) > 0
-			)
-		);
-		
-		if ($level > 0) {
-			foreach ($childs as $path) {
-				$read   = $this->allowed($path, 'read');
-				$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
-				$tree[] = array(
-					'hash'   => $this->encode($path),
-					'phash'  => $hash,
-					'name'   => basename($path),
-					'read'   => $read,
-					'write'  => $this->allowed($path, 'write'),
-					'childs' => count($childs) > 0
-				);
-				
-				if (count($childs)) {
-					$tree = array_merge($tree, $this->getTree($path, $level-1));
-				}
-			}
-		}
-		return $tree;
-	}
 	
 
 	/**
@@ -619,7 +595,12 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function debug() {
-		
+		return array(
+			'root'       => $this->options['basename'],
+			'driver'     => 'LocalFileSystem',
+			'mimeDetect' => $this->options['mimeDetect'],
+			'imgLib'     => $this->options['imgLib']
+		);
 	}
 
 
@@ -749,6 +730,55 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 		return $ret;
 	}
+	
+	/**
+	 * Return required dir childs dirs
+	 *
+	 * @param  strng  dir path
+	 * @param  int    level counter (decrease on each next level)
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function getTree($path, $level) {
+		$hash   = $this->encode($path);
+		$root   = $path == $this->options['path'];
+		$read   = $this->allowed($path, 'read');
+		$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
+		
+		$tree = array(
+			array(
+				'hash'   => $hash,
+				'phash'  => $root ? null : $this->encode(dirname($path)),
+				'name'   => $root ? $this->options['basename'] : basename($path),
+				'read'   => $read,
+				'write'  => $this->allowed($path, 'write'),
+				'childs' => count($childs) > 0
+			)
+		);
+		
+		if ($level > 0) {
+			foreach ($childs as $path) {
+				$read   = $this->allowed($path, 'read');
+				$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
+				$tree[] = array(
+					'hash'   => $this->encode($path),
+					'phash'  => $hash,
+					'name'   => basename($path),
+					'read'   => $read,
+					'write'  => $this->allowed($path, 'write'),
+					'childs' => count($childs) > 0
+				);
+				
+				if (count($childs)) {
+					$tree = array_merge($tree, $this->getTree($path, $level-1));
+				}
+			}
+		}
+		return $tree;
+	}
+	
+	
+	
 	/***************************************************************************/
 	/*                                utilites                                 */
 	/***************************************************************************/

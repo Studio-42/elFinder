@@ -42,9 +42,10 @@ class elFinderConnector {
 		// echo '<pre>';
 		// print_r($args);
 		
-		$result = $this->elFinder->exec($cmd, $args);
+		list($result, $header) = $this->elFinder->exec($cmd, $args);
 		
-		debug($result);
+		$this->output($result, $header ? $header : 'Content-Type: text/html' /*'Content-Type: application/json'*/);
+		
 	}
 	
 	
