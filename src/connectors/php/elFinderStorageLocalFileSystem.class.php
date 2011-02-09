@@ -298,21 +298,21 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 	/**
-	 * Return directory/file info
+	 * Return directory info
 	 *
 	 * @param  string  directory hash
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function fileInfo($hash) {
+	public function dirInfo($hash) {
 		$path = $this->decode($hash);
 		
-		if (!file_exists($path) || !is_dir($path)) {
-			return $this->_error('Invalid parameters');
+		if (!is_dir($path)) {
+			return $this->setError('Invalid parameters');
 		}
 		
-		if (!$this->allowed($path, 'read')) {
-			return $this->_error('Access denied');
+		if (!$this->accepted($path) || !$this->allowed($path, 'read')) {
+			return $this->setError('Access denied');
 		}
 		
 		$info = $this->info($path);
@@ -321,7 +321,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 		
 		return $info;
-		
 	}
 	
 	
@@ -337,11 +336,11 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$files = array();
 		$path  = $this->decode($hash);
 		
-		if (!$path || !is_dir($path)) {
-			return $this->_error('Invalid parameters');
+		if (!is_dir($path)) {
+			return $this->setError('Invalid parameters');
 		}
-		if (!$this->allowed($path, 'read')) {
-			return $this->_error('Access denied');
+		if (!$this->accepted($path) || !$this->allowed($path, 'read')) {
+			return $this->setError('Access denied');
 		}
 		
 		foreach ($this->ls($path) as $file) {
@@ -362,17 +361,19 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($root, $include) {
-		$tree = array();
 		$path = $this->decode($root);
-		echo $path;
-		if (!file_exists($path) || !is_dir($path)) {
-			return $this->_error('Invalid parameters');
+
+		if (!is_dir($path)) {
+			return $this->setError('Invalid parameters');
 		}
 		if (!$this->accepted($path)) {
-			return $this->_error('Access denied');
+			return $this->setError('Access denied');
 		}
 		// @TODO check parents for read
 		
+		$tree = $this->getTree($path, $this->options['treeDeep']);
+		// debug($tree);
+		return $tree;
 	}
 
 
@@ -382,15 +383,42 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function gettree($path, $level) {
+	protected function getTree($path, $level) {
+		$hash   = $this->encode($path);
+		$root   = $path == $this->options['path'];
+		$read   = $this->allowed($path, 'read');
+		$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
+		
 		$tree = array(
 			array(
-				'hash' => $this->encode($path),
-				'name' => $path == $this->options['path'] ? $this->options['basename'] : basename($path),
-				'read' => $this->allowed($path, 'read'),
-				'write' => $this->allowed($path, 'write')
+				'hash'   => $hash,
+				'phash'  => $root ? null : $this->encode(dirname($path)),
+				'name'   => $root ? $this->options['basename'] : basename($path),
+				'read'   => $read,
+				'write'  => $this->allowed($path, 'write'),
+				'childs' => count($childs) > 0
 			)
 		);
+		
+		if ($level > 0) {
+			foreach ($childs as $path) {
+				$read   = $this->allowed($path, 'read');
+				$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
+				$tree[] = array(
+					'hash'   => $this->encode($path),
+					'phash'  => $hash,
+					'name'   => basename($path),
+					'read'   => $read,
+					'write'  => $this->allowed($path, 'write'),
+					'childs' => count($childs) > 0
+				);
+				
+				if (count($childs)) {
+					$tree = array_merge($tree, $this->getTree($path, $level-1));
+				}
+			}
+		}
+		return $tree;
 	}
 	
 
@@ -983,7 +1011,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function _error($msg)	{
+	protected function setError($msg)	{
 		$this->error = $msg;
 		return false;
 	}

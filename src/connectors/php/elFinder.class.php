@@ -120,7 +120,7 @@ class elFinder {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false === ($cwd = $root->fileInfo($target))) {
+		if (false === ($cwd = $root->dirInfo($target))) {
 			return array('error' => $root->error());
 		}
 		
@@ -134,11 +134,11 @@ class elFinder {
 			return array('error' => $root->error());
 		}
 		
-		if ($args['tree']) {
-			$tree = $root->tree($root->rootHash(), $target);
+		if ($args['tree'] && false === ($tree = $root->tree($root->rootHash(), $target))) {
+			return array('error' => $root->error());
 		}
 		
-
+		// echo intval(is_dir(''));
 		// debug($root);
 		// debug($this->defaultRoot);
 	}
