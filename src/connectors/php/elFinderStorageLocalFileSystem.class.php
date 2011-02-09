@@ -12,6 +12,20 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	protected $sort = 1;
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected static $FILTER_DIRS_ONLY = 1;
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected static $FILTER_FILES_ONLY = 2;
+	
+	/**
 	 * Object configuration
 	 *
 	 * @var array
@@ -307,7 +321,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function ls($hash, $sort) {
+	public function dirContent($hash, $sort) {
 		$files = array();
 		$path = $this->decode($hash);
 		
@@ -318,12 +332,12 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return $this->_error('Access denied');
 		}
 		
-		foreach ($this->scandir($path, '') as $file) {
+		foreach ($this->ls($path, self::$FILTER_FILES_ONLY) as $file) {
 			$files[] = $this->info($file);
 		}
 		
 		$this->sort = $sort;
-		usort($files, array($this, 'compare'));
+		// usort($files, array($this, 'compare'));
 		debug($files);
 	}
 
@@ -628,17 +642,26 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
 	
 	/**
-	 * undocumented function
+	 * Return [filtered] directory content 
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  directory path
+	 * @param  int     filter (self::$FILTER_DIRS_ONLY|self::$FILTER_FILES_ONLY)
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function scandir($path, $filter) {
+	protected function ls($path, $filter=0) {
 		$ret = array();
-		$ls = scandir($path);
+		$ls  = scandir($path);
+
 		for ($i=0, $s = count($ls); $i < $s; $i++) { 
 			if ($this->accepted($ls[$i])) {
-				$ret[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				
+				if (!$filter 
+				|| ($filter == self::$FILTER_DIRS_ONLY  && is_dir($p)) 
+				|| ($filter == self::$FILTER_FILES_ONLY && !is_dir($p))) {
+					$ret[] = $p;
+				}
 			}
 		}
 		return $ret;

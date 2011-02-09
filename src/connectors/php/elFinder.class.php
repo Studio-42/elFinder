@@ -129,7 +129,7 @@ class elFinder {
 		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort >self::$SORT_SIZE) {
 			$sort = self::$SORT_KIND_DIRS_FIRST;
 		}
-		$cdc = $root->ls($target, $sort);
+		$cdc = $root->dirContent($target, $sort);
 		// debug($root);
 		// debug($this->defaultRoot);
 	}
