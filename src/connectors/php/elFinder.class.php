@@ -120,7 +120,7 @@ class elFinder {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false == ($cwd = $root->fileInfo($target))) {
+		if (false === ($cwd = $root->fileInfo($target))) {
 			return array('error' => $root->error());
 		}
 		
@@ -129,7 +129,16 @@ class elFinder {
 		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort >self::$SORT_SIZE) {
 			$sort = self::$SORT_KIND_DIRS_FIRST;
 		}
-		$cdc = $root->dirContent($target, $sort);
+		
+		if (false === ($cdc = $root->dirContent($target, $sort))) {
+			return array('error' => $root->error());
+		}
+		
+		if ($args['tree']) {
+			$tree = $root->tree($root->rootHash(), $target);
+		}
+		
+
 		// debug($root);
 		// debug($this->defaultRoot);
 	}

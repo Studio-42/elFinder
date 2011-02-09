@@ -34,6 +34,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'path'         => '',           // directory path
 		'URL'          => '',           // root url
 		'alias'        => '',           // alias to replace root dir name
+		'treeDeep'     => 1,
 		'dotFiles'     => false,        // allow dot files?
 		'dirSize'      => false,        // count directories size?
 		'fileMode'     => 0666,         // new files mode
@@ -258,7 +259,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isReadable($hash) {
-		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'read');
+		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
+		return $this->accepted($path) && $this->allowed($path, 'read');
 	}
 	
 	/**
@@ -269,7 +271,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isWritable($hash) {
-		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'write');
+		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
+		return $this->accepted($path) && $this->allowed($path, 'write');
 	}
 	
 	/**
@@ -280,7 +283,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isRemovable($hash) {
-		return $this->allowed(!$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash), 'rm');
+		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
+		return $this->accepted($path) && $this->allowed($path, 'rm');
 	}
 
 	/**
@@ -346,7 +350,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 		$this->sort = $sort;
 		usort($files, array($this, 'compare'));
-		debug($files);
+		return $files;
 	}
 
 	/**
@@ -357,9 +361,38 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function tree($hash) {
+	public function tree($root, $include) {
+		$tree = array();
+		$path = $this->decode($root);
+		echo $path;
+		if (!file_exists($path) || !is_dir($path)) {
+			return $this->_error('Invalid parameters');
+		}
+		if (!$this->accepted($path)) {
+			return $this->_error('Access denied');
+		}
+		// @TODO check parents for read
 		
 	}
+
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function gettree($path, $level) {
+		$tree = array(
+			array(
+				'hash' => $this->encode($path),
+				'name' => $path == $this->options['path'] ? $this->options['basename'] : basename($path),
+				'read' => $this->allowed($path, 'read'),
+				'write' => $this->allowed($path, 'write')
+			)
+		);
+	}
+	
 
 	/**
 	 * Create thumbnails in directory
@@ -650,6 +683,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
 				$info['url'] = $this->path2url($path);
 			}
+			
+			if (strpos($info['mime'], 'image') === 0) {
+				if (false != ($s = getimagesize($path))) {
+					$info['dim'] = $s[0].'x'.$s[1];
+				}
+			}
+			
 		}
 			
 		return $info;

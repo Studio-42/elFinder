@@ -100,7 +100,7 @@ interface elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function tree($hash);
+	public function tree($root, $include);
 
 	/**
 	 * Create thumbnails in directory
