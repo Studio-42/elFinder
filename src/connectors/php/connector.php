@@ -20,7 +20,7 @@ $opts = array(
 	'roots' => array(
 		array(
 			'path'   => '../../../files',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			'URL'    => 'http://localhost/git/elfinder/files',
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
 			'mimeDetect'   => 'finfo',

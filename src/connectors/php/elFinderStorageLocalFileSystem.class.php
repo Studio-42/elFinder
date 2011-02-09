@@ -32,7 +32,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	protected $options = array(
 		'path'         => '',           // directory path
-		'url'          => '',           // root url
+		'URL'          => '',           // root url
 		'alias'        => '',           // alias to replace root dir name
 		'dotFiles'     => false,        // allow dot files?
 		'dirSize'      => false,        // count directories size?
@@ -188,6 +188,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return false;
 		}
 		
+		if (substr($this->options['URL'], -1, 1) != '/') {
+			$this->options['URL'] = $this->options['URL'].'/';
+		}
 		$this->options['read']  = $this->options['read']  && is_readable($this->options['path']);
 		$this->options['write'] = $this->options['write'] && is_writable($this->options['path']);
 		
@@ -308,7 +311,12 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return $this->_error('Access denied');
 		}
 		
-		return $this->info($path);
+		$info = $this->info($path);
+		if ($path != $this->options['path']) {
+			$info['phash'] = $this->decode(dirname($path));
+		}
+		
+		return $info;
 		
 	}
 	
@@ -323,7 +331,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	public function dirContent($hash, $sort) {
 		$files = array();
-		$path = $this->decode($hash);
+		$path  = $this->decode($hash);
 		
 		if (!$path || !is_dir($path)) {
 			return $this->_error('Invalid parameters');
@@ -332,12 +340,12 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return $this->_error('Access denied');
 		}
 		
-		foreach ($this->ls($path, self::$FILTER_FILES_ONLY) as $file) {
+		foreach ($this->ls($path) as $file) {
 			$files[] = $this->info($file);
 		}
 		
 		$this->sort = $sort;
-		// usort($files, array($this, 'compare'));
+		usort($files, array($this, 'compare'));
 		debug($files);
 	}
 
@@ -627,7 +635,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 
 		$info = array(
 			'name'  => htmlspecialchars($name),
-			'hash'  => $this->decode($path),
+			'hash'  => $this->encode($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->mimetype($path),
 			'rel'   => $rel,
 			'date'  => $date, 
@@ -636,6 +644,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			'write' => $this->allowed($path, 'write'),
 			'rm'    => $this->allowed($path, 'rm'),
 			);
+			
+			
+		if ($info['mime'] != 'directory') {
+			if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
+				$info['url'] = $this->path2url($path);
+			}
+		}
 			
 		return $info;
 	}
@@ -719,6 +734,19 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 		
 		return $path ? $path : '.';
+	}
+	
+	/**
+	 * Return file URL
+	 *
+	 * @param  string  $path 
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function path2url($path) {
+		$dir  = substr(dirname($path), strlen($this->options['path'])+1);
+		$file = rawurlencode(basename($path));
+		return $this->options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
 	}
 	
 	/**
