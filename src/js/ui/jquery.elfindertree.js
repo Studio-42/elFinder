@@ -13,7 +13,7 @@
 			 *
 			 * @type String
 			 **/
-			slideDown = $.browser.msie ? 'show'   : 'slideDown'
+			slideDown = $.browser.msie ? 'show'   : 'slideDown',
 			
 			tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
 			
@@ -46,6 +46,10 @@
 				}
 				return html + '</ul>';
 			};
+		
+		return this.each(function() {
+			
+		})
 		
 		return this.each(function() {
 			var tree = $(this).addClass('elfinder-tree')

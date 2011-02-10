@@ -48,6 +48,8 @@
 		 **/
 		this.version = '1.2 beta';
 		
+		this.api = '';
+		
 		/**
 		 * Configuration options
 		 *
@@ -183,6 +185,7 @@
 			.one('cd', function(e, fm) {
 				// @TODO - disabled
 				$.extend(self.params, e.data.params);
+				self.api = parseFloat(e.data.api) || 1;
 				self.log(e.data)
 			})
 			.bind('cd', function(e) {

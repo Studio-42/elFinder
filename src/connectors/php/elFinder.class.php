@@ -189,7 +189,7 @@ class elFinder {
 	 **/
 	public function exec($cmd, $args) {
 		list($result, $header) = $this->$cmd($args);
-		$result['debug'] = array();
+		$result['debug'] = array('connector' => 'php');
 		if ($this->options['debug']) {
 			foreach ($this->roots as $key => $root) {
 				$result['debug'][$key] = $root->debug();
