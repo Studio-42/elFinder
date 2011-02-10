@@ -186,7 +186,7 @@
 				// @TODO - disabled
 				$.extend(self.params, e.data.params);
 				self.api = parseFloat(e.data.api) || 1;
-				self.log(e.data)
+				// self.log(self.api)
 			})
 			.bind('cd', function(e) {
 				var cdc = e.data.cdc,
@@ -232,14 +232,6 @@
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
-		
-		// $.each(this.listeners, function(e, c) {
-		// 	// self.log(e)
-		// 	self.bind(e, function() {
-		// 		self.log(e)
-		// 		self.log(self.buffer.files)
-		// 	})
-		// })
 		
 		
 		// this.cd(this.last() || '', true, true);

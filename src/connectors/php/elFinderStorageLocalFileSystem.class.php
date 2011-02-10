@@ -381,7 +381,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function tree($root, $include) {
+	public function tree($root) {
 		$path = $this->decode($root);
 
 		if (!is_dir($path)) {

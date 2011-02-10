@@ -1,58 +1,66 @@
 (function($) {
 	
 	$.fn.elfindertree = function(fm) {
-		var
-			/**
-			 * slideToggle method name
-			 *
-			 * @type String
-			 **/
-			 slideToggle = $.browser.msie ? 'toggle' : 'slideToggle',
-			/**
-			 * slideDown method name
-			 *
-			 * @type String
-			 **/
-			slideDown = $.browser.msie ? 'show'   : 'slideDown',
-			
-			tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
-			
-			/**
-			 * Traverse through dirs tree and return html code
-			 *
-			 * @param  Object  tree
-			 * @param  Boolean is this root dirs
-			 * @return String
-			 **/
-			traverse = function(tree, root) {
-				var tpl = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
-					html = root ? '' : '<ul style="display:none">',	
-					end  = root ? '' : '</ul>',
-					icon   = root ? 'elfinder-nav-icon-home' : 'elfinder-nav-icon-folder',
-					i, o, pc;
-
-				for (i=0; i < tree.length; i++) {
-					o = tree[i];
-					if (o.name && o.hash) {
-						pc = fm.ui.perms2class(o);
-						html += tpl.replace('%id', o.hash)
-							.replace('%pclass', pc)
-							.replace('%arrow',  o.dirs.length ? 'elfinder-nav-collapsed' : 'elfinder-nav-empty')
-							.replace('%icon', icon)
-							.replace('%perms',  pc ? '<span class="elfinder-perms"/>' : '')
+		
+		return this.each(function() {
+			var newAPI    = false,
+				subtree   = 'elfinder-nav-subtree',
+				collapsed = 'elfinder-nav-collapsed',
+				expanded  = 'elfinder-nav-expanded',
+				empty     = 'elfinder-nav-empty',
+				folder    = 'elfinder-nav-icon-folder',
+				home      =  'elfinder-nav-icon-home',
+				active    = 'ui-state-active',
+				tpl       = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon %icon"/>%perms %name</a>%childs</li>',
+				ul        = '<ul class="'+subtree+'" style="display:none">',
+				item = function(o, root) {
+					var pclass    = fm.ui.perms2class(o),
+						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
+						hasChilds = newAPI ? o.childs : o.dirs && o.dirs.length,
+						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
+						arrow     = hasChilds ? collapsed : empty,
+						icon      = root ? home : folder;
+						
+					return o && o.name 
+						? tpl.replace('%id',    o.hash)
+							.replace('%pclass', pclass)
+							.replace('%arrow',  arrow)
+							.replace('%icon',   icon)
+							.replace('%perms',  perms)
 							.replace('%name',   o.name)
-							.replace('%childs', o.dirs && o.dirs.length ? traverse(o.dirs) : '');
+							.replace('%childs', childs)
+						: '';
+				},
+				build = function(dirs, root) {
+					var html = '', i, e, d;
+					
+					if (newAPI) {
+						for (i = 0; i < dirs.length; i++) {
+							d = dirs[i];
+							e = tree.find('#nav-'+d.hash);
+							
+							if (e.length) {
+								if (d.phash && e.parents('.'+subtree).prev('[id]').attr('id') != 'nav-'+d.phash) {
+									fm.log('move')
+								}
+							} else {
+								(d.phash ? tree.find('#nav-'+d.phash).next('.'+subtree) : tree).append(item(d, !d.phash));
+							}
+						}
+					} else {
+						if (root) {
+							tree.find('a').remove();
+							tree.html(item(dirs, true));
+						} else {
+							for (i = 0; i < dirs.length; i++) {
+								html += item(dirs[i], root);
+							}
+							return ul + html + '</ul>';
+						}
 					}
-				}
-				return html + '</ul>';
-			};
-		
-		return this.each(function() {
-			
-		})
-		
-		return this.each(function() {
-			var tree = $(this).addClass('elfinder-tree')
+				},
+				
+				tree = $(this).addClass('elfinder-tree')
 					.delegate('a', 'hover', function(e) {
 						$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 					})
@@ -73,145 +81,73 @@
 							fm.cd(id);
 						}
 					})
-					.delegate('a', 'toggle', function() {
-						var $this = $(this),
-							ul = $(this).next('ul');
+					.delegate('a', 'toggle.elfinder', function() {
+						var $this  = $(this),
+							ul     = $this.next('.'+subtree),
+							arrow = $this.children('.'+collapsed),
+							spinner,
+							o;
 						
 						if (ul.children().length) {
-							ul[slideToggle]().end().children('.elfinder-nav-collapsed').toggleClass('elfinder-nav-expanded');
-						} else {
-							$(this).prepend('<span class="elfinder-nav-spinner"/>').children('.elfinder-nav-collapsed').hide()
-							// $(this).append('<span class="elfinder-nav-spinner"/>')
-							var o = {
-								error : function(xhr) { 
-									fm.debug('ajaxerror', xhr); 
-									$this.children('.elfinder-nav-spinner').remove();
-									$this.children('.elfinder-nav-collapsed')
-										.removeClass('elfinder-nav-collapsed')
-										.addClass('elfinder-nav-empty')
-										.show();
-								},
-								success : function(data) {
-									fm.log(data)
-									$this.children('.elfinder-nav-spinner').remove();
-									$this.children('.elfinder-nav-collapsed').show();
-									
-									if (!data || !data.subdirs || !data.subdirs.length) {
-										$this.children('.elfinder-nav-collapsed')
-											.removeClass('elfinder-nav-collapsed')
-											.addClass('elfinder-nav-empty');
-									} else {
-										build(data.subdirs);
-											
+							ul.slideToggle();
+							arrow.toggleClass(expanded);
+						} else if (newAPI) {
+							spinner = $('<span class="elfinder-nav-spinner"/>');
+							$this.prepend(spinner);
+							arrow.hide();
+							
+							fm.ajax({
+									cmd    : 'tree', 
+									target : $(this).attr('id').substr(4)
+								}, {
+									error : function(xhr) { 
+										fm.debug('ajaxerror', xhr); 
+										spinner.remove();
+										arrow.removeClass(collapsed).addClass(empty).show();
+									},
+									success : function(data) {
+										spinner.remove();
+										arrow.show();
+
+										if (!data || !data.tree || !data.tree.length) {
+											arrow.removeClass(collapsed).addClass(empty);
+										} else {
+											build(data.tree);
+											$this.trigger('toggle');
+											if (!tree.find('.'+active).length) {
+												tree.find('#nav-'+fm.cwd.hash).addClass(active);
+											}
+										}
 									}
-									$this.trigger('toggle');
-								}
-							};
-							fm.ajax({ cmd : 'subdirs', dir : $(this).attr('id').substr(4) }, o, true);
+								}, true);
 						}
 						
 					})
-					.delegate('.elfinder-nav-collapsed', 'click', function(e) {
+					.delegate('.'+collapsed, 'click', function(e) {
 						// click on arrow - toggle subdirs
 						e.stopPropagation();
 						e.preventDefault();
-						$(this).parent().trigger('toggle');
-					}),
-				draggable = $.extend({}, fm.ui.draggable, {
-					appendTo : fm.ui.cwd,
-					helper : function() {
-						return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
-							.data('files', [this.id.substr(4)])
-							.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));
-					}
-				}),
-				build = function(dirs) {
-					var i, el, p, o, html, pc;
-					// fm.log(dirs)
-					
-					
-					for (i = 0; i < dirs.length; i++) {
-						o = dirs[i];
-						pc = fm.ui.perms2class(o);
-						el = tree.find('#nav-'+dirs[i].hash);
-						if (el.length) {
-							
-						} else {
-							
-							html = tpl.replace('%id', o.hash)
-								.replace('%pclass', pc)
-								.replace('%arrow',  o.childs ? 'elfinder-nav-collapsed' : 'elfinder-nav-empty')
-								.replace('%icon', !o.phash ? 'elfinder-nav-icon-home' : 'elfinder-nav-icon-folder')
-								.replace('%perms',  pc ? '<span class="elfinder-perms"/>' : '')
-								.replace('%name',   o.name)
-								.replace('%childs', o.childs ? '<ul style="display:none"/>' : '');
-							
-							if (dirs[i].phash) {
-								p = tree.find('#nav-'+dirs[i].phash).next('ul');
-								// fm.log(p)
-								p.append(html)
-							} else {
-								tree.append(html)
-							}
-							
-						}
-					}
-					
-				};
-			
-			// recreate tree if required and
-			// set current dir visible and actve and show subdirs		
-			fm.bind('cd', function(e) {
-				var t = e.data.tree, dir;
+						$(this).parent().trigger('toggle.elfinder');
+					})
+				;
 				
-				if (e.data.tree2) {
-					tree.find('a').remove();
-					tree.html('');
-					build(e.data.tree2)
-					dir = tree.find('[id="nav-'+fm.cwd.hash+'"]').click()
-					return
+			fm.one('cd', function() {
+				newAPI = fm.api > 1;
+			})
+			.bind('cd', function(e) {
+				var dir;
+				
+				e.data.tree && build(e.data.tree, true);
+				
+				tree.find('.'+active).removeClass(active);
+				dir = tree.find('#nav-'+e.data.cwd.hash).addClass(active);
+				// show active root subdirs if required
+				if (dir.children('.'+home).length && fm.options.navOpenRoot && dir.next('.'+subtree).is(':hidden')) {
+					dir.next('.'+subtree).show();
+					dir.children('.'+collapsed).addClass(expanded);
 				}
-				
-				if (t) {
-					// required to avoid drag/drop conflict
-					tree.find('a').remove();
-					// create tree
-					tree.html(traverse([t], true))
-						.find('a')
-						.not(':has(.elfinder-nav-icon-home),.elfinder-na')
-						.draggable(draggable)
-						.end()
-						.not('.elfinder-na,.elfinder-ro')
-						.droppable({
-							tolerance  : 'pointer',
-							hoverClass : 'elfinder-dropable-active ui-state-hover',
-							drop : function(e, ui) {
-								ui.helper.hide();
-								fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-								fm.paste(this.id.substr(4));
-							}
-						});
-				}
-				
-				// find current dir
-				dir = tree.find('[id="nav-'+fm.cwd.hash+'"]')
-
-				// remove active state from prevoiusly active dir
-				tree.find('.ui-state-active')
-					.removeClass('ui-state-active')
-					.children('.elfinder-nav-icon-folder')
-					.removeClass('elfinder-nav-icon-folder-open');
-				
-				// show open folder icon
-				dir.children('.elfinder-nav-icon-folder').addClass('elfinder-nav-icon-folder-open');
-				// set active and show all parents
-				dir.addClass('ui-state-active').parents('ul:hidden').prev('a').trigger('toggle');
-				// show subdirs
-				dir.next('ul').show();
-				// show expanded arrow
-				dir.children('.elfinder-nav-collapsed').addClass('elfinder-nav-expanded');
 			});
+			
 		});
 	}
-	
 })(jQuery);

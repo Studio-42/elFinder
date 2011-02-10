@@ -35,6 +35,9 @@ class elFinder {
 			'init'   => false,
 			'sort'   => false
 			),
+		'tree' => array(
+			'target' => true
+		),
 		'tmb' => array(),
 		'mkdir'  => array(
 			'current' => true, 
@@ -244,11 +247,11 @@ class elFinder {
 		}
 		
 		if ($args['tree']) {
-			$result['tree2'] = array();
+			$result['tree'] = array();
 			
 			foreach ($this->roots as $r) {
 				$hash = $r->rootHash();
-				$result['tree2'] = array_merge($result['tree2'], $r->tree($hash, $r === $root ? $target : null));
+				$result['tree'] = array_merge($result['tree'], $r->tree($hash, $r === $root ? $target : null));
 			}
 		}
 		
@@ -263,6 +266,22 @@ class elFinder {
 		return array($result, '');
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function tree($args) {
+		$target = $args['target'];
+		$root = $this->fileRoot($target);
+		
+		if (!$root || !$root->isDir($target)) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		return array(array('tree' => $root->tree($target)), '');
+	}
 	
 	/***************************************************************************/
 	/*                                   misc                                  */
