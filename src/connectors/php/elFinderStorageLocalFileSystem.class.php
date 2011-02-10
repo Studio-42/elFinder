@@ -337,6 +337,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			$info['phash'] = $this->decode(dirname($path));
 		}
 		
+		$info['url'] = $this->path2url($path).'/';
+		
 		$info['params'] = $this->params;
 		
 		return $info;

@@ -39,9 +39,6 @@ class elFinderConnector {
 			$args[$name] = $arg;
 		}
 		
-		// echo '<pre>';
-		// print_r($args);
-		
 		list($result, $header) = $this->elFinder->exec($cmd, $args);
 		
 		$this->output($result, $header ? $header : 'Content-Type: text/html' /*'Content-Type: application/json'*/);
@@ -50,7 +47,6 @@ class elFinderConnector {
 	
 	
 	protected function output($data, $header = 'Content-Type: text/html' /*'Content-Type: application/json'*/) {
-		
 		if ($header) {
 			header($header);
 		}

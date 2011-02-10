@@ -1,6 +1,14 @@
 <?php
 
 class elFinder {
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $version = '1.2';
+	
 	/**
 	 * Storages (root dirs)
 	 *
@@ -139,6 +147,17 @@ class elFinder {
 	}
 	
 	/**
+	 * Return version (api) number
+	 * Required to correct interaction with client
+	 *
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function version() {
+		return $this->version;
+	}
+	
+	/**
 	 * Return true if command exists
 	 *
 	 * @param  string  command name
@@ -225,15 +244,16 @@ class elFinder {
 		}
 		
 		if ($args['tree']) {
-			$result['tree'] = array();
+			$result['tree2'] = array();
 			
 			foreach ($this->roots as $r) {
 				$hash = $r->rootHash();
-				$result['tree'] = array_merge($result['tree'], $r->tree($hash, $r === $root ? $target : null));
+				$result['tree2'] = array_merge($result['tree2'], $r->tree($hash, $r === $root ? $target : null));
 			}
 		}
 		
 		if ($args['init']) {
+			$result['api'] = $this->version;
 			$result['params'] = array(
 				'disabled'   => $this->options['disabled'],
 				'uplMaxSize' => ini_get('upload_max_filesize')
