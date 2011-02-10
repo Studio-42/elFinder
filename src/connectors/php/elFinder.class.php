@@ -111,7 +111,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function load(array $opts) {
-		
+		$this->time = $this->utime();
 		if (isset($opts['defaults']) && is_array($opts['defaults'])) {
 			$this->options = array_merge($this->options, $opts['defaults']);
 		}
@@ -191,8 +191,9 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function exec($cmd, $args) {
+		// $time = $this->utime();
 		list($result, $header) = $this->$cmd($args);
-		$result['debug'] = array('connector' => 'php');
+		$result['debug'] = array('connector' => 'php', 'time' => $this->utime() - $this->time);
 		if ($this->options['debug']) {
 			foreach ($this->roots as $key => $root) {
 				$result['debug'][$key] = $root->debug();
@@ -321,7 +322,10 @@ class elFinder {
 		return $disabled;
 	}
 	
-	
+	protected function utime() {
+		$time = explode(" ", microtime());
+		return (double)$time[1] + (double)$time[0];
+	}
 	
 }
 

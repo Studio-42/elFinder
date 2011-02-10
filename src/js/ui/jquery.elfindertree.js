@@ -21,7 +21,7 @@
 						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
 						arrow     = hasChilds ? collapsed : empty,
 						icon      = root ? home : folder;
-
+					// @TODO add link icon
 					return o && o.name 
 						? tpl.replace('%id',    o.hash)
 							.replace('%pclass', pclass+(isroot ? root : ''))

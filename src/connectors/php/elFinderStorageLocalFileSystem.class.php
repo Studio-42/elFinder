@@ -323,6 +323,14 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	public function dirInfo($hash) {
 		$path = $this->decode($hash);
+		$link = false;
+		
+		if (filetype($path) == 'link') {
+			if (false === ($path = $this->readlink($path))) {
+				return $this->setError('Access denied');
+			}
+			$link = true;
+		}
 		
 		if (!is_dir($path)) {
 			return $this->setError('Invalid parameters');
@@ -331,15 +339,15 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		if (!$this->accepted($path) || !$this->allowed($path, 'read')) {
 			return $this->setError('Access denied');
 		}
-		
+
 		$info = $this->info($path);
 		if ($path != $this->options['path']) {
 			$info['phash'] = $this->decode(dirname($path));
 		}
 		
-		$info['url'] = $this->path2url($path).'/';
-		
+		$info['url']    = $this->path2url($path).'/';
 		$info['params'] = $this->params;
+		// $info['link']   = $link;
 		
 		return $info;
 	}
@@ -620,7 +628,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	protected function accepted($path) {
 		$filename = basename($path);
-		return '.' != $filename && '..' != $filename && ($this->options['dotFiles'] || '.' != substr($filename, 0, 1));
+		return '.' != $filename && '..' != $filename && ($this->options['dotFiles'] || '.' != substr($filename, 0, 1)) ;
 	}
 	
 	/**
@@ -667,7 +675,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$name = $root ? $this->options['basename'] : basename($path);
 		$rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		$type = filetype($path);
-		$stat = /*$type == 'link' ? lstat($path) :*/ stat($path);
+		// use != 'link' - http://ru2.php.net/manual/en/function.filetype.php#100319
+		$stat = $type != 'link' ? @stat($path) : @lstat($path);
 		
 		if ($stat['mtime'] > $this->today) {
 			$date = 'Today '.date('H:i', $stat['mtime']);
@@ -689,6 +698,18 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			'rm'    => $this->allowed($path, 'rm'),
 			);
 			
+		if ($type == 'link') {
+			if (false === ($link = $this->readlink($path))) {
+				$info['mime']  = 'symlink-broken';
+				$info['read']  = false;
+				$info['write'] = false;
+			} else {
+				$info['mime'] = $this->mimetype($link);
+				$info['link'] = $this->encode($link);
+				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
+				$info['path'] = $link;
+			}
+		}
 			
 		if ($info['mime'] != 'directory') {
 			if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
@@ -706,6 +727,22 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return $info;
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function readlink($path) {
+		$target = @readlink($path);
+		if ($target) {
+			if ('/' != substr($target, 0, 1)) {
+				$target = dirname($path).DIRECTORY_SEPARATOR.$target;
+			}
+			$target = $this->normpath($target);
+		}
+		return $target && file_exists($target) && $this->accepted($target) && strpos($target, $this->options['path']) === 0 ? $target : false;
+	}
 	
 	/**
 	 * Return [filtered] directory content 
@@ -718,14 +755,18 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	protected function ls($path, $filter=0) {
 		$ret = array();
 		$ls  = scandir($path);
-
+		
 		for ($i=0, $s = count($ls); $i < $s; $i++) { 
 			if ($this->accepted($ls[$i])) {
 				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				$allow = true;
+				if ($filter == self::$FILTER_DIRS_ONLY) {
+					$allow = is_dir($p) && (filetype($p) != 'link' || false != $this->readlink($p));
+				} elseif ($filter == self::$FILTER_FILES_ONLY) {
+					$allow = !is_dir($p);
+				}
 				
-				if (!$filter 
-				|| ($filter == self::$FILTER_DIRS_ONLY  && is_dir($p)) 
-				|| ($filter == self::$FILTER_FILES_ONLY && !is_dir($p))) {
+				if ($allow) {
 					$ret[] = $p;
 				}
 			}
@@ -746,7 +787,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$root   = $path == $this->options['path'];
 		$read   = $this->allowed($path, 'read');
 		$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
-		
+
 		$tree = array(
 			array(
 				'hash'   => $hash,
@@ -754,7 +795,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				'name'   => $root ? $this->options['basename'] : basename($path),
 				'read'   => $read,
 				'write'  => $this->allowed($path, 'write'),
-				'childs' => count($childs) > 0
+				'childs' => count($childs) > 0,
+				'link'   => filetype($path) == 'link'
 			)
 		);
 		
@@ -768,7 +810,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 					'name'   => basename($path),
 					'read'   => $read,
 					'write'  => $this->allowed($path, 'write'),
-					'childs' => count($childs) > 0
+					'childs' => count($childs) > 0,
+					'link'   => filetype($path) == 'link'
 				);
 				
 				if (count($childs)) {
@@ -868,20 +911,16 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			 	$type = mime_content_type($path);
 				break;
 			default:
-				$pinfo = pathinfo($path); 
-				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
+				// if (filetype($path) == 'dir') {
+				// 	$type = 'directory';
+				// } else {
+					$pinfo = pathinfo($path); 
+					$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+					$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
+					
+				// }
 		}
 		$type = explode(';', $type); 
-		
-		// if ($this->_options['mimeDetect'] != 'internal' && $type[0] == 'application/octet-stream') {
-		// 	$pinfo = pathinfo($path); 
-		// 	$ext = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-		// 	if (!empty($ext) && !empty($this->_mimeTypes[$ext])) {
-		// 		$type[0] = $this->_mimeTypes[$ext];
-		// 	}
-		// }
-		
 		return $type[0];
 		
 	}

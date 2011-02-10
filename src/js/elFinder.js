@@ -209,7 +209,7 @@
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
-				
+				self.log(e.data.debug.time)
 				self.selected = [];
 			});
 			
@@ -234,8 +234,8 @@
 		this.ui.init();
 		
 		
-		// this.cd(this.last() || '', true, true);
-		this.cd('', true, true);
+		this.cd(this.last() || '', true, true);
+		// this.cd('', true, true);
 		// this.trigger('focus')
 
 	}
