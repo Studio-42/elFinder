@@ -28,7 +28,19 @@ $opts = array(
 			'imgLib' => 'mogrify',
 			'read' => true,
 			'write' => true,
-			'debug' => true
+			'debug' => true,
+			'perms' => array(
+				'/123/' => array(
+					'read'   => true,
+					'write'   => false,
+					'rm'   => true
+				),
+				'/print\.png/' => array(
+					'read'   => true,
+					'write'   => false,
+					'rm'   => false
+				)
+			)
 		),
 		array(
 			'path'   => '../../../files2',

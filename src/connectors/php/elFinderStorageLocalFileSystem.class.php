@@ -667,7 +667,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$name = $root ? $this->options['basename'] : basename($path);
 		$rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		$type = filetype($path);
-		$stat = $type == 'link' ? lstat($path) : stat($path);
+		$stat = /*$type == 'link' ? lstat($path) :*/ stat($path);
 		
 		if ($stat['mtime'] > $this->today) {
 			$date = 'Today '.date('H:i', $stat['mtime']);

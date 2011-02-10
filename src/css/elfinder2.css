@@ -50,6 +50,12 @@
 	border-radius: 8px;
 }
 
+.elfinder-spinner-mini {
+	width:16px;
+	height:16px;
+	background:url(../images/spinner-mini.gif) 0 0 no-repeat;
+}
+
 /************************************/
 /*              TOOLBAR             */
 /************************************/
@@ -168,34 +174,28 @@
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
 .elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
 
-
-
 .elfinder-nav ul { margin:0; padding:0; list-style:none; }
-.elfinder-nav ul.elfinder-tree { margin-bottom:1.5em; }
-.elfinder-nav li { padding:0;  margin:0; display:block;}
+.elfinder-nav li { padding:0;  margin:0;}
+.elfinder-nav-tree { margin-bottom:1.5em; }
+.elfinder-nav-subtree { display:none; }
 
-.elfinder-nav a { 
+.elfinder-ltr .elfinder-nav-subtree { margin-left:15px; }
+.elfinder-rtl .elfinder-nav-subtree { margin-right:15px; }
+
+.elfinder-nav-tree a { 
 	position:relative; 
 	display:block; 
 	overflow:hidden; 
 	padding:3px 1px;
 	outline:0 solid;
-	margin:1px;
+	margin: 0;
 }
-
-.elfinder-tree a.ui-state-active { margin:-1px 0; }
-
-.elfinder-tree a.ui-state-hover { margin:-1px 0px;}
-
-.elfinder-tree > li:first-child > a:first-child.ui-state-hover { margin-top:0px; }
-
-
-.elfinder-ltr .elfinder-nav ul li ul { margin-left:12px; }
-.elfinder-rtl .elfinder-nav ul li ul  {	margin-right:15px; }
-
 
 .elfinder-ltr .elfinder-nav a { padding-left:35px; }
 .elfinder-rtl .elfinder-nav a { padding-right:35px; }
+
+.elfinder-nav-tree a.ui-state-hover { margin:-1px; }
+.elfinder-nav-tree a.ui-state-active.ui-state-hover { margin:0; }
 
 /* arrow before dir */
 .elfinder-nav-collapsed {
@@ -211,14 +211,13 @@
 
 .elfinder-ltr .elfinder-nav-collapsed { left:0; background-position:0 2px; }
 .elfinder-rtl .elfinder-nav-collapsed { right:0; background-position:0 -11px;}
-
-.elfinder-ltr .elfinder-nav-expanded { background-position:0 -23px;}
+.elfinder-ltr .elfinder-nav-expanded { background-position:0 -23px; }
 .elfinder-rtl .elfinder-nav-expanded { background-position:-1px -23px; }
 
 /* no arrow for empty dir */
 .elfinder-nav-empty { background-image:none; }
 
-/* nav dir icon */
+/* folder icon */
 .elfinder-nav-icon {
 	width:16px;
 	height:16px;
@@ -227,30 +226,30 @@
 	margin-top:-8px;
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
+	background-position:0 -51px;
 }
+
+/* opened folder icon */
+.elfinder-nav-tree .ui-state-active .elfinder-nav-icon, 
+.elfinder-nav-tree .elfinder-droppable-active .elfinder-nav-icon { background-position:0 -66px; }
+/* home icon */
+.elfinder-nav-tree .elfinder-nav-tree-root .elfinder-nav-icon { background-position:0 -35px; }
 
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
 .elfinder-rtl .elfinder-nav-icon { right:14px; }
 
-/* dir types */
-.elfinder-nav-icon-home            { background-position:0 -35px;}
-.elfinder-nav-icon-places          { background-position:0 -134px;}
-.elfinder-nav-icon-folder          { background-position:0 -51px; }
-/*.elfinder-nav-icon-folder-open     { background-position:0 -66px;}*/
-.elfinder-tree .elfinder-dropable-active .elfinder-nav-icon { background-position:0 -66px;}
+
+/*.elfinder-nav-icon-places          { background-position:0 -134px;}*/
 
 /* permissions marker in nav */
 .elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
 .elfinder-ltr .elfinder-nav .elfinder-perms { left: 18px; }
 .elfinder-rtl .elfinder-nav .elfinder-perms { right:18px; }
 
-.elfinder-nav-spinner {
+.elfinder-nav .elfinder-spinner-mini {
 	position:absolute;
 	left:0;
 	margin-left:-2px;
-	width:16px;
-	height:16px;
-	background:url(../images/spinner-mini.gif) 0 0 no-repeat;
 }
 
 
