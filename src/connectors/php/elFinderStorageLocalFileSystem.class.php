@@ -417,7 +417,47 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tmb($hash) {
+		$path = $this->decode($hash);
 		
+		if (!is_dir($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		if (!is_readable($path)) {
+			return $this->setError('Access denied');
+		}
+		
+		if (!$this->options['imgLib']) {
+			return array();
+		}
+		
+		$count  = $this->options['tmbAtOnce'] > 0 ? $this->options['tmbAtOnce'] : 5;
+		$files  = $this->ls($path, self::$FILTER_FILES_ONLY);
+		$result = array(
+			'current' => $hash, 
+			'images'  => array(),
+			'tmb'     => false
+			);
+			
+		for ($i = 0, $s = count($files); $i < $s; $i++) {
+			$file = $files[$i];
+			$mime = $this->mimetype($file);
+			
+			if ($this->allowed($file, 'read') && $this->resizable($mime)) {
+				$tmb = $this->tmbPath($file);
+				if (!file_exists($tmb)) {
+					if ($count > 0) {
+						if ($this->thumbnail($file, $tmb)) {
+							$result['images'][$this->encode($file)] = $this->path2url($tmb);
+							$count--;
+						}
+					} else {
+						$result['tmb'] = true;
+						break;
+					}
+				}
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -711,14 +751,25 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			}
 		}
 			
-		if ($info['mime'] != 'directory') {
-			if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
-				$info['url'] = $this->path2url($path);
-			}
+		if ($info['mime'] != 'directory' && $info['read']) {
+			// if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
+			// 	$info['url'] = $this->path2url($path);
+			// }
 			
-			if (strpos($info['mime'], 'image') === 0) {
-				if (false != ($s = getimagesize($path))) {
-					$info['dim'] = $s[0].'x'.$s[1];
+			if (strpos($info['mime'], 'image') === 0 && false != ($s = getimagesize($path))) {
+				$info['dim'] = $s[0].'x'.$s[1];
+				if ($this->resizable($info['mime'])) {
+					$info['resize'] = true;
+					if (($tmb = $this->tmbPath($path)) != '') {
+						if (file_exists($tmb)) {
+							$info['tmb'] = $this->path2url($tmb);
+						} else {
+							$info['createTmb'] = true;
+						}
+						// $info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
+					}
+					// $info['tmbfile'] = $this->path2url($tmb);
+					// $info['tmbDir'] = $this->options['tmbDir'];
 				}
 			}
 			
@@ -726,6 +777,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			
 		return $info;
 	}
+	
+
 	
 	/**
 	 * undocumented function
@@ -997,6 +1050,121 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	protected function uncrypt($hash) {
 		return $hash;
+	}
+	
+	/**
+	 * Return true if file image and can be resized
+	 *
+	 * @param  string  file mimetype
+	 * @return bool
+	 * @author Dmitry Levashov
+	 **/
+	protected function resizable($mime) {
+		return $this->options['imgLib'] && strpos($mime, 'image') === 0
+			? ($this->options['imgLib'] == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif' : true) 
+			: false;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function tmbPath($path) {
+		if ($this->options['tmbDir']) {
+			return dirname($path) == $this->options['tmbDir']
+				? $path
+				: $this->options['tmbDir'].DIRECTORY_SEPARATOR.$this->encode($path).'.png';
+		}
+		return '';
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function thumbnail($path, $tmb) {
+		if (false == ($s = getimagesize($path))) {
+			return false;
+		}
+		$tmbSize = $this->options['tmbSize'];
+		
+		switch ($this->options['imgLib']) {
+			case 'imagick':
+				try {
+					$img = new imagick($path);
+				} catch (Exception $e) {
+					return false;
+				}
+				
+				$img->contrastImage(1);
+				return $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
+				break;
+				
+			case 'mogrify':
+				if (@copy($path, $tmb)) {
+					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
+					// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
+					exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
+					
+					if (file_exists($tmb)) {
+						return true;
+					} elseif ($c == 0) {
+						// find tmb for psd and animated gif
+						$mime = $this->mimetype($img);
+						if ($mime == 'image/vnd.adobe.photoshop' || $mime = 'image/gif') {
+							$pinfo = pathinfo($tmb);
+							$test = $pinfo['dirname'].DIRECTORY_SEPARATOR.$pinfo['filename'].'-0.'.$pinfo['extension'];
+							if (file_exists($test)) {
+								return rename($test, $tmb);
+							}
+						}
+					}
+				}
+				break;
+				
+			case 'gd': 
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($path);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($path);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($path);
+				} 
+				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
+					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
+					if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+						return false;
+					}
+					$r = imagepng($tmp, $tmb, 7);
+					imagedestroy($img);
+					imagedestroy($tmp);
+					return $r;
+				}
+				
+				return false;
+		}
+	}
+	
+	/**
+	 * Return x/y coord for crop image thumbnail
+	 *
+	 * @param  int  $w  image width
+	 * @param  int  $h  image height	
+	 * @return array
+	 **/
+	protected function cropPos($w, $h) {
+		$x = $y = 0;
+		$size = min($w, $h);
+		if ($w > $h) {
+			$x = ceil(($w - $h)/2);
+		} else {
+			$y = ceil(($h - $w)/2);
+		}
+		return array($x, $y, $size);
 	}
 	
 	/**

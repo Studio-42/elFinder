@@ -222,16 +222,16 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @return void
 			 */
-			tmb = function() {
+			thumbnails = function() {
 				fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, {
-						error : function(xhr) { fm.debug('ajaxerror', xhr) },
+						error : function(xhr) { fm.debug('ajaxerror', xhr); },
 						success : function(data) {
 							if (!data || data.error) {
 								return fm.debug('error', data ? data.error : 'Unknown error');
 							}
 						
 							if (data.images && data.current == fm.cwd.hash && fm.view == 'icons') {
-								data.tmb && tmb();
+								data.tmb && thumbnails();
 								$.each(data.images, function(hash, url) {
 									cwd.find('#'+hash+' .elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
 								});
@@ -246,6 +246,7 @@ $.fn.elfindercwd = function(fm) {
 			var list = fm.view == 'list',
 				t    = tpl[fm.view] || tpl.icons,
 				html = '',
+				tmb  = !!e.data.tmb, // old api
 				i, f;
 
 
@@ -254,6 +255,9 @@ $.fn.elfindercwd = function(fm) {
 				f = e.data.cdc[i];
 				if (f && f.name && f.hash) {
 					html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
+					if (f.createTmb && !tmb) {
+						tmb = true;
+					}
 				}
 			}
 			
@@ -308,8 +312,8 @@ $.fn.elfindercwd = function(fm) {
 						cwd.droppable('enable');
 					}
 				});
-			
-			e.data.tmb && !list && tmb();
+			fm.log(tmb)
+			tmb && !list && thumbnails();
 			
 		})
 		.shortcut({

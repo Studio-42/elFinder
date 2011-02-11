@@ -7,39 +7,7 @@
 			 *
 			 * @type jQuery
 			 **/
-			$el = $(el),
-			/**
-			 * Load images thumbnails in background
-			 *
-			 * @param String  current dir hash
-			 * @return void
-			 */
-			tmb = function(key) {
-				self.ajax({
-						// do not trigger ajaxstart event
-						silent : true,
-						data : {cmd : 'tmb', current : key},
-						ajax : {
-								// ajax error handler
-								error : function(r) {
-									self.debug('error', r.status);
-								},
-								// request handler
-								success : function(d) {
-									if (!d || d.error) {
-										return self.debug('error', d ? d.error : 'Uknown error');
-									}
-
-									if (d.images && d.current == self.cwd.hash && self._view == 'icons') {
-										d.tmb && tmb(self.cwd.hash);
-										self.ui.tmb(d.images);
-										self.debug('tmb', d);
-									}
-								}
-							}
-					});
-			}
-			;
+			$el = $(el);
 			
 		/**
 		 * Application version

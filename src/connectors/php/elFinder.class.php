@@ -38,7 +38,9 @@ class elFinder {
 		'tree' => array(
 			'target' => true
 		),
-		'tmb' => array(),
+		'tmb' => array(
+			'current' => true
+		),
 		'mkdir'  => array(
 			'current' => true, 
 			'name' => true
@@ -282,6 +284,27 @@ class elFinder {
 		}
 		
 		return array(array('tree' => $root->tree($target)), '');
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function tmb($args) {
+		
+		$root = $this->fileRoot($args['current']);
+		
+		if (!$root) {
+			return array(array('error' => 'Invalid parameters'), '');
+		}
+		
+		if (false === ($result = $root->tmb($args['current']))) {
+			return array(array('error' => $root->error()), '');
+		}
+		
+		return array($result, '');
 	}
 	
 	/***************************************************************************/
