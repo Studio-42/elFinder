@@ -161,13 +161,13 @@
 					l   = cdc.length,
 					h   = self.history,
 					hl  = h.length;
-				
+				// self.time('cd')
 				// update curent dir info and content	
 				self.cwd = e.data.cwd;
 				self.cdc = {};
 				while (l--) {
 					self.cdc[cdc[l].hash] = cdc[l];
-					self.cwd.size += cdc[l].size;
+					// delete self.cdc[cdc[l].hash].tmb;
 				}
 				
 				// remember last dir
@@ -177,7 +177,9 @@
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
-				self.log(e.data.debug.time)
+				// self.timeEnd('cd')
+				// self.log(e.data.debug.time)
+				// self.log(self.cdc)
 				self.selected = [];
 			});
 			

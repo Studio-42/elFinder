@@ -448,6 +448,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 					if ($count > 0) {
 						if ($this->thumbnail($file, $tmb)) {
 							$result['images'][$this->encode($file)] = $this->path2url($tmb);
+							// $result['images'][] = array('hash' => $this->encode($file), 'tmb' => $this->path2url($tmb));
 							$count--;
 						}
 					} else {
@@ -713,7 +714,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	protected function info($path) {
 		$root = $path == $this->options['path'];
 		$name = $root ? $this->options['basename'] : basename($path);
-		$rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
+		// $rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		$type = filetype($path);
 		// use != 'link' - http://ru2.php.net/manual/en/function.filetype.php#100319
 		$stat = $type != 'link' ? @stat($path) : @lstat($path);
@@ -730,7 +731,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			'name'  => htmlspecialchars($name),
 			'hash'  => $this->encode($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->mimetype($path),
-			'rel'   => $rel,
+			// 'rel'   => $rel,
 			'date'  => $date, 
 			'size'  => $type == 'dir' ? 0 : $stat['size'],
 			'read'  => $this->allowed($path, 'read'),
@@ -761,11 +762,12 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				if ($this->resizable($info['mime'])) {
 					$info['resize'] = true;
 					if (($tmb = $this->tmbPath($path)) != '') {
-						if (file_exists($tmb)) {
-							$info['tmb'] = $this->path2url($tmb);
-						} else {
-							$info['createTmb'] = true;
-						}
+						$info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
+						// if (file_exists($tmb)) {
+						// 	$info['tmb'] = $this->path2url($tmb);
+						// } else {
+						// 	$info['createTmb'] = true;
+						// }
 						// $info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
 					}
 					// $info['tmbfile'] = $this->path2url($tmb);

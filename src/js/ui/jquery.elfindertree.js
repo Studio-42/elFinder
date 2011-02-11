@@ -19,8 +19,7 @@
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
 						hasChilds = newAPI ? o.childs : o.dirs && o.dirs.length,
 						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
-						arrow     = hasChilds ? collapsed : empty,
-						icon      = root ? home : folder;
+						arrow     = hasChilds ? collapsed : empty;
 					// @TODO add link icon
 					return o && o.name 
 						? tpl.replace('%id',    o.hash)
