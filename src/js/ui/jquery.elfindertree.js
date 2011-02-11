@@ -158,7 +158,7 @@
 				;
 				
 			fm.one('cd', function() {
-				newAPI = fm.api > 1;
+				newAPI = fm.isNewApi();
 			})
 			.bind('cd', function(e) {
 				var dir;

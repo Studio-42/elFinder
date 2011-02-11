@@ -46,9 +46,9 @@
 		 *
 		 * @type String
 		 **/
-		this.version = '1.2 beta';
+		this.version = '2.0 beta';
 		
-		this.api = '';
+		this.api = 1;
 		
 		/**
 		 * Configuration options
@@ -295,6 +295,15 @@
 				return /^icons|list$/i.test(t) ? t : 'icons'
 			}
 			return this._view;
+		},
+		
+		/**
+		 * Return true if connector use new (>=2.0) api version
+		 *
+		 * @return Boolean
+		 */
+		isNewApi : function() {
+			return this.api > 1;
 		},
 		
 		/**
