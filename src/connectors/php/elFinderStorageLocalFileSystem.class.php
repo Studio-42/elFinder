@@ -51,7 +51,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'imgLib'       => 'auto',       // image manipulations lib name
 		'tmbDir'       => '.tmb',       // directory for thumbnails
 		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
+		'tmbAtOnce'    => 12,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'read'         => true,         // read permission for root dir itself
 		'write'        => true,         // write permission for root dir itself
@@ -447,8 +447,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				if (!file_exists($tmb)) {
 					if ($count > 0) {
 						if ($this->thumbnail($file, $tmb)) {
-							$result['images'][$this->encode($file)] = $this->path2url($tmb);
-							// $result['images'][] = array('hash' => $this->encode($file), 'tmb' => $this->path2url($tmb));
+							// $result['images'][$this->encode($file)] = $this->path2url($tmb);
+							$result['images'][] = array('hash' => $this->encode($file), 'tmb' => $this->path2url($tmb));
 							$count--;
 						}
 					} else {

@@ -1,61 +1,5 @@
 $.fn.elfindercwd = function(fm) {
 	
-	var tpl = {
-			icons : {
-				container : '%content',
-				file : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all">'
-						+'<div class="elfinder-cwd-file-wrapper ui-corner-all">'
-						+'<div id="%hash-icon" class="elfinder-cwd-icon %mime ui-corner-all" %style/>%marker'
-						+'</div>'
-						+'<div class="elfinder-cwd-filename ui-corner-all">%name</div>'
-						+'</div>'
-			},
-			list : {
-				container : '<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody>%content</tbody></table>',
-				file : '<tr id="%hash" class="elfinder-file %permsclass %dirclass %oddclass">'
-						+'<td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td>'
-						+'<td>%perms</td>'
-						+'<td>%date</td>'
-						+'<td>%size</td>'
-						+'<td>%kind</td>'
-						+'</tr>'
-			}
-		},
-		replace = {
-			permsclass : function(f) {
-				return fm.ui.perms2class(f);
-			},
-			perms : function(f) {
-				return fm.ui.formatPermissions(f);
-			},
-			dirclass : function(f) {
-				return f.mime == 'directory' ? 'directory' : '';
-			},
-			mime : function(f) {
-				return fm.ui.mime2class(f.mime);
-			},
-			style : function(f) {
-				return '';
-				return f.tmb ? 'style="background:url(\''+f.tmb+'\') 0 0 no-repeat"' : '';
-			},
-			size : function(f) {
-				return fm.ui.formatSize(f.size);
-			},
-			date : function(f) {
-				return fm.ui.formatDate(f.date);
-			},
-			kind : function(f) {
-				return fm.ui.mime2kind(f.mime);
-			},
-			marker : function(f) {
-				return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
-			},
-			oddclass : function(f, i) {
-				return i%2 ? 'elfinder-odd-row' : '';
-			}
-		}
-	
-	
 	return this.each(function() {
 		var cwd = $(this).addClass('elfinder-cwd')
 			.delegate('[id]', 'select.elfinder', function(e) {
@@ -95,7 +39,6 @@ $.fn.elfindercwd = function(fm) {
 					} 
 				}
 			}),
-			
 			draggable = $.extend({}, fm.ui.draggable, {
 				appendTo : cwd,
 				helper : function(e, ui) {
@@ -122,6 +65,58 @@ $.fn.elfindercwd = function(fm) {
 					return h;
 				}
 			}),
+			// @todo - in one line
+			tpl = {
+				icons : {
+					container : '%content',
+					file : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all">'
+							+'<div class="elfinder-cwd-file-wrapper ui-corner-all">'
+							+'<div class="elfinder-cwd-icon %mime ui-corner-all"/>%marker'
+							+'</div>'
+							+'<div class="elfinder-cwd-filename ui-corner-all">%name</div>'
+							+'</div>'
+				},
+				list : {
+					container : '<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody>%content</tbody></table>',
+					file : '<tr id="%hash" class="elfinder-file %permsclass %dirclass %oddclass">'
+							+'<td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td>'
+							+'<td>%perms</td>'
+							+'<td>%date</td>'
+							+'<td>%size</td>'
+							+'<td>%kind</td>'
+							+'</tr>'
+				}
+			},
+			replace = {
+				permsclass : function(f) {
+					return fm.ui.perms2class(f);
+				},
+				perms : function(f) {
+					return fm.ui.formatPermissions(f);
+				},
+				dirclass : function(f) {
+					return f.mime == 'directory' ? 'directory' : '';
+				},
+				mime : function(f) {
+					return fm.ui.mime2class(f.mime);
+				},
+				size : function(f) {
+					return fm.ui.formatSize(f.size);
+				},
+				date : function(f) {
+					return fm.ui.formatDate(f.date);
+				},
+				kind : function(f) {
+					return fm.ui.mime2kind(f.mime);
+				},
+				marker : function(f) {
+					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
+				},
+				oddclass : function(f, i) {
+					return i%2 ? 'elfinder-odd-row' : '';
+				}
+			},
+			
 			/**
 			 * Bind some shortcuts to keypress instead of keydown
 			 * Required for procces repeated key in ff and opera 
@@ -238,8 +233,16 @@ $.fn.elfindercwd = function(fm) {
 						}
 				}, true);
 			},
+			/**
+			 * Add thumbnails to required files
+			 * Support to type of argument
+			 * 1: {hash : url, ...} - old api
+			 * 2: [{hash : hashValue, tmb : url}, ...] - new api
+			 *
+			 * @param  Array|Object
+			 * @return void
+			 */
 			setTmb = function(tmb) {
-				
 				$.each(tmb, function(i, v) {
 					var hash, url, t = typeof(i);
 					
@@ -252,7 +255,7 @@ $.fn.elfindercwd = function(fm) {
 						url = v.tmb;
 					}
 					if (hash && url) {
-						cwd.find('#'+hash+' .elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
+						cwd.find('#'+hash).children(':first').children('.elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
 					}
 				});
 			}
@@ -265,9 +268,8 @@ $.fn.elfindercwd = function(fm) {
 				html = '',
 				load = !!e.data.tmb, // old api
 				set = [],
-				i, f;
+				interval, i, f;
 
-			fm.time('data')
 			// create html code
 			for (i = 0; i < e.data.cdc.length; i++) {
 				f = e.data.cdc[i];
@@ -278,32 +280,25 @@ $.fn.elfindercwd = function(fm) {
 							load = true;
 						} else {
 							set.push({hash : f.hash, tmb : f.tmb});
-							
 						}
 						
 					}
 				}
 			}
-			fm.timeEnd('data')
 			
-			if(set.length) {
-				var interval = setInterval(function() {
-					if (set.length) {
-						setTmb(set.splice(0, 24))
-					} else {
-						clearInterval(interval)
-					}
-				}, $.browser.moziila ? 50 : 30)
-			}
-			
-			fm.time('html')
 			// set new content
 			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
 				.html(t.container.replace('%content', html));
-			fm.timeEnd('html')	
+			fm.log('html')	
 							
 			load && !list && loadTmb();
+			
+			if(set.length) {
+				interval = setInterval(function() {
+					set.length ? setTmb(set.splice(0, 24)) : clearInterval(interval);
+				}, $.browser.moziila ? 50 : 30);
+			}
 			
 			// make rows or icons/filenames draggable
 			// and add suport for shift|meta + click select
