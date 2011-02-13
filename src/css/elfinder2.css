@@ -241,10 +241,13 @@
 
 /*.elfinder-nav-icon-places          { background-position:0 -134px;}*/
 
-/* permissions marker in nav */
+/* permissions/symlink marker in nav */
 .elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
 .elfinder-ltr .elfinder-nav .elfinder-perms { left: 18px; }
 .elfinder-rtl .elfinder-nav .elfinder-perms { right:18px; }
+.elfinder-ltr .elfinder-nav .elfinder-symlink { left:8px;}
+.elfinder-rtl .elfinder-nav .elfinder-symlink { right:8px;}
+
 
 .elfinder-nav .elfinder-spinner-mini {
 	position:absolute;

@@ -955,6 +955,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
+		if (filetype($path) == 'dir') {
+			return 'directory';
+		}
 		switch ($this->options['mimeDetect']) {
 			case 'finfo':
 				if (empty($this->_finfo)) {
@@ -966,14 +969,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			 	$type = mime_content_type($path);
 				break;
 			default:
-				// if (filetype($path) == 'dir') {
-				// 	$type = 'directory';
-				// } else {
-					$pinfo = pathinfo($path); 
-					$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-					$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
-					
-				// }
+				$pinfo = pathinfo($path); 
+				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
 		}
 		$type = explode(';', $type); 
 		return $type[0];

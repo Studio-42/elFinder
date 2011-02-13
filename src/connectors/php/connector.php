@@ -28,7 +28,7 @@ function logger($data) {
 
 $opts = array(
 	'defaults' => array('debug' => true, 'disabled' => array('mkdir', 'mkfile', 'mk')),
-	'bind' => array('open' => 'logger'),
+	// 'bind' => array('open' => 'logger'),
 	'roots' => array(
 		array(
 			'path'   => '../../../files',

@@ -11,7 +11,7 @@
 				folder    = 'elfinder-nav-icon-folder',
 				root      = 'elfinder-nav-tree-root',
 				active    = 'ui-state-active',
-				tpl       = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon"/>%perms %name</a>%childs</li>',
+				tpl       = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass"><span class="%arrow"/><span class="elfinder-nav-icon"/>%link %perms %name</a>%childs</li>',
 				ul        = '<ul class="'+subtree+'">',
 				item = function(o, isroot) {
 					var pclass    = fm.ui.perms2class(o),
@@ -20,11 +20,13 @@
 						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
 						arrow     = hasChilds ? collapsed : empty;
 					// @TODO add link icon
+					fm.log(o.link)
 					return o && o.name 
 						? tpl.replace('%id',    o.hash)
 							.replace('%pclass', pclass+(isroot ? root : ''))
 							.replace('%arrow',  arrow)
 							.replace('%perms',  perms)
+							.replace('%link', o.link ? '<span class="elfinder-symlink"/>' : '')
 							.replace('%name',   o.name)
 							.replace('%childs', childs)
 						: '';
