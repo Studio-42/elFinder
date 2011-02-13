@@ -193,16 +193,20 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function exec($cmd, $args) {
-		// $time = $this->utime();
-		list($result, $header) = $this->$cmd($args);
-		$result['debug'] = array('connector' => 'php', 'time' => $this->utime() - $this->time);
+		
+		$result = $this->$cmd($args);
+		$result['debug'] = array(
+			'connector' => 'php', 
+			'time' => $this->utime() - $this->time
+			);
+			
 		if ($this->options['debug']) {
 			foreach ($this->roots as $key => $root) {
 				$result['debug'][$key] = $root->debug();
 			}
 		}
 		
-		return array($result, '');
+		return $result;
 	}
 	
 	/***************************************************************************/
@@ -266,7 +270,7 @@ class elFinder {
 			);
 		}
 		
-		return array($result, '');
+		return $result;
 	}
 	
 	/**
@@ -283,7 +287,7 @@ class elFinder {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		return array(array('tree' => $root->tree($target)), '');
+		return array('tree' => $root->tree($target));
 	}
 	
 	/**
@@ -297,14 +301,14 @@ class elFinder {
 		$root = $this->fileRoot($args['current']);
 		
 		if (!$root) {
-			return array(array('error' => 'Invalid parameters'), '');
+			return array('error' => 'Invalid parameters');
 		}
 		
 		if (false === ($result = $root->tmb($args['current']))) {
-			return array(array('error' => $root->error()), '');
+			return array('error' => $root->error());
 		}
 		
-		return array($result, '');
+		return $result;
 	}
 	
 	/***************************************************************************/

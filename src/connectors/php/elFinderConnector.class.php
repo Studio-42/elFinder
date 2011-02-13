@@ -39,16 +39,23 @@ class elFinderConnector {
 			$args[$name] = $arg;
 		}
 		
-		list($result, $header) = $this->elFinder->exec($cmd, $args);
+		$result = $this->elFinder->exec($cmd, $args);
 		
-		$this->output($result, $header ? $header : 'Content-Type: text/html' /*'Content-Type: application/json'*/);
+		$this->output($result, !empty($result['header']) ? $result['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/);
 		
 	}
 	
 	
-	protected function output($data, $header = 'Content-Type: text/html' /*'Content-Type: application/json'*/) {
+	protected function output($data, $header) {
 		if ($header) {
-			header($header);
+			if (is_array($header)) {
+				foreach ($header as $h) {
+					header($h);
+				}
+			} else {
+				header($header);
+			}
+			
 		}
 		exit(json_encode($data));
 	}

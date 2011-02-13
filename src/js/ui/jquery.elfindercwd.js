@@ -244,7 +244,7 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			setTmb = function(tmb) {
 				$.each(tmb, function(i, v) {
-					var hash, url, t = typeof(i);
+					var t = typeof(i), hash, url;
 					
 					if (t == 'string') {
 						// old api
@@ -290,7 +290,7 @@ $.fn.elfindercwd = function(fm) {
 			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
 				.html(t.container.replace('%content', html));
-			fm.log('html')	
+			
 							
 			load && !list && loadTmb();
 			
