@@ -143,7 +143,12 @@
 
 		this.init = function() {
 			// init dirs tree view and events
-			this.tree.elfindertree(this.fm);
+			if (fm.options.allowNav) {
+				this.tree.elfindertree(this.fm);
+			} else {
+				this.nav.hide();
+			}
+			
 			
 			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
@@ -243,18 +248,6 @@
 			
 		}
 
-
-		/**
-		 * Add thumbnails for icons view
-		 * 
-		 * @param  Object  thumbnails
-		 * @return void
-		 */
-		// this.tmb = function(tmb) {
-		// 	$.each(tmb, function(id, t) {
-		// 		self.cwd.find('#'+id).children('.elfinder-cwd-icon').css('background', 'url("'+t+'") center center no-repeat');
-		// 	});
-		// }
 
 	}
 	
