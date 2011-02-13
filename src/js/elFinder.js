@@ -161,13 +161,12 @@
 					l   = cdc.length,
 					h   = self.history,
 					hl  = h.length;
-				// self.time('cd')
+
 				// update curent dir info and content	
 				self.cwd = e.data.cwd;
 				self.cdc = {};
 				while (l--) {
 					self.cdc[cdc[l].hash] = cdc[l];
-					// delete self.cdc[cdc[l].hash].tmb;
 				}
 				
 				// remember last dir
@@ -177,10 +176,8 @@
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
-				// self.timeEnd('cd')
-				// self.log(e.data.debug.time)
-				// self.log(self.cdc)
 				self.selected = [];
+				self.log(e.data.debug.time);
 			});
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -455,10 +452,11 @@
 						self.trigger('ajaxerror', {error : msg}).debug('ajaxerror', xhr);
 					},
 					success  : function(data) {
+
 						self.trigger('ajaxstop', data);
 
-						if (!data || data.error) {
-							return self.trigger('error', {error : data ? data.error : 'Unknown error'});
+						if (typeof(data) != 'object' || data.error) {
+							return self.trigger('error', {error : data && data.error ? data.error : 'Unknown error'});
 						}
 						
 						self.trigger('cd', data);
@@ -504,7 +502,7 @@
 		 * @return elFinder
 		 */
 		cd : function(hash, tree, init) {
-			var data = {cmd : 'open', target : hash};
+			var data = {cmd : 'open', target : hash, 'mimes[]' : this.options.onlyMimes};
 			
 			if (!this.locks.ui) {
 				

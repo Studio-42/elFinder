@@ -347,6 +347,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 		$info['url']    = $this->path2url($path).'/';
 		$info['params'] = $this->params;
+		$info['rel']    = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		// $info['link']   = $link;
 		
 		return $info;
@@ -361,7 +362,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function dirContent($hash, $sort) {
+	public function dirContent($hash, $sort, $mimes=array()) {
 		$files = array();
 		$path  = $this->decode($hash);
 		
@@ -372,8 +373,26 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return $this->setError('Access denied');
 		}
 		
+		foreach ($mimes as $i => $mime) {
+			$mime = trim($mime);
+			if (empty($mime)) {
+				unset($mimes[$i]);
+			} else {
+				if (strpos($mime, '/') === false) {
+					$mimes[$i] .= '/';
+				}
+				$mimes[$i] = $mime;
+			}
+		}
+
 		foreach ($this->ls($path) as $file) {
-			$files[] = $this->info($file);
+			$file = $this->info($file);
+			
+			if ($file['mime'] == 'directory'
+			|| empty($mimes) 
+			|| $this->checkMime($file['mime'], $mimes)) {
+				$files[] = $file;
+			}
 		}
 		
 		$this->sort = $sort;
@@ -753,9 +772,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 			
 		if ($info['mime'] != 'directory' && $info['read']) {
-			// if ($this->options['fileURL'] && $this->allowed($path, 'read')) {
-			// 	$info['url'] = $this->path2url($path);
-			// }
 			
 			if (strpos($info['mime'], 'image') === 0 && false != ($s = getimagesize($path))) {
 				$info['dim'] = $s[0].'x'.$s[1];
@@ -763,15 +779,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 					$info['resize'] = true;
 					if (($tmb = $this->tmbPath($path)) != '') {
 						$info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
-						// if (file_exists($tmb)) {
-						// 	$info['tmb'] = $this->path2url($tmb);
-						// } else {
-						// 	$info['createTmb'] = true;
-						// }
-						// $info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
 					}
-					// $info['tmbfile'] = $this->path2url($tmb);
-					// $info['tmbDir'] = $this->options['tmbDir'];
 				}
 			}
 			
@@ -955,9 +963,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
-		if (filetype($path) == 'dir') {
-			return 'directory';
-		}
+		// if (filetype($path) == 'dir') {
+		// 	return 'directory';
+		// }
 		switch ($this->options['mimeDetect']) {
 			case 'finfo':
 				if (empty($this->_finfo)) {
@@ -978,6 +986,22 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 	}
 	
+	/**
+	 * Return true if mime is in given mimetypes list
+	 *
+	 * @param  string  mime to test
+	 * @param  array   mimes list
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function checkMime($mime, $mimes) {
+		foreach ($mimes as $allowed) {
+			if (strpos($mime, $allowed) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * undocumented function

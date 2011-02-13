@@ -90,7 +90,7 @@ interface elFinderStorageDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function dirContent($hash, $sort);
+	public function dirContent($hash, $sort, $mimes=array());
 
 	/**
 	 * Return directory subdirs.

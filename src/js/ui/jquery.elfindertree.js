@@ -19,14 +19,13 @@
 						hasChilds = newAPI ? o.childs : o.dirs && o.dirs.length,
 						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
 						arrow     = hasChilds ? collapsed : empty;
-					// @TODO add link icon
-					fm.log(o.link)
+
 					return o && o.name 
 						? tpl.replace('%id',    o.hash)
 							.replace('%pclass', pclass+(isroot ? root : ''))
 							.replace('%arrow',  arrow)
 							.replace('%perms',  perms)
-							.replace('%link', o.link ? '<span class="elfinder-symlink"/>' : '')
+							.replace('%link',   o.link ? '<span class="elfinder-symlink"/>' : '')
 							.replace('%name',   o.name)
 							.replace('%childs', childs)
 						: '';

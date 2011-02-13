@@ -70,7 +70,10 @@ class elFinderConnector {
 		}
 		
 		foreach ($this->elFinder->commandArgsList($cmd) as $name => $req) {
-			$arg = $name == 'FILES' ? $_FILES : (isset($src[$name]) ? trim($src[$name]) : '');
+			$arg = $name == 'FILES' ? $_FILES : (isset($src[$name]) ? $src[$name] : '');
+			if (!is_array($arg)) {
+				$arg = trim($arg);
+			}
 			if ($req && empty($arg)) {
 				$this->output('Invalid parameters');
 			}

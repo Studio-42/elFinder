@@ -33,7 +33,8 @@ class elFinder {
 			'target' => false, 
 			'tree'   => false, 
 			'init'   => false,
-			'sort'   => false
+			'sort'   => false,
+			'mimes'  => false 
 			),
 		'tree' => array(
 			'target' => true
@@ -225,7 +226,7 @@ class elFinder {
 			'connector' => 'php', 
 			'time' => $this->utime() - $this->time
 			);
-			
+		// exit( $result['debug']['time']);
 		if ($this->options['debug']) {
 			foreach ($this->roots as $key => $root) {
 				$result['debug'][$key] = $root->debug();
@@ -273,11 +274,12 @@ class elFinder {
 		}
 
 		$sort = (int)$args['sort'];
-		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort >self::$SORT_SIZE) {
+		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort > self::$SORT_SIZE) {
 			$sort = self::$SORT_KIND_DIRS_FIRST;
 		}
-		
-		if (false === ($result['cdc'] = $root->dirContent($target, $sort))) {
+
+		$mimes = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		if (false === ($result['cdc'] = $root->dirContent($target, $sort, $mimes))) {
 			return array('error' => $root->error());
 		}
 		
@@ -302,10 +304,11 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return subdirs for required directory
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tree($args) {
 		$target = $args['target'];
@@ -319,13 +322,14 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return new created thumbnails list
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
-		
+
 		$root = $this->fileRoot($args['current']);
 		
 		if (!$root) {

@@ -18,6 +18,29 @@ elFinder.prototype.options = {
 	/* show places before navigation? */
 	placesFirst    : true,
 	
+	/**
+	 * Display only required file by types
+	 *
+	 * @type Array
+	 * @default []
+	 * @example
+	 *  onlyMimes : ["image"] - display all images
+	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
+	 */
+	onlyMimes : [],
+	/**
+	 * Show nav panel (not implemented yet)
+	 *
+	 * @type Boolean
+	 * @default true
+	 */
+	allowNav : true,
+	/**
+	 * On init expand current root directory in nav
+	 *
+	 * @type Boolean
+	 * @default true
+	 */
 	navOpenRoot : true,
 	/* callback to get file url (for wswing editors) */
 	editorCallback : null,
