@@ -3,7 +3,7 @@
 class elFinder {
 	
 	/**
-	 * undocumented class variable
+	 * Version number
 	 *
 	 * @var string
 	 **/
@@ -66,6 +66,12 @@ class elFinder {
 		'debug'    => false
 	);
 	
+	/**
+	 * Commands listeners
+	 *
+	 * @var array
+	 **/
+	protected $listeners = array();
 	
 	/**
 	 * Directory content sort rule
@@ -163,6 +169,26 @@ class elFinder {
 	}
 	
 	/**
+	 * Add handler to elFinder command
+	 *
+	 * @param  string  command name
+	 * @param  string|array  callback name or array(object, method)
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function bind($cmd, $handler) {
+		if (!isset($this->listeners[$cmd])) {
+			$this->listeners[$cmd] = array();
+		}
+		
+		if ((is_array($handler) && count($handler) == 2 && class_exists($handler[0]) && method_exists($handler[0], $handler[1]) )
+		|| function_exists($handler)) {
+			$this->listeners[$cmd][] = $handler;
+		}
+		return $this;
+	}
+	
+	/**
 	 * Return true if command exists
 	 *
 	 * @param  string  command name
@@ -205,6 +231,8 @@ class elFinder {
 				$result['debug'][$key] = $root->debug();
 			}
 		}
+		
+		$this->trigger($cmd, array_merge($result, array('cmd' => $cmd, 'args' => $args)));
 		
 		return $result;
 	}
@@ -347,6 +375,26 @@ class elFinder {
 			}
 		}
 		return $disabled;
+	}
+	
+	/**
+	 * Execute all callbacks/listeners for required command
+	 *
+	 * @param  string  command name
+	 * @param  array   data passed to callbacks
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function trigger($cmd, $data) {
+		if (!empty($this->listeners[$cmd])) {
+			foreach ($this->listeners[$cmd] as $handler) {
+				if (is_array($handler)) {
+					$handler[0]->{$handler[1]}($data);
+				} else {
+					$handler($data);
+				}
+			}
+		}
 	}
 	
 	protected function utime() {

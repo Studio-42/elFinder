@@ -15,8 +15,20 @@ function debug($o) {
 	print_r($o);
 }
 
+function logger($data) {
+
+	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
+		$fp = fopen('../../../files/tmp/log.txt', 'a');
+		if ($fp) {
+			fwrite($fp, var_export($data, true));
+			fclose($fp);
+		}
+	}
+}
+
 $opts = array(
 	'defaults' => array('debug' => true, 'disabled' => array('mkdir', 'mkfile', 'mk')),
+	'bind' => array('open' => 'logger'),
 	'roots' => array(
 		array(
 			'path'   => '../../../files',
@@ -55,7 +67,7 @@ $opts = array(
 );
 
 $connector = new elFinderConnector($opts);
-// $connector->run();
+$connector->run();
 
 // echo '<pre>';
 // print_r($connector);
