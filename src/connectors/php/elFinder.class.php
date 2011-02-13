@@ -33,8 +33,8 @@ class elFinder {
 			'target' => false, 
 			'tree'   => false, 
 			'init'   => false,
-			'sort'   => false,
-			'mimes'  => false 
+			// 'sort'   => false,
+			// 'mimes'  => false 
 			),
 		'tree' => array(
 			'target' => true
@@ -275,7 +275,7 @@ class elFinder {
 
 		$sort = (int)$args['sort'];
 		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort > self::$SORT_SIZE) {
-			$sort = self::$SORT_KIND_DIRS_FIRST;
+			$sort = self::$SORT_NAME_DIRS_FIRST;
 		}
 
 		$mimes = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();

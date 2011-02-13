@@ -733,7 +733,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	protected function info($path) {
 		$root = $path == $this->options['path'];
 		$name = $root ? $this->options['basename'] : basename($path);
-		// $rel  = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		$type = filetype($path);
 		// use != 'link' - http://ru2.php.net/manual/en/function.filetype.php#100319
 		$stat = $type != 'link' ? @stat($path) : @lstat($path);
@@ -750,7 +749,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			'name'  => htmlspecialchars($name),
 			'hash'  => $this->encode($path),
 			'mime'  => $type == 'dir' ? 'directory' : $this->mimetype($path),
-			// 'rel'   => $rel,
 			'date'  => $date, 
 			'size'  => $type == 'dir' ? 0 : $stat['size'],
 			'read'  => $this->allowed($path, 'read'),
@@ -764,7 +762,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				$info['read']  = false;
 				$info['write'] = false;
 			} else {
-				$info['mime'] = $this->mimetype($link);
+				$info['mime'] =  $this->mimetype($link);
 				$info['link'] = $this->encode($link);
 				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
 				$info['path'] = $link;
@@ -963,9 +961,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
-		// if (filetype($path) == 'dir') {
-		// 	return 'directory';
-		// }
 		switch ($this->options['mimeDetect']) {
 			case 'finfo':
 				if (empty($this->_finfo)) {
@@ -982,8 +977,11 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
 		}
 		$type = explode(';', $type); 
+
+		if ($type[0] == 'unknown' && is_dir($path)) {
+			$type[0] = 'directory';
+		}
 		return $type[0];
-		
 	}
 	
 	/**

@@ -80,6 +80,13 @@ class elFinderConnector {
 			$args[$name] = $arg;
 		}
 		
+		
+		if (!empty($src['mimes']) && is_array($src['mimes'])) {
+			$args['mimes'] = $src['mimes'];
+		}
+		if (!empty($src['sort'])) {
+			$args['sort'] = $src['sort'];
+		}
 		$result = $this->elFinder->exec($cmd, $args);
 		
 		$this->output($result, !empty($result['header']) ? $result['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/);

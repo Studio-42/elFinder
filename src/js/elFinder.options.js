@@ -28,6 +28,22 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
 	onlyMimes : [],
+	
+	/**
+	 * How to sort files in current directory
+	 *
+	 * @type String
+	 * @default "nameDirsFirst"
+	 * @example
+	 *  - sort : 'nameDirsFirst' - sort by name, directory first
+	 *  - sort : 'kindDirsFirst' - sort by kind, name, directory first
+	 *  - sort : 'sizeDirsFirst' - sort by size, name, directory first
+	 *  - sort : 'name' - sort by name
+	 *  - sort : 'kind' - sort by kind, name
+	 *  - sort : 'size' - sort by size, name
+	 */
+	sort : 'nameDirsFirst',
+	
 	/**
 	 * Show nav panel (not implemented yet)
 	 *

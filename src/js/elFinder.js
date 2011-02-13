@@ -464,6 +464,8 @@
 				};
 				
 			if (!this.locks.ui) {
+				data['mimes[]'] = this.options.onlyMimes;
+				data.sort = this.sort[this.options.sort] || 1;
 				o = $.extend(o, opts, {data : data});
 				!silent && self.trigger('ajaxstart', o);
 				$.ajax(o);
@@ -502,7 +504,7 @@
 		 * @return elFinder
 		 */
 		cd : function(hash, tree, init) {
-			var data = {cmd : 'open', target : hash, 'mimes[]' : this.options.onlyMimes};
+			var data = {cmd : 'open', target : hash};
 			
 			if (!this.locks.ui) {
 				
@@ -654,6 +656,15 @@
 		},
 		
 		i18n : function(m) { return this.messages[m] || m; },
+		
+		sort : {
+			nameDirsFirst : 1,
+			kindDirsFirst : 2,
+			sizeDirsFirst : 3,
+			name : 4,
+			kind : 5,
+			size : 6
+		},
 		
 		/**
 		 * Key codes for non alfanum keys
