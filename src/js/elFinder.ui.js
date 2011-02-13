@@ -193,11 +193,13 @@
 					pattern     : 'ctrl+arrowUp',
 					description : 'Go into parent directory',
 					callback    : function() {
-						var p = self.tree.find('#nav-'+fm.cwd.hash).parent('li').parent('ul').prev('a[id]');
-						
-						if (p.length) {
-							fm.cd(p.attr('id').substr(4));
+						var hash, p;
+						if (fm.cwd.phash) {
+							 hash = fm.cwd.phash
+						} else if ((p = self.tree.find('#nav-'+fm.cwd.hash).parent('li').parent('ul').prev('a[id]')).length) {
+							hash = p.attr('id').substr(4);
 						}
+						hash && fm.cd(hash);
 					}
 				})
 				.shortcut({

@@ -186,14 +186,16 @@
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
 		
-				$.each(self.shortcuts, function(i, s) {
-					if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
-						e.preventDefault();
-						s.callback(e, self);
-						self.debug('shortcut', s.pattern);
-						return false;
-					}
-				});
+				if (!self.locks.shortcuts) {
+					$.each(self.shortcuts, function(i, s) {
+						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
+							e.preventDefault();
+							s.callback(e, self);
+							self.debug('shortcut', s.pattern);
+							return false;
+						}
+					});
+				}
 			});
 		}
 		
