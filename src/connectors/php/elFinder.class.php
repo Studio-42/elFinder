@@ -46,7 +46,7 @@ class elFinder {
 		'mkfile' => array(),
 		'rename' => array(),
 		'duplicate' => array(),
-		'rm' => array(),
+		'rm' => array('targets'),
 		'paste' => array(),
 		'upload' => array(
 			'current' => true, 

@@ -676,17 +676,21 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			if (files.length && !this.locks.ui) {
-				this.ajax({
-					error : error,
-					success : success,
-					data : {
-						cmd : 'rm', 
-						current : this.cwd.hash, 
-						targets : files
-					}	
-				});
+			var self = this,
+				targets = [];
+			
+			if (!this.locks.ui && files && files.length) {
+				$.each(files, function(i, hash) {
+					var f = self.cdc[hash];
+					if (f) {
+						if (!f.rm) {
+							self.trigger('error', {error : ['Access denied', f.name + ' ' + self.i18n('can not be removed')]});
+							return false;
+						}
+					}
+				})
 			}
+			
 			return this;
 		},
 		

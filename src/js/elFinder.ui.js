@@ -177,7 +177,15 @@
 					self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 				})
 				.bind('ajaxerror error', function(e) {
-					self.errorMsg.text(fm.i18n(e.data.error));
+					var error = e.data.error||'', msg = '';
+					if ($.isArray(error)) {
+						$.each(error, function(i, err) {
+							msg += fm.i18n(err) + '<br/>';
+						})
+					} else {
+						msg = fm.i18n(error);
+					}
+					self.errorMsg.html(msg);
 					self.error.trigger('show.elfinder');
 				})
 				.shortcut({
@@ -237,11 +245,11 @@
 				// 	description : 'Delete files',
 				// 	callback    : function() { fm.rm(fm.selected); }
 				// })
-				// .shortcut({
-				// 	pattern     : 'ctrl+backspace',
-				// 	description : 'Delete files',
-				// 	callback    : function() { fm.rm(fm.selected); }
-				// })
+				.shortcut({
+					pattern     : 'ctrl+backspace',
+					description : 'Delete files',
+					callback    : function() { fm.rm(fm.selected); }
+				})
 			;
 			
 		}
