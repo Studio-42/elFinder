@@ -593,33 +593,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		}
 		
 		return $this->remove($path);
-		
-		if (is_dir($path)) {
-			
-		} else {
-			// return @unlink($path);
-		}
-	}
-
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function remove($path) {
-		if (!is_dir($path)) {
-			// return @unlink($path);
-			return true;
-		}
-		
-		$dotFiles = $this->options['dotFiles'];
-		
-		foreach ($this->ls($path) as $p) {
-			echo $p.'<br>';
-		}
-		
-		$this->options['dotFiles'] = $dotFiles;
 	}
 
 	/**
@@ -808,18 +781,19 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	
 
 	/**
-	 * undocumented function
+	 * Return file info
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  file path
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function info($path) {
 		$root = $path == $this->options['path'];
 		$name = $root ? $this->options['basename'] : basename($path);
-		$type = filetype($path);
-		// use != 'link' - http://ru2.php.net/manual/en/function.filetype.php#100319
-		$stat = $type != 'link' ? @stat($path) : @lstat($path);
-		
+		$link = is_link($path);
+		$mime = $this->mimetype($path);
+		$stat = @lstat($path);
+
 		if ($stat['mtime'] > $this->today) {
 			$date = 'Today '.date('H:i', $stat['mtime']);
 		} elseif ($stat['mtime'] > $this->yesterday) {
@@ -831,24 +805,24 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$info = array(
 			'name'  => htmlspecialchars($name),
 			'hash'  => $this->encode($path),
-			'mime'  => $type == 'dir' ? 'directory' : $this->mimetype($path),
+			'mime'  => $mime,
 			'date'  => $date, 
-			'size'  => $type == 'dir' ? 0 : $stat['size'],
+			'size'  => $mime == 'directory' ? 0 : $stat['size'],
 			'read'  => $this->allowed($path, 'read'),
 			'write' => $this->allowed($path, 'write'),
 			'rm'    => $this->allowed($path, 'rm'),
 			);
 			
-		if ($type == 'link') {
+		if ($link) {
 			if (false === ($link = $this->readlink($path))) {
 				$info['mime']  = 'symlink-broken';
 				$info['read']  = false;
 				$info['write'] = false;
 			} else {
-				$info['mime'] =  $this->mimetype($link);
-				$info['link'] = $this->encode($link);
+				$info['mime']   =  $this->mimetype($link);
+				$info['link']   = $this->encode($link);
 				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
-				$info['path'] = $link;
+				$info['path']   = $link;
 			}
 		}
 			
@@ -868,8 +842,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			
 		return $info;
 	}
-	
-
 	
 	/**
 	 * undocumented function
@@ -966,6 +938,39 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		return $tree;
 	}
 	
+	/**
+	 * Remove file/directory
+	 *
+	 * @param  string  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function remove($path) {
+		$dotFiles = $this->options['dotFiles'];
+		$this->options['dotFiles'] = true;
+		$dir = false;
+		$ret = false;
+		
+		if (!file_exists($path)) {
+			$this->setError('File not found');
+		} elseif (!$this->allowed($path, 'rm')) {
+			$this->setError('Access denied');
+		} elseif (false != ($dir = is_dir($path))) {
+			foreach ($this->ls($path) as $p) {
+				if (!$this->remove($p)) {
+					break;
+				}
+			}
+		} 
+		
+		$ret = $dir ? @rmdir($path) : @unlink($path);
+		if ($ret && !$dir && false != ($tmb = $this->tmbPath($path)) && file_exists($tmb)) {
+			@unlink($tmb);
+		}
+		$this->options['dotFiles'] = $dotFiles;
+		return $ret;
+	}
+
 	
 	
 	/***************************************************************************/
