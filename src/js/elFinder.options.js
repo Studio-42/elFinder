@@ -82,7 +82,7 @@ elFinder.prototype.options = {
 	 * @type Object
 	 * @default  {}
 	 */
-	customData : {},
+	customData : {'init' : 42, test2 : '43'},
 	/**
 	 * Show toolbar?
 	 *

@@ -466,8 +466,17 @@
 				};
 				
 			if (!this.locks.ui) {
+				// mimetypes filter
 				data['mimes[]'] = this.options.onlyMimes;
+				// sort type
 				data.sort = this.sort[this.options.sort] || 1;
+				// custom data
+				$.each(this.options.customData || {}, function(k, v) {
+					if (data[k] === void(0)) {
+						data[k] = v;
+					} 
+				});
+				
 				o = $.extend(o, opts, {data : data});
 				!silent && self.trigger('ajaxstart', o);
 				$.ajax(o);
