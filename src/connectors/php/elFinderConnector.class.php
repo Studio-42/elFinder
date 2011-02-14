@@ -27,8 +27,7 @@ class elFinderConnector {
 	 **/
 	public function __construct($opts) {
 		if (!function_exists('json_encode')) {
-			header("Content-Type: application/json");
-			exit('{"error":"PHP JSON module not installed"}');
+			$this->output(array('error' => '{"error":"PHP JSON module not installed"}', 'raw' => true));
 		}
 		
 		$this->elFinder = new elFinder();
@@ -61,7 +60,7 @@ class elFinderConnector {
 			
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
-			$this->output(array('error' => 'Data exceeds the maximum allowed size'), 'Content-Type: text/html');
+			$this->output(array('error' => 'Data exceeds the maximum allowed size', 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
 				
@@ -87,11 +86,8 @@ class elFinderConnector {
 		if (!empty($src['sort'])) {
 			$args['sort'] = $src['sort'];
 		}
-		$result = $this->elFinder->exec($cmd, $args);
 		
-		$this->output($result, !empty($result['header']) ? $result['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/);
-		
-		
+		$this->output($this->elFinder->exec($cmd, $args));
 	}
 	
 	/**
@@ -120,11 +116,15 @@ class elFinderConnector {
 	 * Output json
 	 *
 	 * @param  array  data to output
-	 * @param  header[s]
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function output($data, $header) {
+	protected function output($data) {
+		$header = isset($data['header']) ? $data['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/;
+		$raw    = isset($data['raw']) ? $data['raw'] : false;
+		unset($data['header']);
+		unset($data['raw']);
+		
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {
@@ -133,9 +133,19 @@ class elFinderConnector {
 			} else {
 				header($header);
 			}
-			
 		}
-		exit(json_encode($data));
+		
+		if (isset($data['pointer'])) {
+			rewind($data['pointer']);
+			fpassthru($data['pointer']);
+			if (!empty($data['root'])) {
+				$data['root']->close($data['pointer']);
+			}
+		} else {
+			exit($raw ? $data['error'] : json_encode($data));
+		}
+		
+		
 	}
 	
 }// END class 

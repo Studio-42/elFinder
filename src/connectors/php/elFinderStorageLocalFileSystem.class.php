@@ -254,7 +254,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isFile($hash) {
-		return is_file($this->decode($hash));
+		$path = $this->decode($hash);
+		return is_file($path) && $this->allowed($path, 'read');
 	}
 	
 	/**
@@ -265,7 +266,8 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isDir($hash) {
-		return is_dir($this->decode($hash));
+		$path = $this->decode($hash);
+		return is_dir($path) && $this->allowed($path, 'read');
 	}
 	
 	/**
@@ -277,7 +279,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	public function isReadable($hash) {
 		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
-		return $this->accepted($path) && $this->allowed($path, 'read');
+		return file_exists($path) && $this->accepted($path) && $this->allowed($path, 'read');
 	}
 	
 	/**
@@ -492,7 +494,32 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function open($hash, $mode="rb") {
+		$path = $this->decode($hash);
+
+		if (!is_file($path) || !$this->accepted($path)) {
+			return $this->setError('File not found');
+		}
+		if (!$this->allowed($path, 'read')) {
+			return $this->setError('Access denied');
+		}
 		
+		$mime = $this->mimetype($path);
+		$disp  = preg_match('/^(image|text)/i', $mime) || $mime == 'application/x-shockwave-flash' ? 'inline' : 'attachments';
+
+		$headers = array(
+			"Content-Type: ".$mime, 
+			"Content-Disposition: ".$disp."; filename=".basename($path),
+			"Content-Location: ".str_replace($this->options['path'], '', $path),
+			'Content-Transfer-Encoding: binary',
+			"Content-Length: ".filesize($path),
+			"Connection: close"
+			);
+
+		$fp = fopen($path, $mode);
+		if (!$fp) {
+			return $this->setError('Access denied');
+		}
+		return array('pointer' => $fp, 'root' => $this, 'header' => $headers);
 	}
 
 	/**
@@ -503,7 +530,9 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function close($fp) {
-		
+		if (is_resource($fp)) {
+			@fclose($fp);
+		}
 	}
 	
 	/**

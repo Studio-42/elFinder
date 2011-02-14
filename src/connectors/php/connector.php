@@ -33,7 +33,7 @@ $opts = array(
 		array(
 			'path'   => '../../../files',
 			'URL'    => 'http://localhost/git/elfinder/files',
-			// 'fileURL' => false,
+			'fileURL' => false,
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
 			'disabled' => array('rename'),

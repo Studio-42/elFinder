@@ -36,12 +36,9 @@ class elFinder {
 			// 'sort'   => false,
 			// 'mimes'  => false 
 			),
-		'tree' => array(
-			'target' => true
-		),
-		'tmb' => array(
-			'current' => true
-		),
+		'tree' => array('target' => true),
+		'tmb' => array('current' => true),
+		'file' => array('target' => true),
 		'mkdir'  => array(
 			'current' => true, 
 			'name' => true
@@ -338,6 +335,30 @@ class elFinder {
 		
 		if (false === ($result = $root->tmb($args['current']))) {
 			return array('error' => $root->error());
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function file($args) {
+
+		$hash = $args['target'];
+		$root = $this->fileRoot($hash);
+		if (!$root) {
+			return array('error' => 'Invalid parameters', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+		}
+		
+		$result = $root->open($hash);
+		
+		if (!$result) {
+			$error = $root->error();
+			return array('error' => $error, 'headers' => $error == 'Access denied' ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
 		return $result;

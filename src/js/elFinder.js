@@ -549,7 +549,7 @@
 					// urls diabled - open connector
 					url = this.options.url 
 						+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-						(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+						+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
 						+ '&target=' + hash;
 						
 				}
@@ -559,7 +559,7 @@
 					w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
 				}
 
-				if (window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
+				if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
 					// popup block
 					this.trigger('error', {error : 'Unable to open new window.'});
 				}
