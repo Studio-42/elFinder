@@ -106,10 +106,22 @@ class elFinderConnector {
 	 * @param  string  command name
 	 * @param  string|array  callback name or array(object, method)
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
 		$this->elFinder->bind($cmd, $handler);
+	}
+	
+	/**
+	 * remove handler from elFinder command
+	 *
+	 * @param  string  command name
+	 * @param  string|array  callback name or array(object, method)
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function unbind($cmd, $handler) {
+		$this->elFinder->unbind($cmd, $handler);
 	}
 	
 	/**

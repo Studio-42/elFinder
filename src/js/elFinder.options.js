@@ -77,12 +77,12 @@ elFinder.prototype.options = {
 	/* open last visited dir after reload page or close and open browser */
 	rememberLastDir : true,
 	/**
-	 * Data to append to all ajax request
+	 * Data to append to all ajax requests and to upload form
 	 *
 	 * @type Object
 	 * @default  {}
 	 */
-	customData : {'init' : 42, test2 : '43'},
+	customData : { },
 	/**
 	 * Show toolbar?
 	 *

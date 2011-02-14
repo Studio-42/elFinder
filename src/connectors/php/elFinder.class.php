@@ -171,7 +171,7 @@ class elFinder {
 	 *
 	 * @param  string  command name
 	 * @param  string|array  callback name or array(object, method)
-	 * @return void
+	 * @return elFinder
 	 * @author Dmitry Levashov
 	 **/
 	public function bind($cmd, $handler) {
@@ -182,6 +182,26 @@ class elFinder {
 		if ((is_array($handler) && count($handler) == 2 && class_exists($handler[0]) && method_exists($handler[0], $handler[1]) )
 		|| function_exists($handler)) {
 			$this->listeners[$cmd][] = $handler;
+		}
+		return $this;
+	}
+	
+	/**
+	 * Remove event (command exec) handler
+	 *
+	 * @param  string  command name
+	 * @param  string|array  callback name or array(object, method)
+	 * @return elFinder
+	 * @author Dmitry Levashov
+	 **/
+	public function unbind($cmd, $handler) {
+		if (!empty($this->listeners[$cmd])) {
+			foreach ($this->listeners[$cmd] as $i => $h) {
+				if ($h === $handler) {
+					unset($this->listeners[$cmd][$i]);
+					return $this;
+				}
+			}
 		}
 		return $this;
 	}
@@ -341,10 +361,12 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Required to output file in browser when option fileURL == false 
+	 * Return array contains opened file pointer, root itself and required headers
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function file($args) {
 
