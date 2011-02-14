@@ -533,11 +533,35 @@
 		 * @return elFinder
 		 */
 		open : function(hash) {
-			if (!this.locks.ui) {
-				if (this.cdc[hash] && this.cdc[hash].mime != 'directory') {
-					this.log('open file')
+			var f = this.cdc[hash], url, s, w = '', h;
+			
+			if (!this.locks.ui && f) {
+				
+				if (f.mime == 'directory') {
+					return this.cd(hash);
+				}
+				
+				if (f.url || this.cwd.url) {
+					// old api store url in file propery
+					// new api store only cwd url
+					url = f.url || this.cwd.url + encodeURIComponent(f.name);
 				} else {
-					this.cd(hash);
+					// urls diabled - open connector
+					url = this.options.url 
+						+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
+						(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+						+ '&target=' + hash;
+						
+				}
+				if (f.dim) {
+					// image - set window size
+					s = f.dim.split('x');
+					w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+				}
+
+				if (window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
+					// popup block
+					this.trigger('error', {error : 'Unable to open new window.'});
 				}
 			}
 			return this;

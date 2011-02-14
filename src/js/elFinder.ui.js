@@ -8,15 +8,11 @@
 	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
 			open = function() {
-				var s = fm.selected, l;
-				
-				if (s.length == 1) {
-					fm.open(s[0]);
-				} else {
-					for (i = 0; i < s.length; i++) {
-						if (fm.cdc[s[i]] && fm.cdc[s[i]].mime != 'directory') {
-							fm.open(s[i]);
-						}
+				var s = fm.selected, f, i;
+				// open only one selected folder or every selected files
+				for (i = 0; i < s.length; i++) {
+					if ((f = fm.cdc[s[i]]) && ((s.length == 1 || f.mime != 'directory'))) {
+						fm.open(s[i]);
 					}
 				}
 			}

@@ -344,8 +344,10 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		if ($path != $this->options['path']) {
 			$info['phash'] = $this->encode(dirname($path));
 		}
+		if ($this->options['fileURL']) {
+			$info['url'] = $this->path2url($path, true);
+		}
 		
-		$info['url']    = $this->path2url($path).'/';
 		$info['params'] = $this->params;
 		$info['rel']    = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
 		// $info['link']   = $link;
@@ -947,10 +949,18 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function path2url($path) {
-		$dir  = substr(dirname($path), strlen($this->options['path'])+1);
-		$file = rawurlencode(basename($path));
-		return $this->options['URL'].($dir ? str_replace(DIRECTORY_SEPARATOR, '/', $dir).'/' : '').$file;
+	protected function path2url($path, $isdir=false) {
+		if ($path == $this->options['path']) {
+			$url = $this->options['URL'];
+		} else {
+			$dir  = str_replace(DIRECTORY_SEPARATOR, '/', substr(dirname($path), strlen($this->options['path'])+1));
+			$url = $this->options['URL'].($dir ? $dir.'/' : '').rawurlencode(basename($path));
+			if ($isdir) {
+				$url .= '/';
+			}
+		}
+		// echo $path.' : '.$url.'<br>';
+		return $url;
 	}
 	
 	/**
