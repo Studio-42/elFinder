@@ -213,6 +213,10 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
 		$this->options['cryptLib']   = $this->cryptLib($this->options['cryptLib']);
 
+		// if (strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR)) {
+		// 	
+		// }
+		// 
 		if ($this->options['tmbDir']) {
 			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'];
 			$this->options['tmbDir'] = is_dir($dir) || @mkdir($dir, $this->options['dirMode']) ? $dir : '';
@@ -485,6 +489,34 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 	/**
+	 * Return opened file pointer and required headers
+	 *
+	 * @param  string  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function file($hash) {
+		$fp = $this->open($hash);
+		
+		if ($fp) {
+			$path = $this->decode($hash);
+			$mime = $this->mimetype($path);
+			$disp  = preg_match('/^(image|text)/i', $mime) || $mime == 'application/x-shockwave-flash' ? 'inline' : 'attachments';
+
+			$headers = array(
+				"Content-Type: ".$mime, 
+				"Content-Disposition: ".$disp."; filename=".basename($path),
+				"Content-Location: ".str_replace($this->options['path'], '', $path),
+				'Content-Transfer-Encoding: binary',
+				"Content-Length: ".filesize($path),
+				"Connection: close"
+				);
+			return array('pointer' => $fp, 'root' => $this, 'header' => $headers);
+		}
+		return false;
+	}
+
+	/**
 	 * Open file and return descriptor
 	 * Requered to copy file across storages with different types
 	 *
@@ -502,24 +534,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		if (!$this->allowed($path, 'read')) {
 			return $this->setError('Access denied');
 		}
-		
-		$mime = $this->mimetype($path);
-		$disp  = preg_match('/^(image|text)/i', $mime) || $mime == 'application/x-shockwave-flash' ? 'inline' : 'attachments';
-
-		$headers = array(
-			"Content-Type: ".$mime, 
-			"Content-Disposition: ".$disp."; filename=".basename($path),
-			"Content-Location: ".str_replace($this->options['path'], '', $path),
-			'Content-Transfer-Encoding: binary',
-			"Content-Length: ".filesize($path),
-			"Connection: close"
-			);
-
-		$fp = fopen($path, $mode);
-		if (!$fp) {
-			return $this->setError('Access denied');
-		}
-		return array('pointer' => $fp, 'root' => $this, 'header' => $headers);
+		return fopen($path, $mode);
 	}
 
 	/**
@@ -567,7 +582,44 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function rm($hash) {
+		$path = $this->decode($hash);
 		
+		if (!file_exists($path) || !$this->accepted($path)) {
+			return $this->setError('File not found');
+		}
+		
+		if (!$this->allowed($path, 'rm')) {
+			return $this->setError('Access denied');
+		}
+		
+		return $this->remove($path);
+		
+		if (is_dir($path)) {
+			
+		} else {
+			// return @unlink($path);
+		}
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function remove($path) {
+		if (!is_dir($path)) {
+			// return @unlink($path);
+			return true;
+		}
+		
+		$dotFiles = $this->options['dotFiles'];
+		
+		foreach ($this->ls($path) as $p) {
+			echo $p.'<br>';
+		}
+		
+		$this->options['dotFiles'] = $dotFiles;
 	}
 
 	/**

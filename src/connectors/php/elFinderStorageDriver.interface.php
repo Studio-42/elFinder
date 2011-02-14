@@ -113,6 +113,16 @@ interface elFinderStorageDriver {
 	public function tmb($hash);
 
 	/**
+	 * Return opened file pointer and required headers.
+	 * Used to open file in browser when option fileURL == false
+	 *
+	 * @param  string  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function file($hash);
+
+	/**
 	 * Open file and return descriptor
 	 * Requered to copy file across storages with different types
 	 *

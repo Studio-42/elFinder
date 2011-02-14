@@ -676,19 +676,33 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			var self = this,
-				targets = [];
+			var self = this, f,
+				data = {
+					cmd : 'rm',
+					targets : []
+				},
+				opts = {
+					error : function(xhr) { self.log(xhr) },
+					success : function(data) { self.log(data)}
+				};
 			
-			if (!this.locks.ui && files && files.length) {
-				$.each(files, function(i, hash) {
-					var f = self.cdc[hash];
-					if (f) {
+			if (!this.locks.ui) {
+				$.each(files || [], function(i, hash) {
+					if ((f = self.cdc[hash])) {
 						if (!f.rm) {
 							self.trigger('error', {error : ['Access denied', f.name + ' ' + self.i18n('can not be removed')]});
 							return false;
 						}
-					}
-				})
+						data.targets.push(hash);
+					} 
+				});
+				
+				if (data.targets.length) {
+					
+					this.ajax(data, opts)
+					
+				}
+				
 			}
 			
 			return this;

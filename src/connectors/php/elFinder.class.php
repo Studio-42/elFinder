@@ -46,7 +46,7 @@ class elFinder {
 		'mkfile' => array(),
 		'rename' => array(),
 		'duplicate' => array(),
-		'rm' => array('targets'),
+		'rm' => array('targets' => true),
 		'paste' => array(),
 		'upload' => array(
 			'current' => true, 
@@ -376,7 +376,7 @@ class elFinder {
 			return array('error' => 'Invalid parameters', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
-		$result = $root->open($hash);
+		$result = $root->file($hash);
 		
 		if (!$result) {
 			$error = $root->error();
@@ -384,6 +384,34 @@ class elFinder {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function rm($args) {
+		$removed = array();
+		
+		if (!is_array($args['targets'])) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		foreach ($args['targets'] as $hash) {
+			if (false == ($root = $this->fileRoot($hash))) {
+				return array('error' => 'File not found');
+			}
+			
+			if ($root->rm($hash)) {
+				$removed[] = $hash;
+			} else {
+				return array('error' => $root->error());
+			}
+		}
+		
+		return array('removed' => $removed);
 	}
 	
 	/***************************************************************************/

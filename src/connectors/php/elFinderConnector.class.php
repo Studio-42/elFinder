@@ -74,7 +74,7 @@ class elFinderConnector {
 				$arg = trim($arg);
 			}
 			if ($req && empty($arg)) {
-				$this->output('Invalid parameters');
+				$this->output(array('error' => 'Invalid parameters'));
 			}
 			$args[$name] = $arg;
 		}
@@ -131,11 +131,16 @@ class elFinderConnector {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function output($data) {
+	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/;
 		$raw    = isset($data['raw']) ? $data['raw'] : false;
-		unset($data['header']);
-		unset($data['raw']);
+		if (isset($data['header'])) {
+			unset($data['header']);
+		} 
+		if (isset($data['raw'])) {
+			unset($data['raw']);
+		}
+		
 		
 		if ($header) {
 			if (is_array($header)) {
