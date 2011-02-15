@@ -321,7 +321,24 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 	/**
-	 * Return directory info
+	 * Return file/dir info
+	 *
+	 * @param  string  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function getInfo($hash) {
+		$path = $this->decode($hash);
+		
+		if (!file_exists($path) || !$this->accepted($path)) {
+			return $this->setError('File not found');
+		}
+		return $this->info($path);
+	}
+
+	/**
+	 * Return directory info (same as getInfo() but with additional fields)
+	 * Used to get current working directory info
 	 *
 	 * @param  string  directory hash
 	 * @return array
@@ -329,23 +346,15 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 **/
 	public function dirInfo($hash) {
 		$path = $this->decode($hash);
-		$link = false;
 		
-		if (filetype($path) == 'link') {
-			if (false === ($path = $this->readlink($path))) {
-				return $this->setError('Access denied');
-			}
-			$link = true;
+		if (is_link($path) == 'link' && false === ($path = $this->readlink($path))) {
+			return $this->setError('Access denied');
 		}
 		
-		if (!is_dir($path)) {
+		if (!is_dir($path) || !$this->accepted($path)) {
 			return $this->setError('Invalid parameters');
 		}
 		
-		if (!$this->accepted($path) || !$this->allowed($path, 'read')) {
-			return $this->setError('Access denied');
-		}
-
 		$info = $this->info($path);
 		if ($path != $this->options['path']) {
 			$info['phash'] = $this->encode(dirname($path));
@@ -356,7 +365,6 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		
 		$info['params'] = $this->params;
 		$info['rel']    = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
-		// $info['link']   = $link;
 		
 		return $info;
 	}

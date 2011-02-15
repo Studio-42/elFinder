@@ -74,6 +74,15 @@ interface elFinderStorageDriver {
 	public function isRemovable($hash);
 	
 	/**
+	 * Return file/dir info
+	 *
+	 * @param  string  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function getInfo($hash);
+	
+	/**
 	 * Return directory info
 	 *
 	 * @param  string  directory hash
