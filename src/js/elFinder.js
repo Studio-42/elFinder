@@ -639,7 +639,7 @@
 		 * @return elFinder
 		 */
 		paste : function(dst, clean) {
-			var b = this.buffer, o;
+			var b = this.buffer, o, self = this;
 
 			dst = dst || this.cwd.hash;
 			
@@ -653,6 +653,9 @@
 						dst     : dst,
 						cut     : b.cut ? 1 : 0,
 						targets : b.files
+				}, {
+					error : function(xhr) { self.log(xhr)},
+					success : function(data) { self.log(data)}
 				});
 				clean && this.cleanBuffer();
 			}

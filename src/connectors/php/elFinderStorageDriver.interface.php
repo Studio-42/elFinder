@@ -200,15 +200,27 @@ interface elFinderStorageDriver {
 	public function duplicate($hash);
 
 	/**
-	 * Copy file into required directory
+	 * Copy file/dir under one root storage only
+	 * Return hash of new file/dir
 	 *
-	 * @param  resource  file to copy descriptor
-	 * @param  string    target directory hash
-	 * @param  string    file to copy in name
-	 * @return bool
+	 * @param  string    file/dir to copy hash
+	 * @param  string    destination dir hash
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function copy($fp, $hash, $name);
+	public function copy($from, $to);
+	
+	/**
+	 * Copy file/dir from another root storage
+	 * Return hash of new file/dir
+	 *
+	 * @param  elFinderStorageDriver  source root storage
+	 * @param  string  target file/dir hash
+	 * @param  string  destination dir hash
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function paste($root, $src, $dst);
 	
 	/**
 	 * Return file content

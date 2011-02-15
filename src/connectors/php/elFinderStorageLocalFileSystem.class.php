@@ -635,7 +635,21 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function copy($fp, $hash, $name) {
+	public function copy($from, $to) {
+		
+	}
+	
+	/**
+	 * Copy file/dir from another root storage
+	 * Return hash of new file/dir
+	 *
+	 * @param  elFinderStorageDriver  source root storage
+	 * @param  string  target file/dir hash
+	 * @param  string  destination dir hash
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function paste($root, $src, $dst) {
 		
 	}
 	

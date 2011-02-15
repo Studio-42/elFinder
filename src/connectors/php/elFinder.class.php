@@ -47,7 +47,7 @@ class elFinder {
 		'rename' => array(),
 		'duplicate' => array(),
 		'rm' => array('targets' => true),
-		'paste' => array(),
+		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
 		'upload' => array(
 			'current' => true, 
 			'FILES' => true
@@ -387,9 +387,10 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Remove dirs/files
 	 *
-	 * @return void
+	 * @param array  command arguments
+	 * @return array
 	 * @author Dmitry Levashov
 	 **/
 	protected function rm($args) {
@@ -412,6 +413,49 @@ class elFinder {
 		}
 		
 		return array('removed' => $removed);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function paste($args) {
+		$result  = array('copied');
+		$dst     = $args['dst'];
+		$targets = $args['targets'];
+		$cut     = !empty($args['cut']);
+		$dstRoot = $this->fileRoot($dst);
+		
+		if (!$dstRoot || !is_array($targets) || empty($targets)) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		foreach ($targets as $target) {
+			$srcRoot = $this->fileRoot($target);
+			if (!$srcRoot) {
+				return array('error' => 'Invalid parameters');
+			}
+			if ($srcRoot == $dstRoot) {
+				$copy = $dst->copy($target, $dst);
+				if ($copy) {
+					$result['copied'][] = $copy;
+				} else {
+					return array('error' => $dstRoot->error());
+				}
+			} else {
+				
+			}
+			if ($cut && !$srcRoot->rm($target)) {
+				return array('error' => $srcRoot->error());
+			}
+		}
+		
+		
+		return $dstRoot->getInfo($args['dst']);
+		
+		return $args;
 	}
 	
 	/***************************************************************************/
