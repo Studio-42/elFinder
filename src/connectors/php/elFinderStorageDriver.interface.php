@@ -200,7 +200,7 @@ interface elFinderStorageDriver {
 	public function duplicate($hash);
 
 	/**
-	 * Copy file/dir under one root storage only
+	 * Copy file/dir under the same root storage only
 	 * Return hash of new file/dir
 	 *
 	 * @param  string    file/dir to copy hash

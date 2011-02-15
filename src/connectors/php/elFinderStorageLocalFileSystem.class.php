@@ -40,7 +40,7 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 		'treeDeep'     => 1,
 		'dotFiles'     => false,        // allow dot files?
 		'fileMode'     => 0666,         // new files mode
-		'dirMode'      => 0777,         // new dir mode 
+		'dirMode'      => 0775,         // new dir mode 
 		'cryptLib'     => 'auto',
 		'fileURL'      => true,         // allow send files urls to frontend?
 		'uploadAllow'  => array(),      // mimetypes which allowed to upload
@@ -567,7 +567,29 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function mkdir($hash, $name) {
+		$path = $this->decode($hash);
 		
+		if (!is_dir($path) || !$this->accepted($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		if (!$this->allowed($path, 'write')) {
+			return $this->setError('Access denied');
+		}
+		if (!$this->accepted($name)) {
+			return $this->setError('Invalid parameters');
+		}
+		
+		$dir = $path.DIRECTORY_SEPARATOR.$name;
+		if (file_exists($dir)) {
+			return $this->setError('Access denied');
+		}
+		$umask = umask(0);
+		if (!@mkdir($dir, $this->options['dirMode'])) {
+			umask($umask);
+			return $this->setError('Unable to create directory');
+		}
+		umask($umask);
+		return $this->encode($dir);
 	}
 
 	/**
@@ -579,7 +601,30 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function mkfile($hash, $name) {
+		$path = $this->decode($hash);
 		
+		if (!is_dir($path) || !$this->accepted($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		if (!$this->allowed($path, 'write')) {
+			return $this->setError('Access denied');
+		}
+		if (!$this->accepted($name)) {
+			return $this->setError('Invalid parameters');
+		}
+		$file = $path.DIRECTORY_SEPARATOR.$name;
+		if (file_exists($file)) {
+			return $this->setError('File exists');
+		}
+		
+		$umask = umask(0);
+		if (!@touch($file)) {
+			umask($umask);
+			return $this->setError('Unable to create file');
+		}
+		chmod($file, $this->options['fileMode']);
+		umask($umask);
+		return $this->encode($file);
 	}
 
 	/**
@@ -627,15 +672,21 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	}
 
 	/**
-	 * Copy file into required directory
+	 * Copy file/dir under the same root storage only
+	 * Return hash of new file/dir
 	 *
-	 * @param  resource  file to copy descriptor
-	 * @param  string    target directory hash
-	 * @param  string    file to copy in name
-	 * @return bool
+	 * @param  string    file/dir to copy hash
+	 * @param  string    destination dir hash
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function copy($from, $to) {
+		$src = $this->decode($from);
+		$dst = $this->decode($to);
+		
+		if (!file_exists($src) || !$this->accepted($src) || !is_dir($dst)) {
+			return $this->setError('Invalid parameters');
+		} 
 		
 	}
 	
@@ -650,6 +701,44 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function paste($root, $src, $dst) {
+		$hash = $src;
+		$src = $root->getInfo($src);
+		$dst = $this->decode($dst);
+		if (!$src) {
+			return $this->error($root->error());
+		}
+		if (!$src['read']) {
+			return $this->error('Access denied');
+		}
+		if (!is_dir($dst) || !$this->accepted($dst)) {
+			return $this->error('Invalid parameters');
+		}
+		if (!$this->allowed($dst, 'read')) {
+			return $this->error('Access denied');
+		}
+		
+		if ($src['mime'] == 'directory') {
+			
+		} else {
+			$file = $dst.DIRECTORY_SEPARATOR.$src['name'];
+			echo $file;
+			$fp = fopen($file, 'wb');
+			if (!$fp) {
+				return $this->error('Access denied');
+			}
+			debug($fp);
+			$srcfp = $root->open($hash);
+			if (!$srcfp) {
+				return $this->error('Access denied');
+			}
+			debug($srcfp);
+			rewind($srcfp);
+			while (!feof($srcfp)) {
+				fwrite($fp, fread($srcfp, 4096));
+			}
+			$root->close($srcfpfp);
+			fclose($fp);
+		}
 		
 	}
 	

@@ -493,6 +493,16 @@
 		 */
 		get : function(hash) { return this.cdc[hash]; },
 		
+		exists : function(name) {
+			var hash;
+			
+			for (hash in this.cdc) {
+				if (this.cdc.hasOwnProperty(hash) && this.cdc[hash].name == name) {
+					return true;
+				}
+			}
+			return false;
+		},
 		
 		getSelected : function() {
 			var s = [], 
@@ -709,6 +719,50 @@
 			}
 			
 			return this;
+		},
+		
+		mkdir : function(name) {
+			var self = this;
+			if (!this.locks.ui) {
+				this.ajax({
+					cmd : 'mkdir',
+					current : this.cwd.hash,
+					name : name || this.uniqueName('folder')
+				}, {
+					error : function(xhr) { self.log(xhr) },
+					success : function(data) { self.log(data); }
+				})
+			}
+			return this;
+		},
+		
+		mkfile : function(name) {
+			var self = this;
+			if (!this.locks.ui) {
+				this.ajax({
+					cmd : 'mkfile',
+					current : this.cwd.hash,
+					name : name || this.uniqueName('file')
+				}, {
+					error : function(xhr) { self.log(xhr) },
+					success : function(data) { self.log(data); }
+				})
+			}
+			return this;
+		},
+		
+		uniqueName : function(prefix) {
+			var i = 0, name;
+			
+			if (!this.exists(prefix)) {
+				return prefix;
+			}
+			while (i < 100) {
+				if (!this.exists((name = prefix + ' '+(++i)))) {
+					return name;
+				}
+			}
+			return prefix + Math.random();
 		},
 		
 		i18n : function(m) { return this.messages[m] || m; },

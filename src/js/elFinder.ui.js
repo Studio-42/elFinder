@@ -250,6 +250,16 @@
 					description : 'Delete files',
 					callback    : function() { fm.rm(fm.selected); }
 				})
+				.shortcut({
+					pattern : 'shift+d',
+					description : 'Create directory',
+					callback : function() { fm.mkdir(); }
+				})
+				.shortcut({
+					pattern : 'shift+n',
+					description : 'Create file',
+					callback : function() { fm.mkfile(); }
+				})
 			;
 			
 		}

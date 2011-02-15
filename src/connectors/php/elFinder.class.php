@@ -29,24 +29,16 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'   => array(
-			'target' => false, 
-			'tree'   => false, 
-			'init'   => false,
-			// 'sort'   => false,
-			// 'mimes'  => false 
-			),
-		'tree' => array('target' => true),
-		'tmb' => array('current' => true),
-		'file' => array('target' => true),
-		'mkdir'  => array(
-			'current' => true, 
-			'name' => true
-			),
-		'mkfile' => array(),
-		'rename' => array(),
+		'open'      => array('target' => false, 'tree' => false, 'init' => false),
+		'tree'      => array('target' => true),
+		'tmb'       => array('current' => true),
+		'file'      => array('target' => true),
+		'mkdir'     => array('current' => true, 'name' => true),
+		'mkfile'    => array('current' => true, 'name' => true),
+		'rm'        => array('targets' => true),
+		'rename'    => array(),
 		'duplicate' => array(),
-		'rm' => array('targets' => true),
+		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
 		'upload' => array(
 			'current' => true, 
@@ -387,11 +379,46 @@ class elFinder {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function mkdir($args) {
+		$root = $this->fileRoot($args['current']);
+		if (!$root) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		if (false == ($hash = $root->mkdir($args['current'], $args['name']))) {
+			return array('error' => $root->error());
+		}
+		return array('current' => $args['current'], 'dir' => $root->getInfo($hash));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function mkfile($args) {
+		$root = $this->fileRoot($args['current']);
+		if (!$root) {
+			return array('error' => 'Invalid parameters');
+		}
+		if (false == ($hash = $root->mkfile($args['current'], $args['name']))) {
+			return array('error' => $root->error());
+		}
+		return array('current' => $args['current'], 'file' => $root->getInfo($hash));
+	}
+	
+	/**
 	 * Remove dirs/files
 	 *
 	 * @param array  command arguments
 	 * @return array
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
 		$removed = array();
@@ -416,13 +443,14 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Copy/move files into new destination
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function paste($args) {
-		$result  = array('copied');
+		
 		$dst     = $args['dst'];
 		$targets = $args['targets'];
 		$cut     = !empty($args['cut']);
@@ -432,30 +460,45 @@ class elFinder {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		foreach ($targets as $target) {
-			$srcRoot = $this->fileRoot($target);
+		$result  = array('dst' => $dst, 'copy' => array(), 'rm' => array());
+		
+		foreach ($targets as $src) {
+			$srcRoot = $this->fileRoot($src);
 			if (!$srcRoot) {
 				return array('error' => 'Invalid parameters');
 			}
-			if ($srcRoot == $dstRoot) {
-				$copy = $dst->copy($target, $dst);
-				if ($copy) {
-					$result['copied'][] = $copy;
-				} else {
-					return array('error' => $dstRoot->error());
-				}
-			} else {
-				
-			}
-			if ($cut && !$srcRoot->rm($target)) {
-				return array('error' => $srcRoot->error());
-			}
+			$copy = $dstRoot->paste($srcRoot, $src, $dst);
+			// if ($srcRoot == $dstRoot) {
+			// 	$copy = $dstRoot->copy($target, $dst);
+			// 	if ($copy) {
+			// 		$result['copy'][] = $copy;
+			// 	} else {
+			// 		return array('error' => $dstRoot->error());
+			// 	}
+			// } else {
+			// 	
+			// }
+			// if ($cut && !$srcRoot->rm($target)) {
+			// 	return array('error' => $srcRoot->error());
+			// } else {
+			// 	$result['rm'][] = $target;
+			// }
 		}
-		
+		return $result;
 		
 		return $dstRoot->getInfo($args['dst']);
 		
 		return $args;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function copy($srcRoot, $src, $dstRoot, $dst) {
+		
 	}
 	
 	/***************************************************************************/
