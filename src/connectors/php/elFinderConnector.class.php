@@ -20,26 +20,25 @@ class elFinderConnector {
 	protected $options = array();
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $header = 'Content-Type: text/html' /*'Content-Type: application/json'*/;
+	
+	/**
 	 * Constructor
 	 *
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function __construct($opts) {
+	public function __construct($elFinder) {
 		if (!function_exists('json_encode')) {
 			$this->output(array('error' => '{"error":"PHP JSON module not installed"}', 'raw' => true));
 		}
 		
-		$this->elFinder = new elFinder();
+		$this->elFinder = $elFinder;
 		
-		if (isset($opts['bind']) && is_array($opts['bind'])) {
-			foreach ($opts['bind'] as $cmd => $handler) {
-				$this->elFinder->bind($cmd, $handler);
-			}
-			unset($opts['bind']);
-		}
-		
-		$this->options = $opts;
 	}
 	
 	/**
@@ -50,26 +49,35 @@ class elFinderConnector {
 	 **/
 	public function run() {
 		$isPost = $_SERVER["REQUEST_METHOD"] == 'POST';
-		$src    = $isPost ? $_POST : $_GET;
+		$src    = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
 		$args   = array();
 		
-		if (!$this->elFinder->load($this->options)) {
+		if (!function_exists('json_encode')) {
+			header($this->header);
+			exit('{"error":"PHP JSON module not installed"}');
+		}
+		
+		if (!$this->elFinder->loaded()) {
 			$this->output(array('error' => 'Invalid backend configuration'));
 		}
-			
+		
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
 			$this->output(array('error' => 'Data exceeds the maximum allowed size', 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
-				
+		
 		if (!$this->elFinder->commandExists($cmd)) {
 			$this->output(array('error' => 'Unknown command'));
 		}
 		
+		// collect required arguments to exec command
 		foreach ($this->elFinder->commandArgsList($cmd) as $name => $req) {
-			$arg = $name == 'FILES' ? $_FILES : (isset($src[$name]) ? $src[$name] : '');
+			$arg = $name == 'FILES' 
+				? $_FILES 
+				: (isset($src[$name]) ? $src[$name] : '');
+				
 			if (!is_array($arg)) {
 				$arg = trim($arg);
 			}
@@ -79,49 +87,7 @@ class elFinderConnector {
 			$args[$name] = $arg;
 		}
 		
-		
-		if (!empty($src['mimes']) && is_array($src['mimes'])) {
-			$args['mimes'] = $src['mimes'];
-		}
-		if (!empty($src['sort'])) {
-			$args['sort'] = $src['sort'];
-		}
-		
 		$this->output($this->elFinder->exec($cmd, $args));
-	}
-	
-	/**
-	 * Return elFinder instance
-	 *
-	 * @return elFinder
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function get() {
-		return $this->elFinder;
-	}
-	
-	/**
-	 * Add handler to elFinder command
-	 *
-	 * @param  string  command name
-	 * @param  string|array  callback name or array(object, method)
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function bind($cmd, $handler) {
-		$this->elFinder->bind($cmd, $handler);
-	}
-	
-	/**
-	 * remove handler from elFinder command
-	 *
-	 * @param  string  command name
-	 * @param  string|array  callback name or array(object, method)
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function unbind($cmd, $handler) {
-		$this->elFinder->unbind($cmd, $handler);
 	}
 	
 	/**
@@ -133,14 +99,7 @@ class elFinderConnector {
 	 **/
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : 'Content-Type: text/html' /*'Content-Type: application/json'*/;
-		$raw    = isset($data['raw']) ? $data['raw'] : false;
-		if (isset($data['header'])) {
-			unset($data['header']);
-		} 
-		if (isset($data['raw'])) {
-			unset($data['raw']);
-		}
-		
+		unset($data['header']);
 		
 		if ($header) {
 			if (is_array($header)) {
@@ -159,7 +118,7 @@ class elFinderConnector {
 				$data['root']->close($data['pointer']);
 			}
 		} else {
-			exit($raw ? $data['error'] : json_encode($data));
+			exit(json_encode($data));
 		}
 		
 		

@@ -751,6 +751,30 @@
 			return this;
 		},
 		
+		duplicate : function(files) {
+			var self = this, target = [];
+			
+			$.each(files || this.selected, function(i, hash) {
+				if (self.cdc[hash]) {
+					// @TODO check for readonly/na files
+					target.push(hash);
+				}
+			});
+			
+			this.log(target)
+			
+			if (!this.locks.ui) {
+				this.ajax({
+					current : this.cwd.hash,
+					target : this.api > 1 ? target : target.shift()
+				}, {
+					error : function(xhr) { self.log(xhr) },
+					success : function(data) { self.log(data); }
+				})
+			}
+			
+		},
+		
 		uniqueName : function(prefix) {
 			var i = 0, name;
 			

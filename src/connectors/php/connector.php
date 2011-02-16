@@ -7,7 +7,8 @@ if (function_exists('date_default_timezone_set')) {
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriver.interface.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriverInterface.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageLocalFileSystem.class.php';
 
 function debug($o) {
@@ -16,19 +17,35 @@ function debug($o) {
 }
 
 function logger($data) {
-
+	$str = $data['cmd'].': ';
+	$root = $data['root'];
+	$result = $data['result'];
+	switch ($data['cmd']) {
+		case 'mkdir':
+			$current = $root->dirInfo($result['current']);
+			$str .= $current['rel'].DIRECTORY_SEPARATOR.$result['dir']['name'];
+			break;
+		case 'mkfile':
+			$current = $root->dirInfo($result['current']);
+			$str .= $current['rel'].DIRECTORY_SEPARATOR.$result['file']['name'];
+			break;
+	}
+	
 	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
 		$fp = fopen('../../../files/tmp/log.txt', 'a');
 		if ($fp) {
-			fwrite($fp, var_export($data, true));
+			fwrite($fp, $str."\n");
 			fclose($fp);
 		}
 	}
+	$result['log'] = true;
+	return $result;
 }
 
 $opts = array(
-	'defaults' => array('debug' => true, 'disabled' => array()),
-	// 'bind' => array('open' => 'logger'),
+	'debug' => true,
+	'disabled' => array(),
+	'bind' => array('mkdir' => 'logger'),
 	'roots' => array(
 		array(
 			'path'   => '../../../files',
@@ -37,8 +54,8 @@ $opts = array(
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
 			'disabled' => array('rename'),
-			'mimeDetect'   => 'finfo',
-			'imgLib' => 'mogrify',
+			'mimeDetect'   => 'mime_content_type',
+			'imgLib' => 'imagick',
 			'read' => true,
 			'write' => true,
 			'debug' => true,
@@ -67,7 +84,7 @@ $opts = array(
 	)
 );
 
-$connector = new elFinderConnector($opts);
+$connector = new elFinderConnector(new elFinder($opts));
 $connector->run();
 
 // echo '<pre>';

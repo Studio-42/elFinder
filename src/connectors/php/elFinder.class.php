@@ -29,7 +29,7 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'      => array('target' => false, 'tree' => false, 'init' => false),
+		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'sort' => false),
 		'tree'      => array('target' => true),
 		'tmb'       => array('current' => true),
 		'file'      => array('target' => true),
@@ -37,7 +37,7 @@ class elFinder {
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
 		'rename'    => array(),
-		'duplicate' => array(),
+		'duplicate' => array('current' => true, 'target' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
 		'upload' => array(
@@ -52,7 +52,8 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $options = array(
-		'disabled' => array(), // list commands to disable
+		'disabled' => array(),  // list commands to disable
+		'bind'     => array(),  
 		'debug'    => false
 	);
 	
@@ -99,57 +100,91 @@ class elFinder {
 	 * @var int
 	 **/
 	public static $SORT_SIZE            = 6;
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $time = 0;
+	/**
+	 * Is elFinder init correctly?
+	 *
+	 * @var bool
+	 **/
+	protected $loaded = false;
+	/**
+	 * Send debug to client?
+	 *
+	 * @var string
+	 **/
+	protected $debug = false;
 	
 	/**
-	 * Load storages (roots)
-	 * Return true if at least one storage available
+	 * Constructor
 	 *
-	 * @param  array  elFinder and storages configuration
-	 * @return bool
+	 * @param  array  elFinder and roots configurations
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function load(array $opts) {
-		$this->time = $this->utime();
-		if (isset($opts['defaults']) && is_array($opts['defaults'])) {
-			$this->options = array_merge($this->options, $opts['defaults']);
-		}
-
-		if (empty($opts['roots']) || !is_array($opts['roots'])) {
-			return false;
-		}
-
+	public function __construct($opts) {
+		$this->time  = $this->utime();
+		$this->debug = !empty($opts['debug']);
+		
 		// disable requied commands
-		$this->options['disabled'] = $this->disabled($this->options['disabled']);
-		foreach ($this->options['disabled'] as $cmd) {
-			unset($this->commands[$cmd]);
+		if (isset($opts['disable']) && is_array($opts['disable'])) {
+			foreach ($opts['disable'] as $cmd) {
+				if (!preg_match('/^(open|tree|tmb|file|ping)$/', $cmd) && isset($this->commands[$cmd])) {
+					unset($this->commands[$cmd]);
+				}
+			}
+		}
+		
+		// bind events listeners
+		if (isset($opts['bind']) && is_array($opts['bind'])) {
+			foreach ($opts['bind'] as $cmd => $handler) {
+				$this->bind($cmd, $handler);
+			}
 		}
 
 		// load storages
-		foreach ($opts['roots'] as $i => $o) {
-			$class = 'elFinderStorage'.$o['driver'];
+		if (isset($opts['roots']) && is_array($opts['roots'])) {
+			
+			foreach ($opts['roots'] as $i => $o) {
+				$class = 'elFinderStorage'.$o['driver'];
 
-			if (class_exists($class)) {
-				$root = new $class();
-				// storage id - used as prefix to files hash
-				$key  = strtolower(substr($o['driver'], 0, 1)).$i.'f';
-				// check disabled commands fo storage
-				$o['disabled'] = $this->disabled(@$o['disabled']);
-				if ($root->load($o, $key)) {
-					$this->roots[$key] = $root;
-					if (!$this->defaultRoot && $root->isReadable('/')) {
-						// first readable root is default root
-						$this->defaultRoot = & $this->roots[$key];
+				if (class_exists($class)) {
+					$root = new $class();
+					// storage id - used as prefix to files hash
+					$key  = strtolower(substr($o['driver'], 0, 1)).$i.'f';
+					
+					if ($root->load($o, $key)) {
+						$this->roots[$key] = $root;
+						if (!$this->defaultRoot && $root->isReadable('/')) {
+							// set first readable root as default root
+							$this->defaultRoot = & $this->roots[$key];
+						}
 					}
 				}
 			}
 		}
-
-		return !empty($this->roots);
+		
+		// if at least one roots - ii des
+		$this->loaded = !empty($this->roots);
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function loaded() {
+		return $this->loaded;
+	}
+	
+	
+	/**
 	 * Return version (api) number
-	 * Required to correct interaction with client
 	 *
 	 * @return string
 	 * @author Dmitry (dio) Levashov
@@ -164,7 +199,7 @@ class elFinder {
 	 * @param  string  command name
 	 * @param  string|array  callback name or array(object, method)
 	 * @return elFinder
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
 		if (!isset($this->listeners[$cmd])) {
@@ -175,6 +210,7 @@ class elFinder {
 		|| function_exists($handler)) {
 			$this->listeners[$cmd][] = $handler;
 		}
+
 		return $this;
 	}
 	
@@ -184,7 +220,7 @@ class elFinder {
 	 * @param  string  command name
 	 * @param  string|array  callback name or array(object, method)
 	 * @return elFinder
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function unbind($cmd, $handler) {
 		if (!empty($this->listeners[$cmd])) {
@@ -206,7 +242,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function commandExists($cmd) {
-		return isset($this->commands[$cmd]) && method_exists($this, $cmd);
+		return $this->loaded && isset($this->commands[$cmd]) && method_exists($this, $cmd);
 	}
 	
 	/**
@@ -230,19 +266,24 @@ class elFinder {
 	 **/
 	public function exec($cmd, $args) {
 		
+		if (!$this->loaded) {
+			return array('error' => 'Invalid backend configuration');
+		}
+		if (!$this->commandExists($cmd)) {
+			return array('error' => 'Unknown command');
+		}
+		
 		$result = $this->$cmd($args);
-		$result['debug'] = array(
-			'connector' => 'php', 
-			'time' => $this->utime() - $this->time
-			);
-		// exit( $result['debug']['time']);
-		if ($this->options['debug']) {
+		
+		if ($this->debug) {
+			$result['debug'] = array(
+				'connector' => 'php', 
+				'time'      => $this->utime() - $this->time
+				);
 			foreach ($this->roots as $key => $root) {
 				$result['debug'][$key] = $root->debug();
 			}
 		}
-		
-		$this->trigger($cmd, array_merge($result, array('cmd' => $cmd, 'args' => $args)));
 		
 		return $result;
 	}
@@ -287,7 +328,10 @@ class elFinder {
 			$sort = self::$SORT_NAME_DIRS_FIRST;
 		}
 
-		$mimes = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$mimes = !empty($args['mimes']) && is_array($args['mimes']) 
+			? $args['mimes'] 
+			: array();
+			
 		if (false === ($result['cdc'] = $root->dirContent($target, $sort, $mimes))) {
 			return array('error' => $root->error());
 		}
@@ -304,7 +348,7 @@ class elFinder {
 		if ($args['init']) {
 			$result['api'] = $this->version;
 			$result['params'] = array(
-				'disabled'   => $this->options['disabled'],
+				'commands'   => array_keys($this->commands),
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
 		}
@@ -393,7 +437,9 @@ class elFinder {
 		if (false == ($hash = $root->mkdir($args['current'], $args['name']))) {
 			return array('error' => $root->error());
 		}
-		return array('current' => $args['current'], 'dir' => $root->getInfo($hash));
+		
+		return $this->trigger('mkdir', $args, $root, array('current' => $args['current'], 'dir' => $root->getInfo($hash)));
+		// return array('current' => $args['current'], 'dir' => $root->getInfo($hash));
 	}
 	
 	/**
@@ -440,6 +486,20 @@ class elFinder {
 		}
 		
 		return array('removed' => $removed);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function duplicate($args) {
+		$root = $this->fileRoot($args['current']);
+		if (!$root || !is_array($args['target']) || empty($args['target'])) {
+			return array('error' => 'Invalid parameters');
+		}
+		
 	}
 	
 	/**
@@ -547,16 +607,24 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function trigger($cmd, $data) {
+	protected function trigger($cmd, $args, $root, $result) {
+		$data = array(
+			'cmd' => $cmd,
+			'args' => $args,
+			'root' => $root,
+			'result' => $result
+		);
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
-				if (is_array($handler)) {
-					$handler[0]->{$handler[1]}($data);
-				} else {
-					$handler($data);
+				$tmp = is_array($handler)
+					? $handler[0]->{$handler[1]}($data)
+					: $handler($data);
+				if (is_array($tmp)) {
+					$data['result'] = $tmp;
 				}
 			}
 		}
+		return $data['result'];
 	}
 	
 	protected function utime() {

@@ -1,6 +1,6 @@
 <?php
 
-class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
+class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 	
 
 	
@@ -185,22 +185,13 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function load(array $opts, $key) {
-		$this->prefix = $key;
+		$this->prefix  = $key;
 		$this->options = array_merge($this->options, $opts);
 		
-		if (empty($this->options['path'])) {
+		if (!$this->options['path'] || !is_dir(($this->options['path'] = $this->normpath($this->options['path'])))) {
 			return false;
 		}
 		
-		$this->options['path'] = $this->normpath($this->options['path']);
-		
-		if (!is_dir($this->options['path'])) {
-			return false;
-		}
-		
-		if (substr($this->options['URL'], -1, 1) != '/') {
-			$this->options['URL'] = $this->options['URL'].'/';
-		}
 		$this->options['read']  = $this->options['read']  && is_readable($this->options['path']);
 		$this->options['write'] = $this->options['write'] && is_writable($this->options['path']);
 		
@@ -208,30 +199,24 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 			return false;
 		}
 		
-		$this->options['dirname']    = dirname($this->options['path']);
-		$this->options['basename']   = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
-		$this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
-		$this->options['cryptLib']   = $this->cryptLib($this->options['cryptLib']);
-
-		// if (strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR)) {
-		// 	
-		// }
-		// 
-		if ($this->options['tmbDir']) {
-			$dir = $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'];
-			$this->options['tmbDir'] = is_dir($dir) || @mkdir($dir, $this->options['dirMode']) ? $dir : '';
-			if ($this->options['tmbDir']) {
-				$this->options['imgLib'] = $this->imageLib($this->options['imgLib']);
-			}
-			// @TODO  clean tmb dir
+		if (substr($this->options['URL'], -1, 1) != '/') {
+			$this->options['URL'] = $this->options['URL'].'/';
 		}
 		
+		$this->options['dirname']    = dirname($this->options['path']);
+		$this->options['basename']   = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
+		// $this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
+
+		// setup thumbnails dir and image manipulation ability
+		$this->setMimeDetect();
+		$this->setImageLib();
+		$this->setCryptLib();
+
 		$this->params = array(
 			'dotFiles'   => $this->options['dotFiles'],
 			'disabled'   => $this->options['disabled'],
 			'archives'   => array(),
-			'extract'    => array(),
-			'url'        => $this->options['fileURL'] ? $this->options['URL'] : ''
+			'extract'    => array()
 		);
 		
 		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
@@ -667,8 +652,52 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function duplicate($hash) {
+	public function duplicate($hash, $suffix='copy') {
+		$path = $this->decode($hash);
 		
+		if (!file_exists($path) || !$this->accepted($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		if (!$this->allowed($path, 'read')) {
+			return $this->setError('Access denied');
+		}
+		
+		$name = $this->uniqueName($path, $suffix);
+		echo $name;
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function uniqueName($path, $suffix) {
+		$base = $path;
+		$ext = '';
+		$i = -1;
+		
+		if (!is_dir($path)) {
+			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|\.torrent|[a-z0-9]{1,4})$/i', $path, $m)) {
+				$ext = '.'.$m[1];
+				$base = substr($path, 0,  strlen($path)-strlen($m[0]));
+			}
+		}
+		
+		if (preg_match('/('.$suffix.')(\d*)$/i', $base, $m)) {
+			$i = (int)$m[2];
+			$base = substr($base, 0, strlen($base)-strlen($m[2]));
+		} else {
+			$base .= ' '.$suffix;
+		}
+		
+		while ($i++ < 10000) {
+			$path = $base.($i > 0 ? $i : '').$ext;
+			if (!file_exists($path)) {
+				return $path;
+			}
+		}
+		return $base.md5($f).$ext;
 	}
 
 	/**
@@ -1403,74 +1432,122 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function mimeDetect($type) {
+	protected function setMimeDetect() {
 		$regexp = '/text\/x\-(php|c\+\+)/';
 		$mimes  = array(
-			'finfo' => '',
-			'mime_content_type' => '',
-			'internal' => 'text/x-c++'
+			'finfo' => class_exists('finfo') ? array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))) : '',
+			'mime_content_type' => function_exists('mime_content_type') ? array_shift(explode(';', mime_content_type(__FILE__))) : '',
+			'internal' => 'text/x-php'
 		);
-		
-		if (class_exists('finfo')) {
-			$finfo = finfo_open(FILEINFO_MIME);
-			$mime  = @finfo_file($finfo, __FILE__);
-			$mime  = explode(';', $mime);
-			$mimes['finfo']  = $mime[0];
-		}
-		
-		if (function_exists('mime_content_type')) {
-			$mime = mime_content_type(__FILE__);
-			$mime = explode(';', $mime);
-			$mimes['mime_content_type']  = $mime[0];
-		}
+		$type = $this->options['mimeDetect'];
+		$this->options['mimeDetect'] = 'internal';
 		
 		// test required type
 		if (!empty($mimes[$type]) && preg_match($regexp, $mimes[$type])) {
-			return $type;
+			$this->options['mimeDetect'] = $type;
+		} else {
+			// find first available type
+			foreach ($mimes as $type => $mime) {
+				if (preg_match($regexp, $mime)) {
+					$this->options['mimeDetect'] = $type;
+					break;
+				}
+			}
+			
 		}
-		// find best available type
-		foreach ($mimes as $type => $mime) {
-			if (preg_match($regexp, $mime)) {
-				return $type;
+		// echo $this->options['mimeDetect'];
+		
+		if ($this->options['mimeDetect'] == 'internal') {
+			$file = !empty($this->options['mimefile']) 
+				? $this->options['mimefile'] 
+				: dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types';
+			echo $file.'<br>';
+			echo intval(is_file($file)).'<br>';
+			if ($file && file_exists($file)) {
+				$mimecf = file($file);
+				
+				
+				foreach ($mimecf as $line_num => $line) {
+
+				      if (!preg_match('/^\s*#/', $line)) {
+
+				        $mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+				        $arrsize = count($mime);
+				        if ($arrsize > 1) {
+				          for ($i = 1 ; $i < $arrsize ; $i++) {
+
+				            $this->mimetypes[$mime[$i]] = $mime[0];
+
+				          }
+
+				        }
+
+				      }
+
+				    }
+				// debug($this->mimetypes);
 			}
 		}
+		
+		
 	}
 	
 	/**
-	 * Return available image manipulations lib
+	 * Set thumbnails dir and image manipulations library
 	 *
-	 * @param  string  required lib
-	 * @return string
+	 * @TODO option to set tmbdir readonly?
+	 * @TODO clean tmb dir
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function imageLib($lib) {
-		$libs = array(
-			'imagick' => extension_loaded('imagick'),
-			'mogrify' => false,
-			'gd'      => function_exists('gd_info')
-		);
+	protected function setImageLib() {
 		
-		if (!empty($libs[$lib])) {
-			return $lib;
-		}
+		$path = $this->options['tmbDir']
+			? $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir']
+			: '';
 		
-		foreach ($libs as $lib => $exists) {
-			if ($exists) {
-				return $lib;
+		if ($path) {
+			if (file_exists($path)) {
+				$path = is_dir($path) ? $path : '';
+			} else {
+				$umask = umask(0);
+				$path  = @mkdir($path, $this->options['dirMode']) ? $path : '';
+				umask($umask);
 			}
 		}
-		return '';
+		
+		if (($this->options['tmbDir'] = $path) == '') {
+			return;
+		}
+		
+		$libs = array();
+		if (extension_loaded('imagick')) {
+			$libs[] = 'imagick';
+		}
+		if (function_exists('exec')) {
+			exec('mogrify --version', $o, $c);
+			if ($c == 0) {
+				$libs[] = 'mogrify';
+			}
+		}
+		if (function_exists('gd_info')) {
+			$libs[] = 'gd';
+		}
+		
+		$this->options['imgLib'] = in_array($this->options['imgLib'], $libs) 
+			? $this->options['imgLib'] 
+			: array_shift($libs);
 	}
 	
+	
 	/**
-	 * Return available crypt lib - not implemented yet
+	 * Set crypt lib - not implemented yet
 	 *
-	 * @param  string  required lib
-	 * @return string
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function cryptLib($lib) {
-		return '';
+	protected function setCryptLib() {
+		$this->options['cryptLib'];
 	}
 	
 	/**

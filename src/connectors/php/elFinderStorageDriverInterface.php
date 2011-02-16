@@ -6,7 +6,7 @@
  * @package elFinder
  * @author Dmitry (dio) Levashov
  **/
-interface elFinderStorageDriver {
+interface elFinderStorageDriverInterface {
 	
 	/**
 	 * Init storage.
@@ -194,10 +194,11 @@ interface elFinderStorageDriver {
 	 * Create directory/file copy
 	 *
 	 * @param  string  directory/file hash
+	 * @param  string  localized string "copy"
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function duplicate($hash);
+	public function duplicate($hash, $suffix='copy');
 
 	/**
 	 * Copy file/dir under the same root storage only

@@ -260,6 +260,11 @@
 					description : 'Create file',
 					callback : function() { fm.mkfile(); }
 				})
+				.shortcut({
+					pattern : 'ctrl+shift+d',
+					description : 'Duplicate',
+					callback : function() { fm.duplicate(); }
+				})
 			;
 			
 		}
