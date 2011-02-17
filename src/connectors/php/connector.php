@@ -48,7 +48,7 @@ $opts = array(
 	'bind' => array('mkdir' => 'logger'),
 	'roots' => array(
 		array(
-			'path'   => '../../../files',
+			'path'   => '../../../files/',
 			'URL'    => 'http://localhost/git/elfinder/files',
 			'fileURL' => false,
 			'alias'  => 'Home1',

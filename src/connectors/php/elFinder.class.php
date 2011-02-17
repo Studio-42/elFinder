@@ -153,17 +153,19 @@ class elFinder {
 				$class = 'elFinderStorage'.$o['driver'];
 
 				if (class_exists($class)) {
-					$root = new $class();
 					// storage id - used as prefix to files hash
 					$key  = strtolower(substr($o['driver'], 0, 1)).$i.'f';
+					$root = new $class($key, $o);
+					// debug($root);
+					echo $root->available();
 					
-					if ($root->load($o, $key)) {
-						$this->roots[$key] = $root;
-						if (!$this->defaultRoot && $root->isReadable('/')) {
-							// set first readable root as default root
-							$this->defaultRoot = & $this->roots[$key];
-						}
-					}
+					// if ($root->load($o, $key)) {
+					// 	$this->roots[$key] = $root;
+					// 	if (!$this->defaultRoot && $root->isReadable('/')) {
+					// 		// set first readable root as default root
+					// 		$this->defaultRoot = & $this->roots[$key];
+					// 	}
+					// }
 				}
 			}
 		}

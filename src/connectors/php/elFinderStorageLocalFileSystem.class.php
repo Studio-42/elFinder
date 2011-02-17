@@ -1,109 +1,26 @@
 <?php
 
-class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
-	
-
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $sort = 1;
+/**
+ * undocumented class
+ *
+ * @package default
+ * @author Dmitry Levashov
+ **/
+class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 	
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
-	protected static $FILTER_DIRS_ONLY = 1;
+	protected static $mimetypesLoaded = false;
 	
 	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected static $FILTER_FILES_ONLY = 2;
-	
-	/**
-	 * Object configuration
+	 * extensions/mimetypes for mimeDetect == 'internal' 
 	 *
 	 * @var array
 	 **/
-	protected $options = array(
-		'path'         => '',           // directory path
-		'URL'          => '',           // root url
-		'alias'        => '',           // alias to replace root dir name
-		'disabled'     => array(),
-		'copyFrom'     => true,
-		'copyTo'       => true,
-		'treeDeep'     => 1,
-		'dotFiles'     => false,        // allow dot files?
-		'fileMode'     => 0666,         // new files mode
-		'dirMode'      => 0775,         // new dir mode 
-		'cryptLib'     => 'auto',
-		'fileURL'      => true,         // allow send files urls to frontend?
-		'uploadAllow'  => array(),      // mimetypes which allowed to upload
-		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
-		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
-		'dateFormat'   => 'j M Y H:i',  // files dates format
-		'mimeDetect'   => 'auto',       // how to detect mimetype
-		'imgLib'       => 'auto',       // image manipulations lib name
-		'tmbDir'       => '.tmb',       // directory for thumbnails
-		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-		'tmbAtOnce'    => 12,            // number of thumbnails to generate per request
-		'tmbSize'      => 48,           // images thumbnails size (px)
-		'read'         => true,         // read permission for root dir itself
-		'write'        => true,         // write permission for root dir itself
-		'defaults'     => array(        // default permissions 
-			'read'  => true,
-			'write' => true,
-			'rm'    => true
-		),
-		'perms'        => array()      // individual folders/files permisions    
-	);
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $params = array();
-	
-	/**
-	 * Error message from last failed action
-	 *
-	 * @var string
-	 **/
-	protected $error = '';
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $prefix = '';
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $today = 0;
-	
-	/**
-	 * undocumented class variable
-	 *
-	 * @var string
-	 **/
-	protected $yesterday = 0;
-	
-	/**
-	 * extensions/mimetypes for _mimetypeDetect = 'internal' 
-	 *
-	 * @var array
-	 **/
-	protected $mimetypes = array(
+	protected static $mimetypes = array(
 		// applications
 		'ai'    => 'application/postscript',
 		'eps'   => 'application/postscript',
@@ -172,720 +89,28 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 		'mkv'   => 'video/x-matroska'
 		);
 	
-
-	
 	
 	/**
-	 * Init storage.
-	 * Return true if storage available
+	 * Constructor
 	 *
-	 * @param  array   object configuration
-	 * @param  string  unique key to use as prefix in files hashes
-	 * @return bool
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function load(array $opts, $key) {
-		$this->prefix  = $key;
-		$this->options = array_merge($this->options, $opts);
-		
-		if (!$this->options['path'] || !is_dir(($this->options['path'] = $this->normpath($this->options['path'])))) {
-			return false;
-		}
-		
-		$this->options['read']  = $this->options['read']  && is_readable($this->options['path']);
-		$this->options['write'] = $this->options['write'] && is_writable($this->options['path']);
-		
-		if (!$this->options['read'] && !$this->options['write']) {
-			return false;
-		}
-		
-		if (substr($this->options['URL'], -1, 1) != '/') {
-			$this->options['URL'] = $this->options['URL'].'/';
-		}
-		
-		$this->options['dirname']    = dirname($this->options['path']);
-		$this->options['basename']   = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
-		// $this->options['mimeDetect'] = $this->mimeDetect($this->options['mimeDetect']);
-
-		// setup thumbnails dir and image manipulation ability
-		$this->setMimeDetect();
-		$this->setImageLib();
-		$this->setCryptLib();
-
-		$this->params = array(
-			'dotFiles'   => $this->options['dotFiles'],
-			'disabled'   => $this->options['disabled'],
-			'archives'   => array(),
-			'extract'    => array()
+	public function __construct($id, $opts) {
+		$o = array(
+			'cryptLib'     => 'auto',  // how crypt paths? not implemented yet
+			'mimeDetect'   => 'auto',  // how to detect mimetype
+			'imgLib'       => 'auto',  // image manipulations lib name
+			'tmbCleanProb' => 0,       // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
+			'dotFiles'     => false,   // allow dot files?
+			'accepted'     => '',      // regexp to validate filenames
+			'perms'        => array(), // individual folders/files permisions
 		);
 		
-		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
-		$this->yesterday = $this->today-86400;
-		return true;
+		// extend parent options
+		parent::__construct($id, array_merge($o, $opts));
 	}
 	
-	/**
-	 * Return true if file exists
-	 *
-	 * @param  string  file hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function fileExists($hash) {
-		return file_exists($this->decode($hash));
-	}
-	
-	/**
-	 * Return true if file is ordinary file
-	 *
-	 * @param  string  file hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isFile($hash) {
-		$path = $this->decode($hash);
-		return is_file($path) && $this->allowed($path, 'read');
-	}
-	
-	/**
-	 * Return true if file is directory
-	 *
-	 * @param  string  file hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isDir($hash) {
-		$path = $this->decode($hash);
-		return is_dir($path) && $this->allowed($path, 'read');
-	}
-	
-	/**
-	 * Return true if file is readable
-	 *
-	 * @param  string  file hash (use "/" to test root dir)
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isReadable($hash) {
-		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
-		return file_exists($path) && $this->accepted($path) && $this->allowed($path, 'read');
-	}
-	
-	/**
-	 * Return true if file is writable
-	 *
-	 * @param  string  file hash (use "/" to test root dir)
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isWritable($hash) {
-		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
-		return $this->accepted($path) && $this->allowed($path, 'write');
-	}
-	
-	/**
-	 * Return true if file can be removed
-	 *
-	 * @param  string  file hash (use "/" to test root dir)
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isRemovable($hash) {
-		$path = !$hash || $hash == '/' ? $this->options['path'] : $this->decode($hash);
-		return $this->accepted($path) && $this->allowed($path, 'rm');
-	}
-
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function rootHash() {
-		return $this->encode($this->options['path']);
-	}
-
-	/**
-	 * Return file/dir info
-	 *
-	 * @param  string  file hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function getInfo($hash) {
-		$path = $this->decode($hash);
-		
-		if (!file_exists($path) || !$this->accepted($path)) {
-			return $this->setError('File not found');
-		}
-		return $this->info($path);
-	}
-
-	/**
-	 * Return directory info (same as getInfo() but with additional fields)
-	 * Used to get current working directory info
-	 *
-	 * @param  string  directory hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function dirInfo($hash) {
-		$path = $this->decode($hash);
-		
-		if (is_link($path) == 'link' && false === ($path = $this->readlink($path))) {
-			return $this->setError('Access denied');
-		}
-		
-		if (!is_dir($path) || !$this->accepted($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		
-		$info = $this->info($path);
-		if ($path != $this->options['path']) {
-			$info['phash'] = $this->encode(dirname($path));
-		}
-		if ($this->options['fileURL']) {
-			$info['url'] = $this->path2url($path, true);
-		}
-		
-		$info['params'] = $this->params;
-		$info['rel']    = DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path']));
-		
-		return $info;
-	}
-	
-	
-	/**
-	 * Return directory content
-	 *
-	 * @param  string  directory hash
-	 * @param  string  sort rule
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function dirContent($hash, $sort, $mimes=array()) {
-		$files = array();
-		$path  = $this->decode($hash);
-		
-		if (!is_dir($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!$this->accepted($path) || !$this->allowed($path, 'read')) {
-			return $this->setError('Access denied');
-		}
-		
-		foreach ($mimes as $i => $mime) {
-			$mime = trim($mime);
-			if (empty($mime)) {
-				unset($mimes[$i]);
-			} else {
-				if (strpos($mime, '/') === false) {
-					$mimes[$i] .= '/';
-				}
-				$mimes[$i] = $mime;
-			}
-		}
-
-		foreach ($this->ls($path) as $file) {
-			$file = $this->info($file);
-			
-			if ($file['mime'] == 'directory'
-			|| empty($mimes) 
-			|| $this->checkMime($file['mime'], $mimes)) {
-				$files[] = $file;
-			}
-		}
-		
-		$this->sort = $sort;
-		usort($files, array($this, 'compare'));
-		return $files;
-	}
-
-	/**
-	 * Return directory subdirs.
-	 * Return one-level array, each dir contains parent dir hash
-	 *
-	 * @param  string  directory hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function tree($root) {
-		$path = $this->decode($root);
-
-		if (!is_dir($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!$this->accepted($path)) {
-			return $this->setError('Access denied');
-		}
-		// @TODO check parents for read
-		
-		$tree = $this->getTree($path, $this->options['treeDeep']);
-		// debug($tree);
-		return $tree;
-	}
-
-
-	
-
-	/**
-	 * Create thumbnails in directory
-	 * Return info about created thumbnails
-	 *
-	 * @param  string  directory hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function tmb($hash) {
-		$path = $this->decode($hash);
-		
-		if (!is_dir($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!is_readable($path)) {
-			return $this->setError('Access denied');
-		}
-		
-		if (!$this->options['imgLib']) {
-			return array();
-		}
-		
-		$count  = $this->options['tmbAtOnce'] > 0 ? $this->options['tmbAtOnce'] : 5;
-		$files  = $this->ls($path, self::$FILTER_FILES_ONLY);
-		$result = array(
-			'current' => $hash, 
-			'images'  => array(),
-			'tmb'     => false
-			);
-			
-		for ($i = 0, $s = count($files); $i < $s; $i++) {
-			$file = $files[$i];
-			$mime = $this->mimetype($file);
-			
-			if ($this->allowed($file, 'read') && $this->resizable($mime)) {
-				$tmb = $this->tmbPath($file);
-				if (!file_exists($tmb)) {
-					if ($count > 0) {
-						if ($this->thumbnail($file, $tmb)) {
-							// $result['images'][$this->encode($file)] = $this->path2url($tmb);
-							$result['images'][] = array('hash' => $this->encode($file), 'tmb' => $this->path2url($tmb));
-							$count--;
-						}
-					} else {
-						$result['tmb'] = true;
-						break;
-					}
-				}
-			}
-		}
-		return $result;
-	}
-
-	/**
-	 * Return opened file pointer and required headers
-	 *
-	 * @param  string  file hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function file($hash) {
-		$fp = $this->open($hash);
-		
-		if ($fp) {
-			$path = $this->decode($hash);
-			$mime = $this->mimetype($path);
-			$disp  = preg_match('/^(image|text)/i', $mime) || $mime == 'application/x-shockwave-flash' ? 'inline' : 'attachments';
-
-			$headers = array(
-				"Content-Type: ".$mime, 
-				"Content-Disposition: ".$disp."; filename=".basename($path),
-				"Content-Location: ".str_replace($this->options['path'], '', $path),
-				'Content-Transfer-Encoding: binary',
-				"Content-Length: ".filesize($path),
-				"Connection: close"
-				);
-			return array('pointer' => $fp, 'root' => $this, 'header' => $headers);
-		}
-		return false;
-	}
-
-	/**
-	 * Open file and return descriptor
-	 * Requered to copy file across storages with different types
-	 *
-	 * @param  string  file hash
-	 * @param  string  open mode
-	 * @return resource
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function open($hash, $mode="rb") {
-		$path = $this->decode($hash);
-
-		if (!is_file($path) || !$this->accepted($path)) {
-			return $this->setError('File not found');
-		}
-		if (!$this->allowed($path, 'read')) {
-			return $this->setError('Access denied');
-		}
-		return fopen($path, $mode);
-	}
-
-	/**
-	 * Close file opened by open() methods
-	 *
-	 * @param  resource  file descriptor
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function close($fp) {
-		if (is_resource($fp)) {
-			@fclose($fp);
-		}
-	}
-	
-	/**
-	 * Create directory
-	 *
-	 * @param  string  parent directory hash
-	 * @param  string  new directory name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function mkdir($hash, $name) {
-		$path = $this->decode($hash);
-		
-		if (!is_dir($path) || !$this->accepted($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!$this->allowed($path, 'write')) {
-			return $this->setError('Access denied');
-		}
-		if (!$this->accepted($name)) {
-			return $this->setError('Invalid parameters');
-		}
-		
-		$dir = $path.DIRECTORY_SEPARATOR.$name;
-		if (file_exists($dir)) {
-			return $this->setError('Access denied');
-		}
-		$umask = umask(0);
-		if (!@mkdir($dir, $this->options['dirMode'])) {
-			umask($umask);
-			return $this->setError('Unable to create directory');
-		}
-		umask($umask);
-		return $this->encode($dir);
-	}
-
-	/**
-	 * Create empty file
-	 *
-	 * @param  string  parent directory hash
-	 * @param  string  new file name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function mkfile($hash, $name) {
-		$path = $this->decode($hash);
-		
-		if (!is_dir($path) || !$this->accepted($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!$this->allowed($path, 'write')) {
-			return $this->setError('Access denied');
-		}
-		if (!$this->accepted($name)) {
-			return $this->setError('Invalid parameters');
-		}
-		$file = $path.DIRECTORY_SEPARATOR.$name;
-		if (file_exists($file)) {
-			return $this->setError('File exists');
-		}
-		
-		$umask = umask(0);
-		if (!@touch($file)) {
-			umask($umask);
-			return $this->setError('Unable to create file');
-		}
-		chmod($file, $this->options['fileMode']);
-		umask($umask);
-		return $this->encode($file);
-	}
-
-	/**
-	 * Remove directory/file
-	 *
-	 * @param  string  directory/file hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function rm($hash) {
-		$path = $this->decode($hash);
-		
-		if (!file_exists($path) || !$this->accepted($path)) {
-			return $this->setError('File not found');
-		}
-		
-		if (!$this->allowed($path, 'rm')) {
-			return $this->setError('Access denied');
-		}
-		
-		return $this->remove($path);
-	}
-
-	/**
-	 * Rename directory/file
-	 *
-	 * @param  string  directory/file hash
-	 * @param  string  new name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function rename($hash, $name) {
-		
-	}
-
-	/**
-	 * Create directory/file copy
-	 *
-	 * @param  string  directory/file hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function duplicate($hash, $suffix='copy') {
-		$path = $this->decode($hash);
-		
-		if (!file_exists($path) || !$this->accepted($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		if (!$this->allowed($path, 'read')) {
-			return $this->setError('Access denied');
-		}
-		
-		$name = $this->uniqueName($path, $suffix);
-		echo $name;
-	}
-
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function uniqueName($path, $suffix) {
-		$base = $path;
-		$ext = '';
-		$i = -1;
-		
-		if (!is_dir($path)) {
-			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|\.torrent|[a-z0-9]{1,4})$/i', $path, $m)) {
-				$ext = '.'.$m[1];
-				$base = substr($path, 0,  strlen($path)-strlen($m[0]));
-			}
-		}
-		
-		if (preg_match('/('.$suffix.')(\d*)$/i', $base, $m)) {
-			$i = (int)$m[2];
-			$base = substr($base, 0, strlen($base)-strlen($m[2]));
-		} else {
-			$base .= ' '.$suffix;
-		}
-		
-		while ($i++ < 10000) {
-			$path = $base.($i > 0 ? $i : '').$ext;
-			if (!file_exists($path)) {
-				return $path;
-			}
-		}
-		return $base.md5($f).$ext;
-	}
-
-	/**
-	 * Copy file/dir under the same root storage only
-	 * Return hash of new file/dir
-	 *
-	 * @param  string    file/dir to copy hash
-	 * @param  string    destination dir hash
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function copy($from, $to) {
-		$src = $this->decode($from);
-		$dst = $this->decode($to);
-		
-		if (!file_exists($src) || !$this->accepted($src) || !is_dir($dst)) {
-			return $this->setError('Invalid parameters');
-		} 
-		
-	}
-	
-	/**
-	 * Copy file/dir from another root storage
-	 * Return hash of new file/dir
-	 *
-	 * @param  elFinderStorageDriver  source root storage
-	 * @param  string  target file/dir hash
-	 * @param  string  destination dir hash
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function paste($root, $src, $dst) {
-		$hash = $src;
-		$src = $root->getInfo($src);
-		$dst = $this->decode($dst);
-		if (!$src) {
-			return $this->error($root->error());
-		}
-		if (!$src['read']) {
-			return $this->error('Access denied');
-		}
-		if (!is_dir($dst) || !$this->accepted($dst)) {
-			return $this->error('Invalid parameters');
-		}
-		if (!$this->allowed($dst, 'read')) {
-			return $this->error('Access denied');
-		}
-		
-		if ($src['mime'] == 'directory') {
-			
-		} else {
-			$file = $dst.DIRECTORY_SEPARATOR.$src['name'];
-			echo $file;
-			$fp = fopen($file, 'wb');
-			if (!$fp) {
-				return $this->error('Access denied');
-			}
-			debug($fp);
-			$srcfp = $root->open($hash);
-			if (!$srcfp) {
-				return $this->error('Access denied');
-			}
-			debug($srcfp);
-			rewind($srcfp);
-			while (!feof($srcfp)) {
-				fwrite($fp, fread($srcfp, 4096));
-			}
-			$root->close($srcfpfp);
-			fclose($fp);
-		}
-		
-	}
-	
-	/**
-	 * Return file content
-	 *
-	 * @param  string  file hash
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function getContent($hash) {
-		
-	}
-
-	/**
-	 * Write content into file
-	 *
-	 * @param  string  file hash
-	 * @param  string  new content
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function setContent($hash, $content) {
-		
-	}
-
-	/**
-	 * Create archive from required directories/files
-	 *
-	 * @param  array   files hashes
-	 * @param  string  archive name
-	 * @param  string  archive mimetype
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function archive($files, $name, $type) {
-		
-	}
-
-	/**
-	 * Extract files from archive
-	 *
-	 * @param  string  archive hash
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function extract($hash) {
-		
-	}
-	
-	/**
-	 * Resize image
-	 *
-	 * @param  string  image hash
-	 * @param  int     new width
-	 * @param  int     new height
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function resize($hash, $w, $h) {
-		
-	}
-
-	/**
-	 * Find directories/files by name mask
-	 * Not implemented on client side yet
-	 * For future version
-	 *
-	 * @param  string  name mask
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function find($mask) {
-		
-	}
-	
-	/**
-	 * Return error message from last failed action
-	 *
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function error() {
-		return $this->error;
-	}
-	
-	/**
-	 * Return debug info
-	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function debug() {
-		return array(
-			'root'       => $this->options['basename'],
-			'driver'     => 'LocalFileSystem',
-			'mimeDetect' => $this->options['mimeDetect'],
-			'imgLib'     => $this->options['imgLib']
-		);
-	}
-
-
-	/***************************************************************************/
-	/*                                protected                                */
-	/***************************************************************************/
-	
-	/**
-	 * Return true if file name is not . or ..
-	 * If file name begins with . return value according to $this->options['dotFiles']
-	 *
-	 * @param  string  $file  file name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function accepted($path) {
-		$filename = basename($path);
-		return '.' != $filename && '..' != $filename && ($this->options['dotFiles'] || '.' != substr($filename, 0, 1)) ;
-	}
 	
 	/**
 	 * Return true if required action available for file
@@ -898,541 +123,37 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 	protected function allowed($path, $action) {
 		
 		if ($path == $this->options['path']) {
-			return $action == 'read' ? $this->options['read'] : ($action == 'write' ? $this->options['write'] : false);
-		}
-		
-		if (($action == 'read'  && !is_readable($path))
-		||  ($action == 'write' && !is_writable($path))
-		||  ($action == 'rm'    && !is_writable(dirname($path)))) {
+			if ($action == 'read' || $action == 'write') {
+				return $this->options['defaults'][$action];
+			}
 			return false;
 		}
 		
 		$path = substr($path, strlen($this->options['path'])+1);
 
 		foreach ($this->options['perms'] as $regexp => $rules) {
-			if (preg_match($regexp, $path)) {
-				if (isset($rules[$action])) {
-					return $rules[$action];
-				}
+			if (preg_match($regexp, $path) && isset($rules[$action])) {
+				return $rules[$action];
 			}
 		}
 		return isset($this->options['defaults'][$action]) ? $this->options['defaults'][$action] : false;
 	}
 	
-
-	/**
-	 * Return file info
-	 *
-	 * @param  string  file path
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function info($path) {
-		$root = $path == $this->options['path'];
-		$name = $root ? $this->options['basename'] : basename($path);
-		$link = is_link($path);
-		$mime = $this->mimetype($path);
-		$stat = @lstat($path);
-
-		if ($stat['mtime'] > $this->today) {
-			$date = 'Today '.date('H:i', $stat['mtime']);
-		} elseif ($stat['mtime'] > $this->yesterday) {
-			$date = 'Yesterday '.date('H:i', $stat['mtime']);
-		} else {
-			$date = date($this->options['dateFormat'], $stat['mtime']);
-		}
-
-		$info = array(
-			'name'  => htmlspecialchars($name),
-			'hash'  => $this->encode($path),
-			'mime'  => $mime,
-			'date'  => $date, 
-			'size'  => $mime == 'directory' ? 0 : $stat['size'],
-			'read'  => $this->allowed($path, 'read'),
-			'write' => $this->allowed($path, 'write'),
-			'rm'    => $this->allowed($path, 'rm'),
-			);
-			
-		if ($link) {
-			if (false === ($link = $this->readlink($path))) {
-				$info['mime']  = 'symlink-broken';
-				$info['read']  = false;
-				$info['write'] = false;
-			} else {
-				$info['mime']   =  $this->mimetype($link);
-				$info['link']   = $this->encode($link);
-				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
-				$info['path']   = $link;
-			}
-		}
-			
-		if ($info['mime'] != 'directory' && $info['read']) {
-			
-			if (strpos($info['mime'], 'image') === 0 && false != ($s = getimagesize($path))) {
-				$info['dim'] = $s[0].'x'.$s[1];
-				if ($this->resizable($info['mime'])) {
-					$info['resize'] = true;
-					if (($tmb = $this->tmbPath($path)) != '') {
-						$info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
-					}
-				}
-			}
-			
-		}
-			
-		return $info;
-	}
+	
+	
 	
 	/**
-	 * undocumented function
+	 * Define mimetype detect method, tmbDir, tmbURL, imgLib options
 	 *
 	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function readlink($path) {
-		$target = @readlink($path);
-		if ($target) {
-			if ('/' != substr($target, 0, 1)) {
-				$target = dirname($path).DIRECTORY_SEPARATOR.$target;
-			}
-			$target = $this->normpath($target);
-		}
-		return $target && file_exists($target) && $this->accepted($target) && strpos($target, $this->options['path']) === 0 ? $target : false;
-	}
-	
-	/**
-	 * Return [filtered] directory content 
-	 *
-	 * @param  string  directory path
-	 * @param  int     filter (self::$FILTER_DIRS_ONLY|self::$FILTER_FILES_ONLY)
-	 * @return array
 	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
-	protected function ls($path, $filter=0) {
-		$ret = array();
-		$ls  = scandir($path);
+	protected function _configure() {
+		// define crypt lib - not implemented
+		$this->options['cryptLib'] = '';
 		
-		for ($i=0, $s = count($ls); $i < $s; $i++) { 
-			if ($this->accepted($ls[$i])) {
-				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				$allow = true;
-				if ($filter == self::$FILTER_DIRS_ONLY) {
-					$allow = is_dir($p) && (filetype($p) != 'link' || false != $this->readlink($p));
-				} elseif ($filter == self::$FILTER_FILES_ONLY) {
-					$allow = !is_dir($p);
-				}
-				
-				if ($allow) {
-					$ret[] = $p;
-				}
-			}
-		}
-		return $ret;
-	}
-	
-	/**
-	 * Return required dir childs dirs
-	 *
-	 * @param  strng  dir path
-	 * @param  int    level counter (decrease on each next level)
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function getTree($path, $level) {
-		$hash   = $this->encode($path);
-		$root   = $path == $this->options['path'];
-		$read   = $this->allowed($path, 'read');
-		$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
-
-		$tree = array(
-			array(
-				'hash'   => $hash,
-				'phash'  => $root ? null : $this->encode(dirname($path)),
-				'name'   => $root ? $this->options['basename'] : basename($path),
-				'read'   => $read,
-				'write'  => $this->allowed($path, 'write'),
-				'childs' => count($childs) > 0,
-				'link'   => filetype($path) == 'link'
-			)
-		);
-		
-		if ($level > 0) {
-			foreach ($childs as $path) {
-				$read   = $this->allowed($path, 'read');
-				$childs = $read ? $this->ls($path, self::$FILTER_DIRS_ONLY) : array();
-				$tree[] = array(
-					'hash'   => $this->encode($path),
-					'phash'  => $hash,
-					'name'   => basename($path),
-					'read'   => $read,
-					'write'  => $this->allowed($path, 'write'),
-					'childs' => count($childs) > 0,
-					'link'   => filetype($path) == 'link'
-				);
-				
-				if (count($childs)) {
-					$tree = array_merge($tree, $this->getTree($path, $level-1));
-				}
-			}
-		}
-		return $tree;
-	}
-	
-	/**
-	 * Remove file/directory
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function remove($path) {
-		$dotFiles = $this->options['dotFiles'];
-		$this->options['dotFiles'] = true;
-		$dir = false;
-		$ret = false;
-		
-		if (!file_exists($path)) {
-			$this->setError('File not found');
-		} elseif (!$this->allowed($path, 'rm')) {
-			$this->setError('Access denied');
-		} elseif (false != ($dir = is_dir($path))) {
-			foreach ($this->ls($path) as $p) {
-				if (!$this->remove($p)) {
-					break;
-				}
-			}
-		} 
-		
-		$ret = $dir ? @rmdir($path) : @unlink($path);
-		if ($ret && !$dir && false != ($tmb = $this->tmbPath($path)) && file_exists($tmb)) {
-			@unlink($tmb);
-		}
-		$this->options['dotFiles'] = $dotFiles;
-		return $ret;
-	}
-
-	
-	
-	/***************************************************************************/
-	/*                                utilites                                 */
-	/***************************************************************************/
-	
-	
-	/**
-	 * Return normalized path, this works the same as os.path.normpath() in Python
-	 *
-	 * @param  string  $path  path
-	 * @return string
-	 * @author Troex Nevelin
-	 **/
-	protected function normpath($path) {
-		if (empty($path)) {
-			return '.';
-		}
-
-		if (strpos($path, '/') === 0) {
-			$initial_slashes = true;
-		} else {
-			$initial_slashes = false;
-		}
-			
-		if (($initial_slashes) 
-		&& (strpos($path, '//') === 0) 
-		&& (strpos($path, '///') === false)) {
-			$initial_slashes = 2;
-		}
-			
-		$initial_slashes = (int) $initial_slashes;
-
-		$comps = explode('/', $path);
-		$new_comps = array();
-		foreach ($comps as $comp) {
-			if (in_array($comp, array('', '.'))) {
-				continue;
-			}
-				
-			if (($comp != '..') 
-			|| (!$initial_slashes && !$new_comps) 
-			|| ($new_comps && (end($new_comps) == '..'))) {
-				array_push($new_comps, $comp);
-			} elseif ($new_comps) {
-				array_pop($new_comps);
-			}
-		}
-		$comps = $new_comps;
-		$path = implode('/', $comps);
-		if ($initial_slashes) {
-			$path = str_repeat('/', $initial_slashes) . $path;
-		}
-		
-		return $path ? $path : '.';
-	}
-	
-	/**
-	 * Return file URL
-	 *
-	 * @param  string  $path 
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function path2url($path, $isdir=false) {
-		if ($path == $this->options['path']) {
-			$url = $this->options['URL'];
-		} else {
-			$dir  = str_replace(DIRECTORY_SEPARATOR, '/', substr(dirname($path), strlen($this->options['path'])+1));
-			$url = $this->options['URL'].($dir ? $dir.'/' : '').rawurlencode(basename($path));
-			if ($isdir) {
-				$url .= '/';
-			}
-		}
-		// echo $path.' : '.$url.'<br>';
-		return $url;
-	}
-	
-	/**
-	 * Return file mimetype
-	 *
-	 * @param  string  file path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function mimetype($path) {
-		switch ($this->options['mimeDetect']) {
-			case 'finfo':
-				if (empty($this->_finfo)) {
-					$this->_finfo = finfo_open(FILEINFO_MIME);
-				}
-				$type = @finfo_file($this->_finfo, $path);
-				break;
-			case 'mime_content_type':   
-			 	$type = mime_content_type($path);
-				break;
-			default:
-				$pinfo = pathinfo($path); 
-				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
-		}
-		$type = explode(';', $type); 
-
-		if ($type[0] == 'unknown' && is_dir($path)) {
-			$type[0] = 'directory';
-		}
-		return $type[0];
-	}
-	
-	/**
-	 * Return true if mime is in given mimetypes list
-	 *
-	 * @param  string  mime to test
-	 * @param  array   mimes list
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function checkMime($mime, $mimes) {
-		foreach ($mimes as $allowed) {
-			if (strpos($mime, $allowed) === 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function encode($path) {
-		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
-		$path = substr($path, strlen($this->options['path']));
-		// $cutRoot = substr($path, strlen($this->_options['root']));
-
-		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
-		if (!$path)	{
-			$path = '/';
-		}
-
-		// TODO crypt path and return hash
-		$hash = $this->crypt($path);
-
-		// hash is used as id in HTML that means it must contain vaild chars
-		// make base64 html safe and append prefix in begining
-		$hash = $this->prefix.strtr(base64_encode($hash), '+/=', '-_.');
-		$hash = rtrim($hash, '.'); // remove dots '.' at the end, before it was '=' in base64
-
-		// $this->_result['debug']['crypt_'.$hash] = $cutRoot;
-
-		return $hash;
-		
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function decode($hash) {
-		// echo $hash.'<br>';
-		// remove prefix
-		$hash = substr($hash, strlen($this->prefix));
-		// echo $hash.'<br>';
-		// replace HTML safe base64 to normal
-		$hash = base64_decode(strtr($hash, '-_.', '+/='));
-		// echo $hash.'<br>';
-		// TODO uncrypt hash and return path
-		$path = $this->uncrypt($hash);
-
-		// append ROOT to path after it was cut in _crypt
-		return $this->options['path'].($path == '/' ? '' : $path);
-	}
-	
-	/**
-	 * Return crypted path 
-	 *
-	 * @param  string  path
-	 * @return mixed
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function crypt($path) {
-		return $path;
-	}
-	
-	/**
-	 * Return uncrypted path 
-	 *
-	 * @param  mixed  hash
-	 * @return mixed
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function uncrypt($hash) {
-		return $hash;
-	}
-	
-	/**
-	 * Return true if file image and can be resized
-	 *
-	 * @param  string  file mimetype
-	 * @return bool
-	 * @author Dmitry Levashov
-	 **/
-	protected function resizable($mime) {
-		return $this->options['imgLib'] && strpos($mime, 'image') === 0
-			? ($this->options['imgLib'] == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif' : true) 
-			: false;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function tmbPath($path) {
-		if ($this->options['tmbDir']) {
-			return dirname($path) == $this->options['tmbDir']
-				? $path
-				: $this->options['tmbDir'].DIRECTORY_SEPARATOR.$this->encode($path).'.png';
-		}
-		return '';
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function thumbnail($path, $tmb) {
-		if (false == ($s = getimagesize($path))) {
-			return false;
-		}
-		$tmbSize = $this->options['tmbSize'];
-		
-		switch ($this->options['imgLib']) {
-			case 'imagick':
-				try {
-					$img = new imagick($path);
-				} catch (Exception $e) {
-					return false;
-				}
-				
-				$img->contrastImage(1);
-				return $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
-				break;
-				
-			case 'mogrify':
-				if (@copy($path, $tmb)) {
-					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-					// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-					exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
-					
-					if (file_exists($tmb)) {
-						return true;
-					} elseif ($c == 0) {
-						// find tmb for psd and animated gif
-						$mime = $this->mimetype($img);
-						if ($mime == 'image/vnd.adobe.photoshop' || $mime = 'image/gif') {
-							$pinfo = pathinfo($tmb);
-							$test = $pinfo['dirname'].DIRECTORY_SEPARATOR.$pinfo['filename'].'-0.'.$pinfo['extension'];
-							if (file_exists($test)) {
-								return rename($test, $tmb);
-							}
-						}
-					}
-				}
-				break;
-				
-			case 'gd': 
-				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($path);
-				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($path);
-				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($path);
-				} 
-				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
-					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-					if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
-						return false;
-					}
-					$r = imagepng($tmp, $tmb, 7);
-					imagedestroy($img);
-					imagedestroy($tmp);
-					return $r;
-				}
-				
-				return false;
-		}
-	}
-	
-	/**
-	 * Return x/y coord for crop image thumbnail
-	 *
-	 * @param  int  $w  image width
-	 * @param  int  $h  image height	
-	 * @return array
-	 **/
-	protected function cropPos($w, $h) {
-		$x = $y = 0;
-		$size = min($w, $h);
-		if ($w > $h) {
-			$x = ceil(($w - $h)/2);
-		} else {
-			$y = ceil(($h - $w)/2);
-		}
-		return array($x, $y, $size);
-	}
-	
-	/**
-	 * Return mime detect available method
-	 *
-	 * @param  string  required mimetype detect method
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function setMimeDetect() {
+		// define mime detect method
 		$regexp = '/text\/x\-(php|c\+\+)/';
 		$mimes  = array(
 			'finfo' => class_exists('finfo') ? array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))) : '',
@@ -1453,73 +174,55 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 					break;
 				}
 			}
-			
 		}
-		// echo $this->options['mimeDetect'];
 		
-		if ($this->options['mimeDetect'] == 'internal') {
+		// load mimes from external file for mimeDetect = 'internal'
+		// based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
+		if ($this->options['mimeDetect'] == 'internal' && !elFinderStorageLocalFileSystem::$mimetypesLoaded) {
 			$file = !empty($this->options['mimefile']) 
 				? $this->options['mimefile'] 
 				: dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types';
-			echo $file.'<br>';
-			echo intval(is_file($file)).'<br>';
+
 			if ($file && file_exists($file)) {
 				$mimecf = file($file);
 				
-				
 				foreach ($mimecf as $line_num => $line) {
-
-				      if (!preg_match('/^\s*#/', $line)) {
-
-				        $mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
-				        $arrsize = count($mime);
-				        if ($arrsize > 1) {
-				          for ($i = 1 ; $i < $arrsize ; $i++) {
-
-				            $this->mimetypes[$mime[$i]] = $mime[0];
-
-				          }
-
-				        }
-
-				      }
-
-				    }
-				// debug($this->mimetypes);
+					if (!preg_match('/^\s*#/', $line)) {
+						$mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
+							elFinderStorageLocalFileSystem::$mimetypes[$mime[$i]] = $mime[0];
+						}
+					}
+				}
+				
+				elFinderStorageLocalFileSystem::$mimetypesLoaded = true;
 			}
 		}
 		
-		
-	}
-	
-	/**
-	 * Set thumbnails dir and image manipulations library
-	 *
-	 * @TODO option to set tmbdir readonly?
-	 * @TODO clean tmb dir
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function setImageLib() {
-		
-		$path = $this->options['tmbDir']
-			? $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir']
-			: '';
-		
-		if ($path) {
-			if (file_exists($path)) {
-				$path = is_dir($path) ? $path : '';
-			} else {
-				$umask = umask(0);
-				$path  = @mkdir($path, $this->options['dirMode']) ? $path : '';
-				umask($umask);
+		// define thumbnails dir
+		if ($this->options['tmbDir']) {
+			
+			$path = strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR) === false
+				? $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'] // tmbDir set as dir name
+				: $this->normpath($this->options['tmbDir']);  // tmbDir set as path
+
+			if (!file_exists($path)) {
+				$path = $this->_mkdir($path) ? $path : '';
 			}
+			if ($path && (!is_dir($path) || !is_readable($path))) {
+				$path = '';
+			}	
+			// echo $path;	
+			if (!$path) {
+				$this->options['tmbURL'] = '';
+			} elseif (!$this->options['tmbURL'] && strpos($path, $this->options['path']) === 0 && $this->options['defaults']['read']) {
+				$this->options['tmbURL'] = $this->options['URL'].str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($this->options['path'])+1));
+			}
+			
+			$this->options['tmbDir'] = $this->options['tmbURL'] ? $path : '';
 		}
 		
-		if (($this->options['tmbDir'] = $path) == '') {
-			return;
-		}
-		
+		// define lib to work with images
 		$libs = array();
 		if (extension_loaded('imagick')) {
 			$libs[] = 'imagick';
@@ -1539,15 +242,25 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 			: array_shift($libs);
 	}
 	
-	
 	/**
-	 * Set crypt lib - not implemented yet
+	 * Return true if file name is not . or ..
+	 * If file name begins with . return value according to $this->options['dotFiles']
+	 * If set rule to validate filename - check it
 	 *
-	 * @return void
+	 * @param  string  $file  file name
+	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function setCryptLib() {
-		$this->options['cryptLib'];
+	protected function _accepted($path) {
+		$filename = basename($path);
+		if ($filename == '.' || $filename == '..') {
+			return false;
+		}
+		if ('.' != substr($filename, 0, 1)) {
+			return !!$this->options['dotFiles'];
+		}
+		
+		return !empty($this->options['accepted']) ? preg_match($this->options['accepted'], $filename) : true;
 	}
 	
 	/**
@@ -1556,43 +269,279 @@ class elFinderStorageLocalFileSystem implements elFinderStorageDriverInterface {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function setError($msg)	{
-		$this->error = $msg;
+	protected function _fileExists($path) {
+		return file_exists($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isFile($path) {
+		return is_file($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isDir($path) {
+		return is_dir($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isLink($path) {
+		return is_link($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isReadable($path) {
+		return is_readable($path) && $this->allowed($path, 'read');
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isWritable($path) {
+		return is_writable($path) && $this->allowed($path, 'write');
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _isRemovable($path) {
+		return $this->allowed($path, 'rm');
+	}
+	
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _mkdir($path) {
+		return mkdir($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _touch($path) {
+		return touch($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _symlink($target, $link) {
+		return symlink($target, $link);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _rmdir($path) {
+		return rmdir($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _unlink($path) {
+		return unlink($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _readlink($path) {
+		return readlink($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _fopen($path, $mode) {
+		return fopen($path, $mode);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _fclose($path) {
+		return fclose($fp);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _scandir($path) {
+		return array();
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _tree($path) {
+		return array();
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _stat($path) {
+		return stat($path);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _mimetype($path) {
+		switch ($this->options['mimeDetect']) {
+			case 'finfo':
+				if (empty($this->_finfo)) {
+					$this->_finfo = finfo_open(FILEINFO_MIME);
+				}
+				$type = @finfo_file($this->_finfo, $path);
+				break;
+			case 'mime_content_type':   
+			 	$type = mime_content_type($path);
+				break;
+			default:
+				$pinfo = pathinfo($path); 
+				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
+		}
+		$type = array_shift(explode(';', $type)); 
+		
+		if ($type == 'unknown' && $this->_isDir($path)) {
+			$type = 'directory';
+		} elseif ($type == 'application/x-zip') {
+			// http://elrte.org/redmine/issues/163
+			$type = 'application/zip';
+		}
+		return $type;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _info($path) {
+		return array();
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _copy($from, $to) {
 		return false;
 	}
 	
 	/**
-	 * Method to sort files 
+	 * undocumented function
 	 *
-	 * @param  object  file to compare
-	 * @param  object  file to compare
-	 * @return int
-	 * @author Dmitry (dio) Levashov
+	 * @return void
+	 * @author Dmitry Levashov
 	 **/
-	protected function compare($f1, $f2) {
-		$d1 = $f1['mime'] == 'directory';
-		$d2 = $f2['mime'] == 'directory';
-		$m1 = $f1['mime'];
-		$m2 = $f2['mime'];
-		$s1 = $f1['size'];
-		$s2 = $f2['size'];
-		
-		if ($this->sort <= elFInder::$SORT_SIZE_DIRS_FIRST && $d1 != $d2) {
-			return $d1 ? -1 : 1;
-		}
-		
-		if (($this->sort == elFInder::$SORT_KIND_DIRS_FIRST || $this->sort == elFInder::$SORT_KIND) && $m1 != $m2) {
-			return strcmp($m1, $m2);
-		}
-		
-		if (($this->sort == elFInder::$SORT_SIZE_DIRS_FIRST || $this->sort == elFInder::$SORT_SIZE) && $s1 != $s2) {
-			return $s1 < $s2 ? -1 : 1;
-		}
-		
-		return strcmp($f1['name'], $f2['name']);
+	protected function _fileGetContents($path) {
+		return '';
 	}
 	
-}
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _filePutContents($path, $content) {
+		return false;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _tmb($path, $tmb) {
+		return false;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _resizeImg($path, $w, $h) {
+		return false;
+	}
+	
+	
+	
+} // END class 
+
 
 
 ?>
