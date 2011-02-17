@@ -243,6 +243,21 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 	}
 	
 	/**
+	 * Return current root data required by client (disabled commands, archive ability, etc.)
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _params() {
+		return array(
+			'dotFiles'   => $this->options['dotFiles'],
+			'disabled'   => $this->options['disabled'],
+			'archives'   => array(),
+			'extract'    => array()
+		);
+	}
+	
+	/**
 	 * Return true if file name is not . or ..
 	 * If file name begins with . return value according to $this->options['dotFiles']
 	 * If set rule to validate filename - check it

@@ -258,7 +258,7 @@ abstract class elFinderStorageDriver {
 	 * @author Dmitry Levashov
 	 **/
 	public function startPathHash() {
-		
+		return $this->options['startPath'] ? $this->encode($this->options['startPath']) : false;
 	}
 	
 	/**
@@ -270,7 +270,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function fileExists($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_fileExists($path) ;
+		return $path && $this->_accepted($path) && $this->_fileExists($path) ;
 	}
 	
 	/**
@@ -282,7 +282,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function isFile($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isFile($path);
+		return $path && $this->_accepted($path) && $this->_isFile($path);
 	}
 	
 	/**
@@ -294,7 +294,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function isDir($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isDir($path);
+		return $path && $this->_accepted($path) && $this->_isDir($path);
 	}
 	
 	/**
@@ -306,7 +306,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function isLink($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isLink($path);
+		return $path && $this->_accepted($path) && $this->_isLink($path);
 	}
 	
 	/**
@@ -318,7 +318,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function isReadable($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isReadable($path);
+		return $path && $this->_accepted($path) && $this->_isReadable($path);
 	}
 	
 	/**
@@ -330,7 +330,81 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function isWritable($hash) {
 		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isWritable($path);
+		return $path && $this->_accepted($path) && $this->_isWritable($path);
+	}
+	
+	/**
+	 * Return true if file can be removed
+	 *
+	 * @param  string  file hash 
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isRemovable($hash) {
+		$path = $this->decode($hash);
+		return $path && $this->_accepted($path) && $this->_isRemovable($path);
+	}
+	
+	/**
+	 * Return file/dir info
+	 *
+	 * @param  string  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function info($hash) {
+		$path = $this->decode($hash);
+		
+		if ($this->_accepted($path) || !$this->_fileExists($path)) {
+			$this->setError('File not found');
+		}
+		if (!$this->_isDir($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		return $this->_isReadable($path) 
+				? $this->_info($path) 
+				: $this->setError('Access denied');
+	}
+	
+	/**
+	 * Return directory info (same as info() but with additional fields)
+	 * Used to get current working directory info
+	 *
+	 * @param  string  directory hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function dir($hash) {
+		$path = $this->decode($hash);
+		
+		if ($this->_accepted($path) || !$this->_fileExists($path)) {
+			$this->setError('File not found');
+		}
+		
+		if (!$this->_isReadable($path)) {
+			return $this->setError('Access denied');
+		}
+		
+		if ($this->_isLink($path)) {
+			// try to get link target
+			if (false === ($path = $this->_readlink($path))) {
+				return $this->setError('Broken link');
+			}
+			if (!$this->_isReadable($path)) {
+				return $this->setError('Access denied');
+			}
+		}
+		
+		if (!$this->_isDir($path)) {
+			return $this->setError('Invalid parameters');
+		}
+		
+		return array_merge($this->info($path), array(
+			'phash'  => $path == $this->options['path']) ? false : $this->encode(dirname($path)),
+			'url'    => $this->options['URL'] ? $this->path2url($path, true) : '',
+			'rel'    => DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path'])),
+			'params' => $this->_params()
+		));
 	}
 	
 	/***************************************************************************/
@@ -386,6 +460,27 @@ abstract class elFinderStorageDriver {
 		}
 		
 		return $path ? $path : '.';
+	}
+	
+	/**
+	 * Convert file path into url
+	 *
+	 * @param  string  $path  file path
+	 * @param  bool    $isdir is it directory?
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function path2url($path, $isdir=false) {
+		if ($path == $this->options['path']) {
+			$url = $this->options['URL'];
+		} else {
+			$dir  = str_replace(DIRECTORY_SEPARATOR, '/', substr(dirname($path), strlen($this->options['path'])+1));
+			$url = $this->options['URL'].($dir ? $dir.'/' : '').rawurlencode(basename($path));
+			if ($isdir) {
+				$url .= '/';
+			}
+		}
+		return $url;
 	}
 	
 	/**
@@ -513,6 +608,15 @@ abstract class elFinderStorageDriver {
 	abstract protected function _configure();
 	
 	/**
+	 * Return current root data required by client (disabled commands, archive ability, etc.)
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _params();
+	
+	
+	/**
 	 * Return true if filename of given path is accepted for current storage
 	 *
 	 * @param  string  file path
@@ -577,7 +681,21 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _isRemovable($path);
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _info($path);
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _readlink($path);
 	
 	/**
 	 * undocumented function
@@ -619,13 +737,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _unlink($path);
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _readlink($path);
+	
 	
 	/**
 	 * undocumented function
@@ -675,13 +787,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _mimetype($path);
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _info($path);
+	
 
 	/**
 	 * undocumented function
