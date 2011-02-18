@@ -19,6 +19,13 @@ abstract class elFinderStorageDriver {
 	protected $root = '';
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $rootName = '';
+	
+	/**
 	 * Default directory to open
 	 *
 	 * @var string
@@ -193,7 +200,7 @@ abstract class elFinderStorageDriver {
 				$this->start = '';
 			}
 		}
-
+		$this->rootName = !empty($this->options['alias']) ? $this->options['alias'] : $this->basename($this->root);
 		$this->_configure();
 		$this->available = true;
 	}
@@ -355,19 +362,19 @@ abstract class elFinderStorageDriver {
 			$this->setError('File not found');
 		}
 
-		$mime  = $this->_mimetype($path);
-		$mtime = $this->_mtime($path);
+		$mime = $this->_mimetype($path);
+		$time = $this->_mtime($path);
 
-		if ($mtime > $this->today) {
-			$date = 'Today '.date('H:i', $mtime);
-		} elseif ($mtime > $this->yesterday) {
-			$date = 'Yesterday '.date('H:i', $mtime);
+		if ($time > $this->today) {
+			$date = 'Today '.date('H:i', $time);
+		} elseif ($time > $this->yesterday) {
+			$date = 'Yesterday '.date('H:i', $time);
 		} else {
-			$date = date($this->options['dateFormat'], $mtime);
+			$date = date($this->options['dateFormat'], $time);
 		}
 		
 		$info = array(
-			'name'  => htmlspecialchars($path == $this->options['path'] ? $this->options['basename'] : basename($path)),
+			'name'  => htmlspecialchars($this->_basename($path)),
 			'hash'  => $this->encode($path),
 			'mime'  => $mime,
 			'date'  => $date, 
@@ -377,7 +384,7 @@ abstract class elFinderStorageDriver {
 			'rm'    => $this->_isRemovable($path),
 			);
 			
-		if ($this->_isLink) {
+		if ($this->_isLink($path)) {
 			if (false === ($link = $this->_readlink($path))) {
 				$info['mime']  = 'symlink-broken';
 				$info['read']  = false;

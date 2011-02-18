@@ -152,6 +152,7 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 		
 		// extend parent options
 		parent::__construct($id, array_merge($o, $opts));
+		echo $this->rootName;
 		debug($this->options);
 		
 	}
@@ -584,7 +585,7 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _basename($path) {
-		return basename($path);
+		return $path == $this->root && $this->rootName ? $this->rootName : basename($path);
 	}
 	
 	/**
