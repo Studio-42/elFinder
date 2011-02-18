@@ -13,6 +13,33 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 	 *
 	 * @var string
 	 **/
+	protected $cryptLib = '';
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $tmbPath = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $mimeDetect = 'internal';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $imgLib = '';
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
 	protected static $mimetypesLoaded = false;
 	
 	/**
@@ -100,15 +127,84 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 		$o = array(
 			'cryptLib'     => 'auto',  // how crypt paths? not implemented yet
 			'mimeDetect'   => 'auto',  // how to detect mimetype
+			'tmbDir'       => '.tmb',       // directory for thumbnails
+			
+			'tmbAtOnce'    => 12,           // number of thumbnails to generate per request
+			'tmbSize'      => 48,           // images thumbnails size (px)
 			'imgLib'       => 'auto',  // image manipulations lib name
 			'tmbCleanProb' => 0,       // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 			'dotFiles'     => false,   // allow dot files?
 			'accepted'     => '',      // regexp to validate filenames
+			'defaults'     => array(        // default permissions 
+				'read'  => true,
+				'write' => true,
+				'rm'    => true
+			),
 			'perms'        => array(), // individual folders/files permisions
 		);
 		
+		if (!empty($opts['path'])) {
+			$opts['path'] = $this->normpath($opts['path']);
+		}
+		if (!empty($opts['startPath'])) {
+			$opts['startPath'] = $this->normpath($opts['startPath']);
+		}
+		
 		// extend parent options
 		parent::__construct($id, array_merge($o, $opts));
+		debug($this->options);
+		
+	}
+	
+	
+	/**
+	 * Return normalized path, this works the same as os.path.normpath() in Python
+	 *
+	 * @param  string  $path  path
+	 * @return string
+	 * @author Troex Nevelin
+	 **/
+	protected function normpath($path) {
+		if (empty($path)) {
+			return '.';
+		}
+
+		if (strpos($path, '/') === 0) {
+			$initial_slashes = true;
+		} else {
+			$initial_slashes = false;
+		}
+			
+		if (($initial_slashes) 
+		&& (strpos($path, '//') === 0) 
+		&& (strpos($path, '///') === false)) {
+			$initial_slashes = 2;
+		}
+			
+		$initial_slashes = (int) $initial_slashes;
+
+		$comps = explode('/', $path);
+		$new_comps = array();
+		foreach ($comps as $comp) {
+			if (in_array($comp, array('', '.'))) {
+				continue;
+			}
+				
+			if (($comp != '..') 
+			|| (!$initial_slashes && !$new_comps) 
+			|| ($new_comps && (end($new_comps) == '..'))) {
+				array_push($new_comps, $comp);
+			} elseif ($new_comps) {
+				array_pop($new_comps);
+			}
+		}
+		$comps = $new_comps;
+		$path = implode('/', $comps);
+		if ($initial_slashes) {
+			$path = str_repeat('/', $initial_slashes) . $path;
+		}
+		
+		return $path ? $path : '.';
 	}
 	
 	
@@ -139,19 +235,59 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 		return isset($this->options['defaults'][$action]) ? $this->options['defaults'][$action] : false;
 	}
 	
-	
-	
+	/**
+	 * Return crypted path 
+	 * Not implemented
+	 *
+	 * @param  string  path
+	 * @return mixed
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function crypt($path) {
+		return $path;
+	}
 	
 	/**
-	 * Define mimetype detect method, tmbDir, tmbURL, imgLib options
+	 * Return uncrypted path 
+	 * Not implemented
+	 *
+	 * @param  mixed  hash
+	 * @return mixed
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function uncrypt($hash) {
+		return $hash;
+	}
+	
+	/**
+	 * Define mimetype detect method, tmbDir, tmbURL, imgLib options etc
 	 *
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _configure() {
+		// if root dir is not readable - disallow read any files/dirs
+		if (!is_readable($this->options['path'])) {
+			$this->options['defaults']['read'] = false;
+			foreach ($this->options['perms'] as $i => $rules) {
+				if (isset($rules['read'])) {
+					$this->options['perms'][$i]['read'] = false;
+				}
+			}
+		}
+		// if root dir is not writable - disallow write into any files/dirs
+		if (!is_writable($this->options['path'])) {
+			$this->options['defaults']['write'] = false;
+			foreach ($this->options['perms'] as $i => $rules) {
+				if (isset($rules['write'])) {
+					$this->options['perms'][$i]['write'] = false;
+				}
+			}
+		}
+		
 		// define crypt lib - not implemented
-		$this->options['cryptLib'] = '';
+		$this->cryptLib = '';
 		
 		// define mime detect method
 		$regexp = '/text\/x\-(php|c\+\+)/';
@@ -161,24 +297,23 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 			'internal' => 'text/x-php'
 		);
 		$type = $this->options['mimeDetect'];
-		$this->options['mimeDetect'] = 'internal';
 		
 		// test required type
 		if (!empty($mimes[$type]) && preg_match($regexp, $mimes[$type])) {
-			$this->options['mimeDetect'] = $type;
+			$this->mimeDetect = $type;
 		} else {
 			// find first available type
 			foreach ($mimes as $type => $mime) {
 				if (preg_match($regexp, $mime)) {
-					$this->options['mimeDetect'] = $type;
+					$this->mimeDetect = $type;
 					break;
 				}
 			}
 		}
-		
+
 		// load mimes from external file for mimeDetect = 'internal'
 		// based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
-		if ($this->options['mimeDetect'] == 'internal' && !elFinderStorageLocalFileSystem::$mimetypesLoaded) {
+		if ($this->mimeDetect == 'internal' && !elFinderStorageLocalFileSystem::$mimetypesLoaded) {
 			$file = !empty($this->options['mimefile']) 
 				? $this->options['mimefile'] 
 				: dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types';
@@ -198,28 +333,27 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 				elFinderStorageLocalFileSystem::$mimetypesLoaded = true;
 			}
 		}
-		
-		// define thumbnails dir
-		if ($this->options['tmbDir']) {
-			
-			$path = strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR) === false
-				? $this->options['path'].DIRECTORY_SEPARATOR.$this->options['tmbDir'] // tmbDir set as dir name
-				: $this->normpath($this->options['tmbDir']);  // tmbDir set as path
 
-			if (!file_exists($path)) {
-				$path = $this->_mkdir($path) ? $path : '';
-			}
-			if ($path && (!is_dir($path) || !is_readable($path))) {
-				$path = '';
-			}	
-			// echo $path;	
-			if (!$path) {
-				$this->options['tmbURL'] = '';
-			} elseif (!$this->options['tmbURL'] && strpos($path, $this->options['path']) === 0 && $this->options['defaults']['read']) {
-				$this->options['tmbURL'] = $this->options['URL'].str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($this->options['path'])+1));
+		// define thumbnails dir/URL
+		if ($this->options['tmbDir'] && $this->options['defaults']['read']) {
+			
+			$this->tmbPath = strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR) === false
+				? $this->root.DIRECTORY_SEPARATOR.$this->options['tmbDir'] // tmbDir set as dir name
+				: $this->normpath($this->options['tmbDir']);  // tmbDir set as path
+			
+			if (file_exists($this->tmbPath)) {
+				if (!is_dir($this->tmbPath) || !is_readable($this->tmbPath)) {
+					$this->tmbPath = '';
+				}
+			} elseif (!$this->_mkdir($this->tmbPath)) {
+				$this->tmbPath = '';
 			}
 			
-			$this->options['tmbDir'] = $this->options['tmbURL'] ? $path : '';
+			if (!$this->tmbPath) {
+				$this->tmbURL = '';
+			} elseif (!$this->tmbURL) {
+				$this->tmbURL = $this->_inpath($this->tmbPath, $this->root) ? $this->_path2url($this->tmbPath).'/' : '';
+			}
 		}
 		
 		// define lib to work with images
@@ -237,7 +371,7 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 			$libs[] = 'gd';
 		}
 		
-		$this->options['imgLib'] = in_array($this->options['imgLib'], $libs) 
+		$this->imgLib = in_array($this->options['imgLib'], $libs) 
 			? $this->options['imgLib'] 
 			: array_shift($libs);
 	}
@@ -255,6 +389,89 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 			'archives'   => array(),
 			'extract'    => array()
 		);
+	}
+	
+	/**
+	 * Crypt path and encode to base64
+	 *
+	 * @param  string  file path
+	 * @return string
+	 * @author Troex Nevelin
+	 **/
+	protected function _encode($path) {
+		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
+		$path = substr($path, strlen($this->options['path']));
+
+		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
+		if (!$path)	{
+			$path = '/';
+		}
+
+		// TODO crypt path and return hash
+		$hash = $this->crypt($path);
+
+		// hash is used as id in HTML that means it must contain vaild chars
+		// make base64 html safe and append prefix in begining
+		$hash = strtr(base64_encode($hash), '+/=', '-_.');
+		$hash = rtrim($hash, '.'); // remove dots '.' at the end, before it was '=' in base64
+		return $hash;
+	}
+	
+	/**
+	 * Decode path from base64 and decrypt it
+	 *
+	 * @param  string  file path
+	 * @return string
+	 * @author Troex Nevelin
+	 **/
+	protected function _decode($hash) {
+		// replace HTML safe base64 to normal
+		$hash = base64_decode(strtr($hash, '-_.', '+/='));
+		// TODO uncrypt hash and return path
+		$path = $this->uncrypt($hash);
+
+		// append ROOT to path after it was cut in _crypt
+		return $this->options['path'].($path == '/' ? '' : $path);
+	}
+	
+	
+	/**
+	 * Return true if $path is subdir of $parent
+	 *
+	 * @param  string  $path    path to check
+	 * @param  string  $parent  parent path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _inpath($path, $parent) {
+		return strpos($path, $parent) === 0;
+	}
+	
+	/**
+	 * Return path related to root path
+	 *
+	 * @param  string  $path  fuke path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _relpath($path) {
+		return substr($path, strlen($this->root)+1);
+	}
+	
+	/**
+	 * Convert file path into url
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _path2url($path) {
+		if ($this->URL) {
+			return $path == $this->root
+				? $this->URL
+				: $this->URL.str_replace(DIRECTORY_SEPARATOR, '/', $this->_relpath($path));
+		}
+		return '';
 	}
 	
 	/**
@@ -348,7 +565,83 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 		return $this->allowed($path, 'rm');
 	}
 	
+	/**
+	 * Return file parent directory name
+	 *
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _dirname($path) {
+		return dirname($path);
+	}
+
+	/**
+	 * Return file name
+	 *
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _basename($path) {
+		return basename($path);
+	}
 	
+	/**
+	 * Return file modification time
+	 *
+	 * @param  string $path  file path
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _filemtime($path) {
+		return filemtime($path);
+	}
+	
+	/**
+	 * Return file size
+	 *
+	 * @param  string $path  file path
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _filesize($path) {
+		return filesize($path);
+	}
+	
+	/**
+	 * Return file mime type
+	 *
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _mimetype($path) {
+		switch ($this->options['mimeDetect']) {
+			case 'finfo':
+				if (empty($this->_finfo)) {
+					$this->_finfo = finfo_open(FILEINFO_MIME);
+				}
+				$type = @finfo_file($this->_finfo, $path);
+				break;
+			case 'mime_content_type':   
+			 	$type = mime_content_type($path);
+				break;
+			default:
+				$pinfo = pathinfo($path); 
+				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
+		}
+		$type = array_shift(explode(';', $type)); 
+		
+		if ($type == 'unknown' && $this->_isDir($path)) {
+			$type = 'directory';
+		} elseif ($type == 'application/x-zip') {
+			// http://elrte.org/redmine/issues/163
+			$type = 'application/zip';
+		}
+		return $type;
+	}
 	
 	/**
 	 * undocumented function
@@ -450,59 +743,6 @@ class elFinderStorageLocalFileSystem extends elFinderStorageDriver {
 		return array();
 	}
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function _stat($path) {
-		return stat($path);
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function _mimetype($path) {
-		switch ($this->options['mimeDetect']) {
-			case 'finfo':
-				if (empty($this->_finfo)) {
-					$this->_finfo = finfo_open(FILEINFO_MIME);
-				}
-				$type = @finfo_file($this->_finfo, $path);
-				break;
-			case 'mime_content_type':   
-			 	$type = mime_content_type($path);
-				break;
-			default:
-				$pinfo = pathinfo($path); 
-				$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-				$type  = isset($this->mimetypes[$ext]) ? $this->mimetypes[$ext] : 'unknown;';
-		}
-		$type = array_shift(explode(';', $type)); 
-		
-		if ($type == 'unknown' && $this->_isDir($path)) {
-			$type = 'directory';
-		} elseif ($type == 'application/x-zip') {
-			// http://elrte.org/redmine/issues/163
-			$type = 'application/zip';
-		}
-		return $type;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function _info($path) {
-		return array();
-	}
-
 	/**
 	 * undocumented function
 	 *

@@ -10,6 +10,100 @@
  * @author Alexey Sukhotin
  **/
 abstract class elFinderStorageDriver {
+	
+	/**
+	 * Root directory path
+	 *
+	 * @var string
+	 **/
+	protected $root = '';
+	
+	/**
+	 * Default directory to open
+	 *
+	 * @var string
+	 **/
+	protected $start = '';
+	
+	/**
+	 * Base URL
+	 *
+	 * @var string
+	 **/
+	protected $URL = '';
+	
+	/**
+	 * Base thumbnails URL
+	 *
+	 * @var string
+	 **/
+	protected $tmbURL = '';
+	
+	
+	/**
+	 * Storage id - used as prefix for files hashes
+	 *
+	 * @var string
+	 **/
+	protected $id = '';
+	
+	/**
+	 * Error message from last failed action
+	 *
+	 * @var string
+	 **/
+	protected $error = '';
+	
+	/**
+	 * Today 24:00 timestamp
+	 *
+	 * @var int
+	 **/
+	protected $today = 0;
+	
+	/**
+	 * Yestoday 24:00 timestamp
+	 *
+	 * @var int
+	 **/
+	protected $yesterday = 0;
+	
+	/**
+	 * Some options sending to client
+	 *
+	 * @var array
+	 **/
+	protected $params = array();
+	
+	/**
+	 * Flag - is storage loaded correctly
+	 *
+	 * @var bool
+	 **/
+	protected $available = false;
+	
+	/**
+	 * Object configuration
+	 *
+	 * @var array
+	 **/
+	protected $options = array(
+		'path'         => '',           // root path
+		'alias'        => '',           // alias to replace root dir name
+		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
+		'tmbURL'       => '',           // thumbnails dir URL
+		'startPath'    => '',           // open this path on initial request instead of root path
+		'disabled'     => array(),      // list of commands names to disable on this root
+		'uploadAllow'  => array(),      // mimetypes which allowed to upload
+		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
+		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
+		'treeDeep'     => 1,            // how many subdirs levels return
+		'dateFormat'   => 'j M Y H:i',  // files dates format
+		
+		'copyFrom'     => true,
+		'copyTo'       => true,
+	);
+	
 	/**
 	 * Filter directory content rule
 	 *
@@ -61,84 +155,7 @@ abstract class elFinderStorageDriver {
 	 **/
 	public static $SORT_SIZE            = 6;
 	
-	/**
-	 * Storage id - used as prefix for files hashes
-	 *
-	 * @var string
-	 **/
-	protected $id = '';
 	
-	/**
-	 * Error message from last failed action
-	 *
-	 * @var string
-	 **/
-	protected $error = '';
-	
-	/**
-	 * Today 24:00 timestamp
-	 *
-	 * @var int
-	 **/
-	protected $today = 0;
-	
-	/**
-	 * Yestoday 24:00 timestamp
-	 *
-	 * @var int
-	 **/
-	protected $yesterday = 0;
-	
-	/**
-	 * Some options sending to client
-	 *
-	 * @var array
-	 **/
-	protected $params = array();
-	
-	/**
-	 * Flag - is storage loaded correctly
-	 *
-	 * @var bool
-	 **/
-	protected $available = false;
-	
-	
-	/**
-	 * Object configuration
-	 *
-	 * @var array
-	 **/
-	protected $options = array(
-		'path'         => '',           // root path
-		'alias'        => '',           // alias to replace root dir name
-		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
-		'startPath'    => '',           // open this path on initial request instead of root path
-		'disabled'     => array(),      // list of commands names to disable on this root
-		
-		
-		
-		'tmbDir'       => '.tmb',       // directory for thumbnails
-		'tmbURL'       => '',           // thumbnails dir URL, set your thumbnails dir is outside root directory
-		
-		'tmbAtOnce'    => 12,           // number of thumbnails to generate per request
-		'tmbSize'      => 48,           // images thumbnails size (px)
-		
-		'uploadAllow'  => array(),      // mimetypes which allowed to upload
-		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
-		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
-		'defaults'     => array(        // default permissions 
-			'read'  => true,
-			'write' => true,
-			'rm'    => true
-		),
-		
-		'treeDeep'     => 1,            // how many subdirs levels return
-		'dateFormat'   => 'j M Y H:i',  // files dates format
-		
-		'copyFrom'     => true,
-		'copyTo'       => true,
-	);
 	
 	/**
 	 * Constuctor
@@ -147,57 +164,36 @@ abstract class elFinderStorageDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($id, array $opts) {
-		$this->id = $id;
+		$this->id      = $id;
 		$this->options = array_merge($this->options, $opts);
-		$root = empty($this->options['path']) ? '' : $this->normpath($this->options['path']);
-
+		$this->root    = @$this->options['path'];
+		$this->start   = @$this->options['startPath'];
+		$this->URL     = empty($this->options['URL']) ? '' : $this->options['URL'].(substr($this->options['URL'], -1, 1) != '/' ? '/' : '');
+		$this->tmbURL  = empty($this->options['tmbURL']) ? '' : $this->options['tmbURL'].(substr($this->options['tmbURL'], -1, 1) != '/' ? '/' : '');
+		
 		// root does not exists
-		if (!$root || !$this->_isDir($root)) {
+		if (!$this->root || !$this->_isDir($this->root)) {
 			return;
 		}
-		
-		$readable = $this->_isReadable($root);
 		
 		// root not readable and writable
-		if (!$readable && !$this->_isWritable($root)) {
+		if (!($readable = $this->_isReadable($this->root)) 
+		&& !$this->_isWritable($this->root)) {
 			return;
 		}
 		
-		$this->options['path'] = $root;
-		
-		// if root not readable - set all read rules to false
 		if (!$readable) {
-			$this->options['default']['read'] = false;
-			$this->options['startPath'] = '';
-			foreach ($this->options['perms'] as $reg => $rules) {
-				if (isset($rules['read'])) {
-					$this->options['perms'][$reg]['read'] = false;
-				}
+			$this->start = $this->URL = $this->tmbURL = '';
+		} elseif ($this->start) {
+			// check start dir if set 
+			if (!$this->_accepted($this->start) 
+			|| !$this->_inpath($this->start, $this->root) 
+			|| !$this->_isDir($this->start) 
+			|| !$this->_isReadable($this->start)) {
+				$this->start = '';
 			}
 		}
-		
-		// check start dir if set 
-		if ($this->options['startPath']) {
-			$path = $this->normpath($this->options['startPath']);
-			
-			if (strpos($this->options['path'], $path) === 0 
-			&& $this->accepted($path) 
-			&& $this->_isDir($path) 
-			&& $this->_isReadable($path)) {
-				$this->options['startPath'] = $path;
-			} else {
-				$this->options['startPath'] = '';
-			}
-		}
-		
-		// check trailing slash in url
-		if ($this->options['URL'] && substr($this->options['URL'], -1, 1) != '/') {
-			$this->options['URL'] .= '/';
-		}
-		
-		$this->options['dirname']  = dirname($this->options['path']);
-		$this->options['basename'] = !empty($this->options['alias']) ? $this->options['alias'] : basename($this->options['path']);
-		
+
 		$this->_configure();
 		$this->available = true;
 	}
@@ -247,18 +243,18 @@ abstract class elFinderStorageDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function rootHash() {
-		return $this->encode($this->options['path']);
+	public function root() {
+		return $this->encode($this->root);
 	}
 	
 	/**
-	 * undocumented function
+	 * Return start directory hash if set
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
 	 **/
-	public function startPathHash() {
-		return $this->options['startPath'] ? $this->encode($this->options['startPath']) : false;
+	public function start() {
+		return $this->start ? $this->encode($this->start) : false;
 	}
 	
 	/**
@@ -355,15 +351,59 @@ abstract class elFinderStorageDriver {
 	public function info($hash) {
 		$path = $this->decode($hash);
 		
-		if ($this->_accepted($path) || !$this->_fileExists($path)) {
+		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
 			$this->setError('File not found');
 		}
-		if (!$this->_isDir($path)) {
-			return $this->setError('Invalid parameters');
+
+		$mime  = $this->_mimetype($path);
+		$mtime = $this->_mtime($path);
+
+		if ($mtime > $this->today) {
+			$date = 'Today '.date('H:i', $mtime);
+		} elseif ($mtime > $this->yesterday) {
+			$date = 'Yesterday '.date('H:i', $mtime);
+		} else {
+			$date = date($this->options['dateFormat'], $mtime);
 		}
-		return $this->_isReadable($path) 
-				? $this->_info($path) 
-				: $this->setError('Access denied');
+		
+		$info = array(
+			'name'  => htmlspecialchars($path == $this->options['path'] ? $this->options['basename'] : basename($path)),
+			'hash'  => $this->encode($path),
+			'mime'  => $mime,
+			'date'  => $date, 
+			'size'  => $mime == 'directory' ? 0 : $this->_filesize($path),
+			'read'  => $this->_isReadable($path),
+			'write' => $this->_isWritable($path),
+			'rm'    => $this->_isRemovable($path),
+			);
+			
+		if ($this->_isLink) {
+			if (false === ($link = $this->_readlink($path))) {
+				$info['mime']  = 'symlink-broken';
+				$info['read']  = false;
+				$info['write'] = false;
+			} else {
+				$info['mime']   = $this->_mimetype($link);
+				$info['link']   = $this->encode($link);
+				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
+			}
+		}
+		
+		if ($info['mime'] != 'directory' && $info['read']) {
+			
+			// if (strpos($info['mime'], 'image') === 0 && false != ($s = getimagesize($path))) {
+			// 	$info['dim'] = $s[0].'x'.$s[1];
+			// 	if ($this->resizable($info['mime'])) {
+			// 		$info['resize'] = true;
+			// 		if (($tmb = $this->tmbPath($path)) != '') {
+			// 			$info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
+			// 		}
+			// 	}
+			// }
+			
+		}
+			
+		return $info;
 	}
 	
 	/**
@@ -377,7 +417,7 @@ abstract class elFinderStorageDriver {
 	public function dir($hash) {
 		$path = $this->decode($hash);
 		
-		if ($this->_accepted($path) || !$this->_fileExists($path)) {
+		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
 			$this->setError('File not found');
 		}
 		
@@ -399,156 +439,46 @@ abstract class elFinderStorageDriver {
 			return $this->setError('Invalid parameters');
 		}
 		
-		return array_merge($this->info($path), array(
-			'phash'  => $path == $this->options['path']) ? false : $this->encode(dirname($path)),
-			'url'    => $this->options['URL'] ? $this->path2url($path, true) : '',
-			'rel'    => DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path'])),
-			'params' => $this->_params()
-		));
+		$info = $this->info($path);
+		
+		return is_array($info)
+			? array_merge($this->info($path), array(
+					'phash'  => $path == $this->options['path'] ? false : $this->encode(dirname($path)),
+					'url'    => $this->options['URL'] ? $this->path2url($path, true) : '',
+					'rel'    => DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path'])),
+					'params' => $this->_params()
+				))
+			: false;
+		
 	}
 	
 	/***************************************************************************/
 	/*                                utilites                                 */
 	/***************************************************************************/
 	
-	
 	/**
-	 * Return normalized path, this works the same as os.path.normpath() in Python
-	 *
-	 * @param  string  $path  path
-	 * @return string
-	 * @author Troex Nevelin
-	 **/
-	protected function normpath($path) {
-		if (empty($path)) {
-			return '.';
-		}
-
-		if (strpos($path, '/') === 0) {
-			$initial_slashes = true;
-		} else {
-			$initial_slashes = false;
-		}
-			
-		if (($initial_slashes) 
-		&& (strpos($path, '//') === 0) 
-		&& (strpos($path, '///') === false)) {
-			$initial_slashes = 2;
-		}
-			
-		$initial_slashes = (int) $initial_slashes;
-
-		$comps = explode('/', $path);
-		$new_comps = array();
-		foreach ($comps as $comp) {
-			if (in_array($comp, array('', '.'))) {
-				continue;
-			}
-				
-			if (($comp != '..') 
-			|| (!$initial_slashes && !$new_comps) 
-			|| ($new_comps && (end($new_comps) == '..'))) {
-				array_push($new_comps, $comp);
-			} elseif ($new_comps) {
-				array_pop($new_comps);
-			}
-		}
-		$comps = $new_comps;
-		$path = implode('/', $comps);
-		if ($initial_slashes) {
-			$path = str_repeat('/', $initial_slashes) . $path;
-		}
-		
-		return $path ? $path : '.';
-	}
-	
-	/**
-	 * Convert file path into url
-	 *
-	 * @param  string  $path  file path
-	 * @param  bool    $isdir is it directory?
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function path2url($path, $isdir=false) {
-		if ($path == $this->options['path']) {
-			$url = $this->options['URL'];
-		} else {
-			$dir  = str_replace(DIRECTORY_SEPARATOR, '/', substr(dirname($path), strlen($this->options['path'])+1));
-			$url = $this->options['URL'].($dir ? $dir.'/' : '').rawurlencode(basename($path));
-			if ($isdir) {
-				$url .= '/';
-			}
-		}
-		return $url;
-	}
-	
-	/**
-	 * Crypt path and encode to base64
+	 * Encode path into hash
 	 *
 	 * @param  string  file path
 	 * @return string
-	 * @author Troex Nevelin
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function encode($path) {
-		// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
-		$path = substr($path, strlen($this->options['path']));
-
-		// if reqesting root dir $cutRoot will be empty, then assign '/' as we cannot leave it blank for crypt
-		if (!$path)	{
-			$path = '/';
-		}
-
-		// TODO crypt path and return hash
-		$hash = $this->crypt($path);
-
-		// hash is used as id in HTML that means it must contain vaild chars
-		// make base64 html safe and append prefix in begining
-		$hash = $this->id.strtr(base64_encode($hash), '+/=', '-_.');
-		$hash = rtrim($hash, '.'); // remove dots '.' at the end, before it was '=' in base64
-		return $hash;
+		return $this->id.$this->_encode($path);
 	}
 	
 	/**
-	 * Decode path from base64 and decrypt it
+	 * Decode path from hash
 	 *
-	 * @param  string  file path
+	 * @param  string  file hash
 	 * @return string
-	 * @author Troex Nevelin
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function decode($hash) {
-		// remove prefix
-		$hash = substr($hash, strlen($this->id));
-		// replace HTML safe base64 to normal
-		$hash = base64_decode(strtr($hash, '-_.', '+/='));
-		// TODO uncrypt hash and return path
-		$path = $this->uncrypt($hash);
-
-		// append ROOT to path after it was cut in _crypt
-		return $this->options['path'].($path == '/' ? '' : $path);
+		return $this->_decode(substr($hash, strlen($this->id)));
 	}
 		
-	/**
-	 * Return crypted path 
-	 *
-	 * @param  string  path
-	 * @return mixed
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function crypt($path) {
-		return $path;
-	}
-	
-	/**
-	 * Return uncrypted path 
-	 *
-	 * @param  mixed  hash
-	 * @return mixed
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function uncrypt($hash) {
-		return $hash;
-	}
+		
 	
 	/**
 	 * Sort files 
@@ -600,7 +530,7 @@ abstract class elFinderStorageDriver {
 	/***************************************************************************/
 	
 	/**
-	 * Configure such staffs as tmbDir/URL, imgLib etc.
+	 * Any init actions here
 	 *
 	 * @return void
 	 * @author Dmitry (dio) Levashov
@@ -615,9 +545,52 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _params();
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _encode($path);
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _decode($hash);
 	
 	/**
-	 * Return true if filename of given path is accepted for current storage
+	 * Return true if $path is subdir of $parent
+	 *
+	 * @param  string  $path    path to check
+	 * @param  string  $parent  parent path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _inpath($path, $parent);
+	
+	/**
+	 * Return path related to root path
+	 *
+	 * @param  string  $path  fuke path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _relpath($path);
+	
+	/**
+	 * Return file URL
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _path2url($path);
+	
+	/**
+	 * Return true if filename is accepted for current storage
 	 *
 	 * @param  string  file path
 	 * @return bool
@@ -682,12 +655,49 @@ abstract class elFinderStorageDriver {
 	abstract protected function _isRemovable($path);
 	
 	/**
-	 * undocumented function
+	 * Return file parent directory name
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _info($path);
+	abstract protected function _dirname($path);
+
+	/**
+	 * Return file name
+	 *
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _basename($path);
+
+	/**
+	 * Return file modification time
+	 *
+	 * @param  string $path  file path
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _filemtime($path);
+	
+	/**
+	 * Return file size
+	 *
+	 * @param  string $path  file path
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _filesize($path);
+	
+	/**
+	 * Return file mime type
+	 *
+	 * @param  string $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _mimetype($path);
 	
 	/**
 	 * undocumented function
@@ -771,23 +781,6 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _tree($path);
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _stat($path);
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _mimetype($path);
-	
-	
 
 	/**
 	 * undocumented function
@@ -813,13 +806,25 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _filePutContents($path, $content);
 	
+	
+
 	/**
-	 * undocumented function
+	 * Return file thumnbnail path
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _tmb($path, $tmb);
+	// abstract protected function _tmbPath($path);
+	
+	/**
+	 * Return file thumnbnail URL
+	 *
+	 * @param  string  $path  thumnbnail path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	// abstract protected function _tmbURL($path);
 	
 	/**
 	 * undocumented function
@@ -827,7 +832,15 @@ abstract class elFinderStorageDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	abstract protected function _resizeImg($path, $w, $h);
+	// abstract protected function _tmb($path, $tmb);
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	// abstract protected function _resizeImg($path, $w, $h);
 	
 } // END class 
 

@@ -72,14 +72,14 @@ $opts = array(
 				)
 			)
 		),
-		array(
-			'path'   => '../../../files2',
-			'URL'    => 'http://localhost/git/elfinder/files/',
-			'alias'  => 'Home2',
-			'driver' => 'LocalFileSystem',
-			'mimeDetect'   => 'auto',
-			'debug' => true
-		)
+		// array(
+		// 	'path'   => '../../../files2',
+		// 	'URL'    => 'http://localhost/git/elfinder/files/',
+		// 	'alias'  => 'Home2',
+		// 	'driver' => 'LocalFileSystem',
+		// 	'mimeDetect'   => 'auto',
+		// 	'debug' => true
+		// )
 		
 	)
 );
