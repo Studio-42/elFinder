@@ -7,9 +7,8 @@ if (function_exists('date_default_timezone_set')) {
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriverInterface.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageDriver.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderStorageLocalFileSystem.class.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -49,6 +48,7 @@ $opts = array(
 	'roots' => array(
 		array(
 			'path'   => '../../../files/',
+			// 'startPath' => '../../../files/Images/',
 			'URL'    => 'http://localhost/git/elfinder/files',
 			'fileURL' => false,
 			'alias'  => 'Home1',

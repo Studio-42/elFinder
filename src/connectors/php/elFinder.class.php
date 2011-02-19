@@ -14,14 +14,14 @@ class elFinder {
 	 *
 	 * @var array
 	 **/
-	protected $roots = array();
+	protected $volumes = array();
 	
 	/**
 	 * Default root (storage)
 	 *
 	 * @var elFinderStorageDriver
 	 **/
-	protected $defaultRoot = null;
+	protected $default = null;
 	
 	/**
 	 * Commands and required arguments list
@@ -150,28 +150,25 @@ class elFinder {
 		if (isset($opts['roots']) && is_array($opts['roots'])) {
 			
 			foreach ($opts['roots'] as $i => $o) {
-				$class = 'elFinderStorage'.$o['driver'];
+				$class = 'elFinderVolume'.$o['driver'];
 
 				if (class_exists($class)) {
-					// storage id - used as prefix to files hash
-					$key  = strtolower(substr($o['driver'], 0, 1)).$i.'f';
-					$root = new $class($key, $o);
-					// debug($root);
-					echo $root->available();
+					$volume = new $class();
 					
-					// if ($root->load($o, $key)) {
-					// 	$this->roots[$key] = $root;
-					// 	if (!$this->defaultRoot && $root->isReadable('/')) {
-					// 		// set first readable root as default root
-					// 		$this->defaultRoot = & $this->roots[$key];
-					// 	}
-					// }
+					// unique volume id - used as prefix to files hash
+					$id = $volume->driverid().$i;
+					
+					if ($volume->mount($id, $o)) {
+						$this->volumes[$id] = $volume;
+						if (!$this->default && $volume->isReadable($volume->root())) {
+							$this->default = $this->volumes[$id];
+						}
+					}
 				}
 			}
 		}
-		
-		// if at least one roots - ii des
-		$this->loaded = !empty($this->roots);
+		// if at least one redable volume - ii des
+		$this->loaded = !empty($this->default);
 	}
 	
 	/**
@@ -277,15 +274,15 @@ class elFinder {
 		
 		$result = $this->$cmd($args);
 		
-		if ($this->debug) {
-			$result['debug'] = array(
-				'connector' => 'php', 
-				'time'      => $this->utime() - $this->time
-				);
-			foreach ($this->roots as $key => $root) {
-				$result['debug'][$key] = $root->debug();
-			}
-		}
+		// if ($this->debug) {
+		// 	$result['debug'] = array(
+		// 		'connector' => 'php', 
+		// 		'time'      => $this->utime() - $this->time
+		// 		);
+		// 	foreach ($this->roots as $key => $root) {
+		// 		$result['debug'][$key] = $root->debug();
+		// 	}
+		// }
 		
 		return $result;
 	}
@@ -306,53 +303,54 @@ class elFinder {
 	protected function open($args) {
 		$result = array();
 		$target = $args['target'];
-		$root   = $this->fileRoot($target);
+		$volume = $this->volume($target);
 		
-		if (!$root) {
+		if (!$volume) {
 			if ($args['init']) {
-				$root   = $this->defaultRoot;
-				$target = $root->rootHash();
+				// on init request we can get invalid dir hash -
+				// dir which already does not exists but stored in cookie from last session,
+				// so open default dir
+				$volume = $this->default;
+				if (false == ($target = $volume->start())) {
+					$target = $volume->root();
+				}
 			} else {
 				return array('error' => 'Invalid parameters');
 			}
 		}
 		
-		if (!$root->isDir($target)) {
-			return array('error' => 'Invalid parameters');
+		if (false === ($result['cwd'] = $volume->dir($target))) {
+			return array('error' => $volume->error());
 		}
 		
-		if (false === ($result['cwd'] = $root->dirInfo($target, isset($args['init'])))) {
-			return array('error' => $root->error());
+		if (false === ($result['cdc'] = $volume->scandir($target))) {
+			return array('error' => $volume->error());
 		}
-
-		$sort = (int)$args['sort'];
-		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort > self::$SORT_SIZE) {
-			$sort = self::$SORT_NAME_DIRS_FIRST;
-		}
-
-		$mimes = !empty($args['mimes']) && is_array($args['mimes']) 
-			? $args['mimes'] 
-			: array();
-			
-		if (false === ($result['cdc'] = $root->dirContent($target, $sort, $mimes))) {
-			return array('error' => $root->error());
-		}
+		
 		
 		if ($args['tree']) {
 			$result['tree'] = array();
-			
-			foreach ($this->roots as $r) {
-				$hash = $r->rootHash();
-				$result['tree'] = array_merge($result['tree'], $r->tree($hash, $r === $root ? $target : null));
+			foreach ($this->volumes as $volume) {
+				if (false == ($tree = $volume->tree(''))) {
+					return array('error' => $volume->error());
+				}
+				$result['tree'] = array_merge($result['tree'], $tree);
 			}
 		}
 		
-		if ($args['init']) {
+		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['params'] = array(
 				'commands'   => array_keys($this->commands),
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
+		}
+		
+		if (!empty($args['debug'])) {
+			$result['debug'] = array();
+			foreach ($this->volumes as $id => $volume) {
+				$result['debug'][$id] = $volume->debug();
+			}
 		}
 		
 		return $result;
@@ -573,33 +571,15 @@ class elFinder {
 	 * @return elFinderStorageDriver
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function fileRoot($hash) {
-		foreach ($this->roots as $key => $root) {
-			if (strpos($hash, $key) === 0 && $root->fileExists($hash)) {
-				return $root;
+	protected function volume($hash) {
+		foreach ($this->volumes as $id => $v) {
+			if (strpos($hash, $id) === 0 && $v->fileExists($hash)) {
+				return $this->volumes[$id];
 			}
 		}
 		return false;
 	}
 	
-	/**
-	 * Check commands names to be disabled and fix if required
-	 *
-	 * @param  array  commands names
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function disabled($cmds) {
-		$disabled = array();
-		if (is_array($cmds)) {
-			foreach ($cmds as $cmd) {
-				if (isset($this->commands[$cmd]) && !preg_match('/^(open|tree|tmb|ping)$/', $cmd)) {
-					$disabled[] = $cmd;
-				}
-			}
-		}
-		return $disabled;
-	}
 	
 	/**
 	 * Execute all callbacks/listeners for required command

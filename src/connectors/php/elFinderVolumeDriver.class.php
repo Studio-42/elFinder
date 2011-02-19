@@ -1,15 +1,38 @@
 <?php
 /**
- * Based class for elFinder storages.
- * Realize all storage logic.
- * Create abstraction level under base file sistem operation (like mkdir etc.), 
+ * Based class for elFinder volume.
+ * Realize all logic.
+ * Abstract level realize base file sistem operation (like mkdir etc.), 
  * which must be implemented in childs classes 
  *
  * @author Dmitry (dio) Levashov
  * @author Troex Nevelin
  * @author Alexey Sukhotin
  **/
-abstract class elFinderStorageDriver {
+abstract class elFinderVolumeDriver {
+	
+	/**
+	 * Driver id
+	 * Must be unique and contains [a-z0-9]
+	 * Used as part of volume id
+	 *
+	 * @var string
+	 **/
+	protected $driverId = 'a';
+	
+	/**
+	 * Storage id - used as prefix for files hashes
+	 *
+	 * @var string
+	 **/
+	protected $id = '';
+	
+	/**
+	 * Flag - volume "mounted"and available
+	 *
+	 * @var bool
+	 **/
+	protected $mounted = false;
 	
 	/**
 	 * Root directory path
@@ -19,7 +42,7 @@ abstract class elFinderStorageDriver {
 	protected $root = '';
 	
 	/**
-	 * undocumented class variable
+	 * Root basename | alias
 	 *
 	 * @var string
 	 **/
@@ -40,19 +63,11 @@ abstract class elFinderStorageDriver {
 	protected $URL = '';
 	
 	/**
-	 * Base thumbnails URL
+	 * Thumbnails base URL
 	 *
 	 * @var string
 	 **/
 	protected $tmbURL = '';
-	
-	
-	/**
-	 * Storage id - used as prefix for files hashes
-	 *
-	 * @var string
-	 **/
-	protected $id = '';
 	
 	/**
 	 * Error message from last failed action
@@ -81,13 +96,6 @@ abstract class elFinderStorageDriver {
 	 * @var array
 	 **/
 	protected $params = array();
-	
-	/**
-	 * Flag - is storage loaded correctly
-	 *
-	 * @var bool
-	 **/
-	protected $available = false;
 	
 	/**
 	 * Object configuration
@@ -162,16 +170,15 @@ abstract class elFinderStorageDriver {
 	 **/
 	public static $SORT_SIZE            = 6;
 	
-	
-	
 	/**
-	 * Constuctor
+	 * "Mount" volume
 	 *
-	 * @return void
+	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function __construct($id, array $opts) {
-		$this->id      = $id;
+	public function mount($id, array $opts) {
+		$this->id = $id;
+		$opts = $this->_prepare($opts);
 		$this->options = array_merge($this->options, $opts);
 		$this->root    = @$this->options['path'];
 		$this->start   = @$this->options['startPath'];
@@ -180,13 +187,13 @@ abstract class elFinderStorageDriver {
 		
 		// root does not exists
 		if (!$this->root || !$this->_isDir($this->root)) {
-			return;
+			return false;
 		}
 		
 		// root not readable and writable
 		if (!($readable = $this->_isReadable($this->root)) 
 		&& !$this->_isWritable($this->root)) {
-			return;
+			return false;
 		}
 		
 		if (!$readable) {
@@ -200,19 +207,28 @@ abstract class elFinderStorageDriver {
 				$this->start = '';
 			}
 		}
-		$this->rootName = !empty($this->options['alias']) ? $this->options['alias'] : $this->basename($this->root);
+		$this->rootName = !empty($this->options['alias']) ? $this->options['alias'] : $this->_basename($this->root);
+		
+		if ($this->options['treeDeep'] > 0) {
+			$this->options['treeDeep'] = (int)$this->options['treeDeep'];
+		} else {
+			$this->options['treeDeep'] = 1;
+		}
+		
+		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
+		$this->yesterday = $this->today-86400;
 		$this->_configure();
-		$this->available = true;
+		return $this->mounted = true;
 	}
 	
 	/**
-	 * Return true if storage available to work with
+	 * undocumented function
 	 *
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
+	 * @return void
+	 * @author Dmitry Levashov
 	 **/
-	public function available() {
-		return $this->available;
+	public function driverId() {
+		return $this->driverId;
 	}
 	
 	/**
@@ -225,20 +241,6 @@ abstract class elFinderStorageDriver {
 		return $this->error;
 	}
 	
-	/**
-	 * Return debug info
-	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function debug() {
-		return array(
-			'root'       => $this->options['basename'],
-			'driver'     => 'LocalFileSystem',
-			'mimeDetect' => $this->options['mimeDetect'],
-			'imgLib'     => $this->options['imgLib']
-		);
-	}
 	
 	/***************************************************************************/
 	/*                              storage API                                */
@@ -357,14 +359,174 @@ abstract class elFinderStorageDriver {
 	 **/
 	public function info($hash) {
 		$path = $this->decode($hash);
-		
+		// @todo replace width path() and benchmark
 		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
 			$this->setError('File not found');
 		}
 
-		$mime = $this->_mimetype($path);
-		$time = $this->_mtime($path);
+		return $this->fileinfo($path);
+	}
+	
+	/**
+	 * Return directory info (same as info() but with additional fields)
+	 * Used to get current working directory info, so return info only if dir is readable
+	 *
+	 * @param  string  directory hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function dir($hash) {
+		
+		return false == ($path = $this->path($hash, 'd', 'read', true))
+			? false
+			: array_merge($this->fileinfo($path), array(
+					'phash'  => $path == $this->root ? false : $this->encode($this->_dirname($path)),
+					'url'    => $this->_path2url($path, true),
+					'rel'    => $this->_relpath($path),
+					'params' => $this->_params()
+				));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function scandir($hash, $sort=1, $mimes=array()) {
+		if (false == ($path = $this->path($hash, 'd', 'read'))) {
+			return false;
+		}
+		
+		$files = array();
+		foreach ($this->_scandir($path) as $file) {
+			$files[] = $this->fileinfo($file);
+		}
+		
+		$files = $this->filter($files, $mimes);
+		
+		if ($sort < self::$SORT_NAME_DIRS_FIRST || $sort > self::$SORT_SIZE) {
+			$sort = self::$SORT_NAME_DIRS_FIRST;
+		}
+		$this->sort = $sort;
+		usort($files, array($this, 'compare'));
+		return $files;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function tree($hash) {
+		return false == ($path = $this->path($hash ? $hash : $this->root(), 'd', 'read'))
+			? false
+			: $this->_tree($path, $this->options['treeDeep']);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function debug()	{
+		return array_merge(array('driver' => get_class($this), 'root' => $this->root), $this->_debug());
+	}
+	
+	/***************************************************************************/
+	/*                                utilites                                 */
+	/***************************************************************************/
+	
+	/**
+	 * Decode hash into path and return if it meets the requirement
+	 *
+	 * @param  string  $hash  file hash
+	 * @param  string  $type  file type (d|f)
+	 * @param  string  $perm  permission of required type must be allowed
+	 * @param  bool    $linkTarget  if file is link - check and return link target
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function path($hash, $type='f', $perm="read", $linkTarget = false) {
+		$path = $this->decode($hash);
 
+		if (!$path || !$this->_accepted($path) || !$this->_fileExists($path)) {
+			return $this->setError('File not found');
+		}
+		
+		if (($perm == 'read' && !$this->_isReadable($path))
+		|| ($perm == 'write' && !$this->_isWritable($path))
+		|| ($perm == 'rm'    && !$this->_isRemovable($path))) {
+			return $this->setError('Access denied');
+		}
+		
+		if ($linkTarget && $this->_isLink($path)) {
+			if (false === ($path = $this->_readlink($path))) {
+				return $this->setError('File not found');
+			}
+			if (($perm == 'read'  && !$this->_isReadable($path))
+			||  ($perm == 'write' && !$this->_isWritable($path))
+			||  ($perm == 'rm'    && !$this->_isRemovable($path))) {
+				return $this->setError('Access denied');
+			}
+		}
+		
+		if (($type == 'd' && !$this->_isDir($path))
+		||  ($type == 'f' && !$this->_isFile($path))) {
+			return $this->setError('Invalid parameters');
+		}
+		return $path;
+	}
+	
+	/**
+	 * Filter files list by mimetypes
+	 *
+	 * @param  array  $files  files list (every item is the same as info() method returns)
+	 * @param  array  $mimes  allowed mime types list
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function filter($files, $mimes=array()) {
+		if (!empty($mimes)) {
+			foreach ($files as $id => $file) {
+				if ($file['mime'] != 'directory' && !$this->validMime($file['mime'], $mimes)) {
+					unset($files[$id]);
+				}
+			}
+		}
+		return $files;
+	}
+	
+	/**
+	 * Check if mime is required mimes list
+	 *
+	 * @param  string $mime   mime type to check
+	 * @param  array  $mimes  allowed mime types list
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function validMime($mime, $mimes) {
+		foreach ($mimes as $req) {
+			if (strpos($mime, $req) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Return file info
+	 *
+	 * @param  string  $path  file path
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function fileinfo($path) {
+		$mime = $this->_mimetype($path);
+		$time = $this->_filemtime($path);
+		
 		if ($time > $this->today) {
 			$date = 'Today '.date('H:i', $time);
 		} elseif ($time > $this->yesterday) {
@@ -392,7 +554,7 @@ abstract class elFinderStorageDriver {
 			} else {
 				$info['mime']   = $this->_mimetype($link);
 				$info['link']   = $this->encode($link);
-				$info['linkTo'] = DIRECTORY_SEPARATOR.$this->options['basename'].substr($link, strlen($this->options['path']));
+				$info['linkTo'] = $this->_relpath($link);
 			}
 		}
 		
@@ -411,57 +573,8 @@ abstract class elFinderStorageDriver {
 		}
 			
 		return $info;
-	}
-	
-	/**
-	 * Return directory info (same as info() but with additional fields)
-	 * Used to get current working directory info
-	 *
-	 * @param  string  directory hash
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function dir($hash) {
-		$path = $this->decode($hash);
-		
-		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
-			$this->setError('File not found');
-		}
-		
-		if (!$this->_isReadable($path)) {
-			return $this->setError('Access denied');
-		}
-		
-		if ($this->_isLink($path)) {
-			// try to get link target
-			if (false === ($path = $this->_readlink($path))) {
-				return $this->setError('Broken link');
-			}
-			if (!$this->_isReadable($path)) {
-				return $this->setError('Access denied');
-			}
-		}
-		
-		if (!$this->_isDir($path)) {
-			return $this->setError('Invalid parameters');
-		}
-		
-		$info = $this->info($path);
-		
-		return is_array($info)
-			? array_merge($this->info($path), array(
-					'phash'  => $path == $this->options['path'] ? false : $this->encode(dirname($path)),
-					'url'    => $this->options['URL'] ? $this->path2url($path, true) : '',
-					'rel'    => DIRECTORY_SEPARATOR.$this->options['basename'].substr($path, strlen($this->options['path'])),
-					'params' => $this->_params()
-				))
-			: false;
 		
 	}
-	
-	/***************************************************************************/
-	/*                                utilites                                 */
-	/***************************************************************************/
 	
 	/**
 	 * Encode path into hash
@@ -485,8 +598,6 @@ abstract class elFinderStorageDriver {
 		return $this->_decode(substr($hash, strlen($this->id)));
 	}
 		
-		
-	
 	/**
 	 * Sort files 
 	 *
@@ -537,7 +648,17 @@ abstract class elFinderStorageDriver {
 	/***************************************************************************/
 	
 	/**
-	 * Any init actions here
+	 * Prepare object configuration and do any stuffs required before "mount"
+	 * Return  object configuration
+	 *
+	 * @param  array  $opts  object configuration
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _prepare(array $opts);
+	
+	/**
+	 * Any actions after success "mount"
 	 *
 	 * @return void
 	 * @author Dmitry (dio) Levashov
@@ -720,6 +841,23 @@ abstract class elFinderStorageDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
+	abstract protected function _scandir($path);
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _tree($path, $level);
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
 	abstract protected function _mkdir($path);
 	
 	/**
@@ -772,21 +910,6 @@ abstract class elFinderStorageDriver {
 	 **/
 	abstract protected function _fclose($path);
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _scandir($path);
-
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	abstract protected function _tree($path);
 	
 
 	/**
@@ -848,6 +971,14 @@ abstract class elFinderStorageDriver {
 	 * @author Dmitry Levashov
 	 **/
 	// abstract protected function _resizeImg($path, $w, $h);
+	
+	/**
+	 * Return debug info
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _debug();
 	
 } // END class 
 

@@ -48,7 +48,6 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function run() {
-		return;
 		$isPost = $_SERVER["REQUEST_METHOD"] == 'POST';
 		$src    = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
@@ -87,6 +86,8 @@ class elFinderConnector {
 			}
 			$args[$name] = $arg;
 		}
+		
+		$args['debug'] = isset($src['debug']) ? !!$src['debug'] : false;
 		
 		$this->output($this->elFinder->exec($cmd, $args));
 	}
