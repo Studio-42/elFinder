@@ -130,7 +130,7 @@ class elFinder {
 		$this->time  = $this->utime();
 		$this->debug = !empty($opts['debug']);
 		
-		// disable requied commands
+		// disable required commands
 		if (isset($opts['disable']) && is_array($opts['disable'])) {
 			foreach ($opts['disable'] as $cmd) {
 				if (!preg_match('/^(open|tree|tmb|file|ping)$/', $cmd) && isset($this->commands[$cmd])) {
@@ -146,7 +146,7 @@ class elFinder {
 			}
 		}
 
-		// load storages
+		// "mount" volumes
 		if (isset($opts['roots']) && is_array($opts['roots'])) {
 			
 			foreach ($opts['roots'] as $i => $o) {
@@ -274,15 +274,16 @@ class elFinder {
 		
 		$result = $this->$cmd($args);
 		
-		// if ($this->debug) {
-		// 	$result['debug'] = array(
-		// 		'connector' => 'php', 
-		// 		'time'      => $this->utime() - $this->time
-		// 		);
-		// 	foreach ($this->roots as $key => $root) {
-		// 		$result['debug'][$key] = $root->debug();
-		// 	}
-		// }
+		if ($this->debug || !empty($args['debug'])) {
+			$result['debug'] = array(
+				'connector' => 'php', 
+				'time'      => $this->utime() - $this->time
+				);
+			
+			foreach ($this->volumes as $id => $volume) {
+				$result['debug'][$id] = $volume->debug();
+			}
+		}
 		
 		return $result;
 	}
@@ -344,13 +345,6 @@ class elFinder {
 				'commands'   => array_keys($this->commands),
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
-		}
-		
-		if (!empty($args['debug'])) {
-			$result['debug'] = array();
-			foreach ($this->volumes as $id => $volume) {
-				$result['debug'][$id] = $volume->debug();
-			}
 		}
 		
 		return $result;

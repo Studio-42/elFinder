@@ -455,18 +455,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return strpos($path, $parent) === 0;
+		return $path == $parent || strpos($path, $parent.DIRECTORY_SEPARATOR) === 0;
 	}
 	
 	/**
 	 * Return path related to root path
 	 *
-	 * @param  string  $path  fuke path
+	 * @param  string  $path  file path
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _relpath($path) {
-		return substr($path, strlen($this->root)+1);
+		return $path == $this->root ? '' : substr($path, strlen($this->root)+1);
+	}
+	
+	/**
+	 * Returns fake absolute path - begining with root dir
+	 *
+	 * @param  string  $path  file path
+	 * @return strng
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _abspath($path) {
+		return $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->_relpath($path));
 	}
 	
 	/**
@@ -656,13 +667,36 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Returns the target of a symbolic link,
+	 * if target exists and is under root dir
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $link  link path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _readlink($path) {
-		return readlink($path);
+		$link = false;
+
+		if (($target = @readlink($path)) !== false) {
+			$target = $this->normpath($target);
+
+			if (substr($target, 0, 1) == DIRECTORY_SEPARATOR || preg_match('/^[A-Z]\:\\\/', $target)) {
+				// absolute path
+				$root = realpath($this->root);
+				// check for target outside root
+				if ($this->_inpath($target, $root)) {
+					$link = $this->root.substr($target, strlen($root));
+				}
+			} else {
+				// relative path
+				$link = $this->normpath(dirname($path).DIRECTORY_SEPARATOR.$target);
+				// check for target outside root
+				if (!$this->_inpath($link, $this->root)) {
+					$link = false;
+				}
+			}
+		}
+		return $link;
 	}
 	
 	/**

@@ -359,7 +359,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function info($hash) {
 		$path = $this->decode($hash);
-		// @todo replace width path() and benchmark
+		// @todo replace with path() and benchmark
 		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
 			$this->setError('File not found');
 		}
@@ -382,16 +382,19 @@ abstract class elFinderVolumeDriver {
 			: array_merge($this->fileinfo($path), array(
 					'phash'  => $path == $this->root ? false : $this->encode($this->_dirname($path)),
 					'url'    => $this->_path2url($path, true),
-					'rel'    => $this->_relpath($path),
+					'path'    => $this->_abspath($path), 
 					'params' => $this->_params()
 				));
 	}
 	
 	/**
-	 * undocumented function
+	 * Return directory content
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $hash  file hash
+	 * @param  int     $sort  how to sort files
+	 * @param  array   $mimes mimetypes list to filter files
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function scandir($hash, $sort=1, $mimes=array()) {
 		if (false == ($path = $this->path($hash, 'd', 'read'))) {
@@ -414,10 +417,11 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return subdirectories info for required folder
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string $hash  parent dir hash, or empty string for root dir
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash) {
 		return false == ($path = $this->path($hash ? $hash : $this->root(), 'd', 'read'))
@@ -426,10 +430,10 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return driver debug info
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function debug()	{
 		return array_merge(array('driver' => get_class($this), 'root' => $this->root), $this->_debug());
@@ -554,7 +558,7 @@ abstract class elFinderVolumeDriver {
 			} else {
 				$info['mime']   = $this->_mimetype($link);
 				$info['link']   = $this->encode($link);
-				$info['linkTo'] = $this->_relpath($link);
+				$info['linkTo'] = $this->_abspath($link);
 			}
 		}
 		
@@ -707,6 +711,15 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _relpath($path);
+	
+	/**
+	 * Returns fake absolute path - begining with root dir
+	 *
+	 * @param  string  $path  file path
+	 * @return strng
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _abspath($path);
 	
 	/**
 	 * Return file URL
