@@ -109,6 +109,8 @@ abstract class elFinderVolumeDriver {
 		'alias'        => '',           // alias to replace root dir name
 		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'tmbURL'       => '',           // thumbnails dir URL
+		'tmbAtOnce'    => 12,           // number of thumbnails to generate per request
+		'tmbSize'      => 48,           // images thumbnails size (px)
 		'startPath'    => '',           // open this path on initial request instead of root path
 		'disabled'     => array(),      // list of commands names to disable on this root
 		'uploadAllow'  => array(),      // mimetypes which allowed to upload
@@ -216,7 +218,10 @@ abstract class elFinderVolumeDriver {
 		} else {
 			$this->options['treeDeep'] = 1;
 		}
-		
+		$this->options['tmbSize'] = (int)$this->options['tmbSize'];
+		if ($this->options['tmbSize'] < 20) {
+			$this->options['tmbSize'] = 48;
+		}
 		$this->today = mktime(0,0,0, date('m'), date('d'), date('Y'));
 		$this->yesterday = $this->today-86400;
 		$this->_configure();
@@ -441,7 +446,31 @@ abstract class elFinderVolumeDriver {
 		if (false == ($path = $this->path($hash, 'd', 'read'))) {
 			return false;
 		}
-		$tmb = array();
+		$result = array(
+			'current' => $hash, 
+			'images'  => array(),
+			'tmb'     => false
+			);
+		$cnt = $this->options['tmbAtOnce'] > 0 ? $this->options['tmbAtOnce'] : 12;
+		
+		foreach ($this->_scandir($path, self::$FILTER_FILES_ONLY) as $file) {
+			
+			$mime = $this->_mimetype($file);
+			if ($this->_tmbURL($file, $mime) === true) {
+				
+				if ($cnt > 0) {
+					if (($tmb = $this->_tmb($file, $mime)) != false) {
+						$result['images'][] = array('hash' => $this->encode($file), 'tmb' => $tmb);
+						$cnt--;
+					}
+				} else {
+					$result['tmb'] = true;
+					break;
+				}
+				
+			}
+		}
+		return $result;
 	}
 	
 	/**
@@ -994,26 +1023,15 @@ abstract class elFinderVolumeDriver {
 	 **/
 	abstract protected function _filePutContents($path, $content);
 	
-	
-
 	/**
-	 * Return file thumnbnail path
+	 * Create thumnbnail and return it's URL on success
 	 *
 	 * @param  string  $path  file path
-	 * @return string
+	 * @param  string  $mime  file mime type
+	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	// abstract protected function _tmbPath($path);
-	
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	// abstract protected function _tmb($path, $tmb);
+	abstract protected function _tmb($path, $mime);
 	
 	/**
 	 * undocumented function
