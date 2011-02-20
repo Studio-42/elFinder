@@ -69,6 +69,8 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $tmbURL = '';
 	
+
+	
 	/**
 	 * Error message from last failed action
 	 *
@@ -430,6 +432,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function tmb($hash) {
+		if (false == ($path = $this->path($hash, 'd', 'read'))) {
+			return false;
+		}
+		$tmb = array();
+	}
+	
+	/**
 	 * Return driver debug info
 	 *
 	 * @return array
@@ -562,18 +577,18 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		if ($info['mime'] != 'directory' && $info['read']) {
+		if ($info['read']) {
+			if (($dim = $this->_dimensions($path, $info['mime'])) != false) {
+				$info['dim'] = $dim;
+			}
 			
-			// if (strpos($info['mime'], 'image') === 0 && false != ($s = getimagesize($path))) {
-			// 	$info['dim'] = $s[0].'x'.$s[1];
-			// 	if ($this->resizable($info['mime'])) {
-			// 		$info['resize'] = true;
-			// 		if (($tmb = $this->tmbPath($path)) != '') {
-			// 			$info['tmb'] = file_exists($tmb) ? $this->path2url($tmb) : true;
-			// 		}
-			// 	}
-			// }
+			if (($tmb = $this->_tmbURL($path, $info['mime'])) != false) {
+				$info['tmb'] = $tmb;
+			}
 			
+			if ($this->_isResizable($path, $info['mime'])) {
+				$info['resize'] = true;
+			}
 		}
 			
 		return $info;
@@ -796,6 +811,16 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _isRemovable($path);
 	
 	/**
+	 * Return true if file can be resized by current driver
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _isResizable($path, $mime);
+	
+	/**
 	 * Return file parent directory name
 	 *
 	 * @param  string $path  file path
@@ -847,6 +872,26 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	abstract protected function _readlink($path);
+	
+	/**
+	 * Return file thumnbnail URL or true if thumnbnail can be created
+	 *
+	 * @param  string  $path  thumnbnail path
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _tmbURL($path, $mime);
+	
+	/**
+	 * Return object width and height
+	 * Ususaly used for images, but can be realize for video etc...
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _dimensions($path, $mime);
 	
 	/**
 	 * undocumented function
@@ -960,14 +1005,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	// abstract protected function _tmbPath($path);
 	
-	/**
-	 * Return file thumnbnail URL
-	 *
-	 * @param  string  $path  thumnbnail path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	// abstract protected function _tmbURL($path);
+	
 	
 	/**
 	 * undocumented function

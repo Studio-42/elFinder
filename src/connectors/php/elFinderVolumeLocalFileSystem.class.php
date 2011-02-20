@@ -46,6 +46,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $imgLib = '';
 	
 	/**
+	 * Mime types for which thumbnails can be created
+	 *
+	 * @var array
+	 **/
+	protected $tmbMimes = array();
+	
+	/**
 	 * Flag - mimetypes from external file already loaded?
 	 *
 	 * @var string
@@ -350,7 +357,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($this->options['tmbDir'] && $this->options['defaults']['read']) {
 			
 			$this->tmbPath = strpos($this->options['tmbDir'], DIRECTORY_SEPARATOR) === false
-				? $this->root.DIRECTORY_SEPARATOR.$this->options['tmbDir'] // tmbDir set as dir name
+				? $this->normpath($this->root.DIRECTORY_SEPARATOR.$this->options['tmbDir']) // tmbDir set as dir name
 				: $this->normpath($this->options['tmbDir']);  // tmbDir set as path
 			
 			if (file_exists($this->tmbPath)) {
@@ -366,6 +373,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			} elseif (!$this->tmbURL) {
 				$this->tmbURL = $this->_inpath($this->tmbPath, $this->root) ? $this->_path2url($this->tmbPath).'/' : '';
 			}
+			// echo $this->tmbPath;
 		}
 		
 		// define lib to work with images
@@ -386,6 +394,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->imgLib = in_array($this->options['imgLib'], $libs) 
 			? $this->options['imgLib'] 
 			: array_shift($libs);
+			
+		if ($this->imgLib && $this->tmbURL) {
+			$this->tmbMimes = $this->imgLib == 'gd' 
+				? array('image/jpeg', 'image/png', 'image/gif') 
+				: array('image');
+		}
 	}
 	
 	/**
@@ -588,6 +602,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if file can be resized by current driver
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _isResizable($path, $mime) {
+		return $this->imgLib && $this->validMime($mime, $this->tmbMimes);
+	}
+	
+	
+	/**
 	 * Return file parent directory name
 	 *
 	 * @param  string $path  file path
@@ -697,6 +724,38 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		return $link;
+	}
+	
+	/**
+	 * Return file thumnbnail URL or true if thumnbnail can be created
+	 *
+	 * @param  string  $path  thumnbnail path
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _tmbURL($path, $mime) {
+		if (!empty($this->tmbMimes) && $this->validMime($mime, $this->tmbMimes)) {
+			$file = md5($path).'.png';
+			return file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$file)
+				? $this->tmbURL.$file
+				: $this->_isReadable($path, $mime);
+		}
+		return false;
+	}
+	
+	/**
+	 * Return object width and height
+	 * Ususaly used for images, but can be realize for video etc...
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _dimensions($path, $mime) {
+		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
+			? $s[0].'x'.$s[1] 
+			: false;
 	}
 	
 	/**

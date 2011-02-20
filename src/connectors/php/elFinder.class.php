@@ -376,14 +376,14 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
-
-		$root = $this->fileRoot($args['current']);
+		$dir = $args['current'];
+		$volume = $this->volume($dir);
 		
-		if (!$root) {
+		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false === ($result = $root->tmb($args['current']))) {
+		if (false === ($result = $volume->tmb($dir))) {
 			return array('error' => $root->error());
 		}
 		
