@@ -536,6 +536,36 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Create empty file
+	 *
+	 * @param  string  $hash  parent directory hash
+	 * @param  string  $name  new directory name
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function mkfile($hash, $name)	{
+		if (($path = $this->path($hash, 'd', 'write')) === false) {
+			return false;
+		}
+		// to avoid ../ in dir name
+		$name = $this->_basename($name);
+		
+		if (!$name || !$this->_accepted($name)) {
+			return $this->setError('Invalid folder name');
+		}
+		// check for file with required name
+		if ($this->_hasChild($path, $name)) {
+			return $this->setError('File with the same name already exists');
+		}
+		
+		if (($path = $this->_mkfile($path, $name)) === false) {
+			return $this->setError('Unable to create file');
+		}
+		
+		return $this->encode($path);
+	}
+	
+	/**
 	 * Return driver debug info
 	 *
 	 * @return array
@@ -1012,20 +1042,26 @@ abstract class elFinderVolumeDriver {
 	
 	
 	/**
-	 * undocumented function
+	 * Create directory
+	 * Return new directory path or false on failed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $parent  parent directory path
+	 * @param  string  $name    new directory name
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _mkdir($parent, $name);
 	
 	/**
-	 * undocumented function
+	 * Create empty file
+	 * Return new file path or false on failed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $parent  parent directory path
+	 * @param  string  $name    new file name
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _touch($path);
+	abstract protected function _mkfile($parent, $name);
 	
 	/**
 	 * undocumented function

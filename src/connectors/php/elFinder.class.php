@@ -258,8 +258,8 @@ class elFinder {
 	/**
 	 * Exec command and return result
 	 *
-	 * @param  string  command name
-	 * @param  array   command arguments
+	 * @param  string  $cmd  command name
+	 * @param  array   $args command arguments
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -445,34 +445,38 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mkdir($args) {
-		$dir = $args['current'];
+		$current = $args['current'];
 		
-		if(($volume = $this->volume($dir)) == false) {
+		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false == ($hash = $volume->mkdir($dir, $args['name']))) {
+		if (false == ($hash = $volume->mkdir($current, $args['name']))) {
 			return array('error' => $volume->error());
 		}
 		
-		return $this->trigger('mkdir', $args, $volume, array('current' => $dir, 'dir' => $volume->info($hash)));
+		return $this->trigger('mkdir', $args, $volume, array('current' => $current, 'dir' => $volume->info($hash)));
 	}
 	
 	/**
-	 * undocumented function
+	 * Create empty file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mkfile($args) {
-		$root = $this->fileRoot($args['current']);
-		if (!$root) {
+		$current = $args['current'];
+		
+		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Invalid parameters');
 		}
-		if (false == ($hash = $root->mkfile($args['current'], $args['name']))) {
-			return array('error' => $root->error());
+		
+		if (false == ($hash = $volume->mkfile($current, $args['name']))) {
+			return array('error' => $volume->error());
 		}
-		return array('current' => $args['current'], 'file' => $root->getInfo($hash));
+		
+		return $this->trigger('mkfile', $args, $volume, array('current' => $current, 'file' => $volume->info($hash)));
 	}
 	
 	/**

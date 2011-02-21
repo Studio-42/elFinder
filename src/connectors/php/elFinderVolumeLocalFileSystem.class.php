@@ -859,14 +859,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	
 	
 	/**
-	 * undocumented function
+	 * Create directory
+	 * Return new directory path or false on failed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $parent  parent directory path
+	 * @param  string  $name    new directory name
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($parent, $name) {
 		$path = $parent.DIRECTORY_SEPARATOR.basename($name);
-		if (@mkdir($path)) {
+		if (!file_exists($path) && @mkdir($path)) {
 			chmod($path, $this->options['dirMode']);
 			return $path;
 		}
@@ -874,15 +877,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Create empty file
+	 * Return new file path or false on failed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $parent  parent directory path
+	 * @param  string  $name    new file name
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _touch($path) {
-		if (@touch($path)) {
+	protected function _mkfile($parent, $name) {
+		$path = $parent.DIRECTORY_SEPARATOR.basename($name);
+		if (!file_exists($path) && @touch($path)) {
 			chmod($path, $this->options['fileMode']);
-			return true;
+			return $path;
 		}
 		return false;
 	}
