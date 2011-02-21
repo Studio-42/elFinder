@@ -358,14 +358,17 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tree($args) {
-		$target = $args['target'];
-		$root = $this->fileRoot($target);
+		$dir = $args['target'];
+		$volume = $this->volume($dir);
 		
-		if (!$root || !$root->isDir($target)) {
+		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
+		$tree = $volume->tree($dir);
 		
-		return array('tree' => $root->tree($target));
+		return $tree === false 
+			? array('error' => $volume->error()) 
+			: array('tree' => $tree);
 	}
 	
 	/**
@@ -382,12 +385,11 @@ class elFinder {
 		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
+		$result = $volume->tmb($dir);
 		
-		if (false === ($result = $volume->tmb($dir))) {
-			return array('error' => $root->error());
-		}
-		
-		return $result;
+		return $result === false
+			? array('error' => $root->error())
+			: $result;
 	}
 	
 	/**
@@ -399,20 +401,39 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function file($args) {
-
-		$hash = $args['target'];
-		$root = $this->fileRoot($hash);
-		if (!$root) {
-			return array('error' => 'Invalid parameters', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+		$file = $args['target'];
+		$volume = $this->volume($file);
+		
+		if (!$volume) {
+			return array('error' => 'File not found', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
-		$result = $root->file($hash);
-		
-		if (!$result) {
-			$error = $root->error();
-			return array('error' => $error, 'headers' => $error == 'Access denied' ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 'raw' => true);
+		if (($info = $volume->info($file)) === false
+		||  ($fp = $volume->fopen($file)) === false) {
+			$error = $volume->error();
+			return array(
+				'error' => $error, 
+				'headers' => $error == 'Access denied' ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 
+				'raw' => true);
 		}
 		
+		$disp  = preg_match('/^(image|text)/i', $info['mime']) 
+			|| $info['mime'] == 'application/x-shockwave-flash' 
+				? 'inline' 
+				: 'attachments';
+		
+		$result = array(
+			'volume'  => $volume,
+			'pointer' => $fp,
+			'header'  => array(
+				"Content-Type: ".$info['mime'], 
+				"Content-Disposition: ".$disp."; filename=".$info['name'],
+				// "Content-Location: ".$info['name'],
+				'Content-Transfer-Encoding: binary',
+				"Content-Length: ".$info['size'],
+				"Connection: close"
+			)
+		);
 		return $result;
 	}
 	

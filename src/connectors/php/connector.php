@@ -48,8 +48,8 @@ $opts = array(
 	'roots' => array(
 		array(
 			'path'   => '../../../files/',
-			// 'startPath' => '../../../files/Images/',
-			'URL'    => 'http://localhost/git/elfinder/files',
+			'startPath' => '../../../files/Images/',
+			// 'URL'    => 'http://localhost/git/elfinder/files',
 			'fileURL' => false,
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',

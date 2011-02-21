@@ -366,9 +366,9 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function info($hash) {
 		$path = $this->decode($hash);
-		// @todo replace with path() and benchmark
-		if (!$path || $this->_accepted($path) || !$this->_fileExists($path)) {
-			$this->setError('File not found');
+
+		if (($path = $this->path($hash, '', 'read')) === false) {
+			return $this->setError('File not found');
 		}
 
 		return $this->fileinfo($path);
@@ -471,6 +471,38 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return $result;
+	}
+	
+	/**
+	 * Open file and return file pointer
+	 * Return false on error
+	 *
+	 * @param  string  $hash  file hash
+	 * @param  bool    $write open file for writing?
+	 * @return resource|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fopen($hash, $write=false) {
+		if (($path = $this->path($hash, 'f', $write ? 'write' : 'read')) == false) {
+			return false;
+		}
+		
+		if (($fp = $this->_fopen($path, $write)) === false) {
+			return $this->setError('Unable to open file');
+		}
+		
+		return $fp;
+	}
+	
+	/**
+	 * Close file pointer
+	 *
+	 * @param  resource file pointer
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fclose($fp) {
+		$this->_fclose($fp);
 	}
 	
 	/**
@@ -611,7 +643,7 @@ abstract class elFinderVolumeDriver {
 				$info['dim'] = $dim;
 			}
 			
-			if (($tmb = $this->_tmbURL($path, $info['mime'])) != false) {
+			if ($this->URL && ($tmb = $this->_tmbURL($path, $info['mime'])) != false) {
 				$info['tmb'] = $tmb;
 			}
 			
@@ -982,20 +1014,23 @@ abstract class elFinderVolumeDriver {
 	
 	
 	/**
-	 * undocumented function
+	 * Open file and return file pointer
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  file path
+	 * @param  bool    $write open file for writing
+	 * @return resource|false
+	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _fopen($path, $mode);
+	abstract protected function _fopen($path, $write=false);
 	
 	/**
-	 * undocumented function
+	 * Close opened file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  resource  $fp  file pointer
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _fclose($path);
+	abstract protected function _fclose($fp);
 	
 	
 

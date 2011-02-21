@@ -116,13 +116,16 @@ class elFinderConnector {
 		if (isset($data['pointer'])) {
 			rewind($data['pointer']);
 			fpassthru($data['pointer']);
-			if (!empty($data['root'])) {
-				$data['root']->close($data['pointer']);
+			if (!empty($data['volume'])) {
+				$data['volume']->fclose($data['pointer']);
 			}
 		} else {
-			exit(json_encode($data));
+			if (!empty($data['raw']) && !empty($data['error'])) {
+				exit($data['error']);
+			} else {
+				exit(json_encode($data));
+			}
 		}
-		
 		
 	}
 	
