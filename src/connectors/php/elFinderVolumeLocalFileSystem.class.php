@@ -640,6 +640,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $this->imgLib && $this->validMime($mime, $this->tmbMimes);
 	}
 	
+	/**
+	 * Return true if $parent dir contains file with $name
+	 *
+	 * @param  string  $parent  parent dir path
+	 * @param  string  $name    name to test
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _hasChild($parent, $name) {
+		return file_exists($parent.DIRECTORY_SEPARATOR.$name);
+	}
 	
 	/**
 	 * Return file parent directory name
@@ -853,10 +864,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function _mkdir($path) {
+	protected function _mkdir($parent, $name) {
+		$path = $parent.DIRECTORY_SEPARATOR.basename($name);
 		if (@mkdir($path)) {
 			chmod($path, $this->options['dirMode']);
-			return true;
+			return $path;
 		}
 		return false;
 	}

@@ -506,6 +506,36 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Create directory
+	 *
+	 * @param  string  $hash  parent directory hash
+	 * @param  string  $name  new directory name
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function mkdir($hash, $name)	{
+		if (($path = $this->path($hash, 'd', 'write')) === false) {
+			return false;
+		}
+		// to avoid ../ in dir name
+		$name = $this->_basename($name);
+		
+		if (!$name || !$this->_accepted($name)) {
+			return $this->setError('Invalid folder name');
+		}
+		// check for file with required name
+		if ($this->_hasChild($path, $name)) {
+			return $this->setError('File with the same name already exists');
+		}
+		
+		if (($path = $this->_mkdir($path, $name)) === false) {
+			return $this->setError('Unable to create folder');
+		}
+		
+		return $this->encode($path);
+	}
+	
+	/**
 	 * Return driver debug info
 	 *
 	 * @return array
@@ -882,6 +912,16 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _isResizable($path, $mime);
 	
 	/**
+	 * Return true if $parent dir contains file with $name
+	 *
+	 * @param  string  $parent  parent dir path
+	 * @param  string  $name    name to test
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _hasChild($parent, $name);
+	
+	/**
 	 * Return file parent directory name
 	 *
 	 * @param  string $path  file path
@@ -977,7 +1017,7 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	abstract protected function _mkdir($path);
+	abstract protected function _mkdir($parent, $name);
 	
 	/**
 	 * undocumented function

@@ -17,16 +17,16 @@ function debug($o) {
 
 function logger($data) {
 	$str = $data['cmd'].': ';
-	$root = $data['root'];
+	$volume = $data['volume'];
 	$result = $data['result'];
 	switch ($data['cmd']) {
 		case 'mkdir':
-			$current = $root->dirInfo($result['current']);
-			$str .= $current['rel'].DIRECTORY_SEPARATOR.$result['dir']['name'];
+			$current = $volume->dir($result['current']);
+			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['dir']['name'];
 			break;
 		case 'mkfile':
-			$current = $root->dirInfo($result['current']);
-			$str .= $current['rel'].DIRECTORY_SEPARATOR.$result['file']['name'];
+			$current = $volume->dir($result['current']);
+			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['file']['name'];
 			break;
 	}
 	

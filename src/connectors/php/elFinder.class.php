@@ -393,7 +393,7 @@ class elFinder {
 	}
 	
 	/**
-	 * Required to output file in browser when option fileURL == false 
+	 * Required to utput file in browser when volume URL is not set 
 	 * Return array contains opened file pointer, root itself and required headers
 	 *
 	 * @param  array  command arguments
@@ -438,23 +438,24 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Create directory
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mkdir($args) {
-		$root = $this->fileRoot($args['current']);
-		if (!$root) {
+		$dir = $args['current'];
+		
+		if(($volume = $this->volume($dir)) == false) {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		if (false == ($hash = $root->mkdir($args['current'], $args['name']))) {
-			return array('error' => $root->error());
+		if (false == ($hash = $volume->mkdir($dir, $args['name']))) {
+			return array('error' => $volume->error());
 		}
 		
-		return $this->trigger('mkdir', $args, $root, array('current' => $args['current'], 'dir' => $root->getInfo($hash)));
-		// return array('current' => $args['current'], 'dir' => $root->getInfo($hash));
+		return $this->trigger('mkdir', $args, $volume, array('current' => $dir, 'dir' => $volume->info($hash)));
 	}
 	
 	/**
@@ -604,11 +605,11 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function trigger($cmd, $args, $root, $result) {
+	protected function trigger($cmd, $args, $volume, $result) {
 		$data = array(
-			'cmd' => $cmd,
-			'args' => $args,
-			'root' => $root,
+			'cmd'    => $cmd,
+			'args'   => $args,
+			'volume' => $volume,
 			'result' => $result
 		);
 		if (!empty($this->listeners[$cmd])) {
