@@ -28,6 +28,10 @@ function logger($data) {
 			$current = $volume->dir($result['current']);
 			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['file']['name'];
 			break;
+		case 'rm':
+			$current = $volume->dir($result['removed']['phash']);
+			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['removed']['name'];
+			break;
 	}
 	
 	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
@@ -44,12 +48,13 @@ function logger($data) {
 $opts = array(
 	'debug' => true,
 	'disabled' => array(),
-	'bind' => array('mkdir' => 'logger'),
+	'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
 	'roots' => array(
 		array(
 			'path'   => '../../../files/',
 			'startPath' => '../../../files/Images/',
 			// 'URL'    => 'http://localhost/git/elfinder/files',
+			// 'dotFiles' => true,
 			'fileURL' => false,
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',

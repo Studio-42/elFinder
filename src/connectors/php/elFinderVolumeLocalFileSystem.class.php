@@ -802,13 +802,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function _scandir($path, $filter=0) {
+	protected function _scandir($path, $filter=0, $accepted = true) {
 		$ret = array();
-		$ls  = scandir($path);
+		
+		if (($ls  = @scandir($path)) === false) {
+			return false;
+		}
 		
 		for ($i = 0, $s = count($ls); $i < $s; $i++) {
 			$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-			if ($this->_accepted($ls[$i])) {
+			$a = $accepted ? $this->_accepted($ls[$i]) : ($ls[$i] != '.' && $ls[$i] != '..');
+			
+			if ($a) {
 				if ($filter == self::$FILTER_DIRS_ONLY) {
 					if (is_dir($p)) {
 						$ret[] = $p;

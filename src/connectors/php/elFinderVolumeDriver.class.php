@@ -566,6 +566,17 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Remove dir/file
+	 *
+	 * @param  string  $hash  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function rm($hash) {
+		return ($path = $this->path($hash, '', 'rm')) && $this->remove($path);
+	}
+	
+	/**
 	 * Return driver debug info
 	 *
 	 * @return array
@@ -578,6 +589,8 @@ abstract class elFinderVolumeDriver {
 	/***************************************************************************/
 	/*                                utilites                                 */
 	/***************************************************************************/
+	
+
 	
 	/**
 	 * Decode hash into path and return if it meets the requirement
@@ -678,6 +691,7 @@ abstract class elFinderVolumeDriver {
 		$info = array(
 			'name'  => htmlspecialchars($this->_basename($path)),
 			'hash'  => $this->encode($path),
+			'phash' => $path == $this->root ? false : $this->encode($this->_dirname($path)),
 			'mime'  => $mime,
 			'date'  => $date, 
 			'size'  => $mime == 'directory' ? 0 : $this->_filesize($path),
@@ -736,6 +750,38 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function decode($hash) {
 		return $this->_decode(substr($hash, strlen($this->id)));
+	}
+	
+	/**
+	 * Remove file/recursive remove directory
+	 *
+	 * @param  string  $hash  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function remove($path) {
+		if (!$this->_fileExists($path)) {
+			return $this->setError('File not found');
+		}
+		
+		if (!$this->_isRemovable($path)) {
+			return $this->setError('Access denied');
+		}
+		
+		if (($dir = $this->_isDir($path))) {
+			$ls = $this->_scandir($path, 0, false);
+			if (is_array($ls)) {
+				foreach ($ls as $file) {
+					if (!$this->remove($file)) {
+						return false;
+					}
+				}
+			}
+		} 
+		
+		return ($dir ? $this->_rmdir($path) : $this->_unlink($path)) 
+			? true 
+			: $this->setError('Unable to remove file');
 	}
 		
 	/**
@@ -1030,7 +1076,7 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	abstract protected function _scandir($path);
+	abstract protected function _scandir($path, $filter=0, $accepted = true);
 
 	/**
 	 * undocumented function

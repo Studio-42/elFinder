@@ -455,7 +455,7 @@ class elFinder {
 			return array('error' => $volume->error());
 		}
 		
-		return $this->trigger('mkdir', $args, $volume, array('current' => $current, 'dir' => $volume->info($hash)));
+		return $this->trigger('mkdir', $volume, array('current' => $current, 'dir' => $volume->info($hash)));
 	}
 	
 	/**
@@ -476,11 +476,12 @@ class elFinder {
 			return array('error' => $volume->error());
 		}
 		
-		return $this->trigger('mkfile', $args, $volume, array('current' => $current, 'file' => $volume->info($hash)));
+		return $this->trigger('mkfile', $volume, array('current' => $current, 'file' => $volume->info($hash)));
 	}
 	
 	/**
 	 * Remove dirs/files
+	 * Fire "rm" event on every removed files
 	 *
 	 * @param array  command arguments
 	 * @return array
@@ -494,14 +495,19 @@ class elFinder {
 		}
 		
 		foreach ($args['targets'] as $hash) {
-			if (false == ($root = $this->fileRoot($hash))) {
+			if (false == ($volume = $this->volume($hash))) {
 				return array('error' => 'File not found');
 			}
 			
-			if ($root->rm($hash)) {
-				$removed[] = $hash;
+			if (($info = $volume->info($hash)) === false) {
+				return array('error' => $volume->error());
+			}
+			
+			if ($volume->rm($hash)) {
+				$this->trigger('rm', $volume, array('removed' => $info));
+				$removed[] = $info;
 			} else {
-				return array('error' => $root->error());
+				return array('error' => $volume->error());
 			}
 		}
 		
@@ -609,10 +615,9 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function trigger($cmd, $args, $volume, $result) {
+	protected function trigger($cmd, $volume, $result) {
 		$data = array(
 			'cmd'    => $cmd,
-			'args'   => $args,
 			'volume' => $volume,
 			'result' => $result
 		);
