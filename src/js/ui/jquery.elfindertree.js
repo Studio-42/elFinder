@@ -22,7 +22,7 @@
 
 					return o && o.name 
 						? tpl.replace('%id',    o.hash)
-							.replace('%pclass', pclass+(isroot ? root : ''))
+							.replace('%pclass', pclass+(isroot ? ' '+root : ''))
 							.replace('%arrow',  arrow)
 							.replace('%perms',  perms)
 							.replace('%link',   o.link ? '<span class="elfinder-symlink"/>' : '')

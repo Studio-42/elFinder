@@ -431,12 +431,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash) {
-		$path = $this->path($hash ? $hash : $this->root(), 'd');
-		if (!$path) {
-			echo 'here';
-			return false;
-		}
-		return $this->_tree($path, $this->options['treeDeep']);
 		return false == ($path = $this->path($hash ? $hash : $this->root(), 'd'))
 			? false
 			: $this->_tree($path, $this->options['treeDeep']);
@@ -534,7 +528,7 @@ abstract class elFinderVolumeDriver {
 		}
 		// check for file with required name
 		if ($this->_hasChild($path, $name)) {
-			return $this->setError('File with the same name already exists');
+			return $this->setError('File or folder with the same name already exists');
 		}
 		
 		if (($path = $this->_mkdir($path, $name)) === false) {
@@ -552,7 +546,7 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function mkfile($hash, $name)	{
+	public function mkfile($hash, $name) {
 		if (($path = $this->path($hash, 'd', 'write')) === false) {
 			return false;
 		}
@@ -560,11 +554,11 @@ abstract class elFinderVolumeDriver {
 		$name = $this->_basename($name);
 		
 		if (!$name || !$this->_accepted($name)) {
-			return $this->setError('Invalid folder name');
+			return $this->setError('Invalid file name');
 		}
 		// check for file with required name
 		if ($this->_hasChild($path, $name)) {
-			return $this->setError('File with the same name already exists');
+			return $this->setError('File or folder with the same name already exists');
 		}
 		
 		if (($path = $this->_mkfile($path, $name)) === false) {
@@ -607,7 +601,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  string  $hash  file hash
 	 * @param  string  $type  file type (d|f)
 	 * @param  string  $perm  permission of required type must be allowed
-	 * @param  bool    $linkTarget  if file is link - check and return link target
+	 * @param  bool    $linkTarget  if file is link - check and return link target path
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -615,46 +609,36 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($hash);
 
 		if (!$path) {
-			return $this->setError('File not found');
+			return $this->setError($type == 'd' ? 'Folder not found' : 'File not found');
 		}
 
 		if (!$this->_accepted($path) || !$this->_fileExists($path)) {
-			return $this->setError(array(array('File $1 not found', $this->_basename($path))));
+			return $this->setError(array(($type == 'd' ? 'Folder' : 'File').' "$1" not found', $this->_basename($path)));
 		}
 		
-		if (($perm == 'read' && !$this->_isReadable($path))
-		|| ($perm == 'write' && !$this->_isWritable($path))
-		|| ($perm == 'rm'    && !$this->_isRemovable($path))) {
-			$err = 'File $1 has not read permissions';
-			if ($perm == 'write') {
-				$err = 'File $1 has not write permissions';
-			} elseif ($perm == 'rm') {
-				$err = 'File $1 has not remove permissions';
-			}
-			return $this->setError(array('Access denied', array($err, $this->_basename($path))));
+		$dir = $this->_isDir($path);
+		
+		if (($type == 'd' && !$dir)
+		||  ($type == 'f' && $dir)) {
+			return $this->setError(array(($type == 'd' ? 'Folder' : 'File').' "$1" not found', $this->_basename($path)));
+		}
+		
+		if ($perm == 'read' && !$this->_isReadable($path)) {
+			return $this->setError(array(($dir ? 'The folder' : 'The file').' "$1" can’t be opened because you don’t have permission to see its contents.', $this->_basename($path)));
+		}
+		if ($perm == 'write' && !$this->_isWritable($path)) {
+			return $this->setError(array('You don\’t have permission to write into "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
+		}
+		if ($perm == 'rm' && !$this->_isRemovable($path)) {
+			return $this->setError(array('You don\’t have permission to delete "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
 		}
 		
 		if ($linkTarget && $this->_isLink($path)) {
 			if (false === ($path = $this->_readlink($path))) {
-				return $this->setError('File not found');
-			}
-			if (($perm == 'read'  && !$this->_isReadable($path))
-			||  ($perm == 'write' && !$this->_isWritable($path))
-			||  ($perm == 'rm'    && !$this->_isRemovable($path))) {
-				$err = 'File $1 has not read permissions';
-				if ($perm == 'write') {
-					$err = 'File $1 has not write permissions';
-				} elseif ($perm == 'rm') {
-					$err = 'File $1 has not remove permissions';
-				}
-				return $this->setError(array('Access denied', array($err, $this->_basename($path))));
+				return $this->setError($type == 'd' ? 'Folder not found' : 'File not found');
 			}
 		}
 		
-		if (($type == 'd' && !$this->_isDir($path))
-		||  ($type == 'f' && !$this->_isFile($path))) {
-			return $this->setError(array(array($type == 'd' ? '$1 is not a folder' : '$1 is not a file', $this->_basename($path))));
-		}
 		return $path;
 	}
 	
@@ -789,11 +773,13 @@ abstract class elFinderVolumeDriver {
 			return $this->setError('File not found');
 		}
 		
+		$dir = $this->_isDir($path);
+		
 		if (!$this->_isRemovable($path)) {
-			return $this->setError('Access denied');
+			return $this->setError(array('You don\’t have permission to delete "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
 		}
 		
-		if (($dir = $this->_isDir($path))) {
+		if ($dir) {
 			$ls = $this->_scandir($path, 0, false);
 			if (is_array($ls)) {
 				foreach ($ls as $file) {
@@ -806,7 +792,7 @@ abstract class elFinderVolumeDriver {
 		
 		return ($dir ? $this->_rmdir($path) : $this->_unlink($path)) 
 			? true 
-			: $this->setError('Unable to remove file');
+			: $this->setError(array('Unable to delete "$1" '.($dir ? 'folder' : 'file'), $this->_basename($path)));
 	}
 		
 	/**
@@ -847,7 +833,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function setError($msg)	{
-		$this->error = $msg;
+		$this->error = is_array($msg) ? array($msg) : $msg;
 		return false;
 	}
 	

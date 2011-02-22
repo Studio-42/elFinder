@@ -67,12 +67,12 @@ $opts = array(
 			'perms' => array(
 				'/123/' => array(
 					'read'   => true,
-					'write'   => false,
+					'write'   => true,
 					'rm'   => true
 				),
 				'/print\.png/' => array(
-					'read'   => true,
-					'write'   => false,
+					'read'   => false,
+					'write'   => true,
 					'rm'   => false
 				)
 			)
@@ -85,8 +85,8 @@ $opts = array(
 			'mimeDetect'   => 'auto',
 			'debug' => true,
 			'defaults' => array(
-				'read' => false,
-				'write' => true,
+				'read' => true,
+				'write' => false,
 				'rm' => false
 			)
 		)

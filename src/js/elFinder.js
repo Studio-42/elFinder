@@ -535,7 +535,7 @@
 			if (!this.locks.ui) {
 				
 				if (this.cdc[hash] && !this.cdc[hash].read) {
-					return this.trigger('error', {error : 'Access denied'});
+					// return this.trigger('error', {error : 'Access denied'});
 				} 
 				if (tree) {
 					data.tree = true;
@@ -552,7 +552,7 @@
 		
 		/**
 		 * Open file or directory
-		 * 
+		 * @TODO - check file read permissions
 		 * @param  String  file/dir hash
 		 * @return elFinder
 		 */
@@ -708,8 +708,8 @@
 				$.each(files || [], function(i, hash) {
 					if ((f = self.cdc[hash])) {
 						if (!f.rm) {
-							self.trigger('error', {error : ['Access denied', f.name + ' ' + self.i18n('can not be removed')]});
-							return false;
+							// self.trigger('error', {error : ['Access denied', f.name + ' ' + self.i18n('can not be removed')]});
+							// return false;
 						}
 						data.targets.push(hash);
 					} 
@@ -808,7 +808,7 @@
 				msg = this.messages[msg] || msg;
 				return msg.replace(/\$(\d+)/g, function(a, num) { return m[num-1] || ''; });
 			}
-			return this.messages[m] || m; 
+			return (this.messages[m] || m).replace(/\$(\d+)/g, ''); 
 		},
 		
 		sort : {

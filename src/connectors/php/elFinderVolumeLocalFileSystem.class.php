@@ -862,7 +862,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _tree($path, $level) {
+		$link = false;
 		if ($path != $this->root && $this->_isLink($path)) {
+			$link = true;
 			if (!$this->_readlink($path)) {
 				return array();
 			}
@@ -882,7 +884,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				'read'   => $read,
 				'write'  => $this->_isWritable($path),
 				'childs' => count($childs) > 0,
-				'link'   => $this->_isLink($path)
+				'link'   => $link
 			)
 		);
 

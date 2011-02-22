@@ -411,16 +411,19 @@ class elFinder {
 		$file = $args['target'];
 		$volume = $this->volume($file);
 		
-		if (!$volume) {
+		if (!$volume || !$volume->isFile($file)) {
 			return array('error' => 'File not found', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+		}
+		
+		if (!$volume->isReadable($file)) {
+			return array('error' => 'Access denied', 'headers' => 'HTTP/1.x 403 Access Denied', 'raw' => true);
 		}
 		
 		if (($info = $volume->info($file)) === false
 		||  ($fp = $volume->fopen($file)) === false) {
-			$error = $volume->error();
 			return array(
-				'error' => $error, 
-				'headers' => $error == 'Access denied' ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 
+				'error' => 'File not found', 
+				'headers' => 'HTTP/1.x 404 Not Found', 
 				'raw' => true);
 		}
 		
