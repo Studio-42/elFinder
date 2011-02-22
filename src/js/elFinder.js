@@ -203,6 +203,11 @@
 		this.ui.init();
 		
 		
+		// this.one('cd', function(e) {
+		// 	var error = ['Error 1', ['Error $1 $2 $1 $4', 'one', 'two'], 'Error 3'];
+		// 	self.trigger('error', {error : error})
+		// })
+		
 		this.cd(this.last() || '', true, true);
 		// this.cd('', true, true);
 		// this.trigger('focus')
@@ -789,7 +794,22 @@
 			return prefix + Math.random();
 		},
 		
-		i18n : function(m) { return this.messages[m] || m; },
+		/**
+		 * Return message translated onto current language
+		 *
+		 * @param  String  message
+		 * @return String
+		 **/
+		i18n : function(m) { 
+			var self = this, msg;
+
+			if ($.isArray(m)) {
+				msg = m.shift();
+				msg = this.messages[msg] || msg;
+				return msg.replace(/\$(\d+)/g, function(a, num) { return m[num-1] || ''; });
+			}
+			return this.messages[m] || m; 
+		},
 		
 		sort : {
 			nameDirsFirst : 1,
