@@ -831,14 +831,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * undocumented function
+	 * Return directory subdirs 
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  directory path
+	 * @param  int     $level how many subdirs level to return
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _tree($path, $level) {
 		$read   = $this->_isReadable($path);
-		$childs = $read ? $this->_scandir($path, self::$FILTER_DIRS_ONLY) : array();
+		if ($read) {
+			$childs = $this->_scandir($path, self::$FILTER_DIRS_ONLY);
+		}
+		if (!is_array($childs)) {
+			$childs = array();
+		}
 		
 		$tree = array(
 			array(

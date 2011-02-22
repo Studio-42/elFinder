@@ -365,13 +365,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function info($hash) {
-		$path = $this->decode($hash);
-
-		if (($path = $this->path($hash, '', 'read')) === false) {
-			return $this->setError('File not found');
-		}
-
-		return $this->fileinfo($path);
+		return ($path = $this->path($hash, '', 'read')) === false
+			? false
+			: $this->fileinfo($path);
 	}
 	
 	/**
@@ -384,7 +380,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function dir($hash) {
 		
-		return false == ($path = $this->path($hash, 'd', 'read', true))
+		return ($path = $this->path($hash, 'd', 'read', true)) === false
 			? false
 			: array_merge($this->fileinfo($path), array(
 					'phash'  => $path == $this->root ? false : $this->encode($this->_dirname($path)),
@@ -408,8 +404,12 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
+		if (($ls = $this->_scandir($path)) === false) {
+			return $this->setError('Unable to open folder');
+		}
+		
 		$files = array();
-		foreach ($this->_scandir($path) as $file) {
+		foreach ($ls as $file) {
 			$files[] = $this->fileinfo($file);
 		}
 		
@@ -453,7 +453,11 @@ abstract class elFinderVolumeDriver {
 			);
 		$cnt = $this->options['tmbAtOnce'] > 0 ? $this->options['tmbAtOnce'] : 12;
 		
-		foreach ($this->_scandir($path, self::$FILTER_FILES_ONLY) as $file) {
+		if (($ls = $this->_scandir($path, self::$FILTER_FILES_ONLY)) === false) {
+			return $result;
+		}
+		
+		foreach ($ls as $file) {
 			
 			$mime = $this->_mimetype($file);
 			if ($this->_tmbURL($file, $mime) === true) {
@@ -467,7 +471,6 @@ abstract class elFinderVolumeDriver {
 					$result['tmb'] = true;
 					break;
 				}
-				
 			}
 		}
 		return $result;
@@ -1079,10 +1082,12 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _scandir($path, $filter=0, $accepted = true);
 
 	/**
-	 * undocumented function
+	 * Return directory subdirs 
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  directory path
+	 * @param  int     $level how many subdirs level to return
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _tree($path, $level);
 	
