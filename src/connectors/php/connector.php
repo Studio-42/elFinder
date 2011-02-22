@@ -52,7 +52,7 @@ $opts = array(
 	'roots' => array(
 		array(
 			'path'   => '../../../files/',
-			'startPath' => '../../../files/Images/',
+			// 'startPath' => '../../../files/Images/',
 			// 'URL'    => 'http://localhost/git/elfinder/files',
 			// 'dotFiles' => true,
 			'fileURL' => false,
@@ -77,14 +77,19 @@ $opts = array(
 				)
 			)
 		),
-		// array(
-		// 	'path'   => '../../../files2',
-		// 	'URL'    => 'http://localhost/git/elfinder/files/',
-		// 	'alias'  => 'Home2',
-		// 	'driver' => 'LocalFileSystem',
-		// 	'mimeDetect'   => 'auto',
-		// 	'debug' => true
-		// )
+		array(
+			'path'   => '../../../files2',
+			'URL'    => 'http://localhost/git/elfinder/files/',
+			'alias'  => 'Home2',
+			'driver' => 'LocalFileSystem',
+			'mimeDetect'   => 'auto',
+			'debug' => true,
+			'defaults' => array(
+				'read' => false,
+				'write' => true,
+				'rm' => false
+			)
+		)
 		
 	)
 );

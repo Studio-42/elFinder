@@ -203,7 +203,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 			return false;
 		}
-		
+
 		$path = $this->_relpath($path);
 
 		foreach ($this->options['perms'] as $regexp => $rules) {
@@ -605,6 +605,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function _isReadable($path) {
+		if ($path != $this->root && $this->_isLink($path)) {
+			if (($target = $this->_readlink($path)) === false
+			|| !$this->_isReadable($target)) {
+				return false;
+			}
+		}
 		return is_readable($path) && $this->allowed($path, 'read');
 	}
 	
@@ -615,6 +621,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function _isWritable($path) {
+		if ($path != $this->root && $this->_isLink($path)) {
+			if (($target = $this->_readlink($path)) === false
+			|| !$this->_isWritable($target)) {
+				return false;
+			}
+		}
 		return is_writable($path) && $this->allowed($path, 'write');
 	}
 	
@@ -625,6 +637,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function _isRemovable($path) {
+		if ($path != $this->root && $this->_isLink($path)) {
+			if (($target = $this->_readlink($path)) === false
+			|| !$this->_isRemovable($target)) {
+				return false;
+			}
+		}
 		return $this->allowed($path, 'rm');
 	}
 	
@@ -745,6 +763,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (($target = @readlink($path)) !== false) {
 			$target = $this->normpath($target);
 
+			if ($target == $path) {
+				// circlic 0_o is it possible?
+				return false;
+			}
+
 			if (substr($target, 0, 1) == DIRECTORY_SEPARATOR || preg_match('/^[A-Z]\:\\\/', $target)) {
 				// absolute path
 				$root = realpath($this->root);
@@ -839,10 +862,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _tree($path, $level) {
-		$read   = $this->_isReadable($path);
-		if ($read) {
-			$childs = $this->_scandir($path, self::$FILTER_DIRS_ONLY);
+		if ($path != $this->root && $this->_isLink($path)) {
+			if (!$this->_readlink($path)) {
+				return array();
+			}
 		}
+		$read   = $this->_isReadable($path);
+		$childs = $read ? $this->_scandir($path, self::$FILTER_DIRS_ONLY) : array();
+
 		if (!is_array($childs)) {
 			$childs = array();
 		}

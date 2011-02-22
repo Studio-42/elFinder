@@ -208,8 +208,8 @@
 		// 	self.trigger('error', {error : error})
 		// })
 		
-		this.cd(this.last() || '', true, true);
-		// this.cd('', true, true);
+		// this.cd(this.last() || '', true, true);
+		this.cd('', true, true);
 		// this.trigger('focus')
 
 	}

@@ -316,7 +316,7 @@ class elFinder {
 					$target = $volume->root();
 				}
 			} else {
-				return array('error' => 'Invalid parameters');
+				return array('error' => 'Folder not found');
 			}
 		}
 		
@@ -331,11 +331,18 @@ class elFinder {
 		
 		if ($args['tree']) {
 			$result['tree'] = array();
+			$error = '';
 			foreach ($this->volumes as $volume) {
-				if (false == ($tree = $volume->tree(''))) {
-					return array('error' => $volume->error());
+				if (false === ($tree = $volume->tree(''))) {
+					$error = $volume->error();
+					// return array('error' => $volume->error());
+				} else {
+					$result['tree'] = array_merge($result['tree'], $tree);
 				}
-				$result['tree'] = array_merge($result['tree'], $tree);
+				
+			}
+			if (empty($result['tree'])) {
+				return array('error' => $error);
 			}
 		}
 		
@@ -362,7 +369,7 @@ class elFinder {
 		$volume = $this->volume($dir);
 		
 		if (!$volume) {
-			return array('error' => 'Invalid parameters');
+			return array('error' => 'Folder not found');
 		}
 		$tree = $volume->tree($dir);
 		
@@ -448,7 +455,7 @@ class elFinder {
 		$current = $args['current'];
 		
 		if(($volume = $this->volume($current)) == false) {
-			return array('error' => 'Invalid parameters');
+			return array('error' => 'Folder not found');
 		}
 		
 		if (false == ($hash = $volume->mkdir($current, $args['name']))) {
@@ -469,7 +476,7 @@ class elFinder {
 		$current = $args['current'];
 		
 		if(($volume = $this->volume($current)) == false) {
-			return array('error' => 'Invalid parameters');
+			return array('error' => 'Folder not found');
 		}
 		
 		if (false == ($hash = $volume->mkfile($current, $args['name']))) {
@@ -491,7 +498,7 @@ class elFinder {
 		$removed = array();
 		
 		if (!is_array($args['targets'])) {
-			return array('error' => 'Invalid parameters');
+			return array('error' => 'No files to delete');
 		}
 		
 		foreach ($args['targets'] as $hash) {

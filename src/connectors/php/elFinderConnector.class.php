@@ -33,12 +33,7 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($elFinder) {
-		if (!function_exists('json_encode')) {
-			$this->output(array('error' => '{"error":"PHP JSON module not installed"}', 'raw' => true));
-		}
-		
 		$this->elFinder = $elFinder;
-		
 	}
 	
 	/**
@@ -54,12 +49,11 @@ class elFinderConnector {
 		$args   = array();
 		
 		if (!function_exists('json_encode')) {
-			header($this->header);
-			exit('{"error":"PHP JSON module not installed"}');
+			$this->output(array('error' => '{"error":["Invalid backend configuration","PHP JSON module not installed"]}', 'raw' => true));
 		}
 		
 		if (!$this->elFinder->loaded()) {
-			$this->output(array('error' => 'Invalid backend configuration'));
+			$this->output(array('error' => array('Invalid backend configuration', 'There are no one readable storage available')));
 		}
 		
 		// telepat_mode: on
