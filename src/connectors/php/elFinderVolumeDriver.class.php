@@ -837,8 +837,6 @@ abstract class elFinderVolumeDriver {
 		return false;
 	}
 	
-
-	
 	
 	/***************************************************************************/
 	/*                           abstract methods                              */
