@@ -55,7 +55,7 @@ $opts = array(
 		array(
 			'path'   => '../../../files/',
 			// 'startPath' => '../../../files/Images/',
-			'URL'    => 'http://localhost/git/elfinder/files',
+			// 'URL'    => 'http://localhost/git/elfinder/files',
 			// 'dotFiles' => true,
 			'treeDeep' => 2,
 			'fileURL' => false,

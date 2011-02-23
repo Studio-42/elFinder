@@ -551,19 +551,42 @@
 		 * @return elFinder
 		 */
 		open : function(hash, tree, init) {
-			var dir, f, error;
+			var file,  isdir, error;
 			
 			if (!this.lock()) {
 				if (hash && this.cdc[hash]) {
-					f   = this.cdc[hash];
-					dir = f.mime == 'directory';
-					if (!f.read) {
-						error = (dir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
-						return this.trigger('error', {error : [error, f.name]});
+					file   = this.cdc[hash];
+					isdir = file.mime == 'directory';
+					if (!file.read) {
+						error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
+						return this.trigger('error', {error : [[error, file.name]]});
 					}
 					
-					if (!dir) {
+					if (!isdir) {
 						// open file in new window
+						if (file.url || this.cwd.url) {
+							// old api store url in file propery
+							// new api store only cwd url
+							url = file.url || this.cwd.url + encodeURIComponent(file.name);
+						} else {
+							// urls diabled - open connector
+							url = this.options.url 
+								+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
+								+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+								+ '&target=' + hash;
+
+						}
+						if (file.dim) {
+							// image - set window size
+							s = file.dim.split('x');
+							w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+						}
+
+						if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
+							// popup blocks
+							this.trigger('error', {error : 'Unable to open file in new window.'});
+						}
+						return this;
 					}
 				}
 				
@@ -583,47 +606,6 @@
 				this.ajax(data);
 			}
 			
-			return this;
-		},
-		
-		/**
-		 * Open file or directory
-		 * @TODO - check file read permissions
-		 * @param  String  file/dir hash
-		 * @return elFinder
-		 */
-		open_ : function(hash) {
-			var f = this.cdc[hash], url, s, w = '', h;
-			
-			if (!this.locks.ui && f) {
-				
-				if (f.mime == 'directory') {
-					return this.cd(hash);
-				}
-				
-				if (f.url || this.cwd.url) {
-					// old api store url in file propery
-					// new api store only cwd url
-					url = f.url || this.cwd.url + encodeURIComponent(f.name);
-				} else {
-					// urls diabled - open connector
-					url = this.options.url 
-						+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-						+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
-						+ '&target=' + hash;
-						
-				}
-				if (f.dim) {
-					// image - set window size
-					s = f.dim.split('x');
-					w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-				}
-
-				if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
-					// popup block
-					this.trigger('error', {error : 'Unable to open file in new window.'});
-				}
-			}
 			return this;
 		},
 		
