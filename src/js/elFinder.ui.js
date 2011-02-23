@@ -139,7 +139,7 @@
 
 		this.init = function() {
 			// init dirs tree view and events
-			if (fm.options.allowNav) {
+			if (fm.options.allowNavbar) {
 				this.tree.elfindertree(this.fm);
 			} else {
 				this.nav.hide();

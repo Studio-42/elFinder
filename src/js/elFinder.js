@@ -596,7 +596,7 @@
 					mimes  : this.options.onlyMimes || [],
 					sort   : this.sort[this.options.sort] || 1
 				};
-				if (tree) {
+				if (tree && this.options.allowNavbar) {
 					data.tree = true;
 				}
 				if (init) {

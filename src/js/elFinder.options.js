@@ -97,7 +97,7 @@ elFinder.prototype.options = {
 	 * @type Boolean
 	 * @default  true
 	 */
-	allowNavbar : true,
+	allowNavbar : false,
 	/**
 	 * Show statusbar?
 	 *
