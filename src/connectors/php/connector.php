@@ -1,6 +1,8 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
 
+// exit('{"asd":43}');
+
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
@@ -53,8 +55,9 @@ $opts = array(
 		array(
 			'path'   => '../../../files/',
 			// 'startPath' => '../../../files/Images/',
-			// 'URL'    => 'http://localhost/git/elfinder/files',
+			'URL'    => 'http://localhost/git/elfinder/files',
 			// 'dotFiles' => true,
+			'treeDeep' => 2,
 			'fileURL' => false,
 			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
@@ -77,6 +80,7 @@ $opts = array(
 				)
 			)
 		),
+		// array('path' => '/opt/local', 'driver' => 'LocalFileSystem', 'tmbDir' => '', 'treeDeep' => 5),
 		array(
 			'path'   => '../../../files2',
 			'URL'    => 'http://localhost/git/elfinder/files/',

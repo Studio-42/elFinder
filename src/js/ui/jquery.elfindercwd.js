@@ -2,6 +2,16 @@ $.fn.elfindercwd = function(fm) {
 	
 	return this.each(function() {
 		var cwd = $(this).addClass('elfinder-cwd')
+			.delegate('[id]', 'mouseenter', function(e) {
+				var target = fm.view == 'list' 
+					? $(this) 
+					: $(this).find('.elfinder-cwd-icon,.elfinder-cwd-filename');
+				
+				if (!target.is('.ui-draggable')) {
+					target.draggable(draggable);
+				}
+				
+			})
 			.delegate('[id]', 'select.elfinder', function(e) {
 				var id = $(this).addClass('ui-selected').children().addClass('ui-state-hover').end().attr('id');
 			
@@ -40,6 +50,7 @@ $.fn.elfindercwd = function(fm) {
 				}
 			}),
 			draggable = $.extend({}, fm.ui.draggable, {
+				addClasses : true,
 				appendTo : cwd,
 				helper : function(e, ui) {
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -65,6 +76,18 @@ $.fn.elfindercwd = function(fm) {
 					return h;
 				}
 			}),
+			droppable = {
+				tolerance : 'pointer',
+				hoverClass : 'elfinder-dropable-active',
+				over : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
+				out  : function() { cwd.droppable('enable'); },
+				drop : function(e, ui) {
+					ui.helper.hide();
+					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
+					fm.paste(this.id, true);
+					cwd.droppable('enable');
+				}
+			},
 			// @todo - in one line
 			tpl = {
 				icons : {
@@ -214,26 +237,6 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			/**
-			 * Load images thumbnails in background
-			 *
-			 * @return void
-			 */
-			loadTmb = function() {
-				fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, {
-						error : function(xhr) { fm.debug('ajaxerror', xhr); },
-						success : function(data) {
-							if (!data || data.error) {
-								return fm.debug('error', data ? data.error : 'Unknown error');
-							}
-						
-							if (data.images && data.current == fm.cwd.hash && fm.view == 'icons') {
-								data.tmb && loadTmb();
-								setTmb(data.images);
-							}
-						}
-				}, true);
-			},
-			/**
 			 * Add thumbnails to required files
 			 * Support to type of argument
 			 * 1: {hash : url, ...} - old api
@@ -242,7 +245,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @param  Array|Object
 			 * @return void
 			 */
-			setTmb = function(tmb) {
+			setThumbnails = function(tmb) {
 				$.each(tmb, function(i, v) {
 					var t = typeof(i), hash, url;
 					
@@ -258,93 +261,86 @@ $.fn.elfindercwd = function(fm) {
 						cwd.find('#'+hash).children(':first').children('.elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
 					}
 				});
+			},
+			attachEvents = function() {
+				cwd.find('.directory:not(.elfinder-na,.elfinder-ro)').droppable(droppable);
+				
+				// add suport for shift|meta + click select
+				cwd.find(fm.view == 'list' ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
+					.click(function(e) {
+						var p = this.id ? $(this) : $(this).parents('[id]:first'), 
+							m = $.browser.mozilla, 
+							prev, next, id, s, f;
+
+						if (e.shiftKey) {
+							prev = p.prevAll('.ui-selected:first');
+							next = p.nextAll('.ui-selected:first');
+							if (next.length && !prev.length) {
+								f = 'nextUntil';
+								id = next.attr('id')
+							} else {
+								id = prev.attr('id');
+								f = 'prevUntil'
+							}
+							p[f]('#'+id).add(p).trigger('select.elfinder');
+						} else if (e.ctrlKey || e.metaKey) {
+							p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
+						} else {
+							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+							p.trigger('select.elfinder')
+						}
+
+						fm.trigger('focus').trigger('select');
+					});
 			}
 			;
 		
 
-		fm.bind('cd', function(e) {
-			var list = fm.view == 'list',
-				t    = tpl[fm.view] || tpl.icons,
-				html = '',
-				load = !!e.data.tmb, // old api
-				set = [],
+		fm.bind('open', function(e) {
+			var list     = fm.view == 'list',
+				template = tpl[fm.view] || tpl.icons,
+				html     = [],
+				loadTmb  = !!e.data.tmb, // old api
+				setTmb   = [],
 				interval, i, f;
 
 			// create html code
 			for (i = 0; i < e.data.cdc.length; i++) {
 				f = e.data.cdc[i];
 				if (f && f.name && f.hash) {
-					html += t.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] });
+					html.push(template.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] }));
 					if (f.tmb) {
 						if (f.tmb === true) {
-							load = true;
+							loadTmb = true;
 						} else {
-							set.push({hash : f.hash, tmb : f.tmb});
+							setTmb.push({hash : f.hash, tmb : f.tmb});
 						}
-						
 					}
 				}
 			}
-			
+
 			// set new content
 			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
-				.html(t.container.replace('%content', html));
+				.html(template.container.replace('%content', html.join('')));
 			
-							
-			load && !list && loadTmb();
-			
-			if(set.length) {
+			setTimeout(attachEvents, 25);	
+
+			// load new thumnails from backend
+			loadTmb && !list && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
+
+			// set thumbnails
+			if(setTmb.length) {
 				interval = setInterval(function() {
-					set.length ? setTmb(set.splice(0, 24)) : clearInterval(interval);
-				}, $.browser.moziila ? 50 : 30);
+					setTmb.length ? setThumbnails(setTmb.splice(0, 24)) : clearInterval(interval);
+				}, $.browser.mozilla ? 75 : 20);
 			}
-			
-			// make rows or icons/filenames draggable
-			// and add suport for shift|meta + click select
-			cwd.find(list ? '[id]' : '.elfinder-cwd-icon,.elfinder-cwd-filename')
-				.draggable(draggable)
-				.click(function(e) {
-					var p = this.id ? $(this) : $(this).parents('[id]:first'), 
-						m = $.browser.mozilla, 
-						prev, next, id, s, f;
-
-					if (e.shiftKey) {
-						prev = p.prevAll('.ui-selected:first');
-						next = p.nextAll('.ui-selected:first');
-						if (next.length && !prev.length) {
-							f = 'nextUntil';
-							id = next.attr('id')
-						} else {
-							id = prev.attr('id');
-							f = 'prevUntil'
-						}
-						p[f]('#'+id).add(p).trigger('select.elfinder');
-					} else if (e.ctrlKey || e.metaKey) {
-						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
-					} else {
-						cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-						p.trigger('select.elfinder')
-					}
-
-					fm.trigger('focus').trigger('select');
-				});
-				
-			// make writable dirs droppable
-			cwd.find('.directory:not(.elfinder-na,.elfinder-ro)')
-				.droppable({
-					tolerance : 'pointer',
-					hoverClass : 'elfinder-dropable-active',
-					over : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
-					out  : function() { cwd.droppable('enable'); },
-					drop : function(e, ui) {
-						ui.helper.hide();
-						fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-						fm.paste(this.id, true);
-						cwd.droppable('enable');
-					}
-				});
-			
+		})
+		.bind('tmb', function(e) {
+			if (e.data.current == fm.cwd.hash && fm.view == 'icons') {
+				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
+				setThumbnails(e.data.images);
+			}
 		})
 		.shortcut({
 			pattern     :'ctrl+a', 

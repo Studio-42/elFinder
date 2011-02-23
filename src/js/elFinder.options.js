@@ -137,8 +137,8 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	// debug : true
-	debug : ['event-ajaxstop', 'event-lock', 'event-cd']
+	debug : true
+	// debug : ['event-ajaxstop', 'event-lock', 'event-cd']
 }
 
 })(jQuery);

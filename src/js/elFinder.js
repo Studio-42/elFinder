@@ -2,6 +2,8 @@
 	
 	elFinder = function(el, o) {
 		var self = this,
+			lock = false,
+			loaded = false,
 			/**
 			 * Target node
 			 *
@@ -140,23 +142,31 @@
 			select    : []
 		};
 		
+		this.lock = function(l) {
+			return l === void(0) ? lock : lock = !!l;
+		}
 		
-		this.bind('focus', function() {
-				if (self.locks.shortcuts && !self.locks.ui) {
-					self.locks.shortcuts = false;
-					$('texarea,:text').blur();
-				}
+		this
+			.bind('ajaxstart ajaxstop', function(e) {
+				self.lock(e.type == 'ajaxstart')
+			})
+			.bind('focus', function() {
+				!self.lock() &&	$('texarea,:text').blur();
+				self.lock(false);
 			})
 			.bind('blur', function() {
-				self.locks.shortcuts = true;
+				self.lock(true);
 			})
-			.one('cd', function(e, fm) {
-				// @TODO - disabled
-				$.extend(self.params, e.data.params);
+			.one('open', function(e, fm) {
+				loaded = true;
+				$.extend(self.params, e.data.params||{});
 				self.api = parseFloat(e.data.api) || 1;
-				// self.log(self.api)
+				self.debug('api-version', self.api);
+				
+				self.trigger('load', e.data);
+				delete self.listeners.load;
 			})
-			.bind('cd', function(e) {
+			.bind('open', function(e) {
 				var cdc = e.data.cdc,
 					l   = cdc.length,
 					h   = self.history,
@@ -172,12 +182,16 @@
 				// remember last dir
 				self.last(self.cwd.hash);
 				
-				// update history if required
 				if (!hl || h[hl - 1] != self.cwd.hash) {
+					// update history if required
 					h.push(self.cwd.hash);
 				}
 				self.selected = [];
-				self.log(e.data.debug.time);
+				self.debug('server-time', e.data.debug.time);
+				// !loaded && self.trigger('load', e.data);
+			})
+			.bind('load', function(e) {
+				
 			});
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -186,7 +200,7 @@
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
 		
-				if (!self.locks.shortcuts) {
+				if (!self.lock()) {
 					$.each(self.shortcuts, function(i, s) {
 						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
 							e.preventDefault();
@@ -208,8 +222,8 @@
 		// 	self.trigger('error', {error : error})
 		// })
 		
-		// this.cd(this.last() || '', true, true);
-		this.cd('', true, true);
+		this.open(this.last() || '', true, true);
+		// this.cd('', true, true);
 		// this.trigger('focus')
 
 	}
@@ -286,20 +300,8 @@
 		 * @param  String  dir hash
 		 * @return String|undefined
 		 */
-		last : function(key) { return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : void(0); },
-		
-		/**
-		 * Lock/unlock some functionality
-		 * 
-		 * @param  Object  options { ui : true|false, shortcuts : true|false }
-		 * @return elFinder
-		 */
-		lock : function(o) {
-			if (o === void(0)) {
-				return this.locks;
-			}
-			$.extend(this.locks, o);
-			this.trigger('lock', { locks : this.locks });
+		last : function(key) { 
+			return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : void(0); 
 		},
 		
 		/**
@@ -427,7 +429,7 @@
 						s.shiftKey = $.inArray('SHIFT', p) != -1;
 						s.type     = s.keypress ? 'keypress' : 'keydown';
 						this.shortcuts[s.pattern] = s;
-						this.debug('shortcat-add', s)
+						// this.debug('shortcat-add', s)
 					}
 				}
 			}
@@ -437,54 +439,73 @@
 		/**
 		 * Proccess ajax request
 		 *
-		 * @param  Object  data to send to connector
-		 * @param  Object  ajax options
-		 * @param  Boolean if set - "ajaxstart" event not fired
+		 * @param  Object  data to send to connector or options for ajax request
+		 * @param  String  mode. "bg" - do not fired "ajaxstart/ajaxstop", show errors, "silent" - do not fired "ajaxstart/ajaxstop", errors - to debug
 		 * @return elFinder
 		 */
-		ajax : function(data, opts, silent) {
+		ajax : function(opts, mode) {
 			var self = this,
-				o = {
+				cmd = opts.data ? opts.data.cmd : opts.cmd,
+				options = {
 					url      : this.options.url,
 					async    : true,
 					type     : 'get',
 					dataType : 'json',
 					cache    : false,
-					// timeout  : 1000,
+					data     : $.extend({}, this.options.customData || {}, opts.data || opts),
+					// timeout  : 100,
 					error    : function(xhr, status) { 
-						var msg = status == 'timeout' || status == 'abort' || (xhr ? parseInt(xhr.status) : 0) > 400
-								? 'Unable to connect to backend' 
-								: 'Invalid backend configuration';
+						var error;
 						
-						self.trigger('ajaxerror', {error : msg}).debug('ajaxerror', xhr);
+						switch (status) {
+							case 'abort':
+								error = ['Unable to connect to backend', 'Connection aborted'];
+								break;
+							case 'timeout':
+								error = ['Unable to connect to backend', 'Connection timeout'];
+								break;
+							case 'parsererror':
+								error = 'Invalid backend response';
+								break;
+							default:
+								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend' : 'Invalid backend response';
+						}
+						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
+
 					},
 					success  : function(data) {
-
-						self.trigger('ajaxstop', data);
-
-						if (typeof(data) != 'object' || data.error) {
-							return self.trigger('error', {error : data && data.error ? data.error : 'Unknown error'});
-						}
+						var req = self.required[cmd] || [],
+							i = req.length,
+							error;
 						
-						self.trigger('cd', data);
+						!mode && self.trigger('ajaxstop', data);
+
+						if (!data) {
+							error = 'Invalid backend response';
+						} else if (data.error) {
+							error = data.error;
+						} else {
+							while (i--) {
+								if (data[req[i]] === void(0)) {
+									error = 'Invalid backend response';
+									break;
+								}
+							}
+						}
+
+						if (error) {
+							return self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
+						}
+
+						self.trigger(cmd, data);
 					}
 				};
 				
-			if (!this.locks.ui) {
-				// mimetypes filter
-				data['mimes[]'] = this.options.onlyMimes;
-				// sort type
-				data.sort = this.sort[this.options.sort] || 1;
-				// custom data
-				$.each(this.options.customData || {}, function(k, v) {
-					if (data[k] === void(0)) {
-						data[k] = v;
-					} 
-				});
-				
-				o = $.extend(o, opts, {data : data});
-				!silent && self.trigger('ajaxstart', o);
-				$.ajax(o);
+			opts.data && $.extend(options, opts)
+			
+			if (!this.lock()) {
+				!mode && self.trigger('ajaxstart', options);
+				$.ajax(options);
 			}
 			
 			return this;
@@ -529,24 +550,39 @@
 		 * @param  Boolean  send init flag?
 		 * @return elFinder
 		 */
-		cd : function(hash, tree, init) {
-			var data = {cmd : 'open', target : hash};
+		open : function(hash, tree, init) {
+			var dir, f, error;
 			
-			if (!this.locks.ui) {
+			if (!this.lock()) {
+				if (hash && this.cdc[hash]) {
+					f   = this.cdc[hash];
+					dir = f.mime == 'directory';
+					if (!f.read) {
+						error = (dir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
+						return this.trigger('error', {error : [error, f.name]});
+					}
+					
+					if (!dir) {
+						// open file in new window
+					}
+				}
 				
-				if (this.cdc[hash] && !this.cdc[hash].read) {
-					// return this.trigger('error', {error : 'Access denied'});
-				} 
+				data = {
+					cmd    : 'open',
+					target : hash,
+					mimes  : this.options.onlyMimes || [],
+					sort   : this.sort[this.options.sort] || 1
+				};
 				if (tree) {
 					data.tree = true;
 				}
 				if (init) {
 					data.init = true;
 				}
-
-				this.ajax(data);
 				
+				this.ajax(data);
 			}
+			
 			return this;
 		},
 		
@@ -556,7 +592,7 @@
 		 * @param  String  file/dir hash
 		 * @return elFinder
 		 */
-		open : function(hash) {
+		open_ : function(hash) {
 			var f = this.cdc[hash], url, s, w = '', h;
 			
 			if (!this.locks.ui && f) {
@@ -585,7 +621,7 @@
 
 				if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
 					// popup block
-					this.trigger('error', {error : 'Unable to open new window.'});
+					this.trigger('error', {error : 'Unable to open file in new window.'});
 				}
 			}
 			return this;
@@ -797,7 +833,7 @@
 		/**
 		 * Return message translated onto current language
 		 *
-		 * @param  String  message
+		 * @param  String|Array  message[s]
 		 * @return String
 		 **/
 		i18n : function(m) { 
@@ -810,6 +846,12 @@
 			}
 			return (this.messages[m] || m).replace(/\$(\d+)/g, ''); 
 		},
+		
+		required : {
+			open : ['cwd', 'cdc'],
+			tree : ['tree'],
+			tmb  : ['current', 'images']
+ 		},
 		
 		sort : {
 			nameDirsFirst : 1,

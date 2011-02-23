@@ -162,31 +162,27 @@
 				});
 			
 			// bind fm events handlers and shortcuts
-			fm.bind('lock', function() {
-					self.overlay[fm.locks.ui ? 'show' : 'hide']();
-				})
-				.one('ajaxstop', function(e) {
-					if (!e.data.cwd) {
-						e.stopPropagation()
-						self.spinner.hide();
-					}
-				})
+			fm
 				.bind('ajaxstart ajaxstop ajaxerror', function(e) {
-					var l = e.type != 'ajaxstop';
-					fm.lock({ui : l, shortcuts : l});
-					self.spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
+					self.overlay.add(self.spinner)[e.type == 'ajaxstart' ? 'show' : 'hide']();
 				})
 				.bind('ajaxerror error', function(e) {
-					var error = e.data.error||'', msg = '';
+					var error = e.data.error||'', 
+						msg = '';
+					// fm.log(e.type)	
 					if ($.isArray(error)) {
 						$.each(error, function(i, err) {
 							msg += fm.i18n(err) + '<br/>';
-						})
+						});
 					} else {
 						msg = fm.i18n(error);
 					}
+					
 					self.errorMsg.html(msg);
-					self.error.trigger('show.elfinder');
+					self.error.show();
+					setTimeout(function() {
+						self.error.fadeOut('slow');
+					}, 4000);
 				})
 				.shortcut({
 					pattern     : 'ctrl+arrowLeft',

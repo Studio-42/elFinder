@@ -827,10 +827,11 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Save error message
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string|array  error message
+	 * @return false
+	 * @author Dmitry(dio) Levashov
 	 **/
 	protected function setError($msg)	{
 		$this->error = is_array($msg) ? array($msg) : $msg;
