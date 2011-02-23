@@ -7,25 +7,18 @@ $.fn.elfindercwd = function(fm) {
 					? $(this) 
 					: $(this).find('.elfinder-cwd-icon,.elfinder-cwd-filename');
 				
-				if (!target.is('.ui-draggable')) {
-					target.draggable(draggable);
-				}
-				
+				!target.is('.ui-draggable') && target.draggable(draggable);
 			})
 			.delegate('[id]', 'select.elfinder', function(e) {
 				var id = $(this).addClass('ui-selected').children().addClass('ui-state-hover').end().attr('id');
 			
-				if ($.inArray(id, fm.selected) === -1) {
-					fm.selected.push(id);
-				}
+				$.inArray(id, fm.selected) === -1 && fm.selected.push(id);
 			})
 			.delegate('[id]', 'unselect.elfinder', function(e) {
 				var id = $(this).removeClass('ui-selected').children().removeClass('ui-state-hover').end().attr('id'),
 					ndx = $.inArray(id, fm.selected);
 			
-				if (ndx !== -1) {
-					fm.selected.splice(ndx, 1)
-				}
+				ndx !== -1 && fm.selected.splice(ndx, 1);
 			})
 			.delegate('[id]', 'dblclick', function(e) {
 				fm.open(this.id);
@@ -38,7 +31,7 @@ $.fn.elfindercwd = function(fm) {
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			})
 			.droppable({
-				accept : 'a[id]',
+				accept : '[id]',
 				drop   : function(e, ui) {
 					var src = ui.helper.data('src');
 
@@ -60,6 +53,9 @@ $.fn.elfindercwd = function(fm) {
 					
 					// select dragged file if no selected
 					if (!p.is('.ui-selected')) {
+						if (!(e.ctrlKey||e.metaKey||e.shiftKey)) {
+							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+						}
 						p.trigger('select.elfinder');
 					}
 						
