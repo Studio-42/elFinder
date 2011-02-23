@@ -616,11 +616,11 @@
 		 */
 		reload : function() {
 			this.buffer = {};
-			return this.cd(this.cwd.hash, true);
+			return this.open(this.cwd.hash, true);
 		},
 		
 		/**
-		 * Go to previous opened directory
+		 * Go into previous folder
 		 * 
 		 * @return elFinder
 		 */
@@ -628,7 +628,7 @@
 			if (this.history.length > 1) {
 				// drop current dir
 				this.history.pop();
-				this.cd(this.history.pop());
+				this.open(this.history.pop());
 			}
 			return this;
 		},

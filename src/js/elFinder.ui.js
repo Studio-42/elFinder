@@ -186,20 +186,22 @@
 				})
 				.shortcut({
 					pattern     : 'ctrl+arrowLeft',
-					description : 'See folders you viewed previously',
+					description : 'Return into previous folder',
 					callback    : function() { fm.back(); }
 				})
 				.shortcut({
 					pattern     : 'ctrl+arrowUp',
-					description : 'Go into parent directory',
+					description : 'Go into parent folder',
 					callback    : function() {
 						var hash, p;
+						
 						if (fm.cwd.phash) {
-							 hash = fm.cwd.phash
+							// new api
+							fm.open(fm.cwd.phash);
 						} else if ((p = self.tree.find('#nav-'+fm.cwd.hash).parent('li').parent('ul').prev('a[id]')).length) {
-							hash = p.attr('id').substr(4);
+							// old api
+							fm.open(p.attr('id').substr(4))
 						}
-						hash && fm.cd(hash);
 					}
 				})
 				.shortcut({
