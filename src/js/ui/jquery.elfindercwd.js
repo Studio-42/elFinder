@@ -1,7 +1,19 @@
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
-		var cwd = $(this).addClass('elfinder-cwd')
+		var last,
+			buffer = [],
+			cwd = $(this).addClass('elfinder-cwd')
+			.bind('scroll', function(e) {
+				// fm.log(last)
+				if (last && last.length) {
+					if (buffer.length && cwd.innerHeight() - last.position().top > 30) {
+						// fm.log('load')
+						render(buffer.splice(0, 200))
+					}
+					// fm.log(last.position().top+' '+cwd.innerHeight())
+				}
+			})
 			.delegate('[id]', 'mouseenter', function(e) {
 				var target = fm.view == 'list' 
 					? $(this) 
@@ -31,6 +43,8 @@ $.fn.elfindercwd = function(fm) {
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			})
 			.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'})),
+			
+			
 			draggable = $.extend({}, fm.ui.draggable, {
 				addClasses : true,
 				appendTo : cwd,
@@ -270,7 +284,32 @@ $.fn.elfindercwd = function(fm) {
 
 						fm.trigger('focus').trigger('select');
 					});
+			},
+			
+			render = function(files) {
+				var list     = fm.view == 'list',
+					template = tpl[fm.view] || tpl.icons,
+					html = [], 
+					f, i;
+				fm.time('render')
+				for (i = 0; i < files.length; i++) {
+					f = files[i];
+					if (f.hash && f.name) {
+						html.push(template.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] }));
+					}
+				}
+					
+				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+					.append(template.container.replace('%content', html.join('')));
+					
+				last = cwd.find('[id]:last')
+				
+				// attachEvents()
+				
+				fm.timeEnd('render')	
 			}
+			// last
 			;
 		
 
@@ -280,39 +319,54 @@ $.fn.elfindercwd = function(fm) {
 				html     = [],
 				loadTmb  = !!e.data.tmb, // old api
 				setTmb   = [],
+				parts = [],
 				interval, i, f;
 
+			
+			cwd.empty()
+			buffer = e.data.cdc.slice(0)
+			// parts = buffer.splice(0, 50);
+			
+			render(buffer.splice(0, 200))
+			cwd.scrollTop(0);
+			// i = buffer.length;
+			fm.log(buffer.length)
+			
+			
+			
 			// create html code
-			for (i = 0; i < e.data.cdc.length; i++) {
-				f = e.data.cdc[i];
-				if (f && f.name && f.hash) {
-					html.push(template.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] }));
-					if (f.tmb) {
-						if (f.tmb === true) {
-							loadTmb = true;
-						} else {
-							setTmb.push({hash : f.hash, tmb : f.tmb});
-						}
-					}
-				}
-			}
+			// for (i = 0; i < e.data.cdc.length; i++) {
+			// 	f = e.data.cdc[i];
+			// 	if (f && f.name && f.hash) {
+			// 		html.push(template.file.replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e] }));
+			// 		if (f.tmb) {
+			// 			if (f.tmb === true) {
+			// 				loadTmb = true;
+			// 			} else {
+			// 				setTmb.push({hash : f.hash, tmb : f.tmb});
+			// 			}
+			// 		}
+			// 	}
+			// }
 
 			// set new content
-			cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
-				.html(template.container.replace('%content', html.join('')));
+			// cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+			// 	.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+			// 	.html(template.container.replace('%content', html.join('')));
 			
-			setTimeout(attachEvents, 25);	
+			
+			
+			// setTimeout(attachEvents, 25);	
 
 			// load new thumnails from backend
-			loadTmb && !list && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
+			// loadTmb && !list && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
 
 			// set thumbnails
-			if(setTmb.length) {
-				interval = setInterval(function() {
-					setTmb.length ? setThumbnails(setTmb.splice(0, 24)) : clearInterval(interval);
-				}, $.browser.mozilla ? 75 : 20);
-			}
+			// if(setTmb.length) {
+			// 	interval = setInterval(function() {
+			// 		setTmb.length ? setThumbnails(setTmb.splice(0, 24)) : clearInterval(interval);
+			// 	}, $.browser.mozilla ? 75 : 20);
+			// }
 		})
 		.bind('tmb', function(e) {
 			if (e.data.current == fm.cwd.hash && fm.view == 'icons') {

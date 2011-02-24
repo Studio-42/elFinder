@@ -82,6 +82,9 @@
 		 * @type Object
 		 **/
 		this.cdc      = {};
+		
+		this.tree = {};
+		
 		/**
 		 * Cach of selected files
 		 * Contains objects from this.cdc
@@ -157,59 +160,58 @@
 			.bind('blur', function() {
 				self.lock(true);
 			})
-			.one('open', function(e, fm) {
-				loaded = true;
-				$.extend(self.params, e.data.params||{});
-				self.api = parseFloat(e.data.api) || 1;
-				self.debug('api-version', self.api);
-				
-				self.trigger('load', e.data);
-				delete self.listeners.load;
-				self.tree = {}
-			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
-					l   = cdc.length,
+					i   = cdc.length,
 					h   = self.history,
-					hl  = h.length;
+					hl  = h.length,
+					i, d;
 
-				// update curent dir info and content	
-				self.cwd = e.data.cwd;
+				// update curent dir info and content
+				$.extend(self.cwd, e.data.cwd);	
+
 				self.cdc = {};
-				while (l--) {
-					self.cdc[cdc[l].hash] = cdc[l];
-				}
-				
-				if (e.data.tree && self.api > 1) {
-					for (var i = 0; i < e.data.tree.length; i++) {
-						var d = e.data.tree[i];
-						
-						if (!self.tree[d.hash]) {
-							self.tree[d.hash] = {
-								name : d.name,
-								read : !!d.read,
-								write :!!d.write,
-								rm : d.rm === void(0) ? true : !!d.rm
-							}
-						}
-					}
-
+				while (i--) {
+					self.cdc[cdc[i].hash] = cdc[i];
 				}
 				
 				// remember last dir
 				self.last(self.cwd.hash);
 				
+				// update history if required
 				if (!hl || h[hl - 1] != self.cwd.hash) {
-					// update history if required
 					h.push(self.cwd.hash);
 				}
 				self.selected = [];
-				self.debug('server-time', e.data.debug.time);
-				// !loaded && self.trigger('load', e.data);
-			})
-			.bind('load', function(e) {
 				
-			});
+				// initial loading
+				if (!loaded) {
+					loaded = true;
+					$.extend(self.params, e.data.params||{});
+					self.api = parseFloat(e.data.api) || 1;
+					self.debug('api-version', self.api);
+
+					self.trigger('load', e.data);
+					delete self.listeners.load;
+				}
+			})
+			.bind('open tree', function(e) {
+				// store tree permissions - required to check its for copy/paste etc
+				if (e.data.tree && self.api > 1) {
+					for (i = 0; i < e.data.tree.length; i++) {
+						d = e.data.tree[i];
+						if (!self.tree[d.hash]) {
+							self.tree[d.hash] = {
+								name  : d.name,
+								read  : !!d.read,
+								write :!!d.write,
+								rm    : d.rm === void(0) ? true : !!d.rm
+							}
+						}
+					}
+				}
+			})
+			;
 			
 		// bind to keydown/keypress if shortcuts allowed
 		if (this.options.allowShortcuts) {
@@ -664,7 +666,7 @@
 		 */
 		copy : function(files, src, cut, dd) {
 			var self = this, 
-				tmp = [], 
+				tmp  = [], 
 				file, error;
 			
 			// check read/rm permissions

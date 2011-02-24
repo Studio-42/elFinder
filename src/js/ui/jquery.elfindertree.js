@@ -150,6 +150,7 @@
 			})
 			.bind('open', function(e) {
 				var dir;
+
 				// fm.time('tree')
 				if (e.data.tree) {
 					tree.empty();
