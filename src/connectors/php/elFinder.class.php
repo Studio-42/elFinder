@@ -546,7 +546,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function paste($args) {
-		
+		return array('error' => 'Not implemented');
 		$dst     = $args['dst'];
 		$targets = $args['targets'];
 		$cut     = !empty($args['cut']);

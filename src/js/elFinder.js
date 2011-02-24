@@ -187,9 +187,9 @@
 						if (!self.tree[d.hash]) {
 							self.tree[d.hash] = {
 								name : d.name,
-								read : d.read,
-								write :d.write,
-								rm : d.rm
+								read : !!d.read,
+								write :!!d.write,
+								rm : d.rm === void(0) ? true : !!d.rm
 							}
 						}
 					}
@@ -673,8 +673,7 @@
 				if (file) {
 					if (!file.read) {
 						error = 'Unable to copy "$1". Not enough permission.';
-					} else if (cut && file.rm === false) {
-						// use file.rm === false because old connector do not send rm permission
+					} else if (cut && !file.rm) {
 						error = dd ? 'Unable to move "$1". Not enough permission.' : 'Unable to cut "$1". Not enough permission.';
 					}
 					if (error) {
@@ -739,7 +738,7 @@
 		 * @return elFinder
 		 */
 		cleanBuffer : function() {
-			this.buffer = { files : [], cut : false, src : '' };
+			this.buffer = {files : [], cut : false, src : ''};
 			return this;
 		},
 		

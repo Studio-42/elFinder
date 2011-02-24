@@ -881,10 +881,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				'hash'   => $this->encode($path),
 				'phash'  => $path == $this->root ? null : $this->encode($this->_dirname($path)),
 				'name'   => $this->_basename($path),
-				'read'   => $read,
-				'write'  => $this->_isWritable($path),
-				'rm'     => $this->_isRemovable($path),
-				'childs' => count($childs) > 0,
+				'read'   => (int)$read,
+				'write'  => (int)$this->_isWritable($path),
+				'rm'     => (int)$this->_isRemovable($path),
+				'childs' => intval(count($childs) > 0),
 				'link'   => $link
 			)
 		);

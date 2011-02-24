@@ -704,9 +704,9 @@ abstract class elFinderVolumeDriver {
 			'mime'  => $mime,
 			'date'  => $date, 
 			'size'  => $mime == 'directory' ? 0 : $this->_filesize($path),
-			'read'  => $this->_isReadable($path),
-			'write' => $this->_isWritable($path),
-			'rm'    => $this->_isRemovable($path),
+			'read'  => (int)$this->_isReadable($path),
+			'write' => (int)$this->_isWritable($path),
+			'rm'    => (int)$this->_isRemovable($path),
 			);
 			
 		if ($this->_isLink($path)) {
