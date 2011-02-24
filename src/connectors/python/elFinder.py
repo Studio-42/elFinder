@@ -112,12 +112,6 @@ class connector():
 	httpResponse = None
 
 	def __init__(self, opts):
-		self._time = time.time()
-		t = datetime.fromtimestamp(self._time)
-		self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
-		self._yesterday = self._today - 86400
-
-		self._response['debug'] = {}
 
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
@@ -136,9 +130,27 @@ class connector():
 			if not os.path.exists(self._options['tmbDir']):
 				self._options['tmbDir'] = False
 
+    def _reset_run(self):
+        self.httpStatusCode = 0
+        self.httpHeader = {}
+        self.httpResponse = None
+        self._request = {}
+        self._response = {}
+        self._errorData = {}
+        self._form = {}
+        self._im = None
+        self._sp = None
+
+        self._time = time.time()
+        t = datetime.fromtimestamp(self._time)
+        self._today = time.mktime(datetime(t.year, t.month, t.day).timetuple())
+        self._yesterday = self._today - 86400
+
+        self._response['debug'] = {}
 
 	def run(self, httpRequest = []):
 		"""main function"""
+        self._reset_run()
 		rootOk = True
 		if not os.path.exists(self._options['root']) or self._options['root'] == '':
 			rootOk = False
