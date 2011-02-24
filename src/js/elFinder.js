@@ -149,16 +149,17 @@
 			return l === void(0) ? lock : lock = !!l;
 		}
 		
-		this
-			.bind('ajaxstart ajaxstop', function(e) {
-				self.lock(e.type == 'ajaxstart')
+		this.bind('ajaxstart ajaxstop', function(e) {
+				lock = e.type == 'ajaxstart';
 			})
 			.bind('focus', function() {
-				!self.lock() &&	$('texarea,:text').blur();
-				self.lock(false);
+				if (lock) {
+					lock && $('texarea,:text').blur();
+					lock = false;
+				}
 			})
 			.bind('blur', function() {
-				self.lock(true);
+				lock = true;
 			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
@@ -235,15 +236,7 @@
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
 		
-		
-		// this.one('cd', function(e) {
-		// 	var error = ['Error 1', ['Error $1 $2 $1 $4', 'one', 'two'], 'Error 3'];
-		// 	self.trigger('error', {error : error})
-		// })
-		
 		this.open(this.last() || '', true, true);
-		// this.cd('', true, true);
-		// this.trigger('focus')
 
 	}
 	

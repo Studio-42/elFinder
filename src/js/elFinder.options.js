@@ -105,6 +105,13 @@ elFinder.prototype.options = {
 	 * @default  true
 	 */
 	allowStatusbar : true,
+	
+	showFiles : 100,
+	
+	loadFiles : 100,
+	
+	loadThreshold : 100,
+	
 	/* cookie options */
 	cookie         : {
 		expires : 30,

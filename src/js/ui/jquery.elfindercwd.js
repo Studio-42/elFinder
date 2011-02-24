@@ -1,17 +1,32 @@
+
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
 		var last,
 			buffer = [],
+			tmbcnt = 0,
+			theshold = fm.options.loadThreshold,
 			cwd = $(this).addClass('elfinder-cwd')
 			.bind('scroll', function(e) {
-				// fm.log(last)
+				var height;
+				
 				if (last && last.length) {
-					if (buffer.length && cwd.innerHeight() - last.position().top > 30) {
-						// fm.log('load')
-						render(buffer.splice(0, 200))
+					height = cwd.innerHeight();
+					
+					if (buffer.length && height - last.position().top + theshold > 0) {
+						render(buffer.splice(0, fm.options.loadFiles))
 					}
-					// fm.log(last.position().top+' '+cwd.innerHeight())
+					
+					if (tmbcnt > 0) {
+						cwd.find('[_tmb]')
+							.filter(function() {
+								return height - $(this).parents('[id]:first').position().top + theshold > 0;
+							}).each(function() {
+								var $this = $(this);
+								$this.css('background', "url('"+$this.attr('_tmb')+"') center center no-repeat").removeAttr('_tmb');
+								tmbcnt--;
+							});
+					}
 				}
 			})
 			.delegate('[id]', 'mouseenter', function(e) {
@@ -86,7 +101,7 @@ $.fn.elfindercwd = function(fm) {
 					container : '%content',
 					file : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all">'
 							+'<div class="elfinder-cwd-file-wrapper ui-corner-all">'
-							+'<div class="elfinder-cwd-icon %mime ui-corner-all"/>%marker'
+							+'<div class="elfinder-cwd-icon %mime ui-corner-all"%tmb/>%marker'
 							+'</div>'
 							+'<div class="elfinder-cwd-filename ui-corner-all">%name</div>'
 							+'</div>'
@@ -126,6 +141,9 @@ $.fn.elfindercwd = function(fm) {
 				},
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
+				},
+				tmb : function(f) {
+					return f.tmb ? ' _tmb="'+f.tmb+'"' : '';
 				},
 				oddclass : function(f, i) {
 					return i%2 ? 'elfinder-odd-row' : '';
@@ -304,7 +322,8 @@ $.fn.elfindercwd = function(fm) {
 					.append(template.container.replace('%content', html.join('')));
 					
 				last = cwd.find('[id]:last')
-				
+				tmbcnt = cwd.find('[_tmb]').length;
+				fm.log(tmbcnt)
 				// attachEvents()
 				
 				fm.timeEnd('render')	
@@ -327,10 +346,8 @@ $.fn.elfindercwd = function(fm) {
 			buffer = e.data.cdc.slice(0)
 			// parts = buffer.splice(0, 50);
 			
-			render(buffer.splice(0, 200))
-			cwd.scrollTop(0);
-			// i = buffer.length;
-			fm.log(buffer.length)
+			render(buffer.splice(0, fm.options.showFiles));
+			cwd.scrollTop(0).trigger('scroll');
 			
 			
 			

@@ -69,7 +69,12 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $tmbURL = '';
 	
-
+	/**
+	 * Flag. Request to create thumbnails required
+	 *
+	 * @var bool
+	 **/
+	protected $tmb = false;
 	
 	/**
 	 * Error message from last failed action
@@ -442,6 +447,16 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
+	public function tmbRequestAllowed() {
+		return $this->tmb;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
 	public function tmb($hash) {
 		if (false == ($path = $this->path($hash, 'd', 'read'))) {
 			return false;
@@ -722,12 +737,17 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($info['read']) {
-			if (($dim = $this->_dimensions($path, $info['mime'])) != false) {
+			if ($info['mime'] != 'directory' && ($dim = $this->_dimensions($path, $info['mime'])) != false) {
 				$info['dim'] = $dim;
 			}
 			
 			if ($this->URL && ($tmb = $this->_tmbURL($path, $info['mime'])) != false) {
-				$info['tmb'] = $tmb;
+				if ($tmb === true) {
+					$this->tmb = true;
+				} else {
+					$info['tmb'] = $tmb;
+				}
+				
 			}
 			
 			if ($this->_isResizable($path, $info['mime'])) {

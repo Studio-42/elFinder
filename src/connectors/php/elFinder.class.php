@@ -328,6 +328,7 @@ class elFinder {
 			return array('error' => $volume->error());
 		}
 		
+		$result['cwd']['tmb'] = $volume->tmbRequestAllowed();
 		
 		if ($args['tree']) {
 			$result['tree'] = array();
