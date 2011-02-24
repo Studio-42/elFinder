@@ -714,26 +714,21 @@
 		 * @clean  Boolean  clean buffer after paste - required by drag&drop
 		 * @return elFinder
 		 */
-		paste : function(dst, clean) {
-			var b = this.buffer, o, self = this;
+		paste : function(dst) {
+			var dst = dst || this.cwd.hash,
+				b = this.buffer;
 
-			dst = dst || this.cwd.hash;
-			
 			if (b.src == dst) {
 				this.trigger('error', {error : 'Unable to copy into itself'});
 			} else if (b.files && b.files.length) {
 				this.ajax({
-						cmd     : 'paste',
-						current : this.cwd.hash,
-						src     : b.src,
-						dst     : dst,
-						cut     : b.cut ? 1 : 0,
-						targets : b.files
-				}, {
-					error : function(xhr) { self.log(xhr)},
-					success : function(data) { self.log(data)}
+					cmd     : 'paste',
+					current : this.cwd.hash,
+					src     : b.src,
+					dst     : dst,
+					cut     : b.cut ? 1 : 0,
+					targets : b.files
 				});
-				clean && this.cleanBuffer();
 			}
 			return this;
 		},

@@ -158,11 +158,13 @@
 					}
 					
 					if (src == id) {
+						fm.cleanBuffer();
 						return;
 					}
 					ui.helper.hide();
 					if (fm.copy(ui.helper.data('files'), src, !(e.shiftKey || e.ctrlKey || e.metaKey), true)) {
-						fm.paste(id, true);
+						fm.paste(id);
+						fm.cleanBuffer();
 					}
 				}
 			};
