@@ -136,7 +136,36 @@
 				fm.trigger('focus');
 			});
 	
-		
+		/**
+		 * Common droppable options for nav and cwd
+		 *
+		 * @type Object
+		 **/
+		this.droppable = {
+				tolerance : 'pointer',
+				drop : function(e, ui) {
+					var $this = $(this), 
+						src = ui.helper.data('src'),
+						id;
+					
+					if ($this.is('.elfinder-cwd')) {
+						id = fm.cwd.hash;
+					} else if ($this.is('.elfinder-cwd-file')) {
+						id = this.id;
+						self.cwd.droppable('enable');
+					} else {
+						id = this.id.substr(4);
+					}
+					
+					if (src == id) {
+						return;
+					}
+					ui.helper.hide();
+					if (fm.copy(ui.helper.data('files'), src, !(e.shiftKey || e.ctrlKey || e.metaKey), true)) {
+						fm.paste(id, true);
+					}
+				}
+			};
 
 		this.init = function() {
 			// init dirs tree view and events

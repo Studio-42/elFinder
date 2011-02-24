@@ -659,7 +659,8 @@
 		 * @param  Array    files hashes array
 		 * @param  String   files parent dir hash
 		 * @param  Boolean  cut files?
-		 * @return elFinder
+		 * @param  Boolean  method called from drag&drop - required for correct error message
+		 * @return Boolean
 		 */
 		copy : function(files, src, cut, dd) {
 			var self = this, 
@@ -690,6 +691,7 @@
 					cut   : !!cut,
 					files : tmp
 				};
+				this.trigger(cut ? 'cut' : 'copy', this.buffer);
 				return true;
 			} 
 			this.cleanBuffer();	

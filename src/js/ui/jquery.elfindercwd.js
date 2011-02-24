@@ -1,5 +1,5 @@
 $.fn.elfindercwd = function(fm) {
-	
+	// @TODO on cut add disable class to files?
 	return this.each(function() {
 		var cwd = $(this).addClass('elfinder-cwd')
 			.delegate('[id]', 'mouseenter', function(e) {
@@ -30,18 +30,7 @@ $.fn.elfindercwd = function(fm) {
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			})
-			.droppable({
-				accept : '[id]',
-				drop   : function(e, ui) {
-					var src = ui.helper.data('src');
-
-					if (src != fm.cwd.hash && fm.cwd.write) {
-						ui.helper.hide();
-						fm.copy(ui.helper.data('files'), src, !(e.shiftKey || e.ctrlKey || e.metaKey));
-						fm.paste(fm.cwd.hash, true);
-					} 
-				}
-			}),
+			.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'})),
 			draggable = $.extend({}, fm.ui.draggable, {
 				addClasses : true,
 				appendTo : cwd,
@@ -72,20 +61,11 @@ $.fn.elfindercwd = function(fm) {
 					return h;
 				}
 			}),
-			// @TODO move into ui prototype
-			droppable = {
-				tolerance : 'pointer',
+			droppable = $.extend({}, fm.ui.droppable, {
 				hoverClass : 'elfinder-dropable-active',
 				over : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
-				out  : function() { cwd.droppable('enable'); },
-				drop : function(e, ui) {
-					ui.helper.hide();
-					// fm.log(ui.helper.data('files'))
-					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey), true);
-					// fm.paste(this.id, true);
-					// cwd.droppable('enable');
-				}
-			},
+				out  : function() { cwd.droppable('enable'); }
+			})
 			// @todo - in one line
 			tpl = {
 				icons : {

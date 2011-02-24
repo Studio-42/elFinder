@@ -69,15 +69,9 @@
 								.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));
 						}
 					}),
-				droppable = {
-						tolerance  : 'pointer',
-						hoverClass : 'elfinder-droppable-active ui-state-hover',
-						drop : function(e, ui) {
-							ui.helper.hide();
-							fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-							fm.paste(this.id.substr(4));
-						}
-					},
+				droppable = $.extend({}, fm.ui.droppable, {
+					hoverClass : 'elfinder-droppable-active ui-state-hover'
+				}),
 				attachEvents = function() {
 					tree.find('a')
 						.not('.ui-droppable,.elfinder-na,.elfinder-ro')
