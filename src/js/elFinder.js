@@ -513,7 +513,7 @@
 						}
 
 						if (error) {
-							return self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
+							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
 						}
 
 						self.trigger(cmd, data);
