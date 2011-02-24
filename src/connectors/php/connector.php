@@ -74,8 +74,8 @@ $opts = array(
 					'rm'   => true
 				),
 				'/print\.png/' => array(
-					'read'   => false,
-					'write'   => true,
+					'read'   => true,
+					'write'   => false,
 					'rm'   => false
 				)
 			)

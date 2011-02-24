@@ -165,6 +165,7 @@
 				
 				self.trigger('load', e.data);
 				delete self.listeners.load;
+				self.tree = {}
 			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
@@ -177,6 +178,22 @@
 				self.cdc = {};
 				while (l--) {
 					self.cdc[cdc[l].hash] = cdc[l];
+				}
+				
+				if (e.data.tree && self.api > 1) {
+					for (var i = 0; i < e.data.tree.length; i++) {
+						var d = e.data.tree[i];
+						
+						if (!self.tree[d.hash]) {
+							self.tree[d.hash] = {
+								name : d.name,
+								read : d.read,
+								write :d.write,
+								rm : d.rm
+							}
+						}
+					}
+
 				}
 				
 				// remember last dir
@@ -395,6 +412,8 @@
 					window.console && window.console.error && window.console.error(ex);
 				}
 			}
+			
+			delete e;
 			return this;
 		},
 		
@@ -498,6 +517,7 @@
 						}
 
 						self.trigger(cmd, data);
+						// delete data
 					}
 				};
 				
@@ -641,18 +661,39 @@
 		 * @param  Boolean  cut files?
 		 * @return elFinder
 		 */
-		copy : function(files, src, cut) {
-			files = ($.isArray(files) ? files : this.selected).slice(0);
-
-			this.cleanBuffer();			
-			if (files.length) {
+		copy : function(files, src, cut, dd) {
+			var self = this, 
+				tmp = [], 
+				file, error;
+			
+			// check read/rm permissions
+			$.each(files || this.selected, function(i, hash) {
+				file = self.cdc[hash] || self.tree[hash];
+				if (file) {
+					if (!file.read) {
+						error = 'Unable to copy "$1". Not enough permission.';
+					} else if (cut && file.rm === false) {
+						// use file.rm === false because old connector do not send rm permission
+						error = dd ? 'Unable to move "$1". Not enough permission.' : 'Unable to cut "$1". Not enough permission.';
+					}
+					if (error) {
+						self.trigger('error', {error : [[error, file.name]]});
+						return false;
+					}
+					tmp.push(hash);
+				}
+			});
+			
+			if (tmp.length) {
 				this.buffer = {
 					src   : src || this.cwd.hash,
 					cut   : !!cut,
-					files : files
+					files : tmp
 				};
-			}
-			return this;
+				return true;
+			} 
+			this.cleanBuffer();	
+			return false;
 		},
 		
 		/**
@@ -701,7 +742,7 @@
 		 * @return elFinder
 		 */
 		cleanBuffer : function() {
-			this.buffer = { files : [], cut : false };
+			this.buffer = { files : [], cut : false, src : '' };
 			return this;
 		},
 		

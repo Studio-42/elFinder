@@ -63,6 +63,7 @@
 						addClasses : true,
 						appendTo   : fm.ui.cwd,
 						helper     : function() {
+							// @TODO save permissions
 							return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
 								.data('files', [this.id.substr(4)])
 								.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));

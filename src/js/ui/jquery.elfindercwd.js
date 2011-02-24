@@ -49,7 +49,7 @@ $.fn.elfindercwd = function(fm) {
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
 						h = $('<div class="elfinder-drag-helper"/>'),
 						icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
-						f, l;
+						first, last, files = [];
 					
 					// select dragged file if no selected
 					if (!p.is('.ui-selected')) {
@@ -59,19 +59,20 @@ $.fn.elfindercwd = function(fm) {
 						p.trigger('select.elfinder');
 					}
 						
-					f = fm.get(cwd.find('.ui-selected:first').attr('id'));
-					l = fm.get(cwd.find('.ui-selected:last').attr('id'));
+					first = fm.get(cwd.find('.ui-selected:first').attr('id'));
+					last  = fm.get(cwd.find('.ui-selected:last').attr('id'));
 					// append icons [and number of files]	
-					h.append(icon.replace('%class', fm.ui.mime2class(f.mime)))
+					h.append(icon.replace('%class', fm.ui.mime2class(first.mime)))
 						.data('files', fm.selected)
 						.data('src', fm.cwd.hash);
-					if (f !== l) {
-						h.append(icon.replace('%class', fm.ui.mime2class(l.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+					if (first !== last) {
+						h.append(icon.replace('%class', fm.ui.mime2class(last.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
 					}
 			
 					return h;
 				}
 			}),
+			// @TODO move into ui prototype
 			droppable = {
 				tolerance : 'pointer',
 				hoverClass : 'elfinder-dropable-active',
@@ -79,9 +80,10 @@ $.fn.elfindercwd = function(fm) {
 				out  : function() { cwd.droppable('enable'); },
 				drop : function(e, ui) {
 					ui.helper.hide();
-					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey));
-					fm.paste(this.id, true);
-					cwd.droppable('enable');
+					// fm.log(ui.helper.data('files'))
+					fm.copy(ui.helper.data('files'), ui.helper.data('src'), !(e.shiftKey || e.ctrlKey || e.metaKey), true);
+					// fm.paste(this.id, true);
+					// cwd.droppable('enable');
 				}
 			},
 			// @todo - in one line

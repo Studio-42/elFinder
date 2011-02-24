@@ -883,6 +883,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				'name'   => $this->_basename($path),
 				'read'   => $read,
 				'write'  => $this->_isWritable($path),
+				'rm'     => $this->_isRemovable($path),
 				'childs' => count($childs) > 0,
 				'link'   => $link
 			)

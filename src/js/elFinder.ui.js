@@ -136,6 +136,7 @@
 				fm.trigger('focus');
 			});
 	
+		
 
 		this.init = function() {
 			// init dirs tree view and events
