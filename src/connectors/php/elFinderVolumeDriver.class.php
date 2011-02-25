@@ -479,7 +479,7 @@ abstract class elFinderVolumeDriver {
 				
 				if ($cnt > 0) {
 					if (($tmb = $this->_tmb($file, $mime)) != false) {
-						$result['images'][] = array('hash' => $this->encode($file), 'tmb' => $tmb);
+						$result['images'][$this->encode($file)] = $tmb;
 						$cnt--;
 					}
 				} else {

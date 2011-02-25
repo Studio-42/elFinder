@@ -2,6 +2,17 @@
 	
 	elFinder = function(el, o) {
 		var self = this,
+			/**
+			 * If false - no ajax requests allowed
+			 *
+			 * @type Boolean
+			 **/
+			ajax = true,
+			/**
+			 * shortcuts lock
+			 *
+			 * @type Boolean
+			 **/
 			lock = false,
 			loaded = false,
 			/**
@@ -111,17 +122,6 @@
 		 **/
 		this.shortcuts = {};
 		/**
-		 * Flags indicates what functionality disabled now
-		 *
-		 * @type Object
-		 **/
-		this.locks = {
-			// user actions and comands execution disabled (while ajax request)
-			ui : false, 
-			// shortcuts disabled
-			shortcuts : false
-		};
-		/**
 		 * Cwd view type
 		 *
 		 * @type String
@@ -149,12 +149,24 @@
 			return l === void(0) ? lock : lock = !!l;
 		}
 		
-		this.bind('ajaxstart ajaxstop', function(e) {
-				lock = e.type == 'ajaxstart';
+		this.ajaxAllowed = function() {
+			return ajax;
+		}
+		
+		this.one('ajaxerror error', function(e) {
+				if (!loaded) {
+					e.stopPropagation();
+					self.listeners = {};
+				}
+			})
+			.bind('ajaxstart ajaxstop', function(e) {
+				var l = e.type == 'ajaxstop';
+				ajax = l;
+				lock = !l;
 			})
 			.bind('focus', function() {
 				if (lock) {
-					lock && $('texarea,:text').blur();
+					$('texarea,:text').blur();
 					lock = false;
 				}
 			})
@@ -220,18 +232,23 @@
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
 		
-				if (!self.lock()) {
+				if (!lock) {
+					c == 9 && e.preventDefault();
 					$.each(self.shortcuts, function(i, s) {
 						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
 							e.preventDefault();
 							s.callback(e, self);
-							self.debug('shortcut', s.pattern);
+							// self.debug('shortcut', s.pattern);
 							return false;
 						}
 					});
 				}
 			});
 		}
+		
+		$(document).click(function() {
+			!lock & self.trigger('blur');
+		})
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
@@ -518,7 +535,7 @@
 				
 			opts.data && $.extend(options, opts)
 			
-			if (!this.lock()) {
+			if (this.ajaxAllowed()) {
 				!mode && self.trigger('ajaxstart', options);
 				$.ajax(options);
 			}
@@ -956,14 +973,17 @@
 		})
 	}
 	
-	$.fn.elfinderallattr = function(attr) {
-		var a = [];
+	$.fn.getElFinder = function() {
+		var instance;
 		
 		this.each(function() {
-			a.push($(this).attr(attr));
+			if (this.elfinder) {
+				instance = this.elfinder;
+				return false;
+			}
 		});
 		
-		return a;
+		return instance;
 	}
 	
 	

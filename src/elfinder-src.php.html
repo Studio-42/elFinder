@@ -48,7 +48,7 @@
 	<script src="js/i18n/elfinder.zh_TW.js" type="text/javascript" charset="utf-8"></script>
 	-->
 	<style type="text/css">
-		#close, #open, #dock, #undock, #destroy {
+		.button {
 			width: 100px;
 			position:relative;
 			display: -moz-inline-stack;
@@ -77,26 +77,13 @@
 				url : 'connectors/php/connector.php',
 				// url : 'connectors/elf-json2.json',
 				lang : 'ru'
-				// docked : true,
-				// editorCallback : function(url) { window.console.log(url) },
-				// closeOnEditorCallback : false,
-				// selectMultiple : true,
-				// dialog : {
-				// 	title : 'File manager',
-				// 	height : 500
-				// }
 			})
 
-			$('#close,#open,#dock,#undock,#destroy').click(function() {
-				$('#finder').elfinder($(this).attr('id'));
-			})
 			
-			$('#mkdir').click(function(e) {
-				e.stopPropagation();
-				e.preventDefault();
+			$('#lock').click(function(e) {
+				var f = $('#finder').getElFinder();
 				
-				window.console.log(f[0].elfinder)
-				f[0].elfinder.ui.exec('mkdir')
+				f.lock(true)
 			})
 			
 		})
@@ -104,9 +91,11 @@
 
 </head>
 <body>
-	<a href="#" id="mkdir">mkdir</a>
-	<div id="open">open</div><div id="close">close</div><div id="dock">dock</div><div id="undock">undock</div>
-	<div id="finder">finder</div>
+	<div id="lock" class="button">lock</div>
+	<!-- <div id="close"  class="button">close</div>
+	<div id="dock" class="button">dock</div>
+	<div id="undock" class="button">undock</div>-->
+	<div id="finder">finder</div> 
 	<input type="text" value="123" />
 	
 	

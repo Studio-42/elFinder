@@ -121,10 +121,10 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.viewport = el.empty()
+		this.viewport = el.empty().removeAttr('style').removeAttr('class')
 			.attr('id', fm.id)
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+fm.dir+' '+(fm.options.cssClass||''))
-			.append(this.toolbar.hide())
+			.append(this.toolbar.hide().show())
 			.append(this.workzone)
 			.append(this.overlay.hide())
 			.append(this.spinner)
@@ -133,7 +133,7 @@
 			.click(function(e) {
 				e.stopPropagation();
 				// fire event to enable fm shortcuts
-				fm.trigger('focus');
+				fm.lock() && fm.trigger('focus');
 			});
 	
 		/**
@@ -181,17 +181,6 @@
 			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
 			
-			// click outside elfinder disable shortcuts
-			$(document).click(function() {
-					// disable fm shortcuts
-					fm.trigger('blur');
-				})
-				.keydown(function(e) {
-					if (!fm.locks.shortcuts && e.keyCode == 9) {
-						// prevent fm loosing "focus"
-						e.preventDefault();
-					}
-				});
 			
 			// bind fm events handlers and shortcuts
 			fm
