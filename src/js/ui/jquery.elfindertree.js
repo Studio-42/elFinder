@@ -18,7 +18,7 @@
 					var pclass    = fm.ui.perms2class(dir),
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
 						hasChilds = newAPI ? dir.childs : dir.dirs && dir.dirs.length,
-						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(dir.dirs) : '' ,
+						childs    = newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? build(dir.dirs) : ''), 
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
 					if (dir && dir.name) {
@@ -42,7 +42,7 @@
 					return '';
 				},
 				build = function(dirs, root) {
-					var html = '', i, e, d;
+					var html = '', i, e, d, p, s;
 					
 					if (newAPI) {
 						for (i = 0; i < dirs.length; i++) {
@@ -186,7 +186,28 @@
 			.bind('tree', function(e) {
 				build(e.data.tree);
 				setTimeout(attachEvents, 25);
-			});
+			})
+			.bind('mkdir', function(e) {
+				var dir = e.data.dir && e.data.dir.hash && e.data.dir.name ? e.data.dir : null,
+					html, parent, nodes, arrow;
+				
+				if (dir) {
+					html = item(dir);
+					parent = tree.find('#nav-'+dir.phash);
+					nodes = parent.next('ul').children();
+					
+					if (nodes.length) {
+						
+					} else if (parent.length) {
+						if ((arrow = parent.children('.'+collapsed)).length == 0) {
+							parent.prepend('<span class="elfinder-nav-collapsed"/>');
+						}
+					}
+					
+				}
+					
+			})
+			;
 			
 		});
 	}

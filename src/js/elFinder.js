@@ -254,6 +254,14 @@
 					}
 				}
 			})
+			.bind('mkdir', function(e) {
+				self.log(e.data)
+				if (e.data.dir) {
+					file(e.data.dir)
+				}
+				// self.log(self.cdc)
+				// self.log(self.tree)
+			})
 			;
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -825,17 +833,12 @@
 		},
 		
 		mkdir : function(name) {
-			var self = this;
-			if (!this.locks.ui) {
-				this.ajax({
-					cmd : 'mkdir',
-					current : this.cwd.hash,
-					name : name || this.uniqueName('folder')
-				}, {
-					error : function(xhr) { self.log(xhr) },
-					success : function(data) { self.log(data); }
-				})
-			}
+			this.ajax({
+				cmd     : 'mkdir',
+				current : this.cwd.hash,
+				name    : name || this.uniqueName('folder')
+			})
+			
 			return this;
 		},
 		

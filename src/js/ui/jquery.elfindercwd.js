@@ -400,6 +400,28 @@ $.fn.elfindercwd = function(fm) {
 				cwd.trigger('scroll');
 			}
 		})
+		.bind('mkdir', function(e) {
+			var dir = e.data.dir, nodes, html = item(dir);
+
+			if (dir && dir.hash && dir.name) {
+				
+				nodes = cwd.find('[id].directory')
+				
+				if (nodes.length) {
+					nodes.each(function(i) {
+						var $this = $(this);
+						if (i == nodes.length - 1) {
+							$this.after(html);
+						} else if (dir.name < $this.find('.elfinder-cwd-filename').html()) {
+							$this.before(html);
+							return false;
+						}
+					})
+				} else {
+					(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).prepend(html);
+				}
+			}
+		})
 		.shortcut({
 			pattern     :'ctrl+a', 
 			description : 'Select all files',
