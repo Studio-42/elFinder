@@ -205,7 +205,7 @@ $.fn.elfindercwd = function(fm) {
 							p.trigger('select.elfinder')
 						}
 
-						fm.trigger('select');
+						fm.trigger('select', {selected : fm.selected});
 					});
 			},
 			/**
@@ -273,7 +273,7 @@ $.fn.elfindercwd = function(fm) {
 					// set its visible
 					scrollToView(n.filter(prev ? ':first' : ':last'));
 					// update cache/view
-					fm.trigger('select');
+					fm.trigger('select', {selected : fm.selected});
 				}
 			},
 			/**
@@ -348,7 +348,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.selectable({
 				filter     : '[id]',
-				stop       : function() { fm.lock() && fm.trigger('focus'); fm.trigger('select'); },
+				stop       : function() { fm.lock() && fm.trigger('focus'); fm.trigger('select', {selected : fm.selected}); },
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			})
