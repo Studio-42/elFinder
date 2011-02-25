@@ -20,7 +20,28 @@
 			 *
 			 * @type jQuery
 			 **/
-			$el = $(el);
+			$el = $(el),
+			file = function(file, replace) {
+				var hash = file.hash;
+
+				if (hash && file.name) {
+
+					if (file.mime && (replace || !self.cdc[hash])) {
+						self.cdc[hash] = $.extend({}, file);
+						delete self.cdc[hash].hash;
+						delete self.cdc[hash].tmb;
+					}
+
+					if ((!file.mime || file.mime == 'directory') && (replace || !self.tree[hash])) {
+						self.tree[hash] = $.extend({mime : 'directory'}, file);
+						delete self.tree[hash].hash;
+						delete self.tree[hash].phash;
+						delete self.tree[hash].childs;
+						delete self.tree[hash].size;
+					}
+				}
+			}
+			;
 			
 		/**
 		 * Application version
@@ -93,7 +114,7 @@
 		 * @type Object
 		 **/
 		this.cdc      = {};
-		
+		this.files = {};
 		this.tree = {};
 		
 		/**
@@ -153,6 +174,8 @@
 			return ajax;
 		}
 		
+		
+		
 		this.one('ajaxerror error', function(e) {
 				if (!loaded) {
 					e.stopPropagation();
@@ -180,47 +203,54 @@
 					hl  = h.length,
 					i, d;
 
-				// update curent dir info and content
-				$.extend(self.cwd, e.data.cwd);	
-
-				self.cdc = {};
-				while (i--) {
-					self.cdc[cdc[i].hash] = cdc[i];
+				// init or reload
+				if (self.params) {
+					$.extend(self.params, e.data.params||{});
+					self.tree = {};
+				}
+				// old api
+				if (self.api < 2) {
+					self.tree = {}; 
 				}
 				
+				// update curent dir info
+				$.extend(self.cwd, e.data.cwd);	
 				// remember last dir
 				self.last(self.cwd.hash);
 				
+				// update directory content
+				self.cdc = {};
+				while (i--) {
+					file(cdc[i], true);
+				}
+				// self.log(self.cdc)
+				// self.log(self.tree)
 				// update history if required
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
+				// reset selected files
 				self.selected = [];
 				
 				// initial loading
 				if (!loaded) {
 					loaded = true;
-					$.extend(self.params, e.data.params||{});
 					self.api = parseFloat(e.data.api) || 1;
 					self.debug('api-version', self.api);
-
-					self.trigger('load', e.data);
+					self.trigger('load');
 					delete self.listeners.load;
 				}
 			})
 			.bind('open tree', function(e) {
-				// store tree permissions - required to check its for copy/paste etc
+				var i, f;
+
+				if (!self.tree[self.cwd.hash]) {
+					file(self.cwd);
+				}
 				if (e.data.tree && self.api > 1) {
-					for (i = 0; i < e.data.tree.length; i++) {
-						d = e.data.tree[i];
-						if (!self.tree[d.hash]) {
-							self.tree[d.hash] = {
-								name  : d.name,
-								read  : !!d.read,
-								write :!!d.write,
-								rm    : d.rm === void(0) ? true : !!d.rm
-							}
-						}
+					i = e.data.tree.length;
+					while (i--) {
+						!self.tree[e.data.tree[i].hash] && file(e.data.tree[i]);
 					}
 				}
 			})
@@ -344,7 +374,8 @@
 			if (!e.type) {
 				e = $.Event(e.toLowerCase());
 			}
-			e.data = $.extend(e.data, data);
+			e.data = $.extend(e.data||{}, data, {elfinder : this});
+
 			return e;
 		},
 		
@@ -409,10 +440,10 @@
 		 * @return elFinder
 		 */
 		trigger : function(e, d) {
-			var e = this.event(e, d),
+			var e = this.event(e, d||{}),
 				l = this.listeners[e.type]||[], i;
 
-			this.debug('event-'+e.type, d);
+			this.debug('event-'+e.type, e.data);
 
 			for (i = 0; i < l.length; i++) {
 				if (e.isPropagationStopped()) {

@@ -14,22 +14,32 @@
 				active    = 'ui-state-active',
 				tpl       = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass">%arrow<span class="elfinder-nav-icon"/>%link %perms %name</a>%childs</li>',
 				ul        = '<ul class="'+subtree+'">',
-				item = function(o, isroot) {
-					var pclass    = fm.ui.perms2class(o),
+				item = function(dir, isroot) {
+					var pclass    = fm.ui.perms2class(dir),
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
-						hasChilds = newAPI ? o.childs : o.dirs && o.dirs.length,
-						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(o.dirs) : '' ,
+						hasChilds = newAPI ? dir.childs : dir.dirs && dir.dirs.length,
+						childs    = hasChilds ? newAPI ? ul + '</ul>' : build(dir.dirs) : '' ,
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
-					return o && o.name 
-						? tpl.replace('%id',    o.hash)
+					if (dir && dir.name) {
+						if (!fm.tree[dir.hash]) {
+							fm.tree[dir.hash] = {
+								mime  : 'directory',
+								name  : dir.name,
+								read  : dir.read,
+								write : dir.write,
+								rm    : true
+							};
+						}
+						return tpl.replace('%id',    dir.hash)
 							.replace('%pclass', pclass+(isroot ? ' '+root : ''))
 							.replace('%arrow',  arrow)
 							.replace('%perms',  perms)
-							.replace('%link',   o.link ? '<span class="elfinder-symlink"/>' : '')
-							.replace('%name',   o.name)
+							.replace('%link',   dir.link ? '<span class="elfinder-symlink"/>' : '')
+							.replace('%name',   dir.name)
 							.replace('%childs', childs)
-						: '';
+					}
+					return '';
 				},
 				build = function(dirs, root) {
 					var html = '', i, e, d;
@@ -51,6 +61,7 @@
 						if (root) {
 							tree.find('a').remove();
 							tree.html(item(dirs, true));
+							// fm.log(fm.tree)
 						} else {
 							for (i = 0; i < dirs.length; i++) {
 								html += item(dirs[i], root);

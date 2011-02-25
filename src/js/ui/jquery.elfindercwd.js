@@ -86,7 +86,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			templates = {
 				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all"%tmb/>%marker</div><div class="elfinder-cwd-filename ui-corner-all">%name</div></div>',
-				row  : '<tr id="%hash" class="elfinder-file %permsclass %dirclass %oddclass"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td><td>%perms</td><td>%date</td><td>%size</td><td>%kind</td></tr>'
+				row  : '<tr id="%hash" class="elfinder-file %permsclass %dirclass"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td><td>%perms</td><td>%date</td><td>%size</td><td>%kind</td></tr>'
 			},
 			/**
 			 * Template placeholders replacement rules
@@ -120,9 +120,6 @@ $.fn.elfindercwd = function(fm) {
 				},
 				tmb : function(f) {
 					return f.tmb ? ' _tmb="'+f.tmb+'"' : '';
-				},
-				oddclass : function(f, i) {
-					return i%2 ? 'elfinder-odd-row' : '';
 				}
 			},
 			/**
@@ -132,7 +129,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @return String
 			 **/
 			item = function(f) {
-				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f, i) : f[e]; })
+				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f) : f[e]; })
 			},
 			/**
 			 * Append files to cwd
@@ -351,7 +348,6 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.selectable({
 				filter     : '[id]',
-				// start      : function() { fm.trigger('focus'); },
 				stop       : function() { fm.lock() && fm.trigger('focus'); fm.trigger('select'); },
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
@@ -369,10 +365,10 @@ $.fn.elfindercwd = function(fm) {
 			if (list) {
 				cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 			}
-			
-			buffer = e.data.cdc.slice(0);
-			
-			append(buffer.splice(0, fm.options.showFiles), true);
+			if ($.isArray(e.data.cdc)) {
+				buffer = e.data.cdc.slice(0);
+				append(buffer.splice(0, fm.options.showFiles), true);
+			}
 			
 		})
 		.bind('tmb', function(e) {
