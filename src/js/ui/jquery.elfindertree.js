@@ -106,7 +106,7 @@
 						
 						if (id == fm.cwd.hash) {
 							// already current dir - toggle subdirs
-							dir.trigger('toggle.elfinder');
+							dir.children('.'+collapsed).click();
 						} else if (dir.is('.elfinder-na,.elfinder-wo')) {
 							// not readable dir
 							fm.trigger('error', {error : [['The folder "$1" can’t be opened because you don’t have permission to see its contents.', $.trim(dir.text())]]});
@@ -115,44 +115,37 @@
 							fm.open(id);
 						}
 					})
-					.delegate('a', 'toggle.elfinder', function() {
-						var $this  = $(this),
-							ul     = $this.next('.'+subtree),
-							arrow  = $this.children('.'+collapsed),
-							spinner,
-							opts;
-						
+					.delegate('.'+collapsed, 'click', function(e) {
+						// click on arrow - toggle subdirs
+						var $this = $(this),
+							parent = $this.parent(),
+							ul    = parent.next('.'+subtree),
+							spinner, opts;
+							
+						e.stopPropagation();
+						e.preventDefault();
+
 						if (ul.children().length) {
 							ul.slideToggle();
-							arrow.toggleClass(expanded);
-						} else if (newAPI && arrow.length) {
+							$this.toggleClass(expanded);
+						} else if (newAPI) {
 							spinner = $('<span class="elfinder-spinner-mini"/>');
-							opts = {
-								data : {cmd : 'tree', target : $(this).attr('id').substr(4)},
+							fm.ajax({
+								data : {cmd : 'tree', target : parent.attr('id').substr(4)},
 								beforeSend : function() {
-									$this.prepend(spinner);
-									arrow.hide();
+									$this.before(spinner).hide();
 								},
 								complete : function() {
 									spinner.remove();
-									if (!ul.children().length) {
-										arrow.remove();
-									} else {
-										arrow.show().addClass(expanded);
+									if (ul.children().length) {
 										ul.slideToggle();
+										$this.show().toggleClass(expanded);
+									} else {
+										$this.remove();
 									}
 								}
-							}
-							
-							fm.ajax(opts, 'silent');
+							});
 						}
-						
-					})
-					.delegate('.'+collapsed, 'click', function(e) {
-						// click on arrow - toggle subdirs
-						e.stopPropagation();
-						e.preventDefault();
-						$(this).parent().trigger('toggle.elfinder');
 					})
 				;
 				
@@ -206,6 +199,25 @@
 					
 				}
 					
+			})
+			.bind('rm', function(e) {
+				var rm = e.data.removed || [],
+					l = rm.length,
+					element, parent, ul;
+					
+				while (l--) {
+					element = tree.find('#nav-'+rm[l].hash);
+					parent  = tree.find('#nav-'+rm[l].phash);
+					ul = parent.next('.'+subtree);
+					
+					if (element.length) {
+						element.parent().remove();
+					}
+
+					if (!ul.children().length) {
+						parent.children('.'+collapsed).remove();
+					}
+				}
 			})
 			;
 			

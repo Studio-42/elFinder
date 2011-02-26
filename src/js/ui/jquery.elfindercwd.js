@@ -422,6 +422,14 @@ $.fn.elfindercwd = function(fm) {
 				}
 			}
 		})
+		.bind('rm', function(e) {
+			var rm = e.data.removed || [],
+				l = rm.length;
+
+			while (l--) {
+				cwd.find('#'+rm[l].hash).remove();
+			}
+		})
 		.shortcut({
 			pattern     :'ctrl+a', 
 			description : 'Select all files',

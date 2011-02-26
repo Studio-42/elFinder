@@ -510,10 +510,10 @@ class elFinder {
 				return array('error' => 'File not found');
 			}
 			
-			if (($info = $volume->info($hash)) === false) {
+			if (($info = $volume->info($hash, true)) === false) {
 				return array('error' => $volume->error());
 			}
-			
+
 			if ($volume->rm($hash)) {
 				$removed[] = $info;
 			} else {

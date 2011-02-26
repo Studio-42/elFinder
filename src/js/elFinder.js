@@ -40,6 +40,19 @@
 						delete self.tree[hash].size;
 					}
 				}
+			},
+			remove = function(files) {
+				var i = files.length, hash;
+				
+				while (l--) {
+					hash = files[i];
+					if (self.cdc[hash]) {
+						delete self.cdc[hash];
+					}
+					if (self.tree[hash]) {
+						delete self.tree[hash];
+					}
+				}
 			}
 			;
 			
@@ -262,6 +275,15 @@
 				// self.log(self.cdc)
 				// self.log(self.tree)
 			})
+			.bind('rm', function(e) {
+				self.log(e.data);
+				if (self.api > 1) {
+					
+				} else {
+					e.stopPropagation();
+					self.trigger('open', e.data);
+				}
+			})
 			;
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -276,7 +298,6 @@
 						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
 							e.preventDefault();
 							s.callback(e, self);
-							// self.debug('shortcut', s.pattern);
 							return false;
 						}
 					});
@@ -286,7 +307,7 @@
 		
 		$(document).click(function() {
 			!lock & self.trigger('blur');
-		})
+		});
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
@@ -576,6 +597,9 @@
 			
 			if (this.ajaxAllowed()) {
 				!mode && self.trigger('ajaxstart', options);
+				if (this.api < 2) {
+					options.data = $.extend({current : this.cwd.hash}, options.data);
+				}
 				$.ajax(options);
 			}
 			
@@ -588,7 +612,7 @@
 		 * @param  String  file hash
 		 * @return Object
 		 */
-		get : function(hash) { return this.cdc[hash]; },
+		get : function(hash) { return this.cdc[hash] || this.tree[hash]; },
 		
 		exists : function(name) {
 			var hash;
@@ -800,36 +824,20 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			var self = this, f,
-				data = {
-					cmd : 'rm',
-					targets : []
-				},
-				opts = {
-					error : function(xhr) { self.log(xhr) },
-					success : function(data) { self.log(data)}
-				};
+			var files = $.isArray(files) ? files : [files],
+				targets = [],
+				i, f;
 			
-			if (!this.locks.ui) {
-				$.each(files || [], function(i, hash) {
-					if ((f = self.cdc[hash])) {
-						if (!f.rm) {
-							// self.trigger('error', {error : ['Access denied', f.name + ' ' + self.i18n('can not be removed')]});
-							// return false;
-						}
-						data.targets.push(hash);
-					} 
-				});
-				
-				if (data.targets.length) {
-					
-					this.ajax(data, opts)
-					
+			for (i = 0; i < files.length; i++) {
+				if ((f = this.get(files[i]))) {
+					if (!f.rm) {
+						return this.trigger('error', {error : [['Unable to delete '+(f.mime == 'directory' ? 'folder' : 'file')+' "$1".', f.name], 'Not enough permissions.']});
+					}
+					targets.push(files[i]);
 				}
-				
 			}
 			
-			return this;
+			return targets.length ? this.ajax({cmd : 'rm', targets : targets}, 'nonblocked') : this;
 		},
 		
 		mkdir : function(name) {
@@ -915,7 +923,8 @@
 		required : {
 			open : ['cwd', 'cdc'],
 			tree : ['tree'],
-			tmb  : ['current', 'images']
+			tmb  : ['current', 'images'],
+			// rm   : ['removed']
  		},
 		
 		sort : {

@@ -369,11 +369,11 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function info($hash) {
+	public function info($hash, $phash=false) {
 		
 		return ($path = $this->path($hash, '', 'read')) === false
 			? false
-			: $this->fileinfo($path);
+			: $this->fileinfo($path, $phash);
 	}
 	
 	/**
@@ -641,10 +641,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(array(($dir ? 'The folder' : 'The file').' "$1" can’t be opened because you don’t have permission to see its contents.', $this->_basename($path)));
 		}
 		if ($perm == 'write' && !$this->_isWritable($path)) {
-			return $this->setError(array('You don\’t have permission to write into "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
+			return $this->setError(array('Unable to write into '.($dir ? 'folder' : 'file').' "$1".', $this->_basename($path)), 'Not enough permissions.');
 		}
 		if ($perm == 'rm' && !$this->_isRemovable($path)) {
-			return $this->setError(array('You don\’t have permission to delete "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
+			return $this->setError(array('Unable to delete '.($dir ? 'folder' : 'file').' "$1".', $this->_basename($path)), 'Not enough permissions.');			
 		}
 		
 		if ($linkTarget && $this->_isLink($path)) {
@@ -800,9 +800,9 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$dir = $this->_isDir($path);
-		
+
 		if (!$this->_isRemovable($path)) {
-			return $this->setError(array('You don\’t have permission to delete "$1" '.($dir ? 'folder.' : 'file.'), $this->_basename($path)));
+			return $this->setError(array('Unable to delete '.($dir ? 'folder' : 'file').' "$1".', $this->_basename($path)), 'Not enough permissions.');			
 		}
 		
 		if ($dir) {
@@ -818,7 +818,7 @@ abstract class elFinderVolumeDriver {
 		
 		return ($dir ? $this->_rmdir($path) : $this->_unlink($path)) 
 			? true 
-			: $this->setError(array('Unable to delete "$1" '.($dir ? 'folder' : 'file'), $this->_basename($path)));
+			: $this->setError(array('Unable to delete '.($dir ? 'folder' : 'file').' "$1".', $this->_basename($path)));
 	}
 		
 	/**
@@ -860,7 +860,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry(dio) Levashov
 	 **/
 	protected function setError($msg)	{
-		$this->error = is_array($msg) ? array($msg) : $msg;
+		// $this->error = is_array($msg) ? array($msg) : $msg;
+		$this->error = func_get_args();
 		return false;
 	}
 	
