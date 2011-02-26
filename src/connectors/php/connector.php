@@ -50,7 +50,7 @@ function logger($data) {
 $opts = array(
 	'debug' => true,
 	'disabled' => array(),
-	'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
+	// 'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
 	'roots' => array(
 		array(
 			'path'   => '../../../files/',

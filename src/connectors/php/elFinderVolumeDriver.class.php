@@ -387,10 +387,9 @@ abstract class elFinderVolumeDriver {
 	public function dir($hash) {
 		return ($path = $this->path($hash, 'd', 'read', true)) === false
 			? false
-			: array_merge($this->fileinfo($path), array(
-					'phash'  => $path == $this->root ? false : $this->encode($this->_dirname($path)),
+			: array_merge($this->fileinfo($path, true), array(
 					'url'    => $this->_path2url($path, true),
-					'path'    => $this->_abspath($path), 
+					'path'   => $this->_abspath($path), 
 					'params' => $this->_params()
 				));
 	}
@@ -697,10 +696,11 @@ abstract class elFinderVolumeDriver {
 	 * Return file info
 	 *
 	 * @param  string  $path  file path
+	 * @param  bool    $phash  append parent hash to result? Requred to dicrease result json size.
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function fileinfo($path) {
+	protected function fileinfo($path, $phash = false) {
 		$mime = $this->_mimetype($path);
 		$time = $this->_filemtime($path);
 		
@@ -715,20 +715,26 @@ abstract class elFinderVolumeDriver {
 		$info = array(
 			'name'  => htmlspecialchars($this->_basename($path)),
 			'hash'  => $this->encode($path),
-			'phash' => $path == $this->root ? false : $this->encode($this->_dirname($path)),
 			'mime'  => $mime,
 			'date'  => $date, 
-			'size'  => $mime == 'directory' ? 0 : $this->_filesize($path),
 			'read'  => (int)$this->_isReadable($path),
 			'write' => (int)$this->_isWritable($path),
 			'rm'    => (int)$this->_isRemovable($path),
 			);
 			
+		if ($mime != 'directory') {
+			$info['size'] = $this->_filesize($path);
+		}
+			
+		if ($phash) {
+			$info['phash'] = $path == $this->root ? null : $this->encode($this->_dirname($path));
+		}	
+			
 		if ($this->_isLink($path)) {
 			if (false === ($link = $this->_readlink($path))) {
 				$info['mime']  = 'symlink-broken';
-				$info['read']  = false;
-				$info['write'] = false;
+				$info['read']  = 1;
+				$info['write'] = 1;
 			} else {
 				$info['mime']   = $this->_mimetype($link);
 				$info['link']   = $this->encode($link);
@@ -751,7 +757,7 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			if ($this->_isResizable($path, $info['mime'])) {
-				$info['resize'] = true;
+				$info['resize'] = 1;
 			}
 		}
 			
@@ -828,8 +834,8 @@ abstract class elFinderVolumeDriver {
 		$d2 = $f2['mime'] == 'directory';
 		$m1 = $f1['mime'];
 		$m2 = $f2['mime'];
-		$s1 = $f1['size'];
-		$s2 = $f2['size'];
+		$s1 = isset($f1['size']) ? $f1['size'] : 0;
+		$s2 = isset($f2['size']) ? $f2['size'] : 0;
 		
 		if ($this->sort <= self::$SORT_SIZE_DIRS_FIRST && $d1 != $d2) {
 			return $d1 ? -1 : 1;

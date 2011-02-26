@@ -223,7 +223,7 @@
 				while (i--) {
 					file(cdc[i], true);
 				}
-				// self.log(self.cdc)
+				self.log(self.cdc)
 				// self.log(self.tree)
 				// update history if required
 				if (!hl || h[hl - 1] != self.cwd.hash) {

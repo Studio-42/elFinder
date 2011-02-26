@@ -501,7 +501,7 @@ class elFinder {
 	protected function rm($args) {
 		$removed = array();
 		
-		if (!is_array($args['targets'])) {
+		if (!is_array($args['targets']) || empty($args['targets'])) {
 			return array('error' => 'No files to delete');
 		}
 		
@@ -515,14 +515,13 @@ class elFinder {
 			}
 			
 			if ($volume->rm($hash)) {
-				$this->trigger('rm', $volume, array('removed' => $info));
 				$removed[] = $info;
 			} else {
 				return array('error' => $volume->error());
 			}
 		}
-		
-		return array('removed' => $removed);
+		return $this->trigger('rm', $volume, array('removed' => $removed));
+		// return array('removed' => $removed);
 	}
 	
 	/**
