@@ -209,6 +209,11 @@
 			.bind('blur', function() {
 				lock = true;
 			})
+			.bind('select', function(e) {
+				if ($.isArray(e.data.selected)) {
+					self.selected = e.data.selected;
+				}
+			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
 					i   = cdc.length,
@@ -588,7 +593,7 @@
 							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
 						}
 
-						self.trigger(cmd, data);
+						self.trigger(cmd, data).trigger('updateSelected');
 						// delete data
 					}
 				};
@@ -923,8 +928,7 @@
 		required : {
 			open : ['cwd', 'cdc'],
 			tree : ['tree'],
-			tmb  : ['current', 'images'],
-			// rm   : ['removed']
+			tmb  : ['current', 'images']
  		},
 		
 		sort : {

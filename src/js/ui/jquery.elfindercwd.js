@@ -22,12 +22,6 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			tmbcnt = 0,
 			/**
-			 * Distance in px from item to cwd low edge to start lazy load   
-			 *
-			 * @type Number
-			 **/
-			theshold = fm.options.loadThreshold,
-			/**
 			 * Bind some shortcuts to keypress instead of keydown
 			 * Required to procces repeated key in ff and opera 
 			 *
@@ -132,6 +126,15 @@ $.fn.elfindercwd = function(fm) {
 				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f) : f[e]; })
 			},
 			/**
+			 * Return true if file is visible or place below cwd bottom edge less then fm.options.showThreshold
+			 *
+			 * @param  Object  file info
+			 * @return Boolean
+			 **/
+			visible = function(f) {
+				return cwd.innerHeight() - f.position().top + fm.options.showThreshold > 0;
+			},
+			/**
 			 * Append files to cwd
 			 *
 			 * @param  Array  files info
@@ -170,7 +173,7 @@ $.fn.elfindercwd = function(fm) {
 					
 			},
 			/**
-			 * Attach event handlersto required files
+			 * Attach event handlers to required files
 			 *
 			 * @param  Array  files ids
 			 * @return void
@@ -205,7 +208,7 @@ $.fn.elfindercwd = function(fm) {
 							p.trigger('select.elfinder')
 						}
 
-						fm.trigger('select', {selected : fm.selected});
+						fm.trigger('updateselected');
 					});
 			},
 			/**
@@ -273,7 +276,7 @@ $.fn.elfindercwd = function(fm) {
 					// set its visible
 					scrollToView(n.filter(prev ? ':first' : ':last'));
 					// update cache/view
-					fm.trigger('select', {selected : fm.selected});
+					fm.trigger('updateselected');
 				}
 			},
 			/**
@@ -301,26 +304,21 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			cwd = $(this).addClass('elfinder-cwd')
 			.bind('scroll', function(e) {
-				var height;
-				
 				if (last && last.length) {
-					height = cwd.innerHeight();
 					// lazy load - display not shown files
-					if (buffer.length && height - last.position().top + theshold > 0) {
-						append(buffer.splice(0, fm.options.loadFiles));
+					if (buffer.length && visible(last)) {
+						append(buffer.splice(0, fm.options.showFiles));
 					}
 					
 					// display not shown thumbnails
 					if (tmbcnt > 0) {
 						cwd.find('[_tmb]')
 							.filter(function() {
-								return height - $(this).parents('[id]:first').position().top + theshold > 0;
+								return visible($(this).parents('[id]:first'));
 							}).each(function() {
 								var $this = $(this);
 								$this.css('background', "url('"+$this.attr('_tmb')+"') center center no-repeat").removeAttr('_tmb');
 								tmbcnt--;
-								// as I see in top this take effect
-								delete fm.cdc[$this.parents('[id]:first').attr('id')].tmb;
 							});
 					}
 				}
@@ -333,29 +331,36 @@ $.fn.elfindercwd = function(fm) {
 				!target.is('.ui-draggable') && target.draggable(draggable);
 			})
 			.delegate('[id]', 'select.elfinder', function(e) {
-				var id = $(this).addClass('ui-selected').children().addClass('ui-state-hover').end().attr('id');
-			
-				$.inArray(id, fm.selected) === -1 && fm.selected.push(id);
+				$(this).addClass('ui-selected').children().addClass('ui-state-hover');
 			})
 			.delegate('[id]', 'unselect.elfinder', function(e) {
-				var id = $(this).removeClass('ui-selected').children().removeClass('ui-state-hover').end().attr('id'),
-					ndx = $.inArray(id, fm.selected);
-			
-				ndx !== -1 && fm.selected.splice(ndx, 1);
+				$(this).removeClass('ui-selected').children().removeClass('ui-state-hover');
 			})
 			.delegate('[id]', 'dblclick', function(e) {
 				fm.open(this.id);
 			})
 			.selectable({
 				filter     : '[id]',
-				stop       : function() { fm.lock() && fm.trigger('focus'); fm.trigger('select', {selected : fm.selected}); },
+				stop       : function() { 
+					// unlock fm ui
+					fm.lock() && fm.trigger('focus'); 
+					// update selected
+					fm.trigger('updateselected'); },
 				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
 				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 			})
 			.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'}));
 		
 
-		fm.bind('open', function(e) {
+		fm.bind('updateselected', function(e) {
+			var selected = [];
+			e.stopPropagation();
+			cwd.find('[id].ui-selected').each(function() {
+				selected.push($(this).attr('id'));
+			})
+			fm.trigger('select', {selected : selected});
+		})
+		.bind('open', function(e) {
 			var list = fm.view == 'list';
 
 			cwd.empty()
@@ -365,6 +370,7 @@ $.fn.elfindercwd = function(fm) {
 			if (list) {
 				cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 			}
+
 			if ($.isArray(e.data.cdc)) {
 				buffer = e.data.cdc.slice(0);
 				append(buffer.splice(0, fm.options.showFiles), true);
@@ -435,7 +441,7 @@ $.fn.elfindercwd = function(fm) {
 			description : 'Select all files',
 			callback    : function() { 
 				cwd.find('[id]:not(.ui-selected)').trigger('select.elfinder'); 
-				fm.trigger('select'); 
+				fm.trigger('updateselected'); 
 			}
 		})
 		.shortcut({

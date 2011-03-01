@@ -394,7 +394,7 @@
 			cursor     : 'move',
 			cursorAt   : {left : 52, top : 47},
 			refreshPositions : true,
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
 		},
 		
 		

@@ -128,6 +128,7 @@
 /* nav and cwd container */
 .elfinder-workzone {
 	padding:2px 0;
+	position:relative;
 }
 
 .elfinder-spinner {
@@ -169,6 +170,7 @@
 	padding:3px;
 	font-size:.72em;
 	overflow:auto;
+/*	position:relative;*/
 }
 
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }

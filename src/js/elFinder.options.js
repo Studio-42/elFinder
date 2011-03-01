@@ -105,12 +105,22 @@ elFinder.prototype.options = {
 	 * @default  true
 	 */
 	allowStatusbar : true,
-	
-	showFiles : 100,
-	
-	loadFiles : 100,
-	
-	loadThreshold : 100,
+	/**
+	 * Lazy load config.
+	 * How many files show at once?
+	 *
+	 * @type Number
+	 * @default  50
+	 */
+	showFiles : 50,
+	/**
+	 * Lazy load config.
+	 * Distance in px to cwd bottom edge to start display files
+	 *
+	 * @type Number
+	 * @default  100
+	 */
+	showThreshold : 100,
 	
 	/* cookie options */
 	cookie         : {
@@ -145,7 +155,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	// debug : true
-	debug : ['event-open', 'event-rm', 'event-tree']
+	debug : ['event-select', 'event-updateselected']
 }
 
 })(jQuery);
