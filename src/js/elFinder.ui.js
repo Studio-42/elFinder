@@ -181,7 +181,6 @@
 			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
 			
-			
 			// bind fm events handlers and shortcuts
 			fm
 				.bind('ajaxstart ajaxstop ajaxerror', function(e) {
