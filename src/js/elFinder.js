@@ -241,7 +241,7 @@
 				while (i--) {
 					file(cdc[i], true);
 				}
-				self.log(self.cdc)
+				// self.log(self.cdc)
 				// self.log(self.tree)
 				// update history if required
 				if (!hl || h[hl - 1] != self.cwd.hash) {
@@ -630,10 +630,18 @@
 			return false;
 		},
 		
-		getSelected : function() {
-			var s = [], 
-				l = this.selected.length;
+		getSelected : function(index) {
+			var ret = [], 
+				sel = this.selected, i;
+				// l = this.selected.length;
 			
+			if (index === void(0)) {
+				for (i = 0; i < sel.length; i++) {
+					ret.push(this.cdc[sel[i]]);
+				}
+				return ret;
+			}
+			return ret;
 			while (l--) {
 				if (this.cdc[this.selected[l]]) {
 					s.unshift(this.cdc[this.selected[l]]);

@@ -270,6 +270,7 @@
 	position:relative;
 /*	border:1px solid #111;*/
 	font-size:.7em;
+	cursor:default;
 }
 
 /************** ICONS VIEW *************/

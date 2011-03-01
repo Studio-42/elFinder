@@ -2,86 +2,17 @@
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
-		var /**
-			 * Last rendered file 
-			 * Required to start lazy load
-			 *
-			 * @type JQuery
-			 **/
-			last,
-			/**
-			 * Files we get from server but not show yet
-			 *
-			 * @type Array
-			 **/
-			buffer = [],
-			/**
-			 * Number of not shown thumbnails
-			 *
-			 * @type Number
-			 **/
-			tmbcnt = 0,
-			/**
-			 * Bind some shortcuts to keypress instead of keydown
-			 * Required to procces repeated key in ff and opera 
-			 *
-			 * @type Boolean
-			 */
-			keypress = $.browser.mozilla || $.browser.opera,
-			/**
-			 * Draggable options
-			 *
-			 * @type Array
-			 **/
-			draggable = $.extend({}, fm.ui.draggable, {
-				addClasses : true,
-				appendTo   : this,
-				helper     : function(e, ui) {
-					var p = this.id ? $(this) : $(this).parents('[id]:first'),
-						h = $('<div class="elfinder-drag-helper"/>'),
-						icon = '<div class="elfinder-cwd-icon %class ui-corner-all"/>',
-						first, last, files = [];
-					
-					// select dragged file if no selected
-					if (!p.is('.ui-selected')) {
-						if (!(e.ctrlKey||e.metaKey||e.shiftKey)) {
-							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-						}
-						p.trigger('select.elfinder');
-					}
-						
-					first = fm.get(cwd.find('.ui-selected:first').attr('id'));
-					last  = fm.get(cwd.find('.ui-selected:last').attr('id'));
-					// append icons [and number of files]	
-					h.append(icon.replace('%class', fm.ui.mime2class(first.mime)))
-						.data('files', fm.selected)
-						.data('src', fm.cwd.hash);
-					if (first !== last) {
-						h.append(icon.replace('%class', fm.ui.mime2class(last.mime)) + '<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
-					}
-			
-					return h;
-				}
-			}),
-			/**
-			 * Droppable options
-			 *
-			 * @type Array
-			 **/
-			droppable = $.extend({}, fm.ui.droppable, {
-				hoverClass : 'elfinder-dropable-active',
-				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
-				out        : function() { cwd.droppable('enable'); }
-			}),
+		var 
 			/**
 			 * File templates
 			 *
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all"%tmb/>%marker</div><div class="elfinder-cwd-filename ui-corner-all">%name</div></div>',
+				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all" unselectable="on"%style/>%marker</div><div class="elfinder-cwd-filename ui-corner-all">%name</div></div>',
 				row  : '<tr id="%hash" class="elfinder-file %permsclass %dirclass"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td><td>%perms</td><td>%date</td><td>%size</td><td>%kind</td></tr>'
 			},
+			
 			/**
 			 * Template placeholders replacement rules
 			 *
@@ -112,10 +43,11 @@ $.fn.elfindercwd = function(fm) {
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 				},
-				tmb : function(f) {
-					return f.tmb ? ' _tmb="'+f.tmb+'"' : '';
+				style : function(f) {
+					return f.tmb ? ' style="background:url(\''+f.tmb+'\') center center no-repeat"' : '';
 				}
 			},
+			
 			/**
 			 * Return file html
 			 *
@@ -125,92 +57,14 @@ $.fn.elfindercwd = function(fm) {
 			item = function(f) {
 				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f) : f[e]; })
 			},
+			
 			/**
-			 * Return true if file is visible or place below cwd bottom edge less then fm.options.showThreshold
+			 * Flag. Required for msie to avoid unselect files on dragstart
 			 *
-			 * @param  Object  file info
-			 * @return Boolean
+			 * @type Boolean
 			 **/
-			visible = function(f) {
-				return cwd.innerHeight() - f.position().top + fm.options.showThreshold > 0;
-			},
-			/**
-			 * Append files to cwd
-			 *
-			 * @param  Array  files info
-			 * @param  Boolean  scroll to top?
-			 * @return void
-			 **/
-			append = function(files, scroll) {
-				var html = [], ids = [],
-					f, i;
-					
-				fm.time('render')
-				for (i = 0; i < files.length; i++) {
-					f = files[i];
-					if (f.hash && f.name) {
-						html.push(item(f));
-						ids.push(f.hash)
-					}
-				}
-				
-				(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).append(html.join(''));
-					
-				last = cwd.find('[id]:last')
-				tmbcnt = cwd.find('[_tmb]').length;
-				
-				fm.cwd.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
-				
-				// on page reload browser remeber scroll position, 
-				// so  scroll top to avoid loading too many files
-				scroll && cwd.scrollTop(0);
-				// call to show thumbnails
-				cwd.trigger('scroll');
-				
-				setTimeout(function() { bind(ids); }, 10);
-				
-				fm.timeEnd('render')
-					
-			},
-			/**
-			 * Attach event handlers to required files
-			 *
-			 * @param  Array  files ids
-			 * @return void
-			 **/
-			bind = function(ids) {
-				var selector = '#'+ids.join(',#'),
-					elements = cwd.find(selector);
-
-				elements.filter('.directory:not(.elfinder-na,.elfinder-ro)').droppable(droppable);
-				// suport shift|meta + click select
-				(fm.view == 'list' ? elements : elements.find('.elfinder-cwd-icon,.elfinder-cwd-filename'))
-					.click(function(e) {
-						var p = this.id ? $(this) : $(this).parents('[id]:first'), 
-							m = $.browser.mozilla, 
-							prev, next, id, s, f;
-
-						if (e.shiftKey) {
-							prev = p.prevAll('.ui-selected:first');
-							next = p.nextAll('.ui-selected:first');
-							if (next.length && !prev.length) {
-								f = 'nextUntil';
-								id = next.attr('id')
-							} else {
-								id = prev.attr('id');
-								f = 'prevUntil'
-							}
-							p[f]('#'+id).add(p).trigger('select.elfinder');
-						} else if (e.ctrlKey || e.metaKey) {
-							p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
-						} else {
-							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-							p.trigger('select.elfinder')
-						}
-
-						fm.trigger('updateselected');
-					});
-			},
+			selectLock = false,
+			
 			/**
 			 * Move selection to prev/next file
 			 *
@@ -279,6 +133,7 @@ $.fn.elfindercwd = function(fm) {
 					fm.trigger('updateselected');
 				}
 			},
+			
 			/**
 			 * Scroll file to set it visible
 			 *
@@ -297,59 +152,199 @@ $.fn.elfindercwd = function(fm) {
 					cwd.scrollTop(Math.ceil(t + h - ph + st));
 				}
 			},
+			
+			/**
+			 * Last rendered file 
+			 * Required to start lazy load
+			 *
+			 * @type JQuery
+			 **/
+			last,
+			
+			/**
+			 * Files we get from server but not show yet
+			 *
+			 * @type Array
+			 **/
+			buffer = [],
+			
+			/**
+			 * Flag to aviod unnessesary paralell scroll event handlers cals
+			 *
+			 * @type  Boolean
+			 */
+			scrollLock = false,
+			
+			/**
+			 * Flag to aviod cwd scrolled into prev position after page reload
+			 *
+			 * @type  Boolean
+			 */
+			scrollTop = false,
+			
+			/**
+			 * Cwd scroll event handler.
+			 * Lazy load - append to cwd not shown files
+			 *
+			 * @return void
+			 */
+			scroll = function() {
+				var html = [],  
+					dirs = false, 
+					files, i;
+				
+				if (buffer.length) {
+					if (!scrollLock) {
+						scrollLock = true;
+						
+						while ((!last || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
+							&& (files = buffer.splice(0, fm.options.showFiles)).length) {
+							html = [];
+							dirs = false;
+							for (i = 0; i < files.length; i++) {
+								html.push(item(files[i]));
+								if (files[i].mime == 'directory') {
+									dirs = true;
+								}
+							}
+							(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).append(html.join(''));
+							
+							last = cwd.find('[id]:last');
+							scrollTop && cwd.scrollTop(0);
+							
+							if (dirs) {
+								setTimeout(function() {
+									cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+								}, 20);
+							}
+						}
+						scrollLock = false;
+					}
+				} else {
+					cwd.unbind('scroll', scroll);
+				}
+			},
+			
+			/**
+			 * Draggable options
+			 *
+			 * @type Array
+			 **/
+			draggable = $.extend({}, fm.ui.draggable, {
+				addClasses : true,
+				appendTo   : this,
+				stop : function(e) { 
+					cwd.selectable('enable');
+					selectLock = false;
+				},
+				helper     : function(e, ui) {
+					var element = this.id ? $(this) : $(this).parents('[id]:first'),
+						helper  = $('<div class="elfinder-drag-helper"/>'),
+						files   = [],
+						icon    = function(mime) { return '<div class="elfinder-cwd-icon '+fm.ui.mime2class(mime)+' ui-corner-all"/>'; };
+
+					cwd.selectable('disable').removeClass('ui-state-disabled');
+
+					// select dragged file if no selected
+					if (!element.is('.ui-selected')) {
+						if (!(e.ctrlKey||e.metaKey||e.shiftKey)) {
+							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+						}
+						element.trigger('select.elfinder');
+						fm.trigger('updateselected');
+					}
+					selectLock = true;
+					
+					if ((files = fm.getSelected()).length) {
+						helper.append(icon(files[0].mime))
+							.data({
+								files : files,
+								src   : fm.cwd.hash
+							});
+						files.length > 1 && helper.append(icon(files[files.length - 1].mime)+'<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+					}
+					return helper
+				}
+			}),
+
+			/**
+			 * Droppable options
+			 *
+			 * @type Array
+			 **/
+			droppable = $.extend({}, fm.ui.droppable, {
+				hoverClass : 'elfinder-dropable-active',
+				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
+				out        : function() { cwd.droppable('enable'); }
+			}),
+			
+			/**
+			 * Bind some shortcuts to keypress instead of keydown.
+			 * Required to procces repeated key press in ff and opera.
+			 *
+			 * @type Boolean
+			 */
+			keypress = $.browser.mozilla || $.browser.opera,
+			
 			/**
 			 * CWD node itself
 			 *
 			 * @type JQuery
 			 **/
-			cwd = $(this).addClass('elfinder-cwd')
-			.bind('scroll', function(e) {
-				if (last && last.length) {
-					// lazy load - display not shown files
-					if (buffer.length && visible(last)) {
-						append(buffer.splice(0, fm.options.showFiles));
+			cwd = $(this)
+				.addClass('elfinder-cwd')
+				.attr('unselectable', 'on')
+				// fix ui.selectable bugs and add shift+click support 
+				.delegate('[id]', 'click', function(e) {
+					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
+						prev = p.prevAll('.ui-selected:first'),
+						next = p.nextAll('.ui-selected:first'),
+						pl   = prev.length,
+						nl   = next.length,
+						sib;
+
+					e.stopImmediatePropagation();
+
+					if (e.shiftKey && (pl || nl)) {
+						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
+						sib.add(p).trigger('select.elfinder');
+					} else if (e.ctrlKey || e.metaKey) {
+						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
+					} else {
+						cwd.find('[id].ui-selected').trigger('unselect.elfinder');
+						p.trigger('select.elfinder');
 					}
-					
-					// display not shown thumbnails
-					if (tmbcnt > 0) {
-						cwd.find('[_tmb]')
-							.filter(function() {
-								return visible($(this).parents('[id]:first'));
-							}).each(function() {
-								var $this = $(this);
-								$this.css('background', "url('"+$this.attr('_tmb')+"') center center no-repeat").removeAttr('_tmb');
-								tmbcnt--;
-							});
-					}
-				}
-			})
-			.delegate('[id]', 'mouseenter', function(e) {
-				var target = fm.view == 'list' 
-					? $(this) 
-					: $(this).find('.elfinder-cwd-icon,.elfinder-cwd-filename');
-				// set file draggable
-				!target.is('.ui-draggable') && target.draggable(draggable);
-			})
-			.delegate('[id]', 'select.elfinder', function(e) {
-				$(this).addClass('ui-selected').children().addClass('ui-state-hover');
-			})
-			.delegate('[id]', 'unselect.elfinder', function(e) {
-				$(this).removeClass('ui-selected').children().removeClass('ui-state-hover');
-			})
-			.delegate('[id]', 'dblclick', function(e) {
-				fm.open(this.id);
-			})
-			.selectable({
-				filter     : '[id]',
-				stop       : function() { 
-					// unlock fm ui
-					fm.lock() && fm.trigger('focus'); 
-					// update selected
-					fm.trigger('updateselected'); },
-				selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
-				unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
-			})
-			.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'}));
+
+					fm.trigger('updateselected');
+				})
+				// call fm.open()
+				.delegate('[id]', 'dblclick', function(e) {
+					fm.open(this.id);
+				})
+				// attach draggable
+				.delegate('[id]', 'mouseenter', function(e) {
+					var target = fm.view == 'list' ? $(this) : $(this).find('.elfinder-cwd-icon,.elfinder-cwd-filename');
+				
+					!target.is('.ui-draggable') && target.draggable(draggable);
+				})
+				// add hover class to selected file
+				.delegate('[id]', 'select.elfinder', function(e) {
+					!selectLock && $(this).addClass('ui-selected').children().addClass('ui-state-hover');
+				})
+				// remove hover class from unselected file
+				.delegate('[id]', 'unselect.elfinder', function(e) {
+					!selectLock && $(this).removeClass('ui-selected').children().removeClass('ui-state-hover');
+				})
+				// make files selectable
+				.selectable({
+					filter     : '[id]',
+					delay      : 10,
+					stop       : function(e) { fm.lock() && fm.trigger('focus'); fm.trigger('updateselected'); },
+					selected   : function(e, ui) {  $(ui.selected).trigger('select.elfinder');	},
+					unselected : function(e, ui) {  $(ui.unselected).trigger('unselect.elfinder'); }
+				})
+				// make cwd itself droppable for folders from nav panel
+				.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'}));
 		
 
 		fm.bind('updateselected', function(e) {
@@ -373,7 +368,9 @@ $.fn.elfindercwd = function(fm) {
 
 			if ($.isArray(e.data.cdc)) {
 				buffer = e.data.cdc.slice(0);
-				append(buffer.splice(0, fm.options.showFiles), true);
+				scrollTop = true;
+				cwd.bind('scroll', scroll).trigger('scroll');
+				scrollTop = false;
 			}
 			
 		})
