@@ -120,6 +120,14 @@ class elFinder {
 	protected $debug = false;
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $disabled = array();
+	
+	
+	/**
 	 * Constructor
 	 *
 	 * @param  array  elFinder and roots configurations
@@ -131,12 +139,9 @@ class elFinder {
 		$this->debug = !empty($opts['debug']);
 		
 		// disable required commands
-		if (isset($opts['disable']) && is_array($opts['disable'])) {
-			foreach ($opts['disable'] as $cmd) {
-				if (!preg_match('/^(open|tree|tmb|file|ping)$/', $cmd) && isset($this->commands[$cmd])) {
-					unset($this->commands[$cmd]);
-				}
-			}
+		$this->disabled = $this->disabled(@$opts['disabled']);
+		foreach ($this->disabled as $cmd) {
+			unset($this->commands[$cmd]);
 		}
 		
 		// bind events listeners
@@ -157,6 +162,8 @@ class elFinder {
 					
 					// unique volume id - used as prefix to files hash
 					$id = $volume->driverid().$i;
+					
+					$o['disabled'] = $this->disabled(@$o['disabled']);
 					
 					if ($volume->mount($id, $o)) {
 						$this->volumes[$id] = $volume;
@@ -350,7 +357,7 @@ class elFinder {
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['params'] = array(
-				'commands'   => array_keys($this->commands),
+				'disabled'   => $this->disabled,
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
 		}
@@ -600,6 +607,31 @@ class elFinder {
 	/***************************************************************************/
 	/*                                   misc                                  */
 	/***************************************************************************/
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function filter($cmd) {
+		return isset($this->commands[$cmd]) && !preg_match('/^(open|tree|tmb|file|ping)$/', $cmd);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function disabled($cmds) {
+		if (!is_array($cmds)) {
+			$cmds = array();
+		}
+		
+		return array_filter($cmds, array($this, 'filter'));
+	}
+	
 	/**
 	 * Return root - file's owner
 	 *

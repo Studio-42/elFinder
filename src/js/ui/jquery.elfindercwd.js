@@ -190,7 +190,7 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			scroll = function() {
 				var html = [],  
-					dirs = false, 
+					dirs, 
 					files, i;
 				
 				if (buffer.length) {
@@ -199,14 +199,15 @@ $.fn.elfindercwd = function(fm) {
 						
 						while ((!last || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
 							&& (files = buffer.splice(0, fm.options.showFiles)).length) {
-							html = [];
 							dirs = false;
-							for (i = 0; i < files.length; i++) {
-								html.push(item(files[i]));
-								if (files[i].mime == 'directory') {
+							
+							html = $.map(files, function(f) {
+								if (f.mime == 'directory') {
 									dirs = true;
 								}
-							}
+								return f.hash && f.name ? item(f) : null;
+							});
+
 							(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).append(html.join(''));
 							
 							last = cwd.find('[id]:last');

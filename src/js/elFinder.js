@@ -2,21 +2,6 @@
 	
 	elFinder = function(el, o) {
 		var self = this,
-			/**
-			 * If false - no ajax requests allowed
-			 *
-			 * @type Boolean
-			 **/
-			
-			ajax = true,
-			/**
-			 * shortcuts lock
-			 *
-			 * @type Boolean
-			 **/
-			lock = false,
-			
-			
 			
 			/**
 			 * Flag to fire "load" event
@@ -30,10 +15,34 @@
 			 *
 			 * @type Object
 			 **/
-			states = {
+			permissions = {
 				ajax : true,
 				shortcuts : true
 			},
+			
+			/**
+			 * Core parameters from connctor
+			 *
+			 * @type Object
+			 **/
+			params = {},
+			
+			cwd = {
+				hash   : '',
+				phash  : '',
+				name   : '',
+				path   : '',
+				url    : '',
+				date   : '',
+				read   : 1,
+				write  : 1,
+				rm     : 1,
+				params : {}
+			},
+			
+			files = {},
+			
+			tree = {},
 			
 			/**
 			 * Selected files ids
@@ -42,6 +51,11 @@
 			 **/
 			selected = [],
 			
+			/**
+			 * Events listeners
+			 *
+			 * @type Object
+			 **/
 			listeners = {
 				load      : [],
 				focus     : [],
@@ -60,42 +74,7 @@
 			 *
 			 * @type jQuery
 			 **/
-			$el = $(el),
-			
-			save = function(file, replace) {
-				var hash = file.hash;
-
-				if (hash && file.name) {
-
-					if (file.mime && (replace || !self.cdc[hash])) {
-						self.cdc[hash] = $.extend({}, file);
-						delete self.cdc[hash].hash;
-						delete self.cdc[hash].tmb;
-					}
-
-					if ((!file.mime || file.mime == 'directory') && (replace || !self.tree[hash])) {
-						self.tree[hash] = $.extend({mime : 'directory'}, file);
-						delete self.tree[hash].hash;
-						delete self.tree[hash].phash;
-						delete self.tree[hash].childs;
-						delete self.tree[hash].size;
-					}
-				}
-			},
-			remove = function(files) {
-				var i = files.length, hash;
-				
-				while (l--) {
-					hash = files[i];
-					if (self.cdc[hash]) {
-						delete self.cdc[hash];
-					}
-					if (self.tree[hash]) {
-						delete self.tree[hash];
-					}
-				}
-			}
-			;
+			$el = $(el)	;
 			
 		/**
 		 * Application version
@@ -118,14 +97,12 @@
 		 **/
 		this.options = $.extend({}, this.options, o||{});
 		
-		
-		
 		/**
-		 * Some options from connector
+		 * United core parameters from connector and from cwd (new api)
 		 *
 		 * @type Object
 		 **/
-		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
+		this.params = {};
 		
 		/**
 		 * Interface language
@@ -151,29 +128,6 @@
 		this.messages = this.i18[this.lang].messages;
 		
 		/**
-		 * Current working directory info
-		 *
-		 * @type Object
-		 **/
-		this.cwd      = {};
-		
-		/**
-		 * Current directory content
-		 *
-		 * @type Object
-		 **/
-		this.cdc   = {};
-		this.files = {};
-		this.tree = {};
-		
-		/**
-		 * Cach of selected files
-		 * Contains objects from this.cdc
-		 *
-		 * @type Array
-		 **/
-		// this.selected = [];
-		/**
 		 * History, contains hashs of last opened directories
 		 *
 		 * @type Array
@@ -197,12 +151,8 @@
 		 * @type String
 		 **/
 		this.view = this.viewType();
-		/**
-		 * Events listeners
-		 *
-		 * @type Object
-		 **/
-		;
+		
+		
 		
 		/**
 		 * Enable ajax requests and shortcuts.
@@ -212,7 +162,7 @@
 		 **/
 		this.activate = function() {
 			if (loaded) {
-				states = {
+				permissions = {
 					ajax : true,
 					shortcuts : true
 				}
@@ -226,7 +176,7 @@
 		 * @return elFinder
 		 **/
 		this.deactivate = function() {
-			states = {
+			permissions = {
 				ajax : false,
 				shortcuts : false
 			}
@@ -239,22 +189,23 @@
 		 * @return Boolean
 		 **/
 		this.active = function() {
-			return states.shortcuts;
+			return permissions.shortcuts;
 		}
 		
-		
-		// this.lock = function(l) {
-		// 	return l === void(0) ? lock : lock = !!l;
-		// }
-		// 
-		// this.ajaxAllowed = function() {
-		// 	return ajax;
-		// }
-		
+		/**
+		 * Return selected files hashes
+		 *
+		 * @return Array
+		 **/
 		this.selected = function() {
 			return selected;
 		}
 		
+		/**
+		 * Return number of selected files
+		 *
+		 * @return Number
+		 **/
 		this.countSelected = function() {
 			return selected.length;
 		}
@@ -327,10 +278,10 @@
 				
 			opts.data && $.extend(options, opts)
 			
-			if (states.ajax) {
+			if (permissions.ajax) {
 				!mode && self.trigger('ajaxstart', options);
 				if (this.api < 2) {
-					options.data = $.extend({current : this.cwd.hash}, options.data);
+					options.data = $.extend({current : cwd.hash}, options.data);
 				}
 				$.ajax(options);
 			}
@@ -404,85 +355,158 @@
 			return this;
 		};
 		
+		/**
+		 * Return current working directory info
+		 * 
+		 * @return Object
+		 */
+		this.cwd = function() {
+			return cwd;
+		}
+		
+		/**
+		 * Return file data from current dir or tree by it's hash
+		 * 
+		 * @param  String  file hash
+		 * @return Object
+		 */
+		this.file = function(hash) { 
+			return files[hash] || tree[hash]; 
+		};
+		
+		/**
+		 * Return file data from current dir if file with required name exists
+		 * 
+		 * @param  String  file name
+		 * @return Object
+		 */
+		this.fileByName = function(name) {
+			var hash;
+			
+			for (hash in files) {
+				if (files.hasOwnProperty(hash) && files[hash].name == name) {
+					return files[hash];
+				}
+			}
+		};
+		
+		/**
+		 * Return file/dir info with required name
+		 * 
+		 * @param  String  file hash
+		 * @return Object|Boolean
+		 */
+		this.fileExists = function(name) {
+			return this.fileByName(name) !== void(0);
+		};
+		
+		/**
+		 * Return selected files info
+		 * 
+		 * @return Array
+		 */
+		this.selectedFiles = function() {
+			return $.map(selected, function(hash) { return files[hash] || null });
+		};
+		
 		
 		this
 			// disable/enable ajax on ajaxstart/ajaxstop events
 			.bind('ajaxstart ajaxstop', function(e) {
-				states.ajax = e.type == 'ajaxstop';
+				permissions.ajax = e.type == 'ajaxstop';
 			})
 			// enable shortcuts on click inside file manager ui
 			.bind('focus', function() {
-				if (!states.shortcuts) {
+				if (!permissions.shortcuts) {
 					$('texarea,:text').blur();
-					states.shortcuts = true;
+					permissions.shortcuts = true;
 				}
 			})
 			// disable shortcuts on click outside file manager ui
 			.bind('blur', function() {
 				lock = true;
 			})
+			// cache selected files hashes
 			.bind('select', function(e) {
-				var ids = $.isArray(e.data.selected) ? e.data.selected : [], i;
-					
-				selected = [];
-				for (i = 0; i < ids.length; i++) {
-					self.cdc[ids[i]] && !selected[ids[i]] && selected.push(ids[i]);
-				}
-			})
-			.bind('open', function(e) {
-				var cdc = e.data.cdc,
-					i   = cdc.length,
-					h   = self.history,
-					hl  = h.length,
-					i, d;
+				var hashes = [];
 
-				// init or reload
-				if (self.params) {
-					$.extend(self.params, e.data.params||{});
-					self.tree = {};
+				selected = $.map(e.data.selected || [], function(hash) { 
+					if (files[hash] && $.inArray(hash, hashes) === -1) {
+						hashes.push(hash);
+						return hash;
+					}
+					return null;
+				});
+			})
+			// set some params and cache directory content
+			.bind('open', function(e) {
+				var data = e.data,
+					l = data.cdc.length, 
+					f;
+
+				// initial loading
+				if (!loaded) {
+					loaded   = true;
+					self.api = parseFloat(e.data.api) || 1;
+					
+					if (data.params) {
+						// remove disabled commands
+						$.each(data.params.disabled || [], function(i, cmd) {
+							self.commands[cmd] && delete self.commands[cmd];
+						});
+						data.params.disabled = [];
+						// store core params
+						params = data.params;
+					}
 				}
-				// old api
+				
+				// join core and cwd params
+				self.params = $.extend({}, params, self.api > 1 ? data.cwd.params : {});
+
+				cwd = data.cwd;
+
 				if (self.api < 2) {
-					self.tree = {}; 
+					cwd.url = params.url;
 				}
-				
-				// update curent dir info
-				$.extend(self.cwd, e.data.cwd);	
+
 				// remember last dir
-				self.lastDir(self.cwd.hash);
-				
-				// update directory content
-				self.cdc = {};
-				while (i--) {
-					save(cdc[i], true);
+				self.lastDir(cwd.hash);
+
+				// cache directory content
+				files = {};
+				while(l--) {
+					f = data.cdc[l];
+					if (f.name && f.hash) {
+						files[f.hash] = f;
+					}
 				}
-				// self.log(self.cdc)
-				// self.log(self.tree)
-				// update history if required
-				if (!hl || h[hl - 1] != self.cwd.hash) {
-					h.push(self.cwd.hash);
-				}
+
 				// clean selected files cache
 				selected = [];
 				
-				// initial loading
-				if (!loaded) {
-					loaded = true;
-					self.api = parseFloat(e.data.api) || 1;
+				// fire "load" event and remove its listeners
+				if (listeners.load) {
 					self.trigger('load').debug('api-version', self.api);
 					delete listeners.load;
 				}
+				
 			})
+			// cache directories tree data
 			.bind('open tree', function(e) {
-				var i, f;
-
-				if (!self.tree[self.cwd.hash]) {
-					save(self.cwd);
+				var src = e.data.tree || [],
+					l = src.length,
+					f;
+					
+				// init/reload or old api - clean tree cache
+				if (e.type =='open' && (data.params || self.api < 2)) {
+					tree = {};
 				}
-				if (e.data.tree && self.api > 1) {
-					i = e.data.tree.length;
-					while (i--) {
-						!self.tree[e.data.tree[i].hash] && save(e.data.tree[i]);
+
+				while (l--) {
+					f = src[l];
+					if (f.hash && f.name && !tree[f.hash]) {
+						f.mime = 'directory';
+						tree[f.hash] = f;
 					}
 				}
 			})
@@ -511,7 +535,7 @@
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
 		
-				if (!lock) {
+				if (permissions.shortcuts) {
 					c == 9 && e.preventDefault();
 					$.each(self.shortcuts, function(i, s) {
 						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
@@ -544,7 +568,7 @@
 			return this.deactivate().trigger('error', {error : 'Invalid configuration! You have to set URL option.'});
 		}
 		
-		this.open(this.lastDir() || '', true, true);
+		this.open(this.lastDir(), true, true);
 
 	}
 	
@@ -704,109 +728,66 @@
 		
 		
 		/**
-		 * Return file/dir from current dir or tree by it's hash
+		 * Open directory/file
 		 * 
-		 * @param  String  file hash
-		 * @return Object
-		 */
-		file : function(hash) { return this.cdc[hash] || this.tree[hash]; },
-		
-		/**
-		 * Return file/dir info with required name
-		 * 
-		 * @param  String  file hash
-		 * @return Object|Boolean
-		 */
-		fileByName : function(name) {
-			var hash;
-			
-			for (hash in this.cdc) {
-				if (this.cdc.hasOwnProperty(hash) && this.cdc[hash].name == name) {
-					return this.cdc[hash];
-				}
-			}
-		},
-		
-		/**
-		 * Return selected files info
-		 * 
-		 * @return Array
-		 */
-		selectedFiles : function() {
-			var files = [], 
-				sel   = this.selected(), i;
-			
-			for (i = 0; i < sel.length; i++) {
-				files.push(this.cdc[sel[i]]);
-			}
-			return files;
-		},
-		
-		checkPermissions : function(files) {
-			
-		},
-		
-		/**
-		 * Change current directory
-		 * 
-		 * @param  String   dir hash
-		 * @param  Boolean  update nav dir tree?
-		 * @param  Boolean  send init flag?
+		 * @param  String   file hash
+		 * @param  Boolean  update nav dir tree? (for open dir only)
+		 * @param  Boolean  send init flag? (for open dir only)
 		 * @return elFinder
 		 */
 		open : function(hash, tree, init) {
-			var file,  isdir, error;
+			var file  = this.file(hash), 
+				isdir = !file || file.mime == 'directory',
+				error;
 			
-			if (hash && this.cdc[hash]) {
-				file   = this.cdc[hash];
-				isdir = file.mime == 'directory';
-				if (!file.read) {
-					error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
-					return this.trigger('error', {error : [[error, file.name]]});
+			if (file && !file.read) {
+				error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
+				return this.trigger('error', {error : [[error, file.name]]});
+			}	
+			
+			// change directory
+			if (isdir) {
+				data = {
+					cmd    : 'open',
+					target : hash || '',
+					mimes  : this.options.onlyMimes || [],
+					sort   : this.sort[this.options.sort] || 1
+				};
+
+				if (tree && this.options.allowNavbar) {
+					data.tree = true;
 				}
+				if (init) {
+					data.init = true;
+				}
+
+				return this.ajax(data);
+			}
+			
 				
-				if (!isdir) {
-					// open file in new window
-					if (file.url || this.cwd.url) {
-						// old api store url in file propery
-						// new api store only cwd url
-						url = file.url || this.cwd.url + encodeURIComponent(file.name);
-					} else {
-						// urls diabled - open connector
-						url = this.options.url 
-							+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-							+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
-							+ '&target=' + hash;
+			// open file in new window
+			if (this.cwd().url) {
+				// old api store url in file propery
+				// new api store only cwd url
+				url = file.url || this.cwd().url + encodeURIComponent(file.name);
+			} else {
+				// urls diabled - open connector
+				url = this.options.url 
+					+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
+					+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+					+ '&target=' + hash;
+			}
+			// image - set window size
+			if (file.dim) {
+				s = file.dim.split('x');
+				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+			}
 
-					}
-					if (file.dim) {
-						// image - set window size
-						s = file.dim.split('x');
-						w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-					}
-
-					if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
-						// popup blocks
-						this.trigger('error', {error : 'Unable to open file in new window.'});
-					}
-					return this;
-				}
+			if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
+				// popup blocks
+				this.trigger('error', {error : ['Unable to open file in new window.', 'Allow popup window in your browser.']});
 			}
-			
-			data = {
-				cmd    : 'open',
-				target : hash,
-				mimes  : this.options.onlyMimes || [],
-				sort   : this.sort[this.options.sort] || 1
-			};
-			if (tree && this.options.allowNavbar) {
-				data.tree = true;
-			}
-			if (init) {
-				data.init = true;
-			}
-			
-			return this.ajax(data);
+			return this;
 		},
 		
 		/**
@@ -1073,7 +1054,9 @@
 			return this;
 		},
 		time : function(l) { window.console && window.console.time && window.console.time(l); },
-		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
+		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); },
+		
+		commands : {}
 	}
 	
 	

@@ -49,7 +49,7 @@ function logger($data) {
 
 $opts = array(
 	'debug' => true,
-	'disabled' => array(),
+	'disabled' => array('rm', 'open', 'asd'),
 	// 'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
 	'roots' => array(
 		array(
@@ -83,7 +83,7 @@ $opts = array(
 		// array('path' => '/opt/local', 'driver' => 'LocalFileSystem', 'tmbDir' => '', 'treeDeep' => 5),
 		array(
 			'path'   => '../../../files2',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			'URL'    => 'http://localhost/git/elfinder/files2/',
 			'alias'  => 'Home2',
 			'driver' => 'LocalFileSystem',
 			'mimeDetect'   => 'auto',

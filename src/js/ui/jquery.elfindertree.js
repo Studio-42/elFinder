@@ -22,15 +22,6 @@
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
 					if (dir && dir.name) {
-						if (!fm.tree[dir.hash]) {
-							fm.tree[dir.hash] = {
-								mime  : 'directory',
-								name  : dir.name,
-								read  : dir.read,
-								write : dir.write,
-								rm    : true
-							};
-						}
 						return tpl.replace('%id',    dir.hash)
 							.replace('%pclass', pclass+(isroot ? ' '+root : ''))
 							.replace('%arrow',  arrow)
@@ -104,7 +95,7 @@
 
 						e.preventDefault();
 						
-						if (id == fm.cwd.hash) {
+						if (id == fm.cwd().hash) {
 							// already current dir - toggle subdirs
 							dir.children('.'+collapsed).click();
 						} else if (dir.is('.elfinder-na,.elfinder-wo')) {
