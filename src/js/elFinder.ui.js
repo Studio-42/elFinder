@@ -134,7 +134,7 @@
 			.click(function(e) {
 				e.stopPropagation();
 				// fire event to enable fm shortcuts
-				fm.lock() && fm.trigger('focus');
+				fm.trigger('focus');
 			});
 	
 		/**

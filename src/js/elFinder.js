@@ -16,6 +16,8 @@
 			 **/
 			lock = false,
 			
+			
+			
 			/**
 			 * Flag to fire "load" event
 			 *
@@ -24,11 +26,34 @@
 			loaded = false,
 			
 			/**
+			 * Permissions to exec ajax requests and build-in shortcuts
+			 *
+			 * @type Object
+			 **/
+			states = {
+				ajax : true,
+				shortcuts : true
+			},
+			
+			/**
 			 * Selected files ids
 			 *
 			 * @type Array
 			 **/
 			selected = [],
+			
+			listeners = {
+				load      : [],
+				focus     : [],
+				blur      : [],
+				ajaxstart : [],
+				ajaxstop  : [],
+				ajaxerror : [],
+				error     : [],
+				select    : [],
+				open      : []
+				
+			},
 			
 			/**
 			 * Target node
@@ -37,7 +62,7 @@
 			 **/
 			$el = $(el),
 			
-			file = function(file, replace) {
+			save = function(file, replace) {
 				var hash = file.hash;
 
 				if (hash && file.name) {
@@ -79,6 +104,11 @@
 		 **/
 		this.version = '2.0 beta';
 		
+		/**
+		 * Protocol version
+		 *
+		 * @type String
+		 **/
 		this.api = 1;
 		
 		/**
@@ -88,10 +118,7 @@
 		 **/
 		this.options = $.extend({}, this.options, o||{});
 		
-		if (!this.options.url) {
-			alert('Invalid configuration! You have to set URL option.');
-			return;
-		}
+		
 		
 		/**
 		 * Some options from connector
@@ -135,7 +162,7 @@
 		 *
 		 * @type Object
 		 **/
-		this.cdc      = {};
+		this.cdc   = {};
 		this.files = {};
 		this.tree = {};
 		
@@ -169,54 +196,228 @@
 		 *
 		 * @type String
 		 **/
-		this.view = this.viewType('icons');
+		this.view = this.viewType();
 		/**
 		 * Events listeners
 		 *
 		 * @type Object
 		 **/
-		this.listeners = {
-			load      : [],
-			focus     : [],
-			blur      : [],
-			lock      : [],
-			ajaxstart : [],
-			ajaxstop  : [],
-			ajaxerror : [],
-			error     : [],
-			cd        : [],
-			select    : []
-		};
+		;
 		
-		this.lock = function(l) {
-			return l === void(0) ? lock : lock = !!l;
+		/**
+		 * Enable ajax requests and shortcuts.
+		 * Take effect only if fm loaded correctly.
+		 *
+		 * @return elFinder
+		 **/
+		this.activate = function() {
+			if (loaded) {
+				states = {
+					ajax : true,
+					shortcuts : true
+				}
+			}
+			return this;
 		}
 		
-		this.ajaxAllowed = function() {
-			return ajax;
+		/**
+		 * Disable ajax requests and shortcuts.
+		 *
+		 * @return elFinder
+		 **/
+		this.deactivate = function() {
+			states = {
+				ajax : false,
+				shortcuts : false
+			}
+			return this;
 		}
+		
+		/**
+		 * Return true if build-in shortcuts enabled.
+		 *
+		 * @return Boolean
+		 **/
+		this.active = function() {
+			return states.shortcuts;
+		}
+		
+		
+		// this.lock = function(l) {
+		// 	return l === void(0) ? lock : lock = !!l;
+		// }
+		// 
+		// this.ajaxAllowed = function() {
+		// 	return ajax;
+		// }
 		
 		this.selected = function() {
 			return selected;
 		}
 		
-		this.one('ajaxerror error', function(e) {
-				if (!loaded) {
-					e.stopPropagation();
-					self.listeners = {};
+		this.countSelected = function() {
+			return selected.length;
+		}
+		
+		/**
+		 * Proccess ajax request
+		 *
+		 * @param  Object  data to send to connector or options for ajax request
+		 * @param  String  mode. "bg" - do not fired "ajaxstart/ajaxstop", show errors, "silent" - do not fired "ajaxstart/ajaxstop", errors - to debug
+		 * @return elFinder
+		 */
+		this.ajax = function(opts, mode) {
+			var self = this,
+				cmd = opts.data ? opts.data.cmd : opts.cmd,
+				options = {
+					url      : this.options.url,
+					async    : true,
+					type     : 'get',
+					dataType : 'json',
+					cache    : false,
+					data     : $.extend({}, this.options.customData || {}, opts.data || opts),
+					// timeout  : 100,
+					error    : function(xhr, status) { 
+						var error;
+						
+						switch (status) {
+							case 'abort':
+								error = ['Unable to connect to backend.', 'Connection aborted.'];
+								break;
+							case 'timeout':
+								error = ['Unable to connect to backend.', 'Connection timeout.'];
+								break;
+							case 'parsererror':
+								error = 'Invalid backend response';
+								break;
+							default:
+								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend.' : 'Invalid backend response.';
+						}
+						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
+
+					},
+					success  : function(data) {
+						var req = self.required[cmd] || [],
+							i = req.length,
+							error;
+						
+						!mode && self.trigger('ajaxstop', data);
+
+						if (!data) {
+							error = 'Invalid backend response';
+						} else if (data.error) {
+							error = data.error;
+						} else {
+							while (i--) {
+								if (data[req[i]] === void(0)) {
+									error = 'Invalid backend response';
+									break;
+								}
+							}
+						}
+
+						if (error) {
+							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
+						}
+
+						self.trigger(cmd, data).trigger('updateSelected');
+						// delete data
+					}
+				};
+				
+			opts.data && $.extend(options, opts)
+			
+			if (states.ajax) {
+				!mode && self.trigger('ajaxstart', options);
+				if (this.api < 2) {
+					options.data = $.extend({current : this.cwd.hash}, options.data);
 				}
-			})
+				$.ajax(options);
+			}
+			
+			return this;
+		};
+		
+		/**
+		 * Attach listener to events
+		 * To bind to multiply events at once, separate events names by space
+		 * 
+		 * @param  String  event(s) name(s)
+		 * @param  Object  event handler
+		 * @return elFinder
+		 */
+		this.bind = function(e, c) {
+			var e, i;
+			
+			if (typeof(c) == 'function') {
+				e = ('' + e).toLowerCase().split(/\s+/)
+				for (i = 0; i < e.length; i++) {
+					if (listeners[e[i]] === void(0)) {
+						listeners[e[i]] = [];
+					}
+					listeners[e[i]].push(c);
+				}
+			}
+			return this;
+		};
+		
+		/**
+		 * Remove event listener if exists
+		 *
+		 * @param  String    event name
+		 * @param  Function  callback
+		 * @return elFinder
+		 */
+		this.unbind = function(e, c) {
+			var l = listeners[('' + e).toLowerCase()] || [],
+				i = l.indexOf(c);
+
+			i > -1 && l.splice(i, 1);
+			return this;
+		};
+		
+		/**
+		 * Send notification to all event listeners
+		 *
+		 * @param  jQuery.Event|String  event or event type
+		 * @param  Object        extra parameters
+		 * @return elFinder
+		 */
+		this.trigger = function(e, d) {
+			var e = this.event(e, d||{}),
+				l = listeners[e.type]||[], i;
+
+			this.debug('event-'+e.type, e.data);
+
+			for (i = 0; i < l.length; i++) {
+				if (e.isPropagationStopped()) {
+					break;
+				}
+				try {
+					l[i](e, this);
+				} catch (ex) {
+					window.console && window.console.error && window.console.error(ex);
+				}
+			}
+			
+			delete e;
+			return this;
+		};
+		
+		
+		this
+			// disable/enable ajax on ajaxstart/ajaxstop events
 			.bind('ajaxstart ajaxstop', function(e) {
-				var l = e.type == 'ajaxstop';
-				ajax = l;
-				lock = !l;
+				states.ajax = e.type == 'ajaxstop';
 			})
+			// enable shortcuts on click inside file manager ui
 			.bind('focus', function() {
-				if (lock) {
+				if (!states.shortcuts) {
 					$('texarea,:text').blur();
-					lock = false;
+					states.shortcuts = true;
 				}
 			})
+			// disable shortcuts on click outside file manager ui
 			.bind('blur', function() {
 				lock = true;
 			})
@@ -225,13 +426,8 @@
 					
 				selected = [];
 				for (i = 0; i < ids.length; i++) {
-					self.cdc[ids[i]] && selected.push(ids[i]);
+					self.cdc[ids[i]] && !selected[ids[i]] && selected.push(ids[i]);
 				}
-				self.log(selected)
-				// if ($.isArray(e.data.selected)) {
-				// 	self.selected = e.data.selected;
-				// 	
-				// }
 			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
@@ -253,12 +449,12 @@
 				// update curent dir info
 				$.extend(self.cwd, e.data.cwd);	
 				// remember last dir
-				self.last(self.cwd.hash);
+				self.lastDir(self.cwd.hash);
 				
 				// update directory content
 				self.cdc = {};
 				while (i--) {
-					file(cdc[i], true);
+					save(cdc[i], true);
 				}
 				// self.log(self.cdc)
 				// self.log(self.tree)
@@ -273,21 +469,20 @@
 				if (!loaded) {
 					loaded = true;
 					self.api = parseFloat(e.data.api) || 1;
-					self.debug('api-version', self.api);
-					self.trigger('load');
-					delete self.listeners.load;
+					self.trigger('load').debug('api-version', self.api);
+					delete listeners.load;
 				}
 			})
 			.bind('open tree', function(e) {
 				var i, f;
 
 				if (!self.tree[self.cwd.hash]) {
-					file(self.cwd);
+					save(self.cwd);
 				}
 				if (e.data.tree && self.api > 1) {
 					i = e.data.tree.length;
 					while (i--) {
-						!self.tree[e.data.tree[i].hash] && file(e.data.tree[i]);
+						!self.tree[e.data.tree[i].hash] && save(e.data.tree[i]);
 					}
 				}
 			})
@@ -336,25 +531,47 @@
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
 		
-		this.open(this.last() || '', true, true);
+		this.one('ajaxerror error', function(e) {
+			// fm not correctly loaded
+			if (!loaded) {
+				e.stopPropagation();
+				self.deactivate();
+				listeners = {};
+			}
+		});
+		
+		if (!this.options.url) {
+			return this.deactivate().trigger('error', {error : 'Invalid configuration! You have to set URL option.'});
+		}
+		
+		this.open(this.lastDir() || '', true, true);
 
 	}
 	
 	
 	elFinder.prototype = {
 		/**
+		 * Return true if connector use new (>=2.0) api version
+		 *
+		 * @return Boolean
+		 */
+		isNewApi : function() {
+			return this.api > 1;
+		},
+		
+		/**
 		 * Get/set cookie
 		 *
 		 * @param  String       cookie name
 		 * @param  String|void  cookie value
-		 * @return Strng|void
+		 * @return String|void
 		 */
 		cookie : function(name, value) {
-			var d, o;
+			var d, o, c, i;
 
 			if (value === void(0)) {
 				if (document.cookie && document.cookie != '') {
-					var i, c = document.cookie.split(';');
+					c = document.cookie.split(';');
 					name += '=';
 					for (i=0; i<c.length; i++) {
 						c[i] = $.trim(c[i]);
@@ -367,16 +584,17 @@
 			} 
 
 			o = $.extend({}, this.options.cookie);
-			if (value===null) {
+			if (value === null) {
 				value = '';
 				o.expires = -1;
 			}
 			if (typeof(o.expires) == 'number') {
 				d = new Date();
-				d.setTime(d.getTime()+(o.expires * 24 * 60 * 60 * 1000));
+				d.setTime(d.getTime()+(o.expires * 86400000));
 				o.expires = d;
 			}
 			document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
+			return value;
 		},
 		
 		/**
@@ -386,34 +604,26 @@
 		 * @return Strng
 		 */
 		viewType : function(t) {
-			var c = 'el-finder-view';
+			var c = 'el-finder-view',
+				r = /^icons|list$/i;
 
-			if (t && /^icons|list$/i.test(t)) {
-				this.cookie(c, (this._view = t));
-			} else if (!this._view) {
+			if (t && r.test(t)) {
+				this.cookie(c, (this.view = t));
+			} else if (!this.view) {
 				t = this.cookie(c);
-				return /^icons|list$/i.test(t) ? t : 'icons'
+				this.view = r.test(t) ? t : 'icons'
 			}
-			return this._view;
-		},
-		
-		/**
-		 * Return true if connector use new (>=2.0) api version
-		 *
-		 * @return Boolean
-		 */
-		isNewApi : function() {
-			return this.api > 1;
+			return this.view;
 		},
 		
 		/**
 		 * Get/set last opened directory
 		 * 
-		 * @param  String  dir hash
-		 * @return String|undefined
+		 * @param  String|undefined  dir hash
+		 * @return String
 		 */
-		last : function(key) { 
-			return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : void(0); 
+		lastDir : function(key) { 
+			return this.options.rememberLastDir ? this.cookie('el-finder-last', key) : ''; 
 		},
 		
 		/**
@@ -433,44 +643,8 @@
 		},
 		
 		/**
-		 * Add event listener
-		 * 
-		 * @param  String  event(s) name(s)
-		 * @param  Object  event handler
-		 * @return elFinder
-		 */
-		bind : function(e, c) {
-			var e = e.toLowerCase().split(/\s+/), i;
-			
-			if (typeof(c) == 'function') {
-				for (i = 0; i < e.length; i++) {
-					if (this.listeners[e[i]] === void(0)) {
-						this.listeners[e[i]] = [];
-					}
-					this.listeners[e[i]].push(c);
-				}
-			}
-			return this;
-		},
-		
-		/**
-		 * Remove event listener if exists
-		 *
-		 * @param  String    event name
-		 * @param  Function  callback
-		 * @return elFinder
-		 */
-		unbind : function(e, c) {
-			var l = this.listeners[e.toLowerCase()] || [],
-				i = l.indexOf(c);
-
-			i > -1 && l.splice(i, 1);
-			return this;
-		},
-		
-		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
-		 * To bind multiply events at once, separate events names by space
+		 * To bind to multiply events at once, separate events names by space
 		 *
 		 * @param  String    event name
 		 * @param  Function  callback
@@ -485,33 +659,10 @@
 			return this.bind(e, h);
 		},
 		
-		/**
-		 * Send notification to all event subscribers
-		 *
-		 * @param  jQuery.Event|String  event or event type
-		 * @param  Object        extra parameters
-		 * @return elFinder
-		 */
-		trigger : function(e, d) {
-			var e = this.event(e, d||{}),
-				l = this.listeners[e.type]||[], i;
+		
 
-			this.debug('event-'+e.type, e.data);
-
-			for (i = 0; i < l.length; i++) {
-				if (e.isPropagationStopped()) {
-					break;
-				}
-				try {
-					l[i](e, this);
-				} catch (ex) {
-					window.console && window.console.error && window.console.error(ex);
-				}
-			}
-			
-			delete e;
-			return this;
-		},
+		
+		
 		
 		/**
 		 * Bind keybord shortcut to keydown event
@@ -551,84 +702,6 @@
 			return this;
 		},
 		
-		/**
-		 * Proccess ajax request
-		 *
-		 * @param  Object  data to send to connector or options for ajax request
-		 * @param  String  mode. "bg" - do not fired "ajaxstart/ajaxstop", show errors, "silent" - do not fired "ajaxstart/ajaxstop", errors - to debug
-		 * @return elFinder
-		 */
-		ajax : function(opts, mode) {
-			var self = this,
-				cmd = opts.data ? opts.data.cmd : opts.cmd,
-				options = {
-					url      : this.options.url,
-					async    : true,
-					type     : 'get',
-					dataType : 'json',
-					cache    : false,
-					data     : $.extend({}, this.options.customData || {}, opts.data || opts),
-					// timeout  : 100,
-					error    : function(xhr, status) { 
-						var error;
-						
-						switch (status) {
-							case 'abort':
-								error = ['Unable to connect to backend', 'Connection aborted'];
-								break;
-							case 'timeout':
-								error = ['Unable to connect to backend', 'Connection timeout'];
-								break;
-							case 'parsererror':
-								error = 'Invalid backend response';
-								break;
-							default:
-								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend' : 'Invalid backend response';
-						}
-						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
-
-					},
-					success  : function(data) {
-						var req = self.required[cmd] || [],
-							i = req.length,
-							error;
-						
-						!mode && self.trigger('ajaxstop', data);
-
-						if (!data) {
-							error = 'Invalid backend response';
-						} else if (data.error) {
-							error = data.error;
-						} else {
-							while (i--) {
-								if (data[req[i]] === void(0)) {
-									error = 'Invalid backend response';
-									break;
-								}
-							}
-						}
-
-						if (error) {
-							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
-						}
-
-						self.trigger(cmd, data).trigger('updateSelected');
-						// delete data
-					}
-				};
-				
-			opts.data && $.extend(options, opts)
-			
-			if (this.ajaxAllowed()) {
-				!mode && self.trigger('ajaxstart', options);
-				if (this.api < 2) {
-					options.data = $.extend({current : this.cwd.hash}, options.data);
-				}
-				$.ajax(options);
-			}
-			
-			return this;
-		},
 		
 		/**
 		 * Return file/dir from current dir or tree by it's hash
@@ -649,10 +722,9 @@
 			
 			for (hash in this.cdc) {
 				if (this.cdc.hasOwnProperty(hash) && this.cdc[hash].name == name) {
-					return true;
+					return this.cdc[hash];
 				}
 			}
-			return false;
 		},
 		
 		/**
@@ -685,60 +757,56 @@
 		open : function(hash, tree, init) {
 			var file,  isdir, error;
 			
-			if (!this.lock()) {
-				if (hash && this.cdc[hash]) {
-					file   = this.cdc[hash];
-					isdir = file.mime == 'directory';
-					if (!file.read) {
-						error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
-						return this.trigger('error', {error : [[error, file.name]]});
-					}
-					
-					if (!isdir) {
-						// open file in new window
-						if (file.url || this.cwd.url) {
-							// old api store url in file propery
-							// new api store only cwd url
-							url = file.url || this.cwd.url + encodeURIComponent(file.name);
-						} else {
-							// urls diabled - open connector
-							url = this.options.url 
-								+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-								+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
-								+ '&target=' + hash;
-
-						}
-						if (file.dim) {
-							// image - set window size
-							s = file.dim.split('x');
-							w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-						}
-
-						if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
-							// popup blocks
-							this.trigger('error', {error : 'Unable to open file in new window.'});
-						}
-						return this;
-					}
+			if (hash && this.cdc[hash]) {
+				file   = this.cdc[hash];
+				isdir = file.mime == 'directory';
+				if (!file.read) {
+					error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
+					return this.trigger('error', {error : [[error, file.name]]});
 				}
 				
-				data = {
-					cmd    : 'open',
-					target : hash,
-					mimes  : this.options.onlyMimes || [],
-					sort   : this.sort[this.options.sort] || 1
-				};
-				if (tree && this.options.allowNavbar) {
-					data.tree = true;
+				if (!isdir) {
+					// open file in new window
+					if (file.url || this.cwd.url) {
+						// old api store url in file propery
+						// new api store only cwd url
+						url = file.url || this.cwd.url + encodeURIComponent(file.name);
+					} else {
+						// urls diabled - open connector
+						url = this.options.url 
+							+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
+							+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+							+ '&target=' + hash;
+
+					}
+					if (file.dim) {
+						// image - set window size
+						s = file.dim.split('x');
+						w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+					}
+
+					if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
+						// popup blocks
+						this.trigger('error', {error : 'Unable to open file in new window.'});
+					}
+					return this;
 				}
-				if (init) {
-					data.init = true;
-				}
-				
-				this.ajax(data);
 			}
 			
-			return this;
+			data = {
+				cmd    : 'open',
+				target : hash,
+				mimes  : this.options.onlyMimes || [],
+				sort   : this.sort[this.options.sort] || 1
+			};
+			if (tree && this.options.allowNavbar) {
+				data.tree = true;
+			}
+			if (init) {
+				data.init = true;
+			}
+			
+			return this.ajax(data);
 		},
 		
 		/**
@@ -810,7 +878,9 @@
 		 * @param  Array  files hashes array
 		 * @return elFinder
 		 */
-		cut : function(files, src) { return this.copy(files, src, true); },
+		cut : function(files, src) { 
+			return this.copy(files, src, true); 
+		},
 		
 		/**
 		 * Paste files from buffer into required directory

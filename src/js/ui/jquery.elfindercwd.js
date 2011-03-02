@@ -342,7 +342,7 @@ $.fn.elfindercwd = function(fm) {
 				.selectable({
 					filter     : '[id]',
 					delay      : 10,
-					stop       : function(e) { fm.lock() && fm.trigger('focus'); fm.trigger('updateselected'); },
+					stop       : function(e) { fm.trigger('updateselected'); },
 					selected   : function(e, ui) {  $(ui.selected).trigger('select.elfinder');	},
 					unselected : function(e, ui) {  $(ui.unselected).trigger('unselect.elfinder'); }
 				})
