@@ -1466,7 +1466,7 @@ class connector():
 
 		try:
 			sp = self._sp.Popen(cmd, shell = False, stdout = self._sp.PIPE, stderr = self._sp.PIPE)
-			out, err = sp.communicate()
+			out, err = sp.communicate('')
 			ret = sp.returncode
 			# print cmd, ret, out, err
 		except:
