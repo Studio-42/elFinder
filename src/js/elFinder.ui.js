@@ -122,7 +122,7 @@
 		 * @type  jQuery
 		 */
 		this.viewport = el.empty().removeAttr('style').removeAttr('class')
-			.attr('id', fm.id)
+			// .attr('id', fm.id)
 			// .attr('unselectable', 'on')
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+fm.dir+' '+(fm.options.cssClass||''))
 			.append(this.toolbar.hide().show())

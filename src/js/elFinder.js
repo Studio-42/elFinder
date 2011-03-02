@@ -7,6 +7,7 @@
 			 *
 			 * @type Boolean
 			 **/
+			
 			ajax = true,
 			/**
 			 * shortcuts lock
@@ -14,13 +15,28 @@
 			 * @type Boolean
 			 **/
 			lock = false,
+			
+			/**
+			 * Flag to fire "load" event
+			 *
+			 * @type Boolean
+			 **/
 			loaded = false,
+			
+			/**
+			 * Selected files ids
+			 *
+			 * @type Array
+			 **/
+			selected = [],
+			
 			/**
 			 * Target node
 			 *
 			 * @type jQuery
 			 **/
 			$el = $(el),
+			
 			file = function(file, replace) {
 				var hash = file.hash;
 
@@ -85,13 +101,6 @@
 		this.params = { dotFiles : false, arc : '', uplMaxSize : '' };
 		
 		/**
-		 * ID. Requeried to get/set elfinder instance cookies
-		 *
-		 * @type String
-		 **/
-		this.id = $el.attr('id') || '';
-		
-		/**
 		 * Interface language
 		 *
 		 * @type String
@@ -136,7 +145,7 @@
 		 *
 		 * @type Array
 		 **/
-		this.selected = [];
+		// this.selected = [];
 		/**
 		 * History, contains hashs of last opened directories
 		 *
@@ -187,7 +196,9 @@
 			return ajax;
 		}
 		
-		
+		this.selected = function() {
+			return selected;
+		}
 		
 		this.one('ajaxerror error', function(e) {
 				if (!loaded) {
@@ -210,9 +221,17 @@
 				lock = true;
 			})
 			.bind('select', function(e) {
-				if ($.isArray(e.data.selected)) {
-					self.selected = e.data.selected;
+				var ids = $.isArray(e.data.selected) ? e.data.selected : [], i;
+					
+				selected = [];
+				for (i = 0; i < ids.length; i++) {
+					self.cdc[ids[i]] && selected.push(ids[i]);
 				}
+				self.log(selected)
+				// if ($.isArray(e.data.selected)) {
+				// 	self.selected = e.data.selected;
+				// 	
+				// }
 			})
 			.bind('open', function(e) {
 				var cdc = e.data.cdc,
@@ -247,8 +266,8 @@
 				if (!hl || h[hl - 1] != self.cwd.hash) {
 					h.push(self.cwd.hash);
 				}
-				// reset selected files
-				self.selected = [];
+				// clean selected files cache
+				selected = [];
 				
 				// initial loading
 				if (!loaded) {
@@ -612,14 +631,20 @@
 		},
 		
 		/**
-		 * Return file/dir from current dir by it's hash
+		 * Return file/dir from current dir or tree by it's hash
 		 * 
 		 * @param  String  file hash
 		 * @return Object
 		 */
-		get : function(hash) { return this.cdc[hash] || this.tree[hash]; },
+		file : function(hash) { return this.cdc[hash] || this.tree[hash]; },
 		
-		exists : function(name) {
+		/**
+		 * Return file/dir info with required name
+		 * 
+		 * @param  String  file hash
+		 * @return Object|Boolean
+		 */
+		fileByName : function(name) {
 			var hash;
 			
 			for (hash in this.cdc) {
@@ -630,24 +655,23 @@
 			return false;
 		},
 		
-		getSelected : function(index) {
-			var ret = [], 
-				sel = this.selected, i;
-				// l = this.selected.length;
+		/**
+		 * Return selected files info
+		 * 
+		 * @return Array
+		 */
+		selectedFiles : function() {
+			var files = [], 
+				sel   = this.selected(), i;
 			
-			if (index === void(0)) {
-				for (i = 0; i < sel.length; i++) {
-					ret.push(this.cdc[sel[i]]);
-				}
-				return ret;
+			for (i = 0; i < sel.length; i++) {
+				files.push(this.cdc[sel[i]]);
 			}
-			return ret;
-			while (l--) {
-				if (this.cdc[this.selected[l]]) {
-					s.unshift(this.cdc[this.selected[l]]);
-				}
-			}
-			return s;
+			return files;
+		},
+		
+		checkPermissions : function(files) {
+			
 		},
 		
 		/**
@@ -751,37 +775,31 @@
 		 * @return Boolean
 		 */
 		copy : function(files, src, cut, dd) {
-			var self = this, 
-				tmp  = [], 
-				file, error;
-			
-			// check read/rm permissions
-			$.each(files || this.selected, function(i, hash) {
-				file = self.cdc[hash] || self.tree[hash];
-				if (file) {
-					if (!file.read) {
-						error = 'Unable to copy "$1". Not enough permission.';
-					} else if (cut && !file.rm) {
-						error = dd ? 'Unable to move "$1". Not enough permission.' : 'Unable to cut "$1". Not enough permission.';
+			var self  = this, 
+				error = '',
+				files = $.map(files, function(hash) {
+					var file = self.file(hash);
+					
+					if (file && !error && (!file.read || (cut ? !file.rm : false))) {
+						error = (cut ? (dd ? 'Unable to move "$1"' : 'Unable to cut "$1"') : 'Unable to copy "$1"') + '. Not enough permission.';
+						error = self.i18n([error, file.name]);
 					}
-					if (error) {
-						self.trigger('error', {error : [[error, file.name]]});
-						return false;
-					}
-					tmp.push(hash);
-				}
-			});
-			
-			if (tmp.length) {
+					return file ? hash : null;
+				});
+				
+			if (error) {
+				self.trigger('error', {error : error});
+				
+			} else if (files.length) {
 				this.buffer = {
 					src   : src || this.cwd.hash,
-					cut   : !!cut,
-					files : tmp
+					cut   : cut ? 1 : 0,
+					files : files
 				};
 				this.trigger(cut ? 'cut' : 'copy', this.buffer);
 				return true;
-			} 
-			this.cleanBuffer();	
+			}
+			
 			return false;
 		},
 		

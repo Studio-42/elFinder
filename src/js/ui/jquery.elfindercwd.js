@@ -79,7 +79,7 @@ $.fn.elfindercwd = function(fm) {
 					list     = fm.view == 'list',
 					s, n, top, left;
 				
-				if (fm.selected.length) {
+				if (fm.selected().length) {
 					// find fist/last selected file
 					s = cwd.find('[id].ui-selected:'+(prev ? 'first' : 'last'));
 					
@@ -238,10 +238,10 @@ $.fn.elfindercwd = function(fm) {
 					selectLock = false;
 				},
 				helper     : function(e, ui) {
-					var element = this.id ? $(this) : $(this).parents('[id]:first'),
-						helper  = $('<div class="elfinder-drag-helper"/>'),
-						files   = [],
-						icon    = function(mime) { return '<div class="elfinder-cwd-icon '+fm.ui.mime2class(mime)+' ui-corner-all"/>'; };
+					var element  = this.id ? $(this) : $(this).parents('[id]:first'),
+						helper   = $('<div class="elfinder-drag-helper"/>'),
+						selected = [],
+						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.ui.mime2class(mime)+' ui-corner-all"/>'; }, l;
 
 					cwd.selectable('disable').removeClass('ui-state-disabled');
 
@@ -255,15 +255,18 @@ $.fn.elfindercwd = function(fm) {
 					}
 					selectLock = true;
 					
-					if ((files = fm.getSelected()).length) {
-						helper.append(icon(files[0].mime))
+					if ((selected = fm.selected()).length) {
+						l = selected.length;
+						
+						helper.append(icon(fm.file(selected[0]).mime))
 							.data({
-								files : files,
+								files : selected,
 								src   : fm.cwd.hash
 							});
-						files.length > 1 && helper.append(icon(files[files.length - 1].mime)+'<span class="elfinder-drag-num">'+fm.selected.length+'</span>');
+							
+						l > 1 && helper.append(icon(fm.file(selected[l-1]).mime)+'<span class="elfinder-drag-num">'+l+'</span>');
 					}
-					return helper
+					return helper;
 				}
 			}),
 
