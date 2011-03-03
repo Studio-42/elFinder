@@ -248,9 +248,7 @@
 
 					},
 					success  : function(data) {
-						var req = self.required[cmd] || [],
-							i = req.length,
-							error;
+						var error;
 						
 						!mode && self.trigger('ajaxstop', data);
 
@@ -259,12 +257,16 @@
 						} else if (data.error) {
 							error = data.error;
 						} else {
-							while (i--) {
-								if (data[req[i]] === void(0)) {
+							$.each(self.validate[cmd]||[], function(cmd, rules) {
+								var d = data[cmd];
+								
+								if ((d === void(0) && rules.req) 
+								|| (d !== void(0) && rules.valid && !rules.valid(d))) {
 									error = 'Invalid backend response';
-									break;
+									return false;
 								}
-							}
+								
+							})
 						}
 
 						if (error) {
@@ -459,6 +461,8 @@
 						// store core params
 						params = data.params;
 					}
+					// update validate data rules
+					self.validate.open.tree.valid = self.newAPI ? $.isArray : $.isPlainObject;
 				}
 				
 				// join core and cwd params
@@ -1034,11 +1038,16 @@
 			return (this.messages[m] || m).replace(/\$(\d+)/g, ''); 
 		},
 		
-		required : {
-			open : ['cwd', 'cdc'],
-			tree : ['tree'],
-			tmb  : ['current', 'images']
- 		},
+		validate : {
+			open : {
+				cwd    : {req : true, valid : $.isPlainObject},
+				tree   : {req : false},
+				params : {req : false, valid : $.isPlainObject}
+			},
+			tree : {
+				tree : {req : true, valid : $.isArray}
+			}
+		},
 		
 		sort : {
 			nameDirsFirst : 1,

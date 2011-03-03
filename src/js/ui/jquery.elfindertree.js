@@ -38,23 +38,16 @@
 						for (i = 0; i < dirs.length; i++) {
 							dir    = dirs[i];
 							node   = tree.find('#nav-'+dir.hash);
-							parent = dir.phash ? tree.find('#nav-'+dir.phash).next('.'+subtree) : tree;
-
-							if (node.length) {
-								if (parent !== node.parents('.'+subtree).prev('[id]')) {
-									stree.append(node);
-									fm.log('move dir in tree');
-								}
-							} else {
-								parent.append(item(dir, !dir.phash));
+							
+							if (!node.length) {
+								(dir.phash ? tree.find('#nav-'+dir.phash).next('.'+subtree) : tree).append(item(dir, !dir.phash));
 							}
 						}
-						attachEvents();
+						
 					} else {
 						if (root) {
 							tree.find('a').remove();
 							tree.html(item(dirs, true));
-							attachEvents();
 						} else {
 							for (i = 0; i < dirs.length; i++) {
 								html.push(item(dirs[i], root));
@@ -62,6 +55,23 @@
 							return ul + html.join('') + '</ul>';
 						}
 					}
+				},
+				append = function(dirs) {
+					build(dirs, true);
+					
+					tree.find('.'+active).removeClass(active);
+					dir = tree.find('#nav-'+fm.cwd().hash).addClass(active);
+
+					if (fm.options.navOpenRoot && dir.length) {
+						// show active root subdirs if required
+						if (dir.is('.'+root)) {
+							dir.next('.'+subtree).show();
+							dir.children('.'+collapsed).addClass(expanded);
+						} else if (e.data.params) {
+							dir.parentsUntil('.elfinder-nav-tree').last().children('.'+root).next('.'+subtree).show();
+						}
+					}
+					attachEvents();
 				},
 				draggable = $.extend({}, fm.ui.draggable, {
 						addClasses : true,
@@ -137,39 +147,22 @@
 										$this.remove();
 									}
 								}
-							});
+							}, 'silent');
 						}
 					})
 				;
 				
 			fm.bind('open', function(e) {
-				var dir;
-
-				fm.time('tree')
 				if (e.data.tree) {
 					tree.empty();
-					// can help om really big tree
+					// can help on really big tree
 					setTimeout(function() {
-						build(e.data.tree, true);
-						tree.find('.'+active).removeClass(active);
-						dir = tree.find('#nav-'+e.data.cwd.hash).addClass(active);
-
-						if (fm.options.navOpenRoot && dir.length) {
-							// show active root subdirs if required
-							if (dir.is('.'+root)) {
-								dir.next('.'+subtree).show();
-								dir.children('.'+collapsed).addClass(expanded);
-							} else if (e.data.params) {
-								dir.parentsUntil('.elfinder-nav-tree').last().children('.'+root).next('.'+subtree).show();
-							}
-						}
+						append(e.data.tree);
 					}, 20);
 				}
-				fm.timeEnd('tree')
 			})
 			.bind('tree', function(e) {
-				build(e.data.tree);
-				setTimeout(attachEvents, 25);
+				append(e.data.tree)
 			})
 			.bind('mkdir', function(e) {
 				var dir = e.data.dir && e.data.dir.hash && e.data.dir.name ? e.data.dir : null,
