@@ -472,6 +472,7 @@
 
 				if (self.api < 2) {
 					cwd.url = params.url;
+					cwd.tmb = data.tmb;
 				}
 
 				// remember last dir
@@ -537,6 +538,14 @@
 						}
 					}
 				}
+			})
+			// cache created thumbnails urls
+			.bind('tmb', function(e) {
+				$.each(e.data.images, function(hash, url) {
+					if (files[hash]) {
+						files[hash].tmb = url;
+					}
+				});
 			})
 			.bind('mkdir', function(e) {
 				self.log(e.data)

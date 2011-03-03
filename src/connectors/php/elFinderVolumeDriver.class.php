@@ -70,13 +70,6 @@ abstract class elFinderVolumeDriver {
 	protected $tmbURL = '';
 	
 	/**
-	 * Flag. Request to create thumbnails required
-	 *
-	 * @var bool
-	 **/
-	protected $tmb = false;
-	
-	/**
 	 * Error message from last failed action
 	 *
 	 * @var string
@@ -114,7 +107,6 @@ abstract class elFinderVolumeDriver {
 		'alias'        => '',           // alias to replace root dir name
 		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'tmbURL'       => '',           // thumbnails dir URL
-		'tmbAtOnce'    => 12,           // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'startPath'    => '',           // open this path on initial request instead of root path
 		'disabled'     => array(),      // list of commands names to disable on this root
@@ -448,48 +440,20 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	public function tmbRequestAllowed() {
-		return $this->tmb;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function tmb($hash) {
-		if (false == ($path = $this->path($hash, 'd', 'read'))) {
-			return false;
-		}
-		$result = array(
-			'current' => $hash, 
-			'images'  => array(),
-			'tmb'     => false
-			);
-		$cnt = $this->options['tmbAtOnce'] > 0 ? $this->options['tmbAtOnce'] : 12;
-		
-		if (($ls = $this->_scandir($path, self::$FILTER_FILES_ONLY)) === false) {
-			return $result;
-		}
-		
-		foreach ($ls as $file) {
+	public function tmb($files) {
+		$images = array();
 			
-			$mime = $this->_mimetype($file);
-			if ($this->_tmbURL($file, $mime) === true) {
+		foreach ($files as $hash) {
+			if (($file = $this->path($hash, 'f', 'read')) !== false) {
+				$mime = $this->_mimetype($file);
+				$tmb = $this->_tmbURL($file, $mime);
 				
-				if ($cnt > 0) {
-					if (($tmb = $this->_tmb($file, $mime)) != false) {
-						$result['images'][$this->encode($file)] = $tmb;
-						$cnt--;
-					}
-				} else {
-					$result['tmb'] = true;
-					break;
+				if (is_string($tmb) || ($tmb === true && (($tmb = $this->_tmb($file, $mime)) != false))) {
+					$images[$hash] = $tmb;
 				}
 			}
 		}
-		return $result;
+		return $images;	
 	}
 	
 	/**
@@ -750,11 +714,11 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			if ($this->URL && ($tmb = $this->_tmbURL($path, $info['mime'])) != false) {
-				if ($tmb === true) {
-					$this->tmb = true;
-				} else {
-					$info['tmb'] = $tmb;
-				}
+				// if ($tmb === true) {
+					// $this->tmb = true;
+				// } else {
+					$info['tmb'] = is_string($tmb) ? $tmb : 1;
+				// }
 				
 			}
 			

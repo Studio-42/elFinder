@@ -31,7 +31,7 @@ class elFinder {
 	protected $commands = array(
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'sort' => false),
 		'tree'      => array('target' => true),
-		'tmb'       => array('current' => true),
+		'tmb'       => array('current' => true, 'files' => true),
 		'file'      => array('target' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true),
@@ -335,7 +335,7 @@ class elFinder {
 			return array('error' => $volume->error());
 		}
 		
-		$result['cwd']['tmb'] = $volume->tmbRequestAllowed();
+		// $result['cwd']['tmb'] = $volume->tmbRequestAllowed();
 		
 		if ($args['tree']) {
 			$result['tree'] = array();
@@ -394,13 +394,18 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
-		$dir = $args['current'];
-		$volume = $this->volume($dir);
+		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
 		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
-		$result = $volume->tmb($dir);
+		
+		return array(
+			'current' => $args['current'],
+			'images'  => $volume->tmb($args['files'])
+		);
+		
+		$result = $volume->tmb($dir, $args['files']);
 		
 		return $result === false
 			? array('error' => $root->error())

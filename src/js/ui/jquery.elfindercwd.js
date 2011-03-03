@@ -44,7 +44,8 @@ $.fn.elfindercwd = function(fm) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 				},
 				style : function(f) {
-					return f.tmb ? ' style="background:url(\''+f.tmb+'\') center center no-repeat"' : '';
+					// fm.log(f.tmb)
+					return typeof(f.tmb) == 'string' ? ' style="background:url(\''+f.tmb+'\') center center no-repeat"' : '';
 				}
 			},
 			
@@ -181,7 +182,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @type  Boolean
 			 */
 			scrollTop = false,
-			
+			tmb = !!fm.cwd().tmb,
 			/**
 			 * Cwd scroll event handler.
 			 * Lazy load - append to cwd not shown files
@@ -190,6 +191,8 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			scroll = function() {
 				var html = [],  
+					
+					tmbs = [],
 					dirs, 
 					files, i;
 				
@@ -205,6 +208,9 @@ $.fn.elfindercwd = function(fm) {
 								if (f.mime == 'directory') {
 									dirs = true;
 								}
+								if (f.tmb === 1) {
+									tmbs.push(f.hash)
+								}
 								return f.hash && f.name ? item(f) : null;
 							});
 
@@ -218,6 +224,10 @@ $.fn.elfindercwd = function(fm) {
 									cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
 								}, 20);
 							}
+							
+							if (tmb || tmbs.length) {
+								fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+							} 
 						}
 						scrollLock = false;
 					}
@@ -225,6 +235,8 @@ $.fn.elfindercwd = function(fm) {
 					cwd.unbind('scroll', scroll);
 				}
 			},
+			
+			
 			
 			/**
 			 * Draggable options
@@ -379,32 +391,24 @@ $.fn.elfindercwd = function(fm) {
 			
 		})
 		.bind('tmb', function(e) {
-			var find = function(hash) {
-				for (var i = 0; i < buffer.length; i++) {
-					if (hash == buffer[i].hash) {
-						return buffer[i];
-					}
-				}
-			};
+			tmb = !!e.data.tmb;
 			
-			if (e.data.current == fm.cwd.hash && fm.view == 'icons') {
-				
-
+			if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
 				$.each(e.data.images, function(hash, url) {
-					var element;
-					
-					if ((element = cwd.find('#'+hash+' .elfinder-cwd-icon')).length) {
-						element.attr('_tmb', url);
-						tmbcnt++;
+					var node = cwd.find('#'+hash);
+					if (node.length) {
+						node.find('.elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
 					} else {
-						if ((element = find(hash))) {
-							element.tmb = url;
-						}
 						e.data.tmb = false;
-					} 
+						for (i = 0; i < buffer.length; i++) {
+							if (buffer[i].hash == hash) {
+								buffer[i].tmb = url;
+								break;
+							}
+						}
+					}
 				});
-				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd.hash}, 'silent');
-				cwd.trigger('scroll');
+				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			}
 		})
 		.bind('mkdir', function(e) {
