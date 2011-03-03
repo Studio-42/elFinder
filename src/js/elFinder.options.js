@@ -75,7 +75,7 @@ elFinder.prototype.options = {
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
-	rememberLastDir : true,
+	rememberLastDir : false,
 	/**
 	 * Data to append to all ajax requests and to upload form
 	 *
@@ -154,8 +154,8 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	debug : false
-	// debug : ['event-select', 'event-updateselected']
+	// debug : false
+	debug : ['event-open']
 }
 
 })(jQuery);

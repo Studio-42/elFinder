@@ -280,9 +280,6 @@
 			
 			if (permissions.ajax) {
 				!mode && self.trigger('ajaxstart', options);
-				if (this.api < 2) {
-					options.data = $.extend({current : cwd.hash}, options.data);
-				}
 				$.ajax(options);
 			}
 			
@@ -409,6 +406,8 @@
 			return $.map(selected, function(hash) { return files[hash] || null });
 		};
 		
+		this.newAPI = false;
+		this.oldAPI = true;
 		
 		this
 			// disable/enable ajax on ajaxstart/ajaxstop events
@@ -448,6 +447,8 @@
 				if (!loaded) {
 					loaded   = true;
 					self.api = parseFloat(e.data.api) || 1;
+					self.newAPI = self.api > 1;
+					self.oldAPI = !self.newAPI;
 					
 					if (data.params) {
 						// remove disabled commands
@@ -495,18 +496,41 @@
 			.bind('open tree', function(e) {
 				var src = e.data.tree || [],
 					l = src.length,
-					f;
+					f,
+					traverse = function(dir) {
+						var l, d;
+
+						function add(d) {
+							if (d.name && d.hash && !tree[d.hash]) {
+								d = $.extend({mime : 'directory', rm : 1}, d);
+								delete d.dirs;
+								tree[d.hash] = d;
+							}
+						}
+
+						add(dir);
+
+						if (dir.dirs && dir.dirs.length) {
+							l = dir.dirs.length;
+							while (l--) {
+								d = dir.dirs[l];
+								d.dirs && d.dirs.length ? traverse(d) : add(d);
+							}
+						}
+					};
 					
 				// init/reload or old api - clean tree cache
-				if (e.type =='open' && (data.params || self.api < 2)) {
+				if (self.oldAPI && e.type =='open' && e.data.tree) {
 					tree = {};
-				}
-
-				while (l--) {
-					f = src[l];
-					if (f.hash && f.name && !tree[f.hash]) {
-						f.mime = 'directory';
-						tree[f.hash] = f;
+					traverse(src);
+					self.log(tree)
+				} else if (self.newAPI) {
+					while (l--) {
+						f = src[l];
+						if (f.hash && f.name && !tree[f.hash]) {
+							f.mime = 'directory';
+							tree[f.hash] = f;
+						}
 					}
 				}
 			})
@@ -525,6 +549,13 @@
 				} else {
 					e.stopPropagation();
 					self.trigger('open', e.data);
+				}
+			})
+			.bind('paste', function(e) {
+				self.log(e.data)
+				if (self.oldAPI) {
+					// e.stopPropagation()
+					self.trigger('open', e.data)
 				}
 			})
 			;
@@ -774,7 +805,7 @@
 				// urls diabled - open connector
 				url = this.options.url 
 					+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-					+(this.api < 2 ? 'cmd=open&current=' + this.cwd.hash : 'cmd=file')
+					+(this.api < 2 ? 'cmd=open&current=' + this.cwd().hash : 'cmd=file')
 					+ '&target=' + hash;
 			}
 			// image - set window size
@@ -797,7 +828,7 @@
 		 */
 		reload : function() {
 			this.buffer = {};
-			return this.open(this.cwd.hash, true);
+			return this.open(this.cwd().hash, true);
 		},
 		
 		/**
@@ -818,7 +849,7 @@
 		 * Copy files into buffer
 		 * 
 		 * @param  Array    files hashes array
-		 * @param  String   files parent dir hash
+		 * @param  String   files parent dir hash (required by old api)
 		 * @param  Boolean  cut files?
 		 * @param  Boolean  method called from drag&drop - required for correct error message
 		 * @return Boolean
@@ -841,11 +872,11 @@
 				
 			} else if (files.length) {
 				this.buffer = {
-					src   : src || this.cwd.hash,
+					src   : src || this.cwd().hash,
 					cut   : cut ? 1 : 0,
 					files : files
 				};
-				this.trigger(cut ? 'cut' : 'copy', this.buffer);
+				this.trigger(cut ? 'cut' : 'copy', {buffer : this.buffer});
 				return true;
 			}
 			
@@ -871,7 +902,8 @@
 		 * @return elFinder
 		 */
 		paste : function(dst) {
-			var dst = dst || this.cwd.hash,
+			var cwd = this.cwd().hash,
+				dst = dst || cwd,
 				b = this.buffer;
 
 			if (b.src == dst) {
@@ -879,7 +911,7 @@
 			} else if (b.files && b.files.length) {
 				this.ajax({
 					cmd     : 'paste',
-					current : this.cwd.hash,
+					current : cwd,
 					src     : b.src,
 					dst     : dst,
 					cut     : b.cut ? 1 : 0,
