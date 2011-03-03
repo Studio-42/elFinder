@@ -57,7 +57,9 @@ elFinder.prototype.options = {
 	 * @type Boolean
 	 * @default true
 	 */
-	navOpenRoot : true,
+	alwaysOpenRoot : true,
+	
+	syncTree : true,
 	/* callback to get file url (for wswing editors) */
 	editorCallback : null,
 	/* string to cut from file url begin before pass it to editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */
@@ -75,7 +77,7 @@ elFinder.prototype.options = {
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
-	rememberLastDir : false,
+	rememberLastDir : true,
 	/**
 	 * Data to append to all ajax requests and to upload form
 	 *

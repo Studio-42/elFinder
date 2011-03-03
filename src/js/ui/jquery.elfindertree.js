@@ -56,22 +56,22 @@
 						}
 					}
 				},
-				append = function(dirs) {
-					build(dirs, true);
-					
+				sync = function() {
 					tree.find('.'+active).removeClass(active);
 					dir = tree.find('#nav-'+fm.cwd().hash).addClass(active);
 
-					if (fm.options.navOpenRoot && dir.length) {
-						// show active root subdirs if required
-						if (dir.is('.'+root)) {
+					if (dir.is('.'+root)) {
+						if (fm.options.alwaysOpenRoot) {
 							dir.next('.'+subtree).show();
 							dir.children('.'+collapsed).addClass(expanded);
-						} else if (e.data.params) {
-							dir.parentsUntil('.elfinder-nav-tree').last().children('.'+root).next('.'+subtree).show();
+						}
+					} else if (fm.options.syncTree) {
+						if (dir.length) {
+							dir.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prev('a').children('.'+collapsed).addClass(expanded);
+						} else {
+							fm.ajax({cmd : 'parents', target : fm.cwd().hash});
 						}
 					}
-					attachEvents();
 				},
 				draggable = $.extend({}, fm.ui.draggable, {
 						addClasses : true,
@@ -157,12 +157,19 @@
 					tree.empty();
 					// can help on really big tree
 					setTimeout(function() {
-						append(e.data.tree);
+						build(e.data.tree, true);
+						attachEvents();
+						sync();
 					}, 20);
+				} else {
+					sync()
 				}
+				// sync();
 			})
-			.bind('tree', function(e) {
-				append(e.data.tree)
+			.bind('tree parents', function(e) {
+				build(e.data.tree);
+				sync();
+				attachEvents();
 			})
 			.bind('mkdir', function(e) {
 				var dir = e.data.dir && e.data.dir.hash && e.data.dir.name ? e.data.dir : null,

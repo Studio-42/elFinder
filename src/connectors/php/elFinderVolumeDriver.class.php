@@ -440,6 +440,42 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
+	public function parents($hash) {
+		if (($path = $this->path($hash, 'd', 'read')) === false) {
+			return $this->setError('File not found');
+		}
+		$tree = $this->_tree($path, 1);
+		// debug($tree);
+		// $info = $this->fileinfo($path, true);
+		// 
+		// $childs = $this->_scandir($path, self::$FILTER_DIRS_ONLY);
+		// $info['childs'] = intval(count($childs) > 0);
+		// $tree = array($info);
+		
+		
+		while ($path != $this->root) {
+			$path = $this->_dirname($path);
+			// echo $path.'<br>';
+			if (!$this->_isReadable($path)) {
+				return $this->setError('Access denied');
+				
+			} 
+			$info = $this->fileinfo($path, true);
+			$info['childs'] = 1;
+			array_unshift($tree, $info);
+			// $tree[] = $info;
+		}
+		// $tree = array_reverse($tree);
+		
+		return $tree;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
 	public function tmb($files) {
 		$images = array();
 			

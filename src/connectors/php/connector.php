@@ -80,7 +80,7 @@ $opts = array(
 				)
 			)
 		),
-		// array('path' => '/opt/local', 'driver' => 'LocalFileSystem', 'tmbDir' => '', 'treeDeep' => 5),
+		array('path' => '/opt/local', 'driver' => 'LocalFileSystem', 'tmbDir' => '', 'treeDeep' => 2),
 		array(
 			'path'   => '../../../files2',
 			'URL'    => 'http://localhost/git/elfinder/files2/',

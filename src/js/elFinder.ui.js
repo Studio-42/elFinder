@@ -8,13 +8,15 @@
 	elFinder.prototype.ui = function(fm, el) {
 		var self = this,
 			open = function() {
-				var s = fm.selected, f, i;
-				// open only one selected folder or every selected files
-				for (i = 0; i < s.length; i++) {
-					if ((f = fm.cdc[s[i]]) && ((s.length == 1 || f.mime != 'directory'))) {
-						fm.open(s[i]);
-					}
+				var s = fm.selected(), f, i;
+				
+				if (s.length == 1) {
+					return fm.open(s[0]);
 				}
+				
+				$.each(s, function(i, h) {
+					fm.file(h).mime != 'directory' && fm.open(h);
+				});
 			}
 			;
 
@@ -214,14 +216,14 @@
 					pattern     : 'ctrl+arrowUp',
 					description : 'Go into parent folder',
 					callback    : function() {
-						var hash, p;
+						var hash = fm.cwd().phash, p;
 						
-						if (fm.cwd.phash) {
+						if (hash) {
 							// new api
-							fm.open(fm.cwd.phash);
-						} else if ((p = self.tree.find('#nav-'+fm.cwd.hash).parent('li').parent('ul').prev('a[id]')).length) {
+							fm.open(hash);
+						} else if ((p = self.tree.find('#nav-'+fm.cwd().hash).parent('li').parent('ul').prev('a[id]')).length) {
 							// old api
-							fm.open(p.attr('id').substr(4))
+							fm.open(p.attr('id').substr(4));
 						}
 					}
 				})
@@ -267,7 +269,7 @@
 				.shortcut({
 					pattern     : 'ctrl+backspace',
 					description : 'Delete files',
-					callback    : function() { fm.rm(fm.selected); }
+					callback    : function() { fm.rm(fm.selected()); }
 				})
 				.shortcut({
 					pattern : 'shift+d',

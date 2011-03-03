@@ -31,6 +31,7 @@ class elFinder {
 	protected $commands = array(
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'sort' => false),
 		'tree'      => array('target' => true),
+		'parents'   => array('target' => true),
 		'tmb'       => array('current' => true, 'files' => true),
 		'file'      => array('target' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
@@ -380,6 +381,27 @@ class elFinder {
 			return array('error' => 'Folder not found');
 		}
 		$tree = $volume->tree($dir);
+		
+		return $tree === false 
+			? array('error' => $volume->error()) 
+			: array('tree' => $tree);
+	}
+	
+	/**
+	 * Return parents dir for required directory
+	 *
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function parents($args) {
+		$dir = $args['target'];
+		$volume = $this->volume($dir);
+		
+		if (!$volume) {
+			return array('error' => 'Folder not found');
+		}
+		$tree = $volume->parents($dir);
 		
 		return $tree === false 
 			? array('error' => $volume->error()) 

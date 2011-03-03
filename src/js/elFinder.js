@@ -498,7 +498,7 @@
 				
 			})
 			// cache directories tree data
-			.bind('open tree', function(e) {
+			.bind('open tree parents', function(e) {
 				var src = e.data.tree || [],
 					l = src.length,
 					f,
@@ -539,7 +539,7 @@
 					}
 				}
 			})
-			// cache created thumbnails urls
+			// cache new thumbnails urls
 			.bind('tmb', function(e) {
 				$.each(e.data.images, function(hash, url) {
 					if (files[hash]) {
@@ -951,20 +951,23 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			var files = $.isArray(files) ? files : [files],
-				targets = [],
-				i, f;
+			var self = this,
+				error;
 			
-			for (i = 0; i < files.length; i++) {
-				if ((f = this.get(files[i]))) {
-					if (!f.rm) {
-						return this.trigger('error', {error : [['Unable to delete '+(f.mime == 'directory' ? 'folder' : 'file')+' "$1".', f.name], 'Not enough permissions.']});
-					}
-					targets.push(files[i]);
+			files = $.map($.isArray(files) ? files : [files], function(hash) {
+				var file = self.file(hash);
+				
+				if (file && !error && !file.rm) {
+					error = [self.i18n(['Unable to delete "$1".', file.name]), 'Not enough permission.'];
 				}
-			}
+				return file ? hash : null;
+			});
 			
-			return targets.length ? this.ajax({cmd : 'rm', targets : targets}, 'nonblocked') : this;
+			if (error) {
+				return this.trigger('error', {error : error});
+			}
+			self.log(files)
+			// return files.length ? this.ajax({cmd : 'rm', targets : files}, 'bg') : this;
 		},
 		
 		mkdir : function(name) {
@@ -1055,6 +1058,13 @@
 			},
 			tree : {
 				tree : {req : true, valid : $.isArray}
+			},
+			parents : {
+				tree : {req : true, valid : $.isArray}
+			},
+			tmb : {
+				current : {req : true},
+				images  : {req : true, valid : $.isPlainObject}
 			}
 		},
 		
