@@ -3,9 +3,7 @@
 	$.fn.elfindertree = function(fm) {
 		
 		return this.each(function() {
-			var newAPI    = false,
-				ids = [],
-				subtree   = 'elfinder-nav-subtree',
+			var subtree   = 'elfinder-nav-subtree',
 				collapsed = 'elfinder-nav-collapsed',
 				expanded  = 'elfinder-nav-expanded',
 				empty     = 'elfinder-nav-empty',
@@ -17,8 +15,8 @@
 				item = function(dir, isroot) {
 					var pclass    = fm.ui.perms2class(dir),
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
-						hasChilds = newAPI ? dir.childs : dir.dirs && dir.dirs.length,
-						childs    = newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? build(dir.dirs) : ''), 
+						hasChilds = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length,
+						childs    = fm.newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? build(dir.dirs) : ''), 
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
 					if (dir && dir.name) {
@@ -33,31 +31,35 @@
 					return '';
 				},
 				build = function(dirs, root) {
-					var html = '', i, e, d, p, s;
+					var dir, node, parent,
+						html = [], i;
 					
-					if (newAPI) {
+					if (fm.newAPI) {
 						for (i = 0; i < dirs.length; i++) {
-							d = dirs[i];
-							e = tree.find('#nav-'+d.hash);
-							
-							if (e.length) {
-								if (d.phash && e.parents('.'+subtree).prev('[id]').attr('id') != 'nav-'+d.phash) {
-									fm.log('move')
+							dir    = dirs[i];
+							node   = tree.find('#nav-'+dir.hash);
+							parent = dir.phash ? tree.find('#nav-'+dir.phash).next('.'+subtree) : tree;
+
+							if (node.length) {
+								if (parent !== node.parents('.'+subtree).prev('[id]')) {
+									stree.append(node);
+									fm.log('move dir in tree');
 								}
 							} else {
-								(d.phash ? tree.find('#nav-'+d.phash).next('.'+subtree) : tree).append(item(d, !d.phash));
+								parent.append(item(dir, !dir.phash));
 							}
 						}
+						attachEvents();
 					} else {
 						if (root) {
 							tree.find('a').remove();
 							tree.html(item(dirs, true));
-							// fm.log(fm.tree)
+							attachEvents();
 						} else {
 							for (i = 0; i < dirs.length; i++) {
-								html += item(dirs[i], root);
+								html.push(item(dirs[i], root));
 							}
-							return ul + html + '</ul>';
+							return ul + html.join('') + '</ul>';
 						}
 					}
 				},
@@ -119,7 +121,7 @@
 						if (ul.children().length) {
 							ul.slideToggle();
 							$this.toggleClass(expanded);
-						} else if (newAPI) {
+						} else if (fm.newAPI) {
 							spinner = $('<span class="elfinder-spinner-mini"/>');
 							fm.ajax({
 								data : {cmd : 'tree', target : parent.attr('id').substr(4)},
@@ -140,32 +142,30 @@
 					})
 				;
 				
-			fm.bind('load', function(e) {
-				newAPI = fm.isNewApi();
-			})
-			.bind('open', function(e) {
+			fm.bind('open', function(e) {
 				var dir;
 
-				// fm.time('tree')
+				fm.time('tree')
 				if (e.data.tree) {
 					tree.empty();
-					build(e.data.tree, true);
-					setTimeout(attachEvents, 25);
+					// can help om really big tree
+					setTimeout(function() {
+						build(e.data.tree, true);
+						tree.find('.'+active).removeClass(active);
+						dir = tree.find('#nav-'+e.data.cwd.hash).addClass(active);
+
+						if (fm.options.navOpenRoot && dir.length) {
+							// show active root subdirs if required
+							if (dir.is('.'+root)) {
+								dir.next('.'+subtree).show();
+								dir.children('.'+collapsed).addClass(expanded);
+							} else if (e.data.params) {
+								dir.parentsUntil('.elfinder-nav-tree').last().children('.'+root).next('.'+subtree).show();
+							}
+						}
+					}, 20);
 				}
-				// fm.timeEnd('tree')
-				
-				tree.find('.'+active).removeClass(active);
-				dir = tree.find('#nav-'+e.data.cwd.hash).addClass(active);
-				
-				if (fm.options.navOpenRoot && dir.length) {
-					// show active root subdirs if required
-					if (dir.is('.'+root)) {
-						dir.next('.'+subtree).show();
-						dir.children('.'+collapsed).addClass(expanded);
-					} else if (e.data.params) {
-						dir.parentsUntil('.elfinder-nav-tree').last().children('.'+root).next('.'+subtree).show();
-					}
-				}
+				fm.timeEnd('tree')
 			})
 			.bind('tree', function(e) {
 				build(e.data.tree);
