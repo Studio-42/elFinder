@@ -187,7 +187,9 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mount($id, array $opts) {
 		$this->id = $id;
-		$opts = $this->_prepare($opts);
+		if (($opts = $this->_prepare($opts)) === false) {
+			return;
+		}
 		$this->options = array_merge($this->options, $opts);
 		$this->root    = @$this->options['path'];
 		$this->start   = @$this->options['startPath'];
@@ -872,10 +874,10 @@ abstract class elFinderVolumeDriver {
 	
 	/**
 	 * Prepare object configuration and do any stuffs required before "mount"
-	 * Return  object configuration
+	 * Return  object configuration or false on failed
 	 *
 	 * @param  array  $opts  object configuration
-	 * @return array
+	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _prepare(array $opts);
