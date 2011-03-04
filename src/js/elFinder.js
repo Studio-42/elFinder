@@ -559,7 +559,7 @@
 						}
 					}
 				}
-				// self.log(tree)	
+				self.log(tree)	
 				return
 				
 				// init/reload or old api - clean tree cache
@@ -588,30 +588,44 @@
 					}
 				});
 			})
-			.bind('mkdir', function(e) {
-				self.log(e.data)
-				if (e.data.dir) {
-					file(e.data.dir)
+			// update files cache
+			.bind('removed', function(e) {
+				var rm = e.data.removed,
+					l = rm.length,  
+					find = function(hash) {
+						var ret = [hash];
+						
+						$.each(tree, function(h, f) {
+							if (f.phash == hash) {
+								ret.push(f.hash);
+								if (f.childs) {
+									ret.concat(find(h));
+								}
+							}
+						});
+						return ret;
+					};
+
+				while (l--) {
+					delete files[rm[l].hash];
+					$.each(find(rm[l].hash), function(i, h) {
+						delete tree[h];
+					});
 				}
-				// self.log(self.cdc)
-				// self.log(self.tree)
 			})
-			.bind('rm', function(e) {
-				self.log(e.data);
-				if (self.api > 1) {
+			.bind('added', function(e) {
+				var add = e.data.added,
+					l = add.length, f;
 					
-				} else {
-					e.stopPropagation();
-					self.trigger('open', e.data);
+				while (l--) {
+					f = add[l]
+					files[f.hash] = f;
+					if (f.mime == 'directory') {
+						tree[f.hash] = f;
+					}
 				}
 			})
-			.bind('paste', function(e) {
-				self.log(e.data)
-				if (self.oldAPI) {
-					// e.stopPropagation()
-					self.trigger('open', e.data)
-				}
-			})
+
 			;
 			
 		// bind to keydown/keypress if shortcuts allowed
@@ -1043,25 +1057,24 @@
 		},
 		
 		mkdir : function(name) {
-			var file = this.fileByName(name);
-			this.log(name)
+			var self = this;
 			
 			if (!this.validName(name)) {
 				return this.trigger('error', {error : 'Unacceptable name.'});
 			}
 			
-			if (file) {
+			if (this.fileByName(name)) {
 				return this.trigger('error', {error : 'File with the same name already exists.'});
 			}
 			if (!this.cwd().write) {
 				return this.trigger('error', {error : ['Unable to create directory', 'Not enough permission.']});
 			}
 			
-			// return this.ajax({
-			// 	data : {cmd : 'mkdir', current : this.cwd().hash, name : name},
-			// 	beforeSend : function() { self.ui.notify('mkdir', 1); },
-			// 	complete : function() { self.ui.notify('mkdir', -1); }
-			// }, 'bg');
+			return this.ajax({
+				data : {cmd : 'mkdir', current : this.cwd().hash, name : name},
+				beforeSend : function() { self.ui.notify('mkdir', 1); },
+				complete : function() { self.ui.notify('mkdir', -1); }
+			}, 'bg');
 			
 		},
 		
@@ -1171,6 +1184,9 @@
 			},
 			rm : {
 				removed : {req : true, valid : $.isArray}
+			},
+			mkdir : {
+				added : {req : true, valid : $.isArray}
 			}
 		},
 		

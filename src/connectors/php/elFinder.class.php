@@ -495,12 +495,17 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Folder not found');
 		}
+		sleep(5);
 		
+		return ($hash = $volume->mkdir($current, $args['name'])) === false
+			? array('error' => $volume->error())
+			: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($volume->info($hash, true))));
+			
 		if (false == ($hash = $volume->mkdir($current, $args['name']))) {
 			return array('error' => $volume->error());
 		}
 		
-		return $this->trigger('mkdir', $volume, array('current' => $current, 'dir' => $volume->info($hash)));
+		return $this->trigger('mkdir', $volume, array('current' => $current, 'added' => $volume->info($hash, true)));
 	}
 	
 	/**
@@ -554,7 +559,7 @@ class elFinder {
 				return array('error' => $volume->error());
 			}
 		}
-		sleep(10);
+		
 		return $this->trigger('rm', $volume, array('removed' => $removed));
 		// return array('removed' => $removed);
 	}

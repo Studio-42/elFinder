@@ -199,7 +199,7 @@
 }
 
 .elfinder-ntf-rm .elfinder-ntf-icon { background-position:0 -257px;}
-
+.elfinder-ntf-mkdir .elfinder-ntf-icon{ background-position: 0 -200px; }
 .elfinder-ntf-spinner {
 /*	border:1px solid #111;*/
 	margin-top:3px;

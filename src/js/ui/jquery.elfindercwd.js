@@ -411,7 +411,7 @@ $.fn.elfindercwd = function(fm) {
 				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			}
 		})
-		.bind('mkdir', function(e) {
+		.bind('mkdir2', function(e) {
 			var dir = e.data.dir, nodes, html = item(dir);
 
 			if (dir && dir.hash && dir.name) {
@@ -432,6 +432,9 @@ $.fn.elfindercwd = function(fm) {
 					(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).prepend(html);
 				}
 			}
+		})
+		.bind('added', function(e) {
+			fm.log(e.data.added)
 		})
 		.bind('removed', function(e) {
 			var rm = e.data.removed,
