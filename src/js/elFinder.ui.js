@@ -176,11 +176,12 @@
 				}
 			};
 
-		
-		this.ntfCnt = {
-			rm : 0,
-			mkdir : 0
-		}
+		/**
+		 * Counters for notification messa
+		 *
+		 * @type Object
+		 **/
+		this.ntfCnt = {}
 
 
 		this.init = function() {
@@ -310,15 +311,24 @@
 	elFinder.prototype.ui.prototype = {
 		
 		notifyMsgs : {
-			rm : 'Removing files.',
-			mkdir : 'Creating directory.'
+			rm : {
+				one  : 'Removing file.',
+				many : 'Removing files.'
+			},
+			mkdir : {
+				one  : 'Creating folder.',
+				many : 'Creating folders.'
+			}
 		},
 		
 		notify : function(type, counter) {
-			var cnt = this.ntfCnt, node;
+			var cnt = this.ntfCnt, node, msg;
 			
 
-			if (cnt[type] !== void(0)) {
+			if (this.notifyMsgs[type] !== void(0)) {
+				if (cnt[type] === void(0)) {
+					cnt[type] = 0;
+				}
 				cnt[type] += parseInt(counter);
 				
 				if (cnt[type] < 0) {
@@ -326,7 +336,7 @@
 				}
 				
 				if (!(node = this.ntfWindow.find('.elfinder-ntf-'+type)).length) {
-					node = $('<div class="elfinder-ntf elfinder-ntf-'+type+'"><span class="elfinder-ntf-icon"/><div class="elfinder-ntf-msg">'+(this.fm.i18n(this.notifyMsgs[type] || ''))+'<span class="elfinder-ntf-cnt"/></div><div class="elfinder-ntf-spinner"/></div>').appendTo(this.ntfWindow)
+					node = $('<div class="elfinder-ntf elfinder-ntf-'+type+'"><span class="elfinder-ntf-icon"/><div class="elfinder-ntf-msg"/><div class="elfinder-ntf-spinner"/></div>').appendTo(this.ntfWindow)
 				}
 				
 				if (cnt[type] == 0) {
@@ -335,7 +345,8 @@
 						this.ntfWindow.hide();
 					}
 				} else {
-					node.find('.elfinder-ntf-cnt').text(' ('+cnt[type]+')');
+					msg = this.notifyMsgs[type][cnt[type] == 1 ? 'one' : 'many'];
+					node.find('.elfinder-ntf-msg').text(this.fm.i18n(msg) + (cnt[type] > 1 ? ' ('+cnt[type]+')' : ''));
 					this.ntfWindow.show();
 				}
 			}
