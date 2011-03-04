@@ -265,11 +265,11 @@
 						} else if (data.error) {
 							error = data.error;
 						} else {
-							$.each(rules[cmd]||[], function(cmd, rules) {
-								var d = data[cmd];
+							$.each(rules[cmd]||[], function(name, rule) {
+								var d = data[name];
 								
-								if ((d === void(0) && rules.req) 
-								|| (d !== void(0) && rules.valid && !rules.valid(d))) {
+								if ((d === void(0) && rule.req) 
+								|| (d !== void(0) && rule.valid && !rule.valid(d))) {
 									error = 'Invalid backend response';
 									return false;
 								}
@@ -280,8 +280,9 @@
 						if (error) {
 							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
 						}
-
+						self.trigger('focus')
 						self.trigger(cmd, data).trigger('updateSelected');
+						
 						// delete data
 					}
 				};
@@ -436,7 +437,7 @@
 			})
 			// disable shortcuts on click outside file manager ui
 			.bind('blur', function() {
-				lock = true;
+				permissions.shortcuts = false;
 			})
 			// cache selected files hashes
 			.bind('select', function(e) {
@@ -456,8 +457,8 @@
 				self.api = parseFloat(e.data.api) || 1;
 				self.newAPI = self.api > 1;
 				self.oldAPI = !self.newAPI;
-				rules = self[self.newAPI ? 'newAPIRules' : 'newAPIRules'];
-				self.log(rules)
+				rules = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+
 				// remove disabled commands
 				$.each(e.data.params.disabled || [], function(i, cmd) {
 					self.commands[cmd] && delete self.commands[cmd];
@@ -470,6 +471,7 @@
 					cwd.url = params.url;
 					cwd.tmb = data.tmb;
 				}
+				self.debug('api', self.api)
 			})
 			// set some params and cache directory content
 			.bind('open', function(e) {
@@ -533,13 +535,37 @@
 							}
 						}
 					};
-					
+				
+				if (src) {
+					if (self.oldAPI) {
+						tree = {};
+						traverse(src);
+					} else {
+						if (e.type == 'open' && src.length) {
+							tree = {};
+							// self.log('empty')
+						}
+						while (l--) {
+							f = src[l];
+							if (f.hash && f.name && !tree[f.hash]) {
+								f.mime = 'directory';
+								tree[f.hash] = f;
+							}
+						}
+					}
+				}
+				// self.log(tree)	
+				return
+				
 				// init/reload or old api - clean tree cache
-				if (self.oldAPI && e.type =='open' && e.data.tree) {
+				if (self.oldAPI && e.data.tree) {
 					tree = {};
 					traverse(src);
-					self.log(tree)
 				} else if (self.newAPI) {
+					if (e.type == 'open' && src.length) {
+						tree = {};
+						self.log('empty')
+					}
 					while (l--) {
 						f = src[l];
 						if (f.hash && f.name && !tree[f.hash]) {
@@ -588,7 +614,7 @@
 			$(document).bind('keydown keypress', function(e) {
 				var c = e.keyCode,
 					ctrlKey = e.ctrlKey||e.metaKey;
-		
+
 				if (permissions.shortcuts) {
 					c == 9 && e.preventDefault();
 					$.each(self.shortcuts, function(i, s) {
@@ -602,9 +628,7 @@
 			});
 		}
 		
-		$(document).click(function() {
-			!lock & self.trigger('blur');
-		});
+		
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();

@@ -180,6 +180,9 @@
 				this.nav.hide();
 			}
 			
+			$(document).click(function() {
+				fm.trigger('blur');
+			});
 			
 			// init current dir view and events
 			this.cwd.elfindercwd(this.fm);
