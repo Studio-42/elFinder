@@ -380,6 +380,10 @@
 			return cwd;
 		}
 		
+		this.tree = function() {
+			return tree;
+		}
+		
 		/**
 		 * Return file data from current dir or tree by it's hash
 		 * 
@@ -618,10 +622,12 @@
 					l = add.length, f;
 					
 				while (l--) {
-					f = add[l]
-					files[f.hash] = f;
-					if (f.mime == 'directory') {
-						tree[f.hash] = f;
+					f = add[l];
+					if (f.name && f.hash) {
+						files[f.hash] = f;
+						if (f.mime == 'directory') {
+							tree[f.hash] = f;
+						}
 					}
 				}
 			})

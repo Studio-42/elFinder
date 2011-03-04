@@ -185,7 +185,7 @@
 				sync();
 				attachEvents();
 			})
-			.bind('mkdir', function(e) {
+			.bind('mkdir2', function(e) {
 				var dir = e.data.dir && e.data.dir.hash && e.data.dir.name ? e.data.dir : null,
 					html, parent, nodes, arrow;
 				
@@ -205,19 +205,60 @@
 				}
 					
 			})
+			// add new dirs in tree
+			.bind('added', function(e) {
+				var add = e.data.added,
+					l = add.length,
+					dir, parent, stree, childs, cnt, arrow, node;
+
+				while (l--) {
+					dir = add[l];
+					if (dir.name && dir.hash && (parent = tree.find('#nav-'+dir.phash)).length) {
+						stree  = parent.next('.'+subtree);
+						childs = stree.children().children('[id]');
+						cnt    = childs.length;
+						arrow  = parent.children('.'+collapsed);
+						
+						// insert only if parent has not subdirs or subdirs already loaded
+						if (!arrow.length || cnt > 0) {
+							node = $(item(dir));
+							childs.each(function() {
+								var $this = $(this),
+									name = fm.file($this.attr('id').substr(4)).name;
+								
+								if (dir.name < name) {
+									$this.parent().before(node);
+									return false;
+								}
+							})
+							
+							if (!node.parents().length) {
+								stree.prepend(node);
+							}
+							
+						}
+						if (!arrow.length) {
+							parent.prepend('<span class="elfinder-nav-collapsed"/>');
+						}
+					}
+				}
+			})
+			// remove dirs from tree
 			.bind('removed', function(e) {
 				var rm = e.data.removed,
 					l = rm.length,
-					node, parent;
+					node, parent, stree;
 					
 				while (l--) {
 					if (rm[l].mime == 'directory') {
 						node   = tree.find('#nav-'+rm[l].hash);
 						parent = tree.find('#nav-'+rm[l].phash);
+						
 						if (node.length && parent.length) {
 							node.parent().remove();
-							if (!parent.next('.'+subtree).children().length) {
-								parent.next('.'+subtree).hide();
+							stree = parent.next('.'+subtree);
+							if (!stree.children().length) {
+								stree.hide();
 								parent.children('.'+collapsed).remove();
 							}
 						}

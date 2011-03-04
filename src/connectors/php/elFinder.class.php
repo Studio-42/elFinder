@@ -495,7 +495,7 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		sleep(5);
+		// sleep(5);
 		
 		return ($hash = $volume->mkdir($current, $args['name'])) === false
 			? array('error' => $volume->error())

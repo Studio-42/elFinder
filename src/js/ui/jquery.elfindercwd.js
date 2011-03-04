@@ -433,9 +433,7 @@ $.fn.elfindercwd = function(fm) {
 				}
 			}
 		})
-		.bind('added', function(e) {
-			fm.log(e.data.added)
-		})
+		
 		.bind('removed', function(e) {
 			var rm = e.data.removed,
 				l = rm.length;
