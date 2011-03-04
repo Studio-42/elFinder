@@ -157,7 +157,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	// debug : false
-	debug : ['event-open']
+	debug : ['event-open', 'event-load']
 }
 
 })(jQuery);

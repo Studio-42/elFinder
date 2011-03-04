@@ -20,6 +20,14 @@
 				shortcuts : true
 			},
 			
+			rules = {
+				open : {
+					cwd    : {req : true, valid : $.isPlainObject},
+					tree   : {req : true, valid : function(d) { return $.isArray(d) || $.isPlainObject(d); }},
+					params : {req : true, valid : $.isPlainObject}
+				}
+			},
+			
 			/**
 			 * Core parameters from connctor
 			 *
@@ -257,7 +265,7 @@
 						} else if (data.error) {
 							error = data.error;
 						} else {
-							$.each(self.validate[cmd]||[], function(cmd, rules) {
+							$.each(rules[cmd]||[], function(cmd, rules) {
 								var d = data[cmd];
 								
 								if ((d === void(0) && rules.req) 
@@ -303,6 +311,9 @@
 				e = ('' + e).toLowerCase().split(/\s+/)
 				for (i = 0; i < e.length; i++) {
 					if (listeners[e[i]] === void(0)) {
+						if (e[i] == 'load') {
+							continue;
+						}
 						listeners[e[i]] = [];
 					}
 					listeners[e[i]].push(c);
@@ -337,7 +348,7 @@
 			var e = this.event(e, d||{}),
 				l = listeners[e.type]||[], i;
 
-			this.debug('event-'+e.type, e.data);
+			
 
 			for (i = 0; i < l.length; i++) {
 				if (e.isPropagationStopped()) {
@@ -349,8 +360,8 @@
 					window.console && window.console.error && window.console.error(ex);
 				}
 			}
-			
-			delete e;
+			this.debug('event-'+e.type, e.data);
+			// delete e;
 			return this;
 		};
 		
@@ -439,41 +450,41 @@
 					return null;
 				});
 			})
+			// init file manager
+			.bind('load', function(e) {
+				loaded = true;
+				self.api = parseFloat(e.data.api) || 1;
+				self.newAPI = self.api > 1;
+				self.oldAPI = !self.newAPI;
+				rules = self[self.newAPI ? 'newAPIRules' : 'newAPIRules'];
+				self.log(rules)
+				// remove disabled commands
+				$.each(e.data.params.disabled || [], function(i, cmd) {
+					self.commands[cmd] && delete self.commands[cmd];
+				});
+				e.data.params.disabled = [];
+				// store core params
+				params = e.data.params;
+				
+				if (self.oldAPI) {
+					cwd.url = params.url;
+					cwd.tmb = data.tmb;
+				}
+			})
 			// set some params and cache directory content
 			.bind('open', function(e) {
 				var data = e.data,
 					l = data.cdc.length, 
 					f;
 
-				// initial loading
-				if (!loaded) {
-					loaded   = true;
-					self.api = parseFloat(e.data.api) || 1;
-					self.newAPI = self.api > 1;
-					self.oldAPI = !self.newAPI;
-					
-					if (data.params) {
-						// remove disabled commands
-						$.each(data.params.disabled || [], function(i, cmd) {
-							self.commands[cmd] && delete self.commands[cmd];
-						});
-						data.params.disabled = [];
-						// store core params
-						params = data.params;
-					}
-					// update validate data rules
-					self.validate.open.tree.valid = self.newAPI ? $.isArray : $.isPlainObject;
-				}
-				
-				// join core and cwd params
-				self.params = $.extend({}, params, self.api > 1 ? data.cwd.params : {});
-
+				// set current directory data
 				cwd = data.cwd;
 
-				if (self.api < 2) {
-					cwd.url = params.url;
-					cwd.tmb = data.tmb;
-				}
+				// initial loading
+				!loaded && self.trigger('load', data);
+				
+				// join core and cwd params 
+				self.params = $.extend({}, params, self.newAPI ? data.cwd.params : {});
 
 				// remember last dir
 				self.lastDir(cwd.hash);
@@ -490,9 +501,8 @@
 				// clean selected files cache
 				selected = [];
 				
-				// fire "load" event and remove its listeners
+				// remove "load" event listeners
 				if (listeners.load) {
-					self.trigger('load').debug('api-version', self.api);
 					delete listeners.load;
 				}
 				
@@ -1050,14 +1060,32 @@
 			return (this.messages[m] || m).replace(/\$(\d+)/g, ''); 
 		},
 		
-		validate : {
+		oldAPIRules : {
 			open : {
-				cwd    : {req : true, valid : $.isPlainObject},
-				tree   : {req : false},
+				cwd    : {req : true,  valid : $.isPlainObject},
+				tree   : {req : false, valid : $.isPlainObject},
 				params : {req : false, valid : $.isPlainObject}
 			},
 			tree : {
-				tree : {req : true, valid : $.isArray}
+				tree : {req : true, valid : function() { return false; }}
+			},
+			parents : {
+				tree : {req : true, valid : function() { return false; }}
+			},
+			tmb : {
+				current : {req : true},
+				images  : {req : true, valid : $.isPlainObject}
+			}
+		},
+		
+		newAPIRules : {
+			open : {
+				cwd    : {req : true,  valid : $.isPlainObject},
+				tree   : {req : false, valid : $.isArray},
+				params : {req : false, valid : $.isPlainObject}
+			},
+			tree : {
+				tree : {req : true	}
 			},
 			parents : {
 				tree : {req : true, valid : $.isArray}

@@ -16,7 +16,7 @@
 					var pclass    = fm.ui.perms2class(dir),
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
 						hasChilds = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length,
-						childs    = fm.newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? build(dir.dirs) : ''), 
+						childs    = fm.newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? append(dir.dirs) : ''), 
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
 					if (dir && dir.name) {
@@ -30,7 +30,14 @@
 					}
 					return '';
 				},
-				build = function(dirs, root) {
+				/**
+				 * Append new dirs to tree
+				 *
+				 * @params  Array|Object  dirs
+				 * @params  Boolean       create root node? required by old api
+				 * @return void
+				 */
+				append = function(dirs, root) {
 					var dir, node, parent,
 						html = [], i;
 					
@@ -86,6 +93,12 @@
 				droppable = $.extend({}, fm.ui.droppable, {
 					hoverClass : 'elfinder-droppable-active ui-state-hover'
 				}),
+				
+				/**
+				 * Attach droppable events
+				 *
+				 * @return void
+				 */
 				attachEvents = function() {
 					tree.find('a')
 						.not('.ui-droppable,.elfinder-na,.elfinder-ro')
@@ -151,23 +164,24 @@
 						}
 					})
 				;
-				
+			
+			// [re]create tree
 			fm.bind('open', function(e) {
 				if (e.data.tree) {
 					tree.empty();
 					// can help on really big tree
 					setTimeout(function() {
-						build(e.data.tree, true);
+						append(e.data.tree, true);
 						attachEvents();
 						sync();
 					}, 20);
 				} else {
-					sync()
+					sync();
 				}
-				// sync();
 			})
+			// update tree
 			.bind('tree parents', function(e) {
-				build(e.data.tree);
+				append(e.data.tree);
 				sync();
 				attachEvents();
 			})
