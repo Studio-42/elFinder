@@ -124,6 +124,18 @@ elFinder.prototype.options = {
 	 */
 	showThreshold : 100,
 	
+	/**
+	 * Additional rule to valid new file name.
+	 * By default not allowed empty names or '..'
+	 *
+	 * @type false|RegExp|function
+	 * @default  false
+	 * @example
+	 *  disable names with spaces:
+	 *  validName : /^[^\s]$/
+	 */
+	validName : false,
+	
 	/* cookie options */
 	cookie         : {
 		expires : 30,

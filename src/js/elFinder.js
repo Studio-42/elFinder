@@ -984,6 +984,31 @@
 		},
 		
 		/**
+		 * Valid file name
+		 * 
+		 * @param  String  name to test
+		 * @return Boolean
+		 */
+		validName : function(name) {
+			if (!name 
+			|| typeof(name) != 'string' 
+			|| name == '..' 
+			|| (!this.cwd().params.dotFiles && name.indexOf('.') === 0)) {
+				return false;
+			}
+
+			if (this.options.validName) {
+				if (this.options.validName instanceof RegExp) {
+					return this.options.validName.test(name);
+				} 
+				if (typeof(this.options.validName) == 'function') {
+					return this.options.validName(name)
+				}
+			}
+			return true;
+		},
+		
+		/**
 		 * Remove directories / files
 		 * 
 		 * @param  Array  files hashes
@@ -1008,29 +1033,36 @@
 
 			cnt = files.length;
 
-			// self.ui.notify('rm', cnt)
-			// return this
-
-			return files.length 
+			return cnt 
 				? self.ajax({
 						data : {cmd : 'rm', targets : files, current : this.cwd().hash},
-						beforeSend : function() { self.ui.notify('rm', files.length); },
-						complete : function() { self.ui.notify('rm', -files.length); }
+						beforeSend : function() { self.ui.notify('rm', cnt); },
+						complete : function() { self.ui.notify('rm', -cnt); }
 					}, 'bg') 
 				: this;
-
-			// self.ui.notify('rm', cnt)
-			// return files.length ? this.ajax({cmd : 'rm', targets : files, current : self.cwd().hash}, 'bg') : this;
 		},
 		
 		mkdir : function(name) {
-			this.ajax({
-				cmd     : 'mkdir',
-				current : this.cwd.hash,
-				name    : name || this.uniqueName('folder')
-			})
+			var file = this.fileByName(name);
+			this.log(name)
 			
-			return this;
+			if (!this.validName(name)) {
+				return this.trigger('error', {error : 'Unacceptable name.'});
+			}
+			
+			if (file) {
+				return this.trigger('error', {error : 'File with the same name already exists.'});
+			}
+			if (!this.cwd().write) {
+				return this.trigger('error', {error : ['Unable to create directory', 'Not enough permission.']});
+			}
+			
+			// return this.ajax({
+			// 	data : {cmd : 'mkdir', current : this.cwd().hash, name : name},
+			// 	beforeSend : function() { self.ui.notify('mkdir', 1); },
+			// 	complete : function() { self.ui.notify('mkdir', -1); }
+			// }, 'bg');
+			
 		},
 		
 		mkfile : function(name) {
