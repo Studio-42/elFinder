@@ -118,6 +118,8 @@
 		 */
 		this.statusbar = $('<div class="ui-widget-header ui-corner-all elfinder-statusbar"/>');
 		
+		this.ntfWindow = $('<div class="ui-corner-all elfinder-notify-window"></div>').draggable();
+		
 		/**
 		 * Common elFinder container
 		 * 
@@ -127,12 +129,14 @@
 			// .attr('id', fm.id)
 			// .attr('unselectable', 'on')
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+fm.dir+' '+(fm.options.cssClass||''))
+			
 			.append(this.toolbar.hide().show())
 			.append(this.workzone)
 			.append(this.overlay.hide())
 			.append(this.spinner)
 			.append(this.error)
 			.append(this.statusbar.hide())
+			.append(this.ntfWindow)
 			.click(function(e) {
 				e.stopPropagation();
 				// fire event to enable fm shortcuts
@@ -171,6 +175,13 @@
 					}
 				}
 			};
+
+		
+		this.ntfCnt = {
+			rm : 0,
+			mkdir : 0
+		}
+
 
 		this.init = function() {
 			// init dirs tree view and events
@@ -297,6 +308,40 @@
 	}
 	
 	elFinder.prototype.ui.prototype = {
+		
+		notifyMsgs : {
+			rm : 'Removing files.',
+			mkdir : 'Creating directory.'
+		},
+		
+		notify : function(type, counter) {
+			var cnt = this.ntfCnt, node;
+			
+
+			if (cnt[type] !== void(0)) {
+				cnt[type] += parseInt(counter);
+				
+				if (cnt[type] < 0) {
+					cnt[type] = 0;
+				}
+				
+				if (!(node = this.ntfWindow.find('.elfinder-ntf-'+type)).length) {
+					node = $('<div class="elfinder-ntf elfinder-ntf-'+type+'"><span class="elfinder-ntf-icon"/><div class="elfinder-ntf-msg">'+(this.fm.i18n(this.notifyMsgs[type] || ''))+'<span class="elfinder-ntf-cnt"/></div><div class="elfinder-ntf-spinner"/></div>').appendTo(this.ntfWindow)
+				}
+				
+				if (cnt[type] == 0) {
+					node.remove();
+					if (!this.ntfWindow.children('.elfinder-ntf').length) {
+						this.ntfWindow.hide();
+					}
+				} else {
+					node.find('.elfinder-ntf-cnt').text(' ('+cnt[type]+')');
+					this.ntfWindow.show();
+				}
+			}
+		},
+		
+		
 		/**
 		 * Convert mimetype into css classes
 		 * 

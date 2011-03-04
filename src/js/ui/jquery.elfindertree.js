@@ -205,25 +205,26 @@
 				}
 					
 			})
-			.bind('rm', function(e) {
-				var rm = e.data.removed || [],
+			.bind('removed', function(e) {
+				var rm = e.data.removed,
 					l = rm.length,
-					element, parent, ul;
+					node, parent;
 					
 				while (l--) {
-					element = tree.find('#nav-'+rm[l].hash);
-					parent  = tree.find('#nav-'+rm[l].phash);
-					ul = parent.next('.'+subtree);
-					
-					if (element.length) {
-						element.parent().remove();
-					}
-
-					if (!ul.children().length) {
-						parent.children('.'+collapsed).remove();
+					if (rm[l].mime == 'directory') {
+						node   = tree.find('#nav-'+rm[l].hash);
+						parent = tree.find('#nav-'+rm[l].phash);
+						if (node.length && parent.length) {
+							node.parent().remove();
+							if (!parent.next('.'+subtree).children().length) {
+								parent.next('.'+subtree).hide();
+								parent.children('.'+collapsed).remove();
+							}
+						}
 					}
 				}
 			})
+			
 			;
 			
 		});

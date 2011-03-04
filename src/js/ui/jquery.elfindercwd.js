@@ -433,14 +433,18 @@ $.fn.elfindercwd = function(fm) {
 				}
 			}
 		})
-		.bind('rm', function(e) {
-			var rm = e.data.removed || [],
+		.bind('removed', function(e) {
+			var rm = e.data.removed,
 				l = rm.length;
 
 			while (l--) {
 				cwd.find('#'+rm[l].hash).remove();
 			}
 		})
+		
+		// .bind('rm', function(e) {
+		
+		// })
 		.shortcut({
 			pattern     :'ctrl+a', 
 			description : 'Select all files',

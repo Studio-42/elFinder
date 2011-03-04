@@ -554,6 +554,7 @@ class elFinder {
 				return array('error' => $volume->error());
 			}
 		}
+		sleep(10);
 		return $this->trigger('rm', $volume, array('removed' => $removed));
 		// return array('removed' => $removed);
 	}

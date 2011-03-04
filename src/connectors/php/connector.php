@@ -49,7 +49,7 @@ function logger($data) {
 
 $opts = array(
 	'debug' => true,
-	'disabled' => array('rm', 'open', 'asd'),
+	// 'disabled' => array('rm', 'open', 'asd'),
 	// 'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
 	'roots' => array(
 		array(

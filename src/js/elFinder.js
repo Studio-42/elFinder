@@ -280,10 +280,15 @@
 						if (error) {
 							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
 						}
-						self.trigger('focus')
-						self.trigger(cmd, data).trigger('updateSelected');
-						
-						// delete data
+
+						// fire event with command name
+						self.trigger(cmd, data);
+						// fire some event to update ui
+						data.added && self.trigger('added', data);
+						data.removed && self.trigger('removed', data);
+						data.changed && self.trigger('changed', data);
+						// update selected files
+						self.trigger('focus').trigger('updateSelected');
 					}
 				};
 				
@@ -986,7 +991,7 @@
 		 */
 		rm : function(files) {
 			var self = this,
-				error;
+				error, cnt;
 			
 			files = $.map($.isArray(files) ? files : [files], function(hash) {
 				var file = self.file(hash);
@@ -1000,8 +1005,22 @@
 			if (error) {
 				return this.trigger('error', {error : error});
 			}
-			self.log(files)
-			// return files.length ? this.ajax({cmd : 'rm', targets : files}, 'bg') : this;
+
+			cnt = files.length;
+
+			// self.ui.notify('rm', cnt)
+			// return this
+
+			return files.length 
+				? self.ajax({
+						data : {cmd : 'rm', targets : files, current : this.cwd().hash},
+						beforeSend : function() { self.ui.notify('rm', files.length); },
+						complete : function() { self.ui.notify('rm', -files.length); }
+					}, 'bg') 
+				: this;
+
+			// self.ui.notify('rm', cnt)
+			// return files.length ? this.ajax({cmd : 'rm', targets : files, current : self.cwd().hash}, 'bg') : this;
 		},
 		
 		mkdir : function(name) {
@@ -1117,6 +1136,9 @@
 			tmb : {
 				current : {req : true},
 				images  : {req : true, valid : $.isPlainObject}
+			},
+			rm : {
+				removed : {req : true, valid : $.isArray}
 			}
 		},
 		
