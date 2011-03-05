@@ -30,6 +30,7 @@
 	height:50px;
 /*	border:1px solid #111;*/
 	padding:0 0 0 37px;
+	z-index:100000;
 }
 
 .elfinder-drag-helper-plus {
@@ -128,7 +129,7 @@
 /* nav and cwd container */
 .elfinder-workzone {
 	padding:2px 0;
-/*	position:relative;*/
+	position:relative;
 	overflow:hidden;
 /*	border:2px solid red;*/
 }

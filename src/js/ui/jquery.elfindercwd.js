@@ -76,14 +76,14 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			select = function(dir, append) {
 				var prev     = dir == 'left' || dir == 'up',
+					sel = cwd.find('[id].ui-selected'),
 					selector = prev ? 'first' : 'last',
 					list     = fm.view == 'list',
 					s, n, top, left;
-				
-				if (fm.selected().length) {
-					// find fist/last selected file
-					s = cwd.find('[id].ui-selected:'+(prev ? 'first' : 'last'));
-					
+
+				if (sel.length) {
+					s = sel.filter(prev ? ':first' : ':last');
+
 					if (!s[prev ? 'prev' : 'next']('[id]').length) {
 						// there is no sibling on required side - do not move selection
 						n = s;
@@ -244,13 +244,11 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Array
 			 **/
 			draggable = $.extend({}, fm.ui.draggable, {
-				addClasses : true,
-				appendTo   : this,
-				stop : function(e) { 
+				stop   : function(e) { 
 					cwd.selectable('enable');
 					selectLock = false;
 				},
-				helper     : function(e, ui) {
+				helper : function(e, ui) {
 					var element  = this.id ? $(this) : $(this).parents('[id]:first'),
 						helper   = $('<div class="elfinder-drag-helper"/>'),
 						selected = [],
@@ -289,6 +287,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Array
 			 **/
 			droppable = $.extend({}, fm.ui.droppable, {
+				
 				hoverClass : 'elfinder-dropable-active',
 				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
 				out        : function() { cwd.droppable('enable'); }

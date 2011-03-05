@@ -143,6 +143,17 @@
 				fm.trigger('focus');
 			});
 	
+		this.draggable = {
+			appendTo   : this.workzone,
+			addClasses  : true,
+			delay      : 30,
+			revert     : true,
+			cursor     : 'move',
+			cursorAt   : {left : 52, top : 47},
+			refreshPositions : true,
+			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
+		};
+	
 		/**
 		 * Common droppable options for nav and cwd
 		 *
@@ -176,6 +187,13 @@
 				}
 			};
 
+
+		/**
+		 * Default options for jquery-ui draggable
+		 * 
+		 * @type  Object
+		 */
+		
 		/**
 		 * Counters for notification messa
 		 *
@@ -443,20 +461,16 @@
 	        return Math.round(s/n)+' '+u;
 		},
 		
-		/**
-		 * Default options for jquery-ui draggable
-		 * 
-		 * @type  Object
-		 */
-		draggable : {
-			addClasses : false,
-			delay      : 30,
-			revert     : true,
-			cursor     : 'move',
-			cursorAt   : {left : 52, top : 47},
-			refreshPositions : true,
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
-		},
+		// draggable : {
+		// 	// appendTo   : this.workzone,
+		// 	
+		// 	delay      : 30,
+		// 	revert     : true,
+		// 	cursor     : 'move',
+		// 	cursorAt   : {left : 52, top : 47},
+		// 	refreshPositions : true,
+		// 	drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
+		// },
 		
 		
 		/**

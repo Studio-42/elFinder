@@ -77,6 +77,35 @@
 				
 			},
 			
+			update = function(data) {
+				var l = data.length, f;
+				// return 
+				while(l--) {
+					f = data[l];
+					
+					if (f.name && f.hash) {
+						if (f.mime && !f.phash) { // from cdc
+							f.phash = cwd.hash;
+						}
+						if (!f.mime) {
+							f.mime = 'directory';
+						}
+						if (!f.rm) {
+							f.rm = true;
+						}
+						if (f.phash == cwd.hash && !files[f.hash]) {
+							files[f.hash] = f;
+							cwd.filesnum++;
+							cwd.size += parseInt(f.size) || 0;
+						}
+						
+						if (f.mime == 'directory' && !tree[f.hash]) {
+							tree[f.hash] = f;
+						} 
+					}
+				}
+			},
+			
 			/**
 			 * Target node
 			 *
@@ -490,7 +519,9 @@
 
 				// set current directory data
 				cwd = data.cwd;
-
+				cwd.size = 0;
+				cwd.filesnum = 0;
+				
 				// initial loading
 				!loaded && self.trigger('load', data);
 				
@@ -502,16 +533,8 @@
 
 				// cache directory content
 				files = {};
-				while(l--) {
-					f = data.cdc[l];
-					if (f.name && f.hash) {
-						files[f.hash] = f;
-					}
-				}
+				update(data.cdc);
 
-				// clean selected files cache
-				selected = [];
-				
 				// remove "load" event listeners
 				if (listeners.load) {
 					delete listeners.load;
@@ -552,35 +575,10 @@
 					} else {
 						if (e.type == 'open' && src.length) {
 							tree = {};
-							// self.log('empty')
 						}
-						while (l--) {
-							f = src[l];
-							if (f.hash && f.name && !tree[f.hash]) {
-								f.mime = 'directory';
-								tree[f.hash] = f;
-							}
-						}
-					}
-				}
-				self.log(tree)	
-				return
-				
-				// init/reload or old api - clean tree cache
-				if (self.oldAPI && e.data.tree) {
-					tree = {};
-					traverse(src);
-				} else if (self.newAPI) {
-					if (e.type == 'open' && src.length) {
-						tree = {};
-						self.log('empty')
-					}
-					while (l--) {
-						f = src[l];
-						if (f.hash && f.name && !tree[f.hash]) {
-							f.mime = 'directory';
-							tree[f.hash] = f;
-						}
+						update(src);
+						self.log('tree')
+						self.log(tree)
 					}
 				}
 			})
@@ -594,8 +592,8 @@
 			})
 			// update files cache
 			.bind('removed', function(e) {
-				var rm = e.data.removed,
-					l = rm.length,  
+				var rm   = e.data.removed,
+					l    = rm.length,  
 					find = function(hash) {
 						var ret = [hash];
 						
@@ -617,19 +615,9 @@
 					});
 				}
 			})
+			//  update files cache
 			.bind('added', function(e) {
-				var add = e.data.added,
-					l = add.length, f;
-					
-				while (l--) {
-					f = add[l];
-					if (f.name && f.hash) {
-						files[f.hash] = f;
-						if (f.mime == 'directory') {
-							tree[f.hash] = f;
-						}
-					}
-				}
+				update(e.data.added);
 			})
 
 			;

@@ -6,6 +6,7 @@
 			var subtree   = 'elfinder-nav-subtree',
 				collapsed = 'elfinder-nav-collapsed',
 				expanded  = 'elfinder-nav-expanded',
+				loaded    = 'elfinder-subtree-loaded',
 				empty     = 'elfinder-nav-empty',
 				folder    = 'elfinder-nav-icon-folder',
 				root      = 'elfinder-nav-tree-root',
@@ -16,7 +17,7 @@
 					var pclass    = fm.ui.perms2class(dir),
 						perms     = pclass ? '<span class="elfinder-perms"/>' : '',
 						hasChilds = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length,
-						childs    = fm.newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? append(dir.dirs) : ''), 
+						childs    = fm.newAPI ? ul + '</ul>' : (dir.dirs && dir.dirs.length ? build(dir.dirs) : ''), 
 						arrow     = hasChilds ? '<span class="elfinder-nav-collapsed"/>' : '';
 					
 					if (dir && dir.name) {
@@ -37,20 +38,47 @@
 				 * @params  Boolean       create root node? required by old api
 				 * @return void
 				 */
-				append = function(dirs, root) {
-					var dir, node, parent,
+				build = function(dirs, root, added) {
+					var dir, node, parent, stree, arrow,
 						html = [], i;
-					
+
 					if (fm.newAPI) {
 						for (i = 0; i < dirs.length; i++) {
 							dir    = dirs[i];
 							node   = tree.find('#nav-'+dir.hash);
-							
-							if (!node.length) {
-								(dir.phash ? tree.find('#nav-'+dir.phash).next('.'+subtree) : tree).append(item(dir, !dir.phash));
+							// parent = dir.phash ? tree.find('#nav-'+dir.phash).next('.'+subtree) : tree;
+							if (dir.phash) {
+								parent = tree.find('#nav-'+dir.phash);
+								stree = parent.next('.'+subtree)
+							} else {
+								parent = stree = tree
 							}
+							arrow = parent.children('.'+collapsed);
+							if (parent.length && !node.length) {
+								if (!added) {
+									// create/update tree in "open"/"tree"/"parents" commands
+									stree.append(item(dir, !dir.phash));
+									arrow.addClass(loaded);
+								} else if (!arrow.length || arrow.is('.'+loaded)) {
+									// add new dir in "mkdir"/"copy" commands
+									node = $(item(dir, !dir.phash));
+									stree.children().children('[id]').each(function() {
+										var $this = $(this);
+
+										if (dir.name < fm.file($this.attr('id').substr(4)).name) {
+											$this.parent().before(node);
+											return false;
+										}
+									});
+									if (!node.parents().length) {
+										stree.prepend(node);
+									}
+									if (!arrow.length) {
+										parent.prepend('<span class="'+collapsed+' '+loaded+'"/>')
+									}
+								}
+							} 
 						}
-						
 					} else {
 						if (root) {
 							tree.find('a').remove();
@@ -62,6 +90,19 @@
 							return ul + html.join('') + '</ul>';
 						}
 					}
+				},
+				
+				append = function(dirs, root, added) {
+					if (root) {
+						tree.empty();
+					}
+					build(dirs, root, added);
+					if (tree.children().length) {
+						sync();
+						attachEvents();
+						
+					}
+					
 				},
 				sync = function() {
 					tree.find('.'+active).removeClass(active);
@@ -81,10 +122,7 @@
 					}
 				},
 				draggable = $.extend({}, fm.ui.draggable, {
-						addClasses : true,
-						appendTo   : fm.ui.cwd,
-						helper     : function() {
-							// @TODO save permissions
+						helper : function() {
 							return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
 								.data('files', [this.id.substr(4)])
 								.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));
@@ -141,7 +179,7 @@
 						e.stopPropagation();
 						e.preventDefault();
 
-						if (ul.children().length) {
+						if ($this.is('.'+loaded)/*ul.children().length*/) {
 							ul.slideToggle();
 							$this.toggleClass(expanded);
 						} else if (fm.newAPI) {
@@ -168,12 +206,13 @@
 			// [re]create tree
 			fm.bind('open', function(e) {
 				if (e.data.tree) {
-					tree.empty();
+					
 					// can help on really big tree
 					setTimeout(function() {
+
 						append(e.data.tree, true);
-						attachEvents();
-						sync();
+						// attachEvents();
+						// sync();
 					}, 20);
 				} else {
 					sync();
@@ -182,66 +221,13 @@
 			// update tree
 			.bind('tree parents', function(e) {
 				append(e.data.tree);
-				sync();
-				attachEvents();
-			})
-			.bind('mkdir2', function(e) {
-				var dir = e.data.dir && e.data.dir.hash && e.data.dir.name ? e.data.dir : null,
-					html, parent, nodes, arrow;
-				
-				if (dir) {
-					html = item(dir);
-					parent = tree.find('#nav-'+dir.phash);
-					nodes = parent.next('ul').children();
-					
-					if (nodes.length) {
-						
-					} else if (parent.length) {
-						if ((arrow = parent.children('.'+collapsed)).length == 0) {
-							parent.prepend('<span class="elfinder-nav-collapsed"/>');
-						}
-					}
-					
-				}
-					
+				// sync();
+				// attachEvents();
 			})
 			// add new dirs in tree
 			.bind('added', function(e) {
-				var add = e.data.added,
-					l = add.length,
-					dir, parent, stree, childs, cnt, arrow, node;
-
-				while (l--) {
-					dir = add[l];
-					if (dir.name && dir.hash && (parent = tree.find('#nav-'+dir.phash)).length) {
-						stree  = parent.next('.'+subtree);
-						childs = stree.children().children('[id]');
-						cnt    = childs.length;
-						arrow  = parent.children('.'+collapsed);
-						
-						// insert only if parent has not subdirs or subdirs already loaded
-						if (!arrow.length || cnt > 0) {
-							node = $(item(dir));
-							childs.each(function() {
-								var $this = $(this),
-									name = fm.file($this.attr('id').substr(4)).name;
-								
-								if (dir.name < name) {
-									$this.parent().before(node);
-									return false;
-								}
-							})
-							
-							if (!node.parents().length) {
-								stree.prepend(node);
-							}
-							
-						}
-						if (!arrow.length) {
-							parent.prepend('<span class="elfinder-nav-collapsed"/>');
-						}
-					}
-				}
+				append($.map(e.data.added, function(f) { return f.mime == 'directory' ? f : null}), false, true);
+				
 			})
 			// remove dirs from tree
 			.bind('removed', function(e) {
