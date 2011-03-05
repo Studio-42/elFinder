@@ -38,7 +38,7 @@ class elFinder {
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
 		'rename'    => array(),
-		'duplicate' => array('current' => true, 'target' => true),
+		'duplicate' => array('target' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
 		'upload' => array(
@@ -495,17 +495,12 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		// sleep(5);
+		sleep(5);
 		
 		return ($hash = $volume->mkdir($current, $args['name'])) === false
 			? array('error' => $volume->error())
 			: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($volume->info($hash, true))));
 			
-		if (false == ($hash = $volume->mkdir($current, $args['name']))) {
-			return array('error' => $volume->error());
-		}
-		
-		return $this->trigger('mkdir', $volume, array('current' => $current, 'added' => $volume->info($hash, true)));
 	}
 	
 	/**
@@ -521,12 +516,11 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Folder not found');
 		}
+		sleep(5);
 		
-		if (false == ($hash = $volume->mkfile($current, $args['name']))) {
-			return array('error' => $volume->error());
-		}
-		
-		return $this->trigger('mkfile', $volume, array('current' => $current, 'file' => $volume->info($hash)));
+		return ($hash = $volume->mkfile($current, $args['name'])) === false
+			? array('error' => $volume->error())
+			: $this->trigger('mkfile', $volume, array('current' => $current, 'added' => array($volume->info($hash, true))));
 	}
 	
 	/**
@@ -540,12 +534,12 @@ class elFinder {
 	protected function rm($args) {
 		$removed = array();
 		
-		if (!is_array($args['targets']) || empty($args['targets'])) {
+		if (!is_array($args['targets'])) {
 			return array('error' => 'No files to delete');
 		}
 		
 		foreach ($args['targets'] as $hash) {
-			if (false == ($volume = $this->volume($hash))) {
+			if (($volume = $this->volume($hash)) === false) {
 				return array('error' => 'File not found');
 			}
 			
@@ -571,10 +565,25 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function duplicate($args) {
-		$root = $this->fileRoot($args['current']);
-		if (!$root || !is_array($args['target']) || empty($args['target'])) {
-			return array('error' => 'Invalid parameters');
+		$added = array();
+		
+		if (!is_array($args['target'])) {
+			return array('error' => 'No files to delete');
 		}
+		
+		if (($volume = $this->volume($args['target'][0])) === false) {
+			return array('error' => 'File not found');
+		}
+		
+		foreach ($args['target'] as $hash) {
+			if (($hash = $volume->duplicate($hash)) === false) {
+				return array('error' => $volume->error());
+			} else {
+				$added[] = $volume->info($hash);
+			}
+		}
+		
+		return $this->trigger('duplicate', $volume, array('added' => $added));
 		
 	}
 	

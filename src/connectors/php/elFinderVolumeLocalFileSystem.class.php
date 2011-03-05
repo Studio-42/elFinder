@@ -936,6 +936,16 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return false;
 	}
 	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _duplicate($path) {
+	}
+	
 	/**
 	 * undocumented function
 	 *
@@ -995,8 +1005,23 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function _copy($from, $to) {
-		return false;
+	protected function _copy($src, $dir, $name) {
+		
+		if (!$this->_isReadable($src) || !$this->_isWritable($dir)) {
+			return $this->setError(array('Unable to copy $1.', $this->_basename($src)), 'Not enough permissions.');
+		}
+		
+		$target = $dir.DIRECTORY_SEPARATOR.$name;
+		// echo 'target '.$target;
+		if ($this->_isDir($src)) {
+			
+		} else {
+			if (!copy($src, $target)) {
+				return $this->setError(array('Unable to copy $1.', $this->_basename($src)));
+			}
+		}
+		
+		return $target;
 	}
 	
 	/**

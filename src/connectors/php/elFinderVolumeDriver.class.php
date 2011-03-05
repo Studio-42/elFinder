@@ -445,17 +445,8 @@ abstract class elFinderVolumeDriver {
 			return $this->setError('File not found');
 		}
 		$tree = $this->_tree($path, 1);
-		// debug($tree);
-		// $info = $this->fileinfo($path, true);
-		// 
-		// $childs = $this->_scandir($path, self::$FILTER_DIRS_ONLY);
-		// $info['childs'] = intval(count($childs) > 0);
-		// $tree = array($info);
-		
-		
 		while ($path != $this->root) {
 			$path = $this->_dirname($path);
-			// echo $path.'<br>';
 			if (!$this->_isReadable($path)) {
 				return $this->setError('Access denied');
 				
@@ -463,10 +454,7 @@ abstract class elFinderVolumeDriver {
 			$info = $this->fileinfo($path, true);
 			$info['childs'] = 1;
 			array_unshift($tree, $info);
-			// $tree[] = $info;
 		}
-		// $tree = array_reverse($tree);
-		
 		return $tree;
 	}
 	
@@ -593,6 +581,23 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function rm($hash) {
 		return ($path = $this->path($hash, '', 'rm')) && $this->remove($path);
+	}
+	
+	/**
+	 * Duplicate file
+	 *
+	 * @param  string  $hash file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function duplicate($hash) {
+		if (($path = $this->path($hash, '', 'read')) === false) {
+			return false;
+		}
+
+		return ($p = $this->_copy($path, $this->_dirname($path), $this->uniqueName($path))) === false
+			? false
+			: $this->encode($p);
 	}
 	
 	/**
@@ -822,6 +827,44 @@ abstract class elFinderVolumeDriver {
 			? true 
 			: $this->setError(array('Unable to delete '.($dir ? 'folder' : 'file').' "$1".', $this->_basename($path)));
 	}
+	
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function uniqueName($path, $suffix = ' copy') {
+		$dir  = $this->_dirname($path);
+		$name = $this->_basename($path); 
+		$ext  = '';
+
+		if ($this->_isFile($path)) {
+			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$ext = '.'.$m[1];
+				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+			}
+		}
+		
+		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
+			$i = (int)$m[2];
+			$name = substr($name, 0, strlen($name)-strlen($m[2]));
+		} else {
+			$name .= $suffix;
+			$i = 0;
+		}
+		
+		while ($i++ <= 10000) {
+			$n = $name.($i > 0 ? $i : '').$ext;
+			
+			if (!$this->_hasChild($dir, $n)) {
+				return $n;
+			}
+		}
+		return $name.md5($path).$ext;
+	}
+	
 		
 	/**
 	 * Sort files 
@@ -853,6 +896,8 @@ abstract class elFinderVolumeDriver {
 		
 		return strcmp($f1['name'], $f2['name']);
 	}
+	
+	
 	
 	/**
 	 * Save error message
@@ -1149,6 +1194,14 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _mkfile($parent, $name);
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	abstract protected function _duplicate($path);
 	
 	/**
 	 * undocumented function
@@ -1203,7 +1256,7 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	abstract protected function _copy($from, $to);
+	abstract protected function _copy($src, $dir, $name);
 	
 	/**
 	 * undocumented function

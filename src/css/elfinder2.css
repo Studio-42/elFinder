@@ -178,7 +178,6 @@
 .elfinder-ntf {
 	padding:5px 9px;
 	text-align:center;
-/*	border:1px solid red;*/
 }
 
 .elfinder-ntf-msg {
@@ -187,22 +186,20 @@
 }
 
 .elfinder-ntf-icon {
-/*	display:none;*/
 	position:absolute;
 	left:12px;
 	top:50%;
 	margin-top:-12px;
 	width:16px;
 	height:16px;
-/*	float:left;*/
-/*	margin-top:5px;*/
-	background:url(../images/toolbar.png) 0 0 no-repeat;
+	background:url(../images/toolbar.png) 16px 0 no-repeat;
 }
 
-.elfinder-ntf-rm .elfinder-ntf-icon { background-position:0 -257px;}
-.elfinder-ntf-mkdir .elfinder-ntf-icon{ background-position: 0 -200px; }
+.elfinder-ntf-rm     .elfinder-ntf-icon { background-position: 0 -257px;}
+.elfinder-ntf-mkdir  .elfinder-ntf-icon { background-position: 0 -200px; }
+.elfinder-ntf-mkfile .elfinder-ntf-icon { background-position: 0 -217px; }
+
 .elfinder-ntf-spinner {
-/*	border:1px solid #111;*/
 	margin-top:3px;
 	height:15px;
 	background:url(../images/spinner-ntf2.gif) center center no-repeat;

@@ -1043,16 +1043,17 @@
 
 			return cnt 
 				? self.ajax({
-						data : {cmd : 'rm', targets : files, current : this.cwd().hash},
+						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
 						beforeSend : function() { self.ui.notify('rm', cnt); },
-						complete : function() { self.ui.notify('rm', -cnt); }
+						complete   : function() { self.ui.notify('rm', -cnt); }
 					}, 'bg') 
 				: this;
 		},
 		
-		mkdir : function(name) {
-			var self = this;
-			
+		make : function(name, type) {
+			var self = this,
+				cmd = type == 'file' ? 'mkfile' : 'mkdir';
+				
 			if (!this.validName(name)) {
 				return this.trigger('error', {error : 'Unacceptable name.'});
 			}
@@ -1061,33 +1062,52 @@
 				return this.trigger('error', {error : 'File with the same name already exists.'});
 			}
 			if (!this.cwd().write) {
-				return this.trigger('error', {error : ['Unable to create directory', 'Not enough permission.']});
+				return this.trigger('error', {error : [cmd == 'mkdir' ? 'Unable to create directory' : 'Unable to create file', 'Not enough permission.']});
 			}
 			
 			return this.ajax({
-				data : {cmd : 'mkdir', current : this.cwd().hash, name : name},
-				beforeSend : function() { self.ui.notify('mkdir', 1); },
-				complete : function() { self.ui.notify('mkdir', -1); }
-			}, 'bg');
-			
+				data : {cmd : cmd, current : this.cwd().hash, name : name},
+				beforeSend : function() { self.ui.notify(cmd, 1); },
+				complete   : function() { self.ui.notify(cmd, -1); }
+			}, 'bg');	
+		},
+		
+		mkdir : function(name) {
+			return this.make(name);
 		},
 		
 		mkfile : function(name) {
-			var self = this;
-			if (!this.locks.ui) {
-				this.ajax({
-					cmd : 'mkfile',
-					current : this.cwd.hash,
-					name : name || this.uniqueName('file')
-				}, {
-					error : function(xhr) { self.log(xhr) },
-					success : function(data) { self.log(data); }
-				})
-			}
-			return this;
+			return this.make(name, 'file');
 		},
 		
 		duplicate : function(files) {
+			var self = this,
+				error, cnt;
+			
+			files = $.map($.isArray(files) ? files : [files], function(hash) {
+				var file = self.file(hash);
+				
+				if (file && !error && !file.read) {
+					error = [self.i18n(['Unable to duplicate "$1".', file.name]), 'Not enough permission.'];
+				}
+				return file ? hash : null;
+			});
+			
+			if (error) {
+				return this.trigger('error', {error : error});
+			}
+
+			cnt = files.length;
+
+			return cnt 
+				? self.ajax({
+						data       : {cmd : 'duplicate', target : this.newAPI ? files : files.shift(), current : this.cwd().hash},
+						beforeSend : function() { self.ui.notify('duplicate', cnt); },
+						complete   : function() { self.ui.notify('duplicate', -cnt); }
+					}, 'bg') 
+				: this;
+			
+			
 			var self = this, target = [];
 			
 			$.each(files || this.selected, function(i, hash) {

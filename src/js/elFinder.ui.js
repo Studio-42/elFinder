@@ -312,12 +312,12 @@
 				.shortcut({
 					pattern : 'shift+n',
 					description : 'Create file',
-					callback : function() { fm.mkfile(); }
+					callback : function() { fm.mkfile('untitle file'); }
 				})
 				.shortcut({
 					pattern : 'ctrl+shift+d',
 					description : 'Duplicate',
-					callback : function() { fm.duplicate(); }
+					callback : function() { fm.duplicate(fm.selected()); }
 				})
 			;
 			
@@ -336,6 +336,14 @@
 			mkdir : {
 				one  : 'Creating folder.',
 				many : 'Creating folders.'
+			},
+			mkfile : {
+				one  : 'Creating file.',
+				many : 'Creating files.'
+			},
+			duplicate : {
+				one  : 'Duplicate file.',
+				many : 'Duplicate files.'
 			}
 		},
 		

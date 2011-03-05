@@ -9,7 +9,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all" unselectable="on"%style/>%marker</div><div class="elfinder-cwd-filename ui-corner-all">%name</div></div>',
+				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all" unselectable="on"%style/>%marker</div><div class="elfinder-cwd-filename ui-corner-all" title="%name">%name</div></div>',
 				row  : '<tr id="%hash" class="elfinder-file %permsclass %dirclass"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td><td>%perms</td><td>%date</td><td>%size</td><td>%kind</td></tr>'
 			},
 			
@@ -410,28 +410,6 @@ $.fn.elfindercwd = function(fm) {
 				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			}
 		})
-		.bind('mkdir2', function(e) {
-			var dir = e.data.dir, nodes, html = item(dir);
-
-			if (dir && dir.hash && dir.name) {
-				
-				nodes = cwd.find('[id].directory')
-				
-				if (nodes.length) {
-					nodes.each(function(i) {
-						var $this = $(this);
-						if (i == nodes.length - 1) {
-							$this.after(html);
-						} else if (dir.name < $this.find('.elfinder-cwd-filename').html()) {
-							$this.before(html);
-							return false;
-						}
-					})
-				} else {
-					(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).prepend(html);
-				}
-			}
-		})
 		// add new files
 		.bind('added', function(e) {
 			var phash = fm.cwd().hash,
@@ -466,11 +444,15 @@ $.fn.elfindercwd = function(fm) {
 					}
 					return 	f1.name > f2.name ? 1 : -1;
 				},
+				tmbs = [],
 				curr, next, node;
 				
 			top:
 			while (l--) {
 				f = add[l];
+				if (f.tmb) {
+					tmbs.push(f.hash);
+				}
 				node = $(item(f));
 				
 				if (!first.length) {
@@ -486,8 +468,8 @@ $.fn.elfindercwd = function(fm) {
 					}
 					node.insertAfter(curr);
 				}
-				
 			}
+			tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
 				
 		})
 		// remove files
