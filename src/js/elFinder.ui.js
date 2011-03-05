@@ -307,7 +307,7 @@
 				.shortcut({
 					pattern : 'shift+d',
 					description : 'Create directory',
-					callback : function() { fm.mkdir('folder'); }
+					callback : function() { fm.mkdir('www'); }
 				})
 				.shortcut({
 					pattern : 'shift+n',

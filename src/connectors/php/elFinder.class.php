@@ -332,7 +332,7 @@ class elFinder {
 			return array('error' => $volume->error());
 		}
 		
-		if (false === ($result['cdc'] = $volume->scandir($target))) {
+		if (false === ($result['cdc'] = $volume->scandir($target, $args['sort'], $args['mimes']))) {
 			return array('error' => $volume->error());
 		}
 		

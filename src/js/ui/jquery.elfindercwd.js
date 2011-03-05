@@ -432,7 +432,65 @@ $.fn.elfindercwd = function(fm) {
 				}
 			}
 		})
-		
+		// add new files
+		.bind('added', function(e) {
+			var phash = fm.cwd().hash,
+				add = $.map(e.data.added, function(f) { return f.phash == phash ? f : null}),
+				l = add.length, f,
+				sort = fm.sort[fm.options.sort] || 1,
+				first = cwd.find('[id]:first'),
+				compare = function(f1, f2) {
+					var m1 = f1.mime,
+						m2 = f2.mime,
+						d1 = m1 == 'directory',
+						d2 = m2 == 'directory',
+						n1 = f1.name,
+						n2 = f2.name;
+					
+					// dir first	
+					if (sort < 3) {
+						if (d1 && !d2) {
+							return -1;
+						}
+						if (!d1 && d2) {
+							return 1;
+						}
+					}
+					// by mime
+					if ((sort == 2 || sort == 5) && m1 != m2) {
+						return m1 > m2 ? 1 : -1;
+					}
+					// by size
+					if ((sort == 3 || sort == 6) && s1 != s2) {
+						return s1 > s2 ? 1 : -1;
+					}
+					return 	f1.name > f2.name ? 1 : -1;
+				},
+				curr, next, node;
+				
+			top:
+			while (l--) {
+				f = add[l];
+				node = $(item(f));
+				
+				if (!first.length) {
+					(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
+				} else {
+					curr = first;
+					while ((next = curr.next('[id]')).length) {
+						if (compare(f, fm.file(curr.attr('id'))) == -1) {
+							node.insertBefore(curr);
+							break top;
+						}
+						curr = next;
+					}
+					node.insertAfter(curr);
+				}
+				
+			}
+				
+		})
+		// remove files
 		.bind('removed', function(e) {
 			var rm = e.data.removed,
 				l = rm.length;
@@ -442,9 +500,7 @@ $.fn.elfindercwd = function(fm) {
 			}
 		})
 		
-		// .bind('rm', function(e) {
 		
-		// })
 		.shortcut({
 			pattern     :'ctrl+a', 
 			description : 'Select all files',

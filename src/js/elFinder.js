@@ -1,5 +1,5 @@
 (function($) {
-	
+
 	elFinder = function(el, o) {
 		var self = this,
 			
