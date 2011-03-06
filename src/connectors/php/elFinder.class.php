@@ -537,7 +537,7 @@ class elFinder {
 		if (!is_array($args['targets'])) {
 			return array('error' => 'No files to delete');
 		}
-		
+		sleep(5);
 		foreach ($args['targets'] as $hash) {
 			if (($volume = $this->volume($hash)) === false) {
 				return array('error' => 'File not found');

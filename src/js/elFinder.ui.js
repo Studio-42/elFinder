@@ -312,7 +312,7 @@
 				.shortcut({
 					pattern : 'shift+n',
 					description : 'Create file',
-					callback : function() { fm.mkfile('untitle file'); }
+					callback : function() { fm.mkfile('wp-1.txts'); }
 				})
 				.shortcut({
 					pattern : 'ctrl+shift+d',

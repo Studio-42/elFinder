@@ -412,11 +412,11 @@ $.fn.elfindercwd = function(fm) {
 		})
 		// add new files
 		.bind('added', function(e) {
-			var phash = fm.cwd().hash,
-				add = $.map(e.data.added, function(f) { return f.phash == phash ? f : null}),
-				l = add.length, f,
-				sort = fm.sort[fm.options.sort] || 1,
-				first = cwd.find('[id]:first'),
+			var phash   = fm.cwd().hash,
+				add     = $.map(e.data.added, function(f) { return f.phash == phash ? f : null}),
+				l       = add.length, f,
+				sort    = fm.sort[fm.options.sort] || 1,
+				first   = cwd.find('[id]:first'),
 				compare = function(f1, f2) {
 					var m1 = f1.mime,
 						m2 = f2.mime,
@@ -444,7 +444,7 @@ $.fn.elfindercwd = function(fm) {
 					}
 					return 	f1.name > f2.name ? 1 : -1;
 				},
-				tmbs = [],
+				tmbs    = [],
 				curr, next, node;
 				
 			top:
@@ -458,6 +458,7 @@ $.fn.elfindercwd = function(fm) {
 				if (!first.length) {
 					(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
 				} else {
+					// trying insert into cwd
 					curr = first;
 					while ((next = curr.next('[id]')).length) {
 						if (compare(f, fm.file(curr.attr('id'))) == -1) {
@@ -466,6 +467,15 @@ $.fn.elfindercwd = function(fm) {
 						}
 						curr = next;
 					}
+					// trying find place in buffer
+					l = buffer.length;
+					while (l--) {
+						if (compare(f, buffer[l]) > 0) {
+							buffer = buffer.slice(0, l+1).concat([f]).concat(buffer.slice(l+1));
+							break top;
+						}
+					}
+					// insert after last node
 					node.insertAfter(curr);
 				}
 			}
