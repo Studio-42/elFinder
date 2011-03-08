@@ -320,41 +320,40 @@ class elFinder {
 				// dir which already does not exists but stored in cookie from last session,
 				// so open default dir
 				$volume = $this->default;
-				if (false == ($target = $volume->start())) {
-					$target = $volume->root();
+				if ($target && (!$volume->isDir($target) || $volume->isReadable($target))) {
+					$target = '';
+				}
+				
+				if (!$target) {
+					$target = $volume->defaultPath();
 				}
 			} else {
 				return array('error' => 'Folder not found');
 			}
 		}
 		
-		if (false === ($result['cwd'] = $volume->dir($target))) {
+		// get current working directory info
+		if (($result['cwd'] = $volume->info($target, array('phash', 'url', 'path', 'params'))) === false) {
 			return array('error' => $volume->error());
 		}
-		
-		if (false === ($result['cdc'] = $volume->scandir($target, $args['sort'], $args['mimes']))) {
+		// get current working directory content
+		if (($result['cdc'] = $volume->scandir($target, $args['sort'], $args['mimes'])) === false) {
 			return array('error' => $volume->error());
 		}
-		
-		// $result['cwd']['tmb'] = $volume->tmbRequestAllowed();
-		
+		// get trees from all volumes
 		if ($args['tree']) {
 			$result['tree'] = array();
 			$error = '';
 			foreach ($this->volumes as $volume) {
-				if (false === ($tree = $volume->tree(''))) {
-					$error = $volume->error();
-					// return array('error' => $volume->error());
+				if (($tree = $volume->tree('')) == false) {
+					// tree can not be empty
+					return array('error' => $volume->error());
 				} else {
 					$result['tree'] = array_merge($result['tree'], $tree);
 				}
-				
-			}
-			if (empty($result['tree'])) {
-				return array('error' => $error);
 			}
 		}
-		
+		// get additional params for init loading
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['params'] = array(
@@ -375,14 +374,12 @@ class elFinder {
 	 **/
 	protected function tree($args) {
 		$dir = $args['target'];
-		$volume = $this->volume($dir);
 		
-		if (!$volume) {
+		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		$tree = $volume->tree($dir);
 		
-		return $tree === false 
+		return ($tree = $volume->tree($dir)) == false 
 			? array('error' => $volume->error()) 
 			: array('tree' => $tree);
 	}
@@ -396,14 +393,12 @@ class elFinder {
 	 **/
 	protected function parents($args) {
 		$dir = $args['target'];
-		$volume = $this->volume($dir);
-		
-		if (!$volume) {
+				
+		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		$tree = $volume->parents($dir);
-		
-		return $tree === false 
+
+		return ($tree = $volume->parents($dir)) == false 
 			? array('error' => $volume->error()) 
 			: array('tree' => $tree);
 	}
@@ -579,7 +574,7 @@ class elFinder {
 			if (($hash = $volume->duplicate($hash)) === false) {
 				return array('error' => $volume->error());
 			} else {
-				$added[] = $volume->info($hash);
+				$added[] = $volume->info($hash, true, true);
 			}
 		}
 		

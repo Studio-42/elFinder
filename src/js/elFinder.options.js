@@ -77,7 +77,7 @@ elFinder.prototype.options = {
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
-	rememberLastDir : true,
+	rememberLastDir : false,
 	/**
 	 * Data to append to all ajax requests and to upload form
 	 *

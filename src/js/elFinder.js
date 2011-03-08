@@ -84,7 +84,7 @@
 					f = data[l];
 					
 					if (f.name && f.hash) {
-						if (f.mime && !f.phash) { // from cdc
+						if (f.phash === void(0)) { // from cdc
 							f.phash = cwd.hash;
 						}
 						if (!f.mime) {
@@ -577,8 +577,8 @@
 							tree = {};
 						}
 						update(src);
-						self.log('tree')
-						self.log(tree)
+						// self.log('tree')
+						// self.log(tree)
 					}
 				}
 			})

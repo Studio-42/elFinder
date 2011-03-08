@@ -117,7 +117,7 @@
 						if (dir.length) {
 							dir.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prev('a').children('.'+collapsed).addClass(expanded);
 						} else {
-							fm.ajax({cmd : 'parents', target : fm.cwd().hash});
+							fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
 						}
 					}
 				},
@@ -206,7 +206,7 @@
 			// [re]create tree
 			fm.bind('open', function(e) {
 				if (e.data.tree) {
-					
+					// fm.log(e.data.tree)
 					// can help on really big tree
 					setTimeout(function() {
 
