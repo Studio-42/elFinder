@@ -331,11 +331,44 @@ class elFinder {
 				return array('error' => 'Folder not found');
 			}
 		}
-		
+
 		// get current working directory info
 		if (($result['cwd'] = $volume->info($target, array('phash', 'url', 'path', 'params'))) === false) {
 			return array('error' => $volume->error());
 		}
+		
+		if (($result['files'] = $volume->open($target, $args['mimes'], isset($args['tree']))) === false) {
+			return array('error' => $volume->error());
+		}
+		
+		shuffle($result['files']);
+		// $result['tree'] = array();
+		if (isset($args['tree'])) {
+			foreach ($this->volumes as $v) {
+				if ($v->id() != $volume->id()) {
+					
+					// echo $v->id().'<br>';
+					$tree = $v->tree();
+					if ($tree) {
+						$result['files'] = array_merge($result['files'], $tree);
+						// $result['tree'] = array_merge($result['tree'], $tree);
+					}
+					// debug($tree);
+				}
+			}
+		}
+		
+		// get additional params for init loading
+		if (!empty($args['init'])) {
+			$result['api'] = $this->version;
+			$result['params'] = array(
+				'disabled'   => $this->disabled,
+				'uplMaxSize' => ini_get('upload_max_filesize')
+			);
+		}
+		
+		return $result;
+		
 		// get current working directory content
 		if (($result['cdc'] = $volume->scandir($target, $args['sort'], $args['mimes'])) === false) {
 			return array('error' => $volume->error());
@@ -362,6 +395,19 @@ class elFinder {
 			);
 		}
 		
+		
+		
+		
+		if (isset($args['tree'])) {
+			foreach ($this->volumes as $vid => $v) {
+				// echo $vid.' : '.$v->id.'<br>';
+				if ($v == $volume) {
+					
+					// echo $v->id;
+					// debug($v->tree());
+				}
+			}
+		}
 		return $result;
 	}
 	

@@ -20,13 +20,7 @@
 				shortcuts : true
 			},
 			
-			rules = {
-				open : {
-					cwd    : {req : true, valid : $.isPlainObject},
-					tree   : {req : true, valid : function(d) { return $.isArray(d) || $.isPlainObject(d); }},
-					params : {req : true, valid : $.isPlainObject}
-				}
-			},
+			rules = {},
 			
 			/**
 			 * Core parameters from connctor
@@ -77,7 +71,45 @@
 				
 			},
 			
+			check = function(cmd, d) {
+				var rule = rules[cmd] || {}, i;
+
+				for (i in rule) {
+					if (rule.hasOwnProperty(i)) {
+						if ((d[i] === void(0) && rule[i].req)
+						|| (d[i] !== void(0) && rule[i].valid && !rule[i].valid(d[i]))) {
+							return false;
+						}
+					}
+				}
+				return true;
+			},
+			
 			update = function(data) {
+				var l = data.length, f, i;
+
+				while (l--) {
+					f = data[l];
+					if (self.oldAPI) {
+						f.phash = cwd.hash;
+					}
+					files[f.hash] = f;
+					if (f.phash == cwd.hash) {
+						cwd.files++;
+						cwd.size += parseInt(f.size) || 0;
+					}
+				}
+				
+				for (i in files) {
+					if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
+						self.log('delete '+files[i].name)
+						delete files[i];
+					}
+				}
+				
+			},
+			
+			update2 = function(data) {
 				var l = data.length, f;
 				// return 
 				while(l--) {
@@ -189,7 +221,7 @@
 		 **/
 		this.view = this.viewType();
 		
-		
+		this.sort = this.sortType();
 		
 		/**
 		 * Enable ajax requests and shortcuts.
@@ -285,7 +317,7 @@
 
 					},
 					success  : function(data) {
-						var error;
+						var e, error;
 						
 						!mode && self.trigger('ajaxstop', data);
 
@@ -293,8 +325,10 @@
 							error = 'Invalid backend response';
 						} else if (data.error) {
 							error = data.error;
-						} else {
+						} else if (!check(cmd, data)) {
+							error = 'Invalid backend response';
 							$.each(rules[cmd]||[], function(name, rule) {
+								
 								var d = data[name];
 								
 								if ((d === void(0) && rule.req) 
@@ -462,6 +496,13 @@
 		this.oldAPI = true;
 		
 		this
+			.one('ajaxstop', function(e) {
+				self.api    = parseFloat(e.data.api) || 1;
+				self.newAPI = self.api > 1;
+				self.oldAPI = !self.newAPI;
+				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+
+			})
 			// disable/enable ajax on ajaxstart/ajaxstop events
 			.bind('ajaxstart ajaxstop', function(e) {
 				permissions.ajax = e.type == 'ajaxstop';
@@ -491,11 +532,7 @@
 			})
 			// init file manager
 			.bind('load', function(e) {
-				loaded = true;
-				self.api = parseFloat(e.data.api) || 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+				loaded      = true;
 
 				// remove disabled commands
 				$.each(e.data.params.disabled || [], function(i, cmd) {
@@ -513,27 +550,27 @@
 			})
 			// set some params and cache directory content
 			.bind('open', function(e) {
-				var data = e.data,
-					l = data.cdc.length, 
-					f;
-
 				// set current directory data
-				cwd = data.cwd;
+				cwd = e.data.cwd;
 				cwd.size = 0;
 				cwd.filesnum = 0;
 				
 				// initial loading
-				!loaded && self.trigger('load', data);
+				!loaded && self.trigger('load', e.data);
 				
 				// join core and cwd params 
-				self.params = $.extend({}, params, self.newAPI ? data.cwd.params : {});
-
+				if (self.newAPI) {
+					self.params = $.extend({}, params, e.data.cwd.params);
+				}
+				
+				// cache directory content
+				files = {};
+				update(self.newAPI ? e.data.files : e.data.cdc);
+				// self.log(files)
 				// remember last dir
 				self.lastDir(cwd.hash);
 
-				// cache directory content
-				files = {};
-				update(data.cdc);
+				
 
 				// remove "load" event listeners
 				if (listeners.load) {
@@ -719,7 +756,7 @@
 		 * @return Strng
 		 */
 		viewType : function(t) {
-			var c = 'el-finder-view',
+			var c = 'elfinder-view',
 				r = /^icons|list$/i;
 
 			if (t && r.test(t)) {
@@ -729,6 +766,24 @@
 				this.view = r.test(t) ? t : 'icons'
 			}
 			return this.view;
+		},
+		
+		/**
+		 * Get/set view type (icons | list)
+		 *
+		 * @param  String|void  type
+		 * @return Strng
+		 */
+		sortType : function(t) {
+			var c = 'elfinder-sort';
+
+			if (t && this.sorts[t]) {
+				this.cookie(c, (this.sort = t));
+			} else if (!this.sort) {
+				t = this.cookie(c);
+				this.sort = this.sorts[t] ? t : this.sorts[this.options.sort] || 1;
+			}
+			return this.sort;
 		},
 		
 		/**
@@ -841,8 +896,7 @@
 				data = {
 					cmd    : 'open',
 					target : hash || '',
-					mimes  : this.options.onlyMimes || [],
-					sort   : this.sort[this.options.sort] || 1
+					mimes  : this.options.onlyMimes || []
 				};
 
 				if (tree && this.options.allowNavbar) {
@@ -1183,7 +1237,7 @@
 		newAPIRules : {
 			open : {
 				cwd    : {req : true,  valid : $.isPlainObject},
-				tree   : {req : false, valid : $.isArray},
+				files  : {req : true, valid : $.isArray},
 				params : {req : false, valid : $.isPlainObject}
 			},
 			tree : {
@@ -1204,7 +1258,7 @@
 			}
 		},
 		
-		sort : {
+		sorts : {
 			nameDirsFirst : 1,
 			kindDirsFirst : 2,
 			sizeDirsFirst : 3,

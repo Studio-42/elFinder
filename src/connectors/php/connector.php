@@ -93,7 +93,8 @@ $opts = array(
 		// 		'write' => false,
 		// 		'rm' => false
 		// 	)
-		// )
+		// ),
+		array('path' => '../../../files3', 'driver' => 'LocalFileSystem'),
 		
 	)
 );

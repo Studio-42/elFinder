@@ -18,13 +18,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $driverId = 'l';
 	
 	/**
-	 * Mime types for which thumbnails can be created
-	 *
-	 * @var array
-	 **/
-	protected $tmbMimes = array();
-	
-	/**
 	 * finfo object
 	 *
 	 * @var object
@@ -168,7 +161,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $type;
 	}
 	
-
 	/**
 	 * Prepare object configuration
 	 *
@@ -179,15 +171,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _prepare(array $opts) {
 		$o = array(
 			'cryptLib'     => 'auto',  // how crypt paths? not implemented yet
-			'mimeDetect'   => 'auto',  // how to detect mimetype
-			'tmbDir'       => '.tmb',  // directory for thumbnails
-			'imgLib'       => 'auto',  // image manipulations lib name
-			'tmbCleanProb' => 0,       // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-			'dotFiles'     => false,   // allow dot files?
-			'accepted'     => '',      // regexp to validate filenames
 			'dirMode'      => 0777,
 			'fileMode'     => 0666,
-			'tmbDirMode'   => 0777,
 			'defaults'     => array(   // default permissions 
 				'read'  => true,
 				'write' => true,
@@ -397,12 +382,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function _isWritable($path) {
-		// if ($path != $this->root && $this->_isLink($path)) {
-		// 	if (($target = $this->_readlink($path)) === false
-		// 	|| !$this->_isWritable($target)) {
-		// 		return false;
-		// 	}
-		// }
 		return is_writable($path) && $this->allowed($path, 'write');
 	}
 	
@@ -424,18 +403,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return true if file can be resized by current driver
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isResizable($path, $mime) {
-		return $this->imgLib && $this->validMime($mime, $this->tmbMimes);
-	}
-	
-	/**
 	 * Return true if path is dir and has at least one childs directory
 	 *
 	 * @param  string  $path  dir path
@@ -446,7 +413,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (is_dir($path)) {
 			$dir = dir($path);
 			while (($entry = $dir->read()) !== false) {
-				if ($entry != '.' && $entry != '..' && is_dir($dir->path.DIRECTORY_SEPARATOR.$entry)) {
+				if ($entry != '.' && $entry != '..' && $this->accepted($entry) && is_dir($dir->path.DIRECTORY_SEPARATOR.$entry)) {
 					$dir->close();
 					return true;
 				}
@@ -488,9 +455,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return filesize($path);
+		return @filesize($path);
 	}
-	
 	
 	/**
 	 * Returns the target of a symbolic link,
@@ -520,21 +486,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		return $link;
-	}
-	
-	/**
-	 * Return object width and height
-	 * Ususaly used for images, but can be realize for video etc...
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _dimensions($path, $mime) {
-		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
-			? $s[0].'x'.$s[1] 
-			: false;
 	}
 	
 	/**

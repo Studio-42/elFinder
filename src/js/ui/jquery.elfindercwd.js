@@ -154,6 +154,38 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			
+
+			compare = function(f1, f2) {
+				var m1 = f1.mime,
+					m2 = f2.mime,
+					d1 = m1 == 'directory',
+					d2 = m2 == 'directory',
+					n1 = f1.name,
+					n2 = f2.name,
+					s1 = f1.size || 0,
+					s2 = f2.size || 0;
+				
+				// dir first	
+				if (fm.sort <= 3) {
+					if (d1 && !d2) {
+						return -1;
+					}
+					if (!d1 && d2) {
+						return 1;
+					}
+				}
+				// by mime
+				if ((fm.sort == 2 ||fm. sort == 5) && m1 != m2) {
+					return m1 > m2 ? 1 : -1;
+				}
+				// by size
+				if ((fm.sort == 3 || fm.sort == 6) && s1 != s2) {
+					return s1 > s2 ? 1 : -1;
+				}
+				
+				return f1.name.localeCompare(f2.name);
+			},
+			
 			/**
 			 * Last rendered file 
 			 * Required to start lazy load
@@ -371,8 +403,9 @@ $.fn.elfindercwd = function(fm) {
 			fm.trigger('select', {selected : selected});
 		})
 		.bind('open', function(e) {
-			var list = fm.view == 'list';
-
+			var list  = fm.view == 'list', 
+				phash = fm.cwd().hash;
+			
 			cwd.empty()
 				.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
@@ -381,13 +414,14 @@ $.fn.elfindercwd = function(fm) {
 				cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 			}
 
-			if ($.isArray(e.data.cdc)) {
-				buffer = e.data.cdc.slice(0);
-				scrollTop = true;
-				cwd.bind('scroll', scroll).trigger('scroll');
-				scrollTop = false;
-			}
+			buffer = fm.oldAPI
+				? e.data.cdc.slice(0)
+				: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
 			
+			buffer = buffer.sort(compare);
+			scrollTop = true;
+			cwd.bind('scroll', scroll).trigger('scroll');
+			scrollTop = false;
 		})
 		.bind('tmb', function(e) {
 			tmb = !!e.data.tmb;
