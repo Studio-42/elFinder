@@ -648,9 +648,9 @@ class connector():
 
 		self._response['cwd'] = {
 			'hash': self.__hash(path),
-			'name': name,
+			'name': self.__checkUtf8(name),
 			'mime': 'directory',
-			'rel': rel,
+			'rel': self.__checkUtf8(rel),
 			'size': 0,
 			'date': datetime.fromtimestamp(os.stat(path).st_mtime).strftime("%d %b %Y %H:%M"),
 			'read': True,
@@ -698,7 +698,7 @@ class connector():
 			fdate = statDate.strftime("%d %b %Y %H:%M")
 
 		info = {
-			'name': os.path.basename(path),
+			'name': self.__checkUtf8(os.path.basename(path)),
 			'hash': self.__hash(path),
 			'mime': 'directory' if filetype == 'dir' else self.__mimetype(path),
 			'date': fdate,
@@ -774,11 +774,12 @@ class connector():
 			name = os.path.basename(path)
 		tree = {
 			'hash': self.__hash(path),
-			'name': name,
+			'name': self.__checkUtf8(name),
 			'read': self.__isAllowed(path, 'read'),
 			'write': self.__isAllowed(path, 'write'),
 			'dirs': []
 		}
+
 		if self.__isAllowed(path, 'read'):
 			for d in sorted(os.listdir(path)):
 				pd = os.path.join(path, d)
@@ -1302,6 +1303,7 @@ class connector():
 		curDir = path
 		length = len(self._options['root'])
 		url = str(self._options['URL'] + curDir[length:]).replace(os.sep, '/')
+
 		try:
 			import urllib
 			url = urllib.quote(url, '/:~')
@@ -1464,4 +1466,14 @@ class connector():
 			return False
 
 		return True
+
+
+	def __checkUtf8(self, name):
+		try:
+			name.decode('utf-8')
+		except UnicodeDecodeError:
+			name = unicode(name, 'utf-8', 'replace')
+			self.__debug('invalid encoding', name)
+			#name += ' (invalid encoding)'
+		return name
 
