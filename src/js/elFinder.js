@@ -109,35 +109,6 @@
 				
 			},
 			
-			update2 = function(data) {
-				var l = data.length, f;
-				// return 
-				while(l--) {
-					f = data[l];
-					
-					if (f.name && f.hash) {
-						if (f.phash === void(0)) { // from cdc
-							f.phash = cwd.hash;
-						}
-						if (!f.mime) {
-							f.mime = 'directory';
-						}
-						if (!f.rm) {
-							f.rm = true;
-						}
-						if (f.phash == cwd.hash && !files[f.hash]) {
-							files[f.hash] = f;
-							cwd.filesnum++;
-							cwd.size += parseInt(f.size) || 0;
-						}
-						
-						if (f.mime == 'directory' && !tree[f.hash]) {
-							tree[f.hash] = f;
-						} 
-					}
-				}
-			},
-			
 			/**
 			 * Target node
 			 *
@@ -327,17 +298,6 @@
 							error = data.error;
 						} else if (!check(cmd, data)) {
 							error = 'Invalid backend response';
-							$.each(rules[cmd]||[], function(name, rule) {
-								
-								var d = data[name];
-								
-								if ((d === void(0) && rule.req) 
-								|| (d !== void(0) && rule.valid && !rule.valid(d))) {
-									error = 'Invalid backend response';
-									return false;
-								}
-								
-							})
 						}
 
 						if (error) {
@@ -347,9 +307,8 @@
 						// fire event with command name
 						self.trigger(cmd, data);
 						// fire some event to update ui
-						data.added && self.trigger('added', data);
+						data.added   && self.trigger('added', data);
 						data.removed && self.trigger('removed', data);
-						data.changed && self.trigger('changed', data);
 						// update selected files
 						self.trigger('focus').trigger('updateSelected');
 					}
@@ -634,7 +593,7 @@
 					find = function(hash) {
 						var ret = [hash];
 						
-						$.each(tree, function(h, f) {
+						$.each(files, function(h, f) {
 							if (f.phash == hash) {
 								ret.push(f.hash);
 								if (f.childs) {
@@ -648,13 +607,14 @@
 				while (l--) {
 					delete files[rm[l].hash];
 					$.each(find(rm[l].hash), function(i, h) {
-						delete tree[h];
+						delete files[h];
 					});
 				}
 			})
 			//  update files cache
 			.bind('added', function(e) {
 				update(e.data.added);
+				self.log(files)
 			})
 
 			;
@@ -697,6 +657,27 @@
 		}
 		
 		this.open(this.lastDir(), true, true);
+
+		if (this.options.sync > 0) {
+			setInterval(function() {
+				self.log('sync')
+				var data = {
+					cmd     : 'sync',
+					current : cwd.hash,
+					targets : [],
+					mimes   : self.options.onlyMimes || []
+				}
+				var targets = [];
+				
+				$.each(files, function(hash, f) {
+					// if (f.phash == cwd.hash)
+					data.targets.push(hash)
+				})
+				
+				// self.log(data)
+				self.ajax({data : data, type : 'post'}, 'silent')
+			}, this.options.sync)
+		}
 
 	}
 	

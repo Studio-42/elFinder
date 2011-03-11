@@ -655,6 +655,54 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Check for new/removed files
+	 *
+	 * @param  array  files hashes from client
+	 * @param  string current directory hash if it belongs current volume
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function sync($hashes, $current='') {
+		$result = array('removed' => array(), 'added' => array());
+		$exists = array();
+		$parents = array();
+		$added = array();
+		
+		// check removed files
+		foreach ($hashes as $hash) {
+			if (($path = $this->path($hash)) == false) {
+				$result['removed'][] = $hash;
+			} else {
+				$exists[] = $path;
+			}
+		}
+
+		// find new files in current directory if required
+		if ($current 
+		&& ($cwd = $this->path($current, 'd', 'read')) != false
+		&& ($ls = $this->_scandir($cwd)) !== false) {
+			$added = array_diff($ls, $exists);
+		}
+		
+		// find new directories
+		foreach ($exists as $path) {
+			if ($this->_isDir($path)) {
+
+				$parents[] = $path == $this->root ? $path : $this->_dirname($path);
+			}
+		}
+		
+		foreach (array_unique($parents) as $path) {
+			$added = array_merge($added, array_diff($this->_scandir($path, self::FILTER_DIRS_ONLY), $exists));
+		}
+		foreach (array_unique($added) as $path) {
+			$result['added'][] = $this->fileinfo($path);
+		}
+		
+		return $result;
+	}
+	
+	/**
 	 * Open file and return file pointer
 	 * Return false on error
 	 *
@@ -1014,9 +1062,10 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function path($hash, $type='f', $perm="", $linkTarget = false) {
+	protected function path($hash, $type='', $perm="", $linkTarget = false) {
 		
 		if (!$hash || !($path = $this->decode($hash))) {
+			
 			return $this->setError($type == 'd' ? 'Folder not found' : 'File not found');
 		}
 

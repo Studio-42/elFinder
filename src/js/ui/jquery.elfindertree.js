@@ -3,17 +3,77 @@
 	$.fn.elfindertree = function(fm) {
 		
 		return this.each(function() {
-			var subtree   = 'elfinder-nav-subtree',
+			var 
+				/**
+				 * Subtree class name
+				 *
+				 * @type String
+				 */
+				subtree   = 'elfinder-nav-subtree',
+				
+				/**
+				 * Collapsed arrow class name
+				 *
+				 * @type String
+				 */
 				collapsed = 'elfinder-nav-collapsed',
+				
+				/**
+				 * Expanded arrow class name
+				 *
+				 * @type String
+				 */
 				expanded  = 'elfinder-nav-expanded',
+				
+				/**
+				 * Class name to mark arrow for directory with already loaded children
+				 *
+				 * @type String
+				 */
 				loaded    = 'elfinder-subtree-loaded',
-				empty     = 'elfinder-nav-empty',
-				folder    = 'elfinder-nav-icon-folder',
+				
+				/**
+				 * Root directory class name
+				 *
+				 * @type String
+				 */
 				root      = 'elfinder-nav-tree-root',
+				
+				/**
+				 * Current directory class name
+				 *
+				 * @type String
+				 */
 				active    = 'ui-state-active',
+				
+				/**
+				 * Directory html template
+				 *
+				 * @type String
+				 */
 				tpl       = '<li><a href="#" id="nav-%id" class="ui-corner-all %pclass">%arrow<span class="elfinder-nav-icon"/>%link %perms %name</a>%childs</li>',
+				
+				/**
+				 * Subtree html
+				 *
+				 * @type String
+				 */
 				ul        = '<ul class="'+subtree+'">',
+				
+				/**
+				 * Arrow html
+				 *
+				 * @type String
+				 */
 				arrow     = '<span class="elfinder-nav-collapsed"/>' 
+				
+				/**
+				 * Return html for directory to insert in tree
+				 *
+				 * @param  Object   directory
+				 * @param  Boolean  is it root directory?
+				 * @return String
+				 */
 				item = function(dir, isroot) {
 					var pclass = fm.ui.perms2class(dir),
 						childs = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length;
@@ -29,6 +89,7 @@
 					}
 					return '';
 				},
+				
 				/**
 				 * Create tree content
 				 * Only for old api
@@ -37,11 +98,11 @@
 				 * @param  Boolean  is it root directory?
 				 * @return void
 				 */
-				create = function(dirs, root) {
+				create = function(dirs, isroot) {
 					var html= [], i;
 					
 					
-					if (root) {
+					if (isroot) {
 						tree.find('a').remove();
 						tree.html(item(dirs, true));
 					} else {
@@ -161,21 +222,22 @@
 				 */
 				proccess = function(e) {
 					var src = fm.newAPI 
-							? $.map(e.data.files || e.data.tree || [], function(f) { return f.mime == 'directory' ? f : null })
+							? $.map(e.data.files || e.data.tree || e.data.added || [], function(f) { return f.mime == 'directory' ? f : null })
 							: e.data.tree;
 					
-					setTimeout(function() {
-						(fm.oldAPI || e.data.api) && tree.empty();
-						fm.newAPI ? update(src, e.data.api) : create(src, true);
-						sync();
-						tree.find('a')
-							.not('.ui-droppable,.elfinder-na,.elfinder-ro')
-							.droppable(droppable);
-					}, 20)		
-					
+					(fm.oldAPI || e.data.api) && tree.empty();
+					fm.newAPI ? update(src, e.data.api) : create(src, true);
+					sync();
+					tree.find('a')
+						.not('.ui-droppable,.elfinder-na,.elfinder-ro')
+						.droppable(droppable);
 				},
 				
-				
+				/**
+				 * Draggable options
+				 *
+				 * @type Object
+				 */
 				draggable = $.extend({}, fm.ui.draggable, {
 						helper : function() {
 							return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
@@ -183,11 +245,21 @@
 								.data('src', $(this).parent('li').parent('ul').prev('a').attr('id').substr(4));
 						}
 					}),
+					
+				/**
+				 * Droppable options
+				 *
+				 * @type Object
+				 */
 				droppable = $.extend({}, fm.ui.droppable, {
 					hoverClass : 'elfinder-droppable-active ui-state-hover'
 				}),
 				
-
+				/**
+				 * Navigation tree
+				 *
+				 * @type JQuery
+				 */
 				tree = $(this).addClass('elfinder-nav-tree')
 					.delegate('a', 'hover', function(e) {
 						var $this = $(this), 
@@ -225,7 +297,7 @@
 						e.stopPropagation();
 						e.preventDefault();
 
-						if ($this.is('.'+loaded)/*ul.children().length*/) {
+						if ($this.is('.'+loaded)) {
 							ul.slideToggle();
 							$this.toggleClass(expanded);
 						} else if (fm.newAPI) {
@@ -246,32 +318,28 @@
 								}
 							}, 'silent');
 						}
-					})
-				;
+					});
 			
-			// [re]create tree
+			// bind events
 			fm.bind('load', function(e) {
 				if (fm.oldAPI) {
 					arrow = '<span class="elfinder-nav-collapsed '+loaded+'"/>' ;
 				}
 			})
-			.bind('open tree parents', proccess)
-			.bind('added', function(e) {
-				append($.map(e.data.added, function(f) { return f.mime == 'directory' ? f : null}), false, true);
-				
-			})
-			// remove dirs from tree
-			.bind('removed', function(e) {
-				var rm = e.data.removed,
-					l = rm.length,
-					node, parent, stree;
+				// update tree
+				.bind('open', function(e) {
+					setTimeout(function() { proccess(e) }, 20)
+				})
+				.bind('tree parents added', proccess)
+				// remove dirs from tree
+				.bind('removed', function(e) {
+					var rm = e.data.removed,
+						l = rm.length,
+						node, parent, stree;
 					
-				while (l--) {
-					if (rm[l].mime == 'directory') {
-						node   = tree.find('#nav-'+rm[l].hash);
-						parent = tree.find('#nav-'+rm[l].phash);
-						
-						if (node.length && parent.length) {
+					while (l--) {
+						if ((node = tree.find('#nav-'+rm[l])).length) {
+							parent = node.parents('ul:first').prev();
 							node.parent().remove();
 							stree = parent.next('.'+subtree);
 							if (!stree.children().length) {
@@ -280,10 +348,7 @@
 							}
 						}
 					}
-				}
-			})
-			
-			;
+				});
 			
 		});
 	}

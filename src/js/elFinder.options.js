@@ -122,7 +122,7 @@ elFinder.prototype.options = {
 	 * @type Number
 	 * @default  100
 	 */
-	showThreshold : 100,
+	showThreshold : 50,
 	
 	/**
 	 * Additional rule to valid new file name.
@@ -135,6 +135,8 @@ elFinder.prototype.options = {
 	 *  validName : /^[^\s]$/
 	 */
 	validName : false,
+	
+	sync : 15000,
 	
 	/* cookie options */
 	cookie         : {

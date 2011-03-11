@@ -201,6 +201,17 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			buffer = [],
 			
+			indexof = function(hash) {
+				var l = buffer.length;
+				
+				while (l--) {
+					if (buffer[l].hash == hash) {
+						return l;
+					}
+				}
+				return -1;
+			},
+			
 			/**
 			 * Flag to aviod unnessesary paralell scroll event handlers cals
 			 *
@@ -449,35 +460,7 @@ $.fn.elfindercwd = function(fm) {
 			var phash   = fm.cwd().hash,
 				add     = $.map(e.data.added, function(f) { return f.phash == phash ? f : null}),
 				l       = add.length, f,
-				sort    = fm.sort[fm.options.sort] || 1,
 				first   = cwd.find('[id]:first'),
-				compare = function(f1, f2) {
-					var m1 = f1.mime,
-						m2 = f2.mime,
-						d1 = m1 == 'directory',
-						d2 = m2 == 'directory',
-						n1 = f1.name,
-						n2 = f2.name;
-					
-					// dir first	
-					if (sort < 3) {
-						if (d1 && !d2) {
-							return -1;
-						}
-						if (!d1 && d2) {
-							return 1;
-						}
-					}
-					// by mime
-					if ((sort == 2 || sort == 5) && m1 != m2) {
-						return m1 > m2 ? 1 : -1;
-					}
-					// by size
-					if ((sort == 3 || sort == 6) && s1 != s2) {
-						return s1 > s2 ? 1 : -1;
-					}
-					return 	f1.name > f2.name ? 1 : -1;
-				},
 				tmbs    = [],
 				curr, next, node;
 				
@@ -519,10 +502,14 @@ $.fn.elfindercwd = function(fm) {
 		// remove files
 		.bind('removed', function(e) {
 			var rm = e.data.removed,
-				l = rm.length;
+				l = rm.length, n;
 
 			while (l--) {
-				cwd.find('#'+rm[l].hash).remove();
+				if ((n = cwd.find('#'+rm[l])).length) {
+					n.remove();
+				} else if ((n = indexof(rm[l])) != -1) {
+					buffer.splice(n, 1);
+				}
 			}
 		})
 		

@@ -33,6 +33,7 @@ class elFinder {
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('current' => true, 'files' => true),
+		'sync'      => array('current' => true, 'targets' => true),
 		'file'      => array('target' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true),
@@ -473,6 +474,36 @@ class elFinder {
 		return $result === false
 			? array('error' => $root->error())
 			: $result;
+	}
+	
+	/**
+	 * Check for new/removed files
+	 *
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function sync($args) {
+		$result  = array('added' => array(), 'removed' => array());
+		$targets = array();
+		$active  = '';
+		
+		foreach ($this->volumes as $id => $v) {
+			$targets[$id] = array();
+			if (strpos($args['current'], $id) === 0) {
+				$active = $id;
+			}
+			foreach ($args['targets'] as $hash) {
+				if (strpos($hash, $id) === 0) {
+					$targets[$id][] = $hash;
+				}
+			}
+		}
+		foreach ($targets as $id => $hashes) {
+			$result = array_merge_recursive($result, $this->volumes[$id]->sync($hashes, $id == $active ? $args['current'] : ''));
+		}
+
+		return $result;
 	}
 	
 	/**
