@@ -342,6 +342,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Returns TRUE if the thumbnail with given name exists
+	 *
+	 * @param  string  $name  thumbnail file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _tmbExists($name) {
+		return file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$name);
+	}
+	
+	/**
 	 * Returns TRUE if the filename exists and is a directory, FALSE otherwise.
 	 *
 	 * @param  string  $path file path

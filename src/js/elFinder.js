@@ -4,7 +4,7 @@
 		var self = this,
 			
 			/**
-			 * Flag to fire "load" event
+			 * Flag to not fire "load" event twice
 			 *
 			 * @type Boolean
 			 **/
@@ -20,15 +20,34 @@
 				shortcuts : true
 			},
 			
+			/**
+			 * Rules for ajax data validate
+			 *
+			 * @type Object
+			 **/
 			rules = {},
 			
 			/**
-			 * Core parameters from connctor
+			 * Parameters got from connctor on init requiest.
+			 * Do not changed in session
+			 *
+			 * @type Object
+			 **/
+			coreParams = {},
+			
+			/**
+			 * In new api any volume can has own parameters, 
+			 * so here store united parameters
 			 *
 			 * @type Object
 			 **/
 			params = {},
 			
+			/**
+			 * Current working directory
+			 *
+			 * @type Object
+			 **/
 			cwd = {
 				hash   : '',
 				phash  : '',
@@ -39,12 +58,17 @@
 				read   : 1,
 				write  : 1,
 				rm     : 1,
-				params : {}
+				params : {},
+				files  : 0,
+				size   : 0
 			},
 			
+			/**
+			 * All files/dirs "visible" for this moment
+			 *
+			 * @type Object
+			 **/
 			files = {},
-			
-			tree = {},
 			
 			/**
 			 * Selected files ids
@@ -71,7 +95,14 @@
 				
 			},
 			
-			check = function(cmd, d) {
+			/**
+			 * Valid data for command based on rules
+			 *
+			 * @param  String  command name
+			 * @param  Object  command data
+			 * @return Boolean
+			 **/
+			validCmdData = function(cmd, d) {
 				var rule = rules[cmd] || {}, i;
 
 				for (i in rule) {
@@ -85,8 +116,27 @@
 				return true;
 			},
 			
-			update = function(data) {
+			/**
+			 * Store info about files/dirs in "files" object.
+			 * Here we get data.files for new api or data.cdc for old api.
+			 * Files from data.tree for old api adds in cacheTree()
+			 *
+			 * @param  Array    files
+			 * @param  Boolean  remove files does not belongs current working directory?
+			 * @return void
+			 **/
+			cache = function(data, clear) {
 				var l = data.length, f, i;
+
+				if (clear) {
+					cwd.size  = 0;
+					cwd.files = 0;
+					for (i in files) {
+						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
+							delete files[i];
+						}
+					}
+				}
 
 				while (l--) {
 					f = data[l];
@@ -99,12 +149,31 @@
 						cwd.size += parseInt(f.size) || 0;
 					}
 				}
-				
-				for (i in files) {
-					if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
-						self.log('delete '+files[i].name)
-						delete files[i];
-					}
+			},
+			
+			/**
+			 * Store info about dirs form data.tree for old api.
+			 *
+			 * @param  Object   dire tree
+			 * @return void
+			 **/
+			cacheTree = function(dir) {
+				var l = dir.dirs && dir.dirs.length ? dir.dirs.length : 0, 
+					d,
+					add = function(d) {
+						if (d.name && d.hash && !files[d.hash]) {
+							d = $.extend({mime : 'directory', rm : 1}, d);
+							delete d.dirs;
+							files[d.hash] = d;
+						}
+						
+					};
+
+				add(dir);
+
+				while (l--) {
+					d = dir.dirs[l];
+					d.dirs && d.dirs.length ? cacheTree(d) : add(d);
 				}
 				
 			},
@@ -130,6 +199,9 @@
 		 **/
 		this.api = 1;
 		
+		this.newAPI = false;
+		this.oldAPI = true;
+		
 		/**
 		 * Configuration options
 		 *
@@ -137,12 +209,6 @@
 		 **/
 		this.options = $.extend({}, this.options, o||{});
 		
-		/**
-		 * United core parameters from connector and from cwd (new api)
-		 *
-		 * @type Object
-		 **/
-		this.params = {};
 		
 		/**
 		 * Interface language
@@ -296,7 +362,7 @@
 							error = 'Invalid backend response';
 						} else if (data.error) {
 							error = data.error;
-						} else if (!check(cmd, data)) {
+						} else if (!validCmdData(cmd, data)) {
 							error = 'Invalid backend response';
 						}
 
@@ -306,16 +372,18 @@
 
 						// fire event with command name
 						self.trigger(cmd, data);
+						
 						// fire some event to update ui
-						data.added   && self.trigger('added', data);
 						data.removed && self.trigger('removed', data);
+						data.added   && self.trigger('added', data);
+						
 						// update selected files
 						self.trigger('focus').trigger('updateSelected');
 					}
 				};
 				
 			opts.data && $.extend(options, opts)
-			
+
 			if (permissions.ajax) {
 				!mode && self.trigger('ajaxstart', options);
 				$.ajax(options);
@@ -323,6 +391,21 @@
 			
 			return this;
 		};
+		
+		this.sync = function(silent) {
+			var data = {
+				cmd     : 'sync',
+				current : cwd.hash,
+				targets : [],
+				mimes   : self.options.onlyMimes || []
+			};
+			
+			$.each(files, function(hash, f) {
+				data.targets.push(hash);
+			});
+
+			return self.ajax({data : data, type : 'post'}, silent ? 'silent' : '');
+		}
 		
 		/**
 		 * Attach listener to events
@@ -402,8 +485,9 @@
 			return cwd;
 		}
 		
-		this.tree = function() {
-			return tree;
+		this.param = function(n) {
+
+			return params[n];
 		}
 		
 		/**
@@ -451,8 +535,7 @@
 			return $.map(selected, function(hash) { return files[hash] || null });
 		};
 		
-		this.newAPI = false;
-		this.oldAPI = true;
+		
 		
 		this
 			.one('ajaxstop', function(e) {
@@ -491,45 +574,47 @@
 			})
 			// init file manager
 			.bind('load', function(e) {
-				loaded      = true;
+				loaded = true;
 
 				// remove disabled commands
 				$.each(e.data.params.disabled || [], function(i, cmd) {
 					self.commands[cmd] && delete self.commands[cmd];
 				});
-				e.data.params.disabled = [];
+				delete e.data.params.disabled;
+				
 				// store core params
-				params = e.data.params;
+				coreParams = e.data.params;
 				
 				if (self.oldAPI) {
-					cwd.url = params.url;
+					cwd.url = coreParams.url;
 					cwd.tmb = data.tmb;
 				}
-				self.debug('api', self.api)
+				self.debug('api', self.api);
 			})
 			// set some params and cache directory content
 			.bind('open', function(e) {
 				// set current directory data
 				cwd = e.data.cwd;
-				cwd.size = 0;
-				cwd.filesnum = 0;
 				
-				// initial loading
+				// initial loading - fire event
 				!loaded && self.trigger('load', e.data);
 				
 				// join core and cwd params 
 				if (self.newAPI) {
-					self.params = $.extend({}, params, e.data.cwd.params);
+					params = $.extend({}, coreParams, e.data.cwd.params);
+				}
+
+				// old api: if we get tree - reset cache
+				if (this.oldAPI && e.data.tree) {
+					files = {};
+					cacheTree(e.data.tree);
 				}
 				
-				// cache directory content
-				files = {};
-				update(self.newAPI ? e.data.files : e.data.cdc);
-				// self.log(files)
+				// cache files
+				cache(self.newAPI ? e.data.files : e.data.cdc, true);
+
 				// remember last dir
 				self.lastDir(cwd.hash);
-
-				
 
 				// remove "load" event listeners
 				if (listeners.load) {
@@ -538,45 +623,8 @@
 				
 			})
 			// cache directories tree data
-			.bind('open tree parents', function(e) {
-				var src = e.data.tree || [],
-					l = src.length,
-					f,
-					traverse = function(dir) {
-						var l, d;
-
-						function add(d) {
-							if (d.name && d.hash && !tree[d.hash]) {
-								d = $.extend({mime : 'directory', rm : 1}, d);
-								delete d.dirs;
-								tree[d.hash] = d;
-							}
-						}
-
-						add(dir);
-
-						if (dir.dirs && dir.dirs.length) {
-							l = dir.dirs.length;
-							while (l--) {
-								d = dir.dirs[l];
-								d.dirs && d.dirs.length ? traverse(d) : add(d);
-							}
-						}
-					};
-				
-				if (src) {
-					if (self.oldAPI) {
-						tree = {};
-						traverse(src);
-					} else {
-						if (e.type == 'open' && src.length) {
-							tree = {};
-						}
-						update(src);
-						// self.log('tree')
-						// self.log(tree)
-					}
-				}
+			.bind('tree parents', function(e) {
+				cache(e.data.tree || []);
 			})
 			// cache new thumbnails urls
 			.bind('tmb', function(e) {
@@ -643,14 +691,22 @@
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
 		
-		this.one('ajaxerror error', function(e) {
-			// fm not correctly loaded
-			if (!loaded) {
-				e.stopPropagation();
-				self.deactivate();
-				listeners = {};
-			}
-		});
+		this
+			.one('ajaxerror error', function(e) {
+				// fm not correctly loaded
+				if (!loaded) {
+					e.stopPropagation();
+					self.deactivate();
+					listeners = {};
+				}
+			})
+			.one('open', function() {
+				if (self.newAPI && self.options.sync > 3000) {
+					setTimeout(function() {
+						self.sync(true);
+					}, self.options.sync);
+				}
+			});
 		
 		if (!this.options.url) {
 			return this.deactivate().trigger('error', {error : 'Invalid configuration! You have to set URL option.'});
@@ -658,26 +714,6 @@
 		
 		this.open(this.lastDir(), true, true);
 
-		if (this.options.sync > 0) {
-			setInterval(function() {
-				self.log('sync')
-				var data = {
-					cmd     : 'sync',
-					current : cwd.hash,
-					targets : [],
-					mimes   : self.options.onlyMimes || []
-				}
-				var targets = [];
-				
-				$.each(files, function(hash, f) {
-					// if (f.phash == cwd.hash)
-					data.targets.push(hash)
-				})
-				
-				// self.log(data)
-				self.ajax({data : data, type : 'post'}, 'silent')
-			}, this.options.sync)
-		}
 
 	}
 	
@@ -1274,7 +1310,7 @@
 			}
 		},
 		
-		log : function(m) { window.console && window.console.log && window.console.log(m); },
+		log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 		
 		debug : function(type, m) {
 			var d = this.options.debug;

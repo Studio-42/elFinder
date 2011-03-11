@@ -27,7 +27,7 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image"] - display all images
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
-	onlyMimes : [],
+	onlyMimes : ['image'],
 	
 	/**
 	 * How to sort files in current directory
@@ -136,7 +136,7 @@ elFinder.prototype.options = {
 	 */
 	validName : false,
 	
-	sync : 15000,
+	sync : 0,
 	
 	/* cookie options */
 	cookie         : {
@@ -171,7 +171,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	// debug : false
-	debug : ['event-open', 'event-load', 'event-change']
+	debug : ['event-open', 'event-load', 'event-added']
 }
 
 })(jQuery);

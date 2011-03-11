@@ -527,7 +527,8 @@ abstract class elFinderVolumeDriver {
 		if (($path = $this->path($hash, '', 'read')) === false) {
 			return false;
 		}
-		$result = array();
+
+		$files = array();
 		
 		if (($ls = $this->_scandir($path)) === false) {
 			return $this->setError('Unable to open folder');
@@ -535,16 +536,22 @@ abstract class elFinderVolumeDriver {
 		
 		foreach ($ls as $file) {
 			$info = $this->fileinfo($file);
-			$result[$info['hash']] = $info;
+			$files[$info['hash']] = $info;
 		}
-		$tree = $this->gettree($this->root, $this->treeDeep);
 		
-		foreach ($tree as $dir) {
-			if (!isset($result[$dir['hash']])) {
-				$result[$dir['hash']] = $dir;
+		// append tree if required
+		if ($tree) {
+			$tree = $this->gettree($this->root, $this->treeDeep);
+
+			foreach ($tree as $dir) {
+				if (!isset($files[$dir['hash']])) {
+					$files[$dir['hash']] = $dir;
+				}
 			}
 		}
-		return array_values($result);
+		// debug($mimes);
+		$files = $this->filter($files, $mimes);
+		return array_values($files);
 	}
 	
 	/**
@@ -555,44 +562,22 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function info($hash, $opts=array()) {
-		return ($path = $this->path($hash, '', 'read')) === false
-			? false
-			: $this->fileinfo($path, $opts);
-	}
-	
-	/**
-	 * Return directory content
-	 *
-	 * @param  string  $hash  file hash
-	 * @param  int     $sort  how to sort files
-	 * @param  array   $mimes mimetypes list to filter files
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function scandir($hash, $sort=1, $mimes=array()) {
-		if (($path = $this->path($hash, 'd', 'read')) === false) {
+	public function info($hash, $extended=false) {
+		
+		if (($path = $this->path($hash, '', 'read')) === false) {
 			return false;
 		}
+		$info = $this->fileinfo($path);
 		
-		if (($ls = $this->_scandir($path)) === false) {
-			return $this->setError('Unable to open folder');
+		if ($extended) {
+			$info['params'] = array_merge(array('tmbUrl' => $this->tmbURL),  $this->_params());
+			$info['url'] = $this->_path2url($path).($path == $this->root ? '' : '/');
+			// $info['tmbUrl'] = $this->tmbURL;
 		}
 		
-		$files = array();
-		foreach ($ls as $file) {
-			$files[] = $this->fileinfo($file);
-		}
-		
-		$files = $this->filter($files, $mimes);
-		
-		if ($sort < self::SORT_NAME_DIRS_FIRST || $sort > self::SORT_SIZE) {
-			$sort = self::SORT_NAME_DIRS_FIRST;
-		}
-		$this->sort = $sort;
-		usort($files, array($this, 'compare'));
-		return $files;
+		return $info;
 	}
+	
 	
 	/**
 	 * Return subdirectories info for required folder
@@ -662,7 +647,7 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function sync($hashes, $current='') {
+	public function sync($hashes, $current='', $mimes=array()) {
 		$result = array('removed' => array(), 'added' => array());
 		$exists = array();
 		$parents = array();
@@ -695,9 +680,12 @@ abstract class elFinderVolumeDriver {
 		foreach (array_unique($parents) as $path) {
 			$added = array_merge($added, array_diff($this->_scandir($path, self::FILTER_DIRS_ONLY), $exists));
 		}
+		
 		foreach (array_unique($added) as $path) {
 			$result['added'][] = $this->fileinfo($path);
 		}
+		
+		$result['added'] = array_values($this->filter($result['added'], $mimes));
 		
 		return $result;
 	}
@@ -1065,7 +1053,6 @@ abstract class elFinderVolumeDriver {
 	protected function path($hash, $type='', $perm="", $linkTarget = false) {
 		
 		if (!$hash || !($path = $this->decode($hash))) {
-			
 			return $this->setError($type == 'd' ? 'Folder not found' : 'File not found');
 		}
 
@@ -1111,6 +1098,7 @@ abstract class elFinderVolumeDriver {
 	protected function filter($files, $mimes=array()) {
 		if (!empty($mimes)) {
 			foreach ($files as $id => $file) {
+				// debug($file);
 				if ($file['mime'] != 'directory' && !$this->validMime($file['mime'], $mimes)) {
 					unset($files[$id]);
 				}
@@ -1128,19 +1116,18 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function validMime($mime, $mimes) {
-		return in_array($mime, $mimes) || in_array(substr($mime, 0, strpos('/', $mime)), $mimes);
+		return in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
 	}
 	
 	/**
 	 * Return file info
 	 *
 	 * @param  string  $path  file path
-	 * @param  bool    $phash  append parent hash to result? Requred to dicrease result json size.
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function fileinfo($path, $opts=array()) {
-		$opts = array_flip($opts);
+	protected function fileinfo($path) {
+		$root = $path == $this->root;
 		
 		if (!empty($this->cache['info'][$path])) {
 			return $this->cache['info'][$path];
@@ -1149,27 +1136,14 @@ abstract class elFinderVolumeDriver {
 		$info = array(
 			'name'  => htmlspecialchars($this->_basename($path)),
 			'hash'  => $this->encode($path),
+			'phash' => $root ? null : $this->encode($this->_dirname($path)),
 			'mime'  => $this->mimetype($path),
 			'read'  => (int)$this->_isReadable($path),
 			'write' => (int)$this->_isWritable($path),
 			'rm'    => (int)$this->_isRemovable($path),
-			// 'perms' => substr(sprintf('%o', fileperms($path)), -4),
-			'relpath' => $this->_relpath($path)
+			'rel'   => $root ? $this->rootName : DIRECTORY_SEPARATOR.$this->_relpath($path)
 		);
 		
-		
-		// if (isset($opts['phash'])) {
-			$info['phash'] = $path == $this->root ? null : $this->encode($this->_dirname($path));
-		// }
-		if (isset($opts['url'])) {
-			$info['url'] = $this->_path2url($path).($path == $this->root ? '' : '/');
-		}
-		// if (isset($opts['path'])) {
-			$info['path'] = $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->_relpath($path));
-		// }
-		if (isset($opts['params'])) {
-			$info['params'] = $this->_params();
-		}
 		
 		if ($info['read']) {
 			$time = $this->_filemtime($path);
@@ -1194,13 +1168,11 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			if ($info['mime'] == 'directory') {
-				// if (isset($opts['childs'])) {
-					$info['childs'] = (int)$this->_hasSubdirs($path);
-				// }
+				$info['childs'] = (int)$this->_hasSubdirs($path);
 			} elseif ($info['mime'] != 'symlink-broken') {
 				$info['size'] = $this->_filesize($path);
 				
-				if (($tmb = $this->tmbURL($path, $info['mime'])) != false) {
+				if (($tmb = $this->getTmb($path)) != false) {
 					$info['tmb'] = $tmb;
 				} elseif ($this->canCreateTmb($path, $info['mime'])) {
 					$info['tmb'] = 1;
@@ -1249,21 +1221,21 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return thumbnail url if thumbnail exists
+	 * Return thumnbnail name if exists
 	 *
 	 * @param  string  $path file path
-	 * @return string
+	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function tmbURL($path) {
+	protected function getTmb($path) {
 		if ($this->tmbURL) {
-			// do not create thumbnail for thumbnail
-			if (strpos($path, $this->tmbPath.DIRECTORY_SEPARATOR)) {
-				return $this->tmbURL.substr($path, strlen($this->tmbPath)+1);
+			// file itself thumnbnail
+			if ($this->_inpath($path, $this->tmbPath)) {
+				return $this->_basename($path);
 			}
 			$name = $this->tmbName($path);
-			if (file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$name)) {
-				return $this->tmbURL.$name;
+			if ($this->_tmbExists($name)) {
+				return $name;
 			}
 		}
 		return false;
@@ -1272,13 +1244,14 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return true if thumnbnail for required file can be created
 	 *
-	 * @param  string  $path  thumnbnail path
+	 * @param  string  $path  thumnbnail path 
 	 * @param  string  $mime  file mimetype
 	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function canCreateTmb($path, $mime) {
 		return $this->imgLib 
+			&& !$this->_inpath($path, $this->tmbPath)
 			&& $this->tmbURL
 			&& $this->tmbPathWritable 
 			&& strpos('image', $mime) == 0 
@@ -1674,6 +1647,15 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _isFile($path);
+	
+	/**
+	 * Returns TRUE if the thumbnail with given name exists
+	 *
+	 * @param  string  $name  thumbnail file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _tmbExists($name);
 	
 	/**
 	 * Returns TRUE if the filename exists and is a directory, FALSE otherwise.

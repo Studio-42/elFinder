@@ -4,6 +4,14 @@ $.fn.elfindercwd = function(fm) {
 	return this.each(function() {
 		var 
 			/**
+			 * Base thumbnails url
+			 * New API only
+			 *
+			 * @type String
+			 **/
+			tmbUrl = '',
+			
+			/**
 			 * File templates
 			 *
 			 * @type Object
@@ -44,8 +52,7 @@ $.fn.elfindercwd = function(fm) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 				},
 				style : function(f) {
-					// fm.log(f.tmb)
-					return typeof(f.tmb) == 'string' ? ' style="background:url(\''+f.tmb+'\') center center no-repeat"' : '';
+					return typeof(f.tmb) == 'string' ? ' style="background:url(\''+tmbUrl+f.tmb+'\') center center no-repeat"' : '';
 				}
 			},
 			
@@ -405,7 +412,8 @@ $.fn.elfindercwd = function(fm) {
 				.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'}));
 		
 
-		fm.bind('updateselected', function(e) {
+		fm
+		.bind('updateselected', function(e) {
 			var selected = [];
 			e.stopPropagation();
 			cwd.find('[id].ui-selected').each(function() {
@@ -416,6 +424,8 @@ $.fn.elfindercwd = function(fm) {
 		.bind('open', function(e) {
 			var list  = fm.view == 'list', 
 				phash = fm.cwd().hash;
+			
+			tmbUrl = fm.param('tmbUrl');
 			
 			cwd.empty()
 				.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
@@ -458,46 +468,40 @@ $.fn.elfindercwd = function(fm) {
 		// add new files
 		.bind('added', function(e) {
 			var phash   = fm.cwd().hash,
-				add     = $.map(e.data.added, function(f) { return f.phash == phash ? f : null}),
-				l       = add.length, f,
-				first   = cwd.find('[id]:first'),
+				l       = e.data.added.length, f,
 				tmbs    = [],
-				curr, next, node;
-				
-			top:
-			while (l--) {
-				f = add[l];
-				if (f.tmb) {
-					tmbs.push(f.hash);
-				}
-				node = $(item(f));
-				
-				if (!first.length) {
+				append  = function(f) {
+					var node = item(f),
+						i, first, curr;
+					
+					if ((first = cwd.find('[id]:first')).length) {
+						curr = first;
+						while (curr.length) {
+							if (compare(f, fm.file(curr.attr('id'))) < 0) {
+								return curr.before(node);
+							}
+							curr = curr.next('[id]');
+						}
+					} 
+					
+					if (buffer.length) {
+						for (i = 0; i < buffer.length; i++) {
+							if (compare(f, buffer[i]) < 0) {
+								return buffer.splice(i, 0, f);
+							}
+						}
+						return buffer.push(f);
+					}
+					
 					(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
-				} else {
-					// trying insert into cwd
-					curr = first;
-					while ((next = curr.next('[id]')).length) {
-						if (compare(f, fm.file(curr.attr('id'))) == -1) {
-							node.insertBefore(curr);
-							break top;
-						}
-						curr = next;
-					}
-					// trying find place in buffer
-					l = buffer.length;
-					while (l--) {
-						if (compare(f, buffer[l]) > 0) {
-							buffer = buffer.slice(0, l+1).concat([f]).concat(buffer.slice(l+1));
-							break top;
-						}
-					}
-					// insert after last node
-					node.insertAfter(curr);
+				};
+			
+			while (l--) {
+				f = e.data.added[l];
+				if (f.phash == phash && !cwd.find('#'+f.hash).length) {
+					append(f);
 				}
 			}
-			tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-				
 		})
 		// remove files
 		.bind('removed', function(e) {
