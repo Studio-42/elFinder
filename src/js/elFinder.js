@@ -370,12 +370,13 @@
 							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
 						}
 
-						// fire event with command name
-						self.trigger(cmd, data);
 						
 						// fire some event to update ui
-						data.removed && self.trigger('removed', data);
-						data.added   && self.trigger('added', data);
+						data.removed && data.removed.length && self.trigger('removed', data);
+						data.added   && data.added.length   && self.trigger('added', data);
+						
+						// fire event with command name
+						self.trigger(cmd, data);
 						
 						// update selected files
 						self.trigger('focus').trigger('updateSelected');
@@ -491,6 +492,12 @@
 			return cwd;
 		}
 		
+		/**
+		 * Return parameter value
+		 * 
+		 * @param  String  param name
+		 * @return mixed
+		 */
 		this.param = function(n) {
 
 			return params[n];
@@ -720,8 +727,14 @@
 			return this.deactivate().trigger('error', {error : 'Invalid configuration! You have to set URL option.'});
 		}
 		
-		this.open(this.lastDir(), true, true);
-
+		// this.open(this.lastDir(), true, true);
+		this.ajax({
+			cmd    : 'open',
+			target : this.lastDir() || '',
+			mimes  : this.options.onlyMimes || [],
+			init   : true,
+			tree   : !!this.options.allowNavbar
+		});
 
 	}
 	
@@ -906,7 +919,7 @@
 		 * @param  Boolean  send init flag? (for open dir only)
 		 * @return elFinder
 		 */
-		open : function(hash, tree, init) {
+		open : function(hash) {
 			var file  = this.file(hash), 
 				isdir = !file || file.mime == 'directory',
 				error;
@@ -918,23 +931,13 @@
 			
 			// change directory
 			if (isdir) {
-				data = {
+				return this.ajax({
 					cmd    : 'open',
 					target : hash || '',
 					mimes  : this.options.onlyMimes || []
-				};
-
-				if (tree && this.options.allowNavbar) {
-					data.tree = true;
-				}
-				if (init) {
-					data.init = true;
-				}
-
-				return this.ajax(data);
+				});
 			}
 			
-				
 			// open file in new window
 			if (this.cwd().url) {
 				// old api store url in file propery
@@ -967,7 +970,15 @@
 		 */
 		reload : function() {
 			this.buffer = {};
-			return this.open(this.cwd().hash, true);
+			
+			return this.newAPI 
+				? this.sync(false)
+				: this.ajax({
+					cmd    : 'open',
+					target : this.lastDir() || '',
+					mimes  : this.options.onlyMimes || [],
+					tree   : !!this.options.allowNavbar
+				});
 		},
 		
 		/**
