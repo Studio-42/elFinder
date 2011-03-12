@@ -572,7 +572,6 @@ abstract class elFinderVolumeDriver {
 		if ($extended) {
 			$info['params'] = array_merge(array('tmbUrl' => $this->tmbURL),  $this->_params());
 			$info['url'] = $this->_path2url($path).($path == $this->root ? '' : '/');
-			// $info['tmbUrl'] = $this->tmbURL;
 		}
 		
 		return $info;
@@ -630,7 +629,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->tmbURL) {
 			foreach ($files as $hash) {
 				if (($path = $this->path($hash, 'f', 'read')) !== false) {
-					if (($tmb = $this->tmbURL($path)) != false || ($tmb = $this->createTmb($path)) != false) {
+					if (($tmb = $this->gettmb($path)) != false || ($tmb = $this->createTmb($path)) != false) {
 						$images[$hash] = $tmb;
 					} 
 				}
@@ -1259,35 +1258,6 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return true if file can be resized by current driver
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function isResizable($path, $mime) {
-		return $this->imgLib 
-			&& strpos('image', $mime) == 0 
-			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
-	}
-	
-	/**
-	 * Return object width and height
-	 * Ususaly used for images, but can be realize for video etc...
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function dimensions($path, $mime) {
-		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
-			? $s[0].'x'.$s[1] 
-			: false;
-	}
-	
-	/**
 	 * Create thumnbnail and return it's URL on success
 	 *
 	 * @param  string  $path  file path
@@ -1300,8 +1270,8 @@ abstract class elFinderVolumeDriver {
 		if (!$this->canCreateTmb($path, $mime)) {
 			return false;
 		}
-
-		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
+		$name = $this->tmbName($path);
+		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
 		// copy image in tmbPath so some drivers does not store files on local fs
 		if (($src = $this->_fopen($path, 'rb')) == false 
 		|| ($trg = @fopen($tmb, 'wb')) == false) {
@@ -1375,7 +1345,7 @@ abstract class elFinderVolumeDriver {
 				break;
 		}
 		
-		return $result ? $this->tmbURL.basename($tmb) : false;
+		return $result ? $name : false;
 	}
 	
 	/**
@@ -1395,6 +1365,36 @@ abstract class elFinderVolumeDriver {
 		}
 		return array($x, $y, $size);
 	}
+	
+	/**
+	 * Return true if file can be resized by current driver
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function isResizable($path, $mime) {
+		return $this->imgLib 
+			&& strpos('image', $mime) == 0 
+			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
+	}
+	
+	/**
+	 * Return object width and height
+	 * Ususaly used for images, but can be realize for video etc...
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function dimensions($path, $mime) {
+		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
+			? $s[0].'x'.$s[1] 
+			: false;
+	}
+	
 	
 	
 	/**

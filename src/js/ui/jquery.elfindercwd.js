@@ -241,10 +241,9 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			scroll = function() {
 				var html = [],  
-					
 					tmbs = [],
-					dirs, 
-					files, i;
+					dirs = false, 
+					files;
 				
 				if (buffer.length) {
 					if (!scrollLock) {
@@ -252,16 +251,18 @@ $.fn.elfindercwd = function(fm) {
 						
 						while ((!last || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
 							&& (files = buffer.splice(0, fm.options.showFiles)).length) {
-							dirs = false;
 							
 							html = $.map(files, function(f) {
-								if (f.mime == 'directory') {
-									dirs = true;
+								if (f.hash && f.name) {
+									if (f.mime == 'directory') {
+										dirs = true;
+									}
+									if (f.tmb === 1) {
+										tmbs.push(f.hash)
+									}
+									return item(f);
 								}
-								if (f.tmb === 1) {
-									tmbs.push(f.hash)
-								}
-								return f.hash && f.name ? item(f) : null;
+								return null;
 							});
 
 							(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).append(html.join(''));
@@ -269,24 +270,22 @@ $.fn.elfindercwd = function(fm) {
 							last = cwd.find('[id]:last');
 							scrollTop && cwd.scrollTop(0);
 							
-							if (dirs) {
-								setTimeout(function() {
-									cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
-								}, 20);
-							}
-							
-							if (tmb || tmbs.length) {
-								fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-							} 
 						}
 						scrollLock = false;
+						if (dirs) {
+							setTimeout(function() {
+								cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+							}, 20);
+						}
+						if (tmbs.length || fm.cwd().tmb) {
+							fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+						} 
+						
 					}
 				} else {
 					cwd.unbind('scroll', scroll);
 				}
 			},
-			
-			
 			
 			/**
 			 * Draggable options
@@ -425,7 +424,7 @@ $.fn.elfindercwd = function(fm) {
 			var list  = fm.view == 'list', 
 				phash = fm.cwd().hash;
 			
-			tmbUrl = fm.param('tmbUrl');
+			tmbUrl = fm.param('tmbUrl')||'';
 			
 			cwd.empty()
 				.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
@@ -445,23 +444,22 @@ $.fn.elfindercwd = function(fm) {
 			scrollTop = false;
 		})
 		.bind('tmb', function(e) {
-			tmb = !!e.data.tmb;
 			
 			if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
 				$.each(e.data.images, function(hash, url) {
-					var node = cwd.find('#'+hash);
+					var node = cwd.find('#'+hash), ndx;
+
 					if (node.length) {
-						node.find('.elfinder-cwd-icon').css('background', "url('"+url+"') center center no-repeat");
+						node.find('.elfinder-cwd-icon').css('background', "url('"+tmbUrl+url+"') center center no-repeat");
 					} else {
 						e.data.tmb = false;
-						for (i = 0; i < buffer.length; i++) {
-							if (buffer[i].hash == hash) {
-								buffer[i].tmb = url;
-								break;
-							}
+						
+						if ((ndx = indexof(hash)) != -1) {
+							buffer[ndx].tmb = url;
 						}
 					}
 				});
+				// old api
 				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			}
 		})
@@ -500,8 +498,11 @@ $.fn.elfindercwd = function(fm) {
 				f = e.data.added[l];
 				if (f.phash == phash && !cwd.find('#'+f.hash).length) {
 					append(f);
+					f.tmb === 1 && tmbs.push(f.hash);
 				}
 			}
+			
+			tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
 		})
 		// remove files
 		.bind('removed', function(e) {

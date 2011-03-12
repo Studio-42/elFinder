@@ -107,7 +107,7 @@
 						tree.html(item(dirs, true));
 					} else {
 						for (i = 0; i < dirs.length; i++) {
-							html.push(item(dirs[i], root));
+							html.push(item(dirs[i]));
 						}
 						return ul + html.join('') + '</ul>';
 					}
@@ -221,16 +221,18 @@
 				 * @return void
 				 */
 				proccess = function(e) {
-					var src = fm.newAPI 
-							? $.map(e.data.files || e.data.tree || e.data.added || [], function(f) { return f.mime == 'directory' ? f : null })
-							: e.data.tree;
+					var d = false;
 					
-					(fm.oldAPI || e.data.api) && tree.empty();
-					fm.newAPI ? update(src, e.data.api) : create(src, true);
+					if (fm.newAPI) {
+						e.data.api && tree.empty();
+						update($.map(e.data.files || e.data.tree || e.data.added || [], function(f) { return f.mime == 'directory' ? f : null }), e.data.api);
+						d = true;
+					} else if (e.data.tree) {
+						create(e.data.tree, true);
+						d = true;
+					}
 					sync();
-					tree.find('a')
-						.not('.ui-droppable,.elfinder-na,.elfinder-ro')
-						.droppable(droppable);
+					d && tree.find('a').not('.ui-droppable,.elfinder-na,.elfinder-ro').droppable(droppable);
 				},
 				
 				/**
@@ -261,15 +263,6 @@
 				 * @type JQuery
 				 */
 				tree = $(this).addClass('elfinder-nav-tree')
-					.delegate('a', 'hover', function(e) {
-						var $this = $(this), 
-							enter = e.type == 'mouseenter';
-						
-						$this.toggleClass('ui-state-hover', enter);
-						if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
-							$this.draggable(draggable);
-						}
-					})
 					.delegate('a', 'click', function(e) {
 						var dir = $(this),
 							id  = this.id.substr(4);
@@ -324,6 +317,16 @@
 			fm.bind('load', function(e) {
 				if (fm.oldAPI) {
 					arrow = '<span class="elfinder-nav-collapsed '+loaded+'"/>' ;
+				} else {
+					tree.delegate('a', 'hover', function(e) {
+						var $this = $(this), 
+							enter = e.type == 'mouseenter';
+						
+						$this.toggleClass('ui-state-hover', enter);
+						if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
+							$this.draggable(draggable);
+						}
+					});
 				}
 			})
 				// update tree

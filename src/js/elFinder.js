@@ -586,8 +586,9 @@
 				coreParams = e.data.params;
 				
 				if (self.oldAPI) {
+					params = coreParams;
 					cwd.url = coreParams.url;
-					cwd.tmb = data.tmb;
+					
 				}
 				self.debug('api', self.api);
 			})
@@ -602,12 +603,14 @@
 				// join core and cwd params 
 				if (self.newAPI) {
 					params = $.extend({}, coreParams, e.data.cwd.params);
-				}
-
-				// old api: if we get tree - reset cache
-				if (this.oldAPI && e.data.tree) {
-					files = {};
-					cacheTree(e.data.tree);
+				} else {
+					
+					cwd.tmb = !!e.data.tmb;
+					// old api: if we get tree - reset cache
+					if (e.data.tree) {
+						files = {};
+						cacheTree(e.data.tree);
+					}
 				}
 				
 				// cache files
