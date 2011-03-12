@@ -157,12 +157,12 @@
 			 * @param  Object   dire tree
 			 * @return void
 			 **/
-			cacheTree = function(dir) {
+			cacheTree = function(dir, phash) {
 				var l = dir.dirs && dir.dirs.length ? dir.dirs.length : 0, 
 					d,
 					add = function(d) {
 						if (d.name && d.hash && !files[d.hash]) {
-							d = $.extend({mime : 'directory', rm : 1}, d);
+							d = $.extend({phash : phash, mime : 'directory', rm : 1}, d);
 							delete d.dirs;
 							files[d.hash] = d;
 						}
@@ -170,10 +170,10 @@
 					};
 
 				add(dir);
-
+				phash = dir.hash;
 				while (l--) {
 					d = dir.dirs[l];
-					d.dirs && d.dirs.length ? cacheTree(d) : add(d);
+					d.dirs && d.dirs.length ? cacheTree(d, phash) : add(d);
 				}
 				
 			},
@@ -324,8 +324,8 @@
 		 * @return elFinder
 		 */
 		this.ajax = function(opts, mode) {
-			var self = this,
-				cmd = opts.data ? opts.data.cmd : opts.cmd,
+			var self    = this,
+				cmd     = opts.data ? opts.data.cmd : opts.cmd,
 				options = {
 					url      : this.options.url,
 					async    : true,
@@ -392,6 +392,12 @@
 			return this;
 		};
 		
+		/**
+		 * Sync files with connector
+		 *
+		 * @param  Boolean  do it in background?
+		 * @return elFinder
+		 **/
 		this.sync = function(silent) {
 			var data = {
 				cmd     : 'sync',
@@ -600,11 +606,11 @@
 				// initial loading - fire event
 				!loaded && self.trigger('load', e.data);
 				
-				// join core and cwd params 
+				
 				if (self.newAPI) {
+					// join core and cwd params 
 					params = $.extend({}, coreParams, e.data.cwd.params);
-				} else {
-					
+				} else {					
 					cwd.tmb = !!e.data.tmb;
 					// old api: if we get tree - reset cache
 					if (e.data.tree) {
@@ -665,7 +671,6 @@
 			//  update files cache
 			.bind('added', function(e) {
 				update(e.data.added);
-				self.log(files)
 			})
 
 			;

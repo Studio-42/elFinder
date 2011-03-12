@@ -161,7 +161,13 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			
-
+			/**
+			 * Compare two files based on elFinder.sort
+			 *
+			 * @param Object  file
+			 * @param Object  file
+			 * @return Number
+			 */
 			compare = function(f1, f2) {
 				var m1 = f1.mime,
 					m2 = f2.mime,
@@ -208,6 +214,12 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			buffer = [],
 			
+			/**
+			 * Return index of elements with required hash in buffer 
+			 *
+			 * @param String  file hash
+			 * @return Number
+			 */
 			indexof = function(hash) {
 				var l = buffer.length;
 				
@@ -232,7 +244,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @type  Boolean
 			 */
 			scrollTop = false,
-			tmb = !!fm.cwd().tmb,
+
 			/**
 			 * Cwd scroll event handler.
 			 * Lazy load - append to cwd not shown files
@@ -336,7 +348,6 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Array
 			 **/
 			droppable = $.extend({}, fm.ui.droppable, {
-				
 				hoverClass : 'elfinder-dropable-active',
 				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
 				out        : function() { cwd.droppable('enable'); }
@@ -412,111 +423,113 @@ $.fn.elfindercwd = function(fm) {
 		
 
 		fm
-		.bind('updateselected', function(e) {
-			var selected = [];
-			e.stopPropagation();
-			cwd.find('[id].ui-selected').each(function() {
-				selected.push($(this).attr('id'));
-			})
-			fm.trigger('select', {selected : selected});
-		})
-		.bind('open', function(e) {
-			var list  = fm.view == 'list', 
-				phash = fm.cwd().hash;
 			
-			tmbUrl = fm.param('tmbUrl')||'';
-			
-			cwd.empty()
-				.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-				.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
-			
-			if (list) {
-				cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
-			}
-
-			buffer = fm.oldAPI
-				? e.data.cdc.slice(0)
-				: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
-			
-			buffer = buffer.sort(compare);
-			scrollTop = true;
-			cwd.bind('scroll', scroll).trigger('scroll');
-			scrollTop = false;
-		})
-		.bind('tmb', function(e) {
-			
-			if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
-				$.each(e.data.images, function(hash, url) {
-					var node = cwd.find('#'+hash), ndx;
-
-					if (node.length) {
-						node.find('.elfinder-cwd-icon').css('background', "url('"+tmbUrl+url+"') center center no-repeat");
-					} else {
-						e.data.tmb = false;
-						
-						if ((ndx = indexof(hash)) != -1) {
-							buffer[ndx].tmb = url;
-						}
-					}
+			.bind('updateselected', function(e) {
+				var selected = [];
+				e.stopPropagation();
+				cwd.find('[id].ui-selected').each(function() {
+					selected.push($(this).attr('id'));
 				});
-				// old api
-				e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
-			}
-		})
-		// add new files
-		.bind('added', function(e) {
-			var phash   = fm.cwd().hash,
-				l       = e.data.added.length, f,
-				tmbs    = [],
-				append  = function(f) {
-					var node = item(f),
-						i, first, curr;
-					
-					if ((first = cwd.find('[id]:first')).length) {
-						curr = first;
-						while (curr.length) {
-							if (compare(f, fm.file(curr.attr('id'))) < 0) {
-								return curr.before(node);
-							}
-							curr = curr.next('[id]');
-						}
-					} 
-					
-					if (buffer.length) {
-						for (i = 0; i < buffer.length; i++) {
-							if (compare(f, buffer[i]) < 0) {
-								return buffer.splice(i, 0, f);
-							}
-						}
-						return buffer.push(f);
-					}
-					
-					(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
-				};
+				fm.trigger('select', {selected : selected});
+			})
+			// update directory content
+			.bind('open', function(e) {
+				var list  = fm.view == 'list', 
+					phash = fm.cwd().hash;
 			
-			while (l--) {
-				f = e.data.added[l];
-				if (f.phash == phash && !cwd.find('#'+f.hash).length) {
-					append(f);
-					f.tmb === 1 && tmbs.push(f.hash);
+				tmbUrl = fm.param('tmbUrl')||'';
+			
+				cwd.empty()
+					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
+			
+				if (list) {
+					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}
-			}
-			
-			tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-		})
-		// remove files
-		.bind('removed', function(e) {
-			var rm = e.data.removed,
-				l = rm.length, n;
 
-			while (l--) {
-				if ((n = cwd.find('#'+rm[l])).length) {
-					n.remove();
-				} else if ((n = indexof(rm[l])) != -1) {
-					buffer.splice(n, 1);
+				buffer = fm.oldAPI
+					? e.data.cdc.slice(0)
+					: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
+			
+				buffer = buffer.sort(compare);
+				scrollTop = true;
+				cwd.bind('scroll', scroll).trigger('scroll');
+				scrollTop = false;
+			})
+			// add thumbnails
+			.bind('tmb', function(e) {
+				if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
+					$.each(e.data.images, function(hash, url) {
+						var node = cwd.find('#'+hash), ndx;
+
+						if (node.length) {
+							node.find('.elfinder-cwd-icon').css('background', "url('"+tmbUrl+url+"') center center no-repeat");
+						} else {
+							e.data.tmb = false;
+						
+							if ((ndx = indexof(hash)) != -1) {
+								buffer[ndx].tmb = url;
+							}
+						}
+					});
+					// old api
+					e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 				}
-			}
-		})
+			})
+			// add new files
+			.bind('added', function(e) {
+				var phash   = fm.cwd().hash,
+					l       = e.data.added.length, f,
+					tmbs    = [],
+					append  = function(f) {
+						var node = item(f),
+							i, first, curr;
+					
+						if ((first = cwd.find('[id]:first')).length) {
+							curr = first;
+							while (curr.length) {
+								if (compare(f, fm.file(curr.attr('id'))) < 0) {
+									return curr.before(node);
+								}
+								curr = curr.next('[id]');
+							}
+						} 
+					
+						if (buffer.length) {
+							for (i = 0; i < buffer.length; i++) {
+								if (compare(f, buffer[i]) < 0) {
+									return buffer.splice(i, 0, f);
+								}
+							}
+							return buffer.push(f);
+						}
+					
+						(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
+					};
+			
+				while (l--) {
+					f = e.data.added[l];
+					if (f.phash == phash && !cwd.find('#'+f.hash).length) {
+						append(f);
+						f.tmb === 1 && tmbs.push(f.hash);
+					}
+				}
+			
+				tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+			})
+			// remove files
+			.bind('removed', function(e) {
+				var rm = e.data.removed,
+					l = rm.length, n;
+
+				while (l--) {
+					if ((n = cwd.find('#'+rm[l])).length) {
+						n.remove();
+					} else if ((n = indexof(rm[l])) != -1) {
+						buffer.splice(n, 1);
+					}
+				}
+			})
 		
 		
 		.shortcut({

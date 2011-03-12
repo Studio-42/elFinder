@@ -263,6 +263,15 @@
 				 * @type JQuery
 				 */
 				tree = $(this).addClass('elfinder-nav-tree')
+					.delegate('a', 'hover', function(e) {
+						var $this = $(this), 
+							enter = e.type == 'mouseenter';
+						
+						$this.toggleClass('ui-state-hover', enter);
+						if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
+							$this.draggable(draggable);
+						}
+					})
 					.delegate('a', 'click', function(e) {
 						var dir = $(this),
 							id  = this.id.substr(4);
@@ -314,21 +323,12 @@
 					});
 			
 			// bind events
-			fm.bind('load', function(e) {
-				if (fm.oldAPI) {
-					arrow = '<span class="elfinder-nav-collapsed '+loaded+'"/>' ;
-				} else {
-					tree.delegate('a', 'hover', function(e) {
-						var $this = $(this), 
-							enter = e.type == 'mouseenter';
-						
-						$this.toggleClass('ui-state-hover', enter);
-						if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
-							$this.draggable(draggable);
-						}
-					});
-				}
-			})
+			fm
+				.bind('load', function(e) {
+					if (fm.oldAPI) {
+						arrow = '<span class="elfinder-nav-collapsed '+loaded+'"/>' ;
+					} 
+				})
 				// update tree
 				.bind('open', function(e) {
 					setTimeout(function() { proccess(e) }, 20)
