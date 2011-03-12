@@ -234,12 +234,6 @@
 		this.messages = this.i18[this.lang].messages;
 		
 		/**
-		 * History, contains hashs of last opened directories
-		 *
-		 * @type Array
-		 **/
-		this.history  = [];
-		/**
 		 * Buffer for copied files
 		 *
 		 * @type Object
@@ -705,6 +699,8 @@
 		
 		this.ui = new this.ui(this, $el);
 		this.ui.init();
+
+		this.history = new this.history(this);
 		
 		this
 			.one('ajaxerror error', function(e) {
@@ -971,6 +967,8 @@
 		reload : function() {
 			this.buffer = {};
 			
+			this.trigger('reload');
+			
 			return this.newAPI 
 				? this.sync(false)
 				: this.ajax({
@@ -987,11 +985,17 @@
 		 * @return elFinder
 		 */
 		back : function() {
-			if (this.history.length > 1) {
-				// drop current dir
-				this.history.pop();
-				this.open(this.history.pop());
-			}
+			this.history.back();
+			return this;
+		},
+		
+		/**
+		 * Go into previous folder
+		 * 
+		 * @return elFinder
+		 */
+		fwd : function() {
+			this.history.fwd();
 			return this;
 		},
 		
