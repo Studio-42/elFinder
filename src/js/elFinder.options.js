@@ -11,8 +11,7 @@ elFinder.prototype.options = {
 	lang           : 'en',
 	/* additional css class for filemanager container */
 	cssClass       : '',
-	/* characters number to wrap file name in icons view. set to 0 to disable wrap */
-	wrap           : 14,
+	blurClass : 'elfinder-blur',
 	/* Name for places/favorites (i18n), set to '' to disable places */
 	places         : 'Places',
 	/* show places before navigation? */
@@ -27,7 +26,7 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image"] - display all images
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
-	onlyMimes : ['image'],
+	onlyMimes : [],
 	
 	/**
 	 * How to sort files in current directory
@@ -59,6 +58,8 @@ elFinder.prototype.options = {
 	 */
 	alwaysOpenRoot : true,
 	
+	resizable : false,
+	
 	syncTree : true,
 	/* callback to get file url (for wswing editors) */
 	editorCallback : null,
@@ -71,9 +72,9 @@ elFinder.prototype.options = {
 	/* fm view (icons|list) */
 	view           : 'icons',
 	/* width to overwrite css options */
-	width          : '',
+	width          : 'auto',
 	/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-	height         : '',
+	height         : 300,
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
@@ -171,7 +172,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	// debug : false
-	debug : ['event-open', 'event-load', 'event-added', 'event-removed']
+	debug : ['event-copy', 'event-cut']
 }
 
 })(jQuery);

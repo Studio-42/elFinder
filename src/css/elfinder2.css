@@ -26,15 +26,25 @@
 .elfinder-rtl  { text-align:right; direction:rtl; }
 /* drag helper */
 .elfinder-drag-helper {
-	width:80px;
+	width:60px;
 	height:50px;
-/*	border:1px solid #111;*/
-	padding:0 0 0 37px;
+	border:1px solid #111;
+	padding:0 0 0 30px;
 	z-index:100000;
 }
 
-.elfinder-drag-helper-plus {
-	background:url('../images/toolbar.png') 0 -591px no-repeat;
+.elfinder-drag-helper-icon-plus {
+	position:absolute;
+	width:16px;
+	height:16px;
+	left:53px;
+	top:53px;
+	background:url('../images/toolbar.png') 0 -592px no-repeat;
+	display:none;
+}
+
+.elfinder-drag-helper-plus .elfinder-drag-helper-icon-plus {
+	display:block;
 }
 /* files num in drag helper */
 .elfinder-drag-num {
@@ -56,6 +66,8 @@
 	height:16px;
 	background:url(../images/spinner-mini.gif) 0 0 no-repeat;
 }
+
+.elfinder-blur { opacity: .6; filter:Alpha(Opacity=60); }
 
 /************************************/
 /*              TOOLBAR             */
@@ -128,10 +140,11 @@
 /************************************/
 /* nav and cwd container */
 .elfinder-workzone {
-	padding:2px 0;
+	padding: 0;
 	position:relative;
 	overflow:hidden;
-/*	border:2px solid red;*/
+/*	height:300px;*/
+/*	border:1px solid red;*/
 }
 
 .elfinder-spinner {
@@ -143,36 +156,65 @@
 	margin-top:-25px;
 	margin-left:-125px;
 	background:transparent url(../images/spinner.gif) 50% 50% no-repeat;
+/*	display:none;*/
+}
+
+
+/*.elfinder-error div { clear:both; }
+.elfinder-error .ui-icon-alert { float:left; margin:.2em; }
+.elfinder-error .ui-icon-close { float:right; margin:.2em; }
+*/
+.elfinder-error,
+.elfinder-notify-window {
+	position:absolute;
+	top:2px;
+	right:15px;
+	min-width:250px;
+	min-height:50px;
+	padding:5px;
+	overflow:hidden;
+	border:1px solid #ccc;
+	background:#eee;
+	font-size:.82em;
+	cursor:move;
 	display:none;
 }
 
 .elfinder-error {
-	position:absolute;
-	width:250px;
 	top:50%;
 	left:50%;
-	margin-top:-50px;
-	margin-left:-125px;
-	padding:.5em .5em 1em .5em;
-	font-size:.8em;
-	display:none;
+	margin-top:-30px;
+	margin-left:-175px;
+	width:350px;
 }
 
-.elfinder-error div { clear:both; }
-.elfinder-error .ui-icon-alert { float:left; margin:.2em; }
-.elfinder-error .ui-icon-close { float:right; margin:.2em; }
+.elfinder-error-title {
+	text-align:center;
+	font-weight:bold;
+}
 
-.elfinder-notify-window {
-	border:1px solid #ccc;
-	width:250px;
+.elfinder-error-msg {
+	text-align:center;
+	padding:1px 0 0 42px;
+}
+
+.elfinder-error-icon {
+	width:32px;
+	height:32px;
 	position:absolute;
-	top:2px;
-	right:15px;
-	min-height:50px;
-	display:none;
-	
-	background:#eee;
-	cursor:move;
+	top:50%;
+	margin-top:-16px;
+	left:10px;
+	background:url(../images/error.png) 0 0 no-repeat;
+}
+
+.elfinder-error-icon-close {
+	width:18px;
+	height:18px;
+	position:absolute;
+	top:5px;
+	right:5px;
+	cursor:default;
 }
 
 .elfinder-ntf {
@@ -202,21 +244,23 @@
 .elfinder-ntf-spinner {
 	margin-top:3px;
 	height:15px;
-	background:url(../images/spinner-ntf2.gif) center center no-repeat;
+	background:url(../images/spinner-ntf.gif) center center no-repeat;
 }
 /************************************/
 /*              NAVIGATION PANEL             */
 /************************************/
 /* navigation panel with dirs tree */
 .elfinder .elfinder-nav {
-	height:350px;
+/*	height:350px;*/
 	width:220px;
 	background-image:none;
-	padding:3px;
+	padding:2px 10px 2px 2px;
 	font-size:.72em;
 	overflow:auto;
 	position:relative;
 }
+
+.elfinder-nav .ui-resizable-e { right:0; }
 
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
 .elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
@@ -236,6 +280,7 @@
 	padding:3px 1px;
 	outline:0 solid;
 	margin: 0;
+	white-space:nowrap;
 }
 
 .elfinder-ltr .elfinder-nav a { padding-left:35px; }
@@ -307,8 +352,9 @@
 /*          CURRENT WORKING DIRECTORY            */
 /*************************************************/
 .elfinder-cwd { 
-	height: 356px;
-	padding: 0 3px;
+/*	height: 356px;*/
+	padding:2px;
+/*	padding: 0 3px;*/
 	overflow: auto;
 	position:relative;
 /*	border:1px solid #111;*/

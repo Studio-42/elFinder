@@ -87,6 +87,17 @@ elFinder.prototype.history = function(fm) {
 		.bind('reload', function() {
 			history = [];
 			current = void(0);
-		});
+		})
+		.shortcut({
+			pattern     : 'ctrl+arrowLeft',
+			description : 'Go back',
+			callback    : function() { self.back(); }
+		})
+		.shortcut({
+			pattern     : 'ctrl+arrowRight',
+			description : 'Go forward',
+			callback    : function() { self.fwd(); }
+		})
+		;
 	
 }

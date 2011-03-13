@@ -23,10 +23,14 @@
 	<script src="js/elFinder.js"               type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.ui.js"          type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.history.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/elFinder.command.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ui/error.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ui/spinner.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ui/overlay.js" type="text/javascript" charset="utf-8"></script>
 	
 	<script src="js/elFinder.options.js"       type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/jquery.elfindertree.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/jquery.elfindercwd.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ui/tree.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ui/cwd.js" type="text/javascript" charset="utf-8"></script>
 	
 	
 	
@@ -50,6 +54,7 @@
 	<script src="js/i18n/elfinder.zh_TW.js" type="text/javascript" charset="utf-8"></script>
 	-->
 	<style type="text/css">
+		
 		.button {
 			width: 100px;
 			position:relative;
@@ -75,14 +80,26 @@
 
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
-			var f = $('#finder').elfinder({
+			var f1 = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-				// url : 'connectors/elf-json2.json',
 				lang : 'ru'
-			})
+			}).elfinder('instance')
 
 			
 			
+			// setTimeout(function() {
+				// var f2 = $('#finder2').elfinder({
+				// 	url : 'connectors/php/connector.php',
+				// 	lang : 'ru',
+				// 	// allowNavbar : false
+				// }).elfinder('instance')
+			// }, 2000)
+			
+			// setTimeout(function() {
+				// console.log(f1.ui.fm.id)
+				// console.log(f2.ui.fm.id)
+			// 	
+			// }, 2000)
 		})
 	</script>
 
@@ -92,7 +109,8 @@
 	<!-- <div id="close"  class="button">close</div>
 	<div id="dock" class="button">dock</div>
 	<div id="undock" class="button">undock</div>-->
-	<div id="finder">finder</div> 
+	<div id="finder">finder</div>
+	<div id="finder2">finder</div> 
 	<input type="text" value="123" />
 	
 	

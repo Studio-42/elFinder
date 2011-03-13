@@ -1,11 +1,11 @@
-(function($) {
+
 	/**
 	 * @class elFinder ui - main controller to interact with user
 	 * Create filemanager view and ui-widgets.
 	 * Add some events handlers
 	 * 
 	 */
-	elFinder.prototype.ui = function(fm, el) {
+	elFinder.prototype._ui = function(fm, el) {
 		var self = this,
 			open = function() {
 				var s = fm.selected(), f, i;
@@ -53,7 +53,7 @@
 		 * 
 		 * @type  jQuery
 		 */
-		this.nav = $('<div class="ui-state-default elfinder-nav"/>').append(this.tree);
+		this.nav = $('<div class="ui-state-default elfinder-nav"/>')//.append(this.tree);
 
 		/**
 		 * Current working directory panel
@@ -205,7 +205,8 @@
 		this.init = function() {
 			// init dirs tree view and events
 			if (fm.options.allowNavbar) {
-				this.tree.elfindertree(this.fm);
+				// this.tree.elfindertree(this.fm).appendTo(this.nav);
+				this.tree.append('<li>wtf? '+this.fm.id+'</li>').elfindertree(this.fm).appendTo(this.nav)
 			} else {
 				this.nav.hide();
 			}
@@ -326,7 +327,7 @@
 
 	}
 	
-	elFinder.prototype.ui.prototype = {
+	elFinder.prototype._ui.prototype = {
 		
 		notifyMsgs : {
 			rm : {
@@ -551,4 +552,3 @@
 		
 	}
 	
-})(jQuery);

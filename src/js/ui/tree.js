@@ -1,8 +1,9 @@
-(function($) {
+// (function($) {
 	
 	$.fn.elfindertree = function(fm) {
-		
+
 		return this.each(function() {
+
 			var 
 				/**
 				 * Subtree class name
@@ -65,7 +66,7 @@
 				 *
 				 * @type String
 				 */
-				arrow     = '<span class="elfinder-nav-collapsed"/>' 
+				arrow     = '<span class="elfinder-nav-collapsed '+(fm.oldAPI ? loaded : '')+'"/>',
 				
 				/**
 				 * Return html for directory to insert in tree
@@ -75,7 +76,7 @@
 				 * @return String
 				 */
 				item = function(dir, isroot) {
-					var pclass = fm.ui.perms2class(dir),
+					var pclass = fm.perms2class(dir),
 						childs = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length;
 					
 					if (dir && dir.name) {
@@ -222,7 +223,7 @@
 				 */
 				proccess = function(e) {
 					var d = false;
-					
+
 					if (fm.newAPI) {
 						e.data.api && tree.empty();
 						update($.map(e.data.files || e.data.tree || e.data.added || [], function(f) { return f.mime == 'directory' ? f : null }), e.data.api);
@@ -240,7 +241,7 @@
 				 *
 				 * @type Object
 				 */
-				draggable = $.extend({}, fm.ui.draggable, {
+				draggable = $.extend({}, fm.draggable, {
 						helper : function() {
 							return $('<div class="elfinder-drag-helper"><div class="elfinder-cwd-icon elfinder-cwd-icon-directory ui-corner-all"/></div>')
 								.data('files', [this.id.substr(4)])
@@ -253,7 +254,7 @@
 				 *
 				 * @type Object
 				 */
-				droppable = $.extend({}, fm.ui.droppable, {
+				droppable = $.extend({}, fm.droppable, {
 					hoverClass : 'elfinder-droppable-active ui-state-hover'
 				}),
 				
@@ -322,16 +323,14 @@
 						}
 					});
 			
+			
 			// bind events
 			fm
-				.bind('load', function(e) {
-					if (fm.oldAPI) {
-						arrow = '<span class="elfinder-nav-collapsed '+loaded+'"/>' ;
-					} 
-				})
 				// update tree
 				.bind('open', function(e) {
-					setTimeout(function() { proccess(e) }, 20)
+
+					proccess(e)
+					// setTimeout(function() { proccess(e) }, 20)
 				})
 				.bind('tree parents added', proccess)
 				// remove dirs from tree
@@ -355,4 +354,4 @@
 			
 		});
 	}
-})(jQuery);
+// })(jQuery);

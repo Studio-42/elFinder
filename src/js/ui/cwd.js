@@ -1,4 +1,8 @@
-
+/**
+ * Current working directory.
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
@@ -28,25 +32,25 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			replace = {
 				permsclass : function(f) {
-					return fm.ui.perms2class(f);
+					return fm.perms2class(f);
 				},
 				perms : function(f) {
-					return fm.ui.formatPermissions(f);
+					return fm.formatPermissions(f);
 				},
 				dirclass : function(f) {
 					return f.mime == 'directory' ? 'directory' : '';
 				},
 				mime : function(f) {
-					return fm.ui.mime2class(f.mime);
+					return fm.mime2class(f.mime);
 				},
 				size : function(f) {
-					return fm.ui.formatSize(f.size);
+					return fm.formatSize(f.size);
 				},
 				date : function(f) {
-					return fm.ui.formatDate(f.date);
+					return fm.formatDate(f.date);
 				},
 				kind : function(f) {
-					return fm.ui.mime2kind(f.mime);
+					return fm.mime2kind(f.mime);
 				},
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
@@ -256,7 +260,7 @@ $.fn.elfindercwd = function(fm) {
 					tmbs = [],
 					dirs = false, 
 					files;
-				
+				// fm.log(fm.id)
 				if (buffer.length) {
 					if (!scrollLock) {
 						scrollLock = true;
@@ -304,18 +308,19 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type Array
 			 **/
-			draggable = $.extend({}, fm.ui.draggable, {
+			draggable = $.extend({}, fm.draggable, {
 				stop   : function(e) { 
-					cwd.selectable('enable');
+					cwd.selectable('enable').droppable('enable');
 					selectLock = false;
 				},
 				helper : function(e, ui) {
 					var element  = this.id ? $(this) : $(this).parents('[id]:first'),
-						helper   = $('<div class="elfinder-drag-helper"/>'),
+						helper   = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
 						selected = [],
-						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.ui.mime2class(mime)+' ui-corner-all"/>'; }, l;
+						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>'; }, l;
 
-					cwd.selectable('disable').removeClass('ui-state-disabled');
+					cwd.droppable('disable')
+					cwd.selectable('disable').droppable('disable').removeClass('ui-state-disabled');
 
 					// select dragged file if no selected
 					if (!element.is('.ui-selected')) {
@@ -333,7 +338,7 @@ $.fn.elfindercwd = function(fm) {
 						helper.append(icon(fm.file(selected[0]).mime))
 							.data({
 								files : selected,
-								src   : fm.cwd.hash
+								src   : fm.cwd().hash
 							});
 							
 						l > 1 && helper.append(icon(fm.file(selected[l-1]).mime)+'<span class="elfinder-drag-num">'+l+'</span>');
@@ -347,10 +352,10 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type Array
 			 **/
-			droppable = $.extend({}, fm.ui.droppable, {
+			droppable = $.extend({}, fm.droppable, {
 				hoverClass : 'elfinder-dropable-active',
 				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
-				out        : function() { cwd.droppable('enable'); }
+				// out        : function() { cwd.droppable('enable'); }
 			}),
 			
 			/**
@@ -413,13 +418,12 @@ $.fn.elfindercwd = function(fm) {
 				// make files selectable
 				.selectable({
 					filter     : '[id]',
-					delay      : 10,
 					stop       : function(e) { fm.trigger('updateselected'); },
-					selected   : function(e, ui) {  $(ui.selected).trigger('select.elfinder');	},
-					unselected : function(e, ui) {  $(ui.unselected).trigger('unselect.elfinder'); }
+					selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
+					unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
 				})
 				// make cwd itself droppable for folders from nav panel
-				.droppable($.extend({}, fm.ui.droppable, {accept : 'a[id]'}));
+				.droppable($.extend({}, fm.droppable));
 		
 
 		fm
@@ -455,6 +459,7 @@ $.fn.elfindercwd = function(fm) {
 				scrollTop = true;
 				cwd.bind('scroll', scroll).trigger('scroll');
 				scrollTop = false;
+
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {
@@ -587,6 +592,32 @@ $.fn.elfindercwd = function(fm) {
 			description : 'Append downside file to selected',
 			keypress    : keypress,
 			callback    : function() { select('down', true); }
+		})
+		.shortcut({
+			pattern     : 'ctrl+arrowUp',
+			description : 'Go into parent folder',
+			callback    : function() {
+				var hash = fm.cwd().phash;
+				hash && fm.open(hash);
+			}
+		})
+		.shortcut({
+			pattern     : 'ctrl+arrowDown',
+			description : 'Open directory or files',
+			callback    : function() {
+				$.each(fm.selected(), function(i, hash) {
+					fm.open(hash);
+				});
+			}
+		})
+		.shortcut({
+			pattern     : 'enter',
+			description : 'Open directory or files',
+			callback    : function() {
+				$.each(fm.selected(), function(i, hash) {
+					fm.open(hash);
+				});
+			}
 		})
 		;
 		
