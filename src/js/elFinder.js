@@ -343,7 +343,7 @@
 			var self    = this,
 				request = $.extend({}, this.options.customData || {}, opts.data || opts), 
 				cmd     = request.cmd,
-				mode    = /^bg|silent$/.test(mode) ? mode : 'blocked',
+				mode    = /^bg|silent$/.test(mode) ? mode : 'block',
 				options = {
 					url      : this.options.url,
 					async    : true,
@@ -368,7 +368,7 @@
 							default:
 								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend.' : 'Invalid backend response.';
 						}
-						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error, request : request});
+						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error, request : request, mode : mode});
 
 					},
 					success  : function(data) {
@@ -405,7 +405,7 @@
 				if (mode != 'silent' && cmd != 'open') {
 					self.trigger('before'+cmd, {request : request});
 				}
-				self.trigger('ajaxstart', {request : request, 'mode' : mode});
+				self.trigger('ajaxstart', {request : request, mode : mode});
 				opts.data && $.extend(options, opts);
 				$.ajax(options);
 			}
@@ -694,8 +694,11 @@
 
 			})
 			// disable/enable ajax on ajaxstart/ajaxstop events
-			.bind('ajaxstart ajaxstop', function(e) {
-				permissions.ajax = e.type == 'ajaxstop';
+			.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+				if (e.data.mode == 'block') {
+					permissions.ajax = e.type != 'ajaxstart';
+				}
+				
 			})
 			// enable shortcuts 
 			.bind('focus', function() {

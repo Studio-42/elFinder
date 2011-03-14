@@ -7,8 +7,8 @@ $.fn.elfinderoverlay = function(fm) {
 				e.stopPropagation();
 			});
 			
-		fm.bind('ajaxstart ajaxstop', function(e) {
-			e.data.mode == 'blocked' && o[e.type == 'ajaxstart' ? 'show' : 'hide']();
+		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+			e.data.mode == 'block' && o[e.type == 'ajaxstart' ? 'show' : 'hide']();
 		})
 	})
 }

@@ -164,88 +164,102 @@
 .elfinder-error .ui-icon-alert { float:left; margin:.2em; }
 .elfinder-error .ui-icon-close { float:right; margin:.2em; }
 */
-.elfinder-error,
-.elfinder-notify {
+
+.elfinder-dialog {
 	position:absolute;
-	top:2px;
-	right:15px;
-	min-width:250px;
-	min-height:50px;
-	padding:5px;
-	overflow:hidden;
-	border:1px solid #ccc;
-	background:#eee;
+	
+	width:290px;
+	height:auto;
+	padding:0;
+}
+
+.elfinder-dialog .ui-widget-header {
+	border-left:0 solid;
+	border-top:0 solid;
+	border-right:0 solid;
+	padding:2px 9px;
 	font-size:.82em;
+	position:relative;
+	background:url(../images/header.png) 0 center repeat-x;
 	cursor:move;
-/*	display:none;*/
 }
 
-.elfinder-error {
+.elfinder-dialog .ui-icon {
+	position:absolute;
+	right:.5em;
 	top:50%;
-	left:50%;
-	margin-top:-30px;
-	margin-left:-175px;
-	width:350px;
+	margin-top:-8px;
 }
 
-.elfinder-error-title {
-	text-align:center;
-	font-weight:bold;
+.elfinder-dialog .ui-widget-content {
+	border:0 solid;
+	background:#eee;
+	padding:.5em;
+	position:relative;
+	font-size:.76em;
 }
 
-.elfinder-error-msg {
-	text-align:center;
-	padding:1px 0 0 42px;
+.elfinder-dialog-text {
+	margin-left:42px;
 }
 
-.elfinder-error-icon {
+.elfinder-dialog-icon {
 	width:32px;
 	height:32px;
 	position:absolute;
-	top:50%;
-	margin-top:-16px;
-	left:10px;
-	background:url(../images/error.png) 0 0 no-repeat;
+	left:7px;
+	top:9px;
+	background:url(../images/dialogs.png) 0 0 no-repeat;
 }
 
-.elfinder-error-icon-close {
-	width:18px;
-	height:18px;
-	position:absolute;
-	top:5px;
-	right:5px;
-	cursor:default;
+.elfinder-dialog-buttonpane {
+	padding-top:3px;
 }
 
-.elfinder-ntf {
-	padding:5px 9px;
+.elfinder-dialog-button {
+	float:right;
+	border:1px solid #ccc;
+	padding:1px 5px;
+	background:url(../images/button.png) 0 50% repeat-x;
+	outline:0 solid;
+}
+
+.elfinder-dialog-button:hover {
+	background-image:url(../images/button-hover.png)
+}
+
+.elfinder-dialog-error {
+	top:30%;
+	left:50%;
+	margin-left:-145px;
+}
+
+.elfinder-dialog-notify {
+	top:1em;
+	right:1em;
+}
+
+.elfinder-notify-type {
 	text-align:center;
 }
 
-.elfinder-ntf-msg {
+.elfinder-notify-msg {
 	white-space:nowrap;
-	font-size:.72em;
 }
 
-.elfinder-ntf-icon {
-	position:absolute;
-	left:12px;
-	top:50%;
-	margin-top:-12px;
-	width:16px;
-	height:16px;
-	background:url(../images/toolbar.png) 16px 0 no-repeat;
-}
-
-.elfinder-ntf-rm     .elfinder-ntf-icon { background-position: 0 -257px;}
-.elfinder-ntf-mkdir  .elfinder-ntf-icon { background-position: 0 -200px; }
-.elfinder-ntf-mkfile .elfinder-ntf-icon { background-position: 0 -217px; }
-
-.elfinder-ntf-spinner {
-	margin-top:3px;
+.elfinder-notify-spinner {
+	margin:3px 0;
 	height:15px;
 	background:url(../images/spinner-ntf.gif) center center no-repeat;
 }
+
+.elfinder-notify-mkdir     .elfinder-dialog-icon { background-position: 0 -64px; }
+.elfinder-notify-mkfile    .elfinder-dialog-icon { background-position: 0 -96px; }
+.elfinder-notify-paste     .elfinder-dialog-icon,
+.elfinder-notify-diplicate .elfinder-dialog-icon { background-position: 0 -128px; }
+.elfinder-notify-upload    .elfinder-dialog-icon { background-position: 0 -160px; }
+.elfinder-notify-rm        .elfinder-dialog-icon { background-position: 0 -192px; }
+
 /************************************/
 /*              NAVIGATION PANEL             */
 /************************************/

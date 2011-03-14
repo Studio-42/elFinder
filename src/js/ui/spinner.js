@@ -10,7 +10,7 @@ $.fn.elfinderspinner = function(fm) {
 		var spinner = $(this).addClass('elfinder-spinner').hide();
 			
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
-			e.data.mode == 'blocked' && spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
+			e.data.mode == 'block' && spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 		})
 	});
 }

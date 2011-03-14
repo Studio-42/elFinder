@@ -8,13 +8,18 @@
 $.fn.elfindererror = function(fm) {
 
 	return this.each(function() {
-		var msg = $('<div class="elfinder-error-msg">asdsdfasfssssssssssssdd asdfasdfa </div>'),
-			win = $(this).addClass('ui-corner-all elfinder-error')
-				.append('<span class="elfinder-error-icon"/>')
-				.append($('<span class="ui-icon ui-icon-close elfinder-error-icon-close"/>').click(function() { win.hide(); }))
-				.append('<div class="elfinder-error-title">'+fm.i18n('Error')+'!</div>')
-				.append(msg)
-				.draggable();
+		var text   = 'elfinder-dialog-text',
+			close  = 'ui-icon-close',
+			button = 'elfinder-dialog-button',
+			win    = $(this).addClass('ui-helper-reset ui-widget ui-widget-content ui-corner-all elfinder-dialog elfinder-dialog-error')
+				.append('<div class="ui-widget-header ui-corner-top">'+fm.i18n('Error')+'<span class="ui-icon '+close+'"/></div><div class="ui-widget-content ui-corner-bottom ui-clearfix"><div class="'+text+'"/><span class="elfinder-dialog-icon elfinder-dialog-icon-error"/><div class="elfinder-dialog-buttonpane ui-helper-clearfix"><button class="ui-corner-all '+button+'">'+fm.i18n('Ok')+'</button></div></div>')
+				.draggable(),
+			msg = win.find('.'+text),
+			btn = win.find('.'+button);
+				
+		win.find('.'+close).add(btn).click(function() {
+			win.hide();
+		});
 				
 		fm.bind('error ajaxerror', function(e) {
 			var error = e.data.error||'', 
@@ -30,9 +35,7 @@ $.fn.elfindererror = function(fm) {
 			
 			msg.html(text);
 			win.show();
-			setTimeout(function() {
-				win.hide();
-			}, 4000);
+			btn.focus();
 		})
 		.bind('ajaxstart select', function() {
 			win.hide();
