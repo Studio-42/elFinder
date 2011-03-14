@@ -622,7 +622,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function paste($args) {
-		sleep(15);
+		sleep(5);
 		return array('error' => 'Not implemented');
 		$dst     = $args['dst'];
 		$targets = $args['targets'];

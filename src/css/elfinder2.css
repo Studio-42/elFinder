@@ -167,10 +167,11 @@
 
 .elfinder-dialog {
 	position:absolute;
-	
+	z-index:10000;
 	width:290px;
 	height:auto;
 	padding:0;
+	overflow:hidden;
 }
 
 .elfinder-dialog .ui-widget-header {
@@ -194,13 +195,14 @@
 .elfinder-dialog .ui-widget-content {
 	border:0 solid;
 	background:#eee;
-	padding:.5em;
+	padding:.7em .5em;
 	position:relative;
 	font-size:.76em;
 }
 
 .elfinder-dialog-text {
 	margin-left:42px;
+	padding:.4em 0;
 }
 
 .elfinder-dialog-icon {
@@ -213,13 +215,15 @@
 }
 
 .elfinder-dialog-buttonpane {
-	padding-top:3px;
+	padding-top:.5em;
+/*	border-top:1px solid #111;*/
 }
 
 .elfinder-dialog-button {
 	float:right;
 	border:1px solid #ccc;
 	padding:1px 5px;
+	margin: 0 0 0 5px;
 	background:url(../images/button.png) 0 50% repeat-x;
 	outline:0 solid;
 }
@@ -228,7 +232,8 @@
 	background-image:url(../images/button-hover.png)
 }
 
-.elfinder-dialog-error {
+.elfinder-dialog-error,
+.elfinder-dialog-confirm {
 	top:30%;
 	left:50%;
 	margin-left:-145px;
@@ -253,12 +258,19 @@
 	background:url(../images/spinner-ntf.gif) center center no-repeat;
 }
 
+.elfinder-dialog-confirm-applyall {
+	padding-top:3px;
+}
+
+.elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
 .elfinder-notify-mkdir     .elfinder-dialog-icon { background-position: 0 -64px; }
 .elfinder-notify-mkfile    .elfinder-dialog-icon { background-position: 0 -96px; }
 .elfinder-notify-paste     .elfinder-dialog-icon,
 .elfinder-notify-diplicate .elfinder-dialog-icon { background-position: 0 -128px; }
 .elfinder-notify-upload    .elfinder-dialog-icon { background-position: 0 -160px; }
 .elfinder-notify-rm        .elfinder-dialog-icon { background-position: 0 -192px; }
+
+
 
 /************************************/
 /*              NAVIGATION PANEL             */

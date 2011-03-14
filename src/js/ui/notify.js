@@ -42,7 +42,9 @@ $.fn.elfindernotify = function(fm) {
 				.append('<div class="ui-widget-header ui-corner-top">&nbsp;</div>')
 				.append(content)
 				.hide()
-				.draggable();
+				.bind('mouseenter', function() {
+					!win.is('.ui-draggable') && win.unbind('mouseenter').draggable();
+				});
 			
 		
 		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {

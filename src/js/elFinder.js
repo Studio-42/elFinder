@@ -99,8 +99,6 @@
 			
 			workzone = $('<div class="ui-helper-clearfix ui-corner-all elfinder-workzone"/>'),
 			
-			overlay = $('<div/>'),
-			
 			nav = $('<div class="ui-state-default elfinder-nav"/>'),
 			
 			dir = $('<div/>'),
@@ -607,13 +605,17 @@
 		
 		this.droppable = {
 				tolerance : 'pointer',
+				// accept : 'a',
 				drop : function(e, ui) {
 					var $this = $(this), 
 						src   = ui.helper.data('src'),
-						files = ui.helper.data('files'),
+						files = ui.helper.data('files')||[],
 						l = files.length,
 						dst;
 					
+					if (!l) {
+						return;
+					}
 					self.cleanBuffer();
 					// self.log(this)
 					if ($this.is('.elfinder-cwd')) {
@@ -655,13 +657,18 @@
 			.html('')
 			.removeAttr('style')
 			.removeAttr('class')
+
 			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+(this.options.cssClass||''))
+			
 			.append(workzone)
-			.append(overlay.elfinderoverlay(this))
+			.append($('<div/>').elfinderoverlay(this))
 			.append($('<div/>').elfinderspinner(this))
 			.append($('<div/>').elfindererror(this))
 			.append($('<div/>').elfindernotify(this))
+			.append($('<div/>').elfinderconfirm(this))
 			.append(statusbar.hide())
+		
+		// $('body').append($('<div/>').elfindererror(this))
 			
 		this.node[0].elfinder = this
 		width  = self.options.width || 'auto'; 
@@ -698,7 +705,6 @@
 				if (e.data.mode == 'block') {
 					permissions.ajax = e.type != 'ajaxstart';
 				}
-				
 			})
 			// enable shortcuts 
 			.bind('focus', function() {
@@ -714,6 +720,9 @@
 					permissions.shortcuts = false;
 					self.node.addClass(self.options.blurClass)
 				}
+			})
+			.bind('uilock uiunlock', function(e) {
+				permissions.shortcuts = e.type == 'uiunlock';
 			})
 			// cache selected files hashes
 			.bind('select', function(e) {
@@ -830,6 +839,16 @@
 			})
 
 			;
+		
+		this.shortcut({
+				pattern     : 'ctrl+backspace',
+				description : 'Delete files',
+				callback    : function() { 
+					self.trigger('confirm', {title : 'Delete', text : 'Do you want to delete files', cb : function(result, all) {
+						self.log(result).log(all)
+					}})
+				}
+		})
 			
 		if (this.oldAPI) {
 			this.bind('open', function() {

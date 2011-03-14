@@ -13,7 +13,10 @@ $.fn.elfindererror = function(fm) {
 			button = 'elfinder-dialog-button',
 			win    = $(this).addClass('ui-helper-reset ui-widget ui-widget-content ui-corner-all elfinder-dialog elfinder-dialog-error')
 				.append('<div class="ui-widget-header ui-corner-top">'+fm.i18n('Error')+'<span class="ui-icon '+close+'"/></div><div class="ui-widget-content ui-corner-bottom ui-clearfix"><div class="'+text+'"/><span class="elfinder-dialog-icon elfinder-dialog-icon-error"/><div class="elfinder-dialog-buttonpane ui-helper-clearfix"><button class="ui-corner-all '+button+'">'+fm.i18n('Ok')+'</button></div></div>')
-				.draggable(),
+				.hide()
+				.bind('mouseenter', function() {
+					!win.is('.ui-draggable') && win.unbind('mouseenter').draggable();
+				}),
 			msg = win.find('.'+text),
 			btn = win.find('.'+button);
 				
@@ -34,11 +37,16 @@ $.fn.elfindererror = function(fm) {
 			}
 			
 			msg.html(text);
-			win.show();
+			
+			// win.css('top', '100px')
+			win.css({
+				top : '30%',
+				left : '50%'
+			}).show();
 			btn.focus();
 		})
-		.bind('ajaxstart select', function() {
-			win.hide();
+		.bind('ajaxstart select2', function() {
+			// win.hide();
 		})
 	});
 }
