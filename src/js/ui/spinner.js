@@ -9,11 +9,8 @@ $.fn.elfinderspinner = function(fm) {
 	return this.each(function() {
 		var spinner = $(this).addClass('elfinder-spinner').hide();
 			
-		fm.bind('ajaxstart', function() {
-			spinner.show();
+		fm.bind('ajaxstart ajaxstop ajaxerror', function(e) {
+			e.data.mode == 'blocked' && spinner[e.type == 'ajaxstart' ? 'show' : 'hide']();
 		})
-		.bind('ajaxstop ajaxerror', function() {
-			spinner.hide();
-		});
 	});
 }

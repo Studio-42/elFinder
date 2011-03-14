@@ -341,14 +341,16 @@
 		 */
 		this.ajax = function(opts, mode) {
 			var self    = this,
-				cmd     = opts.data ? opts.data.cmd : opts.cmd,
+				request = $.extend({}, this.options.customData || {}, opts.data || opts), 
+				cmd     = request.cmd,
+				mode    = /^bg|silent$/.test(mode) ? mode : 'blocked',
 				options = {
 					url      : this.options.url,
 					async    : true,
 					type     : 'get',
 					dataType : 'json',
 					cache    : false,
-					data     : $.extend({}, this.options.customData || {}, opts.data || opts),
+					data     : request,
 					// timeout  : 100,
 					error    : function(xhr, status) { 
 						var error;
@@ -366,13 +368,13 @@
 							default:
 								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend.' : 'Invalid backend response.';
 						}
-						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error});
+						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error, request : request});
 
 					},
 					success  : function(data) {
-						var e, error;
+						var error;
 						
-						!mode && self.trigger('ajaxstop', data);
+						self.trigger('ajaxstop', {request : request, response : data, mode : mode});
 
 						if (!data) {
 							error = 'Invalid backend response';
@@ -383,10 +385,9 @@
 						}
 
 						if (error) {
-							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error});
+							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : data, request : request});
 						}
 
-						
 						// fire some event to update ui
 						data.removed && data.removed.length && self.trigger('removed', data);
 						data.added   && data.added.length   && self.trigger('added', data);
@@ -395,14 +396,17 @@
 						self.trigger(cmd, data);
 						
 						// update selected files
-						self.trigger('focus').trigger('updateSelected');
+						self.trigger('updateSelected');
 					}
 				};
 				
-			opts.data && $.extend(options, opts)
-
+			// ajax allowed - fire events and send request
 			if (permissions.ajax) {
-				!mode && self.trigger('ajaxstart', options);
+				if (mode != 'silent' && cmd != 'open') {
+					self.trigger('before'+cmd, {request : request});
+				}
+				self.trigger('ajaxstart', {request : request, 'mode' : mode});
+				opts.data && $.extend(options, opts);
 				$.ajax(options);
 			}
 			
@@ -656,6 +660,7 @@
 			.append(overlay.elfinderoverlay(this))
 			.append($('<div/>').elfinderspinner(this))
 			.append($('<div/>').elfindererror(this))
+			.append($('<div/>').elfindernotify(this))
 			.append(statusbar.hide())
 			
 		this.node[0].elfinder = this
@@ -680,7 +685,9 @@
 		
 		this
 			.one('ajaxstop', function(e) {
-				self.api    = parseFloat(e.data.api) || 1;
+				var data = e.data.response;
+
+				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
 				self.newAPI = self.api > 1;
 				self.oldAPI = !self.newAPI;
 				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
@@ -721,7 +728,7 @@
 			.bind('open', function(e) {
 				// set current directory data
 				cwd = e.data.cwd;
-				
+
 				// initial loading
 				if (!loaded) {
 					// remove disabled commands
@@ -744,7 +751,7 @@
 						workzone.append(nav)
 						nav.append($('<ul/>').elfindertree(self))
 					}
-
+					
 					workzone.append(dir.elfindercwd(self));
 					self.resize(width, height);
 					self.debug('api', self.api);
@@ -762,19 +769,18 @@
 				}
 				
 				// cache files
-				cache(self.newAPI ? e.data.files : e.data.cdc, true);
+				cache(e.data.files || e.data.cdc, true);
 
 				// remember last dir
 				self.lastDir(cwd.hash);
 
 				// initial loading - fire event
-				!loaded && self.trigger('load', e.data);
 				if (!loaded) {
-					loaded = true;
 					// fire event
 					self.trigger('load', e.data);
 					// remove "load" event listeners
 					delete listeners.load;
+					loaded = true;
 				}
 
 			})
@@ -859,6 +865,7 @@
 		this.history = new this.history(this);
 		
 		this
+			.trigger('focus')
 			.one('ajaxerror error', function(e) {
 				// fm not correctly loaded
 				if (!loaded) {
@@ -1246,13 +1253,13 @@
 		 * @return elFinder
 		 */
 		paste : function(dst) {
-			var cwd = this.cwd().hash,
-				dst = dst || cwd,
-				b = this.buffer,
-				hash, l = b.files.length,
-				file,
+			var cwd   = this.cwd().hash,
+				dst   = dst || cwd,
+				b     = this.buffer,
+				l     = b.files.length,
 				paste = [],
-				duplicate = [];
+				dpl   = [], 
+				file, hash;
 
 			while (l--) {
 				hash = b.files[l];
@@ -1260,7 +1267,7 @@
 				
 				if (file && !this.hasParent(dst, hash)) {
 					if (file.phash == dst) {
-						duplicate.push(hash)
+						dpl.push(hash)
 					} else {
 						paste.push(hash);
 					}
@@ -1278,9 +1285,9 @@
 				}, 'bg');
 			}
 			
-			this.log(paste).log(duplicate)
-			if (duplicate.length) {
-				this.duplicate(duplicate);
+			this.log(paste).log(dpl)
+			if (dpl.length) {
+				this.duplicate(dpl);
 			}
 			b.cut && this.cleanBuffer();
 			return this;

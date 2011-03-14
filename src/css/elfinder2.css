@@ -165,7 +165,7 @@
 .elfinder-error .ui-icon-close { float:right; margin:.2em; }
 */
 .elfinder-error,
-.elfinder-notify-window {
+.elfinder-notify {
 	position:absolute;
 	top:2px;
 	right:15px;
@@ -177,7 +177,7 @@
 	background:#eee;
 	font-size:.82em;
 	cursor:move;
-	display:none;
+/*	display:none;*/
 }
 
 .elfinder-error {

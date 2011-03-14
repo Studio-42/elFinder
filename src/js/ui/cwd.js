@@ -319,7 +319,6 @@ $.fn.elfindercwd = function(fm) {
 						selected = [],
 						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>'; }, l;
 
-					cwd.droppable('disable')
 					cwd.selectable('disable').droppable('disable').removeClass('ui-state-disabled');
 
 					// select dragged file if no selected
@@ -534,6 +533,12 @@ $.fn.elfindercwd = function(fm) {
 						buffer.splice(n, 1);
 					}
 				}
+			})
+			.bind('cut', function(e) {
+				// disable draggable for selected
+			})
+			.bind('error', function(e) {
+				// remove disabled class
 			})
 		
 		
