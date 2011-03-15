@@ -8,6 +8,25 @@
 $.fn.elfindererror = function(fm) {
 
 	return this.each(function() {
+		var message = $('<div class="elfinder-dialog-text"/>'),
+			dialog = $(this).append(message).elfinderdialog(fm, {
+				title : 'Error',
+				dialogClass : 'elfinder-dialog-error',
+				buttons : {
+					Ok : function() { fm.log(this)}
+				}
+			});
+			
+		fm.log(dialog)
+			
+		fm.bind('ajaxerror error', function(e) {
+			message.text('error')
+			dialog.elfinderdialog('open')
+		})
+	})
+
+
+	return this.each(function() {
 		var text   = 'elfinder-dialog-text',
 			close  = 'ui-icon-close',
 			button = 'elfinder-dialog-button',
