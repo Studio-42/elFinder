@@ -6,6 +6,7 @@
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
+		// fm.log(fm.id)
 		var 
 			/**
 			 * Base thumbnails url
@@ -260,7 +261,7 @@ $.fn.elfindercwd = function(fm) {
 					tmbs = [],
 					dirs = false, 
 					files;
-				// fm.log(fm.id)
+				
 				if (buffer.length) {
 					if (!scrollLock) {
 						scrollLock = true;
@@ -288,14 +289,14 @@ $.fn.elfindercwd = function(fm) {
 							
 						}
 						scrollLock = false;
-						if (dirs) {
-							setTimeout(function() {
-								cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
-							}, 20);
-						}
-						if (tmbs.length || fm.cwd().tmb) {
-							fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-						} 
+						// if (dirs) {
+						// 	setTimeout(function() {
+						// 		cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+						// 	}, 20);
+						// }
+						// if (tmbs.length || fm.cwd().tmb) {
+						// 	fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+						// } 
 						
 					}
 				} else {
@@ -438,8 +439,8 @@ $.fn.elfindercwd = function(fm) {
 			// update directory content
 			.bind('open', function(e) {
 				var list  = fm.view == 'list', 
-					phash = fm.cwd().hash;
-			
+					phash = e.data.cwd.hash; 
+				
 				tmbUrl = fm.param('tmbUrl')||'';
 			
 				cwd.empty()
@@ -451,14 +452,13 @@ $.fn.elfindercwd = function(fm) {
 				}
 
 				buffer = fm.oldAPI
-					? e.data.cdc.slice(0)
+					? e.data.cdc
 					: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
-			
+					
 				buffer = buffer.sort(compare);
 				scrollTop = true;
 				cwd.bind('scroll', scroll).trigger('scroll');
 				scrollTop = false;
-
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {
@@ -540,9 +540,9 @@ $.fn.elfindercwd = function(fm) {
 			.bind('error', function(e) {
 				// remove disabled class
 			})
+		return
 		
-		
-		.shortcut({
+		fm.shortcut({
 			pattern     :'ctrl+a', 
 			description : 'Select all files',
 			callback    : function() { 

@@ -1,9 +1,8 @@
 (function($) {
 
 	elFinder = function(node, opts) {
+		
 		var self = this,
-			
-			node = $(node),
 			/**
 			 * Flag to not fire "load" event twice
 			 *
@@ -12,15 +11,41 @@
 			loaded = false,
 			
 			/**
-			 * Permissions to exec ajax requests and build-in shortcuts
+			 * Is shortcuts/commands enabled
 			 *
-			 * @type Object
+			 * @type Boolean
 			 **/
-			permissions = {
-				ajax : true,
-				shortcuts : true,
-				blur : true
-			},
+			enabled = false,
+			
+			/**
+			 * On click inside elFinder we set this flag to false so when event bubbled to document no blur fired
+			 *
+			 * @type Boolean
+			 **/
+			blur = true,
+			
+			/**
+			 * Store enabled value before ajax requiest
+			 *
+			 * @type Boolean
+			 **/
+			prevEnabled = false,
+			
+			/**
+			 * Is ajax requiest allowed.
+			 * "sync" requiest blocked othe requests until complete
+			 *
+			 * @type Boolean
+			 **/
+			ajax = true,
+			
+			/**
+			 * Some ajax requests and every modal dialog required to show overlay,
+			 * so we count it to not enable shortcuts until any requests complete and any dialogs closed
+			 *
+			 * @type Number
+			 **/
+			overlayCnt = 0,
 			
 			/**
 			 * Rules for ajax data validate
@@ -97,17 +122,74 @@
 				
 			},
 			
+			node = $(node),
+			
+			prevContent = $('<div/>'),
+			
 			workzone = $('<div class="ui-helper-clearfix ui-corner-all elfinder-workzone"/>'),
 			
-			nav = $('<div class="ui-state-default elfinder-nav"/>'),
+			nav = $('<div class="ui-state-default elfinder-nav"/>').hide().appendTo(workzone),
 			
-			dir = $('<div/>'),
+			dir = $('<div/>').appendTo(workzone),
 			
-			toolbar = $('<ul/>'),
+			toolbar = $('<ul class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar"/>').hide(),
 			
-			statusbar = $('<div>'),
+			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
+			
+			overlay = $('<div class="ui-widget-overlay elfinder-overlay"/>')
+				.hide()
+				.mousedown(function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+				}),
+			
+			spinner = $('<div class="elfinder-spinner"/>').hide(),
+			
+			
 			
 			width, height,
+			
+			/**
+			 * Increase overlayCnt and show overlay
+			 *
+			 * @return void
+			 */
+			showOverlay = function() {
+				overlayCnt++;
+				if (overlay.is(':hidden')) {
+					overlay.css('zIndex', 1 + overlay.zIndex()).show();
+				}
+			},
+			
+			/**
+			 * Decrease overlayCnt and if its == 0 hide overlay
+			 *
+			 * @return void
+			 */
+			hideOverlay = function() {
+				if (--overlayCnt == 0) {
+					overlay.hide();
+				}
+			},
+			
+			/**
+			 * Show spinner above overlay
+			 *
+			 * @return void
+			 */
+			showSpinner = function() {
+				spinner.css('zIndex', 1 + overlay.css('zIndex')).show();
+			},
+			
+			/**
+			 * Hide spinner
+			 *
+			 * @return void
+			 */
+			hideSpinner = function() {
+				spinner.hide();
+			},
+			
 			/**
 			 * Valid data for command based on rules
 			 *
@@ -140,7 +222,8 @@
 			 **/
 			cache = function(data, clear) {
 				var l = data.length, f, i;
-
+				
+				// remove only files does not belongs current dir
 				if (clear) {
 					cwd.size  = 0;
 					cwd.files = 0;
@@ -171,11 +254,13 @@
 			 * @return void
 			 **/
 			cacheTree = function(dir, phash) {
-				var l = dir.dirs && dir.dirs.length ? dir.dirs.length : 0, 
-					d,
+				var childs = dir.dirs || [],
+					l = childs.length, 
 					add = function(d) {
 						if (d.name && d.hash && !files[d.hash]) {
-							d = $.extend({phash : phash, mime : 'directory', rm : 1}, d);
+							d.phash = phash;
+							d.mime  = 'directory';
+							d.rm    = 1;
 							delete d.dirs;
 							files[d.hash] = d;
 						}
@@ -183,16 +268,37 @@
 
 				add(dir);
 				phash = dir.hash; 
+				
 				while (l--) {
-					d = dir.dirs[l];
-					d.dirs && d.dirs.length ? cacheTree(d, phash) : add(d);
-					if (!cwd.phash && d.hash == cwd.hash) {
+					dir = childs[l];
+					dir.dirs && dir.dirs.length ? cacheTree(ddir, phash) : add(dir);
+					if (!cwd.phash && dir.hash == cwd.hash) {
 						cwd.phash = phash;
 					}
-					
 				}
+			},
+			
+			/**
+			 * Send init ajax request
+			 *
+			 * @return void
+			 */
+			start = function() {
+				// focus current instances and blur other elFinder instances if exists
+				self.node.mousedown();
+
+				self.ajax({
+						cmd    : 'open',
+						target : self.lastDir() || '',
+						mimes  : self.options.onlyMimes || [],
+						init   : true,
+						tree   : !!self.options.allowNavbar
+					});
 				
-			};
+			},
+			sInterval = null;
+
+
 
 		/**
 		 * Application version
@@ -275,42 +381,42 @@
 		this.sort = this.sortType();
 		
 		/**
-		 * Enable ajax requests and shortcuts.
-		 * Take effect only if fm loaded correctly.
-		 *
-		 * @return elFinder
-		 **/
-		this.activate = function() {
-			if (loaded) {
-				permissions = {
-					ajax : true,
-					shortcuts : true
-				}
-			}
-			return this;
-		}
-		
-		/**
-		 * Disable ajax requests and shortcuts.
-		 *
-		 * @return elFinder
-		 **/
-		this.deactivate = function() {
-			permissions = {
-				ajax : false,
-				shortcuts : false
-			}
-			return this;
-		}
-		
-		/**
-		 * Return true if build-in shortcuts enabled.
+		 * Return true if filemanager is visible
 		 *
 		 * @return Boolean
 		 **/
-		this.active = function() {
-			return permissions.shortcuts;
+		this.isVisible = function() {
+			return this.node.is(':visible');
 		}
+		
+		/**
+		 * Return true if filemanager is active
+		 *
+		 * @return Boolean
+		 **/
+		this.isEnabled = function() {
+			return this.isVisible() && enabled;
+		}
+		
+		/**
+		 * Make filemanager active
+		 *
+		 * @return elFinder
+		 **/
+		this.enable = function() {
+			return this.trigger('focus');
+		}
+		
+		/**
+		 * Make filemanager not active
+		 *
+		 * @return elFinder
+		 **/
+		this.disable = function() {
+			return this.trigger('blur');
+		}
+		
+		
 		
 		/**
 		 * Return selected files hashes
@@ -334,14 +440,17 @@
 		 * Proccess ajax request
 		 *
 		 * @param  Object  data to send to connector or options for ajax request
-		 * @param  String  mode. "bg" - do not fired "ajaxstart/ajaxstop", show errors, "silent" - do not fired "ajaxstart/ajaxstop", errors - to debug
+		 * @param  String  request mode. 
+		 * 		"sync"   - does not create real sync request, only block other elFinder requests until end
+		 * 		"bg"     - do not block other requests, on error - show message
+		 * 		"silent" - do not block other requests, send error message to debug
 		 * @return elFinder
 		 */
 		this.ajax = function(opts, mode) {
 			var self    = this,
 				request = $.extend({}, this.options.customData || {}, opts.data || opts), 
 				cmd     = request.cmd,
-				mode    = /^bg|silent$/.test(mode) ? mode : 'block',
+				mode    = /^sync|bg|silent$/.test(mode) ? mode : 'sync',
 				options = {
 					url      : this.options.url,
 					async    : true,
@@ -399,10 +508,7 @@
 				};
 				
 			// ajax allowed - fire events and send request
-			if (permissions.ajax) {
-				if (mode != 'silent' && cmd != 'open') {
-					self.trigger('before'+cmd, {request : request});
-				}
+			if (ajax && this.isVisible()) {
 				self.trigger('ajaxstart', {request : request, mode : mode});
 				opts.data && $.extend(options, opts);
 				$.ajax(options);
@@ -440,19 +546,20 @@
 		 * @param  Object  event handler
 		 * @return elFinder
 		 */
-		this.bind = function(e, c) {
-			var e, i;
+		this.bind = function(event, callback) {
+			var i;
 			
-			if (typeof(c) == 'function') {
-				e = ('' + e).toLowerCase().split(/\s+/)
-				for (i = 0; i < e.length; i++) {
-					if (listeners[e[i]] === void(0)) {
-						if (e[i] == 'load') {
+			if (typeof(callback) == 'function') {
+				event = ('' + event).toLowerCase().split(/\s+/);
+				
+				for (i = 0; i < event.length; i++) {
+					if (listeners[event[i]] === void(0)) {
+						if (event[i] == 'load') {
 							continue;
 						}
-						listeners[e[i]] = [];
+						listeners[event[i]] = [];
 					}
-					listeners[e[i]].push(c);
+					listeners[event[i]].push(callback);
 				}
 			}
 			return this;
@@ -465,9 +572,10 @@
 		 * @param  Function  callback
 		 * @return elFinder
 		 */
-		this.unbind = function(e, c) {
-			var l = listeners[('' + e).toLowerCase()] || [],
-				i = l.indexOf(c);
+		this.unbind = function(event, callback) {
+			var event = ('' + event).toLowerCase(),
+				l = listeners[event] || [],
+				i = l.indexOf(callback);
 
 			i > -1 && l.splice(i, 1);
 			return this;
@@ -476,30 +584,35 @@
 		/**
 		 * Send notification to all event listeners
 		 *
-		 * @param  jQuery.Event|String  event or event type
-		 * @param  Object        extra parameters
+		 * @param  String   event type
+		 * @param  Object   data to send across event
 		 * @return elFinder
 		 */
-		this.trigger = function(e, d) {
-			var e = this.event(e, d||{}),
-				l = listeners[e.type]||[], i;
-
-			
-
-			for (i = 0; i < l.length; i++) {
-				if (e.isPropagationStopped()) {
-					break;
-				}
-				try {
-					l[i](e, this);
-				} catch (ex) {
-					window.console && window.console.error && window.console.error(ex);
+		this.trigger = function(event, data) {
+			var event    = event.toLowerCase(),
+				handlers = listeners[event] || [], i, j;
+			if (event == 'open')
+				this.time('event '+event)
+			if (handlers.length) {
+				event = $.Event(event);
+				for (i = 0; i < handlers.length; i++) {
+					// to avoid data modifications, remember about "sharing" passing arguments in js :) 
+					event.data = $.extend(true, {}, data);
+					try {
+						handlers[i](event, this);
+					} catch (exeption) {
+						window.console && window.console.error && window.console.error(exeption);
+					}
+					
+					if (event.isPropagationStopped()) {
+						break;
+					}
 				}
 			}
-			this.debug('event-'+e.type, e.data);
-			// delete e;
+			
+			this.timeEnd('event '+event.type)
 			return this;
-		};
+		}
 		
 		/**
 		 * Return current working directory info
@@ -565,6 +678,66 @@
 		this.selectedFiles = function() {
 			return $.map(selected, function(hash) { return files[hash] || null });
 		};
+		
+		/**
+		 * Create and return jQuery UI dialog.
+		 *
+		 * @param  String|DOMElement  dialog content
+		 * @param  Object             dialog options
+		 * @param  String             dialog type for error|notify|confirm dialogs 
+		 * @return jQuery
+		 */
+		this.dialog = function(content, options, type) {
+			var self    = this,
+				modal   = !!options.modal,
+				buttons = options.buttons,
+				dialog  = $('<div/>').append(content);
+				
+			delete options.modal;
+			delete options.buttons
+			
+			options = $.extend({
+				title : '',
+				resizable : false,
+				minHeight : 100,
+				closeOnEscape : true,
+				create : function() {
+					var $this = $(this);
+					$this.nextAll('.ui-dialog-buttonpane').addClass('ui-corner-bottom');
+					if (!options.closeOnEscape) {
+						$this.prev().children('.ui-dialog-titlebar-close').remove();
+					}
+				},
+				close : function() {
+					modal && hideOverlay();
+					self.trigger('focus');
+					$(this).dialog('destroy');
+					dialog.remove();
+				}
+			}, options, {
+				dialogClass : 'std42-dialog elfinder-dialog'
+				
+			});
+			
+			options.title = this.i18n(options.title);
+			
+			if (type) {
+				dialog.append('<span class="elfinder-dialog-icon"/>');
+				options.dialogClass += ' elfinder-dialog-'+type;
+			}
+			
+			if (buttons) {
+				options.buttons = {};
+				$.each(buttons, function(name, cb) {
+					options.buttons[self.i18n(name)] = cb;
+				});
+			}
+			
+			modal && showOverlay();
+			
+			return dialog.dialog(options);
+		}
+		
 		
 		/**
 		 * Resize elfinder window
@@ -641,56 +814,100 @@
 				}
 			};
 		
+		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr');
 		
-		// blur elfinder on document click
-		$(document).mousedown(function(e) {
-			permissions.blur && self.trigger('blur');
-			permissions.blur = true;
-		})
+		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
+			return alert(this.i18n('Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.'));
+		}
+
+		if (!node.length) {
+			return alert(this.i18n('elFinder required DOM Element to be created.'));
+		}
 		
-		this.node = node
-			// focus elfinder on click itself
-			.bind('mousedown', function() {
-				permissions.blur = false;
+		if (!this.options.url) {
+			return alert(this.i18n('Invalid elFinder configuration! You have to set URL option.'));
+		}
+		
+		
+		$.each(node.contents(), function() {
+			prevContent.append(this);
+		});
+		
+		if (this.options.cssClass) {
+			this.cssClass += ' '+this.options.cssClass;
+		}
+		
+		this.node = node.addClass(this.cssClass)
+			.append(toolbar)
+			.append(workzone)
+			.append(statusbar)
+			.append(overlay)
+			.append(spinner)
+			.bind('mousedown.elfinder', function() {
+				blur = false;
 				self.trigger('focus');
 			})
-			.html('')
-			.removeAttr('style')
-			.removeAttr('class')
-
-			.addClass('ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+(this.options.cssClass||''))
-			
-			.append(workzone)
-			.append($('<div/>').elfinderoverlay(this))
-			.append($('<div/>').elfinderspinner(this))
-			.append($('<div/>').elfindererror(this))
-			.append($('<div/>').elfindernotify(this))
-			.append($('<div/>').elfinderconfirm(this))
-			.append(statusbar.hide())
 		
-		// $('body').append($('<div/>').elfindererror(this))
-			
-		this.node[0].elfinder = this
+		
 		width  = self.options.width || 'auto'; 
 		height = self.options.height || 300;
-		this.resize(width, height)
-
-		// return
-		if (!this.options.url) {
-			return this.deactivate().trigger('error', {error : 'Invalid configuration! You have to set URL option.'});
-		}
-		
-		if (this.options.resizable) {
-			this.node.resizable({
-				resize : function() { self.updateHeight(); },
-				minWidth : 300,
-				minHeight : 200
-			});
-		}
-		
-		
+		this.resize(width, height);
+		this.node[0].elfinder = this;
 		
 		this
+			/**
+			 * Enable elFinder shortcuts if no "sync" ajax request in progress or modal dialog opened
+			 */
+			.bind('focus', function() {
+				if (self.isVisible() && !enabled && !overlayCnt) {
+					$('texarea,input,button').blur();
+					enabled = true;
+					self.node.removeClass(self.options.blurClass);
+				}
+			})
+			/**
+			 * Disable elFinder shortcuts
+			 */
+			.bind('blur', function() {
+				if (enabled) {
+					enabled = false;
+					prevEnabled = false;
+					// overlayCnt ==0 && 
+					self.node.addClass(self.options.blurClass);
+				}
+			})
+			/**
+			 * On "sync" ajax start disable ajax requests, shortcuts and show overlay/spinner.
+			 * Store current "enabled" to restore after request complete
+			 */
+			.bind('ajaxstart', function(e) {
+				var en = enabled;
+				if (e.data.mode == 'sync') {
+					ajax = false;
+					showOverlay();
+					showSpinner();
+					self.trigger('blur');
+					prevEnabled = en;
+				}
+			})
+			/**
+			 * On "sync" ajax complete enable ajax requests, 
+			 * restore "enabled" to value before requests if no modal dialogs opened or "blur" events occured.
+			 * Hide overlay/spinner
+			 */
+			.bind('ajaxstop ajaxerror', function(e) {
+				if (e.data.mode == 'sync') {
+					ajax = true;
+					hideSpinner();
+					hideOverlay();
+					prevEnabled && self.trigger('focus');
+				}
+			})
+			/**
+			 * On first success ajax request complete 
+			 * set api version, json validation rules
+			 * and init ui.
+			 */
 			.one('ajaxstop', function(e) {
 				var data = e.data.response;
 
@@ -698,45 +915,49 @@
 				self.newAPI = self.api > 1;
 				self.oldAPI = !self.newAPI;
 				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+				
+				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
+				if (self.options.allowNav) {
+					nav.show().append($('<ul/>').elfindertree(self));
+				}
 
 			})
-			// disable/enable ajax on ajaxstart/ajaxstop events
-			.bind('ajaxstart ajaxstop ajaxerror', function(e) {
-				if (e.data.mode == 'block') {
-					permissions.ajax = e.type != 'ajaxstart';
-				}
-			})
-			// enable shortcuts 
-			.bind('focus', function() {
-				if (!permissions.shortcuts) {
-					$('texarea,:text').blur();
-					permissions.shortcuts = true;
-					self.node.removeClass(self.options.blurClass)
-				}
-			})
-			// disable shortcuts 
-			.bind('blur', function() {
-				if (permissions.shortcuts) {
-					permissions.shortcuts = false;
-					self.node.addClass(self.options.blurClass)
-				}
-			})
-			.bind('uilock uiunlock', function(e) {
-				permissions.shortcuts = e.type == 'uiunlock';
-			})
-			// cache selected files hashes
-			.bind('select', function(e) {
-				var hashes = [];
+			/**
+			 * Show error dialog
+			 */
+			.bind('ajaxerror error', function(e) {
+				var text = (function(error) {
+						text = [];
+						
+						$.each($.isArray(error) ? error : [error], function(i,e) {
+							text.push(self.i18n(e));
+						});
+						
+						return text.join('<br/>');
+					})(e.data.error||'');
 
-				selected = $.map(e.data.selected || [], function(hash) { 
-					if (files[hash] && $.inArray(hash, hashes) === -1) {
-						hashes.push(hash);
-						return hash;
-					}
-					return null;
-				});
+				if (self.isVisible()) {
+					self.dialog('<div class="elfinder-dialog-text">'+text+'</div>', {
+						title : 'Error',
+						modal : true,
+						closeOnEscape : false,
+						buttons : {
+							Ok : function() { $(this).dialog('close'); }
+						}
+					}, 'error');
+				}
+					
+				// fm not correctly loaded
+				if (!loaded) {
+					self.trigger('failed');
+					listeners = {};
+					enabled   = false;
+				}
+
 			})
-			// set some params and cache directory content
+			/**
+			 * Set params if required and update files cache
+			 */
 			.bind('open', function(e) {
 				// set current directory data
 				cwd = e.data.cwd;
@@ -756,15 +977,7 @@
 						cwd.url = coreParams.url;
 					}
 					
-					// init ui
-					if (self.options.allowNav) {
-						nav.addClass('ui-corner-' + (self.direction == 'rtl' ? 'right' : 'left'))
-							.resizable({handles : 'e', minWidth : 100})
-						workzone.append(nav)
-						nav.append($('<ul/>').elfindertree(self))
-					}
-					
-					workzone.append(dir.elfindercwd(self));
+					// workzone.append(dir.elfindercwd(self));
 					self.resize(width, height);
 					self.debug('api', self.api);
 				}
@@ -780,7 +993,6 @@
 					}
 				}
 				
-				// cache files
 				cache(e.data.files || e.data.cdc, true);
 
 				// remember last dir
@@ -796,11 +1008,15 @@
 				}
 
 			})
-			// cache directories tree data
+			/**
+			 * Update files cache
+			 */
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
 			})
-			// cache new thumbnails urls
+			/**
+			 * Update thumbnails names in files cache
+			 */
 			.bind('tmb', function(e) {
 				$.each(e.data.images, function(hash, url) {
 					if (files[hash]) {
@@ -808,7 +1024,21 @@
 					}
 				});
 			})
-			// update files cache
+			/**
+			 * cache selected files hashes
+			 */
+			.bind('select', function(e) {
+				selected = []
+				$.each(e.data.selected || [], function(i, hash) {
+					if (files[hash] && $.inArray(hash, selected) === -1) {
+						selected.push(hash);
+					}
+				});
+				self.log(selected)
+			})
+			/**
+			 * Update files cache - remove not existed files
+			 */
 			.bind('removed', function(e) {
 				var rm   = e.data.removed,
 					l    = rm.length,  
@@ -833,12 +1063,68 @@
 					});
 				}
 			})
-			//  update files cache
+			/**
+			 * Update files cache - add new files
+			 */
 			.bind('added', function(e) {
 				update(e.data.added);
+			});
+		
+		// start loading only visible filemanager
+		if (this.isVisible()) {
+			start();
+		} else {
+			sInterval = setInterval(function() {
+				if (self.isVisible()) {
+					clearInterval(sInterval);
+					start();
+				}
+			}, 100);
+		}
+		
+		
+		return
+		// blur elfinder on document click
+		$(document).mousedown(function(e) {
+			blur && self.trigger('blur');
+			blur = true;
+			prevEnabled = false;
+		})
+		
+		this.node = node
+			// focus elfinder on click itself
+			.bind('mousedown', function() {
+				blur = false;
+				self.trigger('focus');
 			})
+			.html('')
+			.removeAttr('style')
+			.removeAttr('class')
 
-			;
+			
+			.append(workzone)
+
+			.append(overlay)
+			.append(spinner)
+			.append(statusbar.hide())
+		
+		
+			
+		
+
+		
+		
+		if (this.options.resizable) {
+			this.node.resizable({
+				resize : function() { self.updateHeight(); },
+				minWidth : 300,
+				minHeight : 200
+			});
+		}
+		
+		
+
+		
 		
 		this.shortcut({
 				pattern     : 'ctrl+backspace',
@@ -879,24 +1165,9 @@
 			});
 		}
 		
-		
-		
-		// this.ui = new this._ui(this, $el);
-		// this.ui.init();
-
 		this.history = new this.history(this);
 		
-		this
-			.trigger('focus')
-			.one('ajaxerror error', function(e) {
-				// fm not correctly loaded
-				if (!loaded) {
-					e.stopPropagation();
-					self.deactivate();
-					listeners = {};
-				}
-			})
-			.one('open', function() {
+		this.one('open', function() {
 				if (self.newAPI && self.options.sync > 3000) {
 					setTimeout(function() {
 						self.sync(true);
@@ -905,14 +1176,7 @@
 			});
 		
 		
-		this.ajax({
-			cmd    : 'open',
-			target : this.lastDir() || '',
-			mimes  : this.options.onlyMimes || [],
-			init   : true,
-			tree   : !!this.options.allowNavbar
-		});
-
+		
 	}
 	
 	
@@ -1012,22 +1276,6 @@
 		},
 		
 		/**
-		 * Create/normalize event - add event.data object if not exists and
-		 * event.data.elfinder - current elfinder instance
-		 * 
-		 * @param  jQuery.Event|String  event or event name
-		 * @return jQuery.Event
-		 */
-		event : function(e, data) {
-			if (!e.type) {
-				e = $.Event(e.toLowerCase());
-			}
-			e.data = $.extend(e.data||{}, data, {elfinder : this});
-
-			return e;
-		},
-		
-		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
 		 * To bind to multiply events at once, separate events names by space
 		 *
@@ -1035,13 +1283,13 @@
 		 * @param  Function  callback
 		 * @return elFinder
 		 */
-		one : function(e, c) {
+		one : function(event, callback) {
 			var self = this,
-				h = $.proxy(c, function(e) {
-					setTimeout(function() {self.unbind(e.type, h);}, 3);
-					return c.apply(this, arguments);
+				h = $.proxy(callback, function(event) {
+					setTimeout(function() {self.unbind(event.type, h);}, 3);
+					return callback.apply(this, arguments);
 				});
-			return this.bind(e, h);
+			return this.bind(event, h);
 		},
 		
 		
@@ -1734,35 +1982,14 @@
 			var d = this.options.debug;
 
 			if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
-				window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ', m);
+				window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 			} 
 			return this;
 		},
 		time : function(l) { window.console && window.console.time && window.console.time(l); },
 		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); },
 		
-		commands : {},
-		
-		ui : {
-			cwd : function(fm) {
-				return $('<div/>').elfindercwd(fm);
-			},
-			tree : function(fm) {
-				return $('<ul/>').elfindertree(fm);
-			},
-			
-			places : function(fm) {
-				return $('<ul/>').elfinderplaces(fm);
-			},
-			
-			button : function() {
-				return $('<a href="#"/>');
-			},
-			
-			dialog : function(opts) {
-				return $('<div/>').dialog(opts);
-			}
-		}
+		commands : {}
 	}
 	
 	

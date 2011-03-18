@@ -165,7 +165,7 @@
 .elfinder-error .ui-icon-close { float:right; margin:.2em; }
 */
 
-.elfinder-dialog {
+/*.elfinder-dialog {
 	position:absolute;
 	z-index:10000;
 	width:290px;
@@ -213,10 +213,9 @@
 	top:9px;
 	background:url(../images/dialogs.png) 0 0 no-repeat;
 }
-
-.elfinder-dialog-buttonspane {
+*/
+/*.elfinder-dialog-buttonspane {
 	padding-top:.5em;
-/*	border-top:1px solid #111;*/
 }
 
 .elfinder-dialog-button {
@@ -238,7 +237,7 @@
 	left:50%;
 	margin-left:-145px;
 }
-
+*/
 .elfinder-dialog-notify {
 	top:1em;
 	right:1em;

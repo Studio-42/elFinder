@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
 
+// sleep(3);
 // exit('{"asd":43}');
 
 if (function_exists('date_default_timezone_set')) {

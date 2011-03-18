@@ -1,0 +1,66 @@
+/* jquery-ui dialog fix */
+.std42-dialog {	padding:0; }
+/* comment this line to enable ui theme original background */
+.std42-dialog, .std42-dialog .ui-widget-content { background-color:#eee; background-image:none; }
+
+.std42-dialog .ui-dialog-titlebar {
+	border-left:0 solid;
+	border-top:0 solid;
+	border-right:0 solid;
+	-moz-border-radius-bottomleft: 0; 
+	-webkit-border-bottom-left-radius: 0; 
+	border-bottom-left-radius: 0; 
+	-moz-border-radius-bottomright: 0; 
+	-webkit-border-bottom-right-radius: 0; 
+	border-bottom-right-radius: 0; 
+	font-size:.86em;
+	padding:.1em 1em;
+}
+
+.std42-dialog .ui-dialog-content {
+	padding:.2em .5em;
+	font-size:.86em;
+}
+
+.std42-dialog .ui-dialog-buttonpane {
+	border:0 solid;
+	margin:0;
+	padding:0;
+}
+
+.std42-dialog .ui-dialog-buttonpane button {
+	margin:.2em 1em;
+	font-size:.82em;
+	padding:0;
+}
+
+.std42-dialog .ui-dialog-buttonpane button span {
+	padding:2px 9px;
+}
+
+/* elfinder dialog */
+.elfinder-dialog .elfinder-dialog-icon {
+	position:absolute;
+	width:32px;
+	height:32px;
+	left:12px;
+	top:50%;
+	margin-top:-15px;
+	background:url(../images/dialogs.png) 0 0 no-repeat;
+}
+
+.elfinder-dialog .elfinder-dialog-text {
+	margin:0 0 0 45px;
+}
+
+.elfinder-dialog-error .ui-dialog-content { padding-top:.7em;}
+
+
+
+
+
+
+
+
+
+

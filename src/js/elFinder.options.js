@@ -76,7 +76,7 @@ elFinder.prototype.options = {
 	/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
 	height         : 300,
 	/* disable shortcuts exclude arrows/space */
-	allowShortcuts : true,
+	allowShortcuts : false,
 	/* open last visited dir after reload page or close and open browser */
 	rememberLastDir : true,
 	/**
@@ -100,14 +100,14 @@ elFinder.prototype.options = {
 	 * @type Boolean
 	 * @default  true
 	 */
-	allowNavbar : true,
+	allowNavbar : false,
 	/**
 	 * Show statusbar?
 	 *
 	 * @type Boolean
 	 * @default  true
 	 */
-	allowStatusbar : true,
+	// allowStatusbar : true,
 	/**
 	 * Lazy load config.
 	 * How many files show at once?
@@ -171,8 +171,8 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	// debug : true
-	debug : ['event-ajaxstart']
+	debug : false
+	// debug : ['event-open']
 }
 
 })(jQuery);
