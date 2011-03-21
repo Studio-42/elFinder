@@ -122,6 +122,8 @@
 				
 			},
 			
+			shortcuts = {},
+			
 			node = $(node),
 			
 			prevContent = $('<div/>'),
@@ -284,8 +286,40 @@
 			 * @return void
 			 */
 			start = function() {
+				var opts = {
+						cmd    : 'open',
+						target : self.lastDir() || '',
+						mimes  : self.options.onlyMimes || [],
+						init   : true,
+						tree   : !!self.options.allowNavbar
+					},
+					interval;
+				
+				if (self.isVisible()) {
+					return self.ajax(opts).node.mousedown();
+				} 
+				
+				interval = setInterval(function() {
+					if (self.isVisible()) {
+						clearInterval(interval);
+						self.ajax(opts).node.mousedown();
+					}
+				}, 100);
+				return;
 				// focus current instances and blur other elFinder instances if exists
 				self.node.mousedown();
+
+				// start loading only visible filemanager
+				if (this.isVisible()) {
+					start();
+				} else {
+					sInterval = setInterval(function() {
+						if (self.isVisible()) {
+							clearInterval(sInterval);
+							start();
+						}
+					}, 100);
+				}
 
 				self.ajax({
 						cmd    : 'open',
@@ -296,7 +330,34 @@
 					});
 				
 			},
-			sInterval = null;
+
+			/**
+			 * Exec shortcut
+			 *
+			 * @param  jQuery.Event  keydown/keypress event
+			 * @return void
+			 */
+			execShortcut = function(e) {
+				var code    = e.keyCode,
+					ctrlKey = e.ctrlKey || e.metaKey;
+				
+				if (enabled) {
+					// prevent tab out of elfinder
+					code == 9 && e.preventDefault();
+					$.each(shortcuts, function(i, shortcut) {
+						if (shortcut.type == e.type 
+						&& shortcut.keyCode == code 
+						&& shortcut.shiftKey == e.shiftKey 
+						&& shortcut.ctrlKey == ctrlKey 
+						&& shortcut.altKey == e.altKey) {
+							e.preventDefault();
+							shortcut.callback(e, self);
+							return false;
+						}
+					});
+				}
+			}
+			;
 
 
 
@@ -615,6 +676,48 @@
 		}
 		
 		/**
+		 * Bind keybord shortcut to keydown event
+		 *
+		 * @example
+		 *    elfinder.shortcut({ 
+		 *       pattern : 'ctrl+a', 
+		 *       description : 'Select all files', 
+		 *       callback : function(e) { ... }, 
+		 *       keypress : true|false (bind to keypress instead of keydown) 
+		 *    })
+		 *
+		 * @param  Object  shortcut config
+		 * @return elFinder
+		 */
+		this.shortcut = function(s) {
+			var patterns, pattern, code, i, parts;
+			
+			if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
+				patterns = s.pattern.toUpperCase().split(/\s+/);
+				
+				for (i= 0; i < patterns.length; i++) {
+					pattern = patterns[i]
+					parts   = pattern.split('+');
+					code    = (code = parts.pop()).length == 1 
+						? code.charCodeAt(0) 
+						: $.ui.keyCode[code];
+
+					if (code) {
+						shortcuts[pattern] = {
+							keyCode  : code,
+							altKey   : $.inArray('ALT', parts)   != -1,
+							ctrlKey  : $.inArray('CTRL', parts)  != -1,
+							shiftKey : $.inArray('SHIFT', parts) != -1,
+							type     : s.type || 'keydown',
+							callback : s.callback
+						}
+					}
+				}
+			}
+			return this;
+		}
+		
+		/**
 		 * Return current working directory info
 		 * 
 		 * @return Object
@@ -814,7 +917,6 @@
 				}
 			};
 		
-		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr');
 		
 		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
 			return alert(this.i18n('Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.'));
@@ -833,6 +935,8 @@
 			prevContent.append(this);
 		});
 		
+		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr');
+		
 		if (this.options.cssClass) {
 			this.cssClass += ' '+this.options.cssClass;
 		}
@@ -845,7 +949,7 @@
 			.append(spinner)
 			.bind('mousedown.elfinder', function() {
 				blur = false;
-				self.trigger('focus');
+				!enabled && self.trigger('focus');
 			})
 		
 		
@@ -853,6 +957,14 @@
 		height = self.options.height || 300;
 		this.resize(width, height);
 		this.node[0].elfinder = this;
+		
+		if (this.options.resizable) {
+			this.node.resizable({
+				resize : function() { self.updateHeight(); },
+				minWidth : 300,
+				minHeight : 200
+			});
+		}
 		
 		this
 			/**
@@ -904,25 +1016,6 @@
 				}
 			})
 			/**
-			 * On first success ajax request complete 
-			 * set api version, json validation rules
-			 * and init ui.
-			 */
-			.one('ajaxstop', function(e) {
-				var data = e.data.response;
-
-				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
-				
-				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
-				if (self.options.allowNav) {
-					nav.show().append($('<ul/>').elfindertree(self));
-				}
-
-			})
-			/**
 			 * Show error dialog
 			 */
 			.bind('ajaxerror error', function(e) {
@@ -956,6 +1049,47 @@
 
 			})
 			/**
+			 * On first success ajax request complete 
+			 * set api version, json validation rules
+			 * and init ui.
+			 */
+			.bind('load', function(e) {
+				var data = e.data;
+
+				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
+				self.newAPI = self.api > 1;
+				self.oldAPI = !self.newAPI;
+				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+				
+				// store core params
+				coreParams = e.data.params;
+				// fix params for old api
+				if (self.oldAPI) {
+					params  = coreParams;
+					cwd.url = coreParams.url;
+				}
+				
+				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
+				
+				self.options.allowNav && nav.show().append($('<ul/>').elfindertree(self));
+				
+				self.history = new self.history(self);
+				
+				$(document)
+					// blur elfinder on document click
+					.bind('mousedown.elfinder', function(e) {
+						blur && enabled && self.trigger('blur');
+						blur = true;
+					})
+					// exec shortcuts
+					.bind('keydown keypress', execShortcut);
+				
+				self.resize(width, height);
+				self.debug('api', self.api);
+				delete listeners.load;
+				loaded = true;
+			})
+			/**
 			 * Set params if required and update files cache
 			 */
 			.bind('open', function(e) {
@@ -963,49 +1097,35 @@
 				cwd = e.data.cwd;
 
 				// initial loading
-				if (!loaded) {
-					// remove disabled commands
-					$.each(e.data.params.disabled || [], function(i, cmd) {
-						self.commands[cmd] && delete self.commands[cmd];
-					});
-					delete e.data.params.disabled;
-					// store core params
-					coreParams = e.data.params;
-					// fix params for old api
-					if (self.oldAPI) {
-						params  = coreParams;
-						cwd.url = coreParams.url;
-					}
-					
-					// workzone.append(dir.elfindercwd(self));
-					self.resize(width, height);
-					self.debug('api', self.api);
-				}
+				!loaded && self.trigger('load', e.data);
+				
 				
 				params = $.extend({}, coreParams, e.data.cwd.params||{});
-				
-				if (self.oldAPI) {					
+
+				if (self.newAPI) {
+					if (self.options.sync > 3000) {
+						setInterval(function() {
+							self.sync();
+						}, self.options.sync);
+					}
+				} else {					
 					cwd.tmb = !!e.data.tmb;
 					// old api: if we get tree - reset cache
 					if (e.data.tree) {
 						files = {};
 						cacheTree(e.data.tree);
 					}
+					// var id;
+					// 
+					// if (!cwd.phash && typeof((id = nav.find('#nav-'+cwd.hash).parents('ul:first').prev('[id]').attr('id'))) == 'string') {
+					// 	cwd.phash = id.substr(4);
+					// }
 				}
 				
 				cache(e.data.files || e.data.cdc, true);
 
 				// remember last dir
 				self.lastDir(cwd.hash);
-
-				// initial loading - fire event
-				if (!loaded) {
-					// fire event
-					self.trigger('load', e.data);
-					// remove "load" event listeners
-					delete listeners.load;
-					loaded = true;
-				}
 
 			})
 			/**
@@ -1028,13 +1148,9 @@
 			 * cache selected files hashes
 			 */
 			.bind('select', function(e) {
-				selected = []
-				$.each(e.data.selected || [], function(i, hash) {
-					if (files[hash] && $.inArray(hash, selected) === -1) {
-						selected.push(hash);
-					}
+				selected = $.map(e.data.selected || [], function(hash) {
+					return files[hash] ? hash : null;
 				});
-				self.log(selected)
 			})
 			/**
 			 * Update files cache - remove not existed files
@@ -1070,112 +1186,17 @@
 				update(e.data.added);
 			});
 		
-		// start loading only visible filemanager
-		if (this.isVisible()) {
-			start();
-		} else {
-			sInterval = setInterval(function() {
-				if (self.isVisible()) {
-					clearInterval(sInterval);
-					start();
-				}
-			}, 100);
-		}
+		start();
 		
-		
-		return
-		// blur elfinder on document click
-		$(document).mousedown(function(e) {
-			blur && self.trigger('blur');
-			blur = true;
-			prevEnabled = false;
-		})
-		
-		this.node = node
-			// focus elfinder on click itself
-			.bind('mousedown', function() {
-				blur = false;
-				self.trigger('focus');
-			})
-			.html('')
-			.removeAttr('style')
-			.removeAttr('class')
-
-			
-			.append(workzone)
-
-			.append(overlay)
-			.append(spinner)
-			.append(statusbar.hide())
-		
-		
-			
-		
-
-		
-		
-		if (this.options.resizable) {
-			this.node.resizable({
-				resize : function() { self.updateHeight(); },
-				minWidth : 300,
-				minHeight : 200
-			});
-		}
-		
-		
-
-		
-		
-		this.shortcut({
-				pattern     : 'ctrl+backspace',
-				description : 'Delete files',
-				callback    : function() { 
-					self.trigger('confirm', {title : 'Delete', text : 'Do you want to delete files', cb : function(result, all) {
-						self.log(result).log(all)
-					}})
-				}
-		})
-			
-		if (this.oldAPI) {
-			this.bind('open', function() {
-				var id;
-				// find parent hash for current directory
-				if (!cwd.phash && typeof((id = nav.find('#nav-'+cwd.hash).parents('ul:first').prev('[id]').attr('id'))) == 'string') {
-					cwd.phash = id.substr(4);
-				}
-			});
-		}
-			
-		// bind to keydown/keypress if shortcuts allowed
-		if (this.options.allowShortcuts) {
-			$(document).bind('keydown keypress', function(e) {
-				var c = e.keyCode,
-					ctrlKey = e.ctrlKey||e.metaKey;
-
-				if (permissions.shortcuts) {
-					c == 9 && e.preventDefault();
-					$.each(self.shortcuts, function(i, s) {
-						if (s.type == e.type && c == s.keyCode && s.shiftKey == e.shiftKey && s.ctrlKey == ctrlKey && s.altKey == e.altKey) {
-							e.preventDefault();
-							s.callback(e, self);
-							return false;
-						}
-					});
-				}
-			});
-		}
-		
-		this.history = new this.history(this);
-		
-		this.one('open', function() {
-				if (self.newAPI && self.options.sync > 3000) {
-					setTimeout(function() {
-						self.sync(true);
-					}, self.options.sync);
-				}
-			});
-		
-		
+		// this.shortcut({
+		// 		pattern     : 'ctrl+backspace',
+		// 		description : 'Delete files',
+		// 		callback    : function() { 
+		// 			self.trigger('confirm', {title : 'Delete', text : 'Do you want to delete files', cb : function(result, all) {
+		// 				self.log(result).log(all)
+		// 			}})
+		// 		}
+		// })
 		
 	}
 	
@@ -1297,41 +1318,6 @@
 		
 		
 		
-		/**
-		 * Bind keybord shortcut to keydown event
-		 *
-		 * @example
-		 *    elfinder.shortcut({ 
-		 *       pattern : 'ctrl+a', 
-		 *       description : 'Select all files', 
-		 *       callback : function(e) { ... }, 
-		 *       keypress : true|false (bind to keypress instead of keydown) 
-		 *    })
-		 *
-		 * @param  Object  shortcut config
-		 * @return elFinder
-		 */
-		shortcut : function(s) {
-			var p, c;
-
-			if (this.options.allowShortcuts && s.pattern && typeof(s.callback) == 'function') {
-				s.pattern = s.pattern.toUpperCase();
-				p = s.pattern.split('+');
-				c = p.pop();
-				
-				s.keyCode = this.keyCodes[c] || c.charCodeAt(0);
-				if (s) {
-					s.altKey   = $.inArray('ALT', p)   != -1;
-					s.ctrlKey  = $.inArray('CTRL', p)  != -1;
-					s.shiftKey = $.inArray('SHIFT', p) != -1;
-					s.type     = s.keypress ? 'keypress' : 'keydown';
-					this.shortcuts[s.pattern] = s;
-					// this.debug('shortcat-add', s)
-				}
-				
-			}
-			return this;
-		},
 		
 		
 		/**

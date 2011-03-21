@@ -89,12 +89,12 @@ elFinder.prototype.history = function(fm) {
 			current = void(0);
 		})
 		.shortcut({
-			pattern     : 'ctrl+arrowLeft',
+			pattern     : 'ctrl+left',
 			description : 'Go back',
 			callback    : function() { self.back(); }
 		})
 		.shortcut({
-			pattern     : 'ctrl+arrowRight',
+			pattern     : 'ctrl+right',
 			description : 'Go forward',
 			callback    : function() { self.fwd(); }
 		})

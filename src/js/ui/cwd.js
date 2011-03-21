@@ -86,9 +86,10 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 * @rise select			
 			 */
-			select = function(dir, append) {
-				var prev     = dir == 'left' || dir == 'up',
-					sel = cwd.find('[id].ui-selected'),
+			select = function(keyCode, append) {
+				var code     = $.ui.keyCode,
+					prev     = keyCode == code.LEFT || keyCode == code.UP,
+					sel      = cwd.find('[id].ui-selected'),
 					selector = prev ? 'first' : 'last',
 					list     = fm.view == 'list',
 					s, n, top, left;
@@ -99,7 +100,7 @@ $.fn.elfindercwd = function(fm) {
 					if (!s[prev ? 'prev' : 'next']('[id]').length) {
 						// there is no sibling on required side - do not move selection
 						n = s;
-					} else if (list || dir == 'left' || dir == 'right') {
+					} else if (list || keyCode == code.LEFT || keyCode == code.RIGHT) {
 						// find real prevoius file
 						n = s[prev ? 'prev' : 'next']('[id]');
 					} else {
@@ -145,6 +146,12 @@ $.fn.elfindercwd = function(fm) {
 					// update cache/view
 					fm.trigger('updateselected');
 				}
+			},
+			
+			selected = function() {
+				return $.map(cwd.find('[id].ui-selected'), function(n) {
+					return $(n).attr('id');
+				});
 			},
 			
 			/**
@@ -359,14 +366,6 @@ $.fn.elfindercwd = function(fm) {
 			}),
 			
 			/**
-			 * Bind some shortcuts to keypress instead of keydown.
-			 * Required to procces repeated key press in ff and opera.
-			 *
-			 * @type Boolean
-			 */
-			keypress = $.browser.mozilla || $.browser.opera,
-			
-			/**
 			 * CWD node itself
 			 *
 			 * @type JQuery
@@ -426,15 +425,9 @@ $.fn.elfindercwd = function(fm) {
 				.droppable($.extend({}, fm.droppable));
 		
 
-		fm
-			
-			.bind('updateselected', function(e) {
-				var selected = [];
+		fm.bind('updateselected', function(e) {
 				e.stopPropagation();
-				cwd.find('[id].ui-selected').each(function() {
-					selected.push($(this).attr('id'));
-				});
-				fm.trigger('select', {selected : selected});
+				fm.trigger('select', {selected : selected()});
 			})
 			// update directory content
 			.bind('open', function(e) {
@@ -540,91 +533,38 @@ $.fn.elfindercwd = function(fm) {
 			.bind('error', function(e) {
 				// remove disabled class
 			})
-		return
-		
-		fm.shortcut({
-			pattern     :'ctrl+a', 
-			description : 'Select all files',
-			callback    : function() { 
-				cwd.find('[id]:not(.ui-selected)').trigger('select.elfinder'); 
-				fm.trigger('updateselected'); 
-			}
-		})
-		.shortcut({
-			pattern     : 'arrowLeft',
-			description : 'Select file on left or last file',
-			keypress    : keypress,
-			callback    : function() { select('left'); }
-		})
-		.shortcut({
-			pattern     : 'arrowUp',
-			description : 'Select file upside',
-			keypress    : keypress,
-			callback    : function() { select('up'); }
-		})
-		.shortcut({
-			pattern     : 'arrowRight',
-			description : 'Select file on right or last file',
-			keypress    : keypress,
-			callback    : function() { select('right'); }
-		})
-		.shortcut({
-			pattern     : 'arrowDown',
-			description : 'Select file downside',
-			keypress    : keypress,
-			callback    : function() { select('down'); }
-		})
-		.shortcut({
-			pattern     : 'shift+arrowLeft',
-			description : 'Append file on left to selected',
-			keypress    : keypress,
-			callback    : function() { select('left', true); }
-		})
-		.shortcut({
-			pattern     : 'shift+arrowUp',
-			description : 'Append upside file to selected',
-			keypress    : keypress,
-			callback    : function() { select('up', true); }
-		})
-		.shortcut({
-			pattern     : 'shift+arrowRight',
-			description : 'Append file on right to selected',
-			keypress    : keypress,
-			callback    : function() { select('right', true); }
-		})
-		.shortcut({
-			pattern     : 'shift+arrowDown',
-			description : 'Append downside file to selected',
-			keypress    : keypress,
-			callback    : function() { select('down', true); }
-		})
-		.shortcut({
-			pattern     : 'ctrl+arrowUp',
-			description : 'Go into parent folder',
-			callback    : function() {
-				var hash = fm.cwd().phash;
-				hash && fm.open(hash);
-			}
-		})
-		.shortcut({
-			pattern     : 'ctrl+arrowDown',
-			description : 'Open directory or files',
-			callback    : function() {
-				$.each(fm.selected(), function(i, hash) {
-					fm.open(hash);
-				});
-			}
-		})
-		.shortcut({
-			pattern     : 'enter',
-			description : 'Open directory or files',
-			callback    : function() {
-				$.each(fm.selected(), function(i, hash) {
-					fm.open(hash);
-				});
-			}
-		})
-		;
+			.shortcut({
+				pattern     :'ctrl+a', 
+				description : 'Select all files',
+				callback    : function() { 
+					cwd.find('[id]:not(.ui-selected)').trigger('select.elfinder'); 
+					fm.trigger('select', {selected : selected()}); 
+				}
+			})
+			.shortcut({
+				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
+				description : 'Control selection by arrows and shift key',
+				type        : $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+				callback    : function(e) { select(e.keyCode, e.shiftKey); }
+			})
+			.shortcut({
+				pattern     : 'home',
+				description : 'Select first file',
+				callback    : function(e) { 
+					cwd.find('[id]:.ui-selected').trigger('unselect.elfinder'); 
+					cwd.find('[id]:first').trigger('select.elfinder') 
+					fm.trigger('select', {selected : selected()}); 
+				}
+			})
+			.shortcut({
+				pattern     : 'end',
+				description : 'Select last file',
+				callback    : function(e) { 
+					cwd.find('[id]:.ui-selected').trigger('unselect.elfinder'); 
+					cwd.find('[id]:last').trigger('select.elfinder') 
+					fm.trigger('select', {selected : selected()}); 
+				}
+			});
 		
 	});
 	

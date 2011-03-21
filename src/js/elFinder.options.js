@@ -76,7 +76,7 @@ elFinder.prototype.options = {
 	/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
 	height         : 300,
 	/* disable shortcuts exclude arrows/space */
-	allowShortcuts : false,
+	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
 	rememberLastDir : true,
 	/**
