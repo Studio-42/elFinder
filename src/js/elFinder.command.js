@@ -17,7 +17,7 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  String
 	 */
-	this.name = '';
+	// this.name = '';
 	
 	/**
 	 * Short command description
@@ -64,35 +64,40 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  Number
 	 */
-	this.state = this.states.disabled;
+	this.state = this.states.enabled;
 	
 	/**
-	 * True when command disabled for current root
+	 * Command disabled for current root?
 	 *
 	 * @type  Boolen
 	 */
-	this.lock = false;
+	this.diabled = false;
 	
 	/**
-	 * Ui widget name
+	 * If true - command can not be disabled in any case
 	 *
-	 * @type  String
+	 * @type  Boolen
 	 */
-	this.ui = 'button';
+	this.required = false;
 	
 	/**
-	 * Bind events and shortcuts
+	 * Prepare object -
+	 * bind events and shortcuts
 	 *
-	 * @return elFinder.command
+	 * @return void
 	 */
-	this.init = function() {
-		var self = this,
-			fm = this.fm;
+	this.setup = function(name, opts) {
+		var self     = this,
+			fm       = this.fm,
+			defaults = {ui : 'button'};
 		
+		this.name      = name;
+		this.title     = fm.i18n(this.title || this.name);
+		this.options   = $.extend(defaults, opts);
 		this.listeners = [];
 
-		fm.bind('open', function() {
-			self.lock = !!$.inArray(self.name, fm.param('disabled'));
+		!this.required && fm.bind('open', function() {
+			self.lock = $.inArray(self.name, fm.param('disabled')) === -1;
 		});
 		
 		$.each(this.handlers, function(e, c) {
@@ -102,18 +107,24 @@ elFinder.prototype.command = function(fm) {
 		$.each(this.shortcuts, function(i, s) {
 			fm.shortcut(s);
 		});
-		return this;
+		this.init();
 	}
 
+	this.init = function() { }
+
 	/**
-	 * Exec command if it is not disabled
+	 * Exec command if it is enabled and return result
 	 *
 	 * @param  mixed  command value
-	 * @return elFinder.command
+	 * @return mixed
 	 */
 	this.exec = function(v) { 
-		return this.enabled() ? this : this._exec(v);
+		if (this.enabled()) {
+			return this._exec(v);
+		}
 	}
+	
+	this._exec = function() { }
 	
 	/**
 	 * Return true if command enabled.
@@ -168,10 +179,3 @@ elFinder.prototype.command = function(fm) {
 	}
 }
 
-elFinder.prototype.command.back = function() {
-	var self = this;
-	
-	this.handlers = {
-		open : function() { self.update(fm.history.canBack() ? self.states.enabled : self.states.disabled); }
-	}
-}

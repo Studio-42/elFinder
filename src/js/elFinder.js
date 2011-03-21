@@ -124,6 +124,8 @@
 			
 			shortcuts = {},
 			
+			commands = {},
+			
 			node = $(node),
 			
 			prevContent = $('<div/>'),
@@ -351,6 +353,7 @@
 						&& shortcut.ctrlKey == ctrlKey 
 						&& shortcut.altKey == e.altKey) {
 							e.preventDefault();
+							self.log(i)
 							shortcut.callback(e, self);
 							return false;
 						}
@@ -782,6 +785,15 @@
 			return $.map(selected, function(hash) { return files[hash] || null });
 		};
 		
+		this.root = function() {
+			var dir = files[cwd.hash];
+			
+			while (dir && dir.phash) {
+				dir = files[dir.phash]
+			}
+			return dir.hash;
+		}
+		
 		/**
 		 * Create and return jQuery UI dialog.
 		 *
@@ -841,6 +853,11 @@
 			return dialog.dialog(options);
 		}
 		
+		this.exec = function(cmd, value) {
+			if (commands[cmd]) {
+				return commands[cmd].exec(value);
+			}
+		}
 		
 		/**
 		 * Resize elfinder window
@@ -1048,13 +1065,22 @@
 				}
 
 			})
+			
+			.one('ajaxstop', function(e) {
+				self.trigger('load', e.data.response);
+			})
 			/**
 			 * On first success ajax request complete 
 			 * set api version, json validation rules
 			 * and init ui.
 			 */
 			.bind('load', function(e) {
-				var data = e.data;
+				var data = e.data,
+					base = new self.command(self),
+					opts = self.options,
+					cmds = opts.commands || [],
+					cmd,
+					l;
 
 				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
 				self.newAPI = self.api > 1;
@@ -1084,6 +1110,23 @@
 					// exec shortcuts
 					.bind('keydown keypress', execShortcut);
 				
+				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
+					$.inArray(name, cmds) === -1 && cmds.push(name)
+				});
+				
+				self.log(cmds)
+				
+				$.each(cmds, function(i, name) {
+					var cmd = self.commands[name];
+					if ($.isFunction(cmd) && !commands[name]) {
+						self.log(cmd)
+						cmd.prototype = base;
+						commands[name] = new cmd();
+						commands[name].setup(name);
+					}
+				})
+				self.log(shortcuts)
+				
 				self.resize(width, height);
 				self.debug('api', self.api);
 				delete listeners.load;
@@ -1095,11 +1138,7 @@
 			.bind('open', function(e) {
 				// set current directory data
 				cwd = e.data.cwd;
-
-				// initial loading
-				!loaded && self.trigger('load', e.data);
-				
-				
+				// update params for current directory (new api)
 				params = $.extend({}, coreParams, e.data.cwd.params||{});
 
 				if (self.newAPI) {
@@ -1313,13 +1352,6 @@
 			return this.bind(event, h);
 		},
 		
-		
-
-		
-		
-		
-		
-		
 		/**
 		 * Open directory/file
 		 * 
@@ -1387,7 +1419,6 @@
 				: this.ajax({
 					cmd    : 'open',
 					target : this.lastDir() || '',
-					mimes  : this.options.onlyMimes || [],
 					tree   : !!this.options.allowNavbar
 				});
 		},
@@ -1936,23 +1967,6 @@
 			size : 6
 		},
 		
-		/**
-		 * Key codes for non alfanum keys
-		 *
-		 * @type Object
-		 **/
-		keyCodes : {
-			'ARROWLEFT'  : 37,
-			'ARROWUP'    : 38,
-			'ARROWRIGHT' : 39,
-			'ARROWDOWN'  : 40,
-			'ESC'        : 27,
-			'ENTER'      : 13,
-			'SPACE'      : 32,
-			'DELETE'     : 46,
-			'BACKSPACE'  : 8
-		},
-		
 		i18 : {
 			en : {
 				_translator  : '',
@@ -1975,6 +1989,11 @@
 		time : function(l) { window.console && window.console.time && window.console.time(l); },
 		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); },
 		
+		/**
+		 * Commands costructors
+		 *
+		 * @type Object
+		 */
 		commands : {}
 	}
 	

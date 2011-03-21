@@ -139,6 +139,10 @@ elFinder.prototype.options = {
 	
 	sync : 0,
 	
+	commands : ['back', 'forward'],
+	
+	commandsOptions : {},
+	
 	/* cookie options */
 	cookie         : {
 		expires : 30,

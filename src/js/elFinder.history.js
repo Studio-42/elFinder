@@ -40,7 +40,7 @@ elFinder.prototype.history = function(fm) {
 	 *
 	 * @return Boolen
 	 */
-	this.canFwd = function() {
+	this.canForward = function() {
 		return 1 + current < history.length;
 	}
 	
@@ -61,8 +61,8 @@ elFinder.prototype.history = function(fm) {
 	 *
 	 * @return void
 	 */
-	this.fwd = function() {
-		if (this.canFwd()) {
+	this.forward = function() {
+		if (this.canForward()) {
 			ignor = true;
 			fm.open(history[++current]);
 		}
@@ -87,17 +87,6 @@ elFinder.prototype.history = function(fm) {
 		.bind('reload', function() {
 			history = [];
 			current = void(0);
-		})
-		.shortcut({
-			pattern     : 'ctrl+left',
-			description : 'Go back',
-			callback    : function() { self.back(); }
-		})
-		.shortcut({
-			pattern     : 'ctrl+right',
-			description : 'Go forward',
-			callback    : function() { self.fwd(); }
-		})
-		;
+		});
 	
 }

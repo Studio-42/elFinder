@@ -24,6 +24,11 @@
 	<script src="js/elFinder.js"         type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.history.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.command.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/commands/back.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/commands/forward.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/commands/up.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/commands/home.js" type="text/javascript" charset="utf-8"></script>
+	
 
 	<script src="js/ui/notify.js"        type="text/javascript" charset="utf-8"></script>
 	<script src="js/ui/confirm.js"       type="text/javascript" charset="utf-8"></script>
@@ -106,13 +111,19 @@
 			// 	lang : 'ru'
 			// }).elfinder('instance')
 			
-
+			$('#back').click(function(e) {
+				f1.exec('back')
+			})
+			$('#fwd').click(function(e) {
+				f1.exec('forward')
+			})
 		})
 	</script>
 
 </head>
 <body>
-	<div id="lock" class="button">lock</div>
+	<div id="back" class="button">back</div>
+	<div id="fwd" class="button">forward</div>
 	<!-- <div id="close"  class="button">close</div>
 	<div id="dock" class="button">dock</div>
 	<div id="undock" class="button">undock</div>-->
