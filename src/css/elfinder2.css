@@ -72,7 +72,7 @@
 /************************************/
 /*              TOOLBAR             */
 /************************************/
-.elfinder-toolbar { padding:.2em; }
+.elfinder-toolbar { padding:.2em; margin-bottom:2px; }
 
 /* container for button's group */
 .elfinder-buttonset {

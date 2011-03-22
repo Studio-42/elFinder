@@ -150,9 +150,21 @@ elFinder.prototype.options = {
 		path    : '/',
 		secure  : false
 	},
+	
+	/**
+	 * Toolbar name.
+	 * Toolbar is jquery plugin named $.fn.elfindertoolbar+toolbar 
+	 * Now only one $.fn.elfindertoolbar exists.
+	 * Required for future features.
+	 *
+	 * @type String
+	 * @default ""
+	 */
+	toolbar : '',
 	/* buttons on toolbar */
-	toolbar        : [
-		['back', 'reload'],
+	toolbarConf : [['back', 'forward', 'up', 'home']],
+	toolbarConf_ : [
+		['back', 'forward', 'up', 'home'],
 		['select', 'open'],
 		['mkdir', 'mkfile', 'upload'],
 		['copy', 'paste', 'rm'],
@@ -176,7 +188,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	debug : false
-	// debug : ['event-open']
+	// debug : ['event-open', 'event-focus', 'event-blur']
 }
 
 })(jQuery);

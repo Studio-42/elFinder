@@ -136,7 +136,7 @@
 			
 			dir = $('<div/>').appendTo(workzone),
 			
-			toolbar = $('<ul class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar"/>').hide(),
+			toolbar = $('<div/>').hide(),
 			
 			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
 			
@@ -655,6 +655,7 @@
 		this.trigger = function(event, data) {
 			var event    = event.toLowerCase(),
 				handlers = listeners[event] || [], i, j;
+			
 			if (event == 'open')
 				this.time('event '+event)
 			if (handlers.length) {
@@ -673,7 +674,7 @@
 					}
 				}
 			}
-			
+			this.debug('event-'+event.type, data)
 			this.timeEnd('event '+event.type)
 			return this;
 		}
@@ -1080,7 +1081,7 @@
 					opts = self.options,
 					cmds = opts.commands || [],
 					cmd,
-					l;
+					l, tb = 'elfindertoolbar'+opts.toolbar;
 
 				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
 				self.newAPI = self.api > 1;
@@ -1114,18 +1115,24 @@
 					$.inArray(name, cmds) === -1 && cmds.push(name)
 				});
 				
-				self.log(cmds)
+				// self.log(cmds)
 				
 				$.each(cmds, function(i, name) {
 					var cmd = self.commands[name];
 					if ($.isFunction(cmd) && !commands[name]) {
-						self.log(cmd)
+						// self.log(cmd)
 						cmd.prototype = base;
 						commands[name] = new cmd();
+						commands[name]._super = base;
 						commands[name].setup(name);
 					}
-				})
-				self.log(shortcuts)
+				});
+				
+				if (!$.fn[tb]) {
+					tb = 'elfindertoolbar';
+				}
+				toolbar[tb](opts.toolbarConf, commands)
+				
 				
 				self.resize(width, height);
 				self.debug('api', self.api);

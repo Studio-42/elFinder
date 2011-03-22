@@ -17,7 +17,7 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  String
 	 */
-	// this.name = '';
+	this.name = '';
 	
 	/**
 	 * Short command description
@@ -32,28 +32,28 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  elFinder.command
 	 */
-	this.super = null;
+	this._super = null;
 	
 	/**
 	 * elFinder events handlers
 	 *
 	 * @type  Object
 	 */
-	this.handlers = {};
+	this._handlers = {};
 	
 	/**
 	 * Shortcuts
 	 *
 	 * @type  Array
 	 */
-	this.shortcuts = [];
+	this._shortcuts = [];
 	
 	/**
 	 * Command states list
 	 *
 	 * @type  Object
 	 */
-	this.states = {
+	this._state = {
 		disabled : -1,
 		enabled  : 0,
 		active   : 1
@@ -64,21 +64,22 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  Number
 	 */
-	this.state = this.states.enabled;
+	this.state = this._state.disabled;
 	
 	/**
-	 * Command disabled for current root?
+	 * Every root directory can disable commands on it.
+	 * If this command disabled - set to false
 	 *
 	 * @type  Boolen
 	 */
-	this.diabled = false;
+	this._enabled = false;
 	
 	/**
 	 * If true - command can not be disabled in any case
 	 *
 	 * @type  Boolen
 	 */
-	this.required = false;
+	this._required = false;
 	
 	/**
 	 * Prepare object -
@@ -89,24 +90,28 @@ elFinder.prototype.command = function(fm) {
 	this.setup = function(name, opts) {
 		var self     = this,
 			fm       = this.fm,
-			defaults = {ui : 'button'};
+			handlers = {
+				'focus open' : function() { self._update(); },
+				blur  : function() { self._update(self._state.disabled); }
+			};
 		
 		this.name      = name;
 		this.title     = fm.i18n(this.title || this.name);
-		this.options   = $.extend(defaults, opts);
-		this.listeners = [];
+		this.options   = $.extend({ui : 'button'}, opts);
+		this._listeners = [];
 
-		!this.required && fm.bind('open', function() {
-			self.lock = $.inArray(self.name, fm.param('disabled')) === -1;
+		!this._required && fm.bind('open', function() {
+			self._enabled = $.inArray(self.name, fm.param('disabled')) === -1;
 		});
 		
-		$.each(this.handlers, function(e, c) {
+		$.each($.extend(handlers, this._handlers), function(e, c) {
 			fm.bind(e, c);
 		});
 		
-		$.each(this.shortcuts, function(i, s) {
+		$.each(this._shortcuts, function(i, s) {
 			fm.shortcut(s);
 		});
+		
 		this.init();
 	}
 
@@ -132,7 +137,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.enabled = function() {
-		return !this.lock && this.state >= this.states.enabled;
+		return this._getstate() >= this._state.enabled;
 	}
 	
 	/**
@@ -141,7 +146,17 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.active = function() {
-		return !this.lock && this.state == this.states.active;
+		return this._getstate() == this._state.active;
+	}
+	
+	/**
+	 * Return current command state.
+	 * Should be overloaded in most commands
+	 *
+	 * @return Number
+	 */
+	this._getstate = function() {
+		return (this._enabled || this._required) ? this._state.enabled : this._state.disabled;
 	}
 	
 	/**
@@ -149,12 +164,17 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @return elFinder.command
 	 */
-	this.update = function(state) {
-		var old = this.state;
-		if (!this.lock) {
+	this._update = function(state, value) {
+		var state    = state === void(0) ? this._getstate() : state,
+			oldState = this.state,
+			oldValue = this.value;
+			
+		// change state only if command is not disabled
+		if (this._enabled || this._required) {
 			this.state = state;
-			old != state && this.change();
+			this.value = value;
 		}
+		(oldState !== this.state || oldValue != this.value) && this.change();
 		return this;
 	}
 	
@@ -166,14 +186,14 @@ elFinder.prototype.command = function(fm) {
 	 * @return elFinder.command
 	 */
 	this.change = function(c) {
-		var l = this.listeners.length;
+		var l = this._listeners.length;
 		
-		if (c === void(0) && this.enabled()) {
+		if (c === void(0)) {
 			while (l--) {
-				this.listeners[l](this);
+				this._listeners[l](this);
 			}
 		} else if (typeof(c) === 'function') {
-			this.listeners.push(c);
+			this._listeners.push(c);
 		}
 		return this;
 	}
