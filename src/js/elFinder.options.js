@@ -139,7 +139,7 @@ elFinder.prototype.options = {
 	
 	sync : 0,
 	
-	commands : ['back', 'forward'],
+	commands : ['back', 'forward', 'up', 'home', 'open', 'copy', 'cut', 'paste'],
 	
 	commandsOptions : {},
 	
@@ -162,7 +162,11 @@ elFinder.prototype.options = {
 	 */
 	toolbar : '',
 	/* buttons on toolbar */
-	toolbarConf : [['back', 'forward', 'up', 'home']],
+	toolbarConf : [
+		['back', 'forward', 'up', 'home'],
+		['open'],
+		['copy', 'cut', 'paste']
+	],
 	toolbarConf_ : [
 		['back', 'forward', 'up', 'home'],
 		['select', 'open'],
@@ -187,8 +191,8 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	debug : false
-	// debug : ['event-open', 'event-focus', 'event-blur']
+	// debug : false
+	debug : ['event-copy', 'event-cut', 'event-dblclick']
 }
 
 })(jQuery);

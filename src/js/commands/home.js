@@ -4,7 +4,7 @@ elFinder.prototype.commands.home = function() {
 	
 	this._required = true;
 	
-	this.shortcuts = [{
+	this._shortcuts = [{
 		pattern     : 'ctrl+home ctrl+shift+up',
 		description : 'Go to parent directory',
 		callback    : function() { self.exec(); }

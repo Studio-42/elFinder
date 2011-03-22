@@ -126,6 +126,17 @@
 			
 			commands = {},
 			
+			/**
+			 * Buffer for copied files
+			 *
+			 * @type Object
+			 **/
+			clipboard = {
+				files : [],
+				src   : null, // required for old api
+				cut   : false
+			},
+			
 			node = $(node),
 			
 			prevContent = $('<div/>'),
@@ -359,6 +370,16 @@
 						}
 					});
 				}
+			},
+			
+			resetClipboard = function() {
+				clipboard = {
+					files : [],
+					src   : null, // required for old api
+					cut   : false
+				}
+				
+				self.trigger('changeClipboard', {clipboard : clipboard});
 			}
 			;
 
@@ -479,8 +500,6 @@
 		this.disable = function() {
 			return this.trigger('blur');
 		}
-		
-		
 		
 		/**
 		 * Return selected files hashes
@@ -656,8 +675,8 @@
 			var event    = event.toLowerCase(),
 				handlers = listeners[event] || [], i, j;
 			
-			if (event == 'open')
-				this.time('event '+event)
+			this.debug('event-'+event, data)
+			
 			if (handlers.length) {
 				event = $.Event(event);
 				for (i = 0; i < handlers.length; i++) {
@@ -674,8 +693,6 @@
 					}
 				}
 			}
-			this.debug('event-'+event.type, data)
-			this.timeEnd('event '+event.type)
 			return this;
 		}
 		
@@ -786,6 +803,11 @@
 			return $.map(selected, function(hash) { return files[hash] || null });
 		};
 		
+		/**
+		 * Return root dir hash for current working directory
+		 * 
+		 * @return String
+		 */
 		this.root = function() {
 			var dir = files[cwd.hash];
 			
@@ -793,6 +815,59 @@
 				dir = files[dir.phash]
 			}
 			return dir.hash;
+		}
+		
+		this.clipboard = function() {
+			return $.extend({}, clipboard);
+		}
+		
+		/**
+		 * Copy files into buffer
+		 * 
+		 * @param  Array    files hashes array
+		 * @param  String   files parent dir hash (required by old api)
+		 * @param  Boolean  cut files?
+		 * @param  Boolean  method called from drag&drop - required for correct error message
+		 * @return Boolean
+		 */
+		this.copy = function(files, src, cut, dd) {
+			var self   = this,
+				_files = [],
+				errors = [],
+				file;
+			
+			resetClipboard();
+			
+			$.each(files||[], function(i, hash) {
+				if (file = self.file(hash)) {
+					if (!file.read || (cut && !file.rm)) {
+						errors.push(file.name);
+					} else {
+						_files.push(hash);
+					}
+				}
+			})
+			
+			if (errors.length) {
+				return !!this.trigger('error', {
+					error : [
+						[cut ? (dd ? 'Unable to move "$1".' : 'Unable to cut "$1".') : 'Unable to copy "$1".', errors.join(', ')], 
+						'Not enough permission.'
+					]
+				});
+			}
+			
+			if (_files.length) {
+				clipboard = {
+					src   : src || this.cwd().hash,
+					cut   : cut,
+					files : _files
+				};
+
+				return !!this.trigger('changeclipboard', {clipboard : clipboard});
+			}
+			
+			return false;
 		}
 		
 		/**
@@ -1111,9 +1186,9 @@
 					// exec shortcuts
 					.bind('keydown keypress', execShortcut);
 				
-				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
-					$.inArray(name, cmds) === -1 && cmds.push(name)
-				});
+				// $.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
+				// 	$.inArray(name, cmds) === -1 && cmds.push(name)
+				// });
 				
 				// self.log(cmds)
 				
@@ -1127,7 +1202,7 @@
 						commands[name].setup(name);
 					}
 				});
-				
+				// self.log(commands)
 				if (!$.fn[tb]) {
 					tb = 'elfindertoolbar';
 				}
@@ -1448,72 +1523,6 @@
 		fwd : function() {
 			this.history.fwd();
 			return this;
-		},
-		
-		/**
-		 * Copy files into buffer
-		 * 
-		 * @param  Array    files hashes array
-		 * @param  String   files parent dir hash (required by old api)
-		 * @param  Boolean  cut files?
-		 * @param  Boolean  method called from drag&drop - required for correct error message
-		 * @return Boolean
-		 */
-		copy : function(files, src, cut, dd) {
-			var error = cut ? (dd ? 'Unable to move "$1".' : 'Unable to cut "$1".') : 'Unable to copy "$1".',
-				i, hash, file, result = [];
-			
-			this.cleanBuffer();
-			
-			for (i= 0; i < files.length; i++) {
-				hash = files[i];
-				file = this.file(hash);
-				
-				if (file) {
-					if (!file.read || (cut && !file.rm)) {
-						return this.trigger('error', [[error, file.name], 'Not enough permission.'])
-					}
-					result.push(hash);
-				}
-			}
-			
-			if (result.length) {
-				this.buffer = {
-					src   : src || this.cwd().hash,
-					cut   : cut ? 1 : 0,
-					files : files
-				};
-				this.trigger(cut ? 'cut' : 'copy', {buffer : this.buffer});
-				return true;
-			}
-			
-			return false;
-			var self  = this, 
-				error = '',
-				files = $.map(files, function(hash) {
-					var file = self.file(hash);
-					
-					if (file && !error && (!file.read || (cut ? !file.rm : false))) {
-						error = (cut ? (dd ? 'Unable to move "$1"' : 'Unable to cut "$1"') : 'Unable to copy "$1"') + '. Not enough permission.';
-						error = self.i18n([error, file.name]);
-					}
-					return file ? hash : null;
-				});
-				
-			if (error) {
-				self.trigger('error', {error : error});
-				
-			} else if (files.length) {
-				this.buffer = {
-					src   : src || this.cwd().hash,
-					cut   : cut ? 1 : 0,
-					files : files
-				};
-				this.trigger(cut ? 'cut' : 'copy', {buffer : this.buffer});
-				return true;
-			}
-			
-			return false;
 		},
 		
 		/**

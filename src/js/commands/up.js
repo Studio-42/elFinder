@@ -4,8 +4,8 @@ elFinder.prototype.commands.up = function() {
 	
 	this._required = true;
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+up',
+	this._shortcuts = [{
+		pattern     : 'ctrl+up backspace',
 		description : 'Go to parent directory',
 		callback    : function() { self.exec() }
 	}];

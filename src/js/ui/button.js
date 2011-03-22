@@ -7,19 +7,18 @@ $.fn.elfinderbutton = function(cmd) {
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
 				.hover(function(e) {
 					var $this = $(this);
-					if (!$this.is('.'+disabled)) {
-						$this.toggleClass('ui-state-hover', e.type == 'mouseenter')
-					}
+					!$this.is('.'+disabled) && $this.toggleClass('ui-state-hover', e.type == 'mouseenter')
 				})
 				.click(function(e) {
 					e.preventDefault();
 					!$(this).is('.'+disabled) && this._click();
 				});
 			
-		cmd.change(function() {
-			if (cmd.enabled()) {
+		cmd.change(function(e) {
+			
+			if (e.data.enabled) {
 				self.removeClass(disabled);
-				cmd.active() && self.addClass(active);
+				e.data.active && self.addClass(active);
 			} else {
 				self.removeClass(active).addClass(disabled);
 			}

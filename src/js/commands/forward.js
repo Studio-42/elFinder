@@ -5,7 +5,7 @@ elFinder.prototype.commands.forward = function() {
 	this._required = true;
 	
 	
-	this.shortcuts = [{
+	this._shortcuts = [{
 		pattern     : 'ctrl+right',
 		description : 'Go forward',
 		callback    : function() { self.exec(); }

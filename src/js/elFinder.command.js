@@ -91,8 +91,8 @@ elFinder.prototype.command = function(fm) {
 		var self     = this,
 			fm       = this.fm,
 			handlers = {
-				'focus open' : function() { self._update(); },
-				blur  : function() { self._update(self._state.disabled); }
+				'focus open' : function(e) {  self._update(); },
+				blur  : function(e) {  self._update(self._state.disabled); }
 			};
 		
 		this.name      = name;
@@ -104,7 +104,7 @@ elFinder.prototype.command = function(fm) {
 			self._enabled = $.inArray(self.name, fm.param('disabled')) === -1;
 		});
 		
-		$.each($.extend(handlers, this._handlers), function(e, c) {
+		$.each($.extend({}, handlers, this._handlers), function(e, c) {
 			fm.bind(e, c);
 		});
 		
@@ -112,10 +112,10 @@ elFinder.prototype.command = function(fm) {
 			fm.shortcut(s);
 		});
 		
-		this.init();
+		this._init();
 	}
 
-	this.init = function() { }
+	this._init = function() { }
 
 	/**
 	 * Exec command if it is enabled and return result
@@ -175,6 +175,7 @@ elFinder.prototype.command = function(fm) {
 			this.value = value;
 		}
 		(oldState !== this.state || oldValue != this.value) && this.change();
+		// this.fm.log(this.name+' '+this.state)
 		return this;
 	}
 	
@@ -186,11 +187,19 @@ elFinder.prototype.command = function(fm) {
 	 * @return elFinder.command
 	 */
 	this.change = function(c) {
-		var l = this._listeners.length;
+		var l = this._listeners.length, e;
 		
 		if (c === void(0)) {
 			while (l--) {
-				this._listeners[l](this);
+				e = $.Event();
+				e.data = {
+					command  : this,
+					disabled : this.state === this._state.disabled,
+					enabled  : this.state === this._state.enabled,
+					active   : this.state === this._state.active,
+					value    : this.value
+				}
+				this._listeners[l](e);
 			}
 		} else if (typeof(c) === 'function') {
 			this._listeners.push(c);

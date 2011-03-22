@@ -398,7 +398,7 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// call fm.open()
 				.delegate('[id]', 'dblclick', function(e) {
-					fm.open(this.id);
+					fm.trigger('dblclick', {file : this.id});
 				})
 				// attach draggable
 				.delegate('[id]', 'mouseenter', function(e) {
