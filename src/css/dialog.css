@@ -19,18 +19,20 @@
 
 .std42-dialog .ui-dialog-content {
 	padding:.2em .5em;
-	font-size:.86em;
+	font-size:.82em;
 }
 
 .std42-dialog .ui-dialog-buttonpane {
 	border:0 solid;
 	margin:0;
-	padding:0;
+	padding:.2em .5em;
+	font-size:.82em;
 }
 
 .std42-dialog .ui-dialog-buttonpane button {
-	margin:.2em 1em;
-	font-size:.82em;
+/*	margin:.2em 1em .2em 0;*/
+	margin:0 0 0 .2em;
+	
 	padding:0;
 }
 

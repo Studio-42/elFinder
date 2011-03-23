@@ -139,7 +139,7 @@ elFinder.prototype.options = {
 	
 	sync : 0,
 	
-	commands : ['back', 'forward', 'up', 'home', 'open', 'copy', 'cut', 'paste'],
+	commands : ['back', 'forward', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm'],
 	
 	commandsOptions : {},
 	
@@ -165,7 +165,8 @@ elFinder.prototype.options = {
 	toolbarConf : [
 		['back', 'forward', 'up', 'home'],
 		['open'],
-		['copy', 'cut', 'paste']
+		['copy', 'cut', 'paste'],
+		['rm']
 	],
 	toolbarConf_ : [
 		['back', 'forward', 'up', 'home'],

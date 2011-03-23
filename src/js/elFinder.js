@@ -1418,6 +1418,38 @@
 		},
 		
 		/**
+		 * Open confiration dialog
+		 * 
+		 * @param  String    dialog title
+		 * @param  String    dialog text
+		 * @param  Function  Ok button callback
+		 * @param  Boolean   Show "Apply to all" checkbox
+		 * @return String
+		 */
+		confirm : function(title, text, callback, applytoall) {
+			var checkbox = $('<input type="checkbox"/>'),
+					opts = {
+					title : title,
+					modal : true,
+					buttons : {
+						Ok : function() {
+							$(this).dialog('close');
+							callback(checkbox.is(':checked'));
+						},
+						Cancel : function() { $(this).dialog('close'); }
+					}
+				
+				},
+				dialog = this.dialog('<div class="elfinder-dialog-text">'+text+'</div>', opts, 'notify');
+			
+			if (applytoall) {
+				dialog.parents('.elfinder-dialog')
+					.find('.ui-dialog-buttonpane')
+					.prepend($('<label> '+this.i18n('Apply to all')+'</label>').prepend(checkbox));
+			}
+		},
+		
+		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
 		 * To bind to multiply events at once, separate events names by space
 		 *
