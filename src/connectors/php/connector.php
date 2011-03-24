@@ -72,7 +72,7 @@ $opts = array(
 				'/123/' => array(
 					'read'   => true,
 					'write'   => true,
-					'rm'   => true
+					'rm'   => false
 				),
 				'/print\.png/' => array(
 					'read'   => true,

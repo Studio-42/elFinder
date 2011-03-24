@@ -160,7 +160,12 @@
 			
 			spinner = $('<div class="elfinder-spinner"/>').hide(),
 			
-			
+			/**
+			 * Notification dialog
+			 *
+			 * @type  jQuery
+			 */
+			notifyDialog = $('<div/>'), 
 			
 			width, height,
 			
@@ -684,8 +689,8 @@
 					event.data = $.extend(true, {}, data);
 					try {
 						handlers[i](event, this);
-					} catch (exeption) {
-						window.console && window.console.error && window.console.error(exeption);
+					} catch (ex) {
+						window.console && window.console.error && window.console.error(ex);
 					}
 					
 					if (event.isPropagationStopped()) {
@@ -884,8 +889,8 @@
 				buttons = options.buttons,
 				dialog  = $('<div/>').append(content);
 				
-			delete options.modal;
-			delete options.buttons
+			options.modal = false;
+			options.buttons = {};
 			
 			options = $.extend({
 				title : '',
@@ -913,12 +918,12 @@
 			options.title = this.i18n(options.title);
 			
 			if (type) {
-				dialog.append('<span class="elfinder-dialog-icon"/>');
+				type != 'notify' && dialog.append('<span class="elfinder-dialog-icon"/>');
 				options.dialogClass += ' elfinder-dialog-'+type;
 			}
-			
+
 			if (buttons) {
-				options.buttons = {};
+				
 				$.each(buttons, function(name, cb) {
 					options.buttons[self.i18n(name)] = cb;
 				});
@@ -927,6 +932,39 @@
 			modal && showOverlay();
 			
 			return dialog.dialog(options);
+		}
+		
+		/**
+		 * Open notification dialog 
+		 * and append/update message for required notification type.
+		 *
+		 * @param  String  notification type (@see elFinder.notifyType)
+		 * @param  Number  notification counter (how many files to work with)
+		 * @return elFinder
+		 */
+		this.notify = function(type, cnt) {
+			var msg    = this.notifyType[type], 
+				nclass = 'elfinder-notify',
+				tclass = nclass+'-text',
+				place;
+				
+			if (msg) {
+				place = notifyDialog.find('.'+nclass);
+				
+				if (place.length) {
+					cnt += parseInt(place.data('cnt'));
+				} else {
+					place = $('<div class="'+nclass+' '+nclass+'-'+type+'"><span class="'+tclass+'"/><div class="elfinder-notify-spinner"/><span class="elfinder-dialog-icon"/></div>').appendTo(notifyDialog);
+				}
+				if (cnt > 0) {
+					place.data('cnt', cnt).children('.'+tclass).text(this.i18n(msg)+' ('+cnt+')');
+					notifyDialog.dialog('open');
+				} else {
+					place.remove();
+					!notifyDialog.children().length && notifyDialog.dialog('close');
+				}
+			}
+			return this;
 		}
 		
 		this.exec = function(cmd, value) {
@@ -962,7 +1000,7 @@
 		
 		this.draggable = {
 			appendTo   : 'body',
-			addClasses  : true,
+			addClasses : true,
 			delay      : 30,
 			revert     : true,
 			cursor     : 'move',
@@ -1114,7 +1152,7 @@
 			.bind('ajaxerror error', function(e) {
 				var text = (function(error) {
 						text = [];
-						
+						self.log(error)
 						$.each($.isArray(error) ? error : [error], function(i,e) {
 							text.push(self.i18n(e));
 						});
@@ -1123,7 +1161,7 @@
 					})(e.data.error||'');
 
 				if (self.isVisible()) {
-					self.dialog('<div class="elfinder-dialog-text">'+text+'</div>', {
+					self.dialog(text, {
 						title : 'Error',
 						modal : true,
 						closeOnEscape : false,
@@ -1175,6 +1213,18 @@
 				
 				self.options.allowNav && nav.show().append($('<ul/>').elfindertree(self));
 				
+				notifyDialog = self.dialog('', {
+					closeOnEscape : false,
+					autoOpen : false,
+					open : function() {
+						var $this = $(this),
+							o = dir.offset(); 
+						$(this).dialog({position : [o.left+dir.width() - $(this).width(), o.top]})
+						self.log(o.left+dir.width() - $(this).width())
+						},
+					close : function() { }
+				}, 'notify')
+				
 				self.history = new self.history(self);
 				
 				$(document)
@@ -1213,6 +1263,7 @@
 				self.debug('api', self.api);
 				delete listeners.load;
 				loaded = true;
+				// self.notify('rm', 1)
 			})
 			/**
 			 * Set params if required and update files cache
@@ -1292,7 +1343,7 @@
 						});
 						return ret;
 					};
-
+				
 				while (l--) {
 					delete files[rm[l].hash];
 					$.each(find(rm[l].hash), function(i, h) {
@@ -1440,13 +1491,37 @@
 					}
 				
 				},
-				dialog = this.dialog('<div class="elfinder-dialog-text">'+text+'</div>', opts, 'notify');
+				dialog = this.dialog(text, opts, 'confirm');
 			
 			if (applytoall) {
 				dialog.parents('.elfinder-dialog')
 					.find('.ui-dialog-buttonpane')
 					.prepend($('<label> '+this.i18n('Apply to all')+'</label>').prepend(checkbox));
 			}
+		},
+		
+		/**
+		 * Notifications messages by types
+		 *
+		 * @type  Object
+		 */
+		notifyType : {
+			mkdir : 'Creating directory',
+			mkfile : 'Creating files',
+			rm     : 'Delete files'
+		},
+		
+		/**
+		 * Create new notification type.
+		 * Required for future (not included in core elFinder) commands/plugins
+		 *
+		 * @param  String    notification type
+		 * @param  String  notification message
+		 * @return elFinder
+		 */
+		registerNotification : function(type, msg) {
+			!notifyType[type] && type && msg && this.notifyType[type] = msg;
+			return this;
 		},
 		
 		/**
@@ -1671,28 +1746,27 @@
 		 */
 		rm : function(files) {
 			var self = this,
-				error, cnt;
+				errors = [], 
+				cnt;
 			
 			files = $.map($.isArray(files) ? files : [files], function(hash) {
 				var file = self.file(hash);
-				
-				if (file && !error && !file.rm) {
-					error = [self.i18n(['Unable to delete "$1".', file.name]), 'Not enough permission.'];
+
+				if (file && !file.rm) {
+					errors.push(file.name);
 				}
 				return file ? hash : null;
 			});
 			
-			if (error) {
-				return this.trigger('error', {error : error});
+			if (errors.length) {
+				return this.trigger('error', {error : [['Unable to delete "$1".', errors.join(', ')], 'Not enough permission.']});
 			}
 
-			cnt = files.length;
-
-			return cnt 
+			return (cnt = files.length) > 0 
 				? self.ajax({
 						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
-						beforeSend : function() { self.ui.notify('rm', cnt); },
-						complete   : function() { self.ui.notify('rm', -cnt); }
+						beforeSend : function() { self.notify('rm', cnt); },
+						complete   : function() { self.notify('rm', -cnt); }
 					}, 'bg') 
 				: this;
 		},

@@ -1,5 +1,6 @@
 /* jquery-ui dialog fix */
 .std42-dialog {	padding:0; }
+
 /* comment this line to enable ui theme original background */
 .std42-dialog, .std42-dialog .ui-widget-content { background-color:#eee; background-image:none; }
 
@@ -13,13 +14,14 @@
 	-moz-border-radius-bottomright: 0; 
 	-webkit-border-bottom-right-radius: 0; 
 	border-bottom-right-radius: 0; 
-	font-size:.86em;
+	font-size:.82em;
+	font-weight:normal;
 	padding:.1em 1em;
 }
 
 .std42-dialog .ui-dialog-content {
-	padding:.2em .5em;
-	font-size:.82em;
+	padding:.3em .5em;
+	font-size:.80em;
 }
 
 .std42-dialog .ui-dialog-buttonpane {
@@ -30,34 +32,13 @@
 }
 
 .std42-dialog .ui-dialog-buttonpane button {
-/*	margin:.2em 1em .2em 0;*/
 	margin:0 0 0 .2em;
-	
 	padding:0;
 }
 
 .std42-dialog .ui-dialog-buttonpane button span {
 	padding:2px 9px;
 }
-
-/* elfinder dialog */
-.elfinder-dialog .elfinder-dialog-icon {
-	position:absolute;
-	width:32px;
-	height:32px;
-	left:12px;
-	top:50%;
-	margin-top:-15px;
-	background:url(../images/dialogs.png) 0 0 no-repeat;
-}
-
-.elfinder-dialog .elfinder-dialog-text {
-	margin:0 0 0 45px;
-}
-
-.elfinder-dialog-error .ui-dialog-content { padding-top:.7em;}
-
-
 
 
 

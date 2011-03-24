@@ -1,0 +1,49 @@
+/* elfinder dialog */
+.elfinder-dialog .elfinder-dialog-icon {
+	position:absolute;
+	width:32px;
+	height:32px;
+	left:12px;
+	top:50%;
+	margin-top:-15px;
+	background:url(../images/dialogs.png) 0 0 no-repeat;
+}
+
+.elfinder-dialog-error .ui-dialog-content,
+.elfinder-dialog-confirm .ui-dialog-content { 
+	padding-left:56px;
+}
+
+.elfinder-dialog-notify .ui-dialog-content { padding:0;}
+
+.elfinder-notify {
+	border-bottom:1px solid #ccc;
+	position:relative;
+	padding:.5em;
+	text-align:center;
+}
+
+.elfinder-notify:last-child { border:0 solid; }
+
+.elfinder-notify-spinner {
+	margin:3px 0;
+	height:15px;
+	background:url(../images/spinner-ntf.gif) center center no-repeat;
+}
+
+.elfinder-dialog-confirm-applyall {
+	padding-top:3px;
+}
+
+.elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
+
+.elfinder-notify-mkdir     .elfinder-dialog-icon { background-position: 0 -64px; }
+.elfinder-notify-mkfile    .elfinder-dialog-icon { background-position: 0 -96px; }
+.elfinder-notify-paste     .elfinder-dialog-icon,
+.elfinder-notify-diplicate .elfinder-dialog-icon { background-position: 0 -128px; }
+.elfinder-notify-upload    .elfinder-dialog-icon { background-position: 0 -160px; }
+.elfinder-notify-rm        .elfinder-dialog-icon { background-position: 0 -192px; }
+
+
+
+

@@ -516,16 +516,16 @@ $.fn.elfindercwd = function(fm) {
 			})
 			// remove files
 			.bind('removed', function(e) {
-				var rm = e.data.removed,
-					l = rm.length, n;
-
-				while (l--) {
-					if ((n = cwd.find('#'+rm[l])).length) {
-						n.remove();
-					} else if ((n = indexof(rm[l])) != -1) {
-						buffer.splice(n, 1);
-					}
-				}
+				// var rm = e.data.removed,
+				// 	l = rm.length, n;
+				// 
+				// while (l--) {
+				// 	if ((n = cwd.find('#'+rm[l])).length) {
+				// 		n.remove();
+				// 	} else if ((n = indexof(rm[l])) != -1) {
+				// 		buffer.splice(n, 1);
+				// 	}
+				// }
 			})
 			.bind('cut', function(e) {
 				// disable draggable for selected
