@@ -67,7 +67,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @param  Object  file info
 			 * @return String
 			 **/
-			item = function(f) {
+			itemhtml = function(f) {
 				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f) : f[e]; })
 			},
 			
@@ -232,7 +232,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @param String  file hash
 			 * @return Number
 			 */
-			indexof = function(hash) {
+			index = function(hash) {
 				var l = buffer.length;
 				
 				while (l--) {
@@ -284,7 +284,7 @@ $.fn.elfindercwd = function(fm) {
 									if (f.tmb === 1) {
 										tmbs.push(f.hash)
 									}
-									return item(f);
+									return itemhtml(f);
 								}
 								return null;
 							});
@@ -296,14 +296,14 @@ $.fn.elfindercwd = function(fm) {
 							
 						}
 						scrollLock = false;
-						// if (dirs) {
-						// 	setTimeout(function() {
-						// 		cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
-						// 	}, 20);
-						// }
-						// if (tmbs.length || fm.cwd().tmb) {
-						// 	fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-						// } 
+						if (dirs) {
+							setTimeout(function() {
+								cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+							}, 20);
+						}
+						if (tmbs.length || fm.cwd().tmb) {
+							fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+						} 
 						
 					}
 				} else {
@@ -479,7 +479,7 @@ $.fn.elfindercwd = function(fm) {
 					l       = e.data.added.length, f,
 					tmbs    = [],
 					append  = function(f) {
-						var node = item(f),
+						var node = itemhtml(f),
 							i, first, curr;
 					
 						if ((first = cwd.find('[id]:first')).length) {
@@ -516,17 +516,59 @@ $.fn.elfindercwd = function(fm) {
 			})
 			// remove files
 			.bind('removed', function(e) {
-				// var rm = e.data.removed,
-				// 	l = rm.length, n;
-				// 
-				// while (l--) {
-				// 	if ((n = cwd.find('#'+rm[l])).length) {
-				// 		n.remove();
-				// 	} else if ((n = indexof(rm[l])) != -1) {
-				// 		buffer.splice(n, 1);
-				// 	}
-				// }
+				var rm = e.data.removed,
+					l = rm.length, hash, n;
+				
+				while (l--) {
+					hash = rm[l].hash;
+					
+					if ((n = cwd.find('#'+hash)).length) {
+						n.remove();
+					} else if ((n = index(hash)) != -1) {
+						buffer.splice(n, 1);
+					}
+				}
 			})
+			.bind('ajaxstart', function(e) {
+				var cmd = e.data.request.cmd,
+					files = [];
+				
+				if (cmd == 'rm') {
+					files = e.data.request.targets;
+				}
+				
+				$.each(files, function(i, hash) {
+					var node = cwd.find('#'+hash),
+						drag = fm.view == 'list' 
+							? node 
+							: node.find('.elfinder-cwd-icon,.elfinder-cwd-filename');
+					
+					drag.is('.ui-draggable') && drag.draggable('disable');
+					node.is('.directory') && node.droppable('disable');
+				});
+			})
+			.bind('ajaxstop', function(e) {
+				var cmd     = e.data.request.cmd,
+					removed = e.data.response.removed || [],
+					files   = [];
+				
+				if (cmd == 'rm') {
+					files = e.data.request.targets;
+				}
+				
+				$.each(files, function(i, hash) {
+					var node = cwd.find('#'+hash),
+						drag = fm.view == 'list' 
+							? node 
+							: node.find('.elfinder-cwd-icon,.elfinder-cwd-filename');
+					
+					if ($.inArray(hash, removed) === -1) {
+						drag.is('.ui-draggable') && drag.draggable('enable');
+						node.is('.directory') && node.droppable('enable');
+					}
+				});
+			})
+			
 			.bind('cut', function(e) {
 				// disable draggable for selected
 			})

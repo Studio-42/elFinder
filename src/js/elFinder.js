@@ -1354,7 +1354,7 @@
 						});
 						return ret;
 					};
-				
+
 				while (l--) {
 					$.each(childs(rm[l].hash), function(i, h) {
 						var file = self.file(h);
@@ -1365,6 +1365,7 @@
 						
 					});
 				}
+
 			})
 			/**
 			 * Update files cache - add new files
