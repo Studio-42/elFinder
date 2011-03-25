@@ -398,12 +398,6 @@
 		this.version = '2.0 beta';
 		
 		/**
-		 * Target node
-		 *
-		 * @type jQuery
-		 **/
-		// this.node = $(node).html('').removeAttr('style').removeAttr('class');
-		/**
 		 * Protocol version
 		 *
 		 * @type String
@@ -426,6 +420,14 @@
 		 * @type String
 		 **/
 		this.id = node.attr('id') || '';
+		
+		/**
+		 * Events namespace
+		 *
+		 * @type String
+		 **/
+		this.namespace = 'elfinder'+(this.id || Math.random().toString().substr(2, 7));
+		
 		/**
 		 * Interface language
 		 *
@@ -589,9 +591,6 @@
 						
 						// fire event with command name
 						self.trigger(cmd, data);
-						
-						// update selected files
-						self.trigger('updateSelected');
 					}
 				};
 				
@@ -1334,6 +1333,7 @@
 				selected = $.map(e.data.selected || [], function(hash) {
 					return files[hash] ? hash : null;
 				});
+				self.log(selected)
 			})
 			/**
 			 * Update files cache - remove not existed files

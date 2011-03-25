@@ -6,8 +6,50 @@
 $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
-		// fm.log(fm.id)
+		
 		var 
+			/**
+			 * Select event full name
+			 *
+			 * @type String
+			 **/
+			evtSelect = 'select.'+fm.namespace,
+			
+			/**
+			 * Unselect event full name
+			 *
+			 * @type String
+			 **/
+			evtUnselect = 'select.'+fm.namespace,
+			
+			/**
+			 * Selected css class
+			 *
+			 * @type String
+			 **/
+			clSelected = 'ui-selected',
+			
+			/**
+			 * Disabled css class
+			 *
+			 * @type String
+			 **/
+			clDisabled = 'ui-state-disabled',
+			
+			/**
+			 * Draggable css class
+			 *
+			 * @type String
+			 **/
+			clDraggable = 'ui-draggable',
+			
+			/**
+			 * Hover css class
+			 *
+			 * @type String
+			 **/
+			clHover     = 'ui-state-hover',
+
 			/**
 			 * Base thumbnails url
 			 * New API only
@@ -22,8 +64,8 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="%hash" class="elfinder-cwd-file %permsclass %dirclass ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon %mime ui-corner-all" unselectable="on"%style/>%marker</div><div class="elfinder-cwd-filename ui-corner-all" title="%name">%name</div></div>',
-				row  : '<tr id="%hash" class="elfinder-file %permsclass %dirclass"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon %mime"/>%marker<span class="elfinder-filename">%name</span></div></td><td>%perms</td><td>%date</td><td>%size</td><td>%kind</td></tr>'
+				icon : '<div id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename ui-corner-all" title="{name}">{name}</div></div>',
+				row  : '<tr id="{hash}" class="elfinder-file {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
 			},
 			
 			/**
@@ -31,7 +73,7 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type Object
 			 **/
-			replace = {
+			replacement = {
 				permsclass : function(f) {
 					return fm.perms2class(f);
 				},
@@ -68,7 +110,10 @@ $.fn.elfindercwd = function(fm) {
 			 * @return String
 			 **/
 			itemhtml = function(f) {
-				return templates[fm.view == 'list' ? 'row' : 'icon'].replace(/%([a-z]+)/g, function(s, e) { return replace[e] ? replace[e](f) : f[e]; })
+				return templates[fm.view == 'list' ? 'row' : 'icon']
+						.replace(/\{([a-z]+)\}/g, function(s, e) { 
+							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
+						});
 			},
 			
 			/**
@@ -89,7 +134,7 @@ $.fn.elfindercwd = function(fm) {
 			select = function(keyCode, append) {
 				var code     = $.ui.keyCode,
 					prev     = keyCode == code.LEFT || keyCode == code.UP,
-					sel      = cwd.find('[id].ui-selected'),
+					sel      = cwd.find('[id].'+clSelected),
 					selector = prev ? 'first' : 'last',
 					list     = fm.view == 'list',
 					s, n, top, left;
@@ -137,21 +182,45 @@ $.fn.elfindercwd = function(fm) {
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
 					} else {
 						// unselect selected files
-						cwd.find('.ui-selected').trigger('unselect.elfinder')
+						sel.trigger(evtUnselect)
 					}
 					// select file(s)
-					n.trigger('select.elfinder');
+					n.trigger(evtSelect);
 					// set its visible
 					scrollToView(n.filter(prev ? ':first' : ':last'));
 					// update cache/view
-					fm.trigger('updateselected');
+					trigger();
 				}
 			},
 			
+			/**
+			 * Unselect all files
+			 *
+			 * @return void
+			 */
+			unselectAll = function() {
+				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+			},
+			
+			/**
+			 * Return selected files hashes list
+			 *
+			 * @return Array
+			 */
 			selected = function() {
-				return $.map(cwd.find('[id].ui-selected'), function(n) {
-					return $(n).attr('id');
+				return $.map(cwd.find('[id].'+clSelected), function(n) {
+					n = $(n);
+					return n.is('.'+clDisabled) ? null : $(n).attr('id');
 				});
+			},
+			
+			/**
+			 * Fire elfinder "select" event and pass selected files to it
+			 *
+			 * @return void
+			 */
+			trigger = function() {
+				fm.trigger('select', {selected : selected()});
 			},
 			
 			/**
@@ -327,15 +396,13 @@ $.fn.elfindercwd = function(fm) {
 						selected = [],
 						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>'; }, l;
 
-					cwd.selectable('disable').droppable('disable').removeClass('ui-state-disabled');
+					cwd.selectable('disable').droppable('disable').removeClass(clDisabled);
 
 					// select dragged file if no selected
-					if (!element.is('.ui-selected')) {
-						if (!(e.ctrlKey||e.metaKey||e.shiftKey)) {
-							cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-						}
-						element.trigger('select.elfinder');
-						fm.trigger('updateselected');
+					if (!element.is('.'+clSelected)) {
+						!(e.ctrlKey||e.metaKey||e.shiftKey) && unselectAll();
+						element.trigger(evtSelect);
+						trigger();
 					}
 					selectLock = true;
 					
@@ -361,7 +428,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			droppable = $.extend({}, fm.droppable, {
 				hoverClass : 'elfinder-dropable-active',
-				over       : function() { cwd.droppable('disable').removeClass('ui-state-disabled'); },
+				over       : function() { cwd.droppable('disable').removeClass(clDisabled); },
 				// out        : function() { cwd.droppable('enable'); }
 			}),
 			
@@ -376,8 +443,8 @@ $.fn.elfindercwd = function(fm) {
 				// fix ui.selectable bugs and add shift+click support 
 				.delegate('[id]', 'click', function(e) {
 					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
-						prev = p.prevAll('.ui-selected:first'),
-						next = p.nextAll('.ui-selected:first'),
+						prev = p.prevAll('.'+clSelected+':first'),
+						next = p.nextAll('.'+clSelected+':first'),
 						pl   = prev.length,
 						nl   = next.length,
 						sib;
@@ -386,15 +453,15 @@ $.fn.elfindercwd = function(fm) {
 
 					if (e.shiftKey && (pl || nl)) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
-						sib.add(p).trigger('select.elfinder');
+						sib.add(p).trigger(evtSelect);
 					} else if (e.ctrlKey || e.metaKey) {
-						p.trigger((p.is('.ui-selected') ? 'unselect' : 'select') + '.elfinder');
+						p.trigger((p.is('.'+clSelected) ? 'unselect' : 'select') + '.elfinder');
 					} else {
-						cwd.find('[id].ui-selected').trigger('unselect.elfinder');
-						p.trigger('select.elfinder');
+						cwd.find('[id].'+clSelected).trigger(evtUnselect);
+						p.trigger(evtSelect);
 					}
 
-					fm.trigger('updateselected');
+					trigger();
 				})
 				// call fm.open()
 				.delegate('[id]', 'dblclick', function(e) {
@@ -402,33 +469,34 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// attach draggable
 				.delegate('[id]', 'mouseenter', function(e) {
-					var target = fm.view == 'list' ? $(this) : $(this).find('.elfinder-cwd-icon,.elfinder-cwd-filename');
-				
-					!target.is('.ui-draggable') && target.draggable(draggable);
+					var target = fm.view == 'list' 
+							? $(this) 
+							: $(this).children();
+
+					!target.is('.'+clDraggable) && target.draggable(draggable);
 				})
 				// add hover class to selected file
-				.delegate('[id]', 'select.elfinder', function(e) {
-					!selectLock && $(this).addClass('ui-selected').children().addClass('ui-state-hover');
+				.delegate('[id]', evtSelect, function(e) {
+					var $this = $(this);
+
+					!selectLock && !$this.is('.'+clDisabled) && $this.addClass(clSelected).children().addClass(clHover);
 				})
 				// remove hover class from unselected file
-				.delegate('[id]', 'unselect.elfinder', function(e) {
-					!selectLock && $(this).removeClass('ui-selected').children().removeClass('ui-state-hover');
+				.delegate('[id]', evtUnselect, function(e) {
+					!selectLock && $(this).removeClass(clSelected).children().removeClass(clHover);
 				})
 				// make files selectable
 				.selectable({
 					filter     : '[id]',
-					stop       : function(e) { fm.trigger('updateselected'); },
-					selected   : function(e, ui) { $(ui.selected).trigger('select.elfinder');	},
-					unselected : function(e, ui) { $(ui.unselected).trigger('unselect.elfinder'); }
+					stop       : trigger,
+					selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
 				// make cwd itself droppable for folders from nav panel
 				.droppable($.extend({}, fm.droppable));
 		
 
-		fm.bind('updateselected', function(e) {
-				e.stopPropagation();
-				fm.trigger('select', {selected : selected()});
-			})
+		fm
 			// update directory content
 			.bind('open', function(e) {
 				var list  = fm.view == 'list', 
@@ -452,6 +520,7 @@ $.fn.elfindercwd = function(fm) {
 				scrollTop = true;
 				cwd.bind('scroll', scroll).trigger('scroll');
 				scrollTop = false;
+				trigger();
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {
@@ -529,8 +598,9 @@ $.fn.elfindercwd = function(fm) {
 					}
 				}
 			})
+			// on some commands make target files disabled
 			.bind('ajaxstart', function(e) {
-				var cmd = e.data.request.cmd,
+				var cmd   = e.data.request.cmd,
 					files = [];
 				
 				if (cmd == 'rm') {
@@ -539,14 +609,19 @@ $.fn.elfindercwd = function(fm) {
 				
 				$.each(files, function(i, hash) {
 					var node = cwd.find('#'+hash),
-						drag = fm.view == 'list' 
+						list = fm.view == 'list',
+						drag = list 
 							? node 
-							: node.find('.elfinder-cwd-icon,.elfinder-cwd-filename');
-					
-					drag.is('.ui-draggable') && drag.draggable('disable');
+							: node.children();
+							
+					node.addClass(clDisabled).trigger(evtUnselect);
+					drag.is('.'+clDraggable) && drag.draggable('disable');
 					node.is('.directory') && node.droppable('disable');
+					!list && drag.removeClass(clDisabled);
 				});
+				fm.trigger('select', {selected : selected()});
 			})
+			// enable files disabled in ajaxstart handler
 			.bind('ajaxstop', function(e) {
 				var cmd     = e.data.request.cmd,
 					removed = e.data.response.removed || [],
@@ -560,26 +635,20 @@ $.fn.elfindercwd = function(fm) {
 					var node = cwd.find('#'+hash),
 						drag = fm.view == 'list' 
 							? node 
-							: node.find('.elfinder-cwd-icon,.elfinder-cwd-filename');
+							: node.children();
 					
 					if ($.inArray(hash, removed) === -1) {
-						drag.is('.ui-draggable') && drag.draggable('enable');
+						node.removeClass(clDisabled);
+						drag.is('.'+clDraggable) && drag.draggable('enable');
 						node.is('.directory') && node.droppable('enable');
 					}
 				});
-			})
-			
-			.bind('cut', function(e) {
-				// disable draggable for selected
-			})
-			.bind('error', function(e) {
-				// remove disabled class
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 
 				description : 'Select all files',
 				callback    : function() { 
-					cwd.find('[id]:not(.ui-selected)').trigger('select.elfinder'); 
+					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
 					fm.trigger('select', {selected : selected()}); 
 				}
 			})
@@ -593,8 +662,8 @@ $.fn.elfindercwd = function(fm) {
 				pattern     : 'home',
 				description : 'Select first file',
 				callback    : function(e) { 
-					cwd.find('[id]:.ui-selected').trigger('unselect.elfinder'); 
-					cwd.find('[id]:first').trigger('select.elfinder') 
+					unselectAll();
+					cwd.find('[id]:first').trigger(evtSelect) 
 					fm.trigger('select', {selected : selected()}); 
 				}
 			})
@@ -602,8 +671,8 @@ $.fn.elfindercwd = function(fm) {
 				pattern     : 'end',
 				description : 'Select last file',
 				callback    : function(e) { 
-					cwd.find('[id]:.ui-selected').trigger('unselect.elfinder'); 
-					cwd.find('[id]:last').trigger('select.elfinder') 
+					unselectAll();
+					cwd.find('[id]:last').trigger(evtSelect) 
 					fm.trigger('select', {selected : selected()}); 
 				}
 			});
