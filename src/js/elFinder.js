@@ -903,9 +903,18 @@
 						nw = node.width(),
 						dw = dialog.width(),
 						nh = node.height(),
-						dh = dialog.height();
+						dh = dialog.height(),
+						p = type == 'notify'
+							? [parseInt(o.left + nw - dw-7), parseInt(o.top+7)]
+							: [parseInt(o.left + (nw/2) - (dw/2)), parseInt(o.top + (nh/2) - (dh/2)) ];
 					
-					dialog.dialog({position : [nw/2 - dw/2 + o.left, nh/2+o.top-dh ]});
+					dialog.dialog({position : p});
+					
+					if (modal) {
+						showOverlay();
+						self.trigger('blur');
+					}
+					 
 				},
 				create : function() {
 					var $this = $(this);
@@ -933,13 +942,12 @@
 			}
 
 			if (buttons) {
-				
 				$.each(buttons, function(name, cb) {
 					options.buttons[self.i18n(name)] = cb;
 				});
 			}
 			
-			modal && showOverlay();
+			
 			
 			return dialog.dialog(options);
 		}
@@ -1162,7 +1170,6 @@
 			.bind('ajaxerror error', function(e) {
 				var text = (function(error) {
 						text = [];
-						self.log(error)
 						$.each($.isArray(error) ? error : [error], function(i,e) {
 							text.push(self.i18n(e));
 						});
@@ -1225,16 +1232,10 @@
 				
 				notifyDialog = self.dialog('', {
 					closeOnEscape : false,
-					autoOpen : false,
-					open : function() {
-						var $this = $(this),
-							o = dir.offset(); 
-						$(this).dialog({position : [o.left+dir.width() - $(this).width(), o.top]})
-						self.log(o.left+dir.width() - $(this).width())
-						},
-					close : function() { }
-				}, 'notify')
-				
+					autoOpen      : false,
+					close         : function() { }
+				}, 'notify');
+
 				self.history = new self.history(self);
 				
 				$(document)
@@ -1340,14 +1341,14 @@
 			.bind('removed', function(e) {
 				var rm   = e.data.removed,
 					l    = rm.length,  
-					find = function(hash) {
+					childs = function(hash) {
 						var ret = [hash];
 						
 						$.each(files, function(h, f) {
 							if (f.phash == hash) {
 								ret.push(f.hash);
 								if (f.childs) {
-									ret.concat(find(h));
+									ret.concat(childs(h));
 								}
 							}
 						});
@@ -1355,9 +1356,13 @@
 					};
 				
 				while (l--) {
-					delete files[rm[l].hash];
-					$.each(find(rm[l].hash), function(i, h) {
+					$.each(childs(rm[l].hash), function(i, h) {
+						var file = self.file(h);
+						if (file.phash == cwd.hash) {
+							cwd.size -= file.size;
+						}
 						delete files[h];
+						
 					});
 				}
 			})
