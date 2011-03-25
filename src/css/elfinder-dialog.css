@@ -13,7 +13,7 @@
 .elfinder-dialog-confirm .ui-dialog-content { 
 	padding-left:56px;
 }
-
+.elfinder-dialog-notify .ui-dialog-titlebar { padding:0;}
 .elfinder-dialog-notify .ui-dialog-content { padding:0;}
 
 .elfinder-notify {

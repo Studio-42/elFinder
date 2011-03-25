@@ -885,6 +885,7 @@
 		 */
 		this.dialog = function(content, options, type) {
 			var self    = this,
+				node    = this.node,
 				modal   = !!options.modal,
 				buttons = options.buttons,
 				dialog  = $('<div/>').append(content);
@@ -893,10 +894,19 @@
 			options.buttons = {};
 			
 			options = $.extend({
-				title : '',
-				resizable : false,
-				minHeight : 100,
+				title         : '',
+				resizable     : false,
+				minHeight     : 100,
 				closeOnEscape : true,
+				open : function() {
+					var o = node.offset(),
+						nw = node.width(),
+						dw = dialog.width(),
+						nh = node.height(),
+						dh = dialog.height();
+					
+					dialog.dialog({position : [nw/2 - dw/2 + o.left, nh/2+o.top-dh ]});
+				},
 				create : function() {
 					var $this = $(this);
 					$this.nextAll('.ui-dialog-buttonpane').addClass('ui-corner-bottom');
@@ -1478,8 +1488,10 @@
 		 * @return String
 		 */
 		confirm : function(title, text, callback, applytoall) {
-			var checkbox = $('<input type="checkbox"/>'),
-					opts = {
+			var node = this.node,
+				self = this,
+				checkbox = $('<input type="checkbox"/>'),
+				opts = {
 					title : title,
 					modal : true,
 					buttons : {
@@ -1506,7 +1518,7 @@
 		 * @type  Object
 		 */
 		notifyType : {
-			mkdir : 'Creating directory',
+			mkdir  : 'Creating directory',
 			mkfile : 'Creating files',
 			rm     : 'Delete files'
 		},
