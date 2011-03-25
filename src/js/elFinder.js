@@ -1520,7 +1520,9 @@
 		 * @return elFinder
 		 */
 		registerNotification : function(type, msg) {
-			!notifyType[type] && type && msg && this.notifyType[type] = msg;
+			if (!notifyType[type] && type && msg) {
+				this.notifyType[type] = msg;
+			}
 			return this;
 		},
 		
