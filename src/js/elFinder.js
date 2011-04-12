@@ -1195,7 +1195,9 @@
 				}
 
 			})
-			
+			/**
+			 * Fire "load" event if first ajax request succesfull
+			 */
 			.one('ajaxstop', function(e) {
 				self.trigger('load', e.data.response);
 			})
@@ -1333,7 +1335,6 @@
 				selected = $.map(e.data.selected || [], function(hash) {
 					return files[hash] ? hash : null;
 				});
-				self.log(selected)
 			})
 			/**
 			 * Update files cache - remove not existed files

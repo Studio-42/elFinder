@@ -23,6 +23,13 @@ $.fn.elfindercwd = function(fm) {
 			evtUnselect = 'unselect.'+fm.namespace,
 			
 			/**
+			 * Disable event full name
+			 *
+			 * @type String
+			 **/
+			evtDisable = 'disable.'+fm.namespace,
+			
+			/**
 			 * Selected css class
 			 *
 			 * @type String
@@ -137,17 +144,22 @@ $.fn.elfindercwd = function(fm) {
 					sel      = cwd.find('[id].'+clSelected),
 					selector = prev ? 'first' : 'last',
 					list     = fm.view == 'list',
-					s, n, top, left;
-
+					s, n, sib, top, left;
+					
+				function sibling(n, direction) {
+					return n[direction+'All']('[id]:not(.'+clDisabled+'):first');
+				}
+				
 				if (sel.length) {
 					s = sel.filter(prev ? ':first' : ':last');
-
-					if (!s[prev ? 'prev' : 'next']('[id]').length) {
+					sib = sibling(s, prev ? 'prev' : 'next');
+					
+					if (!sib.length) {
 						// there is no sibling on required side - do not move selection
 						n = s;
 					} else if (list || keyCode == code.LEFT || keyCode == code.RIGHT) {
 						// find real prevoius file
-						n = s[prev ? 'prev' : 'next']('[id]');
+						n = sib;
 					} else {
 						// find up/down side file in icons view
 						top = s.position().top;
@@ -157,22 +169,32 @@ $.fn.elfindercwd = function(fm) {
 						if (prev) {
 							do {
 								n = n.prev('[id]');
-							} while (n.length && !(n.position().top < top && n.position().left <= left))
-							
+							} while (n.length && !(n.position().top < top && n.position().left <= left));
+
+							if (n.is('.'+clDisabled)) {
+								n = sibling(n, 'next');
+							}
 						} else {
 							do {
 								n = n.next('[id]');
-							} while (n.length && !(n.position().top > top && n.position().left >= left))
+							} while (n.length && !(n.position().top > top && n.position().left >= left));
+							
+							if (n.is('.'+clDisabled)) {
+								n = sibling(n, 'prev');
+							}
 							// there is row before last one - select last file
-							if (!n.length && cwd.find('[id]:last').position().top > top) {
-								n = cwd.find('[id]:last');
+							if (!n.length) {
+								sib = cwd.find('[id]:not(.'+clDisabled+'):last');
+								if (sib.position().top > top) {
+									n = sib;
+								}
 							}
 						}
 					}
 					
 				} else {
 					// there are no selected file - select first/last one
-					n = cwd.find('[id]:'+(prev ? 'last' : 'first'))
+					n = cwd.find('[id]:not(.'+clDisabled+'):'+(prev ? 'last' : 'first'))
 				}
 				
 				if (n && n.length) {
@@ -182,7 +204,7 @@ $.fn.elfindercwd = function(fm) {
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
 					} else {
 						// unselect selected files
-						sel.trigger(evtUnselect)
+						sel.trigger(evtUnselect);
 					}
 					// select file(s)
 					n.trigger(evtSelect);
@@ -428,8 +450,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			droppable = $.extend({}, fm.droppable, {
 				hoverClass : 'elfinder-dropable-active',
-				over       : function() { cwd.droppable('disable').removeClass(clDisabled); },
-				// out        : function() { cwd.droppable('enable'); }
+				over       : function() { cwd.droppable('disable').removeClass(clDisabled); }
 			}),
 			
 			/**
@@ -441,7 +462,7 @@ $.fn.elfindercwd = function(fm) {
 				.addClass('elfinder-cwd')
 				.attr('unselectable', 'on')
 				// fix ui.selectable bugs and add shift+click support 
-				.delegate('[id]', 'click', function(e) {
+				.delegate('[id]', 'click.'+fm.namespace, function(e) {
 					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
 						prev = p.prevAll('.'+clSelected+':first'),
 						next = p.nextAll('.'+clSelected+':first'),
@@ -464,16 +485,17 @@ $.fn.elfindercwd = function(fm) {
 					trigger();
 				})
 				// call fm.open()
-				.delegate('[id]', 'dblclick', function(e) {
+				.delegate('[id]', 'dblclick.'+fm.namespace, function(e) {
 					fm.trigger('dblclick', {file : this.id});
 				})
 				// attach draggable
-				.delegate('[id]', 'mouseenter', function(e) {
-					var target = fm.view == 'list' 
-							? $(this) 
-							: $(this).children();
+				.delegate('[id]', 'mouseenter.'+fm.namespace, function(e) {
+					var $this = $(this),
+						target = fm.view == 'list' 
+							? $this 
+							: $this.children();
 
-					!target.is('.'+clDraggable) && target.draggable(draggable);
+					!target.is('.'+clDraggable) && !$this.is('.'+clDisabled)  && target.draggable(draggable);
 				})
 				// add hover class to selected file
 				.delegate('[id]', evtSelect, function(e) {
@@ -483,6 +505,18 @@ $.fn.elfindercwd = function(fm) {
 				// remove hover class from unselected file
 				.delegate('[id]', evtUnselect, function(e) {
 					!selectLock && $(this).removeClass(clSelected).children().removeClass(clHover);
+				})
+				.delegate('[id]', evtDisable, function() {
+					var $this = $(this).addClass('ui-state-disabled').trigger(evtUnselect);
+					
+					if (fm.view == 'list') {
+						$this.is('.'+clDraggable) && $this.draggable('destroy');
+					} else {
+						$this.children('.'+clDraggable).draggable('destroy');
+					}
+				})
+				.delegate('[id]', 'enable.'+fm.namespace, function() {
+					
 				})
 				// make files selectable
 				.selectable({
@@ -642,6 +676,19 @@ $.fn.elfindercwd = function(fm) {
 						node.is('.directory') && node.droppable('enable');
 					}
 				});
+			})
+			// disable cuted files
+			.bind('changeclipboard', function(e) {
+				var c = e.data.clipboard, 
+					l = c.files.length;
+					
+				cwd.find('[id].'+clDisabled).removeClass(clDisabled);
+				
+				if (l && c.cut) {
+					while (l--) {
+						cwd.find('#'+c.files[l]).trigger(evtDisable);
+					}
+				}
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 
