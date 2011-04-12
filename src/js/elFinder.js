@@ -1257,7 +1257,7 @@
 				$.each(cmds, function(i, name) {
 					var cmd = self.commands[name];
 					if ($.isFunction(cmd) && !commands[name]) {
-						// self.log(cmd)
+						// self.log(name)
 						cmd.prototype = base;
 						commands[name] = new cmd();
 						commands[name]._super = base;
@@ -1313,6 +1313,12 @@
 
 			})
 			/**
+			 * Clean clipboard on reload
+			 */
+			.bind('reload', function() {
+				resetClipboard();
+			})
+			/**
 			 * Update files cache
 			 */
 			.bind('tree parents', function(e) {
@@ -1336,6 +1342,7 @@
 					return files[hash] ? hash : null;
 				});
 			})
+			
 			/**
 			 * Update files cache - remove not existed files
 			 */
