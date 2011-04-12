@@ -20,7 +20,7 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type String
 			 **/
-			evtUnselect = 'select.'+fm.namespace,
+			evtUnselect = 'unselect.'+fm.namespace,
 			
 			/**
 			 * Selected css class
@@ -455,7 +455,7 @@ $.fn.elfindercwd = function(fm) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
 						sib.add(p).trigger(evtSelect);
 					} else if (e.ctrlKey || e.metaKey) {
-						p.trigger((p.is('.'+clSelected) ? 'unselect' : 'select') + '.elfinder');
+						p.trigger(p.is('.'+clSelected) ? evtUnselect : evtSelect);
 					} else {
 						cwd.find('[id].'+clSelected).trigger(evtUnselect);
 						p.trigger(evtSelect);
@@ -478,7 +478,6 @@ $.fn.elfindercwd = function(fm) {
 				// add hover class to selected file
 				.delegate('[id]', evtSelect, function(e) {
 					var $this = $(this);
-
 					!selectLock && !$this.is('.'+clDisabled) && $this.addClass(clSelected).children().addClass(clHover);
 				})
 				// remove hover class from unselected file
@@ -619,7 +618,7 @@ $.fn.elfindercwd = function(fm) {
 					node.is('.directory') && node.droppable('disable');
 					!list && drag.removeClass(clDisabled);
 				});
-				fm.trigger('select', {selected : selected()});
+				trigger();
 			})
 			// enable files disabled in ajaxstart handler
 			.bind('ajaxstop', function(e) {
@@ -649,7 +648,7 @@ $.fn.elfindercwd = function(fm) {
 				description : 'Select all files',
 				callback    : function() { 
 					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
-					fm.trigger('select', {selected : selected()}); 
+					trigger();
 				}
 			})
 			.shortcut({
@@ -663,8 +662,8 @@ $.fn.elfindercwd = function(fm) {
 				description : 'Select first file',
 				callback    : function(e) { 
 					unselectAll();
-					cwd.find('[id]:first').trigger(evtSelect) 
-					fm.trigger('select', {selected : selected()}); 
+					cwd.find('[id]:first').trigger(evtSelect) ;
+					trigger();
 				}
 			})
 			.shortcut({
@@ -672,8 +671,8 @@ $.fn.elfindercwd = function(fm) {
 				description : 'Select last file',
 				callback    : function(e) { 
 					unselectAll();
-					cwd.find('[id]:last').trigger(evtSelect) 
-					fm.trigger('select', {selected : selected()}); 
+					cwd.find('[id]:last').trigger(evtSelect) ;
+					trigger();
 				}
 			});
 		
