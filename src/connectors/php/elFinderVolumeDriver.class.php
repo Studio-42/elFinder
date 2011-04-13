@@ -570,6 +570,7 @@ abstract class elFinderVolumeDriver {
 		$info = $this->fileinfo($path);
 		
 		if ($extended) {
+			$info['rel'] = $this->rootName.DIRECTORY_SEPARATOR.($path == $this->root ? '' : $this->_relpath($path).DIRECTORY_SEPARATOR);
 			$info['params'] = array_merge(array('tmbUrl' => $this->tmbURL),  $this->_params());
 			$info['url'] = $this->_path2url($path).($path == $this->root ? '' : '/');
 		}
@@ -688,6 +689,39 @@ abstract class elFinderVolumeDriver {
 		
 		return $result;
 	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function size($hashes) {
+		$size = 0;
+		
+		foreach ($hashes as $hash) {
+			if (($path = $this->path($hash)) !== false) {
+				$size += $this->_isDir($path) ? $this->dirsize($path) : $this->_filesize($path);
+			}
+		}
+		// 
+		// 
+		// if (($path = $this->path($hash)) === false) {
+		// 	return false;
+		// }
+		// 
+		// if (!$this->_isReadable($path)) {
+		// 	return 0;
+		// }
+		// 
+		// if ($this->mimetype($path) == 'directory') {
+		// 	return $this->dirsize($path);
+		// } 
+		// 
+		// return $this->_filesize($path);
+		return $size;
+	}
+	
 	
 	/**
 	 * Open file and return file pointer
@@ -1126,11 +1160,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function fileinfo($path) {
-		$root = $path == $this->root;
 		
 		if (!empty($this->cache['info'][$path])) {
 			return $this->cache['info'][$path];
 		}
+		
+		$root = $path == $this->root;
+		
 		
 		$info = array(
 			'name'  => htmlspecialchars($this->_basename($path)),
@@ -1139,22 +1175,30 @@ abstract class elFinderVolumeDriver {
 			'mime'  => $this->mimetype($path),
 			'read'  => (int)$this->_isReadable($path),
 			'write' => (int)$this->_isWritable($path),
-			'rm'    => (int)$this->_isRemovable($path),
-			'rel'   => $root ? $this->rootName : DIRECTORY_SEPARATOR.$this->_relpath($path)
+			'rm'    => (int)$this->_isRemovable($path)
 		);
 		
+		$islink = $this->_isLink($path);
+		if ($islink) {
+			$stat = $this->_lstat($path);
+			$info['size'] = $stat['size'];
+			$time = $stat['mtime'];
+		} else {
+			$info['size'] = $this->_filesize($path);
+			$time = $this->_filemtime($path);
+		}
+		
+		if ($time > $this->today) {
+			$info['date'] = 'Today '.date('H:i', $time);
+		} elseif ($time > $this->yesterday) {
+			$info['date'] = 'Yesterday '.date('H:i', $time);
+		} else {
+			$info['date'] = date($this->options['dateFormat'], $time);
+		}
 		
 		if ($info['read']) {
-			$time = $this->_filemtime($path);
-			if ($time > $this->today) {
-				$info['date'] = 'Today '.date('H:i', $time);
-			} elseif ($time > $this->yesterday) {
-				$info['date'] = 'Yesterday '.date('H:i', $time);
-			} else {
-				$info['date'] = date($this->options['dateFormat'], $time);
-			}
 			
-			if ($path != $this->root && $this->_isLink($path)) {
+			if (!$root && $islink) {
 				if (false === ($link = $this->readlink($path))) {
 					$info['mime']  = 'symlink-broken';
 					$info['read']  = 0;
@@ -1162,14 +1206,14 @@ abstract class elFinderVolumeDriver {
 				} else {
 					$info['mime']   = $this->mimetype($link);
 					$info['link']   = $this->encode($link);
-					$info['linkTo'] = $this->rootName.DIRECTORY_SEPARATOR.$this->_relpath($path);
+					$info['linkTo'] = $this->rootName.DIRECTORY_SEPARATOR.$this->_relpath($link);
 				}
 			}
 			
 			if ($info['mime'] == 'directory') {
 				$info['childs'] = (int)$this->_hasSubdirs($path);
 			} elseif ($info['mime'] != 'symlink-broken') {
-				$info['size'] = $this->_filesize($path);
+				// $info['size'] = $this->_filesize($path);
 				
 				if (($tmb = $this->getTmb($path)) != false) {
 					$info['tmb'] = $tmb;
@@ -1184,9 +1228,7 @@ abstract class elFinderVolumeDriver {
 					$info['resize'] = 1;
 				}
 			}
-		} else {
-			$info['date'] = 'unknown';
-		}
+		} 
 
 		$this->cache['info'][$path] = $info;
 		return $info;
@@ -1206,6 +1248,31 @@ abstract class elFinderVolumeDriver {
 		}
 		// check for target outside root
 		return $this->_inpath($path, $this->root) && $this->_fileExists($path) ? $path : false;
+	}
+	
+	/**
+	 * Return total directory size
+	 *
+	 * @param  string  $hash  path
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function dirsize($path) {
+		$size = 0;
+		
+		if ($this->_isReadable($path) && ($ls = $this->_scandir($path)) !== false) {
+			foreach ($ls as $path) {
+				if ($this->_isLink($path)) {
+					$stat = $this->_lstat($path);
+					$size += $stat['size'];
+				} elseif ($this->_isDir($path)) {
+					$size += $this->dirsize($path);
+				} else {
+					$size += $this->_filesize($path);
+				}
+			}
+		}
+		return $size;
 	}
 	
 	/**
@@ -1720,6 +1787,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _hasChild($parent, $name);
+	
+	/**
+	 * Return symlink stat (required only size and mtime)
+	 *
+	 * @param  string  $path  link path
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _lstat($path);
+	
 	
 	/**
 	 * Return file modification time

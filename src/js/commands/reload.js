@@ -2,6 +2,8 @@
 elFinder.prototype.commands.reload = function() {
 	var self = this;
 	
+	this._required = true;
+	
 	this._shortcuts = [{
 		pattern     : 'ctrl+shift+r',
 		description : 'Reload',

@@ -22,7 +22,7 @@ elFinder.prototype.commands.rm = function() {
 			msg = fm.i18n('Are you shure you want to remove files?') + '<br/>' + fm.i18n('This cannot be undone!'),
 			selected = fm.selected();
 			
-		this.fm.confirm(fm.i18n('Delete'), msg, function() { fm.rm(selected) });
+		fm.confirm(fm.i18n('Delete'), msg, function() { fm.rm(selected) });
 	}
 
 }

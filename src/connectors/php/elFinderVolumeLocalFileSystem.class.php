@@ -242,6 +242,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _relpath($path) {
+		// return $this->rootName.DIRECTORY_SEPARATOR.substr($path, strlen($this->root)+1);
 		return $path == $this->root ? '' : substr($path, strlen($this->root)+1);
 	}
 	
@@ -446,6 +447,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _hasChild($parent, $name) {
 		return file_exists($parent.DIRECTORY_SEPARATOR.$name);
 	}
+	
+	/**
+	 * Return symlink stat (required only size and mtime)
+	 *
+	 * @param  string  $path  link path
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _lstat($path) {
+		return @lstat($path);
+	}
+	
 	
 	/**
 	 * Return file modification time

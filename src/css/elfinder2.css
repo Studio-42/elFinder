@@ -64,7 +64,7 @@
 .elfinder-spinner-mini {
 	width:16px;
 	height:16px;
-	background:url(../images/spinner-mini.gif) 0 0 no-repeat;
+	background:url(../images/spinner-mini.gif) center center no-repeat;
 }
 
 .elfinder-blur { opacity: .6; filter:Alpha(Opacity=60); }
@@ -461,3 +461,42 @@
 	text-align:right;
 }
 
+/*********************************************************/
+/*                        COMMANDS                       */
+/*********************************************************/
+
+/* info */
+.elfinder-info-title {
+/*	clear:both;*/
+/*	border:1px solid #111;*/
+/*	display:none;*/
+}
+
+.elfinder-info-title .elfinder-cwd-icon {
+	float:left;
+	width:48px;
+	height:48px;
+/*	border:1px solid #111;*/
+	margin-right:1em;
+
+}
+
+.elfinder-info-title strong { display:block; padding:.3em 0 .5em 0; }
+
+table.elfinder-info-tb {
+	border:0 solid;
+/*	border-collapse: collapse;*/
+	margin:1em .2em 0 .2em;
+/*	margin:1em auto;*/
+	font-size:.8em;
+}
+
+table.elfinder-info-tb td { white-space:nowrap; padding:2px 3px; }
+
+.elfinder-info-tb tr td:first-child { text-align:right;  }
+
+.elfinder-info-size span { float:left;}
+
+.elfinder-info-size .elfinder-spinner-mini {height:14px; margin:0 5px;}
+
+.elfinder-info-fsize { display:none;}

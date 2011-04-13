@@ -537,7 +537,7 @@ $.fn.elfindercwd = function(fm) {
 				
 				tmbUrl = fm.param('tmbUrl')||'';
 			
-				cwd.empty()
+				cwd.html('')
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
 			

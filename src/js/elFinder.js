@@ -789,6 +789,19 @@
 		};
 		
 		/**
+		 * Return file path relative to root folder
+		 * 
+		 * @param  String  file name
+		 * @return String
+		 */
+		this.path = function(file) {
+			var path = this.isNewApi ? (cwd.rel + (cwd.hash == file.hash ? '' : file.name)) : file.rel,
+				tail = path.substr(-1, 1);
+
+			return tail == '/' || tail == '\\' ? path.substr(0, path.length-1) : path
+		}
+		
+		/**
 		 * Return file/dir info with required name
 		 * 
 		 * @param  String  file hash
@@ -885,6 +898,8 @@
 		this.dialog = function(content, options, type) {
 			var self    = this,
 				node    = this.node,
+				options = options || {},
+				open = options.open,
 				modal   = !!options.modal,
 				buttons = options.buttons,
 				dialog  = $('<div/>').append(content);
@@ -913,7 +928,10 @@
 						showOverlay();
 						self.trigger('blur');
 					}
-					 
+					if (open) {
+						self.log(open)
+						// options.open()
+					} 
 				},
 				create : function() {
 					var $this = $(this);
@@ -1773,7 +1791,7 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			var self = this,
+			var self   = this,
 				errors = [], 
 				cnt;
 			
@@ -1907,7 +1925,7 @@
 				msg = this.messages[msg] || msg;
 				return msg.replace(/\$(\d+)/g, function(a, num) { return m[num-1] || ''; });
 			}
-			return (this.messages[m] || m).replace(/\$(\d+)/g, ''); 
+			return (this.messages[m] || m || '').replace(/\$(\d+)/g, ''); 
 		},
 		
 		/**
@@ -2004,7 +2022,7 @@
 		 */
 		formatDate : function(d) {
 			var self = this;
-			return d.replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
+			return d == 'unknown' ? self.i18n(d) : d.replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
 		},
 		
 		/**
@@ -2034,14 +2052,14 @@
 		 */
 		formatPermissions : function(f) {
 			var r  = !!f.read,
-				w  = !!f.read,
+				w  = !!f.write,
 				rm = !!f.rm,
 				p  = [];
 				
 			r  && p.push(this.i18n('read'));
 			w  && p.push(this.i18n('write'));
 			rm && p.push(this.i18n('remove'));
-			return p.join('/');
+			return p.length ? p.join('/') : this.i18n('no access');
 		},
 		
 		/**

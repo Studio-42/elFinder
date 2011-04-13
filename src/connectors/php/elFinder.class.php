@@ -35,6 +35,7 @@ class elFinder {
 		'tmb'       => array('current' => true, 'files' => true),
 		'sync'      => array('current' => true, 'targets' => true, 'mimes' => false),
 		'file'      => array('target' => true),
+		'size'      => array('targets' => true, 'id' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
@@ -462,7 +463,7 @@ class elFinder {
 	}
 	
 	/**
-	 * Required to utput file in browser when volume URL is not set 
+	 * Required to output file in browser when volume URL is not set 
 	 * Return array contains opened file pointer, root itself and required headers
 	 *
 	 * @param  array  command arguments
@@ -506,6 +507,34 @@ class elFinder {
 				"Connection: close"
 			)
 		);
+		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function size($args) {
+		sleep(5);
+		$result = array('id' => $args['id'], 'size' => 0);
+		$volume = $this->volume(is_array($args['targets']) ? $args['targets'][0] : '');
+		
+		if (!$volume) {
+			return array('error' => 'Invalid parameters');
+		}
+		
+		$result['size'] = $volume->size($args['targets']);
+		
+		// foreach ($args['targets'] as $hash) {
+		// 	$size = $volume->size($hash);
+		// 	if ($size === false) {
+		// 		return array('error' => 'Folder not found');
+		// 	}
+		// 	$result['size'] += $size;
+		// }
+		
 		return $result;
 	}
 	
@@ -564,8 +593,8 @@ class elFinder {
 		if (!is_array($args['targets'])) {
 			return array('error' => 'No files to delete');
 		}
-		sleep(5);
-		return array('error' => 'No files to delete');
+		sleep(1);
+
 		foreach ($args['targets'] as $hash) {
 			if (($volume = $this->volume($hash)) === false) {
 				return array('error' => 'File not found');
