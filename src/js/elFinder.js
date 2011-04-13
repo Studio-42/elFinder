@@ -1793,7 +1793,7 @@
 		rm : function(files) {
 			var self   = this,
 				errors = [], 
-				cnt;
+				cnt, data;
 			
 			files = $.map($.isArray(files) ? files : [files], function(hash) {
 				var file = self.file(hash);
@@ -1807,12 +1807,14 @@
 			if (errors.length) {
 				return this.trigger('error', {error : [['Unable to delete "$1".', errors.join(', ')], 'Not enough permission.']});
 			}
+			
+			data = {files : files};
 
 			return (cnt = files.length) > 0 
 				? self.ajax({
 						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
-						beforeSend : function() { self.notify('rm', cnt); },
-						complete   : function() { self.notify('rm', -cnt); }
+						beforeSend : function() { self.notify('rm', cnt).trigger('lockfiles', data); },
+						complete   : function() { self.notify('rm', -cnt).trigger('unlockfiles', data); }
 					}, 'bg') 
 				: this;
 		},

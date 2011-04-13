@@ -30,6 +30,13 @@ $.fn.elfindercwd = function(fm) {
 			evtDisable = 'disable.'+fm.namespace,
 			
 			/**
+			 * Disable event full name
+			 *
+			 * @type String
+			 **/
+			evtEnable = 'enable.'+fm.namespace,
+			
+			/**
 			 * Selected css class
 			 *
 			 * @type String
@@ -49,6 +56,13 @@ $.fn.elfindercwd = function(fm) {
 			 * @type String
 			 **/
 			clDraggable = 'ui-draggable',
+			
+			/**
+			 * Droppable css class
+			 *
+			 * @type String
+			 **/
+			clDroppable = 'ui-droppable',
 			
 			/**
 			 * Hover css class
@@ -506,17 +520,23 @@ $.fn.elfindercwd = function(fm) {
 				.delegate('[id]', evtUnselect, function(e) {
 					!selectLock && $(this).removeClass(clSelected).children().removeClass(clHover);
 				})
+				// disable files wich removing or moving
 				.delegate('[id]', evtDisable, function() {
-					var $this = $(this).addClass('ui-state-disabled').trigger(evtUnselect);
+					var $this  = $(this).addClass(clDisabled).trigger(evtUnselect), 
+						list   = fm.view == 'list',
+						target = list ? $this : $this.children();
 					
-					if (fm.view == 'list') {
-						$this.is('.'+clDraggable) && $this.draggable('destroy');
-					} else {
-						$this.children('.'+clDraggable).draggable('destroy');
-					}
+					$this.is('.'+clDroppable) && $this.droppable('disable');
+					target.is('.'+clDraggable) && target.draggable('disable');
+					!list && target.removeClass(clDisabled);
 				})
-				.delegate('[id]', 'enable.'+fm.namespace, function() {
+				// if any files was not removed/moved - unlock its
+				.delegate('[id]', evtEnable, function() {
+					var $this  = $(this).removeClass(clDisabled), 
+						target = fm.view == 'list' ? $this : $this.children();
 					
+					$this.is('.'+clDroppable) && $this.droppable('enable');	
+					target.is('.'+clDraggable) && target.draggable('enable');
 				})
 				// make files selectable
 				.selectable({
@@ -678,18 +698,28 @@ $.fn.elfindercwd = function(fm) {
 				});
 			})
 			// disable cuted files
-			.bind('changeclipboard', function(e) {
-				var c = e.data.clipboard, 
-					l = c.files.length;
-					
-				cwd.find('[id].'+clDisabled).removeClass(clDisabled);
+			.bind('lockfiles unlockfiles', function(e) {
+				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
+					files = e.data.files, 
+					l = files.length;
 				
-				if (l && c.cut) {
-					while (l--) {
-						cwd.find('#'+c.files[l]).trigger(evtDisable);
-					}
+				while (l--) {
+					cwd.find('#'+files[l]).trigger(event)
 				}
+				fm.log(files)
 			})
+			// .bind('changeclipboard', function(e) {
+			// 	var c = e.data.clipboard, 
+			// 		l = c.files.length;
+			// 		
+			// 	cwd.find('[id].'+clDisabled).removeClass(clDisabled);
+			// 	
+			// 	if (l && c.cut) {
+			// 		while (l--) {
+			// 			cwd.find('#'+c.files[l]).trigger(evtDisable);
+			// 		}
+			// 	}
+			// })
 			.shortcut({
 				pattern     :'ctrl+a', 
 				description : 'Select all files',
