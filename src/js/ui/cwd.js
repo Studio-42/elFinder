@@ -464,7 +464,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			droppable = $.extend({}, fm.droppable, {
 				hoverClass : 'elfinder-dropable-active',
-				over       : function() { cwd.droppable('disable').removeClass(clDisabled); }
+				over       : function(e, ui) { cwd.droppable('disable').removeClass(clDisabled); }
 			}),
 			
 			/**
@@ -522,9 +522,9 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// disable files wich removing or moving
 				.delegate('[id]', evtDisable, function() {
-					var $this  = $(this).addClass(clDisabled).trigger(evtUnselect), 
+					var $this  = $(this).removeClass(clSelected).addClass(clDisabled), 
 						list   = fm.view == 'list',
-						target = list ? $this : $this.children();
+						target = (list ? $this : $this.children()).removeClass(clHover);
 					
 					$this.is('.'+clDroppable) && $this.droppable('disable');
 					target.is('.'+clDraggable) && target.draggable('disable');
@@ -706,20 +706,8 @@ $.fn.elfindercwd = function(fm) {
 				while (l--) {
 					cwd.find('#'+files[l]).trigger(event)
 				}
-				fm.log(files)
+				trigger()
 			})
-			// .bind('changeclipboard', function(e) {
-			// 	var c = e.data.clipboard, 
-			// 		l = c.files.length;
-			// 		
-			// 	cwd.find('[id].'+clDisabled).removeClass(clDisabled);
-			// 	
-			// 	if (l && c.cut) {
-			// 		while (l--) {
-			// 			cwd.find('#'+c.files[l]).trigger(evtDisable);
-			// 		}
-			// 	}
-			// })
 			.shortcut({
 				pattern     :'ctrl+a', 
 				description : 'Select all files',

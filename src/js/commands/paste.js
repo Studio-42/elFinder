@@ -13,7 +13,8 @@ elFinder.prototype.commands.paste = function() {
 	}];
 	
 	this._getstate = function() {
-		return this.fm.clipboard().files.length && this.fm.cwd().write ? this._state.enabled : this._state.disabled;
+		// this.fm.log(this.fm.clipboard())
+		return this.fm.clipboard().length && this.fm.cwd().write ? this._state.enabled : this._state.disabled;
 	}
 	
 	this._exec = function() {

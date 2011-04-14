@@ -33,7 +33,7 @@
 			
 			/**
 			 * Is ajax requiest allowed.
-			 * "sync" requiest blocked othe requests until complete
+			 * "sync" requiest blocked others requests until complete
 			 *
 			 * @type Boolean
 			 **/
@@ -131,11 +131,13 @@
 			 *
 			 * @type Object
 			 **/
-			clipboard = {
-				files : [],
-				src   : null, // required for old api
-				cut   : false
-			},
+			clipboard = [],
+			// clipboard = {
+			// 	files : [],   // files hashes
+			// 	names : {},   // files names - required for error message
+			// 	src   : null, // files parent folder hash
+			// 	cut   : false // cut files
+			// },
 			
 			node = $(node),
 			
@@ -369,26 +371,28 @@
 						&& shortcut.ctrlKey == ctrlKey 
 						&& shortcut.altKey == e.altKey) {
 							e.preventDefault();
-							self.log(i)
+							// self.log(i)
 							shortcut.callback(e, self);
 							return false;
 						}
 					});
 				}
-			},
-			
-			resetClipboard = function() {
-				clipboard = {
-					files : [],
-					src   : null, // required for old api
-					cut   : false
-				}
-				
-				self.trigger('changeClipboard', {clipboard : clipboard});
 			}
+			// ,
+			// 
+			// resetClipboard = function(quiet) {
+			// 	if (clipboard.files.length && !quiet) {
+			// 		self.trigger('unlockfiles', {files : clipboard.files});
+			// 	}
+			// 	clipboard = {
+			// 		files : [],
+			// 		src   : null, // required for old api
+			// 		cut   : false
+			// 	}
+			// 	
+			// 	self.trigger('changeClipboard', {clipboard : clipboard});
+			// }
 			;
-
-
 
 		/**
 		 * Application version
@@ -689,7 +693,7 @@
 					try {
 						handlers[i](event, this);
 					} catch (ex) {
-						window.console && window.console.error && window.console.error(ex);
+						window.console && window.console.log && window.console.log(ex);
 					}
 					
 					if (event.isPropagationStopped()) {
@@ -758,7 +762,6 @@
 		 * @return mixed
 		 */
 		this.param = function(n) {
-
 			return params[n];
 		}
 		
@@ -772,21 +775,34 @@
 			return files[hash]; 
 		};
 		
+		this.files = function() {
+			return $.extend({}, files);
+		}
+		
 		/**
-		 * Return file data from current dir if file with required name exists
+		 * Return true if file with required name existsin required folder
 		 * 
 		 * @param  String  file name
-		 * @return Object
+		 * @param  String  parent folder hash
+		 * @return Boolean
 		 */
-		this.fileByName = function(name) {
+		this.exists = function(name, phash) {
 			var hash;
-			
+
 			for (hash in files) {
-				if (files.hasOwnProperty(hash) && files[hash].name == name) {
-					return files[hash];
+				if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
+					return true;
 				}
 			}
 		};
+		
+		this.hasChilds = function(hash) {
+			for (var h in files) {
+				if (files.hasOwnProperty(h) && files[h].phash == hash) {
+					return true;
+				}
+			}
+		}
 		
 		/**
 		 * Return file path relative to root folder
@@ -800,16 +816,6 @@
 
 			return tail == '/' || tail == '\\' ? path.substr(0, path.length-1) : path
 		}
-		
-		/**
-		 * Return file/dir info with required name
-		 * 
-		 * @param  String  file hash
-		 * @return Object|Boolean
-		 */
-		this.fileExists = function(name) {
-			return this.fileByName(name) !== void(0);
-		};
 		
 		/**
 		 * Return selected files info
@@ -834,57 +840,32 @@
 			return dir.hash;
 		}
 		
-		this.clipboard = function() {
-			return $.extend({}, clipboard);
-		}
-		
-		/**
-		 * Copy files into buffer
-		 * 
-		 * @param  Array    files hashes array
-		 * @param  String   files parent dir hash (required by old api)
-		 * @param  Boolean  cut files?
-		 * @param  Boolean  method called from drag&drop - required for correct error message
-		 * @return Boolean
-		 */
-		this.copy = function(files, src, cut, dd) {
-			var self   = this,
-				_files = [],
-				errors = [],
-				file;
+		this.clipboard = function(files, cut, quiet) {
+			var map = function(f) { return f.hash; },
+				i, hash, file;
 			
-			resetClipboard();
-			
-			$.each(files||[], function(i, hash) {
-				if (file = self.file(hash)) {
-					if (!file.read || (cut && !file.rm)) {
-						errors.push(file.name);
-					} else {
-						_files.push(hash);
+			if ($.isArray(files)) {
+				clipboard.length && !quiet && this.trigger('unlockfiles', {files : $.map(clipboard, map)});
+
+				clipboard = [];
+				
+				for (i = 0; i < files.length; i++) {
+					hash = files[i];
+					if ((file = this.file(hash)) && file.read) {
+						clipboard.push({
+							hash  : hash,
+							phash : file.phash,
+							name  : file.name,
+							cut   : !!cut
+						});
 					}
 				}
-			})
-			
-			if (errors.length) {
-				return !!this.trigger('error', {
-					error : [
-						[cut ? (dd ? 'Unable to move "$1".' : 'Unable to cut "$1".') : 'Unable to copy "$1".', errors.join(', ')], 
-						'Not enough permission.'
-					]
-				});
-			}
-			
-			if (_files.length) {
-				clipboard = {
-					src   : src || this.cwd().hash,
-					cut   : cut,
-					files : _files
-				};
 
-				return !!this.trigger('changeclipboard', {clipboard : clipboard});
+				this.trigger('changeClipboard', {clipboard : clipboard})
+				cut && !quiet && this.trigger('lockfiles', {files : $.map(clipboard, map)});
 			}
-			
-			return false;
+			// return copy of clipboard instaed of refrence
+			return $.map(clipboard, function(f) { return f; });
 		}
 		
 		/**
@@ -1039,7 +1020,7 @@
 			delay      : 30,
 			revert     : true,
 			cursor     : 'move',
-			cursorAt   : {left : 60, top : 47},
+			cursorAt   : {left : 50, top : 47},
 			refreshPositions : true,
 			start      : function() { self.trigger('focus'); },
 			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
@@ -1047,39 +1028,38 @@
 		
 		this.droppable = {
 				tolerance : 'pointer',
-				// accept : 'a',
+				accept : ':not(.ui-dialog)',
 				drop : function(e, ui) {
 					var $this = $(this), 
 						src   = ui.helper.data('src'),
 						files = ui.helper.data('files')||[],
-						l = files.length,
+						l     = files.length,
 						dst;
 					
 					if (!l) {
 						return;
 					}
-					self.cleanBuffer();
-					// self.log(this)
+
 					if ($this.is('.elfinder-cwd')) {
+						// drop onto current directory
 						dst = cwd.hash;
-						
 					} else if ($this.is('.elfinder-cwd-file')) {
+						// drop on folder in current directory
 						dst = this.id;
 					} else {
+						// drop onto directory in tree
 						dst = this.id.substr(4);
 					}
-					
+
 					while (l--) {
-						
+						// avoid to copy into itself
+						if (files[l] == dst) {
+							return;
+						}
 					}
 					
 					ui.helper.hide();
-					// self.log(src+' '+dst)
-
-					if (self.copy(files, src, !(e.shiftKey || e.ctrlKey || e.metaKey), true)) {
-						self.paste(dst).cleanBuffer();
-						// self.cleanBuffer();
-					}
+					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst)
 				}
 			};
 		
@@ -1528,10 +1508,13 @@
 					modal : true,
 					buttons : {
 						Ok : function() {
+							callback(true, checkbox.is(':checked'));
 							$(this).dialog('close');
-							callback(checkbox.is(':checked'));
 						},
-						Cancel : function() { $(this).dialog('close'); }
+						Cancel : function() { 
+							$(this).dialog('close'); 
+							callback(false, checkbox.is(':checked'));
+						}
 					}
 				
 				},
@@ -1552,7 +1535,9 @@
 		notifyType : {
 			mkdir  : 'Creating directory',
 			mkfile : 'Creating files',
-			rm     : 'Delete files'
+			rm     : 'Delete files',
+			copy   : 'Copy files',
+			move   : 'Move files'
 		},
 		
 		/**
@@ -1679,14 +1664,45 @@
 		},
 		
 		/**
+		 * Copy files into buffer
+		 * 
+		 * @param  Array    files hashes array
+		 * @param  String   files parent dir hash (required by old api)
+		 * @param  Boolean  cut files?
+		 * @param  Boolean  method called from drag&drop - required for correct error message
+		 * @return Boolean
+		 */
+		copy : function(files, cut, dd) {
+			var files = $.isArray(files) ? files : [],
+				error = 'Unable to copy "$1".',
+				i, hash, file;
+			
+			this.clipboard([]);
+			
+			for (i = 0; i < files.length; i++) {
+				hash = files[i];
+				if ((file = this.file(hash)) && (!file.read || (cut && !file.rm))) {
+					if (cut) {
+						error = dd ? 'Unable to move "$1".' : 'Unable to cut "$1".';
+					}
+					return !!this.trigger('error', {error : [[error, file.name], 'Not enough permission.']});
+				}
+			}
+			
+			return !!this.clipboard(files, cut).length;
+			
+		},
+		
+		
+		/**
 		 * Copy files into buffer and mark for delete after paste
 		 * Wrapper for copy method
 		 * 
 		 * @param  Array  files hashes array
 		 * @return elFinder
 		 */
-		cut : function(files, src) { 
-			return this.copy(files, src, true); 
+		cut : function(files) { 
+			return this.copy(files, true); 
 		},
 		
 		hasParent : function(hash, phash) {
@@ -1708,56 +1724,184 @@
 		 * @clean  Boolean  clean buffer after paste - required by drag&drop
 		 * @return elFinder
 		 */
+		
 		paste : function(dst) {
-			var cwd   = this.cwd().hash,
+			var self = this,
+				cwd = this.cwd().hash,
 				dst   = dst || cwd,
-				b     = this.buffer,
-				l     = b.files.length,
-				paste = [],
-				dpl   = [], 
-				file, hash;
+				files = this.clipboard(),
+				exists = [],
+				msg = 'An item named "$1" already exists in this location. Do you want to replace it?';
+				paste = function() {
+					
+				},
+				proccess = function() {
+					var ndx = 0,
+						callback = function(replace, all) {
+							var l = exists.length,
+								remove = function(i) {
+									var i;
+									
+									if ((i = $.inArray(exists[ndx], files)) !== -1) {
+										files.splice(i, 1);
+									}
+								};
 
-			while (l--) {
-				hash = b.files[l];
-				file = this.file(hash);				
-				
-				if (file && !this.hasParent(dst, hash)) {
-					if (file.phash == dst) {
-						dpl.push(hash)
+							if (all) {
+								if (replace) {
+									ndx = exists.length;
+								} else {
+									while (ndx < l) {
+										remove(ndx);
+										ndx++;
+									}
+								}
+							} else if (!replace) {
+								remove(ndx);
+							}
+							
+							if (++ndx < exists.length) {
+								self.confirm('', self.i18n([msg, exists[ndx].name]), callback,true)
+								// ndx++;
+							} else {
+								self.log(files.length)
+							}
+						};
+					
+					for (i = 0; i < files.length; i++) {
+						file = files[i];
+
+						if (file.phash == dst) {
+							continue;
+						}
+
+						if (self.hasParent(dst, file.hash)) {
+							return !!self.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
+						}
+						
+						if (self.exists(file.name, dst)) {
+							exists.push(file);
+						}
+					}
+					
+					if (exists.length) {
+						self.confirm('', self.i18n([msg, exists[0].name]), callback, true)
 					} else {
-						paste.push(hash);
+						paste();
 					}
 				}
+				
+			if (dst == cwd || this.hashChilds(dst)) {
+				proccess()
+			} else {
+				// this.ajax({
+				// 	data : {
+				// 		cmd : 'open',
+				// 		tree : false,
+				// 		target : dst
+				// 	}
+				// }, 'silent')
 			}
-			
-			if (paste.length) {
-				this.ajax({
-					cmd     : 'paste',
-					current : cwd,
-					src     : b.src,
-					dst     : dst,
-					cut     : b.cut ? 1 : 0,
-					targets : paste
-				}, 'bg');
-			}
-			
-			this.log(paste).log(dpl)
-			if (dpl.length) {
-				this.duplicate(dpl);
-			}
-			b.cut && this.cleanBuffer();
-			return this;
+				
 		},
 		
-		/**
-		 * Reset files buffer
-		 * 
-		 * @return elFinder
-		 */
-		cleanBuffer : function() {
-			this.buffer = {files : [], cut : false, src : ''};
-			return this;
+		paste_ : function(dst) {
+			var self  = this,
+				cwd = self.cwd().hash,
+				dst   = dst || cwd,
+				files  = this.clipboard(),
+				targets = [],
+				i, file, msg, cb, exists = [],
+				paste = function() {
+					
+				},
+				proccess = function() {},
+				
+				
+				paste = function() {
+					var file = this,
+						hash = file.hash,
+						cut  = file.cut,
+						ntype = cut ? 'move' : 'copy',
+						data = {files : [hash]};
+					
+					self.ajax({
+						data : {
+							cmd     : 'paste',
+							current : cwd,
+							src     : file.phash,
+							dst     : dst,
+							cut     : file.cut ? 1 : 0,
+							targets : [hash]
+						},
+						beforeSend : function() { 
+							self.notify(ntype, 1); 
+							file.cut && self.trigger('lockfiles', data);
+						},
+						complete   : function() { 
+							self.notify(ntype, -1).trigger('unlockfiles', data); 
+						}
+					}, 'bg');
+					
+				};
+
+			this.clipboard([]);
+
+			for (i = 0; i < files.length; i++) {
+				file = files[i];
+				
+				if (file.phash == dst) {
+					continue;
+				}
+				
+				if (this.hasParent(dst, file.hash)) {
+					return !!this.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
+				} 
+				
+				// targets.push(file.hash);
+				
+				if (this.exists(file.name, dst)) {
+					exists.push(file);
+					// msg = this.i18n(['An item named "$1" already exists in this location. Do you want to replace it?', file.name]);
+					// cb = $.proxy(paste, file);
+					// this.confirm('', msg, function(applyToAll) {
+					// 	if (applyToAll) {
+					// 		for (var i = 0; i < files.length; i++) {
+					// 			files[i].force = true;
+					// 		}
+					// 	}
+					// 	cb()
+					// }, true)
+				} else {
+					// $.proxy(paste, file)()
+				}
+				
+			}
+			
+			if (exists.length) {
+				var ndx = 0;
+				msg = 'An item named "$1" already exists in this location. Do you want to replace it?';
+				cb = function(replace, all) {
+					var file,
+						i;
+						
+					if (ndx < exists.length) {
+						file = exists[ndx]
+						msg = self.i18n(['An item named "$1" already exists in this location. Do you want to replace it?', file.name]);
+						// 
+						self.confirm('', msg, cb)
+						ndx++;
+					} else {
+						// self.log(files.length)
+					}
+					
+					
+				}
+				this.confirm('', this.i18n([msg, exists[0].name]), cb)
+				
+			}
 		},
+		
 		
 		/**
 		 * Valid file name

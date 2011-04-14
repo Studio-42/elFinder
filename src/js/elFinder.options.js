@@ -193,8 +193,8 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	// debug : false
-	debug : ['event-changeclipboard']
+	// debug : true
+	// debug : ['event-select']
 }
 
 })(jQuery);
