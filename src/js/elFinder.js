@@ -1378,7 +1378,7 @@
 			 * Update files cache - add new files
 			 */
 			.bind('added', function(e) {
-				update(e.data.added);
+				cache(e.data.added);
 			});
 		
 		start();
@@ -1539,7 +1539,8 @@
 			rm     : 'Delete files',
 			copy   : 'Copy files',
 			move   : 'Move files',
-			prepareCopy : 'Prepare to copy files'
+			prepareCopy : 'Prepare to copy files',
+			duplicate : 'Duplicate files'
 		},
 		
 		/**
@@ -1969,68 +1970,35 @@
 			return this.make(name, 'file');
 		},
 		
+		/**
+		 * Create duplicates for required files
+		 *
+		 * @param  Array  files
+		 * @return elFinder
+		 **/
 		duplicate : function(files) {
-			var self = this,
+			var self  = this,
 				files = $.isArray(files) ? files : [],
+				l     = files.length,
 				i, f;
 			
-			for (i = 0; i < files.length; i++) {
-				f = this.file(files[i]);
-				if (!f || !f.read) {
-					return this.trigger('error', {error : ['Unable to duplicate "$1".', f.name]})
-					return this.trigger('error', {error : [self.i18n(['Unable to duplicate "$1".', f.name]), 'Not enough permission.']});
+			for (i = 0; i < l; i++) {
+				if (!(f = this.file(files[i])) || !f.read) {
+					return this.trigger('error', {error : ['Unable to duplicate "$1".', f.name]});
 				}
 			}
 			
-			return this;
-			var self = this,
-				error, cnt;
-			
-			files = $.map($.isArray(files) ? files : [files], function(hash) {
-				var file = self.file(hash);
-				
-				if (file && !error && !file.read) {
-					error = [self.i18n(['Unable to duplicate "$1".', file.name]), 'Not enough permission.'];
-				}
-				return file ? hash : null;
-			});
-			
-			if (error) {
-				return this.trigger('error', {error : error});
-			}
-
-			cnt = files.length;
-
-			return cnt 
+			return l 
 				? self.ajax({
-						data       : {cmd : 'duplicate', target : this.newAPI ? files : files.shift(), current : this.cwd().hash},
-						beforeSend : function() { self.ui.notify('duplicate', cnt); },
-						complete   : function() { self.ui.notify('duplicate', -cnt); }
+						data : {
+							cmd     : 'duplicate', 
+							target  : this.newAPI ? files : files.shift(), // old connector support only one file duplicate at once
+							current : this.cwd().hash
+						},
+						beforeSend : function() { self.notify('duplicate', l); },
+						complete   : function() { self.notify('duplicate', -l); }
 					}, 'bg') 
 				: this;
-			
-			
-			var self = this, target = [];
-			
-			$.each(files || this.selected, function(i, hash) {
-				if (self.cdc[hash]) {
-					// @TODO check for readonly/na files
-					target.push(hash);
-				}
-			});
-			
-			this.log(target)
-			
-			if (!this.locks.ui) {
-				this.ajax({
-					current : this.cwd.hash,
-					target : this.api > 1 ? target : target.shift()
-				}, {
-					error : function(xhr) { self.log(xhr) },
-					success : function(data) { self.log(data); }
-				})
-			}
-			
 		},
 		
 		uniqueName : function(prefix) {
