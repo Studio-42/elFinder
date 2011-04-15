@@ -1175,21 +1175,12 @@
 			 * Show error dialog
 			 */
 			.bind('ajaxerror error', function(e) {
-				var text = (function(error) {
-						text = [];
-						$.each($.isArray(error) ? error : [error], function(i,e) {
-							text.push(self.i18n(e));
-						});
-						
-						return text.join('<br/>');
-					})(e.data.error||'');
-
 				if (self.isVisible()) {
-					self.dialog(text, {
-						title : 'Error',
-						modal : true,
+					self.dialog(self.i18n(e.data.error), {
+						title         : 'Error',
+						modal         : true,
 						closeOnEscape : false,
-						buttons : {
+						buttons       : {
 							Ok : function() { $(this).dialog('close'); }
 						}
 					}, 'error');
@@ -1924,7 +1915,7 @@
 				errors = [], 
 				cnt, data;
 			
-			files = $.map($.isArray(files) ? files : [files], function(hash) {
+			files = $.map($.isArray(files) ? files : [], function(hash) {
 				var file = self.file(hash);
 
 				if (file && !file.rm) {
@@ -1979,6 +1970,19 @@
 		},
 		
 		duplicate : function(files) {
+			var self = this,
+				files = $.isArray(files) ? files : [],
+				i, f;
+			
+			for (i = 0; i < files.length; i++) {
+				f = this.file(files[i]);
+				if (!f || !f.read) {
+					return this.trigger('error', {error : ['Unable to duplicate "$1".', f.name]})
+					return this.trigger('error', {error : [self.i18n(['Unable to duplicate "$1".', f.name]), 'Not enough permission.']});
+				}
+			}
+			
+			return this;
 			var self = this,
 				error, cnt;
 			
@@ -2049,14 +2053,12 @@
 		 * @param  String|Array  message[s]
 		 * @return String
 		 **/
-		i18n : function(m) { 
-			var self = this, msg;
-			if ($.isArray(m)) {
-				msg = m.shift();
-				msg = this.messages[msg] || msg;
-				return msg.replace(/\$(\d+)/g, function(a, num) { return m[num-1] || ''; });
-			}
-			return (this.messages[m] || m || '').replace(/\$(\d+)/g, ''); 
+		i18n : function(msg) { 
+			var msg = $.isArray(msg) ? msg : [msg],
+				messages = this.messages;
+			
+			msg = $.map(msg, function(m) { return messages[m] || m; });
+			return msg[0].replace(/\$(\d+)/g, function(m, num) { return msg[num] || ''; });
 		},
 		
 		/**

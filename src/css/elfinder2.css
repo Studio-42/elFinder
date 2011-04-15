@@ -124,9 +124,10 @@
 .elfinder-button-icon-copy       { background-position: 0 -278px; }
 .elfinder-button-icon-cut        { background-position: 0 -296px; }
 .elfinder-button-icon-paste      { background-position: 0 -313px; }
+.elfinder-button-icon-duplicate  { background-position: 0 -330px; }
 .elfinder-button-icon-rename     { background-position: 0 -334px; }
 .elfinder-button-icon-edit       { background-position: 0 -352px; }
-.elfinder-button-icon-info       { background-position: 0 -424px; }
+.elfinder-button-icon-info       { background-position: 0 -346px; }
 .elfinder-button-icon-help       { background-position: 0 -442px; }
 .elfinder-button-icon-icons      { background-position: 0 -371px; }
 .elfinder-button-icon-list       { background-position: 0 -388px; }
