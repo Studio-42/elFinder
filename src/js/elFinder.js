@@ -775,6 +775,11 @@
 			return files[hash]; 
 		};
 		
+		/**
+		 * Return all cached files
+		 * 
+		 * @return Array
+		 */
 		this.files = function() {
 			return $.extend({}, files);
 		}
@@ -795,14 +800,6 @@
 				}
 			}
 		};
-		
-		this.hasChilds = function(hash) {
-			for (var h in files) {
-				if (files.hasOwnProperty(h) && files[h].phash == hash) {
-					return true;
-				}
-			}
-		}
 		
 		/**
 		 * Return file path relative to root folder
@@ -840,6 +837,19 @@
 			return dir.hash;
 		}
 		
+		/**
+		 * Get/set clipboard content.
+		 * Return new clipboard content.
+		 *
+		 * @example
+		 *   this.clipboard([]) - clean clipboard, all previous cutted files will be unlocked
+		 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
+		 * 
+		 * @param  Array    new files hashes
+		 * @param  Boolean  cut files?
+		 * @param  Boolean  if true previous cutted files not be unlocked
+		 * @return Array
+		 */
 		this.clipboard = function(files, cut, quiet) {
 			var map = function(f) { return f.hash; },
 				i, hash, file;
@@ -864,7 +874,7 @@
 				this.trigger('changeClipboard', {clipboard : clipboard})
 				cut && !quiet && this.trigger('lockfiles', {files : $.map(clipboard, map)});
 			}
-			// return copy of clipboard instaed of refrence
+			// return copy of clipboard instead of refrence
 			return $.map(clipboard, function(f) { return f; });
 		}
 		
@@ -1059,7 +1069,7 @@
 					}
 					
 					ui.helper.hide();
-					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst)
+					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst, true);
 				}
 			};
 		
@@ -1537,7 +1547,8 @@
 			mkfile : 'Creating files',
 			rm     : 'Delete files',
 			copy   : 'Copy files',
-			move   : 'Move files'
+			move   : 'Move files',
+			prepareCopy : 'Prepare to copy files'
 		},
 		
 		/**
@@ -1699,7 +1710,7 @@
 		 * Wrapper for copy method
 		 * 
 		 * @param  Array  files hashes array
-		 * @return elFinder
+		 * @return Boolean
 		 */
 		cut : function(files) { 
 			return this.copy(files, true); 
@@ -1721,29 +1732,88 @@
 		 * Paste files from buffer into required directory
 		 * 
 		 * @param  String   directory hash, if not set - paste in current working directory
-		 * @clean  Boolean  clean buffer after paste - required by drag&drop
+		 * @clean  Boolean  clean buffer after paste - required to not store in clipboard files moved by drag&drop
 		 * @return elFinder
 		 */
-		
-		paste : function(dst) {
-			var self = this,
-				cwd = this.cwd().hash,
-				dst   = dst || cwd,
-				files = this.clipboard(),
-				exists = [],
-				msg = 'An item named "$1" already exists in this location. Do you want to replace it?';
-				paste = function() {
+		paste : function(dst, clean) {
+			var self    = this,
+				cwd     = this.cwd().hash,  // current dir hash
+				dst     = dst || cwd,       // target dir hash
+				files   = this.clipboard(), // files to paste
+				num     = files.length,
+				exists  = [],               // files with names existed in target dir
+				msg     = 'An item named "$1" already exists in this location. Do you want to replace it?',
+				content = [],               // target dir files, if target != cwd
+				/**
+				 * Find file with required name in target directory files
+				 *
+				 * @param  String  file name
+				 * @return Boolean
+				 */
+				find = function(name) {
+					var i;
 					
+					// target == current - search in files
+					if (dst == cwd) { 
+						return self.exists(name, dst);
+					} 
+					
+					// target dir != current - search in cache
+					i = content.length;
+					while (i--) {
+						if (content[i].name == name) {
+							return true;
+						}
+					}
 				},
+				/**
+				 * Send ajax request to exec "paste" command
+				 *
+				 * @return void
+				 */
+				paste = function() {
+					var targets = [], 
+						l = files.length, 
+						i, cut, ntype;
+						
+					if (l) {
+						cut = files[0].cut;
+						ntype = cut ? 'move' : 'copy';
+						(cut || clean) && self.clipboard([], false, true); // clean clipboard
+						
+						for (i = 0; i < l; i++) {
+							targets.push(files[i].hash);
+						}
+						
+						self.ajax({
+							data : {
+								cmd     : 'paste',
+								current : cwd,
+								src     : files[0].phash,
+								dst     : dst,
+								targets : targets,
+								cut     : cut ? 1 : 0
+							},
+							beforeSend : function() { self.notify(ntype, l); },
+							complete   : function() { self.notify(ntype, -l).trigger('unlockfiles', {files : targets}); }
+						}, 'bg');
+					}
+				},
+				/**
+				 * Check files, open confirm dialogs if required and exec paste()
+				 *
+				 * @return void
+				 */
 				proccess = function() {
 					var ndx = 0,
 						callback = function(replace, all) {
 							var l = exists.length,
-								remove = function(i) {
+								remove = function() {
 									var i;
 									
 									if ((i = $.inArray(exists[ndx], files)) !== -1) {
 										files.splice(i, 1);
+										self.trigger('unlockfiles', {files : [exists[ndx].hash]})
 									}
 								};
 
@@ -1752,156 +1822,71 @@
 									ndx = exists.length;
 								} else {
 									while (ndx < l) {
-										remove(ndx);
+										remove();
 										ndx++;
 									}
 								}
 							} else if (!replace) {
-								remove(ndx);
+								remove();
 							}
 							
 							if (++ndx < exists.length) {
 								self.confirm('', self.i18n([msg, exists[ndx].name]), callback,true)
-								// ndx++;
 							} else {
-								self.log(files.length)
+								paste()
 							}
 						};
 					
-					for (i = 0; i < files.length; i++) {
+					for (i = 0; i < num; i++) {
 						file = files[i];
-
-						if (file.phash == dst) {
-							continue;
-						}
-
-						if (self.hasParent(dst, file.hash)) {
-							return !!self.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
+						
+						// paste in file parent dir not allowed
+						if (file.phash == dst) { 
+							return;
 						}
 						
-						if (self.exists(file.name, dst)) {
+						// paste into itself not allowed
+						if (self.hasParent(dst, file.hash)) { 
+							return self.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
+						}
+						
+						// file with same name exists
+						if (find(file.name)) {
 							exists.push(file);
 						}
 					}
 					
 					if (exists.length) {
-						self.confirm('', self.i18n([msg, exists[0].name]), callback, true)
+						self.confirm('', self.i18n([msg, exists[0].name]), callback, true);
 					} else {
 						paste();
 					}
 				}
 				
-			if (dst == cwd || this.hashChilds(dst)) {
-				proccess()
+			if (dst == cwd) {
+				// paste into current dir
+				proccess();
 			} else {
-				// this.ajax({
-				// 	data : {
-				// 		cmd : 'open',
-				// 		tree : false,
-				// 		target : dst
-				// 	}
-				// }, 'silent')
-			}
-				
-		},
-		
-		paste_ : function(dst) {
-			var self  = this,
-				cwd = self.cwd().hash,
-				dst   = dst || cwd,
-				files  = this.clipboard(),
-				targets = [],
-				i, file, msg, cb, exists = [],
-				paste = function() {
-					
-				},
-				proccess = function() {},
-				
-				
-				paste = function() {
-					var file = this,
-						hash = file.hash,
-						cut  = file.cut,
-						ntype = cut ? 'move' : 'copy',
-						data = {files : [hash]};
-					
-					self.ajax({
-						data : {
-							cmd     : 'paste',
-							current : cwd,
-							src     : file.phash,
-							dst     : dst,
-							cut     : file.cut ? 1 : 0,
-							targets : [hash]
-						},
-						beforeSend : function() { 
-							self.notify(ntype, 1); 
-							file.cut && self.trigger('lockfiles', data);
-						},
-						complete   : function() { 
-							self.notify(ntype, -1).trigger('unlockfiles', data); 
+				// get target dir content
+				this.ajax({
+					data : {
+						cmd : 'open',
+						tree : false,
+						target : dst
+					},
+					success : function(data) {
+						var src;
+						if (data && (src = self.isNewApi ? data.files : data.cwd) && $.isArray(src)) {
+							content = src; 
 						}
-					}, 'bg');
-					
-				};
-
-			this.clipboard([]);
-
-			for (i = 0; i < files.length; i++) {
-				file = files[i];
-				
-				if (file.phash == dst) {
-					continue;
-				}
-				
-				if (this.hasParent(dst, file.hash)) {
-					return !!this.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
-				} 
-				
-				// targets.push(file.hash);
-				
-				if (this.exists(file.name, dst)) {
-					exists.push(file);
-					// msg = this.i18n(['An item named "$1" already exists in this location. Do you want to replace it?', file.name]);
-					// cb = $.proxy(paste, file);
-					// this.confirm('', msg, function(applyToAll) {
-					// 	if (applyToAll) {
-					// 		for (var i = 0; i < files.length; i++) {
-					// 			files[i].force = true;
-					// 		}
-					// 	}
-					// 	cb()
-					// }, true)
-				} else {
-					// $.proxy(paste, file)()
-				}
-				
+						proccess();
+					},
+					beforeSend : function() { self.notify('prepareCopy', num); },
+					complete   : function() { self.notify('prepareCopy', -num); }
+				}, 'silent')
 			}
-			
-			if (exists.length) {
-				var ndx = 0;
-				msg = 'An item named "$1" already exists in this location. Do you want to replace it?';
-				cb = function(replace, all) {
-					var file,
-						i;
-						
-					if (ndx < exists.length) {
-						file = exists[ndx]
-						msg = self.i18n(['An item named "$1" already exists in this location. Do you want to replace it?', file.name]);
-						// 
-						self.confirm('', msg, cb)
-						ndx++;
-					} else {
-						// self.log(files.length)
-					}
-					
-					
-				}
-				this.confirm('', this.i18n([msg, exists[0].name]), cb)
 				
-			}
 		},
-		
 		
 		/**
 		 * Valid file name
