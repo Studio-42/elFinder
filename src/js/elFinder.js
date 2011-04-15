@@ -568,6 +568,10 @@
 							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : data, request : request});
 						}
 
+						if (data.warning) {
+							self.trigger('warning', {warning : data.warning});
+						}
+
 						// fire some event to update ui
 						data.removed && data.removed.length && self.trigger('removed', data);
 						data.added   && data.added.length   && self.trigger('added', data);
@@ -1127,9 +1131,9 @@
 			/**
 			 * Show error dialog
 			 */
-			.bind('ajaxerror error', function(e) {
+			.bind('ajaxerror error warning', function(e) {
 				if (self.isVisible()) {
-					self.dialog(self.i18n(e.data.error), {
+					self.dialog(self.i18n(e.data.error || e.data.warning), {
 						title         : 'Error',
 						modal         : true,
 						closeOnEscape : false,
@@ -1329,16 +1333,6 @@
 			});
 		
 		start();
-		
-		// this.shortcut({
-		// 		pattern     : 'ctrl+backspace',
-		// 		description : 'Delete files',
-		// 		callback    : function() { 
-		// 			self.trigger('confirm', {title : 'Delete', text : 'Do you want to delete files', cb : function(result, all) {
-		// 				self.log(result).log(all)
-		// 			}})
-		// 		}
-		// })
 		
 	}
 	
@@ -1678,17 +1672,15 @@
 					if (cut) {
 						error = dd ? 'Unable to move "$1".' : 'Unable to cut "$1".';
 					}
-					return !!this.trigger('error', {error : [[error, file.name], 'Not enough permission.']});
+					return !!this.trigger('error', {error : [error, file.name]});
 				}
 			}
 			
 			return !!this.clipboard(files, cut).length;
-			
 		},
 		
-		
 		/**
-		 * Copy files into buffer and mark for delete after paste
+		 * Copy files into buffer and mark for deletion after paste
 		 * Wrapper for copy method
 		 * 
 		 * @param  Array  files hashes array
@@ -1829,7 +1821,7 @@
 						
 						// paste into itself not allowed
 						if (self.hasParent(dst, file.hash)) { 
-							return self.trigger('error', {error : [['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]]});
+							return self.trigger('error', {error : ['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]});
 						}
 						
 						// file with same name exists
@@ -1916,7 +1908,7 @@
 			});
 			
 			if (errors.length) {
-				return this.trigger('error', {error : [['Unable to delete "$1".', errors.join(', ')], 'Not enough permission.']});
+				return this.trigger('error', {error : ['Unable to delete "$1".', errors.join(', ')]});
 			}
 			
 			data = {files : files};

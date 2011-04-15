@@ -622,10 +622,11 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function duplicate($args) {
-		$added = array();
+		$result = array('added' => array(), 'warning' => 'test warning');
+		// $added = array();
 		
 		if (!is_array($args['target'])) {
-			return array('error' => 'No files to delete');
+			return array('error' => 'File is not defined');
 		}
 		
 		if (($volume = $this->volume($args['target'][0])) === false) {
@@ -634,13 +635,14 @@ class elFinder {
 		
 		foreach ($args['target'] as $hash) {
 			if (($hash = $volume->duplicate($hash)) === false) {
-				return array('error' => $volume->error());
+				$result['warning'] = $volume->error();
+				return $this->trigger('duplicate', $volume, $result);
 			} else {
-				$added[] = $volume->info($hash, true, true);
+				$result['added'][] = $volume->info($hash, true, true);
 			}
 		}
 		
-		return $this->trigger('duplicate', $volume, array('added' => $added));
+		return $this->trigger('duplicate', $volume, $result);
 		
 	}
 	
