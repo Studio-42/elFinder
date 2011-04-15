@@ -162,13 +162,6 @@
 			
 			spinner = $('<div class="elfinder-spinner"/>').hide(),
 			
-			/**
-			 * Notification dialog
-			 *
-			 * @type  jQuery
-			 */
-			notifyDialog = $('<div/>'), 
-			
 			width, height,
 			
 			/**
@@ -378,20 +371,6 @@
 					});
 				}
 			}
-			// ,
-			// 
-			// resetClipboard = function(quiet) {
-			// 	if (clipboard.files.length && !quiet) {
-			// 		self.trigger('unlockfiles', {files : clipboard.files});
-			// 	}
-			// 	clipboard = {
-			// 		files : [],
-			// 		src   : null, // required for old api
-			// 		cut   : false
-			// 	}
-			// 	
-			// 	self.trigger('changeClipboard', {clipboard : clipboard});
-			// }
 			;
 
 		/**
@@ -961,38 +940,12 @@
 		}
 		
 		/**
-		 * Open notification dialog 
-		 * and append/update message for required notification type.
+		 * Exec command and return result;
 		 *
-		 * @param  String  notification type (@see elFinder.notifyType)
-		 * @param  Number  notification counter (how many files to work with)
-		 * @return elFinder
-		 */
-		this.notify = function(type, cnt) {
-			var msg    = this.notifyType[type], 
-				nclass = 'elfinder-notify',
-				tclass = nclass+'-text',
-				place;
-				
-			if (msg) {
-				place = notifyDialog.find('.'+nclass);
-				
-				if (place.length) {
-					cnt += parseInt(place.data('cnt'));
-				} else {
-					place = $('<div class="'+nclass+' '+nclass+'-'+type+'"><span class="'+tclass+'"/><div class="elfinder-notify-spinner"/><span class="elfinder-dialog-icon"/></div>').appendTo(notifyDialog);
-				}
-				if (cnt > 0) {
-					place.data('cnt', cnt).children('.'+tclass).text(this.i18n(msg)+' ('+cnt+')');
-					notifyDialog.dialog('open');
-				} else {
-					place.remove();
-					!notifyDialog.children().length && notifyDialog.dialog('close');
-				}
-			}
-			return this;
-		}
-		
+		 * @param  String  command name
+		 * @param  mixed   command argument
+		 * @return mixed
+		 */		
 		this.exec = function(cmd, value) {
 			if (commands[cmd]) {
 				return commands[cmd].exec(value);
@@ -1230,12 +1183,6 @@
 				
 				self.options.allowNav && nav.show().append($('<ul/>').elfindertree(self));
 				
-				notifyDialog = self.dialog('', {
-					closeOnEscape : false,
-					autoOpen      : false,
-					close         : function() { }
-				}, 'notify');
-
 				self.history = new self.history(self);
 				
 				$(document)
@@ -1557,6 +1504,49 @@
 			}
 			return this;
 		},
+		
+		/**
+		 * Open notification dialog 
+		 * and append/update message for required notification type.
+		 *
+		 * @param  String  notification type (@see elFinder.notifyType)
+		 * @param  Number  notification counter (how many files to work with)
+		 * @return elFinder
+		 */
+		notify : function(type, cnt) {
+			var msg    = this.notifyType[type], 
+				nclass = 'elfinder-notify',
+				tclass = nclass+'-text',
+				dialog,
+				place;
+				
+			if (msg) {
+				if (!this.notifyDialog) {
+					this.notifyDialog = this.dialog('', {
+						closeOnEscape : false,
+						autoOpen      : false,
+						close         : function() { }
+					}, 'notify');
+				}
+				dialog = this.notifyDialog;
+				place = dialog.find('.'+nclass);
+				
+				if (place.length) {
+					cnt += parseInt(place.data('cnt'));
+				} else {
+					place = $('<div class="'+nclass+' '+nclass+'-'+type+'"><span class="'+tclass+'"/><div class="elfinder-notify-spinner"/><span class="elfinder-dialog-icon"/></div>').appendTo(dialog);
+				}
+				if (cnt > 0) {
+					place.data('cnt', cnt).children('.'+tclass).text(this.i18n(msg)+' ('+cnt+')');
+					dialog.dialog('open');
+				} else {
+					place.remove();
+					!dialog.children().length && dialog.dialog('close');
+				}
+			}
+			return this;
+		},
+		
 		
 		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
