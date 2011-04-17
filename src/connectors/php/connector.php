@@ -12,6 +12,7 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php'
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -49,56 +50,29 @@ function logger($data) {
 }
 
 $opts = array(
-	'debug' => true,
-	// 'disabled' => array('rm', 'open', 'asd'),
-	// 'bind' => array('mkdir' => 'logger', 'mkfile' => 'logger', 'rm' => 'logger'),
 	'roots' => array(
 		array(
-			'path'   => '../../../files/',
-			// 'startPath' => '../../../files/Images/',
-			'URL'    => 'http://localhost/git/elfinder/files/',
-			// 'dotFiles' => true,
-			'treeDeep' => 2,
-			'fileURL' => false,
-			'alias'  => 'Home1',
 			'driver' => 'LocalFileSystem',
-			'disabled' => array('rename'),
-			'mimeDetect'   => 'mime_content_type',
-			'imgLib' => 'imagick',
-			'read' => true,
-			'write' => true,
-			'debug' => true,
-			'perms' => array(
-				'/123/' => array(
-					'read'   => true,
-					'write'   => true,
-					'rm'   => false
-				),
-				'/print\.png/' => array(
-					'read'   => true,
-					'write'   => false,
-					'rm'   => false
-				)
-			)
+			'path'   => '../../../files/',
+			'URL'    => 'http://localhost/git/elfinder/',
+			// 'startPath'   => '../../../files/mimes/',
+			// 'defaults' => array('read' => false)
 		),
-		// array('path' => '/opt/local', 'driver' => 'LocalFileSystem', 'tmbDir' => '', 'treeDeep' => 6),
-		// array(
-		// 	'path'   => '../../../files2',
-		// 	'URL'    => 'http://localhost/git/elfinder/files2/',
-		// 	'alias'  => 'Home2',
-		// 	'driver' => 'LocalFileSystem',
-		// 	'mimeDetect'   => 'auto',
-		// 	'debug' => true,
-		// 	'defaults' => array(
-		// 		'read' => true,
-		// 		'write' => false,
-		// 		'rm' => false
-		// 	)
-		// ),
-		array('path' => '../../../files3', 'driver' => 'LocalFileSystem'),
-		
+		array(
+			'driver' => 'MySQL',
+			'path' => 1,
+			'startPath' => 2,
+			'user' => 'dio',
+			'pass' => 'hane',
+			'db' => 'elfinder',
+			'user_id' => 1,
+			'URL'    => 'http://localhost/git/elfinder',
+			'tmbPath' => '../../../tmb/'
+		)
 	)
+	
 );
+
 
 $connector = new elFinderConnector(new elFinder($opts));
 $connector->run();

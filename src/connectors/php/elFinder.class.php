@@ -169,9 +169,10 @@ class elFinder {
 					$o['disabled'] = $this->disabled(@$o['disabled']);
 					
 					if ($volume->mount($id, $o)) {
+						
 						$this->volumes[$id] = $volume;
-						if (!$this->default && $volume->isReadable($volume->root())) {
-							$this->default = $this->volumes[$id];
+						if (!$this->default && $volume->isReadable()) {
+							$this->default = $this->volumes[$id]; 
 						}
 					}
 				}
@@ -338,7 +339,9 @@ class elFinder {
 		if (($result['cwd'] = $volume->info($target, true)) == false) {
 			return array('error' => $volume->error());
 		}
-
+		$result['cwd']['path'] = $volume->path($target);
+		$result['cwd']['url']  = $volume->url();
+ 	debug($result['cwd']);
 		// get current working directory info and files list
 		if (($result['files'] = $volume->open($target, $args['mimes'], $tree)) === false) {
 			return array('error' => $volume->error());
