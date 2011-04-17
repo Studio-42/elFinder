@@ -463,8 +463,18 @@ abstract class elFinderVolumeDriver {
 		return array(
 			'tmbURL'   => $this->tmbURL,
 			'dotFiles' => (int)$this->options['dotFiles'],
-			'disabled' => array()
+			'disabled' => $this->disabled()
 		);
+	}
+	
+	/**
+	 * Return list of disabled on this volume commands
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function disabled() {
+		return is_array($this->options['disabled']) ? $this->options['disabled'] : array();
 	}
 	
 	/**
@@ -540,6 +550,28 @@ abstract class elFinderVolumeDriver {
 		return $file;
 	}
 	
+	/**
+	 * Return directory content or false on error
+	 *
+	 * @param  string   $hash  file hash
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function readdir($hash, $mimes=array()) {
+		
+		$file = $this->info($hash);
+		if (!$file) {
+			return false;
+		}
+		if ($file['mime'] != 'directory') {
+			return $this->setError('$1 is not a directory', $file['name']);
+		}
+		
+		$path = $this->decode($hash);
+		
+		$files = $this->scandir($path, $mimes);
+		debug($files);
+	}
 	
 	/*********************************************************************/
 	/*                        INIT AND CONFIGURE                         */
@@ -952,13 +984,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function gettmb($path) {
-		if ($this->tmbURL) {
+		if ($this->tmbURL && $this->tmbPath) {
 			// file itself thumnbnail
 			if ($this->inpath($path, $this->tmbPath)) {
 				return basename($path);
 			}
 			$name = $this->tmbname($path);
-			if ($this->_tmbExists($name)) {
+			if (file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$name)) {
 				return $name;
 			}
 		}
@@ -977,7 +1009,7 @@ abstract class elFinderVolumeDriver {
 		return $this->tmbPath
 			&& $this->tmbURL
 			&& $this->tmbPathWritable 
-			&& !$this->_inpath($path, $this->tmbPath) // do not create thumnbnail for thumnbnail
+			&& !$this->inpath($path, $this->tmbPath) // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos('image', $mime) == 0 
 			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
@@ -1056,7 +1088,7 @@ abstract class elFinderVolumeDriver {
 				if ($target) {
 					$file['mime']   = $this->mimetype($target);
 					$file['link']   = $this->encode($target);
-					$file['linkTo'] = $this->abspath($target);
+					$file['linkTo'] = $this->relpath($target);
 				} else {
 					$file['mime']  = 'symlink-broken';
 					$file['read']  = 0;
@@ -1088,6 +1120,37 @@ abstract class elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Return required dir files info
+	 *
+	 * @param  string  $path  dir path
+	 * @param  array   $mimes only dirs files this mimes include in result 
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function scandir($path, $mimes=array()) {
+		$files = array();
+		
+		foreach ($this->_scandir($path) as $p) {
+			$file = $this->file($p);
+			if ($file && ($file['mime'] == 'directory' || !$mimes || $this->mimeAccepted($file['mime'], $mimes))) {
+				$files[] = $file;
+			}
+		}
+		return $files;
+	}
+	
+	/**
+	 * Return true if mime is required mimes list
+	 *
+	 * @param  string $mime   mime type to check
+	 * @param  array  $mimes  allowed mime types list
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function mimeAccepted($mime, $mimes) {
+		return in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
+	}
 	
 	/************************** abstract methods ***************************/
 	
@@ -1209,6 +1272,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _dimensions($path, $mime);
+	
+	/**
+	 * Return files list in directory
+	 *
+	 * @param  string  $path  dir path
+	 * @param  bool    $all   return all files include with not accepted names
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _scandir($path, $all=false);
 	
 }
 

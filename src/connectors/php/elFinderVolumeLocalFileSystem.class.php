@@ -285,7 +285,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		if (is_dir($path)) {
+		if (is_dir($path) && is_readable($path)) {
 			$dir = dir($path);
 			while (($entry = $dir->read()) !== false) {
 				if ($entry != '.' && $entry != '..' && $this->accepted($entry) && is_dir($dir->path.DIRECTORY_SEPARATOR.$entry)) {
@@ -313,7 +313,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			: false;
 	}
 	
-
+	/**
+	 * Return files list in directory
+	 *
+	 * @param  string  $path  dir path
+	 * @param  bool    $all   return all files include with not accepted names
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _scandir($path, $all=false) {
+		$files = array();
+		
+		$ls = @scandir($path);
+		if (is_array($ls)) {
+			for ($i =0, $l = count($ls); $i < $l; $i++) {
+				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				
+				if (($all && ($ls[$i] != '.' && $ls[$i] != '..'))
+				|| $this->accepted($p)) {
+					$files[] = $p;
+				}
+			}
+		}
+		
+		return $files;
+	}
 	
 	
 }

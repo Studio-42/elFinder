@@ -406,6 +406,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return ($file = $this->file($path)) !== null ? $file['dim'] : false;
 	}
 	
-	
+	/**
+	 * Return files list in directory
+	 *
+	 * @param  string  $path  dir path
+	 * @param  bool    $all   return all files include with not accepted names
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _scandir($path, $all=false) {
+		return array();
+	}
 }
 ?>

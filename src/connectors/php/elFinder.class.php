@@ -141,12 +141,6 @@ class elFinder {
 		$this->time  = $this->utime();
 		$this->debug = !empty($opts['debug']);
 		
-		// disable required commands
-		$this->disabled = $this->disabled(@$opts['disabled']);
-		foreach ($this->disabled as $cmd) {
-			unset($this->commands[$cmd]);
-		}
-		
 		// bind events listeners
 		if (isset($opts['bind']) && is_array($opts['bind'])) {
 			foreach ($opts['bind'] as $cmd => $handler) {
@@ -166,10 +160,7 @@ class elFinder {
 					// unique volume id - used as prefix to files hash
 					$id = $volume->driverid().$i;
 					
-					$o['disabled'] = $this->disabled(@$o['disabled']);
-					
 					if ($volume->mount($id, $o)) {
-						
 						$this->volumes[$id] = $volume;
 						if (!$this->default && $volume->isReadable()) {
 							$this->default = $this->volumes[$id]; 
@@ -341,8 +332,17 @@ class elFinder {
 		}
 		$result['cwd']['path'] = $volume->path($target);
 		$result['cwd']['url']  = $volume->url();
- 	debug($result['cwd']);
+		$result['cwd']['params'] = $volume->params();
+		
+		$files = array();
 		// get current working directory info and files list
+		if (($files = $volume->readdir($target, $args['mimes'])) === false) {
+			return array('error' => $volume->error());
+		}
+ 	debug($result['cwd']);
+return $result;
+		// get current working directory info and files list
+		
 		if (($result['files'] = $volume->open($target, $args['mimes'], $tree)) === false) {
 			return array('error' => $volume->error());
 		} 
@@ -712,30 +712,6 @@ class elFinder {
 	/***************************************************************************/
 	/*                                   misc                                  */
 	/***************************************************************************/
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function filter($cmd) {
-		return isset($this->commands[$cmd]) && !preg_match('/^(open|tree|tmb|file|ping)$/', $cmd);
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function disabled($cmds) {
-		if (!is_array($cmds)) {
-			$cmds = array();
-		}
-		
-		return array_filter($cmds, array($this, 'filter'));
-	}
 	
 	/**
 	 * Return root - file's owner
