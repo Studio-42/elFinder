@@ -1,10 +1,15 @@
 <?php
 
+/**
+ * elFinder driver for local filesystem.
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	
-	
 	/**
-	 * undocumented function
+	 * Constructor
+	 * Extend options with required fields
 	 *
 	 * @return void
 	 * @author Dmitry Levashov
@@ -154,7 +159,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $type;
 	}
 	
-	
 	/**
 	 * Return true if file exists
 	 *
@@ -165,7 +169,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _fileExists($path) {
 		return file_exists($path);
 	}
-	
 	
 	/**
 	 * Return true if path is a directory
@@ -317,30 +320,25 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * Return files list in directory
 	 *
 	 * @param  string  $path  dir path
-	 * @param  bool    $all   return all files include with not accepted names
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _scandir($path, $all=false) {
+	protected function _scandir($path) {
 		$files = array();
 		
 		$ls = @scandir($path);
 		if (is_array($ls)) {
 			for ($i =0, $l = count($ls); $i < $l; $i++) {
-				$p = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				
-				if (($all && ($ls[$i] != '.' && $ls[$i] != '..'))
-				|| $this->accepted($p)) {
-					$files[] = $p;
+				if ($ls[$i] != '.' && $ls[$i] != '..') {
+					$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
 				}
 			}
 		}
-		
 		return $files;
 	}
 	
 	
-}
+} // END class 
 
 
 ?>

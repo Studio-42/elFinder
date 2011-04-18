@@ -282,9 +282,9 @@ class elFinder {
 				'time'      => $this->utime() - $this->time
 				);
 			
-			foreach ($this->volumes as $id => $volume) {
-				$result['debug'][$id] = $volume->debug();
-			}
+			// foreach ($this->volumes as $id => $volume) {
+			// 	$result['debug'][$id] = $volume->debug();
+			// }
 		}
 		
 		return $result;
@@ -304,7 +304,6 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function open($args) {
-		$result = array();
 		$target = $args['target'];
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
@@ -327,40 +326,48 @@ class elFinder {
 			}
 		}
 
-		if (($result['cwd'] = $volume->info($target, true)) == false) {
-			return array('error' => $volume->error());
+		// get current working directory info
+		if (!$volume->fileExists($target)) {
+			echo 'here';
+			return array('error' => 'Folder not found');
+		} elseif (!$volume->isDir($target)) {
+			return array('error' => array('"$1" is not a folder', $volume->path($target)));
+		} elseif (!$volume->isReadable($target)) {
+			return array('error' => array('The folder "$1" can’t be opened because you don’t have permission to see its contents.', $volume->path($target)));
+		} elseif (($cwd = $volume->info($target)) == false) {
+			return array('error' => 'Folder not found');
 		}
-		$result['cwd']['path'] = $volume->path($target);
-		$result['cwd']['url']  = $volume->url();
-		$result['cwd']['params'] = $volume->params();
 		
+		$cwd['path']   = $volume->path($target);
+		$cwd['url']    = $volume->url();
+		$cwd['params'] = $volume->params();
+
 		$files = array();
-		// get current working directory info and files list
-		if (($files = $volume->readdir($target, $args['mimes'])) === false) {
-			return array('error' => $volume->error());
-		}
- 	debug($result['cwd']);
-return $result;
-		// get current working directory info and files list
-		
-		if (($result['files'] = $volume->open($target, $args['mimes'], $tree)) === false) {
-			return array('error' => $volume->error());
-		} 
-		
-		// shuffle($result['files']);
-		if ($tree) {
-			foreach ($this->volumes as $v) {
-				if ($v->id() != $volume->id() && ($tree = $v->tree()) != false) {
-					$result['files'] = array_merge($result['files'], $tree);
+		// get folders trees
+		if ($args['tree']) {
+			foreach ($this->volumes as $id => $v) {
+				if (($tree = $v->tree()) == false) {
+					return array('error' => 'Folder not found');
 				}
+				$files = array_merge($files, $tree);
 			}
 		}
 		
-		// get additional params for init loading
+		// get current working directory files list and add to $files if not exists in it
+		foreach ($volume->readdir($target, $args['mimes']) as $file) {
+			if (!in_array($file, $files)) {
+				$files[] = $file;
+			}
+		}
+		
+		$result = array(
+			'cwd'   => $cwd,
+			'files' => $files
+		);
+		
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['params'] = array(
-				'disabled'   => $this->disabled,
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
 		}

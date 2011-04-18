@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Simple elFinder driver for MySQL.
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	
 	/**
@@ -17,42 +22,25 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected $accessControl = null;
 	
 	/**
-	 * Cache for files fetched from db
-	 *
-	 * @var array
-	 **/
-	protected $files = array();
-	
-	/**
-	 * Default permissions
-	 *
-	 * @var array
-	 **/
-	protected $defaults = array(
-		'read'  => true,
-		'write' => true,
-		'rm'    => true
-	);
-	
-	/**
-	 * undocumented function
+	 * Constructor
+	 * Extend options with required fields
 	 *
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct() {
 		$opts = array(
-			'host'         => 'localhost',
-			'user'         => '',
-			'pass'         => '',
-			'db'           => '',
-			'port'         => null,
-			'socket'       => null,
-			'files_table'  => 'elfinder_file',
-			'perms_table'  => 'elfinder_permission',
-			'user_id'      => 0,
+			'host'          => 'localhost',
+			'user'          => '',
+			'pass'          => '',
+			'db'            => '',
+			'port'          => null,
+			'socket'        => null,
+			'files_table'   => 'elfinder_file',
+			'perms_table'   => 'elfinder_permission',
+			'user_id'       => 0,
 			'accessControl' => null,
-			'tmbPath' => ''
+			'tmbPath'       => ''
 		);
 		$this->options = array_merge($this->options, $opts); 
 	}
@@ -63,7 +51,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	
 	/**
 	 * Prepare driver before mount volume.
-	 * Connect to db and check required tables
+	 * Connect to db, check required tables and fetch root path
 	 *
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
@@ -83,7 +71,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			echo mysqli_error();
 			return false;
 		}
-
 		
 		if ($this->options['accessControl']) {
 			if (is_string($this->options['accessControl']) 
@@ -134,17 +121,15 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _configure() {
-		
-	}
+	protected function _configure() { }
 	
-	/******************************************************************/
-	/*                              utilites                          */
-	/******************************************************************/
+	
+	/*********************************************************************/
+	/*                               FS API                              */
+	/*********************************************************************/
 	
 	/**
-	 * If file exists in cache return it
-	 * or try to fetch file info from db and store in cache
+	 * Try to fetch file info from db and return
 	 *
 	 * @param  string  file path
 	 * @return array
@@ -153,113 +138,82 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function fileinfo($path) {
 		$root = $path == $this->root;
 		if ($root || $this->accepted($path)) {
-			
-			$sql = 'SELECT f.id, f.parent_id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, d.id AS dirs FROM '
-				.$this->tbf.' AS f LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id 
-				LEFT JOIN '.$this->tbf.' AS d ON d.parent_id=f.id
-				WHERE f.path="'.$this->db->real_escape_string($path).'" GROUP BY f.id';
-			// echo $sql;
+			$path = $this->db->real_escape_string($path);
+			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+				IF (a.perm_read<=>NULL, a.perm_read, "'.intval($this->defaults['read']).'") AS perm_read, 
+				IF (a.perm_write<=>NULL, a.perm_write, "'.intval($this->defaults['write']).'") AS perm_write,
+				IF (a.perm_rm<=>NULL, a.perm_rm, "'.intval($this->defaults['rm']).'") AS perm_rm
+				FROM '.$this->tbf.' AS f 
+				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.id
+				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
+				LEFT JOIN '.$this->tbp.' AS a ON a.file_id=f.id AND user_id='.$this->uid.'
+				WHERE f.path="'.$path.'"
+				GROUP BY f.id';
+				
 			if ($res = $this->db->query($sql)) {
-				$file = $res->fetch_assoc();
-				$id   = $file['id'];
-			} 
-			
-			if (empty($file)) {
-				return null;
+				return $this->prepareInfo($res->fetch_assoc());
 			}
-			
-			
-			$file['hash'] = $this->encode($file['path']);
-			$file['phash'] = $file['parent_path'] ? $this->encode($file['parent_path']) : null;
-			$mtime = $file['mtime'];
-			if ($mtime > $this->today) {
-				$date = 'Today '.date('H:i', $mtime);
-			} elseif ($mtime > $this->yesterday) {
-				$date = 'Yesterday '.date('H:i', $mtime);
-			} else {
-				$date = date($this->options['dateFormat'], $mtime);
-			}
-			$file['date'] = $date;
-			
-			if (is_string($this->accessControl)) {
-				$file['read']  = (int)$this->accessControl($this->uid, 'read',  $id, $path);
-				$file['write'] = (int)$this->accessControl($this->uid, 'write', $id, $path);
-				$file['rm']    = (int)$this->accessControl($this->uid, 'rm',    $id, $path);
-			} elseif (is_array($this->accessControl)) {
-				$obj = $this->accessControl[0];
-				$m   = $this->accessControl[1];
-				$file['read']  = (int)$obj->{$m}($this->uid, 'read',  $id, $path);
-				$file['write'] = (int)$obj->{$m}($this->uid, 'write', $id, $path);
-				$file['rm']    = (int)$obj->{$m}($this->uid, 'rm',    $id, $path);
-			} else {
-				$file['read']  = (int)$this->defaults['read'];
-				$file['rm']    = (int)$this->defaults['rm'];
-
-				$sql = 'SELECT f.id, f.path, p.perm_read, p.perm_write, p.perm_rm FROM '
-						.$this->tbf.' AS f, '
-						.$this->tbp.' AS p '
-						.'WHERE (f.id='.$id.' OR INSTR("'.$this->db->real_escape_string($path).'", CONCAT(f.path, "/"))=1) 
-						AND p.user_id='.$this->uid.' AND p.file_id=f.id ORDER BY f.path';
-						
-				if ($res = $this->db->query($sql)) {
-					while ($r = $res->fetch_assoc()) {
-						if ($r['id'] == $id) {
-							$file['read'] = (int)$r['perm_read'];
-							$file['rm']   = (int)$r['perm_rm'];
-							if (!isset($file['write']) || $file['write'] === true) {
-								// set write perm if parent writable
-								$file['write'] = (int)$r['perm_write'];
-							}
-						} else {
-							if (!$r['perm_read']) {
-								// one of parents not readable
-								return null;
-							}
-							$file['write'] = (int)$r['perm_write'];
-						}
-					}
-				}
-				if (!isset($file['write'])) {
-					$file['write'] = (int)$this->defaults['write'];
-				}
-			}
-			if ($root) {
-				$file['rm'] = 0;
-			}
-			
-			
-			
-			if ($file['mime'] == 'directory') {
-				$file['dirs'] = $file['dirs'] ? 1 : 0;
-			} else {
-				unset($file['dirs']);
-				if (($tmb = $this->gettmb($path)) != false) {
-					$file['tmb'] = $tmb;
-				} elseif ($this->canCreateTmb($path, $file['mime'])) {
-					$file['tmb'] = 1;
-				}
-				
-				if ($file['width'] && $file['height']) {
-					$file['dim'] = $file['width'].'x'.$file['height'];
-				}
-				
-				if ($file['write'] && $this->resizable($path, $file['mime'])) {
-					$file['resize'] = 1;
-				}
-			}
-			
-			unset($file['id'], $file['parent_id'], $file['path'], $file['mtime'], $file['parent_path'], $file['width'], $file['height']);
-			$this->files[$path] = $file;
-			
 		}
-
-		return empty($this->files[$path]) ? null : $this->files[$path];
+		return false;
 	}
 	
+	/**
+	 * Get file data from db and return complete fileinfo array 
+	 *
+	 * @param  array  $raw  file data
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function prepareInfo($raw) {
+		$info = array(
+			'hash'  => $this->encode($raw['path']),
+			'phash' => $raw['parent_path'] ? $this->encode($raw['parent_path']) : '',
+			'name'  => $raw['name'],
+			'mime'  => $raw['mime'],
+			'size'  => $raw['size']
+		);
+		if ($raw['dirs']) {
+			$info['dirs'] = 1;
+		}
+		if ($raw['mtime'] > $this->today) {
+			$info['date'] = 'Today '.date('H:i', $raw['mtime']);
+		} elseif ($raw['mtime'] > $this->yesterday) {
+			$info['date'] = 'Yesterday '.date('H:i', $raw['mtime']);
+		} else {
+			$info['date'] = date($this->options['dateFormat'], $raw['mtime']);
+		}
+		
+		if ($this->accessControl) {
+			$info['read']  = (int)$this->accessControl($this->uid, 'read',  $raw['id'], $raw['path'], $this->defaults['read']);
+			$info['write'] = (int)$this->accessControl($this->uid, 'write', $raw['id'], $raw['path'], $this->defaults['write']);
+			$info['rm']    = $raw['parent_path'] ? (int)$this->accessControl($this->uid, 'rm',    $raw['id'], $raw['path'], $this->defaults['rm']) : 0;
+		} else {
+			$info['read'] = $raw['perm_read'];
+			$info['write'] = $raw['perm_write'];
+			$info['rm'] = $raw['parent_path'] ? $raw['perm_rm'] : 0;
+		}
+		
+		if ($raw['width'] && $raw['height']) {
+			$info['dim'] = $raw['width'].'x'.$raw['height'];
+		}
+		if (($tmb = $this->gettmb($raw['path'])) != false) {
+			$info['tmb'] = $tmb;
+		} elseif ($this->canCreateTmb($raw['path'], $info['mime'])) {
+			$info['tmb'] = 1;
+		}
+		return $info;
+	}
 	
-	/*********************************************************************/
-	/*                               FS API                              */
-	/*********************************************************************/
+	/**
+	 * Return file mimetype
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function mimetype($path) {
+		return ($file = $this->file($path)) ? $file['mime'] : 'unknown';
+	}
 	
 	/**
 	 * Return true if file exists
@@ -269,9 +223,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fileExists($path) {
-		
+		return !!$this->file($path);
 	}
-	
 	
 	/**
 	 * Return true if path is a directory
@@ -281,7 +234,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isDir($path) {
-		return ($file = $this->file($path)) !== null ? $file['mime'] == 'directory' : false;
+		return ($file = $this->file($path)) ? $file['mime'] == 'directory' : false;
 	}
 	
 	/**
@@ -292,7 +245,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isFile($path) {
-		return ($file = $this->file($path)) !== null ? $file['mime'] != 'directory' : false;
+		return !$this->_isDir($hash);
 	}
 	
 	/**
@@ -313,7 +266,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isReadable($path) {
-		return ($file = $this->file($path)) !== null ? $file['read'] : false;
+		return ($file = $this->file($path)) ? $file['read'] : false;
 	}
 	
 	/**
@@ -324,7 +277,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isWritable($path) {
-		return ($file = $this->file($path)) !== null ? $file['write'] : false;
+		return ($file = $this->file($path)) ? $file['write'] : false;
 	}
 	
 	/**
@@ -335,7 +288,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isRemovable($path) {
-		return ($file = $this->file($path)) !== null ? $file['rm'] : false;
+		return ($file = $this->file($path)) ? $file['rm'] : false;
 	}
 	
 	/**
@@ -346,7 +299,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return ($file = $this->file($path)) !== null ? $file['size'] : false;
+		return ($file = $this->file($path)) ? $file['size'] : false;
 	}
 	
 	/**
@@ -357,14 +310,14 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) { 
-		return ($file = $this->file($path)) !== null ? $file['mtime'] : false;
+		return ($file = $this->file($path)) ? $file['mtime'] : false;
 	}
 	
 	/**
-	 * Return symlink stat (required only size and mtime)
+	 * Return false, this driver does not support symlinks
 	 *
 	 * @param  string  $path  link path
-	 * @return array
+	 * @return false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _lstat($path) { 
@@ -372,10 +325,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return symlink target file
+	 * Return false, this driver does not support symlinks
 	 *
 	 * @param  string  $path  link path
-	 * @return string
+	 * @return false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _readlink($path) {
@@ -390,7 +343,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		return ($file = $this->file($path)) !== null ? $file['dirs'] : false;
+		return ($file = $this->file($path)) ? $file['dirs'] : false;
 	}
 	
 	/**
@@ -403,19 +356,43 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) { 
-		return ($file = $this->file($path)) !== null ? $file['dim'] : false;
+		return ($file = $this->file($path)) ? $file['dim'] : false;
 	}
 	
 	/**
 	 * Return files list in directory
 	 *
 	 * @param  string  $path  dir path
-	 * @param  bool    $all   return all files include with not accepted names
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _scandir($path, $all=false) {
-		return array();
+	protected function _scandir($path) {
+		$files = array();
+		$path  = $this->db->real_escape_string($path);
+		$sql   = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+			IF (a.perm_read<=>NULL, a.perm_read, "'.intval($this->defaults['read']).'") AS perm_read, 
+			IF (a.perm_write<=>NULL, a.perm_write, "'.intval($this->defaults['write']).'") AS perm_write,
+			IF (a.perm_rm<=>NULL, a.perm_rm, "'.intval($this->defaults['rm']).'") AS perm_rm
+			FROM '.$this->tbf.' AS f 
+			LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
+			LEFT JOIN '.$this->tbp.' AS a ON a.file_id=f.id AND user_id='.$this->uid.', 
+			'.$this->tbf.' AS p WHERE p.path="'.$path.'" AND f.parent_id=p.id  
+			GROUP BY f.id ORDER BY f.path';
+
+		if ($res = $this->db->query($sql)) {
+			while ($r = $res->fetch_assoc()) {
+				$path = $r['path'];
+				if (!isset($this->files[$path])) {
+					$file = $this->prepareInfo($r);
+					$this->files[$path] = $file;
+				} else {
+					$file = $this->files[$path];
+				}
+				$files[] = $path;
+			}
+		}
+
+		return $files;
 	}
 }
 ?>

@@ -50,6 +50,7 @@ function logger($data) {
 }
 
 $opts = array(
+	'debug' => true,
 	'roots' => array(
 		array(
 			'driver' => 'LocalFileSystem',
@@ -61,13 +62,14 @@ $opts = array(
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,
-			'startPath' => 2,
+			// 'startPath' => 2,
 			'user' => 'dio',
 			'pass' => 'hane',
 			'db' => 'elfinder',
 			'user_id' => 1,
 			'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../../../tmb/'
+			'tmbPath' => '../../../tmb/',
+			'tmbURL' => 'http://localhost/git/elfinder/tmb/'
 		)
 	)
 	
