@@ -1193,9 +1193,9 @@ abstract class elFinderVolumeDriver {
 			if ($this->accepted($p)) {
 				if ($this->_isDir($p)) {
 					$dir = $this->file($p);
-					$dirs = $dir;
+					$dirs[] = $dir;
 					if ($deep > 0 && $dir['read']) {
-						$dirs = array_merge($dirs, $this->gettree($p, $deep-1));
+						$dirs[] = array_merge($dirs, $this->gettree($p, $deep-1));
 					}
 				}
 			}

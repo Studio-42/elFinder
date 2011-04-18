@@ -144,7 +144,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				IF (a.perm_write<=>NULL, a.perm_write, "'.intval($this->defaults['write']).'") AS perm_write,
 				IF (a.perm_rm<=>NULL, a.perm_rm, "'.intval($this->defaults['rm']).'") AS perm_rm
 				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.id
+				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 				LEFT JOIN '.$this->tbp.' AS a ON a.file_id=f.id AND user_id='.$this->uid.'
 				WHERE f.path="'.$path.'"
@@ -165,6 +165,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function prepareInfo($raw) {
+		// debug($raw);
 		$info = array(
 			'hash'  => $this->encode($raw['path']),
 			'phash' => $raw['parent_path'] ? $this->encode($raw['parent_path']) : '',

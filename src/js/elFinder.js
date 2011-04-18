@@ -553,7 +553,7 @@
 					},
 					success  : function(data) {
 						var error;
-						
+						// return self.log(data)
 						self.trigger('ajaxstop', {request : request, response : data, mode : mode});
 
 						if (!data) {

@@ -349,10 +349,11 @@ class elFinder {
 				if (($tree = $v->tree()) == false) {
 					return array('error' => 'Folder not found');
 				}
+				// debug($tree);
 				$files = array_merge($files, $tree);
 			}
 		}
-		
+		// debug($files);
 		// get current working directory files list and add to $files if not exists in it
 		foreach ($volume->readdir($target, $args['mimes']) as $file) {
 			if (!in_array($file, $files)) {
@@ -371,7 +372,7 @@ class elFinder {
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);
 		}
-		
+		// debug($result);
 		return $result;
 	}
 	
