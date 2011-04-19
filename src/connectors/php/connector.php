@@ -55,7 +55,7 @@ $opts = array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
-			'URL'    => 'http://localhost/git/elfinder/',
+			'URL'    => 'http://localhost/git/elfinder/files/',
 			// 'startPath'   => '../../../files/mimes/',
 			// 'defaults' => array('read' => false)
 		),

@@ -77,7 +77,7 @@
 				 */
 				item = function(dir, isroot) {
 					var pclass = fm.perms2class(dir),
-						childs = fm.newAPI ? dir.childs : dir.dirs && dir.dirs.length;
+						childs = fm.newAPI ? dir.dirs : dir.dirs && dir.dirs.length;
 					
 					if (dir && dir.name) {
 						return tpl.replace('%id', dir.hash)
@@ -101,7 +101,6 @@
 				 */
 				create = function(dirs, isroot) {
 					var html= [], i;
-					
 					
 					if (isroot) {
 						tree.find('a').remove();
@@ -183,8 +182,10 @@
 					
 					
 					$.each($.map(dirs, function(d, i) { return !d.phash ? d : null }), function(i, root) {
-						if (!find(root.hash).length)
-						tree.append(item(root, true));
+						if (!find(root.hash).length) {
+							tree.append(item(root, true));
+						}
+						
 					});
 					
 					for (i = 0; i < dirs.length; i++) {
@@ -314,7 +315,7 @@
 									spinner.remove();
 									if (ul.children().length) {
 										ul.slideToggle();
-										$this.show().toggleClass(expanded);
+										$this.show().toggleClass(expanded).addClass(loaded);
 									} else {
 										$this.remove();
 									}
@@ -328,7 +329,6 @@
 			fm
 				// update tree
 				.bind('open', function(e) {
-
 					proccess(e)
 					// setTimeout(function() { proccess(e) }, 20)
 				})

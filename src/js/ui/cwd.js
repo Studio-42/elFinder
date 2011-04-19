@@ -555,8 +555,8 @@ $.fn.elfindercwd = function(fm) {
 				var list  = fm.view == 'list', 
 					phash = e.data.cwd.hash; 
 				
-				tmbUrl = fm.param('tmbUrl')||'';
-			
+				tmbUrl = fm.cwd().tmbUrl||'';
+
 				cwd.html('')
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
@@ -574,6 +574,7 @@ $.fn.elfindercwd = function(fm) {
 				cwd.bind('scroll', scroll).trigger('scroll');
 				scrollTop = false;
 				trigger();
+
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {

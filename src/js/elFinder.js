@@ -54,21 +54,6 @@
 			 **/
 			rules = {},
 			
-			/**
-			 * Parameters got from connctor on init requiest.
-			 * Do not changed in session
-			 *
-			 * @type Object
-			 **/
-			coreParams = {},
-			
-			/**
-			 * In new api any volume can has own parameters, 
-			 * so here store united parameters
-			 *
-			 * @type Object
-			 **/
-			params = {},
 			
 			/**
 			 * Current working directory
@@ -81,6 +66,9 @@
 				name   : '',
 				path   : '',
 				url    : '',
+				tmbUrl : '',
+				dotFiles : 0,
+				disabled : [],
 				date   : '',
 				read   : 1,
 				write  : 1,
@@ -242,9 +230,11 @@
 				if (clear) {
 					cwd.size  = 0;
 					cwd.files = 0;
-					for (i in files) {
-						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
-							delete files[i];
+					if (self.options.clearCache) {
+						for (i in files) {
+							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
+								delete files[i];
+							}
 						}
 					}
 				}
@@ -283,12 +273,13 @@
 
 				add(dir);
 				phash = dir.hash; 
-				
+				// self.log(dir.name+' '+dir.hash)
 				while (l--) {
 					dir = childs[l];
-					dir.dirs && dir.dirs.length ? cacheTree(ddir, phash) : add(dir);
+					dir.dirs && dir.dirs.length ? cacheTree(dir.dirs, phash) : add(dir);
 					if (!cwd.phash && dir.hash == cwd.hash) {
 						cwd.phash = phash;
+
 					}
 				}
 			},
@@ -389,6 +380,8 @@
 		
 		this.newAPI = false;
 		this.oldAPI = true;
+		
+		this.uploadMaxSize = '';
 		
 		/**
 		 * Configuration options
@@ -553,7 +546,7 @@
 					},
 					success  : function(data) {
 						var error;
-						// return self.log(data)
+
 						self.trigger('ajaxstop', {request : request, response : data, mode : mode});
 
 						if (!data) {
@@ -736,16 +729,6 @@
 		 */
 		this.cwd = function() {
 			return cwd;
-		}
-		
-		/**
-		 * Return parameter value
-		 * 
-		 * @param  String  param name
-		 * @return mixed
-		 */
-		this.param = function(n) {
-			return params[n];
 		}
 		
 		/**
@@ -1170,17 +1153,15 @@
 					cmd,
 					l, tb = 'elfindertoolbar'+opts.toolbar;
 
-				self.api    = (data.files ? parseFloat(data.api) : 2) || 1;
+				self.api    = parseFloat(data.api)|| 1;
 				self.newAPI = self.api > 1;
 				self.oldAPI = !self.newAPI;
 				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
+
+				self.uploadMaxSize = data.uploadMaxSize;
 				
-				// store core params
-				coreParams = e.data.params;
-				// fix params for old api
 				if (self.oldAPI) {
-					params  = coreParams;
-					cwd.url = coreParams.url;
+					cwd.url = e.data.params.url;
 				}
 				
 				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
@@ -1232,9 +1213,7 @@
 			 */
 			.bind('open', function(e) {
 				// set current directory data
-				cwd = e.data.cwd;
-				// update params for current directory (new api)
-				params = $.extend({}, coreParams, e.data.cwd.params||{});
+				cwd = $.extend(cwd, e.data.cwd)
 
 				if (self.newAPI) {
 					if (self.options.sync > 3000) {
@@ -1248,12 +1227,9 @@
 					if (e.data.tree) {
 						files = {};
 						cacheTree(e.data.tree);
+					} else {
+						cwd.phash = files[cwd.hash].phash;
 					}
-					// var id;
-					// 
-					// if (!cwd.phash && typeof((id = nav.find('#nav-'+cwd.hash).parents('ul:first').prev('[id]').attr('id'))) == 'string') {
-					// 	cwd.phash = id.substr(4);
-					// }
 				}
 				
 				cache(e.data.files || e.data.cdc, true);
@@ -1266,7 +1242,7 @@
 			 * Clean clipboard on reload
 			 */
 			.bind('reload', function() {
-				resetClipboard();
+				self.clipboard([], false, true);
 			})
 			/**
 			 * Update files cache
@@ -1318,6 +1294,7 @@
 						var file = self.file(h);
 						if (file.phash == cwd.hash) {
 							cwd.size -= file.size;
+							cwd.files--;
 						}
 						delete files[h];
 						
@@ -2188,8 +2165,7 @@
 		newAPIRules : {
 			open : {
 				cwd    : {req : true,  valid : $.isPlainObject},
-				files  : {req : true, valid : $.isArray},
-				params : {req : false, valid : $.isPlainObject}
+				files  : {req : true, valid : $.isArray}
 			},
 			tree : {
 				tree : {req : true	}

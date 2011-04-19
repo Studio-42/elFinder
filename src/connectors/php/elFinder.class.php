@@ -340,7 +340,10 @@ class elFinder {
 		
 		$cwd['path']   = $volume->path($target);
 		$cwd['url']    = $volume->url();
-		$cwd['params'] = $volume->params();
+		$cwd['tmbUrl'] = $volume->tmbUrl();
+		$cwd['dotFiles'] = $volume->dotFiles();
+		$cwd['disabled'] = $volume->disabled();
+		// $cwd['params'] = $volume->params();
 
 		$files = array();
 		// get folders trees
@@ -368,6 +371,7 @@ class elFinder {
 		
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
+			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['params'] = array(
 				'uplMaxSize' => ini_get('upload_max_filesize')
 			);

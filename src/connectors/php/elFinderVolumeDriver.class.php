@@ -460,6 +460,28 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function tmbUrl() {
+		return $this->tmbURL;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function dotFiles() {
+		return (int)$this->options['dotFiles'];
+	}
+	
+	
+	
+	/**
 	 * Return volume parameters
 	 *
 	 * @return array
