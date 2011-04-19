@@ -40,7 +40,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			'perms_table'   => 'elfinder_permission',
 			'user_id'       => 0,
 			'accessControl' => null,
-			'tmbPath'       => ''
+			'tmbPath'       => '',
+			'tmpPath'       => ''
 		);
 		$this->options = array_merge($this->options, $opts); 
 	}
@@ -112,6 +113,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			}
 		}
 		
+		
 		return true;
 	}
 	
@@ -121,7 +123,20 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _configure() { }
+	protected function _configure() { 
+		if ($this->options['tmpPath']) {
+			if (!file_exists($this->options['tmpPath'])) {
+				@mkdir($this->options['tmpPath']);
+			}
+		}
+		
+		if (is_dir($this->options['tmpPath']) && is_writable($this->options['tmpPath'])) {
+			$this->tmpPath = $this->options['tmpPath'];
+		} elseif ($this->tmbPathWritable) {
+			$this->tmpPath = $this->tmbPath;
+		}
+
+	}
 	
 	
 	/*********************************************************************/
@@ -173,9 +188,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			'mime'  => $raw['mime'],
 			'size'  => $raw['size']
 		);
-		if ($raw['dirs']) {
-			$info['dirs'] = 1;
-		}
+		
 		if ($raw['mtime'] > $this->today) {
 			$info['date'] = 'Today '.date('H:i', $raw['mtime']);
 		} elseif ($raw['mtime'] > $this->yesterday) {
@@ -194,14 +207,34 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$info['rm'] = $raw['parent_path'] ? $raw['perm_rm'] : 0;
 		}
 		
-		if ($raw['width'] && $raw['height']) {
-			$info['dim'] = $raw['width'].'x'.$raw['height'];
+		if ($info['read']) {
+			if ($info['mime'] == 'directory') {
+				if ($raw['dirs']) {
+					$info['dirs'] = 1;
+				}
+			} else {
+				if ($raw['width'] && $raw['height']) {
+					$info['dim'] = $raw['width'].'x'.$raw['height'];
+				}
+				
+				if (($tmb = $this->gettmb($raw['path'])) != false) {
+					$info['tmb'] = $tmb;
+				} elseif ($this->tmbPath
+						&& $this->tmbURL
+						&& $this->tmbPathWritable 
+						&& !$this->inpath($raw['path'], $this->tmbPath) // do not create thumnbnail for thumnbnail
+						&& $this->imgLib 
+						&& strpos('image', $info['mime']) == 0 
+						&& ($this->imgLib == 'gd' ? $info['mime'] == 'image/jpeg' || $info['mime'] == 'image/png' || $info['mime'] == 'mime/gif' : true)) {
+					$info['tmb'] = 1;
+				}
+				
+				if ($info['write'] && $this->resizable($info['mime'])) {
+					$info['resize'] = 1;
+				}
+			}
 		}
-		if (($tmb = $this->gettmb($raw['path'])) != false) {
-			$info['tmb'] = $tmb;
-		} elseif ($this->canCreateTmb($raw['path'], $info['mime'])) {
-			$info['tmb'] = 1;
-		}
+		
 		return $info;
 	}
 	
@@ -214,6 +247,27 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function mimetype($path) {
 		return ($file = $this->file($path)) ? $file['mime'] : 'unknown';
+	}
+	
+	/**
+	 * Create thumnbnail and return it's URL on success
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _createTmb($path) {
+		echo $path;
+		debug($this->file($path));
+		
+		$sql = 'SELECT name, content FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'"';
+		if ($res = $this->db->query($sql)) {
+			if ($r = $res->fetch_assoc()) {
+				debug($r);
+			}
+		}
+		
 	}
 	
 	/**
@@ -395,5 +449,47 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 
 		return $files;
 	}
-}
+
+	/**
+	 * Copy file into tmp dir, open it and return file pointer
+	 *
+	 * @param  string  $path  file path
+	 * @param  bool    $write open file for writing
+	 * @return resource|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _fopen($path, $mode='rb') {
+		if ($this->tmpPath && ($file = $this->file($path)) && $file['read']) {
+			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$file['name'];
+
+			if ($fp = fopen($tmp, 'w')) {
+				if ($res = $this->db->query('SELECT content FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'"')) {
+					if ($r = $res->fetch_assoc()) {
+						fwrite($fp, $r['content']);
+					}
+				}
+				fclose($fp);
+				
+				return fopen($tmp, $mode);
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Close opened file and remove it from tmp dir
+	 *
+	 * @param  resource  $fp    file pointer
+	 * @param  string    $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _fclose($fp, $path) {
+		@fclose($fp);
+		if ($path) {
+			@unlink($this->tmpPath.DIRECTORY_SEPARATOR.basename($path));
+		}
+	}
+} // END class
+
 ?>

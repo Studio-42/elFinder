@@ -1138,7 +1138,7 @@
 			 * Fire "load" event if first ajax request succesfull
 			 */
 			.one('ajaxstop', function(e) {
-				self.trigger('load', e.data.response);
+				!e.data.response.error && self.trigger('load', e.data.response);
 			})
 			/**
 			 * On first success ajax request complete 

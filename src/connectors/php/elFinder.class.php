@@ -297,7 +297,12 @@ class elFinder {
 	
 	/**
 	 * "Open" directory
-	 * Return cwd,cdc,[tree, params] for client
+	 * Return array with following elements
+	 *  - cwd          - opened dir info
+	 *  - files        - opened dir content [and dirs tree if args[tree]]
+	 *  - api          - api version (if $args[init])
+	 *  - uplMaxSize   - if $args[init]
+	 *  - error        - on failed
 	 *
 	 * @param  array  command arguments
 	 * @return array
@@ -309,50 +314,41 @@ class elFinder {
 		$volume = $this->volume($target);
 		
 		if (!$volume) {
-			if ($args['init']) {
+			if ($ars['init']) {
 				// on init request we can get invalid dir hash -
 				// dir which already does not exists but stored in cookie from last session,
 				// so open default dir
 				$volume = $this->default;
-				if ($target && (!$volume->isDir($target) || $volume->isReadable($target))) {
-					$target = '';
-				}
-				
-				if (!$target) {
-					$target = $volume->defaultPath();
-				}
+				$target = $volume->defaultPath();
 			} else {
-				return array('error' => 'Folder not found');
+				return array('error' => 'Folder not found.');
 			}
-		}
+		} 
 
 		// get current working directory info
-		if (!$volume->fileExists($target)) {
-			echo 'here';
-			return array('error' => 'Folder not found');
-		} elseif (!$volume->isDir($target)) {
-			return array('error' => array('"$1" is not a folder', $volume->path($target)));
-		} elseif (!$volume->isReadable($target)) {
+		if (($cwd = $volume->info($target)) == false) {
+			return array('error' => 'Folder not found.');
+		} elseif (!$cwd['read']) {
 			return array('error' => array('The folder "$1" can’t be opened because you don’t have permission to see its contents.', $volume->path($target)));
-		} elseif (($cwd = $volume->info($target)) == false) {
-			return array('error' => 'Folder not found');
+		} elseif ($cwd['mime'] != 'directory') {
+			return array('error' => array('"$1" is not a folder.', $volume->path($target)));
 		}
 		
-		$cwd['path']   = $volume->path($target);
-		$cwd['url']    = $volume->url();
-		$cwd['tmbUrl'] = $volume->tmbUrl();
+		$cwd['path']     = $volume->path($target);
+		$cwd['url']      = $volume->url();
+		$cwd['tmbUrl']   = $volume->tmbUrl();
 		$cwd['dotFiles'] = $volume->dotFiles();
 		$cwd['disabled'] = $volume->disabled();
-		// $cwd['params'] = $volume->params();
 
 		$files = array();
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
-				if (($tree = $v->tree()) == false) {
-					return array('error' => 'Folder not found');
+				if (($tree = $v->tree()) != false) {
+					$files = array_merge($files, $tree);
+				} elseif ($id == $volume->id()) {
+					return array('error' => array('Volume "$1" error.', $v->path($v->root())));
 				}
-				$files = array_merge($files, $tree);
 			}
 		}
 
@@ -372,7 +368,7 @@ class elFinder {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 		}
-		// debug($result);
+
 		return $result;
 	}
 	
@@ -421,22 +417,23 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
+		$images = array();
 		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
 		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
 		
+		foreach ($args['files'] as $hash) {
+			if (($tmb = $volume->tmb($hash)) != false) {
+				$images[$hash] = $tmb;
+			}
+		}
+		
 		return array(
 			'current' => $args['current'],
-			'images'  => $volume->tmb($args['files'])
+			'images'  => $images
 		);
-		
-		$result = $volume->tmb($dir, $args['files']);
-		
-		return $result === false
-			? array('error' => $root->error())
-			: $result;
 	}
 	
 	/**

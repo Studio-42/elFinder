@@ -455,7 +455,7 @@ abstract class elFinderVolumeDriver {
 	public function path($hash) {
 		$path = $this->decode($hash);
 		return $path 
-			? $this->rootName.DIRECTORY_SEPARATOR.($path == $this->root ? '' : $this->relpath($path).DIRECTORY_SEPARATOR)
+			? $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->relpath($path))
 			: '';
 	}
 	
@@ -617,6 +617,64 @@ abstract class elFinderVolumeDriver {
 		return $dirs;
 	}
 	
+	/**
+	 * Create thumbnail for required file and return its name of false on failed
+	 *
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function tmb($hash) {
+		if ($path = $this->decode($hash)) {
+			if (($tmb = $this->gettmb($path))) {
+				return $tmb;
+			}
+			return $this->createTmb($path);
+		}
+		return false;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function open($hash) {
+		$path = $this->decode($hash);
+		if (($file = $this->file($path)) == false || !$file['read'] || $file['mime'] == 'directory') {
+			return false;
+		}
+		return $this->_fopen($path, 'rb');
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function close($fp, $hash) {
+		$this->_fclose($fp, $this->decode($hash));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function save($fp, $dir, $info) {
+		return $this->_save($fp, $this->decode($dir), $info);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function copy($hash, $dir) {
+	}
 	
 	/*********************************************************************/
 	/*                        INIT AND CONFIGURE                         */
@@ -1057,8 +1115,118 @@ abstract class elFinderVolumeDriver {
 			&& $this->tmbPathWritable 
 			&& !$this->inpath($path, $this->tmbPath) // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
+			&& $this->_isReadable($path)
 			&& strpos('image', $mime) == 0 
 			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
+	}
+	
+	/**
+	 * Return x/y coord for crop image thumbnail
+	 *
+	 * @param  int  $w  image width
+	 * @param  int  $h  image height	
+	 * @return array
+	 **/
+	protected function cropPos($w, $h) {
+		$x = $y = 0;
+		$size = min($w, $h);
+		if ($w > $h) {
+			$x = ceil(($w - $h)/2);
+		} else {
+			$y = ceil(($h - $w)/2);
+		}
+		return array($x, $y, $size);
+	}
+	
+	/**
+	 * Create thumnbnail and return it's URL on success
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function createTmb($path) {
+		$mime = $this->mimetype($path);
+		if (!$this->canCreateTmb($path, $mime)) {
+			return false;
+		}
+		$name = $this->tmbName($path);
+		$tmb  = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
+		// copy image in tmbPath so some drivers does not store files on local fs
+		if (($src = $this->_fopen($path, 'rb')) == false 
+		||  ($trg = @fopen($tmb, 'wb')) == false) {
+			return false;
+		}
+		
+		while (!feof($src)) {
+			fwrite($trg, fread($src, 8192));
+		}
+		
+		$this->_fclose($src, $path);
+		fclose($trg);
+		
+		if (($s = @getimagesize($tmb)) == false) {
+			return false;
+		}
+		
+		$result = false;
+		$tmbSize = $this->tmbSize;
+		
+		switch ($this->imgLib) {
+			case 'imagick':
+				try {
+					$img = new imagick($tmb);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				$img->contrastImage(1);
+				$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
+				break;
+				
+			case 'mogrify':
+				list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
+				// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
+				exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
+
+				if (file_exists($tmb)) {
+					$result = true;
+				} elseif ($c == 0) {
+					// find tmb for psd and animated gif
+					if ($mime == 'image/vnd.adobe.photoshop' || $mime = 'image/gif') {
+						$pinfo = pathinfo($tmb);
+						$test = $pinfo['dirname'].DIRECTORY_SEPARATOR.$pinfo['filename'].'-0.'.$pinfo['extension'];
+						if (file_exists($test)) {
+							$result = @rename($test, $tmb);
+						}
+					}
+				}
+				break;
+				
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($tmb);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($tmb);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($tmb);
+				} elseif ($s['mime'] == 'image/xbm') {
+					$img = imagecreatefromxbm($tmb);
+				}
+				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
+					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
+					if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+						return false;
+					}
+					$result = imagepng($tmp, $tmb, 7);
+					imagedestroy($img);
+					imagedestroy($tmp);
+				}
+				break;
+		}
+		
+		return $result ? $name : false;
 	}
 	
 	/**
@@ -1069,7 +1237,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function resizable($path, $mime) {
+	protected function resizable($mime) {
 		return $this->imgLib 
 			&& strpos('image', $mime) == 0 
 			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
@@ -1142,25 +1310,29 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 			
-			if ($dir && $this->_subdirs($path)) {
-				if ($this->_subdirs($path)) {
-					$file['dirs'] = 1;
-				}
-			} elseif (1) {
-				if (($tmb = $this->gettmb($path)) != false) {
-					$file['tmb'] = $tmb;
-				} elseif ($this->canCreateTmb($path, $file['mime'])) {
-					$file['tmb'] = 1;
-				}
-				
-				if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
-					$file['dim'] = $dim;
-				}
-				
-				if ($file['write'] && $this->resizable($path, $file['mime'])) {
-					$file['resize'] = 1;
+			
+			if ($file['read']) {
+				if ($dir) {
+					if ($this->_subdirs($path)) {
+						$file['dirs'] = 1;
+					}
+				} else {
+					if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
+						$file['dim'] = $dim;
+					}
+					
+					if (($tmb = $this->gettmb($path)) != false) {
+						$file['tmb'] = $tmb;
+					} elseif ($this->canCreateTmb($path, $file['mime'])) {
+						$file['tmb'] = 1;
+					}
+					
+					if ($file['write'] && $this->resizable($file['mime'])) {
+						$file['resize'] = 1;
+					}
 				}
 			}
+			
 			return $file;
 		}
 		return false;
@@ -1354,6 +1526,25 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _scandir($path);
+	
+	/**
+	 * Open file and return file pointer
+	 *
+	 * @param  string  $path  file path
+	 * @param  bool    $write open file for writing
+	 * @return resource|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _fopen($path, $mode="rb");
+	
+	/**
+	 * Close opened file
+	 *
+	 * @param  resource  $fp  file pointer
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _fclose($fp, $path);
 	
 } // END class
 

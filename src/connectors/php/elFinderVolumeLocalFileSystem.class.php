@@ -337,7 +337,28 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $files;
 	}
 	
+	/**
+	 * Open file and return file pointer
+	 *
+	 * @param  string  $path  file path
+	 * @param  bool    $write open file for writing
+	 * @return resource|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _fopen($path, $mode='rb') {
+		return @fopen($path, $mode);
+	}
 	
+	/**
+	 * Close opened file
+	 *
+	 * @param  resource  $fp  file pointer
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _fclose($fp, $path) {
+		return @fclose($fp);
+	}
 } // END class 
 
 
