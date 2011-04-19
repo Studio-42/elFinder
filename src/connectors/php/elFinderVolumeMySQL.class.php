@@ -73,6 +73,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			return false;
 		}
 		
+		$this->db->query('SET SESSION character_set_client=utf8');
+		$this->db->query('SET SESSION character_set_connection=utf8');
+		$this->db->query('SET SESSION character_set_results=utf8');
+		
 		if ($this->options['accessControl']) {
 			if (is_string($this->options['accessControl']) 
 			&& function_exists($this->options['accessControl'])) {
@@ -135,7 +139,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		} elseif ($this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
-
 	}
 	
 	
@@ -155,9 +158,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if ($root || $this->accepted($path)) {
 			$path = $this->db->real_escape_string($path);
 			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				IF (a.perm_read<=>NULL, a.perm_read, "'.intval($this->defaults['read']).'") AS perm_read, 
-				IF (a.perm_write<=>NULL, a.perm_write, "'.intval($this->defaults['write']).'") AS perm_write,
-				IF (a.perm_rm<=>NULL, a.perm_rm, "'.intval($this->defaults['rm']).'") AS perm_rm
+				a.perm_read, 
+				a.perm_write,
+				a.perm_rm
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
@@ -202,11 +205,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$info['write'] = (int)$this->accessControl($this->uid, 'write', $raw['id'], $raw['path'], $this->defaults['write']);
 			$info['rm']    = $raw['parent_path'] ? (int)$this->accessControl($this->uid, 'rm',    $raw['id'], $raw['path'], $this->defaults['rm']) : 0;
 		} else {
-			$info['read'] = $raw['perm_read'];
-			$info['write'] = $raw['perm_write'];
-			$info['rm'] = $raw['parent_path'] ? $raw['perm_rm'] : 0;
+			$info['read']  = $raw['perm_read'] == '' ? $this->defaults['read'] : (int)$raw['perm_read'];
+			$info['write'] = $raw['perm_write'] == '' ? $this->defaults['write'] : (int)$raw['perm_write'];
+			$info['rm']    = $raw['parent_path'] ? ($raw['perm_rm'] == '' ? $this->defaults['rm'] : (int)$raw['perm_rm']) : 0;
 		}
-		
+
 		if ($info['read']) {
 			if ($info['mime'] == 'directory') {
 				if ($raw['dirs']) {
@@ -247,27 +250,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function mimetype($path) {
 		return ($file = $this->file($path)) ? $file['mime'] : 'unknown';
-	}
-	
-	/**
-	 * Create thumnbnail and return it's URL on success
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return string|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _createTmb($path) {
-		echo $path;
-		debug($this->file($path));
-		
-		$sql = 'SELECT name, content FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'"';
-		if ($res = $this->db->query($sql)) {
-			if ($r = $res->fetch_assoc()) {
-				debug($r);
-			}
-		}
-		
 	}
 	
 	/**
@@ -425,9 +407,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$files = array();
 		$path  = $this->db->real_escape_string($path);
 		$sql   = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-			IF (a.perm_read<=>NULL, a.perm_read, "'.intval($this->defaults['read']).'") AS perm_read, 
-			IF (a.perm_write<=>NULL, a.perm_write, "'.intval($this->defaults['write']).'") AS perm_write,
-			IF (a.perm_rm<=>NULL, a.perm_rm, "'.intval($this->defaults['rm']).'") AS perm_rm
+			a.perm_read, 
+			a.perm_write,
+			a.perm_rm
 			FROM '.$this->tbf.' AS f 
 			LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 			LEFT JOIN '.$this->tbp.' AS a ON a.file_id=f.id AND user_id='.$this->uid.', 

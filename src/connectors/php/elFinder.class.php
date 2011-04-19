@@ -347,7 +347,7 @@ class elFinder {
 				if (($tree = $v->tree()) != false) {
 					$files = array_merge($files, $tree);
 				} elseif ($id == $volume->id()) {
-					return array('error' => array('Volume "$1" error.', $v->path($v->root())));
+					return array('error' => array('Unable to get "$1" folders list.', $v->path($v->root())));
 				}
 			}
 		}
