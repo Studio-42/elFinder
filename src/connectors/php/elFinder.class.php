@@ -352,11 +352,10 @@ class elFinder {
 				if (($tree = $v->tree()) == false) {
 					return array('error' => 'Folder not found');
 				}
-				// debug($tree);
 				$files = array_merge($files, $tree);
 			}
 		}
-		// debug($files);
+
 		// get current working directory files list and add to $files if not exists in it
 		foreach ($volume->readdir($target, $args['mimes']) as $file) {
 			if (!in_array($file, $files)) {
@@ -372,9 +371,6 @@ class elFinder {
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
-			$result['params'] = array(
-				'uplMaxSize' => ini_get('upload_max_filesize')
-			);
 		}
 		// debug($result);
 		return $result;
@@ -390,13 +386,11 @@ class elFinder {
 	protected function tree($args) {
 		$dir = $args['target'];
 		
-		if (($volume = $this->volume($dir)) == false) {
+		if (($volume = $this->volume($dir)) == false
+		||  ($tree = $volume->tree($dir)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		
-		return ($tree = $volume->tree($dir)) == false 
-			? array('error' => $volume->error()) 
-			: array('tree' => $tree);
+		return array('tree' => $tree);
 	}
 	
 	/**
