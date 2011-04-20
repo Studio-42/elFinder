@@ -68,42 +68,6 @@ class elFinder {
 	protected $listeners = array();
 	
 	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_NAME_DIRS_FIRST = 1;
-	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_KIND_DIRS_FIRST = 2;
-	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_SIZE_DIRS_FIRST = 3;
-	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_NAME            = 4;
-	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_KIND            = 5;
-	/**
-	 * Directory content sort rule
-	 *
-	 * @var int
-	 **/
-	public static $SORT_SIZE            = 6;
-	/**
 	 * undocumented class variable
 	 *
 	 * @var string
@@ -129,6 +93,19 @@ class elFinder {
 	 **/
 	protected $disabled = array();
 	
+	const ERROR_NOT_FOUND = 1;
+	const ERROR_NO_READ = 2;
+	const ERROR_NOT_DIR = 3;
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected static $errors = array(
+		1 => 'File not found',
+		2 => '$1" can’t be opened because you don’t have permission to see its contents.',
+		3 => 'Required location is not a folder'
+	);
 	
 	/**
 	 * Constructor
@@ -294,6 +271,19 @@ class elFinder {
 	/*                                 commands                                */
 	/***************************************************************************/
 
+	/**
+	 * Translate error number into error message
+	 *
+	 * @param  int     $errno  error number
+	 * @param  string  $path   file path 
+	 * @return string|array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function error($errno, $path) {
+		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
+		
+		return in_array($errno, array(self::ERROR_NO_READ)) ? array($msg, $path) : $msg;
+	}
 	
 	/**
 	 * "Open" directory
@@ -321,25 +311,23 @@ class elFinder {
 				$volume = $this->default;
 				$target = $volume->defaultPath();
 			} else {
-				return array('error' => 'Folder not found.');
+				return array('error' => $this->error(self::ERROR_NOT_FOUND));
 			}
 		} 
 
+		
+		
+
 		// get current working directory info
-		if (($cwd = $volume->info($target)) == false) {
-			return array('error' => 'Folder not found.');
-		} elseif (!$cwd['read']) {
-			return array('error' => array('The folder "$1" can’t be opened because you don’t have permission to see its contents.', $volume->path($target)));
-		} elseif ($cwd['mime'] != 'directory') {
-			return array('error' => array('"$1" is not a folder.', $volume->path($target)));
-		}
+		if (($cwd = $volume->dir($target)) == false) {
+			return array('error' => $this->error($volume->errno(), $volume->path($target)));
+		} 
 		
 		$cwd['path']     = $volume->path($target);
-		$cwd['url']      = $volume->url();
-		$cwd['tmbUrl']   = $volume->tmbUrl();
-		$cwd['dotFiles'] = $volume->dotFiles();
-		$cwd['disabled'] = $volume->disabled();
+		$cwd = array_merge($cwd, $volume->options());
 
+		// debug($cwd);
+		// return array();
 		$files = array();
 		// get folders trees
 		if ($args['tree']) {
@@ -363,7 +351,7 @@ class elFinder {
 			'cwd'   => $cwd,
 			'files' => $files
 		);
-		
+		debug($result);
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');

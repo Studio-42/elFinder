@@ -13,6 +13,8 @@
  **/
 abstract class elFinderVolumeDriver {
 	
+	const ERROR_NOT_FOUND = 1;
+	
 	/**
 	 * Driver id
 	 * Must be started from letter and contains [a-z0-9]
@@ -119,7 +121,7 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @var array
 	 **/
-	protected $error = array();
+	protected $errno = 0;
 	
 	/**
 	 * Today 24:00 timestamp
@@ -144,7 +146,7 @@ abstract class elFinderVolumeDriver {
 		'path'         => '',           // root path
 		'alias'        => '',           // alias to replace root dir name
 		'startPath'    => '',           // open this path on initial request instead of root path
-		'treeDeep'     => 1,            // how many subdirs levels return per request
+		'treeDeep'     => 2,            // how many subdirs levels return per request
 		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'mimeDetect'   => 'auto',       // how to detect mimetype
 		'mimefile'     => '',           // mimetype file path
@@ -161,13 +163,19 @@ abstract class elFinderVolumeDriver {
 		'dateFormat'   => 'j M Y H:i',  // files dates format
 		'copyFrom'     => true,  // allow to copy from this volume to other ones
 		'copyTo'       => true,  // allow to copy from other volumes to this one
-		'dotFiles'     => false,        // allow dot files?
-		'allowed'     => '',           // regexp, additional rule to check file names
 		'disabled'     => array(),      // list of commands names to disable on this root
 		'defaults'     => array(   // default permissions 
 			'read'  => true,
-			'write' => true,
-			'rm'    => true
+			'write' => true
+		),
+		'attributes' => array(
+			array(
+				'pattern' => '/\/\../',
+				'read' => false,
+				'write' => false,
+				'locked' => true,
+				'hidden' => true
+			)
 		)
 	);
 	
@@ -334,21 +342,34 @@ abstract class elFinderVolumeDriver {
 		|| !$this->_init()) {
 			return false;
 		}
-		$this->defaults['read']  = (int)$this->options['defaults']['read'];
-		$this->defaults['write'] = (int)$this->options['defaults']['write'];
-		$this->defaults['rm']    = (int)$this->options['defaults']['rm'];
-		$this->today             = mktime(0,0,0, date('m'), date('d'), date('Y'));
-		$this->yesterday         = $this->today-86400;
+		$this->defaults = array(
+			'read'  => (int)$this->options['defaults']['read'],
+			'write' => (int)$this->options['defaults']['write'],
+			'locked'  => false,
+			'hidden'  => false
+		);
+		$this->attributes = $this->options['attributes']; 
+		$dot = array(
+			'pattern' => '/\/\..?$/',
+			'read' => false,
+			'write' => false,
+			'locked' => true,
+			'hidden' => true
+		);
+		array_unshift($this->attributes, $dot);
+
+		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
+		$this->yesterday = $this->today-86400;
 		
 		$this->root = $this->normpath($this->options['path']);
 		$this->rootName = empty($this->options['alias']) ? basename($this->root) : $this->options['alias'];
 
 		if (!$this->_isDir($this->root) 
-		|| (!$this->_isReadable($this->root) && !$this->_isWritable($this->root))) {
+		|| (!$this->readable($this->root) && !$this->writable($this->root))) {
 			return false;
 		}
 		
-		if ($this->_isReadable($this->root)) {
+		if ($this->readable($this->root)) {
 			$this->treeDeep = $this->options['treeDeep'] > 0 ? (int)$this->options['treeDeep'] : 1;
 			$this->URL      = $this->options['URL'];
 			if (preg_match("|[^/?&=]$|", $this->URL)) {
@@ -401,6 +422,7 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
+		
 		$this->_configure();
 		return $this->mounted = true;
 	}
@@ -411,8 +433,8 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function error() {
-		return $this->error;
+	public function errno() {
+		return $this->errno;
 	}
 	
 	/**
@@ -436,17 +458,24 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return base url
+	 * Return some volume options:
+	 * - url
+	 * - tmbUrl
+	 * - disabled
 	 *
-	 * @return string
+	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function url() {
-		return $this->URL;
+	public function options() {
+		return array(
+			'url'      => $this->URL,
+			'tmbUrl'   => $this->tmbURL,
+			'disabled' => is_array($this->options['disabled']) ? $this->options['disabled'] : array()
+		);
 	}
 	
 	/**
-	 * Return file path relative root dir
+	 * Return file path relative to root dir
 	 *
 	 * @param  string  $hash  file hash
 	 * @return string
@@ -460,120 +489,24 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function tmbUrl() {
-		return $this->tmbURL;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function dotFiles() {
-		return (int)$this->options['dotFiles'];
-	}
-	
-	
-	
-	/**
-	 * Return volume parameters
-	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function params() {
-		return array(
-			'tmbURL'   => $this->tmbURL,
-			'dotFiles' => (int)$this->options['dotFiles'],
-			'disabled' => $this->disabled()
-		);
-	}
-	
-	/**
-	 * Return list of disabled on this volume commands
-	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function disabled() {
-		return is_array($this->options['disabled']) ? $this->options['disabled'] : array();
-	}
-	
-	/**
 	 * Return true if file exists
 	 *
-	 * @return bool
+	 * @param  string   $hash  file hash
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function fileExists($hash) {
-		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_fileExists($path);
+		return $this->_fileExists($this->decode($hash));
 	}
 	
 	/**
-	 * Return true if file is ordinary file
+	 * Return true if root folder is readable
 	 *
-	 * @param  string  file hash 
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function isFile($hash) {
-		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isFile($path);
-	}
-	
-	/**
-	 * Return true if file is directory
-	 *
-	 * @param  string  file hash 
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isDir($hash) {
-		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isDir($path);
-	}
-	
-	/**
-	 * Return true if file is readable
-	 *
-	 * @param  string  file hash 
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isReadable($hash='') {
-		$path = $hash ? $this->decode($hash) : $this->root;
-		return $path && $this->accepted($path) && $this->_isReadable($path);
-	}
-	
-	/**
-	 * Return true if file is writable
-	 *
-	 * @param  string  file hash 
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isWritable($hash) {
-		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isWritable($path);
-	}
-	
-	/**
-	 * Return true if file is removeable
-	 *
-	 * @param  string  file hash 
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function isRemovable($hash) {
-		$path = $this->decode($hash);
-		return $path && $this->accepted($path) && $this->_isRemovable($path);
+	public function isReadable() {
+		return $this->readable($this->root);
 	}
 	
 	/**
@@ -584,7 +517,32 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function info($hash) {
-		return $this->file($this->decode($hash));
+		$path = $this->decode($hash);
+		if (($file = $this->file($path)) == false
+		|| $file['hidden']) {
+			return $this->error(elFinder::ERROR_NOT_FOUND);
+		} elseif (!$file['read']) {
+			return $this->error(elFinder::ERROR_NO_READ);
+		}
+		unset($file['hidden']);
+		return $file;
+	}
+	
+	/**
+	 * Return folder info
+	 *
+	 * @param  string   $hash  folder hash
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function dir($hash) {
+		if (($dir = $this->info($hash)) != false) {
+			return $dir['mime'] == 'directory' 
+				? $dir 
+				: $this->error(elFinder::ERROR_NOT_DIR);
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -596,25 +554,74 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function readdir($hash, $mimes=array()) {
+		if (($file = $this->dir($hash)) == false) {
+			return false;
+		}
 		return $this->scandir($this->decode($hash), $mimes);
 	}
 
 	/**
 	 * Return subfolders for required one or false on error
 	 *
-	 * @param  string   $hash  folder hash
+	 * @param  string   $hash  folder hash or empty string to get tree from root folder
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash='') {
-		$path = $hash ? $this->decode($hash) : $this->root;
-		$dir = $this->file($path);
-		if (!$dir || $dir['mime'] != 'directory') {
+		if (!$hash) {
+			$hash = $this->encode($this->root);
+		}
+		if (($dir = $this->dir($hash)) == false) {
 			return false;
 		}
-		$dirs = $this->gettree($path, $this->treeDeep-1);
+		$dirs = $this->gettree($this->decode($hash), $this->treeDeep-1);
 		array_unshift($dirs, $dir);
 		return $dirs;
+	}
+	
+	/**
+	 * Return parents directories for required one
+	 *
+	 * @param  string  $hash  directory hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function parents($hash) {
+		$path = $this->decode($hash);
+		if (!$path || !$this->_isDir($path)) {
+			return false;
+		}
+		
+		$tree = array();
+		
+		do {
+			if (($dir = $this->file($path))) {
+				array_unshift($file);
+			}
+			$path = dirname($path);
+		} while ($path != $this->root);
+		
+		$tree = array($this->file($path));
+		while ($path != $this->root) {
+			
+		}
+		
+		if (($path = $this->path($hash, 'd', 'read')) === false) {
+			return $this->setError('File not found');
+		}
+		
+		$tree = array($this->fileinfo($path, array('phash', 'childs')));
+		while ($path != $this->root) {
+			$path = $this->_dirname($path);
+			if (!$this->_isReadable($path)) {
+				return $this->setError('Access denied');
+				
+			} 
+			$info = $this->fileinfo($path, array('phash', 'childs'));
+			$info['childs'] = 1;
+			array_unshift($tree, $info);
+		}
+		return $tree;
 	}
 	
 	/**
@@ -809,14 +816,16 @@ abstract class elFinderVolumeDriver {
 	 * @return false
 	 * @author Dmitry(dio) Levashov
 	 **/
-	protected function setError($msg)	{
-		$this->error = func_get_args();
+	protected function error($errno) {
+		$this->errno = $errno;
 		return false;
 	}
 	
 	/*********************************************************************/
 	/*                               FS API                              */
 	/*********************************************************************/
+	
+	
 	/**
 	 * Return normalized path, this works the same as os.path.normpath() in Python
 	 *
@@ -868,6 +877,78 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return file attribute (read|write|locked|hidden)
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $name  attribute name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function attr($path, $name) {
+		if ($path == $this->root) {
+			return $name == 'locked'
+				? true // root dir always locked!
+				: (isset($this->defaults[$name]) ? $this->defaults[$name] : false);
+		}
+
+		$path = DIRECTORY_SEPARATOR.$this->relpath($path);
+
+		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
+			$attr = $this->attributes[$i];
+
+			if (isset($attr[$name]) && preg_match($attr['pattern'], $path)) {
+				return $attr[$name];
+			} 
+		}
+		return isset($this->defaults[$name]) ? $this->defaults[$name] : false;
+	}
+	
+	/**
+	 * Return true if file is readable
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function readable($path) {
+		return $this->_isReadable($path) && $this->attr($path, 'read');
+	}
+
+	/**
+	 * Return true if file is writable
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function writable($path) {
+		return $this->_isWritable($path) && $this->attr($path, 'write');
+	}
+	
+	/**
+	 * Return true if file is readable
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function locked($path) {
+		return $this->attr($path, 'locked');
+	}
+	
+	/**
+	 * Return true if file is readable
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function hidden($path) {
+		return $this->attr($path, 'hidden');
+	}
+	
+	
+	/**
 	 * Encode path into hash
 	 *
 	 * @param  string  file path
@@ -877,19 +958,19 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function encode($path) {
 		if ($path) {
-			if (isset($this->paths[$path])) {
-				// echo 'cache '.$this->paths[$path];
-				return $this->paths[$path];
+			if (($hash = array_search($path, $this->paths)) !== false) {
+				// echo 'cache '.$path.' : '.$hash.'<br>';
+				return $hash;
 			}
 			// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
-			$path = $this->relpath($path);
+			$p = $this->relpath($path);
 			// if reqesting root dir $path will be empty, then assign '/' as we cannot leave it blank for crypt
-			if (!$path)	{
-				$path = DIRECTORY_SEPARATOR;
+			if (!$p)	{
+				$p = DIRECTORY_SEPARATOR;
 			}
 
 			// TODO crypt path and return hash
-			$hash = $this->crypt($path);
+			$hash = $this->crypt($p);
 			// hash is used as id in HTML that means it must contain vaild chars
 			// make base64 html safe and append prefix in begining
 			$hash = strtr(base64_encode($hash), '+/=', '-_.');
@@ -897,7 +978,7 @@ abstract class elFinderVolumeDriver {
 			$hash = rtrim($hash, '.'); 
 			// append volume id to make hash unique
 			$hash = $this->id.$hash;
-			$this->paths[$path] = $hash;
+			$this->paths[$hash] = $path;
 			return $hash;
 		}
 	}
@@ -912,9 +993,9 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function decode($hash) {
 		if (strpos($hash, $this->id) === 0) {
-			if (!empty($this->hashes[$hash])) {
-				// echo 'cache '.$this->hashes[$hash];
-				return $this->hashes[$hash];
+			if (isset($this->paths[$hash])) {
+				// echo 'cache '.$hash.' : '.$this->paths[$hash].'<br>';
+				return $this->paths[$hash];
 			}
 			// cut volume id after it was prepended in encode
 			$h = substr($hash, strlen($this->id));
@@ -924,7 +1005,7 @@ abstract class elFinderVolumeDriver {
 			$path = $this->uncrypt($h); 
 			// append ROOT to path after it was cut in encode
 			$path = $this->root.($path == DIRECTORY_SEPARATOR ? '' : DIRECTORY_SEPARATOR.$path); 
-			$this->hashes[$hash] = $path;
+			$this->paths[$hash] = $path;
 			return $path;
 		}
 	}
@@ -990,30 +1071,6 @@ abstract class elFinderVolumeDriver {
 				: $this->URL.str_replace(DIRECTORY_SEPARATOR, '/', $this->relpath($path));
 		}
 		return '';
-	}
-	
-	/**
-	 * Return true if file name is not . or ..
-	 * If file name begins with . return value according to $this->options['dotFiles']
-	 * If set rule to validate filename - check it
-	 *
-	 * @param  string  $file  file name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function accepted($path) {
-		if ($path == $this->root) {
-			return true;
-		}
-		$filename = basename($path);
-		if ($filename == '.' || $filename == '..') {
-			return false;
-		}
-		if ('.' == substr($filename, 0, 1)) {
-			return !!$this->options['dotFiles'];
-		}
-		
-		return empty($this->options['accepted']) ? true : preg_match($this->options['accepted'], $path);
 	}
 	
 	/**
@@ -1252,7 +1309,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function file($path) {
-		return isset($this->files[$path]) ? $this->files[$path] : $this->files[$path] = $this->fileinfo($path);
+		return isset($this->files[$path]) 
+			? $this->files[$path] 
+			: $this->files[$path] = $this->fileinfo($path);
 	}
 	
 	/**
@@ -1263,79 +1322,86 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function fileinfo($path) {
+		$name = basename($path);
 		$root = $path == $this->root;
-		if (($root || $this->accepted($path)) && $this->_fileExists($path)) {
-			$link  = $this->_isLink($path);
-			$mime  = $this->mimetype($path);
-			$dir   = $mime == 'directory';
-			$mtime = $this->_filemtime($path);
-
-			if ($mtime > $this->today) {
-				$date = 'Today '.date('H:i', $mtime);
-			} elseif ($mtime > $this->yesterday) {
-				$date = 'Yesterday '.date('H:i', $mtime);
-			} else {
-				$date = date($this->options['dateFormat'], $mtime);
-			}
-			$size = 0;
-			if ($link) {
-				$stat = $this->_lstat($path);
-				$size = $stat['size'];
-			} elseif (!$dir) {
-				$size = $this->_filesize($path);
-			}
-
-			$file = array(
-				'hash'  => $this->encode($path),
-				'phash' => $root ? '' : $this->encode(dirname($path)),
-				'name'  => $root && $this->options['alias'] ? $this->options['alias'] : basename($path),
-				'mime'  => $mime,
-				'size'  => $size,
-				'date'  => $date,
-				'read'  => (int)$this->_isReadable($path),
-				'write' => (int)$this->_isWritable($path),
-				'rm'    => (int)$this->_isRemovable($path)
-			);
-			
-			if (!$root && $link) {
-				$target = $this->readlink($path);
-				if ($target) {
-					$file['mime']   = $this->mimetype($target);
-					$file['link']   = $this->encode($target);
-					$file['linkTo'] = $this->relpath($target);
-				} else {
-					$file['mime']  = 'symlink-broken';
-					$file['read']  = 0;
-					$file['write'] = 0;
-				}
-			}
-			
-			
-			if ($file['read']) {
-				if ($dir) {
-					if ($this->_subdirs($path)) {
-						$file['dirs'] = 1;
-					}
-				} else {
-					if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
-						$file['dim'] = $dim;
-					}
-					
-					if (($tmb = $this->gettmb($path)) != false) {
-						$file['tmb'] = $tmb;
-					} elseif ($this->canCreateTmb($path, $file['mime'])) {
-						$file['tmb'] = 1;
-					}
-					
-					if ($file['write'] && $this->resizable($file['mime'])) {
-						$file['resize'] = 1;
-					}
-				}
-			}
-			
-			return $file;
+		
+		if ($name == '.' 
+		||  $name == '..'
+		|| !$this->_fileExists($path)) {
+			return false;
 		}
-		return false;
+		
+		$mime  = $this->mimetype($path);
+		$dir   = $mime == 'directory';
+		$mtime = $this->_filemtime($path);
+		$link  = $this->_isLink($path);
+
+		if ($mtime > $this->today) {
+			$date = 'Today '.date('H:i', $mtime);
+		} elseif ($mtime > $this->yesterday) {
+			$date = 'Yesterday '.date('H:i', $mtime);
+		} else {
+			$date = date($this->options['dateFormat'], $mtime);
+		}
+		
+		$size = 0;
+		if ($link) {
+			$stat = $this->_lstat($path);
+			$size = $stat['size'];
+		} elseif (!$dir) {
+			$size = $this->_filesize($path);
+		}
+
+		$file = array(
+			'hash'   => $this->encode($path),
+			'phash'  => $root ? '' : $this->encode(dirname($path)),
+			'name'   => $root && $this->rootName ? $this->rootName : basename($path),
+			'mime'   => $mime,
+			'size'   => $size,
+			'date'   => $date,
+			'read'   => (int)$this->readable($path),
+			'write'  => (int)$this->writable($path),
+			'locked' => (int)$this->locked($path),
+			'hidden' => (int)$this->hidden($path)
+		);
+		
+		if (!$root && $link) {
+			$target = $this->readlink($path);
+			if ($target) {
+				$file['mime']   = $this->mimetype($target);
+				$file['link']   = $this->encode($target);
+				$file['linkTo'] = $this->relpath($target);
+			} else {
+				$file['mime']  = 'symlink-broken';
+				$file['read']  = 0;
+				$file['write'] = 0;
+			}
+		}
+		
+		
+		if ($file['read']) {
+			if ($dir) {
+				if ($this->_subdirs($path)) {
+					$file['dirs'] = 1;
+				}
+			} else {
+				if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
+					$file['dim'] = $dim;
+				}
+				
+				if (($tmb = $this->gettmb($path)) != false) {
+					$file['tmb'] = $tmb;
+				} elseif ($this->canCreateTmb($path, $file['mime'])) {
+					$file['tmb'] = 1;
+				}
+				
+				if ($file['write'] && $this->resizable($file['mime'])) {
+					$file['resize'] = 1;
+				}
+			}
+		}
+		
+		return $file;
 	}
 	
 	/**
@@ -1350,13 +1416,14 @@ abstract class elFinderVolumeDriver {
 		$files = array();
 
 		foreach ($this->_scandir($path) as $p) {
-			if ($this->accepted($p)) {
-				$mime = $this->mimetype($path);
-				if (!$mimes || $this->_isDir($path) || $this->mimeAccepted($this->mimetype($path), $mimes)) {
-					$files[] = $this->file($p);
-				}
+			if (($this->_isDir($p) || !$mimes || $this->mimeAccepted($this->mimetype($p), $mimes))
+			&& ($file = $this->file($p)) != false
+			&& !$file['hidden']) {
+				unset($file['hidden']);
+				$files[] = $file;
 			}
 		}
+
 		return $files;
 	}
 	
@@ -1384,13 +1451,11 @@ abstract class elFinderVolumeDriver {
 		$dirs = array();
 
 		foreach ($this->_scandir($path) as $p) {
-			if ($this->accepted($p)) {
-				if ($this->_isDir($p)) {
-					$dir = $this->file($p);
-					$dirs[] = $dir;
-					if ($deep > 0 && $dir['read']) {
-						$dirs[] = array_merge($dirs, $this->gettree($p, $deep-1));
-					}
+			if ($this->_isDir($p) && ($dir = $this->file($p)) != false && !$dir['hidden']) {
+				unset($dir['hidden']);
+				$dirs[] = $dir;
+				if ($deep > 0 && isset($dir['dirs'])) {
+					$dirs = array_merge($dirs, $this->gettree($p, $deep-1));
 				}
 			}
 		}
@@ -1452,15 +1517,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _isWritable($path);
-	
-	/**
-	 * Return true if file can be removed
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	abstract protected function _isRemovable($path);
 	
 	/**
 	 * Return file size

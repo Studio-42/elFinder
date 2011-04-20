@@ -99,34 +99,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/*********************************************************************/
 	
 	/**
-	 * Return true if required action available for file
-	 *
-	 * @param  string  file path
-	 * @param  string  action (read|write|rm)
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function allowed($path, $action) {
-		
-		if ($path == $this->root) {
-			if ($action == 'read' || $action == 'write') {
-				return $this->defaults[$action];
-			}
-			// remove root dir not allowed
-			return false;
-		}
-
-		$path = $this->relpath($path);
-
-		foreach ($this->options['perms'] as $regexp => $rules) {
-			if (isset($rules[$action]) && preg_match($regexp, $path)) {
-				return $rules[$action];
-			}
-		}
-		return isset($this->defaults[$action]) ? $this->defaults[$action] : false;
-	}
-	
-	/**
 	 * Return file mime type
 	 * Override parent method
 	 *
@@ -211,7 +183,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isReadable($path) {
-		return is_readable($path) && $this->allowed($path, 'read');
+		return is_readable($path);
 	}
 	
 	/**
@@ -222,18 +194,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isWritable($path) {
-		return is_writable($path) && $this->allowed($path, 'write');
-	}
-	
-	/**
-	 * Return true if file can be removed
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isRemovable($path) {
-		 return $this->allowed($path, 'rm');
+		return is_writable($path);
 	}
 	
 	/**
@@ -291,7 +252,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (is_dir($path) && is_readable($path)) {
 			$dir = dir($path);
 			while (($entry = $dir->read()) !== false) {
-				if ($entry != '.' && $entry != '..' && $this->accepted($entry) && is_dir($dir->path.DIRECTORY_SEPARATOR.$entry)) {
+				$p = $dir->path.DIRECTORY_SEPARATOR.$entry;
+				if ($entry != '.' && $entry != '..' && is_dir($p) && !$this->hidden($p)) {
 					$dir->close();
 					return true;
 				}
@@ -325,13 +287,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($path) {
 		$files = array();
+		$ls    = @scandir($path);
 		
-		$ls = @scandir($path);
 		if (is_array($ls)) {
 			for ($i =0, $l = count($ls); $i < $l; $i++) {
-				if ($ls[$i] != '.' && $ls[$i] != '..') {
-					$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
-				}
+				$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
 			}
 		}
 		return $files;

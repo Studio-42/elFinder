@@ -52,13 +52,23 @@ function logger($data) {
 $opts = array(
 	'debug' => true,
 	'roots' => array(
-		array(
-			'driver' => 'LocalFileSystem',
-			'path'   => '../../../files/',
-			'URL'    => 'http://localhost/git/elfinder/files/',
-			// 'startPath'   => '../../../files/mimes/',
-			// 'defaults' => array('read' => false)
-		),
+		// array(
+		// 	'driver' => 'LocalFileSystem',
+		// 	'path'   => '../../../files/',
+		// 	'URL'    => 'http://localhost/git/elfinder/files/',
+		// 	'attributes' => array(
+		// 		array(),
+		// 		array(
+		// 			'pattern' => '/\.png$/',
+		// 			'read' => false,
+		// 			'write' => false,
+		// 			'locked' => true,
+		// 			'hidden' => true
+		// 		)
+		// 	)
+		// 	// 'startPath'   => '../../../files/mimes/',
+		// 	// 'defaults' => array('read' => false)
+		// ),
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,
@@ -69,7 +79,18 @@ $opts = array(
 			'user_id' => 1,
 			'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../../../tmb/',
-			'tmbURL' => 'http://localhost/git/elfinder/tmb/'
+			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
+			// 'attributes' => array(
+			// 	array(),
+			// 	array(
+			// 		'pattern' => '/\.jpg$/',
+			// 		'read' => false,
+			// 		'write' => false,
+			// 		'locked' => true,
+			// 		'hidden' => true
+			// 	)
+			// )
+			
 		)
 	)
 	
