@@ -67,13 +67,11 @@
 				path   : '',
 				url    : '',
 				tmbUrl : '',
-				dotFiles : 0,
 				disabled : [],
 				date   : '',
 				read   : 1,
 				write  : 1,
-				rm     : 1,
-				params : {},
+				locked     : 1,
 				files  : 0,
 				size   : 0
 			},
@@ -243,6 +241,8 @@
 					f = data[l];
 					if (self.oldAPI) {
 						f.phash = cwd.hash;
+						f.locked = !!f.rm;
+						delete f.rm;
 					}
 					files[f.hash] = f;
 					if (f.phash == cwd.hash) {
@@ -263,9 +263,9 @@
 					l = childs.length, 
 					add = function(d) {
 						if (d.name && d.hash && !files[d.hash]) {
-							d.phash = phash;
-							d.mime  = 'directory';
-							d.rm    = 1;
+							d.phash  = phash;
+							d.mime   = 'directory';
+							d.locked = false;
 							delete d.dirs;
 							files[d.hash] = d;
 						}
@@ -279,7 +279,6 @@
 					dir.dirs && dir.dirs.length ? cacheTree(dir.dirs, phash) : add(dir);
 					if (!cwd.phash && dir.hash == cwd.hash) {
 						cwd.phash = phash;
-
 					}
 				}
 			},
@@ -1212,9 +1211,15 @@
 			 * Set params if required and update files cache
 			 */
 			.bind('open', function(e) {
+				var data = e.data;
+				
 				// set current directory data
+				// if (self.oldAPI) {
+				// 	data.cwd.locked = !!data.cwd.rm;
+				// 	delete data.cwd.rm;
+				// }
 				cwd = $.extend(cwd, e.data.cwd)
-
+				
 				if (self.newAPI) {
 					if (self.options.sync > 3000) {
 						setInterval(function() {
@@ -1222,18 +1227,19 @@
 						}, self.options.sync);
 					}
 				} else {					
-					cwd.tmb = !!e.data.tmb;
+					cwd.tmb = !!data.tmb;
 					// old api: if we get tree - reset cache
-					if (e.data.tree) {
+					if (data.tree) {
 						files = {};
-						cacheTree(e.data.tree);
-					} else {
-						cwd.phash = files[cwd.hash].phash;
-					}
+						cacheTree(data.tree);
+					} 
+					cwd.phash = files[cwd.hash].phash;
+					cwd.locked = cwd.phash ? !!cwd.rm : true;
+					delete cwd.rm;
 				}
 				
-				cache(e.data.files || e.data.cdc, true);
-
+				cache(self.newAPI ? e.data.files : e.data.cdc, true);
+				self.log(files)
 				// remember last dir
 				self.lastDir(cwd.hash);
 
