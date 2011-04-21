@@ -13,8 +13,6 @@
  **/
 abstract class elFinderVolumeDriver {
 	
-	const ERROR_NOT_FOUND = 1;
-	
 	/**
 	 * Driver id
 	 * Must be started from letter and contains [a-z0-9]
@@ -521,8 +519,6 @@ abstract class elFinderVolumeDriver {
 		if (($file = $this->info($path)) == false
 		|| $file['hidden']) {
 			return $this->error(elFinder::ERROR_NOT_FOUND);
-		} elseif (!$file['read']) {
-			return $this->error(elFinder::ERROR_NOT_READ);
 		}
 		unset($file['hidden']);
 		return $file;
@@ -557,6 +553,9 @@ abstract class elFinderVolumeDriver {
 		if (($file = $this->dir($hash)) == false) {
 			return false;
 		}
+		if (!$file['read']) {
+			return $this->error(elFinder::ERROR_NOT_READ);
+		}
 		return $this->scandir($this->decode($hash), $mimes);
 	}
 
@@ -568,13 +567,12 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash='') {
-		if (!$hash) {
-			$hash = $this->encode($this->root);
-		}
-		if (($dir = $this->dir($hash)) == false) {
-			return false;
-		}
-		$dirs = $this->gettree($this->decode($hash), $this->treeDeep-1);
+		$path = $hash ? $this->decode($hash) : $this->root;
+		if (($dir = $this->info($path)) == false || $dir['hidden']) {
+			return $this->error(elFinder::ERROR_NOT_FOUND);
+		} 
+ 		unset($dir['hidden']);
+		$dirs = $dir['read'] ? $this->gettree($path, $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);
 		return $dirs;
 	}
@@ -587,7 +585,18 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function parents($hash) {
+		if (($dir = $this->dir($hash)) == false) {
+			return false;
+		}
+		
 		$path = $this->decode($hash);
+		$tree = array();
+		
+		while (($path = dirname($path)) != $this->root) {
+			// if (!$this->_isDir($path)
+			// || !$this)
+		}
+		
 		if (!$path || !$this->_isDir($path)) {
 			return false;
 		}
