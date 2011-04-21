@@ -146,7 +146,7 @@ abstract class elFinderVolumeDriver {
 		'path'         => '',           // root path
 		'alias'        => '',           // alias to replace root dir name
 		'startPath'    => '',           // open this path on initial request instead of root path
-		'treeDeep'     => 2,            // how many subdirs levels return per request
+		'treeDeep'     => 1,            // how many subdirs levels return per request
 		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'mimeDetect'   => 'auto',       // how to detect mimetype
 		'mimefile'     => '',           // mimetype file path
@@ -343,18 +343,18 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		$this->defaults = array(
-			'read'  => (int)$this->options['defaults']['read'],
-			'write' => (int)$this->options['defaults']['write'],
+			'read'    => (int)$this->options['defaults']['read'],
+			'write'   => (int)$this->options['defaults']['write'],
 			'locked'  => false,
 			'hidden'  => false
 		);
 		$this->attributes = $this->options['attributes']; 
 		$dot = array(
 			'pattern' => '/\/\..?$/',
-			'read' => false,
-			'write' => false,
-			'locked' => true,
-			'hidden' => true
+			'read'    => false,
+			'write'   => false,
+			'locked'  => true,
+			'hidden'  => true
 		);
 		array_unshift($this->attributes, $dot);
 
@@ -516,13 +516,13 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function info($hash) {
+	public function file($hash) {
 		$path = $this->decode($hash);
-		if (($file = $this->file($path)) == false
+		if (($file = $this->info($path)) == false
 		|| $file['hidden']) {
 			return $this->error(elFinder::ERROR_NOT_FOUND);
 		} elseif (!$file['read']) {
-			return $this->error(elFinder::ERROR_NO_READ);
+			return $this->error(elFinder::ERROR_NOT_READ);
 		}
 		unset($file['hidden']);
 		return $file;
@@ -536,7 +536,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function dir($hash) {
-		if (($dir = $this->info($hash)) != false) {
+		if (($dir = $this->file($hash)) != false) {
 			return $dir['mime'] == 'directory' 
 				? $dir 
 				: $this->error(elFinder::ERROR_NOT_DIR);
@@ -1308,7 +1308,7 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function file($path) {
+	protected function info($path) {
 		return isset($this->files[$path]) 
 			? $this->files[$path] 
 			: $this->files[$path] = $this->fileinfo($path);
@@ -1417,7 +1417,7 @@ abstract class elFinderVolumeDriver {
 
 		foreach ($this->_scandir($path) as $p) {
 			if (($this->_isDir($p) || !$mimes || $this->mimeAccepted($this->mimetype($p), $mimes))
-			&& ($file = $this->file($p)) != false
+			&& ($file = $this->info($p)) != false
 			&& !$file['hidden']) {
 				unset($file['hidden']);
 				$files[] = $file;
@@ -1451,7 +1451,7 @@ abstract class elFinderVolumeDriver {
 		$dirs = array();
 
 		foreach ($this->_scandir($path) as $p) {
-			if ($this->_isDir($p) && ($dir = $this->file($p)) != false && !$dir['hidden']) {
+			if ($this->_isDir($p) && ($dir = $this->info($p)) != false && !$dir['hidden']) {
 				unset($dir['hidden']);
 				$dirs[] = $dir;
 				if ($deep > 0 && isset($dir['dirs'])) {

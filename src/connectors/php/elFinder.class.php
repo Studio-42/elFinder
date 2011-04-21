@@ -94,7 +94,7 @@ class elFinder {
 	protected $disabled = array();
 	
 	const ERROR_NOT_FOUND = 1;
-	const ERROR_NO_READ = 2;
+	const ERROR_NOT_READ = 2;
 	const ERROR_NOT_DIR = 3;
 	/**
 	 * undocumented class variable
@@ -282,7 +282,7 @@ class elFinder {
 	protected function error($errno, $path) {
 		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
 		
-		return in_array($errno, array(self::ERROR_NO_READ)) ? array($msg, $path) : $msg;
+		return in_array($errno, array(self::ERROR_NOT_READ)) ? array($msg, $path) : $msg;
 	}
 	
 	/**
@@ -304,7 +304,7 @@ class elFinder {
 		$volume = $this->volume($target);
 		
 		if (!$volume) {
-			if ($ars['init']) {
+			if ($args['init']) {
 				// on init request we can get invalid dir hash -
 				// dir which already does not exists but stored in cookie from last session,
 				// so open default dir
@@ -351,7 +351,7 @@ class elFinder {
 			'cwd'   => $cwd,
 			'files' => $files
 		);
-		debug($result);
+		// debug($result);
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');

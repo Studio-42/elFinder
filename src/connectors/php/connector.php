@@ -52,23 +52,23 @@ function logger($data) {
 $opts = array(
 	'debug' => true,
 	'roots' => array(
-		// array(
-		// 	'driver' => 'LocalFileSystem',
-		// 	'path'   => '../../../files/',
-		// 	'URL'    => 'http://localhost/git/elfinder/files/',
-		// 	'attributes' => array(
-		// 		array(),
-		// 		array(
-		// 			'pattern' => '/\.png$/',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'locked' => true,
-		// 			'hidden' => true
-		// 		)
-		// 	)
-		// 	// 'startPath'   => '../../../files/mimes/',
-		// 	// 'defaults' => array('read' => false)
-		// ),
+		array(
+			'driver' => 'LocalFileSystem',
+			'path'   => '../../../files/',
+			'URL'    => 'http://localhost/git/elfinder/files/',
+			'attributes' => array(
+				array(),
+				array(
+					'pattern' => '/\.png$/',
+					'read' => false,
+					'write' => false,
+					'locked' => true,
+					'hidden' => true
+				)
+			)
+			// 'startPath'   => '../../../files/mimes/',
+			// 'defaults' => array('read' => false)
+		),
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,

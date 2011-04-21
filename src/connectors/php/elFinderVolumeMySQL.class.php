@@ -294,7 +294,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
-		return ($file = $this->file($path)) ? $file['mime'] : 'unknown';
+		return ($file = $this->info($path)) ? $file['mime'] : 'unknown';
 	}
 	
 	/**
@@ -305,7 +305,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fileExists($path) {
-		return !!$this->file($path);
+		return !!$this->info($path);
 	}
 	
 	/**
@@ -316,7 +316,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isDir($path) {
-		return ($file = $this->file($path)) ? $file['mime'] == 'directory' : false;
+		return ($file = $this->info($path)) ? $file['mime'] == 'directory' : false;
 	}
 	
 	/**
@@ -348,7 +348,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isReadable($path) {
-		return ($file = $this->file($path)) ? $file['read'] : false;
+		return ($file = $this->info($path)) ? $file['read'] : false;
 	}
 	
 	/**
@@ -359,7 +359,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isWritable($path) {
-		return ($file = $this->file($path)) ? $file['write'] : false;
+		return ($file = $this->info($path)) ? $file['write'] : false;
 	}
 	
 	/**
@@ -370,7 +370,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return ($file = $this->file($path)) ? $file['size'] : false;
+		return ($file = $this->info($path)) ? $file['size'] : false;
 	}
 	
 	/**
@@ -381,7 +381,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) { 
-		return ($file = $this->file($path)) ? $file['mtime'] : false;
+		return ($file = $this->info($path)) ? $file['mtime'] : false;
 	}
 	
 	/**
@@ -414,7 +414,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		return ($file = $this->file($path)) ? $file['dirs'] : false;
+		return ($file = $this->info($path)) ? $file['dirs'] : false;
 	}
 	
 	/**
@@ -427,7 +427,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) { 
-		return ($file = $this->file($path)) ? $file['dim'] : false;
+		return ($file = $this->info($path)) ? $file['dim'] : false;
 	}
 	
 	/**
@@ -465,11 +465,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if ($res = $this->db->query($sql)) {
 			while ($r = $res->fetch_assoc()) {
 				$path = $r['path'];
-				if (!isset($this->files[$path])) {
+				if (!isset($this->infos[$path])) {
 					$file = $this->prepareInfo($r);
-					$this->files[$path] = $file;
+					$this->infos[$path] = $file;
 				} else {
-					$file = $this->files[$path];
+					$file = $this->infos[$path];
 				}
 				$files[] = $path;
 			}
@@ -487,7 +487,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		if ($this->tmpPath && ($file = $this->file($path)) && $file['read']) {
+		if ($this->tmpPath && ($file = $this->info($path)) && $file['read']) {
 			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$file['name'];
 
 			if ($fp = fopen($tmp, 'w')) {
