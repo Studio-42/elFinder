@@ -570,7 +570,9 @@ abstract class elFinderVolumeDriver {
 		$path = $hash ? $this->decode($hash) : $this->root;
 		if (($dir = $this->info($path)) == false || $dir['hidden']) {
 			return $this->error(elFinder::ERROR_NOT_FOUND);
-		} 
+		} elseif ($dir['mime'] != 'directory') {
+			return $this->error(elFinder::ERROR_NOT_DIR);
+		}
  		unset($dir['hidden']);
 		$dirs = $dir['read'] ? $this->gettree($path, $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);

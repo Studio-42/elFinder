@@ -372,7 +372,7 @@ class elFinder {
 			return array('error' => $this->error(ERROR_NOT_FOUND));
 		}
 		if (($tree = $volume->tree($dir)) === false) {
-			return array('error' => $this->error(self::ERROR_NOT_LIST, $volume->path($dir)));
+			return array('error' => $this->error($volume->errno(), $volume->path($dir)));
 		}
 		return array('tree' => $tree);
 	}
@@ -388,12 +388,12 @@ class elFinder {
 		$dir = $args['target'];
 				
 		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => 'Folder not found');
+			return array('error' => $this->error(ERROR_NOT_FOUND));
 		}
 
 
-		return ($tree = $volume->parents($dir)) == false 
-			? array('error' => $volume->error()) 
+		return ($tree = $volume->parents($dir)) === false 
+			? array('error' => $this->error($volume->errno(), $volume->path($dir)))
 			: array('tree' => $tree);
 	}
 	
