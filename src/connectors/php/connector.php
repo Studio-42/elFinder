@@ -64,6 +64,13 @@ $opts = array(
 					'write' => false,
 					'locked' => true,
 					'hidden' => true
+				),
+				array(
+					'pattern' => '/mimes$/',
+					'read' => true,
+					'write' => false,
+					'locked' => true,
+					// 'hidden' => false
 				)
 			)
 			// 'startPath'   => '../../../files/mimes/',

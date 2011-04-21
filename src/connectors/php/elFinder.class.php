@@ -96,6 +96,7 @@ class elFinder {
 	const ERROR_NOT_FOUND = 1;
 	const ERROR_NOT_READ = 2;
 	const ERROR_NOT_DIR = 3;
+	const ERROR_NOT_LIST = 4;
 	/**
 	 * undocumented class variable
 	 *
@@ -104,7 +105,8 @@ class elFinder {
 	protected static $errors = array(
 		1 => 'File not found',
 		2 => '$1" can’t be opened because you don’t have permission to see its contents.',
-		3 => 'Required location is not a folder'
+		3 => 'Required location is not a folder',
+		4 => 'Unable to get "$1" folders list.'
 	);
 	
 	/**
@@ -282,7 +284,7 @@ class elFinder {
 	protected function error($errno, $path) {
 		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
 		
-		return in_array($errno, array(self::ERROR_NOT_READ)) ? array($msg, $path) : $msg;
+		return in_array($errno, array(self::ERROR_NOT_READ, self::ERROR_NOT_LIST)) ? array($msg, $path) : $msg;
 	}
 	
 	/**
@@ -315,27 +317,23 @@ class elFinder {
 			}
 		} 
 
-		
-		
-
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
 			return array('error' => $this->error($volume->errno(), $volume->path($target)));
 		} 
 		
-		$cwd['path']     = $volume->path($target);
+		$cwd['path'] = $volume->path($target);
 		$cwd = array_merge($cwd, $volume->options());
 
-		// debug($cwd);
-		// return array();
 		$files = array();
+		
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
 				if (($tree = $v->tree()) != false) {
 					$files = array_merge($files, $tree);
 				} elseif ($id == $volume->id()) {
-					return array('error' => array('Unable to get "$1" folders list.', $v->path($v->root())));
+					return array('error' => $this->error(self::ERROR_NOT_LIST, $v->path($v->root())));
 				}
 			}
 		}
@@ -351,7 +349,7 @@ class elFinder {
 			'cwd'   => $cwd,
 			'files' => $files
 		);
-		// debug($result);
+
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
@@ -370,9 +368,11 @@ class elFinder {
 	protected function tree($args) {
 		$dir = $args['target'];
 		
-		if (($volume = $this->volume($dir)) == false
-		||  ($tree = $volume->tree($dir)) == false) {
-			return array('error' => 'Folder not found');
+		if (($volume = $this->volume($dir)) == false) {
+			return array('error' => $this->error(ERROR_NOT_FOUND));
+		}
+		if (($tree = $volume->tree($dir)) === false) {
+			return array('error' => $this->error(self::ERROR_NOT_LIST, $volume->path($dir)));
 		}
 		return array('tree' => $tree);
 	}

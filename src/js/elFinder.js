@@ -2119,12 +2119,12 @@
 		formatPermissions : function(f) {
 			var r  = !!f.read,
 				w  = !!f.write,
-				rm = !!f.rm,
+				// rm = !!f.rm,
 				p  = [];
 				
 			r  && p.push(this.i18n('read'));
 			w  && p.push(this.i18n('write'));
-			rm && p.push(this.i18n('remove'));
+			// rm && p.push(this.i18n('remove'));
 			return p.length ? p.join('/') : this.i18n('no access');
 		},
 		
