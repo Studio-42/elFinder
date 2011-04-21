@@ -590,45 +590,15 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$path = $this->decode($hash);
-		$tree = array();
+		$tree = array($dir);
 		
 		while (($path = dirname($path)) != $this->root) {
-			// if (!$this->_isDir($path)
-			// || !$this)
-		}
-		
-		if (!$path || !$this->_isDir($path)) {
-			return false;
-		}
-		
-		$tree = array();
-		
-		do {
-			if (($dir = $this->file($path))) {
-				array_unshift($file);
+			if (($d = $this->info($path)) != false 
+			&& $d['mime'] == 'directory'
+			&& !$d['hidden']) {
+				unset($d['hidden']);
+				array_unshift($tree, $d);
 			}
-			$path = dirname($path);
-		} while ($path != $this->root);
-		
-		$tree = array($this->file($path));
-		while ($path != $this->root) {
-			
-		}
-		
-		if (($path = $this->path($hash, 'd', 'read')) === false) {
-			return $this->setError('File not found');
-		}
-		
-		$tree = array($this->fileinfo($path, array('phash', 'childs')));
-		while ($path != $this->root) {
-			$path = $this->_dirname($path);
-			if (!$this->_isReadable($path)) {
-				return $this->setError('Access denied');
-				
-			} 
-			$info = $this->fileinfo($path, array('phash', 'childs'));
-			$info['childs'] = 1;
-			array_unshift($tree, $info);
 		}
 		return $tree;
 	}
