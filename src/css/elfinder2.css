@@ -487,20 +487,21 @@
 
 .elfinder-info-title strong { display:block; padding:.3em 0 .5em 0; }
 
-table.elfinder-info-tb {
+.elfinder-info-tb {
 	border:0 solid;
 /*	border-collapse: collapse;*/
-	margin:1em .2em 0 .2em;
+	margin:1em .2em 1em .2em;
 /*	margin:1em auto;*/
-	font-size:.8em;
+	font-size:.82em;
 }
 
-table.elfinder-info-tb td { white-space:nowrap; padding:2px 3px; }
+.elfinder-info-tb td { white-space:nowrap; padding:2px; }
 
 .elfinder-info-tb tr td:first-child { text-align:right;  }
 
-.elfinder-info-size span { float:left;}
+.elfinder-info-tb span { float:left;}
+.elfinder-info-tb a { outline: none; text-decoration:underline; }
+.elfinder-info-tb a:hover { text-decoration:none; }
+.elfinder-info-tb .elfinder-spinner-mini {height:14px; margin:0 5px;}
 
-.elfinder-info-size .elfinder-spinner-mini {height:14px; margin:0 5px;}
-
-.elfinder-info-fsize { display:none;}
+/*.elfinder-info-fsize { display:none;}*/

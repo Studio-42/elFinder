@@ -773,10 +773,20 @@
 		 * @return String
 		 */
 		this.path = function(file) {
-			var path = this.isNewApi ? (cwd.rel + (cwd.hash == file.hash ? '' : file.name)) : file.rel,
-				tail = path.substr(-1, 1);
-
-			return tail == '/' || tail == '\\' ? path.substr(0, path.length-1) : path
+			return this.isNewApi 
+				? cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name)
+				: file.rel;
+		}
+		
+		this.url = function(file) {
+			var path = '';
+			if (this.isNewApi) {
+				if (cwd.url) {
+					path = this.path(file).replace(cwd.separator, '/');
+					return cwd.url + path.substr(path.indexOf('/')+1)
+				}
+			}
+			return file.url;
 		}
 		
 		/**
@@ -1187,11 +1197,12 @@
 				$.each(cmds, function(i, name) {
 					var cmd = self.commands[name];
 					if ($.isFunction(cmd) && !commands[name]) {
-						// self.log(name)
-						cmd.prototype = base;
+						var _super = $.extend({}, base, cmd.prototype);
+						// cmd.prototype = base;
+						cmd.prototype = _super;
 						commands[name] = new cmd();
-						commands[name]._super = base;
-						commands[name].setup(name);
+						commands[name]._super = _super;
+						commands[name].setup(name, self.options[name]||{});
 					}
 				});
 				// self.log(commands)
@@ -1541,6 +1552,8 @@
 				});
 			return this.bind(event, h);
 		},
+		
+		
 		
 		/**
 		 * Open directory/file
@@ -2076,8 +2089,15 @@
 		 * @param  String  file mimetype
 		 * @return String
 		 */
-		mime2kind : function(mime) {
-			return this.i18n(this.kinds[mime]||'unknown');
+		mime2kind : function(f) {
+			var kind = '';
+			if (typeof(f) == 'object') {
+				kind = f.link ? 'Alias' : this.kinds[f.mime]||'unknown';
+			} else {
+				this.log('mime2kind required file')
+				kind = this.kinds[f]||'unknown';
+			}
+			return this.i18n(kind);
 		},
 		
 		/**
@@ -2117,15 +2137,12 @@
 		 * @return String
 		 */
 		formatPermissions : function(f) {
-			var r  = !!f.read,
-				w  = !!f.write,
-				// rm = !!f.rm,
-				p  = [];
+			var p  = [];
 				
-			r  && p.push(this.i18n('read'));
-			w  && p.push(this.i18n('write'));
-			// rm && p.push(this.i18n('remove'));
-			return p.length ? p.join('/') : this.i18n('no access');
+			f.read && p.push(this.i18n('read'));
+			f.write && p.push(this.i18n('write'));	
+
+			return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('no access');
 		},
 		
 		/**

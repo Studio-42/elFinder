@@ -482,7 +482,7 @@ abstract class elFinderVolumeDriver {
 	public function path($hash) {
 		$path = $this->decode($hash);
 		return $path 
-			? $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->relpath($path))
+			? $this->abspath($path)
 			: '';
 	}
 	
@@ -1314,6 +1314,16 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function abspath($path) {
+		return $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.basename($path));
+	}
+	
+	/**
 	 * Return fileinfo
 	 *
 	 * @param  string  $path  file cache
@@ -1369,7 +1379,7 @@ abstract class elFinderVolumeDriver {
 			if ($target) {
 				$file['mime']   = $this->mimetype($target);
 				$file['link']   = $this->encode($target);
-				$file['linkTo'] = $this->relpath($target);
+				$file['linkTo'] = $this->abspath($target);
 			} else {
 				$file['mime']  = 'symlink-broken';
 				$file['read']  = 0;

@@ -81,6 +81,8 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this._required = false;
 	
+	this.options = { };
+	
 	/**
 	 * Prepare object -
 	 * bind events and shortcuts
@@ -97,7 +99,7 @@ elFinder.prototype.command = function(fm) {
 		
 		this.name      = name;
 		this.title     = fm.i18n(this.title || this.name);
-		this.options   = $.extend({ui : 'button'}, opts);
+		this.options   = $.extend({ui : 'button'}, this.options, opts);
 		this._listeners = [];
 
 		!this._required && fm.bind('open', function() {

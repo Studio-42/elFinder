@@ -35,7 +35,7 @@ class elFinder {
 		'tmb'       => array('current' => true, 'files' => true),
 		'sync'      => array('current' => true, 'targets' => true, 'mimes' => false),
 		'file'      => array('target' => true),
-		'size'      => array('targets' => true, 'id' => true),
+		'size'      => array('targets' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
@@ -323,6 +323,7 @@ class elFinder {
 		} 
 		
 		$cwd['path'] = $volume->path($target);
+		$cwd['separator'] = DIRECTORY_SEPARATOR;
 		$cwd = array_merge($cwd, $volume->options());
 
 		$files = array();
@@ -511,7 +512,7 @@ class elFinder {
 	 **/
 	protected function size($args) {
 		// sleep(1);
-		$result = array('id' => $args['id'], 'size' => 0);
+		$size = 0;
 		$target = is_array($args['targets']) ? $args['targets'][0] : '';
 		
 		if (!$target || ($volume = $this->volume($target)) == false) {
@@ -525,20 +526,9 @@ class elFinder {
 		}
 		
 		foreach ($args['targets'] as $t) {
-			$result['size'] += $volume->size($t);
+			$size += $volume->size($t);
 		}
-		
-		// $result['size'] = $volume->size($args['targets']);
-		
-		// foreach ($args['targets'] as $hash) {
-		// 	$size = $volume->size($hash);
-		// 	if ($size === false) {
-		// 		return array('error' => 'Folder not found');
-		// 	}
-		// 	$result['size'] += $size;
-		// }
-		
-		return $result;
+		return array('size' => $size);
 	}
 	
 	/**
