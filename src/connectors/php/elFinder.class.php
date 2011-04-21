@@ -391,7 +391,6 @@ class elFinder {
 			return array('error' => $this->error(ERROR_NOT_FOUND));
 		}
 
-
 		return ($tree = $volume->parents($dir)) === false 
 			? array('error' => $this->error($volume->errno(), $volume->path($dir)))
 			: array('tree' => $tree);
@@ -409,7 +408,7 @@ class elFinder {
 		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
 		if (!$volume) {
-			return array('error' => 'Invalid parameters');
+			return array('error' => $this->error(ERROR_NOT_FOUND));
 		}
 		
 		foreach ($args['files'] as $hash) {
@@ -511,15 +510,25 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function size($args) {
-		sleep(5);
+		// sleep(1);
 		$result = array('id' => $args['id'], 'size' => 0);
+		$target = is_array($args['targets']) ? $args['targets'][0] : '';
+		
+		if (!$target || ($volume = $this->volume($target)) == false) {
+			return array('error' => $this->error(ERROR_NOT_FOUND));
+		}
+		
 		$volume = $this->volume(is_array($args['targets']) ? $args['targets'][0] : '');
 		
 		if (!$volume) {
 			return array('error' => 'Invalid parameters');
 		}
 		
-		$result['size'] = $volume->size($args['targets']);
+		foreach ($args['targets'] as $t) {
+			$result['size'] += $volume->size($t);
+		}
+		
+		// $result['size'] = $volume->size($args['targets']);
 		
 		// foreach ($args['targets'] as $hash) {
 		// 	$size = $volume->size($hash);

@@ -627,6 +627,24 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
+	public function size($hash) {
+		return $this->countSize($this->decode($hash));
+		$path = $this->decode($hash);
+		if (($file = $this->info($path)) == false || $file['hidden']) {
+			return $this->error(elFinder::ERROR_NOT_FOUND);
+		}
+		
+		return $file['mime'] == 'directory'
+			? $this->dirsize($path)
+			: $file['size'];
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
 	public function open($hash) {
 		$path = $this->decode($hash);
 		if (($file = $this->file($path)) == false || !$file['read'] || $file['mime'] == 'directory') {
@@ -1441,6 +1459,38 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return $dirs;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function countSize($path) {
+		if (!$this->_fileExists($path) || $this->hidden($path)) {
+			return 0;
+		}
+		if ($this->_isLink($path)) {
+			$lstat = $this->_lstat($path);
+			return $lstat['size'];
+		}
+		if ($this->_isFile($path)) {
+			return $this->_filesize($path);
+		}
+		if (!$this->readable($path)) {
+			return 0;
+		}
+		
+		$size = 0;
+		foreach ($this->_scandir($path) as $p) {
+			$name = basename($p);
+			if ($name != '.' && $p != '..') {
+				$size += $this->countSize($p);
+			}
+			
+		}
+		return $size;
 	}
 	
 	/************************** abstract methods ***************************/
