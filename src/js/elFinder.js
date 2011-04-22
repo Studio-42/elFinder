@@ -241,7 +241,7 @@
 					f = data[l];
 					if (self.oldAPI) {
 						f.phash = cwd.hash;
-						f.locked = !!f.rm;
+						f.locked = !f.rm;
 						delete f.rm;
 					}
 					files[f.hash] = f;
@@ -773,6 +773,7 @@
 		 * @return String
 		 */
 		this.path = function(file) {
+			return cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name);
 			return this.isNewApi 
 				? cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name)
 				: file.rel;
@@ -1244,9 +1245,19 @@
 						files = {};
 						cacheTree(data.tree);
 					} 
-					cwd.phash = files[cwd.hash].phash;
-					cwd.locked = cwd.phash ? !!cwd.rm : true;
+					cwd.path = cwd.rel;
+					delete cwd.rel;
+					// find cwd in cached files and set parent hash
+					cwd.phash  = files[cwd.hash].phash;
+					// if cwd is root - locked it
+					cwd.locked = cwd.phash ? !cwd.rm : true;
 					delete cwd.rm;
+
+					if (cwd.path.indexOf('\\') != -1) {
+						cwd.separator = '\\';
+					} else if (cwd.path.indexOf('/') != -1 || !cwd.separator) {
+						cwd.separator = '/';
+					} 
 				}
 				
 				cache(self.newAPI ? e.data.files : e.data.cdc, true);

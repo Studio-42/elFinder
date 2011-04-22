@@ -23,7 +23,7 @@ elFinder.prototype.commands.info = function() {
 			kinds   = [],
 			files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
 			length  = files.length,
-			targets = fm.isNewApi
+			targets = fm.newAPI
 				? length >1 || files[0].mime == 'directory' ? $.map(files, function(f) { return f.mime == 'directory' && f.read && !f.link ? f.hash : null }) : []
 				: [],
 			updatesize = function(size) {
@@ -42,7 +42,7 @@ elFinder.prototype.commands.info = function() {
 				}
 			});
 		} else {
-			title = tpl.title.replace('{name}', fm.i18n('Items')+': '+length)
+			title = tpl.title.replace('{name}', fm.i18n('Items')+': '+length).replace('{class}', 'elfinder-cwd-icon-group')
 			dirs  = $.map(files, function(f) { return f.mime == 'directory' && !f.link ? 1 : null; }).length;
 			dirs && kinds.push(fm.i18n('Folders')+': '+dirs);
 			dirs < length && kinds.push(fm.i18n('Documents')+': '+(length-dirs));
@@ -51,7 +51,6 @@ elFinder.prototype.commands.info = function() {
 			content.push(tpl.row.replace('{label}', fm.i18n('Kind')).replace('{value}', kinds.join(', ')));
 			content.push(tpl.row.replace('{label}', fm.i18n('Size')).replace('{value}', !targets.length ? fm.formatSize(size) : '<span>'+fm.i18n('Calculating')+'</span> <span class="elfinder-spinner-mini"/>'));
 			content.push(tpl.row.replace('{label}', fm.i18n('Path')).replace('{value}', fm.cwd().path));
-			
 		}
 		
 		content = tpl.main.replace('{title}', title).replace('{content}', content.join('')).replace(/\{[a-z0-9]+\}/g, '');
@@ -60,7 +59,7 @@ elFinder.prototype.commands.info = function() {
 			title     : fm.i18n('Info'),
 			resizable : true,
 			width     : 220,
-			minWidth  : 220,
+			minWidth  : 230,
 			focus     : function() {
 				var $this = $(this),
 					w = $this.find('table').outerWidth(), 
@@ -69,7 +68,7 @@ elFinder.prototype.commands.info = function() {
 				// expand dialog width to content width
 				if (w > $this.width()) {
 					max = parseInt($(window).width()/2);
-					w = w < max ? w+12 : max;
+					w = w < max ? w+14 : max;
 					$this.dialog('option', 'width', w).dialog('option', 'minWidth', w);
 				}
 				$this.dialog('option', 'focus', null);
@@ -96,7 +95,7 @@ elFinder.prototype.commands.info.prototype.options = {
 		title  : function(f, tpl, fm) {
 			return tpl
 				.replace('{class}', fm.mime2class(f.mime))
-				.replace('{style}', f.tmb ? 'background:url(\''+((fm.isNewApi ? fm.cwd().tmbUrl : '') + f.tmb)+'\') center center no-repeat' : '')
+				.replace('{style}', f.tmb ? 'background:url(\''+((fm.newAPI ? fm.cwd().tmbUrl : '') + f.tmb)+'\') center center no-repeat' : '')
 				.replace('{name}', f.name)
 				.replace('{kind}', fm.mime2kind(f))
 		},
@@ -105,8 +104,8 @@ elFinder.prototype.commands.info.prototype.options = {
 		},
 		size   : function(f, tpl, fm) {
 			var size = fm.formatSize(f.size);
-			
-			if (fm.isNewApi && f.mime == 'directory' && !f.link) {
+
+			if (fm.newAPI && f.mime == 'directory' && !f.link) {
 				size = f.read ? '<span>'+fm.i18n('Calculating')+'</span> <span class="elfinder-spinner-mini"/>' : fm.i18n('unknown');
 			}
 			

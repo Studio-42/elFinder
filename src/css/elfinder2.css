@@ -390,7 +390,7 @@
 .elfinder-cwd-icon-x-bzip, .elfinder-cwd-icon-x-bzip2 { background-position: 0 -1150px; }
 .elfinder-cwd-icon-x-rar, .elfinder-cwd-icon-x-rar-compressed { background-position: 0 -1200px; }
 .elfinder-cwd-icon-x-shockwave-flash { background-position: 0 -1250px; }
-
+.elfinder-cwd-icon-group { background-position:0 -1300px;}
 
 /* textfield inside icon */
 .elfinder-cwd input {
