@@ -292,11 +292,14 @@
 				var opts = {
 						cmd    : 'open',
 						target : self.lastDir() || '',
-						mimes  : self.options.onlyMimes || [],
-						init   : true,
-						tree   : !!self.options.allowNavbar
+						init   : true
 					},
 					interval;
+				
+				if (self.options.allowNavbar || self.oldAPI) {
+					// old api required tree to get cwd parent hash
+					opts.tree = 1;
+				}
 				
 				if (self.isVisible()) {
 					return self.ajax(opts).node.mousedown();
@@ -308,30 +311,6 @@
 						self.ajax(opts).node.mousedown();
 					}
 				}, 100);
-				return;
-				// focus current instances and blur other elFinder instances if exists
-				self.node.mousedown();
-
-				// start loading only visible filemanager
-				if (this.isVisible()) {
-					start();
-				} else {
-					sInterval = setInterval(function() {
-						if (self.isVisible()) {
-							clearInterval(sInterval);
-							start();
-						}
-					}, 100);
-				}
-
-				self.ajax({
-						cmd    : 'open',
-						target : self.lastDir() || '',
-						mimes  : self.options.onlyMimes || [],
-						init   : true,
-						tree   : !!self.options.allowNavbar
-					});
-				
 			},
 
 			/**
@@ -445,6 +424,11 @@
 		 **/
 		this.view = this.viewType();
 		
+		/**
+		 * Sort files type
+		 *
+		 * @type String
+		 **/
 		this.sort = this.sortType();
 		
 		/**
@@ -484,6 +468,75 @@
 		}
 		
 		/**
+		 * Return root dir hash for current working directory
+		 * 
+		 * @return String
+		 */
+		this.root = function() {
+			var dir = files[cwd.hash];
+			
+			while (dir && dir.phash) {
+				dir = files[dir.phash]
+			}
+			return dir.hash;
+		}
+		
+		/**
+		 * Return current working directory info
+		 * 
+		 * @return Object
+		 */
+		this.cwd = function() {
+			return cwd;
+		}
+		
+		/**
+		 * Return file data from current dir or tree by it's hash
+		 * 
+		 * @param  String  file hash
+		 * @return Object
+		 */
+		this.file = function(hash) { 
+			return files[hash]; 
+		};
+		
+		/**
+		 * Return all cached files
+		 * 
+		 * @return Array
+		 */
+		this.files = function() {
+			return $.extend({}, files);
+		}
+		
+		/**
+		 * Return file path
+		 * 
+		 * @param  Object  file
+		 * @return String
+		 */
+		this.path = function(file) {
+			return cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name);
+		}
+		
+		/**
+		 * Return file url if set
+		 * 
+		 * @param  Object  file
+		 * @return String
+		 */
+		this.url = function(file) {
+			var path = '';
+			if (this.isNewApi) {
+				if (cwd.url) {
+					path = this.path(file).replace(cwd.separator, '/');
+					return cwd.url + path.substr(path.indexOf('/')+1)
+				}
+			}
+			return file.url;
+		}
+		
+		/**
 		 * Return selected files hashes
 		 *
 		 * @return Array
@@ -493,16 +546,48 @@
 		}
 		
 		/**
-		 * Return number of selected files
-		 *
-		 * @return Number
-		 **/
-		this.countSelected = function() {
-			return selected.length;
-		}
+		 * Return selected files info
+		 * 
+		 * @return Array
+		 */
+		this.selectedFiles = function() {
+			return $.map(selected, function(hash) { return files[hash] || null });
+		};
 		
 		/**
-		 * Proccess ajax request
+		 * Return true if file with required name existsin required folder
+		 * 
+		 * @param  String  file name
+		 * @param  String  parent folder hash
+		 * @return Boolean
+		 */
+		// this.exists = function(name, phash) {
+		// 	var hash;
+		// 
+		// 	for (hash in files) {
+		// 		if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
+		// 			return true;
+		// 		}
+		// 	}
+		// };
+		
+		/**
+		 * Proccess ajax request.
+		 * Fired events :
+		 *  - "ajaxstart" before request,
+		 *  - "ajaxstop"  on request complete,
+		 *  - "ajaxerror" on request failed
+		 *  - "error" on error from backend
+		 *  - event with command name on request success
+		 *  - "added"/"removed" if response contains data with this names
+		 *
+		 * @example
+		 * 1. elfinder.ajax({cmd : 'open', init : true}) - request lock interface till request complete
+		 * 2. elfinder.ajax({data : {...}, comlete : function() { ... }}, 'bg') 
+		 *        - add handler to request 'complete' event 
+		 *          and produce request without lock interface,
+		 *          but errors will shown
+		 * 3. elfinder.ajax({...}, 'silent') - all errors will be send to debug
 		 *
 		 * @param  Object  data to send to connector or options for ajax request
 		 * @param  String  request mode. 
@@ -513,29 +598,28 @@
 		 */
 		this.ajax = function(opts, mode) {
 			var self    = this,
-				request = $.extend({}, this.options.customData || {}, opts.data || opts), 
-				cmd     = request.cmd,
+				options = this.options,
 				mode    = /^sync|bg|silent$/.test(mode) ? mode : 'sync',
-				options = {
-					url      : this.options.url,
+				request = $.extend({}, options.customData, {mimes : options.onlyMimes || []}),
+				params  = {
+					url      : options.url,
 					async    : true,
 					type     : 'get',
 					dataType : 'json',
 					cache    : false,
 					data     : request,
-					// timeout  : 100,
 					error    : function(xhr, status) { 
 						var error;
 						
 						switch (status) {
 							case 'abort':
-								error = ['Unable to connect to backend.', 'Connection aborted.'];
+								error = ['Unable to connect to backend. $1', 'Connection aborted.'];
 								break;
 							case 'timeout':
-								error = ['Unable to connect to backend.', 'Connection timeout.'];
+								error = ['Unable to connect to backend. $1', 'Connection timeout.'];
 								break;
 							case 'parsererror':
-								error = 'Invalid backend response';
+								error = ['Invalid backend response. $1', 'Data is not JSON.'];
 								break;
 							default:
 								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend.' : 'Invalid backend response.';
@@ -543,43 +627,50 @@
 						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error, request : request, mode : mode});
 
 					},
-					success  : function(data) {
+					success  : function(response) {
 						var error;
 
-						self.trigger('ajaxstop', {request : request, response : data, mode : mode});
+						self.trigger('ajaxstop', {request : request, response : response, mode : mode});
 
-						if (!data) {
-							error = 'Invalid backend response';
-						} else if (data.error) {
-							error = data.error;
-						} else if (!validCmdData(cmd, data)) {
-							error = 'Invalid backend response';
+						if (!response) {
+							error = ['Invalid backend response. $1', 'Data is empty.'];
+						} else if (response.error) {
+							error = response.error;
+						} else if (!validCmdData(request.cmd, response)) {
+							error = ['Invalid backend response. $1', 'Invalid data.'];
 						}
 
 						if (error) {
-							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : data, request : request});
+							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : response, request : request});
 						}
 
-						if (data.warning) {
-							self.trigger('warning', {warning : data.warning});
+						if (response.warning) {
+							self.trigger('warning', {warning : response.warning});
 						}
 
 						// fire some event to update ui
-						data.removed && data.removed.length && self.trigger('removed', data);
-						data.added   && data.added.length   && self.trigger('added', data);
+						response.removed && response.removed.length && self.trigger('removed', response);
+						response.added   && response.added.length   && self.trigger('added', response);
 						
 						// fire event with command name
-						self.trigger(cmd, data);
+						self.trigger(request.cmd, response);
 					}
+					
 				};
 				
+			if (!$.isPlainObject(opts)) {
+				return this.debug('error', 'ajax() required first argument Object but '+typeof(opts)+' given');
+			}
+			
+			opts.data ? $.extend(params, opts) : $.extend(params.data, opts);
+			params.data = $.extend({}, options.customData, {mimes : options.onlyMimes || []}, params.data);
+			request = params.data;
+
 			// ajax allowed - fire events and send request
 			if (ajax && this.isVisible()) {
 				self.trigger('ajaxstart', {request : request, mode : mode});
-				opts.data && $.extend(options, opts);
-				$.ajax(options);
+				$.ajax(params);
 			}
-			
 			return this;
 		};
 		
@@ -590,6 +681,25 @@
 		 * @return elFinder
 		 **/
 		this.sync = function(silent) {
+			var targets = [];
+			
+			if (this.newAPI) {
+				$.each(files, function(h, f) {
+					f.phash == cwd.hash && targets.push(h);
+				});
+				
+				self.ajax({
+					data : {
+						cmd : 'sync', 
+						current : cwd.hash, 
+						targets : targets
+					},
+					method : 'post'
+				}, silent ? 'silent' : '');
+			}
+			
+			this.log(targets)
+			return
 			var data = {
 				cmd     : 'sync',
 				current : cwd.hash,
@@ -600,7 +710,7 @@
 			$.each(files, function(hash, f) {
 				data.targets.push(hash);
 			});
-
+		
 			return self.ajax({data : data, type : 'post'}, silent ? 'silent' : '');
 		}
 		
@@ -721,97 +831,10 @@
 			return this;
 		}
 		
-		/**
-		 * Return current working directory info
-		 * 
-		 * @return Object
-		 */
-		this.cwd = function() {
-			return cwd;
-		}
 		
-		/**
-		 * Return file data from current dir or tree by it's hash
-		 * 
-		 * @param  String  file hash
-		 * @return Object
-		 */
-		this.file = function(hash) { 
-			return files[hash]; 
-		};
 		
-		/**
-		 * Return all cached files
-		 * 
-		 * @return Array
-		 */
-		this.files = function() {
-			return $.extend({}, files);
-		}
 		
-		/**
-		 * Return true if file with required name existsin required folder
-		 * 
-		 * @param  String  file name
-		 * @param  String  parent folder hash
-		 * @return Boolean
-		 */
-		this.exists = function(name, phash) {
-			var hash;
-
-			for (hash in files) {
-				if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
-					return true;
-				}
-			}
-		};
 		
-		/**
-		 * Return file path relative to root folder
-		 * 
-		 * @param  String  file name
-		 * @return String
-		 */
-		this.path = function(file) {
-			return cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name);
-			return this.isNewApi 
-				? cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name)
-				: file.rel;
-		}
-		
-		this.url = function(file) {
-			var path = '';
-			if (this.isNewApi) {
-				if (cwd.url) {
-					path = this.path(file).replace(cwd.separator, '/');
-					return cwd.url + path.substr(path.indexOf('/')+1)
-				}
-			}
-			return file.url;
-		}
-		
-		/**
-		 * Return selected files info
-		 * 
-		 * @return Array
-		 */
-		this.selectedFiles = function() {
-			return $.map(selected, function(hash) { return files[hash] || null });
-		};
-		
-		/**
-		 * Return root dir hash for current working directory
-		 * 
-		 * @return String
-		 */
-		this.root = function() {
-			var dir = files[cwd.hash];
-			
-			while (dir && dir.phash) {
-				dir = files[dir.phash]
-			}
-			return dir.hash;
-		}
 		
 		/**
 		 * Get/set clipboard content.
@@ -1176,7 +1199,7 @@
 				
 				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
 				
-				self.options.allowNav && nav.show().append($('<ul/>').elfindertree(self));
+				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
 				
 				self.history = new self.history(self);
 				
@@ -1261,7 +1284,7 @@
 				}
 				
 				cache(self.newAPI ? e.data.files : e.data.cdc, true);
-				self.log(files)
+				// self.log(files)
 				// remember last dir
 				self.lastDir(cwd.hash);
 
@@ -1588,8 +1611,7 @@
 			if (isdir) {
 				return this.ajax({
 					cmd    : 'open',
-					target : hash || '',
-					mimes  : this.options.onlyMimes || []
+					target : hash || ''
 				});
 			}
 			
@@ -1633,7 +1655,7 @@
 				: this.ajax({
 					cmd    : 'open',
 					target : this.lastDir() || '',
-					tree   : !!this.options.allowNavbar
+					tree   : 1
 				});
 		},
 		

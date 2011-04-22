@@ -26,7 +26,7 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image"] - display all images
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
-	onlyMimes : [],
+	onlyMimes : ["image/png"],
 	
 	/**
 	 * How to sort files in current directory
@@ -85,7 +85,7 @@ elFinder.prototype.options = {
 	 * @type Object
 	 * @default  {}
 	 */
-	customData : { },
+	customData : {token : '42'},
 	/**
 	 * Show toolbar?
 	 *
@@ -100,7 +100,7 @@ elFinder.prototype.options = {
 	 * @type Boolean
 	 * @default  true
 	 */
-	allowNavbar : false,
+	allowNavbar : true,
 	/**
 	 * Show statusbar?
 	 *
@@ -195,7 +195,7 @@ elFinder.prototype.options = {
 	selectMultiple : false,
 	commandsOptions : {},
 	// debug : true
-	// debug : ['event-select']
+	// debug : ['event-ajaxstart']
 }
 
 })(jQuery);

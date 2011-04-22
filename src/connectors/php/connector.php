@@ -58,13 +58,13 @@ $opts = array(
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			'attributes' => array(
 				array(),
-				array(
-					'pattern' => '/\.png$/',
-					'read' => false,
-					'write' => false,
-					'locked' => true,
-					'hidden' => true
-				),
+				// array(
+				// 	'pattern' => '/\.png$/',
+				// 	'read' => false,
+				// 	'write' => false,
+				// 	'locked' => true,
+				// 	'hidden' => true
+				// ),
 				array(
 					'pattern' => '/mimes$/',
 					'read' => true,

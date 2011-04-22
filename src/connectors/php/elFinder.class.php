@@ -432,7 +432,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function sync($args) {
-		sleep(1);
+		debug($args);
 		$result  = array('added' => array(), 'removed' => array());
 		$targets = array();
 		$active  = '';
