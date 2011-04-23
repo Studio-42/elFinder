@@ -566,7 +566,7 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function tree($hash='') {
+	public function tree($hash='', $deep=0) {
 		$path = $hash ? $this->decode($hash) : $this->root;
 		if (($dir = $this->info($path)) == false || $dir['hidden']) {
 			return $this->error(elFinder::ERROR_NOT_FOUND);
@@ -574,7 +574,7 @@ abstract class elFinderVolumeDriver {
 			return $this->error(elFinder::ERROR_NOT_DIR);
 		}
  		unset($dir['hidden']);
-		$dirs = $dir['read'] ? $this->gettree($path, $this->treeDeep-1) : array();
+		$dirs = $dir['read'] ? $this->gettree($path, $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);
 		return $dirs;
 	}

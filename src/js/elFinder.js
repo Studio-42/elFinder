@@ -226,8 +226,6 @@
 				
 				// remove only files does not belongs current dir
 				if (clear) {
-					cwd.size  = 0;
-					cwd.files = 0;
 					if (self.options.clearCache) {
 						for (i in files) {
 							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
@@ -245,10 +243,6 @@
 						delete f.rm;
 					}
 					files[f.hash] = f;
-					if (f.phash == cwd.hash) {
-						cwd.files++;
-						cwd.size += parseInt(f.size) || 0;
-					}
 				}
 			},
 			
@@ -684,13 +678,13 @@
 			var targets = [];
 			
 			if (this.newAPI) {
-				$.each(files, function(h, f) {
-					f.phash == cwd.hash && targets.push(h);
+				$.each(files, function(h) {
+					targets.push(h);
 				});
 				
 				self.ajax({
 					data : {
-						cmd : 'sync', 
+						cmd     : 'sync', 
 						current : cwd.hash, 
 						targets : targets
 					},
@@ -698,20 +692,7 @@
 				}, silent ? 'silent' : '');
 			}
 			
-			this.log(targets)
-			return
-			var data = {
-				cmd     : 'sync',
-				current : cwd.hash,
-				targets : [],
-				mimes   : self.options.onlyMimes || []
-			};
-			
-			$.each(files, function(hash, f) {
-				data.targets.push(hash);
-			});
-		
-			return self.ajax({data : data, type : 'post'}, silent ? 'silent' : '');
+			return this;
 		}
 		
 		/**
@@ -1324,34 +1305,24 @@
 			 * Update files cache - remove not existed files
 			 */
 			.bind('removed', function(e) {
-				var rm   = e.data.removed,
-					l    = rm.length,  
-					childs = function(hash) {
-						var ret = [hash];
-						
-						$.each(files, function(h, f) {
-							if (f.phash == hash) {
-								ret.push(f.hash);
-								if (f.childs) {
-									ret.concat(childs(h));
-								}
+				var rm = e.data.removed,
+					l  = rm.length, 
+					remove = function(hash) {
+						var file = files[hash];
+						if (file) {
+							self.log(files[hash].name)
+							if (file.mime == 'directory' && file.dirs) {
+								$.each(files, function(h, f) {
+									f.phash == hash && remove(h);
+								});
 							}
-						});
-						return ret;
-					};
-
-				while (l--) {
-					$.each(childs(rm[l].hash), function(i, h) {
-						var file = self.file(h);
-						if (file.phash == cwd.hash) {
-							cwd.size -= file.size;
-							cwd.files--;
+							delete files[hash];
 						}
-						delete files[h];
-						
-					});
+					};
+					
+				while (l--) {
+					remove(rm[l]);
 				}
-
 			})
 			/**
 			 * Update files cache - add new files

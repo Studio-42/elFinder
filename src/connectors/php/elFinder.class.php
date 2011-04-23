@@ -281,7 +281,7 @@ class elFinder {
 	 * @return string|array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function error($errno, $path) {
+	protected function error($errno, $path='') {
 		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
 		
 		return in_array($errno, array(self::ERROR_NOT_READ, self::ERROR_NOT_LIST)) ? array($msg, $path) : $msg;
@@ -432,28 +432,74 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function sync($args) {
-		debug($args);
-		$result  = array('added' => array(), 'removed' => array());
-		$targets = array();
-		$active  = '';
-		$mimes   = !empty($args['mimes']) ? $args['mimes'] : array();
-
+		$current = $args['current'];
+		$targets = $args['targets'];
+		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$removed = array();
+		$added   = array();
+		$groups  = array();
+		$active  = 0;
+		
+		// find current volume and check current dir
 		foreach ($this->volumes as $id => $v) {
-			$targets[$id] = array();
-			if (strpos($args['current'], $id) === 0) {
+			if (strpos($current, $id) === 0) {
+				if (!$v->fileExists($current)) {
+					return array('go' => $v->root(), 'warning' => $this->error(self::ERROR_NOT_FOUND));
+				}
 				$active = $id;
 			}
-			foreach ($args['targets'] as $hash) {
-				if (strpos($hash, $id) === 0) {
-					$targets[$id][] = $hash;
+		}
+
+		// no current volume or dir
+		if (!$active) {
+			return array('root' => $this->default->root(), 'warning' => $this->error(self::ERROR_NOT_FOUND));
+		}
+
+		// find removed files
+		foreach ($this->volumes as $id => $v) {
+			$groups[$id] = array();
+			foreach ($targets as $i => $target) {
+				if (strpos($target, $id) === 0) {
+					if ($v->fileExists($target)) {
+						$groups[$id][] = $target;
+					} else {
+						$removed[] = $target;
+						unset($targets[$i]);
+					}
+				}
+			}
+			
+			// find new in current directory
+			if ($id == $active) {
+				foreach ($v->readdir($current, $mimes) as $file) {
+					if (!in_array($file['hash'], $groups[$id]) && !in_array($file, $added)) {
+						$added[] = $file;
+					}
+				}
+			}
+			
+			// find new in tree
+			$dirs = array();
+			// find dirs and store its parents
+			foreach ($groups[$id] as $hash) {
+				if (($dir = $v->dir($hash)) != false) {
+					$dirs[] = $dir['phash'] ? $dir['phash'] : $dir['hash'];
+				}
+			}
+			// load tree for every parents dir and check dirs exists in request data
+			$dirs = array_unique($dirs);
+			foreach ($dirs as $hash) {
+				if (($tree = $v->tree($hash, 1)) != false) {
+					foreach ($tree as $dir) {
+						if ($dir['hash'] != $current && !in_array($dir['hash'], $groups[$id]) && !in_array($dir, $added)) {
+							$added[] = $dir;
+						}
+					}
 				}
 			}
 		}
-		foreach ($targets as $id => $hashes) {
-			$result = array_merge_recursive($result, $this->volumes[$id]->sync($hashes, $id == $active ? $args['current'] : '', $mimes));
-		}
 
-		return $result;
+		return array('added' => $added, 'removed' => $removed);
 	}
 	
 	/**
@@ -505,24 +551,18 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Count total files size
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function size($args) {
-		// sleep(1);
 		$size = 0;
 		$target = is_array($args['targets']) ? $args['targets'][0] : '';
 		
 		if (!$target || ($volume = $this->volume($target)) == false) {
 			return array('error' => $this->error(ERROR_NOT_FOUND));
-		}
-		
-		$volume = $this->volume(is_array($args['targets']) ? $args['targets'][0] : '');
-		
-		if (!$volume) {
-			return array('error' => 'Invalid parameters');
 		}
 		
 		foreach ($args['targets'] as $t) {
