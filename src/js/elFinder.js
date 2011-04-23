@@ -691,8 +691,7 @@
 						targets : targets
 					},
 					method : 'post',
-					beforeSend : function() { allowSync = false; },
-					complete : function() { allowSync = true}
+					beforeSend : function() { allowSync = false; }
 				}, sync ? 'sync' : 'silent');
 				return true;
 			}
@@ -1281,8 +1280,11 @@
 			/**
 			 * Clean clipboard on reload
 			 */
-			.bind('reload', function() {
-				self.clipboard([], false, true);
+			.bind('sync', function(e) {
+
+				
+				e.data.root && self.open(e.data.root);
+				allowSync = true;
 			})
 			/**
 			 * Update files cache
@@ -1625,7 +1627,7 @@
 		 * @return elFinder
 		 */
 		reload : function() {
-			this.trigger('reload').clipboard([]);
+			this.trigger('reload').clipboard([], false, true);
 			
 			return this.newAPI 
 				? this.sync(true)

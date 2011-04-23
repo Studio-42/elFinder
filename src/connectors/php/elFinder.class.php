@@ -97,6 +97,7 @@ class elFinder {
 	const ERROR_NOT_READ = 2;
 	const ERROR_NOT_DIR = 3;
 	const ERROR_NOT_LIST = 4;
+	const ERROR_FOLDER_NOT_EXISTS = 5;
 	/**
 	 * undocumented class variable
 	 *
@@ -106,7 +107,8 @@ class elFinder {
 		1 => 'File not found',
 		2 => '$1" can’t be opened because you don’t have permission to see its contents.',
 		3 => 'Required location is not a folder',
-		4 => 'Unable to get "$1" folders list.'
+		4 => 'Unable to get "$1" folders list.',
+		5 => 'Required folder does not exists'
 	);
 	
 	/**
@@ -439,12 +441,12 @@ class elFinder {
 		$added   = array();
 		$groups  = array();
 		$active  = 0;
-		sleep(3);
+		// sleep(3);
 		// find current volume and check current dir
 		foreach ($this->volumes as $id => $v) {
 			if (strpos($current, $id) === 0) {
-				if (!$v->fileExists($current)) {
-					return array('go' => $v->root(), 'warning' => $this->error(self::ERROR_NOT_FOUND));
+				if ($v->fileExists($current)) {
+					return array('root' => $v->root(), 'warning' => $this->error(self::ERROR_FOLDER_NOT_EXISTS));
 				}
 				$active = $id;
 			}
@@ -452,7 +454,7 @@ class elFinder {
 
 		// no current volume or dir
 		if (!$active) {
-			return array('root' => $this->default->root(), 'warning' => $this->error(self::ERROR_NOT_FOUND));
+			return array('root' => $this->default->root(), 'warning' => $this->error(self::ERROR_FOLDER_NOT_EXISTS));
 		}
 
 		// find removed files
