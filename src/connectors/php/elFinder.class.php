@@ -439,7 +439,7 @@ class elFinder {
 		$added   = array();
 		$groups  = array();
 		$active  = 0;
-		
+		sleep(3);
 		// find current volume and check current dir
 		foreach ($this->volumes as $id => $v) {
 			if (strpos($current, $id) === 0) {

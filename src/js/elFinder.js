@@ -118,12 +118,6 @@
 			 * @type Object
 			 **/
 			clipboard = [],
-			// clipboard = {
-			// 	files : [],   // files hashes
-			// 	names : {},   // files names - required for error message
-			// 	src   : null, // files parent folder hash
-			// 	cut   : false // cut files
-			// },
 			
 			node = $(node),
 			
@@ -333,7 +327,14 @@
 						}
 					});
 				}
-			}
+			},
+			
+			/**
+			 * Flag to avoid parallels sync requests 
+			 *
+			 * @type Boolean
+			 **/
+			allowSync = true
 			;
 
 		/**
@@ -669,15 +670,16 @@
 		};
 		
 		/**
-		 * Sync files with connector
+		 * Sync files with connector if other sync request not in progress
+		 * Return true on send requiest
 		 *
-		 * @param  Boolean  do it in background?
-		 * @return elFinder
+		 * @param  Boolean  do it in sync mode (freeze interface)?
+		 * @return Boolean
 		 **/
-		this.sync = function(silent) {
+		this.sync = function(sync) {
 			var targets = [];
 			
-			if (this.newAPI) {
+			if (this.newAPI && (allowSync || sync)) {
 				$.each(files, function(h) {
 					targets.push(h);
 				});
@@ -688,11 +690,13 @@
 						current : cwd.hash, 
 						targets : targets
 					},
-					method : 'post'
-				}, silent ? 'silent' : '');
+					method : 'post',
+					beforeSend : function() { allowSync = false; },
+					complete : function() { allowSync = true}
+				}, sync ? 'sync' : 'silent');
+				return true;
 			}
-			
-			return this;
+			return false;
 		}
 		
 		/**
@@ -1172,10 +1176,16 @@
 				self.oldAPI = !self.newAPI;
 				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
 
-				self.uploadMaxSize = data.uploadMaxSize;
-				
 				if (self.oldAPI) {
 					cwd.url = e.data.params.url;
+					self.uploadMaxSize = data.params.uploadMaxSize;
+				} else {
+					self.uploadMaxSize = data.uploadMaxSize;
+					if (opts.sync >= 3000) {
+						setInterval(function() {
+							self.sync();
+						}, self.options.sync);
+					}
 				}
 				
 				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
@@ -1193,9 +1203,9 @@
 					// exec shortcuts
 					.bind('keydown keypress', execShortcut);
 				
-				// $.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
-				// 	$.inArray(name, cmds) === -1 && cmds.push(name)
-				// });
+				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
+					$.inArray(name, cmds) === -1 && cmds.push(name)
+				});
 				
 				// self.log(cmds)
 				
@@ -1221,6 +1231,8 @@
 				self.debug('api', self.api);
 				delete listeners.load;
 				loaded = true;
+				
+				
 				// self.notify('rm', 1)
 			})
 			/**
@@ -1237,11 +1249,7 @@
 				cwd = $.extend(cwd, e.data.cwd)
 				
 				if (self.newAPI) {
-					if (self.options.sync > 3000) {
-						setInterval(function() {
-							self.sync();
-						}, self.options.sync);
-					}
+					
 				} else {					
 					cwd.tmb = !!data.tmb;
 					// old api: if we get tree - reset cache
@@ -1617,12 +1625,10 @@
 		 * @return elFinder
 		 */
 		reload : function() {
-			this.buffer = {};
-			
-			this.trigger('reload');
+			this.trigger('reload').clipboard([]);
 			
 			return this.newAPI 
-				? this.sync(false)
+				? this.sync(true)
 				: this.ajax({
 					cmd    : 'open',
 					target : this.lastDir() || '',
