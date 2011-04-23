@@ -96,8 +96,9 @@ class elFinder {
 	const ERROR_NOT_FOUND = 1;
 	const ERROR_NOT_READ = 2;
 	const ERROR_NOT_DIR = 3;
-	const ERROR_NOT_LIST = 4;
-	const ERROR_FOLDER_NOT_EXISTS = 5;
+	const ERROR_NOT_FILE = 4;
+	const ERROR_NOT_LIST = 5;
+
 	/**
 	 * undocumented class variable
 	 *
@@ -105,10 +106,11 @@ class elFinder {
 	 **/
 	protected static $errors = array(
 		1 => 'File not found',
-		2 => '$1" can’t be opened because you don’t have permission to see its contents.',
-		3 => 'Required location is not a folder',
-		4 => 'Unable to get "$1" folders list.',
-		5 => 'Required folder does not exists'
+		2 => '"$1" can’t be opened because you don’t have permission to see its contents.',
+		3 => '"$1" is not a folder.',
+		4 => '"$1" is not a file.',
+		5 => 'Unable to get "$1" folders list.',
+
 	);
 	
 	/**
@@ -286,7 +288,8 @@ class elFinder {
 	protected function error($errno, $path='') {
 		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
 		
-		return in_array($errno, array(self::ERROR_NOT_READ, self::ERROR_NOT_LIST)) ? array($msg, $path) : $msg;
+		return array($msg, $path);
+		// return in_array($errno, array(self::ERROR_NOT_READ, self::ERROR_NOT_LIST)) ? array($msg, $path) : $msg;
 	}
 	
 	/**
@@ -445,8 +448,8 @@ class elFinder {
 		// find current volume and check current dir
 		foreach ($this->volumes as $id => $v) {
 			if (strpos($current, $id) === 0) {
-				if ($v->fileExists($current)) {
-					return array('root' => $v->root(), 'warning' => $this->error(self::ERROR_FOLDER_NOT_EXISTS));
+				if (!$v->fileExists($current)) {
+					return array('root' => $v->root(), 'current' => $current);
 				}
 				$active = $id;
 			}
@@ -454,7 +457,7 @@ class elFinder {
 
 		// no current volume or dir
 		if (!$active) {
-			return array('root' => $this->default->root(), 'warning' => $this->error(self::ERROR_FOLDER_NOT_EXISTS));
+			return array('root' => $this->default->root(), 'current' => $current);
 		}
 
 		// find removed files
@@ -473,7 +476,10 @@ class elFinder {
 			
 			// find new in current directory
 			if ($id == $active) {
-				foreach ($v->readdir($current, $mimes) as $file) {
+				if (($files = $v->readdir($current, $mimes)) === false) {
+					return array('root' => $v->root(), 'current' => $current);
+				}
+				foreach ($files as $file) {
 					if (!in_array($file['hash'], $groups[$id]) && !in_array($file, $added)) {
 						$added[] = $file;
 					}
@@ -501,7 +507,7 @@ class elFinder {
 			}
 		}
 
-		return array('added' => $added, 'removed' => $removed);
+		return array('added' => $added, 'removed' => $removed, 'current' => $current);
 	}
 	
 	/**

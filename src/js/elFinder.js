@@ -277,20 +277,13 @@
 			 * @return void
 			 */
 			start = function() {
-				var opts = {
-						cmd    : 'open',
-						target : self.lastDir() || '',
-						init   : true
-					},
-					interval;
-				
 				if (self.options.allowNavbar || self.oldAPI) {
 					// old api required tree to get cwd parent hash
 					opts.tree = 1;
 				}
 				
 				if (self.isVisible()) {
-					return self.ajax(opts).node.mousedown();
+					return self.openDir('', true, true).node.mousedown();
 				} 
 				
 				interval = setInterval(function() {
@@ -1272,18 +1265,18 @@
 				}
 				
 				cache(self.newAPI ? e.data.files : e.data.cdc, true);
-				// self.log(files)
+
 				// remember last dir
 				self.lastDir(cwd.hash);
 
 			})
 			/**
-			 * Clean clipboard on reload
+			 * If current dir - go to root dir on sync
 			 */
 			.bind('sync', function(e) {
-
-				
-				e.data.root && self.open(e.data.root);
+				if (e.data.root && e.data.current == cwd.hash) {
+					self.trigger('error', {error : ['"$1" does not exists.', cwd.name]}).open(e.data.root, true);
+				}
 				allowSync = true;
 			})
 			/**
@@ -1578,7 +1571,7 @@
 		 * @param  Boolean  send init flag? (for open dir only)
 		 * @return elFinder
 		 */
-		open : function(hash) {
+		_open : function(hash) {
 			var file  = this.file(hash), 
 				isdir = !file || file.mime == 'directory',
 				error;
@@ -1622,6 +1615,66 @@
 		},
 		
 		/**
+		 * Open directory/file
+		 * 
+		 * @param  String   file hash
+		 * @param  Boolean  update nav dir tree? (for open dir only)
+		 * @param  Boolean  send init flag? (for open dir only)
+		 * @return elFinder
+		 */
+		open : function(hash, tree, init) {
+			var file;
+			
+			if (hash) {
+				file = this.file(hash);
+				if (!file) {
+					return this;
+				}
+				if (file.mime != 'directory') {
+					return this.openFile(hash);
+				}
+			}
+			
+			return this.openDir(hash, tree, init);
+		},
+	
+		/**
+		 * Open directory
+		 * 
+		 * @param  String   directory hash or empty string to open last opened dir
+		 * @param  Boolean  update nav dir tree? 
+		 * @param  Boolean  send init flag? (
+		 * @return elFinder
+		 */
+		openDir : function(hash, tree, init) {
+			var opts = {cmd : 'open'}, dir;
+			
+			hash = hash||this.lastDir()||'';
+			if (hash && (dir = this.file(hash))) {
+				if (dir.mime != 'directory') {
+					return this.trigger('error', {error : [this.errors.notDir, dir.name]});
+				}
+				if (!dir.read) {
+					return this.trigger('error', {error : [this.errors.notRead, dir.name]});
+				}
+			}
+			
+			opts.target = hash;
+			if (tree && !this.allowNavbar) {
+				opts.tree = 1;
+			}
+			if (init) {
+				opts.init = 1;
+			}
+			
+			return this.ajax(opts);
+		},
+		
+		openFile : function(hash) {
+			
+		},
+		
+		/**
 		 * Reload current directory
 		 * 
 		 * @return elFinder
@@ -1631,11 +1684,7 @@
 			
 			return this.newAPI 
 				? this.sync(true)
-				: this.ajax({
-					cmd    : 'open',
-					target : this.lastDir() || '',
-					tree   : 1
-				});
+				: this.openDir(this.cwd().hash, true);
 		},
 		
 		/**
@@ -2003,6 +2052,11 @@
 				}
 			}
 			return prefix + Math.random();
+		},
+		
+		errors : {
+			notDir : '"$1" is not a folder.',
+			notRead : '"$1" can’t be opened because you don’t have permission to see its contents.'
 		},
 		
 		/**
