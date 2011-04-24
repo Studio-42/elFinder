@@ -291,7 +291,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		if (is_array($ls)) {
 			for ($i =0, $l = count($ls); $i < $l; $i++) {
-				$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];
+				if ($ls[$i] != '.' && $ls[$i] != '..') {
+					$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];	
+				}
 			}
 		}
 		return $files;
@@ -319,6 +321,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path) {
 		return @fclose($fp);
 	}
+	
+	/**
+	 * Remove file
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _unlink($path) {
+		return @unlink($path);
+	}
+
+	/**
+	 * Remove dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _rmdir($path) {
+		return @rmdir($path);
+	}
+
+	
+	
 } // END class 
 
 

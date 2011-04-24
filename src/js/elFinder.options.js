@@ -115,7 +115,7 @@ elFinder.prototype.options = {
 	 * @type Number
 	 * @default  50
 	 */
-	showFiles : 50,
+	showFiles : 30,
 	/**
 	 * Lazy load config.
 	 * Distance in px to cwd bottom edge to start display files

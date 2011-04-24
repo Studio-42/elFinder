@@ -579,7 +579,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return parents directories for required one
+	 * Return part of dirs tree from required dir upside till root dir
 	 *
 	 * @param  string  $hash  directory hash
 	 * @return array
@@ -1336,7 +1336,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function abspath($path) {
-		return $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.basename($path));
+		return $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->relpath($path));
 	}
 	
 	/**
@@ -1527,10 +1527,25 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function remove($path) {
 		if (!$this->_fileExists($path)) {
-			return $this->error(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
+
 		if ($this->locked($path)) {
-			return $this->error(elFinder::ERROR_NOT_REMOVE);
+			return $this->setError(elFinder::ERROR_NOT_REMOVE, $this->abspath($path));
+		}
+		// echo "$path<br>";
+		if ($this->_isDir($path)) {
+			foreach ($this->_scandir($path) as $p) {
+				$name = basename($p);
+				if ($name != '.' && $name != '..') {
+					if (!$this->remove($p)) {
+						return false;
+					}
+				}
+			}
+			return $this->_rmdir($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->abspath($path));
+		} else {
+			return $this->_unlink($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->abspath($path));
 		}
 	}
 	
@@ -1673,6 +1688,26 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _fclose($fp, $path);
+	
+	/**
+	 * Remove file
+	 *
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _unlink($path);
+
+	/**
+	 * Remove dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _rmdir($path);
+
+
 	
 } // END class
 

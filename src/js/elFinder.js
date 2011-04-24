@@ -1320,7 +1320,6 @@
 					return files[hash] ? hash : null;
 				});
 			})
-			
 			/**
 			 * Update files cache - remove not existed files
 			 */
@@ -1330,7 +1329,6 @@
 					remove = function(hash) {
 						var file = files[hash];
 						if (file) {
-							self.log(files[hash].name)
 							if (file.mime == 'directory' && file.dirs) {
 								$.each(files, function(h, f) {
 									f.phash == hash && remove(h);
@@ -1955,6 +1953,7 @@
 				files = $.isArray(files) ? files : [],
 				cnt = files.length,
 				lock = {files : files},
+				current = this.cwd().hash,
 				hash, file, i;
 			
 			for (i = 0; i < cnt; i++) {
@@ -1969,34 +1968,21 @@
 			
 			return cnt > 0 
 				? self.ajax({
-						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
+						data       : {cmd : 'rm', targets : files, current : current},
 						beforeSend : function() { self.notify('rm', cnt).trigger('lockfiles', lock); },
-						complete   : function() { self.notify('rm', -cnt).trigger('unlockfiles', lock); }
+						complete   : function(v) { 
+							var data, error; 
+							
+							self.notify('rm', -cnt).trigger('unlockfiles', lock); 
+							
+							if (self.cwd().hash == current && v && v.responseText) {
+								data = $.parseJSON(v.responseText);
+								data && data.error == self.errors.notFound && self.reload();
+							}
+						}
 					}, 'bg') 
 				: this;
 			
-			files = $.map($.isArray(files) ? files : [], function(hash) {
-				var file = self.file(hash);
-
-				if (file && !file.rm) {
-					errors.push(file.name);
-				}
-				return file ? hash : null;
-			});
-			
-			if (errors.length) {
-				return this.trigger('error', {error : ['Unable to delete "$1".', errors.join(', ')]});
-			}
-			
-			data = {files : files};
-
-			return (cnt = files.length) > 0 
-				? self.ajax({
-						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
-						beforeSend : function() { self.notify('rm', cnt).trigger('lockfiles', data); },
-						complete   : function() { self.notify('rm', -cnt).trigger('unlockfiles', data); }
-					}, 'bg') 
-				: this;
 		},
 		
 		make : function(name, type) {

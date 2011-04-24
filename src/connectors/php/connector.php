@@ -58,7 +58,13 @@ $opts = array(
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
-				array(),
+				array(
+					'pattern' => '/\/\..?$/',
+					'read'    => true,
+					'write'   => true,
+					'locked'  => false,
+					'hidden'  => false
+				),
 				// array(
 				// 	'pattern' => '/\.png$/',
 				// 	'read' => false,

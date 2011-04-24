@@ -640,15 +640,14 @@ $.fn.elfindercwd = function(fm) {
 			// remove files
 			.bind('removed', function(e) {
 				var rm = e.data.removed,
-					l = rm.length, hash, n;
+					l = rm.length, hash, n, ndx;
 				
 				while (l--) {
-					hash = rm[l].hash;
-					
+					hash = rm[l];
 					if ((n = cwd.find('#'+hash)).length) {
 						n.remove();
-					} else if ((n = index(hash)) != -1) {
-						buffer.splice(n, 1);
+					} else if ((ndx = index(hash)) != -1) {
+						buffer.splice(ndx, 1);
 					}
 				}
 			})

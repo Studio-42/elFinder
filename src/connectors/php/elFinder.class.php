@@ -634,6 +634,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
+		// sleep(5);
 		if (!is_array($args['targets']) || empty($args['targets'])) {
 			return array();
 		}
@@ -646,16 +647,14 @@ class elFinder {
 		
 		foreach ($targets as $hash) {
 			if (($file = $volume->file($hash)) == false) {
-				return array('removed' => $removed, 'error' => $this->error($volume->errno(), $volume->path($hash)));
+				return array('removed' => $removed, 'error' => $this->error($volume->error()));
 			}
-			if ($file['locked']) {
-				return array('removed' => $removed, 'error' => $this->error(self::ERROR_NOT_REMOVE, $volume->path($hash)));
-			}
+
 			if ($volume->rm($hash)) {
 				$removed[] = $hash;
 				$removedInfo[] = $file;
 			} else {
-				return array('error' => $volume->error($volume->errno(), $volume->path($hash)));
+				return array('error' => $this->error($volume->error()));
 			}
 		}
 		
