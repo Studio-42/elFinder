@@ -344,7 +344,32 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return @rmdir($path);
 	}
 
+	/**
+	 * Copy file into another file
+	 *
+	 * @param  string  $source  source file name
+	 * @param  string  $target  target file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _copy($source, $target) {
+		return @copy($source, $target);
+	}
 	
+	/**
+	 * Create dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _mkdir($path) {
+		if (@mkdir($path)) {
+			@chmod($path, $this->options['dirMode']);
+			return true;
+		}
+		return false;
+	}
 	
 } // END class 
 

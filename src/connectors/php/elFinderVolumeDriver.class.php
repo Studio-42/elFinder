@@ -669,13 +669,30 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Remove file/dir
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $hash  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function rm($hash) {
 		return $this->remove($this->decode($hash));
+	}
+	
+	/**
+	 * Create file duplicate
+	 *
+	 * @param  string   $hash  file hash
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function duplicate($hash) {
+		$path = $this->decode($hash);
+		if (!$this->_fileExists($path)) {
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
+		}
+		$target = dirname($path).DIRECTORY_SEPARATOR.$this->uniqueName($path);
+		return $this->copy($path, $target) ? $this->encode($target) : false;
 	}
 	
 	/**
@@ -694,7 +711,7 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	public function copy($hash, $dir) {
+	public function copyTo($hash, $dir) {
 	}
 	
 	/*********************************************************************/
@@ -1520,10 +1537,11 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Remove file/dir
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function remove($path) {
 		if (!$this->_fileExists($path)) {
@@ -1547,6 +1565,93 @@ abstract class elFinderVolumeDriver {
 		} else {
 			return $this->_unlink($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->abspath($path));
 		}
+	}
+	
+	/**
+	 * Return new unique name based on file name and suffix
+	 *
+	 * @param  string  $path    file path
+	 * @param  string  $suffix  suffix append to name
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function uniqueName($path, $suffix = ' copy') {
+		$dir  = dirname($path);
+		$name = basename($path); 
+		$ext  = '';
+
+		if ($this->_isFile($path)) {
+			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$ext  = '.'.$m[1];
+				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+			}
+		}
+		
+		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
+			$i    = (int)$m[2];
+			$name = substr($name, 0, strlen($name)-strlen($m[2]));
+		} else {
+			$i     = 0;
+			$name .= $suffix;
+		}
+		
+		while ($i++ <= 10000) {
+			$n = $name.($i > 0 ? $i : '').$ext;
+			
+			if (!$this->_fileExists($dir.DIRECTORY_SEPARATOR.$n)) {
+				return $n;
+			}
+		}
+		return $name.md5($path).$ext;
+	}
+	
+	
+	/**
+	 * Copy file to another one
+	 *
+	 * @param  string  $source  source file path
+	 * @param  string  $target  target file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function copy($source, $target) {
+		$dir = dirname($target);
+		if (!$this->_isDir($dir)) {
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
+		}
+		if (!$this->writable($dir)) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE);
+		}
+		if (!$this->_fileExists($source)) {
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
+		}
+		if (!$this->readable($source)) {
+			return $this->setError(elFinder::ERROR_NOT_COPY, $this->abspath($source));
+		}
+		
+		if ($this->_fileExists($target)) {
+			if (!$this->remove($target)) {
+				return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->abspath($target));
+			}
+		}
+		
+		if ($this->_isDir($source)) {
+			if (!$this->_mkdir($target) || ($ls = $this->_scandir($source)) === false) {
+				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			}
+			foreach ($ls as $path) {
+				if ($path != '.' && $path != '..' && !$this->hidden($path)) {
+					if (!$this->copy($path, $target.DIRECTORY_SEPARATOR.basename($path))) {
+						return false;
+					}
+				}
+			}
+		} else {
+			if (!$this->_copy($source, $target)) {
+				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			}
+		}
+		return true;
 	}
 	
 	/************************** abstract methods ***************************/
@@ -1707,7 +1812,24 @@ abstract class elFinderVolumeDriver {
 	 **/
 	abstract protected function _rmdir($path);
 
-
+	/**
+	 * Copy file into another file
+	 *
+	 * @param  string  $source  source file name
+	 * @param  string  $target  target file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _copy($source, $target);
+	
+	/**
+	 * Create dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _mkdir($path);
 	
 } // END class
 

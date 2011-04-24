@@ -554,6 +554,29 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $this->db->affected_rows > 0;
 	}
 	
+	/**
+	 * Copy file into another file
+	 *
+	 * @param  string  $source  source file name
+	 * @param  string  $target  target file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _copy($source, $target) {
+		// return @copy($source, $target);
+	}
+	
+	/**
+	 * Create dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _mkdir($path) {
+	}
+	
+	
 } // END class
 
 ?>

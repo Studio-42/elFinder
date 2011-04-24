@@ -100,6 +100,10 @@ class elFinder {
 	const ERROR_NOT_LIST = 5;
 	const ERROR_NOT_REMOVE = 6;
 	const ERROR_REMOVE = 7;
+	const ERROR_NOT_COPY = 8;
+	const ERROR_NOT_WRITE = 9;
+	const ERROR_NOT_REPLACE = 10;
+	const ERROR_COPY = 11;
 
 	/**
 	 * undocumented class variable
@@ -113,7 +117,11 @@ class elFinder {
 		4 => '"$1" is not a file.',
 		5 => 'Unable to get "$1" folders list.',
 		6 => '"$1" is locked and can not be removed.',
-		7 => 'Unable to remove "$1"'
+		7 => 'Unable to remove "$1"',
+		8 => '"$1" can’t be copied because you don’t have permission to see its contents.',
+		9 => 'You don’t have permission to write into "$1"',
+		10 => '"$1" exists and can’t be replaced',
+		11 => 'Unable to copy "$1" to "$2"'
 	);
 	
 	/**
@@ -669,28 +677,27 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function duplicate($args) {
-		$result = array('added' => array(), 'warning' => 'test warning');
-		// $added = array();
+		$targets = is_array($args['target']) ? $args['target'] : array();
+		$added = array();
 		
-		if (!is_array($args['target'])) {
-			return array('error' => 'File is not defined');
+		if (!$targets) {
+			return array();
 		}
 		
-		if (($volume = $this->volume($args['target'][0])) === false) {
-			return array('error' => 'File not found');
+		if (($volume = $this->volume($targets[0])) == false) {
+			return array('error' => $this->error(self::ERROR_NOT_FOUND));
 		}
 		
-		foreach ($args['target'] as $hash) {
-			if (($hash = $volume->duplicate($hash)) === false) {
-				$result['warning'] = $volume->error();
-				return $this->trigger('duplicate', $volume, $result);
+		foreach ($targets as $hash) {
+			if (($h = $volume->duplicate($hash)) !== false
+			&& ($file = $volume->file($h)) != false) {
+				$added[] = $file;
 			} else {
-				$result['added'][] = $volume->info($hash, true, true);
+				return array('error' => $this->error($volume->error()));
 			}
 		}
 		
-		return $this->trigger('duplicate', $volume, $result);
-		
+		return $this->trigger('duplicate', $volume, array('added' => $added));
 	}
 	
 	/**

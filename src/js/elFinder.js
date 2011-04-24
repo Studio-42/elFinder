@@ -1949,10 +1949,10 @@
 		 * @return elFinder
 		 */
 		rm : function(files) {
-			var self   = this,
-				files = $.isArray(files) ? files : [],
-				cnt = files.length,
-				lock = {files : files},
+			var self    = this,
+				files   = $.isArray(files) ? files : [],
+				cnt     = files.length,
+				lock    = {files : files},
 				current = this.cwd().hash,
 				hash, file, i;
 			
@@ -1974,7 +1974,7 @@
 							var data, error; 
 							
 							self.notify('rm', -cnt).trigger('unlockfiles', lock); 
-							
+							// if remove failed with "File not found" error in current dir - reload it
 							if (self.cwd().hash == current && v && v.responseText) {
 								data = $.parseJSON(v.responseText);
 								data && data.error == self.errors.notFound && self.reload();
@@ -2024,24 +2024,29 @@
 		duplicate : function(files) {
 			var self  = this,
 				files = $.isArray(files) ? files : [],
-				l     = files.length,
-				i, f;
+				cnt   = files.length,
+				i, file;
 			
-			for (i = 0; i < l; i++) {
-				if (!(f = this.file(files[i])) || !f.read) {
-					return this.trigger('error', {error : ['Unable to duplicate "$1".', f.name]});
+			for (i = 0; i < cnt; i++) {
+				file = this.file(files[i]);
+				if (!file) {
+					return this.trigger('error', {error : this.errors.notFound});
+				}
+				
+				if (!file.read) {
+					return this.trigger('error', {error : [this.errors.notCopy, file.name]});
 				}
 			}
 			
-			return l 
+			return cnt
 				? self.ajax({
 						data : {
 							cmd     : 'duplicate', 
 							target  : this.newAPI ? files : files.shift(), // old connector support only one file duplicate at once
 							current : this.cwd().hash
 						},
-						beforeSend : function() { self.notify('duplicate', l); },
-						complete   : function() { self.notify('duplicate', -l); }
+						beforeSend : function() { self.notify('duplicate', cnt); },
+						complete   : function() { self.notify('duplicate', -cnt); }
 					}, 'bg') 
 				: this;
 		},
@@ -2069,7 +2074,8 @@
 			notFile      : '"$1" is not a file.',
 			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
 			notRm        : '"$1" is locked and can not be removed.',
-			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
+			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
+			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.'
 		},
 		
 		/**

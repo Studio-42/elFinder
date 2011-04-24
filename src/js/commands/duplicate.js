@@ -7,15 +7,7 @@ elFinder.prototype.commands.duplicate = function() {
 	}
 	
 	this._getstate = function() {
-		var selected = this.fm.selectedFiles(),
-			l = selected.length;
-			
-		while (l--) {
-			if (selected[l].read) {
-				return this._state.enabled;
-			}
-		}
-		return this._state.disabled;
+		return this._state[this.fm.selected().length ? 'enabled' : 'disabled'];
 	}
 	
 	this._exec = function() {
