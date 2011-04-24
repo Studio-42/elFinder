@@ -104,7 +104,7 @@ class elFinder {
 	const ERROR_NOT_WRITE = 9;
 	const ERROR_NOT_REPLACE = 10;
 	const ERROR_COPY = 11;
-
+	const ERROR_NOT_COPY_INTO_ITSELF = 12;
 	/**
 	 * undocumented class variable
 	 *
@@ -121,7 +121,8 @@ class elFinder {
 		8 => '"$1" can’t be copied because you don’t have permission to see its contents.',
 		9 => 'You don’t have permission to write into "$1"',
 		10 => '"$1" exists and can’t be replaced',
-		11 => 'Unable to copy "$1" to "$2"'
+		11 => 'Unable to copy "$1" to "$2"',
+		12 => 'Unable to copy "$1" into itself'
 	);
 	
 	/**

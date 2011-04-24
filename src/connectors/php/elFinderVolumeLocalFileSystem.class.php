@@ -238,7 +238,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _readlink($path) {
-		return @readlink($path);
+		$target = @readlink($path);
+		if (!$target) {
+			return false;
+		}
+
+		// absolute path
+		if (substr($target, 0, 1) == '/') {
+			$root = realpath($this->root);
+			// not exists or link to outside root
+			if (!file_exists($target) || !$this->inpath($root, $target || $root == $target)) {
+				return false;
+			}
+			return $this->root.substr($target, strlen($root));
+		}
+		
+		$target = $this->normpath($this->root.DIRECTORY_SEPARATOR.$target);
+		// echo $this->root.' '. $target.'<br>';
+		// not exists or link to outside root
+		if (!file_exists($target) || !$this->inpath($this->root, $target) || $this->root == $target) {
+
+			return false;
+		}
+		return $target;
 	}
 	
 	/**
@@ -366,6 +388,23 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _mkdir($path) {
 		if (@mkdir($path)) {
 			@chmod($path, $this->options['dirMode']);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Create symlink
+	 *
+	 * @param  string  $target  link target
+	 * @param  string  $path    symlink path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _symlink($target, $path) {
+		$target = '.'.DIRECTORY_SEPARATOR.$this->relpath($target);
+		if (@symlink($target, $path)) {
+			@chmod($path, $this->options[$this->_isDir($target) ? 'dirMode' : 'fileMode'] );
 			return true;
 		}
 		return false;

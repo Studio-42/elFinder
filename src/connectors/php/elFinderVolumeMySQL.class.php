@@ -576,7 +576,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _mkdir($path) {
 	}
 	
-	
+	/**
+	 * Driver does not support symlinks - return false
+	 *
+	 * @param  string  $target  link target
+	 * @param  string  $path    symlink path
+	 * @return false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _symlink($target, $path) {
+		return false;
+	}
 } // END class
 
 ?>

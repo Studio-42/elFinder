@@ -1086,7 +1086,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function inpath($path, $parent) {
-		return $path == $parent || strpos($path.DIRECTORY_SEPARATOR, $parent) === 0;
+		return $path == $parent || strpos($parent, $path.DIRECTORY_SEPARATOR) === 0;
 	}
 	
 	/**
@@ -1128,34 +1128,6 @@ abstract class elFinderVolumeDriver {
 			$type = 'application/zip';
 		}
 		return $type;
-	}
-	
-	/**
-	 * Returns the target of a symbolic link,
-	 * if target exists and is under root dir
-	 *
-	 * @param  string  $link  link path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function readlink($path) {
-		$link = false;
-
-		if (($target = $this->_readlink($path)) !== false) {
-			$target = $this->normpath($target);
-
-			if ($target == $path) {
-				// circlic 0_o is it possible?
-				$link = false;
-			} elseif (substr($target, 0, 1) == DIRECTORY_SEPARATOR || preg_match('/^[A-Z]\:\\\/', $target)) {
-				// absolute path
-				$link = $this->root.substr($target, strlen(realpath($this->root)));
-			} else {
-				// relative path
-				$link = $this->normpath(dirname($path).DIRECTORY_SEPARATOR.$target);
-			}
-		}
-		return $link;
 	}
 	
 	/**
@@ -1408,7 +1380,7 @@ abstract class elFinderVolumeDriver {
 		);
 		
 		if (!$root && $link) {
-			$target = $this->readlink($path);
+			$target = $this->_readlink($path);
 			if ($target) {
 				$file['mime']   = $this->mimetype($target);
 				$file['link']   = $this->encode($target);
@@ -1605,7 +1577,6 @@ abstract class elFinderVolumeDriver {
 		return $name.md5($path).$ext;
 	}
 	
-	
 	/**
 	 * Copy file to another one
 	 *
@@ -1629,13 +1600,24 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_NOT_COPY, $this->abspath($source));
 		}
 		
+		if ($this->inpath($source, $target)) {
+			return $this->setError(elFinder::ERROR_NOT_COPY_INTO_ITSELF, $this->abspath($source));
+		}
+		
 		if ($this->_fileExists($target)) {
 			if (!$this->remove($target)) {
 				return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->abspath($target));
 			}
 		}
 		
-		if ($this->_isDir($source)) {
+		if ($this->_isLink($source)) {
+			if (($link = $this->_readlink($source)) == false) {
+				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			}
+			if (!$this->_symlink($link, $target)) {
+				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			}
+		} elseif ($this->_isDir($source)) {
 			if (!$this->_mkdir($target) || ($ls = $this->_scandir($source)) === false) {
 				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
 			}
@@ -1830,6 +1812,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _mkdir($path);
+	
+	/**
+	 * Create symlink
+	 *
+	 * @param  string  $target  link target
+	 * @param  string  $path    symlink path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _symlink($target, $path);
 	
 } // END class
 
