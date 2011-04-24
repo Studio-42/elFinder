@@ -55,7 +55,7 @@ $opts = array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
-			// 'URL'    => 'http://localhost/git/elfinder/files/',
+			'URL'    => 'http://localhost/git/elfinder/files/',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(),
@@ -72,6 +72,12 @@ $opts = array(
 					'write' => false,
 					'locked' => true,
 					// 'hidden' => false
+				),
+				array(
+					'pattern' => '/123$/',
+					'read' => false,
+					// 'write' => false,
+					// 'locked' => true,
 				)
 			)
 			// 'startPath'   => '../../../files/mimes/',

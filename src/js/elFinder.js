@@ -731,6 +731,7 @@
 				i = l.indexOf(callback);
 
 			i > -1 && l.splice(i, 1);
+			delete callback; // need this?
 			return this;
 		};
 		
@@ -750,17 +751,17 @@
 			if (handlers.length) {
 				event = $.Event(event);
 				for (i = 0; i < handlers.length; i++) {
-					// to avoid data modifications, remember about "sharing" passing arguments in js :) 
+					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
 					event.data = $.extend(true, {}, data);
 					try {
-						handlers[i](event, this);
+						if (handlers[i](event, this) === false 
+						|| event.isDefaultPrevented()) {
+							break;
+						}
 					} catch (ex) {
 						window.console && window.console.log && window.console.log(ex);
 					}
 					
-					if (event.isPropagationStopped()) {
-						break;
-					}
 				}
 			}
 			return this;
@@ -1135,27 +1136,39 @@
 						}
 					}, 'error');
 				}
-					
-				// fm not correctly loaded
-				if (!loaded) {
-					self.trigger('failed');
-					listeners = {};
-					enabled   = false;
-				}
-
 			})
 			/**
-			 * Fire "load" event if first ajax request succesfull
+			 * If first 'open' request succesfull - fire "load" event to init fm.
+			 * If not - check if we remember last dir, reset it and try to 'open' default dir
 			 */
 			.one('ajaxstop', function(e) {
-				!e.data.response.error && self.trigger('load', e.data.response);
+				var r = e.data.response;
+				
+				if (r.error) {
+					if (self.lastDir()) {
+						e.preventDefault();
+						self.lastDir('');
+						self.one('ajaxstop', function(e) {
+							var r = e.data.response;
+							
+							r.error 
+								? self.trigger('error', {error : r.error}).trigger('failed', r) 
+								: self.trigger('load', r);
+						}).open('', true, true);
+						
+					} else {
+						self.trigger('failed', r);
+					}
+				} else {
+					self.trigger('load', r);
+				}
 			})
 			/**
 			 * On first success ajax request complete 
 			 * set api version, json validation rules
 			 * and init ui.
 			 */
-			.bind('load', function(e) {
+			.one('load', function(e) {
 				var data = e.data,
 					base = new self.command(self),
 					opts = self.options,
@@ -1226,6 +1239,10 @@
 				
 				
 				// self.notify('rm', 1)
+			})
+			.one('failed', function() {
+				listeners = {};
+				enabled   = false;
 			})
 			/**
 			 * Set params if required and update files cache
@@ -1935,8 +1952,28 @@
 		 */
 		rm : function(files) {
 			var self   = this,
-				errors = [], 
-				cnt, data;
+				files = $.isArray(files) ? files : [],
+				cnt = files.length,
+				lock = {files : files},
+				hash, file, i;
+			
+			for (i = 0; i < cnt; i++) {
+				hash = files[i];
+				if (!(file = this.file(hash))) {
+					return this.trigger('error', {error : this.errors.notFound});
+				}
+				if (file.locked) {
+					return this.trigger('error', {error : [this.errors.notRm, file.name]});
+				}
+			}
+			
+			return cnt > 0 
+				? self.ajax({
+						data       : {cmd : 'rm', targets : files, current : this.cwd().hash},
+						beforeSend : function() { self.notify('rm', cnt).trigger('lockfiles', lock); },
+						complete   : function() { self.notify('rm', -cnt).trigger('unlockfiles', lock); }
+					}, 'bg') 
+				: this;
 			
 			files = $.map($.isArray(files) ? files : [], function(hash) {
 				var file = self.file(hash);
@@ -2045,7 +2082,8 @@
 			notDir       : '"$1" is not a folder.',
 			notFile      : '"$1" is not a file.',
 			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
-			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.'
+			notRm        : '"$1" is locked and can not be removed.',
+			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
 		},
 		
 		/**

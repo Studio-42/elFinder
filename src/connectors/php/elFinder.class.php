@@ -98,6 +98,8 @@ class elFinder {
 	const ERROR_NOT_DIR = 3;
 	const ERROR_NOT_FILE = 4;
 	const ERROR_NOT_LIST = 5;
+	const ERROR_NOT_REMOVE = 6;
+	const ERROR_REMOVE = 7;
 
 	/**
 	 * undocumented class variable
@@ -110,7 +112,8 @@ class elFinder {
 		3 => '"$1" is not a folder.',
 		4 => '"$1" is not a file.',
 		5 => 'Unable to get "$1" folders list.',
-
+		6 => '"$1" is locked and can not be removed.',
+		7 => 'Unable to remove "$1"'
 	);
 	
 	/**
@@ -280,16 +283,16 @@ class elFinder {
 	/**
 	 * Translate error number into error message
 	 *
-	 * @param  int     $errno  error number
-	 * @param  string  $path   file path 
-	 * @return string|array
+	 * @param  int|array     $error  error number or array(error number [, arguments])
+	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function error($errno, $path='') {
-		$msg = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
-		
-		return array($msg, $path);
-		// return in_array($errno, array(self::ERROR_NOT_READ, self::ERROR_NOT_LIST)) ? array($msg, $path) : $msg;
+	protected function error($error) {
+		$error = is_array($error) ? $error : array($error);
+		$errno = array_shift($error);
+		$msg   = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
+		array_unshift($error, $msg);
+		return $error;
 	}
 	
 	/**
@@ -324,7 +327,7 @@ class elFinder {
 
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
-			return array('error' => $this->error($volume->errno(), $volume->path($target)));
+			return array('error' => $this->error($volume->error()));
 		} 
 		
 		$cwd['path'] = $volume->path($target);
@@ -336,16 +339,21 @@ class elFinder {
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
-				if (($tree = $v->tree()) != false) {
+				$tree = $v->tree();
+				if ($tree === false && $id == $volume->id()) {
+					return array('error' => $this->error($volume->error()));
+				}
+				if ($tree) {
 					$files = array_merge($files, $tree);
-				} elseif ($id == $volume->id()) {
-					return array('error' => $this->error(self::ERROR_NOT_LIST, $v->path($v->root())));
 				}
 			}
 		}
 
 		// get current working directory files list and add to $files if not exists in it
-		foreach ($volume->readdir($target, $args['mimes']) as $file) {
+		if (($ls = $volume->readdir($target, $args['mimes'])) === false) {
+			return array('error' => $this->error($volume->error()));
+		}
+		foreach ($ls as $file) {
 			if (!in_array($file, $files)) {
 				$files[] = $file;
 			}
@@ -626,31 +634,33 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
+		if (!is_array($args['targets']) || empty($args['targets'])) {
+			return array();
+		}
+		$targets = $args['targets'];
 		$removed = array();
-		
-		if (!is_array($args['targets'])) {
-			return array('error' => 'No files to delete');
+		$volume  = $this->volume($targets[0]);
+		if (!$volume) {
+			return array('error' => $this->error(self::ERROR_NOT_FOUND));
 		}
-		sleep(1);
-
-		foreach ($args['targets'] as $hash) {
-			if (($volume = $this->volume($hash)) === false) {
-				return array('error' => 'File not found');
+		
+		foreach ($targets as $hash) {
+			if (($file = $volume->file($hash)) == false) {
+				return array('removed' => $removed, 'error' => $this->error($volume->errno(), $volume->path($hash)));
 			}
-			
-			if (($info = $volume->info($hash, true)) === false) {
-				return array('error' => $volume->error());
+			if ($file['locked']) {
+				return array('removed' => $removed, 'error' => $this->error(self::ERROR_NOT_REMOVE, $volume->path($hash)));
 			}
-
 			if ($volume->rm($hash)) {
-				$removed[] = $info;
+				$removed[] = $hash;
+				$removedInfo[] = $file;
 			} else {
-				return array('error' => $volume->error());
+				return array('error' => $volume->error($volume->errno(), $volume->path($hash)));
 			}
 		}
 		
-		return $this->trigger('rm', $volume, array('removed' => $removed));
-		// return array('removed' => $removed);
+		$this->trigger('rm', $volume, array('removed' => $removedInfo));
+		return array('removed' => $removed);
 	}
 	
 	/**

@@ -122,6 +122,13 @@ abstract class elFinderVolumeDriver {
 	protected $errno = 0;
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $error = array();
+	
+	/**
 	 * Today 24:00 timestamp
 	 *
 	 * @var int
@@ -285,13 +292,6 @@ abstract class elFinderVolumeDriver {
 	protected $files = array();
 	
 	/**
-	 * hash to path map cache
-	 *
-	 * @var array
-	 **/
-	protected $hashes = array();
-	
-	/**
 	 * path to hash map cache
 	 *
 	 * @var array
@@ -431,8 +431,8 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function errno() {
-		return $this->errno;
+	public function error() {
+		return $this->error;
 	}
 	
 	/**
@@ -456,7 +456,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return some volume options:
+	 * Return volume options requiredby client:
 	 * - url
 	 * - tmbUrl
 	 * - disabled
@@ -518,7 +518,7 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($hash);
 		if (($file = $this->info($path)) == false
 		|| $file['hidden']) {
-			return $this->error(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 		unset($file['hidden']);
 		return $file;
@@ -535,7 +535,7 @@ abstract class elFinderVolumeDriver {
 		if (($dir = $this->file($hash)) != false) {
 			return $dir['mime'] == 'directory' 
 				? $dir 
-				: $this->error(elFinder::ERROR_NOT_DIR);
+				: $this->setError(elFinder::ERROR_NOT_DIR, $this->path($hash));
 		}
 		
 		return false;
@@ -554,7 +554,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		if (!$file['read']) {
-			return $this->error(elFinder::ERROR_NOT_READ);
+			return $this->setError(elFinder::ERROR_NOT_READ, $this->path($hash));
 		}
 		return $this->scandir($this->decode($hash), $mimes);
 	}
@@ -569,9 +569,9 @@ abstract class elFinderVolumeDriver {
 	public function tree($hash='', $deep=0) {
 		$path = $hash ? $this->decode($hash) : $this->root;
 		if (($dir = $this->info($path)) == false || $dir['hidden']) {
-			return $this->error(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		} elseif ($dir['mime'] != 'directory') {
-			return $this->error(elFinder::ERROR_NOT_DIR);
+			return $this->setError(elFinder::ERROR_NOT_DIR);
 		}
  		unset($dir['hidden']);
 		$dirs = $dir['read'] ? $this->gettree($path, $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
@@ -647,7 +647,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($file['mime'] == 'directory') {
-			$this->error(elFinder::ERROR_NOT_FILE);
+			$this->setError(elFinder::ERROR_NOT_FILE);
 		}
 
 		return $this->_fopen($path, 'rb');
@@ -663,6 +663,16 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function close($fp, $hash) {
 		$this->_fclose($fp, $this->decode($hash));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function rm($hash) {
+		return $this->remove($this->decode($hash));
 	}
 	
 	/**
@@ -813,12 +823,13 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Save error message
 	 *
-	 * @param  string|array  error message
+	 * @param  int|array  error number | array(error number, arguments)
 	 * @return false
 	 * @author Dmitry(dio) Levashov
 	 **/
-	protected function error($errno) {
-		$this->errno = $errno;
+	protected function setError($error) {
+		$this->error = func_get_args(); //is_array($error) ? $error : array($error);
+		
 		return false;
 	}
 	
@@ -1503,6 +1514,21 @@ abstract class elFinderVolumeDriver {
 			
 		}
 		return $size;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function remove($path) {
+		if (!$this->_fileExists($path)) {
+			return $this->error(elFinder::ERROR_NOT_FOUND);
+		}
+		if ($this->locked($path)) {
+			return $this->error(elFinder::ERROR_NOT_REMOVE);
+		}
 	}
 	
 	/************************** abstract methods ***************************/
