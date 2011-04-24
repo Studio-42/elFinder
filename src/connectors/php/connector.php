@@ -55,7 +55,8 @@ $opts = array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			// 'URL'    => 'http://localhost/git/elfinder/files/',
+			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(),
 				// array(
@@ -84,7 +85,7 @@ $opts = array(
 			'pass' => 'hane',
 			'db' => 'elfinder',
 			'user_id' => 1,
-			'URL'    => 'http://localhost/git/elfinder',
+			// 'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../../../tmb/',
 			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
 			// 'attributes' => array(

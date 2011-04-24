@@ -622,42 +622,44 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return file size / total directory size
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string   file hash
+	 * @return int
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function size($hash) {
 		return $this->countSize($this->decode($hash));
-		$path = $this->decode($hash);
-		if (($file = $this->info($path)) == false || $file['hidden']) {
-			return $this->error(elFinder::ERROR_NOT_FOUND);
-		}
-		
-		return $file['mime'] == 'directory'
-			? $this->dirsize($path)
-			: $file['size'];
 	}
 	
 	/**
-	 * undocumented function
+	 * Open file for reading and return file pointer
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string   file hash
+	 * @return Resource
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function open($hash) {
 		$path = $this->decode($hash);
-		if (($file = $this->file($path)) == false || !$file['read'] || $file['mime'] == 'directory') {
+
+		if (($file = $this->file($hash)) == false) {
 			return false;
 		}
+		
+		if ($file['mime'] == 'directory') {
+			$this->error(elFinder::ERROR_NOT_FILE);
+		}
+
 		return $this->_fopen($path, 'rb');
 	}
 	
 	/**
-	 * undocumented function
+	 * Close file pointer
 	 *
+	 * @param  Resource  $fp   file pointer
+	 * @param  string    $hash file hash
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function close($fp, $hash) {
 		$this->_fclose($fp, $this->decode($hash));

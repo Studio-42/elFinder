@@ -518,7 +518,7 @@
 			if (this.isNewApi) {
 				if (cwd.url) {
 					path = this.path(file).replace(cwd.separator, '/');
-					return cwd.url + path.substr(path.indexOf('/')+1)
+					return cwd.url + path.substr(path.indexOf('/')+1);
 				}
 			}
 			return file.url;
@@ -1025,15 +1025,15 @@
 		
 		
 		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
-			return alert(this.i18n('Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.'));
+			return alert(this.i18n(this.errors.jquiInvalid));
 		}
 
 		if (!node.length) {
-			return alert(this.i18n('elFinder required DOM Element to be created.'));
+			return alert(this.i18n(this.errors.nodeRequired));
 		}
 		
 		if (!this.options.url) {
-			return alert(this.i18n('Invalid elFinder configuration! You have to set URL option.'));
+			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
 		
@@ -1561,59 +1561,6 @@
 			return this.bind(event, h);
 		},
 		
-		
-		
-		/**
-		 * Open directory/file
-		 * 
-		 * @param  String   file hash
-		 * @param  Boolean  update nav dir tree? (for open dir only)
-		 * @param  Boolean  send init flag? (for open dir only)
-		 * @return elFinder
-		 */
-		_open : function(hash) {
-			var file  = this.file(hash), 
-				isdir = !file || file.mime == 'directory',
-				error;
-			
-			if (file && !file.read) {
-				error = (isdir ? 'The folder' : 'The file') + ' "$1" can’t be opened because you don’t have permission to see its contents.';
-				return this.trigger('error', {error : [[error, file.name]]});
-			}	
-			
-			// change directory
-			if (isdir) {
-				return this.ajax({
-					cmd    : 'open',
-					target : hash || ''
-				});
-			}
-			
-			// open file in new window
-			if (this.cwd().url) {
-				// old api store url in file propery
-				// new api store only cwd url
-				url = file.url || this.cwd().url + encodeURIComponent(file.name);
-			} else {
-				// urls diabled - open connector
-				url = this.options.url 
-					+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
-					+(this.api < 2 ? 'cmd=open&current=' + this.cwd().hash : 'cmd=file')
-					+ '&target=' + hash;
-			}
-			// image - set window size
-			if (file.dim) {
-				s = file.dim.split('x');
-				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-			}
-
-			if (!window.open(url, '_blank', w + 'top=50,left=50,scrollbars=yes,resizable=yes')) {
-				// popup blocks
-				this.trigger('error', {error : ['Unable to open file in new window.', 'Allow popup window in your browser.']});
-			}
-			return this;
-		},
-		
 		/**
 		 * Open directory/file
 		 * 
@@ -1670,8 +1617,44 @@
 			return this.ajax(opts);
 		},
 		
+		/**
+		 * Open file in new window
+		 * 
+		 * @param  String   file hash
+		 * @return elFinder
+		 */
 		openFile : function(hash) {
+			var file = this.file(hash), url;
+			if (!file) {
+				return this.trigger('error', {error : this.errors.notFound});
+			}
+			if (file.mime == 'directory') {
+				return this.trigger('error', {error : [this.errors.notFile, file.name]});
+			}
+			if (!file.read) {
+				return this.trigger('error', {error : [this.errors.notRead, file.name]});
+			}
 			
+			url = this.url(file);
+			if (!url) {
+				// urls diabled - redirect to connector
+				url = this.options.url 
+					+ (this.options.url.indexOf('?') === -1 ? '?' : '&') 
+					+(this.oldAPI ? 'cmd=open&current=' + this.cwd().hash : 'cmd=file')
+					+ '&target=' + hash;
+			}
+
+			// image - set window size
+			if (file.dim) {
+				s = file.dim.split('x');
+				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+			}
+
+			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
+				// popup blocks
+				this.trigger('error', {error : this.errors.popupBlocks});
+			}
+			return this;
 		},
 		
 		/**
@@ -2055,8 +2038,14 @@
 		},
 		
 		errors : {
-			notDir : '"$1" is not a folder.',
-			notRead : '"$1" can’t be opened because you don’t have permission to see its contents.'
+			jquiInvalid  : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
+			nodeRequired : 'elFinder required DOM Element to be created.',
+			urlRequired  : 'Invalid elFinder configuration! You have to set URL option.',
+			notFound     : 'File not found',
+			notDir       : '"$1" is not a folder.',
+			notFile      : '"$1" is not a file.',
+			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
+			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.'
 		},
 		
 		/**

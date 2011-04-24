@@ -111,8 +111,9 @@ class elFinderConnector {
 			rewind($data['pointer']);
 			fpassthru($data['pointer']);
 			if (!empty($data['volume'])) {
-				$data['volume']->fclose($data['pointer']);
+				$data['volume']->close($data['pointer'], $data['info']['hash']);
 			}
+			exit();
 		} else {
 			if (!empty($data['raw']) && !empty($data['error'])) {
 				exit($data['error']);

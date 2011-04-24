@@ -26,7 +26,7 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image"] - display all images
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
-	onlyMimes : ["image/png"],
+	onlyMimes : [],
 	
 	/**
 	 * How to sort files in current directory

@@ -519,39 +519,36 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function file($args) {
-		$file = $args['target'];
-		$volume = $this->volume($file);
+		$target = $args['target'];
 		
-		if (!$volume || !$volume->isFile($file)) {
-			return array('error' => 'File not found', 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+		if (($volume = $this->volume($target)) == false) {
+			return array('error' => $this->error(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
-		if (!$volume->isReadable($file)) {
-			return array('error' => 'Access denied', 'headers' => 'HTTP/1.x 403 Access Denied', 'raw' => true);
+		if (($file = $volume->file($target)) == false) {
+			$errno = $volume->errno();
+			return array('error' => $this->error($errno), 'headers' => $errno == self::ERROR_NOT_READ ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
-		if (($info = $volume->info($file)) === false
-		||  ($fp = $volume->fopen($file)) === false) {
-			return array(
-				'error' => 'File not found', 
-				'headers' => 'HTTP/1.x 404 Not Found', 
-				'raw' => true);
+		if (($fp = $volume->open($target)) == false) {
+			return array('error' => $this->error(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
-		$disp  = preg_match('/^(image|text)/i', $info['mime']) 
-			|| $info['mime'] == 'application/x-shockwave-flash' 
+		$disp  = preg_match('/^(image|text)/i', $file['mime']) 
+			|| $file['mime'] == 'application/x-shockwave-flash' 
 				? 'inline' 
 				: 'attachments';
 		
 		$result = array(
 			'volume'  => $volume,
 			'pointer' => $fp,
+			'info'    => $file,
 			'header'  => array(
-				"Content-Type: ".$info['mime'], 
-				"Content-Disposition: ".$disp."; filename=".$info['name'],
+				"Content-Type: ".$file['mime'], 
+				"Content-Disposition: ".$disp."; filename=".$file['name'],
 				// "Content-Location: ".$info['name'],
 				'Content-Transfer-Encoding: binary',
-				"Content-Length: ".$info['size'],
+				"Content-Length: ".$file['size'],
 				"Connection: close"
 			)
 		);
