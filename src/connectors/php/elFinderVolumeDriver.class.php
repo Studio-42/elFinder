@@ -567,14 +567,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash='', $deep=0) {
-		$path = $hash ? $this->decode($hash) : $this->root;
-		if (($dir = $this->info($path)) == false || $dir['hidden']) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
-		} elseif ($dir['mime'] != 'directory') {
-			return $this->setError(elFinder::ERROR_NOT_DIR);
+		$hash = $hash ? $hash : $this->encode($this->root);
+		if (($dir = $this->dir($hash)) == false) {
+			return false;
 		}
+		
  		unset($dir['hidden']);
-		$dirs = $dir['read'] ? $this->gettree($path, $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
+		$dirs = $dir['read'] ? $this->gettree($this->decode($hash), $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);
 		return $dirs;
 	}
@@ -600,6 +599,13 @@ abstract class elFinderVolumeDriver {
 			&& !$d['hidden']) {
 				unset($d['hidden']);
 				array_unshift($tree, $d);
+				if ($path != $this->root) {
+					foreach ($this->gettree($path, 0) as $dir) {
+						if (!in_array($dir, $tree)) {
+							$tree[] = $dir;
+						}
+					}
+				}
 			}
 		}
 		return $tree;
@@ -613,10 +619,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function tmb($hash) {
 		if ($path = $this->decode($hash)) {
-			if (($tmb = $this->gettmb($path))) {
-				return $tmb;
-			}
-			return $this->createTmb($path);
+			return ($tmb = $this->gettmb($path)) ? $tmb : $this->createTmb($path);
 		}
 		return false;
 	}
@@ -647,7 +650,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($file['mime'] == 'directory') {
-			$this->setError(elFinder::ERROR_NOT_FILE);
+			$this->setError(elFinder::ERROR_NOT_FILE, $file['path']);
 		}
 
 		return $this->_fopen($path, 'rb');

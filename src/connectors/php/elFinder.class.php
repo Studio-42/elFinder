@@ -386,7 +386,7 @@ class elFinder {
 			return array('error' => $this->error(ERROR_NOT_FOUND));
 		}
 		if (($tree = $volume->tree($dir)) === false) {
-			return array('error' => $this->error($volume->errno(), $volume->path($dir)));
+			return array('error' => $this->error($volume->error()));
 		}
 		return array('tree' => $tree);
 	}

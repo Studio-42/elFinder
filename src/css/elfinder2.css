@@ -335,6 +335,7 @@
 	margin:0 auto;
 /*	border:1px solid #111;*/
 	background: url('../images/icons-big.png') 0 0 no-repeat;
+	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 /*	background-position:0 0;*/
 /*	background-repeat:no-repeat;*/
 }
