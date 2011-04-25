@@ -109,25 +109,31 @@
 	background:url('../images/toolbar.png')  no-repeat; 
 }
 /* buttons icons */
+.elfinder-button-icon-home     { background-position: 0 -34px; }
+.elfinder-button-icon-open       { background-position: 0 -66px; }
 .elfinder-button-icon-back       { background-position: 0 -150px; }
 .elfinder-button-icon-forward    { background-position: 0 -166px; }
 .elfinder-button-icon-up         { background-position: 0 -182px; }
 .elfinder-button-icon-reload     { background-position: 0 -198px; }
-.elfinder-button-icon-home     { background-position: 0 -34px; }
-
-.elfinder-button-icon-select     { background-position: 0 -183px; }
-.elfinder-button-icon-open       { background-position: 0 -66px; }
-.elfinder-button-icon-mkdir      { background-position: 0 -200px; }
-.elfinder-button-icon-mkfile     { background-position: 0 -217px; }
-.elfinder-button-icon-upload     { background-position: 0 -237px; }
 .elfinder-button-icon-rm         { background-position: 0 -262px; }
 .elfinder-button-icon-copy       { background-position: 0 -278px; }
 .elfinder-button-icon-cut        { background-position: 0 -296px; }
 .elfinder-button-icon-paste      { background-position: 0 -313px; }
 .elfinder-button-icon-duplicate  { background-position: 0 -330px; }
-.elfinder-button-icon-rename     { background-position: 0 -334px; }
-.elfinder-button-icon-edit       { background-position: 0 -352px; }
 .elfinder-button-icon-info       { background-position: 0 -346px; }
+.elfinder-button-icon-rename     { background-position: 0 -364px; }
+
+
+/*
+.elfinder-button-icon-select     { background-position: 0 -183px; }
+
+.elfinder-button-icon-mkdir      { background-position: 0 -200px; }
+.elfinder-button-icon-mkfile     { background-position: 0 -217px; }
+.elfinder-button-icon-upload     { background-position: 0 -237px; }
+
+
+.elfinder-button-icon-edit       { background-position: 0 -352px; }
+
 .elfinder-button-icon-help       { background-position: 0 -442px; }
 .elfinder-button-icon-icons      { background-position: 0 -371px; }
 .elfinder-button-icon-list       { background-position: 0 -388px; }
@@ -137,7 +143,7 @@
 .elfinder-button-icon-quicklook  { background-position: 0 -498px; }
 .elfinder-button-icon-dock       { background-position: 0 -531px; }
 .elfinder-button-icon-undock  { background-position: 0 -514px; }
-
+*/
 /* extended toolbar */
 .elfinder-toolbar-ext .elfinder-buttonset { background:transparent; }
 
@@ -396,7 +402,8 @@
 /* textfield inside icon */
 .elfinder-cwd input {
 	width:100%;
-	font-size:.7em;
+/*	font-size:.7em;*/
+	border:1px solid #ccc;
 }
 
 

@@ -59,11 +59,11 @@ $opts = array(
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(
-					'pattern' => '/\/\..?$/',
-					'read'    => true,
-					'write'   => true,
-					'locked'  => false,
-					'hidden'  => false
+					// 'pattern' => '/\/\..?$/',
+					// 'read'    => true,
+					// 'write'   => true,
+					// 'locked'  => false,
+					// 'hidden'  => false
 				),
 				// array(
 				// 	'pattern' => '/\.png$/',

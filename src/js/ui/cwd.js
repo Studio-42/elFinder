@@ -4,6 +4,24 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindercwd = function(fm) {
+	
+	this.getFile = function(id) {
+		var cwd = this.filter('.elfinder-cwd:first');
+		
+		return cwd.find('#'+id)
+	}
+	
+	this.fakeDir = function(name) {
+		var cwd = this.filter('.elfinder-cwd:first'),
+			list, dir = $('<div/>');
+			
+		if (cwd.length) {
+			list = cwd.find('table').length;
+		}
+		
+		return dir;
+	}
+	
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
 		

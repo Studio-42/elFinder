@@ -410,6 +410,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Rename file
+	 *
+	 * @param  string  $oldPath  file to rename path
+	 * @param  string  $newPath  new path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _rename($oldPath, $newPath) {
+		return @rename($oldPath, $newPath);
+	}
+	
 } // END class 
 
 

@@ -39,7 +39,7 @@ class elFinder {
 		'mkdir'     => array('current' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
-		'rename'    => array(),
+		'rename'    => array('target' => true, 'name' => true),
 		'duplicate' => array('target' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
@@ -105,6 +105,9 @@ class elFinder {
 	const ERROR_NOT_REPLACE = 10;
 	const ERROR_COPY = 11;
 	const ERROR_NOT_COPY_INTO_ITSELF = 12;
+	const ERROR_LOCKED = 13;
+	const ERROR_INVALID_NAME = 14;
+	const ERROR_RENAME = 15;
 	/**
 	 * undocumented class variable
 	 *
@@ -122,7 +125,10 @@ class elFinder {
 		9 => 'You don’t have permission to write into "$1"',
 		10 => '"$1" exists and can’t be replaced',
 		11 => 'Unable to copy "$1" to "$2"',
-		12 => 'Unable to copy "$1" into itself'
+		12 => 'Unable to copy "$1" into itself',
+		13 => 'File "$1" locked and can’t be removed or renamed.',
+		14 => 'File name "$1" is not allowed.',
+		15 => 'Unable to rename "$1" into "$2"'
 	);
 	
 	/**
@@ -635,6 +641,25 @@ class elFinder {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function rename($args) {
+		$target = $args['target'];
+		if (($volume = $this->volume($target)) == false) {
+			return array('error' => $this->error(self::ERROR_NOT_FOUND));
+		}
+		
+		if (($file = $volume->rename($target, $args['name'])) == false) {
+			return array('error' => $this->error($volume->error()));
+		}
+		
+		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => array($file)));
+	}
+	
+	/**
 	 * Remove dirs/files
 	 * Fire "rm" event on every removed files
 	 *
@@ -643,7 +668,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
-		// sleep(5);
+		sleep(5);
 		if (!is_array($args['targets']) || empty($args['targets'])) {
 			return array();
 		}

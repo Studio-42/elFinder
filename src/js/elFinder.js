@@ -314,7 +314,6 @@
 						&& shortcut.ctrlKey == ctrlKey 
 						&& shortcut.altKey == e.altKey) {
 							e.preventDefault();
-							// self.log(i)
 							shortcut.callback(e, self);
 							return false;
 						}
@@ -650,12 +649,16 @@
 				return this.debug('error', 'ajax() required first argument Object but '+typeof(opts)+' given');
 			}
 			
-			opts.data ? $.extend(params, opts) : $.extend(params.data, opts);
-			params.data = $.extend({}, options.customData, {mimes : options.onlyMimes || []}, params.data);
+			if (opts.data) {
+				params = $.extend(true, params, opts);
+			} else {
+				$.extend(params.data, opts);
+			}
+
 			request = params.data;
 
 			// ajax allowed - fire events and send request
-			if (ajax && this.isVisible()) {
+			if (ajax && this.isVisible() && request.cmd) {
 				self.trigger('ajaxstart', {request : request, mode : mode});
 				$.ajax(params);
 			}
@@ -935,6 +938,10 @@
 			
 			
 			return dialog.dialog(options);
+		}
+		
+		this.getUIDir = function() {
+			return dir;
 		}
 		
 		/**
@@ -1498,7 +1505,8 @@
 			copy   : 'Copy files',
 			move   : 'Move files',
 			prepareCopy : 'Prepare to copy files',
-			duplicate : 'Duplicate files'
+			duplicate : 'Duplicate files',
+			rename : 'Rename files'
 		},
 		
 		/**
@@ -1924,19 +1932,22 @@
 		 * @return Boolean
 		 */
 		validName : function(name) {
+			var validator = this.options.validName;
+			
 			if (!name 
 			|| typeof(name) != 'string' 
-			|| name == '..' 
-			|| (!this.cwd().params.dotFiles && name.indexOf('.') === 0)) {
+			|| /^\.\.?$/.test(name)
+			|| name.indexOf(this.cwd().separator) !== -1
+			) {
 				return false;
 			}
-
-			if (this.options.validName) {
-				if (this.options.validName instanceof RegExp) {
-					return this.options.validName.test(name);
+			
+			if (validator) {
+				if (validator instanceof RegExp) {
+					return validator.test(name);
 				} 
-				if (typeof(this.options.validName) == 'function') {
-					return this.options.validName(name)
+				if (typeof(validator) == 'function') {
+					return validator(name);
 				}
 			}
 			return true;
@@ -1983,6 +1994,48 @@
 					}, 'bg') 
 				: this;
 			
+		},
+		
+		rename : function(hash, name) {
+			var self = this,
+				file = this.file(hash), error;
+			
+			if (!file) {
+				error = this.errors.notFound;
+			}
+			
+			if (!this.validName(name)) {
+				error = this.errors.invalidName;
+			}
+			
+			if (file.locked) {
+				error = [this.errors.fileLocked, file.name];
+			}
+			
+			if (error) {
+				this.trigger('error', {error : error});
+				return false;
+			}
+			
+			var data = {
+				cmd     : 'rename',
+				current : this.cwd().hash, // old api
+				target  : hash,
+				name    : name
+			}
+
+			this.ajax({
+				data : {
+					cmd     : 'rename',
+					current : this.cwd().hash, // old api
+					target  : hash,
+					name    : name
+				},
+				beforeSend : function() { self.notify('rename', 1); },
+				complete   : function() { self.notify('rename', -1); }
+			}, 'bg');
+			
+			return true;
 		},
 		
 		make : function(name, type) {
@@ -2075,7 +2128,9 @@
 			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
 			notRm        : '"$1" is locked and can not be removed.',
 			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
-			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.'
+			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
+			invalidName  : 'Invalid file name.',
+			fileLocked   : 'File "$1" locked and can’t be removed or renamed.'
 		},
 		
 		/**

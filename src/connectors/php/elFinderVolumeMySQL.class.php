@@ -72,7 +72,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _init() {
-
+	
 		if (!$this->options['host'] 
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
@@ -327,7 +327,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isFile($path) {
-		return !$this->_isDir($hash);
+		return !$this->_isDir($path);
 	}
 	
 	/**
@@ -574,6 +574,26 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path) {
+		if ($this->_fileExists($path)) {
+			return false;
+		}
+		
+		$parent = dirname($path);
+		$name   = basename($path);
+		$sql = 'SELECT id FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($parent).'"';
+		if ($res = $this->db->query($sql)) {
+			$r = $res->fetch_assoc();
+			$parentId = $r['parent_id'];
+		} else {
+			return false;
+		}
+		
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, path, size, mtime, mime) 
+			VALUES ("'.$parentId.'", "'.$this->db->real_escape_string($name).'", "'.$this->db->real_escape_string($path).'", 0, '.time().', "directory")';
+		echo $sql;	
+		// return 
+		$this->db->query($sql);
+		exit();
 	}
 	
 	/**
@@ -587,6 +607,29 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _symlink($target, $path) {
 		return false;
 	}
+	
+	/**
+	 * Rename file
+	 *
+	 * @param  string  $oldPath  file to rename path
+	 * @param  string  $newPath  new path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _rename($oldPath, $newPath) {
+		$name    = basename($newPath);
+		$oldPath = $this->db->real_escape_string($oldPath);
+		$newPath = $this->db->real_escape_string($newPath);
+		
+		$sql = 'UPDATE '.$this->tbf.' SET name="'.$this->db->real_escape_string($name).'", path="'.$newPath.'" WHERE path="'.$oldPath.'" LIMIT 1';
+		echo intval($this->db->query($sql));
+		echo $this->db->affected_rows;
+		// return $this->db->query($sql) ? $this->db->affected_rows : false;
+	}
+	
+	
+	
+	
 } // END class
 
 ?>

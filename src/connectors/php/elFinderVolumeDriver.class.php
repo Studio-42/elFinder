@@ -669,6 +669,36 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function rename($hash, $name) {
+		if (($file = $this->file($hash)) == false) {
+			return false;
+		}
+		if ($file['locked']) {
+			debug($file);
+			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
+		}
+		
+		$path = $this->decode($hash);
+		$renamed = dirname($path).DIRECTORY_SEPARATOR.$name;
+		
+		if ($this->locked($renamed)) {
+			
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $file['name']);
+		}
+		
+		if (!$this->_rename($path, $renamed)) {
+			return $this->setError(elFinder::ERROR_RENAME, $this->abspath($path), $this->abspath($renamed));
+		}
+		
+		return $this->file($this->encode($renamed));
+	}
+	
+	/**
 	 * Remove file/dir
 	 *
 	 * @param  string  $hash  file hash
@@ -1623,6 +1653,7 @@ abstract class elFinderVolumeDriver {
 			}
 			foreach ($ls as $path) {
 				if ($path != '.' && $path != '..' && !$this->hidden($path)) {
+					// echo $path.'-->'.$target.DIRECTORY_SEPARATOR.basename($path).'<br>';
 					if (!$this->copy($path, $target.DIRECTORY_SEPARATOR.basename($path))) {
 						return false;
 					}
@@ -1822,6 +1853,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _symlink($target, $path);
+	
+	/**
+	 * Rename file
+	 *
+	 * @param  string  $oldPath  file to rename path
+	 * @param  string  $newPath  new path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _rename($oldPath, $newPath);
 	
 } // END class
 
