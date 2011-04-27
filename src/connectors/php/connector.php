@@ -55,15 +55,16 @@ $opts = array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
+			'startPath' => '../../../files/mimes',
 			'URL'    => 'http://localhost/git/elfinder/files/',
-			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(
-					// 'pattern' => '/\/\..?$/',
-					// 'read'    => true,
-					// 'write'   => true,
-					// 'locked'  => false,
-					// 'hidden'  => false
+					'pattern' => '/\/\..*$/',
+					'read'    => true,
+					'write'   => true,
+					'locked'  => false,
+					'hidden'  => true
 				),
 				// array(
 				// 	'pattern' => '/\.png$/',
@@ -92,7 +93,7 @@ $opts = array(
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,
-			// 'startPath' => 2,
+			'startPath' => 6,
 			'user' => 'dio',
 			'pass' => 'hane',
 			'db' => 'elfinder',

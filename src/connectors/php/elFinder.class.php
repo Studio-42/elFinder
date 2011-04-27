@@ -93,42 +93,57 @@ class elFinder {
 	 **/
 	protected $disabled = array();
 	
-	const ERROR_NOT_FOUND = 1;
-	const ERROR_NOT_READ = 2;
-	const ERROR_NOT_DIR = 3;
-	const ERROR_NOT_FILE = 4;
-	const ERROR_NOT_LIST = 5;
-	const ERROR_NOT_REMOVE = 6;
-	const ERROR_REMOVE = 7;
-	const ERROR_NOT_COPY = 8;
-	const ERROR_NOT_WRITE = 9;
-	const ERROR_NOT_REPLACE = 10;
-	const ERROR_COPY = 11;
-	const ERROR_NOT_COPY_INTO_ITSELF = 12;
-	const ERROR_LOCKED = 13;
-	const ERROR_INVALID_NAME = 14;
-	const ERROR_RENAME = 15;
+	const ERROR_UNKNOWN              = 0;
+	const ERROR_CONF                 = 1;
+	const ERROR_CONF_NO_JSON         = 2;
+	const ERROR_CONF_NO_VOL          = 3;
+	const ERROR_UNKNOWN_CMD          = 4;
+	const ERROR_INV_PARAMS           = 5;
+	const ERROR_NOT_FOUND            = 6;
+	const ERROR_NOT_READ             = 7;
+	const ERROR_NOT_DIR              = 8;
+	const ERROR_NOT_FILE             = 9;
+	const ERROR_NOT_LIST             = 10;
+	const ERROR_NOT_REMOVE           = 11;
+	const ERROR_REMOVE               = 12;
+	const ERROR_NOT_COPY             = 13;
+	const ERROR_NOT_WRITE            = 14;
+	const ERROR_NOT_REPLACE          = 15;
+	const ERROR_COPY                 = 16;
+	const ERROR_NOT_COPY_INTO_ITSELF = 17;
+	const ERROR_LOCKED               = 18;
+	const ERROR_INVALID_NAME         = 19;
+	const ERROR_RENAME               = 20;
+	const ERROR_POST_DATA_MAXSIZE    = 21;
+	
 	/**
 	 * undocumented class variable
 	 *
 	 * @var string
 	 **/
 	protected static $errors = array(
-		1 => 'File not found',
-		2 => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		3 => '"$1" is not a folder.',
-		4 => '"$1" is not a file.',
-		5 => 'Unable to get "$1" folders list.',
-		6 => '"$1" is locked and can not be removed.',
-		7 => 'Unable to remove "$1"',
-		8 => '"$1" can’t be copied because you don’t have permission to see its contents.',
-		9 => 'You don’t have permission to write into "$1"',
-		10 => '"$1" exists and can’t be replaced',
-		11 => 'Unable to copy "$1" to "$2"',
-		12 => 'Unable to copy "$1" into itself',
-		13 => 'File "$1" locked and can’t be removed or renamed.',
-		14 => 'File name "$1" is not allowed.',
-		15 => 'Unable to rename "$1" into "$2"'
+		0  => 'Unknown error.',
+		1  => 'Invalid backend configuration. $1',
+		2  => 'PHP JSON module not installed.',
+		3  => 'There are no one readable volumes available.',
+		4  => 'Unknown command.',
+		5  => 'Invalid parameters.',
+		6  => 'File not found.',
+		7  => '"$1" can’t be opened because you don’t have permission to see its contents.',
+		8  => '"$1" is not a folder.',
+		9  => '"$1" is not a file.',
+		10 => 'Unable to get "$1" folders list.',
+		11 => '"$1" is locked and can not be removed.',
+		12 => 'Unable to remove "$1".',
+		13 => '"$1" can’t be copied because you don’t have permission to see its contents.',
+		14 => 'You don’t have permission to write into "$1".',
+		15 => '"$1" exists and can’t be replaced',
+		16 => 'Unable to copy "$1" to "$2".',
+		17 => 'Unable to copy "$1" into itself.',
+		18 => 'File "$1" locked and can’t be removed or renamed.',
+		19 => 'File name "$1" is not allowed.',
+		20 => 'Unable to rename "$1" into "$2".',
+		21 => 'Data exceeds the maximum allowed size.'
 	);
 	
 	/**
@@ -159,7 +174,7 @@ class elFinder {
 					$volume = new $class();
 					
 					// unique volume id - used as prefix to files hash
-					$id = $volume->driverid().$i;
+					$id = $volume->driverid().$i.'_';
 					
 					if ($volume->mount($id, $o)) {
 						$this->volumes[$id] = $volume;
@@ -170,7 +185,7 @@ class elFinder {
 				}
 			}
 		}
-		// if at least one redable volume - ii des
+		// if at least one redable volume - ii desu
 		$this->loaded = !empty($this->default);
 	}
 	
@@ -296,18 +311,36 @@ class elFinder {
 	/***************************************************************************/
 
 	/**
-	 * Translate error number into error message
+	 * Translate error number(s) into error message
 	 *
-	 * @param  int|array     $error  error number or array(error number [, arguments])
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function error($error) {
-		$error = is_array($error) ? $error : array($error);
-		$errno = array_shift($error);
-		$msg   = isset(self::$errors[$errno]) ? self::$errors[$errno] : 'Unknown error';
-		array_unshift($error, $msg);
-		return $error;
+	public function errorMessage() {
+		
+		if (func_num_args() == 1) {
+			$errors = func_get_arg(0);
+			if (!is_array($errors)) {
+				$errors = array($errors);
+			}
+		} else {
+			$errors = func_get_args();
+		}
+		
+		if (!count($errors)) {
+			return self::$errors[self::ERROR_UNKNOWN];
+		}
+
+		for ($i = 0, $c = count($errors); $i < $c; $i++) {
+			$v = $errors[$i];
+			if (isset(self::$errors[$v])) {
+				$errors[$i] = self::$errors[$v];
+			} elseif ($i == 0) {
+				$errors[$i] = self::$errors[self::ERROR_UNKNOWN];
+			}
+		}
+		
+		return $errors;
 	}
 	
 	/**
@@ -336,19 +369,17 @@ class elFinder {
 				$volume = $this->default;
 				$target = $volume->defaultPath();
 			} else {
-				return array('error' => $this->error(self::ERROR_NOT_FOUND));
+				return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 			}
 		} 
-
+		
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
-			return array('error' => $this->error($volume->error()));
+			return array('error' => $this->errorMessage($volume->error()));
 		} 
-		
-		$cwd['path'] = $volume->path($target);
-		$cwd['separator'] = DIRECTORY_SEPARATOR;
-		$cwd = array_merge($cwd, $volume->options());
 
+		$cwd['path'] = $volume->path($target);
+		$cwd = array_merge($cwd, $volume->options());
 		$files = array();
 		
 		// get folders trees
@@ -356,7 +387,7 @@ class elFinder {
 			foreach ($this->volumes as $id => $v) {
 				$tree = $v->tree();
 				if ($tree === false && $id == $volume->id()) {
-					return array('error' => $this->error($volume->error()));
+					return array('error' => $this->errorMessage($volume->error()));
 				}
 				if ($tree) {
 					$files = array_merge($files, $tree);
@@ -366,14 +397,15 @@ class elFinder {
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->readdir($target, $args['mimes'])) === false) {
-			return array('error' => $this->error($volume->error()));
+			return array('error' => $this->errorMessage($volume->error()));
 		}
+		
 		foreach ($ls as $file) {
 			if (!in_array($file, $files)) {
 				$files[] = $file;
 			}
 		}
-		
+
 		$result = array(
 			'cwd'   => $cwd,
 			'files' => $files
@@ -417,11 +449,11 @@ class elFinder {
 		$dir = $args['target'];
 				
 		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => $this->error(ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 
 		return ($tree = $volume->parents($dir)) === false 
-			? array('error' => $this->error($volume->errno(), $volume->path($dir)))
+			? array('error' => $this->errorMessage($volume->error()))
 			: array('tree' => $tree);
 	}
 	
@@ -799,7 +831,7 @@ class elFinder {
 	 **/
 	protected function volume($hash) {
 		foreach ($this->volumes as $id => $v) {
-			if (strpos($hash, $id) === 0 && $v->fileExists($hash)) {
+			if (strpos($hash, $id) === 0) {
 				return $this->volumes[$id];
 			}
 		}

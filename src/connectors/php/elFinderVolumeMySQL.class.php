@@ -36,6 +36,14 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected $accessControl = null;
 	
 	/**
+	 * Directory for tmp files
+	 * If not set driver will try to use tmbDir as tmpDir
+	 *
+	 * @var string
+	 **/
+	protected $tmpPath = '';
+	
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -71,7 +79,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _init() {
+	protected function init() {
 	
 		if (!$this->options['host'] 
 		||  !$this->options['user'] 
@@ -115,175 +123,193 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if (empty($tables[$this->tbf])) {
 			return false;
 		}
-		if ($this->tba && empty($tables[$this->tba])) {
-			$this->tba = '';
-		}
+		
+		$this->tba = empty($tables[$this->options['attr_table']]) ? '' : $this->options['attr_table'];
 		
 		$this->uid = (int)$this->options['user_id'];
 		
-		if ($res = $this->db->query('SELECT path FROM '.$this->tbf.' WHERE id='.intval($this->options['path']))) {
-			if ($r = $res->fetch_assoc()) {
-				$this->options['path'] = $r['path'];
-			}
-		} 
+		$this->options['alias'] = '';
 		
-		if ($this->options['startPath']) {
-			if ($res = $this->db->query('SELECT path FROM '.$this->tbf.' WHERE id='.intval($this->options['startPath']))) {
-				if ($r = $res->fetch_assoc()) {
-					$this->options['startPath'] = $r['path'];
-				}
-			}
-		}
+		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
 		
 		
 		return true;
 	}
 	
 	/**
-	 * No configure required
+	 * Set tmp path
 	 *
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _configure() { 
-		if ($this->options['tmpPath']) {
-			if (!file_exists($this->options['tmpPath'])) {
-				@mkdir($this->options['tmpPath']);
+	protected function configure() {
+		parent::configure();
+		$tmp = $this->options['tmpPath'];
+		if ($tmp) {
+			if (!file_exists($tmp)) {
+				if (@mkdir($tmp)) {
+					@chmod($tmp, $this->options['tmbPathMode']);
+				}
 			}
+			$this->tmpPath = is_dir($tmp) && is_writable($tmp);
 		}
 		
-		if (is_dir($this->options['tmpPath']) && is_writable($this->options['tmpPath'])) {
-			$this->tmpPath = $this->options['tmpPath'];
-		} elseif ($this->tmbPathWritable) {
+		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
 	}
-	
 	
 	/*********************************************************************/
 	/*                               FS API                              */
 	/*********************************************************************/
 	
 	/**
-	 * Try to fetch file info from db and return
+	 * Return file info from cache.
+	 * If there is no info in cache - load it
+	 *
+	 * @param  string  $path  file cache
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function stat($path, $raw=false) {
+		$file = parent::stat($path);
+		if ($file && !$raw) {
+			unset($file['id']);
+			unset($file['parent_id']);
+		}
+		return $file;
+	}
+	
+	/**
+	 * Try to fetch file from db and return it
 	 *
 	 * @param  string  file path
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function fileinfo($path) {
-		$root = $path == $this->root;
-		$path = $this->db->real_escape_string($path);
-		
-		if ($this->tba) {
-			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+	protected function getstat($path) {
+
+		$sql = $this->tba
+			? 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
 				a.aread, a.awrite, a.alocked, a.ahidden
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 				LEFT JOIN '.$this->tba.' AS a ON a.file_id=f.id AND user_id='.$this->uid.'
-				WHERE f.path="'.$path.'"
-				GROUP BY f.id';
-			
-		} else {
-			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+				WHERE f.id="'.$path.'"
+				GROUP BY f.id'
+			: 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
 				"" AS aread, "" AS awrite, "" AS alocked, "" AS ahidden 
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 				WHERE f.path="'.$path.'"
 				GROUP BY f.id';
-		}
-		
-			
-		if ($res = $this->db->query($sql)) {
-			return $this->prepareInfo($res->fetch_assoc());
-		}
 
-		return false;
+		return ($res = $this->db->query($sql))
+			? $this->prepareStat($res->fetch_assoc())
+			: false;
 	}
 	
 	/**
-	 * Get file data from db and return complete fileinfo array 
+	 * Convert file data fetched from db into fileinfo structure
 	 *
-	 * @param  array  $raw  file data
-	 * @return array
+	 * @param  array     $raw  assoc array from db
+	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function prepareInfo($raw) {
-		// debug($raw);
-		// debug($this->defaults);
-		$info = array(
-			'hash'  => $this->encode($raw['path']),
-			'phash' => $raw['parent_path'] ? $this->encode($raw['parent_path']) : '',
+	protected function prepareStat($raw) {
+		
+		if (empty($raw) || empty($raw['id'])) {
+			return false;
+		}
+		
+		$file = array(
+			'id'    => $raw['id'],
+			'parent_id' => $raw['parent_id'], 
+			'hash'  => $this->encode($raw['id']),
+			'phash' => $raw['parent_id'] ? $this->encode($raw['parent_id']) : '',
 			'name'  => $raw['name'],
 			'mime'  => $raw['mime'],
 			'size'  => $raw['size']
 		);
-		
 		if ($raw['mtime'] > $this->today) {
-			$info['date'] = 'Today '.date('H:i', $raw['mtime']);
+			$file['date'] = 'Today '.date('H:i', $raw['mtime']);
 		} elseif ($raw['mtime'] > $this->yesterday) {
-			$info['date'] = 'Yesterday '.date('H:i', $raw['mtime']);
+			$file['date'] = 'Yesterday '.date('H:i', $raw['mtime']);
 		} else {
-			$info['date'] = date($this->options['dateFormat'], $raw['mtime']);
+			$file['date'] = date($this->options['dateFormat'], $raw['mtime']);
 		}
 		
 		if ($this->accessControl) {
-			$info['read']   = (int)$this->accessControl($this->uid, 'read',   $raw['id'], $raw['path'], $this->defaults['read']);
-			$info['write']  = (int)$this->accessControl($this->uid, 'write',  $raw['id'], $raw['path'], $this->defaults['write']);
-			$info['locked'] = (int)$this->accessControl($this->uid, 'locked', $raw['id'], $raw['path'], $this->defaults['locked']);
-			$info['hidden'] = (int)$this->accessControl($this->uid, 'hidden', $raw['id'], $raw['path'], $this->defaults['hidden']);
+			$file['read']   = (int)$this->accessControl($this->uid, 'read',   $raw['id'], $this->defaults['read']);
+			$file['write']  = (int)$this->accessControl($this->uid, 'write',  $raw['id'], $this->defaults['write']);
+			$file['locked'] = (int)$this->accessControl($this->uid, 'locked', $raw['id'], $this->defaults['locked']);
+			$file['hidden'] = (int)$this->accessControl($this->uid, 'hidden', $raw['id'], $this->defaults['hidden']);
 			
 		} else {
-			$info['read']   = intval($raw['aread']   == '' ? $this->defaults['read']   : $raw['aread']);
-			$info['write']  = intval($raw['awrite']  == '' ? $this->defaults['write']  : $raw['awrite']);
-			$info['locked'] = intval($raw['alocked'] == '' ? $this->defaults['locked'] : $raw['alocked']);
-			$info['hidden'] = intval($raw['ahidden'] == '' ? $this->defaults['hidden'] : $raw['ahidden']);
+			$file['read']   = intval($raw['aread']   == '' ? $this->defaults['read']   : $raw['aread']);
+			$file['write']  = intval($raw['awrite']  == '' ? $this->defaults['write']  : $raw['awrite']);
+			$file['locked'] = intval($raw['alocked'] == '' ? $this->defaults['locked'] : $raw['alocked']);
+			$file['hidden'] = intval($raw['ahidden'] == '' ? $this->defaults['hidden'] : $raw['ahidden']);
 		}
-
-		if (!$info['phash']) {
-			$info['locked'] = 1;
-			$info['hidden'] = 0;
-		} else {
-			if ($this->locked($raw['path'])) {
-				$info['locked'] = 1;
-			}
-			if ($this->hidden($raw['path'])) {
-				$info['hidden'] = 1;
-			}
+		// root always locked
+		if (!$file['phash']) {
+			$file['locked'] = 1;
+			$file['hidden'] = 0;
 		}
-
-
-		if ($info['read']) {
-			if ($info['mime'] == 'directory') {
+		
+		if ($file['read']) {
+			if ($file['mime'] == 'directory') {
 				if ($raw['dirs']) {
-					$info['dirs'] = 1;
+					$file['dirs'] = 1;
 				}
 			} else {
 				if ($raw['width'] && $raw['height']) {
 					$info['dim'] = $raw['width'].'x'.$raw['height'];
 				}
-				
-				if (($tmb = $this->gettmb($raw['path'])) != false) {
-					$info['tmb'] = $tmb;
-				} elseif ($this->tmbPath
-						&& $this->tmbURL
-						&& $this->tmbPathWritable 
-						&& !$this->inpath($raw['path'], $this->tmbPath) // do not create thumnbnail for thumnbnail
-						&& $this->imgLib 
-						&& strpos('image', $info['mime']) == 0 
-						&& ($this->imgLib == 'gd' ? $info['mime'] == 'image/jpeg' || $info['mime'] == 'image/png' || $info['mime'] == 'mime/gif' : true)) {
-					$info['tmb'] = 1;
+
+				if (($tmb = $this->gettmb($raw['id'])) != false) {
+					$file['tmb'] = $tmb;
+				} elseif ($this->canCreateTmb($raw['id'], $file['mime'])) {
+					$file['tmb'] = 1;
 				}
-				
-				if ($info['write'] && $this->resizable($info['mime'])) {
-					$info['resize'] = 1;
+
+				if ($file['write'] && $this->resizable($file['mime'])) {
+					$file['resize'] = 1;
 				}
 			}
-		}
+		} 
 		
-		return $info;
+		// debug($file);
+		return $file;
+	}
+	
+	/**
+	 * Return array of parents id if all parents readable and not hidden
+	 *
+	 * @param  int   $id  file id
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function getParents($id) {
+		$parents = array();
+
+		while ($id > 0) {
+			$file = $this->stat($id, true);
+			if (!$file) {
+				return array();
+			}
+			$id = $file['parent_id'];
+			if ($id > 0) {
+				if (!$this->_isReadable($id) || $this->_isHidden($id)) {
+					return array();
+				}
+				array_unshift($parents, $id);
+				
+			}
+		}
+		return $parents;
 	}
 	
 	/**
@@ -294,8 +320,112 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
-		return ($file = $this->info($path)) ? $file['mime'] : 'unknown';
+		return ($file = $this->stat($path)) ? $file['mime'] : 'unknown';
 	}
+	
+	/**
+	 * Return path without changes
+	 *
+	 * @param  string  $path  path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _normpath($path) {
+		return $path;
+	}
+	
+	/**
+	 * Return parent directory path
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _dirname($path) {
+		return ($file = $this->stat($path, true)) ? $file['parent_id'] : false;
+	}
+
+	/**
+	 * Return file name
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _basename($path) {
+		return ($file = $this->stat($path)) ? $file['name'] : '';
+	}
+
+	/**
+	 * Return path (id) without changes
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _relpath($path) {
+		return $path;
+	}
+	
+	/**
+	 * Return path (id) without changes
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _abspath($path) {
+		return $path;
+	}
+	
+	/**
+	 * Return fake path started from root dir
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _path($path) {
+		if (($file = $this->stat($path)) == false) {
+			return '';
+		}
+		
+		$parentsIds = $this->getParents($path);
+		$path = '';
+		foreach ($parentsIds as $id) {
+			$dir = $this->stat($id);
+			$path .= $dir['name'].$this->separator;
+		}
+		return $path.$file['name'];
+	}
+	
+	/**
+	 * Return true if $path is children of $parent
+	 *
+	 * @param  string  $path    path to check
+	 * @param  string  $parent  parent path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _inpath($path, $parent) {
+		if ($path == $parent) {
+			return true;
+		}
+		return in_array($parent, $this->getParents($path));
+	}
+	
+	/**
+	 * Return true if $parent dir has child with $name
+	 *
+	 * @param  string  $parent  dir path
+	 * @param  string  $name    file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _hasChild($parent, $name) {
+		// return file_exists($parent.DIRECTORY_SEPARATOR.$name);
+	}
+	
 	
 	/**
 	 * Return true if file exists
@@ -305,7 +435,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fileExists($path) {
-		return !!$this->info($path);
+		return !!$this->stat($path);
 	}
 	
 	/**
@@ -316,7 +446,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isDir($path) {
-		return ($file = $this->info($path)) ? $file['mime'] == 'directory' : false;
+		return ($file = $this->stat($path)) ? $file['mime'] == 'directory' : false;
 	}
 	
 	/**
@@ -340,6 +470,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _isLink($path) {
 		return false;
 	}
+	
 	/**
 	 * Return true if path is readable
 	 *
@@ -348,7 +479,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isReadable($path) {
-		return ($file = $this->info($path)) ? $file['read'] : false;
+		return ($file = $this->stat($path)) ? $file['read'] : false;
 	}
 	
 	/**
@@ -359,7 +490,29 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isWritable($path) {
-		return ($file = $this->info($path)) ? $file['write'] : false;
+		return ($file = $this->stat($path)) ? $file['write'] : false;
+	}
+	
+	/**
+	 * Return true if path is locked
+	 *
+	 * @param  string  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _isLocked($path) {
+		return ($file = $this->stat($path)) ? $file['locked'] : false;
+	}
+	
+	/**
+	 * Return true if path is hidden
+	 *
+	 * @param  string  file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _isHidden($path) {
+		return ($file = $this->stat($path)) ? $file['hidden'] : false;
 	}
 	
 	/**
@@ -437,41 +590,35 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _scandir($path) {
+	protected function _scandir($id) {
 		$files = array();
-		$path  = $this->db->real_escape_string($path);
 		
-		if ($this->tba) {
-			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+		$sql = $this->tba
+			? 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
 				a.aread, a.awrite, a.alocked, a.ahidden
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
-				LEFT JOIN '.$this->tba.' AS a ON a.file_id=f.id AND user_id='.$this->uid.', '
-				.$this->tbf.' AS p 
-				WHERE p.path="'.$path.'" AND f.parent_id=p.id
-				GROUP BY f.id  ORDER BY f.path';
-			
-		} else {
-			$sql = 'SELECT f.id, f.path, p.path AS parent_path, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				"" AS aread, "" AS awrite, "" AS alocked, "" AS ahidden 
+				LEFT JOIN '.$this->tba.' AS a ON a.file_id=f.id AND user_id='.$this->uid.' 
+				WHERE f.parent_id="'.$id.'"
+				GROUP BY f.id'
+			: 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
+				"" AS aread, "" AS awrite, "" AS alocked, "" AS ahidden
 				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id,'
-				.$this->tbf.' AS p  
-				WHERE p.path="'.$path.'" AND f.parent_id=p.id
-				GROUP BY f.id ORDER BY f.path';
-		}
-		
+				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
+				WHERE f.parent_id="'.$id.'"
+				GROUP BY f.id';
 
 		if ($res = $this->db->query($sql)) {
 			while ($r = $res->fetch_assoc()) {
-				$path = $r['path'];
-				if (!isset($this->infos[$path])) {
-					$file = $this->prepareInfo($r);
-					$this->infos[$path] = $file;
+				$id = $r['id'];
+				if (!isset($this->cache[$id])) {
+					$file = $this->prepareStat($r);
+					$this->cache[$id] = $file;
+					unset($file['parent_id']);
 				} else {
-					$file = $this->infos[$path];
+					$file = $this->cache[$id];
 				}
-				$files[] = $path;
+				$files[] = $id;
 			}
 		}
 
@@ -487,11 +634,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		if ($this->tmpPath && ($file = $this->info($path)) && $file['read']) {
-			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$file['name'];
+		if ($this->tmpPath && ($file = $this->stat($path)) && $file['read']) {
+			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$path;
 
 			if ($fp = fopen($tmp, 'w')) {
-				if ($res = $this->db->query('SELECT content FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'"')) {
+				if ($res = $this->db->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"')) {
 					if ($r = $res->fetch_assoc()) {
 						fwrite($fp, $r['content']);
 					}
@@ -515,7 +662,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path) {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->tmpPath.DIRECTORY_SEPARATOR.basename($path));
+			@unlink($this->tmpPath.DIRECTORY_SEPARATOR.$path);
 		}
 	}
 	
