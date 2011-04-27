@@ -553,6 +553,18 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if file exists and not hidden
+	 *
+	 * @param  string  $hash  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fileExists($hash) {
+		$path = $this->decode($hash);
+		return $this->_fileExists($path) && !$this->_isHidden($path);
+	}
+	
+	/**
 	 * Return true if root folder is readable
 	 *
 	 * @return bool

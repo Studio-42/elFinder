@@ -266,7 +266,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			} else {
 				if ($raw['width'] && $raw['height']) {
-					$info['dim'] = $raw['width'].'x'.$raw['height'];
+					$file['dim'] = $raw['width'].'x'.$raw['height'];
 				}
 
 				if (($tmb = $this->gettmb($raw['id'])) != false) {

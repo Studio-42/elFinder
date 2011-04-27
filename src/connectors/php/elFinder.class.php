@@ -430,10 +430,10 @@ class elFinder {
 		$dir = $args['target'];
 		
 		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => $this->error(ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		if (($tree = $volume->tree($dir)) === false) {
-			return array('error' => $this->error($volume->error()));
+			return array('error' => $this->errorMessage($volume->error()));
 		}
 		return array('tree' => $tree);
 	}
@@ -469,7 +469,7 @@ class elFinder {
 		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
 		if (!$volume) {
-			return array('error' => $this->error(ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
 		foreach ($args['files'] as $hash) {
@@ -577,16 +577,17 @@ class elFinder {
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
 		if (($file = $volume->file($target)) == false) {
-			$errno = $volume->errno();
-			return array('error' => $this->error($errno), 'headers' => $errno == self::ERROR_NOT_READ ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found', 'raw' => true);
+			$error  = $volume->error();
+			$header = count($error) > 1 ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found';
+			return array('error' => $this->errorMessage($error), 'headers' => $header, 'raw' => true);
 		}
 		
 		if (($fp = $volume->open($target)) == false) {
-			return array('error' => $this->error(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
 		}
 		
 		$disp  = preg_match('/^(image|text)/i', $file['mime']) 
