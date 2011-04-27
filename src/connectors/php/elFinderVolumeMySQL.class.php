@@ -674,7 +674,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		$sql = 'DELETE FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'" AND mime!="directory" LIMIT 1';
+		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime!="directory" LIMIT 1';
 		return $this->db->query($sql) && $this->db->affected_rows > 0;
 	}
 
@@ -686,19 +686,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		$sql = 'SELECT COUNT(f.id) AS num FROM '.$this->tbf.' AS f, '.$this->tbf.' AS p '
-			.'WHERE p.path="'.$this->db->real_escape_string($path).'" AND p.mime="directory" AND f.parent_id=p.id GROUP BY p.id';
+		$sql = 'SELECT COUNT(f.id) AS num FROM '.$this->tbf.' WHERE parent_id="'.intval($path).'" GROUP BY f.parent_id';
 
 		if ($res = $this->db->query($sql)) {
 			if ($r = $res->fetch_assoc()) {
-				if ($r > 0) {
+				if ($r['num'] > 0) {
 					return false;
 				}
 			}
 		}
-		$sql = 'DELETE FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($path).'" AND mime="directory" LIMIT 1';
-		$this->db->query($sql);
-		return $this->db->affected_rows > 0;
+		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime="directory" LIMIT 1';
+		return $this->db->query($sql) ? $this->db->affected_rows > 0 : false;
 	}
 	
 	/**

@@ -1104,6 +1104,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function rmTmb($path) {
+		$path = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
+		if (file_exists($path)) {
+			@unlink($path);
+		}
+	}
+	
+	/**
 	 * Return true if file can be resized by current driver
 	 *
 	 * @param  string  $path  file path
@@ -1325,22 +1338,26 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 
-		if ($this->locked($path)) {
-			return $this->setError(elFinder::ERROR_NOT_REMOVE, $this->abspath($path));
+		if ($this->_isLocked($path)) {
+			return $this->setError(elFinder::ERROR_NOT_REMOVE, $this->_path($path));
 		}
-		// echo "$path<br>";
+
 		if ($this->_isDir($path)) {
 			foreach ($this->_scandir($path) as $p) {
-				$name = basename($p);
+				$name = $this->_basename($p);
 				if ($name != '.' && $name != '..') {
 					if (!$this->remove($p)) {
 						return false;
 					}
 				}
 			}
-			return $this->_rmdir($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->abspath($path));
+			return $this->_rmdir($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->_path($path));
 		} else {
-			return $this->_unlink($path) ? true : $this->setError(elFinder::ERROR_REMOVE, $this->abspath($path));
+			if ($this->_unlink($path)) {
+				$this->rmTmb($path);
+				return true;
+			}
+			return $this->setError(elFinder::ERROR_REMOVE, $this->_path($path));
 		}
 	}
 	
