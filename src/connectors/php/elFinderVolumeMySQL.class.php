@@ -523,7 +523,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return ($file = $this->info($path)) ? $file['size'] : false;
+		return ($file = $this->stat($path)) ? $file['size'] : false;
 	}
 	
 	/**
@@ -534,7 +534,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) { 
-		return ($file = $this->info($path)) ? $file['mtime'] : false;
+		return ($file = $this->stat($path)) ? $file['mtime'] : false;
 	}
 	
 	/**
@@ -567,7 +567,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		return ($file = $this->info($path)) ? $file['dirs'] : false;
+		return ($file = $this->stat($path)) ? $file['dirs'] : false;
 	}
 	
 	/**
@@ -580,7 +580,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) { 
-		return ($file = $this->info($path)) ? $file['dim'] : false;
+		return ($file = $this->stat($path)) ? $file['dim'] : false;
 	}
 	
 	/**

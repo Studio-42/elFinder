@@ -623,7 +623,7 @@ class elFinder {
 		$target = is_array($args['targets']) ? $args['targets'][0] : '';
 		
 		if (!$target || ($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
 		foreach ($args['targets'] as $t) {

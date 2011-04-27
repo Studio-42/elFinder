@@ -1289,7 +1289,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function countSize($path) {
-		if (!$this->_fileExists($path) || $this->hidden($path)) {
+		if (!$this->_fileExists($path) 
+		|| !$this->_isReadable($path) 
+		|| $this->_isHidden($path)) {
 			return 0;
 		}
 		if ($this->_isLink($path)) {
@@ -1299,13 +1301,10 @@ abstract class elFinderVolumeDriver {
 		if ($this->_isFile($path)) {
 			return $this->_filesize($path);
 		}
-		if (!$this->readable($path)) {
-			return 0;
-		}
 		
 		$size = 0;
 		foreach ($this->_scandir($path) as $p) {
-			$name = basename($p);
+			$name = $this->_basename($p);
 			if ($name != '.' && $p != '..') {
 				$size += $this->countSize($p);
 			}
