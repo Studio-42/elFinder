@@ -104,19 +104,18 @@ class elFinder {
 	const ERROR_NOT_DIR              = 8;
 	const ERROR_NOT_FILE             = 9;
 	const ERROR_NOT_LIST             = 10;
-	const ERROR_NOT_REMOVE           = 11;
+	const ERROR_LOCKED               = 11;
 	const ERROR_REMOVE               = 12;
 	const ERROR_NOT_COPY             = 13;
 	const ERROR_NOT_WRITE            = 14;
 	const ERROR_NOT_REPLACE          = 15;
 	const ERROR_COPY                 = 16;
 	const ERROR_NOT_COPY_INTO_ITSELF = 17;
-	const ERROR_LOCKED               = 18;
-	const ERROR_INVALID_NAME         = 19;
-	const ERROR_RENAME               = 20;
-	const ERROR_POST_DATA_MAXSIZE    = 21;
-	const ERROR_NOT_RENAME           = 22;
-	const ERROR_FILE_EXISTS          = 23;
+	const ERROR_INVALID_NAME         = 18;
+	const ERROR_RENAME               = 19;
+	const ERROR_POST_DATA_MAXSIZE    = 20;
+	const ERROR_NOT_RENAME           = 21;
+	const ERROR_FILE_EXISTS          = 22;
 
 	
 	/**
@@ -136,19 +135,18 @@ class elFinder {
 		8  => '"$1" is not a folder.',
 		9  => '"$1" is not a file.',
 		10 => 'Unable to get "$1" folders list.',
-		11 => '"$1" is locked and can not be removed.',
+		11 => 'File "$1" locked and can’t be removed or renamed.',
 		12 => 'Unable to remove "$1".',
 		13 => '"$1" can’t be copied because you don’t have permission to see its contents.',
 		14 => 'You don’t have permission to write into "$1".',
-		15 => '"$1" exists and can’t be replaced',
+		15 => 'Object named "$1" exists and can’t be replaced.',
 		16 => 'Unable to copy "$1" to "$2".',
 		17 => 'Unable to copy "$1" into itself.',
-		18 => 'File "$1" locked and can’t be removed or renamed.',
-		19 => 'File name "$1" is not allowed.',
-		20 => 'Unable to rename "$1" into "$2".',
-		21 => 'Data exceeds the maximum allowed size.',
-		22 => '"$1" can’t be renamed because parent folder is read only.',
-		23 => 'Object with name "$1" already exists in this location.',
+		18 => 'File name "$1" is not allowed.',
+		19 => 'Unable to rename "$1" into "$2".',
+		20 => 'Data exceeds the maximum allowed size.',
+		21 => '"$1" can’t be renamed because parent folder is read only.',
+		22 => 'Object with name "$1" already exists in this location.',
 
 	);
 	
@@ -385,6 +383,7 @@ class elFinder {
 		} 
 
 		$cwd['path'] = $volume->path($target);
+		$cwd['url']  = $volume->url($target);
 		$cwd = array_merge($cwd, $volume->options());
 		$files = array();
 		

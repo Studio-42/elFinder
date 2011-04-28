@@ -130,9 +130,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		$this->options['alias'] = '';
 		
-		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
-		
-		
 		return true;
 	}
 	
@@ -436,6 +433,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			return true;
 		}
 		return in_array($parent, $this->getParents($path));
+	}
+	
+	/**
+	 * Return file/dir URL
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _url($path) {
+		return $this->URL ? $this->URL.$path.$this->separator : '';
 	}
 	
 	/**

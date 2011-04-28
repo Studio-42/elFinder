@@ -112,6 +112,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				'hidden'  => true
 			));
 		}
+		
+		$this->separator = DIRECTORY_SEPARATOR;
 	}
 	
 	/*********************************************************************/
@@ -310,6 +312,26 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _inpath($path, $parent) {
 		return $path == $parent || strpos($path, $parent.DIRECTORY_SEPARATOR) === 0;
+	}
+	
+	/**
+	 * Return file/dir URL
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _url($path) {
+		if (!$this->URL) {
+			return '';
+		}
+		if ($path == $this->root) {
+			return $this->URL;
+		}
+		if ($this->_isDir($path)) {
+			$path .= $this->separator;
+		}
+		return $this->URL.str_replace($this->separator, '/', substr($path, strlen($this->root)+1));
 	}
 	
 	/**
@@ -592,7 +614,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _copy($source, $targetDir, $name='') {
 		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
-		return @copy($source, $target);
+		return copy($source, $target);
 	}
 	
 	/**
