@@ -24,7 +24,9 @@ elFinder.prototype.commands.info = function() {
 			files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
 			length  = files.length,
 			targets = fm.newAPI
-				? length >1 || files[0].mime == 'directory' ? $.map(files, function(f) { return f.mime == 'directory' && f.read && !f.link ? f.hash : null }) : []
+				? length >1 || files[0].mime == 'directory' 
+					? $.map(files, function(f) { return f.mime == 'directory' && f.read && !f.link ? f.hash : null }) 
+					: []
 				: [],
 			updatesize = function(size) {
 				dialog.find('.elfinder-spinner-mini').parents('td:first').text(typeof(size) == 'number' ? fm.formatSize(size) : fm.i18n('unknown'));
@@ -46,8 +48,8 @@ elFinder.prototype.commands.info = function() {
 			dirs  = $.map(files, function(f) { return f.mime == 'directory' && !f.link ? 1 : null; }).length;
 			dirs && kinds.push(fm.i18n('Folders')+': '+dirs);
 			dirs < length && kinds.push(fm.i18n('Documents')+': '+(length-dirs));
-			$.each(files, function(h, f) { size += f.size });
-			
+			$.each(files, function(h, f) { size += parseInt(f.size); });
+
 			content.push(tpl.row.replace('{label}', fm.i18n('Kind')).replace('{value}', kinds.join(', ')));
 			content.push(tpl.row.replace('{label}', fm.i18n('Size')).replace('{value}', !targets.length ? fm.formatSize(size) : '<span>'+fm.i18n('Calculating')+'</span> <span class="elfinder-spinner-mini"/>'));
 			content.push(tpl.row.replace('{label}', fm.i18n('Path')).replace('{value}', fm.cwd().path));
