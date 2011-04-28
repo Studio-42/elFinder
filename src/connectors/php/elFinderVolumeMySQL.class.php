@@ -346,6 +346,30 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * Find in given dir child with required name and return it's id.
+	 * If child not exists - return -1
+	 *
+	 * @param  int  $dir
+	 * @param  string  $name
+	 * @return int
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _joinPath($dir, $name) {
+		if (!$this->stat($dir)) {
+			return -1;
+		}
+		
+		$sql = 'SELECT id FROM '.$this->tbf.' WHERE parent_id="'.$dir.'" AND name="'.$this->db->real_escape_string($name).'"';
+		if ($res = $this->db->query($sql)) {
+			if ($r = $res->fetch_assoc()) {
+				return $r['id'];
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
 	 * Return file name
 	 *
 	 * @param  string  $path  file path
@@ -423,9 +447,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _hasChild($parent, $name) {
-		// return file_exists($parent.DIRECTORY_SEPARATOR.$name);
+		$sql = 'SELECT id FROM '.$this->tbf.' WHERE parent_id="'.intval($parent).'" AND name="'.$this->db->real_escape_string($name).'"';
+		return $this->db->query($sql) && $this->db->affected_rows > 0;
 	}
-	
 	
 	/**
 	 * Return true if file exists
@@ -702,43 +726,65 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	/**
 	 * Copy file into another file
 	 *
-	 * @param  string  $source  source file name
-	 * @param  string  $target  target file name
+	 * @param  string  $source     source file path
+	 * @param  string  $targetDir  target directory path
+	 * @param  string  $name       new file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _copy($source, $target) {
-		// return @copy($source, $target);
+	protected function _copy($source, $targetDir, $name='') {
+		if (!$this->stat($source)) {
+			return false;
+		}
+		// debug($source);
+		if (!$name) {
+			$name = $this->_basename($source);
+		}
+
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, content, size, mtime, mime, width, height)  '
+				.'SELECT "'.intval($targetDir).'", "'.$this->db->real_escape_string($name).'", content, size, "'.time().'", mime, width, height FROM '.$this->tbf.' WHERE id="'.intval($source).'"';
+
+		if ($this->db->query($sql) && $this->db->affected_rows) {
+			$id = $this->db->insert_id;
+			
+			if ($this->tba) {
+				$sql = 'SELECT user_id, aread, awrite, alocked, ahidden FROM '.$this->tba.' WHERE file_id="'.intval($source).'"';
+				if ($res = $this->db->query($sql)) {
+					$data = array();
+					while ($r = $res->fetch_assoc()) {
+						$data[] = '"'.implode('","', $r).'"';
+					}
+					
+					if ($data) {
+						$sql = 'INSERT INTO '.$this->tba.' (file_id, user_id, aread, awrite, alocked, ahidden) VALUES ';
+						$sql .= '('.implode('), (', $data).')';
+						$this->db->query($sql);
+					}
+				}
+			}
+			
+			return true;
+		}
+		return false;
 	}
 	
 	/**
 	 * Create dir
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _mkdir($path) {
-		if ($this->_fileExists($path)) {
+	protected function _mkdir($path, $name) {
+		if (!$this->_isDir($path)) {
 			return false;
 		}
 		
-		$parent = dirname($path);
-		$name   = basename($path);
-		$sql = 'SELECT id FROM '.$this->tbf.' WHERE path="'.$this->db->real_escape_string($parent).'"';
-		if ($res = $this->db->query($sql)) {
-			$r = $res->fetch_assoc();
-			$parentId = $r['parent_id'];
-		} else {
-			return false;
-		}
-		
-		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, path, size, mtime, mime) 
-			VALUES ("'.$parentId.'", "'.$this->db->real_escape_string($name).'", "'.$this->db->real_escape_string($path).'", 0, '.time().', "directory")';
-		echo $sql;	
-		// return 
-		$this->db->query($sql);
-		exit();
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, size, mtime, mime) 
+			VALUES ("'.$path.'", "'.$this->db->real_escape_string($name).'", 0, '.time().', "directory")';
+
+		return $this->db->query($sql) && $this->db->affected_rows > 0;
 	}
 	
 	/**
@@ -749,7 +795,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _symlink($target, $path) {
+	protected function _symlink($target, $path, $name='') {
 		return false;
 	}
 	

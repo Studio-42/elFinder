@@ -205,6 +205,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * Join dir name and file name and retur full path
+	 *
+	 * @param  string  $dir
+	 * @param  string  $name
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _joinPath($dir, $name) {
+		return $dir.DIRECTORY_SEPARATOR.$name;
+	}
+	
+
+	/**
 	 * Return normalized path, this works the same as os.path.normpath() in Python
 	 *
 	 * @param  string  $path  path
@@ -296,7 +309,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($parent, $path.DIRECTORY_SEPARATOR) === 0;
+		return $path == $parent || strpos($path, $parent.DIRECTORY_SEPARATOR) === 0;
 	}
 	
 	/**
@@ -449,7 +462,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (substr($target, 0, 1) == '/') {
 			$root = realpath($this->root);
 			// not exists or link to outside root
-			if (!file_exists($target) || !$this->_inpath($root, $target || $root == $target)) {
+			if (!file_exists($target) || !$this->_inpath($target, $root) || $target == $root) {
 				return false;
 			}
 			return $this->root.substr($target, strlen($root));
@@ -458,7 +471,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$target = $this->_normpath($this->root.DIRECTORY_SEPARATOR.$target);
 		// echo $this->root.' '. $target.'<br>';
 		// not exists or link to outside root
-		if (!file_exists($target) || !$this->_inpath($this->root, $target) || $this->root == $target) {
+		if (!file_exists($target) || !$this->_inpath($target, $target) || $this->root == $target) {
 
 			return false;
 		}
@@ -571,23 +584,28 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/**
 	 * Copy file into another file
 	 *
-	 * @param  string  $source  source file name
-	 * @param  string  $target  target file name
+	 * @param  string  $source     source file path
+	 * @param  string  $targetDir  target directory path
+	 * @param  string  $name       new file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _copy($source, $target) {
+	protected function _copy($source, $targetDir, $name='') {
+		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
 		return @copy($source, $target);
 	}
 	
 	/**
 	 * Create dir
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _mkdir($path) {
+	protected function _mkdir($path, $name) {
+		$path = $path.DIRECTORY_SEPARATOR.$name;
+		
 		if (@mkdir($path)) {
 			@chmod($path, $this->options['dirMode']);
 			return true;
@@ -603,8 +621,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _symlink($target, $path) {
+	protected function _symlink($target, $path, $name='') {
+		if (!$name) {
+			$name = basename($path);
+		}
 		$target = '.'.DIRECTORY_SEPARATOR.$this->relpath($target);
+		$path = $path.DIRECTORY_SEPARATOR.$name;
 		if (@symlink($target, $path)) {
 			@chmod($path, $this->options[$this->_isDir($target) ? 'dirMode' : 'fileMode'] );
 			return true;

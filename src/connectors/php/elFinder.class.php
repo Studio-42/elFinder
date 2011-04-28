@@ -744,15 +744,14 @@ class elFinder {
 		}
 		
 		if (($volume = $this->volume($targets[0])) == false) {
-			return array('error' => $this->error(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
 		foreach ($targets as $hash) {
-			if (($h = $volume->duplicate($hash)) !== false
-			&& ($file = $volume->file($h)) != false) {
-				$added[] = $file;
+			if (($file = $volume->duplicate($hash)) == false) {
+				return array('added' => $added, 'error' => $this->errorMessage($volume->error()));
 			} else {
-				return array('error' => $this->error($volume->error()));
+				$added[] = $file;
 			}
 		}
 		

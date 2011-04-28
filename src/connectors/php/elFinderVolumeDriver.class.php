@@ -780,7 +780,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create file duplicate
+	 * Duplicate file
 	 *
 	 * @param  string   $hash  file hash
 	 * @return string|false
@@ -788,11 +788,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function duplicate($hash) {
 		$path = $this->decode($hash);
+		
 		if (!$this->_fileExists($path)) {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
-		$target = dirname($path).DIRECTORY_SEPARATOR.$this->uniqueName($path);
-		return $this->copy($path, $target) ? $this->encode($target) : false;
+		
+		$name = $this->uniqueName($path);
+		$dir  = $this->_dirname($path);
+		return $this->stat($this->docopy($path, $dir, $name));
 	}
 	
 	/**
@@ -824,7 +827,6 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function setError($error) {
 		$this->error = func_get_args(); //is_array($error) ? $error : array($error);
-		
 		return false;
 	}
 	
@@ -1370,12 +1372,12 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function uniqueName($path, $suffix = ' copy') {
-		$dir  = dirname($path);
-		$name = basename($path); 
+		$dir  = $this->_dirname($path);
+		$name = $this->_basename($path); 
 		$ext  = '';
 
 		if ($this->_isFile($path)) {
-			if (preg_match('/\.(tar\.gz|tar\.bz|tar\.bz2|[a-z0-9]{1,4})$/i', $name, $m)) {
+			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
 				$ext  = '.'.$m[1];
 				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
 			}
@@ -1388,11 +1390,9 @@ abstract class elFinderVolumeDriver {
 			$i     = 0;
 			$name .= $suffix;
 		}
-		
 		while ($i++ <= 10000) {
 			$n = $name.($i > 0 ? $i : '').$ext;
-			
-			if (!$this->_fileExists($dir.DIRECTORY_SEPARATOR.$n)) {
+			if (!$this->_hasChild($dir, $n)) {
 				return $n;
 			}
 		}
@@ -1400,63 +1400,71 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Copy file to another one
+	 * Copy file to another one and return new file path
 	 *
 	 * @param  string  $source  source file path
-	 * @param  string  $target  target file path
-	 * @return bool
+	 * @param  string  $target  target dir path
+	 * @param  string  $name    new file name
+	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function copy($source, $target) {
-		$dir = dirname($target);
-		if (!$this->_isDir($dir)) {
+	protected function docopy($source, $targetDir, $name='') {
+		
+		if (!$this->_isDir($targetDir)) {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
-		if (!$this->writable($dir)) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE);
+		
+		if (!$this->_isWritable($targetDir)) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($targetDir));
 		}
+
 		if (!$this->_fileExists($source)) {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
-		if (!$this->readable($source)) {
-			return $this->setError(elFinder::ERROR_NOT_COPY, $this->abspath($source));
+
+		if (!$this->_isReadable($source)) {
+			return $this->setError(elFinder::ERROR_NOT_COPY, $this->_path($source));
 		}
 		
-		if ($this->inpath($source, $target)) {
-			return $this->setError(elFinder::ERROR_NOT_COPY_INTO_ITSELF, $this->abspath($source));
+		if ($this->_inpath($targetDir, $source)) {
+			return $this->setError(elFinder::ERROR_NOT_COPY_INTO_ITSELF, $this->_path($source));
 		}
+
+		if (!$name) {
+			$name = $this->_basename($source);
+		}
+
+		$target = $this->_joinPath($targetDir, $name);
 		
-		if ($this->_fileExists($target)) {
-			if (!$this->remove($target)) {
-				return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->abspath($target));
-			}
+		if ($this->_fileExists($target) && !$this->remove($target)) {
+			return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($target));
 		}
 		
 		if ($this->_isLink($source)) {
-			if (($link = $this->_readlink($source)) == false) {
-				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			if (($link = $this->_readlink($source)) == false || !$this->_symlink($link, $targetDir, $name)) {
+				return $this->setError(elFinder::ERROR_COPY, $this->_path($source), $this->_path($targetDir));
 			}
-			if (!$this->_symlink($link, $target)) {
-				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
-			}
+			return $this->_joinPath($targetDir, $name);
 		} elseif ($this->_isDir($source)) {
-			if (!$this->_mkdir($target) || ($ls = $this->_scandir($source)) === false) {
-				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
+			if (!$this->_mkdir($targetDir, $name) || ($ls = $this->_scandir($source)) === false) {
+				return $this->setError(elFinder::ERROR_COPY, $this->_path($source), $this->_path($targetDir));
 			}
+			
+			$target = $this->_joinPath($targetDir, $name);
 			foreach ($ls as $path) {
-				if ($path != '.' && $path != '..' && !$this->hidden($path)) {
-					// echo $path.'-->'.$target.DIRECTORY_SEPARATOR.basename($path).'<br>';
-					if (!$this->copy($path, $target.DIRECTORY_SEPARATOR.basename($path))) {
-						return false;
+				$name = $this->_basename($path);
+				if ($name != '.' && $name != '..' && !$this->_isHidden($path)) {
+					if (!$this->docopy($path, $target)) {
+						return $this->setError(elFinder::ERROR_COPY, $this->_path($path), $this->_path($target));
 					}
 				}
 			}
-		} else {
-			if (!$this->_copy($source, $target)) {
-				return $this->setError(elFinder::ERROR_COPY, $this->abspath($source), $this->abspath($target));
-			}
+			return $target;
+		} elseif (!$this->_copy($source, $targetDir, $name)) {
+			return $this->setError(elFinder::ERROR_COPY, $this->_path($source), $this->_path($targetDir));
 		}
-		return true;
+
+		return $this->_joinPath($targetDir, $name);
 	}
 	
 	/************************** abstract methods ***************************/
@@ -1487,6 +1495,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _basename($path);
+
+	/**
+	 * Join dir name and file name and retur full path
+	 *
+	 * @param  string  $dir   dir path
+	 * @param  string  $name  file name
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _joinPath($dir, $name);
 
 	/**
 	 * Return file path related to root dir
@@ -1712,31 +1730,34 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Copy file into another file
 	 *
-	 * @param  string  $source  source file name
-	 * @param  string  $target  target file name
+	 * @param  string  $source  source file path
+	 * @param  string  $target  target dir path
+	 * @param  string  $name    file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _copy($source, $target);
+	abstract protected function _copy($source, $targetDir, $name='');
 	
 	/**
 	 * Create dir
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _mkdir($path);
+	abstract protected function _mkdir($path, $name);
 	
 	/**
 	 * Create symlink
 	 *
 	 * @param  string  $target  link target
-	 * @param  string  $path    symlink path
+	 * @param  string  $path    symlink dir
+	 * @param  string  $name    symlink name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _symlink($target, $path);
+	abstract protected function _symlink($target, $path, $name='');
 	
 	/**
 	 * Rename file
