@@ -596,6 +596,20 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Move file into another parent dir
+	 *
+	 * @param  string  $source  source file path
+	 * @param  string  $target  target dir path
+	 * @param  string  $name    file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _move($source, $targetDir, $name='') {
+		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
+		return @rename($source, $target);
+	}
+	
+	/**
 	 * Create dir
 	 *
 	 * @param  string  $path  parent dir path
@@ -634,17 +648,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return false;
 	}
 	
-	/**
-	 * Rename file
-	 *
-	 * @param  string  $oldPath  file to rename path
-	 * @param  string  $newPath  new path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _rename($oldPath, $newPath) {
-		return @rename($oldPath, $newPath);
-	}
+
 	
 } // END class 
 

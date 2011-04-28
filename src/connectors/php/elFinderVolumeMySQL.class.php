@@ -769,6 +769,26 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Move file into another parent dir
+	 *
+	 * @param  string  $source  source file path
+	 * @param  string  $target  target dir path
+	 * @param  string  $name    file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _move($source, $targetDir, $name='') {
+		if (!$name) {
+			$name = $this->_basename($source);
+		}
+		$parentId = $this->_dirname($source);
+		
+		$sql = 'UPDATE '.$this->tbf.' SET parent_id="'.$parentId.'", name="'.$this->db->real_escape_string($name).'", mtime="'.time().'" WHERE id="'.intval($source).'"';
+		
+		return $this->db->query($sql) && $this->db->affected_rows;
+	}
+	
+	/**
 	 * Create dir
 	 *
 	 * @param  string  $path  parent dir path

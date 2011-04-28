@@ -162,6 +162,7 @@ abstract class elFinderVolumeDriver {
 		'copyFrom'     => true,  // allow to copy from this volume to other ones
 		'copyTo'       => true,  // allow to copy from other volumes to this one
 		'disabled'     => array(),      // list of commands names to disable on this root
+		'acceptedName' => '',
 		'defaults'     => array(   // default permissions 
 			'read'  => true,
 			'write' => true
@@ -739,33 +740,59 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Rename file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $hash  file hash
+	 * @param  string  $name  new file name
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function rename($hash, $name) {
 		if (($file = $this->file($hash)) == false) {
 			return false;
 		}
+		
 		if ($file['locked']) {
-			debug($file);
-			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
+			return $this->setError(elFinder::ERROR_LOCKED, $this->_path($path));
 		}
 		
-		$path = $this->decode($hash);
-		$renamed = dirname($path).DIRECTORY_SEPARATOR.$name;
+		$source  = $this->decode($hash);
+		$dir     = $this->_dirname($source);
+		$oldName = $this->_basename($source);
 		
-		if ($this->locked($renamed)) {
-			
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $file['name']);
+		if ($this->_isHidden($dir)) {
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 		
-		if (!$this->_rename($path, $renamed)) {
-			return $this->setError(elFinder::ERROR_RENAME, $this->abspath($path), $this->abspath($renamed));
+		if (!$this->_isWritable($dir)) {
+			return $this->setError(elFinder::ERROR_NOT_RENAME, $oldName);
 		}
 		
-		return $this->file($this->encode($renamed));
+		if (!$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+		}
+		
+		if ($this->_fileExists($this->_joinPath($dir, $name))) {
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+		}
+		
+		if (!$this->_move($source, $dir, $name)) {
+			return $this->setError(elFinder::ERROR_RENAME, $oldName, $name);
+		} 
+		$this->clearStat($source);
+		$this->rmTmb($source);
+		$renamed = $this->_joinPath($dir, $name);
+		
+		if (($file = $this->stat($renamed)) == false) {
+			return $this->setError(elFinder::ERROR_RENAME, $oldName, $name);
+		}
+		
+		if ($file['hidden']) {
+			return array();
+		}
+		
+		unset($file['hidden']);
+		return $file;
 	}
 	
 	/**
@@ -918,6 +945,17 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function uncrypt($hash) {
 		return $hash;
+	}
+	
+	/**
+	 * Validate file name based on $this->options['acceptedName'] regexp
+	 *
+	 * @param  string  $name  file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function nameAccepted($name) {
+		return !empty($this->options['acceptedName']) ? preg_match($this->options['acceptedName'], $name) : true;
 	}
 	
 	/**
@@ -1235,6 +1273,23 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		return $file;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function clearStat($path='') {
+		if ($path) {
+			if (isset($this->cache[$path])) {
+				unset($this->cache[$path]);
+			}
+		} else {
+			$this->cache = array();
+		}
+		
 	}
 	
 	/**
@@ -1739,6 +1794,17 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _copy($source, $targetDir, $name='');
 	
 	/**
+	 * Move file into another parent dir
+	 *
+	 * @param  string  $source  source file path
+	 * @param  string  $target  target dir path
+	 * @param  string  $name    file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _move($source, $targetDir, $name='');
+	
+	/**
 	 * Create dir
 	 *
 	 * @param  string  $path  parent dir path
@@ -1758,16 +1824,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _symlink($target, $path, $name='');
-	
-	/**
-	 * Rename file
-	 *
-	 * @param  string  $oldPath  file to rename path
-	 * @param  string  $newPath  new path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	abstract protected function _rename($oldPath, $newPath);
+
 	
 } // END class
 

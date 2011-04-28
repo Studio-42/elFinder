@@ -115,6 +115,9 @@ class elFinder {
 	const ERROR_INVALID_NAME         = 19;
 	const ERROR_RENAME               = 20;
 	const ERROR_POST_DATA_MAXSIZE    = 21;
+	const ERROR_NOT_RENAME           = 22;
+	const ERROR_FILE_EXISTS          = 23;
+
 	
 	/**
 	 * undocumented class variable
@@ -143,7 +146,10 @@ class elFinder {
 		18 => 'File "$1" locked and can’t be removed or renamed.',
 		19 => 'File name "$1" is not allowed.',
 		20 => 'Unable to rename "$1" into "$2".',
-		21 => 'Data exceeds the maximum allowed size.'
+		21 => 'Data exceeds the maximum allowed size.',
+		22 => '"$1" can’t be renamed because parent folder is read only.',
+		23 => 'Object with name "$1" already exists in this location.',
+
 	);
 	
 	/**
@@ -674,22 +680,27 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Rename file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  $args
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rename($args) {
 		$target = $args['target'];
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
-		if (($file = $volume->rename($target, $args['name'])) == false) {
-			return array('error' => $this->error($volume->error()));
+		if (($rm = $volume->file($target)) == false
+		|| ($file = $volume->rename($target, $args['name'])) === false) {
+			return array('error' => $this->errorMessage($volume->error()));
 		}
+
+		// if renamed file is hidden we get empty array
+		$added = !empty($file) ? array($file) : array();
 		
-		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => array($file)));
+		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => $added));
 	}
 	
 	/**
