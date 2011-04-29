@@ -704,35 +704,29 @@ class elFinder {
 	
 	/**
 	 * Remove dirs/files
-	 * Fire "rm" event on every removed files
 	 *
 	 * @param array  command arguments
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
-		// sleep(5);
-		if (!is_array($args['targets']) || empty($args['targets'])) {
+		$targets = $targets = is_array($args['targets']) ? $args['targets'] : array();
+		$removed = array();
+		if (!$targets) {
 			return array();
 		}
-		$targets = $args['targets'];
-		$removed = array();
-		$volume  = $this->volume($targets[0]);
-		if (!$volume) {
+		
+		if (($volume  = $this->volume($targets[0])) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
 		foreach ($targets as $hash) {
-			if (($file = $volume->file($hash)) == false) {
-				return array('removed' => $removed, 'error' => $this->errorMessage($volume->error()));
+			if (($file = $volume->file($hash)) == false
+			|| !$volume->rm($hash)) {
+				return array('removed' => $removed, 'warning' => $this->errorMessage($volume->error()));
 			}
-
-			if ($volume->rm($hash)) {
-				$removed[]     = $hash;
-				$removedInfo[] = $file;
-			} else {
-				return array('error' => $this->errorMessage($volume->error()));
-			}
+			$removed[]     = $hash;
+			$removedInfo[] = $file;
 		}
 		
 		$this->trigger('rm', $volume, array('removed' => $removedInfo));
@@ -740,10 +734,11 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Duplicate file - create copy with "copy%d" suffix
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function duplicate($args) {
 		$targets = is_array($args['target']) ? $args['target'] : array();
@@ -758,15 +753,13 @@ class elFinder {
 		}
 		
 		foreach ($targets as $hash) {
-			$file = $volume->duplicate($hash);
-			if ($file) {
+			if (($file = $volume->duplicate($hash)) != false) {
 				$added[] = $file;
 			}
-			$error = $volume->error();
-			if ($error) {
+			
+			if (($error = $volume->error()) != false) {
 				return array('added' => $added, 'warning' => $this->errorMessage($error));
 			}
-			
 		}
 		
 		return $this->trigger('duplicate', $volume, array('added' => $added));
