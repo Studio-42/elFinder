@@ -180,12 +180,10 @@
 							}
 						};
 					
-					
 					$.each($.map(dirs, function(d, i) { return !d.phash ? d : null }), function(i, root) {
 						if (!find(root.hash).length) {
 							tree.append(item(root, true));
 						}
-						
 					});
 					
 					for (i = 0; i < dirs.length; i++) {

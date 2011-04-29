@@ -48,14 +48,14 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
-
+// sleep(1);
 $opts = array(
 	'debug' => true,
 	'roots' => array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
-			'startPath' => '../../../files/mimes',
+			// 'startPath' => '../../../files/mimes',
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(

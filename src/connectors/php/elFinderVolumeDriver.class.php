@@ -662,6 +662,7 @@ abstract class elFinderVolumeDriver {
  		unset($dir['hidden']);
 		$dirs = $dir['read'] ? $this->gettree($this->decode($hash), $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);
+		// debug($dirs);
 		return $dirs;
 	}
 	
@@ -788,24 +789,25 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function rename($hash, $name) {
 		$path  = $this->decode($hash);
-		if (($file = $this->file($hash)) == false) {
-			return false;
+		if (!$this->_fileExists($path)
+		||   $this->_isHidden($path)) {
+			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 		
 		$dir      = $this->_dirname($path);
-		$_oldPath = $this->_path($path);
-		$_newPath = $dir.$this->separator.$name;
+		$oldPath = $this->_path($path);
+		$newPath = $dir.$this->separator.$name;
 		
 		if ($this->_isHidden($dir)) {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 		
-		if ($file['locked']) {
-			return $this->setError(elFinder::ERROR_LOCKED, $$_oldPath);
+		if (!$this->_isWritable($dir)) {
+			return $this->setError(elFinder::ERROR_NOT_RENAME, $oldPath);
 		}
 		
-		if (!$this->_isWritable($dir)) {
-			return $this->setError(elFinder::ERROR_NOT_RENAME, $_oldPath);
+		if ($this->_isLocked($path)) {
+			return $this->setError(elFinder::ERROR_LOCKED, $oldPath);
 		}
 		
 		if (!$this->nameAccepted($name)) {
@@ -818,14 +820,14 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->_move($path, $dir, $name)) {
-			return $this->setError(elFinder::ERROR_RENAME, $_oldPath, $_newPath);
+			return $this->setError(elFinder::ERROR_RENAME, $oldPath, $newPath);
 		} 
 		$this->clearStat($path);
 		$this->rmTmb($path);
 		$renamed = $this->_joinPath($dir, $name);
 		
 		if (($file = $this->stat($renamed)) == false) {
-			return $this->setError(elFinder::ERROR_RENAME, $_oldPath, $_newPath);
+			return $this->setError(elFinder::ERROR_RENAME, $oldPath, $newPath);
 		}
 		
 		if ($file['hidden']) {

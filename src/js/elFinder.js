@@ -18,7 +18,7 @@
 			enabled = false,
 			
 			/**
-			 * On click inside elFinder we set this flag to false so when event bubbled to document no blur fired
+			 * On click inside elFinder we set this flag to false so when event bubbled to document no blur event fired
 			 *
 			 * @type Boolean
 			 **/
@@ -33,7 +33,9 @@
 			
 			/**
 			 * Is ajax requiest allowed.
-			 * "sync" requiest blocked others requests until complete
+			 * Required to avoid several parallel 'open' command.
+			 * Also required to ignore calls to ajax() method from outside elFinder if its not loaded
+			 * If true, other ajax() call will be ignored.
 			 *
 			 * @type Boolean
 			 **/
@@ -61,23 +63,23 @@
 			 * @type Object
 			 **/
 			cwd = {
-				hash   : '',
-				phash  : '',
-				name   : '',
-				path   : '',
-				url    : '',
-				tmbUrl : '',
+				hash     : '',
+				phash    : '',
+				name     : '',
+				path     : '',
+				url      : '',
+				tmbUrl   : '',
 				disabled : [],
-				date   : '',
-				read   : 1,
-				write  : 1,
-				locked     : 1,
-				files  : 0,
-				size   : 0
+				date     : '',
+				read     : 1,
+				write    : 1,
+				locked   : 1,
+				files    : 0,
+				size     : 0
 			},
 			
 			/**
-			 * All files/dirs "visible" for this moment
+			 * Files/dirs cache
 			 *
 			 * @type Object
 			 **/
@@ -95,21 +97,20 @@
 			 *
 			 * @type Object
 			 **/
-			listeners = {
-				load      : [],
-				focus     : [],
-				blur      : [],
-				ajaxstart : [],
-				ajaxstop  : [],
-				ajaxerror : [],
-				error     : [],
-				select    : [],
-				open      : []
-				
-			},
+			listeners = {},
 			
+			/**
+			 * Shortcuts
+			 *
+			 * @type Object
+			 **/
 			shortcuts = {},
 			
+			/**
+			 * Loaded commands
+			 *
+			 * @type Object
+			 **/
 			commands = {},
 			
 			/**
@@ -271,25 +272,116 @@
 				}
 			},
 			
+			
 			/**
 			 * Send init ajax request
 			 *
 			 * @return void
 			 */
-			start = function() {
-				if (self.options.allowNavbar || self.oldAPI) {
+			init = function() {
+				var opts = {
+						data : {
+							cmd    : 'open',
+							target : self.lastDir(),
+							init   : true
+							
+						},
+						error : function() {
+							self.lastDir('');
+							function() {
+								setTimeout(function() {
+									ajax = false;
+									enabled = false;
+									self.destroy();
+								}, 20);
+							}
+						},
+						success : function(data) {
+							var base = new self.command(self),
+								opts = self.options,
+								cmds = opts.commands || [],
+								cmd,
+								l, 
+								tb = 'elfindertoolbar'+opts.toolbar;
+								
+							self.log(data)
+							self.api    = parseFloat(data.api)|| 1;
+							self.newAPI = self.api > 1;
+							self.oldAPI = !self.newAPI;
+							rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
+
+							if (self.oldAPI) {
+								if (data.params) {
+									cwd.url = data.params.url;
+									self.uploadMaxSize = data.params.uploadMaxSize;
+								}
+							} else {
+								self.uploadMaxSize = data.uploadMaxSize;
+								if (opts.sync >= 3000) {
+									setInterval(function() {
+										self.sync();
+									}, self.options.sync);
+								}
+							}
+							
+							dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
+							self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
+
+							self.history = new self.history(self);
+
+							$(document)
+								// blur elfinder on document click
+								.bind('mousedown.'+self.namespace, function(e) {
+									blur && enabled && self.trigger('blur');
+									blur = true;
+								})
+								// exec shortcuts
+								.bind('keydown.'+self.namespace+' keypress.'+self.namespace, execShortcut);
+
+							$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
+								$.inArray(name, cmds) === -1 && cmds.push(name)
+							});
+
+							// self.log(cmds)
+
+							$.each(cmds, function(i, name) {
+								var cmd = self.commands[name];
+								if ($.isFunction(cmd) && !commands[name]) {
+									var _super = $.extend({}, base, cmd.prototype);
+									// cmd.prototype = base;
+									cmd.prototype = _super;
+									commands[name] = new cmd();
+									commands[name]._super = _super;
+									commands[name].setup(name, self.options[name]||{});
+								}
+							});
+							
+							if (!$.fn[tb]) {
+								tb = 'elfindertoolbar';
+							}
+							toolbar[tb](opts.toolbarConf, commands)
+
+							self.resize(width, height);
+							self.debug('api', self.api);
+							self.trigger('loaded')
+							delete listeners.load;
+							loaded = true;
+						}
+					}, 
+					interval;
+				
+				if (self.options.allowNavbar) {// || self.oldAPI) {
 					// old api required tree to get cwd parent hash
-					opts.tree = 1;
+					opts.data.tree = 1;
 				}
 				
-				if (self.isVisible()) {
-					return self.openDir('', true, true).node.mousedown();
+				if (self.visible()) {
+					return self.trigger('focus').ajax(opts);
 				} 
-				
 				interval = setInterval(function() {
-					if (self.isVisible()) {
-						clearInterval(interval);
-						self.ajax(opts).node.mousedown();
+					if (self.visible()) {
+						self.trigger('focus').ajax(opts);
+						interval && clearInterval(interval);
 					}
 				}, 100);
 			},
@@ -355,6 +447,8 @@
 		 **/
 		this.options = $.extend({}, this.options, opts||{});
 		
+		this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
+		
 		/**
 		 * ID. Required to create unique cookie name
 		 *
@@ -391,13 +485,7 @@
 		 * @type Object
 		 **/
 		this.messages = this.i18[this.lang].messages;
-		
-		/**
-		 * Buffer for copied files
-		 *
-		 * @type Object
-		 **/
-		this.buffer   = {files : [], cut : false};
+
 		/**
 		 * Registered shortcuts
 		 *
@@ -418,14 +506,7 @@
 		 **/
 		this.sort = this.sortType();
 		
-		/**
-		 * Return true if filemanager is visible
-		 *
-		 * @return Boolean
-		 **/
-		this.isVisible = function() {
-			return this.node.is(':visible');
-		}
+
 		
 		/**
 		 * Return true if filemanager is active
@@ -434,24 +515,6 @@
 		 **/
 		this.isEnabled = function() {
 			return this.isVisible() && enabled;
-		}
-		
-		/**
-		 * Make filemanager active
-		 *
-		 * @return elFinder
-		 **/
-		this.enable = function() {
-			return this.trigger('focus');
-		}
-		
-		/**
-		 * Make filemanager not active
-		 *
-		 * @return elFinder
-		 **/
-		this.disable = function() {
-			return this.trigger('blur');
 		}
 		
 		/**
@@ -587,82 +650,106 @@
 			var self    = this,
 				options = this.options,
 				mode    = /^sync|bg|silent$/.test(mode) ? mode : 'sync',
-				request = $.extend({}, options.customData, {mimes : options.onlyMimes || []}),
+				cmd     = '',
 				params  = {
 					url      : options.url,
 					async    : true,
 					type     : 'get',
 					dataType : 'json',
 					cache    : false,
-					data     : request,
-					error    : function(xhr, status) { 
-						var error;
-						
-						switch (status) {
-							case 'abort':
-								error = ['Unable to connect to backend. $1', 'Connection aborted.'];
-								break;
-							case 'timeout':
-								error = ['Unable to connect to backend. $1', 'Connection timeout.'];
-								break;
-							case 'parsererror':
-								error = ['Invalid backend response. $1', 'Data is not JSON.'];
-								break;
-							default:
-								error = xhr && parseInt(xhr.status) > 400 ? 'Unable to connect to backend.' : 'Invalid backend response.';
-						}
-						self[mode == 'silent' ? 'debug' : 'trigger']('ajaxerror', {error : error, request : request, mode : mode});
-
-					},
-					success  : function(response) {
-						var error;
-
-						self.trigger('ajaxstop', {request : request, response : response, mode : mode});
-
-						if (!response) {
-							error = ['Invalid backend response. $1', 'Data is empty.'];
-						} else if (response.error) {
-							error = response.error;
-						} else if (!validCmdData(request.cmd, response)) {
-							error = ['Invalid backend response. $1', 'Invalid data.'];
-						}
-
-						if (error) {
-							return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : response, request : request});
-						}
-
-						if (response.warning) {
-							self.trigger('warning', {warning : response.warning});
-						}
-
-						// fire some event to update ui
-						response.removed && response.removed.length && self.trigger('removed', response);
-						response.added   && response.added.length   && self.trigger('added', response);
-						
-						// fire event with command name
-						self.trigger(request.cmd, response);
-					}
+					// timeout  : 100,
+					data     : this.customData
+				},
+				error = function(xhr, status) {
+					var errors = self.errors, error;
 					
-				};
+					switch (status) {
+						case 'abort':
+							error = [errors.noConnect, errors.connectAborted];
+							break;
+						case 'timeout':
+							error = [errors.noConnect, errors.connectTimeout];
+							break;
+						case 'parsererror':
+							error = [errors.invResponse, errors.notJSON];
+							break;
+						default:
+							error = xhr && parseInt(xhr.status) > 400 ? errors.noConnect : errors.invResponse;
+					}
+					self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, mode : mode});
+					
+				},
+				success = function(response) {
+					var errors = self.errors, error;
+
+					if (!response) {
+						error = [errors.invResponse, errors.emptyData];
+					} else if (response.error) {
+						error = response.error;
+					} else if (!validCmdData(cmd, response)) {
+						error = [errors.invResponse, errors.invData];
+					}
+
+					if (error) {
+						return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : response});
+					}
+
+					if (response.warning) {
+						self.trigger('warning', {warning : response.warning});
+					}
+
+					// fire some event to update cache/ui
+					response.removed && response.removed.length && self.trigger('removed', response);
+					response.added   && response.added.length   && self.trigger('added', response);
+					
+					// fire event with command name
+					self.trigger(cmd, response);
+				}, 
+				startSync = function() {
+					ajax = false;
+					prevEnabled = enabled;
+					enabled = false;
+					showOverlay();
+					showSpinner();
+					
+				},
+				stopSync = function() {
+					ajax = true;
+					hideSpinner();
+					hideOverlay();
+					prevEnabled && self.trigger('focus');
+				},
 				
-			if (!$.isPlainObject(opts)) {
-				return this.debug('error', 'ajax() required first argument Object but '+typeof(opts)+' given');
-			}
-			
+				en, jqxhr;
+				
 			if (opts.data) {
 				params = $.extend(true, params, opts);
 			} else {
 				$.extend(params.data, opts);
 			}
-
-			request = params.data;
-
-			// ajax allowed - fire events and send request
-			if (ajax && this.isVisible() && request.cmd) {
-				self.trigger('ajaxstart', {request : request, mode : mode});
-				$.ajax(params);
+			
+			if (!params.data.cmd) {
+				this.debug('error', 'elFinder.ajax() required data.cmd.');
+				return $.Deferred().reject();
 			}
-			return this;
+				
+			params.data.mimes = options.onlyMimes || [];
+			cmd = params.data.cmd;
+			
+			if (ajax && this.visible()) {
+				if (mode == 'sync') {
+					params.beforeSend = startSync;
+					return $.ajax(params)
+							.fail(error)
+							.success(success)
+							.complete(stopSync);
+				}
+				
+				return jqxhr = $.ajax(params).fail(error).success(success);
+			}
+			
+			return $.Deferred().reject();
+			
 		};
 		
 		/**
@@ -811,11 +898,6 @@
 			}
 			return this;
 		}
-		
-		
-		
-		
-		
 		
 		/**
 		 * Get/set clipboard content.
@@ -982,6 +1064,25 @@
 			return this.resize(width, height);
 		}
 		
+		/**
+		 * Destroy this elFinder instance
+		 *
+		 * @return void
+		 **/
+		this.destroy = function() {
+			if (this.node && this.node[0].elfinder) {
+				listeners = {};
+				shortcuts = {};
+				enabled   = false;
+				ajax      = false;
+				this.node.children().remove();
+				$(document).unbind('.'+this.namespace);
+				delete this.node[0].elfinder;
+				delete this;
+			}
+		}
+		
+		
 		this.draggable = {
 			appendTo   : 'body',
 			addClasses : true,
@@ -1085,7 +1186,7 @@
 			 * Enable elFinder shortcuts if no "sync" ajax request in progress or modal dialog opened
 			 */
 			.bind('focus', function() {
-				if (self.isVisible() && !enabled && !overlayCnt) {
+				if (self.visible() && !enabled && !overlayCnt) {
 					$('texarea,input,button').blur();
 					enabled = true;
 					self.node.removeClass(self.options.blurClass);
@@ -1103,37 +1204,10 @@
 				}
 			})
 			/**
-			 * On "sync" ajax start disable ajax requests, shortcuts and show overlay/spinner.
-			 * Store current "enabled" to restore after request complete
-			 */
-			.bind('ajaxstart', function(e) {
-				var en = enabled;
-				if (e.data.mode == 'sync') {
-					ajax = false;
-					showOverlay();
-					showSpinner();
-					self.trigger('blur');
-					prevEnabled = en;
-				}
-			})
-			/**
-			 * On "sync" ajax complete enable ajax requests, 
-			 * restore "enabled" to value before requests if no modal dialogs opened or "blur" events occured.
-			 * Hide overlay/spinner
-			 */
-			.bind('ajaxstop ajaxerror', function(e) {
-				if (e.data.mode == 'sync') {
-					ajax = true;
-					hideSpinner();
-					hideOverlay();
-					prevEnabled && self.trigger('focus');
-				}
-			})
-			/**
 			 * Show error dialog
 			 */
-			.bind('ajaxerror error warning', function(e) {
-				if (self.isVisible()) {
+			.bind('error warning', function(e) {
+				if (self.visible()) {
 					self.dialog(self.i18n(e.data.error || e.data.warning), {
 						title         : 'Error',
 						modal         : true,
@@ -1145,127 +1219,17 @@
 				}
 			})
 			/**
-			 * If first 'open' request succesfull - fire "load" event to init fm.
-			 * If not - check if we remember last dir, reset it and try to 'open' default dir
-			 */
-			.one('ajaxstop', function(e) {
-				var r = e.data.response;
-				
-				if (r.error) {
-					if (self.lastDir()) {
-						e.preventDefault();
-						self.lastDir('');
-						self.one('ajaxstop', function(e) {
-							var r = e.data.response;
-							
-							r.error 
-								? self.trigger('error', {error : r.error}).trigger('failed', r) 
-								: self.trigger('load', r);
-						}).open('', true, true);
-						
-					} else {
-						self.trigger('failed', r);
-					}
-				} else {
-					self.trigger('load', r);
-				}
-			})
-			/**
-			 * On first success ajax request complete 
-			 * set api version, json validation rules
-			 * and init ui.
-			 */
-			.one('load', function(e) {
-				var data = e.data,
-					base = new self.command(self),
-					opts = self.options,
-					cmds = opts.commands || [],
-					cmd,
-					l, tb = 'elfindertoolbar'+opts.toolbar;
-
-				self.api    = parseFloat(data.api)|| 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules       = self[self.newAPI ? 'newAPIRules' : 'oldAPIRules'];
-
-				if (self.oldAPI) {
-					cwd.url = e.data.params.url;
-					self.uploadMaxSize = data.params.uploadMaxSize;
-				} else {
-					self.uploadMaxSize = data.uploadMaxSize;
-					if (opts.sync >= 3000) {
-						setInterval(function() {
-							self.sync();
-						}, self.options.sync);
-					}
-				}
-				
-				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
-				
-				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
-				
-				self.history = new self.history(self);
-				
-				$(document)
-					// blur elfinder on document click
-					.bind('mousedown.elfinder', function(e) {
-						blur && enabled && self.trigger('blur');
-						blur = true;
-					})
-					// exec shortcuts
-					.bind('keydown keypress', execShortcut);
-				
-				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
-					$.inArray(name, cmds) === -1 && cmds.push(name)
-				});
-				
-				// self.log(cmds)
-				
-				$.each(cmds, function(i, name) {
-					var cmd = self.commands[name];
-					if ($.isFunction(cmd) && !commands[name]) {
-						var _super = $.extend({}, base, cmd.prototype);
-						// cmd.prototype = base;
-						cmd.prototype = _super;
-						commands[name] = new cmd();
-						commands[name]._super = _super;
-						commands[name].setup(name, self.options[name]||{});
-					}
-				});
-				// self.log(commands)
-				if (!$.fn[tb]) {
-					tb = 'elfindertoolbar';
-				}
-				toolbar[tb](opts.toolbarConf, commands)
-				
-				
-				self.resize(width, height);
-				self.debug('api', self.api);
-				delete listeners.load;
-				loaded = true;
-				
-				
-				// self.notify('rm', 1)
-			})
-			.one('failed', function() {
-				listeners = {};
-				enabled   = false;
-			})
-			/**
 			 * Set params if required and update files cache
 			 */
 			.bind('open', function(e) {
 				var data = e.data;
-				
-				// set current directory data
-				// if (self.oldAPI) {
-				// 	data.cwd.locked = !!data.cwd.rm;
-				// 	delete data.cwd.rm;
-				// }
+
 				cwd = $.extend(cwd, e.data.cwd)
+				cache(self.newAPI ? e.data.files : e.data.cdc, true);
+				
 				
 				if (self.newAPI) {
-					
+					self.log(files[data.cwdhash])
 				} else {					
 					cwd.tmb = !!data.tmb;
 					// old api: if we get tree - reset cache
@@ -1356,21 +1320,259 @@
 				cache(e.data.added);
 			});
 		
-		start();
+		
+		init();
 		
 	}
 	
 	
 	elFinder.prototype = {
-		/**
-		 * Return true if connector use new (>=2.0) api version
-		 *
-		 * @return Boolean
-		 */
-		isNewApi : function() {
-			return this.api > 1;
+		
+		i18 : {
+			en : {
+				_translator  : '',
+				_translation : 'English localization',
+				direction    : 'ltr',
+				messages     : {}
+			}
 		},
 		
+		errors : {
+			jquiInvalid  : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
+			nodeRequired : 'elFinder required DOM Element to be created.',
+			urlRequired  : 'Invalid elFinder configuration! You have to set URL option.',
+			noConnect    : 'Unable to connect to backend. $1',
+			connectAborted      : 'Connection aborted.',
+			connectTimeout : 'Connection timeout.',
+			invResponse : 'Invalid backend response. $1',
+			notJSON : 'Data is not JSON.',
+			emptyData : 'Data is empty.',
+			invData : 'Invalid data.',
+			
+			notFound     : 'File not found',
+			notDir       : '"$1" is not a folder.',
+			notFile      : '"$1" is not a file.',
+			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
+			notRm        : '"$1" is locked and can not be removed.',
+			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
+			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
+			invalidName  : 'Invalid file name.',
+			fileLocked   : 'File "$1" locked and can’t be removed or renamed.'
+		},
+		
+		/**
+		 * File mimetype to kind mapping
+		 * 
+		 * @type  Object
+		 */
+		kinds : {
+			'unknown'                       : 'Unknown',
+			'directory'                     : 'Folder',
+			'symlink'                       : 'Alias',
+			'symlink-broken'                : 'Broken alias',
+			'application/x-empty'           : 'Plain text',
+			'application/postscript'        : 'Postscript document',
+			'application/octet-stream'      : 'Application',
+			'application/vnd.ms-office'     : 'Microsoft Office document',
+			'application/vnd.ms-word'       : 'Microsoft Word document',  
+		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
+			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
+			'application/pdf'               : 'Portable Document Format (PDF)',
+			'application/vnd.oasis.opendocument.text' : 'Open Office document',
+			'application/x-shockwave-flash' : 'Flash application',
+			'application/xml'               : 'XML document', 
+			'application/x-bittorrent'      : 'Bittorrent file',
+			'application/x-7z-compressed'   : '7z archive',
+			'application/x-tar'             : 'TAR archive', 
+		    'application/x-gzip'            : 'GZIP archive', 
+		    'application/x-bzip2'           : 'BZIP archive', 
+		    'application/zip'               : 'ZIP archive',  
+		    'application/x-rar'             : 'RAR archive',
+			'application/javascript'        : 'Javascript application',
+			'text/plain'                    : 'Plain text',
+		    'text/x-php'                    : 'PHP source',
+			'text/html'                     : 'HTML document', 
+			'text/javascript'               : 'Javascript source',
+			'text/css'                      : 'CSS style sheet',  
+		    'text/rtf'                      : 'Rich Text Format (RTF)',
+			'text/rtfd'                     : 'RTF with attachments (RTFD)',
+			'text/x-c'                      : 'C source', 
+			'text/x-c++'                    : 'C++ source', 
+			'text/x-shellscript'            : 'Unix shell script',
+		    'text/x-python'                 : 'Python source',
+			'text/x-java'                   : 'Java source',
+			'text/x-ruby'                   : 'Ruby source',
+			'text/x-perl'                   : 'Perl script',
+		    'text/xml'                      : 'XML document', 
+			'image/x-ms-bmp'                : 'BMP image',
+		    'image/jpeg'                    : 'JPEG image',   
+		    'image/gif'                     : 'GIF Image',    
+		    'image/png'                     : 'PNG image',
+			'image/x-targa'                 : 'TGA image',
+		    'image/tiff'                    : 'TIFF image',   
+		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
+			'audio/mpeg'                    : 'MPEG audio',  
+			'audio/midi'                    : 'MIDI audio',
+			'audio/ogg'                     : 'Ogg Vorbis audio',
+			'audio/mp4'                     : 'MP4 audio',
+			'audio/wav'                     : 'WAV audio',
+			'video/x-dv'                    : 'DV video',
+			'video/mp4'                     : 'MP4 video',
+			'video/mpeg'                    : 'MPEG video',  
+			'video/x-msvideo'               : 'AVI video',
+			'video/quicktime'               : 'Quicktime video',
+			'video/x-ms-wmv'                : 'WM video',   
+			'video/x-flv'                   : 'Flash video',
+			'video/x-matroska'              : 'Matroska video'
+		},
+		
+		
+		/**
+		 * Notifications messages by types
+		 *
+		 * @type  Object
+		 */
+		notifyType : {
+			mkdir  : 'Creating directory',
+			mkfile : 'Creating files',
+			rm     : 'Delete files',
+			copy   : 'Copy files',
+			move   : 'Move files',
+			prepareCopy : 'Prepare to copy files',
+			duplicate : 'Duplicate files',
+			rename : 'Rename files'
+		},
+		
+		rules : {
+			oldapi : {
+				open : {
+					cwd    : {req : true,  valid : $.isPlainObject},
+					tree   : {req : false, valid : $.isPlainObject},
+					params : {req : false, valid : $.isPlainObject}
+				},
+				tree : {
+					tree : {req : true, valid : function() { return false; }}
+				},
+				parents : {
+					tree : {req : true, valid : function() { return false; }}
+				},
+				tmb : {
+					current : {req : true},
+					images  : {req : true, valid : $.isPlainObject}
+				}
+			},
+			
+			newapi : {
+				open : {
+					cwd    : {req : true,  valid : $.isPlainObject},
+					files  : {req : true, valid : $.isArray}
+				},
+				tree : {
+					tree : {req : true	}
+				},
+				parents : {
+					tree : {req : true, valid : $.isArray}
+				},
+				tmb : {
+					current : {req : true},
+					images  : {req : true, valid : $.isPlainObject}
+				},
+				rm : {
+					removed : {req : true, valid : $.isArray}
+				},
+				mkdir : {
+					added : {req : true, valid : $.isArray}
+				}
+			}
+		},
+		
+		oldAPIRules : {
+			open : {
+				cwd    : {req : true,  valid : $.isPlainObject},
+				tree   : {req : false, valid : $.isPlainObject},
+				params : {req : false, valid : $.isPlainObject}
+			},
+			tree : {
+				tree : {req : true, valid : function() { return false; }}
+			},
+			parents : {
+				tree : {req : true, valid : function() { return false; }}
+			},
+			tmb : {
+				current : {req : true},
+				images  : {req : true, valid : $.isPlainObject}
+			}
+		},
+		
+		newAPIRules : {
+			open : {
+				cwd    : {req : true,  valid : $.isPlainObject},
+				files  : {req : true, valid : $.isArray}
+			},
+			tree : {
+				tree : {req : true	}
+			},
+			parents : {
+				tree : {req : true, valid : $.isArray}
+			},
+			tmb : {
+				current : {req : true},
+				images  : {req : true, valid : $.isPlainObject}
+			},
+			rm : {
+				removed : {req : true, valid : $.isArray}
+			},
+			mkdir : {
+				added : {req : true, valid : $.isArray}
+			}
+		},
+		
+		sorts : {
+			nameDirsFirst : 1,
+			kindDirsFirst : 2,
+			sizeDirsFirst : 3,
+			name : 4,
+			kind : 5,
+			size : 6
+		},
+		
+		/**
+		 * Commands costructors
+		 *
+		 * @type Object
+		 */
+		commands : {},
+		
+		plugins : {},
+		
+		/**
+		 * Return true if filemanager is visible
+		 *
+		 * @return Boolean
+		 **/
+		visible : function() {
+			return this.node && this.node.is(':visible');
+		},
+		
+		/**
+		 * Make filemanager active
+		 *
+		 * @return elFinder
+		 **/
+		enable : function() {
+			return this.trigger('focus');
+		},
+		
+		/**
+		 * Make filemanager not active
+		 *
+		 * @return elFinder
+		 **/
+		disable : function() {
+			return this.trigger('blur');
+		},
+		
+
 		/**
 		 * Get/set cookie
 		 *
@@ -1493,21 +1695,7 @@
 			}
 		},
 		
-		/**
-		 * Notifications messages by types
-		 *
-		 * @type  Object
-		 */
-		notifyType : {
-			mkdir  : 'Creating directory',
-			mkfile : 'Creating files',
-			rm     : 'Delete files',
-			copy   : 'Copy files',
-			move   : 'Move files',
-			prepareCopy : 'Prepare to copy files',
-			duplicate : 'Duplicate files',
-			rename : 'Rename files'
-		},
+
 		
 		/**
 		 * Create new notification type.
@@ -2118,21 +2306,7 @@
 			return prefix + Math.random();
 		},
 		
-		errors : {
-			jquiInvalid  : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
-			nodeRequired : 'elFinder required DOM Element to be created.',
-			urlRequired  : 'Invalid elFinder configuration! You have to set URL option.',
-			notFound     : 'File not found',
-			notDir       : '"$1" is not a folder.',
-			notFile      : '"$1" is not a file.',
-			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
-			notRm        : '"$1" is locked and can not be removed.',
-			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
-			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
-			invalidName  : 'Invalid file name.',
-			fileLocked   : 'File "$1" locked and can’t be removed or renamed.'
-		},
-		
+
 		/**
 		 * Return message translated onto current language
 		 *
@@ -2147,71 +2321,6 @@
 			return msg[0].replace(/\$(\d+)/g, function(m, num) { return msg[num] || ''; });
 		},
 		
-		/**
-		 * File mimetype to kind mapping
-		 * 
-		 * @type  Object
-		 */
-		kinds : {
-			'unknown'                       : 'Unknown',
-			'directory'                     : 'Folder',
-			'symlink'                       : 'Alias',
-			'symlink-broken'                : 'Broken alias',
-			'application/x-empty'           : 'Plain text',
-			'application/postscript'        : 'Postscript document',
-			'application/octet-stream'      : 'Application',
-			'application/vnd.ms-office'     : 'Microsoft Office document',
-			'application/vnd.ms-word'       : 'Microsoft Word document',  
-		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
-			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
-			'application/pdf'               : 'Portable Document Format (PDF)',
-			'application/vnd.oasis.opendocument.text' : 'Open Office document',
-			'application/x-shockwave-flash' : 'Flash application',
-			'application/xml'               : 'XML document', 
-			'application/x-bittorrent'      : 'Bittorrent file',
-			'application/x-7z-compressed'   : '7z archive',
-			'application/x-tar'             : 'TAR archive', 
-		    'application/x-gzip'            : 'GZIP archive', 
-		    'application/x-bzip2'           : 'BZIP archive', 
-		    'application/zip'               : 'ZIP archive',  
-		    'application/x-rar'             : 'RAR archive',
-			'application/javascript'        : 'Javascript application',
-			'text/plain'                    : 'Plain text',
-		    'text/x-php'                    : 'PHP source',
-			'text/html'                     : 'HTML document', 
-			'text/javascript'               : 'Javascript source',
-			'text/css'                      : 'CSS style sheet',  
-		    'text/rtf'                      : 'Rich Text Format (RTF)',
-			'text/rtfd'                     : 'RTF with attachments (RTFD)',
-			'text/x-c'                      : 'C source', 
-			'text/x-c++'                    : 'C++ source', 
-			'text/x-shellscript'            : 'Unix shell script',
-		    'text/x-python'                 : 'Python source',
-			'text/x-java'                   : 'Java source',
-			'text/x-ruby'                   : 'Ruby source',
-			'text/x-perl'                   : 'Perl script',
-		    'text/xml'                      : 'XML document', 
-			'image/x-ms-bmp'                : 'BMP image',
-		    'image/jpeg'                    : 'JPEG image',   
-		    'image/gif'                     : 'GIF Image',    
-		    'image/png'                     : 'PNG image',
-			'image/x-targa'                 : 'TGA image',
-		    'image/tiff'                    : 'TIFF image',   
-		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-			'audio/mpeg'                    : 'MPEG audio',  
-			'audio/midi'                    : 'MIDI audio',
-			'audio/ogg'                     : 'Ogg Vorbis audio',
-			'audio/mp4'                     : 'MP4 audio',
-			'audio/wav'                     : 'WAV audio',
-			'video/x-dv'                    : 'DV video',
-			'video/mp4'                     : 'MP4 video',
-			'video/mpeg'                    : 'MPEG video',  
-			'video/x-msvideo'               : 'AVI video',
-			'video/quicktime'               : 'Quicktime video',
-			'video/x-ms-wmv'                : 'WM video',   
-			'video/x-flv'                   : 'Flash video',
-			'video/x-matroska'              : 'Matroska video'
-		},
 		
 		/**
 		 * Convert mimetype into css classes
@@ -2307,64 +2416,8 @@
 	        return (s > 0 ? Math.round(s/n) : 0) +' '+u;
 		},
 		
-		oldAPIRules : {
-			open : {
-				cwd    : {req : true,  valid : $.isPlainObject},
-				tree   : {req : false, valid : $.isPlainObject},
-				params : {req : false, valid : $.isPlainObject}
-			},
-			tree : {
-				tree : {req : true, valid : function() { return false; }}
-			},
-			parents : {
-				tree : {req : true, valid : function() { return false; }}
-			},
-			tmb : {
-				current : {req : true},
-				images  : {req : true, valid : $.isPlainObject}
-			}
-		},
 		
-		newAPIRules : {
-			open : {
-				cwd    : {req : true,  valid : $.isPlainObject},
-				files  : {req : true, valid : $.isArray}
-			},
-			tree : {
-				tree : {req : true	}
-			},
-			parents : {
-				tree : {req : true, valid : $.isArray}
-			},
-			tmb : {
-				current : {req : true},
-				images  : {req : true, valid : $.isPlainObject}
-			},
-			rm : {
-				removed : {req : true, valid : $.isArray}
-			},
-			mkdir : {
-				added : {req : true, valid : $.isArray}
-			}
-		},
-		
-		sorts : {
-			nameDirsFirst : 1,
-			kindDirsFirst : 2,
-			sizeDirsFirst : 3,
-			name : 4,
-			kind : 5,
-			size : 6
-		},
-		
-		i18 : {
-			en : {
-				_translator  : '',
-				_translation : 'English localization',
-				direction    : 'ltr',
-				messages     : {}
-			}
-		},
+
 		
 		log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 		
@@ -2377,72 +2430,11 @@
 			return this;
 		},
 		time : function(l) { window.console && window.console.time && window.console.time(l); },
-		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); },
+		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
 		
-		/**
-		 * Commands costructors
-		 *
-		 * @type Object
-		 */
-		commands : {}
+
 	}
 	
-	
-	
-	
-	
-	$.fn.elfinder = function(o) {
-		
-		if (o == 'instance') {
-			return this.getElFinder();
-		}
-		
-		return this.each(function() {
-			
-			var cmd = typeof(o) == 'string' ? o : '';
-			if (!this.elfinder) {
-				new elFinder(this, typeof(o) == 'object' ? o : {})
-			}
-			
-			switch(cmd) {
-				case 'close':
-				case 'hide':
-					this.elfinder.close();
-					break;
-					
-				case 'open':
-				case 'show':
-					this.elfinder.open();
-					break;
-				
-				case 'dock':
-					this.elfinder.dock();
-					break;
-					
-				case 'undock':
-					this.elfinder.undock();
-					break;
-					
-				case'destroy':
-					this.elfinder.destroy();
-					break;
-			}
-			
-		})
-	}
-	
-	$.fn.getElFinder = function() {
-		var instance;
-		
-		this.each(function() {
-			if (this.elfinder) {
-				instance = this.elfinder;
-				return false;
-			}
-		});
-		
-		return instance;
-	}
 	
 	
 })(jQuery);

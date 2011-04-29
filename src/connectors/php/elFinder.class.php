@@ -385,7 +385,7 @@ class elFinder {
 		$cwd['path'] = $volume->path($target);
 		$cwd['url']  = $volume->url($target);
 		$cwd = array_merge($cwd, $volume->options());
-		$files = array();
+		$files = array($cwd);
 		
 		// get folders trees
 		if ($args['tree']) {
@@ -412,6 +412,7 @@ class elFinder {
 		}
 
 		$result = array(
+			'cwdhash' => $cwd['hash'],
 			'cwd'   => $cwd,
 			'files' => $files
 		);
