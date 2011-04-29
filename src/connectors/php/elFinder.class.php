@@ -116,7 +116,7 @@ class elFinder {
 	const ERROR_POST_DATA_MAXSIZE    = 20;
 	const ERROR_NOT_RENAME           = 21;
 	const ERROR_FILE_EXISTS          = 22;
-
+	const ERROR_NOT_RM_BY_PARENT     = 23;
 	
 	/**
 	 * undocumented class variable
@@ -147,7 +147,7 @@ class elFinder {
 		20 => 'Data exceeds the maximum allowed size.',
 		21 => '"$1" can’t be renamed because parent folder is read only.',
 		22 => 'Object with name "$1" already exists in this location.',
-
+		23 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
 	);
 	
 	/**
@@ -401,7 +401,7 @@ class elFinder {
 		}
 
 		// get current working directory files list and add to $files if not exists in it
-		if (($ls = $volume->readdir($target, $args['mimes'])) === false) {
+		if (($ls = $volume->scandir($target, $args['mimes'])) === false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		}
 		

@@ -320,16 +320,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return ($file = $this->stat($path)) ? $file['mime'] : 'unknown';
 	}
 	
-	/**
-	 * Return path without changes
-	 *
-	 * @param  string  $path  path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _normpath($path) {
-		return $path;
-	}
+	/*********************** paths/urls *************************/
 	
 	/**
 	 * Return parent directory path
@@ -375,6 +366,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _basename($path) {
 		return ($file = $this->stat($path)) ? $file['name'] : '';
+	}
+
+	/**
+	 * Return path without changes
+	 *
+	 * @param  string  $path  path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _normpath($path) {
+		return $path;
 	}
 
 	/**
@@ -446,19 +448,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $this->URL ? $this->URL.$path.$this->separator : '';
 	}
 	
-	/**
-	 * Return true if $parent dir has child with $name
-	 *
-	 * @param  string  $parent  dir path
-	 * @param  string  $name    file name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _hasChild($parent, $name) {
-		$sql = 'SELECT id FROM '.$this->tbf.' WHERE parent_id="'.intval($parent).'" AND name="'.$this->db->real_escape_string($name).'"';
-		return $this->db->query($sql) && $this->db->affected_rows > 0;
-	}
-	
+	/*********************** check type *************************/
+		
 	/**
 	 * Return true if file exists
 	 *
@@ -502,6 +493,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _isLink($path) {
 		return false;
 	}
+	
+	/***************** file attributes ********************/
 	
 	/**
 	 * Return true if path is readable
@@ -547,6 +540,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return ($file = $this->stat($path)) ? $file['hidden'] : false;
 	}
 	
+	/***************** file stat ********************/
+	
 	/**
 	 * Return file size
 	 *
@@ -567,28 +562,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _filemtime($path) { 
 		return ($file = $this->stat($path)) ? $file['mtime'] : false;
-	}
-	
-	/**
-	 * Return false, this driver does not support symlinks
-	 *
-	 * @param  string  $path  link path
-	 * @return false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _lstat($path) { 
-		return false;
-	}
-	
-	/**
-	 * Return false, this driver does not support symlinks
-	 *
-	 * @param  string  $path  link path
-	 * @return false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _readlink($path) {
-		return false;
 	}
 	
 	/**
@@ -613,6 +586,30 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _dimensions($path, $mime) { 
 		return ($file = $this->stat($path)) ? $file['dim'] : false;
+	}
+	
+	/**
+	 * Return false, this driver does not support symlinks
+	 *
+	 * @param  string  $path  link path
+	 * @return false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _lstat($path) { 
+		return false;
+	}
+	
+	/******************** file/dir content *********************/
+	
+	/**
+	 * Return false, this driver does not support symlinks
+	 *
+	 * @param  string  $path  link path
+	 * @return false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _readlink($path) {
+		return false;
 	}
 	
 	/**
@@ -698,38 +695,51 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 	}
 	
+	/********************  file/dir manipulations *************************/
+	
 	/**
-	 * Remove file
+	 * Create dir
 	 *
-	 * @param  string  $path  file path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _unlink($path) {
-		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime!="directory" LIMIT 1';
+	protected function _mkdir($path, $name) {
+		if (!$this->_isDir($path)) {
+			return false;
+		}
+		
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, size, mtime, mime) 
+			VALUES ("'.$path.'", "'.$this->db->real_escape_string($name).'", 0, '.time().', "directory")';
+
 		return $this->db->query($sql) && $this->db->affected_rows > 0;
 	}
-
+	
 	/**
-	 * Remove dir
+	 * Create file
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _rmdir($path) {
-		$sql = 'SELECT COUNT(f.id) AS num FROM '.$this->tbf.' WHERE parent_id="'.intval($path).'" GROUP BY f.parent_id';
-
-		if ($res = $this->db->query($sql)) {
-			if ($r = $res->fetch_assoc()) {
-				if ($r['num'] > 0) {
-					return false;
-				}
-			}
-		}
-		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime="directory" LIMIT 1';
-		return $this->db->query($sql) ? $this->db->affected_rows > 0 : false;
+	protected function _mkfile($path, $name) {
+		
 	}
+	
+	/**
+	 * Driver does not support symlinks - return false
+	 *
+	 * @param  string  $target  link target
+	 * @param  string  $path    symlink path
+	 * @return false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _symlink($target, $path, $name='') {
+		return false;
+	}
+	
 	
 	/**
 	 * Copy file into another file
@@ -797,55 +807,37 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create dir
+	 * Remove file
 	 *
-	 * @param  string  $path  parent dir path
-	 * @param string  $name  new directory name
+	 * @param  string  $path  file path
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _mkdir($path, $name) {
-		if (!$this->_isDir($path)) {
-			return false;
-		}
-		
-		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, size, mtime, mime) 
-			VALUES ("'.$path.'", "'.$this->db->real_escape_string($name).'", 0, '.time().', "directory")';
-
+	protected function _unlink($path) {
+		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime!="directory" LIMIT 1';
 		return $this->db->query($sql) && $this->db->affected_rows > 0;
 	}
-	
+
 	/**
-	 * Driver does not support symlinks - return false
+	 * Remove dir
 	 *
-	 * @param  string  $target  link target
-	 * @param  string  $path    symlink path
-	 * @return false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _symlink($target, $path, $name='') {
-		return false;
-	}
-	
-	/**
-	 * Rename file
-	 *
-	 * @param  string  $oldPath  file to rename path
-	 * @param  string  $newPath  new path
+	 * @param  string  $path  dir path
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _rename($oldPath, $newPath) {
-		$name    = basename($newPath);
-		$oldPath = $this->db->real_escape_string($oldPath);
-		$newPath = $this->db->real_escape_string($newPath);
-		
-		$sql = 'UPDATE '.$this->tbf.' SET name="'.$this->db->real_escape_string($name).'", path="'.$newPath.'" WHERE path="'.$oldPath.'" LIMIT 1';
-		echo intval($this->db->query($sql));
-		echo $this->db->affected_rows;
-		// return $this->db->query($sql) ? $this->db->affected_rows : false;
+	protected function _rmdir($path) {
+		$sql = 'SELECT COUNT(f.id) AS num FROM '.$this->tbf.' WHERE parent_id="'.intval($path).'" GROUP BY f.parent_id';
+
+		if ($res = $this->db->query($sql)) {
+			if ($r = $res->fetch_assoc()) {
+				if ($r['num'] > 0) {
+					return false;
+				}
+			}
+		}
+		$sql = 'DELETE FROM '.$this->tbf.' WHERE id="'.intval($path).'" AND mime="directory" LIMIT 1';
+		return $this->db->query($sql) ? $this->db->affected_rows > 0 : false;
 	}
-	
 	
 	
 	

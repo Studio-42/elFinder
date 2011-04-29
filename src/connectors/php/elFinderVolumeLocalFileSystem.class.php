@@ -184,6 +184,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return parent::mimetype($path);
 	}
 	
+	/*********************** paths/urls *************************/
+	
 	/**
 	 * Return parent directory path
 	 *
@@ -218,7 +220,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $dir.DIRECTORY_SEPARATOR.$name;
 	}
 	
-
 	/**
 	 * Return normalized path, this works the same as os.path.normpath() in Python
 	 *
@@ -281,7 +282,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return file path started from root dir
+	 * Convert path related to root dir into real path
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -334,17 +335,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $this->URL.str_replace($this->separator, '/', substr($path, strlen($this->root)+1));
 	}
 	
-	/**
-	 * Return true if $parent dir has child with $name
-	 *
-	 * @param  string  $parent  dir path
-	 * @param  string  $name    file name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _hasChild($parent, $name) {
-		return file_exists($parent.DIRECTORY_SEPARATOR.$name);
-	}
+	/*********************** check type *************************/
 	
 	/**
 	 * Return true if file exists
@@ -390,6 +381,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return is_link($path);
 	}
 	
+	/***************** file attributes ********************/
+	
 	/**
 	 * Return true if path is readable
 	 *
@@ -434,6 +427,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $this->attr($path, 'hidden');
 	}
 	
+	/***************** file stat ********************/
 	/**
 	 * Return file size
 	 *
@@ -457,6 +451,43 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if path is dir and has at least one childs directory
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _subdirs($path) {
+		if (is_dir($path) && is_readable($path)) {
+			$dir = dir($path);
+			while (($entry = $dir->read()) !== false) {
+				$p = $dir->path.DIRECTORY_SEPARATOR.$entry;
+				if ($entry != '.' && $entry != '..' && is_dir($p) && !$this->_isHidden($p)) {
+					$dir->close();
+					return true;
+				}
+			}
+			$dir->close();
+		}
+		return false;
+	}
+	
+	/**
+	 * Return object width and height
+	 * Ususaly used for images, but can be realize for video etc...
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mime  file mime type
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _dimensions($path, $mime) {
+		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
+			? $s[0].'x'.$s[1] 
+			: false;
+	}
+	
+	/**
 	 * Return symlink stat (required only size and mtime)
 	 *
 	 * @param  string  $path  link path
@@ -466,6 +497,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _lstat($path) {
 		return lstat($path);
 	}
+	
+	/******************** file/dir content *********************/
 	
 	/**
 	 * Return symlink target file
@@ -499,31 +532,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		return $target;
 	}
-	
+		
 	/**
-	 * Return true if path is dir and has at least one childs directory
-	 *
-	 * @param  string  $path  dir path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _subdirs($path) {
-		if (is_dir($path) && is_readable($path)) {
-			$dir = dir($path);
-			while (($entry = $dir->read()) !== false) {
-				$p = $dir->path.DIRECTORY_SEPARATOR.$entry;
-				if ($entry != '.' && $entry != '..' && is_dir($p) && !$this->_isHidden($p)) {
-					$dir->close();
-					return true;
-				}
-			}
-			$dir->close();
-		}
-		return false;
-	}
-	
-	/**
-	 * Return files list in directory
+	 * Return files list in directory.
 	 *
 	 * @param  string  $path  dir path
 	 * @return array
@@ -543,21 +554,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $files;
 	}
 		
-	/**
-	 * Return object width and height
-	 * Ususaly used for images, but can be realize for video etc...
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _dimensions($path, $mime) {
-		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
-			? $s[0].'x'.$s[1] 
-			: false;
-	}
-	
 	/**
 	 * Open file and return file pointer
 	 *
@@ -581,28 +577,59 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return @fclose($fp);
 	}
 	
+	/********************  file/dir manipulations *************************/
+	
 	/**
-	 * Remove file
+	 * Create dir
 	 *
-	 * @param  string  $path  file path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _unlink($path) {
-		return @unlink($path);
+	protected function _mkdir($path, $name) {
+		$path = $path.DIRECTORY_SEPARATOR.$name;
+		
+		if (@mkdir($path)) {
+			@chmod($path, $this->options['dirMode']);
+			return true;
+		}
+		return false;
 	}
-
+	
 	/**
-	 * Remove dir
+	 * Create file
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string  $path  parent dir path
+	 * @param string  $name  new file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _rmdir($path) {
-		return @rmdir($path);
+	protected function _mkfile($path, $name) {
+		
 	}
-
+	
+	/**
+	 * Create symlink
+	 *
+	 * @param  string  $target  link target
+	 * @param  string  $path    symlink path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _symlink($target, $path, $name='') {
+		if (!$name) {
+			$name = basename($path);
+		}
+		$target = '.'.DIRECTORY_SEPARATOR.$this->relpath($target);
+		$path = $path.DIRECTORY_SEPARATOR.$name;
+		if (@symlink($target, $path)) {
+			@chmod($path, $this->options[$this->_isDir($target) ? 'dirMode' : 'fileMode'] );
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Copy file into another file
 	 *
@@ -630,47 +657,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
 		return @rename($source, $target);
 	}
-	
-	/**
-	 * Create dir
-	 *
-	 * @param  string  $path  parent dir path
-	 * @param string  $name  new directory name
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _mkdir($path, $name) {
-		$path = $path.DIRECTORY_SEPARATOR.$name;
 		
-		if (@mkdir($path)) {
-			@chmod($path, $this->options['dirMode']);
-			return true;
-		}
-		return false;
-	}
-	
 	/**
-	 * Create symlink
+	 * Remove file
 	 *
-	 * @param  string  $target  link target
-	 * @param  string  $path    symlink path
+	 * @param  string  $path  file path
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _symlink($target, $path, $name='') {
-		if (!$name) {
-			$name = basename($path);
-		}
-		$target = '.'.DIRECTORY_SEPARATOR.$this->relpath($target);
-		$path = $path.DIRECTORY_SEPARATOR.$name;
-		if (@symlink($target, $path)) {
-			@chmod($path, $this->options[$this->_isDir($target) ? 'dirMode' : 'fileMode'] );
-			return true;
-		}
-		return false;
+	protected function _unlink($path) {
+		return @unlink($path);
+	}
+
+	/**
+	 * Remove dir
+	 *
+	 * @param  string  $path  dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _rmdir($path) {
+		return @rmdir($path);
 	}
 	
-
 	
 } // END class 
 

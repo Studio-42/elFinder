@@ -67,11 +67,11 @@ $opts = array(
 					'hidden'  => true
 				),
 				// array(
-				// 	'pattern' => '/\.png$/',
-				// 	'read' => false,
+				// 	'pattern' => '/qwe2$/',
+				// 	'read' => true,
 				// 	'write' => false,
-				// 	'locked' => true,
-				// 	'hidden' => true
+				// 	'locked' => false,
+				// 	'hidden' => false
 				// ),
 				array(
 					'pattern' => '/mimes$/',
