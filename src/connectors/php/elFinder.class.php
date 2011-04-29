@@ -758,11 +758,15 @@ class elFinder {
 		}
 		
 		foreach ($targets as $hash) {
-			if (($file = $volume->duplicate($hash)) == false) {
-				return array('added' => $added, 'error' => $this->errorMessage($volume->error()));
-			} else {
+			$file = $volume->duplicate($hash);
+			if ($file) {
 				$added[] = $file;
 			}
+			$error = $volume->error();
+			if ($error) {
+				return array('added' => $added, 'warning' => $this->errorMessage($error));
+			}
+			
 		}
 		
 		return $this->trigger('duplicate', $volume, array('added' => $added));

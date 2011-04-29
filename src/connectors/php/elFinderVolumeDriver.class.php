@@ -854,13 +854,13 @@ abstract class elFinderVolumeDriver {
 		$name = $this->uniqueName($path);
 		$dir  = $this->_dirname($path);
 		
-		if (!$this->copyRecursive($path, $dir, $name)) {
-			return false;
-		}
+		$this->doCopy($path, $dir, $name);
 		
 		$path = $this->_joinPath($dir, $name);
 		if (($file = $this->stat($path)) == false) {
-			return $this->setError(elFinder::ERROR_COPY, $this->_path($path), $dir.$this->separator.$name);
+			return $this->error 
+				? false 
+				: $this->setError(elFinder::ERROR_COPY, $this->_path($path), $dir.$this->separator.$name);
 		}
 		unset($file['hidden']);
 		return $file;
@@ -1063,7 +1063,9 @@ abstract class elFinderVolumeDriver {
 		}
 		while ($i++ <= 10000) {
 			$n = $name.($i > 0 ? $i : '').$ext;
-			if (!$this->_hasChild($dir, $n)) {
+			if (!$this->_fileExists($this->_joinPath($dir, $n)))
+			// if (!$this->_hasChild($dir, $n)) 
+			{
 				return $n;
 			}
 		}
@@ -1379,7 +1381,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function copyRecursive($source, $dstDir, $name='') {
+	protected function doCopy($source, $dstDir, $name='') {
 		if (!$name) {
 			$name = $this->_basename($source);
 		}
@@ -1409,22 +1411,25 @@ abstract class elFinderVolumeDriver {
 
 		$dst = $this->_joinPath($dstDir, $name);
 		
-		if ($this->_fileExists($dst)) {
-			if ($this->remove($dst)) {
-				$this->clearStat($dst);
-				$this->rmTmb($dst);
-			} else {
-				return $this->setError(elFinder::ERROR_NOT_REPLACE, $_dstPath);
-			}
+		if ($this->_fileExists($dst) && !$this->doRm($dst)) {
+			return $this->setError(elFinder::ERROR_NOT_REPLACE, $_dstPath);
 		}
-		
 		
 		if ($this->_isLink($source)) {
 			if (($link = $this->_readlink($source)) == false || !$this->_symlink($link, $dstDir, $name)) {
 				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
 			}
 			return $this->_joinPath($dstDir, $name);
-		} elseif ($this->_isDir($source)) {
+		} 
+		
+		if ($this->_isFile($source)) {
+			if (!$this->_copy($source, $dstDir, $name)) {
+				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
+			}
+			return $this->_joinPath($dstDir, $name);
+		}
+		
+		if ($this->_isDir($source)) {
 			if (!$this->_mkdir($dstDir, $name) || ($ls = $this->_scandir($source)) === false) {
 				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
 			}
@@ -1433,17 +1438,14 @@ abstract class elFinderVolumeDriver {
 			foreach ($ls as $path) {
 				$name = $this->_basename($path);
 				if ($name != '.' && $name != '..' && !$this->_isHidden($path)) {
-					if (!$this->copyRecursive($path, $dst)) {
+					if (!$this->doCopy($path, $dst)) {
 						return false;
 					}
 				}
 			}
 			return $dst;
-		} elseif (!$this->_copy($source, $dstDir, $name)) {
-			return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
-		}
-
-		return $this->_joinPath($dstDir, $name);
+		} 
+		return false;
 	}
 	
 	

@@ -66,13 +66,13 @@ $opts = array(
 					'locked'  => false,
 					'hidden'  => true
 				),
-				// array(
-				// 	'pattern' => '/qwe2$/',
-				// 	'read' => true,
-				// 	'write' => false,
-				// 	'locked' => false,
-				// 	'hidden' => false
-				// ),
+				array(
+					'pattern' => '/copy\/42$/',
+					'read' => false,
+					'write' => false,
+					'locked' => true,
+					'hidden' => false
+				),
 				array(
 					'pattern' => '/mimes$/',
 					'read' => true,
