@@ -106,7 +106,6 @@ elFinder.prototype.quickLook = function(fm, el) {
 	 * Open quickLook window
 	 **/
 	this.show = function() {
-
 		if (this.win.is(':hidden') && self.fm.selected.length == 1) {
 			update();
 			var id = self.fm.selected[0],
@@ -120,7 +119,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 				left     : o.left,
 				top      : o.top,
 				opacity  : 0
-			}).animate({
+			}).show().animate({
 				width    : 420,
 				height   : 150,
 				opacity  : 1,
@@ -275,7 +274,7 @@ elFinder.prototype.quickLook.prototype.plugins = {
 				img.css({
 					width  : ql.ico.width(),
 					height : ql.ico.height()
-				}).animate({
+				}).show().animate({
 					width  : Math.round(r*w),
 					height : Math.round(r*h)
 				}, 450, function() { 
