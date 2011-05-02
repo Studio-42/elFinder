@@ -1710,7 +1710,6 @@
 					return this.trigger('error', {error : [this.errors.notRead, dir.name]});
 				}
 			}
-			
 			opts.target = hash;
 			
 			if ((this.newAPI && tree && this.options.allowNavbar) || this.oldAPI) {
