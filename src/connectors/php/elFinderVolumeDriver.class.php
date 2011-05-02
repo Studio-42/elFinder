@@ -560,9 +560,10 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function options() {
+	public function options($hash) {
 		return array(
-			// 'url'       => $this->URL,
+			'path' => $this->path($hash),
+			'url'       => $this->URL,
 			'tmbUrl'    => $this->tmbURL,
 			'disabled'  => $this->options['disabled'],
 			'separator' => $this->separator
@@ -590,6 +591,29 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function isReadable($hash='') {
 		return $this->_isReadable($hash ? $this->decode($hash) : $this->root);
+	}
+	
+	/**
+	 * Check if file is folder
+	 *
+	 * @param  string  $hash  file hash
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function isDir($hash) {
+		return $this->_isDir($this->decode($hash));
+	}
+	
+	/**
+	 * Return file parent folder hash
+	 *
+	 * @param  string  $hash  file hash
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function parent($hash) {
+		$path = $this->decode($hash);
+		return $path ? $this->_dirname($path) : '';
 	}
 	
 	/**

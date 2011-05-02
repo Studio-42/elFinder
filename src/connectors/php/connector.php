@@ -1,9 +1,6 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
 
-// sleep(3);
-// exit('{"asd":43}');
-
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
@@ -48,7 +45,7 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
-// sleep(1);
+
 $opts = array(
 	'debug' => true,
 	'roots' => array(
@@ -74,11 +71,11 @@ $opts = array(
 					'hidden' => false
 				),
 				array(
-					'pattern' => '/mimes$/',
+					'pattern' => '/mimes/',
 					'read' => true,
 					'write' => false,
 					'locked' => true,
-					// 'hidden' => false
+					'hidden' => true
 				),
 				array(
 					'pattern' => '/123$/',

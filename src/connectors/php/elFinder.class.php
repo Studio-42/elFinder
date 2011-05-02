@@ -364,28 +364,27 @@ class elFinder {
 		$target = $args['target'];
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-		
-		if (!$volume) {
+
+		if (!$volume || !$volume->fileExists($target)) {
+			// on init request we can get invalid dir hash -
+			// dir which already does not exists but remembered by client,
+			// so open default dir
 			if ($args['init']) {
-				// on init request we can get invalid dir hash -
-				// dir which already does not exists but stored in cookie from last session,
-				// so open default dir
-				$volume = $this->default;
+				if (!$volume) {
+					$volume = $this->default;
+				}
 				$target = $volume->defaultPath();
 			} else {
 				return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 			}
-		} 
+		}
 		
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		} 
 
-		$cwd['path'] = $volume->path($target);
-		$cwd['url']  = $volume->url($target);
-		$cwd = array_merge($cwd, $volume->options());
-		$files = array($cwd);
+		$files = array();
 		
 		// get folders trees
 		if ($args['tree']) {
@@ -412,9 +411,9 @@ class elFinder {
 		}
 
 		$result = array(
-			'cwdhash' => $cwd['hash'],
-			'cwd'   => $cwd,
-			'files' => $files
+			'cwd'     => $cwd,
+			'options' => $volume->options($target),
+			'files'   => $files
 		);
 
 		if (!empty($args['init'])) {
@@ -504,63 +503,49 @@ class elFinder {
 		$removed = array();
 		$added   = array();
 		$groups  = array();
-		$active  = 0;
+		$volume  = $this->volume($current);
 		// sleep(3);
-		// find current volume and check current dir
-		foreach ($this->volumes as $id => $v) {
-			if (strpos($current, $id) === 0) {
-				if (!$v->fileExists($current)) {
-					return array('root' => $v->root(), 'current' => $current);
-				}
-				$active = $id;
+		
+		if (($cwd = $volume->dir($current)) == false) {
+			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
+		} elseif (!$cwd['read']) {
+			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_READ));
+		}
+		
+		// find new in current directory
+		if (($files = $volume->scandir($current, $mimes)) === false) {
+			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
+		}
+		foreach ($files as $file) {
+			if (!in_array($file['hash'], $targets)) {
+				$added[] = $file;
 			}
 		}
-
-		// no current volume or dir
-		if (!$active) {
-			return array('root' => $this->default->root(), 'current' => $current);
-		}
-
+		
 		// find removed files
 		foreach ($this->volumes as $id => $v) {
-			$groups[$id] = array();
-			foreach ($targets as $i => $target) {
-				if (strpos($target, $id) === 0) {
-					if ($v->fileExists($target)) {
-						$groups[$id][] = $target;
-					} else {
-						$removed[] = $target;
-						unset($targets[$i]);
-					}
-				}
-			}
+			// $groups[$id] = array();
 			
-			// find new in current directory
-			if ($id == $active) {
-				if (($files = $v->readdir($current, $mimes)) === false) {
-					return array('root' => $v->root(), 'current' => $current);
-				}
-				foreach ($files as $file) {
-					if (!in_array($file['hash'], $groups[$id]) && !in_array($file, $added)) {
-						$added[] = $file;
-					}
-				}
-			}
-			
-			// find new in tree
 			$dirs = array();
-			// find dirs and store its parents
-			foreach ($groups[$id] as $hash) {
-				if (($dir = $v->dir($hash)) != false) {
-					$dirs[] = $dir['phash'] ? $dir['phash'] : $dir['hash'];
+			
+			foreach ($targets as $i => $hash) {
+				if (strpos($hash, $id) === 0) {
+					if (!$v->fileExists($hash)) {
+						$removed[] = $hash;
+						unset($targets[$i]);
+					} elseif ($v->isDir($hash)) {
+						$phash = $v->parent($hash);
+						$dirs[] = $phash ? $phash : $hash;
+					}
 				}
 			}
+
 			// load tree for every parents dir and check dirs exists in request data
 			$dirs = array_unique($dirs);
 			foreach ($dirs as $hash) {
 				if (($tree = $v->tree($hash, 1)) != false) {
 					foreach ($tree as $dir) {
-						if ($dir['hash'] != $current && !in_array($dir['hash'], $groups[$id]) && !in_array($dir, $added)) {
+						if ($dir['hash'] != $current && !in_array($dir['hash'], $targets) && !in_array($dir, $added)) {
 							$added[] = $dir;
 						}
 					}
@@ -568,7 +553,7 @@ class elFinder {
 			}
 		}
 
-		return array('added' => $added, 'removed' => $removed, 'current' => $current);
+		return array('added' => $added, 'removed' => $removed, 'cwd' => $cwd, 'current' => $current);
 	}
 	
 	/**
@@ -651,7 +636,7 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => 'Folder not found');
 		}
-		sleep(5);
+		// sleep(5);
 		
 		return ($hash = $volume->mkdir($current, $args['name'])) === false
 			? array('error' => $volume->error())

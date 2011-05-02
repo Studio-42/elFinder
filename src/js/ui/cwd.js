@@ -571,7 +571,7 @@ $.fn.elfindercwd = function(fm) {
 			// update directory content
 			.bind('open', function(e) {
 				var list  = fm.view == 'list', 
-					phash = e.data.cwd.hash; 
+					phash = fm.cwd().hash; 
 				
 				tmbUrl = fm.cwd().tmbUrl||'';
 

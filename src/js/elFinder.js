@@ -4,13 +4,6 @@
 		
 		var self = this,
 			/**
-			 * Flag to not fire "load" event twice
-			 *
-			 * @type Boolean
-			 **/
-			loaded = false,
-			
-			/**
 			 * Is shortcuts/commands enabled
 			 *
 			 * @type Boolean
@@ -32,16 +25,6 @@
 			prevEnabled = false,
 			
 			/**
-			 * Is ajax requiest allowed.
-			 * Required to avoid several parallel 'open' command.
-			 * Also required to ignore calls to ajax() method from outside elFinder if its not loaded
-			 * If true, other ajax() call will be ignored.
-			 *
-			 * @type Boolean
-			 **/
-			ajax = true,
-			
-			/**
 			 * Some ajax requests and every modal dialog required to show overlay,
 			 * so we count it to not enable shortcuts until any requests complete and any dialogs closed
 			 *
@@ -50,12 +33,11 @@
 			overlayCnt = 0,
 			
 			/**
-			 * Rules for ajax data validate
+			 * Rules to validate data from backend
 			 *
 			 * @type Object
 			 **/
 			rules = {},
-			
 			
 			/**
 			 * Current working directory
@@ -122,7 +104,7 @@
 			
 			node = $(node),
 			
-			prevContent = $('<div/>'),
+			prevContent = $('<div/>').append(node.contents()),
 			
 			workzone = $('<div class="ui-helper-clearfix ui-corner-all elfinder-workzone"/>'),
 			
@@ -187,27 +169,6 @@
 			},
 			
 			/**
-			 * Valid data for command based on rules
-			 *
-			 * @param  String  command name
-			 * @param  Object  command data
-			 * @return Boolean
-			 **/
-			validCmdData = function(cmd, d) {
-				var rule = rules[cmd] || {}, i;
-
-				for (i in rule) {
-					if (rule.hasOwnProperty(i)) {
-						if ((d[i] === void(0) && rule[i].req)
-						|| (d[i] !== void(0) && rule[i].valid && !rule[i].valid(d[i]))) {
-							return false;
-						}
-					}
-				}
-				return true;
-			},
-			
-			/**
 			 * Store info about files/dirs in "files" object.
 			 * Here we get data.files for new api or data.cdc for old api.
 			 * Files from data.tree for old api adds in cacheTree()
@@ -220,12 +181,10 @@
 				var l = data.length, f, i;
 				
 				// remove only files does not belongs current dir
-				if (clear) {
-					if (self.options.clearCache) {
-						for (i in files) {
-							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
-								delete files[i];
-							}
+				if (clear && self.options.clearCache) {
+					for (i in files) {
+						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
+							delete files[i];
 						}
 					}
 				}
@@ -283,18 +242,15 @@
 						data : {
 							cmd    : 'open',
 							target : self.lastDir(),
+							tree   : true, // required for old api to get cwd parent hash
 							init   : true
 							
 						},
 						error : function() {
 							self.lastDir('');
-							function() {
-								setTimeout(function() {
-									ajax = false;
-									enabled = false;
-									self.destroy();
-								}, 20);
-							}
+							setTimeout(function() {
+								self.destroy(true);
+							}, 20);
 						},
 						success : function(data) {
 							var base = new self.command(self),
@@ -303,12 +259,23 @@
 								cmd,
 								l, 
 								tb = 'elfindertoolbar'+opts.toolbar;
+							
+							if (!data) {
+								data = {};
+							}
 								
-							self.log(data)
 							self.api    = parseFloat(data.api)|| 1;
 							self.newAPI = self.api > 1;
 							self.oldAPI = !self.newAPI;
 							rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
+
+							if (data.error || !rules.open(data)) {
+								self.lastDir('');
+								setTimeout(function() {
+									self.destroy(true);
+								}, 20);
+								return;
+							}
 
 							if (self.oldAPI) {
 								if (data.params) {
@@ -319,7 +286,7 @@
 								self.uploadMaxSize = data.uploadMaxSize;
 								if (opts.sync >= 3000) {
 									setInterval(function() {
-										self.sync();
+										self.sync('silent');
 									}, self.options.sync);
 								}
 							}
@@ -363,17 +330,12 @@
 
 							self.resize(width, height);
 							self.debug('api', self.api);
-							self.trigger('loaded')
+							self.trigger('load')
 							delete listeners.load;
 							loaded = true;
 						}
 					}, 
 					interval;
-				
-				if (self.options.allowNavbar) {// || self.oldAPI) {
-					// old api required tree to get cwd parent hash
-					opts.data.tree = 1;
-				}
 				
 				if (self.visible()) {
 					return self.trigger('focus').ajax(opts);
@@ -411,14 +373,7 @@
 						}
 					});
 				}
-			},
-			
-			/**
-			 * Flag to avoid parallels sync requests 
-			 *
-			 * @type Boolean
-			 **/
-			allowSync = true
+			}
 			;
 
 		/**
@@ -651,6 +606,7 @@
 				options = this.options,
 				mode    = /^sync|bg|silent$/.test(mode) ? mode : 'sync',
 				cmd     = '',
+				jqxhr,
 				params  = {
 					url      : options.url,
 					async    : true,
@@ -658,7 +614,7 @@
 					dataType : 'json',
 					cache    : false,
 					// timeout  : 100,
-					data     : this.customData
+					data     : {}
 				},
 				error = function(xhr, status) {
 					var errors = self.errors, error;
@@ -686,7 +642,7 @@
 						error = [errors.invResponse, errors.emptyData];
 					} else if (response.error) {
 						error = response.error;
-					} else if (!validCmdData(cmd, response)) {
+					} else if (rules[cmd] && !rules[cmd](response)) {
 						error = [errors.invResponse, errors.invData];
 					}
 
@@ -704,30 +660,15 @@
 					
 					// fire event with command name
 					self.trigger(cmd, response);
-				}, 
-				startSync = function() {
-					ajax = false;
-					prevEnabled = enabled;
-					enabled = false;
-					showOverlay();
-					showSpinner();
-					
-				},
-				stopSync = function() {
-					ajax = true;
-					hideSpinner();
-					hideOverlay();
-					prevEnabled && self.trigger('focus');
-				},
+				};
 				
-				en, jqxhr;
-				
+			params.data = $.extend({}, this.customData);
 			if (opts.data) {
 				params = $.extend(true, params, opts);
 			} else {
 				$.extend(params.data, opts);
 			}
-			
+
 			if (!params.data.cmd) {
 				this.debug('error', 'elFinder.ajax() required data.cmd.');
 				return $.Deferred().reject();
@@ -735,51 +676,32 @@
 				
 			params.data.mimes = options.onlyMimes || [];
 			cmd = params.data.cmd;
-			
-			if (ajax && this.visible()) {
-				if (mode == 'sync') {
-					params.beforeSend = startSync;
-					return $.ajax(params)
-							.fail(error)
-							.success(success)
-							.complete(stopSync);
+
+			if (this.visible()) {
+				if (params.data.init) {
+					self.log('clean cahe');
+					files = {}
 				}
-				
-				return jqxhr = $.ajax(params).fail(error).success(success);
+				jqxhr = $.ajax(params).fail(error).success(success);
+				if (mode == 'sync') {
+					prevEnabled = enabled;
+					enabled = false;
+					showOverlay();
+					showSpinner();
+					
+					jqxhr.complete(function() {
+						hideSpinner();
+						hideOverlay();
+						prevEnabled && self.trigger('focus');
+					});
+				}
+				return jqxhr;
 			}
 			
 			return $.Deferred().reject();
 			
 		};
 		
-		/**
-		 * Sync files with connector if other sync request not in progress
-		 * Return true on send requiest
-		 *
-		 * @param  Boolean  do it in sync mode (freeze interface)?
-		 * @return Boolean
-		 **/
-		this.sync = function(sync) {
-			var targets = [];
-			
-			if (this.newAPI && (allowSync || sync)) {
-				$.each(files, function(h) {
-					targets.push(h);
-				});
-				
-				self.ajax({
-					data : {
-						cmd     : 'sync', 
-						current : cwd.hash, 
-						targets : targets
-					},
-					method : 'post',
-					beforeSend : function() { allowSync = false; }
-				}, sync ? 'sync' : 'silent');
-				return true;
-			}
-			return false;
-		}
 		
 		/**
 		 * Attach listener to events
@@ -1069,13 +991,17 @@
 		 *
 		 * @return void
 		 **/
-		this.destroy = function() {
+		this.destroy = function(notRestoreNode) {
 			if (this.node && this.node[0].elfinder) {
+				this.trigger('destroy');
 				listeners = {};
 				shortcuts = {};
 				enabled   = false;
 				ajax      = false;
 				this.node.children().remove();
+				!notRestoreNode && this.node.append(prevContent.contents()).removeClass(this.cssClass);
+
+				// prevContent.unwrap()
 				$(document).unbind('.'+this.namespace);
 				delete this.node[0].elfinder;
 				delete this;
@@ -1145,11 +1071,8 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
-		
-		$.each(node.contents(), function() {
-			prevContent.append(this);
-		});
-		
+		prevContent.append(node.contents());
+
 		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr');
 		
 		if (this.options.cssClass) {
@@ -1224,26 +1147,29 @@
 			.bind('open', function(e) {
 				var data = e.data;
 
-				cwd = $.extend(cwd, e.data.cwd)
-				cache(self.newAPI ? e.data.files : e.data.cdc, true);
+				cwd = $.extend(cwd, self.newAPI ? data.options : {}, data.cwd)
+				// old api - if we get tree - reset cache
+				if (self.oldAPI && data.tree) {
+					files = {};
+					cacheTree(data.tree);
+				}
+				cache(self.newAPI ? data.files : data.cdc, true);
 				
-				
-				if (self.newAPI) {
-					self.log(files[data.cwdhash])
-				} else {					
+				// remember last dir
+				self.lastDir(cwd.hash);
+
+				// fix cwd for old api
+				if (self.oldAPI) {
 					cwd.tmb = !!data.tmb;
-					// old api: if we get tree - reset cache
-					if (data.tree) {
-						files = {};
-						cacheTree(data.tree);
-					} 
-					cwd.path = cwd.rel;
-					delete cwd.rel;
+					
 					// find cwd in cached files and set parent hash
 					cwd.phash  = files[cwd.hash].phash;
 					// if cwd is root - locked it
 					cwd.locked = cwd.phash ? !cwd.rm : true;
 					delete cwd.rm;
+					
+					cwd.path = cwd.rel;
+					delete cwd.rel;
 
 					if (cwd.path.indexOf('\\') != -1) {
 						cwd.separator = '\\';
@@ -1251,21 +1177,7 @@
 						cwd.separator = '/';
 					} 
 				}
-				
-				cache(self.newAPI ? e.data.files : e.data.cdc, true);
-
-				// remember last dir
-				self.lastDir(cwd.hash);
-
-			})
-			/**
-			 * If current dir - go to root dir on sync
-			 */
-			.bind('sync', function(e) {
-				if (e.data.root && e.data.current == cwd.hash) {
-					self.trigger('error', {error : ['"$1" does not exists.', cwd.name]}).open(e.data.root, true);
-				}
-				allowSync = true;
+				// self.log(cwd)
 			})
 			/**
 			 * Update files cache
@@ -1349,7 +1261,7 @@
 			emptyData : 'Data is empty.',
 			invData : 'Invalid data.',
 			
-			notFound     : 'File not found',
+			notFound     : 'File not found.',
 			notDir       : '"$1" is not a folder.',
 			notFile      : '"$1" is not a file.',
 			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
@@ -1445,85 +1357,15 @@
 		
 		rules : {
 			oldapi : {
-				open : {
-					cwd    : {req : true,  valid : $.isPlainObject},
-					tree   : {req : false, valid : $.isPlainObject},
-					params : {req : false, valid : $.isPlainObject}
-				},
-				tree : {
-					tree : {req : true, valid : function() { return false; }}
-				},
-				parents : {
-					tree : {req : true, valid : function() { return false; }}
-				},
-				tmb : {
-					current : {req : true},
-					images  : {req : true, valid : $.isPlainObject}
-				}
+				open    : function(data) { return data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
+				tmb     : function(data) { return data.current && data.images && $.isPlainObject(data.images); }
 			},
 			
 			newapi : {
-				open : {
-					cwd    : {req : true,  valid : $.isPlainObject},
-					files  : {req : true, valid : $.isArray}
-				},
-				tree : {
-					tree : {req : true	}
-				},
-				parents : {
-					tree : {req : true, valid : $.isArray}
-				},
-				tmb : {
-					current : {req : true},
-					images  : {req : true, valid : $.isPlainObject}
-				},
-				rm : {
-					removed : {req : true, valid : $.isArray}
-				},
-				mkdir : {
-					added : {req : true, valid : $.isArray}
-				}
-			}
-		},
-		
-		oldAPIRules : {
-			open : {
-				cwd    : {req : true,  valid : $.isPlainObject},
-				tree   : {req : false, valid : $.isPlainObject},
-				params : {req : false, valid : $.isPlainObject}
-			},
-			tree : {
-				tree : {req : true, valid : function() { return false; }}
-			},
-			parents : {
-				tree : {req : true, valid : function() { return false; }}
-			},
-			tmb : {
-				current : {req : true},
-				images  : {req : true, valid : $.isPlainObject}
-			}
-		},
-		
-		newAPIRules : {
-			open : {
-				cwd    : {req : true,  valid : $.isPlainObject},
-				files  : {req : true, valid : $.isArray}
-			},
-			tree : {
-				tree : {req : true	}
-			},
-			parents : {
-				tree : {req : true, valid : $.isArray}
-			},
-			tmb : {
-				current : {req : true},
-				images  : {req : true, valid : $.isPlainObject}
-			},
-			rm : {
-				removed : {req : true, valid : $.isArray}
-			},
-			mkdir : {
-				added : {req : true, valid : $.isArray}
+				open    : function(data) { return data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
+				tree    : function(data) { return data.tree && $.isArray(data.tree); },
+				parents : function(data) { return data.tree && $.isArray(data.tree); },
+				tmb     : function(data) { return data.current && data.images && $.isPlainObject(data.images); }
 			}
 		},
 		
@@ -1796,18 +1638,43 @@
 			return this.openDir(hash, tree, init);
 		},
 	
+		errorInResponse : function(text, error) {
+			var json, errors, i;
+			
+			if (text) {
+				try {
+					json = $.parseJSON(text);
+				} catch (e) {
+					this.debug('error', 'Unable to parse response text');
+					return false;
+				}
+				errors = json.error;
+				if (!$.isArray(errors)) {
+					errors = [errors];
+				}
+				i = errors.length;
+				while (i--) {
+					if (errors[i] == error) {
+						return true;
+					}
+				}
+			}
+		},
+	
 		/**
 		 * Open directory
 		 * 
 		 * @param  String   directory hash or empty string to open last opened dir
 		 * @param  Boolean  update nav dir tree? 
 		 * @param  Boolean  send init flag? (
-		 * @return elFinder
+		 * @return $.Deferred
 		 */
 		openDir : function(hash, tree, init) {
-			var opts = {cmd : 'open'}, dir;
+			var self = this,
+				opts = {cmd : 'open'}, 
+				dir, jqxhr;
 			
-			hash = hash||this.lastDir()||'';
+			hash = hash||this.lastDir();
 			if (hash && (dir = this.file(hash))) {
 				if (dir.mime != 'directory') {
 					return this.trigger('error', {error : [this.errors.notDir, dir.name]});
@@ -1816,16 +1683,32 @@
 					return this.trigger('error', {error : [this.errors.notRead, dir.name]});
 				}
 			}
-			
 			opts.target = hash;
-			if (tree && !this.allowNavbar) {
+			
+			if ((this.newAPI && tree && this.options.allowNavbar) || this.oldAPI) {
 				opts.tree = 1;
 			}
+
 			if (init) {
-				opts.init = 1;
+				opts.init =1;
 			}
+
+			jqxhr = this.ajax(opts);
 			
-			return this.ajax(opts);
+			return init
+				? jqxhr
+				: jqxhr.then(function(data) {
+					// on 'open' failed try sync current dir
+					if (data && data.error) {
+						self.sync('silent')
+							.then(function(data) {
+								if (data && data.error) {
+									self.lastDir('');
+									self.openDir('', true, true);
+								}
+							});
+					}
+				});
 		},
 		
 		/**
@@ -1869,16 +1752,54 @@
 		},
 		
 		/**
+		 * Sync files with connector if other sync request not in progress
+		 * Return true on send requiest
+		 *
+		 * @param  String  request mode (sync|bg|silent)
+		 * @return $.Deferred
+		 **/
+		sync : function(mode) {
+			var self = this, 
+				cwd = this.cwd(),
+				targets = [];
+			
+			if (this.newAPI) {
+				$.each(this.files(), function(hash) {
+					targets.push(hash);
+				});
+
+				return this.ajax({
+						data   : {cmd : 'sync', current : cwd.hash, targets : targets},
+						method : 'post'
+					},
+					mode
+				);
+			}
+			
+			return $.Deferred.reject();
+		},
+		
+		
+		/**
 		 * Reload current directory
 		 * 
-		 * @return elFinder
+		 * @return $.Deferred
 		 */
 		reload : function() {
+			var self = this;
+			
 			this.trigger('reload').clipboard([], false, true);
 			
-			return this.newAPI 
-				? this.sync(true)
-				: this.openDir(this.cwd().hash, true);
+			return this.newAPI
+				? this.sync("sync")
+					.then(function(data) {
+						// if current dir symc failed - go to default dir
+						if (data && data.error) {
+							self.lastDir('');
+							self.openDir('', true, true);
+						}
+					})
+				: this.openDir(this.cwd().hash, true, true);
 		},
 		
 		/**
