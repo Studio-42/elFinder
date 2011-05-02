@@ -505,8 +505,9 @@ class elFinder {
 		$groups  = array();
 		$volume  = $this->volume($current);
 		// sleep(3);
-		
-		if (($cwd = $volume->dir($current)) == false) {
+		if (!$volume) {
+			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+		} elseif (($cwd = $volume->dir($current)) == false) {
 			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
 		} elseif (!$cwd['read']) {
 			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_READ));

@@ -461,7 +461,13 @@
 		 **/
 		this.sort = this.sortType();
 		
-
+		/**
+		 * Flag - allow sync reuqest?
+		 * Required to aviod several sync at once
+		 *
+		 * @type Boold
+		 **/
+		this.allowSync = true;
 		
 		/**
 		 * Return true if filemanager is active
@@ -647,6 +653,9 @@
 					}
 
 					if (error) {
+						return mode == 'silent'
+							? self.debug('error', self.i18n(error))
+							: self.trigger('error', {error : error, response : response});
 						return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : response});
 					}
 
@@ -1615,6 +1624,47 @@
 		},
 		
 		/**
+		 * Sync files with connector if other sync request not in progress
+		 * Return true on send requiest
+		 *
+		 * @param  String  request mode (sync|bg|silent)
+		 * @return $.Deferred
+		 **/
+		sync : function(mode) {
+			var self    = this, 
+				cwd     = this.cwd(),
+				targets = [];
+			
+			if (this.oldAPI) {
+				return this.openDir(this.lastDir(), true, true);
+			}
+			
+			if (this.allowSync) {
+				this.allowSync = false;
+				$.each(this.files(), function(hash) {
+					targets.push(hash);
+				});
+
+				return this.ajax({
+						data   : {cmd : 'sync', current : cwd.hash, targets : targets},
+						method : 'post'
+					},
+					mode
+				).then(function(data) {
+					self.allowSync = true;
+					if (data && data.error) {
+						if (data.current == cwd.hash) {
+							self.lastDir('');
+							self.openDir('', true, true);
+						}
+					}
+				});
+			}
+			return $.Deferred().reject();
+		},
+		
+		
+		/**
 		 * Open directory/file
 		 * 
 		 * @param  String   file hash
@@ -1636,29 +1686,6 @@
 			}
 			
 			return this.openDir(hash, tree, init);
-		},
-	
-		errorInResponse : function(text, error) {
-			var json, errors, i;
-			
-			if (text) {
-				try {
-					json = $.parseJSON(text);
-				} catch (e) {
-					this.debug('error', 'Unable to parse response text');
-					return false;
-				}
-				errors = json.error;
-				if (!$.isArray(errors)) {
-					errors = [errors];
-				}
-				i = errors.length;
-				while (i--) {
-					if (errors[i] == error) {
-						return true;
-					}
-				}
-			}
 		},
 	
 		/**
@@ -1700,13 +1727,7 @@
 				: jqxhr.then(function(data) {
 					// on 'open' failed try sync current dir
 					if (data && data.error) {
-						self.sync('silent')
-							.then(function(data) {
-								if (data && data.error) {
-									self.lastDir('');
-									self.openDir('', true, true);
-								}
-							});
+						self.sync('silent');
 					}
 				});
 		},
@@ -1751,33 +1772,6 @@
 			return this;
 		},
 		
-		/**
-		 * Sync files with connector if other sync request not in progress
-		 * Return true on send requiest
-		 *
-		 * @param  String  request mode (sync|bg|silent)
-		 * @return $.Deferred
-		 **/
-		sync : function(mode) {
-			var self = this, 
-				cwd = this.cwd(),
-				targets = [];
-			
-			if (this.newAPI) {
-				$.each(this.files(), function(hash) {
-					targets.push(hash);
-				});
-
-				return this.ajax({
-						data   : {cmd : 'sync', current : cwd.hash, targets : targets},
-						method : 'post'
-					},
-					mode
-				);
-			}
-			
-			return $.Deferred.reject();
-		},
 		
 		
 		/**
@@ -1790,16 +1784,7 @@
 			
 			this.trigger('reload').clipboard([], false, true);
 			
-			return this.newAPI
-				? this.sync("sync")
-					.then(function(data) {
-						// if current dir symc failed - go to default dir
-						if (data && data.error) {
-							self.lastDir('');
-							self.openDir('', true, true);
-						}
-					})
-				: this.openDir(this.cwd().hash, true, true);
+			return this.sync("sync");
 		},
 		
 		/**
