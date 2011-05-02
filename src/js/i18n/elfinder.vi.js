@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Liên kết tới',
 		'Dimensions'  : 'Kích thước',
 		'Confirmation required' : 'Yêu cầu xác nhận',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Bạn có chắc là muốn xóa tập tin? <br /> Không thể phục hồi!',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Bạn có chắc là muốn xóa tập tin? <br /> Không thể phục hồi!',
 		/* permissions */
 		'read'        : 'đọc',
 		'write'       : 'ghi',
