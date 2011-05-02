@@ -1,7 +1,8 @@
 /**
  * Turkish translation
  * @author Özgür Çakırca <dijitalartist@gmail.com>
- * @version 2010-10-21
+ * @author Mesut Erdemir <erdemirmesut@gmail.com>
+ * @version 2010-11-03
  */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
