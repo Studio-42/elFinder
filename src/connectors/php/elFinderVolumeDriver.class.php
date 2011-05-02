@@ -371,7 +371,20 @@ abstract class elFinderVolumeDriver {
 	public function id() {
 		return $this->id;
 	}
-				
+		
+
+	/**
+	 * Return debug info for client
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function debug() {
+		return array(
+			'mimeDetect' => $this->mimeDetect,
+			'imgLib'     => $this->imgLib
+		);
+	}
 	/**
 	 * "Mount" volume.
 	 * Return true if volume available for read or write, 
@@ -563,10 +576,11 @@ abstract class elFinderVolumeDriver {
 	public function options($hash) {
 		return array(
 			'path' => $this->path($hash),
-			'url'       => $this->URL,
-			'tmbUrl'    => $this->tmbURL,
-			'disabled'  => $this->options['disabled'],
-			'separator' => $this->separator
+			'url'        => $this->URL,
+			'tmbUrl'     => $this->tmbURL,
+			'disabled'   => $this->options['disabled'],
+			'separator'  => $this->separator,
+			'uplMaxSize' => ini_get('upload_max_filesize')
 		);
 	}
 	

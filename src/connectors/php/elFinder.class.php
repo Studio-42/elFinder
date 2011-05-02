@@ -299,12 +299,15 @@ class elFinder {
 		if ($this->debug || !empty($args['debug'])) {
 			$result['debug'] = array(
 				'connector' => 'php', 
-				'time'      => $this->utime() - $this->time
+				'time'      => $this->utime() - $this->time,
+				'volumes' => array()
 				);
 			
-			// foreach ($this->volumes as $id => $volume) {
-			// 	$result['debug'][$id] = $volume->debug();
-			// }
+			foreach ($this->volumes as $id => $volume) {
+				$result['debug']['volumes'][] = array_merge(
+					array('id' => $id, 'driver' => substr(get_class($volume), strlen('elfinderdriver'))), 
+					$volume->debug());
+			}
 		}
 		
 		return $result;

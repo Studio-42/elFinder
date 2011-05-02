@@ -277,18 +277,10 @@
 								return;
 							}
 
-							if (self.oldAPI) {
-								if (data.params) {
-									cwd.url = data.params.url;
-									self.uploadMaxSize = data.params.uploadMaxSize;
-								}
-							} else {
-								self.uploadMaxSize = data.uploadMaxSize;
-								if (opts.sync >= 3000) {
-									setInterval(function() {
-										self.sync('silent');
-									}, self.options.sync);
-								}
+							if (opts.sync >= 3000) {
+								setInterval(function() {
+									self.sync('silent');
+								}, self.options.sync);
 							}
 							
 							dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
@@ -1156,7 +1148,7 @@
 			.bind('open', function(e) {
 				var data = e.data;
 
-				cwd = $.extend(cwd, self.newAPI ? data.options : {}, data.cwd)
+				cwd = $.extend(cwd, self.newAPI ? data.options : data.params, data.cwd);
 				// old api - if we get tree - reset cache
 				if (self.oldAPI && data.tree) {
 					files = {};
@@ -1186,7 +1178,8 @@
 						cwd.separator = '/';
 					} 
 				}
-				// self.log(cwd)
+
+				data.debug && self.debug('backend-debug', data.debug);
 			})
 			/**
 			 * Update files cache
