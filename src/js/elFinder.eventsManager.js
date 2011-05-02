@@ -289,7 +289,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 		
 		$('a:not(.noaccess,.readonly)', this.tree).droppable({
 			tolerance : 'pointer',
-			accept : '(div,tr)[key]',
+			accept : 'div[key],tr[key]',
 			over   : function() { $(this).addClass('el-finder-droppable'); },
 			out    : function() { $(this).removeClass('el-finder-droppable'); },
 			drop   : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }
@@ -352,7 +352,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			.filter('.directory')
 			.droppable({
 				tolerance : 'pointer',
-				accept    : '(div,tr)[key]',
+				accept    : 'div[key],tr[key]',
 				over      : function() { $(this).addClass('el-finder-droppable');  },
 				out       : function() { $(this).removeClass('el-finder-droppable'); },
 				drop      : function(e, ui) { $(this).removeClass('el-finder-droppable'); self.fm.drop(e, ui, $(this).attr('key')); }

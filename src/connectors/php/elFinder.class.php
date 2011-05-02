@@ -598,7 +598,8 @@ class elFinder {
 				} elseif (!$this->_isUploadAllow($_FILES['upload']['name'][$i], $_FILES['upload']['tmp_name'][$i])) {
 					$this->_errorData($_FILES['upload']['name'][$i], 'Not allowed file type');					
 				} else {
-					$file = $dir.DIRECTORY_SEPARATOR.$_FILES['upload']['name'][$i];
+					$name = $this->_checkName($_FILES['upload']['name'][$i]);
+					$file = $dir.DIRECTORY_SEPARATOR.$name;
 					if (!@move_uploaded_file($_FILES['upload']['tmp_name'][$i], $file)) {
 						$this->_errorData($_FILES['upload']['name'][$i], 'Unable to save uploaded file');	
 					} else {
@@ -1927,6 +1928,3 @@ class elFinder {
 	}	
 	
 }
-
-
-?>
