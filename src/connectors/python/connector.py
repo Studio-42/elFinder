@@ -2,7 +2,10 @@
 
 
 import cgi
-import json
+try:
+	import json
+except ImportError:
+	import simplejson as json
 import elFinder
 
 # configure connector options
