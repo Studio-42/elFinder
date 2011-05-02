@@ -112,9 +112,10 @@ class connector():
 	httpResponse = None
 
 	def __init__(self, opts):
-
 		for opt in opts:
 			self._options[opt] = opts.get(opt)
+
+		self._response['debug'] = {}
 
 		self._options['URL'] = self._options['URL'].rstrip('/')
 		self._options['root'] = self._options['root'].rstrip(os.sep)
@@ -130,7 +131,9 @@ class connector():
 			if not os.path.exists(self._options['tmbDir']):
 				self._options['tmbDir'] = False
 
-	def _reset_run(self):
+
+	def __reset(self):
+		"""Flush per request variables"""
 		self.httpStatusCode = 0
 		self.httpHeader = {}
 		self.httpResponse = None
@@ -138,8 +141,6 @@ class connector():
 		self._response = {}
 		self._errorData = {}
 		self._form = {}
-		self._im = None
-		self._sp = None
 
 		self._time = time.time()
 		t = datetime.fromtimestamp(self._time)
@@ -148,9 +149,10 @@ class connector():
 
 		self._response['debug'] = {}
 
+
 	def run(self, httpRequest = []):
 		"""main function"""
-		self._reset_run()
+		self.__reset()
 		rootOk = True
 		if not os.path.exists(self._options['root']) or self._options['root'] == '':
 			rootOk = False
@@ -193,7 +195,6 @@ class connector():
 					'extract': self._options['archivers']['extract'].keys(),
 					'url': url
 				}
-
 
 		if self._errorData:
 			self._response['errorData'] = self._errorData

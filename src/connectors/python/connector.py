@@ -15,7 +15,7 @@ opts = {
 	'URL': 'http://localhost:8001/~troex/git/elfinder/files',
 	## other options
 	'debug': True,
-	'fileURL': False,  # download files using connector, no direct urls to files
+	'fileURL': True,  # download files using connector, no direct urls to files
 	# 'dirSize': True,
 	# 'dotFiles': True,
 	# 'perms': {
