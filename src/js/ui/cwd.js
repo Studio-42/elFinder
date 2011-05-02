@@ -605,7 +605,7 @@ $.fn.elfindercwd = function(fm) {
 						} else {
 							e.data.tmb = false;
 						
-							if ((ndx = indexof(hash)) != -1) {
+							if ((ndx = index(hash)) != -1) {
 								buffer[ndx].tmb = url;
 							}
 						}

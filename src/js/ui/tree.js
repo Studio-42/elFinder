@@ -327,8 +327,8 @@
 			fm
 				// update tree
 				.bind('open', function(e) {
-					proccess(e)
-					// setTimeout(function() { proccess(e) }, 20)
+					// proccess(e)
+					setTimeout(function() { proccess(e) }, 20)
 				})
 				.bind('tree parents added', proccess)
 				// remove dirs from tree

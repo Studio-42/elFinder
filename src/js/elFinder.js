@@ -221,13 +221,13 @@
 
 				add(dir);
 				phash = dir.hash; 
-				// self.log(dir.name+' '+dir.hash)
+
 				while (l--) {
 					dir = childs[l];
-					dir.dirs && dir.dirs.length ? cacheTree(dir.dirs, phash) : add(dir);
 					if (!cwd.phash && dir.hash == cwd.hash) {
 						cwd.phash = phash;
 					}
+					dir.dirs && dir.dirs.length ? cacheTree(dir, phash) : add(dir);
 				}
 			},
 			
@@ -1178,7 +1178,7 @@
 						cwd.separator = '/';
 					} 
 				}
-
+				// self.log(cwd)
 				data.debug && self.debug('backend-debug', data.debug);
 			})
 			/**
@@ -1639,8 +1639,8 @@
 				});
 
 				return this.ajax({
-						data   : {cmd : 'sync', current : cwd.hash, targets : targets},
-						method : 'post'
+						data : {cmd : 'sync', current : cwd.hash, targets : targets},
+						type : 'post'
 					},
 					mode
 				).then(function(data) {
