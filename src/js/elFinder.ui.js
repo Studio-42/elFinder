@@ -694,7 +694,7 @@ elFinder.prototype.ui.prototype.commands = {
 			};
 			if (ids.length) {
 				this.fm.lockShortcuts(true);
-				$('<div><div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong>'+this.fm.i18n('Are you shure you want to remove files?<br /> This cannot be undone!')+'</strong></div></div>')
+				$('<div><div class="ui-state-error ui-corner-all"><span class="ui-icon ui-icon-alert"/><strong>'+this.fm.i18n('Are you sure you want to remove files?<br /> This cannot be undone!')+'</strong></div></div>')
 					.dialog({
 						title       : this.fm.i18n('Confirmation required'),
 						dialogClass : 'el-finder-dialog',

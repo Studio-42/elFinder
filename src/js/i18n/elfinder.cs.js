@@ -83,7 +83,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Odkaz na',
 		'Dimensions'  : 'Rozměry',
 		'Confirmation required' : 'Vyžadováno potvrzení',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Jse si jist, že chcete odstranit soubory?<br />Tato operace je nevratná!',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Jse si jist, že chcete odstranit soubory?<br />Tato operace je nevratná!',
 		/* permissions */
 		'read'        : 'čtení',
 		'write'       : 'zápis',

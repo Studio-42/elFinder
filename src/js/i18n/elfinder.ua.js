@@ -80,7 +80,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Вказує',
 		'Dimensions'  : 'Дозвіл',
 		'Confirmation required' : 'Необхідно підтвердити',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Ви впевнені, що хочете видалити файл? <br /> Дія є незворотнім.',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Ви впевнені, що хочете видалити файл? <br /> Дія є незворотнім.',
 		/* permissions */
 		'read'        : 'читання',
 		'write'       : 'запис',

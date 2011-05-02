@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Bağlantı',
 		'Dimensions'  : 'Boyutlar',
 		'Confirmation required' : 'Onay gerekli',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Dosyayı silmek istediğinizden emin misiniz? <br /> eylem geri döndürülemez',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Dosyayı silmek istediğinizden emin misiniz? <br /> eylem geri döndürülemez',
 		/* permissions */
 		'read'        : 'okuma',
 		'write'       : 'yazma',

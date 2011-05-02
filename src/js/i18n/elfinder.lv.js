@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Uzrāda uz',
 		'Dimensions'  : 'Atļauja',
 		'Confirmation required' : 'Nepieciešas apstiprinājums',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Vai tiešām vēlaties dzēst failus? <br />Darbība neatgriezināma.',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Vai tiešām vēlaties dzēst failus? <br />Darbība neatgriezināma.',
 		/* permissions */
 		'read'        : 'rasīšana',
 		'write'       : 'rakstīšana',

@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Enlaza con',
 		'Dimensions'  : 'Dimensiones',
 		'Confirmation required' : 'Se requiere confirmación',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : '¿Está seguir que desea eliminar el fichero? <br />Esta acción es irreversible.',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : '¿Está seguir que desea eliminar el fichero? <br />Esta acción es irreversible.',
 		/* permissions */
 		'read'        : 'lectura',
 		'write'       : 'escritura',

@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'リンク先',
 		'Dimensions'  : '画像サイズ',
 		'Confirmation required' : '確認',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'ファイルを削除します。よろしいですか？<br />この操作は取り消しできません！',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'ファイルを削除します。よろしいですか？<br />この操作は取り消しできません！',
 		/* permissions */
 		'read'        : '読み取り',
 		'write'       : '書き込み',

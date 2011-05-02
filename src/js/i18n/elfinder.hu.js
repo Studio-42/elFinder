@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
         'Link to'     : 'Link',
         'Dimensions'  : 'Dimenziók',
         'Confirmation required' : 'Megerősítés szükséges',
-        'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Biztosan törölni szeretné a fájlokat? <br />A művelet visszavonhatatlan!',
+        'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Biztosan törölni szeretné a fájlokat? <br />A művelet visszavonhatatlan!',
         /* permissions */
         'read'        : 'olvasás',
         'write'       : 'írás',

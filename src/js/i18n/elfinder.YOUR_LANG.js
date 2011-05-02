@@ -84,7 +84,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : '',
 		'Dimensions'  : '',
 		'Confirmation required' : '',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : '',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : '',
 		/* permissions */
 		'read'        : '',
 		'write'       : '',

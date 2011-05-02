@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'ลิงค์ไปยัง',
 		'Dimensions'  : 'ความละเอียด',
 		'Confirmation required' : 'ยืนยันการดำเนินการ',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'คุณแน่ใจว่าจะลบไฟล์นี้? <br />ซึ่งไม่สามารถกู้คืนได้',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'คุณแน่ใจว่าจะลบไฟล์นี้? <br />ซึ่งไม่สามารถกู้คืนได้',
 		/* permissions */
 		'read'        : 'อ่าน',
 		'write'       : 'เขียน',

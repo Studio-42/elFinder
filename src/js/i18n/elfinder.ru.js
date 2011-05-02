@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : 'Указывает',
 		'Dimensions'  : 'Разрешение',
 		'Confirmation required' : 'Требуется подтверждение',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : 'Вы уверены, что хотите удалить файл? <br />Действие необратимо.',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : 'Вы уверены, что хотите удалить файл? <br />Действие необратимо.',
 		/* permissions */
 		'read'        : 'чтение',
 		'write'       : 'запись',

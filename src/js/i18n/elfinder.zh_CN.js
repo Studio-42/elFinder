@@ -81,7 +81,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Link to'     : '链接',
 		'Dimensions'  : '尺寸',
 		'Confirmation required' : '需要确认',
-		'Are you shure you want to remove files?<br /> This cannot be undone!' : '你确定要删除的文件吗？ <br />行动是不可逆转的。',
+		'Are you sure you want to remove files?<br /> This cannot be undone!' : '你确定要删除的文件吗？ <br />行动是不可逆转的。',
 		/* permissions */
 		'read'        : '读',
 		'write'       : '写',
