@@ -305,7 +305,7 @@ class elFinder {
 		if (isset($_GET['init'])) {
 			
 			$ts = $this->_utime();
-			$this->_result['disabled'] = $this->_options['disabled'];
+			$this->_result['disabled'] = array_values($this->_options['disabled']);
 			
 			$this->_result['params'] = array(
 				'dotFiles'   => $this->_options['dotFiles'],
