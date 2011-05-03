@@ -45,7 +45,7 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
-
+//a0_bWltZXM  a0_bWltZXMucG5n
 $opts = array(
 	'debug' => true,
 	'roots' => array(
@@ -75,7 +75,7 @@ $opts = array(
 					'read' => true,
 					'write' => false,
 					'locked' => true,
-					'hidden' => true
+					// 'hidden' => true
 				),
 				array(
 					'pattern' => '/123$/',
@@ -83,7 +83,7 @@ $opts = array(
 					// 'write' => false,
 					// 'locked' => true,
 				)
-			)
+			),
 			// 'startPath'   => '../../../files/mimes/',
 			// 'defaults' => array('read' => false)
 		),

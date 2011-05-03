@@ -99,24 +99,26 @@ class elFinder {
 	const ERROR_CONF_NO_VOL          = 3;
 	const ERROR_UNKNOWN_CMD          = 4;
 	const ERROR_INV_PARAMS           = 5;
-	const ERROR_NOT_FOUND            = 6;
-	const ERROR_NOT_READ             = 7;
-	const ERROR_NOT_DIR              = 8;
-	const ERROR_NOT_FILE             = 9;
-	const ERROR_NOT_LIST             = 10;
-	const ERROR_LOCKED               = 11;
-	const ERROR_REMOVE               = 12;
-	const ERROR_NOT_COPY             = 13;
-	const ERROR_NOT_WRITE            = 14;
-	const ERROR_NOT_REPLACE          = 15;
-	const ERROR_COPY                 = 16;
-	const ERROR_NOT_COPY_INTO_ITSELF = 17;
-	const ERROR_INVALID_NAME         = 18;
-	const ERROR_RENAME               = 19;
-	const ERROR_POST_DATA_MAXSIZE    = 20;
-	const ERROR_NOT_RENAME           = 21;
-	const ERROR_FILE_EXISTS          = 22;
-	const ERROR_NOT_RM_BY_PARENT     = 23;
+	const ERROR_FILE_NOT_FOUND       = 6;
+	const ERROR_DIR_NOT_FOUND        = 7;
+	const ERROR_NOT_OPEN             = 8;
+	const ERROR_NOT_READ             = 9;
+	const ERROR_NOT_DIR              = 10;
+	const ERROR_NOT_FILE             = 11;
+	const ERROR_READ_DIR             = 12;
+	const ERROR_LOCKED               = 13;
+	const ERROR_REMOVE               = 14;
+	const ERROR_NOT_COPY             = 15;
+	const ERROR_NOT_WRITE            = 16;
+	const ERROR_NOT_REPLACE          = 17;
+	const ERROR_COPY                 = 18;
+	const ERROR_NOT_COPY_INTO_ITSELF = 19;
+	const ERROR_INVALID_NAME         = 20;
+	const ERROR_RENAME               = 21;
+	const ERROR_POST_DATA_MAXSIZE    = 22;
+	const ERROR_NOT_RENAME           = 23;
+	const ERROR_FILE_EXISTS          = 24;
+	const ERROR_NOT_RM_BY_PARENT     = 25;
 	
 	/**
 	 * undocumented class variable
@@ -125,29 +127,31 @@ class elFinder {
 	 **/
 	protected static $errors = array(
 		0  => 'Unknown error.',
-		1  => 'Invalid backend configuration. $1',
+		1  => 'Invalid backend configuration.',
 		2  => 'PHP JSON module not installed.',
 		3  => 'There are no one readable volumes available.',
 		4  => 'Unknown command.',
 		5  => 'Invalid parameters.',
 		6  => 'File not found.',
-		7  => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		8  => '"$1" is not a folder.',
-		9  => '"$1" is not a file.',
-		10 => 'Unable to get "$1" folders list.',
-		11 => 'File "$1" locked and can’t be removed or renamed.',
-		12 => 'Unable to remove "$1".',
-		13 => '"$1" can’t be copied because you don’t have permission to see its contents.',
-		14 => 'You don’t have permission to write into "$1".',
-		15 => 'Object named "$1" exists and can’t be replaced.',
-		16 => 'Unable to copy "$1" to "$2".',
-		17 => 'Unable to copy "$1" into itself.',
-		18 => 'File name "$1" is not allowed.',
-		19 => 'Unable to rename "$1" into "$2".',
-		20 => 'Data exceeds the maximum allowed size.',
-		21 => '"$1" can’t be renamed because parent folder is read only.',
-		22 => 'Object with name "$1" already exists in this location.',
-		23 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
+		7  => 'Folder not found.',
+		8  => 'Unable to open location. $1',
+		9  => '"$1" can’t be opened because you don’t have permission to see its contents.',
+		10 => '"$1" is not a folder.',
+		11 => '"$1" is not a file.',
+		12 => 'Unable to read folder "$1" content.',
+		13 => 'Object "$1" locked and can’t be removed or renamed.',
+		14 => 'Unable to remove "$1".',
+		15 => '"$1" can’t be copied because you don’t have permission to see its contents.',
+		16 => 'You don’t have permission to write into "$1".',
+		17 => 'Object named "$1" exists and can’t be replaced.',
+		18 => 'Unable to copy "$1" to "$2".',
+		19 => 'Unable to copy "$1" into itself.',
+		20 => 'File name "$1" is not allowed.',
+		21 => 'Unable to rename "$1" into "$2".',
+		22 => 'Data exceeds the maximum allowed size.',
+		23 => '"$1" can’t be renamed because parent folder is read only.',
+		24 => 'Object with name "$1" already exists in this location.',
+		25 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
 	);
 	
 	/**
@@ -288,10 +292,10 @@ class elFinder {
 	public function exec($cmd, $args) {
 		
 		if (!$this->loaded) {
-			return array('error' => 'Invalid backend configuration');
+			return array('error' => $this->errorMessage(self::ERROR_CONF, self::ERROR_CONF_NO_VOL));
 		}
 		if (!$this->commandExists($cmd)) {
-			return array('error' => 'Unknown command');
+			return array('error' => $this->errorMessage(self::ERROR_UNKNOWN_CMD));
 		}
 		
 		$result = $this->$cmd($args);
@@ -368,17 +372,15 @@ class elFinder {
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
 
-		if (!$volume || !$volume->fileExists($target)) {
+		if (!$volume || !$volume->isDir($target) || !$volume->isReadable($target)) {
 			// on init request we can get invalid dir hash -
 			// dir which already does not exists but remembered by client,
 			// so open default dir
 			if ($args['init']) {
-				if (!$volume) {
-					$volume = $this->default;
-				}
+				$volume = $this->default;
 				$target = $volume->defaultPath();
 			} else {
-				return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+				return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 			}
 		}
 		
@@ -392,11 +394,7 @@ class elFinder {
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
-				$tree = $v->tree();
-				if ($tree === false && $id == $volume->id()) {
-					return array('error' => $this->errorMessage($volume->error()));
-				}
-				if ($tree) {
+				if (($tree = $v->tree()) != false) {
 					$files = array_merge($files, $tree);
 				}
 			}
@@ -412,7 +410,9 @@ class elFinder {
 				$files[] = $file;
 			}
 		}
-
+		
+		$files[] = $cwd;
+		
 		$result = array(
 			'cwd'     => $cwd,
 			'options' => $volume->options($target),
@@ -438,9 +438,9 @@ class elFinder {
 		$dir = $args['target'];
 		
 		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		}
-		if (($tree = $volume->tree($dir)) === false) {
+		if (($tree = $volume->tree($dir)) == false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		}
 		return array('tree' => $tree);

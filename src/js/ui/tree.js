@@ -281,9 +281,6 @@
 						if (id == fm.cwd().hash) {
 							// already current dir - toggle subdirs
 							dir.children('.'+collapsed).click();
-						} else if (dir.is('.elfinder-na,.elfinder-wo')) {
-							// not readable dir
-							fm.trigger('error', {error : [['The folder "$1" can’t be opened because you don’t have permission to see its contents.', $.trim(dir.text())]]});
 						} else {
 							// change dir
 							fm.open(id);

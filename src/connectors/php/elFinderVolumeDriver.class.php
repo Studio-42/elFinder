@@ -115,9 +115,9 @@ abstract class elFinderVolumeDriver {
 	protected $treeDeep = 1;
 	
 	/**
-	 * undocumented class variable
+	 * Errors from last failed action
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $error = array();
 	
@@ -641,7 +641,7 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($hash);
 		if (($file = $this->stat($path)) == false
 		|| $file['hidden']) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		unset($file['hidden']);
 		return $file;
@@ -655,13 +655,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function dir($hash) {
-		if (($dir = $this->file($hash)) != false) {
-			return $dir['mime'] == 'directory' 
-				? $dir 
-				: $this->setError(elFinder::ERROR_NOT_DIR, $this->path($hash));
+		if (($dir = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 		}
 		
-		return false;
+		return $dir['mime'] == 'directory' 
+			? $dir 
+			: $this->setError(elFinder::ERROR_NOT_DIR, $this->path($hash));
 	}
 	
 	/**
@@ -692,15 +692,15 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function tree($hash='', $deep=0) {
 		$hash = $hash ? $hash : $this->encode($this->root);
-		
+
 		if (($dir = $this->dir($hash)) == false) {
 			return false;
 		}
-		
+
  		unset($dir['hidden']);
 		$dirs = $dir['read'] ? $this->gettree($this->decode($hash), $deep > 0 ? $deep -1 : $this->treeDeep-1) : array();
 		array_unshift($dirs, $dir);
-		// debug($dirs);
+
 		return $dirs;
 	}
 	
@@ -712,30 +712,34 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function parents($hash) {
-		if (($dir = $this->dir($hash)) == false) {
+		if (($current = $this->dir($hash)) == false) {
 			return false;
 		}
 
 		$path = $this->decode($hash);
-		$tree = array($dir);
+		$tree = array();
 		
 		while ($path && $path != $this->root) {
 			$path = $this->_dirname($path);
-			$dir  = $this->stat($path);
-			if (!$dir || !$dir['read'] || $dir['hidden']) {
-				return array();
+			if (($dir = $this->stat($path)) == false || $dir['hidden']) {
+				return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+			} elseif (!$dir['read']) {
+				return $this->setError(elFinder::ERROR_NOT_READ, $this->_path($path));
 			}
 			unset($dir['hidden']);
 			array_unshift($tree, $dir);
 			if ($path != $this->root) {
-				foreach ($this->getScandir($path) as $dir) {
+				foreach ($this->gettree($path, 0) as $dir) {
 					if (!in_array($dir, $tree)) {
+						unset($dir['hidden']);
 						$tree[] = $dir;
 					}
 				}
+				
 			}
 		}
-		return $tree;
+
+		return $tree ? $tree : array($current);
 	}
 	
 	/**

@@ -1178,8 +1178,9 @@
 						cwd.separator = '/';
 					} 
 				}
-				// self.log(cwd)
+				self.log(files[cwd.hash])
 				data.debug && self.debug('backend-debug', data.debug);
+				// self.trigger('error', {error : [self.errors.notRead, cwd.name]});
 			})
 			/**
 			 * Update files cache
@@ -2213,6 +2214,41 @@
 		 * @return String
 		 **/
 		i18n : function(msg) { 
+			var messages = this.messages, ignore = [], i;
+			var self = this;
+			
+			// this.log(msg)
+			// this.log($.isArray(msg))
+			
+			if ($.isArray(msg)) {
+				if (msg.length == 1) {
+					msg = msg[0];
+				} else {
+					i = msg.length-1;
+					while (i--) {
+						// this.log(msg[i])
+						msg[i] = msg[i].replace(/\$(\d+)/g, function(m, num) { 
+							num = i + parseInt(num);
+							if (num > 0 && msg[num]) {
+								ignore.push(num)
+								return msg[num];
+							}
+							return '';
+						});
+						
+					}
+					msg = $.map(msg, function(e, i) { return $.inArray(i, ignore) === -1 ? e : null; }).join(' ');
+					
+				}
+			}
+			
+			if (typeof(msg) != 'string') {
+				msg = msg.toString();
+				this.debug('error', 'Invalid message : '+msg)
+			}
+			
+			return msg.replace(/\$(\d+)/g, '');
+			
 			var msg = $.isArray(msg) ? msg : [msg],
 				messages = this.messages;
 			

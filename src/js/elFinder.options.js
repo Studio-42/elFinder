@@ -195,7 +195,7 @@ elFinder.prototype.options = {
 	selectMultiple : false,
 	commandsOptions : {},
 	// debug : true
-	debug : ['error', 'backend-debug']
+	debug : ['error', 'event-error']
 }
 
 })(jQuery);
