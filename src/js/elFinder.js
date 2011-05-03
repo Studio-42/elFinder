@@ -1178,7 +1178,7 @@
 						cwd.separator = '/';
 					} 
 				}
-				self.log(files[cwd.hash])
+				// self.log(files[cwd.hash])
 				data.debug && self.debug('backend-debug', data.debug);
 				// self.trigger('error', {error : [self.errors.notRead, cwd.name]});
 			})
@@ -1627,16 +1627,19 @@
 		sync : function(mode) {
 			var self    = this, 
 				cwd     = this.cwd(),
-				targets = [];
+				targets = {};
 			
 			if (this.oldAPI) {
 				return this.openDir(this.lastDir(), true, true);
 			}
-			
 			if (this.allowSync) {
 				this.allowSync = false;
-				$.each(this.files(), function(hash) {
-					targets.push(hash);
+				$.each(this.files(), function(hash, file) {
+					delete file['hash'];
+					delete file['phash'];
+					delete file['tmb']
+					targets[hash] = file;
+					// targets.push(hash);
 				});
 
 				return this.ajax({
@@ -1645,6 +1648,7 @@
 					},
 					mode
 				).then(function(data) {
+					// alert('fuck')
 					self.allowSync = true;
 					if (data && data.error) {
 						if (data.current == cwd.hash) {

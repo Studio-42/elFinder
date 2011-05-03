@@ -101,24 +101,23 @@ class elFinder {
 	const ERROR_INV_PARAMS           = 5;
 	const ERROR_FILE_NOT_FOUND       = 6;
 	const ERROR_DIR_NOT_FOUND        = 7;
-	const ERROR_NOT_OPEN             = 8;
-	const ERROR_NOT_READ             = 9;
-	const ERROR_NOT_DIR              = 10;
-	const ERROR_NOT_FILE             = 11;
-	const ERROR_READ_DIR             = 12;
-	const ERROR_LOCKED               = 13;
-	const ERROR_REMOVE               = 14;
-	const ERROR_NOT_COPY             = 15;
-	const ERROR_NOT_WRITE            = 16;
-	const ERROR_NOT_REPLACE          = 17;
-	const ERROR_COPY                 = 18;
-	const ERROR_NOT_COPY_INTO_ITSELF = 19;
-	const ERROR_INVALID_NAME         = 20;
-	const ERROR_RENAME               = 21;
-	const ERROR_POST_DATA_MAXSIZE    = 22;
-	const ERROR_NOT_RENAME           = 23;
-	const ERROR_FILE_EXISTS          = 24;
-	const ERROR_NOT_RM_BY_PARENT     = 25;
+	const ERROR_NOT_READ             = 8;
+	const ERROR_NOT_DIR              = 9;
+	const ERROR_NOT_FILE             = 10;
+	const ERROR_READ_DIR             = 11;
+	const ERROR_LOCKED               = 12;
+	const ERROR_REMOVE               = 13;
+	const ERROR_NOT_COPY             = 14;
+	const ERROR_NOT_WRITE            = 15;
+	const ERROR_NOT_REPLACE          = 16;
+	const ERROR_COPY                 = 17;
+	const ERROR_NOT_COPY_INTO_ITSELF = 18;
+	const ERROR_INVALID_NAME         = 19;
+	const ERROR_RENAME               = 20;
+	const ERROR_POST_DATA_MAXSIZE    = 21;
+	const ERROR_NOT_RENAME           = 22;
+	const ERROR_FILE_EXISTS          = 23;
+	const ERROR_NOT_RM_BY_PARENT     = 24;
 	
 	/**
 	 * undocumented class variable
@@ -134,24 +133,23 @@ class elFinder {
 		5  => 'Invalid parameters.',
 		6  => 'File not found.',
 		7  => 'Folder not found.',
-		8  => 'Unable to open location. $1',
-		9  => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		10 => '"$1" is not a folder.',
-		11 => '"$1" is not a file.',
-		12 => 'Unable to read folder "$1" content.',
-		13 => 'Object "$1" locked and can’t be removed or renamed.',
-		14 => 'Unable to remove "$1".',
-		15 => '"$1" can’t be copied because you don’t have permission to see its contents.',
-		16 => 'You don’t have permission to write into "$1".',
-		17 => 'Object named "$1" exists and can’t be replaced.',
-		18 => 'Unable to copy "$1" to "$2".',
-		19 => 'Unable to copy "$1" into itself.',
-		20 => 'File name "$1" is not allowed.',
-		21 => 'Unable to rename "$1" into "$2".',
-		22 => 'Data exceeds the maximum allowed size.',
-		23 => '"$1" can’t be renamed because parent folder is read only.',
-		24 => 'Object with name "$1" already exists in this location.',
-		25 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
+		8  => '"$1" can’t be opened because you don’t have permission to see its contents.',
+		9  => '"$1" is not a folder.',
+		10 => '"$1" is not a file.',
+		11 => 'Unable to read folder "$1" content.',
+		12 => 'Object "$1" locked and can’t be removed or renamed.',
+		13 => 'Unable to remove "$1".',
+		14 => '"$1" can’t be copied because you don’t have permission to see its contents.',
+		15 => 'You don’t have permission to write into "$1".',
+		16 => 'Object named "$1" exists and can’t be replaced.',
+		17 => 'Unable to copy "$1" to "$2".',
+		18 => 'Unable to copy "$1" into itself.',
+		19 => 'File name "$1" is not allowed.',
+		20 => 'Unable to rename "$1" into "$2".',
+		21 => 'Data exceeds the maximum allowed size.',
+		22 => '"$1" can’t be renamed because parent folder is read only.',
+		23 => 'Object with name "$1" already exists in this location.',
+		24 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
 	);
 	
 	/**
@@ -304,7 +302,8 @@ class elFinder {
 			$result['debug'] = array(
 				'connector' => 'php', 
 				'time'      => $this->utime() - $this->time,
-				'volumes' => array()
+				'memory'    => ceil(memory_get_peak_usage()/1024).'Kb / '.ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
+				'volumes'   => array()
 				);
 			
 			foreach ($this->volumes as $id => $volume) {
@@ -358,7 +357,7 @@ class elFinder {
 	 * "Open" directory
 	 * Return array with following elements
 	 *  - cwd          - opened dir info
-	 *  - files        - opened dir content [and dirs tree if args[tree]]
+	 *  - files        - opened dir content [and dirs tree if $args[tree]]
 	 *  - api          - api version (if $args[init])
 	 *  - uplMaxSize   - if $args[init]
 	 *  - error        - on failed
@@ -507,36 +506,48 @@ class elFinder {
 		$added   = array();
 		$groups  = array();
 		$volume  = $this->volume($current);
-		// sleep(3);
+		
 		if (!$volume) {
-			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		} elseif (($cwd = $volume->dir($current)) == false) {
 			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
 		} elseif (!$cwd['read']) {
 			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_READ));
 		}
 		
-		// find new in current directory
+		// get current directory content
 		if (($files = $volume->scandir($current, $mimes)) === false) {
 			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
 		}
+		// debug($files);
+		// find diff in current directory
 		foreach ($files as $file) {
-			if (!in_array($file['hash'], $targets)) {
+			$hash = $file['hash'];
+			if (empty($targets[$hash])) {
+				// new file
 				$added[] = $file;
+			} else {
+				if (!$this->equal($file, $targets[$hash])) {
+					// modified
+					$removed[] = $hash;
+					$added[]   = $file;
+				}
+				$targets[$hash] = null;
+				unset($targets[$hash]);
 			}
+			
+			
 		}
 		
 		// find removed files
 		foreach ($this->volumes as $id => $v) {
-			// $groups[$id] = array();
-			
 			$dirs = array();
 			
-			foreach ($targets as $i => $hash) {
+			foreach ($targets as $hash => $file) {
 				if (strpos($hash, $id) === 0) {
 					if (!$v->fileExists($hash)) {
 						$removed[] = $hash;
-						unset($targets[$i]);
+						unset($targets[$hash]);
 					} elseif ($v->isDir($hash)) {
 						$phash = $v->parent($hash);
 						$dirs[] = $phash ? $phash : $hash;
@@ -549,15 +560,36 @@ class elFinder {
 			foreach ($dirs as $hash) {
 				if (($tree = $v->tree($hash, 1)) != false) {
 					foreach ($tree as $dir) {
-						if ($dir['hash'] != $current && !in_array($dir['hash'], $targets) && !in_array($dir, $added)) {
-							$added[] = $dir;
+						if ($dir['hash'] != $current) {
+							if (empty($targets[$dir['hash']])) {
+								if (!in_array($dir, $added)) {
+									$added[] = $dir;
+								}
+							} elseif (!$this->equal($dir, $targets[$dir['hash']])) {
+								$removed[] = $dir['hash'];
+								$added[]   = $dir;
+							}
 						}
 					}
 				}
 			}
 		}
-
+	
 		return array('added' => $added, 'removed' => $removed, 'cwd' => $cwd, 'current' => $current);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function equal($file1, $file2) {
+		return $file1['name'] == $file2['name'] && $file1['mime'] == $file2['mime'] && $file1['date'] == $file2['date']
+			&& $file1['read'] == $file2['read'] 
+			&& $file1['write'] == $file2['write']
+			&& $file1['locked'] == $file2['locked']
+			&& intval(isset($file1['dirs'])) == intval(isset($file2['dirs']));
 	}
 	
 	/**

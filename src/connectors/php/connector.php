@@ -52,6 +52,7 @@ $opts = array(
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
+			'alias' => 'fs',
 			// 'startPath' => '../../../files/mimes',
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
@@ -90,7 +91,7 @@ $opts = array(
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,
-			'startPath' => 6,
+			// 'startPath' => 6,
 			'user' => 'dio',
 			'pass' => 'hane',
 			'db' => 'elfinder',

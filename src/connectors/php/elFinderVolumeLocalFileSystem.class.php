@@ -542,13 +542,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($path) {
 		$files = array();
-		$ls    = @scandir($path);
 		
-		if (is_array($ls)) {
-			for ($i =0, $l = count($ls); $i < $l; $i++) {
-				if ($ls[$i] != '.' && $ls[$i] != '..') {
-					$files[] = $path.DIRECTORY_SEPARATOR.$ls[$i];	
-				}
+		foreach (scandir($path) as $name) {
+			if ($name != '.' && $name != '..') {
+				$files[] = $path.DIRECTORY_SEPARATOR.$name;
 			}
 		}
 		return $files;
