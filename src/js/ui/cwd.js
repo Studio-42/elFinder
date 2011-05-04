@@ -605,38 +605,16 @@ $.fn.elfindercwd = function(fm) {
 						fm.log('go')
 						fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 					}
-					// $.each(e.data.images, function(hash, url) {
-					// 	var node = cwd.find('#'+hash), ndx;
-					// 
-					// 	if (node.length) {
-					// 		
-					// 		(function(node, tmb) {
-					// 			fm.log(tmb)
-					// 			$('<img src="'+tmb+'"/>').bind('load', function() {
-					// 				fm.log('load')
-					// 				node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat");
-					// 			})
-					// 		})(node, tmbUrl+url)
-					// 		
-					// 		
-					// 	} else {
-					// 		e.data.tmb = false;
-					// 	
-					// 		if ((ndx = index(hash)) != -1) {
-					// 			buffer[ndx].tmb = url;
-					// 		}
-					// 	}
-					// });
-					// old api
-					// e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 				}
 			})
 			// add new files
 			.bind('added', function(e) {
-				var phash   = fm.cwd().hash,
-					l       = e.data.added.length, f,
-					tmbs    = [],
-					append  = function(f) {
+				var phash  = fm.cwd().hash,
+					l      = e.data.added.length, f,
+					atmb   = {},
+					ltmb   = [],
+					place  = fm.view == 'list' ? cwd.find('tbody') : cwd,
+					append = function(f) {
 						var node = itemhtml(f),
 							i, first, curr;
 					
@@ -659,18 +637,22 @@ $.fn.elfindercwd = function(fm) {
 							return buffer.push(f);
 						}
 					
-						(fm.view == 'list' ? cwd.find('tbody') : cwd).append(node);
-					};
+						place.append(node);
+					},
+					hash;
 			
 				while (l--) {
 					f = e.data.added[l];
-					if (f.phash == phash && !cwd.find('#'+f.hash).length) {
+					hash = f.hash;
+					if (phash == phash && !cwd.find('#'+hash).length) {
 						append(f);
-						f.tmb === 1 && tmbs.push(f.hash);
+						if (f.tmb) {
+							f.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = f.tmb);
+						}
 					}
 				}
-			
-				tmbs.length && fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
+				attachThumbnails(atmb);
+				ltmb.length && fm.ajax({cmd : 'tmb', current : phash, files : ltmb}, 'silent');
 			})
 			// remove files
 			.bind('removed', function(e) {
