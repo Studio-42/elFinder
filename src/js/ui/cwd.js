@@ -137,9 +137,9 @@ $.fn.elfindercwd = function(fm) {
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
 				},
-				style : function(f) {
-					return typeof(f.tmb) == 'string' ? ' style="background:url(\''+tmbUrl+f.tmb+'\') center center no-repeat"' : '';
-				}
+				// style : function(f) {
+				// 	return typeof(f.tmb) == 'string' ? ' style="background:url(\''+tmbUrl+f.tmb+'\') center center no-repeat"' : '';
+				// }
 			},
 			
 			/**
@@ -335,14 +335,6 @@ $.fn.elfindercwd = function(fm) {
 			},
 			
 			/**
-			 * Last rendered file 
-			 * Required to start lazy load
-			 *
-			 * @type JQuery
-			 **/
-			last,
-			
-			/**
 			 * Files we get from server but not show yet
 			 *
 			 * @type Array
@@ -366,19 +358,7 @@ $.fn.elfindercwd = function(fm) {
 				return -1;
 			},
 			
-			/**
-			 * Flag to aviod unnessesary paralell scroll event handlers cals
-			 *
-			 * @type  Boolean
-			 */
-			scrollLock = false,
-			
-			/**
-			 * Flag to aviod cwd scrolled into prev position after page reload
-			 *
-			 * @type  Boolean
-			 */
-			scrollTop = false,
+			scrollEvent = 'scroll.'+fm.namespace,
 
 			/**
 			 * Cwd scroll event handler.
@@ -386,52 +366,75 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @return void
 			 */
-			scroll = function() {
-				var html = [],  
-					tmbs = [],
-					dirs = false, 
+			render = function() {
+				var html  = [],  
+					dirs  = false, 
+					ltmb  = [],
+					atmb  = {},
+					last  = cwd.find('[id]:last'),
+					top   = !last.length,
+					place = fm.view == 'list' ? cwd.children('table').children('tbody') : cwd,
 					files;
-				
-				if (buffer.length) {
-					if (!scrollLock) {
-						scrollLock = true;
-						
-						while ((!last || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
-							&& (files = buffer.splice(0, fm.options.showFiles)).length) {
-							
-							html = $.map(files, function(f) {
-								if (f.hash && f.name) {
-									if (f.mime == 'directory') {
-										dirs = true;
-									}
-									if (f.tmb === 1) {
-										tmbs.push(f.hash)
-									}
-									return itemhtml(f);
-								}
-								return null;
-							});
 
-							(fm.view == 'list' ? cwd.children('table').children('tbody') : cwd).append(html.join(''));
-							
-							last = cwd.find('[id]:last');
-							scrollTop && cwd.scrollTop(0);
-							
-						}
-						scrollLock = false;
-						if (dirs) {
-							setTimeout(function() {
-								cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
-							}, 20);
-						}
-						if (tmbs.length || fm.cwd().tmb) {
-							fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : tmbs}, 'silent');
-						} 
-						
-					}
-				} else {
-					cwd.unbind('scroll', scroll);
+				if (!buffer.length) {
+					return cwd.unbind(scrollEvent);
 				}
+
+				while ((!last.length || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
+					&& (files = buffer.splice(0, fm.options.showFiles)).length) {
+					
+					ltmb = [];
+					atmb = {};
+					html = $.map(files, function(f) {
+						if (f.hash && f.name) {
+							if (f.mime == 'directory') {
+								dirs = true;
+							}
+							if (f.tmb) {
+								f.tmb === 1 ? ltmb.push(f.hash) : (atmb[f.hash] = f.tmb)
+							}
+							return itemhtml(f);
+						}
+						return null;
+					});
+
+					place.append(html.join(''));
+					last = cwd.find('[id]:last');
+					top && cwd.scrollTop(0);
+					attachThumbnails(atmb);
+
+					if (ltmb.length || fm.option('tmb')) {
+						fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : ltmb}, 'silent')
+					}
+				}
+				
+				if (dirs) {
+					setTimeout(function() {
+						cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+					}, 20);
+				}
+				
+			},
+			
+			attachThumbnails = function(images) {
+				var ret = true;
+				$.each(images, function(hash, tmb) {
+					var node = cwd.find('#'+hash);
+					if (node.length) {
+						(function(node, tmb) {
+							$('<img src="'+tmb+'"/>').load(function() {
+								$(this).unbind('load');
+								node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat");
+							})
+						})(node, tmbUrl+tmb);
+					} else {
+						ret = false;
+						if ((ndx = index(hash)) != -1) {
+							buffer[ndx].tmb = tmb;
+						}
+					}
+				});
+				return ret;
 			},
 			
 			/**
@@ -573,7 +576,7 @@ $.fn.elfindercwd = function(fm) {
 				var list  = fm.view == 'list', 
 					phash = fm.cwd().hash; 
 				
-				tmbUrl = fm.cwd().tmbUrl||'';
+				tmbUrl = fm.option('tmbUrl');
 
 				cwd.html('')
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
@@ -588,30 +591,44 @@ $.fn.elfindercwd = function(fm) {
 					: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
 					
 				buffer = buffer.sort(compare);
-				scrollTop = true;
-				cwd.bind('scroll', scroll).trigger('scroll');
-				scrollTop = false;
+				
+				cwd.bind(scrollEvent, render).trigger('scroll');
+
 				trigger();
 
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {
 				if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
-					$.each(e.data.images, function(hash, url) {
-						var node = cwd.find('#'+hash), ndx;
-
-						if (node.length) {
-							node.find('.elfinder-cwd-icon').css('background', "url('"+tmbUrl+url+"') center center no-repeat");
-						} else {
-							e.data.tmb = false;
-						
-							if ((ndx = index(hash)) != -1) {
-								buffer[ndx].tmb = url;
-							}
-						}
-					});
+					
+					if (attachThumbnails(e.data.images) && e.data.tmb) {
+						fm.log('go')
+						fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
+					}
+					// $.each(e.data.images, function(hash, url) {
+					// 	var node = cwd.find('#'+hash), ndx;
+					// 
+					// 	if (node.length) {
+					// 		
+					// 		(function(node, tmb) {
+					// 			fm.log(tmb)
+					// 			$('<img src="'+tmb+'"/>').bind('load', function() {
+					// 				fm.log('load')
+					// 				node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat");
+					// 			})
+					// 		})(node, tmbUrl+url)
+					// 		
+					// 		
+					// 	} else {
+					// 		e.data.tmb = false;
+					// 	
+					// 		if ((ndx = index(hash)) != -1) {
+					// 			buffer[ndx].tmb = url;
+					// 		}
+					// 	}
+					// });
 					// old api
-					e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
+					// e.data.tmb && fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 				}
 			})
 			// add new files

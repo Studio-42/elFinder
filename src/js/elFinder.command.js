@@ -103,7 +103,7 @@ elFinder.prototype.command = function(fm) {
 		this._listeners = [];
 
 		!this._required && fm.bind('open', function() {
-			self._enabled = $.inArray(self.name, fm.cwd().disabled) === -1;
+			self._enabled = fm.isCommandEnabled(self.name);
 		});
 		
 		$.each($.extend({}, handlers, this._handlers), function(e, c) {

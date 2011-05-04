@@ -308,9 +308,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					$file['tmb'] = 1;
 				}
 
-				if ($file['write'] && $this->resizable($file['mime'])) {
-					$file['resize'] = 1;
-				}
 			}
 		} 
 		

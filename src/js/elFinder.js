@@ -44,21 +44,16 @@
 			 *
 			 * @type Object
 			 **/
-			cwd = {
-				hash     : '',
-				phash    : '',
-				name     : '',
+			cwdOptions = {
 				path     : '',
 				url      : '',
 				tmbUrl   : '',
 				disabled : [],
-				date     : '',
-				read     : 1,
-				write    : 1,
-				locked   : 1,
-				files    : 0,
-				size     : 0
+				uplMaxSize : '',
+				separator : '/'
 			},
+			
+			cwd = '',
 			
 			/**
 			 * Files/dirs cache
@@ -170,32 +165,25 @@
 			
 			/**
 			 * Store info about files/dirs in "files" object.
-			 * Here we get data.files for new api or data.cdc for old api.
+			 * Here we proccess data.files for new api or data.cdc for old api.
 			 * Files from data.tree for old api adds in cacheTree()
 			 *
-			 * @param  Array    files
-			 * @param  Boolean  remove files does not belongs current working directory?
+			 * @param  Array  files
 			 * @return void
 			 **/
-			cache = function(data, clear) {
-				var l = data.length, f, i;
-				
-				// remove only files does not belongs current dir
-				if (clear && self.options.clearCache) {
-					for (i in files) {
-						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash != cwd.hash) {
-							delete files[i];
-						}
-					}
-				}
+			cache = function(data) {
+				var l = data.length, f;
 
 				while (l--) {
 					f = data[l];
 					if (self.oldAPI) {
-						f.phash = cwd.hash;
+						f.phash = cwd;
 						f.locked = !f.rm;
 						delete f.rm;
+						delete f.url;
+						delete f.resize;
 					}
+					// delete f.tmb;
 					files[f.hash] = f;
 				}
 			},
@@ -224,9 +212,9 @@
 
 				while (l--) {
 					dir = childs[l];
-					if (!cwd.phash && dir.hash == cwd.hash) {
-						cwd.phash = phash;
-					}
+					// if (!cwd.phash && dir.hash == cwd.hash) {
+					// 	cwd.phash = phash;
+					// }
 					dir.dirs && dir.dirs.length ? cacheTree(dir, phash) : add(dir);
 				}
 			},
@@ -490,7 +478,15 @@
 		 * @return Object
 		 */
 		this.cwd = function() {
-			return cwd;
+			return files[cwd];
+		}
+		
+		this.option = function(name) {
+			return cwdOptions[name]||'';
+		}
+		
+		this.isCommandEnabled = function(name) {
+			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : true;
 		}
 		
 		/**
@@ -519,7 +515,7 @@
 		 * @return String
 		 */
 		this.path = function(file) {
-			return cwd.path + (file.hash == cwd.hash ? '' : cwd.separator+file.name);
+			return cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name);
 		}
 		
 		/**
@@ -530,13 +526,12 @@
 		 */
 		this.url = function(file) {
 			var path = '';
-			if (this.isNewApi) {
-				if (cwd.url) {
-					path = this.path(file).replace(cwd.separator, '/');
-					return cwd.url + path.substr(path.indexOf('/')+1);
-				}
+
+			if (cwdOptions.url) {
+				path = this.path(file).replace(cwdOptions.separator, '/');
+				return cwdOptions.url + path.substr(path.indexOf('/')+1);
 			}
-			return file.url;
+			return '';
 		}
 		
 		/**
@@ -577,16 +572,13 @@
 		/**
 		 * Proccess ajax request.
 		 * Fired events :
-		 *  - "ajaxstart" before request,
-		 *  - "ajaxstop"  on request complete,
-		 *  - "ajaxerror" on request failed
 		 *  - "error" on error from backend
 		 *  - event with command name on request success
 		 *  - "added"/"removed" if response contains data with this names
 		 *
 		 * @example
 		 * 1. elfinder.ajax({cmd : 'open', init : true}) - request lock interface till request complete
-		 * 2. elfinder.ajax({data : {...}, comlete : function() { ... }}, 'bg') 
+		 * 2. elfinder.ajax({data : {...}, complete : function() { ... }}, 'bg') 
 		 *        - add handler to request 'complete' event 
 		 *          and produce request without lock interface,
 		 *          but errors will shown
@@ -597,7 +589,7 @@
 		 * 		"sync"   - does not create real sync request, only block other elFinder requests until end
 		 * 		"bg"     - do not block other requests, on error - show message
 		 * 		"silent" - do not block other requests, send error message to debug
-		 * @return elFinder
+		 * @return $.Deferred
 		 */
 		this.ajax = function(opts, mode) {
 			var self    = this,
@@ -630,8 +622,9 @@
 						default:
 							error = xhr && parseInt(xhr.status) > 400 ? errors.noConnect : errors.invResponse;
 					}
-					self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, mode : mode});
-					
+					mode == 'silent' 
+						? self.debug('error', self.i18n(error))
+						: self.trigger('error', {error : error, response : response});
 				},
 				success = function(response) {
 					var errors = self.errors, error;
@@ -648,7 +641,6 @@
 						return mode == 'silent'
 							? self.debug('error', self.i18n(error))
 							: self.trigger('error', {error : error, response : response});
-						return self[mode == 'silent' ? 'debug' : 'trigger']('error', {error : error, response : response});
 					}
 
 					if (response.warning) {
@@ -1146,8 +1138,62 @@
 			 * Set params if required and update files cache
 			 */
 			.bind('open', function(e) {
-				var data = e.data;
+				var data = e.data, i;
+				
+				if (data.api || data.params) {
+					// init - reset cache
+					files = {};
+				} else {
+					// remove only files from prev cwd
+					for (i in files) {
+						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash == cwd) {
+							delete files[i];
+						}
+					}
+				}
+				
+				if (self.newAPI) {
+					cwd = data.cwd;
+					cwdOptions = $.extend({}, cwdOptions, data.options);
+					cache(data.files);
+					// self.log(files)
+				} else {
+					// self.log(data)
+					cwd = data.cwd.hash;
+					
+					data.tree && cacheTree(data.tree)
+					cache(data.cdc);
+					if (files[cwd].phash) {
+						data.cwd.phash = files[cwd].phash;
+					}
+					
+					cwdOptions = $.extend({}, cwdOptions, data.params, {path : data.cwd.rel, disabled : data.disabled});
+					delete data.cwd.rel;
+					
+					if (cwdOptions.path.indexOf('\\') != -1) {
+						cwdOptions.separator = '\\';
+					} else if (cwdOptions.path.indexOf('/') != -1) {
+						cwdOptions.separator = '/';
+					}
+					
+					cwdOptions.tmb = !!data.tmb;
 
+					files[cwd] = data.cwd;
+					self.log(cwdOptions)
+					
+					
+				}
+				
+				if (!files[cwd]) {
+					e.preventDefault();
+					return self.trigger('error', {error : [self.errors.invResponse, self.errors.invData]});
+				}
+				self.lastDir(cwd);
+				data.debug && self.debug('backend-debug', data.debug);
+				return;
+				
+				
+				
 				cwd = $.extend(cwd, self.newAPI ? data.options : data.params, data.cwd);
 				// old api - if we get tree - reset cache
 				if (self.oldAPI && data.tree) {
@@ -1365,7 +1411,7 @@
 			},
 			
 			newapi : {
-				open    : function(data) { return data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
+				open    : function(data) { return data.cwd && data.files && typeof(data.cwd) == 'string' && $.isArray(data.files); },
 				tree    : function(data) { return data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data.tree && $.isArray(data.tree); },
 				tmb     : function(data) { return data.current && data.images && $.isPlainObject(data.images); }
@@ -1633,30 +1679,52 @@
 				return this.openDir(this.lastDir(), true, true);
 			}
 			if (this.allowSync) {
+				targets = $.map(this.files(), function(f, hash) { return hash; });
 				this.allowSync = false;
-				$.each(this.files(), function(hash, file) {
-					delete file['hash'];
-					delete file['phash'];
-					delete file['tmb']
-					targets[hash] = file;
-					// targets.push(hash);
-				});
-
 				return this.ajax({
 						data : {cmd : 'sync', current : cwd.hash, targets : targets},
 						type : 'post'
 					},
 					mode
-				).then(function(data) {
-					// alert('fuck')
+				).always(function() {
 					self.allowSync = true;
-					if (data && data.error) {
-						if (data.current == cwd.hash) {
-							self.lastDir('');
-							self.openDir('', true, true);
+				})
+				.done(function(data) {
+					var removed = [],
+						added   = [];
+						
+					self.log(data)
+					
+					$.each(data.files, function(i, file) {
+						var hash = file.hash,
+							prev = self.file(hash);
+						
+						if (prev.name  != file.name 
+						|| prev.phash  != file.phash 
+						|| prev.mime   != file.mime
+						|| prev.read   != file.read
+						|| prev.write  != file.write
+						|| prev.locked != file.locked
+						|| prev.date   != file.date
+						|| prev.dirs   != file.dirs) {
+							removed.push(hash);
+							added.push(file)
 						}
-					}
-				});
+						
+					})
+					
+				})
+				
+				// .then(function(data) {
+				// 	// alert('fuck')
+				// 	self.allowSync = true;
+				// 	if (data && data.error) {
+				// 		if (data.current == cwd.hash) {
+				// 			self.lastDir('');
+				// 			self.openDir('', true, true);
+				// 		}
+				// 	}
+				// });
 			}
 			return $.Deferred().reject();
 		},
@@ -1694,7 +1762,7 @@
 		 * @param  Boolean  send init flag? (
 		 * @return $.Deferred
 		 */
-		openDir : function(hash, tree, init) {
+		openDir : function(hash, init) {
 			var self = this,
 				opts = {cmd : 'open'}, 
 				dir, jqxhr;
@@ -1710,12 +1778,13 @@
 			}
 			opts.target = hash;
 			
-			if ((this.newAPI && tree && this.options.allowNavbar) || this.oldAPI) {
-				opts.tree = 1;
-			}
 
 			if (init) {
 				opts.init =1;
+				if ((this.newAPI && this.options.allowNavbar) || this.oldAPI) {
+					opts.tree = 1;
+				}
+				
 			}
 
 			jqxhr = this.ajax(opts);
@@ -2219,10 +2288,6 @@
 		 **/
 		i18n : function(msg) { 
 			var messages = this.messages, ignore = [], i;
-			var self = this;
-			
-			// this.log(msg)
-			// this.log($.isArray(msg))
 			
 			if ($.isArray(msg)) {
 				if (msg.length == 1) {

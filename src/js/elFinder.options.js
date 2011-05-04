@@ -194,6 +194,7 @@ elFinder.prototype.options = {
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
 	commandsOptions : {},
+	clearCache : true,
 	// debug : true
 	debug : ['error', 'backend-debug']
 }

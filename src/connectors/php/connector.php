@@ -55,6 +55,7 @@ $opts = array(
 			'alias' => 'fs',
 			// 'startPath' => '../../../files/mimes',
 			'URL'    => 'http://localhost/git/elfinder/files/',
+			// 'tmbPath' => '.tmb',
 			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(

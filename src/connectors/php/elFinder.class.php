@@ -410,10 +410,12 @@ class elFinder {
 			}
 		}
 		
-		$files[] = $cwd;
+		if (!in_array($cwd, $files)) {
+			$files[] = $cwd;
+		}
 		
 		$result = array(
-			'cwd'     => $cwd,
+			'cwd'     => $cwd['hash'],
 			'options' => $volume->options($target),
 			'files'   => $files
 		);
@@ -503,7 +505,7 @@ class elFinder {
 		$targets = $args['targets'];
 		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$removed = array();
-		$added   = array();
+		
 		$groups  = array();
 		$volume  = $this->volume($current);
 		
@@ -519,6 +521,38 @@ class elFinder {
 		if (($files = $volume->scandir($current, $mimes)) === false) {
 			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
 		}
+		
+		foreach ($this->volumes as $id => $v) {
+			$dirs = array();
+			// find removed files
+			foreach ($targets as $i => $hash) {
+				if (strpos($hash, $id) === 0) {
+					if (!$v->fileExists($hash)) {
+						unset($targets[$i]);
+						$removed[] = $hash;
+					} elseif ($v->isDir($hash)) {
+						// store parent dir hash
+						$phash = $v->parent($hash);
+						$dirs[] = $phash ? $phash : $hash;
+					}
+				}
+			}
+			$dirs = array_unique($dirs);
+			
+			foreach ($dirs as $hash) {
+				if (($tree = $v->tree($hash, 0)) != false) {
+					foreach ($tree as $dir) {
+						if (!in_array($dir, $files)) {
+							$files[] = $dir;
+						}
+					}
+				}
+			}
+			
+		}
+		
+		return array('current' => $current, 'removed' => $removed, 'files' => $files);
+	
 		// debug($files);
 		// find diff in current directory
 		foreach ($files as $file) {

@@ -1162,15 +1162,10 @@ abstract class elFinderVolumeDriver {
 				if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
 					$file['dim'] = $dim;
 				}
-				
 				if (($tmb = $this->gettmb($path)) != false) {
 					$file['tmb'] = $tmb;
 				} elseif ($this->canCreateTmb($path, $file['mime'])) {
 					$file['tmb'] = 1;
-				}
-				
-				if ($file['write'] && $this->resizable($file['mime'])) {
-					$file['resize'] = 1;
 				}
 			}
 		}
@@ -1213,20 +1208,6 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function mimeAccepted($mime, $mimes) {
 		return in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
-	}
-	
-	/**
-	 * Return true if file can be resized by current driver
-	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function resizable($mime) {
-		return $this->imgLib 
-			&& strpos('image', $mime) === 0 
-			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
 	}
 	
 	/**
@@ -1440,7 +1421,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmbname($path) {
-		return md5(basename($path)).'.png';
+		return md5($path).'.png';
 	}
 	
 	/**
@@ -1477,7 +1458,9 @@ abstract class elFinderVolumeDriver {
 			&& $this->tmbURL
 			&& $this->tmbPathWritable 
 			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
-			&& $this->resizable($mime);
+			&& $this->imgLib 
+			&& strpos($mime, 'image') === 0 
+			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
 	}
 	
 	/**
