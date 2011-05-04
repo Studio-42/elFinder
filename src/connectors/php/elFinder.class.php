@@ -29,11 +29,11 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'sort' => false),
+		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('current' => true, 'files' => true),
-		'sync'      => array('current' => true, 'targets' => true, 'mimes' => false),
+		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
 		'file'      => array('target' => true),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
@@ -494,136 +494,14 @@ class elFinder {
 	}
 	
 	/**
-	 * Check for new/removed files
+	 * Call "open" command
 	 *
 	 * @param  array  command arguments
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function sync($args) {
-		$current = $args['current'];
-		$targets = $args['targets'];
-		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
-		$removed = array();
-		
-		$groups  = array();
-		$volume  = $this->volume($current);
-		
-		if (!$volume) {
-			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
-		} elseif (($cwd = $volume->dir($current)) == false) {
-			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
-		} elseif (!$cwd['read']) {
-			return array('current' => $current, 'error' => $this->errorMessage(self::ERROR_NOT_READ));
-		}
-		
-		// get current directory content
-		if (($files = $volume->scandir($current, $mimes)) === false) {
-			return array('current' => $current, 'error' => $this->errorMessage($volume->error()));
-		}
-		
-		foreach ($this->volumes as $id => $v) {
-			$dirs = array();
-			// find removed files
-			foreach ($targets as $i => $hash) {
-				if (strpos($hash, $id) === 0) {
-					if (!$v->fileExists($hash)) {
-						unset($targets[$i]);
-						$removed[] = $hash;
-					} elseif ($v->isDir($hash)) {
-						// store parent dir hash
-						$phash = $v->parent($hash);
-						$dirs[] = $phash ? $phash : $hash;
-					}
-				}
-			}
-			$dirs = array_unique($dirs);
-			
-			foreach ($dirs as $hash) {
-				if (($tree = $v->tree($hash, 0)) != false) {
-					foreach ($tree as $dir) {
-						if (!in_array($dir, $files)) {
-							$files[] = $dir;
-						}
-					}
-				}
-			}
-			
-		}
-		
-		return array('current' => $current, 'removed' => $removed, 'files' => $files);
-	
-		// debug($files);
-		// find diff in current directory
-		foreach ($files as $file) {
-			$hash = $file['hash'];
-			if (empty($targets[$hash])) {
-				// new file
-				$added[] = $file;
-			} else {
-				if (!$this->equal($file, $targets[$hash])) {
-					// modified
-					$removed[] = $hash;
-					$added[]   = $file;
-				}
-				$targets[$hash] = null;
-				unset($targets[$hash]);
-			}
-			
-			
-		}
-		
-		// find removed files
-		foreach ($this->volumes as $id => $v) {
-			$dirs = array();
-			
-			foreach ($targets as $hash => $file) {
-				if (strpos($hash, $id) === 0) {
-					if (!$v->fileExists($hash)) {
-						$removed[] = $hash;
-						unset($targets[$hash]);
-					} elseif ($v->isDir($hash)) {
-						$phash = $v->parent($hash);
-						$dirs[] = $phash ? $phash : $hash;
-					}
-				}
-			}
-
-			// load tree for every parents dir and check dirs exists in request data
-			$dirs = array_unique($dirs);
-			foreach ($dirs as $hash) {
-				if (($tree = $v->tree($hash, 1)) != false) {
-					foreach ($tree as $dir) {
-						if ($dir['hash'] != $current) {
-							if (empty($targets[$dir['hash']])) {
-								if (!in_array($dir, $added)) {
-									$added[] = $dir;
-								}
-							} elseif (!$this->equal($dir, $targets[$dir['hash']])) {
-								$removed[] = $dir['hash'];
-								$added[]   = $dir;
-							}
-						}
-					}
-				}
-			}
-		}
-	
-		return array('added' => $added, 'removed' => $removed, 'cwd' => $cwd, 'current' => $current);
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function equal($file1, $file2) {
-		return $file1['name'] == $file2['name'] && $file1['mime'] == $file2['mime'] && $file1['date'] == $file2['date']
-			&& $file1['read'] == $file2['read'] 
-			&& $file1['write'] == $file2['write']
-			&& $file1['locked'] == $file2['locked']
-			&& intval(isset($file1['dirs'])) == intval(isset($file2['dirs']));
+		return $this->open($args);
 	}
 	
 	/**

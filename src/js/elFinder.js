@@ -449,6 +449,8 @@
 		 **/
 		this.allowSync = true;
 		
+		
+		
 		/**
 		 * Return true if filemanager is active
 		 *
@@ -1156,9 +1158,7 @@
 					cwd = data.cwd;
 					cwdOptions = $.extend({}, cwdOptions, data.options);
 					cache(data.files);
-					// self.log(files)
 				} else {
-					// self.log(data)
 					cwd = data.cwd.hash;
 					
 					data.tree && cacheTree(data.tree)
@@ -1179,9 +1179,6 @@
 					cwdOptions.tmb = !!data.tmb;
 
 					files[cwd] = data.cwd;
-					self.log(cwdOptions)
-					
-					
 				}
 				
 				if (!files[cwd]) {
@@ -1190,43 +1187,6 @@
 				}
 				self.lastDir(cwd);
 				data.debug && self.debug('backend-debug', data.debug);
-				return;
-				
-				
-				
-				cwd = $.extend(cwd, self.newAPI ? data.options : data.params, data.cwd);
-				// old api - if we get tree - reset cache
-				if (self.oldAPI && data.tree) {
-					files = {};
-					cacheTree(data.tree);
-				}
-				cache(self.newAPI ? data.files : data.cdc, true);
-				
-				// remember last dir
-				self.lastDir(cwd.hash);
-
-				// fix cwd for old api
-				if (self.oldAPI) {
-					cwd.tmb = !!data.tmb;
-					
-					// find cwd in cached files and set parent hash
-					cwd.phash  = files[cwd.hash].phash;
-					// if cwd is root - locked it
-					cwd.locked = cwd.phash ? !cwd.rm : true;
-					delete cwd.rm;
-					
-					cwd.path = cwd.rel;
-					delete cwd.rel;
-
-					if (cwd.path.indexOf('\\') != -1) {
-						cwd.separator = '\\';
-					} else if (cwd.path.indexOf('/') != -1 || !cwd.separator) {
-						cwd.separator = '/';
-					} 
-				}
-				// self.log(files[cwd.hash])
-				data.debug && self.debug('backend-debug', data.debug);
-				// self.trigger('error', {error : [self.errors.notRead, cwd.name]});
 			})
 			/**
 			 * Update files cache
@@ -1234,14 +1194,49 @@
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
 			})
-			/**
-			 * Update thumbnails names in files cache
-			 */
-			.bind('tmb', function(e) {
-				$.each(e.data.images, function(hash, url) {
-					if (files[hash]) {
-						files[hash].tmb = url;
+			
+			.bind('sync', function(e) {
+				var state   = {},
+					removed = [],
+					added   = [],
+					changed = [];
+				
+				$.each(e.data.files, function(i, f) {
+					state[f.hash] = f;
+				});
+				
+				$.each(files, function(hash, f) {
+					if (!state[hash]) {
+						removed.push(hash);
 					}
+				});
+				
+				$.each(state, function(hash, file) {
+					var prev = files[hash];
+					
+					if (!prev) {
+						added.push(file)
+					} else if (prev.name  != file.name 
+					|| prev.phash  != file.phash 
+					|| prev.mime   != file.mime
+					|| prev.read   != file.read
+					|| prev.write  != file.write
+					|| prev.locked != file.locked
+					|| prev.date   != file.date
+					|| prev.dirs   != file.dirs
+					|| prev.size   != file.size) {
+						changed.push(file);
+					}
+					
+				})
+				
+				removed && self.trigger('removed', {removed : removed});
+				added   && self.trigger('added',   {added : added});
+				changed && self.trigger('changed', {changed : changed});
+			})
+			.bind('changed', function(e) {
+				$.each(e.data.changed||[], function(i, file) {
+					files[file.hash] && $.extend(files[file.hash], file);
 				});
 			})
 			/**
@@ -1671,62 +1666,62 @@
 		 * @return $.Deferred
 		 **/
 		sync : function(mode) {
-			var self    = this, 
-				cwd     = this.cwd(),
-				targets = {};
+			return this.oldAPI
+				? this.openDir(this.lastDir(), true)
+				: this.ajax({cmd : 'sync', target : this.cwd().hash, tree : this.oldAPI || this.options.allowNavbar});
 			
-			if (this.oldAPI) {
-				return this.openDir(this.lastDir(), true, true);
-			}
-			if (this.allowSync) {
-				targets = $.map(this.files(), function(f, hash) { return hash; });
-				this.allowSync = false;
+			var self = this;
+			
 				return this.ajax({
-						data : {cmd : 'sync', current : cwd.hash, targets : targets},
-						type : 'post'
+						data : {cmd : 'sync', target : this.cwd().hash, tree : this.oldAPI || this.options.allowNavbar},
+						// type : 'post'
 					},
 					mode
 				).always(function() {
 					self.allowSync = true;
 				})
 				.done(function(data) {
-					var removed = [],
-						added   = [];
-						
-					self.log(data)
+					var files = self.files(),
+						state = {},
+						removed = [],
+						added   = [],
+						changed = [];
 					
-					$.each(data.files, function(i, file) {
-						var hash = file.hash,
-							prev = self.file(hash);
+					self.log('done')
+					$.each(data.files, function(i, f) {
+						state[f.hash] = f;
+					});
+					
+					self.log(state)
+					
+					$.each(files, function(hash, f) {
+						if (!state[hash]) {
+							self.log(f.name)
+							removed.push(hash)
+						}
+					});
+					
+					$.each(state, function(hash, file) {
+						var prev = files[hash];
 						
-						if (prev.name  != file.name 
+						if (!prev) {
+							added.push(file)
+						} else if (prev.name  != file.name 
 						|| prev.phash  != file.phash 
 						|| prev.mime   != file.mime
 						|| prev.read   != file.read
 						|| prev.write  != file.write
 						|| prev.locked != file.locked
 						|| prev.date   != file.date
-						|| prev.dirs   != file.dirs) {
-							removed.push(hash);
-							added.push(file)
+						|| prev.dirs   != file.dirs
+						|| prev.size   != file.size) {
+							changed.push(file);
 						}
 						
 					})
-					
+					self.log(removed).log(added).log(changed)
 				})
-				
-				// .then(function(data) {
-				// 	// alert('fuck')
-				// 	self.allowSync = true;
-				// 	if (data && data.error) {
-				// 		if (data.current == cwd.hash) {
-				// 			self.lastDir('');
-				// 			self.openDir('', true, true);
-				// 		}
-				// 	}
-				// });
-			}
-			return $.Deferred().reject();
+
 		},
 		
 		
@@ -1738,7 +1733,7 @@
 		 * @param  Boolean  send init flag? (for open dir only)
 		 * @return elFinder
 		 */
-		open : function(hash, tree, init) {
+		open : function(hash) {
 			var file;
 			
 			if (hash) {
@@ -1751,7 +1746,7 @@
 				}
 			}
 			
-			return this.openDir(hash, tree, init);
+			return this.openDir(hash);
 		},
 	
 		/**
@@ -1781,10 +1776,7 @@
 
 			if (init) {
 				opts.init =1;
-				if ((this.newAPI && this.options.allowNavbar) || this.oldAPI) {
-					opts.tree = 1;
-				}
-				
+				opts.tree = (this.newAPI && this.options.allowNavbar) || this.oldAPI ? 1 : 0;
 			}
 
 			jqxhr = this.ajax(opts);
