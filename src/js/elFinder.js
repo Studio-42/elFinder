@@ -466,7 +466,7 @@
 		 * @return String
 		 */
 		this.root = function() {
-			var dir = files[cwd.hash];
+			var dir = files[cwd];
 			
 			while (dir && dir.phash) {
 				dir = files[dir.phash]
@@ -1230,7 +1230,7 @@
 					}
 					
 				})
-				
+				// self.log('here')
 				removed && self.trigger('removed', {removed : removed});
 				added   && self.trigger('added',   {added : added});
 				changed && self.trigger('changed', {changed : changed});

@@ -414,6 +414,8 @@ class elFinder {
 			$files[] = $cwd;
 		}
 		
+		shuffle($files);
+		
 		$result = array(
 			'cwd'     => $cwd['hash'],
 			'options' => $volume->options($target),

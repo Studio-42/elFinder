@@ -218,25 +218,38 @@
 .elfinder-nav-tree a.ui-state-hover { margin:-1px; }
 .elfinder-nav-tree a.ui-state-active.ui-state-hover { margin:0; }
 
-/* arrow before dir */
-.elfinder-nav-collapsed {
+.elfinder-nav-arrow {
 	width:12px;
 	height:12px;
 	position:absolute;
 	top:50%;
 	margin-top:-6px;
+	cursor:default;
+}
+
+.elfinder-nav-collapsed, .elfinder-nav-collapsed.ui-state-active {
+	background-image:url(../images/collapsed-left.png);
+	background-position: 5px center;
+	background-repeat: no-repeat;
+}
+
+.elfinder-nav-expanded {
+	background-image:url(../images/expanded.png);
+}
+
+/* arrow before dir */
+/*.elfinder-nav-collapsed {
+	
 	background-image:url(../images/toolbar.png);
 	background-repeat:no-repeat;
-	cursor:default;
+	
 }
 
 .elfinder-ltr .elfinder-nav-collapsed { left:0; background-position:0 2px; }
 .elfinder-rtl .elfinder-nav-collapsed { right:0; background-position:0 -11px;}
 .elfinder-ltr .elfinder-nav-expanded { background-position:0 -23px; }
 .elfinder-rtl .elfinder-nav-expanded { background-position:-1px -23px; }
-
-/* no arrow for empty dir */
-.elfinder-nav-empty { background-image:none; }
+*/
 
 /* folder icon */
 .elfinder-nav-icon {
