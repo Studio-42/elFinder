@@ -1216,8 +1216,8 @@
 					
 					if (!prev) {
 						added.push(file)
-					} else if (prev.name  != file.name 
-					|| prev.phash  != file.phash 
+					} else if (prev.name != file.name 
+					|| prev.phash  != file.phash
 					|| prev.mime   != file.mime
 					|| prev.read   != file.read
 					|| prev.write  != file.write
@@ -1225,6 +1225,7 @@
 					|| prev.date   != file.date
 					|| prev.dirs   != file.dirs
 					|| prev.size   != file.size) {
+						// self.log(file)
 						changed.push(file);
 					}
 					
@@ -1543,6 +1544,8 @@
 		lastDir : function(key) { 
 			return this.options.rememberLastDir ? this.cookie('el-finder-last-'+this.id, key) : ''; 
 		},
+		
+		
 		
 		/**
 		 * Open confiration dialog
@@ -2269,6 +2272,44 @@
 				}
 			}
 			return prefix + Math.random();
+		},
+		
+		/**
+		 * Compare two files based on elFinder.sort
+		 *
+		 * @param Object  file
+		 * @param Object  file
+		 * @return Number
+		 */
+		compare : function(f1, f2) {
+			var m1 = f1.mime,
+				m2 = f2.mime,
+				d1 = m1 == 'directory',
+				d2 = m2 == 'directory',
+				n1 = f1.name,
+				n2 = f2.name,
+				s1 = f1.size || 0,
+				s2 = f2.size || 0;
+			// this.log(f1).log(f2).log(this.sort)
+			// dir first	
+			if (this.sort <= 3) {
+				if (d1 && !d2) {
+					return -1;
+				}
+				if (!d1 && d2) {
+					return 1;
+				}
+			}
+			// by mime
+			if ((this.sort == 2 ||this. sort == 5) && m1 != m2) {
+				return m1 > m2 ? 1 : -1;
+			}
+			// by size
+			if ((this.sort == 3 || this.sort == 6) && s1 != s2) {
+				return s1 > s2 ? 1 : -1;
+			}
+			
+			return f1.name.localeCompare(f2.name);
 		},
 		
 

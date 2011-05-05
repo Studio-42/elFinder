@@ -358,6 +358,11 @@ $.fn.elfindercwd = function(fm) {
 				return -1;
 			},
 			
+			/**
+			 * Scroll event name
+			 *
+			 * @type String
+			 **/
 			scrollEvent = 'scroll.'+fm.namespace,
 
 			/**
@@ -383,8 +388,6 @@ $.fn.elfindercwd = function(fm) {
 				while ((!last.length || cwd.innerHeight() - last.position().top + fm.options.showThreshold > 0) 
 					&& (files = buffer.splice(0, fm.options.showFiles)).length) {
 					
-					ltmb = [];
-					atmb = {};
 					html = $.map(files, function(f) {
 						if (f.hash && f.name) {
 							if (f.mime == 'directory') {
@@ -400,22 +403,50 @@ $.fn.elfindercwd = function(fm) {
 
 					place.append(html.join(''));
 					last = cwd.find('[id]:last');
+					// scroll top on dir load to avoid scroll after page reload
 					top && cwd.scrollTop(0);
-					attachThumbnails(atmb);
-
-					if (ltmb.length || fm.option('tmb')) {
-						fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : ltmb}, 'silent')
-					}
+					
 				}
-				
-				if (dirs) {
-					setTimeout(function() {
-						cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
-					}, 20);
-				}
+				// load/attach thumbnails
+				thumbnails(atmb, ltmb);
+				// make directory droppable
+				dirs && makeDroppable();
 				
 			},
 			
+			/**
+			 * Make directory droppable
+			 *
+			 * @return void
+			 */
+			makeDroppable = function() {
+				setTimeout(function() {
+					cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+				}, 20);
+			},
+			
+			/**
+			 * Attach existed thumbnails and send request to create thumbnails
+			 *
+			 * @param  Object  file hash -> thumbnail map for existed thumbnails
+			 * @param  Array   files hashes to create thumbnails
+			 * @return void
+			 */
+			thumbnails = function(attach, load) {
+				attachThumbnails(attach);
+				if (load.length || fm.option('tmb')) {
+					fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : load}, 'silent');
+				}
+			},
+			
+			/**
+			 * Preload required thumbnails and on load add css to files.
+			 * Return false if required file is not visible yet (in buffer) -
+			 * required for old api to stop loading thumbnails.
+			 *
+			 * @param  Object  file hash -> thumbnail map
+			 * @return Boolean
+			 */
 			attachThumbnails = function(images) {
 				var ret = true;
 				$.each(images, function(hash, tmb) {
@@ -435,6 +466,90 @@ $.fn.elfindercwd = function(fm) {
 					}
 				});
 				return ret;
+			},
+			
+			/**
+			 * Add new files to cwd/buffer
+			 *
+			 * @param  Array  new files
+			 * @return void
+			 */
+			add = function(files) {
+				var place    = fm.view == 'list' ? cwd.find('tbody') : cwd,
+					l        = files.length, 
+					ltmb     = [],
+					atmb     = {},
+					dirs     = false,
+					findNode = function(file) {
+						var pointer = cwd.find('[id]:first'), file2;
+					
+						while (pointer.length) {
+							file2 = fm.file(pointer.attr('id'));
+							if (file2 && fm.compare(file, file2) < 0) {
+								return pointer;
+							}
+							pointer = pointer.next('[id]');
+						}
+					},
+					findIndex = function(file) {
+						var l = buffer.length, i;
+						
+						for (i =0; i < l; i++) {
+							if (fm.compare(file, buffer[i]) < 0) {
+								return i;
+							}
+						}
+						return l || -1;
+					},
+					file, hash, node, ndx;
+
+				
+				while (l--) {
+					file = files[l];
+					hash = file.hash;
+					
+					if (cwd.find('#'+hash).length) {
+						continue;
+					}
+					
+					if ((node = findNode(file)) && node.length) {
+						node.before(itemhtml(file));
+					} else if ((ndx = findIndex(file)) >= 0) {
+						buffer.splice(ndx, 0, file);
+					} else {
+						place.append(itemhtml(file));
+					}
+					
+					if (cwd.find('#'+hash).length) {
+						if (file.mime == 'directory') {
+							dirs = true;
+						} else if (file.tmb) {
+							file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb)
+						}
+					}
+				}
+				
+				thumbnails(atmb, ltmb);
+				dirs && makeDroppable();
+			},
+			
+			/**
+			 * Remove files from cwd/buffer
+			 *
+			 * @param  Array  files hashes
+			 * @return void
+			 */
+			remove = function(files) {
+				var l = files.length, hash, n, ndx;
+				
+				while (l--) {
+					hash = files[l];
+					if ((n = cwd.find('#'+hash)).length) {
+						n.remove();
+					} else if ((ndx = index(hash)) != -1) {
+						buffer.splice(ndx, 1);
+					}
+				}
 			},
 			
 			/**
@@ -587,132 +702,50 @@ $.fn.elfindercwd = function(fm) {
 				}
 
 				buffer = fm.oldAPI
-					? e.data.cdc
-					: $.map(e.data.files, function(f) { return f.phash == phash ? f : null });
+					? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? f : null })
+					: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
 					
 				buffer = buffer.sort(compare);
 				
-				cwd.bind(scrollEvent, render).trigger('scroll');
+				cwd.bind(scrollEvent, render).trigger(scrollEvent);
 
 				trigger();
 
 			})
 			// add thumbnails
 			.bind('tmb', function(e) {
-				if (fm.view != 'list' && e.data.current == fm.cwd().hash) {
-					
-					if (attachThumbnails(e.data.images) && e.data.tmb) {
-						fm.log('go')
-						fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
-					}
-				}
+				fm.view != 'list' && 
+				e.data.current == fm.cwd().hash &&
+				attachThumbnails(e.data.images) && e.data.tmb &&
+				fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			})
 			// add new files
 			.bind('added', function(e) {
-				var phash  = fm.cwd().hash,
-					l      = e.data.added.length, f,
-					atmb   = {},
-					ltmb   = [],
-					place  = fm.view == 'list' ? cwd.find('tbody') : cwd,
-					append = function(f) {
-						var node = itemhtml(f),
-							i, first, curr;
-					
-						if ((first = cwd.find('[id]:first')).length) {
-							curr = first;
-							while (curr.length) {
-								if (compare(f, fm.file(curr.attr('id'))) < 0) {
-									return curr.before(node);
-								}
-								curr = curr.next('[id]');
-							}
-						} 
-					
-						if (buffer.length) {
-							for (i = 0; i < buffer.length; i++) {
-								if (compare(f, buffer[i]) < 0) {
-									return buffer.splice(i, 0, f);
-								}
-							}
-							return buffer.push(f);
-						}
-					
-						place.append(node);
-					},
-					hash;
-			
-				while (l--) {
-					f = e.data.added[l];
-					hash = f.hash;
-					if (phash == phash && !cwd.find('#'+hash).length) {
-						append(f);
-						if (f.tmb) {
-							f.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = f.tmb);
+				var phash = fm.cwd().hash;
+				return add($.map(e.data.added || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
+			})
+			// remove and add changed files
+			.bind('changed', function(e) {
+				var phash   = fm.cwd().hash,
+					changed = e.data.changed || [],
+					i       = changed.length,
+					file;
+
+				while (i--) {
+					file = changed[i];
+
+					if (file.name && file.name) {
+						remove([file.hash]);
+						if (file.phash == phash) {
+							add([file]);
 						}
 					}
 				}
-				attachThumbnails(atmb);
-				ltmb.length && fm.ajax({cmd : 'tmb', current : phash, files : ltmb}, 'silent');
+				
 			})
 			// remove files
 			.bind('removed', function(e) {
-				var rm = e.data.removed,
-					l = rm.length, hash, n, ndx;
-				
-				while (l--) {
-					hash = rm[l];
-					if ((n = cwd.find('#'+hash)).length) {
-						n.remove();
-					} else if ((ndx = index(hash)) != -1) {
-						buffer.splice(ndx, 1);
-					}
-				}
-			})
-			// on some commands make target files disabled
-			.bind('ajaxstart', function(e) {
-				var cmd   = e.data.request.cmd,
-					files = [];
-				
-				if (cmd == 'rm') {
-					files = e.data.request.targets;
-				}
-				
-				$.each(files, function(i, hash) {
-					var node = cwd.find('#'+hash),
-						list = fm.view == 'list',
-						drag = list 
-							? node 
-							: node.children();
-							
-					node.addClass(clDisabled).trigger(evtUnselect);
-					drag.is('.'+clDraggable) && drag.draggable('disable');
-					node.is('.directory') && node.droppable('disable');
-					!list && drag.removeClass(clDisabled);
-				});
-				trigger();
-			})
-			// enable files disabled in ajaxstart handler
-			.bind('ajaxstop', function(e) {
-				var cmd     = e.data.request.cmd,
-					removed = e.data.response.removed || [],
-					files   = [];
-				
-				if (cmd == 'rm') {
-					files = e.data.request.targets;
-				}
-				
-				$.each(files, function(i, hash) {
-					var node = cwd.find('#'+hash),
-						drag = fm.view == 'list' 
-							? node 
-							: node.children();
-					
-					if ($.inArray(hash, removed) === -1) {
-						node.removeClass(clDisabled);
-						drag.is('.'+clDraggable) && drag.draggable('enable');
-						node.is('.directory') && node.droppable('enable');
-					}
-				});
+				remove(e.data.removed || []);
 			})
 			// disable cuted files
 			.bind('lockfiles unlockfiles', function(e) {
