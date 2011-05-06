@@ -37,6 +37,11 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			loaded    = 'elfinder-subtree-loaded',
 			
+			/**
+			 * Arraw class name
+			 *
+			 * @type String
+			 */
 			arrow = 'elfinder-nav-arrow',
 			
 			/**
@@ -44,7 +49,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @type String
 			 */
-			// root      = 'elfinder-nav-tree-root',
+			root      = 'elfinder-nav-tree-root',
 			
 			/**
 			 * Current directory class name
@@ -54,35 +59,18 @@ $.fn.elfindertree = function(fm, opts) {
 			active    = 'ui-state-active',
 			
 			/**
+			 * Hover class name
+			 *
+			 * @type String
+			 */
+			hover    = 'ui-state-hover',
+			
+			/**
 			 * Open current dir root on init
 			 *
 			 * @type Boolean
 			 */
 			openRoot = fm.options.openRootOnLoad,
-			
-			/**
-			 * Mark current directory as active
-			 * If current directory is not in tree - load it and its parents
-			 *
-			 * @return void
-			 */
-			sync = function() {
-				var current = tree.find('#nav-'+fm.cwd().hash);
-				
-				if (openRoot) {
-					tree.find('#nav-'+fm.root()).addClass(expanded).nextAll('.'+subtree).show();
-					openRoot = false;
-				}
-				
-				tree.find('[id].'+active).removeClass(active);
-				current.addClass(active);
-				
-				if (fm.options.syncTree) {
-					current.length
-						? current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded)
-						: fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
-				}
-			},
 			
 			/**
 			 * Draggable options
@@ -106,13 +94,72 @@ $.fn.elfindertree = function(fm, opts) {
 				hoverClass : 'elfinder-droppable-active ui-state-hover'
 			}),
 			
+			/**
+			 * Convert node id into file hash
+			 *
+			 * @param  DOMElement  dir node
+			 * @return String
+			 */
 			id = function(dir) {
 				return ''+dir.attr('id').substr(4);
 			},
 			
-			normalizeTree = function(tree) {
+			/**
+			 * Mark current directory as active
+			 * If current directory is not in tree - load it and its parents
+			 *
+			 * @return void
+			 */
+			sync = function() {
+				var current = tree.find('#nav-'+fm.cwd().hash);
+				
+				if (openRoot) {
+					tree.find('#nav-'+fm.root()).addClass(expanded).nextAll('.'+subtree).show();
+					openRoot = false;
+				}
+				
+				tree.find('[id].'+active).removeClass(active);
+				current.addClass(active);
+				
+				if (fm.options.syncTree) {
+					if (current.length) {
+						current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded);
+					} else if (fm.newAPI) {
+						fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
+					}
+				}
+			},
 			
-				return [];
+			/**
+			 * Convert old api tree into plain array of dirs
+			 *
+			 * @param  Object  root dir
+			 * @return Array
+			 */
+			normalizeTree = function(root) {
+				var result   = [],
+					traverse = function(dirs, phash) {
+						var i, dir;
+						
+						for (i = 0; i < dirs.length; i++) {
+							dir = dirs[i];
+							
+							result.push({
+								mime  : 'directory',
+								hash  : dir.hash,
+								phash : phash,
+								name  : dir.name,
+								read  : dir.read,
+								write : dir.write,
+								dirs  : !!dir.dirs.length
+							})
+							dir.dirs.length && traverse(dir.dirs, dir.hash);
+						}
+					};
+
+				traverse([root]);
+
+				return result;
 			},
 			
 			/**
@@ -157,7 +204,6 @@ $.fn.elfindertree = function(fm, opts) {
 				var length  = dirs.length,
 					orphans = [],
 					i, dir, html, parent, sibling;
-
 				
 				for (i = 0; i < length; i++) {
 					dir = dirs[i];
@@ -191,7 +237,9 @@ $.fn.elfindertree = function(fm, opts) {
 					.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
 					.addClass(loaded);
 
-				sync();
+				tree.find('[id]:not(.'+root+',.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
+
+
 			},
 			
 			/**
@@ -201,21 +249,14 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			tree = $(this).addClass('elfinder-nav-tree')
 				.delegate('a', 'mouseenter', function() {
-					$(this).addClass('ui-state-hover')
+					var link = $(this);
+					link.addClass(hover);
+					!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(draggable);
 				})
 				.delegate('a', 'mouseleave', function() {
-					$(this).removeClass('ui-state-hover')
+					$(this).removeClass(hover);
 					
 				})
-				// .delegate('a', 'hover', function(e) {
-				// 	var $this = $(this), 
-				// 		enter = e.type == 'mouseenter';
-				// 	
-				// 	$this.toggleClass('ui-state-hover', enter);
-				// 	if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
-				// 		$this.draggable(draggable);
-				// 	}
-				// })
 				.delegate('a', 'click', function(e) {
 					var link = $(this),
 						hash = id(link);
@@ -259,20 +300,30 @@ $.fn.elfindertree = function(fm, opts) {
 		fm
 			// update tree
 			.bind('open', function(e) {
-				updateTree(fm.newAPI ? e.data.files : normalizeTree(e.data.tree))
-				// fm.log('open')
-				// proccess(e)
-				// setTimeout(function() { proccess(e) }, 20)
+				var data = e.data,
+					dirs = fm.newAPI 
+						? data.files
+						: data.tree ? normalizeTree(data.tree) : [];
+
+				if (dirs.length) {
+					e.api && tree.empty();
+					setTimeout(function() {
+						updateTree(dirs);
+						sync();
+					}, 10);
+				} else {
+					sync();
+				}
 			})
+			// add new dirs 
 			.bind('tree parents', function(e) {
-				fm.log(e.data)
-				updateTree(e.data.tree)
+				updateTree(e.data.tree);
+				e.type == 'parents' && sync();
 			})
-			// .bind('tree parents added', proccess)
 			// remove dirs from tree
 			.bind('removed', function(e) {
 				var rm = e.data.removed,
-					l = rm.length,
+					l  = rm.length,
 					node, parent, stree;
 				
 				while (l--) {
@@ -291,6 +342,11 @@ $.fn.elfindertree = function(fm, opts) {
 	});
 }
 
+/**
+ * Default tree template and methods to proccess template
+ *
+ * @type Object
+ */
 $.fn.elfindertree.defaults = {
 	template : '<li><a href="#" id="nav-{hash}" class="ui-corner-all {cssclass}"><span class="elfinder-nav-arrow"/><span class="elfinder-nav-icon"/>{symlink}{permissions} {name}</a><ul class="elfinder-nav-subtree"/></li>',
 	replace : {
