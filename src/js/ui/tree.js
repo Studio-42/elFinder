@@ -264,7 +264,7 @@ $.fn.elfindertree = function(fm, opts) {
 				// proccess(e)
 				// setTimeout(function() { proccess(e) }, 20)
 			})
-			.bind('tree', function(e) {
+			.bind('tree parents', function(e) {
 				fm.log(e.data)
 				updateTree(e.data.tree)
 			})

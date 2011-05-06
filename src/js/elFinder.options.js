@@ -60,7 +60,7 @@ elFinder.prototype.options = {
 	
 	resizable : false,
 	
-	syncTree : false,
+	syncTree : true,
 	/* callback to get file url (for wswing editors) */
 	editorCallback : null,
 	/* string to cut from file url begin before pass it to editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */

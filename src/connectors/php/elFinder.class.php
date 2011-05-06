@@ -410,14 +410,14 @@ class elFinder {
 			}
 		}
 		
-		if (!in_array($cwd, $files)) {
-			$files[] = $cwd;
-		}
+		// if (!in_array($cwd, $files)) {
+		// 	$files[] = $cwd;
+		// }
 		
-		shuffle($files);
+		// shuffle($files);
 		
 		$result = array(
-			'cwd'     => $cwd['hash'],
+			'cwd'     => $cwd,
 			'options' => $volume->options($target),
 			'files'   => $files
 		);

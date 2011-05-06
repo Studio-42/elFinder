@@ -1153,10 +1153,11 @@
 						}
 					}
 				}
-				
+				// self.log(data)
 				if (self.newAPI) {
-					cwd = data.cwd;
+					cwd = data.cwd.hash;
 					cwdOptions = $.extend({}, cwdOptions, data.options);
+					data.files.push(data.cwd)
 					cache(data.files);
 				} else {
 					cwd = data.cwd.hash;
@@ -1181,10 +1182,6 @@
 					files[cwd] = data.cwd;
 				}
 				
-				if (!files[cwd]) {
-					e.preventDefault();
-					return self.trigger('error', {error : [self.errors.invResponse, self.errors.invData]});
-				}
 				self.lastDir(cwd);
 				data.debug && self.debug('backend-debug', data.debug);
 			})
@@ -1407,7 +1404,7 @@
 			},
 			
 			newapi : {
-				open    : function(data) { return data.cwd && data.files && typeof(data.cwd) == 'string' && $.isArray(data.files); },
+				open    : function(data) { return data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
 				tree    : function(data) { return data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data.tree && $.isArray(data.tree); },
 				tmb     : function(data) { return data.current && data.images && $.isPlainObject(data.images); }
