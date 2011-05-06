@@ -37,6 +37,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			loaded    = 'elfinder-subtree-loaded',
 			
+			arrow = 'elfinder-nav-arrow',
+			
 			/**
 			 * Root directory class name
 			 *
@@ -104,7 +106,9 @@ $.fn.elfindertree = function(fm, opts) {
 				hoverClass : 'elfinder-droppable-active ui-state-hover'
 			}),
 			
-			
+			id = function(dir) {
+				return ''+dir.attr('id').substr(4);
+			},
 			
 			normalizeTree = function(tree) {
 			
@@ -196,59 +200,57 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @type JQuery
 			 */
 			tree = $(this).addClass('elfinder-nav-tree')
-				.delegate('a', 'hover', function(e) {
-					var $this = $(this), 
-						enter = e.type == 'mouseenter';
-					
-					$this.toggleClass('ui-state-hover', enter);
-					if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
-						$this.draggable(draggable);
-					}
+				.delegate('a', 'mouseenter', function() {
+					$(this).addClass('ui-state-hover')
 				})
+				.delegate('a', 'mouseleave', function() {
+					$(this).removeClass('ui-state-hover')
+					
+				})
+				// .delegate('a', 'hover', function(e) {
+				// 	var $this = $(this), 
+				// 		enter = e.type == 'mouseenter';
+				// 	
+				// 	$this.toggleClass('ui-state-hover', enter);
+				// 	if (enter && !$this.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo')) {
+				// 		$this.draggable(draggable);
+				// 	}
+				// })
 				.delegate('a', 'click', function(e) {
-					var dir = $(this),
-						id  = this.id.substr(4);
+					var link = $(this),
+						hash = id(link);
 
 					e.preventDefault();
 					
-					if (id == fm.cwd().hash) {
-						// already current dir - toggle subdirs
-						dir.children('.'+collapsed).click();
-					} else {
-						// change dir
-						fm.open(id);
+					if (hash != fm.cwd().hash) {
+						fm.openDir(hash)
+					} else if (link.is('.'+collapsed)) {
+						link.find('.'+arrow).click()
 					}
 				})
-				.delegate('.'+collapsed, 'click', function(e) {
-					// click on arrow - toggle subdirs
-					var $this = $(this),
-						parent = $this.parent(),
-						ul    = parent.next('.'+subtree),
-						spinner, opts;
-						
+				.delegate('a.'+collapsed+' .'+arrow, 'click', function(e) {
+					var arrow = $(this),
+						link  = arrow.parents('[id]:first'),
+						stree = link.nextAll('.'+subtree),
+						spin;
+					
 					e.stopPropagation();
 					e.preventDefault();
 
-					if ($this.is('.'+loaded)) {
-						ul.slideToggle();
-						$this.toggleClass(expanded);
-					} else if (fm.newAPI) {
-						spinner = $('<span class="elfinder-spinner-mini"/>');
-						fm.ajax({
-							data : {cmd : 'tree', target : parent.attr('id').substr(4)},
-							beforeSend : function() {
-								$this.before(spinner).hide();
-							},
-							complete : function() {
-								spinner.remove();
-								if (ul.children().length) {
-									ul.slideToggle();
-									$this.show().toggleClass(expanded).addClass(loaded);
-								} else {
-									$this.remove();
-								}
-							}
-						}, 'silent');
+					if (link.is('.'+loaded)) {
+						link.toggleClass(expanded);
+						stree.slideToggle()
+					} else {
+						spin = $('<span class="elfinder-spinner-mini"/>').insertAfter(arrow);
+						fm.ajax({cmd : 'tree', target : id(link)}, 'silent')
+							.always(function() {
+								spin.remove();
+								link.addClass(loaded)
+								if (stree.children().length) {
+									link.addClass(collapsed+' '+expanded);
+									stree.slideDown();
+								} 
+							});
 					}
 				});
 		
@@ -261,6 +263,10 @@ $.fn.elfindertree = function(fm, opts) {
 				// fm.log('open')
 				// proccess(e)
 				// setTimeout(function() { proccess(e) }, 20)
+			})
+			.bind('tree', function(e) {
+				fm.log(e.data)
+				updateTree(e.data.tree)
 			})
 			// .bind('tree parents added', proccess)
 			// remove dirs from tree
@@ -286,10 +292,10 @@ $.fn.elfindertree = function(fm, opts) {
 }
 
 $.fn.elfindertree.defaults = {
-	template : '<li><a href="#" id="nav-{hash}" class="ui-corner-all {cssclass}"><span class="elfinder-nav-icon"/>{symlink}{permissions} {name}</a><ul class="elfinder-nav-subtree"/></li>',
+	template : '<li><a href="#" id="nav-{hash}" class="ui-corner-all {cssclass}"><span class="elfinder-nav-arrow"/><span class="elfinder-nav-icon"/>{symlink}{permissions} {name}</a><ul class="elfinder-nav-subtree"/></li>',
 	replace : {
-		cssclass    : function(dir, fm) { return (dir.phash ? '' : 'elfinder-nav-tree-root')+' '+(dir.dirs ? 'elfinder-nav-collapsed' : '')+' '+fm.perms2class(dir); },
-		permissions : function(dir, fm) {  return !dir.read || !dir.write ? '<span class="elfinder-perms"/>' : ''; },
+		cssclass    : function(dir, fm) { return (dir.phash ? '' : 'elfinder-nav-tree-root')+' '+fm.perms2class(dir)+' '+(dir.dirs ? 'elfinder-nav-collapsed' : ''); },
+		permissions : function(dir, fm) { return !dir.read || !dir.write ? '<span class="elfinder-perms"/>' : ''; },
 		symlink     : function(dir, fm) { return dir.link ? '<span class="elfinder-symlink"/>' : ''; }
 	}
 }

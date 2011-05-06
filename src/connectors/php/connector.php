@@ -89,34 +89,34 @@ $opts = array(
 			// 'startPath'   => '../../../files/mimes/',
 			// 'defaults' => array('read' => false)
 		),
-		// array(
-		// 	'driver' => 'MySQL',
-		// 	'path' => 1,
-		// 	// 'startPath' => 6,
-		// 	'user' => 'dio',
-		// 	'pass' => 'hane',
-		// 	'db' => 'elfinder',
-		// 	'user_id' => 1,
-		// 	// 'URL'    => 'http://localhost/git/elfinder',
-		// 	'tmbPath' => '../../../tmb/',
-		// 	'tmbURL' => 'http://localhost/git/elfinder/tmb/',
-		// 	// 'attributes' => array(
-		// 	// 	array(),
-		// 	// 	array(
-		// 	// 		'pattern' => '/\.jpg$/',
-		// 	// 		'read' => false,
-		// 	// 		'write' => false,
-		// 	// 		'locked' => true,
-		// 	// 		'hidden' => true
-		// 	// 	)
-		// 	// )
-		// 	
-		// )
+		array(
+			'driver' => 'MySQL',
+			'path' => 1,
+			// 'startPath' => 6,
+			'user' => 'dio',
+			'pass' => 'hane',
+			'db' => 'elfinder',
+			'user_id' => 1,
+			// 'URL'    => 'http://localhost/git/elfinder',
+			'tmbPath' => '../../../tmb/',
+			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
+			// 'attributes' => array(
+			// 	array(),
+			// 	array(
+			// 		'pattern' => '/\.jpg$/',
+			// 		'read' => false,
+			// 		'write' => false,
+			// 		'locked' => true,
+			// 		'hidden' => true
+			// 	)
+			// )
+			
+		)
 	)
 	
 );
 
-
+// sleep(2);
 $connector = new elFinderConnector(new elFinder($opts));
 $connector->run();
 
