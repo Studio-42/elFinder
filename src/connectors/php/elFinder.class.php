@@ -458,7 +458,7 @@ class elFinder {
 	 **/
 	protected function parents($args) {
 		$dir = $args['target'];
-				
+		exit();
 		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}

@@ -41,7 +41,7 @@ elFinder.prototype.options = {
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
 	 */
-	sort : 'nameDirsFirst',
+	sort : 'sizeDirsFirst',
 	
 	/**
 	 * Show nav panel (not implemented yet)
@@ -196,7 +196,7 @@ elFinder.prototype.options = {
 	commandsOptions : {},
 	clearCache : true,
 	// debug : true
-	debug : ['error', 'backend-debug']
+	debug : ['error', 'event-load']
 }
 
 })(jQuery);
