@@ -176,46 +176,8 @@
 
 				while (l--) {
 					f = data[l];
-					if (self.oldAPI) {
-						f.phash = cwd;
-						f.locked = !f.rm;
-						delete f.rm;
-						delete f.url;
-						delete f.resize;
-					}
 					delete f.tmb;
 					files[f.hash] = f;
-				}
-			},
-			
-			/**
-			 * Store info about dirs form data.tree for old api.
-			 *
-			 * @param  Object   dire tree
-			 * @return void
-			 **/
-			cacheTree = function(dir, phash) {
-				var childs = dir.dirs || [],
-					l = childs.length, 
-					add = function(d) {
-						if (d.name && d.hash && !files[d.hash]) {
-							d.phash  = phash;
-							d.mime   = 'directory';
-							d.locked = false;
-							delete d.dirs;
-							files[d.hash] = d;
-						}
-					};
-
-				add(dir);
-				phash = dir.hash; 
-
-				while (l--) {
-					dir = childs[l];
-					// if (!cwd.phash && dir.hash == cwd.hash) {
-					// 	cwd.phash = phash;
-					// }
-					dir.dirs && dir.dirs.length ? cacheTree(dir, phash) : add(dir);
 				}
 			},
 			
@@ -1066,35 +1028,31 @@
 						}
 					}
 				}
-				// self.log(data)
+				
+				cwd = data.cwd.hash;
+				
 				if (self.newAPI) {
-					cwd = data.cwd.hash;
 					cwdOptions = $.extend({}, cwdOptions, data.options);
-					data.files.push(data.cwd)
+					data.files.push(data.cwd);
 					cache(data.files);
 				} else {
-					cwd = data.cwd.hash;
+					data.tree && cache(self.normalizeOldTree(data.tree));
+					cache($.map(data.cdc, function(f) { return self.normalizeOldFile(f, cwd); }));
 					
-					data.tree && cacheTree(data.tree)
-					cache(data.cdc);
-					if (files[cwd].phash) {
-						data.cwd.phash = files[cwd].phash;
+					if (!files[cwd]) {
+						files[cwd] = self.normalizeOldFile(data.cwd);
 					}
-					
-					cwdOptions = $.extend({}, cwdOptions, data.params, {path : data.cwd.rel, disabled : data.disabled});
-					delete data.cwd.rel;
-					
+
+					cwdOptions = $.extend({}, cwdOptions, data.params, {path : data.cwd.rel, disabled : data.disabled, tmb : !!data.tmb});
+
 					if (cwdOptions.path.indexOf('\\') != -1) {
 						cwdOptions.separator = '\\';
 					} else if (cwdOptions.path.indexOf('/') != -1) {
 						cwdOptions.separator = '/';
 					}
 					
-					cwdOptions.tmb = !!data.tmb;
-
-					files[cwd] = data.cwd;
 				}
-				
+
 				self.lastDir(cwd);
 				data.debug && self.debug('backend-debug', data.debug);
 			})
@@ -1532,22 +1490,14 @@
 		 * @return Array
 		 */
 		normalizeOldTree : function(root) {
-			var result   = [],
+			var self     = this,
+				result   = [],
 				traverse = function(dirs, phash) {
 					var i, dir;
 					
 					for (i = 0; i < dirs.length; i++) {
 						dir = dirs[i];
-						
-						result.push({
-							mime  : 'directory',
-							hash  : dir.hash,
-							phash : phash,
-							name  : dir.name,
-							read  : dir.read,
-							write : dir.write,
-							dirs  : !!dir.dirs.length
-						})
+						result.push(self.normalizeOldFile(dir, phash))
 						dir.dirs.length && traverse(dir.dirs, dir.hash);
 					}
 				};
@@ -1557,6 +1507,36 @@
 			return result;
 		},
 		
+		/**
+		 * Convert file info from old api format into new one
+		 *
+		 * @param  Object  file
+		 * @param  String  parent dir hash
+		 * @return Object
+		 */
+		normalizeOldFile : function(file, phash) {
+			var info = {
+				hash : file.hash,
+				phash : phash,
+				name : file.name,
+				mime : file.mime || 'directory',
+				date : file.date || 'unknown',
+				size : file.size || 0,
+				read : file.read,
+				write : file.write,
+				locked : phash ? !file.rm : true
+			}
+			if (file.dirs && file.dirs.length) {
+				info.dirs = true;
+			}
+			if (file.dim) {
+				info.dim = file.dim;
+			}
+			if (file.resize) {
+				info.resize = file.resize;
+			}
+			return info;
+		},
 		
 		/**
 		 * Open confiration dialog
