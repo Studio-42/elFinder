@@ -426,7 +426,7 @@ class elFinder {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 		}
-
+		
 		return $result;
 	}
 	
@@ -439,13 +439,14 @@ class elFinder {
 	 **/
 	protected function tree($args) {
 		$dir = $args['target'];
-		
+		// exit();
 		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		}
 		if (($tree = $volume->tree($dir)) == false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		}
+		return array('tree' => 42);
 		return array('tree' => $tree);
 	}
 	
@@ -458,7 +459,7 @@ class elFinder {
 	 **/
 	protected function parents($args) {
 		$dir = $args['target'];
-		exit();
+		
 		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}

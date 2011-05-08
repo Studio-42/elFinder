@@ -154,34 +154,6 @@ $.fn.elfindertree = function(fm) {
 				return $.map(files, function(f) { return f.hash && f.name && f.mime && f.mime == 'directory' ? f : null });
 			},
 			
-			/**
-			 * Mark current directory as active
-			 * If current directory is not in tree - load it and its parents
-			 *
-			 * @return void
-			 */
-			sync = function() {
-				var current = tree.find('#'+hash2id(fm.cwd().hash)), rootNode;
-				
-				if (openRoot) {
-					rootNode = tree.find('#'+hash2id(fm.root()));
-					rootNode.is('.'+loaded) && rootNode.addClass(expanded).next('.'+subtree).show();
-					openRoot = false;
-				}
-				
-				if (!current.is('.'+active)) {
-					tree.find('[id].'+active).removeClass(active);
-					current.addClass(active);
-				}
-				
-				if (fm.options.syncTree) {
-					if (current.length) {
-						current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded);
-					} else if (fm.newAPI) {
-						fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
-					}
-				}
-			},
 			
 			/**
 			 * Convert old api tree into plain array of dirs
@@ -286,6 +258,34 @@ $.fn.elfindertree = function(fm) {
 				tree.find('[id]:not(.'+root+',.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
 			},
 			
+			/**
+			 * Mark current directory as active
+			 * If current directory is not in tree - load it and its parents
+			 *
+			 * @return void
+			 */
+			sync = function() {
+				var current = tree.find('#'+hash2id(fm.cwd().hash)), rootNode;
+				
+				if (openRoot) {
+					rootNode = tree.find('#'+hash2id(fm.root()));
+					rootNode.is('.'+loaded) && rootNode.addClass(expanded).next('.'+subtree).show();
+					openRoot = false;
+				}
+				
+				if (!current.is('.'+active)) {
+					tree.find('[id].'+active).removeClass(active);
+					current.addClass(active);
+				}
+				
+				if (fm.options.syncTree) {
+					if (current.length) {
+						current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded);
+					} else if (fm.newAPI) {
+						fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
+					}
+				}
+			},
 			
 			
 			/**
@@ -312,13 +312,13 @@ $.fn.elfindertree = function(fm) {
 					if (hash != fm.cwd().hash) {
 						fm.openDir(hash)
 					} else if (link.is('.'+collapsed)) {
-						link.find('.'+arrow).click()
+						link.find('.'+arrow).click();
 					}
 				})
 				.delegate('a.'+collapsed+' .'+arrow, 'click', function(e) {
 					var arrow = $(this),
 						link  = arrow.parents('[id]:first'),
-						stree = link.nextAll('.'+subtree),
+						stree = link.next('.'+subtree),
 						spin;
 					
 					e.stopPropagation();
@@ -329,14 +329,18 @@ $.fn.elfindertree = function(fm) {
 						stree.slideToggle()
 					} else {
 						spin = $('<span class="elfinder-spinner-mini"/>').insertAfter(arrow);
-						fm.ajax({cmd : 'tree', target : dirHash(link)}, 'silent')
-							.always(function() {
+						fm.ajax({cmd : 'tree', target : dirHash(link)}, 'bg')
+							.fail(function() { link.removeClass(collapsed); })
+							.done(function(data) { updateTree(filter(data.tree)); })
+							.always(function(data) {
 								spin.remove();
-								link.addClass(loaded)
+								link.addClass(loaded);
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
 									stree.slideDown();
-								} 
+								} else {
+									link.removeClass(collapsed);
+								}
 							});
 					}
 				});
@@ -367,11 +371,11 @@ $.fn.elfindertree = function(fm) {
 				}
 			})
 			// add new dirs 
-			.bind('tree parents', function(e) {
-				updateTree(filter(e.data.tree));
-				e.type == 'parents' && sync();
-				
-			})
+			// .bind('tree parents', function(e) {
+			// 	updateTree(filter(e.data.tree));
+			// 	e.type == 'parents' && sync();
+			// 	
+			// })
 			.bind('added', function(e) {
 				var dirs = filter(e.data.added);
 

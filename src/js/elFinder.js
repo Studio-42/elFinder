@@ -8,29 +8,14 @@
 			 *
 			 * @type Boolean
 			 **/
-			enabled = false,
-			
-			/**
-			 * On click inside elFinder we set this flag to false so when event bubbled to document no blur event fired
-			 *
-			 * @type Boolean
-			 **/
-			blur = true,
+			enabled = true,
 			
 			/**
 			 * Store enabled value before ajax requiest
 			 *
 			 * @type Boolean
 			 **/
-			prevEnabled = false,
-			
-			/**
-			 * Some ajax requests and every modal dialog required to show overlay,
-			 * so we count it to not enable shortcuts until any requests complete and any dialogs closed
-			 *
-			 * @type Number
-			 **/
-			overlayCnt = 0,
+			prevEnabled = true,
 			
 			/**
 			 * Rules to validate data from backend
@@ -99,6 +84,16 @@
 			
 			node = $(node),
 			
+			id = node.attr('id') || '',
+			
+			namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
+			
+			mousedown = 'mousedown.'+namespace,
+			
+			keydown = 'keydown.'+namespace,
+			
+			keypress = 'keypress.'+namespace,
+			
 			prevContent = $('<div/>').append(node.contents()),
 			
 			workzone = $('<div class="ui-helper-clearfix ui-corner-all elfinder-workzone"/>'),
@@ -111,57 +106,9 @@
 			
 			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
 			
-			overlay = $('<div class="ui-widget-overlay elfinder-overlay"/>')
-				.hide()
-				.mousedown(function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-				}),
-			
-			spinner = $('<div class="elfinder-spinner"/>').hide(),
+			overlay = $('<div/>').elfinderoverlay(),
 			
 			width, height,
-			
-			/**
-			 * Increase overlayCnt and show overlay
-			 *
-			 * @return void
-			 */
-			showOverlay = function() {
-				overlayCnt++;
-				if (overlay.is(':hidden')) {
-					overlay.css('zIndex', 1 + overlay.zIndex()).show();
-				}
-			},
-			
-			/**
-			 * Decrease overlayCnt and if its == 0 hide overlay
-			 *
-			 * @return void
-			 */
-			hideOverlay = function() {
-				if (--overlayCnt == 0) {
-					overlay.hide();
-				}
-			},
-			
-			/**
-			 * Show spinner above overlay
-			 *
-			 * @return void
-			 */
-			showSpinner = function() {
-				spinner.css('zIndex', 1 + overlay.css('zIndex')).show();
-			},
-			
-			/**
-			 * Hide spinner
-			 *
-			 * @return void
-			 */
-			hideSpinner = function() {
-				spinner.hide();
-			},
 			
 			/**
 			 * Store info about files/dirs in "files" object.
@@ -176,23 +123,13 @@
 
 				while (l--) {
 					f = data[l];
-					delete f.tmb;
-					files[f.hash] = f;
+					if (f.name && f.hash && f.mime) {
+						// delete f.tmb;
+						files[f.hash] = f;
+					}
 				}
 			},
 			
-			/**
-			 * On load failed make elfinder inactive
-			 *
-			 * @return void
-			 */
-			onloadfail = function() {
-				self.lastDir('');
-				listeners = {};
-				shortcuts = {};
-				enabled   = false;
-				$(document).add(node).unbind('.'+this.namespace);
-			},
 
 			/**
 			 * Exec shortcut
@@ -219,7 +156,199 @@
 						}
 					});
 				}
+			},
+			
+			setAPI = function(ver) {
+				self.api    = parseFloat(ver) || 1;
+				self.newAPI = self.api > 1;
+				self.oldAPI = !self.newAPI;
+				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
 			}
+			
+			/**
+			 * On load failed make elfinder inactive
+			 *
+			 * @return void
+			 */
+			loadfail = function() {
+				self.disable().lastDir('');
+				listeners = {};
+				shortcuts = {};
+				$(document).add(node).unbind('.'+this.namespace);
+				self.trigger = function() { }
+			},
+			
+			load = function(data) {
+				var base = new self.command(self),
+					opts = self.options,
+					cmds = opts.commands || [],
+					tb   = 'elfindertoolbar'+opts.toolbar,
+					cmd,
+					l;
+				
+				setAPI(data.api);
+				
+				if (!self.validResponse('open', data)) {
+					self.error([self.errors.invResponse, self.errors.invData]);
+					return onloadfail();
+				}
+				
+				
+				self.history = new self.history(self);
+				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
+				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
+
+				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
+					$.inArray(name, cmds) === -1 && cmds.push(name)
+				});
+
+				$.each(cmds, function(i, name) {
+					var cmd = self.commands[name];
+					if ($.isFunction(cmd) && !commands[name]) {
+						var _super = $.extend({}, base, cmd.prototype);
+						// cmd.prototype = base;
+						cmd.prototype = _super;
+						commands[name] = new cmd();
+						commands[name]._super = _super;
+						commands[name].setup(name, self.options[name]||{});
+					}
+				});
+				
+				if (!$.fn[tb]) {
+					tb = 'elfindertoolbar';
+				}
+				toolbar[tb](opts.toolbarConf, commands)
+
+				self.debug('api', self.api)
+					.resize(width, height)
+					.load();
+
+				responseHandlers.open($.extend(true, data))
+				self.trigger('open', data);
+
+				// self.trigger('open', data);
+				// if (opts.sync >= 3000) {
+				// 	setInterval(function() {
+				// 		self.sync('silent');
+				// 	}, self.options.sync);
+				// }
+				
+			},
+			
+			responseHandlers = {
+				open : function(data) {
+					if (data.api || data.params) {
+						// init - reset cache
+						files = {};
+					} else {
+						// remove only files from prev cwd
+						for (i in files) {
+							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash == cwd) {
+								delete files[i];
+							}
+						}
+					}
+
+					cwd = data.cwd.hash;
+
+					if (self.newAPI) {
+						cwdOptions = $.extend({}, cwdOptions, data.options);
+						data.files.push(data.cwd);
+						cache(data.files);
+					} else {
+						data.tree && cache(self.normalizeOldTree(data.tree));
+						cache($.map(data.cdc, function(f) { return self.normalizeOldFile(f, cwd); }));
+
+						if (!files[cwd]) {
+							files[cwd] = self.normalizeOldFile(data.cwd);
+						}
+
+						cwdOptions = self.normalizeOldOptions(data);
+
+						if (cwdOptions.path.indexOf('\\') != -1) {
+							cwdOptions.separator = '\\';
+						} else if (cwdOptions.path.indexOf('/') != -1) {
+							cwdOptions.separator = '/';
+						}
+
+					}
+					// self.log(cwdOptions)
+					self.lastDir(cwd);
+					data.debug && self.debug('backend-debug', data.debug);
+					
+					return self
+				},
+				tree : function(data) {
+					cache(data.tree || []);
+					return self;
+				},
+				parents : function(data) {
+					cache(data.tree || []);
+					return self;
+				},
+				
+				add : function(data) {
+					
+				},
+				
+				remove : function(data) {
+					
+				}, 
+				
+				change : function(data) {
+					
+				},
+				
+				sync : function(data) {
+					var raw = [data.cwd].concat(data.files).concat(data.tree||[]),
+						state   = {},
+						removed = [],
+						added   = [],
+						changed = [], i, f;
+
+					cwdOptions = $.extend({}, cwdOptions, data.options);
+					self.log(data)
+					for (i = 0; i < raw.length; i++) {
+						f = raw[i];
+						if (f.hash && f.name && !state[f.hash]) {
+							state[f.hash] = f;
+						}
+					}
+
+					$.each(files, function(hash, f) {
+						if (!state[hash]) {
+							removed.push(hash);
+						}
+					});
+
+					$.each(state, function(hash, file) {
+						var prev = files[hash];
+
+						if (!prev) {
+							added.push(file)
+						} else if (prev.name != file.name 
+						|| prev.phash  != file.phash
+						|| prev.mime   != file.mime
+						|| prev.read   != file.read
+						|| prev.write  != file.write
+						|| prev.locked != file.locked
+						|| prev.date   != file.date
+						|| prev.dirs   != file.dirs
+						|| prev.size   != file.size) {
+							// self.log(file)
+							changed.push(file);
+						}
+
+					})
+					self.log(removed).log(added).log(changed)
+					return self
+					removed && self.trigger('removed', {removed : removed});
+					added   && self.trigger('added',   {added : added});
+					changed && self.trigger('changed', {changed : changed});
+					
+				}
+			}
+			
 			;
 
 		/**
@@ -248,6 +377,8 @@
 		 **/
 		this.options = $.extend({}, this.options, opts||{});
 		
+		this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get',
+		
 		this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
 		
 		/**
@@ -255,15 +386,15 @@
 		 *
 		 * @type String
 		 **/
-		this.id = node.attr('id') || '';
+		this.id = id;
 		
 		/**
 		 * Events namespace
 		 *
 		 * @type String
 		 **/
-		this.namespace = 'elfinder'+(this.id || Math.random().toString().substr(2, 7));
-		
+		this.namespace = namespace;
+
 		/**
 		 * Interface language
 		 *
@@ -306,14 +437,6 @@
 		 * @type String
 		 **/
 		this.sort = this.sortType();
-		
-		/**
-		 * Flag - allow sync reuqest?
-		 * Required to aviod several sync at once
-		 *
-		 * @type Boold
-		 **/
-		this.allowSync = true;
 		
 		/**
 		 * Return true if filemanager is active
@@ -375,6 +498,8 @@
 		this.isCommandEnabled = function(name) {
 			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : true;
 		}
+		
+		
 		
 		/**
 		 * Return file data from current dir or tree by it's hash
@@ -488,38 +613,38 @@
 		 * 		"silent" - do not block other requests, send error message to debug
 		 * @return $.Deferred
 		 */
-		this.ajax = function(options) {
+		this.ajax = function(options, freeze) {
 			var self    = this,
 				o       = this.options,
 				errors  = this.errors,
 				dfrd    = $.Deferred(),
 				data    = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
 				cmd     = data.cmd,
-				mode    = (function() { return /^sync|bg|silent$/.test(options.mode) ? options.mode : 'sync'; })(),
-				deffail = options.preventDefault !== void(0) ? !options.preventDefault : !options.preventFail,
-				defdone = options.preventDefault !== void(0) ? !options.preventDefault : !options.preventDone,
+				deffail = !(options.preventDefault || options.preventFail),
+				defdone = !(options.preventDefault || options.preventDone),
 				options = $.extend({
 					url      : o.url,
 					async    : true,
-					type     : 'get',
+					type     : this.requestType,
 					dataType : 'json',
 					cache    : false,
 					// timeout  : 100,
 					data     : data
 				}, options.options || {}),
 				fail = function(error) {
-					mode == 'silent' 
-						? self.debug('error', self.i18n(error))
-						: self.trigger('error', {error : error});
+					self.error(error)
 				},
 				done = function(data) {
-					if (data.warning) {
-						self.trigger('warning', {warning : data.warning});
+					data.warning && self.error(data.warning);
+
+					if (responseHandlers[cmd]) {
+						responseHandlers[cmd]($.extend({}, data))
 					}
+
 					// fire some event to update cache/ui
 					data.removed && data.removed.length && self.trigger('removed', data);
-					data.added   && data.added.length   && self.trigger('added', data);
-					data.changed   && data.changed.length   && self.trigger('changed', data);
+					data.added   && data.added.length   && self.trigger('added',   data);
+					data.changed && data.changed.length && self.trigger('changed', data);
 					
 					// fire event with command name
 					self.trigger(cmd, data);
@@ -557,24 +682,28 @@
 					error ? dfrd.reject(error) : dfrd.resolve(response);
 				}
 				;
-				
+			// self.log(deffail).log(defdone)
 			deffail && dfrd.fail(fail);
 			defdone && dfrd.done(done);
-				
+			o.debug && dfrd.fail(function(error) { self.debug('error', self.i18n(error)); });
+			
 			if (!cmd) {
 				return dfrd.reject(errors.cmdRequired);
 			}	
 			
-			if (mode == 'sync') {
-				prevEnabled = enabled;
-				enabled = false;
-				showOverlay();
-				showSpinner();
+			if (freeze) {
+				// prevEnabled = enabled;
+				// enabled = false;
+				this.disable()
+				overlay.show()
+				// showOverlay();
+				// showSpinner();
 				
 				dfrd.always(function() {
-					hideSpinner();
-					hideOverlay();
-					prevEnabled && self.trigger('focus');
+					// hideSpinner();
+					overlay.hide()
+					// hideOverlay();
+					prevEnabled && self.enable();
 				});
 			}
 			
@@ -778,7 +907,7 @@
 					dialog.dialog({position : p});
 					
 					if (modal) {
-						showOverlay();
+						// showOverlay();
 						self.trigger('blur');
 					}
 					if (open) {
@@ -794,7 +923,7 @@
 					}
 				},
 				close : function() {
-					modal && hideOverlay();
+					// modal && hideOverlay();
 					self.trigger('focus');
 					$(this).dialog('destroy');
 					dialog.remove();
@@ -864,7 +993,83 @@
 			return this.resize(width, height);
 		}
 		
+		this.sync = function(freeze) {
+			var self    = this,
+				raw     = {},
+				removed = [],
+				added   = [],
+				changed = [],
+				dfrd    = $.Deferred(),
+				opts1   = {
+					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
+					preventDefault : true
+				},
+				opts2 = {
+					data : {cmd : 'parents', target : cwd},
+					preventDefault : true
+				};
+			
+			$.when(
+				this.ajax(opts1, freeze),
+				this.ajax(opts2, freeze)
+			)
+			.fail(function(error) {
+				freeze && self.error(error);
+				dfrd.reject()
+			})
+			.then(function(odata, pdata) {
+				setAPI(odata.api);
 
+				if (!(self.validResponse('open', odata) 
+				&& (self.oldAPI || self.validResponse('parents', pdata)))) {
+					self.error([self.errors.invResponse, self.errors.invData]);
+					return dfrd.reject();
+				}
+				
+				if (self.newAPI) {
+					cwdOptions = $.extend({}, cwdOptions, odata.options);
+					$.each(odata.files.concat(pdata.tree), function(i, f) {
+						if (f.hash && f.name && f.mime) {
+							raw[f.hash] = f;
+						}
+					})
+				} else {
+					cwdOptions = $.extend({}, cwdOptions, self.normalizeOldOptions(odata));
+					raw = self.normalizeOldTree(data.tree);
+					$.each(data.cdc, function(i, f) {
+						if (f.hash && f.name && f.mime) {
+							raw[f.hash] = self.normalizeOldFile(f, cwd);
+						}
+					});
+				}
+
+				$.each(files, function(hash, f) {
+					!raw[hash] && removed.push(hash);
+				})
+				
+				$.each(raw, function(hash, file) {
+					var origin = files[hash];
+					
+					if (!origin) {
+						added.push(file);
+					} else {
+						$.each(file, function(prop) {
+							if (file[prop] != origin[prop]) {
+								changed.push(file)
+								return false;
+							}
+						})
+					}
+					
+					
+				})
+				
+				self.log(removed).log(added).log(changed)
+				
+			});
+			
+			return dfrd;
+		}
 		
 		/**
 		 * Destroy this elFinder instance
@@ -880,6 +1085,7 @@
 				node[0].elfinder = null;
 			}
 		}
+		
 		
 		
 		this.draggable = {
@@ -944,21 +1150,15 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
-		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr');
-		
-		if (this.options.cssClass) {
-			this.cssClass += ' '+this.options.cssClass;
-		}
+		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 		
 		node.addClass(this.cssClass)
 			.append(toolbar)
 			.append(workzone)
 			.append(statusbar)
 			.append(overlay)
-			.append(spinner)
-			.bind('mousedown.'+this.namespace, function() {
-				blur = false;
-				!enabled && self.trigger('focus');
+			.bind(mousedown, function() {
+				!enabled && self.enable();
 			});
 		
 		width  = self.options.width || 'auto'; 
@@ -966,104 +1166,71 @@
 		this.resize(width, height);
 		node[0].elfinder = this;
 		
-		if (this.options.resizable) {
-			node.resizable({
+		this.options.resizable 
+		&& $.fn.resizable 
+		&& node.resizable({
 				resize    : function() { self.updateHeight(); },
 				minWidth  : 300,
 				minHeight : 200
 			});
-		}
+		
+		// attach events to document
+		$(document)
+			// disable elfinder on click outside elfinder
+			.bind(mousedown, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+			// exec shortcuts
+			.bind(keydown+' '+keypress, execShortcut);
+		
+		// create methods
+		$.each(['enable', 'disable', 'load', 'select', 'error'], function(i, name) {
+			self[name] = function() {
+				var arg = arguments[0];
+				return arguments.length == 1 && typeof(arg) == 'function'
+					? self.bind(name, arg)
+					: self.trigger(name, $.isPlainObject(arg) ? arg : {value : arg});
+			}
+		})
+		
+		// bind event handlers
+		this.enable(function() {
+			if (!enabled && self.visible() && overlay.is(':hidden')) {
+				enabled = true;
+				$('texarea,input,button').blur();
+			}
+		})
+		.disable(function() {
+			prevEnabled = enabled;
+			enabled = false;
+			
+		})
+		.select(function(e) {
+			selected = $.map(e.data.selected || e.data.value|| [], function(hash) {
+				return files[hash] ? hash : null;
+			});
+		})
+		.error(function(e) { 
+			alert(self.i18n(e.data.error || e.data.value))
+		})
+		
 		
 		this
 			/**
-			 * Enable elFinder shortcuts if no "sync" ajax request in progress or modal dialog opened
-			 */
-			.bind('focus', function() {
-				if (self.visible() && !enabled && !overlayCnt) {
-					$('texarea,input,button').blur();
-					enabled = true;
-					node.removeClass(self.options.blurClass);
-				}
-			})
-			/**
-			 * Disable elFinder shortcuts
-			 */
-			.bind('blur', function() {
-				if (enabled) {
-					enabled = false;
-					prevEnabled = false;
-					// overlayCnt ==0 && 
-					self.node.addClass(self.options.blurClass);
-				}
-			})
-			/**
 			 * Show error dialog
 			 */
-			.bind('error warning', function(e) {
-				if (self.visible()) {
-					self.dialog(self.i18n(e.data.error || e.data.warning), {
-						title         : 'Error',
-						modal         : true,
-						closeOnEscape : false,
-						buttons       : {
-							Ok : function() { $(this).dialog('close'); }
-						}
-					}, 'error');
-				}
-			})
-			/**
-			 * Set params if required and update files cache
-			 */
-			.bind('open', function(e) {
-				var data = e.data, i;
-				
-				if (data.api || data.params) {
-					// init - reset cache
-					files = {};
-				} else {
-					// remove only files from prev cwd
-					for (i in files) {
-						if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash == cwd) {
-							delete files[i];
-						}
-					}
-				}
-				
-				cwd = data.cwd.hash;
-				
-				if (self.newAPI) {
-					cwdOptions = $.extend({}, cwdOptions, data.options);
-					data.files.push(data.cwd);
-					cache(data.files);
-				} else {
-					data.tree && cache(self.normalizeOldTree(data.tree));
-					cache($.map(data.cdc, function(f) { return self.normalizeOldFile(f, cwd); }));
-					
-					if (!files[cwd]) {
-						files[cwd] = self.normalizeOldFile(data.cwd);
-					}
-
-					cwdOptions = $.extend({}, cwdOptions, data.params, {path : data.cwd.rel, disabled : data.disabled, tmb : !!data.tmb});
-
-					if (cwdOptions.path.indexOf('\\') != -1) {
-						cwdOptions.separator = '\\';
-					} else if (cwdOptions.path.indexOf('/') != -1) {
-						cwdOptions.separator = '/';
-					}
-					
-				}
-
-				self.lastDir(cwd);
-				data.debug && self.debug('backend-debug', data.debug);
-			})
-			/**
-			 * Update files cache
-			 */
-			.bind('tree parents', function(e) {
-				cache(e.data.tree || []);
-			})
+			// .bind('error warning', function(e) {
+			// 	if (self.visible()) {
+			// 		self.dialog(self.i18n(e.data.error || e.data.warning), {
+			// 			title         : 'Error',
+			// 			modal         : true,
+			// 			closeOnEscape : false,
+			// 			buttons       : {
+			// 				Ok : function() { $(this).dialog('close'); }
+			// 			}
+			// 		}, 'error');
+			// 	}
+			// })
 			
-			.bind('sync', function(e) {
+			.bind('sync_', function(e) {
 				var data = e.data,
 					raw = [data.cwd].concat(data.files).concat(data.tree||[]),
 					state   = {},
@@ -1117,14 +1284,6 @@
 				// });
 			})
 			/**
-			 * cache selected files hashes
-			 */
-			.bind('select', function(e) {
-				selected = $.map(e.data.selected || [], function(hash) {
-					return files[hash] ? hash : null;
-				});
-			})
-			/**
 			 * Update files cache - remove not existed files
 			 */
 			.bind('removed', function(e) {
@@ -1153,71 +1312,10 @@
 				cache(e.data.added);
 			});
 		
-		this.ajax({data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, preventDone : true})
-			.fail(onloadfail)
-			.done(function(data) { 
-				var base = new self.command(self),
-					opts = self.options,
-					cmds = opts.commands || [],
-					tb   = 'elfindertoolbar'+opts.toolbar,
-					cmd,
-					l;
-				
-				self.api    = parseFloat(data.api)|| 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
-				
-				if (!self.validResponse('open', data)) {
-					self.trigger('error', {error : [self.errors.invResponse, self.errors.invData]});
-					return onloadfail();
-				}
-
-				// if (opts.sync >= 3000) {
-				// 	setInterval(function() {
-				// 		self.sync('silent');
-				// 	}, self.options.sync);
-				// }
-				
-				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
-				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
-
-				self.history = new self.history(self);
-
-				$(document)
-					// blur elfinder on document click
-					.bind('mousedown.'+self.namespace, function(e) {
-						blur && enabled && self.trigger('blur');
-						blur = true;
-					})
-					// exec shortcuts
-					.bind('keydown.'+self.namespace+' keypress.'+self.namespace, execShortcut);
-
-				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
-					$.inArray(name, cmds) === -1 && cmds.push(name)
-				});
-
-				$.each(cmds, function(i, name) {
-					var cmd = self.commands[name];
-					if ($.isFunction(cmd) && !commands[name]) {
-						var _super = $.extend({}, base, cmd.prototype);
-						// cmd.prototype = base;
-						cmd.prototype = _super;
-						commands[name] = new cmd();
-						commands[name]._super = _super;
-						commands[name].setup(name, self.options[name]||{});
-					}
-				});
-				
-				if (!$.fn[tb]) {
-					tb = 'elfindertoolbar';
-				}
-				toolbar[tb](opts.toolbarConf, commands)
-
-				self.resize(width, height);
-				self.debug('api', self.api);
-				self.trigger('load').trigger('open', data);
-			})
+		this.ajax({data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, preventDone : true}, true)
+			.fail(loadfail)
+			.done(load)
+			
 	}
 	
 	
@@ -1538,6 +1636,10 @@
 			return info;
 		},
 		
+		normalizeOldOptions : function(data) {
+			return $.extend(data.params, {path : data.cwd.rel, disabled : data.disabled, tmb : !!data.tmb});
+		},
+		
 		/**
 		 * Open confiration dialog
 		 * 
@@ -1650,118 +1752,6 @@
 					return callback.apply(this, arguments);
 				});
 			return this.bind(event, h);
-		},
-		
-		/**
-		 * Sync files with connector if other sync request not in progress
-		 * Return true on send requiest
-		 *
-		 * @param  String  request mode (sync|bg|silent)
-		 * @return $.Deferred
-		 **/
-		sync : function(mode) {
-			var self = this,
-				cwd  = this.cwd().hash,
-				error,
-				data = {},
-				opts = {
-					cmd : 'open',
-					target : cwd,
-					init : true
-				},
-				dfrd;
-			
-			if (this.options.allowNavbar) {
-				opts.tree = true;
-			}
-
-			var d = $.Deferred().fail(function() { self.log('here') })
-
-			// d.reject()
-
-			$.when(function() { return true}).fail(function() { self.log('fail')}).reject()
-
-			dfrd = $.when(
-				this.ajax(opts, 
-					'sync',
-					function(r) { 
-						data.cwd = r.cwd;
-						data.files = r.files;
-						data.options = r.options;
-					}, 
-					function(err) { error = err; }
-				),
-				this.ajax({cmd : 'parents', target : cwd}, 'silent', function(r) { data.tree = r.tree; }, function(err) { error = err; } )
-			).always(function() {
-				if (error) {
-					mode == 'silent' ? self.debug('error', error) : self.trigger('error', {error : error});
-					return
-					
-				}
-				self.trigger('sync', data)
-				// self.log(error)
-				// self.log(data)
-			})
-			// self.log(dfrd)
-			return dfrd
-			
-			return $.Deferred()
-			return this.oldAPI
-				? this.openDir(this.lastDir(), true)
-				: this.ajax({cmd : 'sync', target : this.cwd().hash, tree : this.oldAPI || this.options.allowNavbar}, mode);
-			
-			var self = this;
-			
-				return this.ajax({
-						data : {cmd : 'sync', target : this.cwd().hash, tree : this.oldAPI || this.options.allowNavbar},
-						// type : 'post'
-					},
-					mode
-				).always(function() {
-					self.allowSync = true;
-				})
-				.done(function(data) {
-					var files = self.files(),
-						state = {},
-						removed = [],
-						added   = [],
-						changed = [];
-					
-					self.log('done')
-					$.each(data.files, function(i, f) {
-						state[f.hash] = f;
-					});
-					
-					self.log(state)
-					
-					$.each(files, function(hash, f) {
-						if (!state[hash]) {
-							self.log(f.name)
-							removed.push(hash)
-						}
-					});
-					
-					$.each(state, function(hash, file) {
-						var prev = files[hash];
-						
-						if (!prev) {
-							added.push(file)
-						} else if (prev.name  != file.name 
-						|| prev.phash  != file.phash 
-						|| prev.mime   != file.mime
-						|| prev.read   != file.read
-						|| prev.write  != file.write
-						|| prev.locked != file.locked
-						|| prev.date   != file.date
-						|| prev.dirs   != file.dirs
-						|| prev.size   != file.size) {
-							changed.push(file);
-						}
-						
-					})
-					self.log(removed).log(added).log(changed)
-				})
-
 		},
 		
 		
@@ -1884,11 +1874,9 @@
 		reload : function() {
 			var self = this;
 			
-			this.trigger('reload').clipboard([], false, true);
+			// this.trigger('reload').clipboard([], false, true);
 			
-			return this.sync("sync").fail(function() {
-				self.log('fail')
-			});
+			return this.sync(true)
 		},
 		
 		/**

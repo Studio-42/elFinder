@@ -68,6 +68,7 @@ elFinder.prototype.history = function(fm) {
 		}
 	}
 	
+	
 	fm
 		// store opened dir in history
 		.bind('open', function(e) {

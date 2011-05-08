@@ -7,6 +7,7 @@
 elFinder.prototype.options = {
 	/* connector url. Required! */
 	url            : '',
+	requestType : 'get',
 	/* interface language */
 	lang           : 'en',
 	/* additional css class for filemanager container */
@@ -196,7 +197,7 @@ elFinder.prototype.options = {
 	commandsOptions : {},
 	clearCache : true,
 	// debug : true
-	debug : ['error', 'event-load']
+	debug : ['error', 'event-load', 'event-open']
 }
 
 })(jQuery);

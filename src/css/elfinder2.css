@@ -72,6 +72,8 @@
 
 .elfinder-blur { opacity: .6; filter:Alpha(Opacity=60); }
 
+.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }
+
 /************************************/
 /*              TOOLBAR             */
 /************************************/
