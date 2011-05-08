@@ -368,7 +368,7 @@
 		 * @return Boolean
 		 **/
 		this.visible = function() {
-			return node.is(':visible')
+			return node.is(':visible');
 		}
 		
 		/**
@@ -394,10 +394,22 @@
 			return files[cwd];
 		}
 		
+		/**
+		 * Return required cwd option
+		 * 
+		 * @param  String  option name
+		 * @return mixed
+		 */
 		this.option = function(name) {
 			return cwdOptions[name]||'';
 		}
 		
+		/**
+		 * Return true if command enabled
+		 * 
+		 * @param  String  command name
+		 * @return Boolean
+		 */
 		this.isCommandEnabled = function(name) {
 			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : true;
 		}
@@ -519,7 +531,7 @@
 				o       = this.options,
 				errors  = this.errors,
 				dfrd    = $.Deferred(),
-				data    = $.extend(o.customData || {}, {mimes : o.onlyMimes || {}}, options.data || options),
+				data    = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
 				cmd     = data.cmd,
 				mode    = (function() { return /^sync|bg|silent$/.test(options.mode) ? options.mode : 'sync'; })(),
 				deffail = options.preventDefault !== void(0) ? !options.preventDefault : !options.preventFail,
@@ -900,12 +912,9 @@
 		this.destroy = function(notRestoreNode) {
 			if (node && node[0].elfinder) {
 				this.trigger('destroy');
-				listeners = {};
-				shortcuts = {};
-				enabled   = false;
+				onloadfail();
 				node.children().remove();
 				!notRestoreNode && node.append(prevContent.contents()).removeClass(this.cssClass);
-				$(document).unbind('.'+this.namespace);
 				node[0].elfinder = null;
 			}
 		}
@@ -1827,7 +1836,10 @@
 
 			if (init) {
 				opts.init =1;
-				opts.tree = (this.newAPI && this.options.allowNavbar) || this.oldAPI ? 1 : 0;
+				if (this.options.allowNavbar || this.oldAPI) {
+					opts.tree = 1;
+				}
+
 			}
 
 			jqxhr = this.ajax(opts);
