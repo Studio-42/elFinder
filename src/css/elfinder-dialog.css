@@ -1,5 +1,5 @@
 /* elfinder dialog */
-.elfinder-dialog .elfinder-dialog-icon {
+.elfinder-dialog-icon {
 	position:absolute;
 	width:32px;
 	height:32px;
@@ -11,9 +11,10 @@
 
 .elfinder-dialog-error .ui-dialog-content,
 .elfinder-dialog-confirm .ui-dialog-content { 
-	padding-left:56px;
+	padding-left: 56px;
+	min-height:35px;
 }
-.elfinder-dialog-notify .ui-dialog-titlebar { padding:0;}
+.elfinder-dialog-notify .ui-dialog-titlebar { display:none ;}
 .elfinder-dialog-notify .ui-dialog-content { padding:0;}
 
 .elfinder-notify {

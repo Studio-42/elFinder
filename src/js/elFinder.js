@@ -108,7 +108,7 @@
 			
 			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
 			
-			overlay = $('<div/>').elfinderoverlay(),
+			overlay = $('<div/>').elfinderoverlay({hide : function() { self.enable(); }}),
 			
 			width, height,
 			
@@ -843,78 +843,10 @@
 		 * @param  String             dialog type for error|notify|confirm dialogs 
 		 * @return jQuery
 		 */
-		this.dialog = function(content, options, type) {
-			var self    = this,
-				// node    = this.node,
-				options = options || {},
-				open = options.open,
-				modal   = !!options.modal,
-				buttons = options.buttons,
-				dialog  = $('<div/>').append(content);
-				
-			options.modal = false;
-			options.buttons = {};
+		this.dialog = function(content, options) {
 			
-			options = $.extend({
-				title         : '',
-				resizable     : false,
-				minHeight     : 100,
-				closeOnEscape : true,
-				open : function() {
-					var o = node.offset(),
-						nw = node.width(),
-						dw = dialog.width(),
-						nh = node.height(),
-						dh = dialog.height(),
-						p = type == 'notify'
-							? [parseInt(o.left + nw - dw-7), parseInt(o.top+7)]
-							: [parseInt(o.left + (nw/2) - (dw/2)), parseInt(o.top + (nh/2) - (dh/2)) ];
-					
-					dialog.dialog({position : p});
-					
-					if (modal) {
-						// showOverlay();
-						self.trigger('blur');
-					}
-					if (open) {
-						self.log(open)
-						// options.open()
-					} 
-				},
-				create : function() {
-					var $this = $(this);
-					$this.nextAll('.ui-dialog-buttonpane').addClass('ui-corner-bottom');
-					if (!options.closeOnEscape) {
-						$this.prev().children('.ui-dialog-titlebar-close').remove();
-					}
-				},
-				close : function() {
-					// modal && hideOverlay();
-					self.trigger('focus');
-					$(this).dialog('destroy');
-					dialog.remove();
-				}
-			}, options, {
-				dialogClass : 'std42-dialog elfinder-dialog'
-				
-			});
+			return $('<div/>').append(content).elfinderdialog(options, node)
 			
-			options.title = this.i18n(options.title);
-			
-			if (type) {
-				type != 'notify' && dialog.append('<span class="elfinder-dialog-icon"/>');
-				options.dialogClass += ' elfinder-dialog-'+type;
-			}
-
-			if (buttons) {
-				$.each(buttons, function(name, cb) {
-					options.buttons[self.i18n(name)] = cb;
-				});
-			}
-			
-			
-			
-			return dialog.dialog(options);
 		}
 		
 		this.getUIDir = function() {
@@ -959,11 +891,16 @@
 			return this.resize(width, height);
 		}
 		
+		/**
+		 * Sync content
+		 * 
+		 * @param  Boolean  freeze interface untill complete
+		 * @return jQuery.Deferred
+		 */
 		this.sync = function(freeze) {
-			var self    = this,
-				
-				dfrd    = $.Deferred(),
-				opts1   = {
+			var self  = this,
+				dfrd  = $.Deferred(),
+				opts1 = {
 					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
 					preventDefault : true
 				},
@@ -978,7 +915,7 @@
 			)
 			.fail(function(error) {
 				freeze && self.error(error);
-				dfrd.reject()
+				dfrd.reject();
 			})
 			.then(function(odata, pdata) {
 				var raw     = {},
@@ -1179,6 +1116,9 @@
 		
 		// bind event handlers
 		this
+			.open(function() {
+				self.error('Unable to connect to backend. ')
+			})
 			.enable(function() {
 				if (!enabled && self.visible() && overlay.is(':hidden')) {
 					enabled = true;
@@ -1196,10 +1136,23 @@
 				});
 			})
 			.error(function(e) { 
-				alert(self.i18n(e.data.error || e.data.value))
+				var opts = {
+					cssClass : 'elfinder-dialog-error',
+					title    : self.i18n('Error'),
+					modal    : true,
+					buttons  : {
+						Ok : function() { $(this).elfinderdialog('close'); }
+					}
+				}
+				
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || e.data.value), opts)
+				
+				// $('<div>'+self.i18n(e.data.error || e.data.value)+'</div>').elfinderdialog(opts, node)
+				// alert(self.i18n(e.data.error || e.data.value))
 			})
 			;
 
+		// this.error('message')
 		// attach events to document
 		$(document)
 			// disable elfinder on click outside elfinder

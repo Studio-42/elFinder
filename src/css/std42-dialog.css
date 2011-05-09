@@ -16,8 +16,11 @@
 	border-bottom-right-radius: 0; 
 	font-size:.82em;
 	font-weight:normal;
-	padding:.1em 1em;
+	padding:.2em 1em;
 }
+
+.std42-dialog .ui-dialog-titlebar-close,
+.std42-dialog .ui-dialog-titlebar-close:hover { padding:1px; }
 
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
@@ -27,20 +30,21 @@
 .std42-dialog .ui-dialog-buttonpane {
 	border:0 solid;
 	margin:0;
-	padding:.2em .5em;
-	font-size:.82em;
+	padding:.5em .7em;
+	font-size:.76em;
+/*	border:1px solid #111;*/
 }
 
 .std42-dialog .ui-dialog-buttonpane button {
-	margin:0 0 0 .2em;
+	margin:0 0 0 .4em;
 	padding:0;
 }
-
+/*.ui-button-text-only .ui-button-text { padding: .4em 1em; }*/
 .std42-dialog .ui-dialog-buttonpane button span {
 	padding:2px 9px;
 }
 
-
+.std42-dialog .ui-resizable-se { bottom:0; right:0;}
 
 
 
