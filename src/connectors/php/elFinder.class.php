@@ -446,7 +446,7 @@ class elFinder {
 		if (($tree = $volume->tree($dir)) == false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		}
-		return array('tree' => 42);
+		// return array('tree' => 42);
 		return array('tree' => $tree);
 	}
 	

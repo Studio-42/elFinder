@@ -17,6 +17,8 @@
 			 **/
 			prevEnabled = true,
 			
+			events = ['enable', 'disable', 'error', 'load', 'open', 'tree', 'parents', 'select',  'add', 'remove', 'change'],
+			
 			/**
 			 * Rules to validate data from backend
 			 *
@@ -287,66 +289,36 @@
 					return self;
 				},
 				
-				add : function(data) {
-					
+				add : function(added) {
+					cache(added);
+					return self;
 				},
 				
-				remove : function(data) {
-					
+				remove : function(removed) {
+					var l  = removed.length, 
+						rm = function(hash) {
+							var file = files[hash];
+							if (file) {
+								if (file.mime == 'directory' && file.dirs) {
+									$.each(files, function(h, f) {
+										f.phash == hash && rm(h);
+									});
+								}
+								delete files[hash];
+							}
+						};
+
+					while (l--) {
+						rm(removed[l]);
+					}
+					return self;
 				}, 
 				
-				change : function(data) {
-					
-				},
-				
-				sync : function(data) {
-					var raw = [data.cwd].concat(data.files).concat(data.tree||[]),
-						state   = {},
-						removed = [],
-						added   = [],
-						changed = [], i, f;
-
-					cwdOptions = $.extend({}, cwdOptions, data.options);
-					self.log(data)
-					for (i = 0; i < raw.length; i++) {
-						f = raw[i];
-						if (f.hash && f.name && !state[f.hash]) {
-							state[f.hash] = f;
-						}
-					}
-
-					$.each(files, function(hash, f) {
-						if (!state[hash]) {
-							removed.push(hash);
-						}
-					});
-
-					$.each(state, function(hash, file) {
-						var prev = files[hash];
-
-						if (!prev) {
-							added.push(file)
-						} else if (prev.name != file.name 
-						|| prev.phash  != file.phash
-						|| prev.mime   != file.mime
-						|| prev.read   != file.read
-						|| prev.write  != file.write
-						|| prev.locked != file.locked
-						|| prev.date   != file.date
-						|| prev.dirs   != file.dirs
-						|| prev.size   != file.size) {
-							// self.log(file)
-							changed.push(file);
-						}
-
-					})
-					self.log(removed).log(added).log(changed)
-					return self
-					removed && self.trigger('removed', {removed : removed});
-					added   && self.trigger('added',   {added : added});
-					changed && self.trigger('changed', {changed : changed});
-					
+				change : function(changed) {
+					cache(changed);
+					return self;
 				}
+				
 			}
 			
 			;
@@ -675,10 +647,10 @@
 						error = [errors.invResponse, errors.emptyData];
 					} else if (response.error) {
 						error = response.error;
-					} else if (!self.validResponse(response)) {
+					} else if (!self.validResponse(cmd, response)) {
 						error = [errors.invResponse, errors.invData];
 					}
-					
+
 					error ? dfrd.reject(error) : dfrd.resolve(response);
 				}
 				;
@@ -692,17 +664,11 @@
 			}	
 			
 			if (freeze) {
-				// prevEnabled = enabled;
-				// enabled = false;
-				this.disable()
-				overlay.show()
-				// showOverlay();
-				// showSpinner();
+				this.disable();
+				overlay.show();
 				
 				dfrd.always(function() {
-					// hideSpinner();
-					overlay.hide()
-					// hideOverlay();
+					overlay.hide();
 					prevEnabled && self.enable();
 				});
 			}
@@ -995,10 +961,7 @@
 		
 		this.sync = function(freeze) {
 			var self    = this,
-				raw     = {},
-				removed = [],
-				added   = [],
-				changed = [],
+				
 				dfrd    = $.Deferred(),
 				opts1   = {
 					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
@@ -1018,21 +981,37 @@
 				dfrd.reject()
 			})
 			.then(function(odata, pdata) {
+				var raw     = {},
+					removed = [],
+					added   = [],
+					changed = [],
+					isChanged = function(hash) {
+						var l = changed.length;
+					
+						while (l--) {
+							if (changed[l].hash == hash) {
+								return true;
+							}
+						}
+					};
+				
 				setAPI(odata.api);
 
+				// valid data
 				if (!(self.validResponse('open', odata) 
 				&& (self.oldAPI || self.validResponse('parents', pdata)))) {
 					self.error([self.errors.invResponse, self.errors.invData]);
 					return dfrd.reject();
 				}
 				
+				// create new files list
 				if (self.newAPI) {
 					cwdOptions = $.extend({}, cwdOptions, odata.options);
 					$.each(odata.files.concat(pdata.tree), function(i, f) {
 						if (f.hash && f.name && f.mime) {
 							raw[f.hash] = f;
 						}
-					})
+					});
 				} else {
 					cwdOptions = $.extend({}, cwdOptions, self.normalizeOldOptions(odata));
 					raw = self.normalizeOldTree(data.tree);
@@ -1043,10 +1022,12 @@
 					});
 				}
 
+				// find removed
 				$.each(files, function(hash, f) {
 					!raw[hash] && removed.push(hash);
-				})
+				});
 				
+				// compare files
 				$.each(raw, function(hash, file) {
 					var origin = files[hash];
 					
@@ -1058,14 +1039,25 @@
 								changed.push(file)
 								return false;
 							}
-						})
+						});
 					}
-					
-					
-				})
+				});
+				
+				// parents of removed dirs mark as changed (required for tree correct work)
+				$.each(removed, function(i, hash) {
+					var file = files[hash], 
+						phash = file.phash;
+
+					if (phash && file.mime == 'directory' && $.inArray(phash, removed) === -1 && raw[phash] && !isChanged(phash)) {
+						changed.push(raw[phash]);
+					}
+				});
 				
 				self.log(removed).log(added).log(changed)
-				
+				removed.length && responseHandlers.remove(removed).remove({removed : removed});
+				added.length   && responseHandlers.add(added).add({added : added});
+				changed.length && responseHandlers.change(changed).change({changed : changed});
+				dfrd.resolve();
 			});
 			
 			return dfrd;
@@ -1174,15 +1166,9 @@
 				minHeight : 200
 			});
 		
-		// attach events to document
-		$(document)
-			// disable elfinder on click outside elfinder
-			.bind(mousedown, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
-			// exec shortcuts
-			.bind(keydown+' '+keypress, execShortcut);
 		
 		// create methods
-		$.each(['enable', 'disable', 'load', 'select', 'error'], function(i, name) {
+		$.each(events, function(i, name) {
 			self[name] = function() {
 				var arg = arguments[0];
 				return arguments.length == 1 && typeof(arg) == 'function'
@@ -1192,28 +1178,36 @@
 		})
 		
 		// bind event handlers
-		this.enable(function() {
-			if (!enabled && self.visible() && overlay.is(':hidden')) {
-				enabled = true;
-				$('texarea,input,button').blur();
-			}
-		})
-		.disable(function() {
-			prevEnabled = enabled;
-			enabled = false;
-			
-		})
-		.select(function(e) {
-			selected = $.map(e.data.selected || e.data.value|| [], function(hash) {
-				return files[hash] ? hash : null;
-			});
-		})
-		.error(function(e) { 
-			alert(self.i18n(e.data.error || e.data.value))
-		})
-		
-		
 		this
+			.enable(function() {
+				if (!enabled && self.visible() && overlay.is(':hidden')) {
+					enabled = true;
+					$('texarea,input,button').blur();
+				}
+			})
+			.disable(function() {
+				prevEnabled = enabled;
+				enabled = false;
+			
+			})
+			.select(function(e) {
+				selected = $.map(e.data.selected || e.data.value|| [], function(hash) {
+					return files[hash] ? hash : null;
+				});
+			})
+			.error(function(e) { 
+				alert(self.i18n(e.data.error || e.data.value))
+			})
+			;
+
+		// attach events to document
+		$(document)
+			// disable elfinder on click outside elfinder
+			.bind(mousedown, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+			// exec shortcuts
+			.bind(keydown+' '+keypress, execShortcut);
+		
+		// this
 			/**
 			 * Show error dialog
 			 */
@@ -1229,92 +1223,14 @@
 			// 		}, 'error');
 			// 	}
 			// })
-			
-			.bind('sync_', function(e) {
-				var data = e.data,
-					raw = [data.cwd].concat(data.files).concat(data.tree||[]),
-					state   = {},
-					removed = [],
-					added   = [],
-					changed = [], i, f;
-
-				cwdOptions = $.extend({}, cwdOptions, data.options);
-				self.log(data)
-				for (i = 0; i < raw.length; i++) {
-					f = raw[i];
-					if (f.hash && f.name && !state[f.hash]) {
-						state[f.hash] = f;
-					}
-				}
-				
-				$.each(files, function(hash, f) {
-					if (!state[hash]) {
-						removed.push(hash);
-					}
-				});
-				
-				$.each(state, function(hash, file) {
-					var prev = files[hash];
-					
-					if (!prev) {
-						added.push(file)
-					} else if (prev.name != file.name 
-					|| prev.phash  != file.phash
-					|| prev.mime   != file.mime
-					|| prev.read   != file.read
-					|| prev.write  != file.write
-					|| prev.locked != file.locked
-					|| prev.date   != file.date
-					|| prev.dirs   != file.dirs
-					|| prev.size   != file.size) {
-						// self.log(file)
-						changed.push(file);
-					}
-					
-				})
-				self.log(removed).log(added).log(changed)
-				removed && self.trigger('removed', {removed : removed});
-				added   && self.trigger('added',   {added : added});
-				changed && self.trigger('changed', {changed : changed});
-			})
-			.bind('changed', function(e) {
-				cache(e.data.changed||[])
-				// $.each(e.data.changed||[], function(i, file) {
-				// 	files[file.hash] && $.extend(files[file.hash], file);
-				// });
-			})
-			/**
-			 * Update files cache - remove not existed files
-			 */
-			.bind('removed', function(e) {
-				var rm = e.data.removed,
-					l  = rm.length, 
-					remove = function(hash) {
-						var file = files[hash];
-						if (file) {
-							if (file.mime == 'directory' && file.dirs) {
-								$.each(files, function(h, f) {
-									f.phash == hash && remove(h);
-								});
-							}
-							delete files[hash];
-						}
-					};
-					
-				while (l--) {
-					remove(rm[l]);
-				}
-			})
-			/**
-			 * Update files cache - add new files
-			 */
-			.bind('added', function(e) {
-				cache(e.data.added);
-			});
 		
 		this.ajax({data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, preventDone : true}, true)
 			.fail(loadfail)
 			.done(load)
+			.always(function() {
+				delete loadfail;
+				delete load;
+			});
 			
 	}
 	

@@ -329,7 +329,7 @@ $.fn.elfindertree = function(fm) {
 						stree.slideToggle()
 					} else {
 						spin = $('<span class="elfinder-spinner-mini"/>').insertAfter(arrow);
-						fm.ajax({cmd : 'tree', target : dirHash(link)}, 'bg')
+						fm.ajax({cmd : 'tree', target : dirHash(link)})
 							.fail(function() { link.removeClass(collapsed); })
 							.done(function(data) { updateTree(filter(data.tree)); })
 							.always(function(data) {
@@ -345,11 +345,10 @@ $.fn.elfindertree = function(fm) {
 					}
 				});
 		
-		
-		// bind events
+		// bind events handlers
 		fm
-			// update tree
-			.bind('open', function(e) {
+			// create/update tree
+			.open(function(e) {
 				var data = e.data,
 					init = data.api || data.params,
 					dirs = fm.newAPI 
@@ -360,7 +359,7 @@ $.fn.elfindertree = function(fm) {
 					init && tree.empty();
 					setTimeout(function() {
 						updateTree(dirs);
-						
+					
 						init && tree.find('[id].'+collapsed+':not(.'+loaded+')')
 								.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
 								.addClass(loaded);
@@ -370,14 +369,9 @@ $.fn.elfindertree = function(fm) {
 					sync();
 				}
 			})
-			// add new dirs 
-			// .bind('tree parents', function(e) {
-			// 	updateTree(filter(e.data.tree));
-			// 	e.type == 'parents' && sync();
-			// 	
-			// })
-			.bind('added', function(e) {
-				var dirs = filter(e.data.added);
+			// add new dirs
+			.add(function(e) {
+				var dirs = filter(e.data.added || e.data.value);
 
 				if (dirs.length) {
 					updateTree(dirs);
@@ -386,10 +380,10 @@ $.fn.elfindertree = function(fm) {
 						tree.find('#'+hash2id(dir.phash)).not('.'+collapsed).addClass(collapsed);
 					});
 				}
-				
 			})
-			.bind('changed', function(e) {
-				var dirs = filter(e.data.changed),
+			// update changed dirs
+			.change(function(e) {
+				var dirs = filter(e.data.changed || e.data.value),
 					l = dirs.length,
 					dir, node, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
 				
@@ -397,10 +391,10 @@ $.fn.elfindertree = function(fm) {
 					dir = dirs[l];
 					if ((node = tree.find('#'+hash2id(dir.hash))).length) {
 						if (dir.phash) {
-							realParent = node.parents('.'+subtree+':first');
-							reqParent  = findSubtree(dir.phash);
+							realParent  = node.parents('.'+subtree+':first');
+							reqParent   = findSubtree(dir.phash);
 							realSibling = node.parent().next()
-							reqSibling = findSibling(reqParent, dir)
+							reqSibling  = findSibling(reqParent, dir)
 							
 							if (!reqParent.length) {
 								continue;
@@ -410,36 +404,27 @@ $.fn.elfindertree = function(fm) {
 								reqSibling.length ? reqSibling.before(node) : reqParent.append(node);
 							}
 						}
+						
 						isExpanded = node.is('.'+expanded);
 						isLoaded   = node.is('.'+loaded);
 						node.replaceWith(itemhtml(dir, true));
-						if (isExpanded || isLoaded) {
-							node = tree.find('#'+hash2id(dir.hash));
+						
+						if (dir.dirs 
+						&& (isExpanded || isLoaded) 
+						&& (node = tree.find('#'+hash2id(dir.hash))) 
+						&& node.next('.'+subtree).children().length) {
 							isExpanded && node.addClass(expanded);
 							isLoaded && node.addClass(loaded);
 						}
 					}
 				}
-				
-				tree.find('[id]').filter('.'+loaded).each(function() {
-					var link  = $(this),
-						stree = link.next('.'+subtree);
-					if (!stree.children().length) {
-						link.removeClass(collapsed+' '+loaded);
-						stree.hide();
-					}
-				})
-				.end()
-				.not('.'+collapsed).each(function() {
-					var link = $(this);
-					link.next('.'+subtree).children().length && link.addClass(collapsed);
-				});
+
 				sync();
 				updateDroppable();
 			})
-			// remove dirs from tree
-			.bind('removed', function(e) {
-				var hashes = e.data.removed,
+			// remove dirs
+			.remove(function(e) {
+				var hashes = e.data.removed || e.data.value,
 					l  = hashes.length,
 					node, parent, stree;
 				
@@ -454,7 +439,8 @@ $.fn.elfindertree = function(fm) {
 						}
 					}
 				}
-			});
+			})
+		
 		
 	});
 }

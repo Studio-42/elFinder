@@ -720,14 +720,14 @@ $.fn.elfindercwd = function(fm) {
 				fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
 			})
 			// add new files
-			.bind('added', function(e) {
+			.bind('add', function(e) {
 				var phash = fm.cwd().hash;
-				return add($.map(e.data.added || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
+				return add($.map(e.data.added || e.data.value || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
 			})
 			// remove and add changed files
-			.bind('changed', function(e) {
+			.bind('change', function(e) {
 				var phash   = fm.cwd().hash,
-					changed = e.data.changed || [],
+					changed = e.data.changed || e.data.value || [],
 					i       = changed.length,
 					file;
 
@@ -744,8 +744,8 @@ $.fn.elfindercwd = function(fm) {
 				
 			})
 			// remove files
-			.bind('removed', function(e) {
-				remove(e.data.removed || []);
+			.bind('remove', function(e) {
+				remove(e.data.removed || e.data.value || []);
 			})
 			// disable cuted files
 			.bind('lockfiles unlockfiles', function(e) {

@@ -53,6 +53,7 @@ $opts = array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
 			'alias' => 'File system',
+			'treeDeep' => 2,
 			// 'startPath' => '../../../files/mimes',
 			'URL'    => 'http://localhost/git/elfinder/files/',
 			// 'tmbPath' => '.tmb',
