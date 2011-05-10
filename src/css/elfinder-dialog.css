@@ -14,7 +14,7 @@
 	padding-left: 56px;
 	min-height:35px;
 }
-.elfinder-dialog-notify .ui-dialog-titlebar { display:none ;}
+.elfinder-dialog-notify .ui-dialog-titlebar-close { display:none ;}
 .elfinder-dialog-notify .ui-dialog-content { padding:0;}
 
 .elfinder-notify {
@@ -23,6 +23,7 @@
 	padding:.5em;
 	text-align:center;
 }
+/*.elfinder-dialog-active { border:1px solid red;}*/
 
 .elfinder-notify:last-child { border:0 solid; }
 

@@ -1,43 +1,47 @@
 
 $.fn.elfinderoverlay = function(opts) {
 	
-	opts = $.extend({}, opts);
-	
-	this.each(function() {
+	this.filter(':not(.elfinder-overlay)').each(function() {
+		opts = $.extend({}, opts);
 		$(this).addClass('ui-widget-overlay elfinder-overlay')
 			.hide()
 			.mousedown(function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			})
-			.data('cnt', 0)
-			.data('hide', opts.hide);
+			.data({
+				cnt : 0,
+				show : typeof(opts.show) == 'function' ? opts.show : function() { },
+				hide : typeof(opts.hide) == 'function' ? opts.hide : function() { }
+			});
 	});
 	
-	return $.extend(this, {
-		show : function() {
-			var o = this.eq(0)
+	if (opts == 'show') {
+		var o    = this.eq(0),
+			cnt  = o.data('cnt') + 1,
+			show = o.data('show');
+			
+		o.data('cnt', cnt);
 
-			if (o.is(':hidden')) {
-				o.zIndex(o.parent().zIndex()+1).data('cnt', o.data('cnt')+1);
-				$.fn.show.apply(this, arguments);
-			}
-		},
-		hide : function() {
-			var o = this.eq(0),
-				cnt = o.data('cnt'),
-				hide = o.data('hide');
-
-			if (o.is(':visible')) {
-				cnt--;
-				o.data('cnt', cnt > 0 ? cnt : 0);
-				if (cnt < 1) {
-					$.fn.hide.apply(this, arguments);
-					hide && hide();
-				}
-
-			}
+		if (o.is(':hidden')) {
+			o.zIndex(o.parent().zIndex()+1);
+			o.show();
+			show();
 		}
-	})
+	} 
 	
+	if (opts == 'hide') {
+		var o    = this.eq(0),
+			cnt  = o.data('cnt') - 1,
+			hide = o.data('hide');
+		
+		o.data('cnt', cnt);
+			
+		if (cnt == 0 && o.is(':visible')) {
+			o.hide();
+			hide();        
+		}
+	}
+	
+	return this;
 }

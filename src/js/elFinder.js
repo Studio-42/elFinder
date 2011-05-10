@@ -108,9 +108,12 @@
 			
 			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
 			
-			overlay = $('<div/>').elfinderoverlay({hide : function() { self.enable(); }}),
+			overlay = $('<div/>').elfinderoverlay({
+				show : function() { self.disable(); },
+				hide : function() { prevEnabled && self.enable(); },
+			}),
 			
-			ndialog = $('<div>notify</div>'),
+			ndialog = $('<div/>'),
 			
 			ntpl = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
 			
@@ -598,6 +601,8 @@
 				cmd     = data.cmd,
 				deffail = !(options.preventDefault || options.preventFail),
 				defdone = !(options.preventDefault || options.preventDone),
+				notify  = options.notify,
+				interval,
 				options = $.extend({
 					url      : o.url,
 					async    : true,
@@ -668,13 +673,28 @@
 			}	
 			
 			if (freeze) {
-				this.disable();
-				overlay.show();
+				
+				overlay.elfinderoverlay('show');
 				
 				dfrd.always(function() {
-					overlay.hide();
-					prevEnabled && self.enable();
+					overlay.elfinderoverlay('hide');
 				});
+			}
+			
+			if (notify.type) {
+				
+				timeout = setTimeout(function() {
+					self.notify(notify);
+					dfrd.always(function() {
+						notify.cnt = -(parseInt(notify.cnt)||0);
+						self.notify(notify);
+					})
+				}, o.notifyDelay)
+				
+				dfrd.always(function() {
+					clearTimeout(timeout)
+				})
+				
 			}
 			
 			$.ajax(options).fail(error).success(success);
@@ -857,20 +877,26 @@
 		 * Open notification dialog 
 		 * and append/update message for required notification type.
 		 *
-		 * @param  String  notification type (@see elFinder.notifyType)
-		 * @param  Number  notification counter (how many files to work with)
+		 * @param  Object  options
+		 * @example  
+		 * this.notify({
+		 *    type : 'copy',
+		 *    msg : 'Copy files', // not required for known types @see this.notifyType
+		 *    cnt : 3,
+		 *    hideCnt : false, // true for not show count
+		 * })
 		 * @return elFinder
 		 */
 		this.notify = function(opts) {
-			var type = opts.type,
-				msg  = opts.msg || this.notifyType[type], 
-				cnt  = opts.cnt,
+			var type   = opts.type,
+				msg    = opts.msg || this.i18n(this.notifyType[type]), 
+				cnt    = opts.cnt,
 				notify = ndialog.children('.elfinder-notify-'+type);
 			
 			if (!type) {
 				return;
 			}
-			this.log(notify)
+			
 			if (notify.length) {
 				cnt += parseInt(notify.data('cnt')) || 0;
 			} else if (cnt > 0) {
@@ -878,15 +904,18 @@
 			} else {
 				return;
 			}
-
 			
 			if (cnt > 0) {
 				notify.data('cnt', cnt)
-				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')')
+				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
+				ndialog.is(':hidden') && ndialog.elfinderdialog('open');
 			} else {
 				notify.remove();
 				self.log(ndialog.children().length)
+				!ndialog.children().length && ndialog.elfinderdialog('close');
 			}
+			
+			return this;
 		}
 		
 		
@@ -1156,27 +1185,21 @@
 		})
 		
 		ndialog.elfinderdialog({
-			cssClass : 'elfinder-dialog-notify'
+			cssClass  : 'elfinder-dialog-notify',
+			position  : {top : '12px', right : '12px'},
+			resizable : false,
+			autoOpen  : false,
+			title     : '&nbsp;'
 		}, node);
 		
-		// this.notify({
-		// 	type : 'open',
-		// 	msg : 'Open folder',
-		// 	cnt : 1
-		// })
-		
-		// setTimeout(function() {
-		// 	self.log('close')
-		// 	self.notify({
-		// 		type : 'open',
-		// 		cnt : -1
-		// 	})
-		// }, 3000)
 		
 		// bind event handlers
 		this
 			.open(function() {
-				self.error('Unable to connect to backend. ')
+				// self.notify
+				// self.error('Unable to connect to backend. ')
+				// self.error('Message')
+				// self.error('Message')
 			})
 			.enable(function() {
 				if (!enabled && self.visible() && overlay.is(':hidden')) {
@@ -1210,7 +1233,7 @@
 			})
 			;
 
-		// this.error('message')
+
 		// attach events to document
 		$(document)
 			// disable elfinder on click outside elfinder
@@ -1218,24 +1241,11 @@
 			// exec shortcuts
 			.bind(keydown+' '+keypress, execShortcut);
 		
-		// this
-			/**
-			 * Show error dialog
-			 */
-			// .bind('error warning', function(e) {
-			// 	if (self.visible()) {
-			// 		self.dialog(self.i18n(e.data.error || e.data.warning), {
-			// 			title         : 'Error',
-			// 			modal         : true,
-			// 			closeOnEscape : false,
-			// 			buttons       : {
-			// 				Ok : function() { $(this).dialog('close'); }
-			// 			}
-			// 		}, 'error');
-			// 	}
-			// })
-		
-		this.ajax({data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, preventDone : true}, true)
+		this.ajax({
+				data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
+				preventDone : true,
+				notify : {type : 'open', cnt : 1, hideCnt : true}
+			}, true)
 			.fail(loadfail)
 			.done(load)
 			.always(function() {
@@ -1354,6 +1364,7 @@
 		 * @type  Object
 		 */
 		notifyType : {
+			open   : 'Open folder',
 			mkdir  : 'Creating directory',
 			mkfile : 'Creating files',
 			rm     : 'Delete files',

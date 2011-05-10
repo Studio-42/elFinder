@@ -61,6 +61,8 @@ elFinder.prototype.options = {
 	
 	resizable : false,
 	
+	notifyDelay : 500,
+	
 	syncTree : true,
 	/* callback to get file url (for wswing editors) */
 	editorCallback : null,
@@ -197,7 +199,7 @@ elFinder.prototype.options = {
 	commandsOptions : {},
 	clearCache : true,
 	// debug : true
-	debug : ['error', 'event-load', 'event-open']
+	// debug : ['error', 'event-enable', 'event-disable']
 }
 
 })(jQuery);
