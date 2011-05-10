@@ -38,6 +38,8 @@
 
 .elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
 
+.elfinder-dialog-icon-open { background-position: 0 -225px; }
+
 .elfinder-notify-mkdir     .elfinder-dialog-icon { background-position: 0 -64px; }
 .elfinder-notify-mkfile    .elfinder-dialog-icon { background-position: 0 -96px; }
 .elfinder-notify-paste     .elfinder-dialog-icon,

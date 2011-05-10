@@ -1,39 +1,30 @@
 
 $.fn.elfinderdialog = function(opts, parent) {
+	var dialog;
 	
-	var self   = this,
-		dialog = this.closest('.ui-dialog'), options;
-		close  = function(e) {
-			if (e.keyCode == $.ui.keyCode.ESCAPE){
-				$(document).unbind('keyup');
-				self.elfinderdialog('close');
-			} 
-		};
-	
-	if (dialog.length && (options = dialog[0].dialogOptions) && typeof(opts) == 'string') {
-		if (opts == 'open') {
-			options.modal && options.overlay.show();
+	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
+		if (opts == 'open' && dialog.is(':hidden')) {
 			dialog.fadeIn('fast', function() {
-				dialog.find('.ui-button:first').focus()//.addClass('ui-state-hover')
-				dialog.find(':text:first').focus();
-				options.open && options.open()
+				dialog.trigger('open');
 			});
-		} else if (opts == 'close') {
-			options.modal && options.overlay.hide();
+		} else if (opts == 'close' && dialog.is(':visible')) {
 			dialog.fadeOut('fast', function() {
-				options.close && options.close();
+				dialog.trigger('close');
+			});
+		} else if (opts == 'destroy') {
+			dialog.fadeOut('fast', function() {
 				dialog.remove();
-				
 			});
 		}
 	}
 	
 	opts = $.extend({}, $.fn.elfinderdialog.defaults, opts);
 	
-	opts.closeOnEscape && !dialog.length && $(document).one('keyup', close);
+	// opts.closeOnEscape && !dialog.length && $(document).bind('keyup', close);
 
 	this.filter(':not(.ui-dialog-content)').each(function() {
 		var self       = $(this).addClass('ui-dialog-content ui-widget-content'),
+			id         = parseInt(Math.random()*1000000),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"/>')
 				.append(buttonset),
@@ -48,6 +39,21 @@ $.fn.elfinderdialog = function(opts, parent) {
 					width  : opts.width,
 					height : opts.height
 				})
+				.mousedown(function() {
+					parent.find('.elfinder-dialog').removeClass('elfinder-dialog-active');
+					dialog.addClass('elfinder-dialog-active');
+				})
+				.bind('open', function() {
+					opts.modal && parent.children('.elfinder-overlay').show();
+					dialog.mousedown();
+					dialog.find('.ui-button:first').focus();
+					dialog.find(':text:first').focus();
+					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
+				})
+				.bind('close', function() {
+					opts.modal && parent.children('.elfinder-overlay').hide();
+					typeof(opts.close) == 'function' && $.proxy(opts.close, self[0])();
+				})
 				
 			;
 		
@@ -58,13 +64,16 @@ $.fn.elfinderdialog = function(opts, parent) {
 			}
 		}	
 
-		dialog.css(opts.position)[0].dialogOptions = {
-			modal   : opts.modal,
-			overlay : dialog.parent().children('.elfinder-overlay'),
-			open    : typeof(opts.open)  == 'function' ? $.proxy(opts.open, this)  : null,
-			close   : typeof(opts.close) == 'function' ? $.proxy(opts.close, this) : null
-		};
+		dialog.css(opts.position)
 
+		if (opts.closeOnEscape) {
+			$(document).bind('keyup.'+id, function(e) {
+				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.is('.elfinder-dialog-active')) {
+					self.elfinderdialog('close');
+					$(document).unbind('keyup.'+id);
+				}
+			})
+		}
 		dialog.prepend(
 			$('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">'+opts.title+'</div>')
 				.prepend($('<a href="#" class="ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></a>')
@@ -100,7 +109,6 @@ $.fn.elfinderdialog = function(opts, parent) {
 			
 		if (opts.resizable && $.fn.resizable) {
 			dialog.resizable({
-					
 					minWidth   : opts.minWidth,
 					minHeight  : opts.minHeight,
 					alsoResize : this
@@ -128,6 +136,6 @@ $.fn.elfinderdialog.defaults = {
 	position  : null,
 	width     : 300,
 	height    : 'auto',
-	minWidth  : 150,
+	minWidth  : 200,
 	minHeight : 110
 }

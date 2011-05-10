@@ -110,6 +110,10 @@
 			
 			overlay = $('<div/>').elfinderoverlay({hide : function() { self.enable(); }}),
 			
+			ndialog = $('<div>notify</div>'),
+			
+			ntpl = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
+			
 			width, height,
 			
 			/**
@@ -849,6 +853,43 @@
 			
 		}
 		
+		/**
+		 * Open notification dialog 
+		 * and append/update message for required notification type.
+		 *
+		 * @param  String  notification type (@see elFinder.notifyType)
+		 * @param  Number  notification counter (how many files to work with)
+		 * @return elFinder
+		 */
+		this.notify = function(opts) {
+			var type = opts.type,
+				msg  = opts.msg || this.notifyType[type], 
+				cnt  = opts.cnt,
+				notify = ndialog.children('.elfinder-notify-'+type);
+			
+			if (!type) {
+				return;
+			}
+			this.log(notify)
+			if (notify.length) {
+				cnt += parseInt(notify.data('cnt')) || 0;
+			} else if (cnt > 0) {
+				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg)).appendTo(ndialog)
+			} else {
+				return;
+			}
+
+			
+			if (cnt > 0) {
+				notify.data('cnt', cnt)
+				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')')
+			} else {
+				notify.remove();
+				self.log(ndialog.children().length)
+			}
+		}
+		
+		
 		this.getUIDir = function() {
 			return dir;
 		}
@@ -1114,6 +1155,24 @@
 			}
 		})
 		
+		ndialog.elfinderdialog({
+			cssClass : 'elfinder-dialog-notify'
+		}, node);
+		
+		// this.notify({
+		// 	type : 'open',
+		// 	msg : 'Open folder',
+		// 	cnt : 1
+		// })
+		
+		// setTimeout(function() {
+		// 	self.log('close')
+		// 	self.notify({
+		// 		type : 'open',
+		// 		cnt : -1
+		// 	})
+		// }, 3000)
+		
 		// bind event handlers
 		this
 			.open(function() {
@@ -1137,18 +1196,17 @@
 			})
 			.error(function(e) { 
 				var opts = {
-					cssClass : 'elfinder-dialog-error',
-					title    : self.i18n('Error'),
-					modal    : true,
-					buttons  : {
+					cssClass  : 'elfinder-dialog-error',
+					title     : self.i18n('Error'),
+					modal     : true,
+					resizable : false,
+					close     : function() { $(this).elfinderdialog('destroy') },
+					buttons   : {
 						Ok : function() { $(this).elfinderdialog('close'); }
 					}
-				}
+				};
 				
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || e.data.value), opts)
-				
-				// $('<div>'+self.i18n(e.data.error || e.data.value)+'</div>').elfinderdialog(opts, node)
-				// alert(self.i18n(e.data.error || e.data.value))
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || e.data.value), opts);
 			})
 			;
 
@@ -1563,15 +1621,8 @@
 			return this;
 		},
 		
-		/**
-		 * Open notification dialog 
-		 * and append/update message for required notification type.
-		 *
-		 * @param  String  notification type (@see elFinder.notifyType)
-		 * @param  Number  notification counter (how many files to work with)
-		 * @return elFinder
-		 */
-		notify : function(type, cnt) {
+		
+		_notify : function(type, cnt) {
 			var msg    = this.notifyType[type], 
 				nclass = 'elfinder-notify',
 				tclass = nclass+'-text',
