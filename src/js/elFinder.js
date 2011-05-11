@@ -1,6 +1,7 @@
+"use strict";
 (function($) {
 
-	elFinder = function(node, opts) {
+	window.elFinder = function(node, opts) {
 		
 		var self = this,
 			/**
@@ -70,6 +71,8 @@
 			 **/
 			shortcuts = {},
 			
+			base = new self.command(self),
+			
 			/**
 			 * Loaded commands
 			 *
@@ -105,6 +108,8 @@
 			dir = $('<div/>').appendTo(workzone),
 			
 			toolbar = $('<div/>').hide(),
+			
+			toolbarName = opts.toolbar || 'elfindertoolbar',
 			
 			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
 			
@@ -172,7 +177,7 @@
 				self.newAPI = self.api > 1;
 				self.oldAPI = !self.newAPI;
 				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
-			}
+			},
 			
 			/**
 			 * On load failed make elfinder inactive
@@ -188,12 +193,10 @@
 			},
 			
 			load = function(data) {
-				var base = new self.command(self),
+				var 
 					opts = self.options,
-					cmds = opts.commands || [],
-					tb   = 'elfindertoolbar'+opts.toolbar,
-					cmd,
-					l;
+					cmds = opts.commands || [];
+					
 				
 				setAPI(data.api);
 				
@@ -202,38 +205,18 @@
 					return onloadfail();
 				}
 				
-				
-				self.history = new self.history(self);
 				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
 				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
-
-				$.each(['open', 'back', 'forward', 'up', 'home'], function(i, name) {
-					$.inArray(name, cmds) === -1 && cmds.push(name)
-				});
-
-				$.each(cmds, function(i, name) {
-					var cmd = self.commands[name];
-					if ($.isFunction(cmd) && !commands[name]) {
-						var _super = $.extend({}, base, cmd.prototype);
-						// cmd.prototype = base;
-						cmd.prototype = _super;
-						commands[name] = new cmd();
-						commands[name]._super = _super;
-						commands[name].setup(name, self.options[name]||{});
-					}
-				});
 				
-				if (!$.fn[tb]) {
-					tb = 'elfindertoolbar';
-				}
-				toolbar[tb](opts.toolbarConf, commands)
+				self.history = new self.history(self);
+
 
 				self.debug('api', self.api)
 					.resize(width, height)
 					.load();
 
-				responseHandlers.open($.extend(true, data))
-				self.trigger('open', data);
+				responseHandlers.open($.extend(true, data));
+				self.open(data);
 
 				// self.trigger('open', data);
 				// if (opts.sync >= 3000) {
@@ -251,7 +234,7 @@
 						files = {};
 					} else {
 						// remove only files from prev cwd
-						for (i in files) {
+						for (var i in files) {
 							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash == cwd) {
 								delete files[i];
 							}
@@ -505,8 +488,9 @@
 		 * @param  Object  file
 		 * @return String
 		 */
-		this.path = function(file) {
-			return cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name);
+		this.path = function(hash) {
+			var file = files[hash];
+			return file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
 		}
 		
 		/**
@@ -515,11 +499,11 @@
 		 * @param  Object  file
 		 * @return String
 		 */
-		this.url = function(file) {
+		this.url = function(hash) {
 			var path = '';
 
-			if (cwdOptions.url) {
-				path = this.path(file).replace(cwdOptions.separator, '/');
+			if (cwdOptions.url && (path = this.path(hash))) {
+				path = path.replace(cwdOptions.separator, '/');
 				return cwdOptions.url + path.substr(path.indexOf('/')+1);
 			}
 			return '';
@@ -592,7 +576,7 @@
 		 * 		"silent" - do not block other requests, send error message to debug
 		 * @return $.Deferred
 		 */
-		this.ajax = function(options, freeze) {
+		this.ajax = function(options) {
 			var self    = this,
 				o       = this.options,
 				errors  = this.errors,
@@ -602,7 +586,8 @@
 				deffail = !(options.preventDefault || options.preventFail),
 				defdone = !(options.preventDefault || options.preventDone),
 				notify  = options.notify,
-				interval,
+				freeze  = options.freeze,
+				timeout,
 				options = $.extend({
 					url      : o.url,
 					async    : true,
@@ -671,11 +656,10 @@
 			if (!cmd) {
 				return dfrd.reject(errors.cmdRequired);
 			}	
-			
+
+			// "freeze" interface
 			if (freeze) {
-				
 				overlay.elfinderoverlay('show');
-				
 				dfrd.always(function() {
 					overlay.elfinderoverlay('hide');
 				});
@@ -864,13 +848,10 @@
 		 *
 		 * @param  String|DOMElement  dialog content
 		 * @param  Object             dialog options
-		 * @param  String             dialog type for error|notify|confirm dialogs 
 		 * @return jQuery
 		 */
 		this.dialog = function(content, options) {
-			
-			return $('<div/>').append(content).elfinderdialog(options, node)
-			
+			return $('<div/>').append(content).elfinderdialog(options, node);
 		}
 		
 		/**
@@ -1136,19 +1117,20 @@
 				}
 			};
 		
-		
+		// check jquery ui
 		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
 			return alert(this.i18n(this.errors.jquiInvalid));
 		}
-
+		// check node
 		if (!node.length) {
 			return alert(this.i18n(this.errors.nodeRequired));
 		}
-		
+		// check connector url
 		if (!this.options.url) {
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
+		// prepare node
 		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 		
 		node.addClass(this.cssClass)
@@ -1173,17 +1155,7 @@
 				minHeight : 200
 			});
 		
-		
-		// create methods
-		$.each(events, function(i, name) {
-			self[name] = function() {
-				var arg = arguments[0];
-				return arguments.length == 1 && typeof(arg) == 'function'
-					? self.bind(name, arg)
-					: self.trigger(name, $.isPlainObject(arg) ? arg : {value : arg});
-			}
-		})
-		
+		// create notification dialog
 		ndialog.elfinderdialog({
 			cssClass  : 'elfinder-dialog-notify',
 			position  : {top : '12px', right : '12px'},
@@ -1192,15 +1164,18 @@
 			title     : '&nbsp;'
 		}, node);
 		
+		// create bind/trigger aliases for build-in events
+		$.each(events, function(i, name) {
+			self[name] = function() {
+				var arg = arguments[0];
+				return arguments.length == 1 && typeof(arg) == 'function'
+					? self.bind(name, arg)
+					: self.trigger(name, $.isPlainObject(arg) ? arg : {value : arg});
+			}
+		});
 		
 		// bind event handlers
 		this
-			.open(function() {
-				// self.notify
-				// self.error('Unable to connect to backend. ')
-				// self.error('Message')
-				// self.error('Message')
-			})
 			.enable(function() {
 				if (!enabled && self.visible() && overlay.is(':hidden')) {
 					enabled = true;
@@ -1233,6 +1208,26 @@
 			})
 			;
 
+		if ($.inArray('open', this.options.commands) === -1) {
+			this.options.commands.push('open');
+		}
+
+		$.each(this.options.commands, function(i, name) {
+			var cmd = self.commands[name];
+			if ($.isFunction(cmd) && !commands[name]) {
+				// var _super = $.extend({}, base, cmd.prototype);
+				// cmd.prototype = base;
+				cmd.prototype = $.extend({}, base, cmd.prototype);
+				commands[name] = new cmd();
+				// commands[name]._super = _super;
+				commands[name].setup(name, self.options[name]||{});
+			}
+		});
+		
+		
+		// load toolbar if exists
+		$.fn[toolbarName] && toolbar[toolbarName](this.options.toolbarConf, commands);
+		
 
 		// attach events to document
 		$(document)
@@ -1241,22 +1236,31 @@
 			// exec shortcuts
 			.bind(keydown+' '+keypress, execShortcut);
 		
+			
+		
+		
 		this.ajax({
-				data : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
+				data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
 				preventDone : true,
-				notify : {type : 'open', cnt : 1, hideCnt : true}
-			}, true)
+				notify      : {type : 'open', cnt : 1, hideCnt : true},
+				freeze      : true
+			})
 			.fail(loadfail)
 			.done(load)
 			.always(function() {
-				delete loadfail;
-				delete load;
+				loadfail = load = null
 			});
 			
 	}
 	
 	
 	elFinder.prototype = {
+		
+		cmdStateDisabled : -1,
+		
+		cmdStateEnabled : 0,
+		
+		cmdStateActive : 1,
 		
 		i18 : {
 			en : {
@@ -1280,6 +1284,7 @@
 			invData : 'Invalid data.',
 			cmdRequired : 'Backend request required command name.',
 			
+			invOpenArg   : 'Unable to open required files/filders',
 			notFound     : 'File not found.',
 			notDir       : '"$1" is not a folder.',
 			notFile      : '"$1" is not a file.',
@@ -2282,7 +2287,7 @@
 		 **/
 		i18n : function(msg) { 
 			var messages = this.messages, ignore = [], i;
-			
+
 			if ($.isArray(msg)) {
 				if (msg.length == 1) {
 					msg = msg[0];
@@ -2306,17 +2311,11 @@
 			}
 			
 			if (typeof(msg) != 'string') {
-				msg = msg.toString();
-				this.debug('error', 'Invalid message : '+msg)
+				this.debug('error', 'Invalid message : '+msg);
+				return '';
 			}
 			
 			return msg.replace(/\$(\d+)/g, '');
-			
-			var msg = $.isArray(msg) ? msg : [msg],
-				messages = this.messages;
-			
-			msg = $.map(msg, function(m) { return messages[m] || m; });
-			return msg[0].replace(/\$(\d+)/g, function(m, num) { return msg[num] || ''; });
 		},
 		
 		

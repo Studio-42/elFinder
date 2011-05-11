@@ -15,7 +15,7 @@ function debug($o) {
 	echo '<pre>';
 	print_r($o);
 }
-
+// exit();
 function logger($data) {
 	$str = $data['cmd'].': ';
 	$volume = $data['volume'];
@@ -45,7 +45,7 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
-sleep(3);
+// sleep(3);
 $opts = array(
 	'debug' => true,
 	'roots' => array(

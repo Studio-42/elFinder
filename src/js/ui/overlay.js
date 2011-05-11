@@ -10,7 +10,7 @@ $.fn.elfinderoverlay = function(opts) {
 				e.stopPropagation();
 			})
 			.data({
-				cnt : 0,
+				cnt  : 0,
 				show : typeof(opts.show) == 'function' ? opts.show : function() { },
 				hide : typeof(opts.hide) == 'function' ? opts.hide : function() { }
 			});
@@ -20,7 +20,7 @@ $.fn.elfinderoverlay = function(opts) {
 		var o    = this.eq(0),
 			cnt  = o.data('cnt') + 1,
 			show = o.data('show');
-			
+
 		o.data('cnt', cnt);
 
 		if (o.is(':hidden')) {

@@ -5,12 +5,21 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.command = function(fm) {
+
 	/**
 	 * elFinder instance
 	 *
 	 * @type  elFinder
 	 */
 	this.fm = fm;
+	
+	/**
+	 * Command prototype object.
+	 * Added by elFinder on command creation
+	 *
+	 * @type  elFinder.command
+	 */
+	// this._super = null;
 	
 	/**
 	 * Command name, same as class name
@@ -25,63 +34,47 @@ elFinder.prototype.command = function(fm) {
 	 * @type  String
 	 */
 	this.title = '';
-
-	/**
-	 * Command prototype object.
-	 * Added by elFinder on command creation
-	 *
-	 * @type  elFinder.command
-	 */
-	this._super = null;
-	
-	/**
-	 * elFinder events handlers
-	 *
-	 * @type  Object
-	 */
-	this._handlers = {};
-	
-	/**
-	 * Shortcuts
-	 *
-	 * @type  Array
-	 */
-	this._shortcuts = [];
-	
-	/**
-	 * Command states list
-	 *
-	 * @type  Object
-	 */
-	this._state = {
-		disabled : -1,
-		enabled  : 0,
-		active   : 1
-	};
 	
 	/**
 	 * Current command state
 	 *
 	 * @type  Number
 	 */
-	this.state = this._state.disabled;
+	this.state = fm.cmdStateDisabled;
 	
 	/**
-	 * Every root directory can disable commands on it.
-	 * If this command disabled - set to false
+	 * If true, command can not be disabled by connector.
+	 * @see this.update()
 	 *
 	 * @type  Boolen
 	 */
-	this._enabled = false;
+	this.alwaysEnabled = false;
 	
 	/**
-	 * If true - command can not be disabled in any case
+	 * elFinder events handlers
 	 *
-	 * @type  Boolen
+	 * @type  Object
 	 */
-	this._required = false;
+	this.handlers = {
+		enable  : function() { this.update(); },
+		disable : function() { this.update(fm.cmdStateDisabled); },
+		open    : function() { this.update(); },
+	};
 	
-	this.options = { };
+	/**
+	 * Shortcuts
+	 *
+	 * @type  Array
+	 */
+	this.shortcuts = [];
+	
+	/**
+	 * Command options
+	 *
+	 * @type  Object
+	 */
+	this.options = {ui : 'button'};
+	
 	
 	/**
 	 * Prepare object -
@@ -90,48 +83,60 @@ elFinder.prototype.command = function(fm) {
 	 * @return void
 	 */
 	this.setup = function(name, opts) {
-		var self     = this,
-			fm       = this.fm,
-			handlers = {
-				'focus open' : function(e) {  self._update(); },
-				blur  : function(e) {  self._update(self._state.disabled); }
-			};
+		var self = this,
+			fm   = this.fm;
 		
 		this.name      = name;
 		this.title     = fm.i18n(this.title || this.name);
-		this.options   = $.extend({ui : 'button'}, this.options, opts);
-		this._listeners = [];
+		this.options   = $.extend({}, this.options, opts);
+		this.listeners = [];
 
-		!this._required && fm.bind('open', function() {
-			self._enabled = fm.isCommandEnabled(self.name);
+		$.each(this.handlers, function(cmd, handler) {
+			fm.bind(cmd, $.proxy(handler, self));
 		});
-		
-		$.each($.extend({}, handlers, this._handlers), function(e, c) {
-			fm.bind(e, c);
-		});
-		
-		$.each(this._shortcuts, function(i, s) {
+
+		$.each(this.shortcuts, function(i, s) {
 			fm.shortcut(s);
 		});
 		
 		this._init();
 	}
 
+	/**
+	 * Command specific init stuffs
+	 *
+	 * @return void
+	 */
 	this._init = function() { }
 
 	/**
 	 * Exec command if it is enabled and return result
 	 *
 	 * @param  mixed  command value
-	 * @return mixed
+	 * @return $.Deferred
 	 */
 	this.exec = function(v) { 
-		if (this.enabled()) {
-			return this._exec(v);
-		}
+		return this.enabled() ? this._exec(v) : $.Deferred().reject({error : 'Command disabled'});
 	}
 	
-	this._exec = function() { }
+	/**
+	 * Here command do smth usefull
+	 *
+	 * @param  mixed  command value
+	 * @return $.Deferred
+	 */
+	this._exec = function(v) { 
+		return $.Deferred().reject(); 
+	}
+	
+	/**
+	 * Return true if command disabled.
+	 *
+	 * @return Boolen
+	 */
+	this.disabled = function() {
+		return this.state == this.fm.cmdStateDisabled;
+	}
 	
 	/**
 	 * Return true if command enabled.
@@ -139,7 +144,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.enabled = function() {
-		return this._getstate() >= this._state.enabled;
+		return this.state != this.fm.cmdStateDisabled;
 	}
 	
 	/**
@@ -148,65 +153,68 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.active = function() {
-		return this._getstate() == this._state.active;
+		return this.state == this.fm.cmdStateActive;
 	}
 	
 	/**
 	 * Return current command state.
-	 * Should be overloaded in most commands
+	 * Must be overloaded in most commands
 	 *
 	 * @return Number
 	 */
-	this._getstate = function() {
-		return (this._enabled || this._required) ? this._state.enabled : this._state.disabled;
+	this.getstate = function() {
+		return this.fm.cmdStateDisabled;
 	}
 	
 	/**
-	 * If command enabled set command state
+	 * Update command state/value
+	 * and rize 'cahnge' event if smth changed
 	 *
-	 * @return elFinder.command
+	 * @param  Number  new state or undefined to auto update state
+	 * @param  mixed   new value
+	 * @return void
 	 */
-	this._update = function(state, value) {
-		var state    = state === void(0) ? this._getstate() : state,
-			oldState = this.state,
-			oldValue = this.value;
-			
-		// change state only if command is not disabled
-		if (this._enabled || this._required) {
-			this.state = state;
-			this.value = value;
+	this.update = function(s, v) {
+		var state = this.state,
+			value = this.value;
+
+		if (this.alwaysEnabled) {
+			this.state = this.getstate();
+		} else if (!this.fm.isCommandEnabled(this.name)) {
+			this.state = fm.cmdStateDisabled;
+		} else {
+			this.state = s !== void(0) ? s : this.getstate();
 		}
-		(oldState !== this.state || oldValue != this.value) && this.change();
-		// this.fm.log(this.name+' '+this.state)
-		return this;
+
+		this.value = v;
+		
+		if (state != this.state || value != this.value) {
+			this.change();
+		}
 	}
 	
 	/**
-	 * Without argument - notify listeners,
-	 * With argument of type function - add new listener
+	 * Bind handler / rize 'change' event.
 	 *
-	 * @param  Function  callback
-	 * @return elFinder.command
+	 * @param  Function|undefined  event callback
+	 * @return void
 	 */
 	this.change = function(c) {
-		var l = this._listeners.length, e;
+		var cmd, i;
 		
-		if (c === void(0)) {
-			while (l--) {
-				e = $.Event();
-				e.data = {
-					command  : this,
-					disabled : this.state === this._state.disabled,
-					enabled  : this.state === this._state.enabled,
-					active   : this.state === this._state.active,
-					value    : this.value
+		if (typeof(c) === 'function') {
+			this.listeners.push(c);			
+		} else {
+			for (i = 0; i < this.listeners.length; i++) {
+				cmd = this.listeners[i];
+				try {
+					cmd.call(this, this.state, this.value);
+				} catch (e) {
+					this.fm.debug('error', e)
 				}
-				this._listeners[l](e);
 			}
-		} else if (typeof(c) === 'function') {
-			this._listeners.push(c);
+
 		}
-		return this;
 	}
 }
 

@@ -636,7 +636,11 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// call fm.open()
 				.delegate('[id]', 'dblclick.'+fm.namespace, function(e) {
-					fm.trigger('dblclick', {file : this.id});
+					// fm.trigger('dblclick', {file : this.id});
+					fm.exec('open', this.id).always(function(d) {
+						fm.log(d)
+					})
+					
 				})
 				// attach draggable
 				.delegate('[id]', 'mouseenter.'+fm.namespace, function(e) {
