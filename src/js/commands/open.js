@@ -19,8 +19,7 @@ elFinder.prototype.commands.open = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+down' + (this.fm.options.selectOnEnter ? '' : ' enter NUMPAD_ENTER'),
-		description : 'Open files or enter directory',
-		callback    : function() { self.exec(); }
+		description : 'Open files or enter directory'
 	}];
 	
 	this.getstate = function() {
@@ -31,9 +30,9 @@ elFinder.prototype.commands.open = function() {
 		return cnt && (cnt == 1 || onlyFiles(sel)) ? fm.cmdStateEnabled : fm.cmdStateDisabled;
 	}
 	
-	this._exec = function(targets) {
+	this.exec = function(targets) {
 		var fm      = this.fm, 
-			dfrd    = $.Deferred().fail(function(e) { fm.error(e); }),
+			dfrd    = $.Deferred(),
 			targets = targets ? $.isArray(targets) ? targets : [targets] : this.fm.selected(),
 			cnt     = targets.length,
 			errors  = fm.errors,
@@ -45,9 +44,11 @@ elFinder.prototype.commands.open = function() {
 				hash = targets[0];
 				file = fm.file(hash);
 				if (!file || file.mime == 'directory') {
-					return file && !file.read
-						? dfrd.reject(fm.i18n([errors.notRead, file.name]))
-						: fm.ajax({
+					if (file && !file.read) {
+						this.enabled() && fm.error([errors.notRead, file.name])
+						return dfrd.reject(fm.i18n([errors.notRead, file.name]));
+					}
+					return fm.ajax({
 							data   : {cmd : 'open', target : hash},
 							notify : {type : 'open', cnt : 1, hideCnt : true},
 							freeze : true

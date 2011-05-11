@@ -4,10 +4,10 @@ elFinder.prototype.commands.back = function() {
 	
 	this._required = true;
 	
-	this._shortcuts = [{
+	this.shortcuts = [{
 		pattern     : 'ctrl+left',
 		description : 'Go back',
-		callback    : function() { self.exec(); }
+		callback    : function() { this.exec(); }
 	}];
 	
 	this._getstate = function() {

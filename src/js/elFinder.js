@@ -185,7 +185,7 @@
 			 * @return void
 			 */
 			loadfail = function() {
-				self.disable().lastDir('');
+				self.trigger('fail').disable().lastDir('');
 				listeners = {};
 				shortcuts = {};
 				$(document).add(node).unbind('.'+this.namespace);
@@ -429,7 +429,7 @@
 			while (dir && dir.phash) {
 				dir = files[dir.phash]
 			}
-			return dir.hash;
+			return dir ? dir.hash : '';
 		}
 		
 		/**
@@ -438,7 +438,7 @@
 		 * @return Object
 		 */
 		this.cwd = function() {
-			return files[cwd];
+			return files[cwd] || {};
 		}
 		
 		/**

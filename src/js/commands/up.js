@@ -1,21 +1,19 @@
 
 elFinder.prototype.commands.up = function() {
-	var self = this;
 	
-	this._required = true;
+	this.alwaysEnabled = true;
 	
-	this._shortcuts = [{
+	this.shortcuts = [{
 		pattern     : 'ctrl+up backspace',
-		description : 'Go to parent directory',
-		callback    : function() { self.exec() }
+		description : 'Go to parent directory'
 	}];
 	
-	this._getstate = function() {
-		return self.fm.cwd().phash ? self._state.enabled : self._state.disabled;
+	this.getstate = function() {
+		return this.fm.cwd().phash ? 0 : -1;
 	}
 	
 	this._exec = function() {
-		self.fm.open(self.fm.cwd().phash);
+		this.fm.exec('open', this.fm.cwd().phash);
 	}
 
 }

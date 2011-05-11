@@ -1,21 +1,20 @@
 
 elFinder.prototype.commands.reload = function() {
-	var self = this;
 	
-	this._required = true;
+	this.alwaysEnabled = true;
 	
-	this._shortcuts = [{
+	this.shortcuts = [{
 		pattern     : 'ctrl+shift+r',
-		description : 'Reload',
-		callback    : function() { self.exec(); }
+		description : 'Reload'
 	}];
 	
-	this._getstate = function() {
+	this.getstate = function() {
+		return -1;
 		return self._state.enabled;
 	}
 	
 	this._exec = function() {
-		self.fm.reload();
+		this.fm.reload();
 	}
 
 }

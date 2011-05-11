@@ -40,7 +40,7 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @type  Number
 	 */
-	this.state = fm.cmdStateDisabled;
+	this.state = -1;
 	
 	/**
 	 * If true, command can not be disabled by connector.
@@ -51,13 +51,14 @@ elFinder.prototype.command = function(fm) {
 	this.alwaysEnabled = false;
 	
 	/**
-	 * elFinder events handlers
+	 * elFinder events handlers.
+	 * Inside handlers "this" is current command object
 	 *
 	 * @type  Object
 	 */
 	this.handlers = {
 		enable  : function() { this.update(); },
-		disable : function() { this.update(fm.cmdStateDisabled); },
+		disable : function() { this.update(-1); },
 		open    : function() { this.update(); },
 	};
 	
@@ -91,12 +92,15 @@ elFinder.prototype.command = function(fm) {
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 
-		$.each(this.handlers, function(cmd, handler) {
-			fm.bind(cmd, $.proxy(handler, self));
-		});
+		fm.one('load', function() {
+			$.each(self.handlers, function(cmd, handler) {
+				fm.bind(cmd, $.proxy(handler, self));
+			});
 
-		$.each(this.shortcuts, function(i, s) {
-			fm.shortcut(s);
+			$.each(self.shortcuts, function(i, s) {
+				s.callback = $.proxy(s.callback || function() { this.exec() }, self);
+				fm.shortcut(s);
+			});
 		});
 		
 		this._init();
@@ -135,7 +139,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.disabled = function() {
-		return this.state == this.fm.cmdStateDisabled;
+		return this.state < 0;
 	}
 	
 	/**
@@ -144,7 +148,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.enabled = function() {
-		return this.state != this.fm.cmdStateDisabled;
+		return this.state > -1;
 	}
 	
 	/**
@@ -153,7 +157,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Boolen
 	 */
 	this.active = function() {
-		return this.state == this.fm.cmdStateActive;
+		return this.state > 0;
 	}
 	
 	/**
@@ -163,7 +167,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return Number
 	 */
 	this.getstate = function() {
-		return this.fm.cmdStateDisabled;
+		return -1;
 	}
 	
 	/**
@@ -181,7 +185,7 @@ elFinder.prototype.command = function(fm) {
 		if (this.alwaysEnabled) {
 			this.state = this.getstate();
 		} else if (!this.fm.isCommandEnabled(this.name)) {
-			this.state = fm.cmdStateDisabled;
+			this.state = -1;
 		} else {
 			this.state = s !== void(0) ? s : this.getstate();
 		}
@@ -213,8 +217,8 @@ elFinder.prototype.command = function(fm) {
 					this.fm.debug('error', e)
 				}
 			}
-
 		}
+		return this;
 	}
 }
 

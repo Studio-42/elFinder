@@ -1,21 +1,23 @@
 
 elFinder.prototype.commands.home = function() {
-	var self = this;
 	
-	this._required = true;
+	this.alwaysEnabled = true;
 	
 	this._shortcuts = [{
 		pattern     : 'ctrl+home ctrl+shift+up',
-		description : 'Go to parent directory',
-		callback    : function() { self.exec(); }
+		description : 'Go to root folder'
 	}];
 	
-	this._getstate = function() {
-		return self.fm.cwd().phash ? self._state.enabled : self._state.disabled;
+	this.getstate = function() {
+		var root = this.fm.root(),
+			cwd  = this.fm.cwd().hash;
+			
+		return root && cwd && root != cwd ? 0: -1;
 	}
 	
 	this._exec = function() {
-		self.fm.open(self.fm.root());
+		this.fm.exec('open', this.fm.root());
 	}
+	
 
 }
