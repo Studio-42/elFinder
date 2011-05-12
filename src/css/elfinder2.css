@@ -21,7 +21,7 @@
 .elfinder-wo .elfinder-perms { background-position:0 -98px;}
 
 /* common container */
-.elfinder { padding:2px; position:relative; }
+.elfinder { padding:2px; position:relative; display:block; }
 
 .elfinder-rtl  { text-align:right; direction:rtl; }
 /* drag helper */

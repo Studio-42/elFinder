@@ -11,7 +11,7 @@ elFinder.prototype.commands.help = function() {
 	}
 	
 	this._exec = function() {
-		alert('Dont panic!');
+		alert('Dont panic!?');
 	}
 
 }

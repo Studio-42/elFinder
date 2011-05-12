@@ -10,7 +10,6 @@ elFinder.prototype.commands.reload = function() {
 	
 	this.getstate = function() {
 		return 0;
-		return self._state.enabled;
 	}
 	
 	this._exec = function() {

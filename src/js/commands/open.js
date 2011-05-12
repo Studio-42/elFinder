@@ -15,10 +15,14 @@ elFinder.prototype.commands.open = function() {
 	
 	this.alwaysEnabled = true;
 	
-	this.handlers.select = function() { this.update() };
+	this.handlers = {
+		select   : function() { this.update() },
+		dblclick : function(e) { this.exec([e.data.file]) }
+	}
+	
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+down' + (this.fm.options.selectOnEnter ? '' : ' enter NUMPAD_ENTER'),
+		pattern     : 'ctrl+down enter NUMPAD_ENTER',
 		description : 'Open files or enter directory'
 	}];
 	
@@ -27,17 +31,17 @@ elFinder.prototype.commands.open = function() {
 			sel = fm.selected(),
 			cnt = sel.length;
 
-		return cnt && (cnt == 1 || onlyFiles(sel)) ? fm.cmdStateEnabled : fm.cmdStateDisabled;
+		return cnt && (cnt == 1 || onlyFiles(sel)) ? 0 : -1;
 	}
 	
-	this.exec = function(targets) {
+	this._exec = function(targets) {
 		var fm      = this.fm, 
 			dfrd    = $.Deferred(),
 			targets = targets ? $.isArray(targets) ? targets : [targets] : this.fm.selected(),
 			cnt     = targets.length,
 			errors  = fm.errors,
 			hash, file, i, url, s, w;
-		
+
 		if (cnt && (cnt == 1 || onlyFiles(targets))) {
 			
 			if (cnt == 1) {
@@ -48,11 +52,13 @@ elFinder.prototype.commands.open = function() {
 						this.enabled() && fm.error([errors.notRead, file.name])
 						return dfrd.reject(fm.i18n([errors.notRead, file.name]));
 					}
+
 					return fm.ajax({
 							data   : {cmd : 'open', target : hash},
 							notify : {type : 'open', cnt : 1, hideCnt : true},
 							freeze : true
-						}).fail(function() {
+						})
+						.fail(function() {
 							fm.sync(true);
 						});
 				}

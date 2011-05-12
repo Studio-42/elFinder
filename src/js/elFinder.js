@@ -18,7 +18,7 @@
 			 **/
 			prevEnabled = true,
 			
-			events = ['enable', 'disable', 'error', 'load', 'open', 'tree', 'parents', 'select',  'add', 'remove', 'change'],
+			events = ['enable', 'disable', 'error', 'load', 'open', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile'],
 			
 			/**
 			 * Rules to validate data from backend
@@ -787,7 +787,7 @@
 						? code.charCodeAt(0) 
 						: $.ui.keyCode[code];
 
-					if (code) {
+					if (code && !shortcuts[pattern]) {
 						shortcuts[pattern] = {
 							keyCode  : code,
 							altKey   : $.inArray('ALT', parts)   != -1,
@@ -909,12 +909,10 @@
 		 *
 		 * @param  String  command name
 		 * @param  mixed   command argument
-		 * @return mixed
+		 * @return $.Deferred
 		 */		
 		this.exec = function(cmd, value) {
-			if (commands[cmd]) {
-				return commands[cmd].exec(value);
-			}
+			return commands[cmd] ? commands[cmd].exec(value) : $.Deferred().reject('No such command');
 		}
 		
 		/**
@@ -1123,7 +1121,6 @@
 		}
 		
 		
-		
 		this.draggable = {
 			appendTo   : 'body',
 			addClasses : true,
@@ -1264,6 +1261,15 @@
 			})
 			;
 
+		if (typeof(this.options.editorCallback) == 'function') {
+			this.bind('getfile', this.options.editorCallback);
+		}
+
+		$.each(this.options.handlers, function(event, callback) {
+			self.bind(event, callback)
+			// if (typeof(event) == 'string' && typeof(callback))
+		})
+
 		if ($.inArray('open', this.options.commands) === -1) {
 			this.options.commands.push('open');
 		}
@@ -1273,10 +1279,11 @@
 			if ($.isFunction(cmd) && !commands[name]) {
 				// var _super = $.extend({}, base, cmd.prototype);
 				// cmd.prototype = base;
-				cmd.prototype = $.extend({}, base, cmd.prototype);
+				// cmd.prototype = $.extend({}, base, cmd.prototype);
+				cmd.prototype = base;
 				commands[name] = new cmd();
 				// commands[name]._super = _super;
-				commands[name].setup(name, self.options[name]||{});
+				commands[name].setup(name, self.options.commandsOptions[name]||{});
 			}
 		});
 		
@@ -1311,12 +1318,6 @@
 	
 	
 	elFinder.prototype = {
-		
-		cmdStateDisabled : -1,
-		
-		cmdStateEnabled : 0,
-		
-		cmdStateActive : 1,
 		
 		i18 : {
 			en : {

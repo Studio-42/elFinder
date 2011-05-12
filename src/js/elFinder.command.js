@@ -14,14 +14,6 @@ elFinder.prototype.command = function(fm) {
 	this.fm = fm;
 	
 	/**
-	 * Command prototype object.
-	 * Added by elFinder on command creation
-	 *
-	 * @type  elFinder.command
-	 */
-	// this._super = null;
-	
-	/**
 	 * Command name, same as class name
 	 *
 	 * @type  String
@@ -38,6 +30,11 @@ elFinder.prototype.command = function(fm) {
 	/**
 	 * Current command state
 	 *
+	 * @example
+	 * this.state = -1; // command disabled
+	 * this.state = 0;  // command enabled
+	 * this.state = 1;  // command active (for example "fullscreen" command while elfinder in fullscreen mode)
+	 * @default -1
 	 * @type  Number
 	 */
 	this.state = -1;
@@ -51,16 +48,36 @@ elFinder.prototype.command = function(fm) {
 	this.alwaysEnabled = false;
 	
 	/**
+	 * If true, this means command was disabled by connector.
+	 * @see this.update()
+	 *
+	 * @type  Boolen
+	 */
+	this._disabled = false;
+	
+	/**
+	 * elFinder events defaults handlers.
+	 * Inside handlers "this" is current command object
+	 *
+	 * @type  Object
+	 */
+	this._handlers = {
+		enable  : function() { this.update(); },
+		disable : function() { this.update(-1); },
+		open    : function() { 
+			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
+			this.update(); 
+			
+		},
+	};
+	
+	/**
 	 * elFinder events handlers.
 	 * Inside handlers "this" is current command object
 	 *
 	 * @type  Object
 	 */
-	this.handlers = {
-		enable  : function() { this.update(); },
-		disable : function() { this.update(-1); },
-		open    : function() { this.update(); },
-	};
+	this.handlers = {}
 	
 	/**
 	 * Shortcuts
@@ -75,7 +92,6 @@ elFinder.prototype.command = function(fm) {
 	 * @type  Object
 	 */
 	this.options = {ui : 'button'};
-	
 	
 	/**
 	 * Prepare object -
@@ -93,7 +109,7 @@ elFinder.prototype.command = function(fm) {
 		this.listeners = [];
 
 		fm.one('load', function() {
-			$.each(self.handlers, function(cmd, handler) {
+			$.each($.extend({}, self._handlers, self.handlers), function(cmd, handler) {
 				fm.bind(cmd, $.proxy(handler, self));
 			});
 
@@ -103,7 +119,7 @@ elFinder.prototype.command = function(fm) {
 			});
 		});
 		
-		this._init();
+		this.init();
 	}
 
 	/**
@@ -111,7 +127,7 @@ elFinder.prototype.command = function(fm) {
 	 *
 	 * @return void
 	 */
-	this._init = function() { }
+	this.init = function() { }
 
 	/**
 	 * Exec command if it is enabled and return result
@@ -182,9 +198,7 @@ elFinder.prototype.command = function(fm) {
 		var state = this.state,
 			value = this.value;
 
-		if (this.alwaysEnabled) {
-			this.state = this.getstate();
-		} else if (!this.fm.isCommandEnabled(this.name)) {
+		if (this._disabled) {
 			this.state = -1;
 		} else {
 			this.state = s !== void(0) ? s : this.getstate();
@@ -221,4 +235,5 @@ elFinder.prototype.command = function(fm) {
 		return this;
 	}
 }
+
 

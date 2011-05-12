@@ -397,7 +397,10 @@ $.fn.elfindercwd = function(fm) {
 			thumbnails = function(attach, load) {
 				attachThumbnails(attach);
 				if (load.length || fm.option('tmb')) {
-					fm.ajax({cmd : 'tmb', current : fm.cwd().hash, files : load}, 'silent');
+					fm.ajax({
+						data : {cmd : 'tmb', current : fm.cwd().hash, files : load},
+						preventFail : true
+					});
 				}
 			},
 			
@@ -598,11 +601,7 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// call fm.open()
 				.delegate('[id]', 'dblclick.'+fm.namespace, function(e) {
-					// fm.trigger('dblclick', {file : this.id});
-					fm.exec('open', this.id).always(function(d) {
-						fm.log(d)
-					})
-					
+					fm.dblclick({file : this.id});
 				})
 				// attach draggable
 				.delegate('[id]', 'mouseenter.'+fm.namespace, function(e) {

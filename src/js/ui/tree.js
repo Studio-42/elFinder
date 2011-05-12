@@ -229,7 +229,7 @@ $.fn.elfindertree = function(fm) {
 				var length  = dirs.length,
 					orphans = [],
 					i, dir, html, parent, sibling;
-				fm.time('tree')
+				// fm.time('tree')
 				for (i = 0; i < length; i++) {
 					dir = dirs[i];
 					
@@ -250,7 +250,7 @@ $.fn.elfindertree = function(fm) {
 				} 
 
 				updateDroppable();
-				fm.timeEnd('tree')
+				// fm.timeEnd('tree')
 
 			},
 			
@@ -308,9 +308,9 @@ $.fn.elfindertree = function(fm) {
 						hash = dirHash(link);
 
 					e.preventDefault();
-					
+
 					if (hash != fm.cwd().hash) {
-						fm.openDir(hash)
+						fm.exec('open', hash);
 					} else if (link.is('.'+collapsed)) {
 						link.find('.'+arrow).click();
 					}

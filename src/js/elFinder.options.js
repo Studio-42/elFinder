@@ -81,7 +81,7 @@ elFinder.prototype.options = {
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
-	rememberLastDir : true,
+	// rememberLastDir : true,
 	/**
 	 * Data to append to all ajax requests and to upload form
 	 *
@@ -89,6 +89,14 @@ elFinder.prototype.options = {
 	 * @default  {}
 	 */
 	customData : {token : '42'},
+	
+	handlers : {},
+	
+	// getFileCallback : function(file) {
+	// 	console.log('got file')
+	// 	console.log(file)
+	// },
+	
 	/**
 	 * Show toolbar?
 	 *
@@ -144,7 +152,7 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'up', 'home', 'reload', 'help'],
+	commands : ['open', 'reload', 'getfile', 'help'],
 	
 	
 	commandsOptions : {},
@@ -170,7 +178,7 @@ elFinder.prototype.options = {
 	/* buttons on toolbar */
 	toolbarConf : [
 		['back', 'forward', 'reload', 'up', 'home'],
-		['open'],
+		['open', 'select'],
 		['copy', 'cut', 'paste', 'duplicate', 'rename'],
 		['rm'],
 		['info'],
@@ -200,7 +208,14 @@ elFinder.prototype.options = {
 	autoReload : 0,
 	/* set to true if you need to select several files at once from editorCallback */
 	selectMultiple : false,
-	commandsOptions : {},
+	commandsOptions : {
+		getfile : {
+			dblclick : true,
+			enter    : true,
+			multiple : true,
+			folders  : false
+		}
+	},
 	clearCache : true,
 	// debug : true
 	// debug : ['error', 'event-enable', 'event-disable']

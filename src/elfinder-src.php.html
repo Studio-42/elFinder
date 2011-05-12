@@ -42,6 +42,7 @@
 	<script src="js/commands/duplicate.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/commands/rename.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/commands/help.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/commands/getfile.js" type="text/javascript" charset="utf-8"></script>
 	
 	<script src="js/ui/overlay.js"        type="text/javascript" charset="utf-8"></script>
 	<script src="js/ui/dialog.js"           type="text/javascript" charset="utf-8"></script>
@@ -117,9 +118,17 @@
 			// }, 3000)
 			
 			var f1 = $('#finder').elfinder({
-				url : 'connectors/php-old/connector.php',
+				url : 'connectors/php/connector.php',
+
+				// width:650,
 				lang : 'ru'
 			}).elfinder('instance')
+
+			// $('#finder2').elfinder({
+			// 	url : 'connectors/php/connector.php',
+			// 	width:650,
+			// 	lang : 'ru'
+			// })
 
 			// console.log(f1)
 			// 
@@ -140,6 +149,20 @@
 			$('#fwd').click(function(e) {
 				f1.exec('forward')
 			})
+			
+			$('#dialog').click(function() {
+				var f = $('<div/>'),
+					opts = {
+					url : 'connectors/php/connector.php',
+					getFileCallback : function(files) {
+						console.log(files)
+						f.elfinder('destory')
+					}
+				}
+				f.elfinder(opts).dialog()
+				
+			})
+			
 		})
 	</script>
 
@@ -148,11 +171,17 @@
 	
 	<div id="back" class="button">back</div>
 	<div id="fwd" class="button">forward</div>
+	<div id="dialog" class="button">dialog</div>
 	<!-- <div id="close"  class="button">close</div>
 	<div id="dock" class="button">dock</div>
 	<div id="undock" class="button">undock</div>-->
-	<div id="finder">finder <span>here</span></div>
-	<div id="asd">finder</div> 
+	<!-- <div style="width:670px; float:left"> -->
+		<div id="finder">finder <span>here</span></div>
+	<!-- </div> -->
+	<!-- <div style="width:670px; float:left">
+		<div id="finder2">finder</div> 
+	</div> -->
+	<br clear="all"/>
 	<input type="text" value="123" />
 	
 	
