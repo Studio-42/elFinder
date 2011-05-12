@@ -16,6 +16,9 @@ elFinder.prototype.commands.reload = function() {
 		var fm = this.fm;
 		
 		return this.fm.sync(true)
+			.done(function() {
+				fm.reload();
+			})
 			.fail(function(error) {
 				var cwd = fm.cwd().hash,
 					root = fm.root();

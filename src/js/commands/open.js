@@ -108,7 +108,7 @@ elFinder.prototype.commands.open = function() {
 				}
 			}
 
-			return dfrd.resolve()
+			return dfrd.resolve();
 		}
 		return dfrd.reject(fm.i18n(errors.invOpenArg));
 		

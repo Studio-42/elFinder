@@ -1,8 +1,7 @@
 
 elFinder.prototype.commands.back = function() {
-	var self = this;
-	
-	this._required = true;
+
+	this.alwaysEnabled = true;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+left',
@@ -10,12 +9,12 @@ elFinder.prototype.commands.back = function() {
 		callback    : function() { this.exec(); }
 	}];
 	
-	this._getstate = function() {
-		return self.fm.history.canBack() ? self._state.enabled : self._state.disabled
+	this.getstate = function() {
+		return this.fm.history.canBack() ? 0 : -1;
 	}
 	
 	this._exec = function() {
-		self.fm.history.back();
+		this.fm.history.back();
 	}
 
 }

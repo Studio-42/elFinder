@@ -1,22 +1,21 @@
 
 elFinder.prototype.commands.forward = function() {
-	var self = this;
 	
-	this._required = true;
+	this.alwaysEnabled = true;
 	
 	
-	this._shortcuts = [{
+	this.shortcuts = [{
 		pattern     : 'ctrl+right',
 		description : 'Go forward',
 		callback    : function() { self.exec(); }
 	}];
 	
-	this._getstate = function() {
-		return self.fm.history.canForward() ? self._state.enabled : self._state.disabled
+	this.getstate = function() {
+		return this.fm.history.canForward() ? 0 : -1;
 	}
 	
 	this._exec = function() {
-		self.fm.history.forward();
+		this.fm.history.forward();
 	}
 	
 }

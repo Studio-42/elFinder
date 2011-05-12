@@ -67,8 +67,11 @@ elFinder.prototype.command = function(fm) {
 		open    : function() { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
 			this.update(); 
-			
 		},
+		reload : function() { 
+			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
+			this.update(); 
+		}
 	};
 	
 	/**

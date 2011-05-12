@@ -265,7 +265,9 @@ $.fn.elfindertree = function(fm) {
 			 * @return void
 			 */
 			sync = function() {
-				var current = tree.find('#'+hash2id(fm.cwd().hash)), rootNode;
+				var cwd     = fm.cwd().hash,
+					current = tree.find('#'+hash2id(cwd)), 
+					rootNode;
 				
 				if (openRoot) {
 					rootNode = tree.find('#'+hash2id(fm.root()));
@@ -282,7 +284,11 @@ $.fn.elfindertree = function(fm) {
 					if (current.length) {
 						current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded);
 					} else if (fm.newAPI) {
-						fm.ajax({cmd : 'parents', target : fm.cwd().hash}, 'silent');
+						fm.ajax({cmd : 'parents', target : cwd})
+							.done(function(data) {
+								updateTree(filter(data.tree));
+								cwd == fm.cwd().hash && sync();
+							});
 					}
 				}
 			},

@@ -18,7 +18,7 @@
 			 **/
 			prevEnabled = true,
 			
-			events = ['enable', 'disable', 'error', 'load', 'open', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile'],
+			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile'],
 			
 			/**
 			 * Rules to validate data from backend
