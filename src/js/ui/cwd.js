@@ -297,44 +297,6 @@ $.fn.elfindercwd = function(fm) {
 			},
 			
 			/**
-			 * Compare two files based on elFinder.sort
-			 *
-			 * @param Object  file
-			 * @param Object  file
-			 * @return Number
-			 */
-			compare = function(f1, f2) {
-				var m1 = f1.mime,
-					m2 = f2.mime,
-					d1 = m1 == 'directory',
-					d2 = m2 == 'directory',
-					n1 = f1.name,
-					n2 = f2.name,
-					s1 = f1.size || 0,
-					s2 = f2.size || 0;
-				
-				// dir first	
-				if (fm.sort <= 3) {
-					if (d1 && !d2) {
-						return -1;
-					}
-					if (!d1 && d2) {
-						return 1;
-					}
-				}
-				// by mime
-				if ((fm.sort == 2 ||fm. sort == 5) && m1 != m2) {
-					return m1 > m2 ? 1 : -1;
-				}
-				// by size
-				if ((fm.sort == 3 || fm.sort == 6) && s1 != s2) {
-					return s1 > s2 ? 1 : -1;
-				}
-				
-				return f1.name.localeCompare(f2.name);
-			},
-			
-			/**
 			 * Files we get from server but not show yet
 			 *
 			 * @type Array
@@ -706,11 +668,11 @@ $.fn.elfindercwd = function(fm) {
 				}
 
 				buffer = fm.oldAPI
-					? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? f : null })
+					? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
 					: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
-					
-				buffer = buffer.sort(compare);
-				
+
+				buffer = fm.sortFiles(buffer)
+
 				cwd.bind(scrollEvent, render).trigger(scrollEvent);
 
 				trigger();

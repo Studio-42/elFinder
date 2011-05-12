@@ -42,7 +42,7 @@ elFinder.prototype.options = {
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
 	 */
-	sort : 'sizeDirsFirst',
+	sort : 'nameDirsFirst',
 	
 	/**
 	 * Show nav panel (not implemented yet)
@@ -144,7 +144,7 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'up', 'home', 'help'],
+	commands : ['open', 'up', 'home', 'reload', 'help'],
 	
 	
 	commandsOptions : {},
@@ -202,7 +202,7 @@ elFinder.prototype.options = {
 	selectMultiple : false,
 	commandsOptions : {},
 	clearCache : true,
-	debug : true
+	// debug : true
 	// debug : ['error', 'event-enable', 'event-disable']
 }
 

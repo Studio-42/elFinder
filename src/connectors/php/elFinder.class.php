@@ -439,7 +439,7 @@ class elFinder {
 	 **/
 	protected function tree($args) {
 		$dir = $args['target'];
-		// exit();
+		
 		if (($volume = $this->volume($dir)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		}

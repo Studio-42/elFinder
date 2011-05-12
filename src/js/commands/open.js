@@ -52,6 +52,8 @@ elFinder.prototype.commands.open = function() {
 							data   : {cmd : 'open', target : hash},
 							notify : {type : 'open', cnt : 1, hideCnt : true},
 							freeze : true
+						}).fail(function() {
+							fm.sync(true);
 						});
 				}
 			}

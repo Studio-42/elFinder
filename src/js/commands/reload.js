@@ -9,12 +9,12 @@ elFinder.prototype.commands.reload = function() {
 	}];
 	
 	this.getstate = function() {
-		return -1;
+		return 0;
 		return self._state.enabled;
 	}
 	
 	this._exec = function() {
-		this.fm.reload();
+		this.fm.sync(true);
 	}
 
 }

@@ -400,6 +400,8 @@
 		 **/
 		this.sort = this.sortType();
 		
+		this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
+		
 		/**
 		 * Return true if filemanager is active
 		 *
@@ -458,10 +460,8 @@
 		 * @return Boolean
 		 */
 		this.isCommandEnabled = function(name) {
-			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : true;
+			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
 		}
-		
-		
 		
 		/**
 		 * Return file data from current dir or tree by it's hash
@@ -585,7 +585,7 @@
 				cmd     = data.cmd,
 				deffail = !(options.preventDefault || options.preventFail),
 				defdone = !(options.preventDefault || options.preventDone),
-				notify  = options.notify,
+				notify  = $.extend({}, options.notify),
 				freeze  = options.freeze,
 				timeout,
 				options = $.extend({
@@ -665,7 +665,7 @@
 				});
 			}
 			
-			if (notify.type) {
+			if (notify.type && notify.cnt) {
 				
 				timeout = setTimeout(function() {
 					self.notify(notify);
@@ -673,7 +673,7 @@
 						notify.cnt = -(parseInt(notify.cnt)||0);
 						self.notify(notify);
 					})
-				}, o.notifyDelay)
+				}, self.notifyDelay)
 				
 				dfrd.always(function() {
 					clearTimeout(timeout)
@@ -950,103 +950,159 @@
 		 */
 		this.sync = function(freeze) {
 			var self  = this,
-				dfrd  = $.Deferred(),
+				dfrd  = $.Deferred().fail(function(error) {
+					if (freeze) {
+						self.error(error);
+						if (self.cwd().phash) {
+							self.ajax({
+								data        : {cmd : 'open', target : self.root(), init : 1, tree : 1},
+								preventFail : true,
+								freeze      : true,
+								notify      : { type : 'open', cnt : 1}
+							})
+						}
+					} else {
+						self.debug('error', error);
+					}
+				}),
 				opts1 = {
 					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
-					preventDefault : true
+					preventDefault : true,
+					freeze : true
 				},
 				opts2 = {
 					data : {cmd : 'parents', target : cwd},
-					preventDefault : true
-				};
-			
-			$.when(
-				this.ajax(opts1, freeze),
-				this.ajax(opts2, freeze)
-			)
-			.fail(function(error) {
-				freeze && self.error(error);
-				dfrd.reject();
-			})
-			.then(function(odata, pdata) {
-				var raw     = {},
-					removed = [],
-					added   = [],
-					changed = [],
-					isChanged = function(hash) {
-						var l = changed.length;
-					
-						while (l--) {
-							if (changed[l].hash == hash) {
-								return true;
+					preventDefault : true,
+					freeze : true
+				},
+				doSync = function(odata, pdata) {
+					var raw     = {},
+						removed = [],
+						added   = [],
+						changed = [],
+						isChanged = function(hash) {
+							var l = changed.length;
+
+							while (l--) {
+								if (changed[l].hash == hash) {
+									return true;
+								}
 							}
-						}
-					};
-				
-				setAPI(odata.api);
+						};
 
-				// valid data
-				if (!(self.validResponse('open', odata) 
-				&& (self.oldAPI || self.validResponse('parents', pdata)))) {
-					self.error([self.errors.invResponse, self.errors.invData]);
-					return dfrd.reject();
-				}
-				
-				// create new files list
-				if (self.newAPI) {
-					cwdOptions = $.extend({}, cwdOptions, odata.options);
-					$.each(odata.files.concat(pdata.tree), function(i, f) {
-						if (f.hash && f.name && f.mime) {
-							raw[f.hash] = f;
-						}
-					});
-				} else {
-					cwdOptions = $.extend({}, cwdOptions, self.normalizeOldOptions(odata));
-					raw = self.normalizeOldTree(data.tree);
-					$.each(data.cdc, function(i, f) {
-						if (f.hash && f.name && f.mime) {
-							raw[f.hash] = self.normalizeOldFile(f, cwd);
-						}
-					});
-				}
+					setAPI(odata.api);
 
-				// find removed
-				$.each(files, function(hash, f) {
-					!raw[hash] && removed.push(hash);
-				});
-				
-				// compare files
-				$.each(raw, function(hash, file) {
-					var origin = files[hash];
+					// valid data
+					if (!self.validResponse('open', odata)) {
+						return dfrd.reject([self.errors.invResponse, self.errors.invData]);
+					}
 					
-					if (!origin) {
-						added.push(file);
+					if (self.newAPI && !self.validResponse('parents', pdata)) {
+						return dfrd.reject([self.errors.invResponse, self.errors.invData])
+					}
+					
+
+					// create new files list
+					if (self.newAPI) {
+						cwdOptions = $.extend({}, cwdOptions, odata.options);
+						$.each(odata.files.concat(pdata.tree), function(i, f) {
+							if (f.hash && f.name && f.mime) {
+								raw[f.hash] = f;
+							}
+						});
 					} else {
-						$.each(file, function(prop) {
-							if (file[prop] != origin[prop]) {
-								changed.push(file)
-								return false;
+						cwdOptions = $.extend({}, cwdOptions, self.normalizeOldOptions(odata));
+						$.each(self.normalizeOldTree(odata.tree), function(i, f) {
+							if (f.hash && f.name) {
+								raw[f.hash] = f;
+							}
+						});
+						$.each(odata.cdc, function(i, f) {
+							if (f.hash && f.name && f.mime) {
+								raw[f.hash] = self.normalizeOldFile(f, cwd);
 							}
 						});
 					}
-				});
-				
-				// parents of removed dirs mark as changed (required for tree correct work)
-				$.each(removed, function(i, hash) {
-					var file = files[hash], 
-						phash = file.phash;
 
-					if (phash && file.mime == 'directory' && $.inArray(phash, removed) === -1 && raw[phash] && !isChanged(phash)) {
-						changed.push(raw[phash]);
-					}
-				});
+					// find removed
+					$.each(files, function(hash, f) {
+						!raw[hash] && removed.push(hash);
+					});
+
+					// compare files
+					$.each(raw, function(hash, file) {
+						var origin = files[hash];
+
+						if (!origin) {
+							added.push(file);
+						} else {
+							$.each(file, function(prop) {
+								if (file[prop] != origin[prop]) {
+									changed.push(file)
+									return false;
+								}
+							});
+						}
+					});
+
+					// parents of removed dirs mark as changed (required for tree correct work)
+					$.each(removed, function(i, hash) {
+						var file  = files[hash], 
+							phash = file.phash;
+
+						if (phash && file.mime == 'directory' && $.inArray(phash, removed) === -1 && raw[phash] && !isChanged(phash)) {
+							changed.push(raw[phash]);
+						}
+					});
+
+					self.log(removed.length).log(added.length).log(changed.length)
+					removed.length && responseHandlers.remove(removed).remove({removed : removed});
+					added.length   && responseHandlers.add(added).add({added : added});
+					changed.length && responseHandlers.change(changed).change({changed : changed});
+					dfrd.resolve();
+					
+				},
+				timeout
+				;
+			
+			if (freeze) {
+				timeout = setTimeout(function() {
+					self.notify({
+						type    : 'reload',
+						cnt     : 1,
+						hideCnt : true
+					});
+
+					dfrd.always(function() {
+						self.notify({
+							type : 'reload',
+							cnt  : -1
+						})
+					})
+				}, self.notifyDelay)
 				
-				self.log(removed).log(added).log(changed)
-				removed.length && responseHandlers.remove(removed).remove({removed : removed});
-				added.length   && responseHandlers.add(added).add({added : added});
-				changed.length && responseHandlers.change(changed).change({changed : changed});
-				dfrd.resolve();
-			});
+				dfrd.always(function() {
+					clearTimeout(timeout);
+				});
+			}
+			
+			if (this.newAPI) {
+				$.when(
+					this.ajax(opts1),
+					this.ajax(opts2)
+				)
+				.fail(function(error) {
+					dfrd.reject(error)
+				})
+				.then(doSync);
+			} else {
+				this.ajax(opts1).fail(function(error) {
+					dfrd.reject(error)
+				})
+				.then(doSync);
+			}
+			
+			
 			
 			return dfrd;
 		}
@@ -1370,6 +1426,7 @@
 		 */
 		notifyType : {
 			open   : 'Open folder',
+			reload : 'Reload folder content',
 			mkdir  : 'Creating directory',
 			mkfile : 'Creating files',
 			rm     : 'Delete files',
@@ -1535,17 +1592,32 @@
 		 * @return Object
 		 */
 		normalizeOldFile : function(file, phash) {
-			var info = {
-				hash : file.hash,
-				phash : phash,
-				name : file.name,
-				mime : file.mime || 'directory',
-				date : file.date || 'unknown',
-				size : file.size || 0,
-				read : file.read,
-				write : file.write,
-				locked : phash ? !file.rm : true
+			var mime = file.mime || 'directory',
+				size = mime == 'directory' && !file.linkTo ? 0 : file.size,
+				info = {
+					hash   : file.hash,
+					phash  : phash,
+					name   : file.name,
+					mime   : mime,
+					date   : file.date || 'unknown',
+					size   : size,
+					read   : file.read,
+					write  : file.write,
+					locked : phash ? !file.rm : true
+				};
+			
+			if (file.link) {
+				info.link = file.link;
 			}
+
+			if (file.linkTo) {
+				info.linkTo = file.linkTo;
+			}
+			
+			if (file.tmb) {
+				info.tmb = file.tmb;
+			}
+				
 			if (file.dirs && file.dirs.length) {
 				info.dirs = true;
 			}
@@ -2076,10 +2148,10 @@
 		},
 		
 		/**
-		 * Compare two files based on elFinder.sort
+		 * Compare files based on elFinder.sort
 		 *
-		 * @param Object  file
-		 * @param Object  file
+		 * @param  Object  file
+		 * @param  Object  file
 		 * @return Number
 		 */
 		compare : function(f1, f2) {
@@ -2089,11 +2161,12 @@
 				d2 = m2 == 'directory',
 				n1 = f1.name,
 				n2 = f2.name,
-				s1 = f1.size || 0,
-				s2 = f2.size || 0;
-			// this.log(f1).log(f2).log(this.sort)
+				s1 = d1 ? 0 : f1.size || 0,
+				s2 = d2 ? 0 : f2.size || 0,
+				sort = this.sort;
+
 			// dir first	
-			if (this.sort <= 3) {
+			if (sort <= 3) {
 				if (d1 && !d2) {
 					return -1;
 				}
@@ -2102,17 +2175,28 @@
 				}
 			}
 			// by mime
-			if ((this.sort == 2 ||this. sort == 5) && m1 != m2) {
+			if ((sort == 2 || sort == 5) && m1 != m2) {
 				return m1 > m2 ? 1 : -1;
 			}
 			// by size
-			if ((this.sort == 3 || this.sort == 6) && s1 != s2) {
+			if ((sort == 3 || sort == 6) && s1 != s2) {
 				return s1 > s2 ? 1 : -1;
 			}
-			
+
 			return f1.name.localeCompare(f2.name);
+			
 		},
 		
+		
+		/**
+		 * Sort files based on elFinder.sort
+		 *
+		 * @param  Array  files
+		 * @return Array
+		 */
+		sortFiles : function(files) {
+			return files.sort($.proxy(this.compare, this));
+		},
 
 		/**
 		 * Return message translated onto current language
