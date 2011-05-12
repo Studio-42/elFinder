@@ -215,7 +215,7 @@
 					.resize(width, height)
 					.load();
 
-				responseHandlers.open($.extend(true, data));
+				responseHandlers.open($.extend(true, {}, data));
 				self.open(data);
 
 				// self.trigger('open', data);
@@ -242,6 +242,9 @@
 					}
 
 					cwd = data.cwd.hash;
+
+					// self.log('got cwd : '+cwd)
+					self.log(data)
 
 					if (self.newAPI) {
 						cwdOptions = $.extend({}, cwdOptions, data.options);
@@ -602,9 +605,10 @@
 				},
 				done = function(data) {
 					data.warning && self.error(data.warning);
+					// data = $.extend(true, {}, data)
 
 					if (responseHandlers[cmd]) {
-						responseHandlers[cmd]($.extend({}, data))
+						responseHandlers[cmd]($.extend(true, {}, data))
 					}
 
 					// fire some event to update cache/ui
@@ -1207,6 +1211,9 @@
 		
 		// bind event handlers
 		this
+			.open(function() {
+				self.log('cwd '+cwd+' '+self.file(cwd).name)
+			})
 			.enable(function() {
 				if (!enabled && self.visible() && overlay.is(':hidden')) {
 					enabled = true;

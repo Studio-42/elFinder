@@ -269,6 +269,8 @@ $.fn.elfindertree = function(fm) {
 					current = tree.find('#'+hash2id(cwd)), 
 					rootNode;
 				
+				// fm.log(cwd)
+				
 				if (openRoot) {
 					rootNode = tree.find('#'+hash2id(fm.root()));
 					rootNode.is('.'+loaded) && rootNode.addClass(expanded).next('.'+subtree).show();
@@ -284,7 +286,10 @@ $.fn.elfindertree = function(fm) {
 					if (current.length) {
 						current.parentsUntil('.elfinder-nav-tree').filter('.'+subtree).show().prevAll('[id]:first').addClass(expanded);
 					} else if (fm.newAPI) {
-						fm.ajax({cmd : 'parents', target : cwd})
+						fm.ajax({
+							data : {cmd : 'parents', target : cwd},
+							preventFail : true
+						})
 							.done(function(data) {
 								updateTree(filter(data.tree));
 								cwd == fm.cwd().hash && sync();
