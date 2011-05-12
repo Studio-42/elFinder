@@ -20,18 +20,27 @@ elFinder.prototype.commands.open = function() {
 		dblclick : function(e) { this.exec([e.data.file]) }
 	}
 	
-	
 	this.shortcuts = [{
 		pattern     : 'ctrl+down enter NUMPAD_ENTER',
 		description : 'Open files or enter directory'
 	}];
+	
+	// fake for button
+	this.disabled = function() {
+		return this.state <= 0;
+	}
+	
+	// fake for button
+	this.active = function() {
+		return false;
+	}
 	
 	this.getstate = function() {
 		var fm  = this.fm,
 			sel = fm.selected(),
 			cnt = sel.length;
 
-		return cnt && (cnt == 1 || onlyFiles(sel)) ? 0 : -1;
+		return cnt && (cnt == 1 || onlyFiles(sel)) ? 1 : 0;
 	}
 	
 	this._exec = function(targets) {
@@ -59,7 +68,14 @@ elFinder.prototype.commands.open = function() {
 							freeze : true
 						})
 						.fail(function() {
-							fm.sync(true);
+							fm.sync(true)
+								.fail(function() {
+									var cwd = fm.cwd().hash,
+										root = fm.root();
+									if (cwd && root && cwd != root) {
+										self._exec(fm.root());
+									}
+								});
 						});
 				}
 			}

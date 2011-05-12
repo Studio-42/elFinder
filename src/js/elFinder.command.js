@@ -136,7 +136,7 @@ elFinder.prototype.command = function(fm) {
 	 * @return $.Deferred
 	 */
 	this.exec = function(v) { 
-		return this.enabled() ? this._exec(v) : $.Deferred().reject({error : 'Command disabled'});
+		return this.state > -1 ? this._exec(v) : $.Deferred().reject({error : 'Command disabled'});
 	}
 	
 	/**

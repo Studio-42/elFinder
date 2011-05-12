@@ -79,7 +79,7 @@ $opts = array(
 					'read' => true,
 					'write' => false,
 					'locked' => true,
-					'hidden' => true
+					// 'hidden' => true
 				),
 				array(
 					'pattern' => '/123$/',

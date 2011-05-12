@@ -590,7 +590,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isReadable($hash='') {
-		return $this->_isReadable($hash ? $this->decode($hash) : $this->root);
+		$path = $hash ? $this->decode($hash) : $this->root;
+		return $this->_fileExists($path) && !$this->_isHidden($path) && $this->_isReadable($path);
 	}
 	
 	/**
@@ -601,7 +602,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function isDir($hash) {
-		return $this->_isDir($this->decode($hash));
+		$path = $this->decode($hash);
+		return $this->_fileExists($path) && !$this->_isHidden($path) && $this->_isDir($this->decode($hash));
 	}
 	
 	/**

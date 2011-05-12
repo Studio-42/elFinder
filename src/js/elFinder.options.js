@@ -81,7 +81,7 @@ elFinder.prototype.options = {
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
-	// rememberLastDir : true,
+	rememberLastDir : true,
 	/**
 	 * Data to append to all ajax requests and to upload form
 	 *
@@ -152,7 +152,7 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'reload', 'getfile', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'getfile', 'help'],
 	
 	
 	commandsOptions : {},

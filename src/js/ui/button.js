@@ -1,5 +1,6 @@
 $.fn.elfinderbutton = function(cmd) {
 	return this.each(function() {
+		
 		var disabled = 'ui-state-disabled',
 			active   = 'ui-state-active',
 			button   = $(this).addClass('ui-widget ui-state-default ui-corner-all elfinder-button')
@@ -13,7 +14,6 @@ $.fn.elfinderbutton = function(cmd) {
 					!button.is('.'+disabled) && this._click();
 				});
 			
-		
 			
 		cmd.change(function() {
 			// here this - command object 

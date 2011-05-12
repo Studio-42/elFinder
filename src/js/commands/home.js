@@ -3,7 +3,7 @@ elFinder.prototype.commands.home = function() {
 	
 	this.alwaysEnabled = true;
 	
-	this._shortcuts = [{
+	this.shortcuts = [{
 		pattern     : 'ctrl+home ctrl+shift+up',
 		description : 'Go to root folder'
 	}];
@@ -16,7 +16,7 @@ elFinder.prototype.commands.home = function() {
 	}
 	
 	this._exec = function() {
-		this.fm.exec('open', this.fm.root());
+		return this.fm.exec('open', this.fm.root());
 	}
 	
 

@@ -49,21 +49,23 @@ $.fn.elfinderdialog = function(opts, parent) {
 					dialog.find(':text:first').focus();
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
-					parent.find('.elfinder-dialog:visible:not(.elfinder-dialog-notify)').each(function() {
-						var d     = $(this),
-							top   = parseInt(d.css('top')),
-							left  = parseInt(d.css('left')),
-							_top  = parseInt(dialog.css('top')),
-							_left = parseInt(dialog.css('left'))
-							;
-						
-						if (d[0] != dialog[0] && (top >= _top || left >= _left)) {
-							dialog.css({
-								top  : (top+10)+'px',
-								left : (left+10)+'px'
-							});
-						}
-					});
+					if (!dialog.is('.elfinder-dialog-notify')) {
+						parent.find('.elfinder-dialog:visible').not('.elfinder-dialog-notify').each(function() {
+							var d     = $(this),
+								top   = parseInt(d.css('top')),
+								left  = parseInt(d.css('left')),
+								_top  = parseInt(dialog.css('top')),
+								_left = parseInt(dialog.css('left'))
+								;
+
+							if (d[0] != dialog[0] && (top >= _top || left >= _left)) {
+								dialog.css({
+									top  : (top+10)+'px',
+									left : (left+10)+'px'
+								});
+							}
+						});
+					}
 				})
 				.bind('close', function() {
 					var z;

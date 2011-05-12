@@ -13,7 +13,21 @@ elFinder.prototype.commands.reload = function() {
 	}
 	
 	this._exec = function() {
-		this.fm.sync(true);
+		var fm = this.fm;
+		
+		return this.fm.sync(true)
+			.fail(function(error) {
+				var cwd = fm.cwd().hash,
+					root = fm.root();
+				
+				fm.error(error);
+				if (cwd != root) {
+					fm.ajax({
+						data : {cmd : 'open', target : root, tree : 1, init : 1},
+						notify : {type : 'open', cnt : 1, hideCnt : true}
+					});
+				}
+			});
 	}
 
 }

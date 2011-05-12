@@ -185,7 +185,7 @@
 			 * @return void
 			 */
 			loadfail = function() {
-				self.trigger('fail').disable().lastDir('');
+				self.trigger('fail').disable()//.lastDir('');
 				listeners = {};
 				shortcuts = {};
 				$(document).add(node).unbind('.'+this.namespace);
@@ -948,21 +948,7 @@
 		 */
 		this.sync = function(freeze) {
 			var self  = this,
-				dfrd  = $.Deferred().fail(function(error) {
-					if (freeze) {
-						self.error(error);
-						if (self.cwd().phash) {
-							self.ajax({
-								data        : {cmd : 'open', target : self.root(), init : 1, tree : 1},
-								preventFail : true,
-								freeze      : true,
-								notify      : { type : 'open', cnt : 1}
-							})
-						}
-					} else {
-						self.debug('error', error);
-					}
-				}),
+				dfrd  = $.Deferred(),
 				opts1 = {
 					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
 					preventDefault : true,
@@ -1060,24 +1046,16 @@
 					dfrd.resolve();
 					
 				},
-				timeout
-				;
+				timeout;
 			
 			if (freeze) {
 				timeout = setTimeout(function() {
-					self.notify({
-						type    : 'reload',
-						cnt     : 1,
-						hideCnt : true
-					});
-
+					self.notify({type : 'reload', cnt : 1, hideCnt : true});
+			
 					dfrd.always(function() {
-						self.notify({
-							type : 'reload',
-							cnt  : -1
-						})
+						self.notify({type : 'reload', cnt  : -1});
 					})
-				}, self.notifyDelay)
+				}, self.notifyDelay);
 				
 				dfrd.always(function() {
 					clearTimeout(timeout);
