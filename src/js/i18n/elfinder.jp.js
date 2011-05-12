@@ -1,5 +1,5 @@
 /*
- * Hungarian translation
+ * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @version 2010-09-22
  */
