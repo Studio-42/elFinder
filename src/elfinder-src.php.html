@@ -155,8 +155,9 @@
 					opts = {
 					url : 'connectors/php/connector.php',
 					getFileCallback : function(files) {
-						console.log(files)
-						f.elfinder('destory')
+						console.log(this)
+						this.destroy()
+						// f.elfinder('destory')
 					}
 				}
 				f.elfinder(opts).dialog()

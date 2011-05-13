@@ -118,10 +118,6 @@
 				hide : function() { prevEnabled && self.enable(); },
 			}),
 			
-			ndialog = $('<div/>'),
-			
-			ntpl = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
-			
 			width, height,
 			
 			/**
@@ -185,7 +181,7 @@
 			 * @return void
 			 */
 			loadfail = function() {
-				self.trigger('fail').disable()//.lastDir('');
+				self.trigger('fail').disable().lastDir('');
 				listeners = {};
 				shortcuts = {};
 				$(document).add(node).unbind('.'+this.namespace);
@@ -243,9 +239,6 @@
 
 					cwd = data.cwd.hash;
 
-					// self.log('got cwd : '+cwd)
-					self.log(data)
-
 					if (self.newAPI) {
 						cwdOptions = $.extend({}, cwdOptions, data.options);
 						data.files.push(data.cwd);
@@ -267,7 +260,7 @@
 						}
 
 					}
-					// self.log(cwdOptions)
+
 					self.lastDir(cwd);
 					data.debug && self.debug('backend-debug', data.debug);
 					
@@ -557,6 +550,7 @@
 		this.validResponse = function(cmd, data) {
 			return rules[cmd] ? rules[cmd](data) : true;
 		}
+		
 		/**
 		 * Proccess ajax request.
 		 * Fired events :
@@ -652,7 +646,7 @@
 					error ? dfrd.reject(error) : dfrd.resolve(response);
 				}
 				;
-			// self.log(deffail).log(defdone)
+
 			deffail && dfrd.fail(fail);
 			defdone && dfrd.done(done);
 			o.debug && dfrd.fail(function(error) { self.debug('error', self.i18n(error)); });
@@ -858,50 +852,7 @@
 			return $('<div/>').append(content).elfinderdialog(options, node);
 		}
 		
-		/**
-		 * Open notification dialog 
-		 * and append/update message for required notification type.
-		 *
-		 * @param  Object  options
-		 * @example  
-		 * this.notify({
-		 *    type : 'copy',
-		 *    msg : 'Copy files', // not required for known types @see this.notifyType
-		 *    cnt : 3,
-		 *    hideCnt : false, // true for not show count
-		 * })
-		 * @return elFinder
-		 */
-		this.notify = function(opts) {
-			var type   = opts.type,
-				msg    = opts.msg || this.i18n(this.notifyType[type]), 
-				cnt    = opts.cnt,
-				notify = ndialog.children('.elfinder-notify-'+type);
-			
-			if (!type) {
-				return;
-			}
-			
-			if (notify.length) {
-				cnt += parseInt(notify.data('cnt')) || 0;
-			} else if (cnt > 0) {
-				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg)).appendTo(ndialog)
-			} else {
-				return;
-			}
-			
-			if (cnt > 0) {
-				notify.data('cnt', cnt)
-				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
-				ndialog.is(':hidden') && ndialog.elfinderdialog('open');
-			} else {
-				notify.remove();
-				self.log(ndialog.children().length)
-				!ndialog.children().length && ndialog.elfinderdialog('close');
-			}
-			
-			return this;
-		}
+		
 		
 		
 		this.getUIDir = function() {
@@ -1043,7 +994,7 @@
 						}
 					});
 
-					self.log(removed.length).log(added.length).log(changed.length)
+					// self.log(removed.length).log(added.length).log(changed.length)
 					removed.length && responseHandlers.remove(removed).remove({removed : removed});
 					added.length   && responseHandlers.add(added).add({added : added});
 					changed.length && responseHandlers.change(changed).change({changed : changed});
@@ -1094,8 +1045,11 @@
 		 **/
 		this.destroy = function(notRestoreNode) {
 			if (node && node[0].elfinder) {
-				this.trigger('destroy');
-				onloadfail();
+				this.trigger('destroy').disable();
+				listeners = {};
+				shortcuts = {};
+				$(document).add(node).unbind('.'+this.namespace);
+				self.trigger = function() { }
 				node.children().remove();
 				!notRestoreNode && node.append(prevContent.contents()).removeClass(this.cssClass);
 				node[0].elfinder = null;
@@ -1165,6 +1119,15 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
+		// create notification dialog
+		this.ndialog = $('<div/>').elfinderdialog({
+			cssClass  : 'elfinder-dialog-notify',
+			position  : {top : '12px', right : '12px'},
+			resizable : false,
+			autoOpen  : false,
+			title     : '&nbsp;'
+		}, node);
+		
 		// prepare node
 		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 		
@@ -1190,14 +1153,7 @@
 				minHeight : 200
 			});
 		
-		// create notification dialog
-		ndialog.elfinderdialog({
-			cssClass  : 'elfinder-dialog-notify',
-			position  : {top : '12px', right : '12px'},
-			resizable : false,
-			autoOpen  : false,
-			title     : '&nbsp;'
-		}, node);
+		
 		
 		// create bind/trigger aliases for build-in events
 		$.each(events, function(i, name) {
@@ -1211,9 +1167,6 @@
 		
 		// bind event handlers
 		this
-			.open(function() {
-				self.log('cwd '+cwd+' '+self.file(cwd).name)
-			})
 			.enable(function() {
 				if (!enabled && self.visible() && overlay.is(':hidden')) {
 					enabled = true;
@@ -1405,23 +1358,6 @@
 		},
 		
 		
-		/**
-		 * Notifications messages by types
-		 *
-		 * @type  Object
-		 */
-		notifyType : {
-			open   : 'Open folder',
-			reload : 'Reload folder content',
-			mkdir  : 'Creating directory',
-			mkfile : 'Creating files',
-			rm     : 'Delete files',
-			copy   : 'Copy files',
-			move   : 'Move files',
-			prepareCopy : 'Prepare to copy files',
-			duplicate : 'Duplicate files',
-			rename : 'Rename files'
-		},
 		
 		rules : {
 			oldapi : {
@@ -1621,43 +1557,23 @@
 		},
 		
 		/**
-		 * Open confiration dialog
-		 * 
-		 * @param  String    dialog title
-		 * @param  String    dialog text
-		 * @param  Function  Ok button callback
-		 * @param  Boolean   Show "Apply to all" checkbox
-		 * @return String
+		 * Notifications messages by types
+		 *
+		 * @type  Object
 		 */
-		confirm : function(title, text, callback, applytoall) {
-			var node = this.node,
-				self = this,
-				checkbox = $('<input type="checkbox"/>'),
-				opts = {
-					title : title,
-					modal : true,
-					buttons : {
-						Ok : function() {
-							callback(true, checkbox.is(':checked'));
-							$(this).dialog('close');
-						},
-						Cancel : function() { 
-							$(this).dialog('close'); 
-							callback(false, checkbox.is(':checked'));
-						}
-					}
-				
-				},
-				dialog = this.dialog(text, opts, 'confirm');
-			
-			if (applytoall) {
-				dialog.parents('.elfinder-dialog')
-					.find('.ui-dialog-buttonpane')
-					.prepend($('<label> '+this.i18n('Apply to all')+'</label>').prepend(checkbox));
-			}
+		notifyType : {
+			open   : 'Open folder',
+			reload : 'Reload folder content',
+			mkdir  : 'Creating directory',
+			mkfile : 'Creating files',
+			rm     : 'Delete files',
+			copy   : 'Copy files',
+			move   : 'Move files',
+			prepareCopy : 'Prepare to copy files',
+			duplicate : 'Duplicate files',
+			rename : 'Rename files'
 		},
 		
-
 		
 		/**
 		 * Create new notification type.
@@ -1668,47 +1584,137 @@
 		 * @return elFinder
 		 */
 		registerNotification : function(type, msg) {
-			if (!notifyType[type] && type && msg) {
+			if (!this.notifyType[type] && type && msg) {
 				this.notifyType[type] = msg;
 			}
 			return this;
 		},
 		
-		
-		_notify : function(type, cnt) {
-			var msg    = this.notifyType[type], 
-				nclass = 'elfinder-notify',
-				tclass = nclass+'-text',
-				dialog,
-				place;
-				
-			if (msg) {
-				if (!this.notifyDialog) {
-					this.notifyDialog = this.dialog('', {
-						closeOnEscape : false,
-						autoOpen      : false,
-						close         : function() { }
-					}, 'notify');
-				}
-				dialog = this.notifyDialog;
-				place = dialog.find('.'+nclass);
-				
-				if (place.length) {
-					cnt += parseInt(place.data('cnt'));
-				} else {
-					place = $('<div class="'+nclass+' '+nclass+'-'+type+'"><span class="'+tclass+'"/><div class="elfinder-notify-spinner"/><span class="elfinder-dialog-icon"/></div>').appendTo(dialog);
-				}
-				if (cnt > 0) {
-					place.data('cnt', cnt).children('.'+tclass).text(this.i18n(msg)+' ('+cnt+')');
-					dialog.dialog('open');
-				} else {
-					place.remove();
-					!dialog.children().length && dialog.dialog('close');
-				}
+		/**
+		 * Open notification dialog 
+		 * and append/update message for required notification type.
+		 *
+		 * @param  Object  options
+		 * @example  
+		 * this.notify({
+		 *    type : 'copy',
+		 *    msg : 'Copy files', // not required for known types @see this.notifyType
+		 *    cnt : 3,
+		 *    hideCnt : false, // true for not show count
+		 * })
+		 * @return elFinder
+		 */
+		notify : function(opts) {
+			var ndialog = this.ndialog,
+				ntpl    = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
+				type    = opts.type,
+				msg     = opts.msg || this.i18n(this.notifyType[type]), 
+				cnt     = opts.cnt,
+				notify  = ndialog.children('.elfinder-notify-'+type);
+			
+			if (!type) {
+				return this;
 			}
+			
+			if (notify.length) {
+				cnt += parseInt(notify.data('cnt')) || 0;
+			} else if (cnt > 0) {
+				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg)).appendTo(ndialog)
+			} else {
+				return;
+			}
+			
+			if (cnt > 0) {
+				notify.data('cnt', cnt)
+				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
+				ndialog.is(':hidden') && ndialog.elfinderdialog('open');
+			} else {
+				notify.remove();
+				!ndialog.children().length && ndialog.elfinderdialog('close');
+			}
+			
 			return this;
 		},
 		
+		/**
+		 * Open confirmation dialog 
+		 *
+		 * @param  Object  options
+		 * @example  
+		 * this.confirm({
+		 *    title : 'Remove files',
+		 *    text  : 'Here is question text',
+		 *    accept : {  // accept callback - required
+		 *      label : 'Continue',
+		 *      callback : function(applyToAll) { fm.log('Ok') }
+		 *    },
+		 *    cancel : { // cancel callback - required
+		 *      label : 'Cancel',
+		 *      callback : function() { fm.log('Cancel')}
+		 *    },
+		 *    reject : { // reject callback - optionally
+		 *      label : 'No',
+		 *      callback : function(applyToAll) { fm.log('No')}
+		 *   },
+		 *   all : true  // display checkbox "Apply to all"
+		 * })
+		 * @return elFinder
+		 */
+		confirm : function(opts) {
+			var complete = false,
+				options = {
+					cssClass  : 'elfinder-dialog-confirm',
+					modal     : true,
+					resizable : false,
+					title     : this.i18n(opts.title || 'Confirmation required'),
+					close     : function() { 
+						!complete && opts.cancel.callback();
+						$(this).elfinderdialog('destroy');
+					},
+					buttons : {}
+				},
+				apply = this.i18n('Apply to all'),
+				checkbox;
+
+			
+			if (opts.reject) {
+				options.buttons[this.i18n(opts.reject.label)] = function() {
+					opts.reject.callback(!!(checkbox.length && checkbox.prop('checked')))
+					complete = true;
+					$(this).elfinderdialog('close')
+				};
+			}
+			
+			options.buttons[this.i18n(opts.cancel.label)] = function() {
+				$(this).elfinderdialog('close')
+			};
+			options.buttons[this.i18n(opts.accept.label)] = function() {
+				opts.accept.callback(!!(checkbox.length && checkbox.prop('checked')))
+				complete = true;
+				$(this).elfinderdialog('close')
+			};
+			
+			if (opts.all) {
+				if (opts.reject) {
+					options.width = 330;
+				}
+				options.create = function() {
+					checkbox = $('<input type="checkbox" />');
+					$(this).next().children().before($('<label>'+apply+'</label>').prepend(checkbox));
+				}
+				
+				options.open = function() {
+					var pane = $(this).next(),
+						width = parseInt(pane.children(':first').outerWidth() + pane.children(':last').outerWidth());
+
+					if (width > parseInt(pane.width())) {
+						$(this).closest('.elfinder-dialog').width(width+30);
+					}
+				}
+			}
+			
+			return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
+		},
 		
 		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
@@ -2145,8 +2151,8 @@
 				m2 = f2.mime,
 				d1 = m1 == 'directory',
 				d2 = m2 == 'directory',
-				n1 = f1.name,
-				n2 = f2.name,
+				n1 = f1.name.toLowerCase(),
+				n2 = f2.name.toLowerCase(),
 				s1 = d1 ? 0 : f1.size || 0,
 				s2 = d2 ? 0 : f2.size || 0,
 				sort = this.sort;
@@ -2199,7 +2205,6 @@
 				} else {
 					i = msg.length-1;
 					while (i--) {
-						// this.log(msg[i])
 						msg[i] = msg[i].replace(/\$(\d+)/g, function(m, num) { 
 							num = i + parseInt(num);
 							if (num > 0 && msg[num]) {
