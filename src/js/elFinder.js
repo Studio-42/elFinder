@@ -2049,41 +2049,6 @@
 			return this.make(name, 'file');
 		},
 		
-		/**
-		 * Create duplicates for required files
-		 *
-		 * @param  Array  files
-		 * @return elFinder
-		 **/
-		duplicate : function(files) {
-			var self  = this,
-				files = $.isArray(files) ? files : [],
-				cnt   = files.length,
-				i, file;
-			
-			for (i = 0; i < cnt; i++) {
-				file = this.file(files[i]);
-				if (!file) {
-					return this.trigger('error', {error : this.errors.notFound});
-				}
-				
-				if (!file.read) {
-					return this.trigger('error', {error : [this.errors.notCopy, file.name]});
-				}
-			}
-			
-			return cnt
-				? self.ajax({
-						data : {
-							cmd     : 'duplicate', 
-							target  : this.newAPI ? files : files.shift(), // old connector support only one file duplicate at once
-							current : this.cwd().hash
-						},
-						beforeSend : function() { self.notify('duplicate', cnt); },
-						complete   : function() { self.notify('duplicate', -cnt); }
-					}, 'bg') 
-				: this;
-		},
 		
 		uniqueName : function(prefix) {
 			var i = 0, name;

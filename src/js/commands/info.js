@@ -1,18 +1,115 @@
 
 elFinder.prototype.commands.info = function() {
-	var self = this;
 	
-	this._shortcuts = [{
+	this.tpl = {
+		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
+		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
+		groupTitle : '<strong>{items}: {num}</strong>',
+		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
+		spinner    : '<span>{text}</span> <span class="elfinder-spinner-mini"/>'
+	}
+	
+	
+	this.alwaysEnabled = true;
+	
+	this.shortcuts = [{
 		pattern     : 'ctrl+i',
-		description : 'Delete',
-		callback    : function() { self.exec(); }
+		description : 'Get info'
 	}];
 	
-	this._getstate = function() {
-		return this._state.enabled;
+	this.getstate = function() {
+		return this.fm.cwd().hash ? 0 : -1;
 	}
 	
 	this._exec = function() {
+		var self    = this,
+			fm      = this.fm,
+			tpl     = this.tpl,
+			row     = tpl.row,
+			files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
+			cnt     = files.length,
+			content = [],
+			view    = tpl.main,
+			l       = '{label}',
+			v       = '{value}',
+			dialog = fm.dialog('<div/>', {
+				title    : fm.i18n('Info'),
+				autoOpen : false,
+				width    : 270,
+				minWidth : 200,
+				close    : function() { $(this).elfinderdialog('destroy'); }
+			}),
+			count = [],
+			size,
+			tmb,
+			file,
+			title;
+			
+		if (!cnt) {
+			return $.Deferred().reject();
+		}
+			
+		if (cnt == 1) {
+			file  = files[0];
+			view  = view.replace('{class}', fm.mime2class(file.mime));
+			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
+			
+			if (file.tmb) {
+				tmb = fm.option('tmbUrl')+file.tmb;
+			}
+			
+			if (!file.read) {
+				size = fm.i18n('unknown');
+			} else if (file.mime != 'directory' || fm.oldAPI) {
+				size = fm.formatSize(file.size);
+			} else {
+				size = tpl.spinner.replace('{text}', fm.i18n('Calculating'));
+				count.push(file.hash);
+			}
+			
+			content.push(row.replace(l, fm.i18n('Size')).replace(v, size));
+			file.linkTo && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.linkTo));
+			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.path(file.hash)));
+			content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
+			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));
+			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));
+			content.push(row.replace(l, fm.i18n('Access')).replace(v, fm.formatPermissions(file)));
+			content.push(row.replace(l, fm.i18n('Locked')).replace(v, fm.i18n(file.locked ? 'yes' : 'no')));
+
+		} else {
+			
+		}
+		
+		view = view.replace('{title}', title).replace('{content}', content.join(''));
+		
+		dialog.append(view).elfinderdialog('open');
+
+		// load thumbnail
+		if (tmb) {
+			$('<img src="'+tmb+'"/>').load(function() {
+				dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat');
+				$(this).unbind('load');
+			});
+		}
+		
+		// send request to count total size
+		if (count.length) {
+			fm.ajax({
+					data : {cmd : 'size', targets : count},
+					preventDefault : true
+				})
+				.fail(function() {
+					dialog.find('.elfinder-spinner-mini').parent().text(fm.i18n('unknown'));
+				})
+				.done(function(data) {
+					var size = parseInt(data.size);
+					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : fm.i18n('unknown'));
+				});
+		}
+		
+	}
+	
+	this._exec_ = function() {
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.options.tpl,
@@ -85,61 +182,4 @@ elFinder.prototype.commands.info = function() {
 		
 	}
 	
-}
-
-elFinder.prototype.commands.info.prototype.options = {
-	tpl : {
-		main  : '{title}<table class="elfinder-info-tb">{content}</table>',
-		title : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all" style="{style}"/><strong>{name}</strong><span class="elfinder-info-kind">{kind}</span></div>',
-		row   : '<tr><td>{label} : </td><td>{value}</td></tr>'
-	},
-	renders : {
-		title  : function(f, tpl, fm) {
-			return tpl
-				.replace('{class}', fm.mime2class(f.mime))
-				.replace('{style}', f.tmb ? 'background:url(\''+((fm.newAPI ? fm.cwd().tmbUrl : '') + f.tmb)+'\') center center no-repeat' : '')
-				.replace('{name}', f.name)
-				.replace('{kind}', fm.mime2kind(f))
-		},
-		kind : function(f, tpl, fm) {
-			return tpl.replace('{label}', fm.i18n('Kind')).replace('{value}',fm.mime2kind(f)); 
-		},
-		size   : function(f, tpl, fm) {
-			var size = fm.formatSize(f.size);
-
-			if (fm.newAPI && f.mime == 'directory' && !f.link) {
-				size = f.read ? '<span>'+fm.i18n('Calculating')+'</span> <span class="elfinder-spinner-mini"/>' : fm.i18n('unknown');
-			}
-			
-			return tpl.replace('{label}', fm.i18n('Size')).replace('{value}', size);
-		},
-		path   : function(f, tpl, fm) {
-			return tpl.replace('{label}', fm.i18n('Path')).replace('{value}', fm.path(f))
-		},
-		url : function(f, tpl, fm) {
-			var url = f.mime != 'directory' ? fm.url(f) : '';
-
-			return url ? tpl.replace('{label}', fm.i18n('Link')).replace('{value}', '<a href="'+url+'" target="_blank">'+f.name+'</a>') : ''
-		},
-		linkTo : function(f, tpl, fm) {
-			return f.link
-				? tpl.replace('{label}', fm.i18n('Alias for')).replace('{value}', f.linkTo)
-				: '';
-		},
-		date   : function(f, tpl, fm) {
-			return tpl.replace('{label}', fm.i18n('Modified')).replace('{value}', fm.formatDate(f.date))
-		},
-		dim    : function(f, tpl, fm) {
-			return f.dim 
-				? tpl.replace('{label}', fm.i18n('Dimensions')).replace('{value}', f.dim)
-				: '';
-		},
-		perms : function(f, tpl, fm) {
-			return tpl.replace('{label}', fm.i18n('Access')).replace('{value}', fm.formatPermissions(f));
-		},
-
-		locked : function(f, tpl, fm) {
-			return tpl.replace('{label}', fm.i18n('Locked')).replace('{value}', fm.i18n(f.locked ? 'yes' : 'no'));
-		}
-	}
 }
