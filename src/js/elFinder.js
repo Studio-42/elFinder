@@ -1974,48 +1974,6 @@
 			return true;
 		},
 		
-		/**
-		 * Remove directories / files
-		 * 
-		 * @param  Array  files hashes
-		 * @return elFinder
-		 */
-		rm : function(files) {
-			var self    = this,
-				files   = $.isArray(files) ? files : [],
-				cnt     = files.length,
-				lock    = {files : files},
-				current = this.cwd().hash,
-				hash, file, i;
-			
-			for (i = 0; i < cnt; i++) {
-				hash = files[i];
-				if (!(file = this.file(hash))) {
-					return this.trigger('error', {error : this.errors.notFound});
-				}
-				if (file.locked) {
-					return this.trigger('error', {error : [this.errors.notRm, file.name]});
-				}
-			}
-			
-			return cnt > 0 
-				? self.ajax({
-						data       : {cmd : 'rm', targets : files, current : current},
-						beforeSend : function() { self.notify('rm', cnt).trigger('lockfiles', lock); },
-						complete   : function(v) { 
-							var data, error; 
-							
-							self.notify('rm', -cnt).trigger('unlockfiles', lock); 
-							// if remove failed with "File not found" error in current dir - reload it
-							if (self.cwd().hash == current && v && v.responseText) {
-								data = $.parseJSON(v.responseText);
-								data && data.error == self.errors.notFound && self.reload();
-							}
-						}
-					}, 'bg') 
-				: this;
-			
-		},
 		
 		rename : function(hash, name) {
 			var self = this,
