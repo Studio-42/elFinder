@@ -686,11 +686,11 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash;
-				return add($.map(e.data.added || e.data.value || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
+				return add($.map(e.data.added || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
 			})
 			.change(function(e) {
 				var phash   = fm.cwd().hash,
-					changed = e.data.changed || e.data.value || [],
+					changed = e.data.changed || [],
 					i       = changed.length,
 					file;
 
@@ -707,12 +707,12 @@ $.fn.elfindercwd = function(fm) {
 				
 			})
 			.remove(function(e) {
-				remove(e.data.removed || e.data.value || []);
+				remove(e.data.removed || []);
 			})
 			// disable cuted files
 			.bind('lockfiles unlockfiles', function(e) {
 				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
-					files = e.data.files || e.data.value, 
+					files = e.data.files || [], 
 					l = files.length;
 				
 				while (l--) {

@@ -6,8 +6,7 @@ elFinder.prototype.commands.forward = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+right',
-		description : 'Go forward',
-		callback    : function() { self.exec(); }
+		description : 'Go forward'
 	}];
 	
 	this.getstate = function() {
@@ -15,7 +14,7 @@ elFinder.prototype.commands.forward = function() {
 	}
 	
 	this._exec = function() {
-		this.fm.history.forward();
+		return this.fm.history.forward();
 	}
 	
 }

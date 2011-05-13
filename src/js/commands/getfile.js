@@ -3,7 +3,9 @@ elFinder.prototype.commands.getfile = function() {
 	
 	this.alwaysEnabled = true;
 	
-	this.callback = typeof(this.fm.options.getFileCallback) == 'function' ? $.proxy(this.fm.options.getFileCallback, this.fm) : false;
+	this.callback = typeof(this.fm.options.getFileCallback) == 'function' 
+		? $.proxy(this.fm.options.getFileCallback, this.fm) 
+		: false;
 	
 	this.handlers = {
 		select : function() { this.update() }

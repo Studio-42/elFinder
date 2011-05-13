@@ -40,7 +40,7 @@ class elFinder {
 		'mkfile'    => array('current' => true, 'name' => true),
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true),
-		'duplicate' => array('target' => true),
+		'duplicate' => array('targets' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
 		'upload' => array(
@@ -678,7 +678,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function duplicate($args) {
-		$targets = is_array($args['target']) ? $args['target'] : array();
+		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$added = array();
 		
 		if (!$targets) {

@@ -13,7 +13,7 @@ elFinder.prototype.commands.up = function() {
 	}
 	
 	this._exec = function() {
-		this.fm.exec('open', this.fm.cwd().phash);
+		return this.fm.exec('open', this.fm.cwd().phash);
 	}
 
 }

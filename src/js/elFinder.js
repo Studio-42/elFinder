@@ -18,7 +18,7 @@
 			 **/
 			prevEnabled = true,
 			
-			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
+			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
 			
 			/**
 			 * Rules to validate data from backend
@@ -275,13 +275,14 @@
 					return self;
 				},
 				
-				add : function(added) {
-					cache(added);
+				add : function(data) {
+					cache(data.added);
 					return self;
 				},
 				
-				remove : function(removed) {
-					var l  = removed.length, 
+				remove : function(data) {
+					var removed = data.removed,
+						l  = removed.length, 
 						rm = function(hash) {
 							var file = files[hash];
 							if (file) {
@@ -300,8 +301,8 @@
 					return self;
 				}, 
 				
-				change : function(changed) {
-					cache(changed);
+				change : function(data) {
+					cache(data.changed);
 					return self;
 				}
 				
@@ -606,9 +607,9 @@
 					}
 
 					// fire some event to update cache/ui
-					data.removed && data.removed.length && self.trigger('remove', data);
-					data.added   && data.added.length   && self.trigger('add',    data);
-					data.changed && data.changed.length && self.trigger('change', data);
+					data.removed && data.removed.length && responseHandlers.remove(data).remove(data);
+					data.added   && data.added.length   && responseHandlers.add(data).add(data);
+					data.changed && data.changed.length && responseHandlers.change(data).change(data);
 					
 					// fire event with command name
 					self.trigger(cmd, data);
@@ -1161,7 +1162,7 @@
 				var arg = arguments[0];
 				return arguments.length == 1 && typeof(arg) == 'function'
 					? self.bind(name, arg)
-					: self.trigger(name, $.isPlainObject(arg) ? arg : {value : arg});
+					: self.trigger(name, $.isPlainObject(arg) ? arg : {});
 			}
 		});
 		
@@ -1286,6 +1287,7 @@
 			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
 			notRm        : '"$1" is locked and can not be removed.',
 			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
+			notDuplicate : 'Unable to duplicate "$1" because you have not permission to read it',
 			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
 			invalidName  : 'Invalid file name.',
 			fileLocked   : 'File "$1" locked and can’t be removed or renamed.'

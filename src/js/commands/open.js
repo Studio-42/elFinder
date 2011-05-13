@@ -43,10 +43,10 @@ elFinder.prototype.commands.open = function() {
 		return cnt && (cnt == 1 || onlyFiles(sel)) ? 1 : 0;
 	}
 	
-	this._exec = function(targets) {
+	this._exec = function(hashes) {
 		var fm      = this.fm, 
 			dfrd    = $.Deferred(),
-			targets = targets ? $.isArray(targets) ? targets : [targets] : this.fm.selected(),
+			targets = this.files(hashes),
 			cnt     = targets.length,
 			errors  = fm.errors,
 			hash, file, i, url, s, w;

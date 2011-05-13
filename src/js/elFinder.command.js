@@ -215,7 +215,7 @@ elFinder.prototype.command = function(fm) {
 	}
 	
 	/**
-	 * Bind handler / rize 'change' event.
+	 * Bind handler / fire 'change' event.
 	 *
 	 * @param  Function|undefined  event callback
 	 * @return void
@@ -236,6 +236,14 @@ elFinder.prototype.command = function(fm) {
 			}
 		}
 		return this;
+	}
+	
+	this.files = function(hashes) {
+		var fm = this.fm;
+		
+		return hashes
+			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) ? hash : null; })
+			: fm.selected();
 	}
 }
 

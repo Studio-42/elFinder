@@ -52,8 +52,9 @@ elFinder.prototype.history = function(fm) {
 	this.back = function() {
 		if (this.canBack()) {
 			ignor = true;
-			fm.exec('open', history[--current])
+			return fm.exec('open', history[--current])
 		}
+		return $.Deferred().reject();
 	}
 	
 	/**
@@ -64,8 +65,9 @@ elFinder.prototype.history = function(fm) {
 	this.forward = function() {
 		if (this.canForward()) {
 			ignor = true;
-			fm.exec('open', history[++current]);
+			return fm.exec('open', history[++current]);
 		}
+		return $.Deferred().reject();
 	}
 	
 	
@@ -81,7 +83,6 @@ elFinder.prototype.history = function(fm) {
 
 		history[history.length-1] != cwd && history.push(cwd);
 		current = history.length - 1;
-		
 	})
 	.reload(function() {
 		history = [fm.cwd().hash];

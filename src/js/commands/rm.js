@@ -18,15 +18,8 @@ elFinder.prototype.commands.rm = function() {
 		var self  = this,
 			fm    = this.fm,
 			dfrd  = $.Deferred(),
-			files = [],
+			files = this.files(hashes),
 			cnt, i, error, file, hash;
-			
-		if (hashes) {
-			hashes = $.isArray(hashes) ? hashes : [hashes];
-			files  = $.map(hashes, function(hash) { return fm.file(hash) ? hash : null; });
-		} else {
-			files = fm.selected();
-		}
 			
 		cnt = files.length;
 		
@@ -50,7 +43,7 @@ elFinder.prototype.commands.rm = function() {
 			accept : {
 				label    : 'Remove',
 				callback : function() {  
-					fm.lockfiles(files);
+					fm.lockfiles({files : files});
 					fm.ajax({
 						data   : {cmd : 'rm', targets : files, current : fm.cwd().hash},
 						notify : {type : 'rm', cnt : cnt}
@@ -59,7 +52,7 @@ elFinder.prototype.commands.rm = function() {
 					}).done(function(data) {
 						dfrd.done(data);
 					}).always(function() {
-						fm.unlockfiles(files);
+						fm.unlockfiles({files : files});
 					});
 				}
 			},

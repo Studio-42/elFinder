@@ -5,8 +5,7 @@ elFinder.prototype.commands.back = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+left',
-		description : 'Go back',
-		callback    : function() { this.exec(); }
+		description : 'Go back'
 	}];
 	
 	this.getstate = function() {
@@ -14,7 +13,7 @@ elFinder.prototype.commands.back = function() {
 	}
 	
 	this._exec = function() {
-		this.fm.history.back();
+		return this.fm.history.back();
 	}
 
 }

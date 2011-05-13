@@ -382,7 +382,7 @@ $.fn.elfindertree = function(fm) {
 			})
 			// add new dirs
 			.add(function(e) {
-				var dirs = filter(e.data.added || e.data.value);
+				var dirs = filter(e.data.added || []);
 
 				if (dirs.length) {
 					updateTree(dirs);
@@ -394,7 +394,7 @@ $.fn.elfindertree = function(fm) {
 			})
 			// update changed dirs
 			.change(function(e) {
-				var dirs = filter(e.data.changed || e.data.value),
+				var dirs = filter(e.data.changed || []),
 					l = dirs.length,
 					dir, node, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
 				
@@ -435,7 +435,7 @@ $.fn.elfindertree = function(fm) {
 			})
 			// remove dirs
 			.remove(function(e) {
-				var hashes = e.data.removed || e.data.value,
+				var hashes = e.data.removed || [],
 					l  = hashes.length,
 					node, parent, stree;
 				
