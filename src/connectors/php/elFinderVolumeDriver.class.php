@@ -1329,7 +1329,6 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if ($result) {
-			$this->clearStat($path);
 			$this->rmTmb($path);
 			return true;
 		}

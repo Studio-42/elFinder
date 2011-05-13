@@ -18,7 +18,7 @@
 			 **/
 			prevEnabled = true,
 			
-			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile'],
+			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'tree', 'parents', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
 			
 			/**
 			 * Rules to validate data from backend
@@ -606,9 +606,9 @@
 					}
 
 					// fire some event to update cache/ui
-					data.removed && data.removed.length && self.trigger('removed', data);
-					data.added   && data.added.length   && self.trigger('added',   data);
-					data.changed && data.changed.length && self.trigger('changed', data);
+					data.removed && data.removed.length && self.trigger('remove', data);
+					data.added   && data.added.length   && self.trigger('add',    data);
+					data.changed && data.changed.length && self.trigger('change', data);
 					
 					// fire event with command name
 					self.trigger(cmd, data);
@@ -1667,11 +1667,11 @@
 					modal     : true,
 					resizable : false,
 					title     : this.i18n(opts.title || 'Confirmation required'),
+					buttons   : {},
 					close     : function() { 
 						!complete && opts.cancel.callback();
 						$(this).elfinderdialog('destroy');
-					},
-					buttons : {}
+					}
 				},
 				apply = this.i18n('Apply to all'),
 				checkbox;
@@ -1679,7 +1679,7 @@
 			
 			if (opts.reject) {
 				options.buttons[this.i18n(opts.reject.label)] = function() {
-					opts.reject.callback(!!(checkbox.length && checkbox.prop('checked')))
+					opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 					complete = true;
 					$(this).elfinderdialog('close')
 				};
@@ -1689,7 +1689,7 @@
 				$(this).elfinderdialog('close')
 			};
 			options.buttons[this.i18n(opts.accept.label)] = function() {
-				opts.accept.callback(!!(checkbox.length && checkbox.prop('checked')))
+				opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
@@ -1726,7 +1726,7 @@
 		 */
 		one : function(event, callback) {
 			var self = this,
-				h = $.proxy(callback, function(event) {
+				h    = $.proxy(callback, function(event) {
 					setTimeout(function() {self.unbind(event.type, h);}, 3);
 					return callback.apply(this, arguments);
 				});

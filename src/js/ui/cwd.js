@@ -370,7 +370,9 @@ $.fn.elfindercwd = function(fm) {
 					
 				}
 				// load/attach thumbnails
-				thumbnails(atmb, ltmb);
+				attachThumbnails(atmb);
+				loadThumbnails(fm.newAPI ? ltmb : fm.option('tmb'));
+
 				// make directory droppable
 				dirs && makeDroppable();
 				
@@ -385,23 +387,6 @@ $.fn.elfindercwd = function(fm) {
 				setTimeout(function() {
 					cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
 				}, 20);
-			},
-			
-			/**
-			 * Attach existed thumbnails and send request to create thumbnails
-			 *
-			 * @param  Object  file hash -> thumbnail map for existed thumbnails
-			 * @param  Array   files hashes to create thumbnails
-			 * @return void
-			 */
-			thumbnails = function(attach, load) {
-				attachThumbnails(attach);
-				if (load.length || fm.option('tmb')) {
-					fm.ajax({
-						data : {cmd : 'tmb', current : fm.cwd().hash, files : load},
-						preventFail : true
-					});
-				}
 			},
 			
 			/**
@@ -431,6 +416,28 @@ $.fn.elfindercwd = function(fm) {
 					}
 				});
 				return ret;
+			},
+			
+			/**
+			 * Load thumbnails from backend.
+			 *
+			 * @param  Array|Boolean  files hashes list for new api | true for old api
+			 * @return void
+			 */
+			loadThumbnails = function(files) {
+				if (files === true || files.length) {
+					fm.ajax({
+						data : {cmd : 'tmb', current : fm.cwd().hash, files : files},
+						preventFail : true
+					}).done(function(data) {
+						if (fm.view != 'list' 
+						&& data.current == fm.cwd().hash
+						&& attachThumbnails(data.images)
+						&& data.tmb) {
+							loadThumbnails(true);
+						}
+					});
+				} 
 			},
 			
 			/**
@@ -489,12 +496,13 @@ $.fn.elfindercwd = function(fm) {
 						if (file.mime == 'directory') {
 							dirs = true;
 						} else if (file.tmb) {
-							file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb)
+							file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb);
 						}
 					}
 				}
 				
-				thumbnails(atmb, ltmb);
+				attachThumbnails(atmb);
+				loadThumbnails(fm.newAPI ? ltmb : fm.option('tmb'));
 				dirs && makeDroppable();
 			},
 			
@@ -651,46 +659,36 @@ $.fn.elfindercwd = function(fm) {
 		
 
 		fm
-			// update directory content
-			.bind('open', function(e) {
+			.open(function(e) {
 				var list  = fm.view == 'list', 
 					phash = fm.cwd().hash; 
-				
+			
 				tmbUrl = fm.option('tmbUrl');
-
+		
 				cwd.html('')
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
-			
+		
 				if (list) {
 					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}
-
+		
 				buffer = fm.oldAPI
 					? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
 					: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
-
+		
 				buffer = fm.sortFiles(buffer)
-
+		
 				cwd.bind(scrollEvent, render).trigger(scrollEvent);
-
+		
 				trigger();
-
+			
 			})
-			// add thumbnails
-			.bind('tmb', function(e) {
-				fm.view != 'list' && 
-				e.data.current == fm.cwd().hash &&
-				attachThumbnails(e.data.images) && e.data.tmb &&
-				fm.ajax({cmd : 'tmb', current : fm.cwd().hash}, 'silent');
-			})
-			// add new files
-			.bind('add', function(e) {
+			.add(function(e) {
 				var phash = fm.cwd().hash;
 				return add($.map(e.data.added || e.data.value || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
 			})
-			// remove and add changed files
-			.bind('change', function(e) {
+			.change(function(e) {
 				var phash   = fm.cwd().hash,
 					changed = e.data.changed || e.data.value || [],
 					i       = changed.length,
@@ -708,20 +706,19 @@ $.fn.elfindercwd = function(fm) {
 				}
 				
 			})
-			// remove files
-			.bind('remove', function(e) {
+			.remove(function(e) {
 				remove(e.data.removed || e.data.value || []);
 			})
 			// disable cuted files
 			.bind('lockfiles unlockfiles', function(e) {
 				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
-					files = e.data.files, 
+					files = e.data.files || e.data.value, 
 					l = files.length;
 				
 				while (l--) {
-					cwd.find('#'+files[l]).trigger(event)
+					cwd.find('#'+files[l]).trigger(event);
 				}
-				trigger()
+				trigger();
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 

@@ -660,7 +660,7 @@ class elFinder {
 		foreach ($targets as $hash) {
 			if (($file = $volume->file($hash)) == false
 			|| !$volume->rm($hash)) {
-				return array('removed' => $removed, 'warning' => $this->errorMessage($volume->error()));
+				return array('removed' => $removed, 'error' => $this->errorMessage($volume->error()));
 			}
 			$removed[]     = $hash;
 			$removedInfo[] = $file;

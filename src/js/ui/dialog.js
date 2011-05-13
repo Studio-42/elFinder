@@ -4,15 +4,15 @@ $.fn.elfinderdialog = function(opts, parent) {
 	
 	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
 		if (opts == 'open' && dialog.is(':hidden')) {
-			dialog.fadeIn('fast', function() {
+			dialog.fadeIn(200, function() {
 				dialog.trigger('open');
 			});
 		} else if (opts == 'close' && dialog.is(':visible')) {
-			dialog.fadeOut('fast', function() {
+			dialog.fadeOut(200, function() {
 				dialog.trigger('close');
 			});
 		} else if (opts == 'destroy') {
-			dialog.fadeOut('fast', function() {
+			dialog.fadeOut(200, function() {
 				dialog.remove();
 			});
 		}

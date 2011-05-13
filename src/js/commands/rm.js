@@ -7,55 +7,68 @@ elFinder.prototype.commands.rm = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace',
-		description : 'Delete',
-		callback    : function() { this.exec(); }
+		description : 'Delete'
 	}];
 	
 	this.getstate = function() {
 		return this.fm.selected().length ? 0 : -1;
 	}
 	
-	this._exec = function() {
-		var self = this,
-			fm = this.fm,
-			dfrd = $.Deferred(),
-			sel = fm.selected();
-			cnt = sel.length,
-			opts = {
-				cssClass : 'elfinder-dialog-confirm',
-				title : fm.i18n('Confirmation requied'),
-				modal : true
-			},
-			d = '<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>'+fm.i18n('Are you shure you want to remove files?<br/>This cannot be undone!');
+	this._exec = function(hashes) {
+		var self  = this,
+			fm    = this.fm,
+			dfrd  = $.Deferred(),
+			files = [],
+			cnt, i, error, file, hash;
 			
+		if (hashes) {
+			hashes = $.isArray(hashes) ? hashes : [hashes];
+			files  = $.map(hashes, function(hash) { return fm.file(hash) ? hash : null; });
+		} else {
+			files = fm.selected();
+		}
+			
+		cnt = files.length;
+		
+		if (!cnt) {
+			return dfrd.reject('No files to remove');
+		}
+			
+		for (i = 0; i < cnt; i++) {
+			hash = files[i];
+			file = fm.file(hash);
+			if (file.locked) {
+				error = [fm.errors.fileLocked, file.name];
+				fm.error(error);
+				return dfrd.reject(error)
+			}
+		}
 			
 		fm.confirm({
-			text : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+			title  : 'Remove',
+			text   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
 			accept : {
-				label : 'Continue',
-				callback : function() { fm.log('Ok') }
+				label    : 'Remove',
+				callback : function() {  
+					fm.lockfiles(files);
+					fm.ajax({
+						data   : {cmd : 'rm', targets : files, current : fm.cwd().hash},
+						notify : {type : 'rm', cnt : cnt}
+					}).fail(function(error) {
+						dfrd.reject(error);
+					}).done(function(data) {
+						dfrd.done(data);
+					}).always(function() {
+						fm.unlockfiles(files);
+					});
+				}
 			},
 			cancel : {
 				label : 'Cancel',
-				callback : function() { fm.log('Cancel')}
-			},
-			reject : {
-				label : 'No',
-				callback : function(checked) { fm.log('No').log(checked)}
-			},
-			all : true
-		})
-		// fm.dialog(d, opts)
-			
-			
+				callback : function() { dfrd.done(); }
+			}
+		});
 		return dfrd;
-		
-		var self = this,
-			fm = this.fm,
-			msg = fm.i18n('Are you shure you want to remove files?<br/>This cannot be undone!'),
-			selected = fm.selected();
-			
-		fm.confirm(fm.i18n('Delete'), msg, function(result) { result && fm.rm(selected) });
 	}
 
 }
