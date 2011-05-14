@@ -1,4 +1,7 @@
-
+/**
+ * @class info. Display dialog with file info
+ * @author Dmitry (dio) Levashov, dio@std42.ru
+ **/
 elFinder.prototype.commands.info = function() {
 	
 	this.tpl = {
@@ -40,10 +43,7 @@ elFinder.prototype.commands.info = function() {
 				close    : function() { $(this).elfinderdialog('destroy'); }
 			}),
 			count = [],
-			size,
-			tmb,
-			file,
-			title;
+			size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -75,9 +75,20 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));
 			content.push(row.replace(l, fm.i18n('Access')).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, fm.i18n('Locked')).replace(v, fm.i18n(file.locked ? 'yes' : 'no')));
-
 		} else {
-			
+			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
+			title = tpl.groupTitle.replace('{items}', fm.i18n('Items')).replace('{num}', cnt);
+			dcnt  = $.map(files, function(f) { return f.mime == 'directory' ? 1 : null }).length;
+			if (!dcnt) {
+				size = 0;
+				$.each(files, function(h, f) { size += f.size;});
+				content.push(row.replace(l, fm.i18n('Kind')).replace(v, fm.i18n('Files')));
+				content.push(row.replace(l, fm.i18n('Size')).replace(v, fm.formatSize(size)));
+			} else {
+				content.push(row.replace(l, fm.i18n('Kind')).replace(v, dcnt == cnt ? fm.i18n('Folders') : fm.i18n('Folders')+' '+dcnt+', '+fm.i18n('Files')+' '+(cnt-dcnt)))
+				content.push(row.replace(l, fm.i18n('Size')).replace(v, tpl.spinner.replace('{text}', fm.i18n('Calculating'))));
+				count = $.map(files, function(f) { return f.hash });
+			}
 		}
 		
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
@@ -106,79 +117,6 @@ elFinder.prototype.commands.info = function() {
 					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : fm.i18n('unknown'));
 				});
 		}
-		
-	}
-	
-	this._exec_ = function() {
-		var self    = this,
-			fm      = this.fm,
-			tpl     = this.options.tpl,
-			renders = this.options.renders,
-			title   = '',
-			content = [],
-			size    = 0,
-			kinds   = [],
-			files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
-			length  = files.length,
-			targets = fm.newAPI
-				? length >1 || files[0].mime == 'directory' 
-					? $.map(files, function(f) { return f.mime == 'directory' && f.read && !f.link ? f.hash : null }) 
-					: []
-				: [],
-			updatesize = function(size) {
-				dialog.find('.elfinder-spinner-mini').parents('td:first').text(typeof(size) == 'number' ? fm.formatSize(size) : fm.i18n('unknown'));
-			},
-			dialog,	dirs;
-		
-		if (length == 1) {
-			$.each(renders, function(name, r) {
-				var html;
-				if (name == 'title') {
-					title = r(files[0], tpl.title, fm);
-				} else {
-					html = r(files[0], tpl.row, fm);
-					html && content.push(html);
-				}
-			});
-		} else {
-			title = tpl.title.replace('{name}', fm.i18n('Items')+': '+length).replace('{class}', 'elfinder-cwd-icon-group')
-			dirs  = $.map(files, function(f) { return f.mime == 'directory' && !f.link ? 1 : null; }).length;
-			dirs && kinds.push(fm.i18n('Folders')+': '+dirs);
-			dirs < length && kinds.push(fm.i18n('Documents')+': '+(length-dirs));
-			$.each(files, function(h, f) { size += parseInt(f.size); });
-
-			content.push(tpl.row.replace('{label}', fm.i18n('Kind')).replace('{value}', kinds.join(', ')));
-			content.push(tpl.row.replace('{label}', fm.i18n('Size')).replace('{value}', !targets.length ? fm.formatSize(size) : '<span>'+fm.i18n('Calculating')+'</span> <span class="elfinder-spinner-mini"/>'));
-			content.push(tpl.row.replace('{label}', fm.i18n('Path')).replace('{value}', fm.cwd().path));
-		}
-		
-		content = tpl.main.replace('{title}', title).replace('{content}', content.join('')).replace(/\{[a-z0-9]+\}/g, '');
-		
-		dialog = fm.dialog(content, {
-			title     : fm.i18n('Info'),
-			resizable : true,
-			width     : 220,
-			minWidth  : 230,
-			focus     : function() {
-				var $this = $(this),
-					w = $this.find('table').outerWidth(), 
-					max;
-
-				// expand dialog width to content width
-				if (w > $this.width()) {
-					max = parseInt($(window).width()/2);
-					w = w < max ? w+14 : max;
-					$this.dialog('option', 'width', w).dialog('option', 'minWidth', w);
-				}
-				$this.dialog('option', 'focus', null);
-			}
-		});
-		
-		targets.length && fm.ajax({
-			data    : {cmd : 'size', targets : targets},
-			error   : function() { updatesize() },
-			success : function(data) { updatesize(data && data.size >= 0 ? parseInt(size + data.size) : '' ); }
-		}, 'silent');
 		
 	}
 	

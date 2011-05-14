@@ -82,7 +82,7 @@
 			 *
 			 * @type Array
 			 **/
-			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
+			events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
 			
 			/**
 			 * Rules to validate data from backend
@@ -1210,7 +1210,18 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
-		
+		/**
+		 * Alias for this.trigger('error', {error : 'message'})
+		 *
+		 * @param  String  error message
+		 * @return elFinder
+		 **/
+		this.error = function() {
+			var arg = arguments[0];
+			return arguments.length == 1 && typeof(arg) == 'function'
+				? self.bind('error', arg)
+				: self.trigger('error', {error : arg});
+		}
 		
 		// create bind/trigger aliases for build-in events
 		$.each(events, function(i, name) {
@@ -1252,9 +1263,8 @@
 					}
 				};
 				
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || e.data.value), opts);
-			})
-			;
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+			});
 
 		// bind external event handlers
 		$.each(this.options.handlers, function(event, callback) {
@@ -1391,17 +1401,17 @@
 		 * @type  Object
 		 */
 		errors : {
-			jquiInvalid  : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
-			nodeRequired : 'elFinder required DOM Element to be created.',
-			urlRequired  : 'Invalid elFinder configuration! You have to set URL option.',
-			noConnect    : 'Unable to connect to backend. $1',
-			connectAborted      : 'Connection aborted.',
+			jquiInvalid    : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
+			nodeRequired   : 'elFinder required DOM Element to be created.',
+			urlRequired    : 'Invalid elFinder configuration! You have to set URL option.',
+			noConnect      : 'Unable to connect to backend. $1',
+			connectAborted : 'Connection aborted.',
 			connectTimeout : 'Connection timeout.',
-			invResponse : 'Invalid backend response. $1',
-			notJSON : 'Data is not JSON.',
-			emptyData : 'Data is empty.',
-			invData : 'Invalid data.',
-			cmdRequired : 'Backend request required command name.',
+			invResponse    : 'Invalid backend response. $1',
+			notJSON        : 'Data is not JSON.',
+			emptyData      : 'Data is empty.',
+			invData        : 'Invalid data.',
+			cmdRequired    : 'Backend request required command name.',
 			
 			invOpenArg   : 'Unable to open required files/filders',
 			notFound     : 'File not found.',

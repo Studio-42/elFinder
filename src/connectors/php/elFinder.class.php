@@ -569,6 +569,9 @@ class elFinder {
 		}
 		
 		foreach ($args['targets'] as $t) {
+			if (!$volume->isReadable($t)) {
+				return array('error' => $this->errorMessage(self::ERROR_NOT_READ));
+			}
 			$size += $volume->size($t);
 		}
 		return array('size' => $size);
