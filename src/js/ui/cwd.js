@@ -25,6 +25,8 @@ $.fn.elfindercwd = function(fm) {
 	// @TODO on cut add disable class to files?
 	return this.each(function() {
 		
+		$(this).parent().children('.elfinder-workzone').append(this);
+		
 		var 
 			/**
 			 * Select event full name

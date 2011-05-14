@@ -18,6 +18,21 @@ elFinder.prototype.options = {
 	/* show places before navigation? */
 	placesFirst    : true,
 	
+	ui : ['toolbar', 'tree'],
+	
+	uiOptions : {
+		toolbar : [
+			['back', 'forward', 'reload', 'up', 'home'],
+			['open', 'select'],
+			['copy', 'cut', 'paste', 'duplicate', 'rename'],
+			['rm'],
+			['info'],
+			['help']
+		],
+		
+		tree : {tag : 'ul'}
+	},
+	
 	/**
 	 * Display only required file by types
 	 *
@@ -59,7 +74,7 @@ elFinder.prototype.options = {
 	 */
 	openRootOnLoad : true,
 	
-	resizable : false,
+	resizable : true,
 	
 	notifyDelay : 500,
 	
@@ -77,7 +92,7 @@ elFinder.prototype.options = {
 	/* width to overwrite css options */
 	width          : 'auto',
 	/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-	height         : 300,
+	height         : 400,
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */

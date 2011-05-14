@@ -1,6 +1,12 @@
 /************************************/
 /*            COMMON STUFFS         */
 /************************************/
+
+/* common container */
+.elfinder { padding:2px; position:relative; display:block; }
+
+.elfinder-rtl  { text-align:right; direction:rtl; }
+
 /* dir/file permissions marker */
 .elfinder-perms,
 /* symlink marker */
@@ -20,10 +26,7 @@
 /* write only */
 .elfinder-wo .elfinder-perms { background-position:0 -98px;}
 
-/* common container */
-.elfinder { padding:2px; position:relative; display:block; }
 
-.elfinder-rtl  { text-align:right; direction:rtl; }
 /* drag helper */
 .elfinder-drag-helper {
 	width:60px;
@@ -158,9 +161,9 @@
 .elfinder-workzone {
 	padding: 0;
 	position:relative;
-	overflow:hidden;
+/*	overflow:hidden;*/
 /*	height:300px;*/
-/*	border:1px solid red;*/
+/*	outline:1px solid red;*/
 }
 
 .elfinder-spinner {
@@ -189,6 +192,7 @@
 	font-size:.72em;
 	overflow:auto;
 	position:relative;
+	display:none;
 }
 
 .elfinder-nav .ui-resizable-e { right:0; }

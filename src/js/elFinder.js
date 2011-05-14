@@ -4,6 +4,65 @@
 	window.elFinder = function(node, opts) {
 		
 		var self = this,
+			
+			/**
+			 * Node on which elfinder creating
+			 *
+			 * @type jQuery
+			 **/
+			node = $(node),
+			
+			/**
+			 * Store node contents.
+			 *
+			 * @see this.destroy
+			 * @type jQuery
+			 **/
+			prevContent = $('<div/>').append(node.contents()),
+			
+			/**
+			 * Store node inline styles
+			 *
+			 * @see this.destroy
+			 * @type String
+			 **/
+			prevStyle = node.attr('style'),
+			
+			/**
+			 * Instance ID. Required to get/set cookie
+			 *
+			 * @type String
+			 **/
+			id = node.attr('id') || '',
+			
+			/**
+			 * Events namespace
+			 *
+			 * @type String
+			 **/
+			namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
+			
+			/**
+			 * Mousedown event
+			 *
+			 * @type String
+			 **/
+			mousedown = 'mousedown.'+namespace,
+			
+			/**
+			 * Keydown event
+			 *
+			 * @type String
+			 **/
+			keydown = 'keydown.'+namespace,
+			
+			/**
+			 * Keypress event
+			 *
+			 * @type String
+			 **/
+			keypress = 'keypress.'+namespace,
+			
 			/**
 			 * Is shortcuts/commands enabled
 			 *
@@ -18,6 +77,11 @@
 			 **/
 			prevEnabled = true,
 			
+			/**
+			 * List of build-in events which mapped into methods with same names
+			 *
+			 * @type Array
+			 **/
 			events = ['enable', 'disable', 'error', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles'],
 			
 			/**
@@ -28,20 +92,25 @@
 			rules = {},
 			
 			/**
-			 * Current working directory
+			 * Current working directory hash
+			 *
+			 * @type String
+			 **/
+			cwd = '',
+			
+			/**
+			 * Current working directory options
 			 *
 			 * @type Object
 			 **/
 			cwdOptions = {
-				path     : '',
-				url      : '',
-				tmbUrl   : '',
-				disabled : [],
+				path       : '',
+				url        : '',
+				tmbUrl     : '',
+				disabled   : [],
 				uplMaxSize : '',
-				separator : '/'
+				separator  : '/'
 			},
-			
-			cwd = '',
 			
 			/**
 			 * Files/dirs cache
@@ -51,7 +120,7 @@
 			files = {},
 			
 			/**
-			 * Selected files ids
+			 * Selected files hashes
 			 *
 			 * @type Array
 			 **/
@@ -71,160 +140,43 @@
 			 **/
 			shortcuts = {},
 			
-			base = new self.command(self),
-			
-			/**
-			 * Loaded commands
-			 *
-			 * @type Object
-			 **/
-			commands = {},
-			
 			/**
 			 * Buffer for copied files
 			 *
-			 * @type Object
+			 * @type Array
 			 **/
 			clipboard = [],
 			
-			node = $(node),
-			
-			id = node.attr('id') || '',
-			
-			namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
-			
-			mousedown = 'mousedown.'+namespace,
-			
-			keydown = 'keydown.'+namespace,
-			
-			keypress = 'keypress.'+namespace,
-			
-			prevContent = $('<div/>').append(node.contents()),
-			
-			workzone = $('<div class="ui-helper-clearfix ui-corner-all elfinder-workzone"/>'),
-			
-			nav = $('<div class="ui-state-default elfinder-nav"/>').hide().appendTo(workzone),
-			
-			dir = $('<div/>').appendTo(workzone),
-			
-			toolbar = $('<div/>').hide(),
-			
-			toolbarName = opts.toolbar || 'elfindertoolbar',
-			
-			statusbar = $('<div class="ui-helper-clearfix ui-widget-header ui-corner-all elfinder-statusbar"/>').hide(),
-			
-			overlay = $('<div/>').elfinderoverlay({
-				show : function() { self.disable(); },
-				hide : function() { prevEnabled && self.enable(); },
-			}),
-			
-			width, height,
-			
 			/**
-			 * Store info about files/dirs in "files" object.
-			 * Here we proccess data.files for new api or data.cdc for old api.
-			 * Files from data.tree for old api adds in cacheTree()
+			 * Commands prototype
 			 *
-			 * @param  Array  files
-			 * @return void
+			 * @type Object
 			 **/
-			cache = function(data) {
-				var l = data.length, f;
-
-				while (l--) {
-					f = data[l];
-					if (f.name && f.hash && f.mime) {
-						// delete f.tmb;
-						files[f.hash] = f;
-					}
-				}
-			},
-			
-
-			/**
-			 * Exec shortcut
-			 *
-			 * @param  jQuery.Event  keydown/keypress event
-			 * @return void
-			 */
-			execShortcut = function(e) {
-				var code    = e.keyCode,
-					ctrlKey = e.ctrlKey || e.metaKey;
-				
-				if (enabled) {
-					// prevent tab out of elfinder
-					code == 9 && e.preventDefault();
-					$.each(shortcuts, function(i, shortcut) {
-						if (shortcut.type == e.type 
-						&& shortcut.keyCode == code 
-						&& shortcut.shiftKey == e.shiftKey 
-						&& shortcut.ctrlKey == ctrlKey 
-						&& shortcut.altKey == e.altKey) {
-							e.preventDefault();
-							shortcut.callback(e, self);
-							return false;
-						}
-					});
-				}
-			},
-			
-			setAPI = function(ver) {
-				self.api    = parseFloat(ver) || 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
-			},
+			base = new self.command(self),
 			
 			/**
-			 * On load failed make elfinder inactive
+			 * elFinder node width
 			 *
-			 * @return void
-			 */
-			loadfail = function() {
-				self.trigger('fail').disable().lastDir('');
-				listeners = {};
-				shortcuts = {};
-				$(document).add(node).unbind('.'+this.namespace);
-				self.trigger = function() { }
-			},
+			 * @type String
+			 * @default "auto"
+			 **/
+			width  = this.options.width || 'auto',
 			
-			load = function(data) {
-				var 
-					opts = self.options,
-					cmds = opts.commands || [];
-					
-				
-				setAPI(data.api);
-				
-				if (!self.validResponse('open', data)) {
-					self.error([self.errors.invResponse, self.errors.invData]);
-					return onloadfail();
-				}
-				
-				dir.elfindercwd(self).attr('id', 'elfindercwd-'+self.id);
-				self.options.allowNavbar && nav.show().append($('<ul/>').elfindertree(self));
-				
-				self.history = new self.history(self);
-
-
-				self.debug('api', self.api)
-					.resize(width, height)
-					.load();
-
-				responseHandlers.open($.extend(true, {}, data));
-				self.open(data);
-
-				// self.trigger('open', data);
-				// if (opts.sync >= 3000) {
-				// 	setInterval(function() {
-				// 		self.sync('silent');
-				// 	}, self.options.sync);
-				// }
-				
-			},
+			/**
+			 * elFinder node height
+			 *
+			 * @type Number
+			 * @default 300
+			 **/
+			height = parseInt(this.options.height) || 300,
 			
+			/**
+			 * Methods to update cache after get some data from backend
+			 *
+			 * @type Object
+			 **/
 			responseHandlers = {
-				open : function(data) {
+				open    : function(data) {
 					if (data.api || data.params) {
 						// init - reset cache
 						files = {};
@@ -266,7 +218,7 @@
 					
 					return self
 				},
-				tree : function(data) {
+				tree    : function(data) {
 					cache(data.tree || []);
 					return self;
 				},
@@ -274,13 +226,11 @@
 					cache(data.tree || []);
 					return self;
 				},
-				
-				add : function(data) {
+				add     : function(data) {
 					cache(data.added);
 					return self;
 				},
-				
-				remove : function(data) {
+				remove  : function(data) {
 					var removed = data.removed,
 						l  = removed.length, 
 						rm = function(hash) {
@@ -300,15 +250,115 @@
 					}
 					return self;
 				}, 
-				
-				change : function(data) {
+				change  : function(data) {
 					cache(data.changed);
 					return self;
 				}
 				
-			}
+			},
 			
+			/**
+			 * Set api version number and ajax data validation rules.
+			 *
+			 * @param  String api version
+			 * @return void
+			 */
+			setAPI = function(ver) {
+				self.api    = parseFloat(ver) || 1;
+				self.newAPI = self.api > 1;
+				self.oldAPI = !self.newAPI;
+				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
+			},
+			
+			/**
+			 * On load failed make elfinder inactive
+			 *
+			 * @return void
+			 */
+			loadfail = function() {
+				self.trigger('fail').disable().lastDir('');
+				listeners = {};
+				shortcuts = {};
+				$(document).add(node).unbind('.'+this.namespace);
+				self.trigger = function() { }
+			},
+			
+			/**
+			 * On success load set api, valid data and fire "open" event
+			 *
+			 * @param  Object  data from backend
+			 * @return void
+			 */
+			load = function(data) {
+				var opts = self.options;
+				
+				setAPI(data.api);
+				
+				if (!self.validResponse('open', data)) {
+					self.error([self.errors.invResponse, self.errors.invData]);
+					return onloadfail();
+				}
+
+				self.load().debug('api', self.api);
+
+				responseHandlers.open($.extend(true, {}, data));
+				self.open(data);
+
+				// self.trigger('open', data);
+				// if (opts.sync >= 3000) {
+				// 	setInterval(function() {
+				// 		self.sync('silent');
+				// 	}, self.options.sync);
+				// }
+				
+			},
+			
+			/**
+			 * Store info about files/dirs in "files" object.
+			 *
+			 * @param  Array  files
+			 * @return void
+			 **/
+			cache = function(data) {
+				var l = data.length, f;
+
+				while (l--) {
+					f = data[l];
+					if (f.name && f.hash && f.mime) {
+						// delete f.tmb;
+						files[f.hash] = f;
+					}
+				}
+			},
+			
+			/**
+			 * Exec shortcut
+			 *
+			 * @param  jQuery.Event  keydown/keypress event
+			 * @return void
+			 */
+			execShortcut = function(e) {
+				var code    = e.keyCode,
+					ctrlKey = e.ctrlKey || e.metaKey;
+				
+				if (enabled) {
+					// prevent tab out of elfinder
+					code == 9 && e.preventDefault();
+					$.each(shortcuts, function(i, shortcut) {
+						if (shortcut.type == e.type 
+						&& shortcut.keyCode == code 
+						&& shortcut.shiftKey == e.shiftKey 
+						&& shortcut.ctrlKey == ctrlKey 
+						&& shortcut.altKey == e.altKey) {
+							e.preventDefault();
+							shortcut.callback(e, self);
+							return false;
+						}
+					});
+				}
+			}
 			;
+
 
 		/**
 		 * Application version
@@ -324,10 +374,19 @@
 		 **/
 		this.api = 1;
 		
+		/**
+		 * elFinder use new api
+		 *
+		 * @type Boolean
+		 **/
 		this.newAPI = false;
-		this.oldAPI = true;
 		
-		this.uploadMaxSize = '';
+		/**
+		 * elFinder use old api
+		 *
+		 * @type Boolean
+		 **/
+		this.oldAPI = true;
 		
 		/**
 		 * Configuration options
@@ -336,8 +395,27 @@
 		 **/
 		this.options = $.extend({}, this.options, opts||{});
 		
+		/**
+		 * Css classes 
+		 *
+		 * @type String
+		 **/
+		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
+		
+		/**
+		 * Ajax request type
+		 *
+		 * @type String
+		 * @default "get"
+		 **/
 		this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get',
 		
+		/**
+		 * Any data to send across every ajax request
+		 *
+		 * @type Object
+		 * @default {}
+		 **/
 		this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
 		
 		/**
@@ -369,7 +447,7 @@
 		 * @default "ltr"
 		 **/
 		this.direction = this.i18[this.lang].direction;
-		// this.dir = 'rtl'
+
 		/**
 		 * i18 messages
 		 *
@@ -383,6 +461,7 @@
 		 * @type Object
 		 **/
 		this.shortcuts = {};
+
 		/**
 		 * Cwd view type
 		 *
@@ -397,7 +476,72 @@
 		 **/
 		this.sort = this.sortType();
 		
+		/**
+		 * Delay in ms before open notification dialog
+		 *
+		 * @type Number
+		 * @default 500
+		 **/
 		this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
+		
+		/**
+		 * Base draggable options
+		 *
+		 * @type Object
+		 **/
+		this.draggable = {
+			appendTo   : 'body',
+			addClasses : true,
+			delay      : 30,
+			revert     : true,
+			cursor     : 'move',
+			cursorAt   : {left : 50, top : 47},
+			refreshPositions : true,
+			start      : function() { self.trigger('focus'); },
+			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
+		};
+		
+		/**
+		 * Base droppable options
+		 *
+		 * @type Object
+		 **/
+		this.droppable = {
+				tolerance : 'pointer',
+				accept : ':not(.ui-dialog)',
+				drop : function(e, ui) {
+					var $this = $(this), 
+						src   = ui.helper.data('src'),
+						files = ui.helper.data('files')||[],
+						l     = files.length,
+						dst;
+					
+					if (!l) {
+						return;
+					}
+
+					if ($this.is('.elfinder-cwd')) {
+						// drop onto current directory
+						dst = cwd.hash;
+					} else if ($this.is('.elfinder-cwd-file')) {
+						// drop on folder in current directory
+						dst = this.id;
+					} else {
+						// drop onto directory in tree
+						dst = this.id.substr(4);
+					}
+
+					while (l--) {
+						// avoid to copy into itself
+						if (files[l] == dst) {
+							return;
+						}
+					}
+					
+					ui.helper.hide();
+					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst, true);
+				}
+			};
 		
 		/**
 		 * Return true if filemanager is active
@@ -448,16 +592,6 @@
 		 */
 		this.option = function(name) {
 			return cwdOptions[name]||'';
-		}
-		
-		/**
-		 * Return true if command enabled
-		 * 
-		 * @param  String  command name
-		 * @return Boolean
-		 */
-		this.isCommandEnabled = function(name) {
-			return commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
 		}
 		
 		/**
@@ -658,9 +792,9 @@
 
 			// "freeze" interface
 			if (freeze) {
-				overlay.elfinderoverlay('show');
+				this.ui.overlay.elfinderoverlay('show');
 				dfrd.always(function() {
-					overlay.elfinderoverlay('hide');
+					self.ui.overlay.elfinderoverlay('hide');
 				});
 			}
 			
@@ -685,217 +819,6 @@
 			return dfrd;
 		};
 		
-		
-		/**
-		 * Attach listener to events
-		 * To bind to multiply events at once, separate events names by space
-		 * 
-		 * @param  String  event(s) name(s)
-		 * @param  Object  event handler
-		 * @return elFinder
-		 */
-		this.bind = function(event, callback) {
-			var i;
-			
-			if (typeof(callback) == 'function') {
-				event = ('' + event).toLowerCase().split(/\s+/);
-				
-				for (i = 0; i < event.length; i++) {
-					if (listeners[event[i]] === void(0)) {
-						listeners[event[i]] = [];
-					}
-					listeners[event[i]].push(callback);
-				}
-			}
-			return this;
-		};
-		
-		/**
-		 * Remove event listener if exists
-		 *
-		 * @param  String    event name
-		 * @param  Function  callback
-		 * @return elFinder
-		 */
-		this.unbind = function(event, callback) {
-			var l = listeners[('' + event).toLowerCase()] || [],
-				i = l.indexOf(callback);
-
-			i > -1 && l.splice(i, 1);
-			//delete callback; // need this?
-			callback = null
-			return this;
-		};
-		
-		/**
-		 * Send notification to all event listeners
-		 *
-		 * @param  String   event type
-		 * @param  Object   data to send across event
-		 * @return elFinder
-		 */
-		this.trigger = function(event, data) {
-			var event    = event.toLowerCase(),
-				handlers = listeners[event] || [], i, j;
-			
-			this.debug('event-'+event, data)
-			
-			if (handlers.length) {
-				event = $.Event(event);
-				for (i = 0; i < handlers.length; i++) {
-					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-					event.data = $.extend(true, {}, data);
-					try {
-						if (handlers[i](event, this) === false 
-						|| event.isDefaultPrevented()) {
-							break;
-						}
-					} catch (ex) {
-						window.console && window.console.log && window.console.log(ex);
-					}
-					
-				}
-			}
-			return this;
-		}
-		
-		/**
-		 * Bind keybord shortcut to keydown event
-		 *
-		 * @example
-		 *    elfinder.shortcut({ 
-		 *       pattern : 'ctrl+a', 
-		 *       description : 'Select all files', 
-		 *       callback : function(e) { ... }, 
-		 *       keypress : true|false (bind to keypress instead of keydown) 
-		 *    })
-		 *
-		 * @param  Object  shortcut config
-		 * @return elFinder
-		 */
-		this.shortcut = function(s) {
-			var patterns, pattern, code, i, parts;
-			
-			if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
-				patterns = s.pattern.toUpperCase().split(/\s+/);
-				
-				for (i= 0; i < patterns.length; i++) {
-					pattern = patterns[i]
-					parts   = pattern.split('+');
-					code    = (code = parts.pop()).length == 1 
-						? code.charCodeAt(0) 
-						: $.ui.keyCode[code];
-
-					if (code && !shortcuts[pattern]) {
-						shortcuts[pattern] = {
-							keyCode  : code,
-							altKey   : $.inArray('ALT', parts)   != -1,
-							ctrlKey  : $.inArray('CTRL', parts)  != -1,
-							shiftKey : $.inArray('SHIFT', parts) != -1,
-							type     : s.type || 'keydown',
-							callback : s.callback
-						}
-					}
-				}
-			}
-			return this;
-		}
-		
-		/**
-		 * Get/set clipboard content.
-		 * Return new clipboard content.
-		 *
-		 * @example
-		 *   this.clipboard([]) - clean clipboard, all previous cutted files will be unlocked
-		 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
-		 * 
-		 * @param  Array    new files hashes
-		 * @param  Boolean  cut files?
-		 * @param  Boolean  if true previous cutted files not be unlocked
-		 * @return Array
-		 */
-		this.clipboard = function(files, cut, quiet) {
-			var map = function(f) { return f.hash; },
-				i, hash, file;
-			
-			if ($.isArray(files)) {
-				clipboard.length && !quiet && this.trigger('unlockfiles', {files : $.map(clipboard, map)});
-
-				clipboard = [];
-				
-				for (i = 0; i < files.length; i++) {
-					hash = files[i];
-					if ((file = this.file(hash)) && file.read) {
-						clipboard.push({
-							hash  : hash,
-							phash : file.phash,
-							name  : file.name,
-							cut   : !!cut
-						});
-					}
-				}
-
-				this.trigger('changeClipboard', {clipboard : clipboard})
-				cut && !quiet && this.trigger('lockfiles', {files : $.map(clipboard, map)});
-			}
-			// return copy of clipboard instead of refrence
-			return $.map(clipboard, function(f) { return f; });
-		}
-		
-		/**
-		 * Create and return jQuery UI dialog.
-		 *
-		 * @param  String|DOMElement  dialog content
-		 * @param  Object             dialog options
-		 * @return jQuery
-		 */
-		this.dialog = function(content, options) {
-			return $('<div/>').append(content).elfinderdialog(options, node);
-		}
-		
-		
-		
-		
-		this.getUIDir = function() {
-			return dir;
-		}
-		
-		/**
-		 * Exec command and return result;
-		 *
-		 * @param  String  command name
-		 * @param  mixed   command argument
-		 * @return $.Deferred
-		 */		
-		this.exec = function(cmd, value) {
-			return commands[cmd] ? commands[cmd].exec(value) : $.Deferred().reject('No such command');
-		}
-		
-		/**
-		 * Resize elfinder window
-		 * 
-		 * @param  String|Number  width
-		 * @param  Number         height
-		 * @return elFinder
-		 */
-		this.resize = function(w, h) {
-			node.width(w).height(h);
-			return this.updateHeight();
-		}
-		
-		this.updateHeight = function() {
-			var h = node.height() - (toolbar.is(':visible') ? toolbar.outerHeight(true) : 0) - (statusbar.is(':visible') ? statusbar.outerHeight(true) : 0);
-			workzone.height(h);
-			h = workzone.height();
-			nav.height(h - 2 - (nav.innerHeight() - nav.height()));
-			dir.height(h - (dir.innerHeight() - dir.height()));
-			return this;
-		}
-		
-		this.restoreSize = function() {
-			return this.resize(width, height);
-		}
-		
 		/**
 		 * Sync content
 		 * 
@@ -906,7 +829,7 @@
 			var self  = this,
 				dfrd  = $.Deferred(),
 				opts1 = {
-					data : {cmd : 'open', init : 1, target : cwd, tree : 1},
+					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
 					preventDefault : true,
 					freeze : true
 				},
@@ -1033,10 +956,225 @@
 				})
 				.then(doSync);
 			}
-			
-			
-			
 			return dfrd;
+		}
+		
+		/**
+		 * Attach listener to events
+		 * To bind to multiply events at once, separate events names by space
+		 * 
+		 * @param  String  event(s) name(s)
+		 * @param  Object  event handler
+		 * @return elFinder
+		 */
+		this.bind = function(event, callback) {
+			var i;
+			
+			if (typeof(callback) == 'function') {
+				event = ('' + event).toLowerCase().split(/\s+/);
+				
+				for (i = 0; i < event.length; i++) {
+					if (listeners[event[i]] === void(0)) {
+						listeners[event[i]] = [];
+					}
+					listeners[event[i]].push(callback);
+				}
+			}
+			return this;
+		};
+		
+		/**
+		 * Remove event listener if exists
+		 *
+		 * @param  String    event name
+		 * @param  Function  callback
+		 * @return elFinder
+		 */
+		this.unbind = function(event, callback) {
+			var l = listeners[('' + event).toLowerCase()] || [],
+				i = l.indexOf(callback);
+
+			i > -1 && l.splice(i, 1);
+			//delete callback; // need this?
+			callback = null
+			return this;
+		};
+		
+		/**
+		 * Fire event - send notification to all event listeners
+		 *
+		 * @param  String   event type
+		 * @param  Object   data to send across event
+		 * @return elFinder
+		 */
+		this.trigger = function(event, data) {
+			var event    = event.toLowerCase(),
+				handlers = listeners[event] || [], i, j;
+			
+			this.debug('event-'+event, data)
+			
+			if (handlers.length) {
+				event = $.Event(event);
+				for (i = 0; i < handlers.length; i++) {
+					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+					event.data = $.extend(true, {}, data);
+					try {
+						if (handlers[i](event, this) === false 
+						|| event.isDefaultPrevented()) {
+							break;
+						}
+					} catch (ex) {
+						window.console && window.console.log && window.console.log(ex);
+					}
+					
+				}
+			}
+			return this;
+		}
+		
+		/**
+		 * Bind keybord shortcut to keydown event
+		 *
+		 * @example
+		 *    elfinder.shortcut({ 
+		 *       pattern : 'ctrl+a', 
+		 *       description : 'Select all files', 
+		 *       callback : function(e) { ... }, 
+		 *       keypress : true|false (bind to keypress instead of keydown) 
+		 *    })
+		 *
+		 * @param  Object  shortcut config
+		 * @return elFinder
+		 */
+		this.shortcut = function(s) {
+			var patterns, pattern, code, i, parts;
+			
+			if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
+				patterns = s.pattern.toUpperCase().split(/\s+/);
+				
+				for (i= 0; i < patterns.length; i++) {
+					pattern = patterns[i]
+					parts   = pattern.split('+');
+					code    = (code = parts.pop()).length == 1 
+						? code.charCodeAt(0) 
+						: $.ui.keyCode[code];
+
+					if (code && !shortcuts[pattern]) {
+						shortcuts[pattern] = {
+							keyCode  : code,
+							altKey   : $.inArray('ALT', parts)   != -1,
+							ctrlKey  : $.inArray('CTRL', parts)  != -1,
+							shiftKey : $.inArray('SHIFT', parts) != -1,
+							type     : s.type || 'keydown',
+							callback : s.callback
+						}
+					}
+				}
+			}
+			return this;
+		}
+		
+		/**
+		 * Get/set clipboard content.
+		 * Return new clipboard content.
+		 *
+		 * @example
+		 *   this.clipboard([]) - clean clipboard, all previous cutted files will be unlocked
+		 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
+		 * 
+		 * @param  Array    new files hashes
+		 * @param  Boolean  cut files?
+		 * @param  Boolean  if true previous cutted files not be unlocked
+		 * @return Array
+		 */
+		this.clipboard = function(files, cut, quiet) {
+			var map = function(f) { return f.hash; },
+				i, hash, file;
+			
+			if ($.isArray(files)) {
+				clipboard.length && !quiet && this.trigger('unlockfiles', {files : $.map(clipboard, map)});
+
+				clipboard = [];
+				
+				for (i = 0; i < files.length; i++) {
+					hash = files[i];
+					if ((file = this.file(hash)) && file.read) {
+						clipboard.push({
+							hash  : hash,
+							phash : file.phash,
+							name  : file.name,
+							cut   : !!cut
+						});
+					}
+				}
+
+				this.trigger('changeClipboard', {clipboard : clipboard})
+				cut && !quiet && this.trigger('lockfiles', {files : $.map(clipboard, map)});
+			}
+			// return copy of clipboard instead of refrence
+			return $.map(clipboard, function(f) { return f; });
+		}
+		
+		/**
+		 * Return true if command enabled
+		 * 
+		 * @param  String  command name
+		 * @return Boolean
+		 */
+		this.isCommandEnabled = function(name) {
+			return this._commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
+		}
+		
+		/**
+		 * Exec command and return result;
+		 *
+		 * @param  String  command name
+		 * @param  mixed   command argument
+		 * @return $.Deferred
+		 */		
+		this.exec = function(cmd, value) {
+			return this._commands[cmd] ? this._commands[cmd].exec(value) : $.Deferred().reject('No such command');
+		}
+		
+		/**
+		 * Create and return dialog.
+		 *
+		 * @param  String|DOMElement  dialog content
+		 * @param  Object             dialog options
+		 * @return jQuery
+		 */
+		this.dialog = function(content, options) {
+			return $('<div/>').append(content).appendTo(node).elfinderdialog(options);
+		}
+		
+		/**
+		 * Return UI widget or node
+		 *
+		 * @param  String  ui name
+		 * @return jQuery
+		 */
+		this.getUI = function(ui) {
+			return this.ui[ui] || node;
+		}
+		
+		/**
+		 * Resize elfinder node
+		 * 
+		 * @param  String|Number  width
+		 * @param  Number         height
+		 * @return void
+		 */
+		this.resize = function(w, h) {
+			node.css('width', w).height(h).trigger('resize');
+		}
+		
+		/**
+		 * Restore elfinder node size
+		 * 
+		 * @return elFinder
+		 */
+		this.restoreSize = function() {
+			this.resize(width, height);
 		}
 		
 		/**
@@ -1044,7 +1182,7 @@
 		 *
 		 * @return void
 		 **/
-		this.destroy = function(notRestoreNode) {
+		this.destroy = function() {
 			if (node && node[0].elfinder) {
 				this.trigger('destroy').disable();
 				listeners = {};
@@ -1052,60 +1190,12 @@
 				$(document).add(node).unbind('.'+this.namespace);
 				self.trigger = function() { }
 				node.children().remove();
-				!notRestoreNode && node.append(prevContent.contents()).removeClass(this.cssClass);
+				node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 				node[0].elfinder = null;
 			}
 		}
 		
-		
-		this.draggable = {
-			appendTo   : 'body',
-			addClasses : true,
-			delay      : 30,
-			revert     : true,
-			cursor     : 'move',
-			cursorAt   : {left : 50, top : 47},
-			refreshPositions : true,
-			start      : function() { self.trigger('focus'); },
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
-		};
-		
-		this.droppable = {
-				tolerance : 'pointer',
-				accept : ':not(.ui-dialog)',
-				drop : function(e, ui) {
-					var $this = $(this), 
-						src   = ui.helper.data('src'),
-						files = ui.helper.data('files')||[],
-						l     = files.length,
-						dst;
-					
-					if (!l) {
-						return;
-					}
-
-					if ($this.is('.elfinder-cwd')) {
-						// drop onto current directory
-						dst = cwd.hash;
-					} else if ($this.is('.elfinder-cwd-file')) {
-						// drop on folder in current directory
-						dst = this.id;
-					} else {
-						// drop onto directory in tree
-						dst = this.id.substr(4);
-					}
-
-					while (l--) {
-						// avoid to copy into itself
-						if (files[l] == dst) {
-							return;
-						}
-					}
-					
-					ui.helper.hide();
-					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst, true);
-				}
-			};
+		/*************  init stuffs  ****************/
 		
 		// check jquery ui
 		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
@@ -1120,40 +1210,6 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
-		// create notification dialog
-		this.ndialog = $('<div/>').elfinderdialog({
-			cssClass  : 'elfinder-dialog-notify',
-			position  : {top : '12px', right : '12px'},
-			resizable : false,
-			autoOpen  : false,
-			title     : '&nbsp;'
-		}, node);
-		
-		// prepare node
-		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
-		
-		node.addClass(this.cssClass)
-			.append(toolbar)
-			.append(workzone)
-			.append(statusbar)
-			.append(overlay)
-			.bind(mousedown, function() {
-				!enabled && self.enable();
-			});
-		
-		width  = self.options.width || 'auto'; 
-		height = self.options.height || 300;
-		this.resize(width, height);
-		node[0].elfinder = this;
-		
-		this.options.resizable 
-		&& $.fn.resizable 
-		&& node.resizable({
-				resize    : function() { self.updateHeight(); },
-				minWidth  : 300,
-				minHeight : 200
-			});
-		
 		
 		
 		// create bind/trigger aliases for build-in events
@@ -1166,10 +1222,10 @@
 			}
 		});
 		
-		// bind event handlers
+		// bind core event handlers
 		this
 			.enable(function() {
-				if (!enabled && self.visible() && overlay.is(':hidden')) {
+				if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 					enabled = true;
 					$('texarea,input,button').blur();
 				}
@@ -1200,36 +1256,92 @@
 			})
 			;
 
-		if (typeof(this.options.editorCallback) == 'function') {
-			this.bind('getfile', this.options.editorCallback);
-		}
-
+		// bind external event handlers
 		$.each(this.options.handlers, function(event, callback) {
-			self.bind(event, callback)
-			// if (typeof(event) == 'string' && typeof(callback))
-		})
+			self.bind(event, callback);
+		});
 
-		if ($.inArray('open', this.options.commands) === -1) {
-			this.options.commands.push('open');
-		}
-
+		/**
+		 * History object. Store visited folders
+		 *
+		 * @type Object
+		 **/
+		this.history = new this.history(this);
+		
+		/**
+		 * Loaded commands
+		 *
+		 * @type Object
+		 **/
+		this._commands = {};
+		
+		// command "open" required always
+		$.inArray('open', this.options.commands) === -1 && this.options.commands.push('open');
+		// load commands
 		$.each(this.options.commands, function(i, name) {
 			var cmd = self.commands[name];
-			if ($.isFunction(cmd) && !commands[name]) {
-				// var _super = $.extend({}, base, cmd.prototype);
-				// cmd.prototype = base;
-				// cmd.prototype = $.extend({}, base, cmd.prototype);
+			if ($.isFunction(cmd) && !self._commands[name]) {
 				cmd.prototype = base;
-				commands[name] = new cmd();
-				// commands[name]._super = _super;
-				commands[name].setup(name, self.options.commandsOptions[name]||{});
+				self._commands[name] = new cmd();
+				self._commands[name].setup(name, self.options.commandsOptions[name]||{});
 			}
 		});
 		
+		// prepare node
+		node.addClass(this.cssClass)
+			.bind(mousedown, function() {
+				!enabled && self.enable();
+			});
 		
-		// load toolbar if exists
-		$.fn[toolbarName] && toolbar[toolbarName](this.options.toolbarConf, commands);
+		/**
+		 * UI nodes
+		 *
+		 * @type Object
+		 **/
+		this.ui = {
+			// container for nav panel and current folder container
+			workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
+			// overlay
+			overlay : $('<div/>').appendTo(node).elfinderoverlay({
+				show : function() { self.disable(); },
+				hide : function() { prevEnabled && self.enable(); },
+			}),
+			// current folder container
+			cwd : $('<div/>').appendTo(node).elfindercwd(this),
+			// notification dialog window
+			notify : this.dialog('', {
+				cssClass  : 'elfinder-dialog-notify',
+				position  : {top : '12px', right : '12px'},
+				resizable : false,
+				autoOpen  : false,
+				title     : '&nbsp;'
+			})
+		}
 		
+		// load required ui
+		$.each(this.options.ui || [], function(i, ui) {
+			var name = 'elfinder'+ui,
+				opts = self.options.uiOptions[ui] || {};
+
+			if (!self.ui[ui] && $.fn[name]) {
+				self.ui[ui] = $('<'+(opts.node || 'div')+'/>').appendTo(node)[name](self, opts);
+			}
+		});
+		
+		// update size
+		this.resize(width, height);
+		
+		// store instance in node
+		node[0].elfinder = this;
+		
+		// make node resizable
+		this.options.resizable 
+		&& $.fn.resizable 
+		&& node.resizable({
+			alsoResize : self.ui.workzone,
+			minWidth  : 300,
+			minHeight : 200
+		});
 
 		// attach events to document
 		$(document)
@@ -1238,9 +1350,7 @@
 			// exec shortcuts
 			.bind(keydown+' '+keypress, execShortcut);
 		
-			
-		
-		
+		// send initial request and start to pray >_<
 		this.ajax({
 				data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
 				preventDone : true,
@@ -1250,14 +1360,22 @@
 			.fail(loadfail)
 			.done(load)
 			.always(function() {
-				loadfail = load = null
+				loadfail = load = null;
 			});
 			
 	}
 	
-	
+	/**
+	 * Prototype
+	 * 
+	 * @type  Object
+	 */
 	elFinder.prototype = {
-		
+		/**
+		 * Internationalization object
+		 * 
+		 * @type  Object
+		 */
 		i18 : {
 			en : {
 				_translator  : '',
@@ -1267,6 +1385,11 @@
 			}
 		},
 		
+		/**
+		 * Errors messages
+		 * 
+		 * @type  Object
+		 */
 		errors : {
 			jquiInvalid  : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
 			nodeRequired : 'elFinder required DOM Element to be created.',
@@ -1328,6 +1451,7 @@
 			'text/javascript'               : 'Javascript source',
 			'text/css'                      : 'CSS style sheet',  
 		    'text/rtf'                      : 'Rich Text Format (RTF)',
+			'application/rtf'               : 'Rich Text Format (RTF)',
 			'text/rtfd'                     : 'RTF with attachments (RTFD)',
 			'text/x-c'                      : 'C source', 
 			'text/x-c++'                    : 'C++ source', 
@@ -1360,7 +1484,11 @@
 		},
 		
 		
-		
+		/**
+		 * Ajax request data validation rules
+		 * 
+		 * @type  Object
+		 */
 		rules : {
 			oldapi : {
 				open    : function(data) { return data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
@@ -1375,6 +1503,11 @@
 			}
 		},
 		
+		/**
+		 * Sort types for current directory content
+		 * 
+		 * @type  Object
+		 */
 		sorts : {
 			nameDirsFirst : 1,
 			kindDirsFirst : 2,
@@ -1391,7 +1524,22 @@
 		 */
 		commands : {},
 		
-		plugins : {},
+		/**
+		 * Bind callback to event(s) The callback is executed at most once per event.
+		 * To bind to multiply events at once, separate events names by space
+		 *
+		 * @param  String    event name
+		 * @param  Function  callback
+		 * @return elFinder
+		 */
+		one : function(event, callback) {
+			var self = this,
+				h    = $.proxy(callback, function(event) {
+					setTimeout(function() {self.unbind(event.type, h);}, 3);
+					return callback.apply(this, arguments);
+				});
+			return this.bind(event, h);
+		},
 		
 		/**
 		 * Get/set cookie
@@ -1478,8 +1626,19 @@
 			return this.options.rememberLastDir ? this.cookie('el-finder-last-'+this.id, key) : ''; 
 		},
 		
+		/**
+		 * Node for escape html entities in texts
+		 * 
+		 * @type jQuery
+		 */
 		_node : $('<span/>'),
 		
+		/**
+		 * Replace not html-safe symbols to html entities
+		 * 
+		 * @param  String  text to escape
+		 * @return String
+		 */
 		escape : function(name) {
 			return this._node.text(name).html();
 		},
@@ -1554,8 +1713,64 @@
 			return info;
 		},
 		
+		/**
+		 * Convert old api options
+		 *
+		 * @param  Object  options
+		 * @return Object
+		 */
 		normalizeOldOptions : function(data) {
 			return $.extend(data.params, {path : data.cwd.rel, disabled : data.disabled, tmb : !!data.tmb});
+		},
+		
+		/**
+		 * Compare files based on elFinder.sort
+		 *
+		 * @param  Object  file
+		 * @param  Object  file
+		 * @return Number
+		 */
+		compare : function(f1, f2) {
+			var m1 = f1.mime,
+				m2 = f2.mime,
+				d1 = m1 == 'directory',
+				d2 = m2 == 'directory',
+				n1 = f1.name.toLowerCase(),
+				n2 = f2.name.toLowerCase(),
+				s1 = d1 ? 0 : f1.size || 0,
+				s2 = d2 ? 0 : f2.size || 0,
+				sort = this.sort;
+
+			// dir first	
+			if (sort <= 3) {
+				if (d1 && !d2) {
+					return -1;
+				}
+				if (!d1 && d2) {
+					return 1;
+				}
+			}
+			// by mime
+			if ((sort == 2 || sort == 5) && m1 != m2) {
+				return m1 > m2 ? 1 : -1;
+			}
+			// by size
+			if ((sort == 3 || sort == 6) && s1 != s2) {
+				return s1 > s2 ? 1 : -1;
+			}
+
+			return f1.name.localeCompare(f2.name);
+			
+		},
+		
+		/**
+		 * Sort files based on elFinder.sort
+		 *
+		 * @param  Array  files
+		 * @return Array
+		 */
+		sortFiles : function(files) {
+			return files.sort($.proxy(this.compare, this));
 		},
 		
 		/**
@@ -1576,7 +1791,6 @@
 			rename : 'Rename files'
 		},
 		
-		
 		/**
 		 * Create new notification type.
 		 * Required for future (not included in core elFinder) commands/plugins
@@ -1585,7 +1799,7 @@
 		 * @param  String  notification message
 		 * @return elFinder
 		 */
-		registerNotification : function(type, msg) {
+		registerNotifyType : function(type, msg) {
 			if (!this.notifyType[type] && type && msg) {
 				this.notifyType[type] = msg;
 			}
@@ -1607,7 +1821,7 @@
 		 * @return elFinder
 		 */
 		notify : function(opts) {
-			var ndialog = this.ndialog,
+			var ndialog = this.ui.notify,
 				ntpl    = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
 				type    = opts.type,
 				msg     = opts.msg || this.i18n(this.notifyType[type]), 
@@ -1718,22 +1932,6 @@
 			return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
 		},
 		
-		/**
-		 * Bind callback to event(s) The callback is executed at most once per event.
-		 * To bind to multiply events at once, separate events names by space
-		 *
-		 * @param  String    event name
-		 * @param  Function  callback
-		 * @return elFinder
-		 */
-		one : function(event, callback) {
-			var self = this,
-				h    = $.proxy(callback, function(event) {
-					setTimeout(function() {self.unbind(event.type, h);}, 3);
-					return callback.apply(this, arguments);
-				});
-			return this.bind(event, h);
-		},
 		
 		
 		/**
@@ -2064,56 +2262,6 @@
 			return prefix + Math.random();
 		},
 		
-		/**
-		 * Compare files based on elFinder.sort
-		 *
-		 * @param  Object  file
-		 * @param  Object  file
-		 * @return Number
-		 */
-		compare : function(f1, f2) {
-			var m1 = f1.mime,
-				m2 = f2.mime,
-				d1 = m1 == 'directory',
-				d2 = m2 == 'directory',
-				n1 = f1.name.toLowerCase(),
-				n2 = f2.name.toLowerCase(),
-				s1 = d1 ? 0 : f1.size || 0,
-				s2 = d2 ? 0 : f2.size || 0,
-				sort = this.sort;
-
-			// dir first	
-			if (sort <= 3) {
-				if (d1 && !d2) {
-					return -1;
-				}
-				if (!d1 && d2) {
-					return 1;
-				}
-			}
-			// by mime
-			if ((sort == 2 || sort == 5) && m1 != m2) {
-				return m1 > m2 ? 1 : -1;
-			}
-			// by size
-			if ((sort == 3 || sort == 6) && s1 != s2) {
-				return s1 > s2 ? 1 : -1;
-			}
-
-			return f1.name.localeCompare(f2.name);
-			
-		},
-		
-		
-		/**
-		 * Sort files based on elFinder.sort
-		 *
-		 * @param  Array  files
-		 * @return Array
-		 */
-		sortFiles : function(files) {
-			return files.sort($.proxy(this.compare, this));
-		},
 
 		/**
 		 * Return message translated onto current language

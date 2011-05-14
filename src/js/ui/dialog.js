@@ -1,5 +1,5 @@
 
-$.fn.elfinderdialog = function(opts, parent) {
+$.fn.elfinderdialog = function(opts) {
 	var dialog;
 	
 	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
@@ -22,6 +22,7 @@ $.fn.elfinderdialog = function(opts, parent) {
 
 	this.filter(':not(.ui-dialog-content)').each(function() {
 		var self       = $(this).addClass('ui-dialog-content ui-widget-content'),
+			parent     = self.parent(),
 			id         = parseInt(Math.random()*1000000),
 			overlay    = parent.children('.elfinder-overlay'),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),

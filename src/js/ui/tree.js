@@ -2,8 +2,8 @@
 
 $.fn.elfindertree = function(fm) {
 
-	return this.each(function() {
-
+	this.not('.elfinder-nav-tree').each(function() {
+		$(this).parent().find('.elfinder-nav').append(this).show();
 		var 
 			/**
 			 * Subtree class name
@@ -454,6 +454,8 @@ $.fn.elfindertree = function(fm) {
 		
 		
 	});
+	
+	return this;
 }
 
 
