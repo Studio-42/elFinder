@@ -11,11 +11,11 @@ $.fn.elfindercwd = function(fm) {
 	
 	this.fakeObject = function(name, mime) {
 		var cwd = this.filter('.elfinder-cwd:first'),
-			id = 'tmp_'+ParseInt(Math.random()*100000);
+			id = 'tmp_'+parseInt(Math.random()*100000);
 		
+		cwd.trigger('fakeobj', ['test'])
 		
-		
-		return dir;
+		// return dir;
 	}
 	
 	// @TODO on cut add disable class to files?
@@ -653,7 +653,13 @@ $.fn.elfindercwd = function(fm) {
 					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
 				// make cwd itself droppable for folders from nav panel
-				.droppable($.extend({}, fm.droppable));
+				.droppable($.extend({}, fm.droppable))
+				.bind('create.'+fm.namespace, function(e, file) {
+					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
+
+					cwd.scrollTop(0)
+					parent.prepend(itemhtml(file))
+				});
 		
 
 		fm

@@ -18,6 +18,7 @@ elFinder.prototype.commands.rename = function() {
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
+					input.remove();
 					input.parent().html(fm.escape(file.name));
 				})
 				.always(function() {
@@ -58,7 +59,7 @@ elFinder.prototype.commands.rename = function() {
 								notify : {type : 'rename', cnt : 1}
 							})
 							.fail(function(error) {
-								dfrd.reject()
+								dfrd.reject();
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
@@ -68,12 +69,10 @@ elFinder.prototype.commands.rename = function() {
 							});
 						
 					}
-				})
-				,
-				hash, node
-			;
+				}),
+				node = cwd.find('#'+file.hash).find('.elfinder-cwd-filename').empty().append(input.val(file.name));
 		
-		if (!file || cnt > 1) {
+		if (!file || cnt > 1 || !node.length) {
 			return dfrd.reject(errors.invParams);
 		}
 		
@@ -81,9 +80,8 @@ elFinder.prototype.commands.rename = function() {
 			return dfrd.reject([errors.fileLocked, file.name]);
 		}
 		
-		fm.disable()
-		cwd.getFile(file.hash).find('.elfinder-cwd-filename').empty().append(input.val(file.name));
-		input.select().focus()
+		fm.disable();
+		input.select().focus();
 		
 		return dfrd;
 	}

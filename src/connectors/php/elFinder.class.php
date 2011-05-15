@@ -594,7 +594,7 @@ class elFinder {
 		
 		return ($hash = $volume->mkdir($current, $args['name'])) === false
 			? array('error' => $volume->error())
-			: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($volume->info($hash, true))));
+			: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($volume->file($hash))));
 			
 	}
 	

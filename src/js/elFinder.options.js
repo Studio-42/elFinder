@@ -24,7 +24,7 @@ elFinder.prototype.options = {
 		toolbar : [
 			['back', 'forward', 'reload', 'up', 'home'],
 			['open', 'select'],
-			['copy', 'cut', 'paste', 'duplicate', 'rename'],
+			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile'],
 			['rm'],
 			['info'],
 			['help']
@@ -167,7 +167,7 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'info', 'help'],
 	
 	
 	commandsOptions : {},

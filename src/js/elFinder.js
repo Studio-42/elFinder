@@ -2260,14 +2260,16 @@
 		},
 		
 		
-		uniqueName : function(prefix) {
+		uniqueName : function(prefix, phash) {
 			var i = 0, name;
 			
-			if (!this.exists(prefix)) {
+			prefix = this.i18n(prefix);
+			
+			if (!this.fileByName(prefix, phash)) {
 				return prefix;
 			}
-			while (i < 100) {
-				if (!this.exists((name = prefix + ' '+(++i)))) {
+			while (i < 10000) {
+				if (!this.fileByName((name = prefix + ' '+(++i)), phash)) {
 					return name;
 				}
 			}
