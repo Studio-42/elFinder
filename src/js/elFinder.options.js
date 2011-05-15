@@ -167,7 +167,7 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'info', 'help'],
 	
 	
 	commandsOptions : {},
@@ -233,7 +233,7 @@ elFinder.prototype.options = {
 	},
 	clearCache : true,
 	// debug : true
-	// debug : ['error', 'event-select']
+	debug : ['error', 'event-select']
 }
 
 })(jQuery);

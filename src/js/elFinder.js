@@ -646,7 +646,7 @@
 		 * @return Array
 		 **/
 		this.selected = function() {
-			return selected;
+			return selected.slice(0);
 		}
 		
 		/**
@@ -665,15 +665,15 @@
 		 * @param  String  parent folder hash
 		 * @return Boolean
 		 */
-		// this.exists = function(name, phash) {
-		// 	var hash;
-		// 
-		// 	for (hash in files) {
-		// 		if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
-		// 			return true;
-		// 		}
-		// 	}
-		// };
+		this.fileByName = function(name, phash) {
+			var hash;
+		
+			for (hash in files) {
+				if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
+					return files[hash];
+				}
+			}
+		};
 		
 		/**
 		 * Valid data for required command based on rules
@@ -1422,8 +1422,10 @@
 			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
 			notDuplicate : 'Unable to duplicate "$1" because you have not permission to read it',
 			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
-			invalidName  : 'Invalid file name.',
-			fileLocked   : 'File "$1" locked and can’t be removed or renamed.'
+			invName  : 'Invalid file name.',
+			fileLocked   : 'File "$1" locked and can’t be removed or renamed.',
+			invParams    : 'Invalid parameters.',
+			nameExists   : 'Object named "$1" already exists at this location. Select another name.'
 		},
 		
 		/**

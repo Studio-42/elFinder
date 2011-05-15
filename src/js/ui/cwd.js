@@ -6,24 +6,20 @@
 $.fn.elfindercwd = function(fm) {
 	
 	this.getFile = function(id) {
-		var cwd = this.filter('.elfinder-cwd:first');
-		
-		return cwd.find('#'+id)
+		return this.filter('.elfinder-cwd:first').find('#'+id)
 	}
 	
-	this.fakeDir = function(name) {
+	this.fakeObject = function(name, mime) {
 		var cwd = this.filter('.elfinder-cwd:first'),
-			list, dir = $('<div/>');
-			
-		if (cwd.length) {
-			list = cwd.find('table').length;
-		}
+			id = 'tmp_'+ParseInt(Math.random()*100000);
+		
+		
 		
 		return dir;
 	}
 	
 	// @TODO on cut add disable class to files?
-	return this.each(function() {
+	this.not('.elfinder-cwd').each(function() {
 		
 		$(this).parent().children('.elfinder-workzone').append(this);
 		
@@ -757,4 +753,5 @@ $.fn.elfindercwd = function(fm) {
 		
 	});
 	
+	return this;
 }

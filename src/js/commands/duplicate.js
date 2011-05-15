@@ -45,11 +45,7 @@ elFinder.prototype.commands.duplicate = function() {
 		return fm.ajax({
 			data : data,
 			notify : {type : 'duplicate', cnt : fm.newAPI ? cnt : 1}
-		})
-		
-		
-		
-		// this.fm.duplicate(this.fm.selected());
+		});
 	}
 
 }

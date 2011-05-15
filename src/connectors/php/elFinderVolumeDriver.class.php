@@ -852,7 +852,7 @@ abstract class elFinderVolumeDriver {
 		if (!$this->_move($path, $dir, $name)) {
 			return $this->setError(elFinder::ERROR_RENAME, $oldPath, $newPath);
 		} 
-		$this->clearStat($path);
+
 		$this->rmTmb($path);
 		$renamed = $this->_joinPath($dir, $name);
 		
