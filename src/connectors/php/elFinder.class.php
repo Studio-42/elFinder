@@ -118,6 +118,10 @@ class elFinder {
 	const ERROR_NOT_RENAME           = 22;
 	const ERROR_FILE_EXISTS          = 23;
 	const ERROR_NOT_RM_BY_PARENT     = 24;
+	const ERROR_MKDIR                = 25;
+	const ERROR_MKFILE               = 26;
+	// const ERROR_NOT_MKFILE           = 27;
+	// const ERROR_NOT_MKFILE           = 28;
 	
 	/**
 	 * undocumented class variable
@@ -144,12 +148,15 @@ class elFinder {
 		16 => 'Object named "$1" exists and can’t be replaced.',
 		17 => 'Unable to copy "$1" to "$2".',
 		18 => 'Unable to copy "$1" into itself.',
-		19 => 'File name "$1" is not allowed.',
+		19 => 'Name "$1" is not allowed.',
 		20 => 'Unable to rename "$1" into "$2".',
 		21 => 'Data exceeds the maximum allowed size.',
 		22 => '"$1" can’t be renamed because parent folder is read only.',
 		23 => 'Object with name "$1" already exists in this location.',
-		24 => 'Object "$1" can’t be removed because in this location modifications not allowed.'
+		24 => 'Object "$1" can’t be removed because in this location modifications not allowed.',
+		25 => 'Unable to create folder "$1".',
+		// 26 => 'Unable to create file "$1".',
+		// 27 => 'Unable to create folder "$1".'
 	);
 	
 	/**
@@ -343,6 +350,7 @@ class elFinder {
 
 		for ($i = 0, $c = count($errors); $i < $c; $i++) {
 			$v = $errors[$i];
+
 			if (isset(self::$errors[$v])) {
 				$errors[$i] = self::$errors[$v];
 			} elseif ($i == 0) {
@@ -588,13 +596,14 @@ class elFinder {
 		$current = $args['current'];
 		
 		if(($volume = $this->volume($current)) == false) {
-			return array('error' => 'Folder not found');
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		// sleep(5);
 		
-		return ($hash = $volume->mkdir($current, $args['name'])) === false
-			? array('error' => $volume->error())
-			: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($volume->file($hash))));
+		return ($hash = $volume->mkdir($current, $args['name'])) == false
+			|| ($dir = $volume->dir($hash)) == false
+				? array('error' => $this->errorMessage($volume->error()))
+				: $this->trigger('mkdir', $volume, array('current' => $current, 'hash' => $hash, 'added' => array($dir)));
 			
 	}
 	

@@ -163,7 +163,7 @@ abstract class elFinderVolumeDriver {
 		'copyFrom'     => true,  // allow to copy from this volume to other ones
 		'copyTo'       => true,  // allow to copy from other volumes to this one
 		'disabled'     => array(),      // list of commands names to disable on this root
-		'acceptedName' => '',
+		'acceptedName' => '/^[^\.]/',
 		'defaults'     => array(   // default permissions 
 			'read'  => true,
 			'write' => true
@@ -796,6 +796,31 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function mkdir($dst, $name) {
+		$path = $this->decode($dst);
+		$dir = $this->dir($dst);
+
+		if (!$dir) {
+			return false;
+		}
+		
+		if (!$dir['write']) {
+			return $this->setError(elFinder::ERROR_MKDIR, $name, elFinder::ERROR_NOT_WRITE, $this->_relpath($path));
+		}
+		
+		if (!$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+		}
+		
+		if ($this->_fileExists($this->_joinPath($path, $name))) {
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+		}
+		
+		if (!$this->_mkdir($path, $name)) {
+			$this->setError(elFinder::ERROR_MKDIR, $name);
+		}
+		
+		return $this->encode($this->_joinPath($path, $name));
+		
 	}
 	
 	/**

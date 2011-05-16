@@ -202,6 +202,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path, $raw=false) {
+
 		$file = isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->cache[$path] = $this->getstat($path);
@@ -388,12 +389,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					$this->paths[$dir][$name] = $r['id'];
 				}
 			} else {
-				$this->paths[$dir][$name] = -1;
+				// $this->paths[$dir][$name] = -1;
 			}
 			
 		}
-		
-		return $this->paths[$dir][$name];
+		return isset($this->paths[$dir][$name]) ? $this->paths[$dir][$name] : -1;
 	}
 	
 	/**
