@@ -603,7 +603,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkfile($path, $name) {
+		$path = $path.DIRECTORY_SEPARATOR.$name;
 		
+		if (($fp = @fopen($path, 'w'))) {
+			@fclose($fp);
+			@chmod($path, $this->options['fileMode']);
+			return true;
+		}
+		return false;
 	}
 	
 	/**

@@ -743,7 +743,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * Create dir
 	 *
 	 * @param  string  $path  parent dir path
-	 * @param string  $name  new directory name
+	 * @param  string  $name  new directory name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -762,11 +762,19 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * Create file
 	 *
 	 * @param  string  $path  parent dir path
-	 * @param string  $name  new file name
+	 * @param  string  $name  new file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkfile($path, $name) {
+		if (!$this->_isDir($path)) {
+			return false;
+		}
+		$this->sqlCnt++;
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, size, mtime, mime) 
+			VALUES ("'.$path.'", "'.$this->db->real_escape_string($name).'", 0, '.time().', "text/plain")';
+
+		return $this->db->query($sql) && $this->db->affected_rows > 0;
 		
 	}
 	

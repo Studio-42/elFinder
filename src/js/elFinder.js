@@ -2261,23 +2261,33 @@
 		
 		
 		uniqueName : function(prefix, phash) {
-			var i = 0, name;
+			var i = 0, ext = '', p, name;
 			
 			if (!phash) {
 				phash = this.cwd().hash;
 			}
 			
+			
+			
+			if ((p = prefix.indexOf('.txt')) != -1) {
+				ext = '.txt';
+				prefix = prefix.substr(0, p);
+			}
+			
 			prefix = this.i18n(prefix);
 			
-			if (!this.fileByName(prefix, phash)) {
-				return prefix;
+			name = prefix+ext;
+			
+			if (!this.fileByName(name, phash)) {
+				return name;
 			}
 			while (i < 10000) {
-				if (!this.fileByName((name = prefix + ' '+(++i)), phash)) {
+				name = prefix + ' ' + (++i) + ext;
+				if (!this.fileByName(name, phash)) {
 					return name;
 				}
 			}
-			return prefix + Math.random();
+			return prefix + Math.random() + ext;
 		},
 		
 

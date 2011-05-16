@@ -797,7 +797,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mkdir($dst, $name) {
 		$path = $this->decode($dst);
-		$dir = $this->dir($dst);
+		$dir  = $this->dir($dst);
 
 		if (!$dir) {
 			return false;
@@ -832,6 +832,31 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function mkfile($dst, $name) {
+		$path = $this->decode($dst);
+		$dir  = $this->dir($dst);
+
+		if (!$dir) {
+			return false;
+		}
+		
+		if (!$dir['write']) {
+			return $this->setError(elFinder::ERROR_MKFILE, $name, elFinder::ERROR_NOT_WRITE, $this->_relpath($path));
+		}
+		
+		if (!$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+		}
+		
+		if ($this->_fileExists($this->_joinPath($path, $name))) {
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+		}
+		
+		if (!$this->_mkfile($path, $name)) {
+			$this->setError(elFinder::ERROR_MKFILE, $name);
+		}
+		
+		return $this->encode($this->_joinPath($path, $name));
+		
 	}
 	
 	/**
