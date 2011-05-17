@@ -17,7 +17,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			while (i--) {
 				if ((cmd = commands[panels[l][i]])) {
 					button = 'elfinder'+cmd.options.ui;
-					$.fn[button] && panel.prepend($('<a href="#"/>')[button](cmd));
+					$.fn[button] && panel.prepend($('<div/>')[button](cmd));
 				}
 			}
 			

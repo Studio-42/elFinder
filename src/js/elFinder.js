@@ -108,8 +108,10 @@
 				url        : '',
 				tmbUrl     : '',
 				disabled   : [],
-				uplMaxSize : '',
-				separator  : '/'
+				separator  : '/',
+				archives   : [],
+				extract    : [],
+				tmb        : false // old API
 			},
 			
 			/**
@@ -183,7 +185,9 @@
 					} else {
 						// remove only files from prev cwd
 						for (var i in files) {
-							if (files.hasOwnProperty(i) && files[i].mime != 'directory' && files[i].phash == cwd) {
+							if (files.hasOwnProperty(i) 
+							&& files[i].mime != 'directory' 
+							&& files[i].phash == cwd) {
 								delete files[i];
 							}
 						}
@@ -191,32 +195,13 @@
 
 					cwd = data.cwd.hash;
 
-					if (self.newAPI) {
-						cwdOptions = $.extend({}, cwdOptions, data.options);
-						data.files.push(data.cwd);
-						cache(data.files);
-					} else {
-						data.tree && cache(self.normalizeOldTree(data.tree));
-						cache($.map(data.cdc, function(f) { return self.normalizeOldFile(f, cwd); }));
-
-						if (!files[cwd]) {
-							files[cwd] = self.normalizeOldFile(data.cwd);
-						}
-
-						cwdOptions = self.normalizeOldOptions(data);
-
-						if (cwdOptions.path.indexOf('\\') != -1) {
-							cwdOptions.separator = '\\';
-						} else if (cwdOptions.path.indexOf('/') != -1) {
-							cwdOptions.separator = '/';
-						}
-
-					}
-
+					cwdOptions = $.extend({}, cwdOptions, data.options);
+					data.files.push(data.cwd);
+					cache(data.files);
 					self.lastDir(cwd);
 					data.debug && self.debug('backend-debug', data.debug);
 					
-					return self
+					return self;
 				},
 				tree    : function(data) {
 					cache(data.tree || []);
@@ -293,24 +278,16 @@
 				var opts = self.options;
 				
 				setAPI(data.api);
-				
+
 				if (!self.validResponse('open', data)) {
 					self.error([self.errors.invResponse, self.errors.invData]);
-					return onloadfail();
+					return loadfail();
 				}
 
 				self.load().debug('api', self.api);
-
-				responseHandlers.open($.extend(true, {}, data));
-				self.open(data);
-
-				// self.trigger('open', data);
-				// if (opts.sync >= 3000) {
-				// 	setInterval(function() {
-				// 		self.sync('silent');
-				// 	}, self.options.sync);
-				// }
-				
+				self.log('load')
+				data = $.extend(true, {}, self.normalizeData('open', data));
+				responseHandlers.open(data).trigger('open', data);
 			},
 			
 			/**
@@ -683,7 +660,82 @@
 		 * @return Boolean
 		 */
 		this.validResponse = function(cmd, data) {
-			return rules[cmd] ? rules[cmd](data) : true;
+			return rules[rules[cmd] ? cmd : 'defaults'](data);
+		}
+		
+		this.normalizeData = function(cmd, data) {
+			var self   = this,
+				files  = {},
+				result = {}, 
+				filter = function(file) {
+					return file && file.hash && file.name && file.mime ? file : null;
+				},
+				phash, cwd;
+			
+			if (this.newAPI) {
+				if (data.files) {
+					data.files = $.map(data.files, filter);
+				} 
+				if (data.tree) {
+					data.tree = $.map(data.tree, filter);
+				}
+
+				if (data.added) {
+					data.added = $.map(data.added, filter);
+				}
+				if (data.removed) {
+					data.removed = $.map(data.removed, filter);
+				}
+				if (data.changed) {
+					data.changed = $.map(data.changed, filter);
+				}
+
+				return data;
+			}
+			
+			if (/^(tmb|read|edit)$/i.test(cmd)) {
+				return data;
+			}
+			// self.log(data)
+			phash = data.cwd.hash;
+			
+			if (data.tree) {
+				$.each(this.normalizeOldTree(data.tree), function(i, file) {
+					files[file.hash] = file;
+				});
+			}
+			
+			$.each(data.cdc, function(i, file) {
+				var hash = file.hash;
+				
+				if (files[hash]) {
+					files[hash].date   = file.date;
+					files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
+				} else {
+					files[hash] = self.normalizeOldFile(file, phash);
+				}
+			});
+			
+
+			cwd = files[phash] || this.normalizeOldFile(data.cwd);
+			files = $.map(files, filter);
+
+			if (cmd == 'open') {
+				result = {
+					cwd     : cwd,
+					files   : files,
+					options : self.normalizeOldOptions(data)
+				}
+
+			} else {
+				
+			}
+			
+			if (data.debug) {
+				result.debug = data.debug;
+			}
+			
+			return result;
 		}
 		
 		/**
@@ -730,12 +782,13 @@
 					data     : data
 				}, options.options || {}),
 				fail = function(error) {
-					self.error(error)
+					self.error(error);
 				},
 				done = function(data) {
 					data.warning && self.error(data.warning);
 					// data = $.extend(true, {}, data)
-
+					self.log('done')
+					
 					if (responseHandlers[cmd]) {
 						responseHandlers[cmd]($.extend(true, {}, data))
 					}
@@ -774,11 +827,13 @@
 						error = [errors.invResponse, errors.emptyData];
 					} else if (response.error) {
 						error = response.error;
-					} else if (!self.validResponse(cmd, response)) {
+					} else if (rules.defaults && !self.validResponse(cmd, response)) {
 						error = [errors.invResponse, errors.invData];
 					}
-
-					error ? dfrd.reject(error) : dfrd.resolve(response);
+					
+					error 
+						? dfrd.reject(error) 
+						: dfrd.resolve(rules.defaults ? self.normalizeData(cmd, response) : response);
 				}
 				;
 
@@ -818,6 +873,16 @@
 			
 			return dfrd;
 		};
+		
+		this.filesEqual = function(file1, file2) {
+			var res = true;
+			$.each(file1, function(prop) {
+				if (file1[prop] != file2[prop]) {
+					return res = false;
+				}
+			});
+			return res;
+		}
 		
 		/**
 		 * Sync content
@@ -1503,15 +1568,27 @@
 		 */
 		rules : {
 			oldapi : {
-				open    : function(data) { return data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-				tmb     : function(data) { return data.current && data.images && $.isPlainObject(data.images); }
+				defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
+				tmb     : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); }
 			},
 			
 			newapi : {
+				defaults : function(data) {  
+					if (!data) {
+						return false;
+					}
+					if ((data.added && !$.isArray(data.added))
+					||  (data.removed && !$.isArray(data.removed))
+					||  (data.changed && !$.isArray(data.changed))) {
+						return false;
+					}
+					return true;
+				},
 				open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
 				tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-				tmb     : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); }
+				tmb     : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); },
+				upload  : function(data) { return data && data.current && $.isPlainObject(data.added);}
 			}
 		},
 		
@@ -1686,7 +1763,7 @@
 		 * @param  String  parent dir hash
 		 * @return Object
 		 */
-		normalizeOldFile : function(file, phash) {
+		normalizeOldFile : function(file, phash, tmb) {
 			var mime = file.mime || 'directory',
 				size = mime == 'directory' && !file.linkTo ? 0 : file.size,
 				info = {
@@ -1698,7 +1775,7 @@
 					size   : size,
 					read   : file.read,
 					write  : file.write,
-					locked : phash ? !file.rm : true
+					locked : !phash ? true : file.rm === void(0) ? false : !file.rm
 				};
 			
 			if (file.link) {
@@ -1711,6 +1788,8 @@
 			
 			if (file.tmb) {
 				info.tmb = file.tmb;
+			} else if (info.mime.indexOf('image/') === 0 && tmb) {
+				info.tmb = 1;
 			}
 				
 			if (file.dirs && file.dirs.length) {
@@ -1732,7 +1811,24 @@
 		 * @return Object
 		 */
 		normalizeOldOptions : function(data) {
-			return $.extend(data.params, {path : data.cwd.rel, disabled : data.disabled, tmb : !!data.tmb});
+			var opts = {
+					path     : data.cwd.rel,
+					disabled : data.disabled || [],
+					tmb      : !!data.tmb 
+				};
+			
+			if (data.params) {
+				opts.url = data.params.url;
+				opts.archives = data.params.archives;
+				opts.extract = data.params.extract;
+			}
+			
+			if (opts.path.indexOf('/') !== -1) {
+				opts.separator = '/';
+			} else if (opts.path.indexOf('\\') !== -1) {
+				opts.separator = '\\';
+			}
+			return opts;
 		},
 		
 		/**

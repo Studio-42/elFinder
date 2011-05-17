@@ -43,10 +43,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
-		'upload' => array(
-			'current' => true, 
-			'FILES' => true
-			)
+		'upload' => array('current' => true, 'FILES' => true)
 	);
 	
 	/**
@@ -711,6 +708,22 @@ class elFinder {
 		}
 		
 		return $this->trigger('duplicate', $volume, array('added' => $added));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function upload($args) {
+		// debug($args);
+		$current = $args['current'];
+		$volume = $this->volume($current);
+		
+		if (!$volume) {
+			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+		}
 	}
 	
 	/**

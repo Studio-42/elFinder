@@ -105,7 +105,7 @@ elFinder.prototype.command = function(fm) {
 	this.setup = function(name, opts) {
 		var self = this,
 			fm   = this.fm;
-		
+
 		this.name      = name;
 		this.title     = fm.i18n(this.title || this.name);
 		this.options   = $.extend({}, this.options, opts);

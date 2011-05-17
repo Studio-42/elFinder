@@ -677,9 +677,11 @@ $.fn.elfindercwd = function(fm) {
 					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}
 		
-				buffer = fm.oldAPI
-					? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
-					: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
+				// buffer = fm.oldAPI
+				// 	? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
+				// 	: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
+
+				buffer = e.data.files
 		
 				buffer = fm.sortFiles(buffer)
 		

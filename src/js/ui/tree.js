@@ -151,7 +151,7 @@ $.fn.elfindertree = function(fm) {
 			},
 			
 			filter = function(files) {
-				return $.map(files, function(f) { return f.hash && f.name && f.mime && f.mime == 'directory' ? f : null });
+				return $.map(files, function(f) { return f.mime == 'directory' ? f : null });
 			},
 			
 			
@@ -361,21 +361,20 @@ $.fn.elfindertree = function(fm) {
 			// create/update tree
 			.open(function(e) {
 				var data = e.data,
-					init = data.api || data.params,
-					dirs = fm.newAPI 
-						? filter(data.files)
-						: data.tree ? normalizeTree(data.tree) : [];
+					init = !tree.children().length, 
+					dirs = filter(data.files);
+
 
 				if (dirs.length) {
-					init && tree.empty();
-					setTimeout(function() {
+
+					// setTimeout(function() {
 						updateTree(dirs);
 					
 						init && tree.find('[id].'+collapsed+':not(.'+loaded+')')
 								.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
 								.addClass(loaded);
 						sync();
-					}, 10);
+					// }, 10);
 				} else {
 					sync();
 				}

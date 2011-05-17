@@ -92,8 +92,19 @@
 /* button */
 .elfinder-button {
 	float:left;
+	width:16px;
+	height:16px;
 	margin:0 1px;
 	padding:3px;
+	overflow:hidden;
+	position:relative;
+}
+
+.elfinder-button form {
+	position:absolute;
+	top:0;
+	right:0;
+	 opacity: 0; filter:Alpha(Opacity=0);
 }
 
 /* rtl/ltr fixes */
@@ -112,6 +123,7 @@
 	height:16px;
 	float:left;
 	background:url('../images/toolbar.png')  no-repeat; 
+	z-index:100;
 }
 /* buttons icons */
 .elfinder-button-icon-home     { background-position: 0 -34px; }

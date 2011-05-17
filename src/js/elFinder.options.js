@@ -24,7 +24,7 @@ elFinder.prototype.options = {
 		toolbar : [
 			['back', 'forward', 'reload', 'up', 'home'],
 			['open', 'select'],
-			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile'],
+			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
 			['rm'],
 			['info'],
 			['help']
@@ -103,7 +103,7 @@ elFinder.prototype.options = {
 	 * @type Object
 	 * @default  {}
 	 */
-	customData : {token : '42'},
+	customData : {token : '42', test : 'test'},
 	
 	handlers : {},
 	
@@ -167,10 +167,8 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'info', 'help'],
 	
-	
-	commandsOptions : {},
 	
 	/* cookie options */
 	cookie         : {
@@ -194,7 +192,7 @@ elFinder.prototype.options = {
 	toolbarConf : [
 		['back', 'forward', 'reload', 'up', 'home'],
 		['open', 'select'],
-		['copy', 'cut', 'paste', 'duplicate', 'rename'],
+		['copy', 'cut', 'paste', 'duplicate', 'rename', 'upload'],
 		['rm'],
 		['info'],
 		['help']
@@ -229,11 +227,12 @@ elFinder.prototype.options = {
 			enter    : true,
 			multiple : true,
 			folders  : false
-		}
+		},
+		upload : {ui : 'uploadbutton', test : 42}
 	},
 	clearCache : true,
 	// debug : true
-	debug : ['error', 'event-select']
+	// debug : ['error', 'event-select']
 }
 
 })(jQuery);

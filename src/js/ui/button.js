@@ -10,7 +10,7 @@ $.fn.elfinderbutton = function(cmd) {
 					!button.is('.'+disabled) && button.toggleClass('ui-state-hover', e.type == 'mouseenter');
 				})
 				.click(function(e) {
-					e.preventDefault();
+					// e.preventDefault();
 					!button.is('.'+disabled) && this._click();
 				});
 			
