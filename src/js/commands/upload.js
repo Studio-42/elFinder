@@ -14,35 +14,22 @@ elFinder.prototype.commands.upload = function() {
 					xhr = new XMLHttpRequest(),
 					formData = new FormData();
 				
-				xhr.open('POST', opts.url+'2', true);
+				xhr.addEventListener('load', function() {
+					fm.log('load').log(xhr.responseText)
+				}, false)
+				xhr.addEventListener('error', function() {
+					fm.log('error').log(xhr)
+				}, false)
+				xhr.addEventListener('abort', function() {
+					fm.log('abort').log(xhr)
+				}, false)
+				xhr.upload.addEventListener('progress', function(e) {
+					fm.log('progress').log(parseInt((e.loaded * 100) / e.total))
+					
+				}, false)
 				
-				// xhr.upload.addEventListener('error', function(e) {
-				// 	fm.log(e).log(xhr)
-				// }, false);
-				// xhr.upload.addEventListener('abort', function(e) {
-				// 	fm.log(e).log(xhr)
-				// }, false);
-				// 
-				// xhr.upload.addEventListener('load', function(e) {
-				// 	fm.log(xhr).log(xhr.status).log(xhr.statusText).log(xhr.responseText).log(xhr.responseXML)
-				// 	var data;
-				// 	
-				// 	
-				// 	if (xhr.status == 200) {
-				// 		try {
-				// 			data = $.parseJSON(xhr.responseText);
-				// 		} catch (e) {
-				// 			return dfrd.reject([errors.invResponse, errors.notJSON]);
-				// 		}
-				// 		fm.log(data)
-				// 		// if (data.error) {
-				// 		// 	return dfrd.reject(data.error);
-				// 		// }
-				// 		// 
-				// 		// fm.log(data)
-				// 	}
-				// 	
-				// }, false);
+				xhr.open('POST', opts.url, true);
+				
 				
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4) {
@@ -50,7 +37,7 @@ elFinder.prototype.commands.upload = function() {
 						if (xhr.status == 0) {
 							return dfrd.reject([errors.noConnect, errors.connectAborted])
 						}
-						if (status > 500)
+						// if (status > 500)
 					}
 				}
 				
@@ -194,7 +181,7 @@ elFinder.prototype.commands.upload = function() {
 	
 	this._exec = function(input) {
 		var fm = this.fm,
-			dfrd = new transport(input[0])
+			dfrd = new transport(input)
 				.fail(function(error) {
 					fm.error(error);
 				}).done(function(data) {
@@ -206,7 +193,6 @@ elFinder.prototype.commands.upload = function() {
 					}
  					fm.trigger('upload', data);
 				});
-		
 		return dfrd;
 	}
 
