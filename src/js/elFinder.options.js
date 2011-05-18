@@ -228,7 +228,7 @@ elFinder.prototype.options = {
 			multiple : true,
 			folders  : false
 		},
-		upload : {ui : 'uploadbutton', test : 42}
+		upload : {ui : 'uploadbutton', iframeTimeout : 900000}
 	},
 	clearCache : true,
 	// debug : true

@@ -172,6 +172,33 @@
 			 **/
 			height = parseInt(this.options.height) || 300,
 			
+			open = function(data) {
+				// self.log('init: '+data.init)
+				if (data.init) {
+					// init - reset cache
+					files = {};
+				} else {
+					// remove only files from prev cwd
+					for (var i in files) {
+						if (files.hasOwnProperty(i) 
+						&& files[i].mime != 'directory' 
+						&& files[i].phash == cwd) {
+							delete files[i];
+						}
+					}
+				}
+
+				cwd = data.cwd.hash;
+				cache(data.files);
+				if (!files[cwd]) {
+					self.log('no cwd in cache')
+					cache([data.cwd]);
+				}
+				self.lastDir(cwd);
+				data.debug && self.debug('backend-debug', data.debug);
+				
+			},
+			
 			/**
 			 * Methods to update cache after get some data from backend
 			 *
@@ -179,7 +206,9 @@
 			 **/
 			responseHandlers = {
 				open    : function(data) {
-					if (data.api || data.params) {
+					return
+					self.log('init: '+data.init)
+					if (data.init) {
 						// init - reset cache
 						files = {};
 					} else {
@@ -235,7 +264,10 @@
 					return self;
 				}, 
 				change  : function(data) {
-					cache(data.changed);
+					$.each(data.changed, function(i, file) {
+						var hash = file.hash;
+						files[hash] = files[hash] ? $.extend(files[hash], file) : file;
+					})
 					return self;
 				}
 				
@@ -255,31 +287,6 @@
 			},
 			
 			/**
-			 * On load failed make elfinder inactive
-			 *
-			 * @return void
-			 */
-			loadfail = function() {
-				self.trigger('fail').disable().lastDir('');
-				listeners = {};
-				shortcuts = {};
-				$(document).add(node).unbind('.'+this.namespace);
-				self.trigger = function() { }
-			},
-			
-			/**
-			 * On success load set api, valid data and fire "open" event
-			 *
-			 * @param  Object  data from backend
-			 * @return void
-			 */
-			load = function(data) {
-				self.load().debug('api', self.api);
-				data = $.extend(true, {}, data);
-				responseHandlers.open(data).trigger('open', data);
-			},
-			
-			/**
 			 * Store info about files/dirs in "files" object.
 			 *
 			 * @param  Array  files
@@ -291,7 +298,6 @@
 				while (l--) {
 					f = data[l];
 					if (f.name && f.hash && f.mime) {
-						// delete f.tmb;
 						files[f.hash] = f;
 					}
 				}
@@ -576,7 +582,7 @@
 		 * @return Array
 		 */
 		this.files = function() {
-			return $.extend({}, files);
+			return $.extend(true, {}, files);
 		}
 		
 		/**
@@ -649,7 +655,7 @@
 		 * @return Boolean
 		 */
 		this.validResponse = function(cmd, data) {
-			return rules[rules[cmd] ? cmd : 'defaults'](data);
+			return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
 		}
 		
 		
@@ -701,10 +707,9 @@
 				},
 				done = function(data) {
 					data.warning && self.error(data.warning);
-					// data = $.extend(true, {}, data)
 					
-					if (responseHandlers[cmd]) {
-						responseHandlers[cmd]($.extend(true, {}, data))
+					if (cmd == 'open') {
+						open($.extend(true, {}, data))
 					}
 
 					// fire some event to update cache/ui
@@ -1229,6 +1234,38 @@
 				};
 				
 				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+			})
+			.bind('tree parents', function(e) {
+				cache(e.data.tree || []);
+			})
+			.add(function(e) {
+				cache(e.data.added||[]);
+			})
+			.change(function(e) {
+				$.each(e.data.changed||[], function(i, file) {
+					var hash = file.hash;
+					files[hash] = files[hash] ? $.extend(files[hash], file) : file;
+				});
+			})
+			.remove(function(e) {
+				var removed = e.data.removed||[],
+					l  = removed.length, 
+					rm = function(hash) {
+						var file = files[hash];
+						if (file) {
+							if (file.mime == 'directory' && file.dirs) {
+								$.each(files, function(h, f) {
+									f.phash == hash && rm(h);
+								});
+							}
+							delete files[hash];
+						}
+					};
+
+				while (l--) {
+					rm(removed[l]);
+				}
+				
 			});
 
 		// bind external event handlers
@@ -1332,10 +1369,18 @@
 				notify      : {type : 'open', cnt : 1, hideCnt : true},
 				freeze      : true
 			})
-			.fail(loadfail)
-			.done(load)
-			.always(function() {
-				loadfail = load = null;
+			.fail(function() {
+				self.trigger('fail').disable().lastDir('');
+				listeners = {};
+				shortcuts = {};
+				$(document).add(node).unbind('.'+this.namespace);
+				self.trigger = function() { };
+			})
+			.done(function(data) {
+				self.load().debug('api', self.api);
+				data = $.extend(true, {}, data);
+				open(data);
+				self.trigger('open', data);
 			});
 			
 	}
@@ -1469,9 +1514,9 @@
 		rules : {
 			oldapi : {
 				defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-				tmb      : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); }
+				tmb      : function(data) { return data && data.current && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+				upload   : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); }
 			},
-			
 			newapi : {
 				defaults : function(data) {  
 					if (!data) {
@@ -1487,8 +1532,8 @@
 				open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
 				tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-				tmb     : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); },
-				upload  : function(data) { return data && data.current && $.isPlainObject(data.added);}
+				tmb     : function(data) { return data && data.current && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+				upload  : function(data) { return data && data.current && ($.isPlainObject(data.added) || $.isArray(data.added));}
 			}
 		},
 		
@@ -1658,13 +1703,12 @@
 				if (data.added) {
 					data.added = $.map(data.added, filter);
 				}
-				if (data.removed) {
-					data.removed = $.map(data.removed, filter);
-				}
 				if (data.changed) {
 					data.changed = $.map(data.changed, filter);
 				}
-
+				if (data.api) {
+					data.init = true;
+				}
 				return data;
 			}
 			
@@ -1690,24 +1734,25 @@
 					files[hash] = self.normalizeOldFile(file, phash);
 				}
 			});
-			
 
-			cwd = files[phash] || this.normalizeOldFile(data.cwd);
-			files = $.map(files, filter);
-
+			result = {
+					cwd     : files[phash] || this.normalizeOldFile(data.cwd),
+					files   : $.map(files, filter),
+					debug   : data.debug
+				};
 			if (cmd == 'open') {
-				result = {
-					cwd     : cwd,
-					files   : files,
-					options : self.normalizeOldOptions(data)
+				result.options = self.normalizeOldOptions(data);
+				if (data.params) {
+					result.init = true;
 				}
-
-			} else {
-				
+			} else if (data.selected) {
+				result.selected = data.selected
 			}
-			
-			if (data.debug) {
-				result.debug = data.debug;
+			if (data.error) {
+				result.error = data.error;
+			}
+			if (data.warning) {
+				result.warning = data.warning;
 			}
 			
 			return result;
@@ -1862,24 +1907,23 @@
 			return files.sort($.proxy(this.compare, this));
 		},
 		
-		
-		
 		/**
 		 * Notifications messages by types
 		 *
 		 * @type  Object
 		 */
 		notifyType : {
-			open   : 'Open folder',
-			reload : 'Reload folder content',
-			mkdir  : 'Creating directory',
-			mkfile : 'Creating files',
-			rm     : 'Delete files',
-			copy   : 'Copy files',
-			move   : 'Move files',
+			open        : 'Open folder',
+			reload      : 'Reload folder content',
+			mkdir       : 'Creating directory',
+			mkfile      : 'Creating files',
+			rm          : 'Delete files',
+			copy        : 'Copy files',
+			move        : 'Move files',
 			prepareCopy : 'Prepare to copy files',
-			duplicate : 'Duplicate files',
-			rename : 'Rename files'
+			duplicate   : 'Duplicate files',
+			rename      : 'Rename files',
+			upload      : 'Uploading files'
 		},
 		
 		/**
@@ -1915,7 +1959,7 @@
 			var ndialog = this.ui.notify,
 				ntpl    = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
 				type    = opts.type,
-				msg     = opts.msg || this.i18n(this.notifyType[type]), 
+				msg     = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'), 
 				cnt     = opts.cnt,
 				notify  = ndialog.children('.elfinder-notify-'+type);
 			

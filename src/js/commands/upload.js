@@ -1,45 +1,13 @@
 "use strict"
 elFinder.prototype.commands.upload = function() {
 
-	var cnt = 0,
-		fm   = this.fm,
-		opts = this.fm.options,
+	var self = this,
+		fm    = this.fm,
+		opts  = this.fm.options,
 		mimes = opts.onlyMimes,
 		data  = opts.customData,
-		
-		normalizeData = function(data) {
-			var ret = {
-				// current : '',
-				added : [],
-				changed : []
-			};
-			
-			if (fm.newAPI) {
-				return data;
-			}
-			
-			ret.current = data.cwd.hash;
-			
-			$.each(data.cdc, function(i, file) {
-				file = fm.normalizeOldFile(file, ret.current);
-				if ($.inArray(file.hash, data.select) !== -1) {
-					
-					if (!fm.file(file.hash)) {
-						ret.added.push(file);
-						fm.log('new '+file.name)
-					} else {
-						ret.changed.push(file)
-						fm.log('changed '+file.name)
-					}
-					
-				}
-				
-				// fm.log(file.name)
-			})
-			
-			return ret
-			
-		},
+		errors = fm.errors,
+		counter = 0,		
 		transports = {
 			xhrFormData : function(input) {
 			
@@ -50,42 +18,69 @@ elFinder.prototype.commands.upload = function() {
 			},
 		
 			iframe : function(input) {
-				var dfrd = new $.Deferred(),
-					msie = $.browser.msie,
-					name = 'iframe-'+fm.namespace+'-'+(++cnt),
+				var dfrd   = new $.Deferred(),
+					msie   = $.browser.msie,
+					cnt    = input[0].files ? input[0].files.length : 1,
+					name   = 'iframe-'+fm.namespace+'-'+(++counter),
 					iframe = $('<iframe src="'+(msie ? 'javascript:false' : 'about:blank')+'" name="'+name+'" />')
 						.unbind('load')
 						.bind('load', function() {
 							var response = iframe.contents().text(),
-								data;
+								raw, data, error;
 								
-							msie && $('<iframe src="javascript:false;"></iframe>').appendTo(form);
-                            // form.remove();
-								
-							fm.log($.parseJSON(response))
+							iframe.unbind('load');
+							fm.notify({type : 'upload', cnt : -cnt});
+							tm && clearTimeout(tm);
+							setTimeout(function() {
+								msie && $('<iframe src="javascript:false;"/>').appendTo(form);
+								form.remove();
+							}, 100);
 							
 							try {
-								data = $.parseJSON(response);
+								raw = $.parseJSON(response);
 							} catch(e) {
-								return dfrd.reject([fm.errors.invResponse, fm.errors.notJSON]);
+								return dfrd.reject([errors.invResponse, errors.notJSON]);
 							}
-							
-							if (!data) {
-								dfrd.reject([fm.errors.invResponse, fm.errors.emptyData]);
-							} else if (data.error) {
-								dfrd.reject(data.error);
-							} else {
-								fm.validResponse('upload', data) 
-									? dfrd.resolve(normalizeData(data)) 
-									: dfrd.reject([fm.errors.invResponse, fm.errors.invData]);
+
+							if (!raw) {
+								return dfrd.reject([errors.invResponse, errors.emptyData]);
 							}
+							if (!fm.validResponse('upload', raw)) {
+								return dfrd.reject([errors.invResponse, errors.invData]);
+							}
+
+							if (raw.error) {
+								if (fm.newAPI) {
+									return dfrd.reject(raw.error);
+								}
+								raw.warning = fm.i18n(raw.error);
+								$.each(raw.errorData||[], function(name, msg) {
+									raw.warning += '. '+fm.i18n(msg)+': '+name;
+								})
+
+								raw.error = null;
+								if (!fm.validResponse('upload', raw)) {
+									return dfrd.reject(raw.warning);
+								}
+							} 
+							// fm.log(raw)
+							data = fm.normalizeData('upload', raw);
 							
+							if (fm.oldAPI && !raw.tree) {
+								$.each(fm.files(), function(hash, file) {
+									file.phash != data.cwd.hash && data.files.push(file);
+								});
+								data = fm.diff(data.files);
+								data.current = raw.cwd.hash;
+							}
+							dfrd.resolve(data);
 							
 						}),
 					form = $('<form action="'+opts.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'"><input type="text" name="cmd" value="upload" /><input type="text" name="current" value="'+fm.cwd().hash+'" /></form>')
 						.append(iframe)
-						.append(input.attr('name', 'upload[]'))
-					;
+						.append(input.attr('name', 'upload[]')),
+					tm;
+					
 					
 				$.each(mimes, function(i, mime) {
 					form.append('<input type="text" name="mimes[]" value="'+mime+'"/>');
@@ -96,11 +91,20 @@ elFinder.prototype.commands.upload = function() {
 				});
 					
 				form.appendTo('body').submit();
+				
+				fm.notify({type : 'upload', cnt : cnt});
+				if (self.options.iframeTimeout > 0) {
+					tm = setTimeout(function() {
+						dfrd.reject([errors.noConnect, errors.connectTimeout]);
+					}, self.options.iframeTimeout);
+				}
 			
 				return dfrd;
 			}
 		},
 		transport;
+	
+	this.title = 'Upload files';
 		
 	this.init = function() {
 		this.options.forceIframe = true
@@ -125,39 +129,21 @@ elFinder.prototype.commands.upload = function() {
 	}
 	
 	this._exec = function(input) {
-		
-		
 		var fm = this.fm,
-			o = fm.options
-		;
+			dfrd = new transport(input)
+				.fail(function(error) {
+					fm.error(error);
+				}).done(function(data) {
+					data.warning && fm.error(data.warning);
+					if (data.current == fm.cwd().hash) {
+						data.removed && fm.remove(data);
+						data.added   && fm.add(data);
+						data.changed && fm.change(data);
+					}
+ 					fm.trigger('upload', data);
+				});
 		
-		// this.fm.log(input.val())
-		
-		var t = new transport(input).fail(function(error) {
-			fm.log('error '+error)
-		}).done(function(data) {
-			fm.log(data)
-		})
-		
-		return
-		form.attr({
-			action : o.url,
-			method : 'post',
-			enctype : 'multipart/form-data'
-		})
-		
-		form.append('<input type="hidden" name="cmd" value="upload"/><input type="hidden" name="current" value="'+fm.cwd().hash+'"/>');
-		
-		$.each(o.onlyMimes, function(i, mime) {
-			form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
-		});
-		
-		$.each(o.customData, function(k, v) {
-			form.append('<input type="hidden" name="'+k+'" value="'+v+'"/>');
-		});
-		
-		
-		
+		return dfrd;
 	}
 
 }
