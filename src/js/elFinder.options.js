@@ -232,7 +232,7 @@ elFinder.prototype.options = {
 	},
 	clearCache : true,
 	// debug : true
-	// debug : ['error', 'event-select']
+	debug : ['error', 'api']
 }
 
 })(jQuery);

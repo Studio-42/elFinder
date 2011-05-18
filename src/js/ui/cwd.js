@@ -681,8 +681,8 @@ $.fn.elfindercwd = function(fm) {
 				// 	? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
 				// 	: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
 
-				buffer = e.data.files
-		
+				buffer = $.map(e.data.files, function(f) { return f.phash == phash ? f : null; });
+				
 				buffer = fm.sortFiles(buffer)
 		
 				cwd.bind(scrollEvent, render).trigger(scrollEvent);

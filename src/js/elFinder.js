@@ -275,18 +275,8 @@
 			 * @return void
 			 */
 			load = function(data) {
-				var opts = self.options;
-				
-				setAPI(data.api);
-
-				if (!self.validResponse('open', data)) {
-					self.error([self.errors.invResponse, self.errors.invData]);
-					return loadfail();
-				}
-
 				self.load().debug('api', self.api);
-				self.log('load')
-				data = $.extend(true, {}, self.normalizeData('open', data));
+				data = $.extend(true, {}, data);
 				responseHandlers.open(data).trigger('open', data);
 			},
 			
@@ -663,80 +653,6 @@
 			return rules[rules[cmd] ? cmd : 'defaults'](data);
 		}
 		
-		this.normalizeData = function(cmd, data) {
-			var self   = this,
-				files  = {},
-				result = {}, 
-				filter = function(file) {
-					return file && file.hash && file.name && file.mime ? file : null;
-				},
-				phash, cwd;
-			
-			if (this.newAPI) {
-				if (data.files) {
-					data.files = $.map(data.files, filter);
-				} 
-				if (data.tree) {
-					data.tree = $.map(data.tree, filter);
-				}
-
-				if (data.added) {
-					data.added = $.map(data.added, filter);
-				}
-				if (data.removed) {
-					data.removed = $.map(data.removed, filter);
-				}
-				if (data.changed) {
-					data.changed = $.map(data.changed, filter);
-				}
-
-				return data;
-			}
-			
-			if (/^(tmb|read|edit)$/i.test(cmd)) {
-				return data;
-			}
-			// self.log(data)
-			phash = data.cwd.hash;
-			
-			if (data.tree) {
-				$.each(this.normalizeOldTree(data.tree), function(i, file) {
-					files[file.hash] = file;
-				});
-			}
-			
-			$.each(data.cdc, function(i, file) {
-				var hash = file.hash;
-				
-				if (files[hash]) {
-					files[hash].date   = file.date;
-					files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
-				} else {
-					files[hash] = self.normalizeOldFile(file, phash);
-				}
-			});
-			
-
-			cwd = files[phash] || this.normalizeOldFile(data.cwd);
-			files = $.map(files, filter);
-
-			if (cmd == 'open') {
-				result = {
-					cwd     : cwd,
-					files   : files,
-					options : self.normalizeOldOptions(data)
-				}
-
-			} else {
-				
-			}
-			
-			if (data.debug) {
-				result.debug = data.debug;
-			}
-			
-			return result;
-		}
 		
 		/**
 		 * Proccess ajax request.
@@ -787,7 +703,6 @@
 				done = function(data) {
 					data.warning && self.error(data.warning);
 					// data = $.extend(true, {}, data)
-					self.log('done')
 					
 					if (responseHandlers[cmd]) {
 						responseHandlers[cmd]($.extend(true, {}, data))
@@ -823,17 +738,19 @@
 				success = function(response) {
 					var error;
 
+					cmd == 'open' && (response.api || response.params) && setAPI(response.api || 1);
+
 					if (!response) {
 						error = [errors.invResponse, errors.emptyData];
 					} else if (response.error) {
 						error = response.error;
-					} else if (rules.defaults && !self.validResponse(cmd, response)) {
+					} else if (!self.validResponse(cmd, response)) {
 						error = [errors.invResponse, errors.invData];
 					}
-					
+
 					error 
 						? dfrd.reject(error) 
-						: dfrd.resolve(rules.defaults ? self.normalizeData(cmd, response) : response);
+						: dfrd.resolve(self.normalizeData(cmd, response));
 				}
 				;
 
@@ -1569,7 +1486,7 @@
 		rules : {
 			oldapi : {
 				defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-				tmb     : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); }
+				tmb      : function(data) { return data && data.current && data.images && $.isPlainObject(data.images); }
 			},
 			
 			newapi : {
@@ -1730,6 +1647,87 @@
 		 */
 		escape : function(name) {
 			return this._node.text(name).html();
+		},
+		
+		/**
+		 * Cleanup ajax data.
+		 * For old api convert data into new api format
+		 * 
+		 * @param  String  command name
+		 * @param  Object  data from backend
+		 * @return Object
+		 */
+		normalizeData : function(cmd, data) {
+			var self   = this,
+				files  = {},
+				result = {}, 
+				filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
+				phash, cwd;
+			
+			if (this.newAPI) {
+				if (data.files) {
+					data.files = $.map(data.files, filter);
+				} 
+				if (data.tree) {
+					data.tree = $.map(data.tree, filter);
+				}
+
+				if (data.added) {
+					data.added = $.map(data.added, filter);
+				}
+				if (data.removed) {
+					data.removed = $.map(data.removed, filter);
+				}
+				if (data.changed) {
+					data.changed = $.map(data.changed, filter);
+				}
+
+				return data;
+			}
+			
+			if (/^(tmb|read|edit)$/i.test(cmd)) {
+				return data;
+			}
+			// self.log(data)
+			phash = data.cwd.hash;
+			
+			if (data.tree) {
+				$.each(this.normalizeOldTree(data.tree), function(i, file) {
+					files[file.hash] = file;
+				});
+			}
+			
+			$.each(data.cdc, function(i, file) {
+				var hash = file.hash;
+				
+				if (files[hash]) {
+					files[hash].date   = file.date;
+					files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
+				} else {
+					files[hash] = self.normalizeOldFile(file, phash);
+				}
+			});
+			
+
+			cwd = files[phash] || this.normalizeOldFile(data.cwd);
+			files = $.map(files, filter);
+
+			if (cmd == 'open') {
+				result = {
+					cwd     : cwd,
+					files   : files,
+					options : self.normalizeOldOptions(data)
+				}
+
+			} else {
+				
+			}
+			
+			if (data.debug) {
+				result.debug = data.debug;
+			}
+			
+			return result;
 		},
 		
 		/**
