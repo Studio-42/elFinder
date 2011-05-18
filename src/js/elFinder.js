@@ -859,6 +859,70 @@
 			};
 		}
 		
+		/**
+		 * Sync content
+		 * 
+		 * @param  Boolean  freeze interface untill complete
+		 * @return jQuery.Deferred
+		 */
+		this.sync = function(freeze) {
+			var self  = this,
+				dfrd  = $.Deferred(),
+				opts1 = {
+					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
+					preventDefault : true,
+					freeze : true
+				},
+				opts2 = {
+					data : {cmd : 'parents', target : cwd},
+					preventDefault : true,
+					freeze : true
+				},
+				doSync = function(odata, pdata) {
+					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
+					self.log('diff')
+					self.log(diff.removed).log(diff.added).log(diff.changed);
+					
+					diff.removed.length && responseHandlers.remove(diff).remove(diff);
+					diff.added.length   && responseHandlers.add(diff).add(diff);
+					diff.changed.length && responseHandlers.change(diff).change(diff);
+					return dfrd.resolve();
+				},
+				timeout;
+			
+			if (freeze) {
+				timeout = setTimeout(function() {
+					self.notify({type : 'reload', cnt : 1, hideCnt : true});
+			
+					dfrd.always(function() {
+						self.notify({type : 'reload', cnt  : -1});
+					});
+				}, self.notifyDelay);
+				
+				dfrd.always(function() {
+					clearTimeout(timeout);
+				});
+			}
+			
+			if (this.newAPI) {
+				$.when(
+					this.ajax(opts1),
+					this.ajax(opts2)
+				)
+				.fail(function(error) {
+					dfrd.reject(error)
+				})
+				.then(doSync);
+			} else {
+				this.ajax(opts1)
+					.fail(function(error) {
+						dfrd.reject(error)
+					})
+					.then(doSync);
+			}
+			return dfrd;
+		}
+		
 		
 		/**
 		 * Attach listener to events
@@ -1798,70 +1862,6 @@
 			return files.sort($.proxy(this.compare, this));
 		},
 		
-		/**
-		 * Sync content
-		 * 
-		 * @param  Boolean  freeze interface untill complete
-		 * @return jQuery.Deferred
-		 */
-		sync : function(freeze) {
-			var self  = this,
-				cwd   = this.cwd().hash,
-				dfrd  = $.Deferred(),
-				opts1 = {
-					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
-					preventDefault : true,
-					freeze : true
-				},
-				opts2 = {
-					data : {cmd : 'parents', target : cwd},
-					preventDefault : true,
-					freeze : true
-				},
-				doSync = function(odata, pdata) {
-					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
-					self.log('diff')
-					self.log(diff.removed).log(diff.added).log(diff.changed);
-					
-					diff.removed.length && responseHandlers.remove(diff).remove(diff);
-					diff.added.length   && responseHandlers.add(diff).add(diff);
-					diff.changed.length && responseHandlers.change(diff).change(diff);
-					return dfrd.resolve();
-				},
-				timeout;
-			
-			if (freeze) {
-				timeout = setTimeout(function() {
-					self.notify({type : 'reload', cnt : 1, hideCnt : true});
-			
-					dfrd.always(function() {
-						self.notify({type : 'reload', cnt  : -1});
-					});
-				}, self.notifyDelay);
-				
-				dfrd.always(function() {
-					clearTimeout(timeout);
-				});
-			}
-			
-			if (this.newAPI) {
-				$.when(
-					this.ajax(opts1),
-					this.ajax(opts2)
-				)
-				.fail(function(error) {
-					dfrd.reject(error)
-				})
-				.then(doSync);
-			} else {
-				this.ajax(opts1)
-					.fail(function(error) {
-						dfrd.reject(error)
-					})
-					.then(doSync);
-			}
-			return dfrd;
-		},
 		
 		
 		/**
