@@ -195,7 +195,6 @@
 
 					cwd = data.cwd.hash;
 
-					cwdOptions = $.extend({}, cwdOptions, data.options);
 					data.files.push(data.cwd);
 					cache(data.files);
 					self.lastDir(cwd);
@@ -736,21 +735,23 @@
 					dfrd.reject(error);
 				},
 				success = function(response) {
-					var error;
-
-					cmd == 'open' && (response.api || response.params) && setAPI(response.api || 1);
-
-					if (!response) {
-						error = [errors.invResponse, errors.emptyData];
-					} else if (response.error) {
-						error = response.error;
-					} else if (!self.validResponse(cmd, response)) {
-						error = [errors.invResponse, errors.invData];
+					if (cmd == 'open' && (response.api || response.params)) {
+						setAPI(response.api || 1);
 					}
 
-					error 
-						? dfrd.reject(error) 
-						: dfrd.resolve(self.normalizeData(cmd, response));
+					if (!response) {
+						return dfrd.reject([errors.invResponse, errors.emptyData]);
+					} else if (response.error) {
+						return dfrd.reject(response.error);
+					} else if (!self.validResponse(cmd, response)) {
+						return dfrd.reject([errors.invResponse, errors.invData]);
+					}
+
+					response = self.normalizeData(cmd, response);
+					if (cmd == 'open' && response.options) {
+						cwdOptions = $.extend({}, cwdOptions, response.options);
+					}
+					dfrd.resolve(response);
 				}
 				;
 
@@ -791,155 +792,73 @@
 			return dfrd;
 		};
 		
-		this.filesEqual = function(file1, file2) {
-			var res = true;
-			$.each(file1, function(prop) {
-				if (file1[prop] != file2[prop]) {
-					return res = false;
+		/**
+		 * Compare current files cache with new files and return diff
+		 * 
+		 * @param  Array  new files
+		 * @return Object
+		 */
+		this.diff = function(incoming) {
+			var raw       = {},
+				added     = [],
+				removed   = [],
+				changed   = [],
+				isChanged = function(hash) {
+					var l = changed.length;
+
+					while (l--) {
+						if (changed[l].hash == hash) {
+							return true;
+						}
+					}
+				};
+				
+			$.each(incoming, function(i, f) {
+				raw[f.hash] = f;
+			});
+				
+			// find removed
+			$.each(files, function(hash, f) {
+				!raw[hash] && removed.push(hash);
+			});
+			
+			// compare files
+			$.each(raw, function(hash, file) {
+				var origin = files[hash];
+
+				if (!origin) {
+					added.push(file);
+				} else {
+					$.each(file, function(prop) {
+						if (file[prop] != origin[prop]) {
+							changed.push(file)
+							return false;
+						}
+					});
 				}
 			});
-			return res;
+			
+			// parents of removed dirs mark as changed (required for tree correct work)
+			$.each(removed, function(i, hash) {
+				var file  = files[hash], 
+					phash = file.phash;
+
+				if (phash 
+				&& file.mime == 'directory' 
+				&& $.inArray(phash, removed) === -1 
+				&& raw[phash] 
+				&& !isChanged(phash)) {
+					changed.push(raw[phash]);
+				}
+			});
+			
+			return {
+				added   : added,
+				removed : removed,
+				changed : changed
+			};
 		}
 		
-		/**
-		 * Sync content
-		 * 
-		 * @param  Boolean  freeze interface untill complete
-		 * @return jQuery.Deferred
-		 */
-		this.sync = function(freeze) {
-			var self  = this,
-				dfrd  = $.Deferred(),
-				opts1 = {
-					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
-					preventDefault : true,
-					freeze : true
-				},
-				opts2 = {
-					data : {cmd : 'parents', target : cwd},
-					preventDefault : true,
-					freeze : true
-				},
-				doSync = function(odata, pdata) {
-					var raw     = {},
-						removed = [],
-						added   = [],
-						changed = [],
-						isChanged = function(hash) {
-							var l = changed.length;
-
-							while (l--) {
-								if (changed[l].hash == hash) {
-									return true;
-								}
-							}
-						};
-
-					setAPI(odata.api);
-
-					// valid data
-					if (!self.validResponse('open', odata)) {
-						return dfrd.reject([self.errors.invResponse, self.errors.invData]);
-					}
-					
-					if (self.newAPI && !self.validResponse('parents', pdata)) {
-						return dfrd.reject([self.errors.invResponse, self.errors.invData])
-					}
-					
-
-					// create new files list
-					if (self.newAPI) {
-						cwdOptions = $.extend({}, cwdOptions, odata.options);
-						$.each(odata.files.concat(pdata.tree), function(i, f) {
-							if (f.hash && f.name && f.mime) {
-								raw[f.hash] = f;
-							}
-						});
-					} else {
-						cwdOptions = $.extend({}, cwdOptions, self.normalizeOldOptions(odata));
-						$.each(self.normalizeOldTree(odata.tree), function(i, f) {
-							if (f.hash && f.name) {
-								raw[f.hash] = f;
-							}
-						});
-						$.each(odata.cdc, function(i, f) {
-							if (f.hash && f.name && f.mime) {
-								raw[f.hash] = self.normalizeOldFile(f, cwd);
-							}
-						});
-					}
-
-					// find removed
-					$.each(files, function(hash, f) {
-						!raw[hash] && removed.push(hash);
-					});
-
-					// compare files
-					$.each(raw, function(hash, file) {
-						var origin = files[hash];
-
-						if (!origin) {
-							added.push(file);
-						} else {
-							$.each(file, function(prop) {
-								if (file[prop] != origin[prop]) {
-									changed.push(file)
-									return false;
-								}
-							});
-						}
-					});
-
-					// parents of removed dirs mark as changed (required for tree correct work)
-					$.each(removed, function(i, hash) {
-						var file  = files[hash], 
-							phash = file.phash;
-
-						if (phash && file.mime == 'directory' && $.inArray(phash, removed) === -1 && raw[phash] && !isChanged(phash)) {
-							changed.push(raw[phash]);
-						}
-					});
-
-					// self.log(removed.length).log(added.length).log(changed.length)
-					removed.length && responseHandlers.remove(removed).remove({removed : removed});
-					added.length   && responseHandlers.add(added).add({added : added});
-					changed.length && responseHandlers.change(changed).change({changed : changed});
-					dfrd.resolve();
-					
-				},
-				timeout;
-			
-			if (freeze) {
-				timeout = setTimeout(function() {
-					self.notify({type : 'reload', cnt : 1, hideCnt : true});
-			
-					dfrd.always(function() {
-						self.notify({type : 'reload', cnt  : -1});
-					})
-				}, self.notifyDelay);
-				
-				dfrd.always(function() {
-					clearTimeout(timeout);
-				});
-			}
-			
-			if (this.newAPI) {
-				$.when(
-					this.ajax(opts1),
-					this.ajax(opts2)
-				)
-				.fail(function(error) {
-					dfrd.reject(error)
-				})
-				.then(doSync);
-			} else {
-				this.ajax(opts1).fail(function(error) {
-					dfrd.reject(error)
-				})
-				.then(doSync);
-			}
-			return dfrd;
-		}
 		
 		/**
 		 * Attach listener to events
@@ -1878,6 +1797,72 @@
 		sortFiles : function(files) {
 			return files.sort($.proxy(this.compare, this));
 		},
+		
+		/**
+		 * Sync content
+		 * 
+		 * @param  Boolean  freeze interface untill complete
+		 * @return jQuery.Deferred
+		 */
+		sync : function(freeze) {
+			var self  = this,
+				cwd   = this.cwd().hash,
+				dfrd  = $.Deferred(),
+				opts1 = {
+					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
+					preventDefault : true,
+					freeze : true
+				},
+				opts2 = {
+					data : {cmd : 'parents', target : cwd},
+					preventDefault : true,
+					freeze : true
+				},
+				doSync = function(odata, pdata) {
+					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
+					self.log('diff')
+					self.log(diff.removed).log(diff.added).log(diff.changed);
+					
+					diff.removed.length && responseHandlers.remove(diff).remove(diff);
+					diff.added.length   && responseHandlers.add(diff).add(diff);
+					diff.changed.length && responseHandlers.change(diff).change(diff);
+					return dfrd.resolve();
+				},
+				timeout;
+			
+			if (freeze) {
+				timeout = setTimeout(function() {
+					self.notify({type : 'reload', cnt : 1, hideCnt : true});
+			
+					dfrd.always(function() {
+						self.notify({type : 'reload', cnt  : -1});
+					});
+				}, self.notifyDelay);
+				
+				dfrd.always(function() {
+					clearTimeout(timeout);
+				});
+			}
+			
+			if (this.newAPI) {
+				$.when(
+					this.ajax(opts1),
+					this.ajax(opts2)
+				)
+				.fail(function(error) {
+					dfrd.reject(error)
+				})
+				.then(doSync);
+			} else {
+				this.ajax(opts1)
+					.fail(function(error) {
+						dfrd.reject(error)
+					})
+					.then(doSync);
+			}
+			return dfrd;
+		},
+		
 		
 		/**
 		 * Notifications messages by types
