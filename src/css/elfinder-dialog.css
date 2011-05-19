@@ -21,16 +21,35 @@
 	border-bottom:1px solid #ccc;
 	position:relative;
 	padding:.5em;
+	padding-left:30px;
 	text-align:center;
+	overflow:hidden;
 }
 /*.elfinder-dialog-active { border:1px solid red;}*/
 
 .elfinder-notify:last-child { border:0 solid; }
 
-.elfinder-notify-spinner {
-	margin:3px 0;
-	height:15px;
-	background:url(../images/spinner-ntf.gif) center center no-repeat;
+
+.elfinder-notify-progressbar {
+	width:180px;
+	height:8px;
+	border:1px solid #aaa;
+	background:#f5f5f5;
+	margin:5px auto;
+	overflow:hidden;
+}
+
+.elfinder-notify-progress {
+	width:100%;
+/*	border:1px solid #aaa;*/
+	height:8px;
+	background:url(../images/spinner-ntf.gif) center center repeat-x;
+}
+
+.elfinder-notify-progressbar, .elfinder-notify-progress {
+	-moz-border-radius: 2px; 
+	-webkit-border-radius: 2px; 
+	border-radius: 2px;
 }
 
 .elfinder-dialog-confirm-applyall {

@@ -45,7 +45,7 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
-// sleep(3);
+// sleep(5);
 $opts = array(
 	'debug' => true,
 	'roots' => array(

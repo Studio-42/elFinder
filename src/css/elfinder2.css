@@ -344,7 +344,9 @@
 	padding-bottom:2px;
 	cursor:default;
 	overflow:hidden;
-	
+/*	-webkit-box-shadow: 10px 10px 10px #000;*/
+/*		-moz-box-shadow: 10px 10px 10px #000;*/
+/*		box-shadow: 10px 10px 10px #000;*/
 }
 
 .elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 3px 0; }

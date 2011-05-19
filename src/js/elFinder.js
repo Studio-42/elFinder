@@ -1266,7 +1266,15 @@
 					rm(removed[l]);
 				}
 				
-			});
+			})
+			.bind('rm', function(e) {
+				self.log('remove')
+				
+				var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
+				
+				node.append(audio)
+			})
+			;
 
 		// bind external event handlers
 		$.each(this.options.handlers, function(event, callback) {
@@ -1326,7 +1334,8 @@
 				position  : {top : '12px', right : '12px'},
 				resizable : false,
 				autoOpen  : false,
-				title     : '&nbsp;'
+				title     : '&nbsp;',
+				width     : 280
 			})
 		}
 		
@@ -1381,6 +1390,31 @@
 				data = $.extend(true, {}, data);
 				open(data);
 				self.trigger('open', data);
+				
+				// self.notify({type : 'upload', cnt : 1, progress : 50})
+				// self.notify({type : 'upload', cnt : 1, prc : 0})
+				// self.notify({type : 'upload', cnt : 1})
+				
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
+				// }, 2000)
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
+				// }, 4000)
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
+				// }, 6000)
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : -1, prc : 75})
+				// }, 8000)
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : -1, prc : 50})
+				// }, 9000)
+				
+				// setTimeout(function() {
+				// 	self.notify({type : 'upload', cnt : -1})
+				// }, 7000)
+				
 			});
 			
 	}
@@ -1952,33 +1986,56 @@
 		 *    msg : 'Copy files', // not required for known types @see this.notifyType
 		 *    cnt : 3,
 		 *    hideCnt : false, // true for not show count
+		 *    progress : 10 // progress bar percents (use cnt : 0 to update progress bar)
 		 * })
 		 * @return elFinder
 		 */
 		notify : function(opts) {
-			var ndialog = this.ui.notify,
-				ntpl    = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-spinner"/></div>',
-				type    = opts.type,
-				msg     = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'), 
-				cnt     = opts.cnt,
-				notify  = ndialog.children('.elfinder-notify-'+type);
+			var type     = opts.type,
+				msg      = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'),
+				ndialog  = this.ui.notify,
+				notify   = ndialog.children('.elfinder-notify-'+type),
+				ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
+				delta    = opts.cnt,
+				progress = opts.progress >= 0 && opts.progress <= 100 ? opts.progress : 0,
+				cnt, total, prc;
 			
 			if (!type) {
 				return this;
 			}
 			
-			if (notify.length) {
-				cnt += parseInt(notify.data('cnt')) || 0;
-			} else if (cnt > 0) {
-				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg)).appendTo(ndialog)
-			} else {
-				return;
+			if (!notify.length) {
+				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg))
+					.appendTo(ndialog)
+					.data('cnt', 0);
+
+				if (progress) {
+					notify.data({progress : 0, total : 0});
+				}
 			}
+
+			cnt = delta + parseInt(notify.data('cnt'));
 			
 			if (cnt > 0) {
-				notify.data('cnt', cnt)
 				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
 				ndialog.is(':hidden') && ndialog.elfinderdialog('open');
+				notify.data('cnt', cnt);
+				
+				if (progress < 100
+				&& (total = notify.data('total')) >= 0
+				&& (prc = notify.data('progress')) >= 0) {
+
+					total    = delta + parseInt(notify.data('total'));
+					prc      = progress + prc;
+					progress = parseInt(prc/total);
+					notify.data({progress : prc, total : total});
+					
+					ndialog.find('.elfinder-notify-progress')
+						.animate({
+							width : (progress < 100 ? progress : 100)+'%'
+						}, 20);
+				}
+				
 			} else {
 				notify.remove();
 				!ndialog.children().length && ndialog.elfinderdialog('close');
