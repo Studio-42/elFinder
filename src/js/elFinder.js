@@ -1769,19 +1769,6 @@
 				}
 			});
 
-			result = {
-					cwd     : files[phash] || this.normalizeOldFile(data.cwd),
-					files   : $.map(files, filter),
-					debug   : data.debug
-				};
-			if (cmd == 'open') {
-				result.options = self.normalizeOldOptions(data);
-				if (data.params) {
-					result.init = true;
-				}
-			} else if (data.selected) {
-				result.selected = data.selected
-			}
 			if (data.error) {
 				result.error = data.error;
 			}
@@ -1789,7 +1776,22 @@
 				result.warning = data.warning;
 			}
 			
-			return result;
+			if (cmd == 'open') {
+				return {
+						cwd     : files[phash] || this.normalizeOldFile(data.cwd),
+						files   : $.map(files, filter),
+						options : self.normalizeOldOptions(data),
+						init    : !!data.params,
+						debug   : data.debug
+					};
+				return result;
+			} 
+			
+			return $.extend({
+				current : data.cwd.hash,
+				error : data.error,
+				warning : data.warning
+			}, this.diff($.map(files, filter)));
 		},
 		
 		/**
