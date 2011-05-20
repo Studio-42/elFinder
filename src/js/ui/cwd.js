@@ -677,10 +677,6 @@ $.fn.elfindercwd = function(fm) {
 					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}
 		
-				// buffer = fm.oldAPI
-				// 	? $.map(e.data.cdc,   function(f) { return f.name && f.hash ? fm.normalizeOldFile(f, phash) : null })
-				// 	: $.map(e.data.files, function(f) { return f.phash == phash && f.name && f.hash ? f : null });
-
 				buffer = $.map(e.data.files, function(f) { return f.phash == phash ? f : null; });
 				
 				buffer = fm.sortFiles(buffer)
@@ -725,6 +721,18 @@ $.fn.elfindercwd = function(fm) {
 					cwd.find('#'+files[l]).trigger(event);
 				}
 				trigger();
+			})
+			.bind('mkdir mkfile upload', function(e) {
+				var phash = fm.cwd().hash, files;
+				
+				if (!fm.selected().length) {
+					$.each(e.data.added.concat(e.data.changed), function(i, file) { 
+						if (file && file.phash == phash) {
+							cwd.find('#'+file.hash).trigger(evtSelect);
+						}
+					});
+					trigger();
+				}
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 

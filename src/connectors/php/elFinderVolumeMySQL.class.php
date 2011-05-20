@@ -175,6 +175,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
+		
+		if (!$this->tmpPath) {
+			$this->disabled[] = 'upload';
+			$this->disabled[] = 'paste';
+		}
 	}
 	
 	/**
@@ -892,6 +897,19 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $this->db->query($sql) ? $this->db->affected_rows > 0 : false;
 	}
 	
+	/**
+	 * Create new file and write into it from file pointer
+	 * Return new file path or false on error.
+	 *
+	 * @param  resource  $fp   file pointer
+	 * @param  string    $dir  target dir path
+	 * @param  string    $name file name
+	 * @return bool|string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _save($fp, $dir, $name) {
+		
+	}
 	
 	
 } // END class

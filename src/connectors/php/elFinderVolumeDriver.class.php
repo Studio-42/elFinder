@@ -155,8 +155,8 @@ abstract class elFinderVolumeDriver {
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'imgLib'       => 'auto',       // image manipulations lib name
 		// 'tmbCleanProb' => 0,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-		'uploadAccepted'     => '',           // regexp to validate filenames
-		'uploadAllow'  => array(),      // mimetypes which allowed to upload
+
+		'uploadAllow'  => array('all'),      // mimetypes which allowed to upload
 		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 		'dateFormat'   => 'j M Y H:i',  // files dates format
@@ -195,6 +195,13 @@ abstract class elFinderVolumeDriver {
 	 * @var bool
 	 **/
 	private static $mimetypesLoaded = false;
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $diabled = array();
 	
 	/**
 	 * default extensions/mimetypes for mimeDetect == 'internal' 
@@ -405,15 +412,21 @@ abstract class elFinderVolumeDriver {
 		$this->yesterday = $this->today-86400;
 		
 		// check some options is arrays
-		if (!is_array($this->options['uploadAllow'])) {
-			$this->options['uploadAllow'] = array();
-		}
-		if (!is_array($this->options['uploadDeny'])) {
-			$this->options['uploadDeny'] = array();
-		}
-		if (!is_array($this->options['disabled'])) {
-			$this->options['disabled'] = array();
-		}
+		$this->uploadAllow = isset($this->options['uploadAllow']) && is_array($this->options['uploadAllow'])
+			? $this->options['uploadAllow']
+			: array();
+			
+		$this->uploadDeny = isset($this->options['uploadDeny']) && is_array($this->options['uploadDeny'])
+			? $this->options['uploadDeny']
+			: array();
+			
+		$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
+		$this->uploadOrder = array(trim($parts[0]), trim($parts[1]));
+			
+		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
+			? $this->options['disabled']
+			: array();
+			
 		
 		$this->cryptLib   = $this->options['cryptLib'];
 		$this->mimeDetect = $this->options['mimeDetect'];
@@ -487,6 +500,7 @@ abstract class elFinderVolumeDriver {
 			$this->tmbURL .= '/';
 		}
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
+
 		$this->configure();
 		
 		return $this->mounted = true;
@@ -564,9 +578,8 @@ abstract class elFinderVolumeDriver {
 			'path' => $this->path($hash),
 			'url'        => $this->URL,
 			'tmbUrl'     => $this->tmbURL,
-			'disabled'   => $this->options['disabled'],
-			'separator'  => $this->separator,
-			'uplMaxSize' => ini_get('upload_max_filesize')
+			'disabled'   => $this->disabled,
+			'separator'  => $this->separator
 		);
 	}
 	
@@ -945,6 +958,65 @@ abstract class elFinderVolumeDriver {
 				: $this->setError(elFinder::ERROR_COPY, $this->_path($path), $dir.$this->separator.$name);
 		}
 		unset($file['hidden']);
+		return $file;
+	}
+	
+	/**
+	 * Save uploaded file
+	 *
+	 * @param  string   $tmpPath  temporary file path
+	 * @param  string   $name     file name
+	 * @param  string   $hash     target dir
+	 * @return Array|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function saveUploaded($tmpPath, $name, $target) {
+		$dir = $this->file($target);
+		
+		if (!$dir) {
+			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+		}
+		if ($dir['mime'] != 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_DIR, $dir['name']);
+		}
+		if (!$dir['write']) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
+		}
+		
+		if (!$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $dir['name']);
+		}
+		
+		$target = $this->decode($target);
+		
+		$dst = $this->_joinPath($target, $name);
+
+		if ($this->_fileExists($dst) && !$this->_isWritable($dst)) {
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $this->_path($dst));
+		}
+
+		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpPath); 
+		$allow = in_array('all', $this->uploadAllow) || $this->mimeAccepted($mime, $this->uploadAllow);
+		$deny  = in_array('all', $this->uploadDeny)  || $this->mimeAccepted($mime, $this->uploadDeny);
+
+		if (!($this->uploadOrder[0] == 'allow' ? $allow && !$deny : $allow || !$deny)) {
+			return $this->setError(elFinder::ERROR_UPLOAD_MIME);
+		}
+		
+		if (!($fp = fopen($tmpPath, 'rb'))) {
+			return false;
+		}
+
+		if (($path = $this->_save($fp, $target, $name)) == false) {
+			fclose($fp);
+			return false;
+		}
+		fclose($fp);
+
+		if (($file = $this->stat($path)) == false) {
+			return false;
+		}
+
 		return $file;
 	}
 	
@@ -1964,7 +2036,17 @@ abstract class elFinderVolumeDriver {
 	 **/
 	abstract protected function _rmdir($path);
 
-
+	/**
+	 * Create new file and write into it from file pointer.
+	 * Return new file path or false on error.
+	 *
+	 * @param  resource  $fp   file pointer
+	 * @param  string    $dir  target dir path
+	 * @param  string    $name file name
+	 * @return bool|string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _save($fp, $dir, $name);
 	
 } // END class
 

@@ -117,7 +117,11 @@ class elFinder {
 	const ERROR_NOT_RM_BY_PARENT     = 24;
 	const ERROR_MKDIR                = 25;
 	const ERROR_MKFILE               = 26;
-	// const ERROR_NOT_MKFILE           = 27;
+	const ERROR_NOT_UPLOAD_FILES     = 27;
+	const ERROR_UPLOAD               = 28;
+	const ERROR_UPLOAD_FILE          = 29;
+	const ERROR_UPLOAD_MIME          = 30;
+	const ERROR_UPLOAD_SEND          = 31;
 	// const ERROR_NOT_MKFILE           = 28;
 	
 	/**
@@ -152,8 +156,12 @@ class elFinder {
 		23 => 'Object with name "$1" already exists in this location.',
 		24 => 'Object "$1" can’t be removed because in this location modifications not allowed.',
 		25 => 'Unable to create folder "$1".',
-		// 26 => 'Unable to create file "$1".',
-		// 27 => 'Unable to create folder "$1".'
+		26 => 'Unable to create file "$1".',
+		27 => 'There are no upladed files was found.',
+		28 => 'Unable to upload files.',
+		29 => 'Unable to upload "$1".',
+		30 => 'File has not allowed file type.',
+		31 => 'Transmission file error.'
 	);
 	
 	/**
@@ -717,13 +725,40 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function upload($args) {
-		// debug($args);
 		$current = $args['current'];
-		$volume = $this->volume($current);
+		$volume  = $this->volume($current);
+		$result  = array('current' => $current, 'added' => array());
+		$files   = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
+			? $args['FILES']['upload'] 
+			: array();
+		
 		
 		if (!$volume) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_DIR_NOT_FOUND));
 		}
+		if (empty($files)) {
+			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_NOT_UPLOAD_FILES));
+		}
+		
+		foreach ($files['name'] as $i => $name) {
+
+			if ($files['error'][$i] != 0) {
+				$result['warning'] = $this->errorMessage(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_SEND);
+				return $this->trigger('upload', $volume, $result);
+			}
+			
+			if (($file = $volume->saveUploaded($files['tmp_name'][$i], $name, $current)) == false) {
+				$warn = $volume->error();
+				array_unshift($warn, $name);
+				array_unshift($warn, self::ERROR_UPLOAD_FILE);
+				$result['warning'] = $this->errorMessage($warn);
+				return $this->trigger('upload', $volume, $result);
+			} 
+			$result['added'][] = $file;
+
+		}
+		
+		return $this->trigger('upload', $volume, $result);
 	}
 	
 	/**

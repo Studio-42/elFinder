@@ -684,6 +684,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return @rmdir($path);
 	}
 	
+	/**
+	 * Create new file and write into it from file pointer.
+	 * Return new file path or false on error.
+	 *
+	 * @param  resource  $fp   file pointer
+	 * @param  string    $dir  target dir path
+	 * @param  string    $name file name
+	 * @return bool|string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _save($fp, $dir, $name) {
+		$path = $dir.DIRECTORY_SEPARATOR.$name;
+
+		if (!($target = @fopen($path, 'wb'))) {
+			return false;
+		}
+
+		while (!feof($fp)) {
+			fwrite($target, fread($fp, 8192));
+		}
+		fclose($target);
+		@chmod($path, $this->options['fileMode']);
+		return $path;
+	}
+	
 	
 } // END class 
 

@@ -126,8 +126,15 @@ elFinder.prototype.commands.upload = function() {
 					formData.append('upload['+i+']', file);
 				});
 				
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4 && xhr.status == 0) {
+						// ff bug while send zero sized file
+						dfrd.reject([errors.noConnect, errors.connectAborted]);
+					}
+				}
+				
 				xhr.send(formData);
-
+				// xhr.abort();
 				return dfrd;
 			},
 		
