@@ -238,6 +238,13 @@ elFinder.prototype.command = function(fm) {
 		return this;
 	}
 	
+	/**
+	 * With argument check given files hashes and return list of existed files hashes.
+	 * Without argument return selected files hashes.
+	 *
+	 * @param  Array|String  hashes
+	 * @return Array
+	 */
 	this.files = function(hashes) {
 		var fm = this.fm;
 		

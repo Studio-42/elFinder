@@ -17,11 +17,13 @@ elFinder.prototype.commands.rm = function() {
 	this._exec = function(hashes) {
 		var self  = this,
 			fm    = this.fm,
-			dfrd  = $.Deferred(),
+			dfrd  = $.Deferred()
+				.fail(function(error) {
+					error && fm.error(error);
+				}),
 			files = this.files(hashes),
-			cnt, i, error, file, hash;
-			
-		cnt = files.length;
+			cnt   = files.length, 
+			i, error, file, hash;
 		
 		if (!cnt) {
 			return dfrd.reject('No files to remove');
@@ -31,9 +33,7 @@ elFinder.prototype.commands.rm = function() {
 			hash = files[i];
 			file = fm.file(hash);
 			if (file.locked) {
-				error = [fm.errors.fileLocked, file.name];
-				fm.error(error);
-				return dfrd.reject(error)
+				return dfrd.reject([fm.errors.fileLocked, file.name]);
 			}
 		}
 			
@@ -47,18 +47,21 @@ elFinder.prototype.commands.rm = function() {
 					fm.ajax({
 						data   : {cmd : 'rm', targets : files, current : fm.cwd().hash},
 						notify : {type : 'rm', cnt : cnt}
-					}).fail(function(error) {
+					})
+					.fail(function(error) {
 						dfrd.reject(error);
-					}).done(function(data) {
+					})
+					.done(function(data) {
 						dfrd.done(data);
-					}).always(function() {
+					}
+					).always(function() {
 						fm.unlockfiles({files : files});
 					});
 				}
 			},
 			cancel : {
-				label : 'Cancel',
-				callback : function() { dfrd.done(); }
+				label    : 'Cancel',
+				callback : function() { dfrd.reject(); }
 			}
 		});
 		return dfrd;

@@ -40,20 +40,22 @@ elFinder.prototype.commands.upload = function() {
 				}
 			}
 			
-			data = fm.normalizeData('upload', raw);
-
-			if (fm.oldAPI) {
-				// if no tree - append dirs to data to avoid removing its
-				if (!raw.tree) {
-					$.each(fm.files(), function(hash, file) {
-						file.phash != data.cwd.hash && data.files.push(file);
-					});
-				}
-				// find diff
-				data = fm.diff(data.files);
-				data.current = raw.cwd.hash;
-				data.warning = warning;
+			if (fm.newAPI) {
+				return fm.normalizeData('upload', raw);
 			}
+			
+			data = fm.normalizeData('open', raw);
+			// if no tree - append dirs to data to avoid removing its
+			if (!raw.tree) {
+				$.each(fm.files(), function(hash, file) {
+					file.phash != data.cwd.hash && data.files.push(file);
+				});
+			}
+			// find diff
+			data = fm.diff(data.files);
+			data.current = raw.cwd.hash;
+			data.warning = warning;
+
 			return data;
 		},
 		transports = {
