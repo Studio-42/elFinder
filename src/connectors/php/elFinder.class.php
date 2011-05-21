@@ -747,7 +747,7 @@ class elFinder {
 				return $this->trigger('upload', $volume, $result);
 			}
 			
-			if (($file = $volume->saveUploaded($files['tmp_name'][$i], $name, $current)) == false) {
+			if (($file = $volume->saveFile($files['tmp_name'][$i], $name, $current)) == false) {
 				$warn = $volume->error();
 				array_unshift($warn, $name);
 				array_unshift($warn, self::ERROR_UPLOAD_FILE);

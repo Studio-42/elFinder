@@ -970,7 +970,7 @@ abstract class elFinderVolumeDriver {
 	 * @return Array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function saveUploaded($tmpPath, $name, $target) {
+	public function saveFile($tmpPath, $name, $target) {
 		$dir = $this->file($target);
 		
 		if (!$dir) {
@@ -1418,7 +1418,7 @@ abstract class elFinderVolumeDriver {
 	/**********************  manuipulations  ******************/
 		
 	/**
-	 * Remove file/dir
+	 * Remove file/ recursive remove dir
 	 *
 	 * @param  string  $path  file path
 	 * @return bool
@@ -1997,7 +1997,7 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _symlink($target, $path, $name='');
 	
 	/**
-	 * Copy file into another file
+	 * Copy file into another file (only inside one volume)
 	 *
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
@@ -2008,7 +2008,7 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _copy($source, $targetDir, $name='');
 	
 	/**
-	 * Move file into another parent dir
+	 * Move file into another parent dir (only inside one volume)
 	 *
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path

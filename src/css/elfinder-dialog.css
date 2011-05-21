@@ -43,7 +43,7 @@
 	width:100%;
 /*	border:1px solid #aaa;*/
 	height:8px;
-	background:url(../images/spinner-ntf.gif) center center repeat-x;
+	background:url(../images/progress.gif) center center repeat-x;
 }
 
 .elfinder-notify-progressbar, .elfinder-notify-progress {

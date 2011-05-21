@@ -177,8 +177,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 		
 		if (!$this->tmpPath) {
-			$this->disabled[] = 'upload';
-			$this->disabled[] = 'paste';
+			// $this->disabled[] = 'upload';
+			// $this->disabled[] = 'paste';
 		}
 	}
 	
@@ -909,6 +909,50 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _save($fp, $dir, $name) {
 		
+		$id = $this->_joinPath($dir, $name);
+		// echo $id;
+		
+		if ($this->tmpPath) {
+			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$name;
+			if (!($target = @fopen($tmp, 'wb'))) {
+				return false;
+			}
+
+			while (!feof($fp)) {
+				fwrite($target, fread($fp, 8192));
+			}
+			fclose($target);
+			$mime  = parent::mimetype($tmp);
+			$width = $height = 0;
+			if (strpos($mime, 'image') === 0) {
+				if (($s = getimagesize($tmp))) {
+					$width  = $s[0];
+					$height = $s[1];
+				}
+			}
+			$sql = $id > 0
+				? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)'
+				: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)';
+			$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), realpath($tmp), filesize($tmp), time(), $mime, $width, $height);
+		} else {
+			$this->mimeDetect = 'internal';
+			$mime = parent::mimetype($name);
+			$stat = fstat($fp);
+			$size = $stat['size'];
+			$content = '';
+			while (!feof($fp)) {
+				$content .= fread($fp, 8192);
+			}
+
+			$sql = $id > 0
+				? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", "%s", %d, %d, "%s", %d, %d)'
+				: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", "%s", %d, %d, "%s", %d, %d)';
+			$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), '0x' . bin2hex($content), $size, time(), $mime, 0, 0);
+		}
+		if ($this->db->query($sql)) {
+			return $id > 0 ? $id : $this->db->insert_id;
+		}
+		return false;
 	}
 	
 	
