@@ -657,8 +657,8 @@ $.fn.elfindercwd = function(fm) {
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
 
-					cwd.scrollTop(0)
-					parent.prepend(itemhtml(file))
+					cwd.scrollTop(0);
+					parent.prepend(itemhtml(file));
 				});
 		
 

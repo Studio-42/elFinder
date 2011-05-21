@@ -1238,6 +1238,13 @@
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
 			})
+			.bind('tmb', function(e) {
+				$.each(e.data.images||[], function(hash, tmb) {
+					if (files[hash]) {
+						files[hash].tmb = tmb;
+					}
+				})
+			})
 			.add(function(e) {
 				cache(e.data.added||[]);
 			})
