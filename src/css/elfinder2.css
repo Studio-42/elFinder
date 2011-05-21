@@ -559,3 +559,43 @@
 .elfinder-info-tb .elfinder-spinner-mini {height:14px; margin:0 5px;}
 
 /*.elfinder-info-fsize { display:none;}*/
+
+.elfinder-upload-dropbox {
+	font-size:1.2em;
+	text-align:center;
+	padding:2em 0;
+	
+	border:3px dashed #aaa;
+}
+
+.elfinder-upload-dropbox.ui-state-hover {
+	background:#dfdfdf;
+	border:3px dashed #555;
+}
+
+.elfinder-upload-dialog-or {
+	font-size:1.2em;
+	margin:.3em 0;
+	text-align:center;
+/*	padding:.4em 0;*/
+}
+
+.elfinder-upload-dialog-wrapper {
+	text-align:center;
+/*	margin:.3em 0;*/
+}
+
+.elfinder-upload-dialog-wrapper .ui-button {
+	position:relative;
+	overflow:hidden;
+}
+
+.elfinder-upload-dialog-wrapper .ui-button form {
+	position:absolute;
+	right:0;
+	top:0;
+	opacity: 0; filter:Alpha(Opacity=0);
+}
+
+
+

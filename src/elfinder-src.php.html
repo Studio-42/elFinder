@@ -122,7 +122,20 @@
 			
 			var f1 = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-
+				handlers : {
+					load : function(e, fm) {
+						fm.error('All your base belongs to us >_<')
+					}
+					// open : function(e, fm) {
+					// 	// console.log(e)
+					// 	// console.log(fm)
+					// 	var d = fm.exec('upload').fail(function(error) {
+					// 		// fm.log('fail '+error)
+					// 	}).done(function(data) {
+					// 		// fm.log(data)
+					// 	})
+					// }
+				},
 				// width:650,
 				lang : 'ru'
 			}).elfinder('instance')

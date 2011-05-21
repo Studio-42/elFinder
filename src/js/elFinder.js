@@ -323,7 +323,9 @@
 						&& shortcut.ctrlKey == ctrlKey 
 						&& shortcut.altKey == e.altKey) {
 							e.preventDefault();
+							e.stopPropagation();
 							shortcut.callback(e, self);
+
 							return false;
 						}
 					});
@@ -1233,7 +1235,7 @@
 					}
 				};
 				
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || 'Unknown error.'), opts);
 			})
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);

@@ -5,22 +5,53 @@
  *
  */
 elFinder.prototype.options = {
-	/* connector url. Required! */
+	/**
+	 * Connector url. Required!
+	 *
+	 * @type String
+	 */
 	url            : '',
+
+	/**
+	 * Ajax request type.
+	 *
+	 * @type String
+	 * @default "get"
+	 */
 	requestType : 'get',
-	/* interface language */
+
+	/**
+	 * Interface language
+	 *
+	 * @type String
+	 * @default "en"
+	 */
 	lang           : 'en',
-	/* additional css class for filemanager container */
+
+	/**
+	 * Additional css class for filemanager node.
+	 *
+	 * @type String
+	 */
 	cssClass       : '',
-	blurClass : 'elfinder-blur',
-	/* Name for places/favorites (i18n), set to '' to disable places */
-	places         : 'Places',
-	/* show places before navigation? */
-	placesFirst    : true,
-	
+
+	/**
+	 * UI plugins to load.
+	 * Current dir ui and dialogs loads always.
+	 * Here set not required plugins as folders tree/toolbar/statusbar etc.
+	 *
+	 * @type Array
+	 * @default ['toolbar', 'tree']
+	 */
 	ui : ['toolbar', 'tree'],
-	
+
+	/**
+	 * Some UI plugins options.
+	 *
+	 * @type Object
+	 */
 	uiOptions : {
+		// toolbar content
 		toolbar : [
 			['back', 'forward', 'reload', 'up', 'home'],
 			['open', 'select'],
@@ -29,10 +60,10 @@ elFinder.prototype.options = {
 			['info'],
 			['help']
 		],
-		
+		// folders tree options
 		tree : {tag : 'ul'}
 	},
-	
+
 	/**
 	 * Display only required file by types
 	 *
@@ -43,7 +74,7 @@ elFinder.prototype.options = {
 	 *  onlyMimes : ["image/png", "application/x-shockwave-flash"] - display png and flash
 	 */
 	onlyMimes : [],
-	
+
 	/**
 	 * How to sort files in current directory
 	 *
@@ -178,63 +209,41 @@ elFinder.prototype.options = {
 		secure  : false
 	},
 	
-	/**
-	 * Toolbar name.
-	 * Toolbar is jquery plugin named $.fn.elfindertoolbar+toolbar 
-	 * Now only one $.fn.elfindertoolbar exists.
-	 * Required for future features.
-	 *
-	 * @type String
-	 * @default ""
-	 */
-	toolbar : '',
-	/* buttons on toolbar */
-	toolbarConf : [
-		['back', 'forward', 'reload', 'up', 'home'],
-		['open', 'select'],
-		['copy', 'cut', 'paste', 'duplicate', 'rename', 'upload'],
-		['rm'],
-		['info'],
-		['help']
-	],
-	toolbarConf_ : [
-		['back', 'forward', 'reload', 'up', 'home'],
-		['select', 'open'],
-		['mkdir', 'mkfile', 'upload'],
-		['copy', 'paste', 'rm'],
-		['rename', 'edit'],
-		['info', 'quicklook'],
-		['icons', 'list'],
-		['help']
-	],
 	/* contextmenu commands */
 	contextmenu : {
 		'cwd'   : ['reload', 'delim', 'mkdir', 'mkfile', 'upload', 'delim', 'paste', 'delim', 'info'],
 		'file'  : ['select', 'open', 'quicklook', 'delim', 'copy', 'cut', 'rm', 'delim', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'delim', 'info'],
 		'group' : ['select', 'copy', 'cut', 'rm', 'delim', 'archive', 'extract', 'delim', 'info']
 	},
-	/* jqueryUI dialog options */
-	dialog : null,
-	/* docked mode */
-	docked : false,
-	/* auto reload time (min) */
-	autoReload : 0,
-	/* set to true if you need to select several files at once from editorCallback */
-	selectMultiple : false,
+
+	/**
+	 * Commands options.
+	 *
+	 * @type Object
+	 **/
 	commandsOptions : {
+		// "getfile" command options.
 		getfile : {
+			// exec command on duble click
 			dblclick : true,
+			// exec command on press enter key
 			enter    : true,
+			// allow to return multiple files info
 			multiple : true,
+			// allow to return filers info
 			folders  : false
 		},
+		// "upload" command options.
 		upload : {
-			ui            : 'uploadbutton', 
+			// open dialog on click toolbar button instead of open browser select files dialog
+			forceDialog   : false,
+			// send files using form with iframe target
 			forceIframe   : false, 
+			// 15 min timeout before abort upload files using iframe
 			iframeTimeout : 900000
 		}
 	},
-	clearCache : true,
+	
 	// debug : true
 	debug : ['error', 'api']
 }

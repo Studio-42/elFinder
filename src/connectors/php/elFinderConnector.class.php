@@ -80,6 +80,7 @@ class elFinderConnector {
 				$arg = trim($arg);
 			}
 			if ($req && empty($arg)) {
+				
 				$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_INV_PARAMS)));
 			}
 			$args[$name] = $arg;

@@ -1,28 +1,17 @@
 $.fn.elfinderuploadbutton = function(cmd) {
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd)
-				.unbind('click')
-				.click(function(e) {
-					if (button.is('.ui-state-disabled')) {
-						e.preventDefault();
-						input.val('');
-					}
-				}),
-			input = $('<input type="file" multiple="on"/>')
+				.unbind('click'), 
+			form = $('<form/>').appendTo(button),
+			input = $('<input type="file" multiple="true"/>')
+				.appendTo(form)
 				.change(function() {
 					var _input;
 					if (input.val()) {
 						_input = input.clone(true);
-						input.remove();
-						cmd.exec(input[0]);
+						cmd.exec({input : input.remove()[0]});
 						input = _input.appendTo(form);
 					} 
-				})
-			form = $('<form/>').append(input).appendTo(button)
-			;
-		
-		this._click = function() {
-			cmd.fm.log(here)
-		}
-	})
+				});
+	});
 }
