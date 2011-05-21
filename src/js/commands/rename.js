@@ -17,9 +17,11 @@ elFinder.prototype.commands.rename = function() {
 			file   = fm.file(sel.shift()),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
+					var parent = input.parent();
+					
 					error && fm.error(error);
 					input.remove();
-					input.parent().html(fm.escape(file.name));
+					parent.html(fm.escape(file.name));
 				})
 				.always(function() {
 					fm.enable();

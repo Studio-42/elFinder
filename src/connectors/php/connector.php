@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
-
+ini_set('memory_limit', '128M');
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }

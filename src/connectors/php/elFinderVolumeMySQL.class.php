@@ -910,7 +910,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _save($fp, $dir, $name) {
 		
 		$id = $this->_joinPath($dir, $name);
-		// echo $id;
 		
 		if ($this->tmpPath) {
 			$tmp = $this->tmpPath.DIRECTORY_SEPARATOR.$name;
@@ -930,10 +929,12 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					$height = $s[1];
 				}
 			}
+			
 			$sql = $id > 0
 				? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)'
 				: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)';
 			$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), realpath($tmp), filesize($tmp), time(), $mime, $width, $height);
+			
 		} else {
 			$this->mimeDetect = 'internal';
 			$mime = parent::mimetype($name);
@@ -950,7 +951,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), '0x' . bin2hex($content), $size, time(), $mime, 0, 0);
 		}
 		if ($this->db->query($sql)) {
+			if ($tmp) {
+				unlink($tmp);
+			}
 			return $id > 0 ? $id : $this->db->insert_id;
+		}
+		if ($tmp) {
+			unlink($tmp);
 		}
 		return false;
 	}
