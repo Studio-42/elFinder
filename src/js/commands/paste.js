@@ -18,17 +18,18 @@ elFinder.prototype.commands.paste = function() {
 	}
 	
 	this._exec = function(dst) {
-		var fm    = this.fm,
+		var fm     = this.fm,
 			errors = fm.errors,
-			dst   = dst ? fm.file(dst) : fm.cwd(),
-			files = fm.clipboard(),
-			cnt   = files.length,
-			cut   = cnt ? files[0].cut : false,
-			dfrd  = $.Deferred().fail(function(error) {
+			dst    = dst ? fm.file(dst) : fm.cwd(),
+			files  = fm.clipboard(),
+			cnt    = files.length,
+			cut    = cnt ? files[0].cut : false,
+			dfrd   = $.Deferred().fail(function(error) {
 				error && fm.error(error)
 			}),
-			paste = [],
+			paste     = [],
 			duplicate = [],
+			dopaste, doduplicate,
 			parents,
 			i, file
 			;
@@ -49,8 +50,8 @@ elFinder.prototype.commands.paste = function() {
 		}
 		
 		
-		parents = fm.parents(dst.hash)
-		// fm.log(parents)
+		parents = fm.parents(dst.hash);
+
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if ($.inArray(file.hash, parents) !== -1) {
@@ -72,41 +73,61 @@ elFinder.prototype.commands.paste = function() {
 		
 		fm.log(paste).log(duplicate)
 		
-		if (fm.newAPI) {
-			$.when(
-				// $.Deferred().resolve(),
-				// $.Deferred().resolve()
-				duplicate.length ? fm.exec('duplicate', duplicate) : $.Deferred().resolve(true),
-				paste.length ? fm.ajax({cmd : 'paste', current : fm.cwd().hash, files : paste, dst : dst.hash, cut : cut}) : $.Deferred().resolve(true)
-			).fail(function() { fm.log('fail') })
-			.done(function() { fm.log('done') })
-		} else {
-			$.when(
-				duplicate.length
-					? (function() {
-						var dfrd = $.Deferred();
-						
-						$.each(duplicate, function(i, hash) {
-							fm.log(hash)
-							fm.exec('duplicate', [hash])
-							.fail(function(error) {
-								fm.log(error)
-								dfrd.reject()
-							}).done(function() {
-								dfrd.resolve()
-							})
-						})
-						return dfrd;
-					})()
-					: $.Deferred().resolve()
+		doduplicate = function() {
+			return duplicate.length && fm._commands.duplicate
+				? function() { return fm.exec('duplicate', duplicate) }
+				: $.Deferred.resolve();
+		}
+		
+		dopaste = function() {
+			var phash = fm.cwd().hash,
+				nim = 0, 
+				dfrd = $.Deferred();
+				
+			if (paste.length) {
+				if (fm.newAPI) {
+					return fm.ajax({
+							data   : {cmd : paste, targets : paste, current : phash, cut : cut},
+							notify : {type : 'paste', cnt : paste.length}
+						});
+				} 
+				
+				dfrd= $.Deferred();
+				
+				$.each(paste, function(i, hash) {
+					fm.ajax({
+						data : {cmd : 'paste', current : phash, src : fm.file(hash).phash, dst : dst, targets : [hash]},
+						notify : {type : 'paste', cnt : 1}
+					})
+					.fail(function(error) {
+						num++;
+						if (!dfrd.isRejected()) {
+							dfrd.reject(error);
+						}
+					})
+					.done(function() {
+						if (++num == paste.length && !dfrd.isRejected()) {
+							dfrd.resolve();
+						}
+					});
+				});
+				
+				return dfrd;
+			}
+			
+			return dfrd.resolve();
+		}
+		
+		$.when(
+				dopaste(),
+				doduplicate()
 			)
-			.fail(function() {
-				fm.log('Fail')
+			.fail(function(error) {
+				dfrd.reject(error);
 			})
 			.done(function() {
-				fm.log('Done')
-			})
-		}
+				dfrd.resolve();
+			});
 		
 		return dfrd;	
 	}
