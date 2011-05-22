@@ -490,21 +490,22 @@
 						l     = files.length,
 						dst;
 					
-					self.log(e)
-					return
+					
 					if (!l) {
 						return;
 					}
 
 					if ($this.is('.elfinder-cwd')) {
 						// drop onto current directory
-						dst = cwd.hash;
+						dst = cwd;
 					} else if ($this.is('.elfinder-cwd-file')) {
 						// drop on folder in current directory
 						dst = this.id;
-					} else {
+					} else if ($this.closest('.elfinder-nav-tree').length) {
 						// drop onto directory in tree
 						dst = this.id.substr(4);
+					} else {
+						return;
 					}
 
 					while (l--) {
@@ -515,7 +516,10 @@
 					}
 					
 					ui.helper.hide();
-					self.copy(files, !(e.shiftKey || e.ctrlKey || e.metaKey), true) && self.paste(dst, true);
+					self.clipboard(files);
+					self.exec('paste', dst).always(function() {
+						self.clipboard([]);
+					});
 				}
 			};
 		
@@ -1061,32 +1065,28 @@
 		 * @param  Boolean  if true previous cutted files not be unlocked
 		 * @return Array
 		 */
-		this.clipboard = function(files, cut, quiet) {
-			var map = function(f) { return f.hash; },
-				i, hash, file;
-			
-			if ($.isArray(files)) {
-				clipboard.length && !quiet && this.trigger('unlockfiles', {files : $.map(clipboard, map)});
-
-				clipboard = [];
-				
-				for (i = 0; i < files.length; i++) {
-					hash = files[i];
-					if ((file = this.file(hash)) && file.read) {
-						clipboard.push({
-							hash  : hash,
-							phash : file.phash,
-							name  : file.name,
-							cut   : !!cut
-						});
+		this.clipboard = function(hashes, cut) {
+			// self.log(files)
+			if (hashes !== void(0)) {
+				clipboard = $.map(hashes||[], function(hash) {
+					var file = files[hash];
+					if (file) {
+						return {
+							hash   : hash,
+							phash  : file.phash,
+							name   : file.name,
+							read   : file.read,
+							write  : file.write,
+							locked : file.locked,
+							cut    : !!cut
+						}
 					}
-				}
-
-				this.trigger('changeClipboard', {clipboard : clipboard})
-				cut && !quiet && this.trigger('lockfiles', {files : $.map(clipboard, map)});
+					return null;
+				});
 			}
+
 			// return copy of clipboard instead of refrence
-			return $.map(clipboard, function(f) { return f; });
+			return clipboard.slice(0, clipboard.length);
 		}
 		
 		/**
