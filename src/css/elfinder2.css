@@ -335,6 +335,10 @@
 	cursor:default;
 }
 
+.elfinder-cwd-dragenter {
+	outline:2px solid #8cafed;
+}
+
 /************** ICONS VIEW *************/
 .elfinder-cwd .ui-state-hover { font-weight:normal; }
 

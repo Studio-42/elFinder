@@ -490,6 +490,8 @@
 						l     = files.length,
 						dst;
 					
+					self.log(e)
+					return
 					if (!l) {
 						return;
 					}
