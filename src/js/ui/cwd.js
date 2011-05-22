@@ -24,6 +24,7 @@ $.fn.elfindercwd = function(fm) {
 		$(this).parent().children('.elfinder-workzone').append(this);
 		
 		var 
+			undef = 'undefined',
 			/**
 			 * Select event full name
 			 *
@@ -401,10 +402,9 @@ $.fn.elfindercwd = function(fm) {
 					var node = cwd.find('#'+hash);
 					if (node.length) {
 						(function(node, tmb) {
-							$('<img src="'+tmb+'"/>').load(function() {
-								$(this).unbind('load');
-								node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat");
-							})
+							$('<img/>')
+								.load(function() { node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat"); })
+								.attr('src', tmb);
 						})(node, tmbUrl+tmb);
 					} else {
 						ret = false;
@@ -663,9 +663,9 @@ $.fn.elfindercwd = function(fm) {
 		
 		// drag&drop file upload
 		if (cwd[0].addEventListener
-		&&  XMLHttpRequestUpload !== void(0)
-		&&  File !== void(0)
-		&&  FormData !== void(0)) {
+		&&  typeof XMLHttpRequestUpload != undef
+		&&  typeof File !=undef
+		&&  typeof FormData != undef) {
 			cwd[0].addEventListener('dragenter', function(e) {
 				e.preventDefault();
 				e.stopPropagation();

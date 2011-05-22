@@ -97,10 +97,9 @@ elFinder.prototype.commands.info = function() {
 
 		// load thumbnail
 		if (tmb) {
-			$('<img src="'+tmb+'"/>').load(function() {
-				dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat');
-				$(this).unbind('load');
-			});
+			$('<img/>')
+				.load(function() { dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat'); })
+				.attr('src', tmb);
 		}
 		
 		// send request to count total size
