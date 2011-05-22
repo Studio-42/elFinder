@@ -1,4 +1,10 @@
-
+/**
+ * @class elFinder command "duplicate"
+ * Create file/folder copy with suffix "copy Number"
+ *
+ * @type  elFinder.command
+ * @author  Dmitry (dio) Levashov
+ */
 elFinder.prototype.commands.duplicate = function() {
 	
 	this.handlers = {
@@ -6,46 +12,57 @@ elFinder.prototype.commands.duplicate = function() {
 	}
 	
 	this.getstate = function() {
-		var l = this.fm.selected().length;
-		return l
-			? this.fm.newAPI ? 0 : l == 1 ? 0 : -1
-			: -1;
+		return this.fm.selected().length ? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {
-		var self  = this,
-			fm    = this.fm,
+		var fm    = this.fm,
+			phash = fm.cwd().hash,
 			files = this.files(hashes),
 			cnt   = files.length,
-			dfrd  = $.Deferred(), 
-			data  = {cmd : 'duplicate'},
-			i, file, error;
+			num   = 0,
+			dfrd  = $.Deferred()
+				.fail(function(error) {
+					error && fm.error(error);
+				}), 
+			i;
 			
 		if (!cnt) {
-			return dfrd.reject('Nothing to duplicate');
+			return dfrd.reject(fm.errors.nothing);
 		}
 		
 		for (i = 0; i < cnt; i++) {
-			file = fm.file(files[i]);
-			
-			if (!file.read) {
-				error = [fm.errors.notDuplicate, file.name];
-				fm.error(error);
-				return dfrd.reject(error);
+			if (!fm.file(files[i]).read) {
+				return dfrd.reject([fm.errors.noFilesForCmd, this.title]);
 			}
 		}
 		
 		if (fm.newAPI) {
-			data.targets = files;
-		} else {
-			data.target  = files.shift();
-			data.current = fm.cwd().hash;
-		}
-		
-		return fm.ajax({
-			data : data,
-			notify : {type : 'duplicate', cnt : fm.newAPI ? cnt : 1}
+			return fm.ajax({
+				data   : {cmd : 'duplicate', targets : files},
+				notify : {type : 'duplicate', cnt : cnt}
+			});
+		} 
+				
+		$.each(files, function(i, hash) {
+			fm.ajax({
+				data   : {cmd : 'duplicate', target : hash, current : phash},
+				notify : {type : 'duplicate', cnt : 1}
+			})
+			.fail(function(error) {
+				num++;
+				if (!dfrd.isRejected()) {
+					dfrd.reject(error);
+				}
+			})
+			.done(function(data) {
+				if (++num == cnt && !dfrd.isRejected()) {
+					dfrd.resolve(data);
+				}
+			});
 		});
+		
+		return dfrd;
 	}
 
 }

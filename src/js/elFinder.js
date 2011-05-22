@@ -594,6 +594,23 @@
 		}
 		
 		/**
+		 * Return list of file parents hashes include file hash
+		 * 
+		 * @param  String  file hash
+		 * @return Array
+		 */
+		this.parents = function(hash) {
+			var parents = [],
+				dir;
+			
+			while ((dir = this.file(hash))) {
+				parents.unshift(dir.hash);
+				hash = dir.phash;
+			}
+			return parents;
+		}
+		
+		/**
 		 * Return file path
 		 * 
 		 * @param  Object  file
@@ -761,7 +778,7 @@
 					}
 
 					response = self.normalizeData(cmd, response);
-					if (cmd == 'open' && response.options) {
+					if (response.options) {
 						cwdOptions = $.extend({}, cwdOptions, response.options);
 					}
 					dfrd.resolve(response);
@@ -1057,16 +1074,14 @@
 		 * Return new clipboard content.
 		 *
 		 * @example
-		 *   this.clipboard([]) - clean clipboard, all previous cutted files will be unlocked
+		 *   this.clipboard([]) - clean clipboard
 		 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
 		 * 
 		 * @param  Array    new files hashes
 		 * @param  Boolean  cut files?
-		 * @param  Boolean  if true previous cutted files not be unlocked
 		 * @return Array
 		 */
 		this.clipboard = function(hashes, cut) {
-			// self.log(files)
 			if (hashes !== void(0)) {
 				clipboard = $.map(hashes||[], function(hash) {
 					var file = files[hash];
@@ -1076,13 +1091,13 @@
 							phash  : file.phash,
 							name   : file.name,
 							read   : file.read,
-							write  : file.write,
 							locked : file.locked,
 							cut    : !!cut
 						}
 					}
 					return null;
 				});
+				this.trigger('changeclipboard', {clipboard : clipboard.slice(0, clipboard.length)});
 			}
 
 			// return copy of clipboard instead of refrence
@@ -1402,30 +1417,6 @@
 				open(data);
 				self.trigger('open', data);
 				
-				// self.notify({type : 'upload', cnt : 1, progress : 50})
-				// self.notify({type : 'upload', cnt : 1, prc : 0})
-				// self.notify({type : 'upload', cnt : 1})
-				
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
-				// }, 2000)
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
-				// }, 4000)
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : 0, prc : 25})
-				// }, 6000)
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : -1, prc : 75})
-				// }, 8000)
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : -1, prc : 50})
-				// }, 9000)
-				
-				// setTimeout(function() {
-				// 	self.notify({type : 'upload', cnt : -1})
-				// }, 7000)
-				
 			});
 			
 	}
@@ -1480,7 +1471,9 @@
 			invName      : 'Name "$1" is not allowed.',
 			fileLocked   : 'File "$1" locked and can’t be removed, moved or renamed.',
 			invParams    : 'Invalid parameters.',
-			nameExists   : 'Object named "$1" already exists at this location. Select another name.'
+			nameExists   : 'Object named "$1" already exists at this location. Select another name.',
+			nothingDuplicate : 'Nothing to duplicate.',
+			noFilesForCmd : 'There are no one file was selected for "$1" command.'
 		},
 		
 		/**
@@ -1780,6 +1773,14 @@
 				}
 			});
 
+			if (!data.tree) {
+				$.each(this.files(), function(hash, file) {
+					if (file.phash != phash && file.mime == 'directory') {
+						files[hash] = file;
+					}
+				})
+			}
+
 			if (data.error) {
 				result.error = data.error;
 			}
@@ -1798,10 +1799,13 @@
 				return result;
 			} 
 			
+			
+			
 			return $.extend({
 				current : data.cwd.hash,
-				error : data.error,
-				warning : data.warning
+				error   : data.error,
+				warning : data.warning,
+				options : {tmb : !!data.tmb}
 			}, this.diff($.map(files, filter)));
 		},
 		

@@ -18,6 +18,10 @@ $.fn.elfindercwd = function(fm) {
 		// return dir;
 	}
 	
+	this.unselectAll = function() {
+		cwd = this.filter('.elfinder-cwd:first').trigger('unselectall');
+	}
+	
 	// @TODO on cut add disable class to files?
 	this.not('.elfinder-cwd').each(function() {
 		
@@ -135,10 +139,7 @@ $.fn.elfindercwd = function(fm) {
 				},
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
-				},
-				// style : function(f) {
-				// 	return typeof(f.tmb) == 'string' ? ' style="background:url(\''+tmbUrl+f.tmb+'\') center center no-repeat"' : '';
-				// }
+				}
 			},
 			
 			/**
@@ -659,6 +660,10 @@ $.fn.elfindercwd = function(fm) {
 
 					cwd.scrollTop(0);
 					parent.prepend(itemhtml(file));
+				})
+				.bind('unselectall', function() {
+					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
+					trigger();
 				});
 		
 		// drag&drop file upload
@@ -753,17 +758,17 @@ $.fn.elfindercwd = function(fm) {
 				}
 				trigger();
 			})
-			.bind('mkdir mkfile upload', function(e) {
+			.bind('mkdir mkfile duplicate upload', function(e) {
 				var phash = fm.cwd().hash, files;
 				
-				if (!fm.selected().length) {
+				// if (!fm.selected().length) {
 					$.each(e.data.added.concat(e.data.changed), function(i, file) { 
 						if (file && file.phash == phash) {
 							cwd.find('#'+file.hash).trigger(evtSelect);
 						}
 					});
 					trigger();
-				}
+				// }
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 
