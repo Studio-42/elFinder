@@ -1,23 +1,48 @@
-
+/**
+ * @class elFinder command "copy".
+ * Put files in filemanager clipboard.
+ *
+ * @type  elFinder.command
+ * @author  Dmitry (dio) Levashov
+ */
 elFinder.prototype.commands.cut = function() {
-	var self = this;
 	
-	this._handlers = {
-		select : function() { self._update(); }
+	this.title = 'Cut files';
+	
+	this.handlers = {
+		select : function() { this.update(); }
 	}
 	
-	this._shortcuts = [{
-		pattern     : 'ctrl+x',
-		description : 'Cut',
-		callback    : function() { self.exec(); }
+	this.shortcuts = [{
+		pattern     : 'ctrl+x shift+insert',
+		description : 'Cut files',
 	}];
 	
-	this._getstate = function() {
-		return this.fm.selected().length ? this._state.enabled : this._state.disabled;
+	this.getstate = function() {
+		return this.fm.selected().length ? 0 : -1;
 	}
 	
-	this._exec = function() {
-		self.fm.cut(this.fm.selected());
+	this._exec = function(hashes) {
+		var fm   = this.fm,
+			dfrd = $.Deferred()
+				.fail(function(error) {
+					fm.error(error);
+				}),
+			hashes = this.files(hashes),
+			l      = hashes.length,
+			i, file;
+		
+		for (i = 0; i < l; i++) {
+			file = fm.file(hashes[i]);
+			if (!file.read) {
+				return dfrd.reject([fm.errors.notCopy, file.name]);
+			}
+			if (file.locked) {
+				return dfrd.reject([fm.errors.fileLocked, file.name]);
+			}
+		}
+		
+		return dfrd.resolve(fm.clipboard(hashes, true));
 	}
 
 }

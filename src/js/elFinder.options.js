@@ -35,6 +35,9 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'info', 'help'],
+	
+
 	/**
 	 * UI plugins to load.
 	 * Current dir ui and dialogs loads always.
@@ -198,7 +201,6 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'info', 'help'],
 	
 	
 	/* cookie options */

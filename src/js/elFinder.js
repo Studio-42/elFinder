@@ -1478,7 +1478,7 @@
 			notDuplicate : 'Unable to duplicate "$1" because you have not permission to read it',
 			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
 			invName      : 'Name "$1" is not allowed.',
-			fileLocked   : 'File "$1" locked and can’t be removed or renamed.',
+			fileLocked   : 'File "$1" locked and can’t be removed, moved or renamed.',
 			invParams    : 'Invalid parameters.',
 			nameExists   : 'Object named "$1" already exists at this location. Select another name.'
 		},

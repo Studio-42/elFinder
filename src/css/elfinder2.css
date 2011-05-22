@@ -139,14 +139,14 @@
 .elfinder-button-icon-duplicate  { background-position: 0 -330px; }
 .elfinder-button-icon-info       { background-position: 0 -346px; }
 .elfinder-button-icon-rename     { background-position: 0 -364px; }
-
+.elfinder-button-icon-mkdir      { background-position: 0 -230px; }
+.elfinder-button-icon-mkfile     { background-position: 0 -246px; }
+.elfinder-button-icon-upload     { background-position: 0 -380px; }
 
 /*
 .elfinder-button-icon-select     { background-position: 0 -183px; }
 
-.elfinder-button-icon-mkdir      { background-position: 0 -200px; }
-.elfinder-button-icon-mkfile     { background-position: 0 -217px; }
-.elfinder-button-icon-upload     { background-position: 0 -237px; }
+
 
 
 .elfinder-button-icon-edit       { background-position: 0 -352px; }
