@@ -1475,7 +1475,6 @@
 			fileLocked   : 'File "$1" locked and can’t be removed, moved or renamed.',
 			invParams    : 'Invalid parameters.',
 			nameExists   : 'Object named "$1" already exists at this location. Select another name.',
-			nothingDuplicate : 'Nothing to duplicate.',
 			noFilesForCmd : 'There are no one file was selected for "$1" command.'
 		},
 		

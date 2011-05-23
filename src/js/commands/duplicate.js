@@ -12,7 +12,7 @@ elFinder.prototype.commands.duplicate = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.selected().length ? 0 : -1;
+		return this.fm.cwd().write && this.fm.selected().length ? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {
@@ -38,13 +38,17 @@ elFinder.prototype.commands.duplicate = function() {
 			if (!file.read) {
 				return dfrd.reject([errors.notDuplicate, file.name]);
 			}
+			file = fm.file(file.phash);
+			if (!file.write) {
+				return dfrd.reject(['Unable duplicate "$1" because this location is not writable.', file.name]);
+			}
 		}
 		
 		if (fm.oldAPI) {
 			$.each(files, function(i, hash) {
 				args.push(function() {
 					return fm.ajax({
-						data   : {cmd : 'duplicate', target : hash, current : phash},
+						data   : {cmd : 'duplicate', target : hash, current : fm.files(hash).phash},
 						notify : {type : 'duplicate', cnt : 1}
 					});
 				});
