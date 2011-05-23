@@ -16,53 +16,48 @@ elFinder.prototype.commands.duplicate = function() {
 	}
 	
 	this._exec = function(hashes) {
-		var fm    = this.fm,
-			phash = fm.cwd().hash,
-			files = this.files(hashes),
-			cnt   = files.length,
-			num   = 0,
-			dfrd  = $.Deferred()
+		var fm     = this.fm,
+			errors = fm.errors,
+			phash  = fm.cwd().hash,
+			files  = this.files(hashes),
+			cnt    = files.length,
+			num    = 0,
+			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
 				}), 
-			i;
+			args = [],
+			file, i;
 			
 		if (!cnt) {
-			return dfrd.reject(fm.errors.nothing);
+			return dfrd.reject([errors.noFilesForCmd, this.title]);
 		}
 		
 		for (i = 0; i < cnt; i++) {
-			if (!fm.file(files[i]).read) {
-				return dfrd.reject([fm.errors.noFilesForCmd, this.title]);
+			file = fm.file(files[i]);
+			if (!file.read) {
+				return dfrd.reject([errors.notDuplicate, file.name]);
 			}
 		}
 		
-		if (fm.newAPI) {
-			return fm.ajax({
-				data   : {cmd : 'duplicate', targets : files},
-				notify : {type : 'duplicate', cnt : cnt}
+		if (fm.oldAPI) {
+			$.each(files, function(i, hash) {
+				args.push(function() {
+					return fm.ajax({
+						data   : {cmd : 'duplicate', target : hash, current : phash},
+						notify : {type : 'duplicate', cnt : 1}
+					});
+				});
 			});
-		} 
-				
-		$.each(files, function(i, hash) {
-			fm.ajax({
-				data   : {cmd : 'duplicate', target : hash, current : phash},
-				notify : {type : 'duplicate', cnt : 1}
-			})
-			.fail(function(error) {
-				num++;
-				if (!dfrd.isRejected()) {
-					dfrd.reject(error);
-				}
-			})
-			.done(function(data) {
-				if (++num == cnt && !dfrd.isRejected()) {
-					dfrd.resolve(data);
-				}
-			});
+
+			return fm.waterfall.apply(null, args);
+		}
+		
+		return fm.ajax({
+			data   : {cmd : 'duplicate', targets : files},
+			notify : {type : 'duplicate', cnt : cnt}
 		});
 		
-		return dfrd;
 	}
 
 }

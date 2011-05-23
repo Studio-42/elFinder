@@ -1715,6 +1715,41 @@
 			return this._node.text(name).html();
 		},
 		
+		waterfall : function() {
+			var steps   = [],
+				dfrd    = $.Deferred(),
+				pointer = 0;
+
+			$.each(arguments, function(i, m) {
+				steps.push(function() {
+					var args = Array.prototype.slice.apply(arguments),
+						d = m.apply(null, args);
+
+					if (!d.promise) {
+						d = $.Deferred().resolve(d);
+					}
+
+					d.fail(function(error) {
+						dfrd.reject(error)
+					})
+					.done(function(data) {
+						pointer++;
+						args.push(data);
+
+						if (pointer == steps.length) {
+							dfrd.resolve.apply(dfrd, args)
+						} else {
+							steps[pointer].apply(null, args)
+						}
+					});
+				});
+			});
+
+			steps[0]();
+
+			return dfrd;
+		},
+		
 		/**
 		 * Cleanup ajax data.
 		 * For old api convert data into new api format

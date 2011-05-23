@@ -17,6 +17,19 @@ elFinder.prototype.commands.paste = function() {
 		return this.fm.clipboard().length && this.fm.cwd().write ? 0 : -1;
 	}
 	
+	this.exec = function(dst) {
+		var fm = this.fm;
+		var d = this._exec(dst)
+			.fail(function(error) {
+				fm.log('error').log(error)
+			})
+			.done(function() {
+				// fm.log('data').log(arguments)
+			})
+		
+		return d
+	}
+	
 	this._exec = function(dst) {
 		var fm     = this.fm,
 			errors = fm.errors,
@@ -24,18 +37,145 @@ elFinder.prototype.commands.paste = function() {
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			dfrd   = $.Deferred().fail(function(error) {
-				error && fm.error(error)
-			}),
-			paste     = [],
-			duplicate = [],
-			dopaste, doduplicate,
-			parents,
-			i, file
+			fpaste = [],
+			fcopy  = [],
+			dfrd   = $.Deferred()
+				.fail(function(error) {
+					error && fm.error(error)
+				}),
+			copy = function(files) {
+				return files.length && fm._commands.duplicate
+					? fm.exec('duplicate', files)
+					: $.Deferred().resolve();
+			},
+			paste = function(files) {
+				var dfrd      = $.Deferred(),
+					existed   = [],
+					intersect = function(files, names) {
+						var ret = [], 
+							i   = files.length;
+
+						while (i--) {
+							$.inArray(files[i].name, names) !== -1 && ret.unshift(i);
+						}
+						return ret;
+					},
+					confirm   = function(ndx) {
+						var i    = existed[ndx],
+							file = files[i],
+							last = ndx == existed.length-1;
+
+						if (!file) {
+							return;
+						}
+
+						fm.confirm({
+							title  : 'Move file',
+							text   : 'File '+file.name+' exists. Replace',
+							all    : !last,
+							accept : {
+								label    : 'Replace',
+								callback : function(all) {
+									!last && !all
+										? confirm(++ndx)
+										: paste(files);
+								}
+							},
+							reject : {
+								label    : 'No',
+								callback : function(all) {
+									var i;
+
+									if (all) {
+										i = existed.length;
+										while (ndx < i--) {
+											files[existed[i]].remove = true
+										}
+									} else {
+										files[existed[ndx]].remove = true;
+									}
+
+									!last && !all
+										? confirm(++ndx)
+										: paste(files);
+								}
+							},
+							cancel : {
+								label    : 'Cancel',
+								callback : function() {
+									dfrd.resolve();
+								}
+							}
+						})
+					},
+					valid     = function(names) {
+						existed = intersect(files, names);
+						if (existed.length) {
+							confirm(0);
+						} else {
+							paste(files);
+						}
+					},
+					paste     = function(files) {
+						var files  = $.map(files, function(file) { return !file.remove ? file : null } ),
+							cnt    = files.length,
+							groups = {},
+							args   = [];
+
+						if (!cnt) {
+							return dfrd.resolve();
+						}
+
+
+						if (fm.oldAPI) {
+							$.each(files, function(i, file) {
+								if (!groups[file.phash]) {
+									groups[file.phash] = [];
+								}
+
+								groups[file.phash].push(file.hash);
+							});
+
+							$.each(groups, function(src, targets) {
+								args.push(function() {
+									return fm.ajax({
+										data   : {cmd : 'paste', current : fm.cwd().hash, src : src, dst : dst.hash, targets : targets, cut : cut ? 1 : 0},
+										notify : {type : cut ? 'move' : 'copy', cnt : targets.length}
+									});
+								});
+							});
+
+							fm.waterfall.apply(null, args)
+								.fail(function(error) {
+									dfrd.reject(error);
+								})
+								.done(function() {
+									dfrd.resolve.apply(dfrd, Array.prototype.slice.apply(arguments));
+								})
+
+						}
+
+					}
+					;
+				
+				if (files.length) {
+					if (dst.hash == fm.cwd().hash) {
+						valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }));
+					} else {
+
+					}
+				} else {
+					dfrd.resolve();
+				}
+				
+				
+				return dfrd;
+			},
+			parents, i, file
 			;
 
 		if (!cnt) {
-			return dfrd.reject('There no one files in clipboard to paste');
+			return dfrd.reject('There are no files in clipboard to paste');
 		}
 			
 		if (!dst) {
@@ -45,10 +185,10 @@ elFinder.prototype.commands.paste = function() {
 		if (dst.mime != 'directory') {
 			return dfrd.reject([errors.notDir, dst.name]);
 		}
+		
 		if (!dst.write)	{
 			return dfrd.reject(['Unable paste files because you do not have permissions to write in "$1"', dst.name])
 		}
-		
 		
 		parents = fm.parents(dst.hash);
 
@@ -65,71 +205,23 @@ elFinder.prototype.commands.paste = function() {
 			}
 
 			if (file.phash == dst.hash) {
-				duplicate.push(file.hash);
+				fcopy.push(file.hash);
 			} else {
-				paste.push(file.hash);
-			}
-		}
-		
-		fm.log(paste).log(duplicate)
-		
-		doduplicate = function() {
-			return duplicate.length && fm._commands.duplicate
-				? function() { return fm.exec('duplicate', duplicate) }
-				: $.Deferred.resolve();
-		}
-		
-		dopaste = function() {
-			var phash = fm.cwd().hash,
-				nim = 0, 
-				dfrd = $.Deferred();
-				
-			if (paste.length) {
-				if (fm.newAPI) {
-					return fm.ajax({
-							data   : {cmd : paste, targets : paste, current : phash, cut : cut},
-							notify : {type : 'paste', cnt : paste.length}
-						});
-				} 
-				
-				dfrd= $.Deferred();
-				
-				$.each(paste, function(i, hash) {
-					fm.ajax({
-						data : {cmd : 'paste', current : phash, src : fm.file(hash).phash, dst : dst, targets : [hash]},
-						notify : {type : 'paste', cnt : 1}
-					})
-					.fail(function(error) {
-						num++;
-						if (!dfrd.isRejected()) {
-							dfrd.reject(error);
-						}
-					})
-					.done(function() {
-						if (++num == paste.length && !dfrd.isRejected()) {
-							dfrd.resolve();
-						}
-					});
+				fpaste.push({
+					hash  : file.hash,
+					phash : file.phash,
+					name  : file.name
 				});
-				
-				return dfrd;
 			}
-			
-			return dfrd.resolve();
 		}
 		
-		$.when(
-				dopaste(),
-				doduplicate()
-			)
-			.fail(function(error) {
-				dfrd.reject(error);
-			})
-			.done(function() {
-				dfrd.resolve();
-			});
+		// to avoid error message duplicate
+		// dfrd = $.Deferred();
 		
-		return dfrd;	
+		return $.when(
+			copy(fcopy),
+			paste(fpaste)
+		);
 	}
 
 }
