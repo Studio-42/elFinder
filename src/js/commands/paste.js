@@ -41,9 +41,9 @@ elFinder.prototype.commands.paste = function() {
 			fcopy  = [],
 			dfrd   = $.Deferred()
 				.fail(function(error) {
-					error && fm.error(error)
+					fm.error(error)
 				}),
-			copy = function(files) {
+			copy  = function(files) {
 				return files.length && fm._commands.duplicate
 					? fm.exec('duplicate', files)
 					: $.Deferred().resolve();
@@ -126,7 +126,6 @@ elFinder.prototype.commands.paste = function() {
 							return dfrd.resolve();
 						}
 
-
 						if (fm.oldAPI) {
 							$.each(files, function(i, file) {
 								if (!groups[file.phash]) {
@@ -145,29 +144,36 @@ elFinder.prototype.commands.paste = function() {
 								});
 							});
 
-							fm.waterfall.apply(null, args)
+							return fm.waterfall.apply(null, args)
 								.fail(function(error) {
 									dfrd.reject(error);
 								})
 								.done(function() {
 									dfrd.resolve.apply(dfrd, Array.prototype.slice.apply(arguments));
-								})
-
-						}
-
+								});
+						} 
+						
+						fm.ajax({cmd : 'paste', dst : dst.hash, targets : $.map(files, function(f) { return f.hash}), cut : cut ? 1 : 0});
 					}
 					;
 				
-				if (files.length) {
-					if (dst.hash == fm.cwd().hash) {
-						valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }));
-					} else {
-
-					}
-				} else {
-					dfrd.resolve();
+				if (!files.length) {
+					return dfrd.resolve();
 				}
-				
+					
+				if (fm.oldAPI) {
+					paste(files);
+				} else {
+					dst.hash == fm.cwd().hash
+						? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
+						: fm.ajax({
+							data : {cmd : 'ls', target : dst.hash},
+							preventFail : true
+						})
+						.always(function(data) {
+							valid(data.list || [])
+						});
+				}
 				
 				return dfrd;
 			},
@@ -195,13 +201,13 @@ elFinder.prototype.commands.paste = function() {
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if ($.inArray(file.hash, parents) !== -1) {
-				return dfrd.reject(['Unable to copy "$1" into itself or in child folder', file.name])
+				return dfrd.reject(['Unable to copy "$1" into itself or in child folder', file.name]);
 			}
 			if (!file.read) {
 				return dfrd.reject([notCopy, file.name]);
 			}
 			if (cut && file.locked) {
-				return dfrd.reject([fileLocked, file.name])
+				return dfrd.reject([fileLocked, file.name]);
 			}
 
 			if (file.phash == dst.hash) {
@@ -214,9 +220,6 @@ elFinder.prototype.commands.paste = function() {
 				});
 			}
 		}
-		
-		// to avoid error message duplicate
-		// dfrd = $.Deferred();
 		
 		return $.when(
 			copy(fcopy),

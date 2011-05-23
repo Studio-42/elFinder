@@ -30,6 +30,7 @@ class elFinder {
 	 **/
 	protected $commands = array(
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false),
+		'ls'      => array('target' => true, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('current' => true, 'files' => true),
@@ -423,12 +424,6 @@ class elFinder {
 			}
 		}
 		
-		// if (!in_array($cwd, $files)) {
-		// 	$files[] = $cwd;
-		// }
-		
-		// shuffle($files);
-		
 		$result = array(
 			'cwd'     => $cwd,
 			'options' => $volume->options($target),
@@ -441,6 +436,25 @@ class elFinder {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function ls($args) {
+		$target = $args['target'];
+		
+		if (($volume = $this->volume($target)) == false) {
+			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
+		}
+		if (($list = $volume->ls($target)) === false) {
+			return array('error' => $this->errorMessage($volume->error()));
+		}
+		
+		return array('list' => $list);
 	}
 	
 	/**

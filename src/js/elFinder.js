@@ -516,7 +516,10 @@
 					}
 					
 					ui.helper.hide();
-					self.clipboard(files);
+					
+					self.log(files)
+					// return
+					self.clipboard(files, !(e.ctrlKey||e.shiftKey||e.metaKey));
 					self.exec('paste', dst).always(function() {
 						self.clipboard([]);
 					});

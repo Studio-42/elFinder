@@ -517,7 +517,7 @@ $.fn.elfindercwd = function(fm) {
 				while (l--) {
 					hash = files[l];
 					if ((n = cwd.find('#'+hash)).length) {
-						n.remove();
+						n.detach();
 					} else if ((ndx = index(hash)) != -1) {
 						buffer.splice(ndx, 1);
 					}

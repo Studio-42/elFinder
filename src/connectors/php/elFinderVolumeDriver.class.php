@@ -685,6 +685,29 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function ls($hash, $mimes=array()) {
+		if (($file = $this->dir($hash)) == false) {
+			return false;
+		}
+		
+		$list = array();
+		
+		foreach ($this->_scandir($this->decode($hash)) as $p) {
+			if (!$this->_isHidden($p)
+			&& ($this->_isDir($p) || !$mimes || $this->mimeAccepted($this->mimetype($p), $mimes))) {
+				$list[] = $this->_basename($p);
+			}
+ 		}
+
+		return $list;
+	}
+
+	/**
 	 * Return subfolders for required one or false on error
 	 *
 	 * @param  string   $hash  folder hash or empty string to get tree from root folder
