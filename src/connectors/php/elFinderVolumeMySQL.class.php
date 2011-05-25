@@ -113,6 +113,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$this->db = new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db']);
 		if ($this->db->connect_error || @mysqli_connect_error()) {
 			echo mysqli_error();
+			
 			return false;
 		}
 		
@@ -175,7 +176,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
-		
+
 		if (!$this->tmpPath) {
 			// $this->disabled[] = 'upload';
 			// $this->disabled[] = 'paste';

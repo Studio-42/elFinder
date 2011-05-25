@@ -72,20 +72,24 @@ elFinder.prototype.commands.upload = function() {
 				var dfrd     = new $.Deferred(),
 					xhr      = new XMLHttpRequest(),
 					formData = new FormData(),
-					files    = $.map(data ? data.files || (data.input && data.input.files) || [] : [], function(file) { return file instanceof File  && file.type ? file : null; }),
+					files    = $.map(data && (data.files || (data.input && data.input.files) || []), function(file) { return file instanceof File ? file : null; }),
 					cnt      = files.length, 
 					notify   = false,
 					loaded   = 5,
 					ntm;
 				
 				if (!cnt) {
-					return dfrd.reject();
+					return dfrd.reject('There are no files to upload');
 				}
 				
 				dfrd.always(function() {
-					timeout && clearTimeout(timeout)
+					ntm && clearTimeout(ntm);
 					notify  && fm.notify({type : 'upload', cnt : -cnt});
 				});
+				
+				xhr.addEventListener('error', function() {
+					dfrd.reject('xhr error');
+				}, false);
 				
 				xhr.addEventListener('abort', function() {
 					dfrd.reject([errors.noConnect, errors.connectAborted]);
@@ -114,7 +118,20 @@ elFinder.prototype.commands.upload = function() {
 					var prev = loaded, curr;
 					
 					if (e.lengthComputable) {
+						
 						curr = parseInt(e.loaded*100 / e.total);
+						// to avoid strange bug in safari (not in chrome) with drag&drop
+						// bug: macos finder opened in any folder,
+						// reset safari cache (option+command+e), reload elfinder page,
+						// drop file from finder
+						// on first attempt request starts (progress callback called ones) but never ends.
+						// any next drop - successfull.
+						if (curr > 0 && !notify && !ntm) {
+							ntm  = setTimeout(function() {
+								fm.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
+								notify = true;
+							}, fm.notifyDelay);
+						}
 						if (curr - prev > 4) {
 							loaded = curr;
 							notify && fm.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
@@ -141,17 +158,13 @@ elFinder.prototype.commands.upload = function() {
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4 && xhr.status == 0) {
 						// ff bug while send zero sized file
+						// for safari - send directory
 						dfrd.reject([errors.noConnect, errors.connectAborted]);
 					}
 				}
-				
+
 				xhr.send(formData);
-				
-				ntm = timeout  = setTimeout(function() {
-					fm.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
-					notify = true;
-				}, fm.notifyDelay);
-				// xhr.abort();
+
 				return dfrd;
 			},
 		
@@ -162,7 +175,6 @@ elFinder.prototype.commands.upload = function() {
 					name   = 'iframe-'+fm.namespace+'-'+(++counter),
 					dfrd   = new $.Deferred(),
 					input  = data && data.input,
-					cnt    = input.files ? input.files.length : $(input).val() ? 1 : 0,
 					notify = false,
 					iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" />')
 						.bind('load', function() {
@@ -197,17 +209,17 @@ elFinder.prototype.commands.upload = function() {
 							
 							form.submit();
 						}),
-						form   = $('<form action="'+opts.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="text" name="cmd" value="upload" /><input type="text" name="current" value="'+fm.cwd().hash+'" /></form>')
-							.append($(input).attr('name', 'upload[]'))
-							.append(iframe),
+					form   = $('<form action="'+opts.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none_"><input type="text" name="cmd" value="upload" /><input type="text" name="current" value="'+fm.cwd().hash+'" /></form>'),
+					cnt    = 0,
 					ntm, stm;
-					
-				if (!cnt) {
-					return dfrd.reject();
+
+
+				if (!(input && $(input).is(':file') && (cnt = input.files ? input.files.length : $(input).val() ? 1 : 0))) {
+					return dfrd.reject('There are no files to upload');
 				}
 				
 				
-				form.appendTo('body');
+				form.append($(input).attr('name', 'upload[]')).append(iframe).appendTo('body');
 				
 				$.each(mimes, function(i, mime) {
 					form.append('<input type="text" name="mimes[]" value="'+mime+'"/>');
@@ -289,6 +301,39 @@ elFinder.prototype.commands.upload = function() {
 	
 	this.title = 'Upload files';
 	
+	this.handlers = {
+		// bind cwd ui drop event
+		load : function() {
+			var cwd = fm.getUI('cwd'),
+				xhr = transport == 'xhr';
+			
+			cwd[0].addEventListener('dragenter', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				xhr && cwd.addClass('elfinder-cwd-dragenter');
+			}, false);
+
+			cwd[0].addEventListener('dragleave', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				xhr && cwd.removeClass('elfinder-cwd-dragenter')
+			}, false);
+
+			cwd[0].addEventListener('dragover', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			}, false);
+			
+			cwd[0].addEventListener('drop', function(e) {
+			  	e.preventDefault();
+				if (xhr) {
+					cwd.removeClass('elfinder-cwd-dragenter');
+					e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files});
+				}
+			}, false);
+		}
+	}
+	
 	// Shortcut opens dialog
 	this.shortcuts = [{
 		pattern     : 'ctrl+u',
@@ -310,6 +355,7 @@ elFinder.prototype.commands.upload = function() {
 		} 
 		
 		this.options.ui = this.options.forceDialog ? 'button' : 'uploadbutton';
+		
 	}
 	
 	/**
@@ -369,7 +415,11 @@ elFinder.prototype.commands.upload = function() {
 	this._exec = function(data) {
 		var fm   = this.fm;
 		
-		return dfrd = transports[transport](data)
+		// var d = transports[transport](data)
+		// fm.log(d)
+		// return d
+		
+		return transports[transport](data)
 				.fail(function(error) {
 					error && fm.error(error);
 				})

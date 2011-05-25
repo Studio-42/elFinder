@@ -666,38 +666,6 @@ $.fn.elfindercwd = function(fm) {
 					trigger();
 				});
 		
-		// drag&drop file upload
-		if (cwd[0].addEventListener
-		&&  typeof XMLHttpRequestUpload != undef
-		&&  typeof File !=undef
-		&&  typeof FormData != undef) {
-			cwd[0].addEventListener('dragenter', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				cwd.addClass('elfinder-cwd-dragenter');
-			}, false);
-
-			cwd[0].addEventListener('dragleave', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				cwd.removeClass('elfinder-cwd-dragenter')
-			}, false);
-
-			cwd[0].addEventListener('dragover', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-			}, false);
-
-			cwd[0].addEventListener('drop', function(e) {
-			  	e.preventDefault();
-				cwd.removeClass('elfinder-cwd-dragenter');
-				if (e.dataTransfer && e.dataTransfer.files) {
-					fm.exec('upload', {files : e.dataTransfer.files});
-				}
-			}, false);
-		}
-		
-
 		fm
 			.open(function(e) {
 				var list  = fm.view == 'list', 

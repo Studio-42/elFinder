@@ -9,6 +9,7 @@ $.fn.elfinderuploadbutton = function(cmd) {
 					var _input;
 					if (input.val()) {
 						_input = input.clone(true);
+						// input.val('')
 						cmd.exec({input : input.remove()[0]});
 						input = _input.appendTo(form);
 					} 

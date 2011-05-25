@@ -78,7 +78,7 @@ $opts = array(
 					'hidden' => false
 				),
 				array(
-					'pattern' => '/mimes/',
+					'pattern' => '/mime_/',
 					'read' => true,
 					'write' => false,
 					'locked' => true,
