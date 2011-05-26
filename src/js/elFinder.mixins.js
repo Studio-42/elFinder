@@ -52,7 +52,7 @@ elFinder.prototype.mixins = {
 
 						fm.lockfiles({files : [id]});
 						fm.ajax({
-								data   : {cmd : cmd, name : name, current : phash},
+								data   : {cmd : cmd, name : name, current : phash, target : phash}, // cuurent - for old api
 								notify : {type : cmd, cnt : 1}
 							})
 							.fail(function(error) {

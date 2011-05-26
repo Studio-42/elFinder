@@ -61,10 +61,14 @@ $opts = array(
 			'uploadDeny'  => array(),
 			'uploadOrder' => 'deny,allow',
 			'uploadOverwrite' => false,
-			// 'mimeDetect' => 'internal',
+			'mimeDetect' => 'internal',
 			// 'tmbPath' => '.tmb',
 			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
+				array(
+					'pattern' => '/\/__.*/',
+					'hidden'  => true
+				),
 				array(
 					'pattern' => '/\/\..*$/',
 					'read'    => true,
@@ -80,9 +84,9 @@ $opts = array(
 					'hidden' => false
 				),
 				array(
-					'pattern' => '/mime_/',
+					'pattern' => '/folder_/',
 					'read' => true,
-					'write' => false,
+					// 'write' => false,
 					'locked' => true,
 					// 'hidden' => true
 				),

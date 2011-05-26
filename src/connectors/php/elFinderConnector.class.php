@@ -67,9 +67,6 @@ class elFinderConnector {
 			$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_UNKNOWN_CMD)));
 		}
 		
-		// debug($_POST);
-		// debug($_FILES);
-		
 		// collect required arguments to exec command
 		foreach ($this->elFinder->commandArgsList($cmd) as $name => $req) {
 			$arg = $name == 'FILES' 
@@ -80,8 +77,7 @@ class elFinderConnector {
 				$arg = trim($arg);
 			}
 			if ($req && empty($arg)) {
-				
-				$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_INV_PARAMS)));
+				$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_INV_PARAMS, $cmd)));
 			}
 			$args[$name] = $arg;
 		}

@@ -37,7 +37,7 @@ class elFinder {
 		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
 		'file'      => array('target' => true),
 		'size'      => array('targets' => true),
-		'mkdir'     => array('current' => true, 'name' => true),
+		'mkdir'     => array('target' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
@@ -97,38 +97,37 @@ class elFinder {
 	const ERROR_CONF_NO_VOL          = 3;
 	const ERROR_UNKNOWN_CMD          = 4;
 	const ERROR_INV_PARAMS           = 5;
-	const ERROR_FILE_NOT_FOUND       = 6;
-	const ERROR_DIR_NOT_FOUND        = 7;
-	const ERROR_NOT_READ             = 8;
-	const ERROR_NOT_DIR              = 9;
-	const ERROR_NOT_FILE             = 10;
-	const ERROR_READ_DIR             = 11;
-	const ERROR_LOCKED               = 12;
-	const ERROR_REMOVE               = 13;
-	const ERROR_NOT_COPY             = 14;
-	const ERROR_NOT_WRITE            = 15;
-	const ERROR_NOT_REPLACE          = 16;
-	const ERROR_COPY                 = 17;
-	const ERROR_NOT_COPY_INTO_ITSELF = 18;
-	const ERROR_INVALID_NAME         = 19;
-	const ERROR_RENAME               = 20;
-	const ERROR_POST_DATA_MAXSIZE    = 21;
-	const ERROR_NOT_RENAME           = 22;
+	
+	const ERROR_FILE_NOT_FOUND       = 10;
+	const ERROR_DIR_NOT_FOUND        = 11;
+	const ERROR_NOT_DIR              = 12;
+	const ERROR_NOT_FILE             = 13;
+	const ERROR_NOT_READ             = 14;
+	const ERROR_READ                 = 15;
+	const ERROR_NOT_WRITE            = 16;
+	const ERROR_LOCKED               = 17;
+	const ERROR_INVALID_NAME         = 18;
+	const ERROR_POST_DATA_MAXSIZE    = 19;
+	const ERROR_NOT_UPLOAD_FILES     = 20;
+	const ERROR_UPLOAD_FILE          = 21;
+	const ERROR_INV_MIME             = 22;
 	const ERROR_FILE_EXISTS          = 23;
-	const ERROR_NOT_RM_BY_PARENT     = 24;
-	const ERROR_MKDIR                = 25;
-	const ERROR_MKFILE               = 26;
-	const ERROR_NOT_UPLOAD_FILES     = 27;
-	const ERROR_UPLOAD               = 28;
-	const ERROR_UPLOAD_FILE          = 29;
-	const ERROR_UPLOAD_MIME          = 30;
-	const ERROR_UPLOAD_SEND          = 31;
-	// const ERROR_NOT_MKFILE           = 28;
+	
+	const ERROR_MKDIR                = 30;
+	const ERROR_MKFILE               = 31;
+	const ERROR_RENAME               = 32;
+	const ERROR_REMOVE               = 33;
+	const ERROR_UPLOAD               = 34;
+	const ERROR_DUPLICATE            = 35;
+	const ERROR_COPY                 = 36;
+	const ERROR_MOVE                 = 37;
+	const ERROR_COPY_INTO_ITSELF     = 38;
+	const ERROR_REPLACE              = 37;
 	
 	/**
-	 * undocumented class variable
+	 * Error messages
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected static $errors = array(
 		0  => 'Unknown error.',
@@ -136,33 +135,34 @@ class elFinder {
 		2  => 'PHP JSON module not installed.',
 		3  => 'There are no one readable volumes available.',
 		4  => 'Unknown command.',
-		5  => 'Invalid parameters.',
-		6  => 'File not found.',
-		7  => 'Folder not found.',
-		8  => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		9  => '"$1" is not a folder.',
-		10 => '"$1" is not a file.',
-		11 => 'Unable to read folder "$1" content.',
-		12 => 'Object "$1" locked and can’t be removed or renamed.',
-		13 => 'Unable to remove "$1".',
-		14 => '"$1" can’t be copied because you don’t have permission to see its contents.',
-		15 => 'You don’t have permission to write into "$1".',
-		16 => 'Object named "$1" exists and can’t be replaced.',
-		17 => 'Unable to copy "$1" to "$2".',
-		18 => 'Unable to copy "$1" into itself.',
-		19 => 'Name "$1" is not allowed.',
-		20 => 'Unable to rename "$1" into "$2".',
-		21 => 'Data exceeds the maximum allowed size.',
-		22 => '"$1" can’t be renamed because parent folder is read only.',
-		23 => 'Object with name "$1" already exists in this location.',
-		24 => 'Object "$1" can’t be removed because in this location modifications not allowed.',
-		25 => 'Unable to create folder "$1".',
-		26 => 'Unable to create file "$1".',
-		27 => 'There are no upladed files was found.',
-		28 => 'Unable to upload files.',
-		29 => 'Unable to upload "$1".',
-		30 => 'File has not allowed file type.',
-		31 => 'Transmission file error.'
+		5  => 'Invalid parameters for command "$1".',
+		
+		10 => 'File not found.',
+		11 => 'Folder not found.',
+		12 => '"$1" is not a folder.',
+		13 => '"$1" is not a file.',
+		14 => '"$1" can’t be opened because you don’t have permission to see its contents.',
+		15 => 'Unable to read "$1" content.',
+		16 => 'You don’t have permission to write into "$1".',
+		17 => 'Object "$1" locked and can’t be removed or renamed.',
+		18 => 'Name "$1" is not allowed.',
+		19 => 'Data exceeds the maximum allowed size.',
+		20 => 'There are no upladed files was found.',
+		21 => 'Upload file "$1" error.',
+		22 => 'File "$1" has not allowed file type.',
+		23 => 'Object named "$1" already exists in this location.',
+		
+		30 => 'Unable to create folder "$1".',
+		31 => 'Unable to create file "$1".',
+		32 => 'Unable to rename "$1".',
+		33 => 'Unable to remove "$1".',
+		34 => 'Unable to upload "$1".',
+		35 => 'Unable to create "$1" duplicate.',
+		36 => 'Unable to copy "$1" into "$2".',
+		37 => 'Unable to move "$1" into "$2".',
+		38 => 'Unable to copy "$1" into itself.',
+		39 => 'Object named "$1" exists and can’t be replaced.',
+		
 	);
 	
 	/**
@@ -209,15 +209,14 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if fm init correctly
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function loaded() {
 		return $this->loaded;
 	}
-	
 	
 	/**
 	 * Return version (api) number
@@ -612,17 +611,19 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mkdir($args) {
-		$current = $args['current'];
+		$target = $args['target'];
 		
-		if(($volume = $this->volume($current)) == false) {
+		if(($volume = $this->volume($target)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
 		
-		return ($hash = $volume->mkdir($current, $args['name'])) == false
-			|| ($dir = $volume->dir($hash)) == false
-				? array('error' => $this->errorMessage($volume->error()))
-				: $this->trigger('mkdir', $volume, array('current' => $current, 'added' => array($dir)));
-			
+		if (($dir = $volume->mkdir($target, $args['name'])) == false) {
+			return array('error' => $this->errorMessage($volume->error()));
+		}
+
+		$added = $dir['hidden'] ? array() : array($dir);
+		
+		return $this->trigger('mkdir', $volume, array('added' => $added), $dir);
 	}
 	
 	/**
@@ -638,22 +639,15 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
-		// for hidden file we get true here
-		// if (($hash = $volume->mkfile($current, $args['name'])) === false) {
-		// 	return array('error' => $this->errorMessage($volume->error()));
-		// }
-		// 
-		// if (is_string($hash)) {
-		// 	if (($file = $volume->file($hash)) == false) {
-		// 		return array('error' => $this->errorMessage($volume->error()))
-		// 	}
-		// 	// $added = 
-		// }
+
+		if (($hash = $volume->mkfile($current, $args['name'])) == false
+		|| ($file = $volume->file($hash, true)) == false) {
+			return array('error' => $this->errorMessage($volume->error()));
+		}
+
+		$added = !$file['hidden'] && $volume->mimeAccepted($file['mime'], $args['mimes']) ? array($file) : array();
 		
-		return ($hash = $volume->mkfile($current, $args['name'])) == false
-			|| ($file = $volume->file($hash)) == false
-				? array('error' => $this->errorMessage($volume->error()))
-				: $this->trigger('mkfile', $volume, array('current' => $current, 'added' => array($file)));
+		return $this->trigger('mkfile', $volume, array('added' => $added), $file);
 	}
 	
 	/**
@@ -665,25 +659,21 @@ class elFinder {
 	 **/
 	protected function rename($args) {
 		$target = $args['target'];
+		$name   = $args['name'];
+		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_RENAME, 'unknown file', self::ERROR_FILE_NOT_FOUND));
 		}
 		
-		if (($rm = $volume->file($target)) == false
-		|| ($file = $volume->rename($target, $args['name'])) === false) {
-			return array('error' => $this->errorMessage($volume->error()));
+		if (($rm  = $volume->file($target)) == false
+		|| ($file = $volume->rename($target, $name)) == false) {
+			$error = array(self::ERROR_RENAME, $rm ? $rm['name'] : 'unknown file');
+			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
+
+		$added = !$file['hidden'] && $volume->mimeAccepted($file['mime'], $args['mimes']) ? array($file) : array();
 		
-		// if renamed file is hidden we get empty array
-		if (empty($file) || !$volume->checkMime($file['hash'], $args['mimes'])) {
-			$added = array();
-		} else {
-			$added = array($file);
-		}
-		
-		$result = array('removed' => array($target), 'added' => $added);
-		
-		return $this->trigger('rename', $volume, $result, $rm);
+		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => $added), array('removed' => $rm, 'added' => $file));
 	}
 	
 	/**

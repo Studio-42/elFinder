@@ -1484,7 +1484,7 @@
 		 * @type  Object
 		 */
 		kinds : {
-			'unknown'                       : 'Unknown',
+			'unknown'                       : 'Unknown type',
 			'directory'                     : 'Folder',
 			'symlink'                       : 'Alias',
 			'symlink-broken'                : 'Broken alias',

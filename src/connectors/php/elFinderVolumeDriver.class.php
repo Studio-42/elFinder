@@ -609,6 +609,18 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if mime is required mimes list
+	 *
+	 * @param  string $mime   mime type to check
+	 * @param  array  $mimes  allowed mime types list
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function mimeAccepted($mime, $mimes=array()) {
+		return $mime == 'directory' || empty($mimes) || in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
+	}
+	
+	/**
 	 * Return true if file exists and not hidden
 	 *
 	 * @param  string  $hash  file hash
@@ -645,6 +657,17 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function isHidden($hash) {
+		$path = $this->decode($hash);
+		return $this->_fileExists($path) && $this->_isHidden($path);
+	}
+	
+	/**
 	 * Return file parent folder hash
 	 *
 	 * @param  string  $hash  file hash
@@ -657,32 +680,25 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return true if file has required mime type
-	 *
-	 * @param  string  $hash  file hash
-	 * @param  array   $mimes  mimetypes list
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function checkMime($hash, $mimes=array()) {
-		$file = $this->file($hash);
-		return $file ? $this->mimeAccepted($file['mime'], $mimes) : false;
-	}
-	
-	/**
 	 * Return file info or false on error
 	 *
 	 * @param  string   $hash  file hash
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function file($hash) {
+	public function file($hash, $hidden=false) {
 		$path = $this->decode($hash);
-		if (($file = $this->stat($path)) == false
-		|| $file['hidden']) {
+		if (($file = $this->stat($path)) == false) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
-		unset($file['hidden']);
+		
+		if (!$hidden) {
+			if ($file['hidden']) {
+				return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+			}
+			unset($file['hidden']);
+		}
+
 		return $file;
 	}
 	
@@ -693,8 +709,8 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function dir($hash) {
-		if (($dir = $this->file($hash)) == false) {
+	public function dir($hash, $hidden=false) {
+		if (($dir = $this->file($hash, $hidden)) == false) {
 			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 		}
 		
@@ -893,6 +909,8 @@ abstract class elFinderVolumeDriver {
 			$this->setError(elFinder::ERROR_MKDIR, $name);
 		}
 		
+		return $this->stat($this->_joinPath($path, $name));
+		
 		return $this->encode($this->_joinPath($path, $name));
 		
 	}
@@ -929,14 +947,11 @@ abstract class elFinderVolumeDriver {
 			$this->setError(elFinder::ERROR_MKFILE, $name);
 		}
 		
-		$path = $this->_joinPath($path, $name);
-		
-		return $this->_isHidden($path) ? true : $this->encode($path);
-		
+		return $this->encode($this->_joinPath($path, $name));
 	}
 	
 	/**
-	 * Rename file
+	 * Rename file and return file info
 	 *
 	 * @param  string  $hash  file hash
 	 * @param  string  $name  new file name
@@ -947,19 +962,19 @@ abstract class elFinderVolumeDriver {
 		$path  = $this->decode($hash);
 		if (!$this->_fileExists($path)
 		||   $this->_isHidden($path)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
-		$dir      = $this->_dirname($path);
+		$dir     = $this->_dirname($path);
 		$oldPath = $this->_path($path);
 		$newPath = $dir.$this->separator.$name;
 		
 		if ($this->_isHidden($dir)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		if (!$this->_isWritable($dir)) {
-			return $this->setError(elFinder::ERROR_NOT_RENAME, $oldPath);
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $oldPath);
 		}
 		
 		if ($this->_isLocked($path)) {
@@ -976,22 +991,11 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->_move($path, $dir, $name)) {
-			return $this->setError(elFinder::ERROR_RENAME, $oldPath, $newPath);
+			return false;
 		} 
 
 		$this->rmTmb($path);
-		$renamed = $this->_joinPath($dir, $name);
-		
-		if (($file = $this->stat($renamed)) == false) {
-			return $this->setError(elFinder::ERROR_RENAME, $oldPath, $newPath);
-		}
-		
-		if ($file['hidden']) {
-			return array();
-		}
-		
-		unset($file['hidden']);
-		return $file;
+		return $this->stat($this->_joinPath($dir, $name));
 	}
 	
 	/**
@@ -1153,7 +1157,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry(dio) Levashov
 	 **/
 	protected function setError($error) {
-		$this->error = func_get_args(); //is_array($error) ? $error : array($error);
+		$this->error = func_get_args(); 
 		return false;
 	}
 	
@@ -1397,8 +1401,11 @@ abstract class elFinderVolumeDriver {
 			if ($this->_isDir($path)) {
 				$type = 'directory';
 			} elseif ($this->_filesize($path) == 0) {
-				$type = 'plain/text';
+				$type = 'text/plain';
 			}
+		} elseif ($type == 'application/x-empty') {
+			// finfo return this mime for empty files
+			$type = 'text/plain';
 		} elseif ($type == 'application/x-zip') {
 			// http://elrte.org/redmine/issues/163
 			$type = 'application/zip';
@@ -1406,17 +1413,6 @@ abstract class elFinderVolumeDriver {
 		return $type;
 	}
 	
-	/**
-	 * Return true if mime is required mimes list
-	 *
-	 * @param  string $mime   mime type to check
-	 * @param  array  $mimes  allowed mime types list
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function mimeAccepted($mime, $mimes) {
-		return in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
-	}
 	
 	/**
 	 * Return file/total directory size
