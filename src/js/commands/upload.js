@@ -76,7 +76,15 @@ elFinder.prototype.commands.upload = function() {
 					cnt      = files.length, 
 					notify   = false,
 					loaded   = 5,
+					settm = function() {
+						return setTimeout(function() {
+							fm.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
+							notify = true;
+						}, fm.notifyDelay);
+					},
 					ntm;
+				
+				fm.log($.browser).log($.support)
 				
 				if (!cnt) {
 					return dfrd.reject('There are no files to upload');
@@ -126,11 +134,8 @@ elFinder.prototype.commands.upload = function() {
 						// drop file from finder
 						// on first attempt request starts (progress callback called ones) but never ends.
 						// any next drop - successfull.
-						if (curr > 0 && !notify && !ntm) {
-							ntm  = setTimeout(function() {
-								fm.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
-								notify = true;
-							}, fm.notifyDelay);
+						if (curr > 0 && $.browser.safari && !notify && !ntm) {
+							ntm = settm();
 						}
 						if (curr - prev > 4) {
 							loaded = curr;
@@ -163,6 +168,7 @@ elFinder.prototype.commands.upload = function() {
 					}
 				}
 
+				!$.browser.safari && (ntm = settm());
 				xhr.send(formData);
 
 				return dfrd;

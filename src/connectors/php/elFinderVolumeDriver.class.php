@@ -155,7 +155,7 @@ abstract class elFinderVolumeDriver {
 		'tmbSize'      => 48,           // images thumbnails size (px)
 		'imgLib'       => 'auto',       // image manipulations lib name
 		// 'tmbCleanProb' => 0,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-
+		'uploadOverwrite' => true,
 		'uploadAllow'  => array('all'),      // mimetypes which allowed to upload
 		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
@@ -657,6 +657,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if file has required mime type
+	 *
+	 * @param  string  $hash  file hash
+	 * @param  array   $mimes  mimetypes list
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function checkMime($hash, $mimes=array()) {
+		$file = $this->file($hash);
+		return $file ? $this->mimeAccepted($file['mime'], $mimes) : false;
+	}
+	
+	/**
 	 * Return file info or false on error
 	 *
 	 * @param  string   $hash  file hash
@@ -916,7 +929,9 @@ abstract class elFinderVolumeDriver {
 			$this->setError(elFinder::ERROR_MKFILE, $name);
 		}
 		
-		return $this->encode($this->_joinPath($path, $name));
+		$path = $this->_joinPath($path, $name);
+		
+		return $this->_isHidden($path) ? true : $this->encode($path);
 		
 	}
 	
@@ -994,8 +1009,9 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_NOT_FOUND);
 		}
 		
-		$name = $this->uniqueName($path);
 		$dir  = $this->_dirname($path);
+		$name = $this->uniqueName($dir, $this->_basename($path));
+		
 		
 		$this->doCopy($path, $dir, $name);
 		
@@ -1018,7 +1034,7 @@ abstract class elFinderVolumeDriver {
 	 * @return Array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function saveFile($tmpPath, $name, $target) {
+	public function saveFile($tmpPath, $name, $target, $controlOvewrite=false) {
 		$dir = $this->file($target);
 		
 		if (!$dir) {
@@ -1039,8 +1055,15 @@ abstract class elFinderVolumeDriver {
 		
 		$dst = $this->_joinPath($target, $name);
 
-		if ($this->_fileExists($dst) && !$this->_isWritable($dst)) {
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $this->_path($dst));
+		if ($this->_fileExists($dst)) {
+			if (!$this->_isWritable($dst)) {
+				return $this->setError(elFinder::ERROR_FILE_EXISTS, $this->_path($dst));
+			}
+			
+			if (!$this->options['uploadOverwrite']) {
+				$name = $this->uniqueName($target, $name, '-');
+			}
+			
 		}
 
 		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpPath); 
@@ -1233,17 +1256,17 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function uniqueName($path, $suffix = ' copy') {
-		$dir  = $this->_dirname($path);
-		$name = $this->_basename($path); 
+	protected function uniqueName($dir, $name, $suffix = ' copy') {
+		// $dir  = $this->_dirname($path);
+		// $name = $this->_basename($path); 
 		$ext  = '';
 
-		if ($this->_isFile($path)) {
+		// if ($this->_isFile($path)) {
 			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
 				$ext  = '.'.$m[1];
 				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
 			}
-		}
+		// }
 		
 		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
 			$i    = (int)$m[2];
@@ -1254,9 +1277,7 @@ abstract class elFinderVolumeDriver {
 		}
 		while ($i++ <= 10000) {
 			$n = $name.($i > 0 ? $i : '').$ext;
-			if (!$this->_fileExists($this->_joinPath($dir, $n)))
-			// if (!$this->_hasChild($dir, $n)) 
-			{
+			if (!$this->_fileExists($this->_joinPath($dir, $n))) {
 				return $n;
 			}
 		}

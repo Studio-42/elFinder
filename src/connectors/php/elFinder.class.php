@@ -38,13 +38,13 @@ class elFinder {
 		'file'      => array('target' => true),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('current' => true, 'name' => true),
-		'mkfile'    => array('current' => true, 'name' => true),
+		'mkfile'    => array('current' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
-		'rename'    => array('target' => true, 'name' => true),
+		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true),
 		
-		'paste' => array('dst' => true, 'targets' => true, 'cut' => false),
-		'upload' => array('current' => true, 'FILES' => true)
+		'paste' => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
+		'upload' => array('current' => true, 'FILES' => true, 'mimes' => false)
 	);
 	
 	/**
@@ -638,6 +638,17 @@ class elFinder {
 		if(($volume = $this->volume($current)) == false) {
 			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
 		}
+		// for hidden file we get true here
+		// if (($hash = $volume->mkfile($current, $args['name'])) === false) {
+		// 	return array('error' => $this->errorMessage($volume->error()));
+		// }
+		// 
+		// if (is_string($hash)) {
+		// 	if (($file = $volume->file($hash)) == false) {
+		// 		return array('error' => $this->errorMessage($volume->error()))
+		// 	}
+		// 	// $added = 
+		// }
 		
 		return ($hash = $volume->mkfile($current, $args['name'])) == false
 			|| ($file = $volume->file($hash)) == false
@@ -662,11 +673,17 @@ class elFinder {
 		|| ($file = $volume->rename($target, $args['name'])) === false) {
 			return array('error' => $this->errorMessage($volume->error()));
 		}
-
-		// if renamed file is hidden we get empty array
-		$added = !empty($file) ? array($file) : array();
 		
-		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => $added));
+		// if renamed file is hidden we get empty array
+		if (empty($file) || !$volume->checkMime($file['hash'], $args['mimes'])) {
+			$added = array();
+		} else {
+			$added = array($file);
+		}
+		
+		$result = array('removed' => array($target), 'added' => $added);
+		
+		return $this->trigger('rename', $volume, $result, $rm);
 	}
 	
 	/**
@@ -758,22 +775,27 @@ class elFinder {
 
 			if ($files['error'][$i] != 0) {
 				$result['warning'] = $this->errorMessage(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_SEND);
-				return $this->trigger('upload', $volume, $result);
+				// return $this->trigger('upload', $volume, $result);
+				break;
 			}
 			
-			if (($file = $volume->saveFile($files['tmp_name'][$i], $name, $current)) == false) {
+			if (($file = $volume->saveFile($files['tmp_name'][$i], $name, $current, true)) == false) {
 				$warn = $volume->error();
 				array_unshift($warn, $name);
 				array_unshift($warn, self::ERROR_UPLOAD_FILE);
 				$result['warning'] = $this->errorMessage($warn);
-				return $this->trigger('upload', $volume, $result);
+				// return $this->trigger('upload', $volume, $result);
+				break;
 			} 
 			$result['added'][] = $file;
 
 		}
 		
-		return $this->trigger('upload', $volume, $result);
+		$result = $this->trigger('upload', $volume, $result);
+		$result['added'] = $this->filterByMimes($result['added'], $volume, $args['mimes']);
+		return $result;
 	}
+	
 	
 	/**
 	 * Copy/move files into new destination
@@ -855,6 +877,27 @@ class elFinder {
 		return false;
 	}
 	
+	/**
+	 * Filter files list by mime types
+	 *
+	 * @param  array  $files   files to filter
+	 * @param  object $volume  files volume
+	 * @param  array  $mimes   mimetypes list
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function filterByMimes($files, $volume, $mimes = array())	{
+		if (empty($mimes)) {
+			return $files;
+		}
+		$result = array();
+		foreach ($files as $file) {
+			if ($volume->checkMime($file['hash'], $mimes)) {
+				$result[] = $file;
+			}
+		}
+		return $result;
+	}
 	
 	/**
 	 * Execute all callbacks/listeners for required command
