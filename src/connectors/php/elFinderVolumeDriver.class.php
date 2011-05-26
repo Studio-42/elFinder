@@ -197,6 +197,13 @@ abstract class elFinderVolumeDriver {
 	private static $mimetypesLoaded = false;
 	
 	/**
+	 * Finfo object for mimeDetect == 'finfo'
+	 *
+	 * @var object
+	 **/
+	protected $finfo = null;
+	
+	/**
 	 * undocumented class variable
 	 *
 	 * @var string
@@ -431,10 +438,28 @@ abstract class elFinderVolumeDriver {
 		$this->cryptLib   = $this->options['cryptLib'];
 		$this->mimeDetect = $this->options['mimeDetect'];
 
+		// find available mimetype detect method
+		$type = strtolower($this->options['mimeDetect']);
+		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
+		$regexp = '/text\/x\-(php|c\+\+)/';
+		
+		if (($type == 'finfo' || $type == 'auto') 
+		&& class_exists('finfo')
+		&& preg_match($regexp, array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))))) {
+			$type = 'finfo';
+		} elseif (($type == 'mime_content_type' || $type == 'auto') 
+		&& function_exists('mime_content_type')
+		&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
+			$type = 'mime_content_type';
+		} else {
+			$type = 'internal';
+		}
+		$this->mimeDetect = $type;
+
 		// load mimes from external file for mimeDetect == 'internal'
 		// based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
 		// file must be in file directory or in parent one 
-		if (($this->mimeDetect == 'internal' || $this->mimeDetect == 'auto') && !self::$mimetypesLoaded) {
+		if ($this->mimeDetect == 'internal' && !self::$mimetypesLoaded) {
 			self::$mimetypesLoaded = true;
 			$this->mimeDetect = 'internal';
 			
@@ -1328,9 +1353,24 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mimetype($path) {
-		$pinfo = pathinfo($path); 
-		$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-		$type  = isset(self::$mimetypes[$ext]) ? self::$mimetypes[$ext] : 'unknown';
+		
+		$type = '';
+		
+		if ($this->mimeDetect == 'finfo') {
+			if (empty($this->finfo)) {
+				$this->finfo = finfo_open(FILEINFO_MIME);
+			}
+			$type =  @finfo_file($this->finfo, $path); 
+		} elseif ($type == 'mime_content_type') {
+			$type = mime_content_type($path);
+		} else {
+			$pinfo = pathinfo($path); 
+			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+			$type  = isset(self::$mimetypes[$ext]) ? self::$mimetypes[$ext] : 'unknown';
+		}
+		
+		$type = explode(';', $type);
+		$type = trim($type[0]);
 		
 		if ($type == 'unknown') {
 			if ($this->_isDir($path)) {

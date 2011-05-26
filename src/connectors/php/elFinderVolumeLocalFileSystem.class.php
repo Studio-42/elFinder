@@ -53,23 +53,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
-		// find available mimetype detect method
-		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $this->options['mimeDetect']) 
-			? strtolower($this->options['mimeDetect'])
-			: 'auto';
-		$regexp = '/text\/x\-(php|c\+\+)/';
-		
-		if (($type == 'finfo' || $type == 'auto') 
-		&& class_exists('finfo')
-		&& preg_match($regexp, array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))))) {
-			$this->options['mimeDetect'] = 'finfo';
-		} elseif (($type == 'mime_content_type' || $type == 'auto') 
-		&& function_exists('mime_content_type')
-		&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
-			$this->options['mimeDetect'] = 'mime_content_type';
-		}
-		
-		
 		return true;
 	}
 	
@@ -147,42 +130,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return isset($this->defaults[$name]) ? $this->defaults[$name] : false;
 	}
 	
-	/**
-	 * Return file mime type
-	 * Override parent method
-	 *
-	 * @param  string $path  file path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function mimetype($path) {
-		$type = '';
-		
-		if ($this->mimeDetect == 'finfo') {
-			if (empty($this->finfo)) {
-				$this->finfo = finfo_open(FILEINFO_MIME);
-			}
-			$type =  @finfo_file($this->finfo, $path); 
-		} elseif ($type == 'mime_content_type') {
-			$type = mime_content_type($path);
-		} 
-		
-		if ($type) {
-			if ($type == 'unknown') {
-				if ($this->_isDir($path)) {
-					$type = 'directory';
-				} elseif ($this->_filesize($path) == 0) {
-					$type = 'plain/text';
-				}
-			} elseif ($type == 'application/x-zip') {
-				// http://elrte.org/redmine/issues/163
-				$type = 'application/zip';
-			}
-			return $type;
-		}
-
-		return parent::mimetype($path);
-	}
 	
 	/*********************** paths/urls *************************/
 	

@@ -60,6 +60,7 @@ $opts = array(
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array(),
 			'uploadOrder' => 'deny,allow',
+			// 'mimeDetect' => 'internal',
 			// 'tmbPath' => '.tmb',
 			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
