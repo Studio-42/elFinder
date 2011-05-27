@@ -596,17 +596,17 @@ class elFinder {
 	 **/
 	protected function size($args) {
 		$size = 0;
-		$target = is_array($args['targets']) ? $args['targets'][0] : '';
 		
-		if (!$target || ($volume = $this->volume($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
-		}
-		
-		foreach ($args['targets'] as $t) {
-			if (!$volume->isReadable($t)) {
-				return array('error' => $this->errorMessage(self::ERROR_NOT_READ));
+		foreach ($args['targets'] as $target) {
+			if (($volume = $this->volume($target)) == false
+			|| ($file = $volume->file($target)) == false) {
+				return array('error' => $this->errorMessage(self::ERROR_FILE_NOT_FOUND));
 			}
-			$size += $volume->size($t);
+			
+			if (!$file['read']) {
+				return array('error' => $this->errorMessage(self::ERROR_FILES_LIST, $file['name']));
+			}
+			$size += $volume->size($target);
 		}
 		return array('size' => $size);
 	}
