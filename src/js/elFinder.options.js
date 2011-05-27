@@ -37,7 +37,11 @@ elFinder.prototype.options = {
 
 	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'info', 'help'],
 	
+	dblclick : 'open',
+	enter    : 'open',
+	shiftenter : 'download',
 
+	getFileCallback : null,
 	/**
 	 * UI plugins to load.
 	 * Current dir ui and dialogs loads always.
@@ -226,10 +230,6 @@ elFinder.prototype.options = {
 	commandsOptions : {
 		// "getfile" command options.
 		getfile : {
-			// exec command on duble click
-			dblclick : true,
-			// exec command on press enter key
-			enter    : true,
 			// allow to return multiple files info
 			multiple : true,
 			// allow to return filers info
@@ -243,19 +243,11 @@ elFinder.prototype.options = {
 			forceIframe   : false, 
 			// 15 min timeout before abort upload files using iframe
 			iframeTimeout : 900000
-		},
-		download : {
-			// exec command on duble click
-			dblclick : true,
-			// exec command on press enter key
-			enter    : false,
-			// exec command on press shift+enter key
-			shiftenter    : true,
 		}
 	},
 	
 	// debug : true
-	debug : ['error', 'event-paste']
+	debug : ['error', 'shortcut-exec']
 }
 
 })(jQuery);

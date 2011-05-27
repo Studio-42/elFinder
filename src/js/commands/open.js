@@ -11,28 +11,49 @@ elFinder.prototype.commands.open = function() {
 				}
 			}
 			return true;
+		},
+		callback = function(e) {
+			e.preventDefault();
+			self.exec();
 		};
 	
+	this.title = 'Open files or enter directory';
 	this.alwaysEnabled = true;
 	
 	this.handlers = {
-		select   : function() { this.update() },
-		dblclick : function(e) { this.exec([e.data.file]) }
+		select   : function() { this.update(); }
 	}
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+down enter NUMPAD_ENTER',
+		pattern     : 'ctrl+down numpad_enter',
 		description : 'Open files or enter directory'
 	}];
 	
-	// fake for button
-	this.disabled = function() {
-		return this.state <= 0;
-	}
-	
-	// fake for button
-	this.active = function() {
-		return false;
+	this.init = function() {
+		var self       = this,
+			fm         = this.fm,
+			o          = fm.options,
+			name       = 'open',
+			dblclick   = o.dblclick == name,
+			enter      = o.enter == name,
+			shiftenter = o.shiftenter == name
+			;
+
+		fm.one('load', function() {
+			dblclick && fm.bind('dblclick', callback);
+			
+			enter && fm.shortcut({
+				pattern     : 'enter',
+				description : self.title,
+				callback    : callback
+			});
+			
+			shiftenter && fm.shortcut({
+				pattern     : 'shift+enter',
+				description : self.title,
+				callback    : callback
+			});
+		})
 	}
 	
 	this.getstate = function() {
@@ -40,30 +61,29 @@ elFinder.prototype.commands.open = function() {
 			sel = fm.selected(),
 			cnt = sel.length;
 
-		return cnt && (cnt == 1 || onlyFiles(sel)) ? 1 : 0;
+		return cnt && (cnt == 1 || onlyFiles(sel)) ? 0 : -1;
+	}
+	
+	this.exec = function(hashes) {
+		return this._exec(hashes);
 	}
 	
 	this._exec = function(hashes) {
 		var fm      = this.fm, 
-			dfrd    = $.Deferred(),
+			dfrd    = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			targets = this.files(hashes),
 			cnt     = targets.length,
+			hashes  = $.isArray(hashes) ? hashes : [],
 			errors  = fm.errors,
 			hash, file, i, url, s, w;
 
-		if (cnt && (cnt == 1 || onlyFiles(targets))) {
-			
-			if (cnt == 1) {
-				hash = targets[0];
-				file = fm.file(hash);
-				if (!file || file.mime == 'directory') {
-					if (file && !file.read) {
-						this.enabled() && fm.error([errors.notRead, file.name])
-						return dfrd.reject(fm.i18n([errors.notRead, file.name]));
-					}
-
-					return fm.ajax({
-							data   : {cmd : 'open', target : hash},
+		// open directory
+		if (hashes.length == 1 || cnt == 1) {
+			if (!cnt || ((file = fm.file(targets[0])) && file.mime == 'directory')) {
+				return file && !file.read
+					? dfrd.reject([errors.read, file.name])
+					: fm.ajax({
+							data   : {cmd  : 'open', target : targets[0]},
 							notify : {type : 'open', cnt : 1, hideCnt : true},
 							freeze : true
 						})
@@ -77,41 +97,43 @@ elFinder.prototype.commands.open = function() {
 									}
 								});
 						});
-				}
+			}
+		}
+
+		if (!cnt || !onlyFiles(targets)) {
+			return dfrd.reject();
+		}
+
+		// open files
+		for (i = 0; i < cnt; i++) {
+			hash = targets[i];
+			file = fm.file(hash)
+			if (!file) {
+				return dfrd.reject(fm.i18n([errors.openFile, errors.fileNotFound]));
+			}
+			if (!file.read) {
+				return dfrd.reject(fm.i18n([errors.read, file.name]));
+			}
+
+			if (!(url = fm.url(file.hash))) {
+				url = fm.option('url') || fm.options.url;
+				url = url + (url.indexOf('?') === -1 ? '?' : '&')
+					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+					+ '&target=' + file.hash;
 			}
 			
-			for (i = 0; i < cnt; i++) {
-				hash = targets[i];
-				file = fm.file(hash)
-				if (!file) {
-					return dfrd.reject(fm.i18n(errors.notFound));
-				}
-				if (!file.read) {
-					return dfrd.reject(fm.i18n([errors.notRead, file.name]));
-				}
-
-				if (!(url = fm.url(file.hash))) {
-					url = fm.option('url') || fm.options.url;
-					url = url + (url.indexOf('?') === -1 ? '?' : '&')
-						+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
-						+ '&target=' + file.hash;
-				}
-				
-				// image - set window size
-				if (file.dim) {
-					s = file.dim.split('x');
-					w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-				}
-
-				if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
-					return dfrd.reject(fm.i18n(errors.popupBlocks));
-				}
+			// set window size for image
+			if (file.dim) {
+				s = file.dim.split('x');
+				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
 			}
 
-			return dfrd.resolve();
+			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
+				return dfrd.reject(errors.popupBlocks);
+			}
 		}
-		return dfrd.reject(fm.i18n(errors.invOpenArg));
-		
+
+		return dfrd.resolve(targets);
 	}
 
 }

@@ -4,14 +4,20 @@
  **/
 elFinder.prototype.commands.download = function() {
 
-	var fm = this.fm,
-		filter = function(hashes) {
-		return $.map(hashes, function(h) { 
-			return fm.file(h).mime == 'directory' ? null : h;
-		})
-	}
+	var self     = this,
+		fm       = this.fm,
+		filter   = function(hashes) { return $.map(hashes, function(h) { return fm.file(h).mime == 'directory' ? null : h; }) },
+		callback = function(e) {
+			if (self.getstate() !== -1) {
+				e.preventDefault();
+				self.exec();
+			} else {
+				self.fm.exec('open');
+			}
+		};
+	
 
-	this.title = 'Download file';
+	this.title = 'Download files';
 	this.alwaysEnabled = true;
 	
 	this._handlers = {
@@ -19,28 +25,30 @@ elFinder.prototype.commands.download = function() {
 	};
 	
 	this.init = function() {
-		var self = this,
-			fm   = this.fm,
-			description = 'Return file info into callback',
-			callback = function() { self._exec(); };
+		var self       = this,
+			fm         = this.fm,
+			o          = fm.options,
+			name       = 'download',
+			dblclick   = o.dblclick == name,
+			enter      = o.enter == name,
+			shiftenter = o.shiftenter == name
+			;
 
-		this.options.dblclick && fm.dblclick(function(e) { 
-			if (self.getstate() > -1) {
-				e.preventDefault();
-				self.exec();
-			}
-		});
-		
-		this.options.enter && fm.shortcut({
-			pattern     : 'enter numpad_enter',
-			description : description,
-			callback    : callback
-		});
-		this.options.shiftenter && fm.shortcut({
-			pattern     : 'shift+enter',
-			description : description,
-			callback    : callback
-		});
+		fm.one('load', function() {
+			dblclick && fm.bind('dblclick', callback);
+			
+			enter && fm.shortcut({
+				pattern     : 'enter',
+				description : self.title,
+				callback    : callback
+			});
+			
+			shiftenter && fm.shortcut({
+				pattern     : 'shift+enter',
+				description : self.title,
+				callback    : callback
+			});
+		})
 	}
 	
 	this.getstate = function() {

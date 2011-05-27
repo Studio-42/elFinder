@@ -1,81 +1,87 @@
-
+/**
+ * @class getfile. Return selected files info into outer callback.
+ * @author Dmitry (dio) Levashov, dio@std42.ru
+ **/
 elFinder.prototype.commands.getfile = function() {
 	
-	this.title= 'Select file';
+	var self = this,
+		fm       = this.fm,
+		filter   = function() {
+			var o = self.options,
+				files = [];
+
+				
+			$.each(fm.selectedFiles(), function(h, file) {
+				if (file.mime != 'directory' || o.folders) {
+					files.push(file);
+				}
+			});
+			
+			return o.multiple || files.length == 1 ? files : [];
+		},
+		callback = function(e) {
+			if (self.getstate() !== -1) {
+				e.preventDefault();
+				self.exec();
+			} else {
+				self.fm.exec('open');
+			}
+		};
+	
+	this.title = 'Select files';
 	
 	this.alwaysEnabled = true;
 	
-	this.callback = typeof(this.fm.options.getFileCallback) == 'function' 
-		? $.proxy(this.fm.options.getFileCallback, this.fm) 
+	this.callback = typeof this.fm.options.getFileCallback == 'function' 
+		? this.fm.options.getFileCallback
 		: false;
 	
 	this.handlers = {
-		select : function() { this.update() }
+		select : function() { this.update(); }
 	}
 	
 	this.init = function() {
-		var self = this,
-			fm   = this.fm;
+		var self       = this,
+			fm         = this.fm,
+			o          = fm.options,
+			name       = 'getfile',
+			dblclick   = o.dblclick   == name,
+			enter      = o.enter      == name,
+			shiftenter = o.shiftenter == name;
 
-		if (this.callback) {
-			this.options.dblclick && fm.dblclick(function(e) { 
-				if (self.getstate() > -1) {
-					e.preventDefault();
-					self.exec();
-				}
+		fm.one('load', function() {
+			dblclick && fm.bind('dblclick', callback);
+			
+			enter && fm.shortcut({
+				pattern     : 'enter',
+				description : self.title,
+				callback    : callback
 			});
 			
-			this.options.enter && fm.shortcut({
-				pattern     : 'enter numpad_enter',
-				description : 'Return file info into callback',
-				callback    : function() {
-					self.getstate() > -1 && self.exec();
-				}
+			shiftenter && fm.shortcut({
+				pattern     : 'shift+enter',
+				description : self.title,
+				callback    : callback
 			});
-		}
-
+		})
 	}
 	
 	this.getstate = function() {
-		var fm = this.fm,
-			sel = fm.selected(),
-			cnt = sel.length, f;
-			
-		if (!this.callback || !cnt || (cnt > 1 && !this.options.multiple)) {
-			return -1;
-		}
-		
-		if (this.options.folders) {
-			return 0;
-		}	
-		while (cnt--) {
-			f = fm.file(sel[cnt]);
-			if (f && f.mime == 'directory') {
-				return -1;
-			}
-		}
-		return 0;
-
+		return this.callback && filter().length ? 0 : -1;
 	}
 	
 	this._exec = function() {
-		var fm     = this.fm,
-			hashes = this.options.multiple ? fm.selected() : [fm.selected().shift()],
-			files  = [];
+		var fm    = this.fm,
+			files = filter();
 			
-		$.each(hashes, function(i, hash) {
-			var file = fm.file(hash);
-			
-			if (file) {
-				file.baseUrl = fm.option('url')
-				file.url = fm.url(hash);
-				file.path = fm.path(hash);
-				files.push(file);
-			}
-
+		$.each(files, function(i, file) {
+			file.baseUrl = fm.option('url')
+			file.url     = fm.url(file.hash);
+			file.path    = fm.path(file.hash);
 		});
+
+		this.callback(files, fm);
 		fm.trigger('getfile', {files : files});
-		this.callback(files);
 		return $.Deferred().resolve();
 	}
 

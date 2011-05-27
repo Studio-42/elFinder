@@ -314,21 +314,22 @@
 					ctrlKey = e.ctrlKey || e.metaKey;
 				
 				if (enabled) {
-					// prevent tab out of elfinder
-					code == 9 && e.preventDefault();
+					
 					$.each(shortcuts, function(i, shortcut) {
-						if (shortcut.type == e.type 
-						&& shortcut.keyCode == code 
+						if (shortcut.type    == e.type 
+						&& shortcut.keyCode  == code 
 						&& shortcut.shiftKey == e.shiftKey 
-						&& shortcut.ctrlKey == ctrlKey 
-						&& shortcut.altKey == e.altKey) {
-							e.preventDefault();
+						&& shortcut.ctrlKey  == ctrlKey 
+						&& shortcut.altKey   == e.altKey) {
+							e.preventDefault()
 							e.stopPropagation();
 							shortcut.callback(e, self);
-
-							return false;
+							self.debug('shortcut-exec', i+' : '+shortcut.description);
 						}
 					});
+					
+					// prevent tab out of elfinder
+					code == 9 && e.preventDefault();
 				}
 			}
 			;
@@ -1057,15 +1058,16 @@
 						? code.charCodeAt(0) 
 						: $.ui.keyCode[code];
 
-					if (code && !shortcuts[pattern]) {
+					if (code/* && !shortcuts[pattern]*/) {
 						shortcuts[pattern] = {
-							keyCode  : code,
-							altKey   : $.inArray('ALT', parts)   != -1,
-							ctrlKey  : $.inArray('CTRL', parts)  != -1,
-							shiftKey : $.inArray('SHIFT', parts) != -1,
-							type     : s.type || 'keydown',
-							callback : s.callback
-						}
+							keyCode     : code,
+							altKey      : $.inArray('ALT', parts)   != -1,
+							ctrlKey     : $.inArray('CTRL', parts)  != -1,
+							shiftKey    : $.inArray('SHIFT', parts) != -1,
+							type        : s.type || 'keydown',
+							callback    : s.callback,
+							description : s.description
+						};
 					}
 				}
 			}
@@ -1255,7 +1257,7 @@
 					}
 				};
 				
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || 'Unknown error.'), opts);
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || self.errors.unknown), opts);
 			})
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
@@ -1324,8 +1326,13 @@
 		 **/
 		this._commands = {};
 		
+		if (!$.isArray(this.options.commands)) {
+			this.options.commands = [];
+		}
 		// command "open" required always
 		$.inArray('open', this.options.commands) === -1 && this.options.commands.push('open');
+		$.inArray('help', this.options.commands) === -1 && this.options.commands.push('help');
+
 		// load commands
 		$.each(this.options.commands, function(i, name) {
 			var cmd = self.commands[name];
@@ -1461,21 +1468,21 @@
 			emptyData      : 'Data is empty.',
 			invData        : 'Invalid data.',
 			cmdRequired    : 'Backend request required command name.',
+			invParams      : 'Invalid parameters for command "$1".',
+			popupBlocks    : 'Unable to open file in new window. Allow popup window in your browser.',
+			unknown        : 'Unknown error.',
 			
-			invOpenArg   : 'Unable to open required files/filders',
-			notFound     : 'File not found.',
+			fileNotFound : 'File not found.',
+			dirNotFound  : 'Folder not found.',
 			notDir       : '"$1" is not a folder.',
 			notFile      : '"$1" is not a file.',
-			notRead      : '"$1" can’t be opened because you don’t have permission to see its contents.',
-			notRm        : '"$1" is locked and can not be removed.',
-			notCopy      : '"$1" can’t be copied because you don’t have permission to see its contents.',
-			notDuplicate : 'Unable to duplicate "$1" because you have not permission to read it',
-			popupBlocks  : 'Unable to open file in new window. Allow popup window in your browser.',
+			read         : '"$1" can’t be opened because you don’t have permission to see its contents.',
+			openDir      : 'Open folder error.',
+			openFile     : 'Open file error.',
+			write        :  'You don’t have permission to write into "$1".',
+			locked       : 'Object "$1" locked and can’t be removed or renamed.',
 			invName      : 'Name "$1" is not allowed.',
-			fileLocked   : 'File "$1" locked and can’t be removed, moved or renamed.',
-			invParams    : 'Invalid parameters.',
-			nameExists   : 'Object named "$1" already exists at this location. Select another name.',
-			noFilesForCmd : 'There are no one file was selected for "$1" command.'
+			exists       : 'Object named "$1" already exists in this location.',
 		},
 		
 		/**
