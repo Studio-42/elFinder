@@ -1,6 +1,8 @@
 
 elFinder.prototype.commands.getfile = function() {
 	
+	this.title= 'Select file';
+	
 	this.alwaysEnabled = true;
 	
 	this.callback = typeof(this.fm.options.getFileCallback) == 'function' 

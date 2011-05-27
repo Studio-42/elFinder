@@ -35,7 +35,7 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'info', 'help'],
 	
 
 	/**
@@ -57,7 +57,7 @@ elFinder.prototype.options = {
 		// toolbar content
 		toolbar : [
 			['back', 'forward', 'reload', 'up', 'home'],
-			['open', 'select'],
+			['open', 'getfile', 'download'],
 			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
 			['rm'],
 			['info'],
@@ -243,6 +243,14 @@ elFinder.prototype.options = {
 			forceIframe   : false, 
 			// 15 min timeout before abort upload files using iframe
 			iframeTimeout : 900000
+		},
+		download : {
+			// exec command on duble click
+			dblclick : true,
+			// exec command on press enter key
+			enter    : false,
+			// exec command on press shift+enter key
+			shiftenter    : true,
 		}
 	},
 	

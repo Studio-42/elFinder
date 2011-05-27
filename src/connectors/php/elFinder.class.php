@@ -571,8 +571,6 @@ class elFinder {
 			$mime = $file['mime'];
 		}
 		
-		
-		
 		$result = array(
 			'volume'  => $volume,
 			'pointer' => $fp,
