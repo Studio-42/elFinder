@@ -868,7 +868,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($file['mime'] == 'directory') {
-			$this->setError(elFinder::ERROR_NOT_FILE, $file['path']);
+			return false;
 		}
 
 		return $this->_fopen($path, 'rb');
@@ -887,7 +887,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create directory
+	 * Create directory and return dir info
 	 *
 	 * @param  string   $dst  destination directory
 	 * @param  string   $name directory name
@@ -896,14 +896,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mkdir($dst, $name) {
 		$path = $this->decode($dst);
-		$dir  = $this->dir($dst);
+		$dir  = $this->file($dst);
 
-		if (!$dir) {
-			return false;
+		if (!$dir || $dir['mime'] != 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
 		}
 		
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_MKDIR, $name, elFinder::ERROR_NOT_WRITE, $this->_relpath($path));
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($path));
 		}
 		
 		if (!$this->nameAccepted($name)) {
@@ -915,13 +915,10 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->_mkdir($path, $name)) {
-			$this->setError(elFinder::ERROR_MKDIR, $name);
+			return false;
 		}
 		
 		return $this->stat($this->_joinPath($path, $name));
-		
-		return $this->encode($this->_joinPath($path, $name));
-		
 	}
 	
 	/**
@@ -934,28 +931,28 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mkfile($dst, $name) {
 		$path = $this->decode($dst);
-		$dir  = $this->dir($dst);
+		$dir  = $this->file($dst);
+	
+		if (!$dir || $dir['mime'] != 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+		}
 
-		if (!$dir) {
-			return false;
-		}
-		
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_MKFILE, $name, elFinder::ERROR_NOT_WRITE, $this->_relpath($path));
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($path));
 		}
-		
+
 		if (!$this->nameAccepted($name)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
-		
+
 		if ($this->_fileExists($this->_joinPath($path, $name))) {
 			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
 		}
-		
+
 		if (!$this->_mkfile($path, $name)) {
-			$this->setError(elFinder::ERROR_MKFILE, $name);
+			return false;
 		}
-		
+
 		return $this->encode($this->_joinPath($path, $name));
 	}
 	

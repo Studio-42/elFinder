@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ALL); // Set E_ALL for debuging
+error_reporting(0); // Set E_ALL for debuging
 
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');

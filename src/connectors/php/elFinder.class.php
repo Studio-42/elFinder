@@ -38,7 +38,7 @@ class elFinder {
 		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('target' => true, 'name' => true),
-		'mkfile'    => array('current' => true, 'name' => true, 'mimes' => false),
+		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true),
@@ -622,8 +622,8 @@ class elFinder {
 	 **/
 	protected function mkdir($args) {
 		$target = $args['target'];
-		$name = $args['name'];
-		$error = array(self::ERROR_MKDIR, $name);
+		$name   = $args['name'];
+		$error  = array(self::ERROR_MKDIR, $name);
 		
 		if(($volume = $this->volume($target)) == false) {
 			$error[] = self::ERROR_NOT_TARGET_DIR;
@@ -647,15 +647,17 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function mkfile($args) {
-		$current = $args['current'];
+		$target = $args['target'];
+		$name   = $args['name'];
+		$error  = array(self::ERROR_MKFILE, $name);
 		
-		if(($volume = $this->volume($current)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+		if(($volume = $this->volume($target)) == false) {
+			$error[] = self::ERROR_NOT_TARGET_DIR;
+			return array('error' => $error);
 		}
 
-		if (($hash = $volume->mkfile($current, $args['name'])) == false
-		|| ($file = $volume->file($hash, true)) == false) {
-			return array('error' => $this->errorMessage($volume->error()));
+		if (($file = $volume->mkfile($target, $args['name'])) == false) {
+			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
 
 		$added = !$file['hidden'] && $volume->mimeAccepted($file['mime'], $args['mimes']) ? array($file) : array();
