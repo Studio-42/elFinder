@@ -525,6 +525,10 @@ abstract class elFinderVolumeDriver {
 			$this->tmbURL .= '/';
 		}
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
+		$this->nameValidator = is_string($this->options['acceptedName']) && !empty($this->options['acceptedName']) 
+			? $this->options['acceptedName']
+			: '';
+
 
 		$this->configure();
 		
@@ -1254,7 +1258,12 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function nameAccepted($name) {
-		return !empty($this->options['acceptedName']) ? preg_match($this->options['acceptedName'], $name) : true;
+		if ($this->nameValidator) {
+			return function_exists($this->nameValidator)
+				? ${$this->nameValidator}($name)
+				: preg_match($this->nameValidator, $name);
+		}
+		return true;
 	}
 	
 	/**

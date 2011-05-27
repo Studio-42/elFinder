@@ -114,6 +114,7 @@ class elFinder {
 	const ERROR_UPLOAD_FILE          = 23;
 	const ERROR_INV_MIME             = 24;
 	const ERROR_FILE_EXISTS          = 25;
+	const ERROR_NOT_TARGET_DIR       = 26;
 	
 	const ERROR_MKDIR                = 30;
 	const ERROR_MKFILE               = 31;
@@ -155,6 +156,7 @@ class elFinder {
 		23 => 'Upload file "$1" error.',
 		24 => 'File "$1" has not allowed file type.',
 		25 => 'Object named "$1" already exists in this location.',
+		26 => 'Target folder not found.',
 		
 		30 => 'Unable to create folder "$1".',
 		31 => 'Unable to create file "$1".',
@@ -620,13 +622,16 @@ class elFinder {
 	 **/
 	protected function mkdir($args) {
 		$target = $args['target'];
+		$name = $args['name'];
+		$error = array(self::ERROR_MKDIR, $name);
 		
 		if(($volume = $this->volume($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			$error[] = self::ERROR_NOT_TARGET_DIR;
+			return array('error' => $this->errorMessage($error));
 		}
 		
 		if (($dir = $volume->mkdir($target, $args['name'])) == false) {
-			return array('error' => $this->errorMessage($volume->error()));
+			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
 
 		$added = $dir['hidden'] ? array() : array($dir);
