@@ -682,7 +682,8 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return file info or false on error
 	 *
-	 * @param  string   $hash  file hash
+	 * @param  string   $hash    file hash
+	 * @param  bool     $hidden  return hidden file info
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -706,6 +707,7 @@ abstract class elFinderVolumeDriver {
 	 * Return folder info
 	 *
 	 * @param  string   $hash  folder hash
+	 * @param  bool     $hidden  return hidden file info
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -732,17 +734,19 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		if (!$file['read']) {
-			return $this->setError(elFinder::ERROR_NOT_READ, $this->path($hash));
+			return $this->setError(elFinder::ERROR_FILES_LIST, $this->path($hash));
 		}
 
 		return $this->getScandir($this->decode($hash), $mimes);
 	}
 
 	/**
-	 * undocumented function
+	 * Return dir files names list
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $hash   file hash
+	 * @param  array   $mimes  allowed mimetypes list
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function ls($hash, $mimes=array()) {
 		if (($file = $this->dir($hash)) == false) {
@@ -765,6 +769,7 @@ abstract class elFinderVolumeDriver {
 	 * Return subfolders for required one or false on error
 	 *
 	 * @param  string   $hash  folder hash or empty string to get tree from root folder
+	 * @param  int      $deep  subdir deep
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/

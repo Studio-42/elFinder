@@ -30,12 +30,12 @@ class elFinder {
 	 **/
 	protected $commands = array(
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false),
-		'ls'      => array('target' => true, 'mimes' => false),
+		'ls'        => array('target' => true, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('current' => true, 'files' => true),
 		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
-		'file'      => array('target' => true),
+		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('target' => true, 'name' => true),
 		'mkfile'    => array('current' => true, 'name' => true, 'mimes' => false),
@@ -103,15 +103,17 @@ class elFinder {
 	const ERROR_NOT_DIR              = 12;
 	const ERROR_NOT_FILE             = 13;
 	const ERROR_NOT_READ             = 14;
-	const ERROR_READ                 = 15;
-	const ERROR_NOT_WRITE            = 16;
-	const ERROR_LOCKED               = 17;
-	const ERROR_INVALID_NAME         = 18;
-	const ERROR_POST_DATA_MAXSIZE    = 19;
-	const ERROR_NOT_UPLOAD_FILES     = 20;
-	const ERROR_UPLOAD_FILE          = 21;
-	const ERROR_INV_MIME             = 22;
-	const ERROR_FILE_EXISTS          = 23;
+	const ERROR_OPEN_DIR             = 15;
+	const ERROR_READ_FILE            = 16;
+	const ERROR_FILES_LIST           = 17;
+	const ERROR_NOT_WRITE            = 18;
+	const ERROR_LOCKED               = 19;
+	const ERROR_INVALID_NAME         = 20;
+	const ERROR_POST_DATA_MAXSIZE    = 21;
+	const ERROR_NOT_UPLOAD_FILES     = 22;
+	const ERROR_UPLOAD_FILE          = 23;
+	const ERROR_INV_MIME             = 24;
+	const ERROR_FILE_EXISTS          = 25;
 	
 	const ERROR_MKDIR                = 30;
 	const ERROR_MKFILE               = 31;
@@ -142,15 +144,17 @@ class elFinder {
 		12 => '"$1" is not a folder.',
 		13 => '"$1" is not a file.',
 		14 => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		15 => 'Unable to read "$1" content.',
-		16 => 'You don’t have permission to write into "$1".',
-		17 => 'Object "$1" locked and can’t be removed or renamed.',
-		18 => 'Name "$1" is not allowed.',
-		19 => 'Data exceeds the maximum allowed size.',
-		20 => 'There are no upladed files was found.',
-		21 => 'Upload file "$1" error.',
-		22 => 'File "$1" has not allowed file type.',
-		23 => 'Object named "$1" already exists in this location.',
+		15 => 'Open folder error.',
+		16 => 'Unable to get file content.',
+		17 => 'Unable to get listing on "$1".',
+		18 => 'You don’t have permission to write into "$1".',
+		19 => 'Object "$1" locked and can’t be removed or renamed.',
+		20 => 'Name "$1" is not allowed.',
+		21 => 'Data exceeds the maximum allowed size.',
+		22 => 'There are no upladed files was found.',
+		23 => 'Upload file "$1" error.',
+		24 => 'File "$1" has not allowed file type.',
+		25 => 'Object named "$1" already exists in this location.',
 		
 		30 => 'Unable to create folder "$1".',
 		31 => 'Unable to create file "$1".',
@@ -383,7 +387,8 @@ class elFinder {
 		$target = $args['target'];
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-
+		$error = array(self::ERROR_OPEN_DIR);
+		
 		if (!$volume || !$volume->isDir($target) || !$volume->isReadable($target)) {
 			// on init request we can get invalid dir hash -
 			// dir which already does not exists but remembered by client,
@@ -392,13 +397,14 @@ class elFinder {
 				$volume = $this->default;
 				$target = $volume->defaultPath();
 			} else {
-				return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
+				return array('error' => $this->errorMessage(self::ERROR_OPEN_DIR, self::ERROR_DIR_NOT_FOUND));
 			}
 		}
 		
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
-			return array('error' => $this->errorMessage($volume->error()));
+			
+			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		} 
 
 		$files = array();
@@ -414,7 +420,7 @@ class elFinder {
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($target, $args['mimes'])) === false) {
-			return array('error' => $this->errorMessage($volume->error()));
+			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
 		
 		foreach ($ls as $file) {
@@ -438,19 +444,20 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return dir files names list
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function ls($args) {
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_FILES_LIST, self::ERROR_DIR_NOT_FOUND));
 		}
 		if (($list = $volume->ls($target)) === false) {
-			return array('error' => $this->errorMessage($volume->error()));
+			return array('error' => $this->errorMessage(self::ERROR_FILES_LIST));
 		}
 		
 		return array('list' => $list);
@@ -464,15 +471,16 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tree($args) {
-		$dir = $args['target'];
+		$target = $args['target'];
 		
-		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
+		if (($volume = $this->volume($target)) == false) {
+			return array('error' => $this->errorMessage(self::ERROR_FILES_LIST, 'unknown folder', self::ERROR_DIR_NOT_FOUND));
 		}
-		if (($tree = $volume->tree($dir)) == false) {
-			return array('error' => $this->errorMessage($volume->error()));
+		$dir = $volume->dir($target);
+		if (($dir = $volume->dir($target)) == false
+		|| ($tree = $volume->tree($target)) == false) {
+			return array('error' => $this->errorMessage(self::ERROR_FILES_LIST, $dir ? $dir['name'] : 'unknown folder'));
 		}
-		// return array('tree' => 42);
 		return array('tree' => $tree);
 	}
 	
@@ -484,13 +492,13 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function parents($args) {
-		$dir = $args['target'];
+		$target = $args['target'];
 		
-		if (($volume = $this->volume($dir)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+		if (($volume = $this->volume($target)) == false) {
+			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		}
 
-		return ($tree = $volume->parents($dir)) === false 
+		return ($tree = $volume->parents($target)) === false 
 			? array('error' => $this->errorMessage($volume->error()))
 			: array('tree' => $tree);
 	}
@@ -507,7 +515,7 @@ class elFinder {
 		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
 		if (!$volume) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
 		}
 		
 		foreach ($args['files'] as $hash) {
@@ -523,17 +531,6 @@ class elFinder {
 	}
 	
 	/**
-	 * Call "open" command
-	 *
-	 * @param  array  command arguments
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function sync($args) {
-		return $this->open($args);
-	}
-	
-	/**
 	 * Required to output file in browser when volume URL is not set 
 	 * Return array contains opened file pointer, root itself and required headers
 	 *
@@ -542,35 +539,48 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function file($args) {
-		$target = $args['target'];
-		
-		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+		$target   = $args['target'];
+		$download = !empty($args['download']);
+		$h403     = 'HTTP/1.x 403 Access Denied';
+		$h404     = 'HTTP/1.x 404 Not Found';
+
+		if (($volume = $this->volume($target)) == false) { 
+			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'headers' => $h404, 'raw' => true);
 		}
 		
 		if (($file = $volume->file($target)) == false) {
-			$error  = $volume->error();
-			$header = count($error) > 1 ? 'HTTP/1.x 403 Access Denied' : 'HTTP/1.x 404 Not Found';
-			return array('error' => $this->errorMessage($error), 'headers' => $header, 'raw' => true);
+			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'headers' => $h404, 'raw' => true);
+		}
+		
+		if (!$file['read']) {
+			return array('error' => self::$errors[self::ERROR_READ_FILE], 'headers' => $h403, 'raw' => true);
 		}
 		
 		if (($fp = $volume->open($target)) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND), 'headers' => 'HTTP/1.x 404 Not Found', 'raw' => true);
+			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'headers' => $h404, 'raw' => true);
 		}
 		
-		$disp  = preg_match('/^(image|text)/i', $file['mime']) 
-			|| $file['mime'] == 'application/x-shockwave-flash' 
-				? 'inline' 
-				: 'attachments';
+		if ($download) {
+			$disp = 'attachment';
+			$mime = 'application/octet-stream';
+		} else {
+			$disp  = preg_match('/^(image|text)/i', $file['mime']) 
+				|| $file['mime'] == 'application/x-shockwave-flash' 
+					? 'inline' 
+					: 'attachment';
+			$mime = $file['mime'];
+		}
+		
+		
 		
 		$result = array(
 			'volume'  => $volume,
 			'pointer' => $fp,
 			'info'    => $file,
 			'header'  => array(
-				"Content-Type: ".$file['mime'], 
-				"Content-Disposition: ".$disp."; filename=".$file['name'],
-				// "Content-Location: ".$info['name'],
+				"Content-Type: ".$mime, 
+				"Content-Disposition: ".$disp."; filename=".rawurlencode($file['name']),
+				"Content-Location: ".$file['name'],
 				'Content-Transfer-Encoding: binary',
 				"Content-Length: ".$file['size'],
 				"Connection: close"

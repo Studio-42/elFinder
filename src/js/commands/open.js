@@ -91,12 +91,12 @@ elFinder.prototype.commands.open = function() {
 				}
 
 				if (!(url = fm.url(file.hash))) {
-					url = fm.option('url');
-					url = url + (url.substr(-1, 1) == '/' ? '?' : '&')
+					url = fm.option('url') || fm.options.url;
+					url = url + (url.indexOf('?') === -1 ? '?' : '&')
 						+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
 						+ '&target=' + file.hash;
 				}
-
+				
 				// image - set window size
 				if (file.dim) {
 					s = file.dim.split('x');

@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
-ini_set('memory_limit', '128M');
+
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
@@ -55,7 +55,7 @@ $opts = array(
 			'alias' => 'File system',
 			// 'treeDeep' => 2,
 			// 'startPath' => '../../../files/mimes',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			// 'URL'    => 'http://localhost/git/elfinder/files/',
 			"disabled" => array('reload'),
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array(),
