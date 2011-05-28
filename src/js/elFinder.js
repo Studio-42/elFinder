@@ -2539,9 +2539,12 @@
 		 * @return String
 		 **/
 		i18n : function(msg) { 
-			var messages = this.messages, ignore = [], i;
+			var messages = this.messages, 
+				ignore   = [], 
+				i;
 
 			if ($.isArray(msg)) {
+				msg = msg.slice(0, msg.length)
 				if (msg.length == 1) {
 					msg = msg[0];
 				} else {

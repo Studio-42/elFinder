@@ -46,7 +46,8 @@ elFinder.prototype.commands.rm = function() {
 					fm.lockfiles({files : files});
 					fm.ajax({
 						data   : {cmd : 'rm', targets : files, current : fm.cwd().hash},
-						notify : {type : 'rm', cnt : cnt}
+						notify : {type : 'rm', cnt : cnt},
+						preventFail : true
 					})
 					.fail(function(error) {
 						dfrd.reject(error);

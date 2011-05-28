@@ -699,17 +699,20 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rm($args) {
-		$targets = $targets = is_array($args['targets']) ? $args['targets'] : array();
+		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$removed = array();
+		$result  = array('removed' => array());
+		
 		if (!$targets) {
 			return array();
 		}
 		
-		if (($volume  = $this->volume($targets[0])) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
-		}
-		
-		foreach ($targets as $hash) {
+		foreach ($targets as $target) {
+			
+			if (($volume  = $this->volume($target)) !== false) {
+				return array('error' => $this->errorMessage(self::ERROR_REMOVE, 'unknown file', self::ERROR_FILE_NOT_FOUND));
+			}
+			
 			if (($file = $volume->file($hash)) == false
 			|| !$volume->rm($hash)) {
 				return array('removed' => $removed, 'error' => $this->errorMessage($volume->error()));
