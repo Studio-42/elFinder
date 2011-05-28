@@ -17,11 +17,16 @@ elFinder.prototype.commands.rename = function() {
 			file   = fm.file(sel.shift()),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
-					var parent = input.parent();
-					
+					var parent = input.parent(),
+						name   = fm.escape(file.name);
+
 					error && fm.error(error);
-					input.remove();
-					parent.html(fm.escape(file.name));
+					if (parent.length) {
+						input.remove();
+						parent.html(name);
+					} else {
+						cwd.find('#'+file.hash).find('.elfinder-cwd-filename').html(name);
+					}
 				})
 				.always(function() {
 					fm.enable();
@@ -40,7 +45,7 @@ elFinder.prototype.commands.rename = function() {
 					e.stopPropagation();
 				})
 				.blur(function() {
-					var name = $.trim(input.val()),
+					var name   = $.trim(input.val()),
 						parent = input.parent();
 					
 					if (parent.length) {
