@@ -659,7 +659,7 @@ class elFinder {
 		if (($file = $volume->mkfile($target, $args['name'])) == false) {
 			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
-
+		// debug($file);
 		$added = !$file['hidden'] && $volume->mimeAccepted($file['mime'], $args['mimes']) ? array($file) : array();
 		
 		return $this->trigger('mkfile', $volume, array('added' => $added), $file);
@@ -770,7 +770,7 @@ class elFinder {
 		$files   = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
 			? $args['FILES']['upload'] 
 			: array();
-		
+
 		
 		if (!$volume) {
 			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_DIR_NOT_FOUND));

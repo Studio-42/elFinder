@@ -953,7 +953,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 
-		return $this->encode($this->_joinPath($path, $name));
+		return $this->stat($this->_joinPath($path, $name));
 	}
 	
 	/**

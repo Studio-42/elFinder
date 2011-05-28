@@ -1,13 +1,15 @@
 
 elFinder.prototype.commands.rm = function() {
 
+	this.title = 'Delete files';
+
 	this.handlers = {
 		select : function() { this.update(); }
 	}
 	
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace',
-		description : 'Delete'
+		description : this.title
 	}];
 	
 	this.getstate = function() {
@@ -45,7 +47,7 @@ elFinder.prototype.commands.rm = function() {
 				callback : function() {  
 					fm.lockfiles({files : files});
 					fm.ajax({
-						data   : {cmd : 'rm', targets : files, current : fm.cwd().hash},
+						data   : {cmd  : 'rm', targets : files, current : fm.cwd().hash}, // current - for old api
 						notify : {type : 'rm', cnt : cnt},
 						preventFail : true
 					})

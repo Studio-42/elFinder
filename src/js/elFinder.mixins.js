@@ -52,11 +52,12 @@ elFinder.prototype.mixins = {
 
 						fm.lockfiles({files : [id]});
 						fm.ajax({
-								data   : {cmd : cmd, name : name, current : phash, target : phash}, // cuurent - for old api
-								notify : {type : cmd, cnt : 1}
+								data   : {cmd : cmd, name : name, current : phash, target : phash}, // current - for old api
+								notify : {type : cmd, cnt : 1},
+								preventFail : true
 							})
 							.fail(function(error) {
-								dfrd.reject()
+								dfrd.reject(error)
 							})
 							.done(function(data) {
 								dfrd.resolve(data);

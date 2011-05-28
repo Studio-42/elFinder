@@ -173,7 +173,6 @@
 			height = parseInt(this.options.height) || 300,
 			
 			open = function(data) {
-				// self.log('init: '+data.init)
 				if (data.init) {
 					// init - reset cache
 					files = {};
@@ -196,81 +195,6 @@
 				}
 				self.lastDir(cwd);
 				data.debug && self.debug('backend-debug', data.debug);
-				
-			},
-			
-			/**
-			 * Methods to update cache after get some data from backend
-			 *
-			 * @type Object
-			 **/
-			responseHandlers = {
-				open    : function(data) {
-					return
-					self.log('init: '+data.init)
-					if (data.init) {
-						// init - reset cache
-						files = {};
-					} else {
-						// remove only files from prev cwd
-						for (var i in files) {
-							if (files.hasOwnProperty(i) 
-							&& files[i].mime != 'directory' 
-							&& files[i].phash == cwd) {
-								delete files[i];
-							}
-						}
-					}
-
-					cwd = data.cwd.hash;
-
-					data.files.push(data.cwd);
-					cache(data.files);
-					self.lastDir(cwd);
-					data.debug && self.debug('backend-debug', data.debug);
-					
-					return self;
-				},
-				tree    : function(data) {
-					cache(data.tree || []);
-					return self;
-				},
-				parents : function(data) {
-					cache(data.tree || []);
-					return self;
-				},
-				add     : function(data) {
-					cache(data.added);
-					return self;
-				},
-				remove  : function(data) {
-					var removed = data.removed,
-						l  = removed.length, 
-						rm = function(hash) {
-							var file = files[hash];
-							if (file) {
-								if (file.mime == 'directory' && file.dirs) {
-									$.each(files, function(h, f) {
-										f.phash == hash && rm(h);
-									});
-								}
-								delete files[hash];
-							}
-						};
-
-					while (l--) {
-						rm(removed[l]);
-					}
-					return self;
-				}, 
-				change  : function(data) {
-					$.each(data.changed, function(i, file) {
-						var hash = file.hash;
-						files[hash] = files[hash] ? $.extend(files[hash], file) : file;
-					})
-					return self;
-				}
-				
 			},
 			
 			/**
@@ -742,9 +666,9 @@
 					}
 
 					// fire some event to update cache/ui
-					data.removed && data.removed.length && responseHandlers.remove(data).remove(data);
-					data.added   && data.added.length   && responseHandlers.add(data).add(data);
-					data.changed && data.changed.length && responseHandlers.change(data).change(data);
+					data.removed && data.removed.length && self.remove(data);
+					data.added   && data.added.length   && self.add(data);
+					data.changed && data.changed.length && self.change(data);
 					
 					// fire event with command name
 					self.trigger(cmd, data);
@@ -917,9 +841,9 @@
 					self.log('diff')
 					self.log(diff.removed).log(diff.added).log(diff.changed);
 					
-					diff.removed.length && responseHandlers.remove(diff).remove(diff);
-					diff.added.length   && responseHandlers.add(diff).add(diff);
-					diff.changed.length && responseHandlers.change(diff).change(diff);
+					diff.removed.length && self.remove(diff);
+					diff.added.length   && self.add(diff);
+					diff.changed.length && self.change(diff);
 					return dfrd.resolve();
 				},
 				timeout;
@@ -1280,8 +1204,8 @@
 			})
 			.remove(function(e) {
 				var removed = e.data.removed||[],
-					l  = removed.length, 
-					rm = function(hash) {
+					l       = removed.length, 
+					rm      = function(hash) {
 						var file = files[hash];
 						if (file) {
 							if (file.mime == 'directory' && file.dirs) {
@@ -1292,11 +1216,14 @@
 							delete files[hash];
 						}
 					};
-
+			
 				while (l--) {
 					rm(removed[l]);
 				}
 				
+			})
+			.bind('upload', function(data) {
+				self.log('upload').log(data)
 			})
 			.bind('rm', function(e) {
 				self.log('remove')
@@ -2185,220 +2112,6 @@
 			return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
 		},
 		
-		
-		
-		/**
-		 * Copy files into buffer
-		 * 
-		 * @param  Array    files hashes array
-		 * @param  String   files parent dir hash (required by old api)
-		 * @param  Boolean  cut files?
-		 * @param  Boolean  method called from drag&drop - required for correct error message
-		 * @return Boolean
-		 */
-		copy : function(files, cut, dd) {
-			var files = $.isArray(files) ? files : [],
-				error = 'Unable to copy "$1".',
-				i, hash, file;
-			
-			this.clipboard([]);
-			
-			for (i = 0; i < files.length; i++) {
-				hash = files[i];
-				if ((file = this.file(hash)) && (!file.read || (cut && !file.rm))) {
-					if (cut) {
-						error = dd ? 'Unable to move "$1".' : 'Unable to cut "$1".';
-					}
-					return !!this.trigger('error', {error : [error, file.name]});
-				}
-			}
-			
-			return !!this.clipboard(files, cut).length;
-		},
-		
-		/**
-		 * Copy files into buffer and mark for deletion after paste
-		 * Wrapper for copy method
-		 * 
-		 * @param  Array  files hashes array
-		 * @return Boolean
-		 */
-		cut : function(files) { 
-			return this.copy(files, true); 
-		},
-		
-		hasParent : function(hash, phash) {
-			var file = this.file(hash);
-			
-			do {
-				if (hash == phash || file.phash == phash) {
-					return true;
-				}
-				hash = file.phash;
-			} while ((file = this.file(hash)));
-			return false;
-		},
-		
-		/**
-		 * Paste files from buffer into required directory
-		 * 
-		 * @param  String   directory hash, if not set - paste in current working directory
-		 * @clean  Boolean  clean buffer after paste - required to not store in clipboard files moved by drag&drop
-		 * @return elFinder
-		 */
-		paste : function(dst, clean) {
-			var self    = this,
-				cwd     = this.cwd().hash,  // current dir hash
-				dst     = dst || cwd,       // target dir hash
-				files   = this.clipboard(), // files to paste
-				num     = files.length,
-				exists  = [],               // files with names existed in target dir
-				msg     = 'An item named "$1" already exists in this location. Do you want to replace it?',
-				content = [],               // target dir files, if target != cwd
-				/**
-				 * Find file with required name in target directory files
-				 *
-				 * @param  String  file name
-				 * @return Boolean
-				 */
-				find = function(name) {
-					var i;
-					
-					// target == current - search in files
-					if (dst == cwd) { 
-						return self.exists(name, dst);
-					} 
-					
-					// target dir != current - search in cache
-					i = content.length;
-					while (i--) {
-						if (content[i].name == name) {
-							return true;
-						}
-					}
-				},
-				/**
-				 * Send ajax request to exec "paste" command
-				 *
-				 * @return void
-				 */
-				paste = function() {
-					var targets = [], 
-						l = files.length, 
-						i, cut, ntype;
-						
-					if (l) {
-						cut = files[0].cut;
-						ntype = cut ? 'move' : 'copy';
-						(cut || clean) && self.clipboard([], false, true); // clean clipboard
-						
-						for (i = 0; i < l; i++) {
-							targets.push(files[i].hash);
-						}
-						
-						self.ajax({
-							data : {
-								cmd     : 'paste',
-								current : cwd,
-								src     : files[0].phash,
-								dst     : dst,
-								targets : targets,
-								cut     : cut ? 1 : 0
-							},
-							beforeSend : function() { self.notify(ntype, l); },
-							complete   : function() { self.notify(ntype, -l).trigger('unlockfiles', {files : targets}); }
-						}, 'bg');
-					}
-				},
-				/**
-				 * Check files, open confirm dialogs if required and exec paste()
-				 *
-				 * @return void
-				 */
-				proccess = function() {
-					var ndx = 0,
-						callback = function(replace, all) {
-							var l = exists.length,
-								remove = function() {
-									var i;
-									
-									if ((i = $.inArray(exists[ndx], files)) !== -1) {
-										files.splice(i, 1);
-										self.trigger('unlockfiles', {files : [exists[ndx].hash]})
-									}
-								};
-
-							if (all) {
-								if (replace) {
-									ndx = exists.length;
-								} else {
-									while (ndx < l) {
-										remove();
-										ndx++;
-									}
-								}
-							} else if (!replace) {
-								remove();
-							}
-							
-							if (++ndx < exists.length) {
-								self.confirm('', self.i18n([msg, exists[ndx].name]), callback,true)
-							} else {
-								paste()
-							}
-						};
-					
-					for (i = 0; i < num; i++) {
-						file = files[i];
-						
-						// paste in file parent dir not allowed
-						if (file.phash == dst) { 
-							return;
-						}
-						
-						// paste into itself not allowed
-						if (self.hasParent(dst, file.hash)) { 
-							return self.trigger('error', {error : ['You can’t paste "$1" at this location because you can’t paste an item into itself.', name]});
-						}
-						
-						// file with same name exists
-						if (find(file.name)) {
-							exists.push(file);
-						}
-					}
-					
-					if (exists.length) {
-						self.confirm('', self.i18n([msg, exists[0].name]), callback, true);
-					} else {
-						paste();
-					}
-				}
-				
-			if (dst == cwd) {
-				// paste into current dir
-				proccess();
-			} else {
-				// get target dir content
-				this.ajax({
-					data : {
-						cmd : 'open',
-						tree : false,
-						target : dst
-					},
-					success : function(data) {
-						var src;
-						if (data && (src = self.isNewApi ? data.files : data.cwd) && $.isArray(src)) {
-							content = src; 
-						}
-						proccess();
-					},
-					beforeSend : function() { self.notify('prepareCopy', num); },
-					complete   : function() { self.notify('prepareCopy', -num); }
-				}, 'silent')
-			}
-				
-		},
-		
 		/**
 		 * Valid file name
 		 * 
@@ -2427,97 +2140,25 @@
 			return true;
 		},
 		
-		
-		rename : function(hash, name) {
-			var self = this,
-				file = this.file(hash), error;
-			
-			if (!file) {
-				error = this.errors.notFound;
-			}
-			
-			if (!this.validName(name)) {
-				error = this.errors.invalidName;
-			}
-			
-			if (file.locked) {
-				error = [this.errors.fileLocked, file.name];
-			}
-			
-			if (error) {
-				this.trigger('error', {error : error});
-				return false;
-			}
-			
-			var data = {
-				cmd     : 'rename',
-				current : this.cwd().hash, // old api
-				target  : hash,
-				name    : name
-			}
-
-			this.ajax({
-				data : {
-					cmd     : 'rename',
-					current : this.cwd().hash, // old api
-					target  : hash,
-					name    : name
-				},
-				beforeSend : function() { self.notify('rename', 1); },
-				complete   : function() { self.notify('rename', -1); }
-			}, 'bg');
-			
-			return true;
-		},
-		
-		make : function(name, type) {
-			var self = this,
-				cmd = type == 'file' ? 'mkfile' : 'mkdir';
-				
-			if (!this.validName(name)) {
-				return this.trigger('error', {error : 'Unacceptable name.'});
-			}
-			
-			if (this.fileByName(name)) {
-				return this.trigger('error', {error : 'File with the same name already exists.'});
-			}
-			if (!this.cwd().write) {
-				return this.trigger('error', {error : [cmd == 'mkdir' ? 'Unable to create directory' : 'Unable to create file', 'Not enough permission.']});
-			}
-			
-			return this.ajax({
-				data : {cmd : cmd, current : this.cwd().hash, name : name},
-				beforeSend : function() { self.ui.notify(cmd, 1); },
-				complete   : function() { self.ui.notify(cmd, -1); }
-			}, 'bg');	
-		},
-		
-		mkdir : function(name) {
-			return this.make(name);
-		},
-		
-		mkfile : function(name) {
-			return this.make(name, 'file');
-		},
-		
-		
+		/**
+		 * Create unique file name in required dir
+		 * 
+		 * @param  String  file name
+		 * @param  String  parent dir hash
+		 * @return String
+		 */
 		uniqueName : function(prefix, phash) {
 			var i = 0, ext = '', p, name;
 			
-			if (!phash) {
-				phash = this.cwd().hash;
-			}
-			
-			
-			
+			phash = phash || this.cwd().hash;
+
 			if ((p = prefix.indexOf('.txt')) != -1) {
-				ext = '.txt';
+				ext    = '.txt';
 				prefix = prefix.substr(0, p);
 			}
 			
 			prefix = this.i18n(prefix);
-			
-			name = prefix+ext;
+			name   = prefix+ext;
 			
 			if (!this.fileByName(name, phash)) {
 				return name;
@@ -2531,7 +2172,6 @@
 			return prefix + Math.random() + ext;
 		},
 		
-
 		/**
 		 * Return message translated onto current language
 		 *

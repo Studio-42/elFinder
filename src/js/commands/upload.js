@@ -84,8 +84,6 @@ elFinder.prototype.commands.upload = function() {
 					},
 					ntm;
 				
-				fm.log($.browser).log($.support)
-				
 				if (!cnt) {
 					return dfrd.reject('There are no files to upload');
 				}
@@ -194,7 +192,7 @@ elFinder.prototype.commands.upload = function() {
 
 								setTimeout(function() {
 									msie && $('<iframe src="javascript:false;"/>').appendTo(form);
-									form.remove();
+									// form.remove();
 								}, 100);
 								
 								data.error ? dfrd.reject(data.error) : dfrd.resolve(data);

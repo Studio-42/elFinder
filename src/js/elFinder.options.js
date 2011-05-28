@@ -240,7 +240,7 @@ elFinder.prototype.options = {
 			// open dialog on click toolbar button instead of open browser select files dialog
 			forceDialog   : false,
 			// send files using form with iframe target
-			forceIframe   : false, 
+			forceIframe   : true, 
 			// 15 min timeout before abort upload files using iframe
 			iframeTimeout : 900000
 		}
