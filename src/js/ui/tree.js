@@ -61,12 +61,6 @@ $.fn.elfindertree = function(fm) {
 			 */
 			hover    = 'ui-state-hover',
 			
-			// ro = 'elfinder-ro',
-			// 
-			// wo = 'elfinder-wo',
-			// 
-			// na = 'elfinder-na',
-			
 			/**
 			 * Open current dir root on init
 			 *
@@ -154,38 +148,6 @@ $.fn.elfindertree = function(fm) {
 				return $.map(files, function(f) { return f.mime == 'directory' ? f : null });
 			},
 			
-			
-			/**
-			 * Convert old api tree into plain array of dirs
-			 *
-			 * @param  Object  root dir
-			 * @return Array
-			 */
-			normalizeTree = function(root) {
-				var result   = [],
-					traverse = function(dirs, phash) {
-						var i, dir;
-						
-						for (i = 0; i < dirs.length; i++) {
-							dir = dirs[i];
-							
-							result.push({
-								mime  : 'directory',
-								hash  : dir.hash,
-								phash : phash,
-								name  : dir.name,
-								read  : dir.read,
-								write : dir.write,
-								dirs  : !!dir.dirs.length
-							})
-							dir.dirs.length && traverse(dir.dirs, dir.hash);
-						}
-					};
-
-				traverse([root]);
-
-				return result;
-			},
 			
 			/**
 			 * Find subtree for required directory
@@ -361,9 +323,14 @@ $.fn.elfindertree = function(fm) {
 			// create/update tree
 			.open(function(e) {
 				var data = e.data,
-					init = !tree.children().length, 
+					init = data.init, 
 					dirs = filter(data.files);
 
+				if (init) {
+					openRoot = fm.options.openRootOnLoad;
+					tree.empty();
+					fm.log('init')
+				}
 
 				if (dirs.length) {
 

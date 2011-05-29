@@ -125,7 +125,7 @@ class elFinder {
 	const ERROR_COPY                 = 36;
 	const ERROR_MOVE                 = 37;
 	const ERROR_COPY_INTO_ITSELF     = 38;
-	const ERROR_REPLACE              = 37;
+	const ERROR_REPLACE              = 39;
 	
 	/**
 	 * Error messages
@@ -163,7 +163,7 @@ class elFinder {
 		32 => 'Unable to rename "$1".',
 		33 => 'Unable to remove "$1".',
 		34 => 'Unable to upload "$1".',
-		35 => 'Unable to create "$1" duplicate.',
+		35 => 'Unable to duplicate "$1".',
 		36 => 'Unable to copy "$1" into "$2".',
 		37 => 'Unable to move "$1" into "$2".',
 		38 => 'Unable to copy "$1" into itself.',
@@ -243,13 +243,19 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
-		if (!isset($this->listeners[$cmd])) {
-			$this->listeners[$cmd] = array();
-		}
+		$cmds = array_map('trim', explode(' ', $cmd));
 		
-		if ((is_array($handler) && count($handler) == 2 && class_exists($handler[0]) && method_exists($handler[0], $handler[1]) )
-		|| function_exists($handler)) {
-			$this->listeners[$cmd][] = $handler;
+		foreach ($cmds as $cmd) {
+			if ($cmd) {
+				if (!isset($this->listeners[$cmd])) {
+					$this->listeners[$cmd] = array();
+				}
+
+				if ((is_array($handler) && count($handler) == 2 && class_exists($handler[0]) && method_exists($handler[0], $handler[1]))
+				|| function_exists($handler)) {
+					$this->listeners[$cmd][] = $handler;
+				}
+			}
 		}
 
 		return $this;
@@ -686,9 +692,47 @@ class elFinder {
 			return array('error' => $this->errorMessage(array_merge($error, $volume->error())));
 		}
 
-		$added = !$file['hidden'] && $volume->mimeAccepted($file['mime'], $args['mimes']) ? array($file) : array();
+		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
+			$file['hidden'] = true;
+		}
+		$result = $this->trigger('rename', $volume, array('removed' => array($target), 'added' => array($file), 'removedDetails' => array($rm)));
+		unset($result['removedDetails']);
+		return $result;
+	}
+	
+	/**
+	 * Duplicate file - create copy with "copy %d" suffix
+	 *
+	 * @param array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function duplicate($args) {
+		$targets = is_array($args['targets']) ? $args['targets'] : array();
+		$result  = array('added' => array());
 		
-		return $this->trigger('rename', $volume, array('removed' => array($target), 'added' => $added), array('removed' => $rm, 'added' => $file));
+		if (!$targets) {
+			return array();
+		}
+		
+		foreach ($targets as $target) {
+			if (($volume = $this->volume($target)) == false) {
+				$result['error'] = $this->errorMessage(self::ERROR_DUPLICATE, 'unknown file', self::ERROR_FILE_NOT_FOUND);
+			}
+			
+			if (($src = $volume->file($target)) == false
+			||  ($file = $volume->duplicate($target)) == false) {
+				$error = array(self::ERROR_DUPLICATE, $src ? $src['name'] : 'unknown file');
+				$result['error'] = $this->errorMessage(array_merge($error, $volume->error()));
+				// debug($volume->error());
+				break;
+			}
+			
+			$tmp = $this->trigger('duplicate', $volume, array('added' => array($file), 'src' => $src));
+			$result['added'] = array_merge($result['added'], $tmp['added']);
+		}
+		
+		return $result;
 	}
 	
 	/**
@@ -700,7 +744,6 @@ class elFinder {
 	 **/
 	protected function rm($args) {
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
-		$removed = array();
 		$result  = array('removed' => array());
 		
 		if (!$targets) {
@@ -711,51 +754,21 @@ class elFinder {
 			if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false) {
 				$result['error'] = $this->errorMessage(self::ERROR_REMOVE, 'unknown file', self::ERROR_FILE_NOT_FOUND);
-				return $result;
+				break;
 			}
 			
 			if (!$volume->rm($target)) {
 				$result['error'] = array_merge(array(self::ERROR_REMOVE, $file['name']), $volume->error());
-				return $result;
+				break;
 			}
-			$result['removed'][] = $target;
-			$this->trigger('remove', $volume, $result);
+			
+			$tmp = $this->trigger('rm', $volume, array('removed' => array($target), 'removedDetails' => array($file)));
+			$result['removed'] = array_merge($result['removed'], $tmp['removed']);
 		}
 		
 		return $result;
 	}
 	
-	/**
-	 * Duplicate file - create copy with "copy%d" suffix
-	 *
-	 * @param array  $args  command arguments
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function duplicate($args) {
-		$targets = is_array($args['targets']) ? $args['targets'] : array();
-		$added = array();
-		
-		if (!$targets) {
-			return array();
-		}
-		
-		if (($volume = $this->volume($targets[0])) == false) {
-			return array('error' => $this->errorMessage(self::ERROR_NOT_FOUND));
-		}
-		
-		foreach ($targets as $hash) {
-			if (($file = $volume->duplicate($hash)) != false) {
-				$added[] = $file;
-			}
-			
-			if (($error = $volume->error()) != false) {
-				return array('added' => $added, 'warning' => $this->errorMessage($error));
-			}
-		}
-		
-		return $this->trigger('duplicate', $volume, array('added' => $added));
-	}
 	
 	/**
 	 * undocumented function
@@ -946,6 +959,12 @@ class elFinder {
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
+		}
+		
+		if (!empty($result['error']) 
+		&& (!empty($result['added']) || !empty($result['removed']))) {
+			$result['warning'] = $result['error'];
+			unset($result['error']);
 		}
 		
 		return $result;

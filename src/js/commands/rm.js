@@ -28,14 +28,14 @@ elFinder.prototype.commands.rm = function() {
 			i, error, file, hash;
 		
 		if (!cnt) {
-			return dfrd.reject('No files to remove');
+			return dfrd.reject();
 		}
 			
 		for (i = 0; i < cnt; i++) {
 			hash = files[i];
 			file = fm.file(hash);
 			if (file.locked) {
-				return dfrd.reject([fm.errors.fileLocked, file.name]);
+				return dfrd.reject([fm.errors.locked, file.name]);
 			}
 		}
 			

@@ -61,6 +61,12 @@ function logger2($cmd, $voumes, $result) {
 		case 'mkfile':
 			$log .= $result['added'][0]['name'];
 			break;
+		case 'rename':
+			$log .= 'from '.$result['removedDetails'][0]['name'].' to '.$result['added'][0]['name'];
+			break;
+		case 'duplicate':
+			$log .= 'src: '.$result['src']['name'].' copy: '.$result['added'][0]['name'];
+			break;
 	}
 	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
 		$fp = fopen('../../../files/tmp/log.txt', 'a');
@@ -75,8 +81,7 @@ function logger2($cmd, $voumes, $result) {
 // sleep(5);
 $opts = array(
 	'bind' => array(
-		'mkdir' => 'logger2', 
-		'mkfile' =>'logger2'
+		'mkdir mkfile  rename duplicate' => 'logger2', 
 	),
 	'debug' => true,
 	'roots' => array(
@@ -115,17 +120,17 @@ $opts = array(
 					'hidden' => false
 				),
 				array(
-					'pattern' => '/folder_/',
+					'pattern' => '/images$/',
 					'read' => true,
 					// 'write' => false,
-					'locked' => true,
+					// 'locked' => true,
 					// 'hidden' => true
 				),
 				array(
-					'pattern' => '/123$/',
+					'pattern' => '/.*123$/',
 					'read' => false,
-					// 'write' => false,
-					// 'locked' => true,
+					'write' => false,
+					'locked' => true,
 				)
 			),
 			// 'startPath'   => '../../../files/mimes/',

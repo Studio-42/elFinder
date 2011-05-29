@@ -474,13 +474,24 @@
 		 * 
 		 * @return String
 		 */
-		this.root = function() {
-			var dir = files[cwd];
+		this.root = function(hash) {
+			var dir = files[hash || cwd], i;
 			
 			while (dir && dir.phash) {
 				dir = files[dir.phash]
 			}
-			return dir ? dir.hash : '';
+			if (dir) {
+				return dir.hash;
+			}
+			
+			while (i in files && files.hasOwnProperty(i)) {
+				dir = files[i]
+				if (!dir.phash && !dir.mime == 'directory' && dir.read) {
+					return dir.hash
+				}
+			}
+			
+			return '';
 		}
 		
 		/**
@@ -838,13 +849,19 @@
 				},
 				doSync = function(odata, pdata) {
 					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
-					self.log('diff')
+
 					self.log(diff.removed).log(diff.added).log(diff.changed);
 					
 					diff.removed.length && self.remove(diff);
 					diff.added.length   && self.add(diff);
 					diff.changed.length && self.change(diff);
-					return dfrd.resolve();
+					return dfrd.resolve(diff);
+				},
+				panic = function() {
+					self.ajax({
+						data : {cmd : 'open', target : self.root(), tree : 1, init : 1},
+						notify : {type : 'open', cnt : 1, hideCnt : true}
+					});
 				},
 				timeout;
 			
@@ -868,15 +885,17 @@
 					this.ajax(opts2)
 				)
 				.fail(function(error) {
-					dfrd.reject(error)
+					dfrd.reject(error);
+					panic();
 				})
-				.then(doSync);
+				.done(doSync);
 			} else {
 				this.ajax(opts1)
 					.fail(function(error) {
-						dfrd.reject(error)
+						dfrd.reject(error);
+						panic();
 					})
-					.then(doSync);
+					.done(doSync);
 			}
 			return dfrd;
 		}

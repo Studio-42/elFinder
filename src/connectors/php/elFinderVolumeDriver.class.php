@@ -903,7 +903,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($path));
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
 		}
 		
 		if (!$this->nameAccepted($name)) {
@@ -914,11 +914,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
 		}
 		
-		if (!$this->_mkdir($path, $name)) {
-			return false;
-		}
-		
-		return $this->stat($this->_joinPath($path, $name));
+		return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
 	}
 	
 	/**
@@ -938,7 +934,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($path));
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
 		}
 
 		if (!$this->nameAccepted($name)) {
@@ -949,11 +945,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
 		}
 
-		if (!$this->_mkfile($path, $name)) {
-			return false;
-		}
-
-		return $this->stat($this->_joinPath($path, $name));
+		return $this->_mkfile($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
 	}
 	
 	/**
@@ -965,26 +957,24 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function rename($hash, $name) {
-		$path  = $this->decode($hash);
-		if (!$this->_fileExists($path)
-		||   $this->_isHidden($path)) {
+		$path = $this->decode($hash);
+		
+		if (!($file = $this->file($hash))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
-		$dir     = $this->_dirname($path);
-		$oldPath = $this->_path($path);
-		$newPath = $dir.$this->separator.$name;
+		$dir = $this->_dirname($path);
 		
 		if ($this->_isHidden($dir)) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		if (!$this->_isWritable($dir)) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $oldPath);
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_basename($dir));
 		}
 		
 		if ($this->_isLocked($path)) {
-			return $this->setError(elFinder::ERROR_LOCKED, $oldPath);
+			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
 		}
 		
 		if (!$this->nameAccepted($name)) {
@@ -992,16 +982,16 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$dst = $this->_joinPath($dir, $name);
+		
 		if ($this->_fileExists($dst)) {
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $this->_path($dst));
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
 		}
 		
-		if (!$this->_move($path, $dir, $name)) {
-			return false;
+		if ($this->_move($path, $dir, $name)) {
+			$this->rmTmb($path);
+			return $this->stat($this->_joinPath($dir, $name));
 		} 
-
-		$this->rmTmb($path);
-		return $this->stat($this->_joinPath($dir, $name));
+		return false;
 	}
 	
 	/**
@@ -1014,25 +1004,16 @@ abstract class elFinderVolumeDriver {
 	public function duplicate($hash) {
 		$path = $this->decode($hash);
 		
-		if (!$this->_fileExists($path)
-		||   $this->_isHidden($path)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
+		if (($file = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		$dir  = $this->_dirname($path);
-		$name = $this->uniqueName($dir, $this->_basename($path));
 		
-		
-		$this->doCopy($path, $dir, $name);
-		
-		$path = $this->_joinPath($dir, $name);
-		if (($file = $this->stat($path)) == false) {
-			return $this->error 
-				? false 
-				: $this->setError(elFinder::ERROR_COPY, $this->_path($path), $dir.$this->separator.$name);
+		if (($path = $this->doCopy($path, $dir, $this->uniqueName($dir, $file['name']))) == false) {
+			return false;
 		}
-		unset($file['hidden']);
-		return $file;
+		return $this->stat($path);
 	}
 	
 	/**
@@ -1272,16 +1253,12 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function uniqueName($dir, $name, $suffix = ' copy') {
-		// $dir  = $this->_dirname($path);
-		// $name = $this->_basename($path); 
 		$ext  = '';
 
-		// if ($this->_isFile($path)) {
-			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
-				$ext  = '.'.$m[1];
-				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
-			}
-		// }
+		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
+			$ext  = '.'.$m[1];
+			$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+		}
 		
 		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
 			$i    = (int)$m[2];
@@ -1527,9 +1504,9 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_LOCKED, $name);
 		}
 
-		if (!$this->_isWritable($dirname)) {
-			return $this->setError(elFinder::ERROR_NOT_RM_BY_PARENT, $this->_basename($dirname));
-		}
+		// if (!$this->_isWritable($dirname)) {
+		// 	return $this->setError(elFinder::ERROR_NOT_RM_BY_PARENT, $this->_basename($dirname));
+		// }
 		
 		$result = false;
 		if ($this->_isLink($path) || $this->_isFile($path)) {
@@ -1560,60 +1537,61 @@ abstract class elFinderVolumeDriver {
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function doCopy($source, $dstDir, $name='') {
+	protected function doCopy($source, $dst, $name='') {
+
+		if (!$this->_fileExists($source)) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+		
+		if (!$this->_isReadable($source)) {
+			return $this->setError(elFinder::ERROR_NOT_READ, $this->_basename($src));
+		}
+		
+		
+		if (!$this->_isDir($dst)) {
+			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+		}
+		
+		if (!$this->_isWritable($dst)) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_basename($dst));
+		}
+		
+		if ($this->_inpath($dst, $source)) {
+			return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF);
+		}
+
 		if (!$name) {
 			$name = $this->_basename($source);
 		}
-		
-		$_srcPath = $this->_path($source);
-		$_dstPath = $this->_path($dstDir).$this->separator.$name;
-		
-		if (!$this->_isDir($dstDir)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
-		}
-		
-		if (!$this->_isWritable($dstDir)) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_path($dstDir));
-		}
 
-		if (!$this->_fileExists($source)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
-		}
-
-		if (!$this->_isReadable($source)) {
-			return $this->setError(elFinder::ERROR_NOT_COPY, $_srcPath);
-		}
+		$_dst = $this->_joinPath($dst, $name);
 		
-		if ($this->_inpath($dstDir, $source)) {
-			return $this->setError(elFinder::ERROR_NOT_COPY_INTO_ITSELF, $_srcPath);
-		}
-
-		$dst = $this->_joinPath($dstDir, $name);
-		
-		if ($this->_fileExists($dst) && !$this->doRm($dst)) {
-			return $this->setError(elFinder::ERROR_NOT_REPLACE, $_dstPath);
+		if ($this->_fileExists($_dst)) {
+			if ($this->_isLocked($_dst)) {
+				return $this->setError(elFinder::ERROR_LOCKED, $name);
+			}
+			
+			if (!$this->doRm($_dst)) {
+				return false;
+			}
 		}
 		
 		if ($this->_isLink($source)) {
-			if (($link = $this->_readlink($source)) == false || !$this->_symlink($link, $dstDir, $name)) {
-				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
-			}
-			return $this->_joinPath($dstDir, $name);
+			return ($link = $this->_readlink($source)) != false && $this->_symlink($link, $dst, $name)
+				? $this->_joinPath($dst, $name)
+				: false;
 		} 
 		
 		if ($this->_isFile($source)) {
-			if (!$this->_copy($source, $dstDir, $name)) {
-				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
-			}
-			return $this->_joinPath($dstDir, $name);
+			return $this->_copy($source, $dst, $name) ? $this->_joinPath($dst, $name) : false;
 		}
 		
 		if ($this->_isDir($source)) {
-			if (!$this->_mkdir($dstDir, $name) || ($ls = $this->_scandir($source)) === false) {
-				return $this->setError(elFinder::ERROR_COPY, $_srcPath, $_dstPath);
+			if (!$this->_mkdir($dst, $name) || ($ls = $this->_scandir($source)) === false) {
+				return false;
 			}
 			
-			$dst = $this->_joinPath($dstDir, $name);
+			$dst = $this->_joinPath($dst, $name);
 			foreach ($ls as $path) {
 				$name = $this->_basename($path);
 				if ($name != '.' && $name != '..' && !$this->_isHidden($path)) {

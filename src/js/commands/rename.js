@@ -56,7 +56,7 @@ elFinder.prototype.commands.rename = function() {
 							return dfrd.reject(errors.invName);
 						}
 						if (fm.fileByName(name, file.phash)) {
-							return dfrd.reject([errors.nameExists, name]);
+							return dfrd.reject([errors.exists, name]);
 						}
 						
 						parent.html(fm.escape(name));
@@ -67,6 +67,7 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.fail(function(error) {
 								dfrd.reject();
+								fm.sync();
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
@@ -84,7 +85,7 @@ elFinder.prototype.commands.rename = function() {
 		}
 		
 		if (file.locked) {
-			return dfrd.reject([errors.fileLocked, file.name]);
+			return dfrd.reject([errors.locked, file.name]);
 		}
 		
 		fm.disable();

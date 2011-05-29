@@ -45,7 +45,7 @@ elFinder.prototype.mixins = {
 							return dfrd.reject(errors.invName);
 						}
 						if (fm.fileByName(name, phash)) {
-							return dfrd.reject([errors.nameExists, name]);
+							return dfrd.reject([errors.exists, name]);
 						}
 						
 						parent.html(fm.escape(name));
@@ -57,7 +57,8 @@ elFinder.prototype.mixins = {
 								preventFail : true
 							})
 							.fail(function(error) {
-								dfrd.reject(error)
+								dfrd.reject(error);
+								fm.sync();
 							})
 							.done(function(data) {
 								dfrd.resolve(data);

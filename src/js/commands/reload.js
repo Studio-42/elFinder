@@ -16,20 +16,8 @@ elFinder.prototype.commands.reload = function() {
 		var fm = this.fm;
 		
 		return this.fm.sync(true)
-			.done(function() {
-				fm.reload();
-			})
-			.fail(function(error) {
-				var cwd = fm.cwd().hash,
-					root = fm.root();
-				
-				fm.error(error);
-				if (cwd != root) {
-					fm.ajax({
-						data : {cmd : 'open', target : root, tree : 1, init : 1},
-						notify : {type : 'open', cnt : 1, hideCnt : true}
-					});
-				}
+			.done(function(data) {
+				fm.reload(data);
 			});
 	}
 
