@@ -1017,70 +1017,67 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Save uploaded file
+	 * undocumented function
 	 *
-	 * @param  string   $tmpPath  temporary file path
-	 * @param  string   $name     file name
-	 * @param  string   $hash     target dir
-	 * @return Array|false
-	 * @author Dmitry (dio) Levashov
+	 * @return void
+	 * @author Dmitry Levashov
 	 **/
-	public function saveFile($tmpPath, $name, $target, $controlOvewrite=false) {
-		$dir = $this->file($target);
+	public function uploadAllow($tmpPath, $name) {
+		if (!$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+		}
 		
-		if (!$dir) {
-			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+		$mime  = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpPath); 
+		$allow = in_array('all', $this->uploadAllow) || $this->mimeAccepted($mime, $this->uploadAllow);
+		$deny  = in_array('all', $this->uploadDeny)  || $this->mimeAccepted($mime, $this->uploadDeny);
+		// dont ask me what this mean. I forgot it, but its work :)
+		// for details see python connector
+		if (!($this->uploadOrder[0] == 'allow' ? $allow && !$deny : $allow || !$deny)) {
+			return $this->setError(elFinder::ERROR_UPLOAD_MIME);
 		}
-		if ($dir['mime'] != 'directory') {
-			return $this->setError(elFinder::ERROR_NOT_DIR, $dir['name']);
+		return true;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function save($fp, $dst, $name, $cmd='upload') {
+		$dir  = $this->file($dst);
+		
+		if (!$dir || $dir['mime'] != 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
 		}
+		
 		if (!$dir['write']) {
 			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
 		}
 		
 		if (!$this->nameAccepted($name)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $dir['name']);
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
 		
-		$target = $this->decode($target);
+		$dst  = $this->decode($dst);
+		$_dst = $this->_joinPath($dst, $name);
 		
-		$dst = $this->_joinPath($target, $name);
-
-		if ($this->_fileExists($dst)) {
-			if (!$this->_isWritable($dst)) {
-				return $this->setError(elFinder::ERROR_FILE_EXISTS, $this->_path($dst));
+		if ($this->_fileExists($_dst)) {
+			if (($cmd == 'upload' && !$this->options['uploadOverwrite'])
+			||  ($cmd == 'copy' && !$this->options['copyOverwrite'])) {
+				$name = $this->uniqueName($dst, $name, '-', false);
+			} elseif (!$this->_isWritable($_dst)) {
+				return $this->setError(elFinder::ERROR_REPLACE, $name);
+			} elseif (!$this->doRm($_dst)) {
+				return false;
 			}
-			
-			if (!$this->options['uploadOverwrite']) {
-				$name = $this->uniqueName($target, $name, '-');
-			}
-			
-		}
-
-		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpPath); 
-		$allow = in_array('all', $this->uploadAllow) || $this->mimeAccepted($mime, $this->uploadAllow);
-		$deny  = in_array('all', $this->uploadDeny)  || $this->mimeAccepted($mime, $this->uploadDeny);
-
-		if (!($this->uploadOrder[0] == 'allow' ? $allow && !$deny : $allow || !$deny)) {
-			return $this->setError(elFinder::ERROR_UPLOAD_MIME);
 		}
 		
-		if (!($fp = fopen($tmpPath, 'rb'))) {
-			return false;
-		}
-
-		if (($path = $this->_save($fp, $target, $name)) == false) {
-			fclose($fp);
-			return false;
-		}
-		fclose($fp);
-
-		if (($file = $this->stat($path)) == false) {
-			return false;
-		}
-
-		return $file;
+		return ($path = $this->_save($fp, $dst, $name))
+			? $this->stat($path)
+			: false;
 	}
+	
 	
 	/**
 	 * Copy file in other directory
@@ -1122,9 +1119,9 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	public function save($fp, $dir, $info) {
-		return $this->_save($fp, $this->decode($dir), $info);
-	}
+	// public function save($fp, $dir, $info) {
+	// 	return $this->_save($fp, $this->decode($dir), $info);
+	// }
 	
 	/**
 	 * undocumented function
@@ -1252,7 +1249,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function uniqueName($dir, $name, $suffix = ' copy') {
+	protected function uniqueName($dir, $name, $suffix = ' copy', $checkNum=true) {
 		$ext  = '';
 
 		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
@@ -1260,20 +1257,22 @@ abstract class elFinderVolumeDriver {
 			$name = substr($name, 0,  strlen($name)-strlen($m[0]));
 		}
 		
-		if (preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
+		if ($checkNum && preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
 			$i    = (int)$m[2];
 			$name = substr($name, 0, strlen($name)-strlen($m[2]));
 		} else {
 			$i     = 0;
 			$name .= $suffix;
 		}
-		while ($i++ <= 10000) {
+		$max = $i+100000;
+
+		while ($i++ <= $max) {
 			$n = $name.($i > 0 ? $i : '').$ext;
 			if (!$this->_fileExists($this->_joinPath($dir, $n))) {
 				return $n;
 			}
 		}
-		return $name.md5($path).$ext;
+		return $name.md5($dir).$ext;
 	}
 	
 	/*********************** file stat *********************/

@@ -329,7 +329,6 @@ $.fn.elfindertree = function(fm) {
 				if (init) {
 					openRoot = fm.options.openRootOnLoad;
 					tree.empty();
-					fm.log('init')
 				}
 
 				if (dirs.length) {

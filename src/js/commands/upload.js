@@ -145,6 +145,8 @@ elFinder.prototype.commands.upload = function() {
 				xhr.open('POST', opts.url, true);
 				
 				formData.append('cmd', 'upload');
+				formData.append('target', fm.cwd().hash);
+				// for old api
 				formData.append('current', fm.cwd().hash);
 				
 				$.each(cdata, function(key, val) {
@@ -213,7 +215,7 @@ elFinder.prototype.commands.upload = function() {
 							
 							form.submit();
 						}),
-					form   = $('<form action="'+opts.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none_"><input type="text" name="cmd" value="upload" /><input type="text" name="current" value="'+fm.cwd().hash+'" /></form>'),
+					form   = $('<form action="'+opts.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none_"><input type="text" name="cmd" value="upload" /><input type="text" name="target" value="'+fm.cwd().hash+'" /><input type="text" name="current" value="'+fm.cwd().hash+'" /></form>'),
 					cnt    = 0,
 					ntm, stm;
 
@@ -419,21 +421,16 @@ elFinder.prototype.commands.upload = function() {
 	this._exec = function(data) {
 		var fm   = this.fm;
 		
-		// var d = transports[transport](data)
-		// fm.log(d)
-		// return d
-		
 		return transports[transport](data)
 				.fail(function(error) {
 					error && fm.error(error);
 				})
 				.done(function(data) {
 					data.warning && fm.error(data.warning);
-					if (data.current == fm.cwd().hash) {
-						data.removed && fm.remove(data);
-						data.added   && fm.add(data);
-						data.changed && fm.change(data);
-					}
+					// removed and changed - for old api
+					data.removed && fm.remove(data);
+					data.added   && fm.add(data);
+					data.changed && fm.change(data);
  					fm.trigger('upload', data);
 				});
 				

@@ -33,7 +33,7 @@ class elFinder {
 		'ls'        => array('target' => true, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
-		'tmb'       => array('current' => true, 'files' => true),
+		'tmb'       => array('files' => true),
 		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
 		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
@@ -44,7 +44,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		
 		'paste' => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload' => array('current' => true, 'FILES' => true, 'mimes' => false)
+		'upload' => array('target' => true, 'FILES' => true, 'mimes' => false)
 	);
 	
 	/**
@@ -115,6 +115,7 @@ class elFinder {
 	const ERROR_INV_MIME             = 24;
 	const ERROR_FILE_EXISTS          = 25;
 	const ERROR_NOT_TARGET_DIR       = 26;
+	const ERROR_UPLOAD_MIME          = 27;
 	
 	const ERROR_MKDIR                = 30;
 	const ERROR_MKFILE               = 31;
@@ -157,6 +158,7 @@ class elFinder {
 		24 => 'File "$1" has not allowed file type.',
 		25 => 'Object named "$1" already exists in this location.',
 		26 => 'Target folder not found.',
+		27 => 'Not allowed file type',
 		
 		30 => 'Unable to create folder "$1".',
 		31 => 'Unable to create file "$1".',
@@ -167,7 +169,7 @@ class elFinder {
 		36 => 'Unable to copy "$1" into "$2".',
 		37 => 'Unable to move "$1" into "$2".',
 		38 => 'Unable to copy "$1" into itself.',
-		39 => 'Object named "$1" exists and can’t be replaced.',
+		39 => 'Object named "$1" exists at this location and can’t be replaced.',
 		
 	);
 	
@@ -522,8 +524,8 @@ class elFinder {
 		$images = array();
 		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
 		
-		if (!$volume) {
-			return array('error' => $this->errorMessage(self::ERROR_DIR_NOT_FOUND));
+		if (($volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '')) == false) {
+			return array('error' => $this->errorMessage(self::ERROR_NOT_TARGET_DIR));
 		}
 		
 		foreach ($args['files'] as $hash) {
@@ -532,10 +534,7 @@ class elFinder {
 			}
 		}
 		
-		return array(
-			'current' => $args['current'],
-			'images'  => $images
-		);
+		return array('images'  => $images);
 	}
 	
 	/**
@@ -777,43 +776,45 @@ class elFinder {
 	 * @author Dmitry Levashov
 	 **/
 	protected function upload($args) {
-		$current = $args['current'];
-		$volume  = $this->volume($current);
-		$result  = array('current' => $current, 'added' => array());
-		$files   = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
+		$target = $args['target'];
+		$volume = $this->volume($target);
+		$result = array('added' => array());
+		$files  = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
 			? $args['FILES']['upload'] 
 			: array();
 
 		
 		if (!$volume) {
-			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_DIR_NOT_FOUND));
+			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_NOT_TARGET_DIR));
 		}
 		if (empty($files)) {
 			return array('error' => $this->errorMessage(self::ERROR_UPLOAD, self::ERROR_NOT_UPLOAD_FILES));
 		}
 		
 		foreach ($files['name'] as $i => $name) {
-
-			if ($files['error'][$i] != 0) {
-				$result['warning'] = $this->errorMessage(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_SEND);
-				// return $this->trigger('upload', $volume, $result);
+			$tmpPath = $files['tmp_name'][$i];
+			
+			if ($files['error'][$i]) {
+				$result['warning'] = $this->errorMessage(self::ERROR_UPLOAD_FILE, $name);
 				break;
 			}
 			
-			if (($file = $volume->saveFile($files['tmp_name'][$i], $name, $current, true)) == false) {
-				$warn = $volume->error();
-				array_unshift($warn, $name);
-				array_unshift($warn, self::ERROR_UPLOAD_FILE);
-				$result['warning'] = $this->errorMessage($warn);
-				// return $this->trigger('upload', $volume, $result);
+			if (!$volume->uploadAllow($tmpPath, $name)) {
+				$result['warning'] = $this->errorMessage($volume->error());
+			}
+			
+			if (($fp  = fopen($tmpPath, 'rb')) == false
+			|| ($file = $volume->save($fp, $target, $name, 'upload')) == false) {
+				$error = array(self::ERROR_UPLOAD_FILE, $name);
+				$result['warning'] = $this->errorMessage(array_merge($error, $volume->error()));
 				break;
-			} 
-			$result['added'][] = $file;
-
+			}
+			
+			$tmp = $this->trigger('upload', $volume, array('added' => array($file)));
+			$result['added'] = array_merge($result['added'], $tmp['added']);
+			
 		}
 		
-		$result = $this->trigger('upload', $volume, $result);
-		$result['added'] = $this->filterByMimes($result['added'], $volume, $args['mimes']);
 		return $result;
 	}
 	

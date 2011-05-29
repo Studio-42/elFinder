@@ -426,11 +426,11 @@ $.fn.elfindercwd = function(fm) {
 			loadThumbnails = function(files) {
 				if (files === true || files.length) {
 					fm.ajax({
-						data : {cmd : 'tmb', current : fm.cwd().hash, files : files},
+						data : {cmd : 'tmb', current : fm.cwd().hash, files : files}, // current - for old api
 						preventFail : true
 					}).done(function(data) {
 						if (fm.view != 'list' 
-						&& data.current == fm.cwd().hash
+						// && data.current == fm.cwd().hash
 						&& attachThumbnails(data.images)
 						&& data.tmb) {
 							loadThumbnails(true);

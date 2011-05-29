@@ -1505,7 +1505,7 @@
 		rules : {
 			oldapi : {
 				defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-				tmb      : function(data) { return data && data.current && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+				tmb      : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
 				upload   : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); }
 			},
 			newapi : {
@@ -1523,8 +1523,8 @@
 				open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
 				tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-				tmb     : function(data) { return data && data.current && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-				upload  : function(data) { return data && data.current && ($.isPlainObject(data.added) || $.isArray(data.added));}
+				tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+				upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));}
 			}
 		},
 		

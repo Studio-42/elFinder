@@ -99,7 +99,7 @@ $opts = array(
 			'uploadOverwrite' => false,
 			'mimeDetect' => 'internal',
 			// 'tmbPath' => '.tmb',
-			// 'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(
 					'pattern' => '/\/__.*/',
