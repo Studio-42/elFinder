@@ -1517,15 +1517,18 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function doRm($path) {
 		if (!$this->_fileExists($path)) {
-			return $this->setError(elFinder::ERROR_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 
+		$dirname = $this->_dirname($path);
+		$name    = $this->_basename($path);
+		
 		if ($this->_isLocked($path)) {
-			return $this->setError(elFinder::ERROR_LOCKED, $this->_path($path));
+			return $this->setError(elFinder::ERROR_LOCKED, $name);
 		}
 
-		if (!$this->_isWritable($this->_dirname($path))) {
-			return $this->setError(elFinder::ERROR_NOT_RM_BY_PARENT, $this->_path($path));
+		if (!$this->_isWritable($dirname)) {
+			return $this->setError(elFinder::ERROR_NOT_RM_BY_PARENT, $this->_basename($dirname));
 		}
 		
 		$result = false;
@@ -1545,7 +1548,7 @@ abstract class elFinderVolumeDriver {
 			$this->rmTmb($path);
 			return true;
 		}
-		return $this->setError(elFinder::ERROR_REMOVE, $this->_path($path));
+		return false;
 	}
 	
 	/**

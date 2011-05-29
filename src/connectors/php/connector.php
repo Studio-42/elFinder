@@ -1,5 +1,5 @@
 <?php
-error_reporting(0); // Set E_ALL for debuging
+error_reporting(E_ALL); // Set E_ALL for debuging
 
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
@@ -15,6 +15,7 @@ function debug($o) {
 	echo '<pre>';
 	print_r($o);
 }
+
 // exit();
 function logger($data) {
 	$str = $data['cmd'].': ';
@@ -45,8 +46,38 @@ function logger($data) {
 	$result['log'] = true;
 	return $result;
 }
+
+function logger2($cmd, $voumes, $result) {
+	$log = $cmd.': '.$voumes[0]->id().' ';
+	
+	if (isset($voumes[1])) {
+		$log .= $voumes[1]->id().' ';
+	}
+	
+	$log .= '['.date('d.m H:s').'] ';
+	
+	switch ($cmd) {
+		case 'mkdir':
+		case 'mkfile':
+			$log .= $result['added'][0]['name'];
+			break;
+	}
+	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
+		$fp = fopen('../../../files/tmp/log.txt', 'a');
+		if ($fp) {
+			fwrite($fp, $log."\n");
+			fclose($fp);
+		}
+	}
+	return $result;
+}
+
 // sleep(5);
 $opts = array(
+	'bind' => array(
+		'mkdir' => 'logger2', 
+		'mkfile' =>'logger2'
+	),
 	'debug' => true,
 	'roots' => array(
 		array(

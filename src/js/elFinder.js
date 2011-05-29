@@ -1226,8 +1226,6 @@
 				self.log('upload').log(data)
 			})
 			.bind('rm', function(e) {
-				self.log('remove')
-				
 				var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
 				
 				node.append(audio)
