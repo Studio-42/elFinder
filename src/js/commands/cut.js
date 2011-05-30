@@ -35,10 +35,10 @@ elFinder.prototype.commands.cut = function() {
 		for (i = 0; i < l; i++) {
 			file = fm.file(hashes[i]);
 			if (!file.read) {
-				return dfrd.reject([fm.errors.notCopy, file.name]);
+				return dfrd.reject([fm.errors.copy, file.name]);
 			}
 			if (file.locked) {
-				return dfrd.reject([fm.errors.fileLocked, file.name]);
+				return dfrd.reject([fm.errors.locked, file.name]);
 			}
 		}
 		

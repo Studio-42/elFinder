@@ -104,14 +104,15 @@
 			 * @type Object
 			 **/
 			cwdOptions = {
-				path       : '',
-				url        : '',
-				tmbUrl     : '',
-				disabled   : [],
-				separator  : '/',
-				archives   : [],
-				extract    : [],
-				tmb        : false // old API
+				path          : '',
+				url           : '',
+				tmbUrl        : '',
+				disabled      : [],
+				separator     : '/',
+				archives      : [],
+				extract       : [],
+				copyOverwrite : true,
+				tmb           : false // old API
 			},
 			
 			/**
@@ -1424,9 +1425,14 @@
 			openDir      : 'Open folder error.',
 			openFile     : 'Open file error.',
 			write        :  'You don’t have permission to write into "$1".',
-			locked       : 'Object "$1" locked and can’t be removed or renamed.',
+			locked       : 'Object "$1" locked and can’t be moved, removed or renamed.',
 			invName      : 'Name "$1" is not allowed.',
 			exists       : 'Object named "$1" already exists in this location.',
+			copy         : 'Unable to copy "$1" in clipboard because you don’t have permission to read it.',
+			clpEmpty     : 'There are no files in clipboard.',
+			noDstDir     : 'Destination directory not defined.',
+			pasteWrite   : 'Unable to move files into "$1" because you don’t have permission to write in this location.',
+			pasteItself  : 'Unable to copy "$1" into itself or in child folder.'
 		},
 		
 		/**
@@ -1877,9 +1883,10 @@
 		 */
 		normalizeOldOptions : function(data) {
 			var opts = {
-					path     : data.cwd.rel,
-					disabled : data.disabled || [],
-					tmb      : !!data.tmb 
+					path          : data.cwd.rel,
+					disabled      : data.disabled || [],
+					tmb           : !!data.tmb,
+					copyOverwrite : true
 				};
 			
 			if (data.params) {

@@ -164,15 +164,20 @@ elFinder.prototype.commands.paste = function() {
 				if (fm.oldAPI) {
 					paste(files);
 				} else {
-					dst.hash == fm.cwd().hash
-						? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
-						: fm.ajax({
-							data : {cmd : 'ls', target : dst.hash},
-							preventFail : true
-						})
-						.always(function(data) {
-							valid(data.list || [])
-						});
+					
+					if (!fm.option('copyOverwrite')) {
+						paste(files);
+					} else {
+						dst.hash == fm.cwd().hash
+							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
+							: fm.ajax({
+								data : {cmd : 'ls', target : dst.hash},
+								preventFail : true
+							})
+							.always(function(data) {
+								valid(data.list || [])
+							});
+					}
 				}
 				
 				return dfrd;
@@ -181,11 +186,11 @@ elFinder.prototype.commands.paste = function() {
 			;
 
 		if (!cnt) {
-			return dfrd.reject('There are no files in clipboard to paste');
+			return dfrd.reject(errors.clpEmpty);
 		}
 			
 		if (!dst) {
-			return dfrd.reject('Destination directory not defined.');
+			return dfrd.reject(errors.noDstDir);
 		}
 
 		if (dst.mime != 'directory') {
@@ -193,7 +198,7 @@ elFinder.prototype.commands.paste = function() {
 		}
 		
 		if (!dst.write)	{
-			return dfrd.reject(['Unable paste files because you do not have permissions to write in "$1"', dst.name])
+			return dfrd.reject([errors.pasteWrite, dst.name])
 		}
 		
 		parents = fm.parents(dst.hash);
@@ -201,13 +206,13 @@ elFinder.prototype.commands.paste = function() {
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if ($.inArray(file.hash, parents) !== -1) {
-				return dfrd.reject(['Unable to copy "$1" into itself or in child folder', file.name]);
+				return dfrd.reject([pasteItself, file.name]);
 			}
 			if (!file.read) {
-				return dfrd.reject([notCopy, file.name]);
+				return dfrd.reject([copy, file.name]);
 			}
 			if (cut && file.locked) {
-				return dfrd.reject([fileLocked, file.name]);
+				return dfrd.reject([locked, file.name]);
 			}
 
 			if (file.phash == dst.hash) {

@@ -35,7 +35,7 @@ elFinder.prototype.commands.copy = function() {
 		for (i = 0; i < l; i++) {
 			file = fm.file(hashes[i]);
 			if (!file.read) {
-				return dfrd.reject([fm.errors.notCopy, file.name]);
+				return dfrd.reject([fm.errors.copy, file.name]);
 			}
 		}
 		

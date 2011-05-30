@@ -352,8 +352,8 @@ $.fn.elfindertree = function(fm) {
 				if (dirs.length) {
 					updateTree(dirs);
 					// add arrows to parent dirs
-					$.each(dirs, function(dir) {
-						tree.find('#'+hash2id(dir.phash)).not('.'+collapsed).addClass(collapsed);
+					$.each(dirs, function(i, dir) {
+						tree.find('#'+hash2id(dir.phash)).not('.'+collapsed).has('ul li').addClass(collapsed);
 					});
 				}
 			})

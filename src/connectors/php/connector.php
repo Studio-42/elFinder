@@ -98,6 +98,7 @@ $opts = array(
 			'uploadOrder' => 'deny,allow',
 			'uploadOverwrite' => false,
 			'mimeDetect' => 'internal',
+			
 			// 'tmbPath' => '.tmb',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
@@ -123,7 +124,7 @@ $opts = array(
 					'pattern' => '/images$/',
 					'read' => true,
 					// 'write' => false,
-					// 'locked' => true,
+					'locked' => true,
 					// 'hidden' => true
 				),
 				array(
@@ -145,6 +146,7 @@ $opts = array(
 			'pass' => 'hane',
 			'db' => 'elfinder',
 			'user_id' => 1,
+			// 'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../../../tmb/',
 			'tmbURL' => 'http://localhost/git/elfinder/tmb/',

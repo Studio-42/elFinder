@@ -89,6 +89,13 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
+	protected $copyError = array();
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
 	protected $disabled = array();
 	
 	const ERROR_UNKNOWN              = 0;
@@ -127,6 +134,10 @@ class elFinder {
 	const ERROR_MOVE                 = 37;
 	const ERROR_COPY_INTO_ITSELF     = 38;
 	const ERROR_REPLACE              = 39;
+	const ERROR_COPY_FILES           = 40;
+	const ERROR_MOVE_FILES           = 41;
+	const ERROR_COPY_FROM            = 42;
+	const ERROR_COPY_TO              = 43;	
 	
 	/**
 	 * Error messages
@@ -150,7 +161,7 @@ class elFinder {
 		16 => 'Unable to get file content.',
 		17 => 'Unable to get listing on "$1".',
 		18 => 'You don’t have permission to write into "$1".',
-		19 => 'Object "$1" locked and can’t be removed or renamed.',
+		19 => 'Object "$1" locked and can’t be moved, removed or renamed.',
 		20 => 'Name "$1" is not allowed.',
 		21 => 'Data exceeds the maximum allowed size.',
 		22 => 'There are no upladed files was found.',
@@ -166,11 +177,14 @@ class elFinder {
 		33 => 'Unable to remove "$1".',
 		34 => 'Unable to upload "$1".',
 		35 => 'Unable to duplicate "$1".',
-		36 => 'Unable to copy "$1" into "$2".',
-		37 => 'Unable to move "$1" into "$2".',
+		36 => 'Unable to copy "$1".',
+		37 => 'Unable to move "$1".',
 		38 => 'Unable to copy "$1" into itself.',
 		39 => 'Object named "$1" exists at this location and can’t be replaced.',
-		
+		40 => 'Unable to copy files.',
+		41 => 'Unable to move files.',
+		42 => 'Copy files from volume "$1" not allowed.',
+		43 => 'Copy files on volume "$1" not allowed.',
 	);
 	
 	/**
@@ -827,46 +841,71 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function paste($args) {
-		sleep(5);
-		return array('error' => 'Not implemented');
 		$dst     = $args['dst'];
-		$targets = $args['targets'];
+		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$cut     = !empty($args['cut']);
-		$dstRoot = $this->fileRoot($dst);
+		$result  = array('removed' => array(), 'added' => array());
+		$error   = $cut ? self::ERROR_MOVE_FILES : self::ERROR_COPY_FILES;
 		
-		if (!$dstRoot || !is_array($targets) || empty($targets)) {
-			return array('error' => 'Invalid parameters');
+		if (($dstVolume = $this->volume($dst)) == false
+		|| ($dstDir = $dstVolume->dir($dst)) == false) {
+			return array('error' => $this->errorMessage($error, self::ERROR_NOT_TARGET_DIR));
 		}
 		
-		$result  = array('dst' => $dst, 'copy' => array(), 'rm' => array());
+		if (!$dstDir['write']) {
+			return array('error' => $this->errorMessage($error, self::ERROR_NOT_WRITE, $dstDir['name']));
+		}
 		
-		foreach ($targets as $src) {
-			$srcRoot = $this->fileRoot($src);
-			if (!$srcRoot) {
-				return array('error' => 'Invalid parameters');
+		foreach ($targets as $target) {
+			if (($srcVolume = $this->volume($target)) == false
+			|| ($src = $srcVolume->file($target)) == false) {
+				$result['warning'] = $this->errorMessage($error, self::ERROR_FILE_NOT_FOUND);
+				break;
 			}
-			$copy = $dstRoot->paste($srcRoot, $src, $dst);
-			// if ($srcRoot == $dstRoot) {
-			// 	$copy = $dstRoot->copy($target, $dst);
-			// 	if ($copy) {
-			// 		$result['copy'][] = $copy;
-			// 	} else {
-			// 		return array('error' => $dstRoot->error());
-			// 	}
-			// } else {
-			// 	
-			// }
-			// if ($cut && !$srcRoot->rm($target)) {
-			// 	return array('error' => $srcRoot->error());
-			// } else {
-			// 	$result['rm'][] = $target;
-			// }
+			
+			if ($dstVolume != $srcVolume) {
+				if (!$srcVolume->copyFromAllowed()) {
+					$root = $srcVolume->file($srcVolume->root());
+					$result['warning'] = $this->errorMessage($error, self::ERROR_COPY_FROM, $root['name']);
+					break;
+				}
+				
+				if (!$dstVolume->copyToAllowed()) {
+					$root = $dstVolume->file($dstVolume->root());
+					$result['warning'] = $this->errorMessage($error, self::ERROR_COPY_TO, $root['name']);
+					break;
+				}
+			}
+			
+			if (($file = $this->copy($srcVolume, $dstVolume, $src, $dst, $cut)) == false) {
+				$error = array($cut ? self::ERROR_MOVE : self::ERROR_COPY, $src['name']);
+				$result['warning'] = $this->errorMessage(array_merge($error, $this->copyError));
+				break;
+			}
+			
+			$data = array(
+				'added'          => array($file),
+				'removed'        => array(),
+				'removedDetails' => array()
+			);
+			if ($cut) {
+				if (!$srcVolume->rm($src['hash'])) {
+					$result['warning'] = $this->errorMessage(self::ERROR_REMOVE, $src['name']);
+					break;
+				}
+				$data['removed'][] = $src['hash'];
+				$data['removedDetails'][] = $src; 
+			}
+			
+			$tmp = $this->trigger('paste', array($srcVolume, $dstVolume), $data);
+			$result['added'] = array_merge($result['added'], $tmp['added']);
+			$result['removed'] = array_merge($result['removed'], $tmp['removed']);
+			if ($src['mime'] == 'directory') {
+				$result['removed'][] = $file['hash'];
+			}
 		}
+		
 		return $result;
-		
-		return $dstRoot->getInfo($args['dst']);
-		
-		return $args;
 	}
 	
 	/**
@@ -875,8 +914,46 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function copy($srcRoot, $src, $dstRoot, $dst) {
+	protected function copy($srcVolume, $dstVolume, $src, $dst, $cut) {
+		if (!$src['read']) {
+			$this->copyError = array(self::ERROR_NOT_READ, $src['name']);
+			return false;
+		}
+		if ($cut && $src['locked']) {
+			$this->copyError = array(self::ERROR_LOCKED, $src['name']);
+			return false;
+		}
 		
+		
+		$name = $src['name'];
+		$hash = $src['hash'];
+		
+		if ($src['mime'] == 'directory') {
+			$dir = $dstVolume->mkdir($dst, $name, true);
+			if (!$dir) {
+				$this->copyError = $dstVolume->error();
+				return false;
+			}
+			
+			foreach ($srcVolume->scandir($hash) as $file) {
+				if (!$this->copy($srcVolume, $dstVolume, $file, $dir['hash'], $cut)) {
+					$this->copyError = $dstVolume->error();
+					return false;
+				}
+			}
+			return $dstVolume->dir($dir['hash']);
+		} else {
+			if (($fp = $srcVolume->open($hash)) == false) {
+				return false;
+			}
+			if (($file = $dstVolume->save($fp, $dst, $name, 'copy')) == false) {
+				$this->copyError = $dstVolume->error();
+			}
+			$srcVolume->close($fp, $hash);
+			
+			return $file; 
+			
+		}
 	}
 	
 	/***************************************************************************/

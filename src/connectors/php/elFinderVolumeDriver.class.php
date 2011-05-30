@@ -141,30 +141,58 @@ abstract class elFinderVolumeDriver {
 	 * @var array
 	 **/
 	protected $options = array(
-		'path'         => '',           // root path
-		'startPath'    => '',           // open this path on initial request instead of root path
-		'treeDeep'     => 1,            // how many subdirs levels return per request
-		'URL'          => '',           // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
-		'separator'    => DIRECTORY_SEPARATOR,
-		'cryptLib'     => '',
-		'mimeDetect'   => 'auto',       // how to detect mimetype
-		'mimefile'     => '',           // mimetype file path
-		'tmbPath'       => '.tmb',       // directory for thumbnails
-		'tmbPathMode'   => 0777,         // mode to create thumbnails dir
-		'tmbURL'       => '',           // thumbnails dir URL
-		'tmbSize'      => 48,           // images thumbnails size (px)
-		'imgLib'       => 'auto',       // image manipulations lib name
-		// 'tmbCleanProb' => 0,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
-		'uploadOverwrite' => true,
-		'uploadAllow'  => array('all'),      // mimetypes which allowed to upload
-		'uploadDeny'   => array(),      // mimetypes which not allowed to upload
-		'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
-		'dateFormat'   => 'j M Y H:i',  // files dates format
-		'copyFrom'     => true,  // allow to copy from this volume to other ones
-		'copyTo'       => true,  // allow to copy from other volumes to this one
-		'disabled'     => array(),      // list of commands names to disable on this root
-		'acceptedName' => '/^[^\.]/',
-		'defaults'     => array(   // default permissions 
+		// root directory path
+		'path'            => '',  
+		// open this path on initial request instead of root path
+		'startPath'       => '',        
+		// how many subdirs levels return per request   
+		'treeDeep'        => 1,          
+		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)  
+		'URL'             => '',   
+		// directory separator. required by client to show paths correctly        
+		'separator'       => DIRECTORY_SEPARATOR,
+		// library to crypt/uncrypt files names (not implemented)
+		'cryptLib'        => '',
+		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
+		'mimeDetect'      => 'auto',       
+		// mime.types file path (for mimeDetect==internal)
+		'mimefile'        => '',          
+		// directory for thumbnails 
+		'tmbPath'         => '.tmb',       
+		// mode to create thumbnails dir
+		'tmbPathMode'     => 0777,   
+		// thumbnails dir URL. Set it if store thumbnails outside root directory      
+		'tmbURL'          => '',     
+		// thumbnails size (px)      
+		'tmbSize'         => 48,     
+		// image manipulations library
+		'imgLib'          => 'auto',   
+		// how frequiently clean thumbnails dir (0 - never, 100 - every init request)    
+		// 'tmbCleanProb' => 0,            
+		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
+		'copyOverwrite'   => true,    
+		// if true - join new and old directories content on paste     
+		'copyJoin'        => true, 
+		// on upload -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext   
+		'uploadOverwrite' => true, 
+		// mimetypes allowed to upload
+		'uploadAllow'     => array('all'),      
+		// mimetypes not allowed to upload
+		'uploadDeny'      => array(),      
+		// order to proccess uploadAllow and uploadAllow options
+		'uploadOrder'     => 'deny,allow', 
+		// files dates format
+		'dateFormat'      => 'j M Y H:i',  
+		// allow to copy from this volume to other ones?
+		'copyFrom'        => true,  
+		// allow to copy from other volumes to this one?
+		'copyTo'          => true,  
+		// list of commands disabled on this root
+		'disabled'        => array(),      
+		// regexp or function name to validate new file name
+		'acceptedName'    => '/^[^\.]/',
+		// default permissions 
+		'defaults'     => array(   
 			'read'  => true,
 			'write' => true
 		),
@@ -608,7 +636,8 @@ abstract class elFinderVolumeDriver {
 			'url'        => $this->URL,
 			'tmbUrl'     => $this->tmbURL,
 			'disabled'   => $this->disabled,
-			'separator'  => $this->separator
+			'separator'  => $this->separator,
+			'copyOverwrite' => intval($this->options['copyOverwrite'])
 		);
 	}
 	
@@ -623,6 +652,27 @@ abstract class elFinderVolumeDriver {
 	public function mimeAccepted($mime, $mimes=array()) {
 		return $mime == 'directory' || empty($mimes) || in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
 	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function copyFromAllowed() {
+		return !!$this->options['copyFrom'];
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function copyToAllowed() {
+		return !!$this->options['copyTo'];
+	}
+	
 	
 	/**
 	 * Return true if file exists and not hidden
@@ -894,26 +944,40 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function mkdir($dst, $name) {
+	public function mkdir($dst, $name, $copy=false) {
 		$path = $this->decode($dst);
-		$dir  = $this->file($dst);
-
-		if (!$dir || $dir['mime'] != 'directory') {
+		
+		if (!$this->_isDir($path)) {
 			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
 		}
 		
-		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
+		if (!$this->_isWritable($path)) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_basename($path));
 		}
 		
 		if (!$this->nameAccepted($name)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
 		
-		if ($this->_fileExists($this->_joinPath($path, $name))) {
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+		if ($copy && !$this->options['copyOverwrite']) {
+			$name = $this->uniqueName($path, $name, '-', false);
 		}
 		
+		$dst = $this->_joinPath($path, $name);
+		
+		if ($this->_fileExists($dst)) {
+			
+			if ($copy) {
+				if (!$this->options['copyJoin'] && $this->_isWritable($dst)) {
+					foreach ($this->_scandir($dst) as $p) {
+						$this->doRm($p);
+					}
+				}
+				return $this->stat($dst);
+			} 
+
+			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+		}
 		return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
 	}
 	
@@ -1017,10 +1081,12 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if file mime type accepted for upload
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $tmpPath  temporary file path
+	 * @param  string  $name     file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function uploadAllow($tmpPath, $name) {
 		if (!$this->nameAccepted($name)) {
@@ -1039,10 +1105,14 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Save file in required directory.
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  resource $fp   file pointer
+	 * @param  string   $dst  destination directory
+	 * @param  string   $name file name
+	 * @param  string   $cmd  source command name
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function save($fp, $dst, $name, $cmd='upload') {
 		$dir  = $this->file($dst);
@@ -1078,29 +1148,6 @@ abstract class elFinderVolumeDriver {
 			: false;
 	}
 	
-	
-	/**
-	 * Copy file in other directory
-	 *
-	 * @param  string  $source  file hash
-	 * @param  string  $dst     destination directory
-	 * @return array|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function copy($source, $dst) {
-	}
-	
-	/**
-	 * Move file in other directory
-	 *
-	 * @param  string  $source  file hash
-	 * @param  string  $dst     destination directory
-	 * @return array|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function move($source, $dst) {
-	}
-	
 	/**
 	 * Remove file/dir
 	 *
@@ -1111,27 +1158,6 @@ abstract class elFinderVolumeDriver {
 	public function rm($hash) {
 		return $this->doRm($this->decode($hash));
 	}
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	// public function save($fp, $dir, $info) {
-	// 	return $this->_save($fp, $this->decode($dir), $info);
-	// }
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function copyTo($hash, $dir) {
-	}
-	
 	
 	/**
 	 * Save error message
