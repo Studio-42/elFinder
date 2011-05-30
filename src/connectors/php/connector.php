@@ -104,7 +104,7 @@ $opts = array(
 			'attributes' => array(
 				array(
 					'pattern' => '/\/__.*/',
-					'hidden'  => true
+					// 'hidden'  => true
 				),
 				array(
 					'pattern' => '/\/\..*$/',

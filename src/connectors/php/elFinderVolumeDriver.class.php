@@ -1728,7 +1728,7 @@ abstract class elFinderVolumeDriver {
 		
 		$this->_fclose($src, $path);
 		fclose($trg);
-		
+
 		if (($s = @getimagesize($tmb)) == false) {
 			return false;
 		}
