@@ -275,13 +275,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 		
 		$file = array(
-			'id'    => $raw['id'],
+			'id'        => $raw['id'],
 			'parent_id' => $raw['parent_id'], 
-			'hash'  => $this->encode($raw['id']),
-			'phash' => $raw['parent_id'] ? $this->encode($raw['parent_id']) : '',
-			'name'  => $raw['name'],
-			'mime'  => $raw['mime'],
-			'size'  => $raw['size']
+			'hash'      => $this->encode($raw['id']),
+			'phash'     => $raw['parent_id'] ? $this->encode($raw['parent_id']) : '',
+			'name'      => $raw['name'],
+			'mime'      => $raw['mime'],
+			'size'      => $raw['size']
 		);
 		if ($raw['mtime'] > $this->today) {
 			$file['date'] = 'Today '.date('H:i', $raw['mtime']);
@@ -296,7 +296,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$file['write']  = (int)$this->accessControl($this->uid, 'write',  $raw['id'], $this->defaults['write']);
 			$file['locked'] = (int)$this->accessControl($this->uid, 'locked', $raw['id'], $this->defaults['locked']);
 			$file['hidden'] = (int)$this->accessControl($this->uid, 'hidden', $raw['id'], $this->defaults['hidden']);
-			
 		} else {
 			$file['read']   = intval($raw['aread']   == '' ? $this->defaults['read']   : $raw['aread']);
 			$file['write']  = intval($raw['awrite']  == '' ? $this->defaults['write']  : $raw['awrite']);
@@ -490,17 +489,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			return true;
 		}
 		return in_array($parent, $this->getParents($path));
-	}
-	
-	/**
-	 * Return file/dir URL
-	 *
-	 * @param  string  $path  file path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _url($path) {
-		return $this->URL ? $this->URL.$path.$this->separator : '';
 	}
 	
 	/*********************** check type *************************/

@@ -78,6 +78,21 @@ function logger2($cmd, $voumes, $result) {
 	return $result;
 }
 
+function access($attr, $path) {
+	// echo $path.' '.$attr.'<br>';
+	// return true;
+	if ($attr == 'read' || $attr == 'write') {
+		return true;
+	}
+	return false;
+	if ($attr == 'hidden') {
+		
+		return strpos($path, '__') === 0;
+	}
+	return false;
+	return $attr == 'read' || $attr == 'write';
+}
+
 // sleep(5);
 $opts = array(
 	'bind' => array(
@@ -89,9 +104,10 @@ $opts = array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
 			'alias' => 'File system',
+			'accessControl' => 'access',
 			// 'treeDeep' => 2,
 			// 'startPath' => '../../../files/mimes',
-			// 'URL'    => 'http://localhost/git/elfinder/files/',
+			'URL'    => 'http://localhost/git/elfinder/files/',
 			"disabled" => array('reload'),
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array(),
@@ -104,64 +120,48 @@ $opts = array(
 			'attributes' => array(
 				array(
 					'pattern' => '/\/__.*/',
-					// 'hidden'  => true
+					'hidden'  => true
 				),
 				array(
 					'pattern' => '/\/\..*$/',
-					'read'    => true,
+					'read'    => false,
 					'write'   => true,
 					'locked'  => false,
 					'hidden'  => true
 				),
 				array(
-					'pattern' => '/copy\/42$/',
-					'read' => false,
-					'write' => false,
-					'locked' => true,
-					'hidden' => false
-				),
-				array(
-					'pattern' => '/images$/',
-					'read' => true,
-					// 'write' => false,
-					'locked' => true,
-					// 'hidden' => true
-				),
-				array(
-					'pattern' => '/.*123$/',
-					'read' => false,
-					'write' => false,
-					'locked' => true,
+					'pattern' => '/42/',
+					'locked' => true
 				)
 			),
 			// 'startPath'   => '../../../files/mimes/',
 			// 'defaults' => array('read' => false)
 		),
-		array(
-			'driver' => 'MySQL',
-			'path' => 1,
-			'treeDeep' => 2,
-			// 'startPath' => 6,
-			'user' => 'dio',
-			'pass' => 'hane',
-			'db' => 'elfinder',
-			'user_id' => 1,
-			// 'copyTo' => false,
-			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../../../tmb/',
-			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
-			// 'attributes' => array(
-			// 	array(),
-			// 	array(
-			// 		'pattern' => '/\.jpg$/',
-			// 		'read' => false,
-			// 		'write' => false,
-			// 		'locked' => true,
-			// 		'hidden' => true
-			// 	)
-			// )
-			
-		)
+		// array(
+		// 	'driver' => 'MySQL',
+		// 	'path' => 1,
+		// 	'treeDeep' => 2,
+		// 	// 'startPath' => 6,
+		// 	'user' => 'dio',
+		// 	'pass' => 'hane',
+		// 	'db' => 'elfinder',
+		// 	'user_id' => 1,
+		// 	// 'copyTo' => false,
+		// 	// 'URL'    => 'http://localhost/git/elfinder',
+		// 	'tmbPath' => '../../../tmb/',
+		// 	'tmbURL' => 'http://localhost/git/elfinder/tmb/',
+		// 	// 'attributes' => array(
+		// 	// 	array(),
+		// 	// 	array(
+		// 	// 		'pattern' => '/\.jpg$/',
+		// 	// 		'read' => false,
+		// 	// 		'write' => false,
+		// 	// 		'locked' => true,
+		// 	// 		'hidden' => true
+		// 	// 	)
+		// 	// )
+		// 	
+		// )
 	)
 	
 );

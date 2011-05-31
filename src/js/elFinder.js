@@ -1434,7 +1434,7 @@
 			pasteWrite   : 'Unable to move files into "$1" because you don’t have permission to write in this location.',
 			pasteItself  : 'Unable to copy "$1" into itself or in child folder.'
 		},
-		
+
 		/**
 		 * File mimetype to kind mapping
 		 * 
