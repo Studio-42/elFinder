@@ -477,7 +477,7 @@ abstract class elFinderVolumeDriver {
 				$this->access = $this->options['accessControl'];
 			} elseif (is_array($this->options['accessControl']) 
 			&& count($this->options['accessControl']) > 1 
-			&& class_exists($this->options['accessControl'][0])
+			&& is_object($this->options['accessControl'][0])
 			&& method_exists($this->options['accessControl'][0], $this->options['accessControl'][1])) {
 				$this->access = array($this->options['accessControl'][0], $this->options['accessControl'][1]);
 			}
@@ -486,7 +486,7 @@ abstract class elFinderVolumeDriver {
 		if (!$this->init()) {
 			return false;
 		}
-		
+
 		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
 		$this->yesterday = $this->today-86400;
 		
@@ -505,7 +505,6 @@ abstract class elFinderVolumeDriver {
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
 			? $this->options['disabled']
 			: array();
-			
 		
 		$this->cryptLib   = $this->options['cryptLib'];
 		$this->mimeDetect = $this->options['mimeDetect'];
@@ -561,6 +560,7 @@ abstract class elFinderVolumeDriver {
 		if (!$this->_isDir($this->root)) {
 			return false;
 		}
+
 		$read = $this->attr($this->root, 'read');
 		// echo $this->attr($this->root.'/.tmb', 'hidden');
 		if (!$read && !$this->attr($this->root, 'write')) {

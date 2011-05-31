@@ -54,17 +54,17 @@ class elFinderConnector {
 		}
 		
 		if (!$this->elFinder->loaded()) {
-			$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL)));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL)));
 		}
 		
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
-			$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_UPLOAD, elFinder::ERROR_POST_DATA_MAXSIZE), 'header' => 'Content-Type: text/html'));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD, elFinder::ERROR_POST_DATA_MAXSIZE), 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
 		
 		if (!$this->elFinder->commandExists($cmd)) {
-			$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_UNKNOWN_CMD)));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UNKNOWN_CMD)));
 		}
 		
 		// collect required arguments to exec command
@@ -77,7 +77,7 @@ class elFinderConnector {
 				$arg = trim($arg);
 			}
 			if ($req && empty($arg)) {
-				$this->output(array('error' => $this->elFinder->errorMessage(elFinder::ERROR_INV_PARAMS, $cmd)));
+				$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_INV_PARAMS, $cmd)));
 			}
 			$args[$name] = $arg;
 		}

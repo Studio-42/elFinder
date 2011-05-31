@@ -22,13 +22,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected $tbf = '';
 	
 	/**
-	 * Tables to store files attributes
-	 *
-	 * @var string
-	 **/
-	protected $tba = '';
-	
-	/**
 	 * Function or object and method to test files permissions
 	 *
 	 * @var string|array
@@ -44,16 +37,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected $tmpPath = '';
 	
 	/**
-	 * undocumented class variable
+	 * Files info cache
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $cache = array();
 	
 	/**
-	 * undocumented class variable
+	 * dir/subdirs map cache
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $paths = array();
 	
@@ -80,9 +73,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			'port'          => null,
 			'socket'        => null,
 			'files_table'   => 'elfinder_file',
-			'attr_table'   => 'elfinder_attribute',
-			'user_id'       => 0,
-			'accessControl' => null,
 			'tmbPath'       => '',
 			'tmpPath'       => ''
 		);
@@ -120,38 +110,22 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$this->db->query('SET SESSION character_set_client=utf8');
 		$this->db->query('SET SESSION character_set_connection=utf8');
 		$this->db->query('SET SESSION character_set_results=utf8');
-		
-		if ($this->options['accessControl']) {
-			if (is_string($this->options['accessControl']) 
-			&& function_exists($this->options['accessControl'])) {
-				$this->accessControl = $this->options['accessControl'];
-			} elseif (is_array($this->options['accessControl']) 
-			&& class_exists($this->options['accessControl'][0])
-			&& method_exists($this->options['accessControl'][0], $this->options['accessControl'][1])) {
-				$this->accessControl = $this->options['accessControl'];
-			}
-		}
-		
-		$this->tbf = $this->options['files_table'];
-		$this->tba = $this->options['attr_table'];
-		
-		$tables = array();
+
 		if ($res = $this->db->query('SHOW TABLES')) {
 			while ($row = $res->fetch_array()) {
-				$tables[$row[0]] = 1;
+				if ($row[0] == $this->options['files_table']) {
+					$this->tbf = $this->options['files_table'];
+					break;
+				}
 			}
 		}
 
-		if (empty($tables[$this->tbf])) {
+		if (!$this->tbf) {
 			return false;
 		}
-		
-		$this->tba = empty($tables[$this->options['attr_table']]) ? '' : $this->options['attr_table'];
-		
-		$this->uid = (int)$this->options['user_id'];
-		
+
 		$this->options['alias'] = '';
-		
+
 		return true;
 	}
 	
@@ -228,6 +202,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function clearstat() {
 		$this->cache = array();
+		$this->paths = array();
 	}
 	
 	/**
@@ -239,21 +214,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function getstat($path) {
 		$this->sqlCnt++;
-		$sql = $this->tba
-			? 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				a.aread, a.awrite, a.alocked, a.ahidden
+		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
-				LEFT JOIN '.$this->tba.' AS a ON a.file_id=f.id AND user_id='.$this->uid.'
 				WHERE f.id="'.$path.'"
-				GROUP BY f.id'
-			: 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				"" AS aread, "" AS awrite, "" AS alocked, "" AS ahidden 
-				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
-				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
-				WHERE f.path="'.$path.'"
 				GROUP BY f.id';
 
 		return ($res = $this->db->query($sql))
@@ -291,21 +256,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$file['date'] = date($this->options['dateFormat'], $raw['mtime']);
 		}
 		
-		if ($this->accessControl) {
-			$file['read']   = (int)$this->accessControl($this->uid, 'read',   $raw['id'], $this->defaults['read']);
-			$file['write']  = (int)$this->accessControl($this->uid, 'write',  $raw['id'], $this->defaults['write']);
-			$file['locked'] = (int)$this->accessControl($this->uid, 'locked', $raw['id'], $this->defaults['locked']);
-			$file['hidden'] = (int)$this->accessControl($this->uid, 'hidden', $raw['id'], $this->defaults['hidden']);
-		} else {
-			$file['read']   = intval($raw['aread']   == '' ? $this->defaults['read']   : $raw['aread']);
-			$file['write']  = intval($raw['awrite']  == '' ? $this->defaults['write']  : $raw['awrite']);
-			$file['locked'] = intval($raw['alocked'] == '' ? $this->defaults['locked'] : $raw['alocked']);
-			$file['hidden'] = intval($raw['ahidden'] == '' ? $this->defaults['hidden'] : $raw['ahidden']);
-		}
-		// root always locked
-		if (!$file['phash']) {
+		$file['read']  = $this->attr($raw['id'], 'read');
+		$file['write'] = $this->attr($raw['id'], 'write');
+		if ($this->attr($raw['id'], 'locked')) {
 			$file['locked'] = 1;
-			$file['hidden'] = 0;
+		}
+		if ($this->attr($raw['id'], 'hidden')) {
+			$file['hidden'] = 1;
 		}
 		
 		if ($file['read']) {
@@ -323,7 +280,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				} elseif ($this->canCreateTmb($raw['id'], $file['mime'])) {
 					$file['tmb'] = 1;
 				}
-
 			}
 		} 
 		
@@ -403,10 +359,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				if ($r = $res->fetch_assoc()) {
 					$this->paths[$dir][$name] = $r['id'];
 				}
-			} else {
-				// $this->paths[$dir][$name] = -1;
-			}
-			
+			} 
 		}
 		return isset($this->paths[$dir][$name]) ? $this->paths[$dir][$name] : -1;
 	}
@@ -547,7 +500,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isReadable($path) {
-		return ($file = $this->stat($path)) ? $file['read'] : false;
+		return true;
 	}
 	
 	/**
@@ -558,7 +511,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isWritable($path) {
-		return ($file = $this->stat($path)) ? $file['write'] : false;
+		return true;
 	}
 	
 	/**
@@ -569,7 +522,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isLocked($path) {
-		return ($file = $this->stat($path)) ? $file['locked'] : false;
+		return false;
 	}
 	
 	/**
@@ -580,7 +533,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isHidden($path) {
-		return ($file = $this->stat($path)) ? $file['hidden'] : false;
+		return false;
 	}
 	
 	/***************** file stat ********************/
@@ -664,17 +617,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($id) {
 		$files = array();
-		$this->sqlCnt++;
-		$sql = $this->tba
-			? 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				a.aread, a.awrite, a.alocked, a.ahidden
-				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
-				LEFT JOIN '.$this->tba.' AS a ON a.file_id=f.id AND user_id='.$this->uid.' 
-				WHERE f.parent_id="'.$id.'"
-				GROUP BY f.id'
-			: 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs, 
-				"" AS aread, "" AS awrite, "" AS alocked, "" AS ahidden
+		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs 
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 				WHERE f.parent_id="'.$id.'"
@@ -683,20 +626,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if ($res = $this->db->query($sql)) {
 			while ($r = $res->fetch_assoc()) {
 				$id = $r['id'];
-				if (!isset($this->cache[$id])) {
-					$file = $this->prepareStat($r);
-					$this->cache[$id] = $file;
-				} else {
-					$file = $this->cache[$id];
-				}
+				$this->cache[$id] = $this->prepareStat($r);
 				$files[] = $r['id'];
-				
+
 				if (!isset($this->paths[$r['parent_id']][$r['name']])) {
 					$this->paths[$r['parent_id']][$r['name']] = $r['id'];
 				}
 			}
 		}
 
+		$this->sqlCnt++;
 		return $files;
 	}
 
@@ -818,30 +757,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, content, size, mtime, mime, width, height)  '
 				.'SELECT "'.intval($targetDir).'", "'.$this->db->real_escape_string($name).'", content, size, "'.time().'", mime, width, height FROM '.$this->tbf.' WHERE id="'.intval($source).'"';
 
-		if ($this->db->query($sql) && $this->db->affected_rows) {
-			$id = $this->db->insert_id;
-			
-			if ($this->tba) {
-				$this->sqlCnt++;
-				$sql = 'SELECT user_id, aread, awrite, alocked, ahidden FROM '.$this->tba.' WHERE file_id="'.intval($source).'"';
-				if ($res = $this->db->query($sql)) {
-					$data = array();
-					while ($r = $res->fetch_assoc()) {
-						$data[] = '"'.implode('","', $r).'"';
-					}
-					
-					if ($data) {
-						$this->sqlCnt++;
-						$sql = 'INSERT INTO '.$this->tba.' (file_id, user_id, aread, awrite, alocked, ahidden) VALUES ';
-						$sql .= '('.implode('), (', $data).')';
-						$this->db->query($sql);
-					}
-				}
-			}
-			
-			return true;
-		}
-		return false;
+		return $this->db->query($sql) && $this->db->affected_rows;
 	}
 	
 	/**

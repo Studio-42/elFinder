@@ -267,7 +267,7 @@ class elFinder {
 					$this->listeners[$cmd] = array();
 				}
 
-				if ((is_array($handler) && count($handler) == 2 && class_exists($handler[0]) && method_exists($handler[0], $handler[1]))
+				if ((is_array($handler) && count($handler) == 2 && is_object($handler[0]) && method_exists($handler[0], $handler[1]))
 				|| function_exists($handler)) {
 					$this->listeners[$cmd][] = $handler;
 				}

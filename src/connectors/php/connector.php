@@ -16,49 +16,28 @@ function debug($o) {
 	print_r($o);
 }
 
-// exit();
-function logger($data) {
-	$str = $data['cmd'].': ';
-	$volume = $data['volume'];
-	$result = $data['result'];
-	switch ($data['cmd']) {
-		case 'mkdir':
-			$current = $volume->dir($result['current']);
-			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['dir']['name'];
-			break;
-		case 'mkfile':
-			$current = $volume->dir($result['current']);
-			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['file']['name'];
-			break;
-		case 'rm':
-			$current = $volume->dir($result['removed']['phash']);
-			$str .= $current['path'].DIRECTORY_SEPARATOR.$result['removed']['name'];
-			break;
-	}
-	
-	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
-		$fp = fopen('../../../files/tmp/log.txt', 'a');
-		if ($fp) {
-			fwrite($fp, $str."\n");
-			fclose($fp);
-		}
-	}
-	$result['log'] = true;
-	return $result;
-}
 
-function logger2($cmd, $voumes, $result) {
-	$log = $cmd.': '.$voumes[0]->id().' ';
+/**
+ * Simple logger function.
+ * Demonstrate how to work with elFinder event api.
+ *
+ * @param  string        $cmd     command name
+ * @param  object|array  $voumes  current volume or source/destination volumes list for command "paste"
+ * @param  array         $return  command result
+ * @return array
+ * @author Dmitry (dio) Levashov
+ **/
+function logger($cmd, $voumes, $result) {
+	$log = $cmd.': ['.date('d.m H:s').'] '.$voumes[0]->id().' ';
 	
 	if (isset($voumes[1])) {
 		$log .= $voumes[1]->id().' ';
 	}
 	
-	$log .= '['.date('d.m H:s').'] ';
-	
 	switch ($cmd) {
 		case 'mkdir':
 		case 'mkfile':
+		case 'upload':
 			$log .= $result['added'][0]['name'];
 			break;
 		case 'rename':
@@ -67,8 +46,14 @@ function logger2($cmd, $voumes, $result) {
 		case 'duplicate':
 			$log .= 'src: '.$result['src']['name'].' copy: '.$result['added'][0]['name'];
 			break;
+		case 'rm':
+			$log .= $result['removedDetails'][0]['name'];
+			break;
+
+		default:
+			$log = '';
 	}
-	if (is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
+	if ($log && is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
 		$fp = fopen('../../../files/tmp/log.txt', 'a');
 		if ($fp) {
 			fwrite($fp, $log."\n");
@@ -77,6 +62,64 @@ function logger2($cmd, $voumes, $result) {
 	}
 	return $result;
 }
+
+
+/**
+ * Simple logger function.
+ * Demonstrate how to work with elFinder event api.
+ *
+ * @package elFinder
+ * @author Dmitry (dio) Levashov
+ **/
+class elFinderSimpleLogger {
+	
+	/**
+	 * Write log
+	 *
+	 * @param  string        $cmd     command name
+	 * @param  object|array  $voumes  current volume or source/destination volumes list for command "paste"
+	 * @param  array         $return  command result
+	 * @return array
+	 **/
+	public function write($cmd, $voumes, $result) {
+		$log = $cmd.': ['.date('d.m H:s').'] '.$voumes[0]->id().' ';
+
+		if (isset($voumes[1])) {
+			$log .= $voumes[1]->id().' ';
+		}
+
+		switch ($cmd) {
+			case 'mkdir':
+			case 'mkfile':
+			case 'upload':
+			case 'paste':
+				$log .= $result['added'][0]['name'];
+				break;
+			case 'rename':
+				$log .= 'from '.$result['removedDetails'][0]['name'].' to '.$result['added'][0]['name'];
+				break;
+			case 'duplicate':
+				$log .= 'src: '.$result['src']['name'].' copy: '.$result['added'][0]['name'];
+				break;
+			case 'rm':
+				$log .= $result['removedDetails'][0]['name'];
+				break;
+
+			default:
+				$log = '';
+		}
+		if ($log && is_dir('../../../files/tmp') || @mkdir('../../../files/tmp')) {
+			$fp = fopen('../../../files/tmp/log.txt', 'a');
+			if ($fp) {
+				fwrite($fp, $log."\n");
+				fclose($fp);
+			}
+		}
+		return $result;
+		
+	}
+	
+} // END class 
 
 function access($attr, $path) {
 	// echo $path.' '.$attr.'<br>';
@@ -96,72 +139,65 @@ function access($attr, $path) {
 // sleep(5);
 $opts = array(
 	'bind' => array(
-		'mkdir mkfile  rename duplicate' => 'logger2', 
+		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
 	),
 	'debug' => true,
 	'roots' => array(
-		array(
-			'driver' => 'LocalFileSystem',
-			'path'   => '../../../files/',
-			'alias' => 'File system',
-			'accessControl' => 'access',
-			// 'treeDeep' => 2,
-			// 'startPath' => '../../../files/mimes',
-			'URL'    => 'http://localhost/git/elfinder/files/',
-			"disabled" => array('reload'),
-			'uploadAllow' => array('all'),
-			'uploadDeny'  => array(),
-			'uploadOrder' => 'deny,allow',
-			'uploadOverwrite' => false,
-			'mimeDetect' => 'internal',
-			
-			// 'tmbPath' => '.tmb',
-			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
-			'attributes' => array(
-				array(
-					'pattern' => '/\/__.*/',
-					'hidden'  => true
-				),
-				array(
-					'pattern' => '/\/\..*$/',
-					'read'    => false,
-					'write'   => true,
-					'locked'  => false,
-					'hidden'  => true
-				),
-				array(
-					'pattern' => '/42/',
-					'locked' => true
-				)
-			),
-			// 'startPath'   => '../../../files/mimes/',
-			// 'defaults' => array('read' => false)
-		),
 		// array(
-		// 	'driver' => 'MySQL',
-		// 	'path' => 1,
-		// 	'treeDeep' => 2,
-		// 	// 'startPath' => 6,
-		// 	'user' => 'dio',
-		// 	'pass' => 'hane',
-		// 	'db' => 'elfinder',
-		// 	'user_id' => 1,
-		// 	// 'copyTo' => false,
-		// 	// 'URL'    => 'http://localhost/git/elfinder',
-		// 	'tmbPath' => '../../../tmb/',
-		// 	'tmbURL' => 'http://localhost/git/elfinder/tmb/',
-		// 	// 'attributes' => array(
-		// 	// 	array(),
-		// 	// 	array(
-		// 	// 		'pattern' => '/\.jpg$/',
-		// 	// 		'read' => false,
-		// 	// 		'write' => false,
-		// 	// 		'locked' => true,
-		// 	// 		'hidden' => true
-		// 	// 	)
-		// 	// )
-		// 	
-		// )
+		// 	'driver' => 'LocalFileSystem',
+		// 	'path'   => '../../../files/',
+		// 	'alias' => 'File system',
+		// 	'accessControl' => 'access',
+		// 	'URL'    => 'http://localhost/git/elfinder/files/',
+		// 	"disabled" => array('reload'),
+		// 	'uploadAllow' => array('all'),
+		// 	'uploadDeny'  => array(),
+		// 	'uploadOrder' => 'deny,allow',
+		// 	'uploadOverwrite' => false,
+		// 	'mimeDetect' => 'internal',
+		// 	'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '/\/__.*/',
+		// 			'hidden'  => true
+		// 		),
+		// 		array(
+		// 			'pattern' => '/\/\..*$/',
+		// 			'read'    => false,
+		// 			'write'   => true,
+		// 			'locked'  => false,
+		// 			'hidden'  => true
+		// 		),
+		// 		array(
+		// 			'pattern' => '/42/',
+		// 			'locked' => true
+		// 		)
+		// 	),
+		// ),
+		array(
+			'driver' => 'MySQL',
+			'path' => 1,
+			'treeDeep' => 2,
+			'user' => 'dio',
+			'pass' => 'hane',
+			'db' => 'elfinder',
+			'user_id' => 1,
+			// 'copyTo' => false,
+			'URL'    => 'http://localhost/git/elfinder',
+			'tmbPath' => '../../../tmb/',
+			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
+			// 'attributes' => array(
+			// 	array(),
+			// 	array(
+			// 		'pattern' => '/\.jpg$/',
+			// 		'read' => false,
+			// 		'write' => false,
+			// 		'locked' => true,
+			// 		'hidden' => true
+			// 	)
+			// )
+			
+		)
 	)
 	
 );

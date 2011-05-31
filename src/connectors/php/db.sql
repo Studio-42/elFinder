@@ -14,13 +14,3 @@ CREATE TABLE IF NOT EXISTS `elfinder_file` (
   KEY `parent_id` (`parent_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-DROP TABLE IF EXISTS `elfinder_attribute`;
-CREATE TABLE IF NOT EXISTS `elfinder_attribute` (
-	`file_id` int(7) unsigned NOT NULL AUTO_INCREMENT,
-	`user_id` int(7) unsigned NOT NULL,
-	`aread`   enum('1', '0') NOT NULL DEFAULT '1',
-	`awrite`  enum('1', '0') NOT NULL DEFAULT '1',
-	`alock`   enum('1', '0') NOT NULL DEFAULT '0',
-	`ahidden` enum('1', '0') NOT NULL DEFAULT '0',
-	PRIMARY KEY (`file_id`, `user_id`)
-) ENGINE=MyISAM;
