@@ -206,13 +206,13 @@ elFinder.prototype.commands.paste = function() {
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if ($.inArray(file.hash, parents) !== -1) {
-				return dfrd.reject([pasteItself, file.name]);
+				return dfrd.reject([errors.pasteItself, file.name]);
 			}
 			if (!file.read) {
-				return dfrd.reject([copy, file.name]);
+				return dfrd.reject([errors.copy, file.name]);
 			}
 			if (cut && file.locked) {
-				return dfrd.reject([locked, file.name]);
+				return dfrd.reject([errors.locked, file.name]);
 			}
 
 			if (file.phash == dst.hash) {

@@ -417,6 +417,16 @@ abstract class elFinderVolumeDriver {
 	}
 		
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function name() {
+		return strtolower(substr(get_class($this), strlen('elfinderdriver')));
+	}
+		
+	/**
 	 * Return debug info for client
 	 *
 	 * @return array
@@ -1406,10 +1416,10 @@ abstract class elFinderVolumeDriver {
 			if (is_array($this->access)) {
 				$obj    = $this->access[0];
 				$method = $this->access[1];
-				$perm2  = $obj->{$method}($name, $path, $this->options['accessControlData']);
+				$perm2  = $obj->{$method}($name, $path, $this->options['accessControlData'], $this);
 			} else {
 				$func  = $this->access;
-				$perm2 = $func($name, $path, $this->options['accessControlData']);
+				$perm2 = $func($name, $path, $this->options['accessControlData'], $this);
 			}
 		}
 		

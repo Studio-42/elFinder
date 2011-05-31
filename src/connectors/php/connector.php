@@ -131,7 +131,7 @@ class elFinderSimpleLogger {
  * @return bool
  * @author Dmitry (dio) Levashov
  **/
-function access($attr, $path, $data) {
+function access($attr, $path, $data, $volume) {
 
 	return $attr == 'read' || $attr == 'write';
 	
@@ -149,37 +149,37 @@ $opts = array(
 	),
 	'debug' => true,
 	'roots' => array(
-		// array(
-		// 	'driver' => 'LocalFileSystem',
-		// 	'path'   => '../../../files/',
-		// 	'alias' => 'File system',
-		// 	'accessControl' => 'access',
-		// 	'URL'    => 'http://localhost/git/elfinder/files/',
-		// 	"disabled" => array('reload'),
-		// 	'uploadAllow' => array('all'),
-		// 	'uploadDeny'  => array(),
-		// 	'uploadOrder' => 'deny,allow',
-		// 	'uploadOverwrite' => false,
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '/\/__.*/',
-		// 			'hidden'  => true
-		// 		),
-		// 		array(
-		// 			'pattern' => '/\/\..*$/',
-		// 			'read'    => false,
-		// 			'write'   => true,
-		// 			'locked'  => false,
-		// 			'hidden'  => true
-		// 		),
-		// 		array(
-		// 			'pattern' => '/42/',
-		// 			'locked' => true
-		// 		)
-		// 	),
-		// ),
+		array(
+			'driver' => 'LocalFileSystem',
+			'path'   => '../../../files/',
+			'alias' => 'File system',
+			'accessControl' => 'access',
+			'URL'    => 'http://localhost/git/elfinder/files/',
+			"disabled" => array('reload'),
+			'uploadAllow' => array('all'),
+			'uploadDeny'  => array(),
+			'uploadOrder' => 'deny,allow',
+			'uploadOverwrite' => false,
+			'mimeDetect' => 'internal',
+			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+			'attributes' => array(
+				array(
+					'pattern' => '/\/__.*/',
+					'hidden'  => true
+				),
+				array(
+					'pattern' => '/\/\..*$/',
+					'read'    => false,
+					'write'   => true,
+					'locked'  => false,
+					'hidden'  => true
+				),
+				array(
+					'pattern' => '/42/',
+					'locked' => true
+				)
+			),
+		),
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,

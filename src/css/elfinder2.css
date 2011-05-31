@@ -338,7 +338,9 @@
 .elfinder-cwd-dragenter {
 	outline:2px solid #8cafed;
 }
-
+.elfinder-cwd.elfinder-dropable-active {
+	outline:2px solid red;
+}
 /************** ICONS VIEW *************/
 .elfinder-cwd .ui-state-hover { font-weight:normal; }
 

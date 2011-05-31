@@ -348,7 +348,7 @@ class elFinder {
 			
 			foreach ($this->volumes as $id => $volume) {
 				$result['debug']['volumes'][] = array_merge(
-					array('id' => $id, 'driver' => substr(get_class($volume), strlen('elfinderdriver'))), 
+					array('id' => $id, 'driver' => $volume->name()), 
 					$volume->debug());
 			}
 		}
@@ -933,7 +933,7 @@ class elFinder {
 			}
 			
 			foreach ($srcVolume->scandir($hash) as $file) {
-				if (!$this->copy($srcVolume, $dstVolume, $file, $dir['hash'], $cut)) {
+				if (!$this->copy($srcVolume, $dstVolume, $file, $dir['hash'])) {
 					$this->copyError = $dstVolume->error();
 					return false;
 				}

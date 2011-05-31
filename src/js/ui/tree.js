@@ -417,7 +417,7 @@ $.fn.elfindertree = function(fm) {
 				while (l--) {
 					if ((node = tree.find('#'+hash2id(hashes[l]))).length) {
 						stree = node.parents('.'+subtree+':first');
-						node.parent().remove();
+						node.parent().detach();
 						if (!stree.children().length) {
 							stree.hide().prev('[id]').removeClass(collapsed+' '+expanded+' '+loaded);
 						}

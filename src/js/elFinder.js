@@ -397,8 +397,9 @@
 			cursor     : 'move',
 			cursorAt   : {left : 50, top : 47},
 			refreshPositions : true,
-			start      : function() { self.trigger('focus'); },
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); }
+			start      : function() { self.trigger('focus').trigger('dragstart'); },
+			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+			stop       : function() { self.trigger('focus').trigger('dragstop'); }
 		};
 		
 		/**
