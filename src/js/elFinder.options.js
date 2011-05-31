@@ -247,7 +247,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'shortcut-exec']
+	debug : ['error', 'event-add']
 }
 
 })(jQuery);

@@ -1061,6 +1061,7 @@ abstract class elFinderVolumeDriver {
 
 			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
 		}
+		
 		return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
 	}
 	

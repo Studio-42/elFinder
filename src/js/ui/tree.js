@@ -192,16 +192,21 @@ $.fn.elfindertree = function(fm) {
 					orphans = [],
 					i, dir, html, parent, sibling;
 				// fm.time('tree')
+
 				for (i = 0; i < length; i++) {
 					dir = dirs[i];
-					
+
 					if (tree.find('#'+hash2id(dir.hash)).length) {
 						continue;
 					}
 					
 					if ((parent = findSubtree(dir.phash)).length) {
 						html = itemhtml(dir);
-						(sibling = findSibling(parent, dir)).length ? sibling.before(html) : parent.append(html);
+						if (dir.phash && (sibling = findSibling(parent, dir)).length) {
+							sibling.before(html);
+						} else {
+							parent.append(html);
+						}
 					} else {
 						orphans.push(dir);
 					}
@@ -218,6 +223,18 @@ $.fn.elfindertree = function(fm) {
 			
 			updateDroppable = function() {
 				tree.find('[id]:not(.'+root+',.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
+			},
+			
+			updateArrows = function(dirs, cls) {
+				var sel = cls == loaded
+						? '.'+collapsed+':not(.'+loaded+')'
+						: ':not(.'+collapsed+')';
+
+				$.each(dirs, function(i, dir) {
+					tree.find('#'+hash2id(dir.phash)+sel)
+						.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
+						.addClass(cls);
+				})
 			},
 			
 			/**
@@ -332,13 +349,9 @@ $.fn.elfindertree = function(fm) {
 				}
 
 				if (dirs.length) {
-
 					// setTimeout(function() {
 						updateTree(dirs);
-					
-						init && tree.find('[id].'+collapsed+':not(.'+loaded+')')
-								.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
-								.addClass(loaded);
+						updateArrows(dirs, loaded);
 						sync();
 					// }, 10);
 				} else {
@@ -351,10 +364,7 @@ $.fn.elfindertree = function(fm) {
 
 				if (dirs.length) {
 					updateTree(dirs);
-					// add arrows to parent dirs
-					$.each(dirs, function(i, dir) {
-						tree.find('#'+hash2id(dir.phash)).not('.'+collapsed).has('ul li').addClass(collapsed);
-					});
+					updateArrows(dirs, collapsed);
 				}
 			})
 			// update changed dirs
@@ -402,20 +412,18 @@ $.fn.elfindertree = function(fm) {
 			.remove(function(e) {
 				var hashes = e.data.removed || [],
 					l  = hashes.length,
-					node, parent, stree;
+					node, stree;
 				
 				while (l--) {
 					if ((node = tree.find('#'+hash2id(hashes[l]))).length) {
-						parent = node.parents('.'+subtree).prev('[id]');
-						stree  = parent.next('.'+subtree);
+						stree = node.parents('.'+subtree+':first');
 						node.parent().remove();
 						if (!stree.children().length) {
-							stree.hide();
-							parent.removeClass(collapsed);
+							stree.hide().prev('[id]').removeClass(collapsed+' '+expanded+' '+loaded);
 						}
 					}
 				}
-			})
+			});
 		
 		
 	});
