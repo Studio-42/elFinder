@@ -183,6 +183,8 @@ abstract class elFinderVolumeDriver {
 		'uploadOrder'     => 'deny,allow', 
 		// files dates format
 		'dateFormat'      => 'j M Y H:i',  
+		// files time format
+		'timeFormat'      => 'H:i',
 		// allow to copy from this volume to other ones?
 		'copyFrom'        => true,  
 		// allow to copy from other volumes to this one?
@@ -1444,15 +1446,6 @@ abstract class elFinderVolumeDriver {
 		$dir   = $this->_isDir($path);
 		$mime  = $dir ? 'directory' : $this->mimetype($path);
 		$link  = $this->_isLink($path);
-		$mtime = $this->_filemtime($path);
-
-		if ($mtime > $this->today) {
-			$date = 'Today '.date('H:i', $mtime);
-		} elseif ($mtime > $this->yesterday) {
-			$date = 'Yesterday '.date('H:i', $mtime);
-		} else {
-			$date = date($this->options['dateFormat'], $mtime);
-		}
 		
 		$size = 0;
 		if ($link) {
@@ -1468,7 +1461,7 @@ abstract class elFinderVolumeDriver {
 			'name'   => $root ? $this->rootName : $this->_basename($path),
 			'mime'   => $mime,
 			'size'   => $size,
-			'date'   => $date,
+			'date'   => $this->formatDate($this->_filemtime($path)),
 			'read'   => (int)$this->attr($path, 'read'),
 			'write'  => (int)$this->attr($path, 'write'),
 			// 'locked' => (int)$this->attr($path, 'locked'),
@@ -1632,7 +1625,7 @@ abstract class elFinderVolumeDriver {
 			&& ($dir = $this->stat($p))) {
 				$dirs[] = $dir;
 				if ($deep > 0 && isset($dir['dirs'])) {
-					$dirs = array_merge($dirs, $this->gettree($p, $deep-1), $exclude);
+					$dirs = array_merge($dirs, $this->gettree($p, $deep-1));
 				}
 			}
 		}
@@ -1926,6 +1919,26 @@ abstract class elFinderVolumeDriver {
 		}
 	}
 	
+	/*********************** misc *************************/
+	
+	/**
+	 * Return smart formatted date
+	 *
+	 * @param  int     $ts  file timestamp
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function formatDate($ts) {
+		if ($ts > $this->today) {
+			return 'Today '.date($this->options['timeFormat'], $ts);
+		}
+		
+		if ($ts > $this->yesterday) {
+			return 'Yesterday '.date($this->options['timeFormat'], $ts);
+		} 
+		
+		return date($this->options['dateFormat'], $ts);
+	}
 	
 	/**==================================* abstract methods *====================================**/
 	

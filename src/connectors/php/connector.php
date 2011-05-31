@@ -121,19 +121,25 @@ class elFinderSimpleLogger {
 	
 } // END class 
 
-function access($attr, $path) {
-	// echo $path.' '.$attr.'<br>';
-	// return true;
-	if ($attr == 'read' || $attr == 'write') {
+
+/**
+ * Simple function to demonstrate how to control file access using "accessControl" callback.
+ * Make files started with __ hidden.
+ *
+ * @param  string  $attr  attribute name (read|write|locked|hidden)
+ * @param  string  $path  file path. Attention! This is path relative to volume root directory started with directory separator.
+ * @return bool
+ * @author Dmitry (dio) Levashov
+ **/
+function access($attr, $path, $data) {
+
+	return $attr == 'read' || $attr == 'write';
+	
+	echo $attr.' '.$path.' '.strpos($path, '__').'<br>';
+	if ($attr == 'hidden' && strpos($path, '__') === 0) {
 		return true;
 	}
 	return false;
-	if ($attr == 'hidden') {
-		
-		return strpos($path, '__') === 0;
-	}
-	return false;
-	return $attr == 'read' || $attr == 'write';
 }
 
 // sleep(5);
@@ -143,45 +149,47 @@ $opts = array(
 	),
 	'debug' => true,
 	'roots' => array(
-		// array(
-		// 	'driver' => 'LocalFileSystem',
-		// 	'path'   => '../../../files/',
-		// 	'alias' => 'File system',
-		// 	'accessControl' => 'access',
-		// 	'URL'    => 'http://localhost/git/elfinder/files/',
-		// 	"disabled" => array('reload'),
-		// 	'uploadAllow' => array('all'),
-		// 	'uploadDeny'  => array(),
-		// 	'uploadOrder' => 'deny,allow',
-		// 	'uploadOverwrite' => false,
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '/\/__.*/',
-		// 			'hidden'  => true
-		// 		),
-		// 		array(
-		// 			'pattern' => '/\/\..*$/',
-		// 			'read'    => false,
-		// 			'write'   => true,
-		// 			'locked'  => false,
-		// 			'hidden'  => true
-		// 		),
-		// 		array(
-		// 			'pattern' => '/42/',
-		// 			'locked' => true
-		// 		)
-		// 	),
-		// ),
+		array(
+			'driver' => 'LocalFileSystem',
+			'path'   => '../../../files/',
+			'alias' => 'File system',
+			'accessControl' => 'access',
+			'URL'    => 'http://localhost/git/elfinder/files/',
+			"disabled" => array('reload'),
+			'uploadAllow' => array('all'),
+			'uploadDeny'  => array(),
+			'uploadOrder' => 'deny,allow',
+			'uploadOverwrite' => false,
+			'mimeDetect' => 'internal',
+			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+			'attributes' => array(
+				array(
+					'pattern' => '/\/__.*/',
+					'hidden'  => true
+				),
+				array(
+					'pattern' => '/\/\..*$/',
+					'read'    => false,
+					'write'   => true,
+					'locked'  => false,
+					'hidden'  => true
+				),
+				array(
+					'pattern' => '/42/',
+					'locked' => true
+				)
+			),
+		),
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,
-			'treeDeep' => 2,
+			// 'treeDeep' => 2,
 			'user' => 'dio',
 			'pass' => 'hane',
 			'db' => 'elfinder',
 			'user_id' => 1,
+			'accessControl' => 'access',
+			'separator' => ':',
 			// 'copyTo' => false,
 			'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../../../tmb/',

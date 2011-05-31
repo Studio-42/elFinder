@@ -430,7 +430,7 @@ class elFinder {
 			
 			return array('error' => $this->error(array_merge($error, $volume->error())));
 		} 
-
+		// debug($cwd);
 		$files = array();
 		
 		// get folders trees

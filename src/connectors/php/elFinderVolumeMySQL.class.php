@@ -174,18 +174,92 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	/*********************************************************************/
 	
 	/**
+	 * Perform sql query and return result.
+	 * Increase sqlCnt
+	 *
+	 * @param  string  $sql  query
+	 * @return misc
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function query($sql) {
+		$this->sqlCnt++;
+		return $this->db->query($sql);
+	}
+	
+	/**
 	 * Return file info from cache.
 	 * If there is no info in cache - load it
 	 *
-	 * @param  string  $path  file cache
+	 * @param  string      $path  file cache
+	 * @param  array|bool  $raw   if array - save it as file info, if true - return info with addtional fields
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path, $raw=false) {
 
-		$file = isset($this->cache[$path])
-			? $this->cache[$path]
-			: $this->cache[$path] = $this->getstat($path);
+		if (!isset($this->cache[$path])) {
+
+			if (!is_array($raw)) {
+				$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs
+						FROM '.$this->tbf.' AS f 
+						LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
+						LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
+						WHERE f.id="'.$path.'"
+						GROUP BY f.id';
+						
+				if (($res = $this->query($sql))) {
+					$raw = $res->fetch_assoc();
+				} 
+			}
+			
+			if (!$raw) {
+				return $this->cache[$path] = false;
+			}
+			
+			$file = array(
+				'id'        => $raw['id'],
+				'parent_id' => $raw['parent_id'], 
+				'hash'      => $this->encode($raw['id']),
+				'phash'     => $raw['parent_id'] ? $this->encode($raw['parent_id']) : '',
+				'name'      => $raw['name'],
+				'mime'      => $raw['mime'],
+				'size'      => $raw['size'],
+				'date'      => $this->formatDate($raw['mtime'])
+			);
+			
+			if ($file['mime'] == 'directory') {
+				$file['dirs'] = $raw['dirs'];
+			} else {
+				if ($raw['width'] && $raw['height']) {
+					$file['dim'] = $raw['width'].'x'.$raw['height'];
+				}
+				if (($tmb = $this->gettmb($raw['id'])) != false) {
+					$file['tmb'] = $tmb;
+				} elseif ($this->canCreateTmb($raw['id'], $file['mime'])) {
+					$file['tmb'] = 1;
+				}
+			}
+
+			if (!isset($this->paths[$raw['parent_id']][$raw['name']])) {
+				$this->paths[$raw['parent_id']][$raw['name']] = $raw['id'];
+			}
+			
+			$this->cache[$path] = $file;
+
+			if ($this->cache[$path]) {
+				$id = $this->cache[$path]['id'];
+				$this->cache[$path]['read']  = $this->attr($id, 'read');
+				$this->cache[$path]['write'] = $this->attr($id, 'write');
+				if ($this->attr($id, 'locked')) {
+					$this->cache[$path]['locked'] = 1;
+				}
+				if ($this->attr($id, 'hidden')) {
+					$this->cache[$path]['hidden'] = 1;
+				}
+			}
+		} 
+		
+		$file = $this->cache[$path];
 		
 		if ($file && !$raw) {
 			unset($file['id']);
@@ -206,88 +280,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Try to fetch file from db and return it
-	 *
-	 * @param  string  file path
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function getstat($path) {
-		$this->sqlCnt++;
-		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs
-				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
-				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
-				WHERE f.id="'.$path.'"
-				GROUP BY f.id';
-
-		return ($res = $this->db->query($sql))
-			? $this->prepareStat($res->fetch_assoc())
-			: false;
-	}
-	
-	/**
-	 * Convert file data fetched from db into fileinfo structure
-	 *
-	 * @param  array     $raw  assoc array from db
-	 * @return array|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function prepareStat($raw) {
-		
-		if (empty($raw) || empty($raw['id'])) {
-			return false;
-		}
-		
-		$file = array(
-			'id'        => $raw['id'],
-			'parent_id' => $raw['parent_id'], 
-			'hash'      => $this->encode($raw['id']),
-			'phash'     => $raw['parent_id'] ? $this->encode($raw['parent_id']) : '',
-			'name'      => $raw['name'],
-			'mime'      => $raw['mime'],
-			'size'      => $raw['size']
-		);
-		if ($raw['mtime'] > $this->today) {
-			$file['date'] = 'Today '.date('H:i', $raw['mtime']);
-		} elseif ($raw['mtime'] > $this->yesterday) {
-			$file['date'] = 'Yesterday '.date('H:i', $raw['mtime']);
-		} else {
-			$file['date'] = date($this->options['dateFormat'], $raw['mtime']);
-		}
-		
-		$file['read']  = $this->attr($raw['id'], 'read');
-		$file['write'] = $this->attr($raw['id'], 'write');
-		if ($this->attr($raw['id'], 'locked')) {
-			$file['locked'] = 1;
-		}
-		if ($this->attr($raw['id'], 'hidden')) {
-			$file['hidden'] = 1;
-		}
-		
-		if ($file['read']) {
-			if ($file['mime'] == 'directory') {
-				if ($raw['dirs']) {
-					$file['dirs'] = 1;
-				}
-			} else {
-				if ($raw['width'] && $raw['height']) {
-					$file['dim'] = $raw['width'].'x'.$raw['height'];
-				}
-
-				if (($tmb = $this->gettmb($raw['id'])) != false) {
-					$file['tmb'] = $tmb;
-				} elseif ($this->canCreateTmb($raw['id'], $file['mime'])) {
-					$file['tmb'] = 1;
-				}
-			}
-		} 
-		
-		// debug($file);
-		return $file;
-	}
-	
-	/**
 	 * Return array of parents id if all parents readable and not hidden
 	 *
 	 * @param  int   $id  file id
@@ -304,7 +296,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			}
 			$id = $file['parent_id'];
 			if ($id > 0) {
-				if (!$this->_isReadable($id) || $this->_isHidden($id)) {
+				if (!$this->attr($id, 'read') || $this->attr($id, 'hidden')) {
 					return array();
 				}
 				array_unshift($parents, $id);
@@ -617,25 +609,21 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($id) {
 		$files = array();
-		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs 
+		$sql   = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs 
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
 				WHERE f.parent_id="'.$id.'"
 				GROUP BY f.id';
 
-		if ($res = $this->db->query($sql)) {
+		if ($res = $this->query($sql)) {
 			while ($r = $res->fetch_assoc()) {
 				$id = $r['id'];
-				$this->cache[$id] = $this->prepareStat($r);
-				$files[] = $r['id'];
-
-				if (!isset($this->paths[$r['parent_id']][$r['name']])) {
-					$this->paths[$r['parent_id']][$r['name']] = $r['id'];
-				}
+				
+				$this->stat($id, $r);
+				$files[] = $id;
 			}
 		}
 
-		$this->sqlCnt++;
 		return $files;
 	}
 
