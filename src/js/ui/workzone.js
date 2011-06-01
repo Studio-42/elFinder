@@ -1,10 +1,9 @@
 
 $.fn.elfinderworkzone = function(fm) {
 	this.not('.elfinder-workzone').each(function() {
-		var nav    = $('<div class="ui-state-default elfinder-nav"/>'),
-			wz     = $(this).addClass('elfinder-workzone').append(nav),
+		var wz     = $(this).addClass('elfinder-workzone'),
 			parent = wz.parent().bind('resize', function() {
-				var height = parent.height() - pdelta;
+				var height = parent.height();
 
 				parent.children(':visible').each(function() {
 					var $this = $(this);
@@ -13,13 +12,66 @@ $.fn.elfinderworkzone = function(fm) {
 						height -= $this.outerHeight(true);
 					}
 				});
+				
+				wz.height(height - wdelta);
 
-				wz.height(height).children('.elfinder-cwd').height(height - wdelta);
-				nav.height(height - wdelta);
 			}),
-			wdelta = wz.outerHeight() - wz.height(),
-			pdelta = parent.outerHeight() - parent.height();
+			wdelta = wz.outerHeight(true) - wz.height();
+
 	});
+	
+	
 	
 	return this;
 }
+
+$.fn.elfindernav = function(fm) {
+	
+	this.not('.elfinder-nav').each(function() {
+		var nav    = $(this).addClass('ui-state-default  elfinder-nav'),
+			parent = nav.parent().resize(function() {
+				nav.height(wz.height() - delta)
+			}),
+			wz     = parent.children('.elfinder-workzone').append(nav),
+			delta  = nav.outerHeight() - nav.height(),
+			css    = fm.direction == 'ltr' ? 'left' : 'right',
+			handle, icon;
+
+		;
+		fm.log(wz)
+		
+		if ($.fn.resizable) {
+			icon = $('<span class="elfinder-nav-handle ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
+		
+			handle = nav
+				.resizable({
+					handles : 'e'
+				})
+				.bind('resize', function() {
+					fm.log('resize')
+					icon.css(css, parseInt(nav.width())-icon.outerWidth()-2+'px');
+				})
+				.bind('scroll', function() {
+					handle.height(nav.height() + nav.scrollTop());
+				})
+				.find('.ui-resizable-handle')
+			
+			parent.resize(function() {
+				fm.log(nav.width())
+			})
+			
+			fm.one('open', function() {
+				setTimeout(function() {
+					nav.resize();
+					icon.show();
+				}, 300);
+				
+			});
+		}
+		
+		
+	})
+	
+	return this;
+}
+

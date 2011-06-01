@@ -173,7 +173,8 @@
 .elfinder-workzone {
 	padding: 0;
 	position:relative;
-/*	overflow:hidden;*/
+/*	margin-bottom:3px;*/
+	overflow:hidden;
 /*	height:300px;*/
 /*	outline:1px solid red;*/
 }
@@ -197,10 +198,9 @@
 /************************************/
 /* navigation panel with dirs tree */
 .elfinder .elfinder-nav {
-/*	height:350px;*/
 	width:220px;
 	background-image:none;
-	padding:2px 10px 2px 2px;
+	padding:3px 10px 3px 1px;
 	font-size:.72em;
 	overflow:auto;
 	position:relative;
@@ -212,7 +212,7 @@
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
 .elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
 
-.elfinder-nav ul { margin:0; padding:0; list-style:none; }
+/*.elfinder-nav ul { margin:0; padding:0; list-style:none; }
 .elfinder-nav li { padding:0;  margin:0; display:block;}
 .elfinder-nav-tree { margin-bottom:1.5em; }
 .elfinder-nav-subtree { display:none; }
@@ -228,7 +228,6 @@
 	outline:0 solid;
 	margin: 0;
 	white-space:nowrap;
-/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-tree a { padding-left:35px; }
@@ -248,7 +247,6 @@
 	top:50%;
 	margin-top:-6px;
 	
-/*	border:1px solid #111;*/
 }
 
 .elfinder-nav-collapsed .elfinder-nav-arrow {
@@ -259,31 +257,9 @@
 .elfinder-nav-expanded .elfinder-nav-arrow {
 	background-position:0 -23px;
 }
-/*.elfinder-nav-collapsed, .elfinder-nav-collapsed.ui-state-active {
-	background-image:url(../images/collapsed-left.png);
-	background-position: 5px center;
-	background-repeat: no-repeat;
-}
-
-.elfinder-nav-expanded {
-	background-image:url(../images/expanded.png);
-}
-*/
-/* arrow before dir */
-/*.elfinder-nav-collapsed {
-	
-	background-image:url(../images/toolbar.png);
-	background-repeat:no-repeat;
-	
-}
-
-.elfinder-ltr .elfinder-nav-collapsed { left:0; background-position:0 2px; }
-.elfinder-rtl .elfinder-nav-collapsed { right:0; background-position:0 -11px;}
-.elfinder-ltr .elfinder-nav-expanded { background-position:0 -23px; }
-.elfinder-rtl .elfinder-nav-expanded { background-position:-1px -23px; }
 */
 
-/* folder icon */
+/*
 .elfinder-nav-icon {
 	width:16px;
 	height:16px;
@@ -295,19 +271,15 @@
 	background-position:0 -51px;
 }
 
-/* opened folder icon */
+
 .elfinder-nav-tree .ui-state-active .elfinder-nav-icon, 
 .elfinder-nav-tree .elfinder-droppable-active .elfinder-nav-icon { background-position:0 -66px; }
-/* home icon */
+
 .elfinder-nav-tree .elfinder-nav-tree-root .elfinder-nav-icon { background-position:0 -35px; }
 
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
 .elfinder-rtl .elfinder-nav-icon { right:14px; }
 
-
-/*.elfinder-nav-icon-places          { background-position:0 -134px;}*/
-
-/* permissions/symlink marker in nav */
 .elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
 .elfinder-ltr .elfinder-nav .elfinder-perms { left: 18px; }
 .elfinder-rtl .elfinder-nav .elfinder-perms { right:18px; }
@@ -320,7 +292,7 @@
 	left:0;
 	margin-left:-2px;
 }
-
+*/
 
 /*************************************************/
 /*          CURRENT WORKING DIRECTORY            */
@@ -331,7 +303,7 @@
 /*	padding: 0 3px;*/
 	overflow: auto;
 	position:relative;
-/*	border:1px solid #111;*/
+	border:1px solid #111;
 	font-size:.7em;
 	cursor:default;
 }
@@ -339,7 +311,7 @@
 .elfinder-cwd-dragenter {
 	outline:2px solid #8cafed;
 }
-.elfinder-cwd.elfinder-dropable-active {
+.elfinder-cwd.elfinder-droppable-active {
 	outline:2px solid #8cafed;
 }
 /************** ICONS VIEW *************/
@@ -411,7 +383,7 @@
 */}
 
 /* icon inside file/dir */
-.elfinder-cwd .elfinder-dropable-active .elfinder-cwd-icon { background-position: 0 -100px; }
+.elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
 .elfinder-cwd-icon-directory { background-position:0 -50px; }
 /*.elfinder-cwd-icon-directory-opened { background-position: 0 -100px; }*/
 

@@ -1,6 +1,6 @@
 (function($) {
 
-$.fn.elfindertree = function(fm, n) {
+$.fn.elfindertree = function(fm) {
 
 
 	this.not('.elfinder-nav-tree').each(function() {
@@ -288,7 +288,7 @@ $.fn.elfindertree = function(fm, n) {
 				.delegate('a', 'mouseenter', function(e) {
 					var link = $(this);
 
-					if (!link.is('.elfinder-dropable-active')) {
+					if (!link.is('.elfinder-droppable-active')) {
 						!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
 						// link.addClass(hover);
 					}
@@ -297,7 +297,7 @@ $.fn.elfindertree = function(fm, n) {
 				.delegate('a', 'mouseleave', function(e) {
 					var link = $(this);
 					
-					if (!link.is('.elfinder-dropable-active')) {
+					if (!link.is('.elfinder-droppable-active')) {
 						// link.removeClass(hover)
 						// fm.log('leave '+link.attr('id'))
 					}
@@ -350,11 +350,11 @@ $.fn.elfindertree = function(fm, n) {
 					}
 				})
 				.delegate('a', 'dropover', function(e) {
-					$(this).addClass('elfinder-dropable-active ui-state-hover')
+					$(this).addClass('elfinder-droppable-active ui-state-hover')
 					// fm.log('over '+$(this).attr('id'))
 				})
 				.delegate('a', 'dropout drop', function() {
-					$(this).removeClass('elfinder-dropable-active ui-state-hover')
+					$(this).removeClass('elfinder-droppable-active ui-state-hover')
 					// fm.log('out '+$(this).attr('id'))
 				});		
 		// bind events handlers

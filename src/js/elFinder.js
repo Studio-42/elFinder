@@ -428,6 +428,7 @@
 		this.droppable = {
 				tolerance : 'pointer',
 				accept : ':not(.ui-dialog)',
+				hoverClass : 'elfinder-dropable-active',
 				drop : function(e, ui) {
 					var dst     = $(this),
 						targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
@@ -1311,6 +1312,8 @@
 		this.ui = {
 			// container for nav panel and current folder container
 			workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
+			
+			nav : $('<div/>').appendTo(node).elfindernav(this),
 			// overlay
 			overlay : $('<div/>').appendTo(node).elfinderoverlay({
 				show : function() { self.disable(); },

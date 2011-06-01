@@ -1,0 +1,95 @@
+/* folders tree */
+.elfinder-nav-tree { margin-bottom:1em; border:1px solid red_; }
+
+.elfinder-nav-subtree { display:none_; }
+
+.elfinder-ltr .elfinder-nav-subtree { margin-left:12px; }
+.elfinder-rtl .elfinder-nav-subtree { margin-right:14px; }
+
+.elfinder-nav-tree a { 
+	position:relative; 
+	display:block; 
+	white-space:nowrap;
+	overflow:hidden; 
+	padding:3px 1px;
+	margin: 0 0 1px 0;
+	outline:0 solid;
+	border:1px solid transparent;
+}
+
+
+.elfinder-ltr .elfinder-nav-tree a { padding-left:35px; }
+.elfinder-rtl .elfinder-nav-tree a { padding-right:35px; }
+
+
+.elfinder-nav-arrow {
+	width:12px;
+	height:16px;
+	position:absolute;
+	display:none;
+	top:50%;
+	margin-top:-8px;
+	background-image:url("../images/toolbar.png");
+	background-repeat:no-repeat;
+}
+
+.elfinder-nav-collapsed .elfinder-nav-arrow { cursor:default; display:block; }
+.elfinder-nav-expanded  .elfinder-nav-arrow { background-position:0 -23px; }
+
+.elfinder-ltr .elfinder-nav-collapsed .elfinder-nav-arrow { left:0;  background-position: 0 4px; }
+.elfinder-rtl .elfinder-nav-collapsed .elfinder-nav-arrow { right:0; background-position: 0 16px; }
+
+
+.elfinder-nav-icon {
+	width:16px;
+	height:16px;
+	position:absolute;
+	top:50%;
+	margin-top:-8px;
+	background-image:url("../images/toolbar.png");
+	background-repeat:no-repeat;
+	background-position:0 -51px;
+}
+
+.elfinder-ltr .elfinder-nav-icon { left:14px; }
+.elfinder-rtl .elfinder-nav-icon { right:14px; }
+
+.ui-state-active .elfinder-nav-icon, 
+.elfinder-droppable-active .elfinder-nav-icon { background-position:0 -66px; }
+
+.elfinder-nav-tree-root .elfinder-nav-icon { background-position:-1px -35px; }
+
+.elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
+
+.elfinder-ltr .elfinder-nav .elfinder-perms   { left:  18px; }
+.elfinder-rtl .elfinder-nav .elfinder-perms   { right: 18px; }
+.elfinder-ltr .elfinder-nav .elfinder-symlink { left:  8px; }
+.elfinder-rtl .elfinder-nav .elfinder-symlink { right: 8px; }
+
+
+.elfinder-nav-handle {
+	position:absolute;
+	right:0;
+	top:50%;
+	margin-top:-8px;
+/*	width:16px;*/
+	height:12;
+	opacity:.5;
+	display:none;
+/*	border:1px solid green;*/
+}
+
+.elfinder-nav .ui-resizable-handle {
+	width:12px;
+/*	border:1px solid #111;*/
+}
+
+.elfinder-nav .ui-resizable-handle .ui-icon {
+	border:1px solid red;
+	position:absolute;
+	top:0;
+	left:-2px;
+}
+
+
+

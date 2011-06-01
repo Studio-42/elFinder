@@ -79,7 +79,7 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type String
 			 **/
-			clDropActive = 'elfinder-dropable-active',
+			clDropActive = 'elfinder-droppable-active',
 
 			/**
 			 * Base thumbnails url
