@@ -1,28 +1,10 @@
 /**
- * Current working directory.
+ * elFinder current working directory ui.
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindercwd = function(fm) {
 	
-	this.getFile = function(id) {
-		return this.filter('.elfinder-cwd:first').find('#'+id)
-	}
-	
-	this.fakeObject = function(name, mime) {
-		var cwd = this.filter('.elfinder-cwd:first'),
-			id = 'tmp_'+parseInt(Math.random()*100000);
-		
-		cwd.trigger('fakeobj', ['test'])
-		
-		// return dir;
-	}
-	
-	this.unselectAll = function() {
-		cwd = this.filter('.elfinder-cwd:first').trigger('unselectall');
-	}
-	
-	// @TODO on cut add disable class to files?
 	this.not('.elfinder-cwd').each(function() {
 		
 		$(this).parent().children('.elfinder-workzone').append(this);
@@ -91,6 +73,13 @@ $.fn.elfindercwd = function(fm) {
 			 * @type String
 			 **/
 			clHover     = 'ui-state-hover',
+
+			/**
+			 * Hover css class
+			 *
+			 * @type String
+			 **/
+			clDropActive = 'elfinder-dropable-active',
 
 			/**
 			 * Base thumbnails url
@@ -525,61 +514,6 @@ $.fn.elfindercwd = function(fm) {
 			},
 			
 			/**
-			 * Draggable options
-			 *
-			 * @type Array
-			 **/
-			draggable = $.extend({}, fm.draggable, {
-				// stop   : function(e) { 
-				// 	// fm.log('release')
-				// 	cwd.selectable('enable').droppable('enable');
-				// 	selectLock = false;
-				// },
-				helper : function(e, ui) {
-					var element  = this.id ? $(this) : $(this).parents('[id]:first'),
-						helper   = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
-						selected = [],
-						icon     = function(mime) { return '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>'; }, l;
-
-					cwd.selectable('disable').removeClass(clDisabled);
-					fm.log('helper')
-					// select dragged file if no selected
-					if (!element.is('.'+clSelected)) {
-						fm.log('not selected')
-						!(e.ctrlKey||e.metaKey||e.shiftKey) && unselectAll();
-						element.trigger(evtSelect);
-						// element.trigger('click')
-						trigger();
-					}
-					selectLock = true;
-					
-					if ((selected = fm.selected()).length) {
-						l = selected.length;
-						
-						helper.append(icon(fm.file(selected[0]).mime))
-							.data({
-								files : selected,
-								src   : fm.cwd().hash
-							});
-							
-						l > 1 && helper.append(icon(fm.file(selected[l-1]).mime)+'<span class="elfinder-drag-num">'+l+'</span>');
-					}
-					return helper;
-				}
-			}),
-
-			/**
-			 * Droppable options
-			 *
-			 * @type Array
-			 **/
-			droppable = $.extend({}, fm.droppable, {
-				hoverClass : 'elfinder-dropable-active',
-				over       : function(e, ui) { cwd.droppable('disable').removeClass(clDisabled); },
-				out        : function() { cwd.droppable('enable'); }
-			}),
-			
-			/**
 			 * CWD node itself
 			 *
 			 * @type JQuery
@@ -621,22 +555,26 @@ $.fn.elfindercwd = function(fm) {
 							? $this 
 							: $this.children();
 
-					!target.is('.'+clDraggable) && !$this.is('.'+clDisabled)  && target.draggable(fm.draggable);
+					!target.is('.'+clDraggable+',.'+clDisabled) && target.draggable(fm.draggable);
 				})
-				.delegate('[id]', 'dropover', function(e) {
-					// fm.log('dropover')
-					// fm.log(e)
+				// add css class and disable cwd droppable
+				.delegate('[id]', 'dropover', function(e, ui) {
+					var self = $(this);
+					
 					e.preventDefault();
-					e.stopImmediatePropagation()
-					cwd.droppable('disable').removeClass(clDisabled+' '+'elfinder-dropable-active').trigger('dropout');
-					$(this).addClass('elfinder-dropable-active')
+					e.stopImmediatePropagation();
+					
+					cwd.droppable('disable').removeClass(clDisabled).trigger('dropout');
+					if ($.inArray(self.attr('id'), ui.helper.data('files')) === -1) {
+						self.addClass(clDropActive);
+					}
 				})
-				.delegate('[id]', 'dropout', function(e) {
-					// fm.log('dropout')
+				// remove css class and restore cwd droppable
+				.delegate('[id]', 'dropout drop', function(e) {
 					e.preventDefault();
-					e.stopImmediatePropagation()
+					e.stopImmediatePropagation();
 					cwd.droppable('enable').trigger('dropover')
-					$(this).removeClass('elfinder-dropable-active')
+					$(this).removeClass(clDropActive);
 				})
 				// add hover class to selected file
 				.delegate('[id]', evtSelect, function(e) {
@@ -674,20 +612,18 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// make cwd itself droppable for folders from nav panel
 				.droppable(fm.droppable)
-				.bind('dropover', function() {
-					fm.log('cwd dropover')
-					cwd.addClass('elfinder-dropable-active')
+				// toggle cs class
+				.bind('dropover dropout', function(e) {
+					cwd[e.type == 'dropover' ? 'addClass' : 'removeClass'](clDropActive);
 				})
-				.bind('dropout', function() {
-					fm.log('cwd dropout')
-					cwd.removeClass('elfinder-dropable-active')
-				})
+				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
 
 					cwd.scrollTop(0);
 					parent.prepend(itemhtml(file));
 				})
+				// unselect all selected files
 				.bind('unselectall', function() {
 					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
 					trigger();
@@ -742,9 +678,9 @@ $.fn.elfindercwd = function(fm) {
 			.remove(function(e) {
 				remove(e.data.removed || []);
 			})
-			.bind('dragstart', function(e) {
+			.dragstart(function(e) {
 				var target = $(e.data.target),
-					oe = e.data.originalEvent;
+					oe     = e.data.originalEvent;
 
 				if (target.is('.elfinder-cwd-file')) {
 					// select dragged file if no selected
@@ -759,11 +695,10 @@ $.fn.elfindercwd = function(fm) {
 				cwd.selectable('disable').removeClass(clDisabled);
 				selectLock = true;
 			})
-			.bind('dragstop', function() {
-				cwd.selectable('enable').droppable('enable').removeClass('elfinder-dropable-active');
+			.dragstop(function() {
+				cwd.selectable('enable').droppable('enable').removeClass(clDropActive);
 				selectLock = false;
 			})
-			// disable cuted files
 			.bind('lockfiles unlockfiles', function(e) {
 				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
 					files = e.data.files || [], 
@@ -777,14 +712,14 @@ $.fn.elfindercwd = function(fm) {
 			.bind('mkdir mkfile duplicate upload', function(e) {
 				var phash = fm.cwd().hash, files;
 				
-				// if (!fm.selected().length) {
-					$.each(e.data.added.concat(e.data.changed), function(i, file) { 
-						if (file && file.phash == phash) {
-							cwd.find('#'+file.hash).trigger(evtSelect);
-						}
-					});
-					trigger();
-				// }
+				cwd.trigger('unselectall');
+
+				$.each(e.data.added.concat(e.data.changed), function(i, file) { 
+					if (file && file.phash == phash) {
+						cwd.find('#'+file.hash).trigger(evtSelect);
+					}
+				});
+				trigger();
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 

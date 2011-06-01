@@ -153,7 +153,16 @@ elFinder.prototype.commands.paste = function() {
 								});
 						} 
 						
-						fm.ajax({cmd : 'paste', dst : dst.hash, targets : $.map(files, function(f) { return f.hash}), cut : cut ? 1 : 0});
+						// new API
+						files = $.map(files, function(f) { return f.hash});
+						fm.trigger('lockfiles', {files : files})
+							.ajax({
+								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0},
+								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
+							})
+							.always(function() {
+								fm.trigger('unlockfiles', {files : files});
+							});
 					}
 					;
 				

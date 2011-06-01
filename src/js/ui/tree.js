@@ -285,14 +285,28 @@ $.fn.elfindertree = function(fm, n) {
 			 * @type JQuery
 			 */
 			tree = $(this).addClass('elfinder-nav-tree')
-				.delegate('a', 'mouseenter', function() {
+				.delegate('a', 'mouseenter', function(e) {
 					var link = $(this);
-					link.addClass(hover);
-					!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
-				})
-				.delegate('a', 'mouseleave', function() {
-					$(this).removeClass(hover);
+
+					if (!link.is('.elfinder-dropable-active')) {
+						!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
+						// link.addClass(hover);
+					}
 					
+				})
+				.delegate('a', 'mouseleave', function(e) {
+					var link = $(this);
+					
+					if (!link.is('.elfinder-dropable-active')) {
+						// link.removeClass(hover)
+						// fm.log('leave '+link.attr('id'))
+					}
+				})
+				.delegate('li', 'mouseenter', function() {
+					// fm.log('mouseenter '+$(this).children('a:first').attr('id'))
+				})
+				.delegate('li', 'mouseleave', function() {
+					// fm.log('mouseleave '+$(this).children('a:first').attr('id'))
 				})
 				.delegate('a', 'click', function(e) {
 					var link = $(this),
@@ -334,8 +348,15 @@ $.fn.elfindertree = function(fm, n) {
 								}
 							});
 					}
-				});
-		
+				})
+				.delegate('a', 'dropover', function(e) {
+					$(this).addClass('elfinder-dropable-active ui-state-hover')
+					// fm.log('over '+$(this).attr('id'))
+				})
+				.delegate('a', 'dropout drop', function() {
+					$(this).removeClass('elfinder-dropable-active ui-state-hover')
+					// fm.log('out '+$(this).attr('id'))
+				});		
 		// bind events handlers
 		fm
 			// create/update tree

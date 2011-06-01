@@ -846,7 +846,7 @@ class elFinder {
 		$cut     = !empty($args['cut']);
 		$result  = array('removed' => array(), 'added' => array());
 		$error   = $cut ? self::ERROR_MOVE_FILES : self::ERROR_COPY_FILES;
-		
+		// sleep(3);
 		if (($dstVolume = $this->volume($dst)) == false
 		|| ($dstDir = $dstVolume->dir($dst)) == false) {
 			return array('error' => $this->error($error, self::ERROR_NOT_TARGET_DIR));

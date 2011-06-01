@@ -228,6 +228,7 @@
 	outline:0 solid;
 	margin: 0;
 	white-space:nowrap;
+/*	border:1px solid #111;*/
 }
 
 .elfinder-ltr .elfinder-nav-tree a { padding-left:35px; }
