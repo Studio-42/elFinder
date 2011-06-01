@@ -397,9 +397,29 @@
 			cursor     : 'move',
 			cursorAt   : {left : 50, top : 47},
 			refreshPositions : true,
-			start      : function() { self.trigger('focus').trigger('dragstart'); },
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
-			stop       : function() { self.trigger('focus').trigger('dragstop'); }
+			// start      : function() { self.trigger('focus').trigger('dragstart'); },
+			// drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+			stop       : function() { self.trigger('focus').trigger('dragstop'); },
+			helper     : function(e, ui) {
+				var element = this.id ? $(this) : $(this).parents('[id]:first'),
+					helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
+					icon    = function(mime) { return '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>'; },
+					hashes, l;
+				
+				self.trigger('dragstart', {target : element[0], originalEvent : e});
+				
+				hashes = element.is('.elfinder-cwd-file') 
+					? self.selected() 
+					: [self.navId2Hash(element.attr('id'))];
+				
+				helper.append(icon(files[hashes[0]].mime)).data('files', hashes);
+
+				if ((l = hashes.length) > 1) {
+					helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
+				}
+				
+				return helper;
+			}
 		};
 		
 		/**
@@ -410,6 +430,13 @@
 		this.droppable = {
 				tolerance : 'pointer',
 				accept : ':not(.ui-dialog)',
+				// hoverClass : 'elfinder-dropable-active',
+				over : function(e, ui) {
+					// self.log('over').log(this)
+				},
+				out : function() {
+					// self.log('out').log(this)
+				},
 				drop : function(e, ui) {
 					var $this = $(this), 
 						src   = ui.helper.data('src'),
@@ -417,7 +444,9 @@
 						l     = files.length,
 						dst;
 					
+					self.log(ui.helper.data('files'))
 					
+					return;
 					if (!l) {
 						return;
 					}
@@ -2334,7 +2363,13 @@
 		},
 		
 		
-
+		navHash2Id : function(hash) {
+			return 'nav-'+hash;
+		},
+		
+		navId2Hash : function(id) {
+			return id.substr(4);
+		},
 		
 		log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 		

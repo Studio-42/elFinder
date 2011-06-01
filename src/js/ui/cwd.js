@@ -385,7 +385,7 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			makeDroppable = function() {
 				setTimeout(function() {
-					cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(droppable);
+					cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(fm.droppable);
 				}, 20);
 			},
 			
@@ -545,8 +545,10 @@ $.fn.elfindercwd = function(fm) {
 					fm.log('helper')
 					// select dragged file if no selected
 					if (!element.is('.'+clSelected)) {
+						fm.log('not selected')
 						!(e.ctrlKey||e.metaKey||e.shiftKey) && unselectAll();
 						element.trigger(evtSelect);
+						// element.trigger('click')
 						trigger();
 					}
 					selectLock = true;
@@ -619,7 +621,22 @@ $.fn.elfindercwd = function(fm) {
 							? $this 
 							: $this.children();
 
-					!target.is('.'+clDraggable) && !$this.is('.'+clDisabled)  && target.draggable(draggable);
+					!target.is('.'+clDraggable) && !$this.is('.'+clDisabled)  && target.draggable(fm.draggable);
+				})
+				.delegate('[id]', 'dropover', function(e) {
+					// fm.log('dropover')
+					// fm.log(e)
+					e.preventDefault();
+					e.stopImmediatePropagation()
+					cwd.droppable('disable').removeClass(clDisabled+' '+'elfinder-dropable-active').trigger('dropout');
+					$(this).addClass('elfinder-dropable-active')
+				})
+				.delegate('[id]', 'dropout', function(e) {
+					// fm.log('dropout')
+					e.preventDefault();
+					e.stopImmediatePropagation()
+					cwd.droppable('enable').trigger('dropover')
+					$(this).removeClass('elfinder-dropable-active')
 				})
 				// add hover class to selected file
 				.delegate('[id]', evtSelect, function(e) {
@@ -656,7 +673,15 @@ $.fn.elfindercwd = function(fm) {
 					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
 				// make cwd itself droppable for folders from nav panel
-				.droppable($.extend({}, fm.droppable))
+				.droppable(fm.droppable)
+				.bind('dropover', function() {
+					fm.log('cwd dropover')
+					cwd.addClass('elfinder-dropable-active')
+				})
+				.bind('dropout', function() {
+					fm.log('cwd dropout')
+					cwd.removeClass('elfinder-dropable-active')
+				})
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
 
@@ -717,12 +742,25 @@ $.fn.elfindercwd = function(fm) {
 			.remove(function(e) {
 				remove(e.data.removed || []);
 			})
-			.bind('dragstart', function() {
-				fm.log('dragstart')
+			.bind('dragstart', function(e) {
+				var target = $(e.data.target),
+					oe = e.data.originalEvent;
+
+				if (target.is('.elfinder-cwd-file')) {
+					// select dragged file if no selected
+					if (!target.is('.'+clSelected)) {
+						!(oe.ctrlKey || oe.metaKey || oe.shiftKey) && unselectAll();
+						target.trigger(evtSelect);
+						trigger();
+					}
+					cwd.droppable('disable');
+				}
+				
+				cwd.selectable('disable').removeClass(clDisabled);
+				selectLock = true;
 			})
 			.bind('dragstop', function() {
-				fm.log('dragstop')
-				cwd.selectable('enable').droppable('enable');
+				cwd.selectable('enable').droppable('enable').removeClass('elfinder-dropable-active');
 				selectLock = false;
 			})
 			// disable cuted files

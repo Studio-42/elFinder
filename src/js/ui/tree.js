@@ -1,6 +1,7 @@
 (function($) {
 
-$.fn.elfindertree = function(fm) {
+$.fn.elfindertree = function(fm, n) {
+
 
 	this.not('.elfinder-nav-tree').each(function() {
 		$(this).parent().find('.elfinder-nav').append(this).show();
@@ -222,7 +223,7 @@ $.fn.elfindertree = function(fm) {
 			},
 			
 			updateDroppable = function() {
-				tree.find('[id]:not(.'+root+',.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
+				tree.find('[id]:not(.'+root+',.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(fm.droppable);
 			},
 			
 			updateArrows = function(dirs, cls) {
@@ -287,7 +288,7 @@ $.fn.elfindertree = function(fm) {
 				.delegate('a', 'mouseenter', function() {
 					var link = $(this);
 					link.addClass(hover);
-					!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(draggable);
+					!link.is('.'+root+',.ui-draggable,.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
 				})
 				.delegate('a', 'mouseleave', function() {
 					$(this).removeClass(hover);
