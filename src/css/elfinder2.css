@@ -46,6 +46,7 @@
 	display:none;
 }
 
+/* show "plus" icon when ctrl/shift pressed */
 .elfinder-drag-helper-plus .elfinder-drag-helper-icon-plus {
 	display:block;
 }
