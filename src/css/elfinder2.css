@@ -3,7 +3,7 @@
 /************************************/
 
 /* common container */
-.elfinder { padding:2px; position:relative; display:block; }
+.elfinder { padding:2px; position:relative; display:block;  }
 
 .elfinder-rtl  { text-align:right; direction:rtl; }
 
@@ -176,7 +176,8 @@
 /*	margin-bottom:3px;*/
 	overflow:hidden;
 /*	height:300px;*/
-/*	outline:1px solid red;*/
+	outline:1px solid red;
+/*	display:none;*/
 }
 
 .elfinder-spinner {

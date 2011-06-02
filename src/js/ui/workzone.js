@@ -40,7 +40,7 @@ $.fn.elfindernav = function(fm) {
 		;
 		fm.log(wz)
 		
-		if ($.fn.resizable) {
+		if (!$.fn.resizable) {
 			icon = $('<span class="elfinder-nav-handle ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
 		
 			handle = nav

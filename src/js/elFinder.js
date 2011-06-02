@@ -1352,6 +1352,7 @@
 		this.options.resizable 
 		&& $.fn.resizable 
 		&& node.resizable({
+			handles : 'se',
 			alsoResize : self.ui.workzone,
 			minWidth  : 300,
 			minHeight : 200

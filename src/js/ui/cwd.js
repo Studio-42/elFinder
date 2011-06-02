@@ -7,9 +7,10 @@ $.fn.elfindercwd = function(fm) {
 	
 	this.not('.elfinder-cwd').each(function() {
 		
-		$(this).parent().children('.elfinder-workzone').append(this);
+		// $(this).parent().children('.elfinder-workzone').append(this);
 		
 		var 
+			// parent = 
 			undef = 'undefined',
 			/**
 			 * Select event full name
@@ -627,7 +628,16 @@ $.fn.elfindercwd = function(fm) {
 				.bind('unselectall', function() {
 					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
 					trigger();
-				});
+				}),
+				// elfinder node
+				parent = $(this).parent().resize(function() {
+					cwd.height(wz.height() - delta)
+				}),
+				// workzone node
+				wz = parent.children('.elfinder-workzone').append(this),
+				// outerHeight and height difference
+				delta = cwd.outerHeight(true) - cwd.height()
+				;
 		
 		fm
 			.open(function(e) {
