@@ -1,76 +1,61 @@
-
+/**
+ * @class elfinderworkzone - elFinder container for nav and current directory
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfinderworkzone = function(fm) {
-	this.not('.elfinder-workzone').each(function() {
-		var wz     = $(this).addClass('elfinder-workzone'),
+	var cl = 'elfinder-workzone';
+	
+	this.not('.'+cl).each(function() {
+		var wz     = $(this).addClass(cl),
+			wdelta = wz.outerHeight(true) - wz.height(),
 			parent = wz.parent().bind('resize', function() {
 				var height = parent.height();
 
-				parent.children(':visible').each(function() {
-					var $this = $(this);
-					
-					if (this != wz[0] && $this.css('position') != 'absolute') {
-						height -= $this.outerHeight(true);
+				parent.children(':visible:not(.'+cl+')').each(function() {
+					var ch = $(this);
+
+					if (ch.css('position') != 'absolute') {
+						height -= ch.outerHeight(true);
 					}
 				});
 				
 				wz.height(height - wdelta);
-
-			}),
-			wdelta = wz.outerHeight(true) - wz.height();
-
+			});
 	});
-	
-	
-	
 	return this;
 }
 
+/**
+ * @class elfindernav - elFinder container for diretories tree and places
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfindernav = function(fm) {
 	
 	this.not('.elfinder-nav').each(function() {
-		var nav    = $(this).addClass('ui-state-default  elfinder-nav'),
-			parent = nav.parent().resize(function() {
-				nav.height(wz.height() - delta)
-			}),
+		var nav    = $(this).addClass('ui-state-default elfinder-nav'),
+			parent = nav.parent()
+				.resize(function() {
+					nav.height(wz.height() - delta);
+					icon && icon.length && pos();
+				}),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
-			css    = fm.direction == 'ltr' ? 'left' : 'right',
+			ltr    = fm.direction == 'ltr',
+			css    = ltr ? 'left' : 'right',
+			pos    = function() { icon.css(css, parseInt(handle.offset()[css])-icon.outerWidth()+'px'); },
 			handle, icon;
 
-		;
-		fm.log(wz)
 		
-		if (!$.fn.resizable) {
-			icon = $('<span class="elfinder-nav-handle ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
-		
-			handle = nav
-				.resizable({
-					handles : 'e'
+		if ($.fn.resizable) {
+			icon   = $('<span class="elfinder-nav-handle-icon ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
+			handle = nav.resizable({handles : ltr ? 'e' : 'n'})
+				.resize(pos)
+				.scroll(function() {
+					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
-				.bind('resize', function() {
-					fm.log('resize')
-					icon.css(css, parseInt(nav.width())-icon.outerWidth()-2+'px');
-				})
-				.bind('scroll', function() {
-					handle.height(nav.height() + nav.scrollTop());
-				})
-				.find('.ui-resizable-handle')
-			
-			parent.resize(function() {
-				fm.log(nav.width())
-			})
-			
-			fm.one('open', function() {
-				setTimeout(function() {
-					nav.resize();
-					icon.show();
-				}, 300);
-				
-			});
+				.find('.ui-resizable-handle');
 		}
-		
-		
-	})
+	});
 	
 	return this;
 }

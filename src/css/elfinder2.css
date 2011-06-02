@@ -200,15 +200,22 @@
 /* navigation panel with dirs tree */
 .elfinder .elfinder-nav {
 	width:220px;
-	background-image:none;
-	padding:3px 10px 3px 1px;
+/*	padding:3px 10px 3px 1px;*/
 	font-size:.72em;
+	border:1px solid #aaa;
+	background-image:none;
 	overflow:auto;
-	position:relative;
-	display:none;
 }
 
-.elfinder-nav .ui-resizable-e { right:0; }
+.elfinder .elfinder-nav-wrap {
+	
+/*	padding:2px;*/
+	
+/*	border:1px solid #111;*/
+/*	position:relative;*/
+}
+
+/*.elfinder-nav .ui-resizable-e { right:0; }*/
 
 .elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
 .elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
@@ -304,7 +311,7 @@
 /*	padding: 0 3px;*/
 	overflow: auto;
 	position:relative;
-	border:1px solid #111;
+/*	border:1px solid #111;*/
 	font-size:.7em;
 	cursor:default;
 }

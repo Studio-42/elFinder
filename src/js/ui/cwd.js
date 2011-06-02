@@ -7,8 +7,6 @@ $.fn.elfindercwd = function(fm) {
 	
 	this.not('.elfinder-cwd').each(function() {
 		
-		// $(this).parent().children('.elfinder-workzone').append(this);
-		
 		var 
 			// parent = 
 			undef = 'undefined',

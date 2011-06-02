@@ -10,7 +10,7 @@
 	position:relative; 
 	display:block; 
 	white-space:nowrap;
-	overflow:hidden; 
+/*	overflow:hidden; */
 	padding:3px 1px;
 	margin: 0 0 1px 0;
 	outline:0 solid;
@@ -67,28 +67,16 @@
 .elfinder-rtl .elfinder-nav .elfinder-symlink { right: 8px; }
 
 
-.elfinder-nav-handle {
+.elfinder-nav .ui-resizable-handle { width:12px; }
+.elfinder-ltr .ui-resizable-handle { right:0; }
+.elfinder-rtl .ui-resizable-handle { left:0;  }
+
+.elfinder-nav-handle-icon {
 	position:absolute;
-	right:0;
 	top:50%;
-	margin-top:-8px;
-/*	width:16px;*/
-	height:12;
-	opacity:.5;
-	display:none;
-/*	border:1px solid green;*/
+	margin:-8px 2px 0 2px;
+	opacity: .5; filter:Alpha(Opacity=50);
 }
 
-/*.elfinder-nav .ui-resizable-handle {
-	width:12px;
-}
 
-.elfinder-nav .ui-resizable-handle .ui-icon {
-	border:1px solid red;
-	position:absolute;
-	top:0;
-	left:-2px;
-}
-
-*/
 
