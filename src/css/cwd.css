@@ -1,0 +1,180 @@
+/******************************************************************/
+/*                     CURRENT DIRECTORY STYLES                   */
+/******************************************************************/
+
+/* container */
+.elfinder-cwd { 
+	padding:2px;
+	overflow: auto;
+	position:relative;
+	font-size:.7em;
+	cursor:default;
+}
+
+/* container active on dropenter */
+/* @TODO join in one class */
+.elfinder-cwd-dragenter, .elfinder-cwd.elfinder-droppable-active {
+	outline:2px solid #8cafed;
+}
+
+/************************** ICONS VIEW ********************************/
+
+/* file container */
+
+.elfinder-cwd-view-icons .elfinder-cwd-file {
+	width:80px;
+	height:80px;
+	padding-bottom:2px;
+	cursor:default;
+	overflow:hidden;
+
+}
+
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 3px 0; }
+.elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file { float:right; margin:0 0 3px 3px; }
+
+/* remove ui hover class border */
+.elfinder-cwd-view-icons .ui-state-hover { border:0 solid; }
+
+/* icon wrapper to create selected highlight around icon */
+.elfinder-cwd-view-icons .elfinder-cwd-file-wrapper {
+	width:52px;
+	height:52px;
+	margin:1px auto 1px auto;
+	padding:2px;
+	position:relative;
+	-webkit-box-shadow: 5px 5px 5px #eee;
+	-moz-box-shadow: 5px 5px 5px #eee;
+	box-shadow: 5px 5px 5px #eee;
+}
+
+/* file name place */
+.elfinder-cwd-view-icons .elfinder-cwd-filename {
+	text-align:center;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+    -o-text-overflow:ellipsis;
+	margin:3px 1px 0 1px;
+	padding:1px 2px;
+}
+
+/* permissions/symlink markers */
+.elfinder-cwd-view-icons .elfinder-perms { bottom:2px; right:2px; }
+.elfinder-cwd-view-icons .elfinder-symlink { top:50%; left:0px; }
+
+/* icon/thumbnail */
+.elfinder-cwd-icon {
+	display:block;
+	width:48px;
+	height:48px;
+	margin:0 auto;
+	background: url('../images/icons-big.png') 0 0 no-repeat;
+	-moz-background-clip: padding; 
+	-webkit-background-clip: padding-box; 
+	background-clip: padding-box;
+}
+
+/* "opened folder" icon on dragover */
+.elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
+
+/* mimetypes icons */
+.elfinder-cwd-icon-directory { background-position:0 -50px; }
+.elfinder-cwd-icon-application { background-position:0 -150px; }
+.elfinder-cwd-icon-x-empty, 
+.elfinder-cwd-icon-text { background-position:0  -200px; }
+.elfinder-cwd-icon-image, 
+.elfinder-cwd-icon-vnd-adobe-photoshop, 
+.elfinder-cwd-icon-postscript { background-position:0 -250px;  }
+.elfinder-cwd-icon-audio { background-position:0 -300px; }
+.elfinder-cwd-icon-video { background-position:0 -350px; }
+.elfinder-cwd-icon-rtf, 
+.elfinder-cwd-icon-rtfd { background-position: 0 -400px; }
+.elfinder-cwd-icon-pdf { background-position: 0 -450px; }
+.elfinder-cwd-icon-vnd-ms-office,
+.elfinder-cwd-icon-msword,
+.elfinder-cwd-icon-vnd-ms-word,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text,
+.elfinder-cwd-icon-ms-excel,
+.elfinder-cwd-icon-vnd-ms-excel,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
+.elfinder-cwd-icon-vnd-ms-powerpoint,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation { background-position: 0 -500px; }
+.elfinder-cwd-icon-html { background-position: 0 -550px; }
+.elfinder-cwd-icon-css { background-position: 0 -600px; }
+.elfinder-cwd-icon-javascript, .elfinder-cwd-icon-x-javascript { background-position: 0 -650px; }
+.elfinder-cwd-icon-x-perl { background-position: 0 -700px; }
+.elfinder-cwd-icon-x-python  { background-position: 0 -750px; }
+.elfinder-cwd-icon-x-ruby { background-position: 0 -800px; }
+.elfinder-cwd-icon-x-sh, .elfinder-cwd-icon-x-shellscript { background-position: 0 -850px; }
+.elfinder-cwd-icon-x-c, .elfinder-cwd-icon-x-java-source { background-position: 0 -900px; }
+.elfinder-cwd-icon-x-php { background-position: 0 -950px; }
+.elfinder-cwd-icon-xml { background-position: 0 -1000px; }
+.elfinder-cwd-iconx-zip, .elfinder-cwd-icon-x-7z-compressed { background-position: 0 -1050px; }
+.elfinder-cwd-icon-x-gzip,  
+.elfinder-cwd-icon-x-tar { background-position: 0 -1100px; }
+.elfinder-cwd-icon-x-bzip, 
+.elfinder-cwd-icon-x-bzip2           { background-position: 0 -1150px; }
+.elfinder-cwd-icon-x-rar, 
+.elfinder-cwd-icon-x-rar-compressed  { background-position: 0 -1200px; }
+.elfinder-cwd-icon-x-shockwave-flash { background-position: 0 -1250px; }
+.elfinder-cwd-icon-group             { background-position:0 -1300px;}
+
+/* textfield inside icon */
+.elfinder-cwd input { width:100%; border:1px solid #ccc;  }
+.elfinder-cwd-view-icons { text-align:center; }
+
+
+/************************************  LIST VIEW ************************************/
+
+.elfinder-cwd table { width:100%; border-collapse:collapse; }
+
+.elfinder-cwd table td { 
+	padding:.2em .3em;
+	white-space:nowrap;
+	overflow:hidden;
+	text-align:right;
+	cursor:default;
+	border:0 solid;
+}
+
+.elfinder-cwd table td.ui-state-hover {border:0 solid; }
+
+.elfinder-ltr .elfinder-cwd table td { text-align:right; }
+.elfinder-ltr .elfinder-cwd table td:first-child { text-align:left; }
+.elfinder-rtl .elfinder-cwd table td { text-align:left; }
+.elfinder-rtl .elfinder-cwd table td:first-child { text-align:right; }
+
+.elfinder-odd-row { background:#eee; }
+
+/* filename container */
+.elfinder-cwd-view-list .elfinder-cwd-file-wrapper {
+	text-align:left;
+	padding-left:23px;
+	position:relative;
+}
+
+.elfinder-cwd-view-list .elfinder-perms, 
+.elfinder-cwd-view-list .elfinder-symlink { top:50%; margin-top:-6px; }
+
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-perms { left:7px;  }
+
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px;}
+
+.elfinder-cwd-view-list td .elfinder-cwd-icon {
+	width:16px;
+	height:16px;
+	position:absolute;
+	top:50%;
+	margin-top:-8px;
+	background-image:url(../images/icons-small.png);
+}
+
+
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
+.elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
+
+.elfinder-cwd-list input { width:80%; }
+
+

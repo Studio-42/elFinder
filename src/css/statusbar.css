@@ -1,0 +1,15 @@
+/******************************************************************/
+/*                           STATUSBAR STYLES                     */
+/******************************************************************/
+
+.elfinder-statusbar {
+	padding:.2em .5em;
+	font-size:.76em;
+	font-weight:normal;
+}
+
+/* selected/total files info */
+.elfinder-statusbar-info {
+	float:right;
+	text-align:right;
+}

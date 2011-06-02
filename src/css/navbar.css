@@ -1,3 +1,21 @@
+/*********************************************/
+/*              NAVIGATION PANEL             */
+/*********************************************/
+
+/* container */
+.elfinder .elfinder-nav {
+	width:220px;
+/*	padding:3px 10px 3px 1px;*/
+	font-size:.72em;
+	border:1px solid #aaa;
+	background-image:none;
+	overflow:auto;
+}
+
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
+.elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
+
 /* folders tree */
 .elfinder-nav-tree { margin-bottom:1em; border:1px solid red_; }
 

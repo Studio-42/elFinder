@@ -1,0 +1,71 @@
+/*********************************************/
+/*               TOOLBAR STYLES              */
+/*********************************************/
+/* toolbar container */
+.elfinder-toolbar { padding:.2em; margin-bottom:2px; }
+
+/* container for button's group */
+.elfinder-buttonset {
+	float:left;
+	padding-left:10px;
+	background:url('../images/toolbar.png') 0  -550px  no-repeat; ;
+}
+
+/* button */
+.elfinder-button {
+	float:left;
+	width:16px;
+	height:16px;
+	margin:0 1px;
+	padding:3px;
+	overflow:hidden;
+	position:relative;
+}
+
+/* hack for upload button */
+.elfinder-button form {
+	position:absolute;
+	top:0;
+	right:0;
+	opacity: 0; filter:Alpha(Opacity=0);
+}
+
+/* left to right enviroment */
+.elfinder-rtl .elfinder-buttonset,
+.elfinder-rtl .elfinder-button { float:right; }
+
+/* right to left enviroment */
+.elfinder-ltr .elfinder-buttonset:first-child,
+.elfinder-rtl .elfinder-buttonset:last-child { padding-left:0; background:transparent; }
+
+/* icon inside button */
+.elfinder-button-icon {
+	width:16px;
+	height:16px;
+	float:left;
+	background:url('../images/toolbar.png')  no-repeat; 
+	z-index:100;
+}
+
+/* buttons icons */
+.elfinder-button-icon-home     { background-position: 0 -34px; }
+.elfinder-button-icon-open       { background-position: 0 -66px; }
+.elfinder-button-icon-back       { background-position: 0 -150px; }
+.elfinder-button-icon-forward    { background-position: 0 -166px; }
+.elfinder-button-icon-up         { background-position: 0 -182px; }
+.elfinder-button-icon-reload     { background-position: 0 -198px; }
+.elfinder-button-icon-rm         { background-position: 0 -262px; }
+.elfinder-button-icon-copy       { background-position: 0 -278px; }
+.elfinder-button-icon-cut        { background-position: 0 -296px; }
+.elfinder-button-icon-paste      { background-position: 0 -313px; }
+.elfinder-button-icon-duplicate  { background-position: 0 -330px; }
+.elfinder-button-icon-info       { background-position: 0 -346px; }
+.elfinder-button-icon-rename     { background-position: 0 -364px; }
+.elfinder-button-icon-mkdir      { background-position: 0 -230px; }
+.elfinder-button-icon-mkfile     { background-position: 0 -246px; }
+.elfinder-button-icon-upload     { background-position: 0 -380px; }
+
+.elfinder-toolbar-ext .elfinder-buttonset { background:transparent; }
+
+.elfinder-toolbar-ext .elfinder-button { margin:0; }
+

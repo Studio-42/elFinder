@@ -59,16 +59,17 @@
 	background:url("../images/dialogs.png") 0 0 no-repeat;
 }
 
+/*********************** ERROR DIALOG **************************/
+
 .elfinder-dialog-error .ui-dialog-content,
-.elfinder-dialog-confirm .ui-dialog-content { 
-	padding-left: 56px;
-	min-height:35px;
-}
+.elfinder-dialog-confirm .ui-dialog-content { padding-left: 56px; min-height:35px; }
+
+/*********************** NOTIFY DIALOG **************************/
 
 .elfinder-dialog-notify .ui-dialog-titlebar-close { display:none; }
 .elfinder-dialog-notify .ui-dialog-content { padding:0; }
 
-/* notify dialog */
+/* one notification container */
 .elfinder-notify {
 	border-bottom:1px solid #ccc;
 	position:relative;
@@ -80,6 +81,7 @@
 
 .elfinder-notify:last-child { border:0 solid; }
 
+/* progressbar */
 .elfinder-notify-progressbar {
 	width:180px;
 	height:8px;
@@ -101,7 +103,8 @@
 	border-radius: 2px;
 }
 
-/* confirm dialog */
+/*********************** CONFIRM DIALOG **************************/
+
 .elfinder-dialog-confirm-applyall {	padding-top:3px; }
 
 .elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
@@ -114,6 +117,65 @@
 .elfinder-notify-diplicate .elfinder-dialog-icon { background-position: 0 -128px; }
 .elfinder-notify-upload    .elfinder-dialog-icon { background-position: 0 -160px; }
 .elfinder-notify-rm        .elfinder-dialog-icon { background-position: 0 -192px; }
+
+/*********************** FILE INFO DIALOG **************************/
+
+
+.elfinder-info-title .elfinder-cwd-icon {
+	float:left;
+	width:48px;
+	height:48px;
+	margin-right:1em;
+}
+
+.elfinder-info-title strong { display:block; padding:.3em 0 .5em 0; }
+
+.elfinder-info-tb {
+	border:0 solid;
+	margin:1em .2em 1em .2em;
+	font-size:.82em;
+}
+
+.elfinder-info-tb td { white-space:nowrap; padding:2px; }
+
+.elfinder-info-tb tr td:first-child { text-align:right;  }
+
+.elfinder-info-tb span { float:left;}
+.elfinder-info-tb a { outline: none; text-decoration:underline; }
+.elfinder-info-tb a:hover { text-decoration:none; }
+.elfinder-info-tb .elfinder-spinner-mini {height:14px; margin:0 5px;}
+
+/*********************** UPLOAD DIALOG **************************/
+
+.elfinder-upload-dropbox {
+	font-size:1.2em;
+	text-align:center;
+	padding:2em 0;
+	border:3px dashed #aaa;
+}
+
+.elfinder-upload-dropbox.ui-state-hover {
+	background:#dfdfdf;
+	border:3px dashed #555;
+}
+
+.elfinder-upload-dialog-or {
+	font-size:1.2em;
+	margin:.3em 0;
+	text-align:center;
+}
+
+.elfinder-upload-dialog-wrapper { text-align:center; }
+
+.elfinder-upload-dialog-wrapper .ui-button { position:relative;	overflow:hidden; }
+
+.elfinder-upload-dialog-wrapper .ui-button form {
+	position:absolute;
+	right:0;
+	top:0;
+	opacity: 0; filter:Alpha(Opacity=0);
+}
+
 
 
 
