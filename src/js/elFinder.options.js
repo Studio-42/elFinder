@@ -50,7 +50,7 @@ elFinder.prototype.options = {
 	 * @type Array
 	 * @default ['toolbar', 'tree']
 	 */
-	ui : ['toolbar', 'tree2'],
+	ui : ['toolbar', 'tree'],
 
 	/**
 	 * Some UI plugins options.
@@ -66,9 +66,9 @@ elFinder.prototype.options = {
 			['rm'],
 			['info'],
 			['help']
-		],
+		]
 		// folders tree options
-		tree : {tag : 'ul'}
+		// tree : {tag : 'ul'}
 	},
 
 	/**

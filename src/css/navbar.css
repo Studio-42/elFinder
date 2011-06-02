@@ -5,45 +5,50 @@
 /* container */
 .elfinder .elfinder-navbar {
 	width:220px;
-/*	padding:3px 10px 3px 1px;*/
+	padding:3px 10px 3px 1px;
 	font-size:.72em;
-	border:1px solid #aaa;
 	background-image:none;
 	overflow:auto;
 	display:none;
 }
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left; margin-right:3px; }
+.elfinder-ltr .elfinder-navbar { float:left;  margin-right:3px; }
 .elfinder-rtl .elfinder-navbar { float:right; margin-left:3px; }
 
-/* folders tree */
-.elfinder-nav-tree { margin-bottom:1em; border:1px solid red_; }
+/* folders tree container */
+.elfinder-navbar-tree { margin-bottom:1em; display:table; width:100%;  }
 
-.elfinder-nav-subtree { display:none_; }
+/* subdirs tree */
+.elfinder-navbar-subtree { display:none; }
 
-.elfinder-ltr .elfinder-nav-subtree { margin-left:12px; }
-.elfinder-rtl .elfinder-nav-subtree { margin-right:14px; }
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-navbar-subtree { margin-left:12px; }
+.elfinder-rtl .elfinder-navbar-subtree { margin-right:12px; }
 
-.elfinder-nav-tree a { 
+/* one folder wrapper */
+.elfinder-navbar-dir-wrapper {}
+
+/* folder */
+.elfinder-navbar-dir { 
 	position:relative; 
 	display:block; 
 	white-space:nowrap;
-/*	overflow:hidden; */
-	padding:3px 1px;
-	margin: 0 0 1px 0;
+	padding:3px 12px;
+	margin: 0;
 	outline:0 solid;
 	border:1px solid transparent;
+	cursor:default;
 }
 
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-navbar-dir { padding-left:35px; }
+.elfinder-rtl .elfinder-navbar-dir { padding-right:35px; }
 
-.elfinder-ltr .elfinder-nav-tree a { padding-left:35px; }
-.elfinder-rtl .elfinder-nav-tree a { padding-right:35px; }
-
-
-.elfinder-nav-arrow {
+/* arrow before icon */
+.elfinder-navbar-arrow {
 	width:12px;
-	height:16px;
+	height:14px;
 	position:absolute;
 	display:none;
 	top:50%;
@@ -52,13 +57,30 @@
 	background-repeat:no-repeat;
 }
 
-.elfinder-nav-collapsed .elfinder-nav-arrow { cursor:default; display:block; }
-.elfinder-nav-expanded  .elfinder-nav-arrow { background-position:0 -23px; }
+/* collapsed/expanded arrow view */
+.elfinder-navbar-collapsed .elfinder-navbar-arrow { display:block; }
 
-.elfinder-ltr .elfinder-nav-collapsed .elfinder-nav-arrow { left:0;  background-position: 0 4px; }
-.elfinder-rtl .elfinder-nav-collapsed .elfinder-nav-arrow { right:0; background-position: 0 16px; }
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-navbar-collapsed .elfinder-navbar-arrow { left:0;  background-position: 0 4px;  }
+.elfinder-rtl .elfinder-navbar-expanded .elfinder-navbar-arrow { right:0;  }
+.elfinder-ltr .elfinder-navbar-expanded .elfinder-navbar-arrow,
+.elfinder-rtl .elfinder-navbar-expanded .elfinder-navbar-arrow { background-position:0 -21px; }
 
+.elfinder-navbar-spinner { 
+	width:14px;
+	height:14px;
+	position:absolute;
+	display:block;
+/*	border:1px solid #111;*/
+	top:50%;
+	margin-top:-7px;
+	background: url("../images/spinner-mini.gif") center center no-repeat;
+}
 
+.elfinder-ltr .elfinder-navbar-spinner { left:0;  margin-left:-2px;  }
+/*.elfinder-rtl .elfinder-navbar-spinner { right:0; margin-right:-2px; }*/
+
+/* folder icon */
 .elfinder-nav-icon {
 	width:16px;
 	height:16px;
@@ -70,13 +92,14 @@
 	background-position:0 -51px;
 }
 
+/* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-nav-icon { left:14px; }
 .elfinder-rtl .elfinder-nav-icon { right:14px; }
 
 .ui-state-active .elfinder-nav-icon, 
-.elfinder-droppable-active .elfinder-nav-icon { background-position:0 -66px; }
+.elfinder-droppable-active .elfinder-nav-icon, .ui-state-hover .elfinder-nav-icon { background-position:0 -66px; }
 
-.elfinder-nav-tree-root .elfinder-nav-icon { background-position:-1px -35px; }
+.elfinder-navbar-tree-root .elfinder-nav-icon { background-position:-1px -35px; }
 
 .elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
 
@@ -86,7 +109,7 @@
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
 
-.elfinder-navbar .ui-resizable-handle { width:12px; }
+.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent; }
 .elfinder-ltr .ui-resizable-handle { right:0; }
 .elfinder-rtl .ui-resizable-handle { left:0;  }
 
