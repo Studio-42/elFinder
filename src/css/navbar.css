@@ -3,18 +3,19 @@
 /*********************************************/
 
 /* container */
-.elfinder .elfinder-nav {
+.elfinder .elfinder-navbar {
 	width:220px;
 /*	padding:3px 10px 3px 1px;*/
 	font-size:.72em;
 	border:1px solid #aaa;
 	background-image:none;
 	overflow:auto;
+	display:none;
 }
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-nav { float:left; margin-right:3px; }
-.elfinder-rtl .elfinder-nav { float:right; margin-left:3px; }
+.elfinder-ltr .elfinder-navbar { float:left; margin-right:3px; }
+.elfinder-rtl .elfinder-navbar { float:right; margin-left:3px; }
 
 /* folders tree */
 .elfinder-nav-tree { margin-bottom:1em; border:1px solid red_; }
@@ -77,15 +78,15 @@
 
 .elfinder-nav-tree-root .elfinder-nav-icon { background-position:-1px -35px; }
 
-.elfinder-nav .elfinder-perms { top:50%; margin-top:-8px; }
+.elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
 
-.elfinder-ltr .elfinder-nav .elfinder-perms   { left:  18px; }
-.elfinder-rtl .elfinder-nav .elfinder-perms   { right: 18px; }
-.elfinder-ltr .elfinder-nav .elfinder-symlink { left:  8px; }
-.elfinder-rtl .elfinder-nav .elfinder-symlink { right: 8px; }
+.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
+.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 18px; }
+.elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
+.elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
 
-.elfinder-nav .ui-resizable-handle { width:12px; }
+.elfinder-navbar .ui-resizable-handle { width:12px; }
 .elfinder-ltr .ui-resizable-handle { right:0; }
 .elfinder-rtl .ui-resizable-handle { left:0;  }
 

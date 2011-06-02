@@ -1313,7 +1313,7 @@
 			// container for nav panel and current folder container
 			workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
 			
-			nav : $('<div/>').appendTo(node).elfindernav(this),
+			navbar : $('<div/>').appendTo(node).elfindernavbar(this),
 			// overlay
 			overlay : $('<div/>').appendTo(node).elfinderoverlay({
 				show : function() { self.disable(); },
