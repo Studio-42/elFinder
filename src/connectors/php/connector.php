@@ -143,6 +143,12 @@ function access($attr, $path, $data, $volume) {
 }
 
 // sleep(5);
+
+if (!empty($_GET['count'])) {
+	$s = (int)$_GET['count']*2;
+	sleep($s);
+}
+
 $opts = array(
 	'bind' => array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 

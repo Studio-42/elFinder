@@ -151,6 +151,13 @@
 			clipboard = [],
 			
 			/**
+			 * Queue for 'open' requests
+			 *
+			 * @type Array
+			 **/
+			queue = [],
+			
+			/**
 			 * Commands prototype
 			 *
 			 * @type Object
@@ -657,6 +664,7 @@
 		 * 		"silent" - do not block other requests, send error message to debug
 		 * @return $.Deferred
 		 */
+		
 		this.ajax = function(options) {
 			var self    = this,
 				o       = this.options,
@@ -668,7 +676,7 @@
 				defdone = !(options.preventDefault || options.preventDone),
 				notify  = $.extend({}, options.notify),
 				freeze  = options.freeze,
-				timeout,
+				timeout, 
 				options = $.extend({
 					url      : o.url,
 					async    : true,
@@ -679,7 +687,7 @@
 					data     : data
 				}, options.options || {}),
 				fail = function(error) {
-					self.error(error);
+					error && self.error(error);
 				},
 				done = function(data) {
 					data.warning && self.error(data.warning);
@@ -701,7 +709,7 @@
 					
 					switch (status) {
 						case 'abort':
-							error = [errors.noConnect, errors.connectAborted];
+							error = xhr.quiet ? '' : [errors.noConnect, errors.connectAborted];
 							break;
 						case 'timeout':
 							error = [errors.noConnect, errors.connectTimeout];
@@ -733,7 +741,8 @@
 						cwdOptions = $.extend({}, cwdOptions, response.options);
 					}
 					dfrd.resolve(response);
-				}
+				},
+				xhr, _xhr
 				;
 
 			deffail && dfrd.fail(fail);
@@ -753,7 +762,6 @@
 			}
 			
 			if (notify.type && notify.cnt) {
-				
 				timeout = setTimeout(function() {
 					self.notify(notify);
 					dfrd.always(function() {
@@ -763,12 +771,27 @@
 				}, self.notifyDelay)
 				
 				dfrd.always(function() {
-					clearTimeout(timeout)
-				})
-				
+					clearTimeout(timeout);
+				});
 			}
 			
-			$.ajax(options).fail(error).success(success);
+			if (cmd == 'open') {
+				options.data.count = 5 - queue.length;
+				
+				while ((_xhr = queue.pop()) && !_xhr.isRejected() && !_xhr.isResolved()) {
+					_xhr.quiet = true;
+					_xhr.abort();
+				}
+			}
+			
+			xhr = $.ajax(options).fail(error).success(success);
+			
+			if (cmd == 'open') {
+				queue.unshift(xhr);
+				dfrd.always(function() {
+					queue.pop();
+				});
+			}
 			
 			return dfrd;
 		};

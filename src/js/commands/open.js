@@ -84,11 +84,10 @@ elFinder.prototype.commands.open = function() {
 					? dfrd.reject([errors.read, file.name])
 					: fm.ajax({
 							data   : {cmd  : 'open', target : targets[0]},
-							notify : {type : 'open', cnt : 1, hideCnt : true},
-							freeze : true
+							notify : {type : 'open', cnt : 1, hideCnt : true}
 						})
-						.fail(function() {
-							fm.sync(true)
+						.fail(function(error) {
+							error && fm.sync(true)
 								.fail(function() {
 									var cwd = fm.cwd().hash,
 										root = fm.root();
