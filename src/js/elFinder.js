@@ -394,6 +394,7 @@
 			addClasses : true,
 			delay      : 30,
 			revert     : true,
+			refreshPositions : true,
 			cursor     : 'move',
 			cursorAt   : {left : 50, top : 47},
 			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
@@ -426,8 +427,8 @@
 		 * @type Object
 		 **/
 		this.droppable = {
-				tolerance : 'pointer',
-				accept : ':not(.ui-dialog)',
+				tolerance  : 'pointer',
+				accept     : ':not(.ui-dialog)',
 				hoverClass : 'elfinder-dropable-active',
 				drop : function(e, ui) {
 					var dst     = $(this),
@@ -438,10 +439,10 @@
 						hash = cwd;
 					} else if (dst.is('.elfinder-cwd-file')) {
 						hash = dst.attr('id')
-					} else if (dst.closest('.elfinder-nav-tree').length) {
+					} else if (dst.is('.elfinder-navbar-dir')) {
 						hash = self.navId2Hash(dst.attr('id'));
 					}
-					
+
 					cnt = targets.length;
 					
 					while (cnt--) {

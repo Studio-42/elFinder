@@ -81,7 +81,18 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type Object
 			 */
-			droppable = $.extend({}, fm.droppable, {hoverClass : hover+' '+dropover}),
+			droppable = $.extend({}, fm.droppable, {
+				hoverClass : hover+' '+dropover, 
+				// show subfolders on dropover
+				over : function() { 
+					var link = $(this);
+						if (link.is('.'+collapsed+':not(.'+expanded+')')) {
+							setTimeout(function() {
+								link.is('.'+dropover) && link.children('.'+arrow).click();
+							}, 500);
+						} 
+					}
+				}),
 			
 			/**
 			 * Directory html template
@@ -226,13 +237,14 @@ $.fn.elfindertree = function(fm) {
 							preventFail : true
 						})
 						.done(function(data) {
-							updateTree(filter(data.tree));
+							var dirs = filter(data.tree);
+							updateTree(dirs);
+							updateArrows(dirs, loaded)
 							cwd == fm.cwd().hash && sync();
 						});
 					}
 				}
 			},
-			
 			
 			/**
 			 * Make writable and not root dirs droppable
@@ -240,7 +252,7 @@ $.fn.elfindertree = function(fm) {
 			 * @return void
 			 */
 			updateDroppable = function() {
-				tree.find('[id]:not(.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
+				tree.find('.'+navdir+':not(.ui-droppable,.elfinder-ro,.elfinder-na)').droppable(droppable);
 			},
 			
 			/**
