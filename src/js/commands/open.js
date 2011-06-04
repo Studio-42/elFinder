@@ -115,7 +115,7 @@ elFinder.prototype.commands.open = function() {
 			}
 
 			if (!(url = fm.url(file.hash))) {
-				url = fm.option('url') || fm.options.url;
+				url = fm.options.url;
 				url = url + (url.indexOf('?') === -1 ? '?' : '&')
 					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
 					+ '&target=' + file.hash;

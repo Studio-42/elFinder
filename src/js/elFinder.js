@@ -1455,6 +1455,7 @@
 			unknown        : 'Unknown error.',
 			
 			fileNotFound : 'File not found.',
+			fileNotFoundN : 'File "$1" not found.',
 			dirNotFound  : 'Folder not found.',
 			notDir       : '"$1" is not a folder.',
 			notFile      : '"$1" is not a file.',

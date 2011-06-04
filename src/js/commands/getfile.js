@@ -4,13 +4,12 @@
  **/
 elFinder.prototype.commands.getfile = function() {
 	
-	var self = this,
-		fm       = this.fm,
-		filter   = function() {
+	var self   = this,
+		fm     = this.fm,
+		filter = function() {
 			var o = self.options,
 				files = [];
 
-				
 			$.each(fm.selectedFiles(), function(h, file) {
 				if (file.mime != 'directory' || o.folders) {
 					files.push(file);
@@ -75,7 +74,7 @@ elFinder.prototype.commands.getfile = function() {
 			files = filter();
 			
 		$.each(files, function(i, file) {
-			file.baseUrl = fm.option('url')
+			file.baseUrl = fm.option('url');
 			file.url     = fm.url(file.hash);
 			file.path    = fm.path(file.hash);
 		});

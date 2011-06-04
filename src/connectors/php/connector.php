@@ -144,10 +144,10 @@ function access($attr, $path, $data, $volume) {
 
 // sleep(5);
 
-if (!empty($_GET['count'])) {
-	$s = (int)$_GET['count']*2;
-	sleep($s);
-}
+// if (!empty($_GET['count'])) {
+// 	$s = (int)$_GET['count']*2;
+// 	sleep($s);
+// }
 
 $opts = array(
 	'bind' => array(
