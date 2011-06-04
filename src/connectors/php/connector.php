@@ -142,7 +142,7 @@ function access($attr, $path, $data, $volume) {
 	return false;
 }
 
-// sleep(2);
+// sleep(5);
 $opts = array(
 	'bind' => array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
