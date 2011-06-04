@@ -3,7 +3,7 @@
 $.fn.elfindertree = function(fm) {
 	
 	this.not('.elfinder-navbar-tree').each(function() {
-		$(this).parent().find('.elfinder-navbar').append(this).show();
+		
 		
 		var 
 			/**
@@ -123,7 +123,7 @@ $.fn.elfindertree = function(fm) {
 			 * @return Array
 			 */
 			filter = function(files) {
-				return $.map(files, function(f) { return f.mime == 'directory' ? f : null });
+				return $.map(files||[], function(f) { return f.mime == 'directory' ? f : null });
 			},
 			
 			/**
@@ -194,6 +194,45 @@ $.fn.elfindertree = function(fm) {
 
 				updateDroppable();
 			},
+			
+			/**
+			 * Mark current directory as active
+			 * If current directory is not in tree - load it and its parents
+			 *
+			 * @return void
+			 */
+			sync = function() {
+				var cwd     = fm.cwd().hash,
+					current = tree.find('#'+fm.navHash2Id(cwd)), 
+					rootNode;
+				
+				if (openRoot) {
+					rootNode = tree.find('#'+fm.navHash2Id(fm.root()));
+					rootNode.is('.'+loaded) && rootNode.addClass(expanded).next('.'+subtree).show();
+					openRoot = false;
+				}
+				
+				if (!current.is('.'+active)) {
+					tree.find('.'+navdir+'.'+active).removeClass(active);
+					current.addClass(active);
+				}
+				
+				if (fm.options.syncTree) {
+					if (current.length) {
+						current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
+					} else if (fm.newAPI) {
+						fm.ajax({
+							data : {cmd : 'parents', target : cwd},
+							preventFail : true
+						})
+						.done(function(data) {
+							updateTree(filter(data.tree));
+							cwd == fm.cwd().hash && sync();
+						});
+					}
+				}
+			},
+			
 			
 			/**
 			 * Make writable and not root dirs droppable
@@ -279,6 +318,7 @@ $.fn.elfindertree = function(fm) {
 								} else {
 									link.removeClass(collapsed);
 								}
+								sync()
 							})
 							.always(function(data) {
 								spin.remove();
@@ -290,7 +330,8 @@ $.fn.elfindertree = function(fm) {
 				
 			;
 		
-		
+		tree.parent().find('.elfinder-navbar').append(tree).show()
+
 		fm.open(function(e) {
 			var data = e.data,
 				init = data.init, 
@@ -304,8 +345,75 @@ $.fn.elfindertree = function(fm) {
 			if (dirs.length) {
 				updateTree(dirs);
 				updateArrows(dirs, loaded);
+			} 
+			sync();
+		})
+		// add new dirs
+		.add(function(e) {
+			var dirs = filter(e.data.added);
+
+			if (dirs.length) {
+				updateTree(dirs);
+				updateArrows(dirs, collapsed);
 			}
+		})
+		// update changed dirs
+		.change(function(e) {
+			var dirs = filter(e.data.changed),
+				l    = dirs.length,
+				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
 			
+			while (l--) {
+				dir = dirs[l];
+				if ((node = tree.find('#'+fm.navHash2Id(dir.hash))).length) {
+					if (dir.phash) {
+						realParent  = node.closest('.'+subtree);
+						reqParent   = findSubtree(dir.phash);
+						realSibling = node.parent().next();
+						reqSibling  = findSibling(reqParent, dir);
+						
+						if (!reqParent.length) {
+							continue;
+						}
+						
+						if (reqParent[0] !== realParent[0] || realSibling.get(0) !== reqSibling.get(0)) {
+							reqSibling.length ? reqSibling.before(node) : reqParent.append(node);
+						}
+					}
+					isExpanded = node.is('.'+expanded);
+					isLoaded   = node.is('.'+loaded);
+					tmp = $(itemhtml(dir));
+					node.replaceWith(tmp.children('.'+navdir));
+					
+					if (dir.dirs 
+					&& (isExpanded || isLoaded) 
+					&& (node = tree.find('#'+fm.navHash2Id(dir.hash))) 
+					&& node.next('.'+subtree).children().length) {
+						isExpanded && node.addClass(expanded);
+						isLoaded && node.addClass(loaded);
+					}
+				}
+			}
+
+			sync();
+			updateDroppable();
+		})
+		
+		// remove dirs
+		.remove(function(e) {
+			var dirs = e.data.removed,
+				l    = dirs.length,
+				node, stree;
+			
+			while (l--) {
+				if ((node = tree.find('#'+fm.navHash2Id(dirs[l]))).length) {
+					stree = node.closest('.'+subtree);
+					node.parent().detach();
+					if (!stree.children().length) {
+						stree.hide().prev('.'+navdir).removeClass(collapsed+' '+expanded+' '+loaded);
+					}
+				}
+			}
 		})
 	});
 	
