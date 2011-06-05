@@ -2009,7 +2009,8 @@
 			duplicate   : 'Duplicate files',
 			rename      : 'Rename files',
 			upload      : 'Uploading files',
-			read        : 'Open files'
+			read        : 'Open files',
+			save        : 'Save files'
 		},
 		
 		/**

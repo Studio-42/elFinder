@@ -42,9 +42,9 @@ class elFinder {
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true),
-		
-		'paste' => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload' => array('target' => true, 'FILES' => true, 'mimes' => false)
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
+		'save'      => array('target' => true, 'mimes' => false)
 	);
 	
 	/**
@@ -910,11 +910,25 @@ class elFinder {
 		return $result;
 	}
 	
+	
 	/**
-	 * undocumented function
+	 * Save content into text file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function save($args) {
+	}
+	
+	/***************************************************************************/
+	/*                                   misc                                  */
+	/***************************************************************************/
+	
+	/**
+	 * Recursive copy
+	 *
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function copy($srcVolume, $dstVolume, $src, $dst) {
 		if (!$src['read']) {
@@ -952,10 +966,6 @@ class elFinder {
 			
 		}
 	}
-	
-	/***************************************************************************/
-	/*                                   misc                                  */
-	/***************************************************************************/
 	
 	/**
 	 * Return root - file's owner

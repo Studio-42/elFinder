@@ -105,7 +105,7 @@ $.fn.elfinderdialog = function(opts) {
 			}
 		}	
 
-		dialog.css(opts.position)
+		dialog.css(opts.position);
 
 		if (opts.closeOnEscape) {
 			$(document).bind('keyup.'+id, function(e) {
