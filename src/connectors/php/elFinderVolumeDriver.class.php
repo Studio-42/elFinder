@@ -165,6 +165,10 @@ abstract class elFinderVolumeDriver {
 		'tmbURL'          => '',     
 		// thumbnails size (px)      
 		'tmbSize'         => 48,     
+		// thumbnails crop (true - crop, false - scale image to fit thumbnail size)
+		'tmbCrop'         => true,
+		// thumbnails background color
+		'tmbBgColor'      => '#ffffff',
 		// image manipulations library
 		'imgLib'          => 'auto',   
 		// how frequiently clean thumbnails dir (0 - never, 100 - every init request)    
@@ -1859,7 +1863,32 @@ abstract class elFinderVolumeDriver {
 		
 		$result = false;
 		$tmbSize = $this->tmbSize;
+
+		if ($this->options['tmbCrop'] == false) {
 		
+			/* Calculating image scale width and height */
+			$xscale = $s[0] / $tmbSize;
+			$yscale = $s[1] / $tmbSize;
+
+			if ($yscale > $xscale) {
+				$newwidth = round($s[0] * (1 / $yscale));
+				$newheight = round($s[1] * (1 / $yscale));
+			} else {
+				$newwidth = round($s[0] * (1 / $xscale));
+				$newheight = round($s[1] * (1 / $xscale));
+			}
+
+			/* Keeping original dimensions if image fitting into thumbnail without scale */
+			if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
+				$newwidth = $s[0];
+				$newheight = $s[1];
+			}
+			
+			/* Calculating coordinates for aligning thumbnail */
+			$align_y = ceil(($tmbSize - $newheight) / 2); 
+			$align_x = ceil(($tmbSize - $newwidth) / 2);
+		}
+
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -1869,13 +1898,38 @@ abstract class elFinderVolumeDriver {
 				}
 
 				$img->contrastImage(1);
-				$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
+				
+				if ($this->options['tmbCrop'] == false) {
+        
+					$img->setBackgroundColor($this->options['tmbBgColor']);
+					$img->resizeImage($newwidth, $newheight, NULL, true);
+					$img->extentImage($tmbSize, $tmbSize, $align_x, $align_y);
+					//$_img->setImageGravity(imagick::GRAVITY_CENTER);
+
+					$result = $img->writeImage($tmb);
+          
+				} else {
+					$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
+				}
+				
 				break;
 				
 			case 'mogrify':
 				list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-				// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-				exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
+        
+				if ($this->options['tmbCrop'] == true) {
+					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
+				}
+         
+				$mogrifyArgs = 'mogrify -resize ' . $tmbSize . 'x' . $tmbSize;
+
+				if ($this->options['tmbCrop'] == false) {
+					$mogrifyArgs .= ' -gravity center -background "' . $this->options['tmbBgColor'] . '" -extent ' . $tmbSize . 'x' . $tmbSize;
+				}
+
+				$mogrifyArgs .= ' ' . escapeshellarg($tmb);
+
+				exec($mogrifyArgs, $o, $c);
 
 				if (file_exists($tmb)) {
 					$result = true;
@@ -1902,10 +1956,24 @@ abstract class elFinderVolumeDriver {
 					$img = imagecreatefromxbm($tmb);
 				}
 				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
-					list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-					if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
-						return false;
-					}
+        
+					if ($this->options['tmbCrop'] == false) {
+
+						list($r,$g,$b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
+        
+						imagefill($tmp, 0, 0, imagecolorallocate($tmp, $r, $g, $b));
+
+						if (!imagecopyresampled($tmp, $img, $align_x, $align_y, 0, 0, $newwidth, $newheight, $s[0], $s[1])) {
+							return false;
+						}
+        
+					} else {
+						list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
+						if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+							return false;
+						}
+					}					
+
 					$result = imagepng($tmp, $tmb, 7);
 					imagedestroy($img);
 					imagedestroy($tmp);
