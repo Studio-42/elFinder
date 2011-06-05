@@ -35,7 +35,7 @@ elFinder.prototype.commands.edit = function() {
 					target : hash
 				},
 				url = fm.url(hash) || fm.options.url,
-				edit = function(text) {
+				editDialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20" style="padding:0;margin:0;border:1px solid #ccc">'+text+'</textarea>')
 							.keydown(function(e) {
 								var size = parseInt(self.options.tabSize) || 4,
@@ -73,12 +73,13 @@ elFinder.prototype.commands.edit = function() {
 						fm.ajax({
 							options : {type : 'post'},
 							data : {
-								cmd     : fm.oldAPI ? 'edit' : 'save',
+								cmd     : fm.oldAPI ? 'edit' : 'put',
 								target  : hash,
 								content : value,
 								current : fm.cwd().hash // old api
 							},
-							notify : {type : 'save', cnt : 1}
+							notify : {type : 'save', cnt : 1},
+							preventFail : true
 						})
 						.fail(function(error) {
 							dfrd.reject(error);
@@ -141,7 +142,7 @@ elFinder.prototype.commands.edit = function() {
 					
 					dfrd.reject(error);
 				},
-				success : edit
+				success : editDialog
 			})
 			.always(function() {
 				clearTimeout(timeout);
