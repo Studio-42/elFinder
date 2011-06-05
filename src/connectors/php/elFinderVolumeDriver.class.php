@@ -172,7 +172,7 @@ abstract class elFinderVolumeDriver {
 		// image manipulations library
 		'imgLib'          => 'auto',   
 		// how frequiently clean thumbnails dir (0 - never, 100 - every init request)    
-		// 'tmbCleanProb' => 0,            
+		'tmbCleanProb' => 1,            
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
 		'copyOverwrite'   => true,    
 		// if true - join new and old directories content on paste     
@@ -379,19 +379,33 @@ abstract class elFinderVolumeDriver {
 				$this->tmbPathWritable = is_writable($path);
 			}
 		}
-		
+
 		// set image manipulation library
-		$type = preg_match('/^(imagick|mogrify|gd|auto)$/i', $this->options['imgLib'])
+		$type = preg_match('/^(imagick|gd|auto)$/i', $this->options['imgLib'])
 			? strtolower($this->options['imgLib'])
 			: 'auto';
-			
+
 		if (($type == 'imagick' || $type == 'auto') && extension_loaded('imagick')) {
 			$this->imgLib = 'imagick';
-		} elseif (($type == 'mogrify' || $type == 'auto') && function_exists('exec')) {
-			exec('mogrify --version', $o, $c);
-			$this->imgLib = $c == 0 ? 'mogrify' : (function_exists('gd_info') ? 'gd' : '');
 		} else {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
+		}
+
+		// clean thumbnails dir
+		if ($this->tmbPath) {
+			srand((double) microtime() * 1000000);
+
+			if (rand(1, 200) <= $this->options['tmbCleanProb']) {
+				$ls = scandir($this->tmbPath);
+
+				for ($i=0, $s = count($ls); $i < $s; $i++) {
+					$pinfo = pathinfo($ls[$i]);
+
+					if (strtolower($pinfo['extension']) == 'png') {
+						@unlink($this->tmbPath.DIRECTORY_SEPARATOR.$ls[$i]);
+					}
+				}
+			}
 		}
 	}
 	
@@ -612,6 +626,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->URL && preg_match("|[^/?&=]$|", $this->URL)) {
 			$this->URL .= '/';
 		}
+
 		$this->tmbURL   = !empty($this->options['tmbURL']) ? $this->options['tmbURL'] : '';
 		if ($this->tmbURL && preg_match("|[^/?&=]$|", $this->tmbURL)) {
 			$this->tmbURL .= '/';
@@ -621,9 +636,8 @@ abstract class elFinderVolumeDriver {
 			? $this->options['acceptedName']
 			: '';
 
-		
-
 		$this->configure();
+
 		// return false;
 		return $this->mounted = true;
 	}
@@ -1849,11 +1863,11 @@ abstract class elFinderVolumeDriver {
 		||  ($trg = @fopen($tmb, 'wb')) == false) {
 			return false;
 		}
-		
+
 		while (!feof($src)) {
 			fwrite($trg, fread($src, 8192));
 		}
-		
+
 		$this->_fclose($src, $path);
 		fclose($trg);
 
@@ -1865,7 +1879,7 @@ abstract class elFinderVolumeDriver {
 		$tmbSize = $this->tmbSize;
 
 		if ($this->options['tmbCrop'] == false) {
-		
+
 			/* Calculating image scale width and height */
 			$xscale = $s[0] / $tmbSize;
 			$yscale = $s[1] / $tmbSize;
@@ -1883,7 +1897,7 @@ abstract class elFinderVolumeDriver {
 				$newwidth = $s[0];
 				$newheight = $s[1];
 			}
-			
+
 			/* Calculating coordinates for aligning thumbnail */
 			$align_y = ceil(($tmbSize - $newheight) / 2); 
 			$align_x = ceil(($tmbSize - $newwidth) / 2);
@@ -1898,50 +1912,17 @@ abstract class elFinderVolumeDriver {
 				}
 
 				$img->contrastImage(1);
-				
-				if ($this->options['tmbCrop'] == false) {
-        
-					$img->setBackgroundColor($this->options['tmbBgColor']);
-					$img->resizeImage($newwidth, $newheight, NULL, true);
-					$img->extentImage($tmbSize, $tmbSize, $align_x, $align_y);
-					//$_img->setImageGravity(imagick::GRAVITY_CENTER);
 
-					$result = $img->writeImage($tmb);
+				if ($this->options['tmbCrop'] == false) {
+					$img1 = new Imagick();
+					$img1->newImage($tmbSize, $tmbSize, new ImagickPixel($this->options['tmbBgColor']));
+					$img1->setImageFormat('png');
+					$img->resizeImage($newwidth, $newheight, NULL, true);
+					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $align_x, $align_y );
+					$result = $img1->writeImage($tmb);
           
 				} else {
 					$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
-				}
-				
-				break;
-				
-			case 'mogrify':
-				list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-        
-				if ($this->options['tmbCrop'] == true) {
-					exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-				}
-         
-				$mogrifyArgs = 'mogrify -resize ' . $tmbSize . 'x' . $tmbSize;
-
-				if ($this->options['tmbCrop'] == false) {
-					$mogrifyArgs .= ' -gravity center -background "' . $this->options['tmbBgColor'] . '" -extent ' . $tmbSize . 'x' . $tmbSize;
-				}
-
-				$mogrifyArgs .= ' ' . escapeshellarg($tmb);
-
-				exec($mogrifyArgs, $o, $c);
-
-				if (file_exists($tmb)) {
-					$result = true;
-				} elseif ($c == 0) {
-					// find tmb for psd and animated gif
-					if ($mime == 'image/vnd.adobe.photoshop' || $mime = 'image/gif') {
-						$pinfo = pathinfo($tmb);
-						$test = $pinfo['dirname'].DIRECTORY_SEPARATOR.$pinfo['filename'].'-0.'.$pinfo['extension'];
-						if (file_exists($test)) {
-							$result = @rename($test, $tmb);
-						}
-					}
 				}
 				break;
 				
