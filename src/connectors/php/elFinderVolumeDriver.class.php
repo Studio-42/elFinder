@@ -1238,6 +1238,17 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Put content in text file and return file info.
+	 *
+	 * @param  string  $hash     file hash
+	 * @param  string  $content  new file content
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function putContents($hash, $content) {
+	}
+	
+	/**
 	 * Remove file/dir
 	 *
 	 * @param  string  $hash  file hash

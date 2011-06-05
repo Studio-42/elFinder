@@ -44,7 +44,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
-		'save'      => array('target' => true, 'mimes' => false)
+		'put'       => array('target' => true, 'mimes' => false)
 	);
 	
 	/**
@@ -917,7 +917,22 @@ class elFinder {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function save($args) {
+	protected function put($args) {
+		$target = $args['target'];
+		
+		if (($volume = $this->volume($target)) == false
+		|| ($file = $volume->file($target)) == false) {
+			return array('error' => $this->error(self::ERROR_FILE_NOT_FOUND));
+		}
+		
+		if (($file = $volume->putContents($target, $args['content'])) == false) {
+			return array('error' => $this->error($volume->error));
+		}
+		if (!$dstVolume->mimeAccepted($file['mime'], $args['mimes'])) {
+			$file['hidden'] = true;
+		}
+		
+		return $this->trigger('put', $volume, array('changed' => array($file)));
 	}
 	
 	/***************************************************************************/
@@ -1044,6 +1059,15 @@ class elFinder {
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
+		}
+		
+		if (!empty($result['changed']) && is_array($result['changed'])) {
+			foreach ($result['changed'] as $i => $file) {
+				if (!empty($file['hidden'])) {
+					unset($result['changed'][$i]);
+				}
+			}
+			$result['changed'] = array_merge(array(), $result['changed']);
 		}
 		
 		return $result;

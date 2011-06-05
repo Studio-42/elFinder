@@ -82,6 +82,8 @@ elFinder.prototype.commands.edit = function() {
 							preventFail : true
 						})
 						.fail(function(error) {
+							error.unshift(file.name);
+							error.unshift(errors.save)
 							dfrd.reject(error);
 						})
 						.done(function(data) {
