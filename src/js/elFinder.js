@@ -1470,7 +1470,9 @@
 			clpEmpty     : 'There are no files in clipboard.',
 			noDstDir     : 'Destination directory not defined.',
 			pasteWrite   : 'Unable to move files into "$1" because you don’t have permission to write in this location.',
-			pasteItself  : 'Unable to copy "$1" into itself or in child folder.'
+			pasteItself  : 'Unable to copy "$1" into itself or in child folder.',
+			edit         : 'Unable to edit file "$1".',
+			save         : 'Unable to save file "$1".'
 		},
 
 		/**
@@ -2007,7 +2009,9 @@
 			prepareCopy : 'Prepare to copy files',
 			duplicate   : 'Duplicate files',
 			rename      : 'Rename files',
-			upload      : 'Uploading files'
+			upload      : 'Uploading files',
+			read        : 'Open files',
+			save        : 'Save files'
 		},
 		
 		/**

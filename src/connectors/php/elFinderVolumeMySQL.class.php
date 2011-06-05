@@ -867,6 +867,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Write a string to a file
+	 *
+	 * @param  string  $path     file path
+	 * @param  string  $content  new file content
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _filePutContents($path, $content) {
+		return false;
+	}
 	
 } // END class
 

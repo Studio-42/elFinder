@@ -42,9 +42,9 @@ class elFinder {
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true),
-		
-		'paste' => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload' => array('target' => true, 'FILES' => true, 'mimes' => false)
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false)
 	);
 	
 	/**
@@ -911,10 +911,38 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Save content into text file
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function put($args) {
+		$target = $args['target'];
+		
+		if (($volume = $this->volume($target)) == false
+		|| ($file = $volume->file($target)) == false) {
+			return array('error' => $this->error(self::ERROR_FILE_NOT_FOUND));
+		}
+		
+		if (($file = $volume->putContents($target, $args['content'])) == false) {
+			return array('error' => $this->error($volume->error()));
+		}
+		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
+			$file['hidden'] = true;
+		}
+		
+		return $this->trigger('put', $volume, array('changed' => array($file)));
+	}
+	
+	/***************************************************************************/
+	/*                                   misc                                  */
+	/***************************************************************************/
+	
+	/**
+	 * Recursive copy
+	 *
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function copy($srcVolume, $dstVolume, $src, $dst) {
 		if (!$src['read']) {
@@ -952,10 +980,6 @@ class elFinder {
 			
 		}
 	}
-	
-	/***************************************************************************/
-	/*                                   misc                                  */
-	/***************************************************************************/
 	
 	/**
 	 * Return root - file's owner
@@ -1034,6 +1058,15 @@ class elFinder {
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
+		}
+		
+		if (!empty($result['changed']) && is_array($result['changed'])) {
+			foreach ($result['changed'] as $i => $file) {
+				if (!empty($file['hidden'])) {
+					unset($result['changed'][$i]);
+				}
+			}
+			$result['changed'] = array_merge(array(), $result['changed']);
 		}
 		
 		return $result;

@@ -93,17 +93,19 @@ $.fn.elfinderdialog = function(opts) {
 						}
 					})
 					return z;
-				}
+				},
+				top
 			;
 		
 		if (!opts.position) {
+			top = parseInt((parent.height() - dialog.outerHeight())/2 - 42);
 			opts.position = {
-				top  : parseInt((parent.height() - dialog.outerHeight())/2 - 42)+'px',
+				top  : (top > 0 ? top : 0)+'px',
 				left : parseInt((parent.width() - dialog.outerWidth())/2)+'px'
 			}
 		}	
 
-		dialog.css(opts.position)
+		dialog.css(opts.position);
 
 		if (opts.closeOnEscape) {
 			$(document).bind('keyup.'+id, function(e) {
