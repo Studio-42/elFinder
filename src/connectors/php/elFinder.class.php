@@ -138,6 +138,7 @@ class elFinder {
 	const ERROR_MOVE_FILES           = 41;
 	const ERROR_COPY_FROM            = 42;
 	const ERROR_COPY_TO              = 43;	
+	const ERROR_PUT                  = 44;
 	
 	/**
 	 * Error messages
@@ -185,6 +186,7 @@ class elFinder {
 		41 => 'Unable to move files.',
 		42 => 'Copy files from volume "$1" not allowed.',
 		43 => 'Copy files on volume "$1" not allowed.',
+		44 => 'Unable to save "$1".'
 	);
 	
 	/**
@@ -391,6 +393,39 @@ class elFinder {
 			}
 		}
 		
+		return $errors;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function _error($main, $add=array()) {
+		if (!is_array($main)) {
+			$main = array($main);
+		}
+		if (!empty($add) && !is_array($add)) {
+			$add = array($add);
+		}
+
+		$errors = array_merge($main, $add);
+
+		if (!count($errors)) {
+			return self::$errors[self::ERROR_UNKNOWN];
+		}
+
+		for ($i = 0, $c = count($errors); $i < $c; $i++) {
+			$v = $errors[$i];
+
+			if (is_int($v) && isset(self::$errors[$v])) {
+				$errors[$i] = self::$errors[$v];
+			} elseif ($i == 0) {
+				$errors[$i] = self::$errors[self::ERROR_UNKNOWN];
+			}
+		}
+
 		return $errors;
 	}
 	

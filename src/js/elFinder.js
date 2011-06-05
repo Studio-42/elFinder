@@ -664,7 +664,6 @@
 		 * 		"silent" - do not block other requests, send error message to debug
 		 * @return $.Deferred
 		 */
-		
 		this.ajax = function(options) {
 			var self    = this,
 				o       = this.options,
@@ -676,6 +675,8 @@
 				defdone = !(options.preventDefault || options.preventDone),
 				notify  = $.extend({}, options.notify),
 				freeze  = options.freeze,
+				raw     = !!options.raw,
+				errorPrefix = options.errorPrefix || [],
 				timeout, 
 				options = $.extend({
 					url      : o.url,
@@ -693,7 +694,7 @@
 					data.warning && self.error(data.warning);
 					
 					if (cmd == 'open') {
-						open($.extend(true, {}, data))
+						open($.extend(true, {}, data));
 					}
 
 					// fire some event to update cache/ui
@@ -720,10 +721,13 @@
 						default:
 							error = xhr && parseInt(xhr.status) > 400 ? errors.noConnect : errors.invResponse;
 					}
-					
-					dfrd.reject(error);
+
+					dfrd.reject([errorPrefix, error], xhr);
 				},
 				success = function(response) {
+					if (raw) {
+						return dfrd.resolve(response);
+					}
 					if (cmd == 'open' && (response.api || response.params)) {
 						setAPI(response.api || 1);
 					}
@@ -1192,7 +1196,7 @@
 			var arg = arguments[0];
 			return arguments.length == 1 && typeof(arg) == 'function'
 				? self.bind('error', arg)
-				: self.trigger('error', {error : arg});
+				: self.trigger('error', {error : Array.prototype.slice.call(arguments)});
 		}
 		
 		// create bind/trigger aliases for build-in events
@@ -1224,7 +1228,8 @@
 				});
 			})
 			.error(function(e) { 
-				var opts = {
+				var error = self.i18n.apply(self, $.isArray(e.data.error) ? e.data.error : [e.data.error]),
+					opts = {
 					cssClass  : 'elfinder-dialog-error',
 					title     : self.i18n('Error'),
 					modal     : true,
@@ -1234,8 +1239,8 @@
 						Ok : function() { $(this).elfinderdialog('close'); }
 					}
 				};
-				
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error || self.errors.unknown), opts);
+				self.log(e.data.error)
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+($.trim(error) || self.i18n(self.errors.unknown)), opts);
 			})
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
@@ -1410,7 +1415,7 @@
 				self.trigger('open', data);
 				
 			});
-			
+
 	}
 	
 	/**
@@ -1461,8 +1466,8 @@
 			notFile      : '"$1" is not a file.',
 			read         : '"$1" can’t be opened because you don’t have permission to see its contents.',
 			openDir      : 'Open folder error.',
-			openFile     : 'Open file error.',
-			write        :  'You don’t have permission to write into "$1".',
+			openFile     : 'Unable to open "$1".', //'Open file error.',
+			write        : 'You don’t have permission to write into "$1".',
 			locked       : 'Object "$1" locked and can’t be moved, removed or renamed.',
 			invName      : 'Name "$1" is not allowed.',
 			exists       : 'Object named "$1" already exists in this location.',
@@ -2244,7 +2249,7 @@
 		 * @param  String|Array  message[s]
 		 * @return String
 		 **/
-		i18n : function(msg) { 
+		_i18n : function(msg) { 
 			var messages = this.messages, 
 				ignore   = [], 
 				i;
@@ -2279,6 +2284,47 @@
 			return msg.replace(/\$(\d+)/g, '');
 		},
 		
+		i18n : function() {
+			var messages = this.messages, 
+				input    = [],
+				ignore   = [], 
+				i, j, m;
+				
+			for (i = 0; i< arguments.length; i++) {
+				m = arguments[i];
+				
+				if (typeof m == 'string') {
+					input.push(m);
+				} else if ($.isArray(m)) {
+					for (j = 0; j < m.length; j++) {
+						if (typeof m[j] == 'string') {
+							input.push(m[j]);
+						}
+					}
+				}
+			}
+			
+			for (i = 0; i < input.length; i++) {
+				// dont translate placeholders
+				if ($.inArray(i, ignore) !== -1) {
+					continue;
+				}
+				m = input[i];
+				// translate message
+				m = messages[m] || m;
+				// replace placeholders in message
+				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
+					placeholder = i + parseInt(placeholder);
+					if (placeholder > 0 && input[placeholder]) {
+						ignore.push(placeholder)
+					}
+					return input[placeholder] || '';
+				});
+				input[i] = m;
+			}
+
+			return $.map(input, function(m, i) { return $.inArray(i, ignore) === -1 ? m : null; }).join(' ');
+		},
 		
 		/**
 		 * Convert mimetype into css classes

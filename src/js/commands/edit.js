@@ -24,17 +24,14 @@ elFinder.prototype.commands.edit = function() {
 		 * @return jQuery.Deferred
 		 **/
 		edit = function(hash) {
-			var errors = fm.errors,
-				opts   = fm.options,
-				dfrd   = $.Deferred().fail(function(error) {
-					error && fm.error(error);
-				}), 
-				file = fm.file(hash),
-				data = {
-					cmd    : 'file',
-					target : hash
-				},
-				url = fm.url(hash) || fm.options.url,
+			var file       = fm.file(hash),
+				errors     = fm.errors,
+				openError  = [errors.openFile, file.name, '<br/>'],
+				saveError  = [errors.save, file.name, '<br/>'],
+				opts       = fm.options,
+				dfrd       = $.Deferred().fail(function(error) { error && fm.error(error); }), 
+				data       = {cmd : 'file', target : hash},
+				url        = fm.url(hash) || fm.options.url,
 				editDialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20" style="padding:0;margin:0;border:1px solid #ccc">'+text+'</textarea>')
 							.keydown(function(e) {
@@ -68,10 +65,11 @@ elFinder.prototype.commands.edit = function() {
 						
 					opts.buttons[fm.i18n('Save')] = function() {
 						var value = editor.val();
+						
 						$(this).elfinderdialog('close');
 						
 						fm.ajax({
-							options : {type : 'post'},
+							// options : {type : 'post'},
 							data : {
 								cmd     : fm.oldAPI ? 'edit' : 'put',
 								target  : hash,
@@ -91,7 +89,10 @@ elFinder.prototype.commands.edit = function() {
 						});
 					}
 						
-					opts.buttons[fm.i18n('Cancel')] = function() { $(this).elfinderdialog('close'); }
+					opts.buttons[fm.i18n('Cancel')] = function() { 
+						dfrd.resolve();
+						$(this).elfinderdialog('close'); 
+					}
 					
 					fm.dialog(editor, opts);
 				},
@@ -111,10 +112,40 @@ elFinder.prototype.commands.edit = function() {
 			
 			timeout = setTimeout(function() {
 				fm.notify({type : 'read', cnt : 1});
-				jqxhr.always(function() {
-					fm.notify({type : 'read', cnt : -1});
-				})
+				jqxhr.always(function() { fm.notify({type : 'read', cnt : -1}); });
 			}, opts.notifyDelay);
+			
+			jqxhr = fm.ajax({
+				data : data,
+				options : {
+					url      : url,
+					type     : 'get',
+					dataType : 'html'
+				},
+				raw : true,
+				preventDefault : true
+			})
+			.fail(function(error, xhr) {
+				var status = xhr ? parseInt(xhr.status) : 0;
+				
+				if (status == 403) {
+					// return dfrd.reject([errors.openFile, file.name, errors.read, file.name]);
+				}
+				
+				if (status == 404) {
+					// return dfrd.reject([errors.openFile, file.name, errors.fileNotFound]);
+				}
+				fm.log('error').log(fm.i18n(error))
+				dfrd.reject(openErrorerror);
+			})
+			.done(function(data) {
+				fm.log(data)
+			})
+			.always(function() {
+				clearTimeout(timeout);
+			});
+			
+			return dfrd
 			
 			jqxhr = $.ajax({
 				url      : url,
@@ -136,7 +167,7 @@ elFinder.prototype.commands.edit = function() {
 							if (status == 403) {
 								error = [errors.edit, file.name, errors.read, file.name];
 							} else if (status == 404) {
-								error = [errors.edit, file.name, errors.fileNotFound];
+								error = [errors.openFile, file.name, errors.fileNotFound];
 							} else {
 								error = [errors.edit, fil.name, status > 400 ? errors.noConnect : errors.invResponse];
 							}
@@ -178,16 +209,13 @@ elFinder.prototype.commands.edit = function() {
 	this._exec = function(files) {
 		var files = filter(this.files(files)),
 			list = [],
-			file,
-			dfrd
-			;
-		// fm.log(files)	
+			file, dfrd;
+
 		while ((file = files.shift())) {
-			list.push(edit(file))
+			list.push(edit(file));
 		}
-		// fm.log(list)
 		
-		dfrd = list.length 
+		return dfrd = list.length 
 			? $.when.apply(null, list)
 			: $.Deferred().reject();
 
