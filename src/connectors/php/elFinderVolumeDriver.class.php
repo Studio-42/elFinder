@@ -1553,7 +1553,7 @@ abstract class elFinderVolumeDriver {
 		if ($type == 'unknown') {
 			if ($this->_isDir($path)) {
 				$type = 'directory';
-			} elseif ($this->_filesize($path) == 0) {
+			} elseif ($this->_filesize($path) == 0 || preg_match('/\.(ini|conf)$/i', $path)) {
 				$type = 'text/plain';
 			}
 		} elseif ($type == 'application/x-empty') {

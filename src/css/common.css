@@ -84,3 +84,7 @@
 
 /* transparent overlay >_< */
 .elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }
+
+/* edit text file textarea */
+.elfinder-file-edit { width:100%; height :100%; }
+

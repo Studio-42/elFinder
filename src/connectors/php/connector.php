@@ -142,7 +142,7 @@ function access($attr, $path, $data, $volume) {
 	return false;
 }
 
-// sleep(5);
+// sleep(3);
 
 // if (!empty($_GET['count'])) {
 // 	$s = (int)$_GET['count']*2;
@@ -160,7 +160,7 @@ $opts = array(
 			'path'   => '../../../files/',
 			'alias' => 'File system',
 			'accessControl' => 'access',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			// 'URL'    => 'http://localhost/git/elfinder/files/',
 			"disabled" => array('reload'),
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array(),

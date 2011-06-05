@@ -2,7 +2,8 @@
 elFinder.prototype.commands.edit = function() {
 	var self = this,
 		fm = this.fm,
-		mimes = ['application/javascript', 'application/xhtml+xml', 'audio/x-mp3-playlist', 'application/x-bittorrent torrent'],
+		// text files but not text mime
+		mimes = ['application/javascript', 'application/xhtml+xml', 'audio/x-mp3-playlist', 'application/x-bittorrent torrent', 'application/x-web-config'],
 		filter = function(files) {
 			return $.map(files || [], function(h) {
 				var file = fm.file(h);
@@ -16,8 +17,22 @@ elFinder.prototype.commands.edit = function() {
 					error && fm.error(error);
 				}), 
 				file = fm.file(hash),
-				data = {},
-				url;
+				data = {
+					cmd    : 'file',
+					target : hash
+				},
+				url = fm.url(hash) || fm.options.url,
+				edit = function(text) {
+					var editor = $('<textarea class="elfinder-file-edit">'+text+'</textarea>'),
+						dialog = fm.dialog(editor, { 
+							title : file.name,
+							width : 400,
+							height : 400
+							
+						})
+						;
+				},
+				timeout;
 			
 			if (!file.read) {
 				return dfrd.reject([errors.read, file.name]);
@@ -26,26 +41,21 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject([errors.write, file.name]);
 			}
 			
-			url = fm.url(hash);
-			if (!url) {
-				url = fm.options.url;
-				
-				
-				
-			}
-			data.target = hash;
-			data.cmd = 'file';
-			
 			if (fm.oldAPI) {
 				data.current = file.phash,
-				data.cmd = 'open';
+				data.cmd     = 'open';
 			}
 			
-			data  = $.extend({}, opts.customData, {mimes : opts.onlyMimes}, data);
+			timeout = setTimeout(function() {
+				fm.notify({type : 'read', cnt : 1});
+				dfrd.always(function() {
+					fm.notify({type : 'read', cnt : -1});
+				})
+			}, opts.notifyDelay);
 			
-			return $.ajax({
+			dfrd = $.ajax({
 				url      : url,
-				data     : data,
+				data     : $.extend({}, opts.customData, {mimes : opts.onlyMimes}, data),
 				type     : 'get',
 				dataType : 'html',
 				error    : function(xhr, status) {
@@ -53,19 +63,19 @@ elFinder.prototype.commands.edit = function() {
 
 					switch (status) {
 						case 'abort':
-							error = [errors.noConnect, errors.connectAborted];
+							error = [errors.edit, file.name, errors.noConnect, errors.connectAborted];
 							break;
 						case 'timeout':
-							error = [errors.noConnect, errors.connectTimeout];
+							error = [errors.edit, file.name, errors.noConnect, errors.connectTimeout];
 							break;
 						default:
 							status = parseInt(xhr.status);
-							if (status == 403) {
-								error = [errors.read, file.name];
-							} else if (status == 404) {
-								error = [errors.fileNotFoundN, file.name];
+							if (status == 404) {
+								error = [errors.edit, file.name, errors.read, file.name];
+							} else if (status == 403) {
+								error = [errors.edit, file.name, errors.fileNotFound];
 							} else {
-								status > 400 ? errors.noConnect : errors.invResponse;
+								error = [errors.edit, fil.name, status > 400 ? errors.noConnect : errors.invResponse];
 							}
 					}
 					
@@ -73,8 +83,12 @@ elFinder.prototype.commands.edit = function() {
 				},
 				success : function(data) {
 					fm.log(data)
+					edit(data)
 				}
 			})
+			.always(function() {
+				clearTimeout(timeout);
+			});
 			
 			return dfrd;
 		}
