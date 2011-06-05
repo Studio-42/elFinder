@@ -169,7 +169,7 @@ $opts = array(
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
-			'tmbPath' => '/Users/dio/Sites/git/elfinder/my-tmb',
+			// 'tmbPath' => '/Users/dio/Sites/git/elfinder/my-tmb',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
 				array(

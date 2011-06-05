@@ -645,39 +645,40 @@
 		/**
 		 * Proccess ajax request.
 		 * Fired events :
-		 *  - "error" on error from backend
-		 *  - event with command name on request success
-		 *  - "added"/"removed" if response contains data with this names
-		 *
+		 * @todo
 		 * @example
-		 * 1. elfinder.ajax({cmd : 'open', init : true}) - request lock interface till request complete
-		 * 2. elfinder.ajax({data : {...}, complete : function() { ... }}, 'bg') 
-		 *        - add handler to request 'complete' event 
-		 *          and produce request without lock interface,
-		 *          but errors will shown
-		 * 3. elfinder.ajax({...}, 'silent') - all errors will be send to debug
-		 *
-		 * @param  Object  data to send to connector or options for ajax request
-		 * @param  String  request mode. 
-		 * 		"sync"   - does not create real sync request, only block other elFinder requests until end
-		 * 		"bg"     - do not block other requests, on error - show message
-		 * 		"silent" - do not block other requests, send error message to debug
+		 * @todo
 		 * @return $.Deferred
 		 */
 		this.ajax = function(options) {
-			var self    = this,
-				o       = this.options,
-				errors  = this.errors,
-				dfrd    = $.Deferred(),
-				data    = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
-				cmd     = data.cmd,
-				deffail = !(options.preventDefault || options.preventFail),
-				defdone = !(options.preventDefault || options.preventDone),
-				notify  = $.extend({}, options.notify),
-				freeze  = options.freeze,
-				raw     = !!options.raw,
-				errorPrefix = options.errorPrefix || [],
+			
+			var self     = this,
+				o        = this.options,
+				errors   = this.errors,
+				dfrd     = $.Deferred(),
+				// request data
+				data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
+				// command name
+				cmd      = data.cmd,
+				// call default fail callback (display error dialog) ?
+				deffail  = !(options.preventDefault || options.preventFail),
+				// call default success callback ?
+				defdone  = !(options.preventDefault || options.preventDone),
+				// options for notify dialog
+				notify   = $.extend({}, options.notify),
+				// freeze interface untill request end
+				freeze   = options.freeze,
+				// do not normalize data - return as is
+				raw      = !!options.raw,
+				// default error message, backend messages will be appended to it
+				errorMsg = $.isArray(options.error) ? options.error : [],
+				// message for server 403 error
+				error403 = $.isArray(options.error403) ? options.error403 : ['Backend access denied.'],
+				// message for server 404 error
+				error404 = $.isArray(options.error404) ? options.error404 : ['Backend not found.'],
+				// open notify dialog timeout		
 				timeout, 
+				// request options
 				options = $.extend({
 					url      : o.url,
 					async    : true,
@@ -688,14 +689,14 @@
 					data     : data
 				}, options.options || {}),
 				fail = function(error) {
-					error && self.error(error);
+					error = errorMsg.concat(error);
+					deffail && self.error(error);
+					dfrd.reject(error);
 				},
 				done = function(data) {
 					data.warning && self.error(data.warning);
 					
-					if (cmd == 'open') {
-						open($.extend(true, {}, data));
-					}
+					cmd == 'open' && open($.extend(true, {}, data));
 
 					// fire some event to update cache/ui
 					data.removed && data.removed.length && self.remove(data);
@@ -706,23 +707,17 @@
 					self.trigger(cmd, data);
 				},
 				error = function(xhr, status) {
-					var error;
-					
 					switch (status) {
-						case 'abort':
-							error = xhr.quiet ? '' : [errors.noConnect, errors.connectAborted];
-							break;
-						case 'timeout':
-							error = [errors.noConnect, errors.connectTimeout];
-							break;
-						case 'parsererror':
-							error = [errors.invResponse, errors.notJSON];
-							break;
-						default:
-							error = xhr && parseInt(xhr.status) > 400 ? errors.noConnect : errors.invResponse;
+						case 'abort':       return xhr.quiet ? dfrd.reject() : fail([errors.noConnect, errors.connectAborted]);
+						case 'timeout':	    return fail([errors.noConnect, errors.connectTimeout]);
+						case 'parsererror': return fail([errors.invResponse, errors.notJSON]);
 					}
 
-					dfrd.reject([errorPrefix, error], xhr);
+					switch (xhr.status) {
+						case 403: return fail(error403);
+						case 404: return fail(error404);
+					}
+					fail(status < 500 ? [errors.noConnect] : [errors.invResponse]);
 				},
 				success = function(response) {
 					if (raw) {
@@ -749,7 +744,6 @@
 				xhr, _xhr
 				;
 
-			deffail && dfrd.fail(fail);
 			defdone && dfrd.done(done);
 			o.debug && dfrd.fail(function(error) { self.debug('error', self.i18n(error)); });
 			
@@ -779,6 +773,7 @@
 				});
 			}
 			
+			// abort not completed "open" requests
 			if (cmd == 'open') {
 				options.data.count = 5 - queue.length;
 				
@@ -1229,7 +1224,7 @@
 			})
 			.error(function(e) { 
 				var error = self.i18n.apply(self, $.isArray(e.data.error) ? e.data.error : [e.data.error]),
-					opts = {
+					opts  = {
 					cssClass  : 'elfinder-dialog-error',
 					title     : self.i18n('Error'),
 					modal     : true,
@@ -1239,7 +1234,7 @@
 						Ok : function() { $(this).elfinderdialog('close'); }
 					}
 				};
-				self.log(e.data.error)
+
 				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+($.trim(error) || self.i18n(self.errors.unknown)), opts);
 			})
 			.bind('tree parents', function(e) {

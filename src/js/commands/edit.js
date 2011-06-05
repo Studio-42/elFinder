@@ -29,10 +29,10 @@ elFinder.prototype.commands.edit = function() {
 				openError  = [errors.openFile, file.name, '<br/>'],
 				saveError  = [errors.save, file.name, '<br/>'],
 				opts       = fm.options,
-				dfrd       = $.Deferred().fail(function(error) { error && fm.error(error); }), 
+				dfrd       = $.Deferred().fail(function(error) { error.length && fm.error(error); }), 
 				data       = {cmd : 'file', target : hash},
 				url        = fm.url(hash) || fm.options.url,
-				editDialog = function(text) {
+				dialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20" style="padding:0;margin:0;border:1px solid #ccc">'+text+'</textarea>')
 							.keydown(function(e) {
 								var size = parseInt(self.options.tabSize) || 4,
@@ -77,11 +77,10 @@ elFinder.prototype.commands.edit = function() {
 								current : fm.cwd().hash // old api
 							},
 							notify : {type : 'save', cnt : 1},
-							preventFail : true
+							preventFail : true,
+							error : [errors.save, '<br/>']
 						})
 						.fail(function(error) {
-							error.unshift(file.name);
-							error.unshift(errors.save)
 							dfrd.reject(error);
 						})
 						.done(function(data) {
@@ -129,59 +128,21 @@ elFinder.prototype.commands.edit = function() {
 				var status = xhr ? parseInt(xhr.status) : 0;
 				
 				if (status == 403) {
-					// return dfrd.reject([errors.openFile, file.name, errors.read, file.name]);
+					return dfrd.reject(openError.concat([errors.read, file.name]));
 				}
 				
 				if (status == 404) {
-					// return dfrd.reject([errors.openFile, file.name, errors.fileNotFound]);
+					return dfrd.reject(openError.concat([errors.fileNotFound]));
 				}
-				fm.log('error').log(fm.i18n(error))
-				dfrd.reject(openErrorerror);
+
+				dfrd.reject(openError.concat(error));
 			})
-			.done(function(data) {
-				fm.log(data)
-			})
+			.done(dialog)
 			.always(function() {
 				clearTimeout(timeout);
 			});
 			
 			return dfrd
-			
-			jqxhr = $.ajax({
-				url      : url,
-				data     : $.extend({}, opts.customData, {mimes : opts.onlyMimes}, data),
-				type     : 'get',
-				dataType : 'html',
-				error    : function(xhr, status) {
-					var error;
-
-					switch (status) {
-						case 'abort':
-							error = [errors.edit, file.name, errors.noConnect, errors.connectAborted];
-							break;
-						case 'timeout':
-							error = [errors.edit, file.name, errors.noConnect, errors.connectTimeout];
-							break;
-						default:
-							status = parseInt(xhr.status);
-							if (status == 403) {
-								error = [errors.edit, file.name, errors.read, file.name];
-							} else if (status == 404) {
-								error = [errors.openFile, file.name, errors.fileNotFound];
-							} else {
-								error = [errors.edit, fil.name, status > 400 ? errors.noConnect : errors.invResponse];
-							}
-					}
-					
-					dfrd.reject(error);
-				},
-				success : editDialog
-			})
-			.always(function() {
-				clearTimeout(timeout);
-			});
-			
-			return dfrd;
 		};
 	
 	
