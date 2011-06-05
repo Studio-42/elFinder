@@ -1246,6 +1246,17 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function putContents($hash, $content) {
+		$path = $this->decode($hash);
+		
+		if (!($file = $this->file($hash))) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+		
+		if (!$file['write']) {
+			return $this->setError(elFinder::ERROR_NOT_WRITE, $file['name']);
+		}
+		
+		return $this->_filePutContents($path, $content) ? $this->stat($path) : false;
 	}
 	
 	/**
@@ -2358,6 +2369,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _save($fp, $dir, $name);
+	
+	/**
+	 * Write a string to a file
+	 *
+	 * @param  string  $path     file path
+	 * @param  string  $content  new file content
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _filePutContents($path, $content);
 	
 } // END class
 

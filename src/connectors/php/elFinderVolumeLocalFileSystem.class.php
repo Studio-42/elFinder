@@ -551,6 +551,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $path;
 	}
 	
+	/**
+	 * Write a string to a file
+	 *
+	 * @param  string  $path     file path
+	 * @param  string  $content  new file content
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _filePutContents($path, $content) {
+		return @file_put_contents($path, $content, LOCK_EX);
+	}
 	
 } // END class 
 

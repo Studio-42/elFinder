@@ -44,7 +44,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
-		'put'       => array('target' => true, 'mimes' => false)
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false)
 	);
 	
 	/**
@@ -910,7 +910,6 @@ class elFinder {
 		return $result;
 	}
 	
-	
 	/**
 	 * Save content into text file
 	 *
@@ -926,9 +925,9 @@ class elFinder {
 		}
 		
 		if (($file = $volume->putContents($target, $args['content'])) == false) {
-			return array('error' => $this->error($volume->error));
+			return array('error' => $this->error($volume->error()));
 		}
-		if (!$dstVolume->mimeAccepted($file['mime'], $args['mimes'])) {
+		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
 			$file['hidden'] = true;
 		}
 		
