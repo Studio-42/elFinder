@@ -148,7 +148,7 @@ function access($attr, $path, $data, $volume) {
 // 	$s = (int)$_GET['count']*2;
 // 	sleep($s);
 // }
-
+// exit('{a : 42}');
 $opts = array(
 	'bind' => array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
@@ -184,7 +184,9 @@ $opts = array(
 					'hidden'  => true
 				),
 				array(
-					'pattern' => '/42/',
+					'pattern' => '/folder$/',
+					// 'read' => false
+					// 'hidden' => true,
 					// 'locked' => true
 				)
 			),

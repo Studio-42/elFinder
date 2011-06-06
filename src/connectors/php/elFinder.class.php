@@ -106,34 +106,33 @@ class elFinder {
 	const ERROR_INV_PARAMS       = 5;
 	const ERROR_OPEN             = 6;
 	const ERROR_DIR_NOT_FOUND    = 7;
-	const ERROR_DIR_NOT_FOUND    = 8;
-	const ERROR_FILE_NOT_FOUND   = 9;
-	const ERROR_TRGDIR_NOT_FOUND = 10;
-	const ERROR_NOT_DIR          = 11;
-	const ERROR_NOT_FILE         = 12;
-	const ERROR_NOT_READ         = 13;
-	const ERROR_NOT_WRITE        = 14;
-	const ERROR_PERM_DENIED      = 15;
-	const ERROR_LOCKED           = 16;
-	const ERROR_EXISTS           = 17;
-	const ERROR_INV_NAME         = 18;
-	const ERROR_MKDIR            = 19;
-	const ERROR_MKFILE           = 20;
-	const ERROR_RENAME           = 21;
-	const ERROR_COPY             = 22;
-	const ERROR_MOVE             = 23;
-	const ERROR_COPY_FILES       = 24;
-	const ERROR_MOVE_FILES       = 25;
-	const ERROR_COPY_FROM        = 26;
-	const ERROR_COPY_TO          = 27;
-	const ERROR_COPY_ITSELF      = 28;
-	const ERROR_RM               = 29;
-	const ERROR_RM_FILES         = 30;
-	const ERROR_UPLOAD           = 31;
-	const ERROR_UPLOAD_FILES     = 32;
-	const ERROR_UPLOAD_SIZE      = 33;
-	const ERROR_UPLOAD_NO_FILES  = 34;
-	const ERROR_MIME             = 35;
+	const ERROR_FILE_NOT_FOUND   = 8;
+	const ERROR_TRGDIR_NOT_FOUND = 9;
+	const ERROR_NOT_DIR          = 10;
+	const ERROR_NOT_FILE         = 11;
+	const ERROR_NOT_READ         = 12;
+	const ERROR_NOT_WRITE        = 13;
+	const ERROR_PERM_DENIED      = 14;
+	const ERROR_LOCKED           = 15;
+	const ERROR_EXISTS           = 16;
+	const ERROR_INV_NAME         = 17;
+	const ERROR_MKDIR            = 18;
+	const ERROR_MKFILE           = 19;
+	const ERROR_RENAME           = 20;
+	const ERROR_COPY             = 21;
+	const ERROR_MOVE             = 22;
+	const ERROR_COPY_FILES       = 23;
+	const ERROR_MOVE_FILES       = 24;
+	const ERROR_COPY_FROM        = 25;
+	const ERROR_COPY_TO          = 26;
+	const ERROR_COPY_ITSELF      = 27;
+	const ERROR_RM               = 28;
+	const ERROR_RM_FILES         = 29;
+	const ERROR_UPLOAD           = 30;
+	const ERROR_UPLOAD_FILES     = 31;
+	const ERROR_UPLOAD_SIZE      = 32;
+	const ERROR_UPLOAD_NO_FILES  = 33;
+	const ERROR_MIME             = 34;
 	/**
 	 * undocumented class variable
 	 *
@@ -148,34 +147,33 @@ class elFinder {
 		5  => 'Invalid parameters for command "$1".',
 		6  => 'Unable to open "$1".',
 		7  => 'Folder not found.',
-		8  => 'Folder not found.',
-		9  => 'File not found.',
-		10 => 'Target folder "$1" not found.',
-		11 => 'Object is not a folder.',
-		12 => 'Object is not a file.',
-		13 => 'Unable to read "$1".',
-		14 => 'Unable to write into "$1".',
-		15 => 'Permission denied.',
-		16 => '"$1" is locked and can not be renamed or removed.',
-		17 => 'File named "$1" already exists in this location.',
-		18 => '"$1" is not valid file name.',
-		19 => 'Unable to create folder "$1".',
-		20 => 'Unable to create file "$1".',
-		21 => 'Unable to rename "$1".',
-		22 => 'Unable to copy "$1".',
-		23 => 'Unable to move "$1".',
-		24 => 'Unable to copy files.',
-		25 => 'Unable to move files.',
-		26 => 'Copy files from volume "$1" not allowed.',
-		27 => 'Copy files to volume "$1" not allowed.',
-		28 => 'Unable to copy "$1" into itself.',
-		29 => 'Unable to remove "$1".',
-		30 => 'Unable to remove files.',
-		31 => 'Unable to upload "$1".',
-		32 => 'Unable to upload files.',
-		33 => 'Data exceeds the maximum allowed size.',
-		34 => 'There are no uploaded files was found.',
-		35 => 'File "$1" has not allowed file type.'
+		8  => 'File not found.',
+		9  => 'Target folder "$1" not found.',
+		10 => 'Object is not a folder.',
+		11 => 'Object is not a file.',
+		12 => 'Unable to read "$1".',
+		13 => 'Unable to write into "$1".',
+		14 => 'Permission denied.',
+		15 => '"$1" is locked and can not be renamed or removed.',
+		16 => 'File named "$1" already exists in this location.',
+		17 => '"$1" is not valid file name.',
+		18 => 'Unable to create folder "$1".',
+		19 => 'Unable to create file "$1".',
+		20 => 'Unable to rename "$1".',
+		21 => 'Unable to copy "$1".',
+		22 => 'Unable to move "$1".',
+		23 => 'Unable to copy files.',
+		24 => 'Unable to move files.',
+		25 => 'Copy files from volume "$1" not allowed.',
+		26 => 'Copy files to volume "$1" not allowed.',
+		27 => 'Unable to copy "$1" into itself.',
+		28 => 'Unable to remove "$1".',
+		29 => 'Unable to remove files.',
+		30 => 'Unable to upload "$1".',
+		31 => 'Unable to upload files.',
+		32 => 'Data exceeds the maximum allowed size.',
+		32 => 'There are no uploaded files was found.',
+		34 => 'File "$1" has not allowed file type.'
 	);
 	
 	/**
@@ -357,7 +355,7 @@ class elFinder {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function error() {
+	public function _error() {
 		
 		if (func_num_args() == 1) {
 			$errors = func_get_arg(0);
@@ -391,30 +389,29 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	public function _error($main, $add=array()) {
-		if (!is_array($main)) {
-			$main = array($main);
-		}
-		if (!empty($add) && !is_array($add)) {
-			$add = array($add);
-		}
+	public function error() {
+		$errors = array();
 
-		$errors = array_merge($main, $add);
-
+		foreach (func_get_args() as $msg) {
+			if (is_array($msg)) {
+				$errors = array_merge($errors, $msg);
+			} else {
+				$errors[] = $msg;
+			}
+		}
+		
 		if (!count($errors)) {
 			return self::$errors[self::ERROR_UNKNOWN];
 		}
-
-		for ($i = 0, $c = count($errors); $i < $c; $i++) {
-			$v = $errors[$i];
-
-			if (is_int($v) && isset(self::$errors[$v])) {
-				$errors[$i] = self::$errors[$v];
+		
+		foreach ($errors as $i => $msg) {
+			if (is_int($msg) && !empty(self::$errors[$msg])) {
+				$errors[$i] = self::$errors[$msg];
 			} elseif ($i == 0) {
 				$errors[$i] = self::$errors[self::ERROR_UNKNOWN];
 			}
 		}
-
+		
 		return $errors;
 	}
 	
@@ -433,26 +430,22 @@ class elFinder {
 	 **/
 	protected function open($args) {
 		$target = $args['target'];
+		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-		$error = array(self::ERROR_OPEN_DIR);
+		$hash   = $init ? 'default folder' : '#'.$target;
 		
-		if (!$volume || !$volume->isDir($target) || !$volume->isReadable($target)) {
-			// on init request we can get invalid dir hash -
-			// dir which already does not exists but remembered by client,
-			// so open default dir
-			if ($args['init']) {
-				$volume = $this->default;
-				$target = $volume->defaultPath();
-			} else {
-				return array('error' => $this->error(self::ERROR_OPEN_DIR, self::ERROR_DIR_NOT_FOUND));
-			}
+		// on init request we can get invalid dir hash -
+		// dir which already does not exists but remembered by client,
+		// so open default dir
+		if ($init && !($volume && $target && $volume->isDir($target) && $volume->isReadable($target))) {
+			$volume = $this->default;
+			$target = $volume->defaultPath();
 		}
 		
 		// get current working directory info
 		if (($cwd = $volume->dir($target)) == false) {
-			
-			return array('error' => $this->error(array_merge($error, $volume->error())));
+			return array('error' => $this->error(self::ERROR_OPEN, $hash, '<br>', $volume->error()));
 		} 
 		// debug($cwd);
 		$files = array();
@@ -468,7 +461,7 @@ class elFinder {
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($target, $args['mimes'])) === false) {
-			return array('error' => $this->error(array_merge($error, $volume->error())));
+			return array('error' => $this->error(self::ERROR_OPEN, $hash, '<br>', $volume->error()));
 		}
 		
 		foreach ($ls as $file) {

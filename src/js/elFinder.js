@@ -670,12 +670,6 @@
 				freeze   = options.freeze,
 				// do not normalize data - return as is
 				raw      = !!options.raw,
-				// default error message, backend messages will be appended to it
-				errorMsg = $.isArray(options.error) ? options.error : [],
-				// message for server 403 error
-				error403 = $.isArray(options.error403) ? options.error403 : ['Backend access denied.'],
-				// message for server 404 error
-				error404 = $.isArray(options.error404) ? options.error404 : ['Backend not found.'],
 				// open notify dialog timeout		
 				timeout, 
 				// request options
@@ -688,11 +682,22 @@
 					// timeout  : 100,
 					data     : data
 				}, options.options || {}),
+				/**
+				 * Default error handler. Display error message.
+				 *
+				 * @param String|Array  error messages
+				 * @return void
+				 **/
 				fail = function(error) {
-					error = errorMsg.concat(error);
-					deffail && self.error(error);
-					dfrd.reject(error);
+					error && self.error(error);
 				},
+				/**
+				 * Default success handler. 
+				 * Call default data handlers and fire event with command name.
+				 *
+				 * @param Object  normalized response data
+				 * @return void
+				 **/
 				done = function(data) {
 					data.warning && self.error(data.warning);
 					
@@ -706,33 +711,62 @@
 					// fire event with command name
 					self.trigger(cmd, data);
 				},
+				/**
+				 * Request error handler. Reject dfrd with correct error message.
+				 *
+				 * @param jqxhr  request object
+				 * @param String request status
+				 * @return void
+				 **/
 				error = function(xhr, status) {
+					var error;
+					
 					switch (status) {
-						case 'abort':       return xhr.quiet ? dfrd.reject() : fail([errors.noConnect, errors.connectAborted]);
-						case 'timeout':	    return fail([errors.noConnect, errors.connectTimeout]);
-						case 'parsererror': return fail([errors.invResponse, errors.notJSON]);
+						case 'abort':
+							error = xhr.quiet ? '' : errors.abort;
+							break;
+						case 'timeout':	    
+							error = errors.timeout;
+							break;
+						case 'parsererror': 
+							error = [errors.response, '<br>', errors.json];
+							break;
+						default:
+							if (xhr.status == 403) {
+								error = errors.access;
+							} else if (xhr.status == 404) {
+								error = errors.backend;
+							} else {
+								error = errors.connect;
+							} 
 					}
-
-					switch (xhr.status) {
-						case 403: return fail(error403);
-						case 404: return fail(error404);
-					}
-					fail(status < 500 ? [errors.noConnect] : [errors.invResponse]);
+					
+					dfrd.reject(error, xhr);
 				},
+				/**
+				 * Request success handler. Valid response data and reject/resolve dfrd.
+				 *
+				 * @param Object  response data
+				 * @param String request status
+				 * @return void
+				 **/
 				success = function(response) {
 					if (raw) {
 						return dfrd.resolve(response);
 					}
-					if (cmd == 'open' && (response.api || response.params)) {
+
+					if (cmd == 'open' && response && (response.api || response.params)) {
 						setAPI(response.api || 1);
 					}
-
+					
 					if (!response) {
-						return dfrd.reject([errors.invResponse, errors.emptyData]);
+						return dfrd.reject([errors.response, '<br>', errors.empty]);
+					} else if (!$.isPlainObject(response)) {
+						return dfrd.reject([errors.response, '<br>', errors.json]);
 					} else if (response.error) {
 						return dfrd.reject(response.error);
 					} else if (!self.validResponse(cmd, response)) {
-						return dfrd.reject([errors.invResponse, errors.invData]);
+						return dfrd.reject(errors.response);
 					}
 
 					response = self.normalizeData(cmd, response);
@@ -744,6 +778,7 @@
 				xhr, _xhr
 				;
 
+			deffail && dfrd.fail(fail);
 			defdone && dfrd.done(done);
 			o.debug && dfrd.fail(function(error) { self.debug('error', self.i18n(error)); });
 			
@@ -1191,7 +1226,7 @@
 			var arg = arguments[0];
 			return arguments.length == 1 && typeof(arg) == 'function'
 				? self.bind('error', arg)
-				: self.trigger('error', {error : Array.prototype.slice.call(arguments)});
+				: self.trigger('error', {error : arg});
 		}
 		
 		// create bind/trigger aliases for build-in events
@@ -1223,7 +1258,7 @@
 				});
 			})
 			.error(function(e) { 
-				var error = self.i18n.apply(self, $.isArray(e.data.error) ? e.data.error : [e.data.error]),
+				var 
 					opts  = {
 					cssClass  : 'elfinder-dialog-error',
 					title     : self.i18n('Error'),
@@ -1235,7 +1270,7 @@
 					}
 				};
 
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+($.trim(error) || self.i18n(self.errors.unknown)), opts);
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 			})
 			.bind('tree parents', function(e) {
 				cache(e.data.tree || []);
@@ -1446,12 +1481,11 @@
 			access   : 'Backend access denied.',
 			backend  : 'Backend not found.',
 			connect  : 'Unable to connect to backend.',
-			abort    : 'Connection aborted.',
-			timeout  : 'Connection timeout.',
+			abort    : 'Connection to backend aborted.',
+			timeout  : 'Connection to backend timeout.',
 			response : 'Invalid backend response.',
 			json     : 'Data is not JSON.',
 			empty    : 'Data is empty.',
-			data     : 'Invalid data.',
 			nocmd    : 'Backend request required command name.',
 			open     : 'Unable to open "$1".',
 			notdir   : 'Object is not a folder.', // ?????
@@ -2269,20 +2303,30 @@
 		},
 		
 		i18n : function() {
-			var messages = this.messages, 
+			var self = this,
+				messages = this.messages, 
 				input    = [],
 				ignore   = [], 
+				message = function(m) {
+					var file;
+					if (m.indexOf('#') === 0) {
+						if ((file = self.file(m.substr(1)))) {
+							return file.name;
+						}
+					}
+					return m;
+				},
 				i, j, m;
 				
 			for (i = 0; i< arguments.length; i++) {
 				m = arguments[i];
 				
 				if (typeof m == 'string') {
-					input.push(m);
+					input.push(message(m));
 				} else if ($.isArray(m)) {
 					for (j = 0; j < m.length; j++) {
 						if (typeof m[j] == 'string') {
-							input.push(m[j]);
+							input.push(message(m[j]));
 						}
 					}
 				}
@@ -2304,6 +2348,7 @@
 					}
 					return input[placeholder] || '';
 				});
+
 				input[i] = m;
 			}
 

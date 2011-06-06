@@ -856,13 +856,11 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function file($hash, $hidden=false) {
-		if (($file = $this->stat($this->decode($hash))) == false) {
+		if (($file = $this->stat($this->decode($hash))) == false
+		|| !($hidden || empty($file['hidden']))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
-		
-		return $hidden || empty($file['hidden'])
-			? $file
-			: $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		return $file;
 	}
 	
 	/**
@@ -880,7 +878,7 @@ abstract class elFinderVolumeDriver {
 		
 		return $dir['mime'] == 'directory' 
 			? $dir 
-			: $this->setError(elFinder::ERROR_NOT_DIR, $this->path($hash));
+			: $this->setError(elFinder::ERROR_NOT_DIR);
 	}
 	
 	/**
@@ -898,7 +896,7 @@ abstract class elFinderVolumeDriver {
 		
 		return $dir['read']
 			? $this->getScandir($this->decode($hash), $mimes)
-			: $this->setError(elFinder::ERROR_FILES_LIST, $dir['name']);
+			: $this->setError(elFinder::ERROR_PERM_DENIED);
 	}
 
 	/**
