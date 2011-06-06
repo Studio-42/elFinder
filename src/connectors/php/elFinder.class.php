@@ -98,95 +98,84 @@ class elFinder {
 	 **/
 	protected $disabled = array();
 	
-	const ERROR_UNKNOWN              = 0;
-	const ERROR_CONF                 = 1;
-	const ERROR_CONF_NO_JSON         = 2;
-	const ERROR_CONF_NO_VOL          = 3;
-	const ERROR_UNKNOWN_CMD          = 4;
-	const ERROR_INV_PARAMS           = 5;
-	
-	const ERROR_FILE_NOT_FOUND       = 10;
-	const ERROR_DIR_NOT_FOUND        = 11;
-	const ERROR_NOT_DIR              = 12;
-	const ERROR_NOT_FILE             = 13;
-	const ERROR_NOT_READ             = 14;
-	const ERROR_OPEN_DIR             = 15;
-	const ERROR_READ_FILE            = 16;
-	const ERROR_FILES_LIST           = 17;
-	const ERROR_NOT_WRITE            = 18;
-	const ERROR_LOCKED               = 19;
-	const ERROR_INVALID_NAME         = 20;
-	const ERROR_POST_DATA_MAXSIZE    = 21;
-	const ERROR_NOT_UPLOAD_FILES     = 22;
-	const ERROR_UPLOAD_FILE          = 23;
-	const ERROR_INV_MIME             = 24;
-	const ERROR_FILE_EXISTS          = 25;
-	const ERROR_NOT_TARGET_DIR       = 26;
-	const ERROR_UPLOAD_MIME          = 27;
-	
-	const ERROR_MKDIR                = 30;
-	const ERROR_MKFILE               = 31;
-	const ERROR_RENAME               = 32;
-	const ERROR_REMOVE               = 33;
-	const ERROR_UPLOAD               = 34;
-	const ERROR_DUPLICATE            = 35;
-	const ERROR_COPY                 = 36;
-	const ERROR_MOVE                 = 37;
-	const ERROR_COPY_INTO_ITSELF     = 38;
-	const ERROR_REPLACE              = 39;
-	const ERROR_COPY_FILES           = 40;
-	const ERROR_MOVE_FILES           = 41;
-	const ERROR_COPY_FROM            = 42;
-	const ERROR_COPY_TO              = 43;	
-	const ERROR_PUT                  = 44;
-	
+	const ERROR_UNKNOWN          = 0;
+	const ERROR_UNKNOWN_CMD      = 1;
+	const ERROR_CONF             = 2;
+	const ERROR_CONF_NO_JSON     = 3;
+	const ERROR_CONF_NO_VOL      = 4;
+	const ERROR_INV_PARAMS       = 5;
+	const ERROR_OPEN             = 6;
+	const ERROR_DIR_NOT_FOUND    = 7;
+	const ERROR_DIR_NOT_FOUND    = 8;
+	const ERROR_FILE_NOT_FOUND   = 9;
+	const ERROR_TRGDIR_NOT_FOUND = 10;
+	const ERROR_NOT_DIR          = 11;
+	const ERROR_NOT_FILE         = 12;
+	const ERROR_NOT_READ         = 13;
+	const ERROR_NOT_WRITE        = 14;
+	const ERROR_PERM_DENIED      = 15;
+	const ERROR_LOCKED           = 16;
+	const ERROR_EXISTS           = 17;
+	const ERROR_INV_NAME         = 18;
+	const ERROR_MKDIR            = 19;
+	const ERROR_MKFILE           = 20;
+	const ERROR_RENAME           = 21;
+	const ERROR_COPY             = 22;
+	const ERROR_MOVE             = 23;
+	const ERROR_COPY_FILES       = 24;
+	const ERROR_MOVE_FILES       = 25;
+	const ERROR_COPY_FROM        = 26;
+	const ERROR_COPY_TO          = 27;
+	const ERROR_COPY_ITSELF      = 28;
+	const ERROR_RM               = 29;
+	const ERROR_RM_FILES         = 30;
+	const ERROR_UPLOAD           = 31;
+	const ERROR_UPLOAD_FILES     = 32;
+	const ERROR_UPLOAD_SIZE      = 33;
+	const ERROR_UPLOAD_NO_FILES  = 34;
+	const ERROR_MIME             = 35;
 	/**
-	 * Error messages
+	 * undocumented class variable
 	 *
-	 * @var array
+	 * @var string
 	 **/
 	protected static $errors = array(
 		0  => 'Unknown error.',
-		1  => 'Invalid backend configuration.',
-		2  => 'PHP JSON module not installed.',
-		3  => 'There are no one readable volumes available.',
-		4  => 'Unknown command.',
+		1  => 'Unknown command.',
+		2  => 'Invalid backend configuration.',
+		3  => 'PHP JSON module not installed.',
+		4  => 'There are no one readable volumes available.',
 		5  => 'Invalid parameters for command "$1".',
-		
-		10 => 'File not found.',
-		11 => 'Folder not found.',
-		12 => '"$1" is not a folder.',
-		13 => '"$1" is not a file.',
-		14 => '"$1" can’t be opened because you don’t have permission to see its contents.',
-		15 => 'Open folder error.',
-		16 => 'Unable to get file content.',
-		17 => 'Unable to get listing on "$1".',
-		18 => 'You don’t have permission to write into "$1".',
-		19 => 'Object "$1" locked and can’t be moved, removed or renamed.',
-		20 => 'Name "$1" is not allowed.',
-		21 => 'Data exceeds the maximum allowed size.',
-		22 => 'There are no upladed files was found.',
-		23 => 'Upload file "$1" error.',
-		24 => 'File "$1" has not allowed file type.',
-		25 => 'Object named "$1" already exists in this location.',
-		26 => 'Target folder not found.',
-		27 => 'Not allowed file type',
-		
-		30 => 'Unable to create folder "$1".',
-		31 => 'Unable to create file "$1".',
-		32 => 'Unable to rename "$1".',
-		33 => 'Unable to remove "$1".',
-		34 => 'Unable to upload "$1".',
-		35 => 'Unable to duplicate "$1".',
-		36 => 'Unable to copy "$1".',
-		37 => 'Unable to move "$1".',
-		38 => 'Unable to copy "$1" into itself.',
-		39 => 'Object named "$1" exists at this location and can’t be replaced.',
-		40 => 'Unable to copy files.',
-		41 => 'Unable to move files.',
-		42 => 'Copy files from volume "$1" not allowed.',
-		43 => 'Copy files on volume "$1" not allowed.',
-		44 => 'Unable to save "$1".'
+		6  => 'Unable to open "$1".',
+		7  => 'Folder not found.',
+		8  => 'Folder not found.',
+		9  => 'File not found.',
+		10 => 'Target folder "$1" not found.',
+		11 => 'Object is not a folder.',
+		12 => 'Object is not a file.',
+		13 => 'Unable to read "$1".',
+		14 => 'Unable to write into "$1".',
+		15 => 'Permission denied.',
+		16 => '"$1" is locked and can not be renamed or removed.',
+		17 => 'File named "$1" already exists in this location.',
+		18 => '"$1" is not valid file name.',
+		19 => 'Unable to create folder "$1".',
+		20 => 'Unable to create file "$1".',
+		21 => 'Unable to rename "$1".',
+		22 => 'Unable to copy "$1".',
+		23 => 'Unable to move "$1".',
+		24 => 'Unable to copy files.',
+		25 => 'Unable to move files.',
+		26 => 'Copy files from volume "$1" not allowed.',
+		27 => 'Copy files to volume "$1" not allowed.',
+		28 => 'Unable to copy "$1" into itself.',
+		29 => 'Unable to remove "$1".',
+		30 => 'Unable to remove files.',
+		31 => 'Unable to upload "$1".',
+		32 => 'Unable to upload files.',
+		33 => 'Data exceeds the maximum allowed size.',
+		34 => 'There are no uploaded files was found.',
+		35 => 'File "$1" has not allowed file type.'
 	);
 	
 	/**

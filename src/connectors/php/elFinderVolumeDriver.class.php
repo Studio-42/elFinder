@@ -903,7 +903,7 @@ abstract class elFinderVolumeDriver {
 
 	/**
 	 * Return dir files names list
-	 *
+	 * @todo check read permission
 	 * @param  string  $hash   file hash
 	 * @param  array   $mimes  allowed mimetypes list
 	 * @return array
