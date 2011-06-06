@@ -412,9 +412,13 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			loadThumbnails = function(files) {
+				var data = fm.oldAPI 
+						? {cmd : 'tmb', current : fm.cwd().hash} 
+						: {cmd : 'tmb', targets : files};
+				
 				if (files === true || files.length) {
 					fm.ajax({
-						data : {cmd : 'tmb', current : fm.cwd().hash, files : files}, // current - for old api
+						data        : data,
 						preventFail : true
 					}).done(function(data) {
 						if (fm.view != 'list' 

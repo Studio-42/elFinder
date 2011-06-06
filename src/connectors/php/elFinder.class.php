@@ -33,7 +33,7 @@ class elFinder {
 		'ls'        => array('target' => true, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
-		'tmb'       => array('files' => true),
+		'tmb'       => array('targets' => true),
 		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
 		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
@@ -133,6 +133,8 @@ class elFinder {
 	const ERROR_UPLOAD_SIZE      = 32;
 	const ERROR_UPLOAD_NO_FILES  = 33;
 	const ERROR_MIME             = 34;
+	const ERROR_ACCESS_DENIED    = 35;
+	
 	/**
 	 * undocumented class variable
 	 *
@@ -173,7 +175,8 @@ class elFinder {
 		31 => 'Unable to upload files.',
 		32 => 'Data exceeds the maximum allowed size.',
 		32 => 'There are no uploaded files was found.',
-		34 => 'File "$1" has not allowed file type.'
+		34 => 'File "$1" has not allowed file type.',
+		35 => 'Access denied'
 	);
 	
 	/**
@@ -455,13 +458,15 @@ class elFinder {
 			foreach ($this->volumes as $id => $v) {
 				if (($tree = $v->tree(null, 0, $target)) != false) {
 					$files = array_merge($files, $tree);
+				} else {
+					debug($v->error());
 				}
 			}
 		}
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($target, $args['mimes'])) === false) {
-			return array('error' => $this->error(self::ERROR_OPEN, $hash, '<br>', $volume->error()));
+			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], '<br>', $volume->error()));
 		}
 		
 		foreach ($ls as $file) {
@@ -495,10 +500,10 @@ class elFinder {
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_FILES_LIST, self::ERROR_DIR_NOT_FOUND));
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, '<br>', self::ERROR_DIR_NOT_FOUND));
 		}
 		if (($list = $volume->ls($target)) === false) {
-			return array('error' => $this->error(self::ERROR_FILES_LIST));
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, '<br>', $volume->error()));
 		}
 		
 		return array('list' => $list);
@@ -515,12 +520,12 @@ class elFinder {
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_FILES_LIST, 'unknown folder', self::ERROR_DIR_NOT_FOUND));
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, '<br>', self::ERROR_DIR_NOT_FOUND));
 		}
-		$dir = $volume->dir($target);
+
 		if (($dir = $volume->dir($target)) == false
 		|| ($tree = $volume->tree($target)) == false) {
-			return array('error' => $this->error(self::ERROR_FILES_LIST, $dir ? $dir['name'] : 'unknown folder'));
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, '<br>', $volume->error()));
 		}
 		return array('tree' => $tree);
 	}
@@ -536,7 +541,7 @@ class elFinder {
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_DIR_NOT_FOUND));
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_DIR_NOT_FOUND));
 		}
 
 		return ($tree = $volume->parents($target)) === false 
@@ -552,20 +557,20 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
-		$images = array();
-		$volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '');
+		$result  = array('images' => array());
+		$targets = $args['targets'];
 		
-		if (($volume = $this->volume(is_array($args['files']) ? $args['files'][0] : '')) == false) {
-			return array('error' => $this->error(self::ERROR_NOT_TARGET_DIR));
-		}
-		
-		foreach ($args['files'] as $hash) {
-			if (($tmb = $volume->tmb($hash)) != false) {
-				$images[$hash] = $tmb;
+		foreach ($targets as $target) {
+			if (($volume = $this->volume($target)) == false) {
+				if (!isset($result['tmb_warnings'])) {
+					$result['tmb_warnings'] = array();
+				}
+				$result['tmb_warnings'][] = $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND);
+			} elseif (($tmb = $volume->tmb($target)) != false) {
+				$result['images'][$target] = $tmb;
 			}
 		}
-		
-		return array('images'  => $images);
+		return $result;
 	}
 	
 	/**
@@ -591,7 +596,7 @@ class elFinder {
 		}
 		
 		if (!$file['read']) {
-			return array('error' => self::$errors[self::ERROR_READ_FILE], 'header' => $h403, 'raw' => true);
+			return array('error' => self::$errors[self::ERROR_ACCESS_DENIED], 'header' => $h403, 'raw' => true);
 		}
 		
 		if (($fp = $volume->open($target)) == false) {
@@ -642,7 +647,7 @@ class elFinder {
 			}
 			
 			if (!$file['read']) {
-				return array('error' => $this->error(self::ERROR_FILES_LIST, $file['name']));
+				return array('error' => $this->error(self::ERROR_OPEN, $file['name'], self::ERROR_PERM_DENIED));
 			}
 			$size += $volume->size($target);
 		}

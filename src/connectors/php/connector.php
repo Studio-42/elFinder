@@ -184,7 +184,7 @@ $opts = array(
 					'hidden'  => true
 				),
 				array(
-					'pattern' => '/folder$/',
+					'pattern' => '/folder42$/',
 					// 'read' => false
 					// 'hidden' => true,
 					// 'locked' => true

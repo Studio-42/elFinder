@@ -901,15 +901,19 @@ abstract class elFinderVolumeDriver {
 
 	/**
 	 * Return dir files names list
-	 * @todo check read permission
+	 * 
 	 * @param  string  $hash   file hash
 	 * @param  array   $mimes  allowed mimetypes list
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function ls($hash, $mimes=array()) {
-		if (($file = $this->dir($hash)) == false) {
+		if (($dir = $this->dir($hash)) == false) {
 			return false;
+		}
+		
+		if (!$dir['read']) {
+			$this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		$list = array();
@@ -934,17 +938,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tree($hash='', $deep=0, $exclude='') {
-		$path = $hash ? $this->decode($hash) : $this->root;
+		$hash = $hash ? $hash : $this->encode($this->root);
 		
-		if (($dir = $this->stat($path)) == false
-		|| !empty($dir['hidden'])) {
-			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+		if (($dir = $this->dir($hash)) == false) {
+			return false;
 		}
-		
-		$dirs = $dir['read']
-			? $this->gettree($path, $deep > 0 ? $deep -1 : $this->treeDeep-1, $this->decode($exclude))
-			: array();
-
+		if (!$dir['read']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		$path = $this->decode($hash);
+		$dirs = $this->gettree($path, $deep > 0 ? $deep -1 : $this->treeDeep-1, $this->decode($exclude));
 		array_unshift($dirs, $dir);
 		return $dirs;
 	}
@@ -966,12 +969,14 @@ abstract class elFinderVolumeDriver {
 		
 		while ($path && $path != $this->root) {
 			$path = $this->_dirname($path);
-			if (!$this->attr($path, 'read')) {
-				return $this->setError(elFinder::ERROR_NOT_READ, $this->_basename($path));
-			}
 			if ($this->attr($path, 'hidden')) {
 				return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 			}
+			
+			if (!$this->attr($path, 'read')) {
+				return $this->setError(elFinder::ERROR_OPEN, $this->_basename($path), '<br>', elFinder::ERROR_PERM_DENIED);
+			}
+			
 			$dir = $this->stat($path);
 
 			array_unshift($tree, $dir);
