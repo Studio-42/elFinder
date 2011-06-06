@@ -32,6 +32,8 @@ class elFinder {
 		'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 200 - every init request)
 		'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 		'tmbSize'      => 48,           // images thumbnails size (px)
+		'tmbCrop'      => true,         // crop thumbnails (true - crop, false - scale image to fit thumbnail size)
+		'tmbBgColor'   => '#ffffff',    // thumbnail background color
 		'fileURL'      => true,         // display file URL in "get info"
 		'dateFormat'   => 'j M Y H:i',  // file modification date format
 		'logger'       => null,         // object logger
@@ -1392,6 +1394,34 @@ class elFinder {
 			return false;
 		}
 		$tmbSize = $this->_options['tmbSize'];
+
+		if ($this->_options['tmbCrop'] == false) {
+
+			/* Calculating image scale width and height */
+			$xscale = $s[0] / $tmbSize;
+			$yscale = $s[1] / $tmbSize;
+
+			if ($yscale > $xscale) {
+				$newwidth = round($s[0] * (1 / $yscale));
+				$newheight = round($s[1] * (1 / $yscale));
+			} else {
+				$newwidth = round($s[0] * (1 / $xscale));
+				$newheight = round($s[1] * (1 / $xscale));
+			}
+
+			/* Keeping original dimensions if image fitting into thumbnail without scale */
+			if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
+				$newwidth = $s[0];
+				$newheight = $s[1];
+			}
+
+			/* Calculating coordinates for aligning thumbnail */
+			$align_y = ceil(($tmbSize - $newheight) / 2); 
+			$align_x = ceil(($tmbSize - $newwidth) / 2);
+		}
+    
+    
+    
 		switch ($this->_options['imgLib']) {
 			case 'imagick':
 				try {
@@ -1399,17 +1429,38 @@ class elFinder {
 				} catch (Exception $e) {
 					return false;
 				}
-				
+
 				$_img->contrastImage(1);
-				return $_img->cropThumbnailImage($tmbSize, $tmbSize) && $_img->writeImage($tmb);
+
+				if ($this->_options['tmbCrop'] == false) {
+					$img1 = new Imagick();
+					$img1->newImage($tmbSize, $tmbSize, new ImagickPixel($this->_options['tmbBgColor']));
+					$img1->setImageFormat('png');
+					$_img->resizeImage($newwidth, $newheight, NULL, true);
+					$img1->compositeImage( $_img, imagick::COMPOSITE_OVER, $align_x, $align_y );
+					return $img1->writeImage($tmb);
+				} else {
+					return $_img->cropThumbnailImage($tmbSize, $tmbSize) && $_img->writeImage($tmb);
+				}
 				break;
-				
+
 			case 'mogrify':
 				if (@copy($img, $tmb)) {
 					list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
 					// exec('mogrify -crop '.$size.'x'.$size.'+'.$x.'+'.$y.' -scale '.$tmbSize.'x'.$tmbSize.'! '.escapeshellarg($tmb), $o, $c);
-					exec('mogrify -resize '.$tmbSize.'x'.$tmbSize.'^ -gravity center -extent '.$tmbSize.'x'.$tmbSize.' '.escapeshellarg($tmb), $o, $c);
-					
+
+					$mogrifyArgs = 'mogrify -resize ' . $tmbSize . 'x' . $tmbSize;
+
+					if ($this->_options['tmbCrop'] == false) {
+						$mogrifyArgs .= ' -gravity center -background "' . $this->_options['tmbBgColor'] . '" -extent ' . $tmbSize . 'x' . $tmbSize;
+					}
+
+					if ($this->_options['tmbCrop'] == false) {
+						$mogrifyArgs .= ' ' . escapeshellarg($tmb);
+					}
+
+					exec($mogrifyArgs, $o, $c);
+
 					if (file_exists($tmb)) {
 						return true;
 					} elseif ($c == 0) {
@@ -1437,10 +1488,24 @@ class elFinder {
 				if (!$_img || false == ($_tmb = imagecreatetruecolor($tmbSize, $tmbSize))) {
 					return false;
 				}
-				list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
-				if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
-					return false;
+
+				if ($this->_options['tmbCrop'] == false) {
+
+					list($r,$g,$b) = sscanf($this->_options['tmbBgColor'], "#%02x%02x%02x");
+
+					imagefill($_tmb, 0, 0, imagecolorallocate($_tmb, $r, $g, $b));
+
+					if (!imagecopyresampled($_tmb, $_img, $align_x, $align_y, 0, 0, $newwidth, $newheight, $s[0], $s[1])) {
+						return false;
+					}
+        
+				} else {
+					list($x, $y, $size) = $this->_cropPos($s[0], $s[1]);
+					if (!imagecopyresampled($_tmb, $_img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+						return false;
+					}
 				}
+
 				$r = imagepng($_tmb, $tmb, 7);
 				imagedestroy($_img);
 				imagedestroy($_tmb);
