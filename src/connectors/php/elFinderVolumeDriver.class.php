@@ -1062,15 +1062,15 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($dst);
 		
 		if (($dir = $this->dir($dst)) == false) {
-			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
-		if (!$dir['read']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
+		if (!$dir['read'] || !$dir['write']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if (!$this->nameAccepted($name)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+			return $this->setError(elFinder::ERROR_INV_NAME, $name);
 		}
 		
 		if ($copy && !$this->options['copyOverwrite']) {

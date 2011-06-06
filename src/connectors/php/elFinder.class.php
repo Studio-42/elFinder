@@ -436,21 +436,24 @@ class elFinder {
 		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
+		$cwd    = $volume ? $volume->dir($target) : false;
 		$hash   = $init ? 'default folder' : '#'.$target;
 		
 		// on init request we can get invalid dir hash -
-		// dir which already does not exists but remembered by client,
+		// dir which can not be opened now, but remembered by client,
 		// so open default dir
-		if ($init && !($volume && $target && $volume->isDir($target) && $volume->isReadable($target))) {
-			$volume = $this->default;
-			$target = $volume->defaultPath();
+		if (!$cwd || !$cwd['read']) {
+			if ($init) {
+				$volume = $this->default;
+				$target = $volume->defaultPath();
+				$cwd    = $volume->dir($target);
+			} 
 		}
 		
-		// get current working directory info
-		if (($cwd = $volume->dir($target)) == false) {
-			return array('error' => $this->error(self::ERROR_OPEN, $hash, '<br>', $volume->error()));
-		} 
-		// debug($cwd);
+		if (!$cwd) {
+			return array('error' => $this->error(self::ERROR_OPEN, $hash, '<br>', self::ERROR_DIR_NOT_FOUND));
+		}
+
 		$files = array();
 		
 		// get folders trees
@@ -458,9 +461,7 @@ class elFinder {
 			foreach ($this->volumes as $id => $v) {
 				if (($tree = $v->tree(null, 0, $target)) != false) {
 					$files = array_merge($files, $tree);
-				} else {
-					debug($v->error());
-				}
+				} 
 			}
 		}
 
@@ -664,15 +665,14 @@ class elFinder {
 	protected function mkdir($args) {
 		$target = $args['target'];
 		$name   = $args['name'];
-		$error  = array(self::ERROR_MKDIR, $name);
+		$error  = array(self::ERROR_MKDIR, $name, '<br>');
 		
 		if(($volume = $this->volume($target)) == false) {
-			$error[] = self::ERROR_NOT_TARGET_DIR;
-			return array('error' => $this->error($error));
+			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 		
 		if (($dir = $volume->mkdir($target, $args['name'])) == false) {
-			return array('error' => $this->error(array_merge($error, $volume->error())));
+			return array('error' => $this->error($error, $volume->error()));
 		}
 
 		return $this->trigger('mkdir', $volume, array('added' => array($dir)));
@@ -688,15 +688,14 @@ class elFinder {
 	protected function mkfile($args) {
 		$target = $args['target'];
 		$name   = $args['name'];
-		$error  = array(self::ERROR_MKFILE, $name);
+		$error  = array(self::ERROR_MKFILE, $name, '<br>');
 		
 		if(($volume = $this->volume($target)) == false) {
-			$error[] = self::ERROR_NOT_TARGET_DIR;
-			return array('error' => $error);
+			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 
 		if (($file = $volume->mkfile($target, $args['name'])) == false) {
-			return array('error' => $this->error(array_merge($error, $volume->error())));
+			return array('error' => $this->error($error, $volume->error()));
 		}
 
 		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
@@ -718,13 +717,12 @@ class elFinder {
 		$name   = $args['name'];
 		
 		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_RENAME, 'unknown file', self::ERROR_FILE_NOT_FOUND));
+			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
 		if (($rm  = $volume->file($target)) == false
 		|| ($file = $volume->rename($target, $name)) == false) {
-			$error = array(self::ERROR_RENAME, $rm ? $rm['name'] : 'unknown file');
-			return array('error' => $this->error(array_merge($error, $volume->error())));
+			return array('error' => $this->error(self::ERROR_RENAME, $rm ? $rm['name'] : '#'.$target, $volume->error()));
 		}
 
 		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
