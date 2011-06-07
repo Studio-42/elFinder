@@ -185,6 +185,8 @@ abstract class elFinderVolumeDriver {
 		'uploadDeny'      => array(),      
 		// order to proccess uploadAllow and uploadAllow options
 		'uploadOrder'     => 'deny,allow', 
+		// maximum upload file size. NOTE - this is size for every uploaded files
+		'uploadMaxSize'   => 0,
 		// files dates format
 		'dateFormat'      => 'j M Y H:i',  
 		// files time format
@@ -221,14 +223,48 @@ abstract class elFinderVolumeDriver {
 		'hidden' => false
 	);
 	
+	/**
+	 * Access control function/class
+	 *
+	 * @var mixed
+	 **/
 	protected $attributes = array();
 	
 	/**
-	 * undocumented class variable
+	 * Access control function/class
 	 *
-	 * @var string
+	 * @var mixed
 	 **/
 	protected $access = null;
+	
+	/**
+	 * Mime types allowed to upload
+	 *
+	 * @var array
+	 **/
+	protected $uploadAllow = array();
+	
+	/**
+	 * Mime types denied to upload
+	 *
+	 * @var array
+	 **/
+	protected $uploadDeny = array();
+	
+	/**
+	 * Order to validate uploadAllow and uploadDeny
+	 *
+	 * @var array
+	 **/
+	protected $uploadOrder = array();
+	
+	/**
+	 * Maximum allowed upload file size.
+	 * Set as number or string with unit - "10M", "500K", "1G"
+	 *
+	 * @var int|string
+	 **/
+	protected $uploadMaxSize = 0;
 	
 	/**
 	 * Mimetype detect method
@@ -531,6 +567,23 @@ abstract class elFinderVolumeDriver {
 			
 		$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
 		$this->uploadOrder = array(trim($parts[0]), trim($parts[1]));
+			
+		if (!empty($this->options['uploadMaxSize'])) {
+			$size = ''.$this->options['uploadMaxSize'];
+			$unit = strtolower(substr($size, strlen($size) - 1));
+			$n = 1;
+			switch ($unit) {
+				case 'k':
+					$n = 1024;
+					break;
+				case 'm':
+					$n = 1048576;
+					break;
+				case 'g':
+					$n = 1073741824;
+			}
+			$this->uploadMaxSize = intval($size)*$n;
+		}
 			
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
 			? $this->options['disabled']
@@ -1065,7 +1118,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
-		if (!$dir['read'] || !$dir['write']) {
+		if (!$dir['write']) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1108,7 +1161,7 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($dst);
 	
 		if (($dir = $this->dir($dst, true)) == false) {
-			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#dst');
 		}
 
 		if (!$dir['write']) {
@@ -1143,7 +1196,7 @@ abstract class elFinderVolumeDriver {
 		
 		$dir = $this->_dirname($path);
 		
-		if (!$this->attr($dir, 'write') || !$this->attr($dir, 'read')) {
+		if (!$this->attr($dir, 'write')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1207,8 +1260,13 @@ abstract class elFinderVolumeDriver {
 		// dont ask me what this mean. I forgot it, but its work :)
 		// for details see python connector
 		if (!($this->uploadOrder[0] == 'allow' ? $allow && !$deny : $allow || !$deny)) {
-			return $this->setError(elFinder::ERROR_UPLOAD_MIME);
+			return $this->setError(elFinder::ERROR_MIME);
 		}
+		
+		if ($this->uploadMaxSize > 0 && filesize($tmpPath) > $this->uploadMaxSize) {
+			return $this->setError(elFinder::ERROR_UPLOAD_SIZE);
+		}
+
 		return true;
 	}
 	
@@ -1224,7 +1282,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function save($fp, $dst, $name, $cmd='upload') {
 		if (($dir = $this->dir($dst, true)) == false) {
-			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
 		if (!$dir['write']) {
@@ -1243,7 +1301,7 @@ abstract class elFinderVolumeDriver {
 			||  ($cmd == 'copy'   && !$this->options['copyOverwrite'])) {
 				$name = $this->uniqueName($dst, $name, '-', false);
 			} elseif (!$this->attr($_dst, 'write')) {
-				return $this->setError(elFinder::ERROR_REPLACE, $name);
+				return $this->setError(elFinder::ERROR_PERM_DENIED);
 			} elseif (!$this->doRm($_dst)) {
 				return false;
 			}
@@ -1737,19 +1795,19 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->attr($source, 'read')) {
-			return $this->setError(elFinder::ERROR_NOT_READ, $this->_basename($src));
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if (!$this->_isDir($dst)) {
-			return $this->setError(elFinder::ERROR_NOT_TARGET_DIR);
+			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, $dst['name']);
 		}
 		
 		if (!$this->attr($dst, 'write')) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_basename($dst));
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if ($this->_inpath($dst, $source)) {
-			return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF);
+			return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $source['name']);
 		}
 
 		if (!$name) {

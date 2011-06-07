@@ -22,6 +22,7 @@ var errors = [
 	['',                   'empty',    'Data is empty.'],
 	['',                   'nocmd',    'Backend request required command name.'],
 	
+	['ERROR_ACCESS_DENIED'     '',        'Access denied.'],
 	['ERROR_OPEN',             'open',    'Unable to open "$1".'],
 	['ERROR_DIR_NOT_FOUND',    '',        'Folder not found.'],
 	['ERROR_FILE_NOT_FOUND',   '',        'File not found.'],
@@ -45,11 +46,11 @@ var errors = [
 	['ERROR_COPY_TO',          '',        'Copy files to volume "$1" not allowed.'],
 	['ERROR_COPY_ITSELF',      '',        'Unable to copy "$1" into itself.'],
 	['ERROR_RM',               '',        'Unable to remove "$1".'],
-	['ERROR_RM_FILES',         '',        'Unable to remove files.'],
 	['ERROR_UPLOAD',           '',        'Unable to upload "$1".'],
-	['ERROR_UPLOAD_FILES',     '',        'Unable to upload files.'],
-	['ERROR_UPLOAD_SIZE',      '',        'Data exceeds the maximum allowed size.'],
+	['ERROR_UPLOAD_TRANSFER',  '',        '"$1" transfer error.'],
+	['ERROR_UPLOAD_FILES_SIZE','',        'Data exceeds the maximum allowed size.'],
+	['ERROR_UPLOAD_SIZE',      '',         'File exceeds maximum allowed size.'],
 	['ERROR_UPLOAD_NO_FILES',  '',        'There are no uploaded files was found.'],
-	['ERROR_MIME',             '',        'File "$1" has not allowed file type.'],
+	['ERROR_MIME',             '',        'Not allowed file type.'],
 ]
 

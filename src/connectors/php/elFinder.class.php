@@ -98,42 +98,41 @@ class elFinder {
 	 **/
 	protected $disabled = array();
 	
-	const ERROR_UNKNOWN          = 0;
-	const ERROR_UNKNOWN_CMD      = 1;
-	const ERROR_CONF             = 2;
-	const ERROR_CONF_NO_JSON     = 3;
-	const ERROR_CONF_NO_VOL      = 4;
-	const ERROR_INV_PARAMS       = 5;
-	const ERROR_OPEN             = 6;
-	const ERROR_DIR_NOT_FOUND    = 7;
-	const ERROR_FILE_NOT_FOUND   = 8;
-	const ERROR_TRGDIR_NOT_FOUND = 9;
-	const ERROR_NOT_DIR          = 10;
-	const ERROR_NOT_FILE         = 11;
-	const ERROR_NOT_READ         = 12;
-	const ERROR_NOT_WRITE        = 13;
-	const ERROR_PERM_DENIED      = 14;
-	const ERROR_LOCKED           = 15;
-	const ERROR_EXISTS           = 16;
-	const ERROR_INVALID_NAME     = 17;
-	const ERROR_MKDIR            = 18;
-	const ERROR_MKFILE           = 19;
-	const ERROR_RENAME           = 20;
-	const ERROR_COPY             = 21;
-	const ERROR_MOVE             = 22;
-	const ERROR_COPY_FILES       = 23;
-	const ERROR_MOVE_FILES       = 24;
-	const ERROR_COPY_FROM        = 25;
-	const ERROR_COPY_TO          = 26;
-	const ERROR_COPY_ITSELF      = 27;
-	const ERROR_RM               = 28;
-	const ERROR_RM_FILES         = 29;
-	const ERROR_UPLOAD           = 30;
-	const ERROR_UPLOAD_FILES     = 31;
-	const ERROR_UPLOAD_SIZE      = 32;
-	const ERROR_UPLOAD_NO_FILES  = 33;
-	const ERROR_MIME             = 34;
-	const ERROR_ACCESS_DENIED    = 35;
+	const ERROR_UNKNOWN           = 0;
+	const ERROR_UNKNOWN_CMD       = 1;
+	const ERROR_CONF              = 2;
+	const ERROR_CONF_NO_JSON      = 3;
+	const ERROR_CONF_NO_VOL       = 4;
+	const ERROR_INV_PARAMS        = 5;
+	const ERROR_OPEN              = 6;
+	const ERROR_DIR_NOT_FOUND     = 7;
+	const ERROR_FILE_NOT_FOUND    = 8;
+	const ERROR_TRGDIR_NOT_FOUND  = 9;
+	const ERROR_NOT_DIR           = 10;
+	const ERROR_NOT_FILE          = 11;
+	const ERROR_NOT_READ          = 12;
+	const ERROR_NOT_WRITE         = 13;
+	const ERROR_PERM_DENIED       = 14;
+	const ERROR_LOCKED            = 15;
+	const ERROR_EXISTS            = 16;
+	const ERROR_INVALID_NAME      = 17;
+	const ERROR_MKDIR             = 18;
+	const ERROR_MKFILE            = 19;
+	const ERROR_RENAME            = 20;
+	const ERROR_COPY              = 21;
+	const ERROR_MOVE              = 22;
+	const ERROR_COPY_FROM         = 23;
+	const ERROR_COPY_TO           = 24;
+	const ERROR_COPY_ITSELF       = 25;
+	const ERROR_RM                = 26;
+	const ERROR_UPLOAD            = 27;
+	const ERROR_UPLOAD_NO_FILES   = 28;
+	const ERROR_UPLOAD_FILES_SIZE = 29;
+	const ERROR_UPLOAD_SIZE       = 30;
+	const ERROR_MIME              = 31;
+	const ERROR_UPLOAD_TRANSFER   = 32;
+	const ERROR_ACCESS_DENIED     = 33;
+	
 	
 	/**
 	 * undocumented class variable
@@ -164,19 +163,18 @@ class elFinder {
 		20 => 'Unable to rename "$1".',
 		21 => 'Unable to copy "$1".',
 		22 => 'Unable to move "$1".',
-		23 => 'Unable to copy files.',
-		24 => 'Unable to move files.',
-		25 => 'Copy files from volume "$1" not allowed.',
-		26 => 'Copy files to volume "$1" not allowed.',
-		27 => 'Unable to copy "$1" into itself.',
-		28 => 'Unable to remove "$1".',
-		29 => 'Unable to remove files.',
-		30 => 'Unable to upload "$1".',
-		31 => 'Unable to upload files.',
-		32 => 'Data exceeds the maximum allowed size.',
-		32 => 'There are no uploaded files was found.',
-		34 => 'File "$1" has not allowed file type.',
-		35 => 'Access denied'
+		23 => 'Copy files from volume "$1" not allowed.',
+		24 => 'Copy files to volume "$1" not allowed.',
+		25 => 'Unable to copy "$1" into itself.',
+		26 => 'Unable to remove "$1".',
+		27 => 'Unable to upload "$1".',
+		28 => 'There are no uploaded files was found.',
+		29 => 'Data exceeds the maximum allowed size.',
+		30 => 'File exceeds maximum allowed size.',
+		31 => 'Not allowed file type.',
+		32 => '"$1" transfer error.',
+		33 => 'Access denied',
+		
 	);
 	
 	/**
@@ -667,11 +665,16 @@ class elFinder {
 		$name   = $args['name'];
 		$error  = array(self::ERROR_MKDIR, $name, '<br>');
 		
-		if(($volume = $this->volume($target)) == false) {
+		if (($volume = $this->volume($target)) == false
+		|| ($dir = $volume->dir($target)) == false) {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
-		
-		if (($dir = $volume->mkdir($target, $args['name'])) == false) {
+
+		if (!$dir['read']) {
+			return array('error' => $this->error($error, self::ERROR_PERM_DENIED));
+		}
+
+		if (($dir = $volume->mkdir($target, $name)) == false) {
 			return array('error' => $this->error($error, $volume->error()));
 		}
 
@@ -690,8 +693,13 @@ class elFinder {
 		$name   = $args['name'];
 		$error  = array(self::ERROR_MKFILE, $name, '<br>');
 		
-		if(($volume = $this->volume($target)) == false) {
+		if (($volume = $this->volume($target)) == false
+		|| ($dir = $volume->dir($target)) == false) {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
+		}
+
+		if (!$dir['read']) {
+			return array('error' => $this->error($error, self::ERROR_PERM_DENIED));
 		}
 
 		if (($file = $volume->mkfile($target, $args['name'])) == false) {
@@ -716,13 +724,17 @@ class elFinder {
 		$target = $args['target'];
 		$name   = $args['name'];
 		
-		if (($volume = $this->volume($target)) == false) {
-			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+		if (($volume = $this->volume($target)) == false
+		||  ($rm  = $volume->file($target)) == false) {
+			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, '<br>', self::ERROR_FILE_NOT_FOUND));
 		}
 		
-		if (($rm  = $volume->file($target)) == false
-		|| ($file = $volume->rename($target, $name)) == false) {
-			return array('error' => $this->error(self::ERROR_RENAME, $rm ? $rm['name'] : '#'.$target, $volume->error()));
+		if (!$rm['read']) {
+			return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], '<br>', self::ERROR_PERM_DENIED));
+		}
+		
+		if (($file = $volume->rename($target, $name)) == false) {
+			return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], '<br>', $volume->error()));
 		}
 
 		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
@@ -748,15 +760,14 @@ class elFinder {
 		}
 		
 		foreach ($targets as $target) {
-			if (($volume = $this->volume($target)) == false) {
-				$result['warning'] = $this->error(self::ERROR_DUPLICATE, 'unknown file', self::ERROR_FILE_NOT_FOUND);
+			if (($volume = $this->volume($target)) == false
+			||  ($src = $volume->file($target)) == false) {
+				$result['warning'] = $this->error(self::ERROR_COPY, '#'.$target, '<br>', self::ERROR_FILE_NOT_FOUND);
 				break;
 			}
 			
-			if (($src = $volume->file($target)) == false
-			||  ($file = $volume->duplicate($target)) == false) {
-				$error = array(self::ERROR_DUPLICATE, $src ? $src['name'] : 'unknown file');
-				$result['warning'] = $this->error(array_merge($error, $volume->error()));
+			if (($file = $volume->duplicate($target)) == false) {
+				$result['warning'] = $this->error(self::ERROR_COPY, $src['name'], '<br>', $volume->error());
 				break;
 			}
 			
@@ -785,12 +796,12 @@ class elFinder {
 		foreach ($targets as $target) {
 			if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false) {
-				$result['error'] = $this->error(self::ERROR_REMOVE, 'unknown file', self::ERROR_FILE_NOT_FOUND);
+				$result['warning'] = $this->error(self::ERROR_REMOVE, '#'.$target, '<br>', self::ERROR_FILE_NOT_FOUND);
 				break;
 			}
 			
 			if (!$volume->rm($target)) {
-				$result['error'] = array_merge(array(self::ERROR_REMOVE, $file['name']), $volume->error());
+				$result['warning'] = $this->error(self::ERROR_REMOVE, $file['name'], '<br>', $volume->error());
 				break;
 			}
 			
@@ -799,7 +810,6 @@ class elFinder {
 		
 		return $result;
 	}
-	
 	
 	/**
 	 * Save uploaded files
@@ -815,30 +825,30 @@ class elFinder {
 			? $args['FILES']['upload'] 
 			: array();
 
+		if (empty($files)) {
+			return array('error' => $this->error(self::ERROR_UPLOAD_NO_FILES));
+		}
 		
 		if (!$volume) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_NOT_TARGET_DIR));
-		}
-		if (empty($files)) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_NOT_UPLOAD_FILES));
+			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 		
 		foreach ($files['name'] as $i => $name) {
 			$tmpPath = $files['tmp_name'][$i];
 			
 			if ($files['error'][$i]) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name);
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_TRANSFER, $name);
 				break;
 			}
 			
 			if (!$volume->uploadAllow($tmpPath, $name)) {
-				$result['warning'] = $this->error($volume->error());
+				$result['warning'] = $this->error(self::ERROR_UPLOAD, $name, $volume->error());
+				break;
 			}
 			
 			if (($fp  = fopen($tmpPath, 'rb')) == false
 			|| ($file = $volume->save($fp, $target, $name, 'upload')) == false) {
-				$error = array(self::ERROR_UPLOAD_FILE, $name);
-				$result['warning'] = $this->error(array_merge($error, $volume->error()));
+				$result['warning'] = $this->error(self::ERROR_UPLOAD, $name, $volume->error());
 				break;
 			}
 			
@@ -851,7 +861,6 @@ class elFinder {
 		
 		return $result;
 	}
-	
 	
 	/**
 	 * Copy/move files into new destination
