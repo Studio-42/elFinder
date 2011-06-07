@@ -13,12 +13,14 @@ elFinder.prototype.commands.reload = function() {
 	}
 	
 	this._exec = function() {
-		var fm = this.fm;
-		
-		return this.fm.sync(true)
-			.done(function(data) {
-				fm.reload(data);
-			});
+		var fm      = this.fm,
+			dfrd    = fm.sync(),
+			timeout = setTimeout(function() {
+				fm.notify({type : 'reload', cnt : 1, hideCnt : true});
+				dfrd.always(function() { fm.notify({type : 'reload', cnt  : -1}); });
+			}, fm.notifyDelay);
+			
+		return dfrd.always(function() { clearTimeout(timeout); });
 	}
 
 }

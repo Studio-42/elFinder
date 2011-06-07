@@ -903,7 +903,7 @@
 		 * @param  Boolean  freeze interface untill complete
 		 * @return jQuery.Deferred
 		 */
-		this.sync = function(notify) {
+		this.sync = function() {
 			var self  = this,
 				dfrd  = $.Deferred(),
 				opts1 = {
@@ -927,15 +927,6 @@
 					return dfrd.resolve(diff);
 				},
 				timeout, xhr;
-			
-			if (notify) {
-				timeout = setTimeout(function() {
-					self.notify({type : 'reload', cnt : 1, hideCnt : true});
-					dfrd.always(function() { self.notify({type : 'reload', cnt  : -1}); });
-				}, self.notifyDelay);
-				
-				dfrd.always(function() { clearTimeout(timeout); });
-			}
 			
 			xhr = self.oldAPI 
 				? this.ajax(opts1) 
@@ -1249,7 +1240,6 @@
 					opts  = {
 					cssClass  : 'elfinder-dialog-error',
 					title     : self.i18n('Error'),
-					// modal     : true,
 					resizable : false,
 					close     : function() { $(this).elfinderdialog('destroy') },
 					buttons   : {
