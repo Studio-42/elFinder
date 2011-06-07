@@ -666,10 +666,10 @@
 				defdone  = !(options.preventDefault || options.preventDone),
 				// options for notify dialog
 				notify   = $.extend({}, options.notify),
-				// freeze interface untill request end
-				freeze   = options.freeze,
 				// do not normalize data - return as is
 				raw      = !!options.raw,
+				// sync files on request fail
+				syncOnFail = options.syncOnFail,
 				// open notify dialog timeout		
 				timeout, 
 				// request options
@@ -682,15 +682,6 @@
 					// timeout  : 100,
 					data     : data
 				}, options.options || {}),
-				/**
-				 * Default error handler. Display error message.
-				 *
-				 * @param String|Array  error messages
-				 * @return void
-				 **/
-				fail = function(error) {
-					error && self.error(error);
-				},
 				/**
 				 * Default success handler. 
 				 * Call default data handlers and fire event with command name.
@@ -778,22 +769,27 @@
 				xhr, _xhr
 				;
 
-			deffail && dfrd.fail(fail);
 			defdone && dfrd.done(done);
-			o.debug && dfrd.fail(function(error) { self.debug('error', self.i18n(error)); });
+			dfrd.fail(function(error) {
+				if (error) {
+					if (deffail) {
+						self.error(error);
+					} else {
+						self.debug('error', self.i18n(error));
+					}
+				}
+			})
 			
 			if (!cmd) {
 				return dfrd.reject(errors.cmdRequired);
 			}	
 
-			// "freeze" interface
-			if (freeze) {
-				this.ui.overlay.elfinderoverlay('show');
-				dfrd.always(function() {
-					self.ui.overlay.elfinderoverlay('hide');
+			if (syncOnFail) {
+				dfrd.fail(function(error) {
+					error && self.sync();
 				});
 			}
-			
+
 			if (notify.type && notify.cnt) {
 				timeout = setTimeout(function() {
 					self.notify(notify);
@@ -808,22 +804,26 @@
 				});
 			}
 			
-			// abort not completed "open" requests
+			// quiet abort not completed "open" requests
 			if (cmd == 'open') {
-				options.data.count = 5 - queue.length;
-				
-				while ((_xhr = queue.pop()) && !_xhr.isRejected() && !_xhr.isResolved()) {
-					_xhr.quiet = true;
-					_xhr.abort();
+				while ((_xhr = queue.pop())) {
+					if (!_xhr.isRejected() && !_xhr.isResolved()) {
+						_xhr.quiet = true;
+						_xhr.abort();
+					}
 				}
 			}
-			
+
 			xhr = $.ajax(options).fail(error).success(success);
 			
 			if (cmd == 'open') {
 				queue.unshift(xhr);
 				dfrd.always(function() {
-					queue.pop();
+					var ndx = $.inArray(xhr, queue);
+					
+					if (ndx !== -1) {
+						queue.splice(ndx, 1);
+					}
 				});
 			}
 			
@@ -903,69 +903,56 @@
 		 * @param  Boolean  freeze interface untill complete
 		 * @return jQuery.Deferred
 		 */
-		this.sync = function(freeze) {
+		this.sync = function(notify) {
 			var self  = this,
 				dfrd  = $.Deferred(),
 				opts1 = {
-					data : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
+					data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
 					preventDefault : true,
-					freeze : true
+					// freeze         : freeze
 				},
 				opts2 = {
-					data : {cmd : 'parents', target : cwd},
+					data           : {cmd : 'parents', target : cwd},
 					preventDefault : true,
-					freeze : true
+					// freeze         : freeze
 				},
 				doSync = function(odata, pdata) {
 					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
 
-					self.log(diff.removed).log(diff.added).log(diff.changed);
+					// self.log(diff.removed).log(diff.added).log(diff.changed);
 					
 					diff.removed.length && self.remove(diff);
 					diff.added.length   && self.add(diff);
 					diff.changed.length && self.change(diff);
 					return dfrd.resolve(diff);
 				},
-				panic = function() {
-					self.ajax({
-						data : {cmd : 'open', target : self.root(), tree : 1, init : 1},
-						notify : {type : 'open', cnt : 1, hideCnt : true}
-					});
-				},
-				timeout;
+				timeout, xhr;
 			
-			if (freeze) {
+			if (notify) {
 				timeout = setTimeout(function() {
 					self.notify({type : 'reload', cnt : 1, hideCnt : true});
-			
-					dfrd.always(function() {
-						self.notify({type : 'reload', cnt  : -1});
-					});
+					dfrd.always(function() { self.notify({type : 'reload', cnt  : -1}); });
 				}, self.notifyDelay);
 				
-				dfrd.always(function() {
-					clearTimeout(timeout);
-				});
+				dfrd.always(function() { clearTimeout(timeout); });
 			}
 			
-			if (this.newAPI) {
-				$.when(
+			xhr = self.oldAPI 
+				? this.ajax(opts1) 
+				: $.when(
 					this.ajax(opts1),
 					this.ajax(opts2)
-				)
-				.fail(function(error) {
+				); 
+			
+			xhr.fail(function(error) {
 					dfrd.reject(error);
-					panic();
+					error && self.ajax({
+						data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
+						notify : {type : 'open', cnt : 1, hideCnt : true}
+					});
 				})
 				.done(doSync);
-			} else {
-				this.ajax(opts1)
-					.fail(function(error) {
-						dfrd.reject(error);
-						panic();
-					})
-					.done(doSync);
-			}
+			
 			return dfrd;
 		}
 		
@@ -1262,7 +1249,7 @@
 					opts  = {
 					cssClass  : 'elfinder-dialog-error',
 					title     : self.i18n('Error'),
-					modal     : true,
+					// modal     : true,
 					resizable : false,
 					close     : function() { $(this).elfinderdialog('destroy') },
 					buttons   : {
@@ -1495,7 +1482,7 @@
 			denied   : 'Permission denied.',
 			locked   : '"$1" is locked and can not be renamed or removed.',
 			exists   : 'File named "$1" already exists in this location.',
-			name     : '"$1" is not valid file name.',
+			name     : 'Invalid file name.',
 			
 		},
 		/**
@@ -2352,7 +2339,7 @@
 				input[i] = m;
 			}
 
-			return $.map(input, function(m, i) { return $.inArray(i, ignore) === -1 ? m : null; }).join(' ');
+			return $.map(input, function(m, i) { return $.inArray(i, ignore) === -1 ? m : null; }).join('<br>');
 		},
 		
 		/**

@@ -179,6 +179,10 @@ $opts = array(
 	),
 	'debug' => true,
 	'roots' => array(
+		// array(
+		// 	'driver' => 'LocalFileSystem',
+		// 	'path'   => '../../../files2',
+		// ),
 		array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
@@ -210,11 +214,11 @@ $opts = array(
 				// 	'hidden'  => true
 				// ),
 				array(
-					'pattern' => '/folder42$/',
+					'pattern' => '/\/folder42/',
 					// 'write' => false
 					// 'read' => false
 					// 'hidden' => true,
-					'locked' => true
+					// 'locked' => true
 				)
 			),
 		),
@@ -248,7 +252,7 @@ $opts = array(
 	
 );
 
-// sleep(2);
+// sleep(3);
 $connector = new elFinderConnector(new elFinder($opts));
 $connector->run();
 

@@ -1165,7 +1165,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
 		if (!$this->nameAccepted($name)) {
@@ -1286,7 +1286,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$dir['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $dir['name']);
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if (!$this->nameAccepted($name)) {
@@ -1328,7 +1328,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$file['write']) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $file['name']);
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		return $this->_filePutContents($path, $content) ? $this->stat($path) : false;

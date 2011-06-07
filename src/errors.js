@@ -29,8 +29,6 @@ var errors = [
 	['ERROR_TRGDIR_NOT_FOUND', '',        'Target folder "$1" not found.'],
 	['ERROR_NOT_DIR',          'notdir',  'Object is not a folder.'],
 	['ERROR_NOT_FILE',         'notfile', 'Object is not a file.'],
-	['ERROR_NOT_READ',         'read',    'Unable to read "$1".'],
-	['ERROR_NOT_WRITE',        'write',   'Unable to write into "$1".'],
 	['ERROR_PERM_DENIED',      'denied',  'Permission denied.'],
 	['ERROR_LOCKED',           'locked',  '"$1" is locked and can not be renamed or removed.'],
 	['ERROR_EXISTS',           'exists',  'File named "$1" already exists in this location.'],

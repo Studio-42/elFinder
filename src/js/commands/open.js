@@ -84,18 +84,19 @@ elFinder.prototype.commands.open = function() {
 					? dfrd.reject([errors.read, file.name])
 					: fm.ajax({
 							data   : {cmd  : 'open', target : targets[0]},
-							notify : {type : 'open', cnt : 1, hideCnt : true}
+							notify : {type : 'open', cnt : 1, hideCnt : true},
+							syncOnFail : true
 						})
-						.fail(function(error) {
-							error && fm.sync(true)
-								.fail(function() {
-									var cwd = fm.cwd().hash,
-										root = fm.root();
-									if (cwd && root && cwd != root) {
-										self._exec(fm.root());
-									}
-								});
-						});
+						// .fail(function(error) {
+						// 	error && fm.sync(true)
+						// 		.fail(function() {
+						// 			var cwd = fm.cwd().hash,
+						// 				root = fm.root();
+						// 			if (cwd && root && cwd != root) {
+						// 				self._exec(fm.root());
+						// 			}
+						// 		});
+						// });
 			}
 		}
 
