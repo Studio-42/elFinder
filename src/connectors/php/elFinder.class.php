@@ -131,7 +131,7 @@ class elFinder {
 	const ERROR_MIME              = 29;
 	const ERROR_UPLOAD_TRANSFER   = 30;
 	const ERROR_ACCESS_DENIED     = 31;
-	
+	const ERROR_SAVE              = 32;
 	
 	/**
 	 * undocumented class variable
@@ -171,7 +171,7 @@ class elFinder {
 		29 => 'Not allowed file type.',
 		30 => '"$1" transfer error.',
 		31 => 'Access denied',
-		
+		32 => 'Unable to save "$1".'
 	);
 	
 	/**
@@ -940,14 +940,15 @@ class elFinder {
 	 **/
 	protected function put($args) {
 		$target = $args['target'];
+		$error  = array(self::ERROR_SAVE, '#'.$target);
 		
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
-			return array('error' => $this->error(self::ERROR_FILE_NOT_FOUND));
+			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
 		}
 		
 		if (($file = $volume->putContents($target, $args['content'])) == false) {
-			return array('error' => $this->error($volume->error()));
+			return array('error' => $this->error($error, $volume->error()));
 		}
 		if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
 			$file['hidden'] = true;

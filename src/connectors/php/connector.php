@@ -190,7 +190,7 @@ $opts = array(
 			'accessControl' => array($acl, 'fsAccess'),
 			'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',
-			'URL'    => 'http://localhost/git/elfinder/files/',
+			// 'URL'    => 'http://localhost/git/elfinder/files/',
 
 			'uploadAllow' => array('image'),
 			'uploadDeny'  => array('all'),
@@ -216,7 +216,7 @@ $opts = array(
 				array(
 					'pattern' => '/\/folder42/',
 					// 'write' => false
-					// 'read' => false
+					'read' => false
 					// 'hidden' => true,
 					// 'locked' => true
 				)

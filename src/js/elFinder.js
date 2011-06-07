@@ -714,25 +714,25 @@
 					
 					switch (status) {
 						case 'abort':
-							error = xhr.quiet ? '' : errors.abort;
+							error = xhr.quiet ? '' : [errors.connect, errors.abort];
 							break;
 						case 'timeout':	    
-							error = errors.timeout;
+							error = [errors.connect, errors.timeout];
 							break;
 						case 'parsererror': 
-							error = [errors.response, '<br>', errors.json];
+							error = [errors.response, errors.json];
 							break;
 						default:
 							if (xhr.status == 403) {
-								error = errors.access;
+								error = [errors.connect, errors.access];
 							} else if (xhr.status == 404) {
-								error = errors.backend;
+								error = [errors.connect, errors.notfound];
 							} else {
 								error = errors.connect;
 							} 
 					}
 					
-					dfrd.reject(error, xhr);
+					dfrd.reject(error, xhr, status);
 				},
 				/**
 				 * Request success handler. Valid response data and reject/resolve dfrd.
@@ -751,13 +751,13 @@
 					}
 					
 					if (!response) {
-						return dfrd.reject([errors.response, '<br>', errors.empty]);
+						return dfrd.reject([errors.response, errors.empty], xhr);
 					} else if (!$.isPlainObject(response)) {
-						return dfrd.reject([errors.response, '<br>', errors.json]);
+						return dfrd.reject([errors.response, errors.json], xhr);
 					} else if (response.error) {
-						return dfrd.reject(response.error);
+						return dfrd.reject(response.error, xhr);
 					} else if (!self.validResponse(cmd, response)) {
-						return dfrd.reject(errors.response);
+						return dfrd.reject(errors.response, xhr);
 					}
 
 					response = self.normalizeData(cmd, response);
@@ -900,7 +900,6 @@
 		/**
 		 * Sync content
 		 * 
-		 * @param  Boolean  freeze interface untill complete
 		 * @return jQuery.Deferred
 		 */
 		this.sync = function() {
@@ -946,7 +945,6 @@
 			
 			return dfrd;
 		}
-		
 		
 		/**
 		 * Attach listener to events
@@ -1236,16 +1234,15 @@
 				});
 			})
 			.error(function(e) { 
-				var 
-					opts  = {
-					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n('Error'),
-					resizable : false,
-					close     : function() { $(this).elfinderdialog('destroy') },
-					buttons   : {
-						Ok : function() { $(this).elfinderdialog('close'); }
-					}
+				var opts  = {
+						cssClass  : 'elfinder-dialog-error',
+						title     : self.i18n('Error'),
+						resizable : false,
+						close     : function() { $(this).elfinderdialog('destroy') },
+						buttons   : {}
 				};
+
+				opts.buttons[self.i18n('Close')] = function() { $(this).elfinderdialog('close'); };
 
 				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 			})
@@ -1455,11 +1452,10 @@
 			jqui     : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
 			node     : 'elFinder required DOM Element to be created.',
 			url      : 'Invalid elFinder configuration! You have to set URL option.',
-			access   : 'Backend access denied.',
-			backend  : 'Backend not found.',
+			access   : 'Access denied.',
 			connect  : 'Unable to connect to backend.',
-			abort    : 'Connection to backend aborted.',
-			timeout  : 'Connection to backend timeout.',
+			abort    : 'Connection aborted.',
+			timeout  : 'Connection timeout.',
 			response : 'Invalid backend response.',
 			json     : 'Data is not JSON.',
 			empty    : 'Data is empty.',
@@ -1473,6 +1469,7 @@
 			locked   : '"$1" is locked and can not be renamed or removed.',
 			exists   : 'File named "$1" already exists in this location.',
 			name     : 'Invalid file name.',
+			notfound : 'File not found.'
 			
 		},
 		/**

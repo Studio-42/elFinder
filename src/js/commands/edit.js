@@ -29,7 +29,7 @@ elFinder.prototype.commands.edit = function() {
 				openError  = [errors.openFile, file.name, '<br/>'],
 				saveError  = [errors.save, file.name, '<br/>'],
 				opts       = fm.options,
-				dfrd       = $.Deferred().fail(function(error) { error.length && fm.error(error); }), 
+				dfrd       = $.Deferred(), 
 				data       = {cmd : 'file', target : hash},
 				url        = fm.url(hash) || fm.options.url,
 				dialog = function(text) {
@@ -77,8 +77,7 @@ elFinder.prototype.commands.edit = function() {
 								current : fm.cwd().hash // old api
 							},
 							notify : {type : 'save', cnt : 1},
-							preventFail : true,
-							error : [errors.save, '<br/>']
+							syncOnFail : true
 						})
 						.fail(function(error) {
 							dfrd.reject(error);
@@ -97,6 +96,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				timeout, jqxhr;
 			
+			
 			if (!file.read) {
 				return dfrd.reject([errors.read, file.name]);
 			}
@@ -109,11 +109,6 @@ elFinder.prototype.commands.edit = function() {
 				data.cmd     = 'open';
 			}
 			
-			timeout = setTimeout(function() {
-				fm.notify({type : 'read', cnt : 1});
-				jqxhr.always(function() { fm.notify({type : 'read', cnt : -1}); });
-			}, opts.notifyDelay);
-			
 			jqxhr = fm.ajax({
 				data : data,
 				options : {
@@ -122,25 +117,34 @@ elFinder.prototype.commands.edit = function() {
 					dataType : 'html'
 				},
 				raw : true,
-				preventDefault : true
+				notify : {type : 'read', cnt : 1},
+				preventFail : true,
+				syncOnFail : !fm.option('url')
 			})
-			.fail(function(error, xhr) {
-				var status = xhr ? parseInt(xhr.status) : 0;
+			.fail(function(error, xhr, status) {
+				var error = [errors.open, file.name];
 				
-				if (status == 403) {
-					return dfrd.reject(openError.concat([errors.read, file.name]));
+				switch (status) {
+					case 'abort':
+						error.push(errors.abort);
+						break;
+					case 'timeout':	
+						error.push(errors.timeout);
+						break;
+					default:
+						if (xhr.status == 403) {
+							error.push(errors.access);
+						} else if (xhr.status == 404) {
+							error.push(errors.notfound);
+						} else {
+							error.push(errors.connect);
+						} 
 				}
-				
-				if (status == 404) {
-					return dfrd.reject(openError.concat([errors.fileNotFound]));
-				}
-
-				dfrd.reject(openError.concat(error));
+				fm.error(error);
+				dfrd.reject(error);
 			})
 			.done(dialog)
-			.always(function() {
-				clearTimeout(timeout);
-			});
+			
 			
 			return dfrd
 		};
