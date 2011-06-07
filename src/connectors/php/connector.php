@@ -124,7 +124,6 @@ class elFinderSimpleLogger {
 
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
- * Make files started with __ hidden.
  *
  * @param  string  $attr  attribute name (read|write|locked|hidden)
  * @param  string  $path  file path. Attention! This is path relative to volume root directory started with directory separator.
@@ -132,23 +131,44 @@ class elFinderSimpleLogger {
  * @author Dmitry (dio) Levashov
  **/
 function access($attr, $path, $data, $volume) {
-
-	return $attr == 'read' || $attr == 'write';
-	
-	echo $attr.' '.$path.' '.strpos($path, '__').'<br>';
-	if ($attr == 'hidden' && strpos($path, '__') === 0) {
-		return true;
-	}
-	return false;
+	return strpos(basename($path), '.') === 0
+		? !($attr == 'read' || $attr == 'write')
+		: $attr == 'read' || $attr == 'write';
 }
 
-// sleep(3);
+/**
+ * Access control example class
+ *
+ * @author Dmitry (dio) Levashov
+ **/
+class elFinderTestACL {
+	
+	/**
+	 * make dotfiles not readable, not writable, hidden and locked
+	 *
+	 * @param  string  $attr  attribute name (read|write|locked|hidden)
+	 * @param  string  $path  file path. Attention! This is path relative to volume root directory started with directory separator.
+	 * @param  mixed   $data  data which seted in 'accessControlData' elFinder option
+	 * @param  elFinderVolumeDriver  $volume  volume driver
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function fsAccess($attr, $path, $data, $volume) {
+		
+		if ($volume->name() == 'localfilesystem') {
+			return strpos(basename($path), '.') === 0
+				? !($attr == 'read' || $attr == 'write')
+				: $attr == 'read' || $attr == 'write';
+		}
+		
+		return true;
+	}
+	
+} // END class 
 
-// if (!empty($_GET['count'])) {
-// 	$s = (int)$_GET['count']*2;
-// 	sleep($s);
-// }
-// exit('{a : 42}');
+$acl = new elFinderTestACL();
+
+
 $opts = array(
 	'bind' => array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
@@ -159,8 +179,9 @@ $opts = array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
 			'alias' => 'File system',
-			'accessControl' => 'access',
-			// 'URL'    => 'http://localhost/git/elfinder/files/',
+			'accessControl' => array($acl, 'fsAccess'),
+			'accessControlData' => array('uid' => 1),
+			'URL'    => 'http://localhost/git/elfinder/files/',
 			"disabled" => array('reload'),
 			'uploadAllow' => array('image'),
 			'uploadDeny'  => array('all'),
@@ -170,20 +191,19 @@ $opts = array(
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
-			// 'tmbPath' => '/Users/dio/Sites/git/elfinder/my-tmb',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
 			'attributes' => array(
-				array(
-					'pattern' => '/\/__.*/',
-					'hidden'  => true
-				),
-				array(
-					'pattern' => '/\/\..*$/',
-					'read'    => false,
-					'write'   => true,
-					'locked'  => false,
-					'hidden'  => true
-				),
+				// array(
+				// 	'pattern' => '/\/__.*/',
+				// 	'hidden'  => true
+				// ),
+				// array(
+				// 	'pattern' => '/\/\..*$/',
+				// 	'read'    => false,
+				// 	'write'   => true,
+				// 	'locked'  => false,
+				// 	'hidden'  => true
+				// ),
 				array(
 					'pattern' => '/folder42$/',
 					// 'write' => false

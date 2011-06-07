@@ -690,7 +690,7 @@ abstract class elFinderVolumeDriver {
 			: '';
 
 		$this->configure();
-
+		// debug($this->attributes);
 		// return false;
 		return $this->mounted = true;
 	}
