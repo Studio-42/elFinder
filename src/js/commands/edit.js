@@ -37,7 +37,7 @@ elFinder.prototype.commands.edit = function() {
 							.keydown(function(e) {
 								var size = parseInt(self.options.tabSize) || 4,
 									value, start;
-							
+								e.stopPropagation();
 								if (e.keyCode == 9) {
 									e.preventDefault();
 									// insert spaces on tab press
@@ -53,14 +53,18 @@ elFinder.prototype.commands.edit = function() {
 						opts = {
 							title   : file.name,
 							width   : self.options.dialogWidth || 450,
-							close   : function() { $(this).elfinderdialog('destroy'); },
+							buttons : {},
+							close   : function() { 
+								$(this).elfinderdialog('destroy'); 
+							},
 							open    : function() { 
+								fm.disable();
 								editor.focus(); 
 								if (editor[0].setSelectionRange) {
-									editor[0].setSelectionRange(0, 0)
+									editor[0].setSelectionRange(0, 0);
 								}
-							},
-							buttons : {}
+							}
+							
 						};
 						
 					opts.buttons[fm.i18n('Save')] = function() {
@@ -69,7 +73,7 @@ elFinder.prototype.commands.edit = function() {
 						$(this).elfinderdialog('close');
 						
 						fm.ajax({
-							// options : {type : 'post'},
+							options : {type : 'post'},
 							data : {
 								cmd     : fm.oldAPI ? 'edit' : 'put',
 								target  : hash,

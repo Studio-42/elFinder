@@ -248,7 +248,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'event-add']
+	debug : ['error', 'event-disable']
 }
 
 })(jQuery);
