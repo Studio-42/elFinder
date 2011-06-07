@@ -115,7 +115,7 @@ class elFinder {
 	const ERROR_PERM_DENIED      = 14;
 	const ERROR_LOCKED           = 15;
 	const ERROR_EXISTS           = 16;
-	const ERROR_INV_NAME         = 17;
+	const ERROR_INVALID_NAME     = 17;
 	const ERROR_MKDIR            = 18;
 	const ERROR_MKFILE           = 19;
 	const ERROR_RENAME           = 20;

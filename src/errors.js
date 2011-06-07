@@ -33,7 +33,7 @@ var errors = [
 	['ERROR_PERM_DENIED',      'denied',  'Permission denied.'],
 	['ERROR_LOCKED',           'locked',  '"$1" is locked and can not be renamed or removed.'],
 	['ERROR_EXISTS',           'exists',  'File named "$1" already exists in this location.'],
-	['ERROR_INV_NAME',         'name',    '"$1" is not valid file name.'],
+	['ERROR_INVALID_NAME',     'name',    '"$1" is not valid file name.'],
 	['ERROR_MKDIR',            '',        'Unable to create folder "$1".'],
 	['ERROR_MKFILE',           '',        'Unable to create file "$1".'],
 	['ERROR_RENAME',           '',        'Unable to rename "$1".'],

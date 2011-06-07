@@ -1143,8 +1143,8 @@ abstract class elFinderVolumeDriver {
 		
 		$dir = $this->_dirname($path);
 		
-		if (!$this->attr($dir, 'write')) {
-			return $this->setError(elFinder::ERROR_NOT_WRITE, $this->_basename($dir));
+		if (!$this->attr($dir, 'write') || !$this->attr($dir, 'read')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if ($this->attr($path, 'locked')) {
