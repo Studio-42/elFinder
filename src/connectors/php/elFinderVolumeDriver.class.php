@@ -1123,7 +1123,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->nameAccepted($name)) {
-			return $this->setError(elFinder::ERROR_INV_NAME, $name);
+			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
 		if ($copy && !$this->options['copyOverwrite']) {
@@ -1446,9 +1446,11 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function nameAccepted($name) {
 		if ($this->nameValidator) {
-			return function_exists($this->nameValidator)
-				? ${$this->nameValidator}($name)
-				: preg_match($this->nameValidator, $name);
+			if (function_exists($this->nameValidator)) {
+				$f = $this->nameValidator;
+				return $f($name);
+			}
+			return preg_match($this->nameValidator, $name);
 		}
 		return true;
 	}

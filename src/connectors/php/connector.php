@@ -168,6 +168,10 @@ class elFinderTestACL {
 
 $acl = new elFinderTestACL();
 
+function validName($name) {
+	return strpos($name, '.') !== 0;
+}
+
 
 $opts = array(
 	'bind' => array(
@@ -181,8 +185,9 @@ $opts = array(
 			'alias' => 'File system',
 			'accessControl' => array($acl, 'fsAccess'),
 			'accessControlData' => array('uid' => 1),
+			'acceptedName' => 'validName',
 			'URL'    => 'http://localhost/git/elfinder/files/',
-			"disabled" => array('reload'),
+
 			'uploadAllow' => array('image'),
 			'uploadDeny'  => array('all'),
 			'uploadOrder' => 'deny,allow',
@@ -209,7 +214,7 @@ $opts = array(
 					// 'write' => false
 					// 'read' => false
 					// 'hidden' => true,
-					// 'locked' => true
+					'locked' => true
 				)
 			),
 		),
