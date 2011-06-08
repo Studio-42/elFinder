@@ -1,14 +1,15 @@
 /**
- * @class download. Download selected files
+ * @class elFinder command "download". 
+ * Download selected files.
+ * Only for new api
+ *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.download = function() {
-
 	var self     = this,
 		fm       = this.fm,
-		filter   = function(hashes) { return $.map(hashes, function(h) { return fm.file(h).mime == 'directory' ? null : h; }) },
 		callback = function(e) {
-			if (self.getstate() !== -1) {
+			if (self.getstate() > -1) {
 				e.preventDefault();
 				self.exec();
 			} else {
@@ -52,21 +53,20 @@ elFinder.prototype.commands.download = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.newAPI && filter(this.fm.selected()).length ? 0 : -1;
+		return fm.newAPI && fm.selected().length == this.files().length ? 0 : -1;
 	}
 	
-	this._exec = function() {
-		var hashes = filter(this.fm.selected()),
-			fm     = this.fm,
-			base   = fm.options.url, 
+	this._exec = function(hashes) {
+		var base   = fm.options.url, 
+			files = this.files(hashes),
 			dfrd   = $.Deferred().fail(function(error) { fm.error(error); }),
 			i, url;
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';
 			
-		for (i = 0; i < hashes.length; i++) {
-			if (!window.open(base + 'cmd=file&target=' + hashes[i]+'&download=1') ) {
-				return dfrd.reject(fm.errors.popupBlocks);
+		for (i = 0; i < files.length; i++) {
+			if (!window.open(base + 'cmd=file&target=' + files[i].hash+'&download=1', '_blank') ) {
+				return dfrd.reject(fm.errors.popup);
 			}
 		}
 		return dfrd.resolve(hashes);

@@ -242,15 +242,30 @@ elFinder.prototype.command = function(fm) {
 	 * With argument check given files hashes and return list of existed files hashes.
 	 * Without argument return selected files hashes.
 	 *
-	 * @param  Array|String  hashes
+	 * @param  Array|String|void  hashes
 	 * @return Array
 	 */
-	this.files = function(hashes) {
+	this.hashes = function(hashes) {
 		var fm = this.fm;
 		
 		return hashes
 			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) ? hash : null; })
 			: fm.selected();
+	}
+	
+	/**
+	 * Return only existed files from given fils hashes | selected files
+	 *
+	 * @param  Array|String|void  hashes
+	 * @return Array
+	 */
+	this.files = function(hashes) {
+		var fm = this.fm;
+		
+		return $.map(this.hashes(hashes), function(h) {
+			var file = fm.file(h);
+			return file.mime == 'directory' ? null : file;
+		});
 	}
 }
 

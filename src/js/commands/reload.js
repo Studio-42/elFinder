@@ -1,4 +1,9 @@
-
+/**
+ * @class  elFinder command "reload"
+ * Sync files and folders
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.reload = function() {
 	
 	this.title = 'Reload';
@@ -15,15 +20,16 @@ elFinder.prototype.commands.reload = function() {
 	
 	this._exec = function() {
 		var fm      = this.fm,
-			dfrd    = fm.sync().done(function() {
-				fm.trigger('reload')
-			}),
+			dfrd    = fm.sync(),
 			timeout = setTimeout(function() {
 				fm.notify({type : 'reload', cnt : 1, hideCnt : true});
 				dfrd.always(function() { fm.notify({type : 'reload', cnt  : -1}); });
 			}, fm.notifyDelay);
 			
-		return dfrd.always(function() { clearTimeout(timeout); });
+		return dfrd.always(function() { 
+			clearTimeout(timeout); 
+			fm.trigger('reload');
+		});
 	}
 
 }

@@ -6,6 +6,9 @@
  **/  
 elFinder.prototype.commands.open = function() {
 	var self = this,
+		filter = function(hashes) {
+			return $.map(hashes, function(h) { return self.fm.file(h).mime != 'directory' ? h : null });
+		}
 		callback = function(e) {
 			e.preventDefault();
 			self.exec();
@@ -55,7 +58,7 @@ elFinder.prototype.commands.open = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 
-		return cnt && (cnt == 1 || onlyFiles(sel)) ? 0 : -1;
+		return cnt && (cnt == 1 || cnt == this.files(sel).length) ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -66,12 +69,9 @@ elFinder.prototype.commands.open = function() {
 		var fm     = this.fm, 
 			errors = fm.errors,
 			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			hashes = hashes == void 0 ? fm.selected() : $.isArray(hashes) ? hashes : [hashes],
+			hashes = this.hashes(hashes),
 			cnt    = hashes.length,
-			files  = $.map(hashes, function(h) { 
-				var file = fm.file(h);
-				return file && file.mime != 'directory' ? file : null;
-			}),
+			files  = this.files(hashes),
 			file, url;
 
 		// open folder

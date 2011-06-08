@@ -9,7 +9,6 @@ elFinder.prototype.commands.forward = function() {
 	this.title = 'Forward';
 	this.alwaysEnabled = true;
 	
-	
 	this.shortcuts = [{
 		pattern     : 'ctrl+right',
 		description : 'Go forward'

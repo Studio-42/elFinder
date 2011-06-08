@@ -908,12 +908,10 @@
 				opts1 = {
 					data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
 					preventDefault : true,
-					// freeze         : freeze
 				},
 				opts2 = {
 					data           : {cmd : 'parents', target : cwd},
 					preventDefault : true,
-					// freeze         : freeze
 				},
 				doSync = function(odata, pdata) {
 					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
