@@ -1334,7 +1334,6 @@
 		// prepare node
 		node.addClass(this.cssClass)
 			.bind(mousedown, function() {
-				self.log('node')
 				!enabled && self.enable();
 			});
 		

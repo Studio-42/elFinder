@@ -17,7 +17,7 @@ elFinder.prototype.commands.open = function() {
 			self.exec();
 		};
 	
-	this.title = 'Open files or enter directory';
+	this.title = 'Open';
 	this.alwaysEnabled = true;
 	
 	this.handlers = {

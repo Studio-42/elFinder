@@ -44,8 +44,9 @@ elFinder.prototype.commands.edit = function() {
 									if (this.setSelectionRange) {
 										value = this.value;
 										start = this.selectionStart;
-										this.value = value.substr(0, start) + Array(size+1).join(' ') + value.substr(this.selectionEnd);
-										start += size;
+										// this.value = value.substr(0, start) + Array(size+1).join(' ') + value.substr(this.selectionEnd);
+										this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
+										start += 1;//size;
 										this.setSelectionRange(start, start);
 									}
 								}

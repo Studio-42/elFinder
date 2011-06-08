@@ -1,6 +1,7 @@
 
 elFinder.prototype.commands.reload = function() {
 	
+	this.title = 'Reload';
 	this.alwaysEnabled = true;
 	
 	this.shortcuts = [{

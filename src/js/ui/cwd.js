@@ -81,6 +81,13 @@ $.fn.elfindercwd = function(fm) {
 			clDropActive = 'elfinder-droppable-active',
 
 			/**
+			 * Css class for temporary nodes (for mkdir/mkfile) commands
+			 *
+			 * @type String
+			 **/
+			clTmp = 'elfinder-cwd-file-tmp',
+
+			/**
 			 * Base thumbnails url
 			 * New API only
 			 *
@@ -554,11 +561,11 @@ $.fn.elfindercwd = function(fm) {
 				// attach draggable
 				.delegate('[id]', 'mouseenter.'+fm.namespace, function(e) {
 					var $this = $(this),
-						target = fm.view == 'list' 
-							? $this 
-							: $this.children();
+						target = fm.view == 'list' ? $this : $this.children();
 
-					!target.is('.'+clDraggable+',.'+clDisabled) && target.draggable(fm.draggable);
+					if (!$this.is('.'+clTmp) && !target.is('.'+clDraggable+',.'+clDisabled)) {
+						target.draggable(fm.draggable);
+					}
 				})
 				// add css class and disable cwd droppable
 				.delegate('[id]', 'dropover', function(e, ui) {
@@ -622,9 +629,8 @@ $.fn.elfindercwd = function(fm) {
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
-
-					cwd.scrollTop(0);
-					parent.prepend(itemhtml(file));
+					cwd.trigger('unselectall');
+					parent.prepend($(itemhtml(file)).addClass(clTmp));
 				})
 				// unselect all selected files
 				.bind('unselectall', function() {
