@@ -764,6 +764,7 @@
 					if (response.options) {
 						cwdOptions = $.extend({}, cwdOptions, response.options);
 					}
+
 					dfrd.resolve(response);
 				},
 				xhr, _xhr
@@ -816,14 +817,13 @@
 
 			xhr = $.ajax(options).fail(error).success(success);
 			
+			// add "open" xhr into queue
 			if (cmd == 'open') {
 				queue.unshift(xhr);
 				dfrd.always(function() {
 					var ndx = $.inArray(xhr, queue);
 					
-					if (ndx !== -1) {
-						queue.splice(ndx, 1);
-					}
+					ndx !== -1 && queue.splice(ndx, 1);
 				});
 			}
 			
@@ -1008,6 +1008,7 @@
 					try {
 						if (handlers[i](event, this) === false 
 						|| event.isDefaultPrevented()) {
+							this.debug('event-stoped', event.type);
 							break;
 						}
 					} catch (ex) {
@@ -1469,7 +1470,8 @@
 			locked   : '"$1" is locked and can not be renamed or removed.',
 			exists   : 'File named "$1" already exists in this location.',
 			name     : 'Invalid file name.',
-			notfound : 'File not found.'
+			notfound : 'File not found.',
+			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.'
 			
 		},
 		/**

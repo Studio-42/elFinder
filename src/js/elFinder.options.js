@@ -248,7 +248,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'event-disable']
+	debug : ['error', 'event-stoped', 'backend-debug_', 'event-reload']
 }
 
 })(jQuery);

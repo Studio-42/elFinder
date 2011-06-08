@@ -1,18 +1,18 @@
 /**
  * @class elFinder.history
- * Store visited directory
+ * Store visited folders
  * and provide "back" and "forward" methods
  *
  * @author Dmitry (dio) Levashov
  */
 elFinder.prototype.history = function(fm) {
-	var 
+	var self = this,
 		/**
-		 * Flag. Do not store current opened directory hash
+		 * Update history on "open" event?
 		 *
 		 * @type Boolean
 		 */
-		ignor   = false,
+		update = true,
 		/**
 		 * Directories hashes storage
 		 *
@@ -24,7 +24,30 @@ elFinder.prototype.history = function(fm) {
 		 *
 		 * @type Number
 		 */
-		current;
+		current,
+		/**
+		 * Clear history
+		 *
+		 * @return void
+		 */
+		reset = function() {
+			history = [fm.cwd().hash];
+			current = 0;
+			update  = true;
+		},
+		/**
+		 * Open prev/next folder
+		 *
+		 * @Boolen  open next folder?
+		 * @return jQuery.Deferred
+		 */
+		go = function(fwd) {
+			if ((fwd && self.canForward()) || (!fwd && self.canBack())) {
+				update = false;
+				return fm.exec('open', history[fwd ? ++current : --current]).fail(reset);
+			}
+			return $.Deferred().reject();
+		};
 	
 	/**
 	 * Return true if there is previous visited directories
@@ -32,7 +55,7 @@ elFinder.prototype.history = function(fm) {
 	 * @return Boolen
 	 */
 	this.canBack = function() {
-		return history.length > 1 && current > 0;
+		return current > 0;
 	}
 	
 	/**
@@ -49,13 +72,7 @@ elFinder.prototype.history = function(fm) {
 	 *
 	 * @return void
 	 */
-	this.back = function() {
-		if (this.canBack()) {
-			ignor = true;
-			return fm.exec('open', history[--current])
-		}
-		return $.Deferred().reject();
-	}
+	this.back = go;
 	
 	/**
 	 * Go forward
@@ -63,30 +80,21 @@ elFinder.prototype.history = function(fm) {
 	 * @return void
 	 */
 	this.forward = function() {
-		if (this.canForward()) {
-			ignor = true;
-			return fm.exec('open', history[++current]);
-		}
-		return $.Deferred().reject();
+		return go(true);
 	}
 	
-	
+	// bind to elfinder events
 	fm.open(function(e) {
 		var l = history.length,
 			cwd = fm.cwd().hash;
 
-		if (ignor) {
-			return ignor = false;
+		if (update) {
+			current >= 0 && l > current + 1 && history.splice(current+1);
+			history[history.length-1] != cwd && history.push(cwd);
+			current = history.length - 1;
 		}
-
-		current >= 0 && l > current + 1 && history.splice(current+1);
-
-		history[history.length-1] != cwd && history.push(cwd);
-		current = history.length - 1;
+		update = true;
 	})
-	.reload(function() {
-		history = [fm.cwd().hash];
-		current = 0;
-	});
+	.reload(reset);
 	
 }

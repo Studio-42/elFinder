@@ -69,7 +69,7 @@ elFinder.prototype.mixins = {
 				});
 			
 		if (!node.length) {
-			return dfrd.reject(errors.invParams);
+			return dfrd.reject(errors.unknown);
 		}
 			
 		fm.disable();

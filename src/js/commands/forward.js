@@ -1,6 +1,12 @@
-
+/**
+ * @class  elFinder command "forward"
+ * Open next visited folder
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.forward = function() {
 	
+	this.title = 'Forward';
 	this.alwaysEnabled = true;
 	
 	

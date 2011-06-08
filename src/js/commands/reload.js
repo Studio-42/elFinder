@@ -15,7 +15,9 @@ elFinder.prototype.commands.reload = function() {
 	
 	this._exec = function() {
 		var fm      = this.fm,
-			dfrd    = fm.sync(),
+			dfrd    = fm.sync().done(function() {
+				fm.trigger('reload')
+			}),
 			timeout = setTimeout(function() {
 				fm.notify({type : 'reload', cnt : 1, hideCnt : true});
 				dfrd.always(function() { fm.notify({type : 'reload', cnt  : -1}); });

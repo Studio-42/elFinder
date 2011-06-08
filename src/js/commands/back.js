@@ -1,6 +1,11 @@
-
+/**
+ * @class  elFinder command "back"
+ * Open last visited folder
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.back = function() {
-
+	this.title = 'Back';
 	this.alwaysEnabled = true;
 	
 	this.shortcuts = [{
