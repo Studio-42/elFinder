@@ -10,10 +10,9 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  Array  files hashes
 		 * @return Array
 		 **/
-		filter = function(files) {
-			return $.map(files || [], function(h) {
-				var file = fm.file(h);
-				return file && (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1) ? h : null
+		filter = function(hashes) {
+			return $.map(self.files(hashes), function(file) {
+				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 ? file : null;
 			})
 		},
 		/**
@@ -23,8 +22,8 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  file hash
 		 * @return jQuery.Deferred
 		 **/
-		edit = function(hash) {
-			var file       = fm.file(hash),
+		edit = function(file) {
+			var hash       = file.hash,
 				errors     = fm.errors,
 				openError  = [errors.openFile, file.name, '<br/>'],
 				saveError  = [errors.save, file.name, '<br/>'],
@@ -35,18 +34,17 @@ elFinder.prototype.commands.edit = function() {
 				dialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20" style="padding:0;margin:0;border:1px solid #ccc">'+text+'</textarea>')
 							.keydown(function(e) {
-								var size = parseInt(self.options.tabSize) || 4,
-									value, start;
+								var value, start;
+								
 								e.stopPropagation();
 								if (e.keyCode == 9) {
 									e.preventDefault();
-									// insert spaces on tab press
+									// insert tab on tab press
 									if (this.setSelectionRange) {
 										value = this.value;
 										start = this.selectionStart;
-										// this.value = value.substr(0, start) + Array(size+1).join(' ') + value.substr(this.selectionEnd);
 										this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
-										start += 1;//size;
+										start += 1;
 										this.setSelectionRange(start, start);
 									}
 								}
@@ -164,8 +162,7 @@ elFinder.prototype.commands.edit = function() {
 	 */
 	this.options = {
 		ui          : 'button', 
-		dialogWidth : 450, 
-		tabSize     : 4
+		dialogWidth : 450
 	};
 	
 	this._handlers = {
@@ -173,19 +170,21 @@ elFinder.prototype.commands.edit = function() {
 	};
 	
 	this.getstate = function() {
-		return filter(fm.selected()).length ? 0 : -1;
+		var cnt = fm.selected().length;
+		
+		return cnt && cnt == filter().length ? 0 : -1;
 	}
 	
-	this._exec = function(files) {
-		var files = filter(this.files(files)),
-			list = [],
-			file, dfrd;
+	this._exec = function(hashes) {
+		var files = filter(hashes),
+			list  = [],
+			file;
 
 		while ((file = files.shift())) {
 			list.push(edit(file));
 		}
 		
-		return dfrd = list.length 
+		return list.length 
 			? $.when.apply(null, list)
 			: $.Deferred().reject();
 

@@ -53,7 +53,9 @@ elFinder.prototype.commands.download = function() {
 	}
 	
 	this.getstate = function() {
-		return fm.newAPI && fm.selected().length == this.files().length ? 0 : -1;
+		var cnt = fm.selected().length;
+		
+		return fm.newAPI && cnt && fm.selected().length == this.files().length ? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {

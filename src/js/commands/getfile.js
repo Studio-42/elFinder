@@ -1,5 +1,8 @@
 /**
- * @class getfile. Return selected files info into outer callback.
+ * @class elFinder command "getfile". 
+ * Return selected files info into outer callback.
+ * For use elFinder with wysiwyg editors etc.
+ *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.getfile = function() {
@@ -19,7 +22,7 @@ elFinder.prototype.commands.getfile = function() {
 			return o.multiple || files.length == 1 ? files : [];
 		},
 		callback = function(e) {
-			if (self.getstate() !== -1) {
+			if (self.getstate() > -1) {
 				e.preventDefault();
 				self.exec();
 			} else {

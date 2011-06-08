@@ -35,7 +35,7 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'info', 'help'],
 	
 	dblclick : 'open',
 	enter    : 'open',
@@ -61,7 +61,7 @@ elFinder.prototype.options = {
 		// toolbar content
 		toolbar : [
 			['back', 'forward', 'reload', 'up', 'home'],
-			['open', 'getfile', 'download'],
+			['open', 'getfile', 'download', 'quicklook'],
 			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
 			['rm'],
 			['edit'],

@@ -231,7 +231,7 @@ elFinder.prototype.command = function(fm) {
 				try {
 					cmd.call(this, this.state, this.value);
 				} catch (e) {
-					this.fm.debug('error', e)
+					this.fm.debug('error', this.name+' change handler failed')
 				}
 			}
 		}
