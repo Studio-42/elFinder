@@ -6,25 +6,12 @@
  **/  
 elFinder.prototype.commands.open = function() {
 	var self = this,
-		onlyFiles = function(hashes) {
-			var i = hashes.length, f;
-			
-			while (i--) {
-				f = self.fm.file(hashes[i]);
-				if (!f || f.mime == 'directory') {
-					return false;
-				}
-			}
-			return true;
-		},
 		callback = function(e) {
-			// var sel = self.fm.selected();
 			e.preventDefault();
-			// sel.length && 
 			self.exec();
 		};
 	
-	this.title = 'Open';
+	this.title = 'Open files or enter folder';
 	this.alwaysEnabled = true;
 	
 	this.handlers = {
@@ -76,19 +63,21 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this._exec = function(hashes) {
-		// this.fm.log(hashes)
-		var fm      = this.fm, 
-			dfrd    = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			hashes  = hashes == void 0 ? fm.selected() : $.isArray(hashes) ? hashes : [hashes],
+		var fm     = this.fm, 
+			errors = fm.errors,
+			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
+			hashes = hashes == void 0 ? fm.selected() : $.isArray(hashes) ? hashes : [hashes],
 			cnt    = hashes.length,
-			dir
-			;
-		// this.fm.log(hashes)
+			files  = $.map(hashes, function(h) { 
+				var file = fm.file(h);
+				return file && file.mime != 'directory' ? file : null;
+			}),
+			file, url;
 
-		if (cnt == 1 && (!(dir = fm.file(hashes[0])) || dir.mime == 'directory')) {
-			// fm.log(dir)
-			return dir && !dir.read
-				? dfrd.reject([errors.open, dir.name, errors.denied])
+		// open folder
+		if (cnt == 1 && (!(file = fm.file(hashes[0])) || file.mime == 'directory')) {
+			return file && !file.read
+				? dfrd.reject([errors.open, file.name, errors.denied])
 				: fm.ajax({
 						data   : {cmd  : 'open', target : hashes[0]},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
@@ -96,46 +85,20 @@ elFinder.prototype.commands.open = function() {
 					});
 		}
 		
-		return;	
-		var fm      = this.fm, 
-			dfrd    = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			targets = this.files(hashes),
-			cnt     = targets.length,
-			hashes  = $.isArray(hashes) ? hashes : [],
-			errors  = fm.errors,
-			hash, file, i, url, s, w;
-			
-			
-		fm.log(cnt)
-		// open directory
-		if (hashes.length == 1 || cnt == 1) {
-			if (!cnt || ((file = fm.file(targets[0])) && file.mime == 'directory')) {
-				return file && !file.read
-					? dfrd.reject([errors.open, file.name, errors.denied])
-					: fm.ajax({
-							data   : {cmd  : 'open', target : targets[0]},
-							notify : {type : 'open', cnt : 1, hideCnt : true},
-							// syncOnFail : true
-						});
-			}
-		}
-
-		
-
-		// files and folders selected - do nothing
-		if (!cnt || !onlyFiles(targets)) {
+		// nothing to open or files and folders selected - do nothing
+		if (!cnt || cnt != files.length) {
 			return dfrd.reject();
 		}
-
+		
 		// open files
-		for (i = 0; i < cnt; i++) {
-			hash = targets[i];
-			file = fm.file(hash)
-
+		cnt = files.length;
+		while (cnt--) {
+			file = files[cnt];
+			
 			if (!file.read) {
-				return dfrd.reject(fm.i18n([errors.open, file.name, errors.denied]));
+				return dfrd.reject([errors.open, file.name, errors.denied]);
 			}
-
+			
 			if (!(url = fm.url(file.hash))) {
 				url = fm.options.url;
 				url = url + (url.indexOf('?') === -1 ? '?' : '&')
@@ -153,8 +116,7 @@ elFinder.prototype.commands.open = function() {
 				return dfrd.reject(errors.popup);
 			}
 		}
-
-		return dfrd.resolve(targets);
+		return dfrd.resolve(hashes);
 	}
 
 }
