@@ -229,9 +229,9 @@ elFinder.prototype.command = function(fm) {
 			for (i = 0; i < this.listeners.length; i++) {
 				cmd = this.listeners[i];
 				try {
-					cmd.call(this, this.state, this.value);
+					cmd(this.state, this.value);
 				} catch (e) {
-					this.fm.debug('error', this.name+' change handler failed')
+					this.fm.debug('error', e)
 				}
 			}
 		}

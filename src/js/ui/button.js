@@ -17,11 +17,11 @@ $.fn.elfinderbutton = function(cmd) {
 			
 		cmd.change(function() {
 			// here this - command object 
-			if (this.disabled()) {
+			if (cmd.disabled()) {
 				button.removeClass(active).addClass(disabled);
 			} else {
 				button.removeClass(disabled);
-				button[this.active() ? 'addClass' : 'removeClass'](active);
+				button[cmd.active() ? 'addClass' : 'removeClass'](active);
 			}
 		});
 		cmd.change()	

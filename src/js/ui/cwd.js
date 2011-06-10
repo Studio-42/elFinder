@@ -613,6 +613,9 @@ $.fn.elfindercwd = function(fm) {
 					$this.is('.'+clDroppable) && $this.droppable('enable');	
 					target.is('.'+clDraggable) && target.draggable('enable');
 				})
+				.delegate('[id]', 'scrolltoview', function() {
+					scrollToView($(this))
+				})
 				// make files selectable
 				.selectable({
 					filter     : '[id]',

@@ -595,6 +595,16 @@
 			return '';
 		}
 		
+		this.tmb = function(hash) {
+			var file = files[hash],
+				url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
+			
+			if (url && ($.browser.opera || $.browser.msie)) {
+				url += '?_=' + new Date().getTime();
+			}
+			return url;
+		}
+		
 		/**
 		 * Return selected files hashes
 		 *
