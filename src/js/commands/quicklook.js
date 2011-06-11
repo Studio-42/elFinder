@@ -20,6 +20,7 @@ elFinder.prototype.commands.quicklook = function() {
 			return {
 				opacity : 0,
 				width  : node.width()+'px',
+				// height : node.height(),
 				top    : parseInt(wz.position().top + node.position().top - deltah)+'px',
 				left   : parseInt(cwd.position().left + node.position().left + deltaw)+'px'
 			}
@@ -28,6 +29,7 @@ elFinder.prototype.commands.quicklook = function() {
 			return {
 				opacity : 1,
 				width  : width+'px',
+				// height : height,
 				top    : '50px',
 				left   : parseInt((parent.width() - width)/2)
 			}
@@ -44,6 +46,7 @@ elFinder.prototype.commands.quicklook = function() {
 					.show()
 					.animate(openedCss(node), 'fast', function() { 
 						state = opened;
+						// win.css('height', 'auto')
 						self.window.trigger('open')
 					})
 				
@@ -51,17 +54,21 @@ elFinder.prototype.commands.quicklook = function() {
 			
 		}, 
 		close = function() {
-			var win = self.window;
+			var win = self.window,
+				ui = self.ui;
 			
 			if (self.opened()) {
 				state = animated;
-				self.ui.preview.css({width : 'auto', height : 'auto'}).hide('slow')
-				win.unbind('open resize').css('height', 'auto').animate(closedCss(cwd.find('#'+win.data('hash'))), 'slow', function() { 
-					
-					win.hide().data('resized', false);
-					self.ui.preview.css('height', 'auto').show().children().remove();
-					state = closed; 
-				})
+				// ui.nav.hide()
+				ui.preview.css({width : 'auto', height : 'auto'}).hide(200);
+				win.unbind('open resize')
+					.css('height', 'auto')
+					.animate(closedCss(cwd.find('#'+win.data('hash'))), 350, function() { 
+						win.hide().data('resized', false);
+						ui.preview.show().children().remove();
+						// ui.nav.show()
+						state = closed; 
+					});
 			}
 		},
 		width, height, parent, wz, cwd, deltaw, deltah
@@ -143,13 +150,9 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this.ui = {
-		title : $('<div class="elfinder-quicklook-title"/>'),
+		title   : $('<div class="elfinder-quicklook-title"/>'),
 		preview : $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>'),
-		icon : $('<div/>'),
-		info : $('<div class="elfinder-quicklook-info"/>'),
-		nav : $('<div class="elfinder-quicklook-nav"/>')
-		
-		
+		nav     : $('<div class="elfinder-quicklook-nav"/>')
 	}
 	
 	this.window = $('<div class="ui-reset elfinder-quicklook"/>')
@@ -164,25 +167,26 @@ elFinder.prototype.commands.quicklook = function() {
 	
 	if ($.fn.resizable) {
 		this.window.resizable({ 
-			handles : 'se', 
+			handles    : 'se', 
 			alsoResize : '.elfinder-quicklook-preview',
-			minHeight : 160,
-			start : function() {
-				self.window.data('resized', true)
-			}
-		}).resize(function() {
-			// fm.log('resize')
-
-		})
-		
+			minWidth   : this.options.minWidth || 350,
+			minHeight  : this.options.minHeight || 160,
+			start      : function() { self.window.data('resized', true); }
+		});
 	}
 	
+	/**
+	 * Init command.
+	 * Add default plugins and init other plugins
+	 *
+	 * @return Object
+	 **/
 	this.init = function() {
 		var o = this.options, 
 			plugins = fm.commands.quicklook.plugins || [],
 			i, p;
 		
-		width = o.width > 0 ? parseInt(o.width) : 450;	
+		width  = o.width > 0 ? parseInt(o.width) : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 200;
 		
 		fm.one('load', function() {
@@ -192,23 +196,23 @@ elFinder.prototype.commands.quicklook = function() {
 			deltaw = (cwd.innerWidth() - cwd.width() - 2)/2;
 			deltah = (cwd.innerHeight() - cwd.height() - 2)/2
 
-			// on change preview - update icon and title
+			// on change preview - update file info and title
 			self.preview(function() {
-				var ui = self.ui,
+				var ui   = self.ui,
 					file = self.value,
 					tmb  = fm.tmb(file.hash),
-					icon = $('<div class="elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime)+'"/>'),
-					tpl = '<div class="elfinder-quicklook-info-data">{value}</div>',
+					icon = $('<div class="elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime)+'"/>').hide(),
+					tpl  = '<div class="elfinder-quicklook-info-data">{value}</div>',
 					info = $('<div class="elfinder-quicklook-info">'
 						+ '<div class="elfinder-quicklook-info-name">'+fm.escape(file.name)+'</div>'
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
 						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
 						+ tpl.replace(/\{value\}/, fm.i18n('Modified')+': '+ fm.formatDate(file.date))
-						+'</div>'),
-					show = function() {
-						info.css('margin-top', -parseInt(info.outerHeight(true)/2)+'px').show()
-					}
-					;
+						+'</div>').hide(),
+					margin = function() { 
+						info.css('margin-top', -parseInt(info.outerHeight(true)/2)+'px');
+						info.add(icon).delay(150).fadeIn(100)
+					};
 				
 				self.window.unbind('open resize').data('hash', self.value.hash);	
 				self.ui.title.html(fm.escape(file.name));
@@ -216,7 +220,7 @@ elFinder.prototype.commands.quicklook = function() {
 				self.ui.preview.children()
 					.remove()
 					.end()
-					.append(info.hide())
+					.append(info)
 					.append(icon)
 					;
 				
@@ -225,48 +229,37 @@ elFinder.prototype.commands.quicklook = function() {
 						.hide()
 						.insertAfter(icon)
 						.load(function() {
+							$(this).remove();
 							icon.css('background', 'url("'+tmb+'") center center no-repeat');
-							$(this).remove()
 						})
 						.attr('src', tmb);
 				
-				if (self.opened()) { 
-					show();
-				} else {
-					self.window.one('open', show)
-				}
-
+				self.opened() ? margin() : self.window.one('open', margin);
 			});
 
 			// init plugins
 			$.each(plugins, function(i, pl) { new pl(self); });
 
-			// add default preview handler
+			// if no one plugins catch event - show file info
 			self.preview(function() {
-				var ui  = self.ui,
-					tpl = '<div class="elfinder-quicklook-info-data">{value}</div>',
-					file = self.value,
-					info = '<div class="elfinder-quicklook-info-name">'+fm.escape(file.name)+'</div>'
-							+ tpl.replace(/\{value\}/, fm.mime2kind(file))
-							+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
-							+ tpl.replace(/\{value\}/, fm.i18n('Modified')+': '+ fm.formatDate(file.date)),
-					append = function() {
-						ui.preview.css('height', 'auto').append(ui.info)
+				var show = function() {
+						self.ui.preview.children('.elfinder-quicklook-info,.elfinder-cwd-icon').show();
 					};
-							
-				// ui.preview.find('.elfinder-cwd-icon').addClass('elfinder-quicklook-preview-icon');
-				ui.info.html(info);
-				// self.opened() ? append() : self.window.one('open', append);
-			})
+				// self.opened() ? show() : self.window.one('open', show);
+			});
 
 			// change handler
 			self.change(function() {
 				if (!self.closed()) {
-					self.value ? self.preview() : self.window.trigger('close');
+					self.value ? self.preview() : close() //self.window.trigger('close');
 				}
 			});
 			
-		})
+			$(document).keyup(function(e) {
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && close();
+			});
+			
+		});
 	}
 	
 	this.getstate = function() {
@@ -274,22 +267,42 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this._exec = function() {
-		// this.window.trigger('toggle')
 		if (this.enabled()) {
 			this.closed() ? open() : close();
-			// self.window.trigger(self.closed() ? 'open' : 'close');
 		}
 	}
 	
 }
 
-
+// quicklook plugins
 elFinder.prototype.commands.quicklook.plugins = [
 
+	/**
+	 * Images preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
 	function(ql) {
-		var mimes = ['image/jpeg', 'image/png', 'image/gif'],
-			win = ql.window,
-			preview = ql.ui.preview;
+		var mimes    = ['image/jpeg', 'image/png', 'image/gif'],
+			win     = ql.window,
+			preview = ql.ui.preview,
+			// resize image to fit in quicklook preview
+			resize = function() {
+				var pw = parseInt(preview.width()),
+					ph = parseInt(preview.height()),
+					w, h;
+					
+				if (prop < (pw/ph).toFixed(2)) {
+					h = ph;
+					w = Math.floor(h * prop);
+				} else {
+					w = pw;
+					h = Math.floor(w/prop);
+				}
+				
+				img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+			},
+			img, prop;
 		
 		$.each(navigator.mimeTypes, function(i, o) {
 			var mime = o.type;
@@ -299,66 +312,38 @@ elFinder.prototype.commands.quicklook.plugins = [
 			} 
 		});
 		
-		// ql.fm.log(mimes)
-		
+		// change file handler
 		ql.preview(function() {
 			var file = ql.value,
-				src = ql.fm.url(file.hash),
-				t;
+				src  = ql.fm.url(file.hash);
 				
 			if (file && $.inArray(file.mime, mimes) !== -1) {
-				
-				preview.children().hide();
-				t = setTimeout(function() {
-					preview.children().show()
-				}, 200)
-				
-				$('<img />')
+				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
 					.load(function() {
-						var img = $(this),
-							w   = img.width(),
-							h   = img.height(),
-							p   = (w/h).toFixed(2),
-							show = function(w, h) {
-								img.width(w).height(h).siblings().fadeOut(100).end().fadeIn(350);
-								if (h < preview.height()) {
-									img.css('margin-top', parseInt((preview.height() - h)/2)+'px')
-								}
+						var show = function() {
+							var _show = function(a) {
+								win.bind('resize', resize).trigger('resize');
+								img.fadeIn('fast');
+								a === void(0) && win.data('resized', true);
 							};
 							
-						clearTimeout(t)	;
-						
-						if (ql.opened()) {
-							if (p < (preview.width()/preview.height()).toFixed(2)) {
-								h = parseInt(preview.height());
-								w = Math.floor(h * p);
-							} else {
-								w = preview.width();
-								h = Math.floor(w/p)
-							}
-							show(w, h);
-						} else {
-							win.bind('open', function() {
-								h = Math.floor(Math.min(preview.width()/p, $(window).height() * 0.7));
-								w = Math.floor(h * p);
-								
-								preview.animate({height : h}, 300);
-								show(w, h);
-							})
-							
-							
-						}
+							preview.children('.elfinder-quicklook-info,.elfinder-cwd-icon').remove();
 
+							win.data('resized') 
+								? _show(true) 
+								: preview.animate({height : Math.floor(Math.min(preview.width()/prop, $(window).height() * 0.7))}, 300, _show);
+						};
+						
+						prop = (img.width()/img.height()).toFixed(2);
+						ql.opened() ? show() : win.bind('open', show);
 					})
-					.attr('src', src)
-				;
+					.attr('src', src);
 				
 				return false
 			}
 		})
 		
-		// console.log(ql)
 	}
 ]
