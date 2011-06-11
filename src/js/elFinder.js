@@ -435,7 +435,7 @@
 		 **/
 		this.droppable = {
 				tolerance  : 'pointer',
-				accept     : ':not(.ui-dialog)',
+				accept : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir',
 				hoverClass : 'elfinder-dropable-active',
 				drop : function(e, ui) {
 					var dst     = $(this),
