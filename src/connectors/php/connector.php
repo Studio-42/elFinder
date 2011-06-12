@@ -192,7 +192,7 @@ $opts = array(
 			'acceptedName' => 'validName',
 			'URL'    => 'http://localhost/git/elfinder/files/',
 
-			'uploadAllow' => array('image'),
+			'uploadAllow' => array('all'),
 			'uploadDeny'  => array('all'),
 			'uploadOrder' => 'deny,allow',
 			'uploadOverwrite' => false,

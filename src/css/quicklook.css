@@ -48,6 +48,7 @@
 	margin-top:-8px;
 	width:16px;
 	height:16px;
+	cursor:default;
 }
 
 /* main part of quicklook window */
@@ -137,14 +138,44 @@
 	background-position:0 -32px;
 }
 
-/* text files preview */
+/* text files preview wrapper */
 .elfinder-quicklook-preview-text {
 	width: 100%;
 	height:100%;
 	background:#fff;
 	color:#222;
-	padding:.2em;
 	font-size:.8em;
 	overflow:auto;
 }
+
+/* text preview */
+.elfinder-quicklook-preview-text pre {
+	margin:0;
+	padding:3px 9px;
+}
+
+/* html preview */
+.elfinder-quicklook-preview iframe {
+	width:100%;
+	height:100%;
+	background:#fff;
+	border:0 solid;
+	margin:0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

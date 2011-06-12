@@ -519,7 +519,39 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
-		
+		var mimes   = ['text/html', 'application/xhtml+xml'],
+			win     = ql.window,
+			preview = ql.ui.preview,
+			fm      = ql.fm;
+			
+		ql.preview(function() {
+			var file = ql.value, node, iframe, doc;
+			
+			if (file && file.read && $.inArray(file.mime, mimes) !== -1) {
+				node = $('<iframe/>').hide().appendTo(preview);
+
+				fm.ajax({
+					options        : {dataType : 'html'},
+					data           : {cmd : fm.oldAPI ? 'open' : 'file', target  : file.hash, current : file.phash},
+					preventDefault : true,
+					raw            : true
+				})
+				.done(function(data) {
+					if (node.parent().length) {
+						doc = node[0].contentWindow.document;
+						doc.open();
+						doc.write(data)
+						doc.close()
+						node.show().siblings().remove();
+					}
+				})
+				.fail(function() {
+					node.remove();
+				});
+				return false;
+			}
+		})
+			
 	},
 	
 	/**
@@ -547,7 +579,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					raw            : true
 				})
 				.done(function(data) {
-					node.parent().length && node.text(data).show().siblings().remove();
+					node.parent().length && node.show().append('<pre>'+data+'</pre>').siblings().remove();
 				})
 				.fail(function() {
 					node.remove();
