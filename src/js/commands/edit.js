@@ -1,9 +1,7 @@
 "use strict"
 elFinder.prototype.commands.edit = function() {
 	var self = this,
-		fm = this.fm,
-		// text files but not text mime
-		mimes = ['application/javascript', 'application/xhtml+xml', 'audio/x-mp3-playlist', 'application/x-bittorrent torrent', 'application/x-web-config'],
+		fm   = this.fm,
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -12,7 +10,7 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(hashes) {
 			return $.map(self.files(hashes), function(file) {
-				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 ? file : null;
+				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, fm.textMimes) !== -1 ? file : null;
 			})
 		},
 		/**
