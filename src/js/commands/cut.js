@@ -39,7 +39,7 @@ elFinder.prototype.commands.cut = function() {
 			}
 		});
 		
-		return dfrd.isRejected() ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes)));
+		return dfrd.isRejected() ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
 	}
 
 }
