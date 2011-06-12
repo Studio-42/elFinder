@@ -10,6 +10,12 @@
 	z-index:10000;
 }
 
+.elfinder-quicklook-fullscreen {
+	border-radius:0;
+	-moz-border-radius:0;
+	-webkit-border-radius:0;
+}
+
 /* panel with title */
 .elfinder-quicklook-titlebar {
 	
@@ -49,6 +55,7 @@
 	overflow:hidden;
 	position:relative;
 	margin-bottom:40px;
+	border:1px solid transparent;
 }
 
 /* file icon in preview */
@@ -128,5 +135,16 @@
 .elfinder-quicklook-navbar-icon-next {
 	margin-left:32px;
 	background-position:0 -32px;
+}
+
+/* text files preview */
+.elfinder-quicklook-preview-text {
+	width: 100%;
+	height:100%;
+	background:#fff;
+	color:#222;
+	padding:.2em;
+	font-size:.8em;
+	overflow:auto;
 }
 

@@ -293,10 +293,9 @@ elFinder.prototype.commands.quicklook = function() {
 			}),
 		navbar : $('<div class="elfinder-quicklook-navbar"/>')
 			.append($('<div class="'+navicon+' '+navfsicon+'"/>').mousedown(function(e) {
-					var icon = $(this),
-						win  = self.window,
-						fullscreen = icon.is('.'+navfsicon+'-off'),
-						delta;
+					var icon       = $(this),
+						win        = self.window,
+						fullscreen = icon.is('.'+navfsicon+'-off');
 					
 					if (fullscreen) {
 						win.css(win.data('position'));
@@ -307,14 +306,18 @@ elFinder.prototype.commands.quicklook = function() {
 							width  : win.width(), 
 							height : win.height()
 						})
+						.hide() // try to hide window scrollers and calc coorent window size
 						.css({
 							left   : -Math.ceil(parent.offset().left + 1),
 							top    : -Math.ceil(parent.offset().top + 1),
 							width  : $(window).width(),
 							height : $(window).height()
-						});
+						})
+						.show();
 					}
 					self.ui.titlebar[fullscreen ? 'show' : 'hide']();
+					
+					win[fullscreen ? 'removeClass' : 'addClass']('elfinder-quicklook-fullscreen');
 					icon[fullscreen ? 'removeClass' : 'addClass'](navfsicon+'-off');
 					$.fn.resizable && win.resizable(fullscreen ? 'enable' : 'disable').removeClass('ui-state-disabled');
 					win.trigger('resize');
@@ -338,12 +341,11 @@ elFinder.prototype.commands.quicklook = function() {
 	
 	// make window resizable
 	if ($.fn.resizable) {
-		// this.window.resizable({ 
-		// 	handles   : 'se', 
-		// 	minWidth  : this.options.minWidth || 350,
-		// 	minHeight : this.options.minHeight || 160,
-		// 	start     : function() { self.window.data('resized', true); }
-		// });
+		this.window.resizable({ 
+			handles   : 'se', 
+			minWidth  : this.options.minWidth || 350,
+			minHeight : this.options.minHeight || 160
+		});
 	}
 	
 	/**
@@ -387,13 +389,12 @@ elFinder.prototype.commands.quicklook = function() {
 							.fadeIn(100);
 					};
 				
-				self.window.unbind('open resize').data('hash', self.value.hash);	
 				self.ui.title.html(fm.escape(file.name));
-				
-				self.window.bind('resize', function() {
-					ui.preview.trigger('resize')
-					
-				})
+				self.window.unbind('open resize')
+					.data('hash', self.value.hash)
+					.bind('resize', function() {
+						ui.preview.trigger('resize');
+					});
 				
 				self.ui.preview.children()
 					.remove()
@@ -476,7 +477,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			// remove icon/info, resize and display image
 			show = function() {
 				preview.children('.elfinder-quicklook-info,.elfinder-cwd-icon').remove();
-				preview.bind('resize', resize).trigger('resize');
+				win.bind('resize', resize).trigger('resize');
 				img.fadeIn('slow');
 			},
 			img, prop;
@@ -494,9 +495,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 		// load and display image
 		ql.preview(function() {
 			var file = ql.value,
-				src  = ql.fm.url(file.hash);
+				src;
 				
 			if (file && $.inArray(file.mime, mimes) !== -1) {
+				src  = ql.fm.url(file.hash);
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
@@ -509,5 +511,51 @@ elFinder.prototype.commands.quicklook.plugins = [
 				return false;
 			}
 		});
+	},
+	
+	/**
+	 * HTML preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		
+	},
+	
+	/**
+	 * Texts preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var mimes   = ql.fm.textMimes,
+			win     = ql.window,
+			preview = ql.ui.preview,
+			fm      = ql.fm;
+		
+		ql.preview(function() {
+			var file = ql.value, node;
+			
+			if (file && file.read && (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1)) {
+
+				node = $('<div class="elfinder-quicklook-preview-text"/>').hide().appendTo(preview);
+				
+				fm.ajax({
+					options        : {dataType : 'html'},
+					data           : {cmd : fm.oldAPI ? 'open' : 'file', target  : file.hash, current : file.phash},
+					preventDefault : true,
+					raw            : true
+				})
+				.done(function(data) {
+					node.parent().length && node.text(data).show().siblings().remove();
+				})
+				.fail(function() {
+					node.remove();
+				});
+				
+				return false;
+			}
+		});
 	}
+	
 ]

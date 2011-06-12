@@ -1549,7 +1549,7 @@
 			'video/x-matroska'              : 'Matroska video'
 		},
 		
-		
+		textMimes : ['application/javascript', 'application/xhtml+xml', 'audio/x-mp3-playlist', 'application/x-bittorrent torrent', 'application/x-web-config'],
 		/**
 		 * Ajax request data validation rules
 		 * 
