@@ -32,7 +32,7 @@ elFinder.prototype.commands.cut = function() {
 		
 		$.each(this.files(hashes), function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([errors.copy, file.name, errors.access]);
+				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
 			if (file.locked) {
 				return !dfrd.reject([errors.locked, file.name]);

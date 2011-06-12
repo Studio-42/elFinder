@@ -32,10 +32,10 @@ elFinder.prototype.commands.duplicate = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([errors.copy, file.name, errors.access]);
+				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
 			if (!fm.file(file.phash).write) {
-				return !dfrd.reject([errors.copy, file.name, errors.access]);
+				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
 		})
 		

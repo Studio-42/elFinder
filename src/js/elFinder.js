@@ -1480,7 +1480,9 @@
 			name     : 'Invalid file name.',
 			notfound : 'File not found.',
 			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.',
-			copy     : 'Unable to copy "$1".'
+			copy     : 'Unable to copy "$1".',
+			move     : 'Unable to move "$1".',
+			copyinself : 'Unable to copy "$1" into itself.'
 			
 		},
 		/**
