@@ -152,7 +152,7 @@ class elFinder {
 		10 => 'Object is not a folder.',
 		11 => 'Object is not a file.',
 		12 => 'Permission denied.',
-		13 => '"$1" is locked and can not be renamed or removed.',
+		13 => '"$1" is locked and can not be renamed, moved or removed.',
 		14 => 'File named "$1" already exists in this location.',
 		15 => 'Invalid file name.',
 		16 => 'Unable to create folder "$1".',

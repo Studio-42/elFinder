@@ -13,7 +13,7 @@ elFinder.prototype.commands.paste = function() {
 	}];
 	
 	this.getstate = function() {
-		return 0
+		// return 0
 		return this.fm.clipboard().length && this.fm.cwd().write ? 0 : -1;
 	}
 	

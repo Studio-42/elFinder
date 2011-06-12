@@ -214,11 +214,15 @@ $opts = array(
 				// 	'hidden'  => true
 				// ),
 				array(
+					'pattern' => '/\/folder$/',
+					'read' => false
+				),
+				array(
 					'pattern' => '/\/folder42/',
 					// 'write' => false
-					'read' => false
+					// 'read' => false
 					// 'hidden' => true,
-					// 'locked' => true
+					'locked' => true
 				)
 			),
 		),

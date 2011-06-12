@@ -1475,11 +1475,12 @@
 			read     : 'Unable to read "$1".',
 			write    : 'Unable to write into "$1".',
 			denied   : 'Permission denied.',
-			locked   : '"$1" is locked and can not be renamed or removed.',
+			locked   : '"$1" is locked and can not be renamed, moved or removed.',
 			exists   : 'File named "$1" already exists in this location.',
 			name     : 'Invalid file name.',
 			notfound : 'File not found.',
-			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.'
+			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.',
+			copy     : 'Unable to copy "$1".'
 			
 		},
 		/**

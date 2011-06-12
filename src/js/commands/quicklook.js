@@ -588,6 +588,44 @@ elFinder.prototype.commands.quicklook.plugins = [
 				return false;
 			}
 		});
+	},
+	
+	/**
+	 * PDF preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var win     = ql.window,
+			preview = ql.ui.preview,
+			fm      = ql.fm,
+			active = false;
+			
+		
+		if (($.browser.safari && navigator.platform.indexOf('Mac') != -1) || $.browser.msie) {
+			active = true;
+		} else {
+			$.each(navigator.plugins, function(i, plugins) {
+				$.each(plugins, function(i, plugin) {
+					if (plugin.type == 'application/pdf') {
+						return !(active = true);
+					}
+				});
+			});
+		}
+		
+		active && ql.preview(function() {
+			var file = ql.value, node;
+			
+			if (file && file.read && file.mime == 'application/pdf') {
+				node = $('<iframe/>')
+					.hide()
+					.appendTo(preview)
+					.load(function() { node.parent().length && node.show().siblings().remove(); })
+					.attr('src', fm.url(file.hash));
+			}
+		});
+		
 	}
 	
 ]
