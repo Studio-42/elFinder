@@ -262,10 +262,9 @@ elFinder.prototype.command = function(fm) {
 	this.files = function(hashes) {
 		var fm = this.fm;
 		
-		return $.map(this.hashes(hashes), function(h) {
-			var file = fm.file(h);
-			return file.mime == 'directory' ? null : file;
-		});
+		return hashes
+			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null })
+			: fm.selectedFiles();
 	}
 }
 

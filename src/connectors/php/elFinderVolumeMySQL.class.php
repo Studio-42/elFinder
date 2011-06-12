@@ -868,6 +868,23 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Get file contents
+	 *
+	 * @param  string  $path  file path
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _getContents($path) {
+		$sql = 'SELECT content FROM '.$this->tbf.' WHERE id='.intval($path);
+		if ($res = $this->query($sql)) {
+			if ($r = $res->fetch_assoc()) {
+				return $r['content'];
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Write a string to a file
 	 *
 	 * @param  string  $path     file path

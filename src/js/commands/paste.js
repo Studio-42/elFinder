@@ -13,7 +13,7 @@ elFinder.prototype.commands.paste = function() {
 	}];
 	
 	this.getstate = function() {
-		return 0
+		// return 0
 		return this.fm.clipboard().length && this.fm.cwd().write ? 0 : -1;
 	}
 	
@@ -37,6 +37,7 @@ elFinder.prototype.commands.paste = function() {
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
+			error  = errors[cut ? 'move' : 'copy'],
 			fpaste = [],
 			fcopy  = [],
 			dfrd   = $.Deferred()
@@ -181,6 +182,7 @@ elFinder.prototype.commands.paste = function() {
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
 							: fm.ajax({
 								data : {cmd : 'ls', target : dst.hash},
+								notify : {type : 'preparecopy', cnt : 1, hideCnt : true},
 								preventFail : true
 							})
 							.always(function(data) {
@@ -191,39 +193,30 @@ elFinder.prototype.commands.paste = function() {
 				
 				return dfrd;
 			},
-			parents, i, file
-			;
+			parents = fm.parents(dst.hash);
 
-		if (!cnt) {
-			return dfrd.reject(errors.clpEmpty);
+
+		if (!cnt || !dst || dst.mime != 'directory') {
+			return dfrd.reject();
 		}
 			
-		if (!dst) {
-			return dfrd.reject(errors.noDstDir);
-		}
-
-		if (dst.mime != 'directory') {
-			return dfrd.reject([errors.notDir, dst.name]);
-		}
-		
 		if (!dst.write)	{
-			return dfrd.reject([errors.pasteWrite, dst.name])
+			return dfrd.reject([error, files[0].name, errors.perm]);
 		}
 		
-		parents = fm.parents(dst.hash);
-
-		for (i = 0; i < cnt; i++) {
-			file = files[i];
-			if ($.inArray(file.hash, parents) !== -1) {
-				return dfrd.reject([errors.pasteItself, file.name]);
-			}
+		$.each(files, function(i, file) {
 			if (!file.read) {
-				return dfrd.reject([errors.copy, file.name]);
+				return !dfrd.reject([error, files[0].name, errors.perm]);
 			}
+			
 			if (cut && file.locked) {
-				return dfrd.reject([errors.locked, file.name]);
+				return !dfrd.reject([errors.locked, file.name]);
 			}
-
+			
+			if ($.inArray(file.hash, parents) !== -1) {
+				return !dfrd.reject([errors.copyinself, file.name]);
+			}
+			
 			if (file.phash == dst.hash) {
 				fcopy.push(file.hash);
 			} else {
@@ -233,7 +226,7 @@ elFinder.prototype.commands.paste = function() {
 					name  : file.name
 				});
 			}
-		}
+		});
 		
 		return $.when(
 			copy(fcopy),

@@ -27,19 +27,15 @@ elFinder.prototype.commands.copy = function() {
 			dfrd = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
-				}),
-			hashes = this.files(hashes),
-			l      = hashes.length,
-			i, file;
+				});
 		
-		for (i = 0; i < l; i++) {
-			file = fm.file(hashes[i]);
+		$.each(this.files(hashes), function(i, file) {
 			if (!file.read) {
-				return dfrd.reject([fm.errors.copy, file.name]);
+				return !dfrd.reject([fm.errors.copy, file.name, fm.errors.denied]);
 			}
-		}
+		});
 		
-		return dfrd.resolve(fm.clipboard(hashes));
+		return dfrd.isRejected() ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes)));
 	}
 
 }

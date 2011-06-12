@@ -44,6 +44,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
+		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'name' => true, 'mimes' => true),
 		'extract'   => array('target' => true, 'mimes' => true),
@@ -154,7 +155,7 @@ class elFinder {
 		10 => 'Object is not a folder.',
 		11 => 'Object is not a file.',
 		12 => 'Permission denied.',
-		13 => '"$1" is locked and can not be renamed or removed.',
+		13 => '"$1" is locked and can not be renamed, moved or removed.',
 		14 => 'File named "$1" already exists in this location.',
 		15 => 'Invalid file name.',
 		16 => 'Unable to create folder "$1".',
@@ -932,6 +933,25 @@ class elFinder {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function get($args) {
+		$target = $args['target'];
+		$volume = $this->volume($target);
+		
+		if (!$volume) {
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+		}
+		
+		return ($content = $volume->getContents($target)) === false
+			? array('error' => $this->error(self::ERROR_OPEN, '#'.$target, $volume->error()))
+			: array('content' => $content);
 	}
 	
 	/**

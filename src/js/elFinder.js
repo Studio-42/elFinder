@@ -1475,11 +1475,14 @@
 			read     : 'Unable to read "$1".',
 			write    : 'Unable to write into "$1".',
 			denied   : 'Permission denied.',
-			locked   : '"$1" is locked and can not be renamed or removed.',
+			locked   : '"$1" is locked and can not be renamed, moved or removed.',
 			exists   : 'File named "$1" already exists in this location.',
 			name     : 'Invalid file name.',
 			notfound : 'File not found.',
-			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.'
+			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.',
+			copy     : 'Unable to copy "$1".',
+			move     : 'Unable to move "$1".',
+			copyinself : 'Unable to copy "$1" into itself.'
 			
 		},
 		/**
@@ -2020,14 +2023,14 @@
 		 */
 		notifyType : {
 			open        : 'Open folder',
+			openfile    : 'Open files',
 			reload      : 'Reload folder content',
 			mkdir       : 'Creating directory',
 			mkfile      : 'Creating files',
 			rm          : 'Delete files',
 			copy        : 'Copy files',
 			move        : 'Move files',
-			prepareCopy : 'Prepare to copy files',
-			duplicate   : 'Duplicate files',
+			preparecopy : 'Prepare to copy files',
 			rename      : 'Rename files',
 			upload      : 'Uploading files',
 			read        : 'Open files',

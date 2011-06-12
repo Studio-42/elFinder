@@ -1,4 +1,10 @@
 "use strict"
+/**
+ * @class  elFinder command "edit"
+ * Edit text files
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.edit = function() {
 	var self = this,
 		fm   = this.fm,
@@ -21,16 +27,14 @@ elFinder.prototype.commands.edit = function() {
 		 * @return jQuery.Deferred
 		 **/
 		edit = function(file) {
-			var hash       = file.hash,
-				errors     = fm.errors,
-				openError  = [errors.openFile, file.name, '<br/>'],
-				saveError  = [errors.save, file.name, '<br/>'],
-				opts       = fm.options,
-				dfrd       = $.Deferred(), 
-				data       = {cmd : 'file', target : hash},
-				url        = fm.url(hash) || fm.options.url,
-				dialog = function(text) {
-					var editor = $('<textarea class="elfinder-file-edit" rows="20" style="padding:0;margin:0;border:1px solid #ccc">'+text+'</textarea>')
+			var hash      = file.hash,
+				errors    = fm.errors,
+				opts      = fm.options,
+				dfrd      = $.Deferred(), 
+				data      = {cmd : 'file', target : hash},
+				url       = fm.url(hash) || fm.options.url,
+				dialog    = function(text) {
+					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
 							.keydown(function(e) {
 								var value, start;
 								
@@ -57,9 +61,7 @@ elFinder.prototype.commands.edit = function() {
 							open    : function() { 
 								fm.disable();
 								editor.focus(); 
-								if (editor[0].setSelectionRange) {
-									editor[0].setSelectionRange(0, 0);
-								}
+								editor[0].setSelectionRange && editor[0].setSelectionRange(0, 0);
 							}
 							
 						};
@@ -95,59 +97,31 @@ elFinder.prototype.commands.edit = function() {
 					
 					fm.dialog(editor, opts);
 				},
-				timeout, jqxhr;
+				error;
 			
 			
-			if (!file.read) {
-				return dfrd.reject([errors.read, file.name]);
-			}
-			if (!file.write) {
-				return dfrd.reject([errors.write, file.name]);
-			}
-			
-			if (fm.oldAPI) {
-				data.current = file.phash,
-				data.cmd     = 'open';
+			if (!file.read || !file.write) {
+				error = [errors.open, file.name, errors.denied]
+				fm.error(error)
+				return dfrd.reject(error);
 			}
 			
-			jqxhr = fm.ajax({
-				data : data,
-				options : {
-					url      : url,
-					type     : 'get',
-					dataType : 'html'
+			fm.ajax({
+				data   : {
+					cmd     : fm.oldAPI ? 'fread' : 'get',
+					target  : hash,
+					current : file.phash // old api
 				},
-				raw : true,
-				notify : {type : 'read', cnt : 1},
-				preventFail : true,
-				syncOnFail : !fm.option('url')
+				notify : {type : 'openfile', cnt : 1}
 			})
-			.fail(function(error, xhr, status) {
-				var error = [errors.open, file.name];
-				
-				switch (status) {
-					case 'abort':
-						error.push(errors.abort);
-						break;
-					case 'timeout':	
-						error.push(errors.timeout);
-						break;
-					default:
-						if (xhr.status == 403) {
-							error.push(errors.access);
-						} else if (xhr.status == 404) {
-							error.push(errors.notfound);
-						} else {
-							error.push(errors.connect);
-						} 
-				}
-				fm.error(error);
+			.done(function(data) {
+				dialog(data.content);
+			})
+			.fail(function(error) {
 				dfrd.reject(error);
 			})
-			.done(dialog)
-			
-			
-			return dfrd
+
+			return dfrd;
 		};
 	
 	

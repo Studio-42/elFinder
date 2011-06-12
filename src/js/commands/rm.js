@@ -24,49 +24,51 @@ elFinder.prototype.commands.rm = function() {
 					error && fm.error(error);
 				}),
 			files = this.files(hashes),
-			cnt   = files.length, 
-			i, error, file, hash;
+			cnt   = files.length;
 		
 		if (!cnt) {
 			return dfrd.reject();
 		}
-			
-		for (i = 0; i < cnt; i++) {
-			hash = files[i];
-			file = fm.file(hash);
+		
+		$.each(files, function(i, file) {
 			if (file.locked) {
-				return dfrd.reject([fm.errors.locked, file.name]);
-			}
-		}
-			
-		fm.confirm({
-			title  : 'Remove',
-			text   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
-			accept : {
-				label    : 'Remove',
-				callback : function() {  
-					fm.lockfiles({files : files});
-					fm.ajax({
-						data   : {cmd  : 'rm', targets : files, current : fm.cwd().hash}, // current - for old api
-						notify : {type : 'rm', cnt : cnt},
-						preventFail : true
-					})
-					.fail(function(error) {
-						dfrd.reject(error);
-					})
-					.done(function(data) {
-						dfrd.done(data);
-					}
-					).always(function() {
-						fm.unlockfiles({files : files});
-					});
-				}
-			},
-			cancel : {
-				label    : 'Cancel',
-				callback : function() { dfrd.reject(); }
+				return !dfrd.reject([fm.errors.locked, file.name]);
 			}
 		});
+		
+		if (!dfrd.isRejected()) {
+			files = this.hashes(hashes);
+			
+			fm.confirm({
+				title  : 'Remove',
+				text   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+				accept : {
+					label    : 'Remove',
+					callback : function() {  
+						fm.lockfiles({files : files});
+						fm.ajax({
+							data   : {cmd  : 'rm', targets : files, current : fm.cwd().hash}, // current - for old api
+							notify : {type : 'rm', cnt : cnt},
+							preventFail : true
+						})
+						.fail(function(error) {
+							dfrd.reject(error);
+						})
+						.done(function(data) {
+							dfrd.done(data);
+						}
+						).always(function() {
+							fm.unlockfiles({files : files});
+						});
+					}
+				},
+				cancel : {
+					label    : 'Cancel',
+					callback : function() { dfrd.reject(); }
+				}
+			});
+		}
+			
 		return dfrd;
 	}
 

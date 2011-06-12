@@ -1325,6 +1325,31 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return file contents
+	 *
+	 * @param  string  $hash  file hash
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function getContents($hash) {
+		$file = $this->file($hash);
+		
+		if (!$file) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+		
+		if ($file['mime'] == 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_FILE);
+		}
+		
+		if (!$file['read']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		return $this->_getContents($this->decode($hash));
+	}
+	
+	/**
 	 * Put content in text file and return file info.
 	 *
 	 * @param  string  $hash     file hash
@@ -2479,6 +2504,15 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _save($fp, $dir, $name);
+	
+	/**
+	 * Get file contents
+	 *
+	 * @param  string  $path  file path
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _getContents($path);
 	
 	/**
 	 * Write a string to a file

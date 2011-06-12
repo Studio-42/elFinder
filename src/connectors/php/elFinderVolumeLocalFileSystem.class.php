@@ -552,6 +552,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Get file contents
+	 *
+	 * @param  string  $path  file path
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _getContents($path) {
+		return file_get_contents($path);
+	}
+	
+	/**
 	 * Write a string to a file
 	 *
 	 * @param  string  $path     file path

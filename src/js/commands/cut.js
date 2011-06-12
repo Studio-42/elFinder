@@ -23,26 +23,23 @@ elFinder.prototype.commands.cut = function() {
 	}
 	
 	this._exec = function(hashes) {
-		var fm   = this.fm,
-			dfrd = $.Deferred()
+		var fm     = this.fm,
+			errors = fm.errors,
+			dfrd   = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
-				}),
-			hashes = this.files(hashes),
-			l      = hashes.length,
-			i, file;
+				});
 		
-		for (i = 0; i < l; i++) {
-			file = fm.file(hashes[i]);
+		$.each(this.files(hashes), function(i, file) {
 			if (!file.read) {
-				return dfrd.reject([fm.errors.copy, file.name]);
+				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
 			if (file.locked) {
-				return dfrd.reject([fm.errors.locked, file.name]);
+				return !dfrd.reject([errors.locked, file.name]);
 			}
-		}
+		});
 		
-		return dfrd.resolve(fm.clipboard(hashes, true));
+		return dfrd.isRejected() ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
 	}
 
 }
