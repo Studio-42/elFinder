@@ -48,7 +48,7 @@ elFinder.prototype.commands.duplicate = function() {
 				args.push(function() {
 					return fm.ajax({
 						data   : {cmd : 'duplicate', target : file.hash, current : file.phash},
-						notify : {type : 'duplicate', cnt : 1}
+						notify : {type : 'copy', cnt : 1}
 					});
 				});
 			});
@@ -58,7 +58,7 @@ elFinder.prototype.commands.duplicate = function() {
 		
 		return fm.ajax({
 			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
-			notify : {type : 'duplicate', cnt : cnt}
+			notify : {type : 'copy', cnt : cnt}
 		});
 		
 	}

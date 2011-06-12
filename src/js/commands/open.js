@@ -5,7 +5,8 @@
  * @author Dmitry (dio) Levashov
  **/  
 elFinder.prototype.commands.open = function() {
-	var self = this,
+	var self   = this,
+		title  = 'Open files or enter folder',
 		filter = function(hashes) {
 			return $.map(hashes, function(h) { return self.fm.file(h).mime != 'directory' ? h : null });
 		}
@@ -14,7 +15,7 @@ elFinder.prototype.commands.open = function() {
 			self.exec();
 		};
 	
-	this.title = 'Open files or enter folder';
+	this.title = title;
 	this.alwaysEnabled = true;
 	
 	this.handlers = {
@@ -23,7 +24,7 @@ elFinder.prototype.commands.open = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+down numpad_enter',
-		description : 'Open files or enter folder',
+		description : title,
 		callback    : callback
 	}];
 	
@@ -42,13 +43,13 @@ elFinder.prototype.commands.open = function() {
 			
 			enter && fm.shortcut({
 				pattern     : 'enter',
-				description : self.title,
+				description : title,
 				callback    : callback
 			});
 			
 			shiftenter && fm.shortcut({
 				pattern     : 'shift+enter',
-				description : self.title,
+				description : title,
 				callback    : callback
 			});
 		})
@@ -58,7 +59,7 @@ elFinder.prototype.commands.open = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 
-		return cnt && (cnt == 1 || cnt == this.files(sel).length) ? 0 : -1;
+		return cnt && (cnt == 1 || cnt == filter(sel).length) ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -69,24 +70,29 @@ elFinder.prototype.commands.open = function() {
 		var fm     = this.fm, 
 			errors = fm.errors,
 			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			hashes = this.hashes(hashes),
-			cnt    = hashes.length,
 			files  = this.files(hashes),
+			cnt    = files.length,
 			file, url;
 
+		if (!cnt) {
+			return dfrd.reject();
+		}
+
 		// open folder
-		if (cnt == 1 && (!(file = fm.file(hashes[0])) || file.mime == 'directory')) {
+		if (cnt == 1 && (file = files[0]) && file.mime == 'directory') {
 			return file && !file.read
 				? dfrd.reject([errors.open, file.name, errors.denied])
 				: fm.ajax({
-						data   : {cmd  : 'open', target : hashes[0]},
+						data   : {cmd  : 'open', target : file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
 						syncOnFail : true
 					});
 		}
 		
+		files = $.map(files, function(file) { return file.mime != 'directory' ? file : null });
+		
 		// nothing to open or files and folders selected - do nothing
-		if (!cnt || cnt != files.length) {
+		if (cnt != files.length) {
 			return dfrd.reject();
 		}
 		
