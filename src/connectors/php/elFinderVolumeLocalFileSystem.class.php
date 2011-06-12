@@ -562,6 +562,148 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _filePutContents($path, $content) {
 		return @file_put_contents($path, $content, LOCK_EX);
 	}
+
+	/**
+	 * Return list of available archivers
+	 *
+	 * @return array
+	 **/
+	protected function _checkArchivers()
+	{
+		if (!function_exists('exec')) {
+			$this->options['archivers'] = $this->options['archive'] = array();
+			return;
+		}
+		$arcs = array(
+			'create'  => array(),
+			'extract' => array()
+			);
+		
+		$this->procExec('tar --version', $o, $ctar);
+		
+		if ($ctar == 0) {
+			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
+			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
+			$test = $this->procExec('gzip --version', $o, $c);
+			if ($c == 0) {
+				$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
+				$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz');
+			}
+			$test = $this->procExec('bzip2 --version', $o, $c);
+			if ($c == 0) {
+				$arcs['create']['application/x-bzip2']  = array('cmd' => 'tar', 'argc' => '-cjf', 'ext' => 'tbz');
+				$arcs['extract']['application/x-bzip2'] = array('cmd' => 'tar', 'argc' => '-xjf', 'ext' => 'tbz');
+			}
+		}
+		
+		$this->procExec('zip --version', $o, $c);
+		if ($c == 0) {
+			$arcs['create']['application/zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
+		}
+		
+		$this->procExec('unzip --help', $o, $c);
+		if ($c == 0) {
+			$arcs['extract']['application/zip'] = array('cmd' => 'unzip', 'argc' => '',  'ext' => 'zip');
+		} 
+		
+		$this->procExec('rar --version', $o, $c);
+		if ($c == 0 || $c == 7) {
+			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
+			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
+		} else {
+			$test = $this->procExec('unrar', $o, $c);
+			if ($c==0 || $c == 7) {
+				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar');
+			}
+		}
+		
+		$this->procExec('7za --help', $o, $c);
+		if ($c == 0) {
+			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a', 'ext' => '7z');
+			$arcs['extract']['application/x-7z-compressed'] = array('cmd' => '7za', 'argc' => 'e -y', 'ext' => '7z');
+			
+			if (empty($arcs['create']['application/x-gzip'])) {
+				$arcs['create']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'a -tgzip', 'ext' => 'tar.gz');
+			}
+			if (empty($arcs['extract']['application/x-gzip'])) {
+				$arcs['extract']['application/x-gzip'] = array('cmd' => '7za', 'argc' => 'e -tgzip -y', 'ext' => 'tar.gz');
+			}
+			if (empty($arcs['create']['application/x-bzip2'])) {
+				$arcs['create']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2', 'ext' => 'tar.bz');
+			}
+			if (empty($arcs['extract']['application/x-bzip2'])) {
+				$arcs['extract']['application/x-bzip2'] = array('cmd' => '7za', 'argc' => 'a -tbzip2 -y', 'ext' => 'tar.bz');
+			}
+			if (empty($arcs['create']['application/zip'])) {
+				$arcs['create']['application/zip'] = array('cmd' => '7za', 'argc' => 'a -tzip -l', 'ext' => 'zip');
+			}
+			if (empty($arcs['extract']['application/zip'])) {
+				$arcs['extract']['application/zip'] = array('cmd' => '7za', 'argc' => 'e -tzip -y', 'ext' => 'zip');
+			}
+			if (empty($arcs['create']['application/x-tar'])) {
+				$arcs['create']['application/x-tar'] = array('cmd' => '7za', 'argc' => 'a -ttar -l', 'ext' => 'tar');
+			}
+			if (empty($arcs['extract']['application/x-tar'])) {
+				$arcs['extract']['application/x-tar'] = array('cmd' => '7za', 'argc' => 'e -ttar -y', 'ext' => 'tar');
+			}
+		}
+		
+		$this->options['archivers'] = $arcs;
+		foreach ($this->options['archiveMimes'] as $k=>$mime) {
+			if (!isset($this->options['archivers']['create'][$mime])) {
+				unset($this->options['archiveMimes'][$k]);
+			}
+		}
+		if (empty($this->options['archiveMimes'])) {
+			$this->options['archiveMimes'] = array_keys($this->options['archivers']['create']);
+		}
+	}
+
+	/**
+	 * Write a string to a file
+	 *
+	 * @param  string  $target     file hash
+	 * @return bool|array
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+	protected function _extract($target) {
+
+		$file = $this->file($target);
+		$mime = $file['mime'];
+		$path = $this->decode($file['hash']);
+		$dir = $this->_dirname($path);
+		$this->checkArchivers();
+    
+		if (empty($this->options['archivers']['extract'][$mime])) {
+			return $this->setError(elFinder::ERROR_INV_PARAMS);
+		}
+		
+		$beforeextract = $this->scandir($file['phash']);
+		
+		$cwd = getcwd();
+    
+		$arc = $this->options['archivers']['extract'][$mime];
+    
+		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($file['name']);
+		
+		chdir($dir);
+
+		$this->procExec($cmd, $o, $c);
+		
+		chdir($cwd);
+		
+		$afterextract = $this->scandir($file['phash']);
+		
+		$ddiff = array();
+		
+		foreach ($afterextract as $ae) {
+			if (!in_array($ae, $beforeextract)) {
+				$ddiff[] = $ae;
+			}
+		}
+		
+		return $ddiff;
+	}
 	
 } // END class 
 

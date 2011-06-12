@@ -44,7 +44,9 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
-		'put'       => array('target' => true, 'content' => '', 'mimes' => false)
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
+		'archive'   => array('targets' => true, 'name' => true, 'mimes' => true),
+		'extract'   => array('target' => true, 'mimes' => true),
 	);
 	
 	/**
@@ -956,7 +958,28 @@ class elFinder {
 		
 		return $this->trigger('put', $volume, array('changed' => array($file)));
 	}
-	
+
+	/**
+	 * Extract files from archive
+	 *
+	 * @return void
+	 **/
+	protected function extract($args)
+	{
+		$target = $args['target'];
+		$error  = array(self::ERROR_FILE_NOT_FOUND, '#'.$target);
+
+		if (($volume = $this->volume($target)) == false
+		|| ($file = $volume->file($target)) == false) {
+			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
+		}  
+    
+		if (($changes = $volume->extract($target)) == false) {
+			return array('error' => $this->error($error, self::ERROR_UNKNOWN));
+		}
+
+		return $this->trigger('extract', $volume, array('changed' => $changes));
+	}
 	/***************************************************************************/
 	/*                                   misc                                  */
 	/***************************************************************************/

@@ -208,7 +208,9 @@ abstract class elFinderVolumeDriver {
 			'read'   => true,
 			'write'  => true
 		),
-		'attributes' => array()
+		'attributes' => array(),
+		'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
+		'archivers'    => array(),       // info about archivers to use. See example below. Leave empty for auto detect	
 	);
 	
 	/**
@@ -426,7 +428,7 @@ abstract class elFinderVolumeDriver {
 		} else {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
 		}
-
+		
 		// clean thumbnails dir
 		if ($this->tmbPath) {
 			srand((double) microtime() * 1000000);
@@ -688,6 +690,16 @@ abstract class elFinderVolumeDriver {
 		$this->nameValidator = is_string($this->options['acceptedName']) && !empty($this->options['acceptedName']) 
 			? $this->options['acceptedName']
 			: '';
+			
+		if (isset($this->commands['archive']) || isset($this->commands['extract'])) {
+			$this->checkArchivers();
+			if (isset($this->commands['archive'])) {
+				$this->_result['params']['archives'] = $this->options['archiveMimes'];
+			}
+			if (isset($this->commands['extract'])) {
+				$this->_result['params']['extract'] = array_keys($this->options['archivers']['extract']);
+			}
+		}
 
 		$this->configure();
 		// debug($this->attributes);
@@ -1333,6 +1345,15 @@ abstract class elFinderVolumeDriver {
 		
 		return $this->_filePutContents($path, $content) ? $this->stat($path) : false;
 	}
+	
+	public function extract($hash) {
+		return $this->_extract($hash);
+	}
+	
+	protected function checkArchivers() {
+		return $this->_checkArchivers();
+	}
+	
 	
 	/**
 	 * Remove file/dir
@@ -2049,6 +2070,50 @@ abstract class elFinderVolumeDriver {
 		
 		return $result ? $name : false;
 	}
+
+	/**
+	 * Execute command
+	 *
+	 * @param  string  $cmd  command line
+	 * @return exit code
+	 * @author Alexey Sukhotin
+	 **/	
+	protected function procExec($command , array &$output = null, &$return_var = null, array &$error_output = null) {
+	
+		$descriptorspec = array(
+			0 => array("pipe", "r"),  // stdin
+			1 => array("pipe", "w"),  // stdout
+			2 => array("pipe", "w") // stderr
+		);
+	
+		//$handle = fopen("/tmp/elfinder-deebug.txt", "a+");
+	
+		$process = proc_open($command, $descriptorspec, $pipes, null, null);
+		
+		if (is_resource($process)) {
+			
+			$procStatus = proc_get_status( $process );
+
+			while( $procStatus['running'] === true ) {
+				if( !feof( $pipes[1] ) ) {
+					$output[] = fgets($pipes[1]);
+				}
+				if( !feof( $pipes[2] ) ) {
+					$error_output[] = fgets($pipes[2]);
+				}
+				$procStatus = proc_get_status( $process );
+			}
+			
+			$return_var = proc_close($process);
+		} else {
+			$return_var = -1;
+		}
+		
+		/*fwrite($handle, "pipe=".var_export($error_output,true)."\n" );	
+		fwrite($handle, "c=$return_var\n" );
+		fclose($handle);*/
+		
+	}
 	
 	/**
 	 * Remove thumbnail
@@ -2063,7 +2128,7 @@ abstract class elFinderVolumeDriver {
 			@unlink($path);
 		}
 	}
-	
+
 	/*********************** misc *************************/
 	
 	/**
@@ -2084,7 +2149,8 @@ abstract class elFinderVolumeDriver {
 		
 		return date($this->options['dateFormat'], $ts);
 	}
-	
+
+
 	/**==================================* abstract methods *====================================**/
 	
 	/*********************** paths/urls *************************/
@@ -2423,6 +2489,10 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _filePutContents($path, $content);
+	
+	abstract protected function _extract($target);
+	
+	abstract protected function _checkArchivers();
 	
 } // END class
 
