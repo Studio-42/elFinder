@@ -44,6 +44,7 @@ class elFinder {
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
+		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false)
 	);
 	
@@ -930,6 +931,25 @@ class elFinder {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function get($args) {
+		$target = $args['target'];
+		$volume = $this->volume($target);
+		
+		if (!$volume) {
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+		}
+		
+		return ($content = $volume->getContents($target)) === false
+			? array('error' => $this->error(self::ERROR_OPEN, '#'.$target, $volume->error()))
+			: array('content' => $content);
 	}
 	
 	/**

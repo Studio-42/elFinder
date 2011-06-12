@@ -2023,6 +2023,7 @@
 		 */
 		notifyType : {
 			open        : 'Open folder',
+			openfile    : 'Open files',
 			reload      : 'Reload folder content',
 			mkdir       : 'Creating directory',
 			mkfile      : 'Creating files',

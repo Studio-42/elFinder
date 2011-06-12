@@ -214,8 +214,9 @@ $opts = array(
 				// 	'hidden'  => true
 				// ),
 				array(
-					'pattern' => '/\/folder$/',
-					'read' => false
+					'pattern' => '/file.css$/',
+					// 'read' => false
+					'write' => false
 				),
 				array(
 					'pattern' => '/\/folder42$/',
