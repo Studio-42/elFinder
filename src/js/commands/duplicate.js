@@ -18,37 +18,36 @@ elFinder.prototype.commands.duplicate = function() {
 	this._exec = function(hashes) {
 		var fm     = this.fm,
 			errors = fm.errors,
-			phash  = fm.cwd().hash,
 			files  = this.files(hashes),
 			cnt    = files.length,
-			num    = 0,
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
 				}), 
-			args = [],
-			file, i;
+			args = [];
 			
 		if (!cnt) {
-			return dfrd.reject([errors.noFilesForCmd, this.title]);
+			return dfrd.reject();
 		}
 		
-		for (i = 0; i < cnt; i++) {
-			file = fm.file(files[i]);
+		$.each(files, function(i, file) {
 			if (!file.read) {
-				return dfrd.reject([errors.notDuplicate, file.name]);
+				return !dfrd.reject([errors.copy, file.name, errors.access]);
 			}
-			file = fm.file(file.phash);
-			if (!file.write) {
-				return dfrd.reject(['Unable duplicate "$1" because this location is not writable.', file.name]);
+			if (!fm.file(file.phash).write) {
+				return !dfrd.reject([errors.copy, file.name, errors.access]);
 			}
+		})
+		
+		if (dfrd.isRejected()) {
+			return dfrd;
 		}
 		
 		if (fm.oldAPI) {
-			$.each(files, function(i, hash) {
+			$.each(files, function(i, file) {
 				args.push(function() {
 					return fm.ajax({
-						data   : {cmd : 'duplicate', target : hash, current : fm.files(hash).phash},
+						data   : {cmd : 'duplicate', target : file.hash, current : file.phash},
 						notify : {type : 'duplicate', cnt : 1}
 					});
 				});
@@ -58,7 +57,7 @@ elFinder.prototype.commands.duplicate = function() {
 		}
 		
 		return fm.ajax({
-			data   : {cmd : 'duplicate', targets : files},
+			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
 			notify : {type : 'duplicate', cnt : cnt}
 		});
 		
