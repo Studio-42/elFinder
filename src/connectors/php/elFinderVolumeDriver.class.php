@@ -350,11 +350,10 @@ abstract class elFinderVolumeDriver {
 		'ai'    => 'image/vnd.adobe.photoshop',
 		'xbm'   => 'image/xbm',
 		//audio
-
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
-		'mp4a'  => 'audio/mp4',
+		'm4a'   => 'audio/x-m4a',
 		'wav'   => 'audio/wav',
 		'wma'   => 'audio/x-ms-wma',
 		// video
@@ -637,6 +636,7 @@ abstract class elFinderVolumeDriver {
 					}
 				}
 			}
+			self::$mimetypes['ogg'] = 'audio/ogg';
 		}
 
 		// set root path
