@@ -246,6 +246,9 @@ elFinder.prototype.options = {
 			forceIframe   : false, 
 			// 15 min timeout before abort upload files using iframe
 			iframeTimeout : 900000
+		},
+		quicklook : {
+			minWidth : 300
 		}
 	},
 	

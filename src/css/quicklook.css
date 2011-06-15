@@ -7,21 +7,42 @@
 	border-radius:7px;
 	-moz-border-radius:7px;
 	-webkit-border-radius:7px;
-	z-index:10000;
+	
+	padding:20px 0 40px 0;
+/*	width:400px;*/
+/*	height:200px;*/
+/*	top:50px;*/
 }
+
+.elfinder-quicklook .ui-resizable-handle { border:1px solid #fff;}
 
 .elfinder-quicklook-fullscreen {
 	border-radius:0;
 	-moz-border-radius:0;
 	-webkit-border-radius:0;
+	padding:0;
+	background:#000;
+/*	width:100%;*/
+/*	height:100%;*/
+/*	left : 0;*/
+/*	top:0;*/
+	z-index:10000;
+	display:block;
 }
+
+.elfinder-quicklook-fullscreen .elfinder-quicklook-titlebar { display:none; }
+
+.elfinder-quicklook-fullscreen .elfinder-quicklook-navbar {}
 
 /* panel with title */
 .elfinder-quicklook-titlebar {
-	
 	text-align:center;
 	background:#777;
-	position:relative;
+	position:absolute;
+	left:0;
+	top:0;
+	width:100%;
+	height:20px;
 	-moz-border-radius-topleft: 7px; 
 	-webkit-border-top-left-radius: 7px; 
 	border-top-left-radius: 7px;
@@ -55,33 +76,61 @@
 .elfinder-quicklook-preview {
 	overflow:hidden;
 	position:relative;
-	margin-bottom:40px;
-	border:1px solid transparent;
+/*	margin-bottom:40px;*/
+	border:0 solid;
+	border-left:1px solid transparent;
+	border-right:1px solid transparent;
+/*	border:1px solid #fff;*/
+	height:100%;
+/*	padding-bottom:40px;*/
+}
+
+.elfinder-quicklook-info-wrapper {
+	position:absolute;
+	width:100%;
+/*	height:50px;*/
+	left:0;
+	top:50%;
+	margin-top:-50px;
+/*	overflow:hidden;*/
+/*	border:1px solid #fff;*/
+}
+
+.elfinder-quicklook-info-wrapper table {
+	border:2px solid red;
+	width:100%;
+/*	height:120px;*/
+}
+
+.elfinder-quicklook-info-wrapper table td {
+	color:#fff;
+	vertical-align:center;
+	padding-left:105px;
 }
 
 /* file icon in preview */
-.elfinder-quicklook-preview .elfinder-cwd-icon {
+.elfinder-quicklook .elfinder-cwd-icon {
 	position:absolute;
 	left:32px;
 	top:50%;
-	margin-top:-24px;
+	margin-top:-20px;
+
 }
 
 /* image in preview */
 .elfinder-quicklook-preview img {
 	display:block;
 	margin:0 auto;
+/*	border:1px solid #fff;*/
 }
 
 /* file info container */
 .elfinder-quicklook-info {
-	position:absolute;
-	left:112px;
-	top:50%;
+	padding: 0 12px 0 112px;
 }
 
 /* file name in info */
-.elfinder-quicklook-info-name { 
+.elfinder-quicklook-info .elfinder-quicklook-info-data:first-child { 
 	color:#fff; 
 	font-weight:bold; 
 	padding-bottom:.5em; 
@@ -97,46 +146,78 @@
 /* navigation bar on quicklook window bottom */
 .elfinder-quicklook-navbar {
 	position:absolute;
-	left:0;
-	bottom:0;
-	width:100%;
-	height:40px;
+	left:50%;
+	bottom:4px;
+	width:140px;
+	height:32px;
+	padding:0px;
+	margin-left:-70px;
+	border:1px solid transparent;
+	border-radius:19px;
+	-moz-border-radius:19px;
+	-webkit-border-radius:19px;
+}
+
+.elfinder-quicklook-fullscreen .elfinder-quicklook-navbar {
+	width:188px;
+	margin-left:-94px;
+	padding:5px;
+	border:1px solid #eee;
+	background:#000;
+}
+
+.elfinder-quicklook-fullscreen .elfinder-quicklook-navbar-icon-close,
+.elfinder-quicklook-fullscreen .elfinder-quicklook-navbar-separator {
+	display:inline;
 }
 
 /* icons in navbar */
 .elfinder-quicklook-navbar-icon {
 	width:32px;
 	height:32px;
-	position:absolute;
-	top:50%;
-	margin-top:-16px;
-	left:50%;
+	margin:0 7px;
+	float:left;
 	background:url("../images/quicklook-icons.png") 0 0 no-repeat;
 }
 
 /* fullscreen icon */
 .elfinder-quicklook-navbar-icon-fullscreen {
-	margin-left:-16px;
+/*	margin-left:-16px;*/
 	background-position:0 -64px;
 }
 
 /* exit fullscreen icon */
 .elfinder-quicklook-navbar-icon-fullscreen-off {
-	margin-left:-16px;
+/*	margin-left:-16px;*/
 	background-position:0 -96px;
 }
 
 /* prev file icon */
 .elfinder-quicklook-navbar-icon-prev {
-	margin-left:-64px;
+/*	margin-left:-64px;*/
 	background-position:0 0;
 }
 
 /* next file icon */
 .elfinder-quicklook-navbar-icon-next {
-	margin-left:32px;
+/*	margin-left:32px;*/
 	background-position:0 -32px;
 }
+
+.elfinder-quicklook-navbar-icon-close {
+/*	margin-left:82px;*/
+	background-position:0 -128px;
+	display:none;
+}
+
+.elfinder-quicklook-navbar-separator {
+	width:1px;
+	height:32px;
+	float:left;
+	border-left:1px solid #fff;
+	display:none;
+}
+
 
 /* text files preview wrapper */
 .elfinder-quicklook-preview-text {
