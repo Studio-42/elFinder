@@ -1374,7 +1374,11 @@ abstract class elFinderVolumeDriver {
 	public function extract($hash) {
 		return $this->_extract($hash);
 	}
-	
+
+	public function archive($hash, $hashes) {
+		return $this->_archive($hash, $hashes);
+	}
+
 	protected function checkArchivers() {
 		return $this->_checkArchivers();
 	}
@@ -2097,13 +2101,16 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
-	 * Execute command
+	 * Execute shell command
 	 *
-	 * @param  string  $cmd  command line
+	 * @param  string  $command       command line
+   * @param  array   $output        stdout strings
+   * @param  array   $return_var    process exit code
+   * @param  array   $error_output  stderr strings
 	 * @return exit code
 	 * @author Alexey Sukhotin
 	 **/	
-	protected function procExec($command , array &$output = null, &$return_var = null, array &$error_output = null) {
+	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {
 	
 		$descriptorspec = array(
 			0 => array("pipe", "r"),  // stdin
@@ -2111,32 +2118,37 @@ abstract class elFinderVolumeDriver {
 			2 => array("pipe", "w") // stderr
 		);
 	
-		//$handle = fopen("/tmp/elfinder-deebug.txt", "a+");
+		$handle = fopen("/tmp/elfinder-deebug.txt", "a+");
 	
 		$process = proc_open($command, $descriptorspec, $pipes, null, null);
-		
-		if (is_resource($process)) {
-			
-			$procStatus = proc_get_status( $process );
+    
+    if (is_resource($process)) {
 
-			while( $procStatus['running'] === true ) {
-				if( !feof( $pipes[1] ) ) {
-					$output[] = fgets($pipes[1]);
-				}
-				if( !feof( $pipes[2] ) ) {
-					$error_output[] = fgets($pipes[2]);
-				}
-				$procStatus = proc_get_status( $process );
-			}
-			
-			$return_var = proc_close($process);
-		} else {
-			$return_var = -1;
-		}
+      fclose($pipes[0]);
+    
+      $tmpout = '';
+      $tmperr = '';
+    
+      if( !feof( $pipes[1] ) ) {
+         $output[] = fgets($pipes[1], 1024);
+      }
+      if( !feof( $pipes[2] ) ) {
+        $error_output[] = fgets($pipes[2], 1024);
+      }  
+
+      fclose($pipes[1]);
+      fclose($pipes[2]);
+      $return_var = proc_close($process);
+
+
+    }
 		
-		/*fwrite($handle, "pipe=".var_export($error_output,true)."\n" );	
-		fwrite($handle, "c=$return_var\n" );
-		fclose($handle);*/
+		fwrite($handle, "\n\nexec=".var_export($command,true)."\n" );	
+		fwrite($handle, "error=".var_export($error_output,true)."\n" );	
+		fwrite($handle, "proc_return_code=$return_var\n" );
+		fclose($handle);
+		
+		return $return_var;
 		
 	}
 	
@@ -2525,6 +2537,8 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _filePutContents($path, $content);
 	
 	abstract protected function _extract($target);
+	
+	abstract protected function _archive($args);
 	
 	abstract protected function _checkArchivers();
 	

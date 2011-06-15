@@ -46,7 +46,7 @@ class elFinder {
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
-		'archive'   => array('targets' => true, 'name' => true, 'mimes' => true),
+		'archive'   => array('targets' => true, 'name' => true, 'mimes' => true, 'type' => true, 'current' => true),
 		'extract'   => array('target' => true, 'mimes' => true),
 	);
 	
@@ -135,6 +135,8 @@ class elFinder {
 	const ERROR_UPLOAD_TRANSFER   = 30;
 	const ERROR_ACCESS_DENIED     = 31;
 	const ERROR_SAVE              = 32;
+	const ERROR_EXTRACT           = 33;
+	const ERROR_ARCHIVE			  = 34;
 	
 	/**
 	 * undocumented class variable
@@ -174,7 +176,9 @@ class elFinder {
 		29 => 'Not allowed file type.',
 		30 => '"$1" transfer error.',
 		31 => 'Access denied',
-		32 => 'Unable to save "$1".'
+		32 => 'Unable to save "$1".',
+		33 => 'Unable to extract from "$1".',
+		34 => 'Unable to create archive "$1".',
 	);
 	
 	/**
@@ -987,7 +991,7 @@ class elFinder {
 	protected function extract($args)
 	{
 		$target = $args['target'];
-		$error  = array(self::ERROR_FILE_NOT_FOUND, '#'.$target);
+		$error  = array(self::ERROR_EXTRACT, '#'.$target);
 
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
@@ -999,6 +1003,31 @@ class elFinder {
 		}
 
 		return $this->trigger('extract', $volume, array('changed' => $changes));
+	}
+	
+	/**
+	 * Add files to archive
+	 *
+	 * @return void
+	 **/
+	protected function archive($args)
+	{
+		$targets = $args['targets'];
+		$name = $args['name'];
+		$error  = array(self::ERROR_ARCHIVE, '#'.$name);
+	
+		foreach ($args['targets'] as $target) {
+			if (($volume = $this->volume($target)) == false
+			|| ($file = $volume->file($target)) == false) {
+				return array('error' => $this->error(self::ERROR_EXTRACT, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+			}	
+		}
+
+		if (($changes = $volume->archive($args)) == false) {
+		//	return array('error' => $this->error($error, self::ERROR_UNKNOWN));
+		}
+
+		return $this->trigger('archive', $volume, array('added' => $changes));
 	}
 	/***************************************************************************/
 	/*                                   misc                                  */

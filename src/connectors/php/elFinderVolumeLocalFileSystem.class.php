@@ -579,8 +579,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 *
 	 * @return array
 	 **/
-	protected function _checkArchivers()
-	{
+	protected function _checkArchivers() {
 		if (!function_exists('exec')) {
 			$this->options['archivers'] = $this->options['archive'] = array();
 			return;
@@ -590,16 +589,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			'extract' => array()
 			);
 		
+		//exec('tar --version', $o, $ctar);
 		$this->procExec('tar --version', $o, $ctar);
 		
 		if ($ctar == 0) {
 			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
 			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
+			//$test = exec('gzip --version', $o, $c);
 			$test = $this->procExec('gzip --version', $o, $c);
 			if ($c == 0) {
 				$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
 				$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz');
 			}
+			//$test = exec('bzip2 --version', $o, $c);
 			$test = $this->procExec('bzip2 --version', $o, $c);
 			if ($c == 0) {
 				$arcs['create']['application/x-bzip2']  = array('cmd' => 'tar', 'argc' => '-cjf', 'ext' => 'tbz');
@@ -607,6 +609,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
+		//exec('zip --version', $o, $c);
 		$this->procExec('zip --version', $o, $c);
 		if ($c == 0) {
 			$arcs['create']['application/zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
@@ -617,17 +620,20 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$arcs['extract']['application/zip'] = array('cmd' => 'unzip', 'argc' => '',  'ext' => 'zip');
 		} 
 		
+		//exec('rar --version', $o, $c);
 		$this->procExec('rar --version', $o, $c);
 		if ($c == 0 || $c == 7) {
 			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
 			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
 		} else {
+			//$test = exec('unrar', $o, $c);
 			$test = $this->procExec('unrar', $o, $c);
 			if ($c==0 || $c == 7) {
 				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar');
 			}
 		}
 		
+		//exec('7za --help', $o, $c);
 		$this->procExec('7za --help', $o, $c);
 		if ($c == 0) {
 			$arcs['create']['application/x-7z-compressed']  = array('cmd' => '7za', 'argc' => 'a', 'ext' => '7z');
@@ -714,6 +720,73 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		return $ddiff;
+	}
+	
+	/**
+	 * Create archive of selected type
+	 *
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+	protected function _archive($args) {
+
+		$this->checkArchivers();
+		
+    $dir = $this->decode($args['current']);
+   
+		//$dir = $this->decode($args['current']);
+    
+    $targets = $args['targets'];
+		
+		/*if (empty($this->options['archivers']['create']) 
+		|| empty($args['type']) 
+		|| empty($this->options['archivers']['create'][$args['type']])
+		|| !in_array($args['type'], $this->options['archiveMimes'])) {
+			return $this->setError(elFinder::ERROR_INV_PARAMS);
+		}*/
+		
+		/*if (empty($args['current']) 
+		||  empty($args['targets'])
+		|| !is_array($args['targets'])
+		|| !$this->_isAllowed($dir, 'write')
+		) {
+			return $this->setError(elFinder::ERROR_INV_PARAMS);
+		}*/
+		
+		$files = array();
+		$argc  = '';
+    
+    $fp  = fopen("/tmp/elfinder-debug123.txt","w+");
+    
+		foreach ($targets as $target) {
+			$f = $this->file($target);
+			$argc .= escapeshellarg($f['name']).' ';
+			$files[] = $f;
+		}
+    
+    fwrite($fp, "argc=".var_export($argc,true)."\n");
+		$arc  = $this->options['archivers']['create'][$args['type']];
+    
+    if ($arc) {
+    
+      $name = (count($files) == 1 ? basename($files[0]) : $args['name']) . '.' . $arc['ext'] ;
+      $name = $this->uniqueName($dir, $name, '-', false);
+		
+      $cwd = getcwd();
+      chdir($dir);
+      $cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.$argc;
+		
+      fwrite($fp, "cmd=$cmd\ndir=".$dir."\n");
+      fclose($fp);
+		
+      $this->procExec($cmd, $o, $c);
+      chdir($cwd);
+    }
+		/*if (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
+			$this->_content($dir);
+			$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
+		} else {
+			$this->_result['error'] = 'Unable to create archive';
+		}*/
 	}
 	
 } // END class 
