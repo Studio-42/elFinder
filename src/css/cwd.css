@@ -122,7 +122,7 @@
 .elfinder-cwd-icon-group             { background-position:0 -1300px;}
 
 /* textfield inside icon */
-.elfinder-cwd input { width:100%; border:1px solid #ccc;  }
+.elfinder-cwd input { width:100%; border:0px solid; text-align:center; margin:0; padding:0; }
 .elfinder-cwd-view-icons { text-align:center; }
 
 

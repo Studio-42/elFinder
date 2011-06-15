@@ -9,16 +9,6 @@ elFinder.prototype.commands.quicklook = function() {
 	var self       = this,
 		fm         = self.fm,
 		/**
-		 * listners for "preview" event
-		 *
-		 * @type Array
-		 **/
-		listeners  = {
-			preview : [],
-			open    : [],
-			close   : []
-		},
-		/**
 		 * window closed state
 		 *
 		 * @type Number
@@ -59,7 +49,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 *
 		 * @type Number
 		 **/
-		navfsicon  = navicon+'-fullscreen',
+		fullscreen  = 'elfinder-quicklook-fullscreen',
 		/**
 		 * Triger keydown/keypress event with left/right arrow key code
 		 *
@@ -76,12 +66,13 @@ elFinder.prototype.commands.quicklook = function() {
 		 * @return void
 		 **/
 		closedCss = function(node) {
-			!node.length && (node = $('<div/>'));
+			var height = node.height() - delta;
+			
 			return {
 				opacity : 0,
 				width  : node.width(),
-				height : node.height(),
-				top    : parseInt(wz.position().top + node.position().top - deltah)+'px',
+				height : height > 0 ? height : 1,
+				top    : parseInt(wz.position().top   + node.position().top  - deltah)+'px',
 				left   : parseInt(cwd.position().left + node.position().left + deltaw)+'px'
 			}
 		},
@@ -97,60 +88,6 @@ elFinder.prototype.commands.quicklook = function() {
 				height : height,
 				top    : '50px',
 				left   : parseInt((parent.width() - width)/2)
-			}
-		},
-		/**
-		 * Open window
-		 *
-		 * @return void
-		 **/
-		open      = function() {
-			var win  = self.window,
-				file = self.value, node;
-
-			if (self.closed() && file && (node = cwd.find('#'+file.hash)).length) {
-				state = animated;
-				node.trigger('scrolltoview');
-				self.preview()
-				win.css(closedCss(node))
-					.show()
-					.animate(openedCss(), 'fast', function() { 
-						state = opened;
-						win.trigger('resize');
-						self.open()
-					});
-			}
-		}, 
-		/**
-		 * Close window
-		 *
-		 * @param  Boolean  if true - close without animation
-		 * @return void
-		 **/
-		close     = function(force) {
-			var win     = self.window,
-				ui      = self.ui, 
-				onclose = function() {
-					win.hide();
-					ui.preview.show().children().remove();
-					state = closed;
-					self.close();
-				},
-				node;
-			
-			if (self.opened()) {
-				state = animated;
-
-				if (force || !(node = cwd.find('#'+win.data('hash'))).length) {
-					win.hide();
-					onclose();
-				} else {
-					ui.preview.hide(200);
-					win.unbind('open resize')
-						.css('height', 'auto')
-						.animate(closedCss(node), 350, onclose);
-				}
-				
 			}
 		},
 		
@@ -191,6 +128,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 * @type jQuery
 		 **/
 		cwd, 
+		delta,
 		/**
 		 * Diference between cwd outer width and cwd width
 		 *
@@ -202,7 +140,150 @@ elFinder.prototype.commands.quicklook = function() {
 		 *
 		 * @type Number
 		 **/
-		deltah;
+		deltah,
+		title   = $('<div class="elfinder-quicklook-title"/>'),
+		// preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>'), 
+		icon    = $('<div/>'),
+		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
+		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
+			.mousedown(function(e) {
+				var win = self.window,
+					full = win.is('.'+fullscreen);
+					
+				e.stopPropagation()
+				
+				if (full) {
+					$(window).unbind('scroll.'+fm.namespace);
+					win.appendTo(parent).css(win.data('position'));
+				} else {
+					win.data('position', {
+						left   : win.css('left'), 
+						top    : win.css('top'), 
+						width  : win.width(), 
+						height : win.height()
+					})
+					.prependTo('body')
+					.css({
+						width  : '100%',
+						height : '100%'
+					});
+					
+					$(window).bind('scroll.'+fm.namespace, function() {
+						win.css({
+							left   : parseInt($(window).scrollLeft())+'px',
+							top    : parseInt($(window).scrollTop())+'px',
+						})
+					})
+					.trigger('scroll');
+
+				}
+				
+				win.toggleClass(fullscreen);
+				self.preview.trigger('resize');
+				$(this).toggleClass(navicon+'-fullscreen-off');
+				$.fn.resizable && win.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+			}),
+			
+		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
+			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').mousedown(function() { navtrigger(37); }))
+			.append(fsicon)
+			.append($('<div class="'+navicon+' '+navicon+'-next"/>').mousedown(function() { navtrigger(39); }))
+			.append('<div class="elfinder-quicklook-navbar-separator"/>')
+			.append($('<div class="'+navicon+' '+navicon+'-close"/>').mousedown(function() { self.window.trigger('close'); }))
+		;
+
+	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>');
+
+	this.info = $('<div class="elfinder-quicklook-info-wrapper"/>')
+		.append(icon)
+		.append(info)
+
+	this.window = $('<div class="ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
+		.append(
+			$('<div class="elfinder-quicklook-titlebar"/>')
+				.append(title)
+				.append($('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
+					e.stopPropagation();
+					self.window.trigger('close');
+				}))
+		)
+		.append(this.preview.add(navbar).mousedown(function(e) { e.stopPropagation(); }))
+		// .append(icon.add(info))
+		.append(self.info.hide())
+		.draggable({handles : '.elfinder-quicklook-titlebar'})
+		.bind('open', function(e) {
+			var win  = self.window, 
+				file = self.value,
+				node;
+
+			if (self.closed() && file && (node = cwd.find('#'+file.hash)).length) {
+				state = animated;
+				node.trigger('scrolltoview');
+				win.css(closedCss(node))
+					.show()
+					.animate(openedCss(), 350, function() {
+						state = opened;
+						win.trigger($.Event('preview', {file : self.value}));
+					});
+			}
+		})
+		.bind('close', function(e) {
+			var win   = self.window.trigger('change'),
+				file  = self.value,
+				node  = cwd.find('#'+win.data('hash')),
+				close = function() {
+					state = closed;
+					win.hide();
+					self.preview.children().remove()
+				};
+				
+			if (self.opened()) {
+				state = animated;
+				win.is('.'+fullscreen) && fsicon.mousedown()
+				node.length
+					? win.animate(closedCss(node), 100, close)
+					: close();
+			}
+		})
+		.bind('change', function(e) {
+			self.info.attr('style', '')
+				.hide();
+			icon.removeAttr('class').css('background', '');
+			info.html('');
+		})
+		.bind('preview', function(e) {
+			var fm   = self.fm,
+				win  = self.window,
+				file = e.file,
+				tpl  = '<div class="elfinder-quicklook-info-data">{value}</div>',
+				tmb;
+			
+			if (file) {
+				win.trigger('change').data('hash', file.hash);
+				self.preview.unbind('resize').children().remove();
+				title.html(fm.escape(file.name));
+				
+				info.html(
+						tpl.replace(/\{value\}/, file.name)
+						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
+						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
+						+ tpl.replace(/\{value\}/, fm.i18n('Modified')+': '+ fm.formatDate(file.date))
+					)
+				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
+
+				if (file.tmdb) {
+					$('<img/>')
+						.hide()
+						.appendTo(self.preview)
+						.load(function() {
+							icon.css('background', 'url("'+tmb+'") center center no-repeat');
+							$(this).remove();
+						})
+						.attr('src', (tmb = fm.tmb(file.hash)));
+				}
+				self.info.delay(100).fadeIn(10);
+			}
+		});
 
 	this.title = 'Preview';
 	
@@ -220,24 +301,13 @@ elFinder.prototype.commands.quicklook = function() {
 	 **/
 	this.value = null;
 	
-	/**
-	 * Command options
-	 *
-	 * @type  Object
-	 */
-	this.options = {
-		ui     : 'button', 
-		width  : 450,
-		height : 350
-	};
-	
 	this.handlers = {
 		select   : function() {
 			var state = this.getstate();
 			
 			this.update(state, state > -1 ? this.fm.selectedFiles()[0] : null);
 		},
-		error : function() { close(true); }
+		error : function() { self.window.data('hash', '').trigger('close'); }
 	}
 	
 	this.shortcuts = [{
@@ -279,261 +349,74 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	/**
-	 * Attach/trigger event.
-	 * Event fired when window opened and selected file changed
-	 *
-	 * @param  Function|void  callback
-	 * @return Object
-	 **/
-	this.preview_ = function(cb) {
-		var value;
-		
-		if (typeof(cb) == 'function') {
-			listeners.preview.push(cb);
-		} else {
-			value = $.extend({}, this.value);
-			$.each(listeners.preview, function(i, cb) {
-				try {
-					if (cb(value) === false) {
-						value = false;
-					}
-				} catch (e) {
-					fm.debug('error', e);
-				}
-			});
-		}
-		return self
-	}
-	
-	$.each(['open', 'close', 'preview'], function(i, method) {
-		self[method] = function(callback) {
-			var ls = listeners[method],
-				value;
-			
-			if (typeof(callback) == 'function') {
-				ls.push(callback);
-			} else {
-				value = $.extend({}, this.value);
-				$.each(ls, function(i, callback) {
-					try {
-						if (callback(value) === false && method == 'preview') {
-							value = false;
-						}
-					} catch (e) {
-						fm.debug('error', e);
-					}
-				});
-			}
-			return self;
-		}
-	})
-	
-	/**
-	 * Attach/trigger event.
-	 * Event fired when window opened and selected file changed
-	 *
-	 * @param  Function|void  callback
-	 * @return Object
-	 **/
-	this.close_ = function(cb) {
-		var res;
-		
-		if (typeof(cb) == 'function') {
-			listeners.close.push(cb);
-		} else {
-			$.each(listeners.close, function(i, cb) {
-				try {
-					res = cb()
-				} catch (e) {
-					fm.debug('error', e);
-				}
-			});
-		}
-		return self
-	}
-	
-	
-	/**
-	 * Quicklook window parts
-	 *
-	 * @return Object
-	 **/
-	this.ui = {
-		title    : $('<div class="elfinder-quicklook-title"/>'),
-		titlebar : $('<div class="elfinder-quicklook-titlebar"/>')
-			.append($('<span class="ui-icon ui-icon-circle-close"/>').click(function() { close(); })),
-		preview : $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
-			.bind('resize', function(e) {
-				e.stopPropagation();
-				self.ui.preview.height(self.window.height() - self.ui.titlebar.outerHeight() - self.ui.navbar.outerHeight());
-			}),
-		navbar : $('<div class="elfinder-quicklook-navbar"/>')
-			.append($('<div class="'+navicon+' '+navfsicon+'"/>')
-				.mousedown(function(e) {
-					var icon       = $(this),
-						win        = self.window,
-						fullscreen = icon.is('.'+navfsicon+'-off');
-					
-					if (fullscreen) {
-						win.css(win.data('position'));
-					} else {
-						win.data('position', {
-							left   : win.css('left'), 
-							top    : win.css('top'), 
-							width  : win.width(), 
-							height : win.height()
-						})
-						.hide() // try to hide window scrollers and calc coorent window size
-						.css({
-							left   : -Math.ceil(parent.offset().left + 1),
-							top    : -Math.ceil(parent.offset().top + 1),
-							width  : $(window).width(),
-							height : $(window).height()
-						})
-						.show();
-					}
-					self.ui.titlebar[fullscreen ? 'show' : 'hide']();
-					
-					win[fullscreen ? 'removeClass' : 'addClass']('elfinder-quicklook-fullscreen');
-					icon[fullscreen ? 'removeClass' : 'addClass'](navfsicon+'-off');
-					$.fn.resizable && win.resizable(fullscreen ? 'enable' : 'disable').removeClass('ui-state-disabled');
-					win.trigger('resize');
-				})
-			)
-			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').mousedown(function(e) { navtrigger(37); }))
-			.append($('<div class="'+navicon+' '+navicon+'-next"/>').mousedown(function(e) { navtrigger(39); }))
-	}
-	
-	/**
-	 * Quicklook window 
-	 *
-	 * @return jQuery
-	 **/
-	this.window = $('<div class="elfinder-quicklook" style="position:absolute"/>')
-		.append(self.ui.titlebar.append(this.ui.title))
-		.append(this.ui.preview)
-		.append(this.ui.navbar)
-		.draggable({handle : '.elfinder-quicklook-titlebar'})
-		;
-	
-	// make window resizable
-	if ($.fn.resizable) {
-		this.window.resizable({ 
-			handles   : 'se', 
-			minWidth  : this.options.minWidth || 350,
-			minHeight : this.options.minHeight || 160
-		});
-	}
-	
-	/**
 	 * Init command.
 	 * Add default plugins and init other plugins
 	 *
 	 * @return Object
 	 **/
 	this.init = function() {
-		var o = this.options, 
+		var o       = this.options, 
 			plugins = fm.commands.quicklook.plugins || [],
+			win     = this.window,
 			i, p;
 		
-		width  = o.width > 0 ? parseInt(o.width) : 450;	
-		height = o.height > 0 ? parseInt(o.height) : 200;
-		
+		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
+		height = o.height > 0 ? parseInt(o.height) : 300;
+
 		fm.one('load', function() {
-			parent = fm.getUI().prepend(self.window);
+			parent = fm.getUI().prepend(win);
 			cwd    = fm.getUI('cwd');
 			wz     = cwd.parent();
-			deltaw = (cwd.innerWidth() - cwd.width() - 2)/2;
-			deltah = (cwd.innerHeight() - cwd.height() - 2)/2
+			deltaw = parseInt((cwd.innerWidth()  - cwd.width() - 2)/2);
+			deltah = parseInt((cwd.innerHeight() - cwd.height() - 2)/2),
+			delta  = parseInt(win.outerHeight()  - win.height())
 
-			// on change preview - update file info and title
-			self.preview(function() {
-				var ui   = self.ui,
-					file = self.value,
-					tmb  = fm.tmb(file.hash),
-					icon = $('<div class="elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime)+'"/>').hide(),
-					tpl  = '<div class="elfinder-quicklook-info-data">{value}</div>',
-					info = $('<div class="elfinder-quicklook-info">'
-						+ '<div class="elfinder-quicklook-info-name">'+fm.escape(file.name)+'</div>'
-						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
-						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
-						+ tpl.replace(/\{value\}/, fm.i18n('Modified')+': '+ fm.formatDate(file.date))
-						+'</div>').hide(),
-					margin = function() { 
-						info.css('margin-top', -parseInt(info.outerHeight(true)/2)+'px')
-							.add(icon)
-							.delay(150)
-							.fadeIn(100);
-					};
-				
-				self.ui.title.html(fm.escape(file.name));
-				self.window.unbind('open resize')
-					.data('hash', self.value.hash)
-					.bind('resize', function() {
-						ui.preview.trigger('resize');
-					});
-				
-				self.ui.preview.children()
-					.remove()
-					.end()
-					.append(info)
-					.append(icon)
-					;
-				
-				// load thumbnail
-				tmb && $('<img />')
-						.hide()
-						.insertAfter(icon)
-						.load(function() {
-							$(this).remove();
-							icon.css('background', 'url("'+tmb+'") center center no-repeat');
-						})
-						.attr('src', tmb);
-				
-				self.opened() ? margin() : self.window.one('open', margin);
-				var event = $.Event('test', {file : $.extend(true, {}, self.value)});
-				// event.data = $.extend(true, {}, self.value);
-					// e.data = {'asd' : 12};
-					// e.some = 'qq'
-				// fm.log(event)
-				self.window.trigger(event, self.value)
-			});
-
-			// init plugins
-			$.each(plugins, function(i, pl) { new pl(self); });
-
-			// change handler
+			win.zIndex(10 + parent.zIndex());
+			
+			$(document).keydown(function(e) {
+				e.keyCode == 27 && self.opened() && win.trigger('close')
+			})
+			
+			if ($.fn.resizable) {
+				win.resizable({ 
+					handles   : 'se', 
+					minWidth  : 350, //o.minWidth  > 0 ? parseInt(o.minWidth)  : 300,
+					minHeight : 120, //o.minHeight > 0 ? parseInt(o.minHeight) : 160,
+					resize    : function() { self.preview.trigger('resize'); }
+				});
+			}
+			
 			self.change(function() {
-				if (!self.closed()) {
-					self.value ? self.preview() : close();
+				self.opened() && self.window.trigger(self.value ? $.Event('preview', {file : self.value}) : 'close');
+			});
+			
+			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
+				if (typeof(plugin) == 'function') {
+					new plugin(self)
 				}
 			});
 			
-			// close on escape
-			$(document).keydown(function(e) {
-				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && close();
+			win.bind('preview', function() {
+				self.info.show()
 			});
-			
 		});
+		
 	}
 	
 	this.getstate = function() {
 		return this.fm.selected().length == 1 ? 0 : -1;
 	}
 	
+	
+	
 	this._exec = function() {
-		if (this.enabled()) {
-			this.closed() ? open() : close();
-		}
+		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
 	}
-	
-	
-
 
 }
 
 // quicklook plugins
-elFinder.prototype.commands.quicklook.plugins = [
+elFinder.prototype.commands.quicklook.plugins_ = [
 
 	/**
 	 * Images preview plugin
@@ -604,10 +487,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.ui.preview,
 			fm      = ql.fm;
 			
-		win.bind('test', function(e, file) {
-			fm.log(file)
-			file = null
-			// e.stopPropagation()
+		// win.bind('test', function(e, file) {
+		// 	fm.log(file)
+		// 	file = null
+		// 	// e.stopPropagation()
+		// })
+
+		win.bind('open close preview', function(e) {
+			fm.log(e.type)
 		})
 			
 		ql.preview(function(file) {
