@@ -1024,7 +1024,7 @@ class elFinder {
 		}
 
 		if (($changes = $volume->archive($args)) == false) {
-		//	return array('error' => $this->error($error, self::ERROR_UNKNOWN));
+			return array('error' => $this->error($error, self::ERROR_UNKNOWN));
 		}
 
 		return $this->trigger('archive', $volume, array('added' => $changes));

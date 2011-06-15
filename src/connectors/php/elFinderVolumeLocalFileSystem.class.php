@@ -731,31 +731,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		$this->checkArchivers();
 		
-    $dir = $this->decode($args['current']);
-   
-		//$dir = $this->decode($args['current']);
+		$dir = $this->decode($args['current']);
     
-    $targets = $args['targets'];
-		
-		/*if (empty($this->options['archivers']['create']) 
-		|| empty($args['type']) 
-		|| empty($this->options['archivers']['create'][$args['type']])
-		|| !in_array($args['type'], $this->options['archiveMimes'])) {
-			return $this->setError(elFinder::ERROR_INV_PARAMS);
-		}*/
-		
-		/*if (empty($args['current']) 
-		||  empty($args['targets'])
-		|| !is_array($args['targets'])
-		|| !$this->_isAllowed($dir, 'write')
-		) {
-			return $this->setError(elFinder::ERROR_INV_PARAMS);
-		}*/
+		$targets = $args['targets'];
 		
 		$files = array();
 		$argc  = '';
-    
-    $fp  = fopen("/tmp/elfinder-debug123.txt","w+");
     
 		foreach ($targets as $target) {
 			$f = $this->file($target);
@@ -763,30 +744,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$files[] = $f;
 		}
     
-    fwrite($fp, "argc=".var_export($argc,true)."\n");
 		$arc  = $this->options['archivers']['create'][$args['type']];
     
-    if ($arc) {
+		if ($arc) {
     
-      $name = (count($files) == 1 ? basename($files[0]) : $args['name']) . '.' . $arc['ext'] ;
-      $name = $this->uniqueName($dir, $name, '-', false);
+			$name = (count($files) == 1 ? basename($files[0]) : $args['name']) . '.' . $arc['ext'] ;
+			$name = $this->uniqueName($dir, $name, '-', false);
 		
-      $cwd = getcwd();
-      chdir($dir);
-      $cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.$argc;
+			$cwd = getcwd();
+			chdir($dir);
+			$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.$argc;
 		
-      fwrite($fp, "cmd=$cmd\ndir=".$dir."\n");
-      fclose($fp);
-		
-      $this->procExec($cmd, $o, $c);
-      chdir($cwd);
-    }
-		/*if (file_exists($dir.DIRECTORY_SEPARATOR.$name)) {
-			$this->_content($dir);
-			$this->_result['select'] = array($this->_hash($dir.DIRECTORY_SEPARATOR.$name));
-		} else {
-			$this->_result['error'] = 'Unable to create archive';
-		}*/
+			$this->procExec($cmd, $o, $c);
+			chdir($cwd);
+			
+			
+			if ($c == 0) {
+				$finfo = $this->stat($dir . $this->options['separator'] . $name);
+				return array($finfo);
+			}
+
+			return false;
+		}
+		return false;
 	}
 	
 } // END class 
