@@ -1505,6 +1505,7 @@
 			'application/pdf'               : 'Portable Document Format (PDF)',
 			'application/vnd.oasis.opendocument.text' : 'Open Office document',
 			'application/x-shockwave-flash' : 'Flash application',
+			'application/flash-video'       : 'Flash video',
 			'application/xml'               : 'XML document', 
 			'application/x-bittorrent'      : 'Bittorrent file',
 			'application/x-7z-compressed'   : '7z archive',

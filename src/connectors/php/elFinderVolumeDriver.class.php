@@ -352,11 +352,10 @@ abstract class elFinderVolumeDriver {
 		'ai'    => 'image/vnd.adobe.photoshop',
 		'xbm'   => 'image/xbm',
 		//audio
-
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
-		'mp4a'  => 'audio/mp4',
+		'm4a'   => 'audio/x-m4a',
 		'wav'   => 'audio/wav',
 		'wma'   => 'audio/x-ms-wma',
 		// video
@@ -368,7 +367,9 @@ abstract class elFinderVolumeDriver {
 		'mov'   => 'video/quicktime',
 		'wm'    => 'video/x-ms-wmv',
 		'flv'   => 'video/x-flv',
-		'mkv'   => 'video/x-matroska'
+		'mkv'   => 'video/x-matroska',
+		'webm'  => 'video/webm',
+		'ogv'   => 'video/ogg'
 		);
 	
 	/**
@@ -639,6 +640,7 @@ abstract class elFinderVolumeDriver {
 					}
 				}
 			}
+			self::$mimetypes['ogg'] = 'audio/ogg';
 		}
 
 		// set root path
