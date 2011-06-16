@@ -1743,34 +1743,35 @@
 				dfrd    = $.Deferred(),
 				pointer = 0;
 
-			$.each(arguments, function(i, m) {
-				steps.push(function() {
-					var args = Array.prototype.slice.apply(arguments),
-						d = m.apply(null, args);
+				$.each(arguments, function(i, a) {
+					steps.push(function() {
+						var args = [].slice.apply(arguments), d;
 
-					if (!d.promise) {
-						d = $.Deferred().resolve(d);
-					}
-
-					d.fail(function(error) {
-						dfrd.reject(error)
-					})
-					.done(function(data) {
-						pointer++;
-						args.push(data);
-
-						if (pointer == steps.length) {
-							dfrd.resolve.apply(dfrd, args)
+						if (typeof(a) == 'function') {
+							if (!((d = a.apply(null, args)) && d.promise)) {
+								d = $.Deferred()[d === false ? 'reject' : 'resolve'](d);
+							}
+						} else if (a && a.promise) {
+							d = a;
 						} else {
-							steps[pointer].apply(null, args)
+							d = $.Deferred()[a === false ? 'reject' : 'resolve'](a);
 						}
+
+						d.fail(function() {
+							dfrd.reject.apply(dfrd, [].slice.apply(arguments));
+						})
+						.done(function(data) {
+							pointer++;
+							args.push(data);
+
+							pointer == steps.length
+								? dfrd.resolve.apply(dfrd, args)
+								: steps[pointer].apply(null, args);
+						});
 					});
 				});
-			});
 
-			steps[0]();
-
-			return dfrd;
+				steps.length ? steps[0]() : dfrd.resolve();
 		},
 		
 		/**

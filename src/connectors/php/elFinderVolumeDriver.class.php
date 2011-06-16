@@ -2547,10 +2547,9 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _filePutContents($path, $content);
 
 	/**
-	 * Write a string to a file
+	 * Extract files from archive
 	 *
-	 * @param  string  $target     file hash
-	 * @return bool|array
+	 * @return array|bool
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
 	abstract protected function _extract($target);
@@ -2566,6 +2565,7 @@ abstract class elFinderVolumeDriver {
 	 * Return list of available archivers
 	 *
 	 * @return array
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
 	abstract protected function _checkArchivers();
 	

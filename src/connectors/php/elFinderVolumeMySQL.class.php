@@ -896,6 +896,35 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Extract files from archive
+	 *
+	 * @return array|bool
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+	protected function _extract($target) {
+		return false;
+	}
+
+	/**
+	 * Create archive of selected type
+	 *
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+	protected function _archive($args) {
+		return false;
+	}
+
+	/**
+	 * Return list of available archivers
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+	protected function _checkArchivers() {
+		return array();
+	}
+	
 } // END class
 
 ?>
