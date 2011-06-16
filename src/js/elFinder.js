@@ -1403,7 +1403,7 @@
 		// attach events to document
 		$(document)
 			// disable elfinder on click outside elfinder
-			.bind(mousedown, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+			.bind('click.'+this.namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
 			// exec shortcuts
 			.bind(keydown+' '+keypress, execShortcut);
 		

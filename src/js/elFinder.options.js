@@ -253,7 +253,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'event-stoped', 'backend-debug_', 'event-disabled']
+	debug : ['error', 'event-enable_', 'backend-debug_', 'event-disable_']
 }
 
 })(jQuery);
