@@ -1428,7 +1428,7 @@
 				self.trigger('open', data);
 				
 			});
-
+		
 	}
 	
 	/**
@@ -2035,8 +2035,10 @@
 			preparecopy : 'Prepare to copy files',
 			rename      : 'Rename files',
 			upload      : 'Uploading files',
-			read        : 'Open files',
-			save        : 'Save files'
+			download    : 'Downloading files',
+			save        : 'Save files',
+			compress    : 'Create archives',
+			extract     : 'Extract files'
 		},
 		
 		/**

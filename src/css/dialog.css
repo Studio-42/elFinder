@@ -103,16 +103,22 @@
 	border-radius: 2px;
 }
 
-.elfinder-dialog-icon-open { background-position: 0 -225px; }
-.elfinder-dialog-icon-reload { background-position: 0 -225px; }
-.elfinder-dialog-icon-mkdir  { background-position: 0 -64px; }
-.elfinder-dialog-icon-mkfile { background-position: 0 -96px; }
+/* icons */
+.elfinder-dialog-icon-open, 
+.elfinder-dialog-icon-openfile    { background-position: 0 -225px; }
+.elfinder-dialog-icon-reload      { background-position: 0 -225px; }
+.elfinder-dialog-icon-mkdir       { background-position: 0 -64px; }
+.elfinder-dialog-icon-mkfile      { background-position: 0 -96px; }
 .elfinder-dialog-icon-copy,
 .elfinder-dialog-icon-preparecopy,
-.elfinder-dialog-icon-move { background-position: 0 -128px;}
-
-.elfinder-dialog-icon-upload { background-position: 0 -160px; }
-.elfinder-dialog-icon-rm { background-position: 0 -192px; }
+.elfinder-dialog-icon-move        { background-position: 0 -128px;}
+.elfinder-dialog-icon-upload      { background-position: 0 -160px; }
+.elfinder-dialog-icon-rm          { background-position: 0 -192px; }
+.elfinder-dialog-icon-download    { background-position: 0 -260px; }
+.elfinder-dialog-icon-save        { background-position: 0 -295px; }
+.elfinder-dialog-icon-rename      { background-position: 0 -330px; }
+.elfinder-dialog-icon-compress,
+.elfinder-dialog-icon-extract     { background-position: 0 -365px; }
 
 /*********************** CONFIRM DIALOG **************************/
 

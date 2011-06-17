@@ -88,7 +88,8 @@
 .elfinder-cwd-icon-vnd-adobe-photoshop, 
 .elfinder-cwd-icon-postscript { background-position:0 -250px;  }
 .elfinder-cwd-icon-audio { background-position:0 -300px; }
-.elfinder-cwd-icon-video { background-position:0 -350px; }
+.elfinder-cwd-icon-video,
+.elfinder-cwd-icon-flash-video { background-position:0 -350px; }
 .elfinder-cwd-icon-rtf, 
 .elfinder-cwd-icon-rtfd { background-position: 0 -400px; }
 .elfinder-cwd-icon-pdf { background-position: 0 -450px; }
