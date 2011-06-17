@@ -248,12 +248,13 @@ elFinder.prototype.options = {
 			iframeTimeout : 900000
 		},
 		quicklook : {
-			minWidth : 300
+			autoplay : false,
+			jplayer : 'third-part/jplayer'
 		}
 	},
 	
 	// debug : true
-	debug : ['error', 'event-enable_', 'backend-debug_', 'event-disable_']
+	debug : ['error', 'warning', 'event-enable_', 'backend-debug_', 'event-disable_']
 }
 
 })(jQuery);

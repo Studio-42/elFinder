@@ -255,7 +255,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (ql.support.audio[type]) {
 				e.stopImmediatePropagation();
 				
-				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.url(file.hash)+'" /></audio>').appendTo(preview);
+				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.url(file.hash)+'" /></audio>')
+					.appendTo(preview);
 				autoplay && node[0].play();
 			}
 		});
@@ -291,6 +292,49 @@ elFinder.prototype.commands.quicklook.plugins = [
 			}
 		});
 	},
+	
+	
+	function(ql) {
+		var fm       = ql.fm,
+			preview  = ql.preview,
+			autoplay = !!ql.options['autoplay'],
+			mimes    = ['audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg3', 'audio/mp3', 'audio/x-mp3'],
+			path     = ql.options.jplayer;
+
+		path && $.fn.jPlayer && preview.bind('update', function(e) {
+			var file = e.file,
+			 	mime = file.mime,
+				player, controls;
+			
+			if ($.inArray(file.mime, mimes) !== -1) {
+				e.stopImmediatePropagation();
+
+				controls = $('<div class="elfinder-quicklook-preview-audio"><div class="jp-audio"><div class="jp-type-single"><div id="jp_interface_1" class="jp-interface"><ul class="jp-controls"><li><a href="#" class="jp-play" tabindex="1">play</a></li><li><a href="#" class="jp-pause" tabindex="1">pause</a></li><li><a href="#" class="jp-stop" tabindex="1">stop</a></li><li><a href="#" class="jp-mute" tabindex="1">mute</a></li><li><a href="#" class="jp-unmute" tabindex="1">unmute</a></li></ul><div class="jp-progress"><div class="jp-seek-bar"><div class="jp-play-bar"></div></div></div><div class="jp-volume-bar"><div class="jp-volume-bar-value"></div></div><div class="jp-current-time"></div><div class="jp-duration"></div></div></div></div></div>');
+				player   = $('<div id="jquery_jplayer_1" class="jp-jplayer"></div>')
+					.appendTo(preview.append(controls))
+					.jPlayer({
+						ready: function () {
+							player.jPlayer("setMedia", {
+								mp3 : fm.url(file.hash)
+							});
+							autoplay && player.jPlayer("play");
+						},
+						ended: function (event) {
+							player.jPlayer("play");
+						},
+						warning : function(e) {
+							fm.debug('warning', 'qucklook/jplayer: '+e.jPlayer.warning.message+' '+e.jPlayer.warning.hint);
+						},
+						error : function(e) {
+							fm.debug('error', 'qucklook/jplayer: '+e.jPlayer.error.message+' '+e.jPlayer.error.hint);
+							$(this).add(controls).hide();
+						},
+						swfPath: path
+				});
+			}
+		});
+	},
+	
 	
 	/**
 	 * Audio/video preview plugin using browser plugins

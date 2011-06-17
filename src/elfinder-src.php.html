@@ -71,6 +71,8 @@
 	<script src="js/commands/quicklook.plugins.js" type="text/javascript" charset="utf-8"></script>
 	
 	
+	<script src="third-part/jplayer/jquery.jplayer.min.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="third-part/jplayer/skin/jplayer.blue.monday.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	
 	
 	
@@ -102,22 +104,21 @@
 
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
-			
-			$(document).keydown(function(e) {
-				// console.log(e.keyCode)
-			})
-			
-			// var f = $('<div/>').elfinder({
-			// 	url : 'connectors/php/connector.php',
-			// 	lang : 'ru'
-			// })
-			// 
-			// setTimeout(function() {
-			// 	f.hide().appendTo('body')
-			// 	setTimeout(function() {
-			// 		f.show()
-			// 	}, 2000)
-			// }, 3000)
+
+			// $("#jquery_jplayer_1").jPlayer({
+			// 	ready: function () {
+			// 		$(this).jPlayer("setMedia", {
+			// 			mp3 : "../files/audio/03 Yuuhi wo Miteiru ka_ (Original Mix).mp3"
+			// 			// mp3: "http://www.jplayer.org/audio/mp3/Miaow-07-Bubble.mp3"
+			// 		})//.jPlayer("play");
+			// 	},
+			// 	ended: function (event) {
+			// 		$(this).jPlayer("play");
+			// 	},
+			// 	swfPath: "third-part/jplayer",
+			// 	supplied: "mp3,ogg"
+			// });
+
 			
 			var f1 = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
@@ -189,7 +190,6 @@
 
 </head>
 <body>
-	
 	<div id="back" class="button">back</div>
 	<div id="fwd" class="button">forward</div>
 	<div id="dialog" class="button">dialog</div>
