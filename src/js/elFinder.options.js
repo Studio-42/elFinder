@@ -248,7 +248,7 @@ elFinder.prototype.options = {
 			iframeTimeout : 900000
 		},
 		quicklook : {
-			autoplay : false,
+			autoplay : true,
 			jplayer : 'third-part/jplayer'
 		}
 	},

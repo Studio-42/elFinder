@@ -210,7 +210,7 @@ elFinder.prototype.commands.quicklook = function() {
 			if (file) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
-				self.preview.unbind('changesize').trigger('change').unbind('change').children().remove();
+				self.preview.unbind('changesize').trigger('change').children().remove();
 				title.html(fm.escape(file.name));
 				
 				info.html(

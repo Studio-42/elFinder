@@ -258,9 +258,6 @@ pre.elfinder-quicklook-preview-text {
 	left:0;
 }
 
-.elfinder-quicklook-preview-audio .jp-audio { width:100%; }
-#jp_interface_1 { border:0 solid; }
-
 embed.elfinder-quicklook-preview-audio {
 	height:30px;
 	background:transparent;
@@ -271,6 +268,9 @@ embed.elfinder-quicklook-preview-audio {
 	height:100%;
 }
 
+.elfinder-quicklook-preview-video .jp-video {
+	width:100%;
+}
 
 
 
