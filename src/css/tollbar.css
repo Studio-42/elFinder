@@ -85,8 +85,19 @@
 	position:absolute;
 	left:0;
 	top:19px;
-	border:1px solid #111;
+	padding:0;
+/*	border:1px solid #111;*/
 /*	z-index:10;*/
 }
 
+.elfinder-button-menu-item {
+/*	display:block;*/
+	white-space:nowrap;
+	font-size:.72em;
+	cursor:default;
+	padding:5px 24px 5px 9px;
+}
 
+.elfinder-button-menu .ui-state-hover {
+	border:0 solid;
+}
