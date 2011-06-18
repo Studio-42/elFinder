@@ -1,6 +1,6 @@
 <?php
 /**
- * Based class for elFinder volume.
+ * Base class for elFinder volume.
  * Provide 2 layers:
  *  1. Public API (commands)
  *  2. abstract fs API
@@ -108,6 +108,13 @@ abstract class elFinderVolumeDriver {
 	protected $cryptLib = '';
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $archivers = array();
+	
+	/**
 	 * How many subdirs levels return for tree
 	 *
 	 * @var int
@@ -210,7 +217,11 @@ abstract class elFinderVolumeDriver {
 		),
 		'attributes' => array(),
 		'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
-		'archivers'    => array(),       // info about archivers to use. See example below. Leave empty for auto detect	
+		'archivers'    => array(
+			'create' => array(
+				'application/7z' => array('cmd' => '7z', 'argc' => '', 'ext'=>'7z')
+			)
+		),       // info about archivers to use. See example below. Leave empty for auto detect	
 	);
 	
 	/**
@@ -692,20 +703,44 @@ abstract class elFinderVolumeDriver {
 		$this->nameValidator = is_string($this->options['acceptedName']) && !empty($this->options['acceptedName']) 
 			? $this->options['acceptedName']
 			: '';
-			
-		if (isset($this->commands['archive']) || isset($this->commands['extract'])) {
-			$this->checkArchivers();
-			if (isset($this->commands['archive'])) {
-				$this->_result['params']['archives'] = $this->options['archiveMimes'];
+
+		// if (isset($this->commands['archive']) || isset($this->commands['extract'])) {
+		$this->_checkArchivers();
+		// manual control archive types to create
+		if (!empty($this->options['archiveMimes']) && is_array($this->options['archiveMimes'])) {
+			foreach ($this->archivers['create'] as $mime => $v) {
+				if (!in_array($mime, $this->options['archiveMimes'])) {
+					unset($this->archivers['create'][$mime]);
+				}
 			}
-			if (isset($this->commands['extract'])) {
-				$this->_result['params']['extract'] = array_keys($this->options['archivers']['extract']);
+		}
+		
+		// manualy add archivers
+		if (!empty($this->options['archivers']['create']) && is_array($this->options['archivers']['create'])) {
+			foreach ($this->options['archivers']['create'] as $mime => $conf) {
+				if (strpos($mime, 'application/') === 0 
+				&& !empty($conf['cmd']) 
+				&& isset($conf['argc']) 
+				&& !empty($conf['ext'])
+				&& !isset($this->archivers['create'][$mime])) {
+					$this->archivers['create'][$mime] = $conf;
+				}
+			}
+		}
+		
+		if (!empty($this->options['archivers']['extract']) && is_array($this->options['archivers']['extract'])) {
+			foreach ($this->options['archivers']['extract'] as $mime => $conf) {
+				if (substr($mime, 'application/') === 0 
+				&& !empty($cons['cmd']) 
+				&& isset($conf['argc']) 
+				&& !empty($conf['ext'])
+				&& !isset($this->archivers['extract'][$mime])) {
+					$this->archivers['extract'][$mime] = $conf;
+				}
 			}
 		}
 
 		$this->configure();
-		// debug($this->attributes);
-		// return false;
 		return $this->mounted = true;
 	}
 	
@@ -752,22 +787,22 @@ abstract class elFinderVolumeDriver {
 	
 	/**
 	 * Return volume options required by client:
-	 * - url
-	 * - tmbUrl
-	 * - disabled - list of disabled commands
-	 * - separator - directory separator
 	 *
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function options($hash) {
 		return array(
-			'path' => $this->path($hash),
-			'url'        => $this->URL,
-			'tmbUrl'     => $this->tmbURL,
-			'disabled'   => $this->disabled,
-			'separator'  => $this->separator,
-			'copyOverwrite' => intval($this->options['copyOverwrite'])
+			'path'          => $this->path($hash),
+			'url'           => $this->URL,
+			'tmbUrl'        => $this->tmbURL,
+			'disabled'      => $this->disabled,
+			'separator'     => $this->separator,
+			'copyOverwrite' => intval($this->options['copyOverwrite']),
+			'archivers'     => array(
+				'create'  => array_keys($this->archivers['create']),
+				'extract' => array_keys($this->archivers['extract'])
+			)
 		);
 	}
 	
@@ -1392,16 +1427,6 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
-	 * Return list of available archivers
-	 *
-	 * @return array
-	 **/
-	protected function checkArchivers() {
-		return $this->_checkArchivers();
-	}
-	
-	
-	/**
 	 * Remove file/dir
 	 *
 	 * @param  string  $hash  file hash
@@ -1420,7 +1445,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry(dio) Levashov
 	 **/
 	protected function setError($error) {
-		$this->error = func_get_args(); 
+		return !!($this->error = func_get_args()); 
 		return false;
 	}
 	
@@ -2124,7 +2149,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  array   $output        stdout strings
      * @param  array   $return_var    process exit code
      * @param  array   $error_output  stderr strings
-	 * @return exit code
+	 * @return int     exit code
 	 * @author Alexey Sukhotin
 	 **/	
 	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {

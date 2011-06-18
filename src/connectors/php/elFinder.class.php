@@ -353,46 +353,12 @@ class elFinder {
 	/***************************************************************************/
 	/*                                 commands                                */
 	/***************************************************************************/
-
+	
 	/**
-	 * Translate error number(s) into error message
+	 * Normalize error messages
 	 *
 	 * @return array
 	 * @author Dmitry (dio) Levashov
-	 **/
-	public function _error() {
-		
-		if (func_num_args() == 1) {
-			$errors = func_get_arg(0);
-			if (!is_array($errors)) {
-				$errors = array($errors);
-			}
-		} else {
-			$errors = func_get_args();
-		}
-		
-		if (!count($errors)) {
-			return self::$errors[self::ERROR_UNKNOWN];
-		}
-
-		for ($i = 0, $c = count($errors); $i < $c; $i++) {
-			$v = $errors[$i];
-
-			if (is_int($v) && isset(self::$errors[$v])) {
-				$errors[$i] = self::$errors[$v];
-			} elseif ($i == 0) {
-				$errors[$i] = self::$errors[self::ERROR_UNKNOWN];
-			}
-		}
-		
-		return $errors;
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
 	 **/
 	public function error() {
 		$errors = array();

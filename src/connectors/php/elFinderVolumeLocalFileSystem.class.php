@@ -575,9 +575,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * Return list of available archivers
+	 * Detect available archivers
 	 *
-	 * @return array
+	 * @return void
 	 **/
 	protected function _checkArchivers() {
 		if (!function_exists('exec')) {
@@ -665,15 +665,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
-		$this->options['archivers'] = $arcs;
-		foreach ($this->options['archiveMimes'] as $k=>$mime) {
-			if (!isset($this->options['archivers']['create'][$mime])) {
-				unset($this->options['archiveMimes'][$k]);
-			}
-		}
-		if (empty($this->options['archiveMimes'])) {
-			$this->options['archiveMimes'] = array_keys($this->options['archivers']['create']);
-		}
+		$this->archivers = $arcs;
 	}
 
 	/**
