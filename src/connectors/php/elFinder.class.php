@@ -46,7 +46,7 @@ class elFinder {
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
-		'archive'   => array('targets' => true, 'name' => true, 'mimes' => false, 'type' => true, 'current' => true),
+		'archive'   => array('targets' => true, 'name' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
 	);
 	
@@ -137,7 +137,8 @@ class elFinder {
 	const ERROR_SAVE              = 32;
 	const ERROR_EXTRACT           = 33;
 	const ERROR_ARCHIVE			  = 34;
-	const ERROR_ARCHIVE_TYPE      = 35;
+	const ERROR_NOT_ARCHIVE		  = 35;
+	const ERROR_ARCHIVE_TYPE      = 36;
 	
 	/**
 	 * undocumented class variable
@@ -179,8 +180,9 @@ class elFinder {
 		31 => 'Access denied',
 		32 => 'Unable to save "$1".',
 		33 => 'Unable to extract files from "$1".',
-		34 => 'Unable to create archive "$1".',
-		35 => 'File is not archive or has unsupported archive type.'
+		34 => 'Unable to create archive.',
+		35 => 'File is not archive or has unsupported archive type.',
+		36 => 'Unsupported archive type.'
 	);
 	
 	/**
@@ -954,10 +956,12 @@ class elFinder {
 	/**
 	 * Extract files from archive
 	 *
-	 * @return void
+	 * @param  array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	protected function extract($args)
-	{
+	protected function extract($args) {
 		$target = $args['target'];
 		$error  = array(self::ERROR_EXTRACT, '#'.$target);
 
@@ -974,28 +978,32 @@ class elFinder {
 	}
 	
 	/**
-	 * Add files to archive
+	 * Create archive
 	 *
-	 * @return void
+	 * @param  array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	protected function archive($args)
-	{
-		$targets = $args['targets'];
-		$name = $args['name'];
-		$error  = array(self::ERROR_ARCHIVE, '#'.$name);
+	protected function archive($args) {
+		$targets = isset($args['targets']) && is_array($args['targets']) ? $args['targets'] : array();
+		$type    = $args['type'];
+		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$volume  = count($targets) ? $this->volume($targets[0]) : false;
 	
-		foreach ($args['targets'] as $target) {
-			if (($volume = $this->volume($target)) == false
-			|| ($file = $volume->file($target)) == false) {
-				return array('error' => $this->error(self::ERROR_EXTRACT, '#'.$target, self::ERROR_FILE_NOT_FOUND));
-			}	
+		if (($volume = $this->volume($targets[0])) == false) {
+			return $this->error(self::ERROR_ARCHIVE, self::ERROR_TRGDIR_NOT_FOUND);
 		}
-
-		if (($changes = $volume->archive($args)) == false) {
-			return array('error' => $this->error($error, self::ERROR_UNKNOWN));
+	
+		if (($archive = $volume->archive($targets)) == false) {
+			return $this->error(self::ERROR_ARCHIVE, $volume->error());
 		}
-
-		return $this->trigger('archive', $volume, array('added' => $changes));
+	
+		if (!$volume->checkMime($archive['hash'], $mimes)) {
+			$archive['hidden'] = true;
+		}
+	
+		return $this->trigger('archive', $volume, array('added' => $archive));
 	}
 	/***************************************************************************/
 	/*                                   misc                                  */

@@ -669,10 +669,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * Write a string to a file
+	 * Extract files from archive
 	 *
-	 * @param  string  $target     file hash
-	 * @return bool|array
+	 * @param  string  $path  archive path
+	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
+	 * @return true
 	 * @author Dmitry (dio) Levashov, 
 	 * @author Alexey Sukhotin
 	 **/
@@ -685,49 +686,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		chdir($cwd);
 
 		return true;
-		$file = $this->file($target);
-		$mime = $file['mime'];
-		$path = $this->decode($file['hash']);
-		$dir = $this->_dirname($path);
-		$this->checkArchivers();
-    
-		if (empty($this->options['archivers']['extract'][$mime])) {
-			return $this->setError(elFinder::ERROR_INV_PARAMS);
-		}
-		
-		$beforeextract = $this->scandir($file['phash']);
-		
-		$cwd = getcwd();
-    
-		$arc = $this->options['archivers']['extract'][$mime];
-    
-		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($file['name']);
-		
-		chdir($dir);
-
-		$this->procExec($cmd, $o, $c);
-		
-		chdir($cwd);
-		
-		$afterextract = $this->scandir($file['phash']);
-		
-		$ddiff = array();
-		
-		foreach ($afterextract as $ae) {
-			if (!in_array($ae, $beforeextract)) {
-				$ddiff[] = $ae;
-			}
-		}
-		
-		return $ddiff;
 	}
 	
 	/**
-	 * Create archive of selected type
+	 * Create archive and return its path
 	 *
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @param  string  $dir    target dir
+	 * @param  array   $files  files names list
+	 * @param  string  $name   archive name
+	 * @param  array   $arc    archiver options
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	protected function _archive($args) {
+	protected function _archive($dir, $files, $name, $arc) {
+		$cwd = getcwd();
+		chdir($dir);
+		
+		$files = array_map('escapeshellarg', $files);
+		
+		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.implode(' ', $files);
+		$this->procExec($cmd, $o, $c);
+		chdir($cwd);
+
+		$path = $dir.DIRECTORY_SEPARATOR.$name;
+		return file_exists($path) ? $path : false;
 
 		$this->checkArchivers();
 		

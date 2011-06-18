@@ -1411,10 +1411,12 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Extract files from archive
 	 *
-	 * @return void
+	 * @param  string  $hash  archive hash
+	 * @return array|bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
 	public function extract($hash) {
-		// return $this->_extract($hash);
 		if (($file = $this->file($hash)) == false) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
@@ -1422,7 +1424,7 @@ abstract class elFinderVolumeDriver {
 			? $this->archivers['extract'][$file['mime']]
 			: false;
 		if (!$archiver) {
-			return $this->setError(elFinder::ERROR_ARCHIVE_TYPE);
+			return $this->setError(elFinder::ERROR_NOT_ARCHIVE);
 		}
 		
 		$path = $this->decode($hash);
@@ -1438,15 +1440,12 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$after = $this->scandir($file['phash']);
-		// debug($before);
-		// debug($after);
 		$diff = array();
 		foreach ($after as $file) {
 			if (!in_array($file, $before)) {
 				$diff[] = $file;
 			}
 		}
-		// debug($diff);
 		return $diff;
 	}
 
@@ -1455,8 +1454,40 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @return void
 	 **/
-	public function archive($args) {
-		return $this->_archive($args);
+	public function archive($hashes, $mime) {
+		// return $this->_archive($args);
+		$archiver = isset($this->archivers['create'][$mime])
+			? $this->archivers['create'][$mime]
+			: false;
+		if (!$archiver) {
+			return $this->setError(elFinder::ERROR_ARCHIVE_TYPE);
+		}
+		
+		$files = array();
+		
+		foreach ($hashes as $hash) {
+			if (($file = $this->file($hash)) == false) {
+				return $this->error(elFinder::ERROR_FILE_NOT_FOUND, '#'+$hash);
+			}
+			if (!$file['read']) {
+				return $this->error(elFinder::ERROR_PERM_DENIED);
+			}
+			$path = $this->decode($hash);
+			if (!isset($dir)) {
+				$dir = $this->_dirname($path);
+				if (!$this->attr($dir, 'write')) {
+					return $this->error(elFinder::ERROR_PERM_DENIED);
+				}
+			}
+			
+			$files[] = $this->_basename($path);
+		}
+		
+		$name = (count($files) == 1 ? $files[0] : 'Archive').'.'.$archiver['ext'];
+		
+		$archive = $this->_archive($dir, $files, $this->uniqueName($dir, $name, false), $archiver);
+		
+		return $archive ? $this->file($archive) : false;
 	}
 
 	/**
@@ -2607,23 +2638,33 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Extract files from archive
 	 *
-	 * @return array|bool
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @param  string  $path file path
+	 * @param  array   $arc  archiver options
+	 * @return bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
 	abstract protected function _extract($path, $arc);
 
 	/**
-	 * Create archive of selected type
+	 * Create archive and return its path
 	 *
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @param  string  $dir    target dir
+	 * @param  array   $files  files names list
+	 * @param  string  $name   archive name
+	 * @param  array   $arc    archiver options
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	abstract protected function _archive($args);
+	abstract protected function _archive($dir, $files, $name, $arc);
 
 	/**
-	 * Return list of available archivers
+	 * Detect available archivers
 	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @return void
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
 	abstract protected function _checkArchivers();
 	

@@ -898,28 +898,41 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	
 	/**
 	 * Extract files from archive
+	 * NOT available in this driver!
 	 *
-	 * @return array|bool
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @param  string  $path file path
+	 * @param  array   $arc  archiver options
+	 * @return bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
 	protected function _extract($path, $arc) {
 		return false;
 	}
 
 	/**
-	 * Create archive of selected type
+	 * Create archive and return its path
+	 * NOT available in this driver!
 	 *
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @param  string  $dir    target dir
+	 * @param  array   $files  files names list
+	 * @param  string  $name   archive name
+	 * @param  array   $arc    archiver options
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	protected function _archive($args) {
+	protected function _archive($dir, $files, $name, $arc) {
 		return false;
 	}
 
 	/**
-	 * Return list of available archivers
+	 * Detect available archivers
+	 * NOT available in this driver!
 	 *
-	 * @return array
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @return false
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
 	protected function _checkArchivers() {
 		return array();
