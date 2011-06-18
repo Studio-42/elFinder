@@ -22,6 +22,10 @@
 	position:relative;
 }
 
+.elfinder-menubutton {
+	overflow:visible;
+}
+
 /* hack for upload button */
 .elfinder-button form {
 	position:absolute;

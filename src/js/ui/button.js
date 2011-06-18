@@ -11,7 +11,7 @@ $.fn.elfinderbutton = function(cmd) {
 				})
 				.click(function(e) {
 					// e.preventDefault();
-					!button.is('.'+disabled) && this._click();
+					!button.is('.'+disabled) && this._click(e);
 				});
 			
 			

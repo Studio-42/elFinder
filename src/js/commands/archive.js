@@ -39,6 +39,7 @@ elFinder.prototype.commands.archive = function() {
 	this._exec = function(hashes, type) {
 		var files = this.files(hashes),
 			cnt   = files.length,
+			mime  = type || this.mimes[0],
 			cwd   = fm.cwd(),
 			error = [fm.errors.archive, fm.errors.denied],
 			dfrd  = $.Deferred().fail(function(error) {
@@ -46,7 +47,7 @@ elFinder.prototype.commands.archive = function() {
 			}), 
 			i;
 		
-		if (!(cnt && self.mimes.length && $.inArray(type, this.mimes) !== -1)) {
+		if (!(cnt && self.mimes.length && $.inArray(mime, this.mimes) !== -1)) {
 			return dfrd.reject();
 		}
 		
@@ -62,7 +63,7 @@ elFinder.prototype.commands.archive = function() {
 		}
 
 		return fm.ajax({
-			data       : {cmd : 'archive', targets : this.hashes(hashes), type : self.mimes[0], current : cwd.hash},
+			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mime, current : cwd.hash},
 			notify     : {type : 'archive', cnt : 1},
 			syncOnFail : true
 		});

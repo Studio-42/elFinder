@@ -315,7 +315,7 @@ abstract class elFinderVolumeDriver {
 		// applications
 		'ai'    => 'application/postscript',
 		'eps'   => 'application/postscript',
-		'exe'   => 'application/octet-stream',
+		'exe'   => 'application/x-executable',
 		'doc'   => 'application/vnd.ms-word',
 		'xls'   => 'application/vnd.ms-excel',
 		'ppt'   => 'application/vnd.ms-powerpoint',
@@ -365,6 +365,7 @@ abstract class elFinderVolumeDriver {
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
+		'oga'   => 'audio/ogg',
 		'm4a'   => 'audio/x-m4a',
 		'wav'   => 'audio/wav',
 		'wma'   => 'audio/x-ms-wma',
@@ -645,14 +646,15 @@ abstract class elFinderVolumeDriver {
 					if (!preg_match('/^\s*#/', $line)) {
 						$mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
 						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
-							self::$mimetypes[$mime[$i]] = $mime[0];
+							if (!isset(self::$mimetypes[$mime[$i]])) {
+								self::$mimetypes[$mime[$i]] = $mime[0];
+							} 
 						}
 					}
 				}
 			}
-			self::$mimetypes['ogg'] = 'audio/ogg';
 		}
-
+		// debug(self::$mimetypes);
 		// set root path
 		if (!$this->_isDir($this->root)) {
 			return false;
