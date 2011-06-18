@@ -349,11 +349,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 		var fm       = ql.fm,
 			preview  = ql.preview,
 			autoplay = !!ql.options['autoplay'],
-			mimes    = ['video/mp4', 'video/x-mp4', 'application/flash-video'],
+			mimes    = ['video/mp4', 'video/x-mp4', 'application/flash-video', 'video/x-flv'],
 			path     = ql.options.jplayer;
 			
 		path && $.fn.jPlayer && preview.bind('update', function(e) {
-			var file = e.file, player, controls, delta = 0;
+			var file = e.file, 
+				delta = 0,
+				player, controls,;
 
 			if ($.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();

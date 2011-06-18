@@ -110,8 +110,8 @@
 
 
 .elfinder-navbar .ui-resizable-handle { width:12px; background:transparent; }
-.elfinder-ltr .ui-resizable-handle { right:0; }
-.elfinder-rtl .ui-resizable-handle { left:0;  }
+.elfinder-ltr .elfinder-navbar .ui-resizable-handle { right:0; }
+.elfinder-rtl .elfinder-navbar .ui-resizable-handle { left:0;  }
 
 .elfinder-nav-handle-icon {
 	position:absolute;

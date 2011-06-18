@@ -10,7 +10,12 @@
 	padding:20px 0 40px 0;
 }
 
-.elfinder-quicklook .ui-resizable-handle { border:1px solid #fff;}
+.elfinder-quicklook .ui-resizable-se { 
+	width:14px;
+	height:14px;
+	right:5px;
+	bottom:3px;
+	background:url("../images/toolbar.png") 0 -650px no-repeat;}
 
 /* quicklook fullscreen window */
 .elfinder-quicklook-fullscreen {
@@ -58,7 +63,7 @@
 /* icon "close" in titlebar */
 .elfinder-quicklook-titlebar .ui-icon { 
 	position:absolute;
-	left : .1em;
+	left : 4px;
 	top:50%;
 	margin-top:-8px;
 	width:16px;

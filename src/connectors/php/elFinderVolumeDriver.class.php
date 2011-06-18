@@ -648,7 +648,9 @@ abstract class elFinderVolumeDriver {
 						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
 							if (!isset(self::$mimetypes[$mime[$i]])) {
 								self::$mimetypes[$mime[$i]] = $mime[0];
-							} 
+							} else {
+								// echo $mime[$i].' '.$mime[0].'<br>';
+							}
 						}
 					}
 				}
