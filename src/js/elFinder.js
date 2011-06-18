@@ -1483,7 +1483,8 @@
 			copy     : 'Unable to copy "$1".',
 			move     : 'Unable to move "$1".',
 			copyinself : 'Unable to copy "$1" into itself.',
-			extract    : 'Unable to extract files from "$1".'
+			extract    : 'Unable to extract files from "$1".',
+			archive    : 'Unable to create archive.'
 			
 		},
 		/**
@@ -2038,7 +2039,7 @@
 			upload      : 'Uploading files',
 			download    : 'Downloading files',
 			save        : 'Save files',
-			compress    : 'Create archives',
+			archive     : 'Create archives',
 			extract     : 'Extract files from archive'
 		},
 		

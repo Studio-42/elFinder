@@ -35,7 +35,7 @@ elFinder.prototype.commands.extract = function() {
 	}
 	
 	this.getstate = function() {
-		return getfile() ? 0 : -1;
+		return mimes.length && fm.cwd().write && getfile() ? 0 : -1;
 	}
 	
 	this._exec = function() {
@@ -44,7 +44,7 @@ elFinder.prototype.commands.extract = function() {
 				error && fm.error(error);
 			});
 			
-		if (!file) {
+		if (!(file && mimes.length)) {
 			return dfrd.reject();
 		}
 		

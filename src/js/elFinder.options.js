@@ -35,7 +35,7 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'info', 'help'],
 	
 	// commands : ['quicklook'],
 	
@@ -66,7 +66,7 @@ elFinder.prototype.options = {
 			['open', 'getfile', 'download', 'quicklook'],
 			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
 			['rm'],
-			['edit', 'extract'],
+			['edit', 'extract', 'archive'],
 			['info'],
 			['help']
 		]

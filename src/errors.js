@@ -50,6 +50,7 @@ var errors = [
 	['ERROR_MIME',             '',        'Not allowed file type.'],
 	['ERROR_SAVE',             '',        'Unable to save "$1".'],
 	['ERROR_EXTRACT',          'extract', 'Unable to extract files from "$1".'],
+	['ERROR_ARCHIVE',          'archive', 'Unable to create archive.'],
 	['ERROR_NOT_ARCHIVE',     '',        'File is not archive or has unsupported archive type.'],
 	['ERROR_ARCHIVE_TYPE',     '',        'Unsupported archive type.'],
 ]

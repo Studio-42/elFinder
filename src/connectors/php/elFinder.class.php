@@ -46,7 +46,7 @@ class elFinder {
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
-		'archive'   => array('targets' => true, 'name' => true, 'type' => true, 'mimes' => false),
+		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
 	);
 	
@@ -995,12 +995,8 @@ class elFinder {
 			return $this->error(self::ERROR_ARCHIVE, self::ERROR_TRGDIR_NOT_FOUND);
 		}
 	
-		if (($archive = $volume->archive($targets)) == false) {
+		if (($archive = $volume->archive($targets, $args['type'])) == false) {
 			return $this->error(self::ERROR_ARCHIVE, $volume->error());
-		}
-	
-		if (!$volume->checkMime($archive['hash'], $mimes)) {
-			$archive['hidden'] = true;
 		}
 	
 		return $this->trigger('archive', $volume, array('added' => $archive));
@@ -1085,18 +1081,18 @@ class elFinder {
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function filterByMimes($files, $volume, $mimes = array())	{
-		if (empty($mimes)) {
-			return $files;
-		}
-		$result = array();
-		foreach ($files as $file) {
-			if ($volume->checkMime($file['hash'], $mimes)) {
-				$result[] = $file;
-			}
-		}
-		return $result;
-	}
+	// protected function filterByMimes($files, $volume, $mimes = array())	{
+	// 	if (empty($mimes)) {
+	// 		return $files;
+	// 	}
+	// 	$result = array();
+	// 	foreach ($files as $file) {
+	// 		if ($volume->mimeAccepted($file['hash'], $mimes)) {
+	// 			$result[] = $file;
+	// 		}
+	// 	}
+	// 	return $result;
+	// }
 	
 	/**
 	 * Execute all callbacks/listeners for required command
@@ -1137,22 +1133,22 @@ class elFinder {
 		
 		if (!empty($result['added']) && is_array($result['added'])) {
 			foreach ($result['added'] as $i => $file) {
-				if (!empty($file['hidden'])) {
+				if (!empty($file['hidden']) || !$mimeVolume->mimeAccepted($file['hash'], $mimes)) {
 					unset($result['added'][$i]);
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
-			$result['added'] = $this->filterByMimes($result['added'], $mimeVolume, $mimes);
+			// $result['added'] = $this->filterByMimes($result['added'], $mimeVolume, $mimes);
 		}
 		
 		if (!empty($result['changed']) && is_array($result['changed'])) {
 			foreach ($result['changed'] as $i => $file) {
-				if (!empty($file['hidden'])) {
+				if (!empty($file['hidden']) || !$mimeVolume->mimeAccepted($file['hash'], $mimes)) {
 					unset($result['changed'][$i]);
 				}
 			}
 			$result['changed'] = array_merge(array(), $result['changed']);
-			$result['changed'] = $this->filterByMimes($result['changed'], $mimeVolume, $mimes);
+			// $result['changed'] = $this->filterByMimes($result['changed'], $mimeVolume, $mimes);
 		}
 		
 		return $result;

@@ -210,18 +210,17 @@ abstract class elFinderVolumeDriver {
 		'accessControl' => null,
 		// some data required by access control
 		'accessControlData' => null,
-		// default permissions 
+		// default permissions. not set hidden/locked here - take no effect
 		'defaults'     => array(   
 			'read'   => true,
 			'write'  => true
 		),
-		'attributes' => array(),
-		'archiveMimes' => array(),      // allowed archive's mimetypes to create. Leave empty for all available types.
-		'archivers'    => array(
-			'create' => array(
-				'application/7z' => array('cmd' => '7z', 'argc' => '', 'ext'=>'7z')
-			)
-		),       // info about archivers to use. See example below. Leave empty for auto detect	
+		// files attributes
+		'attributes'   => array(),  
+		// Allowed archive's mimetypes to create. Leave empty for all available types. 
+		'archiveMimes' => array(),  
+		// Manual config for archivers. See example below. Leave empty for auto detect	
+		'archivers'    => array()
 	);
 	
 	/**
@@ -1455,7 +1454,7 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 **/
 	public function archive($hashes, $mime) {
-		// return $this->_archive($args);
+
 		$archiver = isset($this->archivers['create'][$mime])
 			? $this->archivers['create'][$mime]
 			: false;
@@ -1484,8 +1483,9 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$name = (count($files) == 1 ? $files[0] : 'Archive').'.'.$archiver['ext'];
+		$name = $this->uniqueName($dir, $name, '');
 		
-		$archive = $this->_archive($dir, $files, $this->uniqueName($dir, $name, false), $archiver);
+		$archive = $this->_archive($dir, $files, $name, $archiver);
 		
 		return $archive ? $this->file($archive) : false;
 	}
@@ -1622,9 +1622,11 @@ abstract class elFinderVolumeDriver {
 	protected function uniqueName($dir, $name, $suffix = ' copy', $checkNum=true) {
 		$ext  = '';
 
-		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})/i', $name, $m)) {
-			$ext  = '.'.$m[1];
-			$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+		if (!$this->_isDir($this->_joinPath($dir, $name))) {
+			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$ext  = '.'.$m[1];
+				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+			} 
 		}
 		
 		if ($checkNum && preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
@@ -1636,11 +1638,12 @@ abstract class elFinderVolumeDriver {
 		}
 		$max = $i+100000;
 
-		while ($i++ <= $max) {
+		while ($i <= $max) {
 			$n = $name.($i > 0 ? $i : '').$ext;
 			if (!$this->_fileExists($this->_joinPath($dir, $n))) {
 				return $n;
 			}
+			$i++;
 		}
 		return $name.md5($dir).$ext;
 	}

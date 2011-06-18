@@ -372,7 +372,7 @@ elFinder.prototype.commands.quicklook = function() {
 			parent = fm.getUI()//.prepend(win);
 			cwd    = fm.getUI('cwd');
 
-			win.appendTo('body').zIndex(10 + parent.zIndex());
+			win.appendTo('body').zIndex(100 + parent.zIndex());
 			
 			// close window on escape
 			$(document).keydown(function(e) {

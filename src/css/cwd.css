@@ -44,10 +44,10 @@
 	margin:1px auto 1px auto;
 	padding:2px;
 	position:relative;
-	-webkit-box-shadow: 5px 5px 5px #eee;
+/*	-webkit-box-shadow: 5px 5px 5px #eee;
 	-moz-box-shadow: 5px 5px 5px #eee;
 	box-shadow: 5px 5px 5px #eee;
-}
+*/}
 
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
@@ -57,7 +57,7 @@
 	text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
 	margin:3px 1px 0 1px;
-	padding:1px 2px;
+	padding:1px;
 }
 
 /* permissions/symlink markers */
