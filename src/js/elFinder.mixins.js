@@ -39,7 +39,7 @@ elFinder.prototype.mixins = {
 				.blur(function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent();
-					fm.log('blur')
+					
 					if (parent.length) {
 
 						if (!name) {

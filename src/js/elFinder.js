@@ -1295,7 +1295,7 @@
 				
 			})
 			.bind('upload', function(data) {
-				self.log('upload').log(data)
+				// self.log('upload').log(data)
 			})
 			.bind('rm', function(e) {
 				var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
@@ -1428,7 +1428,7 @@
 				self.trigger('open', data);
 				
 			});
-		
+
 	}
 	
 	/**
@@ -1482,7 +1482,8 @@
 			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.',
 			copy     : 'Unable to copy "$1".',
 			move     : 'Unable to move "$1".',
-			copyinself : 'Unable to copy "$1" into itself.'
+			copyinself : 'Unable to copy "$1" into itself.',
+			extract    : 'Unable to extract files from "$1".'
 			
 		},
 		/**
@@ -2038,7 +2039,7 @@
 			download    : 'Downloading files',
 			save        : 'Save files',
 			compress    : 'Create archives',
-			extract     : 'Extract files'
+			extract     : 'Extract files from archive'
 		},
 		
 		/**

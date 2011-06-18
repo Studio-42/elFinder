@@ -219,6 +219,10 @@ $opts = array(
 					'write' => false
 				),
 				array(
+					'pattern' => '/tmb.zip/',
+					// 'read' => false
+				),
+				array(
 					'pattern' => '/\/folder42$/',
 					'write' => false,
 					'read' => false,

@@ -49,5 +49,7 @@ var errors = [
 	['ERROR_UPLOAD_NO_FILES',  '',        'There are no uploaded files was found.'],
 	['ERROR_MIME',             '',        'Not allowed file type.'],
 	['ERROR_SAVE',             '',        'Unable to save "$1".'],
+	['ERROR_EXTRACT',          'extract', 'Unable to extract files from "$1".'],
+	['ERROR_ARCHIVE_TYPE',     '',        'File is not archive or has unsupported archive type.'],
 ]
 

@@ -676,28 +676,25 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash;
-				return add($.map(e.data.added || [], function(f) { return f.phash == phash && f.hash && f.name ? f : null; }))
+
+				add($.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; }));
 			})
 			.change(function(e) {
 				var phash   = fm.cwd().hash,
+				
 					changed = e.data.changed || [],
 					i       = changed.length,
 					file;
 
-				while (i--) {
-					file = changed[i];
-
-					if (file.name && file.name) {
-						remove([file.hash]);
-						if (file.phash == phash) {
-							add([file]);
-						}
-					}
-				}
-				
+				$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
+					remove([file.hash]);
+					add([file]);
+				})
+				trigger();
 			})
 			.remove(function(e) {
 				remove(e.data.removed || []);
+				trigger();
 			})
 			.dragstart(function(e) {
 				var target = $(e.data.target),
@@ -730,12 +727,13 @@ $.fn.elfindercwd = function(fm) {
 				}
 				trigger();
 			})
-			.bind('mkdir mkfile duplicate upload', function(e) {
+			// select new files after some actions
+			.bind('mkdir mkfile duplicate upload rename', function(e) {
 				var phash = fm.cwd().hash, files;
 				
 				cwd.trigger('unselectall');
 
-				$.each(e.data.added.concat(e.data.changed), function(i, file) { 
+				$.each(e.data.added || [], function(i, file) { 
 					if (file && file.phash == phash) {
 						cwd.find('#'+file.hash).trigger(evtSelect);
 					}

@@ -673,10 +673,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 *
 	 * @param  string  $target     file hash
 	 * @return bool|array
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov, 
+	 * @author Alexey Sukhotin
 	 **/
-	protected function _extract($target) {
+	protected function _extract($path, $arc) {
+		$cwd = getcwd();
+		$dir = $this->_dirname($path);
+		chdir($dir);
+		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($this->_basename($path));
+		$this->procExec($cmd, $o, $c);
+		chdir($cwd);
 
+		return true;
 		$file = $this->file($target);
 		$mime = $file['mime'];
 		$path = $this->decode($file['hash']);

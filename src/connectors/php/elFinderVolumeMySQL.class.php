@@ -902,7 +902,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return array|bool
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-	protected function _extract($target) {
+	protected function _extract($path, $arc) {
 		return false;
 	}
 

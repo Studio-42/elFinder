@@ -35,7 +35,7 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'info', 'help'],
 	
 	// commands : ['quicklook'],
 	
@@ -66,7 +66,7 @@ elFinder.prototype.options = {
 			['open', 'getfile', 'download', 'quicklook'],
 			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
 			['rm'],
-			['edit'],
+			['edit', 'extract'],
 			['info'],
 			['help']
 		]
@@ -254,7 +254,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event-enable_', 'backend-debug_', 'event-disable_']
+	debug : ['error', 'warning', 'event-select_', 'backend-debug_', 'event-enable_']
 }
 
 })(jQuery);

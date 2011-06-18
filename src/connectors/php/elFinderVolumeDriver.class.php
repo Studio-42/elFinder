@@ -1414,7 +1414,40 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 **/
 	public function extract($hash) {
-		return $this->_extract($hash);
+		// return $this->_extract($hash);
+		if (($file = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+		$archiver = isset($this->archivers['extract'][$file['mime']])
+			? $this->archivers['extract'][$file['mime']]
+			: false;
+		if (!$archiver) {
+			return $this->setError(elFinder::ERROR_ARCHIVE_TYPE);
+		}
+		
+		$path = $this->decode($hash);
+		
+		if (!$file['read'] || !$this->attr($this->_dirname($path), 'write')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		$before = $this->scandir($file['phash']);
+
+		if (!$this->_extract($path, $archiver)) {
+			return false;
+		}
+		
+		$after = $this->scandir($file['phash']);
+		// debug($before);
+		// debug($after);
+		$diff = array();
+		foreach ($after as $file) {
+			if (!in_array($file, $before)) {
+				$diff[] = $file;
+			}
+		}
+		// debug($diff);
+		return $diff;
 	}
 
 	/**
@@ -2577,7 +2610,7 @@ abstract class elFinderVolumeDriver {
 	 * @return array|bool
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-	abstract protected function _extract($target);
+	abstract protected function _extract($path, $arc);
 
 	/**
 	 * Create archive of selected type

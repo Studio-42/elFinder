@@ -46,8 +46,8 @@ class elFinder {
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
-		'archive'   => array('targets' => true, 'name' => true, 'mimes' => true, 'type' => true, 'current' => true),
-		'extract'   => array('target' => true, 'mimes' => true),
+		'archive'   => array('targets' => true, 'name' => true, 'mimes' => false, 'type' => true, 'current' => true),
+		'extract'   => array('target' => true, 'mimes' => false),
 	);
 	
 	/**
@@ -137,6 +137,7 @@ class elFinder {
 	const ERROR_SAVE              = 32;
 	const ERROR_EXTRACT           = 33;
 	const ERROR_ARCHIVE			  = 34;
+	const ERROR_ARCHIVE_TYPE      = 35;
 	
 	/**
 	 * undocumented class variable
@@ -177,8 +178,9 @@ class elFinder {
 		30 => '"$1" transfer error.',
 		31 => 'Access denied',
 		32 => 'Unable to save "$1".',
-		33 => 'Unable to extract from "$1".',
+		33 => 'Unable to extract files from "$1".',
 		34 => 'Unable to create archive "$1".',
+		35 => 'File is not archive or has unsupported archive type.'
 	);
 	
 	/**
@@ -964,11 +966,11 @@ class elFinder {
 			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
 		}  
     
-		if (($changes = $volume->extract($target)) == false) {
-			return array('error' => $this->error($error, self::ERROR_UNKNOWN));
+		if (($added = $volume->extract($target)) === false) {
+			return array('error' => $this->error(self::ERROR_EXTRACT, $file['name'], $volume->error()));
 		}
 
-		return $this->trigger('extract', $volume, array('changed' => $changes));
+		return $this->trigger('extract', $volume, array('added' => $added));
 	}
 	
 	/**
@@ -1096,7 +1098,7 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function trigger($cmd, $volumes, $result) {
+	protected function trigger($cmd, $volumes, $result, $mimes=array()) {
 		$data = array(
 			'cmd'     => $cmd,
 			'volumes' => is_array($volumes) ? $volumes : array($volumes),
@@ -1104,6 +1106,9 @@ class elFinder {
 		);
 		$volumes = is_array($volumes) ? $volumes : array($volumes);
 		$keys    = array_keys($result);
+		if (!is_array($mimes)) {
+			$mimes = array();
+		}
 		
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
@@ -1120,6 +1125,8 @@ class elFinder {
 			}
 		}
 		
+		$mimeVolume = array_pop($volumes);
+		
 		if (!empty($result['added']) && is_array($result['added'])) {
 			foreach ($result['added'] as $i => $file) {
 				if (!empty($file['hidden'])) {
@@ -1127,6 +1134,7 @@ class elFinder {
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
+			$result['added'] = $this->filterByMimes($result['added'], $mimeVolume, $mimes);
 		}
 		
 		if (!empty($result['changed']) && is_array($result['changed'])) {
@@ -1136,6 +1144,7 @@ class elFinder {
 				}
 			}
 			$result['changed'] = array_merge(array(), $result['changed']);
+			$result['changed'] = $this->filterByMimes($result['changed'], $mimeVolume, $mimes);
 		}
 		
 		return $result;
