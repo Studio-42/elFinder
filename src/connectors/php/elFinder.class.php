@@ -999,7 +999,7 @@ class elFinder {
 			return $this->error(self::ERROR_ARCHIVE, $volume->error());
 		}
 	
-		return $this->trigger('archive', $volume, array('added' => $archive));
+		return $this->trigger('archive', $volume, array('added' => array($archive)));
 	}
 	/***************************************************************************/
 	/*                                   misc                                  */

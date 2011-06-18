@@ -1487,7 +1487,7 @@ abstract class elFinderVolumeDriver {
 		
 		$archive = $this->_archive($dir, $files, $name, $archiver);
 		
-		return $archive ? $this->file($archive) : false;
+		return $archive ? $this->stat($archive) : false;
 	}
 
 	/**
