@@ -21,7 +21,7 @@ elFinder.prototype.commands.download = function() {
 	this.title = 'Download files';
 	this.alwaysEnabled = true;
 	
-	this._handlers = {
+	this.handlers = {
 		select  : function() { this.update(); }
 	};
 	
@@ -62,14 +62,18 @@ elFinder.prototype.commands.download = function() {
 		var base   = fm.options.url, 
 			files = this.files(hashes),
 			dfrd   = $.Deferred().fail(function(error) { fm.error(error); }),
-			i, url;
+			iframe, i, url;
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';
 			
 		for (i = 0; i < files.length; i++) {
-			if (!window.open(base + 'cmd=file&target=' + files[i].hash+'&download=1', '_blank') ) {
-				return dfrd.reject(fm.errors.popup);
-			}
+			var iframe = $('<iframe style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>')
+				.appendTo('body')
+				.load(function() {
+					setTimeout(function() {
+						iframe.remove();
+					}, 1000)
+				});
 		}
 		return dfrd.resolve(hashes);
 	}

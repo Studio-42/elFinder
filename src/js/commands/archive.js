@@ -1,20 +1,23 @@
 "use strict"
 /**
- * @class  elFinder command "extract"
- * Extract files from archive
+ * @class  elFinder command "archive"
+ * Archive selected files
  *
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.archive = function() {
-	var self    = this,
-		fm      = self.fm,
-		mimes   = [];
+	var self  = this,
+		fm    = self.fm;
+		
+	this.mimes = [];
 	
 	this.title = 'Create archive';
 	
-	this._handlers = {
+	this.handlers = {
 		select  : function() { this.update(); },
 	};
+	
+	this.options = { ui : 'archivebutton'}
 	
 	/**
 	 * Update mimes on open/reload
@@ -24,16 +27,16 @@ elFinder.prototype.commands.archive = function() {
 	this.init = function() {
 		fm.one('load', function() {
 			fm.bind('open reload', function() {
-				mimes = fm.option('archivers')['create'] || [];
+				self.mimes = fm.option('archivers')['create'] || [];
 			});
 		});
 	}
 	
 	this.getstate = function() {
-		return mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
+		return self.mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this._exec = function(hashes, type) {
 		var files = this.files(hashes),
 			cnt   = files.length,
 			cwd   = fm.cwd(),
@@ -43,9 +46,7 @@ elFinder.prototype.commands.archive = function() {
 			}), 
 			i;
 		
-		fm.log(files)
-		
-		if (!(cnt && mimes.length)) {
+		if (!(cnt && self.mimes.length && $.inArray(type, this.mimes) !== -1)) {
 			return dfrd.reject();
 		}
 		
@@ -56,14 +57,14 @@ elFinder.prototype.commands.archive = function() {
 			
 		for (i = 0; i < cnt; i++) {
 			if (!files[i].read) {
-				return dfrd.reject(error)
+				return dfrd.reject(error);
 			}
 		}
 
 		return fm.ajax({
-			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mimes[0], current : cwd.hash},
+			data       : {cmd : 'archive', targets : this.hashes(hashes), type : self.mimes[0], current : cwd.hash},
 			notify     : {type : 'archive', cnt : 1},
-			// syncOnFail : true
+			syncOnFail : true
 		});
 	}
 

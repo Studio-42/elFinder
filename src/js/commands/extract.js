@@ -17,7 +17,7 @@ elFinder.prototype.commands.extract = function() {
 	
 	this.title = 'Extract files from archive';
 	
-	this._handlers = {
+	this.handlers = {
 		select  : function() { this.update(); },
 	};
 	

@@ -44,7 +44,7 @@
 	height:16px;
 	float:left;
 	background:url('../images/toolbar.png')  no-repeat; 
-	z-index:100;
+/*	z-index:100;*/
 }
 
 /* buttons icons */
@@ -76,4 +76,13 @@
 .elfinder-toolbar-ext .elfinder-buttonset { background:transparent; }
 
 .elfinder-toolbar-ext .elfinder-button { margin:0; }
+
+.elfinder-button-menu {
+	position:absolute;
+	left:0;
+	top:19px;
+	border:1px solid #111;
+/*	z-index:10;*/
+}
+
 

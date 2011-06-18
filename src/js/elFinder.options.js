@@ -254,7 +254,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event-select_', 'backend-debug_', 'event-enable_']
+	debug : ['error', 'warning', 'event-select_', 'backend-debug_', 'event-enable', 'event-disable']
 }
 
 })(jQuery);

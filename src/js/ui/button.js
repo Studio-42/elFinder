@@ -16,15 +16,15 @@ $.fn.elfinderbutton = function(cmd) {
 			
 			
 		cmd.change(function() {
-			// here this - command object 
 			if (cmd.disabled()) {
 				button.removeClass(active).addClass(disabled);
 			} else {
 				button.removeClass(disabled);
 				button[cmd.active() ? 'addClass' : 'removeClass'](active);
 			}
-		});
-		cmd.change()	
+		})
+		.change();
+		
 		this._click = function() {
 			cmd.exec();
 		}	
