@@ -656,11 +656,12 @@ $.fn.elfindercwd = function(fm) {
 					phash = fm.cwd().hash; 
 			
 				tmbUrl = fm.option('tmbUrl');
-		
-				cwd.html('')
+
+				cwd//.html('')
+					.children('table,.elfinder-cwd-file').remove().end()
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
-		
+
 				if (list) {
 					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}

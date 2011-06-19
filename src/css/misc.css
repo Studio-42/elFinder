@@ -5,3 +5,43 @@
 	padding:2px;
 	border:1px solid #ccc;
 }
+
+.elfinder .elfinder-cwd-search {
+	position:relative;
+	left:0;
+	top:0;
+/*	float:right;*/
+/*	width:100%;*/
+/*	height:50px;*/
+/*	border:1px solid #111;*/
+	padding:7px 12px;
+/*	background:#ccc;*/
+	text-align:left;
+	background-image:none;
+}
+
+.elfinder-cwd-search-wrapper {
+	float:left;
+}
+
+.elfinder-cwd-search input {
+	width:200px;
+	text-align:left;
+	border:1px solid #aaa;
+	margin:0 5px;
+}
+
+.elfinder-cwd-search-button {
+	float:left;
+/*	display:inline-block;*/
+	width:16px;
+	height:16px;
+/*	padding:1px;*/
+}
+
+.elfinder-cwd-search-close {
+	position:absolute;
+	top:50%;
+	margin-top:-8px;
+	right:10px;
+}

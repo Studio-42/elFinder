@@ -1,3 +1,4 @@
+"use strict"
 /**
  * @class  elFinder command "open"
  * Enter folder or open files in new windows
@@ -9,7 +10,7 @@ elFinder.prototype.commands.open = function() {
 		title  = 'Open files or enter folder',
 		filter = function(hashes) {
 			return $.map(hashes, function(h) { return self.fm.file(h).mime != 'directory' ? h : null });
-		}
+		},
 		callback = function(e) {
 			e.preventDefault();
 			self.exec();
@@ -72,7 +73,7 @@ elFinder.prototype.commands.open = function() {
 			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files  = this.files(hashes),
 			cnt    = files.length,
-			file, url;
+			file, url, s, w;
 
 		if (!cnt) {
 			return dfrd.reject();
@@ -112,6 +113,7 @@ elFinder.prototype.commands.open = function() {
 					+ '&target=' + file.hash;
 			}
 			
+			w = '';
 			// set window size for image
 			if (file.dim) {
 				s = file.dim.split('x');

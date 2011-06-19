@@ -353,9 +353,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 			path     = ql.options.jplayer;
 			
 		path && $.fn.jPlayer && preview.bind('update', function(e) {
-			var file = e.file, 
+			var file  = e.file, 
 				delta = 0,
-				player, controls,;
+				player, controls;
 
 			if ($.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();

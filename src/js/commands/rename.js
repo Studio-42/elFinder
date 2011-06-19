@@ -34,7 +34,7 @@ elFinder.prototype.commands.rename = function() {
 			input = $('<input type="text"/>')
 				.keydown(function(e) {
 					e.stopPropagation();
-					e.stopImmediatePropagation()
+					e.stopImmediatePropagation();
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
