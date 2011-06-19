@@ -697,6 +697,40 @@ $.fn.elfindercwd = function(fm) {
 				remove(e.data.removed || []);
 				trigger();
 			})
+			.bind('search', function(e) {
+				var list  = fm.view == 'list';
+				
+				cwd//.html('')
+					.children('table,.elfinder-cwd-file').remove().end()
+					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
+
+				if (list) {
+					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
+				}
+				
+				buffer = fm.sortFiles(e.data.files);
+				cwd.bind(scrollEvent, render).trigger(scrollEvent);
+		
+				trigger();
+			})
+			.bind('searchend', function(e) {
+				var list  = fm.view == 'list';
+				
+				cwd//.html('')
+					.children('table,.elfinder-cwd-file').remove().end()
+					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
+
+				if (list) {
+					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
+				}
+
+				buffer = fm.sortFiles($.map(fm.files(), function(f) { return f }));
+				cwd.bind(scrollEvent, render).trigger(scrollEvent);
+		
+				trigger();
+			})
 			.dragstart(function(e) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;

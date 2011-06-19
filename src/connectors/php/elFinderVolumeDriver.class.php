@@ -1506,6 +1506,16 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function search($q, $mimes) {
+		return array();
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  int|array  error number | array(error number, arguments)

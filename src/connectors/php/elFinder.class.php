@@ -48,6 +48,7 @@ class elFinder {
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
+		'search'    => array('q' => true, 'mimes' => false)
 	);
 	
 	/**
@@ -1001,6 +1002,25 @@ class elFinder {
 	
 		return $this->trigger('archive', $volume, array('added' => array($archive)));
 	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function search($args) {
+		$q      = trim($args['q']);
+		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$result = array();
+		
+		foreach ($this->volumes as $volume) {
+			$result = array_merge($result, $volume->search($q, $mimes));
+		}
+		
+		return array('files' => $result);
+	}
+	
 	/***************************************************************************/
 	/*                                   misc                                  */
 	/***************************************************************************/
