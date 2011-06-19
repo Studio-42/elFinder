@@ -180,6 +180,9 @@
 			 **/
 			height = parseInt(this.options.height) || 300,
 			
+			beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
+				
+			
 			open = function(data) {
 				if (data.init) {
 					// init - reset cache
@@ -576,7 +579,9 @@
 		 */
 		this.path = function(hash) {
 			var file = files[hash];
-			return file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
+			return file.path 
+				? file.path
+				: file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
 		}
 		
 		/**
@@ -586,8 +591,12 @@
 		 * @return String
 		 */
 		this.url = function(hash) {
-			var path = '';
+			var file = files[hash],
+				path = '';
 
+			if (file.url) {
+				return file.url;
+			}
 			if (cwdOptions.url && (path = this.path(hash))) {
 				path = path.replace(cwdOptions.separator, '/');
 				return cwdOptions.url + path.substr(path.indexOf('/')+1);
@@ -1238,9 +1247,7 @@
 			
 			})
 			.select(function(e) {
-				selected = $.map(e.data.selected || e.data.value|| [], function(hash) {
-					return files[hash] ? hash : null;
-				});
+				selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
 			})
 			.error(function(e) { 
 				var opts  = {
@@ -1294,13 +1301,17 @@
 				}
 				
 			})
-			.bind('upload', function(data) {
-				// self.log('upload').log(data)
+			.bind('search', function(e) {
+				cache(e.data.files)
 			})
 			.bind('rm', function(e) {
-				var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
-				
-				node.append(audio)
+				var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
+			
+				play && play != '' && play != 'no' && $(beeper).html('<source src="./images/rm.wav" type="audio/wav">')[0].play()
+			// return value && value !== '' && value != 'no';
+			// 	var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
+			// 	
+			// 	node.append(audio)
 			})
 			;
 
@@ -1582,10 +1593,11 @@
 			},
 			newapi : {
 				defaults : function(data) {  
-					if (!data) {
-						return false;
-					}
-					if ((data.added && !$.isArray(data.added))
+					// if (!data) {
+					// 	return false;
+					// }
+					if (!data
+					|| (data.added && !$.isArray(data.added))
 					||  (data.removed && !$.isArray(data.removed))
 					||  (data.changed && !$.isArray(data.changed))) {
 						return false;
@@ -1596,7 +1608,8 @@
 				tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
 				parents : function(data) { return data && data.tree && $.isArray(data.tree); },
 				tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-				upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));}
+				upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
+				search  : function(data) { return data && data.files && $.isArray(data.files)}
 			}
 		},
 		

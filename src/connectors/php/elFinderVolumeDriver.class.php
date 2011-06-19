@@ -841,7 +841,6 @@ abstract class elFinderVolumeDriver {
 		return !!$this->options['copyTo'];
 	}
 	
-	
 	/**
 	 * Return true if file exists
 	 *
@@ -1512,6 +1511,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	public function search($q, $mimes) {
+		// $result = $this->doSearch($this->root, $q, $mimes);
+		//  
+		// foreach ($result as $i => $file) {
+		// 	$result[$i]['path'] = $this->_path()
+		// }
+
+		return $this->doSearch($this->root, $q, $mimes);
 		return array();
 	}
 	
@@ -1704,16 +1710,14 @@ abstract class elFinderVolumeDriver {
 
 			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
 				$perm3 = $attrs[$name];
-				// echo "$path -  $perm3<br>";
 				break;
 			} 
 		}
 		
-		// echo "$path $name $defaults  $perm1  $perm2  $perm3<br>"	;
 		$ret = $name == 'read' || $name == 'write' 
 			? $defaults & $perm1 & $perm2 & $perm3
 			: $defaults ^ $perm1 ^ $perm2 ^ $perm3;
-		// echo "$path $name $ret<br>"	;
+
 		return $ret;
 	}
 	
@@ -1802,8 +1806,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function mimetype($path) {
-		
+	protected function mimetype($path) {	
 		$type = '';
 		
 		if ($this->mimeDetect == 'finfo') {
@@ -1918,6 +1921,39 @@ abstract class elFinderVolumeDriver {
 		}
 		return $dirs;
 	}	
+		
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function doSearch($path, $q, $mimes) {
+		$result = array();
+		
+		foreach($this->_scandir($path) as $p) {
+			$mime = $this->mimetype($p);
+			if ($this->attr($p, 'hidden') || !$this->mimeAccepted($mime)) {
+				continue;
+			}
+			
+			$name = $this->_basename($p);
+			if (strpos($name, $q) !== false) {
+				$stat = $this->stat($p);
+				$stat['path'] = $this->_path($p);
+				if ($this->URL) {
+					$stat['url'] = $this->URL.str_replace($this->separator, '/', substr($p, strlen($this->root)+1));
+				}
+				
+				$result[] = $stat;
+			}
+			if ($mime == 'directory' && $this->attr($p, 'read')) {
+				$result = array_merge($result, $this->doSearch($p, $q, $mimes));
+			}
+		}
+		
+		return $result;
+	}
 		
 	/**********************  manuipulations  ******************/
 		

@@ -625,7 +625,7 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// make cwd itself droppable for folders from nav panel
 				.droppable(fm.droppable)
-				// toggle cs class
+				// toggle cwd class
 				.bind('dropover dropout', function(e) {
 					cwd[e.type == 'dropover' ? 'addClass' : 'removeClass'](clDropActive);
 				})
@@ -642,7 +642,13 @@ $.fn.elfindercwd = function(fm) {
 				}),
 				// elfinder node
 				parent = $(this).parent().resize(function() {
-					cwd.height(wz.height() - delta)
+					var h = 0;
+					
+					cwd.siblings('.elfinder-panel:visible').each(function() {
+						h += $(this).outerHeight(true)
+					});
+
+					cwd.height(wz.height() - delta - h)
 				}),
 				// workzone node
 				wz = parent.children('.elfinder-workzone').append(this),
@@ -715,7 +721,8 @@ $.fn.elfindercwd = function(fm) {
 				trigger();
 			})
 			.bind('searchend', function(e) {
-				var list  = fm.view == 'list';
+				var list  = fm.view == 'list',
+					phash = fm.cwd().hash; 
 				
 				cwd//.html('')
 					.children('table,.elfinder-cwd-file').remove().end()
@@ -726,7 +733,7 @@ $.fn.elfindercwd = function(fm) {
 					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 				}
 
-				buffer = fm.sortFiles($.map(fm.files(), function(f) { return f }));
+				buffer = fm.sortFiles($.map(fm.files(), function(f) { return f.phash == phash ? f : null; }));
 				cwd.bind(scrollEvent, render).trigger(scrollEvent);
 		
 				trigger();

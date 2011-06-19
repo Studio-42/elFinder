@@ -8,7 +8,9 @@ $.fn.elfinderworkzone = function(fm) {
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
 			wdelta = wz.outerHeight(true) - wz.height(),
-			parent = wz.parent().bind('resize', function() {
+			parent = wz.parent();
+			
+		parent.add(window).bind('resize', function() {
 				var height = parent.height();
 
 				parent.children(':visible:not(.'+cl+')').each(function() {

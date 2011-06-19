@@ -964,6 +964,7 @@ class elFinder {
 	 **/
 	protected function extract($args) {
 		$target = $args['target'];
+		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$error  = array(self::ERROR_EXTRACT, '#'.$target);
 
 		if (($volume = $this->volume($target)) == false
@@ -1000,7 +1001,7 @@ class elFinder {
 			return $this->error(self::ERROR_ARCHIVE, $volume->error());
 		}
 	
-		return $this->trigger('archive', $volume, array('added' => array($archive)));
+		return $this->trigger('archive', $volume, array('added' => array($archive)), $mimes);
 	}
 	
 	/**
@@ -1091,28 +1092,6 @@ class elFinder {
 		}
 		return false;
 	}
-	
-	/**
-	 * Filter files list by mime types
-	 *
-	 * @param  array  $files   files to filter
-	 * @param  object $volume  files volume
-	 * @param  array  $mimes   mimetypes list
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	// protected function filterByMimes($files, $volume, $mimes = array())	{
-	// 	if (empty($mimes)) {
-	// 		return $files;
-	// 	}
-	// 	$result = array();
-	// 	foreach ($files as $file) {
-	// 		if ($volume->mimeAccepted($file['hash'], $mimes)) {
-	// 			$result[] = $file;
-	// 		}
-	// 	}
-	// 	return $result;
-	// }
 	
 	/**
 	 * Execute all callbacks/listeners for required command

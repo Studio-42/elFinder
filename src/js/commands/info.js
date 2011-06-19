@@ -40,6 +40,23 @@ elFinder.prototype.commands.info = function() {
 				autoOpen : false,
 				width    : 270,
 				minWidth : 200,
+				open     : function() {
+					var parent = dialog.parent(),
+						width = dialog.children('table').width(),
+						delta;
+						
+					if (width > parent.width()) {
+						delta = Math.ceil(dialog.innerWidth() - dialog.width())
+						fm.log(delta)
+						parent.width(parseInt(width+delta+1))
+						// parent.width(Math.min(parseInt(width+delta+1), parseInt($(window).width()/2)))
+						// fm.log(Math.min(parseInt(width)+1, parseInt($(window).width()/2)))
+						// $(window).width()/2
+						// 
+						// parent.width(Math.min(parseInt(parent.width(), parseInt($(window)))))
+					}
+					fm.log(width+' '+parent.width())
+				},
 				close    : function() { $(this).elfinderdialog('destroy'); }
 			}),
 			count = [],
