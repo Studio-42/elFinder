@@ -380,7 +380,8 @@ abstract class elFinderVolumeDriver {
 		'flv'   => 'video/x-flv',
 		'mkv'   => 'video/x-matroska',
 		'webm'  => 'video/webm',
-		'ogv'   => 'video/ogg'
+		'ogv'   => 'video/ogg',
+		'ogm'   => 'video/ogg'
 		);
 	
 	/**
