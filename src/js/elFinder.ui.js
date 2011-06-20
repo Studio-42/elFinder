@@ -1196,7 +1196,7 @@ elFinder.prototype.ui.prototype.commands = {
 		this.isAllowed = function() {
 			var extract = this.fm.params.extract,
 				cnt = extract && extract.length;
-			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && cnt && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && cnt && $.inArray(this.fm.getSelected(0).mime, extract) != -1;
 		}
 		
 		this.cm = function(t) {
