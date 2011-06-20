@@ -249,7 +249,7 @@ elFinder.prototype.options = {
 		},
 		quicklook : {
 			autoplay : true,
-			jplayer : 'third-part/jplayer'
+			jplayer  : 'extensions/jplayer'
 		}
 	},
 	
