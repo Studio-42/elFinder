@@ -49,21 +49,22 @@
 			var f = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
 				lang : 'en',
+				docked : true
 
-				editorCallback : function(url) {
-					if (window.console && window.console.log) {
-						window.console.log(url);
-					} else {
-						alert(url);
-					}
-					
-				},
-				closeOnEditorCallback : true
-				// docked : true,
 				// dialog : {
 				// 	title : 'File manager',
 				// 	height : 500
 				// }
+
+				// Callback example
+				//editorCallback : function(url) {
+				//	if (window.console && window.console.log) {
+				//		window.console.log(url);
+				//	} else {
+				//		alert(url);
+				//	}
+				//},
+				//closeOnEditorCallback : true
 			})
 			// window.console.log(f)
 			$('#close,#open,#dock,#undock').click(function() {
