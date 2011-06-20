@@ -750,6 +750,8 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	overflow: inherit !important;
 }
 
+.el-finder-ql.directory p { background-position:  0     -50px; }
+
 /* toolbar */
 .el-finder-ql div.el-finder-ql-drag-handle {
 	height:18px;
