@@ -717,7 +717,7 @@
 			['mkdir', 'mkfile', 'upload'],
 			['copy', 'paste', 'rm'],
 			['rename', 'edit'],
-			['info', 'quicklook'],
+			['info', 'quicklook', 'resize'],
 			['icons', 'list'],
 			['help']
 		],
