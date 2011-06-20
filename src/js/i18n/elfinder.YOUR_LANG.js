@@ -189,7 +189,7 @@ if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n)
 		'Italian localization'              : '',
 		'Latvian localization'              : '',
 		'Poland localization'               : '',
-		'Icons' : 'Иконки',
+		'Icons'                             : '',
 		'License: BSD License'              : '',
 		'elFinder documentation'            : '',
 		'Simple and usefull Content Management System' : '',

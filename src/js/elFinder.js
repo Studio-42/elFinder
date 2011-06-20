@@ -33,7 +33,7 @@
 		/**
 		 * String. Version number;
 		 **/
-		this.version  = '1.2 edge';
+		this.version  = '1.2';
 		/**
 		 * String. jQuery version;
 		 **/

@@ -5,7 +5,7 @@
  */
 (function($) {
 if (elFinder && elFinder.prototype.options && elFinder.prototype.options.i18n) 
-	elFinder.prototype.options.i18n.ua = {
+	elFinder.prototype.options.i18n.uk = {
 		/* errors */
 		'Root directory does not exists'       : 'Коренева директорія не існує',
 		'Unable to connect to backend'         : 'Не вдалося з\'єднатися з сервером',

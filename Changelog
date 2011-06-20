@@ -1,3 +1,16 @@
+2011-06-20  Troex Nevelin  <troex@fury.scancode.ru>
+
+	* elFinder (1.2):
+		- jQuery and UI updated
+		- Python connector improvements
+		- QuickLook fixed
+		- CSS fixes
+		- New icons from http://pixel-mixer.com/
+		- New languages: Czech, Dutch, German, Greek, French, Hungarian, Italian, Japanese, Latvian
+		  Polish, Brazilian Portuguese, Slovak, Thai, Turkish, Vietnamese, Simplified Chinese,
+		  Traditional Chinese
+
+
 2010-03-11  Troex Nevelin  <troex@fury.scancode.ru>
 
 	* elFinder (1.1):
