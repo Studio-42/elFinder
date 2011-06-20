@@ -303,7 +303,7 @@ ul.el-finder-tree, ul.el-finder-places {
 
 /* mimetypes */
 
-.directory p { background-position:  0     -50px; }
+.el-finder-cwd .directory p { background-position:  0     -50px; }
 .application p,.x-java p { background-position: -1px  -150px; }
 .audio p { background-position: -1px -300px; }
 .image p { background-position: -1px -250px;  }
