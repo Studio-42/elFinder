@@ -17,7 +17,7 @@ elFinder.prototype.eventsManager = function(fm, el) {
 	 *
 	 **/
 	this.init = function() {
-		var self = this;
+		var self = this, ignore = false;
 		
 		self.lock = false;
 		
@@ -41,9 +41,15 @@ elFinder.prototype.eventsManager = function(fm, el) {
 				if (window.opera && !e.ctrlKey) {
 					return;
 				}
-				var t = $(e.target);
 				e.preventDefault();
-				e.stopPropagation()
+				e.stopPropagation();
+
+				var t = $(e.target);
+				if ($.browser.mozilla) {
+					ignore = true;
+				}
+				
+
 				if (t.hasClass('el-finder-cwd')) {
 					self.fm.unselectAll();
 				} else {
@@ -59,7 +65,8 @@ elFinder.prototype.eventsManager = function(fm, el) {
 			});
 			
 		$(document).bind('click', function(e) { 
-			self.fm.ui.hideMenu(); 
+			!ignore && self.fm.ui.hideMenu(); 
+			ignore = false
 			$('input', self.cwd).trigger('change'); 
 
 			if (!$(e.target).is('input,textarea,select')) {

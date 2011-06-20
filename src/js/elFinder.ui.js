@@ -96,7 +96,6 @@ elFinder.prototype.ui = function(fm) {
 					self.exec(t.attr('name'), t.attr('argc'));
 				}
 			});
-		// self.fm.log(self.menu.html())
 		function menu(t) {
 			var i, j, a, html, l, src = self.fm.options.contextmenu[t]||[];
 			for (i=0; i < src.length; i++) {
@@ -117,6 +116,7 @@ elFinder.prototype.ui = function(fm) {
 				}
 			};
 		}
+	
 	}
 	
 	this.hideMenu = function() {
@@ -1194,7 +1194,9 @@ elFinder.prototype.ui.prototype.commands = {
 		}
 		
 		this.isAllowed = function() {
-			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && this.fm.params.extract.length && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
+			var extract = this.fm.params.extract,
+				cnt = extract && extract.length;
+			return this.fm.cwd.write && this.fm.selected.length == 1 && this.fm.getSelected(0).read && cnt && $.inArray(this.fm.getSelected(0).mime, this.fm.params.extract) != -1;
 		}
 		
 		this.cm = function(t) {
