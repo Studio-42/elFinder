@@ -1111,7 +1111,7 @@ elFinder.prototype.ui.prototype.commands = {
 		this.isAllowed = function() {
 			if (self.fm.selected.length == 1) {
 				var f = this.fm.getSelected()[0];
-				return f.write && (f.mime.indexOf('text') == 0 || f.mime == 'application/x-empty' || f.mime == 'application/xml');
+				return f.write && f.read && (f.mime.indexOf('text') == 0 || f.mime == 'application/x-empty' || f.mime == 'application/xml');
 			}
 		}
 		
