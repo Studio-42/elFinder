@@ -669,7 +669,7 @@
 		 * @todo
 		 * @return $.Deferred
 		 */
-		this.ajax = function(options) {
+		this.request = function(options) {
 			
 			var self     = this,
 				o        = this.options,
@@ -1633,6 +1633,17 @@
 		 * @type Object
 		 */
 		commands : {},
+		
+		/**
+		 * Wrapper for elFinder.ajax method.
+		 * Required to add websokets support in the future
+		 *
+		 * @param Object request options
+		 * @return $.Deferred
+		 */
+		ajax : function(options) {
+			return this.request(options);
+		},
 		
 		/**
 		 * Bind callback to event(s) The callback is executed at most once per event.
