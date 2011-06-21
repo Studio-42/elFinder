@@ -7,9 +7,12 @@
  **/  
 elFinder.prototype.commands.open = function() {
 	var self   = this,
+		fm     = self.fm,
 		title  = 'Open',
 		filter = function(hashes) {
-			return $.map(hashes, function(h) { return self.fm.file(h).mime != 'directory' ? h : null });
+			return $.map(hashes, function(h) { 
+				var file = fm.file(h);
+				return file.mime != 'directory'  ? h : null });
 		},
 		callback = function(e) {
 			e.preventDefault();
@@ -57,17 +60,26 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var cnt;
+		var hashes = this.hashes(sel),
+			cnt = hashes.length,
+			files;
 		
-		// call from context menu
-		if (sel) {
-			return this.fm.file(sel[0]).read ? 0 : -1;
+		if (!cnt) {
+			hashes = [fm.cwd().hash];
+			cnt    = 1;
 		}
 		
-		sel = this.fm.selected();
-		cnt = sel.length;
-
-		return cnt && (cnt == 1 || cnt == filter(sel).length) ? 0 : -1;
+		if (cnt == 1) {
+			return fm.file(hashes[0]).read && hashes[0] != fm.cwd().hash ? 0 : -1;
+		} else if ((files = this.files(sel)).length == cnt) {
+			while (cnt--) {
+				if (!files[cnt].read) {
+					return -1;
+				}
+			}
+			return 0;
+		}
+		return -1;
 	}
 	
 	this.exec = function(hashes) {

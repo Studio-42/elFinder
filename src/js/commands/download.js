@@ -18,7 +18,7 @@ elFinder.prototype.commands.download = function() {
 		};
 	
 
-	this.title = 'Download files';
+	this.title = 'Download';
 	this.alwaysEnabled = true;
 	
 	this.handlers = {

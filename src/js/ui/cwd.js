@@ -639,6 +639,10 @@ $.fn.elfindercwd = function(fm) {
 				.bind('unselectall', function() {
 					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
 					trigger();
+				})
+				.bind('selectfile', function(e, id) {
+					cwd.find('#'+id).trigger(evtSelect);
+					trigger();
 				}),
 				// elfinder node
 				parent = $(this).parent().resize(function() {

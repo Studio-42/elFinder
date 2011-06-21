@@ -24,7 +24,6 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (item.is('.'+groupclass)) {
 						
 					} else {
-						fm.log(data).log(menu.data('targets'))
 						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.arg, true);
 						close();
 					}
@@ -41,6 +40,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			append = function(type, targets) {
 				var commands = options[type], 
 					sep = false;
+
+				menu.data('targets', targets);
 
 				$.each(commands, function(i, name) {
 					var cmd = fm.command(name),
@@ -77,7 +78,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			 * @return void
 			 **/
 			close = function() {
-				menu.hide().html('');
+				menu.hide().html('').removeData('targets');
 			},
 			/**
 			 * Open menu in required position
@@ -112,17 +113,29 @@ $.fn.elfindercontextmenu = function(fm) {
 
 		fm.one('load', function() {
 			
-			fm.getUI('cwd').bind(event, function(e) {
-				var target = $(e.target);
+			cwd = fm.getUI('cwd').bind(event, function(e) {
+				var target = $(e.target),
+					targets = [],
+					type = 'files';
 
 				e.preventDefault();
-				menu.append('menu').show();
-				fm.log(target)				
-				
+
+				if (target.is('.elfinder-cwd')) {
+					cwd.trigger('unselectall');
+					targets.push(fm.cwd().hash);
+					type = 'cwd'
+				} else {
+					cwd.trigger('selectfile', target.closest('.elfinder-cwd-file').attr('id'))
+					targets = fm.selected()
+				}			
+				// menu.data('targets', targets);
+				append(type, targets);
+				open(e.clientX, e.clientY);
+				fm.log(targets)
 			})
 			
 			fm.getUI('nav').bind(event, function(e) {
-				var target = $(e.target),
+				var target  = $(e.target),
 					targets = [];
 
 				if (target.is('.elfinder-navbar-dir,.elfinder-navbar-dir-wrapper')) {
@@ -131,7 +144,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						target = target.children();
 					}
 					targets.push(fm.navId2Hash(target.attr('id')))
-					menu.data('targets', targets);
+					
 					append('navbar', targets);
 					open(e.clientX, e.clientY);
 				}
@@ -139,7 +152,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			})
 			
 			$(document).mousedown(function() {
-				// fm.log('click')
+				fm.log('click')
 				close()
 			})
 

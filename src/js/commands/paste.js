@@ -1,6 +1,6 @@
 
 elFinder.prototype.commands.paste = function() {
-
+	var fm = this.fm;
 	this.title = 'Paste';
 
 	this.handlers = {
@@ -13,14 +13,24 @@ elFinder.prototype.commands.paste = function() {
 	}];
 	
 	this.getstate = function(dst) {
-		dst = dst ? this.fm.file(dst[0]) : this.fm.cwd();
-		return this.fm.clipboard().length && dst.write ? 0 : -1;
+		if (dst) {
+			if ($.isArray(dst)) {
+				if (dst.length != 1) {
+					return -1;
+				}
+				dst  = fm.file(dst[0]);
+			}
+		} else {
+			dst = fm.cwd();
+		}
+
+		return fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
 	}
 	
 	this.exec = function(dst) {
 		var fm     = this.fm,
 			errors = fm.errors,
-			dst    = dst ? fm.file(dst) : fm.cwd(),
+			dst    = (dst ? this.files(dst) : fm.cwd())[0],
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
@@ -180,7 +190,7 @@ elFinder.prototype.commands.paste = function() {
 				
 				return dfrd;
 			},
-			parents = fm.parents(dst.hash);
+			parents;
 
 
 		if (!cnt || !dst || dst.mime != 'directory') {
@@ -190,6 +200,8 @@ elFinder.prototype.commands.paste = function() {
 		if (!dst.write)	{
 			return dfrd.reject([error, files[0].name, errors.perm]);
 		}
+		
+		parents = fm.parents(dst.hash)
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
