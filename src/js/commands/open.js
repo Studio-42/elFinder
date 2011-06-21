@@ -7,7 +7,7 @@
  **/  
 elFinder.prototype.commands.open = function() {
 	var self   = this,
-		title  = 'Open files or enter folder',
+		title  = 'Open',
 		filter = function(hashes) {
 			return $.map(hashes, function(h) { return self.fm.file(h).mime != 'directory' ? h : null });
 		},
@@ -56,14 +56,23 @@ elFinder.prototype.commands.open = function() {
 		})
 	}
 	
-	this.getstate = function() {
-		var sel = this.fm.selected(),
-			cnt = sel.length;
+	this.getstate = function(sel) {
+		var cnt;
+		
+		// call from context menu
+		if (sel) {
+			return this.fm.file(sel[0]).read ? 0 : -1;
+		}
+		
+		sel = this.fm.selected();
+		cnt = sel.length;
 
 		return cnt && (cnt == 1 || cnt == filter(sel).length) ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
+		// open on every status
+		// status in this command required only for button
 		return this._exec(hashes);
 	}
 	

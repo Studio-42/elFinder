@@ -346,6 +346,16 @@ elFinder.prototype.commands.upload = function() {
 		description : 'Upload files'
 	}];
 	
+	this.options = {
+		ui            : 'uploadbutton',
+		// open dialog on click toolbar button instead of open browser select files dialog
+		forceDialog   : false,
+		// send files using form with iframe target
+		forceIframe   : false, 
+		// 15 min timeout before abort upload files using iframe
+		iframeTimeout : 900000
+	}
+	
 	/**
 	 * Set file sending transport and toolbar button type
 	 *

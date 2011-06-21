@@ -288,7 +288,7 @@ elFinder.prototype.commands.quicklook = function() {
 					? win.animate(closedCss(node), 500, close)
 					: close();
 			}
-		})
+		});
 
 	this.title = 'Preview';
 	

@@ -660,7 +660,6 @@
 			return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
 		}
 		
-		
 		/**
 		 * Proccess ajax request.
 		 * Fired events :
@@ -1132,8 +1131,8 @@
 		 * @param  mixed   command argument
 		 * @return $.Deferred
 		 */		
-		this.exec = function(cmd, value) {
-			return this._commands[cmd] ? this._commands[cmd].exec(value) : $.Deferred().reject('No such command');
+		this.exec = function(cmd, value, value2) {
+			return this._commands[cmd] ? this._commands[cmd].exec(value, value2) : $.Deferred().reject('No such command');
 		}
 		
 		/**
@@ -1155,6 +1154,10 @@
 		 */
 		this.getUI = function(ui) {
 			return this.ui[ui] || node;
+		}
+		
+		this.command = function(name) {
+			return name === void(0) ? this._commands : this._commands[name];
 		}
 		
 		/**
@@ -1365,8 +1368,10 @@
 		this.ui = {
 			// container for nav panel and current folder container
 			workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
-			
+			// container for folders tree / places
 			navbar : $('<div/>').appendTo(node).elfindernavbar(this),
+			// contextmenu
+			contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(this),
 			// overlay
 			overlay : $('<div/>').appendTo(node).elfinderoverlay({
 				show : function() { self.disable(); },
@@ -2297,41 +2302,6 @@
 		 * @param  String|Array  message[s]
 		 * @return String
 		 **/
-		_i18n : function(msg) { 
-			var messages = this.messages, 
-				ignore   = [], 
-				i;
-
-			if ($.isArray(msg)) {
-				msg = msg.slice(0, msg.length)
-				if (msg.length == 1) {
-					msg = msg[0];
-				} else {
-					i = msg.length-1;
-					while (i--) {
-						msg[i] = msg[i].replace(/\$(\d+)/g, function(m, num) { 
-							num = i + parseInt(num);
-							if (num > 0 && msg[num]) {
-								ignore.push(num)
-								return msg[num];
-							}
-							return '';
-						});
-						
-					}
-					msg = $.map(msg, function(e, i) { return $.inArray(i, ignore) === -1 ? e : null; }).join(' ');
-					
-				}
-			}
-			
-			if (typeof(msg) != 'string') {
-				this.debug('error', 'Invalid message : '+msg);
-				return '';
-			}
-			
-			return msg.replace(/\$(\d+)/g, '');
-		},
-		
 		i18n : function() {
 			var self = this,
 				messages = this.messages, 

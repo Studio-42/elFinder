@@ -6,8 +6,9 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.cut = function() {
+	var fm = this.fm;
 	
-	this.title = 'Cut files';
+	this.title = 'Cut';
 	
 	this.handlers = {
 		select : function() { this.update(); }
@@ -15,11 +16,15 @@ elFinder.prototype.commands.cut = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+x shift+insert',
-		description : 'Cut files',
+		description : 'Cut',
 	}];
 	
-	this.getstate = function() {
-		return this.fm.selected().length ? 0 : -1;
+	this.getstate = function(sel) {
+		sel = sel || fm.selected();
+		return sel.length 
+			&& sel[0] != fm.cwd().hash
+			&& $.map(sel, function(h) { var f = fm.file(h); return f.read && !f.locked ? h : null }).length == sel.length
+			? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {

@@ -1,7 +1,7 @@
 
 elFinder.prototype.commands.paste = function() {
 
-	this.title = 'Paste files';
+	this.title = 'Paste';
 
 	this.handlers = {
 		changeclipboard : function() { this.update(); }
@@ -9,25 +9,12 @@ elFinder.prototype.commands.paste = function() {
 
 	this.shortcuts = [{
 		pattern     : 'ctrl+v shift+insert',
-		description : 'Paste files'
+		description : 'Paste'
 	}];
 	
-	this.getstate = function() {
-		// return 0
-		return this.fm.clipboard().length && this.fm.cwd().write ? 0 : -1;
-	}
-	
-	this.exec = function(dst) {
-		var fm = this.fm;
-		var d = this._exec(dst)
-			.fail(function(error) {
-				fm.log('error').log(error)
-			})
-			.done(function() {
-				// fm.log('data').log(arguments)
-			})
-		
-		return d
+	this.getstate = function(dst) {
+		dst = dst ? this.fm.file(dst[0]) : this.fm.cwd();
+		return this.fm.clipboard().length && dst.write ? 0 : -1;
 	}
 	
 	this._exec = function(dst) {

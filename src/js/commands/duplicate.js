@@ -6,12 +6,30 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.duplicate = function() {
+	var fm = this.fm;
+	
+	this.title = 'Duplicate';
 	
 	this.handlers = {
 		select : function() { this.update(); }
 	}
 	
-	this.getstate = function() {
+	this.getstate = function(sel) {
+		sel = sel || this.fm.selected();
+		return sel.length 
+			&& sel[0] != this.fm.cwd().hash
+			&& $.map(sel, function(h) { return fm.file(h).read ? h : null }).length == sel.length
+			? 0 : -1;
+		
+		
+		sel = sel || this.fm.selected();
+		return sel.length && sel[0] != this.fm.cwd().hash && this.fm.file(sel[0]).write ? 0 : -1;
+		
+		if (!files) {
+			files = this.fm.selected();
+		}
+
+		return files.length && this.fm.file(files[0]).write ? 0 : -1;
 		return this.fm.cwd().write && this.fm.selected().length ? 0 : -1;
 	}
 	

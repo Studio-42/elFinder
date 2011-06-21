@@ -3,6 +3,7 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.info = function() {
+	var title = 'Get info';
 	
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
@@ -12,24 +13,25 @@ elFinder.prototype.commands.info = function() {
 		spinner    : '<span>{text}</span> <span class="elfinder-spinner-mini"/>'
 	}
 	
-	
+	this.title = title;
 	this.alwaysEnabled = true;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+i',
-		description : 'Get info'
+		description : title
 	}];
 	
 	this.getstate = function() {
 		return this.fm.cwd().hash ? 0 : -1;
 	}
 	
-	this._exec = function() {
+	this._exec = function(hashes) {
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.tpl,
 			row     = tpl.row,
-			files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
+			files   = this.files(hashes),
+			// files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
 			cnt     = files.length,
 			content = [],
 			view    = tpl.main,
@@ -47,15 +49,8 @@ elFinder.prototype.commands.info = function() {
 						
 					if (width > parent.width()) {
 						delta = Math.ceil(dialog.innerWidth() - dialog.width())
-						fm.log(delta)
-						parent.width(parseInt(width+delta+1))
-						// parent.width(Math.min(parseInt(width+delta+1), parseInt($(window).width()/2)))
-						// fm.log(Math.min(parseInt(width)+1, parseInt($(window).width()/2)))
-						// $(window).width()/2
-						// 
-						// parent.width(Math.min(parseInt(parent.width(), parseInt($(window)))))
+						parent.width(parseInt(width+delta+5))
 					}
-					fm.log(width+' '+parent.width())
 				},
 				close    : function() { $(this).elfinderdialog('destroy'); }
 			}),

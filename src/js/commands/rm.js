@@ -1,7 +1,8 @@
 
 elFinder.prototype.commands.rm = function() {
-
-	this.title = 'Delete files';
+	var fm = this.fm;
+	
+	this.title = 'Delete';
 
 	this.handlers = {
 		select : function() { this.update(); }
@@ -12,8 +13,12 @@ elFinder.prototype.commands.rm = function() {
 		description : this.title
 	}];
 	
-	this.getstate = function() {
-		return this.fm.selected().length ? 0 : -1;
+	this.getstate = function(sel) {
+		sel = sel || fm.selected();
+		return sel.length 
+			&& sel[0] != fm.cwd().hash
+			&& $.map(sel, function(h) { return !fm.file(h).locked ? h : null }).length == sel.length
+			? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {

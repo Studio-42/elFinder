@@ -1,0 +1,35 @@
+.elfinder-contextmenu {
+	position:absolute;
+	border:1px solid #aaa;
+	background:#fff;
+	color:#555;
+	font-size:.8em;
+	z-index:99000;
+	padding:3px 0;
+}
+
+.elfinder-contextmenu-item {
+	position:relative;
+	display:block;
+	padding:5px 30px 5px 33px;
+	text-decoration:none;
+	cursor:default;
+}
+
+.elfinder-contextmenu-icon {
+	position:absolute;
+	width:16px;
+	height:16px;
+	left:9px;
+	top:50%;
+	margin-top:-8px;
+	float:none;
+}
+
+.elfinder-contextmenu .ui-state-hover { border:0 solid; background-image:none;}
+
+.elfinder-contextmenu-separator {
+	height:0px;
+	border-top:1px solid #ccc;
+	margin:0 1px;
+}

@@ -6,8 +6,9 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.copy = function() {
+	var fm = this.fm;
 	
-	this.title = 'Copy files';
+	this.title = 'Copy';
 	
 	this.handlers = {
 		select : function() { this.update(); }
@@ -15,11 +16,15 @@ elFinder.prototype.commands.copy = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+c ctrl+insert',
-		description : 'Copy files',
+		description : 'Copy',
 	}];
 	
-	this.getstate = function() {
-		return this.fm.selected().length ? 0 : -1;
+	this.getstate = function(sel) {
+		sel = sel || fm.selected();
+		return sel.length 
+			&& sel[0] != fm.cwd().hash
+			&& $.map(sel, function(h) { return fm.file(h).read ? h : null }).length == sel.length
+			? 0 : -1;
 	}
 	
 	this._exec = function(hashes) {
