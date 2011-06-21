@@ -147,7 +147,7 @@ elFinder.prototype.commands.edit = function() {
 		return cnt && cnt == filter().length ? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var files = filter(hashes),
 			list  = [],
 			file;

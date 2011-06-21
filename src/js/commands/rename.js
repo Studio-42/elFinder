@@ -8,7 +8,7 @@ elFinder.prototype.commands.rename = function() {
 		return this.fm.selected().length == 1 ? 0 : -1;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		var fm     = this.fm,
 			cwd    = fm.getUI('cwd'),
 			sel    = fm.selected(),

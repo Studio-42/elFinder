@@ -10,7 +10,7 @@ elFinder.prototype.commands.help = function() {
 		return 0;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		alert('Dont panic!?');
 	}
 

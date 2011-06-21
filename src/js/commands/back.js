@@ -17,7 +17,7 @@ elFinder.prototype.commands.back = function() {
 		return this.fm.history.canBack() ? 0 : -1;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		return this.fm.history.back();
 	}
 

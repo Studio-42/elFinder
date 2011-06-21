@@ -21,7 +21,7 @@ elFinder.prototype.commands.search = function() {
 					e.keyCode == 27 && self.close();
 					if (e.keyCode == 13) {
 						input.attr('disabled')
-						self._exec($.trim(input.val())).always(function() {
+						self.exec($.trim(input.val())).always(function() {
 							input.removeAttr('disabled').focus();
 						});
 					}
@@ -125,7 +125,7 @@ elFinder.prototype.commands.search = function() {
 	 * @param  String  search string
 	 * @return $.Deferred
 	 **/
-	this._exec = function(q) {
+	this.exec = function(q) {
 		if (!q) {
 			node.is(':hidden') ? self.open() : self.close();
 			return $.Deferred().reject();

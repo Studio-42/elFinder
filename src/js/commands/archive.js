@@ -36,7 +36,7 @@ elFinder.prototype.commands.archive = function() {
 		return self.mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
 	}
 	
-	this._exec = function(hashes, type) {
+	this.exec = function(hashes, type) {
 		var files = this.files(hashes),
 			cnt   = files.length,
 			mime  = type || this.mimes[0],

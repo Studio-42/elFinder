@@ -58,7 +58,7 @@ elFinder.prototype.commands.download = function() {
 		return fm.newAPI && cnt && fm.selected().length == this.files().length ? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var base   = fm.options.url, 
 			files = this.files(hashes),
 			dfrd   = $.Deferred().fail(function(error) { fm.error(error); }),

@@ -71,12 +71,6 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.exec = function(hashes) {
-		// open on every status
-		// status in this command required only for button
-		return this._exec(hashes);
-	}
-	
-	this._exec = function(hashes) {
 		var fm     = this.fm, 
 			errors = fm.errors,
 			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),

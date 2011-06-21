@@ -25,7 +25,7 @@ elFinder.prototype.commands.info = function() {
 		return this.fm.cwd().hash ? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.tpl,

@@ -17,7 +17,7 @@ elFinder.prototype.commands.paste = function() {
 		return this.fm.clipboard().length && dst.write ? 0 : -1;
 	}
 	
-	this._exec = function(dst) {
+	this.exec = function(dst) {
 		var fm     = this.fm,
 			errors = fm.errors,
 			dst    = dst ? fm.file(dst) : fm.cwd(),

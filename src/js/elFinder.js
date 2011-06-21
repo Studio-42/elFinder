@@ -1127,12 +1127,15 @@
 		/**
 		 * Exec command and return result;
 		 *
-		 * @param  String  command name
-		 * @param  mixed   command argument
+		 * @param  String         command name
+		 * @param  String|Array   usualy files hashes
+		 * @param  String|Array   command options
 		 * @return $.Deferred
 		 */		
-		this.exec = function(cmd, value, value2) {
-			return this._commands[cmd] ? this._commands[cmd].exec(value, value2) : $.Deferred().reject('No such command');
+		this.exec = function(cmd, files, opts) {
+			return this._commands[cmd] && this.isCommandEnabled(cmd) 
+				? this._commands[cmd].exec(files, opts) 
+				: $.Deferred().reject('No such command');
 		}
 		
 		/**

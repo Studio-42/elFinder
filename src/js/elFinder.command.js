@@ -138,7 +138,7 @@ elFinder.prototype.command = function(fm) {
 	 * @param  mixed  command value
 	 * @return $.Deferred
 	 */
-	this.exec = function(v, v2) { 
+	this.exec_ = function(v, v2) { 
 		return this.state > -1 ? this._exec(v, v2) : $.Deferred().reject({error : 'Command disabled'});
 	}
 	
@@ -148,7 +148,7 @@ elFinder.prototype.command = function(fm) {
 	 * @param  mixed  command value
 	 * @return $.Deferred
 	 */
-	this._exec = function(v) { 
+	this.exec = function(files, opts) { 
 		return $.Deferred().reject(); 
 	}
 	

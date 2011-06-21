@@ -24,7 +24,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (item.is('.'+groupclass)) {
 						
 					} else {
-						data && data.cmd && fm.exec(data.cmd, data.targets, data.arg);
+						fm.log(data).log(menu.data('targets'))
+						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.arg, true);
 						close();
 					}
 
@@ -38,7 +39,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			 * @return void
 			 **/
 			append = function(type, targets) {
-				var commands = options[type], sep = false, node;
+				var commands = options[type], 
+					sep = false;
 
 				$.each(commands, function(i, name) {
 					var cmd = fm.command(name),
@@ -49,7 +51,6 @@ $.fn.elfindercontextmenu = function(fm) {
 							menu.append('<div class="elfinder-contextmenu-separator"/>');
 							sep = false;
 						}
-						// name == '|' && menu.append('<div class="elfinder-contextmenu-separator"/>');
 						return;
 					}
 					
@@ -58,7 +59,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					
 					item = $('<div class="elfinder-contextmenu-item"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/>'+cmd.title+'</div>')
-						.data({cmd : cmd.name, targets : targets});
+						.data({cmd : cmd.name});
 
 					
 					if ((variants = cmd.variants()) && variants.length) {
@@ -66,19 +67,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						
 					} 
 					
-					menu.append(item)
+					menu.append(item);
 					sep = true;
 				});
-				
-				// while((node = menu.children(':first')).length && node.is('.'+separatorclass)) {
-				// 	node.remove();
-				// }
-				// 
-				// node = menu.children(':first');
-				// node.is('.'+separatorclass) && node.remove();
-				// if (menu.children)
-				// node = menu.children(':last');
-				// node.is('.'+separatorclass) && node.remove();
 			},
 			/**
 			 * Close menu and empty it
@@ -86,7 +77,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			 * @return void
 			 **/
 			close = function() {
-				menu.hide().html('')
+				menu.hide().html('');
 			},
 			/**
 			 * Open menu in required position
@@ -96,17 +87,23 @@ $.fn.elfindercontextmenu = function(fm) {
 			 * @return void
 			 **/
 			open = function(x, y) {
-				var win = $(window);
+				var win        = $(window),
+					width      = menu.outerWidth(),
+					height     = menu.outerHeight(),
+					wwidth     = win.width(),
+					wheight    = win.height(),
+					scrolltop  = win.scrollTop(),
+					scrollleft = win.scrollLeft(),
+					css        = {
+						top  : (y + height  < wheight ? y : y - height) + scrolltop,
+						left : (x + width < wwidth ? x : x - width) + scrollleft
+					};
 
 				if (!menu.children().length) {
 					return;
 				}
 				
-				menu.css({
-					top  : y + win.scrollTop(),
-					left : x + win.scrollLeft()
-				})
-				.slideDown(100);
+				menu.css(css).show();
 			},
 			item = function(name, title, arg) {
 				menu.append($('<a href="#" class="elfinder-contextmenu-item"><span class="elfinder-button-icon elfinder-button-icon-'+name+' elfinder-contextmenu-icon"/>'+title+'</a>').data({cmd : name, arg : arg}))
@@ -125,14 +122,17 @@ $.fn.elfindercontextmenu = function(fm) {
 			})
 			
 			fm.getUI('nav').bind(event, function(e) {
-				var target = $(e.target);
+				var target = $(e.target),
+					targets = [];
 
 				if (target.is('.elfinder-navbar-dir,.elfinder-navbar-dir-wrapper')) {
 					e.preventDefault();
 					if (target.is('.elfinder-navbar-dir-wrapper')) {
 						target = target.children();
 					}
-					append('navbar', [fm.navId2Hash(target.attr('id'))]);
+					targets.push(fm.navId2Hash(target.attr('id')))
+					menu.data('targets', targets);
+					append('navbar', targets);
 					open(e.clientX, e.clientY);
 				}
 

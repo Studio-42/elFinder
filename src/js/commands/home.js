@@ -15,7 +15,7 @@ elFinder.prototype.commands.home = function() {
 		return root && cwd && root != cwd ? 0: -1;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		return this.fm.exec('open', this.fm.root());
 	}
 	

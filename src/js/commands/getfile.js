@@ -72,7 +72,7 @@ elFinder.prototype.commands.getfile = function() {
 		return this.callback && filter().length ? 0 : -1;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		var fm    = this.fm,
 			files = filter();
 			

@@ -9,9 +9,9 @@ elFinder.prototype.commands.extract = function() {
 	var self    = this,
 		fm      = self.fm,
 		mimes   = [],
-		getfile = function() {
-			var file = fm.selected().length == 1 && fm.selectedFiles()[0];
-			return file && $.inArray(file.mime, mimes) !== -1 ? file : false
+		getfile = function(hashes) {
+			var file = self.files(hashes)[0];
+			return file && $.inArray(file.mime, mimes) !== -1 ? file : false;
 		};
 	
 	
@@ -34,12 +34,13 @@ elFinder.prototype.commands.extract = function() {
 		});
 	}
 	
-	this.getstate = function() {
-		return mimes.length && fm.cwd().write && getfile() ? 0 : -1;
+	this.getstate = function(sel) {
+		var file = getfile(sel);
+		return mimes.length && file && fm.file(file.phash).write ? 0 : -1;
 	}
 	
-	this._exec = function() {
-		var file = getfile(),
+	this.exec = function(hashes) {
+		var file = getfile(hashes),
 			dfrd = $.Deferred().fail(function(error) {
 				error && fm.error(error);
 			});

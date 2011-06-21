@@ -21,7 +21,7 @@ elFinder.prototype.commands.rm = function() {
 			? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var self  = this,
 			fm    = this.fm,
 			dfrd  = $.Deferred()

@@ -27,7 +27,7 @@ elFinder.prototype.commands.cut = function() {
 			? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var fm     = this.fm,
 			errors = fm.errors,
 			dfrd   = $.Deferred()

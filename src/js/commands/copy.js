@@ -27,13 +27,13 @@ elFinder.prototype.commands.copy = function() {
 			? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var fm   = this.fm,
 			dfrd = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
 				});
-		
+
 		$.each(this.files(hashes), function(i, file) {
 			if (!file.read) {
 				return !dfrd.reject([fm.errors.copy, file.name, fm.errors.denied]);

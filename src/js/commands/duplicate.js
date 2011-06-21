@@ -33,7 +33,7 @@ elFinder.prototype.commands.duplicate = function() {
 		return this.fm.cwd().write && this.fm.selected().length ? 0 : -1;
 	}
 	
-	this._exec = function(hashes) {
+	this.exec = function(hashes) {
 		var fm     = this.fm,
 			errors = fm.errors,
 			files  = this.files(hashes),

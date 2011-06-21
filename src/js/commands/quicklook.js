@@ -417,7 +417,7 @@ elFinder.prototype.commands.quicklook = function() {
 	
 	
 	
-	this._exec = function() {
+	this.exec = function() {
 		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
 	}
 

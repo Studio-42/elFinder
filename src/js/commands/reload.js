@@ -18,7 +18,7 @@ elFinder.prototype.commands.reload = function() {
 		return 0;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		var fm      = this.fm,
 			dfrd    = fm.sync(),
 			timeout = setTimeout(function() {

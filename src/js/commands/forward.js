@@ -18,7 +18,7 @@ elFinder.prototype.commands.forward = function() {
 		return this.fm.history.canForward() ? 0 : -1;
 	}
 	
-	this._exec = function() {
+	this.exec = function() {
 		return this.fm.history.forward();
 	}
 	
