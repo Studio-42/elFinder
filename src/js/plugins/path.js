@@ -17,7 +17,7 @@ elFinder.prototype.plugins.path = function(fm) {
 	fm.one('load', function() {
 		fm.getUI('statusbar').append(path).show();
 	})
-	.bind('open', function() {
+	.bind('open searchend', function() {
 		var dirs = [];
 
 		$.each(fm.parents(fm.cwd().hash), function(i, hash) {
@@ -25,6 +25,9 @@ elFinder.prototype.plugins.path = function(fm) {
 		});
 		
 		path.html(dirs.join(fm.option('separator')));
+	})
+	.bind('search', function() {
+		path.html(fm.i18n('Search results'))
 	});
 	
 }

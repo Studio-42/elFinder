@@ -37,6 +37,7 @@ elFinder.prototype.plugins.stat = function(fm) {
 		});
 		
 		sel.html(c ? titlesel+': '+c+' '+titlesize+': '+fm.formatSize(s) : '');
-	});
+	})
+	;
 	
 }
