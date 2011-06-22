@@ -65,10 +65,9 @@ http://elrte.org/redmine/projects/elfinder/wiki
 Authors
 =======
 
-Programming JavaScript and PHP: Dmitry "dio" Levashov <dio@std42.ru>
-Programming Python, testing, support: Troex Nevelin <troex@fury.scancode.ru>
-Spanish localization: Alex "xand" Vavilin <xand@xand.es> http://xand.es
-Design: Valentin Razumnih
+JavaScript and PHP connector: Dmitry "dio" Levashov <dio@std42.ru>
+Python connector, testing, support: Troex Nevelin <troex@fury.scancode.ru>
+Design: Valentin Razumnyh
 
 We hope our tools will be helpful for you.
 
