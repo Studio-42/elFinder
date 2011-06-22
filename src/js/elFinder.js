@@ -1398,7 +1398,8 @@
 				autoOpen  : false,
 				title     : '&nbsp;',
 				width     : 280
-			})
+			}),
+			statusbar : $('<div class="ui-state-default ui-helper-clearfix ui-corner-all elfinder-statusbar"/>').appendTo(node)
 		}
 		
 		// load required ui
@@ -1411,8 +1412,7 @@
 			}
 		});
 		
-		// update size
-		this.resize(width, height);
+		
 		
 		// store instance in node
 		node[0].elfinder = this;
@@ -1426,6 +1426,10 @@
 			minWidth  : 300,
 			minHeight : 200
 		});
+
+		// update size
+		this.resize(width, height);
+		
 
 		// attach events to document
 		$(document)
@@ -1455,7 +1459,11 @@
 				self.trigger('open', data);
 				// self.exec('open', 'a0_Lw')
 			});
-
+		
+		// update ui's size after init
+		this.one('load', function() {
+			node.trigger('resize')
+		})
 	}
 	
 	/**
