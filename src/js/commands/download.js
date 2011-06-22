@@ -15,6 +15,9 @@ elFinder.prototype.commands.download = function() {
 			} else {
 				self.fm.exec('open');
 			}
+		},
+		filter = function(hashes) {
+			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f });
 		};
 	
 
@@ -53,15 +56,16 @@ elFinder.prototype.commands.download = function() {
 	}
 	
 	this.getstate = function() {
-		var cnt = fm.selected().length;
+		var sel = fm.selected(),
+			cnt = sel.length;
 		
-		return fm.newAPI && cnt && fm.selected().length == this.files().length ? 0 : -1;
+		return fm.newAPI && cnt && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var base   = fm.options.url, 
-			files = this.files(hashes),
-			dfrd   = $.Deferred().fail(function(error) { fm.error(error); }),
+		var base  = fm.options.url, 
+			files = filter(hashes),
+			dfrd  = $.Deferred().fail(function(error) { fm.error(error); }),
 			iframe, i, url;
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';

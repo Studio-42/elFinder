@@ -5,7 +5,8 @@ elFinder.prototype.commands.rename = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.selected().length == 1 ? 0 : -1;
+		var sel = this.fm.selected();
+		return sel.length == 1 && !this.fm.file(sel[0]).phash  ? 0 : -1;
 	}
 	
 	this.exec = function() {
