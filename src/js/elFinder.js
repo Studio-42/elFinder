@@ -1445,7 +1445,7 @@
 				data = $.extend(true, {}, data);
 				open(data);
 				self.trigger('open', data);
-				
+				// self.exec('open', 'a0_Lw')
 			});
 
 	}
@@ -1502,6 +1502,7 @@
 			copy     : 'Unable to copy "$1".',
 			move     : 'Unable to move "$1".',
 			copyinself : 'Unable to copy "$1" into itself.',
+			rm         : 'Unable to remove "$1".',
 			extract    : 'Unable to extract files from "$1".',
 			archive    : 'Unable to create archive.'
 			

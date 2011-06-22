@@ -126,7 +126,7 @@ elFinder.prototype.commands.search = function() {
 	 * @return $.Deferred
 	 **/
 	this.exec = function(q) {
-		if (!q) {
+		if (typeof(q) != 'string') {
 			node.is(':hidden') ? self.open() : self.close();
 			return $.Deferred().reject();
 		}

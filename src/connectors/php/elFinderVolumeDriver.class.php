@@ -1512,14 +1512,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	public function search($q, $mimes) {
-		// $result = $this->doSearch($this->root, $q, $mimes);
-		//  
-		// foreach ($result as $i => $file) {
-		// 	$result[$i]['path'] = $this->_path()
-		// }
-
 		return $this->doSearch($this->root, $q, $mimes);
-		return array();
 	}
 	
 	/**
@@ -1531,7 +1524,6 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function setError($error) {
 		return !!($this->error = func_get_args()); 
-		return false;
 	}
 	
 	/*********************************************************************/

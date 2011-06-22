@@ -254,7 +254,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event-select_', 'backend-debug_', 'event-search', 'event-searchend']
+	debug : ['error', 'warning', 'event-reload', 'backend-debug_', 'event-search', 'event-searchend']
 }
 
 })(jQuery);

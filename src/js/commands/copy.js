@@ -21,9 +21,7 @@ elFinder.prototype.commands.copy = function() {
 	
 	this.getstate = function(sel) {
 		sel = sel || fm.selected();
-		return sel.length 
-			&& sel[0] != fm.cwd().hash
-			&& $.map(sel, function(h) { return fm.file(h).read ? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f.read && f.phash  ? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
@@ -35,7 +33,7 @@ elFinder.prototype.commands.copy = function() {
 				});
 
 		$.each(this.files(hashes), function(i, file) {
-			if (!file.read) {
+			if (!(file.read && file.phash)) {
 				return !dfrd.reject([fm.errors.copy, file.name, fm.errors.denied]);
 			}
 		});

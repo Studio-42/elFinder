@@ -21,9 +21,7 @@ elFinder.prototype.commands.cut = function() {
 	
 	this.getstate = function(sel) {
 		sel = sel || fm.selected();
-		return sel.length 
-			&& sel[0] != fm.cwd().hash
-			&& $.map(sel, function(h) { var f = fm.file(h); return f.read && !f.locked ? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f.read && f.phash && !f.locked ? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
@@ -36,7 +34,7 @@ elFinder.prototype.commands.cut = function() {
 				});
 		
 		$.each(this.files(hashes), function(i, file) {
-			if (!file.read) {
+			if (!(file.read && file.phash) ) {
 				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
 			if (file.locked) {

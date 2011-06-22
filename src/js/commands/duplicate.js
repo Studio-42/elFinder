@@ -16,9 +16,7 @@ elFinder.prototype.commands.duplicate = function() {
 	
 	this.getstate = function(sel) {
 		sel = sel || this.fm.selected();
-		return sel.length 
-			&& sel[0] != this.fm.cwd().hash
-			&& $.map(sel, function(h) { return fm.file(h).read ? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f.read && f.phash ? h : null }).length == sel.length
 			? 0 : -1;
 		
 		

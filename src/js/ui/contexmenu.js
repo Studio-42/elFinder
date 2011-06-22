@@ -114,9 +114,9 @@ $.fn.elfindercontextmenu = function(fm) {
 		fm.one('load', function() {
 			
 			cwd = fm.getUI('cwd').bind(event, function(e) {
-				var target = $(e.target),
+				var target  = $(e.target),
 					targets = [],
-					type = 'files';
+					type    = 'files';
 
 				e.preventDefault();
 
@@ -128,10 +128,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					cwd.trigger('selectfile', target.closest('.elfinder-cwd-file').attr('id'))
 					targets = fm.selected()
 				}			
-				// menu.data('targets', targets);
+
 				append(type, targets);
 				open(e.clientX, e.clientY);
-				fm.log(targets)
 			})
 			
 			fm.getUI('nav').bind(event, function(e) {
@@ -151,10 +150,7 @@ $.fn.elfindercontextmenu = function(fm) {
 
 			})
 			
-			$(document).mousedown(function() {
-				fm.log('click')
-				close()
-			})
+			$(document).mousedown(close)
 
 		}).one('destroy', function() {
 			menu.remove();

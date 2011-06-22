@@ -64,11 +64,7 @@ elFinder.prototype.command = function(fm) {
 	this._handlers = {
 		enable  : function() { this.update(); },
 		disable : function() { this.update(-1); },
-		open    : function() { 
-			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
-			this.update(); 
-		},
-		reload : function() { 
+		'open reload'    : function() { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
 			this.update(); 
 		}
@@ -250,8 +246,6 @@ elFinder.prototype.command = function(fm) {
 	 * @return Array
 	 */
 	this.hashes = function(hashes) {
-		var fm = this.fm;
-		
 		return hashes
 			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) ? hash : null; })
 			: fm.selected();

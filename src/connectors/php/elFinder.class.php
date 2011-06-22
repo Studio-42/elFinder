@@ -771,12 +771,12 @@ class elFinder {
 		foreach ($targets as $target) {
 			if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false) {
-				$result['warning'] = $this->error(self::ERROR_REMOVE, '#'.$target, self::ERROR_FILE_NOT_FOUND);
+				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				break;
 			}
 			
 			if (!$volume->rm($target)) {
-				$result['warning'] = $this->error(self::ERROR_REMOVE, $file['name'], $volume->error());
+				$result['warning'] = $this->error(self::ERROR_RM, $file['name'], $volume->error());
 				break;
 			}
 			

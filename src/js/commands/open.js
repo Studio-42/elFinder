@@ -22,8 +22,9 @@ elFinder.prototype.commands.open = function() {
 	this.title = title;
 	this.alwaysEnabled = true;
 	
-	this.handlers = {
-		select   : function() { this.update(); }
+	this._handlers = {
+		disable : function() { this.update(-1); },
+		'select enable reload' : function() { this.update(); }
 	}
 	
 	this.shortcuts = [{
@@ -61,16 +62,15 @@ elFinder.prototype.commands.open = function() {
 	
 	this.getstate = function(sel) {
 		var hashes = this.hashes(sel),
-			cnt = hashes.length,
+			cnt    = hashes.length,
 			files;
-		
+
 		if (!cnt) {
 			hashes = [fm.cwd().hash];
 			cnt    = 1;
 		}
-		
 		if (cnt == 1) {
-			return fm.file(hashes[0]).read && hashes[0] != fm.cwd().hash ? 0 : -1;
+			return hashes[0] && fm.file(hashes[0]).read && hashes[0] != fm.cwd().hash ? 0 : -1;
 		} else if ((files = this.files(sel)).length == cnt) {
 			while (cnt--) {
 				if (!files[cnt].read) {
