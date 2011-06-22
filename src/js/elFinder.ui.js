@@ -354,8 +354,10 @@ elFinder.prototype.ui.prototype.commands = {
 		// }
 		// @patch from Helge Milde
 		// select multiply files
+		
 		if (fm.options.selectMultiple) {
             this.exec = function() {
+
                 var selected = $(fm.getSelected()).map(function() {
                     return fm.options.cutURL == 'root' ? this.url.substr(fm.params.url.length) : this.url.replace(new RegExp('^('+fm.options.cutURL+')'), ''); 
                 });  
@@ -370,14 +372,17 @@ elFinder.prototype.ui.prototype.commands = {
         } else {
             this.exec = function() { 
                 var f = this.fm.getSelected(0);
+
                 if (!f.url) {
                     return this.fm.view.error('File URL disabled by connector config');
                 }
                 this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
-                if (this.fm.options.closeOnEditorCallback) {
+                
+				if (this.fm.options.closeOnEditorCallback) {
                     this.fm.dock();
                     this.fm.close();
                 }
+				
             }
         }
 
