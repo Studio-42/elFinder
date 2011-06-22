@@ -37,7 +37,7 @@ elFinder.prototype.options = {
 
 	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'help'],
 	
-	plugins : ['path'],
+	plugins : ['path', 'stat'],
 	
 	dblclick : 'open',
 	enter    : 'open',

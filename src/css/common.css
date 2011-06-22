@@ -90,13 +90,16 @@
 
 .elfinder-statusbar {
 	margin-top:2px;
-
+	text-align:center;
 }
+
+.elfinder-statusbar span { font-size:.86em;}
 
 .elfinder-ltr .elfinder-plugin-path { float:left; }
 .elfinder-rtl .elfinder-plugin-path { float:right; }
 
-
+.elfinder-ltr .elfinder-plugin-stat-size { float:right; }
+.elfinder-rtl .elfinder-plugin-stat-size { float:left; }
 
 
 
