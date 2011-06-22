@@ -1357,6 +1357,14 @@
 			}
 		});
 		
+		this._plugins = {};
+		$.each(this.options.plugins, function(i, name) {
+			var plugin = self.plugins[name];
+			if ($.isFunction(plugin) && !self._plugins[name]) {
+				self._plugins[name] = new plugin(self);
+			}
+		})
+		
 		// prepare node
 		node.addClass(this.cssClass)
 			.bind(mousedown, function() {
@@ -1642,6 +1650,13 @@
 		 * @type Object
 		 */
 		commands : {},
+		
+		/**
+		 * Plugins costructors
+		 *
+		 * @type Object
+		 */
+		plugins : {},
 		
 		/**
 		 * Wrapper for elFinder.ajax method.

@@ -29,13 +29,11 @@
 }
 
 .elfinder-search-button {
-/*	display:inline-block;*/
 	width:16px;
 	height:16px;
 	position:absolute;
 	top:50%;
 	margin-top:-8px;
-/*	padding:1px;*/
 }
 
 .elfinder .elfinder-search-close {
