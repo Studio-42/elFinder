@@ -1,5 +1,6 @@
 /**
  * @class elfindernav - elFinder container for diretories tree and places
+ *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindernavbar = function(fm) {
@@ -27,6 +28,12 @@ $.fn.elfindernavbar = function(fm) {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
 				.find('.ui-resizable-handle');
+				
+			fm.one('open', function() {
+				setTimeout(function() {
+					parent.trigger('resize');
+				}, 100);
+			});
 		}
 	});
 	

@@ -1,6 +1,6 @@
 
 elFinder.prototype.commands.mkdir = function() {
-	
+	this.disableOnSearch = true;
 	this.mime   = 'directory';
 	this.prefix = 'untitle folder';
 	this.exec  = $.proxy(this.fm.mixins.make, this);

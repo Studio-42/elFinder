@@ -55,6 +55,10 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this._disabled = false;
 	
+	this.disableOnSearch = false;
+	
+	this.updateOnSelect = true;
+	
 	/**
 	 * elFinder events defaults handlers.
 	 * Inside handlers "this" is current command object
@@ -107,6 +111,10 @@ elFinder.prototype.command = function(fm) {
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 
+		if (this.updateOnSelect) {
+			this.handlers.select = function() { /**fm.log(name); **/ this.update(); }
+		}
+
 		fm.one('load', function() {
 			$.each($.extend({}, self._handlers, self.handlers), function(cmd, handler) {
 				fm.bind(cmd, $.proxy(handler, self));
@@ -117,6 +125,15 @@ elFinder.prototype.command = function(fm) {
 				fm.shortcut(s);
 			});
 		});
+		
+		if (this.disableOnSearch) {
+			fm.bind('search searchend', function(e) {
+				self._disabled = e.type == 'search';
+				self.update();
+			});
+		}
+		
+		
 		
 		this.init();
 	}

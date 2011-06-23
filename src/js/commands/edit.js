@@ -14,9 +14,9 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  Array  files hashes
 		 * @return Array
 		 **/
-		filter = function(hashes) {
-			return $.map(self.files(hashes), function(file) {
-				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, fm.textMimes) !== -1 ? file : null;
+		filter = function(files) {
+			return $.map(files, function(file) {
+				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, fm.textMimes) !== -1 && file.read && file.write ? file : null;
 			})
 		},
 		/**
@@ -137,18 +137,15 @@ elFinder.prototype.commands.edit = function() {
 		dialogWidth : 450
 	};
 	
-	this._handlers = {
-		select  : function() { this.update(); }
-	};
-	
-	this.getstate = function() {
-		var cnt = fm.selected().length;
-		
-		return cnt && cnt == filter().length ? 0 : -1;
+	this.getstate = function(sel) {
+		var sel = this.files(sel),
+			cnt = sel.length;
+			
+		return cnt && filter(sel).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var files = filter(hashes),
+		var files = filter(this.files(hashes)),
 			list  = [],
 			file;
 

@@ -21,10 +21,11 @@ elFinder.prototype.commands.open = function() {
 	
 	this.title = title;
 	this.alwaysEnabled = true;
+	this.updateOnSelect = true;
 	
 	this._handlers = {
 		disable : function() { this.update(-1); },
-		'select enable reload' : function() { this.update(); }
+		'enable reload' : function() { this.update(); }
 	}
 	
 	this.shortcuts = [{
@@ -34,14 +35,13 @@ elFinder.prototype.commands.open = function() {
 	}];
 	
 	this.init = function() {
-		var self       = this,
-			fm         = this.fm,
+		var fm         = this.fm,
 			o          = fm.options,
 			name       = 'open',
-			dblclick   = o.dblclick == name,
-			enter      = o.enter == name,
-			shiftenter = o.shiftenter == name
-			;
+			dblclick   = o.dblclick   == name,
+			enter      = o.enter      == name,
+			shiftenter = o.shiftenter == name,
+			ctrlenter  = o.ctrlenter  == name;
 
 		fm.one('load', function() {
 			dblclick && fm.bind('dblclick', callback);
@@ -54,6 +54,12 @@ elFinder.prototype.commands.open = function() {
 			
 			shiftenter && fm.shortcut({
 				pattern     : 'shift+enter',
+				description : title,
+				callback    : callback
+			});
+			
+			ctrlenter && fm.shortcut({
+				pattern     : 'ctrl+enter',
 				description : title,
 				callback    : callback
 			});

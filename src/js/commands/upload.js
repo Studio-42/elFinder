@@ -307,6 +307,8 @@ elFinder.prototype.commands.upload = function() {
 	
 	this.title = 'Upload files';
 	
+	this.disableOnSearch = true;
+	
 	this.handlers = {
 		// bind cwd ui drop event
 		load : function() {

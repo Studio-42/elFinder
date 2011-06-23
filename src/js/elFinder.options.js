@@ -39,9 +39,10 @@ elFinder.prototype.options = {
 	
 	plugins : ['path', 'stat'],
 	
-	dblclick : 'open',
-	enter    : 'open',
+	dblclick   : 'open',
+	enter      : 'rename',
 	shiftenter : 'download',
+	ctrlenter  : 'getfile',
 
 	getFileCallback : null,
 	/**

@@ -1520,7 +1520,8 @@
 			copyinself : 'Unable to copy "$1" into itself.',
 			rm         : 'Unable to remove "$1".',
 			extract    : 'Unable to extract files from "$1".',
-			archive    : 'Unable to create archive.'
+			archive    : 'Unable to create archive.',
+			notarchive : 'File is not archive or has unsupported archive type.'
 			
 		},
 		/**

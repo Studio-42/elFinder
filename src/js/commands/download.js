@@ -24,19 +24,15 @@ elFinder.prototype.commands.download = function() {
 	this.title = 'Download';
 	this.alwaysEnabled = true;
 	
-	this.handlers = {
-		select  : function() { this.update(); }
-	};
-	
 	this.init = function() {
 		var self       = this,
 			fm         = this.fm,
 			o          = fm.options,
 			name       = 'download',
-			dblclick   = o.dblclick == name,
-			enter      = o.enter == name,
-			shiftenter = o.shiftenter == name
-			;
+			dblclick   = o.dblclick   == name,
+			enter      = o.enter      == name,
+			shiftenter = o.shiftenter == name,
+			ctrlenter  = o.ctrlenter  == name;
 
 		fm.one('load', function() {
 			dblclick && fm.bind('dblclick', callback);
@@ -49,6 +45,12 @@ elFinder.prototype.commands.download = function() {
 			
 			shiftenter && fm.shortcut({
 				pattern     : 'shift+enter',
+				description : self.title,
+				callback    : callback
+			});
+			
+			ctrlenter && fm.shortcut({
+				pattern     : 'ctrl+enter',
 				description : self.title,
 				callback    : callback
 			});

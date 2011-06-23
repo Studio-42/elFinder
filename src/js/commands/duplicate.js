@@ -10,25 +10,13 @@ elFinder.prototype.commands.duplicate = function() {
 	
 	this.title = 'Duplicate';
 	
-	this.handlers = {
-		select : function() { this.update(); }
-	}
+	this.disableOnSearch = true;
 	
 	this.getstate = function(sel) {
-		sel = sel || this.fm.selected();
-		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f.read && f.phash ? h : null }).length == sel.length
-			? 0 : -1;
+		var sel = this.files(sel),
+			cnt = sel.length;
 		
-		
-		sel = sel || this.fm.selected();
-		return sel.length && sel[0] != this.fm.cwd().hash && this.fm.file(sel[0]).write ? 0 : -1;
-		
-		if (!files) {
-			files = this.fm.selected();
-		}
-
-		return files.length && this.fm.file(files[0]).write ? 0 : -1;
-		return this.fm.cwd().write && this.fm.selected().length ? 0 : -1;
+		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -53,7 +41,7 @@ elFinder.prototype.commands.duplicate = function() {
 			if (!fm.file(file.phash).write) {
 				return !dfrd.reject([errors.copy, file.name, errors.denied]);
 			}
-		})
+		});
 		
 		if (dfrd.isRejected()) {
 			return dfrd;

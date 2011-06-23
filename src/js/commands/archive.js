@@ -12,6 +12,7 @@ elFinder.prototype.commands.archive = function() {
 	this.mimes = [];
 	
 	this.title = 'Create archive';
+	this.disableOnSearch = true;
 	
 	this.handlers = {
 		select  : function() { this.update(); },

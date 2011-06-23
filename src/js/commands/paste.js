@@ -1,8 +1,10 @@
 
 elFinder.prototype.commands.paste = function() {
 	var fm = this.fm;
+	
 	this.title = 'Paste';
-
+	this.disableOnSearch = true;
+	
 	this.handlers = {
 		changeclipboard : function() { this.update(); }
 	}

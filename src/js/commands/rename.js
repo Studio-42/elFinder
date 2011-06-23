@@ -1,12 +1,44 @@
 elFinder.prototype.commands.rename = function() {
+	var self     = this,
+		fm       = self.fm,
+		filename = '.elfinder-cwd-filename';
 
-	this.handlers = {
-		select : function() { this.update(); }
-	}
+	this.disableOnSearch = true;
 	
 	this.getstate = function() {
-		var sel = this.fm.selected();
-		return sel.length == 1 && !this.fm.file(sel[0]).phash  ? 0 : -1;
+		var sel = fm.selectedFiles();
+
+		return sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
+	}
+	
+	this.init = function() {
+		var o          = fm.options,
+			name       = 'rename',
+			title      = self.title,
+			enter      = o.enter      == name,
+			shiftenter = o.shiftenter == name,
+			ctrlenter  = o.ctrlenter  == name,
+			callback   = function() { self.exec(); };
+
+		fm.one('load', function() {
+			enter && fm.shortcut({
+				pattern     : 'enter',
+				description : title,
+				callback    : callback
+			});
+			
+			shiftenter && fm.shortcut({
+				pattern     : 'shift+enter',
+				description : title,
+				callback    : callback
+			});
+			
+			ctrlenter && fm.shortcut({
+				pattern     : 'ctrl+enter',
+				description : title,
+				callback    : callback
+			});
+		})
 	}
 	
 	this.exec = function() {
@@ -26,7 +58,7 @@ elFinder.prototype.commands.rename = function() {
 						input.remove();
 						parent.html(name);
 					} else {
-						cwd.find('#'+file.hash).find('.elfinder-cwd-filename').html(name);
+						cwd.find('#'+file.hash).find(filename).html(name);
 					}
 				})
 				.always(function() {
@@ -79,7 +111,7 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
-				node = cwd.find('#'+file.hash).find('.elfinder-cwd-filename').empty().append(input.val(file.name));
+				node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
 		
 		if (!file || cnt > 1 || !node.length) {
 			return dfrd.reject(errors.invParams);

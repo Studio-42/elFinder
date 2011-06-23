@@ -7,7 +7,7 @@
 elFinder.prototype.commands.back = function() {
 	this.title = 'Back';
 	this.alwaysEnabled = true;
-	
+	this.updateOnSelect = true;
 	this.shortcuts = [{
 		pattern     : 'ctrl+left',
 		description : 'Go back'
