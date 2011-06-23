@@ -15,14 +15,14 @@ elFinder.prototype.commands.info = function() {
 	
 	this.title = title;
 	this.alwaysEnabled = true;
-	
+	this.updateOnSelect = false;
 	this.shortcuts = [{
 		pattern     : 'ctrl+i',
 		description : title
 	}];
 	
 	this.getstate = function() {
-		return this.fm.cwd().hash ? 0 : -1;
+		return 0;
 	}
 	
 	this.exec = function(hashes) {
@@ -31,7 +31,6 @@ elFinder.prototype.commands.info = function() {
 			tpl     = this.tpl,
 			row     = tpl.row,
 			files   = this.files(hashes),
-			// files   = fm.selected().length ? fm.selectedFiles() : [fm.cwd()],
 			cnt     = files.length,
 			content = [],
 			view    = tpl.main,

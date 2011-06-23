@@ -6,14 +6,9 @@
  * @author Dmitry (dio) Levashov
  **/  
 elFinder.prototype.commands.open = function() {
-	var self   = this,
-		fm     = self.fm,
-		title  = 'Open',
-		filter = function(hashes) {
-			return $.map(hashes, function(h) { 
-				var file = fm.file(h);
-				return file.mime != 'directory'  ? h : null });
-		},
+	var self     = this,
+		fm       = self.fm,
+		title    = 'Open',
 		callback = function(e) {
 			e.preventDefault();
 			self.exec();
@@ -21,11 +16,10 @@ elFinder.prototype.commands.open = function() {
 	
 	this.title = title;
 	this.alwaysEnabled = true;
-	this.updateOnSelect = true;
 	
 	this._handlers = {
 		disable : function() { this.update(-1); },
-		'enable reload' : function() { this.update(); }
+		'select enable reload' : function(e) { this.update();  }
 	}
 	
 	this.shortcuts = [{
@@ -67,25 +61,17 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var hashes = this.hashes(sel),
-			cnt    = hashes.length,
-			files;
-
+		var sel = this.files(sel),
+			cnt = sel.length;
+		
 		if (!cnt) {
-			hashes = [fm.cwd().hash];
-			cnt    = 1;
+			return -1;
 		}
 		if (cnt == 1) {
-			return hashes[0] && fm.file(hashes[0]).read && hashes[0] != fm.cwd().hash ? 0 : -1;
-		} else if ((files = this.files(sel)).length == cnt) {
-			while (cnt--) {
-				if (!files[cnt].read) {
-					return -1;
-				}
-			}
 			return 0;
 		}
-		return -1;
+		
+		return $.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {

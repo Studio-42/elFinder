@@ -2,7 +2,8 @@
 
 elFinder.prototype.commands.help = function() {
 	
-	this.alwaysEnabled = true;
+	this.alwaysEnabled  = true;
+	this.updateOnSelect = false;
 	this.state = 0;
 	
 	

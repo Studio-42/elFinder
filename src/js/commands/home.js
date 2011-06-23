@@ -1,8 +1,8 @@
 
 elFinder.prototype.commands.home = function() {
 	
-	this.alwaysEnabled = true;
-	
+	this.alwaysEnabled  = true;
+	this.updateOnSelect = false;
 	this.shortcuts = [{
 		pattern     : 'ctrl+home ctrl+shift+up',
 		description : 'Go to root folder'
