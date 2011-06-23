@@ -1430,6 +1430,10 @@
 		// update size
 		this.resize(width, height);
 		
+		this.one('load', function() {
+			self.ui.statusbar.append('<div style="clear:both"/>')
+		})
+		// this.ui.statusbar.append('<div class="ui-helper-clearfix"/>')
 
 		// attach events to document
 		$(document)

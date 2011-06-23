@@ -92,6 +92,7 @@ elFinder.prototype.commands.search = function() {
 	 **/
 	this.open = function() {
 		node.is(':hidden') && node.slideDown('fast', function() {
+			fm.trigger('searchshow');
 			parent.trigger('resize');
 			input.focus();
 			self.update();
@@ -114,6 +115,7 @@ elFinder.prototype.commands.search = function() {
 		}
 		
 		if (node.is(':visible:not(:animated)')) {
+			fm.trigger('searchhide')
 			force ? node.hide(1, onclose) : node.slideUp('fast', onclose);
 		}
 	}

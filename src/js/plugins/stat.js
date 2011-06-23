@@ -12,7 +12,7 @@ elFinder.prototype.plugins.stat = function(fm) {
 		titlesel   = fm.i18n('selected items');
 		
 	fm.one('load', function() {
-		fm.getUI('statusbar').append(size.add(sel)).show();
+		fm.getUI('statusbar').prepend(size).append(sel).show();
 	})
 	.bind('open reload add remove change', function() {
 		var cwd = fm.cwd().hash,
@@ -36,7 +36,7 @@ elFinder.prototype.plugins.stat = function(fm) {
 			s += file.size||0
 		});
 		
-		sel.html(c ? titlesel+': '+c+' '+titlesize+': '+fm.formatSize(s) : '');
+		sel.html(c ? titlesel+': '+c+' '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
 	})
 	;
 	

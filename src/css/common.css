@@ -93,9 +93,9 @@
 	text-align:center;
 }
 
-.elfinder-statusbar span { font-size:.86em;}
-
-.elfinder-ltr .elfinder-plugin-path { float:left; }
+.elfinder-statusbar span { font-size:.86em; padding:0;}
+.elfinder-plugin-path, .elfinder-plugin-stat-size { margin-top:2px; }
+.elfinder-ltr .elfinder-plugin-path { float:left;  }
 .elfinder-rtl .elfinder-plugin-path { float:right; }
 
 .elfinder-ltr .elfinder-plugin-stat-size { float:right; }

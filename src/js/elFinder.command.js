@@ -112,7 +112,7 @@ elFinder.prototype.command = function(fm) {
 		this.listeners = [];
 
 		if (this.updateOnSelect) {
-			this.handlers.select = function() { /**fm.log(name); **/ this.update(); }
+			this._handlers.select = function() { /**fm.log(name); **/ this.update(); }
 		}
 
 		fm.one('load', function() {

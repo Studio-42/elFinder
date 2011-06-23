@@ -267,6 +267,7 @@ elFinder.prototype.commands.quicklook = function() {
 					.animate(openedCss(), 550, function() {
 						state = opened;
 						self.preview.trigger($.Event('update', {file : self.value}));
+						self.update(1, self.value)
 					});
 			}
 		})
@@ -279,6 +280,7 @@ elFinder.prototype.commands.quicklook = function() {
 					state = closed;
 					win.hide();
 					preview.children().remove();
+					self.update(0, self.value)
 				};
 				
 			if (self.opened()) {
@@ -307,12 +309,10 @@ elFinder.prototype.commands.quicklook = function() {
 	this.value = null;
 	
 	this.handlers = {
-		select   : function() {
-			var state = this.getstate();
-			
-			this.update(state, state > -1 ? this.fm.selectedFiles()[0] : null);
-		},
-		error : function() { self.window.data('hash', '').trigger('close'); }
+		// save selected file
+		select   : function() { this.update(this.getstate(), this.fm.selectedFiles()[0]); },
+		error : function() { self.window.data('hash', '').trigger('close'); },
+		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close') }
 	}
 	
 	this.shortcuts = [{
@@ -412,7 +412,7 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.selected().length == 1 ? 0 : -1;
+		return this.fm.selected().length == 1 ? state == opened ? 1 : 0 : -1;
 	}
 	
 	

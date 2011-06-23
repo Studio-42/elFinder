@@ -15,7 +15,7 @@ elFinder.prototype.plugins.path = function(fm) {
 			});
 	
 	fm.one('load', function() {
-		fm.getUI('statusbar').append(path).show();
+		fm.getUI('statusbar').prepend(path).show();
 	})
 	.bind('open searchend', function() {
 		var dirs = [];

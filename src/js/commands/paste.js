@@ -4,6 +4,7 @@ elFinder.prototype.commands.paste = function() {
 	
 	this.title = 'Paste';
 	this.disableOnSearch = true;
+	this.updateOnSelect = false;
 	
 	this.handlers = {
 		changeclipboard : function() { this.update(); }
@@ -20,7 +21,7 @@ elFinder.prototype.commands.paste = function() {
 				if (dst.length != 1) {
 					return -1;
 				}
-				dst  = fm.file(dst[0]);
+				dst = fm.file(dst[0]);
 			}
 		} else {
 			dst = fm.cwd();
