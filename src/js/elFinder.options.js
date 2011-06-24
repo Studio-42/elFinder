@@ -258,6 +258,7 @@ elFinder.prototype.options = {
 			 **/
 			transport : null
 		},
+		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,
 			jplayer  : 'extensions/jplayer'
@@ -265,7 +266,7 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event-reload', 'backend-debug_', 'event-search', 'event-searchend']
+	debug : ['error', 'warning', 'event-put', 'backend-debug_', 'event-search', 'event-searchend']
 }
 
 })(jQuery);

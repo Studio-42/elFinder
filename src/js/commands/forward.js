@@ -5,7 +5,6 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.forward = function() {
-	
 	this.title = 'Forward';
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;

@@ -790,6 +790,12 @@ $.fn.elfindercwd = function(fm) {
 				});
 				trigger();
 			})
+			.bind('put edit', function(e) {
+				$.each(files = e.data.changed || [], function(i, file) {
+					cwd.find('#'+file.hash).trigger(evtSelect);
+				});
+				trigger();
+			})
 			.shortcut({
 				pattern     :'ctrl+a', 
 				description : 'Select all files',

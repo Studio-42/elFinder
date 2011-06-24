@@ -1347,6 +1347,8 @@
 		$.inArray('open', this.options.commands) === -1 && this.options.commands.push('open');
 		$.inArray('help', this.options.commands) === -1 && this.options.commands.push('help');
 
+		// $.each(['open'])
+
 		// load commands
 		$.each(this.options.commands, function(i, name) {
 			var cmd = self.commands[name];
@@ -1411,7 +1413,6 @@
 				self.ui[ui] = $('<'+(opts.tag || 'div')+'/>').appendTo(node)[name](self, opts);
 			}
 		});
-		
 		
 		
 		// store instance in node

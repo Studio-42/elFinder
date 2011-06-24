@@ -36,10 +36,11 @@ elFinder.prototype.commands.edit = function() {
 				dialog    = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
 							.keydown(function(e) {
-								var value, start;
+								var code = e.keyCode,
+									value, start;
 								
 								e.stopPropagation();
-								if (e.keyCode == 9) {
+								if (code == 9) {
 									e.preventDefault();
 									// insert tab on tab press
 									if (this.setSelectionRange) {
@@ -48,6 +49,19 @@ elFinder.prototype.commands.edit = function() {
 										this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
 										start += 1;
 										this.setSelectionRange(start, start);
+									}
+								}
+								fm.log(e.keyCode)
+								
+								if (e.ctrlKey || e.metaKey) {
+									// close on ctrl+w/q
+									if (code == 81 || code == 87) {
+										e.preventDefault();
+										cancel();
+									}
+									if (code == 83) {
+										e.preventDefault();
+										save();
 									}
 								}
 							}),
@@ -64,12 +78,15 @@ elFinder.prototype.commands.edit = function() {
 								editor[0].setSelectionRange && editor[0].setSelectionRange(0, 0);
 							}
 							
-						};
-						
-					opts.buttons[fm.i18n('Save')] = function() {
+						},
+					cancel = function() {
+						dfrd.resolve();
+						editor.elfinderdialog('close');
+					},
+					save = function() {
 						var value = editor.val();
 						
-						$(this).elfinderdialog('close');
+						editor.elfinderdialog('close');
 						
 						fm.ajax({
 							options : {type : 'post'},
@@ -88,12 +105,10 @@ elFinder.prototype.commands.edit = function() {
 						.done(function(data) {
 							dfrd.resolve(data);
 						});
-					}
+					};
 						
-					opts.buttons[fm.i18n('Cancel')] = function() { 
-						dfrd.resolve();
-						$(this).elfinderdialog('close'); 
-					}
+					opts.buttons[fm.i18n('Save')]   = save;
+					opts.buttons[fm.i18n('Cancel')] = cancel;
 					
 					fm.dialog(editor, opts);
 				},
@@ -156,7 +171,6 @@ elFinder.prototype.commands.edit = function() {
 		return list.length 
 			? $.when.apply(null, list)
 			: $.Deferred().reject();
-
 	}
 
 }
