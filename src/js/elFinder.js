@@ -1343,11 +1343,10 @@
 		if (!$.isArray(this.options.commands)) {
 			this.options.commands = [];
 		}
-		// command "open" required always
-		$.inArray('open', this.options.commands) === -1 && this.options.commands.push('open');
-		$.inArray('help', this.options.commands) === -1 && this.options.commands.push('help');
-
-		// $.each(['open'])
+		// check required commands
+		$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'search', 'quicklook', 'getfile', 'help'], function(i, cmd) {
+			$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
+		});
 
 		// load commands
 		$.each(this.options.commands, function(i, name) {

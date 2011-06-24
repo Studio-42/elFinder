@@ -49,13 +49,13 @@ elFinder.prototype.commands.search = function() {
 	
 	this.title = title;
 	this.alwaysEnabled = true;
+	this.updateOnSelect = false;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+f',
 		description : title
 	}];
 	
-	this.updateOnSelect = false;
 	
 	/**
 	 * Additional command initialization.
