@@ -10,6 +10,7 @@ elFinder.prototype.commands.search = function() {
 		// flag - we not search already, so no searchend event on close panel
 		found = false,
 		title = fm.i18n('Find files'),
+		
 		// search input field
 		input = $('<input type="text" size="42" class="ui-corner-all"/>')
 			.bind('keydown keypress', function(e) {
@@ -20,10 +21,7 @@ elFinder.prototype.commands.search = function() {
 				if (e.type == 'keydown') {
 					e.keyCode == 27 && self.close();
 					if (e.keyCode == 13) {
-						input.attr('disabled')
-						self.exec($.trim(input.val())).always(function() {
-							input.removeAttr('disabled').focus();
-						});
+						search();
 					}
 				}
 			}),
@@ -44,6 +42,12 @@ elFinder.prototype.commands.search = function() {
 					.hover(function() { $(this).toggleClass('ui-state-hover') })
 			)
 			.elfinderpanel(fm).hide(),
+		search = function() {
+			input.attr('disabled')
+			self.exec($.trim(input.val())).always(function() {
+				input.removeAttr('disabled').focus();
+			});
+		},
 		// main elFinder node
 		parent;
 	
@@ -70,6 +74,9 @@ elFinder.prototype.commands.search = function() {
 		})
 		.bind('open reload', function() {
 			self.close(true);
+		})
+		.select(function() {
+			input.is(':visible') && input.blur();
 		});
 	}
 	

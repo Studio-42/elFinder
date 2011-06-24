@@ -66,11 +66,11 @@ elFinder.prototype.command = function(fm) {
 	 * @type  Object
 	 */
 	this._handlers = {
-		enable  : function() { this.update(); },
-		disable : function() { this.update(-1); },
+		enable  : function() { this.update(void(0), this.value); },
+		disable : function() { this.update(-1, this.value); },
 		'open reload'    : function() { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
-			this.update(); 
+			this.update(void(0), this.value); 
 		}
 	};
 	
@@ -112,7 +112,7 @@ elFinder.prototype.command = function(fm) {
 		this.listeners = [];
 
 		if (this.updateOnSelect) {
-			this._handlers.select = function() { /**fm.log(name); **/ this.update(); }
+			this._handlers.select = function() { this.update(void(0), self.value); }
 		}
 
 		fm.one('load', function() {
@@ -129,11 +129,9 @@ elFinder.prototype.command = function(fm) {
 		if (this.disableOnSearch) {
 			fm.bind('search searchend', function(e) {
 				self._disabled = e.type == 'search';
-				self.update();
+				self.update(void(0), self.value);
 			});
 		}
-		
-		
 		
 		this.init();
 	}
@@ -146,19 +144,10 @@ elFinder.prototype.command = function(fm) {
 	this.init = function() { }
 
 	/**
-	 * Exec command if it is enabled and return result
+	 * Exec command
 	 *
-	 * @param  mixed  command value
-	 * @return $.Deferred
-	 */
-	this.exec_ = function(v, v2) { 
-		return this.state > -1 ? this._exec(v, v2) : $.Deferred().reject({error : 'Command disabled'});
-	}
-	
-	/**
-	 * Here command do smth usefull
-	 *
-	 * @param  mixed  command value
+	 * @param  Array         target files hashes
+	 * @param  Array|Object  command value
 	 * @return $.Deferred
 	 */
 	this.exec = function(files, opts) { 

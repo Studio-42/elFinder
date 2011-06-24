@@ -35,7 +35,7 @@ elFinder.prototype.options = {
 	 */
 	cssClass       : '',
 
-	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'help'],
+	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'],
 	
 	plugins : ['path', 'stat'],
 	
@@ -69,6 +69,7 @@ elFinder.prototype.options = {
 			['rm'],
 			['edit', 'extract', 'archive', 'search'],
 			['info'],
+			['view'],
 			['help']
 		]
 		// folders tree options

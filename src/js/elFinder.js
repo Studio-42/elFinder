@@ -669,7 +669,6 @@
 		 * @return $.Deferred
 		 */
 		this.request = function(options) {
-			
 			var self     = this,
 				o        = this.options,
 				errors   = this.errors,
@@ -791,11 +790,7 @@
 			defdone && dfrd.done(done);
 			dfrd.fail(function(error) {
 				if (error) {
-					if (deffail) {
-						self.error(error);
-					} else {
-						self.debug('error', self.i18n(error));
-					}
+					deffail ? self.error(error) : self.debug('error', self.i18n(error));
 				}
 			})
 			
@@ -1230,7 +1225,7 @@
 		}
 		
 		// create bind/trigger aliases for build-in events
-		$.each(events, function(i, name) {
+		$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop', 'viewchange'], function(i, name) {
 			self[name] = function() {
 				var arg = arguments[0];
 				return arguments.length == 1 && typeof(arg) == 'function'
@@ -1250,7 +1245,6 @@
 			.disable(function() {
 				prevEnabled = enabled;
 				enabled = false;
-			
 			})
 			.select(function(e) {
 				selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
@@ -1314,10 +1308,9 @@
 				var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
 			
 				play && play != '' && play != 'no' && $(beeper).html('<source src="./images/rm.wav" type="audio/wav">')[0].play()
-			// return value && value !== '' && value != 'no';
-			// 	var audio = $('<audio autoplay="on"><source src="./images/rm.wav" type="audio/wav"></audio>');
-			// 	
-			// 	node.append(audio)
+			})
+			.viewchange(function() {
+				self.view = self.viewType(self.view == 'icons' ? 'list' : 'icons');
 			})
 			;
 

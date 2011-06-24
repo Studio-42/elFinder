@@ -68,7 +68,7 @@ elFinder.prototype.commands.quicklook = function() {
 		closedCss = function(node) {
 			return {
 				opacity : 0,
-				width   : node.width(),
+				width   : 20,//node.width(),
 				height  : fm.view == 'list' ? 1 : 20,
 				top     : node.offset().top+'px', 
 				left    : node.offset().left+'px' 

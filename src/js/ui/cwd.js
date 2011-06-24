@@ -130,7 +130,7 @@ $.fn.elfindercwd = function(fm) {
 					return fm.formatDate(f.date);
 				},
 				kind : function(f) {
-					return fm.mime2kind(f.mime);
+					return fm.mime2kind(f);
 				},
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
@@ -665,15 +665,49 @@ $.fn.elfindercwd = function(fm) {
 				;
 		
 		fm
-			.open(function(e) {
+			.bind('open viewchange', function(e) {
 				var list  = fm.view == 'list', 
 					phash = fm.cwd().hash; 
 			
 				tmbUrl = fm.option('tmbUrl');
 
-				cwd//.html('')
-					.children('table,.elfinder-cwd-file').remove().end()
-					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+				try {
+					// to avoid problem with draggable
+					cwd.children('table,.elfinder-cwd-file').remove().end();
+				} catch (e) {
+					cwd.html('');
+				}
+
+				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
+
+				if (list) {
+					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
+				}
+		
+				buffer = $.map(e.type == 'open' ? e.data.files : fm.files(), function(f) { return f.phash == phash ? f : null; });
+				
+				buffer = fm.sortFiles(buffer)
+		
+				cwd.bind(scrollEvent, render).trigger(scrollEvent);
+		
+				trigger();
+				
+			})
+			.open(function(e) {
+				var list  = fm.view == 'list', 
+					phash = fm.cwd().hash; 
+				return
+				tmbUrl = fm.option('tmbUrl');
+
+				try {
+					// to avoid problem with draggable
+					cwd.children('table,.elfinder-cwd-file').remove().end();
+				} catch (e) {
+					cwd.html('');
+				}
+
+				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
 
 				if (list) {
@@ -688,6 +722,9 @@ $.fn.elfindercwd = function(fm) {
 		
 				trigger();
 			
+			})
+			.viewchange(function() {
+				
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash;
