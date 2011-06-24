@@ -111,7 +111,9 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
-				node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
+			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
+		
+		// fm.log(cwd.find('#'+file.hash+' .'+filename))
 		
 		if (!file || cnt > 1 || !node.length) {
 			return dfrd.reject(errors.invParams);

@@ -102,7 +102,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			templates = {
 				icon : '<div id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename ui-corner-all" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				row  : '<tr id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
 			},
 			
 			/**
