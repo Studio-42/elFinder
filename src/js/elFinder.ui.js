@@ -337,24 +337,7 @@ elFinder.prototype.ui.prototype.commands = {
 	select : function(fm) {
 		this.name = 'Select file';
 		this.fm   = fm;
-		
-		// this.exec = function() { 
-		// 	var f = this.fm.getSelected(0);
-		// 	if (!f.url) {
-		// 		return this.fm.view.error('File URL disabled by connector config');
-		// 	} 
-		// 	this.fm.options.editorCallback(this.fm.options.cutURL == 'root' ? f.url.substr(this.fm.params.url.length) : f.url.replace(new RegExp('^('+this.fm.options.cutURL+')'), ''));
-		// 	if (this.fm.options.closeOnEditorCallback) {
-		// 		this.fm.destroy();
-		// 	}
-		// }
 				
-		// this.isAllowed = function() {
-		// 	return this.fm.selected.length == 1 && !/(symlink\-broken|directory)/.test(this.fm.getSelected(0).mime);
-		// }
-		// @patch from Helge Milde
-		// select multiply files
-		
 		if (fm.options.selectMultiple) {
             this.exec = function() {
 
@@ -381,6 +364,7 @@ elFinder.prototype.ui.prototype.commands = {
                 if (this.fm.options.closeOnEditorCallback) {
                     this.fm.dock();
                     this.fm.close();
+					this.fm.destroy();
                 }
 				
             }

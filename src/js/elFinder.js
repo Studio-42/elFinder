@@ -572,11 +572,18 @@
 		/* dialog or docked mode */
 		if (this.options.dialog || this.options.docked) {
 			this.options.dialog = $.extend({width : 570, dialogClass : '', minWidth : 480, minHeight: 330}, this.options.dialog || {});
+			this.options.dialog.open = function() {  
+				setTimeout(function() {
+					$('<input type="text" value="f"/>').appendTo(self.view.win).focus().select().remove()
+				}, 200)
+				
+			}
 			this.options.dialog.dialogClass += 'el-finder-dialog';
 			this.options.dialog.resize = dialogResize;
 			if (this.options.docked) {
 				/* docked mode - create dialog and store size */
 				this.options.dialog.close = function() { self.dock(); };
+				
 				this.view.win.data('size', {width : this.view.win.width(), height : this.view.nav.height()});
 			} else {
 				this.options.dialog.close = function() { 
@@ -629,6 +636,7 @@
 
 			this.eventsManager.lock = true;
 			this.quickLook.hide();
+			this.quickLook.win.remove();
 			if (this.dialog) {
 				this.dialog.dialog('destroy');
 				this.view.win.parent().remove();
