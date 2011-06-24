@@ -115,19 +115,20 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			cwd = fm.getUI('cwd').bind(event, function(e) {
 				var target  = $(e.target),
+					file    = target.closest('.elfinder-cwd-file'),
 					targets = [],
 					type    = 'files';
 
 				e.preventDefault();
 
-				if (target.is('.elfinder-cwd')) {
+				if (file.length) {
+					cwd.trigger('selectfile', file.attr('id'));
+					targets = fm.selected();
+				} else {
 					cwd.trigger('unselectall');
 					targets.push(fm.cwd().hash);
-					type = 'cwd'
-				} else {
-					cwd.trigger('selectfile', target.closest('.elfinder-cwd-file').attr('id'))
-					targets = fm.selected()
-				}			
+					type = 'cwd';
+				}
 
 				append(type, targets);
 				open(e.clientX, e.clientY);
