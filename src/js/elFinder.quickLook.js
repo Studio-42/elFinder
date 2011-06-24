@@ -199,7 +199,7 @@ elFinder.prototype.quickLook = function(fm, el) {
 		self.media.hide().empty();
 		self.win.attr('class', 'el-finder-ql').css('z-index', self.fm.zIndex);
 		self.title.empty();
-		self.ico.removeAttr('style').show();
+		self.ico.attr('style', '').show();
 		self.add.hide().empty();
 		self._hash = '';
 	}

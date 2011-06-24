@@ -832,3 +832,5 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 	height:48px;
 	float:left;
 }
+
+.el-finder-ql .ui-resizable-e, .el-finder-ql .ui-resizable-s { background:transparent !important;}
