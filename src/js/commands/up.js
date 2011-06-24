@@ -2,6 +2,7 @@
 elFinder.prototype.commands.up = function() {
 	
 	this.alwaysEnabled = true;
+	this.updateOnSelect = false;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+up backspace',

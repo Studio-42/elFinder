@@ -3,10 +3,6 @@ elFinder.prototype.commands.rm = function() {
 	var fm = this.fm;
 	
 	this.title = 'Delete';
-
-	this.handlers = {
-		select : function() { this.update(); }
-	}
 	
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace',

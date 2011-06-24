@@ -50,14 +50,12 @@ elFinder.prototype.commands.search = function() {
 	this.title = title;
 	this.alwaysEnabled = true;
 	
-	this.handlers = {
-		select : function() { input.blur(); }
-	}
-	
 	this.shortcuts = [{
 		pattern     : 'ctrl+f',
 		description : title
 	}];
+	
+	this.updateOnSelect = false;
 	
 	/**
 	 * Additional command initialization.
@@ -128,6 +126,9 @@ elFinder.prototype.commands.search = function() {
 	 * @return $.Deferred
 	 **/
 	this.exec = function(q) {
+		if (fm.oldAPI) {
+			return $.Deferred.reject();
+		}
 		if (typeof(q) != 'string') {
 			node.is(':hidden') ? self.open() : self.close();
 			return $.Deferred().reject();

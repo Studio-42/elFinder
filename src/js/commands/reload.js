@@ -8,6 +8,7 @@ elFinder.prototype.commands.reload = function() {
 	
 	this.title = 'Reload';
 	this.alwaysEnabled = true;
+	this.updateOnSelect = true;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+shift+r',

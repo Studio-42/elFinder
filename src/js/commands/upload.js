@@ -53,12 +53,6 @@ elFinder.prototype.commands.upload = function() {
 			}
 			
 			data = fm.normalizeData('open', raw);
-			// if no tree - append dirs to data to avoid removing its
-			// if (!raw.tree) {
-			// 	$.each(fm.files(), function(hash, file) {
-			// 		file.phash != data.cwd.hash && data.files.push(file);
-			// 	});
-			// }
 			// find diff
 			data = fm.diff(data.files);
 			data.current = raw.cwd.hash;
@@ -308,6 +302,7 @@ elFinder.prototype.commands.upload = function() {
 	this.title = 'Upload files';
 	
 	this.disableOnSearch = true;
+	this.updateOnSelect  = false;
 	
 	this.handlers = {
 		// bind cwd ui drop event
@@ -355,7 +350,9 @@ elFinder.prototype.commands.upload = function() {
 		// send files using form with iframe target
 		forceIframe   : false, 
 		// 15 min timeout before abort upload files using iframe
-		iframeTimeout : 900000
+		iframeTimeout : 900000,
+		
+		transport : null
 	}
 	
 	/**
@@ -364,7 +361,8 @@ elFinder.prototype.commands.upload = function() {
 	 * @return void
 	 **/	
 	this.init = function() {
-
+		var opts = this.options;
+		
 		if (!this.options.forceIframe 
 		&&  typeof XMLHttpRequestUpload != undef
 		&&  typeof File != undef
@@ -372,8 +370,13 @@ elFinder.prototype.commands.upload = function() {
 			transport = 'xhr';
 		} 
 		
-		this.options.ui = this.options.forceDialog ? 'button' : 'uploadbutton';
+		if (typeof(opts.transport) == 'function') {
+			transport = 'custom';
+			transports[transport] = $.proxy(opts.transport, fm);
+			fm.log(transports)
+		}
 		
+		this.options.ui = this.options.forceDialog ? 'button' : 'uploadbutton';
 	}
 	
 	/**
@@ -396,14 +399,12 @@ elFinder.prototype.commands.upload = function() {
 	 * @return jQuery.Deferred
 	 **/
 	this.exec = function(v) {
-		var dfrd;
+		var dfrd = $.Deferred();
 		
 		if ($.isPlainObject(v)) {
 			return this._exec(v);
 		}
 
-		dfrd = $.Deferred();
-		
 		dialog(function(data) {
 			
 			if (data && (data.input || data.files)) {

@@ -222,8 +222,8 @@ elFinder.prototype.options = {
 	/* contextmenu commands */
 	contextmenu : {
 		navbar : ['open', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'info'],
-		cwd : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'search', '|', 'info'],
-		files : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'edit', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'archive', 'extract', '|', 'info']
+		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'search', '|', 'info'],
+		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'edit', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'archive', 'extract', '|', 'info']
 	},
 
 	/**
@@ -246,7 +246,17 @@ elFinder.prototype.options = {
 			// send files using form with iframe target
 			forceIframe   : false, 
 			// 15 min timeout before abort upload files using iframe
-			iframeTimeout : 900000
+			iframeTimeout : 900000,
+			/**
+			 * custom function to upload files
+			 *
+			 * @param  Object  must contains input[type="file"] node or FileList
+			 * @example
+			 *   - cmd.exec({input : inputNode})
+			 *   - cmd.exec({files : FilesList})
+			 * @return jQuery.Deferred
+			 **/
+			transport : null
 		},
 		quicklook : {
 			autoplay : true,
