@@ -1225,7 +1225,7 @@
 		}
 		
 		// create bind/trigger aliases for build-in events
-		$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop', 'viewchange'], function(i, name) {
+		$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'], function(i, name) {
 			self[name] = function() {
 				var arg = arguments[0];
 				return arguments.length == 1 && typeof(arg) == 'function'
