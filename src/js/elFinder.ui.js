@@ -364,7 +364,7 @@ elFinder.prototype.ui.prototype.commands = {
                 if (this.fm.options.closeOnEditorCallback) {
                     this.fm.dock();
                     this.fm.close();
-					this.fm.destroy();
+                    this.fm.destroy();
                 }
 				
             }

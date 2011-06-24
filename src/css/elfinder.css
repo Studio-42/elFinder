@@ -574,9 +574,9 @@ tr.el-finder-droppable td.icon  p { background-position:5px -450px; }
 .el-finder-dialog a { outline: none;}
 
 .el-finder-dialog textarea { 
-	width:100%; 
-	height:400px; 
-	outline:none; 
+	width:98.9%;
+	height:400px;
+	outline:none;
 	border:1px solid #ccc;
 	font-family: "Monaco", "Andale Mono", "Lucida Console", monospace;
 }
