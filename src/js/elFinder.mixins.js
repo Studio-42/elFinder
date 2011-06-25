@@ -1,3 +1,4 @@
+"use strict"
 elFinder.prototype.mixins = {
 	make : function() {
 		var fm     = this.fm,
@@ -15,12 +16,14 @@ elFinder.prototype.mixins = {
 				}),
 			id    = 'tmp_'+parseInt(Math.random()*100000),
 			phash = fm.cwd().hash,
+			date = new Date(),
 			file   = {
 				hash  : id,
 				name  : fm.uniqueName(this.prefix),
 				mime  : this.mime,
 				read  : true,
-				write : true
+				write : true,
+				date  : 'Today '+date.getHours()+':'+date.getMinutes()
 			},
 			node = cwd.trigger('create.'+fm.namespace, file).find('#'+id),
 			input = $('<input type="text"/>')
@@ -68,10 +71,11 @@ elFinder.prototype.mixins = {
 					}
 				});
 			
-		if (!node.length) {
-			return dfrd.reject(errors.unknown);
-		}
 			
+		if (!node.length) {
+			return dfrd.reject();
+		}
+		
 		fm.disable();
 		node.find('.elfinder-cwd-filename').empty('').append(input.val(file.name));
 		input.select().focus();

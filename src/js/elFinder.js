@@ -2415,7 +2415,8 @@
 		 */
 		formatDate : function(d) {
 			var self = this;
-			return d == 'unknown' ? self.i18n(d) : d.replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
+
+			return d == 'unknown' ? self.i18n(d) : (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
 		},
 		
 		/**

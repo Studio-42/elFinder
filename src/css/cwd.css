@@ -142,6 +142,9 @@
 	border:0 solid;
 }
 
+.elfinder-cwd table tr:nth-child(odd) { background-color:blue; }
+
+.elfinder-cwd table td.ui-widget-header { font-weight:normal;}
 .elfinder-cwd table td.ui-state-hover {border:0 solid; }
 
 .elfinder-ltr .elfinder-cwd table td { text-align:right; }
