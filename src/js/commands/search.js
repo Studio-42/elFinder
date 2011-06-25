@@ -18,7 +18,7 @@ elFinder.prototype.commands.search = function() {
 	 * @return Number
 	 **/
 	this.getstate = function() {
-		return this.fm.newAPI ? node.is(':hidden') ? 0 : 1 : -1;
+		return this.fm.oldAPI ? -1 : 0;
 	}
 	
 	/**

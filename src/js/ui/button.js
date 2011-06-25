@@ -21,7 +21,7 @@ $.fn.elfinderbutton = function(cmd) {
 					if (!button.is('.'+disabled)) {
 						if (menu && cmd.variants.length > 1) {
 							// close other menus
-							cmd.fm.getUI().click();
+							menu.is(':hidden') && cmd.fm.getUI().click();
 							e.stopPropagation();
 							menu.slideToggle(100);
 						} else {
