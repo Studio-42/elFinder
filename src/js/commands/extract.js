@@ -19,18 +19,11 @@ elFinder.prototype.commands.extract = function() {
 	this.title = 'Extract files from archive';
 	this.disableOnSearch = true;
 	
-	/**
-	 * Update mimes on open/reload
-	 *
-	 * @return void
-	 **/
-	this.init = function() {
-		fm.one('load', function() {
-			fm.bind('open reload', function() {
-				mimes = fm.option('archivers')['extract'] || [];
-			});
-		});
-	}
+	// Update mimes list on open/reload
+	fm.bind('open reload', function() {
+		mimes = fm.option('archivers')['extract'] || [];
+		self.change();
+	});
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),

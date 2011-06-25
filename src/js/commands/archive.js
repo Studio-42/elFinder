@@ -7,40 +7,38 @@
  **/
 elFinder.prototype.commands.archive = function() {
 	var self  = this,
-		fm    = self.fm;
+		fm    = self.fm,
+		mimes = [];
 		
-	this.mimes = [];
+	this.variants = [];
 	
 	this.title = 'Create archive';
+
 	this.disableOnSearch = true;
 	
-	this.handlers = {
-		select  : function() { this.update(); },
-	};
 	
-	this.options = { ui : 'archivebutton'}
 	
 	/**
 	 * Update mimes on open/reload
 	 *
 	 * @return void
 	 **/
-	this.init = function() {
-		fm.one('load', function() {
-			fm.bind('open reload', function() {
-				self.mimes = fm.option('archivers')['create'] || [];
-			});
+	fm.bind('open reload', function() {
+		self.variants = [];
+		$.each((mimes = fm.option('archivers')['create'] || []), function(i, mime) {
+			self.variants.push([mime, fm.mime2kind(mime)])
 		});
-	}
+		self.change();
+	});
 	
 	this.getstate = function() {
-		return self.mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
+		return mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, type) {
 		var files = this.files(hashes),
 			cnt   = files.length,
-			mime  = type || this.mimes[0],
+			mime  = type || mimes[0],
 			cwd   = fm.cwd(),
 			error = [fm.errors.archive, fm.errors.denied],
 			dfrd  = $.Deferred().fail(function(error) {
@@ -48,7 +46,7 @@ elFinder.prototype.commands.archive = function() {
 			}), 
 			i;
 		
-		if (!(cnt && self.mimes.length && $.inArray(mime, this.mimes) !== -1)) {
+		if (!(cnt && mimes.length && $.inArray(mime, mimes) !== -1)) {
 			return dfrd.reject();
 		}
 		
@@ -56,7 +54,6 @@ elFinder.prototype.commands.archive = function() {
 			return dfrd.reject(error);
 		}
 		
-			
 		for (i = 0; i < cnt; i++) {
 			if (!files[i].read) {
 				return dfrd.reject(error);

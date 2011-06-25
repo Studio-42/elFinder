@@ -2391,17 +2391,18 @@
 		/**
 		 * Return localized kind of file
 		 * 
-		 * @param  String  file mimetype
+		 * @param  Object|String  file or file mimetype
 		 * @return String
 		 */
 		mime2kind : function(f) {
+			return this.i18n(typeof(f) == 'object' ? f.link ? 'Alias' : this.kinds[f.mime]||'unknown' : this.kinds[f]||'unknown');
+			
 			var kind = '';
-			if (typeof(f) == 'object') {
-				kind = f.link ? 'Alias' : this.kinds[f.mime]||'unknown';
-			} else {
-				this.log('mime2kind required file')
-				kind = this.kinds[f]||'unknown';
-			}
+			
+			kind = typeof(f) == 'object'
+				? f.link ? 'Alias' : this.kinds[f.mime]||'unknown'
+				: this.kinds[f]||'unknown';
+
 			return this.i18n(kind);
 		},
 		

@@ -80,8 +80,8 @@
 }
 
 /* buttons icons */
-.elfinder-button-icon-home      { background-position: 0 -34px; }
-.elfinder-button-icon-open      { background-position: 0 -66px; }
+.elfinder-button-icon-home      { background-position: 0 -34px;  }
+.elfinder-button-icon-open      { background-position: 0 -66px;  }
 .elfinder-button-icon-back      { background-position: 0 -150px; }
 .elfinder-button-icon-forward   { background-position: 0 -166px; }
 .elfinder-button-icon-up        { background-position: 0 -182px; }
@@ -98,13 +98,14 @@
 .elfinder-button-icon-mkfile    { background-position: 0 -246px; }
 .elfinder-button-icon-upload    { background-position: 0 -380px; }
 .elfinder-button-icon-download  { background-position: 0 -398px; }
-.elfinder-button-icon-quicklook { background-position: 0 -415px; }
+.elfinder-button-icon-quicklook { background-position: 0 -416px; }
 .elfinder-button-icon-edit      { background-position: 0 -433px; }
 .elfinder-button-icon-archive   { background-position: 0 -454px; }
 .elfinder-button-icon-extract   { background-position: 0 -471px; }
 .elfinder-button-icon-help      { background-position: 0 -631px; }
 .elfinder-button-icon-search    { background-position: 0 -667px; }
 .elfinder-button-icon-view      { background-position: 0 -507px; }
+.elfinder-button-icon-view-list { background-position: 0 -523px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
@@ -114,7 +115,7 @@
 	position:absolute;
 	left:0;
 	top:26px;
-	padding:0;
+	padding:3px 0;
 }
 
 /* menu item */
@@ -122,7 +123,7 @@
 	white-space:nowrap;
 	font-size:.72em;
 	cursor:default;
-	padding:5px 24px 5px 9px;
+	padding:5px 19px;
 }
 
 /* fix hover ui class */

@@ -138,7 +138,7 @@
 .elfinder-cwd-view-list { padding:0;}
 
 .elfinder-cwd table { width:100%; border-collapse:collapse; border:0 solid; }
-.elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-right:0 solid; }
+.elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-top:0 solid; border-right:0 solid; }
 
 .elfinder .elfinder-cwd table td { 
 	padding:3px 12px;
