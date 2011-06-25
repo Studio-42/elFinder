@@ -3,7 +3,8 @@
 /*********************************************/
 /* toolbar container */
 .elfinder-toolbar { 
-	padding:7px; 
+	padding:9px 7px 7px 7px; 
+
 	border-left:0 solid; 
 	border-top:0 solid; 
 	border-right:0 solid; 
@@ -24,11 +25,11 @@
 
 /* button */
 .elfinder .elfinder-button {
-	float:left;
 	width:16px;
 	height:16px;
 	margin:0;
 	padding:5px;
+	float:left;
 	overflow:hidden;
 	position:relative;
 	border:0 solid;
@@ -136,3 +137,54 @@
 	right:0;
 	opacity: 0; filter:Alpha(Opacity=0);
 }
+
+
+/* search "button" */
+.elfinder .elfinder-button-search {
+	border:0 solid;
+	background:transparent;
+	padding:0;
+	margin:0;
+	height:auto;
+	float:right;
+	width:202px;
+}
+
+/* ltr/rte enviroment */
+.elfinder-ltr .elfinder-button-search { float:right; margin-right:10px; }
+.elfinder-rtl .elfinder-button-search { float:left; margin-left:10px; }
+
+/* search text field */
+.elfinder-button-search input {
+	width:160px;
+	height:24px;
+	padding:0 20px;
+	font-size:14px;
+	border:0 solid;
+	border:1px solid #aaa;
+	-moz-border-radius: 12px;
+	-webkit-border-radius: 12px;
+	border-radius: 12px;
+}
+
+/* icons */
+.elfinder-button-search .ui-icon {
+	position:absolute;
+	height:18px;
+	top: 50%;
+	margin:-8px 3px 0 3px;
+	opacity: .6; 
+	filter:Alpha(Opacity=60);
+}
+
+/* search/close icons */
+.elfinder-ltr .elfinder-button-search .ui-icon-search { left:0;}
+.elfinder-rtl .elfinder-button-search .ui-icon-search { right:0;}
+.elfinder-ltr .elfinder-button-search .ui-icon-close { right:0;}
+.elfinder-rtl .elfinder-button-search .ui-icon-close { left:0;}
+
+
+
+
+
+

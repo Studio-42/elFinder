@@ -1434,7 +1434,8 @@
 			.bind(keydown+' '+keypress, execShortcut);
 		
 		// send initial request and start to pray >_<
-		this.ajax({
+		this.trigger('init').
+			ajax({
 				data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
 				preventDone : true,
 				notify      : {type : 'open', cnt : 1, hideCnt : true},

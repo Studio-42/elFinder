@@ -1,14 +1,13 @@
 "use strict"
 /**
- * @class  elFinder toolbar button widget.
- * If command has variants - create menu
+ * @class  elFinder toolbar button to switch current directory view.
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderviewbutton = function(cmd) {
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
-			icon = button.children('.elfinder-button-icon');
+			icon   = button.children('.elfinder-button-icon');
 
 		cmd.change(function() {
 			var icons = cmd.fm.view == 'icons';
