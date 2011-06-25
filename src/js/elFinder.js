@@ -439,10 +439,11 @@
 		this.droppable = {
 				tolerance  : 'pointer',
 				accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
-				hoverClass : 'elfinder-dropable-active',
+				hoverClass : 'elfinder-droppable-active',
 				drop : function(e, ui) {
 					var dst     = $(this),
 						targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
+						result  = [],
 						cnt, hash, i, h;
 					
 					if (dst.is('.elfinder-cwd')) {
@@ -457,17 +458,14 @@
 					
 					while (cnt--) {
 						h = targets[cnt];
-						if (h == hash || files[h].phash == hash) {
-							return;
-						}
+						// ignore drop into itself or in own location
+						h != hash && files[h].phash != hash && result.push(h);
 					}
 					
-					if (targets.length) {
+					if (result.length) {
 						ui.helper.hide();
-						self.clipboard(targets, !(e.ctrlKey||e.shiftKey||e.metaKey));
-						self.exec('paste', hash).always(function() {
-							self.clipboard([]);
-						});
+						self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey));
+						self.exec('paste', hash).always(function() { self.clipboard([]); });
 						self.trigger('drop', {files : targets});
 					}
 				}

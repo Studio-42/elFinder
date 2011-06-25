@@ -14,6 +14,8 @@ elFinder.prototype.commands.upload = function() {
 		cdata       = opts.customData,
 		errors      = fm.errors,
 		counter     = 0,
+		dragenter   = 'elfinder-droppable-active',
+		supportxhr  = false,
 		undef       = 'undefined',
 		transport   = 'iframe',
 		prepareData = function(text) {
@@ -307,33 +309,33 @@ elFinder.prototype.commands.upload = function() {
 	this.handlers = {
 		// bind cwd ui drop event
 		load : function() {
-			var cwd = fm.getUI('cwd'),
-				xhr = transport == 'xhr';
+			var cwd  = fm.getUI('cwd'),
+				node = cwd[0];
 			
-			cwd[0].addEventListener('dragenter', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				xhr && cwd.addClass('elfinder-cwd-dragenter');
-			}, false);
+			if (supportxhr && node.addEventListener) {
+				node.addEventListener('dragenter', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					cwd.addClass(dragenter);
+				}, false);
 
-			cwd[0].addEventListener('dragleave', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				xhr && cwd.removeClass('elfinder-cwd-dragenter')
-			}, false);
+				node.addEventListener('dragleave', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					cwd.removeClass(dragenter)
+				}, false);
 
-			cwd[0].addEventListener('dragover', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-			}, false);
-			
-			cwd[0].addEventListener('drop', function(e) {
-			  	e.preventDefault();
-				if (xhr) {
-					cwd.removeClass('elfinder-cwd-dragenter');
+				node.addEventListener('dragover', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+				}, false);
+
+				node.addEventListener('drop', function(e) {
+				  	e.preventDefault();
+					cwd.removeClass(dragenter);
 					e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files});
-				}
-			}, false);
+				}, false);
+			}
 		}
 	}
 	
@@ -367,6 +369,7 @@ elFinder.prototype.commands.upload = function() {
 		&&  typeof XMLHttpRequestUpload != undef
 		&&  typeof File != undef
 		&&  typeof FormData != undef) {
+			supportxhr = true;
 			transport = 'xhr';
 		} 
 		
