@@ -6,7 +6,7 @@
 .std42-dialog {	padding:0; }
 
 /* comment this line to enable ui theme original background */
-.std42-dialog, .std42-dialog .ui-widget-content { background-color:#eee; background-image:none; }
+/*.std42-dialog, .std42-dialog .ui-widget-content { background-color:#eee; background-image:none; }*/
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {

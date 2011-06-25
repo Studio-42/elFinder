@@ -4,7 +4,7 @@
 
 /* container */
 .elfinder-cwd { 
-	padding:2px;
+	padding:0;
 	overflow: auto;
 	position:relative;
 	font-size:.7em;
@@ -58,6 +58,9 @@
     -o-text-overflow:ellipsis;
 	margin:3px 1px 0 1px;
 	padding:1px;
+	-moz-border-radius: 8px; 
+	-webkit-border-radius: 8px; 
+	border-radius: 8px;
 }
 
 /* permissions/symlink markers */
@@ -142,7 +145,7 @@
 	border:0 solid;
 }
 
-.elfinder-cwd table tr:nth-child(odd) { background-color:blue; }
+
 
 .elfinder-cwd table td.ui-widget-header { font-weight:normal;}
 .elfinder-cwd table td.ui-state-hover {border:0 solid; }

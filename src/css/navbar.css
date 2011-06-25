@@ -8,13 +8,16 @@
 	padding:3px 10px 3px 1px;
 	font-size:.72em;
 	background-image:none;
+	border-top:0 solid;
+	border-bottom:0 solid;
+	
 	overflow:auto;
 	display:none;
 }
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left;  margin-right:3px; }
-.elfinder-rtl .elfinder-navbar { float:right; margin-left:3px; }
+.elfinder-ltr .elfinder-navbar { float:left;  margin-right:3px; border-left:0 solid;}
+.elfinder-rtl .elfinder-navbar { float:right; margin-left:3px; border-right:0 solid; }
 
 /* folders tree container */
 .elfinder-navbar-tree { margin-bottom:1em; display:table; width:100%;  }

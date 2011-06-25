@@ -1,0 +1,22 @@
+/******************************************************************/
+/*                          PLUGINS STYLES                        */
+/******************************************************************/
+
+/* statusbar container */
+.elfinder-statusbar { 
+	text-align:center; 
+	border-right:0 solid;
+	border-bottom:0 solid;
+	border-left:0 solid;
+}
+
+.elfinder-statusbar a { text-decoration:none;}
+/* content */
+.elfinder-statusbar span { font-size:.86em; padding:0; }
+/******************* PATH/STAT PLUGINS ****************************/
+.elfinder-plugin-path, .elfinder-plugin-stat-size { margin-top:2px; }
+.elfinder-ltr .elfinder-plugin-path { float:left;  }
+.elfinder-rtl .elfinder-plugin-path { float:right; }
+
+.elfinder-ltr .elfinder-plugin-stat-size { float:right; }
+.elfinder-rtl .elfinder-plugin-stat-size { float:left; }

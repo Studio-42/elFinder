@@ -2,7 +2,7 @@
 $.fn.elfindertoolbar = function(fm, opts) {
 	this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
-			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-all elfinder-toolbar'),
+			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
 			panels   = opts || [],
 			l        = panels.length,
 			i, cmd, panel, button
@@ -11,13 +11,20 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		self.prev().length && self.parent().prepend(this);
 
 		while (l--) {
-			panel = $('<div class="elfinder-buttonset"/>');
+			panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
 			i = panels[l].length;
 			
 			while (i--) {
 				if ((cmd = commands[panels[l][i]])) {
 					button = 'elfinder'+cmd.options.ui;
-					$.fn[button] && panel.prepend($('<div/>')[button](cmd));
+					if ($.fn[button]) {
+						panel.prepend($('<div/>')[button](cmd));
+						if (i > 0) {
+							panel.prepend('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
+						}
+					}
+					
+					// $.fn[button] && panel.prepend($('<div/>')[button](cmd)).prepend('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
 				}
 			}
 			

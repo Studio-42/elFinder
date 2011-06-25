@@ -1,33 +1,30 @@
+/******************************************************************/
+/*                          COMMANDS STYLES                       */
+/******************************************************************/
+
+/********************** COMMAND "EDIT" ****************************/
+/* edit text file textarea */
 .elfinder-file-edit {
-	width:100%;
+	width:99%;
 	height:99%;
 	margin:0;
 	padding:2px;
 	border:1px solid #ccc;
 }
 
+/********************** COMMAND "SEARCH" *************************/
+/* panel under cwd */
+.elfinder-search { margin-bottom:2px; font-size:.72em; }
 
-
-.elfinder .elfinder-panel {
-	position:relative;
-	background-image:none;
-	padding:7px 12px;
-}
-
-.elfinder-search {
-	margin-bottom:2px;
-	font-size:.72em;
-}
-
-.elfinder-search .ui-button-icon-only .ui-button-text { padding:.2em;}
-
+/* text input */
 .elfinder-search input {
-	width:200px;
+	width:250px;
 	text-align:left;
 	border:1px solid #aaa;
 	margin:0 7px;
 }
 
+/* button "find" */
 .elfinder-search-button {
 	width:16px;
 	height:16px;
@@ -35,7 +32,9 @@
 	top:50%;
 	margin-top:-8px;
 }
+.elfinder-search .ui-button-icon-only .ui-button-text { padding:1px;}
 
+/* close icon */
 .elfinder .elfinder-search-close {
 	position:absolute;
 	top:50%;
@@ -45,4 +44,4 @@
 	border:0 solid;
 	background:transparent;
 }
-.elfinder-search .elfinder-search-close  .ui-button-text { padding:0;}
+.elfinder-search .elfinder-search-close .ui-button-text { padding:0;}

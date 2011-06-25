@@ -2,53 +2,81 @@
 /*               TOOLBAR STYLES              */
 /*********************************************/
 /* toolbar container */
-.elfinder-toolbar { padding:.2em; margin-bottom:2px; }
+.elfinder-toolbar { 
+	padding:7px; 
+	border-left:0 solid; 
+	border-top:0 solid; 
+	border-right:0 solid; 
+}
 
 /* container for button's group */
 .elfinder-buttonset {
+	margin-left:10px;
 	float:left;
-	padding-left:10px;
-	background:url('../images/toolbar.png') 0  -550px  no-repeat; ;
+	background:transparent;
+	padding:0;
+	-moz-border-radius: 4px; 
+	-webkit-border-radius: 4px; 
+	border-radius: 4px;
 }
 
+.elfinder-buttonset:first-child { margin:0; }
+
 /* button */
-.elfinder-button {
+.elfinder .elfinder-button {
 	float:left;
 	width:16px;
 	height:16px;
-	margin:0 1px;
-	padding:3px;
+	margin:0;
+	padding:5px;
 	overflow:hidden;
 	position:relative;
+	border:0 solid;
 }
 
-.elfinder-menubutton {
-	overflow:visible;
+.elfinder-button:first-child {
+	-moz-border-radius-topleft: 4px; 
+	-webkit-border-top-left-radius: 4px; 
+	border-top-left-radius: 4px;
+	-moz-border-radius-bottomleft: 4px; 
+	-webkit-border-bottom-left-radius: 4px; 
+	border-bottom-left-radius: 4px;
 }
 
-/* hack for upload button */
-.elfinder-button form {
-	position:absolute;
-	top:0;
-	right:0;
-	opacity: 0; filter:Alpha(Opacity=0);
+.elfinder-button:last-child {
+	-moz-border-radius-topright: 4px; 
+	-webkit-border-top-right-radius: 4px; 
+	border-top-right-radius: 4px;
+	-moz-border-radius-bottomright: 4px; 
+	-webkit-border-bottom-right-radius: 4px; 
+	border-bottom-right-radius: 4px;
 }
 
-/* left to right enviroment */
+/* separator between buttons, required for berder between button with ui color */
+.elfinder-toolbar-button-separator {
+	float:left;
+	padding:0;
+	height:26px;
+	border-top:0 solid;
+	border-right:0 solid;
+	border-bottom:0 solid;
+	width:0;
+}
+
+/* change icon opacity^ not button */
+.elfinder .elfinder-button.ui-state-disabled { opacity:1; filter:Alpha(Opacity=100);}
+.elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
+
+/* rtl enviroment */
 .elfinder-rtl .elfinder-buttonset,
 .elfinder-rtl .elfinder-button { float:right; }
-
-/* right to left enviroment */
-.elfinder-ltr .elfinder-buttonset:first-child,
-.elfinder-rtl .elfinder-buttonset:last-child { padding-left:0; background:transparent; }
 
 /* icon inside button */
 .elfinder-button-icon {
 	width:16px;
 	height:16px;
-	float:left;
+	display:block;
 	background:url('../images/toolbar.png')  no-repeat; 
-/*	z-index:100;*/
 }
 
 /* buttons icons */
@@ -72,33 +100,38 @@
 .elfinder-button-icon-download  { background-position: 0 -398px; }
 .elfinder-button-icon-quicklook { background-position: 0 -415px; }
 .elfinder-button-icon-edit      { background-position: 0 -433px; }
-.elfinder-button-icon-archive      { background-position: 0 -454px; }
-.elfinder-button-icon-extract      { background-position: 0 -471px; }
+.elfinder-button-icon-archive   { background-position: 0 -454px; }
+.elfinder-button-icon-extract   { background-position: 0 -471px; }
 .elfinder-button-icon-help      { background-position: 0 -631px; }
-.elfinder-button-icon-search      { background-position: 0 -667px; }
+.elfinder-button-icon-search    { background-position: 0 -667px; }
 .elfinder-button-icon-view      { background-position: 0 -507px; }
 
-.elfinder-toolbar-ext .elfinder-buttonset { background:transparent; }
+/* button with dropdown menu*/
+.elfinder .elfinder-menubutton { overflow:visible; }
 
-.elfinder-toolbar-ext .elfinder-button { margin:0; }
-
+/* menu */
 .elfinder-button-menu {
 	position:absolute;
 	left:0;
-	top:19px;
+	top:26px;
 	padding:0;
-/*	border:1px solid #111;*/
-/*	z-index:10;*/
 }
 
+/* menu item */
 .elfinder-button-menu-item {
-/*	display:block;*/
 	white-space:nowrap;
 	font-size:.72em;
 	cursor:default;
 	padding:5px 24px 5px 9px;
 }
 
-.elfinder-button-menu .ui-state-hover {
-	border:0 solid;
+/* fix hover ui class */
+.elfinder-button-menu .ui-state-hover { border:0 solid; }
+
+/* hack for upload button */
+.elfinder-button form {
+	position:absolute;
+	top:0;
+	right:0;
+	opacity: 0; filter:Alpha(Opacity=0);
 }

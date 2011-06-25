@@ -1393,7 +1393,7 @@
 				title     : '&nbsp;',
 				width     : 280
 			}),
-			statusbar : $('<div class="ui-state-default ui-helper-clearfix ui-corner-all elfinder-statusbar"/>').appendTo(node)
+			statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').appendTo(node)
 		}
 		
 		// load required ui

@@ -63,12 +63,18 @@ elFinder.prototype.options = {
 	uiOptions : {
 		// toolbar content
 		toolbar : [
-			['back', 'forward', 'reload', 'up', 'home'],
-			['open', 'getfile', 'download', 'quicklook'],
-			['copy', 'cut', 'paste', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload'],
-			['rm'],
-			['edit', 'extract', 'archive', 'search'],
+			['back', 'forward'],
+			['reload'],
+			// ['reload', 'up', 'home'],
+			['mkdir', 'mkfile', 'upload'],
+			['open', 'download', 'getfile'],
 			['info'],
+			['quicklook'],
+			['copy', 'cut', 'paste'],
+			['rm'],
+			['duplicate', 'rename', 'edit'],
+			['extract', 'archive'],
+			['search'],
 			['view'],
 			['help']
 		]

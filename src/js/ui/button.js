@@ -3,7 +3,7 @@ $.fn.elfinderbutton = function(cmd) {
 		
 		var disabled = 'ui-state-disabled',
 			active   = 'ui-state-active',
-			button   = $(this).addClass('ui-widget ui-state-default ui-corner-all elfinder-button')
+			button   = $(this).addClass('ui-widget- ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
 				.hover(function(e) {
