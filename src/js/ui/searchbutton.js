@@ -15,7 +15,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					
 					e.stopPropagation();
 
-					e.type == 'keydown' && e.keyCode == 13 && (val = $.trim(input.val())) && cmd.exec(val).done(function() { active = true; });
+					e.type == 'keydown' && e.keyCode == 13 && (val = $.trim(input.val())) && cmd.exec(val).done(function() { active = true; input.focus(); });
 				})
 				.keyup(function(e) {
 					e.keyCode == 27 && input.val('');
@@ -45,11 +45,15 @@ $.fn.elfindersearchbutton = function(cmd) {
 		}, 200);
 		
 		// register shortcut
-		cmd.fm.shortcut({
-			pattern     : 'ctrl+f',
-			description : cmd.title,
-			callback    : function() { input.select().focus() }
-		});
+		cmd.fm
+			.select(function() {
+				input.blur();
+			})
+			.shortcut({
+				pattern     : 'ctrl+f',
+				description : cmd.title,
+				callback    : function() { input.select().focus() }
+			});
 
 	});
 }

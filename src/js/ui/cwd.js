@@ -703,7 +703,7 @@ $.fn.elfindercwd = function(fm) {
 				;
 		
 		fm
-			.bind('open viewchange', function(e) {
+			.bind('open viewchange searchend', function(e) {
 				var list  = fm.view == 'list', 
 					phash = fm.cwd().hash; 
 			
@@ -730,9 +730,6 @@ $.fn.elfindercwd = function(fm) {
 				cwd.bind(scrollEvent, render).trigger(scrollEvent);
 		
 				trigger();
-				
-				// cwd.prepend('<div class="elfinder-cwd-dragover"/>')
-				
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash;
@@ -773,26 +770,7 @@ $.fn.elfindercwd = function(fm) {
 		
 				trigger();
 			})
-			.bind('searchend', function(e) {
-				var list  = fm.view == 'list',
-					phash = fm.cwd().hash; 
-				
-				cwd//.html('')
-					.children('table,.elfinder-cwd-file').remove().end()
-					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
-
-				if (list) {
-					cwd.html('<table><thead><tr><td class="ui-widget-header">'+fm.i18n('Name')+'</td><td class="ui-widget-header">'+fm.i18n('Permissions')+'</td><td class="ui-widget-header">'+fm.i18n('Modified')+'</td><td class="ui-widget-header">'+fm.i18n('Size')+'</td><td class="ui-widget-header">'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
-				}
-
-				buffer = fm.sortFiles($.map(fm.files(), function(f) { return f.phash == phash ? f : null; }));
-				cwd.bind(scrollEvent, render).trigger(scrollEvent);
-		
-				trigger();
-			})
-			// select dragged file if no selected
-			// disable selectable
+			// select dragged file if no selected, disable selectable
 			.dragstart(function(e) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;
@@ -818,7 +796,7 @@ $.fn.elfindercwd = function(fm) {
 			.bind('lockfiles unlockfiles', function(e) {
 				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
 					files = e.data.files || [], 
-					l = files.length;
+					l     = files.length;
 				
 				while (l--) {
 					cwd.find('#'+files[l]).trigger(event);
