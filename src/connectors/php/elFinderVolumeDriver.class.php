@@ -158,6 +158,8 @@ abstract class elFinderVolumeDriver {
 		'URL'             => '',   
 		// directory separator. required by client to show paths correctly        
 		'separator'       => DIRECTORY_SEPARATOR,
+		//
+		'caseSensitive'   => false,
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
@@ -1248,16 +1250,11 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($hash);
 		
 		
-		
 		if (!($file = $this->file($hash))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		$dir = $this->_dirname($path);
-		
-		// echo json_encode($name).'<br>'.json_encode($file['name']).'<br>';
-		
-		
 		
 		if (!$this->attr($dir, 'write')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
@@ -1271,9 +1268,11 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
 		
+		if ($name == $file['name']) {
+			return $file;
+		}
+		
 		$dst = $this->_joinPath($dir, $name);
-		
-		
 		
 		if ($this->_fileExists($dst)) {
 			return $this->setError(elFinder::ERROR_EXISTS, $file['name']);

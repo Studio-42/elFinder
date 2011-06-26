@@ -191,6 +191,7 @@ $opts = array(
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
 			'alias' => 'File system',
+			'caseSensitive' => true,
 			'accessControl' => array($acl, 'fsAccess'),
 			'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',

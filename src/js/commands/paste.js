@@ -1,4 +1,11 @@
-
+"use strict";
+/**
+ * @class  elFinder command "paste"
+ * Paste filesfrom clipboard into directory.
+ * If files pasted in its parent directory - files duplicates will created
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.paste = function() {
 	var fm = this.fm;
 	
@@ -33,7 +40,7 @@ elFinder.prototype.commands.paste = function() {
 	this.exec = function(dst) {
 		var fm     = this.fm,
 			errors = fm.errors,
-			dst    = (dst ? this.files(dst) : fm.cwd())[0],
+			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
@@ -42,7 +49,7 @@ elFinder.prototype.commands.paste = function() {
 			fcopy  = [],
 			dfrd   = $.Deferred()
 				.fail(function(error) {
-					fm.error(error)
+					error && fm.error(error);
 				}),
 			copy  = function(files) {
 				return files.length && fm._commands.duplicate
@@ -229,7 +236,7 @@ elFinder.prototype.commands.paste = function() {
 				});
 			}
 		});
-		
+
 		return $.when(
 			copy(fcopy),
 			paste(fpaste)
