@@ -120,8 +120,12 @@ $.fn.elfindercontextmenu = function(fm) {
 					type    = 'files';
 
 				e.preventDefault();
-
+				
 				if (file.length) {
+					// do not show menu on disabled files
+					if (file.is('.ui-state-disabled')) {
+						return;
+					}
 					cwd.trigger('selectfile', file.attr('id'));
 					targets = fm.selected();
 				} else {
