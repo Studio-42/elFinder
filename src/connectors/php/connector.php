@@ -17,6 +17,8 @@ function debug($o) {
 }
 
 
+
+
 /**
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.
@@ -174,6 +176,7 @@ function validName($name) {
 
 
 $opts = array(
+	'locale' => 'en_US.UTF-8',
 	'bind' => array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
 	),

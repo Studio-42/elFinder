@@ -1,4 +1,7 @@
 <?php
+
+// mb_internal_encoding("UTF-8");
+
 /**
  * Default elFinder connector
  *

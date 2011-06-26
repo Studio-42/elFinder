@@ -52,17 +52,6 @@ class elFinder {
 	);
 	
 	/**
-	 * Configuration
-	 *
-	 * @var array
-	 **/
-	protected $options = array(
-		'disabled' => array(),  // list commands to disable
-		'bind'     => array(),  
-		'debug'    => false
-	);
-	
-	/**
 	 * Commands listeners
 	 *
 	 * @var array
@@ -197,6 +186,8 @@ class elFinder {
 		$this->time  = $this->utime();
 		$this->debug = !empty($opts['debug']);
 		
+		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
+
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
 			foreach ($opts['bind'] as $cmd => $handler) {
@@ -225,7 +216,7 @@ class elFinder {
 				}
 			}
 		}
-		// if at least one redable volume - ii desu
+		// if at least one redable volume - ii desu >_<
 		$this->loaded = !empty($this->default);
 	}
 	
@@ -340,6 +331,7 @@ class elFinder {
 		if ($this->debug || !empty($args['debug'])) {
 			$result['debug'] = array(
 				'connector' => 'php', 
+				'phpver'    => PHP_VERSION,
 				'time'      => $this->utime() - $this->time,
 				'memory'    => ceil(memory_get_peak_usage()/1024).'Kb / '.ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
 				'volumes'   => array()
@@ -702,6 +694,10 @@ class elFinder {
 		if (($volume = $this->volume($target)) == false
 		||  ($rm  = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+		}
+
+		if ($rm['name'] == $name) {
+			return array();
 		}
 		
 		if (!$rm['read']) {

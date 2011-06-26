@@ -220,7 +220,11 @@ abstract class elFinderVolumeDriver {
 		// Allowed archive's mimetypes to create. Leave empty for all available types. 
 		'archiveMimes' => array(),  
 		// Manual config for archivers. See example below. Leave empty for auto detect	
-		'archivers'    => array()
+		'archivers'    => array(),
+		'utf8fix'      => false,
+		 //                           й                 ё              Й               Ё              Ø         Å
+		'utf8patterns' => array("\u0438\u0306", "\u0435\u0308", "\u0418\u0306", "\u0415\u0308", "\u00d8A", "\u030a"),
+		'utf8replace'  => array("\u0439",        "\u0451",       "\u0419",       "\u0401",       "\u00d8", "\u00c5")
 	);
 	
 	/**
@@ -1242,11 +1246,17 @@ abstract class elFinderVolumeDriver {
 	public function rename($hash, $name) {
 		$path = $this->decode($hash);
 		
+		
+		
 		if (!($file = $this->file($hash))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		$dir = $this->_dirname($path);
+		
+		// echo json_encode($name).'<br>'.json_encode($file['name']).'<br>';
+		
+		
 		
 		if (!$this->attr($dir, 'write')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
@@ -1262,8 +1272,10 @@ abstract class elFinderVolumeDriver {
 		
 		$dst = $this->_joinPath($dir, $name);
 		
+		
+		
 		if ($this->_fileExists($dst)) {
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+			return $this->setError(elFinder::ERROR_EXISTS, $file['name']);
 		}
 		
 		if ($this->_move($path, $dir, $name)) {
@@ -1523,7 +1535,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry(dio) Levashov
 	 **/
 	protected function setError($error) {
-		return !!($this->error = func_get_args()); 
+		$this->error = func_get_args();
+		return false;
 	}
 	
 	/*********************************************************************/
@@ -1747,10 +1760,9 @@ abstract class elFinderVolumeDriver {
 			'size'   => $size,
 			'date'   => $this->formatDate($this->_filemtime($path)),
 			'read'   => (int)$this->attr($path, 'read'),
-			'write'  => (int)$this->attr($path, 'write'),
-			// 'locked' => (int)$this->attr($path, 'locked'),
-			// 'hidden' => (int)$this->attr($path, 'hidden')
+			'write'  => (int)$this->attr($path, 'write')
 		);
+		
 		if ($this->attr($path, 'locked')) {
 			$file['locked'] = 1;
 		}
@@ -1758,7 +1770,6 @@ abstract class elFinderVolumeDriver {
 			$file['hidden'] = 1;
 		}
 		
-		// echo "fuck $path<br>";
 		if ($link && !$root) {
 			if (($target = $this->_readlink($path)) != false) {
 				$file['mime']   = $this->mimetype($target);

@@ -82,6 +82,8 @@ elFinder.prototype.commands.rename = function() {
 						parent = input.parent();
 					
 					if (parent.length) {
+						// fm.log(name).log(file.name).log(name.length).log(file.name.length)
+						// return dfrd.reject();
 						if (name == file.name) {
 							return dfrd.reject();
 						}
