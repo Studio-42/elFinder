@@ -7,11 +7,9 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.paste = function() {
-	var fm = this.fm;
-	
 	this.title = 'Paste';
 	this.disableOnSearch = true;
-	this.updateOnSelect = false;
+	this.updateOnSelect  = false;
 	
 	this.handlers = {
 		changeclipboard : function() { this.update(); }
@@ -28,13 +26,13 @@ elFinder.prototype.commands.paste = function() {
 				if (dst.length != 1) {
 					return -1;
 				}
-				dst = fm.file(dst[0]);
+				dst = this.fm.file(dst[0]);
 			}
 		} else {
-			dst = fm.cwd();
+			dst = this.fm.cwd();
 		}
 
-		return fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
+		return this.fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
 	}
 	
 	this.exec = function(dst) {
@@ -163,13 +161,9 @@ elFinder.prototype.commands.paste = function() {
 						
 						// new API
 						files = $.map(files, function(f) { return f.hash});
-						fm.trigger('lockfiles', {files : files})
-							.ajax({
+						fm.ajax({
 								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
-							})
-							.always(function() {
-								fm.trigger('unlockfiles', {files : files});
 							});
 					}
 					;
@@ -240,7 +234,9 @@ elFinder.prototype.commands.paste = function() {
 		return $.when(
 			copy(fcopy),
 			paste(fpaste)
-		);
+		).always(function() {
+			cut && fm.clipboard([]);
+		});
 	}
 
 }

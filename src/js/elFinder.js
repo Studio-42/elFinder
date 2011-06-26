@@ -1085,7 +1085,11 @@
 		 * @return Array
 		 */
 		this.clipboard = function(hashes, cut) {
+			var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
+			
 			if (hashes !== void(0)) {
+				clipboard.length && this.trigger('unlockfiles', {files : map()});
+				
 				clipboard = $.map(hashes||[], function(hash) {
 					var file = files[hash];
 					if (file) {
@@ -1101,6 +1105,7 @@
 					return null;
 				});
 				this.trigger('changeclipboard', {clipboard : clipboard.slice(0, clipboard.length)});
+				cut && this.trigger('lockfiles', {files : map()});
 			}
 
 			// return copy of clipboard instead of refrence
