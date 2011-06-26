@@ -63,6 +63,10 @@ $.fn.elfindercontextmenu = function(fm) {
 						.data({cmd : cmd.name});
 
 					
+					if (cmd.variants) {
+						fm.log(cmd.variants)
+						sub = $('<div class="elfinder-contextmenu-sub"/>').appendTo(item.addClass('elfinder-contextmenu-group'))
+					}
 					// if ((variants = cmd.variants()) && variants.length) {
 					// 	sub = $('<div class="elfinder-contextmenu-sub"/>').appendTo(item.addClass('elfinder-contextmenu-group'))
 					// 	

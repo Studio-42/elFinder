@@ -1310,7 +1310,7 @@
 			.bind('rm', function(e) {
 				var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
 			
-				play && play != '' && play != 'no' && $(beeper).html('<source src="./images/rm.wav" type="audio/wav">')[0].play()
+				play && play != '' && play != 'no' && $(beeper).html('<source src="./sounds/rm.wav" type="audio/wav">')[0].play()
 			})
 			.viewchange(function() {
 				self.view = self.viewType(self.view == 'icons' ? 'list' : 'icons');

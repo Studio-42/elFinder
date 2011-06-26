@@ -240,10 +240,7 @@ elFinder.prototype.command = function(fm) {
 		return this;
 	}
 	
-	this.variants = function() {
-		return;
-	}
-	
+
 	/**
 	 * With argument check given files hashes and return list of existed files hashes.
 	 * Without argument return selected files hashes.
