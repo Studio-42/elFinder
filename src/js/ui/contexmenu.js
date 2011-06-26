@@ -1,33 +1,31 @@
-
+"use strict"
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
 		var event = $.browser.opera ? 'click' : 'contextmenu',
 			itemclass = 'elfinder-contextmenu-item',
 			groupclass = 'elfinder-contextmenu-group',
-			separatorclass = 'elfinder-contextmenu-separator',
-			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu')
+			subclass   = 'elfinder-contextmenu-sub',
+			subpos     = fm.direction == 'ltr' ? 'left' : 'right',
+			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
 				.delegate('.'+itemclass, 'hover', function() {
 					var item = $(this).toggleClass('ui-state-hover');
-					
+					item.is('.'+groupclass) && item.children('.'+subclass).toggle()
 					
 				})
-				.delegate('.'+itemclass, 'mousedown', function(e) {
+				.delegate('.'+itemclass, 'click', function(e) {
 					var item = $(this),
 						data = item.data();
 
 					e.preventDefault();
 					e.stopPropagation();
-					
-					if (item.is('.'+groupclass)) {
-						
-					} else {
-						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.arg, true);
+
+					if (!item.is('.'+groupclass)) {
+						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.variant, true);
 						close();
 					}
-
 				}),
 			options = $.extend({navbar : [], cwd : []}, fm.options.contextmenu),
 			/**
@@ -41,11 +39,11 @@ $.fn.elfindercontextmenu = function(fm) {
 				var commands = options[type], 
 					sep = false;
 
-				menu.data('targets', targets);
+				menu.text('').data('targets', targets);
 
 				$.each(commands, function(i, name) {
 					var cmd = fm.command(name),
-						item, sub, variants;
+						item, sub;
 
 					if (!(cmd && cmd.name)) {
 						if (name == '|' && sep) {
@@ -59,18 +57,20 @@ $.fn.elfindercontextmenu = function(fm) {
 						return;
 					}
 					
-					item = $('<div class="elfinder-contextmenu-item"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/>'+cmd.title+'</div>')
+					item = $('<div class="'+itemclass+'"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/><span>'+cmd.title+'</span></div>')
 						.data({cmd : cmd.name});
 
 					
 					if (cmd.variants) {
-						fm.log(cmd.variants)
-						sub = $('<div class="elfinder-contextmenu-sub"/>').appendTo(item.addClass('elfinder-contextmenu-group'))
+
+						sub = $('<div class="ui-corner-all '+subclass+'"/>')
+							.appendTo(item.addClass(groupclass).append('<span class="ui-icon ui-icon-triangle-1-e"/>'));
+							
+						$.each(cmd.variants, function(i, variant) {
+							sub.append($('<div class="'+itemclass+'"><span>'+variant[1]+'</span></div>')
+								.data({cmd : cmd.name, variant : variant[0]}));
+						});
 					}
-					// if ((variants = cmd.variants()) && variants.length) {
-					// 	sub = $('<div class="elfinder-contextmenu-sub"/>').appendTo(item.addClass('elfinder-contextmenu-group'))
-					// 	
-					// } 
 					
 					menu.append(item);
 					sep = true;
@@ -82,7 +82,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			 * @return void
 			 **/
 			close = function() {
-				menu.hide().html('').removeData('targets');
+				menu.hide().text('').removeData('targets');
 			},
 			/**
 			 * Open menu in required position
@@ -101,7 +101,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					scrollleft = win.scrollLeft(),
 					css        = {
 						top  : (y + height  < wheight ? y : y - height) + scrolltop,
-						left : (x + width < wwidth ? x : x - width) + scrollleft
+						left : (x + width < wwidth ? x : x - width) + scrollleft,
+						'z-index' : 100 + fm.getUI('workzone').zIndex()
 					};
 
 				if (!menu.children().length) {
@@ -109,9 +110,10 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 				
 				menu.css(css).show();
-			},
-			item = function(name, title, arg) {
-				menu.append($('<a href="#" class="elfinder-contextmenu-item"><span class="elfinder-button-icon elfinder-button-icon-'+name+' elfinder-contextmenu-icon"/>'+title+'</a>').data({cmd : name, arg : arg}))
+				
+				css = {'z-index' : css['z-index']+10};
+				css[subpos] = parseInt(menu.width());
+				menu.find('.elfinder-contextmenu-sub').css(css);
 			},
 			cwd, nav;
 
@@ -159,12 +161,11 @@ $.fn.elfindercontextmenu = function(fm) {
 
 			})
 			
-			$(document).mousedown(close)
+			fm.select(close).getUI().click(close);
 
 		}).one('destroy', function() {
 			menu.remove();
-		})
+		});
 		
-		
-	})
+	});
 }
