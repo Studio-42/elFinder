@@ -181,6 +181,7 @@ $opts = array(
 		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
 	),
 	'debug' => true,
+	
 	'roots' => array(
 		// array(
 		// 	'driver' => 'LocalFileSystem',
@@ -204,6 +205,7 @@ $opts = array(
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
 			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+			'utf8fix' => true,
 			'attributes' => array(
 				// array(
 				// 	'pattern' => '/\/__.*/',

@@ -221,6 +221,7 @@ abstract class elFinderVolumeDriver {
 		'archiveMimes' => array(),  
 		// Manual config for archivers. See example below. Leave empty for auto detect	
 		'archivers'    => array(),
+		// required to fix bug on macos
 		'utf8fix'      => false,
 		 //                           й                 ё              Й               Ё              Ø         Å
 		'utf8patterns' => array("\u0438\u0306", "\u0435\u0308", "\u0418\u0306", "\u0415\u0308", "\u00d8A", "\u030a"),
@@ -1768,6 +1769,10 @@ abstract class elFinderVolumeDriver {
 		}
 		if ($this->attr($path, 'hidden')) {
 			$file['hidden'] = 1;
+		}
+		
+		if ($this->options['utf8fix']) {
+			$file['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($file['name'])));
 		}
 		
 		if ($link && !$root) {
