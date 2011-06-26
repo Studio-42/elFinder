@@ -141,6 +141,9 @@ $.fn.elfindercwd = function(fm) {
 				},
 				marker : function(f) {
 					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
+				},
+				name : function(f) {
+					return fm.escape(f.name);
 				}
 			},
 			
@@ -151,10 +154,14 @@ $.fn.elfindercwd = function(fm) {
 			 * @return String
 			 **/
 			itemhtml = function(f) {
-				return templates[fm.view == 'list' ? 'row' : 'icon']
+				var html = templates[fm.view == 'list' ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
 						});
+						
+				// fm.log(f.name).log(html)
+				// $('body').append(f.name).append('<br>')
+				return html;
 			},
 			
 			/**
