@@ -1,5 +1,8 @@
+"use strict";
 /**
- * @class info. Display dialog with file info
+ * @class elFinder command "info". 
+ * Display dialog with file properties.
+ *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.info = function() {
@@ -43,16 +46,6 @@ elFinder.prototype.commands.info = function() {
 				// test in ie >_<
 				width : 'auto',
 				minWidth : 200,
-				// open     : function() {
-				// 	var parent = dialog.parent(),
-				// 		width = dialog.children('table').width(),
-				// 		delta;
-				// 		
-				// 	if (width > parent.width()) {
-				// 		delta = Math.ceil(dialog.innerWidth() - dialog.width())
-				// 		parent.width(parseInt(width+delta+5))
-				// 	}
-				// },
 				close    : function() { $(this).elfinderdialog('destroy'); }
 			}),
 			count = [],

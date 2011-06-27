@@ -1,9 +1,9 @@
 "use strict"
 /**
- * @class  elFinder command "edit"
- * Edit text files
+ * @class elFinder command "edit". 
+ * Edit text file in dialog window
  *
- * @author Dmitry (dio) Levashov
+ * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.edit = function() {
 	var self = this,
@@ -142,15 +142,10 @@ elFinder.prototype.commands.edit = function() {
 	
 	this.title = 'Edit text file';
 	
-	/**
-	 * Command options
-	 *
-	 * @type  Object
-	 */
-	this.options = {
-		ui          : 'button', 
-		dialogWidth : 450
-	};
+	this.shortcuts = [{
+		pattern     : 'ctrl+e',
+		description : this.title
+	}];
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),

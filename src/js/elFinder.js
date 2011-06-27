@@ -1345,7 +1345,7 @@
 		 **/
 		this.history = new this.history(this);
 		
-		
+		// in getFileCallback set - change default actions on duble click/enter/ctrl+enter
 		if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
 			this.bind('dblclick', function(e) {
 				e.preventDefault();

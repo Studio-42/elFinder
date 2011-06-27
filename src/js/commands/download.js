@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class elFinder command "download". 
  * Download selected files.
@@ -6,16 +7,8 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.download = function() {
-	var self     = this,
-		fm       = this.fm,
-		callback = function(e) {
-			if (self.getstate() > -1) {
-				e.preventDefault();
-				self.exec();
-			} else {
-				self.fm.exec('open');
-			}
-		},
+	var self   = this,
+		fm     = this.fm,
 		filter = function(hashes) {
 			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f });
 		};
@@ -24,48 +17,21 @@ elFinder.prototype.commands.download = function() {
 	this.title = 'Download';
 	this.alwaysEnabled = true;
 	
-	this.init = function() {
-		var self       = this,
-			fm         = this.fm,
-			o          = fm.options,
-			name       = 'download',
-			dblclick   = o.dblclick   == name,
-			enter      = o.enter      == name,
-			shiftenter = o.shiftenter == name,
-			ctrlenter  = o.ctrlenter  == name;
-
-		fm.one('load', function() {
-			// dblclick && fm.bind('dblclick', callback);
-			// 
-			// enter && fm.shortcut({
-			// 	pattern     : 'enter',
-			// 	description : self.title,
-			// 	callback    : callback
-			// });
-			// 
-			// shiftenter && fm.shortcut({
-			// 	pattern     : 'shift+enter',
-			// 	description : self.title,
-			// 	callback    : callback
-			// });
-			// 
-			// ctrlenter && fm.shortcut({
-			// 	pattern     : 'ctrl+enter',
-			// 	description : self.title,
-			// 	callback    : callback
-			// });
-		})
-	}
+	this.shortcuts = [{
+		pattern     : 'shift+enter',
+		description : this.title
+	}];
 	
 	this.getstate = function() {
-		var sel = fm.selected(),
+		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
 		return fm.newAPI && cnt && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var base  = fm.options.url, 
+		var fm    = this.fm,
+			base  = fm.options.url, 
 			files = filter(hashes),
 			dfrd  = $.Deferred().fail(function(error) { fm.error(error); }),
 			iframe, i, url;

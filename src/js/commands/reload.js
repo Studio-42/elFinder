@@ -11,7 +11,7 @@ elFinder.prototype.commands.reload = function() {
 	this.updateOnSelect = true;
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+shift+r',
+		pattern     : 'ctrl+shift+r f5',
 		description : 'Reload'
 	}];
 	

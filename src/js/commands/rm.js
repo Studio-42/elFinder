@@ -1,7 +1,11 @@
-
+"use strict"
+/**
+ * @class  elFinder command "rm"
+ * Delete files
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.rm = function() {
-	var fm = this.fm;
-	
 	this.title = 'Delete';
 	
 	this.shortcuts = [{
@@ -10,6 +14,7 @@ elFinder.prototype.commands.rm = function() {
 	}];
 	
 	this.getstate = function(sel) {
+		var fm = this.fm;
 		sel = sel || fm.selected();
 		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f.phash && !f.locked ? h : null }).length == sel.length
 			? 0 : -1;

@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class elFinder command "copy".
  * Put files in filemanager clipboard.
@@ -6,8 +7,6 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.cut = function() {
-	var fm = this.fm;
-	
 	this.title = 'Cut';
 	
 	this.shortcuts = [{

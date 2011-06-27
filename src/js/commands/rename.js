@@ -11,8 +11,7 @@ elFinder.prototype.commands.rename = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'f2'+(this.fm.OS == 'mac' && ' enter'),
-		description : this.title,
-		callback    : function() { this.exec(); }
+		description : this.title
 	}];
 	
 	this.getstate = function() {

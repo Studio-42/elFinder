@@ -6,6 +6,10 @@ elFinder.prototype.commands.help = function() {
 	this.updateOnSelect = false;
 	this.state = 0;
 	
+	this.shortcuts = [{
+		pattern     : 'f1',
+		description : 'Help',
+	}];
 	
 	this.getstate = function() {
 		return 0;

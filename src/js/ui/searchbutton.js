@@ -50,9 +50,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 				input.blur();
 			})
 			.shortcut({
-				pattern     : 'ctrl+f',
+				pattern     : 'ctrl+f f3',
 				description : cmd.title,
-				callback    : function() { input.select().focus() }
+				callback    : function() { input.select().focus(); }
 			});
 
 	});

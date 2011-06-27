@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class elFinder command "upload"
  * Upload files using iframe or XMLHttpRequest & FormData.
