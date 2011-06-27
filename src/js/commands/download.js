@@ -35,25 +35,25 @@ elFinder.prototype.commands.download = function() {
 			ctrlenter  = o.ctrlenter  == name;
 
 		fm.one('load', function() {
-			dblclick && fm.bind('dblclick', callback);
-			
-			enter && fm.shortcut({
-				pattern     : 'enter',
-				description : self.title,
-				callback    : callback
-			});
-			
-			shiftenter && fm.shortcut({
-				pattern     : 'shift+enter',
-				description : self.title,
-				callback    : callback
-			});
-			
-			ctrlenter && fm.shortcut({
-				pattern     : 'ctrl+enter',
-				description : self.title,
-				callback    : callback
-			});
+			// dblclick && fm.bind('dblclick', callback);
+			// 
+			// enter && fm.shortcut({
+			// 	pattern     : 'enter',
+			// 	description : self.title,
+			// 	callback    : callback
+			// });
+			// 
+			// shiftenter && fm.shortcut({
+			// 	pattern     : 'shift+enter',
+			// 	description : self.title,
+			// 	callback    : callback
+			// });
+			// 
+			// ctrlenter && fm.shortcut({
+			// 	pattern     : 'ctrl+enter',
+			// 	description : self.title,
+			// 	callback    : callback
+			// });
 		})
 	}
 	

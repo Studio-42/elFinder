@@ -189,9 +189,9 @@
 				var f = $('<div/>'),
 					opts = {
 					url : 'connectors/php/connector.php',
-					getFileCallback : function(files) {
+					_getFileCallback : function(files) {
 						console.log(this)
-						this.destroy()
+						// this.destroy()
 						// f.elfinder('destory')
 					}
 				}

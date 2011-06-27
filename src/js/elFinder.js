@@ -298,6 +298,8 @@
 		 **/
 		this.oldAPI = true;
 		
+		this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'unknown';
+		
 		/**
 		 * Configuration options
 		 *
@@ -1029,6 +1031,8 @@
 			return this;
 		}
 		
+		
+		
 		/**
 		 * Bind keybord shortcut to keydown event
 		 *
@@ -1053,10 +1057,10 @@
 					pattern = patterns[i]
 					parts   = pattern.split('+');
 					code    = (code = parts.pop()).length == 1 
-						? code.charCodeAt(0) 
+						? code > 0 ? code : code.charCodeAt(0) 
 						: $.ui.keyCode[code];
 
-					if (code/* && !shortcuts[pattern]*/) {
+					if (code && !shortcuts[pattern]) {
 						shortcuts[pattern] = {
 							keyCode     : code,
 							altKey      : $.inArray('ALT', parts)   != -1,
@@ -1214,6 +1218,18 @@
 			return alert(this.i18n(this.errors.urlRequired));
 		}
 		
+		$.extend($.ui.keyCode, {
+			'F1' : 112,
+			'F2' : 113,
+			'F3' : 114,
+			'F4' : 115,
+			'F5' : 116,
+			'F6' : 117,
+			'F7' : 118,
+			'F8' : 119,
+			'F9' : 120
+		});
+		
 		/**
 		 * Alias for this.trigger('error', {error : 'message'})
 		 *
@@ -1328,6 +1344,26 @@
 		 * @type Object
 		 **/
 		this.history = new this.history(this);
+		
+		
+		if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
+			this.bind('dblclick', function(e) {
+				e.preventDefault();
+				self.exec('getfile').fail(function() {
+					self.exec('open');
+				});
+			});
+			this.shortcut({
+				pattern     : 'enter',
+				description : 'Select files',
+				callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
+			})
+			.shortcut({
+				pattern     : 'ctrl+enter',
+				description : this.OS == 'mac' ? 'Rename' : 'Open',
+				callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
+			});
+		} 
 		
 		/**
 		 * Loaded commands

@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class elFinder command "getfile". 
  * Return selected files info into outer callback.
@@ -16,56 +17,12 @@ elFinder.prototype.commands.getfile = function() {
 			});
 
 			return o.multiple || files.length == 1 ? files : [];
-		},
-		callback = function(e) {
-			if (self.getstate() > -1) {
-				e.preventDefault();
-				self.exec();
-			} else {
-				self.fm.exec('open');
-			}
 		};
 	
-	this.title = 'Select files';
-	
+	this.title         = 'Select files';
 	this.alwaysEnabled = true;
-	
-	this.callback = typeof this.fm.options.getFileCallback == 'function' 
-		? this.fm.options.getFileCallback
-		: false;
-	
-	this.init = function() {
-		var self       = this,
-			fm         = this.fm,
-			o          = fm.options,
-			name       = 'getfile',
-			dblclick   = o.dblclick   == name,
-			enter      = o.enter      == name,
-			shiftenter = o.shiftenter == name,
-			ctrlenter  = o.ctrlenter  == name;
-
-		fm.one('load', function() {
-			dblclick && fm.bind('dblclick', callback);
-			
-			enter && fm.shortcut({
-				pattern     : 'enter',
-				description : self.title,
-				callback    : callback
-			});
-			
-			shiftenter && fm.shortcut({
-				pattern     : 'shift+enter',
-				description : self.title,
-				callback    : callback
-			});
-			
-			ctrlenter && fm.shortcut({
-				pattern     : 'ctrl+enter',
-				description : self.title,
-				callback    : callback
-			});
-		})
-	}
+	this.callback      = fm.options.getFileCallback;
+	this._disabled     = typeof(this.callback) == 'function';
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
@@ -82,16 +39,13 @@ elFinder.prototype.commands.getfile = function() {
 			url   = fm.option('url'),
 			tmb   = fm.option('tmbUrl'),
 			dfrd  = $.Deferred()
-				.fail(function() {
+				.always(function(data) {
 					fm.trigger('getfile', {files : data});
-					self.callback('', fm);
-				})
-				.done(function(data) {
 					self.callback(data, fm);
 				}), 
 			i, file;
 
-		if (!cnt || (cnt > 1 && !opts.multiple)) {
+		if (this.getstate() == -1) {
 			return dfrd.reject();
 		}
 			

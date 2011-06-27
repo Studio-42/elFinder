@@ -6,72 +6,27 @@
  * @author Dmitry (dio) Levashov
  **/  
 elFinder.prototype.commands.open = function() {
-	var self     = this,
-		fm       = self.fm,
-		title    = 'Open',
-		callback = function(e) {
-			e.preventDefault();
-			self.exec();
-		};
-	
-	this.title = title;
+	this.title = 'Open';
 	this.alwaysEnabled = true;
 	
 	this._handlers = {
-		disable : function() { this.update(-1); },
-		'select enable reload' : function(e) { this.update();  }
+		dblclick : function(e) { e.preventDefault(); this.exec() },
+		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	}
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+down numpad_enter',
-		description : title,
-		callback    : callback
+		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter'),
+		description : this.title,
+		callback    : function() { this.exec(); }
 	}];
-	
-	this.init = function() {
-		var fm         = this.fm,
-			o          = fm.options,
-			name       = 'open',
-			dblclick   = o.dblclick   == name,
-			enter      = o.enter      == name,
-			shiftenter = o.shiftenter == name,
-			ctrlenter  = o.ctrlenter  == name;
 
-		fm.one('load', function() {
-			dblclick && fm.bind('dblclick', callback);
-			
-			enter && fm.shortcut({
-				pattern     : 'enter',
-				description : title,
-				callback    : callback
-			});
-			
-			shiftenter && fm.shortcut({
-				pattern     : 'shift+enter',
-				description : title,
-				callback    : callback
-			});
-			
-			ctrlenter && fm.shortcut({
-				pattern     : 'ctrl+enter',
-				description : title,
-				callback    : callback
-			});
-		})
-	}
-	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		if (!cnt) {
-			return -1;
-		}
-		if (cnt == 1) {
-			return 0;
-		}
-		
-		return $.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1;
+		return cnt == 1 
+			? 0 
+			: cnt ? ($.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1) : -1
 	}
 	
 	this.exec = function(hashes) {

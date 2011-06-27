@@ -1,54 +1,35 @@
+"use strict";
+/**
+ * @class elFinder command "rename". 
+ * Rename selected file.
+ *
+ * @author Dmitry (dio) Levashov, dio@std42.ru
+ **/
 elFinder.prototype.commands.rename = function() {
-	var self     = this,
-		fm       = self.fm,
-		filename = '.elfinder-cwd-filename';
-
+	this.title = 'Rename';
 	this.disableOnSearch = true;
 	
+	this.shortcuts = [{
+		pattern     : 'f2'+(this.fm.OS == 'mac' && ' enter'),
+		description : this.title,
+		callback    : function() { this.exec(); }
+	}];
+	
 	this.getstate = function() {
-		var sel = fm.selectedFiles();
+		var sel = this.fm.selectedFiles();
 
 		return sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
 	}
 	
-	this.init = function() {
-		var o          = fm.options,
-			name       = 'rename',
-			title      = self.title,
-			enter      = o.enter      == name,
-			shiftenter = o.shiftenter == name,
-			ctrlenter  = o.ctrlenter  == name,
-			callback   = function() { self.exec(); };
-
-		fm.one('load', function() {
-			enter && fm.shortcut({
-				pattern     : 'enter',
-				description : title,
-				callback    : callback
-			});
-			
-			shiftenter && fm.shortcut({
-				pattern     : 'shift+enter',
-				description : title,
-				callback    : callback
-			});
-			
-			ctrlenter && fm.shortcut({
-				pattern     : 'ctrl+enter',
-				description : title,
-				callback    : callback
-			});
-		})
-	}
-	
 	this.exec = function() {
-		var fm     = this.fm,
-			cwd    = fm.getUI('cwd'),
-			sel    = fm.selected(),
-			cnt    = sel.length,
-			errors = fm.errors,
-			file   = fm.file(sel.shift()),
-			dfrd   = $.Deferred()
+		var fm       = this.fm,
+			cwd      = fm.getUI('cwd'),
+			sel      = fm.selected(),
+			cnt      = sel.length,
+			errors   = fm.errors,
+			file     = fm.file(sel.shift()),
+			filename = '.elfinder-cwd-filename',
+			dfrd     = $.Deferred()
 				.fail(function(error) {
 					var parent = input.parent(),
 						name   = fm.escape(file.name);

@@ -39,10 +39,10 @@ elFinder.prototype.options = {
 	
 	plugins : ['path', 'stat'],
 	
-	dblclick   : 'open',
-	enter      : 'rename',
-	shiftenter : 'download',
-	ctrlenter  : 'getfile',
+	// dblclick   : 'open',
+	// enter      : 'rename',
+	// shiftenter : 'download',
+	// ctrlenter  : 'getfile',
 
 	getFileCallback : null,
 	/**
@@ -242,7 +242,7 @@ elFinder.prototype.options = {
 		// "getfile" command options.
 		getfile : {
 			// allow to return multiple files info
-			multiple : true,
+			multiple : false,
 			// allow to return filers info
 			folders  : false
 		},
