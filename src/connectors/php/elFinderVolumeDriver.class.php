@@ -332,6 +332,7 @@ abstract class elFinderVolumeDriver {
 		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
 		'torrent' => 'application/x-bittorrent',
+		'jar'   => 'application/x-jar',
 		// archives
 		'gz'    => 'application/x-gzip',
 		'tgz'   => 'application/x-gzip',

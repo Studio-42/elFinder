@@ -1573,7 +1573,7 @@
 		 * @type  Object
 		 */
 		kinds : {
-			'unknown'                       : 'Unknown type',
+			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
 			'symlink'                       : 'Alias',
 			'symlink-broken'                : 'Broken alias',
@@ -1599,6 +1599,7 @@
 		    'application/x-rar'             : 'RAR archive',
 			'application/x-tar'             : 'TAR archive', 
 			'application/x-7z-compressed'   : '7z archive',
+			'application/x-jar'             : 'Java JAR file',
 			'text/plain'                    : 'Plain text',
 		    'text/x-php'                    : 'PHP source',
 			'text/html'                     : 'HTML document', 
@@ -2444,7 +2445,7 @@
 		 * @return String
 		 */
 		mime2class : function(mime) {
-			return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/\./g, '-');
+			return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
 		},
 		
 		/**

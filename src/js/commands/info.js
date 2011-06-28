@@ -39,17 +39,24 @@ elFinder.prototype.commands.info = function() {
 			view    = tpl.main,
 			l       = '{label}',
 			v       = '{value}',
-			dialog = fm.dialog('<div/>', {
+			opts    = {
 				title    : fm.i18n('Info'),
-				autoOpen : false,
+				// autoOpen : false,
 				// width    : 270,
 				// test in ie >_<
 				width : 'auto',
-				minWidth : 200,
 				close    : function() { $(this).elfinderdialog('destroy'); }
-			}),
+			},
+			// dialog = fm.dialog('<div/>', {
+			// 	title    : fm.i18n('Info'),
+			// 	autoOpen : false,
+			// 	// width    : 270,
+			// 	// test in ie >_<
+			// 	width : 'auto',
+			// 	close    : function() { $(this).elfinderdialog('destroy'); }
+			// }),
 			count = [],
-			size, tmb, file, title, dcnt;
+			dialog, size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -99,7 +106,9 @@ elFinder.prototype.commands.info = function() {
 		
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
 		
-		dialog.append(view).elfinderdialog('open');
+		dialog = fm.dialog(view, opts)
+		
+		// dialog.append(view).elfinderdialog('open');
 
 		// load thumbnail
 		if (tmb) {

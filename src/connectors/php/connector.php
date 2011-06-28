@@ -222,7 +222,7 @@ $opts = array(
 				array(
 					'pattern' => '/file.css$/',
 					// 'read' => false
-					'write' => false
+					// 'write' => false
 				),
 				array(
 					'pattern' => '/tmb.zip/',

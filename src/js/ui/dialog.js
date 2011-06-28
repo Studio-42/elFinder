@@ -54,6 +54,7 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
 					if (!dialog.is('.elfinder-dialog-notify')) {
+						
 						parent.find('.elfinder-dialog:visible').not('.elfinder-dialog-notify').each(function() {
 							var d     = $(this),
 								top   = parseInt(d.css('top')),
@@ -69,7 +70,7 @@ $.fn.elfinderdialog = function(opts) {
 								});
 							}
 						});
-					}
+					} 
 				})
 				.bind('close', function() {
 					var dialogs = parent.find('.elfinder-dialog:visible'),
@@ -115,8 +116,8 @@ $.fn.elfinderdialog = function(opts) {
 				top  : (top > 0 ? top : 0)+'px',
 				left : parseInt((parent.width() - dialog.outerWidth())/2)+'px'
 			}
-		}	
-
+		} 
+			
 		dialog.css(opts.position);
 
 		if (opts.closeOnEscape) {
