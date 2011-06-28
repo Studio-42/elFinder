@@ -70,6 +70,7 @@ elfinder-install: elfinder connectors-install
 	${CP} ${elfinder_css} ${CSS}/
 	${CP} ${elfinder_js}  ${JS}/
 	${CP} ${SRC}/js/i18n/elfinder.??.js ${I18N}/
+	${CP} ${SRC}/js/i18n/elfinder.??_??.js ${I18N}/
 	${CP} ${SRC}/images/*      ${IMG}/
 
 ${elfinder_css}:
@@ -80,7 +81,7 @@ ${elfinder_js}:
 
 elfinder-uninstall:
 	${RM} -f ${CSS}/${elfinder_css} ${JS}/${elfinder_js} ${JS}/${elfinder_js_min} \
-	         ${I18N}/elfinder.??.js ${IMG}/*
+	         ${I18N}/elfinder.??.js ${I18N}/elfinder.??_??.js ${IMG}/*
 
 clean-elfinder:
 	${RM} -f ${elfinder_css} ${elfinder_js} ${elfinder_js_min}
