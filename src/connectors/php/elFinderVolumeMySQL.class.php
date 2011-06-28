@@ -102,7 +102,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		$this->db = new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db']);
 		if ($this->db->connect_error || @mysqli_connect_error()) {
-			echo mysqli_error();
+			// echo mysqli_error();
 			
 			return false;
 		}

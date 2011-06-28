@@ -832,7 +832,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
-				description : 'Control selection by arrows and shift key',
+				description : 'Control selection by arrows',
 				type        : $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
 				callback    : function(e) { select(e.keyCode, e.shiftKey); }
 			})

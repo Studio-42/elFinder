@@ -367,12 +367,7 @@
 		 **/
 		this.messages = this.i18[this.lang].messages;
 
-		/**
-		 * Registered shortcuts
-		 *
-		 * @type Object
-		 **/
-		this.shortcuts = {};
+		
 
 		/**
 		 * Cwd view type
@@ -1068,13 +1063,28 @@
 							shiftKey    : $.inArray('SHIFT', parts) != -1,
 							type        : s.type || 'keydown',
 							callback    : s.callback,
-							description : s.description
+							description : s.description,
+							pattern     : pattern
 						};
 					}
 				}
 			}
 			return this;
 		}
+		
+		/**
+		 * Registered shortcuts
+		 *
+		 * @type Object
+		 **/
+		this.shortcuts = function() {
+			var ret = [];
+			
+			$.each(shortcuts, function(i, s) {
+				ret.push([s.pattern, self.i18n(s.description)]);
+			});
+			return ret;
+		};
 		
 		/**
 		 * Get/set clipboard content.
@@ -1516,10 +1526,10 @@
 		 */
 		i18 : {
 			en : {
-				_translator  : '',
-				_translation : 'English localization',
-				direction    : 'ltr',
-				messages     : {}
+				translator : 'dio',
+				language   : 'English',
+				direction   : 'ltr',
+				messages    : {}
 			}
 		},
 		

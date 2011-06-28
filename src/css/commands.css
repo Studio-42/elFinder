@@ -45,3 +45,84 @@
 	background:transparent;
 }
 .elfinder-search .elfinder-search-close .ui-button-text { padding:0;}
+
+/* help dialog */
+.elfinder-help { margin-bottom:.5em; }
+
+/* fix tabs */
+.elfinder-help .ui-tabs-panel { padding:.5em; }
+.elfinder-dialog .ui-tabs .ui-tabs-nav li a { padding:.2em 1em;}
+
+.elfinder-help-shortcuts {
+	height:300px;
+	padding:1em;
+	margin:.5em 0;
+	overflow:auto;
+}
+.elfinder-help-shortcut { white-space:nowrap; clear:both;}
+
+.elfinder-help-shortcut-pattern { float:left; width:140px;}
+
+.elfinder-help-logo {
+	width:100px;
+	height:96px;
+	float:left;
+	margin-right:1em;
+	background:url('../images/logo.png') center center no-repeat;
+}
+
+.elfinder-help h3 { font-size:1.5em; margin:.2em 0 .3em 0; }
+
+.elfinder-help-separator { clear:both; padding:.5em;  }
+
+.elfinder-help-link { padding:2px; }
+
+.elfinder-help-team { 
+	clear: both; 
+	text-align:right; 
+	border-bottom:1px solid #ccc;
+	margin:.5em 0;
+}
+
+.elfinder-help-team div { float:left; }
+.elfinder-help-license { font-size:.9em;}
+
+.elfinder-help-disabled {
+	font-weight:bold;
+	text-align:center;
+	margin:90px 0;
+}
+
+.elfinder-help .elfinder-dont-panic {
+	display:block;
+	border:1px solid transparent;
+	width:200px;
+	height:200px;
+	margin:30px auto;
+	text-decoration:none;
+	text-align:center;
+	position:relative;
+	background:#d90004;
+	-moz-box-shadow: 5px 5px 9px #111;
+	-webkit-box-shadow:  5px 5px 9px #111;
+	box-shadow:  5px 5px 9px #111;
+	background: -moz-radial-gradient(80px 80px, circle farthest-corner,  #d90004 35%, #960004 100%);
+	background: -webkit-gradient(radial, 80 80, 60, 80 80, 120, from(#d90004), to(#960004));
+	-moz-border-radius: 100px;
+	-webkit-border-radius: 100px;
+	border-radius: 100px;
+	outline:none;
+}
+
+.elfinder-help .elfinder-dont-panic span {
+	font-size:3em;
+	font-weight:bold;
+	text-align:center;
+	color:#fff;
+	position:absolute;
+	left:0;
+	top:45px;
+}
+
+
+
