@@ -47,14 +47,6 @@ elFinder.prototype.commands.info = function() {
 				width : 'auto',
 				close    : function() { $(this).elfinderdialog('destroy'); }
 			},
-			// dialog = fm.dialog('<div/>', {
-			// 	title    : fm.i18n('Info'),
-			// 	autoOpen : false,
-			// 	// width    : 270,
-			// 	// test in ie >_<
-			// 	width : 'auto',
-			// 	close    : function() { $(this).elfinderdialog('destroy'); }
-			// }),
 			count = [],
 			dialog, size, tmb, file, title, dcnt;
 			
@@ -82,7 +74,7 @@ elFinder.prototype.commands.info = function() {
 			
 			content.push(row.replace(l, fm.i18n('Size')).replace(v, size));
 			file.linkTo && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.linkTo));
-			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.path(file.hash)));
+			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.escape(fm.path(file.hash))));
 			content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));
 			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));

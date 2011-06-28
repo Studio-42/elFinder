@@ -1212,7 +1212,7 @@
 		/*************  init stuffs  ****************/
 		
 		// check jquery ui
-		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.dialog)) {
+		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
 			return alert(this.i18n(this.errors.jquiInvalid));
 		}
 		// check node
@@ -1522,8 +1522,8 @@
 		 */
 		i18 : {
 			en : {
-				translator : 'dio',
-				language   : 'English',
+				translator  : '',
+				language    : 'English',
 				direction   : 'ltr',
 				messages    : {}
 			}
@@ -1536,7 +1536,7 @@
 		 */
 		errors : {
 			uknown     : 'Unknown error.',
-			jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
+			jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and draggable components included.',
 			node       : 'elFinder required DOM Element to be created.',
 			url        : 'Invalid elFinder configuration! You have to set URL option.',
 			access     : 'Access denied.',
