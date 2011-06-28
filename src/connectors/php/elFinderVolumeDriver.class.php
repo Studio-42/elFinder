@@ -331,6 +331,7 @@ abstract class elFinderVolumeDriver {
 		'xml'   => 'application/xml',
 		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
+		'torrent' => 'application/x-bittorrent',
 		// archives
 		'gz'    => 'application/x-gzip',
 		'tgz'   => 'application/x-gzip',
@@ -355,6 +356,7 @@ abstract class elFinderVolumeDriver {
 		'rb'    => 'text/x-ruby',
 		'sh'    => 'text/x-shellscript',
 		'pl'    => 'text/x-perl',
+		'xml'   => 'text/xml',
 		'sql'   => 'text/x-sql',
 		// images
 		'bmp'   => 'image/x-ms-bmp',

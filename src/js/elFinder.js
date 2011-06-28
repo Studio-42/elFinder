@@ -350,7 +350,7 @@
 		 * @type String
 		 * @default "en"
 		 **/
-		this.lang = this.i18[this.options.lang] ? this.options.lang : 'en';
+		this.lang = this.i18[this.options.lang] && this.i18[this.options.lang].messages ? this.options.lang : 'en';
 		
 		/**
 		 * Interface direction
@@ -924,8 +924,6 @@
 				doSync = function(odata, pdata) {
 					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
 
-					// self.log(diff.removed).log(diff.added).log(diff.changed);
-					
 					diff.removed.length && self.remove(diff);
 					diff.added.length   && self.add(diff);
 					diff.changed.length && self.change(diff);
@@ -1025,8 +1023,6 @@
 			}
 			return this;
 		}
-		
-		
 		
 		/**
 		 * Bind keybord shortcut to keydown event
@@ -1539,31 +1535,31 @@
 		 * @type  Object
 		 */
 		errors : {
-			uknown   : 'Unknown error.',
-			jqui     : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
-			node     : 'elFinder required DOM Element to be created.',
-			url      : 'Invalid elFinder configuration! You have to set URL option.',
-			access   : 'Access denied.',
-			connect  : 'Unable to connect to backend.',
-			abort    : 'Connection aborted.',
-			timeout  : 'Connection timeout.',
-			response : 'Invalid backend response.',
-			json     : 'Data is not JSON.',
-			empty    : 'Data is empty.',
-			nocmd    : 'Backend request required command name.',
-			open     : 'Unable to open "$1".',
-			notdir   : 'Object is not a folder.', // ?????
-			notfile  : 'Object is not a file.', // ?????
-			read     : 'Unable to read "$1".',
-			write    : 'Unable to write into "$1".',
-			denied   : 'Permission denied.',
-			locked   : '"$1" is locked and can not be renamed, moved or removed.',
-			exists   : 'File named "$1" already exists in this location.',
-			name     : 'Invalid file name.',
-			notfound : 'File not found.',
-			popup    : 'Browser prevented opening popup window. To open file enable it in browser options.',
-			copy     : 'Unable to copy "$1".',
-			move     : 'Unable to move "$1".',
+			uknown     : 'Unknown error.',
+			jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable, draggable and dialog components included.',
+			node       : 'elFinder required DOM Element to be created.',
+			url        : 'Invalid elFinder configuration! You have to set URL option.',
+			access     : 'Access denied.',
+			connect    : 'Unable to connect to backend.',
+			abort      : 'Connection aborted.',
+			timeout    : 'Connection timeout.',
+			response   : 'Invalid backend response.',
+			json       : 'Data is not JSON.',
+			empty      : 'Data is empty.',
+			nocmd      : 'Backend request required command name.',
+			open       : 'Unable to open "$1".',
+			notdir     : 'Object is not a folder.', 
+			notfile    : 'Object is not a file.', 
+			read       : 'Unable to read "$1".',
+			write      : 'Unable to write into "$1".',
+			denied     : 'Permission denied.',
+			locked     : '"$1" is locked and can not be renamed, moved or removed.',
+			exists     : 'File named "$1" already exists in this location.',
+			name       : 'Invalid file name.',
+			notfound   : 'File not found.',
+			popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
+			copy       : 'Unable to copy "$1".',
+			move       : 'Unable to move "$1".',
 			copyinself : 'Unable to copy "$1" into itself.',
 			rm         : 'Unable to remove "$1".',
 			extract    : 'Unable to extract files from "$1".',
@@ -1584,30 +1580,31 @@
 			'application/x-empty'           : 'Plain text',
 			'application/postscript'        : 'Postscript document',
 			'application/octet-stream'      : 'Application',
+			'application/x-executable'      : 'Application',
 			'application/vnd.ms-office'     : 'Microsoft Office document',
 			'application/vnd.ms-word'       : 'Microsoft Word document',  
 		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
 			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
 			'application/pdf'               : 'Portable Document Format (PDF)',
+			'application/xml'               : 'XML document', 
 			'application/vnd.oasis.opendocument.text' : 'Open Office document',
 			'application/x-shockwave-flash' : 'Flash application',
 			'application/flash-video'       : 'Flash video',
-			'application/xml'               : 'XML document', 
 			'application/x-bittorrent'      : 'Bittorrent file',
-			'application/x-7z-compressed'   : '7z archive',
-			'application/x-tar'             : 'TAR archive', 
-		    'application/x-gzip'            : 'GZIP archive', 
+			'application/javascript'        : 'Javascript source',
+			'application/rtf'               : 'Rich Text Format (RTF)',
+			'application/x-gzip'            : 'GZIP archive', 
 		    'application/x-bzip2'           : 'BZIP archive', 
 		    'application/zip'               : 'ZIP archive',  
 		    'application/x-rar'             : 'RAR archive',
-			'application/javascript'        : 'Javascript application',
+			'application/x-tar'             : 'TAR archive', 
+			'application/x-7z-compressed'   : '7z archive',
 			'text/plain'                    : 'Plain text',
 		    'text/x-php'                    : 'PHP source',
 			'text/html'                     : 'HTML document', 
 			'text/javascript'               : 'Javascript source',
 			'text/css'                      : 'CSS style sheet',  
 		    'text/rtf'                      : 'Rich Text Format (RTF)',
-			'application/rtf'               : 'Rich Text Format (RTF)',
 			'text/rtfd'                     : 'RTF with attachments (RTFD)',
 			'text/x-c'                      : 'C source', 
 			'text/x-c++'                    : 'C++ source', 
@@ -1616,34 +1613,36 @@
 			'text/x-java'                   : 'Java source',
 			'text/x-ruby'                   : 'Ruby source',
 			'text/x-perl'                   : 'Perl script',
+			'text/x-sql'                    : 'SQL source',
 		    'text/xml'                      : 'XML document', 
 			'image/x-ms-bmp'                : 'BMP image',
 		    'image/jpeg'                    : 'JPEG image',   
 		    'image/gif'                     : 'GIF Image',    
 		    'image/png'                     : 'PNG image',
-			'image/x-targa'                 : 'TGA image',
 		    'image/tiff'                    : 'TIFF image',   
 		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
 			'audio/mpeg'                    : 'MPEG audio',  
 			'audio/midi'                    : 'MIDI audio',
 			'audio/ogg'                     : 'Ogg Vorbis audio',
-			'audio/mp4'                     : 'MP4 audio',
+			'audio/mp4'                     : 'MPEG-4 audio',
+			'audio/x-m4a'                   : 'MPEG-4 audio',
 			'audio/wav'                     : 'WAV audio',
-			'video/x-dv'                    : 'DV video',
-			'video/mp4'                     : 'MP4 video',
-			'video/mpeg'                    : 'MPEG video',  
-			'video/x-msvideo'               : 'AVI video',
-			'video/quicktime'               : 'Quicktime video',
-			'video/x-ms-wmv'                : 'WM video',   
-			'video/x-flv'                   : 'Flash video',
-			'video/x-matroska'              : 'Matroska video'
+			'video/x-dv'                    : 'DV movie',
+			'video/mp4'                     : 'MP4 movie',
+			'video/mpeg'                    : 'MPEG movie',  
+			'video/x-msvideo'               : 'AVI movie',
+			'video/quicktime'               : 'Quick Time movie',
+			'video/x-ms-wmv'                : 'Windows Media Movie',   
+			'video/x-flv'                   : 'Flash movie',
+			'video/x-matroska'              : 'Matroska movie',
+			'video/ogg'                     : 'Ogg movie'
 		},
 		
 		textMimes : [
 			'application/javascript', 
 			'application/xhtml+xml', 
 			'audio/x-mp3-playlist', 
-			'application/x-bittorrent torrent', 
+			'application/x-bittorrent', 
 			'application/x-web-config',
 			'application/docbook+xml',
 			'application/x-php',
@@ -1651,7 +1650,7 @@
 			'application/x-awk',
 			'application/x-config',
 			'application/x-csh',
-			
+			'application/xml'
 		],
 		/**
 		 * Ajax request data validation rules
@@ -2447,6 +2446,26 @@
 		 * @return String
 		 */
 		mime2kind : function(f) {
+			var mime = typeof(f) == 'object' ? f.mime : f,
+				kind = this.kinds[mime]||'unknown';
+			
+			if (f.link) {
+				return this.i18n('Alias');
+			}
+			
+			if (kind == 'unknown') {
+				if (mime.indexOf('text') === 0) {
+					kind = 'Text document';
+				} else if (mime.indexOf('image') === 0) {
+					kind = 'Image';
+				} else if (mime.indexOf('audio') === 0) {
+					kind = 'Audio media';
+				} else if (mime.indexOf('video') === 0) {
+					kind = 'Video media';
+				}
+			}
+			
+			return this.i18n(kind)
 			return this.i18n(typeof(f) == 'object' ? f.link ? 'Alias' : this.kinds[f.mime]||'unknown' : this.kinds[f]||'unknown');
 			
 			var kind = '';
