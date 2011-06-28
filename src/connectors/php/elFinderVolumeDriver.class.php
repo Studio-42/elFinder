@@ -176,7 +176,7 @@ abstract class elFinderVolumeDriver {
 		'tmbSize'         => 48,     
 		// thumbnails crop (true - crop, false - scale image to fit thumbnail size)
 		'tmbCrop'         => true,
-		// thumbnails background color
+		// thumbnails background color (hex #rrggbb or 'transparent')
 		'tmbBgColor'      => '#ffffff',
 		// image manipulations library
 		'imgLib'          => 'auto',   
@@ -2250,10 +2250,22 @@ abstract class elFinderVolumeDriver {
 				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
         
 					if ($this->options['tmbCrop'] == false) {
+					
+						
+					
+						if ($this->options['tmbBgColor'] == 'transparent') {
+							list($r,$g,$b)=array(0, 0, 255);
+						} else {
+							list($r,$g,$b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
+						}
 
-						list($r,$g,$b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
+						$bgcolor = imagecolorallocate($tmp, $r, $g, $b);
+						
+						if ($this->options['tmbBgColor'] == 'transparent') {
+							$bgcolor = imagecolortransparent($tmp, $bgcolor);
+						}
         
-						imagefill($tmp, 0, 0, imagecolorallocate($tmp, $r, $g, $b));
+						imagefill($tmp, 0, 0, $bgcolor);
 
 						if (!imagecopyresampled($tmp, $img, $align_x, $align_y, 0, 0, $newwidth, $newheight, $s[0], $s[1])) {
 							return false;
