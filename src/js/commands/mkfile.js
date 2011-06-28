@@ -1,4 +1,5 @@
 elFinder.prototype.commands.mkfile = function() {
+	this.title = 'New text file';
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';

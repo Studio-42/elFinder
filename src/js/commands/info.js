@@ -58,8 +58,8 @@ elFinder.prototype.commands.info = function() {
 		if (cnt == 1) {
 			file  = files[0];
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
-
+			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file)+' '+file.mime);
+			fm.log(file)
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
 			}

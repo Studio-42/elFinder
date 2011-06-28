@@ -358,6 +358,12 @@ abstract class elFinderVolumeDriver {
 		'pl'    => 'text/x-perl',
 		'xml'   => 'text/xml',
 		'sql'   => 'text/x-sql',
+		'c'     => 'text/x-csrc',
+		'h'     => 'text/x-chdr',
+		'cpp'   => 'text/x-c++src',
+		'hh'    => 'text/x-c++hdr',
+		'log'   => 'text/plain',
+		'csv'   => 'text/x-comma-separated-values',
 		// images
 		'bmp'   => 'image/x-ms-bmp',
 		'jpg'   => 'image/jpeg',

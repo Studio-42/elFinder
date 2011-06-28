@@ -16,8 +16,6 @@ elFinder.prototype.commands.archive = function() {
 
 	this.disableOnSearch = true;
 	
-	
-	
 	/**
 	 * Update mimes on open/reload
 	 *

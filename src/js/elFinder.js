@@ -1603,24 +1603,32 @@
 		    'text/x-php'                    : 'PHP source',
 			'text/html'                     : 'HTML document', 
 			'text/javascript'               : 'Javascript source',
-			'text/css'                      : 'CSS style sheet',  
-		    'text/rtf'                      : 'Rich Text Format (RTF)',
-			'text/rtfd'                     : 'RTF with attachments (RTFD)',
+			'text/css'                      : 'Cascading style sheet',  
+		    'text/rtf'                      : 'Rich Text Format',
+			'text/rtfd'                     : 'Rich Text Format',
 			'text/x-c'                      : 'C source', 
+			'text/x-csrc'                   : 'C source',
+			'text/x-chdr'                   : 'C header source',
 			'text/x-c++'                    : 'C++ source', 
+			'text/x-c++src'                 : 'C++ source',
+			'text/x-c++hdr'                 : 'C++ header source',
 			'text/x-shellscript'            : 'Unix shell script',
 		    'text/x-python'                 : 'Python source',
 			'text/x-java'                   : 'Java source',
+			'text/x-java-source'            : 'Java source',
 			'text/x-ruby'                   : 'Ruby source',
 			'text/x-perl'                   : 'Perl script',
 			'text/x-sql'                    : 'SQL source',
 		    'text/xml'                      : 'XML document', 
+			'text/x-comma-separated-values' : 'Comma separated values',
 			'image/x-ms-bmp'                : 'BMP image',
 		    'image/jpeg'                    : 'JPEG image',   
-		    'image/gif'                     : 'GIF Image',    
+		    'image/gif'                     : 'GIF image',    
 		    'image/png'                     : 'PNG image',
 		    'image/tiff'                    : 'TIFF image',   
+			'image/x-targa'                 : 'TGA image',
 		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
+			'image/xbm'                 : 'X bitmap image',
 			'audio/mpeg'                    : 'MPEG audio',  
 			'audio/midi'                    : 'MIDI audio',
 			'audio/ogg'                     : 'Ogg Vorbis audio',
@@ -1628,7 +1636,7 @@
 			'audio/x-m4a'                   : 'MPEG-4 audio',
 			'audio/wav'                     : 'WAV audio',
 			'video/x-dv'                    : 'DV movie',
-			'video/mp4'                     : 'MP4 movie',
+			'video/mp4'                     : 'MPEG-4 movie',
 			'video/mpeg'                    : 'MPEG movie',  
 			'video/x-msvideo'               : 'AVI movie',
 			'video/quicktime'               : 'Quick Time movie',
@@ -2448,12 +2456,10 @@
 		mime2kind : function(f) {
 			var mime = typeof(f) == 'object' ? f.mime : f,
 				kind = this.kinds[mime]||'unknown';
-			
-			if (f.link) {
-				return this.i18n('Alias');
-			}
-			
-			if (kind == 'unknown') {
+
+			if (f.linkTo) {
+				kind = 'Alias';
+			} else if (kind == 'unknown') {
 				if (mime.indexOf('text') === 0) {
 					kind = 'Text document';
 				} else if (mime.indexOf('image') === 0) {
@@ -2462,18 +2468,11 @@
 					kind = 'Audio media';
 				} else if (mime.indexOf('video') === 0) {
 					kind = 'Video media';
+				} else if (mime.indexOf('application') === 0) {
+					kind = 'Application';
 				}
 			}
 			
-			return this.i18n(kind)
-			return this.i18n(typeof(f) == 'object' ? f.link ? 'Alias' : this.kinds[f.mime]||'unknown' : this.kinds[f]||'unknown');
-			
-			var kind = '';
-			
-			kind = typeof(f) == 'object'
-				? f.link ? 'Alias' : this.kinds[f.mime]||'unknown'
-				: this.kinds[f]||'unknown';
-
 			return this.i18n(kind);
 		},
 		

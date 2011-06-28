@@ -374,9 +374,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			} else {
 				return false;
 			}
+		} else {
+			$target = $this->_normpath(dirname($path).DIRECTORY_SEPARATOR.$target);
 		}
-
-		$target = $this->_normpath($this->root.DIRECTORY_SEPARATOR.$target);
 
 		return file_exists($target) && $target != $this->root && $this->_inpath($target, $this->root) ? $target : false;
 	}

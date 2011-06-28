@@ -667,15 +667,12 @@ $.fn.elfindercwd = function(fm) {
 				.bind('dropover', function() {
 					
 				})
-				// toggle cwd class
-				// .bind('dropover dropout', function(e) {
-				// 	cwd[e.type == 'dropover' ? 'addClass' : 'removeClass'](clDropActive);
-				// })
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
 					cwd.trigger('unselectall');
 					parent.prepend($(itemhtml(file)).addClass(clTmp));
+					cwd.scrollTop(0)
 				})
 				// unselect all selected files
 				.bind('unselectall', function() {
