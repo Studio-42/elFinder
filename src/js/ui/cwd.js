@@ -6,7 +6,7 @@
 $.fn.elfindercwd = function(fm) {
 	
 	this.not('.elfinder-cwd').each(function() {
-		fm.time('cwdLoad');
+		// fm.time('cwdLoad');
 		var 
 			// parent = 
 			undef = 'undefined',
@@ -78,7 +78,7 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type String
 			 **/
-			clHover     = 'ui-state-hover',
+			clHover     = fm.res('class', 'hover'), //'ui-state-hover',
 
 			/**
 			 * Hover css class
@@ -854,7 +854,7 @@ $.fn.elfindercwd = function(fm) {
 		
 	});
 	
-	fm.timeEnd('cwdLoad')
+	// fm.timeEnd('cwdLoad')
 	
 	return this;
 }

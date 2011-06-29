@@ -2,7 +2,7 @@
 (function($) {
 
 	window.elFinder = function(node, opts) {
-		
+		this.time('load');
 		var self = this,
 			
 			/**
@@ -1500,13 +1500,14 @@
 				data = $.extend(true, {}, data);
 				open(data);
 				self.trigger('open', data);
-				// self.exec('open', 'a0_Lw')
 			});
 		
 		// update ui's size after init
 		this.one('load', function() {
 			node.trigger('resize')
-		})
+		});
+		
+		self.timeEnd('load'); //107
 	}
 	
 	/**
@@ -1515,6 +1516,11 @@
 	 * @type  Object
 	 */
 	elFinder.prototype = {
+		
+		res : function(type, id) {
+			return this.resources[type] && this.resources[type][id];
+		}, 
+		
 		/**
 		 * Internationalization object
 		 * 

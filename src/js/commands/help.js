@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @class  elFinder command "рудз"
+ * @class  elFinder command "help"
  * "About" dialog
  *
  * @author Dmitry (dio) Levashov
@@ -22,20 +22,20 @@ elFinder.prototype.commands.help = function() {
 	this.fm.one('open', function() {
 		setTimeout(function() {
 			var linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
-				atpl = '<div class="elfinder-help-team"><div>{author}</div>{work}</div>',
-				url = /\{url\}/,
-				link = /\{link\}/,
-				author = /\{author\}/,
-				work = /\{work\}/,
-				r = 'replace',
-				prim = 'ui-priority-primary',
-				sec = 'ui-priority-secondary',
-				lic = 'elfinder-help-license',
-				tab = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
-				html = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
+				atpl    = '<div class="elfinder-help-team"><div>{author}</div>{work}</div>',
+				url     = /\{url\}/,
+				link    = /\{link\}/,
+				author  = /\{author\}/,
+				work    = /\{work\}/,
+				r       = 'replace',
+				prim    = 'ui-priority-primary',
+				sec     = 'ui-priority-secondary',
+				lic     = 'elfinder-help-license',
+				tab     = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
+				html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
 						'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
-				stpl = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
-				sep  = '<div class="elfinder-help-separator"/>',
+				stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
+				sep     = '<div class="elfinder-help-separator"/>',
 				shortcuts = fm.shortcuts()
 				;
 
@@ -56,8 +56,8 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Project home')));
 			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Documentation')));
-			html.push(linktpl[r](url, 'http://github.com/')[r](link, fm.i18n('Fork us on Github')));
-			html.push(linktpl[r](url, 'http://twitter.com/')[r](link, fm.i18n('Follow us in twitter')));
+			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('Fork us on Github')));
+			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('Follow us in twitter')));
 			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('Meet us on facebook')));
 			
 			html.push(sep);
@@ -124,7 +124,7 @@ elFinder.prototype.commands.help = function() {
 					}
 					
 				})
-				.filter(':first').click()
+				.filter(':first').click();
 			
 		}, 200)
 	})
@@ -134,13 +134,7 @@ elFinder.prototype.commands.help = function() {
 	}
 	
 	this.exec = function() {
-		var opts = {
-				title : this.title,
-				width : 530
-			},
-			dialog = this.fm.dialog(content, opts);
-		
-		
+		this.fm.dialog(content, {title : this.title, width : 530});
 	}
 
 }
