@@ -2301,7 +2301,7 @@
 			
 			if (opts.all) {
 				if (opts.reject) {
-					options.width = 330;
+					options.width = 370;
 				}
 				options.create = function() {
 					checkbox = $('<input type="checkbox" />');
@@ -2359,6 +2359,7 @@
 		uniqueName : function(prefix, phash) {
 			var i = 0, ext = '', p, name;
 			
+			prefix = this.i18n(prefix);
 			phash = phash || this.cwd().hash;
 
 			if ((p = prefix.indexOf('.txt')) != -1) {
@@ -2366,7 +2367,6 @@
 				prefix = prefix.substr(0, p);
 			}
 			
-			prefix = this.i18n(prefix);
 			name   = prefix+ext;
 			
 			if (!this.fileByName(name, phash)) {

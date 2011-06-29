@@ -22,7 +22,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					active && cmd.fm.trigger('searchend') && (active = false);
 				});
 		
-		$('<span class="ui-icon ui-icon-search"/>')
+		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
 			.click(function() { input.trigger($.Event('keydown', {keyCode : 13})).focus(); });
 		

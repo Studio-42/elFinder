@@ -1,5 +1,10 @@
 "use strict";
-
+/**
+ * @class  elFinder command "рудз"
+ * "About" dialog
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.help = function() {
 	var fm = this.fm,
 		content;
@@ -29,7 +34,7 @@ elFinder.prototype.commands.help = function() {
 				tab = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
 				html = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
 						'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
-				stpl = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div>: {descrip}</div>',
+				stpl = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
 				sep  = '<div class="elfinder-help-separator"/>',
 				shortcuts = fm.shortcuts()
 				;
@@ -59,9 +64,9 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push('<div class="'+prim+'">'+fm.i18n('Team')+'</div>');
 			
-			html.push(atpl[r](author, 'Dmitry (dio) , dio@std42.ru')[r](work, fm.i18n('chief developer')));
-			html.push(atpl[r](author, 'Troex Nevelin, troex@fury.scancode.ru')[r](work, fm.i18n('mantainer')+', '+fm.i18n('developer')));
-			html.push(atpl[r](author, 'Alexey Sukhotin')[r](work, fm.i18n('developer')));
+			html.push(atpl[r](author, 'Dmitry "dio" &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chief developer')));
+			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('developer')));
+			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('developer')));
 			
 			if (fm.i18[fm.lang].translator) {
 				html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
@@ -71,7 +76,7 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
 			html.push('<div class="'+lic+'">Copyright © 2009-2011, Studio 42</div>');
-			html.push('<div class="'+lic+'">And dont forget your towel</div>');
+			html.push('<div class="'+lic+'">„ …'+fm.i18n('and don\'t forget to take your towel')+' ”</div>');
 			html.push('</div>');
 			// end main
 			
@@ -131,7 +136,7 @@ elFinder.prototype.commands.help = function() {
 	this.exec = function() {
 		var opts = {
 				title : this.title,
-				width : 500
+				width : 530
 			},
 			dialog = this.fm.dialog(content, opts);
 		

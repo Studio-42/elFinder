@@ -77,10 +77,10 @@ elFinder.prototype.commands.paste = function() {
 
 						fm.confirm({
 							title  : 'Move file',
-							text   : 'File '+file.name+' exists. Replace',
+							text   : fm.i18n(['File named "$1" already exists in this location.', file.name, 'Replace old file with new one?']), 
 							all    : !last,
 							accept : {
-								label    : 'Replace',
+								label    : 'Yes',
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)

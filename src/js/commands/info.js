@@ -40,7 +40,7 @@ elFinder.prototype.commands.info = function() {
 			l       = '{label}',
 			v       = '{value}',
 			opts    = {
-				title    : fm.i18n('Info'),
+				title    : this.title,
 				// autoOpen : false,
 				// width    : 270,
 				// test in ie >_<
@@ -57,7 +57,7 @@ elFinder.prototype.commands.info = function() {
 		if (cnt == 1) {
 			file  = files[0];
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file)+' '+file.mime);
+			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
@@ -78,8 +78,8 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));
 			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));
-			content.push(row.replace(l, fm.i18n('Access')).replace(v, fm.formatPermissions(file)));
-			content.push(row.replace(l, fm.i18n('Locked')).replace(v, fm.i18n(file.locked ? 'yes' : 'no')));
+			content.push(row.replace(l, fm.i18n('Permissions')).replace(v, fm.formatPermissions(file)));
+			content.push(row.replace(l, fm.i18n('Locked')).replace(v, fm.i18n(file.locked ? 'Yes' : 'No')));
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
 			title = tpl.groupTitle.replace('{items}', fm.i18n('Items')).replace('{num}', cnt);
@@ -100,8 +100,6 @@ elFinder.prototype.commands.info = function() {
 		
 		dialog = fm.dialog(view, opts)
 		
-		// dialog.append(view).elfinderdialog('open');
-
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')

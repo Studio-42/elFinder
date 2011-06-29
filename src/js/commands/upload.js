@@ -244,7 +244,7 @@ elFinder.prototype.commands.upload = function() {
 						dialog.elfinderdialog('close');
 						callback({input : input[0]});
 					}),
-				button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('Select files')+'</span></div>')
+				button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('Select files to upload')+'</span></div>')
 					.append($('<form/>').append(input))
 					.hover(function() {
 						button.toggleClass('ui-state-hover')

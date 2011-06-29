@@ -12,39 +12,6 @@
 	border:1px solid #ccc;
 }
 
-/********************** COMMAND "SEARCH" *************************/
-/* panel under cwd */
-.elfinder-search { margin-bottom:2px; font-size:.72em; }
-
-/* text input */
-.elfinder-search input {
-	width:250px;
-	text-align:left;
-	border:1px solid #aaa;
-	margin:0 7px;
-}
-
-/* button "find" */
-.elfinder-search-button {
-	width:16px;
-	height:16px;
-	position:absolute;
-	top:50%;
-	margin-top:-8px;
-}
-.elfinder-search .ui-button-icon-only .ui-button-text { padding:1px;}
-
-/* close icon */
-.elfinder .elfinder-search-close {
-	position:absolute;
-	top:50%;
-	margin-top:-10px;
-	right:0;
-	padding:0;
-	border:0 solid;
-	background:transparent;
-}
-.elfinder-search .elfinder-search-close .ui-button-text { padding:0;}
 
 /* help dialog */
 .elfinder-help { margin-bottom:.5em; }
@@ -61,7 +28,7 @@
 }
 .elfinder-help-shortcut { white-space:nowrap; clear:both;}
 
-.elfinder-help-shortcut-pattern { float:left; width:140px;}
+.elfinder-help-shortcut-pattern { float:left; width:160px;}
 
 .elfinder-help-logo {
 	width:100px;
@@ -77,11 +44,16 @@
 
 .elfinder-help-link { padding:2px; }
 
+.elfinder-help .ui-priority-secondary { font-size:.9em;}
+
+.elfinder-help .ui-priority-primary { margin-bottom:7px;}
+
 .elfinder-help-team { 
 	clear: both; 
 	text-align:right; 
 	border-bottom:1px solid #ccc;
 	margin:.5em 0;
+	font-size:.9em;
 }
 
 .elfinder-help-team div { float:left; }

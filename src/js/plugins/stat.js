@@ -20,7 +20,7 @@ elFinder.prototype.plugins.stat = function(fm) {
 					s += file.size||0
 				}
 			})
-			size.html(titleitems+': '+c+' '+titlesize+': '+fm.formatSize(s));
+			size.html(titleitems+': '+c+', '+titlesize+': '+fm.formatSize(s));
 		};
 		
 	fm.one('load', function() {
@@ -41,7 +41,7 @@ elFinder.prototype.plugins.stat = function(fm) {
 			s += file.size||0
 		});
 		
-		sel.html(c ? titlesel+': '+c+' '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+		sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
 	})
 	
 	;

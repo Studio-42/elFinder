@@ -35,6 +35,8 @@
 	border:0 solid;
 }
 
+.elfinder .ui-icon-search { cursor:pointer;}
+
 .elfinder-button:first-child {
 	-moz-border-radius-topleft: 4px; 
 	-webkit-border-top-left-radius: 4px; 

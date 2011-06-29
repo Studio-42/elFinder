@@ -1,14 +1,10 @@
 "use strict"
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ru = {
-		translator : 'Vasily Razumnih',
-		language   : 'Русский',
+		translator : 'Vasiliy Razumnih &lt;rvn@std42.ru&gt;',
+		language   : 'Русский язык',
 		direction  : 'ltr',
 		messages   : {
-			
-			
-			
-			
 			/********************************** errors **********************************/
 			'Error'                                  : 'Ошибка',
 			'Unknown error.'                         : 'Неизвестная ошибка.',
@@ -46,10 +42,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Unable to rename "$1".'                 : 'Ошибка удаления "$1".',
 			'Copy files from volume "$1" not allowed.' : 'Копирование из корневой директории "$1" запрещено.',
 			'Copy files to volume "$1" not allowed.' : 'Копирование в корневую директорию "$1" запрещено.',
-			'Unable to upload "$1".' : 'Ошибка загрузки "$1".',
+			'Unable to upload "$1".'                 : 'Ошибка загрузки "$1".',
 			'There are no uploaded files was found.' : 'Отсутствуют загруженые файлы.',
 			'Data exceeds the maximum allowed size.' : 'Превышен допустимый размер данных.',
-			'File exceeds maximum allowed size.' : 'Размер файла превышает допустимый.',
+			'File exceeds maximum allowed size.'     : 'Размер файла превышает допустимый.',
 			'Not allowed file type.'                 : 'Недопустимый тип файла.',
 			'"$1" transfer error.'                   : 'Ошибка передачи "$1".',
 			'Unable to save "$1".'                   : 'Ошибка сохранения "$1".',
@@ -62,6 +58,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Unsupported archive type.'              : 'Неподдерживаемый тип архива.',
 			'File is not archive or has unsupported archive type.' : 'Файл не является архивом допустимого типа.',  
 			
+			/********************************* current dir *******************************/
+			'Name'                                   : 'Имя файла',
+			'Size'                                   : 'Размер',
+			'Permissions'                            : 'Доступ',
+			'Modified'                               : 'Изменен',
+			'Kind'                                   : 'Тип',
+			'read'                                   : 'чтение',
+			'write'                                  : 'запись',
+			'no access'                              : 'нет доступа',
+			'and'                                    : 'и',
+			'Today'                                  : 'Сегодня',
+			'Yesterday'                              : 'Вчера',
+			
 			/********************************** dialogs **********************************/
 			'Close'                                  : 'Закрыть',
 			'Save'                                   : 'Сохранить',
@@ -69,7 +78,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Cancel'                                 : 'Отмена',
 			'Are you shure you want to remove files?<br/>This cannot be undone!' : 'Хотите удалить файлы?<br>Действие необратимо.', 
 			'Confirmation required'                  : 'Необходимо подтверждение',
-			'Apply to all'                           : 'Все',
+			'Apply to all'                           : 'для всех',
+			'Yes'                                    : 'Да',
+			'No'                                     : 'Нет',
 			
 			/******************************** notifications ********************************/
 			'Open folder'                            : 'Открытие папки',
@@ -103,9 +114,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Home'                                   : 'Домой',
 			'Get info'                               : 'Свойства',
 			'New folder'                             : 'Новая папка',
-			'untitle folder'                         : 'Новая папка',
 			'New text file'                          : 'Новый файл',
-			'untitle file.txt'                       : 'новый файл.txt',
 			'Open'                                   : 'Открыть',
 			'Paste'                                  : 'Вставить',
 			'Preview'                                : 'Быстрый просмотр',
@@ -116,6 +125,54 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Go to parent directory'                 : 'Наверх',
 			'Upload files'                           : 'Загрузить файлы',
 			'View'                                   : 'Вид',
+			
+			/****************************** commands messages ******************************/
+			'untitle folder'                         : 'новая папка',
+			'untitle file.txt'                       : 'новый файл.txt',
+			'View as list'                           : 'Список', 
+			'View as icons'                          : 'Иконки',
+			'Drop files here'                        : 'Бросьте файлы сюда',
+			'or'                                     : 'или',
+			'Select files to upload'                 : 'Выбрерите файлы',
+			'Move file'                              : 'Перемещение файлов',
+			'Replace old file with new one?'         : 'Заменить старый файл новым?',
+			'Path'                                   : 'Путь',
+			'Dimensions'                             : 'Разрешение',
+			'Locked'                                 : 'Защита',
+			'Calculating'                            : 'Вычисляю',
+			'Folders'                                : 'Папок',
+			'Files'                                  : 'Файлов',
+			'Items'                                  : 'Объекты',
+			'unknown'                                : 'неизвестно',
+			'About'                                  : 'О программе',
+			'Shortcuts'                              : 'Горячие клавиши',
+			'Help'                                   : 'Помощь',
+			'Web file manager'                       : 'Файловый менеджер для веб',
+			'Version'                                : 'Версия',
+			'protocol version'                       : 'версия протокола',
+			'Project home'                           : 'Сайт проекта',
+			'Documentation'                          : 'Документация',
+			'Fork us on Github'                      : 'Проект на GitHub',
+			'Follow us in twitter'                   : 'Мы в twitter',
+			'Meet us on facebook'                    : 'Мы на facebook',
+			'Team'                                   : 'Авторы',
+			'chief developer'                        : 'ведущий разработчик',
+			'developer'                              : 'разработчик',
+			'mantainer'                              : 'сопровождение проекта',
+			'translator'                             : 'переводчик',
+			'and don\'t forget to take your towel'   : 'и не забудьте взять своё полотенце',
+			
+			/**************************** shortcuts descriptions ***************************/
+			'Select file(s)'                         : 'Выбрать файл(ы)',
+			'Select all files'                       : 'Выбрать все файлы',
+			'Select first file'                      : 'Выбрать первый файл',
+			'Select last file'                       : 'Выбрать последний файл',
+			
+			/*********************************** plugins ***********************************/
+			'Search results'                         : 'Результаты поиска',
+			'size'                                   :'размер',
+			'items'                                  : 'объектов',
+			'selected items'                         : 'выбрано',
 			
 			/********************************** mimetypes **********************************/
 			'Unknown'                                : 'Неизвестный',
