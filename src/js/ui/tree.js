@@ -10,7 +10,14 @@ $.fn.elfindertree = function(fm) {
 			 * @type String
 			 */
 			root      = 'elfinder-navbar-tree-root',
-			
+
+			/**
+			 * Open root dir if not opened yet
+			 *
+			 * @type Boolean
+			 */
+			openRoot  = true,
+
 			/**
 			 * Subtree class name
 			 *

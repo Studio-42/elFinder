@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>elFinder 2.x source version with PHP connector</title>
+	<!-- 
+	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
+	-->
+	<script src="../js/jquery-1.6.1.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/jquery-ui-1.8.13.custom.min.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="../js/ui-themes/smoothness/jquery-ui-1.8.13.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	 <!-- <link rel="stylesheet" href="../js/ui-themes/Aristo/jquery-ui-1.8.7.custom.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
+
+	<link rel="stylesheet" href="css/common.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/dialog.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/toolbar.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/navbar.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/statusbar.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/cwd.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/quicklook.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/commands.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/contexmenu.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="css/plugins.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<link rel="stylesheet" href="css/theme.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	<script src="elfinder.min.js"           type="text/javascript" charset="utf-8"></script>
+	
+	<script src="js/plugins/path.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/plugins/stat.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="extensions/jplayer/elfinder.quicklook.jplayer.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
+	
+	<style type="text/css">
+		body { font-family:arial, verdana, sans-serif;}
+		.button {
+			width: 100px;
+			position:relative;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			margin:0 3px 3px 0;
+			padding:1px 0;
+			text-align:center;
+			border:1px solid #ccc;
+			background-color:#eee;
+			margin:1em .5em;
+			padding:.3em .7em;
+			border-radius:5px; 
+			-moz-border-radius:5px; 
+			-webkit-border-radius:5px;
+			cursor:pointer;
+		}
+	</style>
+
+	<script type="text/javascript" charset="utf-8">
+		$().ready(function() {
+
+			// $("#jquery_jplayer_1").jPlayer({
+			// 	ready: function () {
+			// 		$(this).jPlayer("setMedia", {
+			// 			mp3 : "../files/audio/03 Yuuhi wo Miteiru ka_ (Original Mix).mp3"
+			// 			// mp3: "http://www.jplayer.org/audio/mp3/Miaow-07-Bubble.mp3"
+			// 		})//.jPlayer("play");
+			// 	},
+			// 	ended: function (event) {
+			// 		$(this).jPlayer("play");
+			// 	},
+			// 	swfPath: "third-part/jplayer",
+			// 	supplied: "mp3,ogg"
+			// });
+
+			var f1 = $('#finder').elfinder({
+				url : 'connectors/php/connector.php',
+				_getFileCallback : function(files, fm) {
+					console.log(files);
+					// fm.destroy()
+				},
+				handlers : {
+					load : function(e, fm) {
+						// fm.error('All your base belongs to us >_<')
+					}
+					// open : function(e, fm) {
+					// 	// console.log(e)
+					// 	// console.log(fm)
+					// 	var d = fm.exec('upload').fail(function(error) {
+					// 		// fm.log('fail '+error)
+					// 	}).done(function(data) {
+					// 		// fm.log(data)
+					// 	})
+					// }
+				},
+				// width:650,
+				lang : 'ru'
+			}).elfinder('instance')
+
+
+			// $('#finder2').elfinder({
+			// 	url : 'connectors/php/connector.php',
+			// 	width:650,
+			// 	lang : 'ru'
+			// })
+
+			// console.log(f1)
+			// 
+			// setTimeout(function() {
+			// 	console.log($('#finder').elfinder('instance'))
+			// }, 2000)
+
+			// new elFinder($('<div/>'))
+
+			// var f2 = $('#asd').elfinder({
+			// 	url : 'connectors/php/connector.php',
+			// 	lang : 'ru'
+			// }).elfinder('instance')
+			
+			$('#back').click(function(e) {
+				f1.exec('back')
+			})
+			$('#fwd').click(function(e) {
+				f1.exec('forward')
+			})
+			
+			$('#dialog').click(function() {
+				var f = $('<div/>'),
+					opts = {
+					url : 'connectors/php/connector.php',
+					_getFileCallback : function(files) {
+						console.log(this)
+						// this.destroy()
+						// f.elfinder('destory')
+					}
+				}
+				f.elfinder(opts).dialog()
+				
+			})
+			
+		})
+	</script>
+
+</head>
+<body>
+	<div id="back" class="button">back</div>
+	<div id="fwd" class="button">forward</div>
+	<div id="dialog" class="button">dialog</div>
+	<!-- <div id="close"  class="button">close</div>
+	<div id="dock" class="button">dock</div>
+	<div id="undock" class="button">undock</div>-->
+	<!-- <div style="width:670px; float:left"> -->
+		<div id="finder">finder <span>here</span></div>
+	<!-- </div> -->
+	<!-- <div style="width:670px; float:left">
+		<div id="finder2">finder</div> 
+	</div> -->
+	<br clear="all"/>
+	<input type="text" value="123" />
+
+	
+	<!-- <div><input type="text" id="i1"></div> -->
+	<!-- <div><input type="text" id="i2"></div> -->
+
+</body>
+</html>
