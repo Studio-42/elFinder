@@ -9,7 +9,7 @@ elFinder.prototype.commands.mkdir = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+shift+n',
-		description : 'Copy',
+		description : this.title,
 	}];
 	
 	this.getstate = function() {

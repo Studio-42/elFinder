@@ -4,14 +4,14 @@ elFinder.prototype.commands.help = function() {
 	var fm = this.fm,
 		content;
 	
-	
+	this.title = 'About this software';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.state = 0;
 	
 	this.shortcuts = [{
 		pattern     : 'f1',
-		description : 'Help',
+		description : this.title,
 	}];
 	
 	this.fm.one('open', function() {
@@ -130,7 +130,7 @@ elFinder.prototype.commands.help = function() {
 	
 	this.exec = function() {
 		var opts = {
-				title : this.fm.i18n('About this software'),
+				title : this.title,
 				width : 500
 			},
 			dialog = this.fm.dialog(content, opts);

@@ -6,11 +6,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		direction  : 'ltr',
 		messages   : {
 			
-			/********************************** dialogs **********************************/
-			'Close'                                  : 'Закрыть',
+			
+			
 			
 			/********************************** errors **********************************/
-			
 			'Error'                                  : 'Ошибка',
 			'Unknown error.'                         : 'Неизвестная ошибка.',
 			'Unknown command.'                       : 'Неизвестная комманда.',
@@ -63,7 +62,62 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Unsupported archive type.'              : 'Неподдерживаемый тип архива.',
 			'File is not archive or has unsupported archive type.' : 'Файл не является архивом допустимого типа.',  
 			
-			/********************************** mimetypes**********************************/
+			/********************************** dialogs **********************************/
+			'Close'                                  : 'Закрыть',
+			'Save'                                   : 'Сохранить',
+			'Remove'                                 : 'Удалить',
+			'Cancel'                                 : 'Отмена',
+			'Are you shure you want to remove files?<br/>This cannot be undone!' : 'Хотите удалить файлы?<br>Действие необратимо.', 
+			'Confirmation required'                  : 'Необходимо подтверждение',
+			'Apply to all'                           : 'Все',
+			
+			/******************************** notifications ********************************/
+			'Open folder'                            : 'Открытие папки',
+			'Open file'                              : 'Открытие файла',
+			'Reload folder content'                  : 'Обновление текущей папки',
+			'Creating directory'                     : 'Создание папки',
+			'Creating files'                         : 'Создание файла',
+			'Delete files'                           : 'Удаление файлов',
+			'Copy files'                             : 'Копирование файлов',
+			'Move files'                             : 'Перемещение файлов',
+			'Prepare to copy files'                  : 'Подготовка к копированию',
+			'Rename files'                           : 'Переименование файлов',
+			'Uploading files'                        : 'Загрузка файлов',
+			'Downloading files'                      : 'Скачивание файлов',
+			'Save files'                             : 'Сохранение файлов',
+			'Creating archive'                       : 'Создание архива',
+			'Extracting files from archive'          : 'Распаковка архива',
+			
+			/******************************* commands names ********************************/
+			'Create archive'                         : 'Создать архив',
+			'Back'                                   : 'Назад',
+			'Copy'                                   : 'Копировать',
+			'Cut'                                    : 'Вырезать',
+			'Download'                               : 'Скачать',
+			'Duplicate'                              : 'Сделать копию',
+			'Edit'                                   : 'Редактировать',
+			'Extract files from archive'             : 'Распаковать архив',
+			'Forward'                                : 'Вперед',
+			'Select files'                           : 'Выбрать',
+			'About this software'                    : 'О программе',
+			'Home'                                   : 'Домой',
+			'Get info'                               : 'Свойства',
+			'New folder'                             : 'Новая папка',
+			'untitle folder'                         : 'Новая папка',
+			'New text file'                          : 'Новый файл',
+			'untitle file.txt'                       : 'новый файл.txt',
+			'Open'                                   : 'Открыть',
+			'Paste'                                  : 'Вставить',
+			'Preview'                                : 'Быстрый просмотр',
+			'Reload'                                 : 'Обновить',
+			'Rename'                                 : 'Переименовать',
+			'Delete'                                 : 'Удалить',
+			'Find files'                             : 'Поиск',
+			'Go to parent directory'                 : 'Наверх',
+			'Upload files'                           : 'Загрузить файлы',
+			'View'                                   : 'Вид',
+			
+			/********************************** mimetypes **********************************/
 			'Unknown'                                : 'Неизвестный',
 			'Folder'                                 : 'Папка',
 			'Alias'                                  : 'Ссылка',

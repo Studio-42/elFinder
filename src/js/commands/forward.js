@@ -10,7 +10,7 @@ elFinder.prototype.commands.forward = function() {
 	this.updateOnSelect = true;
 	this.shortcuts = [{
 		pattern     : 'ctrl+right',
-		description : 'Go forward'
+		description : 'Forward'
 	}];
 	
 	this.getstate = function() {

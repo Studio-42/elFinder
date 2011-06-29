@@ -53,7 +53,7 @@ elFinder.prototype.commands.rm = function() {
 			files = this.hashes(hashes);
 			
 			fm.confirm({
-				title  : 'Remove',
+				title  : 'Delete',
 				text   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
 				accept : {
 					label    : 'Remove',

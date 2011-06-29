@@ -2139,7 +2139,7 @@
 		 */
 		notifyType : {
 			open        : 'Open folder',
-			openfile    : 'Open files',
+			openfile    : 'Open file',
 			reload      : 'Reload folder content',
 			mkdir       : 'Creating directory',
 			mkfile      : 'Creating files',
@@ -2151,8 +2151,8 @@
 			upload      : 'Uploading files',
 			download    : 'Downloading files',
 			save        : 'Save files',
-			archive     : 'Create archives',
-			extract     : 'Extract files from archive'
+			archive     : 'Creating archive',
+			extract     : 'Extracting files from archive'
 		},
 		
 		/**
@@ -2288,12 +2288,14 @@
 				};
 			}
 			
-			options.buttons[this.i18n(opts.cancel.label)] = function() {
-				$(this).elfinderdialog('close')
-			};
+			
 			options.buttons[this.i18n(opts.accept.label)] = function() {
 				opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
+				$(this).elfinderdialog('close')
+			};
+			
+			options.buttons[this.i18n(opts.cancel.label)] = function() {
 				$(this).elfinderdialog('close')
 			};
 			

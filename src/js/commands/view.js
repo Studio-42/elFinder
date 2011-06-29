@@ -17,10 +17,7 @@ elFinder.prototype.commands.view = function() {
 	}
 	
 	this.exec = function() {
-		// this.fm.viewchange();
-		this.update(void(0), this.fm.viewchange().view)
-		// this.value = this.fm.view;
-		// this.change();
+		this.update(void(0), this.fm.viewchange().view);
 	}
 
 }
