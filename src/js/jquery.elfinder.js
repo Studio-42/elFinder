@@ -1,5 +1,3 @@
-(function($) {
-
 $.fn.elfinder = function(o) {
 	
 	if (o == 'instance') {
@@ -44,5 +42,3 @@ $.fn.getElFinder = function() {
 	
 	return instance;
 }
-
-})(jQuery);

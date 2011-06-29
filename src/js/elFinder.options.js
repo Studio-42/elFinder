@@ -1,5 +1,3 @@
-(function($) {
-
 /**
  * Default config
  *
@@ -138,10 +136,10 @@ elFinder.prototype.options = {
 	i18n           : {},
 	/* fm view (icons|list) */
 	view           : 'icons',
-	/* width to overwrite css options */
+	/* width */
 	width          : 'auto',
-	/* height to overwrite css options. Attenion! this is heigt of navigation/cwd panels! not total fm height */
-	height         : 400,
+	/* height */
+	height         : 415,
 	/* disable shortcuts exclude arrows/space */
 	allowShortcuts : true,
 	/* open last visited dir after reload page or close and open browser */
@@ -275,5 +273,3 @@ elFinder.prototype.options = {
 	// debug : true
 	debug : ['error', 'warning', 'event-put', 'backend-debug_', 'event-search', 'event-searchend']
 }
-
-})(jQuery);

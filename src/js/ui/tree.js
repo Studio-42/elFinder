@@ -1,5 +1,3 @@
-(function($) {
-	
 $.fn.elfindertree = function(fm) {
 	
 	this.not('.elfinder-navbar-tree').each(function() {
@@ -475,5 +473,3 @@ $.fn.elfindertree = function(fm) {
 	
 	return this;
 }
-	
-})(jQuery);

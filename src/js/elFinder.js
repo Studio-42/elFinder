@@ -1,2583 +1,2570 @@
 "use strict";
-(function($) {
-
-	window.elFinder = function(node, opts) {
-		this.time('load');
-		var self = this,
-			
-			/**
-			 * Node on which elfinder creating
-			 *
-			 * @type jQuery
-			 **/
-			node = $(node),
-			
-			/**
-			 * Store node contents.
-			 *
-			 * @see this.destroy
-			 * @type jQuery
-			 **/
-			prevContent = $('<div/>').append(node.contents()),
-			
-			/**
-			 * Store node inline styles
-			 *
-			 * @see this.destroy
-			 * @type String
-			 **/
-			prevStyle = node.attr('style'),
-			
-			/**
-			 * Instance ID. Required to get/set cookie
-			 *
-			 * @type String
-			 **/
-			id = node.attr('id') || '',
-			
-			/**
-			 * Events namespace
-			 *
-			 * @type String
-			 **/
-			namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
-			
-			/**
-			 * Mousedown event
-			 *
-			 * @type String
-			 **/
-			mousedown = 'mousedown.'+namespace,
-			
-			/**
-			 * Keydown event
-			 *
-			 * @type String
-			 **/
-			keydown = 'keydown.'+namespace,
-			
-			/**
-			 * Keypress event
-			 *
-			 * @type String
-			 **/
-			keypress = 'keypress.'+namespace,
-			
-			/**
-			 * Is shortcuts/commands enabled
-			 *
-			 * @type Boolean
-			 **/
-			enabled = true,
-			
-			/**
-			 * Store enabled value before ajax requiest
-			 *
-			 * @type Boolean
-			 **/
-			prevEnabled = true,
-			
-			/**
-			 * List of build-in events which mapped into methods with same names
-			 *
-			 * @type Array
-			 **/
-			events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop'],
-			
-			/**
-			 * Rules to validate data from backend
-			 *
-			 * @type Object
-			 **/
-			rules = {},
-			
-			/**
-			 * Current working directory hash
-			 *
-			 * @type String
-			 **/
-			cwd = '',
-			
-			/**
-			 * Current working directory options
-			 *
-			 * @type Object
-			 **/
-			cwdOptions = {
-				path          : '',
-				url           : '',
-				tmbUrl        : '',
-				disabled      : [],
-				separator     : '/',
-				archives      : [],
-				extract       : [],
-				copyOverwrite : true,
-				tmb           : false // old API
-			},
-			
-			/**
-			 * Files/dirs cache
-			 *
-			 * @type Object
-			 **/
-			files = {},
-			
-			/**
-			 * Selected files hashes
-			 *
-			 * @type Array
-			 **/
-			selected = [],
-			
-			/**
-			 * Events listeners
-			 *
-			 * @type Object
-			 **/
-			listeners = {},
-			
-			/**
-			 * Shortcuts
-			 *
-			 * @type Object
-			 **/
-			shortcuts = {},
-			
-			/**
-			 * Buffer for copied files
-			 *
-			 * @type Array
-			 **/
-			clipboard = [],
-			
-			/**
-			 * Queue for 'open' requests
-			 *
-			 * @type Array
-			 **/
-			queue = [],
-			
-			/**
-			 * Commands prototype
-			 *
-			 * @type Object
-			 **/
-			base = new self.command(self),
-			
-			/**
-			 * elFinder node width
-			 *
-			 * @type String
-			 * @default "auto"
-			 **/
-			width  = this.options.width || 'auto',
-			
-			/**
-			 * elFinder node height
-			 *
-			 * @type Number
-			 * @default 300
-			 **/
-			height = parseInt(this.options.height) || 300,
-			
-			beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
-				
-			
-			open = function(data) {
-				if (data.init) {
-					// init - reset cache
-					files = {};
-				} else {
-					// remove only files from prev cwd
-					for (var i in files) {
-						if (files.hasOwnProperty(i) 
-						&& files[i].mime != 'directory' 
-						&& files[i].phash == cwd) {
-							delete files[i];
-						}
-					}
-				}
-
-				cwd = data.cwd.hash;
-				cache(data.files);
-				if (!files[cwd]) {
-					self.log('no cwd in cache')
-					cache([data.cwd]);
-				}
-				self.lastDir(cwd);
-				data.debug && self.debug('backend-debug', data.debug);
-			},
-			
-			/**
-			 * Set api version number and ajax data validation rules.
-			 *
-			 * @param  String api version
-			 * @return void
-			 */
-			setAPI = function(ver) {
-				self.api    = parseFloat(ver) || 1;
-				self.newAPI = self.api > 1;
-				self.oldAPI = !self.newAPI;
-				rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
-			},
-			
-			/**
-			 * Store info about files/dirs in "files" object.
-			 *
-			 * @param  Array  files
-			 * @return void
-			 **/
-			cache = function(data) {
-				var l = data.length, f;
-
-				while (l--) {
-					f = data[l];
-					if (f.name && f.hash && f.mime) {
-						files[f.hash] = f;
-					}
-				}
-			},
-			
-			/**
-			 * Exec shortcut
-			 *
-			 * @param  jQuery.Event  keydown/keypress event
-			 * @return void
-			 */
-			execShortcut = function(e) {
-				var code    = e.keyCode,
-					ctrlKey = e.ctrlKey || e.metaKey;
-				
-				if (enabled) {
-					
-					$.each(shortcuts, function(i, shortcut) {
-						if (shortcut.type    == e.type 
-						&& shortcut.keyCode  == code 
-						&& shortcut.shiftKey == e.shiftKey 
-						&& shortcut.ctrlKey  == ctrlKey 
-						&& shortcut.altKey   == e.altKey) {
-							e.preventDefault()
-							e.stopPropagation();
-							shortcut.callback(e, self);
-							self.debug('shortcut-exec', i+' : '+shortcut.description);
-						}
-					});
-					
-					// prevent tab out of elfinder
-					code == 9 && e.preventDefault();
-				}
-			}
-			;
-
-
+window.elFinder = function(node, opts) {
+	this.time('load');
+	var self = this,
+		
 		/**
-		 * Application version
+		 * Node on which elfinder creating
+		 *
+		 * @type jQuery
+		 **/
+		node = $(node),
+		
+		/**
+		 * Store node contents.
+		 *
+		 * @see this.destroy
+		 * @type jQuery
+		 **/
+		prevContent = $('<div/>').append(node.contents()),
+		
+		/**
+		 * Store node inline styles
+		 *
+		 * @see this.destroy
+		 * @type String
+		 **/
+		prevStyle = node.attr('style'),
+		
+		/**
+		 * Instance ID. Required to get/set cookie
 		 *
 		 * @type String
 		 **/
-		this.version = '2.0 beta';
-		
-		/**
-		 * Protocol version
-		 *
-		 * @type String
-		 **/
-		this.api = 1;
-		
-		/**
-		 * elFinder use new api
-		 *
-		 * @type Boolean
-		 **/
-		this.newAPI = false;
-		
-		/**
-		 * elFinder use old api
-		 *
-		 * @type Boolean
-		 **/
-		this.oldAPI = true;
-		
-		this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'unknown';
-		
-		/**
-		 * Configuration options
-		 *
-		 * @type Object
-		 **/
-		this.options = $.extend({}, this.options, opts||{});
-		
-		/**
-		 * Css classes 
-		 *
-		 * @type String
-		 **/
-		this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
-		
-		/**
-		 * Ajax request type
-		 *
-		 * @type String
-		 * @default "get"
-		 **/
-		this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get',
-		
-		/**
-		 * Any data to send across every ajax request
-		 *
-		 * @type Object
-		 * @default {}
-		 **/
-		this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
-		
-		/**
-		 * ID. Required to create unique cookie name
-		 *
-		 * @type String
-		 **/
-		this.id = id;
+		id = node.attr('id') || '',
 		
 		/**
 		 * Events namespace
 		 *
 		 * @type String
 		 **/
-		this.namespace = namespace;
-
-		/**
-		 * Interface language
-		 *
-		 * @type String
-		 * @default "en"
-		 **/
-		this.lang = this.i18[this.options.lang] && this.i18[this.options.lang].messages ? this.options.lang : 'en';
+		namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
 		
 		/**
-		 * Interface direction
+		 * Mousedown event
 		 *
 		 * @type String
-		 * @default "ltr"
 		 **/
-		this.direction = this.i18[this.lang].direction;
-
+		mousedown = 'mousedown.'+namespace,
+		
 		/**
-		 * i18 messages
+		 * Keydown event
+		 *
+		 * @type String
+		 **/
+		keydown = 'keydown.'+namespace,
+		
+		/**
+		 * Keypress event
+		 *
+		 * @type String
+		 **/
+		keypress = 'keypress.'+namespace,
+		
+		/**
+		 * Is shortcuts/commands enabled
+		 *
+		 * @type Boolean
+		 **/
+		enabled = true,
+		
+		/**
+		 * Store enabled value before ajax requiest
+		 *
+		 * @type Boolean
+		 **/
+		prevEnabled = true,
+		
+		/**
+		 * List of build-in events which mapped into methods with same names
+		 *
+		 * @type Array
+		 **/
+		events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop'],
+		
+		/**
+		 * Rules to validate data from backend
 		 *
 		 * @type Object
 		 **/
-		this.messages = this.i18[this.lang].messages;
-
+		rules = {},
 		
-
 		/**
-		 * Cwd view type
+		 * Current working directory hash
 		 *
 		 * @type String
 		 **/
-		this.view = this.viewType();
+		cwd = '',
 		
 		/**
-		 * Sort files type
+		 * Current working directory options
+		 *
+		 * @type Object
+		 **/
+		cwdOptions = {
+			path          : '',
+			url           : '',
+			tmbUrl        : '',
+			disabled      : [],
+			separator     : '/',
+			archives      : [],
+			extract       : [],
+			copyOverwrite : true,
+			tmb           : false // old API
+		},
+		
+		/**
+		 * Files/dirs cache
+		 *
+		 * @type Object
+		 **/
+		files = {},
+		
+		/**
+		 * Selected files hashes
+		 *
+		 * @type Array
+		 **/
+		selected = [],
+		
+		/**
+		 * Events listeners
+		 *
+		 * @type Object
+		 **/
+		listeners = {},
+		
+		/**
+		 * Shortcuts
+		 *
+		 * @type Object
+		 **/
+		shortcuts = {},
+		
+		/**
+		 * Buffer for copied files
+		 *
+		 * @type Array
+		 **/
+		clipboard = [],
+		
+		/**
+		 * Queue for 'open' requests
+		 *
+		 * @type Array
+		 **/
+		queue = [],
+		
+		/**
+		 * Commands prototype
+		 *
+		 * @type Object
+		 **/
+		base = new self.command(self),
+		
+		/**
+		 * elFinder node width
 		 *
 		 * @type String
+		 * @default "auto"
 		 **/
-		this.sort = this.sortType();
+		width  = this.options.width || 'auto',
 		
 		/**
-		 * Delay in ms before open notification dialog
+		 * elFinder node height
 		 *
 		 * @type Number
-		 * @default 500
+		 * @default 300
 		 **/
-		this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
+		height = parseInt(this.options.height) || 300,
 		
-		/**
-		 * Base draggable options
-		 *
-		 * @type Object
-		 **/
-		this.draggable = {
-			appendTo   : 'body',
-			addClasses : true,
-			delay      : 30,
-			revert     : true,
-			refreshPositions : true,
-			cursor     : 'move',
-			cursorAt   : {left : 50, top : 47},
-			drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
-			stop       : function() { self.trigger('focus').trigger('dragstop'); },
-			helper     : function(e, ui) {
-				var element = this.id ? $(this) : $(this).parents('[id]:first'),
-					helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
-					icon    = function(mime) { return '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>'; },
-					hashes, l;
-				
-				self.trigger('dragstart', {target : element[0], originalEvent : e});
-				
-				hashes = element.is('.elfinder-cwd-file') 
-					? self.selected() 
-					: [self.navId2Hash(element.attr('id'))];
-				
-				helper.append(icon(files[hashes[0]].mime)).data('files', hashes);
-
-				if ((l = hashes.length) > 1) {
-					helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
-				}
-				
-				return helper;
-			}
-		};
-		
-		/**
-		 * Base droppable options
-		 *
-		 * @type Object
-		 **/
-		this.droppable = {
-				tolerance  : 'pointer',
-				accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
-				hoverClass : 'elfinder-droppable-active',
-				drop : function(e, ui) {
-					var dst     = $(this),
-						targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
-						result  = [],
-						cnt, hash, i, h;
-					
-					if (dst.is('.elfinder-cwd')) {
-						hash = cwd;
-					} else if (dst.is('.elfinder-cwd-file')) {
-						hash = dst.attr('id')
-					} else if (dst.is('.elfinder-navbar-dir')) {
-						hash = self.navId2Hash(dst.attr('id'));
-					}
-
-					cnt = targets.length;
-					
-					while (cnt--) {
-						h = targets[cnt];
-						// ignore drop into itself or in own location
-						h != hash && files[h].phash != hash && result.push(h);
-					}
-					
-					if (result.length) {
-						ui.helper.hide();
-						self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey));
-						self.exec('paste', hash).always(function() { self.clipboard([]); });
-						self.trigger('drop', {files : targets});
-					}
-				}
-			};
-		
-		/**
-		 * Return true if filemanager is active
-		 *
-		 * @return Boolean
-		 **/
-		this.enabled = function() {
-			return node.is(':visible') && enabled;
-		}
-		
-		/**
-		 * Return true if filemanager is visible
-		 *
-		 * @return Boolean
-		 **/
-		this.visible = function() {
-			return node.is(':visible');
-		}
-		
-		/**
-		 * Return root dir hash for current working directory
-		 * 
-		 * @return String
-		 */
-		this.root = function(hash) {
-			var dir = files[hash || cwd], i;
+		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
-			while (dir && dir.phash) {
-				dir = files[dir.phash]
-			}
-			if (dir) {
-				return dir.hash;
-			}
-			
-			while (i in files && files.hasOwnProperty(i)) {
-				dir = files[i]
-				if (!dir.phash && !dir.mime == 'directory' && dir.read) {
-					return dir.hash
-				}
-			}
-			
-			return '';
-		}
 		
-		/**
-		 * Return current working directory info
-		 * 
-		 * @return Object
-		 */
-		this.cwd = function() {
-			return files[cwd] || {};
-		}
-		
-		/**
-		 * Return required cwd option
-		 * 
-		 * @param  String  option name
-		 * @return mixed
-		 */
-		this.option = function(name) {
-			return cwdOptions[name]||'';
-		}
-		
-		/**
-		 * Return file data from current dir or tree by it's hash
-		 * 
-		 * @param  String  file hash
-		 * @return Object
-		 */
-		this.file = function(hash) { 
-			return files[hash]; 
-		};
-		
-		/**
-		 * Return all cached files
-		 * 
-		 * @return Array
-		 */
-		this.files = function() {
-			return $.extend(true, {}, files);
-		}
-		
-		/**
-		 * Return list of file parents hashes include file hash
-		 * 
-		 * @param  String  file hash
-		 * @return Array
-		 */
-		this.parents = function(hash) {
-			var parents = [],
-				dir;
-			
-			while ((dir = this.file(hash))) {
-				parents.unshift(dir.hash);
-				hash = dir.phash;
-			}
-			return parents;
-		}
-		
-		/**
-		 * Return file path
-		 * 
-		 * @param  Object  file
-		 * @return String
-		 */
-		this.path = function(hash) {
-			var file = files[hash];
-			return file.path 
-				? file.path
-				: file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
-		}
-		
-		/**
-		 * Return file url if set
-		 * 
-		 * @param  Object  file
-		 * @return String
-		 */
-		this.url = function(hash) {
-			var file = files[hash],
-				path = '';
-
-			if (file.url) {
-				return file.url;
-			}
-			if (cwdOptions.url && (path = this.path(hash))) {
-				path = path.replace(cwdOptions.separator, '/');
-				return cwdOptions.url + path.substr(path.indexOf('/')+1);
-			}
-			return '';
-		}
-		
-		this.tmb = function(hash) {
-			var file = files[hash],
-				url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
-			
-			if (url && ($.browser.opera || $.browser.msie)) {
-				url += '?_=' + new Date().getTime();
-			}
-			return url;
-		}
-		
-		/**
-		 * Return selected files hashes
-		 *
-		 * @return Array
-		 **/
-		this.selected = function() {
-			return selected.slice(0);
-		}
-		
-		/**
-		 * Return selected files info
-		 * 
-		 * @return Array
-		 */
-		this.selectedFiles = function() {
-			return $.map(selected, function(hash) { return files[hash] || null });
-		};
-		
-		/**
-		 * Return true if file with required name existsin required folder
-		 * 
-		 * @param  String  file name
-		 * @param  String  parent folder hash
-		 * @return Boolean
-		 */
-		this.fileByName = function(name, phash) {
-			var hash;
-		
-			for (hash in files) {
-				if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
-					return files[hash];
-				}
-			}
-		};
-		
-		/**
-		 * Valid data for required command based on rules
-		 * 
-		 * @param  String  command name
-		 * @param  Object  cammand's data
-		 * @return Boolean
-		 */
-		this.validResponse = function(cmd, data) {
-			return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
-		}
-		
-		/**
-		 * Proccess ajax request.
-		 * Fired events :
-		 * @todo
-		 * @example
-		 * @todo
-		 * @return $.Deferred
-		 */
-		this.request = function(options) {
-			var self     = this,
-				o        = this.options,
-				errors   = this.errors,
-				dfrd     = $.Deferred(),
-				// request data
-				data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
-				// command name
-				cmd      = data.cmd,
-				// call default fail callback (display error dialog) ?
-				deffail  = !(options.preventDefault || options.preventFail),
-				// call default success callback ?
-				defdone  = !(options.preventDefault || options.preventDone),
-				// options for notify dialog
-				notify   = $.extend({}, options.notify),
-				// do not normalize data - return as is
-				raw      = !!options.raw,
-				// sync files on request fail
-				syncOnFail = options.syncOnFail,
-				// open notify dialog timeout		
-				timeout, 
-				// request options
-				options = $.extend({
-					url      : o.url,
-					async    : true,
-					type     : this.requestType,
-					dataType : 'json',
-					cache    : false,
-					// timeout  : 100,
-					data     : data
-				}, options.options || {}),
-				/**
-				 * Default success handler. 
-				 * Call default data handlers and fire event with command name.
-				 *
-				 * @param Object  normalized response data
-				 * @return void
-				 **/
-				done = function(data) {
-					data.warning && self.error(data.warning);
-					
-					cmd == 'open' && open($.extend(true, {}, data));
-
-					// fire some event to update cache/ui
-					data.removed && data.removed.length && self.remove(data);
-					data.added   && data.added.length   && self.add(data);
-					data.changed && data.changed.length && self.change(data);
-					
-					// fire event with command name
-					self.trigger(cmd, data);
-				},
-				/**
-				 * Request error handler. Reject dfrd with correct error message.
-				 *
-				 * @param jqxhr  request object
-				 * @param String request status
-				 * @return void
-				 **/
-				error = function(xhr, status) {
-					var error;
-					
-					switch (status) {
-						case 'abort':
-							error = xhr.quiet ? '' : [errors.connect, errors.abort];
-							break;
-						case 'timeout':	    
-							error = [errors.connect, errors.timeout];
-							break;
-						case 'parsererror': 
-							error = [errors.response, errors.json];
-							break;
-						default:
-							if (xhr.status == 403) {
-								error = [errors.connect, errors.access];
-							} else if (xhr.status == 404) {
-								error = [errors.connect, errors.notfound];
-							} else {
-								error = errors.connect;
-							} 
-					}
-					
-					dfrd.reject(error, xhr, status);
-				},
-				/**
-				 * Request success handler. Valid response data and reject/resolve dfrd.
-				 *
-				 * @param Object  response data
-				 * @param String request status
-				 * @return void
-				 **/
-				success = function(response) {
-					if (raw) {
-						return dfrd.resolve(response);
-					}
-
-					if (cmd == 'open' && response && (response.api || response.params)) {
-						setAPI(response.api || 1);
-					}
-					
-					if (!response) {
-						return dfrd.reject([errors.response, errors.empty], xhr);
-					} else if (!$.isPlainObject(response)) {
-						return dfrd.reject([errors.response, errors.json], xhr);
-					} else if (response.error) {
-						return dfrd.reject(response.error, xhr);
-					} else if (!self.validResponse(cmd, response)) {
-						return dfrd.reject(errors.response, xhr);
-					}
-
-					response = self.normalizeData(cmd, response);
-					if (response.options) {
-						cwdOptions = $.extend({}, cwdOptions, response.options);
-					}
-
-					dfrd.resolve(response);
-				},
-				xhr, _xhr
-				;
-
-			defdone && dfrd.done(done);
-			dfrd.fail(function(error) {
-				if (error) {
-					deffail ? self.error(error) : self.debug('error', self.i18n(error));
-				}
-			})
-			
-			if (!cmd) {
-				return dfrd.reject(errors.cmdRequired);
-			}	
-
-			if (syncOnFail) {
-				dfrd.fail(function(error) {
-					error && self.sync();
-				});
-			}
-
-			if (notify.type && notify.cnt) {
-				timeout = setTimeout(function() {
-					self.notify(notify);
-					dfrd.always(function() {
-						notify.cnt = -(parseInt(notify.cnt)||0);
-						self.notify(notify);
-					})
-				}, self.notifyDelay)
-				
-				dfrd.always(function() {
-					clearTimeout(timeout);
-				});
-			}
-			
-			// quiet abort not completed "open" requests
-			if (cmd == 'open') {
-				while ((_xhr = queue.pop())) {
-					if (!_xhr.isRejected() && !_xhr.isResolved()) {
-						_xhr.quiet = true;
-						_xhr.abort();
+		open = function(data) {
+			if (data.init) {
+				// init - reset cache
+				files = {};
+			} else {
+				// remove only files from prev cwd
+				for (var i in files) {
+					if (files.hasOwnProperty(i) 
+					&& files[i].mime != 'directory' 
+					&& files[i].phash == cwd) {
+						delete files[i];
 					}
 				}
 			}
 
-			xhr = $.ajax(options).fail(error).success(success);
-			
-			// add "open" xhr into queue
-			if (cmd == 'open') {
-				queue.unshift(xhr);
-				dfrd.always(function() {
-					var ndx = $.inArray(xhr, queue);
-					
-					ndx !== -1 && queue.splice(ndx, 1);
-				});
+			cwd = data.cwd.hash;
+			cache(data.files);
+			if (!files[cwd]) {
+				self.log('no cwd in cache')
+				cache([data.cwd]);
 			}
-			
-			return dfrd;
-		};
+			self.lastDir(cwd);
+			data.debug && self.debug('backend-debug', data.debug);
+		},
 		
 		/**
-		 * Compare current files cache with new files and return diff
-		 * 
-		 * @param  Array  new files
-		 * @return Object
-		 */
-		this.diff = function(incoming) {
-			var raw       = {},
-				added     = [],
-				removed   = [],
-				changed   = [],
-				isChanged = function(hash) {
-					var l = changed.length;
-
-					while (l--) {
-						if (changed[l].hash == hash) {
-							return true;
-						}
-					}
-				};
-				
-			$.each(incoming, function(i, f) {
-				raw[f.hash] = f;
-			});
-				
-			// find removed
-			$.each(files, function(hash, f) {
-				!raw[hash] && removed.push(hash);
-			});
-			
-			// compare files
-			$.each(raw, function(hash, file) {
-				var origin = files[hash];
-
-				if (!origin) {
-					added.push(file);
-				} else {
-					$.each(file, function(prop) {
-						if (file[prop] != origin[prop]) {
-							changed.push(file)
-							return false;
-						}
-					});
-				}
-			});
-			
-			// parents of removed dirs mark as changed (required for tree correct work)
-			$.each(removed, function(i, hash) {
-				var file  = files[hash], 
-					phash = file.phash;
-
-				if (phash 
-				&& file.mime == 'directory' 
-				&& $.inArray(phash, removed) === -1 
-				&& raw[phash] 
-				&& !isChanged(phash)) {
-					changed.push(raw[phash]);
-				}
-			});
-			
-			return {
-				added   : added,
-				removed : removed,
-				changed : changed
-			};
-		}
-		
-		/**
-		 * Sync content
-		 * 
-		 * @return jQuery.Deferred
-		 */
-		this.sync = function() {
-			var self  = this,
-				dfrd  = $.Deferred(),
-				opts1 = {
-					data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
-					preventDefault : true,
-				},
-				opts2 = {
-					data           : {cmd : 'parents', target : cwd},
-					preventDefault : true,
-				},
-				doSync = function(odata, pdata) {
-					var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
-
-					diff.removed.length && self.remove(diff);
-					diff.added.length   && self.add(diff);
-					diff.changed.length && self.change(diff);
-					return dfrd.resolve(diff);
-				},
-				timeout, xhr;
-			
-			xhr = self.oldAPI 
-				? this.ajax(opts1) 
-				: $.when(
-					this.ajax(opts1),
-					this.ajax(opts2)
-				); 
-			
-			xhr.fail(function(error) {
-					dfrd.reject(error);
-					error && self.ajax({
-						data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
-						notify : {type : 'open', cnt : 1, hideCnt : true}
-					});
-				})
-				.done(doSync);
-			
-			return dfrd;
-		}
-		
-		/**
-		 * Attach listener to events
-		 * To bind to multiply events at once, separate events names by space
-		 * 
-		 * @param  String  event(s) name(s)
-		 * @param  Object  event handler
-		 * @return elFinder
-		 */
-		this.bind = function(event, callback) {
-			var i;
-			
-			if (typeof(callback) == 'function') {
-				event = ('' + event).toLowerCase().split(/\s+/);
-				
-				for (i = 0; i < event.length; i++) {
-					if (listeners[event[i]] === void(0)) {
-						listeners[event[i]] = [];
-					}
-					listeners[event[i]].push(callback);
-				}
-			}
-			return this;
-		};
-		
-		/**
-		 * Remove event listener if exists
+		 * Set api version number and ajax data validation rules.
 		 *
-		 * @param  String    event name
-		 * @param  Function  callback
-		 * @return elFinder
-		 */
-		this.unbind = function(event, callback) {
-			var l = listeners[('' + event).toLowerCase()] || [],
-				i = l.indexOf(callback);
-
-			i > -1 && l.splice(i, 1);
-			//delete callback; // need this?
-			callback = null
-			return this;
-		};
-		
-		/**
-		 * Fire event - send notification to all event listeners
-		 *
-		 * @param  String   event type
-		 * @param  Object   data to send across event
-		 * @return elFinder
-		 */
-		this.trigger = function(event, data) {
-			var event    = event.toLowerCase(),
-				handlers = listeners[event] || [], i, j;
-			
-			this.debug('event-'+event, data)
-			
-			if (handlers.length) {
-				event = $.Event(event);
-				for (i = 0; i < handlers.length; i++) {
-					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-					event.data = $.extend(true, {}, data);
-					try {
-						if (handlers[i](event, this) === false 
-						|| event.isDefaultPrevented()) {
-							this.debug('event-stoped', event.type);
-							break;
-						}
-					} catch (ex) {
-						window.console && window.console.log && window.console.log(ex);
-					}
-					
-				}
-			}
-			return this;
-		}
-		
-		/**
-		 * Bind keybord shortcut to keydown event
-		 *
-		 * @example
-		 *    elfinder.shortcut({ 
-		 *       pattern : 'ctrl+a', 
-		 *       description : 'Select all files', 
-		 *       callback : function(e) { ... }, 
-		 *       keypress : true|false (bind to keypress instead of keydown) 
-		 *    })
-		 *
-		 * @param  Object  shortcut config
-		 * @return elFinder
-		 */
-		this.shortcut = function(s) {
-			var patterns, pattern, code, i, parts;
-			
-			if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
-				patterns = s.pattern.toUpperCase().split(/\s+/);
-				
-				for (i= 0; i < patterns.length; i++) {
-					pattern = patterns[i]
-					parts   = pattern.split('+');
-					code    = (code = parts.pop()).length == 1 
-						? code > 0 ? code : code.charCodeAt(0) 
-						: $.ui.keyCode[code];
-
-					if (code && !shortcuts[pattern]) {
-						shortcuts[pattern] = {
-							keyCode     : code,
-							altKey      : $.inArray('ALT', parts)   != -1,
-							ctrlKey     : $.inArray('CTRL', parts)  != -1,
-							shiftKey    : $.inArray('SHIFT', parts) != -1,
-							type        : s.type || 'keydown',
-							callback    : s.callback,
-							description : s.description,
-							pattern     : pattern
-						};
-					}
-				}
-			}
-			return this;
-		}
-		
-		/**
-		 * Registered shortcuts
-		 *
-		 * @type Object
-		 **/
-		this.shortcuts = function() {
-			var ret = [];
-			
-			$.each(shortcuts, function(i, s) {
-				ret.push([s.pattern, self.i18n(s.description)]);
-			});
-			return ret;
-		};
-		
-		/**
-		 * Get/set clipboard content.
-		 * Return new clipboard content.
-		 *
-		 * @example
-		 *   this.clipboard([]) - clean clipboard
-		 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
-		 * 
-		 * @param  Array    new files hashes
-		 * @param  Boolean  cut files?
-		 * @return Array
-		 */
-		this.clipboard = function(hashes, cut) {
-			var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
-			
-			if (hashes !== void(0)) {
-				clipboard.length && this.trigger('unlockfiles', {files : map()});
-				
-				clipboard = $.map(hashes||[], function(hash) {
-					var file = files[hash];
-					if (file) {
-						return {
-							hash   : hash,
-							phash  : file.phash,
-							name   : file.name,
-							read   : file.read,
-							locked : file.locked,
-							cut    : !!cut
-						}
-					}
-					return null;
-				});
-				this.trigger('changeclipboard', {clipboard : clipboard.slice(0, clipboard.length)});
-				cut && this.trigger('lockfiles', {files : map()});
-			}
-
-			// return copy of clipboard instead of refrence
-			return clipboard.slice(0, clipboard.length);
-		}
-		
-		/**
-		 * Return true if command enabled
-		 * 
-		 * @param  String  command name
-		 * @return Boolean
-		 */
-		this.isCommandEnabled = function(name) {
-			return this._commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
-		}
-		
-		/**
-		 * Exec command and return result;
-		 *
-		 * @param  String         command name
-		 * @param  String|Array   usualy files hashes
-		 * @param  String|Array   command options
-		 * @return $.Deferred
-		 */		
-		this.exec = function(cmd, files, opts) {
-			return this._commands[cmd] && this.isCommandEnabled(cmd) 
-				? this._commands[cmd].exec(files, opts) 
-				: $.Deferred().reject('No such command');
-		}
-		
-		/**
-		 * Create and return dialog.
-		 *
-		 * @param  String|DOMElement  dialog content
-		 * @param  Object             dialog options
-		 * @return jQuery
-		 */
-		this.dialog = function(content, options) {
-			return $('<div/>').append(content).appendTo(node).elfinderdialog(options);
-		}
-		
-		/**
-		 * Return UI widget or node
-		 *
-		 * @param  String  ui name
-		 * @return jQuery
-		 */
-		this.getUI = function(ui) {
-			return this.ui[ui] || node;
-		}
-		
-		this.command = function(name) {
-			return name === void(0) ? this._commands : this._commands[name];
-		}
-		
-		/**
-		 * Resize elfinder node
-		 * 
-		 * @param  String|Number  width
-		 * @param  Number         height
+		 * @param  String api version
 		 * @return void
 		 */
-		this.resize = function(w, h) {
-			node.css('width', w).height(h).trigger('resize');
-		}
+		setAPI = function(ver) {
+			self.api    = parseFloat(ver) || 1;
+			self.newAPI = self.api > 1;
+			self.oldAPI = !self.newAPI;
+			rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
+		},
 		
 		/**
-		 * Restore elfinder node size
-		 * 
-		 * @return elFinder
-		 */
-		this.restoreSize = function() {
-			this.resize(width, height);
-		}
-		
-		/**
-		 * Destroy this elFinder instance
+		 * Store info about files/dirs in "files" object.
 		 *
+		 * @param  Array  files
 		 * @return void
 		 **/
-		this.destroy = function() {
-			if (node && node[0].elfinder) {
-				this.trigger('destroy').disable();
-				listeners = {};
-				shortcuts = {};
-				$(document).add(node).unbind('.'+this.namespace);
-				self.trigger = function() { }
-				node.children().remove();
-				node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
-				node[0].elfinder = null;
+		cache = function(data) {
+			var l = data.length, f;
+
+			while (l--) {
+				f = data[l];
+				if (f.name && f.hash && f.mime) {
+					files[f.hash] = f;
+				}
 			}
-		}
-		
-		/*************  init stuffs  ****************/
-		
-		// check jquery ui
-		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
-			return alert(this.i18n(this.errors.jquiInvalid));
-		}
-		// check node
-		if (!node.length) {
-			return alert(this.i18n(this.errors.nodeRequired));
-		}
-		// check connector url
-		if (!this.options.url) {
-			return alert(this.i18n(this.errors.urlRequired));
-		}
-		
-		$.extend($.ui.keyCode, {
-			'F1' : 112,
-			'F2' : 113,
-			'F3' : 114,
-			'F4' : 115,
-			'F5' : 116,
-			'F6' : 117,
-			'F7' : 118,
-			'F8' : 119,
-			'F9' : 120
-		});
+		},
 		
 		/**
-		 * Alias for this.trigger('error', {error : 'message'})
+		 * Exec shortcut
 		 *
-		 * @param  String  error message
-		 * @return elFinder
-		 **/
-		this.error = function() {
-			var arg = arguments[0];
-			return arguments.length == 1 && typeof(arg) == 'function'
-				? self.bind('error', arg)
-				: self.trigger('error', {error : arg});
-		}
-		
-		// create bind/trigger aliases for build-in events
-		$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'], function(i, name) {
-			self[name] = function() {
-				var arg = arguments[0];
-				return arguments.length == 1 && typeof(arg) == 'function'
-					? self.bind(name, arg)
-					: self.trigger(name, $.isPlainObject(arg) ? arg : {});
-			}
-		});
-		
-		// bind core event handlers
-		this
-			.enable(function() {
-				if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
-					enabled = true;
-					$('texarea,input,button').blur();
-				}
-			})
-			.disable(function() {
-				prevEnabled = enabled;
-				enabled = false;
-			})
-			.select(function(e) {
-				selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
-			})
-			.error(function(e) { 
-				var opts  = {
-						cssClass  : 'elfinder-dialog-error',
-						title     : self.i18n('Error'),
-						resizable : false,
-						close     : function() { $(this).elfinderdialog('destroy') },
-						buttons   : {}
-				};
-
-				opts.buttons[self.i18n('Close')] = function() { $(this).elfinderdialog('close'); };
-
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
-			})
-			.bind('tree parents', function(e) {
-				cache(e.data.tree || []);
-			})
-			.bind('tmb', function(e) {
-				$.each(e.data.images||[], function(hash, tmb) {
-					if (files[hash]) {
-						files[hash].tmb = tmb;
-					}
-				})
-			})
-			.add(function(e) {
-				cache(e.data.added||[]);
-			})
-			.change(function(e) {
-				$.each(e.data.changed||[], function(i, file) {
-					var hash = file.hash;
-					files[hash] = files[hash] ? $.extend(files[hash], file) : file;
-				});
-			})
-			.remove(function(e) {
-				var removed = e.data.removed||[],
-					l       = removed.length, 
-					rm      = function(hash) {
-						var file = files[hash];
-						if (file) {
-							if (file.mime == 'directory' && file.dirs) {
-								$.each(files, function(h, f) {
-									f.phash == hash && rm(h);
-								});
-							}
-							delete files[hash];
-						}
-					};
+		 * @param  jQuery.Event  keydown/keypress event
+		 * @return void
+		 */
+		execShortcut = function(e) {
+			var code    = e.keyCode,
+				ctrlKey = e.ctrlKey || e.metaKey;
 			
-				while (l--) {
-					rm(removed[l]);
+			if (enabled) {
+				
+				$.each(shortcuts, function(i, shortcut) {
+					if (shortcut.type    == e.type 
+					&& shortcut.keyCode  == code 
+					&& shortcut.shiftKey == e.shiftKey 
+					&& shortcut.ctrlKey  == ctrlKey 
+					&& shortcut.altKey   == e.altKey) {
+						e.preventDefault()
+						e.stopPropagation();
+						shortcut.callback(e, self);
+						self.debug('shortcut-exec', i+' : '+shortcut.description);
+					}
+				});
+				
+				// prevent tab out of elfinder
+				code == 9 && e.preventDefault();
+			}
+		}
+		;
+
+
+	/**
+	 * Protocol version
+	 *
+	 * @type String
+	 **/
+	this.api = 1;
+	
+	/**
+	 * elFinder use new api
+	 *
+	 * @type Boolean
+	 **/
+	this.newAPI = false;
+	
+	/**
+	 * elFinder use old api
+	 *
+	 * @type Boolean
+	 **/
+	this.oldAPI = true;
+	
+	this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'unknown';
+	
+	/**
+	 * Configuration options
+	 *
+	 * @type Object
+	 **/
+	this.options = $.extend({}, this.options, opts||{});
+	
+	/**
+	 * Css classes 
+	 *
+	 * @type String
+	 **/
+	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
+	
+	/**
+	 * Ajax request type
+	 *
+	 * @type String
+	 * @default "get"
+	 **/
+	this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get',
+	
+	/**
+	 * Any data to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 **/
+	this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
+	
+	/**
+	 * ID. Required to create unique cookie name
+	 *
+	 * @type String
+	 **/
+	this.id = id;
+	
+	/**
+	 * Events namespace
+	 *
+	 * @type String
+	 **/
+	this.namespace = namespace;
+
+	/**
+	 * Interface language
+	 *
+	 * @type String
+	 * @default "en"
+	 **/
+	this.lang = this.i18[this.options.lang] && this.i18[this.options.lang].messages ? this.options.lang : 'en';
+	
+	/**
+	 * Interface direction
+	 *
+	 * @type String
+	 * @default "ltr"
+	 **/
+	this.direction = this.i18[this.lang].direction;
+
+	/**
+	 * i18 messages
+	 *
+	 * @type Object
+	 **/
+	this.messages = this.i18[this.lang].messages;
+
+	
+
+	/**
+	 * Cwd view type
+	 *
+	 * @type String
+	 **/
+	this.view = this.viewType();
+	
+	/**
+	 * Sort files type
+	 *
+	 * @type String
+	 **/
+	this.sort = this.sortType();
+	
+	/**
+	 * Delay in ms before open notification dialog
+	 *
+	 * @type Number
+	 * @default 500
+	 **/
+	this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
+	
+	/**
+	 * Base draggable options
+	 *
+	 * @type Object
+	 **/
+	this.draggable = {
+		appendTo   : 'body',
+		addClasses : true,
+		delay      : 30,
+		revert     : true,
+		refreshPositions : true,
+		cursor     : 'move',
+		cursorAt   : {left : 50, top : 47},
+		drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+		stop       : function() { self.trigger('focus').trigger('dragstop'); },
+		helper     : function(e, ui) {
+			var element = this.id ? $(this) : $(this).parents('[id]:first'),
+				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
+				icon    = function(mime) { return '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>'; },
+				hashes, l;
+			
+			self.trigger('dragstart', {target : element[0], originalEvent : e});
+			
+			hashes = element.is('.elfinder-cwd-file') 
+				? self.selected() 
+				: [self.navId2Hash(element.attr('id'))];
+			
+			helper.append(icon(files[hashes[0]].mime)).data('files', hashes);
+
+			if ((l = hashes.length) > 1) {
+				helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
+			}
+			
+			return helper;
+		}
+	};
+	
+	/**
+	 * Base droppable options
+	 *
+	 * @type Object
+	 **/
+	this.droppable = {
+			tolerance  : 'pointer',
+			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
+			hoverClass : 'elfinder-droppable-active',
+			drop : function(e, ui) {
+				var dst     = $(this),
+					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
+					result  = [],
+					cnt, hash, i, h;
+				
+				if (dst.is('.elfinder-cwd')) {
+					hash = cwd;
+				} else if (dst.is('.elfinder-cwd-file')) {
+					hash = dst.attr('id')
+				} else if (dst.is('.elfinder-navbar-dir')) {
+					hash = self.navId2Hash(dst.attr('id'));
+				}
+
+				cnt = targets.length;
+				
+				while (cnt--) {
+					h = targets[cnt];
+					// ignore drop into itself or in own location
+					h != hash && files[h].phash != hash && result.push(h);
 				}
 				
-			})
-			.bind('search', function(e) {
-				cache(e.data.files)
-			})
-			.bind('rm', function(e) {
-				var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
-			
-				play && play != '' && play != 'no' && $(beeper).html('<source src="./sounds/rm.wav" type="audio/wav">')[0].play()
-			})
-			.viewchange(function() {
-				self.view = self.viewType(self.view == 'icons' ? 'list' : 'icons');
-			})
-			;
-
-		// bind external event handlers
-		$.each(this.options.handlers, function(event, callback) {
-			self.bind(event, callback);
-		});
-
-		/**
-		 * History object. Store visited folders
-		 *
-		 * @type Object
-		 **/
-		this.history = new this.history(this);
-		
-		// in getFileCallback set - change default actions on duble click/enter/ctrl+enter
-		if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
-			this.bind('dblclick', function(e) {
-				e.preventDefault();
-				self.exec('getfile').fail(function() {
-					self.exec('open');
-				});
-			});
-			this.shortcut({
-				pattern     : 'enter',
-				description : 'Select files',
-				callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
-			})
-			.shortcut({
-				pattern     : 'ctrl+enter',
-				description : this.OS == 'mac' ? 'Rename' : 'Open',
-				callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
-			});
-		} 
-		
-		/**
-		 * Loaded commands
-		 *
-		 * @type Object
-		 **/
-		this._commands = {};
-		
-		if (!$.isArray(this.options.commands)) {
-			this.options.commands = [];
-		}
-		// check required commands
-		$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'search', 'quicklook', 'getfile', 'help'], function(i, cmd) {
-			$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
-		});
-
-		// load commands
-		$.each(this.options.commands, function(i, name) {
-			var cmd = self.commands[name];
-			if ($.isFunction(cmd) && !self._commands[name]) {
-				cmd.prototype = base;
-				self._commands[name] = new cmd();
-				self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+				if (result.length) {
+					ui.helper.hide();
+					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey));
+					self.exec('paste', hash).always(function() { self.clipboard([]); });
+					self.trigger('drop', {files : targets});
+				}
 			}
-		});
-		
-		this._plugins = {};
-		$.each(this.options.plugins, function(i, name) {
-			var plugin = self.plugins[name];
-			if ($.isFunction(plugin) && !self._plugins[name]) {
-				self._plugins[name] = new plugin(self);
-			}
-		})
-		
-		// prepare node
-		node.addClass(this.cssClass)
-			.bind(mousedown, function() {
-				!enabled && self.enable();
-			});
-		
-		/**
-		 * UI nodes
-		 *
-		 * @type Object
-		 **/
-		this.ui = {
-			// container for nav panel and current folder container
-			workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
-			// container for folders tree / places
-			navbar : $('<div/>').appendTo(node).elfindernavbar(this),
-			// contextmenu
-			contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(this),
-			// overlay
-			overlay : $('<div/>').appendTo(node).elfinderoverlay({
-				show : function() { self.disable(); },
-				hide : function() { prevEnabled && self.enable(); },
-			}),
-			// current folder container
-			cwd : $('<div/>').appendTo(node).elfindercwd(this),
-			// notification dialog window
-			notify : this.dialog('', {
-				cssClass  : 'elfinder-dialog-notify',
-				position  : {top : '12px', right : '12px'},
-				resizable : false,
-				autoOpen  : false,
-				title     : '&nbsp;',
-				width     : 280
-			}),
-			statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').appendTo(node)
-		}
-		
-		// load required ui
-		$.each(this.options.ui || [], function(i, ui) {
-			var name = 'elfinder'+ui,
-				opts = self.options.uiOptions[ui] || {};
-
-			if (!self.ui[ui] && $.fn[name]) {
-				self.ui[ui] = $('<'+(opts.tag || 'div')+'/>').appendTo(node)[name](self, opts);
-			}
-		});
-		
-		
-		// store instance in node
-		node[0].elfinder = this;
-		
-		// make node resizable
-		this.options.resizable 
-		&& $.fn.resizable 
-		&& node.resizable({
-			handles : 'se',
-			alsoResize : self.ui.workzone,
-			minWidth  : 300,
-			minHeight : 200
-		});
-
-		// update size
-		this.resize(width, height);
-		
-		this.one('load', function() {
-			self.ui.statusbar.append('<div style="clear:both"/>')
-		})
-		// this.ui.statusbar.append('<div class="ui-helper-clearfix"/>')
-
-		// attach events to document
-		$(document)
-			// disable elfinder on click outside elfinder
-			.bind('click.'+this.namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
-			// exec shortcuts
-			.bind(keydown+' '+keypress, execShortcut);
-		
-		// send initial request and start to pray >_<
-		this.trigger('init').
-			ajax({
-				data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
-				preventDone : true,
-				notify      : {type : 'open', cnt : 1, hideCnt : true},
-				freeze      : true
-			})
-			.fail(function() {
-				self.trigger('fail').disable().lastDir('');
-				listeners = {};
-				shortcuts = {};
-				$(document).add(node).unbind('.'+this.namespace);
-				self.trigger = function() { };
-			})
-			.done(function(data) {
-				self.load().debug('api', self.api);
-				data = $.extend(true, {}, data);
-				open(data);
-				self.trigger('open', data);
-			});
-		
-		// update ui's size after init
-		this.one('load', function() {
-			node.trigger('resize')
-		});
-		
-		self.timeEnd('load'); //107
+		};
+	
+	/**
+	 * Return true if filemanager is active
+	 *
+	 * @return Boolean
+	 **/
+	this.enabled = function() {
+		return node.is(':visible') && enabled;
 	}
 	
 	/**
-	 * Prototype
+	 * Return true if filemanager is visible
+	 *
+	 * @return Boolean
+	 **/
+	this.visible = function() {
+		return node.is(':visible');
+	}
+	
+	/**
+	 * Return root dir hash for current working directory
+	 * 
+	 * @return String
+	 */
+	this.root = function(hash) {
+		var dir = files[hash || cwd], i;
+		
+		while (dir && dir.phash) {
+			dir = files[dir.phash]
+		}
+		if (dir) {
+			return dir.hash;
+		}
+		
+		while (i in files && files.hasOwnProperty(i)) {
+			dir = files[i]
+			if (!dir.phash && !dir.mime == 'directory' && dir.read) {
+				return dir.hash
+			}
+		}
+		
+		return '';
+	}
+	
+	/**
+	 * Return current working directory info
+	 * 
+	 * @return Object
+	 */
+	this.cwd = function() {
+		return files[cwd] || {};
+	}
+	
+	/**
+	 * Return required cwd option
+	 * 
+	 * @param  String  option name
+	 * @return mixed
+	 */
+	this.option = function(name) {
+		return cwdOptions[name]||'';
+	}
+	
+	/**
+	 * Return file data from current dir or tree by it's hash
+	 * 
+	 * @param  String  file hash
+	 * @return Object
+	 */
+	this.file = function(hash) { 
+		return files[hash]; 
+	};
+	
+	/**
+	 * Return all cached files
+	 * 
+	 * @return Array
+	 */
+	this.files = function() {
+		return $.extend(true, {}, files);
+	}
+	
+	/**
+	 * Return list of file parents hashes include file hash
+	 * 
+	 * @param  String  file hash
+	 * @return Array
+	 */
+	this.parents = function(hash) {
+		var parents = [],
+			dir;
+		
+		while ((dir = this.file(hash))) {
+			parents.unshift(dir.hash);
+			hash = dir.phash;
+		}
+		return parents;
+	}
+	
+	/**
+	 * Return file path
+	 * 
+	 * @param  Object  file
+	 * @return String
+	 */
+	this.path = function(hash) {
+		var file = files[hash];
+		return file.path 
+			? file.path
+			: file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
+	}
+	
+	/**
+	 * Return file url if set
+	 * 
+	 * @param  Object  file
+	 * @return String
+	 */
+	this.url = function(hash) {
+		var file = files[hash],
+			path = '';
+
+		if (file.url) {
+			return file.url;
+		}
+		if (cwdOptions.url && (path = this.path(hash))) {
+			path = path.replace(cwdOptions.separator, '/');
+			return cwdOptions.url + path.substr(path.indexOf('/')+1);
+		}
+		return '';
+	}
+	
+	this.tmb = function(hash) {
+		var file = files[hash],
+			url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
+		
+		if (url && ($.browser.opera || $.browser.msie)) {
+			url += '?_=' + new Date().getTime();
+		}
+		return url;
+	}
+	
+	/**
+	 * Return selected files hashes
+	 *
+	 * @return Array
+	 **/
+	this.selected = function() {
+		return selected.slice(0);
+	}
+	
+	/**
+	 * Return selected files info
+	 * 
+	 * @return Array
+	 */
+	this.selectedFiles = function() {
+		return $.map(selected, function(hash) { return files[hash] || null });
+	};
+	
+	/**
+	 * Return true if file with required name existsin required folder
+	 * 
+	 * @param  String  file name
+	 * @param  String  parent folder hash
+	 * @return Boolean
+	 */
+	this.fileByName = function(name, phash) {
+		var hash;
+	
+		for (hash in files) {
+			if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
+				return files[hash];
+			}
+		}
+	};
+	
+	/**
+	 * Valid data for required command based on rules
+	 * 
+	 * @param  String  command name
+	 * @param  Object  cammand's data
+	 * @return Boolean
+	 */
+	this.validResponse = function(cmd, data) {
+		return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
+	}
+	
+	/**
+	 * Proccess ajax request.
+	 * Fired events :
+	 * @todo
+	 * @example
+	 * @todo
+	 * @return $.Deferred
+	 */
+	this.request = function(options) {
+		var self     = this,
+			o        = this.options,
+			errors   = this.errors,
+			dfrd     = $.Deferred(),
+			// request data
+			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
+			// command name
+			cmd      = data.cmd,
+			// call default fail callback (display error dialog) ?
+			deffail  = !(options.preventDefault || options.preventFail),
+			// call default success callback ?
+			defdone  = !(options.preventDefault || options.preventDone),
+			// options for notify dialog
+			notify   = $.extend({}, options.notify),
+			// do not normalize data - return as is
+			raw      = !!options.raw,
+			// sync files on request fail
+			syncOnFail = options.syncOnFail,
+			// open notify dialog timeout		
+			timeout, 
+			// request options
+			options = $.extend({
+				url      : o.url,
+				async    : true,
+				type     : this.requestType,
+				dataType : 'json',
+				cache    : false,
+				// timeout  : 100,
+				data     : data
+			}, options.options || {}),
+			/**
+			 * Default success handler. 
+			 * Call default data handlers and fire event with command name.
+			 *
+			 * @param Object  normalized response data
+			 * @return void
+			 **/
+			done = function(data) {
+				data.warning && self.error(data.warning);
+				
+				cmd == 'open' && open($.extend(true, {}, data));
+
+				// fire some event to update cache/ui
+				data.removed && data.removed.length && self.remove(data);
+				data.added   && data.added.length   && self.add(data);
+				data.changed && data.changed.length && self.change(data);
+				
+				// fire event with command name
+				self.trigger(cmd, data);
+			},
+			/**
+			 * Request error handler. Reject dfrd with correct error message.
+			 *
+			 * @param jqxhr  request object
+			 * @param String request status
+			 * @return void
+			 **/
+			error = function(xhr, status) {
+				var error;
+				
+				switch (status) {
+					case 'abort':
+						error = xhr.quiet ? '' : [errors.connect, errors.abort];
+						break;
+					case 'timeout':	    
+						error = [errors.connect, errors.timeout];
+						break;
+					case 'parsererror': 
+						error = [errors.response, errors.json];
+						break;
+					default:
+						if (xhr.status == 403) {
+							error = [errors.connect, errors.access];
+						} else if (xhr.status == 404) {
+							error = [errors.connect, errors.notfound];
+						} else {
+							error = errors.connect;
+						} 
+				}
+				
+				dfrd.reject(error, xhr, status);
+			},
+			/**
+			 * Request success handler. Valid response data and reject/resolve dfrd.
+			 *
+			 * @param Object  response data
+			 * @param String request status
+			 * @return void
+			 **/
+			success = function(response) {
+				if (raw) {
+					return dfrd.resolve(response);
+				}
+
+				if (cmd == 'open' && response && (response.api || response.params)) {
+					setAPI(response.api || 1);
+				}
+				
+				if (!response) {
+					return dfrd.reject([errors.response, errors.empty], xhr);
+				} else if (!$.isPlainObject(response)) {
+					return dfrd.reject([errors.response, errors.json], xhr);
+				} else if (response.error) {
+					return dfrd.reject(response.error, xhr);
+				} else if (!self.validResponse(cmd, response)) {
+					return dfrd.reject(errors.response, xhr);
+				}
+
+				response = self.normalizeData(cmd, response);
+				if (response.options) {
+					cwdOptions = $.extend({}, cwdOptions, response.options);
+				}
+
+				dfrd.resolve(response);
+			},
+			xhr, _xhr
+			;
+
+		defdone && dfrd.done(done);
+		dfrd.fail(function(error) {
+			if (error) {
+				deffail ? self.error(error) : self.debug('error', self.i18n(error));
+			}
+		})
+		
+		if (!cmd) {
+			return dfrd.reject(errors.cmdRequired);
+		}	
+
+		if (syncOnFail) {
+			dfrd.fail(function(error) {
+				error && self.sync();
+			});
+		}
+
+		if (notify.type && notify.cnt) {
+			timeout = setTimeout(function() {
+				self.notify(notify);
+				dfrd.always(function() {
+					notify.cnt = -(parseInt(notify.cnt)||0);
+					self.notify(notify);
+				})
+			}, self.notifyDelay)
+			
+			dfrd.always(function() {
+				clearTimeout(timeout);
+			});
+		}
+		
+		// quiet abort not completed "open" requests
+		if (cmd == 'open') {
+			while ((_xhr = queue.pop())) {
+				if (!_xhr.isRejected() && !_xhr.isResolved()) {
+					_xhr.quiet = true;
+					_xhr.abort();
+				}
+			}
+		}
+
+		xhr = $.ajax(options).fail(error).success(success);
+		
+		// add "open" xhr into queue
+		if (cmd == 'open') {
+			queue.unshift(xhr);
+			dfrd.always(function() {
+				var ndx = $.inArray(xhr, queue);
+				
+				ndx !== -1 && queue.splice(ndx, 1);
+			});
+		}
+		
+		return dfrd;
+	};
+	
+	/**
+	 * Compare current files cache with new files and return diff
+	 * 
+	 * @param  Array  new files
+	 * @return Object
+	 */
+	this.diff = function(incoming) {
+		var raw       = {},
+			added     = [],
+			removed   = [],
+			changed   = [],
+			isChanged = function(hash) {
+				var l = changed.length;
+
+				while (l--) {
+					if (changed[l].hash == hash) {
+						return true;
+					}
+				}
+			};
+			
+		$.each(incoming, function(i, f) {
+			raw[f.hash] = f;
+		});
+			
+		// find removed
+		$.each(files, function(hash, f) {
+			!raw[hash] && removed.push(hash);
+		});
+		
+		// compare files
+		$.each(raw, function(hash, file) {
+			var origin = files[hash];
+
+			if (!origin) {
+				added.push(file);
+			} else {
+				$.each(file, function(prop) {
+					if (file[prop] != origin[prop]) {
+						changed.push(file)
+						return false;
+					}
+				});
+			}
+		});
+		
+		// parents of removed dirs mark as changed (required for tree correct work)
+		$.each(removed, function(i, hash) {
+			var file  = files[hash], 
+				phash = file.phash;
+
+			if (phash 
+			&& file.mime == 'directory' 
+			&& $.inArray(phash, removed) === -1 
+			&& raw[phash] 
+			&& !isChanged(phash)) {
+				changed.push(raw[phash]);
+			}
+		});
+		
+		return {
+			added   : added,
+			removed : removed,
+			changed : changed
+		};
+	}
+	
+	/**
+	 * Sync content
+	 * 
+	 * @return jQuery.Deferred
+	 */
+	this.sync = function() {
+		var self  = this,
+			dfrd  = $.Deferred(),
+			opts1 = {
+				data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
+				preventDefault : true,
+			},
+			opts2 = {
+				data           : {cmd : 'parents', target : cwd},
+				preventDefault : true,
+			},
+			doSync = function(odata, pdata) {
+				var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
+
+				diff.removed.length && self.remove(diff);
+				diff.added.length   && self.add(diff);
+				diff.changed.length && self.change(diff);
+				return dfrd.resolve(diff);
+			},
+			timeout, xhr;
+		
+		xhr = self.oldAPI 
+			? this.ajax(opts1) 
+			: $.when(
+				this.ajax(opts1),
+				this.ajax(opts2)
+			); 
+		
+		xhr.fail(function(error) {
+				dfrd.reject(error);
+				error && self.ajax({
+					data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
+					notify : {type : 'open', cnt : 1, hideCnt : true}
+				});
+			})
+			.done(doSync);
+		
+		return dfrd;
+	}
+	
+	/**
+	 * Attach listener to events
+	 * To bind to multiply events at once, separate events names by space
+	 * 
+	 * @param  String  event(s) name(s)
+	 * @param  Object  event handler
+	 * @return elFinder
+	 */
+	this.bind = function(event, callback) {
+		var i;
+		
+		if (typeof(callback) == 'function') {
+			event = ('' + event).toLowerCase().split(/\s+/);
+			
+			for (i = 0; i < event.length; i++) {
+				if (listeners[event[i]] === void(0)) {
+					listeners[event[i]] = [];
+				}
+				listeners[event[i]].push(callback);
+			}
+		}
+		return this;
+	};
+	
+	/**
+	 * Remove event listener if exists
+	 *
+	 * @param  String    event name
+	 * @param  Function  callback
+	 * @return elFinder
+	 */
+	this.unbind = function(event, callback) {
+		var l = listeners[('' + event).toLowerCase()] || [],
+			i = l.indexOf(callback);
+
+		i > -1 && l.splice(i, 1);
+		//delete callback; // need this?
+		callback = null
+		return this;
+	};
+	
+	/**
+	 * Fire event - send notification to all event listeners
+	 *
+	 * @param  String   event type
+	 * @param  Object   data to send across event
+	 * @return elFinder
+	 */
+	this.trigger = function(event, data) {
+		var event    = event.toLowerCase(),
+			handlers = listeners[event] || [], i, j;
+		
+		this.debug('event-'+event, data)
+		
+		if (handlers.length) {
+			event = $.Event(event);
+			for (i = 0; i < handlers.length; i++) {
+				// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+				event.data = $.extend(true, {}, data);
+				try {
+					if (handlers[i](event, this) === false 
+					|| event.isDefaultPrevented()) {
+						this.debug('event-stoped', event.type);
+						break;
+					}
+				} catch (ex) {
+					window.console && window.console.log && window.console.log(ex);
+				}
+				
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Bind keybord shortcut to keydown event
+	 *
+	 * @example
+	 *    elfinder.shortcut({ 
+	 *       pattern : 'ctrl+a', 
+	 *       description : 'Select all files', 
+	 *       callback : function(e) { ... }, 
+	 *       keypress : true|false (bind to keypress instead of keydown) 
+	 *    })
+	 *
+	 * @param  Object  shortcut config
+	 * @return elFinder
+	 */
+	this.shortcut = function(s) {
+		var patterns, pattern, code, i, parts;
+		
+		if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
+			patterns = s.pattern.toUpperCase().split(/\s+/);
+			
+			for (i= 0; i < patterns.length; i++) {
+				pattern = patterns[i]
+				parts   = pattern.split('+');
+				code    = (code = parts.pop()).length == 1 
+					? code > 0 ? code : code.charCodeAt(0) 
+					: $.ui.keyCode[code];
+
+				if (code && !shortcuts[pattern]) {
+					shortcuts[pattern] = {
+						keyCode     : code,
+						altKey      : $.inArray('ALT', parts)   != -1,
+						ctrlKey     : $.inArray('CTRL', parts)  != -1,
+						shiftKey    : $.inArray('SHIFT', parts) != -1,
+						type        : s.type || 'keydown',
+						callback    : s.callback,
+						description : s.description,
+						pattern     : pattern
+					};
+				}
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Registered shortcuts
+	 *
+	 * @type Object
+	 **/
+	this.shortcuts = function() {
+		var ret = [];
+		
+		$.each(shortcuts, function(i, s) {
+			ret.push([s.pattern, self.i18n(s.description)]);
+		});
+		return ret;
+	};
+	
+	/**
+	 * Get/set clipboard content.
+	 * Return new clipboard content.
+	 *
+	 * @example
+	 *   this.clipboard([]) - clean clipboard
+	 *   this.clipboard([{...}, {...}], true) - put 2 files in clipboard and mark it as cutted
+	 * 
+	 * @param  Array    new files hashes
+	 * @param  Boolean  cut files?
+	 * @return Array
+	 */
+	this.clipboard = function(hashes, cut) {
+		var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
+		
+		if (hashes !== void(0)) {
+			clipboard.length && this.trigger('unlockfiles', {files : map()});
+			
+			clipboard = $.map(hashes||[], function(hash) {
+				var file = files[hash];
+				if (file) {
+					return {
+						hash   : hash,
+						phash  : file.phash,
+						name   : file.name,
+						read   : file.read,
+						locked : file.locked,
+						cut    : !!cut
+					}
+				}
+				return null;
+			});
+			this.trigger('changeclipboard', {clipboard : clipboard.slice(0, clipboard.length)});
+			cut && this.trigger('lockfiles', {files : map()});
+		}
+
+		// return copy of clipboard instead of refrence
+		return clipboard.slice(0, clipboard.length);
+	}
+	
+	/**
+	 * Return true if command enabled
+	 * 
+	 * @param  String  command name
+	 * @return Boolean
+	 */
+	this.isCommandEnabled = function(name) {
+		return this._commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
+	}
+	
+	/**
+	 * Exec command and return result;
+	 *
+	 * @param  String         command name
+	 * @param  String|Array   usualy files hashes
+	 * @param  String|Array   command options
+	 * @return $.Deferred
+	 */		
+	this.exec = function(cmd, files, opts) {
+		return this._commands[cmd] && this.isCommandEnabled(cmd) 
+			? this._commands[cmd].exec(files, opts) 
+			: $.Deferred().reject('No such command');
+	}
+	
+	/**
+	 * Create and return dialog.
+	 *
+	 * @param  String|DOMElement  dialog content
+	 * @param  Object             dialog options
+	 * @return jQuery
+	 */
+	this.dialog = function(content, options) {
+		return $('<div/>').append(content).appendTo(node).elfinderdialog(options);
+	}
+	
+	/**
+	 * Return UI widget or node
+	 *
+	 * @param  String  ui name
+	 * @return jQuery
+	 */
+	this.getUI = function(ui) {
+		return this.ui[ui] || node;
+	}
+	
+	this.command = function(name) {
+		return name === void(0) ? this._commands : this._commands[name];
+	}
+	
+	/**
+	 * Resize elfinder node
+	 * 
+	 * @param  String|Number  width
+	 * @param  Number         height
+	 * @return void
+	 */
+	this.resize = function(w, h) {
+		node.css('width', w).height(h).trigger('resize');
+	}
+	
+	/**
+	 * Restore elfinder node size
+	 * 
+	 * @return elFinder
+	 */
+	this.restoreSize = function() {
+		this.resize(width, height);
+	}
+	
+	/**
+	 * Destroy this elFinder instance
+	 *
+	 * @return void
+	 **/
+	this.destroy = function() {
+		if (node && node[0].elfinder) {
+			this.trigger('destroy').disable();
+			listeners = {};
+			shortcuts = {};
+			$(document).add(node).unbind('.'+this.namespace);
+			self.trigger = function() { }
+			node.children().remove();
+			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
+			node[0].elfinder = null;
+		}
+	}
+	
+	/*************  init stuffs  ****************/
+	
+	// check jquery ui
+	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
+		return alert(this.i18n(this.errors.jquiInvalid));
+	}
+	// check node
+	if (!node.length) {
+		return alert(this.i18n(this.errors.nodeRequired));
+	}
+	// check connector url
+	if (!this.options.url) {
+		return alert(this.i18n(this.errors.urlRequired));
+	}
+	
+	$.extend($.ui.keyCode, {
+		'F1' : 112,
+		'F2' : 113,
+		'F3' : 114,
+		'F4' : 115,
+		'F5' : 116,
+		'F6' : 117,
+		'F7' : 118,
+		'F8' : 119,
+		'F9' : 120
+	});
+	
+	/**
+	 * Alias for this.trigger('error', {error : 'message'})
+	 *
+	 * @param  String  error message
+	 * @return elFinder
+	 **/
+	this.error = function() {
+		var arg = arguments[0];
+		return arguments.length == 1 && typeof(arg) == 'function'
+			? self.bind('error', arg)
+			: self.trigger('error', {error : arg});
+	}
+	
+	// create bind/trigger aliases for build-in events
+	$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'], function(i, name) {
+		self[name] = function() {
+			var arg = arguments[0];
+			return arguments.length == 1 && typeof(arg) == 'function'
+				? self.bind(name, arg)
+				: self.trigger(name, $.isPlainObject(arg) ? arg : {});
+		}
+	});
+	
+	// bind core event handlers
+	this
+		.enable(function() {
+			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
+				enabled = true;
+				$('texarea,input,button').blur();
+			}
+		})
+		.disable(function() {
+			prevEnabled = enabled;
+			enabled = false;
+		})
+		.select(function(e) {
+			selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
+		})
+		.error(function(e) { 
+			var opts  = {
+					cssClass  : 'elfinder-dialog-error',
+					title     : self.i18n('Error'),
+					resizable : false,
+					close     : function() { $(this).elfinderdialog('destroy') },
+					buttons   : {}
+			};
+
+			opts.buttons[self.i18n('Close')] = function() { $(this).elfinderdialog('close'); };
+
+			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+		})
+		.bind('tree parents', function(e) {
+			cache(e.data.tree || []);
+		})
+		.bind('tmb', function(e) {
+			$.each(e.data.images||[], function(hash, tmb) {
+				if (files[hash]) {
+					files[hash].tmb = tmb;
+				}
+			})
+		})
+		.add(function(e) {
+			cache(e.data.added||[]);
+		})
+		.change(function(e) {
+			$.each(e.data.changed||[], function(i, file) {
+				var hash = file.hash;
+				files[hash] = files[hash] ? $.extend(files[hash], file) : file;
+			});
+		})
+		.remove(function(e) {
+			var removed = e.data.removed||[],
+				l       = removed.length, 
+				rm      = function(hash) {
+					var file = files[hash];
+					if (file) {
+						if (file.mime == 'directory' && file.dirs) {
+							$.each(files, function(h, f) {
+								f.phash == hash && rm(h);
+							});
+						}
+						delete files[hash];
+					}
+				};
+		
+			while (l--) {
+				rm(removed[l]);
+			}
+			
+		})
+		.bind('search', function(e) {
+			cache(e.data.files)
+		})
+		.bind('rm', function(e) {
+			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
+		
+			play && play != '' && play != 'no' && $(beeper).html('<source src="./sounds/rm.wav" type="audio/wav">')[0].play()
+		})
+		.viewchange(function() {
+			self.view = self.viewType(self.view == 'icons' ? 'list' : 'icons');
+		})
+		;
+
+	// bind external event handlers
+	$.each(this.options.handlers, function(event, callback) {
+		self.bind(event, callback);
+	});
+
+	/**
+	 * History object. Store visited folders
+	 *
+	 * @type Object
+	 **/
+	this.history = new this.history(this);
+	
+	// in getFileCallback set - change default actions on duble click/enter/ctrl+enter
+	if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
+		this.bind('dblclick', function(e) {
+			e.preventDefault();
+			self.exec('getfile').fail(function() {
+				self.exec('open');
+			});
+		});
+		this.shortcut({
+			pattern     : 'enter',
+			description : 'Select files',
+			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
+		})
+		.shortcut({
+			pattern     : 'ctrl+enter',
+			description : this.OS == 'mac' ? 'Rename' : 'Open',
+			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
+		});
+	} 
+	
+	/**
+	 * Loaded commands
+	 *
+	 * @type Object
+	 **/
+	this._commands = {};
+	
+	if (!$.isArray(this.options.commands)) {
+		this.options.commands = [];
+	}
+	// check required commands
+	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'search', 'quicklook', 'getfile', 'help'], function(i, cmd) {
+		$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
+	});
+
+	// load commands
+	$.each(this.options.commands, function(i, name) {
+		var cmd = self.commands[name];
+		if ($.isFunction(cmd) && !self._commands[name]) {
+			cmd.prototype = base;
+			self._commands[name] = new cmd();
+			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+		}
+	});
+	
+	this._plugins = {};
+	$.each(this.options.plugins, function(i, name) {
+		var plugin = self.plugins[name];
+		if ($.isFunction(plugin) && !self._plugins[name]) {
+			self._plugins[name] = new plugin(self);
+		}
+	})
+	
+	// prepare node
+	node.addClass(this.cssClass)
+		.bind(mousedown, function() {
+			!enabled && self.enable();
+		});
+	
+	/**
+	 * UI nodes
+	 *
+	 * @type Object
+	 **/
+	this.ui = {
+		// container for nav panel and current folder container
+		workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
+		// container for folders tree / places
+		navbar : $('<div/>').appendTo(node).elfindernavbar(this),
+		// contextmenu
+		contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(this),
+		// overlay
+		overlay : $('<div/>').appendTo(node).elfinderoverlay({
+			show : function() { self.disable(); },
+			hide : function() { prevEnabled && self.enable(); },
+		}),
+		// current folder container
+		cwd : $('<div/>').appendTo(node).elfindercwd(this),
+		// notification dialog window
+		notify : this.dialog('', {
+			cssClass  : 'elfinder-dialog-notify',
+			position  : {top : '12px', right : '12px'},
+			resizable : false,
+			autoOpen  : false,
+			title     : '&nbsp;',
+			width     : 280
+		}),
+		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').appendTo(node)
+	}
+	
+	// load required ui
+	$.each(this.options.ui || [], function(i, ui) {
+		var name = 'elfinder'+ui,
+			opts = self.options.uiOptions[ui] || {};
+
+		if (!self.ui[ui] && $.fn[name]) {
+			self.ui[ui] = $('<'+(opts.tag || 'div')+'/>').appendTo(node)[name](self, opts);
+		}
+	});
+	
+	
+	// store instance in node
+	node[0].elfinder = this;
+	
+	// make node resizable
+	this.options.resizable 
+	&& $.fn.resizable 
+	&& node.resizable({
+		handles : 'se',
+		alsoResize : self.ui.workzone,
+		minWidth  : 300,
+		minHeight : 200
+	});
+
+	// update size
+	this.resize(width, height);
+	
+	this.one('load', function() {
+		self.ui.statusbar.append('<div style="clear:both"/>')
+	})
+	// this.ui.statusbar.append('<div class="ui-helper-clearfix"/>')
+
+	// attach events to document
+	$(document)
+		// disable elfinder on click outside elfinder
+		.bind('click.'+this.namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+		// exec shortcuts
+		.bind(keydown+' '+keypress, execShortcut);
+	
+	// send initial request and start to pray >_<
+	this.trigger('init').
+		ajax({
+			data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
+			preventDone : true,
+			notify      : {type : 'open', cnt : 1, hideCnt : true},
+			freeze      : true
+		})
+		.fail(function() {
+			self.trigger('fail').disable().lastDir('');
+			listeners = {};
+			shortcuts = {};
+			$(document).add(node).unbind('.'+this.namespace);
+			self.trigger = function() { };
+		})
+		.done(function(data) {
+			self.load().debug('api', self.api);
+			data = $.extend(true, {}, data);
+			open(data);
+			self.trigger('open', data);
+		});
+	
+	// update ui's size after init
+	this.one('load', function() {
+		node.trigger('resize')
+	});
+	
+	self.timeEnd('load'); //107
+}
+
+/**
+ * Prototype
+ * 
+ * @type  Object
+ */
+elFinder.prototype = {
+	
+	res : function(type, id) {
+		return this.resources[type] && this.resources[type][id];
+	}, 
+	
+	/**
+	 * Internationalization object
 	 * 
 	 * @type  Object
 	 */
-	elFinder.prototype = {
+	i18 : {
+		en : {
+			translator  : '',
+			language    : 'English',
+			direction   : 'ltr',
+			messages    : {}
+		}
+	},
+	
+	/**
+	 * Errors messages
+	 * 
+	 * @type  Object
+	 */
+	errors : {
+		uknown     : 'Unknown error.',
+		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and draggable components included.',
+		node       : 'elFinder required DOM Element to be created.',
+		url        : 'Invalid elFinder configuration! You have to set URL option.',
+		access     : 'Access denied.',
+		connect    : 'Unable to connect to backend.',
+		abort      : 'Connection aborted.',
+		timeout    : 'Connection timeout.',
+		response   : 'Invalid backend response.',
+		json       : 'Data is not JSON.',
+		empty      : 'Data is empty.',
+		nocmd      : 'Backend request required command name.',
+		open       : 'Unable to open "$1".',
+		notdir     : 'Object is not a folder.', 
+		notfile    : 'Object is not a file.', 
+		read       : 'Unable to read "$1".',
+		write      : 'Unable to write into "$1".',
+		denied     : 'Permission denied.',
+		locked     : '"$1" is locked and can not be renamed, moved or removed.',
+		exists     : 'File named "$1" already exists in this location.',
+		name       : 'Invalid file name.',
+		notfound   : 'File not found.',
+		popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
+		copy       : 'Unable to copy "$1".',
+		move       : 'Unable to move "$1".',
+		copyinself : 'Unable to copy "$1" into itself.',
+		rm         : 'Unable to remove "$1".',
+		extract    : 'Unable to extract files from "$1".',
+		archive    : 'Unable to create archive.',
+		notarchive : 'File is not archive or has unsupported archive type.'
 		
-		res : function(type, id) {
-			return this.resources[type] && this.resources[type][id];
-		}, 
-		
-		/**
-		 * Internationalization object
-		 * 
-		 * @type  Object
-		 */
-		i18 : {
-			en : {
-				translator  : '',
-				language    : 'English',
-				direction   : 'ltr',
-				messages    : {}
-			}
+	},
+	/**
+	 * File mimetype to kind mapping
+	 * 
+	 * @type  Object
+	 */
+	kinds : {
+		'unknown'                       : 'Unknown',
+		'directory'                     : 'Folder',
+		'symlink'                       : 'Alias',
+		'symlink-broken'                : 'Broken alias',
+		'application/x-empty'           : 'Plain text',
+		'application/postscript'        : 'Postscript document',
+		'application/octet-stream'      : 'Application',
+		'application/x-executable'      : 'Application',
+		'application/vnd.ms-office'     : 'Microsoft Office document',
+		'application/vnd.ms-word'       : 'Microsoft Word document',  
+	    'application/vnd.ms-excel'      : 'Microsoft Excel document',
+		'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
+		'application/pdf'               : 'Portable Document Format (PDF)',
+		'application/xml'               : 'XML document', 
+		'application/vnd.oasis.opendocument.text' : 'Open Office document',
+		'application/x-shockwave-flash' : 'Flash application',
+		'application/flash-video'       : 'Flash video',
+		'application/x-bittorrent'      : 'Bittorrent file',
+		'application/javascript'        : 'Javascript source',
+		'application/rtf'               : 'Rich Text Format (RTF)',
+		'application/x-gzip'            : 'GZIP archive', 
+	    'application/x-bzip2'           : 'BZIP archive', 
+	    'application/zip'               : 'ZIP archive',  
+	    'application/x-rar'             : 'RAR archive',
+		'application/x-tar'             : 'TAR archive', 
+		'application/x-7z-compressed'   : '7z archive',
+		'application/x-jar'             : 'Java JAR file',
+		'text/plain'                    : 'Plain text',
+	    'text/x-php'                    : 'PHP source',
+		'text/html'                     : 'HTML document', 
+		'text/javascript'               : 'Javascript source',
+		'text/css'                      : 'Cascading style sheet',  
+	    'text/rtf'                      : 'Rich Text Format',
+		'text/rtfd'                     : 'Rich Text Format',
+		'text/x-c'                      : 'C source', 
+		'text/x-csrc'                   : 'C source',
+		'text/x-chdr'                   : 'C header source',
+		'text/x-c++'                    : 'C++ source', 
+		'text/x-c++src'                 : 'C++ source',
+		'text/x-c++hdr'                 : 'C++ header source',
+		'text/x-shellscript'            : 'Unix shell script',
+	    'text/x-python'                 : 'Python source',
+		'text/x-java'                   : 'Java source',
+		'text/x-java-source'            : 'Java source',
+		'text/x-ruby'                   : 'Ruby source',
+		'text/x-perl'                   : 'Perl script',
+		'text/x-sql'                    : 'SQL source',
+	    'text/xml'                      : 'XML document', 
+		'text/x-comma-separated-values' : 'Comma separated values',
+		'image/x-ms-bmp'                : 'BMP image',
+	    'image/jpeg'                    : 'JPEG image',   
+	    'image/gif'                     : 'GIF image',    
+	    'image/png'                     : 'PNG image',
+	    'image/tiff'                    : 'TIFF image',   
+		'image/x-targa'                 : 'TGA image',
+	    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
+		'image/xbm'                 : 'X bitmap image',
+		'audio/mpeg'                    : 'MPEG audio',  
+		'audio/midi'                    : 'MIDI audio',
+		'audio/ogg'                     : 'Ogg Vorbis audio',
+		'audio/mp4'                     : 'MPEG-4 audio',
+		'audio/x-m4a'                   : 'MPEG-4 audio',
+		'audio/wav'                     : 'WAV audio',
+		'video/x-dv'                    : 'DV movie',
+		'video/mp4'                     : 'MPEG-4 movie',
+		'video/mpeg'                    : 'MPEG movie',  
+		'video/x-msvideo'               : 'AVI movie',
+		'video/quicktime'               : 'Quick Time movie',
+		'video/x-ms-wmv'                : 'Windows Media Movie',   
+		'video/x-flv'                   : 'Flash movie',
+		'video/x-matroska'              : 'Matroska movie',
+		'video/ogg'                     : 'Ogg movie'
+	},
+	
+	textMimes : [
+		'application/javascript', 
+		'application/xhtml+xml', 
+		'audio/x-mp3-playlist', 
+		'application/x-bittorrent', 
+		'application/x-web-config',
+		'application/docbook+xml',
+		'application/x-php',
+		'application/x-perl',
+		'application/x-awk',
+		'application/x-config',
+		'application/x-csh',
+		'application/xml'
+	],
+	/**
+	 * Ajax request data validation rules
+	 * 
+	 * @type  Object
+	 */
+	rules : {
+		oldapi : {
+			defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
+			tmb      : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+			upload   : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); }
 		},
-		
-		/**
-		 * Errors messages
-		 * 
-		 * @type  Object
-		 */
-		errors : {
-			uknown     : 'Unknown error.',
-			jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and draggable components included.',
-			node       : 'elFinder required DOM Element to be created.',
-			url        : 'Invalid elFinder configuration! You have to set URL option.',
-			access     : 'Access denied.',
-			connect    : 'Unable to connect to backend.',
-			abort      : 'Connection aborted.',
-			timeout    : 'Connection timeout.',
-			response   : 'Invalid backend response.',
-			json       : 'Data is not JSON.',
-			empty      : 'Data is empty.',
-			nocmd      : 'Backend request required command name.',
-			open       : 'Unable to open "$1".',
-			notdir     : 'Object is not a folder.', 
-			notfile    : 'Object is not a file.', 
-			read       : 'Unable to read "$1".',
-			write      : 'Unable to write into "$1".',
-			denied     : 'Permission denied.',
-			locked     : '"$1" is locked and can not be renamed, moved or removed.',
-			exists     : 'File named "$1" already exists in this location.',
-			name       : 'Invalid file name.',
-			notfound   : 'File not found.',
-			popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
-			copy       : 'Unable to copy "$1".',
-			move       : 'Unable to move "$1".',
-			copyinself : 'Unable to copy "$1" into itself.',
-			rm         : 'Unable to remove "$1".',
-			extract    : 'Unable to extract files from "$1".',
-			archive    : 'Unable to create archive.',
-			notarchive : 'File is not archive or has unsupported archive type.'
-			
-		},
-		/**
-		 * File mimetype to kind mapping
-		 * 
-		 * @type  Object
-		 */
-		kinds : {
-			'unknown'                       : 'Unknown',
-			'directory'                     : 'Folder',
-			'symlink'                       : 'Alias',
-			'symlink-broken'                : 'Broken alias',
-			'application/x-empty'           : 'Plain text',
-			'application/postscript'        : 'Postscript document',
-			'application/octet-stream'      : 'Application',
-			'application/x-executable'      : 'Application',
-			'application/vnd.ms-office'     : 'Microsoft Office document',
-			'application/vnd.ms-word'       : 'Microsoft Word document',  
-		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
-			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
-			'application/pdf'               : 'Portable Document Format (PDF)',
-			'application/xml'               : 'XML document', 
-			'application/vnd.oasis.opendocument.text' : 'Open Office document',
-			'application/x-shockwave-flash' : 'Flash application',
-			'application/flash-video'       : 'Flash video',
-			'application/x-bittorrent'      : 'Bittorrent file',
-			'application/javascript'        : 'Javascript source',
-			'application/rtf'               : 'Rich Text Format (RTF)',
-			'application/x-gzip'            : 'GZIP archive', 
-		    'application/x-bzip2'           : 'BZIP archive', 
-		    'application/zip'               : 'ZIP archive',  
-		    'application/x-rar'             : 'RAR archive',
-			'application/x-tar'             : 'TAR archive', 
-			'application/x-7z-compressed'   : '7z archive',
-			'application/x-jar'             : 'Java JAR file',
-			'text/plain'                    : 'Plain text',
-		    'text/x-php'                    : 'PHP source',
-			'text/html'                     : 'HTML document', 
-			'text/javascript'               : 'Javascript source',
-			'text/css'                      : 'Cascading style sheet',  
-		    'text/rtf'                      : 'Rich Text Format',
-			'text/rtfd'                     : 'Rich Text Format',
-			'text/x-c'                      : 'C source', 
-			'text/x-csrc'                   : 'C source',
-			'text/x-chdr'                   : 'C header source',
-			'text/x-c++'                    : 'C++ source', 
-			'text/x-c++src'                 : 'C++ source',
-			'text/x-c++hdr'                 : 'C++ header source',
-			'text/x-shellscript'            : 'Unix shell script',
-		    'text/x-python'                 : 'Python source',
-			'text/x-java'                   : 'Java source',
-			'text/x-java-source'            : 'Java source',
-			'text/x-ruby'                   : 'Ruby source',
-			'text/x-perl'                   : 'Perl script',
-			'text/x-sql'                    : 'SQL source',
-		    'text/xml'                      : 'XML document', 
-			'text/x-comma-separated-values' : 'Comma separated values',
-			'image/x-ms-bmp'                : 'BMP image',
-		    'image/jpeg'                    : 'JPEG image',   
-		    'image/gif'                     : 'GIF image',    
-		    'image/png'                     : 'PNG image',
-		    'image/tiff'                    : 'TIFF image',   
-			'image/x-targa'                 : 'TGA image',
-		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-			'image/xbm'                 : 'X bitmap image',
-			'audio/mpeg'                    : 'MPEG audio',  
-			'audio/midi'                    : 'MIDI audio',
-			'audio/ogg'                     : 'Ogg Vorbis audio',
-			'audio/mp4'                     : 'MPEG-4 audio',
-			'audio/x-m4a'                   : 'MPEG-4 audio',
-			'audio/wav'                     : 'WAV audio',
-			'video/x-dv'                    : 'DV movie',
-			'video/mp4'                     : 'MPEG-4 movie',
-			'video/mpeg'                    : 'MPEG movie',  
-			'video/x-msvideo'               : 'AVI movie',
-			'video/quicktime'               : 'Quick Time movie',
-			'video/x-ms-wmv'                : 'Windows Media Movie',   
-			'video/x-flv'                   : 'Flash movie',
-			'video/x-matroska'              : 'Matroska movie',
-			'video/ogg'                     : 'Ogg movie'
-		},
-		
-		textMimes : [
-			'application/javascript', 
-			'application/xhtml+xml', 
-			'audio/x-mp3-playlist', 
-			'application/x-bittorrent', 
-			'application/x-web-config',
-			'application/docbook+xml',
-			'application/x-php',
-			'application/x-perl',
-			'application/x-awk',
-			'application/x-config',
-			'application/x-csh',
-			'application/xml'
-		],
-		/**
-		 * Ajax request data validation rules
-		 * 
-		 * @type  Object
-		 */
-		rules : {
-			oldapi : {
-				defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-				tmb      : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-				upload   : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); }
+		newapi : {
+			defaults : function(data) {  
+				// if (!data) {
+				// 	return false;
+				// }
+				if (!data
+				|| (data.added && !$.isArray(data.added))
+				||  (data.removed && !$.isArray(data.removed))
+				||  (data.changed && !$.isArray(data.changed))) {
+					return false;
+				}
+				return true;
 			},
-			newapi : {
-				defaults : function(data) {  
-					// if (!data) {
-					// 	return false;
-					// }
-					if (!data
-					|| (data.added && !$.isArray(data.added))
-					||  (data.removed && !$.isArray(data.removed))
-					||  (data.changed && !$.isArray(data.changed))) {
-						return false;
-					}
-					return true;
-				},
-				open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
-				tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
-				parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-				tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-				upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
-				search  : function(data) { return data && data.files && $.isArray(data.files)}
-			}
-		},
-		
-		/**
-		 * Sort types for current directory content
-		 * 
-		 * @type  Object
-		 */
-		sorts : {
-			nameDirsFirst : 1,
-			kindDirsFirst : 2,
-			sizeDirsFirst : 3,
-			name : 4,
-			kind : 5,
-			size : 6
-		},
-		
-		/**
-		 * Commands costructors
-		 *
-		 * @type Object
-		 */
-		commands : {},
-		
-		/**
-		 * Plugins costructors
-		 *
-		 * @type Object
-		 */
-		plugins : {},
-		
-		/**
-		 * Wrapper for elFinder.ajax method.
-		 * Required to add websokets support in the future
-		 *
-		 * @param Object request options
-		 * @return $.Deferred
-		 */
-		ajax : function(options) {
-			return this.request(options);
-		},
-		
-		/**
-		 * Bind callback to event(s) The callback is executed at most once per event.
-		 * To bind to multiply events at once, separate events names by space
-		 *
-		 * @param  String    event name
-		 * @param  Function  callback
-		 * @return elFinder
-		 */
-		one : function(event, callback) {
-			var self = this,
-				h    = $.proxy(callback, function(event) {
-					setTimeout(function() {self.unbind(event.type, h);}, 3);
-					return callback.apply(this, arguments);
-				});
-			return this.bind(event, h);
-		},
-		
-		/**
-		 * Get/set cookie
-		 *
-		 * @param  String       cookie name
-		 * @param  String|void  cookie value
-		 * @return String|void
-		 */
-		cookie : function(name, value) {
-			var d, o, c, i;
+			open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
+			tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
+			parents : function(data) { return data && data.tree && $.isArray(data.tree); },
+			tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+			upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
+			search  : function(data) { return data && data.files && $.isArray(data.files)}
+		}
+	},
+	
+	/**
+	 * Sort types for current directory content
+	 * 
+	 * @type  Object
+	 */
+	sorts : {
+		nameDirsFirst : 1,
+		kindDirsFirst : 2,
+		sizeDirsFirst : 3,
+		name : 4,
+		kind : 5,
+		size : 6
+	},
+	
+	/**
+	 * Commands costructors
+	 *
+	 * @type Object
+	 */
+	commands : {},
+	
+	/**
+	 * Plugins costructors
+	 *
+	 * @type Object
+	 */
+	plugins : {},
+	
+	/**
+	 * Wrapper for elFinder.ajax method.
+	 * Required to add websokets support in the future
+	 *
+	 * @param Object request options
+	 * @return $.Deferred
+	 */
+	ajax : function(options) {
+		return this.request(options);
+	},
+	
+	/**
+	 * Bind callback to event(s) The callback is executed at most once per event.
+	 * To bind to multiply events at once, separate events names by space
+	 *
+	 * @param  String    event name
+	 * @param  Function  callback
+	 * @return elFinder
+	 */
+	one : function(event, callback) {
+		var self = this,
+			h    = $.proxy(callback, function(event) {
+				setTimeout(function() {self.unbind(event.type, h);}, 3);
+				return callback.apply(this, arguments);
+			});
+		return this.bind(event, h);
+	},
+	
+	/**
+	 * Get/set cookie
+	 *
+	 * @param  String       cookie name
+	 * @param  String|void  cookie value
+	 * @return String|void
+	 */
+	cookie : function(name, value) {
+		var d, o, c, i;
 
-			if (value === void(0)) {
-				if (document.cookie && document.cookie != '') {
-					c = document.cookie.split(';');
-					name += '=';
-					for (i=0; i<c.length; i++) {
-						c[i] = $.trim(c[i]);
-						if (c[i].substring(0, name.length) == name) {
-							return decodeURIComponent(c[i].substring(name.length));
-						}
+		if (value === void(0)) {
+			if (document.cookie && document.cookie != '') {
+				c = document.cookie.split(';');
+				name += '=';
+				for (i=0; i<c.length; i++) {
+					c[i] = $.trim(c[i]);
+					if (c[i].substring(0, name.length) == name) {
+						return decodeURIComponent(c[i].substring(name.length));
 					}
 				}
-				return '';
-			} 
-
-			o = $.extend({}, this.options.cookie);
-			if (value === null) {
-				value = '';
-				o.expires = -1;
 			}
-			if (typeof(o.expires) == 'number') {
-				d = new Date();
-				d.setTime(d.getTime()+(o.expires * 86400000));
-				o.expires = d;
-			}
-			document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
-			return value;
-		},
-		
-		/**
-		 * Get/set view type (icons | list)
-		 *
-		 * @param  String|void  type
-		 * @return Strng
-		 */
-		viewType : function(t) {
-			var c = 'elfinder-view-'+this.id,
-				r = /^icons|list$/i;
+			return '';
+		} 
 
-			if (t && r.test(t)) {
-				this.cookie(c, (this.view = t));
-			} else if (!this.view) {
-				t = this.cookie(c);
-				this.view = r.test(t) ? t : 'icons'
-			}
-			return this.view;
-		},
-		
-		/**
-		 * Get/set view type (icons | list)
-		 *
-		 * @param  String|void  type
-		 * @return Strng
-		 */
-		sortType : function(t) {
-			var c = 'elfinder-sort-'+this.id;
+		o = $.extend({}, this.options.cookie);
+		if (value === null) {
+			value = '';
+			o.expires = -1;
+		}
+		if (typeof(o.expires) == 'number') {
+			d = new Date();
+			d.setTime(d.getTime()+(o.expires * 86400000));
+			o.expires = d;
+		}
+		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
+		return value;
+	},
+	
+	/**
+	 * Get/set view type (icons | list)
+	 *
+	 * @param  String|void  type
+	 * @return Strng
+	 */
+	viewType : function(t) {
+		var c = 'elfinder-view-'+this.id,
+			r = /^icons|list$/i;
 
-			if (t && this.sorts[t]) {
-				this.cookie(c, (this.sort = t));
-			} else if (!this.sort) {
-				t = this.cookie(c);
-				this.sort = this.sorts[t] ? t : this.sorts[this.options.sort] || 1;
-			}
-			return this.sort;
-		},
-		
-		/**
-		 * Get/set last opened directory
-		 * 
-		 * @param  String|undefined  dir hash
-		 * @return String
-		 */
-		lastDir : function(key) { 
-			return this.options.rememberLastDir ? this.cookie('el-finder-last-'+this.id, key) : ''; 
-		},
-		
-		/**
-		 * Node for escape html entities in texts
-		 * 
-		 * @type jQuery
-		 */
-		_node : $('<span/>'),
-		
-		/**
-		 * Replace not html-safe symbols to html entities
-		 * 
-		 * @param  String  text to escape
-		 * @return String
-		 */
-		escape : function(name) {
-			return this._node.text(name).html();
-		},
-		
-		waterfall : function() {
-			var steps   = [],
-				dfrd    = $.Deferred(),
-				pointer = 0;
+		if (t && r.test(t)) {
+			this.cookie(c, (this.view = t));
+		} else if (!this.view) {
+			t = this.cookie(c);
+			this.view = r.test(t) ? t : 'icons'
+		}
+		return this.view;
+	},
+	
+	/**
+	 * Get/set view type (icons | list)
+	 *
+	 * @param  String|void  type
+	 * @return Strng
+	 */
+	sortType : function(t) {
+		var c = 'elfinder-sort-'+this.id;
 
-				$.each(arguments, function(i, a) {
-					steps.push(function() {
-						var args = [].slice.apply(arguments), d;
+		if (t && this.sorts[t]) {
+			this.cookie(c, (this.sort = t));
+		} else if (!this.sort) {
+			t = this.cookie(c);
+			this.sort = this.sorts[t] ? t : this.sorts[this.options.sort] || 1;
+		}
+		return this.sort;
+	},
+	
+	/**
+	 * Get/set last opened directory
+	 * 
+	 * @param  String|undefined  dir hash
+	 * @return String
+	 */
+	lastDir : function(key) { 
+		return this.options.rememberLastDir ? this.cookie('el-finder-last-'+this.id, key) : ''; 
+	},
+	
+	/**
+	 * Node for escape html entities in texts
+	 * 
+	 * @type jQuery
+	 */
+	_node : $('<span/>'),
+	
+	/**
+	 * Replace not html-safe symbols to html entities
+	 * 
+	 * @param  String  text to escape
+	 * @return String
+	 */
+	escape : function(name) {
+		return this._node.text(name).html();
+	},
+	
+	waterfall : function() {
+		var steps   = [],
+			dfrd    = $.Deferred(),
+			pointer = 0;
 
-						if (typeof(a) == 'function') {
-							if (!((d = a.apply(null, args)) && d.promise)) {
-								d = $.Deferred()[d === false ? 'reject' : 'resolve'](d);
-							}
-						} else if (a && a.promise) {
-							d = a;
-						} else {
-							d = $.Deferred()[a === false ? 'reject' : 'resolve'](a);
+			$.each(arguments, function(i, a) {
+				steps.push(function() {
+					var args = [].slice.apply(arguments), d;
+
+					if (typeof(a) == 'function') {
+						if (!((d = a.apply(null, args)) && d.promise)) {
+							d = $.Deferred()[d === false ? 'reject' : 'resolve'](d);
 						}
+					} else if (a && a.promise) {
+						d = a;
+					} else {
+						d = $.Deferred()[a === false ? 'reject' : 'resolve'](a);
+					}
 
-						d.fail(function() {
-							dfrd.reject.apply(dfrd, [].slice.apply(arguments));
-						})
-						.done(function(data) {
-							pointer++;
-							args.push(data);
+					d.fail(function() {
+						dfrd.reject.apply(dfrd, [].slice.apply(arguments));
+					})
+					.done(function(data) {
+						pointer++;
+						args.push(data);
 
-							pointer == steps.length
-								? dfrd.resolve.apply(dfrd, args)
-								: steps[pointer].apply(null, args);
-						});
+						pointer == steps.length
+							? dfrd.resolve.apply(dfrd, args)
+							: steps[pointer].apply(null, args);
 					});
 				});
-
-				steps.length ? steps[0]() : dfrd.resolve();
-		},
-		
-		/**
-		 * Cleanup ajax data.
-		 * For old api convert data into new api format
-		 * 
-		 * @param  String  command name
-		 * @param  Object  data from backend
-		 * @return Object
-		 */
-		normalizeData : function(cmd, data) {
-			var self   = this,
-				files  = {},
-				result = {}, 
-				filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
-				phash, cwd;
-			
-			if (this.newAPI) {
-				if (data.files) {
-					data.files = $.map(data.files, filter);
-				} 
-				if (data.tree) {
-					data.tree = $.map(data.tree, filter);
-				}
-
-				if (data.added) {
-					data.added = $.map(data.added, filter);
-				}
-				if (data.changed) {
-					data.changed = $.map(data.changed, filter);
-				}
-				if (data.api) {
-					data.init = true;
-				}
-				return data;
-			}
-			
-			if (/^(tmb|read|edit)$/i.test(cmd)) {
-				return data;
-			}
-			// self.log(data)
-			phash = data.cwd.hash;
-			
-			if (data.tree) {
-				$.each(this.normalizeOldTree(data.tree), function(i, file) {
-					files[file.hash] = file;
-				});
-			}
-			
-			$.each(data.cdc, function(i, file) {
-				var hash = file.hash;
-				
-				if (files[hash]) {
-					files[hash].date   = file.date;
-					files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
-				} else {
-					files[hash] = self.normalizeOldFile(file, phash);
-				}
 			});
 
-			if (!data.tree) {
-				$.each(this.files(), function(hash, file) {
-					if (file.phash != phash && file.mime == 'directory') {
-						files[hash] = file;
-					}
-				})
-			}
-
-			if (data.error) {
-				result.error = data.error;
-			}
-			if (data.warning) {
-				result.warning = data.warning;
-			}
-			
-			if (cmd == 'open') {
-				return {
-						cwd     : files[phash] || this.normalizeOldFile(data.cwd),
-						files   : $.map(files, filter),
-						options : self.normalizeOldOptions(data),
-						init    : !!data.params,
-						debug   : data.debug
-					};
-				return result;
+			steps.length ? steps[0]() : dfrd.resolve();
+	},
+	
+	/**
+	 * Cleanup ajax data.
+	 * For old api convert data into new api format
+	 * 
+	 * @param  String  command name
+	 * @param  Object  data from backend
+	 * @return Object
+	 */
+	normalizeData : function(cmd, data) {
+		var self   = this,
+			files  = {},
+			result = {}, 
+			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
+			phash, cwd;
+		
+		if (this.newAPI) {
+			if (data.files) {
+				data.files = $.map(data.files, filter);
 			} 
-			
-			
-			
-			return $.extend({
-				current : data.cwd.hash,
-				error   : data.error,
-				warning : data.warning,
-				options : {tmb : !!data.tmb}
-			}, this.diff($.map(files, filter)));
-		},
-		
-		/**
-		 * Convert old api tree into plain array of dirs
-		 *
-		 * @param  Object  root dir
-		 * @return Array
-		 */
-		normalizeOldTree : function(root) {
-			var self     = this,
-				result   = [],
-				traverse = function(dirs, phash) {
-					var i, dir;
-					
-					for (i = 0; i < dirs.length; i++) {
-						dir = dirs[i];
-						result.push(self.normalizeOldFile(dir, phash))
-						dir.dirs.length && traverse(dir.dirs, dir.hash);
-					}
-				};
-
-			traverse([root]);
-
-			return result;
-		},
-		
-		/**
-		 * Convert file info from old api format into new one
-		 *
-		 * @param  Object  file
-		 * @param  String  parent dir hash
-		 * @return Object
-		 */
-		normalizeOldFile : function(file, phash, tmb) {
-			var mime = file.mime || 'directory',
-				size = mime == 'directory' && !file.linkTo ? 0 : file.size,
-				info = {
-					hash   : file.hash,
-					phash  : phash,
-					name   : file.name,
-					mime   : mime,
-					date   : file.date || 'unknown',
-					size   : size,
-					read   : file.read,
-					write  : file.write,
-					locked : !phash ? true : file.rm === void(0) ? false : !file.rm
-				};
-			
-			if (file.link) {
-				info.link = file.link;
+			if (data.tree) {
+				data.tree = $.map(data.tree, filter);
 			}
 
-			if (file.linkTo) {
-				info.linkTo = file.linkTo;
+			if (data.added) {
+				data.added = $.map(data.added, filter);
 			}
-			
-			if (file.tmb) {
-				info.tmb = file.tmb;
-			} else if (info.mime.indexOf('image/') === 0 && tmb) {
-				info.tmb = 1;
+			if (data.changed) {
+				data.changed = $.map(data.changed, filter);
 			}
-				
-			if (file.dirs && file.dirs.length) {
-				info.dirs = true;
+			if (data.api) {
+				data.init = true;
 			}
-			if (file.dim) {
-				info.dim = file.dim;
-			}
-			if (file.resize) {
-				info.resize = file.resize;
-			}
-			return info;
-		},
+			return data;
+		}
 		
-		/**
-		 * Convert old api options
-		 *
-		 * @param  Object  options
-		 * @return Object
-		 */
-		normalizeOldOptions : function(data) {
-			var opts = {
-					path          : data.cwd.rel,
-					disabled      : data.disabled || [],
-					tmb           : !!data.tmb,
-					copyOverwrite : true
-				};
-			
-			if (data.params) {
-				opts.url = data.params.url;
-				opts.archives = data.params.archives;
-				opts.extract = data.params.extract;
-			}
-			
-			if (opts.path.indexOf('/') !== -1) {
-				opts.separator = '/';
-			} else if (opts.path.indexOf('\\') !== -1) {
-				opts.separator = '\\';
-			}
-			return opts;
-		},
+		if (/^(tmb|read|edit)$/i.test(cmd)) {
+			return data;
+		}
+		// self.log(data)
+		phash = data.cwd.hash;
 		
-		/**
-		 * Compare files based on elFinder.sort
-		 *
-		 * @param  Object  file
-		 * @param  Object  file
-		 * @return Number
-		 */
-		compare : function(f1, f2) {
-			var m1 = f1.mime,
-				m2 = f2.mime,
-				d1 = m1 == 'directory',
-				d2 = m2 == 'directory',
-				n1 = f1.name.toLowerCase(),
-				n2 = f2.name.toLowerCase(),
-				s1 = d1 ? 0 : f1.size || 0,
-				s2 = d2 ? 0 : f2.size || 0,
-				sort = this.sort;
-
-			// dir first	
-			if (sort <= 3) {
-				if (d1 && !d2) {
-					return -1;
-				}
-				if (!d1 && d2) {
-					return 1;
-				}
-			}
-			// by mime
-			if ((sort == 2 || sort == 5) && m1 != m2) {
-				return m1 > m2 ? 1 : -1;
-			}
-			// by size
-			if ((sort == 3 || sort == 6) && s1 != s2) {
-				return s1 > s2 ? 1 : -1;
-			}
-
-			return f1.name.localeCompare(f2.name);
-			
-		},
+		if (data.tree) {
+			$.each(this.normalizeOldTree(data.tree), function(i, file) {
+				files[file.hash] = file;
+			});
+		}
 		
-		/**
-		 * Sort files based on elFinder.sort
-		 *
-		 * @param  Array  files
-		 * @return Array
-		 */
-		sortFiles : function(files) {
-			return files.sort($.proxy(this.compare, this));
-		},
-		
-		/**
-		 * Notifications messages by types
-		 *
-		 * @type  Object
-		 */
-		notifyType : {
-			open        : 'Open folder',
-			openfile    : 'Open file',
-			reload      : 'Reload folder content',
-			mkdir       : 'Creating directory',
-			mkfile      : 'Creating files',
-			rm          : 'Delete files',
-			copy        : 'Copy files',
-			move        : 'Move files',
-			preparecopy : 'Prepare to copy files',
-			rename      : 'Rename files',
-			upload      : 'Uploading files',
-			download    : 'Downloading files',
-			save        : 'Save files',
-			archive     : 'Creating archive',
-			extract     : 'Extracting files from archive'
-		},
-		
-		/**
-		 * Create new notification type.
-		 * Required for future (not included in core elFinder) commands/plugins
-		 *
-		 * @param  String    notification type
-		 * @param  String  notification message
-		 * @return elFinder
-		 */
-		registerNotifyType : function(type, msg) {
-			if (!this.notifyType[type] && type && msg) {
-				this.notifyType[type] = msg;
-			}
-			return this;
-		},
-		
-		/**
-		 * Open notification dialog 
-		 * and append/update message for required notification type.
-		 *
-		 * @param  Object  options
-		 * @example  
-		 * this.notify({
-		 *    type : 'copy',
-		 *    msg : 'Copy files', // not required for known types @see this.notifyType
-		 *    cnt : 3,
-		 *    hideCnt : false, // true for not show count
-		 *    progress : 10 // progress bar percents (use cnt : 0 to update progress bar)
-		 * })
-		 * @return elFinder
-		 */
-		notify : function(opts) {
-			var type     = opts.type,
-				msg      = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'),
-				ndialog  = this.ui.notify,
-				notify   = ndialog.children('.elfinder-notify-'+type),
-				ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
-				delta    = opts.cnt,
-				progress = opts.progress >= 0 && opts.progress <= 100 ? opts.progress : 0,
-				cnt, total, prc;
+		$.each(data.cdc, function(i, file) {
+			var hash = file.hash;
 			
-			if (!type) {
-				return this;
-			}
-			
-			if (!notify.length) {
-				notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg))
-					.appendTo(ndialog)
-					.data('cnt', 0);
-
-				if (progress) {
-					notify.data({progress : 0, total : 0});
-				}
-			}
-
-			cnt = delta + parseInt(notify.data('cnt'));
-			
-			if (cnt > 0) {
-				!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
-				ndialog.is(':hidden') && ndialog.elfinderdialog('open');
-				notify.data('cnt', cnt);
-				
-				if (progress < 100
-				&& (total = notify.data('total')) >= 0
-				&& (prc = notify.data('progress')) >= 0) {
-
-					total    = delta + parseInt(notify.data('total'));
-					prc      = progress + prc;
-					progress = parseInt(prc/total);
-					notify.data({progress : prc, total : total});
-					
-					ndialog.find('.elfinder-notify-progress')
-						.animate({
-							width : (progress < 100 ? progress : 100)+'%'
-						}, 20);
-				}
-				
+			if (files[hash]) {
+				files[hash].date   = file.date;
+				files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
 			} else {
-				notify.remove();
-				!ndialog.children().length && ndialog.elfinderdialog('close');
+				files[hash] = self.normalizeOldFile(file, phash);
 			}
-			
-			return this;
-		},
-		
-		/**
-		 * Open confirmation dialog 
-		 *
-		 * @param  Object  options
-		 * @example  
-		 * this.confirm({
-		 *    title : 'Remove files',
-		 *    text  : 'Here is question text',
-		 *    accept : {  // accept callback - required
-		 *      label : 'Continue',
-		 *      callback : function(applyToAll) { fm.log('Ok') }
-		 *    },
-		 *    cancel : { // cancel callback - required
-		 *      label : 'Cancel',
-		 *      callback : function() { fm.log('Cancel')}
-		 *    },
-		 *    reject : { // reject callback - optionally
-		 *      label : 'No',
-		 *      callback : function(applyToAll) { fm.log('No')}
-		 *   },
-		 *   all : true  // display checkbox "Apply to all"
-		 * })
-		 * @return elFinder
-		 */
-		confirm : function(opts) {
-			var complete = false,
-				options = {
-					cssClass  : 'elfinder-dialog-confirm',
-					modal     : true,
-					resizable : false,
-					title     : this.i18n(opts.title || 'Confirmation required'),
-					buttons   : {},
-					close     : function() { 
-						!complete && opts.cancel.callback();
-						$(this).elfinderdialog('destroy');
-					}
-				},
-				apply = this.i18n('Apply to all'),
-				checkbox;
+		});
 
-			
-			if (opts.reject) {
-				options.buttons[this.i18n(opts.reject.label)] = function() {
-					opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
-					complete = true;
-					$(this).elfinderdialog('close')
+		if (!data.tree) {
+			$.each(this.files(), function(hash, file) {
+				if (file.phash != phash && file.mime == 'directory') {
+					files[hash] = file;
+				}
+			})
+		}
+
+		if (data.error) {
+			result.error = data.error;
+		}
+		if (data.warning) {
+			result.warning = data.warning;
+		}
+		
+		if (cmd == 'open') {
+			return {
+					cwd     : files[phash] || this.normalizeOldFile(data.cwd),
+					files   : $.map(files, filter),
+					options : self.normalizeOldOptions(data),
+					init    : !!data.params,
+					debug   : data.debug
 				};
+			return result;
+		} 
+		
+		
+		
+		return $.extend({
+			current : data.cwd.hash,
+			error   : data.error,
+			warning : data.warning,
+			options : {tmb : !!data.tmb}
+		}, this.diff($.map(files, filter)));
+	},
+	
+	/**
+	 * Convert old api tree into plain array of dirs
+	 *
+	 * @param  Object  root dir
+	 * @return Array
+	 */
+	normalizeOldTree : function(root) {
+		var self     = this,
+			result   = [],
+			traverse = function(dirs, phash) {
+				var i, dir;
+				
+				for (i = 0; i < dirs.length; i++) {
+					dir = dirs[i];
+					result.push(self.normalizeOldFile(dir, phash))
+					dir.dirs.length && traverse(dir.dirs, dir.hash);
+				}
+			};
+
+		traverse([root]);
+
+		return result;
+	},
+	
+	/**
+	 * Convert file info from old api format into new one
+	 *
+	 * @param  Object  file
+	 * @param  String  parent dir hash
+	 * @return Object
+	 */
+	normalizeOldFile : function(file, phash, tmb) {
+		var mime = file.mime || 'directory',
+			size = mime == 'directory' && !file.linkTo ? 0 : file.size,
+			info = {
+				hash   : file.hash,
+				phash  : phash,
+				name   : file.name,
+				mime   : mime,
+				date   : file.date || 'unknown',
+				size   : size,
+				read   : file.read,
+				write  : file.write,
+				locked : !phash ? true : file.rm === void(0) ? false : !file.rm
+			};
+		
+		if (file.link) {
+			info.link = file.link;
+		}
+
+		if (file.linkTo) {
+			info.linkTo = file.linkTo;
+		}
+		
+		if (file.tmb) {
+			info.tmb = file.tmb;
+		} else if (info.mime.indexOf('image/') === 0 && tmb) {
+			info.tmb = 1;
+		}
+			
+		if (file.dirs && file.dirs.length) {
+			info.dirs = true;
+		}
+		if (file.dim) {
+			info.dim = file.dim;
+		}
+		if (file.resize) {
+			info.resize = file.resize;
+		}
+		return info;
+	},
+	
+	/**
+	 * Convert old api options
+	 *
+	 * @param  Object  options
+	 * @return Object
+	 */
+	normalizeOldOptions : function(data) {
+		var opts = {
+				path          : data.cwd.rel,
+				disabled      : data.disabled || [],
+				tmb           : !!data.tmb,
+				copyOverwrite : true
+			};
+		
+		if (data.params) {
+			opts.url = data.params.url;
+			opts.archives = data.params.archives;
+			opts.extract = data.params.extract;
+		}
+		
+		if (opts.path.indexOf('/') !== -1) {
+			opts.separator = '/';
+		} else if (opts.path.indexOf('\\') !== -1) {
+			opts.separator = '\\';
+		}
+		return opts;
+	},
+	
+	/**
+	 * Compare files based on elFinder.sort
+	 *
+	 * @param  Object  file
+	 * @param  Object  file
+	 * @return Number
+	 */
+	compare : function(f1, f2) {
+		var m1 = f1.mime,
+			m2 = f2.mime,
+			d1 = m1 == 'directory',
+			d2 = m2 == 'directory',
+			n1 = f1.name.toLowerCase(),
+			n2 = f2.name.toLowerCase(),
+			s1 = d1 ? 0 : f1.size || 0,
+			s2 = d2 ? 0 : f2.size || 0,
+			sort = this.sort;
+
+		// dir first	
+		if (sort <= 3) {
+			if (d1 && !d2) {
+				return -1;
+			}
+			if (!d1 && d2) {
+				return 1;
+			}
+		}
+		// by mime
+		if ((sort == 2 || sort == 5) && m1 != m2) {
+			return m1 > m2 ? 1 : -1;
+		}
+		// by size
+		if ((sort == 3 || sort == 6) && s1 != s2) {
+			return s1 > s2 ? 1 : -1;
+		}
+
+		return f1.name.localeCompare(f2.name);
+		
+	},
+	
+	/**
+	 * Sort files based on elFinder.sort
+	 *
+	 * @param  Array  files
+	 * @return Array
+	 */
+	sortFiles : function(files) {
+		return files.sort($.proxy(this.compare, this));
+	},
+	
+	/**
+	 * Notifications messages by types
+	 *
+	 * @type  Object
+	 */
+	notifyType : {
+		open        : 'Open folder',
+		openfile    : 'Open file',
+		reload      : 'Reload folder content',
+		mkdir       : 'Creating directory',
+		mkfile      : 'Creating files',
+		rm          : 'Delete files',
+		copy        : 'Copy files',
+		move        : 'Move files',
+		preparecopy : 'Prepare to copy files',
+		rename      : 'Rename files',
+		upload      : 'Uploading files',
+		download    : 'Downloading files',
+		save        : 'Save files',
+		archive     : 'Creating archive',
+		extract     : 'Extracting files from archive'
+	},
+	
+	/**
+	 * Create new notification type.
+	 * Required for future (not included in core elFinder) commands/plugins
+	 *
+	 * @param  String    notification type
+	 * @param  String  notification message
+	 * @return elFinder
+	 */
+	registerNotifyType : function(type, msg) {
+		if (!this.notifyType[type] && type && msg) {
+			this.notifyType[type] = msg;
+		}
+		return this;
+	},
+	
+	/**
+	 * Open notification dialog 
+	 * and append/update message for required notification type.
+	 *
+	 * @param  Object  options
+	 * @example  
+	 * this.notify({
+	 *    type : 'copy',
+	 *    msg : 'Copy files', // not required for known types @see this.notifyType
+	 *    cnt : 3,
+	 *    hideCnt : false, // true for not show count
+	 *    progress : 10 // progress bar percents (use cnt : 0 to update progress bar)
+	 * })
+	 * @return elFinder
+	 */
+	notify : function(opts) {
+		var type     = opts.type,
+			msg      = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'),
+			ndialog  = this.ui.notify,
+			notify   = ndialog.children('.elfinder-notify-'+type),
+			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
+			delta    = opts.cnt,
+			progress = opts.progress >= 0 && opts.progress <= 100 ? opts.progress : 0,
+			cnt, total, prc;
+		
+		if (!type) {
+			return this;
+		}
+		
+		if (!notify.length) {
+			notify = $(ntpl.replace(/\{type\}/g, type).replace(/\{msg\}/g, msg))
+				.appendTo(ndialog)
+				.data('cnt', 0);
+
+			if (progress) {
+				notify.data({progress : 0, total : 0});
+			}
+		}
+
+		cnt = delta + parseInt(notify.data('cnt'));
+		
+		if (cnt > 0) {
+			!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
+			ndialog.is(':hidden') && ndialog.elfinderdialog('open');
+			notify.data('cnt', cnt);
+			
+			if (progress < 100
+			&& (total = notify.data('total')) >= 0
+			&& (prc = notify.data('progress')) >= 0) {
+
+				total    = delta + parseInt(notify.data('total'));
+				prc      = progress + prc;
+				progress = parseInt(prc/total);
+				notify.data({progress : prc, total : total});
+				
+				ndialog.find('.elfinder-notify-progress')
+					.animate({
+						width : (progress < 100 ? progress : 100)+'%'
+					}, 20);
 			}
 			
-			
-			options.buttons[this.i18n(opts.accept.label)] = function() {
-				opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
+		} else {
+			notify.remove();
+			!ndialog.children().length && ndialog.elfinderdialog('close');
+		}
+		
+		return this;
+	},
+	
+	/**
+	 * Open confirmation dialog 
+	 *
+	 * @param  Object  options
+	 * @example  
+	 * this.confirm({
+	 *    title : 'Remove files',
+	 *    text  : 'Here is question text',
+	 *    accept : {  // accept callback - required
+	 *      label : 'Continue',
+	 *      callback : function(applyToAll) { fm.log('Ok') }
+	 *    },
+	 *    cancel : { // cancel callback - required
+	 *      label : 'Cancel',
+	 *      callback : function() { fm.log('Cancel')}
+	 *    },
+	 *    reject : { // reject callback - optionally
+	 *      label : 'No',
+	 *      callback : function(applyToAll) { fm.log('No')}
+	 *   },
+	 *   all : true  // display checkbox "Apply to all"
+	 * })
+	 * @return elFinder
+	 */
+	confirm : function(opts) {
+		var complete = false,
+			options = {
+				cssClass  : 'elfinder-dialog-confirm',
+				modal     : true,
+				resizable : false,
+				title     : this.i18n(opts.title || 'Confirmation required'),
+				buttons   : {},
+				close     : function() { 
+					!complete && opts.cancel.callback();
+					$(this).elfinderdialog('destroy');
+				}
+			},
+			apply = this.i18n('Apply to all'),
+			checkbox;
+
+		
+		if (opts.reject) {
+			options.buttons[this.i18n(opts.reject.label)] = function() {
+				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
-			
-			options.buttons[this.i18n(opts.cancel.label)] = function() {
-				$(this).elfinderdialog('close')
-			};
-			
-			if (opts.all) {
-				if (opts.reject) {
-					options.width = 370;
-				}
-				options.create = function() {
-					checkbox = $('<input type="checkbox" />');
-					$(this).next().children().before($('<label>'+apply+'</label>').prepend(checkbox));
-				}
-				
-				options.open = function() {
-					var pane = $(this).next(),
-						width = parseInt(pane.children(':first').outerWidth() + pane.children(':last').outerWidth());
-
-					if (width > parseInt(pane.width())) {
-						$(this).closest('.elfinder-dialog').width(width+30);
-					}
-				}
-			}
-			
-			return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
-		},
+		}
 		
-		/**
-		 * Valid file name
-		 * 
-		 * @param  String  name to test
-		 * @return Boolean
-		 */
-		validName : function(name) {
-			var validator = this.options.validName;
-			
-			if (!name 
-			|| typeof(name) != 'string' 
-			|| /^\.\.?$/.test(name)
-			|| name.indexOf(this.cwd().separator) !== -1
-			) {
-				return false;
+		
+		options.buttons[this.i18n(opts.accept.label)] = function() {
+			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
+			complete = true;
+			$(this).elfinderdialog('close')
+		};
+		
+		options.buttons[this.i18n(opts.cancel.label)] = function() {
+			$(this).elfinderdialog('close')
+		};
+		
+		if (opts.all) {
+			if (opts.reject) {
+				options.width = 370;
+			}
+			options.create = function() {
+				checkbox = $('<input type="checkbox" />');
+				$(this).next().children().before($('<label>'+apply+'</label>').prepend(checkbox));
 			}
 			
-			if (validator) {
-				if (validator instanceof RegExp) {
-					return validator.test(name);
-				} 
-				if (typeof(validator) == 'function') {
-					return validator(name);
+			options.open = function() {
+				var pane = $(this).next(),
+					width = parseInt(pane.children(':first').outerWidth() + pane.children(':last').outerWidth());
+
+				if (width > parseInt(pane.width())) {
+					$(this).closest('.elfinder-dialog').width(width+30);
 				}
 			}
-			return true;
-		},
+		}
 		
-		/**
-		 * Create unique file name in required dir
-		 * 
-		 * @param  String  file name
-		 * @param  String  parent dir hash
-		 * @return String
-		 */
-		uniqueName : function(prefix, phash) {
-			var i = 0, ext = '', p, name;
-			
-			prefix = this.i18n(prefix);
-			phash = phash || this.cwd().hash;
-
-			if ((p = prefix.indexOf('.txt')) != -1) {
-				ext    = '.txt';
-				prefix = prefix.substr(0, p);
+		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
+	},
+	
+	/**
+	 * Valid file name
+	 * 
+	 * @param  String  name to test
+	 * @return Boolean
+	 */
+	validName : function(name) {
+		var validator = this.options.validName;
+		
+		if (!name 
+		|| typeof(name) != 'string' 
+		|| /^\.\.?$/.test(name)
+		|| name.indexOf(this.cwd().separator) !== -1
+		) {
+			return false;
+		}
+		
+		if (validator) {
+			if (validator instanceof RegExp) {
+				return validator.test(name);
+			} 
+			if (typeof(validator) == 'function') {
+				return validator(name);
 			}
-			
-			name   = prefix+ext;
-			
+		}
+		return true;
+	},
+	
+	/**
+	 * Create unique file name in required dir
+	 * 
+	 * @param  String  file name
+	 * @param  String  parent dir hash
+	 * @return String
+	 */
+	uniqueName : function(prefix, phash) {
+		var i = 0, ext = '', p, name;
+		
+		prefix = this.i18n(prefix);
+		phash = phash || this.cwd().hash;
+
+		if ((p = prefix.indexOf('.txt')) != -1) {
+			ext    = '.txt';
+			prefix = prefix.substr(0, p);
+		}
+		
+		name   = prefix+ext;
+		
+		if (!this.fileByName(name, phash)) {
+			return name;
+		}
+		while (i < 10000) {
+			name = prefix + ' ' + (++i) + ext;
 			if (!this.fileByName(name, phash)) {
 				return name;
 			}
-			while (i < 10000) {
-				name = prefix + ' ' + (++i) + ext;
-				if (!this.fileByName(name, phash)) {
-					return name;
-				}
-			}
-			return prefix + Math.random() + ext;
-		},
-		
-		/**
-		 * Return message translated onto current language
-		 *
-		 * @param  String|Array  message[s]
-		 * @return String
-		 **/
-		i18n : function() {
-			var self = this,
-				messages = this.messages, 
-				input    = [],
-				ignore   = [], 
-				message = function(m) {
-					var file;
-					if (m.indexOf('#') === 0) {
-						if ((file = self.file(m.substr(1)))) {
-							return file.name;
-						}
+		}
+		return prefix + Math.random() + ext;
+	},
+	
+	/**
+	 * Return message translated onto current language
+	 *
+	 * @param  String|Array  message[s]
+	 * @return String
+	 **/
+	i18n : function() {
+		var self = this,
+			messages = this.messages, 
+			input    = [],
+			ignore   = [], 
+			message = function(m) {
+				var file;
+				if (m.indexOf('#') === 0) {
+					if ((file = self.file(m.substr(1)))) {
+						return file.name;
 					}
-					return m;
-				},
-				i, j, m;
-				
-			for (i = 0; i< arguments.length; i++) {
-				m = arguments[i];
-				
-				if (typeof m == 'string') {
-					input.push(message(m));
-				} else if ($.isArray(m)) {
-					for (j = 0; j < m.length; j++) {
-						if (typeof m[j] == 'string') {
-							input.push(message(m[j]));
-						}
+				}
+				return m;
+			},
+			i, j, m;
+			
+		for (i = 0; i< arguments.length; i++) {
+			m = arguments[i];
+			
+			if (typeof m == 'string') {
+				input.push(message(m));
+			} else if ($.isArray(m)) {
+				for (j = 0; j < m.length; j++) {
+					if (typeof m[j] == 'string') {
+						input.push(message(m[j]));
 					}
 				}
 			}
-			
-			for (i = 0; i < input.length; i++) {
-				// dont translate placeholders
-				if ($.inArray(i, ignore) !== -1) {
-					continue;
+		}
+		
+		for (i = 0; i < input.length; i++) {
+			// dont translate placeholders
+			if ($.inArray(i, ignore) !== -1) {
+				continue;
+			}
+			m = input[i];
+			// translate message
+			m = messages[m] || m;
+			// replace placeholders in message
+			m = m.replace(/\$(\d+)/g, function(match, placeholder) {
+				placeholder = i + parseInt(placeholder);
+				if (placeholder > 0 && input[placeholder]) {
+					ignore.push(placeholder)
 				}
-				m = input[i];
-				// translate message
-				m = messages[m] || m;
-				// replace placeholders in message
-				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
-					placeholder = i + parseInt(placeholder);
-					if (placeholder > 0 && input[placeholder]) {
-						ignore.push(placeholder)
-					}
-					return input[placeholder] || '';
-				});
+				return input[placeholder] || '';
+			});
 
-				input[i] = m;
+			input[i] = m;
+		}
+
+		return $.map(input, function(m, i) { return $.inArray(i, ignore) === -1 ? m : null; }).join('<br>');
+	},
+	
+	/**
+	 * Convert mimetype into css classes
+	 * 
+	 * @param  String  file mimetype
+	 * @return String
+	 */
+	mime2class : function(mime) {
+		return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
+	},
+	
+	/**
+	 * Return localized kind of file
+	 * 
+	 * @param  Object|String  file or file mimetype
+	 * @return String
+	 */
+	mime2kind : function(f) {
+		var mime = typeof(f) == 'object' ? f.mime : f,
+			kind = this.kinds[mime]||'unknown';
+
+		if (f.linkTo) {
+			kind = 'Alias';
+		} else if (kind == 'unknown') {
+			if (mime.indexOf('text') === 0) {
+				kind = 'Text document';
+			} else if (mime.indexOf('image') === 0) {
+				kind = 'Image';
+			} else if (mime.indexOf('audio') === 0) {
+				kind = 'Audio media';
+			} else if (mime.indexOf('video') === 0) {
+				kind = 'Video media';
+			} else if (mime.indexOf('application') === 0) {
+				kind = 'Application';
 			}
-
-			return $.map(input, function(m, i) { return $.inArray(i, ignore) === -1 ? m : null; }).join('<br>');
-		},
+		}
 		
-		/**
-		 * Convert mimetype into css classes
-		 * 
-		 * @param  String  file mimetype
-		 * @return String
-		 */
-		mime2class : function(mime) {
-			return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
-		},
-		
-		/**
-		 * Return localized kind of file
-		 * 
-		 * @param  Object|String  file or file mimetype
-		 * @return String
-		 */
-		mime2kind : function(f) {
-			var mime = typeof(f) == 'object' ? f.mime : f,
-				kind = this.kinds[mime]||'unknown';
+		return this.i18n(kind);
+	},
+	
+	/**
+	 * Return localized date
+	 * 
+	 * @param  String  date
+	 * @return String
+	 */
+	formatDate : function(d) {
+		var self = this;
 
-			if (f.linkTo) {
-				kind = 'Alias';
-			} else if (kind == 'unknown') {
-				if (mime.indexOf('text') === 0) {
-					kind = 'Text document';
-				} else if (mime.indexOf('image') === 0) {
-					kind = 'Image';
-				} else if (mime.indexOf('audio') === 0) {
-					kind = 'Audio media';
-				} else if (mime.indexOf('video') === 0) {
-					kind = 'Video media';
-				} else if (mime.indexOf('application') === 0) {
-					kind = 'Application';
-				}
-			}
+		return d == 'unknown' ? self.i18n(d) : (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
+	},
+	
+	/**
+	 * Return css class marks file permissions
+	 * 
+	 * @param  Object  file 
+	 * @return String
+	 */
+	perms2class : function(o) {
+		var c = '';
+		
+		if (!o.read && !o.write) {
+			c = 'elfinder-na';
+		} else if (!o.read) {
+			c = 'elfinder-wo';
+		} else if (!o.write) {
+			c = 'elfinder-ro';
+		}
+		return c;
+	},
+	
+	/**
+	 * Return localized string with file permissions
+	 * 
+	 * @param  Object  file
+	 * @return String
+	 */
+	formatPermissions : function(f) {
+		var p  = [];
 			
-			return this.i18n(kind);
-		},
-		
-		/**
-		 * Return localized date
-		 * 
-		 * @param  String  date
-		 * @return String
-		 */
-		formatDate : function(d) {
-			var self = this;
+		f.read && p.push(this.i18n('read'));
+		f.write && p.push(this.i18n('write'));	
 
-			return d == 'unknown' ? self.i18n(d) : (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
-		},
+		return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('no access');
+	},
+	
+	/**
+	 * Return formated file size
+	 * 
+	 * @param  Number  file size
+	 * @return String
+	 */
+	formatSize : function(s) {
+		var n = 1, u = 'bytes';
 		
-		/**
-		 * Return css class marks file permissions
-		 * 
-		 * @param  Object  file 
-		 * @return String
-		 */
-		perms2class : function(o) {
-			var c = '';
-			
-			if (!o.read && !o.write) {
-				c = 'elfinder-na';
-			} else if (!o.read) {
-				c = 'elfinder-wo';
-			} else if (!o.write) {
-				c = 'elfinder-ro';
-			}
-			return c;
-		},
-		
-		/**
-		 * Return localized string with file permissions
-		 * 
-		 * @param  Object  file
-		 * @return String
-		 */
-		formatPermissions : function(f) {
-			var p  = [];
-				
-			f.read && p.push(this.i18n('read'));
-			f.write && p.push(this.i18n('write'));	
-
-			return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('no access');
-		},
-		
-		/**
-		 * Return formated file size
-		 * 
-		 * @param  Number  file size
-		 * @return String
-		 */
-		formatSize : function(s) {
-			var n = 1, u = 'bytes';
-			
-			if (s > 1073741824) {
-				n = 1073741824;
-				u = 'Gb';
-			} else if (s > 1048576) {
-	            n = 1048576;
-	            u = 'Mb';
-	        } else if (s > 1024) {
-	            n = 1024;
-	            u = 'Kb';
-	        }
-	        return (s > 0 ? Math.round(s/n) : 0) +' '+u;
-		},
-		
-		
-		navHash2Id : function(hash) {
-			return 'nav-'+hash;
-		},
-		
-		navId2Hash : function(id) {
-			return id.substr(4);
-		},
-		
-		log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
-		
-		debug : function(type, m) {
-			var d = this.options.debug;
-
-			if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
-				window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
-			} 
-			return this;
-		},
-		time : function(l) { window.console && window.console.time && window.console.time(l); },
-		timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
-		
-
-	}
+		if (s > 1073741824) {
+			n = 1073741824;
+			u = 'Gb';
+		} else if (s > 1048576) {
+            n = 1048576;
+            u = 'Mb';
+        } else if (s > 1024) {
+            n = 1024;
+            u = 'Kb';
+        }
+        return (s > 0 ? Math.round(s/n) : 0) +' '+u;
+	},
 	
 	
+	navHash2Id : function(hash) {
+		return 'nav-'+hash;
+	},
 	
-})(jQuery);
+	navId2Hash : function(id) {
+		return id.substr(4);
+	},
+	
+	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
+	
+	debug : function(type, m) {
+		var d = this.options.debug;
+
+		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
+			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
+		} 
+		return this;
+	},
+	time : function(l) { window.console && window.console.time && window.console.time(l); },
+	timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
+	
+
+}
