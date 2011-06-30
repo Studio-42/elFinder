@@ -1,3 +1,4 @@
+"use strict";
 $.fn.elfindertree = function(fm) {
 	
 	this.not('.elfinder-navbar-tree').each(function() {
@@ -25,12 +26,14 @@ $.fn.elfindertree = function(fm) {
 			 */
 			subtree   = 'elfinder-navbar-subtree',
 			
+			c = 'class',
+			
 			/**
 			 * Directory class name
 			 *
 			 * @type String
 			 */
-			navdir    = 'elfinder-navbar-dir',
+			navdir    = fm.res(c, 'navdir'),
 			
 			/**
 			 * Collapsed arrow class name
@@ -65,42 +68,42 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			active    = 'ui-state-active',
+			active    = fm.res(c, 'active'),
 			
 			/**
 			 * Droppable dirs dropover class
 			 *
 			 * @type String
 			 */
-			dropover = 'elfinder-droppable-active',
+			dropover = fm.res(c, 'adroppable'),
 			
 			/**
 			 * Hover class name
 			 *
 			 * @type String
 			 */
-			hover    = 'ui-state-hover',
+			hover    = fm.res(c, 'hover'),
 			
 			/**
 			 * Disabled dir class name
 			 *
 			 * @type String
 			 */
-			disabled = 'ui-state-disabled',
+			disabled = fm.res(c, 'disabled'),
 			
 			/**
 			 * Draggable dir class name
 			 *
 			 * @type String
 			 */
-			draggable = 'ui-draggable',
+			draggable = fm.res(c, 'draggable'),
 			
 			/**
 			 * Droppable dir  class name
 			 *
 			 * @type String
 			 */
-			droppable = 'ui-droppable',
+			droppable = fm.res(c, 'droppable'),
 			
 			/**
 			 * Droppable options
@@ -127,6 +130,10 @@ $.fn.elfindertree = function(fm) {
 			 */
 			template = '<div class="elfinder-navbar-dir-wrapper"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="elfinder-navbar-subtree"></div></div>',
 			
+			permsTpl = fm.res('tpl', 'perms'),
+			
+			symlinkTpl = fm.res('tpl', 'symlink'),
+			
 			/**
 			 * Html template replacement methods
 			 *
@@ -135,8 +142,8 @@ $.fn.elfindertree = function(fm) {
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
 				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+fm.perms2class(dir)+' '+(dir.dirs ? collapsed : ''); },
-				permissions : function(dir) { return !dir.read || !dir.write ? '<span class="elfinder-perms"/>' : ''; },
-				symlink     : function(dir) { return dir.link ? '<span class="elfinder-symlink"/>' : ''; }
+				permissions : function(dir) { return !dir.read || !dir.write ? permsTpl : ''; },
+				symlink     : function(dir) { return dir.link ? symlinkTpl : ''; }
 			},
 			
 			/**

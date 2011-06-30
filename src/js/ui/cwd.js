@@ -1,3 +1,4 @@
+"use strict";
 /**
  * elFinder current working directory ui.
  *
@@ -39,13 +40,19 @@ $.fn.elfindercwd = function(fm) {
 			evtEnable = 'enable.'+fm.namespace,
 			
 			c = 'class',
+			/**
+			 * File css class
+			 *
+			 * @type String
+			 **/
+			clFile       = fm.res(c, 'cwdfile'),
 			
 			/**
 			 * Selected css class
 			 *
 			 * @type String
 			 **/
-			fileSelector = '.'+fm.res(c, 'cwdfile'),
+			fileSelector = '.'+clFile,
 			
 			/**
 			 * Selected css class
@@ -110,9 +117,13 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="elfinder-cwd-file {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
+				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
 			},
+			
+			permsTpl = fm.res('tpl', 'perms'),
+			
+			symlinkTpl = fm.res('tpl', 'symlink'),
 			
 			/**
 			 * Template placeholders replacement rules
@@ -142,7 +153,7 @@ $.fn.elfindercwd = function(fm) {
 					return fm.mime2kind(f);
 				},
 				marker : function(f) {
-					return (f.link || f.mime == 'symlink-broken' ? '<span class="elfinder-symlink"/>' : '')+(!f.read || !f.write ? '<span class="elfinder-perms"/>' : '');
+					return (f.link || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
 				}
 			},
 			
@@ -409,7 +420,7 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			makeDroppable = function() {
 				setTimeout(function() {
-					cwd.find('.directory:not(.ui-droppable,.elfinder-na,.elfinder-ro)').droppable(fm.droppable);
+					cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable);
 				}, 20);
 			},
 			
@@ -457,10 +468,7 @@ $.fn.elfindercwd = function(fm) {
 						data        : data,
 						preventFail : true
 					}).done(function(data) {
-						if (fm.view != 'list' 
-						// && data.current == fm.cwd().hash
-						&& attachThumbnails(data.images)
-						&& data.tmb) {
+						if (attachThumbnails(data.images) && data.tmb) {
 							loadThumbnails(true);
 						}
 					});

@@ -11,7 +11,8 @@ elFinder.prototype.resources = {
 		navdir     : 'elfinder-navbar-dir'
 	},
 	tpl : {
-		
+		perms : '<span class="elfinder-perms"/>',
+		symlink : '<span class="elfinder-symlink"/>'
 	},
 	error : {
 		
