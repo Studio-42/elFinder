@@ -1,4 +1,9 @@
-
+"use strict";
+/**
+ * @class  elFinder dialog
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfinderdialog = function(opts) {
 	var dialog;
 	
@@ -23,13 +28,17 @@ $.fn.elfinderdialog = function(opts) {
 	this.filter(':not(.ui-dialog-content)').each(function() {
 		var self       = $(this).addClass('ui-dialog-content ui-widget-content'),
 			parent     = self.parent(),
+			clactive   = 'elfinder-dialog-active',
+			cldialog   = 'elfinder-dialog',
+			clnotify   = 'elfinder-dialog-notify',
+			clhover    = 'ui-state-hover',
 			id         = parseInt(Math.random()*1000000),
 			overlay    = parent.children('.elfinder-overlay'),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"/>')
 				.append(buttonset),
 			
-			dialog = $('<div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  elfinder-dialog '+opts.cssClass+'"/>')
+			dialog = $('<div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  '+cldialog+' '+opts.cssClass+'"/>')
 				.hide()
 				.append(self)
 				.appendTo(parent)
@@ -42,9 +51,9 @@ $.fn.elfinderdialog = function(opts) {
 					e.stopPropagation()
 					$(document).mousedown();
 					
-					if (!dialog.is('.elfinder-dialog-active')) {
-						parent.find('.elfinder-dialog:visible').removeClass('elfinder-dialog-active');
-						dialog.addClass('elfinder-dialog-active').zIndex(maxZIndex() + 1);
+					if (!dialog.is('.'+clactive)) {
+						parent.find('.'+cldialog+':visible').removeClass(clactive);
+						dialog.addClass(clactive).zIndex(maxZIndex() + 1);
 					}
 				})
 				.bind('open', function() {
@@ -53,9 +62,9 @@ $.fn.elfinderdialog = function(opts) {
 					dialog.find(':text:first').focus();
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
-					if (!dialog.is('.elfinder-dialog-notify')) {
+					if (!dialog.is('.'+clnotify)) {
 						
-						parent.find('.elfinder-dialog:visible').not('.elfinder-dialog-notify').each(function() {
+						parent.find('.'+cldialog+':visible').not('.'+clnotify).each(function() {
 							var d     = $(this),
 								top   = parseInt(d.css('top')),
 								left  = parseInt(d.css('left')),
@@ -96,7 +105,7 @@ $.fn.elfinderdialog = function(opts) {
 				}),
 				maxZIndex = function() {
 					var z = parent.zIndex() + 10;
-					parent.find('.elfinder-dialog:visible').each(function() {
+					parent.find('.'+cldialog+':visible').each(function() {
 						var _z;
 						if (this != dialog[0]) {
 							_z = $(this).zIndex();
@@ -122,7 +131,7 @@ $.fn.elfinderdialog = function(opts) {
 
 		if (opts.closeOnEscape) {
 			$(document).bind('keyup.'+id, function(e) {
-				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.is('.elfinder-dialog-active')) {
+				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.is('.'+clactive)) {
 					self.elfinderdialog('close');
 					$(document).unbind('keyup.'+id);
 				}
@@ -144,8 +153,8 @@ $.fn.elfinderdialog = function(opts) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+name+'</span></button>')
 				.click($.proxy(cb, self[0]))
 				.hover(function(e) { $(this)[e.type == 'mouseenter' ? 'focus' : 'blur']() })
-				.focus(function() { $(this).addClass('ui-state-hover') })
-				.blur(function() { $(this).removeClass('ui-state-hover') })
+				.focus(function() { $(this).addClass(clhover) })
+				.blur(function() { $(this).removeClass(clhover) })
 				.keydown(function(e) { 
 					var next;
 					
@@ -167,7 +176,6 @@ $.fn.elfinderdialog = function(opts) {
 					minHeight  : opts.minHeight,
 					alsoResize : this
 				});
-			
 		} 
 			
 		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
