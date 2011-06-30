@@ -1,7 +1,7 @@
 /* quicklook window */
 .elfinder-quicklook {
 	position:absolute;
-	background:url("../images/quicklook-bg.png");
+	background:url("../img/quicklook-bg.png");
 	display:none;
 	overflow:hidden;
 	border-radius:7px;
@@ -15,7 +15,7 @@
 	height:14px;
 	right:5px;
 	bottom:3px;
-	background:url("../images/toolbar.png") 0 -650px no-repeat;}
+	background:url("../img/toolbar.png") 0 -650px no-repeat;}
 
 /* quicklook fullscreen window */
 .elfinder-quicklook-fullscreen {
@@ -161,7 +161,7 @@
 	height:32px;
 	margin:0 7px;
 	float:left;
-	background:url("../images/quicklook-icons.png") 0 0 no-repeat;
+	background:url("../img/quicklook-icons.png") 0 0 no-repeat;
 }
 
 /* fullscreen icon */

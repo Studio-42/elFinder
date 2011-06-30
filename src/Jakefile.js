@@ -10,6 +10,7 @@ require.paths.push('/usr/local/lib/node_modules');
 var sys  = require('sys'),
   fs   = require('fs'),
   path = require('path'),
+  util = require('util'),
   ugp  = require('uglify-js').parser,
   ugu  = require('uglify-js').uglify,
   csp  = require('csso/lib/cssp').parse,
@@ -29,8 +30,8 @@ var files = {
     ]
     .concat(grep('js/ui/', '\\.js$'))
     .concat(grep('js/commands/', '\\.js$')),
-
-  'elfinder.full.css': grep('css/', '\\.css$', 'theme')
+  'elfinder.full.css': grep('css/', '\\.css$', 'theme'),
+  'images':  grep('img/', '\\.png|\\.gif')
   },
   dirmode = 0755,
   buildroot = 'build',
@@ -76,7 +77,7 @@ task('default', function(root){
 });
 
 desc('build elFinder')
-task({'build': ['css/elfinder.min.css', 'js/elfinder.min.js']}, function(){
+task({'build': ['css/elfinder.min.css', 'js/elfinder.min.js', 'images']}, function(){
   console.log('build done');
 });
 
@@ -133,6 +134,20 @@ file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
   ast = ugu.ast_mangle(ast); // get a new AST with mangled names
   ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
   fs.writeFileSync(path.join(buildroot, this.name), ugu.gen_code(ast));
+});
+
+// IMG
+desc('copy images')
+task('images', function(){
+  console.log('copy images');
+  var images = files['images'];
+  for (i in images)
+  {
+    console.log('\t' + images[i]);
+    var srcimg = fs.createReadStream(path.join(src, images[i]));
+    var dstimg = fs.createWriteStream(path.join(buildroot, images[i]));
+    util.pump(srcimg, dstimg);
+  }
 });
 
 // other

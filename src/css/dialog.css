@@ -58,7 +58,7 @@
 	left:12px;
 	top:50%;
 	margin-top:-15px;
-	background:url("../images/dialogs.png") 0 0 no-repeat;
+	background:url("../img/dialogs.png") 0 0 no-repeat;
 }
 
 /*********************** ERROR DIALOG **************************/
@@ -96,7 +96,7 @@
 .elfinder-notify-progress {
 	width:100%;
 	height:8px;
-	background:url(../images/progress.gif) center center repeat-x;
+	background:url(../img/progress.gif) center center repeat-x;
 }
 
 .elfinder-notify-progressbar, .elfinder-notify-progress {
