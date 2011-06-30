@@ -304,7 +304,7 @@ $.fn.elfindercwd = function(fm) {
 					h  = o.outerHeight(true),
 					ph = cwd.innerHeight(),
 					st = cwd.scrollTop();
-				
+
 				if (t < 0) {
 					cwd.scrollTop(Math.ceil(t + st) - 9);
 				} else if (t + h > ph) {

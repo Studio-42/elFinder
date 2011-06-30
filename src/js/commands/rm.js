@@ -23,7 +23,7 @@ elFinder.prototype.commands.rm = function() {
 	this.exec = function(hashes) {
 		var self   = this,
 			fm     = this.fm,
-			errors = fm.errors,
+			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);

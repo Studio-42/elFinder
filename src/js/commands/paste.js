@@ -37,7 +37,7 @@ elFinder.prototype.commands.paste = function() {
 	
 	this.exec = function(dst) {
 		var fm     = this.fm,
-			errors = fm.errors,
+			errors = fm.errors(),
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
@@ -116,11 +116,7 @@ elFinder.prototype.commands.paste = function() {
 					},
 					valid     = function(names) {
 						existed = intersect(files, names);
-						if (existed.length) {
-							confirm(0);
-						} else {
-							paste(files);
-						}
+						existed.length ? confirm(0) : paste(files);
 					},
 					paste     = function(files) {
 						var files  = $.map(files, function(file) { return !file.remove ? file : null } ),

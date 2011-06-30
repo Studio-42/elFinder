@@ -31,7 +31,7 @@ elFinder.prototype.commands.open = function() {
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm, 
-			errors = fm.errors,
+			errors = fm.errors(),
 			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files  = this.files(hashes),
 			cnt    = files.length,

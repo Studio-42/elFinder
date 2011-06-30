@@ -30,7 +30,7 @@ elFinder.prototype.commands.copy = function() {
 
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash)) {
-				return !dfrd.reject([fm.errors.copy, file.name, fm.errors.denied]);
+				return !dfrd.reject([fm.errmsg('copy'), file.name, fm.errmsg('denied')]);
 			}
 		});
 		

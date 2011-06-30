@@ -23,12 +23,12 @@ elFinder.prototype.commands.cut = function() {
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors,
+			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
 				});
-		
+
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash) ) {
 				return !dfrd.reject([errors.copy, file.name, errors.denied]);

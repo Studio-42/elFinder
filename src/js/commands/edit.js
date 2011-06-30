@@ -8,6 +8,7 @@
 elFinder.prototype.commands.edit = function() {
 	var self = this,
 		fm   = this.fm,
+		mimes = fm.res('mimes', 'text'),
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -16,7 +17,7 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(files) {
 			return $.map(files, function(file) {
-				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, fm.textMimes) !== -1 && file.read && file.write ? file : null;
+				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 && file.read && file.write ? file : null;
 			})
 		},
 		/**
@@ -28,7 +29,7 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		edit = function(file) {
 			var hash      = file.hash,
-				errors    = fm.errors,
+				errors    = fm.errors(),
 				opts      = fm.options,
 				dfrd      = $.Deferred(), 
 				data      = {cmd : 'file', target : hash},

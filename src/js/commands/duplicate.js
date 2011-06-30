@@ -22,7 +22,7 @@ elFinder.prototype.commands.duplicate = function() {
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors,
+			errors = fm.errors(),
 			files  = this.files(hashes),
 			cnt    = files.length,
 			dfrd   = $.Deferred()

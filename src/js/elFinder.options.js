@@ -35,6 +35,7 @@ elFinder.prototype.options = {
 
 	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'],
 	
+	
 	plugins : ['path', 'stat'],
 	
 	// dblclick   : 'open',
@@ -271,5 +272,5 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event-put', 'backend-debug_', 'event-search', 'event-searchend']
+	debug : ['error', 'warning', '', 'backend-debug_', 'event-search', 'event-searchend']
 }

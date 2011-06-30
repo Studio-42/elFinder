@@ -33,7 +33,7 @@ elFinder.prototype.commands.download = function() {
 		var fm    = this.fm,
 			base  = fm.options.url, 
 			files = filter(hashes),
-			dfrd  = $.Deferred().fail(function(error) { fm.error(error); }),
+			dfrd  = $.Deferred(),
 			iframe, i, url;
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';

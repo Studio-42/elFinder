@@ -37,6 +37,7 @@ elFinder.prototype.commands.search = function() {
 			});
 		}
 		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
+		return $.Deferred().reject();
 	}
 
 }

@@ -13,7 +13,7 @@ elFinder.prototype.commands.upload = function() {
 		opts        = this.fm.options,
 		mimes       = opts.onlyMimes,
 		cdata       = opts.customData,
-		errors      = fm.errors,
+		errors      = fm.errors(),
 		counter     = 0,
 		dragenter   = 'elfinder-droppable-active',
 		supportxhr  = false,
@@ -22,17 +22,17 @@ elFinder.prototype.commands.upload = function() {
 		prepareData = function(text) {
 			var warning = '', raw, data;
 			if (!$.trim(text)) {
-				return {error : [errors.invResponse, errors.emptyData]}
+				return {error : [errors.response, errors.empty]}
 			}
 			
 			try {
 				raw = $.parseJSON(text);
 			} catch (e) {
-				return {error : [errors.invResponse, errors.notJSON]}
+				return {error : [errors.response, errors.json]}
 			}
 			
 			if (!fm.validResponse('upload', raw)) {
-				return {error : [errors.invResponse, errors.invData]};
+				return {error : [errors.response]};
 			}
 			
 			if (raw.error) {
@@ -95,23 +95,23 @@ elFinder.prototype.commands.upload = function() {
 				}, false);
 				
 				xhr.addEventListener('abort', function() {
-					dfrd.reject([errors.noConnect, errors.connectAborted]);
+					dfrd.reject([errors.connect, errors.abort]);
 				}, false);
 				
 				xhr.addEventListener('load', function() {
 					var status = xhr.status, data;
 					
 					if (status > 500) {
-						return dfrd.reject(errors.invResponse);
+						return dfrd.reject(errors.response);
 					}
 					if (status != 200) {
-						return dfrd.reject(errors.noConnect);
+						return dfrd.reject(errors.connect);
 					}
 					if (xhr.readyState != 4) {
-						return dfrd.reject([errors.noConnect, errors.connectTimeout]); // am i right?
+						return dfrd.reject([errors.connect, errors.timeout]); // am i right?
 					}
 					if (!xhr.responseText) {
-						return dfrd.reject([errors.invResponse, errors.emptyData]);
+						return dfrd.reject([errors.response, errors.empty]);
 					}
 					data = prepareData(xhr.responseText);
 					data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
@@ -161,7 +161,7 @@ elFinder.prototype.commands.upload = function() {
 					if (xhr.readyState == 4 && xhr.status == 0) {
 						// ff bug while send zero sized file
 						// for safari - send directory
-						dfrd.reject([errors.noConnect, errors.connectAborted]);
+						dfrd.reject([errors.connect, errors.abort]);
 					}
 				}
 
@@ -206,7 +206,7 @@ elFinder.prototype.commands.upload = function() {
 							// emulate abort on timeout
 							if (self.options.iframeTimeout > 0) {
 								stm = setTimeout(function() {
-									dfrd.reject([errors.noConnect, errors.connectTimeout]);
+									dfrd.reject([errors.connect, errors.timeout]);
 								}, self.options.iframeTimeout);
 							}
 							

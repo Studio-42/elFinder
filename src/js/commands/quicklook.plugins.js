@@ -111,7 +111,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var fm      = ql.fm,
-			mimes   = fm.textMimes,
+			mimes   = fm.res('mimes', 'text'),
 			preview = ql.preview;
 				
 			

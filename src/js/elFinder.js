@@ -658,7 +658,7 @@ window.elFinder = function(node, opts) {
 	this.request = function(options) {
 		var self     = this,
 			o        = this.options,
-			errors   = this.errors,
+			errors   = this.errors(),
 			dfrd     = $.Deferred(),
 			// request data
 			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
@@ -998,9 +998,11 @@ window.elFinder = function(node, opts) {
 		
 		if (handlers.length) {
 			event = $.Event(event);
+
 			for (i = 0; i < handlers.length; i++) {
 				// to avoid data modifications. remember about "sharing" passing arguments in js :) 
 				event.data = $.extend(true, {}, data);
+
 				try {
 					if (handlers[i](event, this) === false 
 					|| event.isDefaultPrevented()) {
@@ -1205,15 +1207,16 @@ window.elFinder = function(node, opts) {
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
-		return alert(this.i18n(this.errors.jquiInvalid));
+		return alert(this.i18n(this.errmsg('jqui')));
 	}
+
 	// check node
 	if (!node.length) {
-		return alert(this.i18n(this.errors.nodeRequired));
+		return alert(this.i18n(this.errmsg('node')));
 	}
 	// check connector url
 	if (!this.options.url) {
-		return alert(this.i18n(this.errors.urlRequired));
+		return alert(this.i18n(this.errmsg('url')));
 	}
 	
 	$.extend($.ui.keyCode, {
@@ -1500,6 +1503,7 @@ window.elFinder = function(node, opts) {
 	});
 	
 	self.timeEnd('load'); //107
+	
 }
 
 /**
@@ -1512,6 +1516,14 @@ elFinder.prototype = {
 	res : function(type, id) {
 		return this.resources[type] && this.resources[type][id];
 	}, 
+	
+	errmsg : function(id) {
+		return this.resources['error'] && this.resources['error'][id] || '';
+	},
+	
+	errors : function() {
+		return this.resources['error'];
+	},
 	
 	/**
 	 * Internationalization object
@@ -1527,44 +1539,6 @@ elFinder.prototype = {
 		}
 	},
 	
-	/**
-	 * Errors messages
-	 * 
-	 * @type  Object
-	 */
-	errors : {
-		uknown     : 'Unknown error.',
-		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and draggable components included.',
-		node       : 'elFinder required DOM Element to be created.',
-		url        : 'Invalid elFinder configuration! You have to set URL option.',
-		access     : 'Access denied.',
-		connect    : 'Unable to connect to backend.',
-		abort      : 'Connection aborted.',
-		timeout    : 'Connection timeout.',
-		response   : 'Invalid backend response.',
-		json       : 'Data is not JSON.',
-		empty      : 'Data is empty.',
-		nocmd      : 'Backend request required command name.',
-		open       : 'Unable to open "$1".',
-		notdir     : 'Object is not a folder.', 
-		notfile    : 'Object is not a file.', 
-		read       : 'Unable to read "$1".',
-		write      : 'Unable to write into "$1".',
-		denied     : 'Permission denied.',
-		locked     : '"$1" is locked and can not be renamed, moved or removed.',
-		exists     : 'File named "$1" already exists in this location.',
-		name       : 'Invalid file name.',
-		notfound   : 'File not found.',
-		popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
-		copy       : 'Unable to copy "$1".',
-		move       : 'Unable to move "$1".',
-		copyinself : 'Unable to copy "$1" into itself.',
-		rm         : 'Unable to remove "$1".',
-		extract    : 'Unable to extract files from "$1".',
-		archive    : 'Unable to create archive.',
-		notarchive : 'File is not archive or has unsupported archive type.'
-		
-	},
 	/**
 	 * File mimetype to kind mapping
 	 * 

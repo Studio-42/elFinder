@@ -35,7 +35,7 @@ elFinder.prototype.commands.extract = function() {
 	this.exec = function(hashes) {
 		var files    = this.files(hashes),
 			dfrd     = $.Deferred(),
-			errors   = fm.errors,
+			errors   = fm.errors(),
 			cnt      = files.length, 
 			complete = cnt, 
 			i, file, error;

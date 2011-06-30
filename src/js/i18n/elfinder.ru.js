@@ -9,7 +9,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Error'                                  : 'Ошибка',
 			'Unknown error.'                         : 'Неизвестная ошибка.',
 			'Unknown command.'                       : 'Неизвестная комманда.',
-			'Invalid jQuery UI configuration. Check selectable, draggable and draggable components included.' : 'Отсутствуют необходимые компоненты jQuery UI - selectable, draggable и draggable.',
+			'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.' : 'Отсутствуют необходимые компоненты jQuery UI - selectable, draggable и droppable.',
 			'elFinder required DOM Element to be created.' : 'Отсутствует DOM элемент для инициализации elFinder.',
 			'Invalid elFinder configuration! You have to set URL option.' : 'Некорректная настройка. Необходимо указать URL сервера.',
 			'Access denied.'                         : 'Доступ запрещен.',
