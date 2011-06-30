@@ -105,7 +105,7 @@ elFinder.prototype.options = {
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
 	 */
-	sort : 'nameDirsFirst',
+	sort : 'kindDirsFirst',
 	
 	/**
 	 * Show nav panel (not implemented yet)

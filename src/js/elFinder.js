@@ -372,8 +372,8 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type String
 	 **/
-	this.sort = this.sortType();
-	
+	this.sort = self.sorts[self.options.sort] || 1;
+
 	/**
 	 * Delay in ms before open notification dialog
 	 *
@@ -1759,24 +1759,6 @@ elFinder.prototype = {
 		}
 		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
 		return value;
-	},
-	
-	/**
-	 * Get/set view type (icons | list)
-	 *
-	 * @param  String|void  type
-	 * @return Strng
-	 */
-	sortType : function(t) {
-		var c = 'elfinder-sort-'+this.id;
-
-		if (t && this.sorts[t]) {
-			this.cookie(c, (this.sort = t));
-		} else if (!this.sort) {
-			t = this.cookie(c);
-			this.sort = this.sorts[t] ? t : this.sorts[this.options.sort] || 1;
-		}
-		return this.sort;
 	},
 	
 	/**
