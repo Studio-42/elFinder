@@ -300,10 +300,10 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			scrollToView = function(o) {
-				var t   = o.position().top;
-					h   = o.outerHeight(true);
-					ph  = cwd.innerHeight();
-					st  = cwd.scrollTop();
+				var t  = o.position().top,
+					h  = o.outerHeight(true),
+					ph = cwd.innerHeight(),
+					st = cwd.scrollTop();
 				
 				if (t < 0) {
 					cwd.scrollTop(Math.ceil(t + st) - 9);

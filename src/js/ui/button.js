@@ -8,12 +8,14 @@
 $.fn.elfinderbutton = function(cmd) {
 	return this.each(function() {
 		
-		var disabled = 'ui-state-disabled',
-			active   = 'ui-state-active',
-			hover    = 'ui-state-hover',
+		var c        = 'class',
+			fm       = cmd.fm,
+			disabled = fm.res(c, 'disabled'),
+			active   = fm.res(c, 'active'),
+			hover    = fm.res(c, 'hover'),
 			item     = 'elfinder-button-menu-item',
 			menu,
-			button   = $(this).addClass('ui-widget- ui-state-default elfinder-button')
+			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
 				.hover(function(e) { !button.is('.'+disabled) && button.toggleClass(hover); })
@@ -31,14 +33,14 @@ $.fn.elfinderbutton = function(cmd) {
 					}
 				}),
 			hideMenu = function() {
-				menu.hide()
+				menu.hide();
 			};
 			
 		// if command has variants create menu
 		if ($.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
 			
-			menu = $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all">menu</div>')
+			menu = $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(button)
 				.zIndex(10+button.zIndex())

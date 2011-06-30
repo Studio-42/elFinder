@@ -1,28 +1,39 @@
-"use strict"
+"use strict";
+/**
+ * @class  elFinder contextmenu
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var event = $.browser.opera ? 'click' : 'contextmenu',
-			itemclass = 'elfinder-contextmenu-item',
-			groupclass = 'elfinder-contextmenu-group',
-			subclass   = 'elfinder-contextmenu-sub',
-			subpos     = fm.direction == 'ltr' ? 'left' : 'right',
+		var event        = $.browser.opera ? 'click' : 'contextmenu',
+			c            = 'class',
+			clItem       = 'elfinder-contextmenu-item',
+			clGroup      = 'elfinder-contextmenu-group',
+			clSub        = 'elfinder-contextmenu-sub',
+			clHover      = fm.res(c, 'hover'),
+			clDisabled   = fm.res(c, 'disabled'),
+			clCwdFile    = fm.res(c, 'cwdfile'), 
+			clNavdir     = fm.res(c, 'navdir'), 
+			clNavDirWrap = fm.res(c, 'navdirwrap'), 
+			subpos       = fm.direction == 'ltr' ? 'left' : 'right',
 			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
-				.delegate('.'+itemclass, 'hover', function() {
-					var item = $(this).toggleClass('ui-state-hover');
-					item.is('.'+groupclass) && item.children('.'+subclass).toggle()
+				.delegate('.'+clItem, 'hover', function() {
+					var item = $(this).toggleClass(clHover);
+					item.is('.'+clGroup) && item.children('.'+clSub).toggle()
 					
 				})
-				.delegate('.'+itemclass, 'click', function(e) {
+				.delegate('.'+clItem, 'click', function(e) {
 					var item = $(this),
 						data = item.data();
 
 					e.preventDefault();
 					e.stopPropagation();
 
-					if (!item.is('.'+groupclass)) {
+					if (!item.is('.'+clGroup)) {
 						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.variant, true);
 						close();
 					}
@@ -57,17 +68,17 @@ $.fn.elfindercontextmenu = function(fm) {
 						return;
 					}
 					
-					item = $('<div class="'+itemclass+'"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/><span>'+cmd.title+'</span></div>')
+					item = $('<div class="'+clItem+'"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/><span>'+cmd.title+'</span></div>')
 						.data({cmd : cmd.name});
 
 					
 					if (cmd.variants) {
 
-						sub = $('<div class="ui-corner-all '+subclass+'"/>')
-							.appendTo(item.addClass(groupclass).append('<span class="ui-icon ui-icon-triangle-1-e"/>'));
+						sub = $('<div class="ui-corner-all '+clSub+'"/>')
+							.appendTo(item.addClass(clGroup).append('<span class="ui-icon ui-icon-triangle-1-e"/>'));
 							
 						$.each(cmd.variants, function(i, variant) {
-							sub.append($('<div class="'+itemclass+'"><span>'+variant[1]+'</span></div>')
+							sub.append($('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')
 								.data({cmd : cmd.name, variant : variant[0]}));
 						});
 					}
@@ -113,7 +124,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				
 				css = {'z-index' : css['z-index']+10};
 				css[subpos] = parseInt(menu.width());
-				menu.find('.elfinder-contextmenu-sub').css(css);
+				menu.find('.'+clSub).css(css);
 			},
 			cwd, nav;
 
@@ -121,7 +132,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			cwd = fm.getUI('cwd').bind(event, function(e) {
 				var target  = $(e.target),
-					file    = target.closest('.elfinder-cwd-file'),
+					file    = target.closest('.'+clCwdFile),
 					targets = [],
 					type    = 'files';
 
@@ -129,7 +140,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				
 				if (file.length) {
 					// do not show menu on disabled files
-					if (file.is('.ui-state-disabled')) {
+					if (file.is('.'+clDisabled)) {
 						return;
 					}
 					cwd.trigger('selectfile', file.attr('id'));
@@ -148,13 +159,10 @@ $.fn.elfindercontextmenu = function(fm) {
 				var target  = $(e.target),
 					targets = [];
 
-				if (target.is('.elfinder-navbar-dir,.elfinder-navbar-dir-wrapper')) {
+				if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
 					e.preventDefault();
-					if (target.is('.elfinder-navbar-dir-wrapper')) {
-						target = target.children();
-					}
+					target.is('.'+clNavDirWrap) && (target = target.children());
 					targets.push(fm.navId2Hash(target.attr('id')))
-					
 					append('navbar', targets);
 					open(e.clientX, e.clientY);
 				}

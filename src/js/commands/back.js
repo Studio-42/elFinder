@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class  elFinder command "back"
  * Open last visited folder
@@ -5,10 +6,10 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.back = function() {
-	this.title = 'Back';
+	this.title          = 'Back';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
-	this.shortcuts = [{
+	this.shortcuts      = [{
 		pattern     : 'ctrl+left',
 		description : 'Back'
 	}];

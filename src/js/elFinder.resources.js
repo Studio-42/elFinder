@@ -8,7 +8,8 @@ elFinder.prototype.resources = {
 		adroppable : 'elfinder-droppable-active',
 		cwdfile    : 'elfinder-cwd-file',
 		cwd        : 'elfinder-cwd',
-		navdir     : 'elfinder-navbar-dir'
+		navdir     : 'elfinder-navbar-dir',
+		navdirwrap : 'elfinder-navbar-dir-wrapper'
 	},
 	tpl : {
 		perms : '<span class="elfinder-perms"/>',
@@ -17,6 +18,7 @@ elFinder.prototype.resources = {
 	error : {
 		
 	},
+	
 	msg : {
 		
 	},

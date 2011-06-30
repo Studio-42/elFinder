@@ -1,4 +1,9 @@
-
+"use strict";
+/**
+ * @class  elFinder toolbar
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfindertoolbar = function(fm, opts) {
 	this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
@@ -23,8 +28,6 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							panel.prepend('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
 						}
 					}
-					
-					// $.fn[button] && panel.prepend($('<div/>')[button](cmd)).prepend('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
 				}
 			}
 			
