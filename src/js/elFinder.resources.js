@@ -25,7 +25,7 @@ elFinder.prototype.resources = {
 		symlink : '<span class="elfinder-symlink"/>'
 	},
 	error : {
-		uknown     : 'Unknown error.',
+		unknown     : 'Unknown error.',
 		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
 		node       : 'elFinder required DOM Element to be created.',
 		url        : 'Invalid elFinder configuration! You have to set URL option.',
@@ -125,7 +125,8 @@ elFinder.prototype.resources = {
 		searchres  : 'Search results',
 		size       : 'size',
 		items      : 'items',
-		selitems   : 'selected items'
+		selitems   : 'selected items',
+		unknown    : 'unknown'
 	},
 	
 	mimes : {
