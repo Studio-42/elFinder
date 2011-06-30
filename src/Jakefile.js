@@ -7,7 +7,7 @@
 
 require.paths.push('/usr/local/lib/node_modules');
 
-var sys  = require('sys'),
+var sys = require('sys'),
   fs   = require('fs'),
   path = require('path'),
   util = require('util'),
@@ -40,7 +40,11 @@ function grep(prefix, mask, exculde) {
   var m = new RegExp(mask);
   var e = new RegExp(exculde);
   var o = new Array();
-  var input = fs.readdirSync(prefix);
+  var input = new Array();
+  try {
+    input = fs.readdirSync(prefix);
+  } catch (e) { }
+
   for (i in input) {
     if ((typeof exculde !== 'undefined') && (input[i].match(e))) {
       //console.log('skip ' + input[i]);
@@ -59,12 +63,12 @@ desc('elFinder default task')
 task('default', function(){
   console.log('build dir:   ' + path.resolve());
   console.log('src dir:     ' + src);
-  var arr = ['css', 'js', 'img'];
-  for (p in arr) {
-    bp = arr[p];
-    if (!path.existsSync(bp)) {
-      console.log('mkdir ' + bp);
-      fs.mkdirSync(bp, dirmode);
+  var dir = ['css', 'js', 'img'];
+  for (d in dir) {
+    var bd = dir[d];
+    if (!path.existsSync(bd)) {
+      console.log('mkdir ' + bd);
+      fs.mkdirSync(bd, dirmode);
     }
   }
   jake.Task['build'].invoke();
@@ -154,10 +158,26 @@ task('images', function(){
 desc('clean the floor')
 task('clean', function(){
   console.log('cleaning the floor')
-  ul = ['js/elfinder.full.js', 'js/elfinder.min.js', 'css/elfinder.full.css', 'css/elfinder.min.css'];
-  for (f in ul) {
-    console.log('\tunlink ' + ul[f]);
-    fs.unlink(ul[f]);
+  uf = ['js/elfinder.full.js', 'js/elfinder.min.js', 'css/elfinder.full.css', 'css/elfinder.min.css'];
+  if (src != path.resolve()) {
+    uf = uf.concat(grep('img', '\\.png|\\.gif')); // clean images only if we are not in src
+  }
+  for (f in uf) {
+    var file = uf[f];
+    if (path.existsSync(file)) {
+      console.log('\tunlink ' + file);
+      fs.unlinkSync(file);
+    }
+  }
+  if (src != path.resolve()) {
+    var ud = ['css', 'js', 'img'];
+    for (d in ud) {
+      var dir = ud[d];
+      if (path.existsSync(dir)) {
+        console.log('\trmdir  ' + dir);
+        fs.rmdirSync(dir);
+      }
+    }
   }
 });
 
