@@ -17,39 +17,37 @@ var sys  = require('sys'),
   csm  = require('csso/lib/cssm').minimize,
   csu  = require('csso/lib/cssoutils');
 
-var files = {
+var dirmode = 0755,
+  src = __dirname,
+  files = {
   'elfinder.full.js':
     [
-      'js/elFinder.js',
-      'js/elFinder.version.js',
-      'js/jquery.elfinder.js',
-      'js/elFinder.options.js',
-      'js/elFinder.history.js',
-      'js/elFinder.command.js',
-      'js/elFinder.resources.js'
+      path.join(src, 'js', 'elFinder.js'),
+      path.join(src, 'js', 'elFinder.version.js'),
+      path.join(src, 'js', 'jquery.elfinder.js'),
+      path.join(src, 'js', 'elFinder.options.js'),
+      path.join(src, 'js', 'elFinder.history.js'),
+      path.join(src, 'js', 'elFinder.command.js'),
+      path.join(src, 'js', 'elFinder.resources.js')
     ]
-    .concat(grep('js/ui/', '\\.js$'))
-    .concat(grep('js/commands/', '\\.js$')),
-  'elfinder.full.css': grep('css/', '\\.css$', 'theme'),
-  'images':  grep('img/', '\\.png|\\.gif')
-  },
-  dirmode = 0755,
-  buildroot = 'build',
-  src = __dirname;
-
+    .concat(grep(path.join(src, 'js', 'ui'), '\\.js$'))
+    .concat(grep(path.join(src, 'js', 'commands'), '\\.js$')),
+  'elfinder.full.css': grep(path.join(src, 'css'), '\\.css$', 'theme'),
+  'images':  grep(path.join(src, 'img'), '\\.png|\\.gif')
+  };
 // @TODO exclude
-function grep(path, mask, exculde) {
-  var r = new RegExp(mask);
+function grep(prefix, mask, exculde) {
+  var m = new RegExp(mask);
   var e = new RegExp(exculde);
   var o = new Array();
-  var input = fs.readdirSync(path);
+  var input = fs.readdirSync(prefix);
   for (i in input) {
     if ((typeof exculde !== 'undefined') && (input[i].match(e))) {
       //console.log('skip ' + input[i]);
       continue;
     }
-    if (input[i].match(r)) {
-      o.push(path + input[i]);
+    if (input[i].match(m)) {
+      o.push(path.join(prefix, input[i]));
     }
   }
   return o.sort();
@@ -58,21 +56,17 @@ function grep(path, mask, exculde) {
 // tasks
 
 desc('elFinder default task')
-task('default', function(root){
-  if (root) {
-    buildroot = root;
-  }
-  var arr = ['', 'css', 'js', 'img'];
+task('default', function(){
+  console.log('build dir:   ' + path.resolve());
+  console.log('src dir:     ' + src);
+  var arr = ['css', 'js', 'img'];
   for (p in arr) {
-    bp = path.join(buildroot, arr[p])
+    bp = arr[p];
     if (!path.existsSync(bp)) {
       console.log('mkdir ' + bp);
       fs.mkdirSync(bp, dirmode);
     }
   }
-  console.log(path.resolve());
-  console.log('build dir:   ' + buildroot);
-  console.log('src dir:     ' + src);
   jake.Task['build'].invoke();
 });
 
@@ -90,9 +84,9 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
     file = this.prereqs[f];
     console.log('\t' + file);
     data += '\n/* File: ' + file + ' */\n';
-    data += fs.readFileSync(path.join(src, file));
+    data += fs.readFileSync(file);
   }
-  fs.writeFileSync(path.join(buildroot, this.name), data);
+  fs.writeFileSync(this.name, data);
 });
 
 desc('optimize elfinder.min.css');
@@ -101,13 +95,13 @@ file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
   var csso = csu.min2string(
     csm(
       csp(
-        fs.readFileSync(path.join(buildroot, 'css/elfinder.full.css')).toString()
+        fs.readFileSync('css/elfinder.full.css').toString()
       ),
       {}
     ).nodes,
     ''
   );
-  fs.writeFileSync(path.join(buildroot, this.name), csso);
+  fs.writeFileSync(this.name, csso);
 });
 
 // JS
@@ -121,19 +115,19 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
     file = myf[f];
     console.log('\t' + file);
     data += '\n/* File: ' + file + ' */\n';
-    data += fs.readFileSync(path.join(src, file));
+    data += fs.readFileSync(file);
   }
   data = '(function($) {\n' + data + '\n})(jQuery);'; // add calusure
-  fs.writeFileSync(path.join(buildroot, this.name), data);
+  fs.writeFileSync(this.name, data);
 });
 
 desc('uglify elfinder.min.js');
 file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
   console.log('uglify elfinder.min.js');
-  var ast = ugp.parse(fs.readFileSync(path.join(buildroot, 'js/elfinder.full.js')).toString()); // parse code and get the initial AST
+  var ast = ugp.parse(fs.readFileSync('js/elfinder.full.js').toString()); // parse code and get the initial AST
   ast = ugu.ast_mangle(ast); // get a new AST with mangled names
   ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
-  fs.writeFileSync(path.join(buildroot, this.name), ugu.gen_code(ast));
+  fs.writeFileSync(this.name, ugu.gen_code(ast));
 });
 
 // IMG
@@ -143,9 +137,15 @@ task('images', function(){
   var images = files['images'];
   for (i in images)
   {
+    var dst = images[i].replace(src, '').substr(1);
+    //console.log(dst);
+    if (path.existsSync(dst)) {
+      continue;
+    }
+
     console.log('\t' + images[i]);
-    var srcimg = fs.createReadStream(path.join(src, images[i]));
-    var dstimg = fs.createWriteStream(path.join(buildroot, images[i]));
+    var srcimg = fs.createReadStream(images[i]);
+    var dstimg = fs.createWriteStream(dst);
     util.pump(srcimg, dstimg);
   }
 });
@@ -156,8 +156,8 @@ task('clean', function(){
   console.log('cleaning the floor')
   ul = ['js/elfinder.full.js', 'js/elfinder.min.js', 'css/elfinder.full.css', 'css/elfinder.min.css'];
   for (f in ul) {
-    console.log("\tunlink " + ul[f]);
-    fs.unlink(path.join(buildroot, ul[f]));
+    console.log('\tunlink ' + ul[f]);
+    fs.unlink(ul[f]);
   }
 });
 
