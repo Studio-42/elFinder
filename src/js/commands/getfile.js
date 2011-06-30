@@ -19,7 +19,6 @@ elFinder.prototype.commands.getfile = function() {
 			return o.multiple || files.length == 1 ? files : [];
 		};
 	
-	this.title         = 'Select files';
 	this.alwaysEnabled = true;
 	this.callback      = fm.options.getFileCallback;
 	this._disabled     = typeof(this.callback) == 'function';

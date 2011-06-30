@@ -5,12 +5,10 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.forward = function() {
-	this.title = 'Forward';
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
 	this.shortcuts = [{
-		pattern     : 'ctrl+right',
-		description : 'Forward'
+		pattern     : 'ctrl+right'
 	}];
 	
 	this.getstate = function() {

@@ -9,8 +9,6 @@
 elFinder.prototype.commands.duplicate = function() {
 	var fm = this.fm;
 	
-	this.title = 'Duplicate';
-	
 	this.disableOnSearch = true;
 	
 	this.getstate = function(sel) {

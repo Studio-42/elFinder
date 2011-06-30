@@ -16,7 +16,6 @@ elFinder.prototype.commands.extract = function() {
 			})
 		};
 	
-	this.title = 'Extract files from archive';
 	this.disableOnSearch = true;
 	
 	// Update mimes list on open/reload

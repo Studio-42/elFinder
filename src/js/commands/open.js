@@ -6,7 +6,6 @@
  * @author Dmitry (dio) Levashov
  **/  
 elFinder.prototype.commands.open = function() {
-	this.title = 'Open';
 	this.alwaysEnabled = true;
 	
 	this._handlers = {
@@ -15,9 +14,7 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter'),
-		description : this.title,
-		callback    : function() { this.exec(); }
+		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter')
 	}];
 
 	this.getstate = function(sel) {

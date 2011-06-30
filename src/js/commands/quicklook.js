@@ -292,8 +292,6 @@ elFinder.prototype.commands.quicklook = function() {
 			}
 		});
 
-	this.title = 'Preview';
-	
 	/**
 	 * This command cannot be disable by backend
 	 *
@@ -316,8 +314,7 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this.shortcuts = [{
-		pattern     : 'space',
-		description : 'Preview'
+		pattern     : 'space'
 	}];
 	
 	this.support = {

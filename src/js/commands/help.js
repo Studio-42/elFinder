@@ -9,7 +9,6 @@ elFinder.prototype.commands.help = function() {
 	var fm = this.fm,
 		content;
 	
-	this.title = 'About this software';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.state = 0;

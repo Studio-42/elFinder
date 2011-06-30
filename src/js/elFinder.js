@@ -358,8 +358,6 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.messages = this.i18[this.lang].messages;
 
-	
-
 	/**
 	 * Cwd view type
 	 *
@@ -1272,13 +1270,13 @@ window.elFinder = function(node, opts) {
 		.error(function(e) { 
 			var opts  = {
 					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n('Error'),
+					title     : self.i18n(self.res('msg', 'error')),
 					resizable : false,
 					close     : function() { $(this).elfinderdialog('destroy') },
 					buttons   : {}
 			};
 
-			opts.buttons[self.i18n('Close')] = function() { $(this).elfinderdialog('close'); };
+			opts.buttons[self.i18n(self.res('msg', 'close'))] = function() { $(this).elfinderdialog('close'); };
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
@@ -1356,16 +1354,17 @@ window.elFinder = function(node, opts) {
 		});
 		this.shortcut({
 			pattern     : 'enter',
-			description : 'Select files',
+			description : this.res('name', 'getfile'),
 			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
 		})
 		.shortcut({
 			pattern     : 'ctrl+enter',
-			description : this.OS == 'mac' ? 'Rename' : 'Open',
+			description : this.res('name', this.OS == 'mac' ? 'rename' : 'open'),
 			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
 		});
+		
 	} 
-	
+
 	/**
 	 * Loaded commands
 	 *
@@ -1503,7 +1502,7 @@ window.elFinder = function(node, opts) {
 	});
 	
 	self.timeEnd('load'); //107
-	
+
 }
 
 /**
@@ -1544,95 +1543,81 @@ elFinder.prototype = {
 	 * 
 	 * @type  Object
 	 */
-	kinds : {
-		'unknown'                       : 'Unknown',
-		'directory'                     : 'Folder',
-		'symlink'                       : 'Alias',
-		'symlink-broken'                : 'Broken alias',
-		'application/x-empty'           : 'Plain text',
-		'application/postscript'        : 'Postscript document',
-		'application/octet-stream'      : 'Application',
-		'application/x-executable'      : 'Application',
-		'application/vnd.ms-office'     : 'Microsoft Office document',
-		'application/vnd.ms-word'       : 'Microsoft Word document',  
-	    'application/vnd.ms-excel'      : 'Microsoft Excel document',
-		'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
-		'application/pdf'               : 'Portable Document Format (PDF)',
-		'application/xml'               : 'XML document', 
-		'application/vnd.oasis.opendocument.text' : 'Open Office document',
-		'application/x-shockwave-flash' : 'Flash application',
-		'application/flash-video'       : 'Flash video',
-		'application/x-bittorrent'      : 'Bittorrent file',
-		'application/javascript'        : 'Javascript source',
-		'application/rtf'               : 'Rich Text Format (RTF)',
-		'application/x-gzip'            : 'GZIP archive', 
-	    'application/x-bzip2'           : 'BZIP archive', 
-	    'application/zip'               : 'ZIP archive',  
-	    'application/x-rar'             : 'RAR archive',
-		'application/x-tar'             : 'TAR archive', 
-		'application/x-7z-compressed'   : '7z archive',
-		'application/x-jar'             : 'Java JAR file',
-		'text/plain'                    : 'Plain text',
-	    'text/x-php'                    : 'PHP source',
-		'text/html'                     : 'HTML document', 
-		'text/javascript'               : 'Javascript source',
-		'text/css'                      : 'Cascading style sheet',  
-	    'text/rtf'                      : 'Rich Text Format',
-		'text/rtfd'                     : 'Rich Text Format',
-		'text/x-c'                      : 'C source', 
-		'text/x-csrc'                   : 'C source',
-		'text/x-chdr'                   : 'C header source',
-		'text/x-c++'                    : 'C++ source', 
-		'text/x-c++src'                 : 'C++ source',
-		'text/x-c++hdr'                 : 'C++ header source',
-		'text/x-shellscript'            : 'Unix shell script',
-	    'text/x-python'                 : 'Python source',
-		'text/x-java'                   : 'Java source',
-		'text/x-java-source'            : 'Java source',
-		'text/x-ruby'                   : 'Ruby source',
-		'text/x-perl'                   : 'Perl script',
-		'text/x-sql'                    : 'SQL source',
-	    'text/xml'                      : 'XML document', 
-		'text/x-comma-separated-values' : 'Comma separated values',
-		'image/x-ms-bmp'                : 'BMP image',
-	    'image/jpeg'                    : 'JPEG image',   
-	    'image/gif'                     : 'GIF image',    
-	    'image/png'                     : 'PNG image',
-	    'image/tiff'                    : 'TIFF image',   
-		'image/x-targa'                 : 'TGA image',
-	    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-		'image/xbm'                 : 'X bitmap image',
-		'audio/mpeg'                    : 'MPEG audio',  
-		'audio/midi'                    : 'MIDI audio',
-		'audio/ogg'                     : 'Ogg Vorbis audio',
-		'audio/mp4'                     : 'MPEG-4 audio',
-		'audio/x-m4a'                   : 'MPEG-4 audio',
-		'audio/wav'                     : 'WAV audio',
-		'video/x-dv'                    : 'DV movie',
-		'video/mp4'                     : 'MPEG-4 movie',
-		'video/mpeg'                    : 'MPEG movie',  
-		'video/x-msvideo'               : 'AVI movie',
-		'video/quicktime'               : 'Quick Time movie',
-		'video/x-ms-wmv'                : 'Windows Media Movie',   
-		'video/x-flv'                   : 'Flash movie',
-		'video/x-matroska'              : 'Matroska movie',
-		'video/ogg'                     : 'Ogg movie'
-	},
+	kinds : 	{
+			'unknown'                       : 'Unknown',
+			'directory'                     : 'Folder',
+			'symlink'                       : 'Alias',
+			'symlink-broken'                : 'Broken alias',
+			'application/x-empty'           : 'Plain text',
+			'application/postscript'        : 'Postscript document',
+			'application/octet-stream'      : 'Application',
+			'application/x-executable'      : 'Application',
+			'application/vnd.ms-office'     : 'Microsoft Office document',
+			'application/vnd.ms-word'       : 'Microsoft Word document',  
+		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
+			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
+			'application/pdf'               : 'Portable Document Format (PDF)',
+			'application/xml'               : 'XML document', 
+			'application/vnd.oasis.opendocument.text' : 'Open Office document',
+			'application/x-shockwave-flash' : 'Flash application',
+			'application/flash-video'       : 'Flash video',
+			'application/x-bittorrent'      : 'Bittorrent file',
+			'application/javascript'        : 'Javascript source',
+			'application/rtf'               : 'Rich Text Format (RTF)',
+			'application/x-gzip'            : 'GZIP archive', 
+		    'application/x-bzip2'           : 'BZIP archive', 
+		    'application/zip'               : 'ZIP archive',  
+		    'application/x-rar'             : 'RAR archive',
+			'application/x-tar'             : 'TAR archive', 
+			'application/x-7z-compressed'   : '7z archive',
+			'application/x-jar'             : 'Java JAR file',
+			'text/plain'                    : 'Plain text',
+		    'text/x-php'                    : 'PHP source',
+			'text/html'                     : 'HTML document', 
+			'text/javascript'               : 'Javascript source',
+			'text/css'                      : 'Cascading style sheet',  
+		    'text/rtf'                      : 'Rich Text Format',
+			'text/rtfd'                     : 'Rich Text Format',
+			'text/x-c'                      : 'C source', 
+			'text/x-csrc'                   : 'C source',
+			'text/x-chdr'                   : 'C header source',
+			'text/x-c++'                    : 'C++ source', 
+			'text/x-c++src'                 : 'C++ source',
+			'text/x-c++hdr'                 : 'C++ header source',
+			'text/x-shellscript'            : 'Unix shell script',
+		    'text/x-python'                 : 'Python source',
+			'text/x-java'                   : 'Java source',
+			'text/x-java-source'            : 'Java source',
+			'text/x-ruby'                   : 'Ruby source',
+			'text/x-perl'                   : 'Perl script',
+			'text/x-sql'                    : 'SQL source',
+		    'text/xml'                      : 'XML document', 
+			'text/x-comma-separated-values' : 'Comma separated values',
+			'image/x-ms-bmp'                : 'BMP image',
+		    'image/jpeg'                    : 'JPEG image',   
+		    'image/gif'                     : 'GIF image',    
+		    'image/png'                     : 'PNG image',
+		    'image/tiff'                    : 'TIFF image',   
+			'image/x-targa'                 : 'TGA image',
+		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
+			'image/xbm'                     : 'X bitmap image',
+			'audio/mpeg'                    : 'MPEG audio',  
+			'audio/midi'                    : 'MIDI audio',
+			'audio/ogg'                     : 'Ogg Vorbis audio',
+			'audio/mp4'                     : 'MPEG-4 audio',
+			'audio/x-m4a'                   : 'MPEG-4 audio',
+			'audio/wav'                     : 'WAV audio',
+			'video/x-dv'                    : 'DV movie',
+			'video/mp4'                     : 'MPEG-4 movie',
+			'video/mpeg'                    : 'MPEG movie',  
+			'video/x-msvideo'               : 'AVI movie',
+			'video/quicktime'               : 'Quick Time movie',
+			'video/x-ms-wmv'                : 'Windows Media Movie',   
+			'video/x-flv'                   : 'Flash movie',
+			'video/x-matroska'              : 'Matroska movie',
+			'video/ogg'                     : 'Ogg movie'
+		},
 	
-	textMimes : [
-		'application/javascript', 
-		'application/xhtml+xml', 
-		'audio/x-mp3-playlist', 
-		'application/x-bittorrent', 
-		'application/x-web-config',
-		'application/docbook+xml',
-		'application/x-php',
-		'application/x-perl',
-		'application/x-awk',
-		'application/x-config',
-		'application/x-csh',
-		'application/xml'
-	],
 	/**
 	 * Ajax request data validation rules
 	 * 
@@ -1646,9 +1631,6 @@ elFinder.prototype = {
 		},
 		newapi : {
 			defaults : function(data) {  
-				// if (!data) {
-				// 	return false;
-				// }
 				if (!data
 				|| (data.added && !$.isArray(data.added))
 				||  (data.removed && !$.isArray(data.removed))
@@ -2105,44 +2087,6 @@ elFinder.prototype = {
 	},
 	
 	/**
-	 * Notifications messages by types
-	 *
-	 * @type  Object
-	 */
-	notifyType : {
-		open        : 'Open folder',
-		openfile    : 'Open file',
-		reload      : 'Reload folder content',
-		mkdir       : 'Creating directory',
-		mkfile      : 'Creating files',
-		rm          : 'Delete files',
-		copy        : 'Copy files',
-		move        : 'Move files',
-		preparecopy : 'Prepare to copy files',
-		rename      : 'Rename files',
-		upload      : 'Uploading files',
-		download    : 'Downloading files',
-		save        : 'Save files',
-		archive     : 'Creating archive',
-		extract     : 'Extracting files from archive'
-	},
-	
-	/**
-	 * Create new notification type.
-	 * Required for future (not included in core elFinder) commands/plugins
-	 *
-	 * @param  String    notification type
-	 * @param  String  notification message
-	 * @return elFinder
-	 */
-	registerNotifyType : function(type, msg) {
-		if (!this.notifyType[type] && type && msg) {
-			this.notifyType[type] = msg;
-		}
-		return this;
-	},
-	
-	/**
 	 * Open notification dialog 
 	 * and append/update message for required notification type.
 	 *
@@ -2159,14 +2103,14 @@ elFinder.prototype = {
 	 */
 	notify : function(opts) {
 		var type     = opts.type,
-			msg      = opts.msg || this.i18n(this.notifyType[type] || 'Doing something.'),
+			msg      = this.i18n(this.res('notify', opts.type) || 'Doing something.'),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
 			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
 			delta    = opts.cnt,
 			progress = opts.progress >= 0 && opts.progress <= 100 ? opts.progress : 0,
 			cnt, total, prc;
-		
+
 		if (!type) {
 			return this;
 		}
@@ -2241,33 +2185,35 @@ elFinder.prototype = {
 				cssClass  : 'elfinder-dialog-confirm',
 				modal     : true,
 				resizable : false,
-				title     : this.i18n(opts.title || 'Confirmation required'),
+				title     : this.i18n(opts.title || this.res('msg', 'confirmreq')),
 				buttons   : {},
 				close     : function() { 
 					!complete && opts.cancel.callback();
 					$(this).elfinderdialog('destroy');
 				}
 			},
-			apply = this.i18n('Apply to all'),
-			checkbox;
+			apply = this.i18n(this.res('msg', 'applyall')),
+			label, checkbox;
 
 		
 		if (opts.reject) {
-			options.buttons[this.i18n(opts.reject.label)] = function() {
+			label = opts.reject.label;
+			options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
 		}
 		
-		
-		options.buttons[this.i18n(opts.accept.label)] = function() {
+		label = opts.accept.label;
+		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 			complete = true;
 			$(this).elfinderdialog('close')
 		};
 		
-		options.buttons[this.i18n(opts.cancel.label)] = function() {
+		label = opts.cancel.label;
+		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
 			$(this).elfinderdialog('close')
 		};
 		

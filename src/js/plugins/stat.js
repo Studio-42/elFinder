@@ -7,9 +7,9 @@
 elFinder.prototype.plugins.stat = function(fm) {
 	var size       = $('<span class="elfinder-plugin-stat-size"/>'),
 		sel        = $('<span class="elfinder-plugin-stat-selected"/>'),
-		titlesize  = fm.i18n('size'),
-		titleitems = fm.i18n('items'),
-		titlesel   = fm.i18n('selected items'),
+		titlesize  = fm.i18n(fm.res('msg', 'size')),
+		titleitems = fm.i18n(fm.res('msg', 'items')),
+		titlesel   = fm.i18n(fm.res('msg', 'selitems')),
 		setstat    = function(files, cwd) {
 			var c = 0, 
 				s = 0;

@@ -6,7 +6,6 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.info = function() {
-	var title = 'Get info';
 	
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
@@ -16,12 +15,10 @@ elFinder.prototype.commands.info = function() {
 		spinner    : '<span>{text}</span> <span class="elfinder-spinner-mini"/>'
 	}
 	
-	this.title = title;
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	this.shortcuts = [{
-		pattern     : 'ctrl+i',
-		description : title
+		pattern     : 'ctrl+i'
 	}];
 	
 	this.getstate = function() {

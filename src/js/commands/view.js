@@ -5,7 +5,6 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.view = function() {
-	this.title          = 'View';
 	this.value          = this.fm.view;
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;

@@ -27,7 +27,7 @@ elFinder.prototype.plugins.path = function(fm) {
 		path.html(dirs.join(fm.option('separator')));
 	})
 	.bind('search', function() {
-		path.html(fm.i18n('Search results'))
+		path.html(fm.i18n(fm.res('msg', 'searchres')));
 	});
 	
 }

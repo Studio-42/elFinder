@@ -6,7 +6,6 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.mkdir = function() {
-	this.title           = 'New folder';
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
@@ -14,8 +13,7 @@ elFinder.prototype.commands.mkdir = function() {
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+shift+n',
-		description : this.title,
+		pattern     : 'ctrl+shift+n'
 	}];
 	
 	this.getstate = function() {

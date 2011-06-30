@@ -13,13 +13,10 @@ elFinder.prototype.commands.download = function() {
 			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f });
 		};
 	
-
-	this.title = 'Download';
 	this.alwaysEnabled = true;
 	
 	this.shortcuts = [{
-		pattern     : 'shift+enter',
-		description : this.title
+		pattern     : 'shift+enter'
 	}];
 	
 	this.getstate = function() {

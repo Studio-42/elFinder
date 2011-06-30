@@ -141,11 +141,8 @@ elFinder.prototype.commands.edit = function() {
 		};
 	
 	
-	this.title = 'Edit';
-	
 	this.shortcuts = [{
-		pattern     : 'ctrl+e',
-		description : this.title
+		pattern     : 'ctrl+e'
 	}];
 	
 	this.getstate = function(sel) {

@@ -7,11 +7,9 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.cut = function() {
-	this.title = 'Cut';
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+x shift+insert',
-		description : 'Cut',
+		pattern     : 'ctrl+x shift+insert'
 	}];
 	
 	this.getstate = function(sel) {

@@ -6,11 +6,9 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.rm = function() {
-	this.title = 'Delete';
 	
 	this.shortcuts = [{
-		pattern     : 'delete ctrl+backspace',
-		description : this.title
+		pattern     : 'delete ctrl+backspace'
 	}];
 	
 	this.getstate = function(sel) {
@@ -53,10 +51,10 @@ elFinder.prototype.commands.rm = function() {
 			files = this.hashes(hashes);
 			
 			fm.confirm({
-				title  : 'Delete',
-				text   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+				title  : self.title,
+				text   : fm.res('confirm', 'rm'),
 				accept : {
-					label    : 'Remove',
+					label    : self.title,
 					callback : function() {  
 						fm.lockfiles({files : files});
 						fm.ajax({
@@ -77,7 +75,7 @@ elFinder.prototype.commands.rm = function() {
 					}
 				},
 				cancel : {
-					label    : 'Cancel',
+					label    : 'cancel',
 					callback : function() { dfrd.reject(); }
 				}
 			});

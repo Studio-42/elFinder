@@ -7,7 +7,7 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.paste = function() {
-	this.title = 'Paste';
+	
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	
@@ -16,8 +16,7 @@ elFinder.prototype.commands.paste = function() {
 	}
 
 	this.shortcuts = [{
-		pattern     : 'ctrl+v shift+insert',
-		description : 'Paste'
+		pattern     : 'ctrl+v shift+insert'
 	}];
 	
 	this.getstate = function(dst) {
@@ -76,11 +75,11 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						fm.confirm({
-							title  : 'Move file',
-							text   : fm.i18n(['File named "$1" already exists in this location.', file.name, 'Replace old file with new one?']), 
+							title  : fm.res('msg', 'move'),
+							text   : fm.i18n([fm.res('error', 'exists'), file.name, fm.res('confirm', 'repl')]), 
 							all    : !last,
 							accept : {
-								label    : 'Yes',
+								label    : 'yes',
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)
@@ -88,7 +87,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							reject : {
-								label    : 'No',
+								label    : 'no',
 								callback : function(all) {
 									var i;
 
@@ -107,7 +106,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							cancel : {
-								label    : 'Cancel',
+								label    : 'cancel',
 								callback : function() {
 									dfrd.resolve();
 								}

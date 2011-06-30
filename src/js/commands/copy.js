@@ -7,11 +7,9 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.copy = function() {
-	this.title = 'Copy';
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+c ctrl+insert',
-		description : 'Copy',
+		pattern     : 'ctrl+c ctrl+insert'
 	}];
 	
 	this.getstate = function(sel) {

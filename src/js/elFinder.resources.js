@@ -1,3 +1,11 @@
+"use strict"
+/**
+ * elFinder resources registry.
+ * Store shared data
+ *
+ * @type Object
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.resources = {
 	'class' : {
 		hover      : 'ui-state-hover',
@@ -49,8 +57,75 @@ elFinder.prototype.resources = {
 		notarchive : 'File is not archive or has unsupported archive type.'
 	},
 	
-	msg : {
+	name : {
+		archive   : 'Create archive',
+		back      : 'Back',
+		copy      : 'Copy',
+		cut       : 'Cut',
+		download  : 'Download',
+		duplicate : 'Duplicate',
+		edit      : 'Edit file',
+		extract   : 'Extract files from archive',
+		forward   : 'Forward',
+		getfile   : 'Select files',
+		help      : 'About this software',
+		info      : 'Get info',
+		mkdir     : 'New folder',
+		mkfile    : 'New text file',
+		open      : 'Open',
+		paste     : 'Paste',
+		quicklook : 'Preview',
+		reload    : 'Reload',
+		rename    : 'Rename',
+		rm        : 'Delete',
+		search    : 'Find files',
+		up        : 'Go to parent directory',
+		upload    : 'Upload files',
+		view      : 'View'
 		
+	},
+	
+	/**
+	 * Notifications messages by types
+	 *
+	 * @type  Object
+	 */
+	notify : {
+		open        : 'Open folder',
+		openfile    : 'Open file',
+		reload      : 'Reload folder content',
+		mkdir       : 'Creating directory',
+		mkfile      : 'Creating files',
+		rm          : 'Delete files',
+		copy        : 'Copy files',
+		move        : 'Move files',
+		preparecopy : 'Prepare to copy files',
+		rename      : 'Rename files',
+		upload      : 'Uploading files',
+		download    : 'Downloading files',
+		save        : 'Save files',
+		archive     : 'Creating archive',
+		extract     : 'Extracting files from archive'
+	},
+	
+	confirm : {
+		rm   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+		repl : 'Replace old file with new one?'
+	},
+	
+	msg : {
+		confirmreq : 'Confirmation required',
+		applyall   : 'Apply to all',
+		cancel     : 'Cancel',
+		move       : 'Move file',
+		yes        : 'Yes',
+		no         : 'No',
+		error      : 'Error',
+		close      : 'Close',
+		searchres  : 'Search results',
+		size       : 'size',
+		items      : 'items',
+		selitems   : 'selected items'
 	},
 	
 	mimes : {

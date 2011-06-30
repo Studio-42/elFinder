@@ -302,7 +302,6 @@ elFinder.prototype.commands.upload = function() {
 		}
 		;
 	
-	this.title = 'Upload files';
 	
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
@@ -342,8 +341,7 @@ elFinder.prototype.commands.upload = function() {
 	
 	// Shortcut opens dialog
 	this.shortcuts = [{
-		pattern     : 'ctrl+u',
-		description : this.title
+		pattern     : 'ctrl+u'
 	}];
 	
 	this.options = {

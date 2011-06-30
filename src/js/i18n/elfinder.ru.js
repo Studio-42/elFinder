@@ -106,7 +106,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Cut'                                    : 'Вырезать',
 			'Download'                               : 'Скачать',
 			'Duplicate'                              : 'Сделать копию',
-			'Edit'                                   : 'Редактировать',
+			'Edit file'                              : 'Редактировать',
 			'Extract files from archive'             : 'Распаковать архив',
 			'Forward'                                : 'Вперед',
 			'Select files'                           : 'Выбрать',

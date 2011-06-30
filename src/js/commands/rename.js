@@ -6,12 +6,10 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.rename = function() {
-	this.title = 'Rename';
 	this.disableOnSearch = true;
 	
 	this.shortcuts = [{
-		pattern     : 'f2'+(this.fm.OS == 'mac' && ' enter'),
-		description : this.title
+		pattern     : 'f2'+(this.fm.OS == 'mac' && ' enter')
 	}];
 	
 	this.getstate = function() {

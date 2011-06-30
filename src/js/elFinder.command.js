@@ -107,7 +107,7 @@ elFinder.prototype.command = function(fm) {
 			fm   = this.fm;
 
 		this.name      = name;
-		this.title     = fm.i18n(this.title || this.name);
+		this.title     = fm.i18n(fm.res('name', name) || this.name);
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 
@@ -122,6 +122,7 @@ elFinder.prototype.command = function(fm) {
 
 			$.each(self.shortcuts, function(i, s) {
 				s.callback = $.proxy(s.callback || function() { this.exec() }, self);
+				!s.description && (s.description = self.title);
 				fm.shortcut(s);
 			});
 		});

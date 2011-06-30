@@ -12,8 +12,6 @@ elFinder.prototype.commands.archive = function() {
 		
 	this.variants = [];
 	
-	this.title = 'Create archive';
-
 	this.disableOnSearch = true;
 	
 	/**

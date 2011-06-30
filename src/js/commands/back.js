@@ -6,12 +6,10 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.back = function() {
-	this.title          = 'Back';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.shortcuts      = [{
-		pattern     : 'ctrl+left',
-		description : 'Back'
+		pattern     : 'ctrl+left'
 	}];
 	
 	this.getstate = function() {

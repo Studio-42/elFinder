@@ -13,9 +13,7 @@ $.fn.elfinderdialog = function(opts) {
 				dialog.trigger('open');
 			});
 		} else if (opts == 'close' && dialog.is(':visible')) {
-			dialog.fadeOut(150, function() {
-				dialog.trigger('close');
-			});
+			dialog.hide().trigger('close');
 		} else if (opts == 'destroy') {
 			dialog.fadeOut(200, function() {
 				dialog.remove();
