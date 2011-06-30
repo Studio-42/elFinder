@@ -647,7 +647,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->mimeDetect == 'internal' && !self::$mimetypesLoaded) {
 			self::$mimetypesLoaded = true;
 			$this->mimeDetect = 'internal';
-			
+			$file = false;
 			if (!empty($this->options['mimefile']) && file_exists($this->options['mimefile'])) {
 				$file = $this->options['mimefile'];
 			} elseif (file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types')) {
