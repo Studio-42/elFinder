@@ -18,11 +18,14 @@ elFinder.prototype.resources = {
 		cwd        : 'elfinder-cwd',
 		navdir     : 'elfinder-navbar-dir',
 		navdirwrap : 'elfinder-navbar-dir-wrapper',
+		navarrow   : 'elfinder-navbar-arrow',
+		navsubtree : 'elfinder-navbar-subtree',
 		searchbtn  : 'elfinder-button-search'
 	},
 	tpl : {
 		perms   : '<span class="elfinder-perms"/>',
-		symlink : '<span class="elfinder-symlink"/>'
+		symlink : '<span class="elfinder-symlink"/>',
+		navicon : '<span class="elfinder-nav-icon"/>',
 	},
 	error : {
 		unknown     : 'Unknown error.',
@@ -126,7 +129,8 @@ elFinder.prototype.resources = {
 		size       : 'size',
 		items      : 'items',
 		selitems   : 'selected items',
-		unknown    : 'unknown'
+		unknown    : 'unknown',
+		places     : 'Places'
 	},
 	
 	mimes : {

@@ -23,14 +23,14 @@ $.fn.elfindertree = function(fm) {
 			 */
 			openRoot  = true,
 
+			c = 'class',
+			
 			/**
 			 * Subtree class name
 			 *
 			 * @type String
 			 */
-			subtree   = 'elfinder-navbar-subtree',
-			
-			c = 'class',
+			subtree   = fm.res(c, 'navsubtree'),
 			
 			/**
 			 * Directory class name
@@ -65,7 +65,7 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			arrow = 'elfinder-navbar-arrow',
+			arrow = fm.res(c, 'navarrow'),
 			
 			/**
 			 * Current directory class name
@@ -132,7 +132,7 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			template = '<div class="'+fm.res(c, 'navdirwrap')+'"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="elfinder-navbar-subtree"></div></div>',
+			template = '<div class="'+fm.res(c, 'navdirwrap')+'"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="'+subtree+'"/></div>',
 			
 			permsTpl = fm.res('tpl', 'perms'),
 			

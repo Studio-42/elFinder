@@ -44,7 +44,7 @@ elFinder.prototype.options = {
 	 * @type Array
 	 * @default ['toolbar', 'tree']
 	 */
-	ui : ['toolbar', 'tree', 'path', 'stat'],
+	ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
 
 	/**
 	 * Some UI plugins options.

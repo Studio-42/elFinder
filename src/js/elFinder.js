@@ -2440,7 +2440,7 @@ elFinder.prototype = {
 	},
 	
 	navId2Hash : function(id) {
-		return id.substr(4);
+		return typeof(id) == 'string' ? id.substr(4) : false;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },

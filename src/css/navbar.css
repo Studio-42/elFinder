@@ -20,7 +20,12 @@
 .elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
 
 /* folders tree container */
-.elfinder-navbar-tree { margin-bottom:1em; display:table; width:100%;  }
+.elfinder-navbar-tree, .elfinder-navbar-places { display:table; width:100%; }
+
+
+.elfinder-navbar .elfinder-navbar-places .ui-state-active  {
+	border:1px solid red;
+}
 
 /* subdirs tree */
 .elfinder-navbar-subtree { display:none; }
@@ -104,6 +109,8 @@
 
 .elfinder-navbar-tree-root .elfinder-nav-icon { background-position:-1px -35px; }
 
+.elfinder-navbar-places .elfinder-navbar-tree-root .elfinder-nav-icon { background-position:0 -134px; }
+
 .elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
 
 .elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
@@ -123,5 +130,9 @@
 	opacity: .5; filter:Alpha(Opacity=50);
 }
 
-
+.elfinder-navbar-places { border:2px solid transparent;}
+.elfinder-navbar-places.elfinder-droppable-active {
+	border:2px solid #8cafed;
+	
+}
 
