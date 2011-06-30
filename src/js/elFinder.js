@@ -366,7 +366,7 @@ window.elFinder = function(node, opts) {
 	  }
 	})();
 
-	this.storage= this.cookie;
+	// this.storage= this.cookie;
 	/**
 	 * Sort files type
 	 *
@@ -1785,8 +1785,8 @@ elFinder.prototype = {
 	 * @param  String|undefined  dir hash
 	 * @return String
 	 */
-	lastDir : function(key) { 
-		return this.options.rememberLastDir ? this.cookie('el-finder-last-'+this.id, key) : ''; 
+	lastDir : function(hash) { 
+		return this.storage('lastdir', hash);
 	},
 	
 	/**
