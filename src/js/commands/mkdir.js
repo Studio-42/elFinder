@@ -1,11 +1,17 @@
-
+"use strict";
+/**
+ * @class  elFinder command "mkdir"
+ * Create new folder
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.mkdir = function() {
-	this.title = 'New folder';
+	this.title           = 'New folder';
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
 	this.prefix          = 'untitle folder';
-	this.exec            = $.proxy(this.fm.mixins.make, this);
+	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+shift+n',
