@@ -405,7 +405,7 @@ window.elFinder = function(node, opts) {
 			
 			self.trigger('dragstart', {target : element[0], originalEvent : e});
 			
-			hashes = element.is('.elfinder-cwd-file') 
+			hashes = element.is('.'+self.res('class', 'cwdfile')) 
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
@@ -427,18 +427,19 @@ window.elFinder = function(node, opts) {
 	this.droppable = {
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
-			hoverClass : 'elfinder-droppable-active',
+			hoverClass : this.res('class', 'adroppable'),
 			drop : function(e, ui) {
 				var dst     = $(this),
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
 					result  = [],
+					c       = 'class',
 					cnt, hash, i, h;
 				
-				if (dst.is('.elfinder-cwd')) {
+				if (dst.is('.'+self.res(c, 'cwd'))) {
 					hash = cwd;
-				} else if (dst.is('.elfinder-cwd-file')) {
-					hash = dst.attr('id')
-				} else if (dst.is('.elfinder-navbar-dir')) {
+				} else if (dst.is('.'+self.res(c, 'cwdfile'))) {
+					hash = dst.attr('id');
+				} else if (dst.is('.'+self.res(c, 'navdir'))) {
 					hash = self.navId2Hash(dst.attr('id'));
 				}
 

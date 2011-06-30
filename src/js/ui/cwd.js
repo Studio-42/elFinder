@@ -38,12 +38,14 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			evtEnable = 'enable.'+fm.namespace,
 			
+			c = 'class',
+			
 			/**
 			 * Selected css class
 			 *
 			 * @type String
 			 **/
-			fileSelector = '.elfinder-cwd-file',
+			fileSelector = '.'+fm.res(c, 'cwdfile'),
 			
 			/**
 			 * Selected css class
@@ -57,35 +59,35 @@ $.fn.elfindercwd = function(fm) {
 			 *
 			 * @type String
 			 **/
-			clDisabled = 'ui-state-disabled',
+			clDisabled = fm.res(c, 'disabled'),
 			
 			/**
 			 * Draggable css class
 			 *
 			 * @type String
 			 **/
-			clDraggable = 'ui-draggable',
+			clDraggable = fm.res(c, 'draggable'),
 			
 			/**
 			 * Droppable css class
 			 *
 			 * @type String
 			 **/
-			clDroppable = 'ui-droppable',
+			clDroppable = fm.res(c, 'droppable'),
 			
 			/**
 			 * Hover css class
 			 *
 			 * @type String
 			 **/
-			clHover     = fm.res('class', 'hover'), //'ui-state-hover',
+			clHover     = fm.res(c, 'hover'), 
 
 			/**
 			 * Hover css class
 			 *
 			 * @type String
 			 **/
-			clDropActive = 'elfinder-droppable-active',
+			clDropActive = fm.res(c, 'adroppable'),
 
 			/**
 			 * Css class for temporary nodes (for mkdir/mkfile) commands
