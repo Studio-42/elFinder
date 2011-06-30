@@ -9,7 +9,8 @@ $.fn.elfindercwd = function(fm) {
 	this.not('.elfinder-cwd').each(function() {
 		// fm.time('cwdLoad');
 		var 
-			// parent = 
+			list = fm.storage('view') == 'list',
+
 			undef = 'undefined',
 			/**
 			 * Select event full name
@@ -165,7 +166,7 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			itemhtml = function(f) {
 				f.name = fm.escape(f.name);
-				return templates[fm.view == 'list' ? 'row' : 'icon']
+				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
 						});
@@ -191,7 +192,6 @@ $.fn.elfindercwd = function(fm) {
 					prev     = keyCode == code.LEFT || keyCode == code.UP,
 					sel      = cwd.find('[id].'+clSelected),
 					selector = prev ? 'first' : 'last',
-					list     = fm.view == 'list',
 					s, n, sib, top, left;
 					
 				function sibling(n, direction) {
@@ -356,7 +356,7 @@ $.fn.elfindercwd = function(fm) {
 					atmb  = {},
 					last  = cwd.find('[id]:last'),
 					top   = !last.length,
-					place = fm.view == 'list' ? cwd.children('table').children('tbody') : cwd,
+					place = list ? cwd.children('table').children('tbody') : cwd,
 					files;
 
 				if (!buffer.length) {
@@ -482,7 +482,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			add = function(files) {
-				var place    = fm.view == 'list' ? cwd.find('tbody') : cwd,
+				var place    = list ? cwd.find('tbody') : cwd,
 					l        = files.length, 
 					ltmb     = [],
 					atmb     = {},
@@ -602,7 +602,7 @@ $.fn.elfindercwd = function(fm) {
 				// attach draggable
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
 					var $this = $(this),
-						target = fm.view == 'list' ? $this : $this.children();
+						target = list ? $this : $this.children();
 
 					if (!$this.is('.'+clTmp) && !target.is('.'+clDraggable+',.'+clDisabled)) {
 						target.draggable(fm.draggable);
@@ -647,7 +647,6 @@ $.fn.elfindercwd = function(fm) {
 				// disable files wich removing or moving
 				.delegate(fileSelector, evtDisable, function() {
 					var $this  = $(this).removeClass(clSelected).addClass(clDisabled), 
-						list   = fm.view == 'list',
 						target = (list ? $this : $this.children()).removeClass(clHover);
 					
 					$this.is('.'+clDroppable) && $this.droppable('disable');
@@ -657,7 +656,7 @@ $.fn.elfindercwd = function(fm) {
 				// if any files was not removed/moved - unlock its
 				.delegate(fileSelector, evtEnable, function() {
 					var $this  = $(this).removeClass(clDisabled), 
-						target = fm.view == 'list' ? $this : $this.children();
+						target = list ? $this : $this.children();
 					
 					$this.is('.'+clDroppable) && $this.droppable('enable');	
 					target.is('.'+clDraggable) && target.draggable('enable');
@@ -679,7 +678,7 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
-					var parent = fm.view == 'list' ? cwd.find('tbody') : cwd;
+					var parent = list ? cwd.find('tbody') : cwd;
 					cwd.trigger('unselectall');
 					parent.prepend($(itemhtml(file)).addClass(clTmp));
 					cwd.scrollTop(0)
@@ -709,10 +708,14 @@ $.fn.elfindercwd = function(fm) {
 				delta = cwd.outerHeight(true) - cwd.height()
 				;
 		
+
 		fm
+			.bind('viewchange', function() {
+				fm.storage('view', (list = !list) ? 'list' : 'icons');
+				
+			})
 			.bind('open viewchange searchend', function(e) {
-				var list  = fm.view == 'list', 
-					phash = fm.cwd().hash; 
+				var phash = fm.cwd().hash; 
 			
 				tmbUrl = fm.option('tmbUrl');
 
@@ -726,9 +729,7 @@ $.fn.elfindercwd = function(fm) {
 				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
 
-				if (list) {
-					cwd.html('<table><thead><tr class="ui-state-default"><td >'+fm.i18n('Name')+'</td><td>'+fm.i18n('Permissions')+'</td><td>'+fm.i18n('Modified')+'</td><td>'+fm.i18n('Size')+'</td><td>'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
-				}
+				list && cwd.html('<table><thead><tr class="ui-state-default"><td >'+fm.i18n('Name')+'</td><td>'+fm.i18n('Permissions')+'</td><td>'+fm.i18n('Modified')+'</td><td>'+fm.i18n('Size')+'</td><td>'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
 		
 				buffer = $.map(e.type == 'open' ? e.data.files : fm.files(), function(f) { return f.phash == phash ? f : null; });
 				
@@ -761,10 +762,8 @@ $.fn.elfindercwd = function(fm) {
 				trigger();
 			})
 			.bind('search', function(e) {
-				var list  = fm.view == 'list';
 				
-				cwd//.html('')
-					.children('table,.elfinder-cwd-file').remove().end()
+				cwd.children('table,.elfinder-cwd-file').remove().end()
 					.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
 
