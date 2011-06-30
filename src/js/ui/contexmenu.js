@@ -111,7 +111,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					scrolltop  = win.scrollTop(),
 					scrollleft = win.scrollLeft(),
 					css        = {
-						top  : (y + height  < wheight ? y : y - height) + scrolltop,
+						top  : (y + height  < wheight  ? y : y - height > 0 ? y - height : y) + scrolltop,
 						left : (x + width < wwidth ? x : x - width) + scrollleft,
 						'z-index' : 100 + fm.getUI('workzone').zIndex()
 					};
