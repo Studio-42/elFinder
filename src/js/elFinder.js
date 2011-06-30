@@ -366,15 +366,7 @@ window.elFinder = function(node, opts) {
 	  }
 	})();
 
-	this.storage()
-
-	/**
-	 * Cwd view type
-	 *
-	 * @type String
-	 **/
-	this.view = this.viewType();
-	
+	this.storage= this.cookie;
 	/**
 	 * Sort files type
 	 *
@@ -1337,9 +1329,7 @@ window.elFinder = function(node, opts) {
 		
 			play && play != '' && play != 'no' && $(beeper).html('<source src="./sounds/rm.wav" type="audio/wav">')[0].play()
 		})
-		.viewchange(function() {
-			self.view = self.viewType(self.view == 'icons' ? 'list' : 'icons');
-		})
+		
 		;
 
 	// bind external event handlers
@@ -1724,8 +1714,10 @@ elFinder.prototype = {
 	localStorage : function(key, val) {
 		var s = window.localStorage;
 		
+		key = 'elfinder-'+key+this.id;
+		
 		val !== void(0) && s.setItem(key, val);
-
+		// s.clear();
 		return s.getItem(key)||'';
 	},
 	
@@ -1738,6 +1730,8 @@ elFinder.prototype = {
 	 */
 	cookie : function(name, value) {
 		var d, o, c, i;
+
+		name = 'elfinder-'+name+this.id;
 
 		if (value === void(0)) {
 			if (document.cookie && document.cookie != '') {
@@ -1765,25 +1759,6 @@ elFinder.prototype = {
 		}
 		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
 		return value;
-	},
-	
-	/**
-	 * Get/set view type (icons | list)
-	 *
-	 * @param  String|void  type
-	 * @return Strng
-	 */
-	viewType : function(t) {
-		var c = 'elfinder-view-'+this.id,
-			r = /^icons|list$/i;
-
-		if (t && r.test(t)) {
-			this.cookie(c, (this.view = t));
-		} else if (!this.view) {
-			t = this.cookie(c);
-			this.view = r.test(t) ? t : 'icons'
-		}
-		return this.view;
 	},
 	
 	/**

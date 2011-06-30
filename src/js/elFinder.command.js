@@ -68,9 +68,10 @@ elFinder.prototype.command = function(fm) {
 	this._handlers = {
 		enable  : function() { this.update(void(0), this.value); },
 		disable : function() { this.update(-1, this.value); },
-		'open reload'    : function() { 
+		'open reload load'    : function(e) { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
-			this.update(void(0), this.value); 
+			this.update(void(0), this.value)
+			this.change(); 
 		}
 	};
 	
@@ -104,7 +105,7 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.setup = function(name, opts) {
 		var self = this,
-			fm   = this.fm;
+			fm   = this.fm, i, s;
 
 		this.name      = name;
 		this.title     = fm.i18n(fm.res('name', name) || this.name);
@@ -112,28 +113,27 @@ elFinder.prototype.command = function(fm) {
 		this.listeners = [];
 
 		if (this.updateOnSelect) {
-			this._handlers.select = function() { this.update(void(0), self.value); }
+			this._handlers.select = function() { this.update(void(0), this.value); }
 		}
 
-		fm.one('load', function() {
-			$.each($.extend({}, self._handlers, self.handlers), function(cmd, handler) {
-				fm.bind(cmd, $.proxy(handler, self));
-			});
-
-			$.each(self.shortcuts, function(i, s) {
-				s.callback = $.proxy(s.callback || function() { this.exec() }, self);
-				!s.description && (s.description = self.title);
-				fm.shortcut(s);
-			});
+		$.each($.extend({}, self._handlers, self.handlers), function(cmd, handler) {
+			fm.bind(cmd, $.proxy(handler, self));
 		});
-		
+
+		for (i = 0; i < this.shortcuts.length; i++) {
+			s = this.shortcuts[i];
+			s.callback = $.proxy(s.callback || function() { this.exec() }, this);
+			!s.description && (s.description = this.title);
+			fm.shortcut(s);
+		}
+
 		if (this.disableOnSearch) {
 			fm.bind('search searchend', function(e) {
 				self._disabled = e.type == 'search';
 				self.update(void(0), self.value);
 			});
 		}
-		
+
 		this.init();
 	}
 
@@ -194,7 +194,7 @@ elFinder.prototype.command = function(fm) {
 	
 	/**
 	 * Update command state/value
-	 * and rize 'cahnge' event if smth changed
+	 * and rize 'change' event if smth changed
 	 *
 	 * @param  Number  new state or undefined to auto update state
 	 * @param  mixed   new value
