@@ -28,10 +28,15 @@ elFinder.prototype.commands.search = function() {
 	 * @return $.Deferred
 	 **/
 	this.exec = function(q) {
-		return this.fm.ajax({
-			data   : {cmd : 'search', q : q},
-			notify : {type : 'seach', cnt : 1, hideCnt : true}
-		});
+		var fm = this.fm;
+		
+		if (typeof(q) == 'string' && q) {
+			return fm.ajax({
+				data   : {cmd : 'search', q : q},
+				notify : {type : 'seach', cnt : 1, hideCnt : true}
+			});
+		}
+		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
 	}
 
 }

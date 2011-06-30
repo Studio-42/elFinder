@@ -17,6 +17,7 @@ elFinder.prototype.commands.view = function() {
 	}
 	
 	this.exec = function() {
+		this.fm.trigger('searchend');
 		this.update(void(0), this.fm.viewchange().view);
 	}
 

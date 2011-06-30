@@ -9,10 +9,11 @@ elFinder.prototype.resources = {
 		cwdfile    : 'elfinder-cwd-file',
 		cwd        : 'elfinder-cwd',
 		navdir     : 'elfinder-navbar-dir',
-		navdirwrap : 'elfinder-navbar-dir-wrapper'
+		navdirwrap : 'elfinder-navbar-dir-wrapper',
+		searchbtn  : 'elfinder-button-search'
 	},
 	tpl : {
-		perms : '<span class="elfinder-perms"/>',
+		perms   : '<span class="elfinder-perms"/>',
 		symlink : '<span class="elfinder-symlink"/>'
 	},
 	error : {

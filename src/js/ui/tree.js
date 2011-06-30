@@ -132,7 +132,7 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			template = '<div class="elfinder-navbar-dir-wrapper"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="elfinder-navbar-subtree"></div></div>',
+			template = '<div class="'+fm.res(c, 'navdirwrap')+'"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="elfinder-navbar-subtree"></div></div>',
 			
 			permsTpl = fm.res('tpl', 'perms'),
 			

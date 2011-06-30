@@ -7,7 +7,7 @@
 $.fn.elfindersearchbutton = function(cmd) {
 	return this.each(function() {
 		var active = false,
-			button = $(this).hide().addClass('ui-widget-content elfinder-button elfinder-button-search'),
+			button = $(this).hide().addClass('ui-widget-content elfinder-button '+cmd.fm.res('class', 'searchbtn')+''),
 			input  = $('<input type="text" size="42"/>')
 				.appendTo(button)
 				.bind('keydown keypress', function(e) {
@@ -48,6 +48,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 		cmd.fm
 			.select(function() {
 				input.blur();
+			})
+			.searchend(function() {
+				input.val('');
 			})
 			.shortcut({
 				pattern     : 'ctrl+f f3',
