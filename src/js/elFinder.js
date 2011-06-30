@@ -358,6 +358,16 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.messages = this.i18[this.lang].messages;
 
+	this.storage = (function() {
+		try {
+	    return 'localStorage' in window && window['localStorage'] !== null ? self.localStorage : self.cookie;
+	  } catch (e) {
+	    return self.cookie;
+	  }
+	})();
+
+	this.storage()
+
 	/**
 	 * Cwd view type
 	 *
@@ -1502,7 +1512,7 @@ window.elFinder = function(node, opts) {
 	});
 	
 	self.timeEnd('load'); //107
-
+	
 }
 
 /**
@@ -1705,11 +1715,26 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Set/get data into/from localStorage
+	 *
+	 * @param  String       key
+	 * @param  String|void  value
+	 * @return String
+	 */
+	localStorage : function(key, val) {
+		var s = window.localStorage;
+		
+		val !== void(0) && s.setItem(key, val);
+
+		return s.getItem(key)||'';
+	},
+	
+	/**
 	 * Get/set cookie
 	 *
 	 * @param  String       cookie name
 	 * @param  String|void  cookie value
-	 * @return String|void
+	 * @return String
 	 */
 	cookie : function(name, value) {
 		var d, o, c, i;
