@@ -358,6 +358,11 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.messages = this.i18[this.lang].messages;
 
+	/**
+	 * Method to store/fetch data
+	 *
+	 * @type Function
+	 **/
 	this.storage = (function() {
 		try {
 	    return 'localStorage' in window && window['localStorage'] !== null ? self.localStorage : self.cookie;
@@ -1390,14 +1395,6 @@ window.elFinder = function(node, opts) {
 		}
 	});
 	
-	this._plugins = {};
-	$.each(this.options.plugins, function(i, name) {
-		var plugin = self.plugins[name];
-		if ($.isFunction(plugin) && !self._plugins[name]) {
-			self._plugins[name] = new plugin(self);
-		}
-	})
-	
 	// prepare node
 	node.addClass(this.cssClass)
 		.bind(mousedown, function() {
@@ -1462,11 +1459,6 @@ window.elFinder = function(node, opts) {
 	// update size
 	this.resize(width, height);
 	
-	this.one('load', function() {
-		self.ui.statusbar.append('<div style="clear:both"/>')
-	})
-	// this.ui.statusbar.append('<div class="ui-helper-clearfix"/>')
-
 	// attach events to document
 	$(document)
 		// disable elfinder on click outside elfinder
@@ -1668,13 +1660,6 @@ elFinder.prototype = {
 	 * @type Object
 	 */
 	commands : {},
-	
-	/**
-	 * Plugins costructors
-	 *
-	 * @type Object
-	 */
-	plugins : {},
 	
 	/**
 	 * Wrapper for elFinder.ajax method.

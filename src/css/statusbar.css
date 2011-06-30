@@ -2,14 +2,26 @@
 /*                           STATUSBAR STYLES                     */
 /******************************************************************/
 
-.elfinder-statusbar {
-	padding:.2em .5em;
-	font-size:.76em;
+
+/* statusbar container */
+.elfinder-statusbar { 
+	text-align:center; 
 	font-weight:normal;
+	padding:.2em .5em;
+	
+	border-right:0 solid;
+	border-bottom:0 solid;
+	border-left:0 solid;
 }
 
-/* selected/total files info */
-.elfinder-statusbar-info {
-	float:right;
-	text-align:right;
-}
+.elfinder-statusbar a { text-decoration:none; }
+
+.elfinder-statusbar div { font-size:.72em; }
+
+/* path in statusbar */
+.elfinder-ltr .elfinder-path { float:left;  }
+.elfinder-rtl .elfinder-path { float:right; }
+
+/* total/selected size in statusbar */
+.elfinder-ltr .elfinder-stat-size { float:right; }
+.elfinder-rtl .elfinder-stat-size { float:left; }
