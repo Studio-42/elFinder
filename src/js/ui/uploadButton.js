@@ -1,3 +1,9 @@
+"use strict";
+/**
+ * @class  elFinder toolbar's button tor upload file
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfinderuploadbutton = function(cmd) {
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd)
@@ -9,7 +15,6 @@ $.fn.elfinderuploadbutton = function(cmd) {
 					var _input;
 					if (input.val()) {
 						_input = input.clone(true);
-						// input.val('')
 						cmd.exec({input : input.remove()[0]});
 						input = _input.appendTo(form);
 					} 

@@ -1,8 +1,12 @@
 "use strict";
+/**
+ * @class  elFinder folders tree
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 $.fn.elfindertree = function(fm) {
 	
 	this.not('.elfinder-navbar-tree').each(function() {
-		
 		
 		var 
 			/**

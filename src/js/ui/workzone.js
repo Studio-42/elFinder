@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class elfinderworkzone - elFinder container for nav and current directory
  * @author Dmitry (dio) Levashov
