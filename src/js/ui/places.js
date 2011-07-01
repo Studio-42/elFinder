@@ -6,56 +6,70 @@
  **/
 $.fn.elfinderplaces = function(fm) {
 	return this.each(function() {
-		var c = 'class',
-			navdir = fm.res(c, 'navdir'),
+		var dirs = [],
+			c = 'class',
+			navdir = fm.res('class', 'navdir'),
 			tpl = fm.res('tpl', 'navdir'),
-			permsTpl = fm.res('tpl', 'perms'),
-			add = function(dir) {
-				var html = tpl.replace(/\{id\}/, 'place-'+dir.id)
+			ptpl = fm.res('tpl', 'perms'),
+			create = function(dir) {
+				var html = tpl.replace(/\{id\}/, 'place-'+dir.hash)
 						.replace(/\{name\}/, fm.escape(dir.name))
 						.replace(/\{cssclass\}/, fm.perms2class(dir))
-						.replace(/\{permissions\}/, !dir.read || !dir.write ? permsTpl : '')
+						.replace(/\{permissions\}/, !dir.read || !dir.write ? ptpl : '')
 						.replace(/\{symlink\}/, '');
-						
-				subtree.append(html).show()
+				return $(html);
 			},
-			arrow = $('<span class="'+fm.res(c, 'navarrow')+'"/>')
+
+			wrapper = create({
+					hash  : 'root-'+fm.namespace, 
+					name  : fm.i18n(fm.res('msg', 'places')),
+					read  : true,
+					write : true
+				}),
+			root = wrapper.children('.'+navdir)
+				.addClass(fm.res(c, 'treeroot'))
 				.click(function() {
 					places.toggleClass('elfinder-navbar-expanded');
 					subtree.slideToggle();
 				}),
-			subtree = $('<div class="'+fm.res(c, 'navsubtree')+'"/>'),
-			wrapper = $('<span class="ui-corner-all '+navdir+' elfinder-navbar-tree-root"/>')
-				.append(arrow)
-				.append('<span class="elfinder-nav-icon"/>')
-				.append(fm.res('tpl', 'navicon'))
-				.append(fm.i18n(fm.res('msg', 'places')))
-				.bind($.browser.opera ? 'click' : 'contextmenu', function(e) {
-					e.stopPropagation();
-					e.preventDefault()
-				}),
-			places = $(this).addClass(' elfinder-navbar-places ui-corner-all')
-				.append(wrapper)
-				.append(subtree)
+			subtree = wrapper.children('.'+fm.res(c, 'navsubtree')),
+			places = $(this).addClass('elfinder-places ui-corner-all')
 				.hide()
+				.append(wrapper)
+				
 				.appendTo(fm.getUI('navbar'))
+				.delegate('.'+navdir, 'hover', function() {
+					$(this).toggleClass('ui-state-hover');
+				})
+				.delegate('.'+navdir, 'click', function(e) {
+					fm.exec('open', $(this).attr('id').substr(6))
+				})
 				.droppable({
 					tolerance  : 'pointer',
 					accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
 					hoverClass : fm.res('class', 'adroppable'),
 					drop : function(e, ui) {
-						var dirs = [];
+						var  resolve = true;
 						
-						fm.log(ui.helper.data('files'))
 						$.each(ui.helper.data('files'), function(i, hash) {
-							var file = fm.file(hash);
+							var file = fm.file(hash), node;
 							
-							if (file && file.mime == 'directory') {
-								dirs.push(file);
+							if (file && file.mime == 'directory' && $.inArray(file.hash, dirs) === -1) {
+
 								fm.log(file.name)
-								add(file)
+								dirs.push(file.hash)
+								node = create(file);
+								subtree.append(node)
+								root.addClass('elfinder-navbar-collapsed')
+							} else {
+								resolve = false;
 							}
 						})
+						fm.log(dirs)
+						
+						fm.storage('places', dirs.join(','))
+						
+						resolve && ui.helper.hide();
 					}
 				})
 		
@@ -63,20 +77,25 @@ $.fn.elfinderplaces = function(fm) {
 	
 		// places.addClass('elfinder-navbar-collapsed')
 		
+		fm.log(subtree)
+		
 		fm.one('load', function() {
-			var dirs;
+			var _places = fm.storage('places').split(',');
 			
 			if (fm.oldAPI) {
 				return;
 			}
 			places.show();
 			fm.getUI('navbar').show();
-				
-			dirs = fm.storage('places');
-			if (dirs) {
-				dirs = dirs.spllit(';');
-				fm.log(dirs)
-			}
+			
+			
+			
+			fm.log(fm.storage('places'))
+			// dirs = fm.storage('places');
+			// if (dirs) {
+			// 	dirs = dirs.spllit(';');
+			// 	fm.log(dirs)
+			// }
 				
 
 		})

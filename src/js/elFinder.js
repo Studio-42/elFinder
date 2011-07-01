@@ -38,7 +38,7 @@ window.elFinder = function(node, opts) {
 		 *
 		 * @type String
 		 **/
-		namespace = 'elfinder'+(id || Math.random().toString().substr(2, 7)),
+		namespace = 'elfinder-'+(id || Math.random().toString().substr(2, 7)),
 		
 		/**
 		 * Mousedown event

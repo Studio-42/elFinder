@@ -8,25 +8,31 @@
  **/
 elFinder.prototype.resources = {
 	'class' : {
-		hover      : 'ui-state-hover',
-		active     : 'ui-state-active',
-		disabled   : 'ui-state-disabled',
-		draggable  : 'ui-draggable',
-		droppable  : 'ui-droppable',
-		adroppable : 'elfinder-droppable-active',
-		cwdfile    : 'elfinder-cwd-file',
-		cwd        : 'elfinder-cwd',
-		navdir     : 'elfinder-navbar-dir',
-		navdirwrap : 'elfinder-navbar-dir-wrapper',
-		navarrow   : 'elfinder-navbar-arrow',
-		navsubtree : 'elfinder-navbar-subtree',
-		searchbtn  : 'elfinder-button-search'
+		hover       : 'ui-state-hover',
+		active      : 'ui-state-active',
+		disabled    : 'ui-state-disabled',
+		draggable   : 'ui-draggable',
+		droppable   : 'ui-droppable',
+		adroppable  : 'elfinder-droppable-active',
+		cwdfile     : 'elfinder-cwd-file',
+		cwd         : 'elfinder-cwd',
+		tree        : 'elfinder-tree',
+		treeroot    : 'elfinder-navbar-root',
+		navdir      : 'elfinder-navbar-dir',
+		navdirwrap  : 'elfinder-navbar-dir-wrapper',
+		navarrow    : 'elfinder-navbar-arrow',
+		navsubtree  : 'elfinder-navbar-subtree',
+		navcollapse : 'elfinder-navbar-collapsed',
+		navexpand   : 'elfinder-navbar-expanded',
+		treedir     : 'elfinder-tree-dir',
+		placedir    : 'elfinder-place-dir',
+		searchbtn   : 'elfinder-button-search'
 	},
 	tpl : {
 		perms   : '<span class="elfinder-perms"/>',
 		symlink : '<span class="elfinder-symlink"/>',
 		navicon : '<span class="elfinder-nav-icon"/>',
-		navdir  : '<div class="elfinder-navbar-dir-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span>'
+		navdir  : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
 		
 	},
 	error : {

@@ -10,8 +10,8 @@
 
 /* navbar */
 .elfinder .elfinder-navbar { background:#dde4eb; }
-.elfinder-navbar .elfinder-navbar-tree .ui-state-hover { background:transparent; border-color:transparent; }
-.elfinder-navbar .elfinder-navbar-tree .ui-state-active { background: #3875d7; border-color:#3875d7; color:#fff; }
+.elfinder-navbar .ui-state-hover  { background:transparent; border-color:transparent; }
+.elfinder-navbar .ui-state-active { background: #3875d7;    border-color:#3875d7; color:#fff; }
 
 
 /* current directory */

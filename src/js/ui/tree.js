@@ -5,16 +5,18 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindertree = function(fm) {
+	var treeclass = fm.res('class', 'tree');
 	
-	this.not('.elfinder-navbar-tree').each(function() {
+	this.not('.'+treeclass).each(function() {
 		
-		var 
+		var c = 'class',
+			
 			/**
 			 * Root directory class name
 			 *
 			 * @type String
 			 */
-			root      = 'elfinder-navbar-tree-root',
+			root      = fm.res(c, 'treeroot'),
 
 			/**
 			 * Open root dir if not opened yet
@@ -23,8 +25,6 @@ $.fn.elfindertree = function(fm) {
 			 */
 			openRoot  = true,
 
-			c = 'class',
-			
 			/**
 			 * Subtree class name
 			 *
@@ -37,21 +37,21 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			navdir    = fm.res(c, 'navdir'),
+			navdir    = fm.res(c, 'treedir'),
 			
 			/**
 			 * Collapsed arrow class name
 			 *
 			 * @type String
 			 */
-			collapsed = 'elfinder-navbar-collapsed',
+			collapsed = fm.res(c, 'navcollapse'),
 			
 			/**
 			 * Expanded arrow class name
 			 *
 			 * @type String
 			 */
-			expanded  = 'elfinder-navbar-expanded',
+			expanded  = fm.res(c, 'navexpand'),
 			
 			/**
 			 * Class name to mark arrow for directory with already loaded children
@@ -132,11 +132,21 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type String
 			 */
-			template = '<div class="'+fm.res(c, 'navdirwrap')+'"><span id="{id}" class="ui-corner-all '+navdir+' {cssclass}"><span class="'+arrow+'"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span> <div class="'+subtree+'"/></div>',
+			tpl = fm.res('tpl', 'navdir'),
 			
-			permsTpl = fm.res('tpl', 'perms'),
+			/**
+			 * Permissions marker html template
+			 *
+			 * @type String
+			 */
+			ptpl = fm.res('tpl', 'perms'),
 			
-			symlinkTpl = fm.res('tpl', 'symlink'),
+			/**
+			 * Symlink marker html template
+			 *
+			 * @type String
+			 */
+			stpl = fm.res('tpl', 'symlink'),
 			
 			/**
 			 * Html template replacement methods
@@ -145,9 +155,9 @@ $.fn.elfindertree = function(fm) {
 			 */
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
-				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+fm.perms2class(dir)+' '+(dir.dirs ? collapsed : ''); },
-				permissions : function(dir) { return !dir.read || !dir.write ? permsTpl : ''; },
-				symlink     : function(dir) { return dir.link ? symlinkTpl : ''; }
+				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs ? collapsed : ''); },
+				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
+				symlink     : function(dir) { return dir.link ? stpl : ''; }
 			},
 			
 			/**
@@ -159,7 +169,7 @@ $.fn.elfindertree = function(fm) {
 			itemhtml = function(dir) {
 				dir.name = fm.escape(dir.name);
 				
-				return template.replace(/(?:\{([a-z]+)\})/ig, function(m, key) {
+				return tpl.replace(/(?:\{([a-z]+)\})/ig, function(m, key) {
 					return dir[key] || (replace[key] ? replace[key](dir) : '');
 				});
 			},
@@ -316,7 +326,7 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type JQuery
 			 */
-			tree = $(this).addClass('elfinder-navbar-tree')
+			tree = $(this).addClass(treeclass)
 				// make dirs draggable and toggle hover class
 				.delegate('.'+navdir, 'hover', function(e) {
 					var link  = $(this), 
