@@ -32,6 +32,7 @@ elFinder.prototype.resources = {
 		perms   : '<span class="elfinder-perms"/>',
 		symlink : '<span class="elfinder-symlink"/>',
 		navicon : '<span class="elfinder-nav-icon"/>',
+		navspinner  : '<span class="elfinder-navbar-spinner"/>',
 		navdir  : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
 		
 	},

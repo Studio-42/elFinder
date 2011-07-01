@@ -48,7 +48,8 @@ class elFinder {
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
-		'search'    => array('q' => true, 'mimes' => false)
+		'search'    => array('q' => true, 'mimes' => false),
+		'info'      => array('targets' => true)
 	);
 	
 	/**
@@ -1018,6 +1019,25 @@ class elFinder {
 		return array('files' => $result);
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function info($args) {
+		$files = array();
+		
+		foreach ($args['targets'] as $hash) {
+			if (($volume = $this->volume($hash)) != false
+			&& ($info = $volume->file($hash)) != false) {
+				$files[] = $info;
+			}
+		}
+		
+		return array('files' => $files);
+	}
+	
 	/***************************************************************************/
 	/*                                   misc                                  */
 	/***************************************************************************/
@@ -1082,8 +1102,10 @@ class elFinder {
 	 **/
 	protected function volume($hash) {
 		foreach ($this->volumes as $id => $v) {
-			if (strpos($hash, $id) === 0) {
+			if (strpos(''.$hash, $id) === 0) {
 				return $this->volumes[$id];
+			} else {
+				// echo $hash;
 			}
 		}
 		return false;

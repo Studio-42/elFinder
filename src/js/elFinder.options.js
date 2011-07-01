@@ -264,5 +264,5 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', '', 'backend-debug_', 'event-search', 'event-searchend']
+	debug : ['error', 'warning', '', 'backend-debug_', 'event-sync', 'event-searchend']
 }

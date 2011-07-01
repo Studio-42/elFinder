@@ -15,7 +15,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			clHover      = fm.res(c, 'hover'),
 			clDisabled   = fm.res(c, 'disabled'),
 			clCwdFile    = fm.res(c, 'cwdfile'), 
-			clNavdir     = fm.res(c, 'navdir'), 
+			clNavdir     = fm.res(c, 'treedir'), 
 			clNavDirWrap = fm.res(c, 'navdirwrap'), 
 			subpos       = fm.direction == 'ltr' ? 'left' : 'right',
 			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
@@ -159,12 +159,17 @@ $.fn.elfindercontextmenu = function(fm) {
 				var target  = $(e.target),
 					targets = [];
 
+
+				e.preventDefault();
 				if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
-					e.preventDefault();
-					target.is('.'+clNavDirWrap) && (target = target.children());
-					targets.push(fm.navId2Hash(target.attr('id')))
-					append('navbar', targets);
-					open(e.clientX, e.clientY);
+					
+
+					target.is('.'+clNavDirWrap) && (target = target.children('.'+clNavdir));
+					if (target.length) {
+						targets.push(fm.navId2Hash(target.attr('id')))
+						append('navbar', targets);
+						open(e.clientX, e.clientY);
+					}
 				}
 
 			})

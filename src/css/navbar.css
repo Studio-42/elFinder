@@ -14,12 +14,13 @@
 	display:none;
 }
 
+
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }
 .elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
 
 /* folders tree container */
-.elfinder-tree { display:table; width:100%; }
+.elfinder-tree { display:table; width:100%; margin-bottom:.5em; }
 
 /* one folder wrapper */
 .elfinder-navbar-wrapper, .elfinder-place-wrapper { }
@@ -34,6 +35,7 @@
 	outline:0 solid;
 	border:1px solid transparent;
 	cursor:default;
+	
 }
 
 /* ltr/rtl enviroment */
@@ -130,5 +132,13 @@
 	margin:-8px 2px 0 2px;
 	opacity: .5; filter:Alpha(Opacity=50);
 }
+
+.elfinder-places { border:1px solid transparent;}
+.elfinder-places.elfinder-droppable-active {
+	border:1px solid #8cafed;;
+}
+
+.elfinder-place-drag .elfinder-navbar-dir { font-size:.9em;}
+
 
 

@@ -127,6 +127,8 @@ $.fn.elfindertree = function(fm) {
 					}
 				}),
 			
+			spinner = $(fm.res('tpl', 'navspinner')),
+			
 			/**
 			 * Directory html template
 			 *
@@ -356,8 +358,7 @@ $.fn.elfindertree = function(fm) {
 				.delegate('.'+navdir+'.'+collapsed+' .'+arrow, 'click', function(e) {
 					var arrow = $(this),
 						link  = arrow.parent('.'+navdir),
-						stree = link.next('.'+subtree),
-						spin;
+						stree = link.next('.'+subtree);
 
 					e.stopPropagation();
 
@@ -365,7 +366,7 @@ $.fn.elfindertree = function(fm) {
 						link.toggleClass(expanded);
 						stree.slideToggle()
 					} else {
-						spin = $('<span class="elfinder-navbar-spinner"/>').insertBefore(arrow);
+						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);
 						
 						fm.ajax({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
@@ -379,7 +380,7 @@ $.fn.elfindertree = function(fm) {
 								sync();
 							})
 							.always(function(data) {
-								spin.remove();
+								spinner.remove();
 								link.addClass(loaded);
 							});
 					}

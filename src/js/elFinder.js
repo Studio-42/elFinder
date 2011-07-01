@@ -909,7 +909,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.sync = function() {
 		var self  = this,
-			dfrd  = $.Deferred(),
+			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
 			opts1 = {
 				data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
 				preventDefault : true,
