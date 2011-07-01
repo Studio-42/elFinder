@@ -26,6 +26,8 @@ elFinder.prototype.resources = {
 		perms   : '<span class="elfinder-perms"/>',
 		symlink : '<span class="elfinder-symlink"/>',
 		navicon : '<span class="elfinder-nav-icon"/>',
+		navdir  : '<div class="elfinder-navbar-dir-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-nav-icon"/>{symlink}{permissions}{name}</span>'
+		
 	},
 	error : {
 		unknown     : 'Unknown error.',
