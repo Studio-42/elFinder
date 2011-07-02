@@ -27,13 +27,13 @@
 }
 
 /* noaccess */
-.elfinder-na .elfinder-perms { background-position:0 -116px; }
+.elfinder-na .elfinder-perms { background-position:0 -96px; }
 
 /* read only */
-.elfinder-ro .elfinder-perms { background-position:0 -82px;}
+.elfinder-ro .elfinder-perms { background-position:0 -64px;}
 
 /* write only */
-.elfinder-wo .elfinder-perms { background-position:0 -98px;}
+.elfinder-wo .elfinder-perms { background-position:0 -80px;}
 
 /* drag helper */
 .elfinder-drag-helper {

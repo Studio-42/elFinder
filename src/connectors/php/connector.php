@@ -220,13 +220,13 @@ $opts = array(
 				// 	'hidden'  => true
 				// ),
 				array(
-					'pattern' => '/file.css$/',
-					// 'read' => false
+					'pattern' => '/folder$/',
+					'read' => false
 					// 'write' => false
 				),
 				array(
-					'pattern' => '/tmb.zip/',
-					// 'read' => false
+					'pattern' => '/folder-23$/',
+					'write' => false
 				),
 				array(
 					'pattern' => '/\/folder42$/',

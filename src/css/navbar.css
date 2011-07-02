@@ -50,7 +50,7 @@
 	display:none;
 	top:50%;
 	margin-top:-8px;
-	background-image:url("../img/toolbar.png");
+	background-image:url("../img/arrows-normal.png");
 	background-repeat:no-repeat;
 }
 
@@ -75,7 +75,7 @@
 	margin-top:-8px;
 	background-image:url("../img/toolbar.png");
 	background-repeat:no-repeat;
-	background-position:0 -51px;
+	background-position:0 -16px;
 }
 
 /* ltr/rtl enviroment */
@@ -83,13 +83,13 @@
 .elfinder-rtl .elfinder-navbar-icon { right:14px; }
 
 /* root folder */
-.elfinder-tree .elfinder-navbar-root .elfinder-navbar-icon { background-position:-1px -35px; }
-.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -134px; }
+.elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 0; }
+.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -48px; }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
 .elfinder-droppable-active .elfinder-navbar-icon, 
-.ui-state-hover            .elfinder-navbar-icon { background-position:0 -66px; }
+.ui-state-hover            .elfinder-navbar-icon { background-position:0 -32px; }
 
 /* subdirs tree */
 .elfinder-navbar-subtree { display:none; }
@@ -135,7 +135,7 @@
 
 .elfinder-places { border:1px solid transparent;}
 .elfinder-places.elfinder-droppable-active {
-	border:1px solid #8cafed;;
+	border:1px solid #8cafed;
 }
 
 .elfinder-place-drag .elfinder-navbar-dir { font-size:.9em;}

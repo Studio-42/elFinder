@@ -56,6 +56,7 @@ elFinder.prototype.options = {
 		toolbar : [
 			['back', 'forward'],
 			['reload'],
+			['home', 'up'],
 			// ['reload', 'up', 'home'],
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
