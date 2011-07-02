@@ -8,6 +8,15 @@
 class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	
 	/**
+	 * Driver id
+	 * Must be started from letter and contains [a-z0-9]
+	 * Used as part of volume id
+	 *
+	 * @var string
+	 **/
+	protected $driverId = 'm';
+	
+	/**
 	 * Database object
 	 *
 	 * @var mysqli

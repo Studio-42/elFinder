@@ -16,6 +16,8 @@ class elFinder {
 	 **/
 	protected $volumes = array();
 	
+	public static $volumesCnt = 1;
+	
 	/**
 	 * Default root (storage)
 	 *
@@ -205,10 +207,9 @@ class elFinder {
 				if (class_exists($class)) {
 					$volume = new $class();
 					
-					// unique volume id - used as prefix to files hash
-					$id = $volume->driverid().$i.'_';
-					
-					if ($volume->mount($id, $o)) {
+					if ($volume->mount($o)) {
+						// unique volume id - used as prefix to files hash
+						$id = $volume->id();
 						$this->volumes[$id] = $volume;
 						if (!$this->default && $volume->isReadable()) {
 							$this->default = $this->volumes[$id]; 

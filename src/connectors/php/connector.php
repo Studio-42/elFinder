@@ -188,6 +188,7 @@ $opts = array(
 		// 	'path'   => '../../../files2',
 		// ),
 		array(
+			// 'id' => 'x5',
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
 			'alias' => 'File system',
@@ -266,6 +267,8 @@ $opts = array(
 	)
 	
 );
+
+
 
 // sleep(2);
 $connector = new elFinderConnector(new elFinder($opts));

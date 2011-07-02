@@ -151,6 +151,7 @@ abstract class elFinderVolumeDriver {
 	 * @var array
 	 **/
 	protected $options = array(
+		'id'              => '',
 		// root directory path
 		'path'            => '',  
 		// open this path on initial request instead of root path
@@ -536,14 +537,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	public function mount($id, array $opts) {
-		// path required
+	public function mount(array $opts) {
 		if (empty($opts['path'])) {
 			return false;
 		}
 		
-		$this->id = $id;
 		$this->options = array_merge($this->options, $opts);
+		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
 		$this->root = $this->_normpath($this->options['path']);
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
 		
