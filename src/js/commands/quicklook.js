@@ -198,6 +198,7 @@ elFinder.prototype.commands.quicklook = function() {
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').css('background', '');
 			info.html('');
+
 		})
 		// update info/icon
 		.bind('update', function(e) {
@@ -206,7 +207,7 @@ elFinder.prototype.commands.quicklook = function() {
 				file    = e.file,
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb;
-			
+
 			if (file) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
@@ -221,7 +222,7 @@ elFinder.prototype.commands.quicklook = function() {
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 
-				if (file.tmdb) {
+				if (file.tmb) {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
@@ -266,8 +267,7 @@ elFinder.prototype.commands.quicklook = function() {
 					.show()
 					.animate(openedCss(), 550, function() {
 						state = opened;
-						self.preview.trigger($.Event('update', {file : self.value}));
-						self.update(1, self.value)
+						self.update(1, self.value);
 					});
 			}
 		})
@@ -308,8 +308,8 @@ elFinder.prototype.commands.quicklook = function() {
 	
 	this.handlers = {
 		// save selected file
-		select   : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
-		error : function() { self.window.data('hash', '').trigger('close'); },
+		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
+		error  : function() { self.window.data('hash', '').trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
 	}
 	
@@ -366,7 +366,7 @@ elFinder.prototype.commands.quicklook = function() {
 		height = o.height > 0 ? parseInt(o.height) : 300;
 
 		fm.one('load', function() {
-			parent = fm.getUI()//.prepend(win);
+			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
 			win.appendTo('body').zIndex(100 + parent.zIndex());

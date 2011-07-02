@@ -265,5 +265,5 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', '', 'shortcut-exec', 'event-sync', 'event-searchend']
+	debug : ['error', 'warning', 'event-sync', 'event-searchend']
 }

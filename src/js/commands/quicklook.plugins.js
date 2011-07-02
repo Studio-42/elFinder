@@ -22,7 +22,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.bind('update', function(e) {
 			var file = e.file,
 				img;
-			
+
 			if ($.inArray(file.mime, mimes) !== -1) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
@@ -245,19 +245,25 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'audio/mp4'     : 'm4a',
 				'audio/x-mp4'   : 'm4a',
 				'audio/ogg'     : 'ogg'
-			};
+			},
+			node;
 
 		preview.bind('update', function(e) {
 			var file = e.file,
-				type = mimes[file.mime],
-				node;
-			
+				type = mimes[file.mime];
+
 			if (ql.support.audio[type]) {
 				e.stopImmediatePropagation();
 				
 				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.url(file.hash)+'" /></audio>')
 					.appendTo(preview);
 				autoplay && node[0].play();
+			}
+		}).bind('change', function() {
+			if (node && node.parent().length) {
+				node[0].pause();
+				node.remove();
+				node= null;
 			}
 		});
 	},
@@ -276,8 +282,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'video/ogg'       : 'ogg',
 				'application/ogg' : 'ogg',
 				'video/webm'      : 'webm'
-			};
-			
+			},
+			node;
+
 		preview.bind('update', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
@@ -288,6 +295,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer><source src="'+ql.fm.url(file.hash)+'" /></video>').appendTo(preview);
 				autoplay && node[0].play();
+				
+			}
+		}).bind('change', function() {
+			if (node && node.parent().length) {
+				node[0].pause();
+				node.remove();
+				node= null;
 			}
 		});
 	},
@@ -299,7 +313,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var preview = ql.preview,
-			mimes   = [];
+			mimes   = [],
+			node;
 			
 		$.each(navigator.plugins, function(i, plugins) {
 			$.each(plugins, function(i, plugin) {
@@ -315,8 +330,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if ($.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 				(video = mime.indexOf('video/') === 0) && ql.hideinfo();
-				$('<embed src="'+ql.fm.url(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
+				node = $('<embed src="'+ql.fm.url(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
 					.appendTo(preview);
+			}
+		}).bind('change', function() {
+			if (node && node.parent().length) {
+				node.remove();
+				node= null;
 			}
 		});
 		
