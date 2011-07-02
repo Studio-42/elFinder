@@ -130,51 +130,52 @@ $.fn.elfindercontextmenu = function(fm) {
 
 		fm.one('load', function() {
 			
-			cwd = fm.getUI('cwd').bind(event, function(e) {
-				var target  = $(e.target),
-					file    = target.closest('.'+clCwdFile),
-					targets = [],
-					type    = 'files';
+			cwd = fm.getUI('cwd')
+				.bind(event, function(e) {
+					var target  = $(e.target),
+						file    = target.closest('.'+clCwdFile),
+						targets = [],
+						type    = 'files';
 
-				e.preventDefault();
+					e.preventDefault();
 				
-				if (file.length) {
-					// do not show menu on disabled files
-					if (file.is('.'+clDisabled)) {
-						return;
+					if (file.length) {
+						// do not show menu on disabled files
+						if (file.is('.'+clDisabled)) {
+							return;
+						}
+						cwd.trigger('selectfile', file.attr('id'));
+						targets = fm.selected();
+					} else {
+						cwd.trigger('unselectall');
+						targets.push(fm.cwd().hash);
+						type = 'cwd';
 					}
-					cwd.trigger('selectfile', file.attr('id'));
-					targets = fm.selected();
-				} else {
-					cwd.trigger('unselectall');
-					targets.push(fm.cwd().hash);
-					type = 'cwd';
-				}
 
-				append(type, targets);
-				open(e.clientX, e.clientY);
-			})
+					append(type, targets);
+					open(e.clientX, e.clientY);
+				});
 			
-			fm.getUI('nav').bind(event, function(e) {
-				var target  = $(e.target),
-					targets = [];
+			fm.getUI('nav')
+				.bind(event, function(e) {
+					var target  = $(e.target),
+						targets = [];
 
 
-				e.preventDefault();
-				if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
+					e.preventDefault();
+					if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
 					
 
-					target.is('.'+clNavDirWrap) && (target = target.children('.'+clNavdir));
-					if (target.length) {
-						targets.push(fm.navId2Hash(target.attr('id')))
-						append('navbar', targets);
-						open(e.clientX, e.clientY);
+						target.is('.'+clNavDirWrap) && (target = target.children('.'+clNavdir));
+						if (target.length) {
+							targets.push(fm.navId2Hash(target.attr('id')))
+							append('navbar', targets);
+							open(e.clientX, e.clientY);
+						}
 					}
-				}
-
-			})
+				});
 			
-			fm.select(close).getUI().click(close);
+			fm.bind('disable select', close).getUI().click(close);
 
 		}).one('destroy', function() {
 			menu.remove();

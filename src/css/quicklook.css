@@ -22,6 +22,8 @@
 	border-radius:0;
 	-moz-border-radius:0;
 	-webkit-border-radius:0;
+	-webkit-background-clip: padding-box;
+/*	background-clip:padding-box;*/
 	padding:0;
 	background:#000;
 	z-index:90000;

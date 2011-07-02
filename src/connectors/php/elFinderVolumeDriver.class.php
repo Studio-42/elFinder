@@ -112,7 +112,10 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @var string
 	 **/
-	protected $archivers = array();
+	protected $archivers = array(
+		'create'  => array(),
+		'extract' => array()
+	);
 	
 	/**
 	 * How many subdirs levels return for tree
@@ -724,7 +727,6 @@ abstract class elFinderVolumeDriver {
 			? $this->options['acceptedName']
 			: '';
 
-		// if (isset($this->commands['archive']) || isset($this->commands['extract'])) {
 		$this->_checkArchivers();
 		// manual control archive types to create
 		if (!empty($this->options['archiveMimes']) && is_array($this->options['archiveMimes'])) {
@@ -1211,7 +1213,7 @@ abstract class elFinderVolumeDriver {
 				return $this->stat($dst);
 			} 
 
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
 		return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
@@ -1241,7 +1243,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if ($this->_fileExists($this->_joinPath($path, $name))) {
-			return $this->setError(elFinder::ERROR_FILE_EXISTS, $name);
+			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 
 		return $this->_mkfile($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
