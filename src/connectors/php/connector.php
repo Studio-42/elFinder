@@ -248,9 +248,9 @@ $opts = array(
 			'accessControl' => 'access',
 			'separator' => ':',
 			// 'copyTo' => false,
-			'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../../../tmb/',
-			'tmbURL' => 'http://localhost/git/elfinder/tmb/',
+			// 'URL'    => 'http://localhost/git/elfinder',
+			'tmbPath' => '../../../files/.dbtmb/',
+			'tmbURL' => 'http://localhost/git/elfinder/files/.dbtmb/',
 			// 'attributes' => array(
 			// 	array(),
 			// 	array(

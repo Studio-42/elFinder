@@ -2332,7 +2332,12 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2class : function(mime) {
-		return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
+		var prefix = 'elfinder-cwd-icon-';
+		
+		mime = mime.split('/');
+		
+		return prefix+mime[0]+(mime[0] != 'image' && mime[1] ? ' '+prefix+mime[1].replace(/(\.|\+)/g, '-') : '')
+		// return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
 	},
 	
 	/**

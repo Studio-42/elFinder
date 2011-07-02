@@ -463,20 +463,24 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			loadThumbnails = function(files) {
-				var data = fm.oldAPI 
-						? {cmd : 'tmb', current : fm.cwd().hash} 
-						: {cmd : 'tmb', targets : files};
+				var tmbs = [];
 				
-				if (files === true || files.length) {
-					fm.ajax({
-						data        : data,
-						preventFail : true
-					}).done(function(data) {
-						if (attachThumbnails(data.images) && data.tmb) {
-							loadThumbnails(true);
+				if (fm.oldAPI) {
+					fm.ajax({cmd : 'tmb', current : fm.cwd().hash, preventFail : true}).done(function(data) {
+						if (attachThumbnails(data.images||[]) && data.tmb) {
+							loadThumbnails();
 						}
-					});
+					})
+					return;
 				} 
+				
+				while ((tmbs = files.splice(0, 5)).length) {
+					fm.ajax({cmd : 'tmb', targets : tmbs, preventFail : true}).done(function(data) {
+						if (!attachThumbnails(data.images||[])) {
+							return;
+						}
+					})
+				}
 			},
 			
 			/**

@@ -524,6 +524,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmb($args) {
+		set_time_limit(0);
 		$result  = array('images' => array());
 		$targets = $args['targets'];
 		
