@@ -88,7 +88,7 @@ elFinder.prototype.commands.edit = function() {
 						
 						editor.elfinderdialog('close');
 						
-						fm.ajax({
+						fm.request({
 							options : {type : 'post'},
 							data : {
 								cmd     : fm.oldAPI ? 'edit' : 'put',
@@ -122,7 +122,7 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
-			fm.ajax({
+			fm.request({
 				data   : {
 					cmd     : fm.oldAPI ? 'fread' : 'get',
 					target  : hash,

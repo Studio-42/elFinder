@@ -1786,7 +1786,6 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($root) {
-			
 			$file['volumeid'] = $this->id;
 		}
 		

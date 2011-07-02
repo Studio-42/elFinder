@@ -206,7 +206,7 @@ $.fn.elfinderplaces = function(fm) {
 			if (dirs.length) {
 				root.prepend(spinner);
 				
-				fm.ajax({
+				fm.request({
 					data : {cmd : 'info', targets : dirs},
 					preventDefault : true
 				})
@@ -242,7 +242,7 @@ $.fn.elfinderplaces = function(fm) {
 				if (dirs.length) {
 					root.prepend(spinner);
 
-					fm.ajax({
+					fm.request({
 						data : {cmd : 'info', targets : dirs},
 						preventDefault : true
 					})

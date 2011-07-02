@@ -80,14 +80,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if ($.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 
-				// stop loading on change file if not loadin yet
+				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
 					if (!jqxhr.isResolved() && !jqxhr.isRejected()) {
 						jqxhr.reject();
 					}
 				});
 				
-				jqxhr = fm.ajax({
+				jqxhr = fm.request({
 					options        : {dataType : 'html'},
 					data           : {cmd : fm.oldAPI ? 'open' : 'file', target  : file.hash, current : file.phash},
 					preventDefault : true,
@@ -130,7 +130,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				});
 				
-				jqxhr = fm.ajax({
+				jqxhr = fm.request({
 					data   : {
 						cmd     : fm.oldAPI ? 'fread' : 'get',
 						target  : file.hash,

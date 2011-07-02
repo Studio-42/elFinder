@@ -1,5 +1,5 @@
 /**
- * Default config
+ * Default elFinder config
  *
  */
 elFinder.prototype.options = {
@@ -8,7 +8,7 @@ elFinder.prototype.options = {
 	 *
 	 * @type String
 	 */
-	url            : '',
+	url : '',
 
 	/**
 	 * Ajax request type.
@@ -19,19 +19,38 @@ elFinder.prototype.options = {
 	requestType : 'get',
 
 	/**
+	 * Transport to send request to backend.
+	 * Required for future extensions using websockets/webdav etc.
+	 * Must be an object with "send" method.
+	 * transport.send must return $.Deferred() object
+	 *
+	 * @type Object
+	 * @default null
+	 * @example
+	 *  transport : {
+	 *    send : function(options) {
+	 *      var dfrd = $.Deferred();
+	 *      // connect to backend ...
+	 *      return dfrd;
+	 *    }
+	 *  }
+	 **/
+	transport : null,
+
+	/**
 	 * Interface language
 	 *
 	 * @type String
 	 * @default "en"
 	 */
-	lang           : 'en',
+	lang : 'en',
 
 	/**
 	 * Additional css class for filemanager node.
 	 *
 	 * @type String
 	 */
-	cssClass       : '',
+	cssClass : '',
 
 	commands : ['open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'],
 	
@@ -120,16 +139,7 @@ elFinder.prototype.options = {
 	notifyDelay : 500,
 	
 	syncTree : true,
-	/* callback to get file url (for wswing editors) */
-	editorCallback : null,
-	/* string to cut from file url begin before pass it to editorCallback. variants: '' - nothing to cut, 'root' - cut root url, 'http://...' - string if it exists in the beginig of url  */
-	cutURL         : '',
-	/* close elfinder after editorCallback */
-	closeOnEditorCallback : true,
-	/* i18 messages. not set manually! */
-	i18n           : {},
-	/* fm view (icons|list) */
-	view           : 'icons',
+
 	/* width */
 	width          : 'auto',
 	/* height */
@@ -188,7 +198,7 @@ elFinder.prototype.options = {
 	 * Distance in px to cwd bottom edge to start display files
 	 *
 	 * @type Number
-	 * @default  100
+	 * @default  50
 	 */
 	showThreshold : 50,
 	
@@ -208,7 +218,13 @@ elFinder.prototype.options = {
 	
 	// commands : ['back', 'forward', 'reload', 'up', 'home', 'open', 'copy', 'cut', 'paste', 'rm', 'info', 'duplicate', 'rename'],
 	
-	
+	/**
+	 * How many thumbnails create in one request
+	 *
+	 * @type Number
+	 * @default  5
+	 */
+	loadTmbs : 5,
 	
 	/* cookie options */
 	cookie         : {

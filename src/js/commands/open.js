@@ -42,7 +42,7 @@ elFinder.prototype.commands.open = function() {
 		if (cnt == 1 && (file = files[0]) && file.mime == 'directory') {
 			return file && !file.read
 				? dfrd.reject([errors.open, file.name, errors.denied])
-				: fm.ajax({
+				: fm.request({
 						data   : {cmd  : 'open', target : file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
 						syncOnFail : true

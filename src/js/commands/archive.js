@@ -56,7 +56,7 @@ elFinder.prototype.commands.archive = function() {
 			}
 		}
 
-		return fm.ajax({
+		return fm.request({
 			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mime, current : cwd.hash},
 			notify     : {type : 'archive', cnt : 1},
 			syncOnFail : true

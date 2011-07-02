@@ -112,6 +112,8 @@ $.fn.elfindercwd = function(fm) {
 			 **/
 			tmbUrl = '',
 			
+			tmbNum = fm.options.loadTmbs > 0 ? fm.options.loadTmbs : 5,
+			
 			/**
 			 * File templates
 			 *
@@ -437,7 +439,8 @@ $.fn.elfindercwd = function(fm) {
 			 * @return Boolean
 			 */
 			attachThumbnails = function(images) {
-				var ret = true;
+				var ret = true, ndx;
+				
 				$.each(images, function(hash, tmb) {
 					var node = cwd.find('#'+hash);
 					if (node.length) {
@@ -466,7 +469,7 @@ $.fn.elfindercwd = function(fm) {
 				var tmbs = [];
 				
 				if (fm.oldAPI) {
-					fm.ajax({cmd : 'tmb', current : fm.cwd().hash, preventFail : true}).done(function(data) {
+					fm.request({cmd : 'tmb', current : fm.cwd().hash, preventFail : true}).done(function(data) {
 						if (attachThumbnails(data.images||[]) && data.tmb) {
 							loadThumbnails();
 						}
@@ -474,8 +477,8 @@ $.fn.elfindercwd = function(fm) {
 					return;
 				} 
 				
-				while ((tmbs = files.splice(0, 5)).length) {
-					fm.ajax({cmd : 'tmb', targets : tmbs, preventFail : true}).done(function(data) {
+				while ((tmbs = files.splice(0, tmbNum)).length) {
+					fm.request({cmd : 'tmb', targets : tmbs, preventFail : true}).done(function(data) {
 						if (!attachThumbnails(data.images||[])) {
 							return;
 						}

@@ -216,7 +216,7 @@ elFinder.prototype.resources = {
 
 							fm.lockfiles({files : [id]});
 
-							fm.ajax({
+							fm.request({
 									data        : {cmd : cmd, name : name, current : phash, target : phash}, // current - for old api
 									notify      : {type : cmd, cnt : 1},
 									preventFail : true,

@@ -57,7 +57,7 @@ elFinder.prototype.commands.rm = function() {
 					label    : self.title,
 					callback : function() {  
 						fm.lockfiles({files : files});
-						fm.ajax({
+						fm.request({
 							data   : {cmd  : 'rm', targets : files, current : fm.cwd().hash}, // current - for old api
 							notify : {type : 'rm', cnt : cnt},
 							preventFail : true

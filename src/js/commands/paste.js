@@ -138,7 +138,7 @@ elFinder.prototype.commands.paste = function() {
 
 							$.each(groups, function(src, targets) {
 								args.push(function() {
-									return fm.ajax({
+									return fm.request({
 										data   : {cmd : 'paste', current : fm.cwd().hash, src : src, dst : dst.hash, targets : targets, cut : cut ? 1 : 0},
 										notify : {type : cut ? 'move' : 'copy', cnt : targets.length}
 									});
@@ -156,7 +156,7 @@ elFinder.prototype.commands.paste = function() {
 						
 						// new API
 						files = $.map(files, function(f) { return f.hash});
-						fm.ajax({
+						fm.request({
 								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							});
@@ -176,7 +176,7 @@ elFinder.prototype.commands.paste = function() {
 					} else {
 						dst.hash == fm.cwd().hash
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
-							: fm.ajax({
+							: fm.request({
 								data : {cmd : 'ls', target : dst.hash},
 								notify : {type : 'preparecopy', cnt : 1, hideCnt : true},
 								preventFail : true

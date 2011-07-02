@@ -31,7 +31,7 @@ elFinder.prototype.commands.search = function() {
 		var fm = this.fm;
 		
 		if (typeof(q) == 'string' && q) {
-			return fm.ajax({
+			return fm.request({
 				data   : {cmd : 'search', q : q},
 				notify : {type : 'seach', cnt : 1, hideCnt : true}
 			});

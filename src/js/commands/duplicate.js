@@ -49,7 +49,7 @@ elFinder.prototype.commands.duplicate = function() {
 		if (fm.oldAPI) {
 			$.each(files, function(i, file) {
 				args.push(function() {
-					return fm.ajax({
+					return fm.request({
 						data   : {cmd : 'duplicate', target : file.hash, current : file.phash},
 						notify : {type : 'copy', cnt : 1}
 					});
@@ -59,7 +59,7 @@ elFinder.prototype.commands.duplicate = function() {
 			return fm.waterfall.apply(null, args);
 		}
 		
-		return fm.ajax({
+		return fm.request({
 			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
 			notify : {type : 'copy', cnt : cnt}
 		});

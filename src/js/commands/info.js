@@ -106,7 +106,7 @@ elFinder.prototype.commands.info = function() {
 		
 		// send request to count total size
 		if (count.length) {
-			fm.ajax({
+			fm.request({
 					data : {cmd : 'size', targets : count},
 					preventDefault : true
 				})

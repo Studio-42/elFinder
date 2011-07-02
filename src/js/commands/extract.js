@@ -57,7 +57,7 @@ elFinder.prototype.commands.extract = function() {
 				return dfrd.reject(error);
 			}
 			
-			fm.ajax({
+			fm.request({
 				data       : {cmd : 'extract', target : file.hash, current : file.phash},
 				notify     : {type : 'extract', cnt : 1},
 				syncOnFail : true

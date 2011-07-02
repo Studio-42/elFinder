@@ -74,7 +74,7 @@ elFinder.prototype.commands.rename = function() {
 						
 						parent.html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
-						fm.ajax({
+						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name, current : file.phash},
 								notify : {type : 'rename', cnt : 1}
 							})

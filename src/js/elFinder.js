@@ -289,7 +289,12 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.oldAPI = true;
 	
-	this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'unknown';
+	/**
+	 * User os. Required to bind native shortcuts for open/rename
+	 *
+	 * @type String
+	 **/
+	this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'other';
 	
 	/**
 	 * Configuration options
@@ -652,6 +657,11 @@ window.elFinder = function(node, opts) {
 		return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
 	}
 	
+	
+	this.transport = this.options.transport && typeof(this.options.transport.send) == 'function'
+		? this.options.transport
+		: { send : function(opts) { return $.ajax(opts) } }
+	
 	/**
 	 * Proccess ajax request.
 	 * Fired events :
@@ -820,7 +830,9 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
-		xhr = $.ajax(options).fail(error).success(success);
+		xhr = this.transport.send(options).fail(error).success(success);
+		
+		// this.transport.send(options)
 		
 		// add "open" xhr into queue
 		if (cmd == 'open') {
@@ -929,15 +941,15 @@ window.elFinder = function(node, opts) {
 			timeout, xhr;
 		
 		xhr = self.oldAPI 
-			? this.ajax(opts1) 
+			? this.request(opts1) 
 			: $.when(
-				this.ajax(opts1),
-				this.ajax(opts2)
+				this.request(opts1),
+				this.request(opts2)
 			); 
 		
 		xhr.fail(function(error) {
 				dfrd.reject(error);
-				error && self.ajax({
+				error && self.request({
 					data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
 					notify : {type : 'open', cnt : 1, hideCnt : true}
 				});
@@ -1467,8 +1479,8 @@ window.elFinder = function(node, opts) {
 		.bind(keydown+' '+keypress, execShortcut);
 	
 	// send initial request and start to pray >_<
-	this.trigger('init').
-		ajax({
+	this.trigger('init')
+		.request({
 			data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
 			preventDone : true,
 			notify      : {type : 'open', cnt : 1, hideCnt : true},
@@ -1668,9 +1680,9 @@ elFinder.prototype = {
 	 * @param Object request options
 	 * @return $.Deferred
 	 */
-	ajax : function(options) {
-		return this.request(options);
-	},
+	// ajax : function(options) {
+	// 	return this.request(options);
+	// },
 	
 	/**
 	 * Bind callback to event(s) The callback is executed at most once per event.
