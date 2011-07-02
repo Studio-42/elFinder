@@ -28,7 +28,7 @@
 	width:16px;
 	height:16px;
 	margin:0;
-	padding:5px;
+	padding:4px;
 	float:left;
 	overflow:hidden;
 	position:relative;
@@ -59,7 +59,7 @@
 .elfinder-toolbar-button-separator {
 	float:left;
 	padding:0;
-	height:26px;
+	height:24px;
 	border-top:0 solid;
 	border-right:0 solid;
 	border-bottom:0 solid;
@@ -162,12 +162,13 @@
 	width:160px;
 	height:24px;
 	padding:0 20px;
-	font-size:14px;
+	font-size:12px;
 	border:0 solid;
 	border:1px solid #aaa;
 	-moz-border-radius: 12px;
 	-webkit-border-radius: 12px;
 	border-radius: 12px;
+	outline:0 solid;
 }
 
 /* icons */
@@ -175,7 +176,7 @@
 	position:absolute;
 	height:18px;
 	top: 50%;
-	margin:-8px 4px 0 4px;
+	margin:-7px 4px 0 4px;
 	opacity: .6; 
 	filter:Alpha(Opacity=60);
 }
