@@ -893,6 +893,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
+		$sql = 'UPDATE '.$this->tbf.' SET content="'.$this->db->real_escape_string($content).'", size="'.strlen($content).'", mtime="'.time().'" WHERE id='.intval($path);
+		if ($this->query($sql)) {
+			$this->clearstat();
+			return true;
+		}
 		return false;
 	}
 	

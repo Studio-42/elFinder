@@ -52,7 +52,6 @@ elFinder.prototype.commands.edit = function() {
 										this.setSelectionRange(start, start);
 									}
 								}
-								fm.log(e.keyCode)
 								
 								if (e.ctrlKey || e.metaKey) {
 									// close on ctrl+w/q
@@ -104,6 +103,7 @@ elFinder.prototype.commands.edit = function() {
 							dfrd.reject(error);
 						})
 						.done(function(data) {
+							data.changed && data.changed.length && fm.change(data);
 							dfrd.resolve(data);
 						});
 					};

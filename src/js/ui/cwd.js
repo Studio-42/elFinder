@@ -263,6 +263,10 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			
+			selectFile = function(hash) {
+				cwd.find('#'+hash).trigger(evtSelect);
+			},
+			
 			/**
 			 * Unselect all files
 			 *
@@ -745,15 +749,13 @@ $.fn.elfindercwd = function(fm) {
 				add($.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; }));
 			})
 			.change(function(e) {
-				var phash   = fm.cwd().hash,
-				
-					changed = e.data.changed || [],
-					i       = changed.length,
-					file;
+				var phash = fm.cwd().hash,
+					sel   = fm.selected();
 
 				$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
 					remove([file.hash]);
 					add([file]);
+					$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
 				})
 				trigger();
 			})
@@ -816,15 +818,7 @@ $.fn.elfindercwd = function(fm) {
 				cwd.trigger('unselectall');
 
 				$.each(e.data.added || [], function(i, file) { 
-					if (file && file.phash == phash) {
-						cwd.find('#'+file.hash).trigger(evtSelect);
-					}
-				});
-				trigger();
-			})
-			.bind('put edit', function(e) {
-				$.each(files = e.data.changed || [], function(i, file) {
-					cwd.find('#'+file.hash).trigger(evtSelect);
+					file && file.phash == phash && selectFile(file.hash);
 				});
 				trigger();
 			})
