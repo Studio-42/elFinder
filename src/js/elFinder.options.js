@@ -281,5 +281,5 @@ elFinder.prototype.options = {
 	},
 	
 	// debug : true
-	debug : ['error', 'warning', 'event', 'event-searchend']
+	debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
 }

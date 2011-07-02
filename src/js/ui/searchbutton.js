@@ -6,29 +6,45 @@
  **/
 $.fn.elfindersearchbutton = function(cmd) {
 	return this.each(function() {
-		var active = false,
+		var result = false,
 			button = $(this).hide().addClass('ui-widget-content elfinder-button '+cmd.fm.res('class', 'searchbtn')+''),
+			search = function() {
+				cmd.exec($.trim(input.val())).done(function() {
+					result = true;
+					input.focus();
+				});
+			},
+			abort = function() {
+				input.val('');
+				if (result) {
+					result = false;
+					cmd.fm.trigger('searchend');
+				}
+			},
 			input  = $('<input type="text" size="42"/>')
 				.appendTo(button)
-				.bind('keydown keypress', function(e) {
-					var val;
-					
+				// to avoid fm shortcuts on arrows
+				.keypress(function(e) {
 					e.stopPropagation();
-
-					e.type == 'keydown' && e.keyCode == 13 && (val = $.trim(input.val())) && cmd.exec(val).done(function() { active = true; input.focus(); });
 				})
-				.keyup(function(e) {
-					e.keyCode == 27 && input.val('');
-					active && cmd.fm.trigger('searchend') && (active = false);
+				.keydown(function(e) {
+					e.stopPropagation();
+					
+					e.keyCode == 13 &&  search();
+					
+					if (e.keyCode== 27) {
+						e.preventDefault();
+						abort();
+					}
 				});
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
-			.click(function() { input.trigger($.Event('keydown', {keyCode : 13})).focus(); });
+			.click(search);
 		
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
-			.click(function() { input.trigger($.Event('keyup', {keyCode : 27})); })
+			.click(abort)
 		
 		// wait when button will be added to DOM
 		setTimeout(function() {
@@ -44,14 +60,11 @@ $.fn.elfindersearchbutton = function(cmd) {
 			}
 		}, 200);
 		
-		// register shortcut
 		cmd.fm
 			.select(function() {
 				input.blur();
 			})
-			.searchend(function() {
-				input.val('');
-			})
+			.viewchange(abort)
 			.shortcut({
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
