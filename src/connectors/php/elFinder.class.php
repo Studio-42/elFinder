@@ -208,7 +208,7 @@ class elFinder {
 					$volume = new $class();
 					
 					if ($volume->mount($o)) {
-						// unique volume id - used as prefix to files hash
+						// unique volume id (ends on "_") - used as prefix to files hash
 						$id = $volume->id();
 						$this->volumes[$id] = $volume;
 						if (!$this->default && $volume->isReadable()) {

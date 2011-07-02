@@ -1785,6 +1785,11 @@ abstract class elFinderVolumeDriver {
 			$file['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($file['name'])));
 		}
 		
+		if ($root) {
+			
+			$file['volumeid'] = $this->id;
+		}
+		
 		if ($link && !$root) {
 			if (($target = $this->_readlink($path)) != false) {
 				$file['mime']   = $this->mimetype($target);

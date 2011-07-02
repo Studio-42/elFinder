@@ -236,6 +236,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				'date'      => $this->formatDate($data['mtime'])
 			);
 			
+			if (!$data['parent_id']) {
+				$file['volumeid'] = $this->id;
+			}
+			
 			if ($file['mime'] == 'directory') {
 				$file['dirs'] = $data['dirs'];
 			} else {
