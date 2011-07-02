@@ -1,10 +1,16 @@
-
+"use strict";
+/**
+ * @class  elFinder command "up"
+ * Go into parent directory
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.up = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+up backspace'
+		pattern     : 'ctrl+up'
 	}];
 	
 	this.getstate = function() {
@@ -12,7 +18,7 @@ elFinder.prototype.commands.up = function() {
 	}
 	
 	this.exec = function() {
-		return this.fm.exec('open', this.fm.cwd().phash);
+		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
 	}
 
 }

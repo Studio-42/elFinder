@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @class  elFinder command "view"
  * Change current directory view (icons/list)

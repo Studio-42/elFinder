@@ -9,7 +9,7 @@ elFinder.prototype.commands.back = function() {
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.shortcuts      = [{
-		pattern     : 'ctrl+left'
+		pattern     : 'ctrl+left backspace'
 	}];
 	
 	this.getstate = function() {
