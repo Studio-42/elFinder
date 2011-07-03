@@ -8,7 +8,7 @@ $.fn.elfindertree = function(fm, opts) {
 	var treeclass = fm.res('class', 'tree');
 	
 	this.not('.'+treeclass).each(function() {
-		fm.log(opts)
+
 		var c = 'class',
 			
 			/**

@@ -557,6 +557,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		fclose($target);
 		@chmod($path, $this->options['fileMode']);
+		clearstatcache();
 		return $path;
 	}
 	

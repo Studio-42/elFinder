@@ -41,14 +41,14 @@
 	font-size:.76em;
 }
 
-.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; }
+.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0 solid; }
 .std42-dialog .ui-dialog-buttonpane button span { padding:2px 9px; }
 
 .elfinder-dialog .ui-resizable-e, 
 .elfinder-dialog .ui-resizable-s { width:0; height:0;}
 /*.elfinder-dialog .ui-resizable-se { right:3px;}*/
 
-
+.std42-dialog .ui-button input { cursor: pointer;}
 
 /* error/notify/confirm dialogs icon */
 .elfinder-dialog-icon {

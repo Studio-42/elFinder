@@ -45,7 +45,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -794,17 +794,18 @@ class elFinder {
 	protected function upload($args) {
 		$target = $args['target'];
 		$volume = $this->volume($target);
-		$result = array('added' => array());
+		$header = !empty($args['html']) ? 'Content-Type: text/html; charset=utf-8' : false;
+		$result = array('added' => array(), 'header' => $header);
 		$files  = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
 			? $args['FILES']['upload'] 
 			: array();
 
 		if (empty($files)) {
-			return array('error' => $this->error(self::ERROR_UPLOAD_NO_FILES));
+			return array('error' => $this->error(self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
 		}
 		
 		if (!$volume) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
+			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
 		}
 		
 		foreach ($files['name'] as $i => $name) {
@@ -832,7 +833,8 @@ class elFinder {
 			
 			$result = $this->merge($result, $this->trigger('upload', $volume, array('added' => array($file))));
 		}
-		
+
+		$result['header'] = $header;
 		return $result;
 	}
 	

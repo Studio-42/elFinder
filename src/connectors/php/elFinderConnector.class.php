@@ -98,7 +98,7 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function output(array $data) {
-		$header = isset($data['header']) ? $data['header'] : 'Content-Type: text/html; charset=utf-8' /*'Content-Type: application/json'*/;
+		$header = isset($data['header']) ? $data['header'] : /*'Content-Type: text/html; charset=utf-8'*/ 'Content-Type: application/json';
 		unset($data['header']);
 		// debug($header);
 		// exit();

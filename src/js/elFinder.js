@@ -658,9 +658,7 @@ window.elFinder = function(node, opts) {
 	}
 	
 	
-	this.transport = this.options.transport && typeof(this.options.transport.send) == 'function'
-		? this.options.transport
-		: { send : function(opts) { return $.ajax(opts) } }
+	
 	
 	/**
 	 * Proccess ajax request.
@@ -830,7 +828,7 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
-		xhr = this.transport.send(options).fail(error).success(success);
+		xhr = this.transport.send(options, this).fail(error).success(success);
 		
 		// this.transport.send(options)
 		
@@ -957,6 +955,10 @@ window.elFinder = function(node, opts) {
 			.done(doSync);
 		
 		return dfrd;
+	}
+	
+	this.upload = function(files) {
+		return this.transport.upload(files, this);
 	}
 	
 	/**
@@ -1257,6 +1259,41 @@ window.elFinder = function(node, opts) {
 		'F8' : 119,
 		'F9' : 120
 	});
+	
+	this.dragUpload = false;
+	this.xhrUpload  = typeof XMLHttpRequestUpload != 'undefined' && typeof File != 'undefined' && typeof FormData != 'undefined';
+	
+	// configure transport object
+	this.transport = {
+		send : function(o) { return $.ajax(o); }
+	}
+	
+	if (this.xhrUpload) {
+		this.transport.upload = $.proxy(this.uploads.xhr, this);
+		this.dragUpload = true;
+	} else {
+		this.transport.upload = $.proxy(this.uploads.iframe, this);
+	}
+	
+	// custom transport object
+	if (this.options.transport) {
+		if (typeof(this.options.transport.init) == 'function') {
+			// init transportif required
+			this.options.transport.init(this);
+		}
+		
+		if (typeof(this.options.transport.send) == 'function') {
+			this.transport.send = this.options.transport.send;
+		}
+		
+		if (typeof(this.options.upload) == 'function') {
+			this.transport.upload = this.options.transport.upload;
+			this.dragUpload = !!this.options.dragUploadAllow;
+		} else if (this.options.transport.upload == 'iframe') {
+			this.dragUpload = false;
+			this.transport.upload = $.proxy(this.uploads.iframe, this);
+		}
+	}
 	
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
@@ -1683,16 +1720,243 @@ elFinder.prototype = {
 	 */
 	commands : {},
 	
-	/**
-	 * Wrapper for elFinder.ajax method.
-	 * Required to add websokets support in the future
-	 *
-	 * @param Object request options
-	 * @return $.Deferred
-	 */
-	// ajax : function(options) {
-	// 	return this.request(options);
-	// },
+	parseUploadData : function(text) {
+		var errors   = this.errors(),
+			data;
+		
+		if (!$.trim(text)) {
+			return {error : [errors.response, errors.empty]};
+		}
+		
+		try {
+			data = $.parseJSON(text);
+		} catch (e) {
+			return {error : [errors.response, errors.json]}
+		}
+		
+		if (!this.validResponse('upload', data)) {
+			return {error : [errors.response]};
+		}
+		
+		data.removed = $.map(data.added||[], function(f) { return f.hash; })
+		
+		if (this.newAPI) {
+			return data;
+		}
+		
+	},
+	
+	iframeCnt : 0,
+	
+	uploads : {
+		// upload transport using iframe
+		iframe : function(data) { 
+			var self   = this,
+				input  = data.input,
+				errors = this.errors(),
+				dfrd   = $.Deferred()
+					.fail(function(error) {
+						error && self.error(error);
+					})
+					.done(function(data) {
+						data.warning && self.error(data.warning);
+						data.removed && self.remove(data);
+						data.added   && self.add(data);
+						data.changed && self.change(data);
+	 					self.trigger('upload', data);
+					}),
+				name = 'iframe-'+this.namespace+(++this.iframeCnt),
+				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'"><input type="text" name="cmd" value="upload" /></form>'),
+				msie = $.browser.msie,
+				// clear timeouts, close notification dialog, remove form/iframe
+				onload = function() {
+					abortto  && clearTimeout(abortto);
+					notifyto && clearTimeout(notifyto);
+					notify   && self.notify({type : 'upload', cnt : -cnt});
+					
+					setTimeout(function() {
+						msie && $('<iframe src="javascript:false;"/>').appendTo(form);
+						form.remove();
+						iframe.remove();
+					}, 100);
+				},
+				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" />')
+					.bind('load', function() {
+						iframe.unbind('load')
+							.bind('load', function() {
+								var data = self.parseUploadData(iframe.contents().text());
+								
+								onload();
+								data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
+							});
+							
+							// notify dialog
+							notifyto = setTimeout(function() {
+								notify = true;
+								self.notify({type : 'upload', cnt : cnt});
+							}, self.options.notifyDelay);
+							
+							// emulate abort on timeout
+							if (self.options.iframeTimeout > 0) {
+								abortto = setTimeout(function() {
+									onload();
+									dfrd.reject([errors.connect, errors.timeout]);
+								}, self.options.iframeTimeout);
+							}
+							
+							form.submit();
+					}),
+				cnt, notify, notifyto, abortto
+				
+				;
+			
+			if (input && $(input).is(':file') && $(input).val()) {
+				form.append(input);
+			} else {
+				return dfrd.reject();
+			}
+			
+			cnt = input.files ? input.files.length : 1;
+			
+			form.append('<input type="hidden" name="'+(this.newAPI ? 'target' : 'current')+'" value="'+this.cwd().hash+'"/>')
+				.append('<input type="hidden" name="html" value="1"/>')
+				.append($(input).attr('name', 'upload[]'));
+			
+			$.each(this.options.onlyMimes||[], function(i, mime) {
+				form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
+			});
+			
+			$.each(this.options.customData, function(key, val) {
+				form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
+			});
+			
+			form.appendTo('body');
+			iframe.appendTo('body');
+			
+			return dfrd;
+		},
+		// upload transport using XMLHttpRequest
+		xhr : function(data) { 
+			var self   = this,
+				errors = this.errors(),
+				dfrd   = $.Deferred()
+					.fail(function(error) {
+						error && self.error(error);
+					})
+					.done(function(data) {
+						data.warning && self.error(data.warning);
+						data.removed && self.remove(data);
+						data.added   && self.add(data);
+						data.changed && self.change(data);
+	 					self.trigger('upload', data);
+					})
+					.always(function() {
+						notifyto && clearTimeout(notifyto);
+						notify && self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
+					}),
+				xhr         = new XMLHttpRequest(),
+				formData    = new FormData(),
+				files       = data.input ? data.input.files : data.files, 
+				cnt         = files.length,
+				loaded      = 5,
+				notify      = false,
+				startNotify = function() {
+					return setTimeout(function() {
+						notify = true;
+						self.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
+					}, self.options.notifyDelay);
+				},
+				notifyto;
+			
+			if (!cnt) {
+				return dfrd.reject();
+			}
+			
+			xhr.addEventListener('error', function() {
+				dfrd.reject(errors.connect);
+			}, false);
+			
+			xhr.addEventListener('abort', function() {
+				dfrd.reject([errors.connect, errors.abort]);
+			}, false);
+			
+			xhr.addEventListener('load', function() {
+				var status = xhr.status, data;
+				
+				if (status > 500) {
+					return dfrd.reject(errors.response);
+				}
+				if (status != 200) {
+					return dfrd.reject(errors.connect);
+				}
+				if (xhr.readyState != 4) {
+					return dfrd.reject([errors.connect, errors.timeout]); // am i right?
+				}
+				if (!xhr.responseText) {
+					return dfrd.reject([errors.response, errors.empty]);
+				}
+				
+				data = self.parseUploadData(xhr.responseText);
+				data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
+			}, false);
+			
+			xhr.upload.addEventListener('progress', function(e) {
+				var prev = loaded, curr;
+
+				if (e.lengthComputable) {
+					
+					curr = parseInt(e.loaded*100 / e.total);
+
+					// to avoid strange bug in safari (not in chrome) with drag&drop.
+					// bug: macos finder opened in any folder,
+					// reset safari cache (option+command+e), reload elfinder page,
+					// drop file from finder
+					// on first attempt request starts (progress callback called ones) but never ends.
+					// any next drop - successfull.
+					if (curr > 0 && !notifyto) {
+						notifyto = startNotify();
+					}
+					
+					if (curr - prev > 4) {
+						loaded = curr;
+						notify && self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
+					}
+				}
+			}, false);
+			
+			
+			xhr.open('POST', this.options.url, true);
+			formData.append('cmd', 'upload');
+			formData.append(this.newAPI ? 'target' : 'current', this.cwd().hash);
+			$.each(this.options.customData, function(key, val) {
+				formData.append(key, val);
+			});
+			$.each(this.options.onlyMimes, function(i, mime) {
+				formData.append('mimes['+i+']', mime);
+			});
+			
+			$.each(files, function(i, file) {
+				formData.append('upload['+i+']', file);
+			});
+			
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4 && xhr.status == 0) {
+					// ff bug while send zero sized file
+					// for safari - send directory
+					dfrd.reject([errors.connect, errors.abort]);
+				}
+			}
+			
+			xhr.send(formData);
+
+			if (!$.browser.safari || !data.files) {
+				notifyto = startNotify();
+			}
+			
+			return dfrd;
+		}
+	},
+	
 	
 	/**
 	 * Bind callback to event(s) The callback is executed at most once per event.

@@ -35,8 +35,14 @@ elFinder.prototype.options = {
 	 *    }
 	 *  }
 	 **/
-	transport : null,
+	transport : {
+		// init : function(o) { console.log(o) }
+		// upload : 'iframe'
+	},
 
+	dragUploadAllow : 'auto',
+	
+	iframeTimeout : 0,
 	/**
 	 * Data to append to all requests and to upload files
 	 *
@@ -96,24 +102,8 @@ elFinder.prototype.options = {
 			oncomplete : ''
 		},
 		// "upload" command options.
-		// @todo split forceIframe & transport
 		upload : {
-			// open dialog on click toolbar button instead of open browser select files dialog
-			forceDialog   : false,
-			// send files using form with iframe target
-			forceIframe   : false, 
-			// 15 min timeout before abort upload files using iframe
-			iframeTimeout : 900000,
-			/**
-			 * custom function to upload files
-			 *
-			 * @param  Object  must contains input[type="file"] node or FileList
-			 * @example
-			 *   - cmd.exec({input : inputNode})
-			 *   - cmd.exec({files : FilesList})
-			 * @return jQuery.Deferred
-			 **/
-			transport : null
+			ui : 'uploadbutton',
 		},
 		// "quicklook" command options.
 		quicklook : {
@@ -168,7 +158,7 @@ elFinder.prototype.options = {
 			// expand current root on init
 			openRootOnLoad : true,
 			// auto load current dir parents
-			syncTree : false
+			syncTree : true
 		}
 	},
 

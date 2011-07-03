@@ -748,6 +748,32 @@ $.fn.elfindercwd = function(fm) {
 				;
 		
 
+		if (fm.dragUpload) {
+			cwd[0].addEventListener('dragenter', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				cwd.addClass(clDropActive);
+			}, false);
+
+			cwd[0].addEventListener('dragleave', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				cwd.removeClass(clDropActive)
+			}, false);
+
+			cwd[0].addEventListener('dragover', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			}, false);
+
+			cwd[0].addEventListener('drop', function(e) {
+			  	e.preventDefault();
+				cwd.removeClass(clDropActive);
+				// fm.log(e.dataTransfer.files)
+				e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.upload({files : e.dataTransfer.files});
+			}, false);
+		}
+
 		fm
 			.bind('open search', function(e) {
 				content(e.data.files, e.type=='search');
