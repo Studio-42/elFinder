@@ -145,7 +145,9 @@ elFinder.prototype.commands.paste = function() {
 								});
 							});
 
-							return fm.waterfall.apply(null, args)
+
+							// fm.log(fm.waterfall)
+							return $.waterfall.apply(null, args)
 								.fail(function(error) {
 									dfrd.reject(error);
 								})

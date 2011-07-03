@@ -690,15 +690,26 @@ window.elFinder = function(node, opts) {
 			// open notify dialog timeout		
 			timeout, 
 			// request options
-			options = $.extend({
-				url      : o.url,
-				async    : true,
-				type     : this.requestType,
-				dataType : 'json',
+			options = {
+				url      : options.url || o.url,
+				async    : options.async || true,
+				type     : options.type || this.requestType,
+				dataType : options.dataType || 'json',
 				cache    : false,
 				// timeout  : 100,
-				data     : data
-			}, options.options || {}),
+				data     : data	
+			},
+			
+			
+			// options = $.extend({
+			// 	url      : o.url,
+			// 	async    : true,
+			// 	type     : this.requestType,
+			// 	dataType : 'json',
+			// 	cache    : false,
+			// 	// timeout  : 100,
+			// 	data     : data
+			// }, options.options || {}),
 			/**
 			 * Default success handler. 
 			 * Call default data handlers and fire event with command name.
@@ -828,7 +839,9 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
-		xhr = this.transport.send(options, this).fail(error).success(success);
+		delete options.preventFail
+
+		xhr = this.transport.send(options).fail(error).done(success);
 		
 		// this.transport.send(options)
 		
@@ -1264,36 +1277,63 @@ window.elFinder = function(node, opts) {
 	this.xhrUpload  = typeof XMLHttpRequestUpload != 'undefined' && typeof File != 'undefined' && typeof FormData != 'undefined';
 	
 	// configure transport object
-	this.transport = {
-		send : function(o) { return $.ajax(o); }
+	this.transport = {}
+	
+	if (typeof(this.options.transport) == 'object') {
+		this.transport = this.options.transport;
+		if (typeof(this.transport.init) == 'function') {
+			this.transport.init(this)
+		}
 	}
 	
-	if (this.xhrUpload) {
+	if (typeof(this.transport.send) != 'function') {
+		this.transport.send = function(opts) { return $.ajax(opts); }
+	}
+	
+	if (this.transport.upload == 'iframe') {
+		this.transport.upload = $.proxy(this.uploads.iframe, this);
+	} else if (typeof(this.transport.upload) == 'function') {
+		this.dragUpload = !!this.options.dragUpload;
+	} else if (this.xhrUpload) {
 		this.transport.upload = $.proxy(this.uploads.xhr, this);
 		this.dragUpload = true;
 	} else {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	}
+	// this.log(this.transport)
 	
-	// custom transport object
-	if (this.options.transport) {
-		if (typeof(this.options.transport.init) == 'function') {
-			// init transportif required
-			this.options.transport.init(this);
-		}
-		
-		if (typeof(this.options.transport.send) == 'function') {
-			this.transport.send = this.options.transport.send;
-		}
-		
-		if (typeof(this.options.upload) == 'function') {
-			this.transport.upload = this.options.transport.upload;
-			this.dragUpload = !!this.options.dragUploadAllow;
-		} else if (this.options.transport.upload == 'iframe') {
-			this.dragUpload = false;
-			this.transport.upload = $.proxy(this.uploads.iframe, this);
-		}
-	}
+	// this.log(typeof(this.options.transport)).log($.isPlainObject(this.options.transport))
+	// 
+	// this.transport = {
+	// 	send : function(o) { return $.ajax(o); }
+	// }
+	
+	// if (this.xhrUpload) {
+	// 	this.transport.upload = $.proxy(this.uploads.xhr, this);
+	// 	this.dragUpload = true;
+	// } else {
+	// 	this.transport.upload = $.proxy(this.uploads.iframe, this);
+	// }
+	// 
+	// // custom transport object
+	// if (this.options.transport) {
+	// 	if (typeof(this.options.transport.init) == 'function') {
+	// 		// init transportif required
+	// 		this.options.transport.init(this);
+	// 	}
+	// 	
+	// 	if (typeof(this.options.transport.send) == 'function') {
+	// 		this.transport.send = this.options.transport.send;
+	// 	}
+	// 	
+	// 	if (typeof(this.options.upload) == 'function') {
+	// 		this.transport.upload = this.options.transport.upload;
+	// 		this.dragUpload = !!this.options.dragUploadAllow;
+	// 	} else if (this.options.transport.upload == 'iframe') {
+	// 		this.dragUpload = false;
+	// 		this.transport.upload = $.proxy(this.uploads.iframe, this);
+	// 	}
+	// }
 	
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
@@ -1895,7 +1935,7 @@ elFinder.prototype = {
 				if (!xhr.responseText) {
 					return dfrd.reject([errors.response, errors.empty]);
 				}
-				
+
 				data = self.parseUploadData(xhr.responseText);
 				data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
 			}, false);
@@ -2057,42 +2097,6 @@ elFinder.prototype = {
 	 */
 	escape : function(name) {
 		return this._node.text(name).html();
-	},
-	
-	waterfall : function() {
-		var steps   = [],
-			dfrd    = $.Deferred(),
-			pointer = 0;
-
-			$.each(arguments, function(i, a) {
-				steps.push(function() {
-					var args = [].slice.apply(arguments), d;
-
-					if (typeof(a) == 'function') {
-						if (!((d = a.apply(null, args)) && d.promise)) {
-							d = $.Deferred()[d === false ? 'reject' : 'resolve'](d);
-						}
-					} else if (a && a.promise) {
-						d = a;
-					} else {
-						d = $.Deferred()[a === false ? 'reject' : 'resolve'](a);
-					}
-
-					d.fail(function() {
-						dfrd.reject.apply(dfrd, [].slice.apply(arguments));
-					})
-					.done(function(data) {
-						pointer++;
-						args.push(data);
-
-						pointer == steps.length
-							? dfrd.resolve.apply(dfrd, args)
-							: steps[pointer].apply(null, args);
-					});
-				});
-			});
-
-			steps.length ? steps[0]() : dfrd.resolve();
 	},
 	
 	/**

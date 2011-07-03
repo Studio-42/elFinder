@@ -309,7 +309,7 @@ elFinder.prototype.commands.quicklook = function() {
 	this.handlers = {
 		// save selected file
 		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
-		error  : function() { self.window.data('hash', '').trigger('close'); },
+		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
 	}
 	

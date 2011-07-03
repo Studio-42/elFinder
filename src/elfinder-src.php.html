@@ -85,6 +85,10 @@
 	
 	<script src="js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
 	
+	<script src="js/proxy/elFinderSupportVer1.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery.waterfall.js" type="text/javascript" charset="utf-8"></script>
+	
+	
 	<style type="text/css">
 		body { font-family:arial, verdana, sans-serif;}
 		.button {
@@ -112,22 +116,10 @@
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 
-			// $("#jquery_jplayer_1").jPlayer({
-			// 	ready: function () {
-			// 		$(this).jPlayer("setMedia", {
-			// 			mp3 : "../files/audio/03 Yuuhi wo Miteiru ka_ (Original Mix).mp3"
-			// 			// mp3: "http://www.jplayer.org/audio/mp3/Miaow-07-Bubble.mp3"
-			// 		})//.jPlayer("play");
-			// 	},
-			// 	ended: function (event) {
-			// 		$(this).jPlayer("play");
-			// 	},
-			// 	swfPath: "third-part/jplayer",
-			// 	supplied: "mp3,ogg"
-			// });
 
 			var f1 = $('#finder').elfinder({
-				url : 'connectors/php/connector.php',
+				url : 'connectors/php-old/connector.php',
+				// transport : new elFinderSupportVer1(),
 				getFileCallback : function(files, fm) {
 					console.log(files);
 					// fm.destroy()
