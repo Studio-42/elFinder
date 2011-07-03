@@ -4,11 +4,11 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfindertree = function(fm) {
+$.fn.elfindertree = function(fm, opts) {
 	var treeclass = fm.res('class', 'tree');
 	
 	this.not('.'+treeclass).each(function() {
-		
+		fm.log(opts)
 		var c = 'class',
 			
 			/**
@@ -23,7 +23,7 @@ $.fn.elfindertree = function(fm) {
 			 *
 			 * @type Boolean
 			 */
-			openRoot  = true,
+			openRoot  = opts.openRootOnLoad,
 
 			/**
 			 * Subtree class name
@@ -277,7 +277,7 @@ $.fn.elfindertree = function(fm) {
 					current.addClass(active);
 				}
 				
-				if (fm.options.syncTree) {
+				if (opts.syncTree) {
 					if (current.length) {
 						current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
 					} else if (fm.newAPI) {
@@ -392,13 +392,9 @@ $.fn.elfindertree = function(fm) {
 
 		fm.open(function(e) {
 			var data = e.data,
-				init = data.init, 
 				dirs = filter(data.files);
 
-			if (init) {
-				openRoot = fm.options.openRootOnLoad;
-				tree.empty();
-			}
+			data.init && tree.empty();
 
 			if (dirs.length) {
 				updateTree(dirs);

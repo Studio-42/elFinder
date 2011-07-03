@@ -143,7 +143,6 @@ elFinder.prototype.options = {
 	
 	/**
 	 * Some UI plugins options.
-	 * @todo openRootOnLoad/syncTree -> tree option
 	 * @type Object
 	 */
 	uiOptions : {
@@ -163,18 +162,16 @@ elFinder.prototype.options = {
 			['search'],
 			['view'],
 			['help']
-		]
+		],
+		// directories tree options
+		tree : {
+			// expand current root on init
+			openRootOnLoad : true,
+			// auto load current dir parents
+			syncTree : false
+		}
 	},
 
-	/**
-	 * On init expand current root directory in nav
-	 *
-	 * @type Boolean
-	 * @default true
-	 */
-	openRootOnLoad : true,
-	syncTree : true,
-	
 	/**
 	 * Display only required files by types
 	 *
@@ -326,6 +323,6 @@ elFinder.prototype.options = {
 	 *
 	 * @type Array|Boolen
 	 */
-	debug : true
-	// debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
+	// debug : true
+	debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
 }
