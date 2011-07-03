@@ -1202,6 +1202,16 @@ window.elFinder = function(node, opts) {
 		this.resize(width, height);
 	}
 	
+	this.show = function() {
+		node.show();
+		this.enable().trigger('show');
+	}
+	
+	this.hide = function() {
+		this.disable().trigger('hide');
+		node.hide();
+	}
+	
 	/**
 	 * Destroy this elFinder instance
 	 *

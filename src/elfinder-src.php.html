@@ -128,7 +128,7 @@
 
 			var f1 = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-				_getFileCallback : function(files, fm) {
+				getFileCallback : function(files, fm) {
 					console.log(files);
 					// fm.destroy()
 				},

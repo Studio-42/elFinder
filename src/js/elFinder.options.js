@@ -87,12 +87,13 @@ elFinder.prototype.options = {
 	 **/
 	commandsOptions : {
 		// "getfile" command options.
-		// @todo  option to close after callback
 		getfile : {
 			// allow to return multiple files info
 			multiple : false,
 			// allow to return filers info
-			folders  : false
+			folders  : false,
+			// action after callback (""/"close"/"destroy")
+			oncomplete : ''
 		},
 		// "upload" command options.
 		// @todo split forceIframe & transport
@@ -325,6 +326,6 @@ elFinder.prototype.options = {
 	 *
 	 * @type Array|Boolen
 	 */
-	// debug : true
-	debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
+	debug : true
+	// debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
 }

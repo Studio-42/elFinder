@@ -38,9 +38,15 @@ elFinder.prototype.commands.getfile = function() {
 			url   = fm.option('url'),
 			tmb   = fm.option('tmbUrl'),
 			dfrd  = $.Deferred()
-				.always(function(data) {
+				.done(function(data) {
 					fm.trigger('getfile', {files : data});
 					self.callback(data, fm);
+					
+					if (opts.oncomplete == 'close') {
+						fm.hide();
+					} else if (opts.oncomplete == 'destroy') {
+						fm.destroy();
+					}
 				}), 
 			i, file;
 
