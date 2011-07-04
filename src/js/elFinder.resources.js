@@ -144,6 +144,7 @@ elFinder.prototype.resources = {
 	
 	mimes : {
 		text : [
+			'application/x-empty',
 			'application/javascript', 
 			'application/xhtml+xml', 
 			'audio/x-mp3-playlist', 

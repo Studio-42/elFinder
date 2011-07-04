@@ -91,10 +91,9 @@ elFinder.prototype.commands.edit = function() {
 						fm.request({
 							options : {type : 'post'},
 							data : {
-								cmd     : fm.oldAPI ? 'edit' : 'put',
+								cmd     : 'put',
 								target  : hash,
-								content : value,
-								current : fm.cwd().hash // old api
+								content : value
 							},
 							notify : {type : 'save', cnt : 1},
 							syncOnFail : true
@@ -123,11 +122,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			fm.request({
-				data   : {
-					cmd     : fm.oldAPI ? 'fread' : 'get',
-					target  : hash,
-					current : file.phash // old api
-				},
+				data   : {cmd : 'get', target  : hash},
 				notify : {type : 'openfile', cnt : 1}
 			})
 			.done(function(data) {

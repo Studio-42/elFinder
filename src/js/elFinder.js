@@ -207,19 +207,6 @@ window.elFinder = function(node, opts) {
 		},
 		
 		/**
-		 * Set api version number and ajax data validation rules.
-		 *
-		 * @param  String api version
-		 * @return void
-		 */
-		setAPI = function(ver) {
-			self.api    = parseFloat(ver) || 1;
-			self.newAPI = self.api > 1;
-			self.oldAPI = !self.newAPI;
-			rules       = self.rules[self.newAPI ? 'newapi' : 'oldapi'];
-		},
-		
-		/**
 		 * Store info about files/dirs in "files" object.
 		 *
 		 * @param  Array  files
@@ -273,7 +260,7 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type String
 	 **/
-	this.api = 1;
+	this.api = null;
 	
 	/**
 	 * elFinder use new api
@@ -287,7 +274,7 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type Boolean
 	 **/
-	this.oldAPI = true;
+	this.oldAPI = false;
 	
 	/**
 	 * User os. Required to bind native shortcuts for open/rename
@@ -654,7 +641,7 @@ window.elFinder = function(node, opts) {
 	 * @return Boolean
 	 */
 	this.validResponse = function(cmd, data) {
-		return !!(data.error || rules[rules[cmd] ? cmd : 'defaults'](data));
+		return this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
 	}
 	
 	
@@ -690,26 +677,15 @@ window.elFinder = function(node, opts) {
 			// open notify dialog timeout		
 			timeout, 
 			// request options
-			options = {
-				url      : options.url || o.url,
-				async    : options.async || true,
-				type     : options.type || this.requestType,
-				dataType : options.dataType || 'json',
+			options = $.extend({
+				url      : o.url,
+				async    : true,
+				type     : this.requestType,
+				dataType : 'json',
 				cache    : false,
 				// timeout  : 100,
-				data     : data	
-			},
-			
-			
-			// options = $.extend({
-			// 	url      : o.url,
-			// 	async    : true,
-			// 	type     : this.requestType,
-			// 	dataType : 'json',
-			// 	cache    : false,
-			// 	// timeout  : 100,
-			// 	data     : data
-			// }, options.options || {}),
+				data     : data
+			}, options.options || {}),
 			/**
 			 * Default success handler. 
 			 * Call default data handlers and fire event with command name.
@@ -773,10 +749,6 @@ window.elFinder = function(node, opts) {
 				if (raw) {
 					return dfrd.resolve(response);
 				}
-
-				if (cmd == 'open' && response && (response.api || response.params)) {
-					setAPI(response.api || 1);
-				}
 				
 				if (!response) {
 					return dfrd.reject([errors.response, errors.empty], xhr);
@@ -788,7 +760,14 @@ window.elFinder = function(node, opts) {
 					return dfrd.reject(errors.response, xhr);
 				}
 
-				response = self.normalizeData(cmd, response);
+				response = self.normalize(cmd, response);
+				
+				if (!self.api) {
+					self.api    = response.api || 1;
+					self.newAPI = self.api >= 2;
+					self.oldAPI = !self.newAPI;
+				}
+				
 				if (response.options) {
 					cwdOptions = $.extend({}, cwdOptions, response.options);
 				}
@@ -1302,39 +1281,6 @@ window.elFinder = function(node, opts) {
 	}
 	// this.log(this.transport)
 	
-	// this.log(typeof(this.options.transport)).log($.isPlainObject(this.options.transport))
-	// 
-	// this.transport = {
-	// 	send : function(o) { return $.ajax(o); }
-	// }
-	
-	// if (this.xhrUpload) {
-	// 	this.transport.upload = $.proxy(this.uploads.xhr, this);
-	// 	this.dragUpload = true;
-	// } else {
-	// 	this.transport.upload = $.proxy(this.uploads.iframe, this);
-	// }
-	// 
-	// // custom transport object
-	// if (this.options.transport) {
-	// 	if (typeof(this.options.transport.init) == 'function') {
-	// 		// init transportif required
-	// 		this.options.transport.init(this);
-	// 	}
-	// 	
-	// 	if (typeof(this.options.transport.send) == 'function') {
-	// 		this.transport.send = this.options.transport.send;
-	// 	}
-	// 	
-	// 	if (typeof(this.options.upload) == 'function') {
-	// 		this.transport.upload = this.options.transport.upload;
-	// 		this.dragUpload = !!this.options.dragUploadAllow;
-	// 	} else if (this.options.transport.upload == 'iframe') {
-	// 		this.dragUpload = false;
-	// 		this.transport.upload = $.proxy(this.uploads.iframe, this);
-	// 	}
-	// }
-	
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
 	 *
@@ -1715,29 +1661,23 @@ elFinder.prototype = {
 	 * @type  Object
 	 */
 	rules : {
-		oldapi : {
-			defaults : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); },
-			tmb      : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-			upload   : function(data) { return data && data.cwd && data.cdc && $.isPlainObject(data.cwd) && $.isArray(data.cdc); }
+		defaults : function(data) {  
+			if (!data
+			|| (data.added && !$.isArray(data.added))
+			||  (data.removed && !$.isArray(data.removed))
+			||  (data.changed && !$.isArray(data.changed))) {
+				return false;
+			}
+			return true;
 		},
-		newapi : {
-			defaults : function(data) {  
-				if (!data
-				|| (data.added && !$.isArray(data.added))
-				||  (data.removed && !$.isArray(data.removed))
-				||  (data.changed && !$.isArray(data.changed))) {
-					return false;
-				}
-				return true;
-			},
-			open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
-			tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
-			parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-			tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-			upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
-			search  : function(data) { return data && data.files && $.isArray(data.files)}
-		}
+		open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
+		tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
+		parents : function(data) { return data && data.tree && $.isArray(data.tree); },
+		tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
+		upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
+		search  : function(data) { return data && data.files && $.isArray(data.files)}
 	},
+
 	
 	/**
 	 * Sort types for current directory content
@@ -2107,191 +2047,28 @@ elFinder.prototype = {
 	 * @param  Object  data from backend
 	 * @return Object
 	 */
-	normalizeData : function(cmd, data) {
-		var self   = this,
-			files  = {},
-			result = {}, 
-			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
-			phash, cwd;
+	normalize : function(cmd, data) {
+		var filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; };
 		
-		if (this.newAPI) {
-			if (data.files) {
-				data.files = $.map(data.files, filter);
-			} 
-			if (data.tree) {
-				data.tree = $.map(data.tree, filter);
-			}
 
-			if (data.added) {
-				data.added = $.map(data.added, filter);
-			}
-			if (data.changed) {
-				data.changed = $.map(data.changed, filter);
-			}
-			if (data.api) {
-				data.init = true;
-			}
-			return data;
-		}
-		
-		if (/^(tmb|read|edit)$/i.test(cmd)) {
-			return data;
-		}
-		// self.log(data)
-		phash = data.cwd.hash;
-		
-		if (data.tree) {
-			$.each(this.normalizeOldTree(data.tree), function(i, file) {
-				files[file.hash] = file;
-			});
-		}
-		
-		$.each(data.cdc, function(i, file) {
-			var hash = file.hash;
-			
-			if (files[hash]) {
-				files[hash].date   = file.date;
-				files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
-			} else {
-				files[hash] = self.normalizeOldFile(file, phash);
-			}
-		});
-
-		if (!data.tree) {
-			$.each(this.files(), function(hash, file) {
-				if (file.phash != phash && file.mime == 'directory') {
-					files[hash] = file;
-				}
-			})
-		}
-
-		if (data.error) {
-			result.error = data.error;
-		}
-		if (data.warning) {
-			result.warning = data.warning;
-		}
-		
-		if (cmd == 'open') {
-			return {
-					cwd     : files[phash] || this.normalizeOldFile(data.cwd),
-					files   : $.map(files, filter),
-					options : self.normalizeOldOptions(data),
-					init    : !!data.params,
-					debug   : data.debug
-				};
-			return result;
+		if (data.files) {
+			data.files = $.map(data.files, filter);
 		} 
-		
-		
-		
-		return $.extend({
-			current : data.cwd.hash,
-			error   : data.error,
-			warning : data.warning,
-			options : {tmb : !!data.tmb}
-		}, this.diff($.map(files, filter)));
-	},
+		if (data.tree) {
+			data.tree = $.map(data.tree, filter);
+		}
+		if (data.added) {
+			data.added = $.map(data.added, filter);
+		}
+		if (data.changed) {
+			data.changed = $.map(data.changed, filter);
+		}
+		if (data.api) {
+			data.init = true;
+		}
+		return data;
+	} ,
 	
-	/**
-	 * Convert old api tree into plain array of dirs
-	 *
-	 * @param  Object  root dir
-	 * @return Array
-	 */
-	normalizeOldTree : function(root) {
-		var self     = this,
-			result   = [],
-			traverse = function(dirs, phash) {
-				var i, dir;
-				
-				for (i = 0; i < dirs.length; i++) {
-					dir = dirs[i];
-					result.push(self.normalizeOldFile(dir, phash))
-					dir.dirs.length && traverse(dir.dirs, dir.hash);
-				}
-			};
-
-		traverse([root]);
-
-		return result;
-	},
-	
-	/**
-	 * Convert file info from old api format into new one
-	 *
-	 * @param  Object  file
-	 * @param  String  parent dir hash
-	 * @return Object
-	 */
-	normalizeOldFile : function(file, phash, tmb) {
-		var mime = file.mime || 'directory',
-			size = mime == 'directory' && !file.linkTo ? 0 : file.size,
-			info = {
-				hash   : file.hash,
-				phash  : phash,
-				name   : file.name,
-				mime   : mime,
-				date   : file.date || 'unknown',
-				size   : size,
-				read   : file.read,
-				write  : file.write,
-				locked : !phash ? true : file.rm === void(0) ? false : !file.rm
-			};
-		
-		if (file.link) {
-			info.link = file.link;
-		}
-
-		if (file.linkTo) {
-			info.linkTo = file.linkTo;
-		}
-		
-		if (file.tmb) {
-			info.tmb = file.tmb;
-		} else if (info.mime.indexOf('image/') === 0 && tmb) {
-			info.tmb = 1;
-		}
-			
-		if (file.dirs && file.dirs.length) {
-			info.dirs = true;
-		}
-		if (file.dim) {
-			info.dim = file.dim;
-		}
-		if (file.resize) {
-			info.resize = file.resize;
-		}
-		return info;
-	},
-	
-	/**
-	 * Convert old api options
-	 *
-	 * @param  Object  options
-	 * @return Object
-	 */
-	normalizeOldOptions : function(data) {
-		var opts = {
-				path          : data.cwd.rel,
-				disabled      : data.disabled || [],
-				tmb           : !!data.tmb,
-				copyOverwrite : true
-			};
-		
-		if (data.params) {
-			opts.url = data.params.url;
-			opts.archives = data.params.archives;
-			opts.extract = data.params.extract;
-		}
-		
-		if (opts.path.indexOf('/') !== -1) {
-			opts.separator = '/';
-		} else if (opts.path.indexOf('\\') !== -1) {
-			opts.separator = '\\';
-		}
-		return opts;
-	},
 	
 	/**
 	 * Compare files based on elFinder.sort

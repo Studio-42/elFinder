@@ -376,7 +376,7 @@ $.fn.elfindercwd = function(fm) {
 							}
 							if (f.tmb) {
 								f.tmb === 1 ? ltmb.push(f.hash) : (atmb[f.hash] = f.tmb)
-							}
+							} 
 							return itemhtml(f);
 						}
 						return null;
@@ -391,7 +391,7 @@ $.fn.elfindercwd = function(fm) {
 
 				// load/attach thumbnails
 				attachThumbnails(atmb);
-				loadThumbnails(fm.newAPI ? ltmb : fm.option('tmb'));
+				ltmb.length && loadThumbnails(ltmb);
 
 				// make directory droppable
 				dirs && makeDroppable();
@@ -445,6 +445,7 @@ $.fn.elfindercwd = function(fm) {
 					var node = cwd.find('#'+hash);
 
 					if (node.length) {
+
 						(function(node, tmb) {
 							$('<img/>')
 								.load(function() { node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat"); })
@@ -470,16 +471,24 @@ $.fn.elfindercwd = function(fm) {
 				var tmbs = [];
 				
 				if (fm.oldAPI) {
-					fm.request({cmd : 'tmb', current : fm.cwd().hash, preventFail : true}).done(function(data) {
-						if (attachThumbnails(data.images||[]) && data.tmb) {
-							loadThumbnails();
-						}
-					})
+					fm.request({
+						data : {cmd : 'tmb', current : fm.cwd().hash},
+						preventFail : true
+						})
+						.done(function(data) {
+							if (attachThumbnails(data.images||[]) && data.tmb) {
+								loadThumbnails();
+							}
+						})
 					return;
 				} 
-				
+
 				while ((tmbs = files.splice(0, tmbNum)).length) {
-					fm.request({cmd : 'tmb', targets : tmbs, preventFail : true}).done(function(data) {
+					fm.request({
+						data : {cmd : 'tmb', targets : tmbs},
+						preventFail : true
+					})
+					.done(function(data) {
 						if (!attachThumbnails(data.images||[])) {
 							return;
 						}
