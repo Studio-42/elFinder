@@ -220,22 +220,22 @@ $opts = array(
 				// 	'locked'  => false,
 				// 	'hidden'  => true
 				// ),
-				array(
-					'pattern' => '/folder$/',
-					'read' => false
-					// 'write' => false
-				),
-				array(
-					'pattern' => '/folder-23$/',
-					'write' => false
-				),
-				array(
-					'pattern' => '/\/folder42$/',
-					'write' => false,
-					'read' => false,
-					// 'hidden' => true,
-					'locked' => true
-				)
+				// array(
+					// 'pattern' => '/folder$/',
+				// 	'read' => false
+				// 	// 'write' => false
+				// ),
+				// array(
+				// 	'pattern' => '/folder-23$/',
+				// 	'write' => false
+				// ),
+				// array(
+				// 	'pattern' => '/\/folder42$/',
+				// 	'write' => false,
+				// 	'read' => false,
+				// 	// 'hidden' => true,
+				// 	'locked' => true
+				// )
 			),
 		),
 		array(

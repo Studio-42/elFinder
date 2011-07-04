@@ -375,7 +375,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (!($target = @readlink($path))) {
 			return false;
 		}
-
+		// echo "path: $path<br>";
+		// echo "raw : $target<br>";
 		if (substr($target, 0, 1) == '/') {
 			$root = realpath($this->root);
 			if (strpos($target, $root.DIRECTORY_SEPARATOR) === 0) {
@@ -386,7 +387,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		} else {
 			$target = $this->_normpath(dirname($path).DIRECTORY_SEPARATOR.$target);
 		}
-
+		// echo "norm $target<br>";
+		if (file_exists($target) && $target != dirname($path) && $this->_inpath($target, $this->root)) {
+			// echo "ok<br>";
+			return $target;
+		}
+		// echo "failed<br>";
+		return false;
 		return file_exists($target) && $target != $this->root && $this->_inpath($target, $this->root) ? $target : false;
 	}
 		
