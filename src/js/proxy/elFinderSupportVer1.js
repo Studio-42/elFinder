@@ -33,6 +33,9 @@ window.elFinderSupportVer1 = function() {
 				opts.data.cmd = 'edit';
 				opts.data.current = fm.file(opts.data.target).phash;
 				break;
+			case 'archive':
+				opts.data.current = fm.file(opts.data.targets[0]).phash;
+				break;
 				
 		}
 		// cmd = opts.data.cmd
@@ -59,7 +62,9 @@ window.elFinderSupportVer1 = function() {
 	
 	this.normalize = function(cmd, data) {
 		var self = this,
-			files = {}, phash;
+			files = {}, 
+			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
+			phash;
 
 		if ((cmd == 'tmb' || cmd == 'get') || data.error) {
 			return data;
@@ -177,8 +182,9 @@ window.elFinderSupportVer1 = function() {
 			info.tmb = file.tmb;
 		} else if (info.mime.indexOf('image/') === 0 && tmb) {
 			info.tmb = 1;
-		}
 			
+		}
+		// this.fm.log(info.name+' '+info.tmb)
 		if (file.dirs && file.dirs.length) {
 			info.dirs = true;
 		}
@@ -202,8 +208,10 @@ window.elFinderSupportVer1 = function() {
 		if (data.params) {
 			opts.api      = 1;
 			opts.url      = data.params.url;
-			opts.archives = data.params.archives;
-			opts.extract  = data.params.extract;
+			opts.archivers = {
+				create  : data.params.archives || [],
+				extract : data.params.extract || []
+			}
 		}
 		
 		if (opts.path.indexOf('/') !== -1) {

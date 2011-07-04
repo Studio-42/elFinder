@@ -2048,7 +2048,17 @@ elFinder.prototype = {
 	 * @return Object
 	 */
 	normalize : function(cmd, data) {
-		var filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; };
+		var filter = function(file) { 
+		
+			if (file && file.hash && file.name && file.mime) {
+				if (file.mime == 'application/x-empty') {
+					file.mime = 'text/plain';
+				}
+				return file;
+			}
+			return null;
+			return file && file.hash && file.name && file.mime ? file : null; 
+		};
 		
 
 		if (data.files) {

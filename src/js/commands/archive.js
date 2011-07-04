@@ -28,6 +28,7 @@ elFinder.prototype.commands.archive = function() {
 	});
 	
 	this.getstate = function() {
+		
 		return mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
 	}
 	
@@ -57,7 +58,7 @@ elFinder.prototype.commands.archive = function() {
 		}
 
 		return fm.request({
-			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mime, current : cwd.hash},
+			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mime},
 			notify     : {type : 'archive', cnt : 1},
 			syncOnFail : true
 		});
