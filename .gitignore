@@ -2,4 +2,7 @@
 ._*
 _*
 .DS_Store
-
+js/elfinder.full.js
+js/elfinder.min.js
+css/elfinder.full.css
+css/elfinder.min.css
