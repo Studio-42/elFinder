@@ -41,7 +41,6 @@ window.elFinderSupportVer1 = function() {
 			cmd = opts.data.cmd,
 			args = [],
 			_opts = {},
-			added = [],
 			data,
 			xhr;
 			
@@ -77,31 +76,20 @@ window.elFinderSupportVer1 = function() {
 				_opts = $.extend(true, {}, opts);
 
 				$.each(opts.data.targets, function(i, hash) {
-					var f = (function(hash) { 
-						return function() { 
-							return $.ajax($.extend(_opts, {data : {cmd : 'duplicate', target : hash, current : fm.file(hash).phash}}))
-								.error(function(error) {
-									fm.error(fm.res('error', 'connect'));
-								})
-								.done(function(data) {
-									data = self.normalize('duplicate', data);
-									if (data.error) {
-										fm.error(data.error);
-									} else if (data.added) {
-										added = added.concat(data.added);
-									}
-								})
-						} })(hash);
-					
-					args.push(f);
-				})
-
-				$.waterfall.apply(null, args)
-					.always(function() {
-						dfrd.resolve({added : added});
-					});
-
-				return dfrd;
+					$.ajax($.extend(_opts, {data : {cmd : 'duplicate', target : hash, current : fm.file(hash).phash}}))
+						.error(function(error) {
+							fm.error(fm.res('error', 'connect'));
+						})
+						.done(function(data) {
+							data = self.normalize('duplicate', data);
+							if (data.error) {
+								fm.error(data.error);
+							} else if (data.added) {
+								fm.trigger('add', {added : data.added});
+							}
+						})
+				});
+				return dfrd.resolve({})
 				break;
 				
 			case 'mkdir':
