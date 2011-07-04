@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * @class elFinder - file manager for web
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 window.elFinder = function(node, opts) {
 	this.time('load');
 	var self = this,
