@@ -760,7 +760,7 @@ window.elFinder = function(node, opts) {
 					return dfrd.reject(errors.response, xhr);
 				}
 
-				response = self.normalize(cmd, response);
+				response = self.normalize(response);
 				
 				if (!self.api) {
 					self.api    = response.api || 1;
@@ -1713,7 +1713,7 @@ elFinder.prototype = {
 		if (!this.validResponse('upload', data)) {
 			return {error : [errors.response]};
 		}
-		
+		data = this.normalize(data);
 		data.removed = $.map(data.added||[], function(f) { return f.hash; })
 		
 		if (this.newAPI) {
@@ -2043,7 +2043,7 @@ elFinder.prototype = {
 	 * @param  Object  data from backend
 	 * @return Object
 	 */
-	normalize : function(cmd, data) {
+	normalize : function(data) {
 		var filter = function(file) { 
 		
 			if (file && file.hash && file.name && file.mime) {

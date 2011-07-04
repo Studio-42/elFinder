@@ -1,10 +1,36 @@
 "use strict";
-
+/**
+ * elFinder transport to support old protocol.
+ *
+ * @example
+ * $('selector').elfinder({
+ *   .... 
+ *   transport : new elFinderSupportVer1()
+ * })
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 window.elFinderSupportVer1 = function() {
 	var self = this;
 	
 	this.init = function(fm) {
 		this.fm = fm;
+		this.fm.parseUploadData = function(text) {
+			var errors   = self.fm.errors(),
+				data;
+
+			if (!$.trim(text)) {
+				return {error : [errors.response, errors.empty]};
+			}
+
+			try {
+				data = $.parseJSON(text);
+			} catch (e) {
+				return {error : [errors.response, errors.json]}
+			}
+			
+			return self.normalize('upload', data);
+		}
 	}
 	
 	
@@ -229,6 +255,9 @@ window.elFinderSupportVer1 = function() {
 				locked : !phash ? true : file.rm === void(0) ? false : !file.rm
 			};
 		
+		if (file.mime == 'application/x-empty') {
+			info.mime = 'text/plain';
+		}
 		if (file.link) {
 			info.link = file.link;
 		}
