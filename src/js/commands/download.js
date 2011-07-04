@@ -23,7 +23,7 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return fm.newAPI && cnt && cnt == filter(sel).length ? 0 : -1;
+		return  cnt && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -32,6 +32,11 @@ elFinder.prototype.commands.download = function() {
 			files = filter(hashes),
 			dfrd  = $.Deferred(),
 			iframe, i, url;
+			
+		if (fm.oldAPI) {
+			fm.error(fm.res('error', 'cmdsupport'));
+			return dfrd.reject();
+		}
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';
 			

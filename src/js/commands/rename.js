@@ -60,8 +60,6 @@ elFinder.prototype.commands.rename = function() {
 						parent = input.parent();
 					
 					if (parent.length) {
-						// fm.log(name).log(file.name).log(name.length).log(file.name.length)
-						// return dfrd.reject();
 						if (name == file.name) {
 							return dfrd.reject();
 						}
@@ -75,7 +73,7 @@ elFinder.prototype.commands.rename = function() {
 						parent.html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
-								data   : {cmd : 'rename', target : file.hash, name : name, current : file.phash},
+								data   : {cmd : 'rename', target : file.hash, name : name},
 								notify : {type : 'rename', cnt : 1}
 							})
 							.fail(function(error) {

@@ -13,7 +13,9 @@ window.elFinderSupportVer1 = function() {
 			fm = this.fm,
 			dfrd = $.Deferred(),
 			cmd = opts.data.cmd,
-			files = [],
+			args = [],
+			_opts = {},
+			added = [],
 			data,
 			xhr;
 			
@@ -25,6 +27,10 @@ window.elFinderSupportVer1 = function() {
 			case 'open':
 				opts.data.tree = 1;
 				break;
+			case 'parents':
+			case 'tree':
+				return dfrd.resolve({tree : []});
+				break;
 			case 'get':
 				opts.data.cmd = 'read';
 				opts.data.current = fm.file(opts.data.target).phash;
@@ -34,7 +40,57 @@ window.elFinderSupportVer1 = function() {
 				opts.data.current = fm.file(opts.data.target).phash;
 				break;
 			case 'archive':
+			case 'rm':
 				opts.data.current = fm.file(opts.data.targets[0]).phash;
+				break;
+			case 'extract':
+			case 'rename':
+				opts.data.current = fm.file(opts.data.target).phash;
+				break;
+			case 'duplicate':
+				_opts = $.extend(true, {}, opts);
+
+				$.each(opts.data.targets, function(i, hash) {
+					var f = (function(hash) { 
+						return function() { 
+							return $.ajax($.extend(_opts, {data : {cmd : 'duplicate', target : hash, current : fm.file(hash).phash}}))
+								.error(function(error) {
+									fm.error(fm.res('error', 'connect'));
+								})
+								.done(function(data) {
+									data = self.normalize('duplicate', data);
+									if (data.error) {
+										fm.error(data.error);
+									} else if (data.added) {
+										added = added.concat(data.added);
+									}
+								})
+						} })(hash);
+					
+					args.push(f);
+				})
+
+				$.waterfall.apply(null, args)
+					.always(function() {
+						dfrd.resolve({added : added});
+					});
+
+				return dfrd;
+				break;
+				
+			case 'mkdir':
+			case 'mkfile':
+				opts.data.current = opts.data.target;
+				break;
+			case 'paste':
+				opts.data.current = opts.data.dst
+				break;
+				
+			case 'size':
+				return dfrd.resolve({error : fm.res('error', 'cmdsupport')});
+				break;
+			case 'search':
+				return dfrd.resolve({error : fm.res('error', 'cmdsupport')});
 				break;
 				
 		}
@@ -45,15 +101,18 @@ window.elFinderSupportVer1 = function() {
 				dfrd.reject(error)
 			})
 			.done(function(raw) {
-				// self.fm.log(cmd)
-				data = self.normalize(cmd, raw)
+				data = self.normalize(cmd, raw);
 				
-				// cmd != 'open' && self.fm.log(data)
-				dfrd.resolve(data)
+				// cmd != 'open' && self.fm.log(data);
 				
+				if (cmd == 'paste' && !data.error) {
+					fm.sync();
+					dfrd.resolve({});
+				} else {
+					dfrd.resolve(data);
+				}
 			})
 			
-		// this.fm.log(opts)
 		return dfrd;
 		
 		return $.ajax(opts);

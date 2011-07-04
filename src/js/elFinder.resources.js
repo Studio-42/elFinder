@@ -37,7 +37,7 @@ elFinder.prototype.resources = {
 		
 	},
 	error : {
-		unknown     : 'Unknown error.',
+		unknown    : 'Unknown error.',
 		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
 		node       : 'elFinder required DOM Element to be created.',
 		url        : 'Invalid elFinder configuration! You have to set URL option.',
@@ -66,7 +66,8 @@ elFinder.prototype.resources = {
 		rm         : 'Unable to remove "$1".',
 		extract    : 'Unable to extract files from "$1".',
 		archive    : 'Unable to create archive.',
-		notarchive : 'File is not archive or has unsupported archive type.'
+		notarchive : 'File is not archive or has unsupported archive type.',
+		cmdsupport : 'Backend does not support this command.'
 	},
 	
 	name : {
@@ -218,7 +219,7 @@ elFinder.prototype.resources = {
 							fm.lockfiles({files : [id]});
 
 							fm.request({
-									data        : {cmd : cmd, name : name, current : phash, target : phash}, // current - for old api
+									data        : {cmd : cmd, name : name, target : phash}, 
 									notify      : {type : cmd, cnt : 1},
 									preventFail : true,
 									syncOnFail  : true

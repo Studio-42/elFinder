@@ -62,7 +62,7 @@ elFinder.prototype.commands.info = function() {
 			
 			if (!file.read) {
 				size = fm.i18n('unknown');
-			} else if (file.mime != 'directory' || fm.oldAPI) {
+			} else if (file.mime != 'directory') {
 				size = fm.formatSize(file.size);
 			} else {
 				size = tpl.spinner.replace('{text}', fm.i18n('Calculating'));

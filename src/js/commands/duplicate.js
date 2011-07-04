@@ -46,18 +46,18 @@ elFinder.prototype.commands.duplicate = function() {
 			return dfrd;
 		}
 		
-		if (fm.oldAPI) {
-			$.each(files, function(i, file) {
-				args.push(function() {
-					return fm.request({
-						data   : {cmd : 'duplicate', target : file.hash, current : file.phash},
-						notify : {type : 'copy', cnt : 1}
-					});
-				});
-			});
-
-			return fm.waterfall.apply(null, args);
-		}
+		// if (fm.oldAPI) {
+		// 	$.each(files, function(i, file) {
+		// 		args.push(function() {
+		// 			return fm.request({
+		// 				data   : {cmd : 'duplicate', target : file.hash, current : file.phash},
+		// 				notify : {type : 'copy', cnt : 1}
+		// 			});
+		// 		});
+		// 	});
+		// 
+		// 	return fm.waterfall.apply(null, args);
+		// }
 		
 		return fm.request({
 			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
