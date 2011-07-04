@@ -17,8 +17,6 @@ function debug($o) {
 }
 
 
-
-
 /**
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.
@@ -191,13 +189,12 @@ $opts = array(
 			// 'id' => 'x5',
 			'driver' => 'LocalFileSystem',
 			'path'   => '../../../files/',
-			'alias' => 'File system',
+			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../../../files/',
+			'alias'  => 'File system',
 			'caseSensitive' => true,
 			'accessControl' => array($acl, 'fsAccess'),
 			'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',
-			'URL'    => 'http://localhost/git/elfinder/files/',
-
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array('all'),
 			'uploadOrder' => 'deny,allow',
@@ -206,7 +203,7 @@ $opts = array(
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
-			'tmbURL'    => 'http://localhost/git/elfinder/files/.tmb/',
+#			'tmbURL'    => '.tmb/',
 			'utf8fix' => true,
 			'attributes' => array(
 				// array(
