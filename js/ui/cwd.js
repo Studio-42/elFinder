@@ -558,7 +558,7 @@ $.fn.elfindercwd = function(fm) {
 				}
 				
 				attachThumbnails(atmb);
-				loadThumbnails(fm.newAPI ? ltmb : fm.option('tmb'));
+				ltmb.length && loadThumbnails(ltmb);
 				dirs && makeDroppable();
 			},
 			

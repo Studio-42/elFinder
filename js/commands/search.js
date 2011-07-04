@@ -18,7 +18,7 @@ elFinder.prototype.commands.search = function() {
 	 * @return Number
 	 **/
 	this.getstate = function() {
-		return this.fm.oldAPI ? -1 : 0;
+		return 0;
 	}
 	
 	/**

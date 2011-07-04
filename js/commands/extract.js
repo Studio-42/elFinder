@@ -58,7 +58,7 @@ elFinder.prototype.commands.extract = function() {
 			}
 			
 			fm.request({
-				data       : {cmd : 'extract', target : file.hash, current : file.phash},
+				data       : {cmd : 'extract', target : file.hash},
 				notify     : {type : 'extract', cnt : 1},
 				syncOnFail : true
 			})

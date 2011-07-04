@@ -121,46 +121,22 @@ elFinder.prototype.commands.paste = function() {
 						var files  = $.map(files, function(file) { return !file.remove ? file : null } ),
 							cnt    = files.length,
 							groups = {},
-							args   = [];
+							args   = [],
+							src;
 
 						if (!cnt) {
 							return dfrd.resolve();
 						}
 
-						if (fm.oldAPI) {
-							$.each(files, function(i, file) {
-								if (!groups[file.phash]) {
-									groups[file.phash] = [];
-								}
-
-								groups[file.phash].push(file.hash);
-							});
-
-							$.each(groups, function(src, targets) {
-								args.push(function() {
-									return fm.request({
-										data   : {cmd : 'paste', current : fm.cwd().hash, src : src, dst : dst.hash, targets : targets, cut : cut ? 1 : 0},
-										notify : {type : cut ? 'move' : 'copy', cnt : targets.length}
-									});
-								});
-							});
-
-
-							// fm.log(fm.waterfall)
-							return $.waterfall.apply(null, args)
-								.fail(function(error) {
-									dfrd.reject(error);
-								})
-								.done(function() {
-									dfrd.resolve.apply(dfrd, Array.prototype.slice.apply(arguments));
-								});
-						} 
-						
-						// new API
+						src = files[0].phash;
 						files = $.map(files, function(f) { return f.hash});
+						
 						fm.request({
-								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0},
+								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
+							})
+							.always(function() {
+								fm.unlockfiles({files : files});
 							});
 					}
 					;

@@ -88,16 +88,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				
 				jqxhr = fm.request({
-					options        : {dataType : 'html'},
-					data           : {cmd : fm.oldAPI ? 'open' : 'file', target  : file.hash, current : file.phash},
-					preventDefault : true,
-					raw            : true
+					data           : {cmd : 'get', target  : file.hash, current : file.phash},
+					preventDefault : true
 				})
 				.done(function(data) {
 					ql.hideinfo();
 					doc = $('<iframe class="elfinder-quicklook-preview-html"/>').appendTo(preview)[0].contentWindow.document;
 					doc.open();
-					doc.write(data);
+					doc.write(data.content);
 					doc.close();
 				});
 			}
@@ -131,11 +129,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				
 				jqxhr = fm.request({
-					data   : {
-						cmd     : fm.oldAPI ? 'fread' : 'get',
-						target  : file.hash,
-						current : file.phash // old api
-					},
+					data   : {cmd     : 'get', target  : file.hash },
 					preventDefault : true
 				})
 				.done(function(data) {

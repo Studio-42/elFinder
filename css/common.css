@@ -23,8 +23,10 @@
 	height:16px;
 	background-image:url(../img/toolbar.png);
 	background-repeat:no-repeat;
-	background-position:0 -570px;
+	background-position:0 -528px;
 }
+
+.elfinder-symlink { }
 
 /* noaccess */
 .elfinder-na .elfinder-perms { background-position:0 -96px; }

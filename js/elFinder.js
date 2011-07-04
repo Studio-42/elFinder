@@ -760,7 +760,7 @@ window.elFinder = function(node, opts) {
 					return dfrd.reject(errors.response, xhr);
 				}
 
-				response = self.normalize(cmd, response);
+				response = self.normalize(response);
 				
 				if (!self.api) {
 					self.api    = response.api || 1;
@@ -913,38 +913,34 @@ window.elFinder = function(node, opts) {
 		var self  = this,
 			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
 			opts1 = {
-				data           : {cmd : 'open', init : 1, target : cwd, tree : !!(this.oldAPI || this.ui.tree)},
+				data           : {cmd : 'open', init : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
 				preventDefault : true,
 			},
 			opts2 = {
 				data           : {cmd : 'parents', target : cwd},
 				preventDefault : true,
-			},
-			doSync = function(odata, pdata) {
-				var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
+			};
+		
+		
+		$.when(
+			this.request(opts1),
+			this.request(opts2)
+		)
+		.fail(function(error) {
+			dfrd.reject(error);
+			error && self.request({
+				data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
+				notify : {type : 'open', cnt : 1, hideCnt : true}
+			});
+		})
+		.done(function(odata, pdata) {
+			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
 
-				diff.removed.length && self.remove(diff);
-				diff.added.length   && self.add(diff);
-				diff.changed.length && self.change(diff);
-				return dfrd.resolve(diff);
-			},
-			timeout, xhr;
-		
-		xhr = self.oldAPI 
-			? this.request(opts1) 
-			: $.when(
-				this.request(opts1),
-				this.request(opts2)
-			); 
-		
-		xhr.fail(function(error) {
-				dfrd.reject(error);
-				error && self.request({
-					data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
-					notify : {type : 'open', cnt : 1, hideCnt : true}
-				});
-			})
-			.done(doSync);
+			diff.removed.length && self.remove(diff);
+			diff.added.length   && self.add(diff);
+			diff.changed.length && self.change(diff);
+			return dfrd.resolve(diff);
+		});
 		
 		return dfrd;
 	}
@@ -1514,7 +1510,7 @@ window.elFinder = function(node, opts) {
 	// send initial request and start to pray >_<
 	this.trigger('init')
 		.request({
-			data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : 1}, 
+			data        : {cmd : 'open', target : self.lastDir(), init : 1, tree : this.ui.tree ? 1 : 0}, 
 			preventDone : true,
 			notify      : {type : 'open', cnt : 1, hideCnt : true},
 			freeze      : true
@@ -1717,7 +1713,7 @@ elFinder.prototype = {
 		if (!this.validResponse('upload', data)) {
 			return {error : [errors.response]};
 		}
-		
+		data = this.normalize(data);
 		data.removed = $.map(data.added||[], function(f) { return f.hash; })
 		
 		if (this.newAPI) {
@@ -2047,8 +2043,18 @@ elFinder.prototype = {
 	 * @param  Object  data from backend
 	 * @return Object
 	 */
-	normalize : function(cmd, data) {
-		var filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; };
+	normalize : function(data) {
+		var filter = function(file) { 
+		
+			if (file && file.hash && file.name && file.mime) {
+				if (file.mime == 'application/x-empty') {
+					file.mime = 'text/plain';
+				}
+				return file;
+			}
+			return null;
+			return file && file.hash && file.name && file.mime ? file : null; 
+		};
 		
 
 		if (data.files) {

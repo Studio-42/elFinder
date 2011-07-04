@@ -62,7 +62,7 @@ elFinder.prototype.commands.info = function() {
 			
 			if (!file.read) {
 				size = fm.i18n('unknown');
-			} else if (file.mime != 'directory' || fm.oldAPI) {
+			} else if (file.mime != 'directory') {
 				size = fm.formatSize(file.size);
 			} else {
 				size = tpl.spinner.replace('{text}', fm.i18n('Calculating'));
@@ -72,7 +72,7 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, fm.i18n('Size')).replace(v, size));
 			file.linkTo && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.linkTo));
 			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.escape(fm.path(file.hash))));
-			content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
+			file.read && content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));
 			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));
 			content.push(row.replace(l, fm.i18n('Permissions')).replace(v, fm.formatPermissions(file)));

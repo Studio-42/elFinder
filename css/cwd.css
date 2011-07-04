@@ -66,7 +66,7 @@
 
 /* permissions/symlink markers */
 .elfinder-cwd-view-icons .elfinder-perms { bottom:4px; right:2px; }
-.elfinder-cwd-view-icons .elfinder-symlink { top:50%; left:0px; }
+.elfinder-cwd-view-icons .elfinder-symlink { bottom:6px; left:0px; }
 
 /* icon/thumbnail */
 .elfinder-cwd-icon {

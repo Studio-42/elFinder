@@ -86,7 +86,6 @@
 	<script src="js/i18n/elfinder.ru.js" type="text/javascript" charset="utf-8"></script>
 	
 	<script src="js/proxy/elFinderSupportVer1.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/jquery.waterfall.js" type="text/javascript" charset="utf-8"></script>
 	
 	
 	<style type="text/css">
@@ -119,11 +118,11 @@
 
 			var f1 = $('#finder').elfinder({
 				url : 'connectors/php/connector.php',
-				transport : new elFinderSupportVer1(),
-				getFileCallback : function(files, fm) {
-					console.log(files);
-					// fm.destroy()
-				},
+				// transport : new elFinderSupportVer1(),
+				// getFileCallback : function(files, fm) {
+				// 	console.log(files);
+				// 	// fm.destroy()
+				// },
 				handlers : {
 					load : function(e, fm) {
 						// fm.error('All your base belongs to us >_<')
