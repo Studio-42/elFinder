@@ -132,6 +132,21 @@ window.elFinderSupportVer1 = function() {
 		return $.ajax(opts);
 	}
 	
+	// fix old connectors errors messages as possible
+	this.errors = {
+		'Unknown command'                                  : 'Unknown command.',
+		'Invalid backend configuration'                    : 'Invalid backend configuration.',
+		'Access denied'                                    : 'Access denied.',
+		'PHP JSON module not installed'                    : 'PHP JSON module not installed.',
+		'File not found'                                   : 'File not found.',
+		'Invalid name'                                     : 'Invalid file name.',
+		'File or folder with the same name already exists' : 'File named "$1" already exists in this location.',
+		'Not allowed file type'                            : 'Not allowed file type.',
+		'File exceeds the maximum allowed filesize'        : 'File exceeds maximum allowed size.',
+		'Unable to copy into itself'                       : 'Unable to copy "$1" into itself.',
+		'Unable to create archive'                         : 'Unable to create archive.',
+		'Unable to extract files from archive'             : 'Unable to extract files from "$1".'
+	}
 	
 	this.normalize = function(cmd, data) {
 		var self = this,
@@ -139,7 +154,24 @@ window.elFinderSupportVer1 = function() {
 			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
 			phash;
 
-		if ((cmd == 'tmb' || cmd == 'get') || data.error) {
+		if ((cmd == 'tmb' || cmd == 'get')) {
+			return data;
+		}
+		
+		if (data.error) {
+			$.each(data.error, function(i, msg) {
+				if (self.errors[msg]) {
+					data.error[i] = self.errors[msg];
+				}
+			});
+		}
+		
+		if (cmd == 'upload' && data.error) {
+			data.warning = $.extend({}, data.error);
+			data.error = false;
+		}
+		
+		if (data.error) {
 			return data;
 		}
 		
