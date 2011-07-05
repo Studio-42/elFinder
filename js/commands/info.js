@@ -6,7 +6,26 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.info = function() {
-	
+	var m   = 'msg',
+		fm  = this.fm,
+		msg = {
+			calc     : fm.res(m, 'calc'),
+			size     : fm.res(m, 'size'),
+			unknown  : fm.res(m, 'unknown'),
+			path     : fm.res(m, 'path'),
+			aliasfor : fm.res(m, 'aliasfor'),
+			modify   : fm.res(m, 'modify'),
+			perms    : fm.res(m, 'perms'),
+			locked   : fm.res(m, 'locked'),
+			dim      : fm.res(m, 'dim'),
+			kind     : fm.res(m, 'kind'),
+			files    : fm.res(m, 'files'),
+			folders  : fm.res(m, 'folders'),
+			items    : fm.res(m, 'items'),
+			yes      : fm.res(m, 'yes'),
+			no       : fm.res(m, 'no'),
+			link     : fm.res(m, 'link')
+		};
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
@@ -20,6 +39,12 @@ elFinder.prototype.commands.info = function() {
 	this.shortcuts = [{
 		pattern     : 'ctrl+i'
 	}];
+	
+	this.init = function() {
+		$.each(msg, function(k, v) {
+			msg[k] = fm.i18n(v);
+		});
+	}
 	
 	this.getstate = function() {
 		return 0;
@@ -61,34 +86,34 @@ elFinder.prototype.commands.info = function() {
 			}
 			
 			if (!file.read) {
-				size = fm.i18n('unknown');
+				size = msg.unknown;
 			} else if (file.mime != 'directory') {
 				size = fm.formatSize(file.size);
 			} else {
-				size = tpl.spinner.replace('{text}', fm.i18n('Calculating'));
+				size = tpl.spinner.replace('{text}', msg.calc);
 				count.push(file.hash);
 			}
 			
-			content.push(row.replace(l, fm.i18n('Size')).replace(v, size));
-			file.link && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.link));
-			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.escape(fm.path(file.hash))));
-			file.read && content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
-			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));
-			content.push(row.replace(l, fm.i18n('Modified')).replace(v, fm.formatDate(file.date)));
-			content.push(row.replace(l, fm.i18n('Permissions')).replace(v, fm.formatPermissions(file)));
-			content.push(row.replace(l, fm.i18n('Locked')).replace(v, fm.i18n(file.locked ? 'Yes' : 'No')));
+			content.push(row.replace(l, msg.size).replace(v, size));
+			file.link && content.push(row.replace(l, msg.aliasfor).replace(v, file.link));
+			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
+			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
+			file.dim && content.push(row.replace(l, msg.dim).replace(v, file.dim));
+			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file.date)));
+			content.push(row.replace(l, msg.modify).replace(v, fm.formatPermissions(file)));
+			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
-			title = tpl.groupTitle.replace('{items}', fm.i18n('Items')).replace('{num}', cnt);
+			title = tpl.groupTitle.replace('{items}', msg.items).replace('{num}', cnt);
 			dcnt  = $.map(files, function(f) { return f.mime == 'directory' ? 1 : null }).length;
 			if (!dcnt) {
 				size = 0;
 				$.each(files, function(h, f) { size += f.size;});
-				content.push(row.replace(l, fm.i18n('Kind')).replace(v, fm.i18n('Files')));
-				content.push(row.replace(l, fm.i18n('Size')).replace(v, fm.formatSize(size)));
+				content.push(row.replace(l, msg.kind).replace(v, msg.files));
+				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
-				content.push(row.replace(l, fm.i18n('Kind')).replace(v, dcnt == cnt ? fm.i18n('Folders') : fm.i18n('Folders')+' '+dcnt+', '+fm.i18n('Files')+' '+(cnt-dcnt)))
-				content.push(row.replace(l, fm.i18n('Size')).replace(v, tpl.spinner.replace('{text}', fm.i18n('Calculating'))));
+				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msf.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)))
+				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc)));
 				count = $.map(files, function(f) { return f.hash });
 			}
 		}
@@ -111,11 +136,11 @@ elFinder.prototype.commands.info = function() {
 					preventDefault : true
 				})
 				.fail(function() {
-					dialog.find('.elfinder-spinner-mini').parent().text(fm.i18n('unknown'));
+					dialog.find('.elfinder-spinner-mini').parent().text(msg.unknown);
 				})
 				.done(function(data) {
 					var size = parseInt(data.size);
-					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : fm.i18n('unknown'));
+					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : msg.unknown);
 				});
 		}
 		

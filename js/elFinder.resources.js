@@ -136,11 +136,22 @@ elFinder.prototype.resources = {
 		error      : 'Error',
 		close      : 'Close',
 		searchres  : 'Search results',
-		size       : 'size',
-		items      : 'items',
+		size       : 'Size',
+		items      : 'Items',
 		selitems   : 'selected items',
 		unknown    : 'unknown',
-		places     : 'Places'
+		places     : 'Places',
+		calc       : 'Calculating',
+		aliasfor   : 'Alias for',
+		path       : 'Path',
+		dim        : 'Dimensions',
+		modify     : 'Modified',
+		perms      : 'Permissions',
+		locked     : 'Locked',
+		kind       : 'Kind',
+		files      : 'Files',
+		folders    : 'Folders',
+		link       : 'Link'
 	},
 	
 	mimes : {

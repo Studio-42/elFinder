@@ -158,6 +158,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Files'                                  : 'Файлов',
 			'Items'                                  : 'Объекты',
 			'unknown'                                : 'неизвестно',
+			'Link'                                   : 'Ссылка',
+			'Alias for'                              : 'Указывает на',
 			'About'                                  : 'О программе',
 			'Shortcuts'                              : 'Горячие клавиши',
 			'Help'                                   : 'Помощь',
