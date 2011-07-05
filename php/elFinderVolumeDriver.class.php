@@ -2162,19 +2162,61 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return x/y coord for crop image thumbnail
 	 *
-	 * @param  int  $w  image width
-	 * @param  int  $h  image height	
-	 * @return array
+	 * @param  int    $w      image width
+	 * @param  int    $h      image height	
+	 * @param  int    $size   thumbnail size
+	 * @param  bool   $crop   crop image fragment for thumbnail
+	 * @return array 
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
-	protected function cropPos($w, $h) {
-		$x = $y = 0;
-		$size = min($w, $h);
-		if ($w > $h) {
-			$x = ceil(($w - $h)/2);
+	protected function tmbEffects($w, $h, $tmbSize, $crop = true) {
+		$x = 0;
+		$y = 0;
+		$size_w = 0;
+		$size_h = 0;
+		
+		if ($crop == false) {
+
+			/* Calculating image scale width and height */
+			$xscale = $w / $tmbSize;
+			$yscale = $h / $tmbSize;
+
+			if ($yscale > $xscale) {
+				$newwidth = round($w * (1 / $yscale));
+				$newheight = round($h * (1 / $yscale));
+			} else {
+				$newwidth = round($w * (1 / $xscale));
+				$newheight = round($h * (1 / $xscale));
+			}
+
+			/* Keeping original dimensions if image fitting into thumbnail without scale */
+			if ($w <= $tmbSize && $h <= $tmbSize) {
+				$newwidth = $w;
+				$newheight = $h;
+			}
+
+			/* Calculating coordinates for aligning thumbnail */
+			$y = ceil(($tmbSize - $newheight) / 2); 
+			$x = ceil(($tmbSize - $newwidth) / 2);
+			
+			$size_w = $newwidth;
+			$size_h = $newheight;
+			
 		} else {
-			$y = ceil(($h - $w)/2);
+		
+			$size_w = $size_h = min($w, $h);
+			
+			/* calculating coordinates for cropping thumbnail */
+			if ($w > $h) {
+				$x = ceil(($w - $h)/2);
+			} else {
+				$y = ceil(($h - $w)/2);
+			}		
+			
 		}
-		return array($x, $y, $size);
+		
+		return array($x, $y, $size_w, $size_h);
 	}
 	
 	/**
@@ -2212,31 +2254,8 @@ abstract class elFinderVolumeDriver {
 		$result = false;
 		$tmbSize = $this->tmbSize;
 
-		if ($this->options['tmbCrop'] == false) {
-
-			/* Calculating image scale width and height */
-			$xscale = $s[0] / $tmbSize;
-			$yscale = $s[1] / $tmbSize;
-
-			if ($yscale > $xscale) {
-				$newwidth = round($s[0] * (1 / $yscale));
-				$newheight = round($s[1] * (1 / $yscale));
-			} else {
-				$newwidth = round($s[0] * (1 / $xscale));
-				$newheight = round($s[1] * (1 / $xscale));
-			}
-
-			/* Keeping original dimensions if image fitting into thumbnail without scale */
-			if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
-				$newwidth = $s[0];
-				$newheight = $s[1];
-			}
-
-			/* Calculating coordinates for aligning thumbnail */
-			$align_y = ceil(($tmbSize - $newheight) / 2); 
-			$align_x = ceil(($tmbSize - $newwidth) / 2);
-		}
-
+		list($x, $y, $size_w, $size_h) = $this->tmbEffects($s[0], $s[1], $tmbSize, $this->options['tmbCrop']);
+		
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -2251,11 +2270,10 @@ abstract class elFinderVolumeDriver {
 					$img1 = new Imagick();
 					$img1->newImage($tmbSize, $tmbSize, new ImagickPixel($this->options['tmbBgColor']));
 					$img1->setImageFormat('png');
-					$img->resizeImage($newwidth, $newheight, NULL, true);
-					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $align_x, $align_y );
+					$img->resizeImage($size_w, $size_h, NULL, true);
+					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
 					$result = $img1->writeImage($tmb);
-          
-				} else {
+          		} else {
 					$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
 				}
 				break;
@@ -2274,12 +2292,10 @@ abstract class elFinderVolumeDriver {
         
 					if ($this->options['tmbCrop'] == false) {
 					
-						
-					
 						if ($this->options['tmbBgColor'] == 'transparent') {
-							list($r,$g,$b)=array(0, 0, 255);
+							list($r, $g, $b) = array(0, 0, 255);
 						} else {
-							list($r,$g,$b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
+							list($r, $g, $b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
 						}
 
 						$bgcolor = imagecolorallocate($tmp, $r, $g, $b);
@@ -2290,13 +2306,12 @@ abstract class elFinderVolumeDriver {
         
 						imagefill($tmp, 0, 0, $bgcolor);
 
-						if (!imagecopyresampled($tmp, $img, $align_x, $align_y, 0, 0, $newwidth, $newheight, $s[0], $s[1])) {
+						if (!imagecopyresampled($tmp, $img, $x, $y, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 							return false;
 						}
         
 					} else {
-						list($x, $y, $size) = $this->cropPos($s[0], $s[1]);
-						if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size, $size)) {
+						if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size_w, $size_h)) {
 							return false;
 						}
 					}					
