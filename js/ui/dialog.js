@@ -46,7 +46,7 @@ $.fn.elfinderdialog = function(opts) {
 				.mousedown(function(e) {
 					e.stopPropagation()
 					$(document).mousedown();
-					
+
 					if (!dialog.is('.'+clactive)) {
 						parent.find('.'+cldialog+':visible').removeClass(clactive);
 						dialog.addClass(clactive).zIndex(maxZIndex() + 1);

@@ -138,7 +138,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						type    = 'files';
 
 					e.preventDefault();
-				
+
 					if (file.length) {
 						// do not show menu on disabled files
 						if (file.is('.'+clDisabled)) {
@@ -156,7 +156,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					open(e.clientX, e.clientY);
 				});
 			
-			fm.getUI('nav')
+			fm.getUI('navbar')
 				.bind(event, function(e) {
 					var target  = $(e.target),
 						targets = [];

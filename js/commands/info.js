@@ -67,7 +67,7 @@ elFinder.prototype.commands.info = function() {
 				// width    : 270,
 				// test in ie >_<
 				width : 'auto',
-				close    : function() { $(this).elfinderdialog('destroy'); }
+				close : function() { $(this).elfinderdialog('destroy'); }
 			},
 			count = [],
 			dialog, size, tmb, file, title, dcnt;
