@@ -1766,7 +1766,7 @@ abstract class elFinderVolumeDriver {
 		if (!$path || !$this->_fileExists($path)) {
 			return false;
 		}
-
+		// echo $path.'<br>';
 		$root  = $path == $this->root;
 		$dir   = $this->_isDir($path);
 		$mime  = $dir ? 'directory' : $this->mimetype($path);

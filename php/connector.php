@@ -267,7 +267,7 @@ $opts = array(
 
 
 
-// sleep(2);
+// sleep(5);
 $connector = new elFinderConnector(new elFinder($opts));
 $connector->run();
 
