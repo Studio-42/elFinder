@@ -53,8 +53,8 @@ function logger($cmd, $voumes, $result) {
 		default:
 			$log = '';
 	}
-	if ($log && is_dir('../../files/tmp') || @mkdir('../../files/tmp')) {
-		$fp = fopen('../../files/tmp/log.txt', 'a');
+	if ($log && is_dir('../files/tmp') || @mkdir('../files/tmp')) {
+		$fp = fopen('../files/tmp/log.txt', 'a');
 		if ($fp) {
 			fwrite($fp, $log."\n");
 			fclose($fp);
@@ -108,8 +108,8 @@ class elFinderSimpleLogger {
 			default:
 				$log = '';
 		}
-		if ($log && is_dir('../../files/tmp') || @mkdir('../../files/tmp')) {
-			$fp = fopen('../../files/tmp/log.txt', 'a');
+		if ($log && is_dir('../files/tmp') || @mkdir('../files/tmp')) {
+			$fp = fopen('../files/tmp/log.txt', 'a');
 			if ($fp) {
 				fwrite($fp, $log."\n");
 				fclose($fp);
@@ -183,13 +183,13 @@ $opts = array(
 	'roots' => array(
 		// array(
 		// 	'driver' => 'LocalFileSystem',
-		// 	'path'   => '../../files2',
+		// 	'path'   => '../files2',
 		// ),
 		array(
 			// 'id' => 'x5',
 			'driver' => 'LocalFileSystem',
-			'path'   => '../../../files/',
-			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../../../files/',
+			'path'   => '../files/',
+			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			'alias'  => 'File system',
 			'caseSensitive' => true,
 			'accessControl' => array($acl, 'fsAccess'),
