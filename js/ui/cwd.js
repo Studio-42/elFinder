@@ -585,8 +585,15 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			
+			msg = {
+				name : fm.i18n(fm.res('msg', 'name')),
+				perm : fm.i18n(fm.res('msg', 'perms')),
+				mod  : fm.i18n(fm.res('msg', 'modify')),
+				size : fm.i18n(fm.res('msg', 'size')),
+				kind : fm.i18n(fm.res('msg', 'kind'))
+			},
 			/**
-			 * Update directorycontent
+			 * Update directory content
 			 *
 			 * @param  Array  files
 			 * @return void
@@ -604,7 +611,7 @@ $.fn.elfindercwd = function(fm) {
 				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
 
-				list && cwd.html('<table><thead><tr class="ui-state-default"><td >'+fm.i18n('Name')+'</td><td>'+fm.i18n('Permissions')+'</td><td>'+fm.i18n('Modified')+'</td><td>'+fm.i18n('Size')+'</td><td>'+fm.i18n('Kind')+'</td></tr></thead><tbody/></table>');
+				list && cwd.html('<table><thead><tr class="ui-state-default"><td >'+msg.name+'</td><td>'+msg.perm+'</td><td>'+msg.mod+'</td><td>'+msg.size+'</td><td>'+msg.kind+'</td></tr></thead><tbody/></table>');
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
 				
@@ -791,15 +798,21 @@ $.fn.elfindercwd = function(fm) {
 				content(fm.files());
 			})
 			.bind('viewchange', function() {
-				var sel = fm.selected();
+				var sel = fm.selected(),
+					l = fm.storage('view') == 'list';
 				
-				fm.storage('view', (list = !list) ? 'list' : 'icons');
-				content(fm.files());
+				if (l != list) {
+					list = l;
+					content(fm.files());
+
+					$.each(sel, function(i, h) {
+						selectFile(h);
+					});
+					trigger();
+				}
 				
-				$.each(sel, function(i, h) {
-					selectFile(h);
-				});
-				trigger();
+				// fm.storage('view', (list = !list) ? 'list' : 'icons');
+				
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash;

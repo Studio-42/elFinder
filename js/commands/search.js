@@ -33,7 +33,7 @@ elFinder.prototype.commands.search = function() {
 		if (typeof(q) == 'string' && q) {
 			return fm.request({
 				data   : {cmd : 'search', q : q},
-				notify : {type : 'seach', cnt : 1, hideCnt : true}
+				notify : {type : 'search', cnt : 1, hideCnt : true}
 			});
 		}
 		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();

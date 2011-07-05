@@ -703,10 +703,6 @@ class elFinder {
 			return array();
 		}
 		
-		if (!$rm['read']) {
-			return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], self::ERROR_PERM_DENIED));
-		}
-		
 		if (($file = $volume->rename($target, $name)) == false) {
 			return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()));
 		}
@@ -1016,7 +1012,7 @@ class elFinder {
 		$q      = trim($args['q']);
 		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$result = array();
-		
+
 		foreach ($this->volumes as $volume) {
 			$result = array_merge($result, $volume->search($q, $mimes));
 		}

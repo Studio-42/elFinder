@@ -118,7 +118,8 @@ elFinder.prototype.resources = {
 		download    : 'Downloading files',
 		save        : 'Save files',
 		archive     : 'Creating archive',
-		extract     : 'Extracting files from archive'
+		extract     : 'Extracting files from archive',
+		search      : 'Searching files'
 	},
 	
 	confirm : {
@@ -151,7 +152,9 @@ elFinder.prototype.resources = {
 		kind       : 'Kind',
 		files      : 'Files',
 		folders    : 'Folders',
-		link       : 'Link'
+		link       : 'Link',
+		name       : 'Name',
+		
 	},
 	
 	mimes : {

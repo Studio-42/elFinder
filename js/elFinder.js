@@ -208,7 +208,7 @@ window.elFinder = function(node, opts) {
 				cache([data.cwd]);
 			}
 			self.lastDir(cwd);
-			data.debug && self.debug('backend-debug', data.debug);
+			
 		},
 		
 		/**
@@ -778,6 +778,7 @@ window.elFinder = function(node, opts) {
 				}
 
 				dfrd.resolve(response);
+				response.debug && self.debug('backend-debug', response.debug);
 			},
 			xhr, _xhr
 			;

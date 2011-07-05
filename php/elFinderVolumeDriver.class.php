@@ -185,7 +185,7 @@ abstract class elFinderVolumeDriver {
 		// image manipulations library
 		'imgLib'          => 'auto',   
 		// how frequiently clean thumbnails dir (0 - never, 100 - every init request)    
-		'tmbCleanProb' => 1,            
+		'tmbCleanProb' => 0,            
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
 		'copyOverwrite'   => true,    
 		// if true - join new and old directories content on paste     
@@ -1288,10 +1288,6 @@ abstract class elFinderVolumeDriver {
 		
 		$dir = $this->_dirname($path);
 		
-		if (!$this->attr($dir, 'write')) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED);
-		}
-		
 		if ($this->attr($path, 'locked')) {
 			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
 		}
@@ -1980,7 +1976,7 @@ abstract class elFinderVolumeDriver {
 			if ($this->attr($p, 'hidden') || !$this->mimeAccepted($mime)) {
 				continue;
 			}
-			
+
 			$name = $this->_basename($p);
 			if (strpos($name, $q) !== false) {
 				$stat = $this->stat($p);
@@ -1991,7 +1987,7 @@ abstract class elFinderVolumeDriver {
 				
 				$result[] = $stat;
 			}
-			if ($mime == 'directory' && $this->attr($p, 'read')) {
+			if ($mime == 'directory' && $this->attr($p, 'read') && !$this->_isLink($p)) {
 				$result = array_merge($result, $this->doSearch($p, $q, $mimes));
 			}
 		}

@@ -100,7 +100,7 @@ elFinder.prototype.commands.info = function() {
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, msg.dim).replace(v, file.dim));
 			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file.date)));
-			content.push(row.replace(l, msg.modify).replace(v, fm.formatPermissions(file)));
+			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');

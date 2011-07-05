@@ -390,7 +390,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($this->_inpath($atarget, $this->aroot)) {
 			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
 		}
-		
 		return false;
 	}
 		
