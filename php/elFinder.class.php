@@ -403,7 +403,6 @@ class elFinder {
 		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-		// echo 'cwd<br>';
 		$cwd    = $volume ? $volume->dir($target, false, true) : false;
 		$hash   = $init ? 'default folder' : '#'.$target;
 
@@ -423,7 +422,7 @@ class elFinder {
 		}
 
 		$files = array();
-		// echo 'tree<br>';
+
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
@@ -432,7 +431,7 @@ class elFinder {
 				} 
 			}
 		}
-		// echo 'scandir<br>';
+
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($cwd['hash'], $args['mimes'])) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
@@ -637,7 +636,7 @@ class elFinder {
 		$error  = array(self::ERROR_MKDIR, $name);
 		
 		if (($volume = $this->volume($target)) == false
-		|| ($dir = $volume->dir($target)) == false) {
+		|| ($dir = $volume->dir($target, false, true)) == false) {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 
@@ -665,7 +664,7 @@ class elFinder {
 		$error  = array(self::ERROR_MKFILE, $name);
 		
 		if (($volume = $this->volume($target)) == false
-		|| ($dir = $volume->dir($target)) == false) {
+		|| ($dir = $volume->dir($target, false, true)) == false) {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 
@@ -913,10 +912,11 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return file content
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function get($args) {
 		$target = $args['target'];

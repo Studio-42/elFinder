@@ -1377,7 +1377,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function save($fp, $dst, $name, $cmd='upload') {
-		if (($dir = $this->dir($dst, true)) == false) {
+		if (($dir = $this->dir($dst, true, true)) == false) {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
@@ -1825,7 +1825,7 @@ abstract class elFinderVolumeDriver {
 		
 		if ($file['read']) {
 			if ($dir) {
-				if ($this->_subdirs($path)) {
+				if (!$link && $this->_subdirs($path)) {
 					$file['dirs'] = 1;
 				}
 			} else {
