@@ -62,6 +62,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
+		$this->aroot = realpath($this->root);
+		
 	}
 	
 	/*********************************************************************/
@@ -375,26 +377,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (!($target = @readlink($path))) {
 			return false;
 		}
-		// echo "path: $path<br>";
-		// echo "raw : $target<br>";
-		if (substr($target, 0, 1) == '/') {
-			$root = realpath($this->root);
-			if (strpos($target, $root.DIRECTORY_SEPARATOR) === 0) {
-				$target = substr($target, strlen($root)+1);
-			} else {
-				return false;
-			}
-		} else {
-			$target = $this->_normpath(dirname($path).DIRECTORY_SEPARATOR.$target);
+		
+		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
+			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
 		}
-		// echo "norm $target<br>";
-		if (file_exists($target) && $target != dirname($path) && $this->_inpath($target, $this->root)) {
-			// echo "ok<br>";
-			return $target;
+		$atarget = realpath($target);
+		
+		if (!$atarget) {
+			return false;
 		}
-		// echo "failed<br>";
+		
+		if ($this->_inpath($atarget, $this->aroot)) {
+			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
+		}
+		
 		return false;
-		return file_exists($target) && $target != $this->root && $this->_inpath($target, $this->root) ? $target : false;
 	}
 		
 	/**

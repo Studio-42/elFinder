@@ -314,5 +314,5 @@ elFinder.prototype.options = {
 	 * @type Array|Boolen
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'event-searchend', 'event-viewchange']
+	debug : ['error', 'warning', 'backend-debug', 'event-viewchange']
 }

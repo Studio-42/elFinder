@@ -188,8 +188,8 @@ $opts = array(
 		array(
 			// 'id' => 'x5',
 			'driver' => 'LocalFileSystem',
-			'path'   => '../../files/',
-			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../../files/',
+			'path'   => '../../../files/',
+			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../../../files/',
 			'alias'  => 'File system',
 			'caseSensitive' => true,
 			'accessControl' => array($acl, 'fsAccess'),
@@ -235,32 +235,32 @@ $opts = array(
 				// )
 			),
 		),
-		array(
-			'driver' => 'MySQL',
-			'path' => 1,
-			// 'treeDeep' => 2,
-			'user' => 'root',
-			'pass' => 'hane',
-			'db' => 'elfinder',
-			'user_id' => 1,
-			'accessControl' => 'access',
-			'separator' => ':',
-			// 'copyTo' => false,
-			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../../files/.dbtmb/',
-			'tmbURL' => 'http://localhost/git/elfinder/files/.dbtmb/',
-			// 'attributes' => array(
-			// 	array(),
-			// 	array(
-			// 		'pattern' => '/\.jpg$/',
-			// 		'read' => false,
-			// 		'write' => false,
-			// 		'locked' => true,
-			// 		'hidden' => true
-			// 	)
-			// )
-			
-		)
+		// array(
+		// 	'driver' => 'MySQL',
+		// 	'path' => 1,
+		// 	// 'treeDeep' => 2,
+		// 	'user' => 'root',
+		// 	'pass' => 'hane',
+		// 	'db' => 'elfinder',
+		// 	'user_id' => 1,
+		// 	'accessControl' => 'access',
+		// 	'separator' => ':',
+		// 	// 'copyTo' => false,
+		// 	// 'URL'    => 'http://localhost/git/elfinder',
+		// 	'tmbPath' => '../../files/.dbtmb/',
+		// 	'tmbURL' => 'http://localhost/git/elfinder/files/.dbtmb/',
+		// 	// 'attributes' => array(
+		// 	// 	array(),
+		// 	// 	array(
+		// 	// 		'pattern' => '/\.jpg$/',
+		// 	// 		'read' => false,
+		// 	// 		'write' => false,
+		// 	// 		'locked' => true,
+		// 	// 		'hidden' => true
+		// 	// 	)
+		// 	// )
+		// 	
+		// )
 	)
 	
 );

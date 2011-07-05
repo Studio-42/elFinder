@@ -315,10 +315,13 @@ $.fn.elfindertree = function(fm, opts) {
 				var sel = cls == loaded
 						? '.'+collapsed+':not(.'+loaded+')'
 						: ':not(.'+collapsed+')';
+				
+						
+				//tree.find('.'+subtree+':has(*)').prev(':not(.'+collapsed+')').addClass(collapsed)
 
 				$.each(dirs, function(i, dir) {
 					tree.find('#'+fm.navHash2Id(dir.phash)+sel)
-						.filter(function() { return $(this).nextAll('.'+subtree+':first').children().length > 0 })
+						.filter(function() { return $(this).next('.'+subtree).children().length > 0 })
 						.addClass(cls);
 				})
 			},

@@ -403,26 +403,27 @@ class elFinder {
 		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-		$cwd    = $volume ? $volume->dir($target) : false;
+		// echo 'cwd<br>';
+		$cwd    = $volume ? $volume->dir($target, false, true) : false;
 		$hash   = $init ? 'default folder' : '#'.$target;
-		
+
 		// on init request we can get invalid dir hash -
 		// dir which can not be opened now, but remembered by client,
 		// so open default dir
-		if (!$cwd || !$cwd['read']) {
-			if ($init) {
-				$volume = $this->default;
-				$target = $volume->defaultPath();
-				$cwd    = $volume->dir($target);
-			} 
+		if ((!$cwd || !$cwd['read']) && $init) {
+			$volume = $this->default;
+			$cwd    = $volume->dir($volume->defaultPath(), false, true);
 		}
 		
 		if (!$cwd) {
 			return array('error' => $this->error(self::ERROR_OPEN, $hash, self::ERROR_DIR_NOT_FOUND));
 		}
+		if (!$cwd['read']) {
+			return array('error' => $this->error(self::ERROR_OPEN, $hash, self::ERROR_PERM_DENIED));
+		}
 
 		$files = array();
-		
+		// echo 'tree<br>';
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
@@ -431,9 +432,9 @@ class elFinder {
 				} 
 			}
 		}
-
+		// echo 'scandir<br>';
 		// get current working directory files list and add to $files if not exists in it
-		if (($ls = $volume->scandir($target, $args['mimes'])) === false) {
+		if (($ls = $volume->scandir($cwd['hash'], $args['mimes'])) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
 		

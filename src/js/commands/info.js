@@ -70,7 +70,7 @@ elFinder.prototype.commands.info = function() {
 			}
 			
 			content.push(row.replace(l, fm.i18n('Size')).replace(v, size));
-			file.linkTo && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.linkTo));
+			file.link && content.push(row.replace(l, fm.i18n('Alias for')).replace(v, file.link));
 			content.push(row.replace(l, fm.i18n('Path')).replace(v, fm.escape(fm.path(file.hash))));
 			file.read && content.push(row.replace(l, 'URL').replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, fm.i18n('Dimensions')).replace(v, file.dim));

@@ -994,10 +994,31 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function dir($hash, $hidden=false) {
+	public function dir($hash, $hidden=false, $resolveLink=false) {
 		if (($dir = $this->file($hash, $hidden)) == false) {
 			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 		}
+		
+		if ($dir['mime'] != 'directory') {
+			return $this->setError(elFinder::ERROR_NOT_DIR);
+		}
+		
+		
+		if ($resolveLink && !empty($dir['link'])) {
+			if (!($target = $this->_readlink($this->decode($hash)))) {
+				return  $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+			}
+
+			if (!($dir = $this->stat($target)) || $this->attr($target, 'hidden')) {
+				return  $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
+			}
+			
+			if ($dir['mime'] != 'directory') {
+				return $this->setError(elFinder::ERROR_NOT_DIR);
+			}
+		}
+		
+		return $dir;
 		
 		return $dir['mime'] == 'directory' 
 			? $dir 
@@ -1753,7 +1774,7 @@ abstract class elFinderVolumeDriver {
 		$root  = $path == $this->root;
 		$dir   = $this->_isDir($path);
 		$mime  = $dir ? 'directory' : $this->mimetype($path);
-		$link  = $this->_isLink($path);
+		$link  = !$root && $this->_isLink($path);
 		
 		$size = 0;
 		if ($link) {
@@ -1789,11 +1810,11 @@ abstract class elFinderVolumeDriver {
 			$file['volumeid'] = $this->id;
 		}
 		
-		if ($link && !$root) {
+		if ($link) {
+			// echo $path;
 			if (($target = $this->_readlink($path)) != false) {
 				$file['mime']   = $this->mimetype($target);
-				$file['link']   = $this->encode($target);
-				$file['linkTo'] = $this->_path($target);
+				$file['link'] = $this->_path($target);
 			} else {
 				$file['mime']  = 'symlink-broken';
 				$file['read']  = 0;
