@@ -2429,7 +2429,7 @@ elFinder.prototype = {
 		var mime = typeof(f) == 'object' ? f.mime : f,
 			kind = this.kinds[mime]||'unknown';
 
-		if (f.link) {
+		if (f.alias) {
 			kind = 'Alias';
 		} else if (kind == 'unknown') {
 			if (mime.indexOf('text') === 0) {

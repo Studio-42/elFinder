@@ -87,7 +87,7 @@ elFinder.prototype.commands.info = function() {
 			
 			if (!file.read) {
 				size = msg.unknown;
-			} else if (file.mime != 'directory') {
+			} else if (file.mime != 'directory' || file.alias) {
 				size = fm.formatSize(file.size);
 			} else {
 				size = tpl.spinner.replace('{text}', msg.calc);
@@ -95,7 +95,7 @@ elFinder.prototype.commands.info = function() {
 			}
 			
 			content.push(row.replace(l, msg.size).replace(v, size));
-			file.link && content.push(row.replace(l, msg.aliasfor).replace(v, file.link));
+			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			file.dim && content.push(row.replace(l, msg.dim).replace(v, file.dim));
@@ -112,7 +112,7 @@ elFinder.prototype.commands.info = function() {
 				content.push(row.replace(l, msg.kind).replace(v, msg.files));
 				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
-				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msf.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)))
+				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msg.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)))
 				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc)));
 				count = $.map(files, function(f) { return f.hash });
 			}

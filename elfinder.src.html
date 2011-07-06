@@ -119,10 +119,10 @@
 			var f1 = $('#finder').elfinder({
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
-				// getFileCallback : function(files, fm) {
-				// 	console.log(files);
-				// 	// fm.destroy()
-				// },
+				getFileCallback : function(files, fm) {
+					console.log(files);
+					// fm.destroy()
+				},
 				handlers : {
 					load : function(e, fm) {
 						// fm.error('All your base belongs to us >_<')

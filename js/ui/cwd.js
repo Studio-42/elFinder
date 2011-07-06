@@ -153,7 +153,7 @@ $.fn.elfindercwd = function(fm) {
 					return fm.mime2kind(f);
 				},
 				marker : function(f) {
-					return (f.link || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
 				}
 			},
 			

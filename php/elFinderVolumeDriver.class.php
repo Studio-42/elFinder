@@ -1004,7 +1004,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		
-		if ($resolveLink && !empty($dir['link'])) {
+		if ($resolveLink && !empty($dir['alias'])) {
 			if (!($target = $this->_readlink($this->decode($hash)))) {
 				return  $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 			}
@@ -1809,8 +1809,8 @@ abstract class elFinderVolumeDriver {
 		if ($link) {
 			// echo $path;
 			if (($target = $this->_readlink($path)) != false) {
-				$file['mime']   = $this->mimetype($target);
-				$file['link'] = $this->_path($target);
+				$file['mime']  = $this->mimetype($target);
+				$file['alias'] = $this->_path($target);
 			} else {
 				$file['mime']  = 'symlink-broken';
 				$file['read']  = 0;
