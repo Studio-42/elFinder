@@ -9,9 +9,9 @@ $.fn.elfinderstat = function(fm) {
 	return this.each(function() {
 		var size       = $(this).addClass('elfinder-stat-size'),
 			sel        = $('<div class="elfinder-stat-selected"/>'),
-			titlesize  = fm.i18n(fm.res('msg', 'size')),
-			titleitems = fm.i18n(fm.res('msg', 'items')),
-			titlesel   = fm.i18n(fm.res('msg', 'selitems')),
+			titlesize  = fm.i18n('size').toLowerCase(),
+			titleitems = fm.i18n('items').toLowerCase(),
+			titlesel   = fm.i18n('selected'),
 			setstat    = function(files, cwd) {
 				var c = 0, 
 					s = 0;

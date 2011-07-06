@@ -27,7 +27,7 @@ $.fn.elfinderpath = function(fm) {
 				path.html(dirs.join(fm.option('separator')));
 			})
 			.bind('search', function() {
-				path.html(fm.i18n(fm.res('msg', 'searchres')));
+				path.html(fm.i18n('searcresult'));
 			});
 	});
 }

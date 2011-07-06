@@ -36,12 +36,11 @@ elFinder.prototype.commands.paste = function() {
 	
 	this.exec = function(dst) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			error  = errors[cut ? 'move' : 'copy'],
+			error  = cut ? 'errMove' : 'errCopy',
 			fpaste = [],
 			fcopy  = [],
 			dfrd   = $.Deferred()
@@ -75,11 +74,11 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						fm.confirm({
-							title  : fm.res('msg', 'move'),
-							text   : fm.i18n([fm.res('error', 'exists'), file.name, fm.res('confirm', 'repl')]), 
+							title  : fm.i18n(cut ? 'moveFiles' : 'copyFiles'),
+							text   : fm.i18n(['errExists', file.name, 'confirmRepl']), 
 							all    : !last,
 							accept : {
-								label    : 'yes',
+								label    : 'btnYes',
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)
@@ -87,7 +86,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							reject : {
-								label    : 'no',
+								label    : 'btnNo',
 								callback : function(all) {
 									var i;
 
@@ -106,7 +105,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							cancel : {
-								label    : 'cancel',
+								label    : 'btnCancel',
 								callback : function() {
 									dfrd.resolve();
 								}
@@ -175,22 +174,22 @@ elFinder.prototype.commands.paste = function() {
 		}
 			
 		if (!dst.write)	{
-			return dfrd.reject([error, files[0].name, errors.perm]);
+			return dfrd.reject([error, files[0].name, 'errPerm']);
 		}
 		
 		parents = fm.parents(dst.hash)
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([error, files[0].name, errors.perm]);
+				return !dfrd.reject([error, files[0].name, 'errPerm']);
 			}
 			
 			if (cut && file.locked) {
-				return !dfrd.reject([errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 			
 			if ($.inArray(file.hash, parents) !== -1) {
-				return !dfrd.reject([errors.copyinself, file.name]);
+				return !dfrd.reject(['errCopyInItself', file.name]);
 			}
 			
 			if (file.phash == dst.hash) {

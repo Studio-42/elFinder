@@ -27,11 +27,10 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.exec = function(hashes) {
-		var fm     = this.fm, 
-			errors = fm.errors(),
-			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			files  = this.files(hashes),
-			cnt    = files.length,
+		var fm    = this.fm, 
+			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
+			files = this.files(hashes),
+			cnt   = files.length,
 			file, url, s, w;
 
 		if (!cnt) {
@@ -41,7 +40,7 @@ elFinder.prototype.commands.open = function() {
 		// open folder
 		if (cnt == 1 && (file = files[0]) && file.mime == 'directory') {
 			return file && !file.read
-				? dfrd.reject([errors.open, file.name, errors.denied])
+				? dfrd.reject(['errOpen', file.name, 'errPerm'])
 				: fm.request({
 						data   : {cmd  : 'open', target : file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
@@ -62,7 +61,7 @@ elFinder.prototype.commands.open = function() {
 			file = files[cnt];
 			
 			if (!file.read) {
-				return dfrd.reject([errors.open, file.name, errors.denied]);
+				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
 			if (!(url = fm.url(file.hash))) {
@@ -80,7 +79,7 @@ elFinder.prototype.commands.open = function() {
 			}
 
 			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
-				return dfrd.reject(errors.popup);
+				return dfrd.reject('errPopup');
 			}
 		}
 		return dfrd.resolve(hashes);

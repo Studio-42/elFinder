@@ -86,6 +86,8 @@ elFinder.prototype.options = {
 		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'
 	],
 	
+	// commands : ['edit'],
+	
 	/**
 	 * Commands options.
 	 *
@@ -313,6 +315,6 @@ elFinder.prototype.options = {
 	 *
 	 * @type Array|Boolen
 	 */
-	// debug : true
-	debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
+	debug : true
+	// debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
 }

@@ -8,52 +8,7 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.upload = function() {
-	var hover = this.fm.res('class', 'hover'),
-		prepareData = function(text) {
-			var warning = '', raw, data;
-			
-			if (!$.trim(text)) {
-				return {error : [errors.response, errors.empty]}
-			}
-			
-			try {
-				raw = $.parseJSON(text);
-			} catch (e) {
-				return {error : [errors.response, errors.json]}
-			}
-			
-			if (!fm.validResponse('upload', raw)) {
-				return {error : [errors.response]};
-			}
-			
-			if (raw.error) {
-				if (fm.newAPI) {
-					return {error : raw.error};
-				}
-				// move error into warning for old api
-				warning = fm.i18n(raw.error);
-				$.each(raw.errorData||[], function(name, msg) {
-					warning += '. '+fm.i18n(msg)+': '+name;
-				})
-
-				raw.error = null;
-				if (!fm.validResponse('upload', raw)) {
-					return {error : warning};
-				}
-			}
-			
-			if (fm.newAPI) {
-				return fm.normalizeData('upload', raw);
-			}
-			
-			data = fm.normalizeData('open', raw);
-			// find diff
-			data = fm.diff(data.files);
-			data.current = raw.cwd.hash;
-			data.warning = warning;
-
-			return data;
-		};
+	var hover = this.fm.res('class', 'hover');
 	
 	
 	this.disableOnSearch = true;
@@ -80,16 +35,16 @@ elFinder.prototype.commands.upload = function() {
 				dialog.elfinderdialog('close');
 				fm.upload(data)
 					.fail(function(error) {
-						dfrd.reject(error)
+						dfrd.reject(error);
 					})
 					.done(function(data) {
-						dfrd.resolve(data)
+						dfrd.resolve(data);
 					});
 			},
 			dfrd, dialog, input, button, dropbox;
 		
 		if (data && (data.input || data.files)) {
-			return fm.upload(data)
+			return fm.upload(data);
 		}
 		
 		dfrd = $.Deferred();
@@ -97,20 +52,20 @@ elFinder.prototype.commands.upload = function() {
 		
 		input = $('<input type="file" multiple="true"/>')
 			.change(function() {
-				upload({input : input[0]})
+				upload({input : input[0]});
 			});
 
-		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('Select files to upload')+'</span></div>')
+		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('selectForUpload')+'</span></div>')
 			.append($('<form/>').append(input))
 			.hover(function() {
-				button.toggleClass('ui-state-hover')
+				button.toggleClass(hover)
 			})
 			
 		dialog = $('<div class="elfinder-upload-dialog-wrapper"/>')
 			.append(button);
 		
 		if (fm.dragUpload) {
-			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox">'+fm.i18n('Drop files here')+'</div>')
+			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox">'+fm.i18n('dropFiles')+'</div>')
 				.prependTo(dialog)
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 
@@ -141,9 +96,9 @@ elFinder.prototype.commands.upload = function() {
 		}
 		
 		fm.dialog(dialog, {
-			title     : this.title,
-			modal     : true,
-			resizable : false,
+			title          : this.title,
+			modal          : true,
+			resizable      : false,
 			destroyOnClose : true
 		});
 			

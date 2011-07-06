@@ -34,7 +34,6 @@ elFinder.prototype.commands.extract = function() {
 	this.exec = function(hashes) {
 		var files    = this.files(hashes),
 			dfrd     = $.Deferred(),
-			errors   = fm.errors(),
 			cnt      = files.length, 
 			complete = cnt, 
 			i, file, error;
@@ -46,13 +45,13 @@ elFinder.prototype.commands.extract = function() {
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (!(file.read && fm.file(file.phash).write)) {
-				error = [errors.extract, file.name, errors.denied]
+				error = ['errExtract', file.name, 'errPerm']
 				fm.error(error);
 				return dfrd.reject(error);
 			}
 			
 			if ($.inArray(file.mime, mimes) === -1) {
-				error = [errors.extract, file.name, errors.notarchive];
+				error = ['errExtract', file.name, 'errNoArchive'];
 				fm.error(error);
 				return dfrd.reject(error);
 			}

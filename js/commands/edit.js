@@ -6,9 +6,9 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.edit = function() {
-	var self = this,
-		fm   = this.fm,
-		mimes = fm.res('mimes', 'text'),
+	var self  = this,
+		fm    = this.fm,
+		mimes = fm.res('mimes', 'text') || [],
 		/**
 		 * Return files acceptable to edit
 		 *

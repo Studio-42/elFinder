@@ -5,9 +5,6 @@
 /* common dialogs class */
 .std42-dialog {	padding:0; }
 
-/* comment this line to enable ui theme original background */
-/*.std42-dialog, .std42-dialog .ui-widget-content { background-color:#eee; background-image:none; }*/
-
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
 	border-left:0 solid;
@@ -30,7 +27,7 @@
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
-	font-size:.76em;
+	font-size:.72em;
 }
 
 /* buttons */
@@ -46,7 +43,6 @@
 
 .elfinder-dialog .ui-resizable-e, 
 .elfinder-dialog .ui-resizable-s { width:0; height:0;}
-/*.elfinder-dialog .ui-resizable-se { right:3px;}*/
 
 .std42-dialog .ui-button input { cursor: pointer;}
 

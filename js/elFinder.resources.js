@@ -29,131 +29,11 @@ elFinder.prototype.resources = {
 		searchbtn   : 'elfinder-button-search'
 	},
 	tpl : {
-		perms   : '<span class="elfinder-perms"/>',
-		symlink : '<span class="elfinder-symlink"/>',
-		navicon : '<span class="elfinder-nav-icon"/>',
-		navspinner  : '<span class="elfinder-navbar-spinner"/>',
-		navdir  : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
-		
-	},
-	error : {
-		unknown    : 'Unknown error.',
-		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
-		node       : 'elFinder required DOM Element to be created.',
-		url        : 'Invalid elFinder configuration! You have to set URL option.',
-		access     : 'Access denied.',
-		connect    : 'Unable to connect to backend.',
-		abort      : 'Connection aborted.',
-		timeout    : 'Connection timeout.',
-		response   : 'Invalid backend response.',
-		json       : 'Data is not JSON.',
-		empty      : 'Data is empty.',
-		nocmd      : 'Backend request required command name.',
-		open       : 'Unable to open "$1".',
-		notdir     : 'Object is not a folder.', 
-		notfile    : 'Object is not a file.', 
-		read       : 'Unable to read "$1".',
-		write      : 'Unable to write into "$1".',
-		denied     : 'Permission denied.',
-		locked     : '"$1" is locked and can not be renamed, moved or removed.',
-		exists     : 'File named "$1" already exists in this location.',
-		name       : 'Invalid file name.',
-		notfound   : 'File not found.',
-		popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
-		copy       : 'Unable to copy "$1".',
-		move       : 'Unable to move "$1".',
-		copyinself : 'Unable to copy "$1" into itself.',
-		rm         : 'Unable to remove "$1".',
-		extract    : 'Unable to extract files from "$1".',
-		archive    : 'Unable to create archive.',
-		notarchive : 'File is not archive or has unsupported archive type.',
-		cmdsupport : 'Backend does not support this command.'
-	},
-	
-	name : {
-		archive   : 'Create archive',
-		back      : 'Back',
-		copy      : 'Copy',
-		cut       : 'Cut',
-		download  : 'Download',
-		duplicate : 'Duplicate',
-		edit      : 'Edit file',
-		extract   : 'Extract files from archive',
-		forward   : 'Forward',
-		getfile   : 'Select files',
-		help      : 'About this software',
-		info      : 'Get info',
-		mkdir     : 'New folder',
-		mkfile    : 'New text file',
-		open      : 'Open',
-		paste     : 'Paste',
-		quicklook : 'Preview',
-		reload    : 'Reload',
-		rename    : 'Rename',
-		rm        : 'Delete',
-		search    : 'Find files',
-		up        : 'Go to parent directory',
-		upload    : 'Upload files',
-		view      : 'View'
-		
-	},
-	
-	/**
-	 * Notifications messages by types
-	 *
-	 * @type  Object
-	 */
-	notify : {
-		open        : 'Open folder',
-		openfile    : 'Open file',
-		reload      : 'Reload folder content',
-		mkdir       : 'Creating directory',
-		mkfile      : 'Creating files',
-		rm          : 'Delete files',
-		copy        : 'Copy files',
-		move        : 'Move files',
-		preparecopy : 'Prepare to copy files',
-		rename      : 'Rename files',
-		upload      : 'Uploading files',
-		download    : 'Downloading files',
-		save        : 'Save files',
-		archive     : 'Creating archive',
-		extract     : 'Extracting files from archive',
-		search      : 'Searching files'
-	},
-	
-	confirm : {
-		rm   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
-		repl : 'Replace old file with new one?'
-	},
-	
-	msg : {
-		confirmreq : 'Confirmation required',
-		applyall   : 'Apply to all',
-		cancel     : 'Cancel',
-		move       : 'Move file',
-		yes        : 'Yes',
-		no         : 'No',
-		error      : 'Error',
-		close      : 'Close',
-		searchres  : 'Search results',
-		size       : 'Size',
-		items      : 'Items',
-		selitems   : 'selected items',
-		unknown    : 'unknown',
-		places     : 'Places',
-		calc       : 'Calculating',
-		aliasfor   : 'Alias for',
-		path       : 'Path',
-		dim        : 'Dimensions',
-		modify     : 'Modified',
-		perms      : 'Permissions',
-		locked     : 'Locked',
-		kind       : 'Kind',
-		files      : 'Files',
-		folders    : 'Folders',
-		link       : 'Link',
-		name       : 'Name',
+		perms      : '<span class="elfinder-perms"/>',
+		symlink    : '<span class="elfinder-symlink"/>',
+		navicon    : '<span class="elfinder-nav-icon"/>',
+		navspinner : '<span class="elfinder-navbar-spinner"/>',
+		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
 		
 	},
 	
@@ -163,7 +43,6 @@ elFinder.prototype.resources = {
 			'application/javascript', 
 			'application/xhtml+xml', 
 			'audio/x-mp3-playlist', 
-			'application/x-bittorrent', 
 			'application/x-web-config',
 			'application/docbook+xml',
 			'application/x-php',
@@ -177,11 +56,10 @@ elFinder.prototype.resources = {
 	
 	mixin : {
 		make : function() {
-			var fm     = this.fm,
-				cmd    = this.name,
-				cwd    = fm.getUI('cwd'),
-				errors = fm.errors(),
-				dfrd   = $.Deferred()
+			var fm   = this.fm,
+				cmd  = this.name,
+				cwd  = fm.getUI('cwd'),
+				dfrd = $.Deferred()
 					.fail(function(error) {
 						error && fm.error(error);
 					})
@@ -222,10 +100,10 @@ elFinder.prototype.resources = {
 						if (parent.length) {
 
 							if (!name) {
-								return dfrd.reject(errors.name);
+								return dfrd.reject('errInvName');
 							}
 							if (fm.fileByName(name, phash)) {
-								return dfrd.reject([errors.exists, name]);
+								return dfrd.reject(['errExists', name]);
 							}
 
 							parent.html(fm.escape(name));

@@ -3,8 +3,7 @@
 /*********************************************/
 /* toolbar container */
 .elfinder-toolbar { 
-	padding:9px 0; 
-
+	padding:4px; 
 	border-left:0 solid; 
 	border-top:0 solid; 
 	border-right:0 solid; 
@@ -12,7 +11,7 @@
 
 /* container for button's group */
 .elfinder-buttonset {
-	margin-left:10px;
+	margin: 1px 4px;
 	float:left;
 	background:transparent;
 	padding:0;
@@ -21,7 +20,7 @@
 	border-radius: 4px;
 }
 
-.elfinder-buttonset:first-child { margin:0; }
+/*.elfinder-buttonset:first-child { margin:0; }*/
 
 /* button */
 .elfinder .elfinder-button {
@@ -147,7 +146,7 @@
 	border:0 solid;
 	background:transparent;
 	padding:0;
-	margin:0;
+	margin: 1px 4px;
 	height:auto;
 	float:right;
 	width:202px;

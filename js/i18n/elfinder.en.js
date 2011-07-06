@@ -66,6 +66,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnRm' : 'Remove',
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
+			'btnYes'    : 'Yes',
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -119,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			
 			'confirmReq'  : 'Confirmation required',
 			'confirmRm'   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+			'confirmRepl' : 'Replace old file with new one?',
 			'apllyAll'    : 'Apply to all',
 			'name'        : 'Name',
 			'size'        : 'Size',
@@ -148,6 +150,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'         : 'yes',
 			'no'          : 'no',
 			'link'        : 'Link',
+			'searcresult' : 'Search results',  
+			'selected' : 'selected items',
 			// 
 			// /******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -181,10 +185,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			// 'untitle file.txt'                       : 'новый файл.txt',
 			// 'View as list'                           : 'Список', 
 			// 'View as icons'                          : 'Иконки',
-			// 'Drop files here'                        : 'Бросьте файлы сюда',
-			// 'or'                                     : 'или',
-			// 'Select files to upload'                 : 'Выбрерите файлы',
-			// 'Move file'                              : 'Перемещение файлов',
+			'dropFiles' : 'Drop files here',
+			'or' : 'or',
+			'selectForUpload' : 'Select files to upload',
+			'moveFiles' : 'Move files',
+			'copyFiles' : 'Copy files',
 			// 'Replace old file with new one?'         : 'Заменить старый файл новым?',
 			// 'Searching files'                        : 'Поиск файлов',
 			// 'Path'                                   : 'Путь',

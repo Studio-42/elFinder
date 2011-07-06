@@ -21,7 +21,6 @@ elFinder.prototype.commands.rm = function() {
 	this.exec = function(hashes) {
 		var self   = this,
 			fm     = this.fm,
-			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
@@ -37,10 +36,10 @@ elFinder.prototype.commands.rm = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.phash) {
-				return !dfrd.reject([errors.rm, file.name, errors.denied]);
+				return !dfrd.reject(['errRm', file.name, 'errPerm']);
 			}
 			if (file.locked) {
-				return !dfrd.reject([fm.errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 			if (file.hash == cwd) {
 				goroot = fm.root(file.hash);

@@ -23,7 +23,6 @@ elFinder.prototype.commands.rename = function() {
 			cwd      = fm.getUI('cwd'),
 			sel      = fm.selected(),
 			cnt      = sel.length,
-			errors   = fm.errors(),
 			file     = fm.file(sel.shift()),
 			filename = '.elfinder-cwd-filename',
 			dfrd     = $.Deferred()
@@ -64,10 +63,10 @@ elFinder.prototype.commands.rename = function() {
 							return dfrd.reject();
 						}
 						if (!name) {
-							return dfrd.reject(errors.invName);
+							return dfrd.reject('errInvName');
 						}
 						if (fm.fileByName(name, file.phash)) {
-							return dfrd.reject([errors.exists, name]);
+							return dfrd.reject(['errExists', name]);
 						}
 						
 						parent.html(fm.escape(name));
@@ -92,11 +91,11 @@ elFinder.prototype.commands.rename = function() {
 			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
 		
 		if (!file || cnt > 1 || !node.length) {
-			return dfrd.reject(errors.invParams);
+			return dfrd.reject('errCmdParams', this.title);
 		}
 		
 		if (file.locked) {
-			return dfrd.reject([errors.locked, file.name]);
+			return dfrd.reject(['errLocked', file.name]);
 		}
 		
 		fm.disable();

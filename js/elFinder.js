@@ -1562,14 +1562,6 @@ elFinder.prototype = {
 		return this.resources[type] && this.resources[type][id];
 	}, 
 	
-	errmsg : function(id) {
-		return this.resources['error'] && this.resources['error'][id] || '';
-	},
-	
-	errors : function() {
-		return this.resources['error'];
-	},
-	
 	/**
 	 * Internationalization object
 	 * 
@@ -1719,28 +1711,24 @@ elFinder.prototype = {
 	commands : {},
 	
 	parseUploadData : function(text) {
-		var errors   = this.errors(),
-			data;
+		var data;
 		
 		if (!$.trim(text)) {
-			return {error : [errors.response, errors.empty]};
+			return {error : ['errResponse', 'errDataEmpty']};
 		}
 		
 		try {
 			data = $.parseJSON(text);
 		} catch (e) {
-			return {error : [errors.response, errors.json]}
+			return {error : ['errResponse', 'errDataNotJSON']}
 		}
 		
 		if (!this.validResponse('upload', data)) {
-			return {error : [errors.response]};
+			return {error : ['errResponse']};
 		}
 		data = this.normalize(data);
 		data.removed = $.map(data.added||[], function(f) { return f.hash; })
-		
-		if (this.newAPI) {
-			return data;
-		}
+		return data;
 		
 	},
 	
@@ -1836,7 +1824,6 @@ elFinder.prototype = {
 		// upload transport using XMLHttpRequest
 		xhr : function(data) { 
 			var self   = this,
-				errors = this.errors(),
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -1871,27 +1858,27 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
-				dfrd.reject(errors.connect);
+				dfrd.reject('errConnect');
 			}, false);
 			
 			xhr.addEventListener('abort', function() {
-				dfrd.reject([errors.connect, errors.abort]);
+				dfrd.reject(['errConnect', 'errAbort']);
 			}, false);
 			
 			xhr.addEventListener('load', function() {
 				var status = xhr.status, data;
 				
 				if (status > 500) {
-					return dfrd.reject(errors.response);
+					return dfrd.reject('errResponse');
 				}
 				if (status != 200) {
-					return dfrd.reject(errors.connect);
+					return dfrd.reject('errConnect');
 				}
 				if (xhr.readyState != 4) {
-					return dfrd.reject([errors.connect, errors.timeout]); // am i right?
+					return dfrd.reject(['errConnect', 'errTimeout']); // am i right?
 				}
 				if (!xhr.responseText) {
-					return dfrd.reject([errors.response, errors.empty]);
+					return dfrd.reject(['errResponse', 'errDataEmpty']);
 				}
 
 				data = self.parseUploadData(xhr.responseText);
@@ -1941,7 +1928,7 @@ elFinder.prototype = {
 				if (xhr.readyState == 4 && xhr.status == 0) {
 					// ff bug while send zero sized file
 					// for safari - send directory
-					dfrd.reject([errors.connect, errors.abort]);
+					dfrd.reject(['errConnect', 'errAbort']);
 				}
 			}
 			
