@@ -810,7 +810,7 @@ $.fn.elfindercwd = function(fm) {
 					});
 					trigger();
 				}
-				
+				// delta = cwd.outerHeight(true) - cwd.height()
 				// fm.storage('view', (list = !list) ? 'list' : 'icons');
 				
 			})

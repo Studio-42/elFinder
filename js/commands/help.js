@@ -38,7 +38,7 @@ elFinder.prototype.commands.help = function() {
 				shortcuts = fm.shortcuts()
 				;
 
-			$.each({main : 'About', shortcuts : 'Shortcuts', help : 'Help'}, function(id, title) {
+			$.each({main : 'about', shortcuts : 'shortcuts', help : 'help'}, function(id, title) {
 				html.push(tab[r](/\{id\}/, id)[r](/\{title\}/, fm.i18n(title)));
 			});
 
@@ -47,37 +47,35 @@ elFinder.prototype.commands.help = function() {
 			// main tab
 			html.push('<div id="main" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
 			html.push('<h3>elFinder</h3>');
-			html.push('<div class="'+prim+'">'+fm.i18n('Web file manager')+'</div>');
-			html.push('<div class="'+sec+'">'+fm.i18n('Version')+': '+fm.version+', '+fm.i18n('protocol version')+': '+fm.api+'</div>');
+			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
+			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocol')+': '+fm.api+'</div>');
 			html.push('<div class="'+sec+'">jQuery/jQuery UI: '+$().jquery+'/'+$.ui.version+'</div>');
 			
 			html.push(sep);
 			
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Project home')));
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Documentation')));
-			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('Fork us on Github')));
-			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('Follow us in twitter')));
-			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('Meet us on facebook')));
+			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('homepage')));
+			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('docs')));
+			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
+			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
 			
 			html.push(sep);
 			
-			html.push('<div class="'+prim+'">'+fm.i18n('Team')+'</div>');
+			html.push('<div class="'+prim+'">'+fm.i18n('team')+'</div>');
 			
-			html.push(atpl[r](author, 'Dmitry "dio" &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chief developer')));
-			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('developer')));
-			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('developer')));
+			html.push(atpl[r](author, 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chiefdev')));
+			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('dev')));
+			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('dev')));
 			
-			if (fm.i18[fm.lang].translator) {
-				html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
-			}
-
-			html.push(atpl[r](author, fm.i18n('Icons'))[r](work, '<a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>'));
+			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			
-			html.push(sep+sep);
+			html.push(sep);
+			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': <a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
 			
+			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
 			html.push('<div class="'+lic+'">Copyright © 2009-2011, Studio 42</div>');
-			html.push('<div class="'+lic+'">„ …'+fm.i18n('and don\'t forget to take your towel')+' ”</div>');
+			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 			// end main
 			
@@ -92,7 +90,7 @@ elFinder.prototype.commands.help = function() {
 
 				html.push('</div>');
 			} else {
-				html.push('<div class="elfinder-help-disabled">'+fm.i18n('Shortcuts disabled')+'</div>')
+				html.push('<div class="elfinder-help-disabled">'+fm.i18n('shortcutsof')+'</div>')
 			}
 			
 			

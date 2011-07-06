@@ -3,7 +3,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 	elFinder.prototype.i18.ru = {
 		translator : 'Vasiliy Razumnih &lt;rvn@std42.ru&gt;',
 		language   : 'Русский язык',
-		direction  : 'ltr',
+		direction  : 'rtl',
 		messages   : {
 			'errConnect'           : 'Не удалось соединиться с сервером.',
 			'errAbort'             : 'Connection aborted.',

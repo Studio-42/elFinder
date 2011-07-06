@@ -295,12 +295,6 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.options = $.extend({}, this.options, opts||{});
 	
-	/**
-	 * Css classes 
-	 *
-	 * @type String
-	 **/
-	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 	
 	/**
 	 * Ajax request type
@@ -347,19 +341,20 @@ window.elFinder = function(node, opts) {
 	 * @default "ltr"
 	 **/
 	this.direction = this.i18[this.lang].direction;
-
+	
 	/**
 	 * i18 messages
 	 *
 	 * @type Object
 	 **/
-	this.messages = this.i18[this.lang].messages;
-
-	this.messages = $.extend({}, this.i18.en && this.i18.en.messages, this.i18[this.lang] && this.i18[this.lang].messages);
+	this.messages = $.extend({}, this.i18.en && this.i18.en.messages, this.lang != 'en' ? this.i18[this.lang].messages : {});
 	
-	// this.log(this.messages2)
-
-	
+	/**
+	 * Css classes 
+	 *
+	 * @type String
+	 **/
+	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 
 	/**
 	 * Method to store/fetch data
@@ -2283,34 +2278,6 @@ elFinder.prototype = {
 		}
 		
 		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
-	},
-	
-	/**
-	 * Valid file name
-	 * 
-	 * @param  String  name to test
-	 * @return Boolean
-	 */
-	_validName : function(name) {
-		var validator = this.options.validName;
-		
-		if (!name 
-		|| typeof(name) != 'string' 
-		|| /^\.\.?$/.test(name)
-		|| name.indexOf(this.cwd().separator) !== -1
-		) {
-			return false;
-		}
-		
-		if (validator) {
-			if (validator instanceof RegExp) {
-				return validator.test(name);
-			} 
-			if (typeof(validator) == 'function') {
-				return validator(name);
-			}
-		}
-		return true;
 	},
 	
 	/**

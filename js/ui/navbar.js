@@ -28,7 +28,7 @@ $.fn.elfindernavbar = function(fm) {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
 				.find('.ui-resizable-handle');
-			fm.log(handle)
+
 			fm.one('open', function() {
 				setTimeout(function() {
 					parent.trigger('resize');
