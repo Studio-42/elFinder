@@ -71,6 +71,8 @@ elFinder.prototype.commands.help = function() {
 				html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			}
 
+			html.push(atpl[r](author, fm.i18n('Icons'))[r](work, '<a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>'));
+			
 			html.push(sep+sep);
 			
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
