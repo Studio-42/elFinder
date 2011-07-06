@@ -52,9 +52,9 @@ elFinder.prototype.commands.rm = function() {
 			
 			fm.confirm({
 				title  : self.title,
-				text   : fm.res('confirm', 'rm'),
+				text   : 'confirmRm',
 				accept : {
-					label    : self.title,
+					label    : 'btnRm',
 					callback : function() {  
 						fm.lockfiles({files : files});
 						fm.request({
@@ -75,7 +75,7 @@ elFinder.prototype.commands.rm = function() {
 					}
 				},
 				cancel : {
-					label    : 'cancel',
+					label    : 'btnCancel',
 					callback : function() { dfrd.reject(); }
 				}
 			});

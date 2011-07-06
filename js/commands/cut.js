@@ -21,7 +21,6 @@ elFinder.prototype.commands.cut = function() {
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
@@ -29,10 +28,10 @@ elFinder.prototype.commands.cut = function() {
 
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash) ) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 			if (file.locked) {
-				return !dfrd.reject([errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 		});
 		

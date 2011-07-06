@@ -13,7 +13,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 			var icons = cmd.value == 'icons';
 
 			icon.toggleClass('elfinder-button-icon-view-list', icons);
-			button.attr('title', cmd.fm.i18n(icons ? 'View as list' : 'View as icons'));
+			button.attr('title', cmd.fm.i18n(icons ? 'viewlist' : 'viewicons'));
 		});
 	});
 }

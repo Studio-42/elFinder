@@ -16,7 +16,7 @@ function debug($o) {
 	print_r($o);
 }
 
-
+// exit();
 /**
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.
@@ -226,13 +226,13 @@ $opts = array(
 				// 	'pattern' => '/folder-23$/',
 				// 	'write' => false
 				// ),
-				// array(
-				// 	'pattern' => '/\/folder42$/',
-				// 	'write' => false,
-				// 	'read' => false,
-				// 	// 'hidden' => true,
-				// 	'locked' => true
-				// )
+				array(
+					'pattern' => '/\/folder42$/',
+					// 'write' => false,
+					// 'read' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
 			),
 		),
 		// array(

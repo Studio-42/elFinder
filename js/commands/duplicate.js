@@ -14,13 +14,12 @@ elFinder.prototype.commands.duplicate = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-		
+
 		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			files  = this.files(hashes),
 			cnt    = files.length,
 			dfrd   = $.Deferred()
@@ -35,10 +34,10 @@ elFinder.prototype.commands.duplicate = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 			if (!fm.file(file.phash).write) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
 		

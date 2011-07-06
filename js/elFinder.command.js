@@ -108,7 +108,7 @@ elFinder.prototype.command = function(fm) {
 			fm   = this.fm, i, s;
 
 		this.name      = name;
-		this.title     = fm.i18n(fm.res('name', name) || this.name);
+		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name) : name, //  fm.i18n(fm.res('name', name) || this.name);
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 

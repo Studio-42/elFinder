@@ -5,6 +5,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		language   : 'Русский язык',
 		direction  : 'ltr',
 		messages   : {
+			'errConnect'           : 'Не удалось соединиться с сервером.',
+			'errAbort'             : 'Connection aborted.',
+			'errTimeout'           : 'Таймаут соедения.',
 			/********************************** errors **********************************/
 			'Error'                                  : 'Ошибка',
 			'Unknown error.'                         : 'Неизвестная ошибка.',

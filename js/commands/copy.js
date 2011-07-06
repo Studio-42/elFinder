@@ -15,7 +15,7 @@ elFinder.prototype.commands.copy = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-		
+
 		return cnt && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
@@ -28,7 +28,7 @@ elFinder.prototype.commands.copy = function() {
 
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash)) {
-				return !dfrd.reject([fm.errmsg('copy'), file.name, fm.errmsg('denied')]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
 		

@@ -37,7 +37,7 @@ elFinder.prototype.commands.archive = function() {
 			cnt   = files.length,
 			mime  = type || mimes[0],
 			cwd   = fm.cwd(),
-			error = [fm.errmsg('archive'), fm.errmsg('denied')],
+			error = ['errArchive', 'errPerm'],
 			dfrd  = $.Deferred().fail(function(error) {
 				error && fm.error(error);
 			}), 

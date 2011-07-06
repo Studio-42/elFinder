@@ -355,6 +355,12 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.messages = this.i18[this.lang].messages;
 
+	this.messages = $.extend({}, this.i18.en && this.i18.en.messages, this.i18[this.lang] && this.i18[this.lang].messages);
+	
+	// this.log(this.messages2)
+
+	
+
 	/**
 	 * Method to store/fetch data
 	 *
@@ -593,6 +599,12 @@ window.elFinder = function(node, opts) {
 		return '';
 	}
 	
+	/**
+	 * Return thumbnail url
+	 * 
+	 * @param  String  file hash
+	 * @return String
+	 */
 	this.tmb = function(hash) {
 		var file = files[hash],
 			url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
@@ -649,9 +661,6 @@ window.elFinder = function(node, opts) {
 		return this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
 	}
 	
-	
-	
-	
 	/**
 	 * Proccess ajax request.
 	 * Fired events :
@@ -663,7 +672,6 @@ window.elFinder = function(node, opts) {
 	this.request = function(options) {
 		var self     = this,
 			o        = this.options,
-			errors   = this.errors(),
 			dfrd     = $.Deferred(),
 			// request data
 			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
@@ -723,21 +731,21 @@ window.elFinder = function(node, opts) {
 				
 				switch (status) {
 					case 'abort':
-						error = xhr.quiet ? '' : [errors.connect, errors.abort];
+						error = xhr.quiet ? '' : ['errConnect', 'errAbort'];
 						break;
 					case 'timeout':	    
-						error = [errors.connect, errors.timeout];
+						error = ['errConnect', 'errTimeout'];
 						break;
 					case 'parsererror': 
-						error = [errors.response, errors.json];
+						error = ['errResponse', 'errDataNotJSON'];
 						break;
 					default:
 						if (xhr.status == 403) {
-							error = [errors.connect, errors.access];
+							error = ['errConnect', 'errAccess'];
 						} else if (xhr.status == 404) {
-							error = [errors.connect, errors.notfound];
+							error = ['errConnect', 'errNotFound'];
 						} else {
-							error = errors.connect;
+							error = 'errConnect';
 						} 
 				}
 				
@@ -756,13 +764,13 @@ window.elFinder = function(node, opts) {
 				}
 				
 				if (!response) {
-					return dfrd.reject([errors.response, errors.empty], xhr);
+					return dfrd.reject(['errResponse', 'errDataEmpty'], xhr);
 				} else if (!$.isPlainObject(response)) {
-					return dfrd.reject([errors.response, errors.json], xhr);
+					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr);
 				} else if (response.error) {
 					return dfrd.reject(response.error, xhr);
 				} else if (!self.validResponse(cmd, response)) {
-					return dfrd.reject(errors.response, xhr);
+					return dfrd.reject('errResponse', xhr);
 				}
 
 				response = self.normalize(response);
@@ -791,7 +799,7 @@ window.elFinder = function(node, opts) {
 		})
 		
 		if (!cmd) {
-			return dfrd.reject(errors.cmdRequired);
+			return dfrd.reject('errCmdReq');
 		}	
 
 		if (syncOnFail) {
@@ -1230,16 +1238,16 @@ window.elFinder = function(node, opts) {
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
-		return alert(this.i18n(this.errmsg('jqui')));
+		return alert(this.i18n('errJqui'));
 	}
 
 	// check node
 	if (!node.length) {
-		return alert(this.i18n(this.errmsg('node')));
+		return alert(this.i18n('errNode'));
 	}
 	// check connector url
 	if (!this.options.url) {
-		return alert(this.i18n(this.errmsg('url')));
+		return alert(this.i18n('errURL'));
 	}
 	
 	$.extend($.ui.keyCode, {
@@ -1281,7 +1289,6 @@ window.elFinder = function(node, opts) {
 	} else {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	}
-	// this.log(this.transport)
 	
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
@@ -1324,13 +1331,13 @@ window.elFinder = function(node, opts) {
 		.error(function(e) { 
 			var opts  = {
 					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n(self.res('msg', 'error')),
+					title     : self.i18n(self.i18n('error')),
 					resizable : false,
-					close     : function() { $(this).elfinderdialog('destroy') },
+					destroyOnClose : true,
 					buttons   : {}
 			};
 
-			opts.buttons[self.i18n(self.res('msg', 'close'))] = function() { $(this).elfinderdialog('close'); };
+			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
@@ -1406,12 +1413,12 @@ window.elFinder = function(node, opts) {
 		});
 		this.shortcut({
 			pattern     : 'enter',
-			description : this.res('name', 'getfile'),
+			description : this.i18n('cmdgetfile'),
 			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
 		})
 		.shortcut({
 			pattern     : 'ctrl+enter',
-			description : this.res('name', this.OS == 'mac' ? 'rename' : 'open'),
+			description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
 			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
 		});
 		
@@ -1541,7 +1548,7 @@ window.elFinder = function(node, opts) {
 	});
 	
 	self.timeEnd('load'); //107
-	
+
 }
 
 /**
@@ -1586,75 +1593,84 @@ elFinder.prototype = {
 			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
 			'symlink'                       : 'Alias',
-			'symlink-broken'                : 'Broken alias',
-			'application/x-empty'           : 'Plain text',
-			'application/postscript'        : 'Postscript document',
-			'application/octet-stream'      : 'Application',
-			'application/x-executable'      : 'Application',
-			'application/vnd.ms-office'     : 'Microsoft Office document',
-			'application/vnd.ms-word'       : 'Microsoft Word document',  
-		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
-			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
-			'application/pdf'               : 'Portable Document Format (PDF)',
-			'application/xml'               : 'XML document', 
-			'application/vnd.oasis.opendocument.text' : 'Open Office document',
-			'application/x-shockwave-flash' : 'Flash application',
+			'symlink-broken'                : 'AliasBroken',
+			'application/x-empty'           : 'TextPlain',
+			'application/postscript'        : 'Postscript',
+			'application/vnd.ms-office'     : 'MsOffice',
+			'application/vnd.ms-word'       : 'MsWord',  
+		    'application/vnd.ms-excel'      : 'MsExcel',
+			'application/vnd.ms-powerpoint' : 'MsPP',
+			'application/pdf'               : 'PDF',
+			'application/xml'               : 'XML', 
+			'application/vnd.oasis.opendocument.text' : 'OO',
+			'application/x-shockwave-flash' : 'AppFlash',
 			'application/flash-video'       : 'Flash video',
-			'application/x-bittorrent'      : 'Bittorrent file',
-			'application/javascript'        : 'Javascript source',
-			'application/rtf'               : 'Rich Text Format (RTF)',
-			'application/x-gzip'            : 'GZIP archive', 
-		    'application/x-bzip2'           : 'BZIP archive', 
-		    'application/zip'               : 'ZIP archive',  
-		    'application/x-rar'             : 'RAR archive',
-			'application/x-tar'             : 'TAR archive', 
-			'application/x-7z-compressed'   : '7z archive',
-			'application/x-jar'             : 'Java JAR file',
-			'text/plain'                    : 'Plain text',
-		    'text/x-php'                    : 'PHP source',
-			'text/html'                     : 'HTML document', 
-			'text/javascript'               : 'Javascript source',
-			'text/css'                      : 'Cascading style sheet',  
-		    'text/rtf'                      : 'Rich Text Format',
-			'text/rtfd'                     : 'Rich Text Format',
-			'text/x-c'                      : 'C source', 
-			'text/x-csrc'                   : 'C source',
-			'text/x-chdr'                   : 'C header source',
-			'text/x-c++'                    : 'C++ source', 
-			'text/x-c++src'                 : 'C++ source',
-			'text/x-c++hdr'                 : 'C++ header source',
-			'text/x-shellscript'            : 'Unix shell script',
-		    'text/x-python'                 : 'Python source',
-			'text/x-java'                   : 'Java source',
-			'text/x-java-source'            : 'Java source',
-			'text/x-ruby'                   : 'Ruby source',
-			'text/x-perl'                   : 'Perl script',
-			'text/x-sql'                    : 'SQL source',
-		    'text/xml'                      : 'XML document', 
-			'text/x-comma-separated-values' : 'Comma separated values',
-			'image/x-ms-bmp'                : 'BMP image',
-		    'image/jpeg'                    : 'JPEG image',   
-		    'image/gif'                     : 'GIF image',    
-		    'image/png'                     : 'PNG image',
-		    'image/tiff'                    : 'TIFF image',   
-			'image/x-targa'                 : 'TGA image',
-		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-			'image/xbm'                     : 'X bitmap image',
-			'audio/mpeg'                    : 'MPEG audio',  
-			'audio/midi'                    : 'MIDI audio',
-			'audio/ogg'                     : 'Ogg Vorbis audio',
-			'audio/mp4'                     : 'MPEG-4 audio',
-			'audio/x-m4a'                   : 'MPEG-4 audio',
-			'audio/wav'                     : 'WAV audio',
-			'video/x-dv'                    : 'DV movie',
-			'video/mp4'                     : 'MPEG-4 movie',
-			'video/mpeg'                    : 'MPEG movie',  
-			'video/x-msvideo'               : 'AVI movie',
-			'video/quicktime'               : 'Quick Time movie',
-			'video/x-ms-wmv'                : 'Windows Media Movie',   
-			'video/x-flv'                   : 'Flash movie',
-			'video/x-matroska'              : 'Matroska movie',
-			'video/ogg'                     : 'Ogg movie'
+			'application/x-bittorrent'      : 'Torrent',
+			'application/javascript'        : 'JS',
+			'application/rtf'               : 'RTF',
+			'application/rtfd'              : 'RTF',
+			'application/x-font-ttf'        : 'TTF',
+			'application/x-font-otf'        : 'OTF',
+			'application/x-rpm'             : 'RPM',
+			'application/x-web-config'      : 'TextPlain',
+			'application/xhtml+xml'         : 'HTML',
+			'application/docbook+xml'       : 'DOCBOOK',
+			'application/x-awk'             : 'AWK',
+			'application/x-gzip'            : 'GZIP', 
+		    'application/x-bzip2'           : 'BZIP', 
+		    'application/zip'               : 'ZIP',  
+		    'application/x-rar'             : 'RAR',
+			'application/x-tar'             : 'TAR', 
+			'application/x-7z-compressed'   : '7z',
+			'application/x-jar'             : 'JAR',
+			'text/plain'                    : 'TextPlain',
+		    'text/x-php'                    : 'PHP',
+			'text/html'                     : 'HTML', 
+			'text/javascript'               : 'JS',
+			'text/css'                      : 'CSS',  
+		    'text/rtf'                      : 'RTF',
+			'text/rtfd'                     : 'RTF',
+			'text/x-c'                      : 'C', 
+			'text/x-csrc'                   : 'C',
+			'text/x-chdr'                   : 'CHeader',
+			'text/x-c++'                    : 'CPP', 
+			'text/x-c++src'                 : 'CPP',
+			'text/x-c++hdr'                 : 'CPPHeader',
+			'text/x-shellscript'            : 'Shell',
+			'application/x-csh'             : 'Shell',
+		    'text/x-python'                 : 'Python',
+			'text/x-java'                   : 'Java',
+			'text/x-java-source'            : 'Java',
+			'text/x-ruby'                   : 'Ruby',
+			'text/x-perl'                   : 'Perl',
+			'text/x-sql'                    : 'SQL',
+		    'text/xml'                      : 'XML', 
+			'text/x-comma-separated-values' : 'CSV',
+			'image/x-ms-bmp'                : 'BMP',
+		    'image/jpeg'                    : 'JPEG',   
+		    'image/gif'                     : 'GIF',    
+		    'image/png'                     : 'PNG',
+		    'image/tiff'                    : 'TIFF',   
+			'image/x-targa'                 : 'TGA',
+		    'image/vnd.adobe.photoshop'     : 'PSD',
+			'image/xbm'                     : 'XBITMAP',
+			'image/pxm'                     : 'PXM',
+			'audio/mpeg'                    : 'AudioMPEG',  
+			'audio/midi'                    : 'AudioMIDI',
+			'audio/ogg'                     : 'AudioOGG',
+			'audio/mp4'                     : 'AudioMPEG4',
+			'audio/x-m4a'                   : 'AudioMPEG4',
+			'audio/wav'                     : 'AudioWAV',
+			'audio/x-mp3-playlist'          : 'AudioPlaylist',
+			'video/x-dv'                    : 'VideoDV',
+			'video/mp4'                     : 'VideoMPEG4',
+			'video/mpeg'                    : 'VideoMPEG',  
+			'video/x-msvideo'               : 'VideoAVI',
+			'video/quicktime'               : 'VideoMOV',
+			'video/x-ms-wmv'                : 'VideoWM',   
+			'video/x-flv'                   : 'VideoFlash',
+			'video/x-matroska'              : 'VideoMKV',
+			'video/ogg'                     : 'VideoOGG'
 		},
 	
 	/**
@@ -2149,7 +2165,7 @@ elFinder.prototype = {
 	 */
 	notify : function(opts) {
 		var type     = opts.type,
-			msg      = this.i18n(this.res('notify', opts.type) || 'Doing something.'),
+			msg      = this.messages['ntf'+type] ? this.i18n('ntf'+type) : this.i18n('ntfsmth'),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
 			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
@@ -2231,35 +2247,32 @@ elFinder.prototype = {
 				cssClass  : 'elfinder-dialog-confirm',
 				modal     : true,
 				resizable : false,
-				title     : this.i18n(opts.title || this.res('msg', 'confirmreq')),
+				title     : this.i18n(opts.title || 'confirmReq'),
 				buttons   : {},
 				close     : function() { 
 					!complete && opts.cancel.callback();
 					$(this).elfinderdialog('destroy');
 				}
 			},
-			apply = this.i18n(this.res('msg', 'applyall')),
+			apply = this.i18n('apllyAll'),
 			label, checkbox;
 
 		
 		if (opts.reject) {
-			label = opts.reject.label;
-			options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+			options.buttons[this.i18n(opts.reject.label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
 		}
 		
-		label = opts.accept.label;
-		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+		options.buttons[this.i18n(opts.accept.label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 			complete = true;
 			$(this).elfinderdialog('close')
 		};
 		
-		label = opts.cancel.label;
-		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+		options.buttons[this.i18n(opts.cancel.label)] = function() {
 			$(this).elfinderdialog('close')
 		};
 		
@@ -2291,7 +2304,7 @@ elFinder.prototype = {
 	 * @param  String  name to test
 	 * @return Boolean
 	 */
-	validName : function(name) {
+	_validName : function(name) {
 		var validator = this.options.validName;
 		
 		if (!name 
@@ -2426,6 +2439,30 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2kind : function(f) {
+		var mime = typeof(f) == 'object' ? f.mime : f, kind;
+		
+		if (f.alias) {
+			kind = 'Alias';
+		} else if (this.kinds[mime]) {
+			kind = this.kinds[mime];
+		} else {
+			if (mime.indexOf('text') === 0) {
+				kind = 'Text';
+			} else if (mime.indexOf('image') === 0) {
+				kind = 'Image';
+			} else if (mime.indexOf('audio') === 0) {
+				kind = 'Audio';
+			} else if (mime.indexOf('video') === 0) {
+				kind = 'Video';
+			} else if (mime.indexOf('application') === 0) {
+				kind = 'App';
+			} else {
+				kind = mime;
+			}
+		}
+		
+		return this.messages['kind'+kind] ? this.i18n('kind'+kind) : mime;
+		
 		var mime = typeof(f) == 'object' ? f.mime : f,
 			kind = this.kinds[mime]||'unknown';
 
@@ -2433,13 +2470,13 @@ elFinder.prototype = {
 			kind = 'Alias';
 		} else if (kind == 'unknown') {
 			if (mime.indexOf('text') === 0) {
-				kind = 'Text document';
+				kind = 'Text';
 			} else if (mime.indexOf('image') === 0) {
 				kind = 'Image';
 			} else if (mime.indexOf('audio') === 0) {
-				kind = 'Audio media';
+				kind = 'Audio';
 			} else if (mime.indexOf('video') === 0) {
-				kind = 'Video media';
+				kind = 'Video';
 			} else if (mime.indexOf('application') === 0) {
 				kind = 'Application';
 			}
@@ -2458,7 +2495,7 @@ elFinder.prototype = {
 		var self = this;
 
 		return d == 'unknown' 
-			? self.i18n(this.res('msg', d)) 
+			? self.i18n('dateUnknown') 
 			: (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
 	},
 	
@@ -2493,7 +2530,7 @@ elFinder.prototype = {
 		f.read && p.push(this.i18n('read'));
 		f.write && p.push(this.i18n('write'));	
 
-		return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('no access');
+		return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('noaccess');
 	},
 	
 	/**

@@ -28,13 +28,12 @@ elFinder.prototype.commands.edit = function() {
 		 * @return jQuery.Deferred
 		 **/
 		edit = function(file) {
-			var hash      = file.hash,
-				errors    = fm.errors(),
-				opts      = fm.options,
-				dfrd      = $.Deferred(), 
-				data      = {cmd : 'file', target : hash},
-				url       = fm.url(hash) || fm.options.url,
-				dialog    = function(text) {
+			var hash   = file.hash,
+				opts   = fm.options,
+				dfrd   = $.Deferred(), 
+				data   = {cmd : 'file', target : hash},
+				url    = fm.url(hash) || fm.options.url,
+				dialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
 							.keydown(function(e) {
 								var code = e.keyCode,
@@ -116,7 +115,7 @@ elFinder.prototype.commands.edit = function() {
 			
 			
 			if (!file.read || !file.write) {
-				error = [errors.open, file.name, errors.denied]
+				error = ['errOpen', file.name, 'errPerm']
 				fm.error(error)
 				return dfrd.reject(error);
 			}

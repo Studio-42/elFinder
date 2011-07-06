@@ -34,7 +34,7 @@ elFinder.prototype.commands.download = function() {
 			iframe, i, url;
 			
 		if (fm.oldAPI) {
-			fm.error(fm.res('error', 'cmdsupport'));
+			fm.error('errCmdNoSupport');
 			return dfrd.reject();
 		}
 			

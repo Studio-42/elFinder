@@ -586,11 +586,11 @@ $.fn.elfindercwd = function(fm) {
 			},
 			
 			msg = {
-				name : fm.i18n(fm.res('msg', 'name')),
-				perm : fm.i18n(fm.res('msg', 'perms')),
-				mod  : fm.i18n(fm.res('msg', 'modify')),
-				size : fm.i18n(fm.res('msg', 'size')),
-				kind : fm.i18n(fm.res('msg', 'kind'))
+				name : fm.i18n('name'),
+				perm : fm.i18n('perms'),
+				mod  : fm.i18n('modify'),
+				size : fm.i18n('size'),
+				kind : fm.i18n('kind')
 			},
 			/**
 			 * Update directory content
@@ -880,7 +880,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 
-				description : 'Select all files',
+				description : 'selectall',
 				callback    : function() { 
 					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
 					trigger();
@@ -888,13 +888,13 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
-				description : 'Select file(s)',
+				description : 'selectfiles',
 				type        : $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
 				callback    : function(e) { select(e.keyCode, e.shiftKey); }
 			})
 			.shortcut({
 				pattern     : 'home',
-				description : 'Select first file',
+				description : 'selectffile',
 				callback    : function(e) { 
 					unselectAll();
 					cwd.find('[id]:first').trigger(evtSelect) ;
@@ -903,7 +903,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     : 'end',
-				description : 'Select last file',
+				description : 'selectlfile',
 				callback    : function(e) { 
 					unselectAll();
 					cwd.find('[id]:last').trigger(evtSelect) ;

@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfinderplaces = function(fm) {
+$.fn.elfinderplaces = function(fm, opts) {
 	return this.each(function() {
 		var dirs      = [],
 			c         = 'class',
@@ -133,7 +133,7 @@ $.fn.elfinderplaces = function(fm) {
 			 **/
 			wrapper = create({
 					hash  : 'root-'+fm.namespace, 
-					name  : fm.i18n(fm.res('msg', 'places')),
+					name  : fm.i18n(opts.name, 'places'),
 					read  : true,
 					write : true
 				}),
@@ -192,7 +192,7 @@ $.fn.elfinderplaces = function(fm) {
 					}
 				});
 	
-		
+
 		// on fm load - show places and load files from backend
 		fm.one('load', function() {
 			if (fm.oldAPI) {

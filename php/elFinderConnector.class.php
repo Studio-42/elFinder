@@ -52,7 +52,7 @@ class elFinderConnector {
 		$args   = array();
 		
 		if (!function_exists('json_encode')) {
-			$error = $this->elFinder->errorMessage(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_JSON);
+			$error = $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_JSON);
 			$this->output(array('error' => '{"error":["'.implode('","', $error).'"]}', 'raw' => true));
 		}
 		
@@ -62,7 +62,7 @@ class elFinderConnector {
 		
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD, elFinder::ERROR_UPLOAD_SIZE), 'header' => 'Content-Type: text/html'));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD_COMMON, elFinder::ERROR_UPLOAD_FILES_SIZE), 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
 		

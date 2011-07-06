@@ -120,18 +120,20 @@ class elFinder {
 	const ERROR_COPY_TO           = 22;
 	const ERROR_COPY_ITSELF       = 23;
 	const ERROR_RM                = 24;
-	const ERROR_UPLOAD            = 25;
-	const ERROR_UPLOAD_NO_FILES   = 26;
-	const ERROR_UPLOAD_FILES_SIZE = 27;
-	const ERROR_UPLOAD_SIZE       = 28;
-	const ERROR_MIME              = 29;
-	const ERROR_UPLOAD_TRANSFER   = 30;
-	const ERROR_ACCESS_DENIED     = 31;
-	const ERROR_SAVE              = 32;
-	const ERROR_EXTRACT           = 33;
-	const ERROR_ARCHIVE			  = 34;
-	const ERROR_NOT_ARCHIVE		  = 35;
-	const ERROR_ARCHIVE_TYPE      = 36;
+	const ERROR_UPLOAD_COMMON     = 25;
+	const ERROR_UPLOAD            = 26;
+	const ERROR_UPLOAD_NO_FILES   = 27;
+	const ERROR_UPLOAD_FILES_SIZE = 28;
+	const ERROR_UPLOAD_SIZE       = 29;
+	const ERROR_MIME              = 30;
+	const ERROR_UPLOAD_TRANSFER   = 31;
+	const ERROR_ACCESS_DENIED     = 32;
+	const ERROR_SAVE              = 33;
+	const ERROR_EXTRACT           = 34;
+	const ERROR_ARCHIVE			  = 35;
+	const ERROR_NOT_ARCHIVE		  = 36;
+	const ERROR_ARCHIVE_TYPE      = 37;
+	
 	
 	/**
 	 * undocumented class variable
@@ -139,43 +141,45 @@ class elFinder {
 	 * @var string
 	 **/
 	protected static $errors = array(
-		0  => 'Unknown error.',
-		1  => 'Unknown command.',
-		2  => 'Invalid backend configuration.',
-		3  => 'PHP JSON module not installed.',
-		4  => 'There are no one readable volumes available.',
-		5  => 'Invalid parameters for command "$1".',
-		6  => 'Unable to open "$1".',
-		7  => 'Folder not found.',
-		8  => 'File not found.',
-		9  => 'Target folder "$1" not found.',
-		10 => 'Object is not a folder.',
-		11 => 'Object is not a file.',
-		12 => 'Permission denied.',
-		13 => '"$1" is locked and can not be renamed, moved or removed.',
-		14 => 'File named "$1" already exists in this location.',
-		15 => 'Invalid file name.',
-		16 => 'Unable to create folder "$1".',
-		17 => 'Unable to create file "$1".',
-		18 => 'Unable to rename "$1".',
-		19 => 'Unable to copy "$1".',
-		20 => 'Unable to move "$1".',
-		21 => 'Copy files from volume "$1" not allowed.',
-		22 => 'Copy files to volume "$1" not allowed.',
-		23 => 'Unable to copy "$1" into itself.',
-		24 => 'Unable to remove "$1".',
-		25 => 'Unable to upload "$1".',
-		26 => 'There are no uploaded files was found.',
-		27 => 'Data exceeds the maximum allowed size.',
-		28 => 'File exceeds maximum allowed size.',
-		29 => 'Not allowed file type.',
-		30 => '"$1" transfer error.',
-		31 => 'Access denied',
-		32 => 'Unable to save "$1".',
-		33 => 'Unable to extract files from "$1".',
-		34 => 'Unable to create archive.',
-		35 => 'File is not archive or has unsupported archive type.',
-		36 => 'Unsupported archive type.'
+		0  => 'errUnknown',
+		1  => 'errUnknownCmd',
+		2  => 'errConf',
+		3  => 'errJSON',
+		4  => 'errNoVolumes',
+		5  => 'errCmdParams',
+		6  => 'errOpen',
+		7  => 'errFolderNotFound',
+		8  => 'errFileNotFound',
+		9  => 'errTrgFolderNotFound',
+		10 => 'errNotFolder',
+		11 => 'errNotFile',
+		12 => 'errPerm',
+		13 => 'errLocked',
+		14 => 'errExists',
+		15 => 'errInvName',
+		16 => 'errMkdir',
+		17 => 'errMkfile',
+		18 => 'errRename',
+		19 => 'errCopy',
+		20 => 'erMove',
+		21 => 'CerrCopyFrom',
+		22 => 'errCopyTo',
+		23 => 'errCopyInItself',
+		24 => 'errRm',
+		25 => 'errUploadCommon',
+		26 => 'errUpload',
+		27 => 'errUploadNoFiles',
+		28 => 'errMaxSize',
+		29 => 'errFileMaxSize',
+		30 => 'errUploadMime',
+		31 => 'errUploadTransfer',
+		32 => 'errAccess',
+		33 => 'errSave',
+		34 => 'errExtract',
+		35 => 'errArchive',
+		36 => 'errNoArchive',
+		37 => 'errArcType',
+		
 	);
 	
 	/**

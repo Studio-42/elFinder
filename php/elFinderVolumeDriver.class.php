@@ -381,6 +381,7 @@ abstract class elFinderVolumeDriver {
 		'psd'   => 'image/vnd.adobe.photoshop',
 		'ai'    => 'image/vnd.adobe.photoshop',
 		'xbm'   => 'image/xbm',
+		'pxm'   => 'image/pxm',
 		//audio
 		'mp3'   => 'audio/mpeg',
 		'mid'   => 'audio/midi',
@@ -1775,16 +1776,16 @@ abstract class elFinderVolumeDriver {
 		$file = array(
 			'hash'  => $this->encode($path),
 			'phash' => $root ? '' : $this->encode(dirname($path)),
-			'name'  => $root ? $this->rootName : $this->_basename($path),
-			'size'  => 0
+			'name'  => $root ? $this->rootName : $this->_basename($path)
 		);
 		
 		if ($link) {
 			$stat = $this->_lstat($path);
 			$file['size'] = $stat['size'];
 			$file['date'] = $this->formatDate($stat['mtime']);
-		} elseif (!$dir) {
-			$file['size'] = $this->_filesize($path);
+		} else {
+			
+			$file['size'] = $dir ? 0 : $this->_filesize($path);
 			$file['date'] = $this->formatDate($this->_filemtime($path));
 		}
 
