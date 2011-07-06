@@ -278,8 +278,8 @@ window.elFinderSupportVer1 = function() {
 		if (file.mime == 'application/x-empty') {
 			info.mime = 'text/plain';
 		}
-		if (file.link) {
-			info.link = file.link;
+		if (file.linkTo) {
+			info.alias = file.linkTo;
 		}
 
 		if (file.linkTo) {

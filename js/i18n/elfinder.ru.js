@@ -177,6 +177,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'developer'                              : 'разработчик',
 			'mantainer'                              : 'сопровождение проекта',
 			'translator'                             : 'переводчик',
+			'Icons'                                  : 'Иконки',
 			'and don\'t forget to take your towel'   : 'и не забудьте взять своё полотенце',
 			
 			/**************************** shortcuts descriptions ***************************/
