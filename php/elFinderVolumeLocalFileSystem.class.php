@@ -302,7 +302,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return filesize($path);
+		return @filesize($path);
 	}
 	
 	/**
@@ -313,7 +313,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) {
-		return filemtime($path);
+		return @filemtime($path);
 	}
 	
 	/**
@@ -390,6 +390,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($this->_inpath($atarget, $this->aroot)) {
 			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
 		}
+		// echo $path.'<br>';
 		return false;
 	}
 		
