@@ -196,7 +196,7 @@ elFinder.prototype.commands.quicklook = function() {
 		// clean info/icon
 		.bind('change', function(e) {
 			self.info.attr('style', '').hide();
-			icon.removeAttr('class').removeAttr('style');
+			icon.removeAttr('class').attr('style', '');
 			info.html('');
 
 		})
