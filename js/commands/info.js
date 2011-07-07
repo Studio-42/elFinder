@@ -8,6 +8,7 @@
 elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
+		spclass = 'elfinder-info-spinner',
 		msg = {
 			calc     : fm.i18n('calc'),
 			size     : fm.i18n('size'),
@@ -26,12 +27,13 @@ elFinder.prototype.commands.info = function() {
 			no       : fm.i18n('no'),
 			link     : fm.i18n('link')
 		};
+		
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
-		spinner    : '<span>{text}</span> <span class="elfinder-spinner-mini"/>'
+		spinner    : '<span>{text}</span> <span class="'+spclass+'"/>'
 	}
 	
 	this.alwaysEnabled = true;
@@ -70,6 +72,7 @@ elFinder.prototype.commands.info = function() {
 				close : function() { $(this).elfinderdialog('destroy'); }
 			},
 			count = [],
+			replSpinner = function(msg) { dialog.find('.'+spclass).parent().text(msg); },
 			dialog, size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
@@ -98,7 +101,24 @@ elFinder.prototype.commands.info = function() {
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
-			file.dim && content.push(row.replace(l, msg.dim).replace(v, file.dim));
+			
+			if (file.dim) { // old api
+				content.push(row.replace(l, msg.dim).replace(v, file.dim));
+			} else if (file.mime.indexOf('image') !== -1) {
+				content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc)));
+				fm.request({
+					data : {cmd : 'dim', target : file.hash},
+					preventDefault : true
+				})
+				.fail(function() {
+					replSpinner(msg.unknown);
+				})
+				.done(function(data) {
+					replSpinner(data.dim || msg.unknown);
+				});
+			}
+			
+			
 			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file.date)));
 			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
@@ -120,7 +140,7 @@ elFinder.prototype.commands.info = function() {
 		
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
 		
-		dialog = fm.dialog(view, opts)
+		dialog = fm.dialog(view, opts);
 		
 		// load thumbnail
 		if (tmb) {
@@ -136,11 +156,11 @@ elFinder.prototype.commands.info = function() {
 					preventDefault : true
 				})
 				.fail(function() {
-					dialog.find('.elfinder-spinner-mini').parent().text(msg.unknown);
+					replSpinner(msg.unknown);
 				})
 				.done(function(data) {
 					var size = parseInt(data.size);
-					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : msg.unknown);
+					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown);
 				});
 		}
 		

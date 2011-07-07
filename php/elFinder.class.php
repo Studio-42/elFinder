@@ -51,7 +51,8 @@ class elFinder {
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
 		'search'    => array('q' => true, 'mimes' => false),
-		'info'      => array('targets' => true)
+		'info'      => array('targets' => true),
+		'dim'       => array('target' => true)
 	);
 	
 	/**
@@ -1007,9 +1008,10 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Search files
 	 *
-	 * @return void
+	 * @param  array  $args  command arguments
+	 * @return array
 	 * @author Dmitry Levashov
 	 **/
 	protected function search($args) {
@@ -1025,9 +1027,10 @@ class elFinder {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return file info (used by client "places" ui)
 	 *
-	 * @return void
+	 * @param  array  $args  command arguments
+	 * @return array
 	 * @author Dmitry Levashov
 	 **/
 	protected function info($args) {
@@ -1041,6 +1044,23 @@ class elFinder {
 		}
 		
 		return array('files' => $files);
+	}
+	
+	/**
+	 * Return image dimmensions
+	 *
+	 * @param  array  $args  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function dim($args) {
+		$target = $args['target'];
+		
+		if (($volume = $this->volume($target)) != false) {
+			$dim = $volume->dimensions($target);
+			return $dim ? array('dim' => $dim) : array();
+		}
+		return array();
 	}
 	
 	/***************************************************************************/

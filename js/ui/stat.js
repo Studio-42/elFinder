@@ -19,7 +19,7 @@ $.fn.elfinderstat = function(fm) {
 				$.each(files, function(i, file) {
 					if (!cwd || file.phash == cwd) {
 						c++;
-						s += file.size||0
+						s += parseInt(file.size)||0;
 					}
 				})
 				size.html(titleitems+': '+c+', '+titlesize+': '+fm.formatSize(s));
@@ -40,7 +40,7 @@ $.fn.elfinderstat = function(fm) {
 
 			$.each(fm.selectedFiles(), function(i, file) {
 				c++;
-				s += file.size||0
+				s += parseInt(file.size)||0;
 			});
 
 			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');

@@ -292,7 +292,7 @@ window.elFinderSupportVer1 = function() {
 			info.tmb = 1;
 			
 		}
-		// this.fm.log(info.name+' '+info.tmb)
+
 		if (file.dirs && file.dirs.length) {
 			info.dirs = true;
 		}

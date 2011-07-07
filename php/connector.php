@@ -204,7 +204,7 @@ $opts = array(
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
 #			'tmbURL'    => '.tmb/',
-			'utf8fix' => true,
+			'utf8fix' => false,
 			'attributes' => array(
 				// array(
 				// 	'pattern' => '/\/__.*/',

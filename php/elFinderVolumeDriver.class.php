@@ -1549,11 +1549,28 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * undocumented function
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $q  search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function search($q, $mimes) {
 		return $this->doSearch($this->root, $q, $mimes);
+	}
+	
+	/**
+	 * Return image dimensions
+	 *
+	 * @param  string  $hash  file hash
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function dimensions($hash) {
+		if (($file = $this->file($hash)) == false) {
+			return false;
+		}
+		
+		return $this->_dimensions($this->decode($hash), $file['mime']);
 	}
 	
 	/**
@@ -1827,9 +1844,6 @@ abstract class elFinderVolumeDriver {
 					$file['dirs'] = 1;
 				}
 			} else {
-				if (($dim = $this->_dimensions($path, $file['mime'])) != false) {
-					$file['dim'] = $dim;
-				}
 				if (($tmb = $this->gettmb($path)) != false) {
 					$file['tmb'] = $tmb;
 				} elseif ($this->canCreateTmb($path, $file['mime'])) {

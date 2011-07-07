@@ -37,7 +37,7 @@ elFinder.prototype.options = {
 	 **/
 	transport : {
 		// init : function(o) { console.log(o) }
-		upload : 'iframe'
+		// upload : 'iframe'
 	},
 
 	dragUploadAllow : 'auto',
@@ -316,5 +316,5 @@ elFinder.prototype.options = {
 	 * @type Array|Boolen
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'shortcut-exec_', 'event-viewchange']
+	debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
 }
