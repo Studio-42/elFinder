@@ -148,6 +148,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (root.is('.'+collapsed)) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();
+						fm.storage('placesState', places.is('.'+expanded)? 1 : 0);
+						fm.log(fm.storage('placesState') )
 					}
 				}),
 			/**
@@ -216,6 +218,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 						file.mime == 'directory' && add(file);
 					});
 					save();
+					if (fm.storage('placesState') > 0) {
+						root.click();
+					}
 				})
 				.always(function() {
 					spinner.remove();
