@@ -491,22 +491,10 @@ $.fn.elfindercwd = function(fm) {
 					})
 					.done(function(data) {
 						if (attachThumbnails(data.images||[])) {
-							loadThumbnails(files)
+							loadThumbnails(files);
 						}
-					})
+					});
 				}
-
-				// while ((tmbs = files.splice(0, tmbNum)).length) {
-				// 	fm.request({
-				// 		data : {cmd : 'tmb', targets : tmbs},
-				// 		preventFail : true
-				// 	})
-				// 	.done(function(data) {
-				// 		if (!attachThumbnails(data.images||[])) {
-				// 			return;
-				// 		}
-				// 	})
-				// }
 			},
 			
 			/**
