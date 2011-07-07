@@ -483,17 +483,30 @@ $.fn.elfindercwd = function(fm) {
 					return;
 				} 
 
-				while ((tmbs = files.splice(0, tmbNum)).length) {
+				tmbs = tmbs = files.splice(0, tmbNum);
+				if (tmbs.length) {
 					fm.request({
 						data : {cmd : 'tmb', targets : tmbs},
 						preventFail : true
 					})
 					.done(function(data) {
-						if (!attachThumbnails(data.images||[])) {
-							return;
+						if (attachThumbnails(data.images||[])) {
+							loadThumbnails(files)
 						}
 					})
 				}
+
+				// while ((tmbs = files.splice(0, tmbNum)).length) {
+				// 	fm.request({
+				// 		data : {cmd : 'tmb', targets : tmbs},
+				// 		preventFail : true
+				// 	})
+				// 	.done(function(data) {
+				// 		if (!attachThumbnails(data.images||[])) {
+				// 			return;
+				// 		}
+				// 	})
+				// }
 			},
 			
 			/**
