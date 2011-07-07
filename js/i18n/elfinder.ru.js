@@ -113,7 +113,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Создание архива',
 			'ntfextract'  : 'Распаковка архива',
 			'ntfsearch'   : 'Поиск файлов',
-			'ntfsmth'     : 'Важное дело desu >_<',
+			'ntfsmth'     : 'Занят важным делом desu >_<',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Незвестно',
