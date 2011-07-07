@@ -186,6 +186,11 @@
 	opacity: 0; filter:Alpha(Opacity=0);
 }
 
+.elfinder-upload-dialog-wrapper .ui-button form input {
+	padding:0 20px;
+	font-size:3em;
+
+}
 
 
 

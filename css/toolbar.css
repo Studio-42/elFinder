@@ -162,9 +162,10 @@
 /* search text field */
 .elfinder-button-search input {
 	width:160px;
-	height:24px;
+	height:22px;
 	padding:0 20px;
-	font-size:12px;
+	font-size:.8em;
+	line-height: 22px;
 	border:0 solid;
 	border:1px solid #aaa;
 	-moz-border-radius: 12px;
@@ -173,7 +174,7 @@
 	outline:0 solid;
 }
 
-.elfinder-rtl .elfinder-button-search input { direction:rtl;}
+.elfinder-rtl .elfinder-button-search input { direction:rtl; }
 
 /* icons */
 .elfinder-button-search .ui-icon {

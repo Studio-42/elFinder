@@ -268,7 +268,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoWM'     : 'Видео Windows Media',
 			'kindVideoFlash'  : 'Видео Flash',
 			'kindVideoMKV'    : 'Видео Matroska',
-			'kindVideoOGG'    : 'Видео Ogg',
+			'kindVideoOGG'    : 'Видео Ogg'
 			
 		}
 	}

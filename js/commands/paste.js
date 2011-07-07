@@ -155,7 +155,7 @@ elFinder.prototype.commands.paste = function() {
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
 							: fm.request({
 								data : {cmd : 'ls', target : dst.hash},
-								notify : {type : 'preparecopy', cnt : 1, hideCnt : true},
+								notify : {type : 'prepare', cnt : 1, hideCnt : true},
 								preventFail : true
 							})
 							.always(function(data) {

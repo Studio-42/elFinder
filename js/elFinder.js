@@ -236,10 +236,10 @@ window.elFinder = function(node, opts) {
 		 */
 		execShortcut = function(e) {
 			var code    = e.keyCode,
-				ctrlKey = e.ctrlKey || e.metaKey;
-			
+				ctrlKey = !!(e.ctrlKey || e.metaKey);
+
 			if (enabled) {
-				
+
 				$.each(shortcuts, function(i, shortcut) {
 					if (shortcut.type    == e.type 
 					&& shortcut.keyCode  == code 
@@ -923,11 +923,11 @@ window.elFinder = function(node, opts) {
 			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
 			opts1 = {
 				data           : {cmd : 'open', init : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
-				preventDefault : true,
+				preventDefault : true
 			},
 			opts2 = {
 				data           : {cmd : 'parents', target : cwd},
-				preventDefault : true,
+				preventDefault : true
 			};
 		
 		
@@ -1465,7 +1465,7 @@ window.elFinder = function(node, opts) {
 		// overlay
 		overlay : $('<div/>').appendTo(node).elfinderoverlay({
 			show : function() { self.disable(); },
-			hide : function() { prevEnabled && self.enable(); },
+			hide : function() { prevEnabled && self.enable(); }
 		}),
 		// current folder container
 		cwd : $('<div/>').appendTo(node).elfindercwd(this),
@@ -1542,7 +1542,7 @@ window.elFinder = function(node, opts) {
 		node.trigger('resize')
 	});
 	
-	self.timeEnd('load'); //107
+	// self.timeEnd('load'); 
 
 }
 
@@ -1734,7 +1734,6 @@ elFinder.prototype = {
 		iframe : function(data) { 
 			var self   = this,
 				input  = data.input,
-				errors = this.errors(),
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -1747,7 +1746,7 @@ elFinder.prototype = {
 	 					self.trigger('upload', data);
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
-				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'"><input type="text" name="cmd" value="upload" /></form>'),
+				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
 				msie = $.browser.msie,
 				// clear timeouts, close notification dialog, remove form/iframe
 				onload = function() {
@@ -1761,7 +1760,7 @@ elFinder.prototype = {
 						iframe.remove();
 					}, 100);
 				},
-				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" />')
+				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
 					.bind('load', function() {
 						iframe.unbind('load')
 							.bind('load', function() {

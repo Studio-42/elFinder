@@ -16,7 +16,7 @@ elFinder.prototype.commands.upload = function() {
 	
 	// Shortcut opens dialog
 	this.shortcuts = [{
-		pattern     : 'ctrl+u',
+		pattern     : 'ctrl+u'
 	}];
 	
 	/**

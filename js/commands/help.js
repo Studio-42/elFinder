@@ -15,7 +15,7 @@ elFinder.prototype.commands.help = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'f1',
-		description : this.title,
+		description : this.title
 	}];
 	
 	this.fm.one('open', function() {

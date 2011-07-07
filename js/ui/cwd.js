@@ -889,7 +889,7 @@ $.fn.elfindercwd = function(fm) {
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
 				description : 'selectfiles',
-				type        : $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+				type        : 'keydown' , //$.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
 				callback    : function(e) { select(e.keyCode, e.shiftKey); }
 			})
 			.shortcut({
