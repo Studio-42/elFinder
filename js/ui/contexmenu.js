@@ -75,7 +75,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (cmd.variants) {
 
 						sub = $('<div class="ui-corner-all '+clSub+'"/>')
-							.appendTo(item.addClass(clGroup).append('<span class="ui-icon ui-icon-triangle-1-e"/>'));
+							.appendTo(item.addClass(clGroup).append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 						$.each(cmd.variants, function(i, variant) {
 							sub.append($('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')

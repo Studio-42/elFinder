@@ -4,23 +4,24 @@
 
 /* container */
 .elfinder .elfinder-navbar {
-	width:220px;
-	padding:3px 10px 3px 1px;
+	width:230px;
+	padding:3px 5px;
 	font-size:.72em;
 	background-image:none;
 	border-top:0 solid;
 	border-bottom:0 solid;
 	overflow:auto;
 	display:none;
+/*	border:1px solid #111;*/
 }
 
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }
-.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
+.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; padding-right:10px; }
+.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; padding-left:10px; }
 
 /* folders tree container */
-.elfinder-tree { display:table; width:100%; margin-bottom:.5em; }
+.elfinder-tree { display:table; width:100%; margin: 0 0 .5em 0; }
 
 /* one folder wrapper */
 .elfinder-navbar-wrapper, .elfinder-place-wrapper { }
@@ -52,6 +53,7 @@
 	margin-top:-8px;
 	background-image:url("../img/arrows-normal.png");
 	background-repeat:no-repeat;
+/*	border:1px solid #111;*/
 }
 
 .ui-state-active .elfinder-navbar-arrow { background-image:url("../img/arrows-active.png"); }
@@ -61,7 +63,7 @@
 
 /* arrow ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 4px; left:0; }
-.elfinder-rtl .elfinder-navbar-expanded  .elfinder-navbar-arrow { right:0;  }
+.elfinder-rtl .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 -10px; right:0;  }
 .elfinder-ltr .elfinder-navbar-expanded  .elfinder-navbar-arrow,
 .elfinder-rtl .elfinder-navbar-expanded  .elfinder-navbar-arrow { background-position:0 -21px; }
 
@@ -123,7 +125,7 @@
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
 /* resizable */
-.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent; }
+.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') bottom center no-repeat; }
 .elfinder-ltr .elfinder-navbar .ui-resizable-handle { right:0; }
 .elfinder-rtl .elfinder-navbar .ui-resizable-handle { left:0;  }
 .elfinder-nav-handle-icon {

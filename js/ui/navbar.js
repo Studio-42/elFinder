@@ -10,24 +10,26 @@ $.fn.elfindernavbar = function(fm) {
 			parent = nav.parent()
 				.resize(function() {
 					nav.height(wz.height() - delta);
-					icon && icon.length && pos();
 				}),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			css    = ltr ? 'left' : 'right',
-			pos    = function() { icon.css(css, parseInt(handle.offset()[css])-icon.outerWidth()+'px'); },
-			handle, icon;
+			handle;
 
 		
 		if ($.fn.resizable) {
-			icon   = $('<span class="elfinder-nav-handle-icon ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
-			handle = nav.resizable({handles : ltr ? 'e' : 'n'})
-				.resize(pos)
+			handle = nav.resizable({handles : ltr ? 'e' : 'w'})
 				.scroll(function() {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
+				
 				.find('.ui-resizable-handle');
+
+			if (!ltr) {
+				nav.resize(function() {
+					nav.css('left', null).css('right', 0);
+				})
+			}
 
 			fm.one('open', function() {
 				setTimeout(function() {

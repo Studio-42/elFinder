@@ -70,8 +70,7 @@
 .elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
 
 /* rtl enviroment */
-.elfinder-rtl .elfinder-buttonset,
-.elfinder-rtl .elfinder-button { float:right; }
+.elfinder-rtl .elfinder-buttonset { float:right; }
 
 /* icon inside button */
 .elfinder-button-icon {
@@ -113,6 +112,8 @@
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
 
+
+
 /* menu */
 .elfinder-button-menu {
 	position:absolute;
@@ -138,8 +139,10 @@
 	top:0;
 	right:0;
 	opacity: 0; filter:Alpha(Opacity=0);
+	cursor: pointer;
 }
 
+.elfinder .elfinder-button form input { background:transparent; cursor: default;}
 
 /* search "button" */
 .elfinder .elfinder-button-search {
@@ -169,6 +172,8 @@
 	border-radius: 12px;
 	outline:0 solid;
 }
+
+.elfinder-rtl .elfinder-button-search input { direction:rtl;}
 
 /* icons */
 .elfinder-button-search .ui-icon {
