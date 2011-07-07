@@ -239,10 +239,10 @@ window.elFinder = function(node, opts) {
 		 */
 		execShortcut = function(e) {
 			var code    = e.keyCode,
-				ctrlKey = e.ctrlKey || e.metaKey;
-			
+				ctrlKey = !!(e.ctrlKey || e.metaKey);
+
 			if (enabled) {
-				
+
 				$.each(shortcuts, function(i, shortcut) {
 					if (shortcut.type    == e.type 
 					&& shortcut.keyCode  == code 
@@ -298,12 +298,6 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.options = $.extend({}, this.options, opts||{});
 	
-	/**
-	 * Css classes 
-	 *
-	 * @type String
-	 **/
-	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 	
 	/**
 	 * Ajax request type
@@ -350,13 +344,20 @@ window.elFinder = function(node, opts) {
 	 * @default "ltr"
 	 **/
 	this.direction = this.i18[this.lang].direction;
-
+	
 	/**
 	 * i18 messages
 	 *
 	 * @type Object
 	 **/
-	this.messages = this.i18[this.lang].messages;
+	this.messages = $.extend({}, this.i18.en && this.i18.en.messages, this.lang != 'en' ? this.i18[this.lang].messages : {});
+	
+	/**
+	 * Css classes 
+	 *
+	 * @type String
+	 **/
+	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 
 	/**
 	 * Method to store/fetch data
@@ -596,6 +597,12 @@ window.elFinder = function(node, opts) {
 		return '';
 	}
 	
+	/**
+	 * Return thumbnail url
+	 * 
+	 * @param  String  file hash
+	 * @return String
+	 */
 	this.tmb = function(hash) {
 		var file = files[hash],
 			url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
@@ -652,9 +659,6 @@ window.elFinder = function(node, opts) {
 		return this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
 	}
 	
-	
-	
-	
 	/**
 	 * Proccess ajax request.
 	 * Fired events :
@@ -666,7 +670,6 @@ window.elFinder = function(node, opts) {
 	this.request = function(options) {
 		var self     = this,
 			o        = this.options,
-			errors   = this.errors(),
 			dfrd     = $.Deferred(),
 			// request data
 			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
@@ -726,21 +729,21 @@ window.elFinder = function(node, opts) {
 				
 				switch (status) {
 					case 'abort':
-						error = xhr.quiet ? '' : [errors.connect, errors.abort];
+						error = xhr.quiet ? '' : ['errConnect', 'errAbort'];
 						break;
 					case 'timeout':	    
-						error = [errors.connect, errors.timeout];
+						error = ['errConnect', 'errTimeout'];
 						break;
 					case 'parsererror': 
-						error = [errors.response, errors.json];
+						error = ['errResponse', 'errDataNotJSON'];
 						break;
 					default:
 						if (xhr.status == 403) {
-							error = [errors.connect, errors.access];
+							error = ['errConnect', 'errAccess'];
 						} else if (xhr.status == 404) {
-							error = [errors.connect, errors.notfound];
+							error = ['errConnect', 'errNotFound'];
 						} else {
-							error = errors.connect;
+							error = 'errConnect';
 						} 
 				}
 				
@@ -759,13 +762,13 @@ window.elFinder = function(node, opts) {
 				}
 				
 				if (!response) {
-					return dfrd.reject([errors.response, errors.empty], xhr);
+					return dfrd.reject(['errResponse', 'errDataEmpty'], xhr);
 				} else if (!$.isPlainObject(response)) {
-					return dfrd.reject([errors.response, errors.json], xhr);
+					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr);
 				} else if (response.error) {
 					return dfrd.reject(response.error, xhr);
 				} else if (!self.validResponse(cmd, response)) {
-					return dfrd.reject(errors.response, xhr);
+					return dfrd.reject('errResponse', xhr);
 				}
 
 				response = self.normalize(response);
@@ -794,7 +797,7 @@ window.elFinder = function(node, opts) {
 		})
 		
 		if (!cmd) {
-			return dfrd.reject(errors.cmdRequired);
+			return dfrd.reject('errCmdReq');
 		}	
 
 		if (syncOnFail) {
@@ -923,11 +926,11 @@ window.elFinder = function(node, opts) {
 			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
 			opts1 = {
 				data           : {cmd : 'open', init : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
-				preventDefault : true,
+				preventDefault : true
 			},
 			opts2 = {
 				data           : {cmd : 'parents', target : cwd},
-				preventDefault : true,
+				preventDefault : true
 			};
 		
 		
@@ -1233,16 +1236,16 @@ window.elFinder = function(node, opts) {
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
-		return alert(this.i18n(this.errmsg('jqui')));
+		return alert(this.i18n('errJqui'));
 	}
 
 	// check node
 	if (!node.length) {
-		return alert(this.i18n(this.errmsg('node')));
+		return alert(this.i18n('errNode'));
 	}
 	// check connector url
 	if (!this.options.url) {
-		return alert(this.i18n(this.errmsg('url')));
+		return alert(this.i18n('errURL'));
 	}
 	
 	$.extend($.ui.keyCode, {
@@ -1284,7 +1287,6 @@ window.elFinder = function(node, opts) {
 	} else {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	}
-	// this.log(this.transport)
 	
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
@@ -1315,11 +1317,13 @@ window.elFinder = function(node, opts) {
 			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 				enabled = true;
 				$('texarea,input,button').blur();
+				node.removeClass('elfinder-disabled')
 			}
 		})
 		.disable(function() {
 			prevEnabled = enabled;
 			enabled = false;
+			node.addClass('elfinder-disabled');
 		})
 		.select(function(e) {
 			selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
@@ -1327,13 +1331,13 @@ window.elFinder = function(node, opts) {
 		.error(function(e) { 
 			var opts  = {
 					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n(self.res('msg', 'error')),
+					title     : self.i18n(self.i18n('error')),
 					resizable : false,
-					close     : function() { $(this).elfinderdialog('destroy') },
+					destroyOnClose : true,
 					buttons   : {}
 			};
 
-			opts.buttons[self.i18n(self.res('msg', 'close'))] = function() { $(this).elfinderdialog('close'); };
+			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
@@ -1409,12 +1413,12 @@ window.elFinder = function(node, opts) {
 		});
 		this.shortcut({
 			pattern     : 'enter',
-			description : this.res('name', 'getfile'),
+			description : this.i18n('cmdgetfile'),
 			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
 		})
 		.shortcut({
 			pattern     : 'ctrl+enter',
-			description : this.res('name', this.OS == 'mac' ? 'rename' : 'open'),
+			description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
 			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
 		});
 		
@@ -1466,7 +1470,7 @@ window.elFinder = function(node, opts) {
 		// overlay
 		overlay : $('<div/>').appendTo(node).elfinderoverlay({
 			show : function() { self.disable(); },
-			hide : function() { prevEnabled && self.enable(); },
+			hide : function() { prevEnabled && self.enable(); }
 		}),
 		// current folder container
 		cwd : $('<div/>').appendTo(node).elfindercwd(this),
@@ -1543,8 +1547,8 @@ window.elFinder = function(node, opts) {
 		node.trigger('resize')
 	});
 	
-	self.timeEnd('load'); //107
-	
+	// self.timeEnd('load'); 
+
 }
 
 /**
@@ -1557,14 +1561,6 @@ elFinder.prototype = {
 	res : function(type, id) {
 		return this.resources[type] && this.resources[type][id];
 	}, 
-	
-	errmsg : function(id) {
-		return this.resources['error'] && this.resources['error'][id] || '';
-	},
-	
-	errors : function() {
-		return this.resources['error'];
-	},
 	
 	/**
 	 * Internationalization object
@@ -1589,75 +1585,84 @@ elFinder.prototype = {
 			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
 			'symlink'                       : 'Alias',
-			'symlink-broken'                : 'Broken alias',
-			'application/x-empty'           : 'Plain text',
-			'application/postscript'        : 'Postscript document',
-			'application/octet-stream'      : 'Application',
-			'application/x-executable'      : 'Application',
-			'application/vnd.ms-office'     : 'Microsoft Office document',
-			'application/vnd.ms-word'       : 'Microsoft Word document',  
-		    'application/vnd.ms-excel'      : 'Microsoft Excel document',
-			'application/vnd.ms-powerpoint' : 'Microsoft Powerpoint presentation',
-			'application/pdf'               : 'Portable Document Format (PDF)',
-			'application/xml'               : 'XML document', 
-			'application/vnd.oasis.opendocument.text' : 'Open Office document',
-			'application/x-shockwave-flash' : 'Flash application',
+			'symlink-broken'                : 'AliasBroken',
+			'application/x-empty'           : 'TextPlain',
+			'application/postscript'        : 'Postscript',
+			'application/vnd.ms-office'     : 'MsOffice',
+			'application/vnd.ms-word'       : 'MsWord',  
+		    'application/vnd.ms-excel'      : 'MsExcel',
+			'application/vnd.ms-powerpoint' : 'MsPP',
+			'application/pdf'               : 'PDF',
+			'application/xml'               : 'XML', 
+			'application/vnd.oasis.opendocument.text' : 'OO',
+			'application/x-shockwave-flash' : 'AppFlash',
 			'application/flash-video'       : 'Flash video',
-			'application/x-bittorrent'      : 'Bittorrent file',
-			'application/javascript'        : 'Javascript source',
-			'application/rtf'               : 'Rich Text Format (RTF)',
-			'application/x-gzip'            : 'GZIP archive', 
-		    'application/x-bzip2'           : 'BZIP archive', 
-		    'application/zip'               : 'ZIP archive',  
-		    'application/x-rar'             : 'RAR archive',
-			'application/x-tar'             : 'TAR archive', 
-			'application/x-7z-compressed'   : '7z archive',
-			'application/x-jar'             : 'Java JAR file',
-			'text/plain'                    : 'Plain text',
-		    'text/x-php'                    : 'PHP source',
-			'text/html'                     : 'HTML document', 
-			'text/javascript'               : 'Javascript source',
-			'text/css'                      : 'Cascading style sheet',  
-		    'text/rtf'                      : 'Rich Text Format',
-			'text/rtfd'                     : 'Rich Text Format',
-			'text/x-c'                      : 'C source', 
-			'text/x-csrc'                   : 'C source',
-			'text/x-chdr'                   : 'C header source',
-			'text/x-c++'                    : 'C++ source', 
-			'text/x-c++src'                 : 'C++ source',
-			'text/x-c++hdr'                 : 'C++ header source',
-			'text/x-shellscript'            : 'Unix shell script',
-		    'text/x-python'                 : 'Python source',
-			'text/x-java'                   : 'Java source',
-			'text/x-java-source'            : 'Java source',
-			'text/x-ruby'                   : 'Ruby source',
-			'text/x-perl'                   : 'Perl script',
-			'text/x-sql'                    : 'SQL source',
-		    'text/xml'                      : 'XML document', 
-			'text/x-comma-separated-values' : 'Comma separated values',
-			'image/x-ms-bmp'                : 'BMP image',
-		    'image/jpeg'                    : 'JPEG image',   
-		    'image/gif'                     : 'GIF image',    
-		    'image/png'                     : 'PNG image',
-		    'image/tiff'                    : 'TIFF image',   
-			'image/x-targa'                 : 'TGA image',
-		    'image/vnd.adobe.photoshop'     : 'Adobe Photoshop image',
-			'image/xbm'                     : 'X bitmap image',
-			'audio/mpeg'                    : 'MPEG audio',  
-			'audio/midi'                    : 'MIDI audio',
-			'audio/ogg'                     : 'Ogg Vorbis audio',
-			'audio/mp4'                     : 'MPEG-4 audio',
-			'audio/x-m4a'                   : 'MPEG-4 audio',
-			'audio/wav'                     : 'WAV audio',
-			'video/x-dv'                    : 'DV movie',
-			'video/mp4'                     : 'MPEG-4 movie',
-			'video/mpeg'                    : 'MPEG movie',  
-			'video/x-msvideo'               : 'AVI movie',
-			'video/quicktime'               : 'Quick Time movie',
-			'video/x-ms-wmv'                : 'Windows Media Movie',   
-			'video/x-flv'                   : 'Flash movie',
-			'video/x-matroska'              : 'Matroska movie',
-			'video/ogg'                     : 'Ogg movie'
+			'application/x-bittorrent'      : 'Torrent',
+			'application/javascript'        : 'JS',
+			'application/rtf'               : 'RTF',
+			'application/rtfd'              : 'RTF',
+			'application/x-font-ttf'        : 'TTF',
+			'application/x-font-otf'        : 'OTF',
+			'application/x-rpm'             : 'RPM',
+			'application/x-web-config'      : 'TextPlain',
+			'application/xhtml+xml'         : 'HTML',
+			'application/docbook+xml'       : 'DOCBOOK',
+			'application/x-awk'             : 'AWK',
+			'application/x-gzip'            : 'GZIP', 
+		    'application/x-bzip2'           : 'BZIP', 
+		    'application/zip'               : 'ZIP',  
+		    'application/x-rar'             : 'RAR',
+			'application/x-tar'             : 'TAR', 
+			'application/x-7z-compressed'   : '7z',
+			'application/x-jar'             : 'JAR',
+			'text/plain'                    : 'TextPlain',
+		    'text/x-php'                    : 'PHP',
+			'text/html'                     : 'HTML', 
+			'text/javascript'               : 'JS',
+			'text/css'                      : 'CSS',  
+		    'text/rtf'                      : 'RTF',
+			'text/rtfd'                     : 'RTF',
+			'text/x-c'                      : 'C', 
+			'text/x-csrc'                   : 'C',
+			'text/x-chdr'                   : 'CHeader',
+			'text/x-c++'                    : 'CPP', 
+			'text/x-c++src'                 : 'CPP',
+			'text/x-c++hdr'                 : 'CPPHeader',
+			'text/x-shellscript'            : 'Shell',
+			'application/x-csh'             : 'Shell',
+		    'text/x-python'                 : 'Python',
+			'text/x-java'                   : 'Java',
+			'text/x-java-source'            : 'Java',
+			'text/x-ruby'                   : 'Ruby',
+			'text/x-perl'                   : 'Perl',
+			'text/x-sql'                    : 'SQL',
+		    'text/xml'                      : 'XML', 
+			'text/x-comma-separated-values' : 'CSV',
+			'image/x-ms-bmp'                : 'BMP',
+		    'image/jpeg'                    : 'JPEG',   
+		    'image/gif'                     : 'GIF',    
+		    'image/png'                     : 'PNG',
+		    'image/tiff'                    : 'TIFF',   
+			'image/x-targa'                 : 'TGA',
+		    'image/vnd.adobe.photoshop'     : 'PSD',
+			'image/xbm'                     : 'XBITMAP',
+			'image/pxm'                     : 'PXM',
+			'audio/mpeg'                    : 'AudioMPEG',  
+			'audio/midi'                    : 'AudioMIDI',
+			'audio/ogg'                     : 'AudioOGG',
+			'audio/mp4'                     : 'AudioMPEG4',
+			'audio/x-m4a'                   : 'AudioMPEG4',
+			'audio/wav'                     : 'AudioWAV',
+			'audio/x-mp3-playlist'          : 'AudioPlaylist',
+			'video/x-dv'                    : 'VideoDV',
+			'video/mp4'                     : 'VideoMPEG4',
+			'video/mpeg'                    : 'VideoMPEG',  
+			'video/x-msvideo'               : 'VideoAVI',
+			'video/quicktime'               : 'VideoMOV',
+			'video/x-ms-wmv'                : 'VideoWM',   
+			'video/x-flv'                   : 'VideoFlash',
+			'video/x-matroska'              : 'VideoMKV',
+			'video/ogg'                     : 'VideoOGG'
 		},
 	
 	/**
@@ -1706,28 +1711,24 @@ elFinder.prototype = {
 	commands : {},
 	
 	parseUploadData : function(text) {
-		var errors   = this.errors(),
-			data;
+		var data;
 		
 		if (!$.trim(text)) {
-			return {error : [errors.response, errors.empty]};
+			return {error : ['errResponse', 'errDataEmpty']};
 		}
 		
 		try {
 			data = $.parseJSON(text);
 		} catch (e) {
-			return {error : [errors.response, errors.json]}
+			return {error : ['errResponse', 'errDataNotJSON']}
 		}
 		
 		if (!this.validResponse('upload', data)) {
-			return {error : [errors.response]};
+			return {error : ['errResponse']};
 		}
 		data = this.normalize(data);
 		data.removed = $.map(data.added||[], function(f) { return f.hash; })
-		
-		if (this.newAPI) {
-			return data;
-		}
+		return data;
 		
 	},
 	
@@ -1738,7 +1739,6 @@ elFinder.prototype = {
 		iframe : function(data) { 
 			var self   = this,
 				input  = data.input,
-				errors = this.errors(),
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -1751,7 +1751,7 @@ elFinder.prototype = {
 	 					self.trigger('upload', data);
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
-				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'"><input type="text" name="cmd" value="upload" /></form>'),
+				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
 				msie = $.browser.msie,
 				// clear timeouts, close notification dialog, remove form/iframe
 				onload = function() {
@@ -1765,7 +1765,7 @@ elFinder.prototype = {
 						iframe.remove();
 					}, 100);
 				},
-				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" />')
+				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
 					.bind('load', function() {
 						iframe.unbind('load')
 							.bind('load', function() {
@@ -1823,7 +1823,6 @@ elFinder.prototype = {
 		// upload transport using XMLHttpRequest
 		xhr : function(data) { 
 			var self   = this,
-				errors = this.errors(),
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -1858,27 +1857,27 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
-				dfrd.reject(errors.connect);
+				dfrd.reject('errConnect');
 			}, false);
 			
 			xhr.addEventListener('abort', function() {
-				dfrd.reject([errors.connect, errors.abort]);
+				dfrd.reject(['errConnect', 'errAbort']);
 			}, false);
 			
 			xhr.addEventListener('load', function() {
 				var status = xhr.status, data;
 				
 				if (status > 500) {
-					return dfrd.reject(errors.response);
+					return dfrd.reject('errResponse');
 				}
 				if (status != 200) {
-					return dfrd.reject(errors.connect);
+					return dfrd.reject('errConnect');
 				}
 				if (xhr.readyState != 4) {
-					return dfrd.reject([errors.connect, errors.timeout]); // am i right?
+					return dfrd.reject(['errConnect', 'errTimeout']); // am i right?
 				}
 				if (!xhr.responseText) {
-					return dfrd.reject([errors.response, errors.empty]);
+					return dfrd.reject(['errResponse', 'errDataEmpty']);
 				}
 
 				data = self.parseUploadData(xhr.responseText);
@@ -1928,7 +1927,7 @@ elFinder.prototype = {
 				if (xhr.readyState == 4 && xhr.status == 0) {
 					// ff bug while send zero sized file
 					// for safari - send directory
-					dfrd.reject([errors.connect, errors.abort]);
+					dfrd.reject(['errConnect', 'errAbort']);
 				}
 			}
 			
@@ -2152,7 +2151,7 @@ elFinder.prototype = {
 	 */
 	notify : function(opts) {
 		var type     = opts.type,
-			msg      = this.i18n(this.res('notify', opts.type) || 'Doing something.'),
+			msg      = this.messages['ntf'+type] ? this.i18n('ntf'+type) : this.i18n('ntfsmth'),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
 			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div></div>',
@@ -2234,35 +2233,32 @@ elFinder.prototype = {
 				cssClass  : 'elfinder-dialog-confirm',
 				modal     : true,
 				resizable : false,
-				title     : this.i18n(opts.title || this.res('msg', 'confirmreq')),
+				title     : this.i18n(opts.title || 'confirmReq'),
 				buttons   : {},
 				close     : function() { 
 					!complete && opts.cancel.callback();
 					$(this).elfinderdialog('destroy');
 				}
 			},
-			apply = this.i18n(this.res('msg', 'applyall')),
+			apply = this.i18n('apllyAll'),
 			label, checkbox;
 
 		
 		if (opts.reject) {
-			label = opts.reject.label;
-			options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+			options.buttons[this.i18n(opts.reject.label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
 		}
 		
-		label = opts.accept.label;
-		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+		options.buttons[this.i18n(opts.accept.label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 			complete = true;
 			$(this).elfinderdialog('close')
 		};
 		
-		label = opts.cancel.label;
-		options.buttons[this.i18n(this.res('msg', label) || label)] = function() {
+		options.buttons[this.i18n(opts.cancel.label)] = function() {
 			$(this).elfinderdialog('close')
 		};
 		
@@ -2286,34 +2282,6 @@ elFinder.prototype = {
 		}
 		
 		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
-	},
-	
-	/**
-	 * Valid file name
-	 * 
-	 * @param  String  name to test
-	 * @return Boolean
-	 */
-	validName : function(name) {
-		var validator = this.options.validName;
-		
-		if (!name 
-		|| typeof(name) != 'string' 
-		|| /^\.\.?$/.test(name)
-		|| name.indexOf(this.cwd().separator) !== -1
-		) {
-			return false;
-		}
-		
-		if (validator) {
-			if (validator instanceof RegExp) {
-				return validator.test(name);
-			} 
-			if (typeof(validator) == 'function') {
-				return validator(name);
-			}
-		}
-		return true;
 	},
 	
 	/**
@@ -2429,6 +2397,30 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2kind : function(f) {
+		var mime = typeof(f) == 'object' ? f.mime : f, kind;
+		
+		if (f.alias) {
+			kind = 'Alias';
+		} else if (this.kinds[mime]) {
+			kind = this.kinds[mime];
+		} else {
+			if (mime.indexOf('text') === 0) {
+				kind = 'Text';
+			} else if (mime.indexOf('image') === 0) {
+				kind = 'Image';
+			} else if (mime.indexOf('audio') === 0) {
+				kind = 'Audio';
+			} else if (mime.indexOf('video') === 0) {
+				kind = 'Video';
+			} else if (mime.indexOf('application') === 0) {
+				kind = 'App';
+			} else {
+				kind = mime;
+			}
+		}
+		
+		return this.messages['kind'+kind] ? this.i18n('kind'+kind) : mime;
+		
 		var mime = typeof(f) == 'object' ? f.mime : f,
 			kind = this.kinds[mime]||'unknown';
 
@@ -2436,13 +2428,13 @@ elFinder.prototype = {
 			kind = 'Alias';
 		} else if (kind == 'unknown') {
 			if (mime.indexOf('text') === 0) {
-				kind = 'Text document';
+				kind = 'Text';
 			} else if (mime.indexOf('image') === 0) {
 				kind = 'Image';
 			} else if (mime.indexOf('audio') === 0) {
-				kind = 'Audio media';
+				kind = 'Audio';
 			} else if (mime.indexOf('video') === 0) {
-				kind = 'Video media';
+				kind = 'Video';
 			} else if (mime.indexOf('application') === 0) {
 				kind = 'Application';
 			}
@@ -2461,7 +2453,7 @@ elFinder.prototype = {
 		var self = this;
 
 		return d == 'unknown' 
-			? self.i18n(this.res('msg', d)) 
+			? self.i18n('dateUnknown') 
 			: (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
 	},
 	
@@ -2496,7 +2488,7 @@ elFinder.prototype = {
 		f.read && p.push(this.i18n('read'));
 		f.write && p.push(this.i18n('write'));	
 
-		return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('no access');
+		return p.length ? p.join(' '+this.i18n('and')+' ') : this.i18n('noaccess');
 	},
 	
 	/**
@@ -2690,6 +2682,8 @@ elFinder.prototype.options = {
 		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'
 	],
 	
+	// commands : ['edit'],
+	
 	/**
 	 * Commands options.
 	 *
@@ -2707,7 +2701,7 @@ elFinder.prototype.options = {
 		},
 		// "upload" command options.
 		upload : {
-			ui : 'uploadbutton',
+			ui : 'uploadbutton'
 		},
 		// "quicklook" command options.
 		quicklook : {
@@ -2918,7 +2912,7 @@ elFinder.prototype.options = {
 	 * @type Array|Boolen
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'backend-debug', 'event-viewchange']
+	debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
 }
 
 /* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.history.js */
@@ -3133,7 +3127,7 @@ elFinder.prototype.command = function(fm) {
 			fm   = this.fm, i, s;
 
 		this.name      = name;
-		this.title     = fm.i18n(fm.res('name', name) || this.name);
+		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name) : name, //  fm.i18n(fm.res('name', name) || this.name);
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 
@@ -3329,131 +3323,11 @@ elFinder.prototype.resources = {
 		searchbtn   : 'elfinder-button-search'
 	},
 	tpl : {
-		perms   : '<span class="elfinder-perms"/>',
-		symlink : '<span class="elfinder-symlink"/>',
-		navicon : '<span class="elfinder-nav-icon"/>',
-		navspinner  : '<span class="elfinder-navbar-spinner"/>',
-		navdir  : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
-		
-	},
-	error : {
-		unknown    : 'Unknown error.',
-		jqui       : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
-		node       : 'elFinder required DOM Element to be created.',
-		url        : 'Invalid elFinder configuration! You have to set URL option.',
-		access     : 'Access denied.',
-		connect    : 'Unable to connect to backend.',
-		abort      : 'Connection aborted.',
-		timeout    : 'Connection timeout.',
-		response   : 'Invalid backend response.',
-		json       : 'Data is not JSON.',
-		empty      : 'Data is empty.',
-		nocmd      : 'Backend request required command name.',
-		open       : 'Unable to open "$1".',
-		notdir     : 'Object is not a folder.', 
-		notfile    : 'Object is not a file.', 
-		read       : 'Unable to read "$1".',
-		write      : 'Unable to write into "$1".',
-		denied     : 'Permission denied.',
-		locked     : '"$1" is locked and can not be renamed, moved or removed.',
-		exists     : 'File named "$1" already exists in this location.',
-		name       : 'Invalid file name.',
-		notfound   : 'File not found.',
-		popup      : 'Browser prevented opening popup window. To open file enable it in browser options.',
-		copy       : 'Unable to copy "$1".',
-		move       : 'Unable to move "$1".',
-		copyinself : 'Unable to copy "$1" into itself.',
-		rm         : 'Unable to remove "$1".',
-		extract    : 'Unable to extract files from "$1".',
-		archive    : 'Unable to create archive.',
-		notarchive : 'File is not archive or has unsupported archive type.',
-		cmdsupport : 'Backend does not support this command.'
-	},
-	
-	name : {
-		archive   : 'Create archive',
-		back      : 'Back',
-		copy      : 'Copy',
-		cut       : 'Cut',
-		download  : 'Download',
-		duplicate : 'Duplicate',
-		edit      : 'Edit file',
-		extract   : 'Extract files from archive',
-		forward   : 'Forward',
-		getfile   : 'Select files',
-		help      : 'About this software',
-		info      : 'Get info',
-		mkdir     : 'New folder',
-		mkfile    : 'New text file',
-		open      : 'Open',
-		paste     : 'Paste',
-		quicklook : 'Preview',
-		reload    : 'Reload',
-		rename    : 'Rename',
-		rm        : 'Delete',
-		search    : 'Find files',
-		up        : 'Go to parent directory',
-		upload    : 'Upload files',
-		view      : 'View'
-		
-	},
-	
-	/**
-	 * Notifications messages by types
-	 *
-	 * @type  Object
-	 */
-	notify : {
-		open        : 'Open folder',
-		openfile    : 'Open file',
-		reload      : 'Reload folder content',
-		mkdir       : 'Creating directory',
-		mkfile      : 'Creating files',
-		rm          : 'Delete files',
-		copy        : 'Copy files',
-		move        : 'Move files',
-		preparecopy : 'Prepare to copy files',
-		rename      : 'Rename files',
-		upload      : 'Uploading files',
-		download    : 'Downloading files',
-		save        : 'Save files',
-		archive     : 'Creating archive',
-		extract     : 'Extracting files from archive',
-		search      : 'Searching files'
-	},
-	
-	confirm : {
-		rm   : 'Are you shure you want to remove files?<br/>This cannot be undone!',
-		repl : 'Replace old file with new one?'
-	},
-	
-	msg : {
-		confirmreq : 'Confirmation required',
-		applyall   : 'Apply to all',
-		cancel     : 'Cancel',
-		move       : 'Move file',
-		yes        : 'Yes',
-		no         : 'No',
-		error      : 'Error',
-		close      : 'Close',
-		searchres  : 'Search results',
-		size       : 'Size',
-		items      : 'Items',
-		selitems   : 'selected items',
-		unknown    : 'unknown',
-		places     : 'Places',
-		calc       : 'Calculating',
-		aliasfor   : 'Alias for',
-		path       : 'Path',
-		dim        : 'Dimensions',
-		modify     : 'Modified',
-		perms      : 'Permissions',
-		locked     : 'Locked',
-		kind       : 'Kind',
-		files      : 'Files',
-		folders    : 'Folders',
-		link       : 'Link',
-		name       : 'Name',
+		perms      : '<span class="elfinder-perms"/>',
+		symlink    : '<span class="elfinder-symlink"/>',
+		navicon    : '<span class="elfinder-nav-icon"/>',
+		navspinner : '<span class="elfinder-navbar-spinner"/>',
+		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
 		
 	},
 	
@@ -3463,7 +3337,6 @@ elFinder.prototype.resources = {
 			'application/javascript', 
 			'application/xhtml+xml', 
 			'audio/x-mp3-playlist', 
-			'application/x-bittorrent', 
 			'application/x-web-config',
 			'application/docbook+xml',
 			'application/x-php',
@@ -3477,11 +3350,10 @@ elFinder.prototype.resources = {
 	
 	mixin : {
 		make : function() {
-			var fm     = this.fm,
-				cmd    = this.name,
-				cwd    = fm.getUI('cwd'),
-				errors = fm.errors(),
-				dfrd   = $.Deferred()
+			var fm   = this.fm,
+				cmd  = this.name,
+				cwd  = fm.getUI('cwd'),
+				dfrd = $.Deferred()
 					.fail(function(error) {
 						error && fm.error(error);
 					})
@@ -3522,10 +3394,10 @@ elFinder.prototype.resources = {
 						if (parent.length) {
 
 							if (!name) {
-								return dfrd.reject(errors.name);
+								return dfrd.reject('errInvName');
 							}
 							if (fm.fileByName(name, phash)) {
-								return dfrd.reject([errors.exists, name]);
+								return dfrd.reject(['errExists', name]);
 							}
 
 							parent.html(fm.escape(name));
@@ -3719,7 +3591,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (cmd.variants) {
 
 						sub = $('<div class="ui-corner-all '+clSub+'"/>')
-							.appendTo(item.addClass(clGroup).append('<span class="ui-icon ui-icon-triangle-1-e"/>'));
+							.appendTo(item.addClass(clGroup).append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 						$.each(cmd.variants, function(i, variant) {
 							sub.append($('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')
@@ -4313,16 +4185,17 @@ $.fn.elfindercwd = function(fm) {
 					return;
 				} 
 
-				while ((tmbs = files.splice(0, tmbNum)).length) {
+				tmbs = tmbs = files.splice(0, tmbNum);
+				if (tmbs.length) {
 					fm.request({
 						data : {cmd : 'tmb', targets : tmbs},
 						preventFail : true
 					})
 					.done(function(data) {
-						if (!attachThumbnails(data.images||[])) {
-							return;
+						if (attachThumbnails(data.images||[])) {
+							loadThumbnails(files);
 						}
-					})
+					});
 				}
 			},
 			
@@ -4416,11 +4289,11 @@ $.fn.elfindercwd = function(fm) {
 			},
 			
 			msg = {
-				name : fm.i18n(fm.res('msg', 'name')),
-				perm : fm.i18n(fm.res('msg', 'perms')),
-				mod  : fm.i18n(fm.res('msg', 'modify')),
-				size : fm.i18n(fm.res('msg', 'size')),
-				kind : fm.i18n(fm.res('msg', 'kind'))
+				name : fm.i18n('name'),
+				perm : fm.i18n('perms'),
+				mod  : fm.i18n('modify'),
+				size : fm.i18n('size'),
+				kind : fm.i18n('kind')
 			},
 			/**
 			 * Update directory content
@@ -4640,7 +4513,7 @@ $.fn.elfindercwd = function(fm) {
 					});
 					trigger();
 				}
-				
+				// delta = cwd.outerHeight(true) - cwd.height()
 				// fm.storage('view', (list = !list) ? 'list' : 'icons');
 				
 			})
@@ -4710,7 +4583,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     :'ctrl+a', 
-				description : 'Select all files',
+				description : 'selectall',
 				callback    : function() { 
 					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
 					trigger();
@@ -4718,13 +4591,13 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
-				description : 'Select file(s)',
-				type        : $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+				description : 'selectfiles',
+				type        : 'keydown' , //$.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
 				callback    : function(e) { select(e.keyCode, e.shiftKey); }
 			})
 			.shortcut({
 				pattern     : 'home',
-				description : 'Select first file',
+				description : 'selectffile',
 				callback    : function(e) { 
 					unselectAll();
 					cwd.find('[id]:first').trigger(evtSelect) ;
@@ -4733,7 +4606,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			.shortcut({
 				pattern     : 'end',
-				description : 'Select last file',
+				description : 'selectlfile',
 				callback    : function(e) { 
 					unselectAll();
 					cwd.find('[id]:last').trigger(evtSelect) ;
@@ -4965,25 +4838,27 @@ $.fn.elfindernavbar = function(fm) {
 			parent = nav.parent()
 				.resize(function() {
 					nav.height(wz.height() - delta);
-					icon && icon.length && pos();
 				}),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			css    = ltr ? 'left' : 'right',
-			pos    = function() { icon.css(css, parseInt(handle.offset()[css])-icon.outerWidth()+'px'); },
-			handle, icon;
+			handle;
 
 		
 		if ($.fn.resizable) {
-			icon   = $('<span class="elfinder-nav-handle-icon ui-icon ui-icon-grip-solid-vertical"/>').prependTo(wz).zIndex(nav.zIndex()+10);
-			handle = nav.resizable({handles : ltr ? 'e' : 'n'})
-				.resize(pos)
+			handle = nav.resizable({handles : ltr ? 'e' : 'w'})
 				.scroll(function() {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
-				.find('.ui-resizable-handle');
 				
+				.find('.ui-resizable-handle');
+
+			if (!ltr) {
+				nav.resize(function() {
+					nav.css('left', null).css('right', 0);
+				})
+			}
+
 			fm.one('open', function() {
 				setTimeout(function() {
 					parent.trigger('resize');
@@ -5071,7 +4946,7 @@ $.fn.elfinderpanel = function(fm) {
  **/
 $.fn.elfinderpath = function(fm) {
 	return this.each(function() {
-		var path = $(this).addClass('elfinder-path').html('&nbsp;path')
+		var path = $(this).addClass('elfinder-path').html('&nbsp;')
 				.delegate('a', 'click', function(e) {
 					var hash = $(this).attr('href').substr(1);
 
@@ -5090,7 +4965,7 @@ $.fn.elfinderpath = function(fm) {
 				path.html(dirs.join(fm.option('separator')));
 			})
 			.bind('search', function() {
-				path.html(fm.i18n(fm.res('msg', 'searchres')));
+				path.html(fm.i18n('searcresult'));
 			});
 	});
 }
@@ -5101,7 +4976,7 @@ $.fn.elfinderpath = function(fm) {
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfinderplaces = function(fm) {
+$.fn.elfinderplaces = function(fm, opts) {
 	return this.each(function() {
 		var dirs      = [],
 			c         = 'class',
@@ -5230,7 +5105,7 @@ $.fn.elfinderplaces = function(fm) {
 			 **/
 			wrapper = create({
 					hash  : 'root-'+fm.namespace, 
-					name  : fm.i18n(fm.res('msg', 'places')),
+					name  : fm.i18n(opts.name, 'places'),
 					read  : true,
 					write : true
 				}),
@@ -5245,6 +5120,7 @@ $.fn.elfinderplaces = function(fm) {
 					if (root.is('.'+collapsed)) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();
+						fm.storage('placesState', places.is('.'+expanded)? 1 : 0);
 					}
 				}),
 			/**
@@ -5289,7 +5165,7 @@ $.fn.elfinderplaces = function(fm) {
 					}
 				});
 	
-		
+
 		// on fm load - show places and load files from backend
 		fm.one('load', function() {
 			if (fm.oldAPI) {
@@ -5313,6 +5189,9 @@ $.fn.elfinderplaces = function(fm) {
 						file.mime == 'directory' && add(file);
 					});
 					save();
+					if (fm.storage('placesState') > 0) {
+						root.click();
+					}
 				})
 				.always(function() {
 					spinner.remove();
@@ -5452,9 +5331,9 @@ $.fn.elfinderstat = function(fm) {
 	return this.each(function() {
 		var size       = $(this).addClass('elfinder-stat-size'),
 			sel        = $('<div class="elfinder-stat-selected"/>'),
-			titlesize  = fm.i18n(fm.res('msg', 'size')),
-			titleitems = fm.i18n(fm.res('msg', 'items')),
-			titlesel   = fm.i18n(fm.res('msg', 'selitems')),
+			titlesize  = fm.i18n('size').toLowerCase(),
+			titleitems = fm.i18n('items').toLowerCase(),
+			titlesel   = fm.i18n('selected'),
 			setstat    = function(files, cwd) {
 				var c = 0, 
 					s = 0;
@@ -5462,7 +5341,7 @@ $.fn.elfinderstat = function(fm) {
 				$.each(files, function(i, file) {
 					if (!cwd || file.phash == cwd) {
 						c++;
-						s += file.size||0
+						s += parseInt(file.size)||0;
 					}
 				})
 				size.html(titleitems+': '+c+', '+titlesize+': '+fm.formatSize(s));
@@ -5483,7 +5362,7 @@ $.fn.elfinderstat = function(fm) {
 
 			$.each(fm.selectedFiles(), function(i, file) {
 				c++;
-				s += file.size||0
+				s += parseInt(file.size)||0;
 			});
 
 			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
@@ -5505,28 +5384,22 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
 			panels   = opts || [],
 			l        = panels.length,
-			i, cmd, panel, button
-		;
+			i, cmd, panel, button;
 		
 		self.prev().length && self.parent().prepend(this);
 
 		while (l--) {
 			panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
 			i = panels[l].length;
-			
 			while (i--) {
 				if ((cmd = commands[panels[l][i]])) {
 					button = 'elfinder'+cmd.options.ui;
-					if ($.fn[button]) {
-						panel.prepend($('<div/>')[button](cmd));
-						if (i > 0) {
-							panel.prepend('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
-						}
-					}
+					$.fn[button] && panel.prepend($('<div/>')[button](cmd));
 				}
 			}
 			
 			panel.children().length && self.prepend(panel);
+			panel.children(':not(:last),:not(:first):not(:last)').after('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
 		}
 		
 		self.children().length && self.show();
@@ -6077,7 +5950,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 			var icons = cmd.value == 'icons';
 
 			icon.toggleClass('elfinder-button-icon-view-list', icons);
-			button.attr('title', cmd.fm.i18n(icons ? 'View as list' : 'View as icons'));
+			button.attr('title', cmd.fm.i18n(icons ? 'viewlist' : 'viewicons'));
 		});
 	});
 }
@@ -6154,7 +6027,7 @@ elFinder.prototype.commands.archive = function() {
 			cnt   = files.length,
 			mime  = type || mimes[0],
 			cwd   = fm.cwd(),
-			error = [fm.errmsg('archive'), fm.errmsg('denied')],
+			error = ['errArchive', 'errPerm'],
 			dfrd  = $.Deferred().fail(function(error) {
 				error && fm.error(error);
 			}), 
@@ -6224,7 +6097,7 @@ elFinder.prototype.commands.copy = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-		
+
 		return cnt && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
@@ -6237,7 +6110,7 @@ elFinder.prototype.commands.copy = function() {
 
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash)) {
-				return !dfrd.reject([fm.errmsg('copy'), file.name, fm.errmsg('denied')]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
 		
@@ -6269,7 +6142,6 @@ elFinder.prototype.commands.cut = function() {
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
@@ -6277,10 +6149,10 @@ elFinder.prototype.commands.cut = function() {
 
 		$.each(this.files(hashes), function(i, file) {
 			if (!(file.read && file.phash) ) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 			if (file.locked) {
-				return !dfrd.reject([errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 		});
 		
@@ -6325,7 +6197,7 @@ elFinder.prototype.commands.download = function() {
 			iframe, i, url;
 			
 		if (fm.oldAPI) {
-			fm.error(fm.res('error', 'cmdsupport'));
+			fm.error('errCmdNoSupport');
 			return dfrd.reject();
 		}
 			
@@ -6361,13 +6233,12 @@ elFinder.prototype.commands.duplicate = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-		
+
 		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			files  = this.files(hashes),
 			cnt    = files.length,
 			dfrd   = $.Deferred()
@@ -6382,10 +6253,10 @@ elFinder.prototype.commands.duplicate = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 			if (!fm.file(file.phash).write) {
-				return !dfrd.reject([errors.copy, file.name, errors.denied]);
+				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
 		
@@ -6410,9 +6281,9 @@ elFinder.prototype.commands.duplicate = function() {
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.edit = function() {
-	var self = this,
-		fm   = this.fm,
-		mimes = fm.res('mimes', 'text'),
+	var self  = this,
+		fm    = this.fm,
+		mimes = fm.res('mimes', 'text') || [],
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -6432,13 +6303,12 @@ elFinder.prototype.commands.edit = function() {
 		 * @return jQuery.Deferred
 		 **/
 		edit = function(file) {
-			var hash      = file.hash,
-				errors    = fm.errors(),
-				opts      = fm.options,
-				dfrd      = $.Deferred(), 
-				data      = {cmd : 'file', target : hash},
-				url       = fm.url(hash) || fm.options.url,
-				dialog    = function(text) {
+			var hash   = file.hash,
+				opts   = fm.options,
+				dfrd   = $.Deferred(), 
+				data   = {cmd : 'file', target : hash},
+				url    = fm.url(hash) || fm.options.url,
+				dialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
 							.keydown(function(e) {
 								var code = e.keyCode,
@@ -6520,7 +6390,7 @@ elFinder.prototype.commands.edit = function() {
 			
 			
 			if (!file.read || !file.write) {
-				error = [errors.open, file.name, errors.denied]
+				error = ['errOpen', file.name, 'errPerm']
 				fm.error(error)
 				return dfrd.reject(error);
 			}
@@ -6603,7 +6473,6 @@ elFinder.prototype.commands.extract = function() {
 	this.exec = function(hashes) {
 		var files    = this.files(hashes),
 			dfrd     = $.Deferred(),
-			errors   = fm.errors(),
 			cnt      = files.length, 
 			complete = cnt, 
 			i, file, error;
@@ -6615,13 +6484,13 @@ elFinder.prototype.commands.extract = function() {
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (!(file.read && fm.file(file.phash).write)) {
-				error = [errors.extract, file.name, errors.denied]
+				error = ['errExtract', file.name, 'errPerm']
 				fm.error(error);
 				return dfrd.reject(error);
 			}
 			
 			if ($.inArray(file.mime, mimes) === -1) {
-				error = [errors.extract, file.name, errors.notarchive];
+				error = ['errExtract', file.name, 'errNoArchive'];
 				fm.error(error);
 				return dfrd.reject(error);
 			}
@@ -6765,7 +6634,7 @@ elFinder.prototype.commands.help = function() {
 	
 	this.shortcuts = [{
 		pattern     : 'f1',
-		description : this.title,
+		description : this.title
 	}];
 	
 	this.fm.one('open', function() {
@@ -6788,7 +6657,7 @@ elFinder.prototype.commands.help = function() {
 				shortcuts = fm.shortcuts()
 				;
 
-			$.each({main : 'About', shortcuts : 'Shortcuts', help : 'Help'}, function(id, title) {
+			$.each({main : 'about', shortcuts : 'shortcuts', help : 'help'}, function(id, title) {
 				html.push(tab[r](/\{id\}/, id)[r](/\{title\}/, fm.i18n(title)));
 			});
 
@@ -6797,37 +6666,35 @@ elFinder.prototype.commands.help = function() {
 			// main tab
 			html.push('<div id="main" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
 			html.push('<h3>elFinder</h3>');
-			html.push('<div class="'+prim+'">'+fm.i18n('Web file manager')+'</div>');
-			html.push('<div class="'+sec+'">'+fm.i18n('Version')+': '+fm.version+', '+fm.i18n('protocol version')+': '+fm.api+'</div>');
+			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
+			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocol')+': '+fm.api+'</div>');
 			html.push('<div class="'+sec+'">jQuery/jQuery UI: '+$().jquery+'/'+$.ui.version+'</div>');
 			
 			html.push(sep);
 			
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Project home')));
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('Documentation')));
-			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('Fork us on Github')));
-			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('Follow us in twitter')));
-			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('Meet us on facebook')));
+			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('homepage')));
+			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('docs')));
+			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
+			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
 			
 			html.push(sep);
 			
-			html.push('<div class="'+prim+'">'+fm.i18n('Team')+'</div>');
+			html.push('<div class="'+prim+'">'+fm.i18n('team')+'</div>');
 			
-			html.push(atpl[r](author, 'Dmitry "dio" &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chief developer')));
-			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('developer')));
-			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('developer')));
+			html.push(atpl[r](author, 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chiefdev')));
+			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('dev')));
+			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('dev')));
 			
-			if (fm.i18[fm.lang].translator) {
-				html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
-			}
-
-			html.push(atpl[r](author, fm.i18n('Icons'))[r](work, '<a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>'));
+			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			
-			html.push(sep+sep);
+			html.push(sep);
+			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': <a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
 			
+			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
 			html.push('<div class="'+lic+'">Copyright © 2009-2011, Studio 42</div>');
-			html.push('<div class="'+lic+'">„ …'+fm.i18n('and don\'t forget to take your towel')+' ”</div>');
+			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 			// end main
 			
@@ -6842,7 +6709,7 @@ elFinder.prototype.commands.help = function() {
 
 				html.push('</div>');
 			} else {
-				html.push('<div class="elfinder-help-disabled">'+fm.i18n('Shortcuts disabled')+'</div>')
+				html.push('<div class="elfinder-help-disabled">'+fm.i18n('shortcutsof')+'</div>')
 			}
 			
 			
@@ -6924,30 +6791,32 @@ elFinder.prototype.commands.home = function() {
 elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
+		spclass = 'elfinder-info-spinner',
 		msg = {
-			calc     : fm.res(m, 'calc'),
-			size     : fm.res(m, 'size'),
-			unknown  : fm.res(m, 'unknown'),
-			path     : fm.res(m, 'path'),
-			aliasfor : fm.res(m, 'aliasfor'),
-			modify   : fm.res(m, 'modify'),
-			perms    : fm.res(m, 'perms'),
-			locked   : fm.res(m, 'locked'),
-			dim      : fm.res(m, 'dim'),
-			kind     : fm.res(m, 'kind'),
-			files    : fm.res(m, 'files'),
-			folders  : fm.res(m, 'folders'),
-			items    : fm.res(m, 'items'),
-			yes      : fm.res(m, 'yes'),
-			no       : fm.res(m, 'no'),
-			link     : fm.res(m, 'link')
+			calc     : fm.i18n('calc'),
+			size     : fm.i18n('size'),
+			unknown  : fm.i18n('unknown'),
+			path     : fm.i18n('path'),
+			aliasfor : fm.i18n('aliasfor'),
+			modify   : fm.i18n('modify'),
+			perms    : fm.i18n('perms'),
+			locked   : fm.i18n('locked'),
+			dim      : fm.i18n('dim'),
+			kind     : fm.i18n('kind'),
+			files    : fm.i18n('files'),
+			folders  : fm.i18n('folders'),
+			items    : fm.i18n('items'),
+			yes      : fm.i18n('yes'),
+			no       : fm.i18n('no'),
+			link     : fm.i18n('link')
 		};
+		
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
-		spinner    : '<span>{text}</span> <span class="elfinder-spinner-mini"/>'
+		spinner    : '<span>{text}</span> <span class="'+spclass+'"/>'
 	}
 	
 	this.alwaysEnabled = true;
@@ -6986,6 +6855,7 @@ elFinder.prototype.commands.info = function() {
 				close : function() { $(this).elfinderdialog('destroy'); }
 			},
 			count = [],
+			replSpinner = function(msg) { dialog.find('.'+spclass).parent().text(msg); },
 			dialog, size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
@@ -7014,7 +6884,24 @@ elFinder.prototype.commands.info = function() {
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
-			file.dim && content.push(row.replace(l, msg.dim).replace(v, file.dim));
+			
+			if (file.dim) { // old api
+				content.push(row.replace(l, msg.dim).replace(v, file.dim));
+			} else if (file.mime.indexOf('image') !== -1) {
+				content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc)));
+				fm.request({
+					data : {cmd : 'dim', target : file.hash},
+					preventDefault : true
+				})
+				.fail(function() {
+					replSpinner(msg.unknown);
+				})
+				.done(function(data) {
+					replSpinner(data.dim || msg.unknown);
+				});
+			}
+			
+			
 			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file.date)));
 			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
@@ -7036,7 +6923,7 @@ elFinder.prototype.commands.info = function() {
 		
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
 		
-		dialog = fm.dialog(view, opts)
+		dialog = fm.dialog(view, opts);
 		
 		// load thumbnail
 		if (tmb) {
@@ -7052,11 +6939,11 @@ elFinder.prototype.commands.info = function() {
 					preventDefault : true
 				})
 				.fail(function() {
-					dialog.find('.elfinder-spinner-mini').parent().text(msg.unknown);
+					replSpinner(msg.unknown);
 				})
 				.done(function(data) {
 					var size = parseInt(data.size);
-					dialog.find('.elfinder-spinner-mini').parent().text(size >= 0 ? fm.formatSize(size) : msg.unknown);
+					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown);
 				});
 		}
 		
@@ -7138,11 +7025,10 @@ elFinder.prototype.commands.open = function() {
 	}
 	
 	this.exec = function(hashes) {
-		var fm     = this.fm, 
-			errors = fm.errors(),
-			dfrd   = $.Deferred().fail(function(error) { error && fm.error(error); }),
-			files  = this.files(hashes),
-			cnt    = files.length,
+		var fm    = this.fm, 
+			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
+			files = this.files(hashes),
+			cnt   = files.length,
 			file, url, s, w;
 
 		if (!cnt) {
@@ -7152,7 +7038,7 @@ elFinder.prototype.commands.open = function() {
 		// open folder
 		if (cnt == 1 && (file = files[0]) && file.mime == 'directory') {
 			return file && !file.read
-				? dfrd.reject([errors.open, file.name, errors.denied])
+				? dfrd.reject(['errOpen', file.name, 'errPerm'])
 				: fm.request({
 						data   : {cmd  : 'open', target : file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
@@ -7173,7 +7059,7 @@ elFinder.prototype.commands.open = function() {
 			file = files[cnt];
 			
 			if (!file.read) {
-				return dfrd.reject([errors.open, file.name, errors.denied]);
+				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
 			if (!(url = fm.url(file.hash))) {
@@ -7191,7 +7077,7 @@ elFinder.prototype.commands.open = function() {
 			}
 
 			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
-				return dfrd.reject(errors.popup);
+				return dfrd.reject('errPopup');
 			}
 		}
 		return dfrd.resolve(hashes);
@@ -7237,12 +7123,11 @@ elFinder.prototype.commands.paste = function() {
 	
 	this.exec = function(dst) {
 		var fm     = this.fm,
-			errors = fm.errors(),
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			error  = errors[cut ? 'move' : 'copy'],
+			error  = cut ? 'errMove' : 'errCopy',
 			fpaste = [],
 			fcopy  = [],
 			dfrd   = $.Deferred()
@@ -7276,11 +7161,11 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						fm.confirm({
-							title  : fm.res('msg', 'move'),
-							text   : fm.i18n([fm.res('error', 'exists'), file.name, fm.res('confirm', 'repl')]), 
+							title  : fm.i18n(cut ? 'moveFiles' : 'copyFiles'),
+							text   : fm.i18n(['errExists', file.name, 'confirmRepl']), 
 							all    : !last,
 							accept : {
-								label    : 'yes',
+								label    : 'btnYes',
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)
@@ -7288,7 +7173,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							reject : {
-								label    : 'no',
+								label    : 'btnNo',
 								callback : function(all) {
 									var i;
 
@@ -7307,7 +7192,7 @@ elFinder.prototype.commands.paste = function() {
 								}
 							},
 							cancel : {
-								label    : 'cancel',
+								label    : 'btnCancel',
 								callback : function() {
 									dfrd.resolve();
 								}
@@ -7357,7 +7242,7 @@ elFinder.prototype.commands.paste = function() {
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
 							: fm.request({
 								data : {cmd : 'ls', target : dst.hash},
-								notify : {type : 'preparecopy', cnt : 1, hideCnt : true},
+								notify : {type : 'prepare', cnt : 1, hideCnt : true},
 								preventFail : true
 							})
 							.always(function(data) {
@@ -7376,22 +7261,22 @@ elFinder.prototype.commands.paste = function() {
 		}
 			
 		if (!dst.write)	{
-			return dfrd.reject([error, files[0].name, errors.perm]);
+			return dfrd.reject([error, files[0].name, 'errPerm']);
 		}
 		
 		parents = fm.parents(dst.hash)
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([error, files[0].name, errors.perm]);
+				return !dfrd.reject([error, files[0].name, 'errPerm']);
 			}
 			
 			if (cut && file.locked) {
-				return !dfrd.reject([errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 			
 			if ($.inArray(file.hash, parents) !== -1) {
-				return !dfrd.reject([errors.copyinself, file.name]);
+				return !dfrd.reject(['errCopyInItself', file.name]);
 			}
 			
 			if (file.phash == dst.hash) {
@@ -7613,7 +7498,7 @@ elFinder.prototype.commands.quicklook = function() {
 		// clean info/icon
 		.bind('change', function(e) {
 			self.info.attr('style', '').hide();
-			icon.removeAttr('class').css('background', '');
+			icon.removeAttr('class').attr('style', '');
 			info.html('');
 
 		})
@@ -7635,7 +7520,7 @@ elFinder.prototype.commands.quicklook = function() {
 						tpl.replace(/\{value\}/, file.name)
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
 						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
-						+ tpl.replace(/\{value\}/, fm.i18n('Modified')+': '+ fm.formatDate(file.date))
+						+ tpl.replace(/\{value\}/, fm.i18n('modify')+': '+ fm.formatDate(file.date))
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 
@@ -8241,7 +8126,6 @@ elFinder.prototype.commands.rename = function() {
 			cwd      = fm.getUI('cwd'),
 			sel      = fm.selected(),
 			cnt      = sel.length,
-			errors   = fm.errors(),
 			file     = fm.file(sel.shift()),
 			filename = '.elfinder-cwd-filename',
 			dfrd     = $.Deferred()
@@ -8282,10 +8166,10 @@ elFinder.prototype.commands.rename = function() {
 							return dfrd.reject();
 						}
 						if (!name) {
-							return dfrd.reject(errors.invName);
+							return dfrd.reject('errInvName');
 						}
 						if (fm.fileByName(name, file.phash)) {
-							return dfrd.reject([errors.exists, name]);
+							return dfrd.reject(['errExists', name]);
 						}
 						
 						parent.html(fm.escape(name));
@@ -8310,11 +8194,11 @@ elFinder.prototype.commands.rename = function() {
 			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
 		
 		if (!file || cnt > 1 || !node.length) {
-			return dfrd.reject(errors.invParams);
+			return dfrd.reject('errCmdParams', this.title);
 		}
 		
 		if (file.locked) {
-			return dfrd.reject([errors.locked, file.name]);
+			return dfrd.reject(['errLocked', file.name]);
 		}
 		
 		fm.disable();
@@ -8348,7 +8232,6 @@ elFinder.prototype.commands.rm = function() {
 	this.exec = function(hashes) {
 		var self   = this,
 			fm     = this.fm,
-			errors = fm.errors(),
 			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
@@ -8364,10 +8247,10 @@ elFinder.prototype.commands.rm = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.phash) {
-				return !dfrd.reject([errors.rm, file.name, errors.denied]);
+				return !dfrd.reject(['errRm', file.name, 'errPerm']);
 			}
 			if (file.locked) {
-				return !dfrd.reject([fm.errors.locked, file.name]);
+				return !dfrd.reject(['errLocked', file.name]);
 			}
 			if (file.hash == cwd) {
 				goroot = fm.root(file.hash);
@@ -8379,9 +8262,9 @@ elFinder.prototype.commands.rm = function() {
 			
 			fm.confirm({
 				title  : self.title,
-				text   : fm.res('confirm', 'rm'),
+				text   : 'confirmRm',
 				accept : {
-					label    : self.title,
+					label    : 'btnRm',
 					callback : function() {  
 						fm.lockfiles({files : files});
 						fm.request({
@@ -8402,7 +8285,7 @@ elFinder.prototype.commands.rm = function() {
 					}
 				},
 				cancel : {
-					label    : 'cancel',
+					label    : 'btnCancel',
 					callback : function() { dfrd.reject(); }
 				}
 			});
@@ -8492,52 +8375,7 @@ elFinder.prototype.commands.up = function() {
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.upload = function() {
-	var hover = this.fm.res('class', 'hover'),
-		prepareData = function(text) {
-			var warning = '', raw, data;
-			
-			if (!$.trim(text)) {
-				return {error : [errors.response, errors.empty]}
-			}
-			
-			try {
-				raw = $.parseJSON(text);
-			} catch (e) {
-				return {error : [errors.response, errors.json]}
-			}
-			
-			if (!fm.validResponse('upload', raw)) {
-				return {error : [errors.response]};
-			}
-			
-			if (raw.error) {
-				if (fm.newAPI) {
-					return {error : raw.error};
-				}
-				// move error into warning for old api
-				warning = fm.i18n(raw.error);
-				$.each(raw.errorData||[], function(name, msg) {
-					warning += '. '+fm.i18n(msg)+': '+name;
-				})
-
-				raw.error = null;
-				if (!fm.validResponse('upload', raw)) {
-					return {error : warning};
-				}
-			}
-			
-			if (fm.newAPI) {
-				return fm.normalizeData('upload', raw);
-			}
-			
-			data = fm.normalizeData('open', raw);
-			// find diff
-			data = fm.diff(data.files);
-			data.current = raw.cwd.hash;
-			data.warning = warning;
-
-			return data;
-		};
+	var hover = this.fm.res('class', 'hover');
 	
 	
 	this.disableOnSearch = true;
@@ -8545,7 +8383,7 @@ elFinder.prototype.commands.upload = function() {
 	
 	// Shortcut opens dialog
 	this.shortcuts = [{
-		pattern     : 'ctrl+u',
+		pattern     : 'ctrl+u'
 	}];
 	
 	/**
@@ -8564,16 +8402,16 @@ elFinder.prototype.commands.upload = function() {
 				dialog.elfinderdialog('close');
 				fm.upload(data)
 					.fail(function(error) {
-						dfrd.reject(error)
+						dfrd.reject(error);
 					})
 					.done(function(data) {
-						dfrd.resolve(data)
+						dfrd.resolve(data);
 					});
 			},
 			dfrd, dialog, input, button, dropbox;
 		
 		if (data && (data.input || data.files)) {
-			return fm.upload(data)
+			return fm.upload(data);
 		}
 		
 		dfrd = $.Deferred();
@@ -8581,20 +8419,20 @@ elFinder.prototype.commands.upload = function() {
 		
 		input = $('<input type="file" multiple="true"/>')
 			.change(function() {
-				upload({input : input[0]})
+				upload({input : input[0]});
 			});
 
-		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('Select files to upload')+'</span></div>')
+		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('selectForUpload')+'</span></div>')
 			.append($('<form/>').append(input))
 			.hover(function() {
-				button.toggleClass('ui-state-hover')
+				button.toggleClass(hover)
 			})
 			
 		dialog = $('<div class="elfinder-upload-dialog-wrapper"/>')
 			.append(button);
 		
 		if (fm.dragUpload) {
-			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox">'+fm.i18n('Drop files here')+'</div>')
+			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox">'+fm.i18n('dropFiles')+'</div>')
 				.prependTo(dialog)
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 
@@ -8625,9 +8463,9 @@ elFinder.prototype.commands.upload = function() {
 		}
 		
 		fm.dialog(dialog, {
-			title     : this.title,
-			modal     : true,
-			resizable : false,
+			title          : this.title,
+			modal          : true,
+			resizable      : false,
 			destroyOnClose : true
 		});
 			
