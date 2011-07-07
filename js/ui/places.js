@@ -149,7 +149,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();
 						fm.storage('placesState', places.is('.'+expanded)? 1 : 0);
-						fm.log(fm.storage('placesState') )
 					}
 				}),
 			/**

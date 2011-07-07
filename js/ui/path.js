@@ -8,7 +8,7 @@
  **/
 $.fn.elfinderpath = function(fm) {
 	return this.each(function() {
-		var path = $(this).addClass('elfinder-path').html('&nbsp;path')
+		var path = $(this).addClass('elfinder-path').html('&nbsp;')
 				.delegate('a', 'click', function(e) {
 					var hash = $(this).attr('href').substr(1);
 

@@ -1314,11 +1314,13 @@ window.elFinder = function(node, opts) {
 			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 				enabled = true;
 				$('texarea,input,button').blur();
+				node.removeClass('elfinder-disabled')
 			}
 		})
 		.disable(function() {
 			prevEnabled = enabled;
 			enabled = false;
+			node.addClass('elfinder-disabled');
 		})
 		.select(function(e) {
 			selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });

@@ -118,7 +118,6 @@
 	left:32px;
 	top:50%;
 	margin-top:-20px;
-
 }
 
 /* image in preview */
@@ -164,6 +163,7 @@
 	margin:0 7px;
 	float:left;
 	background:url("../img/quicklook-icons.png") 0 0 no-repeat;
+	
 }
 
 /* fullscreen icon */
