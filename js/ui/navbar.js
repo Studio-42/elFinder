@@ -23,7 +23,7 @@ $.fn.elfindernavbar = function(fm) {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})
 				
-				.find('.ui-resizable-handle');
+				.find('.ui-resizable-handle').zIndex(nav.zIndex() + 10);
 
 			if (!ltr) {
 				nav.resize(function() {
