@@ -268,6 +268,7 @@ $opts = array(
 
 
 // sleep(3);
+header('Access-Control-Allow-Origin: *');
 $connector = new elFinderConnector(new elFinder($opts));
 $connector->run();
 
