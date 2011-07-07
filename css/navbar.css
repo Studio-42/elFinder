@@ -125,7 +125,7 @@
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
 /* resizable */
-.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') bottom center no-repeat; }
+.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') center center no-repeat; }
 .elfinder-ltr .elfinder-navbar .ui-resizable-handle { right:0; }
 .elfinder-rtl .elfinder-navbar .ui-resizable-handle { left:0;  }
 .elfinder-nav-handle-icon {
