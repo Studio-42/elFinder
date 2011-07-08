@@ -47,8 +47,9 @@ elFinder.prototype.commands.getfile = function() {
 					} else if (opts.oncomplete == 'destroy') {
 						fm.destroy();
 					}
-				}), 
-			i, file;
+				}),
+			req = [], 
+			i, file, dim;
 
 		if (this.getstate() == -1) {
 			return dfrd.reject();
@@ -65,6 +66,31 @@ elFinder.prototype.commands.getfile = function() {
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
+			if (file.dim) {
+				dim = file.dim.split('x');
+				file.width = dim[0];
+				file.height = dim[1];
+			} else if (file.mime.indexOf('image') !== -1) {
+				req.push(fm.request({
+					data : {cmd : 'dim', target : file.hash},
+					preventDefault : true
+				})
+				.done($.proxy(function(data) {
+					if (data.dim) {
+						dim = data.dim.split('x');
+						this.width = dim[0];
+						this.height = dim[1];
+					}
+					this.dim = data.dim
+				}, files[i])));
+			}
+		}
+		
+		if (req.length) {
+			$.when.apply(null, req).always(function() {
+				dfrd.resolve(opts.multiple ? files : files[0]);
+			})
+			return dfrd;
 		}
 		
 		return dfrd.resolve(opts.multiple ? files : files[0]);

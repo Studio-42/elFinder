@@ -162,8 +162,6 @@ abstract class elFinderVolumeDriver {
 		'URL'             => '',   
 		// directory separator. required by client to show paths correctly        
 		'separator'       => DIRECTORY_SEPARATOR,
-		//
-		'caseSensitive'   => false,
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
