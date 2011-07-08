@@ -1586,11 +1586,11 @@ elFinder.prototype = {
 			'application/x-empty'           : 'TextPlain',
 			'application/postscript'        : 'Postscript',
 			'application/vnd.ms-office'     : 'MsOffice',
-			'application/vnd.ms-word'       : 'MsWord',  
-		    'application/vnd.ms-excel'      : 'MsExcel',
+			'application/vnd.ms-word'       : 'MsWord',
+			'application/vnd.ms-excel'      : 'MsExcel',
 			'application/vnd.ms-powerpoint' : 'MsPP',
 			'application/pdf'               : 'PDF',
-			'application/xml'               : 'XML', 
+			'application/xml'               : 'XML',
 			'application/vnd.oasis.opendocument.text' : 'OO',
 			'application/x-shockwave-flash' : 'AppFlash',
 			'application/flash-video'       : 'Flash video',
@@ -1605,46 +1605,46 @@ elFinder.prototype = {
 			'application/xhtml+xml'         : 'HTML',
 			'application/docbook+xml'       : 'DOCBOOK',
 			'application/x-awk'             : 'AWK',
-			'application/x-gzip'            : 'GZIP', 
-		    'application/x-bzip2'           : 'BZIP', 
-		    'application/zip'               : 'ZIP',  
-		    'application/x-rar'             : 'RAR',
-			'application/x-tar'             : 'TAR', 
+			'application/x-gzip'            : 'GZIP',
+			'application/x-bzip2'           : 'BZIP',
+			'application/zip'               : 'ZIP',
+			'application/x-rar'             : 'RAR',
+			'application/x-tar'             : 'TAR',
 			'application/x-7z-compressed'   : '7z',
 			'application/x-jar'             : 'JAR',
 			'text/plain'                    : 'TextPlain',
-		    'text/x-php'                    : 'PHP',
-			'text/html'                     : 'HTML', 
+			'text/x-php'                    : 'PHP',
+			'text/html'                     : 'HTML',
 			'text/javascript'               : 'JS',
-			'text/css'                      : 'CSS',  
-		    'text/rtf'                      : 'RTF',
+			'text/css'                      : 'CSS',
+			'text/rtf'                      : 'RTF',
 			'text/rtfd'                     : 'RTF',
-			'text/x-c'                      : 'C', 
+			'text/x-c'                      : 'C',
 			'text/x-csrc'                   : 'C',
 			'text/x-chdr'                   : 'CHeader',
-			'text/x-c++'                    : 'CPP', 
+			'text/x-c++'                    : 'CPP',
 			'text/x-c++src'                 : 'CPP',
 			'text/x-c++hdr'                 : 'CPPHeader',
 			'text/x-shellscript'            : 'Shell',
 			'application/x-csh'             : 'Shell',
-		    'text/x-python'                 : 'Python',
+			'text/x-python'                 : 'Python',
 			'text/x-java'                   : 'Java',
 			'text/x-java-source'            : 'Java',
 			'text/x-ruby'                   : 'Ruby',
 			'text/x-perl'                   : 'Perl',
 			'text/x-sql'                    : 'SQL',
-		    'text/xml'                      : 'XML', 
+			'text/xml'                      : 'XML',
 			'text/x-comma-separated-values' : 'CSV',
 			'image/x-ms-bmp'                : 'BMP',
-		    'image/jpeg'                    : 'JPEG',   
-		    'image/gif'                     : 'GIF',    
-		    'image/png'                     : 'PNG',
-		    'image/tiff'                    : 'TIFF',   
+			'image/jpeg'                    : 'JPEG',
+			'image/gif'                     : 'GIF',
+			'image/png'                     : 'PNG',
+			'image/tiff'                    : 'TIFF',
 			'image/x-targa'                 : 'TGA',
-		    'image/vnd.adobe.photoshop'     : 'PSD',
+			'image/vnd.adobe.photoshop'     : 'PSD',
 			'image/xbm'                     : 'XBITMAP',
 			'image/pxm'                     : 'PXM',
-			'audio/mpeg'                    : 'AudioMPEG',  
+			'audio/mpeg'                    : 'AudioMPEG',
 			'audio/midi'                    : 'AudioMIDI',
 			'audio/ogg'                     : 'AudioOGG',
 			'audio/mp4'                     : 'AudioMPEG4',
@@ -1653,10 +1653,10 @@ elFinder.prototype = {
 			'audio/x-mp3-playlist'          : 'AudioPlaylist',
 			'video/x-dv'                    : 'VideoDV',
 			'video/mp4'                     : 'VideoMPEG4',
-			'video/mpeg'                    : 'VideoMPEG',  
+			'video/mpeg'                    : 'VideoMPEG',
 			'video/x-msvideo'               : 'VideoAVI',
 			'video/quicktime'               : 'VideoMOV',
-			'video/x-ms-wmv'                : 'VideoWM',   
+			'video/x-ms-wmv'                : 'VideoWM',
 			'video/x-flv'                   : 'VideoFlash',
 			'video/x-matroska'              : 'VideoMKV',
 			'video/ogg'                     : 'VideoOGG'
@@ -1668,7 +1668,7 @@ elFinder.prototype = {
 	 * @type  Object
 	 */
 	rules : {
-		defaults : function(data) {  
+		defaults : function(data) {
 			if (!data
 			|| (data.added && !$.isArray(data.added))
 			||  (data.removed && !$.isArray(data.removed))
@@ -1745,7 +1745,7 @@ elFinder.prototype = {
 						data.removed && self.remove(data);
 						data.added   && self.add(data);
 						data.changed && self.change(data);
-	 					self.trigger('upload', data);
+						self.trigger('upload', data);
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
 				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
@@ -1997,7 +1997,7 @@ elFinder.prototype = {
 				}
 			}
 			return '';
-		} 
+		}
 
 		o = $.extend({}, this.options.cookie);
 		if (value === null) {
@@ -2078,7 +2078,7 @@ elFinder.prototype = {
 			data.init = true;
 		}
 		return data;
-	} ,
+	},
 	
 	
 	/**
@@ -2501,13 +2501,13 @@ elFinder.prototype = {
 			n = 1073741824;
 			u = 'Gb';
 		} else if (s > 1048576) {
-            n = 1048576;
-            u = 'Mb';
-        } else if (s > 1024) {
-            n = 1024;
-            u = 'Kb';
-        }
-        return (s > 0 ? Math.round(s/n) : 0) +' '+u;
+			n = 1048576;
+			u = 'Mb';
+		} else if (s > 1024) {
+			n = 1024;
+			u = 'Kb';
+		}
+		return (s > 0 ? Math.round(s/n) : 0) +' '+u;
 	},
 	
 	
