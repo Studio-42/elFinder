@@ -1589,11 +1589,11 @@ elFinder.prototype = {
 			'application/x-empty'           : 'TextPlain',
 			'application/postscript'        : 'Postscript',
 			'application/vnd.ms-office'     : 'MsOffice',
-			'application/vnd.ms-word'       : 'MsWord',  
-		    'application/vnd.ms-excel'      : 'MsExcel',
+			'application/vnd.ms-word'       : 'MsWord',
+			'application/vnd.ms-excel'      : 'MsExcel',
 			'application/vnd.ms-powerpoint' : 'MsPP',
 			'application/pdf'               : 'PDF',
-			'application/xml'               : 'XML', 
+			'application/xml'               : 'XML',
 			'application/vnd.oasis.opendocument.text' : 'OO',
 			'application/x-shockwave-flash' : 'AppFlash',
 			'application/flash-video'       : 'Flash video',
@@ -1608,46 +1608,46 @@ elFinder.prototype = {
 			'application/xhtml+xml'         : 'HTML',
 			'application/docbook+xml'       : 'DOCBOOK',
 			'application/x-awk'             : 'AWK',
-			'application/x-gzip'            : 'GZIP', 
-		    'application/x-bzip2'           : 'BZIP', 
-		    'application/zip'               : 'ZIP',  
-		    'application/x-rar'             : 'RAR',
-			'application/x-tar'             : 'TAR', 
+			'application/x-gzip'            : 'GZIP',
+			'application/x-bzip2'           : 'BZIP',
+			'application/zip'               : 'ZIP',
+			'application/x-rar'             : 'RAR',
+			'application/x-tar'             : 'TAR',
 			'application/x-7z-compressed'   : '7z',
 			'application/x-jar'             : 'JAR',
 			'text/plain'                    : 'TextPlain',
-		    'text/x-php'                    : 'PHP',
-			'text/html'                     : 'HTML', 
+			'text/x-php'                    : 'PHP',
+			'text/html'                     : 'HTML',
 			'text/javascript'               : 'JS',
-			'text/css'                      : 'CSS',  
-		    'text/rtf'                      : 'RTF',
+			'text/css'                      : 'CSS',
+			'text/rtf'                      : 'RTF',
 			'text/rtfd'                     : 'RTF',
-			'text/x-c'                      : 'C', 
+			'text/x-c'                      : 'C',
 			'text/x-csrc'                   : 'C',
 			'text/x-chdr'                   : 'CHeader',
-			'text/x-c++'                    : 'CPP', 
+			'text/x-c++'                    : 'CPP',
 			'text/x-c++src'                 : 'CPP',
 			'text/x-c++hdr'                 : 'CPPHeader',
 			'text/x-shellscript'            : 'Shell',
 			'application/x-csh'             : 'Shell',
-		    'text/x-python'                 : 'Python',
+			'text/x-python'                 : 'Python',
 			'text/x-java'                   : 'Java',
 			'text/x-java-source'            : 'Java',
 			'text/x-ruby'                   : 'Ruby',
 			'text/x-perl'                   : 'Perl',
 			'text/x-sql'                    : 'SQL',
-		    'text/xml'                      : 'XML', 
+			'text/xml'                      : 'XML',
 			'text/x-comma-separated-values' : 'CSV',
 			'image/x-ms-bmp'                : 'BMP',
-		    'image/jpeg'                    : 'JPEG',   
-		    'image/gif'                     : 'GIF',    
-		    'image/png'                     : 'PNG',
-		    'image/tiff'                    : 'TIFF',   
+			'image/jpeg'                    : 'JPEG',
+			'image/gif'                     : 'GIF',
+			'image/png'                     : 'PNG',
+			'image/tiff'                    : 'TIFF',
 			'image/x-targa'                 : 'TGA',
-		    'image/vnd.adobe.photoshop'     : 'PSD',
+			'image/vnd.adobe.photoshop'     : 'PSD',
 			'image/xbm'                     : 'XBITMAP',
 			'image/pxm'                     : 'PXM',
-			'audio/mpeg'                    : 'AudioMPEG',  
+			'audio/mpeg'                    : 'AudioMPEG',
 			'audio/midi'                    : 'AudioMIDI',
 			'audio/ogg'                     : 'AudioOGG',
 			'audio/mp4'                     : 'AudioMPEG4',
@@ -1656,10 +1656,10 @@ elFinder.prototype = {
 			'audio/x-mp3-playlist'          : 'AudioPlaylist',
 			'video/x-dv'                    : 'VideoDV',
 			'video/mp4'                     : 'VideoMPEG4',
-			'video/mpeg'                    : 'VideoMPEG',  
+			'video/mpeg'                    : 'VideoMPEG',
 			'video/x-msvideo'               : 'VideoAVI',
 			'video/quicktime'               : 'VideoMOV',
-			'video/x-ms-wmv'                : 'VideoWM',   
+			'video/x-ms-wmv'                : 'VideoWM',
 			'video/x-flv'                   : 'VideoFlash',
 			'video/x-matroska'              : 'VideoMKV',
 			'video/ogg'                     : 'VideoOGG'
@@ -1671,7 +1671,7 @@ elFinder.prototype = {
 	 * @type  Object
 	 */
 	rules : {
-		defaults : function(data) {  
+		defaults : function(data) {
 			if (!data
 			|| (data.added && !$.isArray(data.added))
 			||  (data.removed && !$.isArray(data.removed))
@@ -1748,7 +1748,7 @@ elFinder.prototype = {
 						data.removed && self.remove(data);
 						data.added   && self.add(data);
 						data.changed && self.change(data);
-	 					self.trigger('upload', data);
+						self.trigger('upload', data);
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
 				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
@@ -2000,7 +2000,7 @@ elFinder.prototype = {
 				}
 			}
 			return '';
-		} 
+		}
 
 		o = $.extend({}, this.options.cookie);
 		if (value === null) {
@@ -2081,7 +2081,7 @@ elFinder.prototype = {
 			data.init = true;
 		}
 		return data;
-	} ,
+	},
 	
 	
 	/**
@@ -2504,13 +2504,13 @@ elFinder.prototype = {
 			n = 1073741824;
 			u = 'Gb';
 		} else if (s > 1048576) {
-            n = 1048576;
-            u = 'Mb';
-        } else if (s > 1024) {
-            n = 1024;
-            u = 'Kb';
-        }
-        return (s > 0 ? Math.round(s/n) : 0) +' '+u;
+			n = 1048576;
+			u = 'Mb';
+		} else if (s > 1024) {
+			n = 1024;
+			u = 'Kb';
+		}
+		return (s > 0 ? Math.round(s/n) : 0) +' '+u;
 	},
 	
 	
@@ -2737,8 +2737,8 @@ elFinder.prototype.options = {
 		// toolbar configuration
 		toolbar : [
 			['back', 'forward'],
-			['reload'],
-			['home', 'up'],
+			// ['reload'],
+			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
 			['info'],
@@ -2746,9 +2746,9 @@ elFinder.prototype.options = {
 			['copy', 'cut', 'paste'],
 			['rm'],
 			['duplicate', 'rename', 'edit'],
-			['extract', 'archive'],
+			// ['extract', 'archive'],
 			['search'],
-			['view'],
+			// ['view'],
 			['help']
 		],
 		// directories tree options
@@ -2784,7 +2784,7 @@ elFinder.prototype.options = {
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
 	 */
-	sort : 'kindDirsFirst',
+	sort : 'nameDirsFirst',
 	
 	/**
 	 * elFinder width
@@ -3451,9 +3451,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'error'                : 'Error',
 			'errUnknown'           : 'Unknown error.',
 			'errUnknownCmd'        : 'Unknown command.',
-			'errJqui'              : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
-			'errNode'              : 'elFinder required DOM Element to be created.',
-			'errURL'               : 'Invalid elFinder configuration! You have to set URL option.',
+			'errJqui'              : 'Invalid jQuery UI configuration. Selectable, draggable and droppable components must be included.',
+			'errNode'              : 'elFinder requires DOM Element to be created.',
+			'errURL'               : 'Invalid elFinder configuration! URL option is not set.',
 			'errAccess'            : 'Access denied.',
 			'errConnect'           : 'Unable to connect to backend.',
 			'errAbort'             : 'Connection aborted.',
@@ -3462,11 +3462,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResponse'          : 'Invalid backend response.',
 			'errConf'              : 'Invalid backend configuration.',
 			'errJSON'              : 'PHP JSON module not installed.',
-			'errNoVolumes'         : 'There are no one readable volumes available.',
+			'errNoVolumes'         : 'Readable volumes not available.',
 			'errCmdParams'         : 'Invalid parameters for command "$1".',
 			'errDataNotJSON'       : 'Data is not JSON.',
 			'errDataEmpty'         : 'Data is empty.',
-			'errCmdReq'            : 'Backend request required command name.',
+			'errCmdReq'            : 'Backend request requires command name.',
 			'errOpen'              : 'Unable to open "$1".',
 			'errNotFolder'         : 'Object is not a folder.',
 			'errNotFile'           : 'Object is not a file.',
@@ -3474,7 +3474,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errWrite'             : 'Unable to write into "$1".',
 			'errPerm'              : 'Permission denied.',
 			'errLocked'            : '"$1" is locked and can not be renamed, moved or removed.',
-			'errExists'            : 'File named "$1" already exists in this location.',
+			'errExists'            : 'File named "$1" already exists.',
 			'errInvName'           : 'Invalid file name.',
 			'errFolderNotFound'    : 'Folder not found.',
 			'errFileNotFound'      : 'File not found.',
@@ -3483,14 +3483,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMkdir'             : 'Unable to create folder "$1".',
 			'errMkfile'            : 'Unable to create file "$1".',
 			'errRename'            : 'Unable to rename "$1".',
-			'errCopyFrom'          : 'Copy files from volume "$1" not allowed.',
-			'errCopyTo'            : 'Copy files to volume "$1" not allowed.',
+			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
+			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
 			'errUploadCommon'      : 'Upload error.',
 			'errUpload'            : 'Unable to upload "$1".',
-			'errUploadNoFiles'     : 'There are no uploaded files was found.',
+			'errUploadNoFiles'     : 'No files found for upload.',
 			'errMaxSize'           : 'Data exceeds the maximum allowed size.',
 			'errFileMaxSize'       : 'File exceeds maximum allowed size.',
-			'errUploadMime'        : 'Not allowed file type.',
+			'errUploadMime'        : 'File type not allowed.',
 			'errUploadTransfer'    : '"$1" transfer error.', 
 			'errSave'              : 'Unable to save "$1".',
 			'errCopy'              : 'Unable to copy "$1".',
@@ -3559,8 +3559,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
-			'Today'       : 'Сегодня',
-			'Yesterday'   : 'Вчера',
+			'Today'       : 'Today',
+			'Yesterday'   : 'Yesterday',
 			'Jan'         : 'Jan',
 			'Feb'         : 'Feb',
 			'Mar'         : 'Mar',
@@ -3593,8 +3593,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectfiles'     : 'Select file(s)',
 			'selectffile'     : 'Select first file',
 			'selectlfile'     : 'Select last file',
-			'viewlist'        : 'View as list',
-			'viewicons'       : 'View as icons',
+			'viewlist'        : 'List view',
+			'viewicons'       : 'Icons view',
 			'places'          : 'Places',
 			'calc'            : 'Calculate', 
 			'path'            : 'Path',
@@ -3618,7 +3618,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'homepage'        : 'Project home',
 			'docs'            : 'Documentation',
 			'github'          : 'Fork us on Github',
-			'twitter'         : 'Follow us in twitter',
+			'twitter'         : 'Follow us on twitter',
 			'facebook'        : 'Join us on facebook',
 			'team'            : 'Team',
 			'chiefdev'        : 'chief developer',
@@ -3714,9 +3714,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	}
 }
-
-
- 
 
 
 /* File: /home/troex/Sites/git/elfinder-2.x/js/ui/button.js */
@@ -6873,8 +6870,9 @@ elFinder.prototype.commands.getfile = function() {
 					} else if (opts.oncomplete == 'destroy') {
 						fm.destroy();
 					}
-				}), 
-			i, file;
+				}),
+			req = [], 
+			i, file, dim;
 
 		if (this.getstate() == -1) {
 			return dfrd.reject();
@@ -6891,6 +6889,31 @@ elFinder.prototype.commands.getfile = function() {
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
+			if (file.dim) {
+				dim = file.dim.split('x');
+				file.width = dim[0];
+				file.height = dim[1];
+			} else if (file.mime.indexOf('image') !== -1) {
+				req.push(fm.request({
+					data : {cmd : 'dim', target : file.hash},
+					preventDefault : true
+				})
+				.done($.proxy(function(data) {
+					if (data.dim) {
+						dim = data.dim.split('x');
+						this.width = dim[0];
+						this.height = dim[1];
+					}
+					this.dim = data.dim
+				}, files[i])));
+			}
+		}
+		
+		if (req.length) {
+			$.when.apply(null, req).always(function() {
+				dfrd.resolve(opts.multiple ? files : files[0]);
+			})
+			return dfrd;
 		}
 		
 		return dfrd.resolve(opts.multiple ? files : files[0]);

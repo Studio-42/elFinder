@@ -68,6 +68,22 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
   .footer a { font-style: italic; text-decoration: none; color: #222; }
   .footer a:hover { text-decoration: underline; }
 
+/* message styles */
+.message {
+  position: relative;
+  color: #565656;
+  border: 1px solid #f2eda1;
+  background: #fefbd0 url(/images/notify_bg.png) 0 0 repeat-x;
+  margin-bottom: 10px;
+  -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px;
+}
+  .message p {
+    padding: 10px 10px 10px 35px;
+    margin: 0 !important;
+    line-height: 140%;
+    background: url(/images/warning.png) 10px 50% no-repeat;
+  }
+
 .text-center { text-align: center; }
 
 .clearfix:after {content: ".";display: block;height: 0;clear: both;visibility: hidden;}
