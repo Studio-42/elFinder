@@ -2746,9 +2746,9 @@ elFinder.prototype.options = {
 			['copy', 'cut', 'paste'],
 			['rm'],
 			['duplicate', 'rename', 'edit'],
-			// ['extract', 'archive'],
+			['extract', 'archive'],
 			['search'],
-			// ['view'],
+			['view'],
 			['help']
 		],
 		// directories tree options

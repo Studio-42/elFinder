@@ -19,25 +19,7 @@
     <script type="text/javascript">
       $().ready(function() {
         var f1 = $('#elfinder').elfinder({
-          url : '/connector',
-          uiOptions : {
-	          // toolbar configuration
-	          toolbar : [
-		          ['back', 'forward'],
-		          ['reload'],
-		          ['mkdir', 'mkfile', 'upload'],
-		          ['open', 'download', 'getfile'],
-		          ['info'],
-		          ['quicklook'],
-		          ['copy', 'cut', 'paste'],
-		          ['rm'],
-		          ['duplicate', 'rename', 'edit'],
-		          ['extract', 'archive'],
-		          ['search'],
-		          ['view'],
-		          ['help']
-	          ]
-	        }
+          url : '/connector'
         }).elfinder('instance');
       });
     </script>
