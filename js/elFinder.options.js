@@ -141,8 +141,8 @@ elFinder.prototype.options = {
 		// toolbar configuration
 		toolbar : [
 			['back', 'forward'],
-			['reload'],
-			['home', 'up'],
+			// ['reload'],
+			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
 			['info'],
@@ -150,9 +150,9 @@ elFinder.prototype.options = {
 			['copy', 'cut', 'paste'],
 			['rm'],
 			['duplicate', 'rename', 'edit'],
-			['extract', 'archive'],
+			// ['extract', 'archive'],
 			['search'],
-			['view'],
+			// ['view'],
 			['help']
 		],
 		// directories tree options
@@ -188,7 +188,7 @@ elFinder.prototype.options = {
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
 	 */
-	sort : 'kindDirsFirst',
+	sort : 'nameDirsFirst',
 	
 	/**
 	 * elFinder width
