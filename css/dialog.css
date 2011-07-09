@@ -199,11 +199,27 @@
 }
 
 
+.dialogelfinder .dialogelfinder-drag {
+	border-left:0 solid;
+	border-top:0 solid;
+	border-right:0 solid;
+	font-weight:normal;
+	font-size:.9em;
+	padding:2px 12px;
+	cursor:move;
+	position:relative;
+	text-align:left;
+}
 
+.elfinder-rtl .dialogelfinder-drag { text-align:right;}
 
+.dialogelfinder-drag-close {
+	position: absolute;
+	top:50%;
+	margin-top:-8px;
+}
 
-
-
-
+.elfinder-ltr .dialogelfinder-drag-close { right:12px; }
+.elfinder-rtl .dialogelfinder-drag-close { left:12px; }
 
 

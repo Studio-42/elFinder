@@ -14,12 +14,12 @@ $.fn.elfinder = function(o) {
 		switch(cmd) {
 			case 'close':
 			case 'hide':
-				this.elfinder.close();
+				this.elfinder.hide();
 				break;
 				
 			case 'open':
 			case 'show':
-				this.elfinder.open();
+				this.elfinder.show();
 				break;
 				
 			case'destroy':

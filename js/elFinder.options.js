@@ -204,7 +204,7 @@ elFinder.prototype.options = {
 	 * @type Number
 	 * @default  "auto"
 	 */
-	height : 415,
+	height : 400,
 	
 	/**
 	 * Make elFinder resizable if jquery ui resizable available
