@@ -1,7 +1,10 @@
 (function($) {
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.js
+ */
+
 /**
  * @class elFinder - file manager for web
  *
@@ -9,6 +12,7 @@
  **/
 window.elFinder = function(node, opts) {
 	this.time('load');
+	
 	var self = this,
 		
 		/**
@@ -176,15 +180,15 @@ window.elFinder = function(node, opts) {
 		 * @type String
 		 * @default "auto"
 		 **/
-		width  = this.options.width || 'auto',
+		width  = 'auto',
 		
 		/**
 		 * elFinder node height
 		 *
 		 * @type Number
-		 * @default 300
+		 * @default 400
 		 **/
-		height = parseInt(this.options.height) || 300,
+		height = 400,
 		
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -1193,6 +1197,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.resize = function(w, h) {
 		node.css('width', w).height(h).trigger('resize');
+		this.trigger('resize', {width : node.width(), height : node.height()});
 	}
 	
 	/**
@@ -1247,7 +1252,7 @@ window.elFinder = function(node, opts) {
 	if (!this.options.url) {
 		return alert(this.i18n('errURL'));
 	}
-	
+
 	$.extend($.ui.keyCode, {
 		'F1' : 112,
 		'F2' : 113,
@@ -1510,8 +1515,16 @@ window.elFinder = function(node, opts) {
 		minHeight : 200
 	});
 
-	// update size
-	this.resize(width, height);
+	if (this.options.width) {
+		width = this.options.width;
+	}
+	
+	if (this.options.height) {
+		height = parseInt(this.options.height);
+	}
+	
+	// update size	
+	self.resize(width, height);
 	
 	// attach events to document
 	$(document)
@@ -2538,16 +2551,24 @@ elFinder.prototype = {
 
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.version.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.version.js
+ */
+
 /**
  * Application version
  *
  * @type String
  **/
-elFinder.prototype.version = '2.0 beta';
+elFinder.prototype.version = '2.0 beta1';
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/jquery.elfinder.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/jquery.elfinder.js
+ */
+
 $.fn.elfinder = function(o) {
 	
 	if (o == 'instance') {
@@ -2564,12 +2585,12 @@ $.fn.elfinder = function(o) {
 		switch(cmd) {
 			case 'close':
 			case 'hide':
-				this.elfinder.close();
+				this.elfinder.hide();
 				break;
 				
 			case 'open':
 			case 'show':
-				this.elfinder.open();
+				this.elfinder.show();
 				break;
 				
 			case'destroy':
@@ -2593,10 +2614,16 @@ $.fn.getElFinder = function() {
 	return instance;
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.options.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.options.js
+ */
+
 /**
  * Default elFinder config
  *
+ * @type  Object
+ * @autor Dmitry (dio) Levashov
  */
 elFinder.prototype.options = {
 	/**
@@ -2624,21 +2651,38 @@ elFinder.prototype.options = {
 	 * @default null
 	 * @example
 	 *  transport : {
+	 *    init : function(elfinderInstance) { },
 	 *    send : function(options) {
 	 *      var dfrd = $.Deferred();
 	 *      // connect to backend ...
 	 *      return dfrd;
+	 *    },
+	 *    upload : function(data) {
+	 *      var dfrd = $.Deferred();
+	 *      // upload ...
+	 *      return dfrd;
 	 *    }
+	 *    
 	 *  }
 	 **/
-	transport : {
-		// init : function(o) { console.log(o) }
-		// upload : 'iframe'
-	},
+	transport : {},
 
+	/**
+	 * Allow to drag and drop to upload files
+	 *
+	 * @type Boolean|String
+	 * @default  'auto'
+	 */
 	dragUploadAllow : 'auto',
 	
+	/**
+	 * Timeout for upload using iframe
+	 *
+	 * @type Number
+	 * @default  0 - no timeout
+	 */
 	iframeTimeout : 0,
+	
 	/**
 	 * Data to append to all requests and to upload files
 	 *
@@ -2681,8 +2725,6 @@ elFinder.prototype.options = {
 		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
 		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'
 	],
-	
-	// commands : ['edit'],
 	
 	/**
 	 * Commands options.
@@ -2800,7 +2842,7 @@ elFinder.prototype.options = {
 	 * @type Number
 	 * @default  "auto"
 	 */
-	height : 415,
+	height : 400,
 	
 	/**
 	 * Make elFinder resizable if jquery ui resizable available
@@ -2909,13 +2951,17 @@ elFinder.prototype.options = {
 	/**
 	 * Debug config
 	 *
-	 * @type Array|Boolen
+	 * @type Array|Boolean
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
+	debug : ['error', 'warning']
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.history.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.history.js
+ */
+
 /**
  * @class elFinder.history
  * Store visited folders
@@ -3016,7 +3062,11 @@ elFinder.prototype.history = function(fm) {
 	.reload(reset);
 	
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.command.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.command.js
+ */
+
 /**
  * elFinder command prototype
  *
@@ -3291,8 +3341,11 @@ elFinder.prototype.command = function(fm) {
 
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.resources.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/elFinder.resources.js
+ */
+
 /**
  * elFinder resources registry.
  * Store shared data
@@ -3438,8 +3491,11 @@ elFinder.prototype.resources = {
 }
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/i18n/elfinder.en.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/i18n/elfinder.en.js
+ */
+
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
 		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
@@ -3622,8 +3678,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'facebook'        : 'Join us on facebook',
 			'team'            : 'Team',
 			'chiefdev'        : 'chief developer',
-			'dev'             : 'developer',
-			'mantainer'       : 'mantainer',
+			'developer'       : 'developer',
+			'contributor'     : 'contributor',
+			'maintainer'      : 'maintainer',
 			'translator'      : 'translator',
 			'icons'           : 'Icons',
 			'dontforget'      : 'and don\'t forget to take your towel',
@@ -3716,8 +3773,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 }
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/button.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/button.js
+ */
+
 /**
  * @class  elFinder toolbar button widget.
  * If command has variants - create menu
@@ -3791,8 +3851,11 @@ $.fn.elfinderbutton = function(cmd) {
 	});
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/contexmenu.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/contexmenu.js
+ */
+
 /**
  * @class  elFinder contextmenu
  *
@@ -3977,8 +4040,11 @@ $.fn.elfindercontextmenu = function(fm) {
 		
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/cwd.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/cwd.js
+ */
+
 /**
  * elFinder current working directory ui.
  *
@@ -4899,8 +4965,11 @@ $.fn.elfindercwd = function(fm) {
 	return this;
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/dialog.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/dialog.js
+ */
+
 /**
  * @class  elFinder dialog
  *
@@ -5103,7 +5172,11 @@ $.fn.elfinderdialog.defaults = {
 	minWidth  : 200,
 	minHeight : 110
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/navbar.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/navbar.js
+ */
+
 /**
  * @class elfindernav - elFinder container for diretories tree and places
  *
@@ -5148,7 +5221,11 @@ $.fn.elfindernavbar = function(fm) {
 	return this;
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/overlay.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/overlay.js
+ */
+
 
 $.fn.elfinderoverlay = function(opts) {
 	
@@ -5196,7 +5273,11 @@ $.fn.elfinderoverlay = function(opts) {
 	
 	return this;
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/panel.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/panel.js
+ */
+
 $.fn.elfinderpanel = function(fm) {
 	
 	return this.each(function() {
@@ -5213,8 +5294,11 @@ $.fn.elfinderpanel = function(fm) {
 		})
 	})
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/path.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/path.js
+ */
+
 /**
  * @class elFinder ui
  * Display current folder path in statusbar.
@@ -5247,8 +5331,11 @@ $.fn.elfinderpath = function(fm) {
 			});
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/places.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/places.js
+ */
+
 /**
  * @class elFinder places/favorites ui
  *
@@ -5518,8 +5605,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 		
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/searchbutton.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/searchbutton.js
+ */
+
 /**
  * @class  elFinder toolbar search button widget.
  *
@@ -5597,8 +5687,11 @@ $.fn.elfindersearchbutton = function(cmd) {
 
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/stat.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/stat.js
+ */
+
 /**
  * @class elFinder ui
  * Display number of files/selected files and its size in statusbar
@@ -5649,8 +5742,11 @@ $.fn.elfinderstat = function(fm) {
 		;
 	})
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/toolbar.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/toolbar.js
+ */
+
 /**
  * @class  elFinder toolbar
  *
@@ -5685,8 +5781,11 @@ $.fn.elfindertoolbar = function(fm, opts) {
 	
 	return this;
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/tree.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/tree.js
+ */
+
 /**
  * @class  elFinder folders tree
  *
@@ -6188,8 +6287,11 @@ $.fn.elfindertree = function(fm, opts) {
 	return this;
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/uploadButton.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/uploadButton.js
+ */
+
 /**
  * @class  elFinder toolbar's button tor upload file
  *
@@ -6212,8 +6314,11 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				});
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/viewbutton.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/viewbutton.js
+ */
+
 /**
  * @class  elFinder toolbar button to switch current directory view.
  *
@@ -6232,8 +6337,11 @@ $.fn.elfinderviewbutton = function(cmd) {
 		});
 	});
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/ui/workzone.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/ui/workzone.js
+ */
+
 /**
  * @class elfinderworkzone - elFinder container for nav and current directory
  * @author Dmitry (dio) Levashov
@@ -6265,8 +6373,11 @@ $.fn.elfinderworkzone = function(fm) {
 
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/archive.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/archive.js
+ */
+
 /**
  * @class  elFinder command "archive"
  * Archive selected files
@@ -6333,8 +6444,11 @@ elFinder.prototype.commands.archive = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/back.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/back.js
+ */
+
 /**
  * @class  elFinder command "back"
  * Open last visited folder
@@ -6357,8 +6471,11 @@ elFinder.prototype.commands.back = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/copy.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/copy.js
+ */
+
 /**
  * @class elFinder command "copy".
  * Put files in filemanager clipboard.
@@ -6396,8 +6513,11 @@ elFinder.prototype.commands.copy = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/cut.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/cut.js
+ */
+
 /**
  * @class elFinder command "copy".
  * Put files in filemanager clipboard.
@@ -6438,8 +6558,11 @@ elFinder.prototype.commands.cut = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/download.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/download.js
+ */
+
 /**
  * @class elFinder command "download". 
  * Download selected files.
@@ -6494,8 +6617,11 @@ elFinder.prototype.commands.download = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/duplicate.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/duplicate.js
+ */
+
 /**
  * @class elFinder command "duplicate"
  * Create file/folder copy with suffix "copy Number"
@@ -6550,8 +6676,11 @@ elFinder.prototype.commands.duplicate = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/edit.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/edit.js
+ */
+
 /**
  * @class elFinder command "edit". 
  * Edit text file in dialog window
@@ -6714,8 +6843,11 @@ elFinder.prototype.commands.edit = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/extract.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/extract.js
+ */
+
 /**
  * @class  elFinder command "extract"
  * Extract files from archive
@@ -6797,7 +6929,11 @@ elFinder.prototype.commands.extract = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/forward.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/forward.js
+ */
+
 /**
  * @class  elFinder command "forward"
  * Open next visited folder
@@ -6820,8 +6956,11 @@ elFinder.prototype.commands.forward = function() {
 	}
 	
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/getfile.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/getfile.js
+ */
+
 /**
  * @class elFinder command "getfile". 
  * Return selected files info into outer callback.
@@ -6920,8 +7059,11 @@ elFinder.prototype.commands.getfile = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/help.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/help.js
+ */
+
 /**
  * @class  elFinder command "help"
  * "About" dialog
@@ -6976,19 +7118,19 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push(sep);
 			
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('homepage')));
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('docs')));
+			html.push(linktpl[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
+			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
 			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
-			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('twitter')));
-			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
+			html.push(linktpl[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			//html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
 			
 			html.push(sep);
 			
 			html.push('<div class="'+prim+'">'+fm.i18n('team')+'</div>');
 			
 			html.push(atpl[r](author, 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chiefdev')));
-			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('dev')));
-			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('dev')));
+			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('maintainer')));
+			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('contributor')));
 			
 			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			
@@ -7060,7 +7202,12 @@ elFinder.prototype.commands.help = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/home.js */
+
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/home.js
+ */
+
 
 elFinder.prototype.commands.home = function() {
 	this.title = 'Home';
@@ -7084,8 +7231,11 @@ elFinder.prototype.commands.home = function() {
 	
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/info.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/info.js
+ */
+
 /**
  * @class elFinder command "info". 
  * Display dialog with file properties.
@@ -7255,8 +7405,11 @@ elFinder.prototype.commands.info = function() {
 	
 }
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/mkdir.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/mkdir.js
+ */
+
 /**
  * @class  elFinder command "mkdir"
  * Create new folder
@@ -7279,8 +7432,11 @@ elFinder.prototype.commands.mkdir = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/mkfile.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/mkfile.js
+ */
+
 /**
  * @class  elFinder command "mkfile"
  * Create new empty file
@@ -7299,8 +7455,11 @@ elFinder.prototype.commands.mkfile = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/open.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/open.js
+ */
+
 /**
  * @class  elFinder command "open"
  * Enter folder or open files in new windows
@@ -7388,8 +7547,11 @@ elFinder.prototype.commands.open = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/paste.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/paste.js
+ */
+
 /**
  * @class  elFinder command "paste"
  * Paste filesfrom clipboard into directory.
@@ -7603,8 +7765,11 @@ elFinder.prototype.commands.paste = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/quicklook.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/quicklook.js
+ */
+
 /**
  * @class  elFinder command "quicklook"
  * Fast preview for some files types
@@ -8029,7 +8194,11 @@ elFinder.prototype.commands.quicklook = function() {
 }
 
 
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/quicklook.plugins.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/quicklook.plugins.js
+ */
+
 
 elFinder.prototype.commands.quicklook.plugins = [
 	
@@ -8369,7 +8538,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 	}
 	
 ]
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/reload.js */
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/reload.js
+ */
+
 /**
  * @class  elFinder command "reload"
  * Sync files and folders
@@ -8404,8 +8577,11 @@ elFinder.prototype.commands.reload = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/rename.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/rename.js
+ */
+
 /**
  * @class elFinder command "rename". 
  * Rename selected file.
@@ -8512,8 +8688,11 @@ elFinder.prototype.commands.rename = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/rm.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/rm.js
+ */
+
 /**
  * @class  elFinder command "rm"
  * Delete files
@@ -8599,8 +8778,11 @@ elFinder.prototype.commands.rm = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/search.js */
-"use strict"
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/search.js
+ */
+
 /**
  * @class  elFinder command "search"
  * Find files
@@ -8643,8 +8825,11 @@ elFinder.prototype.commands.search = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/up.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/up.js
+ */
+
 /**
  * @class  elFinder command "up"
  * Go into parent directory
@@ -8668,8 +8853,11 @@ elFinder.prototype.commands.up = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/upload.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/upload.js
+ */
+
 /**
  * @class elFinder command "upload"
  * Upload files using iframe or XMLHttpRequest & FormData.
@@ -8777,8 +8965,11 @@ elFinder.prototype.commands.upload = function() {
 	}
 
 }
-/* File: /home/troex/Sites/git/elfinder-2.x/js/commands/view.js */
-"use strict";
+
+/*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/commands/view.js
+ */
+
 /**
  * @class  elFinder command "view"
  * Change current directory view (icons/list)
