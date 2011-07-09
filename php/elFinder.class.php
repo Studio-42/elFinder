@@ -36,7 +36,6 @@ class elFinder {
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('targets' => true),
-		'sync'      => array('target' => true, 'tree' => false, 'mimes' => false),
 		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('target' => true, 'name' => true),

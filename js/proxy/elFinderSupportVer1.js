@@ -16,17 +16,16 @@ window.elFinderSupportVer1 = function() {
 	this.init = function(fm) {
 		this.fm = fm;
 		this.fm.parseUploadData = function(text) {
-			var errors   = self.fm.errors(),
-				data;
+			var data;
 
 			if (!$.trim(text)) {
-				return {error : [errors.response, errors.empty]};
+				return {error : ['errResponse', 'errDataEmpty']};
 			}
 
 			try {
 				data = $.parseJSON(text);
 			} catch (e) {
-				return {error : [errors.response, errors.json]}
+				return {error : ['errResponse', 'errDataNotJSON']}
 			}
 			
 			return self.normalize('upload', data);
@@ -133,20 +132,20 @@ window.elFinderSupportVer1 = function() {
 	}
 	
 	// fix old connectors errors messages as possible
-	this.errors = {
-		'Unknown command'                                  : 'Unknown command.',
-		'Invalid backend configuration'                    : 'Invalid backend configuration.',
-		'Access denied'                                    : 'Access denied.',
-		'PHP JSON module not installed'                    : 'PHP JSON module not installed.',
-		'File not found'                                   : 'File not found.',
-		'Invalid name'                                     : 'Invalid file name.',
-		'File or folder with the same name already exists' : 'File named "$1" already exists in this location.',
-		'Not allowed file type'                            : 'Not allowed file type.',
-		'File exceeds the maximum allowed filesize'        : 'File exceeds maximum allowed size.',
-		'Unable to copy into itself'                       : 'Unable to copy "$1" into itself.',
-		'Unable to create archive'                         : 'Unable to create archive.',
-		'Unable to extract files from archive'             : 'Unable to extract files from "$1".'
-	}
+	// this.errors = {
+	// 	'Unknown command'                                  : 'Unknown command.',
+	// 	'Invalid backend configuration'                    : 'Invalid backend configuration.',
+	// 	'Access denied'                                    : 'Access denied.',
+	// 	'PHP JSON module not installed'                    : 'PHP JSON module not installed.',
+	// 	'File not found'                                   : 'File not found.',
+	// 	'Invalid name'                                     : 'Invalid file name.',
+	// 	'File or folder with the same name already exists' : 'File named "$1" already exists in this location.',
+	// 	'Not allowed file type'                            : 'Not allowed file type.',
+	// 	'File exceeds the maximum allowed filesize'        : 'File exceeds maximum allowed size.',
+	// 	'Unable to copy into itself'                       : 'Unable to copy "$1" into itself.',
+	// 	'Unable to create archive'                         : 'Unable to create archive.',
+	// 	'Unable to extract files from archive'             : 'Unable to extract files from "$1".'
+	// }
 	
 	this.normalize = function(cmd, data) {
 		var self = this,
@@ -158,13 +157,13 @@ window.elFinderSupportVer1 = function() {
 			return data;
 		}
 		
-		if (data.error) {
-			$.each(data.error, function(i, msg) {
-				if (self.errors[msg]) {
-					data.error[i] = self.errors[msg];
-				}
-			});
-		}
+		// if (data.error) {
+		// 	$.each(data.error, function(i, msg) {
+		// 		if (self.errors[msg]) {
+		// 			data.error[i] = self.errors[msg];
+		// 		}
+		// 	});
+		// }
 		
 		if (cmd == 'upload' && data.error) {
 			data.warning = $.extend({}, data.error);
