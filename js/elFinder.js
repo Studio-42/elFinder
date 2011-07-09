@@ -6,6 +6,7 @@
  **/
 window.elFinder = function(node, opts) {
 	this.time('load');
+	
 	var self = this,
 		
 		/**
@@ -173,15 +174,15 @@ window.elFinder = function(node, opts) {
 		 * @type String
 		 * @default "auto"
 		 **/
-		width  = this.options.width || 'auto',
+		width  = 'auto',
 		
 		/**
 		 * elFinder node height
 		 *
 		 * @type Number
-		 * @default 300
+		 * @default 400
 		 **/
-		height = parseInt(this.options.height) || 300,
+		height = 400,
 		
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -1190,6 +1191,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.resize = function(w, h) {
 		node.css('width', w).height(h).trigger('resize');
+		this.trigger('resize', {width : node.width(), height : node.height()});
 	}
 	
 	/**
@@ -1244,7 +1246,7 @@ window.elFinder = function(node, opts) {
 	if (!this.options.url) {
 		return alert(this.i18n('errURL'));
 	}
-	
+
 	$.extend($.ui.keyCode, {
 		'F1' : 112,
 		'F2' : 113,
@@ -1507,8 +1509,16 @@ window.elFinder = function(node, opts) {
 		minHeight : 200
 	});
 
-	// update size
-	this.resize(width, height);
+	if (this.options.width) {
+		width = this.options.width;
+	}
+	
+	if (this.options.height) {
+		height = parseInt(this.options.height);
+	}
+	
+	// update size	
+	self.resize(width, height);
 	
 	// attach events to document
 	$(document)

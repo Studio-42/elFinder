@@ -1,6 +1,6 @@
 "use strict"
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.en = {
+	elFinder.prototype.i18.ar = {
 		translator : 'Tawfek Daghistani  &lt;tawfekov@gmail.com&gt;',
 		language   : 'Arabic', /** Syrian Localization , it may differ if you aren't from Syria or any Country in Middle East**/ 
 		direction  : 'rtl',

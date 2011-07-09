@@ -4,7 +4,7 @@
  * use this file to create new translation
  **/
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.XX = {
+	elFinder.prototype.i18.LANG = {
 		translator : 'Translator name &lt;translator@email.tld&gt;',
 		language   : 'Language of translation',
 		direction  : 'ltr',

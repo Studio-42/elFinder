@@ -24,6 +24,9 @@
 .std42-dialog .ui-dialog-titlebar-close,
 .std42-dialog .ui-dialog-titlebar-close:hover { padding:1px; }
 
+.elfinder-rtl .elfinder-dialog .ui-dialog-titlebar { text-align:right; }
+.elfinder-rtl .elfinder-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close { right:auto; left:.3em; }
+
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
@@ -57,10 +60,17 @@
 	background:url("../img/dialogs.png") 0 0 no-repeat;
 }
 
+.elfinder-rtl .elfinder-dialog-icon { left:auto; right:12px;}
+
+
+
 /*********************** ERROR DIALOG **************************/
 
 .elfinder-dialog-error .ui-dialog-content,
 .elfinder-dialog-confirm .ui-dialog-content { padding-left: 56px; min-height:35px; }
+
+.elfinder-rtl .elfinder-dialog-error .ui-dialog-content,
+.elfinder-rtl .elfinder-dialog-confirm .ui-dialog-content { padding-left:0; padding-right: 56px; }
 
 /*********************** NOTIFY DIALOG **************************/
 
@@ -72,10 +82,13 @@
 	border-bottom:1px solid #ccc;
 	position:relative;
 	padding:.5em;
-	padding-left:30px;
+	
 	text-align:center;
 	overflow:hidden;
 }
+
+.elfinder-ltr .elfinder-notify { padding-left:30px; }
+.elfinder-rtl .elfinder-notify { padding-right:30px; }
 
 .elfinder-notify:last-child { border:0 solid; }
 
@@ -199,11 +212,28 @@
 }
 
 
+/* dialog for elFinder itself */
+.dialogelfinder .dialogelfinder-drag {
+	border-left:0 solid;
+	border-top:0 solid;
+	border-right:0 solid;
+	font-weight:normal;
+	font-size:.9em;
+	padding:2px 12px;
+	cursor:move;
+	position:relative;
+	text-align:left;
+}
 
+.elfinder-rtl .dialogelfinder-drag { text-align:right;}
 
+.dialogelfinder-drag-close {
+	position: absolute;
+	top:50%;
+	margin-top:-8px;
+}
 
-
-
-
+.elfinder-ltr .dialogelfinder-drag-close { right:12px; }
+.elfinder-rtl .dialogelfinder-drag-close { left:12px; }
 
 
