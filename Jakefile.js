@@ -52,10 +52,11 @@ var dirmode = 0755,
 			],
 		'misc':
 			[
+				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
 				path.join(src, 'Changelog'),
 				path.join(src, 'README.md')
 			]
-};
+	};
 
 // custom functions
 function grep(prefix, mask, exculde) {
@@ -175,7 +176,7 @@ file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 });
 
 // IMG + I18N + PHP
-desc('misc')
+desc('copy misc files')
 task('misc', function(){
 	console.log('copy misc files');
 	var cf = files['images']
@@ -206,7 +207,7 @@ task('clean', function(){
 			.concat(grep(path.join('js', 'i18n')))
 			.concat(path.join('css', 'theme.css'))
 			.concat(grep('php'))
-			.concat(['Changelog', 'README.md']);
+			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md']);
 	}
 	for (f in uf) {
 		var file = uf[f];
@@ -225,15 +226,5 @@ task('clean', function(){
 			}
 		}
 	}
-});
-
-desc('help')
-task('help', function(){
-	console.log(
-		'Usage: jake [command]',
-		'\n\nCommands:',
-		'\n	build		 Build elFinder',
-		'\n	clean		 Clean build files'
-	);
 });
 

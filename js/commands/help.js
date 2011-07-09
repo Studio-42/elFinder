@@ -53,19 +53,19 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push(sep);
 			
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('homepage')));
-			html.push(linktpl[r](url, 'http://elrte.org/elfider/')[r](link, fm.i18n('docs')));
+			html.push(linktpl[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
+			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
 			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
-			html.push(linktpl[r](url, 'http://twitter.com/#!/elrte_elfinder')[r](link, fm.i18n('twitter')));
-			html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
+			html.push(linktpl[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			//html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
 			
 			html.push(sep);
 			
 			html.push('<div class="'+prim+'">'+fm.i18n('team')+'</div>');
 			
 			html.push(atpl[r](author, 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chiefdev')));
-			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('mantainer')+', '+fm.i18n('dev')));
-			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('dev')));
+			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('maintainer')));
+			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('contributor')));
 			
 			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			
