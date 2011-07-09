@@ -1,6 +1,8 @@
 /**
  * Default elFinder config
  *
+ * @type  Object
+ * @autor Dmitry (dio) Levashov
  */
 elFinder.prototype.options = {
 	/**
@@ -28,21 +30,38 @@ elFinder.prototype.options = {
 	 * @default null
 	 * @example
 	 *  transport : {
+	 *    init : function(elfinderInstance) { },
 	 *    send : function(options) {
 	 *      var dfrd = $.Deferred();
 	 *      // connect to backend ...
 	 *      return dfrd;
+	 *    },
+	 *    upload : function(data) {
+	 *      var dfrd = $.Deferred();
+	 *      // upload ...
+	 *      return dfrd;
 	 *    }
+	 *    
 	 *  }
 	 **/
-	transport : {
-		// init : function(o) { console.log(o) }
-		// upload : 'iframe'
-	},
+	transport : {},
 
+	/**
+	 * Allow to drag and drop to upload files
+	 *
+	 * @type Boolean|String
+	 * @default  'auto'
+	 */
 	dragUploadAllow : 'auto',
 	
+	/**
+	 * Timeout for upload using iframe
+	 *
+	 * @type Number
+	 * @default  0 - no timeout
+	 */
 	iframeTimeout : 0,
+	
 	/**
 	 * Data to append to all requests and to upload files
 	 *
@@ -85,8 +104,6 @@ elFinder.prototype.options = {
 		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
 		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help'
 	],
-	
-	// commands : ['edit'],
 	
 	/**
 	 * Commands options.
@@ -313,8 +330,8 @@ elFinder.prototype.options = {
 	/**
 	 * Debug config
 	 *
-	 * @type Array|Boolen
+	 * @type Array|Boolean
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'backend-debug_', 'event-viewchange']
+	debug : ['error', 'warning']
 }
