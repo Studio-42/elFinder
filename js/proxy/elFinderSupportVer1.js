@@ -10,8 +10,10 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-window.elFinderSupportVer1 = function() {
+window.elFinderSupportVer1 = function(upload) {
 	var self = this;
+	
+	this.upload = upload || 'auto';
 	
 	this.init = function(fm) {
 		this.fm = fm;
