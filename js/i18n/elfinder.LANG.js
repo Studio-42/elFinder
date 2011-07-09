@@ -1,12 +1,12 @@
-"use strict"
 /**
  * elFinder translation template
- *
+ * 
+ * use this file to create new translation
  **/
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.en = {
-		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
-		language   : 'English',
+	elFinder.prototype.i18.XX = {
+		translator : 'Translator name &lt;translator@email.tld&gt;',
+		language   : 'Language of translation',
 		direction  : 'ltr',
 		messages   : {
 			
@@ -14,9 +14,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'error'                : 'Error',
 			'errUnknown'           : 'Unknown error.',
 			'errUnknownCmd'        : 'Unknown command.',
-			'errJqui'              : 'Invalid jQuery UI configuration. Check selectable, draggable and droppable components included.',
-			'errNode'              : 'elFinder required DOM Element to be created.',
-			'errURL'               : 'Invalid elFinder configuration! You have to set URL option.',
+			'errJqui'              : 'Invalid jQuery UI configuration. Selectable, draggable and droppable components must be included.',
+			'errNode'              : 'elFinder requires DOM Element to be created.',
+			'errURL'               : 'Invalid elFinder configuration! URL option is not set.',
 			'errAccess'            : 'Access denied.',
 			'errConnect'           : 'Unable to connect to backend.',
 			'errAbort'             : 'Connection aborted.',
@@ -25,11 +25,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResponse'          : 'Invalid backend response.',
 			'errConf'              : 'Invalid backend configuration.',
 			'errJSON'              : 'PHP JSON module not installed.',
-			'errNoVolumes'         : 'There are no one readable volumes available.',
+			'errNoVolumes'         : 'Readable volumes not available.',
 			'errCmdParams'         : 'Invalid parameters for command "$1".',
 			'errDataNotJSON'       : 'Data is not JSON.',
 			'errDataEmpty'         : 'Data is empty.',
-			'errCmdReq'            : 'Backend request required command name.',
+			'errCmdReq'            : 'Backend request requires command name.',
 			'errOpen'              : 'Unable to open "$1".',
 			'errNotFolder'         : 'Object is not a folder.',
 			'errNotFile'           : 'Object is not a file.',
@@ -37,7 +37,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errWrite'             : 'Unable to write into "$1".',
 			'errPerm'              : 'Permission denied.',
 			'errLocked'            : '"$1" is locked and can not be renamed, moved or removed.',
-			'errExists'            : 'File named "$1" already exists in this location.',
+			'errExists'            : 'File named "$1" already exists.',
 			'errInvName'           : 'Invalid file name.',
 			'errFolderNotFound'    : 'Folder not found.',
 			'errFileNotFound'      : 'File not found.',
@@ -46,14 +46,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMkdir'             : 'Unable to create folder "$1".',
 			'errMkfile'            : 'Unable to create file "$1".',
 			'errRename'            : 'Unable to rename "$1".',
-			'errCopyFrom'          : 'Copy files from volume "$1" not allowed.',
-			'errCopyTo'            : 'Copy files to volume "$1" not allowed.',
+			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
+			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
 			'errUploadCommon'      : 'Upload error.',
 			'errUpload'            : 'Unable to upload "$1".',
-			'errUploadNoFiles'     : 'There are no uploaded files was found.',
+			'errUploadNoFiles'     : 'No files found for upload.',
 			'errMaxSize'           : 'Data exceeds the maximum allowed size.',
 			'errFileMaxSize'       : 'File exceeds maximum allowed size.',
-			'errUploadMime'        : 'Not allowed file type.',
+			'errUploadMime'        : 'File type not allowed.',
 			'errUploadTransfer'    : '"$1" transfer error.', 
 			'errSave'              : 'Unable to save "$1".',
 			'errCopy'              : 'Unable to copy "$1".',
@@ -122,8 +122,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
-			'Today'       : 'Сегодня',
-			'Yesterday'   : 'Вчера',
+			'Today'       : 'Today',
+			'Yesterday'   : 'Yesterday',
 			'Jan'         : 'Jan',
 			'Feb'         : 'Feb',
 			'Mar'         : 'Mar',
@@ -156,8 +156,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectfiles'     : 'Select file(s)',
 			'selectffile'     : 'Select first file',
 			'selectlfile'     : 'Select last file',
-			'viewlist'        : 'View as list',
-			'viewicons'       : 'View as icons',
+			'viewlist'        : 'List view',
+			'viewicons'       : 'Icons view',
 			'places'          : 'Places',
 			'calc'            : 'Calculate', 
 			'path'            : 'Path',
@@ -181,7 +181,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'homepage'        : 'Project home',
 			'docs'            : 'Documentation',
 			'github'          : 'Fork us on Github',
-			'twitter'         : 'Follow us in twitter',
+			'twitter'         : 'Follow us on twitter',
 			'facebook'        : 'Join us on facebook',
 			'team'            : 'Team',
 			'chiefdev'        : 'chief developer',
@@ -277,7 +277,4 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	}
 }
-
-
- 
 
