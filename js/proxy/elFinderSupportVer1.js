@@ -167,10 +167,11 @@ window.elFinderSupportVer1 = function(upload) {
 		// 	});
 		// }
 		
-		if (cmd == 'upload' && data.error) {
+		if (cmd == 'upload' && data.error && data.cwd) {
 			data.warning = $.extend({}, data.error);
 			data.error = false;
 		}
+		
 		
 		if (data.error) {
 			return data;
