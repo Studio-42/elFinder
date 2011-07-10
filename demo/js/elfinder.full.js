@@ -2953,7 +2953,7 @@ elFinder.prototype.options = {
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'search', '|', 'info'],
 		// current directory file menu
-		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'edit', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'archive', 'extract', '|', 'info']
+		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', '|', 'archive', 'extract', '|', 'info']
 	},
 
 	/**
@@ -7548,7 +7548,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
-	this.prefix          = 'untitled folder.txt';
+	this.prefix          = 'untitled file';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {

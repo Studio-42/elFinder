@@ -114,6 +114,7 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 	padding:6px 24px 10px 24px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #528ecc;
+	text-align: center;
 	line-height: 90%;
 }
   .download-button:hover {
