@@ -9,7 +9,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
-	this.prefix          = 'untitled folder.txt';
+	this.prefix          = 'untitled file';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {
