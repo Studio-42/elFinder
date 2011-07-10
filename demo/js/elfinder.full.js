@@ -1,3 +1,11 @@
+/*!
+ * elFinder - file manager for web
+ * Version 2.0 beta (2011-07-10)
+ * http://elfinder.org
+ * 
+ * Copyright 2009-2011, Studio 42
+ * Licensed under a 3 clauses BSD license
+ */
 (function($) {
 
 
@@ -2561,7 +2569,7 @@ elFinder.prototype = {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.0 beta1';
+elFinder.prototype.version = '2.0 beta';
 
 
 
@@ -3493,6 +3501,98 @@ elFinder.prototype.resources = {
 
 
 /*
+ * File: /home/troex/Sites/git/elfinder-2.x/js/jquery.dialogelfinder.js
+ */
+
+/**
+ * @class dialogelfinder - open elFinder in dialog window
+ *
+ * @param  Object  elFinder options with dialog options
+ * @example
+ * $(selector).dialogelfinder({
+ *     // some elfinder options
+ *     title          : 'My files', // dialog title, default = "Files"
+ *     width          : 850,        // dialog width, default 840
+ *     autoOpen       : false,      // if false - dialog will not be opened after init, default = true
+ *     destroyOnClose : true        // destroy elFinder on close dialog, default = false
+ * })
+ * @author Dmitry (dio) Levashov
+ **/
+$.fn.dialogelfinder = function(opts) {
+	var position = 'elfinderPosition',
+		destroy  = 'elfinderDestroyOnClose';
+	
+	this.not('.elfinder').each(function() {
+		
+		var doc     = $(document),
+			toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
+			button  = $('<a href="#" class="dialogelfinder-drag-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></a>')
+				.appendTo(toolbar)
+				.click(function(e) {
+					e.preventDefault();
+					
+					node.dialogelfinder('close');
+				}),
+			node    = $(this).addClass('dialogelfinder')
+				.css('position', 'absolute')
+				.hide()
+				.appendTo('body')
+				.draggable({ handle : '.dialogelfinder-drag'})
+				.elfinder(opts)
+				.prepend(toolbar),
+			elfinder = node.elfinder('instance');
+		
+		
+		node.width(parseInt(node.width()) || 840) // fix width if set to "auto"
+			.data(destroy, !!opts.destroyOnClose)
+			.find('.elfinder-toolbar').removeClass('ui-corner-top');
+		
+		opts.position && node.data(position, opts.position);
+		
+		opts.autoOpen !== false && $(this).dialogelfinder('open');
+
+	});
+	
+	if (opts == 'open') {
+		var node = $(this),
+			pos  = node.data(position) || {
+				top  : parseInt(($(document).height() - node.height())/2 - 12),
+				left : parseInt(($(document).width() - node.width())/2)
+			},
+			zindex = 100;
+			
+		if (node.is(':hidden')) {
+			
+			$('body').find(':visible').each(function() {
+				var $this = $(this), z;
+				
+				if (this !== node[0] && $this.css('position') == 'absolute' && (z = parseInt($this.zIndex())) > zindex) {
+					zindex = z + 1;
+				}
+			});
+
+			node.zIndex(zindex).css(pos).show().trigger('resize')
+
+			setTimeout(function() {
+				// fix resize icon position and make elfinder active
+				node.trigger('resize').mousedown();
+			}, 200);
+		}
+	} else if (opts == 'close') {
+		var node = $(this);
+			
+		if (node.is(':visible')) {
+			!!node.data(destroy)
+				? node.elfinder('destroy').remove()
+				: node.elfinder('close');
+		}
+	}
+	
+	return this;
+}
+
+
+/*
  * File: /home/troex/Sites/git/elfinder-2.x/js/i18n/elfinder.en.js
  */
 
@@ -3632,7 +3732,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
-			'confirmRm'       : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
@@ -7420,7 +7520,7 @@ elFinder.prototype.commands.mkdir = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
-	this.prefix          = 'untitle folder';
+	this.prefix          = 'untitled folder';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.shortcuts = [{
@@ -7432,6 +7532,7 @@ elFinder.prototype.commands.mkdir = function() {
 	}
 
 }
+
 
 /*
  * File: /home/troex/Sites/git/elfinder-2.x/js/commands/mkfile.js
@@ -7447,7 +7548,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
-	this.prefix          = 'untitle file.txt';
+	this.prefix          = 'untitled folder.txt';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {
@@ -7455,6 +7556,7 @@ elFinder.prototype.commands.mkfile = function() {
 	}
 
 }
+
 
 /*
  * File: /home/troex/Sites/git/elfinder-2.x/js/commands/open.js

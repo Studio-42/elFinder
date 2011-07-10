@@ -48,17 +48,19 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
   
   .header a { text-decoration: none; color: #222; }
 
-  .menu { float: right; margin-top: 15px; margin-right: 30px; }
-    .menu ul { margin: 15px 0 0 0; padding: 0; }
+  .menu { float: right; margin-top: 18px; margin-right: 65px; }
+    .menu ul { margin: 15px 0; padding: 0; }
     .menu ul li {
       display: inline;
       font-family: 'Trebuchet MS', helvetica, sans-serif;
       font-weight: bold;
-      padding-left: 15px;
+      padding: 0 7px;
       font-size: 1.4em;
     }
-    .menu a       { color: #222; text-decoration: none; }
-    .menu a:hover { border-bottom: 3px solid #50a1d5; }
+    .menu li a       { color: #222; text-decoration: none; }
+    .menu li a:hover { border-bottom: 3px solid #50a1d5; }
+    
+  .download { float: right; margin-top: 20px; }
 
 .content {}
   .content a       { color: #222; }
@@ -67,6 +69,12 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 .footer { text-align: center; margin-top: 40px; font-size: 0.8em; }
   .footer a { font-style: italic; text-decoration: none; color: #222; }
   .footer a:hover { text-decoration: underline; }
+
+/* elFinder wide icons */
+#elfinder .elfinder-cwd-view-icons .elfinder-cwd-file {
+  width: 120px;
+  height: 95px;
+}
 
 /* message styles */
 .message {
@@ -84,6 +92,44 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
     background: url(/images/warning.png) 10px 50% no-repeat;
   }
 
+/* Download button */
+
+.download-button {
+	-moz-box-shadow:inset 0px 0px 0px 0px #bbdaf7;
+	-webkit-box-shadow:inset 0px 0px 0px 0px #bbdaf7;
+	box-shadow:inset 0px 0px 0px 0px #bbdaf7;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #79bbff), color-stop(1, #378de5) );
+	background:-moz-linear-gradient( center top, #79bbff 5%, #378de5 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#79bbff', endColorstr='#378de5');
+	background-color:#79bbff;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #84bbf3;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:1.2em;
+	font-weight:bold;
+	padding:6px 24px 10px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #528ecc;
+	line-height: 90%;
+}
+  .download-button:hover {
+	  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #378de5), color-stop(1, #79bbff));
+	  background:-moz-linear-gradient( center top, #378de5 5%, #79bbff 100% );
+	  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#378de5', endColorstr='#79bbff');
+	  background-color:#378de5;
+  }
+  .download-button:active {
+	  position:relative;
+	  top:1px;
+  }
+  a.download-button { color: #ffffff; }
+  .download-button span { font-size: 0.6em; color: #eeeeee; line-height: 80%;}
+
+/* misc */
 .text-center { text-align: center; }
 
 .clearfix:after {content: ".";display: block;height: 0;clear: both;visibility: hidden;}
