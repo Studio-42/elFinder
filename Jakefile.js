@@ -29,6 +29,7 @@ var dirmode = 0755,
 				path.join(src, 'js', 'elFinder.history.js'),
 				path.join(src, 'js', 'elFinder.command.js'),
 				path.join(src, 'js', 'elFinder.resources.js'),
+				path.join(src, 'js', 'jquery.dialogelfinder.js'),
 				path.join(src, 'js', 'i18n', 'elfinder.en.js')
 			]
 			.concat(grep(path.join(src, 'js', 'ui'), '\\.js$'))
@@ -90,6 +91,25 @@ function copyFile(from, to, overwrite) {
 	return util.pump(srcs, dsts);
 }
 
+function getComment() {
+	var ver = fs.readFileSync(path.join(src, 'js', 'elFinder.version.js')).toString();
+	ver = ver.match(/= '(.+)';/);
+	var d = new Date();
+	var bd = d.getFullYear() + '-' +
+		(d.getMonth() >= 9 ? '' : '0') + (d.getMonth() + 1) + '-' +
+		(d.getDate() >= 10 ? '' : '0') + d.getDate();
+	var comment =
+		'/*!\n' +
+		' * elFinder - file manager for web\n' +
+		' * Version ' + ver[1] + ' (' + bd + ')\n' +
+		' * http://elfinder.org\n' +
+		' * \n' +
+		' * Copyright 2009-2011, Studio 42\n' +
+		' * Licensed under a 3 clauses BSD license\n' +
+		' */\n';
+	return comment;
+}
+
 // tasks
 desc('Help')
 task('default', function(){
@@ -130,7 +150,7 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 		data += '\n/* File: ' + file + ' */\n';
 		data += fs.readFileSync(file);
 	}
-	fs.writeFileSync(this.name, data);
+	fs.writeFileSync(this.name, getComment() + data);
 });
 
 desc('optimize elfinder.min.css');
@@ -145,7 +165,7 @@ file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 		).nodes,
 		''
 	);
-	fs.writeFileSync(this.name, csso);
+	fs.writeFileSync(this.name, getComment() + csso);
 });
 
 // JS
@@ -163,7 +183,7 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 		data = data.replace(strict, '');
 	}
 	data = '(function($) {\n' + data + '\n})(jQuery);'; // add closure
-	fs.writeFileSync(this.name, data);
+	fs.writeFileSync(this.name, getComment() + data);
 });
 
 desc('uglify elfinder.min.js');
@@ -172,7 +192,8 @@ file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	var ast = ugp.parse(fs.readFileSync('js/elfinder.full.js').toString()); // parse code and get the initial AST
 	ast = ugu.ast_mangle(ast); // get a new AST with mangled names
 	ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
-	fs.writeFileSync(this.name, ugu.gen_code(ast));
+	var result = ugu.split_lines(ugu.gen_code(ast), 1024 * 8); // insert new line every 8 kb
+	fs.writeFileSync(this.name, getComment() + result);
 });
 
 // IMG + I18N + PHP

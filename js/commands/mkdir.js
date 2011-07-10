@@ -9,7 +9,7 @@ elFinder.prototype.commands.mkdir = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
-	this.prefix          = 'untitle folder';
+	this.prefix          = 'untitled folder';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.shortcuts = [{
