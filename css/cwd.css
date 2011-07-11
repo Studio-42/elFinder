@@ -1,38 +1,42 @@
 /******************************************************************/
 /*                     CURRENT DIRECTORY STYLES                   */
 /******************************************************************/
+/* cwd container to avoid selectable on scrollbar */
+.elfinder-cwd-wrapper {
+	overflow: auto;
+	position:relative;
+	padding:2px;
+	margin:0;
+}
+
+.elfinder-cwd-wrapper-list { padding:0; }
 
 /* container */
 .elfinder-cwd { 
-	overflow: auto;
 	position:relative;
 	font-size:.7em;
 	cursor:default;
-/*	border:2px solid transparent;*/
-	padding:2px;
+	padding:0;
 	margin:0;
-/*	border:2px solid red;*/
-/*	margin-right:0 ;*/
+/*	border:1px solid #111;*/
 }
 
 /* container active on dropenter */
-
-.elfinder .elfinder-cwd.elfinder-droppable-active {
+.elfinder .elfinder-cwd-wrapper.elfinder-droppable-active {
 	padding:0;
 	border:2px solid #8cafed;
 }
 
+
 /************************** ICONS VIEW ********************************/
 
 /* file container */
-
 .elfinder-cwd-view-icons .elfinder-cwd-file {
 	width:80px;
 	height:80px;
 	padding-bottom:2px;
 	cursor:default;
 	overflow:hidden;
-/*	font-family:verdana, trebuchet ms, arial,sans-serif;*/
 }
 
 /* ltr/rtl enviroment */
@@ -145,7 +149,7 @@
 
 /************************************  LIST VIEW ************************************/
 
-.elfinder-cwd-view-list { padding:0 0 4px 0; }
+/*.elfinder-cwd-view-list { padding:0 0 4px 0; }*/
 
 .elfinder-cwd table { width:100%; border-collapse:collapse; border:0 solid; margin:0; }
 .elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-top:0 solid; border-right:0 solid; }
