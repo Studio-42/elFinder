@@ -589,7 +589,7 @@ window.elFinder = function(node, opts) {
 			return file.url;
 		}
 		if (cwdOptions.url && (path = this.path(hash))) {
-			path = path.replace(cwdOptions.separator, '/');
+			path = path.split(cwdOptions.separator).join('/');
 			return cwdOptions.url + path.substr(path.indexOf('/')+1);
 		}
 		return '';
