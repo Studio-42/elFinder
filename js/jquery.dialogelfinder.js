@@ -1,3 +1,4 @@
+
 "use strict";
 /**
  * @class dialogelfinder - open elFinder in dialog window
@@ -18,6 +19,7 @@ $.fn.dialogelfinder = function(opts) {
 		destroy  = 'elfinderDestroyOnClose';
 	
 	this.not('.elfinder').each(function() {
+
 		
 		var doc     = $(document),
 			toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
@@ -83,5 +85,7 @@ $.fn.dialogelfinder = function(opts) {
 		}
 	}
 	
+
 	return this;
 }
+

@@ -205,34 +205,9 @@ $opts = array(
 			'imgLib' => 'imagick',
 #			'tmbURL'    => '.tmb/',
 			'utf8fix' => false,
+			'acceptedName' => '/[a-z0-9_\-]+/i',
 			'attributes' => array(
-				// array(
-				// 	'pattern' => '/\/__.*/',
-				// 	'hidden'  => true
-				// ),
-				// array(
-				// 	'pattern' => '/\/\..*$/',
-				// 	'read'    => false,
-				// 	'write'   => true,
-				// 	'locked'  => false,
-				// 	'hidden'  => true
-				// ),
-				// array(
-					// 'pattern' => '/folder$/',
-				// 	'read' => false
-				// 	// 'write' => false
-				// ),
-				// array(
-				// 	'pattern' => '/folder-23$/',
-				// 	'write' => false
-				// ),
-				array(
-					'pattern' => '/\/folder42$/',
-					'write' => false,
-					// 'read' => false,
-					// 'hidden' => true,
-					'locked' => true
-				)
+				
 			),
 		),
 		array(
@@ -245,6 +220,7 @@ $opts = array(
 			'user_id' => 1,
 			'accessControl' => 'access',
 			'separator' => ':',
+			
 			// 'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../files/.dbtmb/',

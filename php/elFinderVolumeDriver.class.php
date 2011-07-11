@@ -2025,6 +2025,14 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doRm($path) {
+		
+		//https://github.com/Studio-42/elFinder/issues/40
+		// file_exists() return false on symlink points to itself
+		if ($this->_isLink($path)) {
+			$this->rmTmb($path);
+			return $this->_unlink($path);
+		}
+		
 		if (!$this->_fileExists($path)) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
@@ -2036,7 +2044,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_LOCKED, $name);
 		}
 
-		if ($this->_isLink($path) || $this->_isFile($path)) {
+		if ($this->_isFile($path)) {
 			$this->rmTmb($path);
 			return $this->_unlink($path);
 		} elseif ($this->_isDir($path)) {
