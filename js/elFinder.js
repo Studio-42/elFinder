@@ -2504,17 +2504,21 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	formatSize : function(s) {
-		var n = 1, u = 'bytes';
+		var n = 1, u = 'b';
+		
+		if (s == 'unknown') {
+			return this.i18n('unknown');
+		}
 		
 		if (s > 1073741824) {
 			n = 1073741824;
-			u = 'Gb';
+			u = 'GB';
 		} else if (s > 1048576) {
 			n = 1048576;
-			u = 'Mb';
+			u = 'MB';
 		} else if (s > 1024) {
 			n = 1024;
-			u = 'Kb';
+			u = 'KB';
 		}
 		return (s > 0 ? Math.round(s/n) : 0) +' '+u;
 	},

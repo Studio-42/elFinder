@@ -207,7 +207,11 @@ $opts = array(
 			'utf8fix' => false,
 			'acceptedName' => '/[a-z0-9_\-]+/i',
 			'attributes' => array(
-				
+				array(
+					'pattern' => '/1\.tiff$/',
+					'read' => false,
+					'write' => false
+				)
 			),
 		),
 		array(

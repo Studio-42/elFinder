@@ -1796,29 +1796,34 @@ abstract class elFinderVolumeDriver {
 		
 		if ($link) {
 			$stat = $this->_lstat($path);
-			$file['size'] = $stat['size'];
-			$file['date'] = $this->formatDate($stat['mtime']);
-		} else {
 			
-			$file['size'] = $dir ? 0 : $this->_filesize($path);
-			$file['date'] = $this->formatDate($this->_filemtime($path));
-		}
-
-		if ($link) {
+			$file['date'] = $this->formatDate($stat['mtime']);
+			
 			if (($target = $this->_readlink($path)) != false) {
 				$file['mime']  = $this->mimetype($target);
 				$file['alias'] = $this->_path($target);
 				$file['read']  = (int)$this->attr($path, 'read');
 				$file['write'] = (int)$this->attr($path, 'write');
+				$file['size']  = $stat['size'];
 			} else {
 				$file['mime']  = 'symlink-broken';
 				$file['read']  = 0;
 				$file['write'] = 0;
 			}
+			
 		} else {
 			$file['mime']  = $dir ? 'directory' : $this->mimetype($path);
+			// $file['size'] = $dir ? 0 : $this->_filesize($path);
+			$file['date'] = $this->formatDate($this->_filemtime($path));
 			$file['read']  = (int)$this->attr($path, 'read');
 			$file['write'] = (int)$this->attr($path, 'write');
+			if (!$file['read']) {
+				$file['size'] = 'unknown';
+			} elseif ($dir) {
+				$file['size'] = 0;
+			} else {
+				$file['size'] = $this->_filesize($path);
+			}
 		}
 
 		if ($this->attr($path, 'locked')) {

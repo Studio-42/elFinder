@@ -36,9 +36,17 @@ $.fn.elfinderstat = function(fm) {
 		})
 		.select(function() {
 			var s = 0,
-				c = 0;
+				c = 0,
+				files = fm.selectedFiles();
 
-			$.each(fm.selectedFiles(), function(i, file) {
+			if (files.length == 1) {
+				s = files[0].size;
+				sel.html(fm.escape(files[0].name)+(s > 0 ? ', '+fm.formatSize(s) : ''));
+				
+				return;
+			}
+
+			$.each(files, function(i, file) {
 				c++;
 				s += parseInt(file.size)||0;
 			});

@@ -32,7 +32,7 @@
 
 /* file container */
 .elfinder-cwd-view-icons .elfinder-cwd-file {
-	width:80px;
+	width:120px;
 	height:80px;
 	padding-bottom:2px;
 	cursor:default;
@@ -40,8 +40,8 @@
 }
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 3px 0; }
-.elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file { float:right; margin:0 0 3px 3px; }
+.elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 12px 0; }
+.elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file { float:right; margin:0 0 5px 3px; }
 
 /* remove ui hover class border */
 .elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-hover { border:0 solid; }
