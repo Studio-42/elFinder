@@ -16,6 +16,8 @@ $.fn.elfinderdialog = function(opts) {
 			dialog.hide().trigger('close');
 		} else if (opts == 'destroy') {
 			dialog.hide().remove();
+		} else if (opts == 'toTop') {
+			dialog.mousedown();
 		}
 	}
 	

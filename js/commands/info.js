@@ -64,20 +64,25 @@ elFinder.prototype.commands.info = function() {
 			l       = '{label}',
 			v       = '{value}',
 			opts    = {
-				title    : this.title,
-				// autoOpen : false,
-				// width    : 270,
-				// test in ie >_<
+				title : this.title,
 				width : 'auto',
 				close : function() { $(this).elfinderdialog('destroy'); }
 			},
 			count = [],
 			replSpinner = function(msg) { dialog.find('.'+spclass).parent().text(msg); },
-			dialog, size, tmb, file, title, dcnt;
+			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash }).join('-'),
+			dialog = fm.getUI().find('#'+id), 
+			size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
 		}
+			
+		if (dialog.length) {
+			dialog.elfinderdialog('toTop');
+			return $.Deferred().resolve();
+		}
+		
 			
 		if (cnt == 1) {
 			file  = files[0];
@@ -141,7 +146,8 @@ elFinder.prototype.commands.info = function() {
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
 		
 		dialog = fm.dialog(view, opts);
-		
+		dialog.attr('id', id)
+
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
