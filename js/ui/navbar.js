@@ -3,8 +3,8 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfindernavbar = function(fm) {
-	
+$.fn.elfindernavbar = function(fm, opts) {
+
 	this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).addClass('ui-state-default elfinder-navbar'),
 			parent = nav.parent()
@@ -18,7 +18,11 @@ $.fn.elfindernavbar = function(fm) {
 
 		
 		if ($.fn.resizable) {
-			handle = nav.resizable({handles : ltr ? 'e' : 'w'})
+			handle = nav.resizable({
+					handles : ltr ? 'e' : 'w',
+					minWidth : opts.minWidth || 150,
+					maxWidth : opts.maxWidth || 500
+				})
 				.scroll(function() {
 					handle.css('top', parseInt(nav.scrollTop())+'px');
 				})

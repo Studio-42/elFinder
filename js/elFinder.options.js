@@ -178,6 +178,11 @@ elFinder.prototype.options = {
 			openRootOnLoad : true,
 			// auto load current dir parents
 			syncTree : true
+		},
+		// navbar options
+		navbar : {
+			minWidth : 150,
+			maxWidth : 500
 		}
 	},
 

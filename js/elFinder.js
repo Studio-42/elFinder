@@ -1463,7 +1463,7 @@ window.elFinder = function(node, opts) {
 		// container for nav panel and current folder container
 		workzone : $('<div/>').appendTo(node).elfinderworkzone(this),
 		// container for folders tree / places
-		navbar : $('<div/>').appendTo(node).elfindernavbar(this),
+		navbar : $('<div/>').appendTo(node).elfindernavbar(this, this.options.uiOptions.navbar || {}),
 		// contextmenu
 		contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(this),
 		// overlay
