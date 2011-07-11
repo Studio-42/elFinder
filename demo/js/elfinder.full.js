@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.0 beta (2011-07-10)
+ * Version 2.0 beta (2011-07-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2011, Studio 42
@@ -7548,7 +7548,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
-	this.prefix          = 'untitled file';
+	this.prefix          = 'untitled file.txt';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {
