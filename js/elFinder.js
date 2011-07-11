@@ -1503,8 +1503,7 @@ window.elFinder = function(node, opts) {
 	this.options.resizable 
 	&& $.fn.resizable 
 	&& node.resizable({
-		handles : 'se',
-		alsoResize : self.ui.workzone,
+		handles   : 'se',
 		minWidth  : 300,
 		minHeight : 200
 	});
