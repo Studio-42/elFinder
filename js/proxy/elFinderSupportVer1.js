@@ -266,6 +266,7 @@ window.elFinderSupportVer1 = function(upload) {
 		var mime = file.mime || 'directory',
 			size = mime == 'directory' && !file.linkTo ? 0 : file.size,
 			info = {
+				url    : file.url,
 				hash   : file.hash,
 				phash  : phash,
 				name   : file.name,

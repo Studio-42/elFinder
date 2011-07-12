@@ -54,6 +54,9 @@ elFinder.prototype.commands.rename = function() {
 				.mousedown(function(e) {
 					e.stopPropagation();
 				})
+				// .bind('contextmenu', function(e) {
+				// 	e.stopPropagation()
+				// })
 				.blur(function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent();
@@ -90,6 +93,7 @@ elFinder.prototype.commands.rename = function() {
 				}),
 			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
 		
+		
 		if (!file || cnt > 1 || !node.length) {
 			return dfrd.reject('errCmdParams', this.title);
 		}
@@ -98,7 +102,7 @@ elFinder.prototype.commands.rename = function() {
 			return dfrd.reject(['errLocked', file.name]);
 		}
 		
-		fm.disable();
+		// fm.disable();
 		input.select().focus();
 		
 		return dfrd;

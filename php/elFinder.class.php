@@ -136,9 +136,9 @@ class elFinder {
 	
 	
 	/**
-	 * undocumented class variable
+	 * Error messages
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected static $errors = array(
 		0  => 'errUnknown',
@@ -162,7 +162,7 @@ class elFinder {
 		18 => 'errRename',
 		19 => 'errCopy',
 		20 => 'errMove',
-		21 => 'CerrCopyFrom',
+		21 => 'errCopyFrom',
 		22 => 'errCopyTo',
 		23 => 'errCopyInItself',
 		24 => 'errRm',
