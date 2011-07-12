@@ -1599,10 +1599,11 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function encode($path) {
 		if ($path) {
+
 			// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
 			$p = $this->_relpath($path);
 			// if reqesting root dir $path will be empty, then assign '/' as we cannot leave it blank for crypt
-			if (!$p)	{
+			if ($p === '')	{
 				$p = DIRECTORY_SEPARATOR;
 			}
 

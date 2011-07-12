@@ -79,7 +79,7 @@ class elFinderConnector {
 			if (!is_array($arg)) {
 				$arg = trim($arg);
 			}
-			if ($req && empty($arg)) {
+			if ($req && (!isset($arg) || $arg === '')) {
 				$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_INV_PARAMS, $cmd)));
 			}
 			$args[$name] = $arg;
