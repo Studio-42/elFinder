@@ -70,9 +70,6 @@ elFinder.prototype.command = function(fm) {
 		disable : function() { this.update(-1, this.value); },
 		'open reload load'    : function(e) { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
-			if (this._disabled) {
-				this.fm.log(this.name+' disabled')
-			}
 			this.update(void(0), this.value)
 			this.change(); 
 		}
@@ -126,7 +123,6 @@ elFinder.prototype.command = function(fm) {
 		for (i = 0; i < this.shortcuts.length; i++) {
 			s = this.shortcuts[i];
 			s.callback = $.proxy(s.callback || function() { this.exec() }, this);
-			// s.callback = f
 			!s.description && (s.description = this.title);
 			fm.shortcut(s);
 		}

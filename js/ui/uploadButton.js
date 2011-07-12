@@ -19,5 +19,10 @@ $.fn.elfinderuploadbutton = function(cmd) {
 						input = _input.appendTo(form);
 					} 
 				});
+				
+		cmd.change(function() {
+			form[cmd.disabled() ? 'hide' : 'show']();
+		})
+		.change();
 	});
 }
