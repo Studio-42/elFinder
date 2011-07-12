@@ -192,8 +192,8 @@ $opts = array(
 			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			'alias'  => 'File system',
 			'caseSensitive' => true,
-			'accessControl' => array($acl, 'fsAccess'),
-			'accessControlData' => array('uid' => 1),
+			// 'accessControl' => array($acl, 'fsAccess'),
+			// 'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array('all'),
@@ -205,12 +205,13 @@ $opts = array(
 			'imgLib' => 'imagick',
 #			'tmbURL'    => '.tmb/',
 			'utf8fix' => false,
-			'acceptedName' => '/[a-z0-9_\-]+/i',
+			'acceptedName' => '#^[^\.]#', //'/[a-z0-9_\-]+/i',
 			'attributes' => array(
 				array(
-					'pattern' => '/1\.tiff$/',
-					'read' => false,
-					'write' => false
+					'pattern' => '/\/\..+/',
+					// 'read' => false,
+					// 'write' => false
+					// 'locked' => true
 				)
 			),
 		),

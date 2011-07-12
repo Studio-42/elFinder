@@ -161,7 +161,7 @@ class elFinder {
 		17 => 'errMkfile',
 		18 => 'errRename',
 		19 => 'errCopy',
-		20 => 'erMove',
+		20 => 'errMove',
 		21 => 'CerrCopyFrom',
 		22 => 'errCopyTo',
 		23 => 'errCopyInItself',
@@ -1086,29 +1086,29 @@ class elFinder {
 		if ($src['mime'] == 'directory') {
 
 			if (($dir = $dstVolume->mkdir($dst, $name, true)) == false) {
-				$this->error($error, $name, $dstVolume->error());
+				$this->copyError = $this->error($error, $name, $dstVolume->error());
 				return false;
 			}
 			
 			if (($files = $srcVolume->scandir($hash)) === false) {
-				$this->error($error, $name, $srcVolume->error());
+				$this->copyError = $this->error($error, $name, $srcVolume->error());
 				return false;
 			}
 			
 			foreach ($files as $file) {
 				if (!$this->copy($srcVolume, $dstVolume, $file, $dir['hash'], $cut)) {
-					$this->error($error, $file['name'], $srcVolume->error());
+					$this->copyError = $this->error($error, $file['name'], $srcVolume->error());
 					return false;
 				}
 			}
 			return $dstVolume->dir($dir['hash']);
 		} else {
 			if (($fp = $srcVolume->open($hash)) == false) {
-				$this->error($error, $name, $srcVolume->error());
+				$this->copyError = $this->error($error, $name, $srcVolume->error());
 				return false;
 			}
 			if (($file = $dstVolume->save($fp, $dst, $name, 'copy')) == false) {
-				$this->error($error, $name, $srcVolume->error());
+				$this->copyError = $this->error($error, $name, $srcVolume->error());
 			}
 			$srcVolume->close($fp, $hash);
 			
