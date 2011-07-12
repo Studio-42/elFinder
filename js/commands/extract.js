@@ -28,7 +28,7 @@ elFinder.prototype.commands.extract = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return cnt && filter(sel).length == cnt ? 0 : -1;
+		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -38,7 +38,7 @@ elFinder.prototype.commands.extract = function() {
 			complete = cnt, 
 			i, file, error;
 		
-		if (!(cnt && mimes.length)) {
+		if (!(this.enabled() && cnt && mimes.length)) {
 			return dfrd.reject();
 		}
 		

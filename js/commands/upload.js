@@ -10,7 +10,6 @@
 elFinder.prototype.commands.upload = function() {
 	var hover = this.fm.res('class', 'hover');
 	
-	
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	
@@ -25,7 +24,7 @@ elFinder.prototype.commands.upload = function() {
 	 * @return Number
 	 **/
 	this.getstate = function() {
-		return this.fm.cwd().write ? 0 : -1;
+		return !this._disabled && this.fm.cwd().write ? 0 : -1;
 	}
 	
 	
@@ -42,6 +41,10 @@ elFinder.prototype.commands.upload = function() {
 					});
 			},
 			dfrd, dialog, input, button, dropbox;
+		
+		if (this.disabled()) {
+			return $.Deferred().reject();
+		}
 		
 		if (data && (data.input || data.files)) {
 			return fm.upload(data);

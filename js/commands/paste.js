@@ -20,6 +20,9 @@ elFinder.prototype.commands.paste = function() {
 	}];
 	
 	this.getstate = function(dst) {
+		if (this._disabled) {
+			return -1;
+		}
 		if (dst) {
 			if ($.isArray(dst)) {
 				if (dst.length != 1) {
@@ -140,7 +143,7 @@ elFinder.prototype.commands.paste = function() {
 					}
 					;
 				
-				if (!files.length) {
+				if (this.disabled() || !files.length) {
 					return dfrd.resolve();
 				}
 					

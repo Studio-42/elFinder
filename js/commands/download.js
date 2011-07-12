@@ -13,8 +13,6 @@ elFinder.prototype.commands.download = function() {
 			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f });
 		};
 	
-	this.alwaysEnabled = true;
-	
 	this.shortcuts = [{
 		pattern     : 'shift+enter'
 	}];
@@ -23,7 +21,7 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return  cnt && cnt == filter(sel).length ? 0 : -1;
+		return  !this._disabled && cnt && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -32,6 +30,10 @@ elFinder.prototype.commands.download = function() {
 			files = filter(hashes),
 			dfrd  = $.Deferred(),
 			iframe, i, url;
+			
+		if (this.disabled()) {
+			return dfrd.reject();
+		}
 			
 		if (fm.oldAPI) {
 			fm.error('errCmdNoSupport');

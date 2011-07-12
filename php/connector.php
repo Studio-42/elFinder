@@ -191,7 +191,7 @@ $opts = array(
 			'path'   => '../files/',
 			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			'alias'  => 'File system',
-			'caseSensitive' => true,
+			'disabled' => array(),
 			// 'accessControl' => array($acl, 'fsAccess'),
 			// 'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',

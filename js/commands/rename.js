@@ -15,7 +15,7 @@ elFinder.prototype.commands.rename = function() {
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();
 
-		return sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
+		return !this._disabled && sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
 	}
 	
 	this.exec = function() {
@@ -90,6 +90,9 @@ elFinder.prototype.commands.rename = function() {
 				}),
 			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
 		
+		if (this.disabled()) {
+			return dfrd.reject();
+		}
 		
 		if (!file || cnt > 1 || !node.length) {
 			return dfrd.reject('errCmdParams', this.title);

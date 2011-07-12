@@ -28,8 +28,7 @@ elFinder.prototype.commands.archive = function() {
 	});
 	
 	this.getstate = function() {
-		
-		return mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
+		return !this._disabled && mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, type) {
@@ -43,7 +42,7 @@ elFinder.prototype.commands.archive = function() {
 			}), 
 			i;
 
-		if (!(cnt && mimes.length && $.inArray(mime, mimes) !== -1)) {
+		if (!(this.enabled() && cnt && mimes.length && $.inArray(mime, mimes) !== -1)) {
 			return dfrd.reject();
 		}
 		

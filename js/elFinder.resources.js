@@ -126,7 +126,7 @@ elFinder.prototype.resources = {
 					});
 
 
-			if (!node.length) {
+			if (this.disabled() || !node.length) {
 				return dfrd.reject();
 			}
 

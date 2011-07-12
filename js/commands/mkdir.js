@@ -17,7 +17,7 @@ elFinder.prototype.commands.mkdir = function() {
 	}];
 	
 	this.getstate = function() {
-		return this.fm.cwd().write ? 0 : -1;
+		return !this._disabled && this.fm.cwd().write ? 0 : -1;
 	}
 
 }
