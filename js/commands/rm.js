@@ -29,8 +29,8 @@ elFinder.prototype.commands.rm = function() {
 			cnt    = files.length,
 			cwd    = fm.cwd().hash,
 			goroot = false;
-		
-		if (!cnt || this.disabled()) {
+
+		if (!cnt || this._disabled) {
 			return dfrd.reject();
 		}
 		

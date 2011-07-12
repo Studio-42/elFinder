@@ -144,7 +144,7 @@ elFinder.prototype.commands.paste = function() {
 					}
 					;
 				
-				if (self.disabled() || !files.length) {
+				if (self._disabled || !files.length) {
 					return dfrd.resolve();
 				}
 					

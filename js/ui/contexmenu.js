@@ -32,9 +32,10 @@ $.fn.elfindercontextmenu = function(fm) {
 
 					e.preventDefault();
 					e.stopPropagation();
-
+					fm.log(data)
+					fm.log(menu.data('targets'))
 					if (!item.is('.'+clGroup)) {
-						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.variant, true);
+						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.variant);
 						close();
 					}
 				}),
@@ -130,7 +131,7 @@ $.fn.elfindercontextmenu = function(fm) {
 
 		fm.one('load', function() {
 			
-			cwd = fm.getUI('cwd')
+			cwd = fm.getUI('cwd').parent()
 				.bind(event, function(e) {
 					var target  = $(e.target),
 						file    = target.closest('.'+clCwdFile),
@@ -158,7 +159,8 @@ $.fn.elfindercontextmenu = function(fm) {
 
 					append(type, targets);
 					open(e.clientX, e.clientY);
-				});
+				})
+				.children();
 			
 			fm.getUI('navbar')
 				.bind(event, function(e) {
@@ -169,8 +171,6 @@ $.fn.elfindercontextmenu = function(fm) {
 					e.preventDefault();
 					if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
 					
-
-						target.is('.'+clNavDirWrap) && (target = target.children('.'+clNavdir));
 						if (target.length) {
 							targets.push(fm.navId2Hash(target.attr('id')))
 							append('navbar', targets);

@@ -28,15 +28,12 @@ elFinder.prototype.commands.duplicate = function() {
 				}), 
 			args = [];
 			
-		if (!cnt || this.disabled()) {
+		if (!cnt || this._disabled) {
 			return dfrd.reject();
 		}
 		
 		$.each(files, function(i, file) {
-			if (!file.read) {
-				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
-			}
-			if (!fm.file(file.phash).write) {
+			if (!file.read || !fm.file(file.phash).write) {
 				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
