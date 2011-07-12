@@ -200,12 +200,13 @@ $opts = array(
 			'uploadOrder' => 'deny,allow',
 			'uploadOverwrite' => true,
 			'uploadMaxSize' => '128m',
+			// 'copyOverwrite' => false,
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
 #			'tmbURL'    => '.tmb/',
 			'utf8fix' => false,
-			'acceptedName' => '#^[^\.]#', //'/[a-z0-9_\-]+/i',
+			'acceptedName' => '/[a-z0-9_\-]+/i',
 			'attributes' => array(
 				array(
 					'pattern' => '/\/\..+/',

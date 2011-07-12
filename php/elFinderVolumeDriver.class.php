@@ -1216,16 +1216,18 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		if ($copy && !$this->options['copyOverwrite']) {
-			$name = $this->uniqueName($path, $name, '-', false);
-		}
-		
 		$dst = $this->_joinPath($path, $name);
 		
 		if ($this->_fileExists($dst)) {
 			
 			if ($copy) {
-				if (!$this->options['copyJoin'] && $this->attr($dst, 'write')) {
+				
+				if (!$this->options['copyOverwrite']) {
+					// create unique name to not overwrite old file
+					$name = $this->uniqueName($path, $name, '-', false);
+					return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
+				} elseif (!$this->options['copyJoin'] && $this->attr($dst, 'write')) {
+					// if no join allowed - clean directory
 					foreach ($this->_scandir($dst) as $p) {
 						$this->doRm($p);
 					}
@@ -1386,7 +1388,7 @@ abstract class elFinderVolumeDriver {
 		
 		$dst  = $this->decode($dst);
 		$_dst = $this->_joinPath($dst, $name);
-		
+
 		if ($this->_fileExists($_dst)) {
 			if (($cmd == 'upload' && !$this->options['uploadOverwrite'])
 			||  ($cmd == 'copy'   && !$this->options['copyOverwrite'])) {
@@ -1704,7 +1706,7 @@ abstract class elFinderVolumeDriver {
 			$i    = (int)$m[2];
 			$name = substr($name, 0, strlen($name)-strlen($m[2]));
 		} else {
-			$i     = 0;
+			$i     = 1;
 			$name .= $suffix;
 		}
 		$max = $i+100000;

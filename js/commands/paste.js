@@ -38,7 +38,8 @@ elFinder.prototype.commands.paste = function() {
 	}
 	
 	this.exec = function(dst) {
-		var fm     = this.fm,
+		var self   = this,
+			fm     = self.fm,
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
@@ -143,7 +144,7 @@ elFinder.prototype.commands.paste = function() {
 					}
 					;
 				
-				if (this.disabled() || !files.length) {
+				if (self.disabled() || !files.length) {
 					return dfrd.resolve();
 				}
 					
