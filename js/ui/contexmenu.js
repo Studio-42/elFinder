@@ -137,8 +137,12 @@ $.fn.elfindercontextmenu = function(fm) {
 						targets = [],
 						type    = 'files';
 
-					e.preventDefault();
+					if ($(e.target).is(':input')) {
+						return;
+					}
 
+					e.preventDefault();
+					
 					if (file.length) {
 						// do not show menu on disabled files
 						if (file.is('.'+clDisabled)) {
