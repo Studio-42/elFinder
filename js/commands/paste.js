@@ -147,6 +147,7 @@ elFinder.prototype.commands.paste = function() {
 				if (self._disabled || !files.length) {
 					return dfrd.resolve();
 				}
+				
 					
 				if (fm.oldAPI) {
 					paste(files);
@@ -155,6 +156,7 @@ elFinder.prototype.commands.paste = function() {
 					if (!fm.option('copyOverwrite')) {
 						paste(files);
 					} else {
+
 						dst.hash == fm.cwd().hash
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
 							: fm.request({
@@ -170,7 +172,7 @@ elFinder.prototype.commands.paste = function() {
 				
 				return dfrd;
 			},
-			parents;
+			parents, fparents;
 
 
 		if (!cnt || !dst || dst.mime != 'directory') {
@@ -181,7 +183,7 @@ elFinder.prototype.commands.paste = function() {
 			return dfrd.reject([error, files[0].name, 'errPerm']);
 		}
 		
-		parents = fm.parents(dst.hash)
+		parents = fm.parents(dst.hash);
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
@@ -196,6 +198,14 @@ elFinder.prototype.commands.paste = function() {
 				return !dfrd.reject(['errCopyInItself', file.name]);
 			}
 			
+			fparents = fm.parents(file.hash);
+			if ($.inArray(dst.hash, fparents) !== -1) {
+				
+				if ($.map(fparents, function(h) { var d = fm.file(h); return d.phash == dst.hash && d.name == file.name ? d : null }).length) {
+					return !dfrd.reject(['errReplByChild', file.name]);
+				}
+			}
+			
 			if (file.phash == dst.hash) {
 				fcopy.push(file.hash);
 			} else {
@@ -206,6 +216,10 @@ elFinder.prototype.commands.paste = function() {
 				});
 			}
 		});
+
+		if (dfrd.isRejected()) {
+			return dfrd;
+		}
 
 		return $.when(
 			copy(fcopy),

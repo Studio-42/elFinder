@@ -198,6 +198,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Déplacer les fichiers',
 			'copyFiles'       : 'Copier les fichiers',
 			'rmFromPlaces'    : 'Remove from places',
+			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',

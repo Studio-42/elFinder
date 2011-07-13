@@ -1118,6 +1118,7 @@ window.elFinder = function(node, opts) {
 						hash   : hash,
 						phash  : file.phash,
 						name   : file.name,
+						mime   : file.mime,
 						read   : file.read,
 						locked : file.locked,
 						cut    : !!cut
