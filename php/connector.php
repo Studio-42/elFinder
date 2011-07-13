@@ -201,6 +201,7 @@ $opts = array(
 			'uploadOverwrite' => true,
 			'uploadMaxSize' => '128m',
 			// 'copyOverwrite' => false,
+			'copyJoin' => true,
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',

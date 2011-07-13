@@ -970,6 +970,21 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function hasChildDir($parent, $child) {
+		$parent = $this->decode($parent);
+		$child  = $this->decode($child);
+		
+		if (!$this->_fileExists($parent) || !$this->_fileExists($child)) {
+			return false;
+		}
+	}
+	
+	/**
 	 * Return file info or false on error
 	 *
 	 * @param  string   $hash    file hash

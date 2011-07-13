@@ -338,5 +338,5 @@ elFinder.prototype.options = {
 	 * @type Array|Boolean
 	 */
 	// debug : true
-	debug : ['error', 'warning']
+	debug : ['error', 'warning', 'event-destroy']
 }
