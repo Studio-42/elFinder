@@ -53,11 +53,11 @@ $.fn.dialogelfinder = function(opts) {
 	if (opts == 'open') {
 		var node = $(this),
 			pos  = node.data(position) || {
-				top  : parseInt(($(document).height() - node.height())/2 - 12),
-				left : parseInt(($(document).width() - node.width())/2)
+				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
+				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
 			},
 			zindex = 100;
-			
+
 		if (node.is(':hidden')) {
 			
 			$('body').find(':visible').each(function() {
