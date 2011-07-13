@@ -505,10 +505,10 @@ abstract class elFinderVolumeDriver {
 	}
 		
 	/**
-	 * undocumented function
+	 * Return class name without prefix "elfinderdriver"
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function name() {
 		return strtolower(substr(get_class($this), strlen('elfinderdriver')));
@@ -840,19 +840,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if copy from this volume allowed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function copyFromAllowed() {
 		return !!$this->options['copyFrom'];
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if copy on this volume allowed
 	 *
-	 * @return void
+	 * @return bool
 	 * @author Dmitry Levashov
 	 **/
 	public function copyToAllowed() {
@@ -967,21 +967,6 @@ abstract class elFinderVolumeDriver {
 	public function parent($hash) {
 		$path = $this->decode($hash);
 		return $path ? $this->_dirname($path) : '';
-	}
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	public function hasChildDir($parent, $child) {
-		$parent = $this->decode($parent);
-		$child  = $this->decode($child);
-		
-		if (!$this->_fileExists($parent) || !$this->_fileExists($child)) {
-			return false;
-		}
 	}
 	
 	/**
@@ -1562,7 +1547,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Search files
 	 *
 	 * @param  string  $q  search string
 	 * @param  array   $mimes
@@ -2003,10 +1988,13 @@ abstract class elFinderVolumeDriver {
 	}	
 		
 	/**
-	 * undocumented function
+	 * Recursive files search
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path   dir path
+	 * @param  string  $q      search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
@@ -2207,7 +2195,7 @@ abstract class elFinderVolumeDriver {
 			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos($mime, 'image') === 0 
-			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
+			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif' : true);
 	}
 	
 	/**
