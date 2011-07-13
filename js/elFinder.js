@@ -294,7 +294,7 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type Object
 	 **/
-	this.options = $.extend({}, this.options, opts||{});
+	this.options = $.extend(true, {}, this.options, opts||{});
 	
 	
 	/**
@@ -1264,7 +1264,7 @@ window.elFinder = function(node, opts) {
 	
 	// configure transport object
 	this.transport = {}
-	
+
 	if (typeof(this.options.transport) == 'object') {
 		this.transport = this.options.transport;
 		if (typeof(this.transport.init) == 'function') {
@@ -1286,7 +1286,7 @@ window.elFinder = function(node, opts) {
 	} else {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	}
-	
+
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
 	 *

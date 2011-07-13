@@ -163,21 +163,22 @@
 			
 			$('#dialog').click(function() {
 				
-				$('<div/>').dialogelfinder({
+				var fm = $('<div/>').dialogelfinder({
 					url : 'php/connector.php',
 					lang : 'en',
 					width : 840,
+					destroyOnClose : true,
 					getFileCallback : function(files, fm) {
 						console.log(files);
 					},
 					commandsOptions : {
 						getfile : {
-							oncomplete : 'destroy',
+							oncomplete : 'close',
 							folders : true
 						}
 					}
-				})
-				
+				}).dialogelfinder('instance')
+				// console.log(fm)
 			})
 			
 		})

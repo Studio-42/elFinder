@@ -669,33 +669,6 @@ $.fn.elfindercwd = function(fm) {
 						target.draggable(fm.draggable);
 					}
 				})
-				// add css class and disable cwd droppable
-				.delegate(fileSelector, 'dropover', function(e, ui) {
-					// var target = $(this);
-					// 
-					// e.preventDefault();
-					// e.stopImmediatePropagation();
-					// 
-					// cwd.droppable('disable').removeClass(clDisabled+' '+clDropActive);
-					// if ($.inArray(target.attr('id'), ui.helper.data('files')) === -1) {
-					// 	target.children().addClass(clHover);
-					// } else {
-					// 	target.removeClass(clDropActive);
-					// }
-				})
-				// remove css class and restore cwd droppable
-				.delegate(fileSelector, 'dropout drop', function(e) {
-					// var target = $(this);
-					// 
-					// e.preventDefault();
-					// e.stopImmediatePropagation();
-					// cwd.droppable('enable').trigger('dropover');
-					// 
-					// target.removeClass(clDropActive)
-					// if (!target.is('.'+clSelected)) {
-					// 	target.children().removeClass(clHover);
-					// }
-				})
 				// add hover class to selected file
 				.delegate(fileSelector, evtSelect, function(e) {
 					var $this = $(this);
@@ -809,25 +782,25 @@ $.fn.elfindercwd = function(fm) {
 		
 			
 		if (fm.dragUpload) {
-			cwd[0].addEventListener('dragenter', function(e) {
+			wrapper[0].addEventListener('dragenter', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				
 				wrapper.addClass(clDropActive);
 			}, false);
 
-			cwd[0].addEventListener('dragleave', function(e) {
+			wrapper[0].addEventListener('dragleave', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				e.target == cwd[0] && wrapper.removeClass(clDropActive);
 			}, false);
 
-			cwd[0].addEventListener('dragover', function(e) {
+			wrapper[0].addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			}, false);
 
-			cwd[0].addEventListener('drop', function(e) {
+			wrapper[0].addEventListener('drop', function(e) {
 			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
 

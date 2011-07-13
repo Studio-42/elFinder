@@ -201,6 +201,7 @@ $opts = array(
 			'uploadOverwrite' => true,
 			'uploadMaxSize' => '128m',
 			// 'copyOverwrite' => false,
+			'copyJoin' => true,
 			'mimeDetect' => 'internal',
 			'tmbCrop' => false,
 			'imgLib' => 'imagick',
@@ -251,7 +252,7 @@ $opts = array(
 
 // sleep(3);
 header('Access-Control-Allow-Origin: *');
-$connector = new elFinderConnector(new elFinder($opts));
+$connector = new elFinderConnector(new elFinder($opts), true);
 $connector->run();
 
 // echo '<pre>';
