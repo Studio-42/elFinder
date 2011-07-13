@@ -12,6 +12,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			collapsed = fm.res(c, 'navcollapse'),
 			expanded  = fm.res(c, 'navexpand'),
 			hover     = fm.res(c, 'hover'),
+			clroot    = fm.res(c, 'treeroot'),
 			tpl       = fm.res('tpl', 'navdir'),
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
@@ -143,7 +144,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @type jQuery
 			 **/
 			root = wrapper.children('.'+navdir)
-				.addClass(fm.res(c, 'treeroot'))
+				.addClass(clroot)
 				.click(function() {
 					if (root.is('.'+collapsed)) {
 						places.toggleClass(expanded);
@@ -170,7 +171,23 @@ $.fn.elfinderplaces = function(fm, opts) {
 					$(this).toggleClass('ui-state-hover');
 				})
 				.delegate('.'+navdir, 'click', function(e) {
-					fm.exec('open', $(this).attr('id').substr(6))
+					fm.exec('open', $(this).attr('id').substr(6));
+				})
+				.delegate('.'+navdir+':not(.'+clroot+')', 'contextmenu', function(e) {
+					var hash = $(this).attr('id').substr(6);
+					
+					e.preventDefault();
+					
+					fm.trigger('contextmenu', {
+						raw : [{
+							label    : fm.i18n('rmFromPlaces'),
+							icon     : 'rm',
+							callback : function() { remove(hash); save(); }
+						}],
+						'x'       : e.clientX,
+						'y'       : e.clientY
+					})
+					
 				})
 				.droppable({
 					tolerance  : 'pointer',

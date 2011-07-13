@@ -193,7 +193,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'اختر الملفات التي تريد رفعها',
 			'moveFiles'       : 'قص الملفات',
 			'copyFiles'       : 'نسخ الملفات',
-
+			'rmFromPlaces'    : 'Remove from places',
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'غير معروف',
 			'kindFolder'      : 'مجلد',

@@ -7,102 +7,24 @@
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var event        = $.browser.opera ? 'click' : 'contextmenu',
-			c            = 'class',
-			clItem       = 'elfinder-contextmenu-item',
-			clGroup      = 'elfinder-contextmenu-group',
-			clSub        = 'elfinder-contextmenu-sub',
-			clHover      = fm.res(c, 'hover'),
-			clDisabled   = fm.res(c, 'disabled'),
-			clCwdFile    = fm.res(c, 'cwdfile'), 
-			clNavdir     = fm.res(c, 'treedir'), 
-			clNavDirWrap = fm.res(c, 'navdirwrap'), 
-			subpos       = fm.direction == 'ltr' ? 'left' : 'right',
-			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
+		var menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
-				.delegate('.'+clItem, 'hover', function() {
-					var item = $(this).toggleClass(clHover);
-					item.is('.'+clGroup) && item.children('.'+clSub).toggle()
-					
-				})
-				.delegate('.'+clItem, 'click', function(e) {
-					var item = $(this),
-						data = item.data();
-
-					e.preventDefault();
-					e.stopPropagation();
-					fm.log(data)
-					fm.log(menu.data('targets'))
-					if (!item.is('.'+clGroup)) {
-						data && data.cmd && fm.exec(data.cmd, menu.data('targets'), data.variant);
-						close();
-					}
+				.delegate('.elfinder-contextmenu-item', 'hover', function() {
+					$(this).toggleClass('ui-state-hover')
 				}),
-			options = $.extend({navbar : [], cwd : []}, fm.options.contextmenu),
-			/**
-			 * Append items to menu
-			 *
-			 * @param String  menu type (navbar/cwd)
-			 * @param Array   files ids list
-			 * @return void
-			 **/
-			append = function(type, targets) {
-				var commands = options[type], 
-					sep = false;
-
-				menu.text('').data('targets', targets);
-
-				$.each(commands, function(i, name) {
-					var cmd = fm.command(name),
-						item, sub;
-
-					if (!(cmd && cmd.name)) {
-						if (name == '|' && sep) {
-							menu.append('<div class="elfinder-contextmenu-separator"/>');
-							sep = false;
-						}
-						return;
-					}
-					
-					if (cmd.getstate(targets) == -1) {
-						return;
-					}
-					
-					item = $('<div class="'+clItem+'"><span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+' elfinder-contextmenu-icon"/><span>'+cmd.title+'</span></div>')
-						.data({cmd : cmd.name});
-
-					
-					if (cmd.variants) {
-
-						sub = $('<div class="ui-corner-all '+clSub+'"/>')
-							.appendTo(item.addClass(clGroup).append('<span class="elfinder-contextmenu-arrow"/>'));
-							
-						$.each(cmd.variants, function(i, variant) {
-							sub.append($('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')
-								.data({cmd : cmd.name, variant : variant[0]}));
-						});
-					}
-					
-					menu.append(item);
-					sep = true;
-				});
+			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
+			types = $.extend({}, fm.options.contextmenu),
+			tpl     = '<div class="elfinder-contextmenu-item"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
+			item = function(label, icon, callback) {
+				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
+					.click(function(e) {
+						e.stopPropagation();
+						e.stopPropagation();
+						callback();
+					})
 			},
-			/**
-			 * Close menu and empty it
-			 *
-			 * @return void
-			 **/
-			close = function() {
-				menu.hide().text('').removeData('targets');
-			},
-			/**
-			 * Open menu in required position
-			 *
-			 * @param Number  left offset
-			 * @param Number  top offset
-			 * @return void
-			 **/
+			
 			open = function(x, y) {
 				var win        = $(window),
 					width      = menu.outerWidth(),
@@ -112,78 +34,112 @@ $.fn.elfindercontextmenu = function(fm) {
 					scrolltop  = win.scrollTop(),
 					scrollleft = win.scrollLeft(),
 					css        = {
-						top  : (y + height  < wheight  ? y : y - height > 0 ? y - height : y) + scrolltop,
-						left : (x + width < wwidth ? x : x - width) + scrollleft,
+						top  : (y + height < wheight ? y : y - height > 0 ? y - height : y) + scrolltop,
+						left : (x + width  < wwidth  ? x : x - width) + scrollleft,
 						'z-index' : 100 + fm.getUI('workzone').zIndex()
 					};
 
-				if (!menu.children().length) {
-					return;
-				}
-				
-				menu.css(css).show();
+				menu.css(css)
+					.show();
 				
 				css = {'z-index' : css['z-index']+10};
 				css[subpos] = parseInt(menu.width());
-				menu.find('.'+clSub).css(css);
+				menu.find('.elfinder-contextmenu-sub').css(css);
 			},
-			cwd, nav;
-
-		fm.one('load', function() {
 			
-			cwd = fm.getUI('cwd').parent()
-				.bind(event, function(e) {
-					var target  = $(e.target),
-						file    = target.closest('.'+clCwdFile),
-						targets = [],
-						type    = 'files';
-
-					if ($(e.target).is(':input')) {
+			close = function() {
+				menu.hide().empty();
+			},
+			
+			create = function(type, targets) {
+				var sep = false;
+				
+				
+				
+				$.each(types[type]||[], function(i, name) {
+					var cmd, node, submenu;
+					
+					if (name == '|' && sep) {
+						menu.append('<div class="elfinder-contextmenu-separator"/>');
+						sep = false;
 						return;
 					}
-
-					e.preventDefault();
 					
-					if (file.length) {
-						// do not show menu on disabled files
-						if (file.is('.'+clDisabled)) {
-							return;
-						}
-						cwd.trigger('selectfile', file.attr('id'));
-						targets = fm.selected();
-					} else {
-						cwd.trigger('unselectall');
-						targets.push(fm.cwd().hash);
-						type = 'cwd';
-					}
+					cmd = fm.command(name);
 
-					append(type, targets);
-					open(e.clientX, e.clientY);
+					if (cmd && cmd.getstate(targets) != -1) {
+						if (cmd.variants) {
+							if (!cmd.variants.length) {
+								return;
+							}
+							node = item(cmd.title, cmd.name, function() {});
+							
+							submenu = $('<div class="ui-corner-all elfinder-contextmenu-sub"/>')
+								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
+								
+							node.addClass('elfinder-contextmenu-group')
+								.hover(function() {
+									submenu.toggle()
+								})
+								
+							$.each(cmd.variants, function(i, variant) {
+								submenu.append(
+									$('<div class="elfinder-contextmenu-item"><span>'+variant[1]+'</span></div>')
+										.click(function(e) {
+											e.stopPropagation();
+											close();
+											cmd.exec(targets, variant[0]);
+										})
+								);
+							});
+								
+						} else {
+							node = item(cmd.title, cmd.name, function() {
+								close();
+								cmd.exec(targets);
+							})
+							
+						}
+						
+						menu.append(node)
+						sep = true;
+					}
 				})
-				.children();
+			},
 			
-			fm.getUI('navbar')
-				.bind(event, function(e) {
-					var target  = $(e.target),
-						targets = [];
-
-
-					e.preventDefault();
-					if (target.is('.'+clNavdir+',.'+clNavDirWrap)) {
+			createFromRaw = function(raw) {
+				$.each(raw, function(i, data) {
+					var node;
 					
-						if (target.length) {
-							targets.push(fm.navId2Hash(target.attr('id')))
-							append('navbar', targets);
-							open(e.clientX, e.clientY);
-						}
+					if (data.label && typeof data.callback == 'function') {
+						node = item(data.label, data.icon, function() {
+							close();
+							data.callback();
+						});
+						menu.append(node);
 					}
-				});
-			
-			fm.bind('disable select', close).getUI().click(close);
+				})
+			};
+		
+		fm.one('load', function() {
+			fm.bind('contextmenu', function(e) {
+				var data = e.data;
 
-		}).one('destroy', function() {
-			menu.remove();
+				close();
+
+				if (data.type && data.targets) {
+					create(data.type, data.targets);
+				} else if (data.raw) {
+					createFromRaw(data.raw);
+				}
+
+				menu.children().length && open(data.x, data.y);
+			})
+			.one('destroy', function() { menu.remove(); })
+			.bind('disable select', close)
+			.getUI().click(close);
 		});
 		
 	});
+	
 }

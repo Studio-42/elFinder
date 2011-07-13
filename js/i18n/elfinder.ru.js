@@ -192,6 +192,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Выбрать файлы для загрузки',
 			'moveFiles'       : 'Перемещение файлов',
 			'copyFiles'       : 'Копирование файлов',
+			'rmFromPlaces'    : 'Удалить из избранного',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',

@@ -193,7 +193,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Select files to upload',
 			'moveFiles'       : 'Move files',
 			'copyFiles'       : 'Copy files',
-			
+			'rmFromPlaces'    : 'Remove from places',
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindFolder'      : 'Folder',

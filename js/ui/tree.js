@@ -388,6 +388,16 @@ $.fn.elfindertree = function(fm, opts) {
 							});
 					}
 				})
+				.delegate('.'+navdir, 'contextmenu', function(e) {
+					e.preventDefault();
+
+					fm.trigger('contextmenu', {
+						'type'    : 'navbar',
+						'targets' : [fm.navId2Hash($(this).attr('id'))],
+						'x'       : e.clientX,
+						'y'       : e.clientY
+					});
+				})
 				
 			;
 		// move tree into navbar

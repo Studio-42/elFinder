@@ -1495,7 +1495,8 @@ window.elFinder = function(node, opts) {
 		}
 	});
 	
-	
+
+
 	// store instance in node
 	node[0].elfinder = this;
 	

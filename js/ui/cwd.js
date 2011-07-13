@@ -631,7 +631,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @type JQuery
 			 **/
 			cwd = $(this)
-				.addClass('elfinder-cwd')
+				.addClass('ui-helper-clearfix elfinder-cwd')
 				.attr('unselectable', 'on')
 				// fix ui.selectable bugs and add shift+click support 
 				.delegate(fileSelector, 'click.'+fm.namespace, function(e) {
@@ -725,6 +725,34 @@ $.fn.elfindercwd = function(fm) {
 				.delegate(fileSelector, 'scrolltoview', function() {
 					scrollToView($(this))
 				})
+				
+				.bind('contextmenu.'+fm.namespace, function(e) {
+					var file = $(e.target).closest('.'+clFile);
+					
+					if (file.length) {
+						e.stopPropagation();
+						e.preventDefault();
+						if (!file.is('.'+clDisabled)) {
+							if (!file.is('.'+clSelected)) {
+								cwd.trigger('unselectall');
+								file.trigger(evtSelect);
+								trigger();
+							}
+							fm.trigger('contextmenu', {
+								'type'    : 'files',
+								'targets' : fm.selected(),
+								'x'       : e.clientX,
+								'y'       : e.clientY
+							});
+
+						}
+						
+					}
+					// e.preventDefault();
+					
+					
+				})
+				
 				// make files selectable
 				.selectable({
 					filter     : fileSelector,
@@ -750,7 +778,17 @@ $.fn.elfindercwd = function(fm) {
 					cwd.find('#'+id).trigger(evtSelect);
 					trigger();
 				}),
-			wrapper = $('<div class="elfinder-cwd-wrapper"/>'),
+			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
+				.bind('contextmenu', function(e) {
+					e.preventDefault();
+					fm.trigger('contextmenu', {
+						'type'    : 'cwd',
+						'targets' : [fm.cwd().hash],
+						'x'       : e.clientX,
+						'y'       : e.clientY
+					});
+					
+				}),
 			
 			resize = function() {
 				var h = 0,
@@ -768,7 +806,7 @@ $.fn.elfindercwd = function(fm) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this))
 			;
 			
-		cwd.addClass('ui-helper-clearfix')
+		
 			
 		if (fm.dragUpload) {
 			cwd[0].addEventListener('dragenter', function(e) {

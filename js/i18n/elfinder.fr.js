@@ -197,6 +197,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Sélectionner les fichiers à envoyer',
 			'moveFiles'       : 'Déplacer les fichiers',
 			'copyFiles'       : 'Copier les fichiers',
+			'rmFromPlaces'    : 'Remove from places',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
