@@ -29,7 +29,7 @@ var dirmode = 0755,
 				path.join(src, 'js', 'elFinder.history.js'),
 				path.join(src, 'js', 'elFinder.command.js'),
 				path.join(src, 'js', 'elFinder.resources.js'),
-				path.join(src, 'js', 'elFinder.contextmenu.js'),
+				//path.join(src, 'js', 'elFinder.contextmenu.js'),
 				path.join(src, 'js', 'jquery.dialogelfinder.js'),
 				path.join(src, 'js', 'i18n', 'elfinder.en.js')
 			]
