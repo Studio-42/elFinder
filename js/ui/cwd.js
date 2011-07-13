@@ -809,25 +809,25 @@ $.fn.elfindercwd = function(fm) {
 		
 			
 		if (fm.dragUpload) {
-			cwd[0].addEventListener('dragenter', function(e) {
+			wrapper[0].addEventListener('dragenter', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				
 				wrapper.addClass(clDropActive);
 			}, false);
 
-			cwd[0].addEventListener('dragleave', function(e) {
+			wrapper[0].addEventListener('dragleave', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				e.target == cwd[0] && wrapper.removeClass(clDropActive);
 			}, false);
 
-			cwd[0].addEventListener('dragover', function(e) {
+			wrapper[0].addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			}, false);
 
-			cwd[0].addEventListener('drop', function(e) {
+			wrapper[0].addEventListener('drop', function(e) {
 			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
 
