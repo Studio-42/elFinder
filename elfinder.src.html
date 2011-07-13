@@ -121,7 +121,7 @@
 		$().ready(function() {
 
 
-			$('#finder23').elfinder({
+			$('#finder').elfinder({
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
 				getFileCallback : function(files, fm) {
@@ -163,7 +163,7 @@
 			
 			$('#dialog').click(function() {
 				
-				$('<div/>').dialogelfinder({
+				var fm = $('<div/>').dialogelfinder({
 					url : 'php/connector.php',
 					lang : 'en',
 					width : 840,
@@ -177,8 +177,8 @@
 							folders : true
 						}
 					}
-				})
-				
+				}).dialogelfinder('instance')
+				// console.log(fm)
 			})
 			
 		})

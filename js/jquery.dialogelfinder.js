@@ -83,8 +83,9 @@ $.fn.dialogelfinder = function(opts) {
 				? node.elfinder('destroy').remove()
 				: node.elfinder('close');
 		}
+	} else if (opts == 'instance') {
+		return $(this).getElFinder();
 	}
-	
 
 	return this;
 }
