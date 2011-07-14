@@ -60,7 +60,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Неподдерживаемый тип архива.',
 			'errNoArchive'         : 'Файл не является архивом допустимого типа.',
 			'errCmdNoSupport'      : 'Сервер не поддерживает эту комманду.',
-
+			'errReplByChild'       : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
 			'cmdback'      : 'Назад',
@@ -193,8 +194,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Перемещение файлов',
 			'copyFiles'       : 'Копирование файлов',
 			'rmFromPlaces'    : 'Удалить из избранного',
-			'errReplByChild'  : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
-			
+			'untitled folder' : 'новая папка',
+			'untitled file.txt' : 'новый файл.txt',
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

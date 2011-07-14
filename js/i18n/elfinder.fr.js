@@ -65,6 +65,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Type d\'archive non supporté.',
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
 			'errCmdNoSupport'      : 'Le Backend ne prend pas en charge cette commande.',
+			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',
@@ -198,7 +199,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Déplacer les fichiers',
 			'copyFiles'       : 'Copier les fichiers',
 			'rmFromPlaces'    : 'Remove from places',
-			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
+			'untitled folder' : 'untitled folder',
+			'untitled file.txt' : 'untitled file.txt',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',

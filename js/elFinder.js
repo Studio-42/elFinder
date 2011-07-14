@@ -2302,7 +2302,7 @@ elFinder.prototype = {
 	uniqueName : function(prefix, phash) {
 		var i = 0, ext = '', p, name;
 		
-		prefix = this.i18n(prefix);
+		prefix = this.i18n(prefix); this.log(prefix)
 		phash = phash || this.cwd().hash;
 
 		if ((p = prefix.indexOf('.txt')) != -1) {
