@@ -139,7 +139,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
-			'confirmRm'       : 'Are you shure you want to remove files?<br/>This cannot be undone!',
+			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
@@ -197,6 +197,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Select files to upload',
 			'moveFiles'       : 'Move files',
 			'copyFiles'       : 'Copy files',
+			'rmFromPlaces'    : 'Remove from places',
+			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

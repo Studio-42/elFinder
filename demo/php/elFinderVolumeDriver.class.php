@@ -505,10 +505,10 @@ abstract class elFinderVolumeDriver {
 	}
 		
 	/**
-	 * undocumented function
+	 * Return class name without prefix "elfinderdriver"
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return string
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function name() {
 		return strtolower(substr(get_class($this), strlen('elfinderdriver')));
@@ -840,19 +840,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if copy from this volume allowed
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	public function copyFromAllowed() {
 		return !!$this->options['copyFrom'];
 	}
 	
 	/**
-	 * undocumented function
+	 * Return true if copy on this volume allowed
 	 *
-	 * @return void
+	 * @return bool
 	 * @author Dmitry Levashov
 	 **/
 	public function copyToAllowed() {
@@ -1216,16 +1216,18 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		if ($copy && !$this->options['copyOverwrite']) {
-			$name = $this->uniqueName($path, $name, '-', false);
-		}
-		
 		$dst = $this->_joinPath($path, $name);
 		
 		if ($this->_fileExists($dst)) {
 			
 			if ($copy) {
-				if (!$this->options['copyJoin'] && $this->attr($dst, 'write')) {
+				
+				if (!$this->options['copyOverwrite']) {
+					// create unique name to not overwrite old file
+					$name = $this->uniqueName($path, $name, '-', false);
+					return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
+				} elseif (!$this->options['copyJoin'] && $this->attr($dst, 'write')) {
+					// if no join allowed - clean directory
 					foreach ($this->_scandir($dst) as $p) {
 						$this->doRm($p);
 					}
@@ -1386,7 +1388,7 @@ abstract class elFinderVolumeDriver {
 		
 		$dst  = $this->decode($dst);
 		$_dst = $this->_joinPath($dst, $name);
-		
+
 		if ($this->_fileExists($_dst)) {
 			if (($cmd == 'upload' && !$this->options['uploadOverwrite'])
 			||  ($cmd == 'copy'   && !$this->options['copyOverwrite'])) {
@@ -1545,7 +1547,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Search files
 	 *
 	 * @param  string  $q  search string
 	 * @param  array   $mimes
@@ -1599,10 +1601,11 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function encode($path) {
 		if ($path) {
+
 			// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
 			$p = $this->_relpath($path);
 			// if reqesting root dir $path will be empty, then assign '/' as we cannot leave it blank for crypt
-			if (!$p)	{
+			if ($p === '')	{
 				$p = DIRECTORY_SEPARATOR;
 			}
 
@@ -1703,7 +1706,7 @@ abstract class elFinderVolumeDriver {
 			$i    = (int)$m[2];
 			$name = substr($name, 0, strlen($name)-strlen($m[2]));
 		} else {
-			$i     = 0;
+			$i     = 1;
 			$name .= $suffix;
 		}
 		$max = $i+100000;
@@ -1796,29 +1799,34 @@ abstract class elFinderVolumeDriver {
 		
 		if ($link) {
 			$stat = $this->_lstat($path);
-			$file['size'] = $stat['size'];
-			$file['date'] = $this->formatDate($stat['mtime']);
-		} else {
 			
-			$file['size'] = $dir ? 0 : $this->_filesize($path);
-			$file['date'] = $this->formatDate($this->_filemtime($path));
-		}
-
-		if ($link) {
+			$file['date'] = $this->formatDate($stat['mtime']);
+			
 			if (($target = $this->_readlink($path)) != false) {
 				$file['mime']  = $this->mimetype($target);
 				$file['alias'] = $this->_path($target);
 				$file['read']  = (int)$this->attr($path, 'read');
 				$file['write'] = (int)$this->attr($path, 'write');
+				$file['size']  = $stat['size'];
 			} else {
 				$file['mime']  = 'symlink-broken';
 				$file['read']  = 0;
 				$file['write'] = 0;
 			}
+			
 		} else {
 			$file['mime']  = $dir ? 'directory' : $this->mimetype($path);
+			// $file['size'] = $dir ? 0 : $this->_filesize($path);
+			$file['date'] = $this->formatDate($this->_filemtime($path));
 			$file['read']  = (int)$this->attr($path, 'read');
 			$file['write'] = (int)$this->attr($path, 'write');
+			if (!$file['read']) {
+				$file['size'] = 'unknown';
+			} elseif ($dir) {
+				$file['size'] = 0;
+			} else {
+				$file['size'] = $this->_filesize($path);
+			}
 		}
 
 		if ($this->attr($path, 'locked')) {
@@ -1980,10 +1988,13 @@ abstract class elFinderVolumeDriver {
 	}	
 		
 	/**
-	 * undocumented function
+	 * Recursive files search
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path   dir path
+	 * @param  string  $q      search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
@@ -2025,6 +2036,14 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doRm($path) {
+		
+		//https://github.com/Studio-42/elFinder/issues/40
+		// file_exists() return false on symlink points to itself
+		if ($this->_isLink($path)) {
+			$this->rmTmb($path);
+			return $this->_unlink($path);
+		}
+		
 		if (!$this->_fileExists($path)) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
@@ -2036,7 +2055,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_LOCKED, $name);
 		}
 
-		if ($this->_isLink($path) || $this->_isFile($path)) {
+		if ($this->_isFile($path)) {
 			$this->rmTmb($path);
 			return $this->_unlink($path);
 		} elseif ($this->_isDir($path)) {
@@ -2176,7 +2195,7 @@ abstract class elFinderVolumeDriver {
 			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos($mime, 'image') === 0 
-			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'mime/gif' : true);
+			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif' : true);
 	}
 	
 	/**

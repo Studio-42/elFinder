@@ -26,8 +26,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	public function __construct() {
 		$this->options['alias']    = ''; // alias to replace root dir name
-		$this->options['dirMode']  = 0777;
-		$this->options['fileMode'] = 0666;
+		$this->options['dirMode']  = 0755;
+		$this->options['fileMode'] = 0644;
 	}
 	
 	/*********************************************************************/

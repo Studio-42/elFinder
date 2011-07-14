@@ -192,6 +192,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Выбрать файлы для загрузки',
 			'moveFiles'       : 'Перемещение файлов',
 			'copyFiles'       : 'Копирование файлов',
+			'rmFromPlaces'    : 'Удалить из избранного',
+			'errReplByChild'  : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',

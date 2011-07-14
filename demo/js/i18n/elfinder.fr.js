@@ -197,6 +197,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Sélectionner les fichiers à envoyer',
 			'moveFiles'       : 'Déplacer les fichiers',
 			'copyFiles'       : 'Copier les fichiers',
+			'rmFromPlaces'    : 'Remove from places',
+			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
