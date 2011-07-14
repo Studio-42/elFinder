@@ -817,7 +817,7 @@ abstract class elFinderVolumeDriver {
 			'path'          => $this->path($hash),
 			'url'           => $this->URL,
 			'tmbUrl'        => $this->tmbURL,
-			'disabled'      => array(), //$this->disabled,
+			'disabled'      => $this->disabled,
 			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'archivers'     => array(

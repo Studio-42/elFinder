@@ -16,7 +16,7 @@ function debug($o) {
 	print_r($o);
 }
 
-// exit();
+// exit('{"api":"2.0","uplMaxSize":"16M","options":{"archives":{"create":[],"extract":[]},"copyOverwrite":true,"disabled":[],"path":"Home","separator":"/","tmbUrl":"/files/","url":"/files/tmb/"},"cwd":{"path":"Home","thumbUrl":"/files/","filesUrl":"/files/tmb/","dirs":1,"date":"14.07.2011","mime":"directory","hash":"SG9tZQ==","phash":"","name":"Home","read":1,"write":0,"rm":0},"files":[{"dirs":1,"date":"14.07.2011","mime":"directory","hash":"SG9tZQ==","phash":"","name":"Home","read":1,"write":0,"rm":0}]}');
 /**
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.

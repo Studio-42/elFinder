@@ -4,7 +4,7 @@
  * @type  Object
  * @autor Dmitry (dio) Levashov
  */
-elFinder.prototype.options = {
+elFinder.prototype._options = {
 	/**
 	 * Connector url. Required!
 	 *
@@ -328,7 +328,7 @@ elFinder.prototype.options = {
 		// navbarfolder menu
 		navbar : ['open', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'info'],
 		// current directory menu
-		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'search', '|', 'info'],
+		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'info'],
 		// current directory file menu
 		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', '|', 'archive', 'extract', '|', 'info']
 	},

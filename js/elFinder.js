@@ -294,8 +294,22 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type Object
 	 **/
-	this.options = $.extend(true, {}, this.options, opts||{});
+	this.options = $.extend(true, {}, this._options, opts||{});
 	
+	if (opts.ui) {
+		this.options.ui = opts.ui;
+	}
+	
+	if (opts.commands) {
+		this.options.commands = opts.commands;
+	}
+	
+	if (opts.uiOptions && opts.uiOptions.toolbar) {
+		this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
+	}
+
+	$.extend(this.options.contextmenu, opts.contextmenu);
+
 	
 	/**
 	 * Ajax request type
@@ -1435,7 +1449,7 @@ window.elFinder = function(node, opts) {
 		this.options.commands = [];
 	}
 	// check required commands
-	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'search', 'quicklook', 'getfile', 'help'], function(i, cmd) {
+	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'quicklook', 'getfile', 'help'], function(i, cmd) {
 		$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
 	});
 
@@ -1483,7 +1497,7 @@ window.elFinder = function(node, opts) {
 			title     : '&nbsp;',
 			width     : 280
 		}),
-		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').appendTo(node)
+		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
 	}
 	
 	// load required ui
