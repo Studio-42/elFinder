@@ -28,6 +28,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['alias']    = ''; // alias to replace root dir name
 		$this->options['dirMode']  = 0755;
 		$this->options['fileMode'] = 0644;
+		$this->options['quarantine'] = 'quarantine';
 	}
 	
 	/*********************************************************************/
@@ -63,6 +64,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		$this->aroot = realpath($this->root);
+		
+		if (!empty($this->options['quarantine'])) {
+			$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
+			if ((!is_dir($this->quarantine) && !$this->_mkdir($this->root, $this->options['quarantine'])) || !is_writable($this->quarantine)) {
+				$this->archivers['extract'] = array();
+				$this->disabled[] = 'extract';
+			}
+		} else {
+			$this->archivers['extract'] = array();
+			$this->disabled[] = 'extract';
+		}
 		
 	}
 	
@@ -696,6 +708,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _extract($path, $arc) {
+		
+		if ($this->quarantine) {
+			echo microtime();
+			return false;
+		}
+		
 		$cwd = getcwd();
 		$dir = $this->_dirname($path);
 		chdir($dir);
