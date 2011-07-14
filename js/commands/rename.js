@@ -9,7 +9,7 @@ elFinder.prototype.commands.rename = function() {
 	this.disableOnSearch = true;
 	
 	this.shortcuts = [{
-		pattern     : 'f2'+(this.fm.OS == 'mac' && ' enter')
+		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
 	}];
 	
 	this.getstate = function() {
