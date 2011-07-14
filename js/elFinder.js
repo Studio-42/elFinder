@@ -1928,7 +1928,7 @@ elFinder.prototype = {
 			});
 			
 			$.each(files, function(i, file) {
-				formData.append('upload['+i+']', file);
+				formData.append('upload[]', file);
 			});
 			
 			xhr.onreadystatechange = function() {
