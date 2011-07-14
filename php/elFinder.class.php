@@ -134,7 +134,6 @@ class elFinder {
 	const ERROR_NOT_ARCHIVE		  = 36;
 	const ERROR_ARCHIVE_TYPE      = 37;
 	
-	
 	/**
 	 * Error messages
 	 *
@@ -179,7 +178,6 @@ class elFinder {
 		35 => 'errArchive',
 		36 => 'errNoArchive',
 		37 => 'errArcType',
-		
 	);
 	
 	/**
@@ -644,6 +642,10 @@ class elFinder {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
 
+		if ($volume->commandDisabled('mkdir')) {
+			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
+		}
+
 		if (!$dir['read']) {
 			return array('error' => $this->error($error, self::ERROR_PERM_DENIED));
 		}
@@ -670,6 +672,10 @@ class elFinder {
 		if (($volume = $this->volume($target)) == false
 		|| ($dir = $volume->dir($target, false, true)) == false) {
 			return array('error' => $this->error($error, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
+		}
+
+		if ($volume->commandDisabled('mkfile')) {
+			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
 		}
 
 		if (!$dir['read']) {
@@ -701,6 +707,10 @@ class elFinder {
 		if (($volume = $this->volume($target)) == false
 		||  ($rm  = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+		}
+		
+		if ($volume->commandDisabled('rename')) {
+			return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], self::ERROR_ACCESS_DENIED));
 		}
 
 		if ($rm['name'] == $name) {
@@ -740,6 +750,10 @@ class elFinder {
 				break;
 			}
 			
+			if ($volume->commandDisabled('duplicate')) {
+				return array('error' => $this->error(self::ERROR_COPY, $src['name'], self::ERROR_ACCESS_DENIED));
+			}
+			
 			if (($file = $volume->duplicate($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_COPY, $src['name'], $volume->error());
 				break;
@@ -774,6 +788,10 @@ class elFinder {
 				break;
 			}
 			
+			if ($volume->commandDisabled('rm')) {
+				return array('error' => $this->error(self::ERROR_RM, $file['name'], self::ERROR_ACCESS_DENIED));
+			}
+			
 			if (!$volume->rm($target)) {
 				$result['warning'] = $this->error(self::ERROR_RM, $file['name'], $volume->error());
 				break;
@@ -806,6 +824,10 @@ class elFinder {
 		
 		if (!$volume) {
 			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
+		}
+		
+		if ($volume->commandDisabled('upload')) {
+			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_ACCESS_DENIED));
 		}
 		
 		foreach ($files['name'] as $i => $name) {
@@ -859,6 +881,10 @@ class elFinder {
 		if (($dstVolume = $this->volume($dst)) == false
 		|| ($dstDir = $dstVolume->dir($dst)) == false) {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
+		}
+		
+		if ($dstVolume->commandDisabled('paste')) {
+			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_ACCESS_DENIED));
 		}
 		
 		if (!$dstDir['write']) {
@@ -922,12 +948,12 @@ class elFinder {
 		$target = $args['target'];
 		$volume = $this->volume($target);
 		
-		if (!$volume) {
+		if (!$volume || ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
 		return ($content = $volume->getContents($target)) === false
-			? array('error' => $this->error(self::ERROR_OPEN, '#'.$target, $volume->error()))
+			? array('error' => $this->error(self::ERROR_OPEN, $file['name'], $volume->error()))
 			: array('content' => $content);
 	}
 	
@@ -944,6 +970,11 @@ class elFinder {
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
+		}
+		$error[1] = $file['name'];
+		
+		if ($volume->commandDisabled('edit')) {
+			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
 		}
 		
 		if (($file = $volume->putContents($target, $args['content'])) == false) {
@@ -974,8 +1005,14 @@ class elFinder {
 			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
 		}  
     
+		$error[1] = $file['name'];
+		
+		if ($volume->commandDisabled('extract')) {
+			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
+		}
+
 		if (($added = $volume->extract($target)) === false) {
-			return array('error' => $this->error(self::ERROR_EXTRACT, $file['name'], $volume->error()));
+			return array('error' => $this->error($error, $volume->error()));
 		}
 
 		return $this->trigger('extract', $volume, array('added' => $added));
@@ -997,6 +1034,10 @@ class elFinder {
 	
 		if (($volume = $this->volume($targets[0])) == false) {
 			return $this->error(self::ERROR_ARCHIVE, self::ERROR_TRGDIR_NOT_FOUND);
+		}
+	
+		if ($volume->commandDisabled('archive')) {
+			return array('error' => $this->error(self::ERROR_ARCHIVE, self::ERROR_ACCESS_DENIED));
 		}
 	
 		if (($archive = $volume->archive($targets, $args['type'])) == false) {

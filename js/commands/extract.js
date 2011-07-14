@@ -62,7 +62,6 @@ elFinder.prototype.commands.extract = function() {
 				syncOnFail : true
 			})
 			.fail(function(error) {
-				fm.error(error);
 				if (!dfrd.isRejected()) {
 					dfrd.reject(error);
 				}

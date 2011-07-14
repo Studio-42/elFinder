@@ -817,7 +817,7 @@ abstract class elFinderVolumeDriver {
 			'path'          => $this->path($hash),
 			'url'           => $this->URL,
 			'tmbUrl'        => $this->tmbURL,
-			'disabled'      => $this->disabled,
+			'disabled'      => array(), //$this->disabled,
 			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'archivers'     => array(
@@ -825,6 +825,16 @@ abstract class elFinderVolumeDriver {
 				'extract' => array_keys($this->archivers['extract'])
 			)
 		);
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	public function commandDisabled($cmd) {
+		return in_array($cmd, $this->disabled);
 	}
 	
 	/**

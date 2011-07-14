@@ -654,7 +654,7 @@ window.elFinder = function(node, opts) {
 	 * @return Boolean
 	 */
 	this.validResponse = function(cmd, data) {
-		return this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
+		return data.error || this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
 	}
 	
 	/**
