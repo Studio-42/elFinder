@@ -2045,7 +2045,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function doRm($path) {
+	protected function doRm($path, $force = false) {
 		
 		//https://github.com/Studio-42/elFinder/issues/40
 		// file_exists() return false on symlink points to itself
@@ -2061,7 +2061,7 @@ abstract class elFinderVolumeDriver {
 		$dirname = $this->_dirname($path);
 		$name    = $this->_basename($path);
 		
-		if ($this->attr($path, 'locked')) {
+		if (!$force && $this->attr($path, 'locked')) {
 			return $this->setError(elFinder::ERROR_LOCKED, $name);
 		}
 

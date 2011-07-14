@@ -29,6 +29,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['dirMode']  = 0755;
 		$this->options['fileMode'] = 0644;
 		$this->options['quarantine'] = 'quarantine';
+		$this->options['maxArcFilesSize'] = 0;
 	}
 	
 	/*********************************************************************/
@@ -382,10 +383,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * Return symlink target file
 	 *
 	 * @param  string  $path  link path
+	 * @param  string  $root  root path
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _readlink($path) {
+	protected function _readlink($path, $root='') {
 		if (!($target = @readlink($path))) {
 			return false;
 		}
@@ -393,16 +395,24 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
 			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
 		}
+		
 		$atarget = realpath($target);
 		
 		if (!$atarget) {
 			return false;
 		}
 		
+		if ($root) {
+			$aroot = realpath($root);
+		} else {
+			$root  = $this->root;
+			$aroot = $this->aroot;
+		}
+		
 		if ($this->_inpath($atarget, $this->aroot)) {
 			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
 		}
-		// echo $path.'<br>';
+
 		return false;
 	}
 		
@@ -699,6 +709,55 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _unpack($path, $arc) {
+		$cwd = getcwd();
+		$dir = $this->_dirname($path);
+		chdir($dir);
+		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($this->_basename($path));
+		$this->procExec($cmd, $o, $c);
+		chdir($cwd);
+	}
+
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _findSymlinks($path) {
+		if (is_link($path)) {
+			return true;
+		}
+		
+		if (is_dir($path)) {
+			foreach (scandir($path) as $name) {
+				if ($name != '.' && $name != '..') {
+					$p = $path.DIRECTORY_SEPARATOR.$name;
+					if (is_link($p)) {
+						return true;
+					}
+					if (is_dir($p) && $this->_findSymlinks($p)) {
+						return true;
+					} elseif (is_file($p)) {
+						$this->archiveSize += filesize($p);
+					}
+				}
+			}
+		} else {
+			$this->archiveSize += filesize($path);
+		}
+		
+		
+		
+		return false;
+	}
+
+	/**
 	 * Extract files from archive
 	 *
 	 * @param  string  $path  archive path
@@ -710,18 +769,90 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _extract($path, $arc) {
 		
 		if ($this->quarantine) {
-			echo microtime();
-			return false;
+			$dir     = $this->quarantine.DIRECTORY_SEPARATOR.str_replace(' ', '_', microtime()).basename($path);
+			$archive = $dir.DIRECTORY_SEPARATOR.basename($path);
+			
+			if (!@mkdir($dir)) {
+				return false;
+			}
+			
+			chmod($dir, 0777);
+			
+			// copy in quarantine
+			if (!copy($path, $archive)) {
+				return false;
+			}
+			
+			// extract in quarantine
+			$this->_unpack($archive, $arc);
+			@unlink($archive);
+			$ls = scandir($dir);
+			foreach ($ls as $i => $name) {
+				if ($name == '.' || $name == '..') {
+					unset($ls[$i]);
+				}
+			}
+			
+			// no files - extract error ?
+			if (empty($ls)) {
+				return false;
+			}
+			
+			$this->archiveSize = 0;
+			
+			// find symlinks
+			if ($this->_findSymlinks($dir)) {
+				$this->doRm($dir);
+				return false;
+			}
+			$this->doRm($dir);
+			// echo $this->archiveSize;
+			
+			if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $this->archiveSize) {
+				echo $this->options['maxArcFilesSize'];
+				return false;
+			}
+			
+			$result = array();
+			
+			// archive contains one item - extract in archive dir
+			if (count($ls) == 1) {
+				$this->_unpack($path, $arc);
+				
+				$result[] = basename($path).DIRECTORY_SEPARATOR.$ls[0];
+				
+			} else {
+				// for several files - create new directory
+				
+				$name = basename($path);
+				if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
+					$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+				}
+				$test = dirname($path).DIRECTORY_SEPARATOR.$name;
+				if (file_exists($test) || is_link($test)) {
+					$name = $this->uniqueName(dirname($path), $name, '-', false);
+				}
+				
+				$dir     = dirname($path).DIRECTORY_SEPARATOR.$name;
+				$archive = $dir.DIRECTORY_SEPARATOR.basename($path);
+
+				if (!$this->_mkdir(dirname($path), $name) || !copy($path, $archive)) {
+					return false;
+				}
+				
+				$this->_unpack($archive, $arc);
+				@unlink($archive);
+				$result[] = $dir;
+				
+				debug($result);
+			}
+			
+
+			
+			return $result;
 		}
 		
-		$cwd = getcwd();
-		$dir = $this->_dirname($path);
-		chdir($dir);
-		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($this->_basename($path));
-		$this->procExec($cmd, $o, $c);
-		chdir($cwd);
-
-		return true;
+		return false;
 	}
 	
 	/**
