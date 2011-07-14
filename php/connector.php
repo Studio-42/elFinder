@@ -207,7 +207,7 @@ $opts = array(
 			'imgLib' => 'gd',
 #			'tmbURL'    => '.tmb/',
 			'utf8fix' => false,
-			'acceptedName' => '/[\W]*/',
+			// 'acceptedName'    => '/^[\W]*$/',
 			'attributes' => array(
 				array(
 					'pattern' => '/\/\..+/',
