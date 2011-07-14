@@ -153,7 +153,7 @@
 
 /*.elfinder-cwd-view-list { padding:0 0 4px 0; }*/
 
-.elfinder-cwd table { width:100%; border-collapse:collapse; border:0 solid; margin:0; }
+.elfinder-cwd table { width:100%; border-collapse:collapse; border:0 solid; margin:0 0 10px 0; }
 .elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-top:0 solid; border-right:0 solid; }
 .elfinder .elfinder-cwd table thead td { font-size:.9em;}
 .elfinder .elfinder-cwd table td { 

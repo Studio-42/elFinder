@@ -850,6 +850,14 @@ $.fn.elfindercwd = function(fm) {
 				remove(e.data.removed || []);
 				trigger();
 			})
+			// fix cwd height if it less then wrapper
+			.bind('open add search searchend', function() {
+				cwd.css('height', 'auto');
+
+				if (cwd.outerHeight(true) < wrapper.height()) {
+					cwd.height(wrapper.height() - (cwd.outerHeight(true) - cwd.height()) - 2);
+				} 
+			})
 			// select dragged file if no selected, disable selectable
 			.dragstart(function(e) {
 				var target = $(e.data.target),
