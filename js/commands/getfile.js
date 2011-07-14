@@ -48,6 +48,11 @@ elFinder.prototype.commands.getfile = function() {
 						fm.destroy();
 					}
 				}),
+			result = function(file) {
+				return opts.onlyURL
+					? opts.multiple ? $.map(files, function(f) { return f.url; }) : files[0].url
+					: opts.multiple ? files : files[0];
+			},
 			req = [], 
 			i, file, dim;
 
@@ -88,12 +93,12 @@ elFinder.prototype.commands.getfile = function() {
 		
 		if (req.length) {
 			$.when.apply(null, req).always(function() {
-				dfrd.resolve(opts.multiple ? files : files[0]);
+				dfrd.resolve(result(files));
 			})
 			return dfrd;
 		}
 		
-		return dfrd.resolve(opts.multiple ? files : files[0]);
+		return dfrd.resolve(result(files));
 	}
 
 }
