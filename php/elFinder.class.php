@@ -94,95 +94,46 @@ class elFinder {
 	 **/
 	protected $disabled = array();
 	
-	const ERROR_UNKNOWN           = 0;
-	const ERROR_UNKNOWN_CMD       = 1;
-	const ERROR_CONF              = 2;
-	const ERROR_CONF_NO_JSON      = 3;
-	const ERROR_CONF_NO_VOL       = 4;
-	const ERROR_INV_PARAMS        = 5;
-	const ERROR_OPEN              = 6;
-	const ERROR_DIR_NOT_FOUND     = 7;
-	const ERROR_FILE_NOT_FOUND    = 8;
-	const ERROR_TRGDIR_NOT_FOUND  = 9;
-	const ERROR_NOT_DIR           = 10;
-	const ERROR_NOT_FILE          = 11;
-
-	const ERROR_PERM_DENIED       = 12;
-	const ERROR_LOCKED            = 13;
-	const ERROR_EXISTS            = 14;
-	const ERROR_INVALID_NAME      = 15;
-	const ERROR_MKDIR             = 16;
-	const ERROR_MKFILE            = 17;
-	const ERROR_RENAME            = 18;
-	const ERROR_COPY              = 19;
-	const ERROR_MOVE              = 20;
-	const ERROR_COPY_FROM         = 21;
-	const ERROR_COPY_TO           = 22;
-	const ERROR_COPY_ITSELF       = 23;
-	const ERROR_RM                = 24;
-	const ERROR_UPLOAD_COMMON     = 25;
-	const ERROR_UPLOAD            = 26;
-	const ERROR_UPLOAD_NO_FILES   = 27;
-	const ERROR_UPLOAD_FILES_SIZE = 28;
-	const ERROR_UPLOAD_SIZE       = 29;
-	const ERROR_MIME              = 30;
-	const ERROR_UPLOAD_TRANSFER   = 31;
-	const ERROR_ACCESS_DENIED     = 32;
-	const ERROR_SAVE              = 33;
-	const ERROR_EXTRACT           = 34;
-	const ERROR_ARCHIVE			  = 35;
-	const ERROR_NOT_ARCHIVE		  = 36;
-	const ERROR_ARCHIVE_TYPE      = 37;
-	const ERROR_ARC_SYMLINKS      = 38;
-	const ERROR_ARC_MAXSIZE       = 39;
-	
-	/**
-	 * Error messages
-	 *
-	 * @var array
-	 **/
-	protected static $errors = array(
-		0  => 'errUnknown',
-		1  => 'errUnknownCmd',
-		2  => 'errConf',
-		3  => 'errJSON',
-		4  => 'errNoVolumes',
-		5  => 'errCmdParams',
-		6  => 'errOpen',
-		7  => 'errFolderNotFound',
-		8  => 'errFileNotFound',
-		9  => 'errTrgFolderNotFound',
-		10 => 'errNotFolder',
-		11 => 'errNotFile',
-		12 => 'errPerm',
-		13 => 'errLocked',
-		14 => 'errExists',
-		15 => 'errInvName',
-		16 => 'errMkdir',
-		17 => 'errMkfile',
-		18 => 'errRename',
-		19 => 'errCopy',
-		20 => 'errMove',
-		21 => 'errCopyFrom',
-		22 => 'errCopyTo',
-		23 => 'errCopyInItself',
-		24 => 'errRm',
-		25 => 'errUploadCommon',
-		26 => 'errUpload',
-		27 => 'errUploadNoFiles',
-		28 => 'errMaxSize',
-		29 => 'errFileMaxSize',
-		30 => 'errUploadMime',
-		31 => 'errUploadTransfer',
-		32 => 'errAccess',
-		33 => 'errSave',
-		34 => 'errExtract',
-		35 => 'errArchive',
-		36 => 'errNoArchive',
-		37 => 'errArcType',
-		38 => 'errArcSymlinks',
-		39 => 'errArcMaxSize'
-	);
+	const ERROR_UNKNOWN           = 'errUnknown';
+	const ERROR_UNKNOWN_CMD       = 'errUnknownCmd';
+	const ERROR_CONF              = 'errConf';
+	const ERROR_CONF_NO_JSON      = 'errJSON';
+	const ERROR_CONF_NO_VOL       = 'errNoVolumes';
+	const ERROR_INV_PARAMS        = 'errCmdParams';
+	const ERROR_OPEN              = 'errOpen';
+	const ERROR_DIR_NOT_FOUND     = 'errFolderNotFound';
+	const ERROR_FILE_NOT_FOUND    = 'errFileNotFound';
+	const ERROR_TRGDIR_NOT_FOUND  = 'errTrgFolderNotFound';
+	const ERROR_NOT_DIR           = 'errNotFolder';
+	const ERROR_NOT_FILE          = 'errNotFile';
+	const ERROR_PERM_DENIED       = 'errPerm';
+	const ERROR_LOCKED            = 'errLocked';
+	const ERROR_EXISTS            = 'errExists';
+	const ERROR_INVALID_NAME      = 'errInvName';
+	const ERROR_MKDIR             = 'errMkdir';
+	const ERROR_MKFILE            = 'errMkfile';
+	const ERROR_RENAME            = 'errRename';
+	const ERROR_COPY              = 'errCopy';
+	const ERROR_MOVE              = 'errMove';
+	const ERROR_COPY_FROM         = 'errCopyFrom';
+	const ERROR_COPY_TO           = 'errCopyTo';
+	const ERROR_COPY_ITSELF       = 'errCopyInItself';
+	const ERROR_RM                = 'errRm';
+	const ERROR_UPLOAD_COMMON     = 'errUploadCommon';
+	const ERROR_UPLOAD            = 'errUpload';
+	const ERROR_UPLOAD_NO_FILES   = 'errUploadNoFiles';
+	const ERROR_UPLOAD_FILES_SIZE = 'errMaxSize';
+	const ERROR_UPLOAD_SIZE       = 'errFileMaxSize';
+	const ERROR_MIME              = 'errUploadMime';
+	const ERROR_UPLOAD_TRANSFER   = 'errUploadTransfer';
+	const ERROR_ACCESS_DENIED     = 'errAccess';
+	const ERROR_SAVE              = 'errSave';
+	const ERROR_EXTRACT           = 'errExtract';
+	const ERROR_ARCHIVE			  = 'errArchive';
+	const ERROR_NOT_ARCHIVE		  = 'errNoArchive';
+	const ERROR_ARCHIVE_TYPE      = 'errArcType';
+	const ERROR_ARC_SYMLINKS      = 'errArcSymlinks';
+	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
 	
 	/**
 	 * Constructor
@@ -379,6 +330,8 @@ class elFinder {
 		if (!count($errors)) {
 			return self::$errors[self::ERROR_UNKNOWN];
 		}
+		
+		return $errors;
 		
 		foreach ($errors as $i => $msg) {
 			if (is_int($msg) && !empty(self::$errors[$msg])) {

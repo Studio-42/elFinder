@@ -192,7 +192,7 @@ $opts = array(
 			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			'alias'  => 'File system',
 			'disabled' => array(),
-			// 'maxArcFilesSize' => 100,
+			'maxArcFilesSize' => 100,
 			// 'accessControl' => array($acl, 'fsAccess'),
 			// 'accessControlData' => array('uid' => 1),
 			'acceptedName' => 'validName',
