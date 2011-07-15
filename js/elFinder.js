@@ -155,6 +155,15 @@ window.elFinder = function(node, opts) {
 		clipboard = [],
 		
 		/**
+		 * Copied/cuted files hashes
+		 * Prevent from remove its from cache.
+		 * Required for dispaly correct files names in error messages
+		 *
+		 * @type Array
+		 **/
+		remember = [],
+		
+		/**
 		 * Queue for 'open' requests
 		 *
 		 * @type Array
@@ -196,7 +205,8 @@ window.elFinder = function(node, opts) {
 				for (var i in files) {
 					if (files.hasOwnProperty(i) 
 					&& files[i].mime != 'directory' 
-					&& files[i].phash == cwd) {
+					&& files[i].phash == cwd
+					&& $.inArray(i, remember) === -1) {
 						delete files[i];
 					}
 				}
@@ -1124,10 +1134,14 @@ window.elFinder = function(node, opts) {
 		
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
+			remember = [];
 			
 			clipboard = $.map(hashes||[], function(hash) {
 				var file = files[hash];
 				if (file) {
+					
+					remember.push(hash);
+					
 					return {
 						hash   : hash,
 						phash  : file.phash,

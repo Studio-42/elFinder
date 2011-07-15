@@ -197,7 +197,7 @@ $.fn.elfinderdialog.defaults = {
 	closeOnEscape : true,
 	buttons   : {},
 	position  : null,
-	width     : 300,
+	width     : 320,
 	height    : 'auto',
 	minWidth  : 200,
 	minHeight : 110

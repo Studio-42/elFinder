@@ -3,7 +3,7 @@
 class elFinder {
 	
 	/**
-	 * Version number
+	 * API version number
 	 *
 	 * @var string
 	 **/
@@ -16,6 +16,12 @@ class elFinder {
 	 **/
 	protected $volumes = array();
 	
+	/**
+	 * Mounted volumes count
+	 * Required to create unique volume id
+	 *
+	 * @var int
+	 **/
 	public static $volumesCnt = 1;
 	
 	/**
@@ -62,7 +68,7 @@ class elFinder {
 	protected $listeners = array();
 	
 	/**
-	 * undocumented class variable
+	 * script work time for debug
 	 *
 	 * @var string
 	 **/
@@ -81,19 +87,20 @@ class elFinder {
 	protected $debug = false;
 	
 	/**
-	 * undocumented class variable
+	 * Store copy files errors
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $copyError = array();
 	
 	/**
-	 * undocumented class variable
+	 * Disabled commands list
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $disabled = array();
 	
+	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
 	const ERROR_UNKNOWN_CMD       = 'errUnknownCmd';
 	const ERROR_CONF              = 'errConf';
@@ -865,7 +872,7 @@ class elFinder {
 				
 				if (!$dstVolume->copyToAllowed()) {
 					$root = $dstVolume->file($dstVolume->root());
-					$result['warning'] = $this->error($error, self::ERROR_COPY_TO, $root['name']);
+					$result['warning'] = $this->error($error, $src['name'], self::ERROR_COPY_TO, $root['name']);
 					break;
 				}
 			}

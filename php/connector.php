@@ -229,7 +229,7 @@ $opts = array(
 			'accessControl' => 'access',
 			'separator' => ':',
 			
-			// 'copyTo' => false,
+			'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
 			'tmbPath' => '../files/.dbtmb/',
 			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/.dbtmb/',
