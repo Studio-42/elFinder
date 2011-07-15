@@ -892,7 +892,7 @@ $.fn.elfindercwd = function(fm) {
 				trigger();
 			})
 			// select new files after some actions
-			.bind('mkdir mkfile duplicate upload rename archive', function(e) {
+			.bind('mkdir mkfile duplicate upload rename archive extract', function(e) {
 				var phash = fm.cwd().hash, files;
 				
 				cwd.trigger('unselectall');

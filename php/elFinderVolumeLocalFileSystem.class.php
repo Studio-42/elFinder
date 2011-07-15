@@ -18,6 +18,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $driverId = 'l';
 	
 	/**
+	 * Required to count total archive files size
+	 *
+	 * @var int
+	 **/
+	protected $archiveSize = 0;
+	
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -25,11 +32,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct() {
-		$this->options['alias']    = ''; // alias to replace root dir name
-		$this->options['dirMode']  = 0755;
-		$this->options['fileMode'] = 0644;
-		$this->options['quarantine'] = 'quarantine';
-		$this->options['maxArcFilesSize'] = 0;
+		$this->options['alias']    = '';              // alias to replace root dir name
+		$this->options['dirMode']  = 0755;            // new dirs mode
+		$this->options['fileMode'] = 0644;            // new files mode
+		$this->options['quarantine'] = 'quarantine';  // quarantine folder name - required to check archive (must be hidden)
+		$this->options['maxArcFilesSize'] = 0;        // max allowed archive files size (0 - no limit)
 	}
 	
 	/*********************************************************************/
@@ -66,6 +73,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		$this->aroot = realpath($this->root);
 		
+		// check quarantine dir
 		if (!empty($this->options['quarantine'])) {
 			$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
 			if ((!is_dir($this->quarantine) && !$this->_mkdir($this->root, $this->options['quarantine'])) || !is_writable($this->quarantine)) {
@@ -383,11 +391,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * Return symlink target file
 	 *
 	 * @param  string  $path  link path
-	 * @param  string  $root  root path
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _readlink($path, $root='') {
+	protected function _readlink($path) {
 		if (!($target = @readlink($path))) {
 			return false;
 		}
@@ -402,13 +409,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return false;
 		}
 		
-		if ($root) {
-			$aroot = realpath($root);
-		} else {
-			$root  = $this->root;
-			$aroot = $this->aroot;
-		}
-		
+		$root  = $this->root;
+		$aroot = $this->aroot;
+
 		if ($this->_inpath($atarget, $this->aroot)) {
 			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
 		}
@@ -709,10 +712,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * undocumented function
+	 * Unpack archive
 	 *
+	 * @param  string  $path  archive path
+	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
+	 * @return true
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
 	protected function _unpack($path, $arc) {
 		$cwd = getcwd();
@@ -724,10 +731,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * undocumented function
+	 * Recursive symlinks search
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path  file/dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _findSymlinks($path) {
 		if (is_link($path)) {
@@ -751,8 +759,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		} else {
 			$this->archiveSize += filesize($path);
 		}
-		
-		
 		
 		return false;
 	}
@@ -786,10 +792,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			// extract in quarantine
 			$this->_unpack($archive, $arc);
 			@unlink($archive);
-			$ls = scandir($dir);
-			foreach ($ls as $i => $name) {
-				if ($name == '.' || $name == '..') {
-					unset($ls[$i]);
+			
+			// get files list
+			$ls = array();
+			foreach (scandir($dir) as $i => $name) {
+				if ($name != '.' && $name != '..') {
+					$ls[] = $name;
 				}
 			}
 			
@@ -801,29 +809,30 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$this->archiveSize = 0;
 			
 			// find symlinks
-			if ($this->_findSymlinks($dir)) {
-				$this->doRm($dir);
-				return false;
-			}
+			$symlinks = $this->_findSymlinks($dir);
+			// remove arc copy
 			$this->doRm($dir);
-			// echo $this->archiveSize;
 			
+			if ($symlinks) {
+				return $this->setError(elFinder::ERROR_ARC_SYMLINKS);
+			}
+
+			// check max files size
 			if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $this->archiveSize) {
-				echo $this->options['maxArcFilesSize'];
-				return false;
+				return $this->setError(elFinder::ERROR_ARC_MAXSIZE);
 			}
 			
-			$result = array();
+			
 			
 			// archive contains one item - extract in archive dir
 			if (count($ls) == 1) {
 				$this->_unpack($path, $arc);
+				$result = dirname($path).DIRECTORY_SEPARATOR.$ls[0];
 				
-				$result[] = basename($path).DIRECTORY_SEPARATOR.$ls[0];
-				
+
 			} else {
 				// for several files - create new directory
-				
+				// create unique name for directory
 				$name = basename($path);
 				if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
 					$name = substr($name, 0,  strlen($name)-strlen($m[0]));
@@ -833,8 +842,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					$name = $this->uniqueName(dirname($path), $name, '-', false);
 				}
 				
-				$dir     = dirname($path).DIRECTORY_SEPARATOR.$name;
-				$archive = $dir.DIRECTORY_SEPARATOR.basename($path);
+				$result  = dirname($path).DIRECTORY_SEPARATOR.$name;
+				$archive = $result.DIRECTORY_SEPARATOR.basename($path);
 
 				if (!$this->_mkdir(dirname($path), $name) || !copy($path, $archive)) {
 					return false;
@@ -842,17 +851,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				
 				$this->_unpack($archive, $arc);
 				@unlink($archive);
-				$result[] = $dir;
-				
-				debug($result);
 			}
 			
-
-			
-			return $result;
+			return file_exists($result) ? $result : false;
 		}
-		
-		return false;
 	}
 	
 	/**

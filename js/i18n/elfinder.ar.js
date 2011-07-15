@@ -62,6 +62,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'هذا الملف ليس ملف مضغوط أو ذو صسغة غير مدعومة ',
 			'errCmdNoSupport'      : 'الخادم الخلفي لا يدعم هذا الأمر ',
 			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'أنشئ مجلد مضغوط',

@@ -1477,6 +1477,7 @@ abstract class elFinderVolumeDriver {
 		$archiver = isset($this->archivers['extract'][$file['mime']])
 			? $this->archivers['extract'][$file['mime']]
 			: false;
+			
 		if (!$archiver) {
 			return $this->setError(elFinder::ERROR_NOT_ARCHIVE);
 		}
@@ -1487,20 +1488,11 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		$before = $this->scandir($file['phash']);
-
-		if (!$this->_extract($path, $archiver)) {
+		if (($path = $this->_extract($path, $archiver)) == false) {
 			return false;
 		}
-		
-		$after = $this->scandir($file['phash']);
-		$diff = array();
-		foreach ($after as $file) {
-			if (!in_array($file, $before)) {
-				$diff[] = $file;
-			}
-		}
-		return $diff;
+		return $this->stat($path);
+		return $this->_extract($path, $archiver);
 	}
 
 	/**

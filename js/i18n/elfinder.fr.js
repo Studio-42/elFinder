@@ -66,6 +66,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
 			'errCmdNoSupport'      : 'Le Backend ne prend pas en charge cette commande.',
 			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',

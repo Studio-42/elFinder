@@ -133,6 +133,8 @@ class elFinder {
 	const ERROR_ARCHIVE			  = 35;
 	const ERROR_NOT_ARCHIVE		  = 36;
 	const ERROR_ARCHIVE_TYPE      = 37;
+	const ERROR_ARC_SYMLINKS      = 38;
+	const ERROR_ARC_MAXSIZE       = 39;
 	
 	/**
 	 * Error messages
@@ -178,6 +180,8 @@ class elFinder {
 		35 => 'errArchive',
 		36 => 'errNoArchive',
 		37 => 'errArcType',
+		38 => 'errArcSymlinks',
+		39 => 'errArcMaxSize'
 	);
 	
 	/**
@@ -997,7 +1001,7 @@ class elFinder {
 	 **/
 	protected function extract($args) {
 		$target = $args['target'];
-		$mimes   = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$error  = array(self::ERROR_EXTRACT, '#'.$target);
 
 		if (($volume = $this->volume($target)) == false
@@ -1011,11 +1015,11 @@ class elFinder {
 			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
 		}
 
-		if (($added = $volume->extract($target)) === false) {
+		if (($file = $volume->extract($target)) == false) {
 			return array('error' => $this->error($error, $volume->error()));
 		}
 
-		return $this->trigger('extract', $volume, array('added' => $added));
+		return $this->trigger('extract', $volume, array('added' => array($file)));
 	}
 	
 	/**
