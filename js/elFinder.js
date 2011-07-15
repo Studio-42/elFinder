@@ -195,6 +195,7 @@ window.elFinder = function(node, opts) {
 		
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
+		syncInterval,
 		
 		open = function(data) {
 			if (data.init) {
@@ -215,11 +216,9 @@ window.elFinder = function(node, opts) {
 			cwd = data.cwd.hash;
 			cache(data.files);
 			if (!files[cwd]) {
-				self.log('no cwd in cache')
 				cache([data.cwd]);
 			}
 			self.lastDir(cwd);
-			
 		},
 		
 		/**
@@ -1257,6 +1256,9 @@ window.elFinder = function(node, opts) {
 			node.children().remove();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 			node[0].elfinder = null;
+			if (syncInterval) {
+				clearInterval(syncInterval);
+			}
 		}
 	}
 	
@@ -1580,7 +1582,13 @@ window.elFinder = function(node, opts) {
 	
 	// update ui's size after init
 	this.one('load', function() {
-		node.trigger('resize')
+		node.trigger('resize');
+		if (self.options.sync > 1000) {
+			syncInterval = setInterval(function() {
+				self.sync();
+			}, self.options.sync)
+			
+		}
 	});
 	
 	// self.timeEnd('load'); 

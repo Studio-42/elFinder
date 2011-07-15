@@ -297,7 +297,7 @@ elFinder.prototype._options = {
 	 * @type Number
 	 * @default  0 (do not sync)
 	 */
-	sync : 1000,
+	sync : 0,
 	
 	/**
 	 * How many thumbnails create in one request
