@@ -133,13 +133,22 @@ elFinder.prototype.commands.info = function() {
 			dcnt  = $.map(files, function(f) { return f.mime == 'directory' ? 1 : null }).length;
 			if (!dcnt) {
 				size = 0;
-				$.each(files, function(h, f) { size += f.size;});
+				$.each(files, function(h, f) { 
+					var s = parseInt(f.size);
+					
+					if (s >= 0 && size >= 0) {
+						size += s;
+					} else {
+						size = 'unknown';
+					}
+				});
 				content.push(row.replace(l, msg.kind).replace(v, msg.files));
 				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
 				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msg.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)))
 				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc)));
 				count = $.map(files, function(f) { return f.hash });
+				
 			}
 		}
 		
@@ -166,6 +175,7 @@ elFinder.prototype.commands.info = function() {
 				})
 				.done(function(data) {
 					var size = parseInt(data.size);
+					fm.log(data.size)
 					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown);
 				});
 		}
