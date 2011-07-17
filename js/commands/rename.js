@@ -54,6 +54,10 @@ elFinder.prototype.commands.rename = function() {
 				.mousedown(function(e) {
 					e.stopPropagation();
 				})
+				.dblclick(function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+				})
 				.blur(function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent();
