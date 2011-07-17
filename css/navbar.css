@@ -13,6 +13,10 @@
 	overflow:auto;
 	display:none;
 	position:relative;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
 /*	border:1px solid #111;*/
 }
 

@@ -54,11 +54,18 @@ elFinder.prototype.commands.rename = function() {
 				.mousedown(function(e) {
 					e.stopPropagation();
 				})
+				.dblclick(function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+				})
 				.blur(function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent();
-					
+
 					if (parent.length) {
+						if (input[0].setSelectionRange) {
+							input[0].setSelectionRange(0, 0)
+						}
 						if (name == file.name) {
 							return dfrd.reject();
 						}
@@ -88,7 +95,9 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
-			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name));
+			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name)),
+			name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '')
+			;
 		
 		if (this.disabled()) {
 			return dfrd.reject();
@@ -102,8 +111,13 @@ elFinder.prototype.commands.rename = function() {
 			return dfrd.reject(['errLocked', file.name]);
 		}
 		
-		// fm.disable();
+		fm.one('select', function() {
+			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.blur();
+		})
+		
 		input.select().focus();
+		
+		input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 		
 		return dfrd;
 	}
