@@ -1536,7 +1536,23 @@ abstract class elFinderVolumeDriver {
 		
 		return $archive ? $this->stat($archive) : false;
 	}
-
+	
+	/**
+	 * Resize image
+	 *
+	 * @param  string   $hash    image file
+	 * @param  int      $width   new width
+	 * @param  int      $height  new height
+	 * @param  bool	    $crop    crop image
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 **/
+	public function resize($hash, $width, $height, $crop = false) {
+		$path = $this->decode($hash);
+		
+		return $this->resizeImg($path, $width, $height, $crop, false, $this->options['imgLib']) ? $this->stat($path) : false;
+	}
 	/**
 	 * Remove file/dir
 	 *
@@ -2201,66 +2217,6 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return x/y coord for crop image thumbnail
-	 *
-	 * @param  int    $w      image width
-	 * @param  int    $h      image height	
-	 * @param  int    $size   thumbnail size
-	 * @param  bool   $crop   crop image fragment for thumbnail
-	 * @return array 
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
-	 **/
-	protected function tmbEffects($w, $h, $tmbSize, $crop = true) {
-		$x = 0;
-		$y = 0;
-		$size_w = 0;
-		$size_h = 0;
-		
-		if ($crop == false) {
-
-			/* Calculating image scale width and height */
-			$xscale = $w / $tmbSize;
-			$yscale = $h / $tmbSize;
-
-			if ($yscale > $xscale) {
-				$newwidth = round($w * (1 / $yscale));
-				$newheight = round($h * (1 / $yscale));
-			} else {
-				$newwidth = round($w * (1 / $xscale));
-				$newheight = round($h * (1 / $xscale));
-			}
-
-			/* Keeping original dimensions if image fitting into thumbnail without scale */
-			if ($w <= $tmbSize && $h <= $tmbSize) {
-				$newwidth = $w;
-				$newheight = $h;
-			}
-
-			/* Calculating coordinates for aligning thumbnail */
-			$y = ceil(($tmbSize - $newheight) / 2); 
-			$x = ceil(($tmbSize - $newwidth) / 2);
-			
-			$size_w = $newwidth;
-			$size_h = $newheight;
-			
-		} else {
-		
-			$size_w = $size_h = min($w, $h);
-			
-			/* calculating coordinates for cropping thumbnail */
-			if ($w > $h) {
-				$x = ceil(($w - $h)/2);
-			} else {
-				$y = ceil(($h - $w)/2);
-			}		
-			
-		}
-		
-		return array($x, $y, $size_w, $size_h);
-	}
-	
-	/**
 	 * Create thumnbnail and return it's URL on success
 	 *
 	 * @param  string  $path  file path
@@ -2294,78 +2250,197 @@ abstract class elFinderVolumeDriver {
 		
 		$result = false;
 		$tmbSize = $this->tmbSize;
-
-		list($x, $y, $size_w, $size_h) = $this->tmbEffects($s[0], $s[1], $tmbSize, $this->options['tmbCrop']);
 		
-		switch ($this->imgLib) {
+		$result = $this->resizeImg($tmb, $tmbSize, $tmbSize, $this->options['tmbCrop'], true, $this->options['imgLib'], $this->options['tmbBgColor'], 'png');
+
+		return $result ? $name : false;
+	}
+	
+	/**
+	 * Resize image
+	 *
+	 * @param  string   $path     image file
+	 * @param  int      $width    new width
+	 * @param  int      $height   new height
+	 * @param  bool	    $crop     crop image
+	 * @param  bool	    $exactfit fit into given dimensions exactly
+	 * @param  string   $imgLib   image library
+	 * @param  string   $bgcolor  image background color
+	 * @param  string   $destformat	image destination format
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 **/
+	protected function resizeImg($path, $width, $height, $crop = false, $exactfit = false, $imgLib = 'imagick', $bgcolor = '#0000ff', $destformat = null) {
+
+		if (($s = @getimagesize($path)) == false) {
+			return false;
+		}
+		
+		$result = false;
+
+		list($x, $y, $size_w, $size_h) = $this->getResizeCropDimensions($s[0], $s[1], $width, $height, $crop, $exactfit);
+		
+		switch ($imgLib) {
 			case 'imagick':
 				try {
-					$img = new imagick($tmb);
+					$img = new imagick($path);
 				} catch (Exception $e) {
 					return false;
 				}
 
 				$img->contrastImage(1);
 
-				if ($this->options['tmbCrop'] == false) {
-					$img1 = new Imagick();
-					$img1->newImage($tmbSize, $tmbSize, new ImagickPixel($this->options['tmbBgColor']));
-					$img1->setImageFormat('png');
+				if ($crop == false) {
 					$img->resizeImage($size_w, $size_h, NULL, true);
-					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
-					$result = $img1->writeImage($tmb);
+					
+					
+					if ($exactfit == true) {
+						$img1 = new Imagick();
+						$img1->newImage($width, $height, new ImagickPixel($bgcolor));
+						$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
+						$img->resizeImage($size_w, $size_h, NULL, true);
+						$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
+						$result = $img1->writeImage($path);
+						return $result ? $path : false;
+					} 
+					
           		} else {
-					$result = $img->cropThumbnailImage($tmbSize, $tmbSize) && $img->writeImage($tmb);
+					$img->cropImage($width, $height, $x, $y);
 				}
+				
+				$result = $img->writeImage($path);
+				
+				return $result ? $path : false;
+				
 				break;
 				
 			case 'gd':
 				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($tmb);
+					$img = imagecreatefromjpeg($path);
 				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($tmb);
+					$img = imagecreatefrompng($path);
 				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($tmb);
+					$img = imagecreatefromgif($path);
 				} elseif ($s['mime'] == 'image/xbm') {
-					$img = imagecreatefromxbm($tmb);
+					$img = imagecreatefromxbm($path);
 				}
-				if ($img &&  false != ($tmp = imagecreatetruecolor($tmbSize, $tmbSize))) {
+				
+				$init_w = $size_w;
+				$init_h = $size_h;
+				
+				if ($exactfit == true) {
+					$init_w = $width;
+					$init_h = $height;
+				}
+				
+				if ($img &&  false != ($tmp = imagecreatetruecolor($init_w, $init_h))) {
         
-					if ($this->options['tmbCrop'] == false) {
+					if ($crop == false) {
 					
-						if ($this->options['tmbBgColor'] == 'transparent') {
+						if ($bgcolor == 'transparent') {
 							list($r, $g, $b) = array(0, 0, 255);
 						} else {
-							list($r, $g, $b) = sscanf($this->options['tmbBgColor'], "#%02x%02x%02x");
+							list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
 						}
 
-						$bgcolor = imagecolorallocate($tmp, $r, $g, $b);
+						$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
 						
-						if ($this->options['tmbBgColor'] == 'transparent') {
-							$bgcolor = imagecolortransparent($tmp, $bgcolor);
+						if ($bgcolor == 'transparent') {
+							$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
 						}
         
-						imagefill($tmp, 0, 0, $bgcolor);
-
+						imagefill($tmp, 0, 0, $bgcolor1);
+					
 						if (!imagecopyresampled($tmp, $img, $x, $y, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 							return false;
 						}
         
 					} else {
-						if (!imagecopyresampled($tmp, $img, 0, 0, $x, $y, $tmbSize, $tmbSize, $size_w, $size_h)) {
+						if (!imagecopy($tmp, $img, 0, 0, $x, $y, $width, $height)) {
 							return false;
 						}
 					}					
+					
+					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
+						$result = imagejpeg($tmp, $path, 100);
+					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
+						$result = imagegif($tmp, $path, 7);
+					} else {
+						$result = imagepng($tmp, $path, 7);
+					}
 
-					$result = imagepng($tmp, $tmb, 7);
 					imagedestroy($img);
 					imagedestroy($tmp);
+
+					return $result ? $path : false;
+
 				}
 				break;
 		}
 		
-		return $result ? $name : false;
+		return false;
 	}
+	
+	/**
+	 * Return x/y coord for crop image thumbnail
+	 *
+	 * @param  int    $w		image original width
+	 * @param  int    $h		image original height	
+	 * @param  int    $new_w	image new width
+	 * @param  int    $new_h	image new height
+	 * @param  bool   $crop		crop image fragment for thumbnail
+	 * @param  bool   $exactfit	fit into given dimensions exactly
+	 * @return array 
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 **/
+	protected function getResizeCropDimensions($orig_w, $orig_h, $new_w, $new_h, $crop = true, $exactfit = false) {
+		$x = 0;
+		$y = 0;
+		$calculated_w = 0;
+		$calculated_h = 0;
+		
+		if ($crop == false) {
+
+			/* Calculating image scale width and height */
+			$xscale = $orig_w / $new_w;
+			$yscale = $orig_h / $new_h;
+			
+			/* Resizing by biggest side */
+			if ($yscale > $xscale) {
+				$tmp_w = round($orig_w * (1 / $yscale));
+				$tmp_h = round($orig_h * (1 / $yscale));
+			} else {
+				$tmp_w = round($orig_w * (1 / $xscale));
+				$tmp_h = round($orig_h * (1 / $xscale));
+			}
+
+			/* Calculating coordinates for aligning thumbnail */
+			if ($exactfit == true) {
+				$y = ceil(abs($new_h - $tmp_h) / 2); 
+				$x = ceil(abs($new_w - $tmp_w) / 2);
+			}
+			
+			$calculated_w = $tmp_w;
+			$calculated_h = $tmp_h;
+		} else {
+		
+			$calculated_w = $orig_w;
+			$calculated_h = $orig_h;
+			
+			/* calculating coordinates for cropping thumbnail */
+			if ($orig_w > $orig_h) {
+				$x = ceil(($orig_w - $orig_h)/2);
+			} else {
+				$y = ceil(($orig_h - $orig_w)/2);
+			}		
+			
+		}
+		
+		return array($x, $y, $calculated_w, $calculated_h);
+	}
+
 
 	/**
 	 * Execute shell command

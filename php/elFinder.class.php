@@ -57,7 +57,8 @@ class elFinder {
 		'extract'   => array('target' => true, 'mimes' => false),
 		'search'    => array('q' => true, 'mimes' => false),
 		'info'      => array('targets' => true),
-		'dim'       => array('target' => true)
+		'dim'       => array('target' => true),
+		'resize'	=> array('target' => true, 'width' => true, 'height' => true, 'crop' => false)
 	);
 	
 	/**
@@ -141,6 +142,7 @@ class elFinder {
 	const ERROR_ARCHIVE_TYPE      = 'errArcType';
 	const ERROR_ARC_SYMLINKS      = 'errArcSymlinks';
 	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
+	const ERROR_RESIZE			  = 'errResize';
 	
 	/**
 	 * Constructor
@@ -1065,6 +1067,37 @@ class elFinder {
 			return $dim ? array('dim' => $dim) : array();
 		}
 		return array();
+	}
+	
+	/**
+	 * Resize image
+	 *
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 **/
+	protected function resize($args) {
+		$target = $args['target'];
+		$width  = $args['width'];
+		$height = $args['height'];
+		$crop   = $args['crop'];
+		$error  = array(self::ERROR_RESIZE, $target);
+		
+		if (($volume = $this->volume($target)) == false
+		|| ($file = $volume->file($target)) == false) {
+			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
+		}
+
+		if ($volume->commandDisabled('resize')) {
+			return array('error' => $this->error(self::ERROR_RESIZE, $target, self::ERROR_ACCESS_DENIED));
+		}
+			
+		if (($file = $volume->resize($target, $args['width'], $args['height'], $args['crop'])) == false) {
+			return array('error' => $this->error($error, $volume->error()));
+		}
+		
+		return $this->trigger('resize', $volume, array('changed' => array($file)));
 	}
 	
 	/***************************************************************************/

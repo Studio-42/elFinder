@@ -637,7 +637,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		if ($ctar == 0) {
 			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
-			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
+			$arcs['\qqqqqqqqqqqqqqq']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
 			//$test = exec('gzip --version', $o, $c);
 			$test = $this->procExec('gzip --version', $o, $c);
 			if ($c == 0) {
