@@ -108,7 +108,7 @@ elFinder.prototype.commands.rename = function() {
 		}
 		
 		fm.one('select', function() {
-			input.parent().length && input.blur();
+			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.blur();
 		})
 		
 		input.select().focus();
