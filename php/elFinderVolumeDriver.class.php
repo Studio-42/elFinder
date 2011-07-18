@@ -1543,10 +1543,9 @@ abstract class elFinderVolumeDriver {
 	 * @param  string   $hash    image file
 	 * @param  int      $width   new width
 	 * @param  int      $height  new height
-	 * @param  bool	    $crop    crop image
+	 * @param  bool     $crop    crop image
 	 * @return array|false
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
 	public function resize($hash, $width, $height, $crop = false) {
 		$path = $this->decode($hash);
@@ -2259,28 +2258,27 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Resize image
 	 *
-	 * @param  string   $path     image file
-	 * @param  int      $width    new width
-	 * @param  int      $height   new height
-	 * @param  bool	    $crop     crop image
-	 * @param  bool	    $exactfit fit into given dimensions exactly
-	 * @param  string   $imgLib   image library
-	 * @param  string   $bgcolor  image background color
-	 * @param  string   $destformat	image destination format
+	 * @param  string   $path       image file
+	 * @param  int      $width      new width
+	 * @param  int      $height     new height
+	 * @param  bool	    $crop       crop image
+	 * @param  bool	    $exactfit   fit into given dimensions exactly
+	 * @param  string   $imgLib     image library
+	 * @param  string   $bgcolor    image background color
+	 * @param  string   $destformat image destination format
 	 * @return string|false
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
 	protected function resizeImg($path, $width, $height, $crop = false, $exactfit = false, $imgLib = 'imagick', $bgcolor = '#0000ff', $destformat = null) {
 
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
-		
+
 		$result = false;
 
 		list($x, $y, $size_w, $size_h) = $this->getResizeCropDimensions($s[0], $s[1], $width, $height, $crop, $exactfit);
-		
+
 		switch ($imgLib) {
 			case 'imagick':
 				try {
@@ -2293,8 +2291,7 @@ abstract class elFinderVolumeDriver {
 
 				if ($crop == false) {
 					$img->resizeImage($size_w, $size_h, NULL, true);
-					
-					
+
 					if ($exactfit == true) {
 						$img1 = new Imagick();
 						$img1->newImage($width, $height, new ImagickPixel($bgcolor));
@@ -2303,18 +2300,18 @@ abstract class elFinderVolumeDriver {
 						$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
 						$result = $img1->writeImage($path);
 						return $result ? $path : false;
-					} 
-					
-          		} else {
+					}
+
+				} else {
 					$img->cropImage($width, $height, $x, $y);
 				}
-				
+
 				$result = $img->writeImage($path);
-				
+
 				return $result ? $path : false;
-				
+
 				break;
-				
+
 			case 'gd':
 				if ($s['mime'] == 'image/jpeg') {
 					$img = imagecreatefromjpeg($path);
@@ -2325,19 +2322,19 @@ abstract class elFinderVolumeDriver {
 				} elseif ($s['mime'] == 'image/xbm') {
 					$img = imagecreatefromxbm($path);
 				}
-				
+
 				$init_w = $size_w;
 				$init_h = $size_h;
-				
+
 				if ($exactfit == true) {
 					$init_w = $width;
 					$init_h = $height;
 				}
-				
+
 				if ($img &&  false != ($tmp = imagecreatetruecolor($init_w, $init_h))) {
-        
+
 					if ($crop == false) {
-					
+
 						if ($bgcolor == 'transparent') {
 							list($r, $g, $b) = array(0, 0, 255);
 						} else {
@@ -2349,18 +2346,18 @@ abstract class elFinderVolumeDriver {
 						if ($bgcolor == 'transparent') {
 							$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
 						}
-        
+
 						imagefill($tmp, 0, 0, $bgcolor1);
-					
+
 						if (!imagecopyresampled($tmp, $img, $x, $y, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 							return false;
 						}
-        
+
 					} else {
 						if (!imagecopy($tmp, $img, 0, 0, $x, $y, $width, $height)) {
 							return false;
 						}
-					}					
+					}
 					
 					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
 						$result = imagejpeg($tmp, $path, 100);
@@ -2378,10 +2375,10 @@ abstract class elFinderVolumeDriver {
 				}
 				break;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Return x/y coord for crop image thumbnail
 	 *
@@ -2392,8 +2389,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool   $crop		crop image fragment for thumbnail
 	 * @param  bool   $exactfit	fit into given dimensions exactly
 	 * @return array 
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
 	protected function getResizeCropDimensions($orig_w, $orig_h, $new_w, $new_h, $crop = true, $exactfit = false) {
 		$x = 0;
@@ -2406,7 +2402,7 @@ abstract class elFinderVolumeDriver {
 			/* Calculating image scale width and height */
 			$xscale = $orig_w / $new_w;
 			$yscale = $orig_h / $new_h;
-			
+
 			/* Resizing by biggest side */
 			if ($yscale > $xscale) {
 				$tmp_w = round($orig_w * (1 / $yscale));
@@ -2421,23 +2417,23 @@ abstract class elFinderVolumeDriver {
 				$y = ceil(abs($new_h - $tmp_h) / 2); 
 				$x = ceil(abs($new_w - $tmp_w) / 2);
 			}
-			
+
 			$calculated_w = $tmp_w;
 			$calculated_h = $tmp_h;
 		} else {
-		
+
 			$calculated_w = $orig_w;
 			$calculated_h = $orig_h;
-			
+
 			/* calculating coordinates for cropping thumbnail */
 			if ($orig_w > $orig_h) {
 				$x = ceil(($orig_w - $orig_h)/2);
 			} else {
 				$y = ceil(($orig_h - $orig_w)/2);
-			}		
-			
+			}
+
 		}
-		
+
 		return array($x, $y, $calculated_w, $calculated_h);
 	}
 
@@ -2447,34 +2443,34 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  string  $command       command line
 	 * @param  array   $output        stdout strings
-     * @param  array   $return_var    process exit code
-     * @param  array   $error_output  stderr strings
+	 * @param  array   $return_var    process exit code
+	 * @param  array   $error_output  stderr strings
 	 * @return int     exit code
 	 * @author Alexey Sukhotin
-	 **/	
+	 **/
 	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {
-	
+
 		$descriptorspec = array(
 			0 => array("pipe", "r"),  // stdin
 			1 => array("pipe", "w"),  // stdout
-			2 => array("pipe", "w") // stderr
+			2 => array("pipe", "w")   // stderr
 		);
-	
+
 		$process = proc_open($command, $descriptorspec, $pipes, null, null);
-    
+
 		if (is_resource($process)) {
 
 			fclose($pipes[0]);
-    
+
 			$tmpout = '';
 			$tmperr = '';
-    
-			if( !feof( $pipes[1] ) ) {
+
+			if(!feof($pipes[1])) {
 				$output[] = fgets($pipes[1], 1024);
 			}
-			if( !feof( $pipes[2] ) ) {
+			if(!feof($pipes[2])) {
 				$error_output[] = fgets($pipes[2], 1024);
-			}  
+			}
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);

@@ -58,7 +58,7 @@ class elFinder {
 		'search'    => array('q' => true, 'mimes' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
-		'resize'	=> array('target' => true, 'width' => true, 'height' => true, 'crop' => false)
+		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'crop' => false)
 	);
 	
 	/**
@@ -137,12 +137,12 @@ class elFinder {
 	const ERROR_ACCESS_DENIED     = 'errAccess';
 	const ERROR_SAVE              = 'errSave';
 	const ERROR_EXTRACT           = 'errExtract';
-	const ERROR_ARCHIVE			  = 'errArchive';
-	const ERROR_NOT_ARCHIVE		  = 'errNoArchive';
+	const ERROR_ARCHIVE           = 'errArchive';
+	const ERROR_NOT_ARCHIVE       = 'errNoArchive';
 	const ERROR_ARCHIVE_TYPE      = 'errArcType';
 	const ERROR_ARC_SYMLINKS      = 'errArcSymlinks';
 	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
-	const ERROR_RESIZE			  = 'errResize';
+	const ERROR_RESIZE            = 'errResize';
 	
 	/**
 	 * Constructor
