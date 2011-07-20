@@ -33,6 +33,7 @@ elFinder.prototype.commands.edit = function() {
 				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
 				url    = fm.url(hash) || fm.options.url,
+				id    = 'edit-'+fm.namespace+'-'+file.hash,
 				dialog = function(text) {
 					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
 							.keydown(function(e) {
@@ -109,10 +110,16 @@ elFinder.prototype.commands.edit = function() {
 					opts.buttons[fm.i18n('Save')]   = save;
 					opts.buttons[fm.i18n('Cancel')] = cancel;
 					
-					fm.dialog(editor, opts);
+					fm.dialog(editor, opts).attr('id', id);
 				},
+				d = fm.getUI().find('#'+id), 
 				error;
 			
+			
+			if (d.length) {
+				d.elfinderdialog('toTop');
+				return dfrd.resolve();
+			}
 			
 			if (!file.read || !file.write) {
 				error = ['errOpen', file.name, 'errPerm']

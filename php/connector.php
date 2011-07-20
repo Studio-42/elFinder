@@ -195,7 +195,7 @@ $opts = array(
 			'maxArcFilesSize' => 100,
 			// 'accessControl' => array($acl, 'fsAccess'),
 			// 'accessControlData' => array('uid' => 1),
-			'acceptedName' => 'validName',
+			// 'acceptedName' => 'validName',
 			'uploadAllow' => array('all'),
 			'uploadDeny'  => array('all'),
 			'uploadOrder' => 'deny,allow',
@@ -211,10 +211,11 @@ $opts = array(
 			// 'acceptedName'    => '/^[\W]*$/',
 			'attributes' => array(
 				array(
-					'pattern' => '/\/\..+/',
-					// 'read' => false,
-					// 'write' => false
-					// 'locked' => true
+					'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => true
 				)
 			),
 		),
