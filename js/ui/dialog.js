@@ -9,7 +9,7 @@ $.fn.elfinderdialog = function(opts) {
 	
 	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
 		if (opts == 'open' && dialog.is(':hidden')) {
-			dialog.fadeIn(150, function() {
+			dialog.fadeIn(120, function() {
 				dialog.trigger('open');
 			});
 		} else if (opts == 'close' && dialog.is(':visible')) {
@@ -17,7 +17,7 @@ $.fn.elfinderdialog = function(opts) {
 		} else if (opts == 'destroy') {
 			dialog.hide().remove();
 		} else if (opts == 'toTop') {
-			dialog.mousedown();
+			dialog.trigger('totop');
 		}
 	}
 	
@@ -56,8 +56,7 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.bind('open', function() {
 					opts.modal && overlay.elfinderoverlay('show');
-					dialog.mousedown().find('.ui-button:first').focus();
-					dialog.find(':text:first').focus();
+					dialog.trigger('totop');
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
 					if (!dialog.is('.'+clnotify)) {
@@ -70,7 +69,7 @@ $.fn.elfinderdialog = function(opts) {
 								_left = parseInt(dialog.css('left'))
 								;
 
-							if (d[0] != dialog[0] && (top >= _top || left >= _left)) {
+							if (d[0] != dialog[0] && (top == _top || left == _left)) {
 								dialog.css({
 									top  : (top+10)+'px',
 									left : (left+10)+'px'
@@ -90,7 +89,7 @@ $.fn.elfinderdialog = function(opts) {
 						dialogs.each(function() {
 							var d = $(this);
 							if (d.zIndex() >= z) {
-								d.mousedown();
+								d.trigger('totop');
 								return false;
 							}
 						})
@@ -104,6 +103,9 @@ $.fn.elfinderdialog = function(opts) {
 					} else if (opts.destroyOnClose) {
 						dialog.hide().remove();
 					}
+				})
+				.bind('totop', function() {
+					$(this).mousedown().find('.ui-button:first').focus().end().find(':text:first').focus()
 				}),
 				maxZIndex = function() {
 					var z = parent.zIndex() + 10;
@@ -163,6 +165,7 @@ $.fn.elfinderdialog = function(opts) {
 					if (e.keyCode == $.ui.keyCode.ENTER) {
 						$(this).click();
 					}  else if (e.keyCode == $.ui.keyCode.TAB) {
+						console.log('here')
 						next = $(this).next('.ui-button');
 						next.length ? next.focus() : $(this).parent().children('.ui-button:first').focus()
 					}
@@ -195,6 +198,7 @@ $.fn.elfinderdialog.defaults = {
 	resizable : true,
 	autoOpen  : true,
 	closeOnEscape : true,
+	destroyOnClose : false,
 	buttons   : {},
 	position  : null,
 	width     : 320,

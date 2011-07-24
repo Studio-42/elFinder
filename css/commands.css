@@ -2,7 +2,70 @@
 /*                          COMMANDS STYLES                       */
 /******************************************************************/
 
-/********************** COMMAND "HELP" ****************************/
+/********************** COMMAND "RESIZE" ****************************/
+
+.elfinder-resize-control {  }
+
+.elfinder-resize-control input[type=text] { border:1px solid #aaa; }
+
+
+.elfinder-resize-preview {
+	width:400px;
+	height:400px;
+	padding:10px;
+	background:#fff;
+	border:1px solid #aaa;
+	float:right;
+	position:relative;
+	overflow:auto;
+/*	z-index:100;*/
+}
+
+.elfinder-resize-handle { border:1px solid #aaa; position:relative;}
+
+.elfinder-resize-spinner {
+	position:absolute;
+	width:200px;
+	height:30px;
+	top:50%;
+	margin-top:-25px;
+	left:50%;
+	margin-left:-100px;
+	text-align:center;
+	background:url(../img/progress.gif) center bottom repeat-x;
+}
+
+.elfinder-resize-row { margin-bottom:7px; position:relative;}
+
+.elfinder-resize-label { float:left; width:80px;}
+
+.elfinder-resize-reset {
+	width:16px;
+	height:16px;
+/*	border:1px solid #111;*/
+	position:absolute;
+	margin-top:-8px;
+}
+
+.elfinder-dialog-resize .ui-resizable-e { height:100%; width:7px;  } 
+.elfinder-dialog-resize .ui-resizable-s { width:100%; height:7px;}
+
+.elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
+	position:absolute;
+	top:50%;
+	right:0;
+	margin-top:-8px;
+	margin-right:-11px;
+}
+.elfinder-dialog-resize .ui-icon-grip-solid-horizontal {
+	position:absolute;
+	left:50%;
+	bottom:0;
+	margin-left:-8px;
+	margin-bottom:-11px;;
+}
+
+/********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
 	width:99%;
@@ -13,6 +76,7 @@
 }
 
 
+/********************** COMMAND "HELP" ****************************/
 /* help dialog */
 .elfinder-help { margin-bottom:.5em; }
 

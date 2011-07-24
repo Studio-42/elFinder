@@ -1355,6 +1355,9 @@ window.elFinder = function(node, opts) {
 			enabled = false;
 			node.addClass('elfinder-disabled');
 		})
+		.open(function() {
+			selected = [];
+		})
 		.select(function(e) {
 			selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
 		})
