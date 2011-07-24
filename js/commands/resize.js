@@ -194,8 +194,8 @@ elFinder.prototype.commands.resize = function() {
 								resize      : resize.update,
 								stop        : resize.fixHeight
 							});
-							rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-vertical"/>')
-							rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-horizontal"/>')
+							// rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-vertical"/>')
+							// rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-horizontal"/>')
 						}
 					},
 					save = function() {
@@ -224,13 +224,16 @@ elFinder.prototype.commands.resize = function() {
 								target : file.hash,
 								width  : w,
 								height : h,
-								crop   : !resize
+								crop   : resize ? 0 : 1
 							},
 							notify : { type : 'resize', cnt : 1}
 						})
 						
 					},
-					buttons = {}
+					buttons = {},
+					hline = 'elfinder-resize-handle-hline',
+					vline = 'elfinder-resize-handle-vline',
+					rpoint = 'elfinder-resize-handle-point'
 					;
 					
 					
@@ -248,6 +251,14 @@ elFinder.prototype.commands.resize = function() {
 					.append(uiresize)
 					.append(uicrop.hide())
 					.find('input,select').attr('disabled', 'disabled');
+				
+				rhandle.append('<div class="'+hline+' '+hline+'-top"/>')
+					.append('<div class="'+hline+' '+hline+'-bottom"/>')
+					.append('<div class="'+vline+' '+vline+'-left"/>')
+					.append('<div class="'+vline+' '+vline+'-right"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-e"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-s"/>')
 					
 				preview.append(spinner).append(rhandle.hide()).append(img.hide());
 					

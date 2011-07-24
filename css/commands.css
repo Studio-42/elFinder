@@ -21,7 +21,82 @@
 /*	z-index:100;*/
 }
 
-.elfinder-resize-handle { border:1px solid #aaa; position:relative;}
+.elfinder-resize-handle { position:relative;}
+
+.elfinder-resize-handle-hline,
+.elfinder-resize-handle-vline {
+	position:absolute;
+	background-image:url("../img/crop.gif");
+}
+
+.elfinder-resize-handle-hline {
+	width:100%;
+	height:1px !important;
+	background-repeat:repeat-x;
+}
+.elfinder-resize-handle-vline {
+	width:1px !important;
+	height:100%;
+	background-repeat:repeat-y;
+}
+
+.elfinder-resize-handle-hline-top    { top:0; left:0; }
+.elfinder-resize-handle-hline-bottom { bottom:0; left:0; }
+.elfinder-resize-handle-vline-left   { top:0; left:0; }
+.elfinder-resize-handle-vline-right  { top:0; right:0; }
+
+
+
+.elfinder-resize-handle-point {
+	position:absolute;
+	width:8px;
+	height:8px;
+	border:1px solid #777;
+	background:transparent;
+}
+
+.elfinder-resize-handle-point-n {
+	
+}
+
+.elfinder-resize-handle-point-ne {
+	
+}
+
+.elfinder-resize-handle-point-e {
+	top:50%;
+	right:0;
+	margin-top:-5px;
+	margin-right:-5px;
+}
+
+.elfinder-resize-handle-point-se {
+	bottom:0;
+	right:0;
+	margin-bottom:-5px;
+	margin-right:-5px;
+}
+
+.elfinder-resize-handle-point-s {
+	bottom:0;
+	left:50%;
+	margin-bottom:-5px;
+	margin-left:-5px;
+}
+
+.elfinder-resize-handle-point-sw {
+	
+}
+
+.elfinder-resize-handle-point-w {
+	
+}
+
+.elfinder-resize-handle-point-nw {
+	
+}
+
+
 
 .elfinder-resize-spinner {
 	position:absolute;
@@ -47,8 +122,15 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog-resize .ui-resizable-e { height:100%; width:7px;  } 
-.elfinder-dialog-resize .ui-resizable-s { width:100%; height:7px;}
+.elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px;  } 
+.elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px;}
+.elfinder-dialog-resize .ui-resizable-se { 
+	background:transparent; 
+	bottom:0; 
+	right:0; 
+	margin-right:-7px;
+	margin-bottom:-7px;
+}
 
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
 	position:absolute;
