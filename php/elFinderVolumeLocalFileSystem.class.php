@@ -369,6 +369,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) {
+		clearstatcache();
 		return strpos($mime, 'image') === 0 && ($s = @getimagesize($path)) !== false 
 			? $s[0].'x'.$s[1] 
 			: false;

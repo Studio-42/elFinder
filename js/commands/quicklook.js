@@ -37,7 +37,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 *
 		 * @type Number
 		 **/
-		keydown    = $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+		// keydown    = $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
 		/**
 		 * navbar icon class
 		 *
@@ -57,7 +57,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 * @return void
 		 **/
 		navtrigger = function(code) {
-			$(document).trigger($.Event(keydown, { keyCode: code, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
+			$(document).trigger($.Event('keydown', { keyCode: code, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
 		},
 		/**
 		 * Return css for closed window

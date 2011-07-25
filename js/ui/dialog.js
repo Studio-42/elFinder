@@ -46,7 +46,8 @@ $.fn.elfinderdialog = function(opts) {
 					height : opts.height
 				})
 				.mousedown(function(e) {
-					e.stopPropagation()
+					e.stopPropagation();
+					
 					$(document).mousedown();
 
 					if (!dialog.is('.'+clactive)) {

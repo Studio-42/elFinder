@@ -4,7 +4,7 @@
 
 /********************** COMMAND "RESIZE" ****************************/
 
-.elfinder-resize-control {  }
+.elfinder-resize-control { padding-top:1em; }
 
 .elfinder-resize-control input[type=text] { border:1px solid #aaa; }
 

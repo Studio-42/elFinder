@@ -125,12 +125,7 @@ elFinder.prototype.commands.resize = function() {
 								
 							resizable();
 							
-							
-							
-							reset.hover(function() {
-								reset.toggleClass('ui-state-hover');
-							})
-							.click(resetView);
+							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
 						})
 						.error(function() {
@@ -194,12 +189,12 @@ elFinder.prototype.commands.resize = function() {
 								resize      : resize.update,
 								stop        : resize.fixHeight
 							});
-							// rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-vertical"/>')
-							// rhandle.append('<span class="ui-icon ui-icon ui-icon-grip-solid-horizontal"/>')
 						}
 					},
 					save = function() {
 						var resize = type.val() == 'resize', w, h;
+						
+						width.add(height).change();
 						
 						if (resize) {
 							w = parseInt(width.val()) || 0;
@@ -226,28 +221,35 @@ elFinder.prototype.commands.resize = function() {
 								height : h,
 								crop   : resize ? 0 : 1
 							},
-							notify : { type : 'resize', cnt : 1}
+							notify : {type : 'resize', cnt : 1}
 						})
+						.fail(function(error) {
+							dfrd.reject(error);
+						})
+						.done(function() {
+							dfrd.resolve();
+						});
 						
 					},
 					buttons = {},
-					hline = 'elfinder-resize-handle-hline',
-					vline = 'elfinder-resize-handle-vline',
-					rpoint = 'elfinder-resize-handle-point'
+					hline   = 'elfinder-resize-handle-hline',
+					vline   = 'elfinder-resize-handle-vline',
+					rpoint  = 'elfinder-resize-handle-point',
+					src     = fm.url(file.hash)
 					;
 					
 					
 				uiresize.append($(row).append($(label).text(fm.i18n('width'))).append(width).append(reset))
 					.append($(row).append($(label).text(fm.i18n('height'))).append(height))
-					.append($(row).append($('<label/>').text(fm.i18n('Scale proportionally')).prepend(constr)))
-					.append($(row).append(fm.i18n('Proportion')+' ').append(uiprop));
+					.append($(row).append($('<label/>').text(fm.i18n('aspectRatio')).prepend(constr)))
+					.append($(row).append(fm.i18n('scale')+' ').append(uiprop));
 				
 				uicrop.append($(row).append($(label).text('X')).append(pointX))
 					.append($(row).append($(label).text('Y')).append(pointY))
 					.append($(row).append($(label).text(fm.i18n('width'))).append(offsetX))
 					.append($(row).append($(label).text(fm.i18n('height'))).append(offsetY))
 					
-				control.append($(row).append(type))
+				control.append($(row).append(type).hide())
 					.append(uiresize)
 					.append(uicrop.hide())
 					.find('input,select').attr('disabled', 'disabled');
@@ -264,8 +266,8 @@ elFinder.prototype.commands.resize = function() {
 					
 				dialog.append(preview).append(control);
 				
-				buttons[fm.i18n('Resize')] = save;
-				buttons[fm.i18n('Cancel')] = function() { dialog.elfinderdialog('close'); }
+				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
+				buttons[fm.i18n('btnApply')] = save;
 				
 				fm.dialog(dialog, {
 					title          : file.name,
@@ -281,7 +283,7 @@ elFinder.prototype.commands.resize = function() {
 				pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 				pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 
-				img.attr('src', fm.url(file.hash));
+				img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
 			},
 			
 			id, dialog

@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL); // Set E_ALL for debuging
 
+
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
@@ -16,7 +17,7 @@ function debug($o) {
 	print_r($o);
 }
 
-// exit('{"api":"2.0","uplMaxSize":"16M","options":{"archives":{"create":[],"extract":[]},"copyOverwrite":true,"disabled":[],"path":"Home","separator":"/","tmbUrl":"/files/","url":"/files/tmb/"},"cwd":{"path":"Home","thumbUrl":"/files/","filesUrl":"/files/tmb/","dirs":1,"date":"14.07.2011","mime":"directory","hash":"SG9tZQ==","phash":"","name":"Home","read":1,"write":0,"rm":0},"files":[{"dirs":1,"date":"14.07.2011","mime":"directory","hash":"SG9tZQ==","phash":"","name":"Home","read":1,"write":0,"rm":0}]}');
+
 /**
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.
@@ -181,34 +182,16 @@ $opts = array(
 	'debug' => true,
 	
 	'roots' => array(
-		// array(
-		// 	'driver' => 'LocalFileSystem',
-		// 	'path'   => '../files2',
-		// ),
 		array(
-			// 'id' => 'x5',
-			'driver' => 'LocalFileSystem',
-			'path'   => '../files/',
-			'URL'    => dirname($_SERVER['PHP_SELF']) . '/../files/',
-			'alias'  => 'File system',
-			'disabled' => array(),
-			'maxArcFilesSize' => 100,
-			// 'accessControl' => array($acl, 'fsAccess'),
-			// 'accessControlData' => array('uid' => 1),
-			// 'acceptedName' => 'validName',
-			'uploadAllow' => array('all'),
-			'uploadDeny'  => array('all'),
-			'uploadOrder' => 'deny,allow',
-			'uploadOverwrite' => true,
-			'uploadMaxSize' => '128m',
-			// 'copyOverwrite' => false,
-			'copyJoin' => true,
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			'alias'      => 'File system',
 			'mimeDetect' => 'internal',
-			'tmbCrop' => false,
-			'imgLib' => 'gd',
-#			'tmbURL'    => '.tmb/',
-			'utf8fix' => false,
-			// 'acceptedName'    => '/^[\W]*$/',
+			'tmbPath'    => 'tmb',
+			// 'imgLib'     => 'gd',
+			// 'disabled'   => array('resize'),
+			'utf8fix'    => true,
 			'attributes' => array(
 				array(
 					'pattern' => '/^\/\./',

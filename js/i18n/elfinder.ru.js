@@ -67,6 +67,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
 			'errArcSymlinks'       : 'По соображениям безопасности запрещена распаковка архивов, содержащих ссылки (symlinks).',
 			'errArcMaxSize'        : 'Размер файлов в архиве превышает максимально разрешенный.',
+			'errResize'            : 'Не удалось изменить размер "$1".',
+			'errUsupportType'      : 'Неподдерживаемый тип файла.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
@@ -100,6 +102,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnSave'   : 'Сохранить',
 			'btnRm'     : 'Удалить',
 			'btnCancel' : 'Отмена',
+			'btnApply'  : 'Применить',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
 			
@@ -202,6 +205,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Удалить из избранного',
 			'untitled folder' : 'новая папка',
 			'untitled file.txt' : 'новый файл.txt',
+			'aspectRatio'     : 'Сохранять пропорции',
+			'scale'           : 'Масштаб',
+			'width'           : 'Ширина',
+			'height'          : 'Высота',
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

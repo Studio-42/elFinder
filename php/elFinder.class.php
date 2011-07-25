@@ -143,6 +143,7 @@ class elFinder {
 	const ERROR_ARC_SYMLINKS      = 'errArcSymlinks';
 	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
 	const ERROR_RESIZE            = 'errResize';
+	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
 	
 	/**
 	 * Constructor
@@ -1081,19 +1082,21 @@ class elFinder {
 		$target = $args['target'];
 		$width  = $args['width'];
 		$height = $args['height'];
-		$crop   = $args['crop'];
-		$error  = array(self::ERROR_RESIZE, $target);
+		$crop   = !empty($args['crop']);
+		$error  = array(self::ERROR_RESIZE, '#'.$target);
 		
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
 		}
 
+		$error[1] = $file['name'];
+
 		if ($volume->commandDisabled('resize')) {
-			return array('error' => $this->error(self::ERROR_RESIZE, $target, self::ERROR_ACCESS_DENIED));
+			return array('error' => $this->error($error, self::ERROR_PERM_DENIED));
 		}
 			
-		if (($file = $volume->resize($target, $args['width'], $args['height'], $args['crop'])) == false) {
+		if (($file = $volume->resize($target, $width, $height, $crop)) == false) {
 			return array('error' => $this->error($error, $volume->error()));
 		}
 		

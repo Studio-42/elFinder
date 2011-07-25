@@ -211,7 +211,7 @@ abstract class elFinderVolumeDriver {
 		// regexp or function name to validate new file name
 		'acceptedName'    => '/^\w[\w\s\.\-]*$/u',
 		// function/class method to control files permissions
-		'accessControl' => null,
+		'accessControl'   => null,
 		// some data required by access control
 		'accessControlData' => null,
 		// default permissions. not set hidden/locked here - take no effect
@@ -1505,6 +1505,7 @@ abstract class elFinderVolumeDriver {
 		$archiver = isset($this->archivers['create'][$mime])
 			? $this->archivers['create'][$mime]
 			: false;
+			
 		if (!$archiver) {
 			return $this->setError(elFinder::ERROR_ARCHIVE_TYPE);
 		}
@@ -1545,12 +1546,25 @@ abstract class elFinderVolumeDriver {
 	 * @param  int      $height  new height
 	 * @param  bool     $crop    crop image
 	 * @return array|false
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
 	public function resize($hash, $width, $height, $crop = false) {
 		$path = $this->decode($hash);
+		$file = $this->file($hash);
+		if (!$file) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
 		
-		return $this->resizeImg($path, $width, $height, $crop, false, $this->options['imgLib']) ? $this->stat($path) : false;
+		if (!$this->canResize($path, $file['mime'])) {
+			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+		}
+		
+		if (!$file['write']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		return $this->resizeImg($path, $width, $height, $crop, false, $this->imgLib) ? $this->stat($path) : false;
 	}
 	/**
 	 * Remove file/dir
@@ -2216,6 +2230,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return true if required file can be resized.
+	 * By default - the same as canCreateTmb
+	 *
+	 * @param  string  $path  thumnbnail path 
+	 * @param  string  $mime  file mimetype
+	 * @return string|bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function canResize($path, $mime) {
+		return $this->canCreateTmb($path, $mime);
+	}
+	
+	/**
 	 * Create thumnbnail and return it's URL on success
 	 *
 	 * @param  string  $path  file path
@@ -2250,7 +2277,7 @@ abstract class elFinderVolumeDriver {
 		$result = false;
 		$tmbSize = $this->tmbSize;
 		
-		$result = $this->resizeImg($tmb, $tmbSize, $tmbSize, $this->options['tmbCrop'], true, $this->options['imgLib'], $this->options['tmbBgColor'], 'png');
+		$result = $this->resizeImg($tmb, $tmbSize, $tmbSize, $this->options['tmbCrop'], true, $this->imgLib, $this->options['tmbBgColor'], 'png');
 
 		return $result ? $name : false;
 	}
@@ -2281,9 +2308,11 @@ abstract class elFinderVolumeDriver {
 
 		switch ($imgLib) {
 			case 'imagick':
+				
 				try {
 					$img = new imagick($path);
 				} catch (Exception $e) {
+
 					return false;
 				}
 
@@ -2291,7 +2320,7 @@ abstract class elFinderVolumeDriver {
 
 				if ($crop == false) {
 					$img->resizeImage($size_w, $size_h, NULL, true);
-
+					
 					if ($exactfit == true) {
 						$img1 = new Imagick();
 						$img1->newImage($width, $height, new ImagickPixel($bgcolor));
@@ -2300,7 +2329,7 @@ abstract class elFinderVolumeDriver {
 						$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
 						$result = $img1->writeImage($path);
 						return $result ? $path : false;
-					}
+					} 
 
 				} else {
 					$img->cropImage($width, $height, $x, $y);

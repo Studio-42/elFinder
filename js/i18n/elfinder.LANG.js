@@ -75,6 +75,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
 			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
 			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errResize'            : 'Unable to resize "$1".',
+			'errUsupportType'      : 'Unsupported file type.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -102,11 +104,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Go to parent directory',
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
+			'cmdresize'    : 'Resize image',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
 			'btnSave'   : 'Save',
 			'btnRm'     : 'Remove',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Yes',
@@ -210,6 +214,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Remove from places',
 			'untitled folder' : 'untitled folder',
 			'untitled file.txt' : 'untitled file.txt',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Scale',
+			'width'           : 'Width',
+			'height'          : 'Height',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
