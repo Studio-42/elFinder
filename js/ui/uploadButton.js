@@ -10,15 +10,15 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				.unbind('click'), 
 			form = $('<form/>').appendTo(button),
 			input = $('<input type="file" multiple="true"/>')
-				.appendTo(form)
 				.change(function() {
-					var _input;
-					if (input.val()) {
-						_input = input.clone(true);
-						cmd.exec({input : input.remove()[0]});
-						input = _input.appendTo(form);
+					var _input = $(this);
+					if (_input.val()) {
+						cmd.exec({input : _input.remove()[0]});
+						input.clone(true).appendTo(form);
 					} 
 				});
+
+		form.append(input.clone(true));
 				
 		cmd.change(function() {
 			form[cmd.disabled() ? 'hide' : 'show']();
