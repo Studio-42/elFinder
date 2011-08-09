@@ -124,7 +124,7 @@ desc('pre build task')
 task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
-	var dir = ['css', 'js', 'img', path.join('js', 'i18n'), 'php', 'files'];
+	var dir = ['css', 'js', 'img', path.join('js', 'i18n'), path.join('js', 'proxy'), 'php', 'files'];
 	for (d in dir) {
 		var bd = dir[d];
 		if (!path.existsSync(bd)) {
@@ -166,6 +166,7 @@ file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 		).nodes,
 		''
 	);
+	csso = csso.replace(/\)([^\s^\;^\,^\),^\}])/g, ') $1'); // workaround for https://github.com/afelix/csso/issues/16
 	fs.writeFileSync(this.name, getComment() + csso);
 });
 
@@ -239,7 +240,7 @@ task('clean', function(){
 		}
 	}
 	if (src != path.resolve()) {
-		var ud = ['css', path.join('js', 'i18n'), 'js', 'img', 'php', 'files'];
+		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'php', 'files'];
 		for (d in ud) {
 			var dir = ud[d];
 			if (path.existsSync(dir)) {
