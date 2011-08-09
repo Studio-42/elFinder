@@ -9,9 +9,9 @@
 	font-weight:normal;
 	padding:.2em .5em;
 	
-	border-right:0 solid;
-	border-bottom:0 solid;
-	border-left:0 solid;
+	border-right:0 solid transparent;
+	border-bottom:0 solid transparent;
+	border-left:0 solid transparent;
 }
 
 .elfinder-statusbar a { text-decoration:none; }

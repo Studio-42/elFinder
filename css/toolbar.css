@@ -4,9 +4,9 @@
 /* toolbar container */
 .elfinder-toolbar { 
 	padding:4px 0 3px 0; 
-	border-left:0 solid; 
-	border-top:0 solid; 
-	border-right:0 solid; 
+	border-left:0 solid transparent;
+	border-top:0 solid transparent;
+	border-right:0 solid transparent;
 }
 
 /* container for button's group */
