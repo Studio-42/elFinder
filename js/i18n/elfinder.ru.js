@@ -1,7 +1,11 @@
-"use strict"
+/**
+ * Russian translation
+ * @author Dmitry "dio" Levashov <dio@std42.ru>
+ * @version 2011-07-15
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ru = {
-		translator : 'Vasiliy Razumnih &lt;rvn@std42.ru&gt;',
+		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
 		messages   : {

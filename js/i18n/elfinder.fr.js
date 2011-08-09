@@ -1,12 +1,12 @@
 /**
- * elFinder translation template
- * 
- * use this file to create new translation
- **/
+ * French translation
+ * @author Régis Guyomarch <regisg@gmail.com>
+ * @version 2011-07-11
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.LANG = {
+	elFinder.prototype.i18.fr = {
 		translator : 'Régis Guyomarch &lt;regisg@gmail.com&gt;',
-		language   : 'French',
+		language   : 'française',
 		direction  : 'ltr',
 		messages   : {
 			

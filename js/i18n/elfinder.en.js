@@ -1,4 +1,8 @@
-"use strict"
+/**
+ * English translation
+ * @author Troex Nevelin <troex@fury.scancode.ru>
+ * @version 2011-07-10
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
 		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',

@@ -1,12 +1,19 @@
 /**
  * elFinder translation template
- * 
  * use this file to create new translation
- **/
+ * submit new translation via https://github.com/Studio-42/elFinder/issues
+ * or make a pull request
+ */
+ 
+/**
+ * XXXXX translation
+ * @author Translator Name <translator@email.tld>
+ * @version 201x-xx-xx
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.LANG = {
+	elFinder.prototype.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE = {
 		translator : 'Translator name &lt;translator@email.tld&gt;',
-		language   : 'Language of translation',
+		language   : 'Language of translation in your language',
 		direction  : 'ltr',
 		messages   : {
 			
