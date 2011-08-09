@@ -209,7 +209,7 @@ abstract class elFinderVolumeDriver {
 		// list of commands disabled on this root
 		'disabled'        => array(),      
 		// regexp or function name to validate new file name
-		'acceptedName'    => '/^[\W]+$/',
+		'acceptedName'    => '/^\w[\w\s\.\-]*$/u',
 		// function/class method to control files permissions
 		'accessControl' => null,
 		// some data required by access control
