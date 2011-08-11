@@ -1,8 +1,7 @@
-
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2010-08-11
+ * @version 2011-08-11
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
@@ -25,7 +24,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNotFound'          : 'Backend niet gevonden.',
 			'errResponse'          : 'Ongeldige reactie van de backend.',
 			'errConf'              : 'Ongeldige backend configuratie.',
-			'errJSON'              : 'PHP JSON module niet geïnstalleerd.',
+			'errJSON'              : 'PHP JSON module niet geÃ¯nstalleerd.',
 			'errNoVolumes'         : 'Leesbaar volume is niet beschikbaar.',
 			'errCmdParams'         : 'Ongeldige parameters voor commando "$1".',
 			'errDataNotJSON'       : 'Data is niet JSON.',
@@ -47,8 +46,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMkdir'             : 'Kan map "$1" niet aanmaken.',
 			'errMkfile'            : 'Kan bestand "$1" niet aanmaken.',
 			'errRename'            : 'Kan "$1" niet hernoemen.',
-			'errCopyFrom'          : 'Bestanden kopiëren van "$1" is niet toegestaan.',
-			'errCopyTo'            : 'Bestanden kopiëren naar "$1" is niet toegestaan.',
+			'errCopyFrom'          : 'Bestanden kopiÃ«ren van "$1" is niet toegestaan.',
+			'errCopyTo'            : 'Bestanden kopiÃ«ren naar "$1" is niet toegestaan.',
 			'errUploadCommon'      : 'Upload fout.',
 			'errUpload'            : 'Kan "$1" niet uploaden.',
 			'errUploadNoFiles'     : 'Geen bestanden gevonden om te uploaden.',
@@ -57,16 +56,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadMime'        : 'Bestandstype niet toegestaan.',
 			'errUploadTransfer'    : '"$1" overdrachtsfout.', 
 			'errSave'              : 'Kan "$1" niet opslaan.',
-			'errCopy'              : 'Kan "$1" niet kopiëren.',
+			'errCopy'              : 'Kan "$1" niet kopiÃ«ren.',
 			'errMove'              : 'Kan "$1" niet verplaatsen.',
-			'errCopyInItself'      : 'Kan "$1" niet in zichzelf kopiëren.',
+			'errCopyInItself'      : 'Kan "$1" niet in zichzelf kopiÃ«ren.',
 			'errRm'                : 'Kan "$1" niet verwijderen.',
 			'errExtract'           : 'Kan de bestanden van "$1" niet uitpakken.',
 			'errArchive'           : 'Kan het archief niet maken.',
 			'errArcType'           : 'Archief type is niet ondersteund.',
 			'errNoArchive'         : 'Bestand is geen archief of geen ondersteund archief type.',
 			'errCmdNoSupport'      : 'Backend ondersteund dit commando niet.',
-			'errReplByChild'       : 'De map “$1” kan niet vervangen worden door een item uit die map.',
+			'errReplByChild'       : 'De map "$1" kan niet vervangen worden door een item uit die map.',
 			'errArcSymlinks'       : 'Om veiligheidsredenen kan een bestand met symlinks niet worden uitgepakt .',
 			'errArcMaxSize'        : 'Archief overschrijdt de maximale bestandsgrootte.',
 			
@@ -114,7 +113,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfrm'       : 'Bezig met verwijderen bestanden',
 			'ntfcopy'     : 'Kopieer bestanden',
 			'ntfmove'     : 'Verplaats bestanden',
-			'ntfprepare'  : 'Voorbereiden om bestanden te kopiëren',
+			'ntfprepare'  : 'Voorbereiden om bestanden te kopiÃ«ren',
 			'ntfrename'   : 'Hernoem bestanden',
 			'ntfupload'   : 'Bezig met uploaden bestanden',
 			'ntfdownload' : 'Bezig met downloaden bestanden',
