@@ -85,8 +85,8 @@ elFinder.prototype.commands.quicklook = function() {
 				opacity : 1,
 				width  : width,
 				height : height,
-				top    : parseInt(parent.position().top + win.scrollTop()),
-				left   : parseInt((win.width() - width)/2)
+				top    : parseInt((win.height() - height)/2 + win.scrollTop()),
+				left   : parseInt((win.width() - width)/2 + win.scrollLeft())
 			}
 		},
 		
