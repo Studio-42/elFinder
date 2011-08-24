@@ -2024,7 +2024,7 @@ abstract class elFinderVolumeDriver {
 			
 			$name = $this->_basename($p);
 
-			if (strpos($name, $q) !== false) {
+			if ($this->stripos($name, $q) !== false) {
 				$stat = $this->stat($p);
 
 				$stat['path'] = $this->_path($p);
@@ -2518,6 +2518,24 @@ abstract class elFinderVolumeDriver {
 		return date($this->options['dateFormat'], $ts);
 	}
 
+        /**
+         * Find position of first occurrence of string in a string with multibyte support
+         *
+         * @param  string  $haystack  The string being checked.
+         * @param  string  $needle    The string to find in haystack.
+         * @param  int     $offset    The search offset. If it is not specified, 0 is used.
+         * @return int|bool
+         * @author Alexey Sukhotin
+         **/
+        protected function stripos($haystack , $needle , $offset = 0) {
+                if (function_exists('mb_stripos')) {
+                        return mb_stripos($haystack , $needle , $offset);
+                } else if (function_exists('mb_strtolower') && function_exists('mb_strpos')) {
+                        return mb_strpos(mb_strtolower($haystack), mb_strtolower($needle), $offset);
+                } else {
+                        return stripos($haystack , $needle , $offset);
+                }
+        }
 
 	/**==================================* abstract methods *====================================**/
 	
