@@ -144,7 +144,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmReq'      : 'Confirmation requise',
 			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les fichiers?<br/>Cela ne peut être annulé!',
 			'confirmRepl'     : 'Supprimer l\'ancien fichier par le nouveau?',
-			'apllyAll'        : 'Appliquer à tous'
+			'apllyAll'        : 'Appliquer à tous',
 			'name'            : 'Nom',
 			'size'            : 'Taille',
 			'perms'           : 'Permissions',

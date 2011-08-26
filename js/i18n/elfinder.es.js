@@ -1,17 +1,10 @@
 /**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
- 
-/**
- * XXXXX translation
- * @author Translator Name <translator@email.tld>
- * @version 201x-xx-xx
+ * Spanish translation
+ * @author Julián Torres <julian.torres@pabernosmatao.com>
+ * @version 2011-08-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE = {
+	elFinder.prototype.i18.es = {
 		translator : 'Julián Torres &lt;julian.torres@pabernosmatao.com&gt;',
 		language   : 'Español internacional',
 		direction  : 'ltr',

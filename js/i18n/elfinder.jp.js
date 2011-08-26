@@ -1,8 +1,8 @@
-"use strict"
 /**
- * elFinder translation template
- *
- **/
+ * Czech translation
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>
+ * @version 2011-08-26
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
 		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',

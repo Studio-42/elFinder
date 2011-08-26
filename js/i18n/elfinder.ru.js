@@ -9,6 +9,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		language   : 'Русский язык',
 		direction  : 'ltr',
 		messages   : {
+
 			/********************************** errors **********************************/
 			'error'                : 'Ошибка',
 			'errUnknown'           : 'Неизвестная ошибка.',
