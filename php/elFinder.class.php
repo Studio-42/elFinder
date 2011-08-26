@@ -552,13 +552,22 @@ class elFinder {
 			$mime = $file['mime'];
 		}
 		
+		$ua = $_SERVER["HTTP_USER_AGENT"];
+		$filename = 'filename='.$file['name'];
+		
+		 if (preg_match("/MSIE ([0-9]{1,}[\.0-9]{0,})/", $ua)) {
+			$filename = 'filename='.str_replace("+", "%20", rawurlencode($file['name']));
+		} elseif (preg_match("/Firefox\/\d+/", $ua)) {
+			$filename = "filename*=UTF-8''".$file['name'];
+		}
+		
 		$result = array(
 			'volume'  => $volume,
 			'pointer' => $fp,
 			'info'    => $file,
 			'header'  => array(
 				"Content-Type: ".$mime, 
-				"Content-Disposition: ".$disp."; filename=".rawurlencode($file['name']),
+				"Content-Disposition: ".$disp."; ".$filename,
 				"Content-Location: ".$file['name'],
 				'Content-Transfer-Encoding: binary',
 				"Content-Length: ".$file['size'],
