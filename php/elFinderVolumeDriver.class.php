@@ -680,7 +680,7 @@ abstract class elFinderVolumeDriver {
 		if (!$this->_isDir($this->root)) {
 			return false;
 		}
-
+		
 		$read = $this->attr($this->root, 'read');
 		// echo $this->attr($this->root.'/.tmb', 'hidden');
 		if (!$read && !$this->attr($this->root, 'write')) {
@@ -1820,7 +1820,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 
-		$dir   = $this->_isDir($path);
+		$dir = $this->_isDir($path);
 		
 		$file = array(
 			'hash'  => $this->encode($path),
