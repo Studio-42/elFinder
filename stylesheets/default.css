@@ -48,7 +48,7 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
   
   .header a { text-decoration: none; color: #222; }
 
-  .menu { float: right; margin-top: 18px; margin-right: 65px; }
+  .menu { float: right; margin-top: 18px; margin-right: 35px; }
     .menu ul { margin: 15px 0; padding: 0; }
     .menu ul li {
       display: inline;
@@ -111,7 +111,7 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 	font-family:arial;
 	font-size:1.2em;
 	font-weight:bold;
-	padding:6px 24px 10px 24px;
+	padding:6px 15px 10px 15px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #528ecc;
 	text-align: center;
