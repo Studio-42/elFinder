@@ -66,7 +66,7 @@ class elFinderConnector {
 		
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD_COMMON, elFinder::ERROR_UPLOAD_FILES_SIZE), 'header' => 'Content-Type: text/html'));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD, elFinder::ERROR_UPLOAD_TOTAL_SIZE), 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
 		

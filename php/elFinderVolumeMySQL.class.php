@@ -756,7 +756,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 
 		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, content, size, mtime, mime, width, height)  '
 				.'SELECT "'.intval($targetDir).'", "'.$this->db->real_escape_string($name).'", content, size, "'.time().'", mime, width, height FROM '.$this->tbf.' WHERE id="'.intval($source).'"';
-
+		// echo $sql;
 		return $this->query($sql) && $this->db->affected_rows;
 	}
 	

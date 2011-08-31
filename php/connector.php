@@ -189,8 +189,14 @@ $opts = array(
 			'alias'      => 'File system',
 			'mimeDetect' => 'internal',
 			'tmbPath'    => 'tmb',
+			// 'uploadOverwrite' => false,
+			// 'copyOverwrite' => false,
 			// 'imgLib'     => 'gd',
-			// 'disabled'   => array('resize'),
+			// 'disabled'   => array('paste')
+			// 'copyTo' => false,
+			// 'uploadAllow' => array('text'),
+			// 'uploadDeny' => array('text/plain'),
+			// 'uploadOrder'     => 'allow,deny', 
 			'utf8fix'    => true,
 			'attributes' => array(
 				array(
@@ -201,6 +207,7 @@ $opts = array(
 					'locked' => true
 				)
 			),
+			// 'defaults' => array('write' => false)
 		),
 		array(
 			'driver' => 'MySQL',
@@ -212,11 +219,11 @@ $opts = array(
 			'user_id' => 1,
 			'accessControl' => 'access',
 			'separator' => ':',
-			
+			// 'copyOverwrite' => false,
 			'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../files/.dbtmb/',
-			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/.dbtmb/',
+			// 'tmbPath' => '../files/.dbtmb/',
+			// 'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/.dbtmb/',
 			// 'attributes' => array(
 			// 	array(),
 			// 	array(

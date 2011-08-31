@@ -48,13 +48,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Unable to rename "$1".',
 			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
 			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
-			'errUploadCommon'      : 'Upload error.',
-			'errUpload'            : 'Unable to upload "$1".',
-			'errUploadNoFiles'     : 'No files found for upload.',
-			'errMaxSize'           : 'Data exceeds the maximum allowed size.',
-			'errFileMaxSize'       : 'File exceeds maximum allowed size.',
-			'errUploadMime'        : 'File type not allowed.',
+			'errUpload'            : 'Upload error.',  // old name - errUploadCommon
+			'errUploadFile'        : 'Unable to upload "$1".', // old name - errUpload
+			'errUploadNoFiles'     : 'No files found for upload.', 
+			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.', // old name - errMaxSize
+			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
+			'errUploadMime'        : 'File type not allowed.', 
 			'errUploadTransfer'    : '"$1" transfer error.', 
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Unable to save "$1".',
 			'errCopy'              : 'Unable to copy "$1".',
 			'errMove'              : 'Unable to move "$1".',

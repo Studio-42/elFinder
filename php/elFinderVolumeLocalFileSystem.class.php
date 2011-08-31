@@ -812,7 +812,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			// find symlinks
 			$symlinks = $this->_findSymlinks($dir);
 			// remove arc copy
-			$this->doRm($dir);
+			$this->remove($dir);
 			
 			if ($symlinks) {
 				return $this->setError(elFinder::ERROR_ARC_SYMLINKS);

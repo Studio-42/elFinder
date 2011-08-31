@@ -48,7 +48,7 @@ class elFinder {
 		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
-		'duplicate' => array('targets' => true),
+		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false),
 		'get'       => array('target' => true),
@@ -88,6 +88,13 @@ class elFinder {
 	protected $debug = false;
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $uploadDebug = '';
+	
+	/**
 	 * Store copy files errors
 	 *
 	 * @var array
@@ -117,7 +124,7 @@ class elFinder {
 	const ERROR_PERM_DENIED       = 'errPerm';
 	const ERROR_LOCKED            = 'errLocked';
 	const ERROR_EXISTS            = 'errExists';
-	const ERROR_INVALID_NAME      = 'errInvName';
+	const ERROR_INVALID_NAME      = 'errInvName';       // 'Invalid file name.'
 	const ERROR_MKDIR             = 'errMkdir';
 	const ERROR_MKFILE            = 'errMkfile';
 	const ERROR_RENAME            = 'errRename';
@@ -126,15 +133,17 @@ class elFinder {
 	const ERROR_COPY_FROM         = 'errCopyFrom';
 	const ERROR_COPY_TO           = 'errCopyTo';
 	const ERROR_COPY_ITSELF       = 'errCopyInItself';
+	const ERROR_REPLACE           = 'errReplace';          // 'Unable to replace "$1".'
 	const ERROR_RM                = 'errRm';
-	const ERROR_UPLOAD_COMMON     = 'errUploadCommon';
-	const ERROR_UPLOAD            = 'errUpload';
-	const ERROR_UPLOAD_NO_FILES   = 'errUploadNoFiles';
-	const ERROR_UPLOAD_FILES_SIZE = 'errMaxSize';
-	const ERROR_UPLOAD_SIZE       = 'errFileMaxSize';
-	const ERROR_MIME              = 'errUploadMime';
-	const ERROR_UPLOAD_TRANSFER   = 'errUploadTransfer';
+	const ERROR_UPLOAD            = 'errUpload';           // 'Upload error.'
+	const ERROR_UPLOAD_FILE       = 'errUploadFile';       // 'Unable to upload "$1".'
+	const ERROR_UPLOAD_NO_FILES   = 'errUploadNoFiles';    // 'No files found for upload.'
+	const ERROR_UPLOAD_TOTAL_SIZE = 'errUploadTotalSize';  // 'Data exceeds the maximum allowed size.'
+	const ERROR_UPLOAD_FILE_SIZE  = 'errUploadFileSize';   // 'File exceeds maximum allowed size.'
+	const ERROR_UPLOAD_FILE_MIME  = 'errUploadMime';       // 'File type not allowed.'
+	const ERROR_UPLOAD_TRANSFER   = 'errUploadTransfer';   // '"$1" transfer error.'
 	const ERROR_ACCESS_DENIED     = 'errAccess';
+	const ERROR_NOT_REPLACE       = 'errNotReplace';       // Object "$1" already exists at this location and can not be replaced with object of another type.
 	const ERROR_SAVE              = 'errSave';
 	const ERROR_EXTRACT           = 'errExtract';
 	const ERROR_ARCHIVE           = 'errArchive';
@@ -295,6 +304,12 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_UNKNOWN_CMD));
 		}
 		
+		if (!empty($args['mimes']) && is_array($args['mimes'])) {
+			foreach ($this->volumes as $id => $v) {
+				$this->volumes[$id]->setMimesFilter($args['mimes']);
+			}
+		}
+		
 		$result = $this->$cmd($args);
 		
 		if ($this->debug || !empty($args['debug'])) {
@@ -303,6 +318,7 @@ class elFinder {
 				'phpver'    => PHP_VERSION,
 				'time'      => $this->utime() - $this->time,
 				'memory'    => ceil(memory_get_peak_usage()/1024).'Kb / '.ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
+				'upload'    => $this->uploadDebug,
 				'volumes'   => array()
 				);
 			
@@ -337,21 +353,7 @@ class elFinder {
 			}
 		}
 		
-		if (!count($errors)) {
-			return self::$errors[self::ERROR_UNKNOWN];
-		}
-		
-		return $errors;
-		
-		foreach ($errors as $i => $msg) {
-			if (is_int($msg) && !empty(self::$errors[$msg])) {
-				$errors[$i] = self::$errors[$msg];
-			} elseif ($i == 0) {
-				$errors[$i] = self::$errors[self::ERROR_UNKNOWN];
-			}
-		}
-		
-		return $errors;
+		return count($errors) ? $errors : array(self::ERROR_UNKNOWN);
 	}
 	
 	/**
@@ -402,7 +404,7 @@ class elFinder {
 		}
 
 		// get current working directory files list and add to $files if not exists in it
-		if (($ls = $volume->scandir($cwd['hash'], $args['mimes'])) === false) {
+		if (($ls = $volume->scandir($cwd['hash'])) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
 		
@@ -714,23 +716,16 @@ class elFinder {
 	protected function duplicate($args) {
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$result  = array('added' => array());
-		
-		if (!$targets) {
-			return array();
-		}
+		$suffix  = empty($args['suffix']) ? 'copy' : $args['suffix'];
 		
 		foreach ($targets as $target) {
 			if (($volume = $this->volume($target)) == false
-			||  ($src = $volume->file($target)) == false) {
+			|| ($src = $volume->file($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_COPY, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				break;
 			}
 			
-			if ($volume->commandDisabled('duplicate')) {
-				return array('error' => $this->error(self::ERROR_COPY, $src['name'], self::ERROR_ACCESS_DENIED));
-			}
-			
-			if (($file = $volume->duplicate($target)) == false) {
+			if (($file = $volume->duplicate($target, $suffix)) == false) {
 				$result['warning'] = $this->error(self::ERROR_COPY, $src['name'], $volume->error());
 				break;
 			}
@@ -779,63 +774,57 @@ class elFinder {
 		return $result;
 	}
 	
+	
 	/**
 	 * Save uploaded files
 	 *
-	 * @return args
+	 * @param  array
+	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function upload($args) {
 		$target = $args['target'];
 		$volume = $this->volume($target);
-		$header = !empty($args['html']) ? 'Content-Type: text/html; charset=utf-8' : false;
-		$result = array('added' => array(), 'header' => $header);
-		$files  = !empty($args['FILES']['upload']) && is_array($args['FILES']['upload']) 
-			? $args['FILES']['upload'] 
-			: array();
-
+		$files  = isset($args['FILES']['upload']) && is_array($args['FILES']['upload']) ? $args['FILES']['upload'] : array();
+		$result = array('added' => array(), 'removed' => array(), 'header' => empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8');
+		
 		if (empty($files)) {
-			return array('error' => $this->error(self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
+			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
 		}
 		
 		if (!$volume) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
-		}
-		
-		if ($volume->commandDisabled('upload')) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, $files['name'][0], self::ERROR_ACCESS_DENIED));
+			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
 		}
 		
 		foreach ($files['name'] as $i => $name) {
-			$tmpPath = $files['tmp_name'][$i];
-			
-			if ($files['error'][$i]) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD_TRANSFER, $name);
+			if (($error = $files['error'][$i]) > 0) {				
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER);
+				$this->uploadDebug = 'Upload error code: '.$error;
 				break;
 			}
 			
-			if (!$volume->uploadAllow($tmpPath, $name)) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD, $name, $volume->error());
+			$tmpname = $files['tmp_name'][$i];
+			
+			if (($fp = fopen($tmpname, 'rb')) == false) {
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
+				$this->uploadDebug = 'Upload error: unable open tmp file';
 				break;
 			}
 			
-			if (($fp  = fopen($tmpPath, 'rb')) == false
-			|| ($file = $volume->save($fp, $target, $name, 'upload')) == false) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD, $name, $volume->error());
+			if (($file = $volume->upload($fp, $target, $name, $tmpname)) === false) {
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
+				fclose($fp);
 				break;
 			}
 			
-			if (!$volume->mimeAccepted($file['mime'], $args['mimes'])) {
-				$file['hidden'] = true;
-			}
+			fclose($fp);
 			
 			$result = $this->merge($result, $this->trigger('upload', $volume, array('added' => array($file))));
 		}
-
-		$result['header'] = $header;
+		
 		return $result;
 	}
-	
+		
 	/**
 	 * Copy/move files into new destination
 	 *
@@ -847,24 +836,11 @@ class elFinder {
 		$dst     = $args['dst'];
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$cut     = !empty($args['cut']);
-		$result  = array('removed' => array(), 'added' => array());
 		$error   = $cut ? self::ERROR_MOVE : self::ERROR_COPY;
+		$result  = array('removed' => array(), 'added' => array());
 		
-		if (!$targets) {
-			return array();
-		}
-		
-		if (($dstVolume = $this->volume($dst)) == false
-		|| ($dstDir = $dstVolume->dir($dst)) == false) {
+		if (($dstVolume = $this->volume($dst)) == false) {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
-		}
-		
-		if ($dstVolume->commandDisabled('paste')) {
-			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_ACCESS_DENIED));
-		}
-		
-		if (!$dstDir['write']) {
-			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_PERM_DENIED));
 		}
 		
 		foreach ($targets as $target) {
@@ -874,41 +850,23 @@ class elFinder {
 				break;
 			}
 			
-			if ($dstVolume != $srcVolume) {
-				if (!$srcVolume->copyFromAllowed()) {
-					$root = $srcVolume->file($srcVolume->root());
-					$result['warning'] = $this->error($error, self::ERROR_COPY_FROM, $root['name']);
-					
-					break;
-				}
-				
-				if (!$dstVolume->copyToAllowed()) {
-					$root = $dstVolume->file($dstVolume->root());
-					$result['warning'] = $this->error($error, $src['name'], self::ERROR_COPY_TO, $root['name']);
-					break;
-				}
-			}
-
-			if (($file = $this->copy($srcVolume, $dstVolume, $src, $dst, $cut)) == false) {
-				$result['warning'] = $this->copyError;
+			if (($file = $dstVolume->paste($srcVolume, $target, $dst)) === false) {
+				$result['warning'] = $this->error($error, $src['name'], $dstVolume->error());
 				break;
-			}
-
-			if (!$dstVolume->mimeAccepted($file['mime'], $args['mimes'])) {
-				$file['hidden'] = true;
 			}
 			
 			$result = $this->merge($result, $this->trigger('paste', array($srcVolume, $dstVolume), array('added' => array($file))));
 			
 			if ($cut) {
-				if (!$srcVolume->rm($src['hash'])) {
-
-					$result['warning'] = $this->error($error, $src['name'], $srcVolume->error());
+				if ($srcVolume->rm($target)) {
+					$result = $this->merge($result, $this->trigger('rm', $srcVolume, array('removed' => array($target), 'removedDetails' => array($src))));
+				} else {
+					$result['warning'] = $this->error('Unable to remove moved file "$1"', $src['name'], $srcVolume->error());
 					break;
 				}
-				$result = $this->merge($result, $this->trigger('rm', $srcVolume, array('removed' => array($src['hash']), 'removedDetails' => array($src))));
 			}
 		}
+		
 		
 		return $result;
 	}
@@ -1193,7 +1151,7 @@ class elFinder {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function trigger($cmd, $volumes, $result, $mimes=array()) {
+	protected function trigger($cmd, $volumes, $result) {
 		$data = array(
 			'cmd'     => $cmd,
 			'volumes' => is_array($volumes) ? $volumes : array($volumes),
@@ -1201,9 +1159,6 @@ class elFinder {
 		);
 		$volumes = is_array($volumes) ? $volumes : array($volumes);
 		$keys    = array_keys($result);
-		if (!is_array($mimes)) {
-			$mimes = array();
-		}
 		
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
@@ -1220,26 +1175,26 @@ class elFinder {
 			}
 		}
 		
-		$mimeVolume = array_pop($volumes);
+		// some volume methods can return hidden by "onlyMimes" options files.
+		// this file may be required by some listeners but can not be shown to client
+		// so here we remove its
 		
 		if (!empty($result['added']) && is_array($result['added'])) {
 			foreach ($result['added'] as $i => $file) {
-				if (!empty($file['hidden']) || !$mimeVolume->mimeAccepted($file['hash'], $mimes)) {
+				if (!empty($file['hidden'])) {
 					unset($result['added'][$i]);
 				}
 			}
 			$result['added'] = array_merge(array(), $result['added']);
-			// $result['added'] = $this->filterByMimes($result['added'], $mimeVolume, $mimes);
 		}
 		
 		if (!empty($result['changed']) && is_array($result['changed'])) {
 			foreach ($result['changed'] as $i => $file) {
-				if (!empty($file['hidden']) || !$mimeVolume->mimeAccepted($file['hash'], $mimes)) {
+				if (!empty($file['hidden'])) {
 					unset($result['changed'][$i]);
 				}
 			}
 			$result['changed'] = array_merge(array(), $result['changed']);
-			// $result['changed'] = $this->filterByMimes($result['changed'], $mimeVolume, $mimes);
 		}
 		
 		return $result;
