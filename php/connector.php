@@ -207,7 +207,7 @@ $opts = array(
 					'locked' => true
 				)
 			),
-			// 'defaults' => array('write' => false)
+			// 'defaults' => array('read' => false, 'write' => true)
 		),
 		array(
 			'driver' => 'MySQL',

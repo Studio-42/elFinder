@@ -397,7 +397,8 @@ class elFinder {
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
-				if (($tree = $v->tree(null, 0, $target)) != false) {
+
+				if (($tree = $v->tree('', 0, $target)) != false) {
 					$files = array_merge($files, $tree);
 				} 
 			}
@@ -1136,9 +1137,7 @@ class elFinder {
 		foreach ($this->volumes as $id => $v) {
 			if (strpos(''.$hash, $id) === 0) {
 				return $this->volumes[$id];
-			} else {
-				// echo $hash;
-			}
+			} 
 		}
 		return false;
 	}
