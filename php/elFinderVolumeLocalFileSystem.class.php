@@ -530,6 +530,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Replace one file with another.
+	 *
+	 * @param  string  $target  target file path
+	 * @param  string  $source  replacement file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _replace($target, $src) {
+		return @unlink($target) && copy($src, $target);
+	}
+	
+	/**
 	 * Move file into another parent dir
 	 *
 	 * @param  string  $source  source file path

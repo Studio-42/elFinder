@@ -182,33 +182,57 @@ $opts = array(
 	'debug' => true,
 	
 	'roots' => array(
+		
 		array(
 			'driver'     => 'LocalFileSystem',
 			'path'       => '../files/',
 			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			'alias'      => 'File system',
 			'mimeDetect' => 'internal',
-			'tmbPath'    => 'tmb',
-			// 'uploadOverwrite' => false,
-			// 'copyOverwrite' => false,
-			// 'imgLib'     => 'gd',
-			// 'disabled'   => array('paste')
-			// 'copyTo' => false,
-			// 'uploadAllow' => array('text'),
-			// 'uploadDeny' => array('text/plain'),
-			// 'uploadOrder'     => 'allow,deny', 
+			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
 			'attributes' => array(
 				array(
-					'pattern' => '/^\/\./',
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
 					'read' => false,
 					'write' => false,
 					'hidden' => true,
-					'locked' => true
-				)
+					'locked' => false
+				),
+				// array(
+				// 	'pattern' => '~/test/replace/.+jpg$~',
+				// 	// 'pattern' => '/^\/\./',
+				// 	'read' => false,
+				// 	// 'write' => false,
+				// 	// 'hidden' => true,
+				// 	'locked' => true
+				// )
 			),
 			// 'defaults' => array('read' => false, 'write' => true)
 		),
+		
+		// array(
+		// 	'driver'     => 'LocalFileSystem',
+		// 	'path'       => '../files2/',
+		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+		// 	'alias'      => 'Files',
+		// 	'mimeDetect' => 'internal',
+		// 	'tmbPath'    => '.tmb',
+		// 	// 'copyOverwrite' => false,
+		// 	'utf8fix'    => true,
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '~/\.~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			// 'read' => false,
+		// 			// 'write' => false,
+		// 			'hidden' => true,
+		// 			'locked' => false
+		// 		),
+		// 	)
+		// ),
+		
 		array(
 			'driver' => 'MySQL',
 			'path' => 1,

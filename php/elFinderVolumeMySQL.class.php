@@ -624,7 +624,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$files = array();
 		$sql   = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime, f.mime, f.width, f.height, ch.id AS dirs 
 				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id 
+				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id AND ch.mime="directory"
 				WHERE f.parent_id="'.$id.'"
 				GROUP BY f.id';
 
@@ -758,6 +758,44 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				.'SELECT "'.intval($targetDir).'", "'.$this->db->real_escape_string($name).'", content, size, "'.time().'", mime, width, height FROM '.$this->tbf.' WHERE id="'.intval($source).'"';
 		// echo $sql;
 		return $this->query($sql) && $this->db->affected_rows;
+	}
+	
+	/**
+	 * Replace one file with another.
+	 *
+	 * @param  string  $target  target file path
+	 * @param  string  $source  replacement file path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _replace($target, $src) {
+		
+		$sql = 'SELECT parent_id FROM '.$this->tbf.' WHERE id='.intval($target);
+		if (!($res = $this->db->query($sql))) {
+			return false;
+		}
+		$r = $res->fetch_assoc();
+		$parentID = $r['parent_id'];
+		
+		$sql = 'INSERT INTO '.$this->tbf.' (parent_id, name, content, size, mtime, mime, width, height) SELECT 0, name, content, size, mtime, mime, width, height FROM '.$this->tbf.' WHERE id='.$src;
+		
+		if (!$this->db->query($sql)) {
+			return false;
+		}
+		$id = $this->db->insert_id;
+		
+		if (!$this->db->query('DELETE FROM '.$this->tbf.' WHERE id='.$target)) {
+			$this->db->query('DELETE FROM '.$this->tbf.' WHERE id='.$id);
+			return false;
+		}
+		
+		$sql = 'UPDATE '.$this->tbf.' SET id='.intval($target).', parent_id='.intval($parentID).' WHERE id='.$id;
+
+		if (!$this->db->query($sql)) {
+			$this->db->query('DELETE FROM '.$this->tbf.' WHERE id='.$id);
+			return false;
+		}
+		return true;
 	}
 	
 	/**
