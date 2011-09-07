@@ -457,7 +457,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _fclose($fp, $path) {
+	protected function _fclose($fp, $path='') {
 		return @fclose($fp);
 	}
 	
@@ -530,18 +530,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Replace one file with another.
-	 *
-	 * @param  string  $target  target file path
-	 * @param  string  $source  replacement file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _replace($target, $src) {
-		return @unlink($target) && copy($src, $target);
-	}
-	
-	/**
 	 * Move file into another parent dir
 	 *
 	 * @param  string  $source  source file path
@@ -587,7 +575,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name) {
+	protected function _save($fp, $dir, $name, $mime, $w, $h) {
 		$path = $dir.DIRECTORY_SEPARATOR.$name;
 
 		if (!($target = @fopen($path, 'wb'))) {
@@ -623,7 +611,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
-		if (@file_put_contents($path, $content, LOCK_EX)) {
+		if (@file_put_contents($path, $content, LOCK_EX) !== false) {
 			clearstatcache();
 			return true;
 		}

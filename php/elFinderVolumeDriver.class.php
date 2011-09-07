@@ -1185,10 +1185,14 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
+		if (!$this->_move($path, $dir, $name)) {
+			return false;
+		}
+		
 		$this->rmTmb($path);
-		return $this->_move($path, $dir, $name)
-			? $this->stat($this->_joinPath($dir, $name))
-			: false;
+		$path = $this->_joinPath($dir, $name);
+		$this->rmTmb($path);
+		return $this->stat($path);
 	}
 	
 	/**
@@ -1237,6 +1241,9 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$mime  = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname); 
+		if ($mime == 'unknown' && $this->mimeDetect == 'internal') {
+			$mime = elFinderVolumeDriver::mimetypeInternalDetect($name);
+		}
 		$allow = in_array('all', $this->uploadAllow) || $this->mimeAccepted($mime, $this->uploadAllow);
 		$deny  = in_array('all', $this->uploadDeny)  || $this->mimeAccepted($mime, $this->uploadDeny);
 		// dont ask me what this mean. I forgot it, but its work :)
@@ -1258,24 +1265,33 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$dstpath = $this->decode($dst);
-		$test = $this->_joinPath($dstpath, $name);
+		$test    = $this->_joinPath($dstpath, $name);
+		
 		if ($this->_fileExists($test)) {
 			if ($this->options['uploadOverwrite']) {
 				if (!$this->attr($test, 'write')) {
 					return $this->setError(elFinder::ERROR_PERM_DENIED);
-				} elseif ($this->_isDir($test) || $this->_isLink($test)) {
+				} elseif ($this->_isDir($test)) {
 					return $this->setError(elFinder::ERROR_NOT_REPLACE, $name);
-				} elseif (!$this->_unlink($test)) {
-					return $this->setError(elFinder::ERROR_REPLACE, $name);
 				} 
 			} else {
 				$name = $this->uniqueName($dstpath, $name, '-', false);
 			}
 		}
 		
-		return ($path = $this->_save($fp, $dstpath, $name)) == false 
-				? false 
-				: $this->stat($path);
+		$w = $h = 0;
+		if (strpos($mime, 'image') === 0 && ($s = getimagesize($tmpname))) {
+			$w = $s[0];
+			$h = $s[1];
+		}
+
+		if (($path = $this->_save($fp, $dstpath, $name, $mime, $w, $h)) == false) {
+			return false;
+		}
+		
+		$this->rmTmb($path);
+		
+		return $this->stat($path);
 	}
 	
 	/**
@@ -1300,178 +1316,8 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_COPY, '#'.$src, elFinder::ERROR_PERM_DENIED);
 		}
 		
-		
 		return ($path = $this->copyFrom($volume, $src, $dst)) == false ? false : $this->stat($path);
 	}
-	
-	
-	/**
-	 * Copy file/recursive copy dir only in current volume.
-	 * Return new file path or false.
-	 *
-	 * @param  string  $src   source path
-	 * @param  string  $dst   destination dir path
-	 * @param  string  $name  new file name (optionaly)
-	 * @return string|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function copy($src, $dst, $name='') {
-		$name = empty($name) ? $this->_basename($src) : $name;
-
-		if ($this->_inpath($dst, $src)) {
-			return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $this->_path($src));
-		}
-		
-		if (!$this->attr($src, 'read') || !$this->attr($dst, 'write')) {
-			return $this->setError(elFinder::ERROR_COPY, $this->_path($src), elFinder::ERROR_PERM_DENIED);
-		}
-		
-		$test = $this->_joinPath($dst, $name);
-		
-		if ($this->_fileExists($test)) {
-			
-			if ($this->options['copyOverwrite']) {
-				
-				if (!$this->attr($test, 'write')) {
-					return $this->setError(elFinder::ERROR_COPY, $this->_path($src), elFinder::ERROR_PERM_DENIED);
-				} 
-				
-				if ($this->_isLink($test) || ($this->_isDir($src) && !$this->_isDir($test)) || (!$this->_isDir($src) && $this->_isDir($test))) {
-					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($src));
-				} 
-
-				if ($this->_isDir($test)) {
-					foreach ($this->_scandir($test) as $p) {
-						if (!$this->attr($p, 'write')) {
-							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p), elFinder::ERROR_PERM_DENIED);
-						}
-						if (!$this->remove($p, true)) {
-							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p));
-						}
-					}
-				} else {
-					return $this->_replace($test, $src) ? $test	: $this->setError(elFinder::ERROR_REPLACE, $this->_path($src));
-				}
-				
-			} else {
-				$name = $this->uniqueName($dst, $name, '-', false);
-			}
-		}
-		
-		if ($this->_isLink($src)) {
-			return ($link = $this->_readlink($src)) != false && $this->_symlink($link, $dst, $name) ? $this->_joinPath($dst, $name) : false;
-		} 
-		
-		if ($this->_isDir($src)) {
-			if (($ls = $this->_scandir($src)) !== false 
-			&& ($this->_isDir($this->_joinPath($dst, $name)) || $this->_mkdir($dst, $name))) {
-				$dst = $this->_joinPath($dst, $name);
-				foreach ($ls as $path) {
-					$name = $this->_basename($path);
-					if ($name != '.' && $name != '..' && !$this->attr($path, 'hidden')) {
-						if (!$this->copy($path, $dst)) {
-							return false;
-						}
-					}
-				}
-				return $dst;
-			}
-
-			return $this->setError(elFinder::ERROR_COPY, $this->_path($src));
-		} 
-			
-		return $this->_copy($src, $dst, $name) ? $this->_joinPath($dst, $name) : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
-	}
-	
-	/**
-	 * Copy file from another volume.
-	 * Return new file path or false.
-	 *
-	 * @param  Object  $volume  source volume
-	 * @param  string  $src     source file hash
-	 * @param  string  $dst     destination dir path
-	 * @return string|false
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function copyFrom($volume, $src, $dst) {
-		
-		if (($source = $volume->file($src)) == false) {
-			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
-		}
-		
-		if (!$this->nameAccepted($source['name'])) {
-			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_INVALID_NAME);
-		}
-		
-		if (($destination = $this->dir($dst, true)) == false) {
-			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_TRGDIR_NOT_FOUND);
-		}
-		
-		if (!$source['read'] || !$destination['write']) {
-			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_PERM_DENIED);
-		}
-		
-		$dstpath  = $this->decode($dst);
-		$name     = $source['name'];
-		$test     = $this->_joinPath($dstpath, $name);
-		
-		if ($this->_fileExists($test)) {
-			if ($this->options['copyOverwrite']) {
-				
-				if (!$this->attr($test, 'write')) {
-					return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_PERM_DENIED);
-				} 
-				
-				if (!empty($source['alias']) || ($source['mime'] == 'directory' && $destination['mime'] != 'directory') || ($destination['mime'] == 'directory' && $source['mime'] != 'directory')) {
-					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($test));
-				}
-				
-				if ($this->_isDir($test)) {
-					foreach ($this->_scandir($test) as $p) {
-						if (!$this->attr($p, 'write')) {
-							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p), elFinder::ERROR_PERM_DENIED);
-						}
-						if (!$this->remove($p, true)) {
-							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p));
-						}
-					}
-				} 
-				
-			} else {
-				$name = $this->uniqueName($dstpath, $source['name'], '-', false);
-			}
-			
-		}
-		
-		
-		if ($source['mime'] == 'directory') {
-			
-			if (!$this->_isDir($this->_joinPath($dstpath, $name)) && !$this->_mkdir($dstpath, $name)) {
-				return $this->setError(elFinder::ERROR_COPY, $volume->path($src));
-			}
-			
-			$path     = $this->_joinPath($dstpath, $name);
-			$pathhash = $this->encode($path);
-			
-			foreach ($volume->scandir($src) as $entr) {
-				if (!$this->copyFrom($volume, $entr['hash'], $pathhash)) {
-					return false;
-				}
-			}
-			
-		} else {
-			if (($fp = $volume->open($src)) == false
-			|| ($path = $this->_save($fp, $dstpath, $name)) == false) {
-				$fp && $volume->close($fp);
-				return $this->setError(elFinder::ERROR_COPY, $volume->path($src));
-			}
-			
-		}
-		
-		
-		return $path;
-	}
-	
 	
 	/**
 	 * Return file contents
@@ -1982,9 +1828,7 @@ abstract class elFinderVolumeDriver {
 		} elseif ($type == 'mime_content_type') {
 			$type = mime_content_type($path);
 		} else {
-			$pinfo = pathinfo($path); 
-			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-			$type  = isset(self::$mimetypes[$ext]) ? self::$mimetypes[$ext] : 'unknown';
+			$type = elFinderVolumeDriver::mimetypeInternalDetect($path);
 		}
 		
 		$type = explode(';', $type);
@@ -2006,9 +1850,26 @@ abstract class elFinderVolumeDriver {
 			// http://elrte.org/redmine/issues/163
 			$type = 'application/zip';
 		}
+		
+		if ($type == 'unknown' && $this->mimeDetect != 'internal') {
+			$type = elFinderVolumeDriver::mimetypeInternalDetect($path);
+		}
+		
 		return $type;
 	}
 	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	static protected function mimetypeInternalDetect($path) {
+		$pinfo = pathinfo($path); 
+		$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+		return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
+		
+	}
 	
 	/**
 	 * Return file/total directory size
@@ -2135,6 +1996,187 @@ abstract class elFinderVolumeDriver {
 	/**********************  manuipulations  ******************/
 		
 	/**
+	 * Copy file/recursive copy dir only in current volume.
+	 * Return new file path or false.
+	 *
+	 * @param  string  $src   source path
+	 * @param  string  $dst   destination dir path
+	 * @param  string  $name  new file name (optionaly)
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function copy($src, $dst, $name='') {
+		$name = empty($name) ? $this->_basename($src) : $name;
+
+		if ($this->_inpath($dst, $src)) {
+			return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $this->_path($src));
+		}
+		
+		if (!$this->attr($src, 'read') || !$this->attr($dst, 'write')) {
+			return $this->setError(elFinder::ERROR_COPY, $this->_path($src), elFinder::ERROR_PERM_DENIED);
+		}
+		
+		$test = $this->_joinPath($dst, $name);
+		
+		if ($this->_fileExists($test)) {
+			
+			if ($this->options['copyOverwrite']) {
+				
+				if (!$this->attr($test, 'write')) {
+					return $this->setError(elFinder::ERROR_COPY, $this->_path($src), elFinder::ERROR_PERM_DENIED);
+				} 
+				
+				$srcIsDir  = $this->_isDir($src);
+				$testIsDir = $this->_isDir($test);
+				
+				if (($srcIsDir && !$testIsDir) || (!$srcIsDir && $testIsDir)) {
+					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($src));
+				} 
+
+				if ($this->_isDir($test)) {
+					foreach ($this->_scandir($test) as $p) {
+						if (!$this->attr($p, 'write')) {
+							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p), elFinder::ERROR_PERM_DENIED);
+						}
+						if (!$this->remove($p, true)) {
+							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p));
+						}
+					}
+				} else {
+					$this->rmTmb($test);
+				}
+				
+			} else {
+				$name = $this->uniqueName($dst, $name, '-', false);
+			}
+		}
+		
+		
+		if ($this->_isLink($src)) {
+			return ($link = $this->_readlink($src)) != false && $this->_symlink($link, $dst, $name) ? $this->_joinPath($dst, $name) : false;
+		} 
+		
+		if ($this->_isDir($src)) {
+			if (($ls = $this->_scandir($src)) !== false 
+			&& ($this->_isDir($this->_joinPath($dst, $name)) || $this->_mkdir($dst, $name))) {
+				$dst = $this->_joinPath($dst, $name);
+				foreach ($ls as $path) {
+					$name = $this->_basename($path);
+					if ($name != '.' && $name != '..' && !$this->attr($path, 'hidden')) {
+						if (!$this->copy($path, $dst)) {
+							return false;
+						}
+					}
+				}
+				return $dst;
+			}
+
+			return $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+		} 
+		
+		return $this->_copy($src, $dst, $name) ? $this->_joinPath($dst, $name) : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+	}
+	
+	/**
+	 * Copy file from another volume.
+	 * Return new file path or false.
+	 *
+	 * @param  Object  $volume  source volume
+	 * @param  string  $src     source file hash
+	 * @param  string  $dst     destination dir path
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function copyFrom($volume, $src, $dst) {
+		
+		if (($source = $volume->file($src)) == false) {
+			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
+		}
+		
+		if (!$this->nameAccepted($source['name'])) {
+			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_INVALID_NAME);
+		}
+		
+		if (($destination = $this->dir($dst, true)) == false) {
+			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_TRGDIR_NOT_FOUND);
+		}
+		
+		if (!$source['read'] || !$destination['write']) {
+			return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_PERM_DENIED);
+		}
+		
+		$dstpath  = $this->decode($dst);
+		$name     = $source['name'];
+		$test     = $this->_joinPath($dstpath, $name);
+		
+		if ($this->_fileExists($test)) {
+			if ($this->options['copyOverwrite']) {
+				
+				if (!$this->attr($test, 'write')) {
+					return $this->setError(elFinder::ERROR_COPY, $volume->path($src), elFinder::ERROR_PERM_DENIED);
+				} 
+				
+				$srcIsDir = $source['mime'] == 'directory';
+				$testIsDir = $this->_isDir($test);
+				
+				if (/*!empty($source['alias']) ||*/ ($srcIsDir && !$testIsDir) || (!$srcIsDir && $testIsDir)) {
+					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($test));
+				}
+				
+				if ($this->_isDir($test)) {
+					foreach ($this->_scandir($test) as $p) {
+						if (!$this->attr($p, 'write')) {
+							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p), elFinder::ERROR_PERM_DENIED);
+						}
+						if (!$this->remove($p, true)) {
+							return $this->setError(elFinder::ERROR_REPLACE, $this->_path($p));
+						}
+					}
+				} 
+				
+			} else {
+				$name = $this->uniqueName($dstpath, $source['name'], '-', false);
+			}
+		}
+		
+		if ($source['mime'] == 'directory') {
+			
+			if (!$this->_isDir($this->_joinPath($dstpath, $name)) && !$this->_mkdir($dstpath, $name)) {
+				return $this->setError(elFinder::ERROR_COPY, $volume->path($src));
+			}
+			
+			$path     = $this->_joinPath($dstpath, $name);
+			$pathhash = $this->encode($path);
+			
+			foreach ($volume->scandir($src) as $entr) {
+				if (!$this->copyFrom($volume, $entr['hash'], $pathhash)) {
+					return false;
+				}
+			}
+			
+		} else {
+			$stat = $volume->file($src);
+			$mime = $stat['mime'];
+			$w = $h = 0;
+			if (strpos($mime, 'image') === 0 && ($dim = $volume->dimensions($src))) {
+				$s = explode('x', $dim);
+				$w = $s[0];
+				$h = $s[1];
+			}
+			
+			if (($fp = $volume->open($src)) == false
+			|| ($path = $this->_save($fp, $dstpath, $name, $mime, $w, $h)) == false) {
+				$fp && $volume->close($fp, $src);
+				return $this->setError(elFinder::ERROR_COPY, $volume->path($src));
+			}
+			$volume->close($fp, $src);
+		}
+		
+		
+		return $path;
+	}
+		
+	/**
 	 * Remove file/ recursive remove dir
 	 *
 	 * @param  string  $path  file path
@@ -2142,10 +2184,10 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function remove($path, $force = false) {
+		$this->rmTmb($path);
 		//https://github.com/Studio-42/elFinder/issues/40
 		// file_exists() returns false on symlink points to itself
 		if ($this->_isLink($path)) {
-			$this->rmTmb($path);
 			return $this->_unlink($path) ? true : $this->setError(elFinder::ERROR_RM, $this->_path($path));
 		}
 		
@@ -2161,7 +2203,6 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if ($this->_isFile($path)) {
-			$this->rmTmb($path);
 			return $this->_unlink($path);
 		} elseif ($this->_isDir($path)) {
 			foreach ($this->_scandir($path) as $p) {
@@ -2174,34 +2215,7 @@ abstract class elFinderVolumeDriver {
 		}
 	}
 	
-	
-	
-	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function doCopyOutside($src, $volume, $dst) {
-		
-		if (($source = $this->file($src)) == false) {
-			return $this->setError(elFinder::ERROR_COPY, '#'.$src, elFinder::ERROR_FILE_NOT_FOUND, '#'.$src);
-		}
-		
-		if (!$source['read']) {
-			return $this->setError(elFinder::ERROR_COPY, $source['name'], elFinder::ERROR_PERM_DENIED);
-		}
-		
-		if ($source['mime'] == 'directory') {
-			
-		} else {
-			
-		}
-		
-		return false;
-	}
-	
+
 	/************************* thumbnails **************************/
 		
 	/**
@@ -2212,6 +2226,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmbname($path) {
+		if ($this->_isLink($path) && ($link = $this->_readlink($path))) {
+			$path = $link;
+		}
 		return md5($path).'.png';
 	}
 	
@@ -2245,9 +2262,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function canCreateTmb($path, $mime) {
-		return $this->tmbPath
-			&& $this->tmbURL
-			&& $this->tmbPathWritable 
+		return $this->tmbPathWritable 
 			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos($mime, 'image') === 0 
@@ -2276,15 +2291,20 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function createTmb($path) {
-		$mime = $this->mimetype($path);
-		if (!$this->canCreateTmb($path, $mime)) {
+		if (!$this->canCreateTmb($path, $this->mimetype($path))) {
 			return false;
 		}
+		
 		$name = $this->tmbName($path);
 		$tmb  = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
-		// copy image in tmbPath so some drivers does not store files on local fs
-		if (($src = $this->_fopen($path, 'rb')) == false 
-		||  ($trg = @fopen($tmb, 'wb')) == false) {
+		
+		// copy image into tmbPath so some drivers does not store files on local fs
+		if (($src = $this->_fopen($path, 'rb')) == false) {
+			return false;
+		}
+		
+		if (($trg = @fopen($tmb, 'wb')) == false) {
+			$this->_fclose($src, $path);
 			return false;
 		}
 
@@ -2295,16 +2315,18 @@ abstract class elFinderVolumeDriver {
 		$this->_fclose($src, $path);
 		fclose($trg);
 
-		if (($s = @getimagesize($tmb)) == false) {
-			return false;
-		}
-		
 		$result = false;
+		
 		$tmbSize = $this->tmbSize;
 		
 		$result = $this->resizeImg($tmb, $tmbSize, $tmbSize, $this->options['tmbCrop'], true, $this->imgLib, $this->options['tmbBgColor'], 'png');
 
-		return $result ? $name : false;
+		if (!$result) {
+			unlink($tmb);
+			return false;
+		}
+
+		return $name;
 	}
 	
 	/**
@@ -2545,10 +2567,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rmTmb($path) {
-		$path = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
-		if (file_exists($path)) {
-			@unlink($path);
-		}
+		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
+		file_exists($tmb) && @unlink($tmb);
+		clearstatcache();
 	}
 
 	/*********************** misc *************************/
@@ -2828,12 +2849,13 @@ abstract class elFinderVolumeDriver {
 	
 	/**
 	 * Close opened file
-	 *
-	 * @param  resource  $fp  file pointer
+	 * 
+	 * @param  resource  $fp    file pointer
+	 * @param  string    $path  file path
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _fclose($fp, $path);
+	abstract protected function _fclose($fp, $path='');
 	
 	/********************  file/dir manipulations *************************/
 	
@@ -2880,16 +2902,6 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _copy($source, $targetDir, $name='');
 	
 	/**
-	 * Replace one file with another.
-	 *
-	 * @param  string  $target  target file path
-	 * @param  string  $source  replacement file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	abstract protected function _replace($target, $src);
-	
-	/**
 	 * Move file into another parent dir (only inside one volume)
 	 *
 	 * @param  string  $source  source file path
@@ -2928,7 +2940,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _save($fp, $dir, $name);
+	abstract protected function _save($fp, $dir, $name, $mime, $w, $h);
 	
 	/**
 	 * Get file contents

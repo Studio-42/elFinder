@@ -191,6 +191,7 @@ $opts = array(
 			'mimeDetect' => 'internal',
 			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
+			'tmbCrop'         => false,
 			'attributes' => array(
 				array(
 					'pattern' => '~/\.~',
@@ -243,11 +244,13 @@ $opts = array(
 			'user_id' => 1,
 			'accessControl' => 'access',
 			'separator' => ':',
-			// 'copyOverwrite' => false,
-			'copyTo' => false,
+			'tmbCrop'         => false,
+			// 'imgLib' => 'imagick',
+			// 'uploadOverwrite' => false,
+			// 'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
-			// 'tmbPath' => '../files/.dbtmb/',
-			// 'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/.dbtmb/',
+			'tmbPath' => '../files/dbtmb',
+			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/dbtmb/',
 			// 'attributes' => array(
 			// 	array(),
 			// 	array(

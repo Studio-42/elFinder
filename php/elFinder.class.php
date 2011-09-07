@@ -520,27 +520,26 @@ class elFinder {
 		$h404     = 'HTTP/1.x 404 Not Found';
 
 		if (($volume = $this->volume($target)) == false) { 
-			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'header' => $h404, 'raw' => true);
+			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
 		
 		if (($file = $volume->file($target)) == false) {
-			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'header' => $h404, 'raw' => true);
+			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
 		
 		if (!$file['read']) {
-			return array('error' => self::$errors[self::ERROR_ACCESS_DENIED], 'header' => $h403, 'raw' => true);
+			return array('error' => 'Access denied', 'header' => $h403, 'raw' => true);
 		}
 		
 		if (($fp = $volume->open($target)) == false) {
-			return array('error' => self::$errors[self::ERROR_FILE_NOT_FOUND], 'header' => $h404, 'raw' => true);
+			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
 		
 		if ($download) {
 			$disp = 'attachment';
 			$mime = 'application/octet-stream';
 		} else {
-			$disp  = preg_match('/^(image|text)/i', $file['mime']) 
-				|| $file['mime'] == 'application/x-shockwave-flash' 
+			$disp  = preg_match('/^(image|text)/i', $file['mime']) || $file['mime'] == 'application/x-shockwave-flash' 
 					? 'inline' 
 					: 'attachment';
 			$mime = $file['mime'];
