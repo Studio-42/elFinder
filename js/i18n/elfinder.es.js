@@ -65,7 +65,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Tipo de archivo no soportado.',
 			'errNoArchive'         : 'El archivo no es de tipo archivo o es de un tipo no soportado.',
 			'errCmdNoSupport'      : 'El backend no soporta este comando.',
-			'errReplByChild'       : 'La carpeta “$1” no puede ser reemplazada por un elemnto contenido en ella.',
+			'errReplByChild'       : 'La carpeta “$1” no puede ser reemplazada por un elemento contenido en ella.',
 			'errArcSymlinks'       : 'Por razones de seguridad no se pueden descomprimir archivos que contengan symlinks.',
 			'errArcMaxSize'        : 'El tamaño del archivo excede el máximo permitido.',
 			
@@ -186,7 +186,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'github'          : 'Fork us on Github',
 			'twitter'         : 'Síguenos en Twitter',
 			'facebook'        : 'Únete a nostros en Facebook',
-			'team'            : 'Équipo',
+			'team'            : 'Equipo',
 			'chiefdev'        : 'desarrollador jefe',
 			'developer'       : 'desarrollador',
 			'contributor'     : 'contribuyente',
@@ -200,7 +200,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Seleccione archivos para subir',
 			'moveFiles'       : 'Mover archivos',
 			'copyFiles'       : 'Copiar archivos',
-			'rmFromPlaces'    : 'Remove from places',
+			'rmFromPlaces'    : 'Eliminar en sus ubicaciónes',
 			'untitled folder' : 'carpeta sin título',
 			'untitled archivo.txt' : 'archivo.txt sin título',
 			
@@ -280,7 +280,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoWM'     : 'Película Windows Media',
 			'kindVideoFlash'  : 'Película Flash',
 			'kindVideoMKV'    : 'Película Matroska MKV',
-			'kindVideoOGG'    : 'Película Ogge'
+			'kindVideoOGG'    : 'Película Ogg'
 		}
 	}
 }
