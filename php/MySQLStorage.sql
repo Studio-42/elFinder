@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS `elfinder_file` (
   `width` int(5) NOT NULL,
   `height` int(5) NOT NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `parent_id_2` (`parent_id`,`name`),
+  UNIQUE KEY `parent_name` (`parent_id`,`name`),
   KEY `parent_id` (`parent_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+INSERT INTO `elfinder_file` (`id`, `parent_id`, `name`, `content`, `size`, `mtime`, `mime`, `width`, `height`) VALUES 
+('1', '0', 'DATABASE', '', '0', '0', 'directory', '0', '0');
