@@ -5,7 +5,9 @@
  * CSS optimizer: https://github.com/afelix/csso
  */
 
-require.paths.push('/usr/local/lib/node_modules');
+// does anyone know how to overcome this problem?
+require.paths.push('/usr/local/lib/node_modules'); // for common linux install
+require.paths.push('/opt/local/lib/node_modules'); // for Mac OS X macports install
 
 var sys = require('sys'),
 	fs   = require('fs'),
@@ -13,9 +15,7 @@ var sys = require('sys'),
 	util = require('util'),
 	ugp  = require('uglify-js').parser,
 	ugu  = require('uglify-js').uglify,
-	csp  = require('csso/lib/cssp').parse,
-	csm  = require('csso/lib/cssm').minimize,
-	csu  = require('csso/lib/cssoutils');
+	csso = require('csso');
 
 var dirmode = 0755,
 	src = __dirname,
@@ -157,17 +157,8 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var csso = csu.min2string(
-		csm(
-			csp(
-				fs.readFileSync('css/elfinder.full.css').toString()
-			),
-			{}
-		).nodes,
-		''
-	);
-	csso = csso.replace(/\)([^\s^\;^\,^\),^\}])/g, ') $1'); // workaround for https://github.com/afelix/csso/issues/16
-	fs.writeFileSync(this.name, getComment() + csso);
+	var css_optimized = csso.justDoIt(fs.readFileSync('css/elfinder.full.css').toString())
+	fs.writeFileSync(this.name, getComment() + css_optimized);
 });
 
 // JS
