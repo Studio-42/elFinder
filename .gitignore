@@ -6,3 +6,5 @@ php-old
 extensions
 build
 files2
+elFinderVolumeSVN.class.php
+connector-svn.php

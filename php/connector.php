@@ -22,46 +22,54 @@ function debug($o) {
  * Simple logger function.
  * Demonstrate how to work with elFinder event api.
  *
- * @param  string        $cmd     command name
- * @param  object|array  $voumes  current volume or source/destination volumes list for command "paste"
- * @param  array         $return  command result
- * @return array
+ * @param  string   $cmd       command name
+ * @param  array    $result    command result
+ * @param  array    $args      command arguments from client
+ * @param  elFinder $elfinder  elFinder instance
+ * @return void|true
  * @author Dmitry (dio) Levashov
  **/
-function logger($cmd, $voumes, $result) {
-	$log = $cmd.': ['.date('d.m H:s').'] '.$voumes[0]->id().' ';
-	
-	if (isset($voumes[1])) {
-		$log .= $voumes[1]->id().' ';
-	}
-	
-	switch ($cmd) {
-		case 'mkdir':
-		case 'mkfile':
-		case 'upload':
-			$log .= $result['added'][0]['name'];
-			break;
-		case 'rename':
-			$log .= 'from '.$result['removedDetails'][0]['name'].' to '.$result['added'][0]['name'];
-			break;
-		case 'duplicate':
-			$log .= 'src: '.$result['src']['name'].' copy: '.$result['added'][0]['name'];
-			break;
-		case 'rm':
-			$log .= $result['removedDetails'][0]['name'];
-			break;
+function logger($cmd, $result, $args, $elfinder) {
+	$logfile = '../files/temp/log.txt';
 
-		default:
-			$log = '';
+	$dir = dirname($logfile);
+	if (!is_dir($dir) && !mkdir($dir)) {
+		return;
 	}
-	if ($log && is_dir('../files/tmp') || @mkdir('../files/tmp')) {
-		$fp = fopen('../files/tmp/log.txt', 'a');
-		if ($fp) {
-			fwrite($fp, $log."\n");
-			fclose($fp);
+	
+	$log = $cmd.' ['.date('d.m H:s')."]\n";
+	
+	if (!empty($result['error'])) {
+		$log .= "\tERROR: ".implode(' ', $result['error'])."\n";
+	}
+	
+	if (!empty($result['warning'])) {
+		$log .= "\tWARNING: ".implode(' ', $result['warning'])."\n";
+	}
+	
+	if (!empty($result['removed'])) {
+		foreach ($result['removed'] as $file) {
+			// removed file contain additional field "realpath"
+			$log .= "\tREMOVED: ".$file['realpath']."\n";
 		}
 	}
-	return $result;
+	
+	if (!empty($result['added'])) {
+		foreach ($result['added'] as $file) {
+			$log .= "\tADDED: ".$elfinder->realpath($file['hash'])."\n";
+		}
+	}
+	
+	if (!empty($result['changed'])) {
+		foreach ($result['changed'] as $file) {
+			$log .= "\tCHANGED: ".$elfinder->realpath($file['hash'])."\n";
+		}
+	}
+	
+	if (($fp = fopen($logfile, 'a'))) {
+		fwrite($fp, $log."\n");
+		fclose($fp);
+	}
 }
 
 
@@ -75,50 +83,84 @@ function logger($cmd, $voumes, $result) {
 class elFinderSimpleLogger {
 	
 	/**
-	 * Write log
+	 * Log file path
 	 *
-	 * @param  string        $cmd     command name
-	 * @param  object|array  $voumes  current volume or source/destination volumes list for command "paste"
-	 * @param  array         $return  command result
-	 * @return array
+	 * @var string
 	 **/
-	public function write($cmd, $voumes, $result) {
-		$log = $cmd.': ['.date('d.m H:s').'] '.$voumes[0]->id().' ';
-
-		if (isset($voumes[1])) {
-			$log .= $voumes[1]->id().' ';
+	protected $file = '';
+	
+	/**
+	 * constructor
+	 *
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function __construct($path) {
+		$this->file = $path;
+		$dir = dirname($path);
+		if (!is_dir($dir)) {
+			mkdir($dir);
 		}
-
-		switch ($cmd) {
-			case 'mkdir':
-			case 'mkfile':
-			case 'upload':
-			case 'paste':
-				$log .= $result['added'][0]['name'];
-				break;
-			case 'rename':
-				$log .= 'from '.$result['removedDetails'][0]['name'].' to '.$result['added'][0]['name'];
-				break;
-			case 'duplicate':
-				$log .= 'src: '.$result['src']['name'].' copy: '.$result['added'][0]['name'];
-				break;
-			case 'rm':
-				$log .= $result['removedDetails'][0]['name'];
-				break;
-
-			default:
-				$log = '';
+	}
+	
+	/**
+	 * Create log record
+	 *
+	 * @param  string   $cmd       command name
+	 * @param  array    $result    command result
+	 * @param  array    $args      command arguments from client
+	 * @param  elFinder $elfinder  elFinder instance
+	 * @return void|true
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function log($cmd, $result, $args, $elfinder) {
+		$log = $cmd.' ['.date('d.m H:s')."]\n";
+		
+		if (!empty($result['error'])) {
+			$log .= "\tERROR: ".implode(' ', $result['error'])."\n";
 		}
-		if ($log && is_dir('../files/tmp') || @mkdir('../files/tmp')) {
-			$fp = fopen('../files/tmp/log.txt', 'a');
-			if ($fp) {
-				fwrite($fp, $log."\n");
-				fclose($fp);
+		
+		if (!empty($result['warning'])) {
+			$log .= "\tWARNING: ".implode(' ', $result['warning'])."\n";
+		}
+		
+		if (!empty($result['removed'])) {
+			foreach ($result['removed'] as $file) {
+				// removed file contain additional field "realpath"
+				$log .= "\tREMOVED: ".$file['realpath']."\n";
 			}
 		}
-		return $result;
 		
+		if (!empty($result['added'])) {
+			foreach ($result['added'] as $file) {
+				$log .= "\tADDED: ".$elfinder->realpath($file['hash'])."\n";
+			}
+		}
+		
+		if (!empty($result['changed'])) {
+			foreach ($result['changed'] as $file) {
+				$log .= "\tCHANGED: ".$elfinder->realpath($file['hash'])."\n";
+			}
+		}
+		
+		$this->write($log);
 	}
+	
+	/**
+	 * Write log into file
+	 *
+	 * @param  string  $log  log record
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function write($log) {
+		
+		if (($fp = @fopen($this->file, 'a'))) {
+			fwrite($fp, $log."\n");
+			fclose($fp);
+		}
+	}
+	
 	
 } // END class 
 
@@ -174,10 +216,12 @@ function validName($name) {
 }
 
 
+$logger = new elFinderSimpleLogger('../files/temp/log.txt');
+
 $opts = array(
 	'locale' => 'en_US.UTF-8',
 	'bind' => array(
-		'mkdir mkfile  rename duplicate upload rm paste' => array(new elFinderSimpleLogger(), 'write'), 
+		'mkdir mkfile  rename duplicate upload rm paste' => array($logger, 'log'), 
 	),
 	'debug' => true,
 	
@@ -191,7 +235,7 @@ $opts = array(
 			'mimeDetect' => 'internal',
 			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
-			'tmbCrop'         => false,
+			'tmbCrop'    => false,
 			'attributes' => array(
 				array(
 					'pattern' => '~/\.~',
@@ -201,38 +245,38 @@ $opts = array(
 					'hidden' => true,
 					'locked' => false
 				),
-				// array(
-				// 	'pattern' => '~/test/replace/.+jpg$~',
-				// 	// 'pattern' => '/^\/\./',
-				// 	'read' => false,
-				// 	// 'write' => false,
-				// 	// 'hidden' => true,
-				// 	'locked' => true
-				// )
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					// 'read' => false,
+					// 'write' => false,
+					// 'hidden' => true,
+					// 'locked' => true
+				)
 			),
 			// 'defaults' => array('read' => false, 'write' => true)
 		),
 		
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files2/',
-		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
-		// 	'alias'      => 'Files',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	// 'copyOverwrite' => false,
-		// 	'utf8fix'    => true,
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			// 'read' => false,
-		// 			// 'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-		// 	)
-		// ),
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files2/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+			'alias'      => 'Files',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			// 'copyOverwrite' => false,
+			'utf8fix'    => true,
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					// 'read' => false,
+					// 'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+			)
+		),
 		
 		array(
 			'driver' => 'MySQL',
