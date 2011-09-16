@@ -69,7 +69,7 @@ class elFinder {
 		'search'    => array('q' => true, 'mimes' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
-		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'crop' => false)
+		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false)
 	);
 	
 	/**
@@ -1012,14 +1012,16 @@ class elFinder {
 		$target = $args['target'];
 		$width  = $args['width'];
 		$height = $args['height'];
-		$crop   = !empty($args['crop']);
+		$x      = (int)$args['x'];
+		$y      = (int)$args['y'];
+		$mode   = $args['mode'];
 		
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RESIZE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 
-		return ($file = $volume->resize($target, $width, $height, $crop))
+		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode))
 			? array('changed' => $file)
 			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
 	}
