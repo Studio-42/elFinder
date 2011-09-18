@@ -759,6 +759,9 @@ window.elFinder = function(node, opts) {
 				
 				// fire event with command name
 				self.trigger(cmd, data);
+				
+				// force update content
+				data.sync && self.sync();
 			},
 			/**
 			 * Request error handler. Reject dfrd with correct error message.
@@ -1818,6 +1821,7 @@ elFinder.prototype = {
 						data.added   && self.add(data);
 						data.changed && self.change(data);
 						self.trigger('upload', data);
+						data.sync && self.sync();
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
 				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
@@ -1902,6 +1906,7 @@ elFinder.prototype = {
 						data.added   && self.add(data);
 						data.changed && self.change(data);
 	 					self.trigger('upload', data);
+						data.sync && self.sync();
 					})
 					.always(function() {
 						notifyto && clearTimeout(notifyto);
