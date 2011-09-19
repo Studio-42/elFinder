@@ -2648,7 +2648,6 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
 				$img->cropImage($width, $height, $x, $y);
 
 				$result = $img->writeImage($path);
