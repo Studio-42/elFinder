@@ -2574,8 +2574,7 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
-				$img->resizeImage($size_w, $size_h, NULL, true);
+				$img->resizeImage($size_w, $size_h, Imagick::FILTER_LANCZOS, true);
 					
 				$result = $img->writeImage($path);
 
@@ -2730,10 +2729,9 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
-
 				$img1 = new Imagick();
 				$img1->newImage($width, $height, new ImagickPixel($bgcolor));
+				$img1->setImageColorspace($img->getImageColorspace());
 				$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
 				$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
 				$result = $img1->writeImage($path);
