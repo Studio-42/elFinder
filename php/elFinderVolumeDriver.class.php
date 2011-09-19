@@ -1581,7 +1581,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function resize($hash, $width, $height, $x, $y, $mode = 'resize') {
-		if ($this->commandDisabled('archive')) {
+		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1600,9 +1600,6 @@ abstract class elFinderVolumeDriver {
 		}
 
 		switch($mode) {
-			case 'resize':
-				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
-				break;
 
 			case 'propresize':
 				return $this->imgResize($path, $width, $height, true, true, $this->imgLib) ? $this->stat($path) : false;
@@ -1615,7 +1612,12 @@ abstract class elFinderVolumeDriver {
 			case 'fitsquare':
 				return $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib) ? $this->stat($path) : false;
 				break;
+			
+			default:
+				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
+				break;				
     	}
+		
    		return false;
 	}
 	
@@ -2614,7 +2616,7 @@ abstract class elFinderVolumeDriver {
 				}
 				break;
 		}
-
+		
 		return false;
   	}
   
