@@ -209,7 +209,7 @@ abstract class elFinderVolumeDriver {
 		// list of commands disabled on this root
 		'disabled'        => array(),      
 		// regexp or function name to validate new file name
-		'acceptedName'    => '/^\w[\w\s\.\-\(\)\[\]]*$/u',
+		'acceptedName'    => '/^\w[\w\s\.\%\-\(\)\[\]]*$/u',
 		// function/class method to control files permissions
 		'accessControl'   => null,
 		// some data required by access control
@@ -1580,8 +1580,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	public function resize($hash, $width, $height, $crop = false) {
-		if ($this->commandDisabled('archive')) {
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize') {
+		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1598,8 +1598,27 @@ abstract class elFinderVolumeDriver {
 		if (!$this->canResize($path, $file['mime'])) {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
+
+		switch($mode) {
+
+			case 'propresize':
+				return $this->imgResize($path, $width, $height, true, true, $this->imgLib) ? $this->stat($path) : false;
+				break;
+
+			case 'crop':
+				return $this->imgCrop($path, $width, $height, $x, $y, $this->imgLib) ? $this->stat($path) : false;
+				break;
+
+			case 'fitsquare':
+				return $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib) ? $this->stat($path) : false;
+				break;
+			
+			default:
+				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
+				break;				
+    	}
 		
-		return $this->resizeImg($path, $width, $height, $crop, false, $this->imgLib) ? $this->stat($path) : false;
+   		return false;
 	}
 	
 	/**
@@ -2460,8 +2479,32 @@ abstract class elFinderVolumeDriver {
 		
 		$tmbSize = $this->tmbSize;
 		
-		$result = $this->resizeImg($tmb, $tmbSize, $tmbSize, $this->options['tmbCrop'], true, $this->imgLib, $this->options['tmbBgColor'], 'png');
+  		if (($s = @getimagesize($tmb)) == false) {
+			return false;
+		}
+    
+    	/* If image smaller or equal thumbnail size - just fitting to thumbnail square */
+    	if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
+     	   $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
+	    } else {
 
+	    	if ($this->options['tmbCrop']) {
+
+    			$result = true;
+        
+        		/* Resize and crop if image bigger than thumbnail */
+	        	if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
+    				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, $this->imgLib, 'png');
+	        	}
+
+	        	$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, $this->imgLib, 'png');
+
+    		} else {
+        		$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
+        		$result &= $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
+      		}
+
+		}
 		if (!$result) {
 			unlink($tmb);
 			return false;
@@ -2473,26 +2516,55 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Resize image
 	 *
-	 * @param  string   $path       image file
-	 * @param  int      $width      new width
-	 * @param  int      $height     new height
-	 * @param  bool	    $crop       crop image
-	 * @param  bool	    $exactfit   fit into given dimensions exactly
-	 * @param  string   $imgLib     image library
-	 * @param  string   $bgcolor    image background color
-	 * @param  string   $destformat image destination format
+	 * @param  string   $path               image file
+	 * @param  int      $width              new width
+	 * @param  int      $height             new height
+	 * @param  bool	    $keepProportions    crop image
+	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
+	 * @param  string   $imgLib             image library
+	 * @param  string   $destformat         image destination format
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-	protected function resizeImg($path, $width, $height, $crop = false, $exactfit = false, $imgLib = 'imagick', $bgcolor = '#0000ff', $destformat = null) {
-		$this->rmTmb($path);
+  	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $imgLib = 'imagick', $destformat = null ) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
 
-		$result = false;
+    	$result = false;
+    
+    	list($size_w, $size_h) = array($width, $height);
+    
+    	if ($keepProportions == true) {
+           
+      		list($orig_w, $orig_h, $new_w, $new_h) = array($s[0], $s[1], $width, $height);
+        
+      		/* Calculating image scale width and height */
+      		$xscale = $orig_w / $new_w;
+      		$yscale = $orig_h / $new_h;
 
-		list($x, $y, $size_w, $size_h) = $this->getResizeCropDimensions($s[0], $s[1], $width, $height, $crop, $exactfit);
+      		/* Resizing by biggest side */
+
+			if ($resizeByBiggerSide) {
+
+		        if ($orig_w > $orig_h) {
+					$size_h = $orig_h * $width / $orig_w;
+					$size_w = $width;
+        		} else {
+          			$size_w = $orig_w * $height / $orig_h;
+          			$size_h = $height;
+				}
+      
+			} else {
+        		if ($orig_w > $orig_h) {
+          			$size_w = $orig_w * $height / $orig_h;
+          			$size_h = $height;
+		        } else {
+					$size_h = $orig_h * $width / $orig_w;
+					$size_w = $width;
+				}
+			}
+    	}
 
 		switch ($imgLib) {
 			case 'imagick':
@@ -2504,24 +2576,81 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
-
-				if ($crop == false) {
-					$img->resizeImage($size_w, $size_h, NULL, true);
+				$img->resizeImage($size_w, $size_h, Imagick::FILTER_LANCZOS, true);
 					
-					if ($exactfit == true) {
-						$img1 = new Imagick();
-						$img1->newImage($width, $height, new ImagickPixel($bgcolor));
-						$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
-						$img->resizeImage($size_w, $size_h, NULL, true);
-						$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
-						$result = $img1->writeImage($path);
-						return $result ? $path : false;
-					} 
+				$result = $img->writeImage($path);
 
-				} else {
-					$img->cropImage($width, $height, $x, $y);
+				return $result ? $path : false;
+
+				break;
+
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($path);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($path);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($path);
+				} elseif ($s['mime'] == 'image/xbm') {
+					$img = imagecreatefromxbm($path);
 				}
+
+				if ($img &&  false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
+					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
+							return false;
+					}
+		
+					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
+						$result = imagejpeg($tmp, $path, 100);
+					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
+						$result = imagegif($tmp, $path, 7);
+					} else {
+						$result = imagepng($tmp, $path, 7);
+					}
+
+					imagedestroy($img);
+					imagedestroy($tmp);
+
+					return $result ? $path : false;
+
+				}
+				break;
+		}
+		
+		return false;
+  	}
+  
+	/**
+	 * Crop image
+	 *
+	 * @param  string   $path               image file
+	 * @param  int      $width              crop width
+	 * @param  int      $height             crop height
+	 * @param  bool	    $x                  crop left offset
+	 * @param  bool	    $y                  crop top offset
+	 * @param  string   $imgLib             image library
+	 * @param  string   $destformat         image destination format
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+  	protected function imgCrop($path, $width, $height, $x, $y, $imgLib = 'imagick', $destformat = null ) {
+		if (($s = @getimagesize($path)) == false) {
+			return false;
+		}
+
+		$result = false;
+
+		switch ($imgLib) {
+			case 'imagick':
+				
+				try {
+					$img = new imagick($path);
+				} catch (Exception $e) {
+
+					return false;
+				}
+
+				$img->cropImage($width, $height, $x, $y);
 
 				$result = $img->writeImage($path);
 
@@ -2540,40 +2669,10 @@ abstract class elFinderVolumeDriver {
 					$img = imagecreatefromxbm($path);
 				}
 
-				$init_w = $size_w;
-				$init_h = $size_h;
+				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 
-				if ($exactfit == true) {
-					$init_w = $width;
-					$init_h = $height;
-				}
-
-				if ($img &&  false != ($tmp = imagecreatetruecolor($init_w, $init_h))) {
-
-					if ($crop == false) {
-
-						if ($bgcolor == 'transparent') {
-							list($r, $g, $b) = array(0, 0, 255);
-						} else {
-							list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-						}
-
-						$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
-						
-						if ($bgcolor == 'transparent') {
-							$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
-						}
-
-						imagefill($tmp, 0, 0, $bgcolor1);
-
-						if (!imagecopyresampled($tmp, $img, $x, $y, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
-							return false;
-						}
-
-					} else {
-						if (!imagecopy($tmp, $img, 0, 0, $x, $y, $width, $height)) {
-							return false;
-						}
+					if (!imagecopy($tmp, $img, 0, 0, $x, $y, $width, $height)) {
+						return false;
 					}
 					
 					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
@@ -2597,64 +2696,101 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
-	 * Return x/y coord for crop image thumbnail
+	 * Put image to square
 	 *
-	 * @param  int    $w		image original width
-	 * @param  int    $h		image original height	
-	 * @param  int    $new_w	image new width
-	 * @param  int    $new_h	image new height
-	 * @param  bool   $crop		crop image fragment for thumbnail
-	 * @param  bool   $exactfit	fit into given dimensions exactly
-	 * @return array 
+	 * @param  string   $path               image file
+	 * @param  int      $width              square width
+	 * @param  int      $height             square height
+	 * @param  int	    $align              reserved
+	 * @param  int 	    $valign             reserved
+	 * @param  string   $bgcolor            square background color in #rrggbb format
+	 * @param  string   $imgLib             image library
+	 * @param  string   $destformat         image destination format
+	 * @return string|false
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-	protected function getResizeCropDimensions($orig_w, $orig_h, $new_w, $new_h, $crop = true, $exactfit = false) {
-		$x = 0;
-		$y = 0;
-		$calculated_w = 0;
-		$calculated_h = 0;
-		
-		if ($crop == false) {
-
-			/* Calculating image scale width and height */
-			$xscale = $orig_w / $new_w;
-			$yscale = $orig_h / $new_h;
-
-			/* Resizing by biggest side */
-			if ($yscale > $xscale) {
-				$tmp_w = round($orig_w * (1 / $yscale));
-				$tmp_h = round($orig_h * (1 / $yscale));
-			} else {
-				$tmp_w = round($orig_w * (1 / $xscale));
-				$tmp_h = round($orig_h * (1 / $xscale));
-			}
-
-			/* Calculating coordinates for aligning thumbnail */
-			if ($exactfit == true) {
-				$y = ceil(abs($new_h - $tmp_h) / 2); 
-				$x = ceil(abs($new_w - $tmp_w) / 2);
-			}
-
-			$calculated_w = $tmp_w;
-			$calculated_h = $tmp_h;
-		} else {
-
-			$calculated_w = $orig_w;
-			$calculated_h = $orig_h;
-
-			/* calculating coordinates for cropping thumbnail */
-			if ($orig_w > $orig_h) {
-				$x = ceil(($orig_w - $orig_h)/2);
-			} else {
-				$y = ceil(($orig_h - $orig_w)/2);
-			}
-
+  	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $imgLib = 'imagick', $destformat = null ) {
+		if (($s = @getimagesize($path)) == false) {
+			return false;
 		}
 
-		return array($x, $y, $calculated_w, $calculated_h);
-	}
+		$result = false;
 
+		/* Coordinates for image over square aligning */
+		$y = ceil(abs($height - $s[1]) / 2); 
+		$x = ceil(abs($width - $s[0]) / 2);
+    
+		switch ($imgLib) {
+			case 'imagick':
+				
+				try {
+					$img = new imagick($path);
+				} catch (Exception $e) {
 
+					return false;
+				}
+
+				$img1 = new Imagick();
+				$img1->newImage($width, $height, new ImagickPixel($bgcolor));
+				$img1->setImageColorspace($img->getImageColorspace());
+				$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
+				$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
+				$result = $img1->writeImage($path);
+				return $result ? $path : false;
+
+				break;
+
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($path);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($path);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($path);
+				} elseif ($s['mime'] == 'image/xbm') {
+					$img = imagecreatefromxbm($path);
+				}
+
+				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
+
+					if ($bgcolor == 'transparent') {
+						list($r, $g, $b) = array(0, 0, 255);
+					} else {
+						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+					}
+
+					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
+						
+					if ($bgcolor == 'transparent') {
+						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
+					}
+
+					imagefill($tmp, 0, 0, $bgcolor1);
+
+					if (!imagecopy($tmp, $img, $x, $y, 0, 0, $s[0], $s[1])) {
+						return false;
+					}
+					
+					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
+						$result = imagejpeg($tmp, $path, 100);
+					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
+						$result = imagegif($tmp, $path, 7);
+					} else {
+						$result = imagepng($tmp, $path, 7);
+					}
+
+					imagedestroy($img);
+					imagedestroy($tmp);
+
+					return $result ? $path : false;
+
+				}
+				break;
+		}
+
+		return false;  
+  }
+  
 	/**
 	 * Execute shell command
 	 *

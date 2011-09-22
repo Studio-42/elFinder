@@ -585,6 +585,18 @@ window.elFinder = function(node, opts) {
 		return parents;
 	}
 	
+	this.path2array = function(hash) {
+		var file, 
+			path = [];
+			
+		while (hash && (file = files[hash]) && file.hash) {
+			path.unshift(file.name);
+			hash = file.phash;
+		}
+			
+		return path;
+	}
+	
 	/**
 	 * Return file path
 	 * 
@@ -592,10 +604,9 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.path = function(hash) {
-		var file = files[hash];
-		return file.path 
-			? file.path
-			: file ? cwdOptions.path + (file.hash == cwd ? '' : cwdOptions.separator+file.name) : '';
+		return files[hash] && files[hash].path
+			? files[hash].path
+			: this.path2array(hash).join(cwdOptions.separator);
 	}
 	
 	/**
@@ -605,14 +616,25 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.url = function(hash) {
+		
+		if (files[hash] && files[hash].url) {
+			return files[hash].url;
+		}
+		
+		if (cwdOptions.url) {
+			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
+		}
+		
 		var file = files[hash],
 			path = '';
 
 		if (file.url) {
 			return file.url;
 		}
+		
 		if (cwdOptions.url && (path = this.path(hash))) {
 			path = path.split(cwdOptions.separator).join('/');
+			this.log(path)
 			return cwdOptions.url + path.substr(path.indexOf('/')+1);
 		}
 		return '';
@@ -737,6 +759,9 @@ window.elFinder = function(node, opts) {
 				
 				// fire event with command name
 				self.trigger(cmd, data);
+				
+				// force update content
+				data.sync && self.sync();
 			},
 			/**
 			 * Request error handler. Reject dfrd with correct error message.
@@ -1796,6 +1821,7 @@ elFinder.prototype = {
 						data.added   && self.add(data);
 						data.changed && self.change(data);
 						self.trigger('upload', data);
+						data.sync && self.sync();
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
 				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
@@ -1880,6 +1906,7 @@ elFinder.prototype = {
 						data.added   && self.add(data);
 						data.changed && self.change(data);
 	 					self.trigger('upload', data);
+						data.sync && self.sync();
 					})
 					.always(function() {
 						notifyto && clearTimeout(notifyto);

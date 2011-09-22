@@ -236,6 +236,7 @@ $opts = array(
 			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
 			'tmbCrop'    => false,
+			// 'separator' => ':',
 			'attributes' => array(
 				array(
 					'pattern' => '~/\.~',
