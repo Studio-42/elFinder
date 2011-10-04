@@ -97,6 +97,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Наверх',
 			'cmdupload'    : 'Загрузить файлы',
 			'cmdview'      : 'Вид',
+			'cmdresize'    : 'Размер изображения',
+			'cmdsort'      : 'Сортировать',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Закрыть',
@@ -142,6 +144,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Окт',
 			'Nov'         : 'Ноя',
 			'Dec'         : 'Дек',
+
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'по имени (папки в начале)', 
+			'sortkindDirsFirst' : 'по типу (папки в начале)', 
+			'sortsizeDirsFirst' : 'по размеру (папки в начале)', 
+			'sortname'          : 'по имени', 
+			'sortkind'          : 'по типу', 
+			'sortsize'          : 'по размеру',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение.',

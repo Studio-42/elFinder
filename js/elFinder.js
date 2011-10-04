@@ -399,7 +399,8 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type String
 	 **/
-	this.sort = self.sorts[self.options.sort] || 1;
+	// this.sort = self.sorts[this.options.sort] || 1;
+
 
 	/**
 	 * Delay in ms before open notification dialog
@@ -1288,6 +1289,7 @@ window.elFinder = function(node, opts) {
 	}
 	
 	/*************  init stuffs  ****************/
+	this.setSort(this.options.sort)
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
@@ -1773,6 +1775,11 @@ elFinder.prototype = {
 		name : 4,
 		kind : 5,
 		size : 6
+	},
+	
+	setSort : function(type) {
+		this.sort = this.sorts[type] || 1;
+		this.trigger('sortchange');
 	},
 	
 	/**

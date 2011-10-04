@@ -812,7 +812,7 @@ $.fn.elfindercwd = function(fm) {
 			.bind('open search', function(e) {
 				content(e.data.files, e.type=='search');
 			})
-			.searchend(function() {
+			.bind('searchend sortchange', function() {
 				content(fm.files());
 			})
 			.bind('viewchange', function() {

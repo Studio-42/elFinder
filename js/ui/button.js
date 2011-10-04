@@ -14,6 +14,7 @@ $.fn.elfinderbutton = function(cmd) {
 			active   = fm.res(c, 'active'),
 			hover    = fm.res(c, 'hover'),
 			item     = 'elfinder-button-menu-item',
+			selected = 'elfinder-button-menu-item-selcted',
 			menu,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
@@ -22,7 +23,7 @@ $.fn.elfinderbutton = function(cmd) {
 				.click(function(e) { 
 					if (!button.is('.'+disabled)) {
 						button.removeClass(hover);
-						
+
 						if (menu && cmd.variants.length > 1) {
 							// close other menus
 							menu.is(':hidden') && cmd.fm.getUI().click();
@@ -49,6 +50,8 @@ $.fn.elfinderbutton = function(cmd) {
 				.delegate('.'+item, 'hover', function() { $(this).toggleClass(hover) })
 				.delegate('.'+item, 'click', function(e) {
 					e.preventDefault();
+					e.stopPropagation();
+					button.removeClass(hover);
 					cmd.exec(cmd.fm.selected(), $(this).data('value'));
 				});
 
@@ -57,7 +60,7 @@ $.fn.elfinderbutton = function(cmd) {
 			cmd.change(function() {
 				menu.html('');
 				$.each(cmd.variants, function(i, variant) {
-					menu.append($('<div class="'+item+'">'+variant[1]+'</div>').data('value', variant[0]));
+					menu.append($('<div class="'+item+'">'+variant[1]+'</div>').data('value', variant[0]).addClass(variant[0] == cmd.value ? selected : ''));
 				});
 			});
 		}	

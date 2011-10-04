@@ -101,6 +101,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize image',
+			'cmdsort'      : 'Sort',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
@@ -147,6 +148,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Oct',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
+
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'by name (folders first)', 
+			'sortkindDirsFirst' : 'by kind (folders first)', 
+			'sortsizeDirsFirst' : 'by size (folders first)', 
+			'sortname'          : 'by name', 
+			'sortkind'          : 'by kind', 
+			'sortsize'          : 'by size',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
