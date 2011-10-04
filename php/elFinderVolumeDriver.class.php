@@ -1590,7 +1590,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function resize($hash, $width, $height, $x, $y, $mode = 'resize') {
-		if ($this->commandDisabled('archive')) {
+		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1609,9 +1609,6 @@ abstract class elFinderVolumeDriver {
 		}
 
 		switch($mode) {
-			case 'resize':
-				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
-				break;
 
 			case 'propresize':
 				return $this->imgResize($path, $width, $height, true, true, $this->imgLib) ? $this->stat($path) : false;
@@ -1624,7 +1621,12 @@ abstract class elFinderVolumeDriver {
 			case 'fitsquare':
 				return $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib) ? $this->stat($path) : false;
 				break;
+			
+			default:
+				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
+				break;				
     	}
+		
    		return false;
 	}
 	
@@ -2583,8 +2585,7 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
-				$img->resizeImage($size_w, $size_h, NULL, true);
+				$img->resizeImage($size_w, $size_h, Imagick::FILTER_LANCZOS, true);
 					
 				$result = $img->writeImage($path);
 
@@ -2624,7 +2625,7 @@ abstract class elFinderVolumeDriver {
 				}
 				break;
 		}
-
+		
 		return false;
   	}
   
@@ -2658,7 +2659,6 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
 				$img->cropImage($width, $height, $x, $y);
 
 				$result = $img->writeImage($path);
@@ -2739,10 +2739,9 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
-				$img->contrastImage(1);
-
 				$img1 = new Imagick();
 				$img1->newImage($width, $height, new ImagickPixel($bgcolor));
+				$img1->setImageColorspace($img->getImageColorspace());
 				$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
 				$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
 				$result = $img1->writeImage($path);

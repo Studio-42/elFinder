@@ -5,9 +5,7 @@
  * CSS optimizer: https://github.com/afelix/csso
  */
 
-// does anyone know how to overcome this problem?
-require.paths.push('/usr/local/lib/node_modules'); // for common linux install
-require.paths.push('/opt/local/lib/node_modules'); // for Mac OS X macports install
+// if Jake fails to detect need libraries try running before: export NODE_PATH=`npm root`
 
 var sys = require('sys'),
 	fs   = require('fs'),
@@ -29,7 +27,6 @@ var dirmode = 0755,
 				path.join(src, 'js', 'elFinder.history.js'),
 				path.join(src, 'js', 'elFinder.command.js'),
 				path.join(src, 'js', 'elFinder.resources.js'),
-				//path.join(src, 'js', 'elFinder.contextmenu.js'),
 				path.join(src, 'js', 'jquery.dialogelfinder.js'),
 				path.join(src, 'js', 'i18n', 'elfinder.en.js')
 			]
