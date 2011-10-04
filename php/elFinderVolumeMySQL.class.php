@@ -109,7 +109,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			return false;
 		}
 		
-		$this->db = new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db']);
+		$this->db = new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db'], $this->options['port'], $this->options['socket']);
 		if ($this->db->connect_error || @mysqli_connect_error()) {
 			return false;
 		}
@@ -157,6 +157,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 		
 		$this->mimeDetect = 'internal';
+	}
+	
+	/**
+	 * Close connection
+	 *
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function umount() {
+		$this->db->close();
 	}
 	
 	/**

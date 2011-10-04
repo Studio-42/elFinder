@@ -381,6 +381,10 @@ class elFinder {
 			}
 		}
 		
+		foreach ($this->volumes as $volume) {
+			$volume->umount();
+		}
+		
 		return $result;
 	}
 	

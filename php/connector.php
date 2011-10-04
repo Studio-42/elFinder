@@ -283,6 +283,7 @@ $opts = array(
 			'driver' => 'MySQL',
 			'path' => 1,
 			// 'treeDeep' => 2,
+			'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
 			'user' => 'root',
 			'pass' => 'hane',
 			'db' => 'elfinder',

@@ -770,6 +770,15 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Some "unmount" stuffs - may be required by virtual fs
+	 *
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function umount() {
+	}
+	
+	/**
 	 * Return error message from last failed action
 	 *
 	 * @return array
