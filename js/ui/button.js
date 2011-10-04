@@ -21,6 +21,8 @@ $.fn.elfinderbutton = function(cmd) {
 				.hover(function(e) { !button.is('.'+disabled) && button.toggleClass(hover); })
 				.click(function(e) { 
 					if (!button.is('.'+disabled)) {
+						button.removeClass(hover);
+						
 						if (menu && cmd.variants.length > 1) {
 							// close other menus
 							menu.is(':hidden') && cmd.fm.getUI().click();
@@ -29,7 +31,7 @@ $.fn.elfinderbutton = function(cmd) {
 						} else {
 							cmd.exec();
 						}
-
+						
 					}
 				}),
 			hideMenu = function() {
