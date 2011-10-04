@@ -698,7 +698,9 @@ $.fn.elfindercwd = function(fm) {
 				.delegate(fileSelector, 'scrolltoview', function() {
 					scrollToView($(this))
 				})
-				
+				.delegate(fileSelector, 'hover', function(e) {
+					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
+				})
 				.bind('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest('.'+clFile);
 					
@@ -780,7 +782,6 @@ $.fn.elfindercwd = function(fm) {
 			;
 			
 		
-			
 		if (fm.dragUpload) {
 			wrapper[0].addEventListener('dragenter', function(e) {
 				e.preventDefault();
