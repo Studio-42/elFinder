@@ -371,7 +371,7 @@ class elFinder {
 				'connector' => 'php', 
 				'phpver'    => PHP_VERSION,
 				'time'      => $this->utime() - $this->time,
-				'memory'    => ceil(memory_get_peak_usage()/1024).'Kb / '.ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
+				'memory'    => (function_exists('memory_get_peak_usage') ? ceil(memory_get_peak_usage()/1024).'Kb / ' : '').ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
 				'upload'    => $this->uploadDebug,
 				'volumes'   => array()
 				);
