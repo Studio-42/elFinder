@@ -105,6 +105,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize image',
+			'cmdsort'      : 'Sort',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
@@ -150,7 +151,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Oct',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
-
+			
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'by name (folders first)', 
+			'sortkindDirsFirst' : 'by kind (folders first)', 
+			'sortsizeDirsFirst' : 'by size (folders first)', 
+			'sortdateDirsFirst' : 'by date (folders first)', 
+			'sortname'          : 'by name', 
+			'sortkind'          : 'by kind', 
+			'sortsize'          : 'by size',
+			'sortdate'          : 'by date',
+			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
