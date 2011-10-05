@@ -149,9 +149,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortnameDirsFirst' : 'по имени (папки в начале)', 
 			'sortkindDirsFirst' : 'по типу (папки в начале)', 
 			'sortsizeDirsFirst' : 'по размеру (папки в начале)', 
+			'sortdateDirsFirst' : 'по дате (папки в начале)', 
 			'sortname'          : 'по имени', 
 			'sortkind'          : 'по типу', 
 			'sortsize'          : 'по размеру',
+			'sortdate'          : 'по дате',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение.',

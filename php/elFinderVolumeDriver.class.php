@@ -1926,7 +1926,9 @@ abstract class elFinderVolumeDriver {
 		} else {
 			$file['mime']  = $dir ? 'directory' : $this->mimetype($path);
 			// $file['size'] = $dir ? 0 : $this->_filesize($path);
-			$file['date'] = $this->formatDate($this->_filemtime($path));
+			$ts = $this->_filemtime($path);
+			$file['date'] = $this->formatDate($ts);
+			$file['ts'] = $ts;
 			$file['read']  = (int)$this->attr($path, 'read');
 			$file['write'] = (int)$this->attr($path, 'write');
 			if (!$file['read']) {

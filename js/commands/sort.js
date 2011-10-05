@@ -7,7 +7,7 @@
  **/
 elFinder.prototype.commands.sort = function() {
 	var self = this,
-		sorts = ['nameDirsFirst', 'kindDirsFirst', 'sizeDirsFirst', 'name', 'kind', 'size'], i;
+		sorts = ['nameDirsFirst', 'kindDirsFirst', 'sizeDirsFirst', 'dateDirsFirst', 'name', 'kind', 'size', 'date'], i;
 	
 	this.value = 1;
 	this.variants = [];

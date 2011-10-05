@@ -272,6 +272,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			'name'      => $data['name'],
 			'mime'      => $mime,
 			'size'      => $data['size'],
+			'ts'        => $data['mtime'],
 			'date'      => $this->formatDate($data['mtime'])
 		);
 		

@@ -1772,9 +1772,11 @@ elFinder.prototype = {
 		nameDirsFirst : 1,
 		kindDirsFirst : 2,
 		sizeDirsFirst : 3,
-		name : 4,
-		kind : 5,
-		size : 6
+		dateDirsFirst : 4,
+		name : 5,
+		kind : 6,
+		size : 7,
+		date : 8
 	},
 	
 	setSort : function(type) {
@@ -2173,18 +2175,20 @@ elFinder.prototype = {
 	 * @return Number
 	 */
 	compare : function(f1, f2) {
-		var m1 = f1.mime,
-			m2 = f2.mime,
-			d1 = m1 == 'directory',
-			d2 = m2 == 'directory',
+		var m1 = this.mime2kind(f1.mime).toLowerCase(),
+			m2 = this.mime2kind(f2.mime).toLowerCase(),
+			d1 = f1.mime == 'directory',
+			d2 = f2.mime == 'directory',
 			n1 = f1.name.toLowerCase(),
 			n2 = f2.name.toLowerCase(),
 			s1 = d1 ? 0 : f1.size || 0,
 			s2 = d2 ? 0 : f2.size || 0,
+			t1 = f1.ts || f1.date || '',
+			t2 = f2.ts || f2.date || '',
 			sort = this.sort;
 
 		// dir first	
-		if (sort <= 3) {
+		if (sort <= 4) {
 			if (d1 && !d2) {
 				return -1;
 			}
@@ -2193,14 +2197,19 @@ elFinder.prototype = {
 			}
 		}
 		// by mime
-		if ((sort == 2 || sort == 5) && m1 != m2) {
-			return m1 > m2 ? 1 : -1;
+		if ((sort == 2 || sort == 6) && m1 != m2) {
+			return m1.localeCompare(m2);// ? 1 : -1;
+			// return m1 > m2 ? 1 : -1;
 		}
 		// by size
-		if ((sort == 3 || sort == 6) && s1 != s2) {
+		if ((sort == 3 || sort == 7) && s1 != s2) {
 			return s1 > s2 ? 1 : -1;
 		}
 
+		// by date
+		if ((sort == 4 || sort == 8) && t1 != t2) {
+			return t1 > t2 ? 1 : -1;
+		}
 		return f1.name.localeCompare(f2.name);
 		
 	},

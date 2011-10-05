@@ -207,9 +207,11 @@ elFinder.prototype._options = {
 	 *  - sort : 'nameDirsFirst' - sort by name, directory first
 	 *  - sort : 'kindDirsFirst' - sort by kind, name, directory first
 	 *  - sort : 'sizeDirsFirst' - sort by size, name, directory first
+	 *  - sort : 'dateDirsFirst' - sort by date, name, directory first
 	 *  - sort : 'name' - sort by name
 	 *  - sort : 'kind' - sort by kind, name
 	 *  - sort : 'size' - sort by size, name
+	 *  - sort : 'date' - sort by date, name
 	 */
 	sort : 'nameDirsFirst',
 	

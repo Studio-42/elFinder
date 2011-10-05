@@ -153,9 +153,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortnameDirsFirst' : 'by name (folders first)', 
 			'sortkindDirsFirst' : 'by kind (folders first)', 
 			'sortsizeDirsFirst' : 'by size (folders first)', 
+			'sortdateDirsFirst' : 'by date (folders first)', 
 			'sortname'          : 'by name', 
 			'sortkind'          : 'by kind', 
 			'sortsize'          : 'by size',
+			'sortdate'          : 'by date',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
