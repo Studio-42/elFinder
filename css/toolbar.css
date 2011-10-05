@@ -135,7 +135,9 @@
 /* fix hover ui class */
 .elfinder-button-menu .ui-state-hover { border:0 solid; }
 
-.elfinder-button-menu-item-selcted { background:#aaa; }
+.elfinder-button-menu-item-selected { 
+	background:url('../img/selected.png') 1px center no-repeat;
+}
 
 /* hack for upload button */
 .elfinder-button form {

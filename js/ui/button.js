@@ -14,7 +14,7 @@ $.fn.elfinderbutton = function(cmd) {
 			active   = fm.res(c, 'active'),
 			hover    = fm.res(c, 'hover'),
 			item     = 'elfinder-button-menu-item',
-			selected = 'elfinder-button-menu-item-selcted',
+			selected = 'elfinder-button-menu-item-selected',
 			menu,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
