@@ -95,6 +95,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Remonter au dossier parent',
 			'cmdupload'    : 'Envoyer les fichiers',
 			'cmdview'      : 'Vue',
+			'cmdresize'    : 'Resize image',
+			'cmdsort'      : 'Sort',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Fermer',
@@ -139,6 +141,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Oct',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Déc',
+
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'by name (folders first)', 
+			'sortkindDirsFirst' : 'by kind (folders first)', 
+			'sortsizeDirsFirst' : 'by size (folders first)', 
+			'sortdateDirsFirst' : 'by date (folders first)', 
+			'sortname'          : 'by name', 
+			'sortkind'          : 'by kind', 
+			'sortsize'          : 'by size',
+			'sortdate'          : 'by date',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
