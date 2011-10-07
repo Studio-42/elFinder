@@ -1,7 +1,7 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2011-08-11
+ * @version 2011-10-07
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
@@ -68,6 +68,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'De map "$1" kan niet vervangen worden door een item uit die map.',
 			'errArcSymlinks'       : 'Om veiligheidsredenen kan een bestand met symlinks niet worden uitgepakt .',
 			'errArcMaxSize'        : 'Archief overschrijdt de maximale bestandsgrootte.',
+			'errResize'            : 'Kan het formaat van "$1" niet wijzigen.',
+    			'errUsupportType'      : 'Bestandstype wordt niet ondersteund.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
@@ -95,11 +97,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ga een map hoger',
 			'cmdupload'    : 'Upload bestanden',
 			'cmdview'      : 'Bekijk',
+			'cmdresize'    : 'Formaat wijzigen',
+			'cmdsort'      : 'Sorteren',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Sluit',
 			'btnSave'   : 'Opslaan',
 			'btnRm'     : 'Verwijder',
+			'btnApply'  : 'Toepassen',
 			'btnCancel' : 'Annuleren',
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
@@ -139,6 +144,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Okt',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
+			
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'op naam (mappen eerst)', 
+			'sortkindDirsFirst' : 'op type (mappen eerst)', 
+			'sortsizeDirsFirst' : 'op grootte (mappen eerst)', 
+			'sortdateDirsFirst' : 'op datum (mappen eerst)', 
+			'sortname'          : 'op naam', 
+			'sortkind'          : 'op type', 
+			'sortsize'          : 'op grootte',
+			'sortdate'          : 'op datum',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Bevestiging nodig',
@@ -203,6 +218,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Verwijder uit Plaatsen',
 			'untitled folder' : 'Nieuwe map',
 			'untitled file.txt' : 'nieuw bestand.txt',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Schaal',
+			'width'           : 'Breedte',
+			'height'          : 'Hoogte',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',
