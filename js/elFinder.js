@@ -1842,7 +1842,7 @@ elFinder.prototype = {
 						data.sync && self.sync();
 					}),
 				name = 'iframe-'+this.namespace+(++this.iframeCnt),
-				form = $('<form action="'+this.options.url+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
+				form = $('<form action="'+this.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
 				msie = $.browser.msie,
 				// clear timeouts, close notification dialog, remove form/iframe
 				onload = function() {
@@ -2001,7 +2001,7 @@ elFinder.prototype = {
 			}, false);
 			
 			
-			xhr.open('POST', this.options.url, true);
+			xhr.open('POST', this.uploadURL, true);
 			formData.append('cmd', 'upload');
 			formData.append(this.newAPI ? 'target' : 'current', this.cwd().hash);
 			$.each(this.options.customData, function(key, val) {
