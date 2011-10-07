@@ -5,9 +5,8 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfinderbutton = function(cmd) {
+$.fn.elfindersortbutton = function(cmd) {
 	return this.each(function() {
-		
 		var c        = 'class',
 			fm       = cmd.fm,
 			disabled = fm.res(c, 'disabled'),
@@ -58,7 +57,7 @@ $.fn.elfinderbutton = function(cmd) {
 			cmd.change(function() {
 				menu.html('');
 				$.each(cmd.variants, function(i, variant) {
-					menu.append($('<div class="'+item+'">'+variant[1]+'</div>').data('value', variant[0]).addClass(variant[0] == cmd.value ? selected : ''));
+					menu.append($('<div class="'+item+' '+(variant[0] == cmd.value ? selected : '')+' elfinder-menu-item-sort-'+cmd.fm.sortDirect+'"><span class="elfinder-menu-item-sort-dir"/>'+variant[1]+'</div>').data('value', variant[0]));
 				});
 			});
 		}	

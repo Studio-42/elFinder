@@ -9,6 +9,13 @@ elFinder.prototype.commands.sort = function() {
 	var self = this,
 		sorts = ['nameDirsFirst', 'kindDirsFirst', 'sizeDirsFirst', 'dateDirsFirst', 'name', 'kind', 'size', 'date'], i;
 	
+	/**
+	 * Command options
+	 *
+	 * @type  Object
+	 */
+	this.options = {ui : 'sortbutton'};
+	
 	this.value = 1;
 	this.variants = [];
 	
@@ -28,7 +35,9 @@ elFinder.prototype.commands.sort = function() {
 	}
 	
 	this.exec = function(hashes, type) {
-		this.fm.setSort(type);
+		var dir = $.inArray(type, sorts)+1 == this.fm.sort ? (this.fm.sortDirect == 'asc' ? 'desc' : 'asc') : this.fm.sortDirect;
+
+		this.fm.setSort(type, dir);
 	}
 
 }

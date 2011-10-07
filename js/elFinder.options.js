@@ -47,6 +47,15 @@ elFinder.prototype._options = {
 	transport : {},
 
 	/**
+	 * URL to upload file to.
+	 * If not set - connector URL will be used
+	 *
+	 * @type String
+	 * @default  ''
+	 */
+	urlUpload : '',
+
+	/**
 	 * Allow to drag and drop to upload files
 	 *
 	 * @type Boolean|String
@@ -214,6 +223,17 @@ elFinder.prototype._options = {
 	 *  - sort : 'date' - sort by date, name
 	 */
 	sort : 'nameDirsFirst',
+	
+	/**
+	 * Sort files direction.
+	 *
+	 * @type String
+	 * @default  "asc"
+	 * @example
+	 *   - sort : 'asc'  // ascent sorting
+	 *   - sort : 'desc' // descent sorting
+	 */
+	sortDirect : 'asc',
 	
 	/**
 	 * elFinder width

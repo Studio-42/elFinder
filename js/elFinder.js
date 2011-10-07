@@ -344,6 +344,13 @@ window.elFinder = function(node, opts) {
 	this.id = id;
 	
 	/**
+	 * URL to upload files
+	 *
+	 * @type String
+	 **/
+	this.uploadURL = opts.urlUpload || opts.url;
+	
+	/**
 	 * Events namespace
 	 *
 	 * @type String
@@ -1289,7 +1296,8 @@ window.elFinder = function(node, opts) {
 	}
 	
 	/*************  init stuffs  ****************/
-	this.setSort(this.options.sort)
+	// set sort variant
+	this.setSort(this.options.sort, this.options.sortDirect);
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
@@ -1779,8 +1787,9 @@ elFinder.prototype = {
 		date : 8
 	},
 	
-	setSort : function(type) {
+	setSort : function(type, dir) {
 		this.sort = this.sorts[type] || 1;
+		this.sortDirect = dir == 'asc' || dir == 'desc' ? dir : 'asc';
 		this.trigger('sortchange');
 	},
 	
@@ -2053,9 +2062,8 @@ elFinder.prototype = {
 		var s = window.localStorage;
 		
 		key = 'elfinder-'+key+this.id;
-		
 		val !== void(0) && s.setItem(key, val);
-		// s.clear();
+
 		return s.getItem(key)||'';
 	},
 	
@@ -2174,18 +2182,23 @@ elFinder.prototype = {
 	 * @param  Object  file
 	 * @return Number
 	 */
-	compare : function(f1, f2) {
-		var m1 = this.mime2kind(f1.mime).toLowerCase(),
-			m2 = this.mime2kind(f2.mime).toLowerCase(),
-			d1 = f1.mime == 'directory',
-			d2 = f2.mime == 'directory',
-			n1 = f1.name.toLowerCase(),
-			n2 = f2.name.toLowerCase(),
-			s1 = d1 ? 0 : f1.size || 0,
-			s2 = d2 ? 0 : f2.size || 0,
-			t1 = f1.ts || f1.date || '',
-			t2 = f2.ts || f2.date || '',
-			sort = this.sort;
+	compare : function(file1, file2) {
+		var sort = this.sort, 
+			asc  = this.sortDirect == 'asc',
+			f1   = asc ? file1 : file2,
+			f2   = asc ? file2 : file1,
+			m1   = this.mime2kind(f1.mime).toLowerCase(),
+			m2   = this.mime2kind(f2.mime).toLowerCase(),
+			d1   = file1.mime == 'directory',
+			d2   = file2.mime == 'directory',
+			n1   = f1.name.toLowerCase(),
+			n2   = f2.name.toLowerCase(),
+			s1   = d1 ? 0 : f1.size || 0,
+			s2   = d2 ? 0 : f2.size || 0,
+			t1   = f1.ts || f1.date || '',
+			t2   = f2.ts || f2.date || '';
+
+		// this.log(this.sortDirect)
 
 		// dir first	
 		if (sort <= 4) {
