@@ -19,7 +19,7 @@ $.fn.elfinderbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
-				.hover(function(e) { !button.is('.'+disabled) && button.toggleClass(hover); })
+				.hover(function(e) { !button.is('.'+disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
 				.click(function(e) { 
 					if (!button.is('.'+disabled)) {
 						if (menu && cmd.variants.length > 1) {
