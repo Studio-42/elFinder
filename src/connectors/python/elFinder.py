@@ -42,7 +42,10 @@ class connector():
 		},
 		'perms': {},
 		'archiveMimes': {},
-		'archivers': {},
+		'archivers': {
+			'create': {},
+			'extract': {}
+		},
 		'disabled': [],
 		'debug': False
 	}
@@ -191,7 +194,7 @@ class connector():
 				self._response['params'] = {
 					'dotFiles': self._options['dotFiles'],
 					'uplMaxSize': str(self._options['uploadMaxSize']) + 'M',
-					'archives': self._options['archiveMimes'],
+					'archives': self._options['archivers']['create'].keys(),
 					'extract': self._options['archivers']['extract'].keys(),
 					'url': url
 				}
@@ -1370,8 +1373,11 @@ class connector():
 		# out, err = sp.communicate()
 		# print 'out:', out, '\nerr:', err, '\n'
 		archive = { 'create': {}, 'extract': {} }
-		c = archive['create']
-		e = archive['extract']
+
+		if 'archive' in self._options['disabled'] and 'extract' in self._options['disabled']:
+			self._options['archiveMimes'] = []
+			self._options['archivers'] = archive
+			return
 
 		tar = self.__runSubProcess(['tar', '--version'])
 		gzip = self.__runSubProcess(['gzip', '--version'])
@@ -1387,6 +1393,9 @@ class connector():
 		# tar = False
 		# tar = gzip = bzip2 = zipc = unzip = rar = unrar = False
 		# print tar, gzip, bzip2, zipc, unzip, rar, unrar, p7z, p7za, p7zr
+
+		c = archive['create']
+		e = archive['extract']
 
 		if tar:
 			mime = 'application/x-tar'
