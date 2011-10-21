@@ -11,6 +11,7 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -315,23 +316,19 @@ $opts = array(
 
 $opts = array(
 	
-	'locale' => 'en_US.UTF-8',
-	
-	'bind' => array(
-		'mkdir mkfile rename duplicate upload rm paste' => array($logger, 'log'), 
-	),
-	
 	'debug' => true,
 	
 	'roots' => array(
+	
 		array(
+			'alias'      	=> 'FTP File system',
 			'driver' 		=> 'FTP',
 			'host'          => 'localhost',
 			'user'          => 'cem',
 			'pass'          => 'cacapipi',
 			'port'          => 21,
 			'mode'        	=> 'passive',
-			'path'			=> '/',
+			'path'			=> 1,
 			'timeout'		=> 10,
 		)
 	)
