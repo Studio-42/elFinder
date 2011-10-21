@@ -284,7 +284,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fileExists($path) {
-		return false;
+		return true;
+		die('Not yet implemented. (_fileExists)');
 		return file_exists($path);
 	}
 	
@@ -297,6 +298,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _isDir($path) {
 		return true;
+		die('Not yet implemented. (_isDir)' . $path);
 		return is_dir($path);
 	}
 	
@@ -308,7 +310,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isFile($path) {
-		return false;
+		die('Not yet implemented. (_isFile)');
 		return is_file($path);
 	}
 	
@@ -321,6 +323,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _isLink($path) {
 		return false;
+		die('Not yet implemented. (_isLink)');
 		return is_link($path);
 	}
 	
@@ -335,6 +338,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _isReadable($path) {
 		return true;
+		die('Not yet implemented. (_isReadable)');
 		return is_readable($path);
 	}
 	
@@ -347,6 +351,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _isWritable($path) {
 		return true;
+		die('Not yet implemented. (_isWritable)');
 		return is_writable($path);
 	}
 	
@@ -359,6 +364,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _isLocked($path) {
 		return false;
+		die('Not yet implemented. (_isLocked)');
+		return false;
 	}
 	
 	/**
@@ -369,6 +376,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _isHidden($path) {
+		return false;
+		die('Not yet implemented. (_isHidden)');
 		return false;
 	}
 	
@@ -382,6 +391,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _filesize($path) {
 		return 1;
+		die('Not yet implemented. (_filesize)');
 		return @filesize($path);
 	}
 	
@@ -393,7 +403,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) {
-		return 1;
+		return date();
+		die('Not yet implemented. (_filemime)');
 		return @filemtime($path);
 	}
 	
@@ -405,6 +416,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
+		return false;
+		die('Not yet implemented. (_subdirs)');
 		return false;
 	}
 	
@@ -418,6 +431,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) {
+		die('Not yet implemented. (_dimensions)');
 		return false;
 	}
 	
@@ -429,6 +443,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _lstat($path) {
+		die('Not yet implemented. (_lstat)');
 		return lstat($path);
 	}
 	
@@ -442,7 +457,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _readlink($path) {
-		die('there');
+		die('Not yet implemented. (_readlink)');
 		if (!($target = @readlink($path))) {
 			return false;
 		}
@@ -476,11 +491,19 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	protected function _scandir($path) {
-		if ( !is_ressource($this->ftp_conn))
+		
+		if (!($this->ftp_conn))
 		{
 			return false;
 		}
-		return @ftp_nlist($this->ftp_conn, $path);
+		$scandir = ftp_nlist($this->ftp_conn, $path);
+		$files = array();
+		foreach ($scandir as $name) {
+			if ($name != '' && $name != '.' && $name != '..') {
+				$files[] = $path.DIRECTORY_SEPARATOR.$name;
+			}
+		}
+		return $files;
 	}
 		
 	/**
@@ -492,7 +515,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		die('Not yet implemented.');
+		die('Not yet implemented. (_fopen)');
 		return @fopen($path, $mode);
 	}
 	
@@ -521,7 +544,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _mkdir($path, $name) {
 		$path = $path.DIRECTORY_SEPARATOR.$name;
 		
-		if ($path == '' || (!is_ressource($this->ftp_conn)))
+		if ($path == '' || (!($this->ftp_conn)))
 		{
 			return false;
 		}
@@ -618,7 +641,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		if ($path == '' || (!is_ressource($this->ftp_conn)))
+		if ($path == '' || (!($this->ftp_conn)))
 		{
 			return false;
 		}
@@ -738,7 +761,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		if (is_link($path)) {
 			return true;
 		}
-		
 		if (is_dir($path)) {
 			foreach (scandir($path) as $name) {
 				if ($name != '.' && $name != '..') {

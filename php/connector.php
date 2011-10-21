@@ -328,7 +328,7 @@ $opts = array(
 			'pass'          => 'cacapipi',
 			'port'          => 21,
 			'mode'        	=> 'passive',
-			'path'			=> 1,
+			'path'			=> '/',
 			'timeout'		=> 10,
 		)
 	)
