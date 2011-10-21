@@ -3,7 +3,7 @@ error_reporting(E_ALL); // Set E_ALL for debuging
 
 
 if (function_exists('date_default_timezone_set')) {
-	date_default_timezone_set('Europe/Moscow');
+	date_default_timezone_set('Europe/Zurich');
 }
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php';
@@ -313,12 +313,36 @@ $opts = array(
 	
 );
 
-
+$opts = array(
+	
+	'locale' => 'en_US.UTF-8',
+	
+	'bind' => array(
+		'mkdir mkfile rename duplicate upload rm paste' => array($logger, 'log'), 
+	),
+	
+	'debug' => true,
+	
+	'roots' => array(
+		array(
+			'driver' 		=> 'FTP',
+			'host'          => 'localhost',
+			'user'          => 'cem',
+			'pass'          => 'cacapipi',
+			'port'          => 21,
+			'mode'        	=> 'passive',
+			'path'			=> '/',
+			'timeout'		=> 10,
+		)
+	)
+);
 
 // sleep(3);
 header('Access-Control-Allow-Origin: *');
 $connector = new elFinderConnector(new elFinder($opts), true);
 $connector->run();
 
-// echo '<pre>';
-// print_r($connector);
+echo '<pre>';
+print_r($connector);
+echo '</pre>';
+

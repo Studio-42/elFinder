@@ -143,16 +143,16 @@
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
-				// getFileCallback : function(files, fm) {
-				// 	console.log(files);
-				// },
+				getFileCallback : function(files, fm) {
+					console.log(files);
+				},
 				handlers : {
 					load : function(e, fm) {
 						// fm.error('All your base belongs to us >_<')
 					}
 				},
 				// onlyMimes : ['image', 'text/plain']
-				lang : 'ru',
+				lang : 'en',
 				// ui : ['tree', 'toolbar'],
 				// commands : [],
 				// commandsOptions : {
@@ -209,7 +209,7 @@
 						}
 					}
 				}).dialogelfinder('instance')
-				// console.log(fm)
+				 console.log(fm)
 			})
 			
 		})
