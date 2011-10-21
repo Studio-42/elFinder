@@ -217,6 +217,7 @@ elFinder.prototype.commands.resize = function() {
 							data : {
 								cmd    : 'resize',
 								target : file.hash,
+								current: file.phash,
 								width  : w,
 								height : h,
 								crop   : resize ? 0 : 1
