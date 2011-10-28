@@ -3,7 +3,7 @@ error_reporting(E_ALL); // Set E_ALL for debuging
 
 
 if (function_exists('date_default_timezone_set')) {
-	date_default_timezone_set('Europe/Zurich');
+	date_default_timezone_set('Europe/Moscow');
 }
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php';
@@ -11,7 +11,6 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -237,6 +236,7 @@ $opts = array(
 			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
 			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
 			// 'separator' => ':',
 			'attributes' => array(
 				array(
@@ -314,32 +314,12 @@ $opts = array(
 	
 );
 
-$opts = array(
-	
-	'debug' => true,
-	
-	'roots' => array(
-	
-		array(
-			'alias'      	=> 'FTP File system',
-			'driver' 		=> 'FTP',
-			'host'          => 'localhost',
-			'user'          => 'cem',
-			'pass'          => 'cacapipi',
-			'port'          => 21,
-			'mode'        	=> 'passive',
-			'path'			=> '/',
-			'timeout'		=> 10,
-		)
-	)
-);
+
 
 // sleep(3);
 header('Access-Control-Allow-Origin: *');
 $connector = new elFinderConnector(new elFinder($opts), true);
 $connector->run();
 
-echo '<pre>';
-print_r($connector);
-echo '</pre>';
-
+// echo '<pre>';
+// print_r($connector);
