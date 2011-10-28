@@ -138,7 +138,9 @@ elFinder.prototype._options = {
 		quicklook : {
 			autoplay : true,
 			jplayer  : 'extensions/jplayer'
-		}
+		},
+		
+		help : {view : ['about', 'shortcuts', 'help']}
 	},
 	
 	/**

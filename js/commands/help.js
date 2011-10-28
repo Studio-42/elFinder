@@ -6,46 +6,27 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.help = function() {
-	var fm = this.fm,
-		content;
-	
-	this.alwaysEnabled  = true;
-	this.updateOnSelect = false;
-	this.state = 0;
-	
-	this.shortcuts = [{
-		pattern     : 'f1',
-		description : this.title
-	}];
-	
-	this.fm.one('open', function() {
-		setTimeout(function() {
-			var linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
-				atpl    = '<div class="elfinder-help-team"><div>{author}</div>{work}</div>',
-				url     = /\{url\}/,
-				link    = /\{link\}/,
-				author  = /\{author\}/,
-				work    = /\{work\}/,
-				r       = 'replace',
-				prim    = 'ui-priority-primary',
-				sec     = 'ui-priority-secondary',
-				lic     = 'elfinder-help-license',
-				tab     = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
-				html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
-						'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
-				stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
-				sep     = '<div class="elfinder-help-separator"/>',
-				shortcuts = fm.shortcuts()
-				;
-
-			$.each({main : 'about', shortcuts : 'shortcuts', help : 'help'}, function(id, title) {
-				html.push(tab[r](/\{id\}/, id)[r](/\{title\}/, fm.i18n(title)));
-			});
-
-			html.push('</ul>');
-			
-			// main tab
-			html.push('<div id="main" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
+	var fm   = this.fm,
+		self = this,
+		linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
+		atpl    = '<div class="elfinder-help-team"><div>{author}</div>{work}</div>',
+		url     = /\{url\}/,
+		link    = /\{link\}/,
+		author  = /\{author\}/,
+		work    = /\{work\}/,
+		r       = 'replace',
+		prim    = 'ui-priority-primary',
+		sec     = 'ui-priority-secondary',
+		lic     = 'elfinder-help-license',
+		tab     = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
+		html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
+				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
+		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
+		sep     = '<div class="elfinder-help-separator"/>',
+		
+		
+		about = function() {
+			html.push('<div id="about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
 			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocol')+': '+fm.api+'</div>');
@@ -57,7 +38,6 @@ elFinder.prototype.commands.help = function() {
 			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
 			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
 			html.push(linktpl[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
-			//html.push(linktpl[r](url, 'http://facebook.com/')[r](link, fm.i18n('facebook')));
 			
 			html.push(sep);
 			
@@ -77,17 +57,18 @@ elFinder.prototype.commands.help = function() {
 			html.push('<div class="'+lic+'">Copyright © 2009-2011, Studio 42</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
-			// end main
-			
+		},
+		shortcuts = function() {
+			var sh = fm.shortcuts();
 			// shortcuts tab
 			html.push('<div id="shortcuts" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
 			
-			if (shortcuts.length) {
+			if (sh.length) {
 				html.push('<div class="ui-widget-content elfinder-help-shortcuts">');
-				$.each(shortcuts, function(i, s) {
+				$.each(sh, function(i, s) {
 					html.push(stpl.replace(/\{pattern\}/, s[0]).replace(/\{descrip\}/, s[1]));
 				});
-
+			
 				html.push('</div>');
 			} else {
 				html.push('<div class="elfinder-help-disabled">'+fm.i18n('shortcutsof')+'</div>')
@@ -95,15 +76,41 @@ elFinder.prototype.commands.help = function() {
 			
 			
 			html.push('</div>')
-			//end shortcuts
 			
+		},
+		help = function() {
 			// help tab
 			html.push('<div id="help" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
 			html.push('<a href="http://elrte.org/redmine/projects/elfinder/boards" target="_blank" class="elfinder-dont-panic"><span>DON\'T PANIC</span></a>');
-			html.push('</div>')
+			html.push('</div>');
 			// end help
+		},
+		content;
+	
+	this.alwaysEnabled  = true;
+	this.updateOnSelect = false;
+	this.state = 0;
+	
+	this.shortcuts = [{
+		pattern     : 'f1',
+		description : this.title
+	}];
+	
+	this.fm.one('open', function() {
+		setTimeout(function() {
+			var parts = self.options.view || ['about', 'shortcuts', 'help'];
 			
-			html.push('</div>')
+			$.each(parts, function(i, title) {
+				html.push(tab[r](/\{id\}/, title)[r](/\{title\}/, fm.i18n(title)));
+			});
+			
+			html.push('</ul>');
+
+			$.inArray('about', parts) !== -1 && about();
+			$.inArray('shortcuts', parts) !== -1 && shortcuts();
+			$.inArray('help', parts) !== -1 && help();
+			
+			html.push('</div>');
 			content = $(html.join(''));
 			
 			content.find('.ui-tabs-nav li')
