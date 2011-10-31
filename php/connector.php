@@ -229,6 +229,8 @@ function validName($name) {
 
 $logger = new elFinderSimpleLogger('../files/temp/log.txt');
 
+// debug(scandir('ftp://frontrow:frontrow@192.168.1.35/'));
+
 $opts = array(
 	'locale' => 'en_US.UTF-8',
 	'bind' => array(
@@ -272,10 +274,18 @@ $opts = array(
 		
 		array(
 			'driver' => 'FTP',
+			'host' => '192.168.1.37',
 			'user' => 'dio',
 			'pass' => 'hane',
-			'path' => 'Users/dio/'
-		)
+			'path' => '/Users/dio/'
+		),
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => '192.168.1.35',
+		// 	'user' => 'frontrow',
+		// 	'pass' => 'frontrow',
+		// 	'path' => '/'
+		// )
 		
 		// array(
 		// 	'driver'     => 'LocalFileSystem',

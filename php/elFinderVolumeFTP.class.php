@@ -47,6 +47,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $ftpError = '';
 	
 	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $separator = '';
+	
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -89,18 +96,22 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			return false;
 		}
 		
+		$this->separator = $this->options['separator'] ? $this->options['separator'] : DIRECTORY_SEPARATOR;
+		
 		// make path absolute and normalize
 		$this->options['path'] = $this->_normpath($this->options['path']);
 
 		$this->aroot = $this->options['path'];
 
-		if ($this->aroot == DIRECTORY_SEPARATOR && empty($this->options['alias'])) {
+		if ($this->aroot == $this->separator && empty($this->options['alias'])) {
 			$this->options['alias'] = 'FTP home folder';
 		}
 
 
 		// echo filemtime($this->ftpurl($this->aroot));
-		// debug(stat($this->ftpurl($this->aroot)));
+		// $stat = stat($this->ftpurl($this->aroot));
+		// 
+		// echo sprintf("0%o", 0777 & $stat['mode']);
 		return is_dir($this->ftpurl($this->aroot));
 
 	}
@@ -183,7 +194,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$path = '.';
 		}
 
-		$path = preg_replace('|^\.'.preg_quote(DIRECTORY_SEPARATOR).'?|', '/', $path);
+		$path = preg_replace('|^\.'.preg_quote($this->separator).'?|', '/', $path);
 		$path = preg_replace('/^([^\/])/', "/$1", $path);
 
 		if (strpos($path, '/') === 0) {
@@ -243,7 +254,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _abspath($path) {
-		return $path == DIRECTORY_SEPARATOR ? $this->root : $this->root.DIRECTORY_SEPARATOR.$path;
+		return $path == $this->separator ? $this->root : $this->root.$this->separator.$path;
 	}
 	
 	/**
@@ -266,7 +277,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($path, $parent.DIRECTORY_SEPARATOR) === 0;
+		return $path == $parent || strpos($path, $parent.$this->separator) === 0;
 	}
 	
 	/*********************** check type *************************/
@@ -394,6 +405,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
+		$url = $this->ftpurl($path);
+		if (is_readable($url) && ($ls = @scandir($url)) && is_array($ls)) {
+			foreach ($ls as $name) {
+				if ($name != '.' && $name != '..' && is_dir($path.$this->separator.$name)) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 	
@@ -470,8 +489,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$files = array();
 		
 		foreach (scandir($path) as $name) {
+			// echo $name.'<br>';
 			if ($name != '.' && $name != '..') {
-				$files[] = $path.DIRECTORY_SEPARATOR.$name;
+				$files[] = $path.$this->separator.$name;
 			}
 		}
 		return $files;
