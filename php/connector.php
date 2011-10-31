@@ -11,12 +11,23 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 
 function debug($o) {
 	echo '<pre>';
 	print_r($o);
 }
 
+// $ftp_conn = ftp_connect('192.168.1.37');
+// $login_result = ftp_login($ftp_conn, 'dio', 'hane');
+// 
+// debug(ftp_rawlist($ftp_conn, '/Users/dio'));
+
+// $fp = fopen('ftp://dio:hane@192.168.1.37/Users/dio', );
+
+// $r = scandir('ftp://dio:hane@192.168.1.37/.');
+// debug($r);
+// echo intval($r);
 
 /**
  * Simple logger function.
@@ -227,89 +238,96 @@ $opts = array(
 	
 	'roots' => array(
 		
-		array(
-			'driver'     => 'LocalFileSystem',
-			'path'       => '../files/',
-			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
-			'alias'      => 'File system',
-			'mimeDetect' => 'internal',
-			'tmbPath'    => '.tmb',
-			'utf8fix'    => true,
-			'tmbCrop'    => false,
-			'startPath'  => '../files/test',
-			// 'separator' => ':',
-			'attributes' => array(
-				array(
-					'pattern' => '~/\.~',
-					// 'pattern' => '/^\/\./',
-					'read' => false,
-					'write' => false,
-					'hidden' => true,
-					'locked' => false
-				),
-				array(
-					'pattern' => '~/replace/.+png$~',
-					// 'pattern' => '/^\/\./',
-					// 'read' => false,
-					// 'write' => false,
-					// 'hidden' => true,
-					// 'locked' => true
-				)
-			),
-			// 'defaults' => array('read' => false, 'write' => true)
-		),
+		// array(
+		// 	'driver'     => 'LocalFileSystem',
+		// 	'path'       => '../files/',
+		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+		// 	'alias'      => 'File system',
+		// 	'mimeDetect' => 'internal',
+		// 	'tmbPath'    => '.tmb',
+		// 	'utf8fix'    => true,
+		// 	'tmbCrop'    => false,
+		// 	'startPath'  => '../files/test',
+		// 	// 'separator' => ':',
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '~/\.~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			'read' => false,
+		// 			'write' => false,
+		// 			'hidden' => true,
+		// 			'locked' => false
+		// 		),
+		// 		array(
+		// 			'pattern' => '~/replace/.+png$~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			// 'read' => false,
+		// 			// 'write' => false,
+		// 			// 'hidden' => true,
+		// 			// 'locked' => true
+		// 		)
+		// 	),
+		// 	// 'defaults' => array('read' => false, 'write' => true)
+		// ),
 		
 		array(
-			'driver'     => 'LocalFileSystem',
-			'path'       => '../files2/',
-			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
-			'alias'      => 'Files',
-			'mimeDetect' => 'internal',
-			'tmbPath'    => '.tmb',
-			// 'copyOverwrite' => false,
-			'utf8fix'    => true,
-			'attributes' => array(
-				array(
-					'pattern' => '~/\.~',
-					// 'pattern' => '/^\/\./',
-					// 'read' => false,
-					// 'write' => false,
-					'hidden' => true,
-					'locked' => false
-				),
-			)
-		),
-		
-		array(
-			'driver' => 'MySQL',
-			'path' => 1,
-			// 'treeDeep' => 2,
-			'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
-			'user' => 'root',
+			'driver' => 'FTP',
+			'user' => 'dio',
 			'pass' => 'hane',
-			'db' => 'elfinder',
-			'user_id' => 1,
-			'accessControl' => 'access',
-			'separator' => ':',
-			'tmbCrop'         => false,
-			// 'imgLib' => 'imagick',
-			// 'uploadOverwrite' => false,
-			// 'copyTo' => false,
-			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../files/dbtmb',
-			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/dbtmb/',
-			// 'attributes' => array(
-			// 	array(),
-			// 	array(
-			// 		'pattern' => '/\.jpg$/',
-			// 		'read' => false,
-			// 		'write' => false,
-			// 		'locked' => true,
-			// 		'hidden' => true
-			// 	)
-			// )
-			
+			'path' => 'Users/dio/'
 		)
+		
+		// array(
+		// 	'driver'     => 'LocalFileSystem',
+		// 	'path'       => '../files2/',
+		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+		// 	'alias'      => 'Files',
+		// 	'mimeDetect' => 'internal',
+		// 	'tmbPath'    => '.tmb',
+		// 	// 'copyOverwrite' => false,
+		// 	'utf8fix'    => true,
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '~/\.~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			// 'read' => false,
+		// 			// 'write' => false,
+		// 			'hidden' => true,
+		// 			'locked' => false
+		// 		),
+		// 	)
+		// ),
+		
+		// array(
+		// 	'driver' => 'MySQL',
+		// 	'path' => 1,
+		// 	// 'treeDeep' => 2,
+		// 	'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
+		// 	'user' => 'root',
+		// 	'pass' => 'hane',
+		// 	'db' => 'elfinder',
+		// 	'user_id' => 1,
+		// 	'accessControl' => 'access',
+		// 	'separator' => ':',
+		// 	'tmbCrop'         => false,
+		// 	// 'imgLib' => 'imagick',
+		// 	// 'uploadOverwrite' => false,
+		// 	// 'copyTo' => false,
+		// 	// 'URL'    => 'http://localhost/git/elfinder',
+		// 	'tmbPath' => '../files/dbtmb',
+		// 	'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/dbtmb/',
+		// 	// 'attributes' => array(
+		// 	// 	array(),
+		// 	// 	array(
+		// 	// 		'pattern' => '/\.jpg$/',
+		// 	// 		'read' => false,
+		// 	// 		'write' => false,
+		// 	// 		'locked' => true,
+		// 	// 		'hidden' => true
+		// 	// 	)
+		// 	// )
+		// 	
+		// )
 	)
 	
 );

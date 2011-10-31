@@ -592,7 +592,7 @@ abstract class elFinderVolumeDriver {
 		if (!$this->init()) {
 			return false;
 		}
-
+		
 		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
 		$this->yesterday = $this->today-86400;
 		
@@ -690,7 +690,7 @@ abstract class elFinderVolumeDriver {
 		if (!$read && !$this->attr($this->root, 'write')) {
 			return false;
 		}
-		
+
 		if ($read) {
 			// check startPath - path to open by default instead of root
 			if ($this->options['startPath']) {
@@ -766,6 +766,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$this->configure();
+		// echo $this->id().'<br>';
 		return $this->mounted = true;
 	}
 	
