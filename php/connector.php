@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ALL); // Set E_ALL for debuging
+error_reporting(0); // Set E_ALL for debuging
 
 
 if (function_exists('date_default_timezone_set')) {
@@ -277,8 +277,15 @@ $opts = array(
 			'host' => '192.168.1.37',
 			'user' => 'dio',
 			'pass' => 'hane',
-			'path' => '/Users/dio/'
+			'path' => '/Users/dio/Sites'
 		),
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => 'work.std42.ru',
+		// 	'user' => 'dio',
+		// 	'pass' => '123456',
+		// 	'path' => '/'
+		// ),
 		// array(
 		// 	'driver' => 'FTP',
 		// 	'host' => '192.168.1.35',
