@@ -50,6 +50,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
+		$this->aroot = realpath($this->root);
+		$root = $this->stat($this->root);
+		
 		// chek thumbnails path
 		if ($this->options['tmbPath']) {
 			$this->options['tmbPath'] = strpos($this->options['tmbPath'], DIRECTORY_SEPARATOR) === false
@@ -62,7 +65,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		parent::configure();
 		
 		// if no thumbnails url - try detect it
-		if ($this->attr($this->root, 'read') && !$this->tmbURL && $this->URL) {
+		if ($root['read'] && !$this->tmbURL && $this->URL) {
 			if (strpos($this->tmbPath, $this->root) === 0) {
 				$this->tmbURL = $this->URL.str_replace(DIRECTORY_SEPARATOR, '/', substr($this->tmbPath, strlen($this->root)+1));
 				if (preg_match("|[^/?&=]$|", $this->tmbURL)) {
@@ -70,8 +73,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		}
-		
-		$this->aroot = realpath($this->root);
 		
 		// check quarantine dir
 		if (!empty($this->options['quarantine'])) {
@@ -220,6 +221,59 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _inpath($path, $parent) {
 		return $path == $parent || strpos($path, $parent.DIRECTORY_SEPARATOR) === 0;
+	}
+	
+	/**
+	 * Return stat for given path.
+	 * Stat contains following fields:
+	 * - (int)    size    file size in b. required
+	 * - (int)    ts      file modification time in unix time. required
+	 * - (string) mime    mimetype. required for folders, others - optionally
+	 * - (bool)   read    read permissions. required
+	 * - (bool)   write   write permissions. required
+	 * - (bool)   locked  is object locked. optionally
+	 * - (bool)   hidden  is object hidden. optionally
+	 *
+	 * If file does not exists - returns empty array or false.
+	 *
+	 * @param  string  $path    file path 
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function _stat($path) {
+		$stat = array();
+
+		if (!file_exists($path)) {
+			return $stat;
+		}
+
+		if ($path != $this->root && is_link($path)) {
+			if (($target = $this->_readlink($path)) == false) {
+				$stat['mime']  = 'symlink-broken';
+				$stat['read']  = false;
+				$stat['write'] = false;
+				$stat['size'] = 0;
+				return $stat;
+			}
+			$stat['alias'] = $this->_path($target);
+			$path  = $target;
+			$lstat = lstat($path);
+			$size  = $lstat['size'];
+		} else {
+			$size = @filesize($path);
+		}
+		
+		$dir = is_dir($path);
+		
+		$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
+		$stat['ts']       = filemtime($path);
+		$stat['read']     = is_readable($path);
+		$stat['write']    = is_writable($path);
+		if ($stat['read']) {
+			$stat['size'] = $dir ? 0 : $size;
+		}
+		
+		return $stat;
 	}
 	
 	/*********************** check type *************************/

@@ -1,5 +1,5 @@
 <?php
-error_reporting(0); // Set E_ALL for debuging
+error_reporting(E_ALL); // Set E_ALL for debuging
 
 
 if (function_exists('date_default_timezone_set')) {
@@ -10,8 +10,8 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php'
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
+// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
+// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -263,10 +263,10 @@ $opts = array(
 				array(
 					'pattern' => '~/replace/.+png$~',
 					// 'pattern' => '/^\/\./',
-					// 'read' => false,
-					// 'write' => false,
+					'read' => false,
+					'write' => false,
 					// 'hidden' => true,
-					// 'locked' => true
+					'locked' => true
 				)
 			),
 			// 'defaults' => array('read' => false, 'write' => true)
