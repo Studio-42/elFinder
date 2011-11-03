@@ -126,6 +126,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			echo $this->error();
 			return false;
 		}
+		// echo $this->root;
+		// debug(ftp_rawlist($this->connect, $this->root));
+		// return false;
 		return true;
 	}
 
@@ -229,6 +232,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function updateCache($path, $stat) {
+		if (!empty($stat)) {
+			
+		}
+		
+		$this->cache[$path] = $stat;
+	}
+
+	/**
 	 * Parse MLST response and return file stat array or false
 	 *
 	 * @param  array $raw MLST response
@@ -293,8 +310,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
-	protected function parseRaw($raw) {
+	protected function parseRaw($raw, $path) {
 		$info = preg_split("/\s+/", $raw, 9);
+		
 		
 		if (count($info) < 9) {
 			return false;
@@ -304,6 +322,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
 		}
 		
+		$file = $path.'/'.$info[8];
+		$name = $info[8];
+		$stat = array(
+			'name' => $name,
+			'hash' => $this->encode($path.'/'.$name),
+			'mime' => substr($info[0], 0, 1) == 'd' ? 'directory' : $this->mimetype($name)
+		);
+		return $stat;
 	}
 
 	/**
@@ -570,7 +596,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filesize($path) {
-		return filesize($this->ftpurl($path));
+		$stat = $this->stat($path);
+		return $stat['size'];
 	}
 	
 	/**
@@ -581,7 +608,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filemtime($path) {
-		return filemtime($this->ftpurl($path));
+		$stat = $this->stat($path);
+		return $stat['ts'];
 	}
 	
 	/**
@@ -675,12 +703,21 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _scandir($path) {
 		$files = array();
 		
-		foreach (scandir($path) as $name) {
-			// echo $name.'<br>';
-			if ($name != '.' && $name != '..') {
-				$files[] = $path.$this->separator.$name;
-			}
+		$list = ftp_rawlist($this->connect, $path);
+		// debug($list);
+		foreach ($list as $str) {
+			// echo $str.'<br>';
+			$stat = $this->parseRaw($str, $path);
+			debug($stat);
 		}
+		// 
+		// foreach (scandir($path) as $name) {
+		// 	// echo $name.'<br>';
+		// 	if ($name != '.' && $name != '..') {
+		// 		$files[] = $path.$this->separator.$name;
+		// 	}
+		// }
+		// return false;
 		return $files;
 
 	}
