@@ -240,45 +240,45 @@ $opts = array(
 	
 	'roots' => array(
 		
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files/',
-		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
-		// 	'alias'      => 'File system',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	'utf8fix'    => true,
-		// 	'tmbCrop'    => false,
-		// 	'startPath'  => '../files/test',
-		// 	// 'separator' => ':',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-		// 		array(
-		// 			'pattern' => '~/replace/.+png$~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			// 'read' => false,
-		// 			// 'write' => false,
-		// 			// 'hidden' => true,
-		// 			// 'locked' => true
-		// 		)
-		// 	),
-		// 	// 'defaults' => array('read' => false, 'write' => true)
-		// ),
-		
 		array(
-			'driver' => 'FTP',
-			'host' => '192.168.1.37',
-			'user' => 'dio',
-			'pass' => 'hane',
-			'path' => '/Users/dio/Sites'
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files2/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+			'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					// 'read' => false,
+					// 'write' => false,
+					// 'hidden' => true,
+					// 'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
 		),
+		
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => '192.168.1.37',
+		// 	'user' => 'dio',
+		// 	'pass' => 'hane',
+		// 	'path' => '/Users/dio/Sites'
+		// ),
 		// array(
 		// 	'driver' => 'FTP',
 		// 	'host' => 'work.std42.ru',

@@ -424,6 +424,20 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $removed = array();
 	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $cache = array();
+	
+	/**
+	 * undocumented class variable
+	 *
+	 * @var string
+	 **/
+	protected $dirsCache = array();
+	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
 	/*********************************************************************/
@@ -1838,22 +1852,17 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  string  $path  file path
 	 * @param  string  $name  attribute name (read|write|locked|hidden)
+	 * @param  bool    $val   attribute value returned by file system
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function attr($path, $name) {
+	protected function attr($path, $name, $val) {
 		if (!isset($this->defaults[$name])) {
 			return false;
 		}
 		
 		$defaults = $perm1 = $perm2 = $perm3 = $this->defaults[$name];
-
-		switch ($name) {
-			case 'read':   $perm1 = $this->_isReadable($path); break;
-			case 'write':  $perm1 = $this->_isWritable($path); break;
-			case 'locked': $perm1 = $this->_isLocked($path);   break;
-			case 'hidden': $perm1 = $this->_isHidden($path);   break;
-		}
+		$perm1 = !!$val;
 		
 		$path = $this->separator.$this->_relpath($path);
 		
@@ -1892,6 +1901,85 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path) {
+		return isset($this->cache[$path])
+			? $this->cache[$path]
+			: $this->updateCache($path, $this->_stat($path));
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function updateCache($path, $stat) {
+		if (empty($stat) || !is_array($stat)) {
+			return $this->cache[$path] = array();
+		}
+		
+		$root = $path == $this->root;
+		
+		$stat['name'] = $root ? $this->rootName : $this->_basename($path);
+		
+		if ($this->options['utf8fix'] && $this->options['utf8patterns'] && $this->options['utf8replace']) {
+			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($stat['name'])));
+		}
+		
+		$stat['hash'] = $this->encode($path);
+		
+		if (!$root) {
+			$stat['phash'] = $this->encode($this->_dirname($path));
+		} else {
+			$stat['volumeid'] = $this->id;
+		}
+		
+		if (empty($stat['mime'])) {
+			$stat['mime'] = $this->mimetype($stat['name']);
+		}
+		
+		// @todo move dateformat to client
+		$stat['date'] = isset($stat['ts'])
+			? $this->formatDate($stat['ts'])
+			: 'unknown';
+			
+		if (!$stat['size']) {
+			$stat['size'] = 'unknown';
+		}	
+
+		if ($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false)) {
+			$stat['read'] = true;
+		}
+		if ($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false)) {
+			$stat['write'] = true;
+		}
+		if ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : false)) {
+			$stat['locked'] = true;
+		}
+		if ($this->attr($path, 'hidden', isset($stat['hidden']) ? !!$stat['hidden'] : false) 
+		|| !$this->mimeAccepted($stat['mime'])) {
+			$stat['hidden'] = true;
+		}
+		
+		if ($stat['read'] && !$stat['hidden']) {
+			if ($stat['mime'] == 'directory' && empty($stat['alias']) && $this->_subdirs($path)) {
+				$stat['dirs'] = 1;
+			}
+		}
+		
+		return $this->cache[$path] = $stat;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function clearcache() {
+		$this->cache = $this->dirsCache = array();
+	}
+	
+	protected function _stat_($path) {
 		$root  = $path == $this->root;
 		$link  = !$root && $this->_isLink($path);
 		
@@ -2979,6 +3067,25 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _inpath($path, $parent);
+	
+	/**
+	 * Return stat for given path.
+	 * Stat contains following fields:
+	 * - (int)    size    file size in b. required
+	 * - (int)    ts      file modification time in unix time. required
+	 * - (string) mime    mimetype. required for folders, others - optionally
+	 * - (bool)   read    read permissions. required
+	 * - (bool)   write   write permissions. required
+	 * - (bool)   locked  is object locked. optionally
+	 * - (bool)   hidden  is object hidden. optionally
+	 *
+	 * If file does not exists - returns empty array or false.
+	 *
+	 * @param  string  $path    file path 
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 **/
+	abstract protected function _stat($path);
 	
 	/*********************** check type *************************/
 	
