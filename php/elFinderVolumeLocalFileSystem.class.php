@@ -248,7 +248,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 
 		if ($path != $this->root && is_link($path)) {
-			if (($target = $this->_readlink($path)) == false) {
+			if (($target = $this->_readlink($path)) == false 
+			|| $target == $path) {
 				$stat['mime']  = 'symlink-broken';
 				$stat['read']  = false;
 				$stat['write'] = false;
