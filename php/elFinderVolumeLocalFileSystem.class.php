@@ -83,7 +83,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		}
-		// echo $this->tmbURL.'<br>';
+
 		// check quarantine dir
 		if (!empty($this->options['quarantine'])) {
 			$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
@@ -303,7 +303,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		if (is_dir($path) && is_readable($path)) {
+		echo "_subdirs $path<br>";
+		if (($dir = dir($path))) {
 			$dir = dir($path);
 			while (($entry = $dir->read()) !== false) {
 				$p = $dir->path.DIRECTORY_SEPARATOR.$entry;

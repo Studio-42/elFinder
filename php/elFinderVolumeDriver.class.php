@@ -604,13 +604,14 @@ abstract class elFinderVolumeDriver {
 				$this->access = array($this->options['accessControl'][0], $this->options['accessControl'][1]);
 			}
 		}
+		
+		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
+		$this->yesterday = $this->today-86400;
+		
 		// debug($this->attributes);
 		if (!$this->init()) {
 			return false;
 		}
-		
-		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
-		$this->yesterday = $this->today-86400;
 		
 		// check some options is arrays
 		$this->uploadAllow = isset($this->options['uploadAllow']) && is_array($this->options['uploadAllow'])
@@ -1913,7 +1914,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path) {
-		// echo 'stat '.$path.'<br>';
 		return isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->_stat($path));
@@ -1929,7 +1929,7 @@ abstract class elFinderVolumeDriver {
 		if (empty($stat) || !is_array($stat)) {
 			return $this->cache[$path] = array();
 		}
-		// echo 'updateCache '.$path.'<br>';
+
 		$root = $path == $this->root;
 		
 		$stat['name'] = $root ? $this->rootName : $this->_basename($path);
@@ -1949,8 +1949,6 @@ abstract class elFinderVolumeDriver {
 		if (empty($stat['mime'])) {
 			$stat['mime'] = $this->mimetype($stat['name']);
 		}
-		
-		
 		
 		// @todo move dateformat to client
 		$stat['date'] = isset($stat['ts'])
@@ -1973,7 +1971,7 @@ abstract class elFinderVolumeDriver {
 		
 		if ($stat['read'] && empty($stat['hidden'])) {
 			
-			if ($stat['mime'] == 'directory') {
+			if ($stat['mime'] == 'directory' && $stat['read']) {
 				// for dir - check for subdirs
 				if ($this->options['checkSubfolders']) {
 					if (!empty($stat['alias']) && !empty($stat['target'])) {
@@ -1988,11 +1986,13 @@ abstract class elFinderVolumeDriver {
 				}
 			} else {
 				// for files - check for thumbnails
-				$p = isset($stat['target']) ? $stat['target'] : $path;
-				if (($tmb = $this->gettmb($p)) != false) {
-					$stat['tmb'] = $tmb;
-				} elseif ($this->canCreateTmb($p, $stat['mime'])) {
-					$stat['tmb'] = 1;
+				if ($this->tmbURL) {
+					$p = isset($stat['target']) ? $stat['target'] : $path;
+					if (($tmb = $this->gettmb($p)) != false) {
+						$stat['tmb'] = $tmb;
+					} elseif ($this->canCreateTmb($p, $stat['mime'])) {
+						$stat['tmb'] = 1;
+					}
 				}
 			}
 		}
@@ -2167,25 +2167,32 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function getScandir($path) {
 		$files = array();
-		$paths = isset($this->dirsCache[$path]) 
-			? $this->dirsCache[$path]
-			: $this->_scandir($path);
-			
-		// if (isset($this->dirsCache[$path])) {
-		// 	echo 'scandir from cache '.$path.'<br>';
-		// } else {
-		// 	echo 'scandir '.$path.'<br>';
-		// }
 		
-		foreach ($paths as $p) {
-			$stat = $this->stat($p);
-			
-			if ($stat && empty($stat['hidden'])) {
+		!isset($this->dirsCache[$path]) && $this->cacheDir($path);
+
+		foreach ($this->dirsCache[$path] as $p) {
+			if (($stat = $this->stat($p)) && empty($stat['hidden'])) {
 				$files[] = $stat;
 			}
 		}
-		// debug($files);
+
 		return $files;
+	}
+	
+	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function cacheDir($path) {
+		$this->dirsCache[$path] = array();
+
+		foreach ($this->_scandir($path) as $p) {
+			if (($stat = $this->stat($p)) && empty($stat['hidden'])) {
+				$this->dirsCache[$path][] = $p;
+			}
+		}	
 	}
 	
 	/**
@@ -2198,18 +2205,13 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function gettree($path, $deep, $exclude='') {
 		$dirs = array();
+		
+		!isset($this->dirsCache[$path]) && $this->cacheDir($path);
 
-		$paths = isset($this->dirsCache[$path]) 
-			? $this->dirsCache[$path]
-			: $this->_scandir($path);
-			
-		foreach ($paths as $p) {
+		foreach ($this->dirsCache[$path] as $p) {
 			$stat = $this->stat($p);
 			
-			if ($path != $exclude
-			&& $stat
-			&& empty($stat['hidden'])
-			&& $stat['mime'] == 'directory') {
+			if ($stat && empty($stat['hidden']) && $path != $exclude && $stat['mime'] == 'directory') {
 				$dirs[] = $stat;
 				if ($deep > 0 && !empty($stat['dirs'])) {
 					$dirs = array_merge($dirs, $this->gettree($p, $deep-1));
