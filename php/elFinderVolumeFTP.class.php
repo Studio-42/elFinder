@@ -108,28 +108,23 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
 		||  !$this->options['port']
-		||  !$this->options['path']
-		||  !function_exists('ftp_connect')) {
-			return false;
+		||  !$this->options['path']) {
+			return $this->setError('Required options undefined.');
 		}
 		
+		if (!function_exists('ftp_connect')) {
+			return $this->setError('FTP extension not loaded..');
+		}
 		// normalize root path
 		$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 		
 		if (empty($this->options['alias'])) {
 			$this->options['alias'] = $this->root == '/' ? 'FTP folder' : basename($this->root);
 		}
-		// echo $this->root;
-		$this->rootName = $this->options['alias'];
-		// echo $this->rootName;
-		if (!$this->connect()) {
-			echo $this->error();
-			return false;
-		}
-		// echo $this->root;
-		// debug(ftp_rawlist($this->connect, $this->root));
-		// return false;
-		return true;
+
+		// $this->rootName = $this->options['alias'];
+
+		return $this->connect();
 	}
 
 
@@ -151,10 +146,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function connect() {
-		if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))
-		||  !ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
+		if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+			return $this->setError('Unable to connect to FTP server '.$this->options['host']);
+		}
+		if (!ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
 			$this->umount();
-			return $this->setError('Unable to connect or login');
+			return $this->setError('Unable to login into '.$this->options['host']);
 		}
 		
 		// switch off extended passive mode - may be usefull for some servers
@@ -166,14 +163,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		if (!ftp_chdir($this->connect, $this->root) 
 		|| $this->root != ftp_pwd($this->connect)) {
 			$this->umount();
-			return $this->setError('Unable to enter root folder');
+			return $this->setError('Unable to open root folder.');
 		}
 		
 		// check for MLST support
 		$features = ftp_raw($this->connect, 'FEAT');
 		if (!is_array($features)) {
 			$this->umount();
-			return $this->setError('Server does not support FEAT. wtf? 0_o');
+			return $this->setError('Server does not support command FEAT. wtf? 0_o');
 		}
 
 		foreach ($features as $feat) {
@@ -182,7 +179,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			}
 		}
 		
-		return $this->setError('Server does not support MLST. wtf? 0_o');;
+		return $this->setError('Server does not support command MLST. wtf? 0_o');
 	}
 	
 	/*********************************************************************/
@@ -231,19 +228,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return $this->cache[$path];
 	}
 
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function updateCache($path, $stat) {
-		if (!empty($stat)) {
-			
-		}
-		
-		$this->cache[$path] = $stat;
-	}
 
 	/**
 	 * Parse MLST response and return file stat array or false
@@ -396,42 +380,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$path = preg_replace('|^\.\/?|', '/', $path);
 		$path = preg_replace('/^([^\/])/', "/$1", $path);
 
-		if (strpos($path, '/') === 0) {
-			$initial_slashes = true;
-		} else {
-			$initial_slashes = false;
-		}
-			
-		if (($initial_slashes) 
-		&& (strpos($path, '//') === 0) 
-		&& (strpos($path, '///') === false)) {
-			$initial_slashes = 2;
-		}
-			
-		$initial_slashes = (int) $initial_slashes;
-
-		$comps = explode('/', $path);
-		$new_comps = array();
-		foreach ($comps as $comp) {
-			if (in_array($comp, array('', '.'))) {
-				continue;
-			}
-				
-			if (($comp != '..') 
-			|| (!$initial_slashes && !$new_comps) 
-			|| ($new_comps && (end($new_comps) == '..'))) {
-				array_push($new_comps, $comp);
-			} elseif ($new_comps) {
-				array_pop($new_comps);
-			}
-		}
-		$comps = $new_comps;
-		$path = implode('/', $comps);
-		if ($initial_slashes) {
-			$path = str_repeat('/', $initial_slashes) . $path;
-		}
-		
-		return $path ? $path : '.';
+		return parent::_normpath($path);
 	}
 	
 	/**
@@ -479,139 +428,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return $path == $parent || strpos($path, $parent.$this->separator) === 0;
 	}
 	
-	/*********************** check type *************************/
-	
-	/**
-	 * Return true if file exists
-	 *
-	 * @param  string $path  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _fileExists($path) {
-		return !!$this->stat($path);
-	}
-	
-	/**
-	 * Return true if path is a directory
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isDir($path) {
-		if ($path == $this->root) {
-			return true;
-		}
-		$stat = $this->stat($path);
-		return $stat['mime'] == 'directory';
-	}
-	
-	/**
-	 * Return true if path is a file
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isFile($path) {
-		if ($path == $this->root) {
-			return false;
-		}
-		$stat = $this->stat($path);
-		return $stat['mime'] == 'directory';
-	}
-	
-	/**
-	 * Return true if path is a symlink
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isLink($path) {
-		if ($path == $this->root) {
-			return false;
-		}
-		$stat = $this->stat($path);
-		return !!$stat['link'];
-	}
-	
-	/***************** file attributes ********************/
-	
-	/**
-	 * Return true if path is readable
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isReadable($path) {
-		$stat = $this->stat($path);
-		return !empty($stat['read']);
-	}
-	
-	/**
-	 * Return true if path is writable
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isWritable($path) {
-		$stat = $this->stat($path);
-		return !empty($stat['write']);
-	}
-	
-	/**
-	 * Return true if path is locked
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isLocked($path) {
-		$stat = $this->stat($path);
-		return !empty($stat['locked']);
-	}
-	
-	/**
-	 * Return true if path is hidden
-	 *
-	 * @param  string  file path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _isHidden($path) {
-		$stat = $this->stat($path);
-		return !empty($stat['hidden']);
-	}
 	
 	/***************** file stat ********************/
-	/**
-	 * Return file size
-	 *
-	 * @param  string $path  file path
-	 * @return int
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _filesize($path) {
-		$stat = $this->stat($path);
-		return $stat['size'];
-	}
-	
-	/**
-	 * Return file modification time
-	 *
-	 * @param  string $path  file path
-	 * @return int
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _filemtime($path) {
-		$stat = $this->stat($path);
-		return $stat['ts'];
-	}
-	
 	/**
 	 * Return true if path is dir and has at least one childs directory
 	 *
@@ -620,14 +438,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		$url = $this->ftpurl($path);
-		if (is_readable($url) && ($ls = @scandir($url)) && is_array($ls)) {
-			foreach ($ls as $name) {
-				if ($name != '.' && $name != '..' && is_dir($path.$this->separator.$name)) {
-					return true;
-				}
-			}
-		}
 		return false;
 	}
 	
@@ -641,56 +451,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dimensions($path, $mime) {
-		die('Not yet implemented. (_dimensions)');
-		return false;
-	}
-	
-	/**
-	 * Return symlink stat (required only size and mtime)
-	 *
-	 * @param  string  $path  link path
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _lstat($path) {
 		return false;
 	}
 	
 	/******************** file/dir content *********************/
-	
-	/**
-	 * Return symlink target file
-	 *
-	 * @param  string  $path  link path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _readlink($path) {
-		return false;
-		die('Not yet implemented. (_readlink)');
-		if (!($target = @readlink($path))) {
-			return false;
-		}
-		
-		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
-			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
-		}
-		
-		$atarget = realpath($target);
-		
-		if (!$atarget) {
-			return false;
-		}
-		
-		$root  = $this->root;
-		$aroot = $this->aroot;
-
-		if ($this->_inpath($atarget, $this->aroot)) {
-			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
-		}
-
-		return false;
-	}
 		
 	/**
 	 * Return files list in directory.
