@@ -10,8 +10,8 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php'
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
-include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
+// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
+// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 
 function debug($o) {
 	echo '<pre>';
@@ -229,7 +229,7 @@ function validName($name) {
 
 $logger = new elFinderSimpleLogger('../files/temp/log.txt');
 
-// debug(scandir('ftp://frontrow:frontrow@192.168.1.35/'));
+
 
 $opts = array(
 	'locale' => 'en_US.UTF-8',
@@ -240,45 +240,76 @@ $opts = array(
 	
 	'roots' => array(
 		
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files/',
-		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
-		// 	'alias'      => 'File system',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	'utf8fix'    => true,
-		// 	'tmbCrop'    => false,
-		// 	'startPath'  => '../files/test',
-		// 	// 'separator' => ':',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-		// 		array(
-		// 			'pattern' => '~/replace/.+png$~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			// 'read' => false,
-		// 			// 'write' => false,
-		// 			// 'hidden' => true,
-		// 			// 'locked' => true
-		// 		)
-		// 	),
-		// 	// 'defaults' => array('read' => false, 'write' => true)
-		// ),
-		
 		array(
-			'driver' => 'FTP',
-			'host' => '192.168.1.37',
-			'user' => 'dio',
-			'pass' => 'hane',
-			'path' => '/Users/dio/Sites'
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			// 'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
 		),
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files2/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+			'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
+		),
+		
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => '192.168.1.37',
+		// 	'user' => 'dio',
+		// 	'pass' => 'hane',
+		// 	'path' => '/Users/dio/Sites'
+		// ),
 		// array(
 		// 	'driver' => 'FTP',
 		// 	'host' => 'work.std42.ru',

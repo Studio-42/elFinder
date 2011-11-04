@@ -106,11 +106,11 @@ class elFinder {
 	protected $uploadDebug = '';
 	
 	/**
-	 * Store copy files errors
+	 * Errors from not mounted volumes
 	 *
 	 * @var array
 	 **/
-	protected $copyError = array();
+	protected $mountErrors = array();
 	
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
@@ -183,7 +183,7 @@ class elFinder {
 		if (isset($opts['roots']) && is_array($opts['roots'])) {
 			
 			foreach ($opts['roots'] as $i => $o) {
-				$class = 'elFinderVolume'.$o['driver'];
+				$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
 
 				if (class_exists($class)) {
 					$volume = new $class();
@@ -196,7 +196,11 @@ class elFinder {
 						if (!$this->default && $volume->isReadable()) {
 							$this->default = $this->volumes[$id]; 
 						}
+					} else {
+						$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
 					}
+				} else {
+					$this->mountErrors[] = 'Driver "'.$class.'" does not exists';
 				}
 			}
 		}
@@ -374,7 +378,8 @@ class elFinder {
 				'time'      => $this->utime() - $this->time,
 				'memory'    => (function_exists('memory_get_peak_usage') ? ceil(memory_get_peak_usage()/1024).'Kb / ' : '').ceil(memory_get_usage()/1024).'Kb / '.ini_get('memory_limit'),
 				'upload'    => $this->uploadDebug,
-				'volumes'   => array()
+				'volumes'   => array(),
+				'mountErrors' => $this->mountErrors
 				);
 			
 			foreach ($this->volumes as $id => $volume) {
