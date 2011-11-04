@@ -167,6 +167,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
+		
 		$this->time  = $this->utime();
 		$this->debug = !empty($opts['debug']);
 		
@@ -608,7 +609,7 @@ class elFinder {
 		if (($fp = $volume->open($target)) == false) {
 			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
-		
+
 		if ($download) {
 			$disp = 'attachment';
 			$mime = 'application/octet-stream';

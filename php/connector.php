@@ -275,7 +275,7 @@ $opts = array(
 		// array(
 		// 	'driver'     => 'LocalFileSystem',
 		// 	'path'       => '../files2/',
-		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+		// 	// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
 		// 	'alias'      => 'File system',
 		// 	'mimeDetect' => 'internal',
 		// 	'tmbPath'    => '.tmb',
@@ -310,6 +310,7 @@ $opts = array(
 			'user' => 'dio',
 			'pass' => 'hane',
 			'path' => '/Users/dio/Documents',
+			'tmpPath' => '../files/ftp',
 			'attributes' => array(
 				array(
 					'pattern' => '~/\.~',

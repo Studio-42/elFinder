@@ -997,7 +997,6 @@ abstract class elFinderVolumeDriver {
 		}
 		// debug($dir);
 		if ($resolveLink && !empty($dir['thash'])) {
-			echo 'here';
 			$dir = $this->file($dir['thash']);
 		}
 		

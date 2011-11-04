@@ -303,7 +303,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		echo "_subdirs $path<br>";
+
 		if (($dir = dir($path))) {
 			$dir = dir($path);
 			while (($entry = $dir->read()) !== false) {
@@ -394,7 +394,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		return @fopen($path, $mode);
+		return @fopen($path, 'r');
 	}
 	
 	/**

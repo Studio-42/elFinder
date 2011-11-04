@@ -1,5 +1,5 @@
 <?php
-
+ob_start();
 // mb_internal_encoding("UTF-8");
 
 /**
@@ -37,6 +37,7 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($elFinder, $debug=false) {
+		
 		$this->elFinder = $elFinder;
 		if ($debug) {
 			$this->header = 'Content-Type: text/html; charset=utf-8';
@@ -104,7 +105,7 @@ class elFinderConnector {
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
-
+		ob_end_clean();
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {
