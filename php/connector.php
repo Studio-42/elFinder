@@ -229,7 +229,7 @@ function validName($name) {
 
 $logger = new elFinderSimpleLogger('../files/temp/log.txt');
 
-// debug(scandir('ftp://frontrow:frontrow@192.168.1.35/'));
+
 
 $opts = array(
 	'locale' => 'en_US.UTF-8',
@@ -240,6 +240,37 @@ $opts = array(
 	
 	'roots' => array(
 		
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			// 'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
+		),
 		array(
 			'driver'     => 'LocalFileSystem',
 			'path'       => '../files2/',
