@@ -42,7 +42,7 @@ elFinder.prototype.commands.open = function() {
 			return file && !file.read
 				? dfrd.reject(['errOpen', file.name, 'errPerm'])
 				: fm.request({
-						data   : {cmd  : 'open', target : file.hash},
+						data   : {cmd  : 'open', target : file.thash || file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
 						syncOnFail : true
 					});
@@ -64,7 +64,7 @@ elFinder.prototype.commands.open = function() {
 				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
-			if (!(url = fm.url(file.hash))) {
+			if (!(url = fm.url(file.thash || file.hash))) {
 				url = fm.options.url;
 				url = url + (url.indexOf('?') === -1 ? '?' : '&')
 					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')

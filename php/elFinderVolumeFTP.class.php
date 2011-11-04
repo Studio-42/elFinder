@@ -85,7 +85,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'port'          => 21,
 			'mode'        	=> 'passive',
 			'path'			=> '/',
-			'timeout'		=> 10
+			'timeout'		=> 10,
+			'owner'         => true
 		);
 		$this->options = array_merge($this->options, $opts); 
 		$this->options['mimeDetect'] = 'internal';
@@ -125,15 +126,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 
 		$this->rootName = $this->options['alias'];
-		return $this->connect();
+		$this->options['separator'] = '/';
+		return 
+		$this->connect();
 		
-		// debug($this->stat($this->root));
-		$this->stat($this->root);
+		debug($this->stat($this->root));
+		// $this->stat($this->root);
 		
-		$this->gettree($this->root, 0);
+		// $this->gettree($this->root, 0);
 		// $this->getScandir($this->root);
-		debug($this->getScandir($this->root));
-		// $this->getScandir($this->root);
+		// debug($this->_scandir($this->root));
+		// debug($this->getScandir($this->root));
+		$this->getScandir($this->root);
 		return false;
 	}
 
@@ -216,33 +220,62 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function parseRaw($raw) {
 		$info = preg_split("/\s+/", $raw, 9);
 		$stat = array();
-		
+
 		if (count($info) < 9 || $info[8] == '.' || $info[8] == '..') {
 			return false;
 		}
-		// debug($info);
+
 		if (!isset($this->ftpOsUnix)) {
 			$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
 		}
 		
 		if ($this->ftpOsUnix) {
-			$perm = $this->parsePermissions($info[0]);
-			$stat['name']  = $info[8];
-			$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
-			$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
-			$stat['read']  = $perm['read'];
-			$stat['write'] = $perm['write'];
 			
 			$stat['ts'] = strtotime($info[5].' '.$info[6].' '.$info[7]);
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
 			}
 			
-			// $stat['d'] = date('d.m.Y H:i', $stat['ts']);
+			$name = $info[8];
+			
+			if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
+				$name   = trim($m[1]);
+				$target = trim($m[2]);
+				if (substr($target, 0, 1) != '/') {
+					$target = $this->root.'/'.$target;
+				}
+				$target = $this->_normpath($target);
+				$stat['name']  = $name;
+				if ($this->_inpath($target, $this->root) 
+				&& ($tstat = $this->stat($target))) {
+					$stat['size']  = $tstat['mime'] == 'directory' ? 0 : $info[4];
+					$stat['alias'] = $this->_relpath($target);
+					$stat['thash'] = $tstat['hash'];
+					$stat['mime']  = $tstat['mime'];
+					$stat['read']  = $tstat['read'];
+					$stat['write']  = $tstat['write'];
+				} else {
+					
+					$stat['mime']  = 'symlink-broken';
+					$stat['read']  = false;
+					$stat['write'] = false;
+					$stat['size']  = 0;
+					
+				}
+				return $stat;
+			}
+			
+			$perm = $this->parsePermissions($info[0]);
+			$stat['name']  = $name;
+			$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
+			$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
+			$stat['read']  = $perm['read'];
+			$stat['write'] = $perm['write'];
+			$stat['perm']  = substr($info[0], 1);
 		} else {
 			
 		}
-		// echo $stat['name'].' '.$stat['mime'].'<br>';
+
 		return $stat;
 	}
 	
@@ -253,17 +286,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function parsePermissions($perm) {
-		$res = array();
+		$res   = array();
 		$parts = array();
+		$owner = $this->options['owner'];
 		for ($i = 0, $l = strlen($perm); $i < $l; $i++) {
 			$parts[] = substr($perm, $i, 1);
 		}
-		
-		$read = $parts[0] == 'r' || $parts[4] == 'r' || $parts[7] == 'r';
+
+		$read = ($owner && $parts[0] == 'r') || $parts[4] == 'r' || $parts[7] == 'r';
 		
 		return array(
-			'read'  => $parts[0] == 'd' ? $read && ($parts[3] == 'x' || $parts[6] == 'x' || $parts[9] == 'x') : $read,
-			'write' => $parts[2] == 'w' || $parts[5] == 'w' || $parts[8] == 'w'
+			'read'  => $parts[0] == 'd' ? $read && (($owner && $parts[3] == 'x') || $parts[6] == 'x' || $parts[9] == 'x') : $read,
+			'write' => ($owner && $parts[2] == 'w') || $parts[5] == 'w' || $parts[8] == 'w'
 		);
 	}
 	
@@ -275,7 +309,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
-		// echo "cacheDir $path<br>";
+
 		foreach (ftp_rawlist($this->connect, $path) as $raw) {
 			if (($stat = $this->parseRaw($raw))) {
 				$p    = $path.'/'.$stat['name'];
@@ -419,9 +453,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($path, $parent.$this->separator) === 0;
+		return $path == $parent || strpos($path, $parent.'/') === 0;
 	}
-	
 	
 	/***************** file stat ********************/
 	/**
@@ -451,7 +484,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			array_pop($parts);
 			$parts = array_map('strtolower', $parts);
 			$stat  = array();
-
+			// debug($parts);
 			foreach ($parts as $part) {
 
 				list($key, $val) = explode('=', $part);
@@ -472,8 +505,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 						break;
 
 					case 'unix.mode':
-						$stat['read']  = 1;
-						$stat['write'] = 1;
+						$stat['chmod'] = $val;
 						break;
 
 					case 'perm':
@@ -492,6 +524,54 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if ($stat['mime'] == 'directory') {
 				$stat['size'] = 0;
 			}
+			
+			if (isset($stat['chmod'])) {
+				$stat['perm'] = '';
+				if ($stat['chmod'][0] == 0) {
+					$stat['chmod'] = substr($stat['chmod'], 1);
+				}
+
+				for ($i = 0; $i <= 2; $i++) {
+					$perm[$i] = array(false, false, false);
+					$n = $stat['chmod'][$i];
+					
+					if ($n - 4 >= 0) {
+						$perm[$i][0] = true;
+						$n = $n - 4;
+						$stat['perm'] .= 'r';
+					} else {
+						$stat['perm'] .= '-';
+					}
+					
+					if ($n - 2 >= 0) {
+						$perm[$i][1] = true;
+						$n = $n - 2;
+						$stat['perm'] .= 'w';
+					} else {
+						$stat['perm'] .= '-';
+					}
+
+					if ($n - 1 == 0) {
+						$perm[$i][2] = true;
+						$stat['perm'] .= 'x';
+					} else {
+						$stat['perm'] .= '-';
+					}
+					
+					$stat['perm'] .= ' ';
+				}
+				
+				$stat['perm'] = trim($stat['perm']);
+
+				$owner = $this->options['owner'];
+				$read = ($owner && $perm[0][0]) || $perm[1][0] || $perm[2][0];
+
+				$stat['read']  = $stat['mime'] == 'directory' ? $read && (($owner && $perm[0][2]) || $perm[1][2] || $perm[2][2]) : $read;
+				$stat['write'] = ($owner && $perm[0][1]) || $perm[1][1] || $perm[2][1];
+				unset($stat['chmod']);
+
+			}
+			
 			return $stat;
 			
 		}

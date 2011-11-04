@@ -110,7 +110,7 @@ class elFinder {
 	 *
 	 * @var array
 	 **/
-	protected $mountErrors = array();
+	public $mountErrors = array();
 	
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';

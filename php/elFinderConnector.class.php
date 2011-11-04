@@ -61,7 +61,7 @@ class elFinderConnector {
 		}
 		
 		if (!$this->elFinder->loaded()) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL)));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL), 'debug' => $this->elFinder->mountErrors));
 		}
 		
 		// telepat_mode: on
@@ -104,7 +104,7 @@ class elFinderConnector {
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
-		// debug($data);
+
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {

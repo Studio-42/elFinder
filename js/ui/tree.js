@@ -349,10 +349,11 @@ $.fn.elfindertree = function(fm, opts) {
 				// open dir or open subfolders in tree
 				.delegate('.'+navdir, 'click', function(e) {
 					var link = $(this),
-						hash = fm.navId2Hash(link.attr('id'));
+						hash = fm.navId2Hash(link.attr('id')),
+						file = fm.file(hash);
 				
 					if (hash != fm.cwd().hash && !link.is('.'+disabled)) {
-						fm.exec('open', hash);
+						fm.exec('open', file.thash || hash);
 					} else if (link.is('.'+collapsed)) {
 						link.children('.'+arrow).click();
 					}
@@ -371,7 +372,7 @@ $.fn.elfindertree = function(fm, opts) {
 					} else {
 						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);
-						
+
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
 								updateTree(filter(data.tree)); 

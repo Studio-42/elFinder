@@ -995,8 +995,9 @@ abstract class elFinderVolumeDriver {
 		if (($dir = $this->file($hash)) == false) {
 			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 		}
-		
+		// debug($dir);
 		if ($resolveLink && !empty($dir['thash'])) {
+			echo 'here';
 			$dir = $this->file($dir['thash']);
 		}
 		
@@ -1920,10 +1921,12 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Put file stat in cache and return it
 	 *
-	 * @return void
-	 * @author Dmitry Levashov
+	 * @param  string  $path   file path
+	 * @param  array   $stat   file stat
+	 * @return array
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function updateCache($path, $stat) {
 		if (empty($stat) || !is_array($stat)) {
@@ -2006,10 +2009,27 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Get stat for folder content and put in cache
+	 *
+	 * @param  string  $path
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function cacheDir($path) {
+		$this->dirsCache[$path] = array();
+
+		foreach ($this->_scandir($path) as $p) {
+			if (($stat = $this->stat($p)) && empty($stat['hidden'])) {
+				$this->dirsCache[$path][] = $p;
+			}
+		}	
+	}
+	
+	/**
+	 * Clean cache
 	 *
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function clearcache() {
 		$this->cache = $this->dirsCache = array();
@@ -2179,21 +2199,6 @@ abstract class elFinderVolumeDriver {
 		return $files;
 	}
 	
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
-	protected function cacheDir($path) {
-		$this->dirsCache[$path] = array();
-
-		foreach ($this->_scandir($path) as $p) {
-			if (($stat = $this->stat($p)) && empty($stat['hidden'])) {
-				$this->dirsCache[$path][] = $p;
-			}
-		}	
-	}
 	
 	/**
 	 * Return subdirs tree
