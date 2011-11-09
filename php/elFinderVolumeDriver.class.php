@@ -1186,7 +1186,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		$this->clearcache();
-		return $this->_mkdir($path, $name) ? $this->stat($this->_joinPath($path, $name)) : false;
+		return ($path = $this->_mkdir($path, $name)) ? $this->stat($path) : false;
 	}
 	
 	/**
@@ -3105,11 +3105,11 @@ abstract class elFinderVolumeDriver {
 	/********************  file/dir manipulations *************************/
 	
 	/**
-	 * Create dir
+	 * Create dir and return created dir path or false on failed
 	 *
 	 * @param  string  $path  parent dir path
 	 * @param string  $name  new directory name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _mkdir($path, $name);

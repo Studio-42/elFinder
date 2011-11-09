@@ -423,7 +423,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		if (@mkdir($path)) {
 			@chmod($path, $this->options['dirMode']);
-			return true;
+			return $path;
 		}
 
 		return false;

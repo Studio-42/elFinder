@@ -90,7 +90,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'timeout'		=> 10,
 			'owner'         => true,
 			'tmbPath'       => '',
-			'tmpPath'       => ''
+			'tmpPath'       => '',
+			'dirMode'       => 0755,
+			'fileMode'      => 0644
 		);
 		$this->options = array_merge($this->options, $opts); 
 		$this->options['mimeDetect'] = 'internal';
@@ -551,7 +553,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 				for ($i = 0; $i <= 2; $i++) {
 					$perm[$i] = array(false, false, false);
-					$n = $stat['chmod'][$i];
+					$n = isset($stat['chmod'][$i]) ? $stat['chmod'][$i] : 0;
 					
 					if ($n - 4 >= 0) {
 						$perm[$i][0] = true;
@@ -694,29 +696,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
-		$path = $path.DIRECTORY_SEPARATOR.$name;
+		if (($path = ftp_mkdir($this->connect, $path.'/'.$name)) == false) {
+			return false;
+		} 
 		
-		if ($path == '' || (!($this->ftp_conn)))
-		{
-			return false;
-		}
-
-		$result = @ftp_mkdir($this->ftp_conn, $path);
-
-		if ($result === false)
-		{
-			$this->setError('Unable to create remote directory.');
-			return false;
-		}
-
-		/* TODO : implement for ftp */
-		/*
-		if (@mkdir($path)) {
-			@chmod($path, $this->options['dirMode']);
-			return true;
-		}
-		*/
-		return true;
+		$this->options['dirMode'] && @ftp_chmod($this->connect, $this->options['dirMode'], $path);
+		return $path;
 	}
 	
 	/**
