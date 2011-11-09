@@ -660,16 +660,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		if ($this->tmp) {
 			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
-			// $local = $this->tmp.DIRECTORY_SEPARATOR.basename($path);
-			// $mime = $this->mimetype(basename($path));
+
 			if (ftp_get($this->connect, $local, $path, FTP_BINARY)) {
-				return @fopen($local, 'r');
+				return @fopen($local, $mode);
 			}
 		}
 		
 		return false;
-
-		return @fopen($path, $mode);
 	}
 	
 	/**
@@ -858,8 +855,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _getContents($path) {
-		ie('Not yet implemented. (_getContents)');
-		return file_get_contents($path);
+		$contents = '';
+		if (($fp = $this->_fopen($path))) {
+			while (!feof($fp)) {
+			  $contents .= fread($fp, 8192);
+			}
+			$this->_fclose($fp, $path);
+			return $contents;
+		}
+		return false;
 	}
 	
 	/**
@@ -871,12 +875,22 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
-		die('Not yet implemented. (_filePutContents)');
-		if (@file_put_contents($path, $content, LOCK_EX) !== false) {
-			clearstatcache();
-			return true;
+		$res = false;
+
+		if ($this->tmp) {
+			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path).'.txt';
+			
+			if (@file_put_contents($local, $content, LOCK_EX) !== false
+			&& ($fp = @fopen($local, 'rb'))) {
+				clearstatcache();
+				$mode = strpos($this->mimetype($path), 'text/') === 0 ? FTP_ASCII : FTP_BINARY;
+				$res  = ftp_fput($this->connect, $path, $fp, $mode);
+				@fclose($fp);
+			}
+			file_exists($local) && @unlink($local);
 		}
-		return false;
+
+		return $res;
 	}
 
 	/**

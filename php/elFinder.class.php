@@ -158,6 +158,7 @@ class elFinder {
 	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
 	const ERROR_RESIZE            = 'errResize';
 	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
+	const ERROR_NOT_UTF8_CONTENT  = 'errNotUTF8Content';
 	
 	/**
 	 * Constructor
@@ -885,9 +886,17 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
-		return ($content = $volume->getContents($target)) === false
-			? array('error' => $this->error(self::ERROR_OPEN, $volume->path($target), $volume->error()))
-			: array('content' => $content);
+		if (($content = $volume->getContents($target)) === false) {
+			return array('error' => $this->error(self::ERROR_OPEN, $volume->path($target), $volume->error()));
+		}
+		
+		$json = json_encode($content);
+
+		if ($json == 'null' && strlen($json) < strlen($content)) {
+			return array('error' => $this->error(self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+		}
+		
+		return array('content' => $content);
 	}
 	
 	/**
