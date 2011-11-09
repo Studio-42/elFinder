@@ -306,7 +306,7 @@ $opts = array(
 		
 		array(
 			'driver' => 'FTP',
-			'host' => '192.168.1.36',
+			'host' => '192.168.1.38',
 			'user' => 'dio',
 			'pass' => 'hane',
 			'path' => '/Users/dio/Documents',
