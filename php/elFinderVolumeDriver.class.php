@@ -3147,12 +3147,13 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _copy($source, $targetDir, $name);
 	
 	/**
-	 * Move file into another parent dir (only inside one volume)
+	 * Move file into another parent dir.
+	 * Return new file path or false.
 	 *
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
 	 * @param  string  $name    file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _move($source, $targetDir, $name);

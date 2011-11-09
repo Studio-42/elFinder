@@ -723,7 +723,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create symlink
+	 * Create symlink. FTP driver does not support symlinks.
 	 *
 	 * @param  string  $target  link target
 	 * @param  string  $path    symlink path
@@ -731,11 +731,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _symlink($target, $path, $name='') {
-		die('Not yet implemented. (_symlink)');
-		if (!$name) {
-			$name = basename($path);
-		}
-		return @symlink('.'.DIRECTORY_SEPARATOR.$this->_relpath($target), $path.DIRECTORY_SEPARATOR.$name);
+		return false;
 	}
 	
 	/**
@@ -754,18 +750,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Move file into another parent dir
+	 * Move file into another parent dir.
+	 * Return new file path or false.
 	 *
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
 	 * @param  string  $name    file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _move($source, $targetDir, $name='') {
-		die('Not yet implemented. (_move)');
-		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
-		return @rename($source, $target);
+	protected function _move($source, $targetDir, $name) {
+		$target = $targetDir.DIRECTORY_SEPARATOR.$name;
+		return ftp_rename($this->connect, $source, $target) ? $target : false;
 	}
 		
 	/**

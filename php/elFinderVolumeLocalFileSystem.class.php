@@ -475,16 +475,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Move file into another parent dir
+	 * Move file into another parent dir.
+	 * Return new file path or false.
 	 *
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
 	 * @param  string  $name    file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _move($source, $targetDir, $name) {
-		return @rename($source, $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source)));
+		$target = $targetDir.DIRECTORY_SEPARATOR.$name;
+		return @rename($source, $target) ? $target : false;
 	}
 		
 	/**
