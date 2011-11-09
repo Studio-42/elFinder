@@ -730,7 +730,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _symlink($target, $path, $name='') {
+	protected function _symlink($target, $path, $name) {
 		return false;
 	}
 	
@@ -743,7 +743,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _copy($source, $targetDir, $name='') {
+	protected function _copy($source, $targetDir, $name) {
 		die('Not yet implemented. (_copy)');
 		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
 		return copy($source, $target);
