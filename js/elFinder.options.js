@@ -77,7 +77,7 @@ elFinder.prototype._options = {
 	 * @type Object
 	 * @default  {}
 	 */
-	customData : {token : '42', test : 'test'},
+	customData : {},
 	
 	/**
 	 * Event listeners to bind on elFinder init

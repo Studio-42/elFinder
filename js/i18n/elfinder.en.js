@@ -73,6 +73,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
 			'errResize'            : 'Unable to resize "$1".',
 			'errUsupportType'      : 'Unsupported file type.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',

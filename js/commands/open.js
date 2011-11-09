@@ -64,7 +64,7 @@ elFinder.prototype.commands.open = function() {
 				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
-			if (!(url = fm.url(file.thash || file.hash))) {
+			if (!(url = fm.url(/*file.thash || */file.hash))) {
 				url = fm.options.url;
 				url = url + (url.indexOf('?') === -1 ? '?' : '&')
 					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')

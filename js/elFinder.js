@@ -234,7 +234,7 @@ window.elFinder = function(node, opts) {
 				f = data[l];
 				if (f.name && f.hash && f.mime) {
 					files[f.hash] = f;
-				}
+				} 
 			}
 		},
 		
@@ -632,19 +632,7 @@ window.elFinder = function(node, opts) {
 		if (cwdOptions.url) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
-		
-		var file = files[hash],
-			path = '';
 
-		if (file.url) {
-			return file.url;
-		}
-		
-		if (cwdOptions.url && (path = this.path(hash))) {
-			path = path.split(cwdOptions.separator).join('/');
-			this.log(path)
-			return cwdOptions.url + path.substr(path.indexOf('/')+1);
-		}
 		return '';
 	}
 	

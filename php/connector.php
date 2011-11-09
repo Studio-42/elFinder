@@ -306,7 +306,7 @@ $opts = array(
 		
 		array(
 			'driver' => 'FTP',
-			'host' => '192.168.1.36',
+			'host' => '192.168.1.38',
 			'user' => 'dio',
 			'pass' => 'hane',
 			'path' => '/Users/dio/Documents',
@@ -322,13 +322,14 @@ $opts = array(
 				
 			)
 		),
-		// array(
-		// 	'driver' => 'FTP',
-		// 	'host' => 'work.std42.ru',
-		// 	'user' => 'dio',
-		// 	'pass' => '123456',
-		// 	'path' => '/'
-		// ),
+		array(
+			'driver' => 'FTP',
+			'host' => 'work.std42.ru',
+			'user' => 'dio',
+			'pass' => '123456',
+			'path' => '/',
+			'tmpPath' => '../files/ftp',
+		),
 		// array(
 		// 	'driver' => 'FTP',
 		// 	'host' => '192.168.1.35',
