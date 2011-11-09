@@ -411,11 +411,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/********************  file/dir manipulations *************************/
 	
 	/**
-	 * Create dir
+	 * Create dir and return created dir path or false on failed
 	 *
 	 * @param  string  $path  parent dir path
 	 * @param string  $name  new directory name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
@@ -430,11 +430,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create file
+	 * Create file and return it's path or false on failed
 	 *
 	 * @param  string  $path  parent dir path
 	 * @param string  $name  new file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkfile($path, $name) {
@@ -443,7 +443,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (($fp = @fopen($path, 'w'))) {
 			@fclose($fp);
 			@chmod($path, $this->options['fileMode']);
-			return true;
+			return $path;
 		}
 		return false;
 	}

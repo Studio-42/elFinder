@@ -311,6 +311,7 @@ $opts = array(
 			'pass' => 'hane',
 			'path' => '/Users/dio/Documents',
 			'tmpPath' => '../files/ftp',
+			'utf8fix' => true,
 			'attributes' => array(
 				array(
 					'pattern' => '~/\.~',
