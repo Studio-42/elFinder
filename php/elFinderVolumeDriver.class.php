@@ -1364,7 +1364,7 @@ abstract class elFinderVolumeDriver {
 			$w = $s[0];
 			$h = $s[1];
 		}
-
+		// $this->clearcache();
 		if (($path = $this->_save($fp, $dstpath, $name, $mime, $w, $h)) == false) {
 			return false;
 		}
@@ -1373,7 +1373,7 @@ abstract class elFinderVolumeDriver {
 		if (isset($removed)) {
 			$this->removed[] = $removed;
 		}
-		
+
 		return $this->stat($path);
 	}
 	

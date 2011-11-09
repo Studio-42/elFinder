@@ -831,20 +831,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _save($fp, $dir, $name, $mime, $w, $h) {
-		die('Not yet implemented. (_save)');
-		$path = $dir.DIRECTORY_SEPARATOR.$name;
-
-		if (!($target = @fopen($path, 'wb'))) {
-			return false;
-		}
-
-		while (!feof($fp)) {
-			fwrite($target, fread($fp, 8192));
-		}
-		fclose($target);
-		@chmod($path, $this->options['fileMode']);
-		clearstatcache();
-		return $path;
+		$path = $dir.'/'.$name;
+		return ftp_fput($this->connect, $path, $fp, strpos($this->mimetype($path), 'text/') === 0 ? FTP_ASCII : FTP_BINARY)
+			? $path
+			: false;
 	}
 	
 	/**
