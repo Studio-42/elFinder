@@ -793,19 +793,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		if ($path == '' || (!($this->ftp_conn)))
-		{
-			return false;
-		}
-		
-		$result = @ftp_delete($this->ftp_conn, $path);
-
-		if ($result === false)
-		{
-			return $this->setError('Unable to delete remote file');
-			return false;
-		}
-		return true;
+		return ftp_delete($this->connect, $path);
 	}
 
 	/**
@@ -816,8 +804,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		die('Not yet implemented. (_rmdir)');
-		return @rmdir($path);
+		return ftp_rmdir($this->connect, $path);
 	}
 	
 	/**
