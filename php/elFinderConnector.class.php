@@ -105,7 +105,7 @@ class elFinderConnector {
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
-		// ob_end_clean();
+		ob_end_clean();
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {

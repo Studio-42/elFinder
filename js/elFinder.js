@@ -624,16 +624,21 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.url = function(hash) {
+		var file = files[hash];
 		
-		if (files[hash] && files[hash].url) {
-			return files[hash].url;
+		if (!file || !file.read) {
+			return '';
+		}
+		
+		if (file.url) {
+			return file.url;
 		}
 		
 		if (cwdOptions.url) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
-
-		return '';
+		
+		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file') + '&target=' + file.hash;
 	}
 	
 	/**
