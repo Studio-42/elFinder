@@ -86,9 +86,9 @@ abstract class elFinderVolumeDriver {
 	protected $tmbURL = '';
 	
 	/**
-	 * undocumented class variable
+	 * Thumbnails size in px
 	 *
-	 * @var string
+	 * @var int
 	 **/
 	protected $tmbSize = 48;
 	
@@ -108,9 +108,9 @@ abstract class elFinderVolumeDriver {
 	protected $cryptLib = '';
 	
 	/**
-	 * undocumented class variable
+	 * Archivers config
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $archivers = array(
 		'create'  => array(),
@@ -311,9 +311,9 @@ abstract class elFinderVolumeDriver {
 	protected $finfo = null;
 	
 	/**
-	 * undocumented class variable
+	 * List of disabled client's commands
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $diabled = array();
 	
@@ -427,16 +427,16 @@ abstract class elFinderVolumeDriver {
 	protected $removed = array();
 	
 	/**
-	 * undocumented class variable
+	 * Cache storage
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $cache = array();
 	
 	/**
-	 * undocumented class variable
+	 * Cache by folders
 	 *
-	 * @var string
+	 * @var array
 	 **/
 	protected $dirsCache = array();
 	
@@ -995,7 +995,7 @@ abstract class elFinderVolumeDriver {
 		if (($dir = $this->file($hash)) == false) {
 			return $this->setError(elFinder::ERROR_DIR_NOT_FOUND);
 		}
-		// debug($dir);
+
 		if ($resolveLink && !empty($dir['thash'])) {
 			$dir = $this->file($dir['thash']);
 		}

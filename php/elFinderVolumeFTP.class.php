@@ -54,22 +54,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $ftpError = '';
 	
 	/**
-	 * undocumented class variable
+	 * FTP server output list as ftp on linux
 	 *
-	 * @var string
+	 * @var bool
 	 **/
-	protected $separator = '';
-	
 	protected $ftpOsUnix;
 	
-	protected $tmp = '';
-	
 	/**
-	 * undocumented class variable
+	 * Tmp folder path
 	 *
 	 * @var string
 	 **/
-	// protected $cache = array();
+	protected $tmp = '';
 	
 	/**
 	 * Constructor
@@ -231,9 +227,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 
 	/**
-	 * undocumented function
+	 * Parse line from ftp_rawlist() output and return file stat (array)
 	 *
-	 * @return void
+	 * @param  string  $raw  line from ftp_rawlist() output
+	 * @return array
 	 * @author Dmitry Levashov
 	 **/
 	protected function parseRaw($raw) {
@@ -292,17 +289,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['write'] = $perm['write'];
 			$stat['perm']  = substr($info[0], 1);
 		} else {
-			
+			die('Windows ftp servers not supported yet');
 		}
 
 		return $stat;
 	}
 	
 	/**
-	 * undocumented function
+	 * Get stat for folder content and put in cache
 	 *
+	 * @param  string  $path
 	 * @return void
-	 * @author Dmitry Levashov
+	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function parsePermissions($perm) {
 		$res   = array();
@@ -321,14 +319,19 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * undocumented function
+	 * Read dir and put 
 	 *
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
-
+		// echo $path.'<br>';
+		// 
+		// $p = substr($path, 1);
+		// $p = str_replace(" ", "\ ", $p);
+		// echo $p.'<br>';
+		// debug(ftp_nlist($this->connect, '-l /test3/новая\ папка42/'));
 		foreach (ftp_rawlist($this->connect, $path) as $raw) {
 			if (($stat = $this->parseRaw($raw))) {
 				$p    = $path.'/'.$stat['name'];
@@ -339,6 +342,17 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Return ftp transfer mode for file
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function ftpMode($path) {
+		return strpos($this->mimetype($path), 'text/') === 0 ? FTP_ASCII : FTP_BINARY;
 	}
 
 	/*********************** paths/urls *************************/
@@ -639,7 +653,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($path) {
 		$files = array();
-		
+
 		foreach (ftp_rawlist($this->connect, $path) as $str) {
 			if (($stat = $this->parseRaw($str))) {
 				$files[] = $path.DIRECTORY_SEPARATOR.$stat['name'];
@@ -744,9 +758,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _copy($source, $targetDir, $name) {
-		die('Not yet implemented. (_copy)');
-		$target = $targetDir.DIRECTORY_SEPARATOR.($name ? $name : basename($source));
-		return copy($source, $target);
+		$res = false;
+		
+		if ($this->tmp) {
+			$local  = $this->tmp.DIRECTORY_SEPARATOR.md5($source);
+			$target = $targetDir.DIRECTORY_SEPARATOR.$name;
+
+			if (ftp_get($this->connect, $local, $source, FTP_BINARY)
+			&& ftp_put($this->connect, $target, $local, $this->ftpMode($target))) {
+				$res = $target;
+			}
+			@unlink($local);
+		}
+		
+		return $res;
 	}
 	
 	/**
@@ -798,7 +823,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _save($fp, $dir, $name, $mime, $w, $h) {
 		$path = $dir.'/'.$name;
-		return ftp_fput($this->connect, $path, $fp, strpos($this->mimetype($path), 'text/') === 0 ? FTP_ASCII : FTP_BINARY)
+		return ftp_fput($this->connect, $path, $fp, $this->ftpMode($path))
 			? $path
 			: false;
 	}
@@ -839,8 +864,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if (@file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = @fopen($local, 'rb'))) {
 				clearstatcache();
-				$mode = strpos($this->mimetype($path), 'text/') === 0 ? FTP_ASCII : FTP_BINARY;
-				$res  = ftp_fput($this->connect, $path, $fp, $mode);
+				$res  = ftp_fput($this->connect, $path, $fp, $this->ftpMode($path));
 				@fclose($fp);
 			}
 			file_exists($local) && @unlink($local);

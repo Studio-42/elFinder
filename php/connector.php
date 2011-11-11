@@ -304,25 +304,25 @@ $opts = array(
 		// 	// 'defaults' => array('read' => false, 'write' => true)
 		// ),
 		
-		array(
-			'driver' => 'FTP',
-			'host' => '192.168.1.38',
-			'user' => 'dio',
-			'pass' => 'hane',
-			'path' => '/Users/dio/Documents',
-			'tmpPath' => '../files/ftp',
-			'utf8fix' => true,
-			'attributes' => array(
-				array(
-					'pattern' => '~/\.~',
-					'read' => false,
-					'write' => false,
-					'hidden' => true,
-					'locked' => false
-				),
-				
-			)
-		),
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => '192.168.1.38',
+		// 	'user' => 'dio',
+		// 	'pass' => 'hane',
+		// 	'path' => '/Users/dio/Documents',
+		// 	'tmpPath' => '../files/ftp',
+		// 	'utf8fix' => true,
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '~/\.~',
+		// 			'read' => false,
+		// 			'write' => false,
+		// 			'hidden' => true,
+		// 			'locked' => false
+		// 		),
+		// 		
+		// 	)
+		// ),
 		array(
 			'driver' => 'FTP',
 			'host' => 'work.std42.ru',
