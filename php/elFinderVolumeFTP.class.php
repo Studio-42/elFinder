@@ -326,12 +326,17 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
-		// echo $path.'<br>';
-		// 
-		// $p = substr($path, 1);
-		// $p = str_replace(" ", "\ ", $p);
-		// echo $p.'<br>';
-		// debug(ftp_nlist($this->connect, '-l /test3/новая\ папка42/'));
+
+		if (preg_match('/\s|\'|\"/', $path)) {
+			foreach (ftp_nlist($this->connect, $path) as $p) {
+				$p = $path.'/'.$p;
+				if (($stat = $this->_stat($p)) &&empty($stat['hidden'])) {
+					$files[] = $stat;
+					$this->dirsCache[$path][] = $p;
+				}
+			}
+			return;
+		}
 		foreach (ftp_rawlist($this->connect, $path) as $raw) {
 			if (($stat = $this->parseRaw($raw))) {
 				$p    = $path.'/'.$stat['name'];
@@ -620,6 +625,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
+		
+		if (preg_match('/\s|\'|\"/', $path)) {
+			foreach (ftp_nlist($this->connect, $path) as $p) {
+				if (($stat = $this->stat($path.'/'.$p)) && $stat['mime'] == 'directory') {
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		foreach (ftp_rawlist($this->connect, $path) as $str) {
 			if (($stat = $this->parseRaw($str)) && $stat['mime'] == 'directory') {
 				return true;
