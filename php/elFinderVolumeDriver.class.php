@@ -2239,7 +2239,7 @@ abstract class elFinderVolumeDriver {
 		$result = array();
 
 		foreach($this->_scandir($path) as $p) {
-			$stat = $this->$stat($p);
+			$stat = $this->stat($p);
 			if (!empty($stat['hidden']) || !$this->mimeAccepted($stat['mime'])) {
 				continue;
 			}
