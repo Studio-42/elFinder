@@ -105,6 +105,9 @@
 	<!-- elfinder custom extenstions -->
 	<script src="extensions/jplayer/elfinder.quicklook.jplayer.js" type="text/javascript" charset="utf-8"></script>
 	
+	
+	
+	
 	<style type="text/css">
 		body { font-family:arial, verdana, sans-serif;}
 		.button {
@@ -139,6 +142,7 @@
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 
+			// tinyMCE.init({});
 
 			$('#finder').elfinder({
 				// url : 'php/connector.php',
@@ -155,15 +159,30 @@
 				// onlyMimes : ['image', 'text/plain']
 				lang : 'ru',
 				// requestType : 'POST',
-				rememberLastDir : false, // TODO need more testing
+				// rememberLastDir : false, // TODO need more testing
 				// ui : ['tree', 'toolbar'],
 				// commands : [],
 				// commandsOptions : {
-				// 	getfile : {
-				// 		onlyURL : true,
-				// 		multiple : true
+				// 	edit : {
+				// 		mimes : ['text/plain', 'text/html', 'text/javascript'],
+				// 		editors : [
+				// 			{
+				// 				mimes : ['text/html'],
+				// 				load : function(textarea) {
+				// 					tinyMCE.execCommand("mceAddControl", true, textarea.id);
+				// 				},
+				// 				close : function(textarea, instance) {
+				// 					tinyMCE.execCommand('mceRemoveControl', false, textarea.id);
+				// 				},
+				// 				save : function(textarea, editor) {
+				// 					textarea.value = tinyMCE.get(textarea.id).selection.getContent({format : 'html'});
+				// 					tinyMCE.execCommand('mceRemoveControl', false, textarea.id);
+				// 				}
+				// 
+				// 			}
+				// 		]
 				// 	}
-				// },
+				// }
 				// uiOptions : {
 				// 	toolbar : [['help']]
 				// }

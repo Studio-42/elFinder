@@ -143,7 +143,45 @@ elFinder.prototype._options = {
 		edit : {
 			// list of allowed mimetypes to edit
 			// if empty - any text files can be edited
-			mimes : ['text/html', 'text/javascript']
+			mimes : [],
+			// edit files in wysisyg's
+			editors : [
+				// {  
+				//  	/**
+				//  	 * files mimetypes allowed to edit in current wysisyg
+				// 	 * @type  Array
+				// 	 */
+				// 	mimes : ['text/html'], 
+				// 	/**
+				//  	 * Called when "edit" dialog loaded.
+				// 	 * Place to init wysisyg.
+				// 	 * Can return wysisyg instance
+				// 	 *
+				// 	 * @param  DOMElement  textarea node
+				// 	 * @return Object
+				// 	 */
+				// 	load : function(textarea) { },
+				// 	/**
+				//  	 * Called before "edit" dialog closed.
+				// 	 * Place to destroy wysisyg instance.
+				// 	 *
+				// 	 * @param  DOMElement  textarea node
+				// 	 * @param  Object      wysisyg instance (if was returned by "load" callback)
+				// 	 * @return void
+				// 	 */
+				// 	close : function(textarea, instance) { },
+				// 	/**
+				//  	 * Called before file content send to backend.
+				// 	 * Place to update textarea content if needed.
+				// 	 *
+				// 	 * @param  DOMElement  textarea node
+				// 	 * @param  Object      wysisyg instance (if was returned by "load" callback)
+				// 	 * @return void
+				// 	 */
+				// 	save : function(textarea, editor) {}
+				// 
+				// }
+			]
 		},
 		
 		help : {view : ['about', 'shortcuts', 'help']}
