@@ -9,6 +9,10 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		mimes = fm.res('mimes', 'text') || [],
+		editor = function(text, mime) {
+			
+		},
+		
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -16,8 +20,12 @@ elFinder.prototype.commands.edit = function() {
 		 * @return Array
 		 **/
 		filter = function(files) {
+			self.fm.log(self.onlyMimes)
 			return $.map(files, function(file) {
-				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 && file.read && file.write ? file : null;
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1) 
+					&& file.mime.indexOf('text/rtf')
+					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
+					&& file.read && file.write ? file : null;
 			})
 		},
 		/**
@@ -143,14 +151,19 @@ elFinder.prototype.commands.edit = function() {
 		};
 	
 	
+	
 	this.shortcuts = [{
 		pattern     : 'ctrl+e'
 	}];
 	
+	this.init = function() {
+		this.onlyMimes = this.options.mimes || []
+	}
+	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-			
+
 		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
 	

@@ -139,6 +139,12 @@ elFinder.prototype._options = {
 			autoplay : true,
 			jplayer  : 'extensions/jplayer'
 		},
+		// "quicklook" command options.
+		edit : {
+			// list of allowed mimetypes to edit
+			// if empty - any text files can be edited
+			mimes : ['text/html', 'text/javascript']
+		},
 		
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
