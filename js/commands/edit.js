@@ -9,6 +9,7 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		mimes = fm.res('mimes', 'text') || [],
+		
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -17,9 +18,110 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(files) {
 			return $.map(files, function(file) {
-				return file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 && file.read && file.write ? file : null;
-			})
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1) 
+					&& file.mime.indexOf('text/rtf')
+					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
+					&& file.read && file.write ? file : null;
+			});
 		},
+		
+		/**
+		 * Open dialog with textarea to edit file
+		 *
+		 * @param  String  id       dialog id
+		 * @param  Object  file     file object
+		 * @param  String  content  file content
+		 * @return $.Deferred
+		 **/
+		dialog = function(id, file, content) {
+
+			var dfrd = $.Deferred(),
+				ta   = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta">'+content+'</textarea>'),
+				save = function() {
+					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
+					dfrd.resolve(ta.getContent());
+					ta.elfinderdialog('close');
+				},
+				cancel = function() {
+					dfrd.reject();
+					ta.elfinderdialog('close');
+				},
+				opts = {
+					title   : file.name,
+					width   : self.options.dialogWidth || 450,
+					buttons : {},
+					close   : function() { 
+						ta.editor && ta.editor.close(ta[0], ta.editor.instance);
+						$(this).elfinderdialog('destroy'); 
+					},
+					open    : function() { 
+						fm.disable();
+						ta.focus(); 
+						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+						ta.editor && ta.editor.load(ta[0]);
+					}
+					
+				};
+				
+				ta.getContent = function() {
+					return ta.val()
+				}
+				
+				$.each(self.options.editors || [], function(i, editor) {
+					if ($.inArray(file.mime, editor.mimes || []) !== -1 
+					&& typeof editor.load == 'function'
+					&& typeof editor.save == 'function') {
+						ta.editor = {
+							load     : editor.load,
+							save     : editor.save,
+							close    : typeof editor.close == 'function' ? editor.close : function() {},
+							instance : null
+						}
+						
+						return false;
+					}
+				});
+				
+				if (!ta.editor) {
+					ta.keydown(function(e) {
+						var code = e.keyCode,
+							value, start;
+						
+						e.stopPropagation();
+						if (code == 9) {
+							e.preventDefault();
+							// insert tab on tab press
+							if (this.setSelectionRange) {
+								value = this.value;
+								start = this.selectionStart;
+								this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
+								start += 1;
+								this.setSelectionRange(start, start);
+							}
+						}
+						
+						if (e.ctrlKey || e.metaKey) {
+							// close on ctrl+w/q
+							if (code == 81 || code == 87) {
+								e.preventDefault();
+								cancel();
+							}
+							if (code == 83) {
+								e.preventDefault();
+								save();
+							}
+						}
+						
+					})
+				}
+				
+				opts.buttons[fm.i18n('Save')]   = save;
+				opts.buttons[fm.i18n('Cancel')] = cancel
+				
+				fm.dialog(ta, opts).attr('id', id);
+				return dfrd.promise();
+		},
+		
 		/**
 		 * Get file content and
 		 * open dialog with textarea to edit file content
@@ -34,84 +136,6 @@ elFinder.prototype.commands.edit = function() {
 				data   = {cmd : 'file', target : hash},
 				url    = fm.url(hash) || fm.options.url,
 				id    = 'edit-'+fm.namespace+'-'+file.hash,
-				dialog = function(text) {
-					var editor = $('<textarea class="elfinder-file-edit" rows="20">'+text+'</textarea>')
-							.keydown(function(e) {
-								var code = e.keyCode,
-									value, start;
-								
-								e.stopPropagation();
-								if (code == 9) {
-									e.preventDefault();
-									// insert tab on tab press
-									if (this.setSelectionRange) {
-										value = this.value;
-										start = this.selectionStart;
-										this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
-										start += 1;
-										this.setSelectionRange(start, start);
-									}
-								}
-								
-								if (e.ctrlKey || e.metaKey) {
-									// close on ctrl+w/q
-									if (code == 81 || code == 87) {
-										e.preventDefault();
-										cancel();
-									}
-									if (code == 83) {
-										e.preventDefault();
-										save();
-									}
-								}
-							}),
-						opts = {
-							title   : file.name,
-							width   : self.options.dialogWidth || 450,
-							buttons : {},
-							close   : function() { 
-								$(this).elfinderdialog('destroy'); 
-							},
-							open    : function() { 
-								fm.disable();
-								editor.focus(); 
-								editor[0].setSelectionRange && editor[0].setSelectionRange(0, 0);
-							}
-							
-						},
-					cancel = function() {
-						dfrd.resolve();
-						editor.elfinderdialog('close');
-					},
-					save = function() {
-						var value = editor.val();
-						
-						editor.elfinderdialog('close');
-						
-						fm.request({
-							options : {type : 'post'},
-							data : {
-								cmd     : 'put',
-								target  : hash,
-								content : value
-							},
-							notify : {type : 'save', cnt : 1},
-							syncOnFail : true
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						})
-						.done(function(data) {
-							data.changed && data.changed.length && fm.change(data);
-							dfrd.resolve(data);
-						});
-					};
-						
-					opts.buttons[fm.i18n('Save')]   = save;
-					opts.buttons[fm.i18n('Cancel')] = cancel;
-					
-					fm.dialog(editor, opts).attr('id', id);
-				},
 				d = fm.getUI().find('#'+id), 
 				error;
 			
@@ -133,24 +157,48 @@ elFinder.prototype.commands.edit = function() {
 				syncOnFail : true
 			})
 			.done(function(data) {
-				dialog(data.content);
+				dialog(id, file, data.content)
+					.done(function(content) {
+						fm.request({
+							options : {type : 'post'},
+							data : {
+								cmd     : 'put',
+								target  : hash,
+								content : content
+							},
+							notify : {type : 'save', cnt : 1},
+							syncOnFail : true
+						})
+						.fail(function(error) {
+							dfrd.reject(error);
+						})
+						.done(function(data) {
+							data.changed && data.changed.length && fm.change(data);
+							dfrd.resolve(data);
+						});
+					})
 			})
 			.fail(function(error) {
 				dfrd.reject(error);
 			})
 
-			return dfrd;
+			return dfrd.promise();
 		};
+	
 	
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+e'
 	}];
 	
+	this.init = function() {
+		this.onlyMimes = this.options.mimes || []
+	}
+	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-			
+
 		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
 	

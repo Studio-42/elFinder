@@ -2107,7 +2107,7 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	lastDir : function(hash) { 
-		return this.storage('lastdir', hash);
+		return this.options.rememberLastDir ? this.storage('lastdir', hash) : '';
 	},
 	
 	/**
