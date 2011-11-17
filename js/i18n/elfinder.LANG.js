@@ -134,6 +134,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Extracting files from archive',
 			'ntfsearch'   : 'Searching files',
 			'ntfsmth'     : 'Doing something >_<',
+			'ntfloadimg'  : 'Loading image',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -229,6 +230,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Scale',
 			'width'           : 'Width',
 			'height'          : 'Height',
+			'mode'            : 'Mode',
+			'resize'          : 'Resize',
+			'crop'            : 'Crop',
+
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
