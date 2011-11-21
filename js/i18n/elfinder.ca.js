@@ -127,6 +127,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'S\'estan extreient els fitxers de l\'arxiu',
 			'ntfsearch'   : 'S\'estan cercant els fitxers',
 			'ntfsmth'     : 'S\'estan realitzant operacions',
+      'ntfloadimg'  : 'S\'està carregant la imatge',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'desconegut',
@@ -222,6 +223,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Escala',
 			'width'           : 'Amplada',
 			'height'          : 'Alçada',
+      'mode'            : 'Mode',
+      'resize'          : 'Redimensiona',
+      'crop'            : 'Retalla',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconegut',
