@@ -27,15 +27,15 @@ elFinder.prototype.commands.resize = function() {
 					preview  = $('<div class="elfinder-resize-preview"/>'),
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle"/>'),
-					rhandlec  = $('<div class="elfinder-resize-handle"/>'),
+					rhandlec = $('<div class="elfinder-resize-handle"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
-					uitype     = $('<div class="elfinder-resize-type"><div class="elfinder-resize-label">'+fm.i18n('mode')+'</div></div>')
+					uitype   = $('<div class="elfinder-resize-type"><div class="elfinder-resize-label">'+fm.i18n('mode')+'</div></div>')
 						.append('<input checked="checked" type="radio" name="type" id="type-resize" value="resize"/><label for="type-resize">'+fm.i18n('resize')+'</label>')
-						.append('<input type="radio" name="type" id="type-crop" value="crop"/><label for="type-crop">'+fm.i18n('crop')+'</label>');
-					type     = $('input', uitype)
+						.append('<input type="radio" name="type" id="type-crop" value="crop"/><label for="type-crop">'+fm.i18n('crop')+'</label>'),
+					type    = $('input', uitype)
 						.change(function() {
 							uiresize.add(uicrop).toggle();
 							resetView();
