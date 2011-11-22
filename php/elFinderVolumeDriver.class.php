@@ -692,7 +692,7 @@ abstract class elFinderVolumeDriver {
 						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
 							if (!isset(self::$mimetypes[$mime[$i]])) {
 								self::$mimetypes[$mime[$i]] = $mime[0];
-							} 
+							}
 						}
 					}
 				}
@@ -716,11 +716,11 @@ abstract class elFinderVolumeDriver {
 			if ($this->options['startPath']) {
 				$start = $this->stat($this->options['startPath']);
 				if (!empty($start)
-				&& $start['mime'] == 'directory' 
-				&& $start['read'] 
-				&& !$start['hidden'] 
+				&& $start['mime'] == 'directory'
+				&& $start['read']
+				&& !$start['hidden']
 				&& $this->_inpath($this->options['startPath'], $this->root)) {
-					$this->startPath = $path;
+					$this->startPath = $this->options['startPath'];
 				}
 			}
 		} else {
@@ -729,13 +729,12 @@ abstract class elFinderVolumeDriver {
 			$this->options['tmbPath'] = '';
 			// read only volume
 			array_unshift($this->attributes, array(
-				'pattern' => '/.*/', 
+				'pattern' => '/.*/',
 				'read'    => false
 			));
 		}
-		
 		$this->treeDeep = $this->options['treeDeep'] > 0 ? (int)$this->options['treeDeep'] : 1;
-		$this->tmbSize  = $this->options['tmbSize'] > 0 ? (int)$this->options['tmbSize'] : 48;		
+		$this->tmbSize  = $this->options['tmbSize'] > 0 ? (int)$this->options['tmbSize'] : 48;
 		$this->URL      = $this->options['URL'];
 		if ($this->URL && preg_match("|[^/?&=]$|", $this->URL)) {
 			$this->URL .= '/';

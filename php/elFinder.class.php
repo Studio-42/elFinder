@@ -478,7 +478,7 @@ class elFinder {
 
 				if (($tree = $v->tree('', 0, $cwd['hash'])) != false) {
 					$files = array_merge($files, $tree);
-				} 
+				}
 			}
 		}
 
