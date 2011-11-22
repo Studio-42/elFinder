@@ -146,14 +146,14 @@ elFinder.prototype._options = {
 			mimes : [],
 			// edit files in wysisyg's
 			editors : [
-				// {  
-				//  	/**
-				//  	 * files mimetypes allowed to edit in current wysisyg
+				// {
+				// 	/**
+				// 	 * files mimetypes allowed to edit in current wysisyg
 				// 	 * @type  Array
 				// 	 */
 				// 	mimes : ['text/html'], 
 				// 	/**
-				//  	 * Called when "edit" dialog loaded.
+				// 	 * Called when "edit" dialog loaded.
 				// 	 * Place to init wysisyg.
 				// 	 * Can return wysisyg instance
 				// 	 *
@@ -162,7 +162,7 @@ elFinder.prototype._options = {
 				// 	 */
 				// 	load : function(textarea) { },
 				// 	/**
-				//  	 * Called before "edit" dialog closed.
+				// 	 * Called before "edit" dialog closed.
 				// 	 * Place to destroy wysisyg instance.
 				// 	 *
 				// 	 * @param  DOMElement  textarea node
@@ -171,7 +171,7 @@ elFinder.prototype._options = {
 				// 	 */
 				// 	close : function(textarea, instance) { },
 				// 	/**
-				//  	 * Called before file content send to backend.
+				// 	 * Called before file content send to backend.
 				// 	 * Place to update textarea content if needed.
 				// 	 *
 				// 	 * @param  DOMElement  textarea node
@@ -202,9 +202,10 @@ elFinder.prototype._options = {
 	 * Here set not required plugins as folders tree/toolbar/statusbar etc.
 	 *
 	 * @type Array
-	 * @default ['toolbar', 'places', 'tree', 'path', 'stat']
+	 * @default ['toolbar', 'tree', 'path', 'stat']
+	 * @full ['toolbar', 'places', 'tree', 'path', 'stat']
 	 */
-	ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
+	ui : ['toolbar', 'tree', 'path', 'stat'],
 	
 	/**
 	 * Some UI plugins options.
