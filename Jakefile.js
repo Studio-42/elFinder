@@ -200,6 +200,11 @@ task('misc', function(){
 		var dst = cf[i].replace(src, '').substr(1);
 		copyFile(cf[i], dst);
 	}
+	// elfinder.html
+	var hs = path.join(src, 'build', 'elfinder.html');
+	var hd = path.join('elfinder.html');
+	copyFile(hs, hd);
+
 	// connector
 	var cs = path.join(src, 'php', 'connector.minimal.php');
 	var cd = path.join('php', 'connector.php');
@@ -226,6 +231,9 @@ task('clean', function(){
 			console.log('\tunlink ' + file);
 			fs.unlinkSync(file);
 		}
+	}
+	if (path.join(src, 'build') != path.resolve()) {
+		fs.unlinkSync('elfinder.html');
 	}
 	if (src != path.resolve()) {
 		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'php', 'files'];
