@@ -1,6 +1,11 @@
 <?php
-error_reporting(E_ALL); // Set E_ALL for debuging
 
+set_time_limit(0); // just in case it too long, not recommended for production
+error_reporting(E_ALL | E_STRICT); // Set E_ALL for debuging
+
+// needed for case insensitive search to work, due to broken UTF-8 support in PHP
+ini_set('mbstring.internal_encoding', 'UTF-8');
+ini_set('mbstring.func_overload', 2);
 
 if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');

@@ -1,7 +1,5 @@
 <?php
 
-set_time_limit(0);
-
 /**
  * elFinder - file manager for web.
  * Core class.
