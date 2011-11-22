@@ -50,7 +50,16 @@ Requirements
 
 ### Server
  * Any web server
- * PHP (for thumbnails - mogrify utility or GD/Imagick module)
+ * PHP 5.2+ (for thumbnails - mogrify utility or GD/Imagick module)
+
+
+3rd party connectors
+--------------------
+ * [Python](https://github.com/Studio-42/elfinder-python)
+ * [Ruby/Rails](https://github.com/phallstrom/el_finder)
+ * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
+ * [ASP.NET Integration](http://code.google.com/p/elfinderintegration/)
+ * [elFinder .Net connector](http://elfinderconnectornet.codeplex.com/)
 
 
 Support
@@ -59,6 +68,7 @@ Support
  * [Homepage](http://elfinder.org)
  * [Wiki](https://github.com/Studio-42/elFinder/wiki)
  * [Issues](https://github.com/Studio-42/elFinder/issues)
+ * [Forum](http://elfinder.org/forum/)
  * <dev@std42.ru>
 
 
