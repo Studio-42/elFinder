@@ -15,8 +15,8 @@
 	float:left;
 	background:transparent;
 	padding:0;
-	-moz-border-radius: 4px; 
-	-webkit-border-radius: 4px; 
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
 	border-radius: 4px;
 }
 
@@ -165,7 +165,7 @@
 	border:0 solid;
 	background:transparent;
 	padding:0;
-	margin: 1px 4px;
+	margin: 1px 4px 2px 4px;
 	height:auto;
 	float:right;
 	width:202px;
