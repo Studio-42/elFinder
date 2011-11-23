@@ -22,8 +22,9 @@
 
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; padding-right:10px; }
-.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; padding-left:10px; }
+.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }
+.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
+.elfinder-ltr .ui-resizable-e { margin-left:10px; }
 
 /* folders tree container */
 .elfinder-tree { display:table; width:100%; margin: 0 0 .5em 0; }
