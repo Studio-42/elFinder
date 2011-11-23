@@ -165,8 +165,9 @@
 	border:0 solid;
 	background:transparent;
 	padding:0;
-	margin: 1px 4px 2px 4px;
-	height:auto;
+	margin: 1px 4px;
+	height: auto;
+	min-height: 26px;
 	float:right;
 	width:202px;
 }
@@ -197,7 +198,7 @@
 	position:absolute;
 	height:18px;
 	top: 50%;
-	margin:-7px 4px 0 4px;
+	margin:-9px 4px 0 4px;
 	opacity: .6; 
 	filter:Alpha(Opacity=60);
 }
