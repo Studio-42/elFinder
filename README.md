@@ -56,6 +56,7 @@ Requirements
 3rd party connectors
 --------------------
  * [Python](https://github.com/Studio-42/elfinder-python)
+ * [Django](https://github.com/mikery/django-elfinder)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
  * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
  * [ASP.NET Integration](http://code.google.com/p/elfinderintegration/)
