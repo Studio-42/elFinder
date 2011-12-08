@@ -41,7 +41,9 @@
 	outline:0 solid;
 	border:1px solid transparent;
 	cursor:default;
-	
+	/* ie6 hack */
+	zoom:1;
+	_border:1px none;
 }
 
 /* ltr/rtl enviroment */
