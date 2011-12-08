@@ -23,6 +23,9 @@
 	text-decoration:none;
 	white-space:nowrap;
 	cursor:default;
+	/* ie6 hack */
+	zoom:1;
+	_width:0;
 }
 /* text in item */
 .elfinder-contextmenu .elfinder-contextmenu-item span { font-size:.76em; display:block; }
@@ -66,4 +69,7 @@
 	height:0px;
 	border-top:1px solid #ccc;
 	margin:0 1px;
+	/* ie6 hack */
+	_height:auto;
+	font-size:0;
 }
