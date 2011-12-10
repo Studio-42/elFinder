@@ -65,9 +65,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Type d\'archive non supporté.',
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
 			'errCmdNoSupport'      : 'Le Backend ne prend pas en charge cette commande.',
-			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
-			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
-			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errReplByChild'       : 'Le dossier “$1” ne peut pas être remplacé par un élément qu\'il contient.',
+			'errArcSymlinks'       : 'Par mesure de sécurité, il est défendu d\'extraire une archive contenant des liens symboliques.',
+			'errArcMaxSize'        : 'Les fichiers de l\'archive excèdent la taille maximale autorisée.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',
@@ -95,8 +95,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Remonter au dossier parent',
 			'cmdupload'    : 'Envoyer les fichiers',
 			'cmdview'      : 'Vue',
-			'cmdresize'    : 'Resize image',
-			'cmdsort'      : 'Sort',
+			'cmdresize'    : 'Redimmensionner l\'image',
+			'cmdsort'      : 'Trier',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Fermer',
@@ -143,14 +143,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Dec'         : 'Déc',
 
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'by name (folders first)', 
-			'sortkindDirsFirst' : 'by kind (folders first)', 
-			'sortsizeDirsFirst' : 'by size (folders first)', 
-			'sortdateDirsFirst' : 'by date (folders first)', 
-			'sortname'          : 'by name', 
-			'sortkind'          : 'by kind', 
-			'sortsize'          : 'by size',
-			'sortdate'          : 'by date',
+			'sortnameDirsFirst' : 'par nom (dossiers en premier)', 
+			'sortkindDirsFirst' : 'par type (dossiers en premier)', 
+			'sortsizeDirsFirst' : 'par taille (dossiers en premier)', 
+			'sortdateDirsFirst' : 'par date (dossiers en premier)', 
+			'sortname'          : 'par nom', 
+			'sortkind'          : 'par type', 
+			'sortsize'          : 'par taille',
+			'sortdate'          : 'par date',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
@@ -213,8 +213,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Déplacer les fichiers',
 			'copyFiles'       : 'Copier les fichiers',
 			'rmFromPlaces'    : 'Remove from places',
-			'untitled folder' : 'untitled folder',
-			'untitled file.txt' : 'untitled file.txt',
+			'untitled folder' : 'dossier sans nom',
+			'untitled file.txt' : 'sans nom file.txt',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
