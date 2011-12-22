@@ -1634,25 +1634,32 @@ abstract class elFinderVolumeDriver {
 		if (!$this->canResize($path, $file['mime'])) {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
-
+		
 		switch($mode) {
 
 			case 'propresize':
-				return $this->imgResize($path, $width, $height, true, true, $this->imgLib) ? $this->stat($path) : false;
+				$result = $this->imgResize($path, $width, $height, true, true, $this->imgLib);
 				break;
 
 			case 'crop':
-				return $this->imgCrop($path, $width, $height, $x, $y, $this->imgLib) ? $this->stat($path) : false;
+				$result = $this->imgCrop($path, $width, $height, $x, $y, $this->imgLib);
 				break;
 
 			case 'fitsquare':
-				return $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib) ? $this->stat($path) : false;
+				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib);
 				break;
 			
 			default:
-				return $this->imgResize($path, $width, $height, false, true, $this->imgLib) ? $this->stat($path) : false;
+				$result = $this->imgResize($path, $width, $height, false, true, $this->imgLib);
 				break;				
     	}
+		
+		if ($result) {
+			$this->rmTmb($path);
+			$this->clearcache();
+			$this->createTmb($path);
+			return $this->stat($path);
+		}
 		
    		return false;
 	}
@@ -2589,8 +2596,8 @@ abstract class elFinderVolumeDriver {
 		}
 
     	$result = false;
-    
-    	list($size_w, $size_h) = array($width, $height);
+    	
+		list($size_w, $size_h) = array($width, $height);
     
     	if ($keepProportions == true) {
            
@@ -2696,7 +2703,8 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$result = false;
-
+		$this->rmTmb($path);
+		
 		switch ($imgLib) {
 			case 'imagick':
 				
