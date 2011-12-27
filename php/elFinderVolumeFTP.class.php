@@ -40,13 +40,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $tmpPath = '';
 	
 	/**
-	 * Files info cache
-	 *
-	 * @var array
-	 **/
-	protected $cache = array();
-		
-	/**
 	 * Last FTP error message
 	 *
 	 * @var string
@@ -296,10 +289,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Get stat for folder content and put in cache
+	 * Parse permissions string. Return array(read => true/false, write => true/false)
 	 *
-	 * @param  string  $path
-	 * @return void
+	 * @param  string  $perm  permissions string
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function parsePermissions($perm) {
@@ -319,8 +312,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Read dir and put 
+	 * Cache dir contents
 	 *
+	 * @param  string  $path  dir path
 	 * @return void
 	 * @author Dmitry Levashov
 	 **/
@@ -331,7 +325,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			foreach (ftp_nlist($this->connect, $path) as $p) {
 				$p = $path.'/'.$p;
 				if (($stat = $this->_stat($p)) &&empty($stat['hidden'])) {
-					$files[] = $stat;
+					// $files[] = $stat;
 					$this->dirsCache[$path][] = $p;
 				}
 			}
@@ -342,7 +336,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$p    = $path.'/'.$stat['name'];
 				$stat = $this->updateCache($p, $stat);
 				if (empty($stat['hidden'])) {
-					$files[] = $stat;
+					// $files[] = $stat;
 					$this->dirsCache[$path][] = $p;
 				}
 			}
