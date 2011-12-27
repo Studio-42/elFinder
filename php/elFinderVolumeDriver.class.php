@@ -1938,21 +1938,29 @@ abstract class elFinderVolumeDriver {
 			return $this->cache[$path] = array();
 		}
 
+		$stat['hash'] = $this->encode($path);
+
 		$root = $path == $this->root;
 		
-		$stat['name'] = $root ? $this->rootName : $this->_basename($path);
+		if ($root) {
+			$stat['volumeid'] = $this->id;
+			if ($this->rootName) {
+				$stat['name'] = $this->rootName;
+			}
+		} else {
+			if (!$stat['name']) {
+				$stat['name'] = $this->_basename($path);
+			}
+			if (!$stat['phash']) {
+				$stat['phash'] = $this->encode($this->_dirname($path));
+			}
+		}
 		
+		// fix name if required
 		if ($this->options['utf8fix'] && $this->options['utf8patterns'] && $this->options['utf8replace']) {
 			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($stat['name'])));
 		}
 		
-		$stat['hash'] = $this->encode($path);
-		
-		if ($root) {
-			$stat['volumeid'] = $this->id;
-		} else {
-			$stat['phash'] = $this->encode($this->_dirname($path));			
-		}
 		
 		if (empty($stat['mime'])) {
 			$stat['mime'] = $this->mimetype($stat['name']);
@@ -1967,7 +1975,7 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$stat['read'] = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
+		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
 		if ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : false)) {
 			$stat['locked'] = 1;
@@ -1986,7 +1994,7 @@ abstract class elFinderVolumeDriver {
 						$stat['dirs'] = isset($this->cache[$stat['target']])
 							? intval(isset($this->cache[$stat['target']]['dirs']))
 							: $this->_subdirs($stat['target']);
-					} elseif ($this->_subdirs($path)) {
+					} elseif (!$stat['dirs'] && $this->_subdirs($path)) {
 						$stat['dirs'] = 1;
 					}
 				} else {
