@@ -24,16 +24,7 @@ function debug($o) {
 	print_r($o);
 }
 
-// $ftp_conn = ftp_connect('192.168.1.37');
-// $login_result = ftp_login($ftp_conn, 'dio', 'hane');
-// 
-// debug(ftp_rawlist($ftp_conn, '/Users/dio'));
 
-// $fp = fopen('ftp://dio:hane@192.168.1.37/Users/dio', );
-
-// $r = scandir('ftp://dio:hane@192.168.1.37/.');
-// debug($r);
-// echo intval($r);
 
 /**
  * Simple logger function.
@@ -378,6 +369,7 @@ $opts = array(
 		// 	'accessControl' => 'access',
 		// 	'separator' => ':',
 		// 	'tmbCrop'         => false,
+		// 	'files_table' => 'elfinder_file',
 		// 	// 'imgLib' => 'imagick',
 		// 	// 'uploadOverwrite' => false,
 		// 	// 'copyTo' => false,
