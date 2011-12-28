@@ -1948,10 +1948,10 @@ abstract class elFinderVolumeDriver {
 				$stat['name'] = $this->rootName;
 			}
 		} else {
-			if (!$stat['name']) {
+			if (empty($stat['name'])) {
 				$stat['name'] = $this->_basename($path);
 			}
-			if (!$stat['phash']) {
+			if (empty($stat['phash'])) {
 				$stat['phash'] = $this->encode($this->_dirname($path));
 			}
 		}
@@ -1977,10 +1977,15 @@ abstract class elFinderVolumeDriver {
 
 		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
-		if ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : false)) {
+		if ($root) {
+			$stat['locked'] = 1;
+		} elseif ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : false)) {
 			$stat['locked'] = 1;
 		}
-		if ($this->attr($path, 'hidden', isset($stat['hidden']) ? !!$stat['hidden'] : false) 
+		
+		if ($root) {
+			$stat['hidden'] = 0;
+		} elseif ($this->attr($path, 'hidden', isset($stat['hidden']) ? !!$stat['hidden'] : false) 
 		|| !$this->mimeAccepted($stat['mime'])) {
 			$stat['hidden'] = $root ? 0 : 1;
 		}
@@ -1990,11 +1995,18 @@ abstract class elFinderVolumeDriver {
 			if ($stat['mime'] == 'directory' && $stat['read']) {
 				// for dir - check for subdirs
 				if ($this->options['checkSubfolders']) {
-					if (!empty($stat['alias']) && !empty($stat['target'])) {
+					
+					if (isset($stat['dirs'])) {
+						if ($stat['dirs']) {
+							$stat['dirs'] = 1;
+						} else {
+							unset($stat['dirs']);
+						}
+					} elseif (!empty($stat['alias']) && !empty($stat['target'])) {
 						$stat['dirs'] = isset($this->cache[$stat['target']])
 							? intval(isset($this->cache[$stat['target']]['dirs']))
 							: $this->_subdirs($stat['target']);
-					} elseif (!$stat['dirs'] && $this->_subdirs($path)) {
+					} elseif ($this->_subdirs($path)) {
 						$stat['dirs'] = 1;
 					}
 				} else {
@@ -2017,7 +2029,7 @@ abstract class elFinderVolumeDriver {
 			$stat['thash'] = $this->encode($stat['target']);
 			unset($stat['target']);
 		}
-		
+
 		return $this->cache[$path] = $stat;
 	}
 	
