@@ -149,7 +149,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
-
+		echo $this->tmbPath;
 		$this->mimeDetect = 'internal';
 	}
 	
@@ -271,7 +271,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		while ($path) {
 			if ($file = $this->stat($path)) {
 				array_unshift($parents, $path);
-				$path = $file['phash'] ? $this->decode($file['phash']) : false;
+				$path = isset($file['phash']) ? $this->decode($file['phash']) : false;
 			}
 		}
 		
