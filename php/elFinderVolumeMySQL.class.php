@@ -135,20 +135,21 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function configure() {
 		parent::configure();
-		$tmp = $this->options['tmpPath'];
-		if ($tmp) {
+
+		if (($tmp = $this->options['tmpPath'])) {
 			if (!file_exists($tmp)) {
 				if (@mkdir($tmp)) {
 					@chmod($tmp, $this->options['tmbPathMode']);
 				}
 			}
-			$this->tmpPath = is_dir($tmp) && is_writable($tmp);
+			
+			$this->tmpPath = is_dir($tmp) && is_writable($tmp) ? $tmp : false;
 		}
 		
 		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
-		
+
 		$this->mimeDetect = 'internal';
 	}
 	
@@ -208,6 +209,17 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$sql = sprintf($sql, $this->tbf, $path, $this->db->real_escape_string($name), time(), $mime, $this->defaults['read'], $this->defaults['write']);
 		// echo $sql;
 		return $this->query($sql) && $this->db->affected_rows > 0;
+	}
+
+	/**
+	 * Return temporary file path for required file
+	 *
+	 * @param  string  $path   file path
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function tmpname($path) {
+		return $this->tmpPath.DIRECTORY_SEPARATOR.md5($path);
 	}
 
 	/*********************************************************************/
@@ -429,7 +441,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		return ($stat = $this->stat($path)) ? $stat['dirs'] : false;
+		return ($stat = $this->stat($path)) && isset($stat['dirs']) ? $stat['dirs'] : false;
 	}
 	
 	/**
@@ -464,16 +476,24 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * Open file and return file pointer
 	 *
 	 * @param  string  $path  file path
-	 * @param  bool    $write open file for writing
+	 * @param  string  $mode  open file mode (ignored in this driver)
 	 * @return resource|false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
-
-			if (ftp_get($this->connect, $local, $path, FTP_BINARY)) {
-				return @fopen($local, $mode);
+		$fp = $this->tmbPath
+			? @fopen($this->tmpname($path), 'w+')
+			: @tmpfile();
+		
+		
+		if ($fp) {
+			if (($res = $this->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"'))
+			&& ($r = $res->fetch_assoc())) {
+				fwrite($fp, $r['content']);
+				rewind($fp);
+				return $fp;
+			} else {
+				$this->_fclose($fp, $path);
 			}
 		}
 		
@@ -490,7 +510,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->tmp.DIRECTORY_SEPARATOR.md5($path));
+			@unlink($this->tmpname($path));
 		}
 	}
 	
