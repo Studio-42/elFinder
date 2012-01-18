@@ -374,8 +374,9 @@ $opts = array(
 			// 'uploadOverwrite' => false,
 			// 'copyTo' => false,
 			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmbPath' => '../files/dbtmb',
-			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../files/dbtmb/',
+			'tmpPath' => '../filesdb/tmp',
+			'tmbPath' => '../filesdb/tmb',
+			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../filesdb/tmb/',
 			// 'attributes' => array(
 			// 	array(),
 			// 	array(
