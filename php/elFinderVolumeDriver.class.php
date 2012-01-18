@@ -1108,7 +1108,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tmb($hash) {
-		if ($path = $this->decode($hash)) {
+		if (($path = $this->decode($hash))) {
 			return ($tmb = $this->gettmb($path)) ? $tmb : $this->createTmb($path);
 		}
 		return false;
@@ -2535,7 +2535,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function createTmb($path) {
-		if (!$this->canCreateTmb($path, $this->mimetype($path))) {
+		$stat = $this->stat($path);
+		if (!$stat || !$this->canCreateTmb($path, $stat['mime'])) {
 			return false;
 		}
 		

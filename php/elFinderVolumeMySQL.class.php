@@ -149,7 +149,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
-		echo $this->tmbPath;
+
 		$this->mimeDetect = 'internal';
 	}
 	
