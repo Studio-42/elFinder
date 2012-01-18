@@ -439,10 +439,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _scandir($path) {
-		if (!isset($this->dirsCache[$path])) {
-			$this->cacheDir($path);
-		}
-		return $this->dirsCache[$path];
+		return isset($this->dirsCache[$path])
+			? $this->dirsCache[$path]
+			: $this->cacheDir($path);
 	}
 		
 	/**
