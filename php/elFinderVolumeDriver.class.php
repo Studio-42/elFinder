@@ -1979,23 +1979,27 @@ abstract class elFinderVolumeDriver {
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
 		if ($root) {
 			$stat['locked'] = 1;
-		} elseif ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : false)) {
+		} elseif ($this->attr($path, 'locked', !empty($stat['locked']))) {
 			$stat['locked'] = 1;
+		} else {
+			unset($stat['locked']);
 		}
-		
+
 		if ($root) {
-			$stat['hidden'] = 0;
-		} elseif ($this->attr($path, 'hidden', isset($stat['hidden']) ? !!$stat['hidden'] : false) 
+			unset($stat['hidden']);
+		} elseif ($this->attr($path, 'hidden', !empty($stat['hidden'])) 
 		|| !$this->mimeAccepted($stat['mime'])) {
 			$stat['hidden'] = $root ? 0 : 1;
+		} else {
+			unset($stat['hidden']);
 		}
 		
 		if ($stat['read'] && empty($stat['hidden'])) {
 			
-			if ($stat['mime'] == 'directory' && $stat['read']) {
+			if ($stat['mime'] == 'directory') {
 				// for dir - check for subdirs
+
 				if ($this->options['checkSubfolders']) {
-					
 					if (isset($stat['dirs'])) {
 						if ($stat['dirs']) {
 							$stat['dirs'] = 1;
@@ -2006,6 +2010,7 @@ abstract class elFinderVolumeDriver {
 						$stat['dirs'] = isset($this->cache[$stat['target']])
 							? intval(isset($this->cache[$stat['target']]['dirs']))
 							: $this->_subdirs($stat['target']);
+						
 					} elseif ($this->_subdirs($path)) {
 						$stat['dirs'] = 1;
 					}
@@ -2138,7 +2143,7 @@ abstract class elFinderVolumeDriver {
 				$result += $size;
 			}
 		}
-		
+		$this->options['checkSubfolders'] = $subdirs;
 		return $result;
 	}
 	

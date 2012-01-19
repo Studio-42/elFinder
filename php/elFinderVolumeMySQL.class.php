@@ -119,9 +119,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 
 		$this->updateCache($this->options['path'], $this->_stat($this->options['path']));
-		
-		// $this->options['alias'] = '';
-		
+
 		return true;
 	}
 
@@ -236,7 +234,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
 
-		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, ch.id AS dirs 
+		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, IF(ch.id, 1, 0) AS dirs 
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id AND ch.mime="directory"
 				WHERE f.parent_id="'.$path.'"
@@ -245,12 +243,24 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$res = $this->query($sql);
 		if ($res) {
 			while ($row = $res->fetch_assoc()) {
+				// debug($row);
 				$id = $row['id'];
 				if ($row['parent_id']) {
 					$row['phash'] = $this->encode($row['parent_id']);
+				} 
+				
+				if ($row['mime'] == 'directory') {
+					unset($row['width']);
+					unset($row['height']);
+				} else {
+					unset($row['dirs']);
 				}
+				
 				unset($row['id']);
 				unset($row['parent_id']);
+				
+				
+				
 				if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
 					$this->dirsCache[$path][] = $id;
 				}
@@ -424,6 +434,12 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$stat = $res->fetch_assoc();
 			if ($stat['parent_id']) {
 				$stat['phash'] = $this->encode($stat['parent_id']);
+			} 
+			if ($stat['mime'] == 'directory') {
+				unset($stat['width']);
+				unset($stat['height']);
+			} else {
+				unset($stat['dirs']);
 			}
 			unset($stat['id']);
 			unset($stat['parent_id']);
@@ -589,8 +605,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _move($source, $targetDir, $name) {
-		$target = $targetDir.DIRECTORY_SEPARATOR.$name;
-		return ftp_rename($this->connect, $source, $target) ? $target : false;
+		$sql = 'UPDATE %s SET parent_id=%d, name="%s" WHERE id=%d LIMIT 1';
+		$sql = sprintf($sql, $this->tbf, $targetDir, $this->db->real_escape_string($name), $source);
+		return $this->query($sql) && $this->db->affected_rows();
 	}
 		
 	/**
