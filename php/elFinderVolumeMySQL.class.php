@@ -266,6 +266,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			}
 		}
+		
+		return $this->dirsCache[$path];
 	}
 
 	/**
@@ -619,7 +621,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _unlink($path) {
 		$sql = 'DELETE FROM %s WHERE id=%d AND mime!="directory" LIMIT 1';
-		return $this->query(sprintf($sql, $this->tbf, $path)) && $this->db->affected_rows > 0;
+		return $this->query(sprintf($sql, $this->tbf, $path)) && && $this->db->affected_rows;
 	}
 
 	/**
@@ -630,7 +632,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		return ftp_rmdir($this->connect, $path);
+		$sql = 'DELETE FROM %s WHERE id=%d AND mime="directory" LIMIT 1';
+		return $this->query(sprintf($sql, $this->tbf, $path)) && $this->db->affected_rows;
 	}
 	
 	/**
