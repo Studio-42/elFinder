@@ -621,7 +621,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _unlink($path) {
 		$sql = 'DELETE FROM %s WHERE id=%d AND mime!="directory" LIMIT 1';
-		return $this->query(sprintf($sql, $this->tbf, $path)) && && $this->db->affected_rows;
+		return $this->query(sprintf($sql, $this->tbf, $path)) && $this->db->affected_rows;
 	}
 
 	/**
