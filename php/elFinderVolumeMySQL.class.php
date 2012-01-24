@@ -327,7 +327,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _joinPath($dir, $name) {
 		$sql = 'SELECT id FROM '.$this->tbf.' WHERE parent_id="'.$dir.'" AND name="'.$this->db->real_escape_string($name).'"';
+		// echo $sql;
 		if (($res = $this->query($sql)) && ($r = $res->fetch_assoc())) {
+			// echo 'got '.$r['id'];
 			$this->updateCache($r['id'], $this->_stat($r['id']));
 			return $r['id'];
 		}
@@ -580,20 +582,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _copy($source, $targetDir, $name) {
-		$res = false;
-		
-		if ($this->tmp) {
-			$local  = $this->tmp.DIRECTORY_SEPARATOR.md5($source);
-			$target = $targetDir.DIRECTORY_SEPARATOR.$name;
+		$this->clearcache();
+		$id = $this->_joinPath($targetDir, $name);
 
-			if (ftp_get($this->connect, $local, $source, FTP_BINARY)
-			&& ftp_put($this->connect, $target, $local, $this->ftpMode($target))) {
-				$res = $target;
-			}
-			@unlink($local);
-		}
-		
-		return $res;
+		$sql = $id > 0
+			? sprintf('REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden`) (SELECT %d, %d, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden` FROM %s WHERE id=%d)', $this->tbf, $id, $this->_dirname($id), $this->tbf, $source)
+			: sprintf('INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden`) SELECT %d, "%s", content, size, %d, mime, width, height, `read`, `write`, `locked`, `hidden` FROM %s WHERE id=%d', $this->tbf, $targetDir, $this->db->real_escape_string($name), time(), $this->tbf, $source);
+		// echo "$source, $targetDir, $name, $id ";
+		// echo $sql;
+		// $this->clearcache();
+		return $this->query($sql);
 	}
 	
 	/**
@@ -620,8 +618,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		$sql = 'DELETE FROM %s WHERE id=%d AND mime!="directory" LIMIT 1';
-		return $this->query(sprintf($sql, $this->tbf, $path)) && $this->db->affected_rows;
+		return $this->query(sprintf('DELETE FROM %s WHERE id=%d AND mime!="directory" LIMIT 1', $this->tbf, $path)) && $this->db->affected_rows;
 	}
 
 	/**
@@ -632,8 +629,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		$sql = 'DELETE FROM %s WHERE id=%d AND mime="directory" LIMIT 1';
-		return $this->query(sprintf($sql, $this->tbf, $path)) && $this->db->affected_rows;
+		return $this->query(sprintf('DELETE FROM %s WHERE id=%d AND mime="directory" LIMIT 1', $this->tbf, $path)) && $this->db->affected_rows;
 	}
 	
 	/**

@@ -237,38 +237,38 @@ $opts = array(
 	
 	'roots' => array(
 		
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files/',
-		// 	'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
-		// 	// 'alias'      => 'File system',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	'utf8fix'    => true,
-		// 	'tmbCrop'    => false,
-		// 	// 'startPath'  => '../files/test',
-		// 	// 'deep' => 3,	
-		// 	// 'separator' => ':',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-		// 		array(
-		// 			'pattern' => '~/replace/.+png$~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			// 'hidden' => true,
-		// 			'locked' => true
-		// 		)
-		// 	),
-		// 	// 'defaults' => array('read' => false, 'write' => true)
-		// ),
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files/',
+			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			// 'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			// 'startPath'  => '../files/test',
+			// 'deep' => 3,	
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
+		),
 		// array(
 		// 	'driver'     => 'LocalFileSystem',
 		// 	'path'       => '../files2/',
