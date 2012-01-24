@@ -971,9 +971,12 @@ abstract class elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function file($hash, $realpath=false) {
+	public function file($hash) {
 		$path = $this->decode($hash);
-		if (($file = $this->stat($path)) != false && empty($file['hidden'])) {
+		
+		return ($file = $this->stat($path)) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		
+		if (($file = $this->stat($path)) != false) {
 			if ($realpath) {
 				$file['realpath'] = $path;
 			}
@@ -1046,7 +1049,7 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
-	 * Return subfolders for required one or false on error
+	 * Return subfolders for required folder or false on error
 	 *
 	 * @param  string   $hash  folder hash or empty string to get tree from root folder
 	 * @param  int      $deep  subdir deep
@@ -1351,8 +1354,10 @@ abstract class elFinderVolumeDriver {
 				} elseif ($file['mime'] == 'directory') {
 					return $this->setError(elFinder::ERROR_NOT_REPLACE, $name);
 				} 
-				$removed = $file;
-				$removed['realpath'] = $test;
+				$this->remove($file);
+				$this->rmTmb($path);
+				// $removed = $file;
+				// $removed['realpath'] = $test;
 			} else {
 				$name = $this->uniqueName($dstpath, $name, '-', false);
 			}
@@ -1368,10 +1373,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$this->rmTmb($path);
-		if (isset($removed)) {
-			$this->removed[] = $removed;
-		}
+		
 
 		return $this->stat($path);
 	}
@@ -1521,7 +1523,7 @@ abstract class elFinderVolumeDriver {
 		if (!$file['write']) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
-		
+		$this->clearcache();
 		return $this->_filePutContents($path, $content) ? $this->stat($path) : false;
 	}
 	
@@ -1672,10 +1674,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function rm($hash) {
-		if ($this->commandDisabled('rm')) {
-			return array(elFinder::ERROR_ACCESS_DENIED);
-		}
-		return $this->remove($this->decode($hash));
+		return $this->commandDisabled('rm')
+			? array(elFinder::ERROR_ACCESS_DENIED)
+			: $this->remove($this->decode($hash));
 	}
 	
 	/**
@@ -2433,13 +2434,14 @@ abstract class elFinderVolumeDriver {
 	 * Remove file/ recursive remove dir
 	 *
 	 * @param  string  $path   file path
-	 * @param  bool    $force  try to remove even file locked
+	 * @param  bool    $force  try to remove even if file locked
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function remove($path, $force = false) {
 		$this->rmTmb($path);
 		$stat = $this->stat($path);
+		$stat['realpath'] = $path;
 		$this->clearcache();
 		
 		if (empty($stat)) {
@@ -2460,10 +2462,14 @@ abstract class elFinderVolumeDriver {
 			if (!$this->_rmdir($path)) {
 				return $this->setError(elFinder::ERROR_RM, $this->_path($path));
 			}
+			
 		} else {
-			return $this->_unlink($path) ? true : $this->setError(elFinder::ERROR_RM, $this->_path($path));
+			if (!$this->_unlink($path)) {
+				return $this->setError(elFinder::ERROR_RM, $this->_path($path));
+			}
 		}
 
+		$this->removed[] = $stat;
 		return true;
 	}
 	

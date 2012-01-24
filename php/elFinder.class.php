@@ -324,26 +324,33 @@ class elFinder {
 		$result = $this->$cmd($args);
 		
 		// normalize data
-		if (isset($result['added'])) {
-			$result['added'] = $this->toArray($result['added']);
-		}
-		if (isset($result['changed'])) {
-			$result['changed'] = $this->toArray($result['changed']);
-		}
-		if (isset($result['removed'])) {
-			$result['removed'] = $this->toArray($result['removed']);
-		}
+		// if (isset($result['added'])) {
+		// 	$result['added'] = $this->toArray($result['added']);
+		// }
+		// if (isset($result['changed'])) {
+		// 	$result['changed'] = $this->toArray($result['changed']);
+		// }
+		// if (isset($result['removed'])) {
+		// 	$result['removed'] = $this->toArray($result['removed']);
+		// }
 		
-		// some commands can remove/overwrite files
-		if ($cmd == 'upload' || $cmd == 'paste' || $cmd == 'extract') {
-			if (!isset($result['removed'])) {
-				$result['removed'] = array();
-			}
+		if (isset($result['removed'])) {
 			foreach ($this->volumes as $volume) {
 				$result['removed'] = array_merge($result['removed'], $volume->removed());
 				$volume->resetRemoved();
 			}
 		}
+		
+		// some commands can remove/overwrite files
+		// if ($cmd == 'upload' || $cmd == 'paste' || $cmd == 'extract') {
+		// 	if (!isset($result['removed'])) {
+		// 		$result['removed'] = array();
+		// 	}
+		// 	foreach ($this->volumes as $volume) {
+		// 		$result['removed'] = array_merge($result['removed'], $volume->removed());
+		// 		$volume->resetRemoved();
+		// 	}
+		// }
 		
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
@@ -359,8 +366,13 @@ class elFinder {
 		// replace removed files info with removed files hashes
 		if (!empty($result['removed'])) {
 			// debug($result['removed']);
-			$result['removed'] = $this->hashes($result['removed']);
+			// $result['removed'] = $this->hashes($result['removed']);
 			// debug($result['removed']);
+			$removed = array();
+			foreach ($result['removed'] as $file) {
+				$removed[] = $file['hash'];
+			}
+			$result['removed'] = array_unique($removed);
 		}
 		// remove hidden files and filter files by mimetypes
 		if (!empty($result['added'])) {
@@ -683,7 +695,7 @@ class elFinder {
 
 		return ($dir = $volume->mkdir($target, $name)) == false
 			? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
-			: array('added' => $dir);
+			: array('added' => array($dir));
 	}
 	
 	/**
@@ -703,7 +715,7 @@ class elFinder {
 
 		return ($file = $volume->mkfile($target, $args['name'])) == false
 			? array('error' => $this->error(self::ERROR_MKFILE, $name, $volume->error()))
-			: array('added' => $file);
+			: array('added' => array($file));
 	}
 	
 	/**
@@ -718,14 +730,14 @@ class elFinder {
 		$name   = $args['name'];
 		
 		if (($volume = $this->volume($target)) == false
-		||  ($rm  = $volume->file($target, true)) == false) {
+		||  ($rm  = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
+		$rm['realpath'] = $volume->realpath($target);
 		
 		return ($file = $volume->rename($target, $name)) == false
 			? array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()))
-			: array('added' => $file, 'removed' => $rm);
-		
+			: array('added' => array($file), 'removed' => array($rm));
 	}
 	
 	/**
@@ -770,19 +782,16 @@ class elFinder {
 		$result  = array('removed' => array());
 		
 		foreach ($targets as $target) {
-			if (($volume = $this->volume($target)) == false
-			|| ($file = $volume->file($target, true)) == false) {
+			if (($volume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
-				break;
+				return $result;
 			}
-			
 			if (!$volume->rm($target)) {
 				$result['warning'] = $this->error($volume->error());
-				break;
+				return $result;
 			}
-			$result['removed'][] = $file;
 		}
-		
+
 		return $result;
 	}
 	
