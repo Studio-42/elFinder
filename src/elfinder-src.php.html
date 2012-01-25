@@ -20,17 +20,27 @@
 	<script src="js/elFinder.quickLook.js"     type="text/javascript" charset="utf-8"></script>
 	<script src="js/elFinder.eventsManager.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="js/i18n/elfinder.ru.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.cs.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.de.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.el.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.es.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.fr.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.hu.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.it.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.jp.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ko.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.lv.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.nl.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.pl.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.pt_BR.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ro.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ru.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.sk.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.th.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.tr.js"    type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.uk.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.vi.js"    type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.zh_CN.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/i18n/elfinder.zh_TW.js" type="text/javascript" charset="utf-8"></script>
 	
 	<style type="text/css">
@@ -63,8 +73,8 @@
 				url : 'connectors/php/connector.php',
 				lang : 'ru',
 				docked : true,
-				// editorCallback : function(url) { window.console.log(url) },
-				// closeOnEditorCallback : false,
+				editorCallback : function(url) { window.console.log(url) },
+				closeOnEditorCallback : true,
 				selectMultiple : true,
 				dialog : {
 					title : 'File manager',
