@@ -701,15 +701,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _getContents($path) {
-		$contents = '';
-		if (($fp = $this->_fopen($path))) {
-			while (!feof($fp)) {
-			  $contents .= fread($fp, 8192);
-			}
-			$this->_fclose($fp, $path);
-			return $contents;
-		}
-		return false;
+		$sql = sprintf('SELECT content FROM %s WHERE id=%d', $this->tbf, $path);
+		
+		return ($res = $this->query($sql)) && ($r = $res->fetch_assoc()) ? $r['content'] : false;
+		
+		// return ((($res = $this->query($sql)) && ($r = $res->fetch_assoc())) ? $r['content'] : false;
 	}
 	
 	/**
@@ -721,21 +717,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
-		$res = false;
-
-		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path).'.txt';
-			
-			if (@file_put_contents($local, $content, LOCK_EX) !== false
-			&& ($fp = @fopen($local, 'rb'))) {
-				clearstatcache();
-				$res  = ftp_fput($this->connect, $path, $fp, $this->ftpMode($path));
-				@fclose($fp);
-			}
-			file_exists($local) && @unlink($local);
-		}
-
-		return $res;
+		// $sql = sprintf('UPDATE %s SET content="%s", size=%d, mtime=%d WHERE id=%d LIMIT 1', $this->tbf, $this->db->real_escape_string($content), strlen($content), time(), $path);
+		return $this->query(sprintf('UPDATE %s SET content="%s", size=%d, mtime=%d WHERE id=%d LIMIT 1', $this->tbf, $this->db->real_escape_string($content), strlen($content), time(), $path));
 	}
 
 	/**
