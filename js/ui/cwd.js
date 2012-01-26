@@ -842,9 +842,9 @@ $.fn.elfindercwd = function(fm) {
 
 				$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
 					// force to load updated thumbnail
-					if (file.tmb && file.tmb.indexOf('?') === -1) {
-						file.tmb += '?_='+Math.random()
-					}
+					// if (file.tmb && (''+file.tmb).indexOf('?') === -1) {
+					// 	file.tmb += '?_='+Math.random()
+					// }
 					remove([file.hash]);
 					add([file]);
 					$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);

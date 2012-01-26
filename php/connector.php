@@ -367,8 +367,10 @@ $opts = array(
 			'db' => 'elfinder',
 			'user_id' => 1,
 			// 'accessControl' => 'access',
-			'separator' => ':',
+			// 'separator' => ':',
 			'tmbCrop'         => false,
+			// thumbnails background color (hex #rrggbb or 'transparent')
+			'tmbBgColor'      => '#000000',
 			'files_table' => 'elfinder_file',
 			// 'imgLib' => 'imagick',
 			// 'uploadOverwrite' => false,

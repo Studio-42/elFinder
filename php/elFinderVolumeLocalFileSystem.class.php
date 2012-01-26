@@ -663,7 +663,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 *
 	 * @param  string  $path  archive path
 	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
-	 * @return true
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin

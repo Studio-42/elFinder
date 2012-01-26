@@ -1636,9 +1636,9 @@ abstract class elFinderVolumeDriver {
 		if (!$this->canResize($path, $file['mime'])) {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
-		
-		switch($mode) {
 
+		switch($mode) {
+			
 			case 'propresize':
 				$result = $this->imgResize($path, $width, $height, true, true, $this->imgLib);
 				break;
