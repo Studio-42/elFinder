@@ -2559,7 +2559,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		if (($trg = @fopen($tmb, 'wb')) == false) {
+		if (($trg = fopen($tmb, 'wb')) == false) {
 			$this->_fclose($src, $path);
 			return false;
 		}
@@ -2575,7 +2575,7 @@ abstract class elFinderVolumeDriver {
 		
 		$tmbSize = $this->tmbSize;
 		
-  		if (($s = @getimagesize($tmb)) == false) {
+  		if (($s = getimagesize($tmb)) == false) {
 			return false;
 		}
     
@@ -2586,18 +2586,18 @@ abstract class elFinderVolumeDriver {
 
 	    	if ($this->options['tmbCrop']) {
 
-    			$result = true;
+    			// $result = true; 
         
         		/* Resize and crop if image bigger than thumbnail */
 	        	if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
     				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, $this->imgLib, 'png');
 	        	}
 
-	        	$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, $this->imgLib, 'png');
-
+	        	// $result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, $this->imgLib, 'png');
+				$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, 0, 0, $this->imgLib, 'png');
     		} else {
         		$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
-        		$result &= $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
+        		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
       		}
 
 		}
