@@ -588,9 +588,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$sql = $id > 0
 			? sprintf('REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden`) (SELECT %d, %d, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden` FROM %s WHERE id=%d)', $this->tbf, $id, $this->_dirname($id), $this->tbf, $source)
 			: sprintf('INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height, `read`, `write`, `locked`, `hidden`) SELECT %d, "%s", content, size, %d, mime, width, height, `read`, `write`, `locked`, `hidden` FROM %s WHERE id=%d', $this->tbf, $targetDir, $this->db->real_escape_string($name), time(), $this->tbf, $source);
-		// echo "$source, $targetDir, $name, $id ";
-		// echo $sql;
-		// $this->clearcache();
+
 		return $this->query($sql);
 	}
 	
@@ -643,10 +641,56 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _save($fp, $dir, $name, $mime, $w, $h) {
-		$path = $dir.'/'.$name;
-		return ftp_fput($this->connect, $path, $fp, $this->ftpMode($path))
-			? $path
-			: false;
+		$this->clearcache();
+		
+		$id = $this->_joinPath($dir, $name);
+		$this->rmTmb($id);
+		rewind($fp);
+		$stat = fstat($fp);
+		$size = $stat['size'];
+		
+		if (($tmpfile = tempnam($this->tmpPath, $this->id))) {
+			if (($trgfp = fopen($tmpfile, 'wb')) == false) {
+				unlink($tmpfile);
+			} else {
+				while (!feof($fp)) {
+					fwrite($trgfp, fread($fp, 8192));
+				}
+				fclose($trgfp);
+				
+				$sql = $id > 0
+					? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)'
+					: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)';
+				$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), realpath($tmpfile), $size, time(), $mime, $w, $h);
+
+				$res = $this->query($sql);
+				unlink($tmpfile);
+				
+				if ($res) {
+					return $id > 0 ? $id : $this->db->insert_id;
+				}
+			}
+		}
+
+		
+		$content = '';
+		rewind($fp);
+		while (!feof($fp)) {
+			$content .= fread($fp, 8192);
+		}
+		
+		$sql = $id > 0
+			? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", "%s", %d, %d, "%s", %d, %d)'
+			: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", "%s", %d, %d, "%s", %d, %d)';
+		$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->db->real_escape_string($content), $size, time(), $mime, $w, $h);
+		
+		unset($content);
+
+		if ($this->query($sql)) {
+			return $id > 0 ? $id : $this->db->insert_id;
+		}
+		
+		return false;
 	}
 	
 	/**
