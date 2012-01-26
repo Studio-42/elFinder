@@ -924,7 +924,7 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_SAVE, $volume->path($target), $volume->error()));
 		}
 		
-		return array('changed' => $file);
+		return array('changed' => array($file));
 	}
 
 	/**
@@ -946,7 +946,7 @@ class elFinder {
 		}  
 
 		return ($file = $volume->extract($target))
-			? array('added' => $file)
+			? array('added' => array($file))
 			: array('error' => $this->error(self::ERROR_EXTRACT, $volume->path($target), $volume->error()));
 	}
 	
@@ -967,7 +967,7 @@ class elFinder {
 		}
 	
 		return ($file = $volume->archive($targets, $args['type']))
-			? array('added' => $file)
+			? array('added' => array($file))
 			: array('error' => $this->error(self::ERROR_ARCHIVE, $volume->error()));
 	}
 	
@@ -1049,7 +1049,7 @@ class elFinder {
 		}
 
 		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode))
-			? array('changed' => $file)
+			? array('changed' => array($file))
 			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
 	}
 	
@@ -1109,7 +1109,7 @@ class elFinder {
 	protected function filter($files) {
 		foreach ($files as $i => $file) {
 			if (!empty($file['hidden']) || !$this->default->mimeAccepted($file['mime'])) {
-				unset($result['changed'][$i]);
+				unset($files[$i]);
 			}
 		}
 		return array_merge($files, array());
