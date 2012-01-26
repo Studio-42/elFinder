@@ -293,6 +293,49 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $parents;
 	}
 
+	/**
+	 * Resize image
+	 *
+	 * @param  string   $path               image file
+	 * @param  int      $width              new width
+	 * @param  int      $height             new height
+	 * @param  bool	    $keepProportions    crop image
+	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
+	 * @param  string   $imgLib             image library
+	 * @param  string   $destformat         image destination format
+	 * @return string|false
+	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 **/
+  	protected function _imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $imgLib = 'imagick', $destformat = null ) {
+		// echo $path;
+		$result = false;
+		
+		if (($tmpfile = tempnam($this->tmpPath, $this->id)) && ($fp = fopen($tmpfile, 'w'))) {
+			
+			if (($res = $this->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"'))
+			&& ($r = $res->fetch_assoc())) {
+				fwrite($fp, $r['content']);
+				fclose($fp);
+				$imgpath = parent::imgResize($tmpfile, $width, $height, $keepProportions, $resizeByBiggerSide, $imgLib, $destformat);
+				
+				if ($imgpath) {
+					$stat = $this->stat($path);
+					$size = getimagesize($imgpath);
+					$fp = fopen($imgpath, 'rb');
+					$result = $this->_save($fp, $this->decode($stat['phash']), $stat['name'], $stat['mime'], $size[0], $size[1]);
+					fclose($fp);
+				}
+				
+				unlink(@$tmpfile);
+				// echo "new path $path";
+				return $path;
+			} 
+		} 
+		unlink(@$tmpfile);
+		return $result;
+	}
+
+
 	/*********************** paths/urls *************************/
 	
 	/**
@@ -701,11 +744,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _getContents($path) {
-		$sql = sprintf('SELECT content FROM %s WHERE id=%d', $this->tbf, $path);
-		
-		return ($res = $this->query($sql)) && ($r = $res->fetch_assoc()) ? $r['content'] : false;
-		
-		// return ((($res = $this->query($sql)) && ($r = $res->fetch_assoc())) ? $r['content'] : false;
+		return ($res = $this->query(sprintf('SELECT content FROM %s WHERE id=%d', $this->tbf, $path))) && ($r = $res->fetch_assoc()) ? $r['content'] : false;
 	}
 	
 	/**
@@ -717,7 +756,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
-		// $sql = sprintf('UPDATE %s SET content="%s", size=%d, mtime=%d WHERE id=%d LIMIT 1', $this->tbf, $this->db->real_escape_string($content), strlen($content), time(), $path);
 		return $this->query(sprintf('UPDATE %s SET content="%s", size=%d, mtime=%d WHERE id=%d LIMIT 1', $this->tbf, $this->db->real_escape_string($content), strlen($content), time(), $path));
 	}
 
@@ -727,8 +765,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @return void
 	 **/
 	protected function _checkArchivers() {
-		// die('Not yet implemented. (_checkArchivers)');
-		return array();
+		return;
 	}
 
 	/**
@@ -736,14 +773,12 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 *
 	 * @param  string  $path  archive path
 	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
-	 * @return true
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _unpack($path, $arc) {
-		die('Not yet implemented. (_unpack)');
-		return false;
+		return;
 	}
 
 	/**
@@ -754,28 +789,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _findSymlinks($path) {
-		die('Not yet implemented. (_findSymlinks)');
-		if (is_link($path)) {
-			return true;
-		}
-		if (is_dir($path)) {
-			foreach (scandir($path) as $name) {
-				if ($name != '.' && $name != '..') {
-					$p = $path.DIRECTORY_SEPARATOR.$name;
-					if (is_link($p)) {
-						return true;
-					}
-					if (is_dir($p) && $this->_findSymlinks($p)) {
-						return true;
-					} elseif (is_file($p)) {
-						$this->archiveSize += filesize($p);
-					}
-				}
-			}
-		} else {
-			$this->archiveSize += filesize($path);
-		}
-		
 		return false;
 	}
 
@@ -789,8 +802,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _extract($path, $arc) {
-		die('Not yet implemented. (_extract)');
-		
+		return false;
 	}
 	
 	/**
@@ -805,7 +817,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _archive($dir, $files, $name, $arc) {
-		die('Not yet implemented. (_archive)');
 		return false;
 	}
 	
