@@ -246,6 +246,7 @@ $opts = array(
 			'tmbPath'    => '.tmb',
 			'utf8fix'    => true,
 			'tmbCrop'    => false,
+			'tmbBgColor' => 'transparent',
 			// 'startPath'  => '../files/test',
 			// 'deep' => 3,	
 			// 'separator' => ':',
@@ -368,7 +369,7 @@ $opts = array(
 			'user_id' => 1,
 			// 'accessControl' => 'access',
 			// 'separator' => ':',
-			'tmbCrop'         => false,
+			'tmbCrop'         => true,
 			// thumbnails background color (hex #rrggbb or 'transparent')
 			'tmbBgColor'      => '#000000',
 			'files_table' => 'elfinder_file',
