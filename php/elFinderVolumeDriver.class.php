@@ -1601,7 +1601,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	public function resize($hash, $width, $height, $x, $y, $mode = 'resize') {
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg='') {
 		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1616,33 +1616,33 @@ abstract class elFinderVolumeDriver {
 		
 		$path = $this->decode($hash);
 		
-		if (!$this->canResize($path, $file['mime'])) {
+		if (!$this->canResize($path, $file)) {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
 
 		switch($mode) {
 			
 			case 'propresize':
-				$result = $this->imgResize($path, $width, $height, true, true, $this->imgLib);
+				$result = $this->imgResize($path, $width, $height, true, true);
 				break;
 
 			case 'crop':
-				$result = $this->imgCrop($path, $width, $height, $x, $y, $this->imgLib);
+				$result = $this->imgCrop($path, $width, $height, $x, $y);
 				break;
 
 			case 'fitsquare':
-				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib);
+				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', $bg ? $bg : $this->options['tmbBgColor']);
 				break;
 			
 			default:
-				$result = $this->imgResize($path, $width, $height, false, true, $this->imgLib);
+				$result = $this->imgResize($path, $width, $height, false, true);
 				break;				
     	}
 		
 		if ($result) {
 			$this->rmTmb($path);
 			$this->clearcache();
-			$this->createTmb($path);
+			$this->createTmb($path, $file);
 			return $this->stat($path);
 		}
 		
@@ -2533,11 +2533,8 @@ abstract class elFinderVolumeDriver {
 		if (!$stat || !$this->canCreateTmb($path, $stat)) {
 			return false;
 		}
-		// echo $path;
-		// debug($stat);
 		
 		$name = $this->tmbname($stat);
-		// echo $name.'<br>';
 		$tmb  = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
 		
 		// copy image into tmbPath so some drivers does not store files on local fs
@@ -2567,7 +2564,7 @@ abstract class elFinderVolumeDriver {
     
     	/* If image smaller or equal thumbnail size - just fitting to thumbnail square */
     	if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
-     	   $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
+     	   $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
 	    } else {
 
 	    	if ($this->options['tmbCrop']) {
@@ -2576,14 +2573,14 @@ abstract class elFinderVolumeDriver {
         
         		/* Resize and crop if image bigger than thumbnail */
 	        	if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
-    				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, $this->imgLib, 'png');
+    				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
 	        	}
 
 	        	// $result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, $this->imgLib, 'png');
-				$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, 0, 0, $this->imgLib, 'png');
+				$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, 0, 0, 'png');
     		} else {
         		$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
-        		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], $this->imgLib, 'png' );
+        		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
       		}
 
 		}
@@ -2603,12 +2600,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  int      $height             new height
 	 * @param  bool	    $keepProportions    crop image
 	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
-	 * @param  string   $imgLib             image library
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-  	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $imgLib = 'imagick', $destformat = null ) {
+  	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -2648,7 +2644,7 @@ abstract class elFinderVolumeDriver {
 			}
     	}
 
-		switch ($imgLib) {
+		switch ($this->imgLib) {
 			case 'imagick':
 				
 				try {
@@ -2710,12 +2706,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  int      $height             crop height
 	 * @param  bool	    $x                  crop left offset
 	 * @param  bool	    $y                  crop top offset
-	 * @param  string   $imgLib             image library
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-  	protected function imgCrop($path, $width, $height, $x, $y, $imgLib = 'imagick', $destformat = null ) {
+  	protected function imgCrop($path, $width, $height, $x, $y, $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -2723,7 +2718,7 @@ abstract class elFinderVolumeDriver {
 		$result = false;
 		$this->rmTmb($path);
 		
-		switch ($imgLib) {
+		switch ($this->imgLib) {
 			case 'imagick':
 				
 				try {
@@ -2787,12 +2782,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  int	    $align              reserved
 	 * @param  int 	    $valign             reserved
 	 * @param  string   $bgcolor            square background color in #rrggbb format
-	 * @param  string   $imgLib             image library
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
 	 **/
-  	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $imgLib = 'imagick', $destformat = null ) {
+  	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -2803,7 +2797,7 @@ abstract class elFinderVolumeDriver {
 		$y = ceil(abs($height - $s[1]) / 2); 
 		$x = ceil(abs($width - $s[0]) / 2);
     
-		switch ($imgLib) {
+		switch ($this->imgLib) {
 			case 'imagick':
 				
 				try {
