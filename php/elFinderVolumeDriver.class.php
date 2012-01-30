@@ -491,22 +491,6 @@ abstract class elFinderVolumeDriver {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
 		}
 		
-		// clean thumbnails dir
-		if ($this->tmbPath) {
-			srand((double) microtime() * 1000000);
-
-			if (rand(1, 200) <= $this->options['tmbCleanProb']) {
-				$ls = scandir($this->tmbPath);
-
-				for ($i=0, $s = count($ls); $i < $s; $i++) {
-					$pinfo = pathinfo($ls[$i]);
-
-					if (strtolower($pinfo['extension']) == 'png') {
-						@unlink($this->tmbPath.DIRECTORY_SEPARATOR.$ls[$i]);
-					}
-				}
-			}
-		}
 	}
 	
 	
