@@ -1111,10 +1111,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tmb($hash) {
-		if (($path = $this->decode($hash))) {
-			return ($tmb = $this->gettmb($path)) ? $tmb : $this->createTmb($path);
-		}
-		return false;
+		return ($path = $this->decode($hash)) && ($stat = $this->stat($path))
+			? (($tmb = $this->gettmb($path, $stat)) ? $tmb : $this->createTmb($path, $stat))
+			: false;
 	}
 	
 	/**
@@ -2022,9 +2021,9 @@ abstract class elFinderVolumeDriver {
 				// for files - check for thumbnails
 				if ($this->tmbURL) {
 					$p = isset($stat['target']) ? $stat['target'] : $path;
-					if (($tmb = $this->gettmb($p)) != false) {
+					if (($tmb = $this->gettmb($p, $stat)) != false) {
 						$stat['tmb'] = $tmb;
-					} elseif ($this->canCreateTmb($p, $stat['mime'])) {
+					} elseif ($this->canCreateTmb($p, $stat)) {
 						$stat['tmb'] = 1;
 					}
 				}
@@ -2479,28 +2478,29 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return thumbnail file name for required file
 	 *
-	 * @param  string  $path  file path
+	 * @param  array  $stat  file stat
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function tmbname($path) {
-		return md5($path).'.png';
+	protected function tmbname($stat) {
+		return $stat['hash'].$stat['ts'].'.png';
 	}
 	
 	/**
 	 * Return thumnbnail name if exists
 	 *
 	 * @param  string  $path file path
+	 * @param  array   $stat file stat
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function gettmb($path) {
+	protected function gettmb($path, $stat) {
 		if ($this->tmbURL && $this->tmbPath) {
 			// file itself thumnbnail
 			if (strpos($path, $this->tmbPath) === 0) {
 				return basename($path);
 			}
-			$name = $this->tmbname($path);
+			$name = $this->tmbname($stat);
 			if (file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$name)) {
 				return $name;
 			}
@@ -2512,15 +2512,15 @@ abstract class elFinderVolumeDriver {
 	 * Return true if thumnbnail for required file can be created
 	 *
 	 * @param  string  $path  thumnbnail path 
-	 * @param  string  $mime  file mimetype
+	 * @param  array   $stat  file stat
 	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function canCreateTmb($path, $mime) {
+	protected function canCreateTmb($path, $stat) {
 		return $this->tmbPathWritable 
 			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
-			&& strpos($mime, 'image') === 0 
+			&& strpos($stat['mime'], 'image') === 0 
 			&& ($this->imgLib == 'gd' ? $mime == 'image/jpeg' || $mime == 'image/png' || $mime == 'image/gif' : true);
 	}
 	
@@ -2529,12 +2529,12 @@ abstract class elFinderVolumeDriver {
 	 * By default - the same as canCreateTmb
 	 *
 	 * @param  string  $path  thumnbnail path 
-	 * @param  string  $mime  file mimetype
+	 * @param  array   $stat  file stat
 	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function canResize($path, $mime) {
-		return $this->canCreateTmb($path, $mime);
+	protected function canResize($path, $stat) {
+		return $this->canCreateTmb($path, $stat);
 	}
 	
 	/**
@@ -2545,13 +2545,15 @@ abstract class elFinderVolumeDriver {
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function createTmb($path) {
-		$stat = $this->stat($path);
-		if (!$stat || !$this->canCreateTmb($path, $stat['mime'])) {
+	protected function createTmb($path, $stat) {
+		if (!$stat || !$this->canCreateTmb($path, $stat)) {
 			return false;
 		}
+		// echo $path;
+		// debug($stat);
 		
-		$name = $this->tmbName($path);
+		$name = $this->tmbname($stat);
+		// echo $name.'<br>';
 		$tmb  = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
 		
 		// copy image into tmbPath so some drivers does not store files on local fs
