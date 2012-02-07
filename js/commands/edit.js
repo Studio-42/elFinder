@@ -1,6 +1,6 @@
 "use strict"
 /**
- * @class elFinder command "edit".
+ * @class elFinder command "edit". 
  * Edit text file in dialog window
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
@@ -9,7 +9,7 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		mimes = fm.res('mimes', 'text') || [],
-
+		
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -18,13 +18,13 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(files) {
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1)
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write ? file : null;
 			});
 		},
-
+		
 		/**
 		 * Open dialog with textarea to edit file
 		 *
@@ -50,25 +50,25 @@ elFinder.prototype.commands.edit = function() {
 					title   : file.name,
 					width   : self.options.dialogWidth || 450,
 					buttons : {},
-					close   : function() {
+					close   : function() { 
 						ta.editor && ta.editor.close(ta[0], ta.editor.instance);
-						$(this).elfinderdialog('destroy');
+						$(this).elfinderdialog('destroy'); 
 					},
-					open    : function() {
+					open    : function() { 
 						fm.disable();
-						ta.focus();
+						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
 						ta.editor && ta.editor.load(ta[0]);
 					}
-
+					
 				};
-
+				
 				ta.getContent = function() {
 					return ta.val()
 				}
-
+				
 				$.each(self.options.editors || [], function(i, editor) {
-					if ($.inArray(file.mime, editor.mimes || []) !== -1
+					if ($.inArray(file.mime, editor.mimes || []) !== -1 
 					&& typeof editor.load == 'function'
 					&& typeof editor.save == 'function') {
 						ta.editor = {
@@ -77,16 +77,16 @@ elFinder.prototype.commands.edit = function() {
 							close    : typeof editor.close == 'function' ? editor.close : function() {},
 							instance : null
 						}
-
+						
 						return false;
 					}
 				});
-
+				
 				if (!ta.editor) {
 					ta.keydown(function(e) {
 						var code = e.keyCode,
 							value, start;
-
+						
 						e.stopPropagation();
 						if (code == 9) {
 							e.preventDefault();
@@ -99,7 +99,7 @@ elFinder.prototype.commands.edit = function() {
 								this.setSelectionRange(start, start);
 							}
 						}
-
+						
 						if (e.ctrlKey || e.metaKey) {
 							// close on ctrl+w/q
 							if (code == 81 || code == 87) {
@@ -111,17 +111,17 @@ elFinder.prototype.commands.edit = function() {
 								save();
 							}
 						}
-
+						
 					})
 				}
-
+				
 				opts.buttons[fm.i18n('Save')]   = save;
 				opts.buttons[fm.i18n('Cancel')] = cancel
-
+				
 				fm.dialog(ta, opts).attr('id', id);
 				return dfrd.promise();
 		},
-
+		
 		/**
 		 * Get file content and
 		 * open dialog with textarea to edit file content
@@ -132,25 +132,25 @@ elFinder.prototype.commands.edit = function() {
 		edit = function(file) {
 			var hash   = file.hash,
 				opts   = fm.options,
-				dfrd   = $.Deferred(),
+				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
 				url    = fm.url(hash) || fm.options.url,
 				id    = 'edit-'+fm.namespace+'-'+file.hash,
-				d = fm.getUI().find('#'+id),
+				d = fm.getUI().find('#'+id), 
 				error;
-
-
+			
+			
 			if (d.length) {
 				d.elfinderdialog('toTop');
 				return dfrd.resolve();
 			}
-
+			
 			if (!file.read || !file.write) {
 				error = ['errOpen', file.name, 'errPerm']
 				fm.error(error)
 				return dfrd.reject(error);
 			}
-
+			
 			fm.request({
 				data   : {cmd : 'get', target  : hash},
 				notify : {type : 'openfile', cnt : 1},
@@ -184,24 +184,24 @@ elFinder.prototype.commands.edit = function() {
 
 			return dfrd.promise();
 		};
-
-
-
+	
+	
+	
 	this.shortcuts = [{
 		pattern     : 'ctrl+e'
 	}];
-
+	
 	this.init = function() {
 		this.onlyMimes = this.options.mimes || []
 	}
-
+	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
 		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
-
+	
 	this.exec = function(hashes) {
 		var files = filter(this.files(hashes)),
 			list  = [],
@@ -214,8 +214,8 @@ elFinder.prototype.commands.edit = function() {
 		while ((file = files.shift())) {
 			list.push(edit(file));
 		}
-
-		return list.length
+		
+		return list.length 
 			? $.when.apply(null, list)
 			: $.Deferred().reject();
 	}
