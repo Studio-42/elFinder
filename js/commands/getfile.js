@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @class elFinder command "getfile". 
+ * @class elFinder command "getfile".
  * Return selected files info into outer callback.
  * For use elFinder with wysiwyg editors etc.
  *
@@ -18,18 +18,18 @@ elFinder.prototype.commands.getfile = function() {
 
 			return o.multiple || files.length == 1 ? files : [];
 		};
-	
+
 	this.alwaysEnabled = true;
 	this.callback      = fm.options.getFileCallback;
 	this._disabled     = typeof(this.callback) == 'function';
-	
+
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-			
+
 		return this.callback && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
-	
+
 	this.exec = function(hashes) {
 		var fm    = this.fm,
 			opts  = this.options,
@@ -41,7 +41,7 @@ elFinder.prototype.commands.getfile = function() {
 				.done(function(data) {
 					fm.trigger('getfile', {files : data});
 					self.callback(data, fm);
-					
+
 					if (opts.oncomplete == 'close') {
 						fm.hide();
 					} else if (opts.oncomplete == 'destroy') {
@@ -53,13 +53,13 @@ elFinder.prototype.commands.getfile = function() {
 					? opts.multiple ? $.map(files, function(f) { return f.url; }) : files[0].url
 					: opts.multiple ? files : files[0];
 			},
-			req = [], 
+			req = [],
 			i, file, dim;
 
 		if (this.getstate() == -1) {
 			return dfrd.reject();
 		}
-			
+
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (file.mime == 'directory' && !opts.folders) {
@@ -71,33 +71,35 @@ elFinder.prototype.commands.getfile = function() {
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
-			if (file.dim) {
-				dim = file.dim.split('x');
-				file.width = dim[0];
-				file.height = dim[1];
-			} else if (file.mime.indexOf('image') !== -1) {
-				req.push(fm.request({
-					data : {cmd : 'dim', target : file.hash},
-					preventDefault : true
-				})
-				.done($.proxy(function(data) {
-					if (data.dim) {
-						dim = data.dim.split('x');
-						this.width = dim[0];
-						this.height = dim[1];
-					}
-					this.dim = data.dim
-				}, files[i])));
+			if (!file.width && !file.height) {
+				if (file.dim) {
+					dim = file.dim.split('x');
+					file.width = dim[0];
+					file.height = dim[1];
+				} else if (file.mime.indexOf('image') !== -1) {
+					req.push(fm.request({
+						data : {cmd : 'dim', target : file.hash},
+						preventDefault : true
+					})
+					.done($.proxy(function(data) {
+						if (data.dim) {
+							dim = data.dim.split('x');
+							this.width = dim[0];
+							this.height = dim[1];
+						}
+						this.dim = data.dim
+					}, files[i])));
+				}
 			}
 		}
-		
+
 		if (req.length) {
 			$.when.apply(null, req).always(function() {
 				dfrd.resolve(result(files));
 			})
 			return dfrd;
 		}
-		
+
 		return dfrd.resolve(result(files));
 	}
 
