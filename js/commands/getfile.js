@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @class elFinder command "getfile".
+ * @class elFinder command "getfile". 
  * Return selected files info into outer callback.
  * For use elFinder with wysiwyg editors etc.
  *
@@ -18,18 +18,18 @@ elFinder.prototype.commands.getfile = function() {
 
 			return o.multiple || files.length == 1 ? files : [];
 		};
-
+	
 	this.alwaysEnabled = true;
 	this.callback      = fm.options.getFileCallback;
 	this._disabled     = typeof(this.callback) == 'function';
-
+	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
-
+			
 		return this.callback && cnt && filter(sel).length == cnt ? 0 : -1;
 	}
-
+	
 	this.exec = function(hashes) {
 		var fm    = this.fm,
 			opts  = this.options,
@@ -41,7 +41,7 @@ elFinder.prototype.commands.getfile = function() {
 				.done(function(data) {
 					fm.trigger('getfile', {files : data});
 					self.callback(data, fm);
-
+					
 					if (opts.oncomplete == 'close') {
 						fm.hide();
 					} else if (opts.oncomplete == 'destroy') {
@@ -53,13 +53,13 @@ elFinder.prototype.commands.getfile = function() {
 					? opts.multiple ? $.map(files, function(f) { return f.url; }) : files[0].url
 					: opts.multiple ? files : files[0];
 			},
-			req = [],
+			req = [], 
 			i, file, dim;
 
 		if (this.getstate() == -1) {
 			return dfrd.reject();
 		}
-
+			
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (file.mime == 'directory' && !opts.folders) {
@@ -92,14 +92,14 @@ elFinder.prototype.commands.getfile = function() {
 				}
 			}
 		}
-
+		
 		if (req.length) {
 			$.when.apply(null, req).always(function() {
 				dfrd.resolve(result(files));
 			})
 			return dfrd;
 		}
-
+		
 		return dfrd.resolve(result(files));
 	}
 
