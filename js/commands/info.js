@@ -110,17 +110,21 @@ elFinder.prototype.commands.info = function() {
 			if (file.dim) { // old api
 				content.push(row.replace(l, msg.dim).replace(v, file.dim));
 			} else if (file.mime.indexOf('image') !== -1) {
-				content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc)));
-				fm.request({
-					data : {cmd : 'dim', target : file.hash},
-					preventDefault : true
-				})
-				.fail(function() {
-					replSpinner(msg.unknown);
-				})
-				.done(function(data) {
-					replSpinner(data.dim || msg.unknown);
-				});
+				if (file.width && file.height) {
+					content.push(row.replace(l, msg.dim).replace(v, file.width+'x'+file.height));
+				} else {
+					content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc)));
+					fm.request({
+						data : {cmd : 'dim', target : file.hash},
+						preventDefault : true
+					})
+					.fail(function() {
+						replSpinner(msg.unknown);
+					})
+					.done(function(data) {
+						replSpinner(data.dim || msg.unknown);
+					});
+				}
 			}
 			
 			
