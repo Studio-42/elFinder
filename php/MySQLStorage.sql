@@ -10,13 +10,14 @@ CREATE TABLE IF NOT EXISTS `elfinder_file` (
   `read`      enum('1', '0') NOT NULL default '1',
   `write`     enum('1', '0') NOT NULL default '1',
   `locked`    enum('1', '0') NOT NULL default '0',
-  `hidden`    enum('1', '0') NOT NULL default '1',
+  `hidden`    enum('1', '0') NOT NULL default '0',
   `width`     int(5) NOT NULL,
   `height`    int(5) NOT NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `parent_name` (`parent_id`,`name`),
-  KEY `parent_id` (`parent_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY  `parent_name` (`parent_id`, `name`),
+  KEY         `parent_id`   (`parent_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `elfinder_file` (`id`, `parent_id`, `name`, `content`, `size`, `mtime`, `mime`, `width`, `height`) VALUES 
-('1', '0', 'DATABASE', '', '0', '0', 'directory', '1', '1', '0', '0', '0', '0');
+INSERT INTO `elfinder_file`
+(`id`, `parent_id`, `name`,     `content`, `size`, `mtime`, `mime`,      `read`, `write`, `locked`, `hidden`, `width`, `height`) VALUES 
+('1',  '0',         'DATABASE', '',        '0',    '0',     'directory', '1',    '1',     '0',      '0',      '0',     '0');
