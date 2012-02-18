@@ -10,7 +10,8 @@ elFinder.prototype.commands.resize = function() {
 	this.updateOnSelect = false;
 	
 	this.getstate = function() {
-		return this.fm.selected().length == 1 && this.fm.selectedFiles()[0].mime.indexOf('image/') !== -1 ? 0 : -1;
+		var sel = this.fm.selectedFiles();
+		return !this._disabled && sel.length == 1 && !sel[0].locked && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
