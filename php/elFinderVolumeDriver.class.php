@@ -2921,7 +2921,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rmTmb($path) {
-		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
+		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($this->stat($path));
 		file_exists($tmb) && @unlink($tmb);
 		clearstatcache();
 	}
