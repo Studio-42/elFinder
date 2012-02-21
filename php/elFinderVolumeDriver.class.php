@@ -1407,11 +1407,11 @@ abstract class elFinderVolumeDriver {
 		if ($stat) {
 			if ($this->options['copyOverwrite']) {
 				// do not replace file with dir or dir with file
-				if (!$this->isSameType($file['mime'], $this->mimetype($test))) {
+				if (!$this->isSameType($file['mime'], $stat['mime'])) {
 					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($test));
 				}
 				// existed file is not writable
-				if (!$test['write']) {
+				if (!$stat['write']) {
 					return $this->setError($err, $errpath, elFinder::ERROR_PERM_DENIED);
 				}
 				// existed file locked or has locked child
