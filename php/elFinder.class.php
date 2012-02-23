@@ -505,7 +505,7 @@ class elFinder {
 		
 		$result = array(
 			'cwd'     => $cwd,
-			'options' => $volume->options($target),
+			'options' => $volume->options($cwd['hash']),
 			'files'   => $files
 		);
 
