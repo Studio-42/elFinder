@@ -543,7 +543,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function mount(array $opts) {
-		if (empty($opts['path'])) {
+		if ($opts['path'] === '') {
 			return false;
 		}
 		
@@ -1407,11 +1407,11 @@ abstract class elFinderVolumeDriver {
 		if ($stat) {
 			if ($this->options['copyOverwrite']) {
 				// do not replace file with dir or dir with file
-				if (!$this->isSameType($file['mime'], $this->mimetype($test))) {
+				if (!$this->isSameType($file['mime'], $stat['mime'])) {
 					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->_path($test));
 				}
 				// existed file is not writable
-				if (!$test['write']) {
+				if (!$stat['write']) {
 					return $this->setError($err, $errpath, elFinder::ERROR_PERM_DENIED);
 				}
 				// existed file locked or has locked child
@@ -1727,7 +1727,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function encode($path) {
-		if ($path) {
+		if ($path !== '') {
 
 			// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
 			$p = $this->_relpath($path);
@@ -2921,7 +2921,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rmTmb($path) {
-		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($path);
+		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($this->stat($path));
 		file_exists($tmb) && @unlink($tmb);
 		clearstatcache();
 	}
