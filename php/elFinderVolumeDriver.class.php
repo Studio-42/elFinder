@@ -543,7 +543,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function mount(array $opts) {
-		if (empty($opts['path'])) {
+		if ($opts['path'] === '') {
 			return false;
 		}
 		
@@ -1727,7 +1727,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function encode($path) {
-		if ($path) {
+		if ($path !== '') {
 
 			// cut ROOT from $path for security reason, even if hacker decodes the path he will not know the root
 			$p = $this->_relpath($path);
