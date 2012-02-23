@@ -88,7 +88,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function init() {
 		
-		if (!$this->options['host'] 
+		if (!($this->options['host'] || $this->options['socket'])
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
 		||  !$this->options['db']
