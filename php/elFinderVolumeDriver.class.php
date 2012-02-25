@@ -1601,7 +1601,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg='') {
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg='', $deg=0) {
 		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1634,12 +1634,21 @@ abstract class elFinderVolumeDriver {
 				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', $bg ? $bg : $this->options['tmbBgColor']);
 				break;
 			
+			case 'rotateonly':
+				$result = 'rotateonly';
+				break;
+			
 			default:
 				$result = $this->imgResize($path, $width, $height, false, true);
 				break;				
     	}
 		
 		if ($result) {
+			if ($deg) {
+				if (! $this->imgRotate($local, $deg) && $result === 'rotateonly' ) {
+					return false;
+				}
+			}
 			$this->rmTmb($path);
 			$this->clearcache();
 			$this->createTmb($path, $file);
@@ -2868,6 +2877,77 @@ abstract class elFinderVolumeDriver {
 		return false;  
   }
   
+	/**
+	 * Rotate image
+	 *
+	 * @param  string   $path               image file
+	 * @param  int      $degrees            rotete degrees
+	 * @return string|false
+	 * @author nao-pon
+	 **/
+	protected function imgRotate($path, $degrees, $bgcolor = '#ffffff') {
+
+		if (($s = @getimagesize($path)) == false) {
+			return false;
+		}
+
+    	$result = false;
+    	
+		switch ($this->imgLib) {
+			case 'imagick':
+				try {
+					$img = new imagick($path);
+				} catch (Exception $e) {
+
+					return false;
+				}
+
+				$img->rotateImage(new ImagickPixel($bgcolor), $degrees);
+					
+				$result = $img->writeImage($path);
+
+				return $result ? $path : false;
+
+				break;
+
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($path);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($path);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($path);
+				} elseif ($s['mime'] == 'image/xbm') {
+					$img = imagecreatefromxbm($path);
+				}
+
+				$degrees = 360 - $degrees;
+				
+				$tmp = imagecreatetruecolor(1, 1);
+				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+				$bgcolor = imagecolorallocate($tmp, $r, $g, $b);
+				
+				$out = imageRotate($img, $degrees, $bgcolor);
+				
+				if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
+					$result = imagejpeg($out, $path, 100);
+				} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
+					$result = imagegif($out, $path, 7);
+				} else {
+					$result = imagepng($out, $path, 7);
+				}
+								
+				imageDestroy($img);
+				imageDestroy($out);
+
+				return $result ? $path : false;
+				
+				break;
+		}
+		
+		return false;
+	}
+
 	/**
 	 * Execute shell command
 	 *
