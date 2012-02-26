@@ -2885,7 +2885,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string|false
 	 * @author nao-pon
 	 **/
-	protected function imgRotate($path, $degrees, $bgcolor = '#ffffff') {
+	protected function imgRotate($path, $degrees, $bgcolor = '#ffffff', $destformat = null) {
 
 		if (($s = @getimagesize($path)) == false) {
 			return false;
@@ -2920,14 +2920,12 @@ abstract class elFinderVolumeDriver {
 				} elseif ($s['mime'] == 'image/xbm') {
 					$img = imagecreatefromxbm($path);
 				}
-
+				
 				$degrees = 360 - $degrees;
 				
-				$tmp = imagecreatetruecolor(1, 1);
 				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-				$bgcolor = imagecolorallocate($tmp, $r, $g, $b);
-				
-				$out = imageRotate($img, $degrees, $bgcolor);
+				$bgcolor = imagecolorallocate($img, $r, $g, $b);
+				$out = imageRotate($img, $degrees, (int)$bgcolor);
 				
 				if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
 					$result = imagejpeg($out, $path, 100);
