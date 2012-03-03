@@ -1625,10 +1625,6 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
 
-		if (!empty($file['tmb']) && $file['tmb'] != "1") {
-			$this->rmTmb($file['tmb']);
-		}
-
 		switch($mode) {
 			
 			case 'propresize':
@@ -1649,6 +1645,9 @@ abstract class elFinderVolumeDriver {
     	}
 		
 		if ($result) {
+			if (!empty($file['tmb']) && $file['tmb'] != "1") {
+				$this->rmTmb($file['tmb']);
+			}
 			$this->clearcache();
 			return $this->stat($path);
 		}
@@ -2931,7 +2930,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function rmTmb($tmb) {
-		// $tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$tmb;
+		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$tmb;
 		file_exists($tmb) && @unlink($tmb);
 		clearstatcache();
 	}
