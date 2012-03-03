@@ -1,7 +1,7 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @version 2012-02-22
+ * @version 2012-02-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -101,7 +101,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : '親ディレクトリーへ移動',
 			'cmdupload'    : 'ファイルアップロード',
 			'cmdview'      : 'ビュー',
-			'cmdresize'    : 'リサイズ',
+			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
 			
 			/*********************************** buttons ***********************************/ 
@@ -229,6 +229,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'mode'            : 'モード',
 			'resize'          : 'リサイズ',
 			'crop'            : '切り抜き',
+			'rotate'          : '回転',
+			'rotate-l90'      : '90度左回転',
+			'rotate-r90'      : '90度右回転',
+			'deg'             : '度',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
