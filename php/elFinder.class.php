@@ -323,34 +323,12 @@ class elFinder {
 		
 		$result = $this->$cmd($args);
 		
-		// normalize data
-		// if (isset($result['added'])) {
-		// 	$result['added'] = $this->toArray($result['added']);
-		// }
-		// if (isset($result['changed'])) {
-		// 	$result['changed'] = $this->toArray($result['changed']);
-		// }
-		// if (isset($result['removed'])) {
-		// 	$result['removed'] = $this->toArray($result['removed']);
-		// }
-		
 		if (isset($result['removed'])) {
 			foreach ($this->volumes as $volume) {
 				$result['removed'] = array_merge($result['removed'], $volume->removed());
 				$volume->resetRemoved();
 			}
 		}
-		
-		// some commands can remove/overwrite files
-		// if ($cmd == 'upload' || $cmd == 'paste' || $cmd == 'extract') {
-		// 	if (!isset($result['removed'])) {
-		// 		$result['removed'] = array();
-		// 	}
-		// 	foreach ($this->volumes as $volume) {
-		// 		$result['removed'] = array_merge($result['removed'], $volume->removed());
-		// 		$volume->resetRemoved();
-		// 	}
-		// }
 		
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
@@ -365,9 +343,6 @@ class elFinder {
 		
 		// replace removed files info with removed files hashes
 		if (!empty($result['removed'])) {
-			// debug($result['removed']);
-			// $result['removed'] = $this->hashes($result['removed']);
-			// debug($result['removed']);
 			$removed = array();
 			foreach ($result['removed'] as $file) {
 				$removed[] = $file['hash'];
