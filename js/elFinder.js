@@ -1819,8 +1819,8 @@ elFinder.prototype = {
 	
 	uploads : {
 		// upload transport using iframe
-		iframe : function(data) { 
-			var self   = this,
+		iframe : function(data, rm) { 
+			var self   = fm ? fm : this,
 				input  = data.input,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -1905,8 +1905,8 @@ elFinder.prototype = {
 			return dfrd;
 		},
 		// upload transport using XMLHttpRequest
-		xhr : function(data) { 
-			var self   = this,
+		xhr : function(data, fm) { 
+			var self   = fm ? fm : this,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
