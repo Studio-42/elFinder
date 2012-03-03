@@ -1096,9 +1096,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function tmb($hash) {
-		return ($path = $this->decode($hash)) && ($stat = $this->stat($path))
-			? (($tmb = $this->gettmb($path, $stat)) ? $tmb : $this->createTmb($path, $stat))
-			: false;
+		$path = $this->decode($hash);
+		$stat = $this->stat($path);
+		
+		if (isset($stat['tmb'])) {
+			return $stat['tmb'] == "1" ? $this->createTmb($path, $stat) : $stat['tmb'];
+		}
+		return false;
 	}
 	
 	/**
@@ -1905,8 +1909,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path) {
-		// debug($path);
-		// debug($this->cache);
 		return isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->_stat($path));
@@ -2468,7 +2470,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmbname($stat) {
-		// debug($stat);
 		return $stat['hash'].$stat['ts'].'.png';
 	}
 	
@@ -2486,6 +2487,7 @@ abstract class elFinderVolumeDriver {
 			if (strpos($path, $this->tmbPath) === 0) {
 				return basename($path);
 			}
+
 			$name = $this->tmbname($stat);
 			if (file_exists($this->tmbPath.DIRECTORY_SEPARATOR.$name)) {
 				return $name;
@@ -2535,15 +2537,15 @@ abstract class elFinderVolumeDriver {
 		if (!$stat || !$this->canCreateTmb($path, $stat)) {
 			return false;
 		}
-		
+
 		$name = $this->tmbname($stat);
 		$tmb  = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
-		
+
 		// copy image into tmbPath so some drivers does not store files on local fs
 		if (($src = $this->_fopen($path, 'rb')) == false) {
 			return false;
 		}
-		
+
 		if (($trg = fopen($tmb, 'wb')) == false) {
 			$this->_fclose($src, $path);
 			return false;
@@ -2567,11 +2569,10 @@ abstract class elFinderVolumeDriver {
     	/* If image smaller or equal thumbnail size - just fitting to thumbnail square */
     	if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
      	   $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+
 	    } else {
 
 	    	if ($this->options['tmbCrop']) {
-
-    			// $result = true; 
         
         		/* Resize and crop if image bigger than thumbnail */
 	        	if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
@@ -2580,6 +2581,7 @@ abstract class elFinderVolumeDriver {
 
 	        	// $result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, $this->imgLib, 'png');
 				$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, 0, 0, 'png');
+
     		} else {
         		$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
         		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
@@ -2718,7 +2720,6 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$result = false;
-		$this->rmTmb($path);
 		
 		switch ($this->imgLib) {
 			case 'imagick':
@@ -2922,8 +2923,8 @@ abstract class elFinderVolumeDriver {
 	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function rmTmb($path) {
-		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbName($this->stat($path));
+	protected function rmTmb($tmb) {
+		// $tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$tmb;
 		file_exists($tmb) && @unlink($tmb);
 		clearstatcache();
 	}
