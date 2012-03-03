@@ -3269,5 +3269,3 @@ abstract class elFinderVolumeDriver {
 	abstract protected function _checkArchivers();
 	
 } // END class
-
-?>

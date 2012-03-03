@@ -880,5 +880,3 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 } // END class 
-
-?>

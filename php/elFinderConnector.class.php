@@ -1,6 +1,4 @@
 <?php
-ob_start();
-// mb_internal_encoding("UTF-8");
 
 /**
  * Default elFinder connector
@@ -105,7 +103,6 @@ class elFinderConnector {
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
-		ob_end_clean();
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {
@@ -134,5 +131,3 @@ class elFinderConnector {
 	}
 	
 }// END class 
-
-?>

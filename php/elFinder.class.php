@@ -607,11 +607,11 @@ class elFinder {
 		}
 		
 		$filenameEncoded = rawurlencode($file['name']);
-		if (substr($filenameEncoded, '%') === false) { // ASCII only
+		if (strpos($filenameEncoded, '%') === false) { // ASCII only
 			$filename = 'filename="'.$file['name'].'"';
 		} else {
 			$ua = $_SERVER["HTTP_USER_AGENT"];
-			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 not support RFC 6266 (RFC 2231/RFC 5987) 
+			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
 			} else { // RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename*=UTF-8\'\''.$filenameEncoded;
@@ -1099,6 +1099,3 @@ class elFinder {
 	}
 	
 } // END class
-
-
-?>
