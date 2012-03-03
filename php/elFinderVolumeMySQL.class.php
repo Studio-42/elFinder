@@ -220,6 +220,95 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $this->tmpPath.DIRECTORY_SEPARATOR.md5($path);
 	}
 
+	/**
+	 * Resize image
+	 *
+	 * @param  string   $hash    image file
+	 * @param  int      $width   new width
+	 * @param  int      $height  new height
+	 * @param  bool     $crop    crop image
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 **/
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg='') {
+		if ($this->commandDisabled('resize')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		if (($file = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+		
+		if (!$file['write'] || !$file['read']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		$path = $this->decode($hash);
+		
+		if (!$this->canResize($path, $file)) {
+			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+		}
+
+		$img = $this->tmpname($path);
+		
+		if (!($fp = @fopen($img, 'w+'))) {
+			return false;
+		}
+
+		if (($res = $this->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"'))
+		&& ($r = $res->fetch_assoc())) {
+			fwrite($fp, $r['content']);
+			rewind($fp);
+			fclose($fp);
+		} else {
+			return false;
+		}
+
+
+		switch($mode) {
+			
+			case 'propresize':
+				$result = $this->imgResize($img, $width, $height, true, true);
+				break;
+
+			case 'crop':
+				$result = $this->imgCrop($img, $width, $height, $x, $y);
+				break;
+
+			case 'fitsquare':
+				$result = $this->imgSquareFit($img, $width, $height, 'center', 'middle', $bg ? $bg : $this->options['tmbBgColor']);
+				break;
+			
+			default:
+				$result = $this->imgResize($img, $width, $height, false, true);
+				break;				
+    	}
+		
+		if ($result) {
+			
+			$sql = sprintf('UPDATE %s SET content=LOAD_FILE("%s"), mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->db->real_escape_string(realpath($img)), $path);
+			
+			if (!$this->query($sql)) {
+				$content = file_get_contents($img);
+				$sql = sprintf('UPDATE %s SET content="%s", mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->db->real_escape_string($content), $path);
+				if (!$this->query($sql)) {
+					@unlink($img);
+					return false;
+				}
+			}
+			@unlink($img);
+			if (!empty($file['tmb']) && $file['tmb'] != "1") {
+				$this->rmTmb($file['tmb']);
+			}
+			$this->clearcache();
+			return $this->stat($path);
+		}
+		
+   		return false;
+	}
+	
+
 	/*********************************************************************/
 	/*                               FS API                              */
 	/*********************************************************************/
@@ -293,48 +382,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $parents;
 	}
 
-	/**
-	 * Resize image
-	 *
-	 * @param  string   $path               image file
-	 * @param  int      $width              new width
-	 * @param  int      $height             new height
-	 * @param  bool	    $keepProportions    crop image
-	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
-	 * @param  string   $imgLib             image library
-	 * @param  string   $destformat         image destination format
-	 * @return string|false
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
-	 **/
-  	protected function _imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $imgLib = 'imagick', $destformat = null ) {
-		// echo $path;
-		$result = false;
-		
-		if (($tmpfile = tempnam($this->tmpPath, $this->id)) && ($fp = fopen($tmpfile, 'w'))) {
-			
-			if (($res = $this->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"'))
-			&& ($r = $res->fetch_assoc())) {
-				fwrite($fp, $r['content']);
-				fclose($fp);
-				$imgpath = parent::imgResize($tmpfile, $width, $height, $keepProportions, $resizeByBiggerSide, $imgLib, $destformat);
-				
-				if ($imgpath) {
-					$stat = $this->stat($path);
-					$size = getimagesize($imgpath);
-					$fp = fopen($imgpath, 'rb');
-					$result = $this->_save($fp, $this->decode($stat['phash']), $stat['name'], $stat['mime'], $size[0], $size[1]);
-					fclose($fp);
-				}
-				
-				unlink(@$tmpfile);
-				// echo "new path $path";
-				return $path;
-			} 
-		} 
-		unlink(@$tmpfile);
-		return $result;
-	}
-
 
 	/*********************** paths/urls *************************/
 	
@@ -370,9 +417,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _joinPath($dir, $name) {
 		$sql = 'SELECT id FROM '.$this->tbf.' WHERE parent_id="'.$dir.'" AND name="'.$this->db->real_escape_string($name).'"';
-		// echo $sql;
+
 		if (($res = $this->query($sql)) && ($r = $res->fetch_assoc())) {
-			// echo 'got '.$r['id'];
 			$this->updateCache($r['id'], $this->_stat($r['id']));
 			return $r['id'];
 		}
@@ -687,7 +733,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$this->clearcache();
 		
 		$id = $this->_joinPath($dir, $name);
-		$this->rmTmb($id);
 		rewind($fp);
 		$stat = fstat($fp);
 		$size = $stat['size'];
