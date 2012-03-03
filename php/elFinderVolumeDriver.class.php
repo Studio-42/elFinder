@@ -769,7 +769,8 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$this->configure();
-
+		// echo $this->uploadMaxSize;
+		// echo $this->options['uploadMaxSize'];
 		return $this->mounted = true;
 	}
 	
@@ -1904,6 +1905,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path) {
+		// debug($path);
+		// debug($this->cache);
 		return isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->_stat($path));
@@ -2003,14 +2006,12 @@ abstract class elFinderVolumeDriver {
 				}
 			} else {
 				// for files - check for thumbnails
-				if ($this->tmbURL) {
-					$p = isset($stat['target']) ? $stat['target'] : $path;
-					if (($tmb = $this->gettmb($p, $stat)) != false) {
-						$stat['tmb'] = $tmb;
-					} elseif ($this->canCreateTmb($p, $stat)) {
-						$stat['tmb'] = 1;
-					}
+				$p = isset($stat['target']) ? $stat['target'] : $path;
+				if ($this->tmbURL && !isset($stat['tmb']) && $this->canCreateTmb($p, $stat)) {
+					$tmb = $this->gettmb($p, $stat);
+					$stat['tmb'] = $tmb ? $tmb : 1;
 				}
+				
 			}
 		}
 		
@@ -2467,6 +2468,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmbname($stat) {
+		// debug($stat);
 		return $stat['hash'].$stat['ts'].'.png';
 	}
 	
