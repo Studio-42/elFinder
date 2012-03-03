@@ -2273,7 +2273,7 @@ abstract class elFinderVolumeDriver {
 				
 				$result[] = $stat;
 			}
-			if ($stat['mime'] == 'directory' && $stat['read'] && !$stat['alias']) {
+			if ($stat['mime'] == 'directory' && $stat['read'] && !isset($stat['alias'])) {
 				$result = array_merge($result, $this->doSearch($p, $q, $mimes));
 			}
 		}
