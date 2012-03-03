@@ -2267,7 +2267,7 @@ abstract class elFinderVolumeDriver {
 
 			if ($this->stripos($name, $q) !== false) {
 				$stat['path'] = $this->_path($p);
-				if ($this->URL) {
+				if ($this->URL && !isset($stat['url'])) {
 					$stat['url'] = $this->URL . str_replace($this->separator, '/', substr($p, strlen($this->root) + 1));
 				}
 				
