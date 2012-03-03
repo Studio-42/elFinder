@@ -1253,9 +1253,12 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$this->rmTmb($path);
+		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+			$this->rmTmb($stat['tmb']);
+		}
+		
 		$path = $this->_joinPath($dir, $name);
-		$this->rmTmb($path);
+
 		$this->clearcache();
 		return $this->stat($path);
 	}
@@ -1343,9 +1346,6 @@ abstract class elFinderVolumeDriver {
 					return $this->setError(elFinder::ERROR_NOT_REPLACE, $name);
 				} 
 				$this->remove($file);
-				$this->rmTmb($path);
-				// $removed = $file;
-				// $removed['realpath'] = $test;
 			} else {
 				$name = $this->uniqueName($dstpath, $name, '-', false);
 			}
@@ -1625,6 +1625,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
 
+		if (!empty($file['tmb']) && $file['tmb'] != "1") {
+			$this->rmTmb($file['tmb']);
+		}
+
 		switch($mode) {
 			
 			case 'propresize':
@@ -1645,9 +1649,7 @@ abstract class elFinderVolumeDriver {
     	}
 		
 		if ($result) {
-			$this->rmTmb($path);
 			$this->clearcache();
-			$this->createTmb($path, $file);
 			return $this->stat($path);
 		}
 		
@@ -2425,9 +2427,11 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function remove($path, $force = false) {
-		$this->rmTmb($path);
 		$stat = $this->stat($path);
 		$stat['realpath'] = $path;
+		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+			$this->rmTmb($stat['tmb']);
+		}
 		$this->clearcache();
 		
 		if (empty($stat)) {
