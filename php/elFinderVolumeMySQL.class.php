@@ -287,7 +287,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if ($result) {
 			
-			$sql = sprintf('UPDATE %s SET content=LOAD_FILE("%s"), mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->db->real_escape_string(realpath($img)), $path);
+			$sql = sprintf('UPDATE %s SET content=LOAD_FILE("%s"), mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->loadFilePath($img), $path);
 			
 			if (!$this->query($sql)) {
 				$content = file_get_contents($img);
@@ -382,6 +382,20 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $parents;
 	}
 
+	/**
+	 * Return correct file path for LOAD_FILE method
+	 *
+	 * @param  string $path  file path (id)
+	 * @return string
+	 * @author Troex Nevelin
+	 **/
+	protected function loadFilePath($path) {
+		$realPath = realpath($path);
+		if (DIRECTORY_SEPARATOR == '\\') { // windows
+			$realPath = str_replace('\\', '\\\\', $realPath);
+		}
+		return $this->db->real_escape_string($realPath);
+	}
 
 	/*********************** paths/urls *************************/
 	
@@ -749,7 +763,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				$sql = $id > 0
 					? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)'
 					: 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)';
-				$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), realpath($tmpfile), $size, time(), $mime, $w, $h);
+				$sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->loadFilePath($tmpfile), $size, time(), $mime, $w, $h);
 
 				$res = $this->query($sql);
 				unlink($tmpfile);
