@@ -1338,7 +1338,7 @@ window.elFinder = function(node, opts) {
 	if (this.transport.upload == 'iframe') {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	} else if (typeof(this.transport.upload) == 'function') {
-		this.dragUpload = !!this.options.dragUpload;
+		this.dragUpload = !!this.options.dragUploadAllow;
 	} else if (this.xhrUpload) {
 		this.transport.upload = $.proxy(this.uploads.xhr, this);
 		this.dragUpload = true;
