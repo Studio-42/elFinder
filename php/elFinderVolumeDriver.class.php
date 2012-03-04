@@ -153,63 +153,61 @@ abstract class elFinderVolumeDriver {
 	protected $options = array(
 		'id'              => '',
 		// root directory path
-		'path'            => '',  
+		'path'            => '',
 		// open this path on initial request instead of root path
-		'startPath'       => '',        
-		// how many subdirs levels return per request   
-		'treeDeep'        => 1,          
-		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)  
-		'URL'             => '',   
-		// directory separator. required by client to show paths correctly        
+		'startPath'       => '',
+		// how many subdirs levels return per request
+		'treeDeep'        => 1,
+		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)
+		'URL'             => '',
+		// directory separator. required by client to show paths correctly
 		'separator'       => DIRECTORY_SEPARATOR,
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
-		'mimeDetect'      => 'auto',       
+		'mimeDetect'      => 'auto',
 		// mime.types file path (for mimeDetect==internal)
-		'mimefile'        => '',          
-		// directory for thumbnails 
-		'tmbPath'         => '.tmb',       
+		'mimefile'        => '',
+		// directory for thumbnails
+		'tmbPath'         => '.tmb',
 		// mode to create thumbnails dir
-		'tmbPathMode'     => 0777,   
-		// thumbnails dir URL. Set it if store thumbnails outside root directory      
-		'tmbURL'          => '',     
-		// thumbnails size (px)      
-		'tmbSize'         => 48,     
+		'tmbPathMode'     => 0777,
+		// thumbnails dir URL. Set it if store thumbnails outside root directory
+		'tmbURL'          => '',
+		// thumbnails size (px)
+		'tmbSize'         => 48,
 		// thumbnails crop (true - crop, false - scale image to fit thumbnail size)
 		'tmbCrop'         => true,
 		// thumbnails background color (hex #rrggbb or 'transparent')
 		'tmbBgColor'      => '#ffffff',
 		// image manipulations library
-		'imgLib'          => 'auto',   
-		// how frequiently clean thumbnails dir (0 - never, 100 - every init request)    
-		'tmbCleanProb' => 0,            
+		'imgLib'          => 'auto',
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
-		'copyOverwrite'   => true,    
-		// if true - join new and old directories content on paste     
-		'copyJoin'        => true, 
-		// on upload -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext   
-		'uploadOverwrite' => true, 
+		'copyOverwrite'   => true,
+		// if true - join new and old directories content on paste
+		'copyJoin'        => true,
+		// on upload -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
+		'uploadOverwrite' => true,
 		// mimetypes allowed to upload
-		'uploadAllow'     => array('all'),      
+		'uploadAllow'     => array(),
 		// mimetypes not allowed to upload
-		'uploadDeny'      => array(),      
+		'uploadDeny'      => array(),
 		// order to proccess uploadAllow and uploadDeny options
-		'uploadOrder'     => 'deny,allow', 
+		'uploadOrder'     => array('deny', 'allow'),
 		// maximum upload file size. NOTE - this is size for every uploaded files
 		'uploadMaxSize'   => 0,
 		// files dates format
-		'dateFormat'      => 'j M Y H:i',  
+		'dateFormat'      => 'j M Y H:i',
 		// files time format
 		'timeFormat'      => 'H:i',
 		// if true - every folder will be check for children folders, otherwise all folders will be marked as having subfolders
 		'checkSubfolders' => true,
 		// allow to copy from this volume to other ones?
-		'copyFrom'        => true,  
+		'copyFrom'        => true,
 		// allow to copy from other volumes to this one?
-		'copyTo'          => true,  
+		'copyTo'          => true,
 		// list of commands disabled on this root
-		'disabled'        => array(),      
+		'disabled'        => array(),
 		// regexp or function name to validate new file name
 		'acceptedName'    => '/^\w[\w\s\.\%\-\(\)\[\]]*$/u',
 		// function/class method to control files permissions
@@ -217,15 +215,15 @@ abstract class elFinderVolumeDriver {
 		// some data required by access control
 		'accessControlData' => null,
 		// default permissions. not set hidden/locked here - take no effect
-		'defaults'     => array(   
+		'defaults'     => array(
 			'read'   => true,
 			'write'  => true
 		),
 		// files attributes
-		'attributes'   => array(),  
-		// Allowed archive's mimetypes to create. Leave empty for all available types. 
-		'archiveMimes' => array(),  
-		// Manual config for archivers. See example below. Leave empty for auto detect	
+		'attributes'   => array(),
+		// Allowed archive's mimetypes to create. Leave empty for all available types.
+		'archiveMimes' => array(),
+		// Manual config for archivers. See example below. Leave empty for auto detect
 		'archivers'    => array(),
 		// required to fix bug on macos
 		'utf8fix'      => false,
@@ -233,7 +231,7 @@ abstract class elFinderVolumeDriver {
 		'utf8patterns' => array("\u0438\u0306", "\u0435\u0308", "\u0418\u0306", "\u0415\u0308", "\u00d8A", "\u030a"),
 		'utf8replace'  => array("\u0439",        "\u0451",       "\u0419",       "\u0401",       "\u00d8", "\u00c5")
 	);
-	
+
 	/**
 	 * Defaults permissions
 	 *
@@ -605,9 +603,13 @@ abstract class elFinderVolumeDriver {
 		$this->uploadDeny = isset($this->options['uploadDeny']) && is_array($this->options['uploadDeny'])
 			? $this->options['uploadDeny']
 			: array();
-			
-		$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
-		$this->uploadOrder = array(trim($parts[0]), trim($parts[1]));
+
+		if (is_string($this->options['uploadOrder'])) { // telephat_mode on, compatibility with 1.x
+			$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
+			$this->uploadOrder = array(trim($parts[0]), trim($parts[1]));
+		} else { // telephat_mode off
+			$this->uploadOrder = $this->options['uploadOrder'];
+		}
 			
 		if (!empty($this->options['uploadMaxSize'])) {
 			$size = ''.$this->options['uploadMaxSize'];
@@ -861,14 +863,23 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return true if mime is required mimes list
 	 *
-	 * @param  string $mime   mime type to check
-	 * @param  array  $mimes  allowed mime types list or not set to use client mimes list
-	 * @return bool
+	 * @param  string     $mime   mime type to check
+	 * @param  array      $mimes  allowed mime types list or not set to use client mimes list
+	 * @param  bool|null  $empty  what to return on empty list
+	 * @return bool|null
 	 * @author Dmitry (dio) Levashov
+	 * @author Troex Nevelin
 	 **/
-	public function mimeAccepted($mime, $mimes=null) {
-		$mimes = is_array($mimes) ? $mimes : $this->onlyMimes;
-		return empty($mimes) || $mime == 'directory' || in_array($mime, $mimes) || in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
+	public function mimeAccepted($mime, $mimes = array(), $empty = true) {
+		$mimes = !empty($mimes) ? $mimes : $this->onlyMimes;
+		if (empty($mimes)) {
+			return $empty;
+		}
+		return $mime == 'directory'
+			|| in_array('all', $mimes)
+			|| in_array('All', $mimes)
+			|| in_array($mime, $mimes)
+			|| in_array(substr($mime, 0, strpos($mime, '/')), $mimes);
 	}
 	
 	/**
@@ -1320,14 +1331,26 @@ abstract class elFinderVolumeDriver {
 		if ($mime == 'unknown' && $this->mimeDetect == 'internal') {
 			$mime = elFinderVolumeDriver::mimetypeInternalDetect($name);
 		}
-		$allow = in_array('all', $this->uploadAllow) || $this->mimeAccepted($mime, $this->uploadAllow);
-		$deny  = in_array('all', $this->uploadDeny)  || $this->mimeAccepted($mime, $this->uploadDeny);
-		// dont ask me what this mean. I forgot it, but its work :)
-		// for details see python connector
-		if (!($this->uploadOrder[0] == 'allow' ? ($allow && !$deny) : ($allow || !$deny))) {
+
+		// logic based on http://httpd.apache.org/docs/2.2/mod/mod_authz_host.html#order
+		$allow  = $this->mimeAccepted($mime, $this->uploadAllow, null);
+		$deny   = $this->mimeAccepted($mime, $this->uploadDeny,  null);
+		$upload = true; // default to allow
+		if (strtolower($this->uploadOrder[0]) == 'allow') { // array('allow', 'deny'), default is to 'deny'
+			$upload = false; // default is deny
+			if (!$deny && ($allow === true)) { // match only allow
+				$upload = true;
+			}// else (both match | no match | match only deny) { deny }
+		} else { // array('deny', 'allow'), default is to 'allow' - this is the default rule
+			$upload = true; // default is allow
+			if (($deny === true) && !$allow) { // match only deny
+				$upload = false;
+			} // else (both match | no match | match only allow) { allow }
+		}
+		if (!$upload) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
-		
+
 		if ($this->uploadMaxSize > 0 && filesize($tmpPath) > $this->uploadMaxSize) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
