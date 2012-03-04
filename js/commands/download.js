@@ -21,7 +21,7 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return  !this._disabled && cnt && cnt == filter(sel).length ? 0 : -1;
+		return  !this._disabled && cnt && (!$.browser.msie || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -41,16 +41,16 @@ elFinder.prototype.commands.download = function() {
 		}
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';
-			
+		
 		for (i = 0; i < files.length; i++) {
-			var iframe = $('<iframe style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>')
-				.appendTo('body')
-				.load(function() {
-					setTimeout(function() {
-						iframe.remove();
-					}, 1000)
-				});
+			iframe = $('<iframe class="downloader" style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>')
+				.appendTo('body');
 		}
+		iframe.ready(function() {
+			setTimeout(function() {
+				$('body iframe.downloader').remove();
+			}, $.browser.mozilla? (10000 * i + 1) : 1000);
+		});
 		return dfrd.resolve(hashes);
 	}
 
