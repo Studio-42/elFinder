@@ -1601,12 +1601,16 @@ abstract class elFinderVolumeDriver {
 	 * @param  string   $hash    image file
 	 * @param  int      $width   new width
 	 * @param  int      $height  new height
-	 * @param  bool     $crop    crop image
+	 * @param  int      $x       X start poistion for crop
+	 * @param  int      $y       Y start poistion for crop
+	 * @param  string   $mode    action how to mainpulate image
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
+	 * @author nao-pon
+	 * @author Troex Nevelin
 	 **/
-	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg='') {
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
 		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1636,14 +1640,18 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'fitsquare':
-				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', $bg ? $bg : $this->options['tmbBgColor']);
+				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']));
 				break;
-			
+
+			case 'rotate':
+				$result = $this->imgRotate($path, $degree, ($bg ? $bg : $this->options['tmbBgColor']));
+				break;
+
 			default:
 				$result = $this->imgResize($path, $width, $height, false, true);
-				break;				
-    	}
-		
+				break;
+		}
+
 		if ($result) {
 			if (!empty($file['tmb']) && $file['tmb'] != "1") {
 				$this->rmTmb($file['tmb']);
@@ -2612,7 +2620,8 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
   	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
@@ -2718,7 +2727,8 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool	    $y                  crop top offset
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
   	protected function imgCrop($path, $width, $height, $x, $y, $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
@@ -2793,9 +2803,10 @@ abstract class elFinderVolumeDriver {
 	 * @param  string   $bgcolor            square background color in #rrggbb format
 	 * @param  string   $destformat         image destination format
 	 * @return string|false
-	 * @author Dmitry (dio) Levashov, Alexey Sukhotin
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
 	 **/
-  	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
+		protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -2808,11 +2819,9 @@ abstract class elFinderVolumeDriver {
     
 		switch ($this->imgLib) {
 			case 'imagick':
-				
 				try {
 					$img = new imagick($path);
 				} catch (Exception $e) {
-
 					return false;
 				}
 
@@ -2856,7 +2865,7 @@ abstract class elFinderVolumeDriver {
 					if (!imagecopy($tmp, $img, $x, $y, 0, 0, $s[0], $s[1])) {
 						return false;
 					}
-					
+
 					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
 						$result = imagejpeg($tmp, $path, 100);
 					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
@@ -2869,14 +2878,80 @@ abstract class elFinderVolumeDriver {
 					imagedestroy($tmp);
 
 					return $result ? $path : false;
-
 				}
 				break;
 		}
 
-		return false;  
-  }
-  
+		return false;
+	}
+
+	/**
+	 * Rotate image
+	 *
+	 * @param  string   $path               image file
+	 * @param  int      $degree             rotete degrees
+	 * @param  string   $bgcolor            square background color in #rrggbb format
+	 * @param  string   $destformat         image destination format
+	 * @return string|false
+	 * @author nao-pon
+	 * @author Troex Nevelin
+	 **/
+	protected function imgRotate($path, $degree, $bgcolor = '#ffffff', $destformat = null) {
+		if (($s = @getimagesize($path)) == false) {
+			return false;
+		}
+
+		$result = false;
+
+		switch ($this->imgLib) {
+			case 'imagick':
+				try {
+					$img = new imagick($path);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				$img->rotateImage(new ImagickPixel($bgcolor), $degree);
+				$result = $img->writeImage($path);
+				return $result ? $path : false;
+
+				break;
+
+			case 'gd':
+				if ($s['mime'] == 'image/jpeg') {
+					$img = imagecreatefromjpeg($path);
+				} elseif ($s['mime'] == 'image/png') {
+					$img = imagecreatefrompng($path);
+				} elseif ($s['mime'] == 'image/gif') {
+					$img = imagecreatefromgif($path);
+				} elseif ($s['mime'] == 'image/xbm') {
+					$img = imagecreatefromxbm($path);
+				}
+
+				$degree = 360 - $degree;
+				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+				$bgcolor = imagecolorallocate($img, $r, $g, $b);
+				$tmp = imageRotate($img, $degree, (int)$bgcolor);
+
+				if ($destformat == 'jpg' || ($destformat == null && $s['mime'] == 'image/jpeg')) {
+					$result = imagejpeg($tmp, $path, 100);
+				} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
+					$result = imagegif($tmp, $path, 7);
+				} else {
+					$result = imagepng($tmp, $path, 7);
+				}
+
+				imageDestroy($img);
+				imageDestroy($tmp);
+
+				return $result ? $path : false;
+
+				break;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Execute shell command
 	 *
