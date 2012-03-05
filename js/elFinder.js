@@ -385,7 +385,7 @@ window.elFinder = function(node, opts) {
 	this.messages = i18.messages;
 	
 	/**
-	 * Date/time fomat
+	 * Date/time format
 	 *
 	 * @type String
 	 * @default "m.d.Y"
@@ -393,26 +393,35 @@ window.elFinder = function(node, opts) {
 	this.dateTimeFormat = i18.dateTimeFormat;
 	
 	/**
-	 * Time fomat
+	 * Time format
 	 *
 	 * @type String
 	 * @default "H:i:s"
 	 **/
 	this.timeFormat = i18.timeFormat;
 	
+	/**
+	 * Date format like "Yesterday 10:20:12"
+	 *
+	 * @type String
+	 * @default "{day} {time}"
+	 **/
 	this.fancyDateFormat = i18.fancyDateFormat;
-	console.log(i18, this.fancyDateFormat)
+
+	/**
+	 * Today timestamp
+	 *
+	 * @type Number
+	 **/
 	this.today = (new Date(date.getFullYear(), date.getMonth(), date.getDate())).getTime()/1000;
 	
+	/**
+	 * Yesterday timestamp
+	 *
+	 * @type Number
+	 **/
 	this.yesterday = this.today - 86400;
 	
-	// console.log(this.today, new Date(this.yesterday*1000))
-	
-	// var date = new Date();
-	// 
-	// var today = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-	// console.log(today.getTime())
-	// console.log(new Date(today - 86400*1000))
 	/**
 	 * Css classes 
 	 *
@@ -2569,7 +2578,7 @@ elFinder.prototype = {
 	/**
 	 * Return localized date
 	 * 
-	 * @param  String  date
+	 * @param  Object  file object
 	 * @return String
 	 */
 	formatDate : function(file) {
