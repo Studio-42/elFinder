@@ -128,7 +128,7 @@ elFinder.prototype.commands.info = function() {
 			}
 			
 			
-			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file.date)));
+			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file)));
 			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
 		} else {

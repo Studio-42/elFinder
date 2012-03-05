@@ -147,7 +147,7 @@ $.fn.elfindercwd = function(fm) {
 					return fm.formatSize(f.size);
 				},
 				date : function(f) {
-					return fm.formatDate(f.date);
+					return fm.formatDate(f);
 				},
 				kind : function(f) {
 					return fm.mime2kind(f);
