@@ -192,7 +192,7 @@ window.elFinder = function(node, opts) {
 		 * @default 400
 		 **/
 		height = 400,
-		
+				
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -266,7 +266,9 @@ window.elFinder = function(node, opts) {
 				// prevent tab out of elfinder
 				code == 9 && e.preventDefault();
 			}
-		}
+		},
+		date = new Date(),
+		i18
 		;
 
 
@@ -365,21 +367,52 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.lang = this.i18[this.options.lang] && this.i18[this.options.lang].messages ? this.options.lang : 'en';
 	
+	i18 = this.lang == 'en' ? this.i18['en'] : $.extend(true, {}, this.i18['en'], this.i18[this.lang]);
+	
 	/**
 	 * Interface direction
 	 *
 	 * @type String
 	 * @default "ltr"
 	 **/
-	this.direction = this.i18[this.lang].direction;
+	this.direction = i18.direction;
 	
 	/**
 	 * i18 messages
 	 *
 	 * @type Object
 	 **/
-	this.messages = $.extend({}, this.i18.en && this.i18.en.messages, this.lang != 'en' ? this.i18[this.lang].messages : {});
+	this.messages = i18.messages;
 	
+	/**
+	 * Date/time fomat
+	 *
+	 * @type String
+	 * @default "m.d.Y"
+	 **/
+	this.dateTimeFormat = i18.dateTimeFormat;
+	
+	/**
+	 * Time fomat
+	 *
+	 * @type String
+	 * @default "H:i:s"
+	 **/
+	this.timeFormat = i18.timeFormat;
+	
+	this.fancyDateFormat = i18.fancyDateFormat;
+	console.log(i18, this.fancyDateFormat)
+	this.today = (new Date(date.getFullYear(), date.getMonth(), date.getDate())).getTime()/1000;
+	
+	this.yesterday = this.today - 86400;
+	
+	// console.log(this.today, new Date(this.yesterday*1000))
+	
+	// var date = new Date();
+	// 
+	// var today = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+	// console.log(today.getTime())
+	// console.log(new Date(today - 86400*1000))
 	/**
 	 * Css classes 
 	 *
@@ -399,14 +432,6 @@ window.elFinder = function(node, opts) {
 	    return self.cookie;
 	  }
 	})();
-
-	// this.storage= this.cookie;
-	/**
-	 * Sort files type
-	 *
-	 * @type String
-	 **/
-	// this.sort = self.sorts[this.options.sort] || 1;
 
 
 	/**
@@ -1644,10 +1669,13 @@ elFinder.prototype = {
 	 */
 	i18 : {
 		en : {
-			translator  : '',
-			language    : 'English',
-			direction   : 'ltr',
-			messages    : {}
+			translator     : '',
+			language       : 'English',
+			direction      : 'ltr',
+			dateTimeFormat : 'm.d.Y H:i:s',
+			timeFormat     : 'H:i:s',
+			fancyDateFormat : '%s H:i:s',
+			messages       : {}
 		}
 	},
 	
@@ -2482,8 +2510,7 @@ elFinder.prototype = {
 		
 		mime = mime.split('/');
 		
-		return prefix+mime[0]+(mime[0] != 'image' && mime[1] ? ' '+prefix+mime[1].replace(/(\.|\+)/g, '-') : '')
-		// return 'elfinder-cwd-icon-'+mime.replace('/' , ' elfinder-cwd-icon-').replace(/(\.|\+)/g, '-');
+		return prefix+mime[0]+(mime[0] != 'image' && mime[1] ? ' '+prefix+mime[1].replace(/(\.|\+)/g, '-') : '');
 	},
 	
 	/**
@@ -2545,12 +2572,55 @@ elFinder.prototype = {
 	 * @param  String  date
 	 * @return String
 	 */
-	formatDate : function(d) {
-		var self = this;
+	formatDate : function(file) {
+		var self = this, 
+			ts = file.ts, 
+			date, format, d, m, n, y, h, i, s;
 
-		return d == 'unknown' 
-			? self.i18n('dateUnknown') 
-			: (''+d).replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
+		if (ts > 0) {
+			
+			date = new Date(file.ts*1000);
+			
+			h = date.getHours();
+			i = date.getMinutes();
+			s = date.getSeconds();
+			
+			format = ts >= this.yesterday 
+				? this.timeFormat 
+				: this.dateTimeFormat;
+			
+			format = format
+				.replace(/H/, h > 9 ? h : '0'+h)
+				.replace(/G/, h)
+				.replace(/i/, i > 9 ? i : '0'+i)
+				.replace(/s/, s > 9 ? s : '0'+s);
+			
+			if (ts >= this.yesterday) {
+				return this.fancyDateFormat
+					.replace(/\{day\}/, this.i18n(ts >= this.today ? 'Today' : 'Yesterday'))
+					.replace(/\{time\}/, format);
+			}
+			
+			d = date.getDate();
+			m = date.getMonth();
+			n = m + 1;
+			y = date.getFullYear();
+			
+			return format
+				.replace(/d/, d > 9 ? d : '0'+d)
+				.replace(/j/, d)
+				.replace(/D/, date.toDateString().substr(0, 3))
+				.replace(/m/, n > 9 ? n : '0'+n)
+				.replace(/n/, m)
+				.replace(/Y/, y)
+				.replace(/y/, (''+y).substr(2))
+				
+			
+		} else if (file.date) {
+			return file.date.replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
+		}
+		
+		return self.i18n('dateUnknown');
 	},
 	
 	/**
