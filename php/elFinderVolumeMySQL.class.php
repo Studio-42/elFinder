@@ -720,6 +720,20 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * undocumented function
+	 *
+	 * @return void
+	 * @author Dmitry Levashov
+	 **/
+	protected function _setContent($path, $fp) {
+		rewind($fp);
+		$fstat = fstat($fp);
+		$size = $fstat['size'];
+		
+		
+	}
+	
+	/**
 	 * Create new file and write into it from file pointer.
 	 * Return new file path or false on error.
 	 *
