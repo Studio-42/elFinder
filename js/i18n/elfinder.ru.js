@@ -8,6 +8,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
+		dateTimeFormat : 'd.m.Y H:i:s',
+		timeFormat : 'H:i:s',
+		fancyDateFormat : '{day} {time}',
 		messages   : {
 
 			/********************************** errors **********************************/
