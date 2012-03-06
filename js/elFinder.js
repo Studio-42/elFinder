@@ -268,7 +268,7 @@ window.elFinder = function(node, opts) {
 			}
 		},
 		date = new Date(),
-		i18
+		i18n
 		;
 
 
@@ -367,7 +367,9 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.lang = this.i18[this.options.lang] && this.i18[this.options.lang].messages ? this.options.lang : 'en';
 	
-	i18 = this.lang == 'en' ? this.i18['en'] : $.extend(true, {}, this.i18['en'], this.i18[this.lang]);
+	i18n = this.lang == 'en' 
+		? this.i18['en'] 
+		: $.extend(true, {}, this.i18['en'], this.i18[this.lang]);
 	
 	/**
 	 * Interface direction
@@ -375,14 +377,14 @@ window.elFinder = function(node, opts) {
 	 * @type String
 	 * @default "ltr"
 	 **/
-	this.direction = i18.direction;
+	this.direction = i18n.direction;
 	
 	/**
 	 * i18 messages
 	 *
 	 * @type Object
 	 **/
-	this.messages = i18.messages;
+	this.messages = i18n.messages;
 	
 	/**
 	 * Date/time format
@@ -390,15 +392,7 @@ window.elFinder = function(node, opts) {
 	 * @type String
 	 * @default "m.d.Y"
 	 **/
-	this.dateTimeFormat = i18.dateTimeFormat;
-	
-	/**
-	 * Time format
-	 *
-	 * @type String
-	 * @default "H:i:s"
-	 **/
-	this.timeFormat = i18.timeFormat;
+	this.dateFormat = this.options.dateFormat || i18n.dateFormat;
 	
 	/**
 	 * Date format like "Yesterday 10:20:12"
@@ -406,7 +400,7 @@ window.elFinder = function(node, opts) {
 	 * @type String
 	 * @default "{day} {time}"
 	 **/
-	this.fancyDateFormat = i18.fancyDateFormat;
+	this.fancyFormat = this.options.fancyDateFormat || i18n.fancyDateFormat;
 
 	/**
 	 * Today timestamp
@@ -1681,11 +1675,15 @@ elFinder.prototype = {
 			translator     : '',
 			language       : 'English',
 			direction      : 'ltr',
-			dateTimeFormat : 'm.d.Y H:i:s',
-			timeFormat     : 'H:i:s',
-			fancyDateFormat : '%s H:i:s',
+			dateFormat : 'm.d.Y H:i:s',
+			fancyDateFormat : '$1 H:i:s',
 			messages       : {}
-		}
+		},
+		months : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+		monthsShort : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
+		days : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+		daysShort : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 	},
 	
 	/**
@@ -2583,48 +2581,54 @@ elFinder.prototype = {
 	 */
 	formatDate : function(file) {
 		var self = this, 
-			ts = file.ts, 
-			date, format, d, m, n, y, h, i, s;
+			ts   = file.ts, 
+			i18  = self.i18,
+			date, format, output, d, dw, m, y, h, g, i, s;
 
 		if (ts > 0) {
-			
+
 			date = new Date(file.ts*1000);
 			
-			h = date.getHours();
-			i = date.getMinutes();
-			s = date.getSeconds();
+			h  = date.getHours();
+			g  = h > 12 ? h - 12 : h;
+			i  = date.getMinutes();
+			s  = date.getSeconds();
+			d  = date.getDate();
+			dw = date.getDay();
+			m  = date.getMonth() + 1;
+			y  = date.getFullYear();
 			
 			format = ts >= this.yesterday 
-				? this.timeFormat 
-				: this.dateTimeFormat;
+				? this.fancyFormat 
+				: this.dateFormat;
+
+			output = format.replace(/[a-z]/gi, function(val) {
+				switch (val) {
+					case 'd': return d > 9 ? d : '0'+d;
+					case 'j': return d;
+					case 'D': return self.i18n(i18.daysShort[dw]);
+					case 'l': return self.i18n(i18.days[dw]);
+					case 'm': return m > 9 ? m : '0'+m;
+					case 'n': return m;
+					case 'M': return self.i18n(i18.monthsShort[m-1]);
+					case 'F': return self.i18n(i18.months[m-1]);
+					case 'Y': return y;
+					case 'y': return (''+y).substr(2);
+					case 'H': return h > 9 ? h : '0'+h;
+					case 'G': return h;
+					case 'g': return g;
+					case 'h': return g > 9 ? g : '0'+g;
+					case 'a': return h > 12 ? 'pm' : 'am';
+					case 'A': return h > 12 ? 'PM' : 'AM';
+					case 'i': return i > 9 ? i : '0'+i;
+					case 's': return s > 9 ? s : '0'+s;
+				}
+				return val;
+			});
 			
-			format = format
-				.replace(/H/, h > 9 ? h : '0'+h)
-				.replace(/G/, h)
-				.replace(/i/, i > 9 ? i : '0'+i)
-				.replace(/s/, s > 9 ? s : '0'+s);
-			
-			if (ts >= this.yesterday) {
-				return this.fancyDateFormat
-					.replace(/\{day\}/, this.i18n(ts >= this.today ? 'Today' : 'Yesterday'))
-					.replace(/\{time\}/, format);
-			}
-			
-			d = date.getDate();
-			m = date.getMonth();
-			n = m + 1;
-			y = date.getFullYear();
-			
-			return format
-				.replace(/d/, d > 9 ? d : '0'+d)
-				.replace(/j/, d)
-				.replace(/D/, date.toDateString().substr(0, 3))
-				.replace(/m/, n > 9 ? n : '0'+n)
-				.replace(/n/, m)
-				.replace(/Y/, y)
-				.replace(/y/, (''+y).substr(2))
-				
-			
+			return ts >= this.yesterday
+				? output.replace('$1', this.i18n(ts >= this.today ? 'Today' : 'Yesterday'))
+				: output;
 		} else if (file.date) {
 			return file.date.replace(/([a-z]+)\s/i, function(a1, a2) { return self.i18n(a2)+' '; });
 		}
