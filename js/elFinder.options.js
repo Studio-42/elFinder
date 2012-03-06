@@ -283,6 +283,26 @@ elFinder.prototype._options = {
 	sortDirect : 'asc',
 	
 	/**
+	 * File modification datetime format.
+	 * Value from selected language data  is used by default.
+	 * Set format here to overwrite it.
+	 *
+	 * @type String
+	 * @default  ""
+	 */
+	dateFormat : '',
+	
+	/**
+	 * File modification datetime format in form "Yesterday 12:23:01".
+	 * Value from selected language data is used by default.
+	 * Set format here to overwrite it.
+	 *
+	 * @type String
+	 * @default  ""
+	 */
+	fancyDateFormat : '',
+	
+	/**
 	 * elFinder width
 	 *
 	 * @type String|Number
