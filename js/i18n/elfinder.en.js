@@ -230,8 +230,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'resize'          : 'Resize',
 			'crop'            : 'Crop',
 			'rotate'          : 'Rotate',
-			'rotate-l90'      : '90-degree left rotation',
-			'rotate-r90'      : '90-degree right rotation',
+			'rotate-cw'      : '90-degree left rotation',
+			'rotate-ccw'      : '90-degree right rotation',
 			'deg'             : 'Deg',
 			
 			/********************************** mimetypes **********************************/

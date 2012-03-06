@@ -29,6 +29,7 @@ elFinder.prototype.commands.resize = function() {
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle"/>'),
+					rhandler = $('<div class="elfinder-resize-handle"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
 					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
@@ -43,6 +44,7 @@ elFinder.prototype.commands.resize = function() {
 								val = 360 + val;
 							}
 							degree.val(val);
+							rotatepreview(val);
 						})),
 					uideg90     = $(uibutton).attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')
 						.click(function(){
@@ -52,6 +54,7 @@ elFinder.prototype.commands.resize = function() {
 								val = val - 360;
 							}
 							degree.val(val);
+							rotatepreview(val);
 						})),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
@@ -61,18 +64,32 @@ elFinder.prototype.commands.resize = function() {
 						.append('<input type="radio" name="type" id="type-rotate" value="rotate"/><label for="type-rotate">'+fm.i18n('rotate')+'</label>'),
 					type    = $('input', uitype)
 						.change(function() {
-							uiresize.add(uicrop).toggle();
+							var val = $('input:checked', uitype).val();
+					//uiresize.add(uicrop).toggle();
+
 							resetView();
 							resizable(true);
 							croppable(true);
+							rotateable(true);
 							// TODO rotateable
 
-							var val = $('input:checked', uitype).val();
+	
 							if (val == 'resize') {
+								uiresize.show();
+								uirotate.hide();
+								uicrop.hide();
 								resizable();
 							}
 							else if (val == 'crop') {
+								uirotate.hide();
+								uiresize.hide();
+								uicrop.show();
 								croppable();
+							} else if (val == 'rotate') {
+								uiresize.hide();
+								uicrop.hide();
+								uirotate.show();
+								rotateable();
 							}
 						}),
 					constr  = $('<input type="checkbox" checked="checked"/>')
@@ -168,6 +185,7 @@ elFinder.prototype.commands.resize = function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
 					imgc = $('<img/>'),
+					imgr = $('<img/>'),
 					resetView = function() {
 						width.val(owidth);
 						height.val(oheight);
@@ -270,6 +288,38 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}
 					},
+					rotatepreview = function(degree) {
+		
+						var img = $('.elfinder-resize-preview img');
+						img.css('-moz-transform', 'rotate('+degree+'deg)');
+						img.css('-webkit-transform', 'rotate('+degree+'deg)');
+						img.css('-o-transform', 'rotate('+degree+'deg)');
+						img.css('-ms-transform', 'rotate('+degree+'deg)');
+					},
+					rotateable = function(destroy) {
+						if ($.fn.draggable && $.fn.resizable) {
+							if (destroy) {
+								rhandler.resizable('destroy');
+								rhandler.draggable('destroy');
+								rhandler.hide();
+								imgr.hide();
+							}
+							else {
+								imgr.show()
+
+									.width(img.width())
+									.height(img.height());
+								$('.elfinder-resize-preview img').show();
+								rhandler.show()
+									.css('position', 'absolute')
+									.width(imgr.width())
+									.height(imgr.height())
+									.offset(imgr.offset());
+			
+								//rotate.update();
+							}
+						}
+					},
 					save = function() {
 						var w, h, x, y, d;
 						var mode = $('input:checked', uitype).val();
@@ -285,8 +335,8 @@ elFinder.prototype.commands.resize = function() {
 							x = parseInt(pointX.val()) || 0;
 							y = parseInt(pointY.val()) || 0;
 						} else if (mode = 'rotate') {
-							w = parseInt(offsetX.val()) || 0;
-							h = parseInt(offsetY.val()) || 0;
+							w = parseInt(width.val()) || 0;
+							h = parseInt(height.val()) || 0;
 							d = parseInt(degree.val()) || 0;
 							if (d < 0 || d > 360) {
 								return fm.error('Invalid rotate degree');
@@ -297,7 +347,7 @@ elFinder.prototype.commands.resize = function() {
 							return fm.error('Invalid image size');
 						}
 						
-						if (w == owidth && h == oheight) {
+						if (w == owidth && h == oheight && mode != 'rotate') {
 							return fm.error('Image size not changed');
 						}
 						
@@ -349,6 +399,8 @@ elFinder.prototype.commands.resize = function() {
 						.append($('<span/>').text(fm.i18n('degree')))
 					).append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
 				);
+				
+
 				
 				dialog.append(uitype);
 
