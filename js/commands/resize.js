@@ -604,12 +604,12 @@ elFinder.prototype.commands.resize = function() {
 	};
 	$.cssHooks.transform = {
 		get: function(elem, computed, extra) {
-			name = findProperty( elem.style , 
+			var name = findProperty( elem.style , 
 				['WebkitTransform', 'MozTransform', 'OTransform' , 'msTransform' , 'transform'] );
 			return elem.style[name];
 		},
 		set: function(elem, value) {
-			name = findProperty( elem.style , 
+			var name = findProperty( elem.style , 
 				['WebkitTransform', 'MozTransform', 'OTransform' , 'msTransform' , 'transform'] );
 			elem.style[name] = value;
 			return value;
