@@ -177,18 +177,6 @@ elFinder.prototype.commands.resize = function() {
 								.filter(':first').focus();
 								
 							resizable();
-
-							// for ie mouse event problem
-							if ($.browser.msie && parseInt($.browser.version) <= 9) {
-								rhandlec.css({
-									'opacity': 0,
-									'background-color': 'fff'
-								});
-								rhandlec.find('.elfinder-resize-handle-point').css({
-									'opacity': 0.7,
-									'background-color': 'fff'
-								});
-							}
 							
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
@@ -198,7 +186,8 @@ elFinder.prototype.commands.resize = function() {
 						}),
 					basec = $('<div/>'),
 					imgc = $('<img/>'),
-					imgr = $('<img/>').css('cursor', 'pointer'),
+					coverc = $('<div/>'),
+					imgr = $('<img/>'),
 					resetView = function() {
 						width.val(owidth);
 						height.val(oheight);
@@ -265,7 +254,7 @@ elFinder.prototype.commands.resize = function() {
 							if (typeof value == 'undefined') {
 								rdegree = value = parseInt(degree.val());
 							}
-							if ($.browser.msie && parseInt($.browser.version) <= 9) {
+							if ($.browser.msie && parseInt($.browser.version) < 9) {
 								imgr.rotate(value);
 							} else {
 								imgr.animate({rotate: value + 'deg'});
@@ -375,12 +364,15 @@ elFinder.prototype.commands.resize = function() {
 								
 								imgc.width(img.width())
 									.height(img.height());
+								
+								coverc.width(img.width())
+								.height(img.height());
 
-								rhandlec.css('position', 'absolute')
-									.width(imgc.width())
+								rhandlec.width(imgc.width())
 									.height(imgc.height())
 									.offset(imgc.offset())
 									.resizable({
+										alsoResize  : coverc,
 										containment : basec,
 										resize      : crop.update
 									})
@@ -389,6 +381,7 @@ elFinder.prototype.commands.resize = function() {
 										containment : imgc,
 										drag        : crop.update
 									});
+								
 								crop.update();
 							}
 						}
@@ -515,7 +508,8 @@ elFinder.prototype.commands.resize = function() {
 					
 				preview.append(spinner).append(rhandle.hide()).append(img.hide());
 
-				rhandlec.append('<div class="'+hline+' '+hline+'-top"/>')
+				rhandlec.css('position', 'absolute')
+					.append('<div class="'+hline+' '+hline+'-top"/>')
 					.append('<div class="'+hline+' '+hline+'-bottom"/>')
 					.append('<div class="'+vline+' '+vline+'-left"/>')
 					.append('<div class="'+vline+' '+vline+'-right"/>')
@@ -523,7 +517,7 @@ elFinder.prototype.commands.resize = function() {
 					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-s"/>')
 
-				preview.append(basec.hide().append(imgc).append(rhandlec));
+				preview.append(basec.hide().append(imgc).append(rhandlec.append(coverc)));
 				
 				preview.append(imgr.hide());
 				
@@ -545,12 +539,23 @@ elFinder.prototype.commands.resize = function() {
 				
 				reset.css('left', width.position().left + width.width() + 12);
 				
+				coverc.css({ 'opacity': 0.2, 'background-color': '#fff', 'position': 'absolute'}),
+				rhandlec.css('cursor', 'move');
+				rhandlec.find('.elfinder-resize-handle-point').css({
+					'background-color' : '#fff',
+					'opacity': 0.5,
+					'border-color':'#000'
+				});
+				
+				imgr.css('cursor', 'pointer');
+				
 				pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 				pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 				
 				img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
 				imgc.attr('src', img.attr('src'));
 				imgr.attr('src', img.attr('src'));
+				
 			},
 			
 			id, dialog
@@ -635,7 +640,7 @@ elFinder.prototype.commands.resize = function() {
 		$(fx.elem).rotate(fx.now);
 	};
 
-	if ($.browser.msie && parseInt($.browser.version) <= 9) {
+	if ($.browser.msie && parseInt($.browser.version) < 9) {
 		var GetAbsoluteXY = function(element) {
 			var pnode = element;
 			var x = pnode.offsetLeft;
