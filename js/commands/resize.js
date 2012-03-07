@@ -29,7 +29,6 @@ elFinder.prototype.commands.resize = function() {
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle"/>'),
-					rhandler = $('<div class="elfinder-resize-handle"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
 					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
@@ -38,23 +37,13 @@ elFinder.prototype.commands.resize = function() {
 					uirotate    = $('<div class="elfinder-resize-rotate"/>'),
 					uideg270    = $(uibutton).attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')
 						.click(function(){
-							var val = (parseInt(degree.val()) || 0) - 90;
-							//val = parseInt(val / 90) * 90;
-							if (val < 0) {
-								val = 360 + val;
-							}
-							degree.val(val);
-							rotatepreview(val);
+							rdegree = rdegree - 90;
+							rotate.update(rdegree);
 						})),
 					uideg90     = $(uibutton).attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')
 						.click(function(){
-							var val = (parseInt(degree.val()) || 0) + 90;
-							//val = parseInt(val / 90) * 90;
-							if (val >= 360) {
-								val = val - 360;
-							}
-							degree.val(val);
-							rotatepreview(val);
+							rdegree = rdegree + 90;
+							rotate.update(rdegree);
 						})),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
@@ -123,7 +112,10 @@ elFinder.prototype.commands.resize = function() {
 					pointY  = $(input),
 					offsetX = $(input),
 					offsetY = $(input),
-					degree = $('<input type="text" size="3" maxlength="3"/>'),
+					degree = $('<input type="text" size="3" maxlength="3" value="0" />')
+						.change(function() {
+							rotate.update();
+						}),
 					ratio   = 1,
 					prop    = 1,
 					owidth  = 0,
@@ -131,6 +123,9 @@ elFinder.prototype.commands.resize = function() {
 					cratio  = true,
 					pwidth  = 0,
 					pheight = 0,
+					rwidth  = 0,
+					rheight = 0,
+					rdegree = 0,
 					img     = $('<img/>')
 						.load(function() {
 							spinner.remove();
@@ -143,6 +138,11 @@ elFinder.prototype.commands.resize = function() {
 							rhandle.append(img.show()).show();
 							width.val(owidth);
 							height.val(oheight);
+							
+							var r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
+							rwidth = owidth * r_scale;
+							rheight = oheight * r_scale;
+							
 							control.find('input,select').removeAttr('disabled')
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
@@ -177,6 +177,18 @@ elFinder.prototype.commands.resize = function() {
 								.filter(':first').focus();
 								
 							resizable();
+
+							// for ie mouse event problem
+							if ($.browser.msie && parseInt($.browser.version) <= 9) {
+								rhandlec.css({
+									'opacity': 0,
+									'background-color': 'fff'
+								});
+								rhandlec.find('.elfinder-resize-handle-point').css({
+									'opacity': 0.7,
+									'background-color': 'fff'
+								});
+							}
 							
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
@@ -184,8 +196,9 @@ elFinder.prototype.commands.resize = function() {
 						.error(function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
+					basec = $('<div/>'),
 					imgc = $('<img/>'),
-					imgr = $('<img/>'),
+					imgr = $('<img/>').css('cursor', 'pointer'),
 					resetView = function() {
 						width.val(owidth);
 						height.val(oheight);
@@ -198,14 +211,16 @@ elFinder.prototype.commands.resize = function() {
 						},
 						
 						updateView : function(w, h) {
-							if (ratio >= 1 && w > pwidth) {
-								img.width(pwidth).height(Math.ceil(img.width()/ratio));
-							} else if (h > pheight) {
-								img.height(pheight).width(Math.ceil(img.height()*ratio));
-							} else if (w <= pwidth && h <= pheight) {
-								img.width(w).height(h)
+							if (w > pwidth || h > pheight) {
+								if (w > pwidth && (w - pwidth) > (h - pheight)) {
+									img.width(pwidth).height(Math.ceil(img.width()/ratio));
+								} else {
+									img.height(pheight).width(Math.ceil(img.height()*ratio));
+								}
+							} else {
+								img.width(w).height(h);
 							}
-
+							
 							prop = img.width()/w;
 							uiprop.text('1 : '+(1/prop).toFixed(2))
 							resize.updateHandle();
@@ -241,6 +256,94 @@ elFinder.prototype.commands.resize = function() {
 							pointY.val(parseInt((rhandlec.offset().top-imgc.offset().top)/prop));
 						}
 					},
+					rotate = {
+						mouseStartAngle : 0,
+						imageStartAngle : 0,
+						imageBeingRotated : false,
+							
+						update : function(value) {
+							if (typeof value == 'undefined') {
+								rdegree = value = parseInt(degree.val());
+							}
+							if ($.browser.msie && parseInt($.browser.version) <= 9) {
+								imgr.rotate(value);
+							} else {
+								imgr.animate({rotate: value + 'deg'});
+							}
+							value = value % 360;
+							if (value < 0) {
+								value += 360;
+							}
+							degree.val(parseInt(value));
+						},
+						
+						execute : function ( e ) {
+							
+							if ( !rotate.imageBeingRotated ) return;
+							
+							var imageCentre = rotate.getCenter( imgr );
+							var mouseXFromCentre = e.pageX - imageCentre[0];
+							var mouseYFromCentre = e.pageY - imageCentre[1];
+							var mouseAngle = Math.atan2( mouseYFromCentre, mouseXFromCentre );
+							
+							var rotateAngle = mouseAngle - rotate.mouseStartAngle + rotate.imageStartAngle;
+							rotateAngle = Math.round(parseFloat(rotateAngle) * 180 / Math.PI);
+							
+							if ( e.shiftKey ) {
+								rotateAngle = Math.round((rotateAngle + 6)/15) * 15;
+							}
+							
+							imgr.rotate(rotateAngle);
+							
+							rotateAngle = rotateAngle % 360;
+							if (rotateAngle < 0) {
+								rotateAngle += 360;
+							}
+							degree.val(rotateAngle);
+							
+							return false;
+						},
+						
+						start : function ( e ) {
+							
+							rotate.imageBeingRotated = true;
+							
+							var imageCentre = rotate.getCenter( imgr );
+							var mouseStartXFromCentre = e.pageX - imageCentre[0];
+							var mouseStartYFromCentre = e.pageY - imageCentre[1];
+							rotate.mouseStartAngle = Math.atan2( mouseStartYFromCentre, mouseStartXFromCentre );
+							
+							rotate.imageStartAngle = parseFloat(imgr.rotate()) * Math.PI / 180.0;
+							
+							$(document).mousemove( rotate.execute );
+							
+							return false;
+						},
+							
+						stop : function ( e ) {
+							
+							if ( !rotate.imageBeingRotated ) return;
+							
+							$(document).unbind( 'mousemove' , rotate.execute);
+							
+							setTimeout( function() { rotate.imageBeingRotated = false; }, 10 );
+							return false;
+						},
+						
+						getCenter : function ( image ) {
+							
+							var currentRotation = imgr.rotate();
+							imgr.rotate(0);
+							
+							var imageOffset = imgr.offset();
+							var imageCentreX = imageOffset.left + imgr.width() / 2;
+							var imageCentreY = imageOffset.top + imgr.height() / 2;
+							
+							imgr.rotate(currentRotation);
+							
+							return Array( imageCentreX, imageCentreY );
+						}
+					},
 					resizable = function(destroy) {
 						if ($.fn.resizable) {
 							if (destroy) {
@@ -263,24 +366,26 @@ elFinder.prototype.commands.resize = function() {
 							if (destroy) {
 								rhandlec.resizable('destroy');
 								rhandlec.draggable('destroy');
-								rhandlec.hide();
-								imgc.hide();
+								basec.hide();
 							}
 							else {
-								imgc.show()
-									.width(img.width())
+								basec.show()
+									.width(img.width()+10)
+									.height(img.height()+10);
+								
+								imgc.width(img.width())
 									.height(img.height());
 
-								rhandlec.show()
-									.css('position', 'absolute')
+								rhandlec.css('position', 'absolute')
 									.width(imgc.width())
 									.height(imgc.height())
 									.offset(imgc.offset())
 									.resizable({
-										containment : imgc,
+										containment : basec,
 										resize      : crop.update
 									})
 									.draggable({
+										handle      : rhandlec,
 										containment : imgc,
 										drag        : crop.update
 									});
@@ -288,35 +393,18 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}
 					},
-					rotatepreview = function(degree) {
-		
-						var img = $('.elfinder-resize-preview img');
-						img.css('-moz-transform', 'rotate('+degree+'deg)');
-						img.css('-webkit-transform', 'rotate('+degree+'deg)');
-						img.css('-o-transform', 'rotate('+degree+'deg)');
-						img.css('-ms-transform', 'rotate('+degree+'deg)');
-					},
 					rotateable = function(destroy) {
 						if ($.fn.draggable && $.fn.resizable) {
 							if (destroy) {
-								rhandler.resizable('destroy');
-								rhandler.draggable('destroy');
-								rhandler.hide();
 								imgr.hide();
 							}
 							else {
 								imgr.show()
+									.width(rwidth)
+									.height(rheight)
+									.css('margin-top', (pheight-rheight)/2 + 'px')
+									.css('margin-left', (pwidth-rwidth)/2 + 'px');
 
-									.width(img.width())
-									.height(img.height());
-								$('.elfinder-resize-preview img').show();
-								rhandler.show()
-									.css('position', 'absolute')
-									.width(imgr.width())
-									.height(imgr.height())
-									.offset(imgr.offset());
-			
-								//rotate.update();
 							}
 						}
 					},
@@ -335,20 +423,27 @@ elFinder.prototype.commands.resize = function() {
 							x = parseInt(pointX.val()) || 0;
 							y = parseInt(pointY.val()) || 0;
 						} else if (mode = 'rotate') {
-							w = parseInt(width.val()) || 0;
-							h = parseInt(height.val()) || 0;
+							w = owidth;
+							h = oheight;
 							d = parseInt(degree.val()) || 0;
 							if (d < 0 || d > 360) {
 								return fm.error('Invalid rotate degree');
 							}
+							if (d == 0 || d == 360) {
+								return fm.error('Image dose not rotated');
+							}
 						}
 						
-						if (w <= 0 || h <= 0) {
-							return fm.error('Invalid image size');
-						}
-						
-						if (w == owidth && h == oheight && mode != 'rotate') {
-							return fm.error('Image size not changed');
+						if (mode != 'rotate') {
+
+							if (w <= 0 || h <= 0) {
+								return fm.error('Invalid image size');
+							}
+							
+							if (w == owidth && h == oheight) {
+								return fm.error('Image size not changed');
+							}
+
 						}
 						
 						dialog.elfinderdialog('close');
@@ -380,7 +475,9 @@ elFinder.prototype.commands.resize = function() {
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.url(file.hash)
 					;
-					
+				
+				imgr.mousedown( rotate.start );
+				$(document).mouseup( rotate.stop );
 					
 				uiresize.append($(row).append($(label).text(fm.i18n('width'))).append(width).append(reset))
 					.append($(row).append($(label).text(fm.i18n('height'))).append(height))
@@ -399,8 +496,6 @@ elFinder.prototype.commands.resize = function() {
 						.append($('<span/>').text(fm.i18n('degree')))
 					).append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
 				);
-				
-
 				
 				dialog.append(uitype);
 
@@ -428,8 +523,12 @@ elFinder.prototype.commands.resize = function() {
 					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-s"/>')
 
-				preview.append(rhandlec.hide()).append(imgc.hide());
-					
+				preview.append(basec.hide().append(imgc).append(rhandlec));
+				
+				preview.append(imgr.hide());
+				
+				preview.css('overflow', 'hidden');
+				
 				dialog.append(preview).append(control);
 				
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
@@ -448,14 +547,16 @@ elFinder.prototype.commands.resize = function() {
 				
 				pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 				pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
-
+				
 				img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
 				imgc.attr('src', img.attr('src'));
+				imgr.attr('src', img.attr('src'));
 			},
 			
 			id, dialog
 			;
 			
+
 		if (!files.length || files[0].mime.indexOf('image/') === -1) {
 			return dfrd.reject();
 		}
@@ -468,9 +569,165 @@ elFinder.prototype.commands.resize = function() {
 			return dfrd.resolve();
 		}
 		
-		open(files[0], id)
+		open(files[0], id);
 			
 		return dfrd;
 	}
 
-}
+};
+
+(function ($) {
+	
+	var findProperty = function (styleObject, styleArgs) {
+		var i = 0 ;
+		for( i in styleArgs) {
+	        if (typeof styleObject[styleArgs[i]] != 'undefined') 
+	        	return styleArgs[i];
+		}
+		styleObject[styleArgs[i]] = '';
+	    return styleArgs[i];
+	};
+	
+	$.cssHooks.rotate = {
+		get: function(elem, computed, extra) {
+			return $(elem).rotate();
+		},
+		set: function(elem, value) {
+			$(elem).rotate(value);
+			return value;
+		}
+	};
+	$.cssHooks.transform = {
+		get: function(elem, computed, extra) {
+			name = findProperty( elem.style , 
+				['WebkitTransform', 'MozTransform', 'OTransform' , 'msTransform' , 'transform'] );
+			return elem.style[name];
+		},
+		set: function(elem, value) {
+			name = findProperty( elem.style , 
+				['WebkitTransform', 'MozTransform', 'OTransform' , 'msTransform' , 'transform'] );
+			elem.style[name] = value;
+			return value;
+		}
+	};
+	
+	$.fn.rotate = function(val) {
+		if (typeof val == 'undefined') {
+			if ($.browser.opera) {
+				var r = this.css('transform').match(/rotate\((.*?)\)/);
+				return  ( r && r[1])?
+					Math.round(parseFloat(r[1]) * 180 / Math.PI) : 0;
+			} else {
+				var r = this.css('transform').match(/rotate\((.*?)\)/);
+				return  ( r && r[1])? parseInt(r[1]) : 0;
+			}
+		}
+		this.css('transform', 
+			this.css('transform').replace(/none|rotate\(.*?\)/, '') + 'rotate(' + parseInt(val) + 'deg)');
+		return this;
+	};
+
+	$.fx.step.rotate  = function(fx) {
+		if ( fx.state == 0 ) {
+			fx.start = $(fx.elem).rotate();
+			fx.now = fx.start;
+		}
+		$(fx.elem).rotate(fx.now);
+	};
+
+	if ($.browser.msie && parseInt($.browser.version) <= 9) {
+		var GetAbsoluteXY = function(element) {
+			var pnode = element;
+			var x = pnode.offsetLeft;
+			var y = pnode.offsetTop;
+			
+			while ( pnode.offsetParent ) {
+				pnode = pnode.offsetParent;
+				if (pnode != document.body && pnode.currentStyle['position'] != 'static') {
+					break;
+				}
+				if (pnode != document.body && pnode != document.documentElement) {
+					x -= pnode.scrollLeft;
+					y -= pnode.scrollTop;
+				}
+				x += pnode.offsetLeft;
+				y += pnode.offsetTop;
+			}
+			
+			return { x: x, y: y };
+		};
+		
+		var StaticToAbsolute = function (element) {
+			if ( element.currentStyle['position'] != 'static') {
+				return ;
+			}
+
+			var xy = GetAbsoluteXY(element);
+			element.style.position = 'absolute' ;
+			element.style.left = xy.x + 'px';
+			element.style.top = xy.y + 'px';
+		};
+
+		var IETransform = function(element,transform){
+
+			var r;
+			var m11 = 1;
+			var m12 = 1;
+			var m21 = 1;
+			var m22 = 1;
+
+			if (typeof element.style['msTransform'] != 'undefined'){
+				return true;
+			}
+
+			StaticToAbsolute(element);
+
+			r = transform.match(/rotate\((.*?)\)/);
+			var rotate =  ( r && r[1])	?	parseInt(r[1])	:	0;
+
+			rotate = rotate % 360;
+			if (rotate < 0) rotate = 360 + rotate;
+
+			var radian= rotate * Math.PI / 180;
+			var cosX =Math.cos(radian);
+			var sinY =Math.sin(radian);
+
+			m11 *= cosX;
+			m12 *= -sinY;
+			m21 *= sinY;
+			m22 *= cosX;
+
+			element.style.filter =  (element.style.filter || '').replace(/progid:DXImageTransform\.Microsoft\.Matrix\([^)]*\)/, "" ) +
+				("progid:DXImageTransform.Microsoft.Matrix(" + 
+					 "M11=" + m11 + 
+					",M12=" + m12 + 
+					",M21=" + m21 + 
+					",M22=" + m22 + 
+					",FilterType='bilinear',sizingMethod='auto expand')") 
+				;
+
+	  		var ow = parseInt(element.style.width || element.width || 0 );
+	  		var oh = parseInt(element.style.height || element.height || 0 );
+
+			var radian = rotate * Math.PI / 180;
+			var absCosX =Math.abs(Math.cos(radian));
+			var absSinY =Math.abs(Math.sin(radian));
+
+			var dx = (ow - (ow * absCosX + oh * absSinY)) / 2;
+			var dy = (oh - (ow * absSinY + oh * absCosX)) / 2;
+
+			element.style.marginLeft = Math.floor(dx) + "px";
+			element.style.marginTop  = Math.floor(dy) + "px";
+
+			return(true);
+		};
+		
+		var transform_set = $.cssHooks.transform.set;
+		$.cssHooks.transform.set = function(elem, value) {
+			transform_set.apply(this, [elem, value] );
+			IETransform(elem,value);
+			return value;
+		};
+	}
+
+})(jQuery);

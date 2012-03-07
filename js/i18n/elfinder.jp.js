@@ -230,9 +230,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'resize'          : 'リサイズ',
 			'crop'            : '切り抜き',
 			'rotate'          : '回転',
-			'rotate-l90'      : '90度左回転',
-			'rotate-r90'      : '90度右回転',
-			'deg'             : '度',
+			'rotate-cw'       : '90度左回転',
+			'rotate-ccw'      : '90度右回転',
+			'degree'          : '度',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
