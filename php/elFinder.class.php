@@ -168,7 +168,7 @@ class elFinder {
 	public function __construct($opts) {
 		
 		$this->time  = $this->utime();
-		$this->debug = !empty($opts['debug']);
+		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
