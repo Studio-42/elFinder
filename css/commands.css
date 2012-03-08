@@ -147,6 +147,12 @@
 	margin-bottom:-11px;;
 }
 
+.elfinder-resize-rotate-slider {
+	float: left;
+	width: 200px;
+	margin: 5px;
+}
+
 /********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
