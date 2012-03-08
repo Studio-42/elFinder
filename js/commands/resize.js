@@ -552,7 +552,7 @@ elFinder.prototype.commands.resize = function() {
 
 				imgr.css('cursor', 'pointer');
 				
-				$('.elfinder-resize-type').buttonset();
+				uitype.buttonset();
 				
 				pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 				pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
