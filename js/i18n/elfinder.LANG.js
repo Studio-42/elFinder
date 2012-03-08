@@ -233,7 +233,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'mode'            : 'Mode',
 			'resize'          : 'Resize',
 			'crop'            : 'Crop',
-
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : 'Degree',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

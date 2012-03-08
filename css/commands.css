@@ -3,12 +3,9 @@
 /******************************************************************/
 
 /********************** COMMAND "RESIZE" ****************************/
-
+.elfinder-resize-type.ui-buttonset { margin-bottom: 3px; }
 .elfinder-resize-control { padding-top:1em; }
-
-.elfinder-resize-control input[type=text] { border:1px solid #aaa; }
-
-
+.elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
 .elfinder-resize-preview {
 	width:400px;
 	height:400px;
@@ -44,8 +41,6 @@
 .elfinder-resize-handle-hline-bottom { bottom:0; left:0; }
 .elfinder-resize-handle-vline-left   { top:0; left:0; }
 .elfinder-resize-handle-vline-right  { top:0; right:0; }
-
-
 
 .elfinder-resize-handle-point {
 	position:absolute;

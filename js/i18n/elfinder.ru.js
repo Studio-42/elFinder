@@ -222,7 +222,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Масштаб',
 			'width'           : 'Ширина',
 			'height'          : 'Высота',
-			
+			'resize'          : 'Размер',
+			'crop'            : 'Кадрировать',
+			'rotate'          : 'Поворот',
+			'rotate-cw'       : 'Поворот на 90 градусов по часовой стрелке',
+			'rotate-ccw'      : 'Поворот на 90 градусов против часовой стрелке',
+			'degree'          : '°',
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

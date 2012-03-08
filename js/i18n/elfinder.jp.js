@@ -226,7 +226,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : '表示縮尺',
 			'width'           : '幅',
 			'height'          : '高さ',
-			'mode'            : 'モード',
 			'resize'          : 'リサイズ',
 			'crop'            : '切り抜き',
 			'rotate'          : '回転',

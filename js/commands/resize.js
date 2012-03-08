@@ -4,6 +4,8 @@
  * Open dialog to resize image
  *
  * @author Dmitry (dio) Levashov
+ * @author Alexey Sukhotin
+ * @author nao-pon
  **/
 elFinder.prototype.commands.resize = function() {
 
@@ -482,10 +484,11 @@ elFinder.prototype.commands.resize = function() {
 				
 				uirotate.append($(row)
 					.append($(label).text(fm.i18n('rotate')))
-					.append($('<div style="float:left">')
+					.append($('<div style="float:left; width: 130px;">')
 						.append(degree)
 						.append($('<span/>').text(fm.i18n('degree')))
-					).append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
+						.append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
+					)
 				);
 				
 				dialog.append(uitype);
