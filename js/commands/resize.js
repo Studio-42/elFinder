@@ -47,22 +47,20 @@ elFinder.prototype.commands.resize = function() {
 						})),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
-					uitype   = $('<div class="elfinder-resize-type"><div class="elfinder-resize-label">'+fm.i18n('mode')+'</div></div>')
+					//uitype   = $('<div class="elfinder-resize-type"><div class="elfinder-resize-label">'+fm.i18n('mode')+'</div></div>')
+					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input type="radio" name="type" id="type-resize" value="resize" checked="checked" /><label for="type-resize">'+fm.i18n('resize')+'</label>')
 						.append('<input type="radio" name="type" id="type-crop"   value="crop"/><label for="type-crop">'+fm.i18n('crop')+'</label>')
 						.append('<input type="radio" name="type" id="type-rotate" value="rotate"/><label for="type-rotate">'+fm.i18n('rotate')+'</label>'),
-					type    = $('input', uitype)
+					type     = $('input', uitype)
 						.change(function() {
 							var val = $('input:checked', uitype).val();
-					//uiresize.add(uicrop).toggle();
-
+							
 							resetView();
 							resizable(true);
 							croppable(true);
 							rotateable(true);
-							// TODO rotateable
-
-	
+							
 							if (val == 'resize') {
 								uiresize.show();
 								uirotate.hide();
@@ -537,6 +535,11 @@ elFinder.prototype.commands.resize = function() {
 					open           : function() { preview.zIndex(1+$(this).parent().zIndex()); }
 				}).attr('id', id);
 				
+				// for IE < 9 dialog mising at open second+ time.
+				if ($.browser.msie && parseInt($.browser.version) < 9) {
+					$('.elfinder-dialog').css('filter', '');
+				}
+				
 				reset.css('left', width.position().left + width.width() + 12);
 				
 				coverc.css({ 'opacity': 0.2, 'background-color': '#fff', 'position': 'absolute'}),
@@ -546,8 +549,10 @@ elFinder.prototype.commands.resize = function() {
 					'opacity': 0.5,
 					'border-color':'#000'
 				});
-				
+
 				imgr.css('cursor', 'pointer');
+				
+				$('.elfinder-resize-type').buttonset();
 				
 				pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 				pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
