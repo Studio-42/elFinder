@@ -117,14 +117,15 @@ elFinder.prototype.commands.resize = function() {
 					uidegslider = $('<div class="elfinder-resize-rotate-slider"/>')
 						.slider({
 							min: 0,
-							max: 270,
+							max: 359,
 							value: degree.val(),
 							animate: true,
 							change: function(event, ui) {
-								degree.val(ui.value);
+								if (ui.value != uidegslider.slider('value')) {
+									rotate.update(ui.value);
+								}
 							},
 							slide: function(event, ui) {
-								degree.val(ui.value);
 								rotate.update(ui.value, false);
 							}
 						}),
@@ -306,6 +307,8 @@ elFinder.prototype.commands.resize = function() {
 								rotateAngle += 360;
 							}
 							degree.val(rotateAngle);
+
+							uidegslider.slider('value', degree.val());
 							
 							return false;
 						},
