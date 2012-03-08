@@ -199,7 +199,7 @@ elFinder.prototype.commands.resize = function() {
 						
 						updateView : function(w, h) {
 							if (w > pwidth || h > pheight) {
-								if (w > pwidth && (w - pwidth) > (h - pheight)) {
+								if (w > pwidth && (w / pwidth) > (h / pheight)) {
 									img.width(pwidth).height(Math.ceil(img.width()/ratio));
 								} else {
 									img.height(pheight).width(Math.ceil(img.height()*ratio));
