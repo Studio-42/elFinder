@@ -210,6 +210,8 @@ abstract class elFinderVolumeDriver {
 		'disabled'        => array(),
 		// regexp or function name to validate new file name
 		'acceptedName'    => '/^\w[\w\s\.\%\-\(\)\[\]]*$/u',
+		// function/class method to control and modify file name on uploads
+		'uploadNameControl'    => null,
 		// function/class method to control files permissions
 		'accessControl'   => null,
 		// some data required by access control
@@ -1325,6 +1327,21 @@ abstract class elFinderVolumeDriver {
 		
 		if (!$this->nameAccepted($name)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
+		}
+    
+		if (!empty($this->options['uploadNameControl'])) {
+			if (is_string($this->options['uploadNameControl']) 
+			&& function_exists($this->options['uploadNameControl'])) {
+				$function = $this->options['uploadNameControl'];
+				$function($name);
+			} elseif (is_array($this->options['uploadNameControl']) 
+			&& count($this->options['uploadNameControl']) > 1 
+			&& is_object($this->options['uploadNameControl'][0])
+			&& method_exists($this->options['uploadNameControl'][0], $this->options['uploadNameControl'][1])) {
+				$obj    = $this->options['uploadNameControl'][0];
+				$method = $this->options['uploadNameControl'][1];
+				$obj->{$method}($name);
+			}
 		}
 		
 		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname); 
