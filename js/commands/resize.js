@@ -252,7 +252,7 @@ elFinder.prototype.commands.resize = function() {
 							if (typeof value == 'undefined') {
 								rdegree = value = parseInt(degree.val());
 							}
-							if ($.browser.msie && parseInt($.browser.version) < 9) {
+							if ($.browser.opera || ($.browser.msie && parseInt($.browser.version) < 9)) {
 								imgr.rotate(value);
 							} else {
 								imgr.animate({rotate: value + 'deg'});
