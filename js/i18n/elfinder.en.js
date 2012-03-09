@@ -226,13 +226,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Scale',
 			'width'           : 'Width',
 			'height'          : 'Height',
-			'mode'            : 'Mode',
 			'resize'          : 'Resize',
 			'crop'            : 'Crop',
 			'rotate'          : 'Rotate',
-			'rotate-cw'       : '90-degree left rotation',
-			'rotate-ccw'      : '90-degree right rotation',
-			'degree'          : 'Deg',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : 'Degree',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
