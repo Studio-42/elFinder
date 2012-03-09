@@ -5,7 +5,8 @@
  *
  * @author Dmitry (dio) Levashov
  * @author Alexey Sukhotin
- * @author nao-pon
+ * @author Naoki Sawada
+ * @author Sergio Jovani
  **/
 elFinder.prototype.commands.resize = function() {
 
@@ -507,9 +508,12 @@ elFinder.prototype.commands.resize = function() {
 				uirotate.append($(row)
 					.append($(label).text(fm.i18n('rotate')))
 					.append($('<div style="float:left; width: 130px;">')
-						.append(degree)
-						.append($('<span/>').text(fm.i18n('degree')))
-					).append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
+						.append($('<div style="float:left;">')
+							.append(degree)
+							.append($('<span/>').text(fm.i18n('degree')))
+						)
+						.append($(uibuttonset).append(uideg270).append($(uiseparator)).append(uideg90))
+					)
 					.append(uidegslider)
 				);
 

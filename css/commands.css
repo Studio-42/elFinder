@@ -3,8 +3,9 @@
 /******************************************************************/
 
 /********************** COMMAND "RESIZE" ****************************/
-.elfinder-resize-type.ui-buttonset { margin-bottom: 3px; }
-.elfinder-resize-control { padding-top:1em; }
+.elfinder-dialog-resize  { margin-top:.3em; }
+.elfinder-resize-type    { float:left; margin-bottom: .4em; }
+.elfinder-resize-control { padding-top:3em; }
 .elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
 .elfinder-resize-preview {
 	width:400px;
@@ -50,48 +51,29 @@
 	background:transparent;
 }
 
-.elfinder-resize-handle-point-n {
-	
-}
-
-.elfinder-resize-handle-point-ne {
-	
-}
-
-.elfinder-resize-handle-point-e {
+.elfinder-resize-handle-point-n  {}
+.elfinder-resize-handle-point-ne {}
+.elfinder-resize-handle-point-e  {
 	top:50%;
 	right:0;
 	margin-top:-5px;
 	margin-right:-5px;
 }
-
-.elfinder-resize-handle-point-se {
+.elfinder-resize-handle-point-se  {
 	bottom:0;
 	right:0;
 	margin-bottom:-5px;
 	margin-right:-5px;
 }
-
-.elfinder-resize-handle-point-s {
+.elfinder-resize-handle-point-s  {
 	bottom:0;
 	left:50%;
 	margin-bottom:-5px;
 	margin-left:-5px;
 }
-
-.elfinder-resize-handle-point-sw {
-	
-}
-
-.elfinder-resize-handle-point-w {
-	
-}
-
-.elfinder-resize-handle-point-nw {
-	
-}
-
-
+.elfinder-resize-handle-point-sw {}
+.elfinder-resize-handle-point-w  {}
+.elfinder-resize-handle-point-nw {}
 
 .elfinder-resize-spinner {
 	position:absolute;
@@ -107,7 +89,7 @@
 
 .elfinder-resize-row { margin-bottom:7px; position:relative;}
 
-.elfinder-resize-label { float:left; width:80px;}
+.elfinder-resize-label { float:left; width:80px; padding-top: 3px; }
 
 .elfinder-resize-reset {
 	width:16px;
@@ -117,8 +99,8 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px;  } 
-.elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px;}
+.elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
+.elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
 .elfinder-dialog-resize .ui-resizable-se { 
 	background:transparent; 
 	bottom:0; 
@@ -144,8 +126,8 @@
 
 .elfinder-resize-rotate-slider {
 	float: left;
-	width: 200px;
-	margin: 5px;
+	width: 195px;
+	margin: 7px 7px 0;
 }
 
 /********************** COMMAND "EDIT" ****************************/
