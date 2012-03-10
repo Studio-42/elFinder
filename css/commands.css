@@ -124,9 +124,9 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
-.elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
-.elfinder-dialog-resize .ui-resizable-se { 
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se { 
 	background:transparent; 
 	bottom:0; 
 	right:0; 
