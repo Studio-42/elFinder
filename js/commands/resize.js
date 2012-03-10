@@ -259,6 +259,11 @@ elFinder.prototype.commands.resize = function() {
 							offsetY.val(parseInt(rhandlec.height()/prop));
 							pointX.val(parseInt((rhandlec.offset().left-imgc.offset().left)/prop));
 							pointY.val(parseInt((rhandlec.offset().top-imgc.offset().top)/prop));
+						},
+						resize_update : function() {
+							crop.update();
+							coverc.width(rhandlec.width());
+							coverc.height(rhandlec.height());
 						}
 					},
 					rotate = {
@@ -381,29 +386,32 @@ elFinder.prototype.commands.resize = function() {
 								basec.hide();
 							}
 							else {
-								basec.show()
-									.width(img.width()+10)
-									.height(img.height()+10);
-								
-								imgc.width(img.width())
+								imgc
+									.width(img.width())
 									.height(img.height());
 								
-								coverc.width(img.width())
-								.height(img.height());
-
-								rhandlec.width(imgc.width())
+								coverc
+									.width(img.width())
+									.height(img.height());
+								
+								rhandlec
+									.width(imgc.width())
 									.height(imgc.height())
 									.offset(imgc.offset())
 									.resizable({
-										alsoResize  : coverc,
 										containment : basec,
-										resize      : crop.update
+										resize      : crop.resize_update,
+										handles     : 'all'
 									})
 									.draggable({
 										handle      : rhandlec,
 										containment : imgc,
 										drag        : crop.update
 									});
+								
+								basec.show()
+									.width(img.width())
+									.height(img.height());
 								
 								crop.update();
 							}
@@ -541,11 +549,16 @@ elFinder.prototype.commands.resize = function() {
 					.append('<div class="'+hline+' '+hline+'-bottom"/>')
 					.append('<div class="'+vline+' '+vline+'-left"/>')
 					.append('<div class="'+vline+' '+vline+'-right"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-n"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-e"/>')
-					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-s"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-w"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-ne"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-sw"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-nw"/>')
 
-				preview.append(basec.hide().append(imgc).append(rhandlec.append(coverc)));
+				preview.append(basec.css('position', 'absolute').hide().append(imgc).append(rhandlec.append(coverc)));
 				
 				preview.append(imgr.hide());
 				

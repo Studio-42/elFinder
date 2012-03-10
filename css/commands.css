@@ -51,8 +51,18 @@
 	background:transparent;
 }
 
-.elfinder-resize-handle-point-n  {}
-.elfinder-resize-handle-point-ne {}
+.elfinder-resize-handle-point-n  {
+	top:0;
+	left:50%;
+	margin-top:-5px;
+	margin-left:-5px;
+}
+.elfinder-resize-handle-point-ne {
+	top:0;
+	right:0;
+	margin-top:-5px;
+	margin-right:-5px;
+}
 .elfinder-resize-handle-point-e  {
 	top:50%;
 	right:0;
@@ -71,9 +81,24 @@
 	margin-bottom:-5px;
 	margin-left:-5px;
 }
-.elfinder-resize-handle-point-sw {}
-.elfinder-resize-handle-point-w  {}
-.elfinder-resize-handle-point-nw {}
+.elfinder-resize-handle-point-sw {
+	bottom:0;
+	left:0;
+	margin-bottom:-5px;
+	margin-left:-5px;
+}
+.elfinder-resize-handle-point-w  {
+	top:50%;
+	left:0;
+	margin-top:-5px;
+	margin-left:-5px;
+}
+.elfinder-resize-handle-point-nw {
+	top:0;
+	left:0;
+	margin-top:-5px;
+	margin-left:-5px;
+}
 
 .elfinder-resize-spinner {
 	position:absolute;
@@ -99,9 +124,9 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
-.elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
-.elfinder-dialog-resize .ui-resizable-se { 
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se { 
 	background:transparent; 
 	bottom:0; 
 	right:0; 
