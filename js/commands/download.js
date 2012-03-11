@@ -30,6 +30,7 @@ elFinder.prototype.commands.download = function() {
 			files   = filter(hashes),
 			dfrd    = $.Deferred(),
 			iframes = '',
+			cdata   = '',
 			i, url;
 			
 		if (this.disabled()) {
@@ -40,11 +41,15 @@ elFinder.prototype.commands.download = function() {
 			fm.error('errCmdNoSupport');
 			return dfrd.reject();
 		}
-			
+		
+		$.each(fm.options.customData || {}, function(k, v) {
+			cdata += '&'+k+'='+v;
+		});
+		
 		base += base.indexOf('?') === -1 ? '?' : '&';
 		
 		for (i = 0; i < files.length; i++) {
-			iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>';
+			iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+cdata+'"/>';
 		}
 		$(iframes)
 			.appendTo('body')
