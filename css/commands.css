@@ -149,6 +149,8 @@
 	margin-bottom:-11px;;
 }
 
+.elfinder-resize-row .elfinder-buttonset { float:right; }
+
 .elfinder-resize-rotate-slider {
 	float: left;
 	width: 195px;
