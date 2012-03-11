@@ -96,51 +96,53 @@ elFinder.prototype.commands.help = function() {
 		description : this.title
 	}];
 	
-	this.fm.one('open', function() {
-		setTimeout(function() {
-			var parts = self.options.view || ['about', 'shortcuts', 'help'];
-			
-			$.each(parts, function(i, title) {
-				html.push(tab[r](/\{id\}/, title)[r](/\{title\}/, fm.i18n(title)));
-			});
-			
-			html.push('</ul>');
+	setTimeout(function() {
+		var parts = self.options.view || ['about', 'shortcuts', 'help'];
+		
+		$.each(parts, function(i, title) {
+			html.push(tab[r](/\{id\}/, title)[r](/\{title\}/, fm.i18n(title)));
+		});
+		
+		html.push('</ul>');
 
-			$.inArray('about', parts) !== -1 && about();
-			$.inArray('shortcuts', parts) !== -1 && shortcuts();
-			$.inArray('help', parts) !== -1 && help();
-			
-			html.push('</div>');
-			content = $(html.join(''));
-			
-			content.find('.ui-tabs-nav li')
-				.hover(function() {
-					$(this).toggleClass('ui-state-hover')
-				})
-				.children()
-				.click(function(e) {
-					var link = $(this);
-					
-					e.preventDefault();
-					e.stopPropagation();
-					
-					if (!link.is('.ui-tabs-selected')) {
-						link.parent().addClass('ui-tabs-selected ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
-						content.find('.ui-tabs-panel').hide().filter(link.attr('href')).show();
-					}
-					
-				})
-				.filter(':first').click();
-			
-		}, 200)
-	})
+		$.inArray('about', parts) !== -1 && about();
+		$.inArray('shortcuts', parts) !== -1 && shortcuts();
+		$.inArray('help', parts) !== -1 && help();
+		
+		html.push('</div>');
+		content = $(html.join(''));
+		
+		content.find('.ui-tabs-nav li')
+			.hover(function() {
+				$(this).toggleClass('ui-state-hover')
+			})
+			.children()
+			.click(function(e) {
+				var link = $(this);
+				
+				e.preventDefault();
+				e.stopPropagation();
+				
+				if (!link.is('.ui-tabs-selected')) {
+					link.parent().addClass('ui-tabs-selected ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
+					content.find('.ui-tabs-panel').hide().filter(link.attr('href')).show();
+				}
+				
+			})
+			.filter(':first').click();
+		
+	}, 200)
 	
 	this.getstate = function() {
 		return 0;
 	}
 	
 	this.exec = function() {
-		this.fm.dialog(content, {title : this.title, width : 530});
+		if (!this.dialog) {
+			this.dialog = this.fm.dialog(content, {title : this.title, width : 530, autoOpen : false, destroyOnClose : false});
+		}
+		
+		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	}
 
 }
