@@ -19,9 +19,19 @@
 .elfinder-statusbar div { font-size:.7em; }
 
 /* path in statusbar */
+.elfinder-path {
+	max-width:30%;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+    -o-text-overflow:ellipsis;
+}
 .elfinder-ltr .elfinder-path { float:left;  }
 .elfinder-rtl .elfinder-path { float:right; }
 
 /* total/selected size in statusbar */
+.elfinder-stat-size { white-space:nowrap; }
 .elfinder-ltr .elfinder-stat-size { float:right; }
 .elfinder-rtl .elfinder-stat-size { float:left; }
+
+.elfinder-stat-selected { white-space:nowrap; overflow:hidden; }
