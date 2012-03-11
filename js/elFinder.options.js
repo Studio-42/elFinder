@@ -283,6 +283,22 @@ elFinder.prototype._options = {
 	sortDirect : 'asc',
 	
 	/**
+	 * If true - elFinder will formating dates itself, 
+	 * otherwise - backend date will be used.
+	 *
+	 * @type Boolean
+	 */
+	clientFormatDate : true,
+	
+	/**
+	 * Show UTC dates.
+	 * Required set clientFormatDate to true
+	 *
+	 * @type Boolean
+	 */
+	UTCDate : false,
+	
+	/**
 	 * File modification datetime format.
 	 * Value from selected language data  is used by default.
 	 * Set format here to overwrite it.
@@ -296,9 +312,11 @@ elFinder.prototype._options = {
 	 * File modification datetime format in form "Yesterday 12:23:01".
 	 * Value from selected language data is used by default.
 	 * Set format here to overwrite it.
+	 * Use $1 for "Today"/"Yesterday" placeholder
 	 *
 	 * @type String
 	 * @default  ""
+	 * @example "$1 H:m:i"
 	 */
 	fancyDateFormat : '',
 	
