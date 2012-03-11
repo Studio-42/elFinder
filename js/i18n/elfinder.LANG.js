@@ -15,6 +15,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		translator : 'Translator name &lt;translator@email.tld&gt;',
 		language   : 'Language of translation in your language',
 		direction  : 'ltr',
+		dateFormat : 'd.m.Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 			
 			/********************************** errors **********************************/
