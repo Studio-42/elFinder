@@ -1901,19 +1901,21 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$defaults = $perm1 = $perm2 = $perm3 = $this->defaults[$name];
-		$perm1 = !!$val;
-		
 		$path = $this->separator.$this->_relpath($path);
+		$perm = null;
 		
 		if ($this->access) {
 			if (is_array($this->access)) {
 				$obj    = $this->access[0];
 				$method = $this->access[1];
-				$perm2  = $obj->{$method}($name, $path, $this->options['accessControlData'], $this);
+				$perm   = $obj->{$method}($name, $path, $this->options['accessControlData'], $this);
 			} else {
-				$func  = $this->access;
-				$perm2 = $func($name, $path, $this->options['accessControlData'], $this);
+				$func = $this->access;
+				$perm = $func($name, $path, $this->options['accessControlData'], $this);
+			}
+			
+			if ($perm !== null) {
+				return !!$perm;
 			}
 		}
 		
@@ -1921,16 +1923,11 @@ abstract class elFinderVolumeDriver {
 			$attrs = $this->attributes[$i];
 
 			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
-				$perm3 = $attrs[$name];
-				break;
+				$perm = $attrs[$name];
 			} 
 		}
 		
-		$ret = $name == 'read' || $name == 'write' 
-			? $defaults & $perm1 & $perm2 & $perm3
-			: $defaults ^ $perm1 ^ $perm2 ^ $perm3;
-
-		return $ret;
+		return $perm === null ? $this->defaults[$name] : !!$perm;
 	}
 	
 	/**
