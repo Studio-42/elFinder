@@ -268,6 +268,7 @@ window.elFinder = function(node, opts) {
 			}
 		},
 		date = new Date(),
+		utc,
 		i18n
 		;
 
@@ -415,6 +416,16 @@ window.elFinder = function(node, opts) {
 	 * @type Number
 	 **/
 	this.yesterday = this.today - 86400;
+	
+	utc = this.options.UTCDate ? 'UTC' : '';
+	
+	this.getHours    = 'get'+utc+'Hours';
+	this.getMinutes  = 'get'+utc+'Minutes';
+	this.getSeconds  = 'get'+utc+'Seconds';
+	this.getDate     = 'get'+utc+'Date';
+	this.getDay      = 'get'+utc+'Day';
+	this.getMonth    = 'get'+utc+'Month';
+	this.getFullYear = 'get'+utc+'FullYear';
 	
 	/**
 	 * Css classes 
@@ -1672,12 +1683,12 @@ elFinder.prototype = {
 	 */
 	i18 : {
 		en : {
-			translator     : '',
-			language       : 'English',
-			direction      : 'ltr',
-			dateFormat : 'm.d.Y H:i:s',
-			fancyDateFormat : '$1 H:i:s',
-			messages       : {}
+			translator      : '',
+			language        : 'English',
+			direction       : 'ltr',
+			dateFormat      : 'd.m.Y H:i',
+			fancyDateFormat : '$1 H:i',
+			messages        : {}
 		},
 		months : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		monthsShort : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -2585,18 +2596,18 @@ elFinder.prototype = {
 			i18  = self.i18,
 			date, format, output, d, dw, m, y, h, g, i, s;
 
-		if (ts > 0) {
+		if (self.options.clientFormatDate && ts > 0) {
 
 			date = new Date(file.ts*1000);
 			
-			h  = date.getHours();
+			h  = date[self.getHours]();
 			g  = h > 12 ? h - 12 : h;
-			i  = date.getMinutes();
-			s  = date.getSeconds();
-			d  = date.getDate();
-			dw = date.getDay();
-			m  = date.getMonth() + 1;
-			y  = date.getFullYear();
+			i  = date[self.getMinutes]();
+			s  = date[self.getSeconds]();
+			d  = date[self.getDate]();
+			dw = date[self.getDay]();
+			m  = date[self.getMonth]() + 1;
+			y  = date[self.getFullYear]();
 			
 			format = ts >= this.yesterday 
 				? this.fancyFormat 
