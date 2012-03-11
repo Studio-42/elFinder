@@ -338,7 +338,7 @@ $opts = array(
 		// ),
 		
 		array(
-			'driver' => 'MySQL',
+			'driver' => 'MySQL2',
 			'path' => 1,
 			// 'treeDeep' => 2,
 			'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
