@@ -8,6 +8,9 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDriver.class.p
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSystem.class.php';
 // Required for MySQL storage connector
 // include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeMySQL.class.php';
+// Required for FTP connector support
+// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
+
 
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
@@ -18,9 +21,9 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSyste
  * @return bool
  **/
 function access($attr, $path, $data, $volume) {
-	return strpos(basename($path), '.') === 0   // if file/folder begins with '.' (dot)
-		? !($attr == 'read' || $attr == 'write')  // set read+write to false, other (locked+hidden) set to true
-		: ($attr == 'read' || $attr == 'write');  // else set read+write to true, locked+hidden to false
+	return strpos(basename($path), '.') === 0       // if file/folder begins with '.' (dot)
+		? !($attr == 'read' || $attr == 'write')    // set read+write to false, other (locked+hidden) set to true
+		:  ($attr == 'read' || $attr == 'write');   // else set read+write to true, locked+hidden to false
 }
 
 $opts = array(

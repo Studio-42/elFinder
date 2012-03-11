@@ -21,15 +21,16 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return  !this._disabled && cnt && cnt == filter(sel).length ? 0 : -1;
+		return  !this._disabled && cnt && (!$.browser.msie || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var fm    = this.fm,
-			base  = fm.options.url, 
-			files = filter(hashes),
-			dfrd  = $.Deferred(),
-			iframe, i, url;
+		var fm      = this.fm,
+			base    = fm.options.url,
+			files   = filter(hashes),
+			dfrd    = $.Deferred(),
+			iframes = '',
+			i, url;
 			
 		if (this.disabled()) {
 			return dfrd.reject();
@@ -41,16 +42,20 @@ elFinder.prototype.commands.download = function() {
 		}
 			
 		base += base.indexOf('?') === -1 ? '?' : '&';
-			
+		
 		for (i = 0; i < files.length; i++) {
-			var iframe = $('<iframe style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>')
-				.appendTo('body')
-				.load(function() {
-					setTimeout(function() {
-						iframe.remove();
-					}, 1000)
-				});
+			iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+base + 'cmd=file&target=' + files[i].hash+'&download=1'+'"/>';
 		}
+		$(iframes)
+			.appendTo('body')
+			.ready(function() {
+				setTimeout(function() {
+					$(iframes).each(function() {
+						$('#' + $(this).attr('id')).remove();
+					});
+				}, $.browser.mozilla? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
+			});
+
 		return dfrd.resolve(hashes);
 	}
 

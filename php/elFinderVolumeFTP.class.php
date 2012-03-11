@@ -971,7 +971,3 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 	
 } // END class 
-
-
-?>
-		

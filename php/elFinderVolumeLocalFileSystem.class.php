@@ -829,6 +829,3 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 } // END class 
-
-
-?>

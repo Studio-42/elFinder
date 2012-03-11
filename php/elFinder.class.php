@@ -67,7 +67,7 @@ class elFinder {
 		'search'    => array('q' => true, 'mimes' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
-		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false)
+		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false)
 	);
 	
 	/**
@@ -168,7 +168,7 @@ class elFinder {
 	public function __construct($opts) {
 		
 		$this->time  = $this->utime();
-		$this->debug = !empty($opts['debug']);
+		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
@@ -607,11 +607,11 @@ class elFinder {
 		}
 		
 		$filenameEncoded = rawurlencode($file['name']);
-		if (substr($filenameEncoded, '%') === false) { // ASCII only
+		if (strpos($filenameEncoded, '%') === false) { // ASCII only
 			$filename = 'filename="'.$file['name'].'"';
 		} else {
 			$ua = $_SERVER["HTTP_USER_AGENT"];
-			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 not support RFC 6266 (RFC 2231/RFC 5987) 
+			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
 			} else { // RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename*=UTF-8\'\''.$filenameEncoded;
@@ -1020,13 +1020,15 @@ class elFinder {
 		$x      = (int)$args['x'];
 		$y      = (int)$args['y'];
 		$mode   = $args['mode'];
+		$bg     = null;
+		$degree = (int)$args['degree'];
 		
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RESIZE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 
-		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode))
+		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree))
 			? array('changed' => array($file))
 			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
 	}
@@ -1099,6 +1101,3 @@ class elFinder {
 	}
 	
 } // END class
-
-
-?>

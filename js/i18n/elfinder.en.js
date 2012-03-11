@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2011-07-10
+ * @version 2012-02-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -103,7 +103,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Go to parent directory',
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
-			'cmdresize'    : 'Resize image',
+			'cmdresize'    : 'Resize & Rotate',
 			'cmdsort'      : 'Sort',
 			
 			/*********************************** buttons ***********************************/ 
@@ -228,9 +228,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Scale',
 			'width'           : 'Width',
 			'height'          : 'Height',
-      'mode'            : 'Mode',
-      'resize'          : 'Resize',
-      'crop'            : 'Crop',
+			'resize'          : 'Resize',
+			'crop'            : 'Crop',
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : '°',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
