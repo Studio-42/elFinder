@@ -2287,6 +2287,11 @@ abstract class elFinderVolumeDriver {
 
 		foreach($this->_scandir($path) as $p) {
 			$stat = $this->stat($p);
+
+			if (!$stat) { // invalid links
+				continue;
+			}
+
 			if (!empty($stat['hidden']) || !$this->mimeAccepted($stat['mime'])) {
 				continue;
 			}
