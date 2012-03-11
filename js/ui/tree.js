@@ -352,6 +352,8 @@ $.fn.elfindertree = function(fm, opts) {
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
 				
+					fm.trigger('searchend');
+				
 					if (hash != fm.cwd().hash && !link.is('.'+disabled)) {
 						fm.exec('open', file.thash || hash);
 					} else if (link.is('.'+collapsed)) {

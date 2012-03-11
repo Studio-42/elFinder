@@ -62,10 +62,13 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		cmd.fm
 			.error(function() {
-				input.unbind('keydown')
+				input.unbind('keydown');
 			})
 			.select(function() {
 				input.blur();
+			})
+			.bind('searchend', function() {
+				input.val('');
 			})
 			.viewchange(abort)
 			.shortcut({
