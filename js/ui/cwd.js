@@ -934,7 +934,7 @@ $.fn.elfindercwd = function(fm) {
 				description : 'selectffile',
 				callback    : function(e) { 
 					unselectAll();
-					cwd.find('[id]:first').trigger(evtSelect) ;
+					scrollToView(cwd.find('[id]:first').trigger(evtSelect))
 					trigger();
 				}
 			})
@@ -943,7 +943,7 @@ $.fn.elfindercwd = function(fm) {
 				description : 'selectlfile',
 				callback    : function(e) { 
 					unselectAll();
-					cwd.find('[id]:last').trigger(evtSelect) ;
+					scrollToView(cwd.find('[id]:last').trigger(evtSelect)) ;
 					trigger();
 				}
 			});
