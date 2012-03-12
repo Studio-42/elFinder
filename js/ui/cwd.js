@@ -804,8 +804,15 @@ $.fn.elfindercwd = function(fm) {
 			wrapper[0].addEventListener('drop', function(e) {
 			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
-
-				e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files})//fm.upload({files : e.dataTransfer.files});
+				var file = false;
+				if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+					file = e.dataTransfer.files;
+				} else if (e.dataTransfer.getData('text/html')) {
+					file = [ e.dataTransfer.getData('text/html') ];
+				}
+				if (file) {
+					fm.exec('upload', {files : file});
+				}
 			}, false);
 		}
 

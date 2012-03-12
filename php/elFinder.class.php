@@ -59,7 +59,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -774,6 +774,26 @@ class elFinder {
 	}
 	
 	/**
+	 * Get remote contents with cURL
+	 *
+	 * @param  string  $url     target url
+	 * @param  int     $timeout timeout (sec)
+	 * @return string or bool(false)
+	 * @retval string contents
+	 * @retval false error
+	 **/
+	 protected function curl_get_contents( $url, $timeout = 10 ){
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_HEADER, false );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
+		$result = curl_exec( $ch );
+		curl_close( $ch );
+		return $result;
+	}
+	
+	/**
 	 * Save uploaded files
 	 *
 	 * @param  array
@@ -787,7 +807,21 @@ class elFinder {
 		$result = array('added' => array(), 'header' => empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8');
 		
 		if (empty($files)) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
+			if ($volume && isset($args['upload']) && is_array($args['upload'])) {
+				foreach($args['upload'] as $i => $url) {
+					$data = $this->curl_get_contents($url);
+					if ($data) {
+						$tmpfname = tempnam(sys_get_temp_dir(), 'UPL');
+						file_put_contents($tmpfname, $data);
+						$files['tmp_name'][$i] = $tmpfname;
+						$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', preg_replace('#^.*?([^/]+)$#', '$1', $url));
+						$files['error'][$i] = 0;
+					}
+				}
+			}
+			if (empty($files)) {
+				return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
+			}
 		}
 		
 		if (!$volume) {
@@ -806,16 +840,25 @@ class elFinder {
 			if (($fp = fopen($tmpname, 'rb')) == false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
 				$this->uploadDebug = 'Upload error: unable open tmp file';
+				if (! is_uploaded_file($tmpname)) {
+					@ unlink($tmpname);
+					continue;
+				}
 				break;
 			}
 			
 			if (($file = $volume->upload($fp, $target, $name, $tmpname)) === false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
+				if (! is_uploaded_file($tmpname)) {
+					unlink($tmpname);
+					continue;
+				}
 				break;
 			}
 			
 			fclose($fp);
+			if (! is_uploaded_file($tmpname)) unlink($tmpname);
 			$result['added'][] = $file;
 		}
 		

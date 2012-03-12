@@ -1923,9 +1923,24 @@ elFinder.prototype = {
 						notifyto && clearTimeout(notifyto);
 						notify && self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
 					}),
+				checkFile   = function(files) {
+					if (typeof files[0] == 'string') {
+						var ret = [];
+						var regex = /<img[^>]+src=["']?([^"'> ]+)/ig;
+						var m = [];
+						var url = '';
+						while (m = regex.exec(files[0])) {
+							url = m[1].replace(/&amp;/g, '&');
+							if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+						}
+						return ret;
+					} else {
+						return files;
+					}
+				},
 				xhr         = new XMLHttpRequest(),
 				formData    = new FormData(),
-				files       = data.input ? data.input.files : data.files, 
+				files       = checkFile(data.input ? data.input.files : data.files), 
 				cnt         = files.length,
 				loaded      = 5,
 				notify      = false,
