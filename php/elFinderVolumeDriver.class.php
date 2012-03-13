@@ -1901,7 +1901,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$path = $this->separator.$this->_relpath($path);
+		
 		$perm = null;
 		
 		if ($this->access) {
@@ -1921,8 +1921,8 @@ abstract class elFinderVolumeDriver {
 		
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
-
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
+			$p = $this->separator.$this->_relpath($path);
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $p)) {
 				$perm = $attrs[$name];
 			} 
 		}
