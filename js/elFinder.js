@@ -1732,6 +1732,7 @@ elFinder.prototype = {
 			'application/x-gzip'            : 'GZIP',
 			'application/x-bzip2'           : 'BZIP',
 			'application/zip'               : 'ZIP',
+			'application/x-zip'               : 'ZIP',
 			'application/x-rar'             : 'RAR',
 			'application/x-tar'             : 'TAR',
 			'application/x-7z-compressed'   : '7z',
