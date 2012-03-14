@@ -541,7 +541,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function mount(array $opts) {
-		if ($opts['path'] === '') {
+		if (!isset($opts['path']) || $opts['path'] === '') {
 			return false;
 		}
 		
