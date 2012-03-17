@@ -1,7 +1,7 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @version 2012-02-25
+ * @version 2012-03-17
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -103,6 +103,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'ビュー',
 			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
+			'cmdpixlr'     : 'Pixlr で編集',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',

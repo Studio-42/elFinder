@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2012-02-25
+ * @version 2012-03-17
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -105,6 +105,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize & Rotate',
 			'cmdsort'      : 'Sort',
+			'cmdpixlr'     : 'Edit on Pixlr',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
