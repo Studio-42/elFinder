@@ -2599,7 +2599,7 @@ elFinder.prototype = {
 
 		if (self.options.clientFormatDate && ts > 0) {
 
-			date = new Date(file.ts*1000);
+			date = new Date(ts*1000);
 			
 			h  = date[self.getHours]();
 			g  = h > 12 ? h - 12 : h;
