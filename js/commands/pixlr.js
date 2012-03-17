@@ -8,35 +8,61 @@ elFinder.prototype.commands.pixlr = function() {
 	};
 
 	this.exec = function(hashes) {
-		var fm    = this.fm, 
+		var fm    = this.fm,
 		dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
 		files = this.files(hashes),
 		cnt   = files.length,
-		file, url, s, w;
-		
-		var target;
+		fire = function(mode) {
+			var file, url, target, exit;
+			file = files[0];
+			
+			target = fm.options.url;
+			target = target + (target.indexOf('?') === -1 ? '?' : '&')
+				+ 'cmd=pixlr'
+				+ '&target=' + file.phash
+				+ '&node=' + encodeURIComponent(fm.id);
+
+			exit = fm.options.url;
+			exit = exit + (exit.indexOf('?') === -1 ? '?' : '&')
+				+ 'cmd=pixlr';
+			
+			url = 'http://pixlr.com/'+mode+'/?image=' + encodeURIComponent(fm.url(file.hash))
+				+ '&target=' + encodeURIComponent(target)
+				+ '&title=' + encodeURIComponent('pixlr_'+file.name)
+				+ '&exit=' + encodeURIComponent(exit);
+			
+			if (!window.open(url)) {
+				return dfrd.reject('errPopup');
+			}
+		},
+		selector = $('<div/>'),
+		opts    = {
+			title : 'Pixlr Editor or Pixlr Express ?',
+			width : 'auto',
+			close : function() { $(this).elfinderdialog('destroy'); }
+		}
+		;
 		
 		if (!cnt) {
 			return dfrd.reject();
 		}
 		
-		file = files[0]
+		selector.css('text-align', 'center')
+		        .append($('<button/>').css('margin', '30px').append('Pixlr Editor').button().click(
+					function(){
+						fire('editor');
+						$(this).elfinderdialog('destroy');
+						return false;
+					}))
+		        .append($('<button/>').css('margin', '30px').append('Pixlr Express').button().click(
+		        	function(){
+		        		fire('express');
+		        		$(this).elfinderdialog('destroy');
+		        		return false;
+		        	}));
 		
-		target = fm.options.url;
-		target = target + (target.indexOf('?') === -1 ? '?' : '&')
-			+ 'cmd=pixlr'
-			+ '&target=' + file.phash
-			+ '&node=' + encodeURIComponent(fm.id);
+		dialog = fm.dialog(selector, opts);
 
-		
-		url = 'http://pixlr.com/editor/?image=' + encodeURIComponent(fm.url(file.hash))
-			+ '&target=' + encodeURIComponent(target)
-			+ '&title=' + encodeURIComponent('pixlr_'+file.name);
-		
-		if (!window.open(url)) {
-			return dfrd.reject('errPopup');
-		}
-
-		return dfrd.resolve(hashes);
+		return dfrd.resolve();
 	};
 };

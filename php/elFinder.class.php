@@ -68,7 +68,7 @@ class elFinder {
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
-		'pixlr'     => array('target' => true, 'node' => true, 'image' => true, 'type' => true, 'title' => true)
+		'pixlr'     => array('target' => false, 'node' => false, 'image' => false, 'type' => false, 'title' => false)
 	);
 	
 	/**
@@ -1086,19 +1086,25 @@ class elFinder {
 	 * @author Naoki Sawada
 	 **/
 	 protected function pixlr($args) {
-		$args['upload'] = array( $args['image'] );
-		$args['name']   = array( $args['title'].'.'.$args['type'] );
-	
-		$res = $this->upload($args);
-		if (isset($res['warning'])) {
-			$cmd = 'error(elf.i18n("'.join('","', $res['warning']).'"))';
-		} else {
-			$cmd = 'exec("reload")';
-		}
-		$script = 'var elf=window.opener.document.getElementById(\''.htmlspecialchars($args['node']).'\').elfinder; elf.'.$cmd.'; window.close();';
 		
-		echo '<html><head><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+	 	if (! empty($args['target'])) {
+		 	$args['upload'] = array( $args['image'] );
+			$args['name']   = array( $args['title'].'.'.$args['type'] );
 		
+			$res = $this->upload($args);
+			if (isset($res['warning'])) {
+				$cmd = 'error(elf.i18n("'.join('","', $res['warning']).'"))';
+			} else {
+				$cmd = 'exec("reload")';
+			}
+			$script = 'var elf=window.opener.document.getElementById(\''.htmlspecialchars($args['node']).'\').elfinder; elf.'.$cmd.'; window.close();';
+			
+	 	} else {
+	 		$script = 'window.close();';
+	 	}
+	 	
+	 	echo '<html><head><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+	 	
 		exit();
 	}
 
