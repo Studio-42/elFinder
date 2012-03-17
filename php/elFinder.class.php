@@ -1089,7 +1089,7 @@ class elFinder {
 		
 	 	if (! empty($args['target'])) {
 		 	$args['upload'] = array( $args['image'] );
-			$args['name']   = array( $args['title'].'.'.$args['type'] );
+			$args['name']   = array( preg_replace('/\.[a-z]{1,4}$/i', '', $args['title']).'.'.$args['type'] );
 		
 			$res = $this->upload($args);
 			if (isset($res['warning'])) {
