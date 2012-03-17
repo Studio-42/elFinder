@@ -59,7 +59,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -814,7 +814,8 @@ class elFinder {
 						$tmpfname = tempnam(sys_get_temp_dir(), 'UPL');
 						file_put_contents($tmpfname, $data);
 						$files['tmp_name'][$i] = $tmpfname;
-						$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', preg_replace('#^.*?([^/]+)$#', '$1', $url));
+						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('#^.*?([^/]+)$#', '$1', rawurldecode($url));
+						$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
 						$files['error'][$i] = 0;
 					}
 				}
