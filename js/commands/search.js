@@ -31,6 +31,8 @@ elFinder.prototype.commands.search = function() {
 		var fm = this.fm;
 		
 		if (typeof(q) == 'string' && q) {
+			fm.trigger('searchstart', {query : q});
+			
 			return fm.request({
 				data   : {cmd : 'search', q : q},
 				notify : {type : 'search', cnt : 1, hideCnt : true}
