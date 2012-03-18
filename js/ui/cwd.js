@@ -112,6 +112,13 @@ $.fn.elfindercwd = function(fm) {
 			tmbNum = fm.options.loadTmbs > 0 ? fm.options.loadTmbs : 5,
 			
 			/**
+			 * Current search query.
+			 *
+			 * @type String
+			 */
+			query = '',
+			
+			/**
 			 * File templates
 			 *
 			 * @type Object
@@ -816,6 +823,12 @@ $.fn.elfindercwd = function(fm) {
 			.bind('searchend sortchange', function() {
 				content(fm.files());
 			})
+			.bind('searchstart', function(e) {
+				query = e.data.query;
+			})
+			.bind('searchend', function() {
+				query = '';
+			})
 			.bind('viewchange', function() {
 				var sel = fm.selected(),
 					l   = fm.storage('view') == 'list';
@@ -832,23 +845,35 @@ $.fn.elfindercwd = function(fm) {
 				resize();
 			})
 			.add(function(e) {
-				var phash = fm.cwd().hash;
-
-				add($.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; }));
+				var phash = fm.cwd().hash,
+					files = query
+						? $.map(e.data.added || [], function(f) { return f.name.indexOf(query) === -1 ? null : f })
+						: $.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; })
+						;
+				add(files)
+				// add($.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; }));
 			})
 			.change(function(e) {
 				var phash = fm.cwd().hash,
-					sel   = fm.selected();
+					sel   = fm.selected(),
+					files;
 
-				$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
-					// force to load updated thumbnail
-					// if (file.tmb && (''+file.tmb).indexOf('?') === -1) {
-					// 	file.tmb += '?_='+Math.random()
-					// }
-					remove([file.hash]);
-					add([file]);
-					$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
-				})
+				if (query) {
+					$.each(e.data.changed || [], function(i, file) {
+						remove([file.hash]);
+						if (file.name.indexOf(query) !== -1) {
+							add([file]);
+							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+						}
+					})
+				} else {
+					$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
+						remove([file.hash]);
+						add([file]);
+						$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+					});
+				}
+				
 				trigger();
 			})
 			.remove(function(e) {
