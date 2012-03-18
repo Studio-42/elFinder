@@ -15,7 +15,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			item     = 'elfinder-button-menu-item',
 			selected = 'elfinder-button-menu-item-selected',
 			menu,
-			button   = $(this).addClass('ui-state-default elfinder-button')
+			button   = $(this).addClass('ui-state-default elfinder-button elfiner-button-'+cmd.name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
 				.hover(function(e) { !button.is('.'+disabled) && button.toggleClass(hover); })
