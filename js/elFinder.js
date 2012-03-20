@@ -2248,8 +2248,8 @@ elFinder.prototype = {
 			d2   = file2.mime == 'directory',
 			n1   = f1.name.toLowerCase(),
 			n2   = f2.name.toLowerCase(),
-			s1   = d1 ? 0 : f1.size || 0,
-			s2   = d2 ? 0 : f2.size || 0,
+			s1   = d1 ? 0 : parseInt(f1.size) || 0,
+			s2   = d2 ? 0 : parseInt(f2.size) || 0,
 			t1   = f1.ts || f1.date || '',
 			t2   = f2.ts || f2.date || '';
 
