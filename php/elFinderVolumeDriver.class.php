@@ -1351,7 +1351,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 
-		if ($this->uploadMaxSize > 0 && filesize($tmpPath) > $this->uploadMaxSize) {
+		if ($this->uploadMaxSize > 0 && filesize($tmpname) > $this->uploadMaxSize) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
 
