@@ -828,7 +828,7 @@ $.fn.elfindercwd = function(fm) {
 				content(e.data.files, e.type=='search');
 			})
 			.bind('searchend sortchange', function() {
-				content(fm.files());
+				if (query) content(fm.files());
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
