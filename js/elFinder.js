@@ -1539,6 +1539,12 @@ window.elFinder = function(node, opts) {
 		$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
 	});
 
+    // check disabled commands
+    var idx;
+    this.options.disabled && $.each(this.options.disabled, function(i, cmd) {
+        (idx = $.inArray(cmd, self.options.commands)) !== -1 && self.options.commands.splice(idx,1);
+    });
+
 	// load commands
 	$.each(this.options.commands, function(i, name) {
 		var cmd = self.commands[name];
