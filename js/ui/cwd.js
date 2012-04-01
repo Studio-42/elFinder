@@ -773,14 +773,13 @@ $.fn.elfindercwd = function(fm) {
 				}),
 			
 			resize = function() {
-				var h = 0,
-					delta = wrapper.outerHeight(true) - wrapper.height();
-				// return
+				var h = 0;
+
 				wrapper.siblings('.elfinder-panel:visible').each(function() {
-					h += $(this).outerHeight(true)
+					h += $(this).outerHeight(true);
 				});
 
-				wrapper.height(wz.height() - delta - h);
+				wrapper.height(wz.height() - h);
 			},
 			// elfinder node
 			parent = $(this).parent().resize(resize),
