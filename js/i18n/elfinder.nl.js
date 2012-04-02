@@ -129,7 +129,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Bestanden uit het archief aan het uitpakken',
 			'ntfsearch'   : 'Zoeken naar bestanden',
 			'ntfsmth'     : 'Iets aan het doen >_<',
-			'ntfloadimg'  : 'Laden van plaatje..',
+			'ntfloadimg'  : 'Laden van plaatje',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
