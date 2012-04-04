@@ -649,7 +649,7 @@ $.fn.elfindercwd = function(fm) {
 						nl   = next.length,
 						sib;
 
-					e.stopImmediatePropagation();
+					e.stopPropagation();
 
 					if (e.shiftKey && (pl || nl)) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
