@@ -3004,12 +3004,8 @@ abstract class elFinderVolumeDriver {
 			$tmpout = '';
 			$tmperr = '';
 
-			if(!feof($pipes[1])) {
-				$output[] = fgets($pipes[1], 1024);
-			}
-			if(!feof($pipes[2])) {
-				$error_output[] = fgets($pipes[2], 1024);
-			}
+			$output = stream_get_contents($pipes[1]);
+			$error_output = stream_get_contents($pipes[2]);
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);
