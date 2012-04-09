@@ -257,7 +257,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate'	  : 'Draaien',
 			'rotate-cw'	  : 'Draai 90 graden rechtsom',
 			'rotate-ccw'	  : 'Draai 90 graden linksom',
-			'degree'	  : '°'
+			'degree'	  : '°',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',
