@@ -9,8 +9,6 @@
 elFinder.prototype.commands.duplicate = function() {
 	var fm = this.fm;
 	
-	this.disableOnSearch = true;
-	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;

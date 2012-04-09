@@ -1732,6 +1732,7 @@ elFinder.prototype = {
 			'application/x-gzip'            : 'GZIP',
 			'application/x-bzip2'           : 'BZIP',
 			'application/zip'               : 'ZIP',
+			'application/x-zip'               : 'ZIP',
 			'application/x-rar'             : 'RAR',
 			'application/x-tar'             : 'TAR',
 			'application/x-7z-compressed'   : '7z',
@@ -2232,8 +2233,8 @@ elFinder.prototype = {
 			d2   = file2.mime == 'directory',
 			n1   = f1.name.toLowerCase(),
 			n2   = f2.name.toLowerCase(),
-			s1   = d1 ? 0 : f1.size || 0,
-			s2   = d2 ? 0 : f2.size || 0,
+			s1   = d1 ? 0 : parseInt(f1.size) || 0,
+			s2   = d2 ? 0 : parseInt(f2.size) || 0,
 			t1   = f1.ts || f1.date || '',
 			t2   = f2.ts || f2.date || '';
 
@@ -2590,15 +2591,15 @@ elFinder.prototype = {
 	 * @param  Object  file object
 	 * @return String
 	 */
-	formatDate : function(file) {
+	formatDate : function(file, ts) {
 		var self = this, 
-			ts   = file.ts, 
+			ts   = ts || file.ts, 
 			i18  = self.i18,
 			date, format, output, d, dw, m, y, h, g, i, s;
 
 		if (self.options.clientFormatDate && ts > 0) {
 
-			date = new Date(file.ts*1000);
+			date = new Date(ts*1000);
 			
 			h  = date[self.getHours]();
 			g  = h > 12 ? h - 12 : h;

@@ -541,7 +541,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	public function mount(array $opts) {
-		if ($opts['path'] === '') {
+		if (!isset($opts['path']) || $opts['path'] === '') {
 			return false;
 		}
 		
@@ -704,9 +704,12 @@ abstract class elFinderVolumeDriver {
 				if (!empty($start)
 				&& $start['mime'] == 'directory'
 				&& $start['read']
-				&& !$start['hidden']
+				&& empty($start['hidden'])
 				&& $this->_inpath($this->options['startPath'], $this->root)) {
 					$this->startPath = $this->options['startPath'];
+					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
+						$this->startPath = substr($this->startPath, 0, -1);
+					}
 				}
 			}
 		} else {
@@ -1901,7 +1904,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$path = $this->separator.$this->_relpath($path);
+		
 		$perm = null;
 		
 		if ($this->access) {
@@ -1921,8 +1924,8 @@ abstract class elFinderVolumeDriver {
 		
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
-
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
+			$p = $this->separator.$this->_relpath($path);
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $p)) {
 				$perm = $attrs[$name];
 			} 
 		}
@@ -3004,12 +3007,8 @@ abstract class elFinderVolumeDriver {
 			$tmpout = '';
 			$tmperr = '';
 
-			if(!feof($pipes[1])) {
-				$output[] = fgets($pipes[1], 1024);
-			}
-			if(!feof($pipes[2])) {
-				$error_output[] = fgets($pipes[2], 1024);
-			}
+			$output = stream_get_contents($pipes[1]);
+			$error_output = stream_get_contents($pipes[2]);
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);

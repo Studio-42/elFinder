@@ -1,13 +1,15 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2011-10-07
+ * @version 2012-04-02
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
 		translator : 'Barry vd. Heuvel &lt;barry@fruitcakestudio.nl&gt;',
 		language   : 'Nederlands',
 		direction  : 'ltr',
+		dateFormat : 'd-m-Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -127,6 +129,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Bestanden uit het archief aan het uitpakken',
 			'ntfsearch'   : 'Zoeken naar bestanden',
 			'ntfsmth'     : 'Iets aan het doen >_<',
+			'ntfloadimg'  : 'Laden van plaatje',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
@@ -144,6 +147,32 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Okt',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
+			'January'     : 'Januari',
+			'February'    : 'Februari',
+			'March'       : 'Maart',
+			'April'       : 'April',
+			'May'         : 'Mei',
+			'June'        : 'Juni',
+			'July'        : 'Juli',
+			'August'      : 'Augustus',
+			'September'   : 'September',
+			'October'     : 'Oktober',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Zondag', 
+			'Monday'      : 'Maandag', 
+			'Tuesday'     : 'Dinsdag', 
+			'Wednesday'   : 'Woensdag', 
+			'Thursday'    : 'Donderdag', 
+			'Friday'      : 'Vrijdag', 
+			'Saturday'    : 'Zaterdag',
+			'Sun'         : 'Zo', 
+			'Mon'         : 'Ma', 
+			'Tue'         : 'Di', 
+			'Wed'         : 'Wo', 
+			'Thu'         : 'Do', 
+			'Fri'         : 'Vr', 
+			'Sat'         : 'Za',
 			
 			/******************************** sort variants ********************************/
 			'sortnameDirsFirst' : 'op naam (mappen eerst)', 
@@ -222,6 +251,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'scale'           : 'Schaal',
 			'width'           : 'Breedte',
 			'height'          : 'Hoogte',
+			'mode'		  : 'Modus',
+			'resize'	  : 'Verkleinen', //Or: Vergroten/verkleinen
+			'crop'		  : 'Bijsnijden',
+			'rotate'	  : 'Draaien',
+			'rotate-cw'	  : 'Draai 90 graden rechtsom',
+			'rotate-ccw'	  : 'Draai 90 graden linksom',
+			'degree'	  : '°',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',
