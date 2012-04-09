@@ -26,6 +26,19 @@ function access($attr, $path, $data, $volume) {
 		:  null;                                    // else elFinder decide it itself
 }
 
+/**
+ * Function to demonstrate how to control file name on uploading removing unsafe characters.
+ * This function replaces whitespaces by '_', removes non-ASCII characters and convert to lower case.
+ */
+function upload_name(&$name) {
+  // Replace whitespace.
+  $name = str_replace(' ', '_', $name);
+  // Remove remaining unsafe characters.
+  $name = preg_replace('![^0-9A-Za-z_.-]!', '', $name);
+  // Force lowercase to prevent issues on case-insensitive file systems.
+  $name = strtolower($name);
+}
+
 $opts = array(
 	// 'debug' => true,
 	'roots' => array(
@@ -33,7 +46,8 @@ $opts = array(
 			'driver'        => 'LocalFileSystem',   // driver for accessing file system (REQUIRED)
 			'path'          => '../files/',         // path to files (REQUIRED)
 			'URL'           => dirname($_SERVER['PHP_SELF']) . '/../files/', // URL to files (REQUIRED)
-			'accessControl' => 'access'             // disable and hide dot starting files (OPTIONAL)
+			'accessControl' => 'access',            // disable and hide dot starting files (OPTIONAL)
+			'uploadNameControl' => 'upload_name', 	// remove unsafe characters
 		)
 	)
 );
