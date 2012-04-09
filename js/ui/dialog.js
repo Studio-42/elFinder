@@ -40,7 +40,8 @@ $.fn.elfinderdialog = function(opts) {
 				.hide()
 				.append(self)
 				.appendTo(parent)
-				.draggable({ handle : '.ui-dialog-titlebar'})
+				.draggable({ handle : '.ui-dialog-titlebar',
+					     containment : $('body') })
 				.css({
 					width  : opts.width,
 					height : opts.height
