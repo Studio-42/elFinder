@@ -225,6 +225,7 @@ $opts = array(
 		array(
 			'driver'     => 'LocalFileSystem',
 			'path'       => '../files/',
+			'startPath'  => '../files/icons/',
 			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
 			// 'alias'      => 'File system',
 			'mimeDetect' => 'internal',
