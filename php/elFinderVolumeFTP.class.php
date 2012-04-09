@@ -122,8 +122,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$this->rootName = $this->options['alias'];
 		$this->options['separator'] = '/';
-		return 
-		$this->connect();
+		return $this->connect();
 		
 	}
 
