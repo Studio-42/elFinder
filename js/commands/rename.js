@@ -88,7 +88,7 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.fail(function(error) {
 								dfrd.reject();
-								// fm.sync();
+								fm.sync();
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
