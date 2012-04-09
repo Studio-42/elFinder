@@ -162,7 +162,7 @@
 .elfinder .elfinder-cwd table thead td { font-size:.9em;}
 .elfinder .elfinder-cwd table td { 
 	padding:3px 12px;
-	white-space:nowrap;
+	white-space:pre;
 	overflow:hidden;
 	text-align:right;
 	cursor:default;
