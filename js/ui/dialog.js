@@ -97,7 +97,10 @@ $.fn.elfinderdialog = function(opts) {
 						})
 					} else {
 						// return focus to parent
-						parent.mousedown();
+						setTimeout(function() {
+							parent.mousedown().click();
+						}, 10);
+						
 					}
 					
 					if (typeof(opts.close) == 'function') {
