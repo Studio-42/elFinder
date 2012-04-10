@@ -603,7 +603,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		unset($o);
 		//exec('zip --version', $o, $c);
-		$this->procExec('zip --version', $o, $c);
+		$this->procExec('zip -v', $o, $c);
 		if ($c == 0) {
 			$arcs['create']['application/zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
 		}
