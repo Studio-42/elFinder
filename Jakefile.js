@@ -102,7 +102,7 @@ function getComment() {
 		' * Version ' + ver[1] + ' (' + bd + ')\n' +
 		' * http://elfinder.org\n' +
 		' * \n' +
-		' * Copyright 2009-2011, Studio 42\n' +
+		' * Copyright 2009-2012, Studio 42\n' +
 		' * Licensed under a 3 clauses BSD license\n' +
 		' */\n';
 	return comment;
