@@ -11,8 +11,8 @@ elFinder
 </pre>
 
 elFinder is an open-source file manager for web, written in JavaScript using
-jQuery UI. As you can see its creation is inspired by simplicity and convenience
-of Finder program used in Mac OS X operating system.
+jQuery UI. Creation is inspired by simplicity and convenience of Finder program
+used in Mac OS X operating system.
 
 
 Features
@@ -20,20 +20,21 @@ Features
 
  * All operations with files and folders on a remote server (copy, move,
    upload, create folder/file, rename, etc.)
- * High performance server beckend and light client
- * Background file upload with Drag & Drop support
- * Standart methods of file/group selection using mouse or keyboard
- * Rich context menu and toolbar
+ * High performance server beckend and light client UI
+ * Multi-root support
+ * Local file system, MySQL, FTP volume storage drivers
+ * Background file upload with Drag & Drop HTML5 support
  * List and Icons view
- * Shortcuts
+ * Kayboard shortcuts
+ * Standart methods of file/group selection using mouse or keyboard
  * Move/Copy files with Drag & Drop
  * Archives create/extract (zip, rar, 7z, tar, gzip, bzip2)
- * Preview for common file types
- * Edit text files and resize images
+ * Rich context menu and toolbar
+ * Quicklook, preview for common file types
+ * Edit text files and images
  * "Places" for your favorites
  * Calculate directory sizes
  * Thumbnails for image files
- * Quicklook
  * Easy to integrate with web editors (elRTE, CKEditor, TinyMCE)
  * Flexible configuration of access rights, upload file types, user interface
    and other
@@ -45,8 +46,8 @@ Requirements
 ------------
 
 ### Client
- * Modern browser. elFinder was tested in Firefox 5, Internet Explorer 8+,
-   Safari 5, Opera 11 and Chrome 12
+ * Modern browser. elFinder was tested in Firefox 10, Internet Explorer 8+,
+   Safari 5, Opera 11 and Chrome 15+
 
 ### Server
  * Any web server
@@ -77,8 +78,8 @@ Authors
 -------
 
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
- * Maintainer, developer: Troex Nevelin <troex@fury.scancode.ru>
- * Developer: Alexey Sukhotin <strogg@yandex.ru>
+ * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
+ * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb@gmail.com>
  * Icons: [PixelMixer](http://pixelmixer.ru), [Yusuke Kamiyamane](http://p.yusukekamiyamane.com)
 
 We hope our tools will be helpful for you.
@@ -90,7 +91,7 @@ License
 elFinder is issued under a 3-clauses BSD license.
 
 <pre>
-Copyright (c) 2009-2011, Studio 42
+Copyright (c) 2009-2012, Studio 42
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
