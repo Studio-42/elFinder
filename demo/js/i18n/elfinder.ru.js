@@ -1,10 +1,17 @@
-"use strict"
+/**
+ * Russian translation
+ * @author Dmitry "dio" Levashov <dio@std42.ru>
+ * @version 2011-07-15
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ru = {
-		translator : 'Vasiliy Razumnih &lt;rvn@std42.ru&gt;',
+		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
+		dateFormat : 'd M Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
+
 			/********************************** errors **********************************/
 			'error'                : 'Ошибка',
 			'errUnknown'           : 'Неизвестная ошибка.',
@@ -60,7 +67,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Неподдерживаемый тип архива.',
 			'errNoArchive'         : 'Файл не является архивом допустимого типа.',
 			'errCmdNoSupport'      : 'Сервер не поддерживает эту комманду.',
-
+			'errReplByChild'       : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
+			'errArcSymlinks'       : 'По соображениям безопасности запрещена распаковка архивов, содержащих ссылки (symlinks).',
+			'errArcMaxSize'        : 'Размер файлов в архиве превышает максимально разрешенный.',
+			'errResize'            : 'Не удалось изменить размер "$1".',
+			'errUsupportType'      : 'Неподдерживаемый тип файла.',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
 			'cmdback'      : 'Назад',
@@ -87,12 +99,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Наверх',
 			'cmdupload'    : 'Загрузить файлы',
 			'cmdview'      : 'Вид',
+			'cmdresize'    : 'Размер изображения',
+			'cmdsort'      : 'Сортировать',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Закрыть',
 			'btnSave'   : 'Сохранить',
 			'btnRm'     : 'Удалить',
 			'btnCancel' : 'Отмена',
+			'btnApply'  : 'Применить',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
 			
@@ -131,6 +146,42 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Окт',
 			'Nov'         : 'Ноя',
 			'Dec'         : 'Дек',
+			'January'     : 'Январь',
+			'February'    : 'Февраль',
+			'March'       : 'Март',
+			'April'       : 'Апрель',
+			'May'         : 'Май',
+			'June'        : 'Июнь',
+			'July'        : 'Июль',
+			'August'      : 'Август',
+			'September'   : 'Сентябрь',
+			'October'     : 'Октябрь',
+			'November'    : 'Ноябрь',
+			'December'    : 'Декабрь',
+			'Sunday'      : 'Воскресенье', 
+			'Monday'      : 'Понедельник', 
+			'Tuesday'     : 'Вторник', 
+			'Wednesday'   : 'Среда', 
+			'Thursday'    : 'Четверг', 
+			'Friday'      : 'Пятница', 
+			'Saturday'    : 'Суббота',
+			'Sun'         : 'Вск', 
+			'Mon'         : 'Пнд', 
+			'Tue'         : 'Втр', 
+			'Wed'         : 'Срд', 
+			'Thu'         : 'Чтв', 
+			'Fri'         : 'Птн', 
+			'Sat'         : 'Сбт',
+
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'по имени (папки в начале)', 
+			'sortkindDirsFirst' : 'по типу (папки в начале)', 
+			'sortsizeDirsFirst' : 'по размеру (папки в начале)', 
+			'sortdateDirsFirst' : 'по дате (папки в начале)', 
+			'sortname'          : 'по имени', 
+			'sortkind'          : 'по типу', 
+			'sortsize'          : 'по размеру',
+			'sortdate'          : 'по дате',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение.',
@@ -193,8 +244,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Перемещение файлов',
 			'copyFiles'       : 'Копирование файлов',
 			'rmFromPlaces'    : 'Удалить из избранного',
-			'errReplByChild'  : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
-			
+			'untitled folder' : 'новая папка',
+			'untitled file.txt' : 'новый файл.txt',
+			'aspectRatio'     : 'Сохранять пропорции',
+			'scale'           : 'Масштаб',
+			'width'           : 'Ширина',
+			'height'          : 'Высота',
+			'resize'          : 'Размер',
+			'crop'            : 'Кадрировать',
+			'rotate'          : 'Поворот',
+			'rotate-cw'       : 'Поворот на 90 градусов по часовой стрелке',
+			'rotate-ccw'      : 'Поворот на 90 градусов против часовой стрелке',
+			'degree'          : '°',
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

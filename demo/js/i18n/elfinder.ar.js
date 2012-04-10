@@ -1,8 +1,12 @@
-"use strict"
+/**
+ * Arabic translation (Syrian Localization, it may differ if you aren't from Syria or any Country in Middle East)
+ * @author Tawfek Daghistani <tawfekov@gmail.com>
+ * @version 2011-07-09
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ar = {
-		translator : 'Tawfek Daghistani  &lt;tawfekov@gmail.com&gt;',
-		language   : 'Arabic', /** Syrian Localization , it may differ if you aren't from Syria or any Country in Middle East**/ 
+		translator : 'Tawfek Daghistani &lt;tawfekov@gmail.com&gt;',
+		language   : 'العربية',
 		direction  : 'rtl',
 		messages   : {
 
@@ -61,7 +65,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'نوع الملف المضغوط غير مدعومة',
 			'errNoArchive'         : 'هذا الملف ليس ملف مضغوط أو ذو صسغة غير مدعومة ',
 			'errCmdNoSupport'      : 'الخادم الخلفي لا يدعم هذا الأمر ',
-
+			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'أنشئ مجلد مضغوط',
 			'cmdback'      : 'الخلف',
@@ -194,7 +201,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'قص الملفات',
 			'copyFiles'       : 'نسخ الملفات',
 			'rmFromPlaces'    : 'Remove from places',
-			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
+			'untitled folder' : 'untitled folder',
+			'untitled file.txt' : 'untitled file.txt',
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'غير معروف',
 			'kindFolder'      : 'مجلد',

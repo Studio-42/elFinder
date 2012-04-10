@@ -6,7 +6,7 @@
  **/
 
 /* dialogs */
-.std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; }
+.std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; background-clip: content-box; }
 
 /* navbar */
 .elfinder .elfinder-navbar { background:#dde4eb; }

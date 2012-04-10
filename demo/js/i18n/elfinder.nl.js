@@ -1,13 +1,15 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2011-08-11
+ * @version 2012-04-02
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
 		translator : 'Barry vd. Heuvel &lt;barry@fruitcakestudio.nl&gt;',
 		language   : 'Nederlands',
 		direction  : 'ltr',
+		dateFormat : 'd-m-Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -68,6 +70,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'De map "$1" kan niet vervangen worden door een item uit die map.',
 			'errArcSymlinks'       : 'Om veiligheidsredenen kan een bestand met symlinks niet worden uitgepakt .',
 			'errArcMaxSize'        : 'Archief overschrijdt de maximale bestandsgrootte.',
+			'errResize'            : 'Kan het formaat van "$1" niet wijzigen.',
+    			'errUsupportType'      : 'Bestandstype wordt niet ondersteund.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
@@ -95,11 +99,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ga een map hoger',
 			'cmdupload'    : 'Upload bestanden',
 			'cmdview'      : 'Bekijk',
+			'cmdresize'    : 'Formaat wijzigen',
+			'cmdsort'      : 'Sorteren',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Sluit',
 			'btnSave'   : 'Opslaan',
 			'btnRm'     : 'Verwijder',
+			'btnApply'  : 'Toepassen',
 			'btnCancel' : 'Annuleren',
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
@@ -122,6 +129,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Bestanden uit het archief aan het uitpakken',
 			'ntfsearch'   : 'Zoeken naar bestanden',
 			'ntfsmth'     : 'Iets aan het doen >_<',
+			'ntfloadimg'  : 'Laden van plaatje',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
@@ -139,6 +147,42 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Okt',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
+			'January'     : 'Januari',
+			'February'    : 'Februari',
+			'March'       : 'Maart',
+			'April'       : 'April',
+			'May'         : 'Mei',
+			'June'        : 'Juni',
+			'July'        : 'Juli',
+			'August'      : 'Augustus',
+			'September'   : 'September',
+			'October'     : 'Oktober',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Zondag', 
+			'Monday'      : 'Maandag', 
+			'Tuesday'     : 'Dinsdag', 
+			'Wednesday'   : 'Woensdag', 
+			'Thursday'    : 'Donderdag', 
+			'Friday'      : 'Vrijdag', 
+			'Saturday'    : 'Zaterdag',
+			'Sun'         : 'Zo', 
+			'Mon'         : 'Ma', 
+			'Tue'         : 'Di', 
+			'Wed'         : 'Wo', 
+			'Thu'         : 'Do', 
+			'Fri'         : 'Vr', 
+			'Sat'         : 'Za',
+			
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'op naam (mappen eerst)', 
+			'sortkindDirsFirst' : 'op type (mappen eerst)', 
+			'sortsizeDirsFirst' : 'op grootte (mappen eerst)', 
+			'sortdateDirsFirst' : 'op datum (mappen eerst)', 
+			'sortname'          : 'op naam', 
+			'sortkind'          : 'op type', 
+			'sortsize'          : 'op grootte',
+			'sortdate'          : 'op datum',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Bevestiging nodig',
@@ -203,6 +247,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Verwijder uit Plaatsen',
 			'untitled folder' : 'Nieuwe map',
 			'untitled file.txt' : 'nieuw bestand.txt',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Schaal',
+			'width'           : 'Breedte',
+			'height'          : 'Hoogte',
+			'mode'		  : 'Modus',
+			'resize'	  : 'Verkleinen', //Or: Vergroten/verkleinen
+			'crop'		  : 'Bijsnijden',
+			'rotate'	  : 'Draaien',
+			'rotate-cw'	  : 'Draai 90 graden rechtsom',
+			'rotate-ccw'	  : 'Draai 90 graden linksom',
+			'degree'	  : '°',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',

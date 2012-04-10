@@ -1,13 +1,22 @@
 /**
  * elFinder translation template
- * 
  * use this file to create new translation
- **/
+ * submit new translation via https://github.com/Studio-42/elFinder/issues
+ * or make a pull request
+ */
+ 
+/**
+ * XXXXX translation
+ * @author Translator Name <translator@email.tld>
+ * @version 201x-xx-xx
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.LANG = {
+	elFinder.prototype.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE = {
 		translator : 'Translator name &lt;translator@email.tld&gt;',
-		language   : 'Language of translation',
+		language   : 'Language of translation in your language',
 		direction  : 'ltr',
+		dateFormat : 'd.m.Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -65,6 +74,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Unsupported archive type.',
 			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
 			'errCmdNoSupport'      : 'Backend does not support this command.',
+			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errResize'            : 'Unable to resize "$1".',
+			'errUsupportType'      : 'Unsupported file type.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -92,11 +106,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Go to parent directory',
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
+			'cmdresize'    : 'Resize image',
+			'cmdsort'      : 'Sort',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
 			'btnSave'   : 'Save',
 			'btnRm'     : 'Remove',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Yes',
@@ -119,6 +136,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Extracting files from archive',
 			'ntfsearch'   : 'Searching files',
 			'ntfsmth'     : 'Doing something >_<',
+			'ntfloadimg'  : 'Loading image',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -136,7 +154,42 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Oct',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dec',
-
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday', 
+			'Monday'      : 'Monday', 
+			'Tuesday'     : 'Tuesday', 
+			'Wednesday'   : 'Wednesday', 
+			'Thursday'    : 'Thursday', 
+			'Friday'      : 'Friday', 
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'by name (folders first)', 
+			'sortkindDirsFirst' : 'by kind (folders first)', 
+			'sortsizeDirsFirst' : 'by size (folders first)', 
+			'sortdateDirsFirst' : 'by date (folders first)', 
+			'sortname'          : 'by name', 
+			'sortkind'          : 'by kind', 
+			'sortsize'          : 'by size',
+			'sortdate'          : 'by date',
+			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
@@ -198,7 +251,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Move files',
 			'copyFiles'       : 'Copy files',
 			'rmFromPlaces'    : 'Remove from places',
-			'errReplByChild'  : 'The folder “$1” can’t be replaced by an item it contains.',
+			'untitled folder' : 'untitled folder',
+			'untitled file.txt' : 'untitled file.txt',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Scale',
+			'width'           : 'Width',
+			'height'          : 'Height',
+			'mode'            : 'Mode',
+			'resize'          : 'Resize',
+			'crop'            : 'Crop',
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : 'Degree',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

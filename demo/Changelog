@@ -1,7 +1,19 @@
-2010-07-10  Troex Nevelin  <troex@fury.scancode.ru>
+2012-04-10  Troex Nevelin  <troex@fury.scancode.ru>
 
-	* elFinder (2.0):
+	* elFinder (2.0 rc1):
+		- Major code refactor
+		- 200+ bugs fixed since beta version
+		- 14 new translations
+		- FTP volume driver
+		- Advanced image editing dialog
+
+
+2011-07-10  Troex Nevelin  <troex@fury.scancode.ru>
+
+	* elFinder (2.0 beta):
 		- New branch 2.x, total rewrite from scratch
+		- MySQL volume driver support (as file storage)
+		- Full drag & drop support with HTML5 upload
 
 
 2011-06-20  Troex Nevelin  <troex@fury.scancode.ru>

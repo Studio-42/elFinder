@@ -122,6 +122,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Extrayendo elementos del archivo',
 			'ntfsearch'   : 'Buscando archivos',
 			'ntfsmth'     : 'Haciendo algo >_<',
+      'ntfloadimg'  : 'Cargando imagen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'desconocida',
@@ -203,6 +204,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Eliminar en sus ubicaciónes',
 			'untitled folder' : 'carpeta sin título',
 			'untitled archivo.txt' : 'archivo.txt sin título',
+      'mode'            : 'Modo',
+      'resize'          : 'Redimensionar',
+      'crop'            : 'Recortar',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconocido',

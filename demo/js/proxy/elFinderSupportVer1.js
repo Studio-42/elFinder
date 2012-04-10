@@ -71,6 +71,7 @@ window.elFinderSupportVer1 = function(upload) {
 				break;
 			case 'extract':
 			case 'rename':
+			case 'resize':
 				opts.data.current = fm.file(opts.data.target).phash;
 				break;
 			case 'duplicate':

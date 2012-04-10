@@ -1,7 +1,5 @@
 <?php
 
-// mb_internal_encoding("UTF-8");
-
 /**
  * Default elFinder connector
  *
@@ -37,6 +35,7 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($elFinder, $debug=false) {
+		
 		$this->elFinder = $elFinder;
 		if ($debug) {
 			$this->header = 'Content-Type: text/html; charset=utf-8';
@@ -61,12 +60,12 @@ class elFinderConnector {
 		}
 		
 		if (!$this->elFinder->loaded()) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL)));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL), 'debug' => $this->elFinder->mountErrors));
 		}
 		
 		// telepat_mode: on
 		if (!$cmd && $isPost) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD_COMMON, elFinder::ERROR_UPLOAD_FILES_SIZE), 'header' => 'Content-Type: text/html'));
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD, elFinder::ERROR_UPLOAD_TOTAL_SIZE), 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
 		
@@ -104,7 +103,6 @@ class elFinderConnector {
 	protected function output(array $data) {
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
-
 		if ($header) {
 			if (is_array($header)) {
 				foreach ($header as $h) {
@@ -133,5 +131,3 @@ class elFinderConnector {
 	}
 	
 }// END class 
-
-?>

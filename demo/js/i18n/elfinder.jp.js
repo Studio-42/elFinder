@@ -1,7 +1,7 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @version 2011-08-26
+ * @version 2012-02-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -48,23 +48,32 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : '"$1"の名前を変更することができません',
 			'errCopyFrom'          : '"$1"からのファイルコピーが許可されていません',
 			'errCopyTo'            : '"$1"へのファイルコピーが許可されていません',
-			'errUploadCommon'      : 'アップロードエラー',
-			'errUpload'            : '"$1"がアップロードできません',
+			'errUpload'            : 'アップロードエラー',  // old name - errUploadCommon
+			'errUploadFile'        : '"$1"がアップロードできません', // old name - errUpload
 			'errUploadNoFiles'     : 'アップロードされたファイルがありません',
-			'errMaxSize'           : 'データが許容サイズを超えています',
-			'errFileMaxSize'       : 'ファイルが許容サイズを超えています',
+			'errUploadTotalSize'   : 'データが許容サイズを超えています', // old name - errMaxSize
+			'errUploadFileSize'    : 'ファイルが許容サイズを超えています', //  old name - errFileMaxSize
 			'errUploadMime'        : '許可されていないファイル形式です',
 			'errUploadTransfer'    : '"$1" 転送エラーです', 
+			'errNotReplace'        : 'アイテム "$1" は、すでにこの場所にありますがアイテムのタイプが違うので置き換えることはできません', // new
+			'errReplace'           : '"$1"を置き換えることができません',
 			'errSave'              : '"$1"を保存することができません',
 			'errCopy'              : '"$1"をコピーすることができません',
 			'errMove'              : '"$1"を移動することができません',
 			'errCopyInItself'      : '"$1"をそれ自身の中にコピーすることはできません',
 			'errRm'                : '"$1"を削除することができません',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : '"$1"を解凍することができません',
 			'errArchive'           : 'アーカイブを作成することができません',
 			'errArcType'           : 'サポート外のアーカイブ形式です',
 			'errNoArchive'         : 'アーカイブでないかサポートされていないアーカイブ形式です',
 			'errCmdNoSupport'      : 'サポートされていないコマンドです',
+			'errReplByChild'       : 'ホルダ "$1" に含まれてるアイテムを置き換えることはできません',
+			'errArcSymlinks'       : 'シンボリックリンクを含むアーカイブはセキュリティ上、解凍できません',
+			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
+			'errResize'            : '"$1"をリサイズできません',
+			'errUsupportType'      : 'このファイルタイプはサポートされません',
+			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
@@ -92,11 +101,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : '親ディレクトリーへ移動',
 			'cmdupload'    : 'ファイルアップロード',
 			'cmdview'      : 'ビュー',
+			'cmdresize'    : 'リサイズと回転',
+			'cmdsort'      : 'ソート',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
 			'btnSave'   : '保存',
 			'btnRm'     : '削除',
+			'btnApply'  : '適用',
 			'btnCancel' : 'キャンセル',
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
@@ -118,7 +130,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'アーカイブ作成',
 			'ntfextract'  : 'アーカイブを解凍',
 			'ntfsearch'   : 'ファイル検索',
-			'ntfsmth'     : '何かする >_<',
+			'ntfresize'   : 'リサイズしています',
+			'ntfsmth'     : '何かしています >_<',
+			'ntfloadimg'  : 'Loading image',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
@@ -136,6 +150,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : '10月',
 			'Nov'         : '11月',
 			'Dec'         : '12月',
+
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : '名前順 (フォルダ優先)', 
+			'sortkindDirsFirst' : '種類順 (フォルダ優先)', 
+			'sortsizeDirsFirst' : 'サイズ順 (フォルダ優先)', 
+			'sortdateDirsFirst' : '日付順 (フォルダ優先)', 
+			'sortname'          : '名前順', 
+			'sortkind'          : '種類順', 
+			'sortsize'          : 'サイズ順',
+			'sortdate'          : '日付順',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '確認必須です',
@@ -180,13 +204,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'protocol'        : 'プロトコルバージョン',
 			'homepage'        : 'プロジェクトホーム',
 			'docs'            : 'ドキュメンテーション',
-			'github'          : 'Fork us on Github',
-			'twitter'         : 'Follow us on twitter',
-			'facebook'        : 'Join us on facebook',
+			'github'          : 'Github でフォーク',
+			'twitter'         : 'Twitter でフォロー',
+			'facebook'        : 'Facebookグループ に参加',
 			'team'            : 'チーム',
 			'chiefdev'        : 'チーフデベロッパー',
-			'dev'             : 'デベロッパー',
-			'mantainer'       : 'メインテナー',
+			'developer'       : 'デベロッパー',
+			'contributor'     : 'コントリビュータ',
+			'maintainer'      : 'メインテナー',
 			'translator'      : '翻訳者',
 			'icons'           : 'アイコン',
 			'dontforget'      : 'タオル忘れちゃだめよー。',
@@ -196,12 +221,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'アップロードするファイルを選択',
 			'moveFiles'       : 'ファイルを移動',
 			'copyFiles'       : 'ファイルをコピー',
+			'rmFromPlaces'    : 'ここから削除',
+			'aspectRatio'     : '縦横比維持',
+			'scale'           : '表示縮尺',
+			'width'           : '幅',
+			'height'          : '高さ',
+			'resize'          : 'リサイズ',
+			'crop'            : '切り抜き',
+			'rotate'          : '回転',
+			'rotate-cw'       : '90度左回転',
+			'rotate-ccw'      : '90度右回転',
+			'degree'          : '度',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
 			'kindFolder'      : 'フォルダー',
-			'kindAlias'       : 'エイリアス',
-			'kindAliasBroken' : '壊れたエイリアス',
+			'kindAlias'       : '別名',
+			'kindAliasBroken' : '宛先不明の別名',
 			// applications
 			'kindApp'         : 'アプリケーション',
 			'kindPostscript'  : 'Postscript ドキュメント',
@@ -275,5 +311,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska ムービー',
 			'kindVideoOGG'    : 'Ogg ムービー'
 		}
-	}
+	};
 }
+
