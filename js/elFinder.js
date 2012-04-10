@@ -676,8 +676,16 @@ window.elFinder = function(node, opts) {
 		if (cwdOptions.url) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
-		
-		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file') + '&target=' + file.hash;
+
+		var params = $.extend({}, this.customData, {
+			cmd: 'file',
+			target: file.hash
+		});
+		if (this.oldAPI) {
+			params.cmd = 'open';
+			params.current = file.phash;
+		}
+		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
 	}
 	
 	/**
@@ -1414,7 +1422,7 @@ window.elFinder = function(node, opts) {
 			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 				enabled = true;
 				$('texarea:focus,input:focus,button').blur();
-				node.removeClass('elfinder-disabled')
+				node.removeClass('elfinder-disabled');
 			}
 		})
 		.disable(function() {

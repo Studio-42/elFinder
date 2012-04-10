@@ -15,17 +15,20 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		self.prev().length && self.parent().prepend(this);
 
 		while (l--) {
-			panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
-			i = panels[l].length;
-			while (i--) {
-				if ((cmd = commands[panels[l][i]])) {
-					button = 'elfinder'+cmd.options.ui;
-					$.fn[button] && panel.prepend($('<div/>')[button](cmd));
+			if (panels[l]) {
+				panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+				i = panels[l].length;
+				while (i--) {
+					if ((cmd = commands[panels[l][i]])) {
+						button = 'elfinder'+cmd.options.ui;
+						$.fn[button] && panel.prepend($('<div/>')[button](cmd));
+					}
 				}
+				
+				panel.children().length && self.prepend(panel);
+				panel.children(':not(:last),:not(:first):not(:last)').after('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
+
 			}
-			
-			panel.children().length && self.prepend(panel);
-			panel.children(':not(:last),:not(:first):not(:last)').after('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
 		}
 		
 		self.children().length && self.show();

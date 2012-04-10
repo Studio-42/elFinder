@@ -40,7 +40,8 @@ $.fn.elfinderdialog = function(opts) {
 				.hide()
 				.append(self)
 				.appendTo(parent)
-				.draggable({ handle : '.ui-dialog-titlebar'})
+				.draggable({ handle : '.ui-dialog-titlebar',
+					     containment : $('body') })
 				.css({
 					width  : opts.width,
 					height : opts.height
@@ -96,7 +97,10 @@ $.fn.elfinderdialog = function(opts) {
 						})
 					} else {
 						// return focus to parent
-						parent.mousedown();
+						setTimeout(function() {
+							parent.mousedown().click();
+						}, 10);
+						
 					}
 					
 					if (typeof(opts.close) == 'function') {

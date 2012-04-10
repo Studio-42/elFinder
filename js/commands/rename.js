@@ -29,13 +29,18 @@ elFinder.prototype.commands.rename = function() {
 					var parent = input.parent(),
 						name   = fm.escape(file.name);
 
-					error && fm.error(error);
+					
 					if (parent.length) {
 						input.remove();
 						parent.html(name);
 					} else {
 						cwd.find('#'+file.hash).find(filename).html(name);
+						setTimeout(function() {
+							cwd.find('#'+file.hash).click();
+						}, 50);
 					}
+					
+					error && fm.error(error);
 				})
 				.always(function() {
 					fm.enable();

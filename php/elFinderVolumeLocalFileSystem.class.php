@@ -581,16 +581,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		//exec('tar --version', $o, $ctar);
 		$this->procExec('tar --version', $o, $ctar);
-		
+
 		if ($ctar == 0) {
 			$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
 			$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar');
 			//$test = exec('gzip --version', $o, $c);
+			unset($o);
 			$test = $this->procExec('gzip --version', $o, $c);
+
 			if ($c == 0) {
 				$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
 				$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz');
 			}
+			unset($o);
 			//$test = exec('bzip2 --version', $o, $c);
 			$test = $this->procExec('bzip2 --version', $o, $c);
 			if ($c == 0) {
@@ -598,31 +601,32 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$arcs['extract']['application/x-bzip2'] = array('cmd' => 'tar', 'argc' => '-xjf', 'ext' => 'tbz');
 			}
 		}
-		
+		unset($o);
 		//exec('zip --version', $o, $c);
 		$this->procExec('zip --version', $o, $c);
 		if ($c == 0) {
 			$arcs['create']['application/zip']  = array('cmd' => 'zip', 'argc' => '-r9', 'ext' => 'zip');
 		}
-		
+		unset($o);
 		$this->procExec('unzip --help', $o, $c);
 		if ($c == 0) {
 			$arcs['extract']['application/zip'] = array('cmd' => 'unzip', 'argc' => '',  'ext' => 'zip');
 		} 
-		
+		unset($o);
 		//exec('rar --version', $o, $c);
 		$this->procExec('rar --version', $o, $c);
 		if ($c == 0 || $c == 7) {
 			$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
 			$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
 		} else {
+			unset($o);
 			//$test = exec('unrar', $o, $c);
 			$test = $this->procExec('unrar', $o, $c);
 			if ($c==0 || $c == 7) {
 				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar');
 			}
 		}
-		
+		unset($o);
 		//exec('7za --help', $o, $c);
 		$this->procExec('7za --help', $o, $c);
 		if ($c == 0) {

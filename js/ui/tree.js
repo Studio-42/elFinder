@@ -276,7 +276,7 @@ $.fn.elfindertree = function(fm, opts) {
 					tree.find('.'+navdir+'.'+active).removeClass(active);
 					current.addClass(active);
 				}
-				
+
 				if (opts.syncTree) {
 					if (current.length) {
 						current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);

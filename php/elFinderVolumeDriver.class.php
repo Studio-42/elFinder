@@ -704,9 +704,12 @@ abstract class elFinderVolumeDriver {
 				if (!empty($start)
 				&& $start['mime'] == 'directory'
 				&& $start['read']
-				&& !$start['hidden']
+				&& empty($start['hidden'])
 				&& $this->_inpath($this->options['startPath'], $this->root)) {
 					$this->startPath = $this->options['startPath'];
+					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
+						$this->startPath = substr($this->startPath, 0, -1);
+					}
 				}
 			}
 		} else {
@@ -1351,7 +1354,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 
-		if ($this->uploadMaxSize > 0 && filesize($tmpPath) > $this->uploadMaxSize) {
+		if ($this->uploadMaxSize > 0 && filesize($tmpname) > $this->uploadMaxSize) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
 
@@ -3004,12 +3007,8 @@ abstract class elFinderVolumeDriver {
 			$tmpout = '';
 			$tmperr = '';
 
-			if(!feof($pipes[1])) {
-				$output[] = fgets($pipes[1], 1024);
-			}
-			if(!feof($pipes[2])) {
-				$error_output[] = fgets($pipes[2], 1024);
-			}
+			$output = stream_get_contents($pipes[1]);
+			$error_output = stream_get_contents($pipes[2]);
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);
