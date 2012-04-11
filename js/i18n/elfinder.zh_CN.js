@@ -1,13 +1,16 @@
 /**
  * Simplified Chinese translation
  * @author 翻译者 <deerchao@gmail.com>
- * @version 2011-09-08
+ * @author Andy Hu <andyhu7@yahoo.com.hk>
+ * @version 2012-04-11
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.zh_CN = {
-		translator : '翻译者 &lt;deerchao@gmail.com&gt;',
+		translator : '翻译者 &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;',
 		language   : '简体中文',
 		direction  : 'ltr',
+		dateFormat : 'Y-m-d H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -65,6 +68,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : '不支持的压缩格式.',
 			'errNoArchive'         : '文件不是压缩包, 或者不支持该压缩格式.',
 			'errCmdNoSupport'      : '后端不支持该命令.',
+			'errReplByChild'       : '文件夹 “$1” 不能被它所包含的项目替换.',
+			'errArcSymlinks'       : '出于安全上的考虑，不允许解压包含符号链接的压缩包.',
+			'errArcMaxSize'        : '压缩包文件超过最大允许文件大小范围.',
+			'errResize'            : '无法重新调整大小 "$1".',
+			'errUsupportType'      : '不被支持的文件格式.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '创建压缩包',
@@ -92,11 +100,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : '转到上一级文件夹',
 			'cmdupload'    : '上传文件',
 			'cmdview'      : '查看',
+			'cmdresize'    : '重新调整大小',
+			'cmdsort'      : '排序',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '关闭',
 			'btnSave'   : '保存',
 			'btnRm'     : '删除',
+			'btnApply'  : '应用',
 			'btnCancel' : '取消',
 			'btnNo'     : '否',
 			'btnYes'    : '是',
@@ -119,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : '从压缩包提取文件',
 			'ntfsearch'   : '搜索文件',
 			'ntfsmth'     : '正在忙 >_<',
+			'ntfloadimg'  : '正在加载图片',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '未知',
@@ -136,6 +148,41 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : '十月',
 			'Nov'         : '十一月',
 			'Dec'         : '十二月',
+			'January'     : '一月',
+			'February'    : '二月',
+			'March'       : '三月',
+			'April'       : '四月',
+			'May'         : '五月',
+			'June'        : '六月',
+			'July'        : '七月',
+			'August'      : '八月',
+			'September'   : '九月',
+			'October'     : '十月',
+			'November'    : '十一月',
+			'December'    : '十二月',
+			'Sunday'      : '星期日',
+			'Monday'      : '星期一',
+			'Tuesday'     : '星期二',
+			'Wednesday'   : '星期三',
+			'Thursday'    : '星期四',
+			'Friday'      : '星期五',
+			'Saturday'    : '星期六',
+			'Sun'         : '周日', 
+			'Mon'         : '周一', 
+			'Tue'         : '周二', 
+			'Wed'         : '周三', 
+			'Thu'         : '周四', 
+			'Fri'         : '周五', 
+			'Sat'         : '周六',
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : '按名称 (文件夹在最前)', 
+			'sortkindDirsFirst' : '按类型 (文件夹在最前)', 
+			'sortsizeDirsFirst' : '按大小 (文件夹在最前)', 
+			'sortdateDirsFirst' : '按日期 (文件夹在最前)', 
+			'sortname'          : '按名称', 
+			'sortkind'          : '按类型', 
+			'sortsize'          : '按大小',
+			'sortdate'          : '按日期',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '请确认',
@@ -190,13 +237,27 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'maintainer'      : '维护',
 			'translator'      : '翻译',
 			'icons'           : '图标',
-			'dontforget'      : '别忘了带上你的毛巾',
+			'dontforget'      : '别忘了带上你擦汗的毛巾',
 			'shortcutsof'     : '快捷键已禁用',
 			'dropFiles'       : '把文件拖到这里',
 			'or'              : '或者',
 			'selectForUpload' : '选择要上传的文件',
 			'moveFiles'       : '移动文件',
 			'copyFiles'       : '复制文件',
+			'rmFromPlaces'    : 'Remove from places',
+			'untitled folder' : '未命名文件夹',
+			'untitled file.txt' : '未命名文件.txt',
+			'aspectRatio'     : '保持比例',
+			'scale'           : '高宽比',
+			'width'           : '宽',
+			'height'          : '高',
+			'mode'            : '模式',
+			'resize'          : '重新调整大小',
+			'crop'            : '裁切',
+			'rotate'          : '旋转',
+			'rotate-cw'       : '顺时针旋转90度',
+			'rotate-ccw'      : '逆时针旋转90度',
+			'degree'          : '度',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '未知',
@@ -276,5 +337,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska 视频',
 			'kindVideoOGG'    : 'Ogg 视频'
 		}
-	};
+	}
 }
