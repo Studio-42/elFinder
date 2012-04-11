@@ -1,13 +1,16 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @version 2012-02-25
+ * @author Naoki Sawada <hypweb@gmail.com>
+ * @version 2012-04-11
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
 		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
+		dateFormat : 'Y/m/d h:i A', // 2012/04/11 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: 今日 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
