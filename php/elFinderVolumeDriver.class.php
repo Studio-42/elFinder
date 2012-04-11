@@ -1846,6 +1846,7 @@ abstract class elFinderVolumeDriver {
 				$f = $this->nameValidator;
 				return $f($name);
 			}
+
 			return preg_match($this->nameValidator, $name);
 		}
 		return true;
