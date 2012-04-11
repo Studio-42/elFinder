@@ -16,7 +16,7 @@ elFinder.prototype.commands.sort = function() {
 	 */
 	this.options = {ui : 'sortbutton'};
 	
-	this.value = 1;
+	this.value = sorts[0];
 	this.variants = [];
 	
 	for (i = 0; i < sorts.length; i++) {
@@ -36,7 +36,7 @@ elFinder.prototype.commands.sort = function() {
 	
 	this.exec = function(hashes, type) {
 		var dir = $.inArray(type, sorts)+1 == this.fm.sort ? (this.fm.sortDirect == 'asc' ? 'desc' : 'asc') : this.fm.sortDirect;
-
+		// console.log(type, dir)
 		this.fm.setSort(type, dir);
 	}
 
