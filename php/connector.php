@@ -46,12 +46,16 @@ function logger($cmd, $result, $args, $elfinder) {
 		$data = array();
 		if (in_array($key, array('error', 'warning'))) {
 			array_push($data, implode(' ', $value));
-		} else { // changes made to files
-			foreach ($value as $file) {
-				$filepath = (isset($file['realpath']) ? $file['realpath'] : $elfinder->realpath($file['hash']));
-				array_push($data, $filepath);
+		} else {
+			if (is_array($value)) { // changes made to files
+				foreach ($value as $file) {
+					$filepath = (isset($file['realpath']) ? $file['realpath'] : $elfinder->realpath($file['hash']));
+					array_push($data, $filepath);
+				}
+			} else { // other value (ex. header)
+				array_push($data, $value);
 			}
-		}
+					}
 		$log .= sprintf(' %s(%s)', $key, implode(', ', $data));
 	}
 	$log .= "\n";

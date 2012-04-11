@@ -826,14 +826,17 @@ $.fn.elfindercwd = function(fm) {
 			.bind('open search', function(e) {
 				content(e.data.files, e.type=='search');
 			})
-			.bind('searchend sortchange', function() {
-				if (query) content(fm.files());
+			.bind('searchend', function() {
+				query && content(fm.files());
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
 			})
 			.bind('searchend', function() {
 				query = '';
+			})
+			.bind('sortchange', function() {
+				content(fm.files());
 			})
 			.bind('viewchange', function() {
 				var sel = fm.selected(),
