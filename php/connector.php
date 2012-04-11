@@ -55,7 +55,7 @@ function logger($cmd, $result, $args, $elfinder) {
 			} else { // other value (ex. header)
 				array_push($data, $value);
 			}
-					}
+		}
 		$log .= sprintf(' %s(%s)', $key, implode(', ', $data));
 	}
 	$log .= "\n";
