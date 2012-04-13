@@ -1846,6 +1846,7 @@ abstract class elFinderVolumeDriver {
 				$f = $this->nameValidator;
 				return $f($name);
 			}
+
 			return preg_match($this->nameValidator, $name);
 		}
 		return true;
@@ -2355,6 +2356,7 @@ abstract class elFinderVolumeDriver {
 				if (empty($stat['hidden'])) {
 					$name = $stat['name'];
 					if (!$this->copy($this->_joinPath($src, $name), $dst, $name)) {
+						$this->remove($dst, true); // fall back
 						return false;
 					}
 				}

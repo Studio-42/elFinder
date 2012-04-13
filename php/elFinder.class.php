@@ -237,7 +237,9 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
-		$cmds = array_map('trim', explode(' ', $cmd));
+		$cmds = $cmd == '*'
+			? array_keys($this->commands)
+			: array_map('trim', explode(' ', $cmd));
 		
 		foreach ($cmds as $cmd) {
 			if ($cmd) {

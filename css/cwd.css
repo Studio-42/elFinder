@@ -114,7 +114,9 @@
 .elfinder-cwd-icon-vnd-ms-excel,
 .elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
 .elfinder-cwd-icon-vnd-ms-powerpoint,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation { background-position: 0 -500px; }
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-wordprocessingml-document,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-sheet { background-position: 0 -500px; }
 .elfinder-cwd-icon-html              { background-position: 0 -550px; }
 .elfinder-cwd-icon-css               { background-position: 0 -600px; }
 .elfinder-cwd-icon-javascript, 
