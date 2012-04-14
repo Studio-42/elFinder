@@ -166,7 +166,8 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
-		
+		session_start();
+
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		
@@ -179,31 +180,41 @@ class elFinder {
 			}
 		}
 
-		// "mount" volumes
-		if (isset($opts['roots']) && is_array($opts['roots'])) {
-			
-			foreach ($opts['roots'] as $i => $o) {
-				$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
+		if (!isset($opts['roots']) || !is_array($opts['roots'])) {
+			$opts['roots'] = array();
+		}
 
-				if (class_exists($class)) {
-					$volume = new $class();
+		$netVolumes = isset($_SESSION['netVolumes']) && is_array($_SESSION['netVolumes']) ? $_SESSION['netVolumes'] : array();
 
-					if ($volume->mount($o)) {
-						// unique volume id (ends on "_") - used as prefix to files hash
-						$id = $volume->id();
-						
-						$this->volumes[$id] = $volume;
-						if (!$this->default && $volume->isReadable()) {
-							$this->default = $this->volumes[$id]; 
-						}
-					} else {
-						$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
-					}
-				} else {
-					$this->mountErrors[] = 'Driver "'.$class.'" does not exists';
-				}
+		foreach ($netVolumes as $root) {
+			if ($root['driver'] && $root['host'] && $root['user']) {
+				$opts['roots'][] = $root;
 			}
 		}
+
+		// "mount" volumes
+		foreach ($opts['roots'] as $i => $o) {
+			$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
+
+			if (class_exists($class)) {
+				$volume = new $class();
+
+				if ($volume->mount($o)) {
+					// unique volume id (ends on "_") - used as prefix to files hash
+					$id = $volume->id();
+					
+					$this->volumes[$id] = $volume;
+					if (!$this->default && $volume->isReadable()) {
+						$this->default = $this->volumes[$id]; 
+					}
+				} else {
+					$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
+				}
+			} else {
+				$this->mountErrors[] = 'Driver "'.$class.'" does not exists';
+			}
+		}
+
 		// if at least one redable volume - ii desu >_<
 		$this->loaded = !empty($this->default);
 	}
