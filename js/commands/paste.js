@@ -8,7 +8,6 @@
  **/
 elFinder.prototype.commands.paste = function() {
 	
-	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	
 	this.handlers = {
@@ -144,7 +143,7 @@ elFinder.prototype.commands.paste = function() {
 							});
 					}
 					;
-				
+
 				if (self._disabled || !files.length) {
 					return dfrd.resolve();
 				}
@@ -176,10 +175,8 @@ elFinder.prototype.commands.paste = function() {
 			parents, fparents;
 
 
-		if (!cnt) {
-			if (dst && dst.mime == 'directory') {
-				fm.exec('upload');
-			}
+		if (!cnt || !dst || dst.mime != 'directory') {
+			console.log('here')
 			return dfrd.reject();
 		}
 			

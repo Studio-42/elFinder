@@ -274,14 +274,14 @@ $opts = array(
 		// 			'hidden' => true,
 		// 			'locked' => false
 		// 		),
-		// 		array(
-		// 			'pattern' => '~/replace/.+png$~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			// 'hidden' => true,
-		// 			'locked' => true
-		// 		)
+				// array(
+				// 	'pattern' => '~/replace/.+png$~',
+				// 	// 'pattern' => '/^\/\./',
+				// 	'read' => false,
+				// 	'write' => false,
+				// 	// 'hidden' => true,
+				// 	'locked' => true
+				// )
 		// 	),
 		// 	// 'defaults' => array('read' => false, 'write' => true)
 		// ),
