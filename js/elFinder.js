@@ -1980,13 +1980,25 @@ elFinder.prototype = {
 					}),
 				checkFile   = function(files) {
 					if (typeof files[0] == 'string') {
+						//console.log(files[0]);
 						var ret = [];
 						var regex = /<img[^>]+src=["']?([^"'> ]+)/ig;
 						var m = [];
 						var url = '';
+						var links;
 						while (m = regex.exec(files[0])) {
 							url = m[1].replace(/&amp;/g, '&');
 							if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+						}
+						links = files[0].match(/<\/a>/i);
+						if (links && links.length == 1) {
+							regex = /<a[^>]+href=["']?([^"'> ]+)((?:.|\s)+)<\/a>/i;
+							if (m = regex.exec(files[0])) {
+								if (! m[2].match(/<img/i)) {
+									url = m[1].replace(/&amp;/g, '&');
+									if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+								}
+							}
 						}
 						return ret;
 					} else {
