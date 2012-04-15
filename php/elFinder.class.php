@@ -1092,18 +1092,29 @@ class elFinder {
 			$args['name']   = array( preg_replace('/\.[a-z]{1,4}$/i', '', $args['title']).'.'.$args['type'] );
 		
 			$res = $this->upload($args);
-			if (isset($res['warning'])) {
-				$cmd = 'error(elf.i18n("'.join('","', $res['warning']).'"))';
-			} else {
-				$cmd = 'exec("reload")';
-			}
-			$script = 'var elf=window.opener.document.getElementById(\''.htmlspecialchars($args['node']).'\').elfinder; elf.'.$cmd.'; window.close();';
-			
+			$script = '
+				var elf=window.opener.document.getElementById(\''.htmlspecialchars($args['node']).'\').elfinder;
+				var data = '.json_encode($res).';
+				data.warning && elf.error(data.warning);
+				data.added && data.added.length && elf.add(data);
+				elf.trigger(\'upload\', data);
+				window.close();';
 	 	} else {
 	 		$script = 'window.close();';
 	 	}
+	 	$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
 	 	
-	 	echo '<html><head><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+	 	while( ob_get_level() ) {
+			if (! ob_end_clean()) {
+				break;
+			}
+		}
+	 	
+	 	header('Content-Type: text/html; charset=utf-8');
+	 	header('Content-Length: '.strlen($out));
+	 	header('Cache-Control: private');
+	 	header('Pragma: no-cache');
+	 	echo $out;
 	 	
 		exit();
 	}
