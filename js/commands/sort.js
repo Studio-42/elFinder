@@ -23,8 +23,6 @@ elFinder.prototype.commands.sort = function() {
 		this.variants.push([sorts[i], this.fm.i18n('sort' + sorts[i])])
 	}
 	
-	this.disableOnSearch = true;
-	
 	this.fm.bind('load sortchange', function() {
 		self.value = sorts[self.fm.sort-1];
 		self.change();
