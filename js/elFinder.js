@@ -1337,7 +1337,7 @@ window.elFinder = function(node, opts) {
 	
 	/*************  init stuffs  ****************/
 	// set sort variant
-	this.setSort(this.options.sort, this.options.sortDirect);
+	this.setSort(this.storage('sort') || this.options.sort, this.storage('sortDirect') || this.options.sortDirect);
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
@@ -1836,8 +1836,11 @@ elFinder.prototype = {
 	},
 	
 	setSort : function(type, dir) {
+		type = this.sorts[type] ? type : 1;
 		this.sort = this.sorts[type] || 1;
 		this.sortDirect = dir == 'asc' || dir == 'desc' ? dir : 'asc';
+		this.storage('sort', type);
+		this.storage('sortDirect', this.sortDirect);
 		this.trigger('sortchange');
 	},
 	
