@@ -2713,7 +2713,8 @@ elFinder.prototype = {
 			n = 1024;
 			u = 'KB';
 		}
-		return (s > 0 ? Math.round(s/n) : 0) +' '+u;
+		s = s/n;
+		return (s > 0 ? n >= 1048576 ? s.toFixed(2) : Math.round(s) : 0) +' '+u;
 	},
 	
 	

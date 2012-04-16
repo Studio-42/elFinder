@@ -48,7 +48,7 @@ $.fn.elfinderstat = function(fm) {
 
 			$.each(files, function(i, file) {
 				c++;
-				s += parseInt(file.size)||0;
+				s += file.size||0;
 			});
 
 			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
