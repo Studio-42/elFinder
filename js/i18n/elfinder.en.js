@@ -76,7 +76,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResize'            : 'Unable to resize "$1".',
 			'errUsupportType'      : 'Unsupported file type.',
 			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
-			
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
 			'cmdback'      : 'Back',
