@@ -25,6 +25,8 @@ class elFinder {
 	 **/
 	protected $volumes = array();
 	
+	public static $netDrivers = array();
+
 	/**
 	 * Mounted volumes count
 	 * Required to create unique volume id
@@ -67,7 +69,8 @@ class elFinder {
 		'search'    => array('q' => true, 'mimes' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
-		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false)
+		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => true, 'user' => true, 'pass' => false, 'options' => false)
 	);
 	
 	/**
@@ -157,6 +160,9 @@ class elFinder {
 	const ERROR_RESIZE            = 'errResize';
 	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
 	const ERROR_NOT_UTF8_CONTENT  = 'errNotUTF8Content';
+	const ERROR_NETMOUNT          = 'errNetMount';
+	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
+	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
 	
 	/**
 	 * Constructor
@@ -184,12 +190,9 @@ class elFinder {
 			$opts['roots'] = array();
 		}
 
-		$netVolumes = isset($_SESSION['netVolumes']) && is_array($_SESSION['netVolumes']) ? $_SESSION['netVolumes'] : array();
-
-		foreach ($netVolumes as $root) {
-			if ($root['driver'] && $root['host'] && $root['user']) {
-				$opts['roots'][] = $root;
-			}
+		// check for net volumes stored in session
+		foreach ($this->getNetVolumes() as $root) {
+			$opts['roots'][] = $root;
 		}
 
 		// "mount" volumes
@@ -408,6 +411,27 @@ class elFinder {
 		return $volume->realpath($hash);
 	}
 	
+	/**
+	 * Return network volumes config.
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 */
+	protected function getNetVolumes() {
+		return isset($_SESSION['netVolumes']) && is_array($_SESSION['netVolumes']) ? $_SESSION['netVolumes'] : array();;
+	}
+
+	/**
+	 * Save network volumes config.
+	 *
+	 * @param  array  $volumes  volumes config
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 */
+	protected function saveNetVolumes($volumes) {
+		$_SESSION['netVolumes'] = $volumes;
+	}
+
 	/***************************************************************************/
 	/*                                 commands                                */
 	/***************************************************************************/
@@ -432,6 +456,39 @@ class elFinder {
 		return count($errors) ? $errors : array(self::ERROR_UNKNOWN);
 	}
 	
+	protected function netmount($args) {
+		$options  = $args;
+		$protocol = $args['protocol'];
+		$driver   = isset(self::$netDrivers[$protocol]) ? $protocol : '';
+		$class    = 'elfindervolume'.$protocol;
+
+		if (!$driver) {
+			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], self::ERROR_NETMOUNT_NO_DRIVER));
+		}
+
+		
+		$options['driver'] = $driver;
+
+		unset($options['options'], $options['protocol']);
+
+		if (is_array($args['options'])) {
+			foreach ($args['options'] as $key => $value) {
+				$options[$key] = $value;
+			}
+		}
+
+		$volume = new $class();
+
+		if ($volume->mount($options)) {
+			$netVolumes = $this->getNetVolumes();
+			$netVolumes[] = $options;
+			$this->saveNetVolumes($netVolumes);
+		} else {
+			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
+		}
+
+	}
+
 	/**
 	 * "Open" directory
 	 * Return array with following elements
