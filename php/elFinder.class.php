@@ -70,7 +70,7 @@ class elFinder {
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
-		'netmount'  => array('protocol' => true, 'host' => true, 'path' => true, 'user' => true, 'pass' => false, 'options' => false)
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => true, 'user' => true, 'pass' => false, 'alias' => false, 'options' => false)
 	);
 	
 	/**
@@ -480,9 +480,11 @@ class elFinder {
 		$volume = new $class();
 
 		if ($volume->mount($options)) {
-			$netVolumes = $this->getNetVolumes();
+			$netVolumes   = $this->getNetVolumes();
 			$netVolumes[] = $options;
+			$netVolumes   = array_unique($netVolumes);
 			$this->saveNetVolumes($netVolumes);
+			return array('sync' => true);
 		} else {
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
 		}
