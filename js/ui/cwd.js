@@ -118,6 +118,8 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			query = '',
 			
+			lastSearch = [],
+
 			/**
 			 * File templates
 			 *
@@ -608,7 +610,7 @@ $.fn.elfindercwd = function(fm) {
 			 */
 			content = function(files, any) {
 				var phash = fm.cwd().hash; 
-			
+				// console.log(files)
 				try {
 					// to avoid problem with draggable
 					cwd.children('table,'+fileSelector).remove().end();
@@ -823,20 +825,23 @@ $.fn.elfindercwd = function(fm) {
 		}
 
 		fm
-			.bind('open search', function(e) {
-				content(e.data.files, e.type=='search');
+			.bind('open', function(e) {
+				content(e.data.files);
+			})
+			.bind('search', function(e) {
+				lastSearch = e.data.files;
+				content(lastSearch, true);
 			})
 			.bind('searchend', function() {
 				query && content(fm.files());
+				lastSearch = [];
+				query = '';
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
 			})
-			.bind('searchend', function() {
-				query = '';
-			})
 			.bind('sortchange', function() {
-				content(fm.files());
+				content(query ? lastSearch : fm.files(), !!query);
 			})
 			.bind('viewchange', function() {
 				var sel = fm.selected(),

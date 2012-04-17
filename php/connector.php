@@ -309,7 +309,7 @@ $opts = array(
 		// 	'driver' => 'FTP',
 		// 	'host' => 'work.std42.ru',
 		// 	'user' => 'dio',
-		// 	'pass' => '123456',
+		// 	'pass' => 'wallrus',
 		// 	'path' => '/',
 		// 	'tmpPath' => '../files/ftp',
 		// ),
@@ -319,7 +319,7 @@ $opts = array(
 		// 	'user' => 'frontrow',
 		// 	'pass' => 'frontrow',
 		// 	'path' => '/'
-		// )
+		// ),
 		
 		// array(
 		// 	'driver'     => 'LocalFileSystem',
