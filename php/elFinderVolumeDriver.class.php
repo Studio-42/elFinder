@@ -2723,6 +2723,23 @@ abstract class elFinderVolumeDriver {
 				}
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
+					
+					$bgcolor = $this->options['tmbBgColor'];
+
+					if ($bgcolor == 'transparent') {
+						list($r, $g, $b) = array(0, 0, 255);
+					} else {
+						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+					}
+
+					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
+
+					if ($bgcolor == 'transparent') {
+						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
+					}
+
+					imagefill($tmp, 0, 0, $bgcolor1);
+					
 					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 							return false;
 					}
@@ -2797,8 +2814,32 @@ abstract class elFinderVolumeDriver {
 				}
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
+					
+					$bgcolor = $this->options['tmbBgColor'];
 
-					if (!imagecopy($tmp, $img, 0, 0, $x, $y, $width, $height)) {
+					if ($bgcolor == 'transparent') {
+						list($r, $g, $b) = array(0, 0, 255);
+					} else {
+						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+					}
+
+					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
+
+					if ($bgcolor == 'transparent') {
+						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
+					}
+
+					imagefill($tmp, 0, 0, $bgcolor1);
+
+					$size_w = $width;
+					$size_h = $height;
+
+					if ($s[0] < $width || $s[1] < $height) {
+						$size_w = $s[0];
+						$size_h = $s[1];
+					}
+
+					if (!imagecopy($tmp, $img, 0, 0, $x, $y, $size_w, $size_h)) {
 						return false;
 					}
 					
