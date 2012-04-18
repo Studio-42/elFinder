@@ -1,96 +1,98 @@
 "use strict"
-
+/**
+ * @class  elFinder command "netmount"
+ * Mount network volume with user credentials.
+ *
+ * @author Dmitry (dio) Levashov
+ **/
 elFinder.prototype.commands.netmount = function() {
 	var self = this;
 
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 
-	this.netDrivers = [];
+	this.drivers = [];
 	
 	this.handlers = {
 		load : function() {
-			this.netDrivers = this.fm.netDrivers;
+			this.drivers = this.fm.netDrivers;
 		}
-	}
-
-	this.inputs = {
-		protocol : $('<select/>'),
-		host     : $('<input type="text"/>'),
-		port     : $('<input type="text"/>'),
-		path     : $('<input type="text"/>'),
-		user     : $('<input type="text"/>'),
-		pass     : $('<input type="password"/>'),
 	}
 
 	this.getstate = function() {
-		return this.netDrivers.length ? 0 : -1;
+		return this.drivers.length ? 0 : -1;
 	}
 	
+	this.exec = function() {
+		var fm = self.fm,
+			dfrd = $.Deferred(),
+			create = function() {
+				var inputs = {
+						protocol : $('<select/>'),
+						host     : $('<input type="text"/>'),
+						port     : $('<input type="text"/>'),
+						path     : $('<input type="text" value="/"/>'),
+						user     : $('<input type="text"/>'),
+						pass     : $('<input type="password"/>')
+					},
+					opts = {
+						title          : fm.i18n('netMountDialogTitle'),
+						resizable      : false,
+						modal          : true,
+						destroyOnClose : true,
+						close          : function() { 
+							delete self.dialog; 
+							!dfrd.isResolved() && !dfrd.isRejected() && dfrd.reject();
+						},
+						buttons        : {}
+					},
+					content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>');
 
-	this._dialog = function() {
-		var fm   = self.fm,
-			opts = {
-				title     : fm.i18n('netMountDialogTitle'),
-				resizable : false,
-				modal     : true,
-				buttons   : {}
-			},
-			content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>')
+				$.each(self.drivers, function(i, protocol) {
+					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(protocol)+'</option>');
+				});
+
+
+				$.each(inputs, function(name, input) {
+					name != 'protocol' && input.addClass('ui-corner-all');
+					content.append($('<tr/>').append($('<td>'+fm.i18n(name)+'</td>')).append($('<td/>').append(input)));
+				});
+
+				opts.buttons[fm.i18n('btnMount')] = function() {
+					var data = {cmd : 'netmount'};
+
+					$.each(inputs, function(name, input) {
+						var val = $.trim(input.val());
+
+						if (val) {
+							data[name] = val;
+						}
+					});
+
+					if (!data.host) {
+						return self.fm.trigger('error', {error : 'errNetMountHostReq'});
+					}
+
+					self.fm.request({data : data, notify : {type : 'netmount', cnt : 1}})
+						.done(function() { dfrd.resolve(); })
+						.fail(function(error) { dfrd.reject(error); });
+
+					self.dialog.elfinderdialog('close');	
+				}
+
+				opts.buttons[fm.i18n('btnCancel')] = function() {
+					self.dialog.elfinderdialog('close');
+				}
+
+				return fm.dialog(content, opts);
+			}
 			;
 
-		opts.buttons[fm.i18n('btnMount')] = $.proxy(self._onsubmit, self);
-
-		opts.buttons[fm.i18n('btnCancel')] = function() {
-			self.dialog.elfinderdialog('close');
-		}
-
-		$.each(self.netDrivers, function(i, protocol) {
-			self.inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(protocol)+'</option>');
-		});
-
-
-		$.each(self.inputs, function(name, input) {
-			name != 'protocol' && input.addClass('ui-corner-all');
-			content.append($('<tr/>').append($('<td>'+fm.i18n(name)+'</td>')).append($('<td/>').append(input)));
-		});
-
-		self.dialog = fm.dialog(content, opts);
-
-	}
-
-	this._onsubmit = function() {
-		var data = {};
-
-		$.each(self.inputs, function(name, input) {
-			var val = input.val();
-
-			if (val) {
-				data[name] = val;
-			}
-		});
-
-		if (!data.host) {
-			self.fm.trigger('error', {error : 'errNetMountHostReq'});
-		}
-
-	}
-
-	this.exec = function() {
-		
 		if (!self.dialog) {
-			self._dialog();
-			self.dfrd = $.Deferred();
-		} else if (self.dialog.is(':hidden')) {
-			$.each(self.inputs, function(i, input) {
-				input.val('');
-			})
+			self.dialog = create()
 		}
 
-		self.dialog.elfinderdialog('open')
-
-		return self.dfrd.promise();
+		return dfrd.promise();
 	}
-	
 
 }
