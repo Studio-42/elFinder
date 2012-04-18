@@ -111,7 +111,7 @@ elFinder.prototype._options = {
 	commands : [
 		'open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 
 		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
-		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help', 'resize', 'sort'
+		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help', 'resize', 'sort', 'netmount'
 	],
 	
 	/**
@@ -184,6 +184,7 @@ elFinder.prototype._options = {
 			]
 		},
 		
+
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
 	
@@ -215,6 +216,7 @@ elFinder.prototype._options = {
 		// toolbar configuration
 		toolbar : [
 			['back', 'forward'],
+			['netmount'],
 			// ['reload'],
 			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],
