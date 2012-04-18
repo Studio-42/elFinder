@@ -1,8 +1,7 @@
 /**
  * Japanese translation
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2012-04-11
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
+ * @version 2012-04-18
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -77,7 +76,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResize'            : '"$1"をリサイズできません',
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
 			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
-			
+			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
+			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
+			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
