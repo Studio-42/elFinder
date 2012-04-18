@@ -7,6 +7,8 @@ function chmodnum($chmod) {
     return array_sum(str_split($array[0])) . array_sum(str_split($array[1])) . array_sum(str_split($array[2]));
 }
 
+elFinder::$netDrivers['ftp'] = 'FTP';
+
 /**
  * Simple elFinder driver for FTP
  *
@@ -100,7 +102,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	protected function init() {
-
 		if (!$this->options['host'] 
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
@@ -110,8 +111,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 		
 		if (!function_exists('ftp_connect')) {
-			return $this->setError('FTP extension not loaded..');
+			return $this->setError('FTP extension not loaded.');
 		}
+
+		// remove protocol from host
+		$scheme = parse_url($this->options['host'], PHP_URL_SCHEME);
+
+		if ($scheme) {
+			$this->options['host'] = substr($this->options['host'], strlen($scheme)+3);
+		}
+
 		// normalize root path
 		$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 		

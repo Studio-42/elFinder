@@ -72,6 +72,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Размер файлов в архиве превышает максимально разрешенный.',
 			'errResize'            : 'Не удалось изменить размер "$1".',
 			'errUsupportType'      : 'Неподдерживаемый тип файла.',
+			'errNotUTF8Content'    : 'Файл "$1" содержит текст в кодировке отличной от UTF-8 и не может быть отредактирован.',  // added 9.11.2011
+			'errNetMount'          : 'Не удалось подключить "$1".',    // added 17.04.2012
+			'errNetMountNoDriver'  : 'Неподдерживаемый протокол.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Ошибка монтирования.',           // added 17.04.2012
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',

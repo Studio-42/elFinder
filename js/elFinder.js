@@ -758,7 +758,7 @@ window.elFinder = function(node, opts) {
 	 * @todo
 	 * @return $.Deferred
 	 */
-	this.request = function(options) {
+	this.request = function(options) { console.log(options)
 		var self     = this,
 			o        = this.options,
 			dfrd     = $.Deferred(),
@@ -1667,6 +1667,24 @@ window.elFinder = function(node, opts) {
 			}, self.options.sync)
 			
 		}
+
+		// self.request({
+		// 	data : {
+		// 		cmd : 'netmount',
+		// 		protocol : 'ftp',
+		// 		host : 'ftp://work.std42.ru',
+		// 		path : '/',
+		// 		user : 'dio',
+		// 		pass : 'wallrus',
+		// 		alias : 'Sora',
+		// 		options : {main : 42}
+
+		// 	},
+		// 	// preventDone : true
+		// })
+		// .done(function(data) {
+		// 	console.log(data);
+		// })
 	});
 	
 	// self.timeEnd('load'); 
