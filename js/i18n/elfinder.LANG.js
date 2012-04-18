@@ -141,6 +141,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'Searching files',
 			'ntfsmth'     : 'Doing something >_<',
 			'ntfloadimg'  : 'Loading image',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',

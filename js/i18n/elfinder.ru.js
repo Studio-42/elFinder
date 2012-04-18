@@ -133,7 +133,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Распаковка архива',
 			'ntfsearch'   : 'Поиск файлов',
 			'ntfsmth'     : 'Занят важным делом desu >_<',
-			
+			'ntfnetmount' : 'Монтирую сетевой диск', // added 18.04.2012
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Незвестно',
 			'Today'       : 'Сегодня',
