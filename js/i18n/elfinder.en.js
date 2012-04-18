@@ -79,6 +79,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
 			'cmdback'      : 'Back',
@@ -107,6 +108,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize & Rotate',
 			'cmdsort'      : 'Sort',
+			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
@@ -116,7 +118,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Yes',
-			
+			'btnMount'  : 'Mount',  // added 18.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -136,7 +138,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'Searching files',
 			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Doing something >_<',
-      'ntfloadimg'  : 'Loading image',
+      		'ntfloadimg'  : 'Loading image',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -205,7 +207,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Help',
 			'webfm'           : 'Web file manager',
 			'ver'             : 'Version',
-			'protocol'        : 'protocol version',
+			'protocolver'     : 'protocol version',
 			'homepage'        : 'Project home',
 			'docs'            : 'Documentation',
 			'github'          : 'Fork us on Github',
@@ -236,7 +238,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Rotate 90 degrees CW',
 			'rotate-ccw'      : 'Rotate 90 degrees CCW',
 			'degree'          : '°',
-			
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindFolder'      : 'Folder',

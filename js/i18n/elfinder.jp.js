@@ -204,7 +204,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'ヘルプ',
 			'webfm'           : 'ウェブファイルマネージャー',
 			'ver'             : 'バージョン',
-			'protocol'        : 'プロトコルバージョン',
+			'protocolver'     : 'プロトコルバージョン',
 			'homepage'        : 'プロジェクトホーム',
 			'docs'            : 'ドキュメンテーション',
 			'github'          : 'Github でフォーク',

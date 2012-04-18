@@ -177,7 +177,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Súgó',
 			'webfm'           : 'Web file manager',
 			'ver'             : 'Verzió',
-			'protocol'        : 'protokol verzió',
+			'protocolver'     : 'protokol verzió',
 			'homepage'        : 'Projekt honlap',
 			'docs'            : 'Dokumentáció',
 			'github'          : 'Hozz létre egy új verziót a Github-on',
