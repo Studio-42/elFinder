@@ -2,6 +2,7 @@
 
 set_time_limit(0); // just in case it too long, not recommended for production
 error_reporting(E_ALL | E_STRICT); // Set E_ALL for debuging
+// error_reporting(0);
 ini_set('max_file_uploads', 50);   // allow uploading up to 50 files at once
 
 // needed for case insensitive search to work, due to broken UTF-8 support in PHP
