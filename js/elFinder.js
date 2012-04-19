@@ -264,7 +264,10 @@ window.elFinder = function(node, opts) {
 				});
 				
 				// prevent tab out of elfinder
-				code == 9 && e.preventDefault();
+				if (code == 9 && !$(e.target).is(':input')) {
+					e.preventDefault();
+				}
+
 			}
 		},
 		date = new Date(),
@@ -758,7 +761,7 @@ window.elFinder = function(node, opts) {
 	 * @todo
 	 * @return $.Deferred
 	 */
-	this.request = function(options) { console.log(options)
+	this.request = function(options) { 
 		var self     = this,
 			o        = this.options,
 			dfrd     = $.Deferred(),
@@ -875,6 +878,10 @@ window.elFinder = function(node, opts) {
 				
 				if (response.options) {
 					cwdOptions = $.extend({}, cwdOptions, response.options);
+				}
+
+				if (response.netDrivers) {
+					self.netDrivers = response.netDrivers;
 				}
 
 				dfrd.resolve(response);
@@ -1668,23 +1675,6 @@ window.elFinder = function(node, opts) {
 			
 		}
 
-		// self.request({
-		// 	data : {
-		// 		cmd : 'netmount',
-		// 		protocol : 'ftp',
-		// 		host : 'ftp://work.std42.ru',
-		// 		path : '/',
-		// 		user : 'dio',
-		// 		pass : 'wallrus',
-		// 		alias : 'Sora',
-		// 		options : {main : 42}
-
-		// 	},
-		// 	// preventDone : true
-		// })
-		// .done(function(data) {
-		// 	console.log(data);
-		// })
 	});
 	
 	// self.timeEnd('load'); 

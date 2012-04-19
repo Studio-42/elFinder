@@ -78,7 +78,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'port'          => 21,
 			'mode'        	=> 'passive',
 			'path'			=> '/',
-			'timeout'		=> 10,
+			'timeout'		=> 20,
 			'owner'         => true,
 			'tmbPath'       => '',
 			'tmpPath'       => '',
@@ -105,8 +105,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		if (!$this->options['host'] 
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
-		||  !$this->options['port']
-		||  !$this->options['path']) {
+		||  !$this->options['port']) {
 			return $this->setError('Required options undefined.');
 		}
 		
@@ -125,12 +124,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 		
 		if (empty($this->options['alias'])) {
-			$num = elFinder::$volumesCnt-1;
-			$this->options['alias'] = $this->root == '/' || $this->root == '.' ? 'FTP folder '.$num : basename($this->root);
+			$this->options['alias'] = $this->options['user'].'@'.$this->options['host'];
+			// $num = elFinder::$volumesCnt-1;
+			// $this->options['alias'] = $this->root == '/' || $this->root == '.' ? 'FTP folder '.$num : basename($this->root);
 		}
 
 		$this->rootName = $this->options['alias'];
 		$this->options['separator'] = '/';
+
 		return $this->connect();
 		
 	}

@@ -180,7 +180,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'مساعدة',
 			'webfm'           : 'مدير ملفات الويب',
 			'ver'             : 'رقم الإصدار',
-			'protocol'        : 'اصدار البرتوكول',
+			'protocolver'     : 'اصدار البرتوكول',
 			'homepage'        : 'الصفحة الرئيسية',
 			'docs'            : 'التعليمات',
 			'github'          : 'شاركنا بتطوير المشروع على Github',

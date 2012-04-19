@@ -176,7 +176,6 @@ elFinder.prototype.commands.paste = function() {
 
 
 		if (!cnt || !dst || dst.mime != 'directory') {
-			console.log('here')
 			return dfrd.reject();
 		}
 			

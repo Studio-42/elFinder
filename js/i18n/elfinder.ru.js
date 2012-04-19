@@ -76,7 +76,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMount'          : 'Не удалось подключить "$1".',    // added 17.04.2012
 			'errNetMountNoDriver'  : 'Неподдерживаемый протокол.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Ошибка монтирования.',           // added 17.04.2012
-			
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
 			'cmdback'      : 'Назад',
@@ -114,7 +114,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApply'  : 'Применить',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
-			
+			'btnMount'  : 'Подключить',  // added 18.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Открытие папки',
 			'ntffile'     : 'Открытие файла',
@@ -133,7 +133,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Распаковка архива',
 			'ntfsearch'   : 'Поиск файлов',
 			'ntfsmth'     : 'Занят важным делом desu >_<',
-			
+			'ntfnetmount' : 'Монтирую сетевой диск', // added 18.04.2012
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Незвестно',
 			'Today'       : 'Сегодня',
@@ -227,7 +228,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Помощь',
 			'webfm'           : 'Файловый менеджер для web',
 			'ver'             : 'Версия',
-			'protocol'        : 'версия протокола',
+			'protocolver'     : 'версия протокола',
 			'homepage'        : 'Сайт проекта',
 			'docs'            : 'Документация',
 			'github'          : 'Fork us on Github',
@@ -260,7 +261,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Поворот на 90 градусов по часовой стрелке',
 			'rotate-ccw'      : 'Поворот на 90 градусов против часовой стрелке',
 			'degree'          : '°',
-
+			'netMountDialogTitle' : 'Подключить сетевой диск', // added 18.04.2012
+			'protocol'            : 'Протокол', // added 18.04.2012
+			'host'                : 'Хост', // added 18.04.2012
+			'port'                : 'Порт', // added 18.04.2012
+			'user'                : 'Пользователь', // added 18.04.2012
+			'pass'                : 'Пароль', // added 18.04.2012
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

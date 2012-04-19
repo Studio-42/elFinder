@@ -196,7 +196,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Ajuda',
 			'webfm'           : 'Gestor de fitxers web',
 			'ver'             : 'Versió',
-			'protocol'        : 'versió de protocol',
+			'protocolver'     : 'versió de protocol',
 			'homepage'        : 'Pàgina del projecte',
 			'docs'            : 'Documentació',
 			'github'          : 'Bifurca\'ns a GitHub',

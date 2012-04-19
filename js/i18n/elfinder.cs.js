@@ -223,7 +223,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Nápověda',
 			'webfm'           : 'Webový správce souborů',
 			'ver'             : 'Verze',
-			'protocol'        : 'verze protokolu',
+			'protocolver'     : 'verze protokolu',
 			'homepage'        : 'Domovská stránka projektu',
 			'docs'            : 'Dokumentace',
 			'github'          : 'Fork us on Github',
