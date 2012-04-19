@@ -459,10 +459,10 @@ class elFinder {
 	protected function netmount($args) {
 		$options  = array();
 		$protocol = $args['protocol'];
-		$driver   = isset(self::$netDrivers[$protocol]) ? $protocol : '';
-		$class    = 'elfindervolume'.$protocol;
+		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
+		$class    = 'elfindervolume'.$driver;
 
-		if (!$driver) {
+		if (!class_exists($class)) {
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], self::ERROR_NETMOUNT_NO_DRIVER));
 		}
 
@@ -485,10 +485,10 @@ class elFinder {
 		$volume = new $class();
 
 		if ($volume->mount($options)) {
+			$key               = md5(join('-', array($protocol, $options['host'], $options['port'], $options['path'], $options['user'])));
 			$netVolumes        = $this->getNetVolumes();
 			$options['driver'] = $driver;
-			$netVolumes[]      = $options;
-			$netVolumes        = array_unique($netVolumes);
+			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
 			return array('sync' => true);
 		} else {
