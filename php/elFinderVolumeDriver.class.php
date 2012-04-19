@@ -1900,7 +1900,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function attr($path, $name, $val=false) {
+	protected function attr($path, $name, $val=null) {
 		if (!isset($this->defaults[$name])) {
 			return false;
 		}
@@ -1931,7 +1931,7 @@ abstract class elFinderVolumeDriver {
 			} 
 		}
 		
-		return $perm === null ? $this->defaults[$name] : !!$perm;
+		return $perm === null ? (is_null($val)? $this->defaults[$name] : $val) : !!$perm;
 	}
 	
 	/**
@@ -1997,8 +1997,8 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
-		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
+		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null));
+		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null));
 		if ($root) {
 			$stat['locked'] = 1;
 		} elseif ($this->attr($path, 'locked', !empty($stat['locked']))) {
