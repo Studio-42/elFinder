@@ -479,17 +479,14 @@ window.elFinder = function(node, opts) {
 		},
 		start      : function(e, ui) {
 			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
-			locked = true,
 			cnt, h;
 			cnt = targets.length;
 			while (cnt--) {
 				h = targets[cnt];
-				if (! files[h].locked) {
-					locked = false;
+				if (files[h].locked) {
+					ui.helper.addClass('elfinder-drag-helper-plus').data('locked', true);
+					break;
 				}
-			}
-			if (locked) {
-				ui.helper.addClass('elfinder-drag-helper-plus').data('locked', true);
 			}
 		},
 		stop       : function() { self.trigger('focus').trigger('dragstop'); },
