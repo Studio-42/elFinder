@@ -16,13 +16,13 @@ elFinder.prototype.commands.pixlr = function() {
 			var file, url, target, exit;
 			file = files[0];
 			
-			target = fm.options.url;
+			target = (typeof fm.options.fixUrl != 'undefined')? fm.options.fixUrl : fm.options.url;
 			target = target + (target.indexOf('?') === -1 ? '?' : '&')
 				+ 'cmd=pixlr'
 				+ '&target=' + file.phash
 				+ '&node=' + encodeURIComponent(fm.id);
 
-			exit = fm.options.url;
+			exit = (typeof fm.options.fixUrl != 'undefined')? fm.options.fixUrl : fm.options.url;
 			exit = exit + (exit.indexOf('?') === -1 ? '?' : '&')
 				+ 'cmd=pixlr';
 			
