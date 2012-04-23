@@ -610,7 +610,9 @@ class elFinder {
 		$volume = new $class();
 
 		if ($volume->mount($options)) {
-			$key               = md5(join('-', array($protocol, $options['host'], $options['port'], $options['path'], $options['user'])));
+			if (! $key = @ $volume->netMountKey) {
+				$key = md5($protocol . '-' . join('-', $options));
+			}
 			$netVolumes        = $this->getNetVolumes();
 			$options['driver'] = $driver;
 			$netVolumes[$key]  = $options;
