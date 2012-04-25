@@ -318,6 +318,96 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $result;
 	}
 	
+	/**
+	 * Resize image
+	 *
+	 * @param  string   $hash    image file
+	 * @param  int      $width   new width
+	 * @param  int      $height  new height
+	 * @param  int      $x       X start poistion for crop
+	 * @param  int      $y       Y start poistion for crop
+	 * @param  string   $mode    action how to mainpulate image
+	 * @return array|false
+	 * @author Dmitry (dio) Levashov
+	 * @author Alexey Sukhotin
+	 * @author nao-pon
+	 * @author Troex Nevelin
+	 **/
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
+		if ($this->commandDisabled('resize')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+	
+		if (($file = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+	
+		if (!$file['write'] || !$file['read']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+	
+		$path = $this->decode($hash);
+	
+		if (!$this->canResize($path, $file)) {
+			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+		}
+		
+		$path4stat = $path;
+		if (! $path = $this->getLocalName($path)) {
+			return false;
+		}
+		
+		if (! $contents = $this->_getContents($path4stat)) {
+			return false;
+		}
+		
+		if (! @ file_put_contents($path, $contents)) {
+			return false;
+		}
+		
+		switch($mode) {
+				
+			case 'propresize':
+				$result = $this->imgResize($path, $width, $height, true, true);
+				break;
+	
+			case 'crop':
+				$result = $this->imgCrop($path, $width, $height, $x, $y);
+				break;
+	
+			case 'fitsquare':
+				$result = $this->imgSquareFit($path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']));
+				break;
+	
+			case 'rotate':
+				$result = $this->imgRotate($path, $degree, ($bg ? $bg : $this->options['tmbBgColor']));
+				break;
+	
+			default:
+				$result = $this->imgResize($path, $width, $height, false, true);
+				break;
+		}
+	
+		if ($result && $fp = @fopen($path, 'rb')) {
+			
+			clearstatcache();
+			$res = $this->_save($fp, $path4stat);
+			@fclose($fp);
+
+			file_exists($path) && @unlink($path);
+			
+			if (!empty($file['tmb']) && $file['tmb'] != "1") {
+				$this->rmTmb($file['tmb']);
+			}
+			$this->clearcache();
+			return $this->stat($path4stat);
+		}
+		
+		is_file($path) && @unlink($path);
+		
+		return false;
+	}
+
 	/*********************** paths/urls *************************/
 
 	/**
