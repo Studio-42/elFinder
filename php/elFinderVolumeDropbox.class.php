@@ -606,13 +606,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _move($source, $targetDir, $name) {
+		$target = $this->_normpath($targetDir.'/'.$name);
 		try {
-			$this->dropbox->move($source, $this->_normpath($targetDir.'/'.$name));
+			$this->dropbox->move($source, $target);
 		} catch (Dropbox_Exception $e) {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
-
-		return true;
+		unset($this->metaDataCache[$source], $this->metaDataCache[$target]);
+		return $target;
 	}
 
 	/**
