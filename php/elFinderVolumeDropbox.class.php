@@ -361,7 +361,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return false;
 		}
 		
-		if (! @ file_put_contents($path, $contents)) {
+		if (! @ file_put_contents($path, $contents, LOCK_EX)) {
 			return false;
 		}
 		
@@ -555,7 +555,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _dimensions($path, $mime) {
 		if (strpos($mime, 'image') !== 0) return '';
 		if ($local = $this->getLocalName($path)) {
-			if (file_put_contents($local, $this->dropbox->getFile($path))) {
+			if (file_put_contents($local, $this->dropbox->getFile($path), LOCK_EX)) {
 				if ($size = @getimagesize($local)) {
 					return $size[0].'x'.$size[1];
 				}
@@ -599,7 +599,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			}
 			
 			if ($local = $this->getLocalName($path)) {
-				if (file_put_contents($local, $contents)) {
+				if (file_put_contents($local, $contents, LOCK_EX) !== false) {
 					return @fopen($local, $mode);
 				}
 			}
