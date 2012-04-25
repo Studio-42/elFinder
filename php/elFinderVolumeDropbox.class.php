@@ -1,6 +1,6 @@
 <?php
 
-elFinder::$netDrivers['dropbox'] = 'Dropbox';
+//elFinder::$netDrivers['dropbox'] = 'Dropbox';
 
 /**
  * Simple elFinder driver for FTP
@@ -191,14 +191,27 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	public function umount() {
 
 	}
-
+	
+	/**
+	 * Get local temp filename
+	 *
+	 * @return string | false
+	 * @author Naoki Sawada
+	 **/
+	protected function getLocalName($path) {
+		if ($this->tmp) {
+			return $this->tmp.DIRECTORY_SEPARATOR.md5($this->id.$path);
+		}
+		return false;
+	}
+	
 	/**
 	 * Get meta data from Dropbox
 	 *
 	 * @return array | false
 	 * @author Naoki Sawada
 	 **/
-	function getMetaData($path) {
+	protected function getMetaData($path) {
 		if (isset($this->metaDataCache[$path])) {
 			return $this->metaDataCache[$path];
 		}
@@ -208,7 +221,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$res = array();
 			}
 		} catch (Dropbox_Exception $e) {
-			//return $this->setError('Dropbox error: '.$e->getMessage());
+			$this->setError('Dropbox error: '.$e->getMessage());
 			$res = array();
 		}
 		$this->metaDataCache[$path] = $res;
@@ -451,12 +464,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _dimensions($path, $mime) {
 		if (strpos($mime, 'image') !== 0) return '';
-		$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
-		if (file_put_contents($local, $this->dropbox->getFile($path))) {
-			if ($size = @getimagesize($local)) {
-				return $size[0].'x'.$size[1];
+		if ($local = $this->getLocalName($path)) {
+			if (file_put_contents($local, $this->dropbox->getFile($path))) {
+				if ($size = @getimagesize($local)) {
+					return $size[0].'x'.$size[1];
+				}
+				unlink($local);
 			}
-			unlink($local);
 		}
 		return '';
 	}
@@ -488,10 +502,16 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _fopen($path, $mode='rb') {
 
 		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
-
-			if (file_put_contents($local, $this->dropbox->getFile($path))) {
-				return @fopen($local, $mode);
+			$contents = $this->_getContents($path);
+			
+			if ($contents === false) {
+				return false;
+			}
+			
+			if ($local = $this->getLocalName($path)) {
+				if (file_put_contents($local, $contents)) {
+					return @fopen($local, $mode);
+				}
 			}
 		}
 
@@ -508,7 +528,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->tmp.DIRECTORY_SEPARATOR.md5($path));
+			@unlink($this->getLocalName($path));
 		}
 	}
 
@@ -652,14 +672,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _getContents($path) {
 		$contents = '';
-		if (($fp = $this->_fopen($path))) {
-			while (!feof($fp)) {
-			  $contents .= fread($fp, 8192);
-			}
-			$this->_fclose($fp, $path);
-			return $contents;
+		try {
+			$contents = $this->dropbox->getFile($path);
+		} catch (Dropbox_Exception $e) {
+			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
-		return false;
+		return $contents;
 	}
 
 	/**
@@ -673,8 +691,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _filePutContents($path, $content) {
 		$res = false;
 
-		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path).'.txt';
+		if ($local = $this->getLocalName($path)) {
+			$local .= '.txt';
 
 			if (@file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = @fopen($local, 'rb'))) {
