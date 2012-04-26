@@ -254,17 +254,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 
 		if (!$this->tmp) {
-// 			$this->disabled[] = 'mkfile';
-// 			$this->disabled[] = 'paste';
-// 			$this->disabled[] = 'duplicate';
-// 			$this->disabled[] = 'upload';
-// 			$this->disabled[] = 'edit';
 			$this->disabled[] = 'archive';
 			$this->disabled[] = 'extract';
 		}
-
-		// echo $this->tmp;
-
 	}
 
 	/*********************************************************************/
@@ -327,6 +319,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function parseRaw($raw, $single = true) {
 		$stat = array();
 
+		$stat['rev']   = $raw['rev'];
 		$stat['name']  = basename($raw['path']);
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
@@ -499,6 +492,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		is_file($path) && @unlink($path);
 		
 		return false;
+	}
+	
+	/**
+	 * Return thumbnail file name for required file
+	 *
+	 * @param  array  $stat  file stat
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function tmbname($stat) {
+		return 'dropbox_'.$stat['rev'].'.png';
 	}
 	
 	/*********************** paths/urls *************************/
