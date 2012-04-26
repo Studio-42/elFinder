@@ -483,7 +483,14 @@ class elFinder {
 		}
 
 		$volume = new $class();
-
+		
+		if (method_exists($volume, 'netmountPrepare')) {
+			$options = $volume->netmountPrepare($options);
+			if (isset($options['exit'])) {
+				return $options;
+			}
+		}
+		
 		if ($volume->mount($options)) {
 			$netVolumes        = $this->getNetVolumes();
 			$options['driver'] = $driver;
