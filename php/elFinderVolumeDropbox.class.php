@@ -124,11 +124,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 			if ($options['pass'] === 'init') {
 			
-				$callback  = ($_SERVER['SERVER_PORT'] == 443 ? 'https://' : 'http://'); // scheme
-				$callback .= $_SERVER['SERVER_NAME'];	// host
-				$callback .= ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT']);  // port
-				$callback .= $_SERVER['REQUEST_URI'];
-				$callback = str_replace('pass=init', 'pass=return', $callback);
+				$callback  = $options['url']
+				           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return';
 				
 				try {
 					$tokens = $this->oauth->getRequestToken();
