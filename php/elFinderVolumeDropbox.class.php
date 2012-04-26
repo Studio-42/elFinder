@@ -56,6 +56,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected $tmp = '';
 	
 	/**
+	 * Net mount key
+	 *
+	 * @var string
+	 **/
+	public $netMountKey = '';
+	
+	/**
 	* Meta Data Cache
 	*
 	* @var array
@@ -222,6 +229,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 
+		// make ney mount key
+		$this->netMountKey = md5(join('-', array('dropbox', $this->options['path'])));
+		
 		return true;
 
 	}
