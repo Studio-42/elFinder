@@ -220,14 +220,16 @@ elFinder.prototype._options = {
 					pass     : $('<input id="elfinder-cmd-netmout-dropbox-pass" type="text" readonly="readonly"/>')
 				},
 				select: function(fm){
-					fm.request({
-						data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init'},
-						preventDefault : true
-					}).fail(function(){
-					}).done(function(data){
-						$('#elfinder-cmd-netmout-dropbox-host')
-						.html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
-					});
+					if ($('#elfinder-cmd-netmout-dropbox-host').find('span').length) {
+						fm.request({
+							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init'},
+							preventDefault : true
+						}).fail(function(){
+						}).done(function(data){
+							$('#elfinder-cmd-netmout-dropbox-host')
+							.html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
+						});
+					}
 				}
 			}
 		},
