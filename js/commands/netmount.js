@@ -51,7 +51,7 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>');
 
-				content.append($('<tr/>').append($('<td>'+fm.i18n(inputs.protocol.name)+'</td>')).append($('<td/>').append(inputs.protocol)));
+				content.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
 
 				$.each(self.drivers, function(i, protocol) {
 					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(protocol)+'</option>');
