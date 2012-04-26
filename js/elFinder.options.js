@@ -204,7 +204,7 @@ elFinder.prototype._options = {
 				select: function(fm){
 					if ($('#elfinder-cmd-netmout-dropbox-host').find('span').length) {
 						fm.request({
-							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init'},
+							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init', options: {url: fm.uploadURL}},
 							preventDefault : true
 						}).fail(function(){
 						}).done(function(data){
