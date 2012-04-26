@@ -1,6 +1,6 @@
 <?php
 
-//elFinder::$netDrivers['dropbox'] = 'Dropbox';
+elFinder::$netDrivers['dropbox'] = 'Dropbox';
 
 /**
  * Simple elFinder driver for FTP
@@ -71,6 +71,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	public function __construct() {
+		
+		require dirname(__FILE__).DIRECTORY_SEPARATOR.'Dropbox'.DIRECTORY_SEPARATOR.'autoload.php';
+		
 		$opts = array(
 			'consumerKey'       => '',
 			'consumerSecret'    => '',
@@ -85,6 +88,84 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->options = array_merge($this->options, $opts);
 		$this->options['mimeDetect'] = 'internal';
 	}
+
+	public function netmountPrepare($options) {
+		if (empty($options['consumerKey']) && defined('ELFINDER_DROPBOX_CONSUMERKEY')) $options['consumerKey'] = ELFINDER_DROPBOX_CONSUMERKEY;
+		if (empty($options['consumerSecret']) && defined('ELFINDER_DROPBOX_CONSUMERSECRET')) $options['consumerSecret'] = ELFINDER_DROPBOX_CONSUMERSECRET;
+		
+		if ($options['user'] === 'init') {
+
+			if (empty($options['consumerKey']) || empty($options['consumerSecret'])) {
+				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
+			}
+			
+			if (class_exists('OAuth')) {
+				$this->oauth = new Dropbox_OAuth_PHP($options['consumerKey'], $options['consumerSecret']);
+			} else {
+				if (! class_exists('HTTP_OAuth_Consumer')) {
+					// We're going to try to load in manually
+					include 'HTTP/OAuth/Consumer.php';
+				}
+				if (class_exists('HTTP_OAuth_Consumer')) {
+					$this->oauth = new Dropbox_OAuth_PEAR($options['consumerKey'], $options['consumerSecret']);
+				}
+			}
+			
+			if (! $this->oauth) {
+				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
+			}
+
+			if ($options['pass'] === 'init') {
+			
+				$callback  = ($_SERVER['SERVER_PORT'] == 443 ? 'https://' : 'http://'); // scheme
+				$callback .= $_SERVER['SERVER_NAME'];	// host
+				$callback .= ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT']);  // port
+				$callback .= $_SERVER['REQUEST_URI'];
+				$callback = str_replace('pass=init', 'pass=return', $callback);
+				
+				try {
+					$tokens = $this->oauth->getRequestToken();
+					$url= $this->oauth->getAuthorizeUrl(rawurlencode($callback));
+				} catch (Dropbox_Exception $e) {
+					return array('exit' => true, 'body' => '{msg:errAccess}');
+				}
+				
+				$_SESSION['elfinder_dropbox_oath_token'] = $tokens;
+				$html = '<input class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
+				
+				return array('exit' => true, 'body' => $html);
+			} else {
+				$this->oauth->setToken($_SESSION['elfinder_dropbox_oath_token']);
+				$tokens = $this->oauth->getAccessToken();
+				$script = '
+					var token =window.opener.document.getElementById(\'elfinder-cmd-netmout-dropbox-user\');
+					var seckey=window.opener.document.getElementById(\'elfinder-cmd-netmout-dropbox-pass\');
+					token.value = \''.$tokens['token'].'\';
+					seckey.value = \''.$tokens['token_secret'].'\';
+					window.close();';
+				
+				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+				 
+				while( ob_get_level() ) {
+					if (! ob_end_clean()) {
+						break;
+					}
+				}
+				 
+				header('Content-Type: text/html; charset=utf-8');
+				header('Content-Length: '.strlen($out));
+				header('Cache-Control: private');
+				header('Pragma: no-cache');
+				echo $out;
+				 
+				exit();
+			}
+		}
+		$options['accessToken'] = $options['user'];
+		$options['accessTokenSecret'] = $options['pass'];
+		return $options;
+	}
+	
 
 	/*********************************************************************/
 	/*                        INIT AND CONFIGURE                         */
@@ -105,20 +186,21 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		||  !$this->options['accessTokenSecret']) {
 			return $this->setError('Required options undefined.');
 		}
-
-		require dirname(__FILE__).DIRECTORY_SEPARATOR.'Dropbox'.DIRECTORY_SEPARATOR.'autoload.php';
-
-		if (class_exists('OAuth')) {
-			$this->oauth = new Dropbox_OAuth_PHP($this->options['consumerKey'], $this->options['consumerSecret']);
-		} else {
-			if (! class_exists('HTTP_OAuth_Consumer')) {
-				// We're going to try to load in manually
-				include 'HTTP/OAuth/Consumer.php';
-			}
-			if (class_exists('HTTP_OAuth_Consumer')) {
-				$this->oauth = new Dropbox_OAuth_PEAR($this->options['consumerKey'], $this->options['consumerSecret']);
+		
+		if (! $this->oauth) {
+			if (class_exists('OAuth')) {
+				$this->oauth = new Dropbox_OAuth_PHP($this->options['consumerKey'], $this->options['consumerSecret']);
+			} else {
+				if (! class_exists('HTTP_OAuth_Consumer')) {
+					// We're going to try to load in manually
+					include 'HTTP/OAuth/Consumer.php';
+				}
+				if (class_exists('HTTP_OAuth_Consumer')) {
+					$this->oauth = new Dropbox_OAuth_PEAR($this->options['consumerKey'], $this->options['consumerSecret']);
+				}
 			}
 		}
+		
 		if (! $this->oauth) {
 			return $this->setError('OAuth extension not loaded.');
 		}
@@ -235,14 +317,18 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry Levashov
 	 **/
-	protected function parseRaw($raw) {
+	protected function parseRaw($raw, $single = true) {
 		$stat = array();
 
 		$stat['name']  = basename($raw['path']);
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
 		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : time();
-		$stat['dirs']  = ($raw['is_dir'] && !empty($raw['contents']))? 1 : 0;
+		if ($single) {
+			$stat['dirs']  = ($raw['is_dir'] && !empty($raw['contents']))? 1 : 0;
+		} else {
+			$stat['dirs']  = ($raw['is_dir'])? 1 : 0;
+		}
 
 		return $stat;
 	}
@@ -262,7 +348,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 		if (! empty($res['contents'])) {
 			foreach($res['contents'] as $raw) {
-				if ($stat = $this->parseRaw($raw)) {
+				if ($stat = $this->parseRaw($raw, false)) {
 					$stat = $this->updateCache($raw['path'], $stat);
 					if (empty($stat['hidden'])) {
 						$this->dirsCache[$path][] = $raw['path'];
@@ -407,7 +493,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		
 		return false;
 	}
-
+	
 	/*********************** paths/urls *************************/
 
 	/**

@@ -202,6 +202,35 @@ elFinder.prototype._options = {
 		// "info" command options.
 		info : {nullUrlDirLinkSelf : true},
 		
+		netmount: {
+			ftp: {
+				inputs: {
+					host     : $('<input type="text"/>'),
+					port     : $('<input type="text"/>'),
+					path     : $('<input type="text" value="/"/>'),
+					user     : $('<input type="text"/>'),
+					pass     : $('<input type="password"/>')
+				}
+			},
+			dropbox: {
+				inputs: {
+					host     : $('<span id="elfinder-cmd-netmout-dropbox-host"><span class="elfinder-info-spinner"/></span></span><input type="hidden" value="dropbox"/>'),
+					path     : $('<input type="text" value="/"/>'),
+					user     : $('<input id="elfinder-cmd-netmout-dropbox-user" type="text" readonly="readonly"/>'),
+					pass     : $('<input id="elfinder-cmd-netmout-dropbox-pass" type="text" readonly="readonly"/>')
+				},
+				select: function(fm){
+					fm.request({
+						data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init'},
+						preventDefault : true
+					}).fail(function(){
+					}).done(function(data){
+						$('#elfinder-cmd-netmout-dropbox-host')
+						.html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
+					});
+				}
+			}
+		},
 
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
