@@ -34,12 +34,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected $dropbox = null;
 
 	/**
-	 * Directory for tmp files
-	 * If not set driver will try to use tmbDir as tmpDir
+	 * Directory for meta data caches
+	 * If not set driver not cache meta data
 	 *
 	 * @var string
 	 **/
-	protected $tmpPath = '';
+	protected $metaCache = '';
 
 	/**
 	 * Last API error message
@@ -49,7 +49,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected $apiError = '';
 
 	/**
-	 * Tmp folder path
+	 * Directory for tmp files
+	 * If not set driver will try to use tmbDir as tmpDir
 	 *
 	 * @var string
 	 **/
@@ -124,6 +125,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 			if ($options['pass'] === 'init') {
 			
+				if (strpos($options['url'], 'http') !== 0 ) {
+					$options['url'] = $this->getConnectorUrl();
+				}
 				$callback  = $options['url']
 				           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return';
 				
@@ -142,10 +146,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$this->oauth->setToken($_SESSION['elfinder_dropbox_oath_token']);
 				$tokens = $this->oauth->getAccessToken();
 				$script = '
-					var token =window.opener.document.getElementById(\'elfinder-cmd-netmout-dropbox-user\');
-					var seckey=window.opener.document.getElementById(\'elfinder-cmd-netmout-dropbox-pass\');
-					token.value = \''.$tokens['token'].'\';
-					seckey.value = \''.$tokens['token_secret'].'\';
+					var p = window.opener;
+					p.$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
+					p.$("#elfinder-cmd-netmout-dropbox-user").val("'.$tokens['token'].'");
+					p.$("#elfinder-cmd-netmout-dropbox-pass").val("'.$tokens['token_secret'].'");
 					window.close();';
 				
 				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
@@ -170,6 +174,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $options;
 	}
 	
+	private function getConnectorUrl() {
+		$url  = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')? 'https://' : 'http://'
+		       . $_SERVER['SERVER_NAME']                                              // host
+		      . ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT'])  // port
+		       . $_SERVER['REQUEST_URI'];                                             // path & query
+		list($url) = explode('?', $url);
+		return $url;
+	}
 
 	/*********************************************************************/
 	/*                        INIT AND CONFIGURE                         */
