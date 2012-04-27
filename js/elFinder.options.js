@@ -198,20 +198,19 @@ elFinder.prototype._options = {
 				inputs: {
 					host     : $('<span id="elfinder-cmd-netmout-dropbox-host"><span class="elfinder-info-spinner"/></span></span><input type="hidden" value="dropbox"/>'),
 					path     : $('<input type="text" value="/"/>'),
-					user     : $('<input id="elfinder-cmd-netmout-dropbox-user" type="text" readonly="readonly"/>'),
-					pass     : $('<input id="elfinder-cmd-netmout-dropbox-pass" type="text" readonly="readonly"/>')
+					user     : $('<input id="elfinder-cmd-netmout-dropbox-user" type="hidden"/>'),
+					pass     : $('<input id="elfinder-cmd-netmout-dropbox-pass" type="hidden"/>')
 				},
 				select: function(fm){
 					if ($('#elfinder-cmd-netmout-dropbox-host').find('span').length) {
 						fm.request({
 							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init', options: {url: fm.uploadURL}},
 							preventDefault : true
-						}).fail(function(){
 						}).done(function(data){
 							$('#elfinder-cmd-netmout-dropbox-host')
 							.html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
-						});
-					}
+						}).fail(function(){});
+					}					
 				}
 			}
 		},
