@@ -210,7 +210,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	/**
 	 * Get script url
 	 * 
-	 * @return String:
+	 * @return string full URL
+	 * @author Naoki Sawada
 	 */
 	private function getConnectorUrl() {
 		$url  = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')? 'https://' : 'http://'
@@ -221,14 +222,29 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $url;
 	}
 	
+	/**
+	 * Clear meta data cache
+	 * 
+	 * @param string $path 
+	 * @author Naoki Sawada
+	 */
 	private function metaCacheClear($path) {
 		$parent = $this->_dirname($path);
 		unset($this->metaDataCache[$parent], $this->metaDataCache[$path]);
 		if ($this->metaCache) {
 			isset($this->metaCacheArr[$parent]) && $this->metaCacheArr[$parent]['update'] = true;
 			isset($this->metaCacheArr[$path]) && $this->metaCacheArr[$path]['update'] = true;
-			file_put_contents($this->metaCacheFile, serialize($this->metaCacheArr));
+			$this->mataCacheSave();
 		}
+	}
+	
+	/**
+	 * Save meta data to file cache
+	 * 
+	 * @author Naoki Sawada
+	 */
+	private function mataCacheSave() {
+		file_put_contents($this->metaCacheFile, serialize($this->metaCacheArr), LOCK_EX);
 	}
 	
 	/*********************************************************************/
@@ -391,7 +407,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		if ($this->metaCacheFile && isset($this->metaCacheArr[$path])) {
 			$hash = $this->metaCacheArr[$path]['hash'];
-			if (! $this->metaCacheArr[$path]['update'] && $this->metaCacheArr[$path]['ttl'] < $_SERVER['REQUEST_TIME'] && empty($_REQUEST['init'])) {
+			if (! $this->metaCacheArr[$path]['update'] && $this->metaCacheArr[$path]['ttl'] > $_SERVER['REQUEST_TIME'] && empty($_REQUEST['init'])) {
 				return $this->metaCacheArr[$path]['data'];
 			}
 		} else {
@@ -405,6 +421,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		if ($res === true) { // 403
 			$this->metaDataCache[$path] = $this->metaCacheArr[$path]['data']; //memory cache
+			$this->metaCacheArr[$path]['ttl'] = $_SERVER['REQUEST_TIME'] + $this->options['metaCacheTime'];
+			$this->mataCacheSave();
 			return $this->metaCacheArr[$path]['data']; // file cache
 		}
 		$hash = isset($res['hash'])? $res['hash'] : '';
@@ -414,9 +432,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		if ($hash && $this->metaCacheFile) {
 			$this->metaCacheArr[$path]['hash'] = $hash;
 			$this->metaCacheArr[$path]['data'] = $res;
-			$this->metaCacheArr[$path]['ttl'] = $_SERVER['REQUEST_TIME'] + $this->options['metaCachePath'];
+			$this->metaCacheArr[$path]['ttl'] = $_SERVER['REQUEST_TIME'] + $this->options['metaCacheTime'];
 			$this->metaCacheArr[$path]['update'] = false;
-			file_put_contents($this->metaCacheFile, serialize($this->metaCacheArr));
+			$this->mataCacheSave();
 		}
 		$this->metaDataCache[$path] = $res;
 		return $res;
