@@ -77,8 +77,12 @@ elFinder.prototype.commands.netmount = function() {
 					var protocol = inputs.protocol.val();
 					var data = {cmd : 'netmount', protocol: protocol};
 					$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
-						var val = $.trim(input.value || input.val());
-
+						var val;
+						if (typeof input.val == 'function') {
+							val = $.trim(input.val());
+						} else {
+							val = $.trim(input.value);
+						}
 						if (val) {
 							data[input.name] = val;
 						}
