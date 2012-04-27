@@ -155,33 +155,41 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			}
 
 			if ($options['pass'] === 'init') {
-			
-				if (strpos($options['url'], 'http') !== 0 ) {
-					$options['url'] = $this->getConnectorUrl();
+				if (isset($_SESSION['elFinderDropboxTokens'])) {
+					$script = '<script>
+						$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
+						$("#elfinder-cmd-netmout-dropbox-user").val("done");
+						$("#elfinder-cmd-netmout-dropbox-pass").val("done");
+					</script>';
+					$html = 'Dropbox.com'.$script;
+				} else {
+					if (strpos($options['url'], 'http') !== 0 ) {
+						$options['url'] = $this->getConnectorUrl();
+					}
+					$callback  = $options['url']
+					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return';
+					
+					try {
+						$tokens = $this->oauth->getRequestToken();
+						$url= $this->oauth->getAuthorizeUrl(rawurlencode($callback));
+					} catch (Dropbox_Exception $e) {
+						return array('exit' => true, 'body' => '{msg:errAccess}');
+					}
+					
+					$_SESSION['elFinderDropboxAuthTokens'] = $tokens;
+					$html = '<input class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
 				}
-				$callback  = $options['url']
-				           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return';
-				
-				try {
-					$tokens = $this->oauth->getRequestToken();
-					$url= $this->oauth->getAuthorizeUrl(rawurlencode($callback));
-				} catch (Dropbox_Exception $e) {
-					return array('exit' => true, 'body' => '{msg:errAccess}');
-				}
-				
-				$_SESSION['elfinder_dropbox_oath_token'] = $tokens;
-				$html = '<input class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
-				
 				return array('exit' => true, 'body' => $html);
 			} else {
-				$this->oauth->setToken($_SESSION['elfinder_dropbox_oath_token']);
+				$this->oauth->setToken($_SESSION['elFinderDropboxAuthTokens']);
+				unset($_SESSION['elFinderDropboxAuthTokens']);
 				$tokens = $this->oauth->getAccessToken();
-				unset($_SESSION['elfinder_dropbox_oath_token']);
+				$_SESSION['elFinderDropboxTokens'] = array($_GET['uid'], $tokens['token'], $tokens['token_secret']);
 				$script = '
 					var p = window.opener;
 					p.$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
-					p.$("#elfinder-cmd-netmout-dropbox-user").val("'.$_GET['uid'].'");
-					p.$("#elfinder-cmd-netmout-dropbox-pass").val("'.$tokens['token'].' '.$tokens['token_secret'].'");
+					p.$("#elfinder-cmd-netmout-dropbox-user").val("done");
+					p.$("#elfinder-cmd-netmout-dropbox-pass").val("done");
 					window.close();';
 				
 				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
@@ -201,8 +209,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				exit();
 			}
 		}
-		list($options['accessToken'], $options['accessTokenSecret']) = explode(' ', $options['pass']);
-		$options['dropboxUid'] = $options['user'];
+		if (isset($_SESSION['elFinderDropboxTokens'])) {
+			list($options['dropboxUid'], $options['accessToken'], $options['accessTokenSecret']) = $_SESSION['elFinderDropboxTokens'];
+		}
 		unset($options['user'], $options['pass']);
 		return $options;
 	}
