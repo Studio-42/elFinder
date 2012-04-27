@@ -289,7 +289,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
 		if (empty($this->options['alias'])) {
-			$this->options['alias'] = 'Dropbox.com';
+			$this->options['alias'] = ($this->options['path'] === '/')? 'Dropbox.com'  : 'Dropbox'.$this->options['path'];
 		}
 
 		$this->rootName = $this->options['alias'];
