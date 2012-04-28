@@ -1467,7 +1467,31 @@ abstract class elFinderVolumeDriver {
 			}
 			$method = $rmSrc ? 'move' : 'copy';
 			
-			return ($path = $this->$method($source, $destination, $name)) ? $this->stat($path) : false;
+			$srcstat = $this->stat($source);
+			
+			if ($rmSrc && $srcstat['mime'] === 'directory') {
+				$this->removeTmb($source);
+			}
+			
+			if ($path = $this->$method($source, $destination, $name)) {
+				if ($path === true) { // _copy() return true
+					$path = $this->_joinPath($destination, $name);
+				}
+				$stat = $this->stat($path);
+				if ($this->tmbPath && $this->canCreateTmb($source, $srcstat)) { // copy or rename tmb too
+					$srctmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbname($srcstat);
+					if (is_file($srctmb)) {
+						$newtmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbname($stat);
+						if ($rmSrc) {
+							@ rename($srctmb, $newtmb);
+						} else {
+							@ copy($srctmb, $newtmb);
+						}
+					}
+				}
+				return $stat;
+			}
+			return false;
 		}
 		
 		
@@ -2638,6 +2662,24 @@ abstract class elFinderVolumeDriver {
 		}
 
 		return $name;
+	}
+	
+	/**
+	* Remove tmbs / recursive remove tmb
+	*
+	* @param  string  $path   file path
+	* @author Naoki Sawada
+	**/
+	protected function removeTmb($path) {
+		$stat = $this->stat($path);
+		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+			$this->rmTmb($stat['tmb']);
+		} else if ($stat['mime'] === 'directory') {
+			foreach ($this->_scandir($path) as $p) {
+				$name = $this->_basename($p);
+				$name != '.' && $name != '..' && !$this->removeTmb($p);
+			}
+		}
 	}
 	
 	/**
