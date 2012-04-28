@@ -244,6 +244,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			isset($this->metaCacheArr[$parent]) && $this->metaCacheArr[$parent]['update'] = true;
 			isset($this->metaCacheArr[$path]) && $this->metaCacheArr[$path]['update'] = true;
 			$this->mataCacheSave();
+			isset($this->metaCacheArr[$parent]) && $this->metaCacheArr[$parent]['data']['is_dir'] && $this->stat($parent);
 		}
 	}
 	
@@ -450,7 +451,23 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * Parse line from ftp_rawlist() output and return file stat (array)
+	 * Check includes dirctory in contents data
+	 * 
+	 * @param array $contents dropbox metadata contents
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	protected function checkDirs($contents) {
+		foreach($contents as $content) {
+			if ($content['is_dir']) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Parse line from dropbox metadata output and return file stat (array)
 	 *
 	 * @param  string  $raw  line from ftp_rawlist() output
 	 * @return array
@@ -465,11 +482,16 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
 		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : time();
 		if ($single) {
-			$stat['dirs']  = ($raw['is_dir'] && !empty($raw['contents']))? 1 : 0;
+			$stat['dirs']  = ($raw['is_dir'] && !empty($raw['contents']) && $this->checkDirs($raw['contents']))? 1 : 0;
 		} else {
-			$stat['dirs']  = ($raw['is_dir'])? 1 : 0;
+			if ($raw['is_dir']) {
+				if (isset($this->metaCacheArr[$raw['path']])) {
+					$stat['dirs'] = (!empty($this->metaCacheArr[$raw['path']]['data']['contents']) && $this->checkDirs($this->metaCacheArr[$raw['path']]['data']['contents']))? 1 : 0;
+				} else {
+					$stat['dirs'] = 1;
+				}
+			}
 		}
-
 		return $stat;
 	}
 
@@ -765,8 +787,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $res;
 		}
 		return $this->parseRaw($res);
-		//$stat = $this->parseRaw($res);
-		//return $this->updateCache($path, $stat);
 	}
 
 	/**
