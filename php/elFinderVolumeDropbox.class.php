@@ -114,6 +114,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'treeDeep'          => 0,
 			'tmbPath'           => '.tmb',
 			'tmpPath'           => '',
+			'getTnbSize'        => 'medium', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
 			'metaCacheTime'     => '600' // 10m
 		);
@@ -605,7 +606,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return false;
 		}
 		
-		if (! $contents = $this->_getContents($path4stat)) {
+		if (! $contents = $this->getThumbnail($path4stat, $this->options['getTmbSize'])) {
 			return false;
 		}
 		
@@ -665,6 +666,20 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function tmbname($stat) {
 		return 'dropbox_'.$stat['rev'].'.png';
+	}
+	
+	/**
+	 * Get thumbnail from dropbox.com
+	 * @param string $path
+	 * @param string $size
+	 * @return string | boolean
+	 */
+	protected function getThumbnail($path, $size = 'small') {
+		try {
+			return $this->dropbox->getThumbnail($path, $size);
+		} catch (Dropbox_Exception $e) {
+			return false;
+		}
 	}
 	
 	/*********************** paths/urls *************************/
