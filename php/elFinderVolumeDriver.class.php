@@ -2078,7 +2078,11 @@ abstract class elFinderVolumeDriver {
 			$stat['thash'] = $this->encode($stat['target']);
 			unset($stat['target']);
 		}
-
+		
+		if (isset($this->options['netkey']) && $path === $this->root) {
+			$stat['netkey'] = $this->options['netkey'];
+		}
+		
 		return $this->cache[$path] = $stat;
 	}
 	

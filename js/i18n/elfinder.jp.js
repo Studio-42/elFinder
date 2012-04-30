@@ -80,6 +80,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
 			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
+			'errNetUnMount'        : 'アンマウントできません', // added 30.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -109,6 +110,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
 			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
+			'cmdnetunmount': 'アンマウント', // added 30.04.2012
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
@@ -119,7 +121,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
 			'btnMount'  : 'マウント',  // added 18.04.2012
-			'btnApprove': '$1へ行き認可する', // added 26.02.2012
+			'btnApprove': '$1へ行き認可する', // added 26.04.2012
+			'btnUnmount': 'アンマウント', // added 30.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開く',
 			'ntffile'     : 'ファイルを開く',
@@ -141,6 +144,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : '何かしています >_<',
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
+      		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
@@ -246,6 +250,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'ポート', // added 18.04.2012
 			'user'                : 'ユーザー名', // added 18.04.2012
 			'pass'                : 'パスワード', // added 18.04.2012
+			'confirmUnmount'      : '$1をアンマウントしますか?',  // added 30.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

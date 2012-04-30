@@ -115,3 +115,67 @@ elFinder.prototype.commands.netmount = function() {
 	}
 
 }
+
+elFinder.prototype.commands.netunmount = function() {
+	var self = this;
+
+	this.alwaysEnabled  = true;
+	this.updateOnSelect = false;
+
+	this.drivers = [];
+	
+	this.handlers = {
+		load : function() {
+			this.drivers = this.fm.netDrivers;
+		}
+	};
+
+	this.getstate = function(sel) {
+		var fm = this.fm;
+		return !!sel && this.drivers.length && !this._disabled && fm.file(sel[0]).netkey ? 0 : -1;
+	};
+	
+	this.exec = function(hashes) {
+		var self   = this,
+			fm     = this.fm,
+			dfrd   = $.Deferred()
+				.fail(function(error) {
+					error && fm.error(error);
+				}),
+			drive  = fm.file(hashes[0]);
+
+		if (this._disabled) {
+			return dfrd.reject();
+		}
+
+		if (!dfrd.isRejected()) {
+			fm.confirm({
+				title  : self.title,
+				text   : fm.i18n('confirmUnmount', drive.name),
+				accept : {
+					label    : 'btnUnmount',
+					callback : function() {  
+						fm.request({
+							data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : 'dum', pass : 'dum'}, 
+							notify : {type : 'netunmount', cnt : 1},
+							preventFail : true
+						})
+						.fail(function(error) {
+							dfrd.reject(error);
+						})
+						.done(function(data) {
+							dfrd.promise();
+						});
+					}
+				},
+				cancel : {
+					label    : 'btnCancel',
+					callback : function() { dfrd.reject(); }
+				}
+			});
+		}
+			
+		return dfrd;
+	};
+
+};
