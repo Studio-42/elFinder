@@ -175,6 +175,7 @@ class elFinder {
 	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
 	const ERROR_NOT_UTF8_CONTENT  = 'errNotUTF8Content';
 	const ERROR_NETMOUNT          = 'errNetMount';
+	const ERROR_NETUNMOUNT        = 'errNetUnMount';
 	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
 	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
 
@@ -584,6 +585,16 @@ class elFinder {
 	protected function netmount($args) {
 		$options  = array();
 		$protocol = $args['protocol'];
+		
+		if ($protocol === 'netunmount') {
+			if (isset($_SESSION) && is_array($_SESSION) && isset($_SESSION['netVolumes'][$args['host']])) {
+				unset($_SESSION['netVolumes'][$args['host']]);
+				return array('sync' => true);
+			} else {
+				return array('error' => $this->error(self::ERROR_NETUNMOUNT));
+			}
+		}
+		
 		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
 		$class    = 'elfindervolume'.$driver;
 
@@ -622,6 +633,7 @@ class elFinder {
 			}
 			$netVolumes        = $this->getNetVolumes();
 			$options['driver'] = $driver;
+			$options['netkey'] = $key;
 			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
 			return array('sync' => true);
