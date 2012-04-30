@@ -247,6 +247,7 @@ $opts = array(
 		// 'mkdir mkfile rename duplicate upload rm paste' => 'logger'
 	),
 	'debug' => true,
+	'netVolumesSessionKey' => 'netVolumes',
 	'roots' => array(
 		array(
 			'driver'     => 'LocalFileSystem',

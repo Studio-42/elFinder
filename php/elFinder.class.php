@@ -31,7 +31,7 @@ class elFinder {
 	 * Session key of net mount volumes
 	 * @var string
 	 */
-	protected $netVolumesSessionKey = 'netVolumes';
+	protected $netVolumesSessionKey = '';
 	
 	/**
 	 * Mounted volumes count
@@ -183,6 +183,7 @@ class elFinder {
 
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
+		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'netVolumes';
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
@@ -437,16 +438,6 @@ class elFinder {
 	 */
 	protected function saveNetVolumes($volumes) {
 		$_SESSION[$this->netVolumesSessionKey] = $volumes;
-	}
-	
-	/**
-	 * Set net mount volumes session key
-	 * @param string $keyname
-	 * @return void
-	 * @author Naoki Sawada
-	 */
-	protected function setNetVolumesSessionName($key) {
-		$this->netVolumesSessionKey = $key;
 	}
 
 	/***************************************************************************/
