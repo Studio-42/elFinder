@@ -594,8 +594,8 @@ class elFinder {
 		$protocol = $args['protocol'];
 		
 		if ($protocol === 'netunmount') {
-			if (isset($_SESSION) && is_array($_SESSION) && isset($_SESSION['netVolumes'][$args['host']])) {
-				unset($_SESSION['netVolumes'][$args['host']]);
+			if (isset($_SESSION) && is_array($_SESSION) && isset($_SESSION[$this->netVolumesSessionKey][$args['host']])) {
+				unset($_SESSION[$this->netVolumesSessionKey][$args['host']]);
 				return array('sync' => true);
 			} else {
 				return array('error' => $this->error(self::ERROR_NETUNMOUNT));
