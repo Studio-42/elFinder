@@ -89,10 +89,18 @@ class Dropbox_OAuth_PHP extends Dropbox_OAuth {
                         'body'       => null,
                     );
                     break;
+                case 400 :
+                    throw new Dropbox_Exception_Forbidden('Forbidden. Bad input parameter. Error message should indicate which one and why.');
+                case 401 :
+                    throw new Dropbox_Exception_Forbidden('Forbidden. Bad or expired token. This can happen if the user or Dropbox revoked or expired an access token. To fix, you should re-authenticate the user.');
                 case 403 :
                     throw new Dropbox_Exception_Forbidden('Forbidden. This could mean a bad OAuth request, or a file or folder already existing at the target location.');
                 case 404 : 
                     throw new Dropbox_Exception_NotFound('Resource at uri: ' . $uri . ' could not be found');
+                case 405 : 
+                    throw new Dropbox_Exception_Forbidden('Forbidden. Request method not expected (generally should be GET or POST).');
+                case 503 : 
+                    throw new Dropbox_Exception_Forbidden('Forbidden. Your app is making too many requests and is being rate limited. 503s can trigger on a per-app or per-user basis.');
                 case 507 : 
                     throw new Dropbox_Exception_OverQuota('This dropbox is full');
                 default:

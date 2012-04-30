@@ -156,14 +156,25 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			}
 
 			if ($options['pass'] === 'init') {
+				$html = '';
 				if (isset($_SESSION['elFinderDropboxTokens'])) {
-					$script = '<script>
-						$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
-						$("#elfinder-cmd-netmout-dropbox-user").val("done");
-						$("#elfinder-cmd-netmout-dropbox-pass").val("done");
-					</script>';
-					$html = 'Dropbox.com'.$script;
-				} else {
+					// token check
+					try {
+						list(, $accessToken, $accessTokenSecret) = $_SESSION['elFinderDropboxTokens'];
+						$this->oauth->setToken($accessToken, $accessTokenSecret);
+						$this->dropbox = new Dropbox_API($this->oauth, $this->options['root']);
+						$this->dropbox->getAccountInfo();
+						$script = '<script>
+							$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
+							$("#elfinder-cmd-netmout-dropbox-user").val("done");
+							$("#elfinder-cmd-netmout-dropbox-pass").val("done");
+						</script>';
+						$html = 'Dropbox.com'.$script;
+					} catch (Dropbox_Exception $e) {
+						unset($_SESSION['elFinderDropboxTokens']);
+					}
+				}
+				if (! $html) {
 					if (strpos($options['url'], 'http') !== 0 ) {
 						$options['url'] = $this->getConnectorUrl();
 					}
@@ -278,6 +289,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Required options undefined.');
 		}
 		
+		// make net mount key
+		$this->netMountKey = md5(join('-', array('dropbox', $this->options['path'])));
+
 		if (! $this->oauth) {
 			if (class_exists('OAuth')) {
 				$this->oauth = new Dropbox_OAuth_PHP($this->options['consumerKey'], $this->options['consumerSecret']);
@@ -310,6 +324,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$this->oauth->setToken($this->options['accessToken'], $this->options['accessTokenSecret']);
 			$this->dropbox = new Dropbox_API($this->oauth, $this->options['root']);
 		} catch (Dropbox_Exception $e) {
+			unset($_SESSION['elFinderDropboxTokens']);
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		
@@ -319,14 +334,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$res = $this->dropbox->getAccountInfo();
 				$this->options['dropboxUid'] = $res['uid'];
 			} catch (Dropbox_Exception $e) {
+				unset($_SESSION['elFinderDropboxTokens']);
 				return $this->setError('Dropbox error: '.$e->getMessage());
 			}
 		}
 		$this->dropboxUid = $this->options['dropboxUid'];
 
-		// make net mount key
-		$this->netMountKey = md5(join('-', array('dropbox', $this->options['path'])));
-		
 		if (!empty($this->options['tmpPath'])) {
 			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
 				$this->tmp = $this->options['tmpPath'];
@@ -427,6 +440,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		try {
 			$res = $this->dropbox->getMetaData($path, true, $hash);
 		} catch (Dropbox_Exception $e) {
+			unset($_SESSION['elFinderDropboxTokens']);
 			$this->setError('Dropbox error: '.$e->getMessage());
 			$res = array();
 		}

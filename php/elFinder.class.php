@@ -26,7 +26,13 @@ class elFinder {
 	protected $volumes = array();
 	
 	public static $netDrivers = array();
-
+	
+	/**
+	 * Session key of net mount volumes
+	 * @var string
+	 */
+	protected $netVolumesSessionKey = 'netVolumes';
+	
 	/**
 	 * Mounted volumes count
 	 * Required to create unique volume id
@@ -521,7 +527,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function getNetVolumes() {
-		return isset($_SESSION['elFinderNetVolumes']) && is_array($_SESSION['elFinderNetVolumes']) ? $_SESSION['elFinderNetVolumes'] : array();
+		return isset($_SESSION[$this->netVolumesSessionKey]) && is_array($_SESSION[$this->netVolumesSessionKey]) ? $_SESSION[$this->netVolumesSessionKey] : array();
 	}
 
 	/**
@@ -532,7 +538,17 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
-		$_SESSION['elFinderNetVolumes'] = $volumes;
+		$_SESSION[$this->netVolumesSessionKey] = $volumes;
+	}
+	
+	/**
+	 * Set net mount volumes session key
+	 * @param string $keyname
+	 * @return void
+	 * @author Naoki Sawada
+	 */
+	protected function setNetVolumesSessionName($key) {
+		$this->netVolumesSessionKey = $key;
 	}
 
 	/**
@@ -627,17 +643,24 @@ class elFinder {
 			}
 		}
 		
+		$netVolumes = $this->getNetVolumes();
 		if ($volume->mount($options)) {
 			if (! $key = @ $volume->netMountKey) {
 				$key = md5($protocol . '-' . join('-', $options));
 			}
-			$netVolumes        = $this->getNetVolumes();
 			$options['driver'] = $driver;
 			$options['netkey'] = $key;
 			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
 			return array('sync' => true);
 		} else {
+			if (! $key = @ $volume->netMountKey) {
+				$key = md5($protocol . '-' . join('-', $options));
+			}
+			if (isset($netVolumes[$key])) {
+				unset($netVolumes[$key]);
+				$this->saveNetVolumes($netVolumes);
+			}
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
 		}
 
