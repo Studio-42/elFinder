@@ -235,7 +235,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	private function getConnectorUrl() {
-		$url  = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')? 'https://' : 'http://'
+		$url  = ((isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')? 'https://' : 'http://')
 		       . $_SERVER['SERVER_NAME']                                              // host
 		      . ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT'])  // port
 		       . $_SERVER['REQUEST_URI'];                                             // path & query
