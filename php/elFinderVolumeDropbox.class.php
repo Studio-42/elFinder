@@ -112,7 +112,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'root'              => 'dropbox',
 			'path'              => '/',
 			'treeDeep'          => 0,
-			'tmbPath'           => '.tmb',
+			'tmbPath'           => '../files/.tmb',
+			'tmbURL'            => 'files/.tmb',
 			'tmpPath'           => '',
 			'getTnbSize'        => 'medium', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
@@ -252,12 +253,24 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function metaCacheClear($path) {
 		$parent = $this->_dirname($path);
 		unset($this->metaDataCache[$parent], $this->metaDataCache[$path]);
-		if ($this->metaCache) {
-			isset($this->metaCacheArr[$parent]) && $this->metaCacheArr[$parent]['update'] = true;
-			isset($this->metaCacheArr[$path]) && $this->metaCacheArr[$path]['update'] = true;
-			$this->mataCacheSave();
-			isset($this->metaCacheArr[$parent]) && $this->metaCacheArr[$parent]['data']['is_dir'] && $this->stat($parent);
+		$this->deltaCheck();
+	}
+	
+	private function metaCacheGet($refresh = false) {
+		$data = false;
+		if ($data = @file_get_contents($this->metaCacheFile)) {
+			$data = @unserialize($data);
 		}
+		if (! $data || !isset($data['data'])) {
+			$this->metaCacheArr = array();
+			$this->deltaCheck();
+		} else {
+			$this->metaCacheArr = $data;
+			if ($refresh || ($data['mtime'] + $this->options['metaCacheTime']) < $_SERVER['REQUEST_TIME']) {
+				$this->deltaCheck();
+			}
+		}
+		
 	}
 	
 	/**
@@ -363,15 +376,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$this->disabled[] = 'extract';
 		}
 		
-		if ($this->metaCache) {
-			$this->metaCacheFile = $this->metaCache.DIRECTORY_SEPARATOR.'.metaCache_'.$this->dropboxUid;
-			if (is_file($this->metaCacheFile)) {
-				$this->metaCacheArr = @ unserialize(file_get_contents($this->metaCacheFile));
-			}
-			if (! $this->metaCacheArr) {
-				$this->metaCacheArr = array();
-			}
+		if (!$this->metaCache) {
+			return $this->setError('Cache dirctory (metaCachePath or tmp) is require.');
 		}
+		
+		$this->metaCacheFile = $this->metaCache.DIRECTORY_SEPARATOR.'.metaCache_'.$this->dropboxUid;
+		
+		$this->metaCacheGet(!empty($_REQUEST['init']));
 		
 		return true;
 	}
@@ -419,66 +430,67 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return false;
 	}
 	
-	/**
-	 * Get meta data from Dropbox
-	 *
-	 * @return array | false
-	 * @author Naoki Sawada
-	 **/
-	protected function getMetaData($path) {
-		if (isset($this->metaDataCache[$path])) {
-			return $this->metaDataCache[$path]; //memory cache
+	protected function deltaCheck() {
+		if (! $this->metaCacheFile) return;
+		
+		$cache = $this->metaCacheArr;
+		
+		$cursor = '';
+		if (!$cache) {
+			$cache = array('cursor' => '', 'data' => array());
+			$cache['data']['/'] = array(
+				'path' => '/',
+				'is_dir' => 1,
+				'mime_type' => '',
+				'bytes' => 0
+			);
+		} else if (isset($cache['cursor'])) {
+			$cursor = $cache['cursor'];
 		}
-		if ($this->metaCacheFile && isset($this->metaCacheArr[$path])) {
-			$hash = $this->metaCacheArr[$path]['hash'];
-			if (! $this->metaCacheArr[$path]['update'] && $this->metaCacheArr[$path]['ttl'] > $_SERVER['REQUEST_TIME'] && empty($_REQUEST['init'])) {
-				return $this->metaCacheArr[$path]['data'];
-			}
-		} else {
-			$hash = null;
-		}
+		
 		try {
-			$res = $this->dropbox->getMetaData($path, true, $hash);
-		} catch (Dropbox_Exception $e) {
-			unset($_SESSION['elFinderDropboxTokens']);
-			$this->setError('Dropbox error: '.$e->getMessage());
-			$res = array();
+			$more = true;
+			$info = array('cursor' => $cursor, 'entries' => array());
+			do {
+				$_info = $this->dropbox->delta($cursor);
+				$info['entries'] += $_info['entries'];
+				$cursor = $_info['cursor'];
+			} while(! empty($_info['has_more']));
+		} catch(Dropbox_Exception $e) {
+			$info = $e->getMessage();
 		}
-		if ($res === true) { // 403
-			$this->metaDataCache[$path] = $this->metaCacheArr[$path]['data']; //memory cache
-			$this->metaCacheArr[$path]['ttl'] = $_SERVER['REQUEST_TIME'] + $this->options['metaCacheTime'];
-			$this->mataCacheSave();
-			return $this->metaCacheArr[$path]['data']; // file cache
-		}
-		$hash = isset($res['hash'])? $res['hash'] : '';
-		if (!empty($res['is_deleted'])) {
-			$res = array();
-		}
-		if ($hash && $this->metaCacheFile) {
-			$this->metaCacheArr[$path]['hash'] = $hash;
-			$this->metaCacheArr[$path]['data'] = $res;
-			$this->metaCacheArr[$path]['ttl'] = $_SERVER['REQUEST_TIME'] + $this->options['metaCacheTime'];
-			$this->metaCacheArr[$path]['update'] = false;
-			$this->mataCacheSave();
-		}
-		$this->metaDataCache[$path] = $res;
-		return $res;
-	}
-
-	/**
-	 * Check includes dirctory in contents data
-	 * 
-	 * @param array $contents dropbox metadata contents
-	 * @return boolean
-	 * @author Naoki Sawada
-	 */
-	protected function checkDirs($contents) {
-		foreach($contents as $content) {
-			if ($content['is_dir']) {
-				return true;
+		$info['cursor'] = $cursor;
+		
+		$entries = $info['entries'];
+		
+		$cache['cursor'] = $info['cursor'];
+		foreach($entries as $entry) {
+			$key = strtolower($entry[0]);
+			$pkey = strtolower(dirname($key));
+			if (empty($entry[1])) {
+				if (isset($cache['data'][$key]) && !empty($cache['data'][$key]['is_dir'])) {
+					$cache['data'][$pkey]['dirs']--;
+				}
+				unset($cache['data'][$pkey]['contents'][$key], $cache['data'][$key]);
+				continue;
 			}
+			if (!isset($cache['data'][$pkey])) {
+				$cache['data'][$pkey] = array();
+			}
+			if (!empty($entry[1]['is_dir'])) {
+				if (!isset($cache['data'][$pkey]['dirs'])) {
+					$cache['data'][$pkey]['dirs'] = 1;
+				} else {
+					$cache['data'][$pkey]['dirs']++;
+				}
+			}
+			$cache['data'][$pkey]['contents'][$key] = true;
+			$cache['data'][$key] = $entry[1];
 		}
-		return false;
+		$cache['mtime'] = time();
+		
+		$this->metaCacheArr = $cache;
+		$this->mataCacheSave();
 	}
 	
 	/**
@@ -488,7 +500,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry Levashov
 	 **/
-	protected function parseRaw($raw, $single = true) {
+	protected function parseRaw($raw) {
 		$stat = array();
 
 		$stat['rev']   = isset($raw['rev'])? $raw['rev'] : 'root';
@@ -496,17 +508,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
 		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : time();
-		if ($single) {
-			$stat['dirs']  = ($raw['is_dir'] && !empty($raw['contents']) && $this->checkDirs($raw['contents']))? 1 : 0;
-		} else {
-			if ($raw['is_dir']) {
-				if (isset($this->metaCacheArr[$raw['path']])) {
-					$stat['dirs'] = (!empty($this->metaCacheArr[$raw['path']]['data']['contents']) && $this->checkDirs($this->metaCacheArr[$raw['path']]['data']['contents']))? 1 : 0;
-				} else {
-					$stat['dirs'] = 1;
-				}
-			}
-		}
+		$stat['dirs']  = ($raw['is_dir'] && !empty($raw['dirs']))? 1 : 0;
 		return $stat;
 	}
 
@@ -519,14 +521,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
-		if (! $res = $this->getMetaData($path)) {
-			return $res;
-		}
+		$res = $this->metaCacheArr['data'][strtolower($path)];
 
 		if (! empty($res['contents'])) {
-			foreach($res['contents'] as $raw) {
-				if ($stat = $this->parseRaw($raw, false)) {
-					$stat = $this->updateCache($raw['path'], $stat);
+			foreach(array_keys($res['contents']) as $_path) {
+				$raw = $this->metaCacheArr['data'][strtolower($_path)];
+				if ($stat = $this->parseRaw($raw)) {
+					$stat = $this->updateCache($_path, $stat);
 					if (empty($stat['hidden'])) {
 						$this->dirsCache[$path][] = $raw['path'];
 					}
@@ -811,11 +812,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		$stat = array();
-		if (! $res = $this->getMetaData($path)) {
-			return $res;
+		if (isset($this->metaCacheArr['data'][strtolower($path)])) {
+			return $this->parseRaw($this->metaCacheArr['data'][strtolower($path)]);
 		}
-		return $this->parseRaw($res);
+		return false;
 	}
 
 	/**
