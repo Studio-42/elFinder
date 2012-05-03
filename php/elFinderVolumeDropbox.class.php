@@ -1039,7 +1039,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		if ($name) $path .= '/'.$name;
 		$path = $this->_normpath($path);
 		try {
-			$this->dropbox->putFile(str_replace(' ', '%20', $path), $fp);
+			$this->dropbox->putFile($path, $fp);
 		} catch (Dropbox_Exception $e) {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}

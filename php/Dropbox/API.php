@@ -105,11 +105,13 @@ class Dropbox_API {
         $filename = basename($path);
 
         if($directory==='.') $directory = '';
+        $directory = str_replace(array('%2F','~'), array('/','%7E'), rawurlencode($directory));
+        $filename = str_replace('~', '%7E', rawurlencode($filename));
         if (is_null($root)) $root = $this->root;
 
         if (is_string($file)) {
 
-            $file = fopen($file,'r');
+            $file = fopen($file,'rb');
 
         } elseif (!is_resource($file)) {
             throw new Dropbox_Exception('File must be a file-resource or a string');
@@ -234,6 +236,23 @@ class Dropbox_API {
     } 
 
     /**
+    * A way of letting you keep up with changes to files and folders in a user's Dropbox. You can periodically call /delta to get a list of "delta entries", which are instructions on how to update your local state to match the server's state.
+    *
+    * This method returns the information from the newly created directory
+    *
+    * @param string $cursor A string that is used to keep track of your current state. On the next call pass in this value to return delta entries that have been recorded since the cursor was returned.
+    * @return stdclass
+    */
+    public function delta($cursor) {
+    
+    	$arg['cursor'] = $cursor;
+    
+    	$response = $this->oauth->fetch($this->api_url . 'delta', $arg, 'POST');
+    	return json_decode($response['body'],true);
+    
+    }
+
+    /**
      * Returns a thumbnail (as a string) for a file path. 
      * 
      * @param string $path Path to file 
@@ -244,6 +263,7 @@ class Dropbox_API {
     public function getThumbnail($path, $size = 'small', $root = null) {
 
         if (is_null($root)) $root = $this->root;
+        $path = str_replace(array('%2F','~'), array('/','%7E'), rawurlencode($path));
         $response = $this->oauth->fetch($this->api_content_url . 'thumbnails/' . $root . '/' . ltrim($path,'/'),array('size' => $size));
 
         return $response['body'];
@@ -309,14 +329,52 @@ class Dropbox_API {
      * 
      * Note: Links created by the /shares API call expire after thirty days.
      * 
-     * @param type $url
+     * @param type $path
      * @param type $root
      * @return type 
      */
-    public function share($url, $root = null) {
+    public function share($path, $root = null) {
         if (is_null($root)) $root = $this->root;
-        $response = $this->oauth->fetch($this->api_url.  'shares/'. $root . '/' . ltrim($url, '/'));
+        $path = str_replace(array('%2F','~'), array('/','%7E'), rawurlencode($path));
+        $response = $this->oauth->fetch($this->api_url.  'shares/'. $root . '/' . ltrim($path, '/'), array(), 'POST');
         return json_decode($response['body'],true);
 
     }
+
+    /**
+    * Returns a link directly to a file.
+    * Similar to /shares. The difference is that this bypasses the Dropbox webserver, used to provide a preview of the file, so that you can effectively stream the contents of your media.
+    *
+    * Note: The /media link expires after four hours, allotting enough time to stream files, but not enough to leave a connection open indefinitely.
+    *
+    * @param type $path
+    * @param type $root
+    * @return type
+    */
+    public function media($path, $root = null) {
+
+    	if (is_null($root)) $root = $this->root;
+    	$path = str_replace(array('%2F','~'), array('/','%7E'), rawurlencode($path));
+    	$response = $this->oauth->fetch($this->api_url.  'media/'. $root . '/' . ltrim($path, '/'), array(), 'POST');
+    	return json_decode($response['body'],true);
+    
+    }
+
+    /**
+    * Creates and returns a copy_ref to a file. This reference string can be used to copy that file to another user's Dropbox by passing it in as the from_copy_ref parameter on /fileops/copy.
+    *
+    * @param type $path
+    * @param type $root
+    * @return type
+    */
+    public function copy_ref($path, $root = null) {
+
+    	if (is_null($root)) $root = $this->root;
+    	$path = str_replace(array('%2F','~'), array('/','%7E'), rawurlencode($path));
+    	$response = $this->oauth->fetch($this->api_url.  'copy_ref/'. $root . '/' . ltrim($path, '/'));
+    	return json_decode($response['body'],true);
+    
+    }
+    
+
 }
