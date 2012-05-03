@@ -253,7 +253,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function metaCacheClear($path) {
 		$parent = $this->_dirname($path);
 		unset($this->metaDataCache[$parent], $this->metaDataCache[$path]);
-		$this->deltaCheck();
 	}
 	
 	private function metaCacheGet($refresh = false) {
@@ -431,18 +430,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	}
 	
 	protected function deltaCheck() {
-		if (! $this->metaCacheFile) return;
-		
+
 		$cache = $this->metaCacheArr;
 		
 		$cursor = '';
 		if (!$cache) {
 			$cache = array('cursor' => '', 'data' => array());
 			$cache['data']['/'] = array(
-				'path' => '/',
-				'is_dir' => 1,
+				'path'      => '/',
+				'is_dir'    => 1,
 				'mime_type' => '',
-				'bytes' => 0
+				'bytes'     => 0
 			);
 		} else if (isset($cache['cursor'])) {
 			$cursor = $cache['cursor'];
@@ -487,7 +485,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$cache['data'][$pkey]['contents'][$key] = true;
 			$cache['data'][$key] = $entry[1];
 		}
-		$cache['mtime'] = time();
+		$cache['mtime'] = $_SERVER['REQUEST_TIME'];
 		
 		$this->metaCacheArr = $cache;
 		$this->mataCacheSave();
@@ -507,7 +505,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat['name']  = basename($raw['path']);
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
-		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : time();
+		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : $_SERVER['REQUEST_TIME'];
 		$stat['dirs']  = ($raw['is_dir'] && !empty($raw['dirs']))? 1 : 0;
 		return $stat;
 	}
@@ -926,6 +924,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		$this->metaCacheClear($path);
+		$this->deltaCheck();
 		return $path;
 	}
 
@@ -971,6 +970,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		$this->metaCacheClear($path);
+		$this->deltaCheck();
 		return true;
 	}
 
@@ -994,6 +994,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		unset($this->metaDataCache[$source], $this->metaDataCache[$target]);
 		$this->metaCacheClear($source);
 		$this->metaCacheClear($target);
+		$this->deltaCheck();
 		return $target;
 	}
 
@@ -1011,6 +1012,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		$this->metaCacheClear($path);
+		$this->deltaCheck();
 		return true;
 	}
 
@@ -1044,6 +1046,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		$this->metaCacheClear($path);
+		$this->deltaCheck();
 		return $path;
 	}
 
