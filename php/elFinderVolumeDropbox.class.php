@@ -581,6 +581,52 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	}
 	
 	/**
+	* Remove file/ recursive remove dir
+	*
+	* @param  string  $path   file path
+	* @param  bool    $force  try to remove even if file locked
+	* @return bool
+	* @author Dmitry (dio) Levashov
+	* @author Naoki Sawada
+	**/
+	protected function remove($path, $force = false, $recursive = false) {
+		$stat = $this->stat($path);
+		$stat['realpath'] = $path;
+		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+			$this->rmTmb($stat['tmb']);
+		}
+		$this->clearcache();
+	
+		if (empty($stat)) {
+			return $this->setError(elFinder::ERROR_RM, $this->_path($path), elFinder::ERROR_FILE_NOT_FOUND);
+		}
+	
+		if (!$force && !empty($stat['locked'])) {
+			return $this->setError(elFinder::ERROR_LOCKED, $this->_path($path));
+		}
+	
+		if ($stat['mime'] == 'directory') {
+			foreach ($this->_scandir($path) as $p) {
+				$name = $this->_basename($p);
+				if ($name != '.' && $name != '..' && !$this->remove($p, false, true)) {
+					return false;
+				}
+			}
+			if (!$recursive && !$this->_rmdir($path)) {
+				return $this->setError(elFinder::ERROR_RM, $this->_path($path));
+			}
+				
+		} else {
+			if (!$recursive && !$this->_unlink($path)) {
+				return $this->setError(elFinder::ERROR_RM, $this->_path($path));
+			}
+		}
+	
+		$this->removed[] = $stat;
+		return true;
+	}
+	
+	/**
 	 * Resize image
 	 *
 	 * @param  string   $hash    image file
