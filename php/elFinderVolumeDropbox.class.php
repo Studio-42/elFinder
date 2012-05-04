@@ -385,7 +385,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Cache dirctory (metaCachePath or tmp) is require.');
 		}
 		
-		$this->metaCacheFile = $this->metaCache.DIRECTORY_SEPARATOR.'.metaCache_'.$this->dropboxUid;
+		$this->metaCacheFile = $this->metaCache.DIRECTORY_SEPARATOR.'.elFinder_dropbox_metaCache_'.md5($this->dropboxUid.$this->options['consumerSecret']);
 		
 		$this->metaCacheGet(!empty($_REQUEST['init']));
 		
