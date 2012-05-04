@@ -255,6 +255,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		unset($this->metaDataCache[$parent], $this->metaDataCache[$path]);
 	}
 	
+	/**
+	 * Get meta cache and set to $this->metaCacheArr
+	 * 
+	 * @param bool $refresh need refresh
+	 * @author Naoki Sawada
+	 */
 	private function metaCacheGet($refresh = false) {
 		$data = false;
 		if ($data = @file_get_contents($this->metaCacheFile)) {
@@ -578,6 +584,26 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	* Copy file/recursive copy dir only in current volume.
+	* Return new file path or false.
+	*
+	* @param  string  $src   source path
+	* @param  string  $dst   destination dir path
+	* @param  string  $name  new file name (optionaly)
+	* @return string|false
+	* @author Dmitry (dio) Levashov
+	* @author Naoki Sawada
+	**/
+	protected function copy($src, $dst, $name) {
+
+		$this->clearcache();
+
+		return $this->_copy($src, $dst, $name)
+		? $this->_joinPath($dst, $name)
+		: $this->setError(elFinder::ERROR_COPY, $this->_path($src));
 	}
 	
 	/**
@@ -1079,7 +1105,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		try {
 			$this->dropbox->copy($source, $path);
 		} catch (Dropbox_Exception $e) {
-			@unlink($local);
 			return $this->setError('Dropbox error: '.$e->getMessage());
 		}
 		$this->metaCacheClear($path);
