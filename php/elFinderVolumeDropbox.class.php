@@ -518,6 +518,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		} else {
 			$stat['url'] = '1';
 		}
+		if (isset($raw['width'])) $stat['width'] = $raw['width'];
+		if (isset($raw['height'])) $stat['height'] = $raw['height'];
+		
 		return $stat;
 	}
 
@@ -1077,9 +1080,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _dimensions($path, $mime) {
 		if (strpos($mime, 'image') !== 0) return '';
+		$cache =& $this->metaCacheArr['data'][strtolower($path)];
+		if (isset($cache['width']) && isset($cache['height'])) {
+			return $cache['width'].'x'.$cache['height'];
+		}
 		if ($local = $this->getLocalName($path)) {
 			if (file_put_contents($local, $this->dropbox->getFile($path), LOCK_EX)) {
 				if ($size = @getimagesize($local)) {
+					$cache =& $this->metaCacheArr['data'][strtolower($path)];
+					$cache['width'] = $size[0];
+					$cache['height'] = $size[1];
+					$this->mataCacheSave();
 					return $size[0].'x'.$size[1];
 				}
 				unlink($local);
