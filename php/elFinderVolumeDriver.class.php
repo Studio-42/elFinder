@@ -1807,6 +1807,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+<<<<<<< HEAD
 	 * Return temp path
 	 * 
 	 * @return string
@@ -1862,6 +1863,8 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+=======
+>>>>>>> add a new command "url" (Get content URL)
 	 * Return content URL (for netmout volume driver)
 	 * If file.url == 1 requests from JavaScript client with XHR
 	 * 
