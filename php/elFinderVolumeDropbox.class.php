@@ -1091,6 +1091,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					$cache['width'] = $size[0];
 					$cache['height'] = $size[1];
 					$this->mataCacheSave();
+					unlink($local);
 					return $size[0].'x'.$size[1];
 				}
 				unlink($local);
