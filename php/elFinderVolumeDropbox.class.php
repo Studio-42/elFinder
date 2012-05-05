@@ -513,6 +513,11 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
 		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : $_SERVER['REQUEST_TIME'];
 		$stat['dirs']  = ($raw['is_dir'] && !empty($raw['dirs']))? 1 : 0;
+		if (isset($raw['url'])) {
+			$stat['url'] = $raw['url'];
+		} else {
+			$stat['url'] = '1';
+		}
 		return $stat;
 	}
 
@@ -832,6 +837,101 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		} catch (Dropbox_Exception $e) {
 			return false;
 		}
+	}
+	
+	/**
+	* Return content URL
+	*
+	* @param string  $hash  file hash
+	* @param array $options options
+	* @return array
+	* @author Naoki Sawada
+	**/
+	public function getContentUrl($hash, $options = array()) {
+		if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
+			$path = $this->decode($hash);
+			$cache =& $this->metaCacheArr['data'][strtolower($path)];
+			$url = '';
+			if (isset($cache['share'])) {
+				$res = $this->getHttpResponseHeader($cache['share']);
+				if (preg_match("/^HTTP\/[01\.]+ ([0-9]{3})/", $res, $match)) {
+					if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
+						$url = $match[1];
+					} else if ($match[1] >= 400) {
+						$url = '';
+					}
+				} else {
+					$url = '';
+				}
+			}
+			if (! $url) {
+				try {
+					$res = $this->dropbox->share($path);
+					$res = $this->getHttpResponseHeader($res['url']);
+					if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
+						$url = $match[1] . '?dl=1';
+					}
+					if ($url) {
+						$cache['share'] = $url;
+						$this->mataCacheSave();
+						$res = $this->getHttpResponseHeader($url);
+						if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
+							$url = $match[1];
+						}
+					}
+				} catch (Dropbox_Exception $e) {
+					return false;
+				}
+			}
+			return $url;
+		}
+		return $file['url'];
+	}
+	
+	/**
+	 * Get HTTP request response header string
+	 * 
+	 * @param string $url target URL
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	private function getHttpResponseHeader($url) {
+		if (function_exists('curl_exec')) {
+
+			$c = curl_init();
+			curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $c, CURLOPT_CUSTOMREQUEST, 'HEAD' );
+			curl_setopt( $c, CURLOPT_HEADER, 1 );
+			curl_setopt( $c, CURLOPT_NOBODY, true );
+			curl_setopt( $c, CURLOPT_URL, $url );
+			$res = curl_exec( $c );
+			
+		} else {
+			
+			require_once 'HTTP/Request2.php';
+			try {
+				$request2 = new HTTP_Request2();
+				$request2->setConfig(array(
+                    'ssl_verify_peer' => false,
+                    'ssl_verify_host' => false
+                ));
+				$request2->setUrl($url);
+				$request2->setMethod(HTTP_Request2::METHOD_HEAD);
+				$result = $request2->send();
+				$res = array();
+				$res[] = 'HTTP/'.$result->getVersion().' '.$result->getStatus().' '.$result->getReasonPhrase();
+				foreach($result->getHeader() as $key => $val) {
+					$res[] = $key . ': ' . $val;
+				}
+				$res = join("\r\n", $res);
+			} catch( HTTP_Request2_Exception $e ){
+				$res = '';
+			} catch (Exception $e){
+				$res = '';
+			}
+		
+		}
+		return $res;
 	}
 	
 	/*********************** paths/urls *************************/
