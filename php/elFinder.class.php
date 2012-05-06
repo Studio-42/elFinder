@@ -180,7 +180,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
-		session_start();
+		@session_start();
 
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
