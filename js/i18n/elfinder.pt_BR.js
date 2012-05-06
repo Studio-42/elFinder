@@ -8,6 +8,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		translator : 'Leandro Carvalho &lt;contato@leandrowebdev.net&gt;',
 		language   : 'Português',
 		direction  : 'ltr',
+		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -65,6 +67,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Tipo de arquivo não suportado.',
 			'errNoArchive'         : 'Arquivo inválido ou é um tipo sem suporte.',
 			'errCmdNoSupport'      : 'Backend não suporta este comando.',
+			'errNotUTF8Content'    : 'Arquivo "$1" não está em UTF-8 e não pode ser editado.',  // added 9.11.2011
+			'errNetMount'          : 'Habilitar montagem "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Protocolo não suportado.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Monagem falhou.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Servidor requerido.', // added 18.04.2012
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Criar arquivo',
@@ -92,6 +99,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ir para o diretório pai',
 			'cmdupload'    : 'Fazer upload de arquivo',
 			'cmdview'      : 'Vizualizar',
+			'cmdresize'    : 'Redimencionar & Rodar',
+			'cmdsort'      : 'Ordenar',
+			'cmdnetmount'  : 'Montar unidade de rede', // added 18.04.2012
 
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Fechar',
@@ -100,6 +110,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancelar',
 			'btnNo'     : 'Não',
 			'btnYes'    : 'Sim',
+			'btnMount'  : 'Montar',  // added 18.04.2012
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Abrir Pasta',
@@ -119,6 +130,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Extraindo arquivos dos ficheiros',
 			'ntfsearch'   : 'Procurando arquivos',
 			'ntfsmth'     : 'Fazendo alguma coisa >_<',
+			'ntfnetmount' : 'Montando unidade de rede', // added 18.04.2012
+
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Desconhecido',
@@ -137,6 +150,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dez',
 
+			/******************************** sort variants ********************************/
+			'sortnameDirsFirst' : 'por nome (pastas primeiro)', 
+			'sortkindDirsFirst' : 'por tipo (pastas primeiro)', 
+			'sortsizeDirsFirst' : 'por tam. (pastas primeiro)', 
+			'sortdateDirsFirst' : 'por data (pastas primeiro)', 
+			'sortname'          : 'por nome', 
+			'sortkind'          : 'por tipo', 
+			'sortsize'          : 'por tam.',
+			'sortdate'          : 'por data',
+			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmação requerida',
 			'confirmRm'       : 'Você tem certeza que quer remover os arquivos?<br />Isto não pode ser desfeito!',
@@ -197,6 +220,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'Selecione arquivos para upload',
 			'moveFiles'       : 'Mover arquivos',
 			'copyFiles'       : 'Copiar arquivos',
+			'rmFromPlaces'    : 'Remover de Lugares',
+			'aspectRatio'     : 'Manter aspecto',
+			'scale'           : 'Tamanho',
+			'width'           : 'Largura',
+			'height'          : 'Altura',
+			'resize'          : 'Redimencionar',
+			'crop'            : 'Cortar',
+			'rotate'          : 'Rotacionar',
+			'rotate-cw'       : 'Girar 90 graus CW',
+			'rotate-ccw'      : 'Girar 90 graus CCW',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Montar Unidade de rede', // added 18.04.2012
+			'protocol'            : 'Protocolo', // added 18.04.2012
+			'host'                : 'Servidor', // added 18.04.2012
+			'port'                : 'Porta', // added 18.04.2012
+			'user'                : 'Usuário', // added 18.04.2012
+			'pass'                : 'Senha', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconhecio',
