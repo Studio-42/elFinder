@@ -480,6 +480,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			}
 			if (!isset($cache['data'][$pkey])) {
 				$cache['data'][$pkey] = array();
+			} else {
+				unset($cache['data'][$key]['width'], $cache['data'][$key]['height']);
 			}
 			if (!empty($entry[1]['is_dir'])) {
 				if (!isset($cache['data'][$pkey]['dirs'])) {
