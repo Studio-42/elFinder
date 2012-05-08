@@ -12,9 +12,10 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSyste
 // include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeFTP.class.php';
 // Required for Dropbox.com connector support
 // include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDropbox.class.php';
-// Dropbox volume driver need "PHP OAuth extension" or "PEAR’s HTTP_OAUTH package"
-// PHP OAuth extension: http://pecl.php.net/package/oauth
-// PEAR’s HTTP_OAUTH package: http://pear.php.net/package/http_oauth
+// # Dropbox volume driver need "PHP OAuth extension" or "PEAR’s HTTP_OAUTH package"
+// * PHP OAuth extension: http://pecl.php.net/package/oauth
+// * PEAR’s HTTP_OAUTH package: http://pear.php.net/package/http_oauth
+//  * HTTP_OAUTH package require HTTP_Request2 and Net_URL2
 // Dropbox driver need next two settings. You can get at https://www.dropbox.com/developers
 // define('ELFINDER_DROPBOX_CONSUMERKEY',    '');
 // define('ELFINDER_DROPBOX_CONSUMERSECRET', '');
