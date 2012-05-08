@@ -264,7 +264,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function metaCacheGet($refresh = false) {
 		$data = false;
 		if ($data = @file_get_contents($this->metaCacheFile)) {
-			$data = @unserialize($data);
+			if (function_exists('gzcompress') && function_exists('gzuncompress')) {
+				$data = @unserialize(gzuncompress($data));
+			} else {
+				$data = @unserialize(base64_decode($data));
+			}
+			if (!$data) {
+				@unlink($this->metaCacheFile);
+			}
 		}
 		if (! $data || !isset($data['data'])) {
 			$this->metaCacheArr = array();
@@ -284,7 +291,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	private function mataCacheSave() {
-		file_put_contents($this->metaCacheFile, serialize($this->metaCacheArr), LOCK_EX);
+		if (function_exists('gzcompress') && function_exists('gzuncompress')) {
+			$data = gzcompress(serialize($this->metaCacheArr));
+		} else {
+			$data = base64_encode(serialize($this->metaCacheArr));
+		}
+		file_put_contents($this->metaCacheFile, $data, LOCK_EX);
 	}
 	
 	/*********************************************************************/
