@@ -92,8 +92,15 @@ elFinder.prototype.commands.upload = function() {
 			dropbox.addEventListener('drop', function(e) {
 				e.stopPropagation();
 			  	e.preventDefault();
-			
-				upload({files : e.dataTransfer.files});
+				var file = false;
+				if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+					file = e.dataTransfer.files;
+				} else if (e.dataTransfer.getData('text/html')) {
+					file = [ e.dataTransfer.getData('text/html') ];
+				}
+				if (file) {
+					upload({files : file});
+				}
 			}, false);
 			
 		}
