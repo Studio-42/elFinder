@@ -117,7 +117,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'tmpPath'           => '',
 			'getTmbSize'        => 'medium', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
-			'metaCacheTime'     => '600' // 10m
+			'metaCacheTime'     => '600', // 10m
+			'acceptedName'      => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#'
 		);
 		$this->options = array_merge($this->options, $opts);
 		$this->options['mimeDetect'] = 'internal';
