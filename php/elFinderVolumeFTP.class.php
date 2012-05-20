@@ -116,6 +116,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			return $this->setError('Required options undefined.');
 		}
 		
+		// make ney mount key
+		$this->netMountKey = md5(join('-', array('ftp', $this->options['host'], $this->options['port'], $this->options['path'], $this->options['user'])));
+
 		if (!function_exists('ftp_connect')) {
 			return $this->setError('FTP extension not loaded.');
 		}
@@ -138,9 +141,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$this->rootName = $this->options['alias'];
 		$this->options['separator'] = '/';
-		
-		// make ney mount key
-		$this->netMountKey = md5(join('-', array('ftp', $this->options['host'], $this->options['port'], $this->options['path'], $this->options['user'])));
 		
 		return $this->connect();
 		

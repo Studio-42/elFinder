@@ -1,7 +1,7 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
- * @version 2012-04-18
+ * @version 2012-04-23
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -79,6 +79,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
 			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
 			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
+			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
+			'errNetUnMount'        : 'アンマウントできません', // added 30.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -107,6 +109,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'ビュー',
 			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
+			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
+			'cmdnetunmount': 'アンマウント', // added 30.04.2012
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
@@ -116,7 +120,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'キャンセル',
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
-			
+			'btnMount'  : 'マウント',  // added 18.04.2012
+			'btnApprove': '$1へ行き認可する', // added 26.04.2012
+			'btnUnmount': 'アンマウント', // added 30.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開く',
 			'ntffile'     : 'ファイルを開く',
@@ -136,7 +142,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'ファイル検索',
 			'ntfresize'   : 'リサイズしています',
 			'ntfsmth'     : '何かしています >_<',
-			'ntfloadimg'  : 'Loading image',
+      		'ntfloadimg'  : 'イメージを読み込んでいます',
+      		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
+      		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
@@ -236,7 +244,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : '90度左回転',
 			'rotate-ccw'      : '90度右回転',
 			'degree'          : '度',
-			
+			'netMountDialogTitle' : 'ネットワークボリュームのマウント', // added 18.04.2012
+			'protocol'            : 'プロトコル', // added 18.04.2012
+			'host'                : 'ホスト名', // added 18.04.2012
+			'port'                : 'ポート', // added 18.04.2012
+			'user'                : 'ユーザー名', // added 18.04.2012
+			'pass'                : 'パスワード', // added 18.04.2012
+			'confirmUnmount'      : '$1をアンマウントしますか?',  // added 30.04.2012
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
 			'kindFolder'      : 'フォルダー',
