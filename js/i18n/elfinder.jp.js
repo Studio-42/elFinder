@@ -1,8 +1,13 @@
 /**
  * Japanese translation
+<<<<<<< HEAD
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
  * @version 2013-07-03
+=======
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
+ * @version 2012-04-23
+>>>>>>> correction about netmount is extracted from a dropbox brunch
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
