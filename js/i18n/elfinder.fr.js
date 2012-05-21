@@ -1,7 +1,7 @@
 /**
  * French translation
  * @author Régis Guyomarch <regisg@gmail.com>
- * @version 2011-07-11
+ * @version 2012-05-21
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.fr = {
