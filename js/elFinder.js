@@ -1818,10 +1818,48 @@ elFinder.prototype = {
 	iframeCnt : 0,
 	
 	uploads : {
+		// check droped contents
+		checkFile : function(data) {
+			if (typeof data.type == 'files') {
+				return data.files;
+			} else {
+				var ret = [];
+				var regex;
+				var str = data.files[0];
+				if (data.type == 'html') {
+					regex = /<img[^>]+src=["']?([^"'> ]+)/ig;
+					var m = [];
+					var url = '';
+					var links;
+					while (m = regex.exec(str)) {
+						url = m[1].replace(/&amp;/g, '&');
+						if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+					}
+					links = str.match(/<\/a>/i);
+					if (links && links.length == 1) {
+						regex = /<a[^>]+href=["']?([^"'> ]+)((?:.|\s)+)<\/a>/i;
+						if (m = regex.exec(str)) {
+							if (! m[2].match(/<img/i)) {
+								url = m[1].replace(/&amp;/g, '&');
+								if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+							}
+						}
+					}
+				} else {
+					regex = /(http[^<>"{}|\\^\[\]`\s]+)/ig;
+					while (m = regex.exec(str)) {
+						url = m[1].replace(/&amp;/g, '&');
+						if ($.inArray(url, ret) == -1) ret.push(url);
+					}
+				}
+				return ret;
+			}
+		},
 		// upload transport using iframe
 		iframe : function(data, fm) { 
 			var self   = fm ? fm : this,
-				input  = data.input,
+				input  = data.input? data.input : false,
+				files  = !input ? self.uploads.checkFile(data) : false,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -1878,8 +1916,13 @@ elFinder.prototype = {
 				cnt, notify, notifyto, abortto
 				
 				;
-			
-			if (input && $(input).is(':file') && $(input).val()) {
+
+			if (files) {
+				$.each(files, function(i, val) {
+					//val = ('<span>').text(val).html();
+					form.append('<input type="hidden" name="upload[]" value="'+val+'"/>');
+				});
+			} else if (input && $(input).is(':file') && $(input).val()) {
 				form.append(input);
 			} else {
 				return dfrd.reject();
@@ -1923,36 +1966,9 @@ elFinder.prototype = {
 						notifyto && clearTimeout(notifyto);
 						notify && self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
 					}),
-				checkFile   = function(files) {
-					if (typeof files[0] == 'string') {
-						//console.log(files[0]);
-						var ret = [];
-						var regex = /<img[^>]+src=["']?([^"'> ]+)/ig;
-						var m = [];
-						var url = '';
-						var links;
-						while (m = regex.exec(files[0])) {
-							url = m[1].replace(/&amp;/g, '&');
-							if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
-						}
-						links = files[0].match(/<\/a>/i);
-						if (links && links.length == 1) {
-							regex = /<a[^>]+href=["']?([^"'> ]+)((?:.|\s)+)<\/a>/i;
-							if (m = regex.exec(files[0])) {
-								if (! m[2].match(/<img/i)) {
-									url = m[1].replace(/&amp;/g, '&');
-									if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
-								}
-							}
-						}
-						return ret;
-					} else {
-						return files;
-					}
-				},
 				xhr         = new XMLHttpRequest(),
 				formData    = new FormData(),
-				files       = checkFile(data.input ? data.input.files : data.files), 
+				files       = data.input ? data.input.files : self.uploads.checkFile(data), 
 				cnt         = files.length,
 				loaded      = 5,
 				notify      = false,
