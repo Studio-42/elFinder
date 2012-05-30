@@ -952,8 +952,10 @@ class elFinder {
 			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($non_uploads[$tmpfname]);
 			$result['added'][] = $file;
 		}
-		foreach(array_keys($non_uploads[$tmpfname]) as $_temp) {
-			@ unlink($_temp);
+		if ($non_uploads) {
+			foreach(array_keys($non_uploads) as $_temp) {
+				@ unlink($_temp);
+			}
 		}
 		return $result;
 	}

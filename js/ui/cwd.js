@@ -813,13 +813,19 @@ $.fn.elfindercwd = function(fm) {
 			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
 				var file = false;
+				var type = '';
 				if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
 					file = e.dataTransfer.files;
+					type = 'files';
 				} else if (e.dataTransfer.getData('text/html')) {
 					file = [ e.dataTransfer.getData('text/html') ];
+					type = 'html';
+				} else if (e.dataTransfer.getData('text')) {
+					file = [ e.dataTransfer.getData('text') ];
+					type = 'text';
 				}
 				if (file) {
-					fm.exec('upload', {files : file});
+					fm.exec('upload', {files : file, type : type});
 				}
 			}, false);
 		}
