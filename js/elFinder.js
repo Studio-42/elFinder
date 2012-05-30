@@ -1917,18 +1917,17 @@ elFinder.prototype = {
 				
 				;
 
-			if (files) {
+			if (files && files.length) {
 				$.each(files, function(i, val) {
-					//val = ('<span>').text(val).html();
 					form.append('<input type="hidden" name="upload[]" value="'+val+'"/>');
 				});
+				cnt = 1;
 			} else if (input && $(input).is(':file') && $(input).val()) {
 				form.append(input);
+				cnt = input.files ? input.files.length : 1;
 			} else {
 				return dfrd.reject();
 			}
-			
-			cnt = input.files ? input.files.length : 1;
 			
 			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+self.cwd().hash+'"/>')
 				.append('<input type="hidden" name="html" value="1"/>')
