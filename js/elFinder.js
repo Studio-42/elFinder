@@ -1886,7 +1886,7 @@ elFinder.prototype = {
 	uploads : {
 		// check droped contents
 		checkFile : function(data) {
-			if (typeof data.type == 'files') {
+			if (data.type == 'files') {
 				return data.files;
 			} else {
 				var ret = [];
