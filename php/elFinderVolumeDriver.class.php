@@ -1484,6 +1484,10 @@ abstract class elFinderVolumeDriver {
 				if (($locked = $this->closestByAttr($test, 'locked', true))) {
 					return $this->setError(elFinder::ERROR_LOCKED, $this->_path($locked));
 				}
+				// target is entity file of alias
+				if ($volume == $this && ($test == @$file['target'] || $test == $this->decode($src))) {
+					return $this->setError(elFinder::ERROR_REPLACE, $errpath);
+				}
 				// remove existed file
 				if (!$this->remove($test)) {
 					return $this->setError(elFinder::ERROR_REPLACE, $this->_path($test));
@@ -1498,7 +1502,7 @@ abstract class elFinderVolumeDriver {
 			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->_inpath($destination, $source)) {
-				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $path);
+				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
 			
@@ -1959,7 +1963,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function attr($path, $name, $val=false) {
+	protected function attr($path, $name, $val=null) {
 		if (!isset($this->defaults[$name])) {
 			return false;
 		}
@@ -1990,7 +1994,7 @@ abstract class elFinderVolumeDriver {
 			} 
 		}
 		
-		return $perm === null ? $this->defaults[$name] : !!$perm;
+		return $perm === null ? (is_null($val)? $this->defaults[$name] : $val) : !!$perm;
 	}
 	
 	/**
@@ -2056,8 +2060,8 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
-		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
+		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null));
+		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null));
 		if ($root) {
 			$stat['locked'] = 1;
 		} elseif ($this->attr($path, 'locked', !empty($stat['locked']))) {
