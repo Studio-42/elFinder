@@ -472,7 +472,23 @@ window.elFinder = function(node, opts) {
 		refreshPositions : true,
 		cursor     : 'move',
 		cursorAt   : {left : 50, top : 47},
-		drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+		drag       : function(e, ui) {
+			if (! ui.helper.data('locked')) {
+				ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey);
+			}
+		},
+		start      : function(e, ui) {
+			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
+			cnt, h;
+			cnt = targets.length;
+			while (cnt--) {
+				h = targets[cnt];
+				if (files[h].locked) {
+					ui.helper.addClass('elfinder-drag-helper-plus').data('locked', true);
+					break;
+				}
+			}
+		},
 		stop       : function() { self.trigger('focus').trigger('dragstop'); },
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -486,7 +502,7 @@ window.elFinder = function(node, opts) {
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
-			helper.append(icon(files[hashes[0]].mime)).data('files', hashes);
+			helper.append(icon(files[hashes[0]].mime)).data('files', hashes).data('locked', false);
 
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -530,7 +546,7 @@ window.elFinder = function(node, opts) {
 				
 				if (result.length) {
 					ui.helper.hide();
-					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey));
+					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked')));
 					self.exec('paste', hash).always(function() { self.clipboard([]); });
 					self.trigger('drop', {files : targets});
 				}
