@@ -331,10 +331,45 @@ abstract class elFinderVolumeDriver {
 		'pps'   => 'application/vnd.ms-powerpoint',
 		'pdf'   => 'application/pdf',
 		'xml'   => 'application/xml',
-		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
 		'torrent' => 'application/x-bittorrent',
 		'jar'   => 'application/x-jar',
+		// open office (finfo detect as application/zip)
+		'odt'   => 'application/vnd.oasis.opendocument.text',
+		'ott'   => 'application/vnd.oasis.opendocument.text-template',
+		'oth'   => 'application/vnd.oasis.opendocument.text-web',
+		'odm'   => 'application/vnd.oasis.opendocument.text-master',
+		'odg'   => 'application/vnd.oasis.opendocument.graphics',
+		'otg'   => 'application/vnd.oasis.opendocument.graphics-template',
+		'odp'   => 'application/vnd.oasis.opendocument.presentation',
+		'otp'   => 'application/vnd.oasis.opendocument.presentation-template',
+		'ods'   => 'application/vnd.oasis.opendocument.spreadsheet',
+		'ots'   => 'application/vnd.oasis.opendocument.spreadsheet-template',
+		'odc'   => 'application/vnd.oasis.opendocument.chart',
+		'odf'   => 'application/vnd.oasis.opendocument.formula',
+		'odb'   => 'application/vnd.oasis.opendocument.database',
+		'odi'   => 'application/vnd.oasis.opendocument.image',
+		'oxt'   => 'application/vnd.openofficeorg.extension',
+		// MS office 2007 (finfo detect as application/zip)
+		'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		'docm'  => 'application/vnd.ms-word.document.macroEnabled.12',
+		'dotx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+		'dotm'  => 'application/vnd.ms-word.template.macroEnabled.12',
+		'xlsx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'xlsm'  => 'application/vnd.ms-excel.sheet.macroEnabled.12',
+		'xltx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+		'xltm'  => 'application/vnd.ms-excel.template.macroEnabled.12',
+		'xlsb'  => 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+		'xlam'  => 'application/vnd.ms-excel.addin.macroEnabled.12',
+		'pptx'  => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		'pptm'  => 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+		'ppsx'  => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+		'ppsm'  => 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
+		'potx'  => 'application/vnd.openxmlformats-officedocument.presentationml.template',
+		'potm'  => 'application/vnd.ms-powerpoint.template.macroEnabled.12',
+		'ppam'  => 'application/vnd.ms-powerpoint.addin.macroEnabled.12',
+		'sldx'  => 'application/vnd.openxmlformats-officedocument.presentationml.slide',
+		'sldm'  => 'application/vnd.ms-powerpoint.slide.macroEnabled.12',
 		// archives
 		'gz'    => 'application/x-gzip',
 		'tgz'   => 'application/x-gzip',
@@ -1330,7 +1365,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname); 
+		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname, $name); 
 		if ($mime == 'unknown' && $this->mimeDetect == 'internal') {
 			$mime = elFinderVolumeDriver::mimetypeInternalDetect($name);
 		}
@@ -2116,11 +2151,17 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function mimetype($path) {
+	protected function mimetype($path, $name = '') {
 		$type = '';
 		
 		if ($this->mimeDetect == 'finfo') {
-			$type = @finfo_file($this->finfo, $path); 
+			if ($type = @finfo_file($this->finfo, $path)) {
+				if ($name === '') $name = $path;
+				$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
+				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
+					if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
+				}
+			}
 		} elseif ($type == 'mime_content_type') {
 			$type = mime_content_type($path);
 		} else {
