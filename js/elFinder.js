@@ -738,7 +738,7 @@ window.elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.selectedFiles = function() {
-		return $.map(selected, function(hash) { return files[hash] || null });
+		return $.map(selected, function(hash) { return files[hash] ? $.extend({}, files[hash]) : null });
 	};
 	
 	/**
