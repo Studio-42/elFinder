@@ -529,6 +529,35 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
+		
+		$newkey = $this->_normpath($path);
+		$newkey = preg_replace("/\/$/", "", $newkey);
+
+		try {
+			$obj = $this->s3->DeleteObject(array('Bucket' => $this->options['bucket'], 'Key' => $newkey));
+		} catch (Exception $e) {
+		
+		}
+		
+		/*$fp = fopen('/tmp/eltest.txt','a+');
+		
+		fwrite($fp, 'key='.$newkey);*/
+		
+		if (is_object($obj)) {
+			//fwrite($fp, 'obj='.var_export($obj,true));
+			
+			if (isset($obj->DeleteObjectResponse->Code)) {
+				$rc = $obj->DeleteObjectResponse->Code;
+				
+				if (substr($rc, 0, 1) == '2') {
+					return true;
+				}
+			}
+		}
+
+			
+		//fclose($fp);
+		
 		return false;
 	}
 
@@ -540,7 +569,7 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		return false;
+		return $this->_unlink($path . '/');
 	}
 
 	/**
@@ -670,7 +699,10 @@ class S3SoapClient extends SoapClient {
 			}
 
 		}
-
+		
+		/*$fp = fopen('/tmp/s3debug.txt', 'a+');
+		fwrite($fp, 'method='."{$method}". ' timestamp='.date('Y-m-d H:i:s').' args='.var_export($arguments,true) . "\n");
+		fclose($fp);*/
 		return parent::__call($method, $arguments);
 	}
 
