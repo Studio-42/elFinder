@@ -1484,6 +1484,10 @@ abstract class elFinderVolumeDriver {
 				if (($locked = $this->closestByAttr($test, 'locked', true))) {
 					return $this->setError(elFinder::ERROR_LOCKED, $this->_path($locked));
 				}
+				// target is entity file of alias
+				if ($volume == $this && ($test == @$file['target'] || $test == $this->decode($src))) {
+					return $this->setError(elFinder::ERROR_REPLACE, $errpath);
+				}
 				// remove existed file
 				if (!$this->remove($test)) {
 					return $this->setError(elFinder::ERROR_REPLACE, $this->_path($test));
@@ -1498,7 +1502,7 @@ abstract class elFinderVolumeDriver {
 			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->_inpath($destination, $source)) {
-				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $path);
+				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
 			
