@@ -2160,7 +2160,9 @@ abstract class elFinderVolumeDriver {
 		
 		if ($this->mimeDetect == 'finfo') {
 			if ($type = @finfo_file($this->finfo, $path)) {
-				if ($name === '') $name = $path;
+				if ($name === '') {
+					$name = $path;
+				}
 				$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
 				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
 					if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
@@ -2174,8 +2176,8 @@ abstract class elFinderVolumeDriver {
 		
 		$type = explode(';', $type);
 		$type = trim($type[0]);
-		
-		if ($type == 'application/x-empty') {
+
+		if (in_array($type, array('application/x-empty', 'inode/x-empty'))) {
 			// finfo return this mime for empty files
 			$type = 'text/plain';
 		} elseif ($type == 'application/x-zip') {
