@@ -727,7 +727,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
-		if (($path = ftp_mkdir($this->connect, $path.'/'.$name)) == false) {
+		$path = $path.'/'.$name;
+		if (ftp_mkdir($this->connect, $path) === false) {
 			return false;
 		} 
 		
