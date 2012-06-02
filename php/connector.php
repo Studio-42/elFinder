@@ -253,6 +253,7 @@ $opts = array(
 			'tmbCrop'    => false,
 			'tmbBgColor' => 'transparent',
 			'accessControl' => 'access',
+			'acceptedName'    => '/^[^._].*$/',
 			// 'uploadDeny' => array('application', 'text/xml')
 		),
 		// array(
