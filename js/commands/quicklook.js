@@ -92,7 +92,13 @@ elFinder.prototype.commands.quicklook = function() {
 		
 		support = function(codec) {
 			var media = document.createElement(codec.substr(0, codec.indexOf('/'))),
+				value = false;
+			
+			try {
 				value = media.canPlayType && media.canPlayType(codec);
+			} catch (e) {
+				
+			}
 			
 			return value && value !== '' && value != 'no';
 		},
