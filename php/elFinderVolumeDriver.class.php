@@ -1986,10 +1986,12 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
+		$testPath = $this->separator.$this->_relpath($path);
+		
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
-			$p = $this->separator.$this->_relpath($path);
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $p)) {
+			
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $testPath)) {
 				$perm = $attrs[$name];
 			} 
 		}
