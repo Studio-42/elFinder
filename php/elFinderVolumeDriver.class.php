@@ -1996,12 +1996,18 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		$testPath = $this->separator.$this->_relpath($path);
-		
+		if ($this->separator != '/') {
+			$path = str_replace($this->separator, '/', $this->_relpath($path));
+		} else {
+			$path = $this->_relpath($path);
+		}
+
+		$path = '/'.$path;
+
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
 			
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $testPath)) {
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
 				$perm = $attrs[$name];
 			} 
 		}
@@ -3018,7 +3024,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-		protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
+	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
