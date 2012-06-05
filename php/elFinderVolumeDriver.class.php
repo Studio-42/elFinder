@@ -1249,15 +1249,16 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
-		if (!$dir['write']) {
+		$path = $this->decode($dst);
+		
+		if (!$dir['write'] || !$this->allowCreate($path, $name)) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		$path = $this->decode($dst);
-
 		if ($this->stat($this->_joinPath($path, $name))) {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
+		
 		$this->clearcache();
 		return ($path = $this->_mkfile($path, $name)) ? $this->stat($path) : false;
 	}
@@ -1298,6 +1299,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
+		if (!$this->allowCreate($dir, $name)) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
 		if (!$this->_move($path, $dir, $name)) {
 			return false;
 		}
@@ -1331,8 +1336,13 @@ abstract class elFinderVolumeDriver {
 
 		$path = $this->decode($hash);
 		$dir  = $this->_dirname($path);
+		$name = $this->uniqueName($dir, $this->_basename($path), ' '.$suffix.' ');
 
-		return ($path = $this->copy($path, $dir, $this->uniqueName($dir, $this->_basename($path), ' '.$suffix.' '))) == false
+		if (!$this->allowCreate($dir, $name)) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		return ($path = $this->copy($path, $dir, $name)) == false
 			? false
 			: $this->stat($path);
 	}
@@ -1997,6 +2007,46 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		return $perm === null ? (is_null($val)? $this->defaults[$name] : $val) : !!$perm;
+	}
+	
+	/**
+	 * Return true if file with given name can be created in given folder.
+	 *
+	 * @param string $dir  parent dir path
+	 * @param string $name new file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	private function allowCreate($dir, $name) {
+		$path = $this->_joinPath($dir, $name);
+		$perm = null;
+		
+		if ($this->access) {
+			if (is_array($this->access)) {
+				$obj    = $this->access[0];
+				$method = $this->access[1];
+				$perm   = $obj->{$method}('write', $path, $this->options['accessControlData'], $this);
+			} else {
+				$func = $this->access;
+				$perm = $func('write', $path, $this->options['accessControlData'], $this);
+			}
+			
+			if ($perm !== null) {
+				return !!$perm;
+			}
+		}
+		
+		$testPath = $this->separator.$this->_relpath($path);
+		
+		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
+			$attrs = $this->attributes[$i];
+			
+			if (isset($attrs['write']) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $testPath)) {
+				$perm = $attrs['write'];
+			} 
+		}
+		
+		return $perm === null ? true : $perm;
 	}
 	
 	/**
