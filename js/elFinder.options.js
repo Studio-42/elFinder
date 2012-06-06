@@ -122,7 +122,7 @@ elFinder.prototype._options = {
 	commandsOptions : {
 		// "getfile" command options.
 		getfile : {
-			onlyURL  : true,
+			onlyURL  : false,
 			// allow to return multiple files info
 			multiple : false,
 			// allow to return filers info

@@ -547,8 +547,9 @@ window.elFinder = function(node, opts) {
 				if (result.length) {
 					ui.helper.hide();
 					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked')));
-					self.exec('paste', hash).always(function() { self.clipboard([]); });
+					self.exec('paste', hash)//.always(function() { console.log('clean'); self.clipboard([]); });
 					self.trigger('drop', {files : targets});
+
 				}
 			}
 		};
@@ -1226,7 +1227,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.clipboard = function(hashes, cut) {
 		var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
-		
+
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
 			remember = [];
