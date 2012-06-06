@@ -450,6 +450,7 @@ window.elFinder = function(node, opts) {
 	  }
 	})();
 
+	this.viewType = this.storage('view') || this.options.defaultView || 'icons',
 
 	/**
 	 * Delay in ms before open notification dialog
@@ -1605,7 +1606,7 @@ window.elFinder = function(node, opts) {
 			hide : function() { prevEnabled && self.enable(); }
 		}),
 		// current folder container
-		cwd : $('<div/>').appendTo(node).elfindercwd(this),
+		cwd : $('<div/>').appendTo(node).elfindercwd(this, this.options.uiOptions.cwd || {}),
 		// notification dialog window
 		notify : this.dialog('', {
 			cssClass  : 'elfinder-dialog-notify',

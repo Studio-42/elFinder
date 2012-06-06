@@ -198,6 +198,14 @@ elFinder.prototype._options = {
 	getFileCallback : null,
 	
 	/**
+	 * Default directory view. icons/list
+	 *
+	 * @type String
+	 * @default "icons"
+	 */
+	defaultView : 'icons',
+	
+	/**
 	 * UI plugins to load.
 	 * Current dir ui and dialogs loads always.
 	 * Here set not required plugins as folders tree/toolbar/statusbar etc.
