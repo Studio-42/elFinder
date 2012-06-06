@@ -547,7 +547,7 @@ window.elFinder = function(node, opts) {
 				if (result.length) {
 					ui.helper.hide();
 					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked')));
-					self.exec('paste', hash)//.always(function() { console.log('clean'); self.clipboard([]); });
+					self.exec('paste', hash);
 					self.trigger('drop', {files : targets});
 
 				}
