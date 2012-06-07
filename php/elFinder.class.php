@@ -782,12 +782,16 @@ class elFinder {
 	 * @retval string contents
 	 * @retval false error
 	 **/
-	 protected function curl_get_contents( $url, $timeout = 10 ){
+	 protected function curl_get_contents( $url, $timeout = 30 ){
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_HEADER, false );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_BINARYTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt( $ch, CURLOPT_MAXREDIRS, 5);
 		$result = curl_exec( $ch );
 		curl_close( $ch );
 		return $result;
@@ -816,7 +820,7 @@ class elFinder {
 				foreach($args['upload'] as $i => $url) {
 					$data = $this->curl_get_contents($url);
 					if ($data) {
-						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:#.*)?$~', '$1', rawurldecode($url));
+						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
 						if ($_name) {
 							$_ext = '';
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
@@ -873,10 +877,8 @@ class elFinder {
 			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($non_uploads[$tmpfname]);
 			$result['added'][] = $file;
 		}
-		if ($non_uploads) {
-			foreach(array_keys($non_uploads) as $_temp) {
-				@ unlink($_temp);
-			}
+		foreach(array_keys($non_uploads[$tmpfname]) as $_temp) {
+			@ unlink($_temp);
 		}
 		return $result;
 	}
