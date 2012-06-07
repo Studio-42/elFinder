@@ -209,7 +209,7 @@ abstract class elFinderVolumeDriver {
 		// list of commands disabled on this root
 		'disabled'        => array(),
 		// regexp or function name to validate new file name
-		'acceptedName'    => '/^\w[\w\s\.\%\-\(\)\[\]]*$/u',
+		'acceptedName'    => '/^[^.].*/', //<-- DONT touch this! Use constructor options to overwrite it!
 		// function/class method to control files permissions
 		'accessControl'   => null,
 		// some data required by access control
@@ -331,10 +331,45 @@ abstract class elFinderVolumeDriver {
 		'pps'   => 'application/vnd.ms-powerpoint',
 		'pdf'   => 'application/pdf',
 		'xml'   => 'application/xml',
-		'odt'   => 'application/vnd.oasis.opendocument.text',
 		'swf'   => 'application/x-shockwave-flash',
 		'torrent' => 'application/x-bittorrent',
 		'jar'   => 'application/x-jar',
+		// open office (finfo detect as application/zip)
+		'odt'   => 'application/vnd.oasis.opendocument.text',
+		'ott'   => 'application/vnd.oasis.opendocument.text-template',
+		'oth'   => 'application/vnd.oasis.opendocument.text-web',
+		'odm'   => 'application/vnd.oasis.opendocument.text-master',
+		'odg'   => 'application/vnd.oasis.opendocument.graphics',
+		'otg'   => 'application/vnd.oasis.opendocument.graphics-template',
+		'odp'   => 'application/vnd.oasis.opendocument.presentation',
+		'otp'   => 'application/vnd.oasis.opendocument.presentation-template',
+		'ods'   => 'application/vnd.oasis.opendocument.spreadsheet',
+		'ots'   => 'application/vnd.oasis.opendocument.spreadsheet-template',
+		'odc'   => 'application/vnd.oasis.opendocument.chart',
+		'odf'   => 'application/vnd.oasis.opendocument.formula',
+		'odb'   => 'application/vnd.oasis.opendocument.database',
+		'odi'   => 'application/vnd.oasis.opendocument.image',
+		'oxt'   => 'application/vnd.openofficeorg.extension',
+		// MS office 2007 (finfo detect as application/zip)
+		'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		'docm'  => 'application/vnd.ms-word.document.macroEnabled.12',
+		'dotx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+		'dotm'  => 'application/vnd.ms-word.template.macroEnabled.12',
+		'xlsx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'xlsm'  => 'application/vnd.ms-excel.sheet.macroEnabled.12',
+		'xltx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+		'xltm'  => 'application/vnd.ms-excel.template.macroEnabled.12',
+		'xlsb'  => 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+		'xlam'  => 'application/vnd.ms-excel.addin.macroEnabled.12',
+		'pptx'  => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		'pptm'  => 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+		'ppsx'  => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+		'ppsm'  => 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
+		'potx'  => 'application/vnd.openxmlformats-officedocument.presentationml.template',
+		'potm'  => 'application/vnd.ms-powerpoint.template.macroEnabled.12',
+		'ppam'  => 'application/vnd.ms-powerpoint.addin.macroEnabled.12',
+		'sldx'  => 'application/vnd.openxmlformats-officedocument.presentationml.slide',
+		'sldm'  => 'application/vnd.ms-powerpoint.slide.macroEnabled.12',
 		// archives
 		'gz'    => 'application/x-gzip',
 		'tgz'   => 'application/x-gzip',
@@ -1214,15 +1249,16 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
-		if (!$dir['write']) {
+		$path = $this->decode($dst);
+		
+		if (!$dir['write'] || !$this->allowCreate($path, $name)) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		$path = $this->decode($dst);
-
 		if ($this->stat($this->_joinPath($path, $name))) {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
+		
 		$this->clearcache();
 		return ($path = $this->_mkfile($path, $name)) ? $this->stat($path) : false;
 	}
@@ -1263,6 +1299,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
+		if (!$this->allowCreate($dir, $name)) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
 		if (!$this->_move($path, $dir, $name)) {
 			return false;
 		}
@@ -1296,8 +1336,13 @@ abstract class elFinderVolumeDriver {
 
 		$path = $this->decode($hash);
 		$dir  = $this->_dirname($path);
+		$name = $this->uniqueName($dir, $this->_basename($path), ' '.$suffix.' ');
 
-		return ($path = $this->copy($path, $dir, $this->uniqueName($dir, $this->_basename($path), ' '.$suffix.' '))) == false
+		if (!$this->allowCreate($dir, $name)) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		return ($path = $this->copy($path, $dir, $name)) == false
 			? false
 			: $this->stat($path);
 	}
@@ -1330,7 +1375,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname); 
+		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname, $name); 
 		if ($mime == 'unknown' && $this->mimeDetect == 'internal') {
 			$mime = elFinderVolumeDriver::mimetypeInternalDetect($name);
 		}
@@ -1449,6 +1494,10 @@ abstract class elFinderVolumeDriver {
 				if (($locked = $this->closestByAttr($test, 'locked', true))) {
 					return $this->setError(elFinder::ERROR_LOCKED, $this->_path($locked));
 				}
+				// target is entity file of alias
+				if ($volume == $this && ($test == @$file['target'] || $test == $this->decode($src))) {
+					return $this->setError(elFinder::ERROR_REPLACE, $errpath);
+				}
 				// remove existed file
 				if (!$this->remove($test)) {
 					return $this->setError(elFinder::ERROR_REPLACE, $this->_path($test));
@@ -1463,7 +1512,7 @@ abstract class elFinderVolumeDriver {
 			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->_inpath($destination, $source)) {
-				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $path);
+				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
 			
@@ -1924,7 +1973,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function attr($path, $name, $val=false) {
+	protected function attr($path, $name, $val=null) {
 		if (!isset($this->defaults[$name])) {
 			return false;
 		}
@@ -1947,15 +1996,63 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
+		if ($this->separator != '/') {
+			$path = str_replace($this->separator, '/', $this->_relpath($path));
+		} else {
+			$path = $this->_relpath($path);
+		}
+
+		$path = '/'.$path;
+
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
-			$p = $this->separator.$this->_relpath($path);
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $p)) {
+			
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
 				$perm = $attrs[$name];
 			} 
 		}
 		
-		return $perm === null ? $this->defaults[$name] : !!$perm;
+		return $perm === null ? (is_null($val)? $this->defaults[$name] : $val) : !!$perm;
+	}
+	
+	/**
+	 * Return true if file with given name can be created in given folder.
+	 *
+	 * @param string $dir  parent dir path
+	 * @param string $name new file name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	private function allowCreate($dir, $name) {
+		$path = $this->_joinPath($dir, $name);
+		$perm = null;
+		
+		if ($this->access) {
+			if (is_array($this->access)) {
+				$obj    = $this->access[0];
+				$method = $this->access[1];
+				$perm   = $obj->{$method}('write', $path, $this->options['accessControlData'], $this);
+			} else {
+				$func = $this->access;
+				$perm = $func('write', $path, $this->options['accessControlData'], $this);
+			}
+			
+			if ($perm !== null) {
+				return !!$perm;
+			}
+		}
+		
+		$testPath = $this->separator.$this->_relpath($path);
+		
+		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
+			$attrs = $this->attributes[$i];
+			
+			if (isset($attrs['write']) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $testPath)) {
+				$perm = $attrs['write'];
+			} 
+		}
+		
+		return $perm === null ? true : $perm;
 	}
 	
 	/**
@@ -2021,8 +2118,8 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : false));
-		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : false));
+		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null));
+		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null));
 		if ($root) {
 			$stat['locked'] = 1;
 		} elseif ($this->attr($path, 'locked', !empty($stat['locked']))) {
@@ -2116,11 +2213,19 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function mimetype($path) {
+	protected function mimetype($path, $name = '') {
 		$type = '';
 		
 		if ($this->mimeDetect == 'finfo') {
-			$type = @finfo_file($this->finfo, $path); 
+			if ($type = @finfo_file($this->finfo, $path)) {
+				if ($name === '') {
+					$name = $path;
+				}
+				$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
+				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
+					if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
+				}
+			}
 		} elseif ($type == 'mime_content_type') {
 			$type = mime_content_type($path);
 		} else {
@@ -2129,8 +2234,8 @@ abstract class elFinderVolumeDriver {
 		
 		$type = explode(';', $type);
 		$type = trim($type[0]);
-		
-		if ($type == 'application/x-empty') {
+
+		if (in_array($type, array('application/x-empty', 'inode/x-empty'))) {
 			// finfo return this mime for empty files
 			$type = 'text/plain';
 		} elseif ($type == 'application/x-zip') {
@@ -2919,7 +3024,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-		protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
+	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
