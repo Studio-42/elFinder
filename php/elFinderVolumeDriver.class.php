@@ -2574,7 +2574,7 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			if (($fp = $volume->open($src)) == false
-			|| ($path = $this->_save($fp, $destination, $name, $mime, $w, $h)) == false) {
+			|| ($path = $this->_save($fp, $destination, $name, $mime, $w, $h, $source)) == false) {
 				$fp && $volume->close($fp, $src);
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
@@ -3500,6 +3500,10 @@ abstract class elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
+	 * @param  string    $mime file mime type
+	 * @param  integer   $w    image width
+	 * @param  integer   $h    image height
+	 * @param  array     $stat file stat (optional)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
