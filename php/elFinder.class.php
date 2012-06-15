@@ -692,6 +692,8 @@ class elFinder {
 			$ua = $_SERVER["HTTP_USER_AGENT"];
 			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
+			} elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false) { // Safari
+				$filename = 'filename="'.str_replace('"', '', $file['name']).'"';
 			} else { // RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename*=UTF-8\'\''.$filenameEncoded;
 			}
