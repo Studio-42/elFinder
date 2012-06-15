@@ -155,6 +155,16 @@
 				getFileCallback : function(files, fm) {
 					console.log(files);
 				},
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
 				// handlers : {
 				// 	select : function(e) {
 				// 		console.log(e.data)

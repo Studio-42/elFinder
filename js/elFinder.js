@@ -1536,7 +1536,7 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.history = new this.history(this);
 	
-	// in getFileCallback set - change default actions on duble click/enter/ctrl+enter
+	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
 	if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
 		this.bind('dblclick', function(e) {
 			e.preventDefault();
@@ -1581,6 +1581,44 @@ window.elFinder = function(node, opts) {
 			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
 		}
 	});
+	
+	this._sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
+	
+	$.each(this._sortVariants, function(name, method) {
+		if (typeof method != 'function') {
+			delete self._sortVariants[name]
+		} 
+		
+	});
+	
+	this.compare2 = function(file1, file2) {
+		var asc = this.options.sortAsc,
+			type = this.options.sortType,
+			stickFolders = this.options.sortStickFolders,
+			d1 = file1.mime == 'directory',
+			d2 = file2.mime == 'directory',
+			res;
+			
+		console.log(asc, type, stickFolders)
+		
+		if (stickFolders) {
+			if (d1 && !d2) {
+				return -1;
+			} else if (!d1 && d2) {
+				return 1;
+			}
+		}
+		
+		res = asc ? this._sortVariants[type](file1, file2) : this._sortVariants[type](file2, file1);
+		
+		if (type != 'name' && res == 0) {
+			res = asc ? this._sortVariants.name(file1, file2) : this._sortVariants.name(file2, file1);
+		}
+		
+		return res
+	}
+	
+	console.log(this._sortVariants)
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -1695,6 +1733,15 @@ window.elFinder = function(node, opts) {
 
 	});
 	
+	this.one('open', function(e) {
+		var files = $.map(self.files(), function(f) { return f})
+		
+		files = files.sort($.proxy(self.compare2, self))
+		
+		$.each(files, function(i, f) {
+			console.log(f.name+' '+f.mime+', '+f.size)
+		})
+	})
 	// self.timeEnd('load'); 
 
 }
@@ -2284,6 +2331,17 @@ elFinder.prototype = {
 		return data;
 	},
 	
+	_sorts : {
+		name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); },
+		size : function(file1, file2) { 
+			var size1 = parseInt(file1.size) || 0,
+				size2 = parseInt(file2.size) || 0;
+				
+			return size1 == size2 ? 0 : size1 > size2 ? 1 : -1;
+			return (parseInt(file1.size) || 0) > (parseInt(file2.size) || 0) ? 1 : -1; },
+		kind : function(file1, file2) { return file1.mime.localeCompare(file2.mime); }
+		
+	},
 	
 	/**
 	 * Compare files based on elFinder.sort
