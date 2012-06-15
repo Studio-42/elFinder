@@ -7,8 +7,7 @@
 
 // if Jake fails to detect need libraries try running before: export NODE_PATH=`npm root`
 
-var sys = require('sys'),
-	fs   = require('fs'),
+var fs   = require('fs'),
 	path = require('path'),
 	util = require('util'),
 	ugp  = require('uglify-js').parser,
@@ -17,6 +16,7 @@ var sys = require('sys'),
 
 var dirmode = 0755,
 	src = __dirname,
+	version = null,
 	files = {
 		'elfinder.full.js':
 			[
@@ -53,7 +53,8 @@ var dirmode = 0755,
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
 				path.join(src, 'Changelog'),
-				path.join(src, 'README.md')
+				path.join(src, 'README.md'),
+				path.join(src, 'elfinder.html')
 			]
 	};
 
@@ -201,9 +202,9 @@ task('misc', function(){
 		copyFile(cf[i], dst);
 	}
 	// elfinder.html
-	var hs = path.join(src, 'build', 'elfinder.html');
-	var hd = path.join('elfinder.html');
-	copyFile(hs, hd);
+	// var hs = path.join(src, 'build', 'elfinder.html');
+	// var hd = path.join('elfinder.html');
+	// copyFile(hs, hd);
 
 	// connector
 	var cs = path.join(src, 'php', 'connector.minimal.php');
@@ -223,7 +224,7 @@ task('clean', function(){
 			.concat(grep(path.join('js', 'i18n')))
 			.concat(path.join('css', 'theme.css'))
 			.concat(grep('php'))
-			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md']);
+			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', path.join('files', 'readme.txt')]);
 	}
 	for (f in uf) {
 		var file = uf[f];
@@ -232,9 +233,9 @@ task('clean', function(){
 			fs.unlinkSync(file);
 		}
 	}
-	if (path.join(src, 'build') != path.resolve()) {
-		fs.unlinkSync('elfinder.html');
-	}
+	// if (path.join(src, 'build') != path.resolve()) {
+	// 	fs.unlinkSync('elfinder.html');
+	// }
 	if (src != path.resolve()) {
 		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'php', 'files'];
 		for (d in ud) {
@@ -247,3 +248,42 @@ task('clean', function(){
 	}
 });
 
+desc('get current build version from git')
+task('version', function(){
+	jake.exec(['git describe --tags > .version'], function(){
+		version = fs.readFileSync('.version').toString().replace(/\n$/, '');
+		fs.unlinkSync('.version');
+		console.log('Version: ' + version);
+		complete();
+	});
+}, {async: true});
+
+desc('create package task')
+task('prepack', function(){
+	new jake.PackageTask('elfinder', version, function(){
+		var fls = [
+			'js/elfinder.min.js',
+			'js/i18n/*',
+			'js/proxy/*',
+			'css/elfinder.min.css',
+			'css/theme.css',
+			'img/*',
+			'php/*',
+			'files/readme.txt',
+			'Changelog',
+			'README.md',
+			'elfinder.html'
+		];
+
+		this.packageFiles.include(fls);
+		this.needTarGz = true;
+		// this.needZip = true;
+	});
+});
+
+desc('pack release')
+task({'release': ['version', 'prepack']}, function(){
+	copyFile(path.join(src, 'README.md'), path.join('files', 'readme.txt'));
+	jake.Task['package'].invoke();
+	console.log('Created package for elfinder');
+});
