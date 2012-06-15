@@ -875,7 +875,9 @@ class elFinder {
 			$errno,$errstr,$connect_timeout);
 			if ($fp) break;
 			$connect_try_count++;
-			if (connection_aborted()) exit();
+			if (connection_aborted()) {
+				exit();
+			}
 			sleep(1); // wait 1sec
 		}
 		
@@ -895,7 +897,9 @@ class elFinder {
 		
 		$_response = true;
 		while ($_response && (is_null($getSize) || strlen($response) < $getSize)) {
-			if (connection_aborted()) exit();
+			if (connection_aborted()) {
+				exit();
+			}
 			if ($_response = fread($fp, $readsize)) {
 				$response .= $_response;
 			}
