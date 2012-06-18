@@ -292,13 +292,14 @@ elFinder.prototype._options = {
 	 */
 	sortDirect : 'asc',
 	
-	sortType : 'size',
-	sortDirection : 'desc',
+	sortType : 'kind',
+	sortOrder : 'asc',
 	sortAsc : true,
 	sortStickFolders : false,
 	sorts : {
 		date : function(file1, file2) { (file1.ts || file1.date) > (file2.ts || file2.date) ? 1 : -1 },
-		kind : null
+		// kind : null,
+		asd : 32
 	},
 	
 	/**

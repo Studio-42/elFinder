@@ -452,6 +452,22 @@ window.elFinder = function(node, opts) {
 
 	this.viewType = this.storage('view') || this.options.defaultView || 'icons',
 
+	this.sortType = this.storage('sortType') || this.options.sortType || 'name';
+	
+	this.sortOrder = this.storage('sortOrder') || this.options.sortOrder || 'asc';
+	
+	this.sortStickFolders = this.storage('sortStickFolders') || this.options.sortStickFolders;
+
+	this._sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
+	
+	$.each(this._sortVariants, function(name, method) {
+		if (typeof method != 'function') {
+			delete self._sortVariants[name];
+		} 
+	});
+
+	this.compare = $.proxy(this.compare, this)
+
 	/**
 	 * Delay in ms before open notification dialog
 	 *
@@ -1582,44 +1598,6 @@ window.elFinder = function(node, opts) {
 		}
 	});
 	
-	this._sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
-	
-	$.each(this._sortVariants, function(name, method) {
-		if (typeof method != 'function') {
-			delete self._sortVariants[name]
-		} 
-		
-	});
-	
-	this.compare2 = function(file1, file2) {
-		var asc = this.options.sortAsc,
-			type = this.options.sortType,
-			stickFolders = this.options.sortStickFolders,
-			d1 = file1.mime == 'directory',
-			d2 = file2.mime == 'directory',
-			res;
-			
-		console.log(asc, type, stickFolders)
-		
-		if (stickFolders) {
-			if (d1 && !d2) {
-				return -1;
-			} else if (!d1 && d2) {
-				return 1;
-			}
-		}
-		
-		res = asc ? this._sortVariants[type](file1, file2) : this._sortVariants[type](file2, file1);
-		
-		if (type != 'name' && res == 0) {
-			res = asc ? this._sortVariants.name(file1, file2) : this._sortVariants.name(file2, file1);
-		}
-		
-		return res
-	}
-	
-	console.log(this._sortVariants)
-	
 	// prepare node
 	node.addClass(this.cssClass)
 		.bind(mousedown, function() {
@@ -1733,15 +1711,15 @@ window.elFinder = function(node, opts) {
 
 	});
 	
-	this.one('open', function(e) {
-		var files = $.map(self.files(), function(f) { return f})
-		
-		files = files.sort($.proxy(self.compare2, self))
-		
-		$.each(files, function(i, f) {
-			console.log(f.name+' '+f.mime+', '+f.size)
-		})
-	})
+	// this.one('open', function(e) {
+	// 	var files = $.map(self.files(), function(f) { return f})
+	// 	
+	// 	files = files.sort($.proxy(self.compare2, self))
+	// 	
+	// 	$.each(files, function(i, f) {
+	// 		console.log(f.name+' '+f.mime+', '+f.size)
+	// 	})
+	// })
 	// self.timeEnd('load'); 
 
 }
@@ -2351,58 +2329,39 @@ elFinder.prototype = {
 	 * @return Number
 	 */
 	compare : function(file1, file2) {
-		var sort = this.sort, 
-			asc  = this.sortDirect == 'asc',
-			f1   = asc ? file1 : file2,
-			f2   = asc ? file2 : file1,
-			m1   = this.mime2kind(f1.mime).toLowerCase(),
-			m2   = this.mime2kind(f2.mime).toLowerCase(),
-			d1   = file1.mime == 'directory',
-			d2   = file2.mime == 'directory',
-			n1   = f1.name.toLowerCase(),
-			n2   = f2.name.toLowerCase(),
-			s1   = d1 ? 0 : parseInt(f1.size) || 0,
-			s2   = d2 ? 0 : parseInt(f2.size) || 0,
-			t1   = f1.ts || f1.date || '',
-			t2   = f2.ts || f2.date || '';
-
-		// this.log(this.sortDirect)
-
-		// dir first	
-		if (sort <= 4) {
+		var self     = this,
+			type     = self.sortType,
+			asc      = self.sortOrder == 'asc',
+			stick    = self.sortStickFolders,
+			variants = self._sortVariants,
+			sort     = variants[type],
+			d1       = file1.mime == 'directory',
+			d2       = file2.mime == 'directory',
+			res;
+			
+		if (stick) {
 			if (d1 && !d2) {
 				return -1;
-			}
-			if (!d1 && d2) {
+			} else if (!d1 && d2) {
 				return 1;
 			}
 		}
-		// by mime
-		if ((sort == 2 || sort == 6) && m1 != m2) {
-			return m1.localeCompare(m2);// ? 1 : -1;
-			// return m1 > m2 ? 1 : -1;
-		}
-		// by size
-		if ((sort == 3 || sort == 7) && s1 != s2) {
-			return s1 > s2 ? 1 : -1;
-		}
-
-		// by date
-		if ((sort == 4 || sort == 8) && t1 != t2) {
-			return t1 > t2 ? 1 : -1;
-		}
-		return f1.name.localeCompare(f2.name);
 		
+		res = asc ? sort(file1, file2) : sort(file2, file1);
+		
+		return type != 'name' && res == 0
+			? res = asc ? variants.name(file1, file2) : variants.name(file2, file1)
+			: res;
 	},
 	
 	/**
-	 * Sort files based on elFinder.sort
+	 * Sort files based on config
 	 *
 	 * @param  Array  files
 	 * @return Array
 	 */
 	sortFiles : function(files) {
-		return files.sort($.proxy(this.compare, this));
+		return files.sort(this.compare);
 	},
 	
 	/**
