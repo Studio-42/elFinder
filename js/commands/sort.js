@@ -32,9 +32,11 @@ elFinder.prototype.commands.sort = function() {
 		return 0;
 	}
 	
-	this.exec = function(hashes, type) {
-		var dir = $.inArray(type, sorts)+1 == this.fm.sort ? (this.fm.sortDirect == 'asc' ? 'desc' : 'asc') : this.fm.sortDirect;
-		this.fm.setSort(type, dir);
+	this.exec = function(hashes, sort) {
+		// var dir = $.inArray(type, sorts)+1 == this.fm.sort ? (this.fm.sortDirect == 'asc' ? 'desc' : 'asc') : this.fm.sortDirect;
+		// this.fm.setSort(type, dir);
+		console.log(sort)
+		this.fm.setSort(sort.type, sort.order, sort.stick)
 		return $.Deferred().resolve();
 	}
 
