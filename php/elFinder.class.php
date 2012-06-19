@@ -418,7 +418,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function getNetVolumes() {
-		return isset($_SESSION['netVolumes']) && is_array($_SESSION['netVolumes']) ? $_SESSION['netVolumes'] : array();
+		return isset($_SESSION['elFinderNetVolumes']) && is_array($_SESSION['elFinderNetVolumes']) ? $_SESSION['elFinderNetVolumes'] : array();
 	}
 
 	/**
@@ -429,7 +429,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
-		$_SESSION['netVolumes'] = $volumes;
+		$_SESSION['elFinderNetVolumes'] = $volumes;
 	}
 
 	/***************************************************************************/
