@@ -1302,15 +1302,13 @@ abstract class elFinderVolumeDriver {
 		if (!$this->allowCreate($dir, $name)) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
-		
+
+		$this->rmTmb($file); // remove old name tmbs, we cannot do this after dir move
+
 		if (!$this->_move($path, $dir, $name)) {
 			return false;
 		}
-		
-		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
-			$this->rmTmb($stat['tmb']);
-		}
-		
+
 		$path = $this->_joinPath($dir, $name);
 
 		$this->clearcache();
@@ -1515,34 +1513,8 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
-			
-			$srcstat = $this->stat($source);
-			
-			if ($rmSrc && $srcstat['mime'] === 'directory') {
-				$this->removeTmb($source);
-			}
-			
-			if ($path = $this->$method($source, $destination, $name)) {
-				if ($path === true) { // _copy() return true
-					$path = $this->_joinPath($destination, $name);
-				}
-				$stat = $this->stat($path);
-				if ($this->tmbPath && $this->canCreateTmb($source, $srcstat)) { // copy or rename tmb too
-					$srctmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbname($srcstat);
-					if (is_file($srctmb)) {
-						$newtmb = $this->tmbPath.DIRECTORY_SEPARATOR.$this->tmbname($stat);
-						if ($rmSrc) {
-							@ rename($srctmb, $newtmb);
-						} else {
-							@ copy($srctmb, $newtmb);
-						}
-					}
-				}
-				return $stat;
-			}
-			return false;
+			return ($path = $this->$method($source, $destination, $name)) ? $this->stat($path) : false;
 		}
-		
 		
 		// copy/move from another volume
 		if (!$this->options['copyTo'] || !$volume->copyFromAllowed()) {
@@ -1752,14 +1724,12 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if ($result) {
-			if (!empty($file['tmb']) && $file['tmb'] != "1") {
-				$this->rmTmb($file['tmb']);
-			}
+			$this->rmTmb($file);
 			$this->clearcache();
 			return $this->stat($path);
 		}
 		
-   		return false;
+		return false;
 	}
 	
 	/**
@@ -2498,7 +2468,7 @@ abstract class elFinderVolumeDriver {
 			? $this->_joinPath($dst, $name) 
 			: $this->setError(elFinder::ERROR_COPY, $this->_path($src));
 	}
-	
+
 	/**
 	 * Move file
 	 * Return new file path or false.
@@ -2516,12 +2486,14 @@ abstract class elFinderVolumeDriver {
 		
 		if ($this->_move($src, $dst, $name)) {
 			$this->removed[] = $stat;
+			$this->rmTmb($stat);
+
 			return $this->_joinPath($dst, $name);
 		}
-		
+
 		return $this->setError(elFinder::ERROR_MOVE, $this->_path($src));
 	}
-	
+
 	/**
 	 * Copy file from another volume.
 	 * Return new file path or false.
@@ -2595,9 +2567,7 @@ abstract class elFinderVolumeDriver {
 	protected function remove($path, $force = false) {
 		$stat = $this->stat($path);
 		$stat['realpath'] = $path;
-		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
-			$this->rmTmb($stat['tmb']);
-		}
+		$this->rmTmb($stat);
 		$this->clearcache();
 		
 		if (empty($stat)) {
@@ -2768,25 +2738,7 @@ abstract class elFinderVolumeDriver {
 
 		return $name;
 	}
-	
-	/**
-	* Remove tmbs / recursive remove tmb
-	*
-	* @param  string  $path   file path
-	* @author Naoki Sawada
-	**/
-	protected function removeTmb($path) {
-		$stat = $this->stat($path);
-		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
-			$this->rmTmb($stat['tmb']);
-		} else if ($stat['mime'] === 'directory') {
-			foreach ($this->_scandir($path) as $p) {
-				$name = $this->_basename($p);
-				$name != '.' && $name != '..' && !$this->removeTmb($p);
-			}
-		}
-	}
-	
+
 	/**
 	 * Resize image
 	 *
@@ -3210,18 +3162,27 @@ abstract class elFinderVolumeDriver {
 		return $return_var;
 		
 	}
-	
+
 	/**
-	 * Remove thumbnail
+	 * Remove thumbnail, also remove recursively if stat is directory
 	 *
-	 * @param  string  $path  file path
+	 * @param  string  $stat  file stat
 	 * @return void
 	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
+	 * @author Troex Nevelin
 	 **/
-	protected function rmTmb($tmb) {
-		$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$tmb;
-		file_exists($tmb) && @unlink($tmb);
-		clearstatcache();
+	protected function rmTmb($stat) {
+		if ($stat['mime'] === 'directory') {
+			foreach ($this->_scandir($this->decode($stat['hash'])) as $p) {
+				$name = $this->_basename($p);
+				$name != '.' && $name != '..' && $this->rmTmb($this->stat($p));
+			}
+		} else if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+			$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$stat['tmb'];
+			file_exists($tmb) && @unlink($tmb);
+			clearstatcache();
+		}
 	}
 
 	/*********************** misc *************************/
