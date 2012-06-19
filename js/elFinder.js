@@ -450,23 +450,31 @@ window.elFinder = function(node, opts) {
 	  }
 	})();
 
+	// this.storage('sortType', null)
+	// this.storage('sortOrder', null)
+	// this.storage('sortStickFolders', null)
+
 	this.viewType = this.storage('view') || this.options.defaultView || 'icons',
 
 	this.sortType = this.storage('sortType') || this.options.sortType || 'name';
 	
 	this.sortOrder = this.storage('sortOrder') || this.options.sortOrder || 'asc';
-	
-	this.sortStickFolders = this.storage('sortStickFolders') || this.options.sortStickFolders;
 
-	this._sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
+	this.sortStickFolders = true || this.storage('sortStickFolders');
+	console.log('wtf', this.sortStickFolders)
+	// if (this.sortStickFolders === void 0) {
+	// 	this.sortStickFolders = this.options.sortStickFolders;
+	// }
+
+	this.sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
 	
-	$.each(this._sortVariants, function(name, method) {
+	$.each(this.sortVariants, function(name, method) {
 		if (typeof method != 'function') {
-			delete self._sortVariants[name];
+			delete self.sortVariants[name];
 		} 
 	});
 
-	this.compare = $.proxy(this.compare, this)
+	this.compare = $.proxy(this.compare, this);
 
 	/**
 	 * Delay in ms before open notification dialog
@@ -1377,8 +1385,6 @@ window.elFinder = function(node, opts) {
 	}
 	
 	/*************  init stuffs  ****************/
-	// set sort variant
-	this.setSort(this.storage('sort') || this.options.sort, this.storage('sortDirect') || this.options.sortDirect);
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
@@ -1710,16 +1716,7 @@ window.elFinder = function(node, opts) {
 		}
 
 	});
-	
-	// this.one('open', function(e) {
-	// 	var files = $.map(self.files(), function(f) { return f})
-	// 	
-	// 	files = files.sort($.proxy(self.compare2, self))
-	// 	
-	// 	$.each(files, function(i, f) {
-	// 		console.log(f.name+' '+f.mime+', '+f.size)
-	// 	})
-	// })
+
 	// self.timeEnd('load'); 
 
 }
@@ -1919,12 +1916,10 @@ elFinder.prototype = {
 		date : 8
 	},
 	
-	setSort : function(type, dir) {
-		type = this.sorts[type] ? type : 1;
-		this.sort = this.sorts[type] || 1;
-		this.sortDirect = dir == 'asc' || dir == 'desc' ? dir : 'asc';
-		this.storage('sort', type);
-		this.storage('sortDirect', this.sortDirect);
+	setSort : function(type, order, stickFolders) {
+		this.storage('sortType', (this.sortType = this.sortVariants[type] ? type : 'name'));
+		this.storage('sortOrder', (this.sortOrder = /asc|desc/.test(order) ? order : 'asc'));
+		this.storage('sortStickFolders', (this.sortStickFolders = !!stickFolders))
 		this.trigger('sortchange');
 	},
 	
@@ -2333,7 +2328,7 @@ elFinder.prototype = {
 			type     = self.sortType,
 			asc      = self.sortOrder == 'asc',
 			stick    = self.sortStickFolders,
-			variants = self._sortVariants,
+			variants = self.sortVariants,
 			sort     = variants[type],
 			d1       = file1.mime == 'directory',
 			d2       = file2.mime == 'directory',
