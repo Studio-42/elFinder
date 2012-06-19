@@ -279,7 +279,7 @@ elFinder.prototype._options = {
 	 *  - sort : 'size' - sort by size, name
 	 *  - sort : 'date' - sort by date, name
 	 */
-	sort : 'nameDirsFirst',
+	// sort : 'nameDirsFirst',
 	
 	/**
 	 * Sort files direction.
@@ -290,12 +290,11 @@ elFinder.prototype._options = {
 	 *   - sort : 'asc'  // ascent sorting
 	 *   - sort : 'desc' // descent sorting
 	 */
-	sortDirect : 'asc',
+	// sortDirect : 'asc',
 	
-	sortType : 'kind',
+	sortType : 'name',
 	sortOrder : 'asc',
-	sortAsc : true,
-	sortStickFolders : false,
+	sortStickFolders : true,
 	sorts : {
 		date : function(file1, file2) { (file1.ts || file1.date) > (file2.ts || file2.date) ? 1 : -1 },
 		// kind : null,
