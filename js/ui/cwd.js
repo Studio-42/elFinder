@@ -8,8 +8,9 @@ $.fn.elfindercwd = function(fm) {
 	
 	this.not('.elfinder-cwd').each(function() {
 		// fm.time('cwdLoad');
+		
 		var 
-			list = fm.storage('view') == 'list',
+			list = fm.viewType == 'list',
 
 			undef = 'undefined',
 			/**
