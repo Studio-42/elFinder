@@ -265,41 +265,39 @@ elFinder.prototype._options = {
 	onlyMimes : [],
 
 	/**
-	 * How to sort files in current directory
+	 * Custom files sort rules.
+	 * All default rules set in elFinder._sorts
 	 *
-	 * @type String
-	 * @default "nameDirsFirst"
+	 * @type {Object}
 	 * @example
-	 *  - sort : 'nameDirsFirst' - sort by name, directory first
-	 *  - sort : 'kindDirsFirst' - sort by kind, name, directory first
-	 *  - sort : 'sizeDirsFirst' - sort by size, name, directory first
-	 *  - sort : 'dateDirsFirst' - sort by date, name, directory first
-	 *  - sort : 'name' - sort by name
-	 *  - sort : 'kind' - sort by kind, name
-	 *  - sort : 'size' - sort by size, name
-	 *  - sort : 'date' - sort by date, name
+	 * sorts : {
+	 *   name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); }
+	 * }
 	 */
-	// sort : 'nameDirsFirst',
+	sorts : { },
 	
 	/**
-	 * Sort files direction.
+	 * Default sort type.
 	 *
-	 * @type String
-	 * @default  "asc"
-	 * @example
-	 *   - sort : 'asc'  // ascent sorting
-	 *   - sort : 'desc' // descent sorting
+	 * @type {String}
 	 */
-	// sortDirect : 'asc',
-	
 	sortType : 'name',
+	
+	/**
+	 * Default sort order.
+	 *
+	 * @type {String}
+	 * @default "asc"
+	 */
 	sortOrder : 'asc',
+	
+	/**
+	 * Display folders first?
+	 *
+	 * @type {Boolean}
+	 * @default true
+	 */
 	sortStickFolders : true,
-	sorts : {
-		date : function(file1, file2) { (file1.ts || file1.date) > (file2.ts || file2.date) ? 1 : -1 },
-		// kind : null,
-		asd : 32
-	},
 	
 	/**
 	 * If true - elFinder will formating dates itself, 
