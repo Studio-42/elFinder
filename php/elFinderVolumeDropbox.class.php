@@ -641,9 +641,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function remove($path, $force = false, $recursive = false) {
 		$stat = $this->stat($path);
 		$stat['realpath'] = $path;
-		if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
-			$this->rmTmb($stat['tmb']);
-		}
+		$this->rmTmb($stat);
 		$this->clearcache();
 	
 		if (empty($stat)) {
@@ -754,9 +752,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 			file_exists($path) && @unlink($path);
 			
-			if (!empty($file['tmb']) && $file['tmb'] != "1") {
-				$this->rmTmb($file['tmb']);
-			}
+			$this->rmTmb($file);
 			$this->clearcache();
 			return $this->stat($path4stat);
 		}
