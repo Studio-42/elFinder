@@ -526,7 +526,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat['name']  = basename($raw['path']);
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
-		$stat['ts']    = isset($raw['modified'])? strtotime($raw['modified']) : $_SERVER['REQUEST_TIME'];
+		$stat['ts']    = isset($raw['client_mtime'])? strtotime($raw['client_mtime']) :
+		                (isset($raw['modified'])? strtotime($raw['modified']) : $_SERVER['REQUEST_TIME']);
 		$stat['dirs']  = ($raw['is_dir'] && !empty($raw['dirs']))? 1 : 0;
 		if (isset($raw['url'])) {
 			$stat['url'] = $raw['url'];
