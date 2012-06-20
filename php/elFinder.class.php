@@ -210,7 +210,7 @@ class elFinder {
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
-		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'netVolumes';
+		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
