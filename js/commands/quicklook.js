@@ -92,7 +92,13 @@ elFinder.prototype.commands.quicklook = function() {
 		
 		support = function(codec) {
 			var media = document.createElement(codec.substr(0, codec.indexOf('/'))),
+				value = false;
+			
+			try {
 				value = media.canPlayType && media.canPlayType(codec);
+			} catch (e) {
+				
+			}
 			
 			return value && value !== '' && value != 'no';
 		},
@@ -218,7 +224,7 @@ elFinder.prototype.commands.quicklook = function() {
 						tpl.replace(/\{value\}/, file.name)
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
 						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
-						+ tpl.replace(/\{value\}/, fm.i18n('modify')+': '+ fm.formatDate(file.date))
+						+ tpl.replace(/\{value\}/, fm.i18n('modify')+': '+ fm.formatDate(file))
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 

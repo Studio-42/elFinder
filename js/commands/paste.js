@@ -8,7 +8,6 @@
  **/
 elFinder.prototype.commands.paste = function() {
 	
-	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	
 	this.handlers = {
@@ -139,11 +138,12 @@ elFinder.prototype.commands.paste = function() {
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.always(function() {
+								dfrd.resolve();
 								fm.unlockfiles({files : files});
 							});
 					}
 					;
-				
+
 				if (self._disabled || !files.length) {
 					return dfrd.resolve();
 				}

@@ -298,9 +298,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			}
 			@unlink($img);
-			if (!empty($file['tmb']) && $file['tmb'] != "1") {
-				$this->rmTmb($file['tmb']);
-			}
+			$this->rmTmb($file);
 			$this->clearcache();
 			return $this->stat($path);
 		}

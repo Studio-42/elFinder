@@ -150,7 +150,7 @@
 }
 
 .elfinder-button-menu-item-selected .elfinder-menu-item-sort-dir { display:block;}
-.elfinder-menu-item-sort-desc .elfinder-menu-item-sort-dir { background-position:0 -610px;}
+.elfinder-menu-item-sort-desc .elfinder-menu-item-sort-dir { background-position:0 -608px;}
 /* hack for upload button */
 .elfinder-button form {
 	position:absolute;

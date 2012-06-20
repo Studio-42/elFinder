@@ -25,6 +25,8 @@ class elFinder {
 	 **/
 	protected $volumes = array();
 	
+	public static $netDrivers = array();
+
 	/**
 	 * Mounted volumes count
 	 * Required to create unique volume id
@@ -68,6 +70,7 @@ class elFinder {
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false),
 		'pixlr'     => array('target' => false, 'node' => false, 'image' => false, 'type' => false, 'title' => false)
 	);
 	
@@ -158,6 +161,9 @@ class elFinder {
 	const ERROR_RESIZE            = 'errResize';
 	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
 	const ERROR_NOT_UTF8_CONTENT  = 'errNotUTF8Content';
+	const ERROR_NETMOUNT          = 'errNetMount';
+	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
+	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
 	
 	/**
 	 * Constructor
@@ -167,7 +173,10 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
-		
+		if (session_id() == '') {
+			session_start();
+		}
+
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		
@@ -180,31 +189,38 @@ class elFinder {
 			}
 		}
 
+		if (!isset($opts['roots']) || !is_array($opts['roots'])) {
+			$opts['roots'] = array();
+		}
+
+		// check for net volumes stored in session
+		foreach ($this->getNetVolumes() as $root) {
+			$opts['roots'][] = $root;
+		}
+
 		// "mount" volumes
-		if (isset($opts['roots']) && is_array($opts['roots'])) {
-			
-			foreach ($opts['roots'] as $i => $o) {
-				$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
+		foreach ($opts['roots'] as $i => $o) {
+			$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
 
-				if (class_exists($class)) {
-					$volume = new $class();
+			if (class_exists($class)) {
+				$volume = new $class();
 
-					if ($volume->mount($o)) {
-						// unique volume id (ends on "_") - used as prefix to files hash
-						$id = $volume->id();
-						
-						$this->volumes[$id] = $volume;
-						if (!$this->default && $volume->isReadable()) {
-							$this->default = $this->volumes[$id]; 
-						}
-					} else {
-						$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
+				if ($volume->mount($o)) {
+					// unique volume id (ends on "_") - used as prefix to files hash
+					$id = $volume->id();
+					
+					$this->volumes[$id] = $volume;
+					if (!$this->default && $volume->isReadable()) {
+						$this->default = $this->volumes[$id]; 
 					}
 				} else {
-					$this->mountErrors[] = 'Driver "'.$class.'" does not exists';
+					$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
 				}
+			} else {
+				$this->mountErrors[] = 'Driver "'.$class.'" does not exists';
 			}
 		}
+
 		// if at least one redable volume - ii desu >_<
 		$this->loaded = !empty($this->default);
 	}
@@ -238,7 +254,9 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
-		$cmds = array_map('trim', explode(' ', $cmd));
+		$cmds = $cmd == '*'
+			? array_keys($this->commands)
+			: array_map('trim', explode(' ', $cmd));
 		
 		foreach ($cmds as $cmd) {
 			if ($cmd) {
@@ -396,6 +414,27 @@ class elFinder {
 		return $volume->realpath($hash);
 	}
 	
+	/**
+	 * Return network volumes config.
+	 *
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 */
+	protected function getNetVolumes() {
+		return isset($_SESSION['elFinderNetVolumes']) && is_array($_SESSION['elFinderNetVolumes']) ? $_SESSION['elFinderNetVolumes'] : array();
+	}
+
+	/**
+	 * Save network volumes config.
+	 *
+	 * @param  array  $volumes  volumes config
+	 * @return void
+	 * @author Dmitry (dio) Levashov
+	 */
+	protected function saveNetVolumes($volumes) {
+		$_SESSION['elFinderNetVolumes'] = $volumes;
+	}
+
 	/***************************************************************************/
 	/*                                 commands                                */
 	/***************************************************************************/
@@ -420,6 +459,47 @@ class elFinder {
 		return count($errors) ? $errors : array(self::ERROR_UNKNOWN);
 	}
 	
+	protected function netmount($args) {
+		$options  = array();
+		$protocol = $args['protocol'];
+		$driver   = isset(self::$netDrivers[$protocol]) ? $protocol : '';
+		$class    = 'elfindervolume'.$protocol;
+
+		if (!$driver) {
+			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], self::ERROR_NETMOUNT_NO_DRIVER));
+		}
+
+		if (!$args['path']) {
+			$args['path'] = '/';
+		}
+
+		foreach ($args as $k => $v) {
+			if ($k != 'options' && $k != 'protocol' && $v) {
+				$options[$k] = $v;
+			}
+		}
+
+		if (is_array($args['options'])) {
+			foreach ($args['options'] as $key => $value) {
+				$options[$key] = $value;
+			}
+		}
+
+		$volume = new $class();
+
+		if ($volume->mount($options)) {
+			$netVolumes        = $this->getNetVolumes();
+			$options['driver'] = $driver;
+			$netVolumes[]      = $options;
+			$netVolumes        = array_unique($netVolumes);
+			$this->saveNetVolumes($netVolumes);
+			return array('sync' => true);
+		} else {
+			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
+		}
+
+	}
+
 	/**
 	 * "Open" directory
 	 * Return array with following elements
@@ -488,6 +568,7 @@ class elFinder {
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
+			$result['netDrivers'] = array_keys(self::$netDrivers);
 		}
 		
 		return $result;
@@ -614,6 +695,8 @@ class elFinder {
 			$ua = $_SERVER["HTTP_USER_AGENT"];
 			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
+			} elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false) { // Safari
+				$filename = 'filename="'.str_replace('"', '', $file['name']).'"';
 			} else { // RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename*=UTF-8\'\''.$filenameEncoded;
 			}

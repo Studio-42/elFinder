@@ -196,7 +196,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Помощ',
 			'webfm'           : 'Файлов менаджер за web',
 			'ver'             : 'Версия',
-			'protocol'        : 'версия на протокола',
+			'protocolver'        : 'версия на протокола',
 			'homepage'        : 'Начало',
 			'docs'            : 'Документация',
 			'github'          : 'Разклонение в Github',

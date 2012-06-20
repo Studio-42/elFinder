@@ -62,7 +62,7 @@
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align:center;
-	white-space:nowrap;
+	white-space:pre;
 	overflow:hidden;
 	text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
@@ -106,15 +106,46 @@
 .elfinder-cwd-icon-rtf, 
 .elfinder-cwd-icon-rtfd              { background-position: 0 -401px; }
 .elfinder-cwd-icon-pdf               { background-position: 0 -450px; }
-.elfinder-cwd-icon-vnd-ms-office,
-.elfinder-cwd-icon-msword,
-.elfinder-cwd-icon-vnd-ms-word,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text,
 .elfinder-cwd-icon-ms-excel,
+.elfinder-cwd-icon-msword,
 .elfinder-cwd-icon-vnd-ms-excel,
-.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
+.elfinder-cwd-icon-vnd-ms-excel-addin-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-excel-sheet-binary-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-excel-sheet-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-excel-template-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-office,
 .elfinder-cwd-icon-vnd-ms-powerpoint,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation { background-position: 0 -500px; }
+.elfinder-cwd-icon-vnd-ms-powerpoint-addin-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-powerpoint-presentation-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-powerpoint-slide-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-powerpoint-slideshow-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-powerpoint-template-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-word,
+.elfinder-cwd-icon-vnd-ms-word-document-macroEnabled-12,
+.elfinder-cwd-icon-vnd-ms-word-template-macroEnabled-12,
+.elfinder-cwd-icon-vnd-oasis-opendocument-chart,
+.elfinder-cwd-icon-vnd-oasis-opendocument-database,
+.elfinder-cwd-icon-vnd-oasis-opendocument-formula,
+.elfinder-cwd-icon-vnd-oasis-opendocument-graphics,
+.elfinder-cwd-icon-vnd-oasis-opendocument-graphics-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-image,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-master,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-web,
+.elfinder-cwd-icon-vnd-openofficeorg-extension,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-presentation,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-slide,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-slideshow,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-template,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-sheet,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-template,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-wordprocessingml-document,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-wordprocessingml-template { background-position: 0 -500px; }
 .elfinder-cwd-icon-html              { background-position: 0 -550px; }
 .elfinder-cwd-icon-css               { background-position: 0 -600px; }
 .elfinder-cwd-icon-javascript, 
@@ -162,7 +193,7 @@
 .elfinder .elfinder-cwd table thead td { font-size:.9em;}
 .elfinder .elfinder-cwd table td { 
 	padding:3px 12px;
-	white-space:nowrap;
+	white-space:pre;
 	overflow:hidden;
 	text-align:right;
 	cursor:default;

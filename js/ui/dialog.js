@@ -8,12 +8,12 @@ $.fn.elfinderdialog = function(opts) {
 	var dialog;
 	
 	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
-		if (opts == 'open' && dialog.is(':hidden')) {
-			dialog.fadeIn(120, function() {
+		if (opts == 'open') {
+			dialog.css('display') == 'none' && dialog.fadeIn(120, function() {
 				dialog.trigger('open');
 			});
-		} else if (opts == 'close' && dialog.is(':visible')) {
-			dialog.hide().trigger('close');
+		} else if (opts == 'close') {
+			dialog.css('display') != 'none' && dialog.hide().trigger('close');
 		} else if (opts == 'destroy') {
 			dialog.hide().remove();
 		} else if (opts == 'toTop') {
@@ -40,7 +40,8 @@ $.fn.elfinderdialog = function(opts) {
 				.hide()
 				.append(self)
 				.appendTo(parent)
-				.draggable({ handle : '.ui-dialog-titlebar'})
+				.draggable({ handle : '.ui-dialog-titlebar',
+					     containment : $('body') })
 				.css({
 					width  : opts.width,
 					height : opts.height
@@ -96,7 +97,10 @@ $.fn.elfinderdialog = function(opts) {
 						})
 					} else {
 						// return focus to parent
-						parent.mousedown();
+						setTimeout(function() {
+							parent.mousedown().click();
+						}, 10);
+						
 					}
 					
 					if (typeof(opts.close) == 'function') {

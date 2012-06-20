@@ -111,7 +111,7 @@ elFinder.prototype._options = {
 	commands : [
 		'open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 
 		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
-		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help', 'resize', 'sort', 'pixlr'
+		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help', 'resize', 'sort', 'netmount', 'pixlr'
 	],
 	
 	/**
@@ -122,7 +122,7 @@ elFinder.prototype._options = {
 	commandsOptions : {
 		// "getfile" command options.
 		getfile : {
-			onlyURL  : true,
+			onlyURL  : false,
 			// allow to return multiple files info
 			multiple : false,
 			// allow to return filers info
@@ -184,6 +184,7 @@ elFinder.prototype._options = {
 			]
 		},
 		
+
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
 	
@@ -195,6 +196,14 @@ elFinder.prototype._options = {
 	 * @default null (command not active)
 	 */
 	getFileCallback : null,
+	
+	/**
+	 * Default directory view. icons/list
+	 *
+	 * @type String
+	 * @default "icons"
+	 */
+	defaultView : 'icons',
 	
 	/**
 	 * UI plugins to load.
@@ -215,6 +224,7 @@ elFinder.prototype._options = {
 		// toolbar configuration
 		toolbar : [
 			['back', 'forward'],
+			['netmount'],
 			// ['reload'],
 			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],

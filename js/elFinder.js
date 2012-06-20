@@ -264,7 +264,10 @@ window.elFinder = function(node, opts) {
 				});
 				
 				// prevent tab out of elfinder
-				code == 9 && e.preventDefault();
+				if (code == 9 && !$(e.target).is(':input')) {
+					e.preventDefault();
+				}
+
 			}
 		},
 		date = new Date(),
@@ -447,6 +450,7 @@ window.elFinder = function(node, opts) {
 	  }
 	})();
 
+	this.viewType = this.storage('view') || this.options.defaultView || 'icons',
 
 	/**
 	 * Delay in ms before open notification dialog
@@ -469,7 +473,23 @@ window.elFinder = function(node, opts) {
 		refreshPositions : true,
 		cursor     : 'move',
 		cursorAt   : {left : 50, top : 47},
-		drag       : function(e, ui) { ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey); },
+		drag       : function(e, ui) {
+			if (! ui.helper.data('locked')) {
+				ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey);
+			}
+		},
+		start      : function(e, ui) {
+			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
+			cnt, h;
+			cnt = targets.length;
+			while (cnt--) {
+				h = targets[cnt];
+				if (files[h].locked) {
+					ui.helper.addClass('elfinder-drag-helper-plus').data('locked', true);
+					break;
+				}
+			}
+		},
 		stop       : function() { self.trigger('focus').trigger('dragstop'); },
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -483,7 +503,7 @@ window.elFinder = function(node, opts) {
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
-			helper.append(icon(files[hashes[0]].mime)).data('files', hashes);
+			helper.append(icon(files[hashes[0]].mime)).data('files', hashes).data('locked', false);
 
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -527,9 +547,10 @@ window.elFinder = function(node, opts) {
 				
 				if (result.length) {
 					ui.helper.hide();
-					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey));
-					self.exec('paste', hash).always(function() { self.clipboard([]); });
+					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked')));
+					self.exec('paste', hash);
 					self.trigger('drop', {files : targets});
+
 				}
 			}
 		};
@@ -676,8 +697,16 @@ window.elFinder = function(node, opts) {
 		if (cwdOptions.url) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
-		
-		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file') + '&target=' + file.hash;
+
+		var params = $.extend({}, this.customData, {
+			cmd: 'file',
+			target: file.hash
+		});
+		if (this.oldAPI) {
+			params.cmd = 'open';
+			params.current = file.phash;
+		}
+		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
 	}
 	
 	/**
@@ -711,7 +740,7 @@ window.elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.selectedFiles = function() {
-		return $.map(selected, function(hash) { return files[hash] || null });
+		return $.map(selected, function(hash) { return files[hash] ? $.extend({}, files[hash]) : null });
 	};
 	
 	/**
@@ -750,7 +779,7 @@ window.elFinder = function(node, opts) {
 	 * @todo
 	 * @return $.Deferred
 	 */
-	this.request = function(options) {
+	this.request = function(options) { 
 		var self     = this,
 			o        = this.options,
 			dfrd     = $.Deferred(),
@@ -867,6 +896,10 @@ window.elFinder = function(node, opts) {
 				
 				if (response.options) {
 					cwdOptions = $.extend({}, cwdOptions, response.options);
+				}
+
+				if (response.netDrivers) {
+					self.netDrivers = response.netDrivers;
 				}
 
 				dfrd.resolve(response);
@@ -1195,7 +1228,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.clipboard = function(hashes, cut) {
 		var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
-		
+
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
 			remember = [];
@@ -1329,7 +1362,7 @@ window.elFinder = function(node, opts) {
 	
 	/*************  init stuffs  ****************/
 	// set sort variant
-	this.setSort(this.options.sort, this.options.sortDirect);
+	this.setSort(this.storage('sort') || this.options.sort, this.storage('sortDirect') || this.options.sortDirect);
 	
 	// check jquery ui
 	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
@@ -1414,7 +1447,7 @@ window.elFinder = function(node, opts) {
 			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 				enabled = true;
 				$('texarea:focus,input:focus,button').blur();
-				node.removeClass('elfinder-disabled')
+				node.removeClass('elfinder-disabled');
 			}
 		})
 		.disable(function() {
@@ -1573,7 +1606,7 @@ window.elFinder = function(node, opts) {
 			hide : function() { prevEnabled && self.enable(); }
 		}),
 		// current folder container
-		cwd : $('<div/>').appendTo(node).elfindercwd(this),
+		cwd : $('<div/>').appendTo(node).elfindercwd(this, this.options.uiOptions.cwd || {}),
 		// notification dialog window
 		notify : this.dialog('', {
 			cssClass  : 'elfinder-dialog-notify',
@@ -1659,6 +1692,7 @@ window.elFinder = function(node, opts) {
 			}, self.options.sync)
 			
 		}
+
 	});
 	
 	// self.timeEnd('load'); 
@@ -1711,11 +1745,44 @@ elFinder.prototype = {
 			'application/postscript'        : 'Postscript',
 			'application/vnd.ms-office'     : 'MsOffice',
 			'application/vnd.ms-word'       : 'MsWord',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'MsWord',
+			'application/vnd.ms-word.document.macroEnabled.12'                        : 'MsWord',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.template' : 'MsWord',
+			'application/vnd.ms-word.template.macroEnabled.12'                        : 'MsWord',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'       : 'MsWord',
 			'application/vnd.ms-excel'      : 'MsExcel',
+			'application/vnd.ms-excel.sheet.macroEnabled.12'                          : 'MsExcel',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.template'    : 'MsExcel',
+			'application/vnd.ms-excel.template.macroEnabled.12'                       : 'MsExcel',
+			'application/vnd.ms-excel.sheet.binary.macroEnabled.12'                   : 'MsExcel',
+			'application/vnd.ms-excel.addin.macroEnabled.12'                          : 'MsExcel',
 			'application/vnd.ms-powerpoint' : 'MsPP',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation' : 'MsPP',
+			'application/vnd.ms-powerpoint.presentation.macroEnabled.12'              : 'MsPP',
+			'application/vnd.openxmlformats-officedocument.presentationml.slideshow'  : 'MsPP',
+			'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'                 : 'MsPP',
+			'application/vnd.openxmlformats-officedocument.presentationml.template'   : 'MsPP',
+			'application/vnd.ms-powerpoint.template.macroEnabled.12'                  : 'MsPP',
+			'application/vnd.ms-powerpoint.addin.macroEnabled.12'                     : 'MsPP',
+			'application/vnd.openxmlformats-officedocument.presentationml.slide'      : 'MsPP',
+			'application/vnd.ms-powerpoint.slide.macroEnabled.12'                     : 'MsPP',
 			'application/pdf'               : 'PDF',
 			'application/xml'               : 'XML',
 			'application/vnd.oasis.opendocument.text' : 'OO',
+			'application/vnd.oasis.opendocument.text-template'         : 'OO',
+			'application/vnd.oasis.opendocument.text-web'              : 'OO',
+			'application/vnd.oasis.opendocument.text-master'           : 'OO',
+			'application/vnd.oasis.opendocument.graphics'              : 'OO',
+			'application/vnd.oasis.opendocument.graphics-template'     : 'OO',
+			'application/vnd.oasis.opendocument.presentation'          : 'OO',
+			'application/vnd.oasis.opendocument.presentation-template' : 'OO',
+			'application/vnd.oasis.opendocument.spreadsheet'           : 'OO',
+			'application/vnd.oasis.opendocument.spreadsheet-template'  : 'OO',
+			'application/vnd.oasis.opendocument.chart'                 : 'OO',
+			'application/vnd.oasis.opendocument.formula'               : 'OO',
+			'application/vnd.oasis.opendocument.database'              : 'OO',
+			'application/vnd.oasis.opendocument.image'                 : 'OO',
+			'application/vnd.openofficeorg.extension'                  : 'OO',
 			'application/x-shockwave-flash' : 'AppFlash',
 			'application/flash-video'       : 'Flash video',
 			'application/x-bittorrent'      : 'Torrent',
@@ -1828,8 +1895,11 @@ elFinder.prototype = {
 	},
 	
 	setSort : function(type, dir) {
+		type = this.sorts[type] ? type : 1;
 		this.sort = this.sorts[type] || 1;
 		this.sortDirect = dir == 'asc' || dir == 'desc' ? dir : 'asc';
+		this.storage('sort', type);
+		this.storage('sortDirect', this.sortDirect);
 		this.trigger('sortchange');
 	},
 	
@@ -2233,8 +2303,8 @@ elFinder.prototype = {
 			d2   = file2.mime == 'directory',
 			n1   = f1.name.toLowerCase(),
 			n2   = f2.name.toLowerCase(),
-			s1   = d1 ? 0 : f1.size || 0,
-			s2   = d2 ? 0 : f2.size || 0,
+			s1   = d1 ? 0 : parseInt(f1.size) || 0,
+			s2   = d2 ? 0 : parseInt(f2.size) || 0,
 			t1   = f1.ts || f1.date || '',
 			t2   = f2.ts || f2.date || '';
 
@@ -2591,15 +2661,15 @@ elFinder.prototype = {
 	 * @param  Object  file object
 	 * @return String
 	 */
-	formatDate : function(file) {
+	formatDate : function(file, ts) {
 		var self = this, 
-			ts   = file.ts, 
+			ts   = ts || file.ts, 
 			i18  = self.i18,
 			date, format, output, d, dw, m, y, h, g, i, s;
 
 		if (self.options.clientFormatDate && ts > 0) {
 
-			date = new Date(file.ts*1000);
+			date = new Date(ts*1000);
 			
 			h  = date[self.getHours]();
 			g  = h > 12 ? h - 12 : h;
@@ -2705,7 +2775,8 @@ elFinder.prototype = {
 			n = 1024;
 			u = 'KB';
 		}
-		return (s > 0 ? Math.round(s/n) : 0) +' '+u;
+		s = s/n;
+		return (s > 0 ? n >= 1048576 ? s.toFixed(2) : Math.round(s) : 0) +' '+u;
 	},
 	
 	

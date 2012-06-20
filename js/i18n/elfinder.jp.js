@@ -1,13 +1,15 @@
 /**
  * Japanese translation
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @version 2012-03-17
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
+ * @version 2012-04-23
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
 		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
+		dateFormat : 'Y/m/d h:i A', // 2012/04/11 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: 今日 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -74,7 +76,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResize'            : '"$1"をリサイズできません',
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
 			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
-			
+			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
+			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
+			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
+			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -103,6 +108,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'ビュー',
 			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
+			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
 			'cmdpixlr'     : 'Pixlr で編集',
 			
 			/*********************************** buttons ***********************************/ 
@@ -113,7 +119,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'キャンセル',
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
-			
+			'btnMount'  : 'マウント',  // added 18.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開く',
 			'ntffile'     : 'ファイルを開く',
@@ -133,7 +139,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'ファイル検索',
 			'ntfresize'   : 'リサイズしています',
 			'ntfsmth'     : '何かしています >_<',
-			'ntfloadimg'  : 'Loading image',
+      		'ntfloadimg'  : 'イメージを読み込んでいます',
+      		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
@@ -202,7 +209,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'ヘルプ',
 			'webfm'           : 'ウェブファイルマネージャー',
 			'ver'             : 'バージョン',
-			'protocol'        : 'プロトコルバージョン',
+			'protocolver'     : 'プロトコルバージョン',
 			'homepage'        : 'プロジェクトホーム',
 			'docs'            : 'ドキュメンテーション',
 			'github'          : 'Github でフォーク',
@@ -233,7 +240,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : '90度左回転',
 			'rotate-ccw'      : '90度右回転',
 			'degree'          : '度',
-			
+			'netMountDialogTitle' : 'ネットワークボリュームのマウント', // added 18.04.2012
+			'protocol'            : 'プロトコル', // added 18.04.2012
+			'host'                : 'ホスト名', // added 18.04.2012
+			'port'                : 'ポート', // added 18.04.2012
+			'user'                : 'ユーザー名', // added 18.04.2012
+			'pass'                : 'パスワード', // added 18.04.2012
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
 			'kindFolder'      : 'フォルダー',

@@ -16,14 +16,12 @@ elFinder.prototype.commands.sort = function() {
 	 */
 	this.options = {ui : 'sortbutton'};
 	
-	this.value = 1;
+	this.value = sorts[0];
 	this.variants = [];
 	
 	for (i = 0; i < sorts.length; i++) {
 		this.variants.push([sorts[i], this.fm.i18n('sort' + sorts[i])])
 	}
-	
-	this.disableOnSearch = true;
 	
 	this.fm.bind('load sortchange', function() {
 		self.value = sorts[self.fm.sort-1];
@@ -36,8 +34,8 @@ elFinder.prototype.commands.sort = function() {
 	
 	this.exec = function(hashes, type) {
 		var dir = $.inArray(type, sorts)+1 == this.fm.sort ? (this.fm.sortDirect == 'asc' ? 'desc' : 'asc') : this.fm.sortDirect;
-
 		this.fm.setSort(type, dir);
+		return $.Deferred().resolve();
 	}
 
 }

@@ -6,7 +6,6 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.rename = function() {
-	this.disableOnSearch = true;
 	
 	this.shortcuts = [{
 		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
@@ -30,13 +29,18 @@ elFinder.prototype.commands.rename = function() {
 					var parent = input.parent(),
 						name   = fm.escape(file.name);
 
-					error && fm.error(error);
+					
 					if (parent.length) {
 						input.remove();
 						parent.html(name);
 					} else {
 						cwd.find('#'+file.hash).find(filename).html(name);
+						setTimeout(function() {
+							cwd.find('#'+file.hash).click();
+						}, 50);
 					}
+					
+					error && fm.error(error);
 				})
 				.always(function() {
 					fm.enable();

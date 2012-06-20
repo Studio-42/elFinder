@@ -7,6 +7,8 @@ function chmodnum($chmod) {
     return array_sum(str_split($array[0])) . array_sum(str_split($array[1])) . array_sum(str_split($array[2]));
 }
 
+elFinder::$netDrivers['ftp'] = 'FTP';
+
 /**
  * Simple elFinder driver for FTP
  *
@@ -76,7 +78,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'port'          => 21,
 			'mode'        	=> 'passive',
 			'path'			=> '/',
-			'timeout'		=> 10,
+			'timeout'		=> 20,
 			'owner'         => true,
 			'tmbPath'       => '',
 			'tmpPath'       => '',
@@ -100,30 +102,37 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	protected function init() {
-
 		if (!$this->options['host'] 
 		||  !$this->options['user'] 
 		||  !$this->options['pass'] 
-		||  !$this->options['port']
-		||  !$this->options['path']) {
+		||  !$this->options['port']) {
 			return $this->setError('Required options undefined.');
 		}
 		
 		if (!function_exists('ftp_connect')) {
-			return $this->setError('FTP extension not loaded..');
+			return $this->setError('FTP extension not loaded.');
 		}
+
+		// remove protocol from host
+		$scheme = parse_url($this->options['host'], PHP_URL_SCHEME);
+
+		if ($scheme) {
+			$this->options['host'] = substr($this->options['host'], strlen($scheme)+3);
+		}
+
 		// normalize root path
 		$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 		
 		if (empty($this->options['alias'])) {
-			$num = elFinder::$volumesCnt-1;
-			$this->options['alias'] = $this->root == '/' || $this->root == '.' ? 'FTP folder '.$num : basename($this->root);
+			$this->options['alias'] = $this->options['user'].'@'.$this->options['host'];
+			// $num = elFinder::$volumesCnt-1;
+			// $this->options['alias'] = $this->root == '/' || $this->root == '.' ? 'FTP folder '.$num : basename($this->root);
 		}
 
 		$this->rootName = $this->options['alias'];
 		$this->options['separator'] = '/';
-		return 
-		$this->connect();
+
+		return $this->connect();
 		
 	}
 
@@ -718,7 +727,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
-		if (($path = ftp_mkdir($this->connect, $path.'/'.$name)) == false) {
+		$path = $path.'/'.$name;
+		if (ftp_mkdir($this->connect, $path) === false) {
 			return false;
 		} 
 		
