@@ -122,7 +122,7 @@ elFinder.prototype._options = {
 	commandsOptions : {
 		// "getfile" command options.
 		getfile : {
-			onlyURL  : true,
+			onlyURL  : false,
 			// allow to return multiple files info
 			multiple : false,
 			// allow to return filers info
@@ -226,6 +226,14 @@ elFinder.prototype._options = {
 	 * @default null (command not active)
 	 */
 	getFileCallback : null,
+	
+	/**
+	 * Default directory view. icons/list
+	 *
+	 * @type String
+	 * @default "icons"
+	 */
+	defaultView : 'icons',
 	
 	/**
 	 * UI plugins to load.

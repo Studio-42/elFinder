@@ -138,6 +138,7 @@ elFinder.prototype.commands.paste = function() {
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.always(function() {
+								dfrd.resolve();
 								fm.unlockfiles({files : files});
 							});
 					}

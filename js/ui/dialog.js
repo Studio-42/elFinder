@@ -8,12 +8,12 @@ $.fn.elfinderdialog = function(opts) {
 	var dialog;
 	
 	if (typeof(opts) == 'string' && (dialog = this.closest('.ui-dialog')).length) {
-		if (opts == 'open' && dialog.is(':hidden')) {
-			dialog.fadeIn(120, function() {
+		if (opts == 'open') {
+			dialog.css('display') == 'none' && dialog.fadeIn(120, function() {
 				dialog.trigger('open');
 			});
-		} else if (opts == 'close' && dialog.is(':visible')) {
-			dialog.hide().trigger('close');
+		} else if (opts == 'close') {
+			dialog.css('display') != 'none' && dialog.hide().trigger('close');
 		} else if (opts == 'destroy') {
 			dialog.hide().remove();
 		} else if (opts == 'toTop') {
