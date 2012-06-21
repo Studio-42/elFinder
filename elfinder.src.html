@@ -1,119 +1,115 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
-
+<!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta charset="utf-8">
 	<title>elFinder 2.x source version with PHP connector</title>
 	<!-- 
 	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
 	-->
-	<script src="jquery/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
-	<script src="jquery/jquery-ui-1.8.18.custom.min.js" type="text/javascript" charset="utf-8"></script>
-	<link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.18.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<script src="jquery/jquery-1.7.2.min.js"></script>
+	<script src="jquery/jquery-ui-1.8.21.custom.min.js"></script>
+	<link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.21.custom.css" type="text/css">
 
-	<link rel="stylesheet" href="css/common.css"      type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/dialog.css"      type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/toolbar.css"     type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/navbar.css"      type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/statusbar.css"   type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/contextmenu.css" type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/cwd.css"         type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/quicklook.css"   type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="css/commands.css"    type="text/css" media="screen" charset="utf-8">
-	
-	<link rel="stylesheet" href="css/theme.css"       type="text/css" media="screen" charset="utf-8">
-	
+	<link rel="stylesheet" href="css/common.css"      type="text/css">
+	<link rel="stylesheet" href="css/dialog.css"      type="text/css">
+	<link rel="stylesheet" href="css/toolbar.css"     type="text/css">
+	<link rel="stylesheet" href="css/navbar.css"      type="text/css">
+	<link rel="stylesheet" href="css/statusbar.css"   type="text/css">
+	<link rel="stylesheet" href="css/contextmenu.css" type="text/css">
+	<link rel="stylesheet" href="css/cwd.css"         type="text/css">
+	<link rel="stylesheet" href="css/quicklook.css"   type="text/css">
+	<link rel="stylesheet" href="css/commands.css"    type="text/css">
+
+	<link rel="stylesheet" href="css/theme.css"       type="text/css">
+
 	<!-- elfinder core -->
-	<script src="js/elFinder.js"           type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.version.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/jquery.elfinder.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.resources.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.options.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.history.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/elFinder.command.js"   type="text/javascript" charset="utf-8"></script>
-	
+	<script src="js/elFinder.js"></script>
+	<script src="js/elFinder.version.js"></script>
+	<script src="js/jquery.elfinder.js"></script>
+	<script src="js/elFinder.resources.js"></script>
+	<script src="js/elFinder.options.js"></script>
+	<script src="js/elFinder.history.js"></script>
+	<script src="js/elFinder.command.js"></script>
+
 	<!-- elfinder ui -->
-	<script src="js/ui/overlay.js"       type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/workzone.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/navbar.js"        type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/dialog.js"        type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/tree.js"          type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/cwd.js"           type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/toolbar.js"       type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/button.js"        type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/uploadButton.js"  type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/viewbutton.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/searchbutton.js"  type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/sortbutton.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/panel.js"         type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/contextmenu.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/path.js"          type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/stat.js"          type="text/javascript" charset="utf-8"></script>
-	<script src="js/ui/places.js"        type="text/javascript" charset="utf-8"></script>
-	
+	<script src="js/ui/overlay.js"></script>
+	<script src="js/ui/workzone.js"></script>
+	<script src="js/ui/navbar.js"></script>
+	<script src="js/ui/dialog.js"></script>
+	<script src="js/ui/tree.js"></script>
+	<script src="js/ui/cwd.js"></script>
+	<script src="js/ui/toolbar.js"></script>
+	<script src="js/ui/button.js"></script>
+	<script src="js/ui/uploadButton.js"></script>
+	<script src="js/ui/viewbutton.js"></script>
+	<script src="js/ui/searchbutton.js"></script>
+	<script src="js/ui/sortbutton.js"></script>
+	<script src="js/ui/panel.js"></script>
+	<script src="js/ui/contextmenu.js"></script>
+	<script src="js/ui/path.js"></script>
+	<script src="js/ui/stat.js"></script>
+	<script src="js/ui/places.js"></script>
+
 	<!-- elfinder commands -->
-	<script src="js/commands/back.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/forward.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/reload.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/up.js"        type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/home.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/copy.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/cut.js"       type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/paste.js"     type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/open.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/rm.js"        type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/info.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/duplicate.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/rename.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/help.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/getfile.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/mkdir.js"     type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/mkfile.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/upload.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/download.js"  type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/edit.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/quicklook.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/quicklook.plugins.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/extract.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/archive.js"   type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/search.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/view.js"      type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/resize.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/commands/sort.js"      type="text/javascript" charset="utf-8"></script>	
-	<script src="js/commands/netmount.js"      type="text/javascript" charset="utf-8"></script>	
+	<script src="js/commands/back.js"></script>
+	<script src="js/commands/forward.js"></script>
+	<script src="js/commands/reload.js"></script>
+	<script src="js/commands/up.js"></script>
+	<script src="js/commands/home.js"></script>
+	<script src="js/commands/copy.js"></script>
+	<script src="js/commands/cut.js"></script>
+	<script src="js/commands/paste.js"></script>
+	<script src="js/commands/open.js"></script>
+	<script src="js/commands/rm.js"></script>
+	<script src="js/commands/info.js"></script>
+	<script src="js/commands/duplicate.js"></script>
+	<script src="js/commands/rename.js"></script>
+	<script src="js/commands/help.js"></script>
+	<script src="js/commands/getfile.js"></script>
+	<script src="js/commands/mkdir.js"></script>
+	<script src="js/commands/mkfile.js"></script>
+	<script src="js/commands/upload.js"></script>
+	<script src="js/commands/download.js"></script>
+	<script src="js/commands/edit.js"></script>
+	<script src="js/commands/quicklook.js"></script>
+	<script src="js/commands/quicklook.plugins.js"></script>
+	<script src="js/commands/extract.js"></script>
+	<script src="js/commands/archive.js"></script>
+	<script src="js/commands/search.js"></script>
+	<script src="js/commands/view.js"></script>
+	<script src="js/commands/resize.js"></script>
+	<script src="js/commands/sort.js"></script>	
+	<script src="js/commands/netmount.js"></script>	
 
 	<!-- elfinder languages -->
-	<script src="js/i18n/elfinder.ar.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.bg.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.ca.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.cs.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.de.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.en.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.es.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.fr.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.hu.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.jp.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.it.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.nl.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.pl.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.pt_BR.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.ru.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.tr.js"    type="text/javascript" charset="utf-8"></script>
-	<script src="js/i18n/elfinder.zh_CN.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/i18n/elfinder.ar.js"></script>
+	<script src="js/i18n/elfinder.bg.js"></script>
+	<script src="js/i18n/elfinder.ca.js"></script>
+	<script src="js/i18n/elfinder.cs.js"></script>
+	<script src="js/i18n/elfinder.de.js"></script>
+	<script src="js/i18n/elfinder.en.js"></script>
+	<script src="js/i18n/elfinder.es.js"></script>
+	<script src="js/i18n/elfinder.fr.js"></script>
+	<script src="js/i18n/elfinder.hu.js"></script>
+	<script src="js/i18n/elfinder.it.js"></script>
+	<script src="js/i18n/elfinder.jp.js"></script>
+	<script src="js/i18n/elfinder.nl.js"></script>
+	<script src="js/i18n/elfinder.no.js"></script>
+	<script src="js/i18n/elfinder.pl.js"></script>
+	<script src="js/i18n/elfinder.pt_BR.js"></script>
+	<script src="js/i18n/elfinder.ru.js"></script>
+	<script src="js/i18n/elfinder.tr.js"></script>
+	<script src="js/i18n/elfinder.zh_CN.js"></script>
 
 	<!-- elfinder dialog -->
-	<script src="js/jquery.dialogelfinder.js"     type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery.dialogelfinder.js"></script>
 
 	<!-- elfinder 1.x connector API support -->
-	<script src="js/proxy/elFinderSupportVer1.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/proxy/elFinderSupportVer1.js"></script>
 
 	<!-- elfinder custom extenstions -->
-	<script src="extensions/jplayer/elfinder.quicklook.jplayer.js" type="text/javascript" charset="utf-8"></script>
-	
-	
-	
-	
+	<script src="extensions/jplayer/elfinder.quicklook.jplayer.js"></script>
+
 	<style type="text/css">
 		body { font-family:arial, verdana, sans-serif;}
 		.button {
@@ -136,20 +132,17 @@
 			-webkit-border-radius:5px;
 			cursor:pointer;
 		}
-		
-/*		#dialog {
+/*
+		#dialog {
 			position:absolute;
 			left:50%;
 			top:1000px;
 		}
-		
-*/	</style>
+*/
+	</style>
 
-	<script type="text/javascript" charset="utf-8">
+	<script>
 		$().ready(function() {
-
-			// tinyMCE.init({});
-
 			$('#finder').elfinder({
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
@@ -157,6 +150,16 @@
 				getFileCallback : function(files, fm) {
 					console.log(files);
 				},
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
 				// handlers : {
 				// 	select : function(e) {
 				// 		console.log(e.data)
@@ -221,9 +224,8 @@
 			$('#fwd').click(function(e) {
 				f1.exec('forward')
 			})
-			
+
 			$('#dialog').click(function() {
-				
 				var fm = $('<div/>').dialogelfinder({
 					url : 'php/connector.php',
 					lang : 'en',
@@ -238,17 +240,11 @@
 							folders : true
 						}
 					}
-				}).dialogelfinder('instance')
+				}).dialogelfinder('instance');
+			});
 
-			})
-			
-		})
-		
-		
-
-		
+		});
 	</script>
-
 </head>
 <body>
 	<div id="back" class="button">back</div>
@@ -267,7 +263,6 @@
 	<input type="text" value="123" />
 	<input type="text" value="456" />
 
-	
 	<!-- <div><input type="text" id="i1"></div> -->
 	<!-- <div><input type="text" id="i2"></div> -->
 
