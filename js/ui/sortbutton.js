@@ -59,7 +59,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			hide = function() { menu.hide(); };
 			
 			
-		$.each(fm.sortVariants, function(name, value) {
+		$.each(fm.sortRules, function(name, value) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
 		
@@ -69,13 +69,17 @@ $.fn.elfindersortbutton = function(cmd) {
 		fm.bind('disable select', hide).getUI().click(hide);
 			
 		fm.bind('sortchange', update)
+		
+		if (menu.children().length > 1) {
+			cmd.change(function() {
+					button.toggleClass(disabled, cmd.disabled());
+					update();
+				})
+				.change();
 			
-		cmd
-			.change(function() {
-				button.toggleClass(disabled, cmd.disabled());
-				update();
-			})
-			.change();
+		} else {
+			button.addClass(disabled);
+		}
 
 	});
 	
