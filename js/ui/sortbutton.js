@@ -32,18 +32,6 @@ $.fn.elfindersortbutton = function(cmd) {
 				.appendTo(button)
 				.zIndex(12+button.zIndex())
 				.delegate('.'+item, 'hover', function() { $(this).toggleClass(hover) })
-				.delegate('.'+item+':not(:last)', 'click', function(e) {
-					var type = $(this).attr('rel');
-					
-					cmd.exec([], {
-						type  : type, 
-						order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
-						stick : fm.sortStickFolders
-					});
-				})
-				.delegate('.'+item+':last', 'click', function(e) {
-					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders});
-				})
 				.delegate('.'+item, 'click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -63,8 +51,21 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
 		
-		menu.append('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>');
+		menu.children().click(function(e) {
+			var type = $(this).attr('rel');
+			
+			cmd.exec([], {
+				type  : type, 
+				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
+				stick : fm.sortStickFolders
+			});
+		})
 		
+		$('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
+			.appendTo(menu)
+			.click(function() {
+				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders});
+			});		
 		
 		fm.bind('disable select', hide).getUI().click(hide);
 			
