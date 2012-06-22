@@ -190,7 +190,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortkind'          : 'by kind', 
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',
-			'sortFoldersFirst'  : 'Keep folders first', // added 22.06.2012
+			'sortFoldersFirst'  : 'Folders first', // added 22.06.2012
 			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
