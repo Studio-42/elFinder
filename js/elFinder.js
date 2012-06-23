@@ -464,16 +464,16 @@ window.elFinder = function(node, opts) {
 		this.sortStickFolders = !!this.sortStickFolders
 	}
 
-	this.sortVariants = $.extend(true, {}, this._sorts, this.options.sorts)
+	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortsRules);
 	
-	$.each(this.sortVariants, function(name, method) {
+	$.each(this.sortRules, function(name, method) {
 		if (typeof method != 'function') {
-			delete self.sortVariants[name];
+			delete self.sortRules[name];
 		} 
 	});
-
+	
 	this.compare = $.proxy(this.compare, this);
-
+	
 	/**
 	 * Delay in ms before open notification dialog
 	 *
@@ -2344,13 +2344,13 @@ elFinder.prototype = {
 	 * @param {Boolean} show folder first
 	 */
 	setSort : function(type, order, stickFolders) {
-		this.storage('sortType', (this.sortType = this.sortVariants[type] ? type : 'name'));
+		this.storage('sortType', (this.sortType = this.sortRules[type] ? type : 'name'));
 		this.storage('sortOrder', (this.sortOrder = /asc|desc/.test(order) ? order : 'asc'));
 		this.storage('sortStickFolders', (this.sortStickFolders = !!stickFolders) ? 1 : '');
 		this.trigger('sortchange');
 	},
 	
-	_sorts : {
+	_sortRules : {
 		name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); },
 		size : function(file1, file2) { 
 			var size1 = parseInt(file1.size) || 0,
@@ -2375,17 +2375,15 @@ elFinder.prototype = {
 	 * @return Number
 	 */
 	compare : function(file1, file2) {
-		var self     = this,
-			type     = self.sortType,
-			asc      = self.sortOrder == 'asc',
-			stick    = self.sortStickFolders,
-			variants = self.sortVariants,
-			sort     = variants[type],
-			d1       = file1.mime == 'directory',
-			d2       = file2.mime == 'directory',
+		var self  = this,
+			type  = self.sortType,
+			asc   = self.sortOrder == 'asc',
+			stick = self.sortStickFolders,
+			rules = self.sortRules,
+			sort  = rules[type],
+			d1    = file1.mime == 'directory',
+			d2    = file2.mime == 'directory',
 			res;
-			
-		
 			
 		if (stick) {
 			if (d1 && !d2) {
@@ -2398,7 +2396,7 @@ elFinder.prototype = {
 		res = asc ? sort(file1, file2) : sort(file2, file1);
 		
 		return type != 'name' && res == 0
-			? res = asc ? variants.name(file1, file2) : variants.name(file2, file1)
+			? res = asc ? rules.name(file1, file2) : rules.name(file2, file1)
 			: res;
 	},
 	

@@ -187,6 +187,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortkind'          : 'по типу', 
 			'sortsize'          : 'по размеру',
 			'sortdate'          : 'по дате',
+			'sortFoldersFirst'  : 'Папки в начале',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение.',

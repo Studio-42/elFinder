@@ -266,16 +266,16 @@ elFinder.prototype._options = {
 
 	/**
 	 * Custom files sort rules.
-	 * All default rules set in elFinder._sorts
+	 * All default rules (name/size/kind/date) set in elFinder._sortRules
 	 *
 	 * @type {Object}
 	 * @example
-	 * sorts : {
+	 * sortRules : {
 	 *   name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); }
 	 * }
 	 */
-	sorts : { },
-	
+	sortRules : {},
+
 	/**
 	 * Default sort type.
 	 *
