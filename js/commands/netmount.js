@@ -15,7 +15,7 @@ elFinder.prototype.commands.netmount = function() {
 	
 	this.handlers = {
 		load : function() {
-			this.drivers = this.fm.netDrivers;
+			self.drivers = this.fm.netDrivers;
 		}
 	}
 
