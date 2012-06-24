@@ -41,7 +41,7 @@
 	font-size:.76em;
 }
 
-.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0 solid; }
+.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0px solid; }
 .std42-dialog .ui-dialog-buttonpane button span { padding:2px 9px; }
 
 .elfinder-dialog .ui-resizable-e, 

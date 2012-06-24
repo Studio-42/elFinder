@@ -192,7 +192,7 @@
 	-moz-border-radius: 12px;
 	-webkit-border-radius: 12px;
 	border-radius: 12px;
-	outline:0 solid;
+	outline:0px solid;
 }
 
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
