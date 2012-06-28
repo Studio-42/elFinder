@@ -1993,7 +1993,7 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	private function allowCreate($dir, $name) {
+	protected function allowCreate($dir, $name) {
 		$path = $this->_joinPath($dir, $name);
 		$perm = null;
 		
