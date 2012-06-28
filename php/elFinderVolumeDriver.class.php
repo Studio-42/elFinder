@@ -2061,7 +2061,7 @@ abstract class elFinderVolumeDriver {
 				$stat['name'] = $this->rootName;
 			}
 		} else {
-			if (empty($stat['name'])) {
+			if (!isset($stat['name']) || !strlen($stat['name'])) {
 				$stat['name'] = $this->_basename($path);
 			}
 			if (empty($stat['phash'])) {
