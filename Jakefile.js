@@ -33,7 +33,7 @@ var dirmode = 0755,
 			.concat(grep(path.join(src, 'js', 'ui'), '\\.js$'))
 			.concat(grep(path.join(src, 'js', 'commands'), '\\.js$')),
 
-		'elfinder.full.css': grep(path.join(src, 'css'), '\\.css$', 'theme'),
+		'elfinder.full.css': grep(path.join(src, 'css'), '\\.css$', 'elfinder|theme'),
 
 		'images':	grep(path.join(src, 'img'), '\\.png|\\.gif'),
 
@@ -44,8 +44,10 @@ var dirmode = 0755,
 				path.join(src, 'php', 'elFinder.class.php'),
 				path.join(src, 'php', 'elFinderConnector.class.php'),
 				path.join(src, 'php', 'elFinderVolumeDriver.class.php'),
+				path.join(src, 'php', 'elFinderVolumeFTP.class.php'),
 				path.join(src, 'php', 'elFinderVolumeLocalFileSystem.class.php'),
 				path.join(src, 'php', 'elFinderVolumeMySQL.class.php'),
+				path.join(src, 'php', 'connector.minimal.php'),
 				path.join(src, 'php', 'mime.types'),
 				path.join(src, 'php', 'MySQLStorage.sql')
 			],
@@ -261,29 +263,28 @@ task('version', function(){
 desc('create package task')
 task('prepack', function(){
 	new jake.PackageTask('elfinder', version, function(){
-		var fls = [
-			'js/elfinder.min.js',
-			'js/i18n/*',
-			'js/proxy/*',
-			'css/elfinder.min.css',
-			'css/theme.css',
-			'img/*',
-			'php/*',
-			'files/readme.txt',
-			'Changelog',
-			'README.md',
-			'elfinder.html'
-		];
-
-		this.packageFiles.include(fls);
+		var fls = (files['php'].concat(files['images']).concat(files['i18n']).concat(files['misc'])).map(function(i){
+			return i.substr(src.length + 1);
+		});
+		fls.push('files')
+		console.log('Including next files into release:')
+		console.log(fls);
+		this.packageFiles.items = fls;
 		this.needTarGz = true;
-		// this.needZip = true;
+		this.needZip = true;
 	});
 });
 
 desc('pack release')
-task({'release': ['version', 'prepack']}, function(){
-	copyFile(path.join(src, 'README.md'), path.join('files', 'readme.txt'));
-	jake.Task['package'].invoke();
-	console.log('Created package for elfinder');
-});
+task({'release': ['version']}, function(){
+	var prePack = jake.Task['prepack'];
+	prePack.addListener('complete', function() {
+		var pack = jake.Task['package'];
+		pack.addListener('complete', function() {
+			console.log('Created package for elFinder ' + version);
+			complete();
+		});
+		pack.invoke();
+	});
+	prePack.invoke();
+}, {async: true});
