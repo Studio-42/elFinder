@@ -2365,7 +2365,7 @@ abstract class elFinderVolumeDriver {
 		foreach ($this->dirsCache[$path] as $p) {
 			$stat = $this->stat($p);
 			
-			if ($stat && empty($stat['hidden']) && $path != $exclude && $stat['mime'] == 'directory') {
+			if ($stat && empty($stat['hidden']) && $p != $exclude && $stat['mime'] == 'directory') {
 				$dirs[] = $stat;
 				if ($deep > 0 && !empty($stat['dirs'])) {
 					$dirs = array_merge($dirs, $this->gettree($p, $deep-1));

@@ -246,6 +246,7 @@ $opts = array(
 			'path'       => '../files/',
 			'startPath'  => '../files/test/',
 			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			'treeDeep'   => 3,
 			// 'alias'      => 'File system',
 			'mimeDetect' => 'internal',
 			'tmbPath'    => '.tmb',
