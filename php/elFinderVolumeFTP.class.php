@@ -542,7 +542,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					case 'modify':
 						$ts = mktime(intval(substr($val, 8, 2)), intval(substr($val, 10, 2)), intval(substr($val, 12, 2)), intval(substr($val, 4, 2)), intval(substr($val, 6, 2)), substr($val, 0, 4));
 						$stat['ts'] = $ts;
-						$stat['date'] = $this->formatDate($ts);
+						// $stat['date'] = $this->formatDate($ts);
 						break;
 
 					case 'unix.mode':

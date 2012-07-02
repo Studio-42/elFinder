@@ -21,10 +21,12 @@
 
 		<!-- elFinder initialization (REQUIRED) -->
 		<script type="text/javascript" charset="utf-8">
+			// Documentation for client options:
+			// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
 			$().ready(function() {
 				$('#elfinder').elfinder({
-					url : 'php/connector.php'  // connector URL (REQUIRED)
-					// lang: 'ru',             // language (OPTIONAL)
+					url : 'php/connector.minimal.php'  // connector URL (REQUIRED)
+					// lang: 'ru',                     // language (OPTIONAL)
 				});
 			});
 		</script>
