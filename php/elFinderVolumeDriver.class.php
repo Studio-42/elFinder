@@ -2482,11 +2482,11 @@ abstract class elFinderVolumeDriver {
 	protected function move($src, $dst, $name) {
 		$stat = $this->stat($src);
 		$stat['realpath'] = $src;
+		$this->rmTmb($stat); // can not do rmTmb() after _move()
 		$this->clearcache();
 		
 		if ($this->_move($src, $dst, $name)) {
 			$this->removed[] = $stat;
-			$this->rmTmb($stat);
 
 			return $this->_joinPath($dst, $name);
 		}
