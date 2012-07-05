@@ -2365,7 +2365,7 @@ abstract class elFinderVolumeDriver {
 		foreach ($this->dirsCache[$path] as $p) {
 			$stat = $this->stat($p);
 			
-			if ($stat && empty($stat['hidden']) && $path != $exclude && $stat['mime'] == 'directory') {
+			if ($stat && empty($stat['hidden']) && $p != $exclude && $stat['mime'] == 'directory') {
 				$dirs[] = $stat;
 				if ($deep > 0 && !empty($stat['dirs'])) {
 					$dirs = array_merge($dirs, $this->gettree($p, $deep-1));
@@ -2482,11 +2482,11 @@ abstract class elFinderVolumeDriver {
 	protected function move($src, $dst, $name) {
 		$stat = $this->stat($src);
 		$stat['realpath'] = $src;
+		$this->rmTmb($stat); // can not do rmTmb() after _move()
 		$this->clearcache();
 		
 		if ($this->_move($src, $dst, $name)) {
 			$this->removed[] = $stat;
-			$this->rmTmb($stat);
 
 			return $this->_joinPath($dst, $name);
 		}
