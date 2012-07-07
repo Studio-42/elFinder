@@ -417,7 +417,6 @@ $.fn.elfindercwd = function(fm) {
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) { 
 					var hash = fm.cwd().hash;
-
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (fm.file(h).phash == hash) {
 							cwd.removeClass(clDropActive);
@@ -614,7 +613,7 @@ $.fn.elfindercwd = function(fm) {
 				// console.log(files)
 				try {
 					// to avoid problem with draggable
-					cwd.children('table,'+fileSelector).remove().end();
+					cwd.children('table,'+fileSelector).remove();
 				} catch (e) {
 					cwd.html('');
 				}

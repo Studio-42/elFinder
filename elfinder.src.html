@@ -147,15 +147,15 @@
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
-				getFileCallback : function(files, fm) {
-					console.log(files);
-				},
+				// getFileCallback : function(files, fm) {
+				// 	console.log(files);
+				// },
 				handlers : {
                     select : function(event, elfinderInstance) {
                         var selected = event.data.selected;
 						
 						if (selected.length) {
-							console.log(elfinderInstance.file(selected[0]))
+							// console.log(elfinderInstance.file(selected[0]))
 						}
 						
                     }
