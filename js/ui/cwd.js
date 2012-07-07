@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfindercwd = function(fm) {
+$.fn.elfindercwd = function(fm, options) {
 	
 	this.not('.elfinder-cwd').each(function() {
 		// fm.time('cwdLoad');
@@ -127,8 +127,8 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
+				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -164,6 +164,10 @@ $.fn.elfindercwd = function(fm) {
 				},
 				marker : function(f) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+				},
+				tooltip : function(f) {
+					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
+					return f.tooltip? fm.escape(f.tooltip).replace(/"/g, '&quot;').replace(/\r/g, '&#13;') + '&#13;' + title : title;
 				}
 			},
 			
@@ -200,11 +204,11 @@ $.fn.elfindercwd = function(fm) {
 				var code     = $.ui.keyCode,
 					prev     = keyCode == code.LEFT || keyCode == code.UP,
 					sel      = cwd.find('[id].'+clSelected),
-					selector = prev ? 'first' : 'last',
+					selector = prev ? 'first:' : 'last',
 					s, n, sib, top, left;
 					
 				function sibling(n, direction) {
-					return n[direction+'All']('[id]:not(.'+clDisabled+'):first');
+					return n[direction+'All']('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):first');
 				}
 				
 				if (sel.length) {
@@ -251,11 +255,10 @@ $.fn.elfindercwd = function(fm) {
 					
 				} else {
 					// there are no selected file - select first/last one
-					n = cwd.find('[id]:not(.'+clDisabled+'):'+(prev ? 'last' : 'first'))
+					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'))
 				}
 				
-				if (n && n.length) {
-
+				if (n && n.length && !n.is('.elfinder-cwd-parent')) {
 					if (append) {
 						// append new files to selected
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
@@ -417,7 +420,6 @@ $.fn.elfindercwd = function(fm) {
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) { 
 					var hash = fm.cwd().hash;
-
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (fm.file(h).phash == hash) {
 							cwd.removeClass(clDropActive);
@@ -521,10 +523,10 @@ $.fn.elfindercwd = function(fm) {
 					dirs     = false,
 					findNode = function(file) {
 						var pointer = cwd.find('[id]:first'), file2;
-					
+
 						while (pointer.length) {
 							file2 = fm.file(pointer.attr('id'));
-							if (file2 && fm.compare(file, file2) < 0) {
+							if (!pointer.is('.elfinder-cwd-parent') && file2 && fm.compare(file, file2) < 0) {
 								return pointer;
 							}
 							pointer = pointer.next('[id]');
@@ -552,7 +554,7 @@ $.fn.elfindercwd = function(fm) {
 					}
 					
 					if ((node = findNode(file)) && node.length) {
-						node.before(itemhtml(file));
+						node.before(itemhtml(file)); 
 					} else if ((ndx = findIndex(file)) >= 0) {
 						buffer.splice(ndx, 0, file);
 					} else {
@@ -614,7 +616,7 @@ $.fn.elfindercwd = function(fm) {
 				// console.log(files)
 				try {
 					// to avoid problem with draggable
-					cwd.children('table,'+fileSelector).remove().end();
+					cwd.children('table,'+fileSelector).remove();
 				} catch (e) {
 					cwd.html('');
 				}
@@ -633,6 +635,24 @@ $.fn.elfindercwd = function(fm) {
 				wrapper.bind(scrollEvent, render).trigger(scrollEvent);
 		
 				trigger();
+				
+				phash = fm.cwd().phash;
+				
+				if (options.oldSchool && phash && !query) {
+					var parent = $.extend(true, {}, fm.file(phash), {name : '..', mime : 'directory'});
+					parent = $(itemhtml(parent))
+						.addClass('elfinder-cwd-parent')
+						.bind('mousedown click mouseup dblclick mouseenter', function(e) {
+							e.preventDefault();
+							e.stopPropagation();
+						})
+						.dblclick(function() {
+							fm.exec('open', this.id);
+						});
+
+					(list ? cwd.find('tbody') : cwd).prepend(parent);
+				}
+				
 			},
 			
 			/**
@@ -749,9 +769,17 @@ $.fn.elfindercwd = function(fm) {
 				.droppable(droppable)
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
-					var parent = list ? cwd.find('tbody') : cwd;
+					var parent = list ? cwd.find('tbody') : cwd,
+						p = parent.find('.elfinder-cwd-parent'),
+						file = $(itemhtml(file)).addClass(clTmp);
+						
 					cwd.trigger('unselectall');
-					parent.prepend($(itemhtml(file)).addClass(clTmp));
+					if (p.length) {
+						p.after(file);
+					} else {
+						parent.prepend(file);
+					}
+					
 					cwd.scrollTop(0)
 				})
 				// unselect all selected files
@@ -827,9 +855,11 @@ $.fn.elfindercwd = function(fm) {
 				content(lastSearch, true);
 			})
 			.bind('searchend', function() {
-				query && content(fm.files());
 				lastSearch = [];
-				query = '';
+				if (query) {
+					query = '';
+					content(fm.files());
+				}
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
@@ -946,7 +976,7 @@ $.fn.elfindercwd = function(fm) {
 				callback    : function() { 
 					var sel = [], phash;
 					
-					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
+					cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect); 
 					
 					if (buffer.length) {
 						phash = fm.cwd().hash;
