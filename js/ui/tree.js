@@ -243,9 +243,10 @@ $.fn.elfindertree = function(fm, opts) {
 			updateTree = function(dirs) {
 				var length  = dirs.length,
 					orphans = [],
-					i, dir, html, parent, sibling;
+					i = dirs.length, 
+					dir, html, parent, sibling;
 
-				for (i = 0; i < length; i++) {
+				while (i--) {
 					dir = dirs[i];
 
 					if (tree.find('#'+fm.navHash2Id(dir.hash)).length) {
@@ -267,8 +268,11 @@ $.fn.elfindertree = function(fm, opts) {
 				if (orphans.length && orphans.length < length) {
 					return updateTree(orphans);
 				} 
-
-				updateDroppable();
+				
+				setTimeout(function() {
+					updateDroppable();
+				}, 10);
+				
 			},
 			
 			/**

@@ -144,6 +144,7 @@
 	<script>
 		$().ready(function() {
 			$('#finder').elfinder({
+				type : 'post',
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
@@ -168,11 +169,11 @@
 				// onlyMimes : ['image', 'text/plain']
 				// sync : 20000,
 				lang : 'ru',
-				customData : {answer : 42}
+				customData : {answer : 42},
 				// requestType : 'POST',
 				// rememberLastDir : false,
 				// ui : ['tree', 'toolbar'],
-				// ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
+				// ui : ['toolbar', 'path', 'stat'],
 				// commands : [],
 				// commandsOptions : {
 				// 	edit : {
