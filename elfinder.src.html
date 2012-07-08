@@ -144,18 +144,19 @@
 	<script>
 		$().ready(function() {
 			$('#finder').elfinder({
+				type : 'post',
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
-				getFileCallback : function(files, fm) {
-					console.log(files);
-				},
+				// getFileCallback : function(files, fm) {
+				// 	console.log(files);
+				// },
 				handlers : {
                     select : function(event, elfinderInstance) {
                         var selected = event.data.selected;
 						
 						if (selected.length) {
-							console.log(elfinderInstance.file(selected[0]))
+							// console.log(elfinderInstance.file(selected[0]))
 						}
 						
                     }
@@ -168,11 +169,11 @@
 				// onlyMimes : ['image', 'text/plain']
 				// sync : 20000,
 				lang : 'ru',
-				customData : {answer : 42}
+				customData : {answer : 42},
 				// requestType : 'POST',
 				// rememberLastDir : false,
 				// ui : ['tree', 'toolbar'],
-				// ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
+				// ui : ['toolbar', 'path', 'stat'],
 				// commands : [],
 				// commandsOptions : {
 				// 	edit : {

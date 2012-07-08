@@ -535,7 +535,7 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, $hash, self::ERROR_PERM_DENIED));
 		}
 
-		$files = array();
+		$files = array($cwd);
 
 		// get folders trees
 		if ($args['tree']) {
