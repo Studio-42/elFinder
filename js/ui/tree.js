@@ -240,7 +240,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 				while (node.length) {
 					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
-					console.log(dir.name, info.name, dir.name.localeCompare(info.name))
+					// console.log(dir.name, info.name, dir.name.localeCompare(info.name))
 					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
 					&& dir.name.localeCompare(info.name) < 0) {
