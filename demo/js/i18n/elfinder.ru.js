@@ -68,11 +68,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'Файл не является архивом допустимого типа.',
 			'errCmdNoSupport'      : 'Сервер не поддерживает эту комманду.',
 			'errReplByChild'       : 'Невозможно заменить папку "$1" содержащимся в ней объектом.',
-			'errArcSymlinks'       : 'По соображениям безопасности запрещена распаковка архивов, содержащих ссылки (symlinks).',
+			'errArcSymlinks'       : 'По соображениям безопасности запрещена распаковка архивов, содержащих ссылки (symlinks) или файлы с недопустимыми именами.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Размер файлов в архиве превышает максимально разрешенный.',
 			'errResize'            : 'Не удалось изменить размер "$1".',
 			'errUsupportType'      : 'Неподдерживаемый тип файла.',
-			
+			'errNotUTF8Content'    : 'Файл "$1" содержит текст в кодировке отличной от UTF-8 и не может быть отредактирован.',  // added 9.11.2011
+			'errNetMount'          : 'Не удалось подключить "$1".',    // added 17.04.2012
+			'errNetMountNoDriver'  : 'Неподдерживаемый протокол.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Ошибка монтирования.',           // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
 			'cmdback'      : 'Назад',
@@ -110,7 +114,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApply'  : 'Применить',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
-			
+			'btnMount'  : 'Подключить',  // added 18.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Открытие папки',
 			'ntffile'     : 'Открытие файла',
@@ -129,7 +133,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'Распаковка архива',
 			'ntfsearch'   : 'Поиск файлов',
 			'ntfsmth'     : 'Занят важным делом desu >_<',
-			
+			'ntfnetmount' : 'Монтирую сетевой диск', // added 18.04.2012
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Незвестно',
 			'Today'       : 'Сегодня',
@@ -182,6 +187,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortkind'          : 'по типу', 
 			'sortsize'          : 'по размеру',
 			'sortdate'          : 'по дате',
+			'sortFoldersFirst'  : 'Папки в начале',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение.',
@@ -223,7 +229,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Помощь',
 			'webfm'           : 'Файловый менеджер для web',
 			'ver'             : 'Версия',
-			'protocol'        : 'версия протокола',
+			'protocolver'     : 'версия протокола',
 			'homepage'        : 'Сайт проекта',
 			'docs'            : 'Документация',
 			'github'          : 'Fork us on Github',
@@ -256,7 +262,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Поворот на 90 градусов по часовой стрелке',
 			'rotate-ccw'      : 'Поворот на 90 градусов против часовой стрелке',
 			'degree'          : '°',
-
+			'netMountDialogTitle' : 'Подключить сетевой диск', // added 18.04.2012
+			'protocol'            : 'Протокол', // added 18.04.2012
+			'host'                : 'Хост', // added 18.04.2012
+			'port'                : 'Порт', // added 18.04.2012
+			'user'                : 'Пользователь', // added 18.04.2012
+			'pass'                : 'Пароль', // added 18.04.2012
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindFolder'      : 'Папка',

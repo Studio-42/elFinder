@@ -4,27 +4,14 @@
     <title>{{ page.title }}</title>
     <meta charset="utf-8">
     <meta name="description" content="elFinder - file manager from Web" />
-    <link  href="http://fonts.googleapis.com/css?family=Ubuntu:bold&amp;v1" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="/stylesheets/default.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/smoothness/jquery-ui.css" />
-
-    <link rel="stylesheet" type="text/css" media="screen" href="/demo/css/elfinder.min.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="/demo/css/theme.css" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:bold&amp;v1" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/demo/css/elfinder.min.css" />
+    <link rel="stylesheet" type="text/css" href="/demo/css/theme.css" />
 
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-  
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
 
-    <script type="text/javascript" src="/demo/js/elfinder.min.js"></script>
-
-    <script type="text/javascript">
-      $().ready(function() {
-        var f1 = $('#elfinder').elfinder({
-          url : '/connector'
-        }).elfinder('instance');
-      });
-    </script>
   </head>
   <body>
     <div class="wrap">
@@ -33,7 +20,7 @@
         <a href="/"><img src="/images/elfinder-logo.png" alt="elFinder logo" /></a>
         <h1><a href="/">elFinder <span>file manager for web</span></a></h1>
         </div>
-        
+
         <div class="download">
           <a href="https://github.com/downloads/Studio-42/elFinder/elfinder-2.0-rc1.tar.gz" class="download-button" onclick="_gaq.push(['_trackEvent', 'Github', 'Download']);">Download the latest<br/><span>2.0-rc1 &mdash; April 10th, 2012</span></a>
         </div>
@@ -48,7 +35,7 @@
         </div>
 
       </div>
-      
+
       <div class="content">
         {{ content }}
       </div>
@@ -59,7 +46,19 @@
       </div>
     </div>
     <a href="https://github.com/Studio-42/elFinder" onclick="_gaq.push(['_trackEvent', 'Github', 'Fork me']);"><img style="position: absolute; top: 0; left: 0; border: 0;" src="/images/forkme-white.png" alt="Fork me on GitHub"></a>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
+    <script src="/demo/js/elfinder.min.js"></script>
     <script type="text/javascript">
+      // elFinder init
+      $().ready(function() {
+        var f = $('#elfinder').elfinder({
+          url : '/connector'
+        }).elfinder('instance');
+      });
+
+      // Google Analytics
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-8689655-16']);
       _gaq.push(['_trackPageview']);

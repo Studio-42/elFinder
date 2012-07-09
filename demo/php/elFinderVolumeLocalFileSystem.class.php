@@ -696,7 +696,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			foreach (scandir($path) as $name) {
 				if ($name != '.' && $name != '..') {
 					$p = $path.DIRECTORY_SEPARATOR.$name;
-					if (is_link($p)) {
+					if (is_link($p) || !$this->nameAccepted($name)) {
 						return true;
 					}
 					if (is_dir($p) && $this->_findSymlinks($p)) {
@@ -707,6 +707,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		} else {
+			
 			$this->archiveSize += filesize($path);
 		}
 		
@@ -741,7 +742,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			// extract in quarantine
 			$this->_unpack($archive, $arc);
-			@unlink($archive);
+			unlink($archive);
 			
 			// get files list
 			$ls = array();

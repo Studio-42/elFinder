@@ -224,7 +224,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Help',
 			'webfm'           : 'Web bestandsmanager',
 			'ver'             : 'Versie',
-			'protocol'        : 'protocol versie',
+			'protocolver'     : 'protocol versie',
 			'homepage'        : 'Project home',
 			'docs'            : 'Documentatie',
 			'github'          : 'Fork ons op Github',

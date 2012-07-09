@@ -46,8 +46,8 @@ Requirements
 ------------
 
 ### Client
- * Modern browser. elFinder was tested in Firefox 10, Internet Explorer 8+,
-   Safari 5, Opera 11 and Chrome 15+
+ * Modern browser. elFinder was tested in Firefox 12, Internet Explorer 8+,
+   Safari 6, Opera 12 and Chrome 19
 
 ### Server
  * Any web server
@@ -60,8 +60,6 @@ Requirements
  * [Django](https://github.com/mikery/django-elfinder)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
  * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
- * [ASP.NET Integration](http://code.google.com/p/elfinderintegration/)
- * [elFinder .Net connector](http://elfinderconnectornet.codeplex.com/)
 
 
 Support
