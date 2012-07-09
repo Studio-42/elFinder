@@ -220,11 +220,28 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param  Object  new directory
 			 * @return jQuery
 			 */
+			findSibling_ = function(subtree, dir) {
+				var node = subtree.children(':first'),
+					info;
+
+				while (node.length) {
+					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
+					&& dir.name.localeCompare(info.name) < 0) {
+						return node;
+					}
+					node = node.next();
+				}
+				return $('');
+			},
+			
 			findSibling = function(subtree, dir) {
 				var node = subtree.children(':first'),
 					info;
 
 				while (node.length) {
+					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
+					console.log(dir.name, info.name, dir.name.localeCompare(info.name))
+					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
 					&& dir.name.localeCompare(info.name) < 0) {
 						return node;
