@@ -270,37 +270,37 @@ $opts = array(
 			)
 			// 'uploadDeny' => array('application', 'text/xml')
 		),
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files2/',
-		// 	// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
-		// 	'alias'      => 'File system',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	'utf8fix'    => true,
-		// 	'tmbCrop'    => false,
-		// 	'startPath'  => '../files/test',
-		// 	// 'separator' => ':',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-				// array(
-				// 	'pattern' => '~/replace/.+png$~',
-				// 	// 'pattern' => '/^\/\./',
-				// 	'read' => false,
-				// 	'write' => false,
-				// 	// 'hidden' => true,
-				// 	'locked' => true
-				// )
-		// 	),
-		// 	// 'defaults' => array('read' => false, 'write' => true)
-		// ),
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files2/',
+			// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+			'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
+		),
 		
 		// array(
 		// 	'driver' => 'FTP',
