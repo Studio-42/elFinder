@@ -225,8 +225,10 @@ $.fn.elfindertree = function(fm, opts) {
 					info;
 
 				while (node.length) {
+					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
+					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& dir.name.localeCompare(info.name) < 0) {
+					&& dir.name.toLowerCase().localeCompare(info.name.toLowerCase()) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -258,7 +260,7 @@ $.fn.elfindertree = function(fm, opts) {
 						if (dir.phash && (sibling = findSibling(parent, dir)).length) {
 							sibling.before(html);
 						} else {
-							parent.append(html);
+							parent[dir.phash ? 'append' : 'prepend'](html);
 						}
 					} else {
 						orphans.push(dir);
