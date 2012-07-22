@@ -2,7 +2,7 @@
     "name": "studio-42/elfinder",
     "description": "File Manager for Web",
     "keywords": ["jquery-ui", "file manager", "elfinder"],
-    "homepage": "https://github.com/kriswallsmith/assetic",
+    "homepage": "https://github.com/Studio-42/elFinder",
     "license": "3-clauses BSD",
     "authors": [
         {"name": "Dmitry \"dio\" Levashov", "role": "Chief developer", "email": "dio@std42.ru"},
