@@ -266,8 +266,11 @@ task('prepack', function(){
 		var fls = (files['php'].concat(files['images']).concat(files['i18n']).concat(files['misc'])).map(function(i){
 			return i.substr(src.length + 1);
 		});
-		fls.push('files')
-		console.log('Including next files into release:')
+		fls.push(path.join('css', 'elfinder.min.css'));
+		fls.push(path.join('css', 'theme.css'));
+		fls.push(path.join('js', 'elfinder.min.js'));
+		fls.push('files');
+		console.log('Including next files into release:');
 		console.log(fls);
 		this.packageFiles.items = fls;
 		this.needTarGz = true;
