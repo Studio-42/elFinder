@@ -285,6 +285,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			unselectAll = function() {
+				console.log('unselectAll')
 				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
 			},
 			
@@ -294,7 +295,9 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return Array
 			 */
 			selected = function() {
-				return $.map(cwd.find('[id].'+clSelected), function(n) {
+				
+				return $.map(cwd.find('[id].'+clSelected+':not(.'+clDisabled+')'), function(n) {
+					return n.id
 					n = $(n);
 					return n.is('.'+clDisabled) ? null : $(n).attr('id');
 				});
@@ -773,7 +776,8 @@ $.fn.elfindercwd = function(fm, options) {
 						p = parent.find('.elfinder-cwd-parent'),
 						file = $(itemhtml(file)).addClass(clTmp);
 						
-					cwd.trigger('unselectall');
+					// cwd.trigger('unselectall');
+					unselectAll()
 					if (p.length) {
 						p.after(file);
 					} else {
@@ -784,6 +788,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// unselect all selected files
 				.bind('unselectall', function() {
+					console.log('trigger unselectall')
 					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
 					trigger();
 				})
@@ -963,8 +968,8 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('mkdir mkfile duplicate upload rename archive extract', function(e) {
 				var phash = fm.cwd().hash, files;
 				
-				cwd.trigger('unselectall');
-
+				// cwd.trigger('unselectall');
+				unselectAll()
 				$.each(e.data.added || [], function(i, file) { 
 					file && file.phash == phash && selectFile(file.hash);
 				});
