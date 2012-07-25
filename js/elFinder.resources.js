@@ -61,6 +61,7 @@ elFinder.prototype.resources = {
 				cwd  = fm.getUI('cwd'),
 				dfrd = $.Deferred()
 					.fail(function(error) {
+						cwd.trigger('unselectall');
 						error && fm.error(error);
 					})
 					.always(function() {

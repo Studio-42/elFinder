@@ -29,9 +29,9 @@ elFinder.prototype.commands.help = function() {
 			html.push('<div id="about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
-			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': '+fm.api+'</div>');
+			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': <span id="apiver"></span></div>');
 			html.push('<div class="'+sec+'">jQuery/jQuery UI: '+$().jquery+'/'+$.ui.version+'</div>');
-			
+
 			html.push(sep);
 			
 			html.push(linktpl[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
@@ -112,6 +112,8 @@ elFinder.prototype.commands.help = function() {
 		
 		html.push('</div>');
 		content = $(html.join(''));
+		
+		fm.one('load', function setapi() { content.find('#apiver').text(fm.api); });
 		
 		content.find('.ui-tabs-nav li')
 			.hover(function() {

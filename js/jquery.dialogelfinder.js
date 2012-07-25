@@ -1,4 +1,3 @@
-
 "use strict";
 /**
  * @class dialogelfinder - open elFinder in dialog window
@@ -35,7 +34,7 @@ $.fn.dialogelfinder = function(opts) {
 				.hide()
 				.appendTo('body')
 				.draggable({ handle : '.dialogelfinder-drag',
-					     containment : 'parent' })
+					     containment : 'window' })
 				.elfinder(opts)
 				.prepend(toolbar),
 			elfinder = node.elfinder('instance');

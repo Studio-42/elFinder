@@ -910,7 +910,7 @@ window.elFinder = function(node, opts) {
 				}
 
 				response = self.normalize(response);
-				
+
 				if (!self.api) {
 					self.api    = response.api || 1;
 					self.newAPI = self.api >= 2;
