@@ -982,7 +982,7 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			// enable selectable
 			.dragstop(function() {
-				cwd.selectable('enable');
+				cwd.selectable('enable').droppable('enable');
 				selectLock = false;
 			})
 			.bind('lockfiles unlockfiles', function(e) {
