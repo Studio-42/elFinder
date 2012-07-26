@@ -6,7 +6,6 @@
 .elfinder .elfinder-navbar {
 	width:230px;
 	padding:3px 5px;
-	font-size:.72em;
 	background-image:none;
 	border-top:0 solid;
 	border-bottom:0 solid;
@@ -145,7 +144,7 @@
 }
 
 
-.elfinder-place-drag .elfinder-navbar-dir { font-size:.9em;}
+
 
 
 
