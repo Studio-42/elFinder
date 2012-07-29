@@ -1506,14 +1506,21 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		// copy/move inside current volume
+		$source = $this->decode($src);
 		if ($volume == $this) {
-			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->_inpath($destination, $source)) {
 				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
-			return ($path = $this->$method($source, $destination, $name)) ? $this->stat($path) : false;
+
+			if( $path = $this->$method($source, $destination, $name) ){
+				$stat = $this->stat($path);
+				$stat['source'] = $source;
+				return $stat;
+			}else{
+				return false;
+			}
 		}
 		
 		// copy/move from another volume
@@ -1532,8 +1539,9 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_MOVE, $errpath, elFinder::ERROR_RM_SRC);
 			}
 		}
-		return $this->stat($path);
-	}
+		$stat = $this->stat($path);
+		$stat['source'] = $source;
+		return $stat;	}
 	
 	/**
 	 * Return file contents
