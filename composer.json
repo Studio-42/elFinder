@@ -3,7 +3,7 @@
     "description": "File Manager for Web",
     "keywords": ["jquery-ui", "file manager", "elfinder"],
     "homepage": "https://github.com/Studio-42/elFinder",
-    "license": "3-clauses BSD",
+    "license": "BSD-3-Clause",
     "authors": [
         {"name": "Dmitry \"dio\" Levashov", "role": "Chief developer", "email": "dio@std42.ru"},
         {"name": "Troex Nevelin", "role": "Maintainer", "email": "troex@fury.scancode.ru"},
@@ -13,8 +13,6 @@
     "require": {
         "php": ">=5.2.0"
     },
-    "autoload": {
-        "psr-0": { "elfinder": "src/" }
-    },
+    "include-path": [ "php/" ]
     "target-dir": "studio-42/elfinder"
 }
