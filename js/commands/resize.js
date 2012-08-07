@@ -186,7 +186,7 @@ elFinder.prototype.commands.resize = function() {
 										return;
 									}
 								
-									if (c < 48 || c > 57) {
+									if (!((c >= 48 && c <= 57) || (c >= 96 && c <= 105))) {
 										e.preventDefault();
 									}
 								})
