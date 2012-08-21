@@ -179,7 +179,6 @@ elFinder.prototype.commands.info = function() {
 				})
 				.done(function(data) {
 					var size = parseInt(data.size);
-					fm.log(data.size)
 					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown);
 				});
 		}

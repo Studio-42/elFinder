@@ -307,6 +307,8 @@ $.fn.elfindertree = function(fm, opts) {
 						// check if cwd is not in files
 						if ((dir = fm.file(cwd)).phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
 							updateTree([dir]);
+						} else {
+							return;
 						}
 
 						fm.request({

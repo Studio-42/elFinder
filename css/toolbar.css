@@ -128,7 +128,6 @@
 /* menu item */
 .elfinder-button-menu-item {
 	white-space:nowrap;
-	font-size:.72em;
 	cursor:default;
 	padding:5px 19px;
 	position:relative;
@@ -185,7 +184,6 @@
 	width:160px;
 	height:22px;
 	padding:0 20px;
-	font-size:.8em;
 	line-height: 22px;
 	border:0 solid;
 	border:1px solid #aaa;

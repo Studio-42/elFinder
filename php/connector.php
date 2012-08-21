@@ -270,37 +270,37 @@ $opts = array(
 			)
 			// 'uploadDeny' => array('application', 'text/xml')
 		),
-		array(
-			'driver'     => 'LocalFileSystem',
-			'path'       => '../files2/',
-			// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
-			'alias'      => 'File system',
-			'mimeDetect' => 'internal',
-			'tmbPath'    => '.tmb',
-			'utf8fix'    => true,
-			'tmbCrop'    => false,
-			'startPath'  => '../files/test',
-			// 'separator' => ':',
-			'attributes' => array(
-				array(
-					'pattern' => '~/\.~',
-					// 'pattern' => '/^\/\./',
-					'read' => false,
-					'write' => false,
-					'hidden' => true,
-					'locked' => false
-				),
-				array(
-					'pattern' => '~/replace/.+png$~',
-					// 'pattern' => '/^\/\./',
-					'read' => false,
-					'write' => false,
-					// 'hidden' => true,
-					'locked' => true
-				)
-			),
-			// 'defaults' => array('read' => false, 'write' => true)
-		),
+		// array(
+		// 	'driver'     => 'LocalFileSystem',
+		// 	'path'       => '../files2/',
+		// 	// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+		// 	'alias'      => 'File system',
+		// 	'mimeDetect' => 'internal',
+		// 	'tmbPath'    => '.tmb',
+		// 	'utf8fix'    => true,
+		// 	'tmbCrop'    => false,
+		// 	'startPath'  => '../files/test',
+		// 	// 'separator' => ':',
+		// 	'attributes' => array(
+		// 		array(
+		// 			'pattern' => '~/\.~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			'read' => false,
+		// 			'write' => false,
+		// 			'hidden' => true,
+		// 			'locked' => false
+		// 		),
+		// 		array(
+		// 			'pattern' => '~/replace/.+png$~',
+		// 			// 'pattern' => '/^\/\./',
+		// 			'read' => false,
+		// 			'write' => false,
+		// 			// 'hidden' => true,
+		// 			'locked' => true
+		// 		)
+		// 	),
+		// 	// 'defaults' => array('read' => false, 'write' => true)
+		// ),
 		
 		// array(
 		// 	'driver' => 'FTP',
@@ -358,40 +358,40 @@ $opts = array(
 		// 	)
 		// ),
 		
-		array(
-			'driver' => 'MySQL2',
-			'path' => 1,
-			// 'treeDeep' => 2,
-			'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
-			'user' => 'root',
-			'pass' => 'hane',
-			'db' => 'elfinder',
-			'user_id' => 1,
-			// 'accessControl' => 'access',
-			// 'separator' => ':',
-			'tmbCrop'         => true,
-			// thumbnails background color (hex #rrggbb or 'transparent')
-			'tmbBgColor'      => '#000000',
-			'files_table' => 'elfinder_file',
-			// 'imgLib' => 'imagick',
-			// 'uploadOverwrite' => false,
-			// 'copyTo' => false,
-			// 'URL'    => 'http://localhost/git/elfinder',
-			'tmpPath' => '../filesdb/tmp',
-			'tmbPath' => '../filesdb/tmb',
-			'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../filesdb/tmb/',
-			// 'attributes' => array(
-			// 	array(),
-			// 	array(
-			// 		'pattern' => '/\.jpg$/',
-			// 		'read' => false,
-			// 		'write' => false,
-			// 		'locked' => true,
-			// 		'hidden' => true
-			// 	)
-			// )
-			
-		)
+		// array(
+		// 	'driver' => 'MySQL',
+		// 	'path' => 1,
+		// 	// 'treeDeep' => 2,
+		// 	// 'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
+		// 	'user' => 'root',
+		// 	'pass' => 'hane',
+		// 	'db' => 'elfinder',
+		// 	'user_id' => 1,
+		// 	// 'accessControl' => 'access',
+		// 	// 'separator' => ':',
+		// 	'tmbCrop'         => true,
+		// 	// thumbnails background color (hex #rrggbb or 'transparent')
+		// 	'tmbBgColor'      => '#000000',
+		// 	'files_table' => 'elfinder_file',
+		// 	// 'imgLib' => 'imagick',
+		// 	// 'uploadOverwrite' => false,
+		// 	// 'copyTo' => false,
+		// 	// 'URL'    => 'http://localhost/git/elfinder',
+		// 	'tmpPath' => '../filesdb/tmp',
+		// 	'tmbPath' => '../filesdb/tmb',
+		// 	'tmbURL' => dirname($_SERVER['PHP_SELF']) . '/../filesdb/tmb/',
+		// 	// 'attributes' => array(
+		// 	// 	array(),
+		// 	// 	array(
+		// 	// 		'pattern' => '/\.jpg$/',
+		// 	// 		'read' => false,
+		// 	// 		'write' => false,
+		// 	// 		'locked' => true,
+		// 	// 		'hidden' => true
+		// 	// 	)
+		// 	// )
+		// 	
+		// )
 	)
 		
 );

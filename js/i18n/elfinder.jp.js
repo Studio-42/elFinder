@@ -1,7 +1,7 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
- * @version 2012-06-25
+ * @version 2012-08-15
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -70,7 +70,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'サポート外のアーカイブ形式です',
 			'errNoArchive'         : 'アーカイブでないかサポートされていないアーカイブ形式です',
 			'errCmdNoSupport'      : 'サポートされていないコマンドです',
-			'errReplByChild'       : 'ホルダ "$1" に含まれてるアイテムを置き換えることはできません',
+			'errReplByChild'       : 'フォルダ "$1" に含まれてるアイテムを置き換えることはできません',
 			'errArcSymlinks'       : 'シンボリックリンクまたは許容されないファイル名を含むアーカイブはセキュリティ上、解凍できません', // edited 25.06.2012
 			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
 			'errResize'            : '"$1"をリサイズできません',

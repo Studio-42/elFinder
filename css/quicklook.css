@@ -55,7 +55,6 @@
 
 /* window title */
 .elfinder-quicklook-title { 
-	font-size:.7em;
 	color:#fff; 
 	white-space:nowrap; 
 	overflow:hidden;
@@ -106,7 +105,6 @@
 
 /* other data in info */
 .elfinder-quicklook-info-data {
-	font-size:.72em;
 	padding-bottom:.2em;
 	color:#fff;
 }
@@ -207,7 +205,6 @@
 	height:100%;
 	background:#fff;
 	color:#222;
-	font-size:.9em;
 	overflow:auto;
 }
 
