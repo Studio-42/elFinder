@@ -868,7 +868,7 @@ class elFinder {
 	* @author Naoki Sawada
 	**/
 	protected function get_remote_contents( $url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0' ) {
-		$method = function_exists('curl_exec')? 'curl_get_contents' : 'fsock_get_contents'; 
+		$method = (function_exists('curl_exec') && ini_get('safe_mode') == '0')? 'curl_get_contents' : 'fsock_get_contents'; 
 		return $this->$method( $url, $timeout, $redirect_max, $ua );
 	}
 	
@@ -1055,14 +1055,26 @@ class elFinder {
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
 								$_ext = $_match[1];
 							}
-							$tmpfname = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ELF_' . md5($url.microtime()) . $_ext;
-							if (file_put_contents($tmpfname, $data)) {
-								$non_uploads[$tmpfname] = true;
-								$files['tmp_name'][$i] = $tmpfname;
-								$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
-								$files['error'][$i] = 0;
+							$tmpfname = DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime()) . $_ext;
+							$tmpPath = sys_get_temp_dir();
+							if (! @ touch($tmpPath . $tmpfname)) {
+								if ($tmpPath = $volume->getTempPath()) {
+									$tmpfname = $tmpPath . $tmpfname;
+								} else {
+									$tmpfname = '';
+								}
 							} else {
-								@ unlink($tmpfname);
+								$tmpfname = $tmpPath . $tmpfname;
+							}
+							if ($tmpfname) {
+								if (file_put_contents($tmpfname, $data)) {
+									$non_uploads[$tmpfname] = true;
+									$files['tmp_name'][$i] = $tmpfname;
+									$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
+									$files['error'][$i] = 0;
+								} else {
+									@ unlink($tmpfname);
+								}
 							}
 						}
 					}
