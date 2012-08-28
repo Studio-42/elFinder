@@ -82,9 +82,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
-					if (!jqxhr.isResolved() && !jqxhr.isRejected()) {
-						jqxhr.reject();
-					}
+					jqxhr.state() == 'pending' && jqxhr.reject();
 				});
 				
 				jqxhr = fm.request({
@@ -123,9 +121,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
-					if (!jqxhr.isResolved() && !jqxhr.isRejected()) {
-						jqxhr.reject();
-					}
+					jqxhr.state() == 'pending' && jqxhr.reject();
 				});
 				
 				jqxhr = fm.request({

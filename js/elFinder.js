@@ -965,7 +965,7 @@ window.elFinder = function(node, opts) {
 		// quiet abort not completed "open" requests
 		if (cmd == 'open') {
 			while ((_xhr = queue.pop())) {
-				if (!_xhr.isRejected() && !_xhr.isResolved()) {
+				if (_xhr.state() == 'pending') {
 					_xhr.quiet = true;
 					_xhr.abort();
 				}
