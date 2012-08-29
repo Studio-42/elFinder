@@ -218,7 +218,7 @@ elFinder.prototype.commands.paste = function() {
 			}
 		});
 
-		if (dfrd.isRejected()) {
+		if (dfrd.state() == 'rejected') {
 			return dfrd;
 		}
 
