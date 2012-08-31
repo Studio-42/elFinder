@@ -262,10 +262,9 @@ class elFinder {
 				if (!isset($this->listeners[$cmd])) {
 					$this->listeners[$cmd] = array();
 				}
-
-				if ((is_array($handler) && count($handler) == 2 && is_object($handler[0]) && method_exists($handler[0], $handler[1]))
-				|| function_exists($handler)) {
-					$this->listeners[$cmd][] = $handler;
+				
+				if( is_callable($handler) ){
+					$this->listeners[$cmd][] = $handler;				
 				}
 			}
 		}
@@ -351,9 +350,8 @@ class elFinder {
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
-				if ((is_array($handler) && $handler[0]->{$handler[1]}($cmd, $result, $args, $this))
-				||  (!is_array($handler) && $handler($cmd, $result, $args, $this))) {
-					// handler return true to force sync client after command completed
+				// handler return true to force sync client after command completed
+				if( call_user_func($handler,$cmd,$result,$args,$this) ){
 					$result['sync'] = true;
 				}
 			}
