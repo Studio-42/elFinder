@@ -266,7 +266,7 @@ elFinder.prototype.commands.quicklook = function() {
 				node;
 
 			if (self.closed() && file && (node = cwd.find('#'+file.hash)).length) {
-				
+				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
 				win.css(closedCss(node))
@@ -286,7 +286,8 @@ elFinder.prototype.commands.quicklook = function() {
 					state = closed;
 					win.hide();
 					preview.children().remove();
-					self.update(0, self.value)
+					self.update(0, self.value);
+					
 				};
 				
 			if (self.opened()) {
