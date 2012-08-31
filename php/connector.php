@@ -236,8 +236,8 @@ $logger = new elFinderSimpleLogger('../files/temp/log.txt');
 $opts = array(
 	'locale' => 'en_US.UTF-8',
 	'bind' => array(
-		'*' => 'logger'
-		// 'mkdir mkfile rename duplicate upload rm paste' => 'logger'
+		// '*' => 'logger',
+		'mkdir mkfile rename duplicate upload rm paste' => 'logger'
 	),
 	'debug' => true,
 	'roots' => array(
