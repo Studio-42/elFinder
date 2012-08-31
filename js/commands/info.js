@@ -72,7 +72,7 @@ elFinder.prototype.commands.info = function() {
 			replSpinner = function(msg) { dialog.find('.'+spclass).parent().text(msg); },
 			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash }).join('-'),
 			dialog = fm.getUI().find('#'+id), 
-			size, tmb, file, title, dcnt;
+			size, tmb, file, title, dcnt, name, i18;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -86,6 +86,14 @@ elFinder.prototype.commands.info = function() {
 			
 		if (cnt == 1) {
 			file  = files[0];
+			if (!file.phash) {
+				name = 'volume_'+file.name;
+				i18  = fm.i18n(name);
+				if (i18 != name) {
+					file.name = i18;
+				}
+			}
+			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
 			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
 
