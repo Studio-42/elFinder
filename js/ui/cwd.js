@@ -206,7 +206,7 @@ $.fn.elfindercwd = function(fm, options) {
 					sel      = cwd.find('[id].'+clSelected),
 					selector = prev ? 'first:' : 'last',
 					s, n, sib, top, left;
-					
+
 				function sibling(n, direction) {
 					return n[direction+'All']('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):first');
 				}
@@ -252,7 +252,7 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 						}
 					}
-					!append && unselectAll();
+					// !append && unselectAll();
 				} else {
 					// there are no selected file - select first/last one
 					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'))
