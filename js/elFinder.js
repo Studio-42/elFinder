@@ -684,12 +684,12 @@ window.elFinder = function(node, opts) {
 		return parents;
 	}
 	
-	this.path2array = function(hash) {
+	this.path2array = function(hash, i18) {
 		var file, 
 			path = [];
 			
 		while (hash && (file = files[hash]) && file.hash) {
-			path.unshift(file.i18 || file.name);
+			path.unshift(i18 && file.i18 ? file.i18 : file.name);
 			hash = file.phash;
 		}
 			
@@ -702,10 +702,10 @@ window.elFinder = function(node, opts) {
 	 * @param  Object  file
 	 * @return String
 	 */
-	this.path = function(hash) {
+	this.path = function(hash, i18) { 
 		return files[hash] && files[hash].path
 			? files[hash].path
-			: this.path2array(hash).join(cwdOptions.separator);
+			: this.path2array(hash, i18).join(cwdOptions.separator);
 	}
 	
 	/**

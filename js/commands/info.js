@@ -105,7 +105,7 @@ elFinder.prototype.commands.info = function() {
 			
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
-			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
+			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			
 			if (file.dim) { // old api
