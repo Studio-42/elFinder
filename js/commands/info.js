@@ -86,16 +86,9 @@ elFinder.prototype.commands.info = function() {
 			
 		if (cnt == 1) {
 			file  = files[0];
-			if (!file.phash) {
-				name = 'volume_'+file.name;
-				i18  = fm.i18n(name);
-				if (i18 != name) {
-					file.name = i18;
-				}
-			}
 			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
+			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', fm.mime2kind(file));
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;

@@ -233,6 +233,14 @@ window.elFinder = function(node, opts) {
 			while (l--) {
 				f = data[l];
 				if (f.name && f.hash && f.mime) {
+					if (!f.phash) {
+						var name = 'volume_'+f.name,
+							i18 = self.i18n(name);
+
+						if (name != i18) {
+							f.i18 = i18;
+						}
+					}
 					files[f.hash] = f;
 				} 
 			}
@@ -681,7 +689,7 @@ window.elFinder = function(node, opts) {
 			path = [];
 			
 		while (hash && (file = files[hash]) && file.hash) {
-			path.unshift(file.name);
+			path.unshift(file.i18 || file.name);
 			hash = file.phash;
 		}
 			
