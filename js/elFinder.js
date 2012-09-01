@@ -233,6 +233,14 @@ window.elFinder = function(node, opts) {
 			while (l--) {
 				f = data[l];
 				if (f.name && f.hash && f.mime) {
+					if (!f.phash) {
+						var name = 'volume_'+f.name,
+							i18 = self.i18n(name);
+
+						if (name != i18) {
+							f.i18 = i18;
+						}
+					}
 					files[f.hash] = f;
 				} 
 			}
@@ -676,12 +684,12 @@ window.elFinder = function(node, opts) {
 		return parents;
 	}
 	
-	this.path2array = function(hash) {
+	this.path2array = function(hash, i18) {
 		var file, 
 			path = [];
 			
 		while (hash && (file = files[hash]) && file.hash) {
-			path.unshift(file.name);
+			path.unshift(i18 && file.i18 ? file.i18 : file.name);
 			hash = file.phash;
 		}
 			
@@ -694,10 +702,10 @@ window.elFinder = function(node, opts) {
 	 * @param  Object  file
 	 * @return String
 	 */
-	this.path = function(hash) {
+	this.path = function(hash, i18) { 
 		return files[hash] && files[hash].path
 			? files[hash].path
-			: this.path2array(hash).join(cwdOptions.separator);
+			: this.path2array(hash, i18).join(cwdOptions.separator);
 	}
 	
 	/**

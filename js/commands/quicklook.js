@@ -239,7 +239,7 @@ elFinder.prototype.commands.quicklook = function() {
 						.attr('src', (tmb = fm.tmb(file.hash)));
 				}
 				self.info.delay(100).fadeIn(10);
-			} else {
+			} else { 
 				e.stopImmediatePropagation();
 			}
 		});
@@ -248,7 +248,7 @@ elFinder.prototype.commands.quicklook = function() {
 	
 
 	this.window = $('<div class="ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
-		.click(function(e) { e.stopPropagation(); })
+		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
 				.append(title)
@@ -266,7 +266,7 @@ elFinder.prototype.commands.quicklook = function() {
 				node;
 
 			if (self.closed() && file && (node = cwd.find('#'+file.hash)).length) {
-				
+				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
 				win.css(closedCss(node))
@@ -286,7 +286,8 @@ elFinder.prototype.commands.quicklook = function() {
 					state = closed;
 					win.hide();
 					preview.children().remove();
-					self.update(0, self.value)
+					self.update(0, self.value);
+					
 				};
 				
 			if (self.opened()) {

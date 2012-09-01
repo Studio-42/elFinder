@@ -1220,8 +1220,8 @@ abstract class elFinderVolumeDriver {
 		
 		$path = $this->decode($dst);
 		$dst  = $this->_joinPath($path, $name);
-		$stat = $this->stat($dst);
-		if (!empty($stat)) {
+		$stat = $this->stat($dst); 
+		if (!empty($stat)) { 
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		$this->clearcache();

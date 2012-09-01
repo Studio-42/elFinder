@@ -86,8 +86,9 @@ elFinder.prototype.commands.info = function() {
 			
 		if (cnt == 1) {
 			file  = files[0];
+			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
+			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', fm.mime2kind(file));
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
@@ -104,7 +105,7 @@ elFinder.prototype.commands.info = function() {
 			
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
-			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash))));
+			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
 			file.read && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
 			
 			if (file.dim) { // old api

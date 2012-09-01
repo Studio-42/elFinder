@@ -345,7 +345,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoFlash'  : 'Видео Flash',
 			'kindVideoMKV'    : 'Видео Matroska',
 			'kindVideoOGG'    : 'Видео Ogg'
-			
+			,'volume_files' : 'Файлы '
 		}
 	}
 }
