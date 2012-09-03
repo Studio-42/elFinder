@@ -305,9 +305,10 @@ $.fn.elfindertree = function(fm, opts) {
 						return current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
 					}
 					if (fm.newAPI) {
-						// if ((dir = fm.file(cwd)).phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
-							// updateTree([dir]);
-						// }
+						if ((dir = fm.file(cwd)).phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
+							updateTree([dir]);
+							return sync();
+						}
 						fm.request({
 							data : {cmd : 'parents', target : cwd},
 							preventFail : true
