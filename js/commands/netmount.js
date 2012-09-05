@@ -148,7 +148,7 @@ elFinder.prototype.commands.netunmount = function() {
 			return dfrd.reject();
 		}
 
-		if (!dfrd.isRejected()) {
+		if (dfrd.state() == 'pending') {
 			fm.confirm({
 				title  : self.title,
 				text   : fm.i18n('confirmUnmount', drive.name),
