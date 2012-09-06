@@ -1079,7 +1079,7 @@ window.elFinder = function(node, opts) {
 				preventDefault : true
 			},
 			opts2 = {
-				data           : {cmd : 'parents', target : cwd},
+				data           : {cmd : 'tree', target : (cwd == this.root())? cwd : this.file(cwd).phash},
 				preventDefault : true
 			};
 		
