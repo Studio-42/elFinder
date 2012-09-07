@@ -138,6 +138,8 @@ class Dropbox_OAuth_PEAR extends Dropbox_OAuth {
                 throw new Dropbox_Exception_NotFound('Resource at uri: ' . $uri . ' could not be found');
             case 405 : 
                 throw new Dropbox_Exception_Forbidden('Forbidden. Request method not expected (generally should be GET or POST).');
+            case 500 :
+                throw new Dropbox_Exception_Forbidden('Server error. ' . $e->getMessage());
             case 503 : 
                 throw new Dropbox_Exception_Forbidden('Forbidden. Your app is making too many requests and is being rate limited. 503s can trigger on a per-app or per-user basis.');
             case 507 : 
