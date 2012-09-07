@@ -3184,6 +3184,71 @@ abstract class elFinderVolumeDriver {
 			clearstatcache();
 		}
 	}
+	
+	/**
+	 * Create an gd image according to the specified mime type
+	 *
+	 * @param string $path image file
+	 * @param string $mime
+	 * @return gd image resource identifier
+	 */
+	protected function gdImageCreate($path,$mime){
+		switch($mime){
+			case 'image/jpeg':
+			return imagecreatefromjpeg($path);
+
+			case 'image/png':
+			return imagecreatefrompng($path);
+
+			case 'image/gif':
+			return imagecreatefromgif($path);
+
+			case 'image/xbm':
+			return imagecreatefromxbm($path);
+		}
+		return false;
+	}
+
+	/**
+	 * Output gd image to file
+	 *
+	 * @param resource $image gd image resource
+	 * @param string $filename The path to save the file to.
+	 * @param string $destformat The Image type to use for $filename
+	 * @param string $mime The original image mime type
+	 */
+	protected function gdImage($image, $filename, $destformat, $mime ){
+
+		if ($destformat == 'jpg' || ($destformat == null && $mime == 'image/jpeg')) {
+			return imagejpeg($image, $filename, 100);
+		}
+
+		if ($destformat == 'gif' || ($destformat == null && $mime == 'image/gif')) {
+			return imagegif($image, $filename, 7);
+		}
+
+		return imagepng($image, $filename, 7);
+	}
+
+	/**
+	 * Assign the proper background to a gd image
+	 *
+	 * @param resource $image gd image resource
+	 * @param string $bgcolor background color in #rrggbb format
+	 */
+	protected function gdImageBackground($image, $bgcolor){
+
+		if( $bgcolor == 'transparent' ){
+			imagesavealpha($image,true);
+			$bgcolor1 = imagecolorallocatealpha($image, 255, 255, 255, 127);
+
+		}else{
+			list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+			$bgcolor1 = imagecolorallocate($image, $r, $g, $b);
+		}
+
+		imagefill($image, 0, 0, $bgcolor1);
+	}
 
 	/*********************** misc *************************/
 	
