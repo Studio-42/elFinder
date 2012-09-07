@@ -2811,45 +2811,17 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($path);
-				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($path);
-				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($path);
-				} elseif ($s['mime'] == 'image/xbm') {
-					$img = imagecreatefromxbm($path);
-				}
+				$img = self::gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
-					
-					$bgcolor = $this->options['tmbBgColor'];
-
-					if ($bgcolor == 'transparent') {
-						list($r, $g, $b) = array(0, 0, 255);
-					} else {
-						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-					}
-
-					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
-
-					if ($bgcolor == 'transparent') {
-						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
-					}
-
-					imagefill($tmp, 0, 0, $bgcolor1);
+				
+					self::gdImageBackground($tmp,$this->options['tmbBgColor']);
 					
 					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
-							return false;
+						return false;
 					}
 		
-					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
-						$result = imagejpeg($tmp, $path, 100);
-					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
-						$result = imagegif($tmp, $path, 7);
-					} else {
-						$result = imagepng($tmp, $path, 7);
-					}
+					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -2902,33 +2874,11 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($path);
-				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($path);
-				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($path);
-				} elseif ($s['mime'] == 'image/xbm') {
-					$img = imagecreatefromxbm($path);
-				}
+				$img = self::gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 					
-					$bgcolor = $this->options['tmbBgColor'];
-
-					if ($bgcolor == 'transparent') {
-						list($r, $g, $b) = array(0, 0, 255);
-					} else {
-						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-					}
-
-					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
-
-					if ($bgcolor == 'transparent') {
-						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
-					}
-
-					imagefill($tmp, 0, 0, $bgcolor1);
+					self::gdImageBackground($tmp,$this->options['tmbBgColor']);
 
 					$size_w = $width;
 					$size_h = $height;
@@ -2942,13 +2892,7 @@ abstract class elFinderVolumeDriver {
 						return false;
 					}
 					
-					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
-						$result = imagejpeg($tmp, $path, 100);
-					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
-						$result = imagegif($tmp, $path, 7);
-					} else {
-						$result = imagepng($tmp, $path, 7);
-					}
+					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -3006,43 +2950,17 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($path);
-				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($path);
-				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($path);
-				} elseif ($s['mime'] == 'image/xbm') {
-					$img = imagecreatefromxbm($path);
-				}
+				$img = self::gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 
-					if ($bgcolor == 'transparent') {
-						list($r, $g, $b) = array(0, 0, 255);
-					} else {
-						list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-					}
-
-					$bgcolor1 = imagecolorallocate($tmp, $r, $g, $b);
-						
-					if ($bgcolor == 'transparent') {
-						$bgcolor1 = imagecolortransparent($tmp, $bgcolor1);
-					}
-
-					imagefill($tmp, 0, 0, $bgcolor1);
+					self::gdImageBackground($tmp,$bgcolor);
 
 					if (!imagecopy($tmp, $img, $x, $y, 0, 0, $s[0], $s[1])) {
 						return false;
 					}
 
-					if ($destformat == 'jpg'  || ($destformat == null && $s['mime'] == 'image/jpeg')) {
-						$result = imagejpeg($tmp, $path, 100);
-					} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
-						$result = imagegif($tmp, $path, 7);
-					} else {
-						$result = imagepng($tmp, $path, 7);
-					}
+					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -3088,28 +3006,14 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				if ($s['mime'] == 'image/jpeg') {
-					$img = imagecreatefromjpeg($path);
-				} elseif ($s['mime'] == 'image/png') {
-					$img = imagecreatefrompng($path);
-				} elseif ($s['mime'] == 'image/gif') {
-					$img = imagecreatefromgif($path);
-				} elseif ($s['mime'] == 'image/xbm') {
-					$img = imagecreatefromxbm($path);
-				}
+				$img = self::gdImageCreate($path,$s['mime']);
 
 				$degree = 360 - $degree;
 				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
 				$bgcolor = imagecolorallocate($img, $r, $g, $b);
 				$tmp = imageRotate($img, $degree, (int)$bgcolor);
 
-				if ($destformat == 'jpg' || ($destformat == null && $s['mime'] == 'image/jpeg')) {
-					$result = imagejpeg($tmp, $path, 100);
-				} else if ($destformat == 'gif' || ($destformat == null && $s['mime'] == 'image/gif')) {
-					$result = imagegif($tmp, $path, 7);
-				} else {
-					$result = imagepng($tmp, $path, 7);
-				}
+				$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
 
 				imageDestroy($img);
 				imageDestroy($tmp);
