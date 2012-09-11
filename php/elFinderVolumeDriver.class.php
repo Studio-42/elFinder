@@ -1420,13 +1420,19 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		$w = $h = 0;
+		$stat = array(
+			'mime' => $mime, 
+			'w' => 0, 
+			'h' => 0, 
+			'size' => filesize($tmpname));
+		
+		// $w = $h = 0;
 		if (strpos($mime, 'image') === 0 && ($s = getimagesize($tmpname))) {
-			$w = $s[0];
-			$h = $s[1];
+			$stat['w'] = $s[0];
+			$stat['h'] = $s[1];
 		}
 		// $this->clearcache();
-		if (($path = $this->_save($fp, $dstpath, $name, $mime, $w, $h)) == false) {
+		if (($path = $this->_save($fp, $dstpath, $name, $stat)) == false) {
 			return false;
 		}
 		
@@ -2537,16 +2543,16 @@ abstract class elFinderVolumeDriver {
 			}
 			
 		} else {
-			$mime = $source['mime'];
-			$w = $h = 0;
-			if (strpos($mime, 'image') === 0 && ($dim = $volume->dimensions($src))) {
-				$s = explode('x', $dim);
-				$w = $s[0];
-				$h = $s[1];
-			}
+			// $mime = $source['mime'];
+			// $w = $h = 0;
+			// if (strpos($mime, 'image') === 0 && ($dim = $volume->dimensions($src))) {
+			// 	$s = explode('x', $dim);
+			// 	$w = $s[0];
+			// 	$h = $s[1];
+			// }
 			
 			if (($fp = $volume->open($src)) == false
-			|| ($path = $this->_save($fp, $destination, $name, $mime, $w, $h, $source)) == false) {
+			|| ($path = $this->_save($fp, $destination, $name, $source)) == false) {
 				$fp && $volume->close($fp, $src);
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
@@ -3430,14 +3436,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
-	 * @param  string    $mime file mime type
-	 * @param  integer   $w    image width
-	 * @param  integer   $h    image height
-	 * @param  array     $stat file stat (optional)
+	 * @param  array     $stat file stat (required by some virtual fs)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	abstract protected function _save($fp, $dir, $name, $mime, $w, $h);
+	abstract protected function _save($fp, $dir, $name, $stat);
 	
 	/**
 	 * Get file contents
