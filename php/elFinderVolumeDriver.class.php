@@ -2712,18 +2712,17 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
     
-    	/* If image smaller or equal thumbnail size - just fitting to thumbnail square */
-    	if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
-     	   $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+    		/* If image smaller or equal thumbnail size - just fitting to thumbnail square */
+    		if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
+     	   		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+	    	} else {
 
-	    } else {
-
-	    	if ($this->options['tmbCrop']) {
+	    		if ($this->options['tmbCrop']) {
         
-        		/* Resize and crop if image bigger than thumbnail */
-	        	if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
-    				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
-	        	}
+        			/* Resize and crop if image bigger than thumbnail */
+	        		if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
+    					$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
+	        		}
 
 				if (($s = getimagesize($tmb)) != false) {
 					$x = $s[0] > $tmbSize ? intval(($s[0] - $tmbSize)/2) : 0;
@@ -2731,12 +2730,13 @@ abstract class elFinderVolumeDriver {
 					$result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, 'png');
 				}
 
-    		} else {
-        		$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
-        		$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
-      		}
+    			} else {
+        			$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
+      			}
 
+			$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
 		}
+
 		if (!$result) {
 			unlink($tmb);
 			return false;
