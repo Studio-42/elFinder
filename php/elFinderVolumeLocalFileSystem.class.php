@@ -320,7 +320,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	
 	/**
 	 * Return object width and height
-	 * Ususaly used for images, but can be realize for video etc...
+	 * Usualy used for images, but can be realize for video etc...
 	 *
 	 * @param  string  $path  file path
 	 * @param  string  $mime  file mime type

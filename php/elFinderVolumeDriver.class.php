@@ -1421,15 +1421,15 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$stat = array(
-			'mime' => $mime, 
-			'w' => 0, 
-			'h' => 0, 
-			'size' => filesize($tmpname));
+			'mime'   => $mime, 
+			'width'  => 0, 
+			'height' => 0, 
+			'size'   => filesize($tmpname));
 		
 		// $w = $h = 0;
 		if (strpos($mime, 'image') === 0 && ($s = getimagesize($tmpname))) {
-			$stat['w'] = $s[0];
-			$stat['h'] = $s[1];
+			$stat['width'] = $s[0];
+			$stat['height'] = $s[1];
 		}
 		// $this->clearcache();
 		if (($path = $this->_save($fp, $dstpath, $name, $stat)) == false) {
@@ -2545,11 +2545,11 @@ abstract class elFinderVolumeDriver {
 		} else {
 			// $mime = $source['mime'];
 			// $w = $h = 0;
-			// if (strpos($mime, 'image') === 0 && ($dim = $volume->dimensions($src))) {
-			// 	$s = explode('x', $dim);
-			// 	$w = $s[0];
-			// 	$h = $s[1];
-			// }
+			if (($dim = $volume->dimensions($src))) {
+				$s = explode('x', $dim);
+				$source['width']  = $s[0];
+				$source['height'] = $s[1];
+			}
 			
 			if (($fp = $volume->open($src)) == false
 			|| ($path = $this->_save($fp, $destination, $name, $source)) == false) {
