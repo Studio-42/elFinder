@@ -2263,7 +2263,7 @@ abstract class elFinderVolumeDriver {
 		foreach ($this->getScandir($path) as $stat) {
 			$size = $stat['mime'] == 'directory' && $stat['read'] 
 				? $this->countSize($this->_joinPath($path, $stat['name'])) 
-				: isset($stat['size']) ? intval($stat['size']) : 0;
+				: (isset($stat['size']) ? intval($stat['size']) : 0);
 			if ($size > 0) {
 				$result += $size;
 			}
