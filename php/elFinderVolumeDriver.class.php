@@ -2039,6 +2039,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function stat($path) {
+		if ($path === false) {
+			return false;
+		}
 		return isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->_stat($path));
