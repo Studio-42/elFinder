@@ -1305,14 +1305,12 @@ abstract class elFinderVolumeDriver {
 
 		$this->rmTmb($file); // remove old name tmbs, we cannot do this after dir move
 
-		if (!$this->_move($path, $dir, $name)) {
-			return false;
+
+		if (($path = $this->_move($path, $dir, $name))) {
+			$this->clearcache();
+			return $this->stat($path);
 		}
-
-		$path = $this->_joinPath($dir, $name);
-
-		$this->clearcache();
-		return $this->stat($path);
+		return false;
 	}
 	
 	/**

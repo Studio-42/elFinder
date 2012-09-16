@@ -329,14 +329,14 @@ $opts = array(
 		// 	'path' => '/',
 		// 	'tmpPath' => '../files/ftp',
 		// ),
-		array(
-			'driver' => 'FTP',
-			'host' => '10.0.1.3',
-			'user' => 'frontrow',
-			'pass' => 'frontrow',
-			'path' => '/',
-			'tmpPath' => '../files/ftp',
-		),
+		// array(
+		// 	'driver' => 'FTP',
+		// 	'host' => '10.0.1.3',
+		// 	'user' => 'frontrow',
+		// 	'pass' => 'frontrow',
+		// 	'path' => '/',
+		// 	'tmpPath' => '../files/ftp',
+		// ),
 		
 		// array(
 		// 	'driver'     => 'LocalFileSystem',

@@ -767,7 +767,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _move($source, $targetDir, $name) {
 		$sql = 'UPDATE %s SET parent_id=%d, name="%s" WHERE id=%d LIMIT 1';
 		$sql = sprintf($sql, $this->tbf, $targetDir, $this->db->real_escape_string($name), $source);
-		return $this->query($sql) && $this->db->affected_rows > 0;
+		return $this->query($sql) && $this->db->affected_rows > 0 ? $source : false;
 	}
 		
 	/**
