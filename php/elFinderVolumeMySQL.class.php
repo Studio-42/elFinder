@@ -767,7 +767,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _move($source, $targetDir, $name) {
 		$sql = 'UPDATE %s SET parent_id=%d, name="%s" WHERE id=%d LIMIT 1';
 		$sql = sprintf($sql, $this->tbf, $targetDir, $this->db->real_escape_string($name), $source);
-		return $this->query($sql) && $this->db->affected_rows > 0;
+		return $this->query($sql) && $this->db->affected_rows > 0 ? $source : false;
 	}
 		
 	/**
@@ -813,11 +813,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
+	 * @param  array     $stat file stat (required by some virtual fs)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name, $mime, $w, $h) {
+	protected function _save($fp, $dir, $name, $stat) {
 		$this->clearcache();
+		
+		$mime = $stat['mime'];
+		$w = !empty($stat['width'])  ? $stat['width']  : 0;
+		$h = !empty($stat['height']) ? $stat['height'] : 0;
 		
 		$id = $this->_joinPath($dir, $name);
 		rewind($fp);
