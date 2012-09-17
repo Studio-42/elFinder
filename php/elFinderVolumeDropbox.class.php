@@ -1296,10 +1296,11 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
+	 * @param  array     $stat file stat (required by some virtual fs)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $path, $name, $mime, $w, $h) {
+	protected function _save($fp, $path, $name, $stat) {
 		if ($name) $path .= '/'.$name;
 		$path = $this->_normpath($path);
 		try {
