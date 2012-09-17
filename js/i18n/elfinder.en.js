@@ -71,7 +71,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
 			'errCmdNoSupport'      : 'Backend does not support this command.',
 			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
-			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
 			'errResize'            : 'Unable to resize "$1".',
 			'errUsupportType'      : 'Unsupported file type.',
@@ -164,14 +164,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Dec'         : 'Dec',
 
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'by name (folders first)', 
-			'sortkindDirsFirst' : 'by kind (folders first)', 
-			'sortsizeDirsFirst' : 'by size (folders first)', 
-			'sortdateDirsFirst' : 'by date (folders first)', 
 			'sortname'          : 'by name', 
 			'sortkind'          : 'by kind', 
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',

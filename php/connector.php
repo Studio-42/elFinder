@@ -244,8 +244,8 @@ $logger = new elFinderSimpleLogger('../files/temp/log.txt');
 $opts = array(
 	'locale' => 'en_US.UTF-8',
 	'bind' => array(
-		'*' => 'logger'
-		// 'mkdir mkfile rename duplicate upload rm paste' => 'logger'
+		// '*' => 'logger',
+		'mkdir mkfile rename duplicate upload rm paste' => 'logger'
 	),
 	'debug' => true,
 	'netVolumesSessionKey' => 'netVolumes',
@@ -255,6 +255,7 @@ $opts = array(
 			'path'       => '../files/',
 			'startPath'  => '../files/test/',
 			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			// 'treeDeep'   => 3,
 			// 'alias'      => 'File system',
 			'mimeDetect' => 'internal',
 			'tmbPath'    => '.tmb',
@@ -262,7 +263,8 @@ $opts = array(
 			'tmbCrop'    => false,
 			'tmbBgColor' => 'transparent',
 			'accessControl' => 'access',
-			'acceptedName'    => '/^[^.].*$/',
+			'acceptedName'    => '/^[^\.].*$/',
+			// 'tmbSize' => 128,
 			'attributes' => array(
 				array(
 					'pattern' => '/\.js$/',
@@ -277,37 +279,37 @@ $opts = array(
 			)
 			// 'uploadDeny' => array('application', 'text/xml')
 		),
-		// array(
-		// 	'driver'     => 'LocalFileSystem',
-		// 	'path'       => '../files2/',
-		// 	// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
-		// 	'alias'      => 'File system',
-		// 	'mimeDetect' => 'internal',
-		// 	'tmbPath'    => '.tmb',
-		// 	'utf8fix'    => true,
-		// 	'tmbCrop'    => false,
-		// 	'startPath'  => '../files/test',
-		// 	// 'separator' => ':',
-		// 	'attributes' => array(
-		// 		array(
-		// 			'pattern' => '~/\.~',
-		// 			// 'pattern' => '/^\/\./',
-		// 			'read' => false,
-		// 			'write' => false,
-		// 			'hidden' => true,
-		// 			'locked' => false
-		// 		),
-				// array(
-				// 	'pattern' => '~/replace/.+png$~',
-				// 	// 'pattern' => '/^\/\./',
-				// 	'read' => false,
-				// 	'write' => false,
-				// 	// 'hidden' => true,
-				// 	'locked' => true
-				// )
-		// 	),
-		// 	// 'defaults' => array('read' => false, 'write' => true)
-		// ),
+		array(
+			'driver'     => 'LocalFileSystem',
+			'path'       => '../files2/',
+			// 'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files2/',
+			'alias'      => 'File system',
+			'mimeDetect' => 'internal',
+			'tmbPath'    => '.tmb',
+			'utf8fix'    => true,
+			'tmbCrop'    => false,
+			'startPath'  => '../files/test',
+			// 'separator' => ':',
+			'attributes' => array(
+				array(
+					'pattern' => '~/\.~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					'hidden' => true,
+					'locked' => false
+				),
+				array(
+					'pattern' => '~/replace/.+png$~',
+					// 'pattern' => '/^\/\./',
+					'read' => false,
+					'write' => false,
+					// 'hidden' => true,
+					'locked' => true
+				)
+			),
+			// 'defaults' => array('read' => false, 'write' => true)
+		),
 		
 		// array(
 		// 	'driver' => 'FTP',
@@ -338,10 +340,11 @@ $opts = array(
 		// ),
 		// array(
 		// 	'driver' => 'FTP',
-		// 	'host' => '192.168.1.35',
+		// 	'host' => '10.0.1.3',
 		// 	'user' => 'frontrow',
 		// 	'pass' => 'frontrow',
-		// 	'path' => '/'
+		// 	'path' => '/',
+		// 	'tmpPath' => '../files/ftp',
 		// ),
 		
 		// array(
@@ -366,10 +369,10 @@ $opts = array(
 		// ),
 		
 		array(
-			'driver' => 'MySQL2',
+			'driver' => 'MySQL',
 			'path' => 1,
 			// 'treeDeep' => 2,
-			'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
+			// 'socket'          => '/opt/local/var/run/mysql5/mysqld.sock',
 			'user' => 'root',
 			'pass' => 'hane',
 			'db' => 'elfinder',

@@ -36,7 +36,7 @@ elFinder.prototype.commands.duplicate = function() {
 			}
 		});
 		
-		if (dfrd.isRejected()) {
+		if (dfrd.state() == 'rejected') {
 			return dfrd;
 		}
 		

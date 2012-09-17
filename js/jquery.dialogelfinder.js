@@ -1,4 +1,3 @@
-
 "use strict";
 /**
  * @class dialogelfinder - open elFinder in dialog window
@@ -35,7 +34,7 @@ $.fn.dialogelfinder = function(opts) {
 				.hide()
 				.appendTo('body')
 				.draggable({ handle : '.dialogelfinder-drag',
-					     containment : 'parent' })
+					     containment : 'window' })
 				.elfinder(opts)
 				.prepend(toolbar),
 			elfinder = node.elfinder('instance');
@@ -54,8 +53,8 @@ $.fn.dialogelfinder = function(opts) {
 	if (opts == 'open') {
 		var node = $(this),
 			pos  = node.data(position) || {
-				top  : parseInt($(document).scrollTop() + ($('body').height() < node.height() ? 2 : ($('body').height() - node.height())/2)),
-				left : parseInt($(document).scrollLeft() + ($('body').width() < node.width()  ? 2 : ($('body').width()  - node.width())/2))
+				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
+				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
 			},
 			zindex = 100;
 

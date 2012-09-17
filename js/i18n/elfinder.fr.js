@@ -158,15 +158,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Dec'         : 'Déc',
 
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'par nom (dossiers en premier)', 
-			'sortkindDirsFirst' : 'par type (dossiers en premier)', 
-			'sortsizeDirsFirst' : 'par taille (dossiers en premier)', 
-			'sortdateDirsFirst' : 'par date (dossiers en premier)', 
 			'sortname'          : 'par nom', 
 			'sortkind'          : 'par type', 
 			'sortsize'          : 'par taille',
 			'sortdate'          : 'par date',
-
+			'sortFoldersFirst'  : 'Dossiers en premier',
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
 			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les fichiers?<br/>Cela ne peut être annulé!',

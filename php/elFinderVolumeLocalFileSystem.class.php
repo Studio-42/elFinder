@@ -320,7 +320,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	
 	/**
 	 * Return object width and height
-	 * Ususaly used for images, but can be realize for video etc...
+	 * Usualy used for images, but can be realize for video etc...
 	 *
 	 * @param  string  $path  file path
 	 * @param  string  $mime  file mime type
@@ -518,10 +518,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
+	 * @param  array     $stat file stat (required by some virtual fs)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name, $mime, $w, $h) {
+	protected function _save($fp, $dir, $name, $stat) {
 		$path = $dir.DIRECTORY_SEPARATOR.$name;
 
 		if (!($target = @fopen($path, 'wb'))) {
@@ -696,7 +697,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			foreach (scandir($path) as $name) {
 				if ($name != '.' && $name != '..') {
 					$p = $path.DIRECTORY_SEPARATOR.$name;
-					if (is_link($p)) {
+					if (is_link($p) || !$this->nameAccepted($name)) {
 						return true;
 					}
 					if (is_dir($p) && $this->_findSymlinks($p)) {
@@ -707,6 +708,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		} else {
+			
 			$this->archiveSize += filesize($path);
 		}
 		
@@ -741,7 +743,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			// extract in quarantine
 			$this->_unpack($archive, $arc);
-			@unlink($archive);
+			unlink($archive);
 			
 			// get files list
 			$ls = array();

@@ -109,23 +109,39 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			droppable = fm.res(c, 'droppable'),
 			
+			insideNavbar = function(x) {
+				var left = navbar.offset().left;
+					
+				return left <= x && x <= left + navbar.width();
+			},
+			
+			drop = fm.droppable.drop,
+			
 			/**
 			 * Droppable options
 			 *
 			 * @type Object
 			 */
-			droppableopts = $.extend({}, fm.droppable, {
-				hoverClass : hover+' '+dropover, 
+			droppableopts = $.extend(true, {}, fm.droppable, {
 				// show subfolders on dropover
-				over : function() { 
-					var link = $(this);
+				over : function(e) { 
+					var link = $(this),
+						cl   = hover+' '+dropover;
+
+					if (insideNavbar(e.clientX)) {
+						link.addClass(cl)
 						if (link.is('.'+collapsed+':not(.'+expanded+')')) {
 							setTimeout(function() {
 								link.is('.'+dropover) && link.children('.'+arrow).click();
 							}, 500);
-						} 
+						}
+					} else {
+						link.removeClass(cl);
 					}
-				}),
+				},
+				out : function() { $(this).removeClass(hover+' '+dropover); },
+				drop : function(e, ui) { insideNavbar(e.clientX) && drop.call(this, e, ui); }
+			}),
 			
 			spinner = $(fm.res('tpl', 'navspinner')),
 			
@@ -169,7 +185,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return String
 			 */
 			itemhtml = function(dir) {
-				dir.name = fm.escape(dir.name);
+				dir.name = fm.escape(dir.i18 || dir.name);
 				
 				return tpl.replace(/(?:\{([a-z]+)\})/ig, function(m, key) {
 					return dir[key] || (replace[key] ? replace[key](dir) : '');
@@ -209,8 +225,10 @@ $.fn.elfindertree = function(fm, opts) {
 					info;
 
 				while (node.length) {
+					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
+					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& dir.name.localeCompare(info.name) < 0) {
+					&& dir.name.toLowerCase().localeCompare(info.name.toLowerCase()) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -227,9 +245,10 @@ $.fn.elfindertree = function(fm, opts) {
 			updateTree = function(dirs) {
 				var length  = dirs.length,
 					orphans = [],
-					i, dir, html, parent, sibling;
+					i = dirs.length, 
+					dir, html, parent, sibling;
 
-				for (i = 0; i < length; i++) {
+				while (i--) {
 					dir = dirs[i];
 
 					if (tree.find('#'+fm.navHash2Id(dir.hash)).length) {
@@ -241,7 +260,7 @@ $.fn.elfindertree = function(fm, opts) {
 						if (dir.phash && (sibling = findSibling(parent, dir)).length) {
 							sibling.before(html);
 						} else {
-							parent.append(html);
+							parent[dir.phash ? 'append' : 'prepend'](html);
 						}
 					} else {
 						orphans.push(dir);
@@ -251,20 +270,24 @@ $.fn.elfindertree = function(fm, opts) {
 				if (orphans.length && orphans.length < length) {
 					return updateTree(orphans);
 				} 
-
-				updateDroppable();
+				
+				setTimeout(function() {
+					updateDroppable();
+				}, 10);
+				
 			},
 			
 			/**
 			 * Mark current directory as active
 			 * If current directory is not in tree - load it and its parents
 			 *
+			 * @param {Boolean} do not recursive call
 			 * @return void
 			 */
-			sync = function() {
+			sync = function(stopRec) {
 				var cwd     = fm.cwd().hash,
 					current = tree.find('#'+fm.navHash2Id(cwd)), 
-					rootNode;
+					rootNode, dir;
 				
 				if (openRoot) {
 					rootNode = tree.find('#'+fm.navHash2Id(fm.root()));
@@ -279,8 +302,14 @@ $.fn.elfindertree = function(fm, opts) {
 
 				if (opts.syncTree) {
 					if (current.length) {
-						current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
-					} else if (fm.newAPI) {
+						return current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
+					}
+					if (fm.newAPI) {
+						dir = fm.file(cwd);
+						if (dir && dir.phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
+							updateTree([dir]);
+							return sync();
+						}
 						fm.request({
 							data : {cmd : 'parents', target : cwd},
 							preventFail : true
@@ -288,10 +317,12 @@ $.fn.elfindertree = function(fm, opts) {
 						.done(function(data) {
 							var dirs = filter(data.tree);
 							updateTree(dirs);
-							updateArrows(dirs, loaded)
-							cwd == fm.cwd().hash && sync();
-						});
+							updateArrows(dirs, loaded);
+							cwd == fm.cwd().hash && sync(true);
+						})
+						;
 					}
+					
 				}
 			},
 			
@@ -325,6 +356,8 @@ $.fn.elfindertree = function(fm, opts) {
 						.addClass(cls);
 				})
 			},
+			
+			
 			
 			/**
 			 * Navigation tree
@@ -400,11 +433,11 @@ $.fn.elfindertree = function(fm, opts) {
 						'x'       : e.clientX,
 						'y'       : e.clientY
 					});
-				})
+				}),
+			// move tree into navbar
+			navbar = fm.getUI('navbar').append(tree).show()
 				
 			;
-		// move tree into navbar
-		tree.parent().find('.elfinder-navbar').append(tree).show();
 
 		fm.open(function(e) {
 			var data = e.data,

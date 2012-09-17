@@ -210,6 +210,53 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * Search files
+	 *
+	 * @param  string  $q  search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	public function search($q, $mimes) {
+		$result = array();
+
+		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, 0 AS dirs 
+				FROM %s AS f 
+				WHERE f.name RLIKE "%s"';
+		
+		$sql = sprintf($sql, $this->tbf, $this->db->real_escape_string($q));
+		
+		if (($res = $this->query($sql))) {
+			while ($row = $res->fetch_assoc()) {
+				if ($this->mimeAccepted($row['mime'], $mimes)) {
+					$id = $row['id'];
+					if ($row['parent_id']) {
+						$row['phash'] = $this->encode($row['parent_id']);
+					} 
+
+					if ($row['mime'] == 'directory') {
+						unset($row['width']);
+						unset($row['height']);
+					} else {
+						unset($row['dirs']);
+					}
+
+					unset($row['id']);
+					unset($row['parent_id']);
+
+
+
+					if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
+						$result[] = $stat;
+					}
+				}
+			}
+		}
+		
+		return $result;
+	}
+
+	/**
 	 * Return temporary file path for required file
 	 *
 	 * @param  string  $path   file path
@@ -394,6 +441,20 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		}
 		return $this->db->real_escape_string($realPath);
 	}
+
+	/**
+	 * Recursive files search
+	 *
+	 * @param  string  $path   dir path
+	 * @param  string  $q      search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function doSearch($path, $q, $mimes) {
+		return array();
+	}
+
 
 	/*********************** paths/urls *************************/
 	
@@ -706,7 +767,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _move($source, $targetDir, $name) {
 		$sql = 'UPDATE %s SET parent_id=%d, name="%s" WHERE id=%d LIMIT 1';
 		$sql = sprintf($sql, $this->tbf, $targetDir, $this->db->real_escape_string($name), $source);
-		return $this->query($sql) && $this->db->affected_rows > 0;
+		return $this->query($sql) && $this->db->affected_rows > 0 ? $source : false;
 	}
 		
 	/**
@@ -752,11 +813,16 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @param  resource  $fp   file pointer
 	 * @param  string    $dir  target dir path
 	 * @param  string    $name file name
+	 * @param  array     $stat file stat (required by some virtual fs)
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name, $mime, $w, $h) {
+	protected function _save($fp, $dir, $name, $stat) {
 		$this->clearcache();
+		
+		$mime = $stat['mime'];
+		$w = !empty($stat['width'])  ? $stat['width']  : 0;
+		$h = !empty($stat['height']) ? $stat['height'] : 0;
 		
 		$id = $this->_joinPath($dir, $name);
 		rewind($fp);
