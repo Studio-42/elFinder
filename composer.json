@@ -1,0 +1,18 @@
+{
+    "name": "studio-42/fm-elfinder",
+    "description": "File Manager for Web",
+    "keywords": ["jquery-ui", "file manager", "elfinder"],
+    "homepage": "https://github.com/Studio-42/elFinder",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {"name": "Dmitry \"dio\" Levashov", "role": "Chief developer", "email": "dio@std42.ru"},
+        {"name": "Troex Nevelin", "role": "Maintainer", "email": "troex@fury.scancode.ru"},
+        {"name": "Alexey Sukhotin", "role":"Developer", "email": "strogg@yandex.ru"},
+        {"name": "Naoki Sawada", "role": "Developer", "email": "hypweb@gmail.com"}
+    ],
+    "require": {
+        "php": ">=5.2.0"
+    },
+    "include-path": [ "php/" ],
+    "target-dir": "FM/elfinder"
+}
