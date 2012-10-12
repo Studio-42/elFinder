@@ -91,6 +91,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	**/
 	protected $metaDataCache = array();
 
+	private $dropbox_phpFound = false;
+	
 	/**
 	 * Constructor
 	 * Extend options with required fields
@@ -101,7 +103,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	public function __construct() {
 		
-		require dirname(__FILE__).DIRECTORY_SEPARATOR.'Dropbox'.DIRECTORY_SEPARATOR.'autoload.php';
+		@ include 'Dropbox/autoload.php';
+		$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
 		
 		$opts = array(
 			'consumerKey'       => '',
@@ -137,7 +140,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		
 		if ($options['user'] === 'init') {
 
-			if (empty($options['consumerKey']) || empty($options['consumerSecret'])) {
+			if (! $this->dropbox_phpFound || empty($options['consumerKey']) || empty($options['consumerSecret'])) {
 				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
 			}
 			
