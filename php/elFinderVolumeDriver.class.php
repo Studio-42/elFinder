@@ -674,10 +674,18 @@ abstract class elFinderVolumeDriver {
 		$type = strtolower($this->options['mimeDetect']);
 		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
 		$regexp = '/text\/x\-(php|c\+\+)/';
-
+		
+		//make sure the MAGIC envirometn variable is set to the defaults
+		if (getenv('MAGIC') == '') { 
+		  if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+		    putenv("MAGIC={$_ENV['PHPRC']}\extras\magic"); 
+		  } else {
+		    putenv('MAGIC=/usr/share/file/magic'); 
+		  }
+		}
 		if (($type == 'finfo' || $type == 'auto')
 		&& class_exists('finfo')
-		&& preg_match($regexp, array_shift(($tmp = explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__)))))) {
+		&& preg_match($regexp, array_shift(($tmp = explode(';', @finfo_file(finfo_open(FILEINFO_MIME,getenv('MAGIC')), __FILE__)))))) {
 			$type = 'finfo';
 			$this->finfo = finfo_open(FILEINFO_MIME);
 		} elseif (($type == 'mime_content_type' || $type == 'auto')
