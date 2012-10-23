@@ -172,10 +172,10 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
-		if (session_id() == '') {
+        if (session_id() == '') {
+		    register_shutdown_function('session_write_close'); //to insure if ajax call fails that elFinder does not hang on session_start
 			session_start();
 		}
-
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		
