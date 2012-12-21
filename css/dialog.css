@@ -3,7 +3,12 @@
 /*********************************************/
 
 /* common dialogs class */
-.std42-dialog {	padding:0; }
+.std42-dialog {
+	padding:0;
+	position:absolute;
+	left:auto;
+	right:auto;
+}
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
