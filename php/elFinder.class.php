@@ -866,7 +866,7 @@ class elFinder {
 	* @author Naoki Sawada
 	**/
 	protected function get_remote_contents( $url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0' ) {
-		$method = (function_exists('curl_exec') && ini_get('safe_mode') == '0')? 'curl_get_contents' : 'fsock_get_contents'; 
+		$method = (function_exists('curl_exec') && !ini_get('safe_mode'))? 'curl_get_contents' : 'fsock_get_contents'; 
 		return $this->$method( $url, $timeout, $redirect_max, $ua );
 	}
 	
@@ -997,7 +997,7 @@ class elFinder {
 		
 		$resp = array_pad(explode("\r\n\r\n",$response,2), 2, '');
 		$rccd = array_pad(explode(' ',$resp[0],3), 3, ''); // array('HTTP/1.1','200','OK\r\n...')
-		$rc = (integer)$rccd[1];
+		$rc = (int)$rccd[1];
 		
 		// Redirect
 		switch ($rc) {
