@@ -167,7 +167,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'apllyAll'        : 'Aplicar a todos',
 			'name'            : 'Nome',
 			'size'            : 'Tamanho',
-			'perms'           : 'Permições',
+			'perms'           : 'Permissões',
 			'modify'          : 'Modificado',
 			'kind'            : 'Tipo',
 			'read'            : 'Ler',
