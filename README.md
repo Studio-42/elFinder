@@ -25,8 +25,8 @@ Features
  * Local file system, MySQL, FTP volume storage drivers
  * Background file upload with Drag & Drop HTML5 support
  * List and Icons view
- * Kayboard shortcuts
- * Standart methods of file/group selection using mouse or keyboard
+ * Keyboard shortcuts
+ * Standard methods of file/group selection using mouse or keyboard
  * Move/Copy files with Drag & Drop
  * Archives create/extract (zip, rar, 7z, tar, gzip, bzip2)
  * Rich context menu and toolbar
