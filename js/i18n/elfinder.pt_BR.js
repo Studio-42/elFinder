@@ -1,7 +1,7 @@
 /**
  * Brazilian Portuguese translation
  * @author Leandro Carvalho <contato@leandrowebdev.net>
- * @version 2011-07-09
+ * @version 2013-01-22
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pt_BR = {
@@ -167,7 +167,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'apllyAll'        : 'Aplicar a todos',
 			'name'            : 'Nome',
 			'size'            : 'Tamanho',
-			'perms'           : 'Permições',
+			'perms'           : 'Permissões',
 			'modify'          : 'Modificado',
 			'kind'            : 'Tipo',
 			'read'            : 'Ler',
