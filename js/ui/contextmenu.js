@@ -27,8 +27,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			open = function(x, y) {
 				var win        = $(window),
-					width      = menu.outerWidth(),
-					height     = menu.outerHeight(),
+					width      = menu.outerWidth(false),
+					height     = menu.outerHeight(false),
 					wwidth     = win.width(),
 					wheight    = win.height(),
 					scrolltop  = win.scrollTop(),
