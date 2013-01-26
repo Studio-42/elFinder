@@ -1041,9 +1041,9 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
 		}
 		
+		$non_uploads = array();
 		if (empty($files)) {
 			if (isset($args['upload']) && is_array($args['upload'])) {
-				$non_uploads = array();
 				foreach($args['upload'] as $i => $url) {
 					$data = $this->get_remote_contents($url);
 					if ($data) {
