@@ -9,7 +9,10 @@ $.fn.elfindercontextmenu = function(fm) {
 	return this.each(function() {
 		var menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
-				.appendTo('body'),
+				.appendTo('body')
+				.delegate('.elfinder-contextmenu-item', 'mouseenter mouseleave', function() {
+					$(this).toggleClass('ui-state-hover')
+				}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
 			tpl     = '<div class="elfinder-contextmenu-item"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
@@ -19,8 +22,6 @@ $.fn.elfindercontextmenu = function(fm) {
 						e.stopPropagation();
 						e.stopPropagation();
 						callback();
-					}).hover(function(){
-						$(this).toggleClass('ui-state-hover');
 					})
 			},
 			
@@ -88,8 +89,6 @@ $.fn.elfindercontextmenu = function(fm) {
 											e.stopPropagation();
 											close();
 											cmd.exec(targets, variant[0]);
-										}).hover(function(){
-											$(this).toggleClass('ui-state-hover');
 										})
 								);
 							});
