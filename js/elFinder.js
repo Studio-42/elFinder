@@ -319,14 +319,20 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.UA = (function(){
+		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
 		return {
+			// Browser IE <= IE 6
 			ltIE6:typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
+			// Browser IE <= IE 7
 			ltIE7:typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
+			// Browser IE <= IE 8
 			ltIE8:typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
 			IE:document.uniqueID,
 			Firefox:window.sidebar,
 			Opera:window.opera,
-			Webkit:!document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined",
+			Webkit:webkit,
+			Chrome:webkit && window.chrome,
+			Safari:webkit && !window.chrome,
 			Mobile:typeof window.orientation != "undefined"
 		}
 	})();
@@ -2160,7 +2166,7 @@ elFinder.prototype = {
 			
 			xhr.send(formData);
 
-			if (!this.UA.Webkit || !data.files) {
+			if (!this.UA.Safari || !data.files) {
 				notifyto = startNotify();
 			}
 			
