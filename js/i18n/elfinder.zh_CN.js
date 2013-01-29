@@ -1,12 +1,12 @@
 /**
  * Simplified Chinese translation
- * @author 翻译者 <deerchao@gmail.com>
+ * @author deerchao <deerchao@gmail.com>
  * @author Andy Hu <andyhu7@yahoo.com.hk>
- * @version 2012-04-11
+ * @version 2013-01-29
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.zh_CN = {
-		translator : '翻译者 &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;',
+		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;',
 		language   : '简体中文',
 		direction  : 'ltr',
 		dateFormat : 'Y-m-d H:i',
