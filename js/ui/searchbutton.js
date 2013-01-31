@@ -57,7 +57,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			button.parent().detach();
 			cmd.fm.getUI('toolbar').prepend(button.show());
 			// position icons for ie7
-			if ($.browser.msie) {
+			if (cmd.fm.UA.ltIE7) {
 				var icon = button.children(cmd.fm.direction == 'ltr' ? '.ui-icon-close' : '.ui-icon-search');
 				icon.css({
 					right : '',
