@@ -313,6 +313,31 @@ window.elFinder = function(node, opts) {
 	this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'other';
 	
 	/**
+	 * User browser UA.
+	 * jQuery.browser: version deprecated: 1.3, removed: 1.9
+	 *
+	 * @type Object
+	 **/
+	this.UA = (function(){
+		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
+		return {
+			// Browser IE <= IE 6
+			ltIE6:typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
+			// Browser IE <= IE 7
+			ltIE7:typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
+			// Browser IE <= IE 8
+			ltIE8:typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
+			IE:document.uniqueID,
+			Firefox:window.sidebar,
+			Opera:window.opera,
+			Webkit:webkit,
+			Chrome:webkit && window.chrome,
+			Safari:webkit && !window.chrome,
+			Mobile:typeof window.orientation != "undefined"
+		}
+	})();
+	
+	/**
 	 * Configuration options
 	 *
 	 * @type Object
@@ -750,7 +775,7 @@ window.elFinder = function(node, opts) {
 		var file = files[hash],
 			url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
 		
-		if (url && ($.browser.opera || $.browser.msie)) {
+		if (url && (this.UA.Opera || this.UA.IE)) {
 			url += '?_=' + new Date().getTime();
 		}
 		return url;
@@ -1997,7 +2022,7 @@ elFinder.prototype = {
 					}),
 				name = 'iframe-'+self.namespace+(++self.iframeCnt),
 				form = $('<form action="'+self.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
-				msie = $.browser.msie,
+				msie = this.UA.IE,
 				// clear timeouts, close notification dialog, remove form/iframe
 				onload = function() {
 					abortto  && clearTimeout(abortto);
@@ -2183,7 +2208,7 @@ elFinder.prototype = {
 			
 			xhr.send(formData);
 
-			if (!$.browser.safari || !data.files) {
+			if (!this.UA.Safari || !data.files) {
 				notifyto = startNotify();
 			}
 			
