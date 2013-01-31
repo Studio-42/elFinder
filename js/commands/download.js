@@ -21,7 +21,7 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return  !this._disabled && cnt && (!$.browser.msie || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
+		return  !this._disabled && cnt && (!fm.UA.IE || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -58,7 +58,7 @@ elFinder.prototype.commands.download = function() {
 					$(iframes).each(function() {
 						$('#' + $(this).attr('id')).remove();
 					});
-				}, $.browser.mozilla? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
+				}, fm.UA.Firefox? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
 			});
 		fm.trigger('download', {files : files});
 		return dfrd.resolve(hashes);

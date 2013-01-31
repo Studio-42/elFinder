@@ -37,7 +37,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 *
 		 * @type Number
 		 **/
-		// keydown    = $.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+		// keydown    = fm.UA.Firefox || fm.UA.Opera ? 'keypress' : 'keydown',
 		/**
 		 * navbar icon class
 		 *
