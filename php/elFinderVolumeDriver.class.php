@@ -674,10 +674,15 @@ abstract class elFinderVolumeDriver {
 		$type = strtolower($this->options['mimeDetect']);
 		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
 		$regexp = '/text\/x\-(php|c\+\+)/';
-		
+	
 		if (($type == 'finfo' || $type == 'auto') 
-		&& class_exists('finfo')
-		&& preg_match($regexp, array_shift(($tmp = explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__)))))) {
+		&& class_exists('finfo')) {
+			$tmpFileInfo = @explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
+		} else {
+			$tmpFileInfo = false;
+		}
+	
+		if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
 			$type = 'finfo';
 			$this->finfo = finfo_open(FILEINFO_MIME);
 		} elseif (($type == 'mime_content_type' || $type == 'auto') 
@@ -2732,7 +2737,7 @@ abstract class elFinderVolumeDriver {
 				}
 
     			} else {
-        			$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
+        			$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, 'png');
       			}
 
 			$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
