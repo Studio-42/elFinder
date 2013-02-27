@@ -1992,7 +1992,8 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			$perm = call_user_func('write', $path, $this->options['accessControlData'], $this);			
+			// echo $this->access;
+			$perm = call_user_func($this->access, 'write', $path, $this->options['accessControlData'], $this);			
 			if ($perm !== null) {
 				return !!$perm;
 			}
