@@ -255,6 +255,7 @@ $opts = array(
 			'tmbBgColor' => 'transparent',
 			'accessControl' => 'access',
 			'acceptedName'    => '/^[^\.].*$/',
+			// 'disabled' => array('extract', 'archive'),
 			// 'tmbSize' => 128,
 			'attributes' => array(
 				array(

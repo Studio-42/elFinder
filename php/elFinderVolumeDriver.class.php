@@ -878,8 +878,10 @@ abstract class elFinderVolumeDriver {
 			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'archivers'     => array(
-				'create'  => array_keys($this->archivers['create']),
-				'extract' => array_keys($this->archivers['extract'])
+				// 'create'  => array_keys($this->archivers['create']),
+				// 'extract' => array_keys($this->archivers['extract']),
+				'create'  => is_array($this->archivers['create'])  ? array_keys($this->archivers['create'])  : array(),
+				'extract' => is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array()
 			)
 		);
 	}
