@@ -610,16 +610,8 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
-		if (!empty($this->options['accessControl'])) {
-			if (is_string($this->options['accessControl']) 
-			&& function_exists($this->options['accessControl'])) {
-				$this->access = $this->options['accessControl'];
-			} elseif (is_array($this->options['accessControl']) 
-			&& count($this->options['accessControl']) > 1 
-			&& is_object($this->options['accessControl'][0])
-			&& method_exists($this->options['accessControl'][0], $this->options['accessControl'][1])) {
-				$this->access = array($this->options['accessControl'][0], $this->options['accessControl'][1]);
-			}
+		if (!empty($this->options['accessControl']) && is_callable($this->options['accessControl'])) {
+			$this->access = $this->options['accessControl'];
 		}
 		
 		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
@@ -1961,15 +1953,8 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			if (is_array($this->access)) {
-				$obj    = $this->access[0];
-				$method = $this->access[1];
-				$perm   = $obj->{$method}($name, $path, $this->options['accessControlData'], $this);
-			} else {
-				$func = $this->access;
-				$perm = $func($name, $path, $this->options['accessControlData'], $this);
-			}
-			
+			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this);
+
 			if ($perm !== null) {
 				return !!$perm;
 			}
@@ -2007,15 +1992,7 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			if (is_array($this->access)) {
-				$obj    = $this->access[0];
-				$method = $this->access[1];
-				$perm   = $obj->{$method}('write', $path, $this->options['accessControlData'], $this);
-			} else {
-				$func = $this->access;
-				$perm = $func('write', $path, $this->options['accessControlData'], $this);
-			}
-			
+			$perm = call_user_func('write', $path, $this->options['accessControlData'], $this);			
 			if ($perm !== null) {
 				return !!$perm;
 			}
