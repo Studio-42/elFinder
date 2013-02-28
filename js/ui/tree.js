@@ -366,7 +366,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			tree = $(this).addClass(treeclass)
 				// make dirs draggable and toggle hover class
-				.delegate('.'+navdir, 'hover', function(e) {
+				.delegate('.'+navdir, 'mouseenter mouseleave', function(e) {
 					var link  = $(this), 
 						enter = e.type == 'mouseenter';
 					
