@@ -71,11 +71,12 @@ elFinder.prototype.commands.open = function() {
 					+ '&target=' + file.hash;
 			}
 			
-			w = '';
-			// set window size for image
+			// set window size for image if set
 			if (file.dim) {
 				s = file.dim.split('x');
 				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
+			} else {
+				w = 'width='+parseInt(2*$(window).width()/3)+',height='+parseInt(2*$(window).height()/3);
 			}
 
 			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
