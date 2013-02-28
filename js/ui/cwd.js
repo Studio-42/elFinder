@@ -765,8 +765,9 @@ $.fn.elfindercwd = function(fm, options) {
 				.delegate(fileSelector, 'scrolltoview', function() {
 					scrollToView($(this))
 				})
-				.delegate(fileSelector, 'hover', function(e) {
+				.delegate(fileSelector, 'mouseenter mouseleave', function(e) {
 					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
+					$(this).toggleClass('ui-state-hover');
 				})
 				.bind('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest('.'+clFile);
@@ -878,8 +879,21 @@ $.fn.elfindercwd = function(fm, options) {
 			wrapper[0].addEventListener('drop', function(e) {
 			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
-
-				e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files})//fm.upload({files : e.dataTransfer.files});
+				var file = false;
+				var type = '';
+				if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+					file = e.dataTransfer.files;
+					type = 'files';
+				} else if (e.dataTransfer.getData('text/html')) {
+					file = [ e.dataTransfer.getData('text/html') ];
+					type = 'html';
+				} else if (e.dataTransfer.getData('text')) {
+					file = [ e.dataTransfer.getData('text') ];
+					type = 'text';
+				}
+				if (file) {
+					fm.exec('upload', {files : file, type : type});
+				}
 			}, false);
 		}
 
