@@ -31,7 +31,7 @@ $.fn.elfindersortbutton = function(cmd) {
 				.hide()
 				.appendTo(button)
 				.zIndex(12+button.zIndex())
-				.delegate('.'+item, 'hover', function() { $(this).toggleClass(hover) })
+				.delegate('.'+item, 'mouseenter mouseleave', function() { $(this).toggleClass(hover) })
 				.delegate('.'+item, 'click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
