@@ -793,7 +793,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.delegate(fileSelector, 'scrolltoview', function() {
 					scrollToView($(this));
 				})
-				.delegate(fileSelector, 'mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, function(e) {
+				.delegate(fileSelector, 'mouseenter mouseleave', function(e) {
 					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
 					$(this).toggleClass('ui-state-hover');
 				})
