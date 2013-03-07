@@ -31,7 +31,7 @@ elFinder.prototype.commands.open = function() {
 			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files = this.files(hashes),
 			cnt   = files.length,
-			file, url, s, w;
+			file, url, s, w, imgW, imgH, winW, winH;
 
 		if (!cnt) {
 			return dfrd.reject();
@@ -72,12 +72,27 @@ elFinder.prototype.commands.open = function() {
 			}
 			
 			// set window size for image if set
-			if (file.dim) {
+			imgW = winW = Math.round(2 * $(window).width() / 3);
+			imgH = winH = Math.round(2 * $(window).height() / 3);
+			if (parseInt(file.width) && parseInt(file.height)) {
+				imgW = parseInt(file.width);
+				imgH = parseInt(file.height);
+			} else if (file.dim) {
 				s = file.dim.split('x');
-				w = 'width='+(parseInt(s[0])+20) + ',height='+(parseInt(s[1])+20);
-			} else {
-				w = 'width='+parseInt(2*$(window).width()/3)+',height='+parseInt(2*$(window).height()/3);
+				imgW = parseInt(s[0]);
+				imgH = parseInt(s[1]);
 			}
+			if (winW >= imgW && winH >= imgH) {
+				winW = imgW;
+				winH = imgH;
+			} else {
+				if ((imgW - winW) > (imgH - winH)) {
+					winH = Math.round(imgH * (winW / imgW));
+				} else {
+					winW = Math.round(imgW * (winH / imgH));
+				}
+			}
+			w = 'width='+winW+',height='+winH;
 
 			if (!window.open(url, '_blank', w + ',top=50,left=50,scrollbars=yes,resizable=yes')) {
 				return dfrd.reject('errPopup');
