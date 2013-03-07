@@ -10,8 +10,7 @@
 var fs   = require('fs'),
 	path = require('path'),
 	util = require('util'),
-	ugp  = require('uglify-js').parser,
-	ugu  = require('uglify-js').uglify,
+	UglifyJS = require('uglify-js'),
 	csso = require('csso');
 
 var dirmode = 0755,
@@ -182,11 +181,8 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 desc('uglify elfinder.min.js');
 file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	console.log('uglify elfinder.min.js');
-	var ast = ugp.parse(fs.readFileSync('js/elfinder.full.js').toString()); // parse code and get the initial AST
-	ast = ugu.ast_mangle(ast); // get a new AST with mangled names
-	ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
-	var result = ugu.split_lines(ugu.gen_code(ast), 1024 * 8); // insert new line every 8 kb
-	fs.writeFileSync(this.name, getComment() + result);
+	var result = UglifyJS.minify('js/elfinder.full.js');
+	fs.writeFileSync(this.name, getComment() + result.code);
 });
 
 // IMG + I18N + PHP
