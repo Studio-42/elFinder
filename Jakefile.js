@@ -182,7 +182,7 @@ desc('uglify elfinder.min.js');
 file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	console.log('uglify elfinder.min.js');
 	var result = UglifyJS.minify('js/elfinder.full.js');
-	fs.writeFileSync(this.name, getComment() + result.code);
+	fs.writeFileSync(this.name, getComment() + result.code); // as of uglify-js 2.x the result is an object.
 });
 
 // IMG + I18N + PHP
