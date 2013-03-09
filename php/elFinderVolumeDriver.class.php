@@ -795,8 +795,8 @@ abstract class elFinderVolumeDriver {
 		
 		if (!empty($this->options['archivers']['extract']) && is_array($this->options['archivers']['extract'])) {
 			foreach ($this->options['archivers']['extract'] as $mime => $conf) {
-				if (substr($mime, 'application/') === 0 
-				&& !empty($cons['cmd']) 
+				if (strpos($mime, 'application/') === 0
+				&& !empty($conf['cmd']) 
 				&& isset($conf['argc']) 
 				&& !empty($conf['ext'])
 				&& !isset($this->archivers['extract'][$mime])) {

@@ -733,7 +733,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		} 
 		
 		$this->options['dirMode'] && @ftp_chmod($this->connect, $this->options['dirMode'], $path);
-		return $path;
+		return '/'.$path;
 	}
 	
 	/**
@@ -961,10 +961,94 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _extract($path, $arc) {
-		die('Not yet implemented. (_extract)');
+
+		// get current directory
+		$cwd = getcwd();
+
+		// create temporary directory for temporary files
+		$tmpDir = $this->tempDir();
+		if(!$tmpDir) {
+			return false;
+		}
+
+		$basename = $this->_basename($path);
+		$localPath = $tmpDir.DIRECTORY_SEPARATOR.$basename;
+		if(!$this->ftp_downloadFile($path, $localPath)) {
+			return false;
+		}
+
+		//remote directory
+		$remoteDirectory = dirname($path);
+
+		chdir($tmpDir);
+
+		$command = escapeshellcmd($arc['cmd'].' '.$arc['argc'].' '.$basename);
+		error_log($command);
+		exec($command, $output);
+
+		unlink($basename);
+
+		$filesToProcess = $this->listFilesInDirectory($tmpDir);
+
+		if (count($filesToProcess) > 1) {
+
+			// for several files - create new directory
+			// create unique name for directory
+			$name = basename($path);
+			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+			}
 		
+			$test = dirname($path).DIRECTORY_SEPARATOR.$name;
+			if(!$this->stat($test)) {
+				$name = $this->uniqueName(dirname($path), $name, '-', false);
+			}
+
+			$newPath = dirname($path).DIRECTORY_SEPARATOR.$name;
+
+			ftp_mkdir($this->connect, $newPath);
+
+			foreach ($filesToProcess as $filename) {
+				if (is_dir($filename)) {
+					ftp_mkdir($this->connect, $newPath . DIRECTORY_SEPARATOR . $filename);
+				} else {
+					ftp_put($this->connect, $newPath . DIRECTORY_SEPARATOR . $filename, $filename, FTP_BINARY);
+				}
+			}
+
+			unset($filename);
+
+		} else {
+			$filename = $filesToProcess[0];
+			$newPath = $remoteDirectory . DIRECTORY_SEPARATOR . $filename;
+			ftp_put($this->connect, $newPath, $filename, FTP_BINARY);
+		}
+
+		// check success
+		$success = true;
+		foreach($filesToProcess as $file) {
+			$ftpfile = $newPath.DIRECTORY_SEPARATOR.$file;
+			if(is_dir($file)) {
+				$success = $this->ftp_isDirectory($ftpfile);
+			} else {
+				$success = (ftp_size($this->connect, $ftpfile) == filesize($file));
+			}
+
+			if(!$success) {
+				error_log("_extract: error occurred for file ".$file);
+				break;
+			}
+		}
+
+		// return to initial directory
+		chdir($cwd);
+
+		//cleanup
+		elFinderVolumeFTP::deleteDir($tmpDir);
+
+		return $success ? $newPath : false;
 	}
-	
+
 	/**
 	 * Create archive and return its path
 	 *
@@ -977,8 +1061,206 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _archive($dir, $files, $name, $arc) {
-		die('Not yet implemented. (_archive)');
-		return false;
+
+		// get current directory
+		$cwd = getcwd();
+
+		// create temporary directory for temporary files
+		$tmpDir = $this->tempDir();
+		if(!$tmpDir) {
+			return false;
+		}
+
+		//download data
+		if(!$this->ftp_downloadDirectory($dir, $files, $tmpDir)) {
+			return false;
+		}
+
+		// go to the temporary directory
+		chdir($tmpDir);
+
+		// path to local copy of archive
+		$path = $tmpDir.DIRECTORY_SEPARATOR.$name;
+		
+		$file_names_string = "";
+		foreach(scandir($tmpDir) as $filename) {
+			if('.' ==  $filename) {
+				continue;
+			}
+			if('..' ==  $filename) {
+				continue;
+			}
+			$file_names_string = $file_names_string.'"'.$filename.'" ';
+		}
+		$command = escapeshellcmd($arc['cmd'].' '.$arc['argc'].' '.$name.' '.$file_names_string);
+		error_log($command);
+		exec($command, $output);
+
+		$remoteArchiveFile = $dir.DIRECTORY_SEPARATOR.$name;
+
+		// upload archive
+		$handle = fopen($path, "r");
+		if(!ftp_fput($this->connect, $remoteArchiveFile, $handle, FTP_BINARY)) {
+			return false;
+		}
+		fclose($handle);
+
+		// return to initial work directory
+		chdir($cwd);
+
+		//cleanup
+		elFinderVolumeFTP::deleteDir($tmpDir);
+
+		return (ftp_size($this->connect, $remoteArchiveFile) > 0) ? $remoteArchiveFile : false;
 	}
-	
+
+	/**
+	 * Create writable temporary directory and return path to it.
+	 * @return string path to the new temporary directory.
+	*/
+	private function tempDir() {
+		$tempFile = tempnam(sys_get_temp_dir(),'elFinder');
+		unlink($tempFile);
+		return mkdir($tempFile) ? $tempFile : false;
+	}
+
+	/**
+	 * Downloads file from FTP and saves it as local file,
+	 * @param $remoteFile string absolute remote path of file to fetch.
+	 * @param $localFile string absolute local path to make.
+	 * @return string local path to downloaded file or false in case of an error
+	*/
+	private function ftp_downloadFile($remoteFile, $localFile) {
+		$handle = fopen($localFile, "wb");
+		if($handle) {
+			if (ftp_fget($this->connect, $handle, $remoteFile, FTP_BINARY)) {
+				fclose($handle);
+				return $localFile;
+			} else {
+				fclose($handle);
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Download specified list of files into $destLocalDirectory and go through subfolders if any.
+	 * @param string $remoteDirectory string absolute remote FTP path.
+	 * @param array $files array list of files and directories in remote FTP directory.
+	 * @param string $destLocalDirectory string absolute directory path where we need downloaded files.
+	 * @return bool true on success and false on failure.
+	*/
+	private function ftp_downloadDirectory($remoteDirectory, array $files, $destLocalDirectory) {
+		// download files from FTP to local host into the temporary directory
+		foreach ($files as &$file) {
+			$file = basename($file); // in case list of files contains absolute paths
+			if ($this->ftp_isDirectory($remoteDirectory.DIRECTORY_SEPARATOR.$file)) { // we need to go through directories recursively
+				// make subfolder
+				$subfolder = $destLocalDirectory.DIRECTORY_SEPARATOR.$file;
+				if(!elFinderVolumeFTP::touchDirectory($subfolder)) {
+					return false;
+				}
+
+				// list of files in the remote directory
+				$subfiles = ftp_nlist($this->connect, $remoteDirectory.DIRECTORY_SEPARATOR.$file);
+				// download it recursively
+				if(!$this->ftp_downloadDirectory($remoteDirectory.DIRECTORY_SEPARATOR.$file, $subfiles, $subfolder)) {
+					return false;
+				}
+			} else {
+				$this->ftp_downloadFile($remoteDirectory.DIRECTORY_SEPARATOR.$file, $destLocalDirectory.DIRECTORY_SEPARATOR.$file);
+			}
+		}
+		unset($file);
+		return true;
+	}
+
+	/**
+	 * Defines if specified $path represents an FTP directory.
+	 * <br />
+	 * This function is only way to perform this verification provided that we are compatible with PHP 4.
+	 * @param string $path remote FTP path to check.
+	 * @return boolean true if this is a directory, false, otherwise.
+	*/
+	private function ftp_isDirectory($path) {
+		$curPath =  ftp_pwd ($this->connect);
+		$test = @ftp_chdir($this->connect, $path);
+		if($test) {
+			ftp_chdir($this->connect, $curPath);
+		}
+		return $test;
+	}
+
+	/**
+	 * Delete local directory recursively.
+	 * @param $dirPath string to directory to be erased.
+	 * @throws InvalidArgumentException.
+	*/
+	private static function deleteDir($dirPath) {
+		if (! is_dir($dirPath)) {
+			throw new InvalidArgumentException('$dirPath must be a directory');
+		}
+
+		$dirPath = $dirPath.DIRECTORY_SEPARATOR;
+		$files = glob($dirPath . '*', GLOB_MARK);
+		foreach ($files as $file) {
+			if (is_dir($file)) {
+				self::deleteDir($file);
+			} else {
+				unlink($file);
+			}
+		}
+		rmdir($dirPath);
+	}
+
+	/**
+	 * Ensure directory exists and is empty.
+	 * @param string $path path to the directory.
+	 * @return bool true on success and false in case of an error.
+	*/
+	private static function touchDirectory($path) {
+		if (is_dir($path)) {
+			elFinderVolumeFTP::deleteDir($path);
+		} else if(file_exists($path)) {
+			unlink($path);
+		}
+		return mkdir($path);
+	}
+
+	/**
+	 * Returns array of strings containing all files and folders in the specified local directory.
+	 * File names are added to the only in case they satisfy the given $mask parameter.
+	 * @param string $path path to directory to scan.
+	 * @param string $mask a mask for file names ("*" is default).
+	 * @return array array of file and folder names relative to the $path
+	 * or an empty array if the directory $path is empty,
+	 * <br />
+	 * false if $path is not a directory or does not exist.
+	*/
+	private function listFilesInDirectory($path, $mask = "*") {
+
+		if(!is_dir($path)) {
+			return false;
+		}
+
+		$cwd = getcwd();
+		chdir($path);
+
+		$files = array();
+
+		foreach (glob($mask, GLOB_MARK) as $filename) {
+			$files[] = $filename;
+			if(is_dir($filename)) {
+				foreach($this->listFilesInDirectory($path.DIRECTORY_SEPARATOR.$filename) as $subfile) {
+					$files[] = $filename.$subfile;
+				}
+			}
+		}
+
+		chdir($cwd);
+		return $files;
+	}
+
 } // END class 
