@@ -72,6 +72,20 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'Protocolo não suportado.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Monagem falhou.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Servidor requerido.', // added 18.04.2012
+			'errSessionExpires'    : 'Sua sessão expirou por inatividade',
+			'errCreatingTempDir'   : 'Não foi possível criar um diretório temporário: "$1"',
+			'errFtpDownloadFile'   : 'Não foi possível fazer o download do arquivo do FTP: "$1"',
+			'errFtpUploadFile'     : 'Não foi possível fazer o upload do arquivo para o FTP: "$1"',
+			'errFtpMkdir'          : 'Não foi possível criar um diretório remoto no FTP: "$1"',
+			'errArchiveExec'       : 'Erro no arquivamento: "$1"',
+			'errExtractExec'       : 'Erro na extração dos arquivos: "$1"',
+			'cmdsort'              : 'Ordenar',
+			'sortkind'             : 'por tipo',
+			'sortname'             : 'por nome',
+			'sortsize'             : 'por tamanho',
+			'sortdate'             : 'por data',
+			'sortFoldersFirst'     : 'Pastas primeiro',
+			'errUploadFile'        : 'Não foi possível fazer o upload "$1".',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Criar arquivo',
@@ -121,15 +135,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfrm'       : 'Deletar arquivos',
 			'ntfcopy'     : 'Copiar arquivos',
 			'ntfmove'     : 'Mover arquivos',
-			'ntfprepare'  : 'Preparar para copiar os arquivos',
+			'ntfprepare'  : 'Preparando para copiar',
 			'ntfrename'   : 'Renomear arquivos',
-			'ntfupload'   : 'Fazendo o upload dos arquivos',
+			'ntfupload'   : 'Subindo arquivos',
 			'ntfdownload' : 'Baixando os arquivos',
 			'ntfsave'     : 'Slvando os arquivos',
 			'ntfarchive'  : 'Criando os arquivos',
-			'ntfextract'  : 'Extraindo arquivos dos ficheiros',
+			'ntfextract'  : 'Extraindo arquivos',
 			'ntfsearch'   : 'Procurando arquivos',
-			'ntfsmth'     : 'Fazendo alguma coisa >_<',
+			'ntfsmth'     : 'Fazendo alguma coisa',
 			'ntfnetmount' : 'Montando unidade de rede', // added 18.04.2012
 
 
@@ -151,14 +165,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Dec'         : 'Dez',
 
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'por nome (pastas primeiro)', 
-			'sortkindDirsFirst' : 'por tipo (pastas primeiro)', 
-			'sortsizeDirsFirst' : 'por tam. (pastas primeiro)', 
-			'sortdateDirsFirst' : 'por data (pastas primeiro)', 
 			'sortname'          : 'por nome', 
 			'sortkind'          : 'por tipo', 
 			'sortsize'          : 'por tam.',
 			'sortdate'          : 'por data',
+			'sortFoldersFirst'  : 'Pastas primeiro',
 			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmação requerida',

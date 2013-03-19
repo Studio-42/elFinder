@@ -9,6 +9,7 @@ elFinder.prototype.commands.help = function() {
 	var fm   = this.fm,
 		self = this,
 		linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
+		linktpltgt = '<div class="elfinder-help-link"> <a href="{url}" target="_blank">{link}</a></div>',
 		atpl    = '<div class="elfinder-help-team"><div>{author}</div>{work}</div>',
 		url     = /\{url\}/,
 		link    = /\{link\}/,
@@ -34,10 +35,10 @@ elFinder.prototype.commands.help = function() {
 
 			html.push(sep);
 			
-			html.push(linktpl[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
-			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
-			html.push(linktpl[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
-			html.push(linktpl[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			html.push(linktpltgt[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
+			html.push(linktpltgt[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
+			html.push(linktpltgt[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
+			html.push(linktpltgt[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
 			
 			html.push(sep);
 			
@@ -51,7 +52,7 @@ elFinder.prototype.commands.help = function() {
 			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 			
 			html.push(sep);
-			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': <a href="http://pixelmixer.ru/" target="_blank">Pixelmixer</a>, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
+			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');

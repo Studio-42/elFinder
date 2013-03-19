@@ -68,6 +68,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'La carpeta “$1” no puede ser reemplazada por un elemento contenido en ella.',
 			'errArcSymlinks'       : 'Por razones de seguridad no se pueden descomprimir archivos que contengan symlinks.',
 			'errArcMaxSize'        : 'El tamaño del archivo excede el máximo permitido.',
+
+			'errSessionExpires'    : 'La sesión ha expirado por inactividad',
+			'errCreatingTempDir'   : 'No se ha podido crear al directorio temporal: "$1"',
+			'errFtpDownloadFile'   : 'No se ha podido descargar el archivo desde FTP: "$1"',
+			'errFtpUploadFile'     : 'No se ha podido cargar el archivo a FTP: "$1"',
+			'errFtpMkdir'          : 'No se ha podido crear el directorio remoto en FTP: "$1"',
+			'errArchiveExec'       : 'Se ha producido un error durante la archivación: "$1"',
+			'errExtractExec'       : 'Se ha producido un error durante la extracción de archivos: "$1"',
+			'cmdsort'              : 'Clasificar',
+			'sortkind'             : 'por tipo',
+			'sortname'             : 'por nombre',
+			'sortsize'             : 'por tamaño',
+			'sortdate'             : 'por fecha',
+			'sortFoldersFirst'     : 'Las carpetas en primer lugar',
+			'errUploadFile'        : 'No se ha podido cargar "$1".',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Crear archivo',
@@ -121,8 +136,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Creando archivo',
 			'ntfextract'  : 'Extrayendo elementos del archivo',
 			'ntfsearch'   : 'Buscando archivos',
-			'ntfsmth'     : 'Haciendo algo >_<',
-      'ntfloadimg'  : 'Cargando imagen',
+			'ntfsmth'     : 'Haciendo algo',
+			'ntfloadimg'  : 'Cargando imagen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'desconocida',
