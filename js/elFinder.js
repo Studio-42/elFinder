@@ -1116,7 +1116,8 @@ window.elFinder = function(node, opts) {
 			dfrd.reject(error);
 			error && self.request({
 				data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
-				notify : {type : 'open', cnt : 1, hideCnt : true}
+				notify : {type : 'open', cnt : 1, hideCnt : true},
+				preventDefault : true
 			});
 		})
 		.done(function(odata, pdata) {
