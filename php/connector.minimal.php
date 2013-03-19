@@ -33,10 +33,41 @@ $opts = array(
 	// 'debug' => true,
 	'roots' => array(
 		array(
-			'driver'        => 'LocalFileSystem',   // driver for accessing file system (REQUIRED)
-			'path'          => '../files/',         // path to files (REQUIRED)
+			'driver'        => 'FTP',   // driver for accessing file system (REQUIRED)
+			'host'          => '127.0.0.1',
+			'user'          => 'chuck',
+			'pass'          => 'norrison',
+			//'alias'			=> 'Root Folder',
+			'path'  		=> '/',
+			'accessControl' => 'access',
 			'URL'           => dirname($_SERVER['PHP_SELF']) . '/../files/', // URL to files (REQUIRED)
-			'accessControl' => 'access'             // disable and hide dot starting files (OPTIONAL)
+			'tmbPath' 		=> '../files/.ftptmb',
+			'tmbURL'		=> dirname($_SERVER['PHP_SELF']) . '/../files/.ftptmb',
+			'tmpPath'       => '/../files/.tmp',
+			'imgLib'		=> 'auto',
+			'utf8fix'		=> true,
+			'mimeDetect'	=> 'internal',
+			'port'			=> 21,
+			// 'disabled'		=> array (
+					// 'download','resize'
+				// ),
+			'attributes' 	=> array(
+					array(
+						'pattern' => '/.+/', // Read+Write Settings for all Folders
+						'read' 	=> true,
+						'write' => true,
+						'locked' => false
+						),
+					array(
+						'pattern' => '/.(myFold-1|myFold-\.[A-z0-9\.\-\ \ä\Ä\ü\Ü\ö\Ö]+)$/', // Dont delete "myFold-1" and "myFold-*", but full access for Subfolders and Files
+						'read' 	=> true,
+						'write' => true, 
+						'locked' => true
+						)							
+				),
+			'archiveMimes' => array('application/x-7z-compressed'),
+			'mode'          => 'passive',
+			'uploadMaxSize' => '4G'
 		)
 	)
 );
