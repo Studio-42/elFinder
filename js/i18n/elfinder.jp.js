@@ -80,6 +80,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
 			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
+			'errSessionExpires'    : 'アクションがなかったため、セッションが期限切れになりました',
+			'errCreatingTempDir'   : '一時ディレクトリを作成できません："$1"',
+			'errFtpDownloadFile'   : 'FTP からファイルをダウンロードできません："$1"',
+			'errFtpUploadFile'     : 'FTP へファイルをアップロードできません："$1"',
+			'errFtpMkdir'          : 'FTP にリモートディレクトリを作成できません："$1"',
+			'errArchiveExec'       : 'ファイルのアーカイブ中にエラーが発生しました："$1"',
+			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -137,7 +145,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfextract'  : 'アーカイブを解凍',
 			'ntfsearch'   : 'ファイル検索',
 			'ntfresize'   : 'リサイズしています',
-			'ntfsmth'     : '何かしています >_<',
+			'ntfsmth'     : '何かしています',
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
 			
