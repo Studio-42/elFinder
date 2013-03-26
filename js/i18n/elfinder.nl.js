@@ -77,7 +77,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'Niet ondersteund protocol.',   
 			'errNetMountFailed'    : 'Mount mislukt.',    
 			'errNetMountHostReq'   : 'Host is verplicht.',
-      
+			'errSessionExpires'    : 'Uw sessie is verlopen vanwege inactiviteit.',
+			'errCreatingTempDir'   : 'Kan de tijdelijke map niet aanmaken: "$1" ',
+			'errFtpDownloadFile'   : 'Kan het bestand niet downloaden vanaf FTP: "$1"',
+			'errFtpUploadFile'     : 'Kan het bestand niet uploaden naar FTP: "$1"',
+			'errFtpMkdir'          : 'Kan het externe map niet aanmaken op de FTP-server: "$1"',
+			'errArchiveExec'       : 'Er is een fout opgetreden bij het archivering van de bestanden: "$1" ',
+			'errExtractExec'       : 'Er is een fout opgetreden bij het uitpakken van de bestanden: "$1" ',
+			'errUploadFile'        : 'Kan "$1" niet uploaden',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
 			'cmdback'      : 'Vorige',
@@ -116,28 +124,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Annuleren',
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
-                        'btnMount'  : 'Mount',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Bezig met openen van map',
 			'ntffile'     : 'Bezig met openen bestand',
-			'ntfreload'   : 'Bezig met inhoud map vernieuwen',
+			'ntfreload'   : 'Herladen map inhoud',
 			'ntfmkdir'    : 'Bezig met map maken',
 			'ntfmkfile'   : 'Bezig met Bestanden maken',
-			'ntfrm'       : 'Bezig met verwijderen bestanden',
+			'ntfrm'       : 'Verwijderen bestanden',
 			'ntfcopy'     : 'Kopieer bestanden',
 			'ntfmove'     : 'Verplaats bestanden',
-			'ntfprepare'  : 'Voorbereiden om bestanden te kopiëren',
+			'ntfprepare'  : 'Voorbereiden kopiëren',
 			'ntfrename'   : 'Hernoem bestanden',
-			'ntfupload'   : 'Bezig met uploaden bestanden',
-			'ntfdownload' : 'Bezig met downloaden bestanden',
+			'ntfupload'   : 'Bestanden uploaden actief',
+			'ntfdownload' : 'Bestanden downloaden actief',
 			'ntfsave'     : 'Bestanden opslaan',
 			'ntfarchive'  : 'Archief aan het maken',
-			'ntfextract'  : 'Bestanden uit het archief aan het uitpakken',
+			'ntfextract'  : 'Bestanden uitpakken actief',
 			'ntfsearch'   : 'Zoeken naar bestanden',
-			'ntfsmth'     : 'Iets aan het doen >_<',
+			'ntfsmth'     : 'Iets aan het doen',
 			'ntfloadimg'  : 'Laden van plaatje',
-			'ntfnetmount' : 'Bezig met mounten van netwerk volume',
+			'ntfnetmount' : 'Verhogen netwerk volume',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
@@ -350,3 +358,4 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	}
 }
+
