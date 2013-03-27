@@ -1,0 +1,13 @@
+{
+  "name": "elFinder",
+  "version": "0.0.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Studio-42/elFinder.git"
+  }
+}
