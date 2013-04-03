@@ -571,8 +571,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return void
 	 **/
 	protected function _checkArchivers() {
+		if (isset($_SESSION['elFinder_archivers_cache']) && is_array($_SESSION['elFinder_archivers_cache'])) {
+			$this->archivers = $_SESSION['elFinder_archivers_cache'];
+			return;
+		}
 		if (!function_exists('exec')) {
-			$this->options['archivers'] = $this->options['archive'] = array();
+			$_SESSION['elFinder_archivers_cache'] = $this->archivers = $this->options['archivers'] = $this->options['archive'] = array();
 			return;
 		}
 		$arcs = array(
@@ -660,7 +664,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
-		$this->archivers = $arcs;
+		$_SESSION['elFinder_archivers_cache'] = $this->archivers = $arcs;
 	}
 
 	/**
