@@ -2575,13 +2575,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function remove($path, $force = false) {
 		$stat = $this->stat($path);
-		$stat['realpath'] = $path;
-		$this->rmTmb($stat);
-		$this->clearcache();
 		
 		if (empty($stat)) {
 			return $this->setError(elFinder::ERROR_RM, $this->_path($path), elFinder::ERROR_FILE_NOT_FOUND);
 		}
+		
+		$stat['realpath'] = $path;
+		$this->rmTmb($stat);
+		$this->clearcache();
 		
 		if (!$force && !empty($stat['locked'])) {
 			return $this->setError(elFinder::ERROR_LOCKED, $this->_path($path));
