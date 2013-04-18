@@ -634,13 +634,13 @@ class elFinderVolumeYoutube extends elFinderVolumeDriver {
 		$myVideoEntry->setMediaSource($filesource);
 
 		$myVideoEntry->setVideoTitle($name);
-		$myVideoEntry->setVideoDescription('Uploaded with regi-on.net');
+		$myVideoEntry->setVideoDescription('Uploaded with elFinder 2.x');
 		// The category must be a valid YouTube category!
 		$myVideoEntry->setVideoCategory('Film');
 
 		// Set keywords. Please note that this must be a comma-separated string
 		// and that individual keywords cannot contain whitespace
-		$myVideoEntry->SetVideoTags('regi-on.net');
+		$myVideoEntry->SetVideoTags('elFinder');
 
 		// upload URI for the currently authenticated user
 		$uploadUrl = 'http://uploads.gdata.youtube.com/feeds/api/users/default/uploads';
