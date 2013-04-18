@@ -263,6 +263,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return $stat;
 		}
 
+		//Verifies the given path is the root or is inside the root. Prevents directory traveral.
+		if($path !== $this->root && strpos(realpath($path), realpath($this->root).DIRECTORY_SEPARATOR) !== 0){
+		   return $stat;
+		}
+
 		if ($path != $this->root && is_link($path)) {
 			if (($target = $this->readlink($path)) == false 
 			|| $target == $path) {
