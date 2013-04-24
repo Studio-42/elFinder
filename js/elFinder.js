@@ -1446,7 +1446,7 @@ window.elFinder = function(node, opts) {
 	});
 	
 	this.dragUpload = false;
-	this.xhrUpload  = typeof XMLHttpRequestUpload != 'undefined' && typeof File != 'undefined' && typeof FormData != 'undefined';
+	this.xhrUpload  = (typeof XMLHttpRequestUpload != 'undefined' || typeof XMLHttpRequestEventTarget != 'undefined') && typeof File != 'undefined' && typeof FormData != 'undefined';
 	
 	// configure transport object
 	this.transport = {}
