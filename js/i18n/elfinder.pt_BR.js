@@ -325,7 +325,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoWM'     : 'Video Windows Media',
 			'kindVideoFlash'  : 'Video Flash',
 			'kindVideoMKV'    : 'Video Matroska',
-			'kindVideoOGG'    : 'Video Ogg'
+			'kindVideoOGG'    : 'Video Ogg' ,
+			// Adobe
+			'kindPostScriptPrinter'	: 'PS Printer Font',
+			'kindPostScriptFont'	: 'PostScript Font',
+			'kindAdobeFontList'		: 'Adobe Font List',
+			'kindAdobeInDesign'		: 'Arquivo do InDesign' ,
+			'kindMultipleMasterFont': 'Multiple Master Font'
 		}
 	}
 }
