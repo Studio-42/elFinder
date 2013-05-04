@@ -121,7 +121,10 @@ elFinder.prototype.commands.upload = function() {
 			  	e.preventDefault();
 				var file = false;
 				var type = '';
-				if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+				if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
+					file = e.dataTransfer.items;
+					type = 'data';
+				} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
 					file = e.dataTransfer.files;
 					type = 'files';
 				} else if (e.dataTransfer.getData('text/html')) {

@@ -1969,7 +1969,107 @@ elFinder.prototype = {
 	uploads : {
 		// check droped contents
 		checkFile : function(data) {
-			if (data.type == 'files') {
+			if (data.type == 'data') {
+				var dfrd = $.Deferred(),
+				files = [],
+				paths = [],
+				dirctorys = [],
+				entries = [],
+				processing = 0,
+				
+				readEntries = function(dirReader) {
+					var toArray = function(list) {
+						return Array.prototype.slice.call(list || []);
+					};
+					var readFile = function(fileEntry, callback) {
+						var dfrd = $.Deferred();
+						if (fileEntry.isFile) {
+							fileEntry.file(function (file) {
+								dfrd.resolve(file);
+							}, function(e){
+								dfrd.reject();
+							});
+						} else {
+							dfrd.reject('dirctory');
+						}
+						return dfrd.promise();
+					};
+			
+					dirReader.readEntries(function (results) {
+						if (!results.length) {
+							var len = entries.length - 1;
+							var read = function(i) {
+								readFile(entries[i]).done(function(file){
+									paths.push(entries[i].fullPath);
+									files.push(file);
+								}).fail(function(e){
+									if (e == 'dirctory') {
+										// dirctory
+										dirctorys.push(entries[i]);
+									} else {
+										// why fail?
+									}
+								}).always(function(){
+									processing--;
+									if (i < len) {
+										processing++;
+										read(++i);
+									}
+								});
+							};
+							processing++;
+							read(0);
+							processing--;
+						} else {
+							entries = entries.concat(toArray(results));
+							readEntries(dirReader);
+						}
+					});
+				},
+				
+				doScan = function(items, isEntry) {
+					var dirReader, entry;
+					entries = [];
+					var length = items.length;
+					for (var i = 0; i < length; i++) {
+						if (! isEntry) {
+							entry = !!items[i].getAsEntry? items[i].getAsEntry() : items[i].webkitGetAsEntry();
+						} else {
+							entry = items[i];
+						}
+						if (entry.isFile) {
+							paths.push('');
+							files.push(data.files.items[i].getAsFile());
+						} else if (entry.isDirectory) {
+							if (processing > 0) {
+								dirctorys.push(entry);
+							} else {
+								processing = 0;
+								dirReader = entry.createReader();
+								processing++;
+								readEntries(dirReader);
+							}
+						}
+					}
+				};
+				
+				doScan(data.files.items);
+				
+				setTimeout(function wait() {
+					if (processing > 0) {
+						setTimeout(wait, 10);
+					} else {
+						if (dirctorys.length > 0) {
+							doScan([dirctorys.shift()], true);
+							setTimeout(wait, 10);
+						} else {
+							dfrd.resolve([files, paths]);
+						}
+					}
+				}, 10);
+				
+				return dfrd.promise();
+			} else if (data.type == 'files') {
 				return data.files;
 			} else {
 				var ret = [];
@@ -2128,7 +2228,7 @@ elFinder.prototype = {
 				},
 				notifyto;
 			
-			if (!cnt) {
+			if (data.type != 'data' &&!cnt) {
 				return dfrd.reject();
 			}
 			
@@ -2184,30 +2284,48 @@ elFinder.prototype = {
 				}
 			}, false);
 			
-			
-			xhr.open('POST', self.uploadURL, true);
-			formData.append('cmd', 'upload');
-			formData.append(self.newAPI ? 'target' : 'current', self.cwd().hash);
-			$.each(self.options.customData, function(key, val) {
-				formData.append(key, val);
-			});
-			$.each(self.options.onlyMimes, function(i, mime) {
-				formData.append('mimes['+i+']', mime);
-			});
-			
-			$.each(files, function(i, file) {
-				formData.append('upload[]', file);
-			});
-			
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState == 4 && xhr.status == 0) {
-					// ff bug while send zero sized file
-					// for safari - send directory
-					dfrd.reject(['errConnect', 'errAbort']);
+			var send = function(files, paths){
+				xhr.open('POST', self.uploadURL, true);
+				formData.append('cmd', 'upload');
+				formData.append(self.newAPI ? 'target' : 'current', self.cwd().hash);
+				$.each(self.options.customData, function(key, val) {
+					formData.append(key, val);
+				});
+				$.each(self.options.onlyMimes, function(i, mime) {
+					formData.append('mimes['+i+']', mime);
+				});
+				
+				$.each(files, function(i, file) {
+					formData.append('upload[]', file);
+				});
+				
+				if (paths) {
+					$.each(paths, function(i, path) {
+						formData.append('upload_path[]', path);
+					});
 				}
-			}
+				
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4 && xhr.status == 0) {
+						// ff bug while send zero sized file
+						// for safari - send directory
+						dfrd.reject(['errConnect', 'errAbort']);
+					}
+				}
+				
+				xhr.send(formData);
+			};
 			
-			xhr.send(formData);
+			if (data.type != 'data') {
+				send(files);
+			} else {
+				files.done(function(result){
+					cnt = result[0].length;
+					send(result[0], result[1]);
+				}).fail(function(){
+					dfrd.reject();
+				});
+			}
 
 			if (!this.UA.Safari || !data.files) {
 				notifyto = startNotify();

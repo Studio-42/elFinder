@@ -61,7 +61,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -1072,6 +1072,7 @@ class elFinder {
 		$volume = $this->volume($target);
 		$files  = isset($args['FILES']['upload']) && is_array($args['FILES']['upload']) ? $args['FILES']['upload'] : array();
 		$result = array('added' => array(), 'header' => empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8');
+		$paths = $args['upload_path']? $args['upload_path'] : array();
 		
 		if (!$volume) {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
@@ -1137,8 +1138,12 @@ class elFinder {
 				}
 				break;
 			}
-			
-			if (($file = $volume->upload($fp, $target, $name, $tmpname)) === false) {
+			if ($paths && !empty($paths[$i])) {
+				$_target = $volume->getUploadTaget($target, $paths[$i], $result);
+			} else {
+				$_target = $target;
+			}
+			if (! $_target || ($file = $volume->upload($fp, $_target, $name, $tmpname)) === false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
 				if (! is_uploaded_file($tmpname)) {

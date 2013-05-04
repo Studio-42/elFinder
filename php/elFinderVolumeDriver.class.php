@@ -1794,6 +1794,43 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * (Make &) Get upload taget dirctory hash
+	 * 
+	 * @param string $baseTargetHash
+	 * @param string $path
+	 * @param array  $result
+	 * @return boolean|string
+	 * @author Naoki Sawada
+	 */
+	public function getUploadTaget($baseTargetHash, $path, & $result) {
+		$base = $this->decode($baseTargetHash);
+		$targetHash = $baseTargetHash;
+		$path = ltrim($path, '/');
+		$dirs = explode('/', $path);
+		array_pop($dirs);
+		foreach($dirs as $dir) {
+			$targetPath = $this->_joinPath($base, $dir);
+			if (! $_realpath = $this->realpath($this->encode($targetPath))) {
+				if ($stat = $this->mkdir($targetHash, $dir)) {
+					$result['added'][] = $stat;
+					$targetHash = $stat['hash'];
+					$base = $this->decode($targetHash);
+				} else {
+					return false;
+				}
+			} else {
+				$targetHash = $this->encode($_realpath);
+				if ($this->dir($targetHash)) {
+					$base = $this->decode($targetHash);
+				} else {
+					return false;
+				}
+			}
+		}
+		return $targetHash;
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  array  error 
