@@ -1968,7 +1968,7 @@ elFinder.prototype = {
 	
 	uploads : {
 		// check droped contents
-		checkFile : function(data) {
+		checkFile : function(data, fm) {
 			if (data.type == 'data') {
 				var dfrd = $.Deferred(),
 				files = [],
@@ -2000,8 +2000,12 @@ elFinder.prototype = {
 							var len = entries.length - 1;
 							var read = function(i) {
 								readFile(entries[i]).done(function(file){
-									paths.push(entries[i].fullPath);
-									files.push(file);
+									if (! (fm.OS == 'win' && file.name.match(/^(?:desktop\.ini|thumbs\.db)$/i))
+											&&
+										! (fm.OS == 'mac' && file.name.match(/^\.ds_store$/i))) {
+										paths.push(entries[i].fullPath);
+										files.push(file);
+									}
 								}).fail(function(e){
 									if (e == 'dirctory') {
 										// dirctory
@@ -2108,7 +2112,7 @@ elFinder.prototype = {
 		iframe : function(data, fm) { 
 			var self   = fm ? fm : this,
 				input  = data.input? data.input : false,
-				files  = !input ? self.uploads.checkFile(data) : false,
+				files  = !input ? self.uploads.checkFile(data, self) : false,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
@@ -2216,7 +2220,7 @@ elFinder.prototype = {
 					}),
 				xhr         = new XMLHttpRequest(),
 				formData    = new FormData(),
-				files       = data.input ? data.input.files : self.uploads.checkFile(data), 
+				files       = data.input ? data.input.files : self.uploads.checkFile(data, self), 
 				cnt         = files.length,
 				loaded      = 5,
 				notify      = false,
