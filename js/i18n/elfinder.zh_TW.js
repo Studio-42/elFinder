@@ -12,7 +12,7 @@
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE = {
-		translator : 'Yuwei Chuang &lt;ywchuang@gmail.com&gt;',
+		translator : 'Yuwei Chuang &lt;ywchuang.tw@gmail.com&gt;',
 		language   : '正體中文',
 		direction  : 'ltr',
 		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
