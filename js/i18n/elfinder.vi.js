@@ -1,16 +1,16 @@
 /**
-
-Bản dịch Việt Nam
-@Được dịch bởi Chung Thủy f
-@Phiên bản 16-01-2013 */
+ * Vietnamese translation
+ * @author Chung Thủy f <chungthuyf@gmail.com>
+ * @version 16-01-2013
+ */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-elFinder.prototype.i18.vi = {
-translator : 'Chung Thủy f <chungthuyf@gmail.com>',
-language : 'Ngôn ngữ Việt Nam',
-direction : 'ltr',
-dateFormat : 'd.m.Y H:i',
-fancyDateFormat : '$1 H:i',
-messages : {
+  elFinder.prototype.i18.vi = {
+    translator : 'Chung Thủy f &lt;chungthuyf@gmail.com&gt;',
+    language : 'Ngôn ngữ Việt Nam',
+    direction : 'ltr',
+    dateFormat : 'd.m.Y H:i',
+    fancyDateFormat : '$1 H:i',
+    messages : {
 
         /********************************** errors **********************************/
         'error'                : 'Lỗi',
@@ -336,5 +336,5 @@ messages : {
         'kindVideoMKV'    : 'Matroska movie',
         'kindVideoOGG'    : 'Ogg movie'
     }
-}
+  }
 }

@@ -1,11 +1,12 @@
 /**
  * German translation
- * @author JPG & Mace <dev@flying-datacenter.de>  and tora60 from pragmaMx.org
+ * @author JPG & Mace <dev@flying-datacenter.de>
+ * @author tora60 from pragmaMx.org
  * @version 2013-05-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt; and tora60 from pragmaMx.org',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M. Y h:i', // 13. Mai 2012 05:27
