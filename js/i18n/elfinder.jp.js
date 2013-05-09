@@ -1,11 +1,12 @@
 /**
  * Japanese translation
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>
+ * @author Naoki Sawada <hypweb@gmail.com>
  * @version 2012-08-15
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
-		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
+		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
 		dateFormat : 'Y/m/d h:i A', // 2012/04/11 05:27 PM

@@ -1,11 +1,4 @@
 /**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
- 
-/**
  * Slovenian translation
  * @author Damjan Rems <d_rems at yahoo.com>
  * @version 2012-09-07
