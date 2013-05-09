@@ -1906,7 +1906,31 @@ elFinder.prototype = {
 			'video/x-ms-wmv'                : 'VideoWM',
 			'video/x-flv'                   : 'VideoFlash',
 			'video/x-matroska'              : 'VideoMKV',
-			'video/ogg'                     : 'VideoOGG'
+			'video/ogg'                     : 'VideoOGG',
+			/**
+			 * Multiple Master Font File
+			 * @link http://filext.com/file-extension/MMM
+			 * 
+			 * Open Type (Font Format)
+			 * @link http://filext.com/file-extension/OTF
+			 * 
+			 * PostScript printer
+			 * Printer Font Metrics by Adobe Systems Incorporated
+			 * @link http://filext.com/file-extension/PFM
+			 * 
+			 * PostScript Type 1 Font by Adobe Systems Incorporated
+			 * @link http://filext.com/file-extension/PFB
+			 * 
+			 * Adobe Font List
+			 * @link http://filext.com/file-extension/LST
+			 */
+			'application/postscript-printer': 'PostScriptPrinter',
+			'application/x-font'            : 'PostScriptFont',
+			'application/x-adobe-fontlist'  : 'AdobeFontList',
+			'application/x-indesign'        : 'AdobeInDesign',
+			'application/x-deflate'         : 'ZIP',
+			'application/x-font-mmm'        : 'MultipleMasterFont',
+			'application/vnd.adobe.indesign-idml-package' : 'AdobeInDesign'
 		},
 	
 	/**
