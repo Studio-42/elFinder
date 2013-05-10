@@ -1,12 +1,12 @@
 /**
  * Spanish translation
  * @author Julián Torres <julian.torres@pabernosmatao.com>
- * @author Julio Montoya <gugli100@gmail.com> - Fixing typos
- * @version 2013-05-08
+ * @author Julio Montoya <gugli100@gmail.com>
+ * @version 2013-05-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.es = {
-		translator : 'Julián Torres &lt;julian.torres@pabernosmatao.com&gt;',
+		translator : 'Julián Torres &lt;julian.torres@pabernosmatao.com&gt;Julio Montoya &lt;gugli100@gmail.com&gt;',
 		language   : 'Español internacional',
 		direction  : 'ltr',
 		messages   : {
@@ -15,9 +15,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'error'                : 'Error',
 			'errUnknown'           : 'Error desconocido.',
 			'errUnknownCmd'        : 'Comando desconocido.',
-			'errJqui'              : 'Configuración no válida de jQuery UI. deben estar incluidos los componentes selectable, draggable y droppable.',
+			'errJqui'              : 'Configuración inválida de jQuery UI. Deben estar incluidos los componentes selectable, draggable y droppable.',
 			'errNode'              : 'elFinder necesita crear elementos DOM.',
-			'errURL'               : 'Configuración no válida de elFinder! La opción URL no está configurada.',
+			'errURL'               : 'Configuración inválida de elFinder! La opción URL no está configurada.',
 			'errAccess'            : 'Acceso denegado.',
 			'errConnect'           : 'No se ha podido conectar con el backend.',
 			'errAbort'             : 'Conexión cancelada.',
@@ -28,7 +28,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errJSON'              : 'El módulo PHP JSON no está instalado.',
 			'errNoVolumes'         : 'No hay disponibles volúmenes legibles.',
 			'errCmdParams'         : 'Parámetros no válidos para el comando "$1".',
-			'errDataNotJSON'       : 'los datos no estan en formato JSON.',
+			'errDataNotJSON'       : 'Los datos no estan en formato JSON.',
 			'errDataEmpty'         : 'No hay datos.',
 			'errCmdReq'            : 'La petición del backend necesita un nombre de comando.',
 			'errOpen'              : 'No se puede abrir "$1".',
@@ -64,7 +64,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errExtract'           : 'No se puede extraer archivos desde "$1".',
 			'errArchive'           : 'No se puede crear el archivo.',
 			'errArcType'           : 'Tipo de archivo no soportado.',
-			'errNoArchive'         : 'El archivo no es de tipo archivo o es de un tipo no soportado.',
+			'errNoArchive'         : 'El archivo no es de tipo archive o es de un tipo no soportado.',
 			'errCmdNoSupport'      : 'El backend no soporta este comando.',
 			'errReplByChild'       : 'La carpeta “$1” no puede ser reemplazada por un elemento contenido en ella.',
 			'errArcSymlinks'       : 'Por razones de seguridad no se pueden descomprimir archivos que contengan symlinks.',
@@ -77,7 +77,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'No se ha podido crear el directorio remoto en FTP: "$1"',
 			'errArchiveExec'       : 'Se ha producido un error durante la archivación: "$1"',
 			'errExtractExec'       : 'Se ha producido un error durante la extracción de archivos: "$1"',
-			'cmdsort'              : 'Clasificar',
+			'cmdsort'              : 'Ordenar',
 			'sortkind'             : 'por tipo',
 			'sortname'             : 'por nombre',
 			'sortsize'             : 'por tamaño',
@@ -204,7 +204,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'twitter'         : 'Síguenos en Twitter',
 			'facebook'        : 'Únete a nosotros en Facebook',
 			'team'            : 'Equipo',
-			'chiefdev'        : 'desarrollador jefe',
+			'chiefdev'        : 'desarrollador principal',
 			'developer'       : 'desarrollador',
 			'contributor'     : 'contribuyente',
 			'maintainer'      : 'mantenedor',
@@ -220,9 +220,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rmFromPlaces'    : 'Eliminar en sus ubicaciones',
 			'untitled folder' : 'carpeta sin título',
 			'untitled archivo.txt' : 'archivo.txt sin título',
-      'mode'            : 'Modo',
-      'resize'          : 'Redimensionar',
-      'crop'            : 'Recortar',
+      			'mode'            : 'Modo',
+      			'resize'          : 'Redimensionar',
+      			'crop'            : 'Cortar',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconocido',
@@ -292,15 +292,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAudioWAV'    : 'Audio WAV',
 			'AudioPlaylist'   : 'Playlist MP3',
 			'kindVideo'       : 'Video media',
-			'kindVideoDV'     : 'Película DV',
-			'kindVideoMPEG'   : 'Película MPEG',
-			'kindVideoMPEG4'  : 'Película MPEG-4',
-			'kindVideoAVI'    : 'Película AVI',
-			'kindVideoMOV'    : 'Película Quick Time',
-			'kindVideoWM'     : 'Película Windows Media',
-			'kindVideoFlash'  : 'Película Flash',
-			'kindVideoMKV'    : 'Película Matroska MKV',
-			'kindVideoOGG'    : 'Película Ogg'
+			'kindVideoDV'     : 'Video DV',
+			'kindVideoMPEG'   : 'Video MPEG',
+			'kindVideoMPEG4'  : 'Video MPEG-4',
+			'kindVideoAVI'    : 'Video AVI',
+			'kindVideoMOV'    : 'Video Quick Time',
+			'kindVideoWM'     : 'Video Windows Media',
+			'kindVideoFlash'  : 'Video Flash',
+			'kindVideoMKV'    : 'Video Matroska MKV',
+			'kindVideoOGG'    : 'Video Ogg'
 		}
 	}
 }
