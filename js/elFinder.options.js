@@ -376,10 +376,12 @@ elFinder.prototype._options = {
 	/**
 	 * Allow shortcuts
 	 *
-	 * @type Boolean
-	 * @default  true
+	 * @type Array
 	 */
-	allowShortcuts : true,
+	allowShortcuts : [
+		'open', 'reload', 'home', 'up', 'back', 'forward', 'quicklook', 'download', 'rm', 'rename', 'mkdir', 'upload',
+		'copy', 'cut', 'paste', 'edit', 'info', 'help', 'select', 'selectall', 'firstfile', 'lastfile'
+	],
 	
 	/**
 	 * Remeber last opened dir to open it after reload or in next session

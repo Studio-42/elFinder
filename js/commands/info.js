@@ -38,9 +38,12 @@ elFinder.prototype.commands.info = function() {
 	
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
-	this.shortcuts = [{
-		pattern     : 'ctrl+i'
-	}];
+
+	if ( $.inArray('info',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+i'
+		}];
+	}
 	
 	this.init = function() {
 		$.each(msg, function(k, v) {

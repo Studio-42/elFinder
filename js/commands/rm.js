@@ -7,9 +7,11 @@
  **/
 elFinder.prototype.commands.rm = function() {
 	
-	this.shortcuts = [{
-		pattern     : 'delete ctrl+backspace'
-	}];
+	if ( $.inArray('rm',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'delete ctrl+backspace'
+		}];
+	}
 	
 	this.getstate = function(sel) {
 		var fm = this.fm;

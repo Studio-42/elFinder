@@ -12,9 +12,11 @@ elFinder.prototype.commands.mkdir = function() {
 	this.prefix          = 'untitled folder';
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+shift+n'
-	}];
+	if ( $.inArray('mkdir',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+shift+n'
+		}];
+	}
 	
 	this.getstate = function() {
 		return !this._disabled && this.fm.cwd().write ? 0 : -1;

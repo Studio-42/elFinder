@@ -13,9 +13,11 @@ elFinder.prototype.commands.open = function() {
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	}
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter')
-	}];
+	if ( $.inArray('open',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter')
+		}];
+	}
 
 	this.getstate = function(sel) {
 		var sel = this.files(sel),

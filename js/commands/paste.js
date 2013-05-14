@@ -14,9 +14,11 @@ elFinder.prototype.commands.paste = function() {
 		changeclipboard : function() { this.update(); }
 	}
 
-	this.shortcuts = [{
-		pattern     : 'ctrl+v shift+insert'
-	}];
+	if ( $.inArray('paste',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+v shift+insert'
+		}];
+	}
 	
 	this.getstate = function(dst) {
 		if (this._disabled) {

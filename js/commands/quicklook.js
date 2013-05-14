@@ -320,9 +320,11 @@ elFinder.prototype.commands.quicklook = function() {
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
 	}
 	
-	this.shortcuts = [{
-		pattern     : 'space'
-	}];
+	if ( $.inArray('quicklook',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'space'
+		}];
+	}
 	
 	this.support = {
 		audio : {

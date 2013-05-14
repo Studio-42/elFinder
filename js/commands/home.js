@@ -3,10 +3,13 @@ elFinder.prototype.commands.home = function() {
 	this.title = 'Home';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
-	this.shortcuts = [{
-		pattern     : 'ctrl+home ctrl+shift+up',
-		description : 'Home'
-	}];
+
+	if ( $.inArray('home',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+home ctrl+shift+up',
+			description : 'Home'
+		}];
+	}
 	
 	this.getstate = function() {
 		var root = this.fm.root(),

@@ -14,9 +14,11 @@ elFinder.prototype.commands.upload = function() {
 	this.updateOnSelect  = false;
 	
 	// Shortcut opens dialog
-	this.shortcuts = [{
-		pattern     : 'ctrl+u'
-	}];
+	if ( $.inArray('upload',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+u'
+		}];
+	}
 	
 	/**
 	 * Return command state

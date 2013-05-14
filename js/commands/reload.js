@@ -9,9 +9,11 @@ elFinder.prototype.commands.reload = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+shift+r f5'
-	}];
+	if ( $.inArray('reload',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+shift+r f5'
+		}];
+	}
 	
 	this.getstate = function() {
 		return 0;

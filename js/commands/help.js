@@ -92,10 +92,12 @@ elFinder.prototype.commands.help = function() {
 	this.updateOnSelect = false;
 	this.state = 0;
 	
-	this.shortcuts = [{
-		pattern     : 'f1',
-		description : this.title
-	}];
+	if ( $.inArray('help',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'f1',
+			description : this.title
+		}];
+	}
 	
 	setTimeout(function() {
 		var parts = self.options.view || ['about', 'shortcuts', 'help'];

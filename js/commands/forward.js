@@ -7,9 +7,12 @@
 elFinder.prototype.commands.forward = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
-	this.shortcuts = [{
-		pattern     : 'ctrl+right'
-	}];
+
+	if ( $.inArray('forward',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+right'
+		}];
+	}
 	
 	this.getstate = function() {
 		return this.fm.history.canForward() ? 0 : -1;

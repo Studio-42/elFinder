@@ -8,9 +8,11 @@
  */
 elFinder.prototype.commands.copy = function() {
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+c ctrl+insert'
-	}];
+	if ( $.inArray('copy',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+c ctrl+insert'
+		}];
+	}
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),

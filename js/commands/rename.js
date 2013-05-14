@@ -7,9 +7,11 @@
  **/
 elFinder.prototype.commands.rename = function() {
 	
-	this.shortcuts = [{
-		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
-	}];
+	if ( $.inArray('rename',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
+		}];
+	}
 	
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();

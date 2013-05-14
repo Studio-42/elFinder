@@ -187,9 +187,11 @@ elFinder.prototype.commands.edit = function() {
 	
 	
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+e'
-	}];
+	if ( $.inArray('edit',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+e'
+		}];
+	}
 	
 	this.init = function() {
 		this.onlyMimes = this.options.mimes || []

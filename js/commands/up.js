@@ -9,9 +9,11 @@ elFinder.prototype.commands.up = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+up'
-	}];
+	if ( $.inArray('up',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+up'
+		}];
+	}
 	
 	this.getstate = function() {
 		return this.fm.cwd().phash ? 0 : -1;

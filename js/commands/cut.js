@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @class elFinder command "copy".
+ * @class elFinder command "cut".
  * Put files in filemanager clipboard.
  *
  * @type  elFinder.command
@@ -8,9 +8,11 @@
  */
 elFinder.prototype.commands.cut = function() {
 	
-	this.shortcuts = [{
-		pattern     : 'ctrl+x shift+insert'
-	}];
+	if ( $.inArray('cut',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'ctrl+x shift+insert'
+		}];
+	}
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),

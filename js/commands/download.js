@@ -13,9 +13,11 @@ elFinder.prototype.commands.download = function() {
 			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f });
 		};
 	
-	this.shortcuts = [{
-		pattern     : 'shift+enter'
-	}];
+	if ( $.inArray('download',this.fm.options.allowShortcuts) !== -1 ) {
+		this.shortcuts = [{
+			pattern     : 'shift+enter'
+		}];
+	}
 	
 	this.getstate = function() {
 		var sel = this.fm.selected(),
