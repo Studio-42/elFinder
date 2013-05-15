@@ -53,6 +53,9 @@ elFinder.prototype.commands.info = function() {
 	}
 	
 	this.exec = function(hashes) {
+		if (typeof hashes == 'undefined') {
+			hashes = [ this.fm.cwd().hash ];
+		}
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.tpl,
