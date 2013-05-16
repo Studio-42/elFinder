@@ -53,14 +53,14 @@ elFinder.prototype.commands.info = function() {
 	}
 	
 	this.exec = function(hashes) {
-		if (typeof hashes == 'undefined') {
-			hashes = [ this.fm.cwd().hash ];
+		var files   = this.files(hashes);
+		if (! files.length) {
+			files   = this.files([ this.fm.cwd().hash ]);
 		}
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.tpl,
 			row     = tpl.row,
-			files   = this.files(hashes),
 			cnt     = files.length,
 			content = [],
 			view    = tpl.main,
