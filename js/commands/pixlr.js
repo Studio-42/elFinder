@@ -13,29 +13,27 @@ elFinder.prototype.commands.pixlr = function() {
 		files = this.files(hashes),
 		cnt   = files.length,
 		fire = function(mode) {
-			var file, url, target, exit, cdata = '';
+			var file, url, target, exit,
+			cdata = $.param(fm.options.customData);
+			
+			// set custom data
+			if (cdata) {
+				cdata = '&' + cdata;
+			}
+			
 			file = files[0];
 			
-			// add custom data
-			$.each(fm.options.customData || {}, function(k, v) {
-				cdata += '&' + k + '=' + encodeURIComponent(v);
-			});
-
 			target = fm.uploadURL;
 			target = target + (target.indexOf('?') === -1 ? '?' : '&')
 				+ 'cmd=pixlr'
 				+ '&target=' + file.phash
-				+ '&node=' + encodeURIComponent(fm.id);
-			if (cdata) {
-				target += '&' + cdata;
-			}
-
+				+ '&node=' + encodeURIComponent(fm.id)
+				+ cdata;
+			
 			exit = fm.uploadURL;
 			exit = exit + (exit.indexOf('?') === -1 ? '?' : '&')
-				+ 'cmd=pixlr';
-			if (cdata) {
-				exit += '&' + cdata;
-			}
+				+ 'cmd=pixlr'
+				+ cdata;
 			
 			url = 'http://pixlr.com/'+mode+'/?image=' + encodeURIComponent(fm.url(file.hash))
 				+ '&target=' + encodeURIComponent(target)
