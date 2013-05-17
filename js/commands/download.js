@@ -42,9 +42,10 @@ elFinder.prototype.commands.download = function() {
 			return dfrd.reject();
 		}
 		
-		$.each(fm.options.customData || {}, function(k, v) {
-			cdata += '&'+k+'='+v;
-		});
+		cdata = $.param(fm.options.customData || {});
+		if (cdata) {
+			cdata = '&' + cdata;
+		}
 		
 		base += base.indexOf('?') === -1 ? '?' : '&';
 		
