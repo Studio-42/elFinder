@@ -160,6 +160,13 @@ $.fn.elfindertree = function(fm, opts) {
 			ptpl = fm.res('tpl', 'perms'),
 			
 			/**
+			 * Lock marker html template
+			 *
+			 * @type String
+			 */
+			ltpl = fm.res('tpl', 'lock'),
+			
+			/**
 			 * Symlink marker html template
 			 *
 			 * @type String
@@ -174,7 +181,7 @@ $.fn.elfindertree = function(fm, opts) {
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
 				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs && !dir.link ? collapsed : ''); },
-				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
+				permissions : function(dir) { return (!dir.read || !dir.write ? ptpl : '')+(dir.phash && dir.locked? ltpl : ''); },
 				symlink     : function(dir) { return dir.alias ? stpl : ''; }
 			},
 			
