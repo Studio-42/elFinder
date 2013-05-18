@@ -164,7 +164,19 @@ elFinder.prototype.commands.netunmount = function() {
 							dfrd.reject(error);
 						})
 						.done(function(data) {
-							dfrd.promise();
+							var chDrive = (fm.root() == drive.hash);
+							data.removed = [ drive.hash ];
+							fm.remove(data);
+							if (chDrive) {
+								var files = fm.files();
+								for (var i in files) {
+									if (fm.file(i).mime == 'directory') {
+										fm.exec('open', i);
+										break;
+									}
+								}
+							}
+							dfrd.resolve();
 						});
 					}
 				},
