@@ -181,8 +181,9 @@ $.fn.elfindertree = function(fm, opts) {
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
 				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs && !dir.link ? collapsed : ''); },
-				permissions : function(dir) { return (!dir.read || !dir.write ? ptpl : '')+(dir.phash && dir.locked? ltpl : ''); },
-				symlink     : function(dir) { return dir.alias ? stpl : ''; }
+				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
+				symlink     : function(dir) { return dir.alias ? stpl : ''; },
+				style       : function(dir) { return dir.icon ? 'style="background-image:url(\''+dir.icon+'\')"' : ''; }
 			},
 			
 			/**
