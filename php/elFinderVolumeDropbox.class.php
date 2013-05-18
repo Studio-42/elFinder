@@ -121,7 +121,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'getTmbSize'        => 'medium', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
 			'metaCacheTime'     => '600', // 10m
-			'acceptedName'      => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#'
+			'acceptedName'      => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
+			'icon'              => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_dropbox.png'
 		);
 		$this->options = array_merge($this->options, $opts);
 		$this->options['mimeDetect'] = 'internal';
