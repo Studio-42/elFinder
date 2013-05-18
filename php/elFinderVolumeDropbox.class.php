@@ -180,11 +180,20 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					}
 				}
 				if (! $html) {
+					// get customdata
+					$cdata = '';
+					$innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
+					$post = (strtolower($_SERVER['REQUEST_METHOD']) === 'post')? $_POST : $_GET;
+					foreach($post as $k => $v) {
+						if (! in_array($k, $innerKeys)) {
+							$cdata .= '&' . $k . '=' . rawurlencode($v);
+						}
+					}
 					if (strpos($options['url'], 'http') !== 0 ) {
 						$options['url'] = $this->getConnectorUrl();
 					}
 					$callback  = $options['url']
-					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return';
+					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return'.$cdata;
 					
 					try {
 						$tokens = $this->oauth->getRequestToken();
