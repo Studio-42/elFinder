@@ -79,6 +79,7 @@ elFinder.prototype.commands.getfile = function() {
 				} else if (file.mime.indexOf('image') !== -1) {
 					req.push(fm.request({
 						data : {cmd : 'dim', target : file.hash},
+						notify : {type : 'dim', cnt : 1, hideCnt : true},
 						preventDefault : true
 					})
 					.done($.proxy(function(data) {
