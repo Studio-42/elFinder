@@ -82,14 +82,14 @@ elFinder.prototype.commands.getfile = function() {
 						notify : {type : 'dim', cnt : 1, hideCnt : true},
 						preventDefault : true
 					})
-					.done($.proxy(function(data) {
+					.done(function(data) {
 						if (data.dim) {
-							dim = data.dim.split('x');
-							this.width = dim[0];
-							this.height = dim[1];
+							var dim = data.dim.split('x');
+							var rfile = fm.file(file.hash);
+							rfile.width = dim[0];
+							rfile.height = dim[1];
 						}
-						this.dim = data.dim
-					}, files[i])));
+					}));
 				}
 			}
 		}
