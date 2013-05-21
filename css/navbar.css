@@ -123,9 +123,14 @@
 /* permissions marker */
 .elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
 
+/* locked marker */
+.elfinder-navbar .elfinder-lock { top:-2px; }
+
 /* permissions/symlink markers ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
 .elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 18px; }
+.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  18px; }
+.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 18px; }
 .elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
