@@ -86,8 +86,8 @@ elFinder.prototype.commands.getfile = function() {
 						if (data.dim) {
 							var dim = data.dim.split('x');
 							var rfile = fm.file(file.hash);
-							rfile.width = dim[0];
-							rfile.height = dim[1];
+							rfile.width = file.width = dim[0];
+							rfile.height = file.height = dim[1];
 						}
 					}));
 				}
