@@ -629,7 +629,7 @@ $.fn.elfindercwd = function(fm, options) {
 			msg = {
 				name : fm.i18n('name'),
 				perm : fm.i18n('perms'),
-				mod  : fm.i18n('modify'),
+				date : fm.i18n('modify'),
 				size : fm.i18n('size'),
 				kind : fm.i18n('kind')
 			},

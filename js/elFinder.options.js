@@ -324,7 +324,7 @@ elFinder.prototype._options = {
 			// file info columns displayed
 			listView : {
 				// name is always displayed, cols are ordered
-				columns : ['perm', 'mod', 'size', 'kind'],
+				columns : ['perm', 'date', 'size', 'kind'],
 				// override this if you want custom columns name
 				// example
 				// columnsCustomName : {
