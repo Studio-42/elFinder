@@ -364,6 +364,13 @@ window.elFinder = function(node, opts) {
 		this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
 	}
 
+	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columns) {
+		this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
+	}
+	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columnsCustomName) {
+		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+	}
+
 	$.extend(this.options.contextmenu, opts.contextmenu);
 
 	

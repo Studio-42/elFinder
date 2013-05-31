@@ -121,6 +121,15 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			lastSearch = [],
 
+			customColsBuild = function() {
+				var customCols = '';
+				var columns = fm.options.uiOptions.cwd.listView.columns;
+				for (var i = 0; i < columns.length; i++) {
+					customCols += '<td>{' + columns[i] + '}</td>';
+				}
+				return customCols;
+			},
+
 			/**
 			 * File templates
 			 *
@@ -128,7 +137,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			templates = {
 				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td>'+customColsBuild()+'</tr>',
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -625,6 +634,19 @@ $.fn.elfindercwd = function(fm, options) {
 				kind : fm.i18n('kind')
 			},
 			
+			customColsNameBuild = function() {
+				var customColsName = '';
+				var columns = fm.options.uiOptions.cwd.listView.columns;
+				for (var i = 0; i < columns.length; i++) {
+					if (fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]] != null) {
+						customColsName +='<td>'+fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]]+'</td>';
+					} else {
+						customColsName +='<td>'+msg[columns[i]]+'</td>';
+					}
+				}
+				return customColsName;
+			},
+			
 			/**
 			 * Update directory content
 			 *
@@ -649,7 +671,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
 
-				list && cwd.html('<table><thead><tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td><td class="elfinder-cwd-view-th-perm">'+msg.perm+'</td><td class="elfinder-cwd-view-th-date">'+msg.mod+'</td><td class="elfinder-cwd-view-th-size">'+msg.size+'</td><td class="elfinder-cwd-view-th-kind">'+msg.kind+'</td></tr></thead><tbody/></table>');
+				list && cwd.html('<table><thead><tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.i18n('name')+'</td>'+customColsNameBuild()+'</tr></thead><tbody/></table>');
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
 				
