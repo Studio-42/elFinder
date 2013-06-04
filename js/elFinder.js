@@ -1501,7 +1501,7 @@ window.elFinder = function(node, opts) {
 		.enable(function() {
 			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
 				enabled = true;
-				$('texarea:focus,input:focus,button').blur();
+				$('textarea:focus,input:focus,button').blur();
 				node.removeClass('elfinder-disabled');
 			}
 		})
