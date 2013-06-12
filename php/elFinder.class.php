@@ -226,7 +226,7 @@ class elFinder {
 					$id = $volume->id();
 					
 					$this->volumes[$id] = $volume;
-					if (!$this->default && $volume->isReadable()) {
+					if ((!$this->default && !isset($opts['startRoot']) || $opts['startRoot'] === $i) && $volume->isReadable()) {
 						$this->default = $this->volumes[$id]; 
 					}
 				} else {
@@ -900,7 +900,8 @@ class elFinder {
 		$target = $args['target'];
 		$volume = $this->volume($target);
 		$files  = isset($args['FILES']['upload']) && is_array($args['FILES']['upload']) ? $args['FILES']['upload'] : array();
-		$result = array('added' => array(), 'header' => empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8');
+		$header = empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8';
+		$result = array('added' => array(), 'header' => $header);
 		
 		if (empty($files)) {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);

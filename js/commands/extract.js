@@ -77,6 +77,7 @@ elFinder.prototype.commands.extract = function() {
 					}
 				})
 				.done(function () {
+					fm.exec("reload");
 				});
 			}
 		};
