@@ -82,7 +82,7 @@ function grep(prefix, mask, exculde) {
 }
 
 function copyFile(from, to, overwrite) {
-	if (!overwrite && path.existsSync(to)) {
+	if (!overwrite && fs.existsSync(to)) {
 		return false;
 	}
 	console.log('\t' + from);
@@ -126,7 +126,7 @@ task('prebuild', function(){
 	var dir = ['css', 'js', 'img', path.join('js', 'i18n'), path.join('js', 'proxy'), 'php', 'files'];
 	for (d in dir) {
 		var bd = dir[d];
-		if (!path.existsSync(bd)) {
+		if (!fs.existsSync(bd)) {
 			console.log('mkdir ' + bd);
 			fs.mkdirSync(bd, dirmode);
 		}
@@ -182,7 +182,7 @@ desc('uglify elfinder.min.js');
 file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	console.log('uglify elfinder.min.js');
 	var result = UglifyJS.minify('js/elfinder.full.js');
-	fs.writeFileSync(this.name, getComment() + result);
+	fs.writeFileSync(this.name, getComment() + result.code);
 });
 
 // IMG + I18N + PHP
@@ -226,7 +226,7 @@ task('clean', function(){
 	}
 	for (f in uf) {
 		var file = uf[f];
-		if (path.existsSync(file)) {
+		if (fs.existsSync(file)) {
 			console.log('\tunlink ' + file);
 			fs.unlinkSync(file);
 		}
@@ -238,7 +238,7 @@ task('clean', function(){
 		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'php', 'files'];
 		for (d in ud) {
 			var dir = ud[d];
-			if (path.existsSync(dir)) {
+			if (fs.existsSync(dir)) {
 				console.log('\trmdir	' + dir);
 				fs.rmdirSync(dir);
 			}
