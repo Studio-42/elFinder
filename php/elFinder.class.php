@@ -61,7 +61,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false),
 		'get'       => array('target' => true),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -888,6 +888,177 @@ class elFinder {
 
 		return $result;
 	}
+
+	/**
+	* Get remote contents
+	*
+	* @param  string  $url     target url
+	* @param  int     $timeout timeout (sec)
+	* @param  int     $redirect_max redirect max count
+	* @param  string  $ua
+	* @return string or bool(false)
+	* @retval string contents
+	* @retval false  error
+	* @author Naoki Sawada
+	**/
+	protected function get_remote_contents( $url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0' ) {
+		$method = (function_exists('curl_exec') && !ini_get('safe_mode'))? 'curl_get_contents' : 'fsock_get_contents'; 
+		return $this->$method( $url, $timeout, $redirect_max, $ua );
+	}
+	
+	/**
+	 * Get remote contents with cURL
+	 *
+	 * @param  string  $url     target url
+	 * @param  int     $timeout timeout (sec)
+	 * @param  int     $redirect_max redirect max count
+	 * @param  string  $ua
+	 * @return string or bool(false)
+	 * @retval string contents
+	 * @retval false  error
+	 * @author Naoki Sawada
+	 **/
+	 protected function curl_get_contents( $url, $timeout, $redirect_max, $ua ){
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_HEADER, false );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_BINARYTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt( $ch, CURLOPT_MAXREDIRS, $redirect_max);
+		curl_setopt( $ch, CURLOPT_USERAGENT, $ua);
+		$result = curl_exec( $ch );
+		curl_close( $ch );
+		return $result;
+	}
+	
+	/**
+	 * Get remote contents with fsockopen()
+	 *
+	 * @param  string  $url          url
+	 * @param  int     $timeout      timeout (sec)
+	 * @param  int     $redirect_max redirect max count
+	 * @param  string  $ua
+	 * @return string or bool(false)
+	 * @retval string contents
+	 * @retval false  error
+	 * @author Naoki Sawada
+	 */
+	protected function fsock_get_contents( $url, $timeout, $redirect_max, $ua ) {
+
+		$connect_timeout = 3;
+		$connect_try = 3;
+		$method = 'GET';
+		$readsize = 4096;
+
+		$getSize = null;
+		$headers = '';
+		
+		$arr = parse_url($url);
+		if (!$arr){
+			// Bad request
+			return false;
+		}
+		
+		// query
+		$arr['query'] = isset($arr['query']) ? '?'.$arr['query'] : '';
+		// port
+		$arr['port'] = isset($arr['port']) ? $arr['port'] : (!empty($arr['https'])? 443 : 80);
+		
+		$url_base = $arr['scheme'].'://'.$arr['host'].':'.$arr['port'];
+		$url_path = isset($arr['path']) ? $arr['path'] : '/';
+		$uri = $url_path.$arr['query'];
+		
+		$query = $method.' '.$uri." HTTP/1.0\r\n";
+		$query .= "Host: ".$arr['host']."\r\n";
+		if (!empty($ua)) $query .= "User-Agent: ".$ua."\r\n";
+		if (!is_null($getSize)) $query .= 'Range: bytes=0-' . ($getSize - 1) . "\r\n";
+		
+		$query .= $headers;
+
+		$query .= "\r\n";
+
+		$fp = $connect_try_count = 0;
+		while( !$fp && $connect_try_count < $connect_try ) {
+	
+			$errno = 0;
+			$errstr = "";
+			$fp = @ fsockopen(
+			$arr['https'].$arr['host'],
+			$arr['port'],
+			$errno,$errstr,$connect_timeout);
+			if ($fp) break;
+			$connect_try_count++;
+			if (connection_aborted()) {
+				exit();
+			}
+			sleep(1); // wait 1sec
+		}
+		
+		$fwrite = 0;
+		for ($written = 0; $written < strlen($query); $written += $fwrite) {
+			$fwrite = fwrite($fp, substr($query, $written));
+			if (!$fwrite) {
+				break;
+			}
+		}
+		
+		$response = '';
+		
+		if ($timeout) {
+			socket_set_timeout($fp, $timeout);
+		}
+		
+		$_response = true;
+		while ($_response && (is_null($getSize) || strlen($response) < $getSize)) {
+			if (connection_aborted()) {
+				exit();
+			}
+			if ($_response = fread($fp, $readsize)) {
+				$response .= $_response;
+			}
+		}
+		
+		if ($timeout) {
+			$_status = socket_get_status($fp);
+			if ($_status['timed_out']) {
+				fclose($fp);
+				return false; // Request Time-out
+			}
+		}
+		
+		fclose($fp);
+		
+		$resp = array_pad(explode("\r\n\r\n",$response,2), 2, '');
+		$rccd = array_pad(explode(' ',$resp[0],3), 3, ''); // array('HTTP/1.1','200','OK\r\n...')
+		$rc = (int)$rccd[1];
+		
+		// Redirect
+		switch ($rc) {
+			case 307: // Temporary Redirect
+			case 303: // See Other
+			case 302: // Moved Temporarily
+			case 301: // Moved Permanently
+				$matches = array();
+				if (preg_match('/^Location: (.+?)(#.+)?$/im',$resp[0],$matches) && --$redirect_max > 0) {
+					$url = trim($matches[1]);
+					$hash = isset($matches[2])? trim($matches[2]) : '';
+					if (!preg_match('/^https?:\//',$url)) { // no scheme
+						if ($url{0} != '/') { // Relative path
+							// to Absolute path
+							$url = substr($url_path,0,strrpos($url_path,'/')).'/'.$url;
+						}
+						// add sheme,host
+						$url = $url_base.$url;
+					}
+					return $this->fsock_get_contents( $url, $timeout, $redirect_max, $ua );
+				}
+		}
+
+		return $resp[1]; // Data
+	}
 	
 	/**
 	 * Save uploaded files
@@ -903,12 +1074,50 @@ class elFinder {
 		$header = empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8';
 		$result = array('added' => array(), 'header' => $header);
 		
-		if (empty($files)) {
-			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
-		}
-		
 		if (!$volume) {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
+		}
+		
+		$non_uploads = array();
+		if (empty($files)) {
+			if (isset($args['upload']) && is_array($args['upload'])) {
+				foreach($args['upload'] as $i => $url) {
+					$data = $this->get_remote_contents($url);
+					if ($data) {
+						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
+						if ($_name) {
+							$_ext = '';
+							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
+								$_ext = $_match[1];
+							}
+							$tmpfname = DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime()) . $_ext;
+							$tmpPath = sys_get_temp_dir();
+							if (! @ touch($tmpPath . $tmpfname)) {
+								if ($tmpPath = $volume->getTempPath()) {
+									$tmpfname = $tmpPath . $tmpfname;
+								} else {
+									$tmpfname = '';
+								}
+							} else {
+								$tmpfname = $tmpPath . $tmpfname;
+							}
+							if ($tmpfname) {
+								if (file_put_contents($tmpfname, $data)) {
+									$non_uploads[$tmpfname] = true;
+									$files['tmp_name'][$i] = $tmpfname;
+									$files['name'][$i] = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
+									$files['error'][$i] = 0;
+								} else {
+									@ unlink($tmpfname);
+								}
+							}
+						}
+					}
+				}
+			}
+			if (empty($files)) {
+				return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES), 'header' => $header);
+			}
 		}
 		
 		foreach ($files['name'] as $i => $name) {
@@ -923,19 +1132,32 @@ class elFinder {
 			if (($fp = fopen($tmpname, 'rb')) == false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
 				$this->uploadDebug = 'Upload error: unable open tmp file';
+				if (! is_uploaded_file($tmpname)) {
+					if (@ unlink($tmpname)) unset($non_uploads[$tmpfname]);
+					continue;
+				}
 				break;
 			}
 			
 			if (($file = $volume->upload($fp, $target, $name, $tmpname)) === false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
+				if (! is_uploaded_file($tmpname)) {
+					if (@ unlink($tmpname)) unset($non_uploads[$tmpfname]);;
+					continue;
+				}
 				break;
 			}
 			
 			fclose($fp);
+			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($non_uploads[$tmpfname]);
 			$result['added'][] = $file;
 		}
-		
+		if ($non_uploads) {
+			foreach(array_keys($non_uploads) as $_temp) {
+				@ unlink($_temp);
+			}
+		}
 		return $result;
 	}
 		

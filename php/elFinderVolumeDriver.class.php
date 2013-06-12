@@ -1776,6 +1776,24 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return temp path
+	 * 
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	public function getTempPath() {
+		if (@ $this->tmpPath) {
+			return $this->tmpPath;
+		} else if (@ $this->tmp) {
+			return $this->tmp;
+		} else if (@ $this->tmbPath) {
+			return $this->tmbPath;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  array  error 
