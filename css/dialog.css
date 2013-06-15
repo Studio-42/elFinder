@@ -3,7 +3,12 @@
 /*********************************************/
 
 /* common dialogs class */
-.std42-dialog {	padding:0; }
+.std42-dialog {
+	padding:0;
+	position:absolute;
+	left:auto;
+	right:auto;
+}
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
@@ -16,7 +21,6 @@
 	-moz-border-radius-bottomright: 0; 
 	-webkit-border-bottom-right-radius: 0; 
 	border-bottom-right-radius: 0;
-	font-size:.82em;
 	font-weight:normal;
 	padding:.2em 1em;
 }
@@ -30,7 +34,6 @@
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
-	font-size:.72em;
 }
 
 /* buttons */
@@ -38,10 +41,9 @@
 	border:0 solid;
 	margin:0;
 	padding:.5em .7em;
-	font-size:.76em;
 }
 
-.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0 solid; }
+.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0px solid; }
 .std42-dialog .ui-dialog-buttonpane button span { padding:2px 9px; }
 
 .elfinder-dialog .ui-resizable-e, 
@@ -131,6 +133,11 @@
 .elfinder-dialog-icon-archive,
 .elfinder-dialog-icon-extract     { background-position: 0 -365px; }
 .elfinder-dialog-icon-search      { background-position: 0 -402px; }
+.elfinder-dialog-icon-resize,
+.elfinder-dialog-icon-loadimg,
+.elfinder-dialog-icon-netmount,
+.elfinder-dialog-icon-netunmount,
+.elfinder-dialog-icon-dim         { background-position: 0 -434px; }
 
 /*********************** CONFIRM DIALOG **************************/
 
@@ -156,7 +163,6 @@
 	min-width:200px;
 	border:0 solid;
 	margin:1em .2em 1em .2em;
-	font-size:.9em;
 }
 
 .elfinder-info-tb td { white-space:nowrap; padding:2px; }
@@ -179,7 +185,6 @@
 /*********************** UPLOAD DIALOG **************************/
 
 .elfinder-upload-dropbox {
-	font-size:1.2em;
 	text-align:center;
 	padding:2em 0;
 	border:3px dashed #aaa;
@@ -191,7 +196,6 @@
 }
 
 .elfinder-upload-dialog-or {
-	font-size:1.2em;
 	margin:.3em 0;
 	text-align:center;
 }
@@ -220,7 +224,6 @@
 	border-top:0 solid;
 	border-right:0 solid;
 	font-weight:normal;
-	font-size:.9em;
 	padding:2px 12px;
 	cursor:move;
 	position:relative;

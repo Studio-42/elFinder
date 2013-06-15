@@ -79,16 +79,17 @@ elFinder.prototype.commands.getfile = function() {
 				} else if (file.mime.indexOf('image') !== -1) {
 					req.push(fm.request({
 						data : {cmd : 'dim', target : file.hash},
+						notify : {type : 'dim', cnt : 1, hideCnt : true},
 						preventDefault : true
 					})
-					.done($.proxy(function(data) {
+					.done(function(data) {
 						if (data.dim) {
-							dim = data.dim.split('x');
-							this.width = dim[0];
-							this.height = dim[1];
+							var dim = data.dim.split('x');
+							var rfile = fm.file(file.hash);
+							rfile.width = file.width = dim[0];
+							rfile.height = file.height = dim[1];
 						}
-						this.dim = data.dim
-					}, files[i])));
+					}));
 				}
 			}
 		}

@@ -122,14 +122,13 @@
 .elfinder-button-menu {
 	position:absolute;
 	left:0;
-	top:26px;
+	top:25px;
 	padding:3px 0;
 }
 
 /* menu item */
 .elfinder-button-menu-item {
 	white-space:nowrap;
-	font-size:.72em;
 	cursor:default;
 	padding:5px 19px;
 	position:relative;
@@ -138,19 +137,22 @@
 /* fix hover ui class */
 .elfinder-button-menu .ui-state-hover { border:0 solid; }
 
-.elfinder-menu-item-sort-dir {
+.elfinder-button-menu-item-separated { border-top:1px solid #ccc; }
+
+.elfinder-button-menu-item .ui-icon {
 	width:16px;
 	height:16px;
 	position:absolute;
 	left:2px;
 	top:50%;
 	margin-top:-8px;
-	background:url("../img/toolbar.png") 0 -594px no-repeat;
 	display:none;
 }
 
-.elfinder-button-menu-item-selected .elfinder-menu-item-sort-dir { display:block;}
-.elfinder-menu-item-sort-desc .elfinder-menu-item-sort-dir { background-position:0 -608px;}
+.elfinder-button-menu-item-selected .ui-icon { display:block; }
+.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-n { display:none; }
+.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-s { display:none; }
+
 /* hack for upload button */
 .elfinder-button form {
 	position:absolute;
@@ -183,14 +185,13 @@
 	width:160px;
 	height:22px;
 	padding:0 20px;
-	font-size:.8em;
 	line-height: 22px;
 	border:0 solid;
 	border:1px solid #aaa;
 	-moz-border-radius: 12px;
 	-webkit-border-radius: 12px;
 	border-radius: 12px;
-	outline:0 solid;
+	outline:0px solid;
 }
 
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
