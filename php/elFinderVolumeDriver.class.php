@@ -610,16 +610,8 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
-		if (!empty($this->options['accessControl'])) {
-			if (is_string($this->options['accessControl']) 
-			&& function_exists($this->options['accessControl'])) {
-				$this->access = $this->options['accessControl'];
-			} elseif (is_array($this->options['accessControl']) 
-			&& count($this->options['accessControl']) > 1 
-			&& is_object($this->options['accessControl'][0])
-			&& method_exists($this->options['accessControl'][0], $this->options['accessControl'][1])) {
-				$this->access = array($this->options['accessControl'][0], $this->options['accessControl'][1]);
-			}
+		if (!empty($this->options['accessControl']) && is_callable($this->options['accessControl'])) {
+			$this->access = $this->options['accessControl'];
 		}
 		
 		$this->today     = mktime(0,0,0, date('m'), date('d'), date('Y'));
@@ -674,10 +666,15 @@ abstract class elFinderVolumeDriver {
 		$type = strtolower($this->options['mimeDetect']);
 		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
 		$regexp = '/text\/x\-(php|c\+\+)/';
-		
+	
 		if (($type == 'finfo' || $type == 'auto') 
-		&& class_exists('finfo')
-		&& preg_match($regexp, array_shift(($tmp = explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__)))))) {
+		&& class_exists('finfo')) {
+			$tmpFileInfo = @explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
+		} else {
+			$tmpFileInfo = false;
+		}
+	
+		if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
 			$type = 'finfo';
 			$this->finfo = finfo_open(FILEINFO_MIME);
 		} elseif (($type == 'mime_content_type' || $type == 'auto') 
@@ -798,8 +795,8 @@ abstract class elFinderVolumeDriver {
 		
 		if (!empty($this->options['archivers']['extract']) && is_array($this->options['archivers']['extract'])) {
 			foreach ($this->options['archivers']['extract'] as $mime => $conf) {
-				if (substr($mime, 'application/') === 0 
-				&& !empty($cons['cmd']) 
+				if (strpos($mime, 'application/') === 0
+				&& !empty($conf['cmd']) 
 				&& isset($conf['argc']) 
 				&& !empty($conf['ext'])
 				&& !isset($this->archivers['extract'][$mime])) {
@@ -881,8 +878,10 @@ abstract class elFinderVolumeDriver {
 			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'archivers'     => array(
-				'create'  => array_keys($this->archivers['create']),
-				'extract' => array_keys($this->archivers['extract'])
+				// 'create'  => array_keys($this->archivers['create']),
+				// 'extract' => array_keys($this->archivers['extract']),
+				'create'  => is_array($this->archivers['create'])  ? array_keys($this->archivers['create'])  : array(),
+				'extract' => is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array()
 			)
 		);
 	}
@@ -1972,15 +1971,8 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			if (is_array($this->access)) {
-				$obj    = $this->access[0];
-				$method = $this->access[1];
-				$perm   = $obj->{$method}($name, $path, $this->options['accessControlData'], $this);
-			} else {
-				$func = $this->access;
-				$perm = $func($name, $path, $this->options['accessControlData'], $this);
-			}
-			
+			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this);
+
 			if ($perm !== null) {
 				return !!$perm;
 			}
@@ -2018,15 +2010,7 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			if (is_array($this->access)) {
-				$obj    = $this->access[0];
-				$method = $this->access[1];
-				$perm   = $obj->{$method}('write', $path, $this->options['accessControlData'], $this);
-			} else {
-				$func = $this->access;
-				$perm = $func('write', $path, $this->options['accessControlData'], $this);
-			}
-			
+			$perm = call_user_func($this->access, 'write', $path, $this->options['accessControlData'], $this);			
 			if ($perm !== null) {
 				return !!$perm;
 			}
@@ -2593,13 +2577,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function remove($path, $force = false) {
 		$stat = $this->stat($path);
-		$stat['realpath'] = $path;
-		$this->rmTmb($stat);
-		$this->clearcache();
 		
 		if (empty($stat)) {
 			return $this->setError(elFinder::ERROR_RM, $this->_path($path), elFinder::ERROR_FILE_NOT_FOUND);
 		}
+		
+		$stat['realpath'] = $path;
+		$this->rmTmb($stat);
+		$this->clearcache();
 		
 		if (!$force && !empty($stat['locked'])) {
 			return $this->setError(elFinder::ERROR_LOCKED, $this->_path($path));
@@ -2752,7 +2737,7 @@ abstract class elFinderVolumeDriver {
 				}
 
     			} else {
-        			$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
+        			$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, 'png');
       			}
 
 			$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );

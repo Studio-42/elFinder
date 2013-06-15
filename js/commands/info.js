@@ -53,11 +53,14 @@ elFinder.prototype.commands.info = function() {
 	}
 	
 	this.exec = function(hashes) {
+		var files   = this.files(hashes);
+		if (! files.length) {
+			files   = this.files([ this.fm.cwd().hash ]);
+		}
 		var self    = this,
 			fm      = this.fm,
 			tpl     = this.tpl,
 			row     = tpl.row,
-			files   = this.files(hashes),
 			cnt     = files.length,
 			content = [],
 			view    = tpl.main,
@@ -124,6 +127,12 @@ elFinder.prototype.commands.info = function() {
 					})
 					.done(function(data) {
 						replSpinner(data.dim || msg.unknown);
+						if (data.dim) {
+							var dim = data.dim.split('x');
+							var rfile = fm.file(file.hash);
+							rfile.width = dim[0];
+							rfile.height = dim[1];
+						}
 					});
 				}
 			}

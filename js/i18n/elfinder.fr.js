@@ -52,7 +52,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errCopyTo'            : 'Interdiction copier des fichiers vers le volume "$1".',
 			'errUpload'            : 'Erreur lors de l\'envoi du fichier.',
 			'errUploadFile'        : 'Impossible d\'envoyer "$1".',
-			'errUploadNoFiles'     : 'Aucun fichier a envoyer.',
+			'errUploadNoFiles'     : 'Aucun fichier à envoyer.',
 			'errUploadTotalSize'   : 'Les données dépassent la taille maximale allouée.',
 			'errUploadFileSize'    : 'Le fichier dépasse la taille maximale allouée.',
 			'errUploadMime'        : 'Type de fichier non autorisé.',
@@ -78,7 +78,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'Protocol non supporté.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Echec du montage.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Hôte requis.', // added 18.04.2012			
-			
+			'errSessionExpires'    : 'Votre session a expiré en raison de son inactivité',
+			'errCreatingTempDir'   : 'Impossible de créer le répertoire temporaire : "$1"',
+			'errFtpDownloadFile'   : 'Impossible de télécharger le file depuis l\'accès FTP : "$1"',
+			'errFtpUploadFile'     : 'Impossible d\'envoyer le fichier vers l\'accès FTP : "$1"',
+			'errFtpMkdir'          : 'Impossible de créer un répertoire distant sur l\'accès FTP :"$1"',
+			'errArchiveExec'       : 'Erreur lors de l\'archivage des fichiers : "$1"',
+			'errExtractExec'       : 'Erreur lors de l\'extraction des fichiers : "$1"',
+			'errUploadFile'        : 'Envoi impossible de "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',
@@ -91,7 +98,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdextract'   : 'Extraire les fichiers de l\'archive',
 			'cmdforward'   : 'Suivant',
 			'cmdgetfile'   : 'Sélectionner les fichiers',
-			'cmdhelp'      : 'À propose de ce logiciel',
+			'cmdhelp'      : 'À propos de ce logiciel',
 			'cmdhome'      : 'Accueil',
 			'cmdinfo'      : 'Informations',
 			'cmdmkdir'     : 'Nouveau dossier',
@@ -136,7 +143,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Création de l\'archive',
 			'ntfextract'  : 'Extraction des fichiers de l\'archive',
 			'ntfsearch'   : 'Recherche des fichiers',
-			'ntfsmth'     : 'Fait quelque chose >_<',
+			'ntfsmth'     : 'Fait quelque chose',
 			'ntfloadimg'  : 'Chargement de l\' image',
 			'ntfnetmount' : 'Monte le volume réseau', // added 18.04.2012			
 			
@@ -236,7 +243,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'degree'          : '°',
 			'netMountDialogTitle' : 'Monter un volume réseau', // added 18.04.2012
 			'protocol'            : 'Protocole', // added 18.04.2012
-			'host'                : 'Hote', // added 18.04.2012
+			'host'                : 'Hôte', // added 18.04.2012
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Utilisateur', // added 18.04.2012
 			'pass'                : 'Mot de passe', // added 18.04.2012
@@ -244,19 +251,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
 			'kindFolder'      : 'Dossier',
-			'kindAlias'       : 'Raccourcis',
-			'kindAliasBroken' : 'Raccourcis cassé',
+			'kindAlias'       : 'Raccourci',
+			'kindAliasBroken' : 'Raccourci cassé',
 			// applications
 			'kindApp'         : 'Application',
 			'kindPostscript'  : 'Document Postscript',
 			'kindMsOffice'    : 'Document Microsoft Office',
 			'kindMsWord'      : 'Document Microsoft Word',
 			'kindMsExcel'     : 'Document Microsoft Excel',
-			'kindMsPP'        : 'Présentation Microsoft Powerpoint',
-			'kindOO'          : 'Document Open Office',
-			'kindAppFlash'    : 'Application flash',
+			'kindMsPP'        : 'Présentation Microsoft PowerPoint',
+			'kindOO'          : 'Document OpenOffice',
+			'kindAppFlash'    : 'Application Flash',
 			'kindPDF'         : 'Portable Document Format (PDF)',
-			'kindTorrent'     : 'Fichier Bittorrent',
+			'kindTorrent'     : 'Fichier BitTorrent',
 			'kind7z'          : 'Archive 7z',
 			'kindTAR'         : 'Archive TAR',
 			'kindGZIP'        : 'Archive GZIP',
@@ -271,10 +278,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindText'        : 'Document Text',
 			'kindTextPlain'   : 'Texte non formaté',
 			'kindPHP'         : 'Source PHP',
-			'kindCSS'         : 'Cascading style sheet',
+			'kindCSS'         : 'Feuille de style en cascade',
 			'kindHTML'        : 'Document HTML',
-			'kindJS'          : 'Source Javascript',
-			'kindRTF'         : 'Rich Text Format',
+			'kindJS'          : 'Source JavaScript',
+			'kindRTF'         : 'Format de texte enrichi (Rich Text Format)',
 			'kindC'           : 'Source C',
 			'kindCHeader'     : 'Source header C',
 			'kindCPP'         : 'Source C++',
@@ -321,5 +328,3 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	}
 }
-
- 

@@ -157,7 +157,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		parent::configure();
 		
 		if (!empty($this->options['tmpPath'])) {
-			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
+			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'], 0755, true)) && is_writable($this->options['tmpPath'])) {
 				$this->tmp = $this->options['tmpPath'];
 			}
 		}
@@ -211,7 +211,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$features = ftp_raw($this->connect, 'FEAT');
 		if (!is_array($features)) {
 			$this->umount();
-			return $this->setError('Server does not support command FEAT. wtf? 0_o');
+			return $this->setError('Server does not support command FEAT.');
 		}
 
 		foreach ($features as $feat) {
@@ -220,7 +220,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			}
 		}
 		
-		return $this->setError('Server does not support command MLST. wtf? 0_o');
+		return $this->setError('Server does not support command MLST.');
 	}
 	
 	/*********************************************************************/
@@ -340,9 +340,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
 
-		if (preg_match('/\s|\'|\"/', $path)) {
+		if (preg_match('/\'|\"/', $path)) {
 			foreach (ftp_nlist($this->connect, $path) as $p) {
-				$p = $path.'/'.$p;
 				if (($stat = $this->_stat($p)) &&empty($stat['hidden'])) {
 					// $files[] = $stat;
 					$this->dirsCache[$path][] = $p;
@@ -967,14 +966,97 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @param  string  $path  archive path
 	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
 	 * @return true
-	 * @author Dmitry (dio) Levashov, 
+	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
 	 **/
-	protected function _extract($path, $arc) {
-		die('Not yet implemented. (_extract)');
+	protected function _extract($path, $arc)
+	{
+		// get current directory
+		$cwd = getcwd();
+
+		$tmpDir = $this->tempDir();
+		if (!$tmpDir) {
+			return false;
+		}
+
+		$basename = $this->_basename($path);
+		$localPath = $tmpDir . DIRECTORY_SEPARATOR . $basename;
+
+		if (!ftp_get($this->connect, $localPath, $path, FTP_BINARY)) {
+			//cleanup
+			$this->deleteDir($tmpDir);
+			return false;
+		}
+
+		$remoteDirectory = dirname($path);
+		chdir($tmpDir);
+		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' "' . $basename . '"');
+		exec($command, $output, $return_value);
+		unlink($basename);
+		if ($return_value != 0) {
+			$this->setError(elFinder::ERROR_EXTRACT_EXEC, 'Command failed '.escapeshellarg($command));
+			$this->deleteDir($tmpDir); //cleanup
+			return false;
+		}
+
+		$filesToProcess = elFinderVolumeFTP::listFilesInDirectory($tmpDir, true);
+		if(!$filesToProcess) {
+			$this->setError(elFinder::ERROR_EXTRACT_EXEC, $tmpDir." is not a directory");
+			$this->deleteDir($tmpDir); //cleanup
+			return false;
+		}
+		if (count($filesToProcess) > 1) {
+
+			// for several files - create new directory
+			// create unique name for directory
+			$name = basename($path);
+			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
+				$name = substr($name, 0, strlen($name) - strlen($m[0]));
+			}
+
+			$test = dirname($path) . DIRECTORY_SEPARATOR . $name;
+			if ($this->stat($test)) {
+				$name = $this->uniqueName(dirname($path), $name, '-', false);
+			}
+
+			$newPath = dirname($path) . DIRECTORY_SEPARATOR . $name;
+
+			$success = $this->_mkdir(dirname($path), $name);
+			foreach ($filesToProcess as $filename) {
+				if (!$success) {
+					break;
+				}
+				$targetPath = $newPath . DIRECTORY_SEPARATOR . $filename;
+				if (is_dir($filename)) {
+					$success = $this->_mkdir($newPath, $filename);
+				} else {
+					$success = ftp_put($this->connect, $targetPath, $filename, FTP_BINARY);
+				}
+			}
+			unset($filename);
+
+		} else {
+			$filename = $filesToProcess[0];
+			$newPath = $remoteDirectory . DIRECTORY_SEPARATOR . $filename;
+			$success = ftp_put($this->connect, $newPath, $filename, FTP_BINARY);
+		}
+
+		// return to initial directory
+		chdir($cwd);
+
+		//cleanup
+		if(!$this->deleteDir($tmpDir)) {
+			return false;
+		}
 		
+		if (!$success) {
+			$this->setError(elFinder::ERROR_FTP_UPLOAD_FILE, $newPath);
+			return false;
+		}
+		$this->clearcache();
+		return $newPath;
 	}
-	
+
 	/**
 	 * Create archive and return its path
 	 *
@@ -983,12 +1065,348 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @param  string  $name   archive name
 	 * @param  array   $arc    archiver options
 	 * @return string|bool
-	 * @author Dmitry (dio) Levashov, 
+	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
 	 **/
-	protected function _archive($dir, $files, $name, $arc) {
-		die('Not yet implemented. (_archive)');
+	protected function _archive($dir, $files, $name, $arc)
+	{
+		// get current directory
+		$cwd = getcwd();
+
+		$tmpDir = $this->tempDir();
+		if (!$tmpDir) {
+			return false;
+		}
+
+		//download data
+		if (!$this->ftp_download_files($dir, $files, $tmpDir)) {
+			//cleanup
+			$this->deleteDir($tmpDir);
+			return false;
+		}
+
+		// go to the temporary directory
+		chdir($tmpDir);
+
+		// path to local copy of archive
+		$path = $tmpDir . DIRECTORY_SEPARATOR . $name;
+
+		$file_names_string = "";
+		foreach (scandir($tmpDir) as $filename) {
+			if ('.' == $filename) {
+				continue;
+			}
+			if ('..' == $filename) {
+				continue;
+			}
+			$file_names_string = $file_names_string . '"' . $filename . '" ';
+		}
+		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' "' . $name . '" ' . $file_names_string);
+
+		exec($command, $output, $return_value);
+		if ($return_value != 0) {
+			$this->setError(elFinder::ERROR_ARCHIVE_EXEC, 'Command failed '.escapeshellarg($command));
+			$this->deleteDir($tmpDir); //cleanup
+			return false;
+		}
+
+		$remoteArchiveFile = $dir . DIRECTORY_SEPARATOR . $name;
+
+		// upload archive
+		if (!ftp_put($this->connect, $remoteArchiveFile, $path, FTP_BINARY)) {
+			$this->setError(elFinder::ERROR_FTP_UPLOAD_FILE, $remoteArchiveFile);
+			$this->deleteDir($tmpDir); //cleanup
+			return false;
+		}
+
+		// return to initial work directory
+		chdir($cwd);
+
+		//cleanup
+		if(!$this->deleteDir($tmpDir)) {
+			return false;
+		}
+
+		return $remoteArchiveFile;
+	}
+
+	/**
+	 * Create writable temporary directory and return path to it.
+	 * @return string path to the new temporary directory or false in case of error.
+	 */
+	private function tempDir()
+	{
+		$tempPath = tempnam($this->tmp, 'elFinder');
+		if (!$tempPath) {
+			$this->setError(elFinder::ERROR_CREATING_TEMP_DIR, $this->tmp);
+			return false;
+		}
+		$success = unlink($tempPath);
+		if (!$success) {
+			$this->setError(elFinder::ERROR_CREATING_TEMP_DIR, $this->tmp);
+			return false;
+		}
+		$success = mkdir($tempPath, 0755, true);
+		if (!$success) {
+			$this->setError(elFinder::ERROR_CREATING_TEMP_DIR, $this->tmp);
+			return false;
+		}
+		return $tempPath;
+	}
+
+	/**
+	 * Gets in a single FTP request an array of absolute remote FTP paths of files and
+	 * folders in $remote_directory omitting symbolic links.
+	 * @param $remote_directory string remote FTP path to scan for file and folders recursively
+	 * @return array of elements each of which is an array of two elements:
+	 * <ul>
+	 * <li>$item['path'] - absolute remote FTP path</li>
+	 * <li>$item['type'] - either 'f' for file or 'd' for directory</li>
+	 * </ul>
+	 */
+	private function ftp_scan_dir($remote_directory)
+	{
+		$buff = ftp_rawlist($this->connect, $remote_directory, true);
+		$next_folder = false;
+		$items = array();
+		foreach ($buff as $str) {
+			if ('' == $str) {
+				$next_folder = true;
+				continue;
+			}
+			if ($next_folder) {
+				$remote_directory = preg_replace('/\:/', '', $str);
+				$next_folder = false;
+				$item = array();
+				$item['path'] = $remote_directory;
+				$item['type'] = 'd'; // directory
+				$items[] = $item;
+				continue;
+			}
+			$info = preg_split("/\s+/", $str, 9);
+			$type = substr($info[0], 0, 1);
+			switch ($type) {
+				case 'l' : //omit symbolic links
+				case 'd' :
+					break;
+				default:
+					$remote_file_path = $remote_directory . DIRECTORY_SEPARATOR . $info[8];
+					$item = array();
+					$item['path'] = $remote_file_path;
+					$item['type'] = 'f'; // normal file
+					$items[] = $item;
+			}
+		}
+		return $items;
+	}
+
+	/**
+	 * Downloads specified files from remote directory
+	 * if there is a directory among files it is downloaded recursively (omitting symbolic links).
+	 * @param $remote_directory string remote FTP path to a source directory to download from.
+	 * @param array $files list of files to download from remote directory.
+	 * @param $dest_local_directory string destination folder to store downloaded files.
+	 * @return bool true on success and false on failure.
+	 */
+	private function ftp_download_files($remote_directory, array $files, $dest_local_directory)
+	{
+		$contents = $this->ftp_scan_dir($remote_directory);
+		if (!isset($contents)) {
+			$this->setError(elFinder::ERROR_FTP_DOWNLOAD_FILE, $remote_directory);
+			return false;
+		}
+		foreach ($contents as $item) {
+			$drop = true;
+			foreach ($files as $file) {
+				if ($remote_directory . DIRECTORY_SEPARATOR . $file == $item['path'] || strstr($item['path'], $remote_directory . DIRECTORY_SEPARATOR . $file . DIRECTORY_SEPARATOR)) {
+					$drop = false;
+					break;
+				}
+			}
+			if ($drop) continue;
+			$relative_path = str_replace($remote_directory, '', $item['path']);
+			$local_path = $dest_local_directory . DIRECTORY_SEPARATOR . $relative_path;
+			switch ($item['type']) {
+				case 'd':
+					$success = mkdir($local_path);
+					break;
+				case 'f':
+					$success = ftp_get($this->connect, $local_path, $item['path'], FTP_BINARY);
+					break;
+				default:
+					$success = true;
+			}
+			if (!$success) {
+				$this->setError(elFinder::ERROR_FTP_DOWNLOAD_FILE, $remote_directory);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Delete local directory recursively.
+	 * @param $dirPath string to directory to be erased.
+	 * @return bool true on success and false on failure.
+	 */
+	private function deleteDir($dirPath)
+	{
+		if (!is_dir($dirPath)) {
+			$success = unlink($dirPath);
+		} else {
+			$success = true;
+			foreach (array_reverse(elFinderVolumeFTP::listFilesInDirectory($dirPath, false)) as $path) {
+				$path = $dirPath . DIRECTORY_SEPARATOR . $path;
+				if(is_link($path)) {
+					unlink($path);
+				} else if (is_dir($path)) {
+					$success = rmdir($path);
+				} else {
+					$success = unlink($path);
+				}
+				if (!$success) {
+					break;
+				}
+			}
+			if($success) {
+				$success = rmdir($dirPath);
+			}
+		}
+		if(!$success) {
+			$this->setError(elFinder::ERROR_RM, $dirPath);
+			return false;
+		}
+		return $success;
+	}
+
+	/**
+	 * Returns array of strings containing all files and folders in the specified local directory.
+	 * @param $dir
+	 * @param string $prefix
+	 * @internal param string $path path to directory to scan.
+	 * @return array array of files and folders names relative to the $path
+	 * or an empty array if the directory $path is empty,
+	 * <br />
+	 * false if $path is not a directory or does not exist.
+	 */
+	private static function listFilesInDirectory($dir, $omitSymlinks, $prefix = '')
+	{
+		if (!is_dir($dir)) {
+			return false;
+		}
+		$excludes = array(".","..");
+		$result = array();
+		$files = scandir($dir);
+		if(!$files) {
+			return array();
+		}
+		foreach($files as $file) {
+			if(!in_array($file, $excludes)) {
+				$path = $dir.DIRECTORY_SEPARATOR.$file;
+				if(is_link($path)) {
+					if($omitSymlinks) {
+						continue;
+					} else {
+						$result[] = $prefix.$file;
+					}
+				} else if(is_dir($path)) {
+					$result[] = $prefix.$file.DIRECTORY_SEPARATOR;
+					$subs = elFinderVolumeFTP::listFilesInDirectory($path, $omitSymlinks, $prefix.$file.DIRECTORY_SEPARATOR);
+					if($subs) {
+						$result = array_merge($result, $subs);
+					}
+					
+				} else {
+					$result[] = $prefix.$file;
+				}
+			}
+		}
+		return $result;
+	}
+
+/**
+	 * Resize image
+	 * @param string $hash
+	 * @param int $width
+	 * @param int $height
+	 * @param int $x
+	 * @param int $y
+	 * @param string $mode
+	 * @param string $bg
+	 * @param int $degree
+	 * @return array|bool|false
+	 */
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
+		if ($this->commandDisabled('resize')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		if (($file = $this->file($hash)) == false) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+
+		if (!$file['write'] || !$file['read']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		$path = $this->decode($hash);
+
+		$tmpDir = $this->tempDir();
+		if (!$tmpDir) {
+			return false;
+		}
+		
+		$local_path = $tmpDir . DIRECTORY_SEPARATOR . basename($path);
+		$remote_directory = ftp_pwd($this->connect);
+		$success = ftp_get($this->connect, $local_path, $path, FTP_BINARY);
+		if (!$success) {
+			$this->setError(elFinder::ERROR_FTP_DOWNLOAD_FILE, $remote_directory);
+			return false;
+		}
+
+		if (!$this->canResize($path, $file)) {
+			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+		}
+
+		switch($mode) {
+
+			case 'propresize':
+				$result = $this->imgResize($local_path, $width, $height, true, true);
+				break;
+
+			case 'crop':
+				$result = $this->imgCrop($local_path, $width, $height, $x, $y);
+				break;
+
+			case 'fitsquare':
+				$result = $this->imgSquareFit($local_path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']));
+				break;
+
+			case 'rotate':
+				$result = $this->imgRotate($local_path, $degree, ($bg ? $bg : $this->options['tmbBgColor']));
+				break;
+
+			default:
+				$result = $this->imgResize($local_path, $width, $height, false, true);
+				break;
+		}
+
+		if ($result) {
+			
+			// upload to FTP and clear temp local file
+
+			if (!ftp_put($this->connect, $path, $local_path, FTP_BINARY)) {
+				$this->setError(elFinder::ERROR_FTP_UPLOAD_FILE, $path);
+				$this->deleteDir($tmpDir); //cleanup
+			}
+			
+			$this->clearcache();
+			return $this->stat($path);
+		}
+
+		$this->setError(elFinder::ERROR_UNKNOWN);
 		return false;
 	}
-	
-} // END class 
+
+} // END class
+

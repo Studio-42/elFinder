@@ -25,6 +25,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $archiveSize = 0;
 	
 	/**
+	 * Canonicalized absolute pathname of $root
+	 * 
+	 * @var strung
+	 */
+	protected $aroot;
+	
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -260,6 +267,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$stat = array();
 
 		if (!file_exists($path)) {
+			return $stat;
+		}
+
+		//Verifies the given path is the root or is inside the root. Prevents directory traveral.
+		if (!$this->aroot) {
+			// for Inheritance class ( not calling parent::configure() )
+			$this->aroot = realpath($this->root);
+		}
+		if (!$this->_inpath(realpath($path), $this->aroot)) {
 			return $stat;
 		}
 

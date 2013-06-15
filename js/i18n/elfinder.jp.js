@@ -1,11 +1,12 @@
 /**
  * Japanese translation
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
- * @version 2012-08-15
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>
+ * @author Naoki Sawada <hypweb@gmail.com>
+ * @version 2013-05-20
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
-		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
+		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
 		dateFormat : 'Y/m/d h:i A', // 2012/04/11 05:27 PM
@@ -80,7 +81,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
 			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
+			'errSessionExpires'    : 'アクションがなかったため、セッションが期限切れになりました',
+			'errCreatingTempDir'   : '一時ディレクトリを作成できません："$1"',
+			'errFtpDownloadFile'   : 'FTP からファイルをダウンロードできません："$1"',
+			'errFtpUploadFile'     : 'FTP へファイルをアップロードできません："$1"',
+			'errFtpMkdir'          : 'FTP にリモートディレクトリを作成できません："$1"',
+			'errArchiveExec'       : 'ファイルのアーカイブ中にエラーが発生しました："$1"',
+			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
 			'errNetUnMount'        : 'アンマウントできません', // added 30.04.2012
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -124,27 +133,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApprove': '$1へ行き認可する', // added 26.04.2012
 			'btnUnmount': 'アンマウント', // added 30.04.2012
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'フォルダーを開く',
-			'ntffile'     : 'ファイルを開く',
-			'ntfreload'   : 'フォルダーを再読込',
-			'ntfmkdir'    : 'ディレクトリーを作成',
-			'ntfmkfile'   : 'ファイルを作成',
-			'ntfrm'       : 'ファイルを削除',
-			'ntfcopy'     : 'ファイルをコピー',
-			'ntfmove'     : 'ファイルを移動',
-			'ntfprepare'  : 'ファイルコピーを準備',
-			'ntfrename'   : 'ファイル名を変更',
-			'ntfupload'   : 'ファイルをアップロード',
-			'ntfdownload' : 'ファイルをダウンロード',
-			'ntfsave'     : 'ファイルを保存',
-			'ntfarchive'  : 'アーカイブ作成',
-			'ntfextract'  : 'アーカイブを解凍',
-			'ntfsearch'   : 'ファイル検索',
+			'ntfopen'     : 'フォルダーを開いています',
+			'ntffile'     : 'ファイルを開いています',
+			'ntfreload'   : 'フォルダーを再読込しています',
+			'ntfmkdir'    : 'ディレクトリーを作成しています',
+			'ntfmkfile'   : 'ファイルを作成しています',
+			'ntfrm'       : 'ファイルを削除しています',
+			'ntfcopy'     : 'ファイルをコピーしています',
+			'ntfmove'     : 'ファイルを移動しています',
+			'ntfprepare'  : 'ファイルコピーを準備しています',
+			'ntfrename'   : 'ファイル名を変更しています',
+			'ntfupload'   : 'ファイルをアップロードしています',
+			'ntfdownload' : 'ファイルをダウンロードしています',
+			'ntfsave'     : 'ファイルを保存しています',
+			'ntfarchive'  : 'アーカイブ作成しています',
+			'ntfextract'  : 'アーカイブを解凍しています',
+			'ntfsearch'   : 'ファイル検索中',
 			'ntfresize'   : 'リサイズしています',
-			'ntfsmth'     : '何かしています >_<',
+			'ntfsmth'     : '処理をしています',
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
       		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
+			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
