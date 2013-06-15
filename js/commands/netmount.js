@@ -103,7 +103,7 @@ elFinder.prototype.commands.netmount = function() {
 					self.dialog.elfinderdialog('close');
 				};
 				
-				return fm.dialog(content, opts);
+				return fm.dialog(content, opts).ready(function(){inputs.protocol.change();});
 			}
 			;
 
