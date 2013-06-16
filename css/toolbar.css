@@ -111,6 +111,7 @@
 .elfinder-button-icon-sort      { background-position: 0 -577px; }
 .elfinder-button-icon-rotate-r  { background-position: 0 -625px; }
 .elfinder-button-icon-rotate-l  { background-position: 0 -641px; }
+.elfinder-button-icon-pixlr     { background-position: 0 -657px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }

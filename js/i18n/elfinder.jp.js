@@ -118,6 +118,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'リサイズと回転',
 			'cmdsort'      : 'ソート',
 			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
+			'cmdpixlr'     : 'Pixlr で編集',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
