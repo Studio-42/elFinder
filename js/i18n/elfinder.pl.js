@@ -1,13 +1,16 @@
 /**
  * Polish translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
- * @version 2012-01-28
+ * @author Wojciech Jabłoński <www.jablonski@gmail.com>
+ * @version 2013-01-28
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
+		dateFormat : 'd M Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -145,6 +148,32 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'paź',
 			'Nov'         : 'lis',
 			'Dec'         : 'gru',
+			'January'     : 'Styczeń',
+			'February'    : 'Luty',
+			'March'       : 'Marzec',
+			'April'       : 'Kwiecień',
+			'May'         : 'Maj',
+			'June'        : 'Czerwiec',
+			'July'        : 'Lipiec',
+			'August'      : 'Sierpień',
+			'September'   : 'Wrzesień',
+			'October'     : 'Październik',
+			'November'    : 'Listopad',
+			'December'    : 'Grudzień',
+			'Sunday'      : 'niedziela',
+			'Monday'      : 'poniedziałek',
+			'Tuesday'     : 'wtorek',
+			'Wednesday'   : 'środa',
+			'Thursday'    : 'czwartek',
+			'Friday'      : 'piątek',
+			'Saturday'    : 'sobota',
+			'Sun'         : 'nie',
+			'Mon'         : 'pon',
+			'Tue'         : 'wto',
+			'Wed'         : 'śro',
+			'Thu'         : 'czw',
+			'Fri'         : 'pią',
+			'Sat'         : 'sob',
 
 			/******************************** sort variants ********************************/
 			'sortnameDirsFirst' : 'po nazwie (foldery pierwsze)', 
@@ -196,7 +225,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Pomoc',
 			'webfm'           : 'Menedżer plików sieciowych',
 			'ver'             : 'Wersja',
-			'protocolver'     : 'wersja wydania',
+			'protocol'        : 'wersja wydania',
 			'homepage'        : 'Strona główna projektu',
 			'docs'            : 'Dokumentacja',
 			'github'          : 'Obserwuj rozwój projektu na Github',
@@ -226,6 +255,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'mode'            : 'Tryb',
 			'resize'          : 'Zmień rozmiar',
 			'crop'            : 'Przytnij',
+			'rotate'          : 'Obróć',
+			'rotate-cw'       : 'Obróć 90° w lewo',
+			'rotate-ccw'      : 'Obróć 90° w prawo',
+			'degree'          : '°',
+
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',

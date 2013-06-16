@@ -250,6 +250,10 @@ elFinder.prototype._options = {
 		navbar : {
 			minWidth : 150,
 			maxWidth : 500
+		},
+		cwd : {
+			// display parent folder with ".." name :)
+			oldSchool : false
 		}
 	},
 
@@ -265,32 +269,39 @@ elFinder.prototype._options = {
 	onlyMimes : [],
 
 	/**
-	 * How to sort files in current directory
+	 * Custom files sort rules.
+	 * All default rules (name/size/kind/date) set in elFinder._sortRules
 	 *
-	 * @type String
-	 * @default "nameDirsFirst"
+	 * @type {Object}
 	 * @example
-	 *  - sort : 'nameDirsFirst' - sort by name, directory first
-	 *  - sort : 'kindDirsFirst' - sort by kind, name, directory first
-	 *  - sort : 'sizeDirsFirst' - sort by size, name, directory first
-	 *  - sort : 'dateDirsFirst' - sort by date, name, directory first
-	 *  - sort : 'name' - sort by name
-	 *  - sort : 'kind' - sort by kind, name
-	 *  - sort : 'size' - sort by size, name
-	 *  - sort : 'date' - sort by date, name
+	 * sortRules : {
+	 *   name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); }
+	 * }
 	 */
-	sort : 'nameDirsFirst',
+	sortRules : {},
+
+	/**
+	 * Default sort type.
+	 *
+	 * @type {String}
+	 */
+	sortType : 'name',
 	
 	/**
-	 * Sort files direction.
+	 * Default sort order.
 	 *
-	 * @type String
-	 * @default  "asc"
-	 * @example
-	 *   - sort : 'asc'  // ascent sorting
-	 *   - sort : 'desc' // descent sorting
+	 * @type {String}
+	 * @default "asc"
 	 */
-	sortDirect : 'asc',
+	sortOrder : 'asc',
+	
+	/**
+	 * Display folders first?
+	 *
+	 * @type {Boolean}
+	 * @default true
+	 */
+	sortStickFolders : true,
 	
 	/**
 	 * If true - elFinder will formating dates itself, 

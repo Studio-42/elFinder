@@ -99,6 +99,13 @@ class elFinder {
 	 * @var string
 	 **/
 	protected $debug = false;
+
+	/**
+	 * session expires timeout
+	 *
+	 * @var int
+	 **/
+	protected $timeout = 0;
 	
 	/**
 	 * undocumented class variable
@@ -164,7 +171,16 @@ class elFinder {
 	const ERROR_NETMOUNT          = 'errNetMount';
 	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
 	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
-	
+
+	const ERROR_SESSION_EXPIRES 	= 'errSessionExpires';
+
+	const ERROR_CREATING_TEMP_DIR 	= 'errCreatingTempDir';
+	const ERROR_FTP_DOWNLOAD_FILE 	= 'errFtpDownloadFile';
+	const ERROR_FTP_UPLOAD_FILE 	= 'errFtpUploadFile';
+	const ERROR_FTP_MKDIR 		= 'errFtpMkdir';
+	const ERROR_ARCHIVE_EXEC 	= 'errArchiveExec';
+	const ERROR_EXTRACT_EXEC 	= 'errExtractExec';
+
 	/**
 	 * Constructor
 	 *
@@ -179,6 +195,7 @@ class elFinder {
 
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
+		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
@@ -264,8 +281,7 @@ class elFinder {
 					$this->listeners[$cmd] = array();
 				}
 
-				if ((is_array($handler) && count($handler) == 2 && is_object($handler[0]) && method_exists($handler[0], $handler[1]))
-				|| function_exists($handler)) {
+				if (is_callable($handler)) {
 					$this->listeners[$cmd][] = $handler;
 				}
 			}
@@ -315,6 +331,21 @@ class elFinder {
 	public function commandArgsList($cmd) {
 		return $this->commandExists($cmd) ? $this->commands[$cmd] : array();
 	}
+
+	private function session_expires() {
+		
+		if (!isset($_SESSION['LAST_ACTIVITY'])) {
+			$_SESSION['LAST_ACTIVITY'] = time();
+			return false;
+		}
+
+		if ( ($this->timeout > 0) && (time() - $_SESSION['LAST_ACTIVITY'] > $this->timeout) ) {
+			return true;
+		}
+
+		$_SESSION['LAST_ACTIVITY'] = time();
+		return false;	
+	}
 	
 	/**
 	 * Exec command and return result
@@ -328,6 +359,10 @@ class elFinder {
 		
 		if (!$this->loaded) {
 			return array('error' => $this->error(self::ERROR_CONF, self::ERROR_CONF_NO_VOL));
+		}
+
+		if ($this->session_expires()) {
+			return array('error' => $this->error(self::ERROR_SESSION_EXPIRES));
 		}
 		
 		if (!$this->commandExists($cmd)) {
@@ -352,8 +387,7 @@ class elFinder {
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
-				if ((is_array($handler) && $handler[0]->{$handler[1]}($cmd, $result, $args, $this))
-				||  (!is_array($handler) && $handler($cmd, $result, $args, $this))) {
+				if (call_user_func($handler,$cmd,$result,$args,$this)) {
 					// handler return true to force sync client after command completed
 					$result['sync'] = true;
 				}
@@ -541,7 +575,6 @@ class elFinder {
 		// get folders trees
 		if ($args['tree']) {
 			foreach ($this->volumes as $id => $v) {
-
 				if (($tree = $v->tree('', 0, $cwd['hash'])) != false) {
 					$files = array_merge($files, $tree);
 				}

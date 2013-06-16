@@ -24,10 +24,12 @@ $.fn.elfindernavbar = function(fm, opts) {
 					maxWidth : opts.maxWidth || 500
 				})
 				.bind('resize scroll', function() {
+					var offset = (fm.UA.Opera && nav.scrollLeft())? 20 : 2;
 					handle.css({
 						top  : parseInt(nav.scrollTop())+'px',
-						left : parseInt(ltr ? nav.width() + nav.scrollLeft() - handle.width() - 2 : nav.scrollLeft() + 2)
-					})
+						left : ltr ? 'auto' : parseInt(nav.scrollLeft() + offset),
+						right: ltr ? parseInt(nav.scrollLeft() - offset) * -1 : 'auto'
+					});
 				})
 				.find('.ui-resizable-handle').zIndex(nav.zIndex() + 10);
 
@@ -46,4 +48,4 @@ $.fn.elfindernavbar = function(fm, opts) {
 	});
 	
 	return this;
-}
+};

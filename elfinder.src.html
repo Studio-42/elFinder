@@ -6,10 +6,21 @@
 	<!-- 
 	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
 	-->
-	<script src="jquery/jquery-1.7.2.min.js"></script>
-	<script src="jquery/jquery-ui-1.8.21.custom.min.js"></script>
-	<link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.21.custom.css" type="text/css">
 
+	<!-- <script src="jquery/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script> -->
+	<script src="jquery/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- <script src="jquery/jquery-ui-1.8.21.custom.min.js"></script> -->
+	<!-- <script src="jquery/jquery-ui-1.8.23.custom.min.js" type="text/javascript" charset="utf-8"></script> -->
+	<!-- <link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.23.custom.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
+	
+	<script src="jquery/jquery-ui-1.10.1.custom.min.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.10.1.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	<!-- <link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.21.custom.css" type="text/css"> -->
+
+	
 	<link rel="stylesheet" href="css/common.css"      type="text/css">
 	<link rel="stylesheet" href="css/dialog.css"      type="text/css">
 	<link rel="stylesheet" href="css/toolbar.css"     type="text/css">
@@ -20,6 +31,7 @@
 	<link rel="stylesheet" href="css/quicklook.css"   type="text/css">
 	<link rel="stylesheet" href="css/commands.css"    type="text/css">
 
+	<link rel="stylesheet" href="css/fonts.css"       type="text/css">
 	<link rel="stylesheet" href="css/theme.css"       type="text/css">
 
 	<!-- elfinder core -->
@@ -88,19 +100,26 @@
 	<script src="js/i18n/elfinder.ca.js"></script>
 	<script src="js/i18n/elfinder.cs.js"></script>
 	<script src="js/i18n/elfinder.de.js"></script>
+	<script src="js/i18n/elfinder.el.js"></script>
 	<script src="js/i18n/elfinder.en.js"></script>
 	<script src="js/i18n/elfinder.es.js"></script>
+	<script src="js/i18n/elfinder.fa.js"></script>
 	<script src="js/i18n/elfinder.fr.js"></script>
 	<script src="js/i18n/elfinder.hu.js"></script>
 	<script src="js/i18n/elfinder.it.js"></script>
 	<script src="js/i18n/elfinder.jp.js"></script>
+	<script src="js/i18n/elfinder.ko.js"></script>
 	<script src="js/i18n/elfinder.nl.js"></script>
 	<script src="js/i18n/elfinder.no.js"></script>
 	<script src="js/i18n/elfinder.pl.js"></script>
 	<script src="js/i18n/elfinder.pt_BR.js"></script>
 	<script src="js/i18n/elfinder.ru.js"></script>
+	<script src="js/i18n/elfinder.sl.js"></script>
+	<script src="js/i18n/elfinder.sv.js"></script>
 	<script src="js/i18n/elfinder.tr.js"></script>
 	<script src="js/i18n/elfinder.zh_CN.js"></script>
+	<script src="js/i18n/elfinder.zh_TW.js"></script>
+	<script src="js/i18n/elfinder.vi.js"></script>
 
 	<!-- elfinder dialog -->
 	<script src="js/jquery.dialogelfinder.js"></script>
@@ -145,24 +164,37 @@
 	<script>
 		$().ready(function() {
 			$('#finder').elfinder({
+				// requestType : 'post',
+
 				// url : 'php/connector.php',
 				url : 'php/connector.php',
 				// transport : new elFinderSupportVer1(),
-				getFileCallback : function(files, fm) {
-					console.log(files);
-				},
+				// getFileCallback : function(files, fm) {
+				// 	console.log(files);
+				// },
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							// console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
 				// handlers : {
 				// 	select : function(e) {
 				// 		console.log(e.data)
 				// 	}
 				// },
 				// onlyMimes : ['image', 'text/plain']
+				// sync : 20000,
 				lang : 'ru',
-				customData : {answer : 42}
+				customData : {answer : 42},
 				// requestType : 'POST',
 				// rememberLastDir : false,
 				// ui : ['tree', 'toolbar'],
-				// ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
+				// ui : ['toolbar', 'path', 'stat'],
 				// commands : [],
 				// commandsOptions : {
 				// 	edit : {

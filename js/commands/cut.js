@@ -35,7 +35,7 @@ elFinder.prototype.commands.cut = function() {
 			}
 		});
 		
-		return dfrd.isRejected() ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
+		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
 	}
 
 }

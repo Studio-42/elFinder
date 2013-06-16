@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfindercwd = function(fm) {
+$.fn.elfindercwd = function(fm, options) {
 	
 	this.not('.elfinder-cwd').each(function() {
 		// fm.time('cwdLoad');
@@ -127,8 +127,8 @@ $.fn.elfindercwd = function(fm) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
+				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -164,6 +164,10 @@ $.fn.elfindercwd = function(fm) {
 				},
 				marker : function(f) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+				},
+				tooltip : function(f) {
+					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
+					return f.tooltip? fm.escape(f.tooltip).replace(/"/g, '&quot;').replace(/\r/g, '&#13;') + '&#13;' + title : title;
 				}
 			},
 			
@@ -200,11 +204,11 @@ $.fn.elfindercwd = function(fm) {
 				var code     = $.ui.keyCode,
 					prev     = keyCode == code.LEFT || keyCode == code.UP,
 					sel      = cwd.find('[id].'+clSelected),
-					selector = prev ? 'first' : 'last',
+					selector = prev ? 'first:' : 'last',
 					s, n, sib, top, left;
-					
+
 				function sibling(n, direction) {
-					return n[direction+'All']('[id]:not(.'+clDisabled+'):first');
+					return n[direction+'All']('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):first');
 				}
 				
 				if (sel.length) {
@@ -248,14 +252,13 @@ $.fn.elfindercwd = function(fm) {
 							}
 						}
 					}
-					
+					// !append && unselectAll();
 				} else {
 					// there are no selected file - select first/last one
-					n = cwd.find('[id]:not(.'+clDisabled+'):'+(prev ? 'last' : 'first'))
+					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'))
 				}
 				
-				if (n && n.length) {
-
+				if (n && n.length && !n.is('.elfinder-cwd-parent')) {
 					if (append) {
 						// append new files to selected
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
@@ -272,8 +275,18 @@ $.fn.elfindercwd = function(fm) {
 				}
 			},
 			
+			selectedFiles = [],
+			
 			selectFile = function(hash) {
 				cwd.find('#'+hash).trigger(evtSelect);
+			},
+			
+			selectAll = function() {
+				var phash = fm.cwd().hash;
+
+				cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect); 
+				selectedFiles = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null });
+				trigger();
 			},
 			
 			/**
@@ -282,7 +295,9 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			unselectAll = function() {
+				selectedFiles = [];
 				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+				trigger();
 			},
 			
 			/**
@@ -291,10 +306,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @return Array
 			 */
 			selected = function() {
-				return $.map(cwd.find('[id].'+clSelected), function(n) {
-					n = $(n);
-					return n.is('.'+clDisabled) ? null : $(n).attr('id');
-				});
+				return selectedFiles;
 			},
 			
 			/**
@@ -303,7 +315,7 @@ $.fn.elfindercwd = function(fm) {
 			 * @return void
 			 */
 			trigger = function() {
-				fm.trigger('select', {selected : selected()});
+				fm.trigger('select', {selected : selectedFiles});
 			},
 			
 			/**
@@ -406,6 +418,14 @@ $.fn.elfindercwd = function(fm) {
 				// make directory droppable
 				dirs && makeDroppable();
 				
+				if (selectedFiles.length) {
+					place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
+						var id = this.id;
+						
+						$.inArray(id, selectedFiles) !== -1 && $(this).trigger(evtSelect);
+					});
+				}
+				
 			},
 			
 			/**
@@ -417,7 +437,6 @@ $.fn.elfindercwd = function(fm) {
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) { 
 					var hash = fm.cwd().hash;
-
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (fm.file(h).phash == hash) {
 							cwd.removeClass(clDropActive);
@@ -521,10 +540,10 @@ $.fn.elfindercwd = function(fm) {
 					dirs     = false,
 					findNode = function(file) {
 						var pointer = cwd.find('[id]:first'), file2;
-					
+
 						while (pointer.length) {
 							file2 = fm.file(pointer.attr('id'));
-							if (file2 && fm.compare(file, file2) < 0) {
+							if (!pointer.is('.elfinder-cwd-parent') && file2 && fm.compare(file, file2) < 0) {
 								return pointer;
 							}
 							pointer = pointer.next('[id]');
@@ -552,7 +571,7 @@ $.fn.elfindercwd = function(fm) {
 					}
 					
 					if ((node = findNode(file)) && node.length) {
-						node.before(itemhtml(file));
+						node.before(itemhtml(file)); 
 					} else if ((ndx = findIndex(file)) >= 0) {
 						buffer.splice(ndx, 0, file);
 					} else {
@@ -603,6 +622,7 @@ $.fn.elfindercwd = function(fm) {
 				size : fm.i18n('size'),
 				kind : fm.i18n('kind')
 			},
+			
 			/**
 			 * Update directory content
 			 *
@@ -612,9 +632,12 @@ $.fn.elfindercwd = function(fm) {
 			content = function(files, any) {
 				var phash = fm.cwd().hash; 
 				// console.log(files)
+				
+				unselectAll();
+				
 				try {
 					// to avoid problem with draggable
-					cwd.children('table,'+fileSelector).remove().end();
+					cwd.children('table,'+fileSelector).remove();
 				} catch (e) {
 					cwd.html('');
 				}
@@ -632,7 +655,23 @@ $.fn.elfindercwd = function(fm) {
 		
 				wrapper.bind(scrollEvent, render).trigger(scrollEvent);
 		
-				trigger();
+				phash = fm.cwd().phash;
+				
+				if (options.oldSchool && phash && !query) {
+					var parent = $.extend(true, {}, fm.file(phash), {name : '..', mime : 'directory'});
+					parent = $(itemhtml(parent))
+						.addClass('elfinder-cwd-parent')
+						.bind('mousedown click mouseup dblclick mouseenter', function(e) {
+							e.preventDefault();
+							e.stopPropagation();
+						})
+						.dblclick(function() {
+							fm.exec('open', this.id);
+						});
+
+					(list ? cwd.find('tbody') : cwd).prepend(parent);
+				}
+				
 			},
 			
 			/**
@@ -660,7 +699,7 @@ $.fn.elfindercwd = function(fm) {
 					} else if (e.ctrlKey || e.metaKey) {
 						p.trigger(p.is('.'+clSelected) ? evtUnselect : evtSelect);
 					} else {
-						cwd.find('[id].'+clSelected).trigger(evtUnselect);
+						unselectAll();
 						p.trigger(evtSelect);
 					}
 
@@ -681,12 +720,30 @@ $.fn.elfindercwd = function(fm) {
 				})
 				// add hover class to selected file
 				.delegate(fileSelector, evtSelect, function(e) {
-					var $this = $(this);
-					!selectLock && !$this.is('.'+clDisabled) && $this.addClass(clSelected).children().addClass(clHover);
+					var $this = $(this), 
+						id    = $this.attr('id');
+					
+					if (!selectLock && !$this.is('.'+clDisabled)) {
+						$this.addClass(clSelected).children().addClass(clHover);
+						if ($.inArray(id, selectedFiles) === -1) {
+							selectedFiles.push(id);
+						}
+					}
 				})
 				// remove hover class from unselected file
 				.delegate(fileSelector, evtUnselect, function(e) {
-					!selectLock && $(this).removeClass(clSelected).children().removeClass(clHover);
+					var $this = $(this), 
+						id    = $this.attr('id'),
+						ndx;
+					
+					if (!selectLock) {
+						$(this).removeClass(clSelected).children().removeClass(clHover);
+						ndx = $.inArray(id, selectedFiles);
+						if (ndx !== -1) {
+							selectedFiles.splice(ndx, 1);
+						}
+					}
+					
 				})
 				// disable files wich removing or moving
 				.delegate(fileSelector, evtDisable, function() {
@@ -719,7 +776,8 @@ $.fn.elfindercwd = function(fm) {
 						e.preventDefault();
 						if (!file.is('.'+clDisabled)) {
 							if (!file.is('.'+clSelected)) {
-								cwd.trigger('unselectall');
+								// cwd.trigger('unselectall');
+								unselectAll()
 								file.trigger(evtSelect);
 								trigger();
 							}
@@ -749,16 +807,22 @@ $.fn.elfindercwd = function(fm) {
 				.droppable(droppable)
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
-					var parent = list ? cwd.find('tbody') : cwd;
-					cwd.trigger('unselectall');
-					parent.prepend($(itemhtml(file)).addClass(clTmp));
-					cwd.scrollTop(0)
+					var parent = list ? cwd.find('tbody') : cwd,
+						p = parent.find('.elfinder-cwd-parent'),
+						file = $(itemhtml(file)).addClass(clTmp);
+						
+					unselectAll();
+
+					if (p.length) {
+						p.after(file);
+					} else {
+						parent.prepend(file);
+					}
+					
+					cwd.scrollTop(0);
 				})
 				// unselect all selected files
-				.bind('unselectall', function() {
-					cwd.find('[id].'+clSelected+'').trigger(evtUnselect); 
-					trigger();
-				})
+				.bind('unselectall', unselectAll)
 				.bind('selectfile', function(e, id) {
 					cwd.find('#'+id).trigger(evtSelect);
 					trigger();
@@ -784,6 +848,7 @@ $.fn.elfindercwd = function(fm) {
 
 				wrapper.height(wz.height() - h);
 			},
+			
 			// elfinder node
 			parent = $(this).parent().resize(resize),
 			// workzone node
@@ -827,9 +892,11 @@ $.fn.elfindercwd = function(fm) {
 				content(lastSearch, true);
 			})
 			.bind('searchend', function() {
-				query && content(fm.files());
 				lastSearch = [];
-				query = '';
+				if (query) {
+					query = '';
+					content(fm.files());
+				}
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
@@ -858,8 +925,7 @@ $.fn.elfindercwd = function(fm) {
 						? $.map(e.data.added || [], function(f) { return f.name.indexOf(query) === -1 ? null : f })
 						: $.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; })
 						;
-				add(files)
-				// add($.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; }));
+				add(files);
 			})
 			.change(function(e) {
 				var phash = fm.cwd().hash,
@@ -916,7 +982,7 @@ $.fn.elfindercwd = function(fm) {
 			})
 			// enable selectable
 			.dragstop(function() {
-				cwd.selectable('enable');
+				cwd.selectable('enable').droppable('enable');
 				selectLock = false;
 			})
 			.bind('lockfiles unlockfiles', function(e) {
@@ -933,7 +999,7 @@ $.fn.elfindercwd = function(fm) {
 			.bind('mkdir mkfile duplicate upload rename archive extract', function(e) {
 				var phash = fm.cwd().hash, files;
 				
-				cwd.trigger('unselectall');
+				unselectAll();
 
 				$.each(e.data.added || [], function(i, file) { 
 					file && file.phash == phash && selectFile(file.hash);
@@ -943,23 +1009,12 @@ $.fn.elfindercwd = function(fm) {
 			.shortcut({
 				pattern     :'ctrl+a', 
 				description : 'selectall',
-				callback    : function() { 
-					var sel = [], phash;
-					
-					cwd.find('[id]:not(.'+clSelected+')').trigger(evtSelect); 
-					
-					if (buffer.length) {
-						phash = fm.cwd().hash;
-						fm.select({selected : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null; })})
-					} else {
-						trigger();
-					}
-				}
+				callback    : selectAll
 			})
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
 				description : 'selectfiles',
-				type        : 'keydown' , //$.browser.mozilla || $.browser.opera ? 'keypress' : 'keydown',
+				type        : 'keydown' , //fm.UA.Firefox || fm.UA.Opera ? 'keypress' : 'keydown',
 				callback    : function(e) { select(e.keyCode, e.shiftKey); }
 			})
 			.shortcut({
