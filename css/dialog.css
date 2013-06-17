@@ -10,6 +10,11 @@
 	right:auto;
 }
 
+/* position getting overwritten as relative by jquery-ui 1.10 */
+.std42-dialog.elfinder-dialog {
+	position:absolute;
+}
+
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
 	border-left:0 solid transparent;
