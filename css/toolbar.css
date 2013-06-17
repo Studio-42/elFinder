@@ -206,9 +206,9 @@
 	border:0 solid;
 	background:transparent;
 	padding:0;
-	margin: 1px 4px;
+	margin: 4px 4px;
 	height: auto;
-	min-height: 26px;
+	min-height: 30px;
 	float:right;
 	width:202px;
 	overflow: visible;
