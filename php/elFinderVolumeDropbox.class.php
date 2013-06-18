@@ -293,7 +293,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		} else {
 			$this->metaCacheArr = $data;
 			if ($refresh || ($data['mtime'] + $this->options['metaCacheTime']) < $_SERVER['REQUEST_TIME']) {
-				$this->deltaCheck();
+				$this->deltaCheck($refresh);
 			}
 		}
 		
@@ -461,7 +461,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return false;
 	}
 	
-	protected function deltaCheck() {
+	protected function deltaCheck($refresh = false) {
 
 		$cache = $this->metaCacheArr;
 		
@@ -474,7 +474,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				'mime_type' => '',
 				'bytes'     => 0
 			);
-		} else if (isset($cache['cursor'])) {
+		} else if (! $refresh && isset($cache['cursor'])) {
 			$cursor = $cache['cursor'];
 		}
 		
@@ -483,7 +483,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$info = array('cursor' => $cursor, 'entries' => array());
 			do {
 				$_info = $this->dropbox->delta($cursor);
-				$info['entries'] += $_info['entries'];
+				$info['entries'] = array_merge($info['entries'], $_info['entries']);
 				$cursor = $_info['cursor'];
 			} while(! empty($_info['has_more']));
 		} catch(Dropbox_Exception $e) {
