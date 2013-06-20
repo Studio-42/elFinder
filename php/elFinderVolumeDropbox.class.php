@@ -97,6 +97,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'root'              => 'dropbox',
 			'path'              => '/',
 			'PDO_DSN'           => '', // if empty use 'sqlite:(metaCachePath|tmbPath)/elFinder_dropbox_db_(hash:dropboxUid+consumerSecret)'
+			'PDO_User'          => '',
+			'PDO_Pass'          => '',
+			'PDO_Options'       => array(),
 			'PDO_DBName'        => 'dropbox',
 			'treeDeep'          => 0,
 			'tmbPath'           => '../files/.tmb',
@@ -349,7 +352,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		// DataBase table name
 		$this->DB_TableName = $this->options['PDO_DBName'];
 		// DataBase check or make table
-		if ($this->DB = new PDO($pdodsn)) {
+		if ($this->DB = new PDO($pdodsn, $this->options['PDO_User'], $this->options['PDO_Pass'], $this->options['PDO_Options'])) {
 			if (! $this->checkDB()) {
 				return $this->setError('Can not make DB table');
 			}
