@@ -371,6 +371,11 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 	}
 	
+	/**
+	 * Check DB for delta cache
+	 * 
+	 * @return void
+	 */
 	private function checkDB() {
 		$res = $this->query('select * from sqlite_master where type=\'table\' and name=\'dropbox\'; ');
 		if (! $res) {
@@ -380,6 +385,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 	}
 	
+	/**
+	 * DB query and fetchAll
+	 * 
+	 * @param string $sql
+	 * @return boolean|array
+	 */
 	private function query($sql) {
 		if ($sth = $this->DB->query($sql)) {
 			$res = $sth->fetchAll(PDO::FETCH_COLUMN);
@@ -389,6 +400,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $res;
 	}
 	
+	/**
+	 * Get dat(dropbox metadata) from DB
+	 * 
+	 * @param string $path
+	 * @return array dropbox metadata
+	 */
 	private function getDBdat($path) {
 		if ($res = $this->query('select dat from dropbox where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
 			return unserialize($res[0]);
@@ -397,6 +414,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 	}
 	
+	/**
+	 * Update DB dat(dropbox metadata)
+	 * 
+	 * @param string $path
+	 * @param array $dat
+	 * @return bool|array
+	 */
 	private function updateDBdat($path, $dat) {
 		return $this->query('update dropbox set dat='.$this->DB->quote(serialize($dat))
 				. ', isdir=' . ($dat['is_dir']? 1 : 0)
@@ -429,6 +453,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Get delta data and DB update
+	 * 
+	 * @param boolean $refresh force refresh
+	 * @return true|string error message
+	 */
 	protected function deltaCheck($refresh = true) {
 		$chk = false;
 		if (! $refresh && $chk = $this->query('select dat from dropbox where path=\'\' and fname=\'\' limit 1')) {
