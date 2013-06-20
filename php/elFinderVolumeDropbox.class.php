@@ -350,7 +350,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->DB_TableName = $this->options['PDO_DBName'];
 		// DataBase check or make table
 		if ($this->DB = new PDO($pdodsn)) {
-			$this->checkDB();
+			if (! $this->checkDB()) {
+				return $this->setError('Can not make DB table');
+			}
 		} else {
 			return $this->setError('Could not use PDO');
 		}
@@ -391,10 +393,15 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function checkDB() {
 		$res = $this->query('select * from sqlite_master where type=\'table\' and name=\'dropbox\'; ');
 		if (! $res) {
-			$this->DB->exec('CREATE TABLE '.$this->DB_TableName.'(path text, fname text, dat blob, isdir integer);');
-			$this->DB->exec('create index nameidx on '.$this->DB_TableName.'(path, fname)');
-			$this->DB->exec('create index isdiridx on '.$this->DB_TableName.'(isdir)');
+			try {
+				$this->DB->exec('create table '.$this->DB_TableName.'(path text, fname text, dat blob, isdir integer);');
+				$this->DB->exec('create index nameidx on '.$this->DB_TableName.'(path, fname)');
+				$this->DB->exec('create index isdiridx on '.$this->DB_TableName.'(isdir)');
+			} catch (PDOException $e) {
+				return $this->setError($e->getMessage());
+			}
 		}
+		return true;
 	}
 	
 	/**
