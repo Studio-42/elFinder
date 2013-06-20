@@ -756,7 +756,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			clearstatcache();
 			$size = getimagesize($path);
 			if ($fp = @fopen($path, 'rb')) {
-				$res = $this->_save($fp, $path4stat, array());
+				$res = $this->_save($fp, $path4stat, '', array());
 				@fclose($fp);
 	
 				file_exists($path) && @unlink($path);
@@ -1356,7 +1356,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			if (@file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = @fopen($local, 'rb'))) {
 				clearstatcache();
-				$res = $this->_save($fp, $path, array());
+				$res = $this->_save($fp, $path, '', array());
 				@fclose($fp);
 			}
 			file_exists($local) && @unlink($local);
