@@ -72,6 +72,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	
 	private $dropbox_phpFound = false;
 	
+	private $DB_TableName = '';
+	
 	/**
 	 * Constructor
 	 * Extend options with required fields
@@ -94,6 +96,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'dropboxUid'        => '',
 			'root'              => 'dropbox',
 			'path'              => '/',
+			'PDO_DSN'           => '', // if empty use 'sqlite:(metaCachePath|tmbPath)/elFinder_dropbox_db_(hash:dropboxUid+consumerSecret)'
+			'PDO_DBName'        => 'dropbox',
 			'treeDeep'          => 0,
 			'tmbPath'           => '../files/.tmb',
 			'tmbURL'            => 'files/.tmb',
@@ -336,11 +340,19 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Cache dirctory (metaCachePath or tmp) is require.');
 		}
 		
-		$dbfile = $this->metaCache.DIRECTORY_SEPARATOR.'.elFinder_dropbox_db_'.md5($this->dropboxUid.$this->options['consumerSecret']);
-		if ($this->DB = new PDO('sqlite:'.$dbfile)) {
+		// setup PDO
+		if ($this->options['PDO_DSN']) {
+			$pdodsn = $this->options['PDO_DSN'];
+		} else {
+			$pdodsn = 'sqlite:'.$this->metaCache.DIRECTORY_SEPARATOR.'.elFinder_dropbox_db_'.md5($this->dropboxUid.$this->options['consumerSecret']);
+		}
+		// DataBase table name
+		$this->DB_TableName = $this->options['PDO_DBName'];
+		// DataBase check or make table
+		if ($this->DB = new PDO($pdodsn)) {
 			$this->checkDB();
 		} else {
-			return $this->setError('Could not use PDO(SQLite)');
+			return $this->setError('Could not use PDO');
 		}
 		
 		$res = $this->deltaCheck(!empty($_REQUEST['init']));
@@ -379,9 +391,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function checkDB() {
 		$res = $this->query('select * from sqlite_master where type=\'table\' and name=\'dropbox\'; ');
 		if (! $res) {
-			$this->DB->exec('CREATE TABLE dropbox(path text, fname text, dat blob, isdir integer);');
-			$this->DB->exec('create index nameidx on dropbox(path, fname)');
-			$this->DB->exec('create index isdiridx on dropbox(isdir)');
+			$this->DB->exec('CREATE TABLE '.$this->DB_TableName.'(path text, fname text, dat blob, isdir integer);');
+			$this->DB->exec('create index nameidx on '.$this->DB_TableName.'(path, fname)');
+			$this->DB->exec('create index isdiridx on '.$this->DB_TableName.'(isdir)');
 		}
 	}
 	
@@ -407,7 +419,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return array dropbox metadata
 	 */
 	private function getDBdat($path) {
-		if ($res = $this->query('select dat from dropbox where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
+		if ($res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
 			return unserialize($res[0]);
 		} else {
 			return array();
@@ -422,7 +434,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return bool|array
 	 */
 	private function updateDBdat($path, $dat) {
-		return $this->query('update dropbox set dat='.$this->DB->quote(serialize($dat))
+		return $this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($dat))
 				. ', isdir=' . ($dat['is_dir']? 1 : 0)
 				. ' where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))));
 	}
@@ -461,7 +473,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 */
 	protected function deltaCheck($refresh = true) {
 		$chk = false;
-		if (! $refresh && $chk = $this->query('select dat from dropbox where path=\'\' and fname=\'\' limit 1')) {
+		if (! $refresh && $chk = $this->query('select dat from '.$this->DB_TableName.' where path=\'\' and fname=\'\' limit 1')) {
 			$chk = unserialize($chk[0]);
 		}
 		if ($chk && ($chk['mtime'] + $this->options['metaCacheTime']) > $_SERVER['REQUEST_TIME']) {
@@ -472,7 +484,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$more = true;
 			$this->DB->beginTransaction();
 			
-			if ($res = $this->query('select dat from dropbox where path=\'\' and fname=\'\' limit 1')) {
+			if ($res = $this->query('select dat from '.$this->DB_TableName.' where path=\'\' and fname=\'\' limit 1')) {
 				$res = unserialize($res[0]);
 				$cursor = $res['cursor'];
 			} else {
@@ -484,9 +496,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				@ ini_set('max_execution_time', 120);
 				$_info = $this->dropbox->delta($cursor);
 				if (! empty($_info['reset'])) {
-					$this->DB->exec('TRUNCATE table dropbox');
-					$this->DB->exec('insert into dropbox values(\'\', \'\', \''.serialize(array('cursor' => '', 'mtime' => 0)).'\', 0);');
-					$this->DB->exec('insert into dropbox values(\'/\', \'\', \''.serialize(array(
+					$this->DB->exec('TRUNCATE table '.$this->DB_TableName);
+					$this->DB->exec('insert into '.$this->DB_TableName.' values(\'\', \'\', \''.serialize(array('cursor' => '', 'mtime' => 0)).'\', 0);');
+					$this->DB->exec('insert into '.$this->DB_TableName.' values(\'/\', \'\', \''.serialize(array(
 						'path'      => '/',
 						'is_dir'    => 1,
 						'mime_type' => '',
@@ -505,20 +517,20 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					$where = 'where path='.$path.' and fname='.$fname;
 					
 					if (empty($entry[1])) {
-						$this->query('delete from dropbox '.$where);
+						$this->query('delete from '.$this->DB_TableName.' '.$where);
 						! $delete && $delete = true;
 						continue;
 					}
 
-					$sql = 'select path from dropbox '.$where.' limit 1';
+					$sql = 'select path from '.$this->DB_TableName.' '.$where.' limit 1';
 					if (! $reset && $this->query($sql)) {
-						$this->query('update dropbox set dat='.$this->DB->quote(serialize($entry[1])).', isdir='.($entry[1]['is_dir']? 1 : 0).' ' .$where);
+						$this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($entry[1])).', isdir='.($entry[1]['is_dir']? 1 : 0).' ' .$where);
 					} else {
-						$this->query('insert into dropbox values('.$path.', '.$fname.', '.$this->DB->quote(serialize($entry[1])).', '.$this->DB->quote((int)$entry[1]['is_dir']).')');
+						$this->query('insert into '.$this->DB_TableName.' values('.$path.', '.$fname.', '.$this->DB->quote(serialize($entry[1])).', '.$this->DB->quote((int)$entry[1]['is_dir']).')');
 					}
 				}
 			} while (! empty($_info['has_more']));
-			$this->query('update dropbox set dat='.$this->DB->quote(serialize(array('cursor'=>$cursor, 'mtime'=>$_SERVER['REQUEST_TIME']))).' where path=\'\' and fname=\'\'');
+			$this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize(array('cursor'=>$cursor, 'mtime'=>$_SERVER['REQUEST_TIME']))).' where path=\'\' and fname=\'\'');
 			if (! $this->DB->commit()) {
 				$e = $this->DB->errorInfo();
 				return $e[2];
@@ -550,7 +562,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		                (isset($raw['modified'])? strtotime($raw['modified']) : $_SERVER['REQUEST_TIME']);
 		$stat['dirs'] = 0;
 		if ($raw['is_dir']) {
-			$stat['dirs'] = (int)(bool)$this->query('select path from dropbox where isdir=1 and path='.$this->DB->quote(strtolower($raw['path'])));
+			$stat['dirs'] = (int)(bool)$this->query('select path from '.$this->DB_TableName.' where isdir=1 and path='.$this->DB->quote(strtolower($raw['path'])));
 		}
 		
 		if (isset($raw['url'])) {
@@ -573,7 +585,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
-		$res = $this->query('select dat from dropbox where path='.$this->DB->quote(strtolower($path)));
+		$res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower($path)));
 		
 		if ($res) {
 			foreach($res as $raw) {
