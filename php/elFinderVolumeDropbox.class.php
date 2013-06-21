@@ -926,10 +926,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						$url = $match[1] . '?dl=1';
 					}
 					if ($url) {
-						$cache['share'] = $url;
-						$this->updateDBdat($path, $cache);
+						if (! isset($cache['share']) || $cache['share'] !== $url) {
+							$cache['share'] = $url;
+							$this->updateDBdat($path, $cache);
+						}
 						$res = $this->getHttpResponseHeader($url);
-						if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
+						if (preg_match('/^location:\s*(http[^\s?]+)/im', $res, $match)) {
 							$url = $match[1];
 						}
 					}
