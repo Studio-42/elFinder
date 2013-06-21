@@ -344,15 +344,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		
 		// setup PDO
-		if ($this->options['PDO_DSN']) {
-			$pdodsn = $this->options['PDO_DSN'];
-		} else {
-			$pdodsn = 'sqlite:'.$this->metaCache.DIRECTORY_SEPARATOR.'.elFinder_dropbox_db_'.md5($this->dropboxUid.$this->options['consumerSecret']);
+		if (! $this->options['PDO_DSN']) {
+			$this->options['PDO_DSN'] = 'sqlite:'.$this->metaCache.DIRECTORY_SEPARATOR.'.elFinder_dropbox_db_'.md5($this->dropboxUid.$this->options['consumerSecret']);
 		}
 		// DataBase table name
 		$this->DB_TableName = $this->options['PDO_DBName'];
 		// DataBase check or make table
-		if ($this->DB = new PDO($pdodsn, $this->options['PDO_User'], $this->options['PDO_Pass'], $this->options['PDO_Options'])) {
+		if ($this->DB = new PDO($this->options['PDO_DSN'], $this->options['PDO_User'], $this->options['PDO_Pass'], $this->options['PDO_Options'])) {
 			if (! $this->checkDB()) {
 				return $this->setError('Can not make DB table');
 			}
@@ -527,20 +525,20 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					$where = 'where path='.$path.' and fname='.$fname;
 					
 					if (empty($entry[1])) {
-						$this->query('delete from '.$this->DB_TableName.' '.$where);
+						$this->DB->exec('delete from '.$this->DB_TableName.' '.$where);
 						! $delete && $delete = true;
 						continue;
 					}
 
 					$sql = 'select path from '.$this->DB_TableName.' '.$where.' limit 1';
 					if (! $reset && $this->query($sql)) {
-						$this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($entry[1])).', isdir='.($entry[1]['is_dir']? 1 : 0).' ' .$where);
+						$this->DB->exec('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($entry[1])).', isdir='.($entry[1]['is_dir']? 1 : 0).' ' .$where);
 					} else {
-						$this->query('insert into '.$this->DB_TableName.' values('.$path.', '.$fname.', '.$this->DB->quote(serialize($entry[1])).', '.$this->DB->quote((int)$entry[1]['is_dir']).')');
+						$this->DB->exec('insert into '.$this->DB_TableName.' values ('.$path.', '.$fname.', '.$this->DB->quote(serialize($entry[1])).', '.(int)$entry[1]['is_dir'].')');
 					}
 				}
 			} while (! empty($_info['has_more']));
-			$this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize(array('cursor'=>$cursor, 'mtime'=>$_SERVER['REQUEST_TIME']))).' where path=\'\' and fname=\'\'');
+			$this->DB->exec('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize(array('cursor'=>$cursor, 'mtime'=>$_SERVER['REQUEST_TIME']))).' where path=\'\' and fname=\'\'');
 			if (! $this->DB->commit()) {
 				$e = $this->DB->errorInfo();
 				return $e[2];
