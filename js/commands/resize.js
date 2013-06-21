@@ -404,7 +404,7 @@ elFinder.prototype.commands.resize = function() {
 										handles     : 'all'
 									})
 									.draggable({
-										handle      : rhandlec,
+										handle      : coverc,
 										containment : imgc,
 										drag        : crop.update
 									});
