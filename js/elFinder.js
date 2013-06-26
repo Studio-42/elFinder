@@ -746,6 +746,20 @@ window.elFinder = function(node, opts) {
 			return '';
 		}
 		
+		if (file.url == '1') {
+			this.request({
+				data : {cmd : 'url', target : hash},
+				preventFail : true,
+				options: {async: false}
+			})
+			.done(function(data) {
+				file.url = data.url || '';
+			})
+			.fail(function() {
+				file.url = '';
+			});
+		}
+		
 		if (file.url) {
 			return file.url;
 		}
