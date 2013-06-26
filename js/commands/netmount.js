@@ -71,7 +71,6 @@ elFinder.prototype.commands.netmount = function() {
 				content.append(hidden);
 				
 				content.find('.elfinder-netmount-tr').hide();
-				inputs.protocol.change();
 
 				opts.buttons[fm.i18n('btnMount')] = function() {
 					var protocol = inputs.protocol.val();
@@ -92,7 +91,7 @@ elFinder.prototype.commands.netmount = function() {
 						return self.fm.trigger('error', {error : 'errNetMountHostReq'});
 					}
 
-					self.fm.request({data : data, notify : {type : 'netmount', cnt : 1}})
+					self.fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 						.done(function() { dfrd.resolve(); })
 						.fail(function(error) { dfrd.reject(error); });
 
@@ -156,15 +155,27 @@ elFinder.prototype.commands.netunmount = function() {
 					label    : 'btnUnmount',
 					callback : function() {  
 						fm.request({
-							data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : 'dum', pass : 'dum'}, 
-							notify : {type : 'netunmount', cnt : 1},
+							data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : drive.hash, pass : 'dum'}, 
+							notify : {type : 'netunmount', cnt : 1, hideCnt : true},
 							preventFail : true
 						})
 						.fail(function(error) {
 							dfrd.reject(error);
 						})
 						.done(function(data) {
-							dfrd.promise();
+							var chDrive = (fm.root() == drive.hash);
+							data.removed = [ drive.hash ];
+							fm.remove(data);
+							if (chDrive) {
+								var files = fm.files();
+								for (var i in files) {
+									if (fm.file(i).mime == 'directory') {
+										fm.exec('open', i);
+										break;
+									}
+								}
+							}
+							dfrd.resolve();
 						});
 					}
 				},

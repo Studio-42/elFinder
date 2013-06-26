@@ -507,11 +507,20 @@ class elFinder {
 		
 		if ($protocol === 'netunmount') {
 			if (isset($_SESSION) && is_array($_SESSION) && isset($_SESSION[$this->netVolumesSessionKey][$args['host']])) {
-				unset($_SESSION[$this->netVolumesSessionKey][$args['host']]);
-				return array('sync' => true);
-			} else {
-				return array('error' => $this->error(self::ERROR_NETUNMOUNT));
+				$res = true;
+				$netVolumes = $this->getNetVolumes();
+				$key = $args['host'];
+				$volume = $this->volume($args['user']);
+				if (method_exists($volume, 'netunmount')) {
+					$res = $volume->netunmount($netVolumes[$key]);
+				}
+				if ($res) {
+					unset($netVolumes[$key]);
+					$this->saveNetVolumes($netVolumes);
+					return array('sync' => true);
+				}
 			}
+			return array('error' => $this->error(self::ERROR_NETUNMOUNT));
 		}
 		
 		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
