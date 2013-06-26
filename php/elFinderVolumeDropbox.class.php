@@ -231,6 +231,21 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * process of on netunmount
+	 * Drop table `dropbox` & rm thumbs
+	 * 
+	 * @param array $options
+	 * @return boolean
+	 */
+	public function netunmount($options) {
+		$this->DB->exec('drop table '.$this->DB_TableName);
+		foreach(glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.'dropbox_'.md5($this->dropboxUid).'_*.png') as $tmb) {
+			unlink($tmb);
+		}
+		return true;
+	}
+	
+	/**
 	 * Get script url
 	 * 
 	 * @return string full URL
@@ -874,7 +889,11 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function tmbname($stat) {
-		return 'dropbox_'.$stat['rev'].'.png';
+		static $md5;
+		if (! $md5) {
+			$md5 = md5($this->dropboxUid);
+		}
+		return 'dropbox_'.$md5.'_'.$stat['rev'].'.png';
 	}
 	
 	/**
