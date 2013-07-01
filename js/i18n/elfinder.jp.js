@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2013-05-20
+ * @version 2013-07-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -150,6 +150,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
+			'ntfreaddir'  : 'ホルダ情報を読み取っています', // added 01.07.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
