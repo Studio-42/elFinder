@@ -877,6 +877,7 @@ abstract class elFinderVolumeDriver {
 			'disabled'      => $this->disabled,
 			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
+			'uploadMaxSize' => intval($this->uploadMaxSize),
 			'archivers'     => array(
 				// 'create'  => array_keys($this->archivers['create']),
 				// 'extract' => array_keys($this->archivers['extract']),

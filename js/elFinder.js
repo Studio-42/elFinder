@@ -116,6 +116,7 @@ window.elFinder = function(node, opts) {
 			archives      : [],
 			extract       : [],
 			copyOverwrite : true,
+			uploadMaxSize : 0,
 			tmb           : false // old API
 		},
 		
@@ -2319,11 +2320,11 @@ elFinder.prototype = {
 			}, false);
 			
 			var send = function(files, paths){
-				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt;
+				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize;
 				if (! data.checked) {
-					
+					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : fm.uplMaxSize;
 					for (var i=0; i < files.length; i++) {
-						if (fm.uplMaxSize && files[i].size >= fm.uplMaxSize) {
+						if (maxFileSize && files[i].size >= maxFileSize) {
 							self.error(self.i18n('errUploadFile', files[i].name) + ' ' + self.i18n('errUploadFileSize'));
 							continue;
 						}
@@ -2350,6 +2351,7 @@ elFinder.prototype = {
 					}
 					
 					if (sfiles.length == 0) {
+						data.checked = true;
 						return false;
 					}
 					
