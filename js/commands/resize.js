@@ -109,10 +109,10 @@ elFinder.prototype.commands.resize = function() {
 								width.val(w);
 							}
 						}),
-					pointX  = $(input),
-					pointY  = $(input),
-					offsetX = $(input),
-					offsetY = $(input),
+					pointX  = $(input).change(function(){crop.updateView();}),
+					pointY  = $(input).change(function(){crop.updateView();}),
+					offsetX = $(input).change(function(){crop.updateView();}),
+					offsetY = $(input).change(function(){crop.updateView();}),
 					degree = $('<input type="text" size="3" maxlength="3" value="0" />')
 						.change(function() {
 							rotate.update();
@@ -178,6 +178,8 @@ elFinder.prototype.commands.resize = function() {
 
 										if (i.length) {
 											i.focus();
+										} else {
+											$(this).parent().parent().find(':text:' + (e.shiftKey ? 'last' : 'first')).focus();
 										}
 									}
 								
@@ -218,9 +220,11 @@ elFinder.prototype.commands.resize = function() {
 						updateView : function(w, h) {
 							if (w > pwidth || h > pheight) {
 								if (w / pwidth > h / pheight) {
-									img.width(pwidth).height(Math.ceil(img.width()/ratio));
+									prop = pwidth / w;
+									img.width(pwidth).height(Math.ceil(h*prop));
 								} else {
-									img.height(pheight).width(Math.ceil(img.height()*ratio));
+									prop = pheight / h;
+									img.height(pheight).width(Math.ceil(w*prop));
 								}
 							} else {
 								img.width(w).height(h);
@@ -259,6 +263,16 @@ elFinder.prototype.commands.resize = function() {
 							offsetY.val(parseInt(rhandlec.height()/prop));
 							pointX.val(parseInt((rhandlec.offset().left-imgc.offset().left)/prop));
 							pointY.val(parseInt((rhandlec.offset().top-imgc.offset().top)/prop));
+						},
+						updateView : function() {
+							var w = parseInt(offsetX.val() * prop);
+							var h = parseInt(offsetY.val() * prop);
+							rhandlec.width(w);
+							rhandlec.height(h);
+							coverc.width(rhandlec.width());
+							coverc.height(rhandlec.height());
+							rhandlec.offset({left: parseInt(pointX.val()) * prop + imgc.offset().left,
+							                 top: parseInt(pointY.val()) * prop + imgc.offset().top});
 						},
 						resize_update : function() {
 							crop.update();
@@ -566,8 +580,8 @@ elFinder.prototype.commands.resize = function() {
 				
 				dialog.append(preview).append(control);
 				
-				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				buttons[fm.i18n('btnApply')] = save;
+				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				fm.dialog(dialog, {
 					title          : file.name,
