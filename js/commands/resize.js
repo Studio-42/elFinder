@@ -15,7 +15,7 @@ elFinder.prototype.commands.resize = function() {
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();
 		return !this._disabled && sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes) {
 		var fm    = this.fm,
@@ -177,12 +177,12 @@ elFinder.prototype.commands.resize = function() {
 										i = $(this).parent()[e.shiftKey ? 'prev' : 'next']('.elfinder-resize-row').children(':text');
 
 										if (i.length) {
-											i.focus()
+											i.focus();
 										}
 									}
 								
 									if (c == 13) {
-										save()
+										save();
 										return;
 									}
 								
@@ -212,7 +212,7 @@ elFinder.prototype.commands.resize = function() {
 					resize = {
 						update : function() {
 							width.val(parseInt(img.width()/prop));
-							height.val(parseInt(img.height()/prop))
+							height.val(parseInt(img.height()/prop));
 						},
 						
 						updateView : function(w, h) {
@@ -227,7 +227,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 							
 							prop = img.width()/w;
-							uiprop.text('1 : '+(1/prop).toFixed(2))
+							uiprop.text('1 : '+(1/prop).toFixed(2));
 							resize.updateHandle();
 						},
 						
@@ -540,7 +540,7 @@ elFinder.prototype.commands.resize = function() {
 					.append('<div class="'+vline+' '+vline+'-right"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-e"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
-					.append('<div class="'+rpoint+' '+rpoint+'-s"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-s"/>');
 					
 				preview.append(spinner).append(rhandle.hide()).append(img.hide());
 
@@ -556,7 +556,7 @@ elFinder.prototype.commands.resize = function() {
 					.append('<div class="'+rpoint+' '+rpoint+'-ne"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-se"/>')
 					.append('<div class="'+rpoint+' '+rpoint+'-sw"/>')
-					.append('<div class="'+rpoint+' '+rpoint+'-nw"/>')
+					.append('<div class="'+rpoint+' '+rpoint+'-nw"/>');
 
 				preview.append(basec.css('position', 'absolute').hide().append(imgc).append(rhandlec.append(coverc)));
 				
@@ -625,7 +625,7 @@ elFinder.prototype.commands.resize = function() {
 		open(files[0], id);
 			
 		return dfrd;
-	}
+	};
 
 };
 
