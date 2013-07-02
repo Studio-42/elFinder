@@ -92,7 +92,7 @@ elFinder.prototype.commands.resize = function() {
 					width   = $(input)
 						.change(function() {
 							var w = parseInt(width.val()),
-								h = parseInt(cratio ? w/ratio : height.val());
+								h = parseInt(cratio ? Math.round(w/ratio) : height.val());
 
 							if (w > 0 && h > 0) {
 								resize.updateView(w, h);
@@ -102,7 +102,7 @@ elFinder.prototype.commands.resize = function() {
 					height  = $(input)
 						.change(function() {
 							var h = parseInt(height.val()),
-								w = parseInt(cratio ? h*ratio : width.val());
+								w = parseInt(cratio ? Math.round(h*ratio) : width.val());
 
 							if (w > 0 && h > 0) {
 								resize.updateView(w, h);
@@ -213,8 +213,8 @@ elFinder.prototype.commands.resize = function() {
 					},
 					resize = {
 						update : function() {
-							width.val(parseInt(img.width()/prop));
-							height.val(parseInt(img.height()/prop));
+							width.val(Math.round(img.width()/prop));
+							height.val(Math.round(img.height()/prop));
 						},
 						
 						updateView : function(w, h) {
@@ -242,7 +242,7 @@ elFinder.prototype.commands.resize = function() {
 							var w, h;
 							if (cratio) {
 								h = height.val();
-								h = parseInt(h*ratio);
+								h = Math.round(h*ratio);
 								resize.updateView(w, h);
 								width.val(w);
 							}
@@ -251,7 +251,7 @@ elFinder.prototype.commands.resize = function() {
 							var w, h;
 							if (cratio) {
 								w = width.val();
-								h = parseInt(w/ratio);
+								h = Math.round(w/ratio);
 								resize.updateView(w, h);
 								height.val(h);
 							}
@@ -259,20 +259,20 @@ elFinder.prototype.commands.resize = function() {
 					},
 					crop = {
 						update : function() {
-							offsetX.val(parseInt(rhandlec.width()/prop));
-							offsetY.val(parseInt(rhandlec.height()/prop));
-							pointX.val(parseInt((rhandlec.offset().left-imgc.offset().left)/prop));
-							pointY.val(parseInt((rhandlec.offset().top-imgc.offset().top)/prop));
+							offsetX.val(Math.round(rhandlec.width()/prop));
+							offsetY.val(Math.round(rhandlec.height()/prop));
+							pointX.val(Math.round((rhandlec.offset().left-imgc.offset().left)/prop));
+							pointY.val(Math.round((rhandlec.offset().top-imgc.offset().top)/prop));
 						},
 						updateView : function() {
-							var w = parseInt(offsetX.val() * prop);
-							var h = parseInt(offsetY.val() * prop);
+							var w = Math.round(offsetX.val() * prop);
+							var h = Math.round(offsetY.val() * prop);
 							rhandlec.width(w);
 							rhandlec.height(h);
 							coverc.width(rhandlec.width());
 							coverc.height(rhandlec.height());
-							rhandlec.offset({left: parseInt(pointX.val()) * prop + imgc.offset().left,
-							                 top: parseInt(pointY.val()) * prop + imgc.offset().top});
+							rhandlec.offset({left: Math.round(pointX.val()) * prop + imgc.offset().left,
+							                 top: Math.round(pointY.val()) * prop + imgc.offset().top});
 						},
 						resize_update : function() {
 							crop.update();
