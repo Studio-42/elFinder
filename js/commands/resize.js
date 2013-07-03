@@ -184,7 +184,20 @@ elFinder.prototype.commands.resize = function() {
 									}
 								
 									if (c == 13) {
-										save();
+										fm.confirm({
+											title  : $('input:checked', uitype).val(),
+											text   : 'confirmReq',
+											accept : {
+												label    : 'btnApply',
+												callback : function() {  
+													save();
+												}
+											},
+											cancel : {
+												label    : 'btnCancel',
+												callback : function(){}
+											}
+										});
 										return;
 									}
 								
