@@ -75,6 +75,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'シンボリックリンクまたは許容されないファイル名を含むアーカイブはセキュリティ上、解凍できません', // edited 25.06.2012
 			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
 			'errResize'            : '"$1"をリサイズできません',
+			'errResizeDegree'      : 'イメージの回転角度が不正です',  // added 7.3.2013
+			'errResizeRotate'      : 'イメージの回転ができません',  // added 7.3.2013
+			'errResizeSize'        : '指定されたイメージサイズが不正です',  // added 7.3.2013
+			'errResizeNoChange'    : 'イメージサイズなどの変更がありません',  // added 7.3.2013
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
 			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
 			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
