@@ -50,12 +50,11 @@ elFinder.prototype.commands.resize = function() {
 						})),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
-					//uitype   = $('<div class="elfinder-resize-type"><div class="elfinder-resize-label">'+fm.i18n('mode')+'</div></div>')
 					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input type="radio" name="type" id="type-resize" value="resize" checked="checked" /><label for="type-resize">'+fm.i18n('resize')+'</label>')
-						.append('<input type="radio" name="type" id="type-crop"   value="crop"/><label for="type-crop">'+fm.i18n('crop')+'</label>')
-						.append('<input type="radio" name="type" id="type-rotate" value="rotate"/><label for="type-rotate">'+fm.i18n('rotate')+'</label>'),
-					type     = $('input', uitype)
+						.append('<input type="radio" name="type" id="type-crop" value="crop" /><label for="type-crop">'+fm.i18n('crop')+'</label>')
+						.append('<input type="radio" name="type" id="type-rotate" value="rotate" /><label for="type-rotate">'+fm.i18n('rotate')+'</label>'),
+					type     = $('input', uitype).attr('disabled', 'disabled')
 						.change(function() {
 							var val = $('input:checked', uitype).val();
 							
@@ -159,6 +158,7 @@ elFinder.prototype.commands.resize = function() {
 							rwidth = owidth * r_scale;
 							rheight = oheight * r_scale;
 							
+							type.button('enable');
 							control.find('input,select').removeAttr('disabled')
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
