@@ -71,6 +71,7 @@ elFinder.prototype.commands.getfile = function() {
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
+
 			if (!file.width && !file.height) {
 				if (file.dim) {
 					dim = file.dim.split('x');
@@ -81,18 +82,23 @@ elFinder.prototype.commands.getfile = function() {
 						data : {cmd : 'dim', target : file.hash},
 						notify : {type : 'dim', cnt : 1, hideCnt : true},
 						preventDefault : true
-					})
-					.done(function(data) {
-						if (data.dim) {
-							var dim = data.dim.split('x');
-							var rfile = fm.file(file.hash);
-							rfile.width = file.width = dim[0];
-							rfile.height = file.height = dim[1];
-						}
-					}));
-				}
-			}
-		}
+						})
+					);
+			  }
+		  }
+    }
+
+		$.each(req, function(index, value) {
+      value.done(function(data) {
+        if (data.dim) {
+          var file = files[index];
+          var dim = data.dim.split('x');
+          var rfile = fm.file(file.hash);
+          rfile.width = file.width = dim[0];
+          rfile.height = file.height = dim[1];
+        }
+      });
+    });
 		
 		if (req.length) {
 			$.when.apply(null, req).always(function() {
