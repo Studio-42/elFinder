@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2013-05-20
+ * @version 2013-07-03
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -176,9 +176,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortFoldersFirst'  : 'フォルダ優先', // added 21.06.2012
 
 			/********************************** messages **********************************/
-			'confirmReq'      : '確認必須です',
-			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません!',
-			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか?',
+			'confirmReq'      : '処理を実行しますか？',
+			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません！',
+			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか？',
 			'apllyAll'        : '全てに適用します',
 			'name'            : '名前',
 			'size'            : 'サイズ',
