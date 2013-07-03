@@ -259,25 +259,32 @@ elFinder.prototype.commands.resize = function() {
 					},
 					crop = {
 						update : function() {
-							offsetX.val(Math.round(rhandlec.width()/prop));
-							offsetY.val(Math.round(rhandlec.height()/prop));
-							pointX.val(Math.round((rhandlec.offset().left-imgc.offset().left)/prop));
-							pointY.val(Math.round((rhandlec.offset().top-imgc.offset().top)/prop));
+							offsetX.val(Math.round((rhandlec.data('w')||rhandlec.width())/prop));
+							offsetY.val(Math.round((rhandlec.data('h')||rhandlec.height())/prop));
+							pointX.val(Math.round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
+							pointY.val(Math.round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
 						},
 						updateView : function() {
-							var w = Math.round(offsetX.val() * prop);
-							var h = Math.round(offsetY.val() * prop);
-							rhandlec.width(w);
-							rhandlec.height(h);
+							var x = parseInt(pointX.val()) * prop + imgc.offset().left;
+							var y = parseInt(pointY.val()) * prop + imgc.offset().top;
+							var w = offsetX.val() * prop;
+							var h = offsetY.val() * prop;
+							rhandlec.data({x: x, y: y, w: w, h: h});
+							rhandlec.width(Math.round(w));
+							rhandlec.height(Math.round(h));
 							coverc.width(rhandlec.width());
 							coverc.height(rhandlec.height());
-							rhandlec.offset({left: Math.round(pointX.val()) * prop + imgc.offset().left,
-							                 top: Math.round(pointY.val()) * prop + imgc.offset().top});
+							rhandlec.offset({left: Math.round(x), top: Math.round(y)});
 						},
 						resize_update : function() {
+							rhandlec.data({w: null, h: null});
 							crop.update();
 							coverc.width(rhandlec.width());
 							coverc.height(rhandlec.height());
+						},
+						drag_update : function() {
+							rhandlec.data({x: null, y: null});
+							crop.update();
 						}
 					},
 					rotate = {
@@ -420,7 +427,7 @@ elFinder.prototype.commands.resize = function() {
 									.draggable({
 										handle      : coverc,
 										containment : imgc,
-										drag        : crop.update
+										drag        : crop.drag_update
 									});
 								
 								basec.show()
@@ -450,7 +457,7 @@ elFinder.prototype.commands.resize = function() {
 						var w, h, x, y, d;
 						var mode = $('input:checked', uitype).val();
 						
-						width.add(height).change();
+						//width.add(height).change(); // may be unnecessary
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
