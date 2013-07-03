@@ -51,9 +51,9 @@ elFinder.prototype.commands.resize = function() {
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
 					uitype   = $('<div class="elfinder-resize-type"/>')
-						.append('<input type="radio" name="type" id="type-resize" value="resize" checked="checked" /><label for="type-resize">'+fm.i18n('resize')+'</label>')
-						.append('<input type="radio" name="type" id="type-crop" value="crop" /><label for="type-crop">'+fm.i18n('crop')+'</label>')
-						.append('<input type="radio" name="type" id="type-rotate" value="rotate" /><label for="type-rotate">'+fm.i18n('rotate')+'</label>'),
+						.append('<input type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>')
+						.append('<input type="radio" name="type" id="'+id+'-crop" value="crop" /><label for="'+id+'-crop">'+fm.i18n('crop')+'</label>')
+						.append('<input type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					type     = $('input', uitype).attr('disabled', 'disabled')
 						.change(function() {
 							var val = $('input:checked', uitype).val();
@@ -184,7 +184,20 @@ elFinder.prototype.commands.resize = function() {
 									}
 								
 									if (c == 13) {
-										save();
+										fm.confirm({
+											title  : $('input:checked', uitype).val(),
+											text   : 'confirmReq',
+											accept : {
+												label    : 'btnApply',
+												callback : function() {  
+													save();
+												}
+											},
+											cancel : {
+												label    : 'btnCancel',
+												callback : function(){}
+											}
+										});
 										return;
 									}
 								
