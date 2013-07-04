@@ -85,11 +85,11 @@ elFinder.prototype.commands.getfile = function() {
 					.done(function(data) {
 						if (data.dim) {
 							var dim = data.dim.split('x');
-							var rfile = fm.file(file.hash);
-							rfile.width = file.width = dim[0];
-							rfile.height = file.height = dim[1];
+							var rfile = fm.file(this.hash);
+							rfile.width = this.width = dim[0];
+							rfile.height = this.height = dim[1];
 						}
-					}));
+					}.bind(file)));
 				}
 			}
 		}
