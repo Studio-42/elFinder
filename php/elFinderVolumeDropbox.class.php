@@ -282,6 +282,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('Required options undefined.');
 		}
 		
+		if (empty($this->options['metaCachePath']) && defined('ELFINDER_DROPBOX_META_CACHE_PATH')) {
+			$this->options['metaCachePath'] = ELFINDER_DROPBOX_META_CACHE_PATH;
+		}
+		
 		// make net mount key
 		$this->netMountKey = md5(join('-', array('dropbox', $this->options['path'])));
 
