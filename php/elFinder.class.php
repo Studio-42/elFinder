@@ -74,6 +74,13 @@ class elFinder {
 	);
 	
 	/**
+	 * Plugins instance
+	 *
+	 * @var array
+	 **/
+	protected $plugins = array();
+	
+	/**
 	 * Commands listeners
 	 *
 	 * @var array
@@ -198,10 +205,26 @@ class elFinder {
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
+		// make instance of plugins by opts
+ 		if (!empty($opts['plugin']) && is_array($opts['plugin'])) {
+ 			foreach ($opts['plugin'] as $_name => $_opts) {
+ 				$this->getPluginInstance($_name, $_opts);
+ 			}
+ 		}
+		
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
 			foreach ($opts['bind'] as $cmd => $handler) {
-				$this->bind($cmd, $handler);
+				if (strpos($handler, '.')) {
+					list($_domain, $_name, $_method) = array_pad(explode('.', $handler), 3, '');
+					if (strcasecmp($_domain, 'plugin') === 0) {
+						if ($plugin = $this->getPluginInstance($_name) and method_exists($plugin, $_method)) {
+							$this->bind($cmd, array($plugin, $_method));
+						}
+					}
+				} else {
+					$this->bind($cmd, $handler);
+				}
 			}
 		}
 
@@ -466,6 +489,29 @@ class elFinder {
 	 */
 	protected function saveNetVolumes($volumes) {
 		$_SESSION['elFinderNetVolumes'] = $volumes;
+	}
+
+	/**
+	 * Get plugin instance & set to $this->plugins
+	 * 
+	 * @param  string $name   Plugin name (dirctory name)
+	 * @param  array  $opts   Plugin options (optional)
+	 * @return object | bool Plugin object instance Or false
+	 * @author Naoki Sawada
+	 */
+	protected function getPluginInstance($name, $opts = array()) {
+		$key = strtolower($name);
+		if (! isset($this->plugins[$key])) {
+			$p_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . 'plugin.php';
+			if (is_file($p_file)) {
+				require_once $p_file;
+				$class = 'elFinderPlugin' . $name;
+				$this->plugins[$key] = new $class($opts);
+			} else {
+				$this->plugins[$key] = false;
+			}
+		}
+		return $this->plugins[$key];
 	}
 
 	/***************************************************************************/
@@ -1129,6 +1175,14 @@ class elFinder {
 			}
 			
 			$tmpname = $files['tmp_name'][$i];
+			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
+			
+			// do hook function 'upload.presave'
+			if (! empty($this->listeners['upload.presave'])) {
+				foreach($this->listeners['upload.presave'] as $handler) {
+					call_user_func_array($handler, array(&$path, &$name, $tmpname, $this, $volume));
+				}
+			}
 			
 			if (($fp = fopen($tmpname, 'rb')) == false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
@@ -1139,8 +1193,8 @@ class elFinder {
 				}
 				break;
 			}
-			if ($paths && !empty($paths[$i])) {
-				$_target = $volume->getUploadTaget($target, $paths[$i], $result);
+			if ($path) {
+				$_target = $volume->getUploadTaget($target, $path, $result);
 			} else {
 				$_target = $target;
 			}
