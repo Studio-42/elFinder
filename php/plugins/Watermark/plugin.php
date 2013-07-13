@@ -150,13 +150,12 @@ class elFinderPluginWatermark {
 		$dest_y = $srcImgInfo[1] - $watermark_height - $marginBottom;
 		
 		if ($srcImgInfo['mime'] === 'image/png') {
-			if (function_exists('imagesavealpha') && function_exists('imagecolorallocatealpha')) {
+			if (function_exists('imagecolorallocatealpha')) {
 				$bg = imagecolorallocatealpha($oSrcImg, 255, 255, 255, 127);
 				imagefill($oSrcImg, 0, 0 , $bg);
-				imagealphablending($oSrcImg, false);
-				imagesavealpha($oSrcImg, true);
 			}
 		}
+		
 		if ($watermarkImgInfo['mime'] === 'image/png') {
 			imagecopy($oSrcImg, $oWatermarkImg, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height);
 		} else {
@@ -171,6 +170,10 @@ class elFinderPluginWatermark {
 				imagejpeg($oSrcImg, $src, $quality);
 				break;
 			case 'image/png':
+				if (function_exists('imagesavealpha') && function_exists('imagealphablending')) {
+					imagealphablending($oSrcImg, false);
+					imagesavealpha($oSrcImg, true);
+				}
 				imagepng($oSrcImg, $src);
 				break;
 			case 'image/wbmp':
