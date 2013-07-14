@@ -4,7 +4,6 @@ class elFinderPluginWatermark {
 
 	private $opts = array();
 	private $watermarkImgInfo = null;
-	private $enabled = true;
 
 	public function __construct($opts) {
 		$defaults = array(
@@ -20,25 +19,9 @@ class elFinderPluginWatermark {
 
 		$this->opts = array_merge($defaults, $opts);
 
-		// check water mark image
-		if (! file_exists($this->opts['source'])) {
-			$this->opts['source'] = dirname(__FILE__) . "/" . $this->opts['source'];
-		}
-		if (is_readable($this->opts['source'])) {
-			$this->watermarkImgInfo = @getimagesize($this->opts['source']);
-			if (! $this->watermarkImgInfo) {
-				$this->enabled = false;
-			}
-		} else {
-			$this->enabled = false;
-		}
 	}
 
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
-		
-		if (! $this->enabled) {
-			return false;
-		}
 		
 		$opts = $this->opts;
 		$volOpts = $volume->getOptionsPlugin('Watermark');
@@ -55,12 +38,24 @@ class elFinderPluginWatermark {
 			return false;
 		}
 		
+		// check water mark image
+		if (! file_exists($opts['source'])) {
+			$opts['source'] = dirname(__FILE__) . "/" . $opts['source'];
+		}
+		if (is_readable($opts['source'])) {
+			$watermarkImgInfo = @getimagesize($opts['source']);
+			if (! $watermarkImgInfo) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+		
 		$watermark = $opts['source'];
 		$marginLeft = $opts['marginRight'];
 		$marginBottom = $opts['marginBottom'];
 		$quality = $opts['quality'];
 		$transparency = $opts['transparency'];
-		$watermarkImgInfo = $this->watermarkImgInfo;
 
 		// check target image type
 		$imgTypes = array(
