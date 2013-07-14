@@ -8,6 +8,7 @@ class elFinderPluginWatermark {
 
 	public function __construct($opts) {
 		$defaults = array(
+			'enable'         => true,       // For control by volume driver
 			'source'         => 'logo.png', // Path to Water mark image
 			'marginRight'    => 5,          // Margin right pixel
 			'marginBottom'   => 5,          // Margin bottom pixel
@@ -39,16 +40,26 @@ class elFinderPluginWatermark {
 			return false;
 		}
 		
+		$opts = $this->opts;
+		$volOpts = $volume->getOptionsPlugin('Watermark');
+		if (is_array($volOpts)) {
+			$opts = array_merge($this->opts, $volOpts);
+		}
+		
+		if (! $opts['enable']) {
+			return false;
+		}
+		
 		$srcImgInfo = @getimagesize($src);
 		if ($srcImgInfo === false) {
 			return false;
 		}
 		
-		$watermark = $this->opts['source'];
-		$marginLeft = $this->opts['marginRight'];
-		$marginBottom = $this->opts['marginBottom'];
-		$quality = $this->opts['quality'];
-		$transparency = $this->opts['transparency'];
+		$watermark = $opts['source'];
+		$marginLeft = $opts['marginRight'];
+		$marginBottom = $opts['marginBottom'];
+		$quality = $opts['quality'];
+		$transparency = $opts['transparency'];
 		$watermarkImgInfo = $this->watermarkImgInfo;
 
 		// check target image type
@@ -58,12 +69,12 @@ class elFinderPluginWatermark {
 			IMAGETYPE_PNG => IMG_PNG,
 			IMAGETYPE_WBMP => IMG_WBMP,
 		);
-		if (! ($this->opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
+		if (! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
 			return false;
 		}
 		
 		// check target image size
-		if ($this->opts['targetMinPixel'] > 0 && $this->opts['targetMinPixel'] > min($srcImgInfo[0], $srcImgInfo[1])) {
+		if ($opts['targetMinPixel'] > 0 && $opts['targetMinPixel'] > min($srcImgInfo[0], $srcImgInfo[1])) {
 			return false;
 		}
 		
