@@ -205,25 +205,35 @@ class elFinder {
 		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
-		// make instance of plugins by opts
- 		if (!empty($opts['plugin']) && is_array($opts['plugin'])) {
- 			foreach ($opts['plugin'] as $_name => $_opts) {
- 				$this->getPluginInstance($_name, $_opts);
- 			}
- 		}
-		
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
-			foreach ($opts['bind'] as $cmd => $handler) {
-				if (strpos($handler, '.')) {
-					list($_domain, $_name, $_method) = array_pad(explode('.', $handler), 3, '');
-					if (strcasecmp($_domain, 'plugin') === 0) {
-						if ($plugin = $this->getPluginInstance($_name) and method_exists($plugin, $_method)) {
-							$this->bind($cmd, array($plugin, $_method));
+			$_req = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
+			$_reqCmd = isset($_req['cmd']) ? $_req['cmd'] : '';
+			foreach ($opts['bind'] as $cmd => $handlers) {
+				list($_cmd) = explode('.', $cmd);
+				$doRegist = ($_cmd === '*');
+				if (! $doRegist) {
+					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map('trim', explode(' ', $_cmd))));
+				}
+				if ($doRegist) {
+					if (! is_array($handlers)) {
+						$handlers = array($handlers);
+					}
+					foreach($handlers as $handler) {
+						if ($handler) {
+							if (strpos($handler, '.')) {
+								list($_domain, $_name, $_method) = array_pad(explode('.', $handler), 3, '');
+								if (strcasecmp($_domain, 'plugin') === 0) {
+									if ($plugin = $this->getPluginInstance($_name, isset($opts['plugin'][$_name])? $opts['plugin'][$_name] : array())
+											and method_exists($plugin, $_method)) {
+										$this->bind($cmd, array($plugin, $_method));
+									}
+								}
+							} else {
+								$this->bind($cmd, $handler);
+							}
 						}
 					}
-				} else {
-					$this->bind($cmd, $handler);
 				}
 			}
 		}
