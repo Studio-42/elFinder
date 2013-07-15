@@ -11,8 +11,8 @@ class elFinderPluginWatermark {
 			'source'         => 'logo.png', // Path to Water mark image
 			'marginRight'    => 5,          // Margin right pixel
 			'marginBottom'   => 5,          // Margin bottom pixel
-			'quality'        => 90,         // JPEG image save quality
-			'transparency'   => 90,         // Water mark image transparency ( other than PNG )
+			'quality'        => 95,         // JPEG image save quality
+			'transparency'   => 70,         // Water mark image transparency ( other than PNG )
 			'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
 			'targetMinPixel' => 200         // Target image minimum pixel size
 		);
@@ -73,6 +73,59 @@ class elFinderPluginWatermark {
 			return false;
 		}
 		
+		$watermark_width = $watermarkImgInfo[0];
+		$watermark_height = $watermarkImgInfo[1];
+		$dest_x = $srcImgInfo[0] - $watermark_width - $marginLeft;
+		$dest_y = $srcImgInfo[1] - $watermark_height - $marginBottom;
+		
+		if (class_exists('Imagick')) {
+			return $this->watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo);
+		} else {
+			return $this->watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo);
+		}
+	}
+	
+	private function watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo) {
+		
+		try {
+			// Open the original image
+			$img = new Imagick($src);
+			
+			// Open the watermark
+			$watermark = new Imagick($watermark);
+			
+			// Set transparency
+			if (strtoupper($watermark->getImageFormat()) !== 'PNG') {
+				$watermark->setImageOpacity($transparency/100);
+			}
+			
+			// Overlay the watermark on the original image
+			$img->compositeImage($watermark, imagick::COMPOSITE_OVER, $dest_x, $dest_y);
+			
+			// Set quality
+			if (strtoupper($img->getImageFormat()) === 'JPEG') {
+				$img->setImageCompression(imagick::COMPRESSION_JPEG);
+				$img->setCompressionQuality($quality);
+			}
+			
+			$result = $img->writeImage($src);
+			
+			$img->clear();
+			$img->destroy();
+			$watermark->clear();
+			$watermark->destroy();
+			
+			return $result ? true : false;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+	
+	private function watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo) {
+		
+		$watermark_width = $watermarkImgInfo[0];
+		$watermark_height = $watermarkImgInfo[1];
+				
 		$ermsg = '';
 		switch ($watermarkImgInfo['mime']) {
 			case 'image/gif':
@@ -149,11 +202,6 @@ class elFinderPluginWatermark {
 		if ($ermsg || false === $oSrcImg || false === $oWatermarkImg) {
 			return false;
 		}
-		
-		$watermark_width = $watermarkImgInfo[0];
-		$watermark_height = $watermarkImgInfo[1];
-		$dest_x = $srcImgInfo[0] - $watermark_width - $marginLeft;
-		$dest_y = $srcImgInfo[1] - $watermark_height - $marginBottom;
 		
 		if ($srcImgInfo['mime'] === 'image/png') {
 			if (function_exists('imagecolorallocatealpha')) {
