@@ -210,10 +210,10 @@ class elFinder {
 			$_req = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
 			$_reqCmd = isset($_req['cmd']) ? $_req['cmd'] : '';
 			foreach ($opts['bind'] as $cmd => $handlers) {
-				list($_cmd) = explode('.', $cmd);
-				$doRegist = ($_cmd === '*');
+				$doRegist = (strpos($cmd, '*') !== false);
 				if (! $doRegist) {
-					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map('trim', explode(' ', $_cmd))));
+					$_getcmd = create_function('$cmd', 'list($ret) = explode(\'.\', $cmd);return trim($ret);');
+					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map($_getcmd, explode(' ', $cmd))));
 				}
 				if ($doRegist) {
 					if (! is_array($handlers)) {
@@ -303,19 +303,33 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function bind($cmd, $handler) {
-		$cmds = $cmd == '*'
-			? array_keys($this->commands)
-			: array_map('trim', explode(' ', $cmd));
+		$allCmds = array_keys($this->commands);
+		$cmds = array();
+		foreach(explode(' ', $cmd) as $_cmd) {
+			if ($_cmd !== '') {
+				if ($all = strpos($_cmd, '*') !== false) {
+					list(, $sub) = array_pad(explode('.', $_cmd), 2, '');
+					if ($sub) {
+						$sub = str_replace('\'', '\\\'', $sub);
+						$addSub = create_function('$cmd', 'return $cmd . \'.\' . trim(\'' . $sub . '\');');
+						$cmds = array_merge($cmds, array_map($addSub, $allCmds));
+					} else {
+						$cmds = array_merge($cmds, $allCmds);
+					}
+				} else {
+					$cmds[] = $_cmd;
+				}
+			}
+		}
+		$cmds = array_unique($cmds);
 		
 		foreach ($cmds as $cmd) {
-			if ($cmd) {
-				if (!isset($this->listeners[$cmd])) {
-					$this->listeners[$cmd] = array();
-				}
+			if (!isset($this->listeners[$cmd])) {
+				$this->listeners[$cmd] = array();
+			}
 
-				if (is_callable($handler)) {
-					$this->listeners[$cmd][] = $handler;
-				}
+			if (is_callable($handler)) {
+				$this->listeners[$cmd][] = $handler;
 			}
 		}
 
@@ -404,6 +418,14 @@ class elFinder {
 		if (!empty($args['mimes']) && is_array($args['mimes'])) {
 			foreach ($this->volumes as $id => $v) {
 				$this->volumes[$id]->setMimesFilter($args['mimes']);
+			}
+		}
+		
+		// call pre handlers for this command
+		if (!empty($this->listeners[$cmd.'.pre'])) {
+			$volume = isset($args['target'])? $this->volume($args['target']) : false;
+			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
+				call_user_func_array($handler, array($cmd, &$args, $this, $volume));
 			}
 		}
 		
