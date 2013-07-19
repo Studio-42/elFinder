@@ -221,7 +221,7 @@ class elFinder {
 					}
 					foreach($handlers as $handler) {
 						if ($handler) {
-							if (strpos($handler, '.')) {
+							if (is_string($handler) && strpos($handler, '.')) {
 								list($_domain, $_name, $_method) = array_pad(explode('.', $handler), 3, '');
 								if (strcasecmp($_domain, 'plugin') === 0) {
 									if ($plugin = $this->getPluginInstance($_name, isset($opts['plugin'][$_name])? $opts['plugin'][$_name] : array())
