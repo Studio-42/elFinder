@@ -985,7 +985,7 @@ window.elFinder = function(node, opts) {
 
 				if (cmd == 'open' && !!data.init) {
 					self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-					self.uplMaxFile = response.uplMaxFile;
+					self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
 				}
 
 				dfrd.resolve(response);
