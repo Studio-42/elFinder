@@ -4,9 +4,18 @@ _*
 .DS_Store
 php-old
 extensions
-build
 files2
 elFinderVolumeSVN.class.php
 connector-svn.php
 node_modules
 connector.php
+
+# The built output files/dirs:
+build/img
+build/php
+build/js
+build/elfinder.html
+build/README.md
+build/Changelog
+build/css
+build/files

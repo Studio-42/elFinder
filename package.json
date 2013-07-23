@@ -1,0 +1,19 @@
+{
+  "name":         "elFinder",
+  "description":  "Open-source file manager for web, written in JavaScript using jQuery and jQuery UI",
+  "keywords":     ["filemanager"],
+  "author":       "Studio 42",
+  "version":      "2.0.0",
+  "repository":   "https://github.com/Studio-42/elFinder",
+  "licenses": [{
+    "type":       "3-clauses BSD license",
+    "url":        "http://opensource.org/licenses/BSD-3-Clause"
+  }],
+  "engines": {
+    "node":       ">=0.10.0"
+  },
+  "devDependencies": {
+    "uglify-js":  ">=2.3.6",
+    "csso":  ">=1.3.7"
+  }
+}
