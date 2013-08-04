@@ -10,8 +10,7 @@
 var fs   = require('fs'),
 	path = require('path'),
 	util = require('util'),
-	ugp  = require('uglify-js').parser,
-	ugu  = require('uglify-js').uglify,
+	ugjs = require('uglify-js'),
 	csso = require('csso');
 
 var dirmode = 0755,
@@ -41,16 +40,11 @@ var dirmode = 0755,
 
 		'php':
 			[
-				path.join(src, 'php', 'elFinder.class.php'),
-				path.join(src, 'php', 'elFinderConnector.class.php'),
-				path.join(src, 'php', 'elFinderVolumeDriver.class.php'),
-				path.join(src, 'php', 'elFinderVolumeFTP.class.php'),
-				path.join(src, 'php', 'elFinderVolumeLocalFileSystem.class.php'),
-				path.join(src, 'php', 'elFinderVolumeMySQL.class.php'),
 				path.join(src, 'php', 'connector.minimal.php'),
 				path.join(src, 'php', 'mime.types'),
 				path.join(src, 'php', 'MySQLStorage.sql')
-			],
+			]
+			.concat(grep(path.join(src, 'php'), '\\.class\.php$')),
 		'misc':
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
@@ -59,6 +53,17 @@ var dirmode = 0755,
 				path.join(src, 'elfinder.html')
 			]
 	};
+
+// plugins files
+var plugins = [];
+try {
+	plugins = fs.readdirSync(path.join(src, 'php', 'plugins'));
+} catch (err) { }
+if (plugins.length) {
+	for (var i in plugins) {
+		files.php = files.php.concat(grep(path.join(src, 'php', 'plugins', plugins[i]), '.+'));
+	}
+}
 
 // custom functions
 function grep(prefix, mask, exculde) {
@@ -105,7 +110,7 @@ function getComment() {
 		' * Version ' + ver[1] + ' (' + bd + ')\n' +
 		' * http://elfinder.org\n' +
 		' * \n' +
-		' * Copyright 2009-2012, Studio 42\n' +
+		' * Copyright 2009-2013, Studio 42\n' +
 		' * Licensed under a 3 clauses BSD license\n' +
 		' */\n';
 	return comment;
@@ -125,6 +130,12 @@ task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
 	var dir = ['css', 'js', 'img', path.join('js', 'i18n'), path.join('js', 'proxy'), 'php', 'files'];
+	if (plugins.length) {
+		dir.push(path.join('php', 'plugins'));
+		for (var i in plugins) {
+			dir.push(path.join('php', 'plugins', plugins[i]));
+		}
+	}
 	for (d in dir) {
 		var bd = dir[d];
 		if (!path.existsSync(bd)) {
@@ -182,10 +193,16 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 desc('uglify elfinder.min.js');
 file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	console.log('uglify elfinder.min.js');
-	var ast = ugp.parse(fs.readFileSync('js/elfinder.full.js').toString()); // parse code and get the initial AST
-	ast = ugu.ast_mangle(ast); // get a new AST with mangled names
-	ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
-	var result = ugu.split_lines(ugu.gen_code(ast), 1024 * 8); // insert new line every 8 kb
+	if (typeof ugjs.minify == 'undefined') {
+		var ugp  = ugjs.parser;
+		var ugu  = ugjs.uglify;
+		var ast = ugp.parse(fs.readFileSync('js/elfinder.full.js').toString()); // parse code and get the initial AST
+		ast = ugu.ast_mangle(ast); // get a new AST with mangled names
+		ast = ugu.ast_squeeze(ast); // get an AST with compression optimizations
+		var result = ugu.split_lines(ugu.gen_code(ast), 1024 * 8); // insert new line every 8 kb
+	} else {
+		var result = ugjs.minify('js/elfinder.full.js').code;
+	}
 	fs.writeFileSync(this.name, getComment() + result);
 });
 
