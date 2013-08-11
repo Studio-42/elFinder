@@ -247,7 +247,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'crop'            : 'Recadrer',
 			'rotate'          : 'Rotation',
 			'rotate-cw'       : 'Rotation de 90 degrés horaire',
-			'rotate-ccw'      : 'Rotation de 90 degrés amti-horaire',
+			'rotate-ccw'      : 'Rotation de 90 degrés antihoraire',
 			'degree'          : '°',
 			'netMountDialogTitle' : 'Monter un volume réseau', // added 18.04.2012
 			'protocol'            : 'Protocole', // added 18.04.2012
