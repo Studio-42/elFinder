@@ -1,11 +1,11 @@
 /**
  * French translation
- * @author Régis Guyomarch <regisg@gmail.com>
- * @version 2012-05-21
+ * @author Régis Guyomarch <regisg@gmail.com>, Benoit Delachaux <benorde33@gmail.com>
+ * @version 2012-08-11
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.fr = {
-		translator : 'Régis Guyomarch &lt;regisg@gmail.com&gt;',
+		translator : 'Régis Guyomarch &lt;regisg@gmail.com&gt;Benoit Delachaux &lt;benorde33@gmail.com&gt;',
 		language   : 'française',
 		direction  : 'ltr',
 		dateFormat : 'd M, Y H:i',
@@ -38,7 +38,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRead'              : 'Impossible de lire "$1".',
 			'errWrite'             : 'Impossible d\'écrire dans "$1".',
 			'errPerm'              : 'Permission refusée.',
-			'errLocked'            : '"$1" est verrouillé et ne peut être déplace ou supprimé.',
+			'errLocked'            : '"$1" est verrouillé et ne peut être déplacé ou supprimé.',
 			'errExists'            : 'Un fichier nommé "$1" existe déjà.',
 			'errInvName'           : 'Nom de fichier incorrect.',
 			'errFolderNotFound'    : 'Dossier non trouvé.',
@@ -49,7 +49,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMkfile'            : 'impossible de créer le fichier "$1".',
 			'errRename'            : 'Impossible de renommer "$1".',
 			'errCopyFrom'          : 'Interdiction de copier des fichiers depuis le volume "$1".',
-			'errCopyTo'            : 'Interdiction copier des fichiers vers le volume "$1".',
+			'errCopyTo'            : 'Interdiction de copier des fichiers vers le volume "$1".',
 			'errUpload'            : 'Erreur lors de l\'envoi du fichier.',
 			'errUploadFile'        : 'Impossible d\'envoyer "$1".',
 			'errUploadNoFiles'     : 'Aucun fichier à envoyer.',
@@ -58,12 +58,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadMime'        : 'Type de fichier non autorisé.',
 			'errUploadTransfer'    : '"$1" erreur transfert.', 
 			'errNotReplace'        : 'L\'objet "$1" existe déjà à cet endroit et ne peut être remplacé par un objet d\'un type différent.', // new
+			'errReplace'           : 'Impossible de remplacer "$1".', // added 11.08.1013
 			'errSave'              : 'Impossible de sauvegarder "$1".',
 			'errCopy'              : 'Impossible de copier "$1".',
 			'errMove'              : 'Impossible de déplacer "$1".',
 			'errCopyInItself'      : 'Impossible de copier "$1" sur lui-même.',
 			'errRm'                : 'Impossible de supprimer "$1".',
 			'errExtract'           : 'Impossible d\'extraire les fichier de "$1".',
+			'errExtract'           : 'Imbossible d\'extraire les fichiers à partir de "$1".' // added 11.08.2012
 			'errArchive'           : 'Impossible de créer l\'archive.',
 			'errArcType'           : 'Type d\'archive non supporté.',
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
@@ -72,6 +74,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Par mesure de sécurité, il est défendu d\'extraire une archive contenant des liens symboliques.',
 			'errArcMaxSize'        : 'Les fichiers de l\'archive excèdent la taille maximale autorisée.',
 			'errResize'            : 'Impossible de redimensionner "$1".',
+			'errResizeDegree'      : 'Degré de rotation invalide.',  // added 11.8.2013
+			'errResizeRotate'      : 'L\'image ne peut pas être tournée.',  // added 11.8.2013
+			'errResizeSize'        : 'Dimension de l\'image non-valide.',  // added 11.8.2013
+			'errResizeNoChange'    : 'L\'image n\'est pas redimensionnable.',  // added 11.8.2013
 			'errUsupportType'      : 'Type de fichier non supporté.',
 			'errNotUTF8Content'    : 'Le fichier "$1" n\'est pas en UTF-8, il ne peut être édité.',  // added 9.11.2011
 			'errNetMount'          : 'Impossible de monter "$1".', // added 17.04.2012
@@ -85,7 +91,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Impossible de créer un répertoire distant sur l\'accès FTP :"$1"',
 			'errArchiveExec'       : 'Erreur lors de l\'archivage des fichiers : "$1"',
 			'errExtractExec'       : 'Erreur lors de l\'extraction des fichiers : "$1"',
-			'errUploadFile'        : 'Envoi impossible de "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',
@@ -122,6 +127,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnSave'   : 'Sauvegarder',
 			'btnRm'     : 'Supprimer',
 			'btnCancel' : 'Annuler',
+			'btnApply'  : 'Appliquer', // added 11.08.2013
 			'btnNo'     : 'Non',
 			'btnYes'    : 'Oui',
 			'btnMount'  : 'Monter',  // added 18.04.2012
@@ -146,6 +152,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Fait quelque chose',
 			'ntfloadimg'  : 'Chargement de l\' image',
 			'ntfnetmount' : 'Monte le volume réseau', // added 18.04.2012			
+			'ntfdim'      : 'Calcule la dimension de l\'image', // added 11.08.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Inconnue',
@@ -170,6 +177,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'par taille',
 			'sortdate'          : 'par date',
 			'sortFoldersFirst'  : 'Dossiers en premier',
+			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
 			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les fichiers?<br/>Cela ne peut être annulé!',
@@ -237,9 +245,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'height'          : 'Hauteur',
 			'resize'          : 'Redimensionner',
 			'crop'            : 'Recadrer',
-			'rotate'          : 'Rotate',
-			'rotate-cw'       : 'Rotate 90 degrees CW',
-			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'rotate'          : 'Rotation',
+			'rotate-cw'       : 'Rotation de 90 degrés horaire',
+			'rotate-ccw'      : 'Rotation de 90 degrés antihoraire',
 			'degree'          : '°',
 			'netMountDialogTitle' : 'Monter un volume réseau', // added 18.04.2012
 			'protocol'            : 'Protocole', // added 18.04.2012
