@@ -183,7 +183,9 @@ elFinder.prototype.commands.quicklook = function() {
 				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
-				if($.data(parent, "ui-resizable")) { collection.add(parent); } 
+				if(parent.is('.ui-resizable')) {
+					collection = collection.add(parent);
+				};
 				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 			}),
 			
