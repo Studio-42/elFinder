@@ -65,7 +65,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errCopyInItself'      : 'Impossible de copier "$1" sur lui-même.',
 			'errRm'                : 'Impossible de supprimer "$1".',
 			'errExtract'           : 'Impossible d\'extraire les fichier de "$1".',
-			'errExtract'           : 'Imbossible d\'extraire les fichiers à partir de "$1".' // added 11.08.2012
+			'errExtract'           : 'Imbossible d\'extraire les fichiers à partir de "$1".', // added 11.08.2012
 			'errArchive'           : 'Impossible de créer l\'archive.',
 			'errArcType'           : 'Type d\'archive non supporté.',
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
