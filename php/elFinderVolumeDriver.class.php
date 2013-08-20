@@ -833,6 +833,16 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return Extention/MIME Table (elFinderVolumeDriver::$mimetypes)
+	 * 
+	 * @return array
+	 * @author Naoki Sawada
+	 */
+	public function getMimeTable() {
+		return elFinderVolumeDriver::$mimetypes;
+	}
+	
+	/**
 	 * Set mimetypes allowed to display to client
 	 *
 	 * @param  array  $mimes
