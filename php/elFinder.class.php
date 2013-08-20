@@ -1142,14 +1142,14 @@ class elFinder {
 	/**
 	 * Parse Data URI scheme
 	 * 
-	 * @param  string $data
+	 * @param  string $str
 	 * @param  array  $mimeTable
 	 * @return array
 	 * @author Naoki Sawada
 	 */
-	protected function parse_data_scheme( $data, $mimeTable ) {
+	protected function parse_data_scheme( $str, $mimeTable ) {
 		$data = $name = '';
-		if ($fp = fopen('data://'.substr($data, 5), 'rb')) {
+		if ($fp = fopen('data://'.substr($str, 5), 'rb')) {
 			if ($data = stream_get_contents($fp)) {
 				$exts = array_flip($mimeTable);
 				$meta = stream_get_meta_data($fp);
