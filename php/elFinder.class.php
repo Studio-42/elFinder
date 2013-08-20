@@ -1140,6 +1140,28 @@ class elFinder {
 	}
 	
 	/**
+	 * Parse Data URI scheme
+	 * 
+	 * @param  string $data
+	 * @param  array  $mimeTable
+	 * @return array
+	 * @author Naoki Sawada
+	 */
+	protected function parse_data_scheme( $data, $mimeTable ) {
+		$data = $name = '';
+		if ($fp = fopen('data://'.substr($data, 5), 'rb')) {
+			if ($data = stream_get_contents($fp)) {
+				$exts = array_flip($mimeTable);
+				$meta = stream_get_meta_data($fp);
+				$ext = isset($exts[$meta['mediatype']])? '.' . $exts[$meta['mediatype']] : '';
+				$name = substr(md5($data), 0, 8) . $ext;
+			}
+			fclose($fp);
+		}
+		return array($data, $name);
+	}
+	
+	/**
 	 * Save uploaded files
 	 *
 	 * @param  array
@@ -1161,7 +1183,12 @@ class elFinder {
 		if (empty($files)) {
 			if (isset($args['upload']) && is_array($args['upload'])) {
 				foreach($args['upload'] as $i => $url) {
-					$data = $this->get_remote_contents($url);
+					// check is data:
+					if (substr($url, 0, 5) === 'data:') {
+						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $volume->getMimeTable());
+					} else {
+						$data = $this->get_remote_contents($url);
+					}
 					if ($data) {
 						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
 						if ($_name) {
