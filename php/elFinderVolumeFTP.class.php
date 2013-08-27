@@ -1154,7 +1154,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * <li>$item['type'] - either 'f' for file or 'd' for directory</li>
 	 * </ul>
 	 */
-	private function ftp_scan_dir($remote_directory)
+	protected function ftp_scan_dir($remote_directory)
 	{
 		$buff = ftp_rawlist($this->connect, $remote_directory, true);
 		$next_folder = false;
