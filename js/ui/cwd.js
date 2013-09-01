@@ -661,7 +661,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var parent = $.extend(true, {}, fm.file(phash), {name : '..', mime : 'directory'});
 					parent = $(itemhtml(parent))
 						.addClass('elfinder-cwd-parent')
-						.bind('mousedown click mouseup dblclick mouseenter', function(e) {
+						.bind('mousedown click mouseup touchstart touchmove touchend dblclick mouseenter', function(e) {
 							e.preventDefault();
 							e.stopPropagation();
 						})
@@ -708,6 +708,20 @@ $.fn.elfindercwd = function(fm, options) {
 				// call fm.open()
 				.delegate(fileSelector, 'dblclick.'+fm.namespace, function(e) {
 					fm.dblclick({file : this.id});
+				})
+				// call fm.open() for touch device
+				.delegate(fileSelector, 'touchend.'+fm.namespace, function(e) {
+					var p = this.id ? $(this) : $(this).parents('[id]:first');
+					if (p.is('.'+clSelected)) {
+						fm.dblclick({file : this.id});
+					}
+				})
+				// unselect on scrolling for touch device
+				.delegate(fileSelector, 'touchmove.'+fm.namespace, function(e) {
+					var p = this.id ? $(this) : $(this).parents('[id]:first');
+					if (p.is('.'+clSelected)) {
+						p.trigger(evtUnselect);
+					}
 				})
 				// attach draggable
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
