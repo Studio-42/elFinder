@@ -981,14 +981,22 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$remoteDirectory = dirname($path);
 		chdir($tmpDir);
 		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' "' . $basename . '"');
-		exec($command, $output, $return_value);
-		unlink($basename);
-		if ($return_value != 0) {
-			$this->setError(elFinder::ERROR_EXTRACT_EXEC, 'Command failed '.escapeshellarg($command));
-			$this->deleteDir($tmpDir); //cleanup
-			return false;
+		$descriptorspec = array(
+			0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+			1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+			2 => array("pipe", "w") // stderr is a file to write to
+		);
+
+			
+		$process = proc_open($command, $descriptorspec, $pipes, $cwd);
+
+		if (is_resource($process)) {
+			fclose($pipes[0]);
+			fclose($pipes[1]);
+			$return_value = proc_close($process);
 		}
 
+		unlink($basename);
 		$filesToProcess = elFinderVolumeFTP::listFilesInDirectory($tmpDir, true);
 		if(!$filesToProcess) {
 			$this->setError(elFinder::ERROR_EXTRACT_EXEC, $tmpDir." is not a directory");
@@ -1092,12 +1100,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$file_names_string = $file_names_string . '"' . $filename . '" ';
 		}
 		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' "' . $name . '" ' . $file_names_string);
+		
+		$descriptorspec = array(
+			0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+			1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+			2 => array("pipe", "w") // stderr is a file to write to
+		);
 
-		exec($command, $output, $return_value);
-		if ($return_value != 0) {
-			$this->setError(elFinder::ERROR_ARCHIVE_EXEC, 'Command failed '.escapeshellarg($command));
-			$this->deleteDir($tmpDir); //cleanup
-			return false;
+			
+		$process = proc_open($command, $descriptorspec, $pipes, $cwd);
+
+		if (is_resource($process)) {
+			fclose($pipes[0]);
+			fclose($pipes[1]);
+			$return_value = proc_close($process);
 		}
 
 		$remoteArchiveFile = $dir . DIRECTORY_SEPARATOR . $name;
