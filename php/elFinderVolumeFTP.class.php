@@ -1152,7 +1152,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->setError(elFinder::ERROR_CREATING_TEMP_DIR, $this->tmp);
 			return false;
 		}
-		$success = mkdir($tempPath, 0755, true);
+		$success = mkdir($tempPath, 0700, true);
 		if (!$success) {
 			$this->setError(elFinder::ERROR_CREATING_TEMP_DIR, $this->tmp);
 			return false;
