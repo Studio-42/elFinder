@@ -9,7 +9,7 @@ elFinder
 |  __/ | |    | | | | | (_| |  __/ |   
  \___|_|_|    |_|_| |_|\__,_|\___|_|   
 </pre>
-
+r
 elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
 used in Mac OS X operating system.
@@ -51,7 +51,7 @@ Requirements
 
 ### Server
  * Any web server
- * PHP 5.2+ (for thumbnails - mogrify utility or GD/Imagick module)
+ * PHP 5.2+ (fileinfo extension and for thumbnails - mogrify utility or GD/Imagick module)
 
 
 3rd party connectors
