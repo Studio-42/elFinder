@@ -83,7 +83,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'tmbPath'       => '',
 			'tmpPath'       => '',
 			'dirMode'       => 0755,
-			'fileMode'      => 0644
+			'fileMode'      => 0644,
+			'icon'          => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_ftp.png'
 		);
 		$this->options = array_merge($this->options, $opts); 
 		$this->options['mimeDetect'] = 'internal';
@@ -516,6 +517,13 @@ protected function parseRaw($raw) {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
+	
+		//Verifies the given path is the root or is inside the root. Prevents directory traveral.
+		if (!$this->_inpath(realpath($path), realpath($this->root))) {
+			error_log('traversal: '.realpath($path).",".realpath($this->root));
+			return $stat;
+		}
+		
 		$raw = ftp_raw($this->connect, 'MLST '. $path);
 
 		if (is_array($raw) && count($raw) > 1 && substr(trim($raw[0]), 0, 1) == 2) {
@@ -904,8 +912,16 @@ protected function parseRaw($raw) {
 	 * @return void
 	 **/
 	protected function _checkArchivers() {
+		
+		// Added caching to improve performance
+		if (isset($_SESSION['elFinder_archivers_cache']) && is_array($_SESSION['elFinder_archivers_cache'])) {
+			$this->archivers = $_SESSION['elFinder_archivers_cache'];
+			return;
+		}
+	
 		if (!function_exists('exec')) {
-			$this->options['archivers'] = $this->options['archive'] = array();
+			//$this->options['archivers'] = $this->options['archive'] = array();  // old stuff to delete
+			$_SESSION['elFinder_archivers_cache'] = $this->archivers = $this->options['archivers'] = $this->options['archive'] = array();
 			return;
 		}
 		$arcs = array(
@@ -999,7 +1015,8 @@ protected function parseRaw($raw) {
 			}
 		}
 		
-		$this->archivers = $arcs;
+		//$this->archivers = $arcs;  // old stuff to delete
+		$_SESSION['elFinder_archivers_cache'] = $this->archivers = $arcs;
 	}
 
 	/**
@@ -1152,6 +1169,10 @@ protected function parseRaw($raw) {
 				break;
 			}
 		}
+		
+		If ( count($filesToProcess) == 1 ) {
+			$newPath = $newPath.DIRECTORY_SEPARATOR.$filesToProcess[0];
+		}
 
 		// return to initial directory
 		chdir($cwd);
@@ -1160,7 +1181,9 @@ protected function parseRaw($raw) {
 		elFinderVolumeFTP::deleteDir($tmpDir);
 
 		//return $success ? $newPath : false;		
-		return $newPath ? $newPath : false;
+		//return $newPath ? $newPath : false;
+		//error_log("newpath: ".$ftpfile);
+		return $newPath;
 	}
 	
 	/**

@@ -162,6 +162,8 @@ abstract class elFinderVolumeDriver {
 		'URL'             => '',
 		// directory separator. required by client to show paths correctly
 		'separator'       => DIRECTORY_SEPARATOR,
+		// URL of volume icon (16x16 pixel image file)
+		'icon'            => '',
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
@@ -2050,6 +2052,9 @@ abstract class elFinderVolumeDriver {
 			$stat['volumeid'] = $this->id;
 			if ($this->rootName) {
 				$stat['name'] = $this->rootName;
+			}
+			if (! empty($this->options['icon'])) {
+				$stat['icon'] = $this->options['icon'];
 			}
 		} else {
 			if (!isset($stat['name']) || !strlen($stat['name'])) {
