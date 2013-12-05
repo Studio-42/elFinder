@@ -906,18 +906,18 @@ $.fn.elfindercwd = function(fm, options) {
 				wrapper.removeClass(clDropActive);
 				var file = false;
 				var type = '';
-				if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
-					file = e.dataTransfer;
-					type = 'data';
-				} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
-					file = e.dataTransfer.files;
-					type = 'files';
-				} else if (e.dataTransfer.getData('text/html')) {
+				if (e.dataTransfer.getData('text/html')) {
 					file = [ e.dataTransfer.getData('text/html') ];
 					type = 'html';
 				} else if (e.dataTransfer.getData('text')) {
 					file = [ e.dataTransfer.getData('text') ];
 					type = 'text';
+				} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
+					file = e.dataTransfer;
+					type = 'data';
+				} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+					file = e.dataTransfer.files;
+					type = 'files';
 				}
 				if (file) {
 					fm.exec('upload', {files : file, type : type});

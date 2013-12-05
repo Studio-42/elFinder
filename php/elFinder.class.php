@@ -1143,17 +1143,16 @@ class elFinder {
 	 * Parse Data URI scheme
 	 * 
 	 * @param  string $str
-	 * @param  array  $mimeTable
+	 * @param  array  $extTable
 	 * @return array
 	 * @author Naoki Sawada
 	 */
-	protected function parse_data_scheme( $str, $mimeTable ) {
+	protected function parse_data_scheme( $str, $extTable ) {
 		$data = $name = '';
 		if ($fp = fopen('data://'.substr($str, 5), 'rb')) {
 			if ($data = stream_get_contents($fp)) {
-				$exts = array_flip($mimeTable);
 				$meta = stream_get_meta_data($fp);
-				$ext = isset($exts[$meta['mediatype']])? '.' . $exts[$meta['mediatype']] : '';
+				$ext = isset($extTable[$meta['mediatype']])? '.' . $extTable[$meta['mediatype']] : '';
 				$name = substr(md5($data), 0, 8) . $ext;
 			}
 			fclose($fp);
@@ -1179,13 +1178,16 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
 		}
 		
+		// file extentions table by MIME
+		$extTable = array_flip($volume->getMimeTable());
+		
 		$non_uploads = array();
 		if (empty($files)) {
 			if (isset($args['upload']) && is_array($args['upload'])) {
 				foreach($args['upload'] as $i => $url) {
 					// check is data:
 					if (substr($url, 0, 5) === 'data:') {
-						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $volume->getMimeTable());
+						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable);
 					} else {
 						$data = $this->get_remote_contents($url);
 					}
@@ -1235,6 +1237,12 @@ class elFinder {
 			
 			$tmpname = $files['tmp_name'][$i];
 			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
+			if ($name === 'blob') {
+				// for form clipboard with Google Chrome
+				$type = $files['type'][$i];
+				$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
+				$name = substr(md5(basename($tmpname)), 0, 8) . $ext;
+			}
 			
 			// do hook function 'upload.presave'
 			if (! empty($this->listeners['upload.presave'])) {

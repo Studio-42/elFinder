@@ -68,26 +68,37 @@ elFinder.prototype.commands.upload = function() {
 			.append(button);
 		
 		pastebox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable=true></div>')
-			.focus(function() {
-				if (this.innerHTML) {
-					var src = this.innerHTML.replace(/<br[^>]*>/gi, ' ');
-					var type = src.match(/<[^>]+>/)? 'html' : 'text';
-					this.innerHTML = '';
-					upload({files : [ src ], type : type});
+			.on('paste drop', function (evt) {
+				var e = evt.originalEvent || evt;
+				var files = [];
+				var file;
+				if (e.clipboardData && e.clipboardData.items && e.clipboardData.items.length){
+					for (var i=0; i < e.clipboardData.items.length; i++) {
+						if (e.clipboardData.items[i].kind == 'file') {
+							file = e.clipboardData.items[i].getAsFile();
+							files.push(file);
+						}
+					}
+					if (files.length) {
+						upload({files : files, type : 'files'});
+						return;
+					}
 				}
+				var my = e.target;
+				setTimeout(function () {
+					if (my.innerHTML) {
+						var src = my.innerHTML.replace(/<br[^>]*>/gi, ' ');
+						var type = src.match(/<[^>]+>/)? 'html' : 'text';
+						my.innerHTML = '';
+						upload({files : [ src ], type : type});
+					}
+				}, 1);
 			})
-			.bind('dragenter mouseover', function(){
-				this.focus();
-				$(pastebox).addClass(hover);
+			.on('dragenter mouseover', function(){
+				pastebox.addClass(hover);
 			})
-			.bind('dragleave mouseout', function(){
-				this.blur();
-				$(pastebox).removeClass(hover);
-			})
-			.bind('mouseup keyup', function() {
-				setTimeout(function(){
-					$(pastebox).focus();
-				}, 100);
+			.on('dragleave mouseout', function(){
+				pastebox.removeClass(hover);
 			});
 		
 		if (fm.dragUpload) {

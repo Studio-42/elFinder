@@ -2081,17 +2081,19 @@ elFinder.prototype = {
 						} else {
 							entry = items[i];
 						}
-						if (entry.isFile) {
-							paths.push('');
-							files.push(data.files.items[i].getAsFile());
-						} else if (entry.isDirectory) {
-							if (processing > 0) {
-								dirctorys.push(entry);
-							} else {
-								processing = 0;
-								dirReader = entry.createReader();
-								processing++;
-								readEntries(dirReader);
+						if (entry) {
+							if (entry.isFile) {
+								paths.push('');
+								files.push(data.files.items[i].getAsFile());
+							} else if (entry.isDirectory) {
+								if (processing > 0) {
+									dirctorys.push(entry);
+								} else {
+									processing = 0;
+									dirReader = entry.createReader();
+									processing++;
+									readEntries(dirReader);
+								}
 							}
 						}
 					}
