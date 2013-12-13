@@ -826,6 +826,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.selectable({
 					filter     : fileSelector,
 					stop       : trigger,
+					delay      : 250,
 					selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
