@@ -525,6 +525,7 @@ window.elFinder = function(node, opts) {
 		appendTo   : 'body',
 		addClasses : true,
 		delay      : 30,
+		distance   : 8,
 		revert     : true,
 		refreshPositions : true,
 		cursor     : 'move',
