@@ -908,11 +908,15 @@ $.fn.elfindercwd = function(fm, options) {
 				wrapper.removeClass(clDropActive);
 				var file = false;
 				var type = '';
-				if (e.dataTransfer.getData('text/html')) {
-					file = [ e.dataTransfer.getData('text/html') ];
+				var data = null;
+				try{
+					data = e.dataTransfer.getData('text/html');
+				} catch(e) {}
+				if (data) {
+					file = [ data ];
 					type = 'html';
-				} else if (e.dataTransfer.getData('text')) {
-					file = [ e.dataTransfer.getData('text') ];
+				} else if (data = e.dataTransfer.getData('text')) {
+					file = [ data ];
 					type = 'text';
 				} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
 					file = e.dataTransfer;
