@@ -735,6 +735,12 @@ $.fn.elfindercwd = function(fm, options) {
 				.delegate(fileSelector, 'touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
 					clearTimeout($(this).data('longtap'));
 				})
+				.delegate(fileSelector, 'touchstart.'+fm.namespace+' touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
+					var $this = $(this),
+						target = list ? $this : $this.children();
+
+					$(target).draggable();
+				})
 				// attach draggable
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
 					var $this = $(this),
