@@ -59,6 +59,7 @@ elFinder.prototype.commands.info = function() {
 		}
 		var self    = this,
 			fm      = this.fm,
+			o       = this.options,
 			tpl     = this.tpl,
 			row     = tpl.row,
 			cnt     = files.length,
@@ -109,7 +110,16 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
-			file.read && (typeof file.url == 'undefined' || file.url != null) && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+fm.url(file.hash)+'" target="_blank">'+file.name+'</a>'));
+			if (file.read) {
+				var href;
+				if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url == null) {
+					var loc = window.location;
+					href = loc.pathname + loc.search + '#elf_' + file.hash;
+				} else {
+					href = fm.url(file.hash);
+				}
+				content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+file.name+'</a>'));
+			}
 			
 			if (file.dim) { // old api
 				content.push(row.replace(l, msg.dim).replace(v, file.dim));
