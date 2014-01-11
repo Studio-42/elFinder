@@ -112,7 +112,7 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
 			if (file.read) {
 				var href;
-				if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url == null) {
+				if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
 					var loc = window.location;
 					href = loc.pathname + loc.search + '#elf_' + file.hash;
 				} else {
