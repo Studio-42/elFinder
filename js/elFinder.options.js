@@ -392,6 +392,14 @@ elFinder.prototype._options = {
 	rememberLastDir : true,
 	
 	/**
+	 * Use browser native history with supported browsers
+	 *
+	 * @type Boolean
+	 * @default  true
+	 */
+	useBrowserHistory : true,
+	
+	/**
 	 * Lazy load config.
 	 * How many files display at once?
 	 *
