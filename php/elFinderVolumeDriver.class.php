@@ -1133,11 +1133,12 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return part of dirs tree from required dir up to root dir
 	 *
-	 * @param  string  $hash  directory hash
+	 * @param  string    $hash   directory hash
+	 * @param  bool|null $lineal only lineal parents
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function parents($hash) {
+	public function parents($hash, $lineal = false) {
 		if (($current = $this->dir($hash)) == false) {
 			return false;
 		}
@@ -1153,7 +1154,7 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			array_unshift($tree, $stat);
-			if ($path != $this->root) {
+			if (!$lineal && ($path != $this->root)) {
 				foreach ($this->gettree($path, 0) as $dir) {
 					if (!in_array($dir, $tree)) {
 						$tree[] = $dir;
