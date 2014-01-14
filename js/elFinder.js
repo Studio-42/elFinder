@@ -1724,7 +1724,7 @@ window.elFinder = function(node, opts) {
 	// attach events to window
 	self.options.useBrowserHistory && $(window)
 		.on('popstate', function(ev) {
-			var target = ev.originalEvent.state.thash;
+			var target = ev.originalEvent.state && ev.originalEvent.state.thash;
 			target && !$.isEmptyObject(self.files()) && self.request({
 				data   : {cmd  : 'open', target : target, onhistory : 1},
 				notify : {type : 'open', cnt : 1, hideCnt : true},
