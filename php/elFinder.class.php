@@ -321,6 +321,17 @@ class elFinder {
 	}
 	
 	/**
+	 * Return root - file's owner (public func of volume())
+	 *
+	 * @param  string  file hash
+	 * @return elFinderStorageDriver
+	 * @author Naoki Sawada
+	 */
+	public function getVolume($hash) {
+		return $this->volume($hash);
+	}
+	
+	/**
 	 * Return command required arguments info
 	 *
 	 * @param  string  command name
@@ -386,7 +397,7 @@ class elFinder {
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
 			foreach ($this->listeners[$cmd] as $handler) {
-				if (call_user_func($handler,$cmd,$result,$args,$this)) {
+				if (call_user_func_array($handler,array($cmd,&$result,$args,$this))) {
 					// handler return true to force sync client after command completed
 					$result['sync'] = true;
 				}
