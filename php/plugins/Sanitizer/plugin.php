@@ -18,7 +18,7 @@
  *		'plugin' => array(
  *			'Sanitizer' => array(
  *				'enable' => true,
- *				'targets'  => array('\\','/',':','*','?','"','<','>','|',"\0"), // target chars
+ *				'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
  *				'replace'  => '_'    // replace to this
  *			)
  *		),
@@ -31,7 +31,7 @@
  *				'plugin' => array(
  *					'Sanitizer' => array(
  *						'enable' => true,
- *						'targets'  => array('\\','/',':','*','?','"','<','>','|',"\0"), // target chars
+ *						'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
  *						'replace'  => '_'    // replace to this
  *					)
  *				)
@@ -50,7 +50,7 @@ class elFinderPluginSanitizer
 	public function __construct($opts) {
 		$defaults = array(
 			'enable'   => true,  // For control by volume driver
-			'targets'  => array('\\','/',':','*','?','"','<','>','|',"\0"), // target chars
+			'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
 			'replace'  => '_'    // replace to this
 		);
 	
