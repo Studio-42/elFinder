@@ -78,7 +78,7 @@ class elFinderPluginSanitizer
 		if ($path) {
 			$path = $this->sanitizeFileName($path, $opts);
 		}
-		$name = $this->$this->sanitizeFileName($name, $opts);
+		$name = $this->sanitizeFileName($name, $opts);
 		return true;
 	}
 	
