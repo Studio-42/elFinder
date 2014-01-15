@@ -12,14 +12,16 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
- *			'mkdir.pre mkfile.pre rename.pre' => 'Plugin.Normalizer.cmdPreprocess',
+ *			'mkdir.pre mkfile.pre rename.pre' => array(
+ *				'Plugin.Normalizer.cmdPreprocess'
+ *			),
  *			'upload.presave' => array(
  *				'Plugin.Normalizer.onUpLoadPreSave'
  *			)
  *		),
  *		// global configure (optional)
  *		'plugin' => array(
- *			'Normalizer' = array(
+ *			'Normalizer' => array(
  *				'enable' => true,
  *				'nfc'    => true,
  *				'nfkc'   => true
@@ -32,7 +34,7 @@
  *				'path'   => '/path/to/files/',
  *				'URL'    => 'http://localhost/to/files/'
  *				'plugin' => array(
- *					'Normalizer' = array(
+ *					'Normalizer' => array(
  *						'enable' => true,
  *						'nfc'    => true,
  *						'nfkc'   => true
@@ -82,7 +84,7 @@ class elFinderPluginNormalizer
 			$path = $this->normalize($path, $opts);
 		}
 		$name = $this->normalize($name, $opts);
-		return false;
+		return true;
 	}
 	
 	private function getOpts($volume) {
