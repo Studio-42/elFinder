@@ -53,6 +53,11 @@ class elFinderVolumeFTPIIS extends elFinderVolumeFTP {
 
 		$stat['name'] = join(" ", array_slice($info, 3, 9));
 		$stat['read'] = true;
+		
+		$tz = new DateTimeZone(date_default_timezone_get());
+		$dat = DateTime::createFromFormat('m-d-y h:i a', $info[0]." ".$info[1], $tz);
+		$stat['ts'] = $dat->getTimestamp();
+
 		if ($info[2] == '<DIR>')
 		{
 			$stat['size'] = 0;
