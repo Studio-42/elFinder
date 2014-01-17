@@ -23,7 +23,6 @@ class elFinderVolumeFTPIIS extends elFinderVolumeFTP {
 		// switch off extended passive mode - may be usefull for some servers
 		//@ftp_exec($this->connect, 'epsv4 off' );
 		// enter passive mode if required
-		$this->options['mode'] = 'active';
 		ftp_pasv($this->connect, $this->options['mode'] == 'passive');
 
 		// enter root folder
