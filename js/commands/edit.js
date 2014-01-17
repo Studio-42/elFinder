@@ -153,7 +153,7 @@ elFinder.prototype.commands.edit = function() {
 			
 			fm.request({
 				data   : {cmd : 'get', target  : hash},
-				notify : {type : 'openfile', cnt : 1},
+				notify : {type : 'file', cnt : 1},
 				syncOnFail : true
 			})
 			.done(function(data) {
