@@ -87,7 +87,7 @@ class elFinderVolumeFTPIIS extends elFinderVolumeFTP {
 		}
 		foreach (ftp_rawlist($this->connect, $path) as $raw) {
 			if (($stat = $this->parseRaw($raw))) {
-				$p    = $path.DIRECTORY_SEPARATOR.$stat['name'];
+				$p    = $this->_joinPath($path, $stat['name']);
 					// $files[] = $stat;
 					$this->dirsCache[$path][] = $p;
 					//$stat['name'] = $p;
@@ -118,7 +118,7 @@ class elFinderVolumeFTPIIS extends elFinderVolumeFTP {
 		$items = array();
 		foreach ($buff as $str) {
 			$info = preg_split("/\s+/", $str, 9);
-			$remote_file_path = $remote_directory . DIRECTORY_SEPARATOR . join(" ", array_slice($info, 3, 9));
+			$remote_file_path = $this->_joinPath($remote_directory, join(" ", array_slice($info, 3, 9)));
 			$item = array();
 			$item['type'] = $info[2] == '<DIR>' ? 'd' : 'f';
 			$item['path'] = $remote_file_path;
