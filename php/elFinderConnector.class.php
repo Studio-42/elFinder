@@ -59,16 +59,16 @@ class elFinderConnector {
 			$this->output(array('error' => '{"error":["'.implode('","', $error).'"]}', 'raw' => true));
 		}
 		
-		if (!$this->elFinder->loaded()) {
-			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL), 'debug' => $this->elFinder->mountErrors));
-		}
-		
 		// telepat_mode: on
-		if (!$cmd && $isPost) {
+		if (!$cmd && $isPost && (! isset($_FILES) || (count($_FILES) == 0))) {
 			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UPLOAD, elFinder::ERROR_UPLOAD_TOTAL_SIZE), 'header' => 'Content-Type: text/html'));
 		}
 		// telepat_mode: off
-		
+
+		if (!$this->elFinder->loaded()) {
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_CONF, elFinder::ERROR_CONF_NO_VOL), 'debug' => $this->elFinder->mountErrors));
+		}
+				
 		if (!$this->elFinder->commandExists($cmd)) {
 			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UNKNOWN_CMD)));
 		}
