@@ -76,7 +76,7 @@ class elFinderPluginSanitizer
 		}
 	
 		if ($path) {
-			$path = $this->sanitizeFileName($path, $opts);
+			$path = $this->sanitizeFileName($path, $opts, array('/'));
 		}
 		$name = $this->sanitizeFileName($name, $opts);
 		return true;
@@ -93,7 +93,8 @@ class elFinderPluginSanitizer
 		return $opts;
 	}
 	
-	private function sanitizeFileName($filename, $opts) {
-		return str_replace($opts['targets'], $opts['replace'], $filename);
+	private function sanitizeFileName($filename, $opts, $allows = array()) {
+		$targets = $allows? array_diff($opts['targets'], $allows) : $opts['targets'];
+		return str_replace($targets, $opts['replace'], $filename);
   	}
 }
