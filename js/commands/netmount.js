@@ -20,7 +20,7 @@ elFinder.prototype.commands.netmount = function() {
 	}
 
 	this.getstate = function() {
-		return this.drivers.length ? 0 : -1;
+		return this.drivers && this.drivers.length ? 0 : -1;
 	}
 	
 	this.exec = function() {
