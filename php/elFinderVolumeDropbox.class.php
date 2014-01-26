@@ -163,6 +163,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 							$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
 							$("#elfinder-cmd-netmout-dropbox-user").val("done");
 							$("#elfinder-cmd-netmout-dropbox-pass").val("done");
+							$("table.elfinder-netmount-tb input[name=\'host\']").val("dropbox");
 						</script>';
 						$html = 'Dropbox.com'.$script;
 					} catch (Dropbox_Exception $e) {
@@ -193,7 +194,11 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					}
 					
 					$_SESSION['elFinderDropboxAuthTokens'] = $tokens;
-					$html = '<input class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
+					$html = '<input id="elf-volumedriver-dropbox-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
+					$html .= '<script>
+						$("input#elf-volumedriver-dropbox-host-btn").hover(function(){$(this).toggleClass("ui-state-hover")});
+						$("table.elfinder-netmount-tb input[name=\'host\']").val("");
+					</script>';
 				}
 				return array('exit' => true, 'body' => $html);
 			} else {
@@ -206,6 +211,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					p.$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
 					p.$("#elfinder-cmd-netmout-dropbox-user").val("done");
 					p.$("#elfinder-cmd-netmout-dropbox-pass").val("done");
+					p.$("table.elfinder-netmount-tb input[name=\'host\']").val("dropbox");
 					window.close();';
 				
 				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
