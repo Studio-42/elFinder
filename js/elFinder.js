@@ -172,6 +172,13 @@ window.elFinder = function(node, opts) {
 		queue = [],
 		
 		/**
+		 * Net drivers names
+		 *
+		 * @type Array
+		 **/
+		netDrivers = [],
+		
+		/**
 		 * Commands prototype
 		 *
 		 * @type Object
