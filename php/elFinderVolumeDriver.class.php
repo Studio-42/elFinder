@@ -313,7 +313,7 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @var array
 	 **/
-	protected $diabled = array();
+	protected $disabled = array();
 	
 	/**
 	 * default extensions/mimetypes for mimeDetect == 'internal' 
