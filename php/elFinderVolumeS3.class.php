@@ -582,7 +582,7 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name, $mime, $w, $h) {
+	protected function _save($fp, $dir, $name, $mime, $stat) {
 		return false;
 	}
 	
