@@ -3276,6 +3276,11 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 */
 	protected function getArchivers($use_cache = true) {
+		
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+	            return;
+	        }
+        
 		if (!function_exists('proc_open')) {
 			return array();
 		}
