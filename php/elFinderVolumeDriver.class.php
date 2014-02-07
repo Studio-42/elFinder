@@ -732,13 +732,12 @@ abstract class elFinderVolumeDriver {
 		if ($root['read']) {
 			// check startPath - path to open by default instead of root
 			if ($this->options['startPath']) {
-				$this->startPath = $this->options['startPath'];
 				$start = $this->stat($this->options['startPath']);
 				if (!empty($start)
 				&& $start['mime'] == 'directory'
 				&& $start['read']
 				&& empty($start['hidden'])
-				&& $this->_inpath($this->options['startPath'], $this->root)) {
+				/* && $this->_inpath($this->options['startPath'], $this->root) */) {
 					$this->startPath = $this->options['startPath'];
 					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
 						$this->startPath = substr($this->startPath, 0, -1);
