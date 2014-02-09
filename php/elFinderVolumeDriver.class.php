@@ -737,7 +737,7 @@ abstract class elFinderVolumeDriver {
 				&& $start['mime'] == 'directory'
 				&& $start['read']
 				&& empty($start['hidden'])
-				&& $this->_inpath($this->options['startPath'], $this->root)) {
+				/* && $this->_inpath($this->options['startPath'], $this->root) */) {
 					$this->startPath = $this->options['startPath'];
 					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
 						$this->startPath = substr($this->startPath, 0, -1);
