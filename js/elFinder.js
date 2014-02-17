@@ -387,7 +387,7 @@ window.elFinder = function(node, opts) {
      *
      * @type Object
      * @default {}
-     */
+     **/
     this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
 
     /**
@@ -395,7 +395,7 @@ window.elFinder = function(node, opts) {
      *
      * @type Object
      * @default {}
-     */
+     **/
     this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
 
 	/**
