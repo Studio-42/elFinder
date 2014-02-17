@@ -391,7 +391,7 @@ window.elFinder = function(node, opts) {
     this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
 
     /**
-     * Any custom xhrFields to send across every ajax request
+     * Any xhrFields to send across every ajax request
      *
      * @type Object
      * @default {}
@@ -888,8 +888,8 @@ window.elFinder = function(node, opts) {
 				cache    : false,
 				// timeout  : 100,
 				data     : data,
-                headers  : this.customHeaders,
-                xhrFields: this.xhrFields,
+				headers  : this.customHeaders,
+				xhrFields: this.xhrFields
 			}, options.options || {}),
 			/**
 			 * Default success handler. 
