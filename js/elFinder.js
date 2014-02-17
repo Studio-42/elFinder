@@ -383,21 +383,21 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
 
-    /**
-     * Any custom headers to send across every ajax request
-     *
-     * @type Object
-     * @default {}
-     */
-    this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
+	/**
+	 * Any custom headers to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	*/
+	this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
 
-    /**
-     * Any custom xhrFields to send across every ajax request
-     *
-     * @type Object
-     * @default {}
-     */
-    this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
+	/**
+	 * Any custom xhrFields to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 */
+	this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -913,8 +913,8 @@ window.elFinder = function(node, opts) {
 				cache    : false,
 				// timeout  : 100,
 				data     : data,
-                headers  : this.customHeaders,
-                xhrFields: this.xhrFields
+				headers  : this.customHeaders,
+				xhrFields: this.xhrFields
 			}, options.options || {}),
 			/**
 			 * Default success handler. 
