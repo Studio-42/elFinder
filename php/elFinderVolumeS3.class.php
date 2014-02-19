@@ -516,7 +516,6 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 
 		try {
          $obj = $this->s3->deleteObject(array('Bucket' => $this->options['bucket'], 'Key' => $newkey));
-			//$obj = $this->s3->DeleteObject(array('Bucket' => $this->options['bucket'], 'Key' => $newkey));
 		} catch (\Exception $e) {
 		
 		}
