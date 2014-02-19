@@ -7,8 +7,8 @@
  
 /**
  * Greek translation
- * @author yawd <info@yawd.eu>
- * @version 2012-09-12
+ * @author yawd <info@yawd.eu>, Romanos
+ * @version 2014-02-09
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.el = {
@@ -35,7 +35,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errConf'              : 'Μη έγκυρες ρυθμίσεις για το backend.',
 			'errJSON'              : 'Το PHP JSON module δεν είναι εγκατεστημένο.',
 			'errNoVolumes'         : 'Δεν βρέθηκαν αναγνώσιμα volumes.',
-			'errCmdParams'         : 'Μη εέγκυρες παράμετροι για την εντολή "$1".',
+			'errCmdParams'         : 'Μη έγκυρες παράμετροι για την εντολή "$1".',
 			'errDataNotJSON'       : 'Τα δεδομένα δεν είναι JSON.',
 			'errDataEmpty'         : 'Τα δεδομένα είναι άδεια.',
 			'errCmdReq'            : 'Το Backend request χρειάζεται όνομα εντολής.',
@@ -50,8 +50,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errInvName'           : 'Μη έγκυρο όνομα αρχείου.',
 			'errFolderNotFound'    : 'Ο φάκελος δε βρέθηκε.',
 			'errFileNotFound'      : 'Το αρχείο δε βρέθηκε.',
-			'errTrgFolderNotFound' : 'Ο φάκελος "$1" δε βρεέθηκε.',
-			'errPopup'             : 'Το πρόγραμμα πλήγησης αμπόδισε το άνοιγμα αναδυόμενου παραθύρου. Για ανοίξετε το αρχείο ενεργοποιήστε το στις επιλογές του περιηγητή.',
+			'errTrgFolderNotFound' : 'Ο φάκελος "$1" δε βρέθηκε.',
+			'errPopup'             : 'Το πρόγραμμα πλήγησης εμπόδισε το άνοιγμα αναδυόμενου παραθύρου. Για ανοίξετε το αρχείο ενεργοποιήστε το στις επιλογές του περιηγητή.',
 			'errMkdir'             : 'Η δυμιουργία του φακέλου "$1" δεν ήταν δυνατή.',
 			'errMkfile'            : 'Η δημιουργία του αρχείου "$1" δεν ήταν δυνατή.',
 			'errRename'            : 'Η μετονομασία του αρχείου "$1" δεν ήταν δυνατή.',
@@ -146,7 +146,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			/************************************ dates **********************************/
 			'dateUnknown' : 'άγνωστο',
 			'Today'       : 'Σήμερα',
-			'Yesterday'   : 'Εχθές',
+			'Yesterday'   : 'Χθές',
 			'Jan'         : 'Ιαν',
 			'Feb'         : 'Φεβ',
 			'Mar'         : 'Μαρ',
@@ -196,7 +196,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmReq'      : 'Απαιτείται επιβεβαίωση',
 			'confirmRm'       : 'Είστε σίγουροι πως θέλετε να διαγράψετε τα αρχεία?<br/>Οι αλλαγές θα είναι μόνιμες!',
 			'confirmRepl'     : 'Αντικατάσταση του παλιού αρχείου με το νέο?',
-			'apllyAll'        : 'Εφαρμογή σε όλλα',
+			'apllyAll'        : 'Εφαρμογή σε όλα',
 			'name'            : 'Όνομα',
 			'size'            : 'Μέγεθος',
 			'perms'           : 'Δικαιώματα',
@@ -221,17 +221,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dim'             : 'Διαστάσεις',
 			'files'           : 'Αρχεία',
 			'folders'         : 'Φάκελοι',
-			'items'           : 'Ατικείμενα',
+			'items'           : 'Αντικείμενα',
 			'yes'             : 'ναι',
 			'no'              : 'όχι',
-			'link'            : 'Σλυνδεσμος',
+			'link'            : 'Σύνδεσμος',
 			'searcresult'     : 'Αποτελέσματα αναζήτησης',  
 			'selected'        : 'επιλεγμένα αντικείμενα',
 			'about'           : 'Σχετικά',
-			'shortcuts'       : 'Συντομέυσεις',
+			'shortcuts'       : 'Συντομεύσεις',
 			'help'            : 'Βοήθεια',
-			'webfm'           : 'εργαλέιο διαχείρισης αρχείων από το web',
-			'ver'             : 'ΈΚδοση',
+			'webfm'           : 'εργαλείο διαχείρισης αρχείων από το web',
+			'ver'             : 'Έκδοση',
 			'protocolver'     : 'έκδοση πρωτοκόλλου',
 			'homepage'        : 'Σελίδα του project',
 			'docs'            : 'Τεκμηρίωση (documentation)',
@@ -240,8 +240,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'facebook'        : 'Βρείτε μας στο facebook',
 			'team'            : 'Ομάδα',
 			'chiefdev'        : 'κύριος προγραμματιστής',
-			'developer'       : 'προγραμματισής',
-			'contributor'     : 'συνισφορά',
+			'developer'       : 'προγραμματιστής',
+			'contributor'     : 'συνεισφορά',
 			'maintainer'      : 'συντηρητής',
 			'translator'      : 'μεταφραστής',
 			'icons'           : 'Εικονίδια',
@@ -278,7 +278,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAlias'       : 'Ψευδώνυμο (alias)',
 			'kindAliasBroken' : 'Μη έγκυρο ψευδώνυμο',
 			// applications
-			'kindApp'         : 'Εφαρμοφή',
+			'kindApp'         : 'Εφαρμογή',
 			'kindPostscript'  : 'Έγγραφο Postscript',
 			'kindMsOffice'    : 'Έγγραφο Microsoft Office',
 			'kindMsWord'      : 'Έγγραφο Microsoft Word',
