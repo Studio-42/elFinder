@@ -7,8 +7,8 @@
  
 /**
  * Greek translation
- * @author yawd <info@yawd.eu>
- * @version 2012-09-12
+ * @author yawd <info@yawd.eu>, Romanos
+ * @version 2014-02-09
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.el = {
