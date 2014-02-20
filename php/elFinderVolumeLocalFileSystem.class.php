@@ -170,7 +170,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 			
 		$initial_slashes = (int) $initial_slashes;
-
+                
+                $path = str_replace(array('/', '\\'), '/', $path);
+                
 		$comps = explode('/', $path);
 		$new_comps = array();
 		foreach ($comps as $comp) {
