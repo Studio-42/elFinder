@@ -51,6 +51,16 @@ class elFinderConnector {
 	public function run() {
 		$isPost = $_SERVER["REQUEST_METHOD"] == 'POST';
 		$src    = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
+		if ($isPost && !$src && $rawPostData = @file_get_contents('php://input')) {
+			// for support IE XDomainRequest()
+			$parts = explode('&', $rawPostData);
+			foreach($parts as $part) {
+				list($key, $value) = array_pad(explode('=', $part), 2, '');
+				$src[$key] = rawurldecode($value);
+			}
+			$_POST = $src;
+			$_REQUEST = array_merge_recursive($src, $_REQUEST);
+		}
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
 		$args   = array();
 		
