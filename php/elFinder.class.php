@@ -77,7 +77,8 @@ class elFinder {
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false),
-		'url'       => array('target' => true, 'options' => false)
+		'url'       => array('target' => true, 'options' => false),
+		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false)
 	);
 	
 	/**
@@ -133,6 +134,14 @@ class elFinder {
 	 * @var array
 	 **/
 	public $mountErrors = array();
+	
+	/**
+	 * URL for callback output window for CORS
+	 * redirect to this URL when callback output
+	 *
+	 * @var string URL
+	 */
+	protected $callbackWindowURL = '';
 	
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
@@ -211,7 +220,8 @@ class elFinder {
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
-		
+		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
+				
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
 		// bind events listeners
@@ -718,6 +728,9 @@ class elFinder {
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($cwd['hash'])) === false) {
+			if ($options['exit'] === 'callback') {
+				$this->callback($options['out']);
+			}
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
 		
@@ -1571,6 +1584,71 @@ class elFinder {
 			return $url ? array('url' => $url) : array();
 		}
 		return array();
+	}
+	
+	/**
+	 * Output callback result with JavaScript that control elFinder
+	 * or HTTP redirect to callbackWindowURL
+	 *
+	 * @param  array  command arguments
+	 * @author Naoki Sawada
+	 */
+	protected function callback($args) {
+		$checkReg = '/[^a-zA-Z0-9;._-]/';
+		$node = (isset($args['node']) && !preg_match($checkReg, $args['node']))? $args['node'] : '';
+		$json = (isset($args['json']) && @json_decode($args['json']))? $args['json'] : '{}';
+		$bind  = (isset($args['bind']) && !preg_match($checkReg, $args['bind']))? $args['bind'] : '';
+		$done = (!empty($args['done']));
+	
+		while( ob_get_level() ) {
+			if (! ob_end_clean()) {
+				break;
+			}
+		}
+	
+		if ($done || ! $this->callbackWindowURL) {
+			$script = '';
+			if ($node) {
+				$script .= '
+					var w = window.opener || weindow.parent || window
+					var elf = w.document.getElementById(\''.$node.'\').elfinder;
+					if (elf) {
+						var data = '.$json.';
+						data.warning && elf.error(data.warning);
+						data.removed && data.removed.length && elf.remove(data);
+						data.added   && data.added.length   && elf.add(data);
+						data.changed && data.changed.length && elf.change(data);';
+				if ($bind) {
+					$script .= '
+						elf.trigger(\''.$bind.'\', data);';
+				}
+				$script .= '
+						data.sync && elf.sync();
+					}';
+			}
+			$script .= 'window.close();';
+				
+			$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+				
+			header('Content-Type: text/html; charset=utf-8');
+			header('Content-Length: '.strlen($out));
+			header('Cache-Control: private');
+			header('Pragma: no-cache');
+				
+			echo $out;
+				
+		} else {
+			$url = $this->callbackWindowURL;
+			$url .= ((strpos($url, '?') === false)? '?' : '&')
+			. '&node=' . rawurlencode($node)
+			. (($json !== '{}')? ('&json=' . rawurlencode($json)) : '')
+			. ($bind? ('&bind=' .  rawurlencode($bind)) : '')
+			. '&done=1';
+				
+			header('Location: ' . $url);
+				
+		}
+		exit();
 	}
 	
 	/***************************************************************************/
