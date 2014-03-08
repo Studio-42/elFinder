@@ -202,28 +202,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				unset($_SESSION['elFinderDropboxAuthTokens']);
 				$tokens = $this->oauth->getAccessToken();
 				$_SESSION['elFinderDropboxTokens'] = array($_GET['uid'], $tokens['token'], $tokens['token_secret']);
-				$script = '
-						var elf = window.opener.document.getElementById(\''.htmlspecialchars($_GET['node'], ENT_QUOTES, 'UTF-8').'\').elfinder;
-						var data = {protocol: "dropbox", mode: "done"};
-						elf.trigger("netmount", data);
-						window.close();
-						';
 				
-				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><script>'.$script.'</script><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
-				 
-				while( ob_get_level() ) {
-					if (! ob_end_clean()) {
-						break;
-					}
-				}
-				 
-				header('Content-Type: text/html; charset=utf-8');
-				header('Content-Length: '.strlen($out));
-				header('Cache-Control: private');
-				header('Pragma: no-cache');
-				echo $out;
-				 
-				exit();
+				$out = array(
+					'node' => $_GET['node'],
+					'json' => '{"protocol": "dropbox", "mode": "done"}',
+					'bind' => 'netmount'
+				);
+				
+				return array('exit' => 'callback', 'out' => $out);
 			}
 		}
 		if (isset($_SESSION['elFinderDropboxTokens'])) {
