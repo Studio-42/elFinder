@@ -214,21 +214,36 @@ elFinder.prototype._options = {
 			},
 			dropbox: {
 				inputs: {
-					host     : $('<span id="elfinder-cmd-netmout-dropbox-host"><span class="elfinder-info-spinner"/></span></span><input type="hidden" value="dropbox"/>'),
+					host     : $('<span><span class="elfinder-info-spinner"/></span></span><input type="hidden"/>'),
 					path     : $('<input type="text" value="/"/>'),
-					user     : $('<input id="elfinder-cmd-netmout-dropbox-user" type="hidden"/>'),
-					pass     : $('<input id="elfinder-cmd-netmout-dropbox-pass" type="hidden"/>')
+					user     : $('<input type="hidden"/>'),
+					pass     : $('<input type="hidden"/>')
 				},
 				select: function(fm){
-					if ($('#elfinder-cmd-netmout-dropbox-host').find('span').length) {
+					var self = this;
+					if (self.inputs.host.find('span').length) {
 						fm.request({
-							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init', options: {url: fm.uploadURL}},
+							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init', options: {url: fm.uploadURL, id: fm.id}},
 							preventDefault : true
 						}).done(function(data){
-							$('#elfinder-cmd-netmout-dropbox-host')
-							.html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
+							self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+							self.inputs.host.find('span').html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
 						}).fail(function(){});
 					}					
+				},
+				done: function(fm, data){
+					var self = this;
+					if (data.mode == 'makebtn') {
+						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+						self.inputs.host.find('span').hover(function(){$(this).toggleClass("ui-state-hover");});
+						self.inputs.host[1].value = "";
+					} else {
+						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+						self.inputs.host.find('span').html("Dropbox.com");
+						self.inputs.host[1].value = "dropbox";
+						self.inputs.user.val("done");
+						self.inputs.pass.val("done");
+					}
 				}
 			}
 		},

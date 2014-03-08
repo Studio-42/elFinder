@@ -105,6 +105,15 @@ elFinder.prototype.commands.netmount = function() {
 				return fm.dialog(content, opts).ready(function(){inputs.protocol.change();});
 			}
 			;
+		
+		fm.bind('netmount', function(e) {
+			var d = e.data || null;
+			if (d && d.protocol) {
+				if (o[d.protocol] && typeof o[d.protocol].done == 'function') {
+					o[d.protocol].done(fm, d);
+				}
+			}
+		});
 
 		if (!self.dialog) {
 			self.dialog = create();

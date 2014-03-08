@@ -160,12 +160,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						$this->dropbox = new Dropbox_API($this->oauth, $this->options['root']);
 						$this->dropbox->getAccountInfo();
 						$script = '<script>
-							$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
-							$("#elfinder-cmd-netmout-dropbox-user").val("done");
-							$("#elfinder-cmd-netmout-dropbox-pass").val("done");
-							$("table.elfinder-netmount-tb input[name=\'host\']").val("dropbox");
+							$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "dropbox", mode: "done"});
 						</script>';
-						$html = 'Dropbox.com'.$script;
+						$html = $script;
 					} catch (Dropbox_Exception $e) {
 						unset($_SESSION['elFinderDropboxTokens']);
 					}
@@ -184,7 +181,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						$options['url'] = $this->getConnectorUrl();
 					}
 					$callback  = $options['url']
-					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return'.$cdata;
+					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return&node='.$options['id'].$cdata;
 					
 					try {
 						$tokens = $this->oauth->getRequestToken();
@@ -196,8 +193,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					$_SESSION['elFinderDropboxAuthTokens'] = $tokens;
 					$html = '<input id="elf-volumedriver-dropbox-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
 					$html .= '<script>
-						$("input#elf-volumedriver-dropbox-host-btn").hover(function(){$(this).toggleClass("ui-state-hover")});
-						$("table.elfinder-netmount-tb input[name=\'host\']").val("");
+						$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "dropbox", mode: "makebtn"});
 					</script>';
 				}
 				return array('exit' => true, 'body' => $html);
@@ -207,14 +203,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$tokens = $this->oauth->getAccessToken();
 				$_SESSION['elFinderDropboxTokens'] = array($_GET['uid'], $tokens['token'], $tokens['token_secret']);
 				$script = '
-					var p = window.opener;
-					p.$("#elfinder-cmd-netmout-dropbox-host").html("Dropbox.com");
-					p.$("#elfinder-cmd-netmout-dropbox-user").val("done");
-					p.$("#elfinder-cmd-netmout-dropbox-pass").val("done");
-					p.$("table.elfinder-netmount-tb input[name=\'host\']").val("dropbox");
-					window.close();';
+						var elf = window.opener.document.getElementById(\''.htmlspecialchars($_GET['node'], ENT_QUOTES, 'UTF-8').'\').elfinder;
+						var data = {protocol: "dropbox", mode: "done"};
+						elf.trigger("netmount", data);
+						window.close();
+						';
 				
-				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+				$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><script>'.$script.'</script><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
 				 
 				while( ob_get_level() ) {
 					if (! ob_end_clean()) {
