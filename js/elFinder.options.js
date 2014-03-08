@@ -235,7 +235,7 @@ elFinder.prototype._options = {
 					var self = this;
 					if (data.mode == 'makebtn') {
 						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
-						self.inputs.host.find('span').hover(function(){$(this).toggleClass("ui-state-hover");});
+						self.inputs.host.find('input').hover(function(){$(this).toggleClass("ui-state-hover");});
 						self.inputs.host[1].value = "";
 					} else {
 						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
