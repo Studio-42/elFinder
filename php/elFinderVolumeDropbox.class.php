@@ -226,10 +226,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @param array $options
 	 * @return boolean
 	 */
-	public function netunmount($netVolumes) {
+	public function netunmount($netVolumes, $key) {
 		$count = 0;
+		$dropboxUid = '';
+		if (isset($netVolumes[$key])) {
+			$dropboxUid = $netVolumes[$key]['dropboxUid'];
+		}
 		foreach($netVolumes as $volume) {
-			if ($volume['host'] === 'dropbox') {
+			if (@$volume['host'] === 'dropbox' && @$volume['dropboxUid'] === $dropboxUid) {
 				$count++;
 			}
 		}
@@ -330,9 +334,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				return $this->setError('Dropbox error: '.$e->getMessage());
 			}
 		}
-		
-		// auth ok
-		$_SESSION['elFinderDropboxTokens'] = array($this->options['dropboxUid'], $this->options['accessToken'], $this->options['accessTokenSecret']);
 		
 		$this->dropboxUid = $this->options['dropboxUid'];
 		$this->tmbPrefix = 'dropbox'.base_convert($this->dropboxUid, 10, 32);
