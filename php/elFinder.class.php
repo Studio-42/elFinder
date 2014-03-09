@@ -611,7 +611,7 @@ class elFinder {
 				$key = $args['host'];
 				$volume = $this->volume($args['user']);
 				if (method_exists($volume, 'netunmount')) {
-					$res = $volume->netunmount($netVolumes);
+					$res = $volume->netunmount($netVolumes, $key);
 				}
 				if ($res) {
 					unset($netVolumes[$key]);
