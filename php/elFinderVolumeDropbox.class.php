@@ -87,7 +87,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	public function __construct() {
 		
 		//ini_set('memory_limit', '128M');
-		@ include 'Dropbox/autoload.php';
+		@ include_once 'Dropbox/autoload.php';
 		$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
 		
 		$opts = array(
@@ -226,10 +226,18 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @param array $options
 	 * @return boolean
 	 */
-	public function netunmount($options) {
-		$this->DB->exec('drop table '.$this->DB_TableName);
-		foreach(glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png') as $tmb) {
-			unlink($tmb);
+	public function netunmount($netVolumes) {
+		$count = 0;
+		foreach($netVolumes as $volume) {
+			if ($volume['host'] === 'dropbox') {
+				$count++;
+			}
+		}
+		if ($count === 1) {
+			$this->DB->exec('drop table '.$this->DB_TableName);
+			foreach(glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png') as $tmb) {
+				unlink($tmb);
+			}
 		}
 		return true;
 	}
@@ -322,6 +330,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				return $this->setError('Dropbox error: '.$e->getMessage());
 			}
 		}
+		
+		// auth ok
+		$_SESSION['elFinderDropboxTokens'] = array($this->options['dropboxUid'], $this->options['accessToken'], $this->options['accessTokenSecret']);
+		
 		$this->dropboxUid = $this->options['dropboxUid'];
 		$this->tmbPrefix = 'dropbox'.base_convert($this->dropboxUid, 10, 32);
 
