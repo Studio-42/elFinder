@@ -16,6 +16,7 @@
 }
 
 /* dir/file permissions and symlink markers */
+.elfinder-lock,
 .elfinder-perms,
 .elfinder-symlink {
 	position:absolute;
@@ -36,6 +37,11 @@
 
 /* write only */
 .elfinder-wo .elfinder-perms { background-position:0 -80px;}
+
+/* locked */
+.elfinder-lock {
+	background-position:0 -656px;
+}
 
 /* drag helper */
 .elfinder-drag-helper {

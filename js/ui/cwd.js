@@ -133,6 +133,8 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			permsTpl = fm.res('tpl', 'perms'),
 			
+			lockTpl = fm.res('tpl', 'lock'),
+			
 			symlinkTpl = fm.res('tpl', 'symlink'),
 			
 			/**
@@ -163,7 +165,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.mime2kind(f);
 				},
 				marker : function(f) {
-					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
 					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');

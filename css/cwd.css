@@ -75,6 +75,7 @@
 
 /* permissions/symlink markers */
 .elfinder-cwd-view-icons .elfinder-perms { bottom:4px; right:2px; }
+.elfinder-cwd-view-icons .elfinder-lock { top:-3px; right:-2px; }
 .elfinder-cwd-view-icons .elfinder-symlink { bottom:6px; left:0px; }
 
 /* icon/thumbnail */
@@ -216,9 +217,11 @@
 
 /* premissions/symlink marker */
 .elfinder-cwd-view-list .elfinder-perms, 
+.elfinder-cwd-view-list .elfinder-lock,
 .elfinder-cwd-view-list .elfinder-symlink { top:50%; margin-top:-6px; }
 /* markers in ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-perms   { left:7px;  }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-lock    { left:9px; top:0px; }
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px; }
 
 /* file icon */
