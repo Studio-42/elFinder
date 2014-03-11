@@ -595,7 +595,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$stat['dirs'] = (int)(bool)$this->query('select path from '.$this->DB_TableName.' where isdir=1 and path='.$this->DB->quote(strtolower($raw['path'])));
 		}
 		
-		if (isset($raw['url'])) {
+		if (!empty($raw['url'])) {
 			$stat['url'] = $raw['url'];
 		} else {
 			$stat['url'] = '1';
@@ -641,27 +641,23 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	* @author Naoki Sawada
 	**/
 	protected function doSearch($path, $q, $mimes) {
-	
 		$result = array();
-
-		try {
-			if ($path === '/') $path = '';
-			$res = $this->dropbox->search($q, null, $path);
-		} catch (Dropbox_Exception $e) {
-			return $this->setError('Dropbox error: '.$e->getMessage());
-		}
-		
+		$sth = $this->DB->prepare('select dat from '.$this->DB_TableName.' WHERE path LIKE ? AND fname LIKE ?');
+		$sth->execute(array('%'.(($path === $this->root)? '' : strtolower($path)), '%'.strtolower($q).'%'));
+		$res = $sth->fetchAll(PDO::FETCH_COLUMN);
 		if ($res) {
 			foreach($res as $raw) {
+				$raw = unserialize($raw);
 				if ($stat = $this->parseRaw($raw)) {
-					if ($stat['mime'] === 'directory' || !$this->mimeAccepted($stat['mime'], $mimes)) {
-						continue;
+					if (!isset($this->cache[$raw['path']])) {
+						$stat = $this->updateCache($raw['path'], $stat);
 					}
-					$result[] = $this->stat($raw['path']);
+					if ($stat['mime'] !== 'directory' || $this->mimeAccepted($stat['mime'], $mimes)) {
+						$result[] = $this->stat($raw['path']);
+					}
 				}
 			}
 		}
-		
 		return $result;
 	}
 	
@@ -958,6 +954,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				} catch (Dropbox_Exception $e) {
 					return false;
 				}
+			}
+			if ($url) {
+				list($url) = explode('?', $url);
 			}
 			return $url;
 		}
