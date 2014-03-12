@@ -33,7 +33,7 @@ elFinder.prototype.commands.info = function() {
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
-		spinner    : '<span>{text}</span> <span class="'+spclass+'-{name}"/>'
+		spinner    : '<span>{text}</span> <span class="'+spclass+' '+spclass+'-{name}"/>'
 	}
 	
 	this.alwaysEnabled = true;
