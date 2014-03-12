@@ -160,6 +160,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
       		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // added 01.07.2013
+			'ntfurl'      : 'リンクURLを取得しています', // added 11.03.2014
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
