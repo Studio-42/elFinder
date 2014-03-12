@@ -1807,7 +1807,22 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-<<<<<<< HEAD
+	 * Return content URL (for netmout volume driver)
+	 * If file.url == 1 requests from JavaScript client with XHR
+	 * 
+	 * @param string $hash  file hash
+	 * @param array $options  options array
+	 * @return boolean|string
+	 * @author Naoki Sawada
+	 */
+	public function getContentUrl($hash, $options = array()) {
+		if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
+			return false;
+		}
+		return $file['url'];
+	}
+	
+	/**
 	 * Return temp path
 	 * 
 	 * @return string
@@ -1860,24 +1875,6 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return $targetHash;
-	}
-	
-	/**
-=======
->>>>>>> add a new command "url" (Get content URL)
-	 * Return content URL (for netmout volume driver)
-	 * If file.url == 1 requests from JavaScript client with XHR
-	 * 
-	 * @param string $hash  file hash
-	 * @param array $options  options array
-	 * @return boolean|string
-	 * @author Naoki Sawada
-	 */
-	public function getContentUrl($hash, $options = array()) {
-		if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
-			return false;
-		}
-		return $file['url'];
 	}
 	
 	/**

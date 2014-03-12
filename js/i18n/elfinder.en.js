@@ -156,7 +156,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Doing something',
 			'ntfloadimg'  : 'Loading image',
 			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
-     		'ntfnetunmount': 'Unmounting network volume', // added 30.04.2012
+			'ntfnetunmount': 'Unmounting network volume', // added 30.04.2012
 			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 			'ntfreaddir'  : 'Reading folder infomation', // added 01.07.2013
 			

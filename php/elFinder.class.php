@@ -138,7 +138,7 @@ class elFinder {
 	/**
 	 * URL for callback output window for CORS
 	 * redirect to this URL when callback output
-	 *
+	 * 
 	 * @var string URL
 	 */
 	protected $callbackWindowURL = '';
@@ -221,7 +221,7 @@ class elFinder {
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
-				
+		
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
 		// bind events listeners
@@ -650,6 +650,9 @@ class elFinder {
 		if (method_exists($volume, 'netmountPrepare')) {
 			$options = $volume->netmountPrepare($options);
 			if (isset($options['exit'])) {
+				if ($options['exit'] === 'callback') {
+					$this->callback($options['out']);
+				}
 				return $options;
 			}
 		}
@@ -728,9 +731,6 @@ class elFinder {
 
 		// get current working directory files list and add to $files if not exists in it
 		if (($ls = $volume->scandir($cwd['hash'])) === false) {
-			if ($options['exit'] === 'callback') {
-				$this->callback($options['out']);
-			}
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
 		
@@ -1585,11 +1585,11 @@ class elFinder {
 		}
 		return array();
 	}
-	
+
 	/**
 	 * Output callback result with JavaScript that control elFinder
 	 * or HTTP redirect to callbackWindowURL
-	 *
+	 * 
 	 * @param  array  command arguments
 	 * @author Naoki Sawada
 	 */
@@ -1599,13 +1599,13 @@ class elFinder {
 		$json = (isset($args['json']) && @json_decode($args['json']))? $args['json'] : '{}';
 		$bind  = (isset($args['bind']) && !preg_match($checkReg, $args['bind']))? $args['bind'] : '';
 		$done = (!empty($args['done']));
-	
+		
 		while( ob_get_level() ) {
 			if (! ob_end_clean()) {
 				break;
 			}
 		}
-	
+		
 		if ($done || ! $this->callbackWindowURL) {
 			$script = '';
 			if ($node) {
@@ -1627,26 +1627,26 @@ class elFinder {
 					}';
 			}
 			$script .= 'window.close();';
-				
+			
 			$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
-				
+			
 			header('Content-Type: text/html; charset=utf-8');
 			header('Content-Length: '.strlen($out));
 			header('Cache-Control: private');
 			header('Pragma: no-cache');
-				
+			
 			echo $out;
-				
+			
 		} else {
 			$url = $this->callbackWindowURL;
 			$url .= ((strpos($url, '?') === false)? '?' : '&')
-			. '&node=' . rawurlencode($node)
-			. (($json !== '{}')? ('&json=' . rawurlencode($json)) : '')
-			. ($bind? ('&bind=' .  rawurlencode($bind)) : '')
-			. '&done=1';
-				
+				 . '&node=' . rawurlencode($node)
+				 . (($json !== '{}')? ('&json=' . rawurlencode($json)) : '')
+				 . ($bind? ('&bind=' .  rawurlencode($bind)) : '')
+				 . '&done=1';
+			
 			header('Location: ' . $url);
-				
+			
 		}
 		exit();
 	}

@@ -1,13 +1,8 @@
 /**
  * Japanese translation
-<<<<<<< HEAD
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
  * @version 2013-07-03
-=======
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
- * @version 2012-04-23
->>>>>>> correction about netmount is extracted from a dropbox brunch
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -162,7 +157,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : '処理をしています',
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
-			'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
+      		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // added 01.07.2013
 			
