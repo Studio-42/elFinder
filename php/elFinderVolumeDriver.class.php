@@ -1244,7 +1244,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 		
-		if (!$dir['write']) {
+		if (!$dir['write'] || !$this->allowCreate($path, $name, true)) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
