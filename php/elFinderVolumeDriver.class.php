@@ -1281,7 +1281,7 @@ abstract class elFinderVolumeDriver {
 		
 		$path = $this->decode($dst);
 		
-		if (!$dir['write'] || !$this->allowCreate($path, $name)) {
+		if (!$dir['write'] || !$this->allowCreate($path, $name, false)) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
@@ -1329,7 +1329,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
-		if (!$this->allowCreate($dir, $name)) {
+		if (!$this->allowCreate($dir, $name, ($file['mime'] === 'directory'))) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
@@ -1364,7 +1364,7 @@ abstract class elFinderVolumeDriver {
 		$dir  = $this->_dirname($path);
 		$name = $this->uniqueName($dir, $this->_basename($path), ' '.$suffix.' ');
 
-		if (!$this->allowCreate($dir, $name)) {
+		if (!$this->allowCreate($dir, $name, ($file['mime'] === 'directory'))) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
@@ -2045,10 +2045,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  string  $path  file path
 	 * @param  string  $name  attribute name (read|write|locked|hidden)
 	 * @param  bool    $val   attribute value returned by file system
+	 * @param  bool    $isDir path is directory (true: directory, false: file)
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function attr($path, $name, $val=null) {
+	protected function attr($path, $name, $val=null, $isDir=null) {
 		if (!isset($this->defaults[$name])) {
 			return false;
 		}
@@ -2057,7 +2058,7 @@ abstract class elFinderVolumeDriver {
 		$perm = null;
 		
 		if ($this->access) {
-			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this);
+			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this, $isDir);
 
 			if ($perm !== null) {
 				return !!$perm;
@@ -2091,12 +2092,12 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function allowCreate($dir, $name) {
+	protected function allowCreate($dir, $name, $isDir = null) {
 		$path = $this->_joinPath($dir, $name);
 		$perm = null;
 		
 		if ($this->access) {
-			$perm = call_user_func($this->access, 'write', $path, $this->options['accessControlData'], $this);			
+			$perm = call_user_func($this->access, 'write', $path, $this->options['accessControlData'], $this, $isDir);			
 			if ($perm !== null) {
 				return !!$perm;
 			}
@@ -2184,11 +2185,13 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null));
-		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null));
+		$isDir = ($stat['mime'] === 'directory');
+		
+		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null, $isDir));
+		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null, $isDir));
 		if ($root) {
 			$stat['locked'] = 1;
-		} elseif ($this->attr($path, 'locked', !empty($stat['locked']))) {
+		} elseif ($this->attr($path, 'locked', !empty($stat['locked']), $isDir)) {
 			$stat['locked'] = 1;
 		} else {
 			unset($stat['locked']);
@@ -2196,7 +2199,7 @@ abstract class elFinderVolumeDriver {
 
 		if ($root) {
 			unset($stat['hidden']);
-		} elseif ($this->attr($path, 'hidden', !empty($stat['hidden'])) 
+		} elseif ($this->attr($path, 'hidden', !empty($stat['hidden']), $isDir) 
 		|| !$this->mimeAccepted($stat['mime'])) {
 			$stat['hidden'] = $root ? 0 : 1;
 		} else {
@@ -2205,7 +2208,7 @@ abstract class elFinderVolumeDriver {
 		
 		if ($stat['read'] && empty($stat['hidden'])) {
 			
-			if ($stat['mime'] == 'directory') {
+			if ($isDir) {
 				// for dir - check for subdirs
 
 				if ($this->options['checkSubfolders']) {
