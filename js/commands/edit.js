@@ -134,7 +134,6 @@ elFinder.prototype.commands.edit = function() {
 				opts   = fm.options,
 				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
-				url    = fm.url(hash) || fm.options.url,
 				id    = 'edit-'+fm.namespace+'-'+file.hash,
 				d = fm.getUI().find('#'+id), 
 				error;
