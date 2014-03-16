@@ -369,7 +369,7 @@ elFinder.prototype.commands.quicklook = function() {
 			preview = this.preview,
 			i, p;
 		
-		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
+		width  = o.width  > 0 ? parseInt(o.width)  : Math.min(450, $(window).width()-10);	
 		height = o.height > 0 ? parseInt(o.height) : 300;
 
 		fm.one('load', function() {

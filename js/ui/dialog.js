@@ -44,7 +44,8 @@ $.fn.elfinderdialog = function(opts) {
 					     containment : 'document' })
 				.css({
 					width  : opts.width,
-					height : opts.height
+					height : opts.height,
+					maxWidth: opts.maxWidth? opts.maxWidth : $(window).width()-10
 				})
 				.mousedown(function(e) {
 					e.stopPropagation();
