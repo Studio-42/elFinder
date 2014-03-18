@@ -44,8 +44,9 @@ $.fn.elfinderdialog = function(opts) {
 					     containment : 'document' })
 				.css({
 					width  : opts.width,
-					height : opts.height,
-					maxWidth: opts.maxWidth? opts.maxWidth : $(window).width()-10
+					height : opts.height//,
+					//maxWidth: opts.maxWidth? opts.maxWidth : $(window).width()-10,
+					//maxHeight: opts.maxHeight? opts.maxHeight : $(window).height()-20
 				})
 				.mousedown(function(e) {
 					e.stopPropagation();
@@ -58,7 +59,13 @@ $.fn.elfinderdialog = function(opts) {
 					}
 				})
 				.bind('open', function() {
+					var d = $(this),
+					maxWinWidth = (d.outerWidth() > parent.width()-10)? parent.width()-10 : null;
+					
+					maxWinWidth && d.css({width: maxWinWidth, left: '5px'});
+					
 					dialog.trigger('totop');
+					
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
 					if (!dialog.is('.'+clnotify)) {
@@ -73,8 +80,8 @@ $.fn.elfinderdialog = function(opts) {
 
 							if (d[0] != dialog[0] && (top == _top || left == _left)) {
 								dialog.css({
-									top  : (top+10)+'px',
-									left : (left+10)+'px'
+									top  : (top+(maxWinWidth? 15 : 10))+'px',
+									left : (maxWinWidth? 5 : left+10)+'px'
 								});
 							}
 						});
@@ -132,11 +139,10 @@ $.fn.elfinderdialog = function(opts) {
 			;
 		
 		if (!opts.position) {
-			top = parseInt((parent.height() - dialog.outerHeight())/2 - 42);
 			opts.position = {
-				top  : (top > 0 ? top : 0)+'px',
-				left : parseInt((parent.width() - dialog.outerWidth())/2)+'px'
-			}
+				top  : Math.max(0, parseInt((parent.height() - dialog.outerHeight())/2 - 42))+'px',
+				left : Math.max(0, parseInt((parent.width() - dialog.outerWidth())/2))+'px'
+			};
 		} 
 			
 		dialog.css(opts.position);
