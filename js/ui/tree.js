@@ -403,6 +403,24 @@ $.fn.elfindertree = function(fm, opts) {
 						link.children('.'+arrow).click();
 					}
 				})
+				// for touch device
+				.delegate('.'+navdir, 'touchstart', function(e) {
+					var self = this,
+					selfe = e;
+					$(this).data('touching', true);
+					$(this).data('longtap', setTimeout(function(e){
+						// long tap
+						fm.trigger('contextmenu', {
+							'type'    : 'navbar',
+							'targets' : [fm.navId2Hash($(self).attr('id'))],
+							'x'       : selfe.originalEvent.touches[0].clientX,
+							'y'       : selfe.originalEvent.touches[0].clientY
+						});
+					}, 500));
+				})
+				.delegate('.'+navdir, 'touchmove touchend', function(e) {
+					clearTimeout($(this).data('longtap'));
+				})
 				// toggle subfolders in tree
 				.delegate('.'+navdir+'.'+collapsed+' .'+arrow, 'click', function(e) {
 					var arrow = $(this),
