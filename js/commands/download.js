@@ -21,7 +21,7 @@ elFinder.prototype.commands.download = function() {
 		var sel = this.fm.selected(),
 			cnt = sel.length;
 		
-		return  !this._disabled && cnt && (!fm.UA.IE || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
+		return  !this._disabled && !this.fm.UA.Mobile && cnt && (!fm.UA.IE || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
