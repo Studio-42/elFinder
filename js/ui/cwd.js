@@ -720,6 +720,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.delegate(fileSelector, 'touchstart.'+fm.namespace, function(e) {
+					e.stopPropagation();
 					$(this).data('touching', true);
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
 					  sel = p.prevAll('.'+clSelected+':first').length +
@@ -742,6 +743,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.delegate(fileSelector, 'touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
+					e.stopPropagation();
 					clearTimeout($(this).data('longtap'));
 				})
 				// attach draggable
@@ -878,6 +880,22 @@ $.fn.elfindercwd = function(fm, options) {
 						'y'       : e.clientY
 					});
 					
+				})
+				// for touch device
+				.bind('touchstart.'+fm.namespace, function(e) {
+					$(this).data('touching', true);
+					$(this).data('longtap', setTimeout(function(){
+						// long tap
+						fm.trigger('contextmenu', {
+							'type'    : 'cwd',
+							'targets' : [fm.cwd().hash],
+							'x'       : e.originalEvent.touches[0].clientX,
+							'y'       : e.originalEvent.touches[0].clientY
+						});
+					}, 500));
+				})
+				.bind('touchmove '+fm.namespace+' touchend.'+fm.namespace, function(e) {
+					clearTimeout($(this).data('longtap'));
 				}),
 			
 			resize = function() {
