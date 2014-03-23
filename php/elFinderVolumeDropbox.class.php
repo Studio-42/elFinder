@@ -130,7 +130,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		
 		if ($options['user'] === 'init') {
 
-			if (! $this->dropbox_phpFound || empty($options['consumerKey']) || empty($options['consumerSecret'])) {
+			if (! $this->dropbox_phpFound || empty($options['consumerKey']) || empty($options['consumerSecret']) || !class_exists('PDO')) {
 				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
 			}
 			
@@ -274,6 +274,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	protected function init() {
+		if (!class_exists('PDO')) {
+			return $this->setError('PHP PDO class is require.');
+		}
+		
 		if (!$this->options['consumerKey']
 		||  !$this->options['consumerSecret']
 		||  !$this->options['accessToken']
@@ -372,12 +376,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		// DataBase table name
 		$this->DB_TableName = $this->options['PDO_DBName'];
 		// DataBase check or make table
-		if ($this->DB = new PDO($this->options['PDO_DSN'], $this->options['PDO_User'], $this->options['PDO_Pass'], $this->options['PDO_Options'])) {
+		try {
+			$this->DB = new PDO($this->options['PDO_DSN'], $this->options['PDO_User'], $this->options['PDO_Pass'], $this->options['PDO_Options']);
 			if (! $this->checkDB()) {
 				return $this->setError('Can not make DB table');
 			}
-		} else {
-			return $this->setError('Could not use PDO');
+		} catch (PDOException $e) {
+			return $this->setError('PDO connection failed: '.$e->getMessage());
 		}
 		
 		$res = $this->deltaCheck(!empty($_REQUEST['init']));
