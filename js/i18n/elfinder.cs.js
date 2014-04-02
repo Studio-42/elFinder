@@ -130,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'Vyhledávání souborů',
 			'ntfsmth'     : 'Čekejte prosím...',
 			'ntfloadimg'  : 'Načítání obrázků',
+			'ntfdim'      : 'Zjišťuji velikost obrázku',
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'neznámý',
