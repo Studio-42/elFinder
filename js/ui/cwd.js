@@ -935,6 +935,7 @@ $.fn.elfindercwd = function(fm, options) {
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
+				wrapper.removeClass(clDropActive);
 				fm.exec('upload', {dropEvt: e});
 			}, false);
 		}
