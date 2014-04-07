@@ -40,18 +40,73 @@ elFinder.prototype.commands.upload = function() {
 						dfrd.resolve(data);
 					});
 			},
-			dfrd, dialog, input, button, dropbox, pastebox;
+			dfrd, dialog, input, button, dropbox, pastebox, dropUpload, paste;
 		
 		if (this.disabled()) {
 			return $.Deferred().reject();
 		}
 		
-		if (data && (data.input || data.files)) {
-			return fm.upload(data);
+		dropUpload = function(e) {
+			e.stopPropagation();
+		  	e.preventDefault();
+			var file = false;
+			var type = '';
+			var data = null;
+			try{
+				data = e.dataTransfer.getData('text/html');
+			} catch(e) {}
+			if (data) {
+				file = [ data ];
+				type = 'html';
+			} else if (data = e.dataTransfer.getData('text')) {
+				file = [ data ];
+				type = 'text';
+			} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
+				file = e.dataTransfer;
+				type = 'data';
+			} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
+				file = e.dataTransfer.files;
+				type = 'files';
+			}
+			return file? fm.upload({files : file, type : type}) : false;
+		};
+		
+		if (data) {
+			if (data.input || data.files)
+				return fm.upload(data);
+			else if (data.dropEvt) {
+				return dropUpload(data.dropEvt);
+			}
 		}
 		
 		dfrd = $.Deferred();
 		
+		paste = function(e) {
+			var e = e.originalEvent || e;
+			var files = [];
+			var file;
+			if (e.clipboardData && e.clipboardData.items && e.clipboardData.items.length){
+				for (var i=0; i < e.clipboardData.items.length; i++) {
+					if (e.clipboardData.items[i].kind == 'file') {
+						file = e.clipboardData.items[i].getAsFile();
+						files.push(file);
+					}
+				}
+				if (files.length) {
+					upload({files : files, type : 'files'});
+					return;
+				}
+			}
+			var my = e.target;
+			setTimeout(function () {
+				if (my.innerHTML) {
+					var src = my.innerHTML.replace(/<br[^>]*>/gi, ' ');
+					var type = src.match(/<[^>]+>/)? 'html' : 'text';
+					my.innerHTML = '';
+					upload({files : [ src ], type : type});
+				}
+			}, 1);
+		};
 		
 		input = $('<input type="file" multiple="true"/>')
 			.change(function() {
@@ -67,32 +122,18 @@ elFinder.prototype.commands.upload = function() {
 		dialog = $('<div class="elfinder-upload-dialog-wrapper"/>')
 			.append(button);
 		
-		pastebox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable=true></div>')
-			.on('paste drop', function (evt) {
-				var e = evt.originalEvent || evt;
-				var files = [];
-				var file;
-				if (e.clipboardData && e.clipboardData.items && e.clipboardData.items.length){
-					for (var i=0; i < e.clipboardData.items.length; i++) {
-						if (e.clipboardData.items[i].kind == 'file') {
-							file = e.clipboardData.items[i].getAsFile();
-							files.push(file);
-						}
-					}
-					if (files.length) {
-						upload({files : files, type : 'files'});
-						return;
-					}
-				}
-				var my = e.target;
-				setTimeout(function () {
-					if (my.innerHTML) {
-						var src = my.innerHTML.replace(/<br[^>]*>/gi, ' ');
-						var type = src.match(/<[^>]+>/)? 'html' : 'text';
-						my.innerHTML = '';
-						upload({files : [ src ], type : type});
-					}
-				}, 1);
+		pastebox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable="true">'+fm.i18n('dropFilesBrowser')+'</div>')
+			.on('paste drop', function(e){
+				paste(e);
+			})
+			.on('mousedown click', function(){
+				$(this).focus();
+			})
+			.on('focus', function(e){
+				(e.originalEvent || e).target.innerHTML = '';
+			})
+			.on('blur', function(e){
+				(e.originalEvent || e).target.innerHTML = fm.i18n('dropFilesBrowser');
 			})
 			.on('dragenter mouseover', function(){
 				pastebox.addClass(hover);
@@ -102,11 +143,26 @@ elFinder.prototype.commands.upload = function() {
 			});
 		
 		if (fm.dragUpload) {
-			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox">'+fm.i18n('dropFiles')+'</div>')
+			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable="true">'+fm.i18n('dropPasteFiles')+'</div>')
+				.on('paste', function(e){
+					paste(e);
+				})
+				.on('mousedown click', function(){
+					$(this).focus();
+				})
+				.on('focus', function(e){
+					(e.originalEvent || e).target.innerHTML = '';
+				})
+				.on('blur', function(e){
+					(e.originalEvent || e).target.innerHTML = fm.i18n('dropPasteFiles');
+				})
+				.on('mouseover', function(){
+					$(this).addClass(hover);
+				})
+				.on('mouseout', function(){
+					$(this).removeClass(hover);
+				})
 				.prependTo(dialog)
-				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')
-				.after(pastebox)
-				.after('<div>'+fm.i18n('dropFilesBrowser')+'</div>')
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 			
 			dropbox.addEventListener('dragenter', function(e) {
@@ -128,31 +184,12 @@ elFinder.prototype.commands.upload = function() {
 			}, false);
 
 			dropbox.addEventListener('drop', function(e) {
-				e.stopPropagation();
-			  	e.preventDefault();
-				var file = false;
-				var type = '';
-				if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
-					file = e.dataTransfer.items;
-					type = 'data';
-				} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
-					file = e.dataTransfer.files;
-					type = 'files';
-				} else if (e.dataTransfer.getData('text/html')) {
-					file = [ e.dataTransfer.getData('text/html') ];
-					type = 'html';
-				} else if (e.dataTransfer.getData('text')) {
-					file = [ e.dataTransfer.getData('text') ];
-					type = 'text';
-				}
-				if (file) {
-					upload({files : file, type : type});
-				}
+				dialog.elfinderdialog('close');
+				dropUpload(e);
 			}, false);
 			
 		} else {
-			$('<div>'+fm.i18n('dropFilesBrowser')+'</div>')
-				.append(pastebox)
+			pastebox
 				.prependTo(dialog)
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 			

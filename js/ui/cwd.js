@@ -935,30 +935,7 @@ $.fn.elfindercwd = function(fm, options) {
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
-			  	e.preventDefault();
-				wrapper.removeClass(clDropActive);
-				var file = false;
-				var type = '';
-				var data = null;
-				try{
-					data = e.dataTransfer.getData('text/html');
-				} catch(e) {}
-				if (data) {
-					file = [ data ];
-					type = 'html';
-				} else if (data = e.dataTransfer.getData('text')) {
-					file = [ data ];
-					type = 'text';
-				} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
-					file = e.dataTransfer;
-					type = 'data';
-				} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
-					file = e.dataTransfer.files;
-					type = 'files';
-				}
-				if (file) {
-					fm.exec('upload', {files : file, type : type});
-				}
+				fm.exec('upload', {dropEvt: e});
 			}, false);
 		}
 

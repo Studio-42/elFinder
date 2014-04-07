@@ -2327,7 +2327,7 @@ elFinder.prototype = {
 				notifyto, notifyto2;
 			
 			if (!isDataType && !cnt) {
-				return dfrd.reject();
+				return dfrd.reject(['errUploadNoFiles']);
 			}
 			
 			xhr.addEventListener('error', function() {
@@ -2443,6 +2443,10 @@ elFinder.prototype = {
 					}
 				}
 				
+				if (! files.length) {
+					dfrd.reject(['errUploadNoFiles']);
+				}
+				
 				xhr.open('POST', self.uploadURL, true);
 				
 				// set request headers
@@ -2508,9 +2512,13 @@ elFinder.prototype = {
 						notifyto2 && clearTimeout(notifyto2);
 						self.notify({type : 'readdir', cnt : -1});
 						cnt = result[0].length;
-						send(result[0], result[1]);
+						if (cnt) {
+							send(result[0], result[1]);
+						} else {
+							dfrd.reject(['errUploadNoFiles']);
+						}
 					}).fail(function(){
-						dfrd.reject();
+						dfrd.reject(['errUploadNoFiles']);
 					});
 				}
 			}
