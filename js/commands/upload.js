@@ -97,7 +97,7 @@ elFinder.prototype.commands.upload = function() {
 					return;
 				}
 			}
-			var my = e.target;
+			var my = e.target || e.srcElement;
 			setTimeout(function () {
 				if (my.innerHTML) {
 					var src = my.innerHTML.replace(/<br[^>]*>/gi, ' ');
@@ -130,10 +130,12 @@ elFinder.prototype.commands.upload = function() {
 				$(this).focus();
 			})
 			.on('focus', function(e){
-				(e.originalEvent || e).target.innerHTML = '';
+				e = e.originalEvent || e;
+				(e.target || e.srcElement).innerHTML = '';
 			})
 			.on('blur', function(e){
-				(e.originalEvent || e).target.innerHTML = fm.i18n('dropFilesBrowser');
+				e = e.originalEvent || e;
+				(e.target || e.srcElement).innerHTML = fm.i18n('dropFilesBrowser');
 			})
 			.on('dragenter mouseover', function(){
 				pastebox.addClass(hover);
