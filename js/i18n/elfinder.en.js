@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2014-04-07
+ * @version 2014-04-08
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -92,6 +92,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArchiveExec'       : 'Error while archiving files: "$1"',
 			'errExtractExec'       : 'Error while extracting files: "$1"',
 			'errNetUnMount'        : 'Unable to unmount', // added 30.04.2012
+			'errConvUTF8'          : 'Not convertible to UTF-8', // added 08.04.2014
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -135,6 +136,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMount'  : 'Mount',  // added 18.04.2012
 			'btnApprove': 'Goto $1 & approve', // added 26.04.2012
 			'btnUnmount': 'Unmount', // added 30.04.2012
+			'btnConv'   : 'Convert', // added 08.04.2014
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -189,6 +191,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
+			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // added 08.04.2014
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
 			'size'            : 'Size',

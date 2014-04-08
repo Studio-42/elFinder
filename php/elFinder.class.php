@@ -68,7 +68,7 @@ class elFinder {
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false),
-		'get'       => array('target' => true),
+		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
@@ -189,6 +189,7 @@ class elFinder {
 	const ERROR_ARC_MAXSIZE       = 'errArcMaxSize';
 	const ERROR_RESIZE            = 'errResize';
 	const ERROR_UNSUPPORT_TYPE    = 'errUsupportType';
+	const ERROR_CONV_UTF8         = 'errConvUTF8';
 	const ERROR_NOT_UTF8_CONTENT  = 'errNotUTF8Content';
 	const ERROR_NETMOUNT          = 'errNetMount';
 	const ERROR_NETUNMOUNT        = 'errNetUnMount';
@@ -1411,10 +1412,25 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, $volume->path($target), $volume->error()));
 		}
 		
+		if ($args['conv'] && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding')) {
+			$mime = isset($file['mime'])? $file['mime'] : '';
+			if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
+				if ($enc = mb_detect_encoding ( $content , mb_detect_order(), true)) {
+					if (strtolower($enc) !== 'utf-8') {
+						$content = mb_convert_encoding($content, 'UTF-8', $enc);
+					}
+				}
+			}
+		}
+		
 		$json = json_encode($content);
 
-		if ($json == 'null' && strlen($json) < strlen($content)) {
-			return array('error' => $this->error(self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+		if ($json === false || strlen($json) < strlen($content)) {
+			if ($args['conv']) {
+				return array('error' => $this->error(self::ERROR_CONV_UTF8,self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+			} else {
+				return array('doconv' => true);
+			}
 		}
 		
 		return array('content' => $content);
