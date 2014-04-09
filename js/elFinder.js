@@ -2170,28 +2170,29 @@ elFinder.prototype = {
 				return dfrd.promise();
 			} else {
 				var ret = [];
-				var regex;
 				var str = data.files[0];
 				if (data.type == 'html') {
-					regex = /<img[^>]+src=["']?([^"'> ]+)/ig;
-					var m = [];
-					var url = '';
-					var links;
-					while (m = regex.exec(str)) {
-						url = m[1].replace(/&amp;/g, '&');
-						if (url.match(/^http|data:/) && $.inArray(url, ret) == -1) ret.push(url);
-					}
-					links = str.match(/<\/a>/i);
-					if (links && links.length == 1) {
-						regex = /<a[^>]+href=["']?([^"'> ]+)((?:.|\s)+)<\/a>/i;
-						if (m = regex.exec(str)) {
-							if (! m[2].match(/<img/i)) {
-								url = m[1].replace(/&amp;/g, '&');
-								if (url.match(/^http/) && $.inArray(url, ret) == -1) ret.push(url);
+					var tmp = $("<html/>").append($.parseHTML(str));
+					$('img[src]', tmp).each(function(){
+						var url = $(this).attr('src');
+						if (url && $.inArray(url, ret) == -1) ret.push(url);
+					});
+					$('a[href]', tmp).each(function(){
+						var loc,
+							parseUrl = function(url) {
+							    var a = document.createElement('a');
+							    a.href = url;
+							    return a;
+							};
+						if ($(this).text()) {
+							loc = parseUrl($(this).attr('href'));
+							if (loc.href && ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i)) {
+								if ($.inArray(loc.href, ret) == -1) ret.push(loc.href);
 							}
 						}
-					}
+					});
 				} else {
+					var regex, m, url;
 					regex = /(http[^<>"{}|\\^\[\]`\s]+)/ig;
 					while (m = regex.exec(str)) {
 						url = m[1].replace(/&amp;/g, '&');
