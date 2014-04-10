@@ -2437,13 +2437,10 @@ elFinder.prototype = {
 							fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, multiupload: true}).always(function(e) {
 								if (e.added) added = $.merge(added, e.added);
 								added && fm.trigger('multiupload', {added: added});
-								if (notify) {
-									var _cnt = (isDataType? this[0] : this).length;
-									total -= _cnt;
-									if (total < 1) {
-										notifyto && clearTimeout(notifyto);
-										self.notify({type : 'upload', cnt : -cnt, progress : 100 * cnt});
-									}
+								total -= (isDataType? this[0] : this).length;
+								if (notify && total < 1) {
+									notifyto && clearTimeout(notifyto);
+									self.notify({type : 'upload', cnt : -cnt});
 								}
 							}.bind(sfiles[i]));
 						}
