@@ -2344,6 +2344,13 @@ elFinder.prototype = {
 			xhr.addEventListener('load', function() {
 				var status = xhr.status, res;
 				
+				if ((data.checked || notify) && prev == loaded) {
+					loaded = 100;
+					if (loaded - prev > 0) {
+						self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
+					}
+				}
+				
 				if (status > 500) {
 					return dfrd.reject('errResponse');
 				}
@@ -2357,13 +2364,6 @@ elFinder.prototype = {
 					return dfrd.reject(['errResponse', 'errDataEmpty']);
 				}
 
-				if ((data.checked || notify) && prev == loaded) {
-					loaded = 100;
-					if (loaded - prev > 0) {
-						self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
-					}
-				}
-				
 				res = self.parseUploadData(xhr.responseText);
 				res._multiupload = data.multiupload? true : false;
 				res.error ? dfrd.reject(res.error) : dfrd.resolve(res);
@@ -2401,6 +2401,8 @@ elFinder.prototype = {
 					for (var i=0; i < files.length; i++) {
 						if (maxFileSize && files[i].size >= maxFileSize) {
 							self.error(self.i18n('errUploadFile', files[i].name) + ' ' + self.i18n('errUploadFileSize'));
+							cnt--;
+							total--;
 							continue;
 						}
 						if ((fm.uplMaxSize && size + files[i].size >= fm.uplMaxSize) || fcnt > fm.uplMaxFile) {
@@ -2431,16 +2433,17 @@ elFinder.prototype = {
 					}
 					
 					if (sfiles.length > 1) {
-						if (isDataType) notifyto = startNotify();
+						if (!notifyto) notifyto = startNotify();
 						var added = [];
 						for (var i=0; i < sfiles.length; i++) {
-							fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, multiupload: true}).always(function(e) {
+							fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, multiupload: true})
+							.always(function(e) {
 								if (e.added) added = $.merge(added, e.added);
 								added && fm.trigger('multiupload', {added: added});
 								total -= (isDataType? this[0] : this).length;
 								if (notify && total < 1) {
 									notifyto && clearTimeout(notifyto);
-									self.notify({type : 'upload', cnt : -cnt});
+									self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
 								}
 							}.bind(sfiles[i]));
 						}
