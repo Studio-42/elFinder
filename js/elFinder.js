@@ -2408,7 +2408,7 @@ elFinder.prototype = {
 							continue;
 						}
 						if (fm.uplMaxSize && files[i].size >= fm.uplMaxSize) {
-							var BYTES_PER_CHUNK = fm.uplMaxSize;
+							var BYTES_PER_CHUNK = fm.uplMaxSize - 8190; // margin 8kb
 							var SIZE = files[i].size;
 
 							var start = 0;
