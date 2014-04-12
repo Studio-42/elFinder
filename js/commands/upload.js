@@ -72,9 +72,10 @@ elFinder.prototype.commands.upload = function() {
 		};
 		
 		if (data) {
-			if (data.input || data.files)
+			if (data.input || data.files) {
+				data.type = 'files';
 				return fm.upload(data);
-			else if (data.dropEvt) {
+			} else if (data.dropEvt) {
 				return dropUpload(data.dropEvt);
 			}
 		}
