@@ -1408,7 +1408,7 @@ class elFinder {
 		$extTable = array_flip(array_unique($volume->getMimeTable()));
 		
 		if (empty($files)) {
-			if (isset($args['upload']) && is_array($args['upload'])) {
+			if (isset($args['upload']) && is_array($args['upload']) && ($tempDir = $this->getTempDir($volume->getTempPath()))) {
 				$names = array();
 				foreach($args['upload'] as $i => $url) {
 					// check is data:
@@ -1424,29 +1424,27 @@ class elFinder {
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
 								$_ext = $_match[1];
 							}
-							if ($tempDir = $this->getTempDir($volume->getTempPath())) {
-								$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true)) . $_ext;
-								if (file_put_contents($tmpfname, $data)) {
-									$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
-									$_name = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
-									list($_a, $_b) = array_pad(explode('.', $_name, 2), 2, '');
-									if ($_b === '') {
-										$_b = $this->detectFileExtension($tmpfname);
-										$_name = $_a.$_b;
-									} else {
-										$_b = '.'.$_b;
-									}
-									if (isset($names[$_name])) {
-										$_name = $_a.'_'.$names[$_name]++.$_b;
-									} else {
-										$names[$_name] = 1;
-									}
-									$files['tmp_name'][$i] = $tmpfname;
-									$files['name'][$i] = $_name;
-									$files['error'][$i] = 0;
+							$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true)) . $_ext;
+							if (file_put_contents($tmpfname, $data)) {
+								$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
+								$_name = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
+								list($_a, $_b) = array_pad(explode('.', $_name, 2), 2, '');
+								if ($_b === '') {
+									$_b = $this->detectFileExtension($tmpfname);
+									$_name = $_a.$_b;
 								} else {
-									@ unlink($tmpfname);
+									$_b = '.'.$_b;
 								}
+								if (isset($names[$_name])) {
+									$_name = $_a.'_'.$names[$_name]++.$_b;
+								} else {
+									$names[$_name] = 1;
+								}
+								$files['tmp_name'][$i] = $tmpfname;
+								$files['name'][$i] = $_name;
+								$files['error'][$i] = 0;
+							} else {
+								@ unlink($tmpfname);
 							}
 						}
 					}
@@ -1512,14 +1510,14 @@ class elFinder {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
 				if (! is_uploaded_file($tmpname)) {
-					if (@ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);;
+					if (@ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);;
 					continue;
 				}
 				break;
 			}
 			
 			fclose($fp);
-			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
+			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);
 			$result['added'][] = $file;
 		}
 		if ($GLOBALS['elFinderTempFiles']) {
