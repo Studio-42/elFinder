@@ -2325,7 +2325,9 @@ elFinder.prototype = {
 						self.notify({type : 'upload', cnt : cnt, progress : loaded*cnt});
 					}, self.options.notifyDelay);
 				},
-				notifyto, notifyto2;
+				notifyto = null, notifyto2 = null,
+				target = (data.target || self.cwd().hash),
+				chunkID = (data.cid || +new Date());
 			
 			prev = loaded;
 			
@@ -2397,12 +2399,68 @@ elFinder.prototype = {
 			var send = function(files, paths){
 				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize;
 				if (! data.checked && (isDataType || data.type == 'files')) {
-					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : fm.uplMaxSize;
+					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : 0;
 					for (var i=0; i < files.length; i++) {
 						if (maxFileSize && files[i].size >= maxFileSize) {
 							self.error(self.i18n('errUploadFile', files[i].name) + ' ' + self.i18n('errUploadFileSize'));
 							cnt--;
 							total--;
+							continue;
+						}
+						if (fm.uplMaxSize && files[i].size >= fm.uplMaxSize) {
+							var BYTES_PER_CHUNK = fm.uplMaxSize;
+							var SIZE = files[i].size;
+
+							var start = 0;
+							var end = BYTES_PER_CHUNK;
+
+							var chunks = -1;
+							var blob = files[i];
+							var total = Math.floor(SIZE / BYTES_PER_CHUNK);
+							while(start < SIZE) {
+								var chunk;
+								if ('slice' in blob) {
+									chunk = blob.slice(start, end);
+								} else if ('mozSlice' in blob) {
+									chunk = blob.mozSlice(start, end);
+								} else if ('webkitSlice' in blob) {
+									chunk = blob.webkitSlice(start, end);
+								} else {
+									chunk = null;
+									break;
+								}
+								chunk.chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
+								
+								if (size) {
+									c++;
+								}
+								if (typeof sfiles[c] == 'undefined') {
+									sfiles[c] = [];
+									if (isDataType) {
+										sfiles[c][0] = [];
+										sfiles[c][1] = [];
+									}
+								}
+								size = fm.uplMaxSize;
+								fcnt = 1;
+								if (isDataType) {
+									sfiles[c][0].push(chunk);
+									sfiles[c][1].push(paths[i]);
+								} else {
+									sfiles[c].push(chunk);
+								}
+
+								start = end;
+								end = start + BYTES_PER_CHUNK;
+							}
+							if (chunk == null) {
+								self.error(self.i18n('errUploadFile', files[i].name) + ' ' + self.i18n('errUploadFileSize'));
+								cnt--;
+								total--;
+							} else {
+								cnt += chunks;
+								total += chunks;
+							}
 							continue;
 						}
 						if ((fm.uplMaxSize && size + files[i].size >= fm.uplMaxSize) || fcnt > fm.uplMaxFile) {
@@ -2433,20 +2491,33 @@ elFinder.prototype = {
 					}
 					
 					if (sfiles.length > 1) {
-						if (!notifyto) notifyto = startNotify();
-						var added = [];
-						for (var i=0; i < sfiles.length; i++) {
-							fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, multiupload: true})
-							.always(function(e) {
-								if (e.added) added = $.merge(added, e.added);
-								added && fm.trigger('multiupload', {added: added});
-								total -= (isDataType? this[0] : this).length;
-								if (notify && total < 1) {
-									notifyto && clearTimeout(notifyto);
-									self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
+						if (!notify) notifyto = startNotify();
+						var added = [],
+							done = 0,
+							last = sfiles.length,
+							multi = function(files, num){
+								var sfiles = [];
+								while(files.length && sfiles.length < num) {
+									sfiles.push(files.shift());
 								}
-							}.bind(sfiles[i]));
-						}
+								if (sfiles.length) {
+									for (var i=0; i < sfiles.length; i++) {
+										fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, target: target, multiupload: true, cid: chunkID})
+										.always(function(e) {
+											if (e.added) added = $.merge(added, e.added);
+											if (last == ++done) {
+												fm.trigger('multiupload', {added: added});
+												if (notify) {
+													notifyto && clearTimeout(notifyto);
+													self.notify({type : 'upload', cnt : -cnt, progress : 100*cnt});
+												}
+											}
+											multi(files, 1); // Next one
+										});
+									}
+								}
+							};
+						multi(sfiles, 5); // Max connection: 4
 						return false;
 					}
 					
@@ -2481,7 +2552,7 @@ elFinder.prototype = {
 				}
 
 				formData.append('cmd', 'upload');
-				formData.append(self.newAPI ? 'target' : 'current', self.cwd().hash);
+				formData.append(self.newAPI ? 'target' : 'current', target);
 				$.each(self.options.customData, function(key, val) {
 					formData.append(key, val);
 				});
@@ -2491,6 +2562,10 @@ elFinder.prototype = {
 				
 				$.each(files, function(i, file) {
 					formData.append('upload[]', file);
+					if (file.chunk) {
+						formData.append('chunk', file.chunk);
+						formData.append('cid', chunkID);
+					}
 				});
 				
 				if (isDataType) {
@@ -2498,6 +2573,7 @@ elFinder.prototype = {
 						formData.append('upload_path[]', path);
 					});
 				}
+				
 				
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4 && xhr.status == 0) {
@@ -2843,7 +2919,7 @@ elFinder.prototype = {
 				progress = parseInt(prc/total);
 				notify.data({progress : prc, total : total});
 				
-				ndialog.find('.elfinder-notify-progress')
+				notify.find('.elfinder-notify-progress')
 					.animate({
 						width : (progress < 100 ? progress : 100)+'%'
 					}, 20);

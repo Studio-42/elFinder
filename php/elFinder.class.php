@@ -67,7 +67,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
@@ -1293,6 +1293,81 @@ class elFinder {
 	}
 	
 	/**
+	 * Check chunked upload files
+	 * 
+	 * @param string $tmpname  uploaded temporary file path
+	 * @param string $chunk    uploaded chunk file name
+	 * @param string $cid      uploaded chunked file id
+	 * @param string $tempDir  temporary dirctroy path
+	 * @return array (string JoinedTemporaryFilePath, string FileName) or (empty, empty)
+	 * @author Naoki Sawada
+	 */
+	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir) {
+		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
+			$encname = md5($cid . '_' . $m[1]);
+			$part = $tempDir . '/ELF' . $encname . $m[2];
+			if (move_uploaded_file($tmpname, $part)) {
+				$total = $m[3];
+				$parts = array();
+				for ($i = 0; $i <= $total; $i++) {
+					$name = $tempDir . '/ELF' . $encname . '.' . $i . '_' . $total;
+					if (is_readable($name)) {
+						$parts[] = $name;
+					} else {
+						$parts = null;
+						break;
+					}
+				}
+				if ($parts) {
+					if ($resfile = tempnam($tempDir, 'ELF')) {
+						$target = fopen($resfile, 'wb');
+						foreach($parts as $f) {
+							$fp = fopen($f, 'rb');
+							while (!feof($fp)) {
+								fwrite($target, fread($fp, 8192));
+							}
+							fclose($fp);
+							unlink($f);
+						}
+						fclose($target);
+						return array($resfile, $m[1]);
+					}
+				}
+			}
+		}
+		return array('', '');
+	}
+	
+	/**
+	 * Get temporary dirctroy path
+	 * 
+	 * @param  string $volumeTempPath
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	private function getTempDir($volumeTempPath = null) {
+		$testDirs = array();
+		if (function_exists('sys_get_temp_dir')) {
+			$testDirs[] = sys_get_temp_dir();
+		}
+		if ($volumeTempPath) {
+			$testDirs[] = rtrim(realpath($volumeTempPath), DIRECTORY_SEPARATOR);
+		}
+		$tempDir = '';
+		$test = DIRECTORY_SEPARATOR . microtime(true);
+		foreach($testDirs as $testDir) {
+			if (!$testDir) continue;
+			$testFile = $testDir.$test;
+			if (touch($testFile)) {
+				unlink($testFile);
+				$tempDir = $testDir;
+				break;
+			}
+		}
+		return $tempDir;
+	}
+	
+	/**
 	 * Save uploaded files
 	 *
 	 * @param  array
@@ -1304,16 +1379,34 @@ class elFinder {
 		$volume = $this->volume($target);
 		$files  = isset($args['FILES']['upload']) && is_array($args['FILES']['upload']) ? $args['FILES']['upload'] : array();
 		$result = array('added' => array(), 'header' => empty($args['html']) ? false : 'Content-Type: text/html; charset=utf-8');
-		$paths = $args['upload_path']? $args['upload_path'] : array();
+		$paths  = $args['upload_path']? $args['upload_path'] : array();
+		$chunk  = $args['chunk']? $args['chunk'] : '';
+		$cid    = $args['cid']? (int)$args['cid'] : '';
 		
 		if (!$volume) {
 			return array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target), 'header' => $header);
 		}
 		
+		// regist Shutdown function
+		$GLOBALS['elFinderTempFiles'] = array();
+		if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
+			$shutdownfunc = function(){
+				foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
+					@unlink($f);
+				}
+			};
+		} else {
+			$shutdownfunc = create_function('', '
+				foreach(array_keys($GLOBALS[\'elFinderTempFiles\']) as $f){
+					@unlink($f);
+				}
+			');
+		}
+		register_shutdown_function($shutdownfunc);
+		
 		// file extentions table by MIME
 		$extTable = array_flip(array_unique($volume->getMimeTable()));
 		
-		$non_uploads = array();
 		if (empty($files)) {
 			if (isset($args['upload']) && is_array($args['upload'])) {
 				$names = array();
@@ -1331,20 +1424,10 @@ class elFinder {
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
 								$_ext = $_match[1];
 							}
-							$tmpfname = DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime()) . $_ext;
-							$tmpPath = sys_get_temp_dir();
-							if (! @ touch($tmpPath . $tmpfname)) {
-								if ($tmpPath = $volume->getTempPath()) {
-									$tmpfname = $tmpPath . $tmpfname;
-								} else {
-									$tmpfname = '';
-								}
-							} else {
-								$tmpfname = $tmpPath . $tmpfname;
-							}
-							if ($tmpfname) {
+							if ($tempDir = $this->getTempDir($volume->getTempPath())) {
+								$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true)) . $_ext;
 								if (file_put_contents($tmpfname, $data)) {
-									$non_uploads[$tmpfname] = true;
+									$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
 									$_name = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
 									list($_a, $_b) = array_pad(explode('.', $_name, 2), 2, '');
 									if ($_b === '') {
@@ -1384,10 +1467,24 @@ class elFinder {
 			$tmpname = $files['tmp_name'][$i];
 			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
 			if ($name === 'blob') {
-				// for form clipboard with Google Chrome
-				$type = $files['type'][$i];
-				$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
-				$name = substr(md5(basename($tmpname)), 0, 8) . $ext;
+				if ($chunk) {
+					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
+						list($tmpname, $name) = $this->checkChunkedFile($tmpname, $chunk, $cid, $tempDir);
+						if (!$name) {
+							return array('added' => array());
+						}
+						$GLOBALS['elFinderTempFiles'][$tmpname] = true;
+					} else {
+						$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, self::ERROR_UPLOAD_TRANSFER);
+						$this->uploadDebug = 'Upload error: unable open tmp file';
+						return $result;
+					}
+				} else {
+					// for form clipboard with Google Chrome
+					$type = $files['type'][$i];
+					$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
+					$name = substr(md5(basename($tmpname)), 0, 8) . $ext;
+				}
 			}
 			
 			// do hook function 'upload.presave'
@@ -1401,7 +1498,7 @@ class elFinder {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
 				$this->uploadDebug = 'Upload error: unable open tmp file';
 				if (! is_uploaded_file($tmpname)) {
-					if (@ unlink($tmpname)) unset($non_uploads[$tmpfname]);
+					if (@ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
 					continue;
 				}
 				break;
@@ -1415,18 +1512,18 @@ class elFinder {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
 				if (! is_uploaded_file($tmpname)) {
-					if (@ unlink($tmpname)) unset($non_uploads[$tmpfname]);;
+					if (@ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);;
 					continue;
 				}
 				break;
 			}
 			
 			fclose($fp);
-			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($non_uploads[$tmpfname]);
+			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
 			$result['added'][] = $file;
 		}
-		if ($non_uploads) {
-			foreach(array_keys($non_uploads) as $_temp) {
+		if ($GLOBALS['elFinderTempFiles']) {
+			foreach(array_keys($GLOBALS['elFinderTempFiles']) as $_temp) {
 				@ unlink($_temp);
 			}
 		}
