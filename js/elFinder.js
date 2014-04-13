@@ -2314,7 +2314,7 @@ elFinder.prototype = {
 					}),
 				xhr         = new XMLHttpRequest(),
 				formData    = new FormData(),
-				isDataType  = (data.type == 'data'),
+				isDataType  = (data.isDataType || data.type == 'data'),
 				files       = data.input ? data.input.files : self.uploads.checkFile(data, self), 
 				cnt         = data.checked? (isDataType? files[0].length : files.length) : files.length,
 				loaded      = 5, prev,
@@ -2502,7 +2502,14 @@ elFinder.prototype = {
 								}
 								if (sfiles.length) {
 									for (var i=0; i < sfiles.length; i++) {
-										fm.exec('upload', {type: data.type, files: sfiles[i], checked: true, target: target, multiupload: true, cid: chunkID})
+										fm.exec('upload', {
+											type: data.type,
+											isDataType: isDataType,
+											files: sfiles[i],
+											checked: true,
+											target: target,
+											multiupload: true,
+											cid: chunkID})
 										.always(function(e) {
 											if (e.added) added = $.merge(added, e.added);
 											if (last == ++done) {
