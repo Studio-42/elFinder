@@ -1389,19 +1389,19 @@ class elFinder {
 		
 		// regist Shutdown function
 		$GLOBALS['elFinderTempFiles'] = array();
-		if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-			$shutdownfunc = function(){
-				foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
-					@unlink($f);
-				}
-			};
-		} else {
+// 		if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
+// 			$shutdownfunc = function(){ // <- Parse error on PHP < 5.3 ;-(
+// 				foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
+// 					@unlink($f);
+// 				}
+// 			};
+// 		} else {
 			$shutdownfunc = create_function('', '
 				foreach(array_keys($GLOBALS[\'elFinderTempFiles\']) as $f){
 					@unlink($f);
 				}
 			');
-		}
+//		}
 		register_shutdown_function($shutdownfunc);
 		
 		// file extentions table by MIME
