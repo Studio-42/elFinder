@@ -2327,7 +2327,8 @@ elFinder.prototype = {
 				},
 				notifyto = null, notifyto2 = null,
 				target = (data.target || self.cwd().hash),
-				chunkID = (data.cid || +new Date());
+				chunkID = (data.cid || +new Date()),
+				chunkRatio = 1;
 			
 			prev = loaded;
 			
@@ -2349,7 +2350,7 @@ elFinder.prototype = {
 				if ((data.checked || notify) && prev == loaded) {
 					loaded = 100;
 					if (loaded - prev > 0) {
-						self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
+						self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt*chunkRatio});
 					}
 				}
 				
@@ -2391,7 +2392,7 @@ elFinder.prototype = {
 					
 					if (curr - prev > 4) {
 						loaded = curr;
-						(data.checked || notify) && self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt});
+						(data.checked || notify) && self.notify({type : 'upload', cnt : 0, progress : (loaded - prev)*cnt*chunkRatio});
 					}
 				}
 			}, false);
@@ -2429,7 +2430,8 @@ elFinder.prototype = {
 									chunk = null;
 									break;
 								}
-								chunk.chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
+								chunk._chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
+								chunk._ratio = 1 / total;
 								
 								if (size) {
 									c++;
@@ -2458,7 +2460,7 @@ elFinder.prototype = {
 								cnt--;
 								total--;
 							} else {
-								cnt += chunks;
+								//cnt += chunks;
 								total += chunks;
 							}
 							continue;
@@ -2569,9 +2571,10 @@ elFinder.prototype = {
 				
 				$.each(files, function(i, file) {
 					formData.append('upload[]', file);
-					if (file.chunk) {
-						formData.append('chunk', file.chunk);
+					if (file._chunk) {
+						formData.append('chunk', file._chunk);
 						formData.append('cid', chunkID);
+						chunkRatio = file._ratio;
 					}
 				});
 				
