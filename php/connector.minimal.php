@@ -50,7 +50,8 @@ $opts = array(
 			'driver'        => 'LocalFileSystem',   // driver for accessing file system (REQUIRED)
 			'path'          => $_SERVER['DOCUMENT_ROOT'] . '/img/',         // path to files (REQUIRED)
 			'URL'           => 'img', // URL to files (REQUIRED)
-			'accessControl' => 'access'             // disable and hide dot starting files (OPTIONAL)
+			'accessControl' => 'access'   ,          // disable and hide dot starting files (OPTIONAL)
+		    'tmbPath' => 'thumbs',
 		)
 	),
     'bind' => array(
