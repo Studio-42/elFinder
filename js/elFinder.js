@@ -2536,7 +2536,6 @@ elFinder.prototype = {
 						return false;
 					}
 					
-					dataChecked = true;
 					if (isDataType) {
 						files = sfiles[0][0];
 						paths = sfiles[0][1];
@@ -2544,6 +2543,8 @@ elFinder.prototype = {
 						files = sfiles[0];
 					}
 				}
+				
+				dataChecked = true;
 				
 				if (! files.length) {
 					dfrd.reject(['errUploadNoFiles']);
