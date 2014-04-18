@@ -104,4 +104,5 @@ elFinder.prototype.commands.getfile = function() {
 		return dfrd.resolve(result(files));
 	}
 
+        this.buttonType = "button";
 }

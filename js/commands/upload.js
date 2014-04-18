@@ -108,4 +108,5 @@ elFinder.prototype.commands.upload = function() {
 		return dfrd;
 	}
 
+        this.buttonType = "button";
 }

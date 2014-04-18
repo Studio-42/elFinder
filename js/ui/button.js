@@ -17,23 +17,34 @@ $.fn.elfinderbutton = function(cmd) {
 			selected = 'elfinder-button-menu-item-selected',
 			menu,
 			button   = $(this).addClass('ui-state-default elfinder-button')
-				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
-				.hover(function(e) { !button.is('.'+disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
-				.click(function(e) { 
-					if (!button.is('.'+disabled)) {
-						if (menu && cmd.variants.length > 1) {
-							// close other menus
-							menu.is(':hidden') && cmd.fm.getUI().click();
-							e.stopPropagation();
-							menu.slideToggle(100);
-						} else {
-							cmd.exec();
-						}
-						
-					}
-				}),
-			hideMenu = function() {
+                            .attr('title', cmd.title)
+                            .append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>');
+			
+                        if (cmd.buttonType === "button") {
+                            button.addClass("button-type-button");
+                            $(".elfinder-button-icon", button).remove();
+                            var but = $("<p class='button-round-box' />");
+                            var inner = $("<button type='button' class='btn btn-success'>" + cmd.title + "</button>");
+                            but.append(inner);
+                            button.append(but);
+                        };
+                        
+                        button.hover(function(e) { !button.is('.'+disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
+                            .click(function(e) { 
+                                    if (!button.is('.'+disabled)) {
+                                            if (menu && cmd.variants.length > 1) {
+                                                    // close other menus
+                                                    menu.is(':hidden') && cmd.fm.getUI().click();
+                                                    e.stopPropagation();
+                                                    menu.slideToggle(100);
+                                            } else {
+                                                    cmd.exec();
+                                            }
+
+                                    }
+                            });
+                        
+			var hideMenu = function() {
 				menu.hide();
 			};
 			
