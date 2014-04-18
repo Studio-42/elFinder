@@ -55,7 +55,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 		// wait when button will be added to DOM
 		setTimeout(function() {
 			button.parent().detach();
-			cmd.fm.getUI('toolbar').prepend(button.show());
+			cmd.fm.getUI('toolbar').append(button.show());
 			// position icons for ie7
 			if (cmd.fm.UA.ltIE7) {
 				var icon = button.children(cmd.fm.direction == 'ltr' ? '.ui-icon-close' : '.ui-icon-search');
