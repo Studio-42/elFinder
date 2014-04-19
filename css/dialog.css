@@ -126,6 +126,7 @@
 .elfinder-dialog-icon-prepare,
 .elfinder-dialog-icon-move        { background-position: 0 -128px;}
 .elfinder-dialog-icon-upload      { background-position: 0 -160px; }
+.elfinder-dialog-icon-chunkmerge  { background-position: 0 -160px; }
 .elfinder-dialog-icon-rm          { background-position: 0 -192px; }
 .elfinder-dialog-icon-download    { background-position: 0 -260px; }
 .elfinder-dialog-icon-save        { background-position: 0 -295px; }

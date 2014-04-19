@@ -2296,13 +2296,18 @@ elFinder.prototype = {
 		// upload transport using XMLHttpRequest
 		xhr : function(data, fm) { 
 			var self   = fm ? fm : this,
-				notifyto = null, notifyto2 = null,
+				xhr         = new XMLHttpRequest(),
+				notifyto    = null, notifyto2 = null,
 				dataChecked = data.checked,
+				isDataType  = (data.isDataType || data.type == 'data'),
+				retry = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						error && self.error(error);
 					})
 					.done(function(data) {
+						xhr = null;
+						files = null;
 						data.warning && self.error(data.warning);
 						data.removed && self.remove(data);
 						data.added   && self.add(data);
@@ -2313,10 +2318,10 @@ elFinder.prototype = {
 					.always(function() {
 						notifyto && clearTimeout(notifyto);
 						dataChecked && !data.multiupload && checkNotify() && self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
+						notifyto2 && clearTimeout(notifyto2);
+						chunkMerge && self.ui.notify.children('.elfinder-notify-chunkmerge').length && self.notify({type : 'chunkmerge', cnt : -1});
 					}),
-				xhr         = new XMLHttpRequest(),
 				formData    = new FormData(),
-				isDataType  = (data.isDataType || data.type == 'data'),
 				files       = data.input ? data.input.files : self.uploads.checkFile(data, self), 
 				cnt         = data.checked? (isDataType? files[0].length : files.length) : files.length,
 				loaded      = 0, prev,
@@ -2333,9 +2338,9 @@ elFinder.prototype = {
 					}, self.options.notifyDelay);
 				},
 				target = (data.target || self.cwd().hash),
-				chunkID = (data.cid || +new Date());
+				chunkMerge = false;
 			
-			prev = loaded;
+			!chunkMerge && (prev = loaded);
 			
 			if (!isDataType && !cnt) {
 				return dfrd.reject(['errUploadNoFiles']);
@@ -2350,27 +2355,71 @@ elFinder.prototype = {
 			}, false);
 			
 			xhr.addEventListener('load', function(e) {
-				var status = xhr.status, res, curr = 0;
+				var status = xhr.status, res, curr = 0, error = '';
 				
-				if (status > 500) {
-					return dfrd.reject('errResponse');
-				}
 				if (status != 200) {
-					return dfrd.reject('errConnect');
+					if (status > 500) {
+						error = 'errResponse';
+					} else {
+						error = 'errConnect';
+					}
+				} else {
+					if (xhr.readyState != 4) {
+						error = ['errConnect', 'errTimeout']; // am i right?
+					}
+					if (!xhr.responseText) {
+						error = ['errResponse', 'errDataEmpty'];
+					}
 				}
-				if (xhr.readyState != 4) {
-					return dfrd.reject(['errConnect', 'errTimeout']); // am i right?
+				
+				if (error) {
+					if (chunkMerge || retry++ > 3) {
+						var file = isDataType? files[0][0] : files[0];
+						if (file._cid) {
+							formData = new FormData();
+							files = [{_chunkfail: true}];
+							formData.append('chunk', file._chunk);
+							formData.append('cid'  , file._cid);
+							isDataType = false;
+							send(files);
+							return;
+						}
+						return dfrd.reject(error);
+					} else {
+						filesize = 0;
+						xhr.open('POST', self.uploadURL, true);
+						xhr.send(formData);
+						return;
+					}
 				}
-				if (!xhr.responseText) {
-					return dfrd.reject(['errResponse', 'errDataEmpty']);
-				}
+				
 				if (checkNotify() && (curr = e.loaded - prev)) {
 					self.notify({type : 'upload', cnt : 0, progress : curr, size : 0});
 				}
 
 				res = self.parseUploadData(xhr.responseText);
+				
+				// chunked upload commit
+				if (res._chunkmerged) {
+					formData = new FormData();
+					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name}];
+					chunkMerge = true;
+					notifyto2 = setTimeout(function() {
+						self.notify({type : 'chunkmerge', cnt : 1});
+					}, self.options.notifyDelay);
+					isDataType? send(_file, files[1]) : send(_file);
+					return;
+				}
+				
 				res._multiupload = data.multiupload? true : false;
 				res.error ? dfrd.reject(res.error) : dfrd.resolve(res);
+			}, false);
+			
+			xhr.upload.addEventListener('loadstart', function(e) {
+				loaded = e.loaded;
+				if (!data.multiupload) {
+					size = filesize = e.total;
+				}
 			}, false);
 			
 			xhr.upload.addEventListener('progress', function(e) {
@@ -2379,10 +2428,6 @@ elFinder.prototype = {
 				if (e.lengthComputable) {
 					
 					loaded = e.loaded;
-
-					if (!filesize && !data.multiupload) {
-						size = filesize = e.total;
-					}
 
 					// to avoid strange bug in safari (not in chrome) with drag&drop.
 					// bug: macos finder opened in any folder,
@@ -2395,16 +2440,18 @@ elFinder.prototype = {
 					}
 					
 					curr = loaded - prev;
-					if (size || (curr/e.total) >= 0.05) {
+					if (checkNotify() && (size || (curr/e.total) >= 0.05)) {
 						prev = loaded;
-						checkNotify() && self.notify({type : 'upload', cnt : 0, progress : curr, size : size});
+						self.notify({type : 'upload', cnt : 0, progress : curr, size : size});
 					}
 				}
 			}, false);
 			
 			var send = function(files, paths){
-				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize, totalSize = 0;
-				if (! data.checked && (isDataType || data.type == 'files')) {
+				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize, totalSize = 0, chunked = [];
+				var chunkID = +new Date();
+				var BYTES_PER_CHUNK = fm.uplMaxSize - 8190; // margin 8kb
+				if (! dataChecked && (isDataType || data.type == 'files')) {
 					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : 0;
 					for (var i=0; i < files.length; i++) {
 						if (maxFileSize && files[i].size >= maxFileSize) {
@@ -2414,7 +2461,6 @@ elFinder.prototype = {
 							continue;
 						}
 						if (fm.uplMaxSize && files[i].size >= fm.uplMaxSize) {
-							var BYTES_PER_CHUNK = fm.uplMaxSize - 8190; // margin 8kb
 							var SIZE = files[i].size;
 
 							var start = 0;
@@ -2425,6 +2471,7 @@ elFinder.prototype = {
 							var total = Math.floor(SIZE / BYTES_PER_CHUNK);
 
 							totalSize += SIZE;
+							chunked[chunkID] = 0;
 							while(start < SIZE) {
 								var chunk;
 								if ('slice' in blob) {
@@ -2438,6 +2485,8 @@ elFinder.prototype = {
 									break;
 								}
 								chunk._chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
+								chunk._cid   = chunkID;
+								chunked[chunkID]++;
 								
 								if (size) {
 									c++;
@@ -2503,6 +2552,7 @@ elFinder.prototype = {
 						var added = [],
 							done = 0,
 							last = sfiles.length,
+							failChunk = [],
 							multi = function(files, num){
 								var sfiles = [];
 								while(files.length && sfiles.length < num) {
@@ -2510,17 +2560,27 @@ elFinder.prototype = {
 								}
 								if (sfiles.length) {
 									for (var i=0; i < sfiles.length; i++) {
+										var cid = isDataType? (sfiles[i][0][0]._cid || null) : (sfiles[i][0]._cid || null);
+										if (!!failChunk[cid]) {
+											last--;
+											continue;
+										}
 										fm.exec('upload', {
 											type: data.type,
 											isDataType: isDataType,
 											files: sfiles[i],
 											checked: true,
 											target: target,
-											multiupload: true,
-											cid: chunkID})
+											multiupload: true})
+										.fail(function(error) {
+											if (cid) {	
+												failChunk[cid] = true;
+											}
+											error && self.error(error);
+										})
 										.always(function(e) {
 											if (e.added) added = $.merge(added, e.added);
-											if (last == ++done) {
+											if (last <= ++done) {
 												fm.trigger('multiupload', {added: added});
 												notifyto && clearTimeout(notifyto);
 												if (checkNotify()) {
@@ -2532,7 +2592,7 @@ elFinder.prototype = {
 									}
 								}
 							};
-						multi(sfiles, 5); // Max connection: 4
+						multi(sfiles, 3); // Max connection: 3
 						return false;
 					}
 					
@@ -2578,10 +2638,20 @@ elFinder.prototype = {
 				});
 				
 				$.each(files, function(i, file) {
-					formData.append('upload[]', file);
-					if (file._chunk) {
-						formData.append('chunk', file._chunk);
-						formData.append('cid', chunkID);
+					if (file._chunkmerged) {
+						formData.append('chunk', file._chunkmerged);
+						formData.append('upload[]', file._name);
+					} else {
+						if (file._chunkfail) {
+							formData.append('upload[]', 'chunkfail');
+							formData.append('mimes', 'chunkfail');
+						} else {
+							formData.append('upload[]', file);
+						}
+						if (file._chunk) {
+							formData.append('chunk', file._chunk);
+							formData.append('cid'  , file._cid);
+						}
 					}
 				});
 				
@@ -2598,7 +2668,7 @@ elFinder.prototype = {
 						// for safari - send directory
 						dfrd.reject(['errConnect', 'errAbort']);
 					}
-				}
+				};
 				
 				xhr.send(formData);
 				
@@ -2610,7 +2680,7 @@ elFinder.prototype = {
 					dfrd.reject();
 				}
 			} else {
-				if (!! data.checked) {
+				if (dataChecked) {
 					send(files[0], files[1]);
 				} else {
 					notifyto2 = setTimeout(function() {
@@ -2933,7 +3003,7 @@ elFinder.prototype = {
 
 				total += size != null? size : delta;
 				prc   += progress;
-				(size == null && delta < 0) && (prc += delta * 100); 
+				(size == null && delta < 0) && (prc += delta * 100);
 				notify.data({progress : prc, total : total});
 				if (size != null) {
 					prc *= 100;

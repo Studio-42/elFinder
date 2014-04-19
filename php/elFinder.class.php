@@ -1306,7 +1306,15 @@ class elFinder {
 		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
 			$encname = md5($cid . '_' . $m[1]);
 			$part = $tempDir . '/ELF' . $encname . $m[2];
+			if (is_null($tmpname)) {
+				// chunked file upload fail
+				foreach(glob($tempDir . '/ELF' . $encname . '*') as $cf) {
+					@unlink($cf);
+				}
+				return;
+			}
 			if (move_uploaded_file($tmpname, $part)) {
+				@chmod($part, 0600);
 				$total = $m[3];
 				$parts = array();
 				for ($i = 0; $i <= $total; $i++) {
@@ -1319,18 +1327,24 @@ class elFinder {
 					}
 				}
 				if ($parts) {
-					if ($resfile = tempnam($tempDir, 'ELF')) {
-						$target = fopen($resfile, 'wb');
-						foreach($parts as $f) {
-							$fp = fopen($f, 'rb');
-							while (!feof($fp)) {
-								fwrite($target, fread($fp, 8192));
+					$check = $tempDir . '/ELF' . $encname;
+					if (!is_file($check)) {
+						touch($check);
+						if ($resfile = tempnam($tempDir, 'ELF')) {
+							$target = fopen($resfile, 'wb');
+							foreach($parts as $f) {
+								$fp = fopen($f, 'rb');
+								while (!feof($fp)) {
+									fwrite($target, fread($fp, 8192));
+								}
+								fclose($fp);
+								unlink($f);
 							}
-							fclose($fp);
-							unlink($f);
+							fclose($target);
+							unlink($check);
+							return array($resfile, $m[1]);
 						}
-						fclose($target);
-						return array($resfile, $m[1]);
+						unlink($check);
 					}
 				}
 			}
@@ -1361,6 +1375,12 @@ class elFinder {
 			if (touch($testFile)) {
 				unlink($testFile);
 				$tempDir = $testDir;
+				$gc = time() - 3600;
+				foreach(glob($tempDir . '/ELF*') as $cf) {
+					if (filemtime($cf) < $gc) {
+						@unlink($cf);
+					}
+				}
 				break;
 			}
 		}
@@ -1411,6 +1431,23 @@ class elFinder {
 			if (isset($args['upload']) && is_array($args['upload']) && ($tempDir = $this->getTempDir($volume->getTempPath()))) {
 				$names = array();
 				foreach($args['upload'] as $i => $url) {
+					// check chunked file upload commit
+					if ($args['chunk']) {
+						if ($url === 'chunkfail' && $args['mimes'] === 'chunkfail') {
+							$this->checkChunkedFile(null, $chunk, $cid, $tempDir);
+							if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
+								$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $m[1], self::ERROR_UPLOAD_TRANSFER);
+							}
+							return $result;
+						} else {
+							$tmpfname = $tempDir . '/' . $args['chunk'];
+							$files['tmp_name'][$i] = $tmpfname;
+							$files['name'][$i] = $url;
+							$files['error'][$i] = 0;
+							$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
+							break;
+						}
+					}
 					// check is data:
 					if (substr($url, 0, 5) === 'data:') {
 						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable);
@@ -1468,15 +1505,15 @@ class elFinder {
 				if ($chunk) {
 					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
 						list($tmpname, $name) = $this->checkChunkedFile($tmpname, $chunk, $cid, $tempDir);
-						if (!$name) {
-							return array('added' => array());
+						if ($name) {
+							$result['_chunkmerged'] = basename($tmpname);
+							$result['_name'] = $name;
 						}
-						$GLOBALS['elFinderTempFiles'][$tmpname] = true;
 					} else {
 						$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, self::ERROR_UPLOAD_TRANSFER);
 						$this->uploadDebug = 'Upload error: unable open tmp file';
-						return $result;
 					}
+					return $result;
 				} else {
 					// for form clipboard with Google Chrome
 					$type = $files['type'][$i];
