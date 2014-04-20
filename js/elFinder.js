@@ -2331,10 +2331,11 @@ elFinder.prototype = {
 					return notify = (notify || self.ui.notify.children('.elfinder-notify-upload').length);
 				},
 				startNotify = function(size) {
-					if (size) filesize = size;
+					if (!size) size = filesize;
 					return setTimeout(function() {
 						notify = true;
-						self.notify({type : 'upload', cnt : cnt, progress : loaded, size : filesize});
+						self.notify({type : 'upload', cnt : cnt, progress : loaded - prev, size : size});
+						prev = loaded;
 					}, self.options.notifyDelay);
 				},
 				target = (data.target || self.cwd().hash),
@@ -2393,7 +2394,9 @@ elFinder.prototype = {
 					}
 				}
 				
-				if (checkNotify() && (curr = e.loaded - prev)) {
+				loaded = filesize;
+				
+				if (checkNotify() && (curr = loaded - prev)) {
 					self.notify({type : 'upload', cnt : 0, progress : curr, size : 0});
 				}
 
@@ -2416,16 +2419,24 @@ elFinder.prototype = {
 			}, false);
 			
 			xhr.upload.addEventListener('loadstart', function(e) {
-				loaded = e.loaded;
-				if (!data.multiupload) {
-					size = filesize = e.total;
+				if (!chunkMerge && e.lengthComputable) {
+					loaded = e.loaded;
+					retry && (loaded = 0);
+					filesize = e.total;
+					if (!loaded) {
+						loaded = parseInt(filesize * 0.05);
+					}
+					if (checkNotify()) {
+						self.notify({type : 'upload', cnt : 0, progress : loaded - prev, size : data.multiupload? 0 : filesize});
+						prev = loaded;
+					}
 				}
 			}, false);
 			
 			xhr.upload.addEventListener('progress', function(e) {
-				var curr, size = 0;
+				var curr;
 
-				if (e.lengthComputable) {
+				if (e.lengthComputable && !chunkMerge) {
 					
 					loaded = e.loaded;
 
@@ -2439,10 +2450,18 @@ elFinder.prototype = {
 						notifyto = startNotify();
 					}
 					
+					if (!filesize) {
+						retry && (loaded = 0);
+						filesize = e.total;
+						if (!loaded) {
+							loaded = parseInt(filesize * 0.05);
+						}
+					}
+					
 					curr = loaded - prev;
-					if (checkNotify() && (size || (curr/e.total) >= 0.05)) {
+					if (checkNotify() && (curr/e.total) >= 0.05) {
+						self.notify({type : 'upload', cnt : 0, progress : curr, size : 0});
 						prev = loaded;
-						self.notify({type : 'upload', cnt : 0, progress : curr, size : size});
 					}
 				}
 			}, false);
@@ -2593,7 +2612,7 @@ elFinder.prototype = {
 								}
 							};
 						multi(sfiles, 3); // Max connection: 3
-						return false;
+						return true;
 					}
 					
 					if (isDataType) {
@@ -2601,6 +2620,10 @@ elFinder.prototype = {
 						paths = sfiles[0][1];
 					} else {
 						files = sfiles[0];
+					}
+					
+					if (!fm.UA.Safari || !data.files) {
+						notifyto = startNotify();
 					}
 				}
 				
@@ -2701,10 +2724,6 @@ elFinder.prototype = {
 				}
 			}
 
-			if (!isDataType && !data.checked && (!this.UA.Safari || !data.files)) {
-				notifyto = startNotify();
-			}
-			
 			return dfrd;
 		}
 	},
