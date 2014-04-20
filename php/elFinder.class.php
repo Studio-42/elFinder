@@ -1043,61 +1043,70 @@ class elFinder {
 	/**
 	* Get remote contents
 	*
-	* @param  string  $url     target url
-	* @param  int     $timeout timeout (sec)
-	* @param  int     $redirect_max redirect max count
-	* @param  string  $ua
+	* @param  string   $url     target url
+	* @param  int      $timeout timeout (sec)
+	* @param  int      $redirect_max redirect max count
+	* @param  string   $ua
+	* @param  resource $fp
 	* @return string or bool(false)
 	* @retval string contents
 	* @retval false  error
 	* @author Naoki Sawada
 	**/
-	protected function get_remote_contents( $url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0' ) {
+	protected function get_remote_contents( &$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null ) {
 		$method = (function_exists('curl_exec') && !ini_get('safe_mode'))? 'curl_get_contents' : 'fsock_get_contents'; 
-		return $this->$method( $url, $timeout, $redirect_max, $ua );
+		return $this->$method( $url, $timeout, $redirect_max, $ua, $fp );
 	}
 	
 	/**
 	 * Get remote contents with cURL
 	 *
-	 * @param  string  $url     target url
-	 * @param  int     $timeout timeout (sec)
-	 * @param  int     $redirect_max redirect max count
-	 * @param  string  $ua
+	 * @param  string   $url     target url
+	 * @param  int      $timeout timeout (sec)
+	 * @param  int      $redirect_max redirect max count
+	 * @param  string   $ua
+	 * @param  resource $outfp
 	 * @return string or bool(false)
 	 * @retval string contents
 	 * @retval false  error
 	 * @author Naoki Sawada
 	 **/
-	 protected function curl_get_contents( $url, $timeout, $redirect_max, $ua ){
+	 protected function curl_get_contents( &$url, $timeout, $redirect_max, $ua, $outfp ){
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_HEADER, false );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-		curl_setopt( $ch, CURLOPT_BINARYTRANSFER, true );
-		curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
+		if ($outfp) {
+			curl_setopt( $ch, CURLOPT_FILE, $outfp );
+		} else {
+			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_BINARYTRANSFER, true );
+		}
+		curl_setopt( $ch, CURLOPT_LOW_SPEED_LIMIT, 1 );
+		curl_setopt( $ch, CURLOPT_LOW_SPEED_TIME, $timeout );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
 		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt( $ch, CURLOPT_MAXREDIRS, $redirect_max);
 		curl_setopt( $ch, CURLOPT_USERAGENT, $ua);
 		$result = curl_exec( $ch );
+		$url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 		curl_close( $ch );
-		return $result;
+		return $outfp? $outfp : $result;
 	}
 	
 	/**
 	 * Get remote contents with fsockopen()
 	 *
-	 * @param  string  $url          url
-	 * @param  int     $timeout      timeout (sec)
-	 * @param  int     $redirect_max redirect max count
-	 * @param  string  $ua
+	 * @param  string   $url          url
+	 * @param  int      $timeout      timeout (sec)
+	 * @param  int      $redirect_max redirect max count
+	 * @param  string   $ua
+	 * @param  resource $outfp
 	 * @return string or bool(false)
 	 * @retval string contents
 	 * @retval false  error
 	 * @author Naoki Sawada
 	 */
-	protected function fsock_get_contents( $url, $timeout, $redirect_max, $ua ) {
+	protected function fsock_get_contents( &$url, $timeout, $redirect_max, $ua, $outfp ) {
 
 		$connect_timeout = 3;
 		$connect_try = 3;
@@ -1162,28 +1171,14 @@ class elFinder {
 			socket_set_timeout($fp, $timeout);
 		}
 		
-		$_response = true;
-		while ($_response && (is_null($getSize) || strlen($response) < $getSize)) {
-			if (connection_aborted()) {
-				exit();
-			}
-			if ($_response = fread($fp, $readsize)) {
-				$response .= $_response;
-			}
-		}
+		$_response = '';
+		$header = '';
+		while($_response !== "\r\n"){
+			$_response = fgets($fp, $readsize);
+			$header .= $_response;
+		};
 		
-		if ($timeout) {
-			$_status = socket_get_status($fp);
-			if ($_status['timed_out']) {
-				fclose($fp);
-				return false; // Request Time-out
-			}
-		}
-		
-		fclose($fp);
-		
-		$resp = array_pad(explode("\r\n\r\n",$response,2), 2, '');
-		$rccd = array_pad(explode(' ',$resp[0],3), 3, ''); // array('HTTP/1.1','200','OK\r\n...')
+		$rccd = array_pad(explode(' ',$header,3), 3, ''); // array('HTTP/1.1','200','OK\r\n...')
 		$rc = (int)$rccd[1];
 		
 		// Redirect
@@ -1193,7 +1188,7 @@ class elFinder {
 			case 302: // Moved Temporarily
 			case 301: // Moved Permanently
 				$matches = array();
-				if (preg_match('/^Location: (.+?)(#.+)?$/im',$resp[0],$matches) && --$redirect_max > 0) {
+				if (preg_match('/^Location: (.+?)(#.+)?$/im',$header,$matches) && --$redirect_max > 0) {
 					$url = trim($matches[1]);
 					$hash = isset($matches[2])? trim($matches[2]) : '';
 					if (!preg_match('/^https?:\//',$url)) { // no scheme
@@ -1204,11 +1199,36 @@ class elFinder {
 						// add sheme,host
 						$url = $url_base.$url;
 					}
-					return $this->fsock_get_contents( $url, $timeout, $redirect_max, $ua );
+					fclose($fp);
+					return $this->fsock_get_contents( $url, $timeout, $redirect_max, $ua, $outfp );
 				}
 		}
-
-		return $resp[1]; // Data
+		
+		$body = '';
+		if (!$outfp) {
+			$outfp = fopen('php://temp', 'rwb');
+			$body = true;
+		}
+		while(fwrite($outfp, fread($fp, $readsize))) {
+			if ($timeout) {
+				$_status = socket_get_status($fp);
+				if ($_status['timed_out']) {
+					fclose($outfp);
+					fclose($fp);
+					return false; // Request Time-out
+				}
+			}
+		}
+		if ($body) {
+			rewind($outfp);
+			$body = stream_get_contents($outfp);
+			fclose($outfp);
+			$outfp = null;
+		}
+		
+		fclose($fp);
+		
+		return $outfp? $outfp : $body; // Data
 	}
 	
 	/**
@@ -1448,11 +1468,15 @@ class elFinder {
 							break;
 						}
 					}
+					
+					$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true));
+					
 					// check is data:
 					if (substr($url, 0, 5) === 'data:') {
 						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable);
 					} else {
-						$data = $this->get_remote_contents($url);
+						$fp = fopen($tmpfname, 'wb');
+						$data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
 					}
 					if ($data) {
 						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
@@ -1461,12 +1485,15 @@ class elFinder {
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
 								$_ext = $_match[1];
 							}
-							$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true)) . $_ext;
-							if (file_put_contents($tmpfname, $data)) {
+							if ((is_resource($data) && fclose($data)) || file_put_contents($tmpfname, $data)) {
 								$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
 								$_name = preg_replace('/[\/\\?*:|"<>]/', '_', $_name);
 								list($_a, $_b) = array_pad(explode('.', $_name, 2), 2, '');
 								if ($_b === '') {
+									if ($_ext) {
+										rename($tmpfname, $tmpfname . $_ext);
+										$tmpfname = $tmpfname . $_ext;
+									}
 									$_b = $this->detectFileExtension($tmpfname);
 									$_name = $_a.$_b;
 								} else {
