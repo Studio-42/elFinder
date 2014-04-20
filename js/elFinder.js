@@ -2621,10 +2621,10 @@ elFinder.prototype = {
 					} else {
 						files = sfiles[0];
 					}
-					
-					if (!fm.UA.Safari || !data.files) {
-						notifyto = startNotify();
-					}
+				}
+				
+				if (!dataChecked && (!fm.UA.Safari || !data.files)) {
+					notifyto = startNotify();
 				}
 				
 				dataChecked = true;
