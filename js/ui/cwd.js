@@ -694,6 +694,11 @@ $.fn.elfindercwd = function(fm, options) {
 						nl   = next.length,
 						sib;
 
+					if (cwd.data('longtap')) {
+						e.stopPropagation();
+						return;
+					}
+
 					e.stopImmediatePropagation();
 
 					if (e.shiftKey && (pl || nl)) {
@@ -702,10 +707,11 @@ $.fn.elfindercwd = function(fm, options) {
 					} else if (e.ctrlKey || e.metaKey) {
 						p.trigger(p.is('.'+clSelected) ? evtUnselect : evtSelect);
 					} else {
-						if ($(this).data('touching') && p.is('.'+clSelected)) {
-							$(this).data('touching', null);
+						if (p.data('touching') && p.is('.'+clSelected)) {
+							p.data('touching', null);
 							fm.dblclick({file : this.id});
 							unselectAll();
+							return;
 						} else {
 							unselectAll();
 							p.trigger(evtSelect);
@@ -721,12 +727,14 @@ $.fn.elfindercwd = function(fm, options) {
 				// for touch device
 				.delegate(fileSelector, 'touchstart.'+fm.namespace, function(e) {
 					e.stopPropagation();
+					cwd.data('longtap', null);
 					$(this).data('touching', true);
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
 					  sel = p.prevAll('.'+clSelected+':first').length +
 					        p.nextAll('.'+clSelected+':first').length;
-					$(this).data('longtap', setTimeout(function(){
+					p.data('tmlongtap', setTimeout(function(){
 						// long tap
+						cwd.data('longtap', true);
 						if (p.is('.'+clSelected) && sel > 0) {
 							p.trigger(evtUnselect);
 							trigger();
@@ -743,8 +751,9 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.delegate(fileSelector, 'touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
+					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					e.stopPropagation();
-					clearTimeout($(this).data('longtap'));
+					clearTimeout(p.data('tmlongtap'));
 				})
 				// attach draggable
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
@@ -835,6 +844,10 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// unselect all on cwd click
 				.bind('click.'+fm.namespace, function(e) {
+					if (cwd.data('longtap')) {
+						e.stopPropagation();
+						return;
+					}
 					!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 				})
 				
@@ -883,9 +896,12 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.bind('touchstart.'+fm.namespace, function(e) {
-					$(this).data('touching', true);
-					$(this).data('longtap', setTimeout(function(){
+					var p = $(this);
+					cwd.data('longtap', null);
+					p.data('touching', true);
+					p.data('tmlongtap', setTimeout(function(){
 						// long tap
+						cwd.data('longtap', true);
 						fm.trigger('contextmenu', {
 							'type'    : 'cwd',
 							'targets' : [fm.cwd().hash],
@@ -895,7 +911,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.bind('touchmove '+fm.namespace+' touchend.'+fm.namespace, function(e) {
-					clearTimeout($(this).data('longtap'));
+					clearTimeout($(this).data('tmlongtap'));
 				}),
 			
 			resize = function() {
