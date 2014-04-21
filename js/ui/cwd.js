@@ -727,11 +727,11 @@ $.fn.elfindercwd = function(fm, options) {
 				// for touch device
 				.delegate(fileSelector, 'touchstart.'+fm.namespace, function(e) {
 					e.stopPropagation();
-					cwd.data('longtap', null);
-					$(this).data('touching', true);
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
 					  sel = p.prevAll('.'+clSelected+':first').length +
 					        p.nextAll('.'+clSelected+':first').length;
+					cwd.data('longtap', null);
+					p.data('touching', true);
 					p.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
@@ -910,7 +910,7 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}, 500));
 				})
-				.bind('touchmove '+fm.namespace+' touchend.'+fm.namespace, function(e) {
+				.bind('touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
 					clearTimeout($(this).data('tmlongtap'));
 				}),
 			
@@ -929,7 +929,9 @@ $.fn.elfindercwd = function(fm, options) {
 			// workzone node
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this))
 			;
-			
+		
+		// for iOS5 bug
+		$('body').on('touchstart touchmove touchend', function(e){});
 		
 		if (fm.dragUpload) {
 			wrapper[0].addEventListener('dragenter', function(e) {
