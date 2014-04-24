@@ -188,7 +188,7 @@ elFinder.prototype.commands.info = function() {
 				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
 				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msg.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)))
-				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc)));
+				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'dim')));
 				count = $.map(files, function(f) { return f.hash });
 				
 			}
