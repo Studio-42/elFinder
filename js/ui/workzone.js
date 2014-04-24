@@ -12,16 +12,16 @@ $.fn.elfinderworkzone = function(fm) {
 			parent = wz.parent();
 			
 		parent.add(window).bind('resize', function() {
+                                var wz = $("." + cl, parent);
 				var height = parent.height();
 
-				parent.children(':visible:not(.'+cl+')').each(function() {
+				parent.children(':visible:not(.'+cl+'):not(.workzone-wrapper)').each(function() {
 					var ch = $(this);
 
 					if (ch.css('position') != 'absolute') {
 						height -= ch.outerHeight(true);
 					}
 				});
-				
 				wz.height(height - wdelta);
 			});
 	});

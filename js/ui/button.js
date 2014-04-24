@@ -21,7 +21,7 @@ $.fn.elfinderbutton = function(cmd) {
                             .append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>');
 			
                         if (cmd.buttonType === "button") {
-                            button.addClass("button-type-button");
+                            button.addClass("button-type-button").addClass("elfinder-button-icon-" + cmd.name);
                             $(".elfinder-button-icon", button).remove();
                             var but = $("<p class='button-round-box' />");
                             var inner = $("<button type='button' class='btn btn-success'>" + cmd.title + "</button>");

@@ -335,7 +335,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoWM'     : 'Windows Media video',
 			'kindVideoFlash'  : 'Flash video',
 			'kindVideoMKV'    : 'Matroska video',
-			'kindVideoOGG'    : 'Ogg video'
+			'kindVideoOGG'    : 'Ogg video',
+                        // tabs
+                        'tabsTabFm'       : 'Souborový systém',
+                        'tabsTabUrl'      : 'Url',
+                        'tabsTabUrlLabel' : 'Zadejte prosím URL souboru včetně předpony http://'
 		}
 	}
 }
