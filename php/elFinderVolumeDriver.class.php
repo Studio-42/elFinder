@@ -3314,18 +3314,19 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 */
 	protected function getArchivers($use_cache = true) {
+
+		$arcs = array(
+				'create'  => array(),
+				'extract' => array()
+		);
+
 		if (!function_exists('proc_open')) {
-			return array();
+			return $arcs;
 		}
 		
 		if ($use_cache && isset($_SESSION['ELFINDER_ARCHIVERS_CACHE']) && is_array($_SESSION['ELFINDER_ARCHIVERS_CACHE'])) {
 			return $_SESSION['ELFINDER_ARCHIVERS_CACHE'];
 		}
-		
-		$arcs = array(
-				'create'  => array(),
-				'extract' => array()
-		);
 		
 		$this->procExec('tar --version', $o, $ctar);
 		
