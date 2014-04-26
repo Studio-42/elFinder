@@ -2170,12 +2170,26 @@ elFinder.prototype = {
 				return dfrd.promise();
 			} else {
 				var ret = [];
+				var check = [];
 				var str = data.files[0];
 				if (data.type == 'html') {
 					var tmp = $("<html/>").append($.parseHTML(str));
 					$('img[src]', tmp).each(function(){
-						var url = $(this).attr('src');
-						if (url && $.inArray(url, ret) == -1) ret.push(url);
+						var url, purl,
+						self = $(this),
+						pa = self.closest('a');
+						if (pa && pa.attr('href') && pa.attr('href').match(/\.(?:jpe?g|gif|bmp|png)/i)) {
+							purl = pa.attr('href');
+						}
+						url = self.attr('src');
+						if (url) {
+							if (purl) {
+								$.inArray(purl, ret) == -1 && ret.push(purl);
+								$.inArray(url, check) == -1 &&  check.push(url);
+							} else {
+								$.inArray(url, ret) == -1 && ret.push(url);
+							}
+						}
 					});
 					$('a[href]', tmp).each(function(){
 						var loc,
@@ -2187,7 +2201,7 @@ elFinder.prototype = {
 						if ($(this).text()) {
 							loc = parseUrl($(this).attr('href'));
 							if (loc.href && ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i)) {
-								if ($.inArray(loc.href, ret) == -1) ret.push(loc.href);
+								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
 					});
