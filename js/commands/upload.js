@@ -58,15 +58,15 @@ elFinder.prototype.commands.upload = function() {
 			if (data) {
 				file = [ data ];
 				type = 'html';
-			} else if (data = e.dataTransfer.getData('text')) {
-				file = [ data ];
-				type = 'text';
 			} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
 				file = e.dataTransfer;
 				type = 'data';
 			} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
 				file = e.dataTransfer.files;
 				type = 'files';
+			} else if (data = e.dataTransfer.getData('text')) {
+				file = [ data ];
+				type = 'text';
 			}
 			return file? fm.upload({files : file, type : type}) : false;
 		};
