@@ -237,7 +237,7 @@ class elFinder {
 			}
 		}
 
-		// if at least one redable volume - ii desu >_<
+		// if at least one readable volume - ii desu >_<
 		$this->loaded = !empty($this->default);
 	}
 	
