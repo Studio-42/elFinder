@@ -101,6 +101,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Zobrazit',
 			'cmdresize'    : 'Změnit velikost',
 			'cmdsort'      : 'Seřadit',
+                        'cmdurlupload' : 'Nahrát z URL',
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavřít',
@@ -110,6 +111,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Zrušit',
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Ano',
+                        'btnUpload' : 'Nahrát',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otevírání složky',

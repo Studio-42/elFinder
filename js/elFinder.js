@@ -1599,7 +1599,10 @@ window.elFinder = function(node, opts) {
 	if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
 		this.bind('dblclick', function(e) {
 			e.preventDefault();
-			self.exec('getfile');
+			self.exec('getfile').fail(function() {
+                            self.exec('open');
+                        });
+
 		});
 		this.shortcut({
 			pattern     : 'enter',

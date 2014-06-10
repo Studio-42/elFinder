@@ -112,6 +112,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize image',
 			'cmdsort'      : 'Sort',
+                        'cmdurlupload' : 'Upload from URL',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',
@@ -121,6 +122,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Yes',
+                        'btnUpload' : 'Upload',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
