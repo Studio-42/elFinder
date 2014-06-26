@@ -55,6 +55,7 @@ class elFinder {
 		'tmb'       => array('targets' => true),
 		'file'      => array('target' => true, 'download' => false),
 		'size'      => array('targets' => true),
+		'md5sum'    => array('target' => true),
 		'mkdir'     => array('target' => true, 'name' => true),
 		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
@@ -783,6 +784,28 @@ class elFinder {
 		return array('size' => $size);
 	}
 	
+	/**
+	 * get md5sum
+	 *
+	 * @param  array  command arguments
+	 * @return array
+	 * @author gabriel.rota@gmail.com
+	 **/
+	protected function md5sum($args) {
+		$size = 0;
+		
+		$target = $args['target'];
+		if (($volume = $this->volume($target)) == false
+		|| ($file = $volume->file($target)) == false
+		|| !$file['read']) {
+			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target));
+		}
+		
+		$md5sum = $volume->md5sum($target) ;
+		
+		return array('md5sum' => $md5sum);
+	}
+
 	/**
 	 * Create directory
 	 *

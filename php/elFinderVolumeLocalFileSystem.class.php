@@ -411,6 +411,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 	
 	/**
+	 * md5sum of file
+	 *
+	 * @param  string  $path  file path
+	 * @return string
+	 * @author gabriel.rota@gmail.com
+	 **/
+	protected function _md5sum($path) {
+		return md5_file($path);
+	}
+	
+	/**
 	 * Close opened file
 	 *
 	 * @param  resource  $fp  file pointer

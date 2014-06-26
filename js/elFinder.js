@@ -363,6 +363,10 @@ window.elFinder = function(node, opts) {
 		this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
 	}
 
+	if (opts.commandsOptions && opts.commandsOptions.info && opts.commandsOptions.info.md5sum) {
+		this.options.commandsOptions.info.md5sum = opts.commandsOptions.info.md5sum;
+	}
+
 	$.extend(this.options.contextmenu, opts.contextmenu);
 
 	

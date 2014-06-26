@@ -1182,6 +1182,22 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * md5sum from file
+	 *
+	 * @param  string   file hash
+	 * @return string
+	 * @author gabriel.rota@gmail.com
+	 **/
+	public function md5sum($hash) {
+		if (($file = $this->file($hash)) == false
+		|| $file['mime'] == 'directory') {
+			return false;
+		}
+		
+		return $this->_md5sum($this->decode($hash), 'rb');
+	}
+	
+	/**
 	 * Close file pointer
 	 *
 	 * @param  Resource  $fp   file pointer

@@ -260,7 +260,8 @@
 						getfile : {
 							oncomplete : 'close',
 							folders : true
-						}
+						},
+						info : { md5sum : true } // false or none disable md5sum in commands.info
 					}
 				}).dialogelfinder('instance');
 			});

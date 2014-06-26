@@ -25,7 +25,8 @@ elFinder.prototype.commands.info = function() {
 			items    : fm.i18n('items'),
 			yes      : fm.i18n('yes'),
 			no       : fm.i18n('no'),
-			link     : fm.i18n('link')
+			link     : fm.i18n('link'),
+			md5sum   : fm.i18n('md5sum')
 		};
 		
 	this.tpl = {
@@ -76,7 +77,8 @@ elFinder.prototype.commands.info = function() {
 			replSpinner = function(msg) { dialog.find('.'+spclass).parent().text(msg); },
 			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash }).join('-'),
 			dialog = fm.getUI().find('#'+id), 
-			size, tmb, file, title, dcnt;
+			size, tmb, file, title, dcnt,
+			md5sum = false;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -88,7 +90,7 @@ elFinder.prototype.commands.info = function() {
 		}
 		
 			
-		if (cnt == 1) {
+		if (cnt == 1) { // one item selected
 			file  = files[0];
 			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
@@ -98,10 +100,13 @@ elFinder.prototype.commands.info = function() {
 				tmb = fm.option('tmbUrl')+file.tmb;
 			}
 			
-			if (!file.read) {
+			if (!file.read) { // ?
 				size = msg.unknown;
-			} else if (file.mime != 'directory' || file.alias) {
+			} else if (file.mime != 'directory' || file.alias) { // not a dir or link is a file!
 				size = fm.formatSize(file.size);
+				if (fm.options.commandsOptions.info.md5sum) { // if md5sum is enabled
+					md5sum = file.hash; // transport hash of the file for compute md5sum
+				}
 			} else {
 				size = tpl.spinner.replace('{text}', msg.calc);
 				count.push(file.hash);
@@ -176,6 +181,11 @@ elFinder.prototype.commands.info = function() {
 			}
 		}
 		
+		//~ 20140618173227 grota - add md5sum row; only for one file; spinner like size
+		if ( md5sum ) { // if md5sum contain hash of file
+			content.push(row.replace(l, msg.md5sum).replace(v, tpl.spinner.replace('{text}', msg.calc) ));
+		}
+		
 		view = view.replace('{title}', title).replace('{content}', content.join(''));
 		
 		dialog = fm.dialog(view, opts);
@@ -203,6 +213,22 @@ elFinder.prototype.commands.info = function() {
 				});
 		}
 		
+		// send request to compute md5sum
+		if ( md5sum ) { // if md5sum cointain hash of file compute md5sum
+			fm.request({
+					data : {cmd : 'md5sum', target : md5sum},
+					preventDefault : true
+				})
+				.fail(function() {
+					replSpinner(msg.unknown);
+				})
+				.done(function(data) {
+					// TODO: check output and manage
+					var md5sum = data.md5sum;
+					replSpinner(md5sum != '' ? md5sum : msg.unknown);
+				});
+		}
+
 	}
 	
 }
