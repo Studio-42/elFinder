@@ -85,7 +85,7 @@ elFinder.prototype.commands.open = function() {
 			}
 			
 			var form = document.createElement("form");
-			form.action = fm.options.url;
+			form.action = url;
 			form.method = 'POST';
 			form.target = 'new_window';
 			form.style.display = 'none';
