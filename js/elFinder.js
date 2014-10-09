@@ -2930,7 +2930,7 @@ elFinder.prototype = {
 				size2 = parseInt(file2.size) || 0;
 				
 			return size1 == size2 ? 0 : size1 > size2 ? 1 : -1;
-			return (parseInt(file1.size) || 0) > (parseInt(file2.size) || 0) ? 1 : -1; },
+		},
 		kind : function(file1, file2) { return file1.mime.localeCompare(file2.mime); },
 		date : function(file1, file2) { 
 			var date1 = file1.ts || file1.date,
