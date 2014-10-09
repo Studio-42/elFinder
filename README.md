@@ -53,6 +53,11 @@ Requirements
  * Any web server
  * PHP 5.2+ (for thumbnails - mogrify utility or GD/Imagick module)
 
+Downloads
+------------
+ + [elFinder 2.x (RC1)](https://github.com/downloads/Studio-42/elFinder/elfinder-2.0-rc1.tar.gz)
+ + [elFinder 2.x (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.x.zip)
+ + [elFInder 2.1 (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.1.zip)
 
 3rd party connectors
 --------------------
