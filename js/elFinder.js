@@ -2382,6 +2382,7 @@ elFinder.prototype = {
 	
 	_sortRules : {
 		name : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase()); },
+		nameNUM : function(file1, file2) { return file1.name.toLowerCase().localeCompare(file2.name.toLowerCase(), 'de', {numeric: true}); },
 		size : function(file1, file2) { 
 			var size1 = parseInt(file1.size) || 0,
 				size2 = parseInt(file2.size) || 0;
