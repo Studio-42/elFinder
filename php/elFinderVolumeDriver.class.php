@@ -1426,7 +1426,8 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 
-		if ($this->uploadMaxSize > 0 && filesize($tmpname) > $this->uploadMaxSize) {
+		$tmpsize = sprintf('%u', filesize($tmpname));
+		if ($this->uploadMaxSize > 0 && $tmpsize > $this->uploadMaxSize) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
 
@@ -1453,7 +1454,7 @@ abstract class elFinderVolumeDriver {
 			'mime'   => $mime, 
 			'width'  => 0, 
 			'height' => 0, 
-			'size'   => filesize($tmpname));
+			'size'   => $tmpsize);
 		
 		// $w = $h = 0;
 		if (strpos($mime, 'image') === 0 && ($s = getimagesize($tmpname))) {

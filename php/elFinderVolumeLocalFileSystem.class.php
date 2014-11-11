@@ -298,9 +298,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat['target'] = $target;
 			$path  = $target;
 			$lstat = lstat($path);
-			$size  = $lstat['size'];
+			$size  = sprintf('%u', $lstat['size']);
 		} else {
-			$size = @filesize($path);
+			$size = sprintf('%u', @filesize($path));
 		}
 		
 		$dir = is_dir($path);
@@ -629,13 +629,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					if (is_dir($p) && $this->_findSymlinks($p)) {
 						return true;
 					} elseif (is_file($p)) {
-						$this->archiveSize += filesize($p);
+						$this->archiveSize += sprintf('%u', filesize($p));
 					}
 				}
 			}
 		} else {
 			
-			$this->archiveSize += filesize($path);
+			$this->archiveSize += sprintf('%u', filesize($path));
 		}
 		
 		return false;
