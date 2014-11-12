@@ -58,6 +58,9 @@ elFinder.prototype.commands.rename = function() {
 				.mousedown(function(e) {
 					e.stopPropagation();
 				})
+				.click(function(e) { // for touch device
+					e.stopPropagation();
+				})
 				.dblclick(function(e) {
 					e.stopPropagation();
 					e.preventDefault();
