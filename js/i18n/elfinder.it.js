@@ -1,7 +1,7 @@
 /**
  * Italian translation
  * @author Alberto Tocci <alberto.tocci@gmail.com>
- * @version 2012-05-09
+ * @version 2013-07-03
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.it = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Impossibile rinominare "$1".',
 			'errCopyFrom'          : 'Non è possibile copiare file da "$1".',
 			'errCopyTo'            : 'Non è possibile copiare file in "$1".',
-			'errUploadCommon'      : 'Errore di Caricamento.',
-			'errUpload'            : 'Impossibile Caricare "$1".',
+			'errUpload'            : 'Errore di Caricamento.',  // old name - errUploadCommon
+			'errUploadFile'        : 'Impossibile Caricare "$1".', // old name - errUpload
 			'errUploadNoFiles'     : 'Non sono stati specificati file da caricare.',
-			'errMaxSize'           : 'La dimensione totale dei file supera il limite massimo consentito.',
-			'errFileMaxSize'       : 'Le dimensioni del file superano il massimo consentito.',
+			'errUploadTotalSize'   : 'La dimensione totale dei file supera il limite massimo consentito.', // old name - errMaxSize
+			'errUploadFileSize'    : 'Le dimensioni del file superano il massimo consentito.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'FileType non consentito.',
 			'errUploadTransfer'    : 'Trasferimento errato del file "$1".', 
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Impossibile salvare "$1".',
 			'errCopy'              : 'Impossibile copiare "$1".',
 			'errMove'              : 'Impossibile spostare "$1".',
 			'errCopyInItself'      : 'Sorgente e destinazione risultato essere uguali.',
 			'errRm'                : 'Impossibile rimuovere "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Impossibile estrarre file da "$1".',
 			'errArchive'           : 'Impossibile creare archivio.',
 			'errArcType'           : 'Tipo di archivio non supportato.',
@@ -71,7 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Per questioni di sicurezza non è possibile estrarre archivi che contengono collegamenti..',
 			'errArcMaxSize'        : 'La dimensione dell\'archivio supera le massime dimensioni consentite.',
 			'errResize'            : 'Impossibile ridimensionare "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
+			'errResizeRotate'      : 'Image dose not rotated.',  // added 7.3.2013
+			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
 			'errUsupportType'      : 'FileType non supportato.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Crea Archivio',
@@ -101,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Visualizza',
 			'cmdresize'    : 'Ridimensiona Immagine',
 			'cmdsort'      : 'Ordina',
+			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
 
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Chiudi',
@@ -110,7 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancella',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Si',
-
+			'btnMount'  : 'Mount',  // added 18.04.2012
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Apri cartella',
 			'ntffile'     : 'Apri file',
@@ -128,8 +148,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Creazione archivio in corso',
 			'ntfextract'  : 'Estrazione file dall\'archivio in corso',
 			'ntfsearch'   : 'Ricerca files in corso',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Operazione in corso. Attendere...',
 			'ntfloadimg'  : 'Caricamento immagine in corso',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'sconosciuto',
@@ -147,41 +170,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Oct'         : 'Ott',
 			'Nov'         : 'Nov',
 			'Dec'         : 'Dic',
-			'January'     : 'Gennaio',
-			'February'    : 'Febbraio',
-			'March'       : 'Marzo',
-			'April'       : 'Aprile',
-			'May'         : 'Maggio',
-			'June'        : 'Giugno',
-			'July'        : 'Luglio',
-			'August'      : 'Agosto',
-			'September'   : 'Settembre',
-			'October'     : 'Ottobre',
-			'November'    : 'Novembre',
-			'December'    : 'Dicembre',
-			'Sunday'      : 'Domenica', 
-			'Monday'      : 'Lunedì', 
-			'Tuesday'     : 'Martedì', 
-			'Wednesday'   : 'Mercoledì', 
-			'Thursday'    : 'Giovedì', 
-			'Friday'      : 'Venerdì', 
-			'Saturday'    : 'Sabato',
-			'Sun'         : 'Dom', 
-			'Mon'         : 'Lun', 
-			'Tue'         : 'Mar', 
-			'Wed'         : 'Mer', 
-			'Thu'         : 'Gio', 
-			'Fri'         : 'Ven', 
-			'Sat'         : 'Sab',
+
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'per nome (cartelle in testa)', 
-			'sortkindDirsFirst' : 'per tipo (cartelle in testa)', 
-			'sortsizeDirsFirst' : 'per dimensione (cartelle in testa)', 
-			'sortdateDirsFirst' : 'per data (cartelle in testa)', 
 			'sortname'          : 'per nome', 
 			'sortkind'          : 'per tipo', 
 			'sortsize'          : 'per dimensione',
 			'sortdate'          : 'per data',
+			'sortFoldersFirst'  : 'cartelle in testa',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Conferma richiesta',
@@ -223,7 +218,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Help',
 			'webfm'           : 'Web file manager',
 			'ver'             : 'Versione',
-			'protocol'        : 'versione protocollo',
+			'protocolver'     : 'versione protocollo',
 			'homepage'        : 'Home del progetto',
 			'docs'            : 'Documentazione',
 			'github'          : 'Seguici su Github',
@@ -244,19 +239,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Sposta file',
 			'copyFiles'       : 'Copia file',
 			'rmFromPlaces'    : 'Rimuovi da places',
-			'untitled folder' : 'cartella senza titolo',
-			'untitled file.txt' : 'file senza titolo.txt',
 			'aspectRatio'     : 'Proporzioni',
 			'scale'           : 'Scala',
 			'width'           : 'Larghezza',
 			'height'          : 'Altezza',
-			'mode'            : 'Modalità',
 			'resize'          : 'Ridimensione',
 			'crop'            : 'Ritaglia',
 			'rotate'          : 'Ruota',
 			'rotate-cw'       : 'Ruota di 90° in senso orario',
 			'rotate-ccw'      : 'Ruota di 90° in senso antiorario',
 			'degree'          : 'Gradi',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Sconosciuto',
@@ -338,3 +336,4 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	}
 }
+
