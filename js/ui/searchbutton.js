@@ -67,9 +67,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 		}, 200);
 		
 		cmd.fm
-			.error(function() {
-				input.unbind('keydown');
-			})
 			.select(function() {
 				input.blur();
 			})
