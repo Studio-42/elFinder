@@ -985,7 +985,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				if (l != list) {
 					list = l;
-					content(fm.files());
+					content(query ? lastSearch : fm.files(), !!query);
 
 					$.each(sel, function(i, h) {
 						selectFile(h);
