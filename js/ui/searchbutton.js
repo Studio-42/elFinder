@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder toolbar search button widget.
  *
@@ -17,7 +17,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					});
 					
 				} else {
-					cmd.fm.trigger('searchend')
+					cmd.fm.trigger('searchend');
 				}
 			},
 			abort = function() {
@@ -50,7 +50,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
-			.click(abort)
+			.click(abort);
 		
 		// wait when button will be added to DOM
 		setTimeout(function() {
@@ -73,7 +73,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.bind('searchend', function() {
 				input.val('');
 			})
-			.viewchange(abort)
 			.shortcut({
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
@@ -81,4 +80,4 @@ $.fn.elfindersearchbutton = function(cmd) {
 			});
 
 	});
-}
+};
