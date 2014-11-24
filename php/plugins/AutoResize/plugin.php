@@ -1,5 +1,49 @@
 <?php
-
+/**
+ * elFinder Plugin AutoResize
+ *
+ * Auto resize on file upload.
+ *
+ * ex. binding, configure on connector options
+ *	$opts = array(
+ *		'bind' => array(
+ *			'upload.presave' => array(
+ *				'Plugin.AutoResize.onUpLoadPreSave'
+ *			)
+ *		),
+ *		// global configure (optional)
+ *		'plugin' => array(
+ *			'PluginAutoResize' => array(
+ *				'enable'         => true,       // For control by volume driver
+ *				'maxWidth'       => 1024,       // Path to Water mark image
+ *				'maxHeight'      => 1024,       // Margin right pixel
+ *				'quality'        => 95,         // JPEG image save quality
+ *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP // Target image formats ( bit-field )
+ *			)
+ *		),
+ *		// each volume configure (optional)
+ *		'roots' => array(
+ *			array(
+ *				'driver' => 'LocalFileSystem',
+ *				'path'   => '/path/to/files/',
+ *				'URL'    => 'http://localhost/to/files/'
+ *				'plugin' => array(
+ *					'PluginAutoResize' => array(
+ *						'enable'         => true,       // For control by volume driver
+ *						'maxWidth'       => 1024,       // Path to Water mark image
+ *						'maxHeight'      => 1024,       // Margin right pixel
+ *						'quality'        => 95,         // JPEG image save quality
+ *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP // Target image formats ( bit-field )
+ *					)
+ *				)
+ *			)
+ *		)
+ *	);
+ *
+ * @package elfinder
+ * @author Naoki Sawada
+ * @license New BSD
+ */
 class elFinderPluginAutoResize {
 
 	private $opts = array();
