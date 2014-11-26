@@ -1,7 +1,7 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2012-04-02
+ * @version 2014-11-26
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
