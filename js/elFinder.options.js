@@ -453,6 +453,15 @@ elFinder.prototype._options = {
 	rememberLastDir : true,
 	
 	/**
+	 * Clear historys(elFinder) on reload(not browser) function
+	 * Historys was cleared on Reload function on elFinder 2.0 (value is true)
+	 * 
+	 * @type Boolean
+	 * @default  false
+	 */
+	reloadClearHistory : false,
+	
+	/**
 	 * Use browser native history with supported browsers
 	 *
 	 * @type Boolean
