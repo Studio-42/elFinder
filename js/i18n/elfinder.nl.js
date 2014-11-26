@@ -1,7 +1,7 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2012-04-02
+ * @version 2014-11-26
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
@@ -50,13 +50,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Kan "$1" niet hernoemen.',
 			'errCopyFrom'          : 'Bestanden kopiëren van "$1" is niet toegestaan.',
 			'errCopyTo'            : 'Bestanden kopiëren naar "$1" is niet toegestaan.',
-			'errUploadCommon'      : 'Upload fout.',
-			'errUpload'            : 'Kan "$1" niet uploaden.',
+			'errUpload'            : 'Upload fout.',
+			'errUploadFile'        : 'Kan "$1" niet uploaden.',
 			'errUploadNoFiles'     : 'Geen bestanden gevonden om te uploaden.',
-			'errMaxSize'           : 'Data overschrijdt de maximale grootte.',
-			'errFileMaxSize'       : 'Bestand overschrijdt de maximale grootte.',
+			'errUploadTotalSize'   : 'Data overschrijdt de maximale grootte.',
+			'errUploadFileSize'    : 'Bestand overschrijdt de maximale grootte.',
 			'errUploadMime'        : 'Bestandstype niet toegestaan.',
 			'errUploadTransfer'    : '"$1" overdrachtsfout.', 
+			'errNotReplace'        : 'Object "$1" bestaat al op deze locatie en kan niet vervangen worden door een ander type object.',
+			'errReplace'           : 'Kan "$1" niet vervangen.',
 			'errSave'              : 'Kan "$1" niet opslaan.',
 			'errCopy'              : 'Kan "$1" niet kopiëren.',
 			'errMove'              : 'Kan "$1" niet verplaatsen.',
@@ -71,6 +73,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Om veiligheidsredenen kan een bestand met symlinks of bestanden met niet toegestane namen niet worden uitgepakt .',
 			'errArcMaxSize'        : 'Archief overschrijdt de maximale bestandsgrootte.',
 			'errResize'            : 'Kan het formaat van "$1" niet wijzigen.',
+			'errResizeDegree'      : 'Ongeldig aantal graden om te draaien.',
+			'errResizeRotate'      : 'Afbeelding kan niet gedraaid worden.', 
+			'errResizeSize'        : 'Ongeldig afbeelding formaat.', 
+			'errResizeNoChange'    : 'Afbeelding formaat is niet veranderd.', 
 			'errUsupportType'      : 'Bestandstype wordt niet ondersteund.',
 			'errNotUTF8Content'    : 'Bestand "$1" is niet in UTF-8 and kan niet aangepast worden.', 
 			'errNetMount'          : 'Kan "$1" niet mounten.',   
@@ -84,7 +90,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Kan het externe map niet aanmaken op de FTP-server: "$1"',
 			'errArchiveExec'       : 'Er is een fout opgetreden bij het archivering van de bestanden: "$1" ',
 			'errExtractExec'       : 'Er is een fout opgetreden bij het uitpakken van de bestanden: "$1" ',
-			'errUploadFile'        : 'Kan "$1" niet uploaden',
+			'errNetUnMount'        : 'Kan niet mounten', 
+			'errConvUTF8'          : 'Kan niet converteren naar UTF-8',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
@@ -115,6 +122,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Formaat wijzigen',
 			'cmdsort'      : 'Sorteren',
 			'cmdnetmount'  : 'Mount netwerk volume',
+			'cmdnetunmount': 'Unmount',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Sluit',
@@ -125,6 +133,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Mount',
+			'btnApprove': 'Ga naar $1 & keur goed',
+			'btnUnmount': 'Unmount',
+			'btnConv'   : 'Converteer',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Bezig met openen van map',
@@ -145,7 +156,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'Zoeken naar bestanden',
 			'ntfsmth'     : 'Iets aan het doen',
 			'ntfloadimg'  : 'Laden van plaatje',
-			'ntfnetmount' : 'Verhogen netwerk volume',
+			'ntfnetmount' : 'Mounten van netwerk volume',
+			'ntfnetunmount': 'Unmounten van netwerk volume',
+			'ntfdim'      : 'Opvragen afbeeldingen dimensies',
+			'ntfreaddir'  : 'Map informatie inlezen',
+			'ntfurl'      : 'URL van link ophalen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
@@ -277,6 +292,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'            : 'Poort',
 			'user'            : 'Gebruikersnaams', 
 			'pass'            : 'Wachtwoord', 
+			'confirmUnmount'  : 'Weet u zeker dat u $1 wil unmounten?',
+			'dropFilesBrowser': 'Sleep of plak bestanden vanuit de browser',
+			'dropPasteFiles'  : 'Sleep of plak bestanden hier',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',
