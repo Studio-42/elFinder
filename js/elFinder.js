@@ -554,11 +554,6 @@ window.elFinder = function(node, opts) {
 		refreshPositions : true,
 		cursor     : 'move',
 		cursorAt   : {left : 50, top : 47},
-		drag       : function(e, ui) {
-			if (! ui.helper.data('locked')) {
-				ui.helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey);
-			}
-		},
 		start      : function(e, ui) {
 			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
 			cnt, h;
@@ -589,6 +584,12 @@ window.elFinder = function(node, opts) {
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]].mime) + '<span class="elfinder-drag-num">'+l+'</span>');
 			}
+			
+			$(document).bind(keydown + ' keyup.' + namespace, function(e){
+				if (helper.is(':visible') && ! helper.data('locked')) {
+					helper.toggleClass('elfinder-drag-helper-plus', e.shiftKey||e.ctrlKey||e.metaKey);
+				}
+			});
 			
 			return helper;
 		}
