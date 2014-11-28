@@ -20,7 +20,7 @@ Features
 
  * All operations with files and folders on a remote server (copy, move,
    upload, create folder/file, rename, etc.)
- * High performance server beckend and light client UI
+ * High performance server backend and light client UI
  * Multi-root support
  * Local file system, MySQL, FTP volume storage drivers
  * Background file upload with Drag & Drop HTML5 support
