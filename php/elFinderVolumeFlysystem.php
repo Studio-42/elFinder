@@ -3,8 +3,6 @@ use League\Flysystem\Util;
 use League\Flysystem\Filesystem;
 
 /**
- * @file
- *
  * elFinder driver for Flysytem (https://github.com/thephpleague/flysystem)
  *
  * @author Barry vd. Heuvel
@@ -32,9 +30,20 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     {
         $opts = array(
             'filesystem' => null,
-            'path'	     => '/',
+            'adapter'    => null,
         );
+
         $this->options = array_merge($this->options, $opts);
+    }
+
+    public function mount(array $opts)
+    {
+        // If path is not set, use the root
+        if (!isset($opts['path']) || $opts['path'] === '') {
+            $opts['path'] = '/';
+        }
+
+        return parent::mount($opts);
     }
 
     /**
@@ -45,7 +54,12 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function init()
     {
-        $this->fs = $this->options['filesystem'];
+        // Check if filesystem is set, otherwise create Filesystem from adapter
+        if ($this->options['filesystem']) {
+            $this->fs = $this->options['filesystem'];
+        } elseif ($this->options['adapter']) {
+            $this->fs = new Filesystem($this->options['adapter']);
+        }
 
         if (!$this->fs) {
             return $this->setError('A filesystem instance is required');
@@ -112,7 +126,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         }
 
         // If not exists, return empty
-        if( !$this->fs->has($path)) {
+        if ( !$this->fs->has($path)) {
             return array();
         }
 
@@ -166,7 +180,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     protected function _scandir($path)
     {
         $paths = array();
-        foreach($this->fs->listContents($path, false) as $object){
+        foreach ($this->fs->listContents($path, false) as $object) {
             $paths[] = $object['path'];
         }
         return $paths;
