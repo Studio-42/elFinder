@@ -656,7 +656,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
 		$sth = $this->DB->prepare('select dat from '.$this->DB_TableName.' WHERE path LIKE ? AND fname LIKE ?');
-		$sth->execute(array('%'.(($path === $this->root)? '' : strtolower($path)), '%'.strtolower($q).'%'));
+		$sth->execute(array('%'.(($path === '/')? '' : strtolower($path)), '%'.strtolower($q).'%'));
 		$res = $sth->fetchAll(PDO::FETCH_COLUMN);
 		if ($res) {
 			foreach($res as $raw) {
