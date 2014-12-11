@@ -180,6 +180,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 
 			/******************************** sort variants ********************************/
 			'sortname'          : 'by name', 
+			'sortnameNUM'       : 'by name (numeric)', 
 			'sortkind'          : 'by kind', 
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',

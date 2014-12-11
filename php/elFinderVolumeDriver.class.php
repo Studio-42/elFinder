@@ -195,7 +195,11 @@ abstract class elFinderVolumeDriver {
 		// order to proccess uploadAllow and uploadDeny options
 		'uploadOrder'     => array('deny', 'allow'),
 		// maximum upload file size. NOTE - this is size for every uploaded files
-		'uploadMaxSize'   => 0,
+		'uploadMaxSize'   => 0,	
+		// height to downsize uploaded images, 0 to disable
+		'uploadMaxHeight'   => 0,
+		// width to downsize uploaded images, 0 to disable
+		'uploadMaxWidth'   => 0,
 		// files dates format
 		'dateFormat'      => 'j M Y H:i',
 		// files time format
@@ -1428,10 +1432,16 @@ abstract class elFinderVolumeDriver {
 		if (strpos($mime, 'image') === 0 && ($s = getimagesize($tmpname))) {
 			$stat['width'] = $s[0];
 			$stat['height'] = $s[1];
+			$resizeMaxW = intval($this->options['uploadMaxWidth']);
+			$resizeMaxH = intval($this->options['uploadMaxHeight']);
 		}
 		// $this->clearcache();
 		if (($path = $this->_save($fp, $dstpath, $name, $stat)) == false) {
 			return false;
+		}
+		
+		if (isset($resizeMaxW) && $resizeMaxW>0 && $resizeMaxH && ($stat['width'] > $resizeMaxW || $stat['height'] > $resizeMaxH) ) {
+			$this->imgResize($path, $resizeMaxW, $resizeMaxH, true, true);
 		}
 		
 		
