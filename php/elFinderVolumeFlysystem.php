@@ -122,6 +122,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
 
         // If root, just return from above
         if ($this->root == $path) {
+            $stat['name'] = '/';
             return $stat;
         }
 
