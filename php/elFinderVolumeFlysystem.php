@@ -31,6 +31,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         $opts = array(
             'filesystem' => null,
             'adapter'    => null,
+            'icon'       => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_flysystem.png',
         );
 
         $this->options = array_merge($this->options, $opts);
