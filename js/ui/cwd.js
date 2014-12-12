@@ -737,14 +737,16 @@ $.fn.elfindercwd = function(fm, options) {
 							p.trigger(evtUnselect);
 							trigger();
 						} else {
-							p.trigger(evtSelect);
-							trigger();
-							p.trigger(fm.trigger('contextmenu', {
-								'type'    : 'files',
-								'targets' : fm.selected(),
-								'x'       : e.originalEvent.touches[0].clientX,
-								'y'       : e.originalEvent.touches[0].clientY
-							}));
+							if (e.target.nodeName != 'TD' || fm.selected().length > 0) {
+								p.trigger(evtSelect);
+								trigger();
+								p.trigger(fm.trigger('contextmenu', {
+									'type'    : 'files',
+									'targets' : fm.selected(),
+									'x'       : e.originalEvent.touches[0].clientX,
+									'y'       : e.originalEvent.touches[0].clientY
+								}));
+							}
 						}
 					}, 500));
 				})
@@ -816,7 +818,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.bind('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest('.'+clFile);
 					
-					if (file.length) {
+					if (file.length && (e.target.nodeName != 'TD' || $.inArray(file.get(0).id, fm.selected()) > -1)) {
 						e.stopPropagation();
 						e.preventDefault();
 						if (!file.is('.'+clDisabled) && !file.data('touching')) {
