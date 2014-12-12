@@ -649,7 +649,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
 
-				list && cwd.html('<table><thead><tr class="ui-state-default"><td >'+msg.name+'</td><td>'+msg.perm+'</td><td>'+msg.mod+'</td><td>'+msg.size+'</td><td>'+msg.kind+'</td></tr></thead><tbody/></table>');
+				list && cwd.html('<table><thead><tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td><td class="elfinder-cwd-view-th-perm">'+msg.perm+'</td><td class="elfinder-cwd-view-th-date">'+msg.mod+'</td><td class="elfinder-cwd-view-th-size">'+msg.size+'</td><td class="elfinder-cwd-view-th-kind">'+msg.kind+'</td></tr></thead><tbody/></table>');
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
 				

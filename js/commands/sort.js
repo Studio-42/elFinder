@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "sort"
  * Change sort files rule
@@ -28,9 +28,37 @@ elFinder.prototype.commands.sort = function() {
 		});
 	});
 	
+	fm.bind('open sortchange viewchange', function() {
+		var timer = null;
+		timer && clearTimeout(timer);
+		timer = setTimeout(function(){
+			var cols = $(fm.cwd).find('div.elfinder-cwd-wrapper-list table');
+			if (cols.length) {
+				$.each(fm.sortRules, function(name, value) {
+					var td = cols.find('thead tr td.elfinder-cwd-view-th-'+name);
+					if (td.length) {
+						var current = ( name == fm.sortType),
+						sort = {
+							type  : name,
+							order : current ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
+						},arr;
+						if (current) {
+							arr = fm.sortOrder == 'asc' ? 'n' : 's';
+							$('<span class="ui-icon ui-icon-triangle-1-'+arr+'"/>').css({left:'+center+'}).appendTo(td);
+						}
+						$(td).on('click', function(e){
+							fm.exec('sort', [], sort);
+						});
+					}
+					
+				});
+			}
+		}, 100);
+	});
+	
 	this.getstate = function() {
 		return 0;
-	}
+	};
 	
 	this.exec = function(hashes, sortopt) {
 		var fm = this.fm,
@@ -42,6 +70,6 @@ elFinder.prototype.commands.sort = function() {
 
 		this.fm.setSort(sort.type, sort.order, sort.stick);
 		return $.Deferred().resolve();
-	}
+	};
 
-}
+};

@@ -167,6 +167,19 @@
 	border:1px solid #ccc;
 }
 
+/********************** COMMAND "SORT" ****************************/
+/* for list table header sort triangle icon */
+div.elfinder-cwd-wrapper-list tr.ui-state-default td {
+	position: relative;
+}
+div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	position: absolute;
+	top: -5px;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
 
 /********************** COMMAND "HELP" ****************************/
 /* help dialog */
