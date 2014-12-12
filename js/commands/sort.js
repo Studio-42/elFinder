@@ -47,7 +47,13 @@ elFinder.prototype.commands.sort = function() {
 							$('<span class="ui-icon ui-icon-triangle-1-'+arr+'"/>').css({left:'+center+'}).appendTo(td);
 						}
 						$(td).on('click', function(e){
-							fm.exec('sort', [], sort);
+							e.stopPropagation();
+							self.exec([], sort);
+						})
+						.hover(function() {
+							$(this).addClass('ui-state-hover');
+						},function() {
+							$(this).removeClass('ui-state-hover');
 						});
 					}
 					
