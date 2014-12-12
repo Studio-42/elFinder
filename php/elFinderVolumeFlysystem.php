@@ -67,7 +67,6 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         }
 
         $this->root = $this->options['path'];
-        $this->rootName = 'fls';
 
         return true;
     }
@@ -77,7 +76,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function _dirname($path)
     {
-        return Util::dirname($path);
+        return Util::dirname($path) ?: '/';
     }
 
     /**
