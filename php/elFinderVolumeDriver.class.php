@@ -603,7 +603,7 @@ abstract class elFinderVolumeDriver {
 		
 		$this->options = array_merge($this->options, $opts);
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
-		$this->root = $this->normPathCE($this->options['path']);
+		$this->root = $this->normpathCE($this->options['path']);
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
 		
 		// default file attribute
@@ -758,7 +758,7 @@ abstract class elFinderVolumeDriver {
 				&& $start['mime'] == 'directory'
 				&& $start['read']
 				&& empty($start['hidden'])
-				&& $this->inPathCE($this->options['startPath'], $this->root)) {
+				&& $this->inpathCE($this->options['startPath'], $this->root)) {
 					$this->startPath = $this->options['startPath'];
 					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
 						$this->startPath = substr($this->startPath, 0, -1);
@@ -1562,7 +1562,7 @@ abstract class elFinderVolumeDriver {
 		if ($volume == $this) {
 			$source = $this->decode($src);
 			// do not copy into itself
-			if ($this->inPathCE($destination, $source)) {
+			if ($this->inpathCE($destination, $source)) {
 				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
 			}
 			$method = $rmSrc ? 'move' : 'copy';
@@ -1933,6 +1933,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function dirnameCE($path) {
+		if (!$this->encoding) return $this->_dirname($path);
 		$locale = '';
 		if ($this->options['locale']) {
 			$locale = setlocale(LC_ALL, 0);
@@ -1953,6 +1954,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function basenameCE($path) {
+		if (!$this->encoding) return $this->_basename($path);
 		$locale = '';
 		if ($this->options['locale']) {
 			$locale = setlocale(LC_ALL, 0);
@@ -1975,7 +1977,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function joinPathCE($dir, $name) {
-		return $this->convEncOut($this->_joinPath($this->convEncIn($dir), $this->convEncIn($name)));
+		return (!$this->encoding)? $this->_joinPath($dir, $name) : $this->convEncOut($this->_joinPath($this->convEncIn($dir), $this->convEncIn($name)));
 	}
 	
 	/**
@@ -1985,8 +1987,8 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Naoki Sawada
 	 **/
-	protected function normPathCE($path) {
-		return $this->convEncOut($this->_normPath($this->convEncIn($path)));
+	protected function normpathCE($path) {
+		return (!$this->encoding)? $this->_normpath($path) : $this->convEncOut($this->_normpath($this->convEncIn($path)));
 	}
 	
 	/**
@@ -1997,7 +1999,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function relpathCE($path) {
-		return $this->convEncOut($this->_relpath($this->convEncIn($path)));
+		return (!$this->encoding)? $this->_relpath($path) : $this->convEncOut($this->_relpath($this->convEncIn($path)));
 	}
 	
 	/**
@@ -2008,7 +2010,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function abspathCE($path) {
-		return $this->convEncOut($this->_abspath($this->convEncIn($path)));
+		return (!$this->encoding)? $this->_abspath($path): $this->convEncOut($this->_abspath($this->convEncIn($path)));
 	}
 	
 	/**
@@ -2019,8 +2021,8 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Naoki Sawada
 	 **/
-	protected function inPathCE($path, $parent) {
-		return $this->_inPath($this->convEncIn($path), $this->convEncIn($parent));
+	protected function inpathCE($path, $parent) {
+		return (!$this->encoding)? $this->_inpath($path, $parent) : $this->_inpath($this->convEncIn($path), $this->convEncIn($parent));
 	}
 	
 	/**
@@ -2032,7 +2034,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function fopenCE($path, $mode='rb') {
-		return $this->_fopen($this->convEncIn($path), $mode);
+		return (!$this->encoding)? $this->_fopen($path, $mode) : $this->_fopen($this->convEncIn($path), $mode);
 	}
 	
 	/**
@@ -2044,7 +2046,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function fcloseCE($fp, $path='') {
-		return $this->_fclose($fp, $this->convEncIn($path));
+		return (!$this->encoding)? $this->_fclose($fp, $path) : $this->_fclose($fp, $this->convEncIn($path));
 	}
 	
 	/**
@@ -2059,7 +2061,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function saveCE($fp, $dir, $name, $stat) {
-		return $this->convEncOut($this->_save($fp, $this->convEncIn($dir), $this->convEncIn($name), $this->convEncIn($stat)));
+		return (!$this->encoding)? $this->_save($fp, $dir, $name, $stat) : $this->convEncOut($this->_save($fp, $this->convEncIn($dir), $this->convEncIn($name), $this->convEncIn($stat)));
 	}
 	
 	/**
@@ -2070,7 +2072,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function subdirsCE($path) {
-		return $this->_subdirs($this->convEncIn($path));
+		return (!$this->encoding)? $this->_subdirs($path) : $this->_subdirs($this->convEncIn($path));
 	}
 	
 	/**
@@ -2081,7 +2083,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function scandirCE($path) {
-		return $this->convEncOut($this->_scandir($this->convEncIn($path)));
+		return (!$this->encoding)? $this->_scandir($path) : $this->convEncOut($this->_scandir($this->convEncIn($path)));
 	}
 	
 	/**
@@ -2094,7 +2096,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function symlinkCE($source, $targetDir, $name) {
-		return $this->_symlink($this->convEncIn($source), $this->convEncIn($targetDir), $this->convEncIn($name));
+		return (!$this->encoding)? $this->_symlink($source, $targetDir, $name) : $this->_symlink($this->convEncIn($source), $this->convEncIn($targetDir), $this->convEncIn($name));
 	}
 	
 	/***************** paths *******************/
@@ -2415,7 +2417,7 @@ abstract class elFinderVolumeDriver {
 				$stat['icon'] = $this->options['icon'];
 			}
 		} else {
-			if (!isset($stat['name']) || !strlen($stat['name'])) {
+			if (!isset($stat['name']) || $stat['name'] === '') {
 				$stat['name'] = $this->basenameCE($path);
 			}
 			if (empty($stat['phash'])) {
