@@ -1354,7 +1354,7 @@ abstract class elFinderVolumeDriver {
 		$this->rmTmb($file); // remove old name tmbs, we cannot do this after dir move
 
 
-		if (($path = $this->convEncOut($this->_move($this->convEncIn($path), $this->convEncIn($dir), $this->convEncIn($name))))) {
+		if ($path = $this->convEncOut($this->_move($this->convEncIn($path), $this->convEncIn($dir), $this->convEncIn($name)))) {
 			$this->clearcache();
 			return $this->stat($path);
 		}
@@ -1610,7 +1610,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		return $this->_getContents($this->convEncIn($this->decode($hash)));
+		return $this->convEncOut($this->_getContents($this->convEncIn($this->decode($hash))));
 	}
 	
 	/**
@@ -1636,7 +1636,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		$this->clearcache();
-		return $this->_filePutContents($this->convEncIn($path), $content) ? $this->stat($path) : false;
+		return $this->convEncOut($this->_filePutContents($this->convEncIn($path), $content)) ? $this->stat($path) : false;
 	}
 	
 	/**
@@ -1822,7 +1822,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		return $this->_dimensions($this->convEncIn($this->decode($hash)), $file['mime']);
+		return $this->convEncOut($this->_dimensions($this->convEncIn($this->decode($hash)), $file['mime']));
 	}
 	
 	/**
@@ -1933,17 +1933,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function dirnameCE($path) {
-		if (!$this->encoding) return $this->_dirname($path);
-		$locale = '';
-		if ($this->options['locale']) {
-			$locale = setlocale(LC_ALL, 0);
-			@setlocale(LC_ALL, $this->options['locale']);
-		}
-		$ret = $this->convEncOut($this->_dirname($this->convEncIn($path)));
-		if ($locale) {
-			setlocale(LC_ALL, $locale);
-		}
-		return $ret;
+		return (!$this->encoding)? $this->_dirname($path) :	$this->convEncOut($this->_dirname($this->convEncIn($path)));
 	}
 	
 	/**
@@ -1954,17 +1944,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function basenameCE($path) {
-		if (!$this->encoding) return $this->_basename($path);
-		$locale = '';
-		if ($this->options['locale']) {
-			$locale = setlocale(LC_ALL, 0);
-			@setlocale(LC_ALL, $this->options['locale']);
-		}
-		$ret = $this->convEncOut($this->_basename($this->convEncIn($path)));
-		if ($locale) {
-			setlocale(LC_ALL, $locale);
-		}
-		return $ret;
+		return (!$this->encoding)? $this->_basename($path) : $this->convEncOut($this->_basename($this->convEncIn($path)));
 	}
 	
 	/**
@@ -2022,7 +2002,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function inpathCE($path, $parent) {
-		return (!$this->encoding)? $this->_inpath($path, $parent) : $this->_inpath($this->convEncIn($path), $this->convEncIn($parent));
+		return (!$this->encoding)? $this->_inpath($path, $parent) : $this->convEncOut($this->_inpath($this->convEncIn($path), $this->convEncIn($parent)));
 	}
 	
 	/**
@@ -2034,7 +2014,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function fopenCE($path, $mode='rb') {
-		return (!$this->encoding)? $this->_fopen($path, $mode) : $this->_fopen($this->convEncIn($path), $mode);
+		return (!$this->encoding)? $this->_fopen($path, $mode) : $this->convEncOut($this->_fopen($this->convEncIn($path), $mode));
 	}
 	
 	/**
@@ -2046,7 +2026,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function fcloseCE($fp, $path='') {
-		return (!$this->encoding)? $this->_fclose($fp, $path) : $this->_fclose($fp, $this->convEncIn($path));
+		return (!$this->encoding)? $this->_fclose($fp, $path) : $this->convEncOut($this->_fclose($fp, $this->convEncIn($path)));
 	}
 	
 	/**
@@ -2072,7 +2052,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function subdirsCE($path) {
-		return (!$this->encoding)? $this->_subdirs($path) : $this->_subdirs($this->convEncIn($path));
+		return (!$this->encoding)? $this->_subdirs($path) : $this->convEncOut($this->_subdirs($this->convEncIn($path)));
 	}
 	
 	/**
@@ -2096,7 +2076,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function symlinkCE($source, $targetDir, $name) {
-		return (!$this->encoding)? $this->_symlink($source, $targetDir, $name) : $this->_symlink($this->convEncIn($source), $this->convEncIn($targetDir), $this->convEncIn($name));
+		return (!$this->encoding)? $this->_symlink($source, $targetDir, $name) : $this->convEncOut($this->_symlink($this->convEncIn($source), $this->convEncIn($targetDir), $this->convEncIn($name)));
 	}
 	
 	/***************** paths *******************/
@@ -2235,25 +2215,27 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Converts character encoding from UTF-8 to server's one
 	 * 
-	 * @param  mixed  $var     target string or array var
-	 * @param  string $unknown replaces character for unknown
+	 * @param  mixed  $var           target string or array var
+	 * @param  bool   $restoreLocale do retore global locale, default is false
+	 * @param  string $unknown       replaces character for unknown
 	 * @return mixed
 	 * @author Naoki Sawada
 	 */
-	public function convEncIn($var, $unknown = '_') {
-		return (!$this->encoding || (!is_string($var) && !is_array($var)))? $var : $this->convEnc($var, 'UTF-8', $this->encoding, $unknown);
+	public function convEncIn($var, $restoreLocale = false, $unknown = '_') {
+		return (!$this->encoding)? $var : $this->convEnc($var, 'UTF-8', $this->encoding, $this->options['locale'], $restoreLocale, $unknown);
 	}
 	
 	/**
 	 * Converts character encoding from server's one to UTF-8
 	 * 
-	 * @param  mixed  $var     target string or array var
-	 * @param  string $unknown replaces character for unknown
+	 * @param  mixed  $var           target string or array var
+	 * @param  bool   $restoreLocale do retore global locale, default is true
+	 * @param  string $unknown       replaces character for unknown
 	 * @return mixed
 	 * @author Naoki Sawada
 	 */
-	public function convEncOut($var, $unknown = '_') {
-		return (!$this->encoding || (!is_string($var) && !is_array($var)))? $var : $this->convEnc($var, $this->encoding, 'UTF-8', $unknown);
+	public function convEncOut($var, $restoreLocale = true, $unknown = '_') {
+		return (!$this->encoding)? $var : $this->convEnc($var, $this->encoding, 'UTF-8', $this->options['locale'], $restoreLocale, $unknown);
 	}
 	
 	/**
@@ -2262,38 +2244,38 @@ abstract class elFinderVolumeDriver {
 	 * @param  mixed  $var     target string or array var
 	 * @param  string $from    from character encoding
 	 * @param  string $to      to character encoding
+	 * @param  string $locale  local locale
 	 * @param  string $unknown replaces character for unknown
 	 * @return mixed
 	 */
-	protected function convEnc($var, $from, $to, $unknown = '_') {
+	protected function convEnc($var, $from, $to, $locale, $restoreLocale, $unknown = '_') {
 		if (strtoupper($from) !== strtoupper($to)) {
+			if ($locale) {
+				@setlocale(LC_ALL, $locale);
+			}
 			if (is_array($var)) {
 				$_ret = array();
 				foreach($var as $_k => $_v) {
-					$_ret[$_k] = $this->convEnc($_v, $from, $to, $unknown);
+					$_ret[$_k] = $this->convEnc($_v, $from, $to, '', false, $unknown = '_');
 				}
-				return $_ret;
+				$var = $_ret;
 			} else {
 				$_var = false;
 				if (is_string($var)) {
-					$locale = '';
 					$_var = $var;
-					if ($this->options['locale']) {
-						$locale = setlocale(LC_ALL, 0);
-						@setlocale(LC_ALL, $this->options['locale']);
-					}
 					if (false !== ($_var = @iconv($from, $to.'//TRANSLIT', $_var))) {
 						$_var = str_replace('?', $unknown, $_var);
 					}
-					if ($locale) {
-						setlocale(LC_ALL, $locale);
-					}
 				}
-				return ($_var === false)? $var : $_var;
+				if  ($_var !== false) {
+					$var = $_var;
+				}
 			}
-		} else {
-			return $var;
+			if ($restoreLocale) {
+				setlocale(LC_ALL, elFinder::$locale);
+			}
 		}
+		return $var;
 	}
 	
 	/*********************** file stat *********************/
@@ -2498,7 +2480,7 @@ abstract class elFinderVolumeDriver {
 				
 			}
 			if (!isset($stat['url']) && $this->encoding) {
-				$stat['url'] = rtrim($this->options['URL'], '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($path)));
+				$stat['url'] = rtrim($this->options['URL'], '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
 			}
 		}
 		
@@ -2810,7 +2792,7 @@ abstract class elFinderVolumeDriver {
 		if ($srcStat['mime'] == 'directory') {
 			$test = $this->stat($this->joinPathCE($dst, $name));
 			
-			if (($test && $test['mime'] != 'directory') || !$this->_mkdir($this->convEncIn($dst), $this->convEncIn($name))) {
+			if (($test && $test['mime'] != 'directory') || $this->convEncOut(!$this->_mkdir($this->convEncIn($dst), $this->convEncIn($name)))) {
 				return $this->setError(elFinder::ERROR_COPY, $this->path($src));
 			}
 			
@@ -2829,7 +2811,7 @@ abstract class elFinderVolumeDriver {
 			return $dst;
 		} 
 
-		return $this->_copy($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name))
+		return $this->convEncOut($this->_copy($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))
 			? $this->joinPathCE($dst, $name) 
 			: $this->setError(elFinder::ERROR_COPY, $this->path($src));
 	}
@@ -2850,7 +2832,7 @@ abstract class elFinderVolumeDriver {
 		$this->rmTmb($stat); // can not do rmTmb() after _move()
 		$this->clearcache();
 		
-		if ($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name))) {
+		if ($this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
 			$this->removed[] = $stat;
 
 			return $this->joinPathCE($dst, $name);
@@ -2889,7 +2871,7 @@ abstract class elFinderVolumeDriver {
 		if ($source['mime'] == 'directory') {
 			$stat = $this->stat($this->joinPathCE($destination, $name));
 			$this->clearcache();
-			if ((!$stat || $stat['mime'] != 'directory') && !$this->_mkdir($this->convEncIn($destination), $this->convEncIn($name))) {
+			if ((!$stat || $stat['mime'] != 'directory') && $this->convEncOut(!$this->_mkdir($this->convEncIn($destination), $this->convEncIn($name)))) {
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
 			
@@ -2951,12 +2933,12 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 			}
-			if (!$this->_rmdir($this->convEncIn($path))) {
+			if ($this->convEncOut(!$this->_rmdir($this->convEncIn($path)))) {
 				return $this->setError(elFinder::ERROR_RM, $this->path($path));
 			}
 			
 		} else {
-			if (!$this->_unlink($this->convEncIn($path))) {
+			if ($this->convEncOut(!$this->_unlink($this->convEncIn($path)))) {
 				return $this->setError(elFinder::ERROR_RM, $this->path($path));
 			}
 		}

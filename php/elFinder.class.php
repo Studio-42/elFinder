@@ -25,7 +25,19 @@ class elFinder {
 	 **/
 	protected $volumes = array();
 	
+	/**
+	 * Network mount drivers
+	 * 
+	 * @var array
+	 */
 	public static $netDrivers = array();
+	
+	/**
+	 * elFinder global locale
+	 * 
+	 * @var string
+	 */
+	public static $locale = '';
 	
 	/**
 	 * Session key of net mount volumes
@@ -223,7 +235,11 @@ class elFinder {
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		
-		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
+		// setlocale and global locale regists to elFinder::locale
+		self::$locale = !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8';
+		if (false === @setlocale(LC_ALL, self::$locale)) {
+			self::$locale = setlocale(LC_ALL, '');
+		}
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
