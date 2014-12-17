@@ -31,7 +31,6 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         $opts = array(
             'filesystem' => null,
             'adapter'    => null,
-            'icon'       => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_flysystem.png',
         );
 
         $this->options = array_merge($this->options, $opts);
@@ -45,6 +44,29 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         }
 
         return parent::mount($opts);
+    }
+
+    /**
+     * Find the icon based on the used Adapter
+     *
+     * @return string
+     */
+    protected function getIcon()
+    {
+        $adapter = $this->fs->getAdapter();
+
+        if ($adapter instanceof League\Flysystem\Adapter\Local) {
+            $icon = 'volume_icon_local.png';
+        } elseif ($adapter instanceof League\Flysystem\Adapter\AbstractFtpAdapter) {
+            $icon = 'volume_icon_ftp.png';
+        } elseif ($adapter instanceof League\Flysystem\Adapter\Dropbox) {
+            $icon = 'volume_icon_dropbox.png';
+        } else {
+            $icon = 'volume_icon_flysystem.png';
+        }
+
+        $parentUrl = defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '';
+        return $parentUrl . 'img/' . $icon;
     }
 
     /**
@@ -66,6 +88,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
             return $this->setError('A filesystem instance is required');
         }
 
+        $this->options['icon'] = $this->options['icon'] ?: $this->getIcon();
         $this->root = $this->options['path'];
 
         return true;
