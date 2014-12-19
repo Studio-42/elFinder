@@ -1,7 +1,7 @@
 /**
  * Italian translation
  * @author Alberto Tocci <alberto.tocci@gmail.com>
- * @version 2013-07-03
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.it = {
@@ -131,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'No',
 			'btnYes'    : 'Si',
 			'btnMount'  : 'Mount',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Apri cartella',
 			'ntffile'     : 'Apri file',
@@ -360,6 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Filmato Matroska',
 			'kindVideoOGG'    : 'Filmato Ogg'
 		}
-	}
+	};
 }
 
