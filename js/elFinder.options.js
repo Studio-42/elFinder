@@ -206,10 +206,12 @@ elFinder.prototype._options = {
 			ftp: {
 				inputs: {
 					host     : $('<input type="text"/>'),
-					port     : $('<input type="text"/>'),
+					port     : $('<input type="text" placeholder="21"/>'),
 					path     : $('<input type="text" value="/"/>'),
 					user     : $('<input type="text"/>'),
-					pass     : $('<input type="password"/>')
+					pass     : $('<input type="password"/>'),
+					encoding : $('<input type="text" placeholder="Optional"/>'),
+					locale   : $('<input type="text" placeholder="Optional"/>')
 				}
 			},
 			dropbox: {

@@ -296,6 +296,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmUnmount'      : '$1をアンマウントしますか?',  // added 30.04.2012
 			'dropFilesBrowser': 'ブラウザからファイルをドロップまたは貼り付け', // added 30.05.2012
 			'dropPasteFiles'  : 'ここにファイルをドロップまたは貼り付け', // added 07.04.2014
+			'encoding'        : '文字コード', // from v2.1 added 19.12.2014
+			'locale'          : 'ロケール',   // from v2.1 added 19.12.2014
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
