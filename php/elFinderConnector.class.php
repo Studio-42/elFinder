@@ -58,8 +58,8 @@ class elFinderConnector {
 				list($key, $value) = array_pad(explode('=', $part), 2, '');
 				$src[$key] = rawurldecode($value);
 			}
-			$_POST = $src;
-			$_REQUEST = array_merge_recursive($src, $_REQUEST);
+			$_POST = $this->input_filter($src);
+			$_REQUEST = $this->input_filter(array_merge_recursive($src, $_REQUEST));
 		}
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
 		$args   = array();
