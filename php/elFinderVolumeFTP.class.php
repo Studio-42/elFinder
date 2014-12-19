@@ -106,7 +106,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	public function netmountPrepare($options) {
-		if (!empty($_REQUEST['encoding']) && @iconv('UTF-8', $_REQUEST['encoding'], '')) {
+		if (!empty($_REQUEST['encoding']) && @iconv('UTF-8', $_REQUEST['encoding'], '') !== false) {
 			$options['encoding'] = $_REQUEST['encoding'];
 			if (!empty($_REQUEST['locale']) && @setlocale(LC_ALL, $_REQUEST['locale'])) {
 				setlocale(LC_ALL, elFinder::$locale);
