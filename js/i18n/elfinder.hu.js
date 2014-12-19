@@ -1,13 +1,15 @@
 /**
  * Hungarian translation
  * @author Gáspár Lajos <info@glsys.eu>
- * @version 2011-09-10
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.hu = {
 		translator : 'Gáspár Lajos &lt;info@glsys.eu&gt;',
 		language   : 'magyar',
 		direction  : 'ltr',
+		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -48,23 +50,47 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Unable to rename "$1".',
 			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
 			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
-			'errUploadCommon'      : 'Feltöltési hiba.',
-			'errUpload'            : 'Nem sikerült a fájlt feltölteni. ($1)',
+			'errUpload'            : 'Feltöltési hiba.',
+			'errUploadFile'        : 'Nem sikerült a fájlt feltölteni. ($1)',
 			'errUploadNoFiles'     : 'No files found for upload.',
-			'errMaxSize'           : 'Data exceeds the maximum allowed size.',
-			'errFileMaxSize'       : 'File exceeds maximum allowed size.',
+			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.',
+			'errUploadFileSize'    : 'File exceeds maximum allowed size.',
 			'errUploadMime'        : 'File type not allowed.',
-			'errUploadTransfer'    : '"$1" transfer error.', 
+			'errUploadTransfer'    : '"$1" transfer error.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : '"$1" mentése nem sikerült.',
 			'errCopy'              : '"$1" másolása nem sikerült.',
 			'errMove'              : '"$1" áthelyezése nem sikerült.',
 			'errCopyInItself'      : '"$1" nem másolható saját magára.',
 			'errRm'                : '"$1" törlése nem sikerült.',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Unable to extract files from "$1".',
 			'errArchive'           : 'Unable to create archive.',
 			'errArcType'           : 'Nem támogatott archívum típus.',
 			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
 			'errCmdNoSupport'      : 'Backend does not support this command.',
+			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errResize'            : 'Unable to resize "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
+			'errResizeRotate'      : 'Image dose not rotated.',  // added 7.3.2013
+			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
+			'errUsupportType'      : 'Unsupported file type.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Archívum létrehozása',
@@ -92,14 +118,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ugrás a szülőmappába',
 			'cmdupload'    : 'Feltöltés',
 			'cmdview'      : 'View',
+			'cmdresize'    : 'Resize & Rotate',
+			'cmdsort'      : 'Sort',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Bezár',
 			'btnSave'   : 'Ment',
 			'btnRm'     : 'Töröl',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'Mégsem',
 			'btnNo'     : 'Nem',
 			'btnYes'    : 'Igen',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Mappa megnyitás',
@@ -118,25 +149,62 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Archívum létrehozása',
 			'ntfextract'  : 'Kibontás archívumból',
 			'ntfsearch'   : 'Fájlok keresése',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Doing something >_<',
+			'ntfloadimg'  : 'Loading image',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Ismeretlen',
 			'Today'       : 'Ma',
 			'Yesterday'   : 'Tegnap',
-			'Jan'         : 'jan',
-			'Feb'         : 'febr',
-			'Mar'         : 'márc',
-			'Apr'         : 'ápr',
-			'May'         : 'máj',
-			'Jun'         : 'jún',
-			'Jul'         : 'júl',
-			'Aug'         : 'aug',
-			'Sep'         : 'szept',
-			'Oct'         : 'okt',
-			'Nov'         : 'nov',
-			'Dec'         : 'dec',
+			'msJan'       : 'jan',
+			'msFeb'       : 'febr',
+			'msMar'       : 'márc',
+			'msApr'       : 'ápr',
+			'msMay'       : 'máj',
+			'msJun'       : 'jún',
+			'msJul'       : 'júl',
+			'msAug'       : 'aug',
+			'msSep'       : 'szept',
+			'msOct'       : 'okt',
+			'msNov'       : 'nov',
+			'msDec'       : 'dec',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
+			/******************************** sort variants ********************************/
+			'sortname'          : 'by name', 
+			'sortkind'          : 'by kind', 
+			'sortsize'          : 'by size',
+			'sortdate'          : 'by date',
+			'sortFoldersFirst'  : 'Folders first',
+			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Valóban törölni akarja a kijelölt adatokat?<br/>Ez később nem fordítható vissza!',
@@ -197,6 +265,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : 'fájlok böngészése',
 			'moveFiles'       : 'Fájlok áthelyezése',
 			'copyFiles'       : 'Fájlok másolása',
+			'rmFromPlaces'    : 'Remove from places',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Scale',
+			'width'           : 'Width',
+			'height'          : 'Height',
+			'resize'          : 'Resize',
+			'crop'            : 'Crop',
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Ismeretlen',
@@ -276,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska film',
 			'kindVideoOGG'    : 'Ogg film'
 		}
-	}
+	};
 }

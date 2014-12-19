@@ -1,7 +1,7 @@
 /**
  * Slovenian translation
  * @author Damjan Rems <d_rems at yahoo.com>
- * @version 2012-09-07
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sl = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Ni možno preimenovati "$1".',
 			'errCopyFrom'          : 'Kopiranje datotek iz "$1" ni dovoljeno.',
 			'errCopyTo'            : 'Kopiranje datotek na "$1" ni dovoljeno.',
-			'errUploadCommon'      : 'Napaka pri prenosu.',
-			'errUpload'            : '"$1" ni možno naložiti (upload).',
+			'errUpload'            : 'Napaka pri prenosu.',
+			'errUploadFile'        : '"$1" ni možno naložiti (upload).',
 			'errUploadNoFiles'     : 'Ni datotek za nalaganje (upload).',
-			'errMaxSize'           : 'Podatki presegajo največjo dovoljeno velikost.',
-			'errFileMaxSize'       : 'Datoteka presega največjo dovoljeno velikost.',
+			'errUploadTotalSize'   : 'Podatki presegajo največjo dovoljeno velikost.',
+			'errUploadFileSize'    : 'Datoteka presega največjo dovoljeno velikost.',
 			'errUploadMime'        : 'Datoteke s to končnico niso dovoljene.',
-			'errUploadTransfer'    : '"$1" napaka pri prenosu.', 
+			'errUploadTransfer'    : '"$1" napaka pri prenosu.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : '"$1" ni možno shraniti.',
 			'errCopy'              : '"$1" ni možno kopirati.',
 			'errMove'              : '"$1" ni možno premakniti.',
 			'errCopyInItself'      : '"$1" ni možno kopirati samo vase.',
 			'errRm'                : '"$1" ni možno izbrisati.',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Datotek iz "$1" ni možno odpakirati.',
 			'errArchive'           : 'Napaka pri delanju arhiva.',
 			'errArcType'           : 'Nepodprta vrsta arhiva.',
@@ -71,7 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Zaradi varnostnih razlogov arhiva ki vsebuje "symlinks" ni možno odpakirati.',
 			'errArcMaxSize'        : 'Datoteke v arhivu presegajo največjo dovoljeno velikost.',
 			'errResize'            : '"$1" ni možno razširiti.',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Nepodprta vrsta datoteke.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Naredi arhiv',
@@ -101,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Ogled',
 			'cmdresize'    : 'Povečaj (pomanjšaj) sliko',
 			'cmdsort'      : 'Razvrsti',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Zapri',
@@ -110,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Prekliči',
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Da',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Odpri mapo',
@@ -128,25 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Ustvarjam arhiv',
 			'ntfextract'  : 'Razpakiram datoteke iz arhiva',
 			'ntfsearch'   : 'Iščem datoteke',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Počakaj delam >_<',
 			'ntfloadimg'  : 'Nalagam sliko',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'neznan',
 			'Today'       : 'Danes',
 			'Yesterday'   : 'Včeraj',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Maj',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Avg',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Maj',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Avg',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Januar',
 			'February'    : 'Februar',
 			'March'       : 'Marec',
@@ -173,15 +197,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Čet', 
 			'Fri'         : 'Pet', 
 			'Sat'         : 'Sob',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'po imenu (mape na začetku)', 
-			'sortkindDirsFirst' : 'po vrsti (mape na začetku)', 
-			'sortsizeDirsFirst' : 'po velikosti (mape na začetku)', 
-			'sortdateDirsFirst' : 'po datumu (mape na začetku)', 
 			'sortname'          : 'po imenu', 
 			'sortkind'          : 'po vrsti', 
 			'sortsize'          : 'po velikosti',
 			'sortdate'          : 'po datumu',
+			'sortFoldersFirst'  : 'Folders first',
 			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Zahtevana je potrditev',
@@ -223,7 +245,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Pomoč',
 			'webfm'           : 'Spletni upravitelj datotek',
 			'ver'             : 'Verzija',
-			'protocol'        : 'verzija protokola',
+			'protocolver'     : 'verzija protokola',
 			'homepage'        : 'Domača stran',
 			'docs'            : 'Dokumentacija',
 			'github'          : 'Fork us on Github',
@@ -244,19 +266,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Premakni datoteke',
 			'copyFiles'       : 'Kopiraj datoteke',
 			'rmFromPlaces'    : 'Izbriši iz mesta (places)',
-			'untitled folder' : 'mapa brez imena',
-			'untitled file.txt' : 'brez imena file.txt',
 			'aspectRatio'     : 'Razmerje slike',
 			'scale'           : 'Razširi',
 			'width'           : 'Širina',
 			'height'          : 'Višina',
-			'mode'            : 'Način (mode)',
 			'resize'          : 'Povečaj',
 			'crop'            : 'Obreži',
 			'rotate'          : 'Zavrti',
 			'rotate-cw'       : 'Zavrti 90 st. v smeri ure',
 			'rotate-ccw'      : 'Zavrti 90 st. v obratni smeri ure',
 			'degree'          : 'Stopnja',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznan',
@@ -336,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska film',
 			'kindVideoOGG'    : 'Ogg film'
 		}
-	}
+	};
 }

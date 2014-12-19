@@ -1,7 +1,7 @@
 /**
  * Turkish translation
  * @author I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
- * @version 2012-06-15
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.tr = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : '"$1" adı değiştirilemedi.',
 			'errCopyFrom'          : '"$1" dizininden kopyalamaya izin verilmedi.',
 			'errCopyTo'            : '"$1" dizinine kopyalamaya izin verilmedi.',
-			'errUploadCommon'      : 'Dosya gönderme hatası.',
-			'errUpload'            : '"$1" dosya gönderilemedi.',
+			'errUpload'            : 'Dosya gönderme hatası.',
+			'errUploadFile'        : '"$1" dosya gönderilemedi.',
 			'errUploadNoFiles'     : 'Göndermek için dosya bulunamadı.',
-			'errMaxSize'           : 'Data izin verilen boyuttan büyük.',
-			'errFileMaxSize'       : 'Dosya izin verilen boyuttan büyük.',
+			'errUploadTotalSize'   : 'Data izin verilen boyuttan büyük.',
+			'errUploadFileSize'    : 'Dosya izin verilen boyuttan büyük.',
 			'errUploadMime'        : 'Dosya tipine izin verilmiyor.',
-			'errUploadTransfer'    : '"$1" transfer hatası.', 
+			'errUploadTransfer'    : '"$1" transfer hatası.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : '"$1" kaydedilemez.',
 			'errCopy'              : '"$1" kopylanamaz.',
 			'errMove'              : '"$1" taşınamaz.',
 			'errCopyInItself'      : '"$1" kendi içinde kopyalanamaz.',
 			'errRm'                : '"$1" silinemedi.',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : '"$1" arşivi açılamadı.',
 			'errArchive'           : 'Arşiv oluşturulamadı.',
 			'errArcType'           : 'Desteklenmeyen Arşiv Tipi.',
@@ -71,7 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Güvenlik nedeni ile arşiv açılamadı.',
 			'errArcMaxSize'        : 'Arşiv dosyası izin verilen maksimum boyutun üstünde.',
 			'errResize'            : 'Boyutlandırılamadı "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Desteklenmeyen Dosya Tipi.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Arşiv Oluştur',
@@ -101,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Aç',
 			'cmdresize'    : 'Resmi Yeniden Boyutlandır',
 			'cmdsort'      : 'Sırala',
+			'cmdnetmount'  : 'Mount network volume',
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Kapat',
@@ -110,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Vazgeç',
 			'btnNo'     : 'Hayır',
 			'btnYes'    : 'Evet',
+			'btnMount'  : 'Mount',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Klasör Aç',
@@ -128,25 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Arşiv Oluşturuluyor',
 			'ntfextract'  : 'Dosyalar Arşivde Çıkarılıyor',
 			'ntfsearch'   : 'Dosyalar Aranıyor',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Birşeyler Yapılıyor >_<',
 			'ntfloadimg'  : 'Resim Yükleniyor',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'bilinmiyor',
 			'Today'       : 'Bugün',
 			'Yesterday'   : 'Dün',
-			'Jan'         : 'Oca',
-			'Feb'         : 'Şub',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Nis',
-			'May'         : 'May',
-			'Jun'         : 'Haz',
-			'Jul'         : 'Tem',
-			'Aug'         : 'Ağu',
-			'Sep'         : 'Eyl',
-			'Oct'         : 'Ekm',
-			'Nov'         : 'Kas',
-			'Dec'         : 'Ara',
+			'msJan'       : 'Oca',
+			'msFeb'       : 'Şub',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Nis',
+			'msMay'       : 'May',
+			'msJun'       : 'Haz',
+			'msJul'       : 'Tem',
+			'msAug'       : 'Ağu',
+			'msSep'       : 'Eyl',
+			'msOct'       : 'Ekm',
+			'msNov'       : 'Kas',
+			'msDec'       : 'Ara',
 			'January'     : 'Ocak',
 			'February'    : 'Şubat',
 			'March'       : 'Mart',
@@ -173,15 +197,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Per', 
 			'Fri'         : 'Cum', 
 			'Sat'         : 'Cmt',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'Ada göre (önce klasörler)', 
-			'sortkindDirsFirst' : 'Türe göre (önce klasörler)', 
-			'sortsizeDirsFirst' : 'Boyuta göre (önce klasörler)', 
-			'sortdateDirsFirst' : 'Tarihe göre (önce klasörler)', 
 			'sortname'          : 'Ada göre', 
 			'sortkind'          : 'Türe göre', 
 			'sortsize'          : 'Boyuta göre',
 			'sortdate'          : 'Tarihe göre',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Onay gerekli',
@@ -223,7 +245,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'Yardım',
 			'webfm'           : 'Dosya Yöneticisi',
 			'ver'             : 'Versiyon',
-			'protocol'        : 'protocol versiyonu',
+			'protocolver'     : 'protocol versiyonu',
 			'homepage'        : 'Proje Ana Sayfası',
 			'docs'            : 'Yardım',
 			'github'          : 'Fork us on Github',
@@ -244,19 +266,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Dosyaları Taşı',
 			'copyFiles'       : 'Dosyaları Kopyala',
 			'rmFromPlaces'    : 'Klasörlerden Sil',
-			'untitled folder' : 'basliksiz_klasor',
-			'untitled file.txt' : 'basliksiz_dosya.txt',
 			'aspectRatio'     : 'Oran',
 			'scale'           : 'Ölçekle',
 			'width'           : 'Genişlik',
 			'height'          : 'Yükseklik',
-			'mode'            : 'Mod',
 			'resize'          : 'Boyutlandır',
 			'crop'            : 'Kes',
 			'rotate'          : 'Döndür',
 			'rotate-cw'       : '90 Derece Sağa Döndür',
 			'rotate-ccw'      : '90 Derece Sola Döndür',
 			'degree'          : 'Açı',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Bilinmiyor',
@@ -336,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }

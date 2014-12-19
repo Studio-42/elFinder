@@ -1,13 +1,15 @@
 /**
  * Bulgarian translation
  * @author Stamo Petkov <stamo.petkov@gmail.com>
- * @version 2012-02-18
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.bg = {
 		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;',
 		language   : 'Български',
 		direction  : 'ltr',
+		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -48,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Не мога да преименувам "$1".',
 			'errCopyFrom'          : 'Копирането на файлове от том "$1" не е разрешено.',
 			'errCopyTo'            : 'Копирането на файлове в том "$1" не е разрешено.',
-			'errUploadCommon'      : 'Грешка при качване.',
-			'errUpload'            : 'Не мога да кача "$1".',
+			'errUpload'            : 'Грешка при качване.',
+			'errUploadFile'        : 'Не мога да кача "$1".',
 			'errUploadNoFiles'     : 'Не са намерени файлове за качване.',
-			'errMaxSize'           : 'Данните превишават максимално допостумия размер.',
-			'errFileMaxSize'       : 'Файла превишава максимално допустимия размер.',
+			'errUploadTotalSize'   : 'Данните превишават максимално допостумия размер.',
+			'errUploadFileSize'    : 'Файла превишава максимално допустимия размер.',
 			'errUploadMime'        : 'Не е позволен тип на файла.',
 			'errUploadTransfer'    : '"$1" грешка при предаване.', 
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Не мога да запиша "$1".',
 			'errCopy'              : 'Не мога да копирам "$1".',
 			'errMove'              : 'Не мога да преместя "$1".',
 			'errCopyInItself'      : 'Не мога да копирам "$1" върху самия него.',
 			'errRm'                : 'Не мога да премахна "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Не мога да извлеча файловете от "$1".',
 			'errArchive'           : 'Не мога да създам архив.',
 			'errArcType'           : 'Неподдържан тип на архива.',
@@ -69,7 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'От съображения за сигурност няма да бъдат разопаковани архиви съдържащи symlinks.',
 			'errArcMaxSize'        : 'Архивните файлове превишават максимално допустимия размер.',
 			'errResize'            : 'Не мога да преоразмеря "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Неподдържан тип файл.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',
+			'errNetMount'          : 'Unable to mount "$1".',
+			'errNetMountNoDriver'  : 'Unsupported protocol.',
+			'errNetMountFailed'    : 'Mount failed.',
+			'errNetMountHostReq'   : 'Host required.',
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Създай архив',
@@ -99,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Виж',
 			'cmdresize'    : 'Размер на изображение',
 			'cmdsort'      : 'Подреди',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Затвори',
@@ -108,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Отказ',
 			'btnNo'     : 'Не',
 			'btnYes'    : 'Да',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Отваряне на папка',
@@ -126,35 +149,61 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Създавам архив',
 			'ntfextract'  : 'Извличам файловете от архив',
 			'ntfsearch'   : 'Търся файлове',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Зает съм >_<',
 			'ntfloadimg'  : 'Зареждам изображения',
+			'ntfnetmount' : 'Mounting network volume',
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'неизвестна',
 			'Today'       : 'Днес',
 			'Yesterday'   : 'Вчера',
-			'Jan'         : 'Яну',
-			'Feb'         : 'Фев',
-			'Mar'         : 'Мар',
-			'Apr'         : 'Апр',
-			'May'         : 'Май',
-			'Jun'         : 'Юни',
-			'Jul'         : 'Юли',
-			'Aug'         : 'Авг',
-			'Sep'         : 'Сеп',
-			'Oct'         : 'Окт',
-			'Nov'         : 'Ное',
-			'Dec'         : 'Дек',
+			'msJan'       : 'Яну',
+			'msFeb'       : 'Фев',
+			'msMar'       : 'Мар',
+			'msApr'       : 'Апр',
+			'msMay'       : 'Май',
+			'msJun'       : 'Юни',
+			'msJul'       : 'Юли',
+			'msAug'       : 'Авг',
+			'msSep'       : 'Сеп',
+			'msOct'       : 'Окт',
+			'msNov'       : 'Ное',
+			'msDec'       : 'Дек',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'по име (първо папките)', 
-			'sortkindDirsFirst' : 'по вид (първо папките)', 
-			'sortsizeDirsFirst' : 'по размер (първо папките)', 
-			'sortdateDirsFirst' : 'по дата (първо папките)', 
 			'sortname'          : 'по име', 
 			'sortkind'          : 'по вид', 
 			'sortsize'          : 'по размер',
 			'sortdate'          : 'по дата',
+			'sortFoldersFirst'  : 'Folders first',
 			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Изисква се подтвърждение',
@@ -217,16 +266,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Премести файлове',
 			'copyFiles'       : 'Копирай файлове',
 			'rmFromPlaces'    : 'Премахни от Места',
-			'untitled folder' : 'Неозаглавена папка',
-			'untitled file.txt' : 'неозаглавен_файл.txt',
 			'aspectRatio'     : 'Отношение',
 			'scale'           : 'Мащаб',
 			'width'           : 'Ширина',
 			'height'          : 'Височина',
-			'mode'            : 'Режим',
 			'resize'          : 'Преоразмери',
 			'crop'            : 'Отрежи',
-
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Mount network volume',
+			'protocol'        : 'Protocol',
+			'host'            : 'Host',
+			'port'            : 'Port',
+			'user'            : 'User',
+			'pass'            : 'Password',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Непознат',
@@ -306,5 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska филм',
 			'kindVideoOGG'    : 'Ogg филм'
 		}
-	}
+	};
 }
+

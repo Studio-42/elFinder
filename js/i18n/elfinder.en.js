@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2014-04-08
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -137,6 +137,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApprove': 'Goto $1 & approve', // added 26.04.2012
 			'btnUnmount': 'Unmount', // added 30.04.2012
 			'btnConv'   : 'Convert', // added 08.04.2014
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -167,18 +168,44 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dateUnknown' : 'unknown',
 			'Today'       : 'Today',
 			'Yesterday'   : 'Yesterday',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'May',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Oct',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
 			'May'         : 'May',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Oct',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : 'by name', 
@@ -347,6 +374,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska movie',
 			'kindVideoOGG'    : 'Ogg movie'
 		}
-	}
+	};
 }
 

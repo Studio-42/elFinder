@@ -1,7 +1,7 @@
 /**
  * Persian-Farsi Translation
  * @author Keyhan Mohammadpour <keyhan_universityworks@yahoo.com>
- * @version 2012-04-07
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.fa = {
@@ -20,6 +20,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNode'              : 'شی elfinder به درستی ایجاد نشده است .',
 			'errURL'               : 'تنظیمات elfinder شما به درستی انجام نشده است . تنظیم Url را به درستی انجام دهید .',
 			'errAccess'            : 'محدودیت سطح دسترسی',
+			'errConnect'           : 'Unable to connect to backend.',
 			'errAbort'             : 'ارتباط قطع شده است .',
 			'errTimeout'           : 'مهلت زمانی Connection شما به انتها رسیده ایت .',
 			'errNotFound'          : 'تنظیم Backend یافت نشد .',
@@ -49,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'قادر به تغییر نام فایل "$1" نمی باشد .',
 			'errCopyFrom'          : 'کپی نمودن از درایو با نام "$1" امکان پذیر نمی باشد .',
 			'errCopyTo'            : 'کپی نمودن به درایو با نام "$1" امکان پذیر نمی باشد .',
-			'errUploadCommon'      : 'خطای بارگذاری ',
-			'errUpload'            : 'قادر به بارگذاری "$1" نمی باشد .',
+			'errUpload'            : 'خطای بارگذاری ',
+			'errUploadFile'        : 'قادر به بارگذاری "$1" نمی باشد .',
 			'errUploadNoFiles'     : 'هیچ فایلی برای بارگذاری یافت نشد .',
-			'errMaxSize'           : 'حجم داده ها بیشتر از حد مجاز تعیین شده است .',
-			'errFileMaxSize'       : 'حجم فایل بیشتر از حد مجاز تعیین شده است .',
+			'errUploadTotalSize'   : 'حجم داده ها بیشتر از حد مجاز تعیین شده است .',
+			'errUploadFileSize'    : 'حجم فایل بیشتر از حد مجاز تعیین شده است .',
 			'errUploadMime'        : 'نوع فایل انتخابی شما مجاز نمی باشد .',
 			'errUploadTransfer'    : 'در تبادل "$1" خطایی رخ داده است .',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'قادر به دخیره کردن "$1" نمی باشد .',
 			'errCopy'              : 'قادر به کپی نمودن "$1" نمی باشد .',
 			'errMove'              : 'قادر به جابجایی "$1" نمی باشد .',
 			'errCopyInItself'      : 'قادر به کپی نمودن "$1" در درون خودش نمی باشد .',
 			'errRm'                : 'قادر به حذف نمودن "$1" نمی باشد .',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'قادر به استخراج فایل فشرده "$1" نمی باشد .',
 			'errArchive'           : 'قادر به ایجاد آرشیو نمی باشد .',
 			'errArcType'           : 'نوع ناشناخته برای آرشیو .',
@@ -70,8 +74,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'به دلایل مسائل امنیتی قادر به استخراج آرشیو های دارای symlinks نمی باشد .',
 			'errArcMaxSize'        : 'فایل های آرشیو شده به حداکثر اندازه تعیین شده رسیده اند .',
 			'errResize'            : 'قادر به تغییر اندازه "$1" نمی باشد .',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'نوع فایل شما قابل پشتیبانی نمی باشد .',
-
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',
+			'errNetMount'          : 'Unable to mount "$1".',
+			'errNetMountNoDriver'  : 'Unsupported protocol.',
+			'errNetMountFailed'    : 'Mount failed.',
+			'errNetMountHostReq'   : 'Host required.',
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'ساختن آرشیو',
 			'cmdback'      : 'قبلی',
@@ -100,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'نمایش',
 			'cmdresize'    : 'تغییر اندازه فایل',
 			'cmdsort'      : 'مرتب سازی',
+			'cmdnetmount'  : 'Mount network volume',
 
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'بستن',
@@ -109,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'انصراف',
 			'btnNo'     : 'خیر',
 			'btnYes'    : 'بلی',
+			'btnMount'  : 'Mount',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'باز نمودن پوشه',
@@ -127,25 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'در حال ساختن آرشیو',
 			'ntfextract'  : 'استخراج فایل ها از آرشیو',
 			'ntfsearch'   : 'در حال جستجو فایل ها',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'درحال انجام عملیات ....',
 			'ntfloadimg'  : 'در حال لود نمودن تصویر',
-
+			'ntfnetmount' : 'Mounting network volume',
+			'ntfdim'      : 'Acquiring image dimension',
+			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'ناشناخته',
 			'Today'       : 'امروز',
 			'Yesterday'   : 'دیروز',
-			'Jan'         : 'بهمن',
-			'Feb'         : 'اسفند',
-			'Mar'         : 'فروردین',
-			'Apr'         : 'اردیبهشت',
-			'May'         : 'خرداد',
-			'Jun'         : 'تیر',
-			'Jul'         : 'مرداد',
-			'Aug'         : 'شهریور',
-			'Sep'         : 'مهر',
-			'Oct'         : 'آبان',
-			'Nov'         : 'آذر',
-			'Dec'         : 'دی',
+			'msJan'       : 'بهمن',
+			'msFeb'       : 'اسفند',
+			'msMar'       : 'فروردین',
+			'msApr'       : 'اردیبهشت',
+			'msMay'       : 'خرداد',
+			'msJun'       : 'تیر',
+			'msJul'       : 'مرداد',
+			'msAug'       : 'شهریور',
+			'msSep'       : 'مهر',
+			'msOct'       : 'آبان',
+			'msNov'       : 'آذر',
+			'msDec'       : 'دی',
 			'January'     : 'بهمن',
 			'February'    : 'اسفند',
 			'March'       : 'فروردین',
@@ -172,15 +197,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'پنج شنبه',
 			'Fri'         : 'جمعه',
 			'Sat'         : 'شنبه',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'بر اساس نام (پوشه ها در ابتدا قرار می گیرند ) .',
-			'sortkindDirsFirst' : 'بر اساس نوع (پوشه ها در ابتدا قرار می گیرند ) .',
-			'sortsizeDirsFirst' : 'بر اساس اندازه (پوشه ها در ابتدا قرار می گیرند ) .',
-			'sortdateDirsFirst' : 'بر اساس تاریخ (پوشه ها در ابتدا قرار می گیرند ) .',
 			'sortname'          : 'بر اساس نام',
 			'sortkind'          : 'بر اساس نوع',
 			'sortsize'          : 'بر اساس اندازه',
 			'sortdate'          : 'بر اساس تاریخ',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'تاییدیه نهایی نیاز است .',
@@ -222,7 +245,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : 'راهنما',
 			'webfm'           : 'مدیر وب فایل',
 			'ver'             : 'نسخه',
-			'protocol'        : 'نسخه پروتکل',
+			'protocolver'     : 'protocol version',
 			'homepage'        : 'صفحه اصلی پروژه',
 			'docs'            : 'مستندات',
 			'github'          : 'دنبال کردن ما بر روی Github',
@@ -243,20 +266,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'انتقال فایل ها',
 			'copyFiles'       : 'کپی فایل ها',
 			'rmFromPlaces'    : 'حدف',
-			'untitled folder' : 'پوشه بدون نام',
-			'untitled file.txt' : 'فایل متنی بدون نام',
 			'aspectRatio'     : 'نسبت تصویر',
 			'scale'           : 'مقیاس',
 			'width'           : 'طول',
 			'height'          : 'ارتفاع',
-			'mode'            : 'مد',
 			'resize'          : 'تغییر اندازه',
 			'crop'            : 'بریدن',
 			'rotate'          : 'چرخاندن',
 			'rotate-cw'       : 'چرخاندن 90 درجه در جهت عقربه های ساعت',
 			'rotate-ccw'      : 'چرخاندن 90 درجه در جهت خلاف عقربه های ساعت',
 			'degree'          : 'درجه',
-
+			'netMountDialogTitle' : 'Mount network volume',
+			'protocol'        : 'نسخه پروتکل',
+			'host'            : 'Host',
+			'port'            : 'Port',
+			'user'            : 'User',
+			'pass'            : 'Password',
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindFolder'      : 'Folder',
@@ -335,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska movie',
 			'kindVideoOGG'    : 'Ogg movie'
 		}
-	}
+	};
 }

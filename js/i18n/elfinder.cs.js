@@ -1,7 +1,7 @@
 /**
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2013-07-03
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.cs = {
@@ -131,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Ano',
 			'btnMount'  : 'Mount',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otevírání složky',
 			'ntffile'     : 'Otevírání souboru',
@@ -158,18 +159,44 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dateUnknown' : 'neznámý',
 			'Today'       : 'Dnes',
 			'Yesterday'   : 'Včera',
-			'Jan'         : 'Led',
-			'Feb'         : 'Úno',
-			'Mar'         : 'Bře',
-			'Apr'         : 'Dub',
-			'May'         : 'Kvě',
-			'Jun'         : 'Čer',
-			'Jul'         : 'Čec',
-			'Aug'         : 'Srp',
-			'Sep'         : 'Zář',
-			'Oct'         : 'Říj',
-			'Nov'         : 'Lis',
-			'Dec'         : 'Pro',
+			'msJan'       : 'Led',
+			'msFeb'       : 'Úno',
+			'msMar'       : 'Bře',
+			'msApr'       : 'Dub',
+			'msMay'       : 'Kvě',
+			'msJun'       : 'Čer',
+			'msJul'       : 'Čec',
+			'msAug'       : 'Srp',
+			'msSep'       : 'Zář',
+			'msOct'       : 'Říj',
+			'msNov'       : 'Lis',
+			'msDec'       : 'Pro',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : 'dle jména',
@@ -334,6 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }
 

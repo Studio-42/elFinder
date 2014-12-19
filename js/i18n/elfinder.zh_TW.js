@@ -1,7 +1,7 @@
 /**
  * Traditional Chinese translation
  * @author Yuwei Chuang <ywchuang.tw@gmail.com>
- * @version 2013-05-07
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.zh_TW = {
@@ -74,12 +74,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : '出于安全上的考量，禁止解壓縮檔案包含不允許的檔案名稱.',
 			'errArcMaxSize'        : '壓縮檔案超過最大允許檔案大小範圍.',
 			'errResize'            : '無法重新調整大小 "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : '不支援的檔案格式.',
 			'errNotUTF8Content'    : '檔案 "$1" 不是 UTF-8 格式, 不能編輯.',  // added 9.11.2011
 			'errNetMount'          : '無法掛載 "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : '不支援該通訊協議.',     // added 17.04.2012
 			'errNetMountFailed'    : '掛載失敗.',         // added 17.04.2012
 			'errNetMountHostReq'   : '需要指定主機位置.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '建立壓縮檔案',
 			'cmdback'      : '後退',
@@ -119,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : '否',
 			'btnYes'    : '是',
 			'btnMount'  : '掛載',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : '打開資料夾',
 			'ntffile'     : '打開檔案',
@@ -140,23 +153,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : '正在忙 >_<',
 			'ntfloadimg'  : '正在讀取圖片',
       		'ntfnetmount' : '正在掛載 net volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '未知',
 			'Today'       : '今天',
 			'Yesterday'   : '昨天',
-			'Jan'         : '一月',
-			'Feb'         : '二月',
-			'Mar'         : '三月',
-			'Apr'         : '四月',
-			'May'         : '五月',
-			'Jun'         : '六月',
-			'Jul'         : '七月',
-			'Aug'         : '八月',
-			'Sep'         : '九月',
-			'Oct'         : '十月',
-			'Nov'         : '十一月',
-			'Dec'         : '十二月',
+			'msJan'       : '一月',
+			'msFeb'       : '二月',
+			'msMar'       : '三月',
+			'msApr'       : '四月',
+			'msMay'       : '五月',
+			'msJun'       : '六月',
+			'msJul'       : '七月',
+			'msAug'       : '八月',
+			'msSep'       : '九月',
+			'msOct'       : '十月',
+			'msNov'       : '十一月',
+			'msDec'       : '十二月',
 			'January'     : '一月',
 			'February'    : '二月',
 			'March'       : '三月',
@@ -183,15 +197,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : '周四', 
 			'Fri'         : '周五', 
 			'Sat'         : '周六',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : '按名稱 (資料夾在最前)', 
-			'sortkindDirsFirst' : '按類型 (資料夾在最前)', 
-			'sortsizeDirsFirst' : '按大小 (資料夾在最前)', 
-			'sortdateDirsFirst' : '按日期 (資料夾在最前)', 
 			'sortname'          : '按名稱', 
 			'sortkind'          : '按類型', 
 			'sortsize'          : '按大小',
 			'sortdate'          : '按日期',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '請確認',
@@ -254,19 +266,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : '移動檔案',
 			'copyFiles'       : '複製檔案',
 			'rmFromPlaces'    : '從位置中删除',
-			'untitled folder' : '未命名資料夾',
-			'untitled file.txt' : '未命名檔案.txt',
 			'aspectRatio'     : '保持比例',
 			'scale'           : '寬高比',
 			'width'           : '寬',
 			'height'          : '高',
-			'mode'            : '模式',
 			'resize'          : '重新調整大小',
 			'crop'            : '裁切',
 			'rotate'          : '旋轉',
 			'rotate-cw'       : '順時針旋轉90度',
 			'rotate-ccw'      : '逆時針旋轉90度',
 			'degree'          : '度',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
 			'port'            : '接口', // added 18.04.2012
 			'user'            : '使用者', // added 18.04.2012
 			'pass'            : '密碼', // added 18.04.2012
@@ -349,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska 影片',
 			'kindVideoOGG'    : 'Ogg 影片'
 		}
-	}
+	};
 }

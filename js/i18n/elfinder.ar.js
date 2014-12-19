@@ -1,13 +1,15 @@
 /**
  * Arabic translation (Syrian Localization, it may differ if you aren't from Syria or any Country in Middle East)
  * @author Tawfek Daghistani <tawfekov@gmail.com>
- * @version 2011-07-09
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ar = {
 		translator : 'Tawfek Daghistani &lt;tawfekov@gmail.com&gt;',
 		language   : 'العربية',
 		direction  : 'rtl',
+		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -48,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'غير قادر على إعادة تسمية ال  "$1".',
 			'errCopyFrom'          : 'نسخ الملفات من الوسط المحدد "$1"غير مسموح.',
 			'errCopyTo'            : 'نسخ الملفات إلى الوسط المحدد "$1" غير مسموح .',
-			'errUploadCommon'      : 'خطأ أثناء عملية الرفع',
-			'errUpload'            : 'غير قادر على رفع "$1".',
+			'errUpload'            : 'خطأ أثناء عملية الرفع',
+			'errUploadFile'        : 'غير قادر على رفع "$1".',
 			'errUploadNoFiles'     : 'لم يتم رفع أي ملف ',
-			'errMaxSize'           : 'حجم البيانات أكبر من الحجم المسموح به ',
-			'errFileMaxSize'       : 'حجم الملف أكبر من الحجم المسموح به',
+			'errUploadTotalSize'   : 'حجم البيانات أكبر من الحجم المسموح به ',
+			'errUploadFileSize'    : 'حجم الملف أكبر من الحجم المسموح به',
 			'errUploadMime'        : 'نوع ملف غير مسموح ',
 			'errUploadTransfer'    : '"$1" خطأ أثناء عملية النقل', 
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'غير قادر على الحفظ في  "$1".',
 			'errCopy'              : 'غير قادر على النسخ إلى"$1".',
 			'errMove'              : 'غير قادر على القص إلى "$1".',
 			'errCopyInItself'      : 'غير قادر على نسخ الملف "$1" ضمن الملف نفسه.',
 			'errRm'                : 'غير قادر على الحذف "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'غير قادر على استخراج الملفات من  "$1".',
 			'errArchive'           : 'غير قادر على إنشاء ملف  مضغوط',
 			'errArcType'           : 'نوع الملف المضغوط غير مدعومة',
@@ -68,6 +73,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
 			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks.',
 			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errResize'            : 'Unable to resize "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
+			'errUsupportType'      : 'Unsupported file type.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',
+			'errNetMount'          : 'Unable to mount "$1".',
+			'errNetMountNoDriver'  : 'Unsupported protocol.',
+			'errNetMountFailed'    : 'Mount failed.',
+			'errNetMountHostReq'   : 'Host required.',
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'أنشئ مجلد مضغوط',
@@ -95,14 +118,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'تغيير المسار إلى مستوى أعلى',
 			'cmdupload'    : 'رفع ملفات',
 			'cmdview'      : 'عرض',
+			'cmdresize'    : 'Resize & Rotate',
+			'cmdsort'      : 'Sort',
+			'cmdnetmount'  : 'Mount network volume',
 
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'إغلاق',
 			'btnSave'   : 'حفظ',
 			'btnRm'     : 'إزالة',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'إلغاء',
 			'btnNo'     : 'لا',
 			'btnYes'    : 'نعم',
+			'btnMount'  : 'Mount',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'فتح مجلد',
@@ -121,24 +149,61 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'ينشئ ملف مضغوط',
 			'ntfextract'  : 'استخراج ملفات من الملف المضغوط ',
 			'ntfsearch'   : 'يبحث عن ملفات',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'يحضر لشيء ما >_<',
+			'ntfloadimg'  : 'Loading image',
+			'ntfnetmount' : 'Mounting network volume',
+			'ntfdim'      : 'Acquiring image dimension',
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'غير معلوم',
 			'Today'       : 'اليوم',
 			'Yesterday'   : 'البارحة',
-			'Jan'         : 'كانون الثاني',
-			'Feb'         : 'شباط',
-			'Mar'         : 'آذار',
-			'Apr'         : 'نيسان',
-			'May'         : 'أيار',
-			'Jun'         : 'حزيران',
-			'Jul'         : 'تموز',
-			'Aug'         : 'آب',
-			'Sep'         : 'أيلول',
-			'Oct'         : 'تشرين الأول',
-			'Nov'         : 'تشرين الثاني',
-			'Dec'         : 'كانون الأول ',
+			'msJan'       : 'كانون الثاني',
+			'msFeb'       : 'شباط',
+			'msMar'       : 'آذار',
+			'msApr'       : 'نيسان',
+			'msMay'       : 'أيار',
+			'msJun'       : 'حزيران',
+			'msJul'       : 'تموز',
+			'msAug'       : 'آب',
+			'msSep'       : 'أيلول',
+			'msOct'       : 'تشرين الأول',
+			'msNov'       : 'تشرين الثاني',
+			'msDec'       : 'كانون الأول ',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
+
+			/******************************** sort variants ********************************/
+			'sortname'         : 'by name',
+			'sortkind'         : 'by kind',
+			'sortsize'         : 'by size',
+			'sortdate'         : 'by date',
+			'sortFoldersFirst' : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'يرجى التأكيد',
@@ -201,8 +266,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'قص الملفات',
 			'copyFiles'       : 'نسخ الملفات',
 			'rmFromPlaces'    : 'Remove from places',
-			'untitled folder' : 'untitled folder',
-			'untitled file.txt' : 'untitled file.txt',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Scale',
+			'width'           : 'Width',
+			'height'          : 'Height',
+			'resize'          : 'Resize',
+			'crop'            : 'Crop',
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Mount network volume',
+			'protocol'        : 'Protocol',
+			'host'            : 'Host',
+			'port'            : 'Port',
+			'user'            : 'User',
+			'pass'            : 'Password',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'غير معروف',
@@ -253,7 +332,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindCSV'         : 'ملف CSV',
 			'kindDOCBOOK'     : 'Docbook XML ملف',
 			// images
-			'kindصورة'       : 'صورة',
+			'kindImage'       : 'صورة',
 			'kindBMP'         : 'BMP صورة',
 			'kindJPEG'        : 'JPEG صورة',
 			'kindGIF'         : 'GIF صورة',
@@ -282,9 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska ملف فيديو',
 			'kindVideoOGG'    : 'Ogg ملف فيديو'
 		}
-	}
+	};
 }
-
-
- 
 

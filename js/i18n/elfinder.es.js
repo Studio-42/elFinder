@@ -2,13 +2,15 @@
  * Spanish translation
  * @author Julián Torres <julian.torres@pabernosmatao.com>
  * @author Julio Montoya <gugli100@gmail.com> - Fixing typos
- * @version 2013-05-08
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.es = {
 		translator : 'Julián Torres &lt;julian.torres@pabernosmatao.com&gt;',
 		language   : 'Español internacional',
 		direction  : 'ltr',
+		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -49,18 +51,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'No se puede renombrar "$1".',
 			'errCopyFrom'          : 'No se permite copiar archivos desde el volumen "$1".',
 			'errCopyTo'            : 'No se permite copiar archivos al volumen "$1".',
-			'errUploadCommon'      : 'Error en el envio.',
-			'errUpload'            : 'No se puede subir "$1".',
+			'errUpload'            : 'Error en el envio.',
+			'errUploadFile'        : 'No se puede subir "$1".',
 			'errUploadNoFiles'     : 'No hay archivos para subir.',
-			'errMaxSize'           : 'El tamaño de los datos excede el máximo permitido.',
-			'errFileMaxSize'       : 'El tamaño del archivo excede el máximo permitido.',
+			'errUploadTotalSize'   : 'El tamaño de los datos excede el máximo permitido.',
+			'errUploadFileSize'    : 'El tamaño del archivo excede el máximo permitido.',
 			'errUploadMime'        : 'Tipo de archivo no permitido.',
-			'errUploadTransfer'    : 'Error al transferir "$1".', 
+			'errUploadTransfer'    : 'Error al transferir "$1".',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'No se puede guardar "$1".',
 			'errCopy'              : 'No se puede copiar "$1".',
 			'errMove'              : 'No se puede mover "$1".',
 			'errCopyInItself'      : 'No se puede copiar "$1" en si mismo.',
 			'errRm'                : 'No se puede borrar "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'No se puede extraer archivos desde "$1".',
 			'errArchive'           : 'No se puede crear el archivo.',
 			'errArcType'           : 'Tipo de archivo no soportado.',
@@ -69,7 +74,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errReplByChild'       : 'La carpeta “$1” no puede ser reemplazada por un elemento contenido en ella.',
 			'errArcSymlinks'       : 'Por razones de seguridad no se pueden descomprimir archivos que contengan symlinks.',
 			'errArcMaxSize'        : 'El tamaño del archivo excede el máximo permitido.',
-
+			'errResize'            : 'Unable to resize "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
+			'errUsupportType'      : 'Unsupported file type.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',
+			'errNetMount'          : 'Unable to mount "$1".',
+			'errNetMountNoDriver'  : 'Unsupported protocol.',
+			'errNetMountFailed'    : 'Mount failed.',
+			'errNetMountHostReq'   : 'Host required.',
 			'errSessionExpires'    : 'La sesión ha expirado por inactividad',
 			'errCreatingTempDir'   : 'No se ha podido crear al directorio temporal: "$1"',
 			'errFtpDownloadFile'   : 'No se ha podido descargar el archivo desde FTP: "$1"',
@@ -111,14 +126,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ir a la carpeta raíz',
 			'cmdupload'    : 'Subir archivos',
 			'cmdview'      : 'Ver',
+			'cmdresize'    : 'Resize & Rotate',
+			'cmdsort'      : 'Sort',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Cerrar',
 			'btnSave'   : 'Guardar',
 			'btnRm'     : 'Eliminar',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'Cancelar',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Sí',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Abrir carpeta',
@@ -137,25 +157,54 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Creando archivo',
 			'ntfextract'  : 'Extrayendo elementos del archivo',
 			'ntfsearch'   : 'Buscando archivos',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Haciendo algo',
 			'ntfloadimg'  : 'Cargando imagen',
+			'ntfnetmount' : 'Mounting network volume',
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'desconocida',
 			'Today'       : 'Hoy',
 			'Yesterday'   : 'Ayer',
-			'Jan'         : 'Ene',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Abr',
+			'msJan'       : 'Ene',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Abr',
+			'msMay'       : 'May',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Ago',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Oct',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dic',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
 			'May'         : 'May',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Ago',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Oct',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dic',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Se necesita confirmación',
@@ -218,11 +267,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Mover archivos',
 			'copyFiles'       : 'Copiar archivos',
 			'rmFromPlaces'    : 'Eliminar en sus ubicaciones',
-			'untitled folder' : 'carpeta sin título',
-			'untitled archivo.txt' : 'archivo.txt sin título',
-      'mode'            : 'Modo',
-      'resize'          : 'Redimensionar',
-      'crop'            : 'Recortar',
+			'aspectRatio'     : 'Aspect ratio',
+			'scale'           : 'Scale',
+			'width'           : 'Width',
+			'height'          : 'Height',
+			'resize'          : 'Redimensionar',
+			'crop'            : 'Recortar',
+			'rotate'          : 'Rotate',
+			'rotate-cw'       : 'Rotate 90 degrees CW',
+			'rotate-ccw'      : 'Rotate 90 degrees CCW',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Mount network volume',
+			'protocol'        : 'Protocol',
+			'host'            : 'Host',
+			'port'            : 'Port',
+			'user'            : 'User',
+			'pass'            : 'Password',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconocido',
@@ -302,6 +362,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Película Matroska MKV',
 			'kindVideoOGG'    : 'Película Ogg'
 		}
-	}
+	};
 }
 

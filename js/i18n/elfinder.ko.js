@@ -1,7 +1,7 @@
 /**
  * Korean translation
  * @author Hwang Ahreum 황아름 <luckmagic@naver.com>
- * @version 2012-06-27
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ko = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : ' "$1" 이름을 변경할 수 없습니다',
 			'errCopyFrom'          : '볼률 "$1" 로부터 파일을 복사할 수 없습니다',
 			'errCopyTo'            : '볼률 "$1" 에 파일을 복사할 수 없습니다',
-			'errUploadCommon'      : '업로드 에러',
-			'errUpload'            : ' "$1" 업로드할 수 없습니다',
+			'errUpload'            : '업로드 에러',
+			'errUploadFile'        : ' "$1" 업로드할 수 없습니다',
 			'errUploadNoFiles'     : '업로드할 파일이 없습니다',
-			'errMaxSize'           : '데이터가 허용된 최대크기를 초과하였습니다',
-			'errFileMaxSize'       : '파일이 허용된 최대크기를 초과하였습니다',
+			'errUploadTotalSize'   : '데이터가 허용된 최대크기를 초과하였습니다',
+			'errUploadFileSize'    : '파일이 허용된 최대크기를 초과하였습니다',
 			'errUploadMime'        : '잘못된 파일형식입니다',
-			'errUploadTransfer'    : ' "$1" 전송 에러', 
+			'errUploadTransfer'    : ' "$1" 전송 에러',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : ' "$1" 저장할 수 없습니다',
 			'errCopy'              : ' "$1" 복사할 수 없습니다',
 			'errMove'              : ' "$1" 이동할 수 없습니다',
 			'errCopyInItself'      : ' "$1" 이곳에 복사 할 수 없습니다',
 			'errRm'                : ' "$1" 이름을 변경할 수 없습니다',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : ' "$1" 에 압축을 풀 수 없습니다',
 			'errArchive'           : '압축파일을 생성할 수 없습니다',
 			'errArcType'           : '지원하지 않는 압축파일 형식입니다',
@@ -71,7 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : '보안을 위해 시스템 호출을 포함한 압축파일인지를 분석합니다',
 			'errArcMaxSize'        : '압축파일이 허용된 최대크기를 초과하였습니다',
 			'errResize'            : ' "$1" 크기 변경을 할 수 없습니다',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : '지원하지 않는 파일 형식',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '압축파일생성',
@@ -101,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : '보기',
 			'cmdresize'    : '이미지 사이즈변경',
 			'cmdsort'      : '정렬',
+			'cmdnetmount'  : 'Mount network volume',
 
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '닫기',
@@ -110,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : '취소',
 			'btnNo'     : '아니오',
 			'btnYes'    : '예',
+			'btnMount'  : 'Mount',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : '폴더 열기',
@@ -128,25 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : '압축파일만들기',
 			'ntfextract'  : '압축풀기',
 			'ntfsearch'   : '검색',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : '작업중 >_<',
 			'ntfloadimg'  : '이미지 불러오기',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 
 			/************************************ dates **********************************/
 			'dateUnknown' : '알수없음',
 			'Today'       : '오늘',
 			'Yesterday'   : '내일',
-			'Jan'         : '1월',
-			'Feb'         : '2월',
-			'Mar'         : '3월',
-			'Apr'         : '4월',
-			'May'         : '5월',
-			'Jun'         : '6월',
-			'Jul'         : '7월',
-			'Aug'         : '8월',
-			'Sep'         : '9월',
-			'Oct'         : '10월',
-			'Nov'         : '11월',
-			'Dec'         : '12월',
+			'msJan'       : '1월',
+			'msFeb'       : '2월',
+			'msMar'       : '3월',
+			'msApr'       : '4월',
+			'msMay'       : '5월',
+			'msJun'       : '6월',
+			'msJul'       : '7월',
+			'msAug'       : '8월',
+			'msSep'       : '9월',
+			'msOct'       : '10월',
+			'msNov'       : '11월',
+			'msDec'       : '12월',
 			'January'     : '1월',
 			'February'    : '2월',
 			'March'       : '3월',
@@ -173,15 +197,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : '목', 
 			'Fri'         : '금', 
 			'Sat'         : '토',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : '이름 (폴더 먼저)', 
-			'sortkindDirsFirst' : '종류 (폴더 먼저)', 
-			'sortsizeDirsFirst' : '크기 (폴더 먼저)', 
-			'sortdateDirsFirst' : '날짜 (폴더 먼저)', 
 			'sortname'          : '이름', 
 			'sortkind'          : '종류', 
 			'sortsize'          : '크기',
 			'sortdate'          : '날짜',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '확인',
@@ -223,7 +245,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'help'            : '도움말',
 			'webfm'           : '웹 파일매니저',
 			'ver'             : '버전',
-			'protocol'        : '프로토콜 버전',
+			'protocolver'     : '프로토콜 버전',
 			'homepage'        : '홈페이지',
 			'docs'            : '문서',
 			'github'          : 'Fork us on Github',
@@ -244,19 +266,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : '파일 이동',
 			'copyFiles'       : '파일 복사',
 			'rmFromPlaces'    : '현재 폴더에서 삭제하기',
-			'untitled folder' : '새 폴더',
-			'untitled file.txt' : '새 텍스트.txt',
 			'aspectRatio'     : '화면비율',
 			'scale'           : '크기',
 			'width'           : '가로',
 			'height'          : '세로',
-			'mode'            : '모드',
 			'resize'          : '사이즈 변경',
 			'crop'            : '자르기',
 			'rotate'          : '회전',
 			'rotate-cw'       : '반시계방향 90도 회전',
 			'rotate-ccw'      : '시계방향 90도 회전',
 			'degree'          : '각도',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '알수없음',
@@ -336,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska 동영상',
 			'kindVideoOGG'    : 'Ogg 동영상'
 		}
-	}
+	};
 }

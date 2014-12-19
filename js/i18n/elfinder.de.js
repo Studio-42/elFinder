@@ -2,7 +2,7 @@
  * German translation
  * @author JPG & Mace <dev@flying-datacenter.de>
  * @author tora60 from pragmaMx.org
- * @version 2013-05-01
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.de = {
@@ -75,6 +75,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Aus Sicherheitsgründen ist es verboten, ein Archiv mit symbolischen Links zu extrahieren.',
 			'errArcMaxSize'        : 'Die Archiv Dateien übersteigen die maximal erlaubte Größe.',
 			'errResize'            : 'Größe von "$1" kann nicht geändert werden.',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Nicht unterstützter Dateityp.',
 			'errNotUTF8Content'    : 'Die Datei "$1" ist nicht im UTF-8 Format und kann nicht editiert werden.',
 			'errNetMount'          : 'Verbindung mit "$1" nicht möglich.',
@@ -128,6 +132,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nein',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Verbinden',
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'öffne Ordner',
 			'ntffile'     : 'öffne Datei',
@@ -149,23 +154,50 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Bin beschäftigt',
 			'ntfloadimg'  : 'Bild laden',
 			'ntfnetmount' : 'Mit Netzwerkspeicher verbinden',
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unbekannt',
 			'Today'       : 'Heute',
 			'Yesterday'   : 'Gestern',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mär',
-			'Apr'         : 'Apr',
-			'May'         : 'Mai',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dez',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mär',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Mai',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dez',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
 			'sortname'         : 'nach Name',
@@ -230,7 +262,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dontforget'      : 'und vergiss dein Handtuch nicht',
 			'shortcutsof'     : 'Tastenkombinationen deaktiviert',
 			'dropFiles'       : 'Dateien hier ablegen',
-			'dropFilesBrowser': 'Verschieben oder Einfügen von Dateien aus dem Browser',
 			'or'              : 'oder',
 			'selectForUpload' : 'Dateien zum Upload auswählen',
 			'moveFiles'       : 'Dateien verschieben',
@@ -331,5 +362,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska Film',
 			'kindVideoOGG'    : 'Ogg Film'
 		}
-	}
+	};
 }

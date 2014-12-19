@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2014-04-08
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -138,6 +138,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApprove': '$1へ行き認可する', // added 26.04.2012
 			'btnUnmount': 'アンマウント', // added 30.04.2012
 			'btnConv'   : '変換', // added 08.04.2014
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',
 			'ntffile'     : 'ファイルを開いています',
@@ -168,18 +169,44 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dateUnknown' : '不明',
 			'Today'       : '今日',
 			'Yesterday'   : '昨日',
-			'Jan'         : '1月',
-			'Feb'         : '2月',
-			'Mar'         : '3月',
-			'Apr'         : '4月',
+			'msJan'       : '1月',
+			'msFeb'       : '2月',
+			'msMar'       : '3月',
+			'msApr'       : '4月',
+			'msMay'       : '5月',
+			'msJun'       : '6月',
+			'msJul'       : '7月',
+			'msAug'       : '8月',
+			'msSep'       : '9月',
+			'msOct'       : '10月',
+			'msNov'       : '11月',
+			'msDec'       : '12月',
+			'January'     : '1月',
+			'February'    : '2月',
+			'March'       : '3月',
+			'April'       : '4月',
 			'May'         : '5月',
-			'Jun'         : '6月',
-			'Jul'         : '7月',
-			'Aug'         : '8月',
-			'Sep'         : '9月',
-			'Oct'         : '10月',
-			'Nov'         : '11月',
-			'Dec'         : '12月',
+			'June'        : '6月',
+			'July'        : '7月',
+			'August'      : '8月',
+			'September'   : '9月',
+			'October'     : '10月',
+			'November'    : '11月',
+			'December'    : '12月',
+			'Sunday'      : '日曜日',
+			'Monday'      : '月曜日',
+			'Tuesday'     : '火曜日',
+			'Wednesday'   : '水曜日',
+			'Thursday'    : '木曜日',
+			'Friday'      : '金曜日',
+			'Saturday'    : '土曜日',
+			'Sun'         : '(日)', 
+			'Mon'         : '(月)', 
+			'Tue'         : '(火)', 
+			'Wed'         : '(水)', 
+			'Thu'         : '(木)', 
+			'Fri'         : '(金)', 
+			'Sat'         : '(土)',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : '名前順', 

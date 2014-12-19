@@ -1,7 +1,7 @@
 /**
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2013-7-24
+ * @version 2013-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sk = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Nie je možné premenovať "$1".',
 			'errCopyFrom'          : 'Kopírovanie súborov z média "$1" nie je povolené.',
 			'errCopyTo'            : 'Kopírovanie súborov na médium "$1" nie je povolené.',
-			'errUploadCommon'      : 'Problém s nahrávaním.',
-			'errUpload'            : 'Nie je možné nahrať "$1".',
+			'errUpload'            : 'Problém s nahrávaním.',
+			'errUploadFile'        : 'Nie je možné nahrať "$1".',
 			'errUploadNoFiles'     : 'Žiadne súbory neboli nájdené na nahranie.',
-			'errMaxSize'           : 'Dáta prekračujú maximálnu povolenú veľkosť.',
-			'errFileMaxSize'       : 'Súbor prekračuje maximálnu povolenú veľkosť.',
+			'errUploadTotalSize'   : 'Dáta prekračujú maximálnu povolenú veľkosť.',
+			'errUploadFileSize'    : 'Súbor prekračuje maximálnu povolenú veľkosť.',
 			'errUploadMime'        : 'Nepovolený typ súboru.',
-			'errUploadTransfer'    : 'Problém s nahrávaním "$1".', 
+			'errUploadTransfer'    : 'Problém s nahrávaním "$1".',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Nie je možné uložiť "$1".',
 			'errCopy'              : 'Nie je možné kopíropvať "$1".',
 			'errMove'              : 'Nie je možné preniesť "$1".',
 			'errCopyInItself'      : 'Nie je možné kopírovať "$1" do seba.',
 			'errRm'                : 'Nie je možné vymazať "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Nie je možné extrahovať súbory z "$1".',
 			'errArchive'           : 'Nie je možné vytvoriť archív.',
 			'errArcType'           : 'Nepodporovaný typ archívu.',
@@ -71,12 +74,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými menami.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Súbory archívu prekračujú maximálnu povolenú veľkosť.',
 			'errResize'            : 'Nie je možné zmeniť veľkost "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Nepodporovaný typ súboru.',
 			'errNotUTF8Content'    : 'Súbor "$1" nemá obsah kódovaný v UTF-8, a nemôže byť upravený.',  // added 9.11.2011
 			'errNetMount'          : 'Nie je možné pripojiť "$1".',     // added 17.04.2012
 			'errNetMountNoDriver'  : 'Nepodporovaný protokol.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Pripájanie zlyhalo.',             // added 17.04.2012
 			'errNetMountHostReq'   : 'Host je požadovaný.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvoriť archív',
 			'cmdback'      : 'Späť',
@@ -105,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Pozrieť',
 			'cmdresize'    : 'Zmeniť veľkosť obrázku',
 			'cmdsort'      : 'Zoradiť',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Zavrieť',
@@ -114,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Zrušiť',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Áno',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otváranie priečinka',
@@ -132,26 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Vytváranie archívu',
 			'ntfextract'  : 'Extrahovanie súborov z archívu',
 			'ntfsearch'   : 'Prehľadávanie súborov',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Nejaká činnosť >_<',
 			'ntfloadimg'  : 'Nahrávanie obrázka',
 			'ntfnetmount' : 'Pripájanie sieťového média', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'neznámy',
 			'Today'       : 'Dnes',
 			'Yesterday'   : 'Včera',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Maj',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Júl',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Maj',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Júl',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Január',
 			'February'    : 'Február',
 			'March'       : 'Marec',
@@ -178,6 +197,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Štv', 
 			'Fri'         : 'Pia', 
 			'Sat'         : 'Sob',
+			
 			/******************************** sort variants ********************************/
 			'sortname'          : 'podľa mena', 
 			'sortkind'          : 'podľa druhu', 
@@ -246,13 +266,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Premiestniť súbory',
 			'copyFiles'       : 'Kopírovať súbory',
 			'rmFromPlaces'    : 'Odstrániť z umiestnení',
-			'untitled folder' : 'nepomenovaný priečinok',
-			'untitled file.txt' : 'untitled file.txt',
 			'aspectRatio'     : 'Pomer zobrazenia',
 			'scale'           : 'Mierka',
 			'width'           : 'Šírka',
 			'height'          : 'Výška',
-			'mode'            : 'Mód',
 			'resize'          : 'Zmeniť veľkosť',
 			'crop'            : 'Zrezať',
 			'rotate'          : 'Otočiť',
@@ -265,6 +282,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Užívateľ', // added 18.04.2012
 			'pass'                : 'Heslo', // added 18.04.2012
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
 			'kindFolder'      : 'Priečinok',
@@ -343,6 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }
-

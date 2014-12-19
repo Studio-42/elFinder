@@ -1,14 +1,7 @@
 /**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
- 
-/**
  * Danish translation
  * @author Mark Topper (webman.io)
- * @version 2014-04-10
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.da = {
@@ -57,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Kunne ikke omdøbe "$1".',
 			'errCopyFrom'          : 'Kopiering af filer fra volumen "$1" er ikke tilladt.',
 			'errCopyTo'            : 'Kopiering af filer til volumen "$1" er ikke tilladt.',
-			'errUploadCommon'      : 'Upload fejl.',
-			'errUpload'            : 'Kunne ikke uploade "$1".',
+			'errUpload'            : 'Upload fejl.',
+			'errUploadFile'        : 'Kunne ikke uploade "$1".',
 			'errUploadNoFiles'     : 'Ingen filer fundet til upload.',
-			'errMaxSize'           : 'Dataen overskrider den maksimalt tilladte størrelse.',
-			'errFileMaxSize'       : 'Fil overskrider den maksimalt tilladte størrelse.',
+			'errUploadTotalSize'   : 'Dataen overskrider den maksimalt tilladte størrelse.',
+			'errUploadFileSize'    : 'Fil overskrider den maksimalt tilladte størrelse.',
 			'errUploadMime'        : 'Fil type ikke godkendt.',
-			'errUploadTransfer'    : '"$1" overførsels fejl.', 
+			'errUploadTransfer'    : '"$1" overførsels fejl.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Kunne ikke gemme "$1".',
 			'errCopy'              : 'Kunne ikke kopier "$1".',
 			'errMove'              : 'Kunne ikke flytte "$1".',
 			'errCopyInItself'      : 'Kunne ikke kopier "$1" ind i sig selv.',
 			'errRm'                : 'Kunne ikke slette "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Kunne ikke udpakke filer fra "$1".',
 			'errArchive'           : 'Kunne ikke oprette arkiv.',
 			'errArcType'           : 'Arkiv typen er ikke understøttet.',
@@ -78,12 +74,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Af sikkerhedsmæssige årsager nægtede at udpakke arkiver der indeholder symlinks eller filer med ikke tilladte navne.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Arkivfiler overskrider den maksimalt tilladte størrelse.',
 			'errResize'            : 'Kunne ikke ændre størrelsen på "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Ikke-understøttet fil type.',
 			'errNotUTF8Content'    : 'Filen "$1" er ikke i UTF-8 og kan ikke blive redigeret.',  // added 9.11.2011
 			'errNetMount'          : 'Kunne ikke mounte "$1".',     // added 17.04.2012
 			'errNetMountNoDriver'  : 'Ikke-understøttet protocol.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Mount mislykkedes.',             // added 17.04.2012
 			'errNetMountHostReq'   : 'Host krævet.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Lav arkiv',
 			'cmdback'      : 'Tilbage',
@@ -112,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Vis',
 			'cmdresize'    : 'Ændre størrelse',
 			'cmdsort'      : 'Sorter',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Luk',
@@ -121,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Annuler',
 			'btnNo'     : 'Nej',
 			'btnYes'    : 'Ja',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Åben mappe',
@@ -139,26 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Opretter arkiv',
 			'ntfextract'  : 'Udpakker filer fra arkiv',
 			'ntfsearch'   : 'Søger filer',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Gør noget >_<',
 			'ntfloadimg'  : 'Loader billede',
 			'ntfnetmount' : 'Montere netværks volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Ukendt',
 			'Today'       : 'I dag',
 			'Yesterday'   : 'I går',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Maj',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Maj',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Januar',
 			'February'    : 'Februar',
 			'March'       : 'Marts',
@@ -185,6 +197,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Tor', 
 			'Fri'         : 'Fre', 
 			'Sat'         : 'Lør',
+			
 			/******************************** sort variants ********************************/
 			'sortname'          : 'efter navn', 
 			'sortkind'          : 'efter type', 
@@ -253,13 +266,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Flyt filer',
 			'copyFiles'       : 'Kopier filer',
 			'rmFromPlaces'    : 'Slet fra placering',
-			'untitled folder' : 'unavngivet mappe',
-			'untitled file.txt' : 'unavngivet fil.txt',
 			'aspectRatio'     : 'Skærmformat',
 			'scale'           : 'Skala',
 			'width'           : 'Bredte',
 			'height'          : 'Højde',
-			'mode'            : 'Tilstand',
 			'resize'          : 'Ændre størrelse',
 			'crop'            : 'Beskær',
 			'rotate'          : 'Roter',
@@ -272,6 +282,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Bruger', // added 18.04.2012
 			'pass'                : 'Kodeord', // added 18.04.2012
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Ukendt',
 			'kindFolder'      : 'Mappe',
@@ -350,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }

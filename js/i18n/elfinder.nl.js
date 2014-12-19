@@ -1,7 +1,7 @@
 /**
  * Dutch translation
  * @author Barry vd. Heuvel <barry@fruitcakestudio.nl>
- * @version 2014-11-26
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.nl = {
@@ -64,6 +64,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMove'              : 'Kan "$1" niet verplaatsen.',
 			'errCopyInItself'      : 'Kan "$1" niet in zichzelf kopiëren.',
 			'errRm'                : 'Kan "$1" niet verwijderen.',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Kan de bestanden van "$1" niet uitpakken.',
 			'errArchive'           : 'Kan het archief niet maken.',
 			'errArcType'           : 'Archief type is niet ondersteund.',
@@ -90,8 +91,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Kan het externe map niet aanmaken op de FTP-server: "$1"',
 			'errArchiveExec'       : 'Er is een fout opgetreden bij het archivering van de bestanden: "$1" ',
 			'errExtractExec'       : 'Er is een fout opgetreden bij het uitpakken van de bestanden: "$1" ',
-			'errNetUnMount'        : 'Kan niet mounten', 
-			'errConvUTF8'          : 'Kan niet converteren naar UTF-8',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
@@ -122,7 +121,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Formaat wijzigen',
 			'cmdsort'      : 'Sorteren',
 			'cmdnetmount'  : 'Mount netwerk volume',
-			'cmdnetunmount': 'Unmount',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Sluit',
@@ -133,9 +131,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Mount',
-			'btnApprove': 'Ga naar $1 & keur goed',
-			'btnUnmount': 'Unmount',
-			'btnConv'   : 'Converteer',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Bezig met openen van map',
@@ -154,30 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Archief aan het maken',
 			'ntfextract'  : 'Bestanden uitpakken actief',
 			'ntfsearch'   : 'Zoeken naar bestanden',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Iets aan het doen',
 			'ntfloadimg'  : 'Laden van plaatje',
 			'ntfnetmount' : 'Mounten van netwerk volume',
-			'ntfnetunmount': 'Unmounten van netwerk volume',
 			'ntfdim'      : 'Opvragen afbeeldingen dimensies',
-			'ntfreaddir'  : 'Map informatie inlezen',
-			'ntfurl'      : 'URL van link ophalen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
 			'Today'       : 'Vandaag',
 			'Yesterday'   : 'Gisteren',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Mei',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Mei',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Januari',
 			'February'    : 'Februari',
 			'March'       : 'Maart',
@@ -273,13 +266,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Verplaats bestanden',
 			'copyFiles'       : 'Kopieer bestanden',
 			'rmFromPlaces'    : 'Verwijder uit Plaatsen',
-			'untitled folder' : 'Nieuwe map',
-			'untitled file.txt' : 'nieuw bestand.txt',
 			'aspectRatio'     : 'Aspect ratio',
 			'scale'           : 'Schaal',
 			'width'           : 'Breedte',
 			'height'          : 'Hoogte',
-			'mode'		  : 'Modus',
 			'resize'	  : 'Verkleinen', //Or: Vergroten/verkleinen
 			'crop'		  : 'Bijsnijden',
 			'rotate'	  : 'Draaien',
@@ -292,9 +282,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'            : 'Poort',
 			'user'            : 'Gebruikersnaams', 
 			'pass'            : 'Wachtwoord', 
-			'confirmUnmount'  : 'Weet u zeker dat u $1 wil unmounten?',
-			'dropFilesBrowser': 'Sleep of plak bestanden vanuit de browser',
-			'dropPasteFiles'  : 'Sleep of plak bestanden hier',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',
@@ -374,6 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }
 

@@ -1,7 +1,7 @@
 /**
  * Brazilian Portuguese translation
  * @author Leandro Carvalho <contato@leandrowebdev.net>
- * @version 2013-01-22
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pt_BR = {
@@ -50,23 +50,35 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Incapaz de renomear "$1".',
 			'errCopyFrom'          : 'Copia dos arquivos do volume "$1" não permitida.',
 			'errCopyTo'            : 'Copia dos arquivos para o volume "$1" não permitida.',
-			'errUploadCommon'      : 'Erro no upload.',
-			'errUpload'            : 'Incapaz de fazer o upload de "$1".',
+			'errUpload'            : 'Erro no upload.',
+			'errUploadFile'        : 'Não foi possível fazer o upload "$1".',
 			'errUploadNoFiles'     : 'Não foi encontrado nenhum arquivo para upload.',
-			'errMaxSize'           : 'Os dados excedem o tamanho máximo permitido.',
-			'errFileMaxSize'       : 'Arquivo excede o tamanho máximo permitido.',
+			'errUploadTotalSize'   : 'Os dados excedem o tamanho máximo permitido.',
+			'errUploadFileSize'    : 'Arquivo excede o tamanho máximo permitido.',
 			'errUploadMime'        : 'Tipo de arquivo não permitido.',
-			'errUploadTransfer'    : '"$1" erro na transferência.', 
+			'errUploadTransfer'    : '"$1" erro na transferência.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Incapaz de salvar "$1".',
 			'errCopy'              : 'Incapaz de copiar "$1".',
 			'errMove'              : 'Incapaz de mover "$1".',
 			'errCopyInItself'      : 'Incapaz de copiar "$1" nele mesmo.',
 			'errRm'                : 'Incapaz de remover "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Incapaz de extrair os arquivos de "$1".',
 			'errArchive'           : 'Incapaz de criar o arquivo.',
 			'errArcType'           : 'Tipo de arquivo não suportado.',
 			'errNoArchive'         : 'Arquivo inválido ou é um tipo sem suporte.',
 			'errCmdNoSupport'      : 'Backend não suporta este comando.',
+			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
+			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
+			'errResize'            : 'Unable to resize "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
+			'errResizeRotate'      : 'Image dose not rotated.',  // added 7.3.2013
+			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
+			'errUsupportType'      : 'Unsupported file type.',
 			'errNotUTF8Content'    : 'Arquivo "$1" não está em UTF-8 e não pode ser editado.',  // added 9.11.2011
 			'errNetMount'          : 'Habilitar montagem "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Protocolo não suportado.',     // added 17.04.2012
@@ -79,13 +91,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Não foi possível criar um diretório remoto no FTP: "$1"',
 			'errArchiveExec'       : 'Erro no arquivamento: "$1"',
 			'errExtractExec'       : 'Erro na extração dos arquivos: "$1"',
-			'cmdsort'              : 'Ordenar',
-			'sortkind'             : 'por tipo',
-			'sortname'             : 'por nome',
-			'sortsize'             : 'por tamanho',
-			'sortdate'             : 'por data',
-			'sortFoldersFirst'     : 'Pastas primeiro',
-			'errUploadFile'        : 'Não foi possível fazer o upload "$1".',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Criar arquivo',
@@ -121,6 +126,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnClose'  : 'Fechar',
 			'btnSave'   : 'Salvar',
 			'btnRm'     : 'Remover',
+			'btnApply'  : 'Apply',
 			'btnCancel' : 'Cancelar',
 			'btnNo'     : 'Não',
 			'btnYes'    : 'Sim',
@@ -143,26 +149,54 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Criando os arquivos',
 			'ntfextract'  : 'Extraindo arquivos',
 			'ntfsearch'   : 'Procurando arquivos',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Fazendo alguma coisa',
+			'ntfloadimg'  : 'Loading image',
 			'ntfnetmount' : 'Montando unidade de rede', // added 18.04.2012
-
+			'ntfdim'      : 'Acquiring image dimension',
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Desconhecido',
 			'Today'       : 'Hoje',
 			'Yesterday'   : 'Ontem',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Fev',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Abr',
-			'May'         : 'Mai',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Ago',
-			'Sep'         : 'Set',
-			'Oct'         : 'Out',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dez',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Fev',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Abr',
+			'msMay'       : 'Mai',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Ago',
+			'msSep'       : 'Set',
+			'msOct'       : 'Out',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dez',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : 'por nome', 
@@ -327,5 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Video Matroska',
 			'kindVideoOGG'    : 'Video Ogg'
 		}
-	}
+	};
 }

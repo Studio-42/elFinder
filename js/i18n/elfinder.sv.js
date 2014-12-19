@@ -1,7 +1,7 @@
 /**
  * Swedish translation
  * @author Gabriel Satzger <gabriel.satzger@sbg.se>
- * @version 2012-09-10
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sv = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Kan inte döpa om "$1".',
 			'errCopyFrom'          : 'Kopiera filer från volym "$1" tillåts inte.',
 			'errCopyTo'            : 'Kopiera filer till volym "$1" tillåts inte.',
-			'errUploadCommon'      : 'Error vid uppladdningen.',
-			'errUpload'            : 'Kan inte ladda upp "$1".',
+			'errUpload'            : 'Error vid uppladdningen.',
+			'errUploadFile'        : 'Kan inte ladda upp "$1".',
 			'errUploadNoFiles'     : 'Inga filer hittades för uppladdning.',
-			'errMaxSize'           : 'Data överskrider den högsta tillåtna storleken.',
-			'errFileMaxSize'       : 'Filen överskrider den högsta tillåtna storleken.',
+			'errUploadTotalSize'   : 'Data överskrider den högsta tillåtna storleken.',
+			'errUploadFileSize'    : 'Filen överskrider den högsta tillåtna storleken.',
 			'errUploadMime'        : 'Otillåten filtyp.',
-			'errUploadTransfer'    : '"$1" överföringsfel.', 
+			'errUploadTransfer'    : '"$1" överföringsfel.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Kan inte spara "$1".',
 			'errCopy'              : 'Kan inte kopiera "$1".',
 			'errMove'              : 'Kan inte flytta "$1".',
 			'errCopyInItself'      : 'Kan inte flytta "$1" till sig själv.',
 			'errRm'                : 'Kan inte ta bort "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Kan inte packa upp filen från "$1".',
 			'errArchive'           : 'Kan inte skapa arkiv.',
 			'errArcType'           : 'Arkivtypen stöds inte.',
@@ -71,12 +74,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Av säkerhetsskäl nekas arkivet att packas upp då det innehåller symboliska länkar eller filer med ej tillåtna namn.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Arkivfiler överskrider största tillåtna storlek.',
 			'errResize'            : 'Kan inte ändra storlek "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Filtypen stöds inte.',
 			'errNotUTF8Content'    : 'Filen "$1" är inte i UTF-8 och kan inte redigeras.',  // added 9.11.2011
 			'errNetMount'          : 'Kan inte koppla "$1".',     // added 17.04.2012
 			'errNetMountNoDriver'  : 'Protokollet stöds inte.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Kopplingen misslyckades.',             // added 17.04.2012
 			'errNetMountHostReq'   : 'Host krävs.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Skapa arkiv',
 			'cmdback'      : 'Tillbaka',
@@ -105,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Visa',
 			'cmdresize'    : 'Ändra bildstorlek',
 			'cmdsort'      : 'Sortera',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Stäng',
@@ -114,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Ångra',
 			'btnNo'     : 'Nej',
 			'btnYes'    : 'Ja',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Öppnar mapp',
@@ -132,26 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Skapar arkiv',
 			'ntfextract'  : 'Extraherar filer från arkiv',
 			'ntfsearch'   : 'Söker filer',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Gör någonting >_<',
 			'ntfloadimg'  : 'Laddar bild',
 			'ntfnetmount' : 'kopplar nätverksvolym', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'okänt',
 			'Today'       : 'Idag',
 			'Yesterday'   : 'Igår',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Maj',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Aug',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Maj',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Aug',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Januari',
 			'February'    : 'Februari',
 			'March'       : 'Mars',
@@ -180,10 +199,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Sat'         : 'Lör',
 			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'namn (mappar först)', 
-			'sortkindDirsFirst' : 'efter sort (mappar först)', 
-			'sortsizeDirsFirst' : 'efter storlek (mappar först)', 
-			'sortdateDirsFirst' : 'efter datum (mappar först)',
 			'sortname'          : 'efter namn', 
 			'sortkind'          : 'efter sort', 
 			'sortsize'          : 'efter storlek',
@@ -251,13 +266,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Flytta filer',
 			'copyFiles'       : 'Kopiera filer',
 			'rmFromPlaces'    : 'Ta bort från platser',
-			'untitled folder' : 'namnlös mapp',
-			'untitled file.txt' : 'namnlös fil.txt',
 			'aspectRatio'     : 'Aspekt ratio',
 			'scale'           : 'Skala',
 			'width'           : 'Bredd',
 			'height'          : 'Höjd',
-			'mode'            : 'Läge',
 			'resize'          : 'Ändra storlek',
 			'crop'            : 'Beskär',
 			'rotate'          : 'Rotera',
@@ -270,6 +282,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'användare', // added 18.04.2012
 			'pass'                : 'Lösenord', // added 18.04.2012
+			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Okänd',
 			'kindFolder'      : 'Mapp',
@@ -348,6 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska movie',
 			'kindVideoOGG'    : 'Ogg movie'
 		}
-	}
+	};
 }
 

@@ -1,7 +1,7 @@
  /**
  * Serbian translation
  * @author Momčilo m0k1 Mićanović <moki.forum@gmail.com>
- * @version 2014-05-05
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sr = {
@@ -50,18 +50,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Nemoguće preimenovati datoteku "$1".',
 			'errCopyFrom'          : 'Kopiranje datoteki sa "$1" nije dozvoljeno.',
 			'errCopyTo'            : 'Kopiranje datoteki na "$1" nije dozvoljeno.',
-			'errUploadCommon'      : 'Greska pri slanju.',
-			'errUpload'            : 'Nemoguće poslati "$1".',
+			'errUpload'            : 'Greska pri slanju.',
+			'errUploadFile'        : 'Nemoguće poslati "$1".',
 			'errUploadNoFiles'     : 'Nisu pronađene datoteke za slanje.',
-			'errMaxSize'           : 'Podaci premašuju najveću dopuštenu veličinu.',
-			'errFileMaxSize'       : 'Datoteka premašuje najveću dopuštenu veličinu.',
+			'errUploadTotalSize'   : 'Podaci premašuju najveću dopuštenu veličinu.',
+			'errUploadFileSize'    : 'Datoteka premašuje najveću dopuštenu veličinu.',
 			'errUploadMime'        : 'Vrsta datoteke nije dopuštena.',
-			'errUploadTransfer'    : '"$1" greška prilikom slanja.', 
+			'errUploadTransfer'    : '"$1" greška prilikom slanja.',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Nemožeš sačuvati "$1".',
 			'errCopy'              : 'Nemožeš kopirati "$1".',
 			'errMove'              : 'Nemožeš premestiti "$1".',
 			'errCopyInItself'      : 'Nemožeš kopirati "$1" na istu lokaciju.',
 			'errRm'                : 'Nemožeš obrisati "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Nemoguće izvaditi datoteke iz "$1".',
 			'errArchive'           : 'Nemoguće kreirati arhivu.',
 			'errArcType'           : 'Nepodržani tip arhive.',
@@ -71,12 +74,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Zbog bezbednosnih razloga ne možete raspakovati arhive koje sadrže simboličke veze ili datoteke sa nedozvoljenim imenima.',
 			'errArcMaxSize'        : 'Arhiva je dostigla maksimalnu veličinu.',
 			'errResize'            : 'Nemoguće promeniti veličinu "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'nepodržan tip datoteke.',
 			'errNotUTF8Content'    : 'Datoteka "$1" nije u UTF-8  formati i ne može biti izmenjena.',
 			'errNetMount'          : 'Nije moguće montirati "$1".',
 			'errNetMountNoDriver'  : 'Nepodržani protokol.',
 			'errNetMountFailed'    : 'Montiranje neuspelo.',
 			'errNetMountHostReq'   : 'Host je potreban.',
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Kreiraj arhivu',
@@ -106,6 +120,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Pogledaj',
 			'cmdresize'    : 'Promeni veličinu slike',
 			'cmdsort'      : 'Sortiraj',
+			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Zatvori',
@@ -115,6 +130,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Prekini',
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Da',
+			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otvaranje foldera',
@@ -133,26 +149,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Kreiranje arhive',
 			'ntfextract'  : 'Izdvajanje datoteka iz arhive',
 			'ntfsearch'   : 'Pretraga datoteka',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Radim nešto >_<',
 			'ntfloadimg'  : 'Učitavanje slike',
 			'ntfnetmount' : 'Montiranje mrežnog volumena', 
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'nepoznat',
 			'Today'       : 'Danas',
 			'Yesterday'   : 'Sutra',
-			'Jan'         : 'Jan',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Maj',
-			'Jun'         : 'Jun',
-			'Jul'         : 'Jul',
-			'Aug'         : 'Avg',
-			'Sep'         : 'Sep',
-			'Oct'         : 'Okt',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dec',
+			'msJan'       : 'Jan',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Maj',
+			'msJun'       : 'Jun',
+			'msJul'       : 'Jul',
+			'msAug'       : 'Avg',
+			'msSep'       : 'Sep',
+			'msOct'       : 'Okt',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dec',
 			'January'     : 'Januar',
 			'February'    : 'Februar',
 			'March'       : 'Mart',
@@ -179,6 +197,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Čet', 
 			'Fri'         : 'Pet', 
 			'Sat'         : 'Sub',
+			
 			/******************************** sort variants ********************************/
 			'sortname'          : 'po imenu', 
 			'sortkind'          : 'po vrsti', 
@@ -247,13 +266,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Premesti datoteke',
 			'copyFiles'       : 'Kopiraj datoteke',
 			'rmFromPlaces'    : 'Ukloni iz mesta',
-			'untitled folder' : 'bezimeni folder',
-			'untitled file.txt' : 'bezimena datoteka.txt',
 			'aspectRatio'     : 'Omer širine i visine',
 			'scale'           : 'Razmera',
 			'width'           : 'Širina',
 			'height'          : 'Visina',
-			'mode'            : 'Mod',
 			'resize'          : 'Promeni veličinu',
 			'crop'            : 'Iseci',
 			'rotate'          : 'Rotiraj',
@@ -345,6 +361,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska video',
 			'kindVideoOGG'    : 'Ogg video'
 		}
-	}
+	};
 }
-

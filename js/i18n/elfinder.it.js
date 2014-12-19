@@ -1,7 +1,7 @@
 /**
  * Italian translation
  * @author Alberto Tocci <alberto.tocci@gmail.com>
- * @version 2013-07-03
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.it = {
@@ -131,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'No',
 			'btnYes'    : 'Si',
 			'btnMount'  : 'Mount',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Apri cartella',
 			'ntffile'     : 'Apri file',
@@ -158,18 +159,44 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dateUnknown' : 'sconosciuto',
 			'Today'       : 'Oggi',
 			'Yesterday'   : 'Ieri',
-			'Jan'         : 'Gen',
-			'Feb'         : 'Feb',
-			'Mar'         : 'Mar',
-			'Apr'         : 'Apr',
-			'May'         : 'Mag',
-			'Jun'         : 'Giu',
-			'Jul'         : 'Lug',
-			'Aug'         : 'Ago',
-			'Sep'         : 'Set',
-			'Oct'         : 'Ott',
-			'Nov'         : 'Nov',
-			'Dec'         : 'Dic',
+			'msJan'       : 'Gen',
+			'msFeb'       : 'Feb',
+			'msMar'       : 'Mar',
+			'msApr'       : 'Apr',
+			'msMay'       : 'Mag',
+			'msJun'       : 'Giu',
+			'msJul'       : 'Lug',
+			'msAug'       : 'Ago',
+			'msSep'       : 'Set',
+			'msOct'       : 'Ott',
+			'msNov'       : 'Nov',
+			'msDec'       : 'Dic',
+			'January'     : 'January',
+			'February'    : 'February',
+			'March'       : 'March',
+			'April'       : 'April',
+			'May'         : 'May',
+			'June'        : 'June',
+			'July'        : 'July',
+			'August'      : 'August',
+			'September'   : 'September',
+			'October'     : 'October',
+			'November'    : 'November',
+			'December'    : 'December',
+			'Sunday'      : 'Sunday',
+			'Monday'      : 'Monday',
+			'Tuesday'     : 'Tuesday',
+			'Wednesday'   : 'Wednesday',
+			'Thursday'    : 'Thursday',
+			'Friday'      : 'Friday',
+			'Saturday'    : 'Saturday',
+			'Sun'         : 'Sun', 
+			'Mon'         : 'Mon', 
+			'Tue'         : 'Tue', 
+			'Wed'         : 'Wed', 
+			'Thu'         : 'Thu', 
+			'Fri'         : 'Fri', 
+			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : 'per nome', 
@@ -334,6 +361,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Filmato Matroska',
 			'kindVideoOGG'    : 'Filmato Ogg'
 		}
-	}
+	};
 }
 
