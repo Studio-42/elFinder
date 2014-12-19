@@ -98,6 +98,24 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$this->options['mimeDetect'] = 'internal';
 	}
 	
+	/**
+	 * Prepare
+	 * Call from elFinder::netmout() before volume->mount()
+	 *
+	 * @return Array
+	 * @author Naoki Sawada
+	 **/
+	public function netmountPrepare($options) {
+		if (!empty($_REQUEST['encoding']) && @iconv('UTF-8', $_REQUEST['encoding'], '')) {
+			$options['encoding'] = $_REQUEST['encoding'];
+			if (!empty($_REQUEST['locale']) && @setlocale(LC_ALL, $_REQUEST['locale'])) {
+				setlocale(LC_ALL, elFinder::$locale);
+				$options['locale'] = $_REQUEST['locale'];
+			}
+		}
+		return $options;
+	}
+	
 	/*********************************************************************/
 	/*                        INIT AND CONFIGURE                         */
 	/*********************************************************************/
