@@ -1808,7 +1808,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function search($q, $mimes) {
-		return $this->doSearch($this->root, $q, $mimes);
+		return $this->commandDisabled('search')
+			? array()
+			: $this->doSearch($this->root, $q, $mimes);
 	}
 	
 	/**
