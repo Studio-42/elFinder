@@ -85,8 +85,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		// check quarantine dir
 		$this->quarantine = '';
 		if (!empty($this->options['quarantine'])) {
-			if ($this->options['quarantine'] !== basename($this->options['quarantine'])) {
-				if (is_dir($this->options['quarantine']) && is_writable($this->options['quarantine'])) {
+			if (is_dir($this->options['quarantine'])) {
+				if (is_writable($this->options['quarantine'])) {
 					$this->quarantine = $this->options['quarantine'];
 				}
 				$this->options['quarantine'] = '';
