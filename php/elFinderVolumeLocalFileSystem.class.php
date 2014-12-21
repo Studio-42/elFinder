@@ -61,16 +61,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->aroot = realpath($this->root);
 		$root = $this->stat($this->root);
 		
-		if ($this->options['quarantine']) {
-			$this->attributes[] = array(
-				'pattern' => '~^'.preg_quote(DIRECTORY_SEPARATOR.$this->options['quarantine']).'$~',
-				'read'    => false,
-				'write'   => false,
-				'locked'  => true,
-				'hidden'  => true
-			);
-		}
-		
 		// chek thumbnails path
 		if ($this->options['tmbPath']) {
 			$this->options['tmbPath'] = strpos($this->options['tmbPath'], DIRECTORY_SEPARATOR) === false
@@ -93,17 +83,35 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 
 		// check quarantine dir
+		$this->quarantine = '';
 		if (!empty($this->options['quarantine'])) {
-			$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
-			if ((!is_dir($this->quarantine) && !$this->_mkdir($this->root, $this->options['quarantine'])) || !is_writable($this->quarantine)) {
-				$this->archivers['extract'] = array();
-				$this->disabled[] = 'extract';
+			if ($this->options['quarantine'] !== basename($this->options['quarantine'])) {
+				if (is_dir($this->options['quarantine']) && is_writable($this->options['quarantine'])) {
+					$this->quarantine = $this->options['quarantine'];
+				}
+				$this->options['quarantine'] = '';
+			} else {
+				$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
+				if ((!is_dir($this->quarantine) && !$this->_mkdir($this->root, $this->options['quarantine'])) || !is_writable($this->quarantine)) {
+					$this->options['quarantine'] = $this->quarantine = '';
+				}
 			}
-		} else {
+		}
+		
+		if (!$this->quarantine) {
 			$this->archivers['extract'] = array();
 			$this->disabled[] = 'extract';
 		}
 		
+		if ($this->options['quarantine']) {
+			$this->attributes[] = array(
+					'pattern' => '~^'.preg_quote(DIRECTORY_SEPARATOR.$this->options['quarantine']).'$~',
+					'read'    => false,
+					'write'   => false,
+					'locked'  => true,
+					'hidden'  => true
+			);
+		}
 	}
 	
 	/*********************************************************************/
