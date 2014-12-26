@@ -27,7 +27,7 @@ elFinder.prototype.commands.help = function() {
 		
 		
 		about = function() {
-			html.push('<div id="about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>')
+			html.push('<div id="about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
 			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': <span id="apiver"></span></div>');
@@ -56,7 +56,7 @@ elFinder.prototype.commands.help = function() {
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2011, Studio 42</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2014, Studio 42</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
@@ -73,11 +73,11 @@ elFinder.prototype.commands.help = function() {
 			
 				html.push('</div>');
 			} else {
-				html.push('<div class="elfinder-help-disabled">'+fm.i18n('shortcutsof')+'</div>')
+				html.push('<div class="elfinder-help-disabled">'+fm.i18n('shortcutsof')+'</div>');
 			}
 			
 			
-			html.push('</div>')
+			html.push('</div>');
 			
 		},
 		help = function() {
@@ -87,7 +87,7 @@ elFinder.prototype.commands.help = function() {
 			html.push('</div>');
 			// end help
 		},
-		content;
+		content = '';
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -114,11 +114,9 @@ elFinder.prototype.commands.help = function() {
 		html.push('</div>');
 		content = $(html.join(''));
 		
-		fm.one('load', function setapi() { content.find('#apiver').text(fm.api); });
-		
 		content.find('.ui-tabs-nav li')
 			.hover(function() {
-				$(this).toggleClass('ui-state-hover')
+				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
 			.click(function(e) {
@@ -135,18 +133,19 @@ elFinder.prototype.commands.help = function() {
 			})
 			.filter(':first').click();
 		
-	}, 200)
+	}, 200);
 	
 	this.getstate = function() {
 		return 0;
-	}
+	};
 	
 	this.exec = function() {
 		if (!this.dialog) {
+			content.find('#apiver').text(this.fm.api);
 			this.dialog = this.fm.dialog(content, {title : this.title, width : 530, autoOpen : false, destroyOnClose : false});
 		}
 		
 		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
-	}
+	};
 
-}
+};
