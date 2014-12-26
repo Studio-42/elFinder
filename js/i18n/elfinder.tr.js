@@ -153,7 +153,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Birşeyler Yapılıyor >_<',
 			'ntfloadimg'  : 'Resim Yükleniyor',
 			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
-			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
+			'ntfdim'      : 'Resim ebatı elde ediliyor', // added 20.05.2013
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'bilinmiyor',
@@ -280,8 +280,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'protocol'            : 'Protocol', // added 18.04.2012
 			'host'                : 'Host', // added 18.04.2012
 			'port'                : 'Port', // added 18.04.2012
-			'user'                : 'User', // added 18.04.2012
-			'pass'                : 'Password', // added 18.04.2012
+			'user'                : 'Kullanıcı', // added 18.04.2012
+			'pass'                : 'Şifre', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Bilinmiyor',
