@@ -95,7 +95,7 @@
 
 /* root folder */
 .elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 0; }
-.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -48px; }
+.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -704px; }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
