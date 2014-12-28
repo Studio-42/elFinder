@@ -24,6 +24,11 @@
 	-webkit-user-select: none;
 	user-select: none;
 	-webkit-tap-highlight-color:rgba(0,0,0,0);
+	-webkit-touch-callout:none; // disable long tap popup
+	user-select:          none; // disable long tap link
+	-webkit-user-select:  none;
+	-moz-user-select:     none;
+	-khtml-user-select:   none;
 }
 
 /* container active on dropenter */
