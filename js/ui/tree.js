@@ -410,11 +410,10 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.delegate('.'+navdir, 'touchstart', function(e) {
-					var p = $(this),
-					evt = e.originalEvent;
-					p.data('longtap', null);
-					p.data('touching', true);
-					p.data('tmlongtap', setTimeout(function(e){
+					var evt = e.originalEvent,
+					p = $(this)
+					.data('longtap', null)
+					.data('tmlongtap', setTimeout(function(e){
 						// long tap
 						p.data('longtap', true);
 						fm.trigger('contextmenu', {

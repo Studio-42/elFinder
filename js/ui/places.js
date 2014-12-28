@@ -220,14 +220,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 					}
 				})
 				// for touch device
-				//.on('touchstart.'+fm.namespace, '.'+navdir+':not(.'+clroot+')', function(e) {
 				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
-					var p    = $(this),
-					    hash = $(this).attr('id').substr(6);
-					
-					p.data('longtap', null);
-					p.data('touching', true);
-					p.data('tmlongtap', setTimeout(function(){
+					var hash = $(this).attr('id').substr(6),
+					p = $(this)
+					.data('longtap', null)
+					.data('tmlongtap', setTimeout(function(){
 						// long tap
 						p.data('longtap', true);
 						fm.trigger('contextmenu', {
@@ -241,7 +238,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 						});
 					}, 500));
 				})
-				//.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, '.'+navdir+':not(.'+clroot+')', function(e) {
 				.on('touchmove touchend', '.'+navdir+':not(.'+clroot+')', function(e) {
 					clearTimeout($(this).data('tmlongtap'));
 				});
