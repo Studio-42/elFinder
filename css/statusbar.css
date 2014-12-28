@@ -12,6 +12,12 @@
 	border-right:0 solid transparent;
 	border-bottom:0 solid transparent;
 	border-left:0 solid transparent;
+	
+	-webkit-touch-callout:none; // disable long tap popup
+	user-select:          none; // disable long tap link
+	-webkit-user-select:  none;
+	-moz-user-select:     none;
+	-khtml-user-select:   none;
 }
 
 .elfinder-statusbar a { text-decoration:none; }
