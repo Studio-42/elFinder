@@ -131,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdsort'      : 'Sort',
 			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
 			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
+			'cmdplaces'    : 'To Places', // added 28.12.2014
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Close',

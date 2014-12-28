@@ -213,7 +213,42 @@ $.fn.elfinderplaces = function(fm, opts) {
 						save();
 						resolve && ui.helper.hide();
 					}
+				})
+				// for touch device
+				//.on('touchstart.'+fm.namespace, '.'+navdir+':not(.'+clroot+')', function(e) {
+				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
+					var p = $(this);
+					places.data('longtap', null);
+					p.data('touching', true);
+					p.data('tmlongtap', setTimeout(function(){
+						// long tap
+						places.data('longtap', true);
+						fm.trigger('contextmenu', {
+							raw : [{
+								label    : fm.i18n('rmFromPlaces'),
+								icon     : 'rm',
+								callback : function() { remove(hash); save(); }
+							}],
+							'x'       : e.originalEvent.touches[0].clientX,
+							'y'       : e.originalEvent.touches[0].clientY
+						});
+					}, 500));
+				})
+				//.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, '.'+navdir+':not(.'+clroot+')', function(e) {
+				.on('touchmove touchend', '.'+navdir+':not(.'+clroot+')', function(e) {
+					clearTimeout($(this).data('tmlongtap'));
 				});
+
+		// "on regist" for command exec
+		$(this).on('regist', function(e, files){
+			$.each(files, function(i, hash) {
+				var dir = fm.file(hash);
+				if (dir && dir.mime == 'directory' && $.inArray(dir.hash, dirs) === -1) {
+					add(dir);
+				}
+			});
+			save();
+		});
 	
 
 		// on fm load - show places and load files from backend

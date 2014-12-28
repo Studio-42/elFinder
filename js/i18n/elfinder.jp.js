@@ -125,6 +125,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdsort'      : 'ソート',
 			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
 			'cmdnetunmount': 'アンマウント', // added 30.04.2012
+			'cmdplaces'    : 'お気に入りへ', // added 28.12.2014
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
