@@ -152,9 +152,13 @@
 	opacity: .5; filter:Alpha(Opacity=50);
 }
 
-.elfinder-places { border:1px solid transparent;}
+.elfinder-places {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
 .elfinder-places.elfinder-droppable-active {
-	border:1px solid #8cafed;
+	/*border:1px solid #8cafed;*/
 }
 
 
