@@ -105,7 +105,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function _normpath($path)
     {
-        return Util::normalizePath($path);
+        return $path;
     }
 
     /**
