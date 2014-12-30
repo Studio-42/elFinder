@@ -30,7 +30,6 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     {
         $opts = array(
             'filesystem' => null,
-            'adapter'    => null,
         );
 
         $this->options = array_merge($this->options, $opts);
@@ -80,11 +79,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         // Check if filesystem is set, otherwise create Filesystem from adapter
         if ($this->options['filesystem']) {
             $this->fs = $this->options['filesystem'];
-        } elseif ($this->options['adapter']) {
-            $this->fs = new Filesystem($this->options['adapter']);
-        }
-
-        if (!$this->fs) {
+        } else {
             return $this->setError('A filesystem instance is required');
         }
 
@@ -145,7 +140,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
 
         // If root, just return from above
         if ($this->root == $path) {
-            $stat['name'] = '/';
+            $stat['name'] = $this->root;
             return $stat;
         }
 
@@ -392,7 +387,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function _joinPath($dir, $name)
     {
-        return $dir.DIRECTORY_SEPARATOR.$name;
+        return $dir.$this->separator.$name;
     }
 
     /**
@@ -400,19 +395,10 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      *
      * @param  string  $path  file path
      * @return string
-     * @author Dmitry (dio) Levashov
      **/
     protected function _relpath($path)
     {
-        if ($path == $this->root) {
-            return '';
-        }
-
-        if ($this->root !== '/'){
-            $path = substr($path, strlen($this->root)+1);
-        }
-
-        return ltrim($path, '/');
+        return $path;
     }
 
     /**
@@ -420,11 +406,10 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      *
      * @param  string  $path  file path
      * @return string
-     * @author Dmitry (dio) Levashov
      **/
     protected function _abspath($path)
     {
-        return $path == DIRECTORY_SEPARATOR ? $this->root : $this->root.DIRECTORY_SEPARATOR.$path;
+        return $path;
     }
 
     /**
@@ -432,11 +417,10 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      *
      * @param  string  $path  file path
      * @return string
-     * @author Dmitry (dio) Levashov
      **/
     protected function _path($path)
     {
-        return $this->rootName.($path == $this->root ? '/' : $this->separator.$this->_relpath($path));
+        return $path;
     }
 
     /**
@@ -452,7 +436,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         $real_path = realpath($path);
         $real_parent = realpath($parent);
         if ($real_path && $real_parent) {
-            return $real_path === $real_parent || strpos($real_path, $real_parent.DIRECTORY_SEPARATOR) === 0;
+            return $real_path === $real_parent || strpos($real_path, $real_parent.$this->separator) === 0;
         }
         return false;
     }
