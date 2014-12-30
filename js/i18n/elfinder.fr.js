@@ -11,7 +11,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		dateFormat : 'd M, Y H:i',
 		fancyDateFormat : '$1 H:i',
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Erreur',
 			'errUnknown'           : 'Erreur inconnue.',
@@ -56,7 +56,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadTotalSize'   : 'Les données dépassent la taille maximale allouée.',
 			'errUploadFileSize'    : 'Le fichier dépasse la taille maximale allouée.',
 			'errUploadMime'        : 'Type de fichier non autorisé.',
-			'errUploadTransfer'    : '"$1" erreur transfert.', 
+			'errUploadTransfer'    : '"$1" erreur transfert.',
 			'errNotReplace'        : 'L\'objet "$1" existe déjà à cet endroit et ne peut être remplacé par un objet d\'un type différent.', // new
 			'errReplace'           : 'Impossible de remplacer "$1".', // added 11.08.1013
 			'errSave'              : 'Impossible de sauvegarder "$1".',
@@ -83,7 +83,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetMount'          : 'Impossible de monter "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Protocol non supporté.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Echec du montage.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Hôte requis.', // added 18.04.2012			
+			'errNetMountHostReq'   : 'Hôte requis.', // added 18.04.2012
 			'errSessionExpires'    : 'Votre session a expiré en raison de son inactivité',
 			'errCreatingTempDir'   : 'Impossible de créer le répertoire temporaire : "$1"',
 			'errFtpDownloadFile'   : 'Impossible de télécharger le file depuis l\'accès FTP : "$1"',
@@ -91,7 +91,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Impossible de créer un répertoire distant sur l\'accès FTP :"$1"',
 			'errArchiveExec'       : 'Erreur lors de l\'archivage des fichiers : "$1"',
 			'errExtractExec'       : 'Erreur lors de l\'extraction des fichiers : "$1"',
-			
+			'errUploadFile'        : 'Envoi impossible de "$1"',
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Créer une archive',
 			'cmdback'      : 'Précédent',
@@ -121,8 +121,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Redimensionner l\'image',
 			'cmdsort'      : 'Trier',
 			'cmdnetmount'  : 'Monter un volume réseau',
-			
-			/*********************************** buttons ***********************************/ 
+
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Fermer',
 			'btnSave'   : 'Sauvegarder',
 			'btnRm'     : 'Supprimer',
@@ -131,7 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Non',
 			'btnYes'    : 'Oui',
 			'btnMount'  : 'Monter',  // added 18.04.2012
-			
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Ouvrir le dossier',
 			'ntffile'     : 'Ouvrir le fichier',
@@ -199,8 +199,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'par nom', 
-			'sortkind'          : 'par type', 
+			'sortname'          : 'par nom',
+			'sortkind'          : 'par type',
 			'sortsize'          : 'par taille',
 			'sortdate'          : 'par date',
 			'sortFoldersFirst'  : 'Dossiers en premier',
@@ -227,7 +227,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'viewlist'        : 'Vue listing',
 			'viewicons'       : 'Vue icônes',
 			'places'          : 'Places',
-			'calc'            : 'Calculer', 
+			'calc'            : 'Calculer',
 			'path'            : 'Chemin',
 			'aliasfor'        : 'Raccourcis pour',
 			'locked'          : 'Verrouiller',
@@ -238,7 +238,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'oui',
 			'no'              : 'non',
 			'link'            : 'Lien',
-			'searcresult'     : 'Résultat de la recherche',  
+			'searcresult'     : 'Résultat de la recherche',
 			'selected'        : 'Éléments sélectionnés',
 			'about'           : 'À propos',
 			'shortcuts'       : 'Raccourcis',
@@ -282,7 +282,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Utilisateur', // added 18.04.2012
 			'pass'                : 'Mot de passe', // added 18.04.2012
-			
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
 			'kindFolder'      : 'Dossier',
