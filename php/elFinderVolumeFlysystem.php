@@ -52,7 +52,11 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      */
     protected function getIcon()
     {
-        $adapter = $this->fs->getAdapter();
+        try {
+            $adapter = $this->fs->getAdapter();
+        } catch (\Exception $e) {
+            $adapter = null;
+        }
 
         if ($adapter instanceof League\Flysystem\Adapter\Local) {
             $icon = 'volume_icon_local.png';
@@ -76,10 +80,8 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function init()
     {
-        // Check if filesystem is set, otherwise create Filesystem from adapter
-        if ($this->options['filesystem']) {
-            $this->fs = $this->options['filesystem'];
-        } else {
+        $this->fs = $this->options['filesystem'];
+        if (!($this->fs instanceof League\Flysystem\FilesystemInterface)) {
             return $this->setError('A filesystem instance is required');
         }
 
