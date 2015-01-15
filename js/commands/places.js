@@ -21,7 +21,8 @@ elFinder.prototype.commands.places = function() {
 	};
 	
 	this.exec = function(hashes) {
-		places.trigger('regist', [hashes]);
+		var files = this.files(hashes);
+		places.trigger('regist', [ files ]);
 	};
 	
 	fm.one('load', function(){

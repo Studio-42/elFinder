@@ -244,8 +244,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 
 		// "on regist" for command exec
 		$(this).on('regist', function(e, files){
-			$.each(files, function(i, hash) {
-				var dir = fm.file(hash);
+			$.each(files, function(i, dir) {
 				if (dir && dir.mime == 'directory' && $.inArray(dir.hash, dirs) === -1) {
 					add(dir);
 				}
