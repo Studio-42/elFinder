@@ -171,13 +171,6 @@ window.elFinder = function(node, opts) {
 		queue = [],
 		
 		/**
-		 * Net drivers names
-		 *
-		 * @type Array
-		 **/
-		netDrivers = [],
-		
-		/**
 		 * Commands prototype
 		 *
 		 * @type Object
@@ -312,6 +305,12 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.oldAPI = false;
 	
+	/**
+	 * Net drivers names
+	 *
+	 * @type Array
+	 **/
+	this.netDrivers = [];
 	/**
 	 * User os. Required to bind native shortcuts for open/rename
 	 *
