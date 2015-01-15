@@ -224,7 +224,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			
 			places.show().parent().show();
 
-			dirs = $.map(fm.storage('places').split(','), function(hash) { return hash || null});
+			dirs = $.map((fm.storage('places') || '').split(','), function(hash) { return hash || null;});
 			
 			if (dirs.length) {
 				root.prepend(spinner);
