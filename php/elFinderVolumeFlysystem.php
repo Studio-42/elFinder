@@ -368,7 +368,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function _filePutContents($path, $content)
     {
-        return $this->fs->write($path, $content);
+        return $this->fs->update($path, $content);
     }
 
     /*********************** paths/urls *************************/
@@ -520,12 +520,12 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
 
         $path = $this->decode($hash);
 
-        $local_path = tempnam(sys_get_temp_dir(), 'fls');
+        $local_path = tempnam(sys_get_temp_dir(), 'elfinder');
         if (!$local_path) {
             return false;
         }
 
-        $success = file_put_contents($local_path, $this->fs->read($path));
+        $success = file_put_contents($local_path, $this->_getContents($path));
 
         if (!$success) {
             $this->setError(elFinder::ERROR_FTP_DOWNLOAD_FILE, $local_path);
@@ -560,8 +560,9 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
         }
 
         if ($result) {
+
             $contents = file_get_contents($local_path);
-            if ($contents && !$this->fs->update($path, $contents)) {
+            if ($contents && !$this->_filePutContents($path, $contents)) {
                 $this->setError(elFinder::ERROR_FTP_UPLOAD_FILE, $path);
                 $this->deleteFile($local_path); //cleanup
             }
