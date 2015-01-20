@@ -1,6 +1,6 @@
 <?php
 use League\Flysystem\Util;
-use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemInterface;
 
 /**
  * elFinder driver for Flysytem (https://github.com/thephpleague/flysystem)
@@ -18,7 +18,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected $driverId = 'fls';
 
-    /** @var Filesystem $fs */
+    /** @var FilesystemInterface $fs */
     protected $fs;
 
     /**
@@ -81,7 +81,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     protected function init()
     {
         $this->fs = $this->options['filesystem'];
-        if (!($this->fs instanceof League\Flysystem\FilesystemInterface)) {
+        if (!($this->fs instanceof FilesystemInterface)) {
             return $this->setError('A filesystem instance is required');
         }
 
@@ -92,7 +92,10 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     }
 
     /**
-     * {@inheritdoc}
+     * Return parent directory path
+     *
+     * @param  string  $path  file path
+     * @return string
      **/
     protected function _dirname($path)
     {
@@ -179,7 +182,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
 
     /**
      * Return object width and height
-     * Ususaly used for images, but can be realize for video etc...
+     * Usually used for images, but can be realize for video etc...
      *
      * @param  string  $path  file path
      * @param  string  $mime  file mime type
@@ -220,11 +223,15 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     }
 
     /**
-     * {@inheritdoc}
+     * Close opened file
+     *
+     * @param  resource  $fp    file pointer
+     * @param  string    $path  file path
+     * @return bool
      **/
     protected function _fclose($fp, $path='')
     {
-        @fclose($fp);
+        return @fclose($fp);
     }
 
     /********************  file/dir manipulations *************************/
@@ -233,7 +240,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      * Create dir and return created dir path or false on failed
      *
      * @param  string  $path  parent dir path
-     * @param string  $name  new directory name
+     * @param  string  $name  new directory name
      * @return string|bool
      **/
     protected function _mkdir($path, $name)
@@ -435,23 +442,27 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
      **/
     protected function _inpath($path, $parent)
     {
-        $real_path = realpath($path);
-        $real_parent = realpath($parent);
-        if ($real_path && $real_parent) {
-            return $real_path === $real_parent || strpos($real_path, $real_parent.$this->separator) === 0;
-        }
-        return false;
+        return $path == $parent || strpos($path, $parent.'/') === 0;
     }
 
     /**
-     * {@inheritdoc}
+     * Create symlink
+     *
+     * @param  string  $source     file to link to
+     * @param  string  $targetDir  folder to create link in
+     * @param  string  $name       symlink name
+     * @return bool
      **/
     protected function _symlink($source, $targetDir, $name) {
         return false;
     }
 
     /**
-     * {@inheritdoc}
+     * Extract files from archive
+     *
+     * @param  string  $path file path
+     * @param  array   $arc  archiver options
+     * @return bool
      **/
     protected function _extract($path, $arc)
     {
@@ -459,7 +470,13 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     }
 
     /**
-     * {@inheritdoc}
+     * Create archive and return its path
+     *
+     * @param  string  $dir    target dir
+     * @param  array   $files  files names list
+     * @param  string  $name   archive name
+     * @param  array   $arc    archiver options
+     * @return string|bool
      **/
     protected function _archive($dir, $files, $name, $arc)
     {
@@ -467,11 +484,92 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
     }
 
     /**
-     * {@inheritdoc}
+     * Detect available archivers
+     *
+     * @return void
      **/
     protected function _checkArchivers()
     {
         return;
     }
 
+    /**
+     * Resize image
+     * @param string $hash
+     * @param int $width
+     * @param int $height
+     * @param int $x
+     * @param int $y
+     * @param string $mode
+     * @param string $bg
+     * @param int $degree
+     * @return array|bool|false
+     */
+    public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
+        if ($this->commandDisabled('resize')) {
+            return $this->setError(elFinder::ERROR_PERM_DENIED);
+        }
+
+        if (($file = $this->file($hash)) == false) {
+            return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+        }
+
+        if (!$file['write'] || !$file['read']) {
+            return $this->setError(elFinder::ERROR_PERM_DENIED);
+        }
+
+        $path = $this->decode($hash);
+
+        $local_path = tempnam(sys_get_temp_dir(), 'fls');
+        if (!$local_path) {
+            return false;
+        }
+
+        $success = file_put_contents($local_path, $this->fs->read($path));
+
+        if (!$success) {
+            $this->setError(elFinder::ERROR_FTP_DOWNLOAD_FILE, $local_path);
+            return false;
+        }
+
+        if (!$this->canResize($path, $file)) {
+            return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+        }
+
+        switch($mode) {
+
+            case 'propresize':
+                $result = $this->imgResize($local_path, $width, $height, true, true);
+                break;
+
+            case 'crop':
+                $result = $this->imgCrop($local_path, $width, $height, $x, $y);
+                break;
+
+            case 'fitsquare':
+                $result = $this->imgSquareFit($local_path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']));
+                break;
+
+            case 'rotate':
+                $result = $this->imgRotate($local_path, $degree, ($bg ? $bg : $this->options['tmbBgColor']));
+                break;
+
+            default:
+                $result = $this->imgResize($local_path, $width, $height, false, true);
+                break;
+        }
+
+        if ($result) {
+            $contents = file_get_contents($local_path);
+            if ($contents && !$this->fs->update($path, $contents)) {
+                $this->setError(elFinder::ERROR_FTP_UPLOAD_FILE, $path);
+                $this->deleteFile($local_path); //cleanup
+            }
+            $this->clearcache();
+            return $this->stat($path);
+        }
+
+        $this->setError(elFinder::ERROR_UNKNOWN);
+        return false;
+    }
 }
