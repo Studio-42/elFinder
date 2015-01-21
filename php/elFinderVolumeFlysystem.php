@@ -62,7 +62,7 @@ class elFinderVolumeFlysystem extends elFinderVolumeDriver {
             $icon = 'volume_icon_local.png';
         } elseif ($adapter instanceof League\Flysystem\Adapter\AbstractFtpAdapter) {
             $icon = 'volume_icon_ftp.png';
-        } elseif ($adapter instanceof League\Flysystem\Adapter\Dropbox) {
+        } elseif ($adapter instanceof League\Flysystem\Dropbox\DropboxAdapter) {
             $icon = 'volume_icon_dropbox.png';
         } else {
             $icon = 'volume_icon_flysystem.png';
