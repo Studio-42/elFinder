@@ -182,7 +182,8 @@ elFinder.prototype.commands.quicklook = function() {
 				navbar.attr('style', '').draggable(full ? 'destroy' : {});
 				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
-				$.fn.resizable && parent.add(win).resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+				$.fn.resizable && win.resizable(full ? 'enable' : 'disable');
+                parent.add(win).removeClass('ui-state-disabled');
 			}),
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
