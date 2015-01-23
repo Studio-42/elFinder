@@ -2482,8 +2482,8 @@ abstract class elFinderVolumeDriver {
 				}
 				
 			}
-			if (!isset($stat['url']) && $this->encoding) {
-				$stat['url'] = rtrim($this->options['URL'], '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+			if (!isset($stat['url']) && $this->URL && $this->encoding) {
+				$stat['url'] = rtrim($this->URL, '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
 			}
 		}
 		
@@ -2754,7 +2754,11 @@ abstract class elFinderVolumeDriver {
 			if ($this->stripos($name, $q) !== false) {
 				$stat['path'] = $this->path($p);
 				if ($this->URL && !isset($stat['url'])) {
-					$stat['url'] = $this->URL . str_replace($this->separator, '/', substr($p, strlen($this->root) + 1));
+					$path = str_replace($this->separator, '/', substr($p, strlen($this->root) + 1));
+					if ($this->encoding) {
+						$path = str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+					}
+					$stat['url'] = $this->URL . $path;
 				}
 				
 				$result[] = $stat;
