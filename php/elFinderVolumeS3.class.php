@@ -319,10 +319,18 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * @param  string  $mime  file mime type
 	 * @return string
 	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
 	 **/
-	 protected function _dimensions($path, $mime) {
-		return false;
-	 }
+	protected function _dimensions($path, $mime) {
+		$ret = '';
+		if ($work = $this->getWorkFile($path)) {
+			if ($size = @getimagesize($work)) {
+				$ret = $size[0].'x'.$size[1];
+			}
+		}
+		is_file($work) && @unlink($work);
+		return $ret;
+	}
 	
 	/******************** file/dir content *********************/
 
@@ -729,4 +737,3 @@ class S3SoapClient extends SoapClient {
 	
 }
 
-?>
