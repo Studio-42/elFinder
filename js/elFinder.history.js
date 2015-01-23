@@ -107,6 +107,6 @@ elFinder.prototype.history = function(fm) {
 			}
 		}
 	})
-	.reload(reset);
+	.reload(fm.options.reloadClearHistory && reset);
 	
 }
