@@ -323,12 +323,9 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 **/
 	protected function _dimensions($path, $mime) {
 		$ret = '';
-		if ($work = $this->getWorkFile($path)) {
-			if ($size = @getimagesize($work)) {
-				$ret = $size[0].'x'.$size[1];
-			}
+		if ($imgsize = $this->getImageSize($path)) {
+			$ret = $imgsize['dimensions'];
 		}
-		is_file($work) && @unlink($work);
 		return $ret;
 	}
 	

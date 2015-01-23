@@ -2212,28 +2212,6 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * File path of local server side work file path
-	 * 
-	 * @param  string $path path need convert encoding to server encoding
-	 * @return string
-	 * @author Naoki Sawada
-	 */
-	protected function getWorkFile($path) {
-		$work = tempnam(sys_get_temp_dir(), 'elf');
-		if ($wfp = fopen($work, 'wb')) {
-			if ($fp = $this->_fopen($path)) {
-				while(!feof($fp)) {
-					fwrite($wfp, fread($fp, 8192));
-				}
-				$this->_fclose($fp, $path);
-				fclose($wfp);
-				return $work;
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Return new unique name based on file name and suffix
 	 *
 	 * @param  string  $path    file path
@@ -2334,6 +2312,47 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return $var;
+	}
+	
+	/*********************** util mainly for inheritance class *********************/
+	
+	/**
+	 * File path of local server side work file path
+	 * 
+	 * @param  string $path path need convert encoding to server encoding
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	protected function getWorkFile($path) {
+		$work = tempnam(sys_get_temp_dir(), 'elf');
+		if ($wfp = fopen($work, 'wb')) {
+			if ($fp = $this->_fopen($path)) {
+				while(!feof($fp)) {
+					fwrite($wfp, fread($fp, 8192));
+				}
+				$this->_fclose($fp, $path);
+				fclose($wfp);
+				return $work;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Get image size array with `dimensions`
+	 *
+	 * @param string $path path need convert encoding to server encoding
+	 * @return array|false
+	 */
+	public function getImageSize($path) {
+		$size = false;
+		if ($work = $this->getWorkFile($path)) {
+			if ($size = @getimagesize($work)) {
+				$size['dimensions'] = $size[0].'x'.$size[1];
+			}
+		}
+		is_file($work) && @unlink($work);
+		return $size;
 	}
 	
 	/*********************** file stat *********************/
