@@ -13,8 +13,8 @@
 	border-bottom:0 solid transparent;
 	border-left:0 solid transparent;
 	
-	-webkit-touch-callout:none; // disable long tap popup
-	user-select:          none; // disable long tap link
+	-webkit-touch-callout:none;
+	user-select:          none;
 	-webkit-user-select:  none;
 	-moz-user-select:     none;
 	-khtml-user-select:   none;
