@@ -550,7 +550,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		$raw = ftp_raw($this->connect, 'MLST "'.addslashes($path).'"');
+		$raw = ftp_raw($this->connect, 'MLST '.$path);
 
 		if (is_array($raw) && count($raw) > 1 && substr(trim($raw[0]), 0, 1) == 2) {
 			$parts = explode(';', trim($raw[1]));
