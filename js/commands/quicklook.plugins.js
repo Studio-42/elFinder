@@ -19,7 +19,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			} 
 		});
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				img;
 
@@ -74,7 +74,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			fm      = ql.fm;
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file, jqxhr;
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
@@ -111,7 +111,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview;
 				
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				mime = file.mime,
 				jqxhr;
@@ -137,6 +137,44 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * ViewerJS preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var mimes   = ['application/pdf', 'application/vnd.oasis.opendocument.text'],
+			preview = ql.preview,
+			extensions = ['odt','fodt','ott','odp','fodp','otp','ods','fods','ots','pdf'],
+			fm      = ql.fm;
+			
+		fm.options.ViewerJS && preview.bind('previewupdate', function(e) {
+			var file = e.file,
+				node, extension = file.name.split('.').pop();
+			extension = extension.toLowerCase();;
+			var pw = parseInt(preview.width()),
+				ph = parseInt(preview.height());
+			if (pw > 250 && ph > 250 && ($.inArray(file.mime, mimes) !== -1 || $.inArray(extension, extensions) !== -1)) {
+				e.stopImmediatePropagation();
+				preview.one('change', function() {
+					node.unbind('load').remove();
+				});
+				
+				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
+					.hide()
+					.appendTo(preview)
+					.load(function() { 
+						ql.hideinfo();
+						node.show(); 
+					})
+					.attr('src', fm.options.ViewerJS+ql.fm.url(file.hash)+'&viewerjs_filename=/'+file.name);
+			}
+			
+		})
+		
+			
+	},
+
+	/**
 	 * PDF preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
@@ -159,7 +197,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		}
 
-		active && preview.bind('update', function(e) {
+		active && preview.bind('previewupdate', function(e) {
 			var file = e.file, node;
 			
 			if (file.mime == mime) {
@@ -202,7 +240,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		active && preview.bind('update', function(e) {
+		active && preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				node;
 				
@@ -238,7 +276,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 
@@ -275,7 +313,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 				
@@ -312,7 +350,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file  = e.file,
 				mime  = file.mime,
 				video;
