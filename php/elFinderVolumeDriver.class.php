@@ -2483,7 +2483,8 @@ abstract class elFinderVolumeDriver {
 				
 			}
 			if (!isset($stat['url']) && $this->URL && $this->encoding) {
-				$stat['url'] = rtrim($this->URL, '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+				$_path = str_replace($this->separator, '/', substr($path, strlen($this->root) + 1));
+				$stat['url'] = rtrim($this->URL, '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($_path, true)));
 			}
 		}
 		
