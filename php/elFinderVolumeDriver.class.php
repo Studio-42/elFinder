@@ -1753,7 +1753,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 		}
 		
-		$work_path = $this->getWorkFile($path);
+		$work_path = $this->getWorkFile($this->encoding? $this->convEncIn($path, true) : $path);
 		if (!$work_path || !is_writable($work_path)) {
 			if ($work_path && $path !== $work_path && is_file($work_path)) {
 				@unlink($work_path);
@@ -2214,7 +2214,7 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * File path of local server side work file path
 	 * 
-	 * @param  string $path
+	 * @param  string $path path need convert encoding to server encoding
 	 * @return string
 	 * @author Naoki Sawada
 	 */
