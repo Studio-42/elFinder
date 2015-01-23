@@ -764,4 +764,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return file_exists($path) ? $path : false;
 	}
 	
+	/******************** Over write functions *************************/
+	
+	/**
+	 * File path of local server side work file path
+	 *
+	 * @param  string $path
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	protected function getWorkFile($path) {
+		return $path;
+	}
+
 } // END class 
