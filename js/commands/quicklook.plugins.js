@@ -19,7 +19,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			} 
 		});
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				img;
 
@@ -74,7 +74,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			fm      = ql.fm;
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file, jqxhr;
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
@@ -111,7 +111,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview;
 				
 			
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				mime = file.mime,
 				jqxhr;
@@ -159,7 +159,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		}
 
-		active && preview.bind('update', function(e) {
+		active && preview.bind('previewupdate', function(e) {
 			var file = e.file, node;
 			
 			if (file.mime == mime) {
@@ -202,7 +202,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		active && preview.bind('update', function(e) {
+		active && preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				node;
 				
@@ -238,7 +238,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 
@@ -275,7 +275,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 				
@@ -312,7 +312,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		preview.bind('update', function(e) {
+		preview.bind('previewupdate', function(e) {
 			var file  = e.file,
 				mime  = file.mime,
 				video;

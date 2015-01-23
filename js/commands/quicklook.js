@@ -207,7 +207,7 @@ elFinder.prototype.commands.quicklook = function() {
 
 		})
 		// update info/icon
-		.bind('update', function(e) {
+		.bind('previewupdate', function(e) {
 			var fm      = self.fm,
 				preview = self.preview,
 				file    = e.file,
@@ -398,7 +398,7 @@ elFinder.prototype.commands.quicklook = function() {
 			
 			self.change(function() {
 				if (self.opened()) {
-					self.value ? preview.trigger($.Event('update', {file : self.value})) : win.trigger('close');
+					self.value ? preview.trigger($.Event('previewupdate', {file : self.value})) : win.trigger('close');
 				}
 			});
 			
@@ -408,7 +408,7 @@ elFinder.prototype.commands.quicklook = function() {
 				}
 			});
 			
-			preview.bind('update', function() {
+			preview.bind('previewupdate', function() {
 				self.info.show();
 			});
 		});
