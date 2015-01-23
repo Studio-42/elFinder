@@ -70,6 +70,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected $dropboxUid = '';
 	
+	/**
+	 * Dropbox download host, replaces 'www.dropbox.com' of shares URL
+	 * 
+	 * @var string
+	 */
+	private $dropbox_dlhost = 'dl.dropboxusercontent.com';
+	
 	private $dropbox_phpFound = false;
 	
 	private $DB_TableName = '';
@@ -935,41 +942,33 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$path = $this->decode($hash);
 			$cache = $this->getDBdat($path);
 			$url = '';
-			if (isset($cache['share'])) {
+			if (isset($cache['share']) && strpos($cache['share'], $this->dropbox_dlhost) !== false) {
 				$res = $this->getHttpResponseHeader($cache['share']);
 				if (preg_match("/^HTTP\/[01\.]+ ([0-9]{3})/", $res, $match)) {
-					if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
-						$url = $match[1];
-					} else if ($match[1] >= 400) {
-						$url = '';
+					if ($match[1] < 400) {
+						$url = $cache['share'];
 					}
-				} else {
-					$url = '';
 				}
 			}
 			if (! $url) {
 				try {
-					$res = $this->dropbox->share($path);
-					$res = $this->getHttpResponseHeader($res['url']);
-					if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
-						$url = $match[1] . '?dl=1';
-					}
-					if ($url) {
-						if (! isset($cache['share']) || $cache['share'] !== $url) {
-							$cache['share'] = $url;
-							$this->updateDBdat($path, $cache);
-						}
+					$res = $this->dropbox->share($path, null, false);
+					$url = $res['url'];
+					if (strpos($url, 'www.dropbox.com') === false) {
 						$res = $this->getHttpResponseHeader($url);
-						if (preg_match('/^location:\s*(http[^\s?]+)/im', $res, $match)) {
+						if (preg_match('/^location:\s*(http[^\s]+)/im', $res, $match)) {
 							$url = $match[1];
 						}
+					}
+					list($url) = explode('?', $url);
+					$url = str_replace('www.dropbox.com', $this->dropbox_dlhost, $url);
+					if (! isset($cache['share']) || $cache['share'] !== $url) {
+						$cache['share'] = $url;
+						$this->updateDBdat($path, $cache);
 					}
 				} catch (Dropbox_Exception $e) {
 					return false;
 				}
-			}
-			if ($url) {
-				list($url) = explode('?', $url);
 			}
 			return $url;
 		}
