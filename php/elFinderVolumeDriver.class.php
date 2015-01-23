@@ -2221,11 +2221,11 @@ abstract class elFinderVolumeDriver {
 	protected function getWorkFile($path) {
 		$work = tempnam(sys_get_temp_dir(), 'elf');
 		if ($wfp = fopen($work, 'wb')) {
-			if ($fp = $this->fopenCE($path)) {
+			if ($fp = $this->_fopen($path)) {
 				while(!feof($fp)) {
 					fwrite($wfp, fread($fp, 8192));
 				}
-				$this->fcloseCE($fp, $path);
+				$this->_fclose($fp, $path);
 				fclose($wfp);
 				return $work;
 			}
