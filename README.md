@@ -68,7 +68,7 @@ Downloads
 
 3rd party Volume Drivers
 --------------------
- * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver)
+ * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver) (for elFinder 2.1+)
 
 Support
 -------
