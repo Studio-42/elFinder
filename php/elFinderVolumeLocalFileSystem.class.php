@@ -415,7 +415,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
-		return @fopen($path, 'r');
+		return @fopen($path, $mode);
 	}
 	
 	/**
