@@ -137,6 +137,44 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * ViewerJS preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var mimes   = ['application/pdf', 'application/vnd.oasis.opendocument.text'],
+			preview = ql.preview,
+			extensions = ['odt','fodt','ott','odp','fodp','otp','ods','fods','ots','pdf'],
+			fm      = ql.fm;
+			
+		fm.options.ViewerJS && preview.bind('previewupdate', function(e) {
+			var file = e.file,
+				node, extension = file.name.split('.').pop();
+			extension = extension.toLowerCase();;
+			var pw = parseInt(preview.width()),
+				ph = parseInt(preview.height());
+			if (pw > 250 && ph > 250 && ($.inArray(file.mime, mimes) !== -1 || $.inArray(extension, extensions) !== -1)) {
+				e.stopImmediatePropagation();
+				preview.one('change', function() {
+					node.unbind('load').remove();
+				});
+				
+				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
+					.hide()
+					.appendTo(preview)
+					.load(function() { 
+						ql.hideinfo();
+						node.show(); 
+					})
+					.attr('src', fm.options.ViewerJS+ql.fm.url(file.hash)+'&viewerjs_filename=/'+file.name);
+			}
+			
+		})
+		
+			
+	},
+
+	/**
 	 * PDF preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
