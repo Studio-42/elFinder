@@ -1754,8 +1754,10 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$work_path = $this->getWorkFile($path);
-		if ($path !== $work_path && (!$work_path || !is_writable($work_path))) {
-			is_file($work_path) && @unlink($work_path);
+		if (!$work_path || !is_writable($work_path)) {
+			if ($work_path && $path !== $work_path && is_file($work_path)) {
+				@unlink($work_path);
+			}
 			return false;
 		}
 
