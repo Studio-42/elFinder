@@ -65,6 +65,7 @@ Downloads
  * [Django](https://github.com/mikery/django-elfinder)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
  * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
+ * [Laravel](https://github.com/barryvdh/laravel-elfinder)
 
 3rd party Volume Drivers
 --------------------
