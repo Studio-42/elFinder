@@ -23,12 +23,13 @@
 	-webkit-user-select:  none;
 	-moz-user-select:     none;
 	-khtml-user-select:   none;
+	flex: 0 0 auto;
 }
 
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }
-.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
+.elfinder-ltr .elfinder-navbar { border-left:0 solid; }
+.elfinder-rtl .elfinder-navbar { border-right:0 solid; }
 .elfinder-ltr .ui-resizable-e { margin-left:10px; }
 
 /* folders tree container */

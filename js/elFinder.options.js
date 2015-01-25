@@ -154,7 +154,8 @@ elFinder.prototype._options = {
 		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,
-			jplayer  : 'extensions/jplayer'
+			jplayer  : 'extensions/jplayer',
+			panel	 : true
 		},
 		// "quicklook" command options.
 		edit : {

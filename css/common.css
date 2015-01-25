@@ -13,6 +13,8 @@
 	padding: 0;
 	position:relative;
 	overflow:hidden;
+	display:flex;
+	justify-content: space-between;
 }
 
 /* dir/file permissions and symlink markers */

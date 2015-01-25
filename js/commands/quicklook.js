@@ -27,6 +27,18 @@ elFinder.prototype.commands.quicklook = function() {
 		 **/
 		opened     = 2,
 		/**
+		 * panel opened state
+		 *
+		 * @type Number
+		 **/
+		panelopen  = 3,
+		/**
+		 * show in external panel state
+		 *
+		 * @type Number
+		 **/
+		externalpanel = 3,
+		/**
 		 * window state
 		 *
 		 * @type Number
@@ -104,6 +116,33 @@ elFinder.prototype.commands.quicklook = function() {
 			
 			return value && value !== '' && value != 'no';
 		},
+				
+		showPanel = function() {
+			if (state === externalpanel) {
+				self.panel.children().hide();
+				self.panel.find('.elfinder-quicklook-preview').empty();
+			} else { state = panelopen; }
+			self.panel.append(self.preview.add(navbar))
+			.append(self.info.hide()).show(); self.window.hide();
+			self.update(2, self.value);
+			self.panel.on('resize', function() {
+				self.preview.trigger('changesize');
+			}).trigger('resize');
+		},
+				
+		showWindow = function() {
+			if (state === externalpanel) return;
+			self.window.append(self.preview.add(navbar))
+			.append(self.info.hide()).show();
+			self.panel && self.panel.hide();
+			node = cwd.find('#'+self.value.hash);
+			self.window.css(closedCss(node))
+				.show()
+				.animate(openedCss(), 550, function() {
+					state = opened;
+					self.update(1, self.value);
+				});
+		},
 		
 		/**
 		 * Opened window width (from config)
@@ -145,7 +184,10 @@ elFinder.prototype.commands.quicklook = function() {
 					win.css(win.data('position')).unbind('mousemove');
 					$window.unbind(scroll).trigger(self.resize).unbind(self.resize);
 					navbar.unbind('mouseenter').unbind('mousemove');
+					if (state == panelopen) showPanel();
 				} else {
+					self.window.append(self.preview.add(navbar))
+					.append(self.info.hide()).show();
 					win.data('position', {
 						left   : win.css('left'), 
 						top    : win.css('top'), 
@@ -193,6 +235,8 @@ elFinder.prototype.commands.quicklook = function() {
 			.append(fsicon)
 			.append($('<div class="'+navicon+' '+navicon+'-next"/>').mousedown(function() { navtrigger(39); }))
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
+			.append($('<div class="'+navicon+' '+navicon+'-to-panel"/>').mousedown(showPanel))
+			.append($('<div class="'+navicon+' '+navicon+'-to-window"/>').mousedown(showWindow))
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').mousedown(function() { self.window.trigger('close'); }))
 		;
 
@@ -247,8 +291,7 @@ elFinder.prototype.commands.quicklook = function() {
 			}
 		});
 		
-
-	
+	this.panel = false;
 
 	this.window = $('<div class="ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
 		.click(function(e) { e.stopPropagation();  })
@@ -272,33 +315,35 @@ elFinder.prototype.commands.quicklook = function() {
 				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
-				win.css(closedCss(node))
-					.show()
-					.animate(openedCss(), 550, function() {
-						state = opened;
-						self.update(1, self.value);
-					});
+				if (self.panel && parseInt(self.fm.getUI('cwd').width()) > 600) {
+					showPanel();
+				} else {
+					showWindow();
+				}
 			}
 		})
 		.bind('close', function(e) {
 			var win     = self.window,
+				panel   = self.panel,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
 				node    = cwd.find('#'+win.data('hash')),
 				close   = function() {
 					state = closed;
-					win.hide();
+					win.hide(); panel.hide();
 					preview.children().remove();
-					self.update(0, self.value);
-					
+					self.update(self.getstate(), self.value);
 				};
 				
-			if (self.opened()) {
-				state = animated;
-				win.is('.'+fullscreen) && fsicon.mousedown()
-				node.length
-					? win.animate(closedCss(node), 500, close)
-					: close();
+			if (!self.closed() && state !== externalpanel) {
+				if (state == panelopen) close();
+				else {
+					state = animated;
+					win.is('.'+fullscreen) && fsicon.mousedown()
+					node.length
+						? win.animate(closedCss(node), 500, close)
+						: close();
+				}
 			}
 		});
 
@@ -318,7 +363,7 @@ elFinder.prototype.commands.quicklook = function() {
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
+		select : function() { this.update(state == panelopen ? this.getstate() : void(0), this.fm.selectedFiles()[0]); },
 		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
 	}
@@ -375,6 +420,19 @@ elFinder.prototype.commands.quicklook = function() {
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
 
+		if (o.panel) {
+			if (o.panel === true) {
+				this.panel = $('<div class="elfinder-quicklook-panel ui-widget-content" />').hide().appendTo(fm.getUI('workzone'));
+			} else if (typeof o.panel === 'string') {
+				this.panel = jQuery(o.panel);
+				if (this.panel.length !== 1) this.panel = false;
+				else { state = externalpanel; navbar.hide(); }
+			}
+		} else {
+			navbar.find('.'+navicon+'-to-panel').hide();
+		}
+		var panel	= this.panel;
+
 		fm.one('load', function() {
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
@@ -397,11 +455,25 @@ elFinder.prototype.commands.quicklook = function() {
 						preview.trigger('changesize'); 
 					}
 				});
+				panel && panel.resizable({ 
+					handles   : 'w', 
+					minWidth  : 250, 
+					resize    : function() { 
+						// use another event to avoid recursion in fullscreen mode
+						// may be there is clever solution, but i cant find it :(
+						preview.trigger('changesize'); 
+						panel.css('right', 0).css('left', 0);
+					}
+				});
 			}
 			
 			self.change(function() {
-				if (self.opened()) {
-					self.value ? preview.trigger($.Event('previewupdate', {file : self.value})) : win.trigger('close');
+				if (!self.closed()) {
+					state === externalpanel && showPanel();
+					self.value ? preview.show() : preview.hide();
+					if (!self.closed()) {
+						self.value ? preview.trigger($.Event('previewupdate', {file : self.value})) : (self.opened() && win.trigger('close'));
+					}
 				}
 			});
 			
@@ -419,11 +491,15 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.selected().length == 1 ? state == opened ? 1 : 0 : -1;
+		if (state == panelopen) return 2;
+		if (state == externalpanel) return 3;
+		if (this.fm.selected().length != 1) return -1;
+		if (state == opened) return 1;
+		return 0;
 	}
 	
 	this.exec = function() {
-		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
+		this.enabled() && this.window.trigger(!this.closed() ? 'close' : 'open');
 	}
 
 	this.hideinfo = function() {
