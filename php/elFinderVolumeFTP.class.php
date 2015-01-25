@@ -718,7 +718,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _fopen($path, $mode='rb') {
 		
 		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
+			$local = $this->getTempFile($path);
 			$fp = @fopen($local, 'wb');
 			if (ftp_fget($this->connect, $fp, $path, FTP_BINARY)) {
 				fclose($fp);
@@ -742,7 +742,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->tmp.DIRECTORY_SEPARATOR.md5($path));
+			@unlink($this->getTempFile($path));
 		}
 	}
 	
@@ -777,7 +777,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _mkfile($path, $name) {
 		if ($this->tmp) {
 			$path = $path.'/'.$name;
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path);
+			$local = $this->getTempFile();
 			$res = touch($local) && ftp_put($this->connect, $path, $local, FTP_ASCII);
 			@unlink($local);
 			return $res ? $path : false;
@@ -810,7 +810,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$res = false;
 		
 		if ($this->tmp) {
-			$local  = $this->tmp.DIRECTORY_SEPARATOR.md5($source);
+			$local  = $this->getTempFile();
 			$target = $targetDir.DIRECTORY_SEPARATOR.$name;
 
 			if (ftp_get($this->connect, $local, $source, FTP_BINARY)
@@ -909,7 +909,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$res = false;
 
 		if ($this->tmp) {
-			$local = $this->tmp.DIRECTORY_SEPARATOR.md5($path).'.txt';
+			$local = $this->getTempFile();
 			
 			if (@file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = @fopen($local, 'rb'))) {

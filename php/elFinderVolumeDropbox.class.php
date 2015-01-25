@@ -503,19 +503,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Get local temp filename
-	 *
-	 * @return string | false
-	 * @author Naoki Sawada
-	 **/
-	protected function getLocalName($path) {
-		if ($this->tmp) {
-			return $this->tmp.DIRECTORY_SEPARATOR.md5($this->dropboxUid.$path);
-		}
-		return false;
-	}
-	
-	/**
 	 * Get delta data and DB update
 	 * 
 	 * @param boolean $refresh force refresh
@@ -1129,7 +1116,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				return false;
 			}
 			
-			if ($local = $this->getLocalName($path)) {
+			if ($local = $this->getTempFile($path)) {
 				if (file_put_contents($local, $contents, LOCK_EX) !== false) {
 					return @fopen($local, $mode);
 				}
@@ -1149,7 +1136,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->getLocalName($path));
+			@unlink($this->getTempFile($path));
 		}
 	}
 
@@ -1328,9 +1315,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function _filePutContents($path, $content) {
 		$res = false;
 
-		if ($local = $this->getLocalName($path)) {
-			$local .= '.txt';
-
+		if ($local = $this->getTempFile($path)) {
 			if (@file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = @fopen($local, 'rb'))) {
 				clearstatcache();

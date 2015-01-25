@@ -257,17 +257,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $result;
 	}
 
-	/**
-	 * Return temporary file path for required file
-	 *
-	 * @param  string  $path   file path
-	 * @return string
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function tmpname($path) {
-		return $this->tmpPath.DIRECTORY_SEPARATOR.md5($path);
-	}
-
 	/*********************************************************************/
 	/*                               FS API                              */
 	/*********************************************************************/
@@ -578,7 +567,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _fopen($path, $mode='rb') {
 		$fp = $this->tmbPath
-			? @fopen($this->tmpname($path), 'w+')
+			? @fopen($this->getTempFile($path), 'w+')
 			: @tmpfile();
 		
 		
@@ -606,7 +595,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
-			@unlink($this->tmpname($path));
+			@unlink($this->getTempFile($path));
 		}
 	}
 	

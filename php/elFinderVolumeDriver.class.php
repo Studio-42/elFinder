@@ -1754,6 +1754,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$work_path = $this->getWorkFile($this->encoding? $this->convEncIn($path, true) : $path);
+
 		if (!$work_path || !is_writable($work_path)) {
 			if ($work_path && $path !== $work_path && is_file($work_path)) {
 				@unlink($work_path);
@@ -1888,6 +1889,8 @@ abstract class elFinderVolumeDriver {
 			return $this->tmpPath;
 		} else if (@ $this->tmp) {
 			return $this->tmp;
+		} else if (function_exists('sys_get_temp_dir')) {
+			return sys_get_temp_dir();
 		} else if (@ $this->tmbPath) {
 			return $this->tmbPath;
 		} else {
@@ -2317,6 +2320,41 @@ abstract class elFinderVolumeDriver {
 	/*********************** util mainly for inheritance class *********************/
 	
 	/**
+	 * Get temporary filename. Tempfile will be removed when after script execution finishes or exit() is called.
+	 * When needing the unique file to a path, give $path to parameter.
+	 * 
+	 * @param  string       $path for get unique file to a path
+	 * @return string|false
+	 * @author Naoki Sawada
+	 */
+	protected function getTempFile($path = '') {
+		static $cache = array();
+		static $rmfunc;
+		
+		$key = '';
+		if ($path !== '') {
+			$key = $this->id . '#' . $path;
+			if (isset($cache[$key])) {
+				return $cache[$key];
+			}
+		}
+		
+		if ($tmpdir = $this->getTempPath()) {
+			if (!$rmfunc) {
+				$rmfunc = create_function('$f', '@unlink($f);');
+			}
+			$name = tempnam($tmpdir, 'ELF');
+			if ($key) {
+				$cache[$key] = $name;
+			}
+			register_shutdown_function($rmfunc, $name);
+			return $name;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * File path of local server side work file path
 	 * 
 	 * @param  string $path path need convert encoding to server encoding
@@ -2324,15 +2362,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	protected function getWorkFile($path) {
-		$work = tempnam(sys_get_temp_dir(), 'elf');
-		if ($wfp = fopen($work, 'wb')) {
-			if ($fp = $this->_fopen($path)) {
-				while(!feof($fp)) {
-					fwrite($wfp, fread($fp, 8192));
+		if ($work = $this->getTempFile()) {
+			if ($wfp = fopen($work, 'wb')) {
+				if ($fp = $this->_fopen($path)) {
+					while(!feof($fp)) {
+						fwrite($wfp, fread($fp, 8192));
+					}
+					$this->_fclose($fp, $path);
+					fclose($wfp);
+					return $work;
 				}
-				$this->_fclose($fp, $path);
-				fclose($wfp);
-				return $work;
 			}
 		}
 		return false;
