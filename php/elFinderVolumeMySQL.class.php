@@ -69,7 +69,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			'socket'        => null,
 			'files_table'   => 'elfinder_file',
 			'tmbPath'       => '',
-			'tmpPath'       => ''
+			'tmpPath'       => '',
+			'icon'          => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_sql.png'
 		);
 		$this->options = array_merge($this->options, $opts);
 		$this->options['mimeDetect'] = 'internal';
@@ -266,93 +267,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function tmpname($path) {
 		return $this->tmpPath.DIRECTORY_SEPARATOR.md5($path);
 	}
-
-	/**
-	 * Resize image
-	 *
-	 * @param  string   $hash    image file
-	 * @param  int      $width   new width
-	 * @param  int      $height  new height
-	 * @param  bool     $crop    crop image
-	 * @return array|false
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
-	 **/
-	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
-		if ($this->commandDisabled('resize')) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED);
-		}
-		
-		if (($file = $this->file($hash)) == false) {
-			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
-		}
-		
-		if (!$file['write'] || !$file['read']) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED);
-		}
-		
-		$path = $this->decode($hash);
-		
-		if (!$this->canResize($path, $file)) {
-			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
-		}
-
-		$img = $this->tmpname($path);
-		
-		if (!($fp = @fopen($img, 'w+'))) {
-			return false;
-		}
-
-		if (($res = $this->query('SELECT content FROM '.$this->tbf.' WHERE id="'.$path.'"'))
-		&& ($r = $res->fetch_assoc())) {
-			fwrite($fp, $r['content']);
-			rewind($fp);
-			fclose($fp);
-		} else {
-			return false;
-		}
-
-
-		switch($mode) {
-			
-			case 'propresize':
-				$result = $this->imgResize($img, $width, $height, true, true);
-				break;
-
-			case 'crop':
-				$result = $this->imgCrop($img, $width, $height, $x, $y);
-				break;
-
-			case 'fitsquare':
-				$result = $this->imgSquareFit($img, $width, $height, 'center', 'middle', $bg ? $bg : $this->options['tmbBgColor']);
-				break;
-			
-			default:
-				$result = $this->imgResize($img, $width, $height, false, true);
-				break;				
-    	}
-		
-		if ($result) {
-			
-			$sql = sprintf('UPDATE %s SET content=LOAD_FILE("%s"), mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->loadFilePath($img), $path);
-			
-			if (!$this->query($sql)) {
-				$content = file_get_contents($img);
-				$sql = sprintf('UPDATE %s SET content="%s", mtime=UNIX_TIMESTAMP() WHERE id=%d', $this->tbf, $this->db->real_escape_string($content), $path);
-				if (!$this->query($sql)) {
-					@unlink($img);
-					return false;
-				}
-			}
-			@unlink($img);
-			$this->rmTmb($file);
-			$this->clearcache();
-			return $this->stat($path);
-		}
-		
-   		return false;
-	}
-	
 
 	/*********************************************************************/
 	/*                               FS API                              */

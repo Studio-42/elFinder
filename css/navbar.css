@@ -18,12 +18,18 @@
 	user-select: none;
 	-webkit-tap-highlight-color:rgba(0,0,0,0);
 /*	border:1px solid #111;*/
+	-webkit-touch-callout:none;
+	user-select:          none;
+	-webkit-user-select:  none;
+	-moz-user-select:     none;
+	-khtml-user-select:   none;
+	flex: 0 0 auto;
 }
 
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }
-.elfinder-rtl .elfinder-navbar { float:right; border-right:0 solid; }
+.elfinder-ltr .elfinder-navbar { border-left:0 solid; }
+.elfinder-rtl .elfinder-navbar { border-right:0 solid; }
 .elfinder-ltr .ui-resizable-e { margin-left:10px; }
 
 /* folders tree container */
@@ -95,7 +101,7 @@
 
 /* root folder */
 .elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 0; }
-.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -48px; }
+.elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -704px; }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
@@ -127,14 +133,19 @@
 /* permissions marker */
 .elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
 
+/* locked marker */
+.elfinder-navbar .elfinder-lock { top:-2px; }
+
 /* permissions/symlink markers ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
 .elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 18px; }
+.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  18px; }
+.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 18px; }
 .elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
 /* resizable */
-.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') center center no-repeat; left:0; }
+.elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') center center no-repeat; }
 .elfinder-nav-handle-icon {
 	position:absolute;
 	top:50%;

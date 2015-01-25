@@ -44,6 +44,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['fileMode'] = 0644;            // new files mode
 		$this->options['quarantine'] = '.quarantine';  // quarantine folder name - required to check archive (must be hidden)
 		$this->options['maxArcFilesSize'] = 0;        // max allowed archive files size (0 - no limit)
+		$this->options['icon']     = (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_local.png';
 	}
 	
 	/*********************************************************************/
@@ -305,9 +306,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat['target'] = $target;
 			$path  = $target;
 			$lstat = lstat($path);
-			$size  = $lstat['size'];
+			$size  = sprintf('%u', $lstat['size']);
 		} else {
-			$size = @filesize($path);
+			$size = sprintf('%u', @filesize($path));
 		}
 		
 		$dir = is_dir($path);
@@ -632,13 +633,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					if (is_dir($p) && $this->_findSymlinks($p)) {
 						return true;
 					} elseif (is_file($p)) {
-						$this->archiveSize += filesize($p);
+						$this->archiveSize += sprintf('%u', filesize($p));
 					}
 				}
 			}
 		} else {
 			
-			$this->archiveSize += filesize($path);
+			$this->archiveSize += sprintf('%u', filesize($path));
 		}
 		
 		return false;
@@ -763,4 +764,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return file_exists($path) ? $path : false;
 	}
 	
+	/******************** Over write functions *************************/
+	
+	/**
+	 * File path of local server side work file path
+	 *
+	 * @param  string $path
+	 * @return string
+	 * @author Naoki Sawada
+	 */
+	protected function getWorkFile($path) {
+		return $path;
+	}
+
 } // END class 

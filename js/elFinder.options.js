@@ -88,6 +88,22 @@ elFinder.prototype._options = {
 	handlers : {},
 
 	/**
+	 * Any custom headers to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 */
+	customHeaders : {},
+
+	/**
+	 * Any custom xhrFields to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 */
+	xhrFields : {},
+
+	/**
 	 * Interface language
 	 *
 	 * @type String
@@ -111,7 +127,8 @@ elFinder.prototype._options = {
 	commands : [
 		'open', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 
 		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
-		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help', 'resize', 'sort', 'netmount'
+		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help',
+		'resize', 'sort', 'netmount', 'netunmount', 'places'
 	],
 	
 	/**
@@ -137,7 +154,8 @@ elFinder.prototype._options = {
 		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,
-			jplayer  : 'extensions/jplayer'
+			jplayer  : 'extensions/jplayer',
+			panel	 : true
 		},
 		// "quicklook" command options.
 		edit : {
@@ -186,6 +204,53 @@ elFinder.prototype._options = {
 		// "info" command options.
 		info : {nullUrlDirLinkSelf : true},
 		
+		netmount: {
+			ftp: {
+				inputs: {
+					host     : $('<input type="text"/>'),
+					port     : $('<input type="text" placeholder="21"/>'),
+					path     : $('<input type="text" value="/"/>'),
+					user     : $('<input type="text"/>'),
+					pass     : $('<input type="password"/>'),
+					encoding : $('<input type="text" placeholder="Optional"/>'),
+					locale   : $('<input type="text" placeholder="Optional"/>')
+				}
+			},
+			dropbox: {
+				inputs: {
+					host     : $('<span><span class="elfinder-info-spinner"/></span></span><input type="hidden"/>'),
+					path     : $('<input type="text" value="/"/>'),
+					user     : $('<input type="hidden"/>'),
+					pass     : $('<input type="hidden"/>')
+				},
+				select: function(fm){
+					var self = this;
+					if (self.inputs.host.find('span').length) {
+						fm.request({
+							data : {cmd : 'netmount', protocol: 'dropbox', host: 'dropbox.com', user: 'init', pass: 'init', options: {url: fm.uploadURL, id: fm.id}},
+							preventDefault : true
+						}).done(function(data){
+							self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+							self.inputs.host.find('span').html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Dropbox.com');}));
+						}).fail(function(){});
+					}					
+				},
+				done: function(fm, data){
+					var self = this;
+					if (data.mode == 'makebtn') {
+						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+						self.inputs.host.find('input').hover(function(){$(this).toggleClass("ui-state-hover");});
+						self.inputs.host[1].value = "";
+					} else {
+						self.inputs.host.find('span').removeClass("elfinder-info-spinner");
+						self.inputs.host.find('span').html("Dropbox.com");
+						self.inputs.host[1].value = "dropbox";
+						self.inputs.user.val("done");
+						self.inputs.pass.val("done");
+					}
+				}
+			}
+		},
 
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
@@ -392,6 +457,15 @@ elFinder.prototype._options = {
 	rememberLastDir : true,
 	
 	/**
+	 * Clear historys(elFinder) on reload(not browser) function
+	 * Historys was cleared on Reload function on elFinder 2.0 (value is true)
+	 * 
+	 * @type Boolean
+	 * @default  false
+	 */
+	reloadClearHistory : false,
+	
+	/**
 	 * Use browser native history with supported browsers
 	 *
 	 * @type Boolean
@@ -464,11 +538,11 @@ elFinder.prototype._options = {
 	 */
 	contextmenu : {
 		// navbarfolder menu
-		navbar : ['open', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'info'],
+		navbar : ['open', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'places', 'info', 'netunmount'],
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'sort', '|', 'info'],
 		// current directory file menu
-		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'info']
+		files  : ['getfile', '|','open', 'quicklook', '|', 'download', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info']
 	},
 
 	/**

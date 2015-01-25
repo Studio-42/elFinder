@@ -133,6 +133,8 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			permsTpl = fm.res('tpl', 'perms'),
 			
+			lockTpl = fm.res('tpl', 'lock'),
+			
 			symlinkTpl = fm.res('tpl', 'symlink'),
 			
 			/**
@@ -163,7 +165,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.mime2kind(f);
 				},
 				marker : function(f) {
-					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
 					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
@@ -953,10 +955,8 @@ $.fn.elfindercwd = function(fm, options) {
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
-			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
-
-				e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files})//fm.upload({files : e.dataTransfer.files});
+				fm.exec('upload', {dropEvt: e});
 			}, false);
 		}
 
@@ -1073,7 +1073,8 @@ $.fn.elfindercwd = function(fm, options) {
 				trigger();
 			})
 			// select new files after some actions
-			.bind('mkdir mkfile duplicate upload rename archive extract', function(e) {
+			.bind('mkdir mkfile duplicate upload rename archive extract paste multiupload', function(e) {
+				if (e.type == 'upload' && e.data._multiupload) return;
 				var phash = fm.cwd().hash, files;
 				
 				unselectAll();

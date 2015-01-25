@@ -17,6 +17,22 @@
 	bottom:3px;
 	background:url("../img/toolbar.png") 0 -496px no-repeat;}
 
+/* quicklook panel */
+.elfinder-quicklook-panel {
+	width: 275px;
+	display:block;
+	position:relative;
+	flex: 0 0 auto;
+	border-top: 0 solid;
+	border-bottom: 0 solid;
+}
+
+/* ltr/rtl enviroment */
+.elfinder-ltr .elfinder-quicklook-panel { border-right:0 solid; }
+.elfinder-rtl .elfinder-quicklook-panel { border-left:0 solid; }
+
+.elfinder-quicklook-panel .ui-resizable-handle { margin-left:4px; width:12px; background:transparent url('../img/resize.png') center center no-repeat; }
+
 /* quicklook fullscreen window */
 .elfinder-quicklook-fullscreen {
 	border-radius:0;
@@ -129,14 +145,35 @@
 	position:absolute;
 	left:50%;
 	bottom:4px;
-	width:140px;
+	width:186px;
 	height:32px;
 	padding:0px;
-	margin-left:-70px;
+	margin-left:-93px;
 	border:1px solid transparent;
 	border-radius:19px;
 	-moz-border-radius:19px;
 	-webkit-border-radius:19px;
+}
+
+/* navigation bar in panel mode */
+.elfinder-quicklook-panel .elfinder-quicklook-navbar {
+	width:234px;
+	margin-left:-117px;
+	padding:5px;
+	border:1px solid #eee;
+	background:#000;
+}
+
+/* show close and to-window icon in panel mode */
+.elfinder-quicklook-panel .elfinder-quicklook-navbar-icon-close,
+.elfinder-quicklook-panel .elfinder-quicklook-navbar-icon-to-window,
+.elfinder-quicklook-panel .elfinder-quicklook-navbar-separator {
+	display:inline;
+}
+
+/* don't show to-panel icon in panel mode */
+.elfinder-quicklook-panel .elfinder-quicklook-navbar-icon-to-panel {
+	display:none;
 }
 
 /* navigation bar in fullscreen mode */
@@ -148,10 +185,30 @@
 	background:#000;
 }
 
+.elfinder-quicklook-panel .elfinder-quicklook-preview,
+.elfinder-quicklook-fullscreen .elfinder-quicklook-preview {
+	height:auto;
+	top:0px;
+	bottom:52px;
+	left:0px;
+	right:0px;
+	position:absolute;
+}
+
+
+.elfinder-quicklook-panel .elfinder-quicklook-preview {
+	left:12px;
+}
+
 /* show close icon in fullscreen mode */
 .elfinder-quicklook-fullscreen .elfinder-quicklook-navbar-icon-close,
 .elfinder-quicklook-fullscreen .elfinder-quicklook-navbar-separator {
 	display:inline;
+}
+
+/* don't show to-panel icon in fullscreen mode */
+.elfinder-quicklook-fullscreen .elfinder-quicklook-navbar-icon-to-panel {
+	display:none;
 }
 
 /* icons in navbar */
@@ -161,7 +218,6 @@
 	margin:0 7px;
 	float:left;
 	background:url("../img/quicklook-icons.png") 0 0 no-repeat;
-	
 }
 
 /* fullscreen icon */
@@ -172,6 +228,17 @@
 /* exit fullscreen icon */
 .elfinder-quicklook-navbar-icon-fullscreen-off {
 	background-position:0 -96px;
+}
+
+/* to panel icon */
+.elfinder-quicklook-navbar-icon-to-panel {
+	background-position:0 -160px;
+}
+
+/* to window icon */
+.elfinder-quicklook-navbar-icon-to-window {
+	background-position:0 -192px;
+	display:none;
 }
 
 /* prev file icon */
