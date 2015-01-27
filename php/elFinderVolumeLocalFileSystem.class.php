@@ -315,10 +315,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$stat['mime']  = $dir ? 'directory' : $this->mimetype($path);
 		$stat['ts']    = filemtime($path);
 		//logical rights first
-		$stat['read'] = is_readable($path)?null:false;
-		$stat['write'] = is_writable($path)?null:false;
+		$stat['read'] = is_readable($path)? null : false;
+		$stat['write'] = is_writable($path)? null : false;
 
-		if ($stat['read']) {
+		if (is_null($stat['read'])) {
 			$stat['size'] = $dir ? 0 : $size;
 		}
 		
