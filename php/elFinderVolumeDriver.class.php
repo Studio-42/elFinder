@@ -227,10 +227,12 @@ abstract class elFinderVolumeDriver {
 		'accessControl'   => null,
 		// some data required by access control
 		'accessControlData' => null,
-		// default permissions. not set hidden/locked here - take no effect
+		// default permissions.
 		'defaults'     => array(
 			'read'   => true,
-			'write'  => true
+			'write'  => true,
+			'locked' => false,
+			'hidden' => false
 		),
 		// files attributes
 		'attributes'   => array(),
@@ -611,8 +613,8 @@ abstract class elFinderVolumeDriver {
 		$this->defaults = array(
 			'read'    => isset($this->options['defaults']['read'])  ? !!$this->options['defaults']['read']  : true,
 			'write'   => isset($this->options['defaults']['write']) ? !!$this->options['defaults']['write'] : true,
-			'locked'  => false,
-			'hidden'  => false
+			'locked'  => isset($this->options['defaults']['locked']) ? !!$this->options['defaults']['locked'] : false,
+			'hidden'  => isset($this->options['defaults']['hidden']) ? !!$this->options['defaults']['hidden'] : false
 		);
 
 		// root attributes
@@ -2548,7 +2550,7 @@ abstract class elFinderVolumeDriver {
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null, $isDir));
 		if ($root) {
 			$stat['locked'] = 1;
-		} elseif ($this->attr($path, 'locked', !empty($stat['locked']), $isDir)) {
+		} elseif ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : null, $isDir)) {
 			$stat['locked'] = 1;
 		} else {
 			unset($stat['locked']);
@@ -2556,9 +2558,9 @@ abstract class elFinderVolumeDriver {
 
 		if ($root) {
 			unset($stat['hidden']);
-		} elseif ($this->attr($path, 'hidden', !empty($stat['hidden']), $isDir) 
+		} elseif ($this->attr($path, 'hidden', isset($stat['hidden']) ? !!$stat['hidden'] : null, $isDir) 
 		|| !$this->mimeAccepted($stat['mime'])) {
-			$stat['hidden'] = $root ? 0 : 1;
+			$stat['hidden'] = 1;
 		} else {
 			unset($stat['hidden']);
 		}
