@@ -727,6 +727,9 @@ $.fn.elfindercwd = function(fm, options) {
 				// for touch device
 				.delegate(fileSelector, 'touchstart.'+fm.namespace, function(e) {
 					e.stopPropagation();
+					if (e.target.nodeName == 'INPUT') {
+						return;
+					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
 					  sel = p.prevAll('.'+clSelected+':first').length +
 					        p.nextAll('.'+clSelected+':first').length;
@@ -753,8 +756,11 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.delegate(fileSelector, 'touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
-					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					e.stopPropagation();
+					if (e.target.nodeName == 'INPUT') {
+						return;
+					}
+					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
 				})
 				// attach draggable
