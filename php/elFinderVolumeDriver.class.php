@@ -1893,12 +1893,13 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function nameAccepted($name) {
 		if ($this->nameValidator) {
-			if (function_exists($this->nameValidator)) {
-				$f = $this->nameValidator;
-				return $f($name);
+			if (is_callable($this->nameValidator)) {
+				$res = call_user_func($this->nameValidator, $name);
+				return $res;
 			}
-
-			return preg_match($this->nameValidator, $name);
+			if (preg_match($this->nameValidator, '') !== false) {
+				return preg_match($this->nameValidator, $name);
+			}
 		}
 		return true;
 	}
