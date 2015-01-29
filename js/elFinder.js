@@ -1940,6 +1940,7 @@ elFinder.prototype = {
 			'application/x-awk'             : 'AWK',
 			'application/x-gzip'            : 'GZIP',
 			'application/x-bzip2'           : 'BZIP',
+			'application/x-xz'              : 'XZ',
 			'application/zip'               : 'ZIP',
 			'application/x-zip'               : 'ZIP',
 			'application/x-rar'             : 'RAR',
