@@ -1747,7 +1747,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function rm($hash) {
 		return $this->commandDisabled('rm')
-			? array(elFinder::ERROR_ACCESS_DENIED)
+			? $this->setError(elFinder::ERROR_ACCESS_DENIED)
 			: $this->remove($this->decode($hash));
 	}
 	
