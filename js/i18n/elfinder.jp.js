@@ -304,6 +304,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindTAR'         : 'TAR アーカイブ',
 			'kindGZIP'        : 'GZIP アーカイブ',
 			'kindBZIP'        : 'BZIP アーカイブ',
+			'kindXZ'          : 'XZ アーカイブ',
 			'kindZIP'         : 'ZIP アーカイブ',
 			'kindRAR'         : 'RAR アーカイブ',
 			'kindJAR'         : 'Java JAR ファイル',

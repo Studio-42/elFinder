@@ -303,6 +303,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindTAR'         : 'Archive TAR',
 			'kindGZIP'        : 'Archive GZIP',
 			'kindBZIP'        : 'Archive BZIP',
+			'kindXZ'          : 'Archive XZ',
 			'kindZIP'         : 'Archive ZIP',
 			'kindRAR'         : 'Archive RAR',
 			'kindJAR'         : 'Fichier Java JAR',
