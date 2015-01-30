@@ -3709,8 +3709,8 @@ abstract class elFinderVolumeDriver {
 			unset($o);
 			$test = $this->procExec('xz --version', $o, $c);
 			if ($c == 0) {
-				$arcs['create']['application/x-xz']  = array('cmd' => 'tar', 'argc' => '-Jcvf', 'ext' => 'xz');
-				$arcs['extract']['application/x-xz'] = array('cmd' => 'tar', 'argc' => '-Jxvf', 'ext' => 'xz');
+				$arcs['create']['application/x-xz']  = array('cmd' => 'tar', 'argc' => '-cJf', 'ext' => 'xz');
+				$arcs['extract']['application/x-xz'] = array('cmd' => 'tar', 'argc' => '-xJf', 'ext' => 'xz');
 			}
 		}
 		unset($o);
