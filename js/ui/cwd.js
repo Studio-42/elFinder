@@ -155,7 +155,7 @@ $.fn.elfindercwd = function(fm, options) {
 				permsclass : function(f) {
 					return fm.perms2class(f);
 				},
-				perms : function(f) {
+				perm : function(f) {
 					return fm.formatPermissions(f);
 				},
 				dirclass : function(f) {
