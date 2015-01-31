@@ -639,9 +639,9 @@ $.fn.elfindercwd = function(fm, options) {
 				var columns = fm.options.uiOptions.cwd.listView.columns;
 				for (var i = 0; i < columns.length; i++) {
 					if (fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]] != null) {
-						customColsName +='<td>'+fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]]+'</td>';
+						customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]]+'</td>';
 					} else {
-						customColsName +='<td>'+msg[columns[i]]+'</td>';
+						customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+msg[columns[i]]+'</td>';
 					}
 				}
 				return customColsName;
