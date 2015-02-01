@@ -290,6 +290,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
 			}
+			$stat['owner'] = $info[2];
 			
 			$name = $info[8];
 			
@@ -320,7 +321,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				return $stat;
 			}
 			
-			$perm = $this->parsePermissions($info[0]);
+			$perm = $this->parsePermissions($info[0], $stat['owner']);
 			$stat['name']  = $name;
 			$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
 			$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
@@ -341,10 +342,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function parsePermissions($perm) {
+	protected function parsePermissions($perm, $user = '') {
 		$res   = array();
 		$parts = array();
-		$owner = $this->options['owner'];
+		$owner = $user? ($user == $this->options['user']) : $this->options['owner'];
 		for ($i = 0, $l = strlen($perm); $i < $l; $i++) {
 			$parts[] = substr($perm, $i, 1);
 		}
