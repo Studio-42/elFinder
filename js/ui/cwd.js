@@ -635,14 +635,17 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			customColsNameBuild = function() {
-				var customColsName = '';
-				var columns = fm.options.uiOptions.cwd.listView.columns;
+				var name = '',
+				customColsName = '',
+				columns = fm.options.uiOptions.cwd.listView.columns,
+				names = $.extend({}, msg, fm.options.uiOptions.cwd.listView.columnsCustomName);
 				for (var i = 0; i < columns.length; i++) {
-					if (fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]] != null) {
-						customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+fm.options.uiOptions.cwd.listView.columnsCustomName[columns[i]]+'</td>';
+					if (typeof names[columns[i]] !== 'undefined') {
+						name = names[columns[i]];
 					} else {
-						customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+msg[columns[i]]+'</td>';
+						name = fm.i18n(columns[i]);
 					}
+					customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+name+'</td>';
 				}
 				return customColsName;
 			},
