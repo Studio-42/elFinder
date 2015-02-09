@@ -2377,16 +2377,19 @@ abstract class elFinderVolumeDriver {
 	 * Get image size array with `dimensions`
 	 *
 	 * @param string $path path need convert encoding to server encoding
+	 * @param string $mime file mime type
 	 * @return array|false
 	 */
-	public function getImageSize($path) {
+	public function getImageSize($path, $mime = '') {
 		$size = false;
-		if ($work = $this->getWorkFile($path)) {
-			if ($size = @getimagesize($work)) {
-				$size['dimensions'] = $size[0].'x'.$size[1];
+		if ($mime === '' || strtolower(substr($mime, 0, 5)) === 'image') {
+			if ($work = $this->getWorkFile($path)) {
+				if ($size = @getimagesize($work)) {
+					$size['dimensions'] = $size[0].'x'.$size[1];
+				}
 			}
+			is_file($work) && @unlink($work);
 		}
-		is_file($work) && @unlink($work);
 		return $size;
 	}
 	
