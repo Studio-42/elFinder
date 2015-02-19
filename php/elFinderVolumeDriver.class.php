@@ -2923,7 +2923,7 @@ abstract class elFinderVolumeDriver {
 					$name = $stat['name'];
 					if (!$this->copy($this->joinPathCE($src, $name), $dst, $name)) {
 						$this->remove($dst, true); // fall back
-						return false;
+						return $this->setError($this->error, elFinder::ERROR_COPY, $this->_path($src));
 					}
 				}
 			}
@@ -2999,7 +2999,8 @@ abstract class elFinderVolumeDriver {
 			
 			foreach ($volume->scandir($src) as $entr) {
 				if (!$this->copyFrom($volume, $entr['hash'], $path, $entr['name'])) {
-					return false;
+					$this->remove($path, true); // fall back
+					return $this->setError($this->error, elFinder::ERROR_COPY, $errpath);
 				}
 			}
 			
