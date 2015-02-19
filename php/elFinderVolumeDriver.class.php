@@ -2446,7 +2446,7 @@ abstract class elFinderVolumeDriver {
 					$name = $stat['name'];
 					if (!$this->copy($this->_joinPath($src, $name), $dst, $name)) {
 						$this->remove($dst, true); // fall back
-						return false;
+						return $this->setError($this->error, elFinder::ERROR_COPY, $this->_path($src));
 					}
 				}
 			}
