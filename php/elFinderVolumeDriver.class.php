@@ -2522,7 +2522,8 @@ abstract class elFinderVolumeDriver {
 			
 			foreach ($volume->scandir($src) as $entr) {
 				if (!$this->copyFrom($volume, $entr['hash'], $path, $entr['name'])) {
-					return false;
+					$this->remove($path, true); // fall back
+					return $this->setError($this->error, elFinder::ERROR_COPY, $errpath);
 				}
 			}
 			
