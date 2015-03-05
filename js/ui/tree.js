@@ -569,7 +569,7 @@ $.fn.elfindertree = function(fm, opts) {
 				
 				if (dir.length) {
 					dir.is('.'+draggable) && dir.draggable(act);
-					dir.is('.'+droppable) && dir.droppable(active);
+					dir.is('.'+droppable) && dir.droppable(act);
 					dir[lock ? 'addClass' : 'removeClass'](disabled);
 				}
 			});
