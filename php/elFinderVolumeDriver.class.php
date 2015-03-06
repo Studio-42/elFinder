@@ -3714,8 +3714,9 @@ abstract class elFinderVolumeDriver {
 			return $arcs;
 		}
 		
-		if ($use_cache && isset($_SESSION['ELFINDER_ARCHIVERS_CACHE']) && is_array($_SESSION['ELFINDER_ARCHIVERS_CACHE'])) {
-			return $_SESSION['ELFINDER_ARCHIVERS_CACHE'];
+		$sessionKey = $_SESSION[elFinder::$sessionCacheKey . ':ARCHIVERS_CACHE'];
+		if ($use_cache && isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
+			return $_SESSION[$sessionKey];
 		}
 		
 		$this->procExec('tar --version', $o, $ctar);
@@ -3805,7 +3806,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		$_SESSION['ELFINDER_ARCHIVERS_CACHE'] = $arcs;
+		$_SESSION[$sessionKey] = $arcs;
 		return $arcs;
 	}
 
