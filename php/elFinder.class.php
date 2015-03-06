@@ -447,16 +447,16 @@ class elFinder {
 
 	private function session_expires() {
 		
-		if (!isset($_SESSION['LAST_ACTIVITY'])) {
-			$_SESSION['LAST_ACTIVITY'] = time();
+		if (!isset($_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'])) {
+			$_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] = time();
 			return false;
 		}
 
-		if ( ($this->timeout > 0) && (time() - $_SESSION['LAST_ACTIVITY'] > $this->timeout) ) {
+		if ( ($this->timeout > 0) && (time() - $_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] > $this->timeout) ) {
 			return true;
 		}
 
-		$_SESSION['LAST_ACTIVITY'] = time();
+		$_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] = time();
 		return false;	
 	}
 	
