@@ -3714,7 +3714,7 @@ abstract class elFinderVolumeDriver {
 			return $arcs;
 		}
 		
-		$sessionKey = $_SESSION[elFinder::$sessionCacheKey . ':ARCHIVERS_CACHE'];
+		$sessionKey = elFinder::$sessionCacheKey . ':ARCHIVERS_CACHE';
 		if ($use_cache && isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
 			return $_SESSION[$sessionKey];
 		}
