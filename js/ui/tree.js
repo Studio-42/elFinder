@@ -317,9 +317,12 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 					if (fm.newAPI) {
 						dir = fm.file(cwdhash);
-						if (dir && dir.phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
-							updateTree([dir]);
-							return sync();
+						if (dir && dir.phash) {
+							link = tree.find('#'+fm.navHash2Id(dir.phash));
+							if (link.length && link.is('.'+loaded)) {
+								updateTree([dir]);
+								return sync();
+							}
 						}
 						link  = cwd.root? tree.find('#'+fm.navHash2Id(cwd.root)) : null;
 						if (link) {
