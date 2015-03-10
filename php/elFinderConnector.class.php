@@ -124,7 +124,7 @@ class elFinderConnector {
 			if (!empty($data['raw']) && !empty($data['error'])) {
 				exit($data['error']);
 			} else {
-				exit(json_encode($data));
+				exit(json_encode($this->utf8_converter($data)));
 			}
 		}
 		
@@ -149,5 +149,22 @@ class elFinderConnector {
 		$res = str_replace("\0", '', $args);
 		$magic_quotes_gpc && ($res = stripslashes($res));
 		return $res;
+	}
+	
+	/**
+	 * UTF8 Converter
+	 * 
+	 * @param  array  $array
+	 * @return array
+	 */
+	function utf8_converter($array)
+	{
+		array_walk_recursive($array, function(&$item, $key){
+			if(!mb_detect_encoding($item, 'utf-8', true)){
+					$item = utf8_encode($item);
+			}
+		});
+	 
+		return $array;
 	}
 }// END class 
