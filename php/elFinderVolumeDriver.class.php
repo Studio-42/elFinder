@@ -1184,7 +1184,7 @@ abstract class elFinderVolumeDriver {
 			}
 			
 			array_unshift($tree, $stat);
-			if (!$lineal && ($path != $this->root)) {
+			if (!$lineal) {
 				foreach ($this->gettree($path, 0) as $dir) {
 					if (!in_array($dir, $tree)) {
 						$tree[] = $dir;
