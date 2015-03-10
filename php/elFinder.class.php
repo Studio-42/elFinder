@@ -786,6 +786,9 @@ class elFinder {
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
+			if ($volume) {
+				$result['cwd']['root'] = $volume->root();
+			}
 		}
 		
 		return $result;
