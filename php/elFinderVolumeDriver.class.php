@@ -2271,7 +2271,7 @@ abstract class elFinderVolumeDriver {
 	 * @return mixed
 	 * @author Naoki Sawada
 	 */
-	public function convEncIn($var, $restoreLocale = false, $unknown = '_') {
+	public function convEncIn($var = null, $restoreLocale = false, $unknown = '_') {
 		return (!$this->encoding)? $var : $this->convEnc($var, 'UTF-8', $this->encoding, $this->options['locale'], $restoreLocale, $unknown);
 	}
 	
@@ -2284,7 +2284,7 @@ abstract class elFinderVolumeDriver {
 	 * @return mixed
 	 * @author Naoki Sawada
 	 */
-	public function convEncOut($var, $restoreLocale = true, $unknown = '_') {
+	public function convEncOut($var = null, $restoreLocale = true, $unknown = '_') {
 		return (!$this->encoding)? $var : $this->convEnc($var, $this->encoding, 'UTF-8', $this->options['locale'], $restoreLocale, $unknown);
 	}
 	
@@ -2406,6 +2406,23 @@ abstract class elFinderVolumeDriver {
 			is_file($work) && @unlink($work);
 		}
 		return $size;
+	}
+	
+	/**
+	 * Delete dirctory trees
+	 *
+	 * @param string $localpath path need convert encoding to server encoding
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	protected function delTree($localpath) {
+		foreach ($this->_scandir($localpath) as $p) {
+			@set_time_limit(30);
+			$stat = $this->stat($this->convEncOut($p));
+			$this->convEncIn();
+			($stat['mime'] === 'directory')? $this->delTree($p) : $this->_unlink($p);
+		}
+		return $this->_rmdir($localpath);
 	}
 	
 	/*********************** file stat *********************/
@@ -2877,6 +2894,7 @@ abstract class elFinderVolumeDriver {
 		$result = array();
 
 		foreach($this->scandirCE($path) as $p) {
+			@set_time_limit(30);
 			$stat = $this->stat($p);
 
 			if (!$stat) { // invalid links
@@ -3073,16 +3091,11 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($stat['mime'] == 'directory') {
-			foreach ($this->scandirCE($path) as $p) {
-				$name = $this->basenameCE($p);
-				if ($name != '.' && $name != '..' && !$this->remove($p)) {
-					return false;
-				}
-			}
-			if ($this->convEncOut(!$this->_rmdir($this->convEncIn($path)))) {
+			$ret = $this->delTree($this->convEncIn($path));
+			$this->convEncOut();
+			if (!$ret) {
 				return $this->setError(elFinder::ERROR_RM, $this->path($path));
 			}
-			
 		} else {
 			if ($this->convEncOut(!$this->_unlink($this->convEncIn($path)))) {
 				return $this->setError(elFinder::ERROR_RM, $this->path($path));
@@ -3583,6 +3596,7 @@ abstract class elFinderVolumeDriver {
 	protected function rmTmb($stat) {
 		if ($stat['mime'] === 'directory') {
 			foreach ($this->scandirCE($this->decode($stat['hash'])) as $p) {
+				@set_time_limit(30);
 				$name = $this->basenameCE($p);
 				$name != '.' && $name != '..' && $this->rmTmb($this->stat($p));
 			}
