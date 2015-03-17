@@ -659,6 +659,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _extract($path, $arc) {
 		
 		if ($this->quarantine) {
+
 			$dir     = $this->quarantine.DIRECTORY_SEPARATOR.str_replace(' ', '_', microtime()).basename($path);
 			$archive = $dir.DIRECTORY_SEPARATOR.basename($path);
 			
@@ -695,7 +696,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			// find symlinks
 			$symlinks = $this->_findSymlinks($dir);
 			// remove arc copy
-			$this->remove($dir);
+			//$this->remove($dir);
+			$this->delTree($dir, false);
 			
 			if ($symlinks) {
 				return $this->setError(elFinder::ERROR_ARC_SYMLINKS);
@@ -777,6 +779,22 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 */
 	protected function getWorkFile($path) {
 		return $path;
+	}
+
+	/**
+	 * Delete dirctory trees
+	 *
+	 * @param string $localpath path need convert encoding to server encoding
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	protected function delTree($localpath) {
+		foreach (array_diff(scandir($localpath), array('.', '..')) as $file) {
+			@set_time_limit(30);
+			$path = $localpath . '/' . $file;
+			(is_dir($path)) ? $this->delTree($path) : @unlink($path);
+		}
+		return rmdir($localpath);
 	}
 
 } // END class 
