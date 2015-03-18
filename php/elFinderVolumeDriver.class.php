@@ -3824,6 +3824,27 @@ abstract class elFinderVolumeDriver {
 		return $arcs;
 	}
 
+	/**
+	 * Remove directory recursive on local file system
+	 *
+	 * @param string $dir Target dirctory path
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	public function rmdirRecursive($dir) {
+		if (is_dir($dir)) {
+			foreach (array_diff(scandir($dir), array('.', '..')) as $file) {
+				@set_time_limit(30);
+				$path = $dir . '/' . $file;
+				(is_dir($path)) ? $this->rmdirRecursive($path) : @unlink($path);
+			}
+			return @rmdir($dir);
+		} else if (is_file($dir)) {
+			return @unlink($dir);
+		}
+		return false;
+	}
+
 	/**==================================* abstract methods *====================================**/
 	
 	/*********************** paths/urls *************************/

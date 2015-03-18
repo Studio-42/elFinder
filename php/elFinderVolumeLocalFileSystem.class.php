@@ -669,7 +669,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 			
 			// insurance unexpected shutdown
-			register_shutdown_function(array(&$this, 'delTree'), realpath($dir));
+			register_shutdown_function(array($this, 'rmdirRecursive'), realpath($dir));
 			
 			chmod($dir, 0777);
 			
@@ -787,15 +787,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return boolean
 	 * @author Naoki Sawada
 	 */
-	public function delTree($localpath) {
-		if (is_dir($localpath)) {
-			foreach (array_diff(scandir($localpath), array('.', '..')) as $file) {
-				@set_time_limit(30);
-				$path = $localpath . '/' . $file;
-				(is_dir($path)) ? $this->delTree($path) : @unlink($path);
-			}
-			return rmdir($localpath);
-		}
+	protected function delTree($localpath) {
+		return $this->rmdirRecursive($localpath);
 	}
 
 } // END class 
