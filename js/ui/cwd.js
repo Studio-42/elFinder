@@ -849,7 +849,7 @@ $.fn.elfindercwd = function(fm, options) {
 					scrollToView($(this));
 				})
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, function(e) {
-					if (fm.UA.Touch) return;
+					if (!fm.UA.Mouse && fm.UA.Touch) return;
 					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
 					$(this).toggleClass(clHover);
 				})

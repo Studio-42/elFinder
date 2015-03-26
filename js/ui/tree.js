@@ -394,7 +394,7 @@ $.fn.elfindertree = function(fm, opts) {
 					var link  = $(this), 
 						enter = e.type == 'mouseenter';
 					
-					if (!link.is('.'+dropover+' ,.'+disabled) && !fm.UA.Touch) {
+					if (!link.is('.'+dropover+' ,.'+disabled) && (fm.UA.Mouse || !fm.UA.Touch)) {
 						enter && !link.is('.'+root+',.'+draggable+',.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
 						link.toggleClass(hover, enter);
 					}
@@ -405,8 +405,10 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// open dir or open subfolders in tree
 				.delegate('.'+navdir, 'click', function(e) {
-					if (fm.UA.Touch && !$(this).data('tap')) return;
-					$(this).data('tap', null);
+					if ($(this).data('tap')) {
+						$(this).data('tap', null);
+						return;
+					}
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
