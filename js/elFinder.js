@@ -327,6 +327,13 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.UA = (function(){
 		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
+		var mouseCheck = function(){
+			if (!self.UA.Mouse) {
+				self.UA.Mouse = true;
+				node.off('mouseover', mouseCheck);
+			}
+		};
+		node.on('mouseover', mouseCheck);
 		return {
 			// Browser IE <= IE 6
 			ltIE6:typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
@@ -341,7 +348,8 @@ window.elFinder = function(node, opts) {
 			Chrome:webkit && window.chrome,
 			Safari:webkit && !window.chrome,
 			Mobile:typeof window.orientation != "undefined",
-			Touch:typeof window.ontouchstart != "undefined"
+			Touch:typeof window.ontouchstart != "undefined",
+			Mouse:false
 		};
 	})();
 	
