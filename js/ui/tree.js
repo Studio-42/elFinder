@@ -405,7 +405,7 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// open dir or open subfolders in tree
 				.delegate('.'+navdir, 'click', function(e) {
-					if (!$(this).data('tap')) return;
+					if (fm.UA.Touch && !$(this).data('tap')) return;
 					$(this).data('tap', null);
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
