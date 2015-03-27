@@ -51,9 +51,8 @@
 	border:1px solid transparent;
 	cursor:default;
 }
-.elfinder-tree-dir.elfinder-touch {
-	padding: 10px 12px;
-	margin: 0;
+.elfinder-navbar-dir.elfinder-touch {
+	padding: 12px 12px;
 }
 
 /* ltr/rtl enviroment */

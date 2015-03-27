@@ -394,7 +394,7 @@ $.fn.elfindertree = function(fm, opts) {
 					var link  = $(this), 
 						enter = e.type == 'mouseenter';
 					
-					if (!link.is('.'+dropover+' ,.'+disabled) && (fm.UA.Mouse || !fm.UA.Touch)) {
+					if (!link.is('.'+dropover+' ,.'+disabled)) {
 						enter && !link.is('.'+root+',.'+draggable+',.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
 						link.toggleClass(hover, enter);
 					}
@@ -405,16 +405,12 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// open dir or open subfolders in tree
 				.delegate('.'+navdir, 'click', function(e) {
-					if ($(this).data('tap')) {
-						$(this).data('tap', null);
-						return;
-					}
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
 					
-					if (link.data('longtap')) {
-						e.stopPropagation();
+						if (link.data('longtap')) {
+							e.stopPropagation();
 						return;
 					}
 					
@@ -428,10 +424,10 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.delegate('.'+navdir, 'touchstart', function(e) {
+					e.stopPropagation();
 					var evt = e.originalEvent,
 					p = $(this)
 					.addClass(hover)
-					.data('tap', true)
 					.data('longtap', null)
 					.data('tmlongtap', setTimeout(function(e){
 						// long tap
@@ -445,16 +441,10 @@ $.fn.elfindertree = function(fm, opts) {
 					}, 500));
 				})
 				.delegate('.'+navdir, 'touchmove touchend', function(e) {
-					var p = $(this);
-					clearTimeout(p.data('tmlongtap'));
-					p.removeClass(hover);
+					e.stopPropagation();
+					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
-						p.data('tap', null);
-					}
-					if (e.type == 'touchend') {
-						if (p.data('tap') && e.originalEvent.target == this) {
-							p.click();
-						}
+						$(this).removeClass(hover);
 					}
 				})
 				// toggle subfolders in tree

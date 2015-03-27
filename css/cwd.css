@@ -216,9 +216,12 @@
 	border:0 solid;
 	
 }
+.elfinder .elfinder-cwd tr.elfinder-touch td {
+	padding: 10px 12px;
+}
 
 .elfinder .elfinder-cwd tr.elfinder-cwd-file.elfinder-touch td {
-	padding: 10px 12px;
+	padding: 13px 12px;
 }
 
 .elfinder-ltr .elfinder-cwd table td { text-align:right; }

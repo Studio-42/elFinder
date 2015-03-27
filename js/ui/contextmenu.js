@@ -7,15 +7,17 @@
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
+		var cmItem = 'elfinder-contextmenu-item',
+			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
-				.delegate('.elfinder-contextmenu-item', 'mouseenter mouseleave', function() {
+				.delegate('.'+cmItem, 'mouseenter mouseleave', function() {
 					$(this).toggleClass('ui-state-hover')
 				}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
-			tpl     = '<div class="elfinder-contextmenu-item"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
+			clItem = cmItem + (fm.UA.Touch ? ' elfinder-touch' : ''),
+			tpl     = '<div class="'+clItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
 			item = function(label, icon, callback) {
 				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
 					.click(function(e) {
@@ -115,7 +117,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
-									$('<div class="elfinder-contextmenu-item"><span>'+variant[1]+'</span></div>')
+									$('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')
 										.on('click touchstart', function(e) {
 											e.stopPropagation();
 											close();

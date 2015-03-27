@@ -46,7 +46,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			create    = function(dir) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir.hash))
 						.replace(/\{name\}/, fm.escape(dir.name))
-						.replace(/\{cssclass\}/, fm.perms2class(dir))
+						.replace(/\{cssclass\}/, (fm.UA.Touch ? 'elfinder-touch ' : '')+fm.perms2class(dir))
 						.replace(/\{permissions\}/, !dir.read || !dir.write ? ptpl : '')
 						.replace(/\{symlink\}/, ''));
 			},
@@ -172,8 +172,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 				.hide()
 				.append(wrapper)
 				.appendTo(fm.getUI('navbar'))
-				.delegate('.'+navdir, 'mouseenter mouseleave', function() {
-					$(this).toggleClass('ui-state-hover');
+				.delegate('.'+navdir, 'mouseenter mouseleave', function(e) {
+					$(this).toggleClass('ui-state-hover', (e.type == 'mouseenter'));
 				})
 				.delegate('.'+navdir, 'click', function(e) {
 					var p = $(this);
@@ -223,6 +223,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
 					var hash = $(this).attr('id').substr(6),
 					p = $(this)
+					.addClass(hover)
 					.data('longtap', null)
 					.data('tmlongtap', setTimeout(function(){
 						// long tap
@@ -240,6 +241,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 				})
 				.on('touchmove touchend', '.'+navdir+':not(.'+clroot+')', function(e) {
 					clearTimeout($(this).data('tmlongtap'));
+					if (e.type == 'touchmove') {
+						$(this).removeClass(hover);
+					}
 				});
 
 		// "on regist" for command exec
