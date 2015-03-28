@@ -722,9 +722,9 @@ abstract class elFinderVolumeDriver {
 
 		$this->rootName = empty($this->options['alias']) ? $this->_basename($this->root) : $this->options['alias'];
 
-                // This get's triggered if $this->root == '/' and alias is empty.
-                // Maybe modify _basename instead?
-                if (empty($this->rootName)) $this->rootName = $this->separator;
+		// This get's triggered if $this->root == '/' and alias is empty.
+		// Maybe modify _basename instead?
+		if (empty($this->rootName)) $this->rootName = $this->separator;
 
 		$root = $this->stat($this->root);
 		
