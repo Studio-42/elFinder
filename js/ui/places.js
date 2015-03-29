@@ -16,6 +16,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			tpl       = fm.res('tpl', 'navdir'),
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
+			key       = 'places'+(opts.suffix? opts.suffix : ''),
 			/**
 			 * Convert places dir node into dir hash
 			 *
@@ -36,7 +37,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 *
 			 * @return void
 			 **/
-			save      = function() { fm.storage('places', dirs.join(',')); },
+			save      = function() { fm.storage(key, dirs.join(',')); },
 			/**
 			 * Return node for given dir object
 			 *
@@ -265,7 +266,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			
 			places.show().parent().show();
 
-			dirs = $.map((fm.storage('places') || '').split(','), function(hash) { return hash || null;});
+			dirs = $.map((fm.storage(key) || '').split(','), function(hash) { return hash || null;});
 			
 			if (dirs.length) {
 				root.prepend(spinner);
