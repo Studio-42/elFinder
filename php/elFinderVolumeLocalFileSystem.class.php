@@ -275,7 +275,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$real_path = realpath($path);
 		$real_parent = realpath($parent);
 		if ($real_path && $real_parent) {
-			return $real_path === $real_parent || strpos($real_path, $real_parent.DIRECTORY_SEPARATOR) === 0;
+			return $real_path === $real_parent || strpos($real_path, rtrim($real_parent, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR) === 0;
 		}
 		return false;
 	}
