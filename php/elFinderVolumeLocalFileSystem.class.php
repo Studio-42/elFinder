@@ -51,6 +51,24 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/*********************************************************************/
 	
 	/**
+	 * Prepare driver before mount volume.
+	 * Return true if volume is ready.
+	 *
+	 * @return bool
+	 **/
+	protected function init() {
+		// Normalize directory separator for windows
+		if (DIRECTORY_SEPARATOR !== '/') {
+			foreach(array('path', 'tmbPath', 'quarantine') as $key) {
+				if ($this->options[$key]) {
+					$this->options[$key] = str_replace('/', DIRECTORY_SEPARATOR, $this->options[$key]);
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * Configure after successfull mount.
 	 *
 	 * @return void
@@ -64,7 +82,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($this->options['tmbPath']) {
 			$this->options['tmbPath'] = strpos($this->options['tmbPath'], DIRECTORY_SEPARATOR) === false
 				// tmb path set as dirname under root dir
-				? $this->root.DIRECTORY_SEPARATOR.$this->options['tmbPath']
+				? $this->_abspath($this->options['tmbPath'])
 				// tmb path as full path
 				: $this->_normpath($this->options['tmbPath']);
 		}
@@ -90,7 +108,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 				$this->options['quarantine'] = '';
 			} else {
-				$this->quarantine = $this->root.DIRECTORY_SEPARATOR.$this->options['quarantine'];
+				$this->quarantine = $this->_abspath($this->options['quarantine']);
 				if ((!is_dir($this->quarantine) && !$this->_mkdir($this->root, $this->options['quarantine'])) || !is_writable($this->quarantine)) {
 					$this->options['quarantine'] = $this->quarantine = '';
 				}
@@ -164,6 +182,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (empty($path)) {
 			return '.';
 		}
+		
+		$changeSep = (DIRECTORY_SEPARATOR !== '/');
+		if ($changeSep) {
+			$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		}
 
 		if (strpos($path, '/') === 0) {
 			$initial_slashes = true;
@@ -198,6 +221,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$path = implode('/', $comps);
 		if ($initial_slashes) {
 			$path = str_repeat('/', $initial_slashes) . $path;
+		}
+		
+		if ($changeSep) {
+			$path = str_replace('/', DIRECTORY_SEPARATOR, $path);
 		}
 		
 		return $path ? $path : '.';
