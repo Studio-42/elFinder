@@ -56,7 +56,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadNoFiles'     : 'Не знайдено файлів для відвантаження.',
 			'errMaxSize'           : 'Розмір даних перевищує допустиме значення.',
 			'errFileMaxSize'       : 'Розмір файла перевищує допустиме значення.',
-			'errUploadMime'        : 'Тип файлу заборонено.',
+			'errUploadMime'        : 'Файли цього типу заборонені.',
 			'errUploadTransfer'    : '"$1" : помилка передачі.', 
 			'errSave'              : 'Неможливо записати "$1".',
 			'errCopy'              : 'Неможливо скопіювати "$1".',
