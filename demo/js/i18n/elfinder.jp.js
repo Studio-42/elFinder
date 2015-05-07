@@ -1,11 +1,12 @@
 /**
  * Japanese translation
- * @author Tomoaki Yoshida <info@yoshida-studio.jp>, Naoki Sawada <hypweb@gmail.com>
- * @version 2012-06-25
+ * @author Tomoaki Yoshida <info@yoshida-studio.jp>
+ * @author Naoki Sawada <hypweb@gmail.com>
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
-		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
+		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
 		dateFormat : 'Y/m/d h:i A', // 2012/04/11 05:27 PM
@@ -24,8 +25,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errAbort'             : '接続が中断されました',
 			'errTimeout'           : '接続がタイムアウトしました.',
 			'errNotFound'          : 'バックエンドが見つかりません',
-			'errResponse'          : '無効なバックエンドコンフィグレーションです',
-			'errConf'              : '無効なバックエンドコンフィグレーションです',
+			'errResponse'          : '無効なバックエンドレスポンスです',
+			'errConf'              : 'バックエンドの設定が有効ではありません',
 			'errJSON'              : 'PHP JSON モジュールがインストールされていません',
 			'errNoVolumes'         : '読み込み可能なボリュームが入手できません',
 			'errCmdParams'         : 'コマンド "$1"のパラメーターが無効です',
@@ -70,16 +71,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'サポート外のアーカイブ形式です',
 			'errNoArchive'         : 'アーカイブでないかサポートされていないアーカイブ形式です',
 			'errCmdNoSupport'      : 'サポートされていないコマンドです',
-			'errReplByChild'       : 'ホルダ "$1" に含まれてるアイテムを置き換えることはできません',
+			'errReplByChild'       : 'フォルダ "$1" に含まれてるアイテムを置き換えることはできません',
 			'errArcSymlinks'       : 'シンボリックリンクまたは許容されないファイル名を含むアーカイブはセキュリティ上、解凍できません', // edited 25.06.2012
 			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
 			'errResize'            : '"$1"をリサイズできません',
+			'errResizeDegree'      : 'イメージの回転角度が不正です',  // added 7.3.2013
+			'errResizeRotate'      : 'イメージの回転ができません',  // added 7.3.2013
+			'errResizeSize'        : '指定されたイメージサイズが不正です',  // added 7.3.2013
+			'errResizeNoChange'    : 'イメージサイズなどの変更がありません',  // added 7.3.2013
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
 			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
 			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
 			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
 			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
+			'errSessionExpires'    : 'アクションがなかったため、セッションが期限切れになりました',
+			'errCreatingTempDir'   : '一時ディレクトリを作成できません："$1"',
+			'errFtpDownloadFile'   : 'FTP からファイルをダウンロードできません："$1"',
+			'errFtpUploadFile'     : 'FTP へファイルをアップロードできません："$1"',
+			'errFtpMkdir'          : 'FTP にリモートディレクトリを作成できません："$1"',
+			'errArchiveExec'       : 'ファイルのアーカイブ中にエラーが発生しました："$1"',
+			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
+			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -119,44 +132,72 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
 			'btnMount'  : 'マウント',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'フォルダーを開く',
-			'ntffile'     : 'ファイルを開く',
-			'ntfreload'   : 'フォルダーを再読込',
-			'ntfmkdir'    : 'ディレクトリーを作成',
-			'ntfmkfile'   : 'ファイルを作成',
-			'ntfrm'       : 'ファイルを削除',
-			'ntfcopy'     : 'ファイルをコピー',
-			'ntfmove'     : 'ファイルを移動',
-			'ntfprepare'  : 'ファイルコピーを準備',
-			'ntfrename'   : 'ファイル名を変更',
-			'ntfupload'   : 'ファイルをアップロード',
-			'ntfdownload' : 'ファイルをダウンロード',
-			'ntfsave'     : 'ファイルを保存',
-			'ntfarchive'  : 'アーカイブ作成',
-			'ntfextract'  : 'アーカイブを解凍',
-			'ntfsearch'   : 'ファイル検索',
+			'ntfopen'     : 'フォルダーを開いています',
+			'ntffile'     : 'ファイルを開いています',
+			'ntfreload'   : 'フォルダーを再読込しています',
+			'ntfmkdir'    : 'ディレクトリーを作成しています',
+			'ntfmkfile'   : 'ファイルを作成しています',
+			'ntfrm'       : 'ファイルを削除しています',
+			'ntfcopy'     : 'ファイルをコピーしています',
+			'ntfmove'     : 'ファイルを移動しています',
+			'ntfprepare'  : 'ファイルコピーを準備しています',
+			'ntfrename'   : 'ファイル名を変更しています',
+			'ntfupload'   : 'ファイルをアップロードしています',
+			'ntfdownload' : 'ファイルをダウンロードしています',
+			'ntfsave'     : 'ファイルを保存しています',
+			'ntfarchive'  : 'アーカイブ作成しています',
+			'ntfextract'  : 'アーカイブを解凍しています',
+			'ntfsearch'   : 'ファイル検索中',
 			'ntfresize'   : 'リサイズしています',
-			'ntfsmth'     : '何かしています >_<',
+			'ntfsmth'     : '処理をしています',
       		'ntfloadimg'  : 'イメージを読み込んでいます',
       		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
+			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
 			'Today'       : '今日',
 			'Yesterday'   : '昨日',
-			'Jan'         : '1月',
-			'Feb'         : '2月',
-			'Mar'         : '3月',
-			'Apr'         : '4月',
+			'msJan'       : '1月',
+			'msFeb'       : '2月',
+			'msMar'       : '3月',
+			'msApr'       : '4月',
+			'msMay'       : '5月',
+			'msJun'       : '6月',
+			'msJul'       : '7月',
+			'msAug'       : '8月',
+			'msSep'       : '9月',
+			'msOct'       : '10月',
+			'msNov'       : '11月',
+			'msDec'       : '12月',
+			'January'     : '1月',
+			'February'    : '2月',
+			'March'       : '3月',
+			'April'       : '4月',
 			'May'         : '5月',
-			'Jun'         : '6月',
-			'Jul'         : '7月',
-			'Aug'         : '8月',
-			'Sep'         : '9月',
-			'Oct'         : '10月',
-			'Nov'         : '11月',
-			'Dec'         : '12月',
+			'June'        : '6月',
+			'July'        : '7月',
+			'August'      : '8月',
+			'September'   : '9月',
+			'October'     : '10月',
+			'November'    : '11月',
+			'December'    : '12月',
+			'Sunday'      : '日曜日',
+			'Monday'      : '月曜日',
+			'Tuesday'     : '火曜日',
+			'Wednesday'   : '水曜日',
+			'Thursday'    : '木曜日',
+			'Friday'      : '金曜日',
+			'Saturday'    : '土曜日',
+			'Sun'         : '(日)', 
+			'Mon'         : '(月)', 
+			'Tue'         : '(火)', 
+			'Wed'         : '(水)', 
+			'Thu'         : '(木)', 
+			'Fri'         : '(金)', 
+			'Sat'         : '(土)',
 
 			/******************************** sort variants ********************************/
 			'sortname'          : '名前順', 
@@ -166,9 +207,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortFoldersFirst'  : 'フォルダ優先', // added 21.06.2012
 
 			/********************************** messages **********************************/
-			'confirmReq'      : '確認必須です',
-			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません!',
-			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか?',
+			'confirmReq'      : '処理を実行しますか？',
+			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません！',
+			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか？',
 			'apllyAll'        : '全てに適用します',
 			'name'            : '名前',
 			'size'            : 'サイズ',
@@ -186,7 +227,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectlfile'     : '最後のファイルを選択',
 			'viewlist'        : 'リスト形式で見る',
 			'viewicons'       : 'アイコン形式で見る',
-			'places'          : 'Places',
+			'places'          : 'お気に入り',
 			'calc'            : '計算', 
 			'path'            : 'パス',
 			'aliasfor'        : 'エイリアス',
@@ -218,7 +259,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'maintainer'      : 'メインテナー',
 			'translator'      : '翻訳者',
 			'icons'           : 'アイコン',
-			'dontforget'      : 'タオル忘れちゃだめよー。',
+			'dontforget'      : 'タオル忘れちゃだめよ～',
 			'shortcutsof'     : 'ショートカットは利用できません',
 			'dropFiles'       : 'ここにファイルをドロップ',
 			'or'              : 'または',
@@ -263,6 +304,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindTAR'         : 'TAR アーカイブ',
 			'kindGZIP'        : 'GZIP アーカイブ',
 			'kindBZIP'        : 'BZIP アーカイブ',
+			'kindXZ'          : 'XZ アーカイブ',
 			'kindZIP'         : 'ZIP アーカイブ',
 			'kindRAR'         : 'RAR アーカイブ',
 			'kindJAR'         : 'Java JAR ファイル',

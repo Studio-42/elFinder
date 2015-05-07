@@ -46,7 +46,7 @@ window.elFinderSupportVer1 = function(upload) {
 			xhr;
 			
 		dfrd.abort = function() {
-			!xhr.isRejected() && !xhr.isResolved() && xhr.abort();
+			xhr.state() == 'pending' && xhr.abort();
 		}
 		
 		switch (cmd) {

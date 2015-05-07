@@ -1,12 +1,12 @@
 /**
  * Simplified Chinese translation
- * @author 翻译者 <deerchao@gmail.com>
+ * @author deerchao <deerchao@gmail.com>
  * @author Andy Hu <andyhu7@yahoo.com.hk>
- * @version 2012-04-11
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.zh_CN = {
-		translator : '翻译者 &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;',
+		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;',
 		language   : '简体中文',
 		direction  : 'ltr',
 		dateFormat : 'Y-m-d H:i',
@@ -51,18 +51,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : '不能重命名 "$1".',
 			'errCopyFrom'          : '不允许从卷 "$1" 复制.',
 			'errCopyTo'            : '不允许向卷 "$1" 复制.',
-			'errUploadCommon'      : '上传出错.',
-			'errUpload'            : '无法上传 "$1".',
+			'errUpload'            : '上传出错.',
+			'errUploadFile'        : '无法上传 "$1".',
 			'errUploadNoFiles'     : '未找到要上传的文件.',
-			'errMaxSize'           : '数据超过了允许的最大大小.',
-			'errFileMaxSize'       : '文件超过了允许的最大大小.',
+			'errUploadTotalSize'   : '数据超过了允许的最大大小.',
+			'errUploadFileSize'    : '文件超过了允许的最大大小.',
 			'errUploadMime'        : '不允许的文件类型.',
 			'errUploadTransfer'    : '"$1" 传输错误.', 
+			'errNotReplace'        : '对象 "$1" 已经在此位置存在, 不能被其他对象替换.', // new
+			'errReplace'           : '无法替换 "$1".',
 			'errSave'              : '无法保存 "$1".',
 			'errCopy'              : '无法复制 "$1".',
 			'errMove'              : '无法移动 "$1".',
 			'errCopyInItself'      : '不能移动 "$1" 到原有位置.',
 			'errRm'                : '无法删除 "$1".',
+			'errRmSrc'             : '不能删除源文件.',
 			'errExtract'           : '无法从 "$1" 提取文件.',
 			'errArchive'           : '无法创建压缩包.',
 			'errArcType'           : '不支持的压缩格式.',
@@ -72,7 +75,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : '出于安全上的考虑，不允许解压包含符号链接的压缩包.',
 			'errArcMaxSize'        : '压缩包文件超过最大允许文件大小范围.',
 			'errResize'            : '无法重新调整大小 "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : '不被支持的文件格式.',
+			'errNotUTF8Content'    : '文件 "$1" 不是 UTF-8 格式, 不能编辑.',  // added 9.11.2011
+			'errNetMount'          : '无法装载 "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : '不支持该协议.',     // added 17.04.2012
+			'errNetMountFailed'    : '装载失败.',         // added 17.04.2012
+			'errNetMountHostReq'   : '需要指定主机.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '创建压缩包',
@@ -102,6 +121,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : '查看',
 			'cmdresize'    : '重新调整大小',
 			'cmdsort'      : '排序',
+			'cmdnetmount'  : '装载网络卷', // added 18.04.2012
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '关闭',
@@ -111,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : '取消',
 			'btnNo'     : '否',
 			'btnYes'    : '是',
+			'btnMount'  : '装载',  // added 18.04.2012
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : '打开文件夹',
@@ -129,25 +150,28 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : '创建压缩包',
 			'ntfextract'  : '从压缩包提取文件',
 			'ntfsearch'   : '搜索文件',
+			'ntfresize'   : '正在更改尺寸',
 			'ntfsmth'     : '正在忙 >_<',
 			'ntfloadimg'  : '正在加载图片',
+      		'ntfnetmount' : '正在装载网络卷', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '未知',
 			'Today'       : '今天',
 			'Yesterday'   : '昨天',
-			'Jan'         : '一月',
-			'Feb'         : '二月',
-			'Mar'         : '三月',
-			'Apr'         : '四月',
-			'May'         : '五月',
-			'Jun'         : '六月',
-			'Jul'         : '七月',
-			'Aug'         : '八月',
-			'Sep'         : '九月',
-			'Oct'         : '十月',
-			'Nov'         : '十一月',
-			'Dec'         : '十二月',
+			'msJan'       : '一月',
+			'msFeb'       : '二月',
+			'msMar'       : '三月',
+			'msApr'       : '四月',
+			'msMay'       : '五月',
+			'msJun'       : '六月',
+			'msJul'       : '七月',
+			'msAug'       : '八月',
+			'msSep'       : '九月',
+			'msOct'       : '十月',
+			'msNov'       : '十一月',
+			'msDec'       : '十二月',
 			'January'     : '一月',
 			'February'    : '二月',
 			'March'       : '三月',
@@ -174,15 +198,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : '周四', 
 			'Fri'         : '周五', 
 			'Sat'         : '周六',
+			
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : '按名称 (文件夹在最前)', 
-			'sortkindDirsFirst' : '按类型 (文件夹在最前)', 
-			'sortsizeDirsFirst' : '按大小 (文件夹在最前)', 
-			'sortdateDirsFirst' : '按日期 (文件夹在最前)', 
 			'sortname'          : '按名称', 
 			'sortkind'          : '按类型', 
 			'sortsize'          : '按大小',
 			'sortdate'          : '按日期',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '请确认',
@@ -244,20 +266,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectForUpload' : '选择要上传的文件',
 			'moveFiles'       : '移动文件',
 			'copyFiles'       : '复制文件',
-			'rmFromPlaces'    : 'Remove from places',
-			'untitled folder' : '未命名文件夹',
-			'untitled file.txt' : '未命名文件.txt',
+			'rmFromPlaces'    : '从位置中删除',
 			'aspectRatio'     : '保持比例',
 			'scale'           : '高宽比',
 			'width'           : '宽',
 			'height'          : '高',
-			'mode'            : '模式',
 			'resize'          : '重新调整大小',
 			'crop'            : '裁切',
 			'rotate'          : '旋转',
 			'rotate-cw'       : '顺时针旋转90度',
 			'rotate-ccw'      : '逆时针旋转90度',
 			'degree'          : '度',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'            : '端口', // added 18.04.2012
+			'user'            : '用户', // added 18.04.2012
+			'pass'            : '密码', // added 18.04.2012
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '未知',
@@ -279,6 +304,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindTAR'         : 'TAR 压缩包',
 			'kindGZIP'        : 'GZIP 压缩包',
 			'kindBZIP'        : 'BZIP 压缩包',
+			'kindXZ'          : 'XZ 压缩包',
 			'kindZIP'         : 'ZIP 压缩包',
 			'kindRAR'         : 'RAR 压缩包',
 			'kindJAR'         : 'Java JAR 文件',
@@ -337,5 +363,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Matroska 视频',
 			'kindVideoOGG'    : 'Ogg 视频'
 		}
-	}
+	};
 }

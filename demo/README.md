@@ -20,13 +20,13 @@ Features
 
  * All operations with files and folders on a remote server (copy, move,
    upload, create folder/file, rename, etc.)
- * High performance server beckend and light client UI
+ * High performance server backend and light client UI
  * Multi-root support
  * Local file system, MySQL, FTP volume storage drivers
  * Background file upload with Drag & Drop HTML5 support
  * List and Icons view
- * Kayboard shortcuts
- * Standart methods of file/group selection using mouse or keyboard
+ * Keyboard shortcuts
+ * Standard methods of file/group selection using mouse or keyboard
  * Move/Copy files with Drag & Drop
  * Archives create/extract (zip, rar, 7z, tar, gzip, bzip2)
  * Rich context menu and toolbar
@@ -53,6 +53,11 @@ Requirements
  * Any web server
  * PHP 5.2+ (for thumbnails - mogrify utility or GD/Imagick module)
 
+Downloads
+------------
+ + [elFinder 2.x (RC1)](https://github.com/downloads/Studio-42/elFinder/elfinder-2.0-rc1.tar.gz)
+ + [elFinder 2.x (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.x.zip)
+ + [elFInder 2.1 (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.1.zip)
 
 3rd party connectors
 --------------------
@@ -60,7 +65,11 @@ Requirements
  * [Django](https://github.com/mikery/django-elfinder)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
  * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
+ * [Laravel](https://github.com/barryvdh/laravel-elfinder)
 
+3rd party Volume Drivers
+--------------------
+ * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver) (for elFinder 2.1+)
 
 Support
 -------

@@ -1,13 +1,16 @@
 /**
  * Polish translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
- * @version 2012-01-28
+ * @author Wojciech Jabłoński <www.jablonski@gmail.com>
+ * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
+		dateFormat : 'd M Y H:i',
+		fancyDateFormat : '$1 H:i',
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -48,18 +51,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Nie można zmienić nazwy "$1".',
 			'errCopyFrom'          : 'Kopiowanie z katalogu "$1" nie jest możliwe.',
 			'errCopyTo'            : 'Kopiowanie do katalogu "$1" nie jest możliwe.',
-			'errUploadCommon'      : 'Błąd wysyłania.',
-			'errUpload'            : 'Nie można wysłać "$1".',
+			'errUpload'            : 'Błąd wysyłania.',
+			'errUploadFile'        : 'Nie można wysłać "$1".',
 			'errUploadNoFiles'     : 'Nie znaleziono plików do wysłania.',
-			'errMaxSize'           : 'Przekroczono dopuszczalny rozmiar wysyłanych plików.',
-			'errFileMaxSize'       : 'Plik przekracza dopuszczalny rozmiar.',
+			'errUploadTotalSize'   : 'Przekroczono dopuszczalny rozmiar wysyłanych plików.',
+			'errUploadFileSize'    : 'Plik przekracza dopuszczalny rozmiar.',
 			'errUploadMime'        : 'Niedozwolony typ pliku.',
 			'errUploadTransfer'    : 'Błąd przesyłania "$1".',
+			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.',
+			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Nie można zapisać "$1".',
 			'errCopy'              : 'Nie można skopiować "$1".',
 			'errMove'              : 'Nie można przenieść "$1".',
 			'errCopyInItself'      : 'Nie można skopiować "$1" w miejsce jego samego.',
 			'errRm'                : 'Nie można usunąć "$1".',
+			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Nie można wypakować plików z "$1".',
 			'errArchive'           : 'Nie można utworzyć archiwum.',
 			'errArcType'           : 'Nieobsługiwany typ archiwum.',
@@ -69,7 +75,23 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcSymlinks'       : 'Ze względów bezpieczeństwa rozpakowywanie archiwów zawierających dowiązania symboliczne (symlinks) jest niedozwolone.',
 			'errArcMaxSize'        : 'Archiwum przekracza maksymalny dopuszczalny rozmiar.',
 			'errResize'            : 'Nie można zmienić rozmiaru "$1".',
+			'errResizeDegree'      : 'Invalid rotate degree.',
+			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeSize'        : 'Invalid image size.',
+			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Nieobsługiwany typ pliku.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errSessionExpires'    : 'Your session has expired due to inactivity.',
+			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
+			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
+			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
+			'errArchiveExec'       : 'Error while archiving files: "$1"',
+			'errExtractExec'       : 'Error while extracting files: "$1"',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Utwórz archiwum',
@@ -99,6 +121,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Widok',
 			'cmdresize'    : 'Zmień rozmiar obrazu',
 			'cmdsort'      : 'Sortuj',
+			'cmdnetmount'  : 'Mount network volume',
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -108,6 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Anuluj',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Tak',
+			'btnMount'  : 'Mount',
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otwórz folder',
@@ -126,35 +150,61 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Tworzenie archiwum',
 			'ntfextract'  : 'Wypakowywanie plików z archiwum',
 			'ntfsearch'   : 'Wyszukiwanie plików',
+			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Robienie czegoś >_<',
 			'ntfloadimg'  : 'Ładowanie obrazu',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'nieznana',
 			'Today'       : 'Dzisiaj',
 			'Yesterday'   : 'Wczoraj',
-			'Jan'         : 'sty',
-			'Feb'         : 'lut',
-			'Mar'         : 'mar',
-			'Apr'         : 'kwi',
-			'May'         : 'maj',
-			'Jun'         : 'cze',
-			'Jul'         : 'lip',
-			'Aug'         : 'sie',
-			'Sep'         : 'wrz',
-			'Oct'         : 'paź',
-			'Nov'         : 'lis',
-			'Dec'         : 'gru',
+			'msJan'       : 'sty',
+			'msFeb'       : 'lut',
+			'msMar'       : 'mar',
+			'msApr'       : 'kwi',
+			'msMay'       : 'maj',
+			'msJun'       : 'cze',
+			'msJul'       : 'lip',
+			'msAug'       : 'sie',
+			'msSep'       : 'wrz',
+			'msOct'       : 'paź',
+			'msNov'       : 'lis',
+			'msDec'       : 'gru',
+			'January'     : 'Styczeń',
+			'February'    : 'Luty',
+			'March'       : 'Marzec',
+			'April'       : 'Kwiecień',
+			'May'         : 'Maj',
+			'June'        : 'Czerwiec',
+			'July'        : 'Lipiec',
+			'August'      : 'Sierpień',
+			'September'   : 'Wrzesień',
+			'October'     : 'Październik',
+			'November'    : 'Listopad',
+			'December'    : 'Grudzień',
+			'Sunday'      : 'niedziela',
+			'Monday'      : 'poniedziałek',
+			'Tuesday'     : 'wtorek',
+			'Wednesday'   : 'środa',
+			'Thursday'    : 'czwartek',
+			'Friday'      : 'piątek',
+			'Saturday'    : 'sobota',
+			'Sun'         : 'nie',
+			'Mon'         : 'pon',
+			'Tue'         : 'wto',
+			'Wed'         : 'śro',
+			'Thu'         : 'czw',
+			'Fri'         : 'pią',
+			'Sat'         : 'sob',
 
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'po nazwie (foldery pierwsze)', 
-			'sortkindDirsFirst' : 'po typie (foldery pierwsze)', 
-			'sortsizeDirsFirst' : 'po rozmiarze (foldery pierwsze)', 
-			'sortdateDirsFirst' : 'po dacie (foldery pierwsze)', 
 			'sortname'          : 'po nazwie', 
 			'sortkind'          : 'po typie', 
 			'sortsize'          : 'po rozmiarze',
 			'sortdate'          : 'po dacie',
+			'sortFoldersFirst'  : 'Folders first',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Wymagane potwierdzenie',
@@ -217,15 +267,22 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveFiles'       : 'Przenieś pliki',
 			'copyFiles'       : 'Kopiuj pliki',
 			'rmFromPlaces'    : 'Usuń z ulubionych',
-			'untitled folder' : 'nowy folder',
-			'untitled file.txt' : 'nowy plik.txt',
 			'aspectRatio'     : 'Zachowaj proporcje',
 			'scale'           : 'Skala',
 			'width'           : 'Szerokość',
 			'height'          : 'Wysokość',
-			'mode'            : 'Tryb',
 			'resize'          : 'Zmień rozmiar',
 			'crop'            : 'Przytnij',
+			'rotate'          : 'Obróć',
+			'rotate-cw'       : 'Obróć 90° w lewo',
+			'rotate-ccw'      : 'Obróć 90° w prawo',
+			'degree'          : '°',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
@@ -247,6 +304,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindTAR'         : 'Archiwum TAR',
 			'kindGZIP'        : 'Archiwum GZIP',
 			'kindBZIP'        : 'Archiwum BZIP',
+			'kindXZ'          : 'Archiwum XZ',
 			'kindZIP'         : 'Archiwum ZIP',
 			'kindRAR'         : 'Archiwum RAR',
 			'kindJAR'         : 'Java JAR file',
@@ -305,5 +363,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoMKV'    : 'Plik wideo Matroska',
 			'kindVideoOGG'    : 'Plik wideo Ogg'
 		}
-	}
+	};
 }
