@@ -42,7 +42,7 @@ var dirmode = 0755,
 
 		'php':
 			[
-				path.join(src, 'php', 'connector.minimal.php'),
+				path.join(src, 'php', 'connector.minimal.php-dist'),
 				path.join(src, 'php', 'mime.types'),
 				path.join(src, 'php', 'MySQLStorage.sql')
 			]
@@ -230,8 +230,8 @@ task('misc', function(){
 	// copyFile(hs, hd);
 
 	// connector
-	var cs = path.join(src, 'php', 'connector.minimal.php');
-	var cd = path.join('php', 'connector.php');
+	var cs = path.join(src, 'php', 'connector.minimal.php-dist');
+	var cd = path.join('php', 'connector.php-dist');
 	copyFile(cs, cd);
 });
 
