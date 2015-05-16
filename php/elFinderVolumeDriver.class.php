@@ -3525,9 +3525,10 @@ abstract class elFinderVolumeDriver {
 				2 => '180',
 				3 => '270'
 			);
+			$quotedPath = escapeshellarg($path);
 			$cmds = array(
-				'exiftran -i '.$exiftran[$count].' "'.$path.'"',
-				'jpegtran -rotate '.$jpegtran[$count].' -copy all -outfile "'.$path.'" "'.$path.'"'
+				'exiftran -i '.$exiftran[$count].' '.$path,
+				'jpegtran -rotate '.$jpegtran[$count].' -copy all -outfile '.$quotedPath.' '.$quotedPath
 			);
 			foreach($cmds as $cmd) {
 				if ($this->procExec($cmd) === 0) {
