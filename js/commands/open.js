@@ -26,23 +26,26 @@ elFinder.prototype.commands.open = function() {
 			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1) : -1
 	}
 	
-	this.exec = function(hashes) {
+	this.exec = function(hashes, opts) {
 		var fm    = this.fm, 
 			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files = this.files(hashes),
 			cnt   = files.length,
+			thash = (typeof opts == 'object')? opts.thash : false,
 			file, url, s, w, imgW, imgH, winW, winH;
 
-		if (!cnt) {
-			return dfrd.reject();
+		if (!cnt && !thash) {
+			{
+				return dfrd.reject();
+			}
 		}
 
 		// open folder
-		if (cnt == 1 && (file = files[0]) && file.mime == 'directory') {
-			return file && !file.read
+		if (thash || (cnt == 1 && (file = files[0]) && file.mime == 'directory')) {
+			return !thash && file && !file.read
 				? dfrd.reject(['errOpen', file.name, 'errPerm'])
 				: fm.request({
-						data   : {cmd  : 'open', target : file.thash || file.hash},
+						data   : {cmd  : 'open', target : thash || file.thash || file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
 						syncOnFail : true
 					});

@@ -417,7 +417,7 @@ $.fn.elfindertree = function(fm, opts) {
 					fm.trigger('searchend');
 				
 					if (hash != fm.cwd().hash && !link.is('.'+disabled)) {
-						fm.exec('open', file.thash || hash);
+						fm.exec('open', file.thash || hash, {thash: file.thash});
 					} else if (link.is('.'+collapsed)) {
 						link.children('.'+arrow).click();
 					}
