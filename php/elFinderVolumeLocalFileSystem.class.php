@@ -406,7 +406,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
-			$target = dirname($path).DIRECTORY_SEPARATOR.$target;
+			$target = $this->_joinPath(dirname($path), $target);
 		}
 		
 		if ($this->_inpath($target, $this->aroot)) {
@@ -429,7 +429,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		foreach (scandir($path) as $name) {
 			if ($name != '.' && $name != '..') {
-				$files[] = $path.DIRECTORY_SEPARATOR.$name;
+				$files[] = $this->_joinPath($path, $name);
 			}
 		}
 		return $files;
@@ -469,7 +469,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
-		$path = $path.DIRECTORY_SEPARATOR.$name;
+		$path = $this->_joinPath($path, $name);
 
 		if (@mkdir($path)) {
 			@chmod($path, $this->options['dirMode']);
@@ -488,7 +488,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkfile($path, $name) {
-		$path = $path.DIRECTORY_SEPARATOR.$name;
+		$path = $this->_joinPath($path, $name);
 		
 		if (($fp = @fopen($path, 'w'))) {
 			@fclose($fp);
@@ -508,7 +508,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _symlink($source, $targetDir, $name) {
-		return @symlink($source, $targetDir.DIRECTORY_SEPARATOR.$name);
+		return @symlink($source, $this->_joinPath($targetDir, $name));
 	}
 	
 	/**
@@ -521,7 +521,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _copy($source, $targetDir, $name) {
-		return copy($source, $targetDir.DIRECTORY_SEPARATOR.$name);
+		return copy($source, $this->_joinPath($targetDir, $name));
 	}
 	
 	/**
@@ -535,7 +535,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _move($source, $targetDir, $name) {
-		$target = $targetDir.DIRECTORY_SEPARATOR.$name;
+		$target = $this->_joinPath($targetDir, $name);
 		return @rename($source, $target) ? $target : false;
 	}
 		
@@ -573,7 +573,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _save($fp, $dir, $name, $stat) {
-		$path = $dir.DIRECTORY_SEPARATOR.$name;
+		$path = $this->_joinPath($dir, $name);
 
 		if (@file_put_contents($path, $fp, LOCK_EX) === false) {
 			return false;
