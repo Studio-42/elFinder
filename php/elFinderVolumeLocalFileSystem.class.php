@@ -168,7 +168,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _joinPath($dir, $name) {
-		return $dir.DIRECTORY_SEPARATOR.$name;
+		return rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
 	}
 	
 	/**
@@ -238,7 +238,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _relpath($path) {
-		return $path == $this->root ? '' : substr($path, strlen($this->root)+1);
+		return $path == $this->root ? '' : substr($path, strlen(rtrim($this->root, DIRECTORY_SEPARATOR)) + 1);
 	}
 	
 	/**
@@ -249,7 +249,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _abspath($path) {
-		return $path == DIRECTORY_SEPARATOR ? $this->root : $this->root.DIRECTORY_SEPARATOR.$path;
+		return $path == DIRECTORY_SEPARATOR ? $this->root : $this->_joinPath($this->root, $path);
 	}
 	
 	/**
@@ -411,7 +411,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		if ($this->_inpath($target, $this->aroot)) {
 			$atarget = realpath($target);
-			return $this->_normpath($this->root.DIRECTORY_SEPARATOR.substr($atarget, strlen($this->aroot)+1));
+			return $this->_normpath($this->_joinPath($this->root, substr($atarget, strlen(rtrim($this->aroot, DIRECTORY_SEPARATOR)) + 1)));
 		}
 
 		return false;
