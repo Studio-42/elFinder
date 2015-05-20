@@ -1638,7 +1638,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		// check MIME
-		$name = $this->_basename($path);
+		$name = $this->basenameCE($path);
 		$mime = '';
 		if ($this->mimeDetect != 'internal') {
 			if ($tp = tmpfile()) {
