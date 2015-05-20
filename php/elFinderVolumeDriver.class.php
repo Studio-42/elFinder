@@ -1376,22 +1376,7 @@ abstract class elFinderVolumeDriver {
 			$mime = elFinderVolumeDriver::mimetypeInternalDetect($name);
 		}
 
-		// logic based on http://httpd.apache.org/docs/2.2/mod/mod_authz_host.html#order
-		$allow  = $this->mimeAccepted($mime, $this->uploadAllow, null);
-		$deny   = $this->mimeAccepted($mime, $this->uploadDeny,  null);
-		$upload = true; // default to allow
-		if (strtolower($this->uploadOrder[0]) == 'allow') { // array('allow', 'deny'), default is to 'deny'
-			$upload = false; // default is deny
-			if (!$deny && ($allow === true)) { // match only allow
-				$upload = true;
-			}// else (both match | no match | match only deny) { deny }
-		} else { // array('deny', 'allow'), default is to 'allow' - this is the default rule
-			$upload = true; // default is allow
-			if (($deny === true) && !$allow) { // match only deny
-				$upload = false;
-			} // else (both match | no match | match only allow) { allow }
-		}
-		if (!$upload) {
+		if (!$this->allowPutMime($mime)) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 
@@ -1586,6 +1571,26 @@ abstract class elFinderVolumeDriver {
 		if (!$file['write']) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
+		
+		// check MIME
+		$name = $this->_basename($path);
+		$mime = '';
+		if ($this->mimeDetect != 'internal') {
+			if ($tp = tmpfile()) {
+				fwrite($tp, $content);
+				$info = stream_get_meta_data($tp);
+				$filepath = $info['uri'];
+				$mime = $this->mimetype($filepath, $name);
+				fclose($tp);
+			}
+		}
+		if (!$mime) {
+			$mime = $this->mimetype($name);
+		}
+		if (!$this->allowPutMime($mime)) {
+			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
+		}
+		
 		$this->clearcache();
 		return $this->_filePutContents($path, $content) ? $this->stat($path) : false;
 	}
@@ -2015,6 +2020,31 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		return $perm === null ? true : $perm;
+	}
+	
+	/**
+	 * Return true if file MIME type can save with check uploadOrder config.
+	 * 
+	 * @param string $mime
+	 * @return boolean
+	 */
+	protected function allowPutMime($mime) {
+		// logic based on http://httpd.apache.org/docs/2.2/mod/mod_authz_host.html#order
+		$allow  = $this->mimeAccepted($mime, $this->uploadAllow, null);
+		$deny   = $this->mimeAccepted($mime, $this->uploadDeny,  null);
+		$res = true; // default to allow
+		if (strtolower($this->uploadOrder[0]) == 'allow') { // array('allow', 'deny'), default is to 'deny'
+			$res = false; // default is deny
+			if (!$deny && ($allow === true)) { // match only allow
+				$res = true;
+			}// else (both match | no match | match only deny) { deny }
+		} else { // array('deny', 'allow'), default is to 'allow' - this is the default rule
+			$res = true; // default is allow
+			if (($deny === true) && !$allow) { // match only deny
+				$res = false;
+			} // else (both match | no match | match only allow) { allow }
+		}
+		return $res;
 	}
 	
 	/**
@@ -2547,6 +2577,13 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
 			$volume->close($fp, $src);
+			
+			// MIME check
+			$stat = $this->stat($path);
+			if (!$this->allowPutMime($stat['mime'])) {
+				$this->remove($path, true);
+				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
+			}
 		}
 		
 		return $path;
