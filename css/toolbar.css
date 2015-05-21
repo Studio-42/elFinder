@@ -179,6 +179,23 @@
 	min-height: 26px;
 	float:right;
 	width:202px;
+	overflow: visible;
+}
+
+.elfinder .elfinder-button-search .elfinder-button-menu {
+	font-size: 8pt;
+	text-align: center;
+	width: 100%;
+}
+
+.elfinder .elfinder-button-search .elfinder-button-menu div {
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 5px;
+}
+
+.elfinder .elfinder-button-search .elfinder-button-menu div .ui-state-hover {
+	border: 1px solid;
 }
 
 /* ltr/rte enviroment */

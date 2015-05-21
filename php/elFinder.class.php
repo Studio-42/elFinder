@@ -91,7 +91,7 @@ class elFinder {
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
 		'extract'   => array('target' => true, 'mimes' => false),
-		'search'    => array('q' => true, 'mimes' => false),
+		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
@@ -1783,10 +1783,16 @@ class elFinder {
 	protected function search($args) {
 		$q      = trim($args['q']);
 		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
+		$target = !empty($args['target'])? $args['target'] : null;
 		$result = array();
 
-		foreach ($this->volumes as $volume) {
-			$result = array_merge($result, $volume->search($q, $mimes));
+		if (!is_null($target)) {
+			$volume = $this->volume($target);
+			$result = $volume->search($q, $mimes, $target);
+		} else {
+			foreach ($this->volumes as $volume) {
+				$result = array_merge($result, $volume->search($q, $mimes));
+			}
 		}
 		
 		return array('files' => $result);

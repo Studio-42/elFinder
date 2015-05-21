@@ -139,6 +139,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnApprove': '$1へ行き認可する', // added 26.04.2012
 			'btnUnmount': 'アンマウント', // added 30.04.2012
 			'btnConv'   : '変換', // added 08.04.2014
+			'btnCwd'    : 'この場所',   // from v2.1 added 22.5.2015
+			'btnVolume' : 'ボリューム', // from v2.1 added 22.5.2015
+			'btnAll'    : '全て',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIMEタイプ', // from v2.1 added 22.5.2015
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',
@@ -299,6 +303,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dropPasteFiles'  : 'ここにファイルをドロップまたは貼り付け', // added 07.04.2014
 			'encoding'        : '文字コード', // from v2.1 added 19.12.2014
 			'locale'          : 'ロケール',   // from v2.1 added 19.12.2014
+			'searchTarget'    : '検索範囲: $1',               // from v2.1 added 22.5.2015
+			'searchMime'      : '指定した MIME タイプで検索', // from v2.1 added 22.5.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

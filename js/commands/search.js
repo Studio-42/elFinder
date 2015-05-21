@@ -27,14 +27,16 @@ elFinder.prototype.commands.search = function() {
 	 * @param  String  search string
 	 * @return $.Deferred
 	 **/
-	this.exec = function(q) {
+	this.exec = function(q, target, mime) {
 		var fm = this.fm;
 		
 		if (typeof(q) == 'string' && q) {
-			fm.trigger('searchstart', {query : q});
+			target = target += '';
+			mime = mime? [mime+''] : [];
+			fm.trigger('searchstart', {query : q, target : target, mimes : mime});
 			
 			return fm.request({
-				data   : {cmd : 'search', q : q},
+				data   : {cmd : 'search', q : q, target : target, mimes : mime},
 				notify : {type : 'search', cnt : 1, hideCnt : true}
 			});
 		}
