@@ -210,53 +210,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		return $this->query($sql) && $this->db->affected_rows > 0;
 	}
 
-	/**
-	 * Search files
-	 *
-	 * @param  string  $q  search string
-	 * @param  array   $mimes
-	 * @return array
-	 * @author Dmitry (dio) Levashov
-	 **/
-	public function search($q, $mimes) {
-		$result = array();
-
-		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, 0 AS dirs 
-				FROM %s AS f 
-				WHERE f.name RLIKE "%s"';
-		
-		$sql = sprintf($sql, $this->tbf, $this->db->real_escape_string($q));
-		
-		if (($res = $this->query($sql))) {
-			while ($row = $res->fetch_assoc()) {
-				if ($this->mimeAccepted($row['mime'], $mimes)) {
-					$id = $row['id'];
-					if ($row['parent_id']) {
-						$row['phash'] = $this->encode($row['parent_id']);
-					} 
-
-					if ($row['mime'] == 'directory') {
-						unset($row['width']);
-						unset($row['height']);
-					} else {
-						unset($row['dirs']);
-					}
-
-					unset($row['id']);
-					unset($row['parent_id']);
-
-
-
-					if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
-						$result[] = $stat;
-					}
-				}
-			}
-		}
-		
-		return $result;
-	}
-
 	/*********************************************************************/
 	/*                               FS API                              */
 	/*********************************************************************/
@@ -355,7 +308,47 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doSearch($path, $q, $mimes) {
-		return array();
+		if ($path != $this->root) {
+			// @todo use SQL serach
+			return parent::doSearch($path, $q, $mimes);
+		}
+
+		$result = array();
+
+		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, 0 AS dirs 
+				FROM %s AS f 
+				WHERE f.name RLIKE "%s"';
+		
+		$sql = sprintf($sql, $this->tbf, $this->db->real_escape_string($q));
+		
+		if (($res = $this->query($sql))) {
+			while ($row = $res->fetch_assoc()) {
+				if ($this->mimeAccepted($row['mime'], array_merge($mimes, $this->onlyMimes))) {
+					$id = $row['id'];
+					if ($row['parent_id']) {
+						$row['phash'] = $this->encode($row['parent_id']);
+					} 
+
+					if ($row['mime'] == 'directory') {
+						unset($row['width']);
+						unset($row['height']);
+					} else {
+						unset($row['dirs']);
+					}
+
+					unset($row['id']);
+					unset($row['parent_id']);
+
+
+
+					if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
+						$result[] = $stat;
+					}
+				}
+			}
+		}
+		
+		return $result;
 	}
 
 
