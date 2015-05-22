@@ -308,22 +308,52 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doSearch($path, $q, $mimes) {
+		$dirs = array();
 		if ($path != $this->root) {
-			// @todo use SQL serach
-			return parent::doSearch($path, $q, $mimes);
+			$inpath = array(intval($path));
+			while($inpath) {
+				$in = '('.join(',', $inpath).')';
+				$inpath = array();
+				$sql = 'SELECT f.id FROM %s AS f WHERE f.parent_id IN '.$in.' AND `mime` = \'directory\'';
+				$sql = sprintf($sql, $this->tbf);
+				if ($res = $this->query($sql)) {
+					$_dir = array();
+					while ($dat = $res->fetch_assoc()) {
+						$inpath[] = $dat['id'];
+					}
+					$dirs = array_merge($dirs, $inpath);
+				}
+			}
 		}
 
 		$result = array();
-
+		
+		if ($mimes) {
+			$whrs = array();
+			foreach($mimes as $mime) {
+				if (strpos($mime, '/') === false) {
+					$whrs[] = sprintf('f.mime LIKE "%s/%%"', $this->db->real_escape_string($mime));
+				} else {
+					$whrs[] = sprintf('f.mime = "%s"', $this->db->real_escape_string($mime));
+				}
+				$whr = join(' OR ', $whrs);
+			}
+		} else {
+			$whr = sprintf('f.name RLIKE "%s"', $this->db->real_escape_string($q));
+		}
+		if ($dirs) {
+			$whr = '(' . $whr . ') AND (`parent_id` IN (' . join(',', $dirs) . '))';
+		}
+		
 		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, 0 AS dirs 
 				FROM %s AS f 
-				WHERE f.name RLIKE "%s"';
+				WHERE %s';
 		
-		$sql = sprintf($sql, $this->tbf, $this->db->real_escape_string($q));
+		$sql = sprintf($sql, $this->tbf, $whr);
 		
 		if (($res = $this->query($sql))) {
 			while ($row = $res->fetch_assoc()) {
-				if (($mimes && $row['mime'] === 'directory') || !$this->mimeAccepted($row['mime'], $mimes)) {
+				if (!$this->mimeAccepted($row['mime'], $mimes)) {
 					continue;
 				}
 				$id = $row['id'];
