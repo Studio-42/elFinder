@@ -659,7 +659,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					if (!isset($this->cache[$raw['path']])) {
 						$stat = $this->updateCache($raw['path'], $stat);
 					}
-					if ($stat['mime'] !== 'directory' || $this->mimeAccepted($stat['mime'], array_merge($mimes, $this->onlyMimes))) {
+					if (empty($stat['hidden']) && $this->mimeAccepted($stat['mime'], $mimes)) {
 						$result[] = $this->stat($raw['path']);
 					}
 				}

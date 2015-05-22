@@ -323,7 +323,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if (($res = $this->query($sql))) {
 			while ($row = $res->fetch_assoc()) {
-				if ($this->mimeAccepted($row['mime'], array_merge($mimes, $this->onlyMimes))) {
+				if ($this->mimeAccepted($row['mime'], $mimes)) {
 					$id = $row['id'];
 					if ($row['parent_id']) {
 						$row['phash'] = $this->encode($row['parent_id']);
