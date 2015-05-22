@@ -323,27 +323,26 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if (($res = $this->query($sql))) {
 			while ($row = $res->fetch_assoc()) {
-				if ($this->mimeAccepted($row['mime'], $mimes)) {
-					$id = $row['id'];
-					if ($row['parent_id']) {
-						$row['phash'] = $this->encode($row['parent_id']);
-					} 
+				if (($mimes && $row['mime'] === 'directory') || !$this->mimeAccepted($row['mime'], $mimes)) {
+					continue;
+				}
+				$id = $row['id'];
+				if ($row['parent_id']) {
+					$row['phash'] = $this->encode($row['parent_id']);
+				} 
 
-					if ($row['mime'] == 'directory') {
-						unset($row['width']);
-						unset($row['height']);
-					} else {
-						unset($row['dirs']);
-					}
+				if ($row['mime'] == 'directory') {
+					unset($row['width']);
+					unset($row['height']);
+				} else {
+					unset($row['dirs']);
+				}
 
-					unset($row['id']);
-					unset($row['parent_id']);
+				unset($row['id']);
+				unset($row['parent_id']);
 
-
-
-					if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
-						$result[] = $stat;
-					}
+				if (($stat = $this->updateCache($id, $row)) && empty($stat['hidden'])) {
+					$result[] = $stat;
 				}
 			}
 		}
