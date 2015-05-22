@@ -149,6 +149,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnVolume' : 'Volume',    // from v2.1 added 22.5.2015
 			'btnAll'    : 'All',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
+			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',

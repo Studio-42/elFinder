@@ -143,6 +143,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnVolume' : 'ボリューム', // from v2.1 added 22.5.2015
 			'btnAll'    : '全て',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'MIMEタイプ', // from v2.1 added 22.5.2015
+			'btnFileName':'ファイル名', // from v2.1 added 22.5.2015
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',
