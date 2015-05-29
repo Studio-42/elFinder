@@ -223,7 +223,7 @@ elFinder.prototype.commands.quicklook = function() {
 				title.html(fm.escape(file.name));
 				
 				info.html(
-						tpl.replace(/\{value\}/, file.name)
+						tpl.replace(/\{value\}/, fm.escape(file.name))
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
 						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
 						+ tpl.replace(/\{value\}/, fm.i18n('modify')+': '+ fm.formatDate(file))

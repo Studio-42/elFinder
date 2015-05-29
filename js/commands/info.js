@@ -111,7 +111,8 @@ elFinder.prototype.commands.info = function() {
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
 			if (file.read) {
-				var href;
+				var href,
+				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
 					content.push(row.replace(l, msg.link).replace(v, tpl.spinner.replace('{text}', msg.modify).replace('{name}', 'url')));
 					fm.request({
@@ -119,10 +120,10 @@ elFinder.prototype.commands.info = function() {
 						preventDefault : true
 					})
 					.fail(function() {
-						replSpinner(file.name, 'url');
+						replSpinner(name_esc, 'url');
 					})
 					.done(function(data) {
-						replSpinner('<a href="'+data.url+'" target="_blank">'+file.name+'</a>' || file.name, 'url');
+						replSpinner('<a href="'+data.url+'" target="_blank">'+name_esc+'</a>' || name_esc, 'url');
 						if (data.url) {
 							var rfile = fm.file(file.hash);
 							rfile.url = data.url;
@@ -135,7 +136,7 @@ elFinder.prototype.commands.info = function() {
 					} else {
 						href = fm.url(file.hash);
 					}
-					content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+file.name+'</a>'));
+					content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+name_esc+'</a>'));
 				}
 			}
 			
