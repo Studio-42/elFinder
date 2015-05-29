@@ -118,7 +118,7 @@ elFinder.prototype.commands.info = function() {
 				} else {
 					href = fm.url(file.hash);
 				}
-				content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+file.name+'</a>'));
+				content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+fm.escape(file.name)+'</a>'));
 			}
 			
 			if (file.dim) { // old api
