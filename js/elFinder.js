@@ -3331,14 +3331,14 @@ elFinder.prototype = {
 			}
 			m = input[i];
 			// translate message
-			m = messages[m] || m;
+			m = messages[m] || self.escape(m);
 			// replace placeholders in message
 			m = m.replace(/\$(\d+)/g, function(match, placeholder) {
 				placeholder = i + parseInt(placeholder);
 				if (placeholder > 0 && input[placeholder]) {
 					ignore.push(placeholder)
 				}
-				return input[placeholder] || '';
+				return self.escape(input[placeholder]) || '';
 			});
 
 			input[i] = m;
