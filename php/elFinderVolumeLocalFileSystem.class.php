@@ -126,8 +126,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					'read'    => false,
 					'write'   => false,
 					'locked'  => true,
-					'hidden'  => true,
-					'chmod'   => false
+					'hidden'  => true
 			);
 		}
 	}
@@ -326,7 +325,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$stat['mime']  = 'symlink-broken';
 				$stat['read']  = false;
 				$stat['write'] = false;
-				$stat['chmod'] = 0;
 				$stat['size']  = 0;
 				return $stat;
 			}
@@ -353,13 +351,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		//logical rights first
 		$stat['read'] = is_readable($path)? null : false;
 		$stat['write'] = is_writable($path)? null : false;
-
-		if( function_exists('posix_geteuid') && posix_geteuid() == $uid ) {
-			$stat['chmod'] = 1;
-		}
-		else {
-			$stat['chmod'] = 0;
-		}
 
 		if (is_null($stat['read'])) {
 			$stat['size'] = $dir ? 0 : $size;
