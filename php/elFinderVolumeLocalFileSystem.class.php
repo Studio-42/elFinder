@@ -333,8 +333,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$path  = $target;
 			$lstat = lstat($path);
 			$size  = $lstat['size'];
+			$mode  = $lstat['mode'];
+			$uid   = $lstat['uid'];
+			$gid   = $lstat['gid'];
 		} else {
-			$size = @filesize($path);
+			$corestat = stat($path);
+			$size	 = @filesize($path);
+			$mode	 = $corestat['mode'];
+			$uid	  = $corestat['uid'];
+			$gid	  = $corestat['gid'];
 		}
 		
 		$dir = is_dir($path);
@@ -348,6 +355,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (is_null($stat['read'])) {
 			$stat['size'] = $dir ? 0 : $size;
 		}
+
+		$stat['perms'] = array();
+		$stat['perms']['umask'] = sprintf("%04o", @umask());
+		$stat['perms']['octal'] = sprintf("%04o", ($mode & 007777));
+		$stat['perms']['mode']  = $mode;
+
+		$stat['ownership'] = array();
+
+		$stat['ownership']['owner'] = $uid;
+		$owner_info = function_exists('posix_getpwuid') ? @posix_getpwuid($uid) : array( 'name' => '' );
+		$stat['ownership']['ownerName'] = $owner_info['name'];
+
+		$group_info = function_exists('posix_getgrgid') ? @posix_getgrgid($gid) : array( 'name' => '' );
+		$stat['ownership']['group'] = $gid;
+		$stat['ownership']['groupName'] = $group_info['name'];
 		
 		return $stat;
 	}
