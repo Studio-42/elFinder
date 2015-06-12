@@ -118,7 +118,7 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.bind('totop', function() {
 					$(this).mousedown().find('.ui-button:first').focus().end().find(':text:first').focus();
-					$(this).data('modal') && overlay.elfinderoverlay('show');
+					$(this).data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 					overlay.zIndex($(this).zIndex());
 				})
 				.data({modal: opts.modal}),

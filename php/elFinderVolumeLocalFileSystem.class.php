@@ -738,11 +738,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_ARC_MAXSIZE);
 			}
 			
+			$extractTo = $this->extractToNewdir; // 'auto', ture or false
+			
 			// archive contains one item - extract in archive dir
+			$name = '';
 			$src = $dir.DIRECTORY_SEPARATOR.$ls[0];
-			if (count($ls) === 1 && is_file($src)) {
+			if (($extractTo === 'auto' || !$extractTo) && count($ls) === 1 && is_file($src)) {
 				$name = $ls[0];
-			} else {
+			} else if ($extractTo === 'auto' || $extractTo) {
 				// for several files - create new directory
 				// create unique name for directory
 				$src = $dir;
@@ -756,16 +759,35 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 			
-			$result  = dirname($path).DIRECTORY_SEPARATOR.$name;
+			if ($name !== '') {
+				$result  = dirname($path).DIRECTORY_SEPARATOR.$name;
 
-			if (! @rename($src, $result)) {
-				$this->delTree($dir);
-				return false;
+				if (! @rename($src, $result)) {
+					$this->delTree($dir);
+					return false;
+				}
+			} else {
+				$dstDir = dirname($path);
+				$res = false;
+				$result = array();
+				foreach($ls as $name) {
+					$target = $dstDir.DIRECTORY_SEPARATOR.$name;
+					if (is_dir($target)) {
+						$this->delTree($target);
+					}
+					if (@rename($dir.DIRECTORY_SEPARATOR.$name, $target)) {
+						$result[] = $target;
+					}
+				}
+				if (!$result) {
+					$this->delTree($dir);
+					return false;
+				}
 			}
 			
 			is_dir($dir) && $this->delTree($dir);
 			
-			return file_exists($result) ? $result : false;
+			return (is_array($result) || file_exists($result)) ? $result : false;
 		}
 	}
 	

@@ -3269,9 +3269,9 @@ elFinder.prototype = {
 		prefix = this.i18n(prefix); 
 		phash = phash || this.cwd().hash;
 
-		if ((p = prefix.indexOf('.txt')) != -1) {
-			ext    = '.txt';
-			prefix = prefix.substr(0, p);
+		if (p = prefix.match(/^(.+)(\.[^.]+)$/)) {
+			ext    = p[2];
+			prefix = p[1];
 		}
 		
 		name   = prefix+ext;

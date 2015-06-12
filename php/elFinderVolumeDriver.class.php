@@ -153,6 +153,13 @@ abstract class elFinderVolumeDriver {
 	protected $yesterday = 0;
 	
 	/**
+	 * Force make dirctory on extract
+	 *
+	 * @var int
+	 **/
+	protected $extractToNewdir = 'auto';
+	
+	/**
 	 * Object configuration
 	 *
 	 * @var array
@@ -925,6 +932,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function options($hash) {
+		$create = $createext = array();
+		if (isset($this->archivers['create']) && is_array($this->archivers['create'])) {
+			foreach($this->archivers['create'] as $m => $v) {
+				$create[] = $m;
+				$createext[$m] = $v['ext'];
+			}
+		}
 		return array(
 			'path'          => $this->path($this->decode($hash)),
 			'url'           => $this->URL,
@@ -934,10 +948,9 @@ abstract class elFinderVolumeDriver {
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'uploadMaxSize' => intval($this->uploadMaxSize),
 			'archivers'     => array(
-				// 'create'  => array_keys($this->archivers['create']),
-				// 'extract' => array_keys($this->archivers['extract']),
-				'create'  => isset($this->archivers['create']) && is_array($this->archivers['create'])  ? array_keys($this->archivers['create'])  : array(),
-				'extract' => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array()
+				'create'  => $create,
+				'extract' => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
+				'createext' => $createext
 			)
 		);
 	}
@@ -1668,7 +1681,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov, 
 	 * @author Alexey Sukhotin
 	 **/
-	public function extract($hash) {
+	public function extract($hash, $makedir = null) {
 		if ($this->commandDisabled('extract')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1692,7 +1705,20 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		$this->clearcache();
-		return ($path = $this->convEncOut($this->_extract($this->convEncIn($path), $archiver))) ? $this->stat($path) : false;
+		$this->extractToNewdir = is_null($makedir)? 'auto' : (bool)$makedir;
+		
+		if ($path = $this->convEncOut($this->_extract($this->convEncIn($path), $archiver))) {
+			if (is_array($path)) {
+				foreach ($path as $_k => $_p) {
+					$path[$_k] = $this->stat($_p);
+				}
+			} else {
+				$path = $this->stat($path);
+			}
+			return $path;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -1700,7 +1726,7 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @return void
 	 **/
-	public function archive($hashes, $mime) {
+	public function archive($hashes, $mime, $name = '') {
 		if ($this->commandDisabled('archive')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1734,7 +1760,12 @@ abstract class elFinderVolumeDriver {
 			$files[] = $this->basenameCE($path);
 		}
 		
-		$name = (count($files) == 1 ? $files[0] : 'Archive').'.'.$archiver['ext'];
+		if ($name === '') {
+			$name = count($files) == 1 ? $files[0] : 'Archive';
+		} else {
+			$name = str_replace(array('/', '\\'), '_', preg_replace('/\.' . preg_quote($archiver['ext'], '/') . '$/i', '', $name));
+		}
+		$name .='.' . $archiver['ext'];
 		$name = $this->uniqueName($dir, $name, '');
 		$this->clearcache();
 		return ($path = $this->convEncOut($this->_archive($this->convEncIn($dir), $this->convEncIn($files), $this->convEncIn($name), $archiver))) ? $this->stat($path) : false;

@@ -28,7 +28,7 @@ elFinder.prototype.commands.archive = function() {
 	});
 	
 	this.getstate = function() {
-		return !this._disabled && mimes.length && fm.selected().length && fm.cwd().write ? 0 : -1;
+		return !this._disabled && mimes.length && (fm.selected().length || dfrd.state() == 'pending') && fm.cwd().write ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, type) {
@@ -56,11 +56,10 @@ elFinder.prototype.commands.archive = function() {
 			}
 		}
 
-		return fm.request({
-			data       : {cmd : 'archive', targets : this.hashes(hashes), type : mime},
-			notify     : {type : 'archive', cnt : 1},
-			syncOnFail : true
-		});
+		self.mime   = mime;
+		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + '.' + fm.option('archivers')['createext'][mime];
+		self.data   = {targets : self.hashes(hashes), type : mime};
+		return $.proxy(fm.res('mixin', 'make'), self)();
 	}
 
 }

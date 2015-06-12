@@ -81,6 +81,7 @@ elFinder.prototype.resources = {
 					write : true,
 					date  : 'Today '+date.getHours()+':'+date.getMinutes()
 				},
+				data = this.data || {},
 				node = cwd.trigger('create.'+fm.namespace, file).find('#'+id),
 				input = $('<input type="text"/>')
 					.keydown(function(e) {
@@ -113,7 +114,7 @@ elFinder.prototype.resources = {
 							fm.lockfiles({files : [id]});
 
 							fm.request({
-									data        : {cmd : cmd, name : name, target : phash}, 
+									data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
 									notify      : {type : cmd, cnt : 1},
 									preventFail : true,
 									syncOnFail  : true
@@ -123,6 +124,12 @@ elFinder.prototype.resources = {
 								})
 								.done(function(data) {
 									dfrd.resolve(data);
+									if (data.added && data.added[0]) {
+										var newItem = cwd.find('#'+data.added[0].hash);
+										if (newItem.length) {
+											cwd.parent().scrollTop(newItem.offset().top);
+										}
+									}
 								});
 						}
 					});

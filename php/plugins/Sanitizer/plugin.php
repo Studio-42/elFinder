@@ -7,7 +7,7 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
- *			'mkdir.pre mkfile.pre rename.pre' => array(
+ *			'mkdir.pre mkfile.pre rename.pre archive.pre' => array(
  *				'Plugin.Sanitizer.cmdPreprocess'
  *			),
  *			'upload.presave' => array(

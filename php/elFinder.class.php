@@ -89,8 +89,8 @@ class elFinder {
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
-		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false),
-		'extract'   => array('target' => true, 'mimes' => false),
+		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
+		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
@@ -1741,14 +1741,15 @@ class elFinder {
 		$target = $args['target'];
 		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$error  = array(self::ERROR_EXTRACT, '#'.$target);
+		$makedir = isset($args['makedir'])? (bool)$args['makedir'] : null;
 
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_EXTRACT, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}  
 
-		return ($file = $volume->extract($target))
-			? array('added' => array($file))
+		return ($file = $volume->extract($target, $makedir))
+			? array('added' => isset($file['read'])? array($file) : $file)
 			: array('error' => $this->error(self::ERROR_EXTRACT, $volume->path($target), $volume->error()));
 	}
 	
@@ -1763,12 +1764,13 @@ class elFinder {
 	protected function archive($args) {
 		$type    = $args['type'];
 		$targets = isset($args['targets']) && is_array($args['targets']) ? $args['targets'] : array();
+		$name    = isset($args['name'])? $args['name'] : '';
 	
 		if (($volume = $this->volume($targets[0])) == false) {
 			return $this->error(self::ERROR_ARCHIVE, self::ERROR_TRGDIR_NOT_FOUND);
 		}
 	
-		return ($file = $volume->archive($targets, $args['type']))
+		return ($file = $volume->archive($targets, $args['type'], $name))
 			? array('added' => array($file))
 			: array('error' => $this->error(self::ERROR_ARCHIVE, $volume->error()));
 	}

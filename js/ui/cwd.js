@@ -912,7 +912,7 @@ $.fn.elfindercwd = function(fm, options) {
 						parent.prepend(file);
 					}
 					
-					cwd.scrollTop(0);
+					cwd.parent().scrollTop(0);
 				})
 				// unselect all selected files
 				.bind('unselectall', unselectAll)
