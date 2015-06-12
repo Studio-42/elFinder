@@ -70,6 +70,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	public $netMountKey = '';
 	
 	/**
+	 * FTP command `MLST` support
+	 * 
+	 * @var unknown
+	 */
+	private $MLSTsupprt = false;
+	
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -243,11 +250,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		foreach ($features as $feat) {
 			if (strpos(trim($feat), 'MLST') === 0) {
-				return true;
+				$this->MLSTsupprt = true;
+				break;
 			}
 		}
 		
-		return $this->setError('Server does not support command MLST.');
+		return true;
 	}
 	
 	/*********************************************************************/
@@ -551,6 +559,24 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
+		if (isset($this->cache[$path])) {
+			return $this->cache[$path];
+		}
+		if (!$this->MLSTsupprt) {
+			if ($path === $this->root) {
+				return array(
+					'name' => $this->root,
+					'mime' => 'directory',
+					'dirs' => $this->_subdirs($path)
+				);
+			}
+			$this->cacheDir($this->_dirname($path));
+			if (isset($this->cache[$path])) {
+				return $this->cache[$path];
+			} else {
+				return array();
+			}
+		}
 		$raw = ftp_raw($this->connect, 'MLST ' . $path);
 		if (is_array($raw) && count($raw) > 1 && substr(trim($raw[0]), 0, 1) == 2) {
 			$parts = explode(';', trim($raw[1]));
@@ -662,7 +688,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _subdirs($path) {
 		
 		foreach (ftp_rawlist($this->connect, $path) as $str) {
-			if (($stat = $this->parseRaw($str)) && $stat['mime'] == 'directory') {
+			$info = preg_split('/\s+/', $str, 9);
+			if (substr(strtolower($info[0]), 0, 1) === 'd') {
 				return true;
 			}
 		}
