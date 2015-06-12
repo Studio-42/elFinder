@@ -30,10 +30,11 @@ elFinder.prototype.resources = {
 	},
 	tpl : {
 		perms      : '<span class="elfinder-perms"/>',
+		lock       : '<span class="elfinder-lock"/>',
 		symlink    : '<span class="elfinder-symlink"/>',
 		navicon    : '<span class="elfinder-nav-icon"/>',
 		navspinner : '<span class="elfinder-navbar-spinner"/>',
-		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon"/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
+		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
 		
 	},
 	
@@ -80,6 +81,7 @@ elFinder.prototype.resources = {
 					write : true,
 					date  : 'Today '+date.getHours()+':'+date.getMinutes()
 				},
+				data = this.data || {},
 				node = cwd.trigger('create.'+fm.namespace, file).find('#'+id),
 				input = $('<input type="text"/>')
 					.keydown(function(e) {
@@ -112,7 +114,7 @@ elFinder.prototype.resources = {
 							fm.lockfiles({files : [id]});
 
 							fm.request({
-									data        : {cmd : cmd, name : name, target : phash}, 
+									data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
 									notify      : {type : cmd, cnt : 1},
 									preventFail : true,
 									syncOnFail  : true
@@ -122,6 +124,12 @@ elFinder.prototype.resources = {
 								})
 								.done(function(data) {
 									dfrd.resolve(data);
+									if (data.added && data.added[0]) {
+										var newItem = cwd.find('#'+data.added[0].hash);
+										if (newItem.length) {
+											cwd.parent().scrollTop(newItem.offset().top);
+										}
+									}
 								});
 						}
 					});

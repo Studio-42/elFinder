@@ -33,6 +33,9 @@
 	margin-top:-8px;
 	display:none;
 }
+.elfinder-contextmenu-item.elfinder-touch {
+	padding:12px 30px;
+}
 
 /* text in item */
 .elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }

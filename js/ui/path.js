@@ -17,7 +17,7 @@ $.fn.elfinderpath = function(fm) {
 				})
 				.prependTo(fm.getUI('statusbar').show())
 
-			fm.bind('open searchend', function() {
+			fm.bind('open searchend parents', function() {
 				var dirs = [];
 
 				$.each(fm.parents(fm.cwd().hash), function(i, hash) {

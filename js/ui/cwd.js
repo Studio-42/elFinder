@@ -121,17 +121,28 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			lastSearch = [],
 
+			customColsBuild = function() {
+				var customCols = '';
+				var columns = fm.options.uiOptions.cwd.listView.columns;
+				for (var i = 0; i < columns.length; i++) {
+					customCols += '<td>{' + columns[i] + '}</td>';
+				}
+				return customCols;
+			},
+
 			/**
 			 * File templates
 			 *
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{hash}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
-				row  : '<tr id="{hash}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td><td>{perms}</td><td>{date}</td><td>{size}</td><td>{kind}</td></tr>'
+				icon : '<div id="{hash}" class="'+clFile+(fm.UA.Touch ? ' '+'elfinder-touch' : '')+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
+				row  : '<tr id="{hash}" class="'+clFile+(fm.UA.Touch ? ' '+'elfinder-touch' : '')+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td>'+customColsBuild()+'</tr>',
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
+			
+			lockTpl = fm.res('tpl', 'lock'),
 			
 			symlinkTpl = fm.res('tpl', 'symlink'),
 			
@@ -144,7 +155,7 @@ $.fn.elfindercwd = function(fm, options) {
 				permsclass : function(f) {
 					return fm.perms2class(f);
 				},
-				perms : function(f) {
+				perm : function(f) {
 					return fm.formatPermissions(f);
 				},
 				dirclass : function(f) {
@@ -163,7 +174,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.mime2kind(f);
 				},
 				marker : function(f) {
-					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '');
+					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
 					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
@@ -618,9 +629,25 @@ $.fn.elfindercwd = function(fm, options) {
 			msg = {
 				name : fm.i18n('name'),
 				perm : fm.i18n('perms'),
-				mod  : fm.i18n('modify'),
+				date : fm.i18n('modify'),
 				size : fm.i18n('size'),
 				kind : fm.i18n('kind')
+			},
+			
+			customColsNameBuild = function() {
+				var name = '',
+				customColsName = '',
+				columns = fm.options.uiOptions.cwd.listView.columns,
+				names = $.extend({}, msg, fm.options.uiOptions.cwd.listView.columnsCustomName);
+				for (var i = 0; i < columns.length; i++) {
+					if (typeof names[columns[i]] !== 'undefined') {
+						name = names[columns[i]];
+					} else {
+						name = fm.i18n(columns[i]);
+					}
+					customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+name+'</td>';
+				}
+				return customColsName;
 			},
 			
 			/**
@@ -647,7 +674,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
 
-				list && cwd.html('<table><thead><tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td><td class="elfinder-cwd-view-th-perm">'+msg.perm+'</td><td class="elfinder-cwd-view-th-date">'+msg.mod+'</td><td class="elfinder-cwd-view-th-size">'+msg.size+'</td><td class="elfinder-cwd-view-th-kind">'+msg.kind+'</td></tr></thead><tbody/></table>');
+				list && cwd.html('<table><thead><tr class="ui-state-default'+(fm.UA.Touch? ' elfinder-touch' : '')+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr></thead><tbody/></table>');
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
 				
@@ -732,8 +759,9 @@ $.fn.elfindercwd = function(fm, options) {
 					  sel = p.prevAll('.'+clSelected+':first').length +
 					        p.nextAll('.'+clSelected+':first').length;
 					cwd.data('longtap', null);
-					p.data('touching', true);
-					p.data('tmlongtap', setTimeout(function(){
+					p.addClass(clHover)
+					.data('touching', true)
+					.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
 						if (p.is('.'+clSelected) && sel > 0) {
@@ -760,6 +788,9 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
+					if (e.type == 'touchmove') {
+						p.removeClass(clHover);
+					}
 				})
 				// attach draggable
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
@@ -819,7 +850,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.delegate(fileSelector, 'mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, function(e) {
 					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
-					$(this).toggleClass('ui-state-hover');
+					$(this).toggleClass(clHover, (e.type == 'mouseenter'));
 				})
 				.bind('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest('.'+clFile);
@@ -881,7 +912,7 @@ $.fn.elfindercwd = function(fm, options) {
 						parent.prepend(file);
 					}
 					
-					cwd.scrollTop(0);
+					cwd.parent().scrollTop(0);
 				})
 				// unselect all selected files
 				.bind('unselectall', unselectAll)
@@ -959,10 +990,8 @@ $.fn.elfindercwd = function(fm, options) {
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
-			  	e.preventDefault();
 				wrapper.removeClass(clDropActive);
-
-				e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length && fm.exec('upload', {files : e.dataTransfer.files})//fm.upload({files : e.dataTransfer.files});
+				fm.exec('upload', {dropEvt: e});
 			}, false);
 		}
 
@@ -1079,7 +1108,8 @@ $.fn.elfindercwd = function(fm, options) {
 				trigger();
 			})
 			// select new files after some actions
-			.bind('mkdir mkfile duplicate upload rename archive extract', function(e) {
+			.bind('mkdir mkfile duplicate upload rename archive extract paste multiupload', function(e) {
+				if (e.type == 'upload' && e.data._multiupload) return;
 				var phash = fm.cwd().hash, files;
 				
 				unselectAll();

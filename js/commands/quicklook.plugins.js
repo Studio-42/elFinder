@@ -86,7 +86,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				
 				jqxhr = fm.request({
-					data           : {cmd : 'get', target  : file.hash, current : file.phash},
+					data           : {cmd : 'get', target  : file.hash, current : file.phash, conv : 1},
 					preventDefault : true
 				})
 				.done(function(data) {
@@ -125,7 +125,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				
 				jqxhr = fm.request({
-					data   : {cmd     : 'get', target  : file.hash },
+					data   : {cmd     : 'get', target  : file.hash, conv : 1},
 					preventDefault : true
 				})
 				.done(function(data) {

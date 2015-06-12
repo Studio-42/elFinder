@@ -91,6 +91,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Kan het externe map niet aanmaken op de FTP-server: "$1"',
 			'errArchiveExec'       : 'Er is een fout opgetreden bij het archivering van de bestanden: "$1" ',
 			'errExtractExec'       : 'Er is een fout opgetreden bij het uitpakken van de bestanden: "$1" ',
+			'errNetUnMount'        : 'Kan niet unmounten',
+			'errConvUTF8'          : 'Kan niet converteren naar UTF-8',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Maak archief',
@@ -121,6 +123,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Formaat wijzigen',
 			'cmdsort'      : 'Sorteren',
 			'cmdnetmount'  : 'Mount netwerk volume',
+			'cmdnetunmount': 'Unmount',
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Sluit',
@@ -131,6 +134,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nee',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Mount',
+			'btnApprove': 'Ga naar $1 & keur goed',
+			'btnUnmount': 'Unmount',
+			'btnConv'   : 'Converteer',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Bezig met openen van map',
@@ -153,7 +159,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Iets aan het doen',
 			'ntfloadimg'  : 'Laden van plaatje',
 			'ntfnetmount' : 'Mounten van netwerk volume',
+			'ntfnetunmount': 'Unmounten van netwerk volume',
 			'ntfdim'      : 'Opvragen afbeeldingen dimensies',
+			'ntfreaddir'  : 'Map informatie lezen',
+			'ntfurl'      : 'URL van link ophalen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'onbekend',
@@ -209,6 +218,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmReq'      : 'Bevestiging nodig',
 			'confirmRm'       : 'Weet u zeker dat u deze bestanden wil verwijderen?<br/>Deze actie kan niet ongedaan gemaakt worden!',
 			'confirmRepl'     : 'Oud bestand vervangen door het nieuwe bestand?',
+			'confirmConvUTF8' : 'Niet in UTF-8<br/>Converteren naar UTF-8?<br/>De inhoud wordt UTF-8 door op te slaan na de conversie.',
 			'apllyAll'        : 'Toepassen op alles',
 			'name'            : 'Naam',
 			'size'            : 'Grootte',
@@ -281,7 +291,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'host'            : 'Host', 
 			'port'            : 'Poort',
 			'user'            : 'Gebruikersnaams', 
-			'pass'            : 'Wachtwoord', 
+			'pass'            : 'Wachtwoord',
+			'confirmUnmount'  : 'Weet u zeker dat u $1 wil unmounten?',
+			'dropFilesBrowser': 'Sleep of plak bestanden vanuit de browser',
+			'dropPasteFiles'  : 'Sleep of plak bestanden hier',
+			'encoding'        : 'Encodering',
+			'locale'          : 'Locale',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Onbekend',

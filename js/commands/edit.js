@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class elFinder command "edit". 
  * Edit text file in dialog window
@@ -39,12 +39,15 @@ elFinder.prototype.commands.edit = function() {
 				ta   = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					dfrd.resolve(ta.getContent());
-					ta.elfinderdialog('close');
+					dfrd.notify(ta.getContent());
 				},
 				cancel = function() {
 					dfrd.reject();
 					ta.elfinderdialog('close');
+				},
+				savecl = function() {
+					save();
+					cancel();
 				},
 				opts = {
 					title   : file.name,
@@ -64,8 +67,8 @@ elFinder.prototype.commands.edit = function() {
 				};
 				
 				ta.getContent = function() {
-					return ta.val()
-				}
+					return ta.val();
+				};
 				
 				$.each(self.options.editors || [], function(i, editor) {
 					if ($.inArray(file.mime, editor.mimes || []) !== -1 
@@ -76,7 +79,7 @@ elFinder.prototype.commands.edit = function() {
 							save     : editor.save,
 							close    : typeof editor.close == 'function' ? editor.close : function() {},
 							instance : null
-						}
+						};
 						
 						return false;
 					}
@@ -112,11 +115,12 @@ elFinder.prototype.commands.edit = function() {
 							}
 						}
 						
-					})
+					});
 				}
 				
-				opts.buttons[fm.i18n('Save')]   = save;
-				opts.buttons[fm.i18n('Cancel')] = cancel
+				opts.buttons[fm.i18n('btnSave')]      = save;
+				opts.buttons[fm.i18n('btnSaveClose')] = savecl;
+				opts.buttons[fm.i18n('btnCancel')]    = cancel;
 				
 				fm.dialog(ta, opts).attr('id', id);
 				return dfrd.promise();
@@ -129,14 +133,14 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  file hash
 		 * @return jQuery.Deferred
 		 **/
-		edit = function(file) {
+		edit = function(file, doconv) {
 			var hash   = file.hash,
 				opts   = fm.options,
 				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
-				url    = fm.url(hash) || fm.options.url,
 				id    = 'edit-'+fm.namespace+'-'+file.hash,
-				d = fm.getUI().find('#'+id), 
+				d = fm.getUI().find('#'+id),
+				conv   = !doconv? 0 : 1,
 				error;
 			
 			
@@ -146,41 +150,58 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			if (!file.read || !file.write) {
-				error = ['errOpen', file.name, 'errPerm']
-				fm.error(error)
+				error = ['errOpen', file.name, 'errPerm'];
+				fm.error(error);
 				return dfrd.reject(error);
 			}
 			
 			fm.request({
-				data   : {cmd : 'get', target  : hash},
+				data   : {cmd : 'get', target  : hash, conv : conv},
 				notify : {type : 'openfile', cnt : 1},
 				syncOnFail : true
 			})
 			.done(function(data) {
-				dialog(id, file, data.content)
-					.done(function(content) {
-						fm.request({
-							options : {type : 'post'},
-							data : {
-								cmd     : 'put',
-								target  : hash,
-								content : content
-							},
-							notify : {type : 'save', cnt : 1},
-							syncOnFail : true
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						})
-						.done(function(data) {
-							data.changed && data.changed.length && fm.change(data);
-							dfrd.resolve(data);
+				if (data.doconv) {
+					fm.confirm({
+						title  : self.title,
+						text   : 'confirmConvUTF8',
+						accept : {
+							label    : 'btnConv',
+							callback : function() {  
+								dfrd = edit(file, 1);
+							}
+						},
+						cancel : {
+							label    : 'btnCancel',
+							callback : function() { dfrd.reject(); }
+						}
+					});
+				} else {
+					dialog(id, file, data.content)
+						.progress(function(content) {
+							fm.request({
+								options : {type : 'post'},
+								data : {
+									cmd     : 'put',
+									target  : hash,
+									content : content
+								},
+								notify : {type : 'save', cnt : 1},
+								syncOnFail : true
+							})
+							.fail(function(error) {
+								dfrd.reject(error);
+							})
+							.done(function(data) {
+								data.changed && data.changed.length && fm.change(data);
+								dfrd.resolve(data);
+							});
 						});
-					})
+				}
 			})
 			.fail(function(error) {
 				dfrd.reject(error);
-			})
+			});
 
 			return dfrd.promise();
 		};
@@ -192,15 +213,15 @@ elFinder.prototype.commands.edit = function() {
 	}];
 	
 	this.init = function() {
-		this.onlyMimes = this.options.mimes || []
-	}
+		this.onlyMimes = this.options.mimes || [];
+	};
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
 		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes) {
 		var files = filter(this.files(hashes)),
@@ -218,6 +239,6 @@ elFinder.prototype.commands.edit = function() {
 		return list.length 
 			? $.when.apply(null, list)
 			: $.Deferred().reject();
-	}
+	};
 
-}
+};

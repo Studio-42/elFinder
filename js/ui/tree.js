@@ -160,6 +160,13 @@ $.fn.elfindertree = function(fm, opts) {
 			ptpl = fm.res('tpl', 'perms'),
 			
 			/**
+			 * Lock marker html template
+			 *
+			 * @type String
+			 */
+			ltpl = fm.res('tpl', 'lock'),
+			
+			/**
 			 * Symlink marker html template
 			 *
 			 * @type String
@@ -173,9 +180,10 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
-				cssclass    : function(dir) { return (dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs && !dir.link ? collapsed : ''); },
+				cssclass    : function(dir) { return (fm.UA.Touch ? 'elfinder-touch ' : '')+(dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs && !dir.link ? collapsed : ''); },
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
-				symlink     : function(dir) { return dir.alias ? stpl : ''; }
+				symlink     : function(dir) { return dir.alias ? stpl : ''; },
+				style       : function(dir) { return dir.icon ? 'style="background-image:url(\''+dir.icon+'\')"' : ''; }
 			},
 			
 			/**
@@ -287,9 +295,10 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return void
 			 */
 			sync = function(stopRec) {
-				var cwd     = fm.cwd().hash,
-					current = tree.find('#'+fm.navHash2Id(cwd)), 
-					rootNode, dir;
+				var cwd     = fm.cwd(),
+					cwdhash = cwd.hash,
+					current = tree.find('#'+fm.navHash2Id(cwdhash)), 
+					rootNode, dir, link;
 				
 				if (openRoot) {
 					rootNode = tree.find('#'+fm.navHash2Id(fm.root()));
@@ -307,22 +316,35 @@ $.fn.elfindertree = function(fm, opts) {
 						return current.parentsUntil('.'+root).filter('.'+subtree).show().prev('.'+navdir).addClass(expanded);
 					}
 					if (fm.newAPI) {
-						dir = fm.file(cwd);
-						if (dir && dir.phash && tree.find('#'+fm.navHash2Id(dir.phash)).length) {
-							updateTree([dir]);
-							return sync();
+						dir = fm.file(cwdhash);
+						if (dir && dir.phash) {
+							link = tree.find('#'+fm.navHash2Id(dir.phash));
+							if (link.length && link.is('.'+loaded)) {
+								updateTree([dir]);
+								return sync();
+							}
+						}
+						link  = cwd.root? tree.find('#'+fm.navHash2Id(cwd.root)) : null;
+						if (link) {
+							spinner.insertBefore(link.children('.'+arrow));
+							link.removeClass(collapsed);
 						}
 						fm.request({
-							data : {cmd : 'parents', target : cwd},
+							data : {cmd : 'parents', target : cwdhash},
 							preventFail : true
 						})
 						.done(function(data) {
 							var dirs = filter(data.tree);
 							updateTree(dirs);
 							updateArrows(dirs, loaded);
-							cwd == fm.cwd().hash && sync(true);
+							cwdhash == fm.cwd().hash && sync(true);
 						})
-						;
+						.always(function(data) {
+							if (link) {
+								spinner.remove();
+								link.addClass(collapsed+' '+loaded);
+							}
+						});
 					}
 					
 				}
@@ -368,7 +390,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			tree = $(this).addClass(treeclass)
 				// make dirs draggable and toggle hover class
-				.delegate('.'+navdir, 'hover', function(e) {
+				.delegate('.'+navdir, 'mouseenter mouseleave', function(e) {
 					var link  = $(this), 
 						enter = e.type == 'mouseenter';
 					
@@ -386,13 +408,43 @@ $.fn.elfindertree = function(fm, opts) {
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
-				
+					
+						if (link.data('longtap')) {
+							e.stopPropagation();
+						return;
+					}
+					
 					fm.trigger('searchend');
 				
 					if (hash != fm.cwd().hash && !link.is('.'+disabled)) {
-						fm.exec('open', file.thash || hash);
+						fm.exec('open', file.thash || hash, {thash: file.thash});
 					} else if (link.is('.'+collapsed)) {
 						link.children('.'+arrow).click();
+					}
+				})
+				// for touch device
+				.delegate('.'+navdir, 'touchstart', function(e) {
+					e.stopPropagation();
+					var evt = e.originalEvent,
+					p = $(this)
+					.addClass(hover)
+					.data('longtap', null)
+					.data('tmlongtap', setTimeout(function(e){
+						// long tap
+						p.data('longtap', true);
+						fm.trigger('contextmenu', {
+							'type'    : 'navbar',
+							'targets' : [fm.navId2Hash(p.attr('id'))],
+							'x'       : evt.touches[0].clientX,
+							'y'       : evt.touches[0].clientY
+						});
+					}, 500));
+				})
+				.delegate('.'+navdir, 'touchmove touchend', function(e) {
+					e.stopPropagation();
+					clearTimeout($(this).data('tmlongtap'));
+					if (e.type == 'touchmove') {
+						$(this).removeClass(hover);
 					}
 				})
 				// toggle subfolders in tree
