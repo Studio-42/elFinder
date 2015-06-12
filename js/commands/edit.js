@@ -39,12 +39,15 @@ elFinder.prototype.commands.edit = function() {
 				ta   = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					dfrd.resolve(ta.getContent());
-					ta.elfinderdialog('close');
+					dfrd.notify(ta.getContent());
 				},
 				cancel = function() {
 					dfrd.reject();
 					ta.elfinderdialog('close');
+				},
+				savecl = function() {
+					save();
+					cancel();
 				},
 				opts = {
 					title   : file.name,
@@ -115,8 +118,9 @@ elFinder.prototype.commands.edit = function() {
 					});
 				}
 				
-				opts.buttons[fm.i18n('Save')]   = save;
-				opts.buttons[fm.i18n('Cancel')] = cancel;
+				opts.buttons[fm.i18n('btnSave')]      = save;
+				opts.buttons[fm.i18n('btnSaveClose')] = savecl;
+				opts.buttons[fm.i18n('btnCancel')]    = cancel;
 				
 				fm.dialog(ta, opts).attr('id', id);
 				return dfrd.promise();
@@ -174,7 +178,7 @@ elFinder.prototype.commands.edit = function() {
 					});
 				} else {
 					dialog(id, file, data.content)
-						.done(function(content) {
+						.progress(function(content) {
 							fm.request({
 								options : {type : 'post'},
 								data : {
