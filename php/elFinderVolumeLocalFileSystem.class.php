@@ -832,4 +832,67 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $this->rmdirRecursive($localpath);
 	}
 
+	/******************** Over write (Optimized) functions *************************/
+	
+	/**
+	 * Recursive files search
+	 *
+	 * @param  string  $path   dir path
+	 * @param  string  $q      search string
+	 * @param  array   $mimes
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
+	 **/
+	protected function doSearch($path, $q, $mimes) {
+		$result = array();
+	
+		$path = $this->convEncIn($path);
+		$dirs = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+		$match = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*'.$q.'*', GLOB_NOSORT);
+		if ($dirs) {
+			$dirs = $this->convEncOut($dirs, false);
+		} 
+		$match = $this->convEncOut($match);
+		if ($match) {
+			foreach($match as $p) {
+				$stat = $this->stat($p);
+		
+				if (!$stat) { // invalid links
+					continue;
+				}
+		
+				if (!empty($stat['hidden']) || !$this->mimeAccepted($stat['mime'], $mimes)) {
+					continue;
+				}
+					
+				$name = $stat['name'];
+		
+				if ((!$mimes || $stat['mime'] !== 'directory')) {
+					$stat['path'] = $this->path($p);
+					if ($this->URL && !isset($stat['url'])) {
+						$path = str_replace(DIRECTORY_SEPARATOR, '/', substr($p, strlen($this->root) + 1));
+						if ($this->encoding) {
+							$path = str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+						}
+						$stat['url'] = $this->URL . $path;
+					}
+		
+					$result[] = $stat;
+				}
+			}
+		}
+		if ($dirs) {
+			foreach($dirs as $dir) {
+				$stat = $this->stat($dir);
+				if ($stat['read'] && !isset($stat['alias'])) {
+					@set_time_limit(30);
+					$result = array_merge($result, $this->doSearch($dir, $q, $mimes));
+				}
+			}
+		}
+	
+		return $result;
+	}
+	
 } // END class 
