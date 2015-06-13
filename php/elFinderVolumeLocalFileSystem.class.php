@@ -363,16 +363,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _subdirs($path) {
 
-		if (($dir = dir($path))) {
-			$dir = dir($path);
-			while (($entry = $dir->read()) !== false) {
-				$p = $dir->path.DIRECTORY_SEPARATOR.$entry;
-				if ($entry != '.' && $entry != '..' && is_dir($p) && !$this->attr($p, 'hidden')) {
-					$dir->close();
-					return true;
-				}
-			}
-			$dir->close();
+		if (is_dir($path)) {
+			return (bool)glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
 		}
 		return false;
 	}
