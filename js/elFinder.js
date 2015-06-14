@@ -3216,6 +3216,12 @@ elFinder.prototype = {
 			label, checkbox;
 
 		
+		options.buttons[this.i18n(opts.accept.label)] = function() {
+			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
+			complete = true;
+			$(this).elfinderdialog('close')
+		};
+		
 		if (opts.reject) {
 			options.buttons[this.i18n(opts.reject.label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
@@ -3223,12 +3229,6 @@ elFinder.prototype = {
 				$(this).elfinderdialog('close')
 			};
 		}
-		
-		options.buttons[this.i18n(opts.accept.label)] = function() {
-			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
-			complete = true;
-			$(this).elfinderdialog('close')
-		};
 		
 		options.buttons[this.i18n(opts.cancel.label)] = function() {
 			$(this).elfinderdialog('close')

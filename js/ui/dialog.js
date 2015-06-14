@@ -35,6 +35,7 @@ $.fn.elfinderdialog = function(opts) {
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
+			platformWin = (window.navigator.platform.indexOf('Win') != -1),
 			
 			dialog = $('<div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  '+cldialog+' '+opts.cssClass+'"/>')
 				.hide()
@@ -117,7 +118,7 @@ $.fn.elfinderdialog = function(opts) {
 					}
 				})
 				.bind('totop', function() {
-					$(this).mousedown().find('.ui-button:first').focus().end().find(':text:first').focus();
+					$(this).mousedown().find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
 					$(this).data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 					overlay.zIndex($(this).zIndex());
 				})
@@ -178,12 +179,21 @@ $.fn.elfinderdialog = function(opts) {
 					
 					if (e.keyCode == $.ui.keyCode.ENTER) {
 						$(this).click();
-					}  else if (e.keyCode == $.ui.keyCode.TAB) {
+					}  else if (e.keyCode == $.ui.keyCode.TAB || e.keyCode == $.ui.keyCode.RIGHT) {
+						e.preventDefault();
 						next = $(this).next('.ui-button');
-						next.length ? next.focus() : $(this).parent().children('.ui-button:first').focus()
+						next.length ? next.focus() : $(this).parent().children('.ui-button:first').focus();
+					}  else if (e.keyCode == $.ui.keyCode.LEFT) {
+						e.preventDefault();
+						next = $(this).prev('.ui-button');
+						next.length ? next.focus() : $(this).parent().children('.ui-button:last').focus()
 					}
 				})
-			buttonset.append(button);
+			if (platformWin) {
+				buttonset.append(button);
+			} else {
+				buttonset.prepend(button);
+			}
 		})
 			
 		buttonset.children().length && dialog.append(buttonpane);
