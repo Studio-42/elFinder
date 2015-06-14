@@ -8,6 +8,7 @@ $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
 		var cmItem = 'elfinder-contextmenu-item',
+			smItem = 'elfinder-contextsubmenu-item',
 			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
@@ -22,7 +23,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
 					.click(function(e) {
 						e.stopPropagation();
-						e.stopPropagation();
+						e.preventDefault();
 						callback();
 					})
 			},
@@ -75,7 +76,21 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (!cmd.variants.length) {
 								return;
 							}
-							node = item(cmd.title, cmd.name, function() {});
+							node = item(cmd.title, cmd.name, function(){})
+							.on('touchend', function(e){
+								node.data('touching', true);
+								setTimeout(function(){node.data('touching', false);}, 50);
+							})
+							.on('click touchend', '.'+smItem, function(e){
+								e.stopPropagation();
+								if (node.data('touching')) {
+									node.data('touching', false);
+									$(this).removeClass('ui-state-hover');
+									e.preventDefault();
+								} else if (e.type == 'click') {
+									cmd.exec(targets, $(this).data('exec'));
+								}
+							});
 							
 							submenu = $('<div class="ui-corner-all elfinder-contextmenu-sub"/>')
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
@@ -103,26 +118,11 @@ $.fn.elfindercontextmenu = function(fm) {
 									submenu.css(css).toggle();
 							};
 							
-							node.addClass('elfinder-contextmenu-group')
-								.hover(function() { hover(); })
-								.on('touchstart', function(e){
-									if (node.hasClass('ui-state-hover')) {
-										return true;
-									}
-									node.addClass('ui-state-hover');
-									e.preventDefault();
-									hover();
-									return false;
-								});
-								
+							node.addClass('elfinder-contextmenu-group').hover(function(){ hover(); });
+							
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
-									$('<div class="'+clItem+'"><span>'+variant[1]+'</span></div>')
-										.on('click touchstart', function(e) {
-											e.stopPropagation();
-											close();
-											cmd.exec(targets, variant[0]);
-										})
+									$('<div class="'+clItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
 								);
 							});
 								
