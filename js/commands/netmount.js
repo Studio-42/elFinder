@@ -50,7 +50,8 @@ elFinder.prototype.commands.netmount = function() {
 						buttons        : {}
 					},
 					content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>'),
-					hidden  = $('<div/>');
+					hidden  = $('<div/>'),
+					dialog;
 
 				content.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
 
@@ -102,7 +103,12 @@ elFinder.prototype.commands.netmount = function() {
 					self.dialog.elfinderdialog('close');
 				};
 				
-				return fm.dialog(content, opts).ready(function(){inputs.protocol.change();});
+				dialog = fm.dialog(content, opts);
+				dialog.ready(function(){
+					inputs.protocol.change();
+					dialog.elfinderdialog('posInit');
+				});
+				return dialog;
 			}
 			;
 		
