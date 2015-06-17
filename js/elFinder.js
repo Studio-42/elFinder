@@ -1426,7 +1426,11 @@ window.elFinder = function(node, opts) {
 	 * @return jQuery
 	 */
 	this.dialog = function(content, options) {
-		return $('<div/>').append(content).appendTo(node).elfinderdialog(options);
+		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options);
+		this.bind('resize', function(){
+			dialog.elfinderdialog('posInit');
+		});
+		return dialog;
 	}
 	
 	/**
@@ -1747,7 +1751,7 @@ window.elFinder = function(node, opts) {
 		// notification dialog window
 		notify : this.dialog('', {
 			cssClass  : 'elfinder-dialog-notify',
-			position  : {top : '12px', right : '12px'},
+			position  : self.options.notifyPosition,
 			resizable : false,
 			autoOpen  : false,
 			title     : '&nbsp;',
