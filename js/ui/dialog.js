@@ -18,6 +18,8 @@ $.fn.elfinderdialog = function(opts) {
 			dialog.hide().remove();
 		} else if (opts == 'toTop') {
 			dialog.trigger('totop');
+		} else if (opts == 'posInit') {
+			dialog.trigger('posinit');
 		}
 	}
 	
@@ -41,8 +43,13 @@ $.fn.elfinderdialog = function(opts) {
 				.hide()
 				.append(self)
 				.appendTo(parent)
-				.draggable({ handle : '.ui-dialog-titlebar',
-					     containment : 'document' })
+				.draggable({
+					handle : '.ui-dialog-titlebar',
+					containment : 'document',
+					stop : function(e, ui){
+						dialog.css({height : opts.height});
+					}
+				})
 				.css({
 					width  : opts.width,
 					height : opts.height//,
@@ -122,6 +129,16 @@ $.fn.elfinderdialog = function(opts) {
 					$(this).data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 					overlay.zIndex($(this).zIndex());
 				})
+				.bind('posinit', function() {
+					var css = opts.position;
+					if (!css) {
+						css = {
+							top  : Math.max(0, parseInt((parent.height() - dialog.outerHeight())/2 - 42))+'px',
+							left : Math.max(0, parseInt((parent.width() - dialog.outerWidth())/2))+'px'
+						};
+					}
+					dialog.css(css);
+				})
 				.data({modal: opts.modal}),
 				maxZIndex = function() {
 					var z = parent.zIndex() + 10;
@@ -139,14 +156,7 @@ $.fn.elfinderdialog = function(opts) {
 				top
 			;
 		
-		if (!opts.position) {
-			opts.position = {
-				top  : Math.max(0, parseInt((parent.height() - dialog.outerHeight())/2 - 42))+'px',
-				left : Math.max(0, parseInt((parent.width() - dialog.outerWidth())/2))+'px'
-			};
-		} 
-			
-		dialog.css(opts.position);
+		dialog.trigger('posinit');
 
 		if (opts.closeOnEscape) {
 			$(document).bind('keyup.'+id, function(e) {
