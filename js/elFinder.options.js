@@ -454,6 +454,15 @@ elFinder.prototype._options = {
 	notifyDelay : 500,
 	
 	/**
+	 * Position CSS, Width of notifications dialogs
+	 *
+	 * @type Object
+	 * @default {position: {top : '12px', right : '12px'}, width : 280}
+	 * position: CSS object | null (null: position center & middle)
+	 */
+	notifyDialog : {position: {top : '12px', right : '12px'}, width : 280},
+	
+	/**
 	 * Allow shortcuts
 	 *
 	 * @type Boolean

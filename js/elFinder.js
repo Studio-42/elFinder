@@ -1751,11 +1751,11 @@ window.elFinder = function(node, opts) {
 		// notification dialog window
 		notify : this.dialog('', {
 			cssClass  : 'elfinder-dialog-notify',
-			position  : self.options.notifyPosition,
+			position  : this.options.notifyDialog.position,
 			resizable : false,
 			autoOpen  : false,
 			title     : '&nbsp;',
-			width     : 280
+			width     : parseInt(this.options.notifyDialog.width)
 		}),
 		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
 	}
