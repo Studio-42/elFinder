@@ -89,11 +89,14 @@ elFinder.prototype.commands.netmount = function() {
 					});
 
 					if (!data.host) {
-						return self.fm.trigger('error', {error : 'errNetMountHostReq'});
+						return fm.trigger('error', {error : 'errNetMountHostReq'});
 					}
 
-					self.fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
-						.done(function() { dfrd.resolve(); })
+					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
+						.done(function(data) {
+							data.added && data.added.length && fm.exec('open', data.added[0].hash);
+							dfrd.resolve();
+						})
 						.fail(function(error) { dfrd.reject(error); });
 
 					self.dialog.elfinderdialog('close');	
