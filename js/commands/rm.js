@@ -49,13 +49,13 @@ elFinder.prototype.commands.rm = function() {
 		if (dfrd.state() == 'pending') {
 			files = this.hashes(hashes);
 			
+			fm.lockfiles({files : files});
 			fm.confirm({
 				title  : self.title,
 				text   : 'confirmRm',
 				accept : {
 					label    : 'btnRm',
 					callback : function() {  
-						fm.lockfiles({files : files});
 						fm.request({
 							data   : {cmd  : 'rm', targets : files}, 
 							notify : {type : 'rm', cnt : cnt},
@@ -67,15 +67,18 @@ elFinder.prototype.commands.rm = function() {
 						.done(function(data) {
 							dfrd.done(data);
 							goroot && fm.exec('open', goroot)
-						}
-						).always(function() {
+						})
+						.always(function() {
 							fm.unlockfiles({files : files});
 						});
 					}
 				},
 				cancel : {
 					label    : 'btnCancel',
-					callback : function() { dfrd.reject(); }
+					callback : function() {
+						fm.unlockfiles({files : files});
+						dfrd.reject();
+					}
 				}
 			});
 		}
