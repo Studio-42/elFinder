@@ -305,6 +305,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
+		static $names = array();
+		static $statOwner = null;
+		
+		if (is_null($statOwner)) {
+			$statOwner = (!empty($this->options['statOwner']));
+		}
+		
 		$stat = array();
 
 		if (!file_exists($path)) {
@@ -320,6 +327,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return $stat;
 		}
 
+		$uid = 0;
 		if ($path != $this->root && is_link($path)) {
 			if (($target = $this->readlink($path)) == false 
 			|| $target == $path) {
@@ -335,7 +343,20 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$lstat = lstat($path);
 			$size  = sprintf('%u', $lstat['size']);
 		} else {
+			if ($statOwner) {
+				$fstat = stat($path);
+				$uid = $fstat['uid'];
+			}
 			$size = sprintf('%u', @filesize($path));
+		}
+		if ($statOwner && $uid) {
+			if (isset($names[$uid])) {
+				$stat['owner'] = $names[$uid];
+			} else if (is_callable('posix_getpwuid')) {
+				$stat['owner'] = $names[$uid] = posix_getpwuid($uid)['name'];
+			} else {
+				$stat['owner'] = $names[$uid] = $uid;
+			}
 		}
 		
 		$dir = is_dir($path);
