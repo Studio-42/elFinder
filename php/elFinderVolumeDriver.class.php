@@ -228,6 +228,8 @@ abstract class elFinderVolumeDriver {
 		'copyTo'          => true,
 		// list of commands disabled on this root
 		'disabled'        => array(),
+		// enable file owner info, `false` invalidates "chmod" command.
+		'statOwner'       => false,
 		// regexp or function name to validate new file name
 		'acceptedName'    => '/^[^\.].*/', //<-- DONT touch this! Use constructor options to overwrite it!
 		// function/class method to control files permissions
@@ -556,6 +558,10 @@ abstract class elFinderVolumeDriver {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
 		}
 		
+		// check 'statOwner' for command `chmod`
+		if (empty($this->options['statOwner'])) {
+			$this->disabled[] ='chmod';
+		}
 	}
 	
 	
