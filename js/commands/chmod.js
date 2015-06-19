@@ -31,11 +31,11 @@ elFinder.prototype.commands.chmod = function() {
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div>'
 					+'{dataTable}',
-		itemTitle  : '<strong>{name}</strong><span id="elfinder-info-kind">{kind}</span> ('+fm.i18n('owner')+':{owner}</span>)',
+		itemTitle  : '<strong>{name}</strong><span id="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		dataTable  : '<table id="{id}-table-perm"><tr><td>{0}</td><td>{1}</td><td>{2}</td></tr></table>'
 					+'<div class="">'+msg.perm+': <input id="{id}-perm" type="text" size="4" maxlength="3" value="{value}"></div>',
-		fieldset   : '<fieldset id="{id}-fieldset-{level}"><legend>{f_title}</legend>'
+		fieldset   : '<fieldset id="{id}-fieldset-{level}"><legend>{f_title}{name}</legend>'
 					+'<input type="checkbox" value="4" id="{id}-read-{level}-perm"{checked-r}> <label for="{id}-read-{level}-perm">'+msg.read+'</label><br>'
 					+'<input type="checkbox" value="6" id="{id}-write-{level}-perm"{checked-w}{disabled-w}> <label for="{id}-write-{level}-perm">'+msg.write+'</label><br>'
 					+'<input type="checkbox" value="5" id="{id}-execute-{level}-perm"{checked-x}> <label for="{id}-execute-{level}-perm">'+msg.execute+'</label><br>'
@@ -167,14 +167,17 @@ elFinder.prototype.commands.chmod = function() {
 			}
 			return perm;
 		},
-		makeDataTable = function(perm) {
+		makeName = function(name) {
+			return name? ':'+name : '';
+		},
+		makeDataTable = function(perm, f) {
 			var _perm, fieldset;
 			var value = '';
 			var dataTable = tpl.dataTable;
 			for (var i = 0; i < 3; i++){
 				_perm = parseInt(perm.slice(i, i+1), 8);
 				value += _perm.toString(8);
-				fieldset = tpl.fieldset.replace('{f_title}', fm.i18n(level[i])).replace(/\{level\}/g, level[i]);
+				fieldset = tpl.fieldset.replace('{f_title}', fm.i18n(level[i])).replace('{name}', makeName(f[level[i]])).replace(/\{level\}/g, level[i]);
 				dataTable = dataTable.replace('{'+i+'}', fieldset)
 				                     .replace('{checked-r}', ((_perm & 4) == 4)? checked : '')
 				                     .replace('{checked-w}', ((_perm & 2) == 2 && ! file._localalias)? checked : '')
@@ -247,13 +250,13 @@ elFinder.prototype.commands.chmod = function() {
 		if (cnt > 1) {
 			title = tpl.groupTitle.replace('{items}', fm.i18n('items')).replace('{num}', cnt);
 		} else {
-			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file)).replace('{owner}', file.owner);
+			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
 			}
 		}
 
-		dataTable = makeDataTable(makeperm(files));
+		dataTable = makeDataTable(makeperm(files), files.length == 1? files[0] : {});
 
 		view = view.replace('{title}', title).replace('{dataTable}', dataTable).replace(/{id}/g, id);
 
