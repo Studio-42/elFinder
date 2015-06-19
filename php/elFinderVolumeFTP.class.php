@@ -299,6 +299,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
 			}
 			$stat['owner'] = $info[2];
+			$stat['group'] = $info[3];
 			
 			$name = $info[8];
 			
