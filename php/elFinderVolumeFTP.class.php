@@ -336,6 +336,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['read']  = $perm['read'];
 			$stat['write'] = $perm['write'];
 			$stat['perm']  = substr($info[0], 1);
+			$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
 		} else {
 			die('Windows ftp servers not supported yet');
 		}
