@@ -305,11 +305,22 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		static $names = array();
+		static $names = null;
 		static $statOwner = null;
+		static $phpuid = null;
 		
+		if (is_null($names)) {
+			$names = array('uid' => array(), 'gid' =>array());
+		}
 		if (is_null($statOwner)) {
 			$statOwner = (!empty($this->options['statOwner']));
+		}
+		if (is_null($phpuid)) {
+			if (is_callable('posix_getuid')) {
+				$phpuid = posix_getuid();
+			} else {
+				$phpuid = 0;
+			}
 		}
 		
 		$stat = array();
@@ -327,7 +338,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return $stat;
 		}
 
-		$uid = 0;
+		$gid = $uid = 0;
+		$stat['isowner'] = false;
 		if ($path != $this->root && is_link($path)) {
 			if (($target = $this->readlink($path)) == false 
 			|| $target == $path) {
@@ -346,16 +358,32 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			if ($statOwner) {
 				$fstat = stat($path);
 				$uid = $fstat['uid'];
+				$gid = $fstat['gid'];
+				$stat['perm'] = substr((string)decoct($fstat['mode']), -4);
 			}
 			$size = sprintf('%u', @filesize($path));
 		}
-		if ($statOwner && $uid) {
-			if (isset($names[$uid])) {
-				$stat['owner'] = $names[$uid];
-			} else if (is_callable('posix_getpwuid')) {
-				$stat['owner'] = $names[$uid] = posix_getpwuid($uid)['name'];
-			} else {
-				$stat['owner'] = $names[$uid] = $uid;
+		if ($statOwner) {
+			if ($uid) {
+				$stat['isowner'] = ($phpuid == $uid);
+				if (isset($names['uid'][$uid])) {
+					$stat['owner'] = $names['uid'][$uid];
+				} else if (is_callable('posix_getpwuid')) {
+					$pwuid = posix_getpwuid($uid);
+					$stat['owner'] = $names['uid'][$uid] = $pwuid['name'];
+				} else {
+					$stat['owner'] = $names['uid'][$uid] = $uid;
+				}
+			}
+			if ($gid) {
+				if (isset($names['gid'][$gid])) {
+					$stat['group'] = $names['gid'][$gid];
+				} else if (is_callable('posix_getgrgid')) {
+					$grgid = posix_getgrgid($gid);
+					$stat['group'] = $names['gid'][$gid] = $grgid['name'];
+				} else {
+					$stat['group'] = $names['gid'][$gid] = $gid;
+				}
 			}
 		}
 		
