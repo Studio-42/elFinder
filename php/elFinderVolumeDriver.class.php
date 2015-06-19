@@ -951,7 +951,8 @@ abstract class elFinderVolumeDriver {
 				'create'  => $create,
 				'extract' => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
 				'createext' => $createext
-			)
+			),
+			'uiCmdMap' => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array()
 		);
 	}
 	
@@ -2628,7 +2629,6 @@ abstract class elFinderVolumeDriver {
 		$root = $path == $this->root;
 		
 		if ($root) {
-			$stat['volumeid'] = $this->id;
 			if ($this->rootName) {
 				$stat['name'] = $this->rootName;
 			}
@@ -2663,7 +2663,9 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 
-		$isDir = ($stat['mime'] === 'directory');
+		if ($isDir = ($stat['mime'] === 'directory')) {
+			$stat['volumeid'] = $this->id;
+		}
 		
 		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null, $isDir));
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null, $isDir));

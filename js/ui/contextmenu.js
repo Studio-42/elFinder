@@ -58,7 +58,15 @@ $.fn.elfindercontextmenu = function(fm) {
 			create = function(type, targets) {
 				var sep = false;
 				
-				
+				var cmdMap = {};
+				var cmdMaps = fm.options.contextmenu.cmdMaps;
+				if (cmdMaps) {
+					$.each(cmdMaps, function(i, v){
+						if (targets[0].indexOf(i, 0) == 0) {
+							cmdMap = v;
+						}
+					});
+				}
 				
 				$.each(types[type]||[], function(i, name) {
 					var cmd, node, submenu, hover;
@@ -69,6 +77,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						return;
 					}
 					
+					if (cmdMap[name]) {
+						name = cmdMap[name];
+					}
 					cmd = fm.command(name);
 
 					if (cmd && cmd.getstate(targets) != -1) {
