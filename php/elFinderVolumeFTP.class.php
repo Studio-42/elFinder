@@ -298,8 +298,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
 			}
-			$stat['owner'] = $info[2];
-			$stat['group'] = $info[3];
+			
+			if ($this->options['statOwner']) {
+				$stat['owner'] = $info[2];
+				$stat['group'] = $info[3];
+				$stat['perm']  = substr($info[0], 1);
+				$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
+			}
 			
 			$name = $info[8];
 			
@@ -336,8 +341,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
 			$stat['read']  = $perm['read'];
 			$stat['write'] = $perm['write'];
-			$stat['perm']  = substr($info[0], 1);
-			$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
 		} else {
 			die('Windows ftp servers not supported yet');
 		}
