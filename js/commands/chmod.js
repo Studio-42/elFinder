@@ -25,7 +25,7 @@ elFinder.prototype.commands.chmod = function() {
 		files    : fm.i18n('files')
 	},
 	isPerm = function(perm){
-		return (parseInt(perm, 8) != NaN || perm.match(/^[rwx-]{9}$/i));
+		return (!isNaN(parseInt(perm, 8) && parseInt(perm, 8) <= 511) || perm.match(/^([r-][w-][x-]){3}$/i));
 	};
 
 	this.tpl = {
@@ -188,7 +188,7 @@ elFinder.prototype.commands.chmod = function() {
 			return dataTable;
 		},
 		getPerm = function(perm){
-			if (parseInt(perm, 8) != NaN) {
+			if (isNaN(parseInt(perm, 8))) {
 				var mode_array = perm.split('');
 				var a = [];
 
