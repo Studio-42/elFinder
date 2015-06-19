@@ -621,7 +621,9 @@ abstract class elFinderVolumeDriver {
 
 		$path = $this->decode($hash);
 
-		$this->_chmod($path,$mode);
+		if ($this->convEncOut(!$this->_chmod($this->convEncIn($path), $mode))) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED.': '.$file['name']);
+		}
 
 		$this->clearcache();
 

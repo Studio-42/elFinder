@@ -638,11 +638,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/**
 	 * chmod availability
 	 *
-	 * @return void
+	 * @return bool
 	 **/
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
-		chmod($path, $modeOct);
+		return @chmod($path, $modeOct);
 	}
 
 	/**

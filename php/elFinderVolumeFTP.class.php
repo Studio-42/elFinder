@@ -965,11 +965,11 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	/**
 	 * chmod availability
 	 *
-	 * @return void
+	 * @return bool
 	 **/
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
-		@ftp_chmod($this->connect, $modeOct, $path);
+		return @ftp_chmod($this->connect, $modeOct, $path);
 	}
 
 	/**

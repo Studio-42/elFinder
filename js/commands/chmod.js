@@ -93,9 +93,9 @@ elFinder.prototype.commands.chmod = function() {
 			
 			fm.request({
 				data : {
-					cmd    : 'chmod',
-					target : hashes,
-					mode   : perm
+					cmd     : 'chmod',
+					targets : hashes,
+					mode    : perm
 				},
 				notify : {type : 'chmod', cnt : cnt}
 			})

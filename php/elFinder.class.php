@@ -98,7 +98,7 @@ class elFinder {
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
-		'chmod'     => array('target' => true, 'mode' => true)
+		'chmod'     => array('targets' => true, 'mode' => true)
 	);
 	
 	/**
@@ -1453,21 +1453,41 @@ class elFinder {
 	 * @author David Bartle
 	 **/
 	protected function chmod($args) {
-		$target = $args['target'];
-		$mode   = $args['mode'];
+		$targets = $args['targets'];
+		$mode    = intval((string)$args['mode'], 8);
 
-		if (($volume = $this->volume($target)) == false) {
-			$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
+		if (!is_array($targets)) {
+			$targets = array($targets);
+		}
+		
+		$result = array();
+		
+		if (($volume = $this->volume($targets[0])) == false) {
+			$result['error'] = $this->error(self::ERROR_CONF_NO_VOL);
 			return $result;
 		}
 
-		if (($file = $volume->chmod($target, $mode)) === false) {
-			$result['warning'] = $this->error($volume->error());
-			return $result;
+		$files = array();
+		$errors = array();
+		foreach($targets as $target) {
+			$file = $volume->chmod($target, $mode);
+			if ($file) {
+				$files[] = $file;
+			} else {
+				$errors = array_merge($errors, $volume->error());
+			}
 		}
-
-		$result['chmod'] = $file;
-		return $result;
+		
+		if ($files) {
+			$result['changed'] = $files;
+			if ($errors) {
+				$result['warning'] = $this->error($errors);
+			}
+		} else {
+			$result['error'] = $this->error($errors);
+		}
+		
+		return $ret;
 	}
 	
 	/**

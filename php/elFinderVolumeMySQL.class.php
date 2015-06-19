@@ -833,10 +833,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	/**
 	 * chmod implementation
 	 *
-	 * @return void
+	 * @return bool
 	 **/
 	protected function _chmod($path, $mode) {
-		return;
+		return false;
 	}
 
 	/**
