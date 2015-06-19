@@ -1487,7 +1487,7 @@ class elFinder {
 			$result['error'] = $this->error($errors);
 		}
 		
-		return $ret;
+		return $result;
 	}
 	
 	/**
