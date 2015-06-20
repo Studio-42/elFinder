@@ -228,8 +228,10 @@ abstract class elFinderVolumeDriver {
 		'copyTo'          => true,
 		// list of commands disabled on this root
 		'disabled'        => array(),
-		// enable file owner info, `false` invalidates "chmod" command.
+		// enable file owner, group & mode info, `false` to inactivate "chmod" command.
 		'statOwner'       => false,
+		// allow exec chmod of read-only files
+		'allowChmodReadOnly' => false,
 		// regexp or function name to validate new file name
 		'acceptedName'    => '/^[^\.].*/', //<-- DONT touch this! Use constructor options to overwrite it!
 		// function/class method to control files permissions
@@ -621,14 +623,14 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 
-		if (!$file['write']) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		if (!$file['write'] && !$this->options['allowChmodReadOnly']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
 		}
 
 		$path = $this->decode($hash);
 
 		if ($this->convEncOut(!$this->_chmod($this->convEncIn($path), $mode))) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED.': '.$file['name']);
+			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
 		}
 
 		$this->clearcache();
