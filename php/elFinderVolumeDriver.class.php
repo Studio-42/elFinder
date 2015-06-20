@@ -1132,7 +1132,13 @@ abstract class elFinderVolumeDriver {
 	public function file($hash) {
 		$path = $this->decode($hash);
 		
-		return ($file = $this->stat($path)) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		$file = $this->stat($path);
+		
+		if ($hash === $this->root()) {
+			$file['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
+		}
+		
+		return ($file) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 	}
 	
 	/**

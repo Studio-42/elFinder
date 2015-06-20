@@ -234,7 +234,15 @@ window.elFinder = function(node, opts) {
 					}
 				});
 			}
-
+			// non cwd volume's contextmenu
+			if (data.files) {
+				$.each(data.files, function(k, v){
+					if (v.volumeid && v.uiCmdMap && !self.options.contextmenu.cmdMaps[v.volumeid]) {
+						self.options.contextmenu.cmdMaps[v.volumeid] = v.uiCmdMap;
+					}
+				});
+			}
+			
 			if (data.init) {
 				// init - reset cache
 				files = {};
