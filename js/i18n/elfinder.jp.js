@@ -172,6 +172,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // added 01.07.2013
 			'ntfurl'      : 'リンクURLを取得しています', // added 11.03.2014
+			'ntfchmod'    : 'ファイル属性を変更しています', // from v2.1 added 20.6.2015
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',

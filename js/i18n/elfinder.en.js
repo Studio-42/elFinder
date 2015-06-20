@@ -171,6 +171,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 			'ntfreaddir'  : 'Reading folder infomation', // added 01.07.2013
 			'ntfurl'      : 'Getting URL of link', // added 11.03.2014
+			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
