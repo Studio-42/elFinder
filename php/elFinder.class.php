@@ -70,7 +70,8 @@ class elFinder {
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
-		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false)
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false),
+		'chmod'     => array('target' => true, 'mode' => true)
 	);
 	
 	/**
@@ -277,7 +278,6 @@ class elFinder {
 		$cmds = $cmd == '*'
 			? array_keys($this->commands)
 			: array_map('trim', explode(' ', $cmd));
-		
 		foreach ($cmds as $cmd) {
 			if ($cmd) {
 				if (!isset($this->listeners[$cmd])) {
@@ -901,6 +901,31 @@ class elFinder {
 			}
 		}
 
+		return $result;
+	}
+
+	/**
+	 * chmod
+	 *
+	 * @param array  command arguments
+	 * @return array
+	 * @author David Bartle
+	 **/
+	protected function chmod($args) {
+		$target = $args['target'];
+		$mode   = $args['mode'];
+
+		if (($volume = $this->volume($target)) == false) {
+			$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
+			return $result;
+		}
+
+		if (($file = $volume->chmod($target, $mode)) === false) {
+			$result['warning'] = $this->error($volume->error());
+			return $result;
+		}
+
+		$result['chmod'] = $file;
 		return $result;
 	}
 	

@@ -568,6 +568,36 @@ abstract class elFinderVolumeDriver {
 			'imgLib'     => $this->imgLib
 		);
 	}
+
+	/**
+	 * chmod a file or folder
+	 *
+	 * @param  string   $hash    file or folder hash to chmod
+	 * @param  string   $mode    octal string representing new permissions
+	 * @return array|false
+	 * @author David Bartle
+	 **/
+	public function chmod($hash, $mode) {
+		if ($this->commandDisabled('chmod')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		if (!($file = $this->file($hash))) {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
+
+		if (!$file['write']) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		$path = $this->decode($hash);
+
+		$this->_chmod($path,$mode);
+
+		$this->clearcache();
+
+		return ($file = $this->stat($path)) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+	}
 	
 	/**
 	 * "Mount" volume.
@@ -3662,5 +3692,16 @@ abstract class elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	abstract protected function _checkArchivers();
+
+	/**
+	 * Change file mode (chmod)
+	 *
+	 * @param  string  $path  file path
+	 * @param  string  $mode  octal string such as '0755'
+	 * @return bool
+	 * @author David Bartle,
+	 **/
+	abstract protected function _chmod($path, $mode);
+
 	
 } // END class

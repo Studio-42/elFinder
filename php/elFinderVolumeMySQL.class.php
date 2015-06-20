@@ -906,6 +906,15 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 
 	/**
+	 * chmod implementation
+	 *
+	 * @return void
+	 **/
+	protected function _chmod($path, $mode) {
+		return;
+	}
+
+	/**
 	 * Unpack archive
 	 *
 	 * @param  string  $path  archive path

@@ -1,5 +1,34 @@
 <?php
 
+function unixmode_readable($mode) {
+
+	$friendly = '';
+
+	// u
+	$friendly .= (($mode & 0x0100) ? 'r' : '-');
+	$friendly .= (($mode & 0x0080) ? 'w' : '-');
+	$friendly .= (($mode & 0x0040) ?
+					(($mode & 0x0800) ? 's' : 'x' ) :
+					(($mode & 0x0800) ? 'S' : '-'));
+
+	// g
+	$friendly .= (($mode & 0x0020) ? 'r' : '-');
+	$friendly .= (($mode & 0x0010) ? 'w' : '-');
+	$friendly .= (($mode & 0x0008) ?
+					(($mode & 0x0400) ? 's' : 'x' ) :
+					(($mode & 0x0400) ? 'S' : '-'));
+
+	// a
+	$friendly .= (($mode & 0x0004) ? 'r' : '-');
+	$friendly .= (($mode & 0x0002) ? 'w' : '-');
+	$friendly .= (($mode & 0x0001) ?
+					(($mode & 0x0200) ? 't' : 'x' ) :
+					(($mode & 0x0200) ? 'T' : '-'));
+
+	return $friendly;
+
+}
+
 /**
  * elFinder driver for local filesystem.
  *
@@ -333,8 +362,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$path  = $target;
 			$lstat = lstat($path);
 			$size  = $lstat['size'];
+			$mode  = $lstat['mode'];
+			$uid   = $lstat['uid'];
+			$gid   = $lstat['gid'];
 		} else {
-			$size = @filesize($path);
+			$corestat = stat($path);
+			$size	 = @filesize($path);
+			$mode	 = $corestat['mode'];
+			$uid	  = $corestat['uid'];
+			$gid	  = $corestat['gid'];
 		}
 		
 		$dir = is_dir($path);
@@ -348,6 +384,22 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (is_null($stat['read'])) {
 			$stat['size'] = $dir ? 0 : $size;
 		}
+
+		$stat['perms'] = array();
+		$stat['perms']['umask']    = sprintf("%04o", @umask());
+		$stat['perms']['octal']    = sprintf("%04o", ($mode & 007777));
+		$stat['perms']['mode']     = $mode;
+		$stat['perms']['readable'] = unixmode_readable($mode);
+
+		$stat['ownership'] = array();
+
+		$stat['ownership']['owner'] = $uid;
+		$owner_info = function_exists('posix_getpwuid') ? @posix_getpwuid($uid) : array( 'name' => '' );
+		$stat['ownership']['ownerName'] = $owner_info['name'];
+
+		$group_info = function_exists('posix_getgrgid') ? @posix_getgrgid($gid) : array( 'name' => '' );
+		$stat['ownership']['group'] = $gid;
+		$stat['ownership']['groupName'] = $group_info['name'];
 		
 		return $stat;
 	}
@@ -619,6 +671,16 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _checkArchivers() {
 		$this->archivers = $this->getArchivers();
 		return;
+	}
+
+	/**
+	 * chmod availability
+	 *
+	 * @return void
+	 **/
+	protected function _chmod($path, $mode) {
+		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
+		chmod($path, $modeOct);
 	}
 
 	/**
