@@ -759,7 +759,7 @@ class elFinder {
 		$files = array();
 
 		// get folders trees
-		if ($args['tree']) {
+		if ($tree) {
 			foreach ($this->volumes as $id => $v) {
 				$files[] = $v->file($v->root());
 			}
@@ -1992,7 +1992,7 @@ class elFinder {
 		}
 		exit();
 	}
-	
+
 	/***************************************************************************/
 	/*                                   utils                                 */
 	/***************************************************************************/
