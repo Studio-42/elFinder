@@ -126,6 +126,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
 			'cmdnetunmount': 'アンマウント', // added 30.04.2012
 			'cmdplaces'    : 'お気に入りへ', // added 28.12.2014
+			'cmdchmod'     : '属性変更', // from v2.1 added 20.6.2015
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : '閉じる',
@@ -307,6 +308,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'locale'          : 'ロケール',   // from v2.1 added 19.12.2014
 			'searchTarget'    : '検索範囲: $1',               // from v2.1 added 22.5.2015
 			'searchMime'      : '指定した MIME タイプで検索', // from v2.1 added 22.5.2015
+			'owner'           : 'オーナー', // from v2.1 added 20.6.2015
+			'group'           : 'グループ', // from v2.1 added 20.6.2015
+			'other'           : 'その他', // from v2.1 added 20.6.2015
+			'execute'         : '実行', // from v2.1 added 20.6.2015
+			'perm'            : 'パーミッション', // from v2.1 added 20.6.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
