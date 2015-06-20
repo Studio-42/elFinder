@@ -20,7 +20,6 @@ elFinder.prototype.commands.chmod = function() {
 		write    : fm.i18n('write'),
 		execute  : fm.i18n('execute'),
 		perm     : fm.i18n('perm'),
-		perms    : fm.i18n('perms'),
 		kind     : fm.i18n('kind'),
 		files    : fm.i18n('files')
 	},
