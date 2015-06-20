@@ -120,6 +120,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$options['locale'] = $_REQUEST['locale'];
 			}
 		}
+		$options['statOwner'] = true;
+		$options['allowChmodReadOnly'] = true;
 		return $options;
 	}
 	
