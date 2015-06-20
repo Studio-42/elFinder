@@ -214,8 +214,8 @@ window.elFinder = function(node, opts) {
 					// for toolbar
 					$.each(uiCmdMapPrev, function(from, to){
 						var cmd = self._commands[to],
-						button = 'elfinder'+cmd.options.ui;
-						if ($.fn[button]) {
+						button = cmd? 'elfinder'+cmd.options.ui : null;
+						if (button && $.fn[button]) {
 							repCmds.push(from);
 							var btn = $('div.elfinder-buttonset div.elfinder-button').has('span.elfinder-button-icon-'+from);
 							if (btn.length && !btn.next().has('span.elfinder-button-icon-'+to).length) {
