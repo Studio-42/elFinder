@@ -313,6 +313,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'other'           : 'その他', // from v2.1 added 20.6.2015
 			'execute'         : '実行', // from v2.1 added 20.6.2015
 			'perm'            : 'パーミッション', // from v2.1 added 20.6.2015
+			'mode'            : '属性', // from v2.1 added 20.6.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

@@ -173,6 +173,9 @@ $.fn.elfindercwd = function(fm, options) {
 				kind : function(f) {
 					return fm.mime2kind(f);
 				},
+				mode : function(f) {
+					return f.perm? f.perm : '';
+				},
 				marker : function(f) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
