@@ -3283,7 +3283,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function canCreateTmb($path, $stat, $checkTmbPath = true) {
 		return (!$checkTmbPath || $this->tmbPathWritable) 
-			&& strpos($path, $this->tmbPath) === false // do not create thumnbnail for thumnbnail
+			&& (!$this->tmbPath || strpos($path, $this->tmbPath) === false) // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos($stat['mime'], 'image') === 0 
 			&& ($this->imgLib == 'gd' ? $stat['mime'] == 'image/jpeg' || $stat['mime'] == 'image/png' || $stat['mime'] == 'image/gif' : true);
