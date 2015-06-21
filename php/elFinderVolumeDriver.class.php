@@ -2828,6 +2828,8 @@ abstract class elFinderVolumeDriver {
 				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
 					if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
 				}
+			} else {
+				$type = 'unknown';
 			}
 		} elseif ($this->mimeDetect == 'mime_content_type') {
 			$type = mime_content_type($path);
