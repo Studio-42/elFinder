@@ -315,7 +315,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 						preventDefault : true
 					})
 					.done(function(data) {
-						var t;
 						$.each(data.files || [], function(i, file) {
 							if ($.inArray(file.hash, dirs) === -1) {
 								remove(file.hash);
