@@ -515,6 +515,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		if (@mkdir($path)) {
 			@chmod($path, $this->options['dirMode']);
+			clearstatcache();
 			return $path;
 		}
 
@@ -535,6 +536,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (($fp = @fopen($path, 'w'))) {
 			@fclose($fp);
 			@chmod($path, $this->options['fileMode']);
+			clearstatcache();
 			return $path;
 		}
 		return false;
@@ -563,7 +565,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _copy($source, $targetDir, $name) {
-		return copy($source, $this->_joinPath($targetDir, $name));
+		$ret = copy($source, $this->_joinPath($targetDir, $name));
+		$ret && clearstatcache();
+		return $ret;
 	}
 	
 	/**
@@ -578,7 +582,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _move($source, $targetDir, $name) {
 		$target = $this->_joinPath($targetDir, $name);
-		return @rename($source, $target) ? $target : false;
+		$ret = @rename($source, $target) ? $target : false;
+		$ret && clearstatcache();
+		return $ret;
 	}
 		
 	/**
@@ -589,7 +595,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		return @unlink($path);
+		$ret = @unlink($path);
+		$ret && clearstatcache();
+		return $ret;
 	}
 
 	/**
@@ -600,7 +608,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _rmdir($path) {
-		return @rmdir($path);
+		$ret = @rmdir($path);
+		$ret && clearstatcache();
+		return $ret;
 	}
 	
 	/**
@@ -671,7 +681,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
 		$ret = @chmod($path, $modeOct);
-		$ret && clearstatcache($path);
+		$ret && clearstatcache();
 		return  $ret;
 	}
 
