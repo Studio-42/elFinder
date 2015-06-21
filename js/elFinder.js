@@ -2966,7 +2966,6 @@ elFinder.prototype = {
 				return file;
 			}
 			return null;
-			return file && file.hash && file.name && file.mime ? file : null; 
 		};
 		
 
