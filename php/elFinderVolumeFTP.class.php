@@ -365,7 +365,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$parts[] = substr($perm, $i, 1);
 		}
 
-		$read = ($owner && $parts[0] == 'r') || $parts[4] == 'r' || $parts[7] == 'r';
+		$read = ($owner && $parts[1] == 'r') || $parts[4] == 'r' || $parts[7] == 'r';
 		
 		return array(
 			'read'  => $parts[0] == 'd' ? $read && (($owner && $parts[3] == 'x') || $parts[6] == 'x' || $parts[9] == 'x') : $read,
