@@ -3608,6 +3608,84 @@ elFinder.prototype = {
 		return (s > 0 ? n >= 1048576 ? s.toFixed(2) : Math.round(s) : 0) +' '+u;
 	},
 	
+	/**
+	 * Return formated file mode by options.fileModeStyle
+	 * 
+	 * @param  String  file mode
+	 * @return String
+	 */
+	formatFileMode : function(p) {
+		var ret, i, o, s, b, sticy, suid, sgid;
+		p = $.trim(p);
+		if (p.match(/[rwxs-]{9}$/i)) {
+			p = p.substr(-9);
+			if (this.options.fileModeStyle == 'string') {
+				return p;
+			}
+			ret = '';
+			s = 0;
+			for (i=0; i<7; i=i+3) {
+				o = p.substr(i, 3);
+				b = 0;
+				if (o.match(/[r]/i)) {
+					b += 4;
+				}
+				if (o.match(/[w]/i)) {
+					b += 2;
+				}
+				if (o.match(/[xs]/i)) {
+					if (o.match(/[xs]/)) {
+						b += 1;
+					}
+					if (o.match(/[s]/i)) {
+						if (i == 0) {
+							s += 4;
+						} else if (i == 3) {
+							s += 2;
+						}
+					}
+				}
+				ret += b.toString(8);
+			}
+			if (s) {
+				ret = s.toString(8) + ret;
+			}
+		} else {
+			p = parseInt(p, 8);
+			if (!p || this.options.fileModeStyle != 'string') {
+				return p? p.toString(8) : '';
+			}
+			o = p.toString(8);
+			s = 0;
+			if (o.length > 3) {
+				o = o.substr(-4);
+				s = parseInt(o.substr(0, 1), 8);
+				o = o.substr(1);
+			}
+			sticy = ((s & 1) == 1); // not support
+			sgid = ((s & 2) == 2);
+			suid = ((s & 4) == 4);
+			ret = '';
+			for(i=0; i<3; i++) {
+				if ((parseInt(o.substr(i, 1), 8) & 4) == 4) {
+					ret += 'r';
+				} else {
+					ret += '-';
+				}
+				if ((parseInt(o.substr(i, 1), 8) & 2) == 2) {
+					ret += 'w';
+				} else {
+					ret += '-';
+				}
+				if ((parseInt(o.substr(i, 1), 8) & 1) == 1) {
+					ret += ((i==0 && suid)||(i==1 && sgid))? 's' : 'x';
+				} else {
+					ret += '-';
+				}
+			}
+		}
+		return ret;
+	},
 	
 	navHash2Id : function(hash) {
 		return 'nav-'+hash;

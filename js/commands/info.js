@@ -175,7 +175,7 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
 			file.owner && content.push(row.replace(l, msg.owner).replace(v, file.owner));
 			file.group && content.push(row.replace(l, msg.group).replace(v, file.group));
-			file.perm && content.push(row.replace(l, msg.perm).replace(v, file.perm));
+			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
 			title = tpl.groupTitle.replace('{items}', msg.items).replace('{num}', cnt);

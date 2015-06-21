@@ -573,6 +573,15 @@ elFinder.prototype._options = {
 	},
 
 	/**
+	 * Style of file mode at cwd-list, info dialog
+	 * 'string' (ex. rwxr-xr-x) or 'octal' (ex. 755)
+	 * 
+	 * @type {String}
+	 * @default 'string'
+	 */
+	fileModeStyle : 'string',
+
+	/**
 	 * Debug config
 	 *
 	 * @type Array|Boolean
