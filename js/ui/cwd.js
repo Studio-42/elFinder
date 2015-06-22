@@ -176,6 +176,15 @@ $.fn.elfindercwd = function(fm, options) {
 				mode : function(f) {
 					return f.perm? fm.formatFileMode(f.perm) : '';
 				},
+				modestr : function(f) {
+					return f.perm? fm.formatFileMode(f.perm, 'string') : '';
+				},
+				modeoct : function(f) {
+					return f.perm? fm.formatFileMode(f.perm, 'octal') : '';
+				},
+				modeboth : function(f) {
+					return f.perm? fm.formatFileMode(f.perm, 'both') : '';
+				},
 				marker : function(f) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
@@ -634,7 +643,10 @@ $.fn.elfindercwd = function(fm, options) {
 				perm : fm.i18n('perms'),
 				date : fm.i18n('modify'),
 				size : fm.i18n('size'),
-				kind : fm.i18n('kind')
+				kind : fm.i18n('kind'),
+				modestr : fm.i18n('mode'),
+				modeoct : fm.i18n('mode'),
+				modeboth : fm.i18n('mode'),
 			},
 			
 			customColsNameBuild = function() {

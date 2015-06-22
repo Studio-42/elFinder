@@ -3614,17 +3614,22 @@ elFinder.prototype = {
 	 * Return formated file mode by options.fileModeStyle
 	 * 
 	 * @param  String  file mode
+	 * @param  String  format style
 	 * @return String
 	 */
-	formatFileMode : function(p) {
-		var ret, i, o, s, b, sticy, suid, sgid;
+	formatFileMode : function(p, style) {
+		var i, o, s, b, sticy, suid, sgid, str, oct;
+		
+		if (!style) {
+			style = this.options.fileModeStyle.toLowerCase();
+		}
 		p = $.trim(p);
 		if (p.match(/[rwxs-]{9}$/i)) {
-			p = p.substr(-9);
-			if (this.options.fileModeStyle == 'string') {
-				return p;
+			str = p = p.substr(-9);
+			if (style == 'string') {
+				return str;;
 			}
-			ret = '';
+			oct = '';
 			s = 0;
 			for (i=0; i<7; i=i+3) {
 				o = p.substr(i, 3);
@@ -3647,15 +3652,16 @@ elFinder.prototype = {
 						}
 					}
 				}
-				ret += b.toString(8);
+				oct += b.toString(8);
 			}
 			if (s) {
-				ret = s.toString(8) + ret;
+				oct = s.toString(8) + oct;
 			}
 		} else {
 			p = parseInt(p, 8);
-			if (!p || this.options.fileModeStyle != 'string') {
-				return p? p.toString(8) : '';
+			oct = p? p.toString(8) : '';
+			if (!p || style == 'octal') {
+				return oct;
 			}
 			o = p.toString(8);
 			s = 0;
@@ -3667,26 +3673,32 @@ elFinder.prototype = {
 			sticy = ((s & 1) == 1); // not support
 			sgid = ((s & 2) == 2);
 			suid = ((s & 4) == 4);
-			ret = '';
+			str = '';
 			for(i=0; i<3; i++) {
 				if ((parseInt(o.substr(i, 1), 8) & 4) == 4) {
-					ret += 'r';
+					str += 'r';
 				} else {
-					ret += '-';
+					str += '-';
 				}
 				if ((parseInt(o.substr(i, 1), 8) & 2) == 2) {
-					ret += 'w';
+					str += 'w';
 				} else {
-					ret += '-';
+					str += '-';
 				}
 				if ((parseInt(o.substr(i, 1), 8) & 1) == 1) {
-					ret += ((i==0 && suid)||(i==1 && sgid))? 's' : 'x';
+					str += ((i==0 && suid)||(i==1 && sgid))? 's' : 'x';
 				} else {
-					ret += '-';
+					str += '-';
 				}
 			}
 		}
-		return ret;
+		if (style == 'both') {
+			return str + ' (' + oct + ')';
+		} else if (style == 'string') {
+			return str;
+		} else {
+			return oct;
+		}
 	},
 	
 	navHash2Id : function(hash) {
