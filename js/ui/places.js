@@ -113,16 +113,22 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * Remove dir from places
 			 *
 			 * @param  String  directory id
-			 * @return void
+			 * @return String  removed name
 			 **/
 			remove = function(hash) {
-				var ndx = $.inArray(hash, dirs);
+				var ndx = $.inArray(hash, dirs), name, tgt;
 
 				if (ndx !== -1) {
 					dirs.splice(ndx, 1);
-					subtree.find('#'+hash2id(hash)).parent().remove();
-					!subtree.children().length && root.removeClass(collapsed+' '+expanded);
+					tgt = subtree.find('#'+hash2id(hash));
+					if (tgt.length) {
+						name = tgt.text();
+						tgt.parent().remove();
+						!subtree.children().length && root.removeClass(collapsed+' '+expanded);
+					}
 				}
+				
+				return name;
 			},
 			/**
 			 * Remove all dir from places
@@ -300,10 +306,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 				});
 				save();
 			})
-			.bind('rm', function(e){
-				$.each(e.data.removed, function(i, hash) {
-					remove(hash);
-				});
+			.bind('rm paste', function(e){
+				var names = [];
+				if (e.data.removed) {
+					$.each(e.data.removed, function(i, hash) {
+						names.push(remove(hash));
+					});
+				}
+				if (e.data.added) {
+					$.each(e.data.added, function(i, file) {
+						if ($.inArray(file.name, names) !== 1) {
+							file.mime == 'directory' && add(file);
+						}
+					});
+				}
 				save();
 			})
 			.bind('sync', function() {
