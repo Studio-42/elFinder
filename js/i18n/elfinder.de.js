@@ -6,7 +6,7 @@
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org', osworx.net
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, osworx.net',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M Y h:i', // 13. Mai 2012 05:27
