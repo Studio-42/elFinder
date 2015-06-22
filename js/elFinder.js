@@ -522,6 +522,13 @@ window.elFinder = function(node, opts) {
 	this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
 	
 	/**
+	 * Dragging UI Helper object
+	 *
+	 * @type jQuery | null
+	 **/
+	this.draggingUiHelper = null,
+	
+	/**
 	 * Base draggable options
 	 *
 	 * @type Object
@@ -538,6 +545,7 @@ window.elFinder = function(node, opts) {
 		start      : function(e, ui) {
 			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
 			cnt, h;
+			self.draggingUiHelper = ui.helper;
 			cnt = targets.length;
 			while (cnt--) {
 				h = targets[cnt];
@@ -547,12 +555,17 @@ window.elFinder = function(node, opts) {
 				}
 			}
 		},
-		stop       : function() { self.trigger('focus').trigger('dragstop'); },
+		stop       : function() { 
+			self.draggingUiHelper = null;
+			self.trigger('focus').trigger('dragstop');
+		},
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
 				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
 				icon    = function(mime) { return '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>'; },
 				hashes, l;
+			
+			self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
 			
 			self.trigger('dragstart', {target : element[0], originalEvent : e});
 			
