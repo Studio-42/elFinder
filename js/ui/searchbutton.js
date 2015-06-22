@@ -132,12 +132,14 @@ $.fn.elfindersearchbutton = function(cmd) {
 				var dirs    = [],
 					volroot = fm.file(fm.root(fm.cwd().hash));
 				
-				$.each(fm.parents(fm.cwd().hash), function(i, hash) {
-					dirs.push(fm.file(hash).name);
-				});
-	
-				$('#'+id('SearchFromCwd')).next('label').attr('title', fm.i18n('searchTarget', dirs.join(fm.option('separator'))));
-				$('#'+id('SearchFromVol')).next('label').attr('title', fm.i18n('searchTarget', volroot.name));
+				if (volroot) {
+					$.each(fm.parents(fm.cwd().hash), function(i, hash) {
+						dirs.push(fm.file(hash).name);
+					});
+		
+					$('#'+id('SearchFromCwd')).next('label').attr('title', fm.i18n('searchTarget', dirs.join(fm.option('separator'))));
+					$('#'+id('SearchFromVol')).next('label').attr('title', fm.i18n('searchTarget', volroot.name));
+				}
 			})
 			.shortcut({
 				pattern     : 'ctrl+f f3',
