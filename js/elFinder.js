@@ -628,10 +628,13 @@ window.elFinder = function(node, opts) {
 
 		},
 		stop       : function(e, ui) {
+			var files;
 			self.draggingUiHelper = null;
 			self.trigger('focus').trigger('dragstop');
 			if (! ui.helper.data('droped')) {
-				self.trigger('unlockfiles', {files : $.map(ui.helper.data('files')||[], function(h) { return h || null ;})});
+				files = $.map(ui.helper.data('files')||[], function(h) { return h || null ;});
+				self.trigger('unlockfiles', {files : files});
+				self.trigger('selectfiles', {files : files});
 			}
 		},
 		helper     : function(e, ui) {

@@ -1112,10 +1112,15 @@ $.fn.elfindercwd = function(fm, options) {
 				cwd.selectable('enable').droppable('enable');
 				selectLock = false;
 			})
-			.bind('lockfiles unlockfiles', function(e) {
-				var event = e.type == 'lockfiles' ? evtDisable : evtEnable,
-					files = e.data.files || [], 
-					l     = files.length;
+			.bind('lockfiles unlockfiles selectfiles unselectfiles', function(e) {
+				var events = {
+						lockfiles     : evtDisable ,
+						unlockfiles   : evtEnable ,
+						selectfiles   : evtSelect,
+						unselectfiles : evtUnselect },
+					event  = events[e.type],
+					files  = e.data.files || [],
+					l      = files.length;
 				
 				while (l--) {
 					cwd.find('#'+files[l]).trigger(event);
