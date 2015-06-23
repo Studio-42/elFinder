@@ -400,7 +400,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return $this->setError('PDO connection failed: '.$e->getMessage());
 		}
 		
-		$res = $this->deltaCheck(!empty($_REQUEST['init']));
+		$res = $this->deltaCheck(!empty($_REQUEST['reload']) && strpos($_REQUEST['target'], $this->id) === 0);
 		if ($res !== true) {
 			if (is_string($res)) {
 				return $this->setError($res);
