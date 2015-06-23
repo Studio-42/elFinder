@@ -332,11 +332,11 @@ $.fn.elfindertree = function(fm, opts) {
 				if (opts.syncTree) {
 					if (current.length) {
 						if (!noCwd) {
-							current.parentsUntil('.'+root).filter('.'+subtree).show().addClass(expanded, function(){
+							!current.parentsUntil('.'+root).filter('.'+subtree).show().addClass(expanded, function(){
 								if (current.parent().parent().get(0) == this) {
 									scroll();
 								}
-							});
+							}).length && scroll();
 						}
 						return;
 					}
