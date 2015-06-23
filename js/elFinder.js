@@ -1254,11 +1254,19 @@ window.elFinder = function(node, opts) {
 	 */
 	this.sync = function() {
 		var self  = this,
-			dfrd  = $.Deferred().done(function() { self.trigger('sync'); });
-		this.request({
-			data           : {cmd : 'open', init : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
-			preventDefault : true
-		})
+			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
+			opts1 = {
+				data           : {cmd : 'open', init : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
+				preventDefault : true
+			},
+			opts2 = {
+				data           : {cmd : 'parents', target : cwd},
+				preventDefault : true
+			};
+		$.when(
+			this.request(opts1),
+			this.request(opts2)
+		)
 		.fail(function(error) {
 			dfrd.reject(error);
 			error && self.request({

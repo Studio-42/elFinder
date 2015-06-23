@@ -254,7 +254,6 @@ $.fn.elfindertree = function(fm, opts) {
 				var length  = dirs.length,
 					orphans = [],
 					i = dirs.length,
-					cwdRoot = fm.cwd().root || '',
 					dir, html, parent, sibling;
 
 				var firstVol = true; // check for netmount volume
@@ -265,7 +264,7 @@ $.fn.elfindertree = function(fm, opts) {
 						continue;
 					}
 					
-					if (cwdRoot != dir.phash && (parent = findSubtree(dir.phash)).length) {
+					if ((parent = findSubtree(dir.phash)).length) {
 						html = itemhtml(dir);
 						if (dir.phash && (sibling = findSibling(parent, dir)).length) {
 							sibling.before(html);
