@@ -9,7 +9,7 @@ $.fn.elfindertree = function(fm, opts) {
 	
 	this.not('.'+treeclass).each(function() {
 
-		var c = 'class',
+		var c = 'class', mobile = fm.UA.Mobile,
 			
 			/**
 			 * Root directory class name
@@ -428,7 +428,7 @@ $.fn.elfindertree = function(fm, opts) {
 						enter = e.type == 'mouseenter';
 					
 					if (!link.is('.'+dropover+' ,.'+disabled)) {
-						enter && !link.is('.'+root+',.'+draggable+',.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
+						!mobile && enter && !link.is('.'+root+',.'+draggable+',.elfinder-na,.elfinder-wo') && link.draggable(fm.draggable);
 						link.toggleClass(hover, enter);
 					}
 				})

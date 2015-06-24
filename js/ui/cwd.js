@@ -9,7 +9,7 @@ $.fn.elfindercwd = function(fm, options) {
 	this.not('.elfinder-cwd').each(function() {
 		// fm.time('cwdLoad');
 		
-		var 
+		var mobile = fm.UA.Mobile,
 			list = fm.viewType == 'list',
 
 			undef = 'undefined',
@@ -812,7 +812,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this),
 						target = list ? $this : $this.children();
 
-					if (!$this.is('.'+clTmp) && !target.is('.'+clDraggable+',.'+clDisabled)) {
+					if (!mobile && !$this.is('.'+clTmp) && !target.is('.'+clDraggable+',.'+clDisabled)) {
 						target.draggable(fm.draggable);
 					}
 				})
