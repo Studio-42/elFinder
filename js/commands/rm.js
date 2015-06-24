@@ -77,6 +77,7 @@ elFinder.prototype.commands.rm = function() {
 					label    : 'btnCancel',
 					callback : function() {
 						fm.unlockfiles({files : files});
+						fm.selectfiles({files : files});
 						dfrd.reject();
 					}
 				}

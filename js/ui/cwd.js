@@ -850,7 +850,11 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					$this.is('.'+clDroppable) && $this.droppable('disable');
 					target.is('.'+clDraggable) && target.draggable('disable');
-					!list && target.removeClass(clDisabled);
+					if (list) {
+						target.children().removeClass(clHover);
+					} else {
+						target.removeClass(clDisabled);
+					}
 				})
 				// if any files was not removed/moved - unlock its
 				.delegate(fileSelector, evtEnable, function() {
