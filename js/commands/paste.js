@@ -78,7 +78,7 @@ elFinder.prototype.commands.paste = function() {
 
 						fm.confirm({
 							title  : fm.i18n(cut ? 'moveFiles' : 'copyFiles'),
-							text   : fm.i18n(['errExists', file.name, 'confirmRepl']), 
+							text   : ['errExists', file.name, 'confirmRepl'], 
 							all    : !last,
 							accept : {
 								label    : 'btnYes',
