@@ -28,6 +28,8 @@
 	border: 1px solid transparent;
 	border-top:1px solid #fff;
 }
+.elfinder-cwd .elfinder-droppable-active td { background:#A7C6E5 !important; }
+
 
 /* common selected background/color */
 .elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-filename.ui-state-hover,

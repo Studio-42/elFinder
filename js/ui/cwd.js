@@ -439,7 +439,7 @@ $.fn.elfindercwd = function(fm, options) {
 				ltmb.length && loadThumbnails(ltmb);
 
 				// make directory droppable
-				dirs && makeDroppable();
+				dirs && !mobile && makeDroppable();
 				
 				if (selectedFiles.length) {
 					place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
@@ -476,7 +476,9 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			makeDroppable = function() {
 				setTimeout(function() {
-					cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable);
+					cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable).each(function(){
+						fm.makeDirectDropUpload(this, this.id);
+					});
 				}, 20);
 			},
 			
@@ -612,7 +614,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				attachThumbnails(atmb);
 				ltmb.length && loadThumbnails(ltmb);
-				dirs && makeDroppable();
+				dirs && !mobile && makeDroppable();
 			},
 			
 			/**
@@ -989,30 +991,39 @@ $.fn.elfindercwd = function(fm, options) {
 		// for iOS5 bug
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
+		(function(){
+		var ent;
 		if (fm.dragUpload) {
 			wrapper[0].addEventListener('dragenter', function(e) {
+				var cwd = fm.cwd();
 				e.preventDefault();
 				e.stopPropagation();
-				
-				wrapper.addClass(clDropActive);
+				ent = true;
+				cwd && cwd.write && wrapper.addClass(clDropActive);
 			}, false);
 
 			wrapper[0].addEventListener('dragleave', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-				e.target == cwd[0] && wrapper.removeClass(clDropActive);
+				if (ent) {
+					ent = false;
+				} else {
+					wrapper.removeClass(clDropActive);
+				}
 			}, false);
 
 			wrapper[0].addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+				ent = false;
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
 				wrapper.removeClass(clDropActive);
 				fm.exec('upload', {dropEvt: e});
 			}, false);
-		}
+		};
+		})();
 
 		fm
 			.bind('open', function(e) {

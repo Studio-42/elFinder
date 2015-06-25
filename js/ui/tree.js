@@ -281,9 +281,11 @@ $.fn.elfindertree = function(fm, opts) {
 					return updateTree(orphans);
 				} 
 				
-				setTimeout(function() {
-					updateDroppable();
-				}, 10);
+				if (!mobile) {
+					setTimeout(function() {
+						updateDroppable();
+					}, 10);
+				}
 				
 			},
 			
@@ -389,7 +391,9 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return void
 			 */
 			updateDroppable = function() {
-				tree.find('.'+navdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)').droppable(droppableopts);
+				tree.find('.'+navdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)').droppable(droppableopts).each(function(){
+					fm.makeDirectDropUpload(this, fm.navId2Hash(this.id));
+				});
 			},
 			
 			/**
@@ -586,7 +590,7 @@ $.fn.elfindertree = function(fm, opts) {
 			}
 
 			sync();
-			updateDroppable();
+			!mobile && updateDroppable();
 		})
 		// remove dirs
 		.remove(function(e) {

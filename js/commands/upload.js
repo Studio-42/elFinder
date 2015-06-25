@@ -23,15 +23,24 @@ elFinder.prototype.commands.upload = function() {
 	 *
 	 * @return Number
 	 **/
-	this.getstate = function() {
-		return !this._disabled && this.fm.cwd().write ? 0 : -1;
+	this.getstate = function(sel) {
+		var fm = this.fm, f,
+		sel = fm.directUploadTarget? [fm.directUploadTarget] : (sel || [fm.cwd().hash]);
+		if (!this._disabled && sel.length == 1) {
+			f = fm.file(sel[0]);
+		}
+		return (f && f.mime == 'directory' && f.write)? 0 : -1;
 	};
 	
 	
 	this.exec = function(data) {
 		var fm = this.fm,
+			targets = data && (data instanceof Array)? data : null,
 			upload = function(data) {
 				dialog.elfinderdialog('close');
+				if (targets) {
+					data.target = targets[0];
+				}
 				fm.upload(data)
 					.fail(function(error) {
 						dfrd.reject(error);
@@ -42,7 +51,7 @@ elFinder.prototype.commands.upload = function() {
 			},
 			dfrd, dialog, input, button, dropbox, pastebox, dropUpload, paste;
 		
-		if (this.disabled()) {
+		if (this.getstate(targets) < 0) {
 			return $.Deferred().reject();
 		}
 		
@@ -68,10 +77,11 @@ elFinder.prototype.commands.upload = function() {
 				file = [ data ];
 				type = 'text';
 			}
-			return file? fm.upload({files : file, type : type}) : false;
+			target = e._target || null;
+			return file? fm.upload({files : file, type : type, target : target}) : false;
 		};
 		
-		if (data) {
+		if (!targets && data) {
 			if (data.input || data.files) {
 				data.type = 'files';
 				return fm.upload(data);
@@ -188,6 +198,7 @@ elFinder.prototype.commands.upload = function() {
 
 			dropbox.addEventListener('drop', function(e) {
 				dialog.elfinderdialog('close');
+				targets && (e._target = targets[0]);
 				dropUpload(e);
 			}, false);
 			
@@ -199,7 +210,7 @@ elFinder.prototype.commands.upload = function() {
 		}
 		
 		fm.dialog(dialog, {
-			title          : this.title,
+			title          : this.title + (targets? ' - ' + fm.file(targets[0]).name : ''),
 			modal          : true,
 			resizable      : false,
 			destroyOnClose : true

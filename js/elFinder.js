@@ -1928,6 +1928,26 @@ window.elFinder = function(node, opts) {
 
 	});
 
+	if (self.dragUpload) {
+		node[0].addEventListener('dragenter', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}, false);
+		node[0].addEventListener('dragleave', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}, false);
+		node[0].addEventListener('dragover', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}, false);
+		node[0].addEventListener('drop', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			self.error(['errUploadFile', self.i18n('items'), 'errPerm']);
+		}, false);
+	}
+	
 	// self.timeEnd('load'); 
 
 }
@@ -2382,7 +2402,7 @@ elFinder.prototype = {
 				return dfrd.reject();
 			}
 			
-			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+self.cwd().hash+'"/>')
+			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+(data.target || self.cwd().hash)+'"/>')
 				.append('<input type="hidden" name="html" value="1"/>')
 				.append($(input).attr('name', 'upload[]'));
 			
@@ -3718,6 +3738,64 @@ elFinder.prototype = {
 	
 	navId2Hash : function(id) {
 		return typeof(id) == 'string' ? id.substr(4) : false;
+	},
+	
+	/**
+	 * Make event listener for direct upload to directory
+	 * 
+	 * @param  Object  DOM object
+	 * @param  String  Target dirctory hash
+	 * @return void
+	 */
+	makeDirectDropUpload : function(elm, hash) {
+		var self = this, ent,
+		c         = 'class',
+		$elm      = $(elm),
+		collapsed = self.res(c, 'navcollapse'),
+		expanded  = self.res(c, 'navexpand'),
+		dropover  = self.res(c, 'adroppable'),
+		arrow     = self.res(c, 'navarrow'),
+		clDropActive = self.res(c, 'adroppable');
+
+		if (self.dragUpload) {
+			elm.addEventListener('dragenter', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				ent = true;
+				$elm.addClass(clDropActive);
+				if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
+					setTimeout(function() {
+						$elm.is('.'+dropover) && $elm.children('.'+arrow).click();
+					}, 500);
+				}
+			}, false);
+
+			elm.addEventListener('dragleave', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				if (ent) {
+					ent = false;
+				} else {
+					$elm.removeClass(clDropActive);
+				}
+			}, false);
+
+			elm.addEventListener('dragover', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				ent = false;
+			}, false);
+
+			elm.addEventListener('drop', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				$elm.removeClass(clDropActive);
+				e._target = hash;
+				self.directUploadTarget = hash;
+				self.exec('upload', {dropEvt: e});
+				self.directUploadTarget = null;
+			}, false);
+		}
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
