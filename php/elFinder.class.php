@@ -245,7 +245,7 @@ class elFinder {
 		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
 		
 		// check session cache
-		$_optsMD5 = md5(serialize($opts['roots']));
+		$_optsMD5 = md5(json_encode($opts['roots']));
 		if (! isset($_SESSION[self::$sessionCacheKey]) || $_SESSION[self::$sessionCacheKey]['_optsMD5'] !== $_optsMD5) {
 			$_SESSION[self::$sessionCacheKey] = array(
 				'_optsMD5' => $_optsMD5
