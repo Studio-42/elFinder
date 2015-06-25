@@ -3765,7 +3765,7 @@ elFinder.prototype = {
 				$elm.addClass(clDropActive);
 				if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
 					setTimeout(function() {
-						$elm.is('.'+dropover) && $elm.children('.'+arrow).click();
+						$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
 					}, 500);
 				}
 			}, false);
