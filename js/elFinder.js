@@ -2595,7 +2595,7 @@ elFinder.prototype = {
 			var send = function(files, paths){
 				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize, totalSize = 0, chunked = [];
 				var chunkID = +new Date();
-				var BYTES_PER_CHUNK = fm.uplMaxSize - 8190; // margin 8kb
+				var BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, 5242880); // margin 8kb and Max 5MB
 				if (! dataChecked && (isDataType || data.type == 'files')) {
 					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : 0;
 					for (var i=0; i < files.length; i++) {
@@ -2605,7 +2605,7 @@ elFinder.prototype = {
 							total--;
 							continue;
 						}
-						if (fm.uplMaxSize && files[i].size >= fm.uplMaxSize) {
+						if (files[i].size >= BYTES_PER_CHUNK) {
 							var SIZE = files[i].size;
 
 							var start = 0;
@@ -2815,7 +2815,7 @@ elFinder.prototype = {
 					if (xhr.readyState == 4 && xhr.status == 0) {
 						// ff bug while send zero sized file
 						// for safari - send directory
-						dfrd.reject(['errConnect', 'errAbort']);
+						dfrd.reject(['errAbort', 'errFolderUpload']);
 					}
 				};
 				

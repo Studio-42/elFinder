@@ -94,6 +94,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
 			'errNetUnMount'        : 'アンマウントできません', // added 30.04.2012
 			'errConvUTF8'          : 'UTF-8 に変換できませんでした', // added 08.04.2014
+			'errFolderUpload'      : 'フォルダをアップロードしたいのであれば、Google Chrome を使用してください', // from v2.1 added 26.6.2015
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
