@@ -1292,8 +1292,8 @@ window.elFinder = function(node, opts) {
 	}
 	
 	this.upload = function(files) {
-		return this.transport.upload(files, this);
-	}
+			return this.transport.upload(files, this);
+		}
 	
 	/**
 	 * Attach listener to events
@@ -2166,6 +2166,9 @@ elFinder.prototype = {
 	iframeCnt : 0,
 	
 	uploads : {
+		// xhr muiti uploading flag
+		xhrUploading: false,
+		
 		// check droped contents
 		checkFile : function(data, fm) {
 			if (!!data.checked || data.type == 'files') {
@@ -2328,97 +2331,7 @@ elFinder.prototype = {
 				return ret;
 			}
 		},
-		// upload transport using iframe
-		iframe : function(data, fm) { 
-			var self   = fm ? fm : this,
-				input  = data.input? data.input : false,
-				files  = !input ? self.uploads.checkFile(data, self) : false,
-				dfrd   = $.Deferred()
-					.fail(function(error) {
-						error && self.error(error);
-					})
-					.done(function(data) {
-						data.warning && self.error(data.warning);
-						data.removed && self.remove(data);
-						data.added   && self.add(data);
-						data.changed && self.change(data);
-						self.trigger('upload', data);
-						data.sync && self.sync();
-					}),
-				name = 'iframe-'+self.namespace+(++self.iframeCnt),
-				form = $('<form action="'+self.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
-				msie = this.UA.IE,
-				// clear timeouts, close notification dialog, remove form/iframe
-				onload = function() {
-					abortto  && clearTimeout(abortto);
-					notifyto && clearTimeout(notifyto);
-					notify   && self.notify({type : 'upload', cnt : -cnt});
-					
-					setTimeout(function() {
-						msie && $('<iframe src="javascript:false;"/>').appendTo(form);
-						form.remove();
-						iframe.remove();
-					}, 100);
-				},
-				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
-					.bind('load', function() {
-						iframe.unbind('load')
-							.bind('load', function() {
-								var data = self.parseUploadData(iframe.contents().text());
-								
-								onload();
-								data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
-							});
-							
-							// notify dialog
-							notifyto = setTimeout(function() {
-								notify = true;
-								self.notify({type : 'upload', cnt : cnt});
-							}, self.options.notifyDelay);
-							
-							// emulate abort on timeout
-							if (self.options.iframeTimeout > 0) {
-								abortto = setTimeout(function() {
-									onload();
-									dfrd.reject([errors.connect, errors.timeout]);
-								}, self.options.iframeTimeout);
-							}
-							
-							form.submit();
-					}),
-				cnt, notify, notifyto, abortto
-				
-				;
 
-			if (files && files.length) {
-				$.each(files, function(i, val) {
-					form.append('<input type="hidden" name="upload[]" value="'+val+'"/>');
-				});
-				cnt = 1;
-			} else if (input && $(input).is(':file') && $(input).val()) {
-				form.append(input);
-				cnt = input.files ? input.files.length : 1;
-			} else {
-				return dfrd.reject();
-			}
-			
-			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+(data.target || self.cwd().hash)+'"/>')
-				.append('<input type="hidden" name="html" value="1"/>')
-				.append($(input).attr('name', 'upload[]'));
-			
-			$.each(self.options.onlyMimes||[], function(i, mime) {
-				form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
-			});
-			
-			$.each(self.options.customData, function(key, val) {
-				form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
-			});
-			
-			form.appendTo('body');
-			iframe.appendTo('body');
-			
-			return dfrd;
-		},
 		// upload transport using XMLHttpRequest
 		xhr : function(data, fm) { 
 			var self   = fm ? fm : this,
@@ -2434,12 +2347,14 @@ elFinder.prototype = {
 					.done(function(data) {
 						xhr = null;
 						files = null;
-						data.warning && self.error(data.warning);
-						data.removed && self.remove(data);
-						data.added   && self.add(data);
-						data.changed && self.change(data);
-	 					self.trigger('upload', data);
-						data.sync && self.sync();
+						if (data) {
+							data.warning && self.error(data.warning);
+							data.removed && self.remove(data);
+							data.added   && self.add(data);
+							data.changed && self.change(data);
+		 					self.trigger('upload', data);
+							data.sync && self.sync();
+						}
 					})
 					.always(function() {
 						notifyto && clearTimeout(notifyto);
@@ -2593,12 +2508,71 @@ elFinder.prototype = {
 			}, false);
 			
 			var send = function(files, paths){
-				var size = 0, fcnt = 1, sfiles = [], c = 0, total = cnt, maxFileSize, totalSize = 0, chunked = [];
-				var chunkID = +new Date();
-				var BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, 5242880); // margin 8kb and Max 5MB
+				var size = 0,
+				fcnt = 1,
+				sfiles = [],
+				c = 0,
+				total = cnt,
+				maxFileSize,
+				totalSize = 0,
+				chunked = [],
+				chunkID = +new Date(),
+				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, 5242880), // margin 8kb and Max 5MB
+				SIZE, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
+				multi = function(files, num){
+					var sfiles = [], cid;
+					while(files.length && sfiles.length < num) {
+						sfiles.push(files.shift());
+					}
+					if (sfiles.length) {
+						for (var i=0; i < sfiles.length; i++) {
+							cid = isDataType? (sfiles[i][0][0]._cid || null) : (sfiles[i][0]._cid || null);
+							if (!!failChunk[cid]) {
+								last--;
+								continue;
+							}
+							fm.exec('upload', {
+								type: data.type,
+								isDataType: isDataType,
+								files: sfiles[i],
+								checked: true,
+								target: target,
+								multiupload: true})
+							.fail(function(error) {
+								if (cid) {	
+									failChunk[cid] = true;
+								}
+								error && self.error(error);
+							})
+							.always(function(e) {
+								if (e.added) added = $.merge(added, e.added);
+								if (last <= ++done) {
+									fm.trigger('multiupload', {added: added});
+									notifyto && clearTimeout(notifyto);
+									if (checkNotify()) {
+										self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
+									}
+								}
+								multi(files, 1); // Next one
+							});
+						}
+					} else {
+						self.uploads.xhrUploading = false;
+						dfrd.resolve();
+					}
+				},
+				check = function(){
+					if (!self.uploads.xhrUploading) {
+						self.uploads.xhrUploading = true;
+						multi(sfiles, 3); // Max connection: 3
+					} else {
+						setTimeout(function(){ check(); }, 100);
+					}
+				};
+
 				if (! dataChecked && (isDataType || data.type == 'files')) {
 					maxFileSize = fm.option('uploadMaxSize')? fm.option('uploadMaxSize') : 0;
-					for (var i=0; i < files.length; i++) {
+					for (i=0; i < files.length; i++) {
 						if (maxFileSize && files[i].size >= maxFileSize) {
 							self.error(self.i18n('errUploadFile', files[i].name) + ' ' + self.i18n('errUploadFileSize'));
 							cnt--;
@@ -2606,19 +2580,17 @@ elFinder.prototype = {
 							continue;
 						}
 						if (files[i].size >= BYTES_PER_CHUNK) {
-							var SIZE = files[i].size;
-
-							var start = 0;
-							var end = BYTES_PER_CHUNK;
-
-							var chunks = -1;
-							var blob = files[i];
-							var total = Math.floor(SIZE / BYTES_PER_CHUNK);
+							SIZE = files[i].size;
+							start = 0;
+							end = BYTES_PER_CHUNK;
+							chunks = -1;
+							blob = files[i];
+							total = Math.floor(SIZE / BYTES_PER_CHUNK);
 
 							totalSize += SIZE;
 							chunked[chunkID] = 0;
 							while(start < SIZE) {
-								var chunk;
+								chunk;
 								if ('slice' in blob) {
 									chunk = blob.slice(start, end);
 								} else if ('mozSlice' in blob) {
@@ -2688,59 +2660,23 @@ elFinder.prototype = {
 					}
 					
 					if (sfiles.length == 0) {
+						// no data
 						data.checked = true;
 						return false;
 					}
 					
 					if (sfiles.length > 1) {
+						// multi upload
 						notifyto = startNotify(totalSize);
-						var added = [],
-							done = 0,
-							last = sfiles.length,
-							failChunk = [],
-							multi = function(files, num){
-								var sfiles = [];
-								while(files.length && sfiles.length < num) {
-									sfiles.push(files.shift());
-								}
-								if (sfiles.length) {
-									for (var i=0; i < sfiles.length; i++) {
-										var cid = isDataType? (sfiles[i][0][0]._cid || null) : (sfiles[i][0]._cid || null);
-										if (!!failChunk[cid]) {
-											last--;
-											continue;
-										}
-										fm.exec('upload', {
-											type: data.type,
-											isDataType: isDataType,
-											files: sfiles[i],
-											checked: true,
-											target: target,
-											multiupload: true})
-										.fail(function(error) {
-											if (cid) {	
-												failChunk[cid] = true;
-											}
-											error && self.error(error);
-										})
-										.always(function(e) {
-											if (e.added) added = $.merge(added, e.added);
-											if (last <= ++done) {
-												fm.trigger('multiupload', {added: added});
-												notifyto && clearTimeout(notifyto);
-												if (checkNotify()) {
-													self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
-												}
-											}
-											multi(files, 1); // Next one
-										});
-									}
-								}
-							};
-						multi(sfiles, 3); // Max connection: 3
+						added = [];
+						done = 0;
+						last = sfiles.length;
+						failChunk = [];
+						check();
 						return true;
 					}
 					
+					// single upload
 					if (isDataType) {
 						files = sfiles[0][0];
 						paths = sfiles[0][1];
@@ -2850,6 +2786,98 @@ elFinder.prototype = {
 				}
 			}
 
+			return dfrd;
+		},
+		
+		// upload transport using iframe
+		iframe : function(data, fm) { 
+			var self   = fm ? fm : this,
+				input  = data.input? data.input : false,
+				files  = !input ? self.uploads.checkFile(data, self) : false,
+				dfrd   = $.Deferred()
+					.fail(function(error) {
+						error && self.error(error);
+					})
+					.done(function(data) {
+						data.warning && self.error(data.warning);
+						data.removed && self.remove(data);
+						data.added   && self.add(data);
+						data.changed && self.change(data);
+						self.trigger('upload', data);
+						data.sync && self.sync();
+					}),
+				name = 'iframe-'+self.namespace+(++self.iframeCnt),
+				form = $('<form action="'+self.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
+				msie = this.UA.IE,
+				// clear timeouts, close notification dialog, remove form/iframe
+				onload = function() {
+					abortto  && clearTimeout(abortto);
+					notifyto && clearTimeout(notifyto);
+					notify   && self.notify({type : 'upload', cnt : -cnt});
+					
+					setTimeout(function() {
+						msie && $('<iframe src="javascript:false;"/>').appendTo(form);
+						form.remove();
+						iframe.remove();
+					}, 100);
+				},
+				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
+					.bind('load', function() {
+						iframe.unbind('load')
+							.bind('load', function() {
+								var data = self.parseUploadData(iframe.contents().text());
+								
+								onload();
+								data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
+							});
+							
+							// notify dialog
+							notifyto = setTimeout(function() {
+								notify = true;
+								self.notify({type : 'upload', cnt : cnt});
+							}, self.options.notifyDelay);
+							
+							// emulate abort on timeout
+							if (self.options.iframeTimeout > 0) {
+								abortto = setTimeout(function() {
+									onload();
+									dfrd.reject([errors.connect, errors.timeout]);
+								}, self.options.iframeTimeout);
+							}
+							
+							form.submit();
+					}),
+				cnt, notify, notifyto, abortto
+				
+				;
+
+			if (files && files.length) {
+				$.each(files, function(i, val) {
+					form.append('<input type="hidden" name="upload[]" value="'+val+'"/>');
+				});
+				cnt = 1;
+			} else if (input && $(input).is(':file') && $(input).val()) {
+				form.append(input);
+				cnt = input.files ? input.files.length : 1;
+			} else {
+				return dfrd.reject();
+			}
+			
+			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+(data.target || self.cwd().hash)+'"/>')
+				.append('<input type="hidden" name="html" value="1"/>')
+				.append($(input).attr('name', 'upload[]'));
+			
+			$.each(self.options.onlyMimes||[], function(i, mime) {
+				form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
+			});
+			
+			$.each(self.options.customData, function(key, val) {
+				form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
+			});
+			
+			form.appendTo('body');
+			iframe.appendTo('body');
+			
 			return dfrd;
 		}
 	},
