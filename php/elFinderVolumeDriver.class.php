@@ -2733,8 +2733,9 @@ abstract class elFinderVolumeDriver {
 		} else {
 			// lock when parent directory is not writable
 			if (!isset($stat['locked'])) {
-				$pstat = $this->stat($this->dirnameCE($path));
-				if (!$pstat['write']) {
+				$parent = $this->dirnameCE($path);
+				$pstat = isset($this->cache[$parent])? $this->cache[$parent] : array();
+				if (isset($pstat['write']) && !$pstat['write']) {
 					$stat['locked'] = true;
 				}
 			}
