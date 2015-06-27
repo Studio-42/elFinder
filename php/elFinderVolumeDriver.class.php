@@ -623,7 +623,8 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 
-		if (!$file['write'] && !$this->options['allowChmodReadOnly']) {
+		$write = $file['write'];
+		if (!$write && !$this->options['allowChmodReadOnly']) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
 		}
 
@@ -635,7 +636,19 @@ abstract class elFinderVolumeDriver {
 
 		$this->clearcache();
 
-		return ($file = $this->stat($path)) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		if ($file = $this->stat($path)) {
+			$files = array($file);
+			if ($file['mime'] === 'directory' && $write !== $file['write']) {
+				foreach ($this->getScandir($path) as $stat) {
+					if ($this->mimeAccepted($stat['mime'])) {
+						$files[] = $stat;
+					}
+				}
+			}
+			return $files;
+		} else {
+			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
+		}
 	}
 	
 	/**
@@ -2717,10 +2730,19 @@ abstract class elFinderVolumeDriver {
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null, $isDir));
 		if ($root) {
 			$stat['locked'] = 1;
-		} elseif ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : null, $isDir)) {
-			$stat['locked'] = 1;
 		} else {
-			unset($stat['locked']);
+			// lock when parent directory is not writable
+			if (!isset($stat['locked'])) {
+				$pstat = $this->stat($this->dirnameCE($path));
+				if (!$pstat['write']) {
+					$stat['locked'] = true;
+				}
+			}
+			if ($this->attr($path, 'locked', isset($stat['locked']) ? !!$stat['locked'] : null, $isDir)) {
+				$stat['locked'] = 1;
+			} else {
+				unset($stat['locked']);
+			}
 		}
 
 		if ($root) {

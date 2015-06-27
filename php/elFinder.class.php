@@ -1472,7 +1472,7 @@ class elFinder {
 		foreach($targets as $target) {
 			$file = $volume->chmod($target, $mode);
 			if ($file) {
-				$files[] = $file;
+				$files = (is_array($file))? $file : array($file);
 			} else {
 				$errors = array_merge($errors, $volume->error());
 			}
