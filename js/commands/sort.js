@@ -7,7 +7,8 @@
  **/
 elFinder.prototype.commands.sort = function() {
 	var self  = this,
-	fm    = self.fm;
+	fm    = self.fm,
+	timer;
 	
 	/**
 	 * Command options
@@ -29,7 +30,6 @@ elFinder.prototype.commands.sort = function() {
 	});
 	
 	fm.bind('open sortchange viewchange search searchend', function() {
-		var timer = null;
 		timer && clearTimeout(timer);
 		timer = setTimeout(function(){
 			var cols = $(fm.cwd).find('div.elfinder-cwd-wrapper-list table');

@@ -3064,100 +3064,11 @@ elFinder.prototype = {
 	
 	_sortRules : {
 		name : function(file1, file2) {
-			var self = elFinder.prototype._sortRules.name;
-			if (typeof self.loc == 'undefined') {
-				self.loc = (navigator.userLanguage || navigator.browserLanguage || navigator.language || 'en-US');
-			}
-			if (typeof self.sort == 'undefined') {
-				if ('11'.localeCompare('2', self.loc, {numeric: true}) > 0) {
-					// Native support
-					self.sort = function(a, b) {
-						return a.localeCompare(b, self.loc, {numeric: true});
-					};
-				} else {
-					/*
-					 * Edited for elFinder (emulates localeCompare() by numeric) by Naoki Sawada aka nao-pon
-					 */
-					/*
-					 * Huddle/javascript-natural-sort (https://github.com/Huddle/javascript-natural-sort)
-					 */
-					/*
-					 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
-					 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
-					 * http://opensource.org/licenses/mit-license.php
-					 */
-					self.sort = function(a, b) {
-						var re = /(^-?[0-9]+(\.?[0-9]*)[df]?e?[0-9]?$|^0x[0-9a-f]+$|[0-9]+)/gi,
-						sre = /(^[ ]*|[ ]*$)/g,
-						dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
-						hre = /^0x[0-9a-f]+$/i,
-						ore = /^0/,
-						syre = /^[\x01\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/, // symbol first - (Naoki Sawada)
-						i = function(s) { return self.sort.insensitive && (''+s).toLowerCase() || ''+s },
-						// convert all to strings strip whitespace
-						// first character is "_", it's smallest - (Naoki Sawada)
-						x = i(a).replace(sre, '').replace(/^_/, "\x01") || '',
-						y = i(b).replace(sre, '').replace(/^_/, "\x01") || '',
-						// chunk/tokenize
-						xN = x.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
-						yN = y.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
-						// numeric, hex or date detection
-						xD = parseInt(x.match(hre)) || (xN.length != 1 && x.match(dre) && Date.parse(x)),
-						yD = parseInt(y.match(hre)) || xD && y.match(dre) && Date.parse(y) || null,
-						oFxNcL, oFyNcL,
-						locRes = 0;
-
-						// first try and sort Hex codes or Dates
-						if (yD) {
-							if ( xD < yD ) return -1;
-							else if ( xD > yD ) return 1;
-						}
-						// natural sorting through split numeric strings and default strings
-						for(var cLoc=0, numS=Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
-	
-							// find floats not starting with '0', string or 0 if not defined (Clint Priest)
-							oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc]) || xN[cLoc] || 0;
-							oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc]) || yN[cLoc] || 0;
-	
-							// handle numeric vs string comparison - number < string - (Kyle Adams)
-							// but symbol first < number - (Naoki Sawada)
-							if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
-								if (isNaN(oFxNcL) && (typeof oFxNcL !== 'string' || ! oFxNcL.match(syre))) {
-									return 1;
-								} else if (typeof oFyNcL !== 'string' || ! oFyNcL.match(syre)) {
-									return -1;
-								}
-							}
-	
-							// use decimal number comparison if either value is string zero
-							if (parseInt(oFxNcL, 10) === 0) oFxNcL = 0;
-							if (parseInt(oFyNcL, 10) === 0) oFyNcL = 0;
-	
-							// rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
-							if (typeof oFxNcL !== typeof oFyNcL) {
-								oFxNcL += '';
-								oFyNcL += '';
-							}
-	
-							// use locale sensitive sort for strings when case insensitive
-							// note: localeCompare interleaves uppercase with lowercase (e.g. A,a,B,b)
-							if (self.sort.insensitive && typeof oFxNcL === 'string' && typeof oFyNcL === 'string') {
-								locRes = oFxNcL.localeCompare(oFyNcL, self.loc);
-								if (locRes !== 0) return locRes;
-							}
-	
-							if (oFxNcL < oFyNcL) return -1;
-							if (oFxNcL > oFyNcL) return 1;
-						}
-						return 0;
-					};
-					self.sort.insensitive = true;
-				}
-			}
 			var n1 = file1.name.toLowerCase(),
 			    n2 = file2.name.toLowerCase(),
 			    e1 = '',
 			    e2 = '',
+			    so = elFinder.prototype.naturalCompare,
 			    m, ret;
 			if (m = n1.match(/^(.+)(\.[0-9a-z.]+)$/)) {
 				n1 = m[1];
@@ -3167,9 +3078,9 @@ elFinder.prototype = {
 				n2 = m[1];
 				e2 = m[2];
 			}
-			ret = self.sort(n1, n2);
+			ret = so(n1, n2);
 			if (ret == 0 && (e1 || e2) && e1 != e2) {
-				ret = self.sort(e1, e2);
+				ret = so(e1, e2);
 			}
 			return ret;
 		},
@@ -3179,13 +3090,120 @@ elFinder.prototype = {
 				
 			return size1 == size2 ? 0 : size1 > size2 ? 1 : -1;
 		},
-		kind : function(file1, file2) { return file1.mime.localeCompare(file2.mime); },
+		kind : function(file1, file2) {
+			return elFinder.prototype.naturalCompare(file1.mime, file2.mime);
+		},
 		date : function(file1, file2) { 
 			var date1 = file1.ts || file1.date,
 				date2 = file2.ts || file2.date;
 
 			return date1 == date2 ? 0 : date1 > date2 ? 1 : -1
 		}
+	},
+	
+	/**
+	 * Compare strings for natural sort
+	 *
+	 * @param  String
+	 * @param  String
+	 * @return Number
+	 */
+	naturalCompare : function(a, b) {
+		var self = elFinder.prototype.naturalCompare;
+		if (typeof self.loc == 'undefined') {
+			self.loc = (navigator.userLanguage || navigator.browserLanguage || navigator.language || 'en-US');
+		}
+		if (typeof self.sort == 'undefined') {
+			if ('11'.localeCompare('2', self.loc, {numeric: true}) > 0) {
+				// Native support
+				if (window.Intl && window.Intl.Collator) {
+					self.sort = new Intl.Collator(self.loc, {numeric: true}).compare;
+				} else {
+					self.sort = function(a, b) {
+						return a.localeCompare(b, self.loc, {numeric: true});
+					};
+				}
+			} else {
+				/*
+				 * Edited for elFinder (emulates localeCompare() by numeric) by Naoki Sawada aka nao-pon
+				 */
+				/*
+				 * Huddle/javascript-natural-sort (https://github.com/Huddle/javascript-natural-sort)
+				 */
+				/*
+				 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
+				 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
+				 * http://opensource.org/licenses/mit-license.php
+				 */
+				self.sort = function(a, b) {
+					var re = /(^-?[0-9]+(\.?[0-9]*)[df]?e?[0-9]?$|^0x[0-9a-f]+$|[0-9]+)/gi,
+					sre = /(^[ ]*|[ ]*$)/g,
+					dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
+					hre = /^0x[0-9a-f]+$/i,
+					ore = /^0/,
+					syre = /^[\x01\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/, // symbol first - (Naoki Sawada)
+					i = function(s) { return self.sort.insensitive && (''+s).toLowerCase() || ''+s },
+					// convert all to strings strip whitespace
+					// first character is "_", it's smallest - (Naoki Sawada)
+					x = i(a).replace(sre, '').replace(/^_/, "\x01") || '',
+					y = i(b).replace(sre, '').replace(/^_/, "\x01") || '',
+					// chunk/tokenize
+					xN = x.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+					yN = y.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+					// numeric, hex or date detection
+					xD = parseInt(x.match(hre)) || (xN.length != 1 && x.match(dre) && Date.parse(x)),
+					yD = parseInt(y.match(hre)) || xD && y.match(dre) && Date.parse(y) || null,
+					oFxNcL, oFyNcL,
+					locRes = 0;
+
+					// first try and sort Hex codes or Dates
+					if (yD) {
+						if ( xD < yD ) return -1;
+						else if ( xD > yD ) return 1;
+					}
+					// natural sorting through split numeric strings and default strings
+					for(var cLoc=0, numS=Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
+
+						// find floats not starting with '0', string or 0 if not defined (Clint Priest)
+						oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc]) || xN[cLoc] || 0;
+						oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc]) || yN[cLoc] || 0;
+
+						// handle numeric vs string comparison - number < string - (Kyle Adams)
+						// but symbol first < number - (Naoki Sawada)
+						if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
+							if (isNaN(oFxNcL) && (typeof oFxNcL !== 'string' || ! oFxNcL.match(syre))) {
+								return 1;
+							} else if (typeof oFyNcL !== 'string' || ! oFyNcL.match(syre)) {
+								return -1;
+							}
+						}
+
+						// use decimal number comparison if either value is string zero
+						if (parseInt(oFxNcL, 10) === 0) oFxNcL = 0;
+						if (parseInt(oFyNcL, 10) === 0) oFyNcL = 0;
+
+						// rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
+						if (typeof oFxNcL !== typeof oFyNcL) {
+							oFxNcL += '';
+							oFyNcL += '';
+						}
+
+						// use locale sensitive sort for strings when case insensitive
+						// note: localeCompare interleaves uppercase with lowercase (e.g. A,a,B,b)
+						if (self.sort.insensitive && typeof oFxNcL === 'string' && typeof oFyNcL === 'string') {
+							locRes = oFxNcL.localeCompare(oFyNcL, self.loc);
+							if (locRes !== 0) return locRes;
+						}
+
+						if (oFxNcL < oFyNcL) return -1;
+						if (oFxNcL > oFyNcL) return 1;
+					}
+					return 0;
+				};
+				self.sort.insensitive = true;
+			}
+		}
+		return self.sort(a, b);
 	},
 	
 	/**

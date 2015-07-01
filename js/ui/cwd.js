@@ -398,57 +398,88 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
-				var html  = [],  
-					dirs  = false, 
-					ltmb  = [],
-					atmb  = {},
-					last  = cwd.find('[id]:last'),
-					top   = !last.length,
-					place = list ? cwd.children('table').children('tbody') : cwd,
-					files;
+				var go = function(){
+					var html  = [],
+						dirs  = false,
+						ltmb  = [],
+						atmb  = {},
+						last  = buffer._last || cwd.find('[id]:last'),
+						top   = !last.length,
+						place = buffer._place || (list ? cwd.children('table').children('tbody') : cwd),
+						chk, files;
 
-				if (!buffer.length) {
-					return wrapper.unbind(scrollEvent);
-				}
-				
-				while ((!last.length || last.position().top <= wrapper.height() + wrapper.scrollTop() + fm.options.showThreshold)
-					&& (files = buffer.splice(0, fm.options.showFiles)).length) {
+					// check draging scroll bar
+					top && (wrapper._top = 0);
+					if (!!wrapper._mousedown && wrapper._top != wrapper.scrollTop()) {
+						wrapper._top = wrapper.scrollTop();
+						setTimeout(function(){
+							go();
+						}, 50);
+						return;
+					}
 					
-					html = $.map(files, function(f) {
-						if (f.hash && f.name) {
-							if (f.mime == 'directory') {
-								dirs = true;
+					delete buffer._timer;
+
+					if (!buffer.length) {
+						bottomMarker.hide();
+						return wrapper.unbind(scrollEvent);
+					}
+
+					//progress.show();
+					while ((!last.length || (chk = last.position().top - (wrapper.height() + wrapper.scrollTop() + fm.options.showThreshold)) <= 0)
+						&& (files = buffer.splice(0, fm.options.showFiles - (chk || 0) / (buffer._hpi || 1))).length) {
+
+						html = $.map(files, function(f) {
+							if (f.hash && f.name) {
+								if (f.mime == 'directory') {
+									dirs = true;
+								}
+								if (f.tmb) {
+									f.tmb === 1 ? ltmb.push(f.hash) : (atmb[f.hash] = f.tmb);
+								} 
+								return itemhtml(f);
 							}
-							if (f.tmb) {
-								f.tmb === 1 ? ltmb.push(f.hash) : (atmb[f.hash] = f.tmb);
-							} 
-							return itemhtml(f);
+							return null;
+						});
+
+						(top || !buffer.length) && bottomMarker.hide();
+						place.append(html.join(''));
+						last = cwd.find('[id]:last');
+						// scroll top on dir load to avoid scroll after page reload
+						top && wrapper.scrollTop(0);
+						if (top || !buffer._hpi) {
+							buffer._hpi = place.height() / files.length;
+							buffer.length && bottomMarker.css({top: (buffer._hpi * buffer.length + place.height()) + 'px'}).show();
 						}
-						return null;
-					});
+					}
 
-					place.append(html.join(''));
-					last = cwd.find('[id]:last');
-					// scroll top on dir load to avoid scroll after page reload
-					top && cwd.scrollTop(0);
+					// cache last
+					buffer._last = last;
+
+					// load/attach thumbnails
+					attachThumbnails(atmb);
+					ltmb.length && loadThumbnails(ltmb);
+
+					// make directory droppable
+					dirs && !mobile && makeDroppable();
 					
-				}
-
-				// load/attach thumbnails
-				attachThumbnails(atmb);
-				ltmb.length && loadThumbnails(ltmb);
-
-				// make directory droppable
-				dirs && !mobile && makeDroppable();
+					if (selectedFiles.length) {
+						place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
+							var id = this.id;
+							
+							$.inArray(id, selectedFiles) !== -1 && $(this).trigger(evtSelect);
+						});
+					}
+				};
 				
-				if (selectedFiles.length) {
-					place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
-						var id = this.id;
-						
-						$.inArray(id, selectedFiles) !== -1 && $(this).trigger(evtSelect);
-					});
-				}
-				
+				// stop while scrolling
+				buffer._timer && clearTimeout(buffer._timer);
+				// first time to go()
+				!buffer._timer && go();
+				// regist next go()
+				buffer._timer = setTimeout(function(){
+					go();
+				}, 100);
 			},
 			
 			/**
@@ -688,6 +719,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
+				bottomMarker.hide();
 
 				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
 
@@ -970,7 +1002,13 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.bind('touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
 					clearTimeout($(this).data('tmlongtap'));
-				}),
+				})
+				.on('mousedown', function(){wrapper._mousedown = true;})
+				.on('mouseup', function(){wrapper._mousedown = false;}),
+			
+			bottomMarker = $('<div>&nbsp;</div>')
+				.css({position: 'absolute', width: '1px', height: '1px'})
+				.hide(),
 			
 			resize = function() {
 				var h = 0;
@@ -984,9 +1022,11 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// elfinder node
 			parent = $(this).parent().resize(resize),
-			// workzone node
-			wz = parent.children('.elfinder-workzone').append(wrapper.append(this))
+			
+			// workzone node 
+			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
+
 		
 		// for iOS5 bug
 		$('body').on('touchstart touchmove touchend', function(e){});
@@ -1097,11 +1137,13 @@ $.fn.elfindercwd = function(fm, options) {
 				trigger();
 			})
 			// fix cwd height if it less then wrapper
-			.bind('open add search searchend', function() {
+			.bind('open add search searchend viewchange', function() {
 				cwd.css('height', 'auto');
 
-				if (cwd.outerHeight(true) < wrapper.height()) {
-					cwd.height(wrapper.height() - (cwd.outerHeight(true) - cwd.height()) - 2);
+				var wph = wrapper[0].clientHeight,
+				cwdoh = cwd.outerHeight(true);
+				if (cwdoh < wph) {
+					cwd.height(wph - (cwdoh - cwd.height()) - 2);
 				} 
 			})
 			// select dragged file if no selected, disable selectable
