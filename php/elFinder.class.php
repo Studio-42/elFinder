@@ -782,9 +782,12 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
 		
-		foreach ($ls as $file) {
-			if (!in_array($file, $files)) {
-				$files[] = $file;
+		if ($ls) {
+			if ($files) {
+				$files = array_merge($files, $ls);
+				$files = array_unique($files, SORT_REGULAR);
+			} else {
+				$files = $ls;
 			}
 		}
 		
