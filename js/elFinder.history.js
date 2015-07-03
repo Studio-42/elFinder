@@ -88,7 +88,7 @@ elFinder.prototype.history = function(fm) {
 	}
 	
 	// bind to elfinder events
-	fm.open(function(e) {
+	fm.open(function() {
 		var l = history.length,
 			cwd = fm.cwd().hash;
 
