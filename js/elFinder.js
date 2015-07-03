@@ -248,14 +248,13 @@ window.elFinder = function(node, opts) {
 				files = {};
 			} else {
 				// remove only files from prev cwd
-				for (var i in files) {
-					if (files.hasOwnProperty(i) 
-					&& files[i].mime != 'directory' 
-					&& files[i].phash == cwd
+				$.each(Object.keys(files), function(n, i) {
+					if (files[i].mime !== 'directory' 
+					&& files[i].phash === cwd
 					&& $.inArray(i, remember) === -1) {
 						delete files[i];
 					}
-				}
+				});
 			}
 
 			cwd = data.cwd.hash;
@@ -273,10 +272,10 @@ window.elFinder = function(node, opts) {
 		 * @return void
 		 **/
 		cache = function(data) {
-			var l = data.length, f;
+			var l = data.length, f, i;
 
-			while (l--) {
-				f = data[l];
+			for (i = 0; i < l; i++) {
+				f = data[i];
 				if (f.name && f.hash && f.mime) {
 					if (!f.phash) {
 						var name = 'volume_'+f.name,
@@ -1345,16 +1344,24 @@ window.elFinder = function(node, opts) {
 	 */
 	this.trigger = function(event, data) {
 		var event    = event.toLowerCase(),
-			handlers = listeners[event] || [], i, j;
+			handlers = listeners[event] || [], i, l, frozen;
 		
 		this.debug('event-'+event, data)
 		
 		if (handlers.length) {
 			event = $.Event(event);
 
-			for (i = 0; i < handlers.length; i++) {
-				// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-				event.data = $.extend(true, {}, data);
+			// freeze `data` object for better performance, deep copy is too heavy
+			if (Object.freeze) {
+				frozen = $.extend(true, {}, data);
+				event.data = Object.freeze(frozen);
+			}
+			l = handlers.length;
+			for (i = 0; i < l; i++) {
+				if (!frozen) {
+					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+					event.data = $.extend(true, {}, data);
+				}
 
 				try {
 					if (handlers[i](event, this) === false 
@@ -1927,6 +1934,16 @@ window.elFinder = function(node, opts) {
 		}
 
 	});
+
+	(function(){
+		var tm;
+		$(window).on('resize', function(){
+			tm && clearTimeout(tm);
+			tm = setTimeout(function() {
+				self.trigger('resize', {width : node.width(), height : node.height()});
+			}, 200);
+		});
+	})();
 
 	if (self.dragUpload) {
 		node[0].addEventListener('dragenter', function(e) {
@@ -3859,3 +3876,43 @@ elFinder.prototype = {
 	
 
 }
+
+/**
+ * for conpat ex. ie8...
+ *
+ * Object.keys() - JavaScript | MDN
+ * https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+ */
+if (!Object.keys) {
+	Object.keys = (function () {
+		var hasOwnProperty = Object.prototype.hasOwnProperty,
+				hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+				dontEnums = [
+					'toString',
+					'toLocaleString',
+					'valueOf',
+					'hasOwnProperty',
+					'isPrototypeOf',
+					'propertyIsEnumerable',
+					'constructor'
+				],
+				dontEnumsLength = dontEnums.length
+
+		return function (obj) {
+			if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
+
+			var result = []
+
+			for (var prop in obj) {
+				if (hasOwnProperty.call(obj, prop)) result.push(prop)
+			}
+
+			if (hasDontEnumBug) {
+				for (var i=0; i < dontEnumsLength; i++) {
+					if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
+				}
+			}
+			return result
+		}
+	})()
+};
