@@ -539,6 +539,12 @@ $.fn.elfindertree = function(fm, opts) {
 			if (dirs.length) {
 				updateTree(dirs);
 				updateArrows(dirs, loaded);
+				// support volume driver option `uiCmdMap`
+				$.each(dirs, function(k, v){
+					if (v.volumeid && v.uiCmdMap && Object.keys(v.uiCmdMap).length && !fm.options.contextmenu.cmdMaps[v.volumeid]) {
+						fm.options.contextmenu.cmdMaps[v.volumeid] = v.uiCmdMap;
+					}
+				});
 			} 
 			sync(false, dirs);
 		})
