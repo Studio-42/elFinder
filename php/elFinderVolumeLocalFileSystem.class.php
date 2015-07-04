@@ -305,22 +305,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		static $names = null;
-		static $statOwner = null;
-		static $phpuid = null;
 		
-		if (is_null($names)) {
-			$names = array('uid' => array(), 'gid' =>array());
-		}
+		static $statOwner;
 		if (is_null($statOwner)) {
 			$statOwner = (!empty($this->options['statOwner']));
-		}
-		if (is_null($phpuid)) {
-			if (is_callable('posix_getuid')) {
-				$phpuid = posix_getuid();
-			} else {
-				$phpuid = 0;
-			}
 		}
 		
 		$stat = array();
@@ -341,56 +329,38 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$gid = $uid = 0;
 		$stat['isowner'] = false;
 		if ($path != $this->root && is_link($path)) {
-			if (($target = $this->readlink($path)) == false 
+			if (!($target = $this->readlink($path))
 			|| $target == $path) {
-				$stat['mime']  = 'symlink-broken';
-				$stat['read']  = false;
-				$stat['write'] = false;
-				$stat['size']  = 0;
+				if (is_null($target)) {
+					$stat = array();
+				} else {
+					$stat['mime']  = 'symlink-broken';
+					$stat['read']  = false;
+					$stat['write'] = false;
+					$stat['size']  = 0;
+				}
 				return $stat;
 			}
-			$stat['alias']  = $this->_path($target);
-			$stat['target'] = $target;
-			$path  = $target;
 			$lstat = lstat($path);
+			$stat['alias'] = $this->_path($target);
+			$stat['target'] = $target;
 			$size  = sprintf('%u', $lstat['size']);
+			$stat['ts'] = $lstat['mtime'];
 		} else {
-			if ($statOwner) {
-				$fstat = stat($path);
-				$uid = $fstat['uid'];
-				$gid = $fstat['gid'];
-				$stat['perm'] = substr((string)decoct($fstat['mode']), -4);
-			}
 			$size = sprintf('%u', @filesize($path));
+			$stat['ts'] = filemtime($path);
 		}
 		if ($statOwner) {
-			if ($uid) {
-				$stat['isowner'] = ($phpuid == $uid);
-				if (isset($names['uid'][$uid])) {
-					$stat['owner'] = $names['uid'][$uid];
-				} else if (is_callable('posix_getpwuid')) {
-					$pwuid = posix_getpwuid($uid);
-					$stat['owner'] = $names['uid'][$uid] = $pwuid['name'];
-				} else {
-					$stat['owner'] = $names['uid'][$uid] = $uid;
-				}
-			}
-			if ($gid) {
-				if (isset($names['gid'][$gid])) {
-					$stat['group'] = $names['gid'][$gid];
-				} else if (is_callable('posix_getgrgid')) {
-					$grgid = posix_getgrgid($gid);
-					$stat['group'] = $names['gid'][$gid] = $grgid['name'];
-				} else {
-					$stat['group'] = $names['gid'][$gid] = $gid;
-				}
-			}
+			$fstat = stat($path);
+			$uid = $fstat['uid'];
+			$gid = $fstat['gid'];
+			$stat['perm'] = substr((string)decoct($fstat['mode']), -4);
+			$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
 		}
 		
 		$dir = is_dir($path);
-		
+
 		$stat['mime']  = $dir ? 'directory' : $this->mimetype($path);
-		$stat['ts']    = filemtime($path);
 		//logical rights first
 		$stat['read'] = is_readable($path)? null : false;
 		$stat['write'] = is_writable($path)? null : false;
@@ -402,6 +372,55 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $stat;
 	}
 	
+	/**
+	 * Get stat `owner`, `group` and `isowner` by `uid` and `gid`
+	 * Sub-fuction of _stat() and _scandir()
+	 * 
+	 * @param integer $uid
+	 * @param integer $gid
+	 * @return array  stat
+	 */
+	protected function getOwnerStat($uid, $gid) {
+		static $names = null;
+		static $phpuid = null;
+		
+		if (is_null($names)) {
+			$names = array('uid' => array(), 'gid' =>array());
+		}
+		if (is_null($phpuid)) {
+			if (is_callable('posix_getuid')) {
+				$phpuid = posix_getuid();
+			} else {
+				$phpuid = 0;
+			}
+		}
+		
+		$stat = array();
+		
+		if ($uid) {
+			$stat['isowner'] = ($phpuid == $uid);
+			if (isset($names['uid'][$uid])) {
+				$stat['owner'] = $names['uid'][$uid];
+			} else if (is_callable('posix_getpwuid')) {
+				$pwuid = posix_getpwuid($uid);
+				$stat['owner'] = $names['uid'][$uid] = $pwuid['name'];
+			} else {
+				$stat['owner'] = $names['uid'][$uid] = $uid;
+			}
+		}
+		if ($gid) {
+			if (isset($names['gid'][$gid])) {
+				$stat['group'] = $names['gid'][$gid];
+			} else if (is_callable('posix_getgrgid')) {
+				$grgid = posix_getgrgid($gid);
+				$stat['group'] = $names['gid'][$gid] = $grgid['name'];
+			} else {
+				$stat['group'] = $names['gid'][$gid] = $gid;
+			}
+		}
+		
+		return $stat;
+	}
 
 	/**
 	 * Return true if path is dir and has at least one childs directory
@@ -444,14 +463,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function readlink($path) {
 		if (!($target = @readlink($path))) {
-			return false;
+			return null;
 		}
 		
 		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
 			$target = $this->_joinPath(dirname($path), $target);
+			if (!file_exists($target)) {
+				return null;
+			}
 		}
 		
-		if ($this->_inpath($target, $this->aroot)) {
+		if ($this->_inpath($target, $this->root)) {
 			$atarget = realpath($target);
 			return $this->_normpath($this->_joinPath($this->root, substr($atarget, strlen(rtrim($this->aroot, DIRECTORY_SEPARATOR)) + 1)));
 		}
@@ -468,12 +490,73 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _scandir($path) {
 		$files = array();
+		$cache = array();
+		$statOwner = (!empty($this->options['statOwner']));
 		
-		foreach (scandir($path) as $name) {
-			if ($name != '.' && $name != '..') {
-				$files[] = $this->_joinPath($path, $name);
+		foreach (new DirectoryIterator($path) as $file) {
+			if ($file->isDot()) { continue; }
+			
+			$files[] = $fpath = $this->_joinPath($path, $file->getFilename());
+			
+			$br = false;
+			$stat = array();
+			
+			$gid = $uid = 0;
+			$stat['isowner'] = false;
+			if ($file->isLink()) {
+				if (!($target = $this->readlink($fpath))
+				|| $target == $fpath) {
+					if (is_null($target)) {
+						$stat = array();
+					} else {
+						$stat['mime']  = 'symlink-broken';
+						$stat['read']  = false;
+						$stat['write'] = false;
+						$stat['size']  = 0;
+					}
+					$br = true;
+				} else {
+					$dir = is_dir($target);
+					$lstat = lstat($fpath);
+					$stat['alias'] = $this->_path($target);
+					$stat['target'] = $target;
+					$size = sprintf('%u', $lstat['size']);
+					$stat['ts'] = $lstat['mtime'];
+					$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
+				}
+			} else {
+				$dir = $file->isDir();
+				$size = sprintf('%u', $file->getSize());
+				$stat['ts'] = $file->getMTime();
+				$stat['mime'] = $dir ? 'directory' : $this->mimetype($fpath);
+			}
+			if (!$br) {
+				if ($statOwner) {
+					$uid = $file->getOwner();
+					$gid = $file->getGroup();
+					$stat['perm'] = substr((string)decoct($file->getPerms()), -4);
+					$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
+				}
+				
+				//logical rights first
+				$stat['read'] = $file->isReadable()? null : false;
+				$stat['write'] = $file->isWritable()? null : false;
+				
+				if (is_null($stat['read'])) {
+					$stat['size'] = $dir ? 0 : $size;
+				}
+			}
+			
+			$cache[] = array($fpath, $stat);
+		}
+		
+		if ($cache) {
+			$cache = $this->convEncOut($cache, false);
+			foreach($cache as $d) {
+				$this->updateCache($d[0], $d[1]);
 			}
 		}
+		
 		return $files;
 	}
 		
