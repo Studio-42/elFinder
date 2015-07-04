@@ -200,11 +200,12 @@ window.elFinder = function(node, opts) {
 		
 		uiCmdMapPrev = null,
 		open = function(data) {
-			var repCmds = [], volumeid;
+			var repCmds = [], volumeid,
+			dataCmdMap = (data.options.uiCmdMap && data.options.uiCmdMap.length)? data.options.uiCmdMap : {};
 			
 			// support volume driver option `uiCmdMap`
-			if (data && data.options && uiCmdMapPrev !== (data.options.uiCmdMap || {})) {
-				uiCmdMapPrev = (data.options.uiCmdMap || {});
+			if (data && data.options && uiCmdMapPrev !== dataCmdMap) {
+				uiCmdMapPrev = dataCmdMap;
 				if (Object.keys(uiCmdMapPrev).length) {
 					// for contextmenu
 					volumeid = data.cwd? data.cwd.volumeid : null;
@@ -237,7 +238,7 @@ window.elFinder = function(node, opts) {
 			// non cwd volume's contextmenu
 			if (data.files) {
 				$.each(data.files, function(k, v){
-					if (v.volumeid && v.uiCmdMap && !self.options.contextmenu.cmdMaps[v.volumeid]) {
+					if (v.volumeid && v.uiCmdMap && v.uiCmdMap.length && !self.options.contextmenu.cmdMaps[v.volumeid]) {
 						self.options.contextmenu.cmdMaps[v.volumeid] = v.uiCmdMap;
 					}
 				});
