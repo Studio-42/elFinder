@@ -11,33 +11,41 @@ elFinder.prototype.commands.rename = function() {
 		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
 	}];
 	
-	this.getstate = function() {
-		var sel = this.fm.selectedFiles();
+	this.getstate = function(sel) {
+		var sel = this.files(sel);
 
 		return !this._disabled && sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
-	}
+	};
 	
-	this.exec = function() {
+	this.exec = function(hashes) {
 		var fm       = this.fm,
 			cwd      = fm.getUI('cwd'),
-			sel      = fm.selected(),
+			sel      = hashes || (fm.selected().length? fm.selected() : false) || [fm.cwd().hash],
 			cnt      = sel.length,
 			file     = fm.file(sel.shift()),
 			filename = '.elfinder-cwd-filename',
+			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
+			incwd    = (fm.cwd().hash == file.hash),
 			dfrd     = $.Deferred()
+				.done(function(data){
+					incwd && fm.exec('open', data.added[0].hash);
+				})
 				.fail(function(error) {
 					var parent = input.parent(),
 						name   = fm.escape(file.name);
 
-					
-					if (parent.length) {
-						input.remove();
-						parent.html(name);
+					if (type === 'navbar') {
+						input.replaceWith(name);
 					} else {
-						cwd.find('#'+file.hash).find(filename).html(name);
-						setTimeout(function() {
-							cwd.find('#'+file.hash).click();
-						}, 50);
+						if (parent.length) {
+							input.remove();
+							parent.html(name);
+						} else {
+							cwd.find('#'+file.hash).find(filename).html(name);
+							setTimeout(function() {
+								cwd.find('#'+file.hash).click();
+							}, 50);
+						}
 					}
 					
 					error && fm.error(error);
@@ -102,11 +110,12 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
-			node = cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name)),
+			node = (type === 'navbar')? $('#'+fm.navHash2Id(file.hash)).contents().filter(function(){ return this.nodeType==3 && $.inArray($(this).parent(),target); }).replaceWith(input.val(file.name))
+					                  : cwd.find('#'+file.hash).find(filename).empty().append(input.val(file.name)),
 			name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '')
 			;
 		
-		if (this.disabled()) {
+		if (this.getstate([file.hash]) < 0) {
 			return dfrd.reject();
 		}
 		
@@ -127,6 +136,6 @@ elFinder.prototype.commands.rename = function() {
 		input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 		
 		return dfrd;
-	}
+	};
 
 }

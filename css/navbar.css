@@ -145,6 +145,9 @@
 .elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
+/* navbar input */
+.elfinder-navbar input { width:100%; border:0px solid; margin:0; padding:0; }
+
 /* resizable */
 .elfinder-navbar .ui-resizable-handle { width:12px; background:transparent url('../img/resize.png') center center no-repeat; }
 .elfinder-nav-handle-icon {

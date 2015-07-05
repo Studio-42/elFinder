@@ -83,6 +83,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					cmd = fm.command(name);
 
 					if (cmd && cmd.getstate(targets) != -1) {
+						targets._type = type;
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
