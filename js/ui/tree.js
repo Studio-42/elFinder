@@ -522,7 +522,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 					if (link.is('.'+loaded)) {
 						link.toggleClass(expanded);
-						stree.slideToggle()
+						stree.slideToggle('normal', function(){ fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1); })
 					} else {
 						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);
@@ -533,7 +533,7 @@ $.fn.elfindertree = function(fm, opts) {
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
-									stree.slideDown();
+									stree.slideDown('normal', function(){ fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1); });
 								} 
 								sync(true);
 							})
