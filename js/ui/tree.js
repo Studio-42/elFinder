@@ -522,7 +522,16 @@ $.fn.elfindertree = function(fm, opts) {
 
 					if (link.is('.'+loaded)) {
 						link.toggleClass(expanded);
-						stree.slideToggle('normal', function(){ fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1); })
+						stree.slideToggle('normal', function(){
+							if (!mobile) {
+								if (link.hasClass(expanded)) {
+									link.nextAll().find('span.ui-droppable-disabled:visible').droppable('enable');
+								} else {
+									link.nextAll().find('span.ui-droppable:not(.ui-droppable-disabled)').droppable('disable');
+								}
+								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+							}
+						});
 					} else {
 						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);

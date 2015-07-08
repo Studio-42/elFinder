@@ -620,7 +620,7 @@ window.elFinder = function(node, opts) {
 
 		},
 		drag       : function(e, ui) {
-			if (ui.helper.data('refreshPositions')) {
+			if (ui.helper.data('refreshPositions') && $(this).draggable('instance')) {
 				if (ui.helper.data('refreshPositions') > 0) {
 					$(this).draggable('option', { refreshPositions : true });
 					ui.helper.data('refreshPositions', -1);
