@@ -115,11 +115,11 @@ elFinder.prototype.commands.rename = function() {
 			name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '')
 			;
 		
-		if (this.getstate([file.hash]) < 0) {
+		if (cnt > 1 || this.getstate([file.hash]) < 0) {
 			return dfrd.reject();
 		}
 		
-		if (!file || cnt > 1 || !node.length) {
+		if (!file || !node.length) {
 			return dfrd.reject('errCmdParams', this.title);
 		}
 		
