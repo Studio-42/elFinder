@@ -1079,6 +1079,7 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
+				e.data.init && resize();
 			})
 			.bind('search', function(e) {
 				lastSearch = e.data.files;
