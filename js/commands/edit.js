@@ -39,7 +39,7 @@ elFinder.prototype.commands.edit = function() {
 				ta   = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					dfrd.notify(ta.getContent());
+					dfrd.notifyWith(ta);
 				},
 				cancel = function() {
 					dfrd.reject();
@@ -63,6 +63,7 @@ elFinder.prototype.commands.edit = function() {
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
 						if (ta.editor) {
 							ta.editor.instance = ta.editor.load(ta[0]) || null;
+							ta.editor.focus(ta[0], ta.editor.instance);
 						}
 					}
 					
@@ -80,6 +81,7 @@ elFinder.prototype.commands.edit = function() {
 							load     : editor.load,
 							save     : editor.save,
 							close    : typeof editor.close == 'function' ? editor.close : function() {},
+							focus    : typeof editor.focus == 'function' ? editor.focus : function() {},
 							instance : null
 						};
 						
@@ -117,7 +119,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 						}
 						
-					});
+					}).on('mouseenter', function(){this.focus();});
 				}
 				
 				opts.buttons[fm.i18n('btnSave')]      = save;
@@ -159,7 +161,7 @@ elFinder.prototype.commands.edit = function() {
 			
 			fm.request({
 				data   : {cmd : 'get', target  : hash, conv : conv},
-				notify : {type : 'openfile', cnt : 1},
+				notify : {type : 'file', cnt : 1},
 				syncOnFail : true
 			})
 			.done(function(data) {
@@ -180,13 +182,14 @@ elFinder.prototype.commands.edit = function() {
 					});
 				} else {
 					dialog(id, file, data.content)
-						.progress(function(content) {
+						.progress(function() {
+							var ta = this;
 							fm.request({
 								options : {type : 'post'},
 								data : {
 									cmd     : 'put',
 									target  : hash,
-									content : content
+									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},
 								syncOnFail : true
@@ -197,6 +200,10 @@ elFinder.prototype.commands.edit = function() {
 							.done(function(data) {
 								data.changed && data.changed.length && fm.change(data);
 								dfrd.resolve(data);
+								setTimeout(function(){
+									ta.focus();
+									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
+								}, 50);
 							});
 						});
 				}
