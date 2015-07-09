@@ -58,7 +58,9 @@ elFinder.prototype.commands.edit = function() {
 						fm.disable();
 						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-						ta.editor && ta.editor.load(ta[0]);
+						if (ta.editor) {
+							ta.editor.instance = ta.editor.load(ta[0]) || null;
+						}
 					}
 					
 				};
