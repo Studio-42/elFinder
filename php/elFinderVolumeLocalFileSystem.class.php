@@ -492,8 +492,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$files = array();
 		$cache = array();
 		$statOwner = (!empty($this->options['statOwner']));
+		$dirItr = array();
+		try {
+			$dirItr = new DirectoryIterator($path);
+		} catch (UnexpectedValueException $e) {}
 		
-		foreach (new DirectoryIterator($path) as $file) {
+		foreach ($dirItr as $file) {
 			if ($file->isDot()) { continue; }
 			
 			$files[] = $fpath = $this->_joinPath($path, $file->getFilename());
