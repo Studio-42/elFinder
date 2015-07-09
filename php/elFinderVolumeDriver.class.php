@@ -2791,6 +2791,10 @@ abstract class elFinderVolumeDriver {
 				$_path = str_replace($this->separator, '/', substr($path, strlen($this->root) + 1));
 				$stat['url'] = rtrim($this->URL, '/') . '/' . str_replace('%2F', '/', rawurlencode($this->convEncIn($_path, true)));
 			}
+		} else {
+			if ($isDir) {
+				unset($stat['dirs']);
+			}
 		}
 		
 		if (!empty($stat['alias']) && !empty($stat['target'])) {
