@@ -56,20 +56,31 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			create = function(type, targets) {
-				var sep = false;
-				
-				var cmdMap = {};
-				var cmdMaps = fm.options.contextmenu.cmdMaps;
-				if (cmdMaps) {
-					$.each(cmdMaps, function(i, v){
+				var sep = false,
+				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
+				self = fm.getUI('contextmenu');
+
+				if (self.data('cmdMaps')) {
+					$.each(self.data('cmdMaps'), function(i, v){
 						if (targets[0].indexOf(i, 0) == 0) {
 							cmdMap = v;
+							return false;
 						}
 					});
 				}
+				if (!isCwd) {
+					if (self.data('disabledCmd')) {
+						$.each(self.data('disabledCmd'), function(i, v){
+							if (targets[0].indexOf(i, 0) == 0) {
+								disabled = v;
+								return false;
+							}
+						});
+					}
+				}
 				
 				$.each(types[type]||[], function(i, name) {
-					var cmd, node, submenu, hover;
+					var cmd, node, submenu, hover, _disabled;
 					
 					if (name == '|' && sep) {
 						menu.append('<div class="elfinder-contextmenu-separator"/>');
@@ -81,6 +92,11 @@ $.fn.elfindercontextmenu = function(fm) {
 						name = cmdMap[name];
 					}
 					cmd = fm.command(name);
+
+					if (cmd && !isCwd) {
+						_disabled = cmd._disabled;
+						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
+					}
 
 					if (cmd && cmd.getstate(targets) != -1) {
 						targets._type = type;
@@ -149,7 +165,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						menu.append(node)
 						sep = true;
 					}
-				})
+					
+					cmd && !isCwd && (cmd._disabled = _disabled);
+				});
 			},
 			
 			createFromRaw = function(raw) {

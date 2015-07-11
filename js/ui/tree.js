@@ -569,17 +569,30 @@ $.fn.elfindertree = function(fm, opts) {
 
 		fm.open(function(e) {
 			var data = e.data,
-				dirs = filter(data.files);
+				dirs = filter(data.files),
+				//opContextmenu = fm.options.contextmenu,
+				contextmenu = fm.getUI('contextmenu');
 
 			data.init && tree.empty();
 
 			if (dirs.length) {
+				if (!contextmenu.data('cmdMaps')) {
+					contextmenu.data('cmdMaps', {});
+				}
+				if (!contextmenu.data('disabledCmd')) {
+					contextmenu.data('disabledCmd', {});
+				}
 				updateTree(dirs);
 				updateArrows(dirs, loaded);
 				// support volume driver option `uiCmdMap`
 				$.each(dirs, function(k, v){
-					if (v.volumeid && v.uiCmdMap && Object.keys(v.uiCmdMap).length && !fm.options.contextmenu.cmdMaps[v.volumeid]) {
-						fm.options.contextmenu.cmdMaps[v.volumeid] = v.uiCmdMap;
+					if (v.volumeid) {
+						if (v.uiCmdMap && Object.keys(v.uiCmdMap).length && !contextmenu.data('cmdMaps')[v.volumeid]) {
+							contextmenu.data('cmdMaps')[v.volumeid] = v.uiCmdMap;
+						}
+						if (v.disabled && !contextmenu.data('disabledCmd')[v.volumeid]) {
+							contextmenu.data('disabledCmd')[v.volumeid] = v.disabled;
+						}
 					}
 				});
 			} 

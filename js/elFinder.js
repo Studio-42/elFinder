@@ -200,40 +200,24 @@ window.elFinder = function(node, opts) {
 		
 		uiCmdMapPrev = null,
 		open = function(data) {
-			var repCmds = [], volumeid,
-			dataCmdMap = (data.options.uiCmdMap && data.options.uiCmdMap.length)? data.options.uiCmdMap : {};
+			var volumeid, contextmenu;
+			
+			self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
 			
 			// support volume driver option `uiCmdMap`
-			if (data && data.options && uiCmdMapPrev !== dataCmdMap) {
-				uiCmdMapPrev = dataCmdMap;
+			if (data && data.options && uiCmdMapPrev !== self.commandMap) {
+				uiCmdMapPrev = self.commandMap;
 				if (Object.keys(uiCmdMapPrev).length) {
 					// for contextmenu
+					contextmenu = self.getUI('contextmenu');
+					if (!contextmenu.data('cmdMaps')) {
+						contextmenu.data('cmdMaps', {});
+					}
 					volumeid = data.cwd? data.cwd.volumeid : null;
-					if (volumeid && !self.options.contextmenu.cmdMaps[volumeid]) {
-						self.options.contextmenu.cmdMaps[volumeid] = uiCmdMapPrev;
+					if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
+						contextmenu.data('cmdMaps')[volumeid] = uiCmdMapPrev;
 					}
-					// for toolbar
-					$.each(uiCmdMapPrev, function(from, to){
-						var cmd = self._commands[to],
-						button = cmd? 'elfinder'+cmd.options.ui : null;
-						if (button && $.fn[button]) {
-							repCmds.push(from);
-							var btn = $('div.elfinder-buttonset div.elfinder-button').has('span.elfinder-button-icon-'+from);
-							if (btn.length && !btn.next().has('span.elfinder-button-icon-'+to).length) {
-								btn.after($('<div/>')[button](self._commands[to]).data('origin', from));
-								btn.hide();
-							}
-						}
-					});
 				}
-				// reset toolbar
-				$.each($('div.elfinder-button'), function(){
-					var origin = $(this).data('origin');
-					if (origin && $.inArray(origin, repCmds) == -1) {
-						$('span.elfinder-button-icon-'+$(this).data('origin')).parent().show();
-						$(this).remove();
-					}
-				});
 			}
 			
 			if (data.init) {
@@ -256,6 +240,7 @@ window.elFinder = function(node, opts) {
 				cache([data.cwd]);
 			}
 			self.lastDir(cwd);
+			
 		},
 		
 		/**
@@ -1815,6 +1800,13 @@ window.elFinder = function(node, opts) {
 			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
 		}
 	});
+	
+	/**
+	 * UI command map of cwd volume ( That volume driver option `uiCmdMap` )
+	 *
+	 * @type Object
+	 **/
+	this.commandMap = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
