@@ -570,7 +570,6 @@ $.fn.elfindertree = function(fm, opts) {
 		fm.open(function(e) {
 			var data = e.data,
 				dirs = filter(data.files),
-				//opContextmenu = fm.options.contextmenu,
 				contextmenu = fm.getUI('contextmenu');
 
 			data.init && tree.empty();

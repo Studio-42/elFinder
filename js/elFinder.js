@@ -198,16 +198,17 @@ window.elFinder = function(node, opts) {
 			
 		syncInterval,
 		
-		uiCmdMapPrev = null,
+		uiCmdMapPrev = '',
+		
 		open = function(data) {
 			var volumeid, contextmenu;
 			
 			self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
 			
 			// support volume driver option `uiCmdMap`
-			if (data && data.options && uiCmdMapPrev !== self.commandMap) {
-				uiCmdMapPrev = self.commandMap;
-				if (Object.keys(uiCmdMapPrev).length) {
+			if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {;
+				uiCmdMapPrev = JSON.stringify(self.commandMap);
+				if (Object.keys(self.commandMap).length) {
 					// for contextmenu
 					contextmenu = self.getUI('contextmenu');
 					if (!contextmenu.data('cmdMaps')) {
@@ -215,7 +216,7 @@ window.elFinder = function(node, opts) {
 					}
 					volumeid = data.cwd? data.cwd.volumeid : null;
 					if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
-						contextmenu.data('cmdMaps')[volumeid] = uiCmdMapPrev;
+						contextmenu.data('cmdMaps')[volumeid] = self.commandMap;
 					}
 				}
 			}
