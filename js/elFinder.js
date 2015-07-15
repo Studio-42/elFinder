@@ -206,7 +206,7 @@ window.elFinder = function(node, opts) {
 			self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
 			
 			// support volume driver option `uiCmdMap`
-			if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {;
+			if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
 				uiCmdMapPrev = JSON.stringify(self.commandMap);
 				if (Object.keys(self.commandMap).length) {
 					// for contextmenu
