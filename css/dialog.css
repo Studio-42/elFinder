@@ -45,6 +45,7 @@
 
 .std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0px solid; }
 .std42-dialog .ui-dialog-buttonpane button span { padding:2px 9px; }
+.std42-dialog .ui-dialog-buttonpane button span.ui-icon { padding: 2px; }
 
 .elfinder-dialog .ui-resizable-e, 
 .elfinder-dialog .ui-resizable-s { width:0; height:0;}
