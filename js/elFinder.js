@@ -1946,21 +1946,31 @@ window.elFinder = function(node, opts) {
 
 	if (self.dragUpload) {
 		node[0].addEventListener('dragenter', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
+			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
+				e.preventDefault();
+				e.stopPropagation();
+			}
 		}, false);
 		node[0].addEventListener('dragleave', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
+			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
+				e.preventDefault();
+				e.stopPropagation();
+			}
 		}, false);
 		node[0].addEventListener('dragover', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
+			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
+				e.preventDefault();
+				e.stopPropagation();
+			}
 		}, false);
 		node[0].addEventListener('drop', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			self.error(['errUploadFile', self.i18n('items'), 'errPerm']);
+			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
+				e.stopPropagation();
+				e.preventDefault();
+				if ($(e.target).is('[class*="elfinder"]')) {
+					self.error(['errUploadFile', self.i18n('items'), 'errPerm']);
+				}
+			}
 		}, false);
 	}
 	
