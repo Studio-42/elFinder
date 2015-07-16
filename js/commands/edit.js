@@ -78,6 +78,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : file.name,
 					width   : self.options.dialogWidth || 450,
 					buttons : {},
+					closeOnEscape : false,
 					close   : function() { 
 						var $this = $(this),
 						close = function(){
