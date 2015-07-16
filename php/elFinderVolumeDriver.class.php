@@ -433,6 +433,7 @@ abstract class elFinderVolumeDriver {
 		'hh'    => 'text/x-c++hdr',
 		'log'   => 'text/plain',
 		'csv'   => 'text/x-comma-separated-values',
+		'md'    => 'text/x-markdown',
 		// images
 		'bmp'   => 'image/x-ms-bmp',
 		'jpg'   => 'image/jpeg',
