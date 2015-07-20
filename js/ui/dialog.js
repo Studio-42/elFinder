@@ -181,7 +181,13 @@ $.fn.elfinderdialog = function(opts) {
 		$.each(opts.buttons, function(name, cb) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+name+'</span></button>')
 				.click($.proxy(cb, self[0]))
-				.hover(function(e) { $(this)[e.type == 'mouseenter' ? 'focus' : 'blur']() })
+				.hover(function(e) { 
+					if (opts.btnHoverFocus) {
+						$(this)[e.type == 'mouseenter' ? 'focus' : 'blur']();
+					} else {
+						$(this).toggleClass(clhover, e.type == 'mouseenter');
+					}
+				})
 				.focus(function() { $(this).addClass(clhover) })
 				.blur(function() { $(this).removeClass(clhover) })
 				.keydown(function(e) { 
@@ -233,6 +239,7 @@ $.fn.elfinderdialog.defaults = {
 	closeOnEscape : true,
 	destroyOnClose : false,
 	buttons   : {},
+	btnHoverFocus : true,
 	position  : null,
 	width     : 320,
 	height    : 'auto',
