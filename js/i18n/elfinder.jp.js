@@ -367,6 +367,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'AWK ソース',
 			'kindCSV'         : 'CSV',
 			'kindDOCBOOK'     : 'Docbook XML ドキュメント',
+			'kindMarkdown'    : 'Markdown テキスト', // added 20.7.2015
 			// images
 			'kindImage'       : 'イメージ',
 			'kindBMP'         : 'BMP イメージ',

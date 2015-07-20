@@ -189,7 +189,12 @@ abstract class elFinderVolumeDriver {
 		// mime.types file path (for mimeDetect==internal)
 		'mimefile'        => '',
 		// mime type normalize map : Array '[ext]:[detected mime type]' => '[normalized mime]'
-		'mimeMap'         => array('md:application/x-genesis-rom' => 'text/x-markdown'),
+		'mimeMap'         => array(
+		                     'md:application/x-genesis-rom' => 'text/x-markdown',
+		                     'md:text/plain'                => 'text/x-markdown',
+		                     'markdown:text/plain'          => 'text/x-markdown',
+		                     'css:text/x-asm'               => 'text/css'
+		                    ),
 		// directory for thumbnails
 		'tmbPath'         => '.tmb',
 		// mode to create thumbnails dir
@@ -434,6 +439,7 @@ abstract class elFinderVolumeDriver {
 		'log'   => 'text/plain',
 		'csv'   => 'text/x-comma-separated-values',
 		'md'    => 'text/x-markdown',
+		'markdown' => 'text/x-markdown',
 		// images
 		'bmp'   => 'image/x-ms-bmp',
 		'jpg'   => 'image/jpeg',
