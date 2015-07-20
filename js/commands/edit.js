@@ -9,7 +9,10 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		mimes = fm.res('mimes', 'text') || [],
-		
+		rtrim = function(str){
+			return str.replace(/\s+$/, '');
+		},
+	
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -49,7 +52,7 @@ elFinder.prototype.commands.edit = function() {
 						ta.elfinderdialog('close');
 					};
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					if (old !== ta.val()) {
+					if (rtrim(old) !== rtrim(ta.val())) {
 						old = ta.val();
 						fm.confirm({
 							title  : self.title,
@@ -78,6 +81,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : file.name,
 					width   : self.options.dialogWidth || 450,
 					buttons : {},
+					btnHoverFocus : false,
 					closeOnEscape : false,
 					close   : function() { 
 						var $this = $(this),
@@ -86,7 +90,7 @@ elFinder.prototype.commands.edit = function() {
 							$this.elfinderdialog('destroy');
 						};
 						ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-						if (old !== ta.val()) {
+						if (rtrim(old) !== rtrim(ta.val())) {
 							fm.confirm({
 								title  : self.title,
 								text   : 'confirmNotSave',
