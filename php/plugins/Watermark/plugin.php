@@ -89,7 +89,7 @@ class elFinderPluginWatermark {
 		}
 		
 		// check Animation Gif
-		if ($this->isAnimationGif($src)) {
+		if (elFinder::isAnimationGif($src)) {
 			return false;
 		}
 		
@@ -294,49 +294,5 @@ class elFinderPluginWatermark {
 		imageDestroy($oWatermarkImg);
 		
 		return true;
-	}
-	
-	private function isAnimationGif($path)
-	{
-		list($width, $height, $type, $attr) = getimagesize($path);
-		switch ($type) {
-			case IMAGETYPE_GIF:
-				break;
-			default:
-				return false;
-		}
-	
-		$imgcnt = 0;
-		$fp = fopen($path, 'rb');
-		@fread($fp, 4);
-		$c = @fread($fp,1);
-		if (ord($c) != 0x39) {  // GIF89a
-			return false;
-		}
-	
-		while (!feof($fp)) {
-			do {
-				$c = fread($fp, 1);
-			} while(ord($c) != 0x21 && !feof($fp));
-	
-			if (feof($fp)) {
-				break;
-			}
-	
-			$c2 = fread($fp,2);
-			if (bin2hex($c2) == "f904") {
-				$imgcnt++;
-			}
-	
-			if (feof($fp)) {
-				break;
-			}
-		}
-	
-		if ($imgcnt > 1) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 }
