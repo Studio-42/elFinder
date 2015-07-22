@@ -3413,6 +3413,7 @@ abstract class elFinderVolumeDriver {
 		
 			if ($this->options['tmbCrop']) {
 		
+				$result = $tmb;
 				/* Resize and crop if image bigger than thumbnail */
 				if (!(($s[0] > $tmbSize && $s[1] <= $tmbSize) || ($s[0] <= $tmbSize && $s[1] > $tmbSize) ) || ($s[0] > $tmbSize && $s[1] > $tmbSize)) {
 					$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
@@ -3422,6 +3423,8 @@ abstract class elFinderVolumeDriver {
 					$x = $s[0] > $tmbSize ? intval(($s[0] - $tmbSize)/2) : 0;
 					$y = $s[1] > $tmbSize ? intval(($s[1] - $tmbSize)/2) : 0;
 					$result = $this->imgCrop($result, $tmbSize, $tmbSize, $x, $y, 'png');
+				} else {
+					$result = false;
 				}
 		
 			} else {
