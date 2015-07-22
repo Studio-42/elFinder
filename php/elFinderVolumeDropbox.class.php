@@ -114,7 +114,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'tmbPath'           => '../files/.tmb',
 			'tmbURL'            => 'files/.tmb',
 			'tmpPath'           => '',
-			'getTmbSize'        => 'medium', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
+			'getTmbSize'        => 'large', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
 			'metaCacheTime'     => '600', // 10m
 			'acceptedName'      => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
@@ -779,11 +779,12 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				}
 	
 			} else {
-				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, $this->imgLib, 'png');
-				$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+				$result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, 'png');
 			}
-	
+		
+			$result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
 		}
+		
 		if (!$result) {
 			unlink($tmb);
 			return false;
