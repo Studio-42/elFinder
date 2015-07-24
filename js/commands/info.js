@@ -176,6 +176,18 @@ elFinder.prototype.commands.info = function() {
 			file.owner && content.push(row.replace(l, msg.owner).replace(v, file.owner));
 			file.group && content.push(row.replace(l, msg.group).replace(v, file.group));
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
+			
+			// Add custom info fields
+			if (o.custom) $.each(o.custom, function(name, details) {
+				if (!details.mimes || $.inArray(file.mime, details.mimes) >= 0) {
+					// Add to the content
+					content.push(row.replace(l, details.label).replace(v , details.tpl));
+					// Add to @msg map
+					msg[name] = fm.i18n(name);
+					// Register the action
+					details.action(file, fm, dialog, msg);
+				}
+			});
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
 			title = tpl.groupTitle.replace('{items}', msg.items).replace('{num}', cnt);
