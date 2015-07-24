@@ -184,9 +184,10 @@ elFinder.prototype._options = {
 			]
 		},
 		// "info" command options.
-		info : {nullUrlDirLinkSelf : true},
-		
-
+		info : {
+			nullUrlDirLinkSelf : true,
+			md5sum : false
+		},
 		help : {view : ['about', 'shortcuts', 'help']}
 	},
 	
