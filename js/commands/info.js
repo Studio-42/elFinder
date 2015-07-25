@@ -78,7 +78,8 @@ elFinder.prototype.commands.info = function() {
 			count = [],
 			replSpinner = function(msg, name) { dialog.find('.'+spclass+'-'+name).parent().html(msg); },
 			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash; }).join('-'),
-			dialog = fm.getUI().find('#'+id), 
+			dialog = fm.getUI().find('#'+id),
+			customActions = [],
 			size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
@@ -178,16 +179,22 @@ elFinder.prototype.commands.info = function() {
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 			
 			// Add custom info fields
-			if (o.custom) $.each(o.custom, function(name, details) {
-				if (!details.mimes || $.inArray(file.mime, details.mimes) >= 0) {
-					// Add to the content
-					content.push(row.replace(l, details.label).replace(v , details.tpl));
-					// Add to @msg map
-					msg[name] = fm.i18n(name);
-					// Register the action
-					details.action(file, fm, dialog, msg);
-				}
-			});
+			if (o.custom) {
+				$.each(o.custom, function(name, details) {
+					if (
+					  (!details.mimes || $.map(details.mimes, function(m){return (file.mime === m || file.mime.indexOf(m+'/') === 0)? true : null;}).length)
+					    &&
+					  (!details.hashRegex || file.hash.match(details.hashRegex))
+					) {
+						// Add to the content
+						content.push(row.replace(l, fm.i18n(details.label)).replace(v , details.tpl.replace('{id}', id)));
+						// Register the action
+						if (details.action && (typeof details.action == 'function')) {
+							customActions.push(details.action);
+						}
+					}
+				});
+			}
 		} else {
 			view  = view.replace('{class}', 'elfinder-cwd-icon-group');
 			title = tpl.groupTitle.replace('{items}', msg.items).replace('{num}', cnt);
@@ -240,6 +247,17 @@ elFinder.prototype.commands.info = function() {
 				});
 		}
 		
+		// call custom actions
+		if (customActions.length) {
+			$.each(customActions, function(i, action) {
+				try {
+					action(file, fm, dialog);
+				} catch(e) {
+					fm.debug('error', e);
+				}
+			});
+		}
+
 	};
 	
 };
