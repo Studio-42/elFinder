@@ -1875,9 +1875,6 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$path = $this->decode($hash);
-		if (!$this->canResize($path, $file)) {
-			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
-		}
 		
 		$work_path = $this->getWorkFile($this->encoding? $this->convEncIn($path, true) : $path);
 
@@ -1885,7 +1882,13 @@ abstract class elFinderVolumeDriver {
 			if ($work_path && $path !== $work_path && is_file($work_path)) {
 				@unlink($work_path);
 			}
-			return false;
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+
+		if ($this->imgLib != 'imagick') {
+			if (elFinder::isAnimationGif($work_path)) {
+				return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+			}
 		}
 
 		switch($mode) {
@@ -3357,11 +3360,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function canResize($path, $stat) {
-		if ($this->imgLib != 'imagick') {
-			if (elFinder::isAnimationGif($path)) {
-				return false;
-			}
-		}
 		return $this->canCreateTmb($path, $stat, false);
 	}
 	
