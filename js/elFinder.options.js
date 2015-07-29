@@ -377,6 +377,17 @@ elFinder.prototype._options = {
 			openRootOnLoad : true,
 			// auto load current dir parents
 			syncTree : true
+			// ,
+			// /**
+			//  * Add CSS class name to navbar directories (optional)
+			//  * see: https://github.com/Studio-42/elFinder/pull/1061
+			//  * 
+			//  * @type Function
+			//  */
+			// getClass: function(dir) {
+			// 	// ex. This adds the directory's name (lowercase) with prefix as a CSS class
+			// 	return 'elfinder-tree-' + dir.name.replace(/[ "]/g, '').toLowerCase();
+			// }
 		},
 		// navbar options
 		navbar : {
