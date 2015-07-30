@@ -3004,6 +3004,8 @@ elFinder.prototype = {
 		var locHash = window.location.hash;
 		if (locHash && locHash.match(/^#elf_/)) {
 			return locHash.replace(/^#elf_/, '');
+		} else if (this.options.startDir) {
+			return this.options.startDir;
 		} else {
 			return this.lastDir();
 		}
