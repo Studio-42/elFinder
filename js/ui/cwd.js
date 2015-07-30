@@ -1161,10 +1161,10 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('open add search searchend viewchange', function() {
 				cwd.css('height', 'auto');
 
-				var wph = wrapper[0].clientHeight,
+				var wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')),
 				cwdoh = cwd.outerHeight(true);
 				if (cwdoh < wph) {
-					cwd.height(wph - (cwdoh - cwd.height()) - 2);
+					cwd.height(wph);
 				}
 			})
 			// select dragged file if no selected, disable selectable

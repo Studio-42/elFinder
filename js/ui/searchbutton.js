@@ -83,6 +83,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				)
 				.hide()
 				.zIndex(12+button.zIndex())
+				.css('overflow', 'hidden')
 				.appendTo(button);
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
