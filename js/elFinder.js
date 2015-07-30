@@ -644,7 +644,7 @@ window.elFinder = function(node, opts) {
 			
 			self.trigger('dragstart', {target : element[0], originalEvent : e});
 			
-			hashes = element.is('.'+self.res('class', 'cwdfile')) 
+			hashes = element.hasClass(self.res('class', 'cwdfile')) 
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
@@ -684,11 +684,11 @@ window.elFinder = function(node, opts) {
 					cnt, hash, i, h;
 				
 				ui.helper.data('droped', true);
-				if (dst.is('.'+self.res(c, 'cwd'))) {
+				if (dst.hasClass(self.res(c, 'cwd'))) {
 					hash = cwd;
-				} else if (dst.is('.'+self.res(c, 'cwdfile'))) {
+				} else if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
-				} else if (dst.is('.'+self.res(c, 'navdir'))) {
+				} else if (dst.hasClass(self.res(c, 'navdir'))) {
 					hash = self.navId2Hash(dst.attr('id'));
 				}
 

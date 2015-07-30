@@ -158,10 +158,10 @@ $.fn.elfinderplaces = function(fm, opts) {
 			root = wrapper.children('.'+navdir)
 				.addClass(clroot)
 				.click(function() {
-					if (root.is('.'+collapsed)) {
+					if (root.hasClass(collapsed)) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();
-						fm.storage('placesState', places.is('.'+expanded)? 1 : 0);
+						fm.storage('placesState', places.hasClass(expanded)? 1 : 0);
 					}
 				}),
 			/**

@@ -125,7 +125,7 @@ elFinder.prototype.commands.help = function() {
 				e.preventDefault();
 				e.stopPropagation();
 				
-				if (!link.is('.ui-tabs-selected')) {
+				if (!link.hasClass('ui-tabs-selected')) {
 					link.parent().addClass('ui-tabs-selected ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
 					content.find('.ui-tabs-panel').hide().filter(link.attr('href')).show();
 				}

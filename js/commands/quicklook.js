@@ -135,7 +135,7 @@ elFinder.prototype.commands.quicklook = function() {
 		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
 			.mousedown(function(e) {
 				var win     = self.window,
-					full    = win.is('.'+fullscreen),
+					full    = win.hasClass(fullscreen),
 					scroll  = 'scroll.'+fm.namespace,
 					$window = $(window);
 					
@@ -294,7 +294,7 @@ elFinder.prototype.commands.quicklook = function() {
 				
 			if (self.opened()) {
 				state = animated;
-				win.is('.'+fullscreen) && fsicon.mousedown()
+				win.hasClass(fullscreen) && fsicon.mousedown()
 				node.length
 					? win.animate(closedCss(node), 500, close)
 					: close();

@@ -255,7 +255,7 @@ $.fn.elfindercwd = function(fm, options) {
 								n = n.prev('[id]');
 							} while (n.length && !(n.position().top < top && n.position().left <= left));
 
-							if (n.is('.'+clDisabled)) {
+							if (n.hasClass(clDisabled)) {
 								n = sibling(n, 'next');
 							}
 						} else {
@@ -263,7 +263,7 @@ $.fn.elfindercwd = function(fm, options) {
 								n = n.next('[id]');
 							} while (n.length && !(n.position().top > top && n.position().left >= left));
 							
-							if (n.is('.'+clDisabled)) {
+							if (n.hasClass(clDisabled)) {
 								n = sibling(n, 'prev');
 							}
 							// there is row before last one - select last file
@@ -281,7 +281,7 @@ $.fn.elfindercwd = function(fm, options) {
 					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'));
 				}
 				
-				if (n && n.length && !n.is('.elfinder-cwd-parent')) {
+				if (n && n.length && !n.hasClass('elfinder-cwd-parent')) {
 					if (append) {
 						// append new files to selected
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
@@ -597,7 +597,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 						while (pointer.length) {
 							file2 = fm.file(pointer.attr('id'));
-							if (!pointer.is('.elfinder-cwd-parent') && file2 && fm.compare(file, file2) < 0) {
+							if (!pointer.hasClass('elfinder-cwd-parent') && file2 && fm.compare(file, file2) < 0) {
 								return pointer;
 							}
 							pointer = pointer.next('[id]');
@@ -796,9 +796,9 @@ $.fn.elfindercwd = function(fm, options) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
 						sib.add(p).trigger(evtSelect);
 					} else if (e.ctrlKey || e.metaKey) {
-						p.trigger(p.is('.'+clSelected) ? evtUnselect : evtSelect);
+						p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
 					} else {
-						if (p.data('touching') && p.is('.'+clSelected)) {
+						if (p.data('touching') && p.hasClass(clSelected)) {
 							p.data('touching', null);
 							fm.dblclick({file : this.id});
 							unselectAll();
@@ -830,7 +830,7 @@ $.fn.elfindercwd = function(fm, options) {
 					.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
-						if (p.is('.'+clSelected) && sel > 0) {
+						if (p.hasClass(clSelected) && sel > 0) {
 							p.trigger(evtUnselect);
 							trigger();
 						} else {
@@ -863,7 +863,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this),
 						target = list ? $this : $this.children();
 
-					if (!mobile && !$this.is('.'+clTmp) && !target.is('.'+clDraggable+',.'+clDisabled)) {
+					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
 						target.draggable(fm.draggable);
 					}
 				})
@@ -872,7 +872,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this), 
 						id    = $this.attr('id');
 					
-					if (!selectLock && !$this.is('.'+clDisabled)) {
+					if (!selectLock && !$this.hasClass(clDisabled)) {
 						$this.addClass(clSelected).children().addClass(clHover);
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
@@ -902,16 +902,16 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					child.removeClass(clHover+' '+clSelected);
 					
-					$this.is('.'+clDroppable) && $this.droppable('disable');
-					target.is('.'+clDraggable) && target.draggable('disable');
+					$this.hasClass(clDroppable) && $this.droppable('disable');
+					target.hasClass(clDraggable) && target.draggable('disable');
 				})
 				// if any files was not removed/moved - unlock its
 				.delegate(fileSelector, evtEnable, function() {
 					var $this  = $(this).removeClass(clDisabled), 
 						target = list ? $this : $this.children();
 					
-					$this.is('.'+clDroppable) && $this.droppable('enable');	
-					target.is('.'+clDraggable) && target.draggable('enable');
+					$this.hasClass(clDroppable) && $this.droppable('enable');	
+					target.hasClass(clDraggable) && target.draggable('enable');
 				})
 				.delegate(fileSelector, 'scrolltoview', function() {
 					scrollToView($(this));
@@ -926,8 +926,8 @@ $.fn.elfindercwd = function(fm, options) {
 					if (file.length && (e.target.nodeName != 'TD' || $.inArray(file.get(0).id, fm.selected()) > -1)) {
 						e.stopPropagation();
 						e.preventDefault();
-						if (!file.is('.'+clDisabled) && !file.data('touching')) {
-							if (!file.is('.'+clSelected)) {
+						if (!file.hasClass(clDisabled) && !file.data('touching')) {
+							if (!file.hasClass(clSelected)) {
 								// cwd.trigger('unselectall');
 								unselectAll();
 								file.trigger(evtSelect);
@@ -1172,9 +1172,9 @@ $.fn.elfindercwd = function(fm, options) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;
 
-				if (target.is(fileSelector)) {
+				if (target.hasClass(fileSelector.substr(1))) {
 					
-					if (!target.is('.'+clSelected)) {
+					if (!target.hasClass(clSelected)) {
 						!(oe.ctrlKey || oe.metaKey || oe.shiftKey) && unselectAll();
 						target.trigger(evtSelect);
 						trigger();

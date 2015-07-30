@@ -61,7 +61,7 @@ $.fn.elfinderdialog = function(opts) {
 					
 					$(document).mousedown();
 
-					if (!dialog.is('.'+clactive)) {
+					if (!dialog.hasClass(clactive)) {
 						parent.find('.'+cldialog+':visible').removeClass(clactive);
 						dialog.addClass(clactive).zIndex(maxZIndex() + 1);
 					}
@@ -76,7 +76,7 @@ $.fn.elfinderdialog = function(opts) {
 					
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 
-					if (!dialog.is('.'+clnotify)) {
+					if (!dialog.hasClass(clnotify)) {
 						
 						parent.find('.'+cldialog+':visible').not('.'+clnotify).each(function() {
 							var d     = $(this),
@@ -160,7 +160,7 @@ $.fn.elfinderdialog = function(opts) {
 
 		if (opts.closeOnEscape) {
 			$(document).bind('keyup.'+id, function(e) {
-				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.is('.'+clactive)) {
+				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass(clactive)) {
 					self.elfinderdialog('close');
 					$(document).unbind('keyup.'+id);
 				}
