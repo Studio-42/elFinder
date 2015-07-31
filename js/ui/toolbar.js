@@ -9,7 +9,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		var commands = fm._commands,
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
 			panels   = opts || [],
-			dispre   = [],
+			dispre   = null,
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button;
 		
@@ -38,6 +38,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 			
 			self.children().length? self.show() : self.hide();
+			self.trigger('load');
 		};
 		
 		render();
@@ -46,7 +47,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			var repCmds = [],
 			disabled = fm.option('disabled');
 
-			if (dispre.toString() !== disabled.sort().toString()) {
+			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
 			}
 			dispre = disabled.concat().sort();

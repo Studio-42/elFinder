@@ -1025,14 +1025,26 @@ $.fn.elfindercwd = function(fm, options) {
 				.css({position: 'absolute', width: '1px', height: '1px'})
 				.hide(),
 			
+			restm = null,
 			resize = function() {
-				var h = 0;
+				restm && clearTimeout(restm);
+				restm = setTimeout(function(){
+					var h = 0, wph, cwdoh;
 
-				wrapper.siblings('.elfinder-panel:visible').each(function() {
-					h += $(this).outerHeight(true);
-				});
+					wrapper.siblings('div.elfinder-panel:visible').each(function() {
+						h += $(this).outerHeight(true);
+					});
 
-				wrapper.height(wz.height() - h - wrapper._padding);
+					wrapper.height(wz.height() - h - wrapper._padding);
+
+					// fix cwd height if it less then wrapper
+					cwd.css('height', 'auto');
+					wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')),
+					cwdoh = cwd.outerHeight(true);
+					if (cwdoh < wph) {
+						cwd.height(wph);
+					}
+				}, 200);
 			},
 			
 			// elfinder node
@@ -1083,11 +1095,12 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
-				e.data.init && resize();
+				resize();
 			})
 			.bind('search', function(e) {
 				lastSearch = e.data.files;
 				content(lastSearch, true);
+				resize();
 			})
 			.bind('searchend', function() {
 				lastSearch = [];
@@ -1095,6 +1108,7 @@ $.fn.elfindercwd = function(fm, options) {
 					query = '';
 					content(fm.files());
 				}
+				resize();
 			})
 			.bind('searchstart', function(e) {
 				query = e.data.query;
@@ -1121,6 +1135,9 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize();
 				bottomMarkerShow(place, place.find('[id]').length);
+			})
+			.bind('add', function() {
+				resize();
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash,
@@ -1156,16 +1173,6 @@ $.fn.elfindercwd = function(fm, options) {
 			.remove(function(e) {
 				remove(e.data.removed || []);
 				trigger();
-			})
-			// fix cwd height if it less then wrapper
-			.bind('open add search searchend viewchange', function() {
-				cwd.css('height', 'auto');
-
-				var wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')),
-				cwdoh = cwd.outerHeight(true);
-				if (cwdoh < wph) {
-					cwd.height(wph);
-				}
 			})
 			// select dragged file if no selected, disable selectable
 			.dragstart(function(e) {
