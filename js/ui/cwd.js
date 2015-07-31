@@ -1026,17 +1026,21 @@ $.fn.elfindercwd = function(fm, options) {
 				.hide(),
 			
 			restm = null,
-			resize = function() {
-				restm && clearTimeout(restm);
-				restm = setTimeout(function(){
-					var h = 0, wph, cwdoh;
-
+			resize = function(init) {
+				var initHeight = function() {
+					var h = 0;
 					wrapper.siblings('div.elfinder-panel:visible').each(function() {
 						h += $(this).outerHeight(true);
 					});
-
 					wrapper.height(wz.height() - h - wrapper._padding);
-
+				};
+				
+				init && initHeight();
+				
+				restm && clearTimeout(restm);
+				restm = setTimeout(function(){
+					!init && initHeight();
+					var wph, cwdoh;
 					// fix cwd height if it less then wrapper
 					cwd.css('height', 'auto');
 					wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')),
@@ -1133,7 +1137,7 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('resize', function() {
 				var place = list ? cwd.find('tbody') : cwd;
-				resize();
+				resize(true);
 				bottomMarkerShow(place, place.find('[id]').length);
 			})
 			.bind('add', function() {
