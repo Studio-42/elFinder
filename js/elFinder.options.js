@@ -338,6 +338,14 @@ elFinder.prototype._options = {
 	defaultView : 'icons',
 	
 	/**
+	 * Hash of default directory path to open
+	 * 
+	 * @type String
+	 * @default ""
+	 */
+	startPathHash : '',
+	
+	/**
 	 * UI plugins to load.
 	 * Current dir ui and dialogs loads always.
 	 * Here set not required plugins as folders tree/toolbar/statusbar etc.
