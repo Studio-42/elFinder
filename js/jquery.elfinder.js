@@ -4,7 +4,7 @@ $.ui.ddmanager.prepareOffsets = function( t, event ) {
 	/*** elFinder original ***/
 	var isInView = function(elem) {
 		var rect = elem.getBoundingClientRect();
-		return document.elementFromPoint(rect.left, rect.top);
+		return document.elementFromPoint(rect.left, rect.top)? true : false;
 	}
 	
 	var i, j,
