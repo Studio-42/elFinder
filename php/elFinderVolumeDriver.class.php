@@ -1544,7 +1544,9 @@ abstract class elFinderVolumeDriver {
 		$this->clearcache();
 		
 		if ($file) { // file exists
-			if ($this->options['uploadOverwrite']) {
+			// check POST data `overwrite` for 3rd party uploader
+			$overwrite = isset($_POST['overwrite'])? (bool)$_POST['overwrite'] : $this->options['uploadOverwrite'];
+			if ($overwrite) {
 				if (!$file['write']) {
 					return $this->setError(elFinder::ERROR_PERM_DENIED);
 				} elseif ($file['mime'] == 'directory') {
