@@ -3,10 +3,24 @@
 <head>
 	<meta charset="utf-8">
 	<title>elFinder 2.x source version with PHP connector</title>
+	<!-- 
+	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
+	-->
+
+	<!-- <script src="jquery/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script> -->
 	<script src="jquery/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- <script src="jquery/jquery-ui-1.8.21.custom.min.js"></script> -->
+	<!-- <script src="jquery/jquery-ui-1.8.23.custom.min.js" type="text/javascript" charset="utf-8"></script> -->
+	<!-- <link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.23.custom.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
+	
 	<script src="jquery/jquery-ui-1.10.1.custom.min.js" type="text/javascript" charset="utf-8"></script>
 	<link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.10.1.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	<!-- <link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.21.custom.css" type="text/css"> -->
 
+	
 	<link rel="stylesheet" href="css/common.css"      type="text/css">
 	<link rel="stylesheet" href="css/dialog.css"      type="text/css">
 	<link rel="stylesheet" href="css/toolbar.css"     type="text/css">
@@ -112,22 +126,167 @@
 	<!-- elfinder 1.x connector API support -->
 	<script src="js/proxy/elFinderSupportVer1.js"></script>
 
-	<!-- elfinder initialization  -->
-	<script>
-		$(function() {
-			$('#elfinder').elfinder({
-				// Connector URL
-				url : 'php/connector.php',
+	<!-- elfinder custom extenstions -->
+	<script src="extensions/jplayer/elfinder.quicklook.jplayer.js"></script>
 
-				// Callback when a file is double-clicked
-				getFileCallback : function(file) {
-					// ...
-				},
+	<style type="text/css">
+		body { font-family:arial, verdana, sans-serif;}
+		.button {
+			width: 100px;
+			position:relative;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			margin:0 3px 3px 0;
+			padding:1px 0;
+			text-align:center;
+			border:1px solid #ccc;
+			background-color:#eee;
+			margin:1em .5em;
+			padding:.3em .7em;
+			border-radius:5px; 
+			-moz-border-radius:5px; 
+			-webkit-border-radius:5px;
+			cursor:pointer;
+		}
+/*
+		#dialog {
+			position:absolute;
+			left:50%;
+			top:1000px;
+		}
+*/
+	</style>
+
+	<script>
+		$(document).ready(function() {
+			$('#finder').elfinder({
+				// requestType : 'post',
+
+				// url : 'php/connector.php',
+				url : 'php/connector.php',
+				// transport : new elFinderSupportVer1(),
+				// getFileCallback : function(files, fm) {
+				// 	console.log(files);
+				// },
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							// console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
+				// handlers : {
+				// 	select : function(e) {
+				// 		console.log(e.data)
+				// 	}
+				// },
+				// onlyMimes : ['image', 'text/plain']
+				// sync : 20000,
+				lang : 'ru',
+				customData : {answer : 42},
+				// requestType : 'POST',
+				// rememberLastDir : false,
+				// ui : ['tree', 'toolbar'],
+				// ui : ['toolbar', 'path', 'stat'],
+				// commands : [],
+				// commandsOptions : {
+				// 	edit : {
+				// 		mimes : ['text/plain', 'text/html', 'text/javascript'],
+				// 		editors : [
+				// 			{
+				// 				mimes : ['text/html'],
+				// 				load : function(textarea) {
+				// 					tinyMCE.execCommand("mceAddControl", true, textarea.id);
+				// 				},
+				// 				close : function(textarea, instance) {
+				// 					tinyMCE.execCommand('mceRemoveControl', false, textarea.id);
+				// 				},
+				// 				save : function(textarea, editor) {
+				// 					textarea.value = tinyMCE.get(textarea.id).selection.getContent({format : 'html'});
+				// 					tinyMCE.execCommand('mceRemoveControl', false, textarea.id);
+				// 				}
+				// 
+				// 			}
+				// 		]
+				// 	}
+				// }
+				// uiOptions : {
+				// 	toolbar : [['help']]
+				// }
+			})
+
+			// $('#finder2').elfinder({
+			// 	url : 'connectors/php/connector.php',
+			// 	width:650,
+			// 	lang : 'ru'
+			// })
+
+			// console.log(f1)
+			// 
+			// setTimeout(function() {
+			// 	console.log($('#finder').elfinder('instance'))
+			// }, 2000)
+
+			// new elFinder($('<div/>'))
+
+			// var f2 = $('#asd').elfinder({
+			// 	url : 'connectors/php/connector.php',
+			// 	lang : 'ru'
+			// }).elfinder('instance')
+			
+			$('#back').click(function(e) {
+				f1.exec('back')
+			})
+			$('#fwd').click(function(e) {
+				f1.exec('forward')
+			})
+
+			$('#dialog').click(function() {
+				var fm = $('<div/>').dialogelfinder({
+					url : 'php/connector.php',
+					lang : 'en',
+					width : 840,
+					destroyOnClose : true,
+					getFileCallback : function(files, fm) {
+						console.log(files);
+					},
+					commandsOptions : {
+						getfile : {
+							oncomplete : 'close',
+							folders : true
+						}
+					}
+				}).dialogelfinder('instance');
 			});
+
 		});
 	</script>
 </head>
 <body>
-	<div id="elfinder"></div>
+	<div id="back" class="button">back</div>
+	<div id="fwd" class="button">forward</div>
+	<div id="dialog" class="button">dialog</div>
+	<!-- <div id="close"  class="button">close</div>
+	<div id="dock" class="button">dock</div>
+	<div id="undock" class="button">undock</div>-->
+	<!-- <div style="width:670px; float:left"> -->
+		<div id="finder">finder <span>here</span></div>
+	<!-- </div> -->
+	<!-- <div style="width:670px; float:left">
+		<div id="finder2">finder</div> 
+	</div> -->
+	<br clear="all"/>
+	<input type="text" value="123" />
+	<input type="text" value="456" />
+
+	<!-- <div><input type="text" id="i1"></div> -->
+	<!-- <div><input type="text" id="i2"></div> -->
+
 </body>
 </html>
