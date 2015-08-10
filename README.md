@@ -79,7 +79,7 @@ Installation
       $ git clone https://github.com/Studio-42/elFinder.git
       ```
 
- 2. Rename `/php/connector.php-dist` to `/php/connector.php`
+ 2. Rename `/php/connector.minimal.php-dist` to `/php/connector.minimal.php`
  3. Load `/elfinder.src.html` in your browser to run elFinder
 
 Downloads
