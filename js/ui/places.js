@@ -116,7 +116,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return String  removed name
 			 **/
 			remove = function(hash) {
-				var ndx = $.inArray(hash, dirs), name, tgt;
+				var ndx = $.inArray(hash, dirs), name = null, tgt;
 
 				if (ndx !== -1) {
 					dirs.splice(ndx, 1);
@@ -310,10 +310,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 				var names = [];
 				if (e.data.removed) {
 					$.each(e.data.removed, function(i, hash) {
-						names.push(remove(hash));
+						var name = remove(hash);
+						name && names.push(name);
 					});
 				}
-				if (e.data.added) {
+				if (e.data.added && names.length) {
 					$.each(e.data.added, function(i, file) {
 						if ($.inArray(file.name, names) !== 1) {
 							file.mime == 'directory' && add(file);
