@@ -129,17 +129,21 @@ $.fn.elfindertree = function(fm, opts) {
 						cl   = hover+' '+dropover;
 
 					if (insideNavbar(e.clientX)) {
-						link.addClass(cl)
+						link.addClass(hover)
 						if (link.is('.'+collapsed+':not(.'+expanded+')')) {
-							setTimeout(function() {
-								link.hasClass(dropover) && link.children('.'+arrow).click();
-							}, 500);
+							link.data('expandTimer', setTimeout(function() {
+								link.children('.'+arrow).click();
+							}, 500));
 						}
 					} else {
 						link.removeClass(cl);
 					}
 				},
-				out : function() { $(this).removeClass(hover+' '+dropover); },
+				out : function() {
+					var link = $(this);
+					link.data('expandTimer') && clearTimeout(link.data('expandTimer'));
+					link.removeClass(hover);
+				},
 				drop : function(e, ui) { insideNavbar(e.clientX) && drop.call(this, e, ui); }
 			}),
 			
