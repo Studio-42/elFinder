@@ -482,19 +482,34 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			/**
 			 * Droppable options for cwd.
+			 * Drop target is `wrapper`
 			 * Do not add class on childs file over
 			 *
 			 * @type Object
 			 */
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) { 
-					var hash = fm.cwd().hash;
+					var hash  = fm.cwd().hash,
+						$this = $(this);
 					$.each(ui.helper.data('files'), function(i, h) {
-						if (fm.file(h).phash == hash) {
-							cwd.removeClass(clDropActive);
+						if (h === hash || fm.file(h).phash === hash) {
+							if (h !== hash) {
+								$this.data('dropover', true);
+							}
+							if (!$this.data('dropover') || !ui.helper.hasClass('elfinder-drag-helper-plus')) {
+								$this.removeClass(clDropActive);
+							}
 							return false;
 						}
 					});
+				},
+				out : function() {
+					$(this).removeData('dropover')
+					       .removeClass(clDropActive);
+				},
+				deactivate : function() {
+					$(this).removeData('dropover')
+					       .removeClass(clDropActive);
 				}
 			}),
 			
@@ -964,8 +979,6 @@ $.fn.elfindercwd = function(fm, options) {
 					selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
-				// make cwd itself droppable for folders from nav panel
-				.droppable(droppable)
 				// prepend fake file/dir
 				.bind('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
@@ -989,6 +1002,8 @@ $.fn.elfindercwd = function(fm, options) {
 					trigger();
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
+				// make cwd itself droppable for folders from nav panel
+				.droppable(droppable)
 				.bind('contextmenu', function(e) {
 					e.preventDefault();
 					fm.trigger('contextmenu', {
@@ -1215,6 +1230,7 @@ $.fn.elfindercwd = function(fm, options) {
 					$('#'+files[l]).trigger(event);
 				}
 				trigger();
+				wrapper.data('dropover') && wrapper.toggleClass(clDropActive, e.type !== 'lockfiles');
 			})
 			// select new files after some actions
 			.bind('mkdir mkfile duplicate upload rename archive extract paste multiupload', function(e) {
