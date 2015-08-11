@@ -489,11 +489,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) { 
-					var hash  = fm.cwd().hash,
+					var cwd   = fm.cwd(),
+						hash  = cwd.hash,
 						$this = $(this);
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (h === hash || fm.file(h).phash === hash) {
-							if (h !== hash) {
+							if (h !== hash && cwd.write) {
 								$this.data('dropover', true);
 							}
 							if (!$this.data('dropover') || !ui.helper.hasClass('elfinder-drag-helper-plus')) {
