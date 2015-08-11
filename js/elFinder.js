@@ -662,7 +662,7 @@ window.elFinder = function(node, opts) {
 					}
 					return i;
 				},
-				hashes, l;
+				hashes, l, ctr;
 			
 			self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
 			
@@ -679,10 +679,13 @@ window.elFinder = function(node, opts) {
 			}
 			
 			$(document).bind(keydown + ' keyup.' + namespace, function(e){
-				var ctr = (e.shiftKey||e.ctrlKey||e.metaKey);
-				if (helper.is(':visible') && ! helper.data('locked')) {
-					helper.toggleClass('elfinder-drag-helper-plus', ctr);
-					self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes});
+				var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
+				if (ctr !== chk) {
+					ctr = chk;
+					if (helper.is(':visible') && ! helper.data('locked') && ! helper.data('droped')) {
+						helper.toggleClass('elfinder-drag-helper-plus', ctr);
+						self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes});
+					}
 				}
 			});
 			
@@ -696,7 +699,7 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.droppable = {
-			// greedy     : true,
+			greedy     : true,
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
 			hoverClass : this.res('class', 'adroppable'),
@@ -704,16 +707,19 @@ window.elFinder = function(node, opts) {
 				var dst     = $(this),
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
 					result  = [],
+					dups    = [],
+					unlocks = [],
+					isCopy  = (e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked'))? true : false,
 					c       = 'class',
 					cnt, hash, i, h;
 				
 				ui.helper.data('droped', true);
-				if (dst.hasClass(self.res(c, 'cwd'))) {
-					hash = cwd;
-				} else if (dst.hasClass(self.res(c, 'cwdfile'))) {
+				if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
 				} else if (dst.hasClass(self.res(c, 'navdir'))) {
 					hash = self.navId2Hash(dst.attr('id'));
+				} else {
+					hash = cwd;
 				}
 
 				cnt = targets.length;
@@ -724,13 +730,18 @@ window.elFinder = function(node, opts) {
 					if (h != hash && files[h].phash != hash) {
 						result.push(h);
 					} else {
-						self.trigger('unlockfiles', {files : [h]});
+						((isCopy && h !== hash && files[hash].write)? dups : unlocks).push(h);
 					}
+				}
+				unlocks.length && self.trigger('unlockfiles', {files: unlocks});
+				if (dups.length) {
+					ui.helper.hide();
+					self.exec('duplicate', dups);
 				}
 				
 				if (result.length) {
 					ui.helper.hide();
-					self.clipboard(result, !(e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked')));
+					self.clipboard(result, !isCopy);
 					self.exec('paste', hash).always(function(){
 						self.trigger('unlockfiles', {files : targets});
 					});
