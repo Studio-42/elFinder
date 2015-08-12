@@ -604,7 +604,7 @@ elFinder.prototype.commands.resize = function() {
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				fm.dialog(dialog, {
-					title          : file.name,
+					title          : fm.escape(file.name),
 					width          : 650,
 					resizable      : false,
 					destroyOnClose : true,

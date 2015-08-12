@@ -78,7 +78,7 @@ elFinder.prototype.commands.edit = function() {
 					cancel();
 				},
 				opts = {
-					title   : file.name,
+					title   : fm.escape(file.name),
 					width   : self.options.dialogWidth || 450,
 					buttons : {},
 					btnHoverFocus : false,

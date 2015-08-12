@@ -223,7 +223,7 @@ elFinder.prototype.commands.upload = function() {
 		}
 		
 		fm.dialog(dialog, {
-			title          : this.title + (targets? ' - ' + fm.file(targets[0]).name : ''),
+			title          : this.title + (targets? ' - ' + fm.escape(fm.file(targets[0]).name) : ''),
 			modal          : true,
 			resizable      : false,
 			destroyOnClose : true
