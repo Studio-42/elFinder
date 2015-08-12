@@ -202,6 +202,9 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			itemhtml = function(f) {
 				f.name = fm.escape(f.name);
+				if (!list) {
+					f.name = f.name.replace(/([_.])/g, '&#8203;$1');
+				}
 				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 

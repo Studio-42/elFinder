@@ -70,7 +70,9 @@
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align:center;
-	white-space:pre;
+	max-height:30px;
+	white-space:pre-wrap;
+	word-break:normal;
 	overflow:hidden;
 	text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
