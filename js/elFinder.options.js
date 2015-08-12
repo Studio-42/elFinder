@@ -383,6 +383,8 @@ elFinder.prototype._options = {
 		tree : {
 			// expand current root on init
 			openRootOnLoad : true,
+			// expand current work directory on open
+			openCwdOnOpen  : true,
 			// auto load current dir parents
 			syncTree : true
 			// ,

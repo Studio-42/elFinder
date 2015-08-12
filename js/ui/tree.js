@@ -26,6 +26,13 @@ $.fn.elfindertree = function(fm, opts) {
 			openRoot  = opts.openRootOnLoad,
 
 			/**
+			 * Open current work dir if not opened yet
+			 *
+			 * @type Boolean
+			 */
+			openCwd   = opts.openCwdOnOpen,
+
+			/**
 			 * Subtree class name
 			 *
 			 * @type String
@@ -371,7 +378,12 @@ $.fn.elfindertree = function(fm, opts) {
 
 				if (opts.syncTree || !current.length) {
 					if (current.length) {
-						!noCwd && current.addClass(loaded);
+						if (!noCwd) {
+							current.addClass(loaded);
+							if (openCwd && !current.hasClass(expanded)) {
+								current.addClass(expanded).next('.'+subtree).slideDown();
+							}
+						}
 						subs = current.parentsUntil('.'+root).filter('.'+subtree);
 						subsLen = subs.length;
 						cnt = 1;
