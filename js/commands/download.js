@@ -64,7 +64,6 @@ elFinder.prototype.commands.download = function() {
 		}
 		$(iframes)
 			.appendTo('body')
-			.attr('src', this.attr('src'))
 			.ready(function() {
 				setTimeout(function() {
 					$(iframes).each(function() {
