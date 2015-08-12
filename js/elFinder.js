@@ -322,6 +322,11 @@ window.elFinder = function(node, opts) {
 				if (code == 9 && !$(e.target).is(':input')) {
 					e.preventDefault();
 				}
+				
+				// cancel copy or cut by [Esc] key
+				if (code == 27 && self.clipboard().length) {
+					self.clipboard([]);
+				}
 
 			}
 		},
