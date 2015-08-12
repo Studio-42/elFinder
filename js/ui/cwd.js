@@ -152,6 +152,13 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type Object
 			 **/
 			replacement = {
+				name : function(f) {
+					name = fm.escape(f.name);
+					if (!list) {
+						name = name.replace(/([_.])/g, '&#8203;$1');
+					}
+					return name;
+				},
 				permsclass : function(f) {
 					return fm.perms2class(f);
 				},
@@ -201,10 +208,6 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return String
 			 **/
 			itemhtml = function(f) {
-				f.name = fm.escape(f.name);
-				if (!list) {
-					f.name = f.name.replace(/([_.])/g, '&#8203;$1');
-				}
 				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
