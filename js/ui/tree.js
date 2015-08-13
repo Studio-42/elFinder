@@ -378,7 +378,7 @@ $.fn.elfindertree = function(fm, opts) {
 					if (current.length) {
 						if (!noCwd) {
 							current.addClass(loaded);
-							if (openCwd && !current.hasClass(expanded)) {
+							if (openCwd && current.hasClass(collapsed)) {
 								current.addClass(expanded).next('.'+subtree).slideDown();
 							}
 						}
