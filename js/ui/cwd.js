@@ -526,11 +526,13 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			makeDroppable = function() {
-				setTimeout(function() {
-					cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable).each(function(){
-						fm.makeDirectDropUpload(this, this.id);
-					});
-				}, 20);
+				if (fm.isCommandEnabled('paste')) {
+					setTimeout(function() {
+						cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable).each(function(){
+							fm.makeDirectDropUpload(this, this.id);
+						});
+					}, 20);
+				}
 			},
 			
 			/**

@@ -116,6 +116,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			droppable = fm.res(c, 'droppable'),
 			
+			/**
+			 * Un-disabled cmd `paste` volume's root wrapper class
+			 * 
+			 * @type String
+			 */
+			pastable = 'elfinder-navbar-wrapper-pastable',
+			
 			insideNavbar = function(x) {
 				var left = navbar.offset().left;
 					
@@ -289,6 +296,11 @@ $.fn.elfindertree = function(fm, opts) {
 						} else {
 							parent[firstVol || dir.phash ? 'append' : 'prepend'](itemhtml(dir));
 							firstVol = false;
+							if (!dir.phash && dir.disabled) {
+								if ($.inArray('paste', dir.disabled) === -1) {
+									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(pastable);
+								}
+							}
 						}
 					} else {
 						orphans.push(dir);
@@ -435,7 +447,7 @@ $.fn.elfindertree = function(fm, opts) {
 			updateDroppable = function(target) {
 				var limit = 100,
 					next;
-				target = target || tree.find('.'+navdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				target = target || tree.find('div.'+pastable).find('span.'+navdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
 				if (target.length > limit) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
