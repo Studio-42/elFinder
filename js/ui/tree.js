@@ -616,9 +616,6 @@ $.fn.elfindertree = function(fm, opts) {
 				if (!contextmenu.data('cmdMaps')) {
 					contextmenu.data('cmdMaps', {});
 				}
-				if (!contextmenu.data('disabledCmd')) {
-					contextmenu.data('disabledCmd', {});
-				}
 				updateTree(dirs);
 				updateArrows(dirs, loaded);
 				// support volume driver option `uiCmdMap`
@@ -626,9 +623,6 @@ $.fn.elfindertree = function(fm, opts) {
 					if (v.volumeid) {
 						if (v.uiCmdMap && Object.keys(v.uiCmdMap).length && !contextmenu.data('cmdMaps')[v.volumeid]) {
 							contextmenu.data('cmdMaps')[v.volumeid] = v.uiCmdMap;
-						}
-						if (v.disabled && !contextmenu.data('disabledCmd')[v.volumeid]) {
-							contextmenu.data('disabledCmd')[v.volumeid] = v.disabled;
 						}
 					}
 				});

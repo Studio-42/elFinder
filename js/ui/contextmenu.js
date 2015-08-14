@@ -69,8 +69,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 				}
 				if (!isCwd) {
-					if (self.data('disabledCmd')) {
-						$.each(self.data('disabledCmd'), function(i, v){
+					if (fm.disabledCmds) {
+						$.each(fm.disabledCmds, function(i, v){
 							if (targets[0].indexOf(i, 0) == 0) {
 								disabled = v;
 								return false;
