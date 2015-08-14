@@ -41,8 +41,11 @@ elFinder.prototype.commands.rm = function() {
 			if (file.locked) {
 				return !dfrd.reject(['errLocked', file.name]);
 			}
-			if (file.hash == cwd) {
-				goup = (file.phash && fm.file(file.phash).read)? file.phash : fm.root(file.hash);
+			if (file.mime === 'directory') {
+				var parents = fm.parents(cwd);
+				if (file.hash == cwd || $.inArray(file.hash, parents)) {
+					goup = (file.phash && fm.file(file.phash).read)? file.phash : fm.root(file.hash);
+				}
 			}
 		});
 
