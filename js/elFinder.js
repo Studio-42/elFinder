@@ -289,8 +289,8 @@ window.elFinder = function(node, opts) {
 						}
 						
 						// set disabledCmds of each volume
-						if (f.volumeid) {
-							self.disabledCmds[f.volumeid] = f.disabled? f.disabled : [];
+						if (f.volumeid && f.disabled) {
+							self.disabledCmds[f.volumeid] = f.disabled;
 						}
 					}
 					files[f.hash] = f;
