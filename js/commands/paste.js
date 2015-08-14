@@ -147,7 +147,7 @@ elFinder.prototype.commands.paste = function() {
 					}
 					;
 
-				if (self._disabled || !files.length) {
+				if (!fm.isCommandEnabled(self.name, dst.hash) || !files.length) {
 					return dfrd.resolve();
 				}
 				

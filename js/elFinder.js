@@ -287,6 +287,11 @@ window.elFinder = function(node, opts) {
 						if (name != i18) {
 							f.i18 = i18;
 						}
+						
+						// set disabledCmds of each volume
+						if (f.volumeid) {
+							self.disabledCmds[f.volumeid] = f.disabled? f.disabled : [];
+						}
 					}
 					files[f.hash] = f;
 				} 
@@ -747,7 +752,7 @@ window.elFinder = function(node, opts) {
 				if (result.length) {
 					ui.helper.hide();
 					self.clipboard(result, !isCopy);
-					self.exec('paste', hash).always(function(){
+					self.exec('paste', hash, void 0, hash).always(function(){
 						self.trigger('unlockfiles', {files : targets});
 					});
 					self.trigger('drop', {files : targets});
@@ -1516,11 +1521,24 @@ window.elFinder = function(node, opts) {
 	/**
 	 * Return true if command enabled
 	 * 
-	 * @param  String  command name
+	 * @param  String       command name
+	 * @param  String|void  hash for check of own volume's disabled cmds
 	 * @return Boolean
 	 */
-	this.isCommandEnabled = function(name) {
-		return this._commands[name] ? $.inArray(name, cwdOptions.disabled) === -1 : false;
+	this.isCommandEnabled = function(name, dstHash) {
+		var disabled;
+		if (dstHash && self.root(dstHash) !== cwd) {
+			$.each(self.disabledCmds, function(i, v){
+				if (dstHash.indexOf(i, 0) == 0) {
+					disabled = v;
+					return false;
+				}
+			});
+		}
+		if (!disabled) {
+			disabled = cwdOptions.disabled;
+		}
+		return this._commands[name] ? $.inArray(name, disabled) === -1 : false;
 	}
 	
 	/**
@@ -1529,10 +1547,11 @@ window.elFinder = function(node, opts) {
 	 * @param  String         command name
 	 * @param  String|Array   usualy files hashes
 	 * @param  String|Array   command options
+	 * @param  String|void    hash for enabled check of own volume's disabled cmds
 	 * @return $.Deferred
 	 */		
-	this.exec = function(cmd, files, opts) {
-		return this._commands[cmd] && this.isCommandEnabled(cmd) 
+	this.exec = function(cmd, files, opts, dstHash) {
+		return this._commands[cmd] && this.isCommandEnabled(cmd, dstHash) 
 			? this._commands[cmd].exec(files, opts) 
 			: $.Deferred().reject('No such command');
 	}
@@ -1848,6 +1867,13 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.commandMap = {};
+	
+	/**
+	 * Disabled commands Array of each volume
+	 * 
+	 * @type Object
+	 */
+	this.disabledCmds = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
