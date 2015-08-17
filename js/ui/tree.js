@@ -47,6 +47,13 @@ $.fn.elfindertree = function(fm, opts) {
 			navdir    = fm.res(c, 'treedir'),
 			
 			/**
+			 * Directory CSS selector
+			 *
+			 * @type String
+			 */
+			selNavdir = 'span.' + navdir,
+			
+			/**
 			 * Collapsed arrow class name
 			 *
 			 * @type String
@@ -382,7 +389,7 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 				
 				if (!current.hasClass(active)) {
-					tree.find('.'+navdir+'.'+active).removeClass(active);
+					tree.find(selNavdir+'.'+active).removeClass(active);
 					current.addClass(active);
 				}
 
@@ -397,7 +404,7 @@ $.fn.elfindertree = function(fm, opts) {
 						subs = current.parentsUntil('.'+root).filter('.'+subtree);
 						subsLen = subs.length;
 						cnt = 1;
-						subs.show().prev('.'+navdir).addClass(expanded, function(){
+						subs.show().prev(selNavdir).addClass(expanded, function(){
 							!noCwd && subsLen == cnt++ && autoScroll();
 						});
 						!subsLen && !noCwd && autoScroll();
@@ -447,7 +454,7 @@ $.fn.elfindertree = function(fm, opts) {
 			updateDroppable = function(target) {
 				var limit = 100,
 					next;
-				target = target || tree.find('div.'+pastable).find('span.'+navdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				target = target || tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
 				if (target.length > limit) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
@@ -493,7 +500,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			tree = $(this).addClass(treeclass)
 				// make dirs draggable and toggle hover class
-				.delegate('.'+navdir, 'mouseenter mouseleave', function(e) {
+				.on('mouseenter mouseleave', selNavdir, function(e) {
 					var link  = $(this), 
 						enter = e.type == 'mouseenter';
 					
@@ -503,11 +510,11 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				})
 				// add/remove dropover css class
-				.delegate('.'+navdir, 'dropover dropout drop', function(e) {
+				.on('dropover dropout drop', selNavdir, function(e) {
 					$(this)[e.type == 'dropover' ? 'addClass' : 'removeClass'](dropover+' '+hover);
 				})
 				// open dir or open subfolders in tree
-				.delegate('.'+navdir, 'click', function(e) {
+				.on('click', selNavdir, function(e) {
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
@@ -526,7 +533,7 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				})
 				// for touch device
-				.delegate('.'+navdir, 'touchstart', function(e) {
+				.on('touchstart', selNavdir, function(e) {
 					e.stopPropagation();
 					var evt = e.originalEvent,
 					p = $(this)
@@ -543,7 +550,7 @@ $.fn.elfindertree = function(fm, opts) {
 						});
 					}, 500));
 				})
-				.delegate('.'+navdir, 'touchmove touchend', function(e) {
+				.on('touchmove touchend', selNavdir, function(e) {
 					e.stopPropagation();
 					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
@@ -551,9 +558,9 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				})
 				// toggle subfolders in tree
-				.delegate('.'+navdir+'.'+collapsed+' .'+arrow, 'click', function(e) {
+				.on('click', selNavdir+'.'+collapsed+' .'+arrow, function(e) {
 					var arrow = $(this),
-						link  = arrow.parent('.'+navdir),
+						link  = arrow.parent(selNavdir),
 						stree = link.next('.'+subtree);
 
 					e.stopPropagation();
@@ -561,14 +568,7 @@ $.fn.elfindertree = function(fm, opts) {
 					if (link.hasClass(loaded)) {
 						link.toggleClass(expanded);
 						stree.slideToggle('normal', function(){
-							if (!mobile) {
-								//if (link.hasClass(expanded)) {
-								//	link.nextAll().find('span.ui-droppable-disabled:visible').droppable('enable');
-								//} else {
-								//	link.nextAll().find('span.ui-droppable:not(.ui-droppable-disabled)').droppable('disable');
-								//}
-								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-							}
+							fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 						});
 					} else {
 						spinner.insertBefore(arrow);
@@ -580,7 +580,9 @@ $.fn.elfindertree = function(fm, opts) {
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
-									stree.slideDown('normal', function(){ fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1); });
+									stree.slideDown('normal', function(){
+										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+									});
 								} 
 								sync(true);
 							})
@@ -590,7 +592,7 @@ $.fn.elfindertree = function(fm, opts) {
 							});
 					}
 				})
-				.delegate('.'+navdir, 'contextmenu', function(e) {
+				.on('contextmenu', selNavdir, function(e) {
 					e.preventDefault();
 
 					fm.trigger('contextmenu', {
@@ -664,7 +666,7 @@ $.fn.elfindertree = function(fm, opts) {
 					isExpanded = node.hasClass(expanded);
 					isLoaded   = node.hasClass(loaded);
 					tmp        = $(itemhtml(dir));
-					node.replaceWith(tmp.children('.'+navdir));
+					node.replaceWith(tmp.children(selNavdir));
 					
 					if (dir.dirs 
 					&& (isExpanded || isLoaded) 
@@ -690,7 +692,7 @@ $.fn.elfindertree = function(fm, opts) {
 					stree = node.closest('.'+subtree);
 					node.parent().detach();
 					if (!stree.children().length) {
-						stree.hide().prev('.'+navdir).removeClass(collapsed+' '+expanded+' '+loaded);
+						stree.hide().prev(selNavdir).removeClass(collapsed+' '+expanded+' '+loaded);
 					}
 				}
 			}

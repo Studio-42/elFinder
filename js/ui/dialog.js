@@ -66,7 +66,7 @@ $.fn.elfinderdialog = function(opts) {
 						dialog.addClass(clactive).zIndex(maxZIndex() + 1);
 					}
 				})
-				.bind('open', function() {
+				.on('open', function() {
 					var d = $(this),
 					maxWinWidth = (d.outerWidth() > parent.width()-10)? parent.width()-10 : null;
 					
@@ -95,7 +95,7 @@ $.fn.elfinderdialog = function(opts) {
 						});
 					} 
 				})
-				.bind('close', function() {
+				.on('close', function() {
 					var dialogs = parent.find('.elfinder-dialog:visible'),
 						z = maxZIndex();
 					
@@ -124,12 +124,12 @@ $.fn.elfinderdialog = function(opts) {
 						dialog.hide().remove();
 					}
 				})
-				.bind('totop', function() {
+				.on('totop', function() {
 					$(this).mousedown().find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
 					$(this).data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 					overlay.zIndex($(this).zIndex());
 				})
-				.bind('posinit', function() {
+				.on('posinit', function() {
 					var css = opts.position;
 					if (!css) {
 						css = {
@@ -159,10 +159,10 @@ $.fn.elfinderdialog = function(opts) {
 		dialog.trigger('posinit');
 
 		if (opts.closeOnEscape) {
-			$(document).bind('keyup.'+id, function(e) {
+			$(document).on('keyup.'+id, function(e) {
 				if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass(clactive)) {
 					self.elfinderdialog('close');
-					$(document).unbind('keyup.'+id);
+					$(document).off('keyup.'+id);
 				}
 			})
 		}

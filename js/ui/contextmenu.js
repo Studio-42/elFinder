@@ -12,7 +12,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
-				.delegate('.'+cmItem, 'mouseenter mouseleave', function() {
+				.on('mouseenter mouseleave', '.'+cmItem, function() {
 					$(this).toggleClass('ui-state-hover')
 				}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',

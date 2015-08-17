@@ -688,7 +688,7 @@ window.elFinder = function(node, opts) {
 				helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
 			}
 			
-			$(document).bind(keydown + ' keyup.' + namespace, function(e){
+			$(document).on(keydown + ' keyup.' + namespace, function(e){
 				var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
 				if (ctr !== chk) {
 					ctr = chk;
@@ -1626,7 +1626,7 @@ window.elFinder = function(node, opts) {
 			this.trigger('destroy').disable();
 			listeners = {};
 			shortcuts = {};
-			$(document).add(node).unbind('.'+this.namespace);
+			$(document).add(node).off('.'+this.namespace);
 			self.trigger = function() { }
 			node.children().remove();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
@@ -1877,7 +1877,7 @@ window.elFinder = function(node, opts) {
 	
 	// prepare node
 	node.addClass(this.cssClass)
-		.bind(mousedown, function() {
+		.on(mousedown, function() {
 			!enabled && self.enable();
 		});
 	
@@ -1951,9 +1951,9 @@ window.elFinder = function(node, opts) {
 	// attach events to document
 	$(document)
 		// disable elfinder on click outside elfinder
-		.bind('click.'+this.namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+		.on('click.'+this.namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
 		// exec shortcuts
-		.bind(keydown+' '+keypress, execShortcut);
+		.on(keydown+' '+keypress, execShortcut);
 	
 	// attach events to window
 	self.options.useBrowserHistory && $(window)
@@ -1978,7 +1978,7 @@ window.elFinder = function(node, opts) {
 			self.trigger('fail').disable().lastDir('');
 			listeners = {};
 			shortcuts = {};
-			$(document).add(node).unbind('.'+this.namespace);
+			$(document).add(node).off('.'+this.namespace);
 			self.trigger = function() { };
 		})
 		.done(function(data) {
@@ -2915,9 +2915,9 @@ elFinder.prototype = {
 					}, 100);
 				},
 				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
-					.bind('load', function() {
-						iframe.unbind('load')
-							.bind('load', function() {
+					.on('load', function() {
+						iframe.off('load')
+							.on('load', function() {
 								var data = self.parseUploadData(iframe.contents().text());
 								
 								onload();

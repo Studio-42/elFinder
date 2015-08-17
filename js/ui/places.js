@@ -179,10 +179,10 @@ $.fn.elfinderplaces = function(fm, opts) {
 				.hide()
 				.append(wrapper)
 				.appendTo(fm.getUI('navbar'))
-				.delegate('.'+navdir, 'mouseenter mouseleave', function(e) {
+				.on('mouseenter mouseleave', '.'+navdir, function(e) {
 					$(this).toggleClass('ui-state-hover', (e.type == 'mouseenter'));
 				})
-				.delegate('.'+navdir, 'click', function(e) {
+				.on('click', '.'+navdir, function(e) {
 					var p = $(this);
 					if (p.data('longtap')) {
 						e.stopPropagation();
@@ -190,7 +190,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					}
 					fm.exec('open', p.attr('id').substr(6));
 				})
-				.delegate('.'+navdir+':not(.'+clroot+')', 'contextmenu', function(e) {
+				.on('contextmenu', '.'+navdir+':not(.'+clroot+')', function(e) {
 					var hash = $(this).attr('id').substr(6);
 					
 					e.preventDefault();

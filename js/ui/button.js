@@ -45,8 +45,8 @@ $.fn.elfinderbutton = function(cmd) {
 				.hide()
 				.appendTo(button)
 				.zIndex(12+button.zIndex())
-				.delegate('.'+item, 'mouseenter mouseleave', function() { $(this).toggleClass(hover) })
-				.delegate('.'+item, 'click', function(e) {
+				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover) })
+				.on('click', '.'+item, function(e) {
 					e.preventDefault();
 					e.stopPropagation();
 					button.removeClass(hover);

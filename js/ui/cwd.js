@@ -428,7 +428,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 					if (!buffer.length) {
 						bottomMarker.hide();
-						return wrapper.unbind(scrollEvent);
+						return wrapper.off(scrollEvent);
 					}
 
 					//progress.show();
@@ -771,7 +771,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				buffer = fm.sortFiles(buffer);
 		
-				wrapper.bind(scrollEvent, render).trigger(scrollEvent);
+				wrapper.on(scrollEvent, render).trigger(scrollEvent);
 		
 				phash = fm.cwd().phash;
 				
@@ -801,7 +801,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.addClass('ui-helper-clearfix elfinder-cwd')
 				.attr('unselectable', 'on')
 				// fix ui.selectable bugs and add shift+click support 
-				.delegate(fileSelector, 'click.'+fm.namespace, function(e) {
+				.on('click.'+fm.namespace, fileSelector, function(e) {
 					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
 						prev = p.prevAll('.'+clSelected+':first'),
 						next = p.nextAll('.'+clSelected+':first'),
@@ -836,11 +836,11 @@ $.fn.elfindercwd = function(fm, options) {
 					trigger();
 				})
 				// call fm.open()
-				.delegate(fileSelector, 'dblclick.'+fm.namespace, function(e) {
+				.on('dblclick.'+fm.namespace, fileSelector, function(e) {
 					fm.dblclick({file : this.id});
 				})
 				// for touch device
-				.delegate(fileSelector, 'touchstart.'+fm.namespace, function(e) {
+				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
 					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT') {
 						return;
@@ -871,7 +871,7 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 					}, 500));
 				})
-				.delegate(fileSelector, 'touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
+				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
 					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT') {
 						return;
@@ -883,7 +883,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				})
 				// attach draggable
-				.delegate(fileSelector, 'mouseenter.'+fm.namespace, function(e) {
+				.on('mouseenter.'+fm.namespace, fileSelector, function(e) {
 					var $this = $(this),
 						target = list ? $this : $this.children();
 
@@ -892,7 +892,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				})
 				// add hover class to selected file
-				.delegate(fileSelector, evtSelect, function(e) {
+				.on(evtSelect, fileSelector, function(e) {
 					var $this = $(this), 
 						id    = $this.attr('id');
 					
@@ -904,7 +904,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				})
 				// remove hover class from unselected file
-				.delegate(fileSelector, evtUnselect, function(e) {
+				.on(evtUnselect, fileSelector, function(e) {
 					var $this = $(this), 
 						id    = $this.attr('id'),
 						ndx;
@@ -919,7 +919,7 @@ $.fn.elfindercwd = function(fm, options) {
 					
 				})
 				// disable files wich removing or moving
-				.delegate(fileSelector, evtDisable, function() {
+				.on(evtDisable, fileSelector, function() {
 					var $this  = $(this).removeClass(clHover+' '+clSelected).addClass(clDisabled), 
 						child  = $this.children(),
 						target = (list ? $this : child);
@@ -930,21 +930,21 @@ $.fn.elfindercwd = function(fm, options) {
 					target.hasClass(clDraggable) && target.draggable('disable');
 				})
 				// if any files was not removed/moved - unlock its
-				.delegate(fileSelector, evtEnable, function() {
+				.on(evtEnable, fileSelector, function() {
 					var $this  = $(this).removeClass(clDisabled), 
 						target = list ? $this : $this.children();
 					
 					$this.hasClass(clDroppable) && $this.droppable('enable');	
 					target.hasClass(clDraggable) && target.draggable('enable');
 				})
-				.delegate(fileSelector, 'scrolltoview', function() {
+				.on('scrolltoview', fileSelector, function() {
 					scrollToView($(this));
 				})
-				.delegate(fileSelector, 'mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, function(e) {
+				.on('mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, fileSelector, function(e) {
 					fm.trigger('hover', {hash : $(this).attr('id'), type : e.type});
 					$(this).toggleClass(clHover, (e.type == 'mouseenter'));
 				})
-				.bind('contextmenu.'+fm.namespace, function(e) {
+				.on('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest('.'+clFile);
 					
 					if (file.length && (e.target.nodeName != 'TD' || $.inArray(file.get(0).id, fm.selected()) > -1)) {
@@ -972,7 +972,7 @@ $.fn.elfindercwd = function(fm, options) {
 					
 				})
 				// unselect all on cwd click
-				.bind('click.'+fm.namespace, function(e) {
+				.on('click.'+fm.namespace, function(e) {
 					if (cwd.data('longtap')) {
 						e.stopPropagation();
 						return;
@@ -989,7 +989,7 @@ $.fn.elfindercwd = function(fm, options) {
 					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 				})
 				// prepend fake file/dir
-				.bind('create.'+fm.namespace, function(e, file) {
+				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
 						p = parent.find('.elfinder-cwd-parent'),
 						file = $(itemhtml(file)).addClass(clTmp);
@@ -1005,15 +1005,15 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.parent().scrollTop(0);
 				})
 				// unselect all selected files
-				.bind('unselectall', unselectAll)
-				.bind('selectfile', function(e, id) {
+				.on('unselectall', unselectAll)
+				.on('selectfile', function(e, id) {
 					$('#'+id).trigger(evtSelect);
 					trigger();
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
 				.droppable(droppable)
-				.bind('contextmenu', function(e) {
+				.on('contextmenu', function(e) {
 					e.preventDefault();
 					fm.trigger('contextmenu', {
 						'type'    : 'cwd',
@@ -1024,7 +1024,7 @@ $.fn.elfindercwd = function(fm, options) {
 					
 				})
 				// for touch device
-				.bind('touchstart.'+fm.namespace, function(e) {
+				.on('touchstart.'+fm.namespace, function(e) {
 					var p = $(this);
 					cwd.data('longtap', null);
 					p.data('touching', true);
@@ -1039,7 +1039,7 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}, 500));
 				})
-				.bind('touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
+				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
 					clearTimeout($(this).data('tmlongtap'));
 				})
 				.on('mousedown', function(){wrapper._mousedown = true;})
