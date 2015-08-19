@@ -2007,6 +2007,11 @@ window.elFinder = function(node, opts) {
 			tm = setTimeout(function() {
 				self.trigger('resize', {width : node.width(), height : node.height()});
 			}, 200);
+		})
+		.on('beforeunload',function(){
+			if (self.ui.notify.children().length) {
+				return self.i18n('ntfsmth');
+			}
 		});
 	})();
 
