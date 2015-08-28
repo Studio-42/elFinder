@@ -56,7 +56,7 @@ elFinder.prototype.commands.getfile = function() {
 			req = [], 
 			i, file, dim;
 
-		if (this.getstate() == -1) {
+		if (this.getstate(hashes) == -1) {
 			return dfrd.reject();
 		}
 			
