@@ -58,9 +58,10 @@ elFinder.prototype.commands.upload = function() {
 		dropUpload = function(e) {
 			e.stopPropagation();
 			e.preventDefault();
-			var file = false;
-			var type = '';
-			var data = null;
+			var file = false,
+				type = '',
+				data = null,
+				target = e._target || null;
 			try{
 				data = e.dataTransfer.getData('text/html');
 			} catch(e) {}
@@ -77,7 +78,6 @@ elFinder.prototype.commands.upload = function() {
 				file = [ data ];
 				type = 'text';
 			}
-			target = e._target || null;
 			return file? fm.upload({files : file, type : type, target : target}) : false;
 		};
 		
