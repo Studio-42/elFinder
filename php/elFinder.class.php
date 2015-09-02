@@ -928,7 +928,7 @@ class elFinder {
 			$ua = $_SERVER["HTTP_USER_AGENT"];
 			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
-			} elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false) { // Safari
+			} elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false && preg_match('#Version/[3-5]#', $ua)) { // Safari < 6
 				$filename = 'filename="'.str_replace('"', '', $file['name']).'"';
 			} else { // RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename*=UTF-8\'\''.$filenameEncoded;
@@ -942,12 +942,14 @@ class elFinder {
 			'header'  => array(
 				'Content-Type: '.$mime, 
 				'Content-Disposition: '.$disp.'; '.$filename,
-				'Content-Location: '.$file['name'],
 				'Content-Transfer-Encoding: binary',
 				'Content-Length: '.$file['size'],
 				'Connection: close'
 			)
 		);
+		if (isset($file['url']) && $file['url'] && $file['url'] != 1) {
+			$result['header'][] = 'Content-Location: '.$file['url'];
+		}
 		return $result;
 	}
 	
