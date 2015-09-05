@@ -913,7 +913,7 @@ class elFinder {
 
 		if ($download) {
 			$disp = 'attachment';
-			$mime = 'application/force-download';
+			$mime = $file['mime'];
 		} else {
 			$disp  = preg_match('/^(image|text)/i', $file['mime']) || $file['mime'] == 'application/x-shockwave-flash' 
 					? 'inline' 
@@ -925,7 +925,7 @@ class elFinder {
 		if (strpos($filenameEncoded, '%') === false) { // ASCII only
 			$filename = 'filename="'.$file['name'].'"';
 		} else {
-			$ua = $_SERVER["HTTP_USER_AGENT"];
+			$ua = $_SERVER['HTTP_USER_AGENT'];
 			if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
 				$filename = 'filename="'.$filenameEncoded.'"';
 			} elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false && preg_match('#Version/[3-5]#', $ua)) { // Safari < 6
@@ -2079,8 +2079,13 @@ class elFinder {
 	/*                           static  utils                                 */
 	/***************************************************************************/
 	
-	public static function isAnimationGif($path)
-	{
+	/**
+	 * Return Is Animation Gif
+	 * 
+	 * @param  string $path server local path of target image
+	 * @return bool
+	 */
+	public static function isAnimationGif($path) {
 		list($width, $height, $type, $attr) = getimagesize($path);
 		switch ($type) {
 			case IMAGETYPE_GIF:
@@ -2121,6 +2126,17 @@ class elFinder {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Return Is seekable stream resource
+	 * 
+	 * @param resource $resource
+	 * @return bool
+	 */
+	public static function isSeekableStream($resource) {
+		$metadata = stream_get_meta_data($resource);
+		return $metadata['seekable'];
 	}
 
 } // END class

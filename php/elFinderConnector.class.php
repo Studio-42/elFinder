@@ -124,8 +124,55 @@ class elFinderConnector {
 		}
 		
 		if (isset($data['pointer'])) {
-			rewind($data['pointer']);
-			fpassthru($data['pointer']);
+			$toEnd = true;
+			$fp = $data['pointer'];
+			if (elFinder::isSeekableStream($fp)) {
+				header('Accept-Ranges: bytes');
+				$psize = null;
+				if (!empty($_SERVER['HTTP_RANGE'])) {
+					$size = $data['info']['size'];
+					$start = 0;
+					$end = $size - 1;
+					if (preg_match('/bytes=(\d*)-(\d*)(,?)/i', $_SERVER['HTTP_RANGE'], $matches)) {
+						if (empty($matches[3])) {
+							if (empty($matches[1]) && $matches[1] !== '0') {
+								$start = $size - $matches[2];
+							} else {
+								$start = intval($matches[1]);
+								if (!empty($matches[2])) {
+									$end = intval($matches[2]);
+									if ($end >= $size) {
+										$end = $size - 1;
+									}
+									$toEnd = ($end == ($size - 1));
+								}
+							}
+							$psize = $end - $start + 1;
+							
+							header('HTTP/1.1 206 Partial Content');
+							header('Content-Length: ' . $psize);
+							header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
+							
+							fseek($fp, $start);
+						}
+					}
+				}
+				if (is_null($psize)){
+					rewind($fp);
+				}
+			} else {
+				header('Accept-Ranges: none');
+			}
+
+			(session_status() === PHP_SESSION_ACTIVE) && session_write_close();
+
+			if ($toEnd) {
+				fpassthru($fp);
+			} else {
+				$out = fopen('php://output', 'wb');
+				stream_copy_to_stream($fp, $out, $psize);
+				fclose($out);
+			}
 			if (!empty($data['volume'])) {
 				$data['volume']->close($data['pointer'], $data['info']['hash']);
 			}
