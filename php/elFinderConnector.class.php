@@ -164,7 +164,10 @@ class elFinderConnector {
 				header('Accept-Ranges: none');
 			}
 
+			// unlock session data for multiple access
 			(session_status() === PHP_SESSION_ACTIVE) && session_write_close();
+			// client disconnect should abort
+			ignore_user_abort(false);
 
 			if ($toEnd) {
 				fpassthru($fp);
