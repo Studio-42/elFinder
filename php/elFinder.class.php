@@ -133,6 +133,13 @@ class elFinder {
 	 * @var string
 	 **/
 	protected $debug = false;
+	
+	/**
+	 * Call `session_write_close()` before exec command?
+	 * 
+	 * @var bool
+	 */
+	protected $sessionCloseEarlier = true;
 
 	/**
 	 * session expires timeout
@@ -239,6 +246,7 @@ class elFinder {
 
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
+		$this->sessionCloseEarlier = isset($opts['sessionCloseEarlier'])? (bool)$opts['sessionCloseEarlier'] : true;
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
@@ -492,12 +500,17 @@ class elFinder {
 		}
 		
 		// call pre handlers for this command
+		$args['sessionCloseEarlier'] = $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
 			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
 				call_user_func_array($handler, array($cmd, &$args, $this, $volume));
 			}
 		}
+		
+		// unlock session data for multiple access
+		$this->sessionCloseEarlier && $args['sessionCloseEarlier'] && (session_status() === PHP_SESSION_ACTIVE) && session_write_close();
+		unset($this->sessionCloseEarlier);
 		
 		$result = $this->$cmd($args);
 		
