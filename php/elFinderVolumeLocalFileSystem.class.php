@@ -714,8 +714,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _save($fp, $dir, $name, $stat) {
 		$path = $this->_joinPath($dir, $name);
 
-		if (@file_put_contents($path, $fp, LOCK_EX) === false) {
-			return false;
+		$meta = stream_get_meta_data($fp);
+		$uri = $meta['uri'];
+		if (@is_file($uri)) {
+			fclose($fp);
+			if (!@rename($uri, $path) && !@copy($uri, $path)) {
+				return false;
+			}
+		} else {
+			if (@file_put_contents($path, $fp, LOCK_EX) === false) {
+				return false;
+			}
 		}
 
 		@chmod($path, $this->options['fileMode']);
