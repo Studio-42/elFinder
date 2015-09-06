@@ -2520,6 +2520,7 @@ elFinder.prototype = {
 							files = [{_chunkfail: true}];
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
+							formData.append('range', file._range);
 							isDataType = false;
 							send(files);
 							return;
@@ -2615,7 +2616,7 @@ elFinder.prototype = {
 				totalSize = 0,
 				chunked = [],
 				chunkID = +new Date(),
-				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, 5242880), // margin 8kb and Max 5MB
+				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				SIZE, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
 					var sfiles = [], cid;
@@ -2701,6 +2702,7 @@ elFinder.prototype = {
 								}
 								chunk._chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
 								chunk._cid   = chunkID;
+								chunk._range = start + ',' + chunk.size + ',' + SIZE;
 								chunked[chunkID]++;
 								
 								if (size) {
@@ -2834,6 +2836,7 @@ elFinder.prototype = {
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
+							formData.append('range', file._range);
 						}
 					}
 				});

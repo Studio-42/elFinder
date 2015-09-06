@@ -64,6 +64,14 @@ elFinder.prototype._options = {
 	dragUploadAllow : 'auto',
 	
 	/**
+	 * Max size of chunked data of file upload
+	 * 
+	 * @type Number
+	 * @default  10485760(10MB)
+	 */
+	uploadMaxChunkSize : 10485760,
+	
+	/**
 	 * Timeout for upload using iframe
 	 *
 	 * @type Number

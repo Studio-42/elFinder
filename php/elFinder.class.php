@@ -1390,46 +1390,87 @@ class elFinder {
 	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir) {
 		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
 			$encname = md5($cid . '_' . $m[1]);
-			$part = $tempDir . '/ELF' . $encname . $m[2];
+			$base = $tempDir . '/ELF' . $encname;
+			$total = intval($m[3]);
 			if (is_null($tmpname)) {
 				// chunked file upload fail
-				foreach(glob($tempDir . '/ELF' . $encname . '*') as $cf) {
+				foreach(glob($base . '*') as $cf) {
 					@unlink($cf);
 				}
 				return;
 			}
-			if (move_uploaded_file($tmpname, $part)) {
-				@chmod($part, 0600);
-				$total = $m[3];
-				$parts = array();
-				for ($i = 0; $i <= $total; $i++) {
-					$name = $tempDir . '/ELF' . $encname . '.' . $i . '_' . $total;
-					if (is_readable($name)) {
-						$parts[] = $name;
-					} else {
-						$parts = null;
-						break;
-					}
+			
+			if (isset($_POST['range'])) {
+				list($start, $len, $size) = explode(',', $_POST['range']);
+				$tmp = $base . '.part';
+				
+				if (!is_file($tmp)) {
+					// make temp file
+					$fp = fopen($tmp, 'wb');
+					flock($fp, LOCK_EX);
+					ftruncate($fp, $size);
+					flock($fp, LOCK_UN);
+					fclose($fp);
+					touch($base);
 				}
-				if ($parts) {
-					$check = $tempDir . '/ELF' . $encname;
-					if (!is_file($check)) {
-						touch($check);
-						if ($resfile = tempnam($tempDir, 'ELF')) {
-							$target = fopen($resfile, 'wb');
-							foreach($parts as $f) {
-								$fp = fopen($f, 'rb');
-								while (!feof($fp)) {
-									fwrite($target, fread($fp, 8192));
-								}
-								fclose($fp);
-								unlink($f);
+				
+				// wait until makeing temp file (for anothor session)
+				while(!is_file($base)) {
+					usleep(100000); // wait 100ms
+				}
+				
+				// write chunk data
+				$src = fopen($tmpname, 'rb');
+				$fp = fopen($tmp, 'cb');
+				fseek($fp, $start);
+				stream_copy_to_stream($src, $fp);
+				fclose($fp);
+				fclose($src);
+				
+				// write counts
+				file_put_contents($base, "\0", FILE_APPEND);
+				
+				if (filesize($base) === $total) {
+					// Completion
+					unlink($base);
+					return array($tmp, $m[1]);
+				}
+			} else {
+				// old way
+				$part = $base . $m[2];
+				if (move_uploaded_file($tmpname, $part)) {
+					@chmod($part, 0600);
+					if ($total < count(glob($base . '*'))) {
+						$parts = array();
+						for ($i = 0; $i <= $total; $i++) {
+							$name = $base . '.' . $i . '_' . $total;
+							if (is_readable($name)) {
+								$parts[] = $name;
+							} else {
+								$parts = null;
+								break;
 							}
-							fclose($target);
-							unlink($check);
-							return array($resfile, $m[1]);
 						}
-						unlink($check);
+						if ($parts) {
+							if (!is_file($base)) {
+								touch($base);
+								if ($resfile = tempnam($tempDir, 'ELF')) {
+									$target = fopen($resfile, 'wb');
+									foreach($parts as $f) {
+										$fp = fopen($f, 'rb');
+										while (!feof($fp)) {
+											fwrite($target, fread($fp, 8192));
+										}
+										fclose($fp);
+										unlink($f);
+									}
+									fclose($target);
+									unlink($base);
+									return array($resfile, $m[1]);
+								}
+								unlink($base);
+							}
+						}
 					}
 				}
 			}
