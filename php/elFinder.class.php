@@ -142,6 +142,13 @@ class elFinder {
 	protected $sessionCloseEarlier = true;
 
 	/**
+	 * SESSION use commands default is `netmount`, `netunmount` @see __construct()
+	 * 
+	 * @var array
+	 */
+	protected $sessionUseCmds = array();
+	
+	/**
 	 * session expires timeout
 	 *
 	 * @var int
@@ -243,10 +250,15 @@ class elFinder {
 		if (session_id() == '') {
 			session_start();
 		}
+		$sessionUseCmds = array('netmount', 'netunmount');
+		if (isset($opts['sessionUseCmds']) && is_array($opts['sessionUseCmds'])) {
+			$sessionUseCmds = array_merge($sessionUseCmds, $opts['sessionUseCmds']);
+		}
 
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		$this->sessionCloseEarlier = isset($opts['sessionCloseEarlier'])? (bool)$opts['sessionCloseEarlier'] : true;
+		$this->sessionUseCmds = array_flip($sessionUseCmds);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
@@ -498,9 +510,9 @@ class elFinder {
 				$this->volumes[$id]->setMimesFilter($args['mimes']);
 			}
 		}
-		
+
 		// call pre handlers for this command
-		$args['sessionCloseEarlier'] = $this->sessionCloseEarlier;
+		$args['sessionCloseEarlier'] = isset($this->sessionUseCmds[$cmd])? false : $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
 			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
