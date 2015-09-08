@@ -168,7 +168,7 @@ class elFinderConnector {
 			}
 
 			// unlock session data for multiple access
-			(session_status() === PHP_SESSION_ACTIVE) && session_write_close();
+			session_id() && session_write_close();
 			// client disconnect should abort
 			ignore_user_abort(false);
 

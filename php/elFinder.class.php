@@ -509,7 +509,7 @@ class elFinder {
 		}
 		
 		// unlock session data for multiple access
-		$this->sessionCloseEarlier && $args['sessionCloseEarlier'] && (session_status() === PHP_SESSION_ACTIVE) && session_write_close();
+		$this->sessionCloseEarlier && $args['sessionCloseEarlier'] && session_id() && session_write_close();
 		unset($this->sessionCloseEarlier);
 		
 		$result = $this->$cmd($args);
