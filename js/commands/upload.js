@@ -36,11 +36,8 @@ elFinder.prototype.commands.upload = function() {
 	this.exec = function(data) {
 		var fm = this.fm,
 			targets = data && (data instanceof Array)? data : null,
-			upload = function(data) {
-				dialog.elfinderdialog('close');
-				if (targets) {
-					data.target = targets[0];
-				}
+			check  = !targets && data && data.target? [ data.target ] : targets,
+			fmUpload = function(data) {
 				fm.upload(data)
 					.fail(function(error) {
 						dfrd.reject(error);
@@ -49,10 +46,18 @@ elFinder.prototype.commands.upload = function() {
 						dfrd.resolve(data);
 					});
 			},
-			dfrd, dialog, input, button, dropbox, pastebox, dropUpload, paste;
+			upload = function(data) {
+				dialog.elfinderdialog('close');
+				if (targets) {
+					data.target = targets[0];
+				}
+				fmUpload(data);
+			},
+			dfrd = $.Deferred(),
+			dialog, input, button, dropbox, pastebox, dropUpload, paste;
 		
-		if (this.getstate(targets) < 0) {
-			return $.Deferred().reject();
+		if (this.getstate(check) < 0) {
+			return dfrd.reject();
 		}
 		
 		dropUpload = function(e) {
@@ -78,19 +83,22 @@ elFinder.prototype.commands.upload = function() {
 				file = [ data ];
 				type = 'text';
 			}
-			return file? fm.upload({files : file, type : type, target : target}) : false;
+			if (file) {
+				fmUpload({files : file, type : type, target : target});
+			} else {
+				dfrd.reject();
+			}
 		};
 		
 		if (!targets && data) {
 			if (data.input || data.files) {
 				data.type = 'files';
-				return fm.upload(data);
+				fmUpload(data);
 			} else if (data.dropEvt) {
-				return dropUpload(data.dropEvt);
+				dropUpload(data.dropEvt);
 			}
+			return dfrd;
 		}
-		
-		dfrd = $.Deferred();
 		
 		paste = function(e) {
 			var e = e.originalEvent || e;
