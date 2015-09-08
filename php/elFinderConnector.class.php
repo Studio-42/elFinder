@@ -101,6 +101,9 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function output(array $data) {
+		// clear output buffer
+		while(@ob_get_level()){ @ob_end_clean(); }
+		
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
 		if ($header) {
