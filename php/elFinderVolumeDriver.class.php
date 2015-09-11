@@ -1059,8 +1059,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 * @author Troex Nevelin
 	 **/
-	public function mimeAccepted($mime, $mimes = array(), $empty = true) {
-		$mimes = !empty($mimes) ? $mimes : $this->onlyMimes;
+	public function mimeAccepted($mime, $mimes = null, $empty = true) {
+		$mimes = is_array($mimes) ? $mimes : $this->onlyMimes;
 		if (empty($mimes)) {
 			return $empty;
 		}
