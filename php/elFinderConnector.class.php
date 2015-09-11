@@ -140,7 +140,7 @@ class elFinderConnector {
 	 * @return mixed
 	 * @author Naoki Sawada
 	 */
-	private function input_filter($args) {
+	protected function input_filter($args) {
 		static $magic_quotes_gpc = NULL;
 		
 		if ($magic_quotes_gpc === NULL)
