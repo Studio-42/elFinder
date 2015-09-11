@@ -2081,6 +2081,16 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return this uploadMaxSize value
+	 * 
+	 * @return integer
+	 * @author Naoki Sawada
+	 */
+	public function getUploadMaxSize() {
+		return $this->uploadMaxSize;
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  array  error 
