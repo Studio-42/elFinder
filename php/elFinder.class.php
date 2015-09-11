@@ -1401,15 +1401,18 @@ class elFinder {
 	 */
 	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume = null) {
 		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
-			$encname = md5($cid . '_' . $m[1]);
-			$base = $tempDir . '/ELF' . $encname;
 			$fname = $m[1];
+			$encname = md5($cid . '_' . $fname);
+			$base = $tempDir . '/ELF' . $encname;
 			$clast = intval($m[3]);
 			if (is_null($tmpname)) {
+				ignore_user_abort(true);
+				sleep(10); // wait 10 sec
 				// chunked file upload fail
 				foreach(glob($base . '*') as $cf) {
 					@unlink($cf);
 				}
+				ignore_user_abort(false);
 				return;
 			}
 			
@@ -1437,8 +1440,12 @@ class elFinder {
 					touch($base);
 				} else {
 					// wait until makeing temp file (for anothor session)
-					while(!is_file($base)) {
-						usleep(100000); // wait 10ms
+					$cnt = 100; // Time limit 10 sec
+					while(!is_file($base) && --$cnt) {
+						usleep(100000); // wait 100ms
+					}
+					if (!$cnt) {
+						return array(self::ERROR_UPLOAD_TRANSFER, false);
 					}
 				}
 				
@@ -1700,7 +1707,7 @@ class elFinder {
 		}
 		
 		foreach ($files['name'] as $i => $name) {
-			if (($error = $files['error'][$i]) > 0) {				
+			if (($error = $files['error'][$i]) > 0) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER);
 				$this->uploadDebug = 'Upload error code: '.$error;
 				break;
@@ -1712,13 +1719,14 @@ class elFinder {
 				if ($chunk) {
 					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
 						list($tmpname, $name) = $this->checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume);
-						if ($tmpname && $name) {
-							$result['_chunkmerged'] = basename($tmpname);
-							$result['_name'] = $name;
-						}
-						if ($tmpname && $name === false) {
-							$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, $tmpname);
-							$this->uploadDebug = 'Upload error: ' . $tmpname;
+						if ($tmpname) {
+							if ($name === false) {
+								$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, $tmpname);
+								$this->uploadDebug = 'Upload error: ' . $tmpname;
+							} else if ($name) {
+								$result['_chunkmerged'] = basename($tmpname);
+								$result['_name'] = $name;
+							}
 						}
 					} else {
 						$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, self::ERROR_UPLOAD_TRANSFER);

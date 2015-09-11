@@ -2447,7 +2447,6 @@ elFinder.prototype = {
 							files = [{_chunkfail: true}];
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
-							formData.append('range', file._range);
 							isDataType = false;
 							send(files);
 						}
@@ -2508,6 +2507,9 @@ elFinder.prototype = {
 			// regist abort event
 			self.ui.notify.one('click', cancelBtn, fnAbort);
 			$(document).on('keydown', fnAbort);
+			$(window).on('unload', function(e){
+				(dfrd.state() == 'pending') && dfrd.reject();
+			});
 			
 			!chunkMerge && (prev = loaded);
 			
