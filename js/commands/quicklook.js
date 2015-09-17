@@ -186,7 +186,8 @@ elFinder.prototype.commands.quicklook = function() {
 				if(parent.is('.ui-resizable')) {
 					collection = collection.add(parent);
 				};
-				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+				var isDisabledOptions = full ? {disabled: false} : {disabled: true};
+				$.fn.resizable && collection.resizable(isDisabledOptions).removeClass('ui-state-disabled');
 			}),
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
