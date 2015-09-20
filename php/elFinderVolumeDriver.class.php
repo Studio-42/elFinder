@@ -1670,9 +1670,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($rmSrc) {
-			if ($volume->rm($src)) {
-				$this->removed[] = $file;
-			} else {
+			if (!$volume->rm($src)) {
 				return $this->setError(elFinder::ERROR_MOVE, $errpath, elFinder::ERROR_RM_SRC);
 			}
 		}
