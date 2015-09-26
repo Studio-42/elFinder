@@ -156,6 +156,13 @@ class elFinder {
 	protected $timeout = 0;
 	
 	/**
+	 * Temp dir path for Upload
+	 * 
+	 * @var string
+	 */
+	protected $uploadTempPath = '';
+	
+	/**
 	 * undocumented class variable
 	 *
 	 * @var string
@@ -260,6 +267,7 @@ class elFinder {
 		$this->sessionCloseEarlier = isset($opts['sessionCloseEarlier'])? (bool)$opts['sessionCloseEarlier'] : true;
 		$this->sessionUseCmds = array_flip($sessionUseCmds);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
+		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
@@ -1522,6 +1530,9 @@ class elFinder {
 	 */
 	private function getTempDir($volumeTempPath = null) {
 		$testDirs = array();
+		if ($this->uploadTempPath) {
+			$testDirs[] = rtrim(realpath($this->uploadTempPath), DIRECTORY_SEPARATOR);
+		}
 		if (function_exists('sys_get_temp_dir')) {
 			$testDirs[] = sys_get_temp_dir();
 		}
@@ -1531,7 +1542,7 @@ class elFinder {
 		$tempDir = '';
 		$test = DIRECTORY_SEPARATOR . microtime(true);
 		foreach($testDirs as $testDir) {
-			if (!$testDir) continue;
+			if (!$testDir || !is_dir($testDir)) continue;
 			$testFile = $testDir.$test;
 			if (touch($testFile)) {
 				unlink($testFile);
