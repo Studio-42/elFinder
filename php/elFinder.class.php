@@ -219,6 +219,7 @@ class elFinder {
 	const ERROR_UPLOAD_FILE_SIZE  = 'errUploadFileSize';   // 'File exceeds maximum allowed size.'
 	const ERROR_UPLOAD_FILE_MIME  = 'errUploadMime';       // 'File type not allowed.'
 	const ERROR_UPLOAD_TRANSFER   = 'errUploadTransfer';   // '"$1" transfer error.'
+	const ERROR_UPLOAD_TEMP       = 'errUploadTemp';       // 'Unable to make temporary file for upload.'
 	// const ERROR_ACCESS_DENIED     = 'errAccess';
 	const ERROR_NOT_REPLACE       = 'errNotReplace';       // Object "$1" already exists at this location and can not be replaced with object of another type.
 	const ERROR_SAVE              = 'errSave';
@@ -1440,12 +1441,17 @@ class elFinder {
 						return array(self::ERROR_UPLOAD_FILE_SIZE, false);
 					}
 					// make temp file
-					$fp = fopen($tmp, 'wb');
-					flock($fp, LOCK_EX);
-					ftruncate($fp, $size);
-					flock($fp, LOCK_UN);
-					fclose($fp);
-					touch($base);
+					$ok = false;
+					if ($fp = fopen($tmp, 'wb')) {
+						flock($fp, LOCK_EX);
+						$ok = ftruncate($fp, $size);
+						flock($fp, LOCK_UN);
+						fclose($fp);
+						touch($base);
+					}
+					if (!$ok) {
+						return array(self::ERROR_UPLOAD_TEMP, false);
+					}
 				} else {
 					// wait until makeing temp file (for anothor session)
 					$cnt = 100; // Time limit 10 sec
@@ -1453,22 +1459,26 @@ class elFinder {
 						usleep(100000); // wait 100ms
 					}
 					if (!$cnt) {
-						return array(self::ERROR_UPLOAD_TRANSFER, false);
+						return array(self::ERROR_UPLOAD_TEMP, false);
 					}
 				}
 				
 				// check size info
 				if ($len != $csize || $start + $len > $size || ($tmpExists && $size != filesize($tmp))) {
-					return array(self::ERROR_UPLOAD_TRANSFER, false);
+					return array(self::ERROR_UPLOAD_TEMP, false);
 				}
 				
 				// write chunk data
+				$writelen = 0;
 				$src = fopen($tmpname, 'rb');
 				$fp = fopen($tmp, 'cb');
 				fseek($fp, $start);
-				stream_copy_to_stream($src, $fp, $len);
+				$writelen = stream_copy_to_stream($src, $fp, $len);
 				fclose($fp);
 				fclose($src);
+				if ($writelen != $len) {
+					return array(self::ERROR_UPLOAD_TEMP, false);
+				}
 				
 				// write counts
 				file_put_contents($base, "\0", FILE_APPEND) === false;
@@ -1732,7 +1742,9 @@ class elFinder {
 						list($tmpname, $name) = $this->checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume);
 						if ($tmpname) {
 							if ($name === false) {
-								$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, $tmpname);
+								preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m);
+								$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $m[1], $tmpname);
+								$result['_chunkfailure'] = true;
 								$this->uploadDebug = 'Upload error: ' . $tmpname;
 							} else if ($name) {
 								$result['_chunkmerged'] = basename($tmpname);

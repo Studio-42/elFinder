@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2014-12-19
+ * @version 2015-09-26
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -57,6 +57,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'File type not allowed.', 
 			'errUploadTransfer'    : '"$1" transfer error.', 
+			'errUploadTemp'        : 'Unable to make temporary file for upload.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
 			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Unable to save "$1".',

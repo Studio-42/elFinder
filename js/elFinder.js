@@ -2450,6 +2450,7 @@ elFinder.prototype = {
 							isDataType = false;
 							send(files);
 						}
+						files = null;
 						error && self.error(error);
 					})
 					.done(function(data) {
@@ -2586,7 +2587,24 @@ elFinder.prototype = {
 				}
 				
 				res._multiupload = data.multiupload? true : false;
-				res.error ? dfrd.reject(res.error) : dfrd.resolve(res);
+				if (res.error) {
+					if (res._chunkfailure) {
+						abort = true;
+						self.uploads.xhrUploading = false;
+						notifyto && clearTimeout(notifyto);
+						if (self.ui.notify.children('.elfinder-notify-upload').length) {
+							self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
+							dfrd.reject(res.error);
+						} else {
+							// for multi connection
+							dfrd.reject();
+						}
+					} else {
+						dfrd.reject(res.error);
+					}
+				} else {
+					dfrd.resolve(res);
+				}
 			}, false);
 			
 			xhr.upload.addEventListener('loadstart', function(e) {
@@ -2678,7 +2696,7 @@ elFinder.prototype = {
 								if (cid) {	
 									failChunk[cid] = true;
 								}
-								error && self.error(error);
+								//error && self.error(error);
 							})
 							.always(function(e) {
 								if (e && e.added) added = $.merge(added, e.added);

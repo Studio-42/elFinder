@@ -64,6 +64,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadFileSize'    : 'File exceeds maximum allowed size.',
 			'errUploadMime'        : 'File type not allowed.', 
 			'errUploadTransfer'    : '"$1" transfer error.', 
+			'errUploadTemp'        : 'Unable to make temporary file for upload.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
 			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Unable to save "$1".',

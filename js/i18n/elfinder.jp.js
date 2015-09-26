@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2014-12-19
+ * @version 2015-09-26
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -58,6 +58,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadFileSize'    : 'ファイルが許容サイズを超えています', //  old name - errFileMaxSize
 			'errUploadMime'        : '許可されていないファイル形式です',
 			'errUploadTransfer'    : '"$1" 転送エラーです', 
+			'errUploadTemp'        : 'アップロード用一時ファイルが作成できません', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'アイテム "$1" は、すでにこの場所にありますがアイテムのタイプが違うので置き換えることはできません', // new
 			'errReplace'           : '"$1"を置き換えることができません',
 			'errSave'              : '"$1"を保存することができません',
