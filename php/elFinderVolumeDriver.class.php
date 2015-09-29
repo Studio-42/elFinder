@@ -768,7 +768,14 @@ abstract class elFinderVolumeDriver {
 			}
 			$this->uploadMaxSize = intval($size)*$n;
 		}
-			
+		// Set maximum to PHP_INT_MAX
+		if (!defined('PHP_INT_MAX')) {
+			define('PHP_INT_MAX', 2147483647);
+		}
+		if ($this->uploadMaxSize < 1 || $this->uploadMaxSize > PHP_INT_MAX) {
+			$this->uploadMaxSize = PHP_INT_MAX;
+		}
+		
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
 			? $this->options['disabled']
 			: array();
