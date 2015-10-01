@@ -45,7 +45,7 @@ elFinder.prototype.commands.open = function() {
 			return !thash && file && !file.read
 				? dfrd.reject(['errOpen', file.name, 'errPerm'])
 				: fm.request({
-						data   : {cmd  : 'open', target : thash || file.thash || file.hash},
+						data   : {cmd  : 'open', target : thash || file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
 						syncOnFail : true
 					});

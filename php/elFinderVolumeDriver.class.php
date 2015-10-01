@@ -484,6 +484,13 @@ abstract class elFinderVolumeDriver {
 	protected $separator = DIRECTORY_SEPARATOR;
 	
 	/**
+	 * System Root path (Unix like: '/', Windows: '\', 'C:\' or 'D:\'...)
+	 *
+	 * @var string
+	 **/
+	protected $systemRoot = DIRECTORY_SEPARATOR;
+	
+	/**
 	 * Mimetypes allowed to display
 	 *
 	 * @var array
@@ -683,6 +690,7 @@ abstract class elFinderVolumeDriver {
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
 		$this->root = $this->normpathCE($this->options['path']);
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
+		$this->systemRoot = isset($this->options['systemRoot']) ? $this->options['systemRoot'] : DIRECTORY_SEPARATOR;
 		
 		// set server encoding
 		if (!empty($this->options['encoding']) && strtoupper($this->options['encoding']) !== 'UTF-8') {
@@ -2060,8 +2068,8 @@ abstract class elFinderVolumeDriver {
 	public function getUploadTaget($baseTargetHash, $path, & $result) {
 		$base = $this->decode($baseTargetHash);
 		$targetHash = $baseTargetHash;
-		$path = ltrim($path, '/');
-		$dirs = explode('/', $path);
+		$path = ltrim($path, $this->separator);
+		$dirs = explode($this->separator, $path);
 		array_pop($dirs);
 		foreach($dirs as $dir) {
 			$targetPath = $this->joinPathCE($base, $dir);
@@ -3297,7 +3305,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_LOCKED, $this->path($path));
 		}
 		
-		if ($stat['mime'] == 'directory') {
+		if ($stat['mime'] == 'directory' && empty($stat['thash'])) {
 			$ret = $this->delTree($this->convEncIn($path));
 			$this->convEncOut();
 			if (!$ret) {
@@ -4121,6 +4129,50 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
+	 * Resolve relative / (Unix-like)absolute path
+	 * 
+	 * @param string $path  target path
+	 * @param string $base  base path
+	 * @return string
+	 */
+	protected function getFullPath($path, $base) {
+		$separator = $this->separator;
+		$systemroot = $this->systemRoot;
+		
+		// 'Here'
+		if ($path === '' || $path === '.' . $separator) return $base;
+		
+		// Absolute path
+		if (strpos($path, $systemroot) === 0) {
+			return $path;
+		}
+		
+		$preg_separator = '#' . preg_quote($separator, '#') . '#';
+		
+		// Relative path from 'Here'
+		if (substr($path, 0, 2) === '.' . $separator) {
+			$arrn    = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
+			$arrn[0] = $base;
+			return join($separator, $arrn);
+		}
+		
+		// Relative path from dirname()
+		if (substr($path, 0, 3) === '../') {
+			$arrn = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
+			$arrp = preg_split($preg_separator, $base, -1, PREG_SPLIT_NO_EMPTY);
+		
+			while (! empty($arrn) && $arrn[0] === '..') {
+				array_shift($arrn);
+				array_pop($arrp);
+			}
+			$path = ! empty($arrp) ? join($separator, array_merge($arrp, $arrn)) :
+				(! empty($arrn) ? $systemroot . $separator . join($separator, $arrn) : $systemroot);
+		}
+		
+		return $path;
+	}
+
+	/**
 	 * Remove directory recursive on local file system
 	 *
 	 * @param string $dir Target dirctory path
@@ -4128,14 +4180,14 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function rmdirRecursive($dir) {
-		if (is_dir($dir)) {
+		if (!is_link($dir) && is_dir($dir)) {
 			foreach (array_diff(scandir($dir), array('.', '..')) as $file) {
 				@set_time_limit(30);
-				$path = $dir . '/' . $file;
+				$path = $dir . $this->separator . $file;
 				(is_dir($path)) ? $this->rmdirRecursive($path) : @unlink($path);
 			}
 			return @rmdir($dir);
-		} else if (is_file($dir)) {
+		} else if (is_file($dir) || is_link($dir)) {
 			return @unlink($dir);
 		}
 		return false;

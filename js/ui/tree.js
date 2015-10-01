@@ -527,7 +527,7 @@ $.fn.elfindertree = function(fm, opts) {
 					fm.trigger('searchend');
 				
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
-						fm.exec('open', file.thash || hash, {thash: file.thash});
+						fm.exec('open', hash);
 					} else if (link.hasClass(collapsed)) {
 						link.children('.'+arrow).click();
 					}

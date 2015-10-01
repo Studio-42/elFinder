@@ -282,7 +282,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry Levashov
 	 **/
-	protected function parseRaw($raw) {
+	protected function parseRaw($raw, $base) {
 		$info = preg_split("/\s+/", $raw, 9);
 		$stat = array();
 
@@ -313,15 +313,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
 				$name   = trim($m[1]);
 				$target = trim($m[2]);
-				if (substr($target, 0, 1) != '/') {
-					$target = $this->root.'/'.$target;
+				if (substr($target, 0, 1) !== $this->separator) {
+					$target = $this->getFullPath($target, $base, $this->root);
 				}
 				$target = $this->_normpath($target);
 				$stat['name']  = $name;
-				if ($this->_inpath($target, $this->root) 
-				&& ($tstat = $this->stat($target))) {
+				if ($tstat = $this->stat($target)) {
 					$stat['size']  = $tstat['mime'] == 'directory' ? 0 : $info[4];
 					$stat['alias'] = $this->_relpath($target);
+					$stat['alias'] = $target;
 					$stat['thash'] = $tstat['hash'];
 					$stat['mime']  = $tstat['mime'];
 					$stat['read']  = $tstat['read'];
@@ -385,13 +385,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$list = array();
 		foreach (ftp_rawlist($this->connect, $this->convEncIn($path)) as $raw) {
-			if (($stat = $this->parseRaw($raw))) {
+			if (($stat = $this->parseRaw($raw, $path))) {
 				$list[] = $stat;
 			}
 		}
 		$list = $this->convEncOut($list);
+		$prefix = ($path === $this->separator)? $this->separator : $path . $this->separator;
 		foreach($list as $stat) {
-			$p    = $path.'/'.$stat['name'];
+			$p    = $prefix . $stat['name'];
 			$stat = $this->updateCache($p, $stat);
 			if (empty($stat['hidden'])) {
 				// $files[] = $stat;
@@ -459,10 +460,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$path = '.';
 		}
 		// path must be start with /
-		$path = preg_replace('|^\.\/?|', '/', $path);
+		$path = preg_replace('|^\.\/?|', $this->separator, $path);
 		$path = preg_replace('/^([^\/])/', "/$1", $path);
 
-		if (strpos($path, '/') === 0) {
+		if ($path[0] === $this->separator) {
 			$initial_slashes = true;
 		} else {
 			$initial_slashes = false;
@@ -476,7 +477,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			
 		$initial_slashes = (int) $initial_slashes;
 
-		$comps = explode('/', $path);
+		$comps = explode($this->separator, $path);
 		$new_comps = array();
 		foreach ($comps as $comp) {
 			if (in_array($comp, array('', '.'))) {
@@ -492,9 +493,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			}
 		}
 		$comps = $new_comps;
-		$path = implode('/', $comps);
+		$path = implode($this->separator, $comps);
 		if ($initial_slashes) {
-			$path = str_repeat('/', $initial_slashes) . $path;
+			$path = str_repeat($this->separator, $initial_slashes) . $path;
 		}
 		
 		return $path ? $path : '.';
@@ -508,7 +509,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _relpath($path) {
-		return $path == $this->root ? '' : substr($path, strlen($this->root)+1);
+		if ($path === $this->root) {
+			return '';
+		} else {
+			if (strpos($path, $this->root) === 0) {
+				return ltrim(substr($path, strlen($this->root)), $this->separator);
+			} else {
+				// for link
+				return $path;
+			}
+		}
 	}
 	
 	/**
@@ -519,7 +529,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _abspath($path) {
-		return $path == $this->separator ? $this->root : $this->root.$this->separator.$path;
+		if ($path === $this->separator) {
+			return $this->root;
+		} else {
+			if ($path[0] === $this->separator) {
+				// for link
+				return $path;
+			} else {
+				return rtrim($this->root, $this->separator) . $this->separator . $path;
+			}
+		}
 	}
 	
 	/**
@@ -542,7 +561,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($path, $parent.'/') === 0;
+		return $path == $parent || strpos($path, $parent. $this->separator) === 0;
 	}
 	
 	/***************** file stat ********************/
@@ -734,7 +753,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$files = array();
 
  		foreach (ftp_rawlist($this->connect, $path) as $str) {
- 			if (($stat = $this->parseRaw($str))) {
+ 			if (($stat = $this->parseRaw($str, $path))) {
  				$files[] = $path.DIRECTORY_SEPARATOR.$stat['name'];
  			}
  		}
@@ -792,7 +811,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _mkdir($path, $name) {
-		$path = $path.'/'.$name;
+		$path = $path . $this->separator . $name;
 		if (ftp_mkdir($this->connect, $path) === false) {
 			return false;
 		} 
@@ -811,7 +830,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _mkfile($path, $name) {
 		if ($this->tmp) {
-			$path = $path.'/'.$name;
+			$path = $path . $this->separator . $name;
 			$local = $this->getTempFile();
 			$res = touch($local) && ftp_put($this->connect, $path, $local, FTP_ASCII);
 			@unlink($local);
@@ -907,7 +926,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _save($fp, $dir, $name, $stat) {
-		$path = $dir.'/'.$name;
+		$path = $dir . $this->separator . $name;
 		return ftp_fput($this->connect, $path, $fp, $this->ftpMode($path))
 			? $path
 			: false;

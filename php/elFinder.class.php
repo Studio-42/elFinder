@@ -781,7 +781,7 @@ class elFinder {
 		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);
-		$cwd    = $volume ? $volume->dir($target, true) : false;
+		$cwd    = $volume ? $volume->dir($target) : false;
 		$hash   = $init ? 'default folder' : '#'.$target;
 
 		// on init request we can get invalid dir hash -
@@ -789,7 +789,7 @@ class elFinder {
 		// so open default dir
 		if ((!$cwd || !$cwd['read']) && $init) {
 			$volume = $this->default;
-			$cwd    = $volume->dir($volume->defaultPath(), true);
+			$cwd    = $volume->dir($volume->defaultPath());
 		}
 		
 		if (!$cwd) {
