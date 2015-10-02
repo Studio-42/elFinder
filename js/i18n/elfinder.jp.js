@@ -168,9 +168,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'ファイル検索中',
 			'ntfresize'   : 'リサイズしています',
 			'ntfsmth'     : '処理をしています',
-      		'ntfloadimg'  : 'イメージを読み込んでいます',
-      		'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
-      		'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
+			'ntfloadimg'  : 'イメージを読み込んでいます',
+			'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
+			'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // added 30.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // added 01.07.2013
 			'ntfurl'      : 'リンクURLを取得しています', // added 11.03.2014
@@ -247,13 +247,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectfiles'     : 'ファイル選択',
 			'selectffile'     : '最初のファイルを選択',
 			'selectlfile'     : '最後のファイルを選択',
-			'viewlist'        : 'リスト形式で見る',
-			'viewicons'       : 'アイコン形式で見る',
+			'viewlist'        : 'リスト形式で表示',
+			'viewicons'       : 'アイコン形式で表示',
 			'places'          : 'お気に入り',
-			'calc'            : '計算', 
+			'calc'            : '計算中', 
 			'path'            : 'パス',
 			'aliasfor'        : 'エイリアス',
-			'locked'          : 'ロックされています',
+			'locked'          : 'ロック',
 			'dim'             : 'サイズ',
 			'files'           : 'ファイル',
 			'folders'         : 'フォルダー',
