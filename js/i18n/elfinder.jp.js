@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2015-09-26
+ * @version 2015-10-03
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -51,6 +51,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : '"$1"の名前を変更することができません',
 			'errCopyFrom'          : '"$1"からのファイルコピーが許可されていません',
 			'errCopyTo'            : '"$1"へのファイルコピーが許可されていません',
+			'errMkOutLink'         : 'ボリュームルート外へのリンクを作成することはできません', // from v2.1 added 03.10.2015
 			'errUpload'            : 'アップロードエラー',  // old name - errUploadCommon
 			'errUploadFile'        : '"$1"がアップロードできません', // old name - errUpload
 			'errUploadNoFiles'     : 'アップロードされたファイルがありません',

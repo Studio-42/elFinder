@@ -1631,7 +1631,7 @@ abstract class elFinderVolumeDriver {
 		if (($test = $volume->closest($src, $rmSrc ? 'locked' : 'read', $rmSrc))) {
 			return $rmSrc
 				? $this->setError($err, $errpath, elFinder::ERROR_LOCKED, $volume->path($test))
-				: $this->setError($err, $errpath, elFinder::ERROR_PERM_DENIED);
+				: $this->setError($err, $errpath, !empty($file['thash'])? elFinder::ERROR_PERM_DENIED : elFinder::ERROR_MKOUTLINK);
 		}
 
 		$test = $this->joinPathCE($destination, $name);
@@ -3153,6 +3153,9 @@ abstract class elFinderVolumeDriver {
 		
 		if (!empty($srcStat['thash'])) {
 			$target = $this->decode($srcStat['thash']);
+			if (!$this->inpathCE($target, $this->root)) {
+				return $this->setError(elFinder::ERROR_COPY, $this->path($src), elFinder::ERROR_MKOUTLINK);
+			}
 			$stat   = $this->stat($target);
 			$this->clearcache();
 			return $stat && $this->symlinkCE($target, $dst, $name)
