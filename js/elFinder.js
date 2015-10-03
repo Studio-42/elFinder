@@ -3712,7 +3712,7 @@ elFinder.prototype = {
 	mime2kind : function(f) {
 		var mime = typeof(f) == 'object' ? f.mime : f, kind;
 		
-		if (f.alias) {
+		if (f.alias && f.mime != 'symlink-broken') {
 			kind = 'Alias';
 		} else if (this.kinds[mime]) {
 			kind = this.kinds[mime];

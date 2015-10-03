@@ -60,12 +60,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function init() {
 		// Normalize directory separator for windows
 		if (DIRECTORY_SEPARATOR !== '/') {
-			foreach(array('path', 'tmbPath', 'quarantine') as $key) {
+			foreach(array('path', 'tmpPath', 'quarantine') as $key) {
 				if ($this->options[$key]) {
 					$this->options[$key] = str_replace('/', DIRECTORY_SEPARATOR, $this->options[$key]);
 				}
 			}
 		}
+		$this->root = $this->getFullPath($this->root, getcwd());
 		return true;
 	}
 	
@@ -76,7 +77,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
-		$this->aroot = realpath($this->root);
 		$root = $this->stat($this->root);
 		
 		// chek thumbnails path
@@ -291,8 +291,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		$real_path   = (strpos($path,   $this->systemRoot) === 0)? $path   : realpath($path);
-		$real_parent = (strpos($parent, $this->systemRoot) === 0)? $parent : realpath($parent);
+		$cwd = getcwd();
+		$real_path   = $this->getFullPath($path,   $cwd);
+		$real_parent = $this->getFullPath($parent, $cwd);
 		if ($real_path && $real_parent) {
 			return $real_path === $real_parent || strpos($real_path, rtrim($real_parent, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR) === 0;
 		}
@@ -331,33 +332,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		$stat = array();
 
-		if (!file_exists($path)) {
+		if (!file_exists($path) && !is_link($path)) {
 			return $stat;
 		}
 
 		//Verifies the given path is the root or is inside the root. Prevents directory traveral.
-		if (!$this->aroot) {
-			// for Inheritance class ( not calling parent::configure() )
-			$this->aroot = realpath($this->root);
-		}
-		if (!$this->_inpath($path, $this->aroot)) {
+		if (!$this->_inpath($path, $this->root)) {
 			return $stat;
 		}
 
 		$gid = $uid = 0;
 		$stat['isowner'] = false;
+		$linkreadable = false;
 		if ($path != $this->root && is_link($path)) {
 			if (!($target = $this->readlink($path))
 			|| $target == $path) {
 				if (is_null($target)) {
 					$stat = array();
+					return $stat;
 				} else {
 					$stat['mime']  = 'symlink-broken';
-					$stat['read']  = false;
-					$stat['write'] = false;
-					$stat['size']  = 0;
+					$target = readlink($path);
+					$lstat = lstat($path);
+					$ostat = $this->getOwnerStat($lstat['uid'], $lstat['gid']);
+					$linkreadable = !empty($ostat['isowner']);
 				}
-				return $stat;
 			}
 			$lstat = lstat($path);
 			$stat['alias'] = $this->_path($target);
@@ -378,9 +377,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		$dir = is_dir($path);
 
-		$stat['mime']  = $dir ? 'directory' : $this->mimetype($path);
+		if (!isset($stat['mime'])) {
+			$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
+		}
 		//logical rights first
-		$stat['read'] = is_readable($path)? null : false;
+		$stat['read'] = ($linkreadable || is_readable($path))? null : false;
 		$stat['write'] = is_writable($path)? null : false;
 
 		if (is_null($stat['read'])) {
@@ -483,21 +484,16 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (!($target = @readlink($path))) {
 			return null;
 		}
-		
-		if (substr($target, 0, 1) != DIRECTORY_SEPARATOR) {
+
+		if (strpos($target, $this->systemRoot) !== 0) {
 			$target = $this->_joinPath(dirname($path), $target);
-			if (!file_exists($target)) {
-				return null;
-			}
+		}
+
+		if (!file_exists($target)) {
+			return false;
 		}
 		
 		return $target;
-		if ($this->_inpath($target, $this->root)) {
-			$atarget = realpath($target);
-			return $this->_normpath($this->_joinPath($this->root, substr($atarget, strlen(rtrim($this->aroot, DIRECTORY_SEPARATOR)) + 1)));
-		}
-
-		return false;
 	}
 		
 	/**
@@ -517,60 +513,72 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		} catch (UnexpectedValueException $e) {}
 		
 		foreach ($dirItr as $file) {
-			if ($file->isDot()) { continue; }
-			
-			$files[] = $fpath = $this->_joinPath($path, $file->getFilename());
-			
-			$br = false;
-			$stat = array();
-			
-			$gid = $uid = 0;
-			$stat['isowner'] = false;
-			if ($file->isLink()) {
-				if (!($target = $this->readlink($fpath))
-				|| $target == $fpath) {
-					if (is_null($target)) {
-						$stat = array();
+			try {
+				if ($file->isDot()) { continue; }
+				
+				$files[] = $fpath = $this->_joinPath($path, $file->getFilename());
+				
+				$br = false;
+				$stat = array();
+				
+				$gid = $uid = 0;
+				$stat['isowner'] = false;
+				$linkreadable = false;
+				if ($file->isLink()) {
+					if (!($target = $this->readlink($fpath))
+					|| $target == $fpath) {
+						if (is_null($target)) {
+							$stat = array();
+							$br = true;
+						} else {
+							$_path = $path . DIRECTORY_SEPARATOR . $file->getFilename();
+							$stat['mime']  = 'symlink-broken';
+							$target = readlink($_path);
+							$lstat = lstat($_path);
+							$ostat = $this->getOwnerStat($lstat['uid'], $lstat['gid']);
+							$linkreadable = !empty($ostat['isowner']);
+							$dir = false;
+							$stat['alias'] = $this->_path($target);
+							$stat['target'] = $target;
+							$size = sprintf('%u', $lstat['size']);
+							$stat['ts'] = $lstat['mtime'];
+						}
 					} else {
-						$stat['mime']  = 'symlink-broken';
-						$stat['read']  = false;
-						$stat['write'] = false;
-						$stat['size']  = 0;
+						$dir = is_dir($target);
+						$lstat = lstat($fpath);
+						$stat['alias'] = $this->_path($target);
+						$stat['target'] = $target;
+						$size = sprintf('%u', $lstat['size']);
+						$stat['ts'] = $lstat['mtime'];
+						$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
 					}
-					$br = true;
 				} else {
-					$dir = is_dir($target);
-					$lstat = lstat($fpath);
-					$stat['alias'] = $this->_path($target);
-					$stat['target'] = $target;
-					$size = sprintf('%u', $lstat['size']);
-					$stat['ts'] = $lstat['mtime'];
-					$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
+					$dir = $file->isDir();
+					$size = sprintf('%u', $file->getSize());
+					$stat['ts'] = $file->getMTime();
+					$stat['mime'] = $dir ? 'directory' : $this->mimetype($fpath);
 				}
-			} else {
-				$dir = $file->isDir();
-				$size = sprintf('%u', $file->getSize());
-				$stat['ts'] = $file->getMTime();
-				$stat['mime'] = $dir ? 'directory' : $this->mimetype($fpath);
-			}
-			if (!$br) {
-				if ($statOwner) {
-					$uid = $file->getOwner();
-					$gid = $file->getGroup();
-					$stat['perm'] = substr((string)decoct($file->getPerms()), -4);
-					$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
+				if (!$br) {
+					if ($statOwner && !$linkreadable) {
+						$uid = $file->getOwner();
+						$gid = $file->getGroup();
+						$stat['perm'] = substr((string)decoct($file->getPerms()), -4);
+						$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
+					}
+					
+					//logical rights first
+					$stat['read'] = ($linkreadable || $file->isReadable())? null : false;
+					$stat['write'] = $file->isWritable()? null : false;
+					
+					if (is_null($stat['read'])) {
+						$stat['size'] = $dir ? 0 : $size;
+					}
 				}
 				
-				//logical rights first
-				$stat['read'] = $file->isReadable()? null : false;
-				$stat['write'] = $file->isWritable()? null : false;
-				
-				if (is_null($stat['read'])) {
-					$stat['size'] = $dir ? 0 : $size;
-				}
+				$cache[] = array($fpath, $stat);
+			} catch (RuntimeException $e) {
+				continue;
 			}
-			
-			$cache[] = array($fpath, $stat);
 		}
 		
 		if ($cache) {

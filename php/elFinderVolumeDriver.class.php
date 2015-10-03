@@ -4138,6 +4138,14 @@ abstract class elFinderVolumeDriver {
 	protected function getFullPath($path, $base) {
 		$separator = $this->separator;
 		$systemroot = $this->systemRoot;
+
+		$sepquoted = preg_quote($separator, '#');
+
+		// normalize `/../`
+		$normreg = '#('.$sepquoted.')[^'.$sepquoted.']+'.$sepquoted.'\.\.'.$sepquoted.'#';
+		while(preg_match($normreg, $path)) {
+			$path = preg_replace($normreg, '$1', $path);
+		}
 		
 		// 'Here'
 		if ($path === '' || $path === '.' . $separator) return $base;
@@ -4147,7 +4155,7 @@ abstract class elFinderVolumeDriver {
 			return $path;
 		}
 		
-		$preg_separator = '#' . preg_quote($separator, '#') . '#';
+		$preg_separator = '#' . $sepquoted . '#';
 		
 		// Relative path from 'Here'
 		if (substr($path, 0, 2) === '.' . $separator) {
@@ -4165,8 +4173,8 @@ abstract class elFinderVolumeDriver {
 				array_shift($arrn);
 				array_pop($arrp);
 			}
-			$path = ! empty($arrp) ? join($separator, array_merge($arrp, $arrn)) :
-				(! empty($arrn) ? $systemroot . $separator . join($separator, $arrn) : $systemroot);
+			$path = ! empty($arrp) ? $systemroot . join($separator, array_merge($arrp, $arrn)) :
+				(! empty($arrn) ? $systemroot . join($separator, $arrn) : $systemroot);
 		}
 		
 		return $path;
