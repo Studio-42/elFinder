@@ -1022,7 +1022,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return array(
-			'path'          => $this->path($this->decode($hash)),
+			'path'          => $this->path($hash),
 			'url'           => $this->URL,
 			'tmbUrl'        => $this->tmbURL,
 			'disabled'      => array_merge(array_unique($this->disabled)), // `array_merge` for type array of JSON
@@ -1616,7 +1616,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$name = $file['name'];
-		$errpath = $volume->path($src);
+		$errpath = $volume->path($file['hash']);
 		
 		if (($dir = $this->dir($dst)) == false) {
 			return $this->setError($err, $errpath, elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
@@ -1641,7 +1641,7 @@ abstract class elFinderVolumeDriver {
 			if ($this->options['copyOverwrite']) {
 				// do not replace file with dir or dir with file
 				if (!$this->isSameType($file['mime'], $stat['mime'])) {
-					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->path($test));
+					return $this->setError(elFinder::ERROR_NOT_REPLACE, $this->path($stat['hash']));
 				}
 				// existed file is not writable
 				if (!$stat['write']) {
@@ -1649,7 +1649,8 @@ abstract class elFinderVolumeDriver {
 				}
 				// existed file locked or has locked child
 				if (($locked = $this->closestByAttr($test, 'locked', true))) {
-					return $this->setError(elFinder::ERROR_LOCKED, $this->path($locked));
+					$stat = $this->stat($locked);
+					return $this->setError(elFinder::ERROR_LOCKED, $this->path($stat['hash']));
 				}
 				// target is entity file of alias
 				if ($volume == $this && ($test == @$file['target'] || $test == $this->decode($src))) {
@@ -1657,7 +1658,7 @@ abstract class elFinderVolumeDriver {
 				}
 				// remove existed file
 				if (!$this->remove($test)) {
-					return $this->setError(elFinder::ERROR_REPLACE, $this->path($test));
+					return $this->setError(elFinder::ERROR_REPLACE, $this->path($stat['hash']));
 				}
 			} else {
 				$name = $this->uniqueName($destination, $name, ' ', false);
@@ -3116,7 +3117,7 @@ abstract class elFinderVolumeDriver {
 			$name = $stat['name'];
 
 			if ((!$mimes || $stat['mime'] !== 'directory') && $this->stripos($name, $q) !== false) {
-				$stat['path'] = $this->path($p);
+				$stat['path'] = $this->path($stat['hash']);
 				if ($this->URL && !isset($stat['url'])) {
 					$path = str_replace($this->separator, '/', substr($p, strlen($this->root) + 1));
 					if ($this->encoding) {
@@ -3154,20 +3155,20 @@ abstract class elFinderVolumeDriver {
 		if (!empty($srcStat['thash'])) {
 			$target = $this->decode($srcStat['thash']);
 			if (!$this->inpathCE($target, $this->root)) {
-				return $this->setError(elFinder::ERROR_COPY, $this->path($src), elFinder::ERROR_MKOUTLINK);
+				return $this->setError(elFinder::ERROR_COPY, $this->path($srcStat['hash']), elFinder::ERROR_MKOUTLINK);
 			}
 			$stat   = $this->stat($target);
 			$this->clearcache();
 			return $stat && $this->symlinkCE($target, $dst, $name)
 				? $this->joinPathCE($dst, $name)
-				: $this->setError(elFinder::ERROR_COPY, $this->path($src));
+				: $this->setError(elFinder::ERROR_COPY, $this->path($srcStat['hash']));
 		} 
 		
 		if ($srcStat['mime'] == 'directory') {
 			$test = $this->stat($this->joinPathCE($dst, $name));
 			
 			if (($test && $test['mime'] != 'directory') || $this->convEncOut(!$this->_mkdir($this->convEncIn($dst), $this->convEncIn($name)))) {
-				return $this->setError(elFinder::ERROR_COPY, $this->path($src));
+				return $this->setError(elFinder::ERROR_COPY, $this->path($srcStat['hash']));
 			}
 			
 			$dst = $this->joinPathCE($dst, $name);
@@ -3187,7 +3188,7 @@ abstract class elFinderVolumeDriver {
 
 		return $this->convEncOut($this->_copy($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))
 			? $this->joinPathCE($dst, $name) 
-			: $this->setError(elFinder::ERROR_COPY, $this->path($src));
+			: $this->setError(elFinder::ERROR_COPY, $this->path($srcStat['hash']));
 	}
 
 	/**
@@ -3212,7 +3213,7 @@ abstract class elFinderVolumeDriver {
 			return $this->joinPathCE($dst, $name);
 		}
 
-		return $this->setError(elFinder::ERROR_MOVE, $this->path($src));
+		return $this->setError(elFinder::ERROR_MOVE, $this->path($stat['hash']));
 	}
 
 	/**
@@ -3232,7 +3233,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
 		}
 		
-		$errpath = $volume->path($src);
+		$errpath = $volume->path($source['hash']);
 		
 		if (!$this->nameAccepted($source['name'])) {
 			return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_INVALID_NAME);
@@ -3297,7 +3298,7 @@ abstract class elFinderVolumeDriver {
 		$stat = $this->stat($path);
 		
 		if (empty($stat)) {
-			return $this->setError(elFinder::ERROR_RM, $this->path($path), elFinder::ERROR_FILE_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_RM, $this->path($stat['hash']), elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		$stat['realpath'] = $path;
@@ -3305,18 +3306,18 @@ abstract class elFinderVolumeDriver {
 		$this->clearcache();
 		
 		if (!$force && !empty($stat['locked'])) {
-			return $this->setError(elFinder::ERROR_LOCKED, $this->path($path));
+			return $this->setError(elFinder::ERROR_LOCKED, $this->path($stat['hash']));
 		}
 		
 		if ($stat['mime'] == 'directory' && empty($stat['thash'])) {
 			$ret = $this->delTree($this->convEncIn($path));
 			$this->convEncOut();
 			if (!$ret) {
-				return $this->setError(elFinder::ERROR_RM, $this->path($path));
+				return $this->setError(elFinder::ERROR_RM, $this->path($stat['hash']));
 			}
 		} else {
 			if ($this->convEncOut(!$this->_unlink($this->convEncIn($path)))) {
-				return $this->setError(elFinder::ERROR_RM, $this->path($path));
+				return $this->setError(elFinder::ERROR_RM, $this->path($stat['hash']));
 			}
 		}
 

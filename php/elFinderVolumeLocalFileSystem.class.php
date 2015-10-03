@@ -1063,7 +1063,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$name = $stat['name'];
 		
 				if ((!$mimes || $stat['mime'] !== 'directory')) {
-					$stat['path'] = $this->path($p);
+					$stat['path'] = $this->path($stat['hash']);
 					if ($this->URL && !isset($stat['url'])) {
 						$path = str_replace(DIRECTORY_SEPARATOR, '/', substr($p, strlen($this->root) + 1));
 						if ($this->encoding) {
