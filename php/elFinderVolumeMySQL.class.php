@@ -336,8 +336,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				} else {
 					$whrs[] = sprintf('f.mime = "%s"', $this->db->real_escape_string($mime));
 				}
-				$whr = join(' OR ', $whrs);
 			}
+			$whr = join(' OR ', $whrs);
 		} else {
 			$whr = sprintf('f.name RLIKE "%s"', $this->db->real_escape_string($q));
 		}
