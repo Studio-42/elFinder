@@ -434,12 +434,21 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return void
 	 */
 	private function checkDB() {
-		$res = $this->query('select * from sqlite_master where type=\'table\' and name=\'dropbox\'; ');
+		$res = $this->query('SELECT * FROM sqlite_master WHERE type=\'table\' AND name=\''.$this->DB_TableName.'\'');
+		if ($res && isset($_REQUEST['init'])) {
+			// check is index(nameidx) UNIQUE?
+			$chk = $this->query('SELECT sql FROM sqlite_master WHERE type=\'index\' and name=\'nameidx\'');
+			if (!$chk || strpos(strtoupper($chk[0]), 'UNIQUE') === false) {
+				// remake
+				$this->DB->exec('DROP TABLE '.$this->DB_TableName);
+				$res = false;
+			}
+		}
 		if (! $res) {
 			try {
-				$this->DB->exec('create table '.$this->DB_TableName.'(path text, fname text, dat blob, isdir integer);');
-				$this->DB->exec('create index nameidx on '.$this->DB_TableName.'(path, fname)');
-				$this->DB->exec('create index isdiridx on '.$this->DB_TableName.'(isdir)');
+				$this->DB->exec('CREATE TABLE '.$this->DB_TableName.'(path text, fname text, dat blob, isdir integer);');
+				$this->DB->exec('CREATE UNIQUE INDEX nameidx ON '.$this->DB_TableName.'(path, fname)');
+				$this->DB->exec('CREATE INDEX isdiridx ON '.$this->DB_TableName.'(isdir)');
 			} catch (PDOException $e) {
 				return $this->setError($e->getMessage());
 			}
