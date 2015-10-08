@@ -354,13 +354,14 @@ $.fn.elfindertree = function(fm, opts) {
 				var current = $('#'+fm.navHash2Id(fm.cwd().hash));
 				
 				if (current.length) {
-					var top = tree.parent().offset().top,
-					treeH = tree.parent().height(),
+					var parent = tree.parent().stop(),
+					top = parent.offset().top,
+					treeH = parent.height(),
 					bottom = top + treeH - current.outerHeight(),
 					tgtTop = current.offset().top;
 					
 					if (tgtTop < top || tgtTop > bottom) {
-						tree.parent().animate({ scrollTop : tgtTop - top - treeH / 3 }, { duration : 'fast' });
+						parent.animate({ scrollTop : tgtTop - top - treeH / 3 }, { duration : 'fast' });
 					}
 				}
 				
