@@ -350,22 +350,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @return void
 			 */
-			autoScroll = function(stop) {
+			autoScroll = function() {
 				var current = $('#'+fm.navHash2Id(fm.cwd().hash));
 				
 				if (current.length) {
-					var parent = tree.parent().stop(),
+					var parent = tree.parent().stop(false, true),
 					top = parent.offset().top,
 					treeH = parent.height(),
 					bottom = top + treeH - current.outerHeight(),
 					tgtTop = current.offset().top;
 					
 					if (tgtTop < top || tgtTop > bottom) {
-						parent.animate({ scrollTop : tgtTop - top - treeH / 3 }, { duration : 'fast' });
+						parent.animate({ scrollTop : parent.scrollTop() + tgtTop - top - treeH / 3 }, { duration : 'fast' });
 					}
 				}
-				
-				!stop && setTimeout(function(){ autoScroll(true); }, 200);
 			},
 			
 			/**
