@@ -25,11 +25,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $archiveSize = 0;
 	
 	/**
-	 * Canonicalized absolute pathname of $root
+	 * Cache for _subdirs()
 	 * 
-	 * @var strung
+	 * @var array
 	 */
-	protected $aroot;
+	protected $subdirsCache = array();
 	
 	/**
 	 * Constructor
@@ -376,6 +376,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		$dir = is_dir($path);
+		if ($dir && $path !== $this->root) {
+			$this->subdirsCache[basename($path)] = true;
+		}
 
 		if (!isset($stat['mime'])) {
 			$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
@@ -449,11 +452,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-
-		if (is_dir($path)) {
-			return (bool)glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+		if (isset($this->subdirsCache[$path])) {
+			return $this->subdirsCache[$path];
 		}
-		return false;
+		
+		$this->subdirsCache[$path] = (is_dir($path) && glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR));
+		return $this->subdirsCache[$path];
 	}
 	
 	/**
@@ -512,11 +516,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$dirItr = new DirectoryIterator($path);
 		} catch (UnexpectedValueException $e) {}
 		
+		$this->subdirsCache[$path] = false;
 		foreach ($dirItr as $file) {
 			try {
 				if ($file->isDot()) { continue; }
 				
-				$files[] = $fpath = $this->_joinPath($path, $file->getFilename());
+				$files[] = $fpath = $file->getPathname();
 				
 				$br = false;
 				$stat = array();
@@ -531,7 +536,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 							$stat = array();
 							$br = true;
 						} else {
-							$_path = $path . DIRECTORY_SEPARATOR . $file->getFilename();
+							$_path = $fpath;
 							$stat['mime']  = 'symlink-broken';
 							$target = readlink($_path);
 							$lstat = lstat($_path);
@@ -572,6 +577,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					
 					if (is_null($stat['read'])) {
 						$stat['size'] = $dir ? 0 : $size;
+					}
+					
+					if ($dir) {
+						$this->subdirsCache[$path] = true;
 					}
 				}
 				
