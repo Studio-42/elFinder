@@ -416,17 +416,17 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->cacheDirTarget = $target;
 			if ($tstat = $this->stat($target)) {
 				$stat['size']  = $tstat['size'];
-				$stat['ts']    = $tstat['ts'];
 				$stat['alias'] = $target;
 				$stat['thash'] = $tstat['hash'];
 				$stat['mime']  = $tstat['mime'];
 				$stat['read']  = $tstat['read'];
 				$stat['write']  = $tstat['write'];
 				
-				if (isset($tstat['owner'])) { $stat['owner'] = $tstat['owner']; }
-				if (isset($tstat['group'])) { $stat['group'] = $tstat['group']; }
-				if (isset($tstat['perm'])) { $stat['perm']  = $tstat['perm']; }
-				if (isset($tstat['isowner'])) { $stat['isowner'] = $tstat['isowner']; }
+				if (isset($tstat['ts']))      { $stat['ts']      = $tstat['ts']; }
+				if (isset($tstat['owner']))   { $stat['owner']   = $tstat['owner']; }
+				if (isset($tstat['group']))   { $stat['group']   = $tstat['group']; }
+ 				if (isset($tstat['perm']))    { $stat['perm']    = $tstat['perm']; }
+ 				if (isset($tstat['isowner'])) { $stat['isowner'] = $tstat['isowner']; }
 			} else {
 				
 				$stat['mime']  = 'symlink-broken';
