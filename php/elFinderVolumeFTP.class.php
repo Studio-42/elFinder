@@ -756,7 +756,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		foreach (ftp_rawlist($this->connect, $path) as $str) {
 			$info = preg_split('/\s+/', $str, 9);
-			if (substr(strtolower($info[0]), 0, 1) === 'd') {
+			$name = isset($info[8])? trim($info[8]) : '';
+			if ($name && $name !== '.' && $name !== '..' && substr(strtolower($info[0]), 0, 1) === 'd') {
 				return true;
 			}
 		}
