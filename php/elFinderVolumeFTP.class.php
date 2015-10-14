@@ -72,9 +72,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	/**
 	 * FTP command `MLST` support
 	 * 
-	 * @var unknown
+	 * @var bool
 	 */
 	private $MLSTsupprt = false;
+	
+	/**
+	 * Calling cacheDir() target path with non-MLST
+	 * 
+	 * @var string
+	 */
+	private $cacheDirTarget = '';
 	
 	/**
 	 * Constructor
@@ -282,7 +289,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @return array
 	 * @author Dmitry Levashov
 	 **/
-	protected function parseRaw($raw, $base) {
+	protected function parseRaw($raw, $base, $nameOnly = false) {
 		$info = preg_split("/\s+/", $raw, 9);
 		$stat = array();
 
@@ -296,6 +303,30 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		if ($this->ftpOsUnix) {
 			
+			$name = $info[8];
+			
+			if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
+				$name   = trim($m[1]);
+				// check recursive processing
+				if ($this->cacheDirTarget && $this->_joinPath($base, $name) !== $this->cacheDirTarget) {
+					return array();
+				}
+				if (!$nameOnly) {
+					$target = trim($m[2]);
+					if (substr($target, 0, 1) !== $this->separator) {
+						$target = $this->getFullPath($target, $base);
+					}
+					$target = $this->_normpath($target);
+					$stat['name']   = $name;
+					$stat['target'] = $target;
+					return $stat;
+				}
+			}
+			
+			if ($nameOnly) {
+				return array('name' => $name);
+			}
+			
 			$stat['ts'] = strtotime($info[5].' '.$info[6].' '.$info[7]);
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
@@ -306,35 +337,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$stat['group'] = $info[3];
 				$stat['perm']  = substr($info[0], 1);
 				$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
-			}
-			
-			$name = $info[8];
-			
-			if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
-				$name   = trim($m[1]);
-				$target = trim($m[2]);
-				if (substr($target, 0, 1) !== $this->separator) {
-					$target = $this->getFullPath($target, $base, $this->root);
-				}
-				$target = $this->_normpath($target);
-				$stat['name']  = $name;
-				if ($tstat = $this->stat($target)) {
-					$stat['size']  = $tstat['mime'] == 'directory' ? 0 : $info[4];
-					$stat['alias'] = $this->_relpath($target);
-					$stat['alias'] = $target;
-					$stat['thash'] = $tstat['hash'];
-					$stat['mime']  = $tstat['mime'];
-					$stat['read']  = $tstat['read'];
-					$stat['write']  = $tstat['write'];
-				} else {
-					
-					$stat['mime']  = 'symlink-broken';
-					$stat['read']  = false;
-					$stat['write'] = false;
-					$stat['size']  = 0;
-					
-				}
-				return $stat;
 			}
 			
 			$perm = $this->parsePermissions($info[0], $stat['owner']);
@@ -384,21 +386,62 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
  		$this->dirsCache[$path] = array();
 
 		$list = array();
-		foreach (ftp_rawlist($this->connect, $this->convEncIn($path)) as $raw) {
-			if (($stat = $this->parseRaw($raw, $path))) {
+		$encPath = $this->convEncIn($path);
+		foreach (ftp_rawlist($this->connect, $encPath) as $raw) {
+			if (($stat = $this->parseRaw($raw, $encPath))) {
 				$list[] = $stat;
 			}
 		}
 		$list = $this->convEncOut($list);
 		$prefix = ($path === $this->separator)? $this->separator : $path . $this->separator;
+		$targets = array();
 		foreach($list as $stat) {
-			$p    = $prefix . $stat['name'];
+			$p = $prefix . $stat['name'];
+			if (isset($stat['target'])) {
+				// stat later
+				$targets[$stat['name']] = $stat['target'];
+			} else {
+				$stat = $this->updateCache($p, $stat);
+				if (empty($stat['hidden'])) {
+					$this->dirsCache[$path][] = $p;
+				}
+			}
+		}
+		// stat link targets
+		foreach($targets as $name => $target) {
+			$stat = array();
+			$stat['name'] = $name;
+			$p = $prefix . $name;
+			$cacheDirTarget = $this->cacheDirTarget;
+			$this->cacheDirTarget = $target;
+			if ($tstat = $this->stat($target)) {
+				$stat['size']  = $tstat['size'];
+				$stat['ts']    = $tstat['ts'];
+				$stat['alias'] = $target;
+				$stat['thash'] = $tstat['hash'];
+				$stat['mime']  = $tstat['mime'];
+				$stat['read']  = $tstat['read'];
+				$stat['write']  = $tstat['write'];
+				
+				if (isset($tstat['owner'])) { $stat['owner'] = $tstat['owner']; }
+				if (isset($tstat['group'])) { $stat['group'] = $tstat['group']; }
+				if (isset($tstat['perm'])) { $stat['perm']  = $tstat['perm']; }
+				if (isset($tstat['isowner'])) { $stat['isowner'] = $tstat['isowner']; }
+			} else {
+				
+				$stat['mime']  = 'symlink-broken';
+				$stat['read']  = false;
+				$stat['write'] = false;
+				$stat['size']  = 0;
+				
+			}
+			$this->cacheDirTarget = $cacheDirTarget;
 			$stat = $this->updateCache($p, $stat);
 			if (empty($stat['hidden'])) {
-				// $files[] = $stat;
 				$this->dirsCache[$path][] = $p;
 			}
 		}
+
 	}
 
 	/**
@@ -445,7 +488,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _joinPath($dir, $name) {
-		return $dir.DIRECTORY_SEPARATOR.$name;
+		return rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$name;
 	}
 	
 	/**
@@ -609,7 +652,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			array_pop($parts);
 			$parts = array_map('strtolower', $parts);
 			$stat  = array();
-			// debug($parts);
 			foreach ($parts as $part) {
 
 				list($key, $val) = explode('=', $part);
@@ -626,7 +668,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					case 'modify':
 						$ts = mktime(intval(substr($val, 8, 2)), intval(substr($val, 10, 2)), intval(substr($val, 12, 2)), intval(substr($val, 4, 2)), intval(substr($val, 6, 2)), substr($val, 0, 4));
 						$stat['ts'] = $ts;
-						// $stat['date'] = $this->formatDate($ts);
 						break;
 
 					case 'unix.mode':
@@ -753,7 +794,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$files = array();
 
  		foreach (ftp_rawlist($this->connect, $path) as $str) {
- 			if (($stat = $this->parseRaw($str, $path))) {
+ 			if (($stat = $this->parseRaw($str, $path, true))) {
  				$files[] = $path.DIRECTORY_SEPARATOR.$stat['name'];
  			}
  		}
