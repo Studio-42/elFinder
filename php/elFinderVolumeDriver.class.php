@@ -4175,15 +4175,18 @@ abstract class elFinderVolumeDriver {
 		if ($path === '' || $path === '.' . $separator) return $base;
 		
 		// Absolute path
-		if (strpos($path, $systemroot) === 0) {
+		if ($path[0] === $separator || strpos($path, $systemroot) === 0) {
 			return $path;
 		}
 		
 		$preg_separator = '#' . $sepquoted . '#';
 		
 		// Relative path from 'Here'
-		if (substr($path, 0, 2) === '.' . $separator) {
-			$arrn    = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
+		if (substr($path, 0, 2) === '.' . $separator || $path[0] !== '.' || substr($path, 0, 3) !== '..' . $separator) {
+			$arrn = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
+			if ($arrn[0] !== '.') {
+				array_unshift($arrn, '.');
+			}
 			$arrn[0] = $base;
 			return join($separator, $arrn);
 		}
