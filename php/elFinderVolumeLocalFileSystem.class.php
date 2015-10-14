@@ -25,13 +25,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $archiveSize = 0;
 	
 	/**
-	 * Cache for _subdirs()
-	 * 
-	 * @var array
-	 */
-	protected $subdirsCache = array();
-	
-	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -376,10 +369,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		$dir = is_dir($path);
-		if ($dir && $path !== $this->root) {
-			$this->subdirsCache[basename($path)] = true;
-		}
-
+		
 		if (!isset($stat['mime'])) {
 			$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
 		}
@@ -452,12 +442,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _subdirs($path) {
-		if (isset($this->subdirsCache[$path])) {
-			return $this->subdirsCache[$path];
+
+		if (is_dir($path)) {
+			return (bool)glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
 		}
-		
-		$this->subdirsCache[$path] = (is_dir($path) && glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR));
-		return $this->subdirsCache[$path];
+		return false;
 	}
 	
 	/**
@@ -516,7 +505,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$dirItr = new DirectoryIterator($path);
 		} catch (UnexpectedValueException $e) {}
 		
-		$this->subdirsCache[$path] = false;
 		foreach ($dirItr as $file) {
 			try {
 				if ($file->isDot()) { continue; }
@@ -579,9 +567,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 						$stat['size'] = $dir ? 0 : $size;
 					}
 					
-					if ($dir) {
-						$this->subdirsCache[$path] = true;
-					}
 				}
 				
 				$cache[] = array($fpath, $stat);
