@@ -110,6 +110,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		);
 		$this->options = array_merge($this->options, $opts); 
 		$this->options['mimeDetect'] = 'internal';
+		$this->options['maxArcFilesSize'] = 0;     // max allowed archive files size (0 - no limit)
 	}
 	
 	/**
