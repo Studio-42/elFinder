@@ -1093,7 +1093,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		if (!ftp_get($this->connect, $localPath, $path, FTP_BINARY)) {
 			//cleanup
-			$this->deleteDir($dir);
+			$this->rmdirRecursive($dir);
 			return false;
 		}
 
@@ -1112,13 +1112,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$symlinks = $this->_findSymlinks($dir);
 		
 		if ($symlinks) {
-			$this->delTree($dir);
+			$this->rmdirRecursive($dir);
 			return $this->setError(array_merge($this->error, array(elFinder::ERROR_ARC_SYMLINKS)));
 		}
 
 		// check max files size
 		if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $this->archiveSize) {
-			$this->delTree($dir);
+			$this->rmdirRecursive($dir);
 			return $this->setError(elFinder::ERROR_ARC_MAXSIZE);
 		}
 		
@@ -1147,7 +1147,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$result = $this->_joinPath(dirname($path), $name);
 
 			if (! ftp_put($this->connect, $result, $src, FTP_BINARY)) {
-				$this->delTree($dir);
+				$this->rmdirRecursive($dir);
 				return false;
 			}
 		} else {
@@ -1155,7 +1155,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$result = array();
 			if (is_dir($src)) {
 				if (!$dstDir = $this->_mkdir($dstDir, $name)) {
-					$this->delTree($dir);
+					$this->rmdirRecursive($dir);
 					return false;
 				}
 				$result[] = $dstDir;
@@ -1167,25 +1167,25 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					$p = dirname($name);
 					$name = basename($name);
 					if (! $target = $this->_mkdir($this->_joinPath($dstDir, $p), $name)) {
-						$this->delTree($dir);
+						$this->rmdirRecursive($dir);
 						return false;
 					}
 				} else {
 					$target = $this->_joinPath($dstDir, $name);
 					if (! ftp_put($this->connect, $target, $src, FTP_BINARY)) {
-						$this->delTree($dir);
+						$this->rmdirRecursive($dir);
 						return false;
 					}
 				}
 				$result[] = $target;
 			}
 			if (!$result) {
-				$this->delTree($dir);
+				$this->rmdirRecursive($dir);
 				return false;
 			}
 		}
 		
-		is_dir($dir) && $this->delTree($dir);
+		is_dir($dir) && $this->rmdirRecursive($dir);
 		
 		$this->clearcache();
 		return $result? $result : false;
@@ -1215,20 +1215,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		//download data
 		if (!$this->ftp_download_files($dir, $files, $tmpDir)) {
 			//cleanup
-			$this->deleteDir($tmpDir);
+			$this->rmdirRecursive($tmpDir);
 			return false;
 		}
 
 		$remoteArchiveFile = false;
 		if ($path = $this->makeArchive($tmpDir, $files, $name, $arc)) {
-			if ($fp = fopen($path, 'rb')) {
-				$remoteArchiveFile = $this->_save($fp, $dir, $name, array());
-				fclose($fp);
+			$remoteArchiveFile = $this->_joinPath($dir, $name);
+			if (!ftp_put($this->connect, $remoteArchiveFile, $path, FTP_BINARY)) {
+				$remoteArchiveFile = false;
 			}
 		}
 
 		//cleanup
-		if(!$this->deleteDir($tmpDir)) {
+		if(!$this->rmdirRecursive($tmpDir)) {
 			return false;
 		}
 
