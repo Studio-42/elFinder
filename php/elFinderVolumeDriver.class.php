@@ -4226,13 +4226,20 @@ abstract class elFinderVolumeDriver {
 	 */
 	public function rmdirRecursive($dir) {
 		if (!is_link($dir) && is_dir($dir)) {
+			@chmod($dir, 0777);
 			foreach (array_diff(scandir($dir), array('.', '..')) as $file) {
 				@set_time_limit(30);
-				$path = $dir . $this->separator . $file;
-				(is_dir($path)) ? $this->rmdirRecursive($path) : @unlink($path);
+				$path = $dir . DIRECTORY_SEPARATOR . $file;
+				if (!is_link($dir) && is_dir($path)) {
+					$this->rmdirRecursive($path);
+				} else {
+					@chmod($path, 0666);
+					@unlink($path);
+				}
 			}
 			return @rmdir($dir);
 		} else if (is_file($dir) || is_link($dir)) {
+			@chmod($dir, 0666);
 			return @unlink($dir);
 		}
 		return false;
