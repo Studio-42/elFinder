@@ -803,24 +803,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * Unpack archive
-	 *
-	 * @param  string  $path  archive path
-	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 * @author Alexey Sukhotin
-	 **/
-	protected function _unpack($path, $arc) {
-		$cwd = getcwd();
-		$dir = $this->_dirname($path);
-		chdir($dir);
-		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($this->_basename($path));
-		$this->procExec($cmd, $o, $c);
-		chdir($cwd);
-	}
-
-	/**
 	 * Recursive symlinks search
 	 *
 	 * @param  string  $path  file/dir path
@@ -886,8 +868,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 			
 			// extract in quarantine
-			$this->_unpack($archive, $arc);
-			unlink($archive);
+			$this->unpackArchive($archive, $arc);
 			
 			// get files list
 			$ls = array();
@@ -983,17 +964,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Alexey Sukhotin
 	 **/
 	protected function _archive($dir, $files, $name, $arc) {
-		$cwd = getcwd();
-		chdir($dir);
-		
-		$files = array_map('escapeshellarg', $files);
-		
-		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.implode(' ', $files);
-		$this->procExec($cmd, $o, $c);
-		chdir($cwd);
-
-		$path = $dir.DIRECTORY_SEPARATOR.$name;
-		return file_exists($path) ? $path : false;
+		return $this->makeArchive($dir, $files, $name, $arc);
 	}
 	
 	/******************** Over write functions *************************/
