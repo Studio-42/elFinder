@@ -116,6 +116,7 @@ $.fn.elfindercontextmenu = function(fm) {
 									$(this).removeClass('ui-state-hover');
 									e.preventDefault();
 								} else if (e.type == 'click') {
+									menu.hide();
 									cmd.exec(targets, $(this).data('exec'));
 								}
 							});

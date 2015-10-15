@@ -50,6 +50,7 @@ $.fn.elfinderbutton = function(cmd) {
 					e.preventDefault();
 					e.stopPropagation();
 					button.removeClass(hover);
+					menu.hide();
 					cmd.exec(cmd.fm.selected(), $(this).data('value'));
 				});
 
