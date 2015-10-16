@@ -1,12 +1,5 @@
 <?php
 
-function chmodnum($chmod) {
-    $trans = array('-' => '0', 'r' => '4', 'w' => '2', 'x' => '1');
-    $chmod = substr(strtr($chmod, $trans), 1);
-    $array = str_split($chmod, 3);
-    return array_sum(str_split($array[0])) . array_sum(str_split($array[1])) . array_sum(str_split($array[2]));
-}
-
 elFinder::$netDrivers['ftp'] = 'FTP';
 
 /**
@@ -294,63 +287,92 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$info = preg_split("/\s+/", $raw, 9);
 		$stat = array();
 
-		if (count($info) < 9 || $info[8] == '.' || $info[8] == '..') {
-			return false;
-		}
-
 		if (!isset($this->ftpOsUnix)) {
 			$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
 		}
+		if (!$this->ftpOsUnix) {
+			$info = $this->normalizeRawWindows($raw);
+		}
 		
-		if ($this->ftpOsUnix) {
-			
-			$name = $info[8];
-			
-			if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
-				$name   = trim($m[1]);
-				// check recursive processing
-				if ($this->cacheDirTarget && $this->_joinPath($base, $name) !== $this->cacheDirTarget) {
-					return array();
-				}
-				if (!$nameOnly) {
-					$target = trim($m[2]);
-					if (substr($target, 0, 1) !== $this->separator) {
-						$target = $this->getFullPath($target, $base);
-					}
-					$target = $this->_normpath($target);
-					$stat['name']   = $name;
-					$stat['target'] = $target;
-					return $stat;
-				}
+		if (count($info) < 9 || $info[8] == '.' || $info[8] == '..') {
+			return false;
+		}
+		
+		$name = $info[8];
+		
+		if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
+			$name   = trim($m[1]);
+			// check recursive processing
+			if ($this->cacheDirTarget && $this->_joinPath($base, $name) !== $this->cacheDirTarget) {
+				return array();
 			}
-			
-			if ($nameOnly) {
-				return array('name' => $name);
+			if (!$nameOnly) {
+				$target = trim($m[2]);
+				if (substr($target, 0, 1) !== $this->separator) {
+					$target = $this->getFullPath($target, $base);
+				}
+				$target = $this->_normpath($target);
+				$stat['name']   = $name;
+				$stat['target'] = $target;
+				return $stat;
 			}
-			
+		}
+		
+		if ($nameOnly) {
+			return array('name' => $name);
+		}
+		
+		if (is_numeric($info[5]) && !$info[6] && !$info[7]) {
+			// by normalizeRawWindows()
+			$stat['ts'] = $info[5];
+		} else {
 			$stat['ts'] = strtotime($info[5].' '.$info[6].' '.$info[7]);
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
 			}
-			
-			if ($this->options['statOwner']) {
-				$stat['owner'] = $info[2];
-				$stat['group'] = $info[3];
-				$stat['perm']  = substr($info[0], 1);
-				$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
-			}
-			
-			$perm = $this->parsePermissions($info[0], $stat['owner']);
-			$stat['name']  = $name;
-			$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
-			$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
-			$stat['read']  = $perm['read'];
-			$stat['write'] = $perm['write'];
-		} else {
-			die('Windows ftp servers not supported yet');
 		}
-
+		
+		$stat['owner'] = '';
+		if ($this->options['statOwner']) {
+			$stat['owner'] = $info[2];
+			$stat['group'] = $info[3];
+			$stat['perm']  = substr($info[0], 1);
+			$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
+		}
+		
+		$perm = $this->parsePermissions($info[0], $stat['owner']);
+		$stat['name']  = $name;
+		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
+		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
+		$stat['read']  = $perm['read'];
+		$stat['write'] = $perm['write'];
+		
 		return $stat;
+	}
+	
+	/**
+	 * Normalize MS-DOS style FTP LIST Raw line
+	 *
+	 * @param  string  $raw  line from FTP LIST (MS-DOS style)
+	 * @return array
+	 * @author Naoki Sawada
+	 **/
+	protected function normalizeRawWindows($raw) {
+		$info = array_pad(array(), 9, '');
+		$item = preg_replace('#\s+#', ' ', trim($raw), 3);
+		list($date, $time, $size, $name) = explode(' ', $item, 4);
+		$format = strlen($date) === 8 ? 'm-d-yH:iA' : 'Y-m-dH:i';
+		$dateObj = DateTime::createFromFormat($format, $date.$time);
+		$info[5] = strtotime($dateObj->format('Y-m-d H:i'));
+		$info[8] = $name;
+		if ($size === '<DIR>') {
+			$info[4] = 0;
+			$info[0] = 'drwxr-xr-x';
+		} else {
+			$info[4] = (int)$size;
+			$info[0] = '-rw-r--r--';
+		}
+		return $info;
 	}
 	
 	/**
@@ -414,7 +436,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['name'] = $name;
 			$p = $prefix . $name;
 			$cacheDirTarget = $this->cacheDirTarget;
-			$this->cacheDirTarget = $target;
+			$this->cacheDirTarget = $this->convEncIn($target, true);
 			if ($tstat = $this->stat($target)) {
 				$stat['size']  = $tstat['size'];
 				$stat['alias'] = $target;
@@ -629,8 +651,11 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		if (isset($this->cache[$path])) {
-			return $this->cache[$path];
+		$outPath = $this->convEncOut($path);
+		if (isset($this->cache[$outPath])) {
+			return $this->convEncIn($this->cache[$outPath]);
+		} else {
+			$this->convEncIn();
 		}
 		if (!$this->MLSTsupprt) {
 			if ($path === $this->root) {
@@ -640,12 +665,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					'dirs' => $this->_subdirs($path)
 				);
 			}
-			$this->cacheDir($this->_dirname($path));
-			if (isset($this->cache[$path])) {
-				return $this->cache[$path];
-			} else {
-				return array();
-			}
+			$this->cacheDir($this->convEncOut($this->_dirname($path)));
+			return $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());
 		}
 		$raw = ftp_raw($this->connect, 'MLST ' . $path);
 		if (is_array($raw) && count($raw) > 1 && substr(trim($raw[0]), 0, 1) == 2) {
@@ -757,6 +778,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		foreach (ftp_rawlist($this->connect, $path) as $str) {
 			$info = preg_split('/\s+/', $str, 9);
+			if (!isset($this->ftpOsUnix)) {
+				$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
+			}
+			if (!$this->ftpOsUnix) {
+				$info = $this->normalizeRawWindows($str);
+			}
 			$name = isset($info[8])? trim($info[8]) : '';
 			if ($name && $name !== '.' && $name !== '..' && substr(strtolower($info[0]), 0, 1) === 'd') {
 				return true;
@@ -1282,6 +1309,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 		foreach ($buff as $str) {
 			$info = preg_split("/\s+/", $str, 9);
+			if (!isset($this->ftpOsUnix)) {
+				$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
+			}
+			if (!$this->ftpOsUnix) {
+				$info = $this->normalizeRawWindows($str);
+			}
 			$type = substr($info[0], 0, 1);
 			$name = trim($info[8]);
 			if ($name !== '.' && $name !== '..' && (!$targets || isset($targets[$name]))) {
