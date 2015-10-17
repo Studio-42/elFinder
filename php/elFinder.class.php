@@ -95,7 +95,7 @@ class elFinder {
 		'info'      => array('targets' => true),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false),
-		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => true, 'pass' => true, 'alias' => false, 'options' => false),
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
 		'chmod'     => array('targets' => true, 'mode' => true)

@@ -140,10 +140,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function init() {
 		if (!$this->options['host'] 
-		||  !$this->options['user'] 
-		||  !$this->options['pass'] 
 		||  !$this->options['port']) {
 			return $this->setError('Required options undefined.');
+		}
+		
+		if (!$this->options['user']) {
+			$this->options['user'] = 'anonymous';
+			$this->options['pass'] = '';
+		}
+		if (!$this->options['path']) {
+			$this->options['path'] = '/';
 		}
 		
 		// make ney mount key
