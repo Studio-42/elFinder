@@ -47,6 +47,16 @@ class elFinder {
 	public static $sessionCacheKey = '';
 	
 	/**
+	 * elFinder base64encodeSessionData
+	 * elFinder save session data as `UTF-8`
+	 * If the session storage mechanism of the system does not allow `UTF-8`
+	 * And it must be `true` option 'base64encodeSessionData' of elFinder
+	 * 
+	 * @var bool
+	 */
+	protected static $base64encodeSessionData = false;
+	
+	/**
 	 * Session key of net mount volumes
 	 * @var string
 	 */
@@ -281,6 +291,7 @@ class elFinder {
 				'_optsMD5' => $_optsMD5
 			);
 		}
+		self::$base64encodeSessionData = !empty($opts['base64encodeSessionData']);
 		
 		// setlocale and global locale regists to elFinder::locale
 		self::$locale = !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8';
@@ -614,7 +625,12 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function getNetVolumes() {
-		return isset($_SESSION[$this->netVolumesSessionKey]) && is_array($_SESSION[$this->netVolumesSessionKey]) ? $_SESSION[$this->netVolumesSessionKey] : array();
+		if (isset($_SESSION[$this->netVolumesSessionKey])) {
+			if ($data = elFinder::sessionDataDecode($_SESSION[$this->netVolumesSessionKey], 'array')) {
+				return $data;
+			}
+		}
+		return array();
 	}
 
 	/**
@@ -625,7 +641,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
-		$_SESSION[$this->netVolumesSessionKey] = $volumes;
+		$_SESSION[$this->netVolumesSessionKey] = elFinder::sessionDataEncode($volumes);
 	}
 
 	/**
@@ -693,10 +709,10 @@ class elFinder {
 		$protocol = $args['protocol'];
 		
 		if ($protocol === 'netunmount') {
-			if (isset($_SESSION) && is_array($_SESSION) && isset($_SESSION[$this->netVolumesSessionKey][$args['host']])) {
+			$key = $args['host'];
+			$netVolumes = $this->getNetVolumes();
+			if ($netVolumes[$key]) {
 				$res = true;
-				$netVolumes = $this->getNetVolumes();
-				$key = $args['host'];
 				$volume = $this->volume($args['user']);
 				if (method_exists($volume, 'netunmount')) {
 					$res = $volume->netunmount($netVolumes, $key);
@@ -2257,4 +2273,53 @@ class elFinder {
 		return $metadata['seekable'];
 	}
 
+	/**
+	 * serialize and base64_encode of session data (If needed)
+	 * 
+	 * @param  mixed $var  target variable
+	 * @author Naoki Sawada
+	 */
+	public static function sessionDataEncode($var) {
+		if (self::$base64encodeSessionData) {
+			$var = base64_encode(serialize($var));
+		}
+		return $var;
+	}
+	
+	/**
+	 * base64_decode and unserialize of session data  (If needed)
+	 * 
+	 * @param  mixed $var      target variable
+	 * @param  bool  $checkIs  data type for check (array|string|object|int)
+	 * @author Naoki Sawada
+	 */
+	public static function sessionDataDecode(&$var, $checkIs = null) {
+		if (self::$base64encodeSessionData) {
+			$data = @unserialize(@base64_decode($var));
+		} else {
+			$data = $var;
+		}
+		$chk = true;
+		if ($checkIs) {
+			switch ($checkIs) {
+				case 'array':
+					$chk = is_array($data);
+					break;
+				case 'string':
+					$chk = is_string($data);
+					break;
+				case 'object':
+					$chk = is_object($data);
+					break;
+				case 'int':
+					$chk = is_int($data);
+					break;
+			}
+		}
+		if (!$chk) {
+			unset($var);
+			return false;
+		}
+		return $data;
+	}
 } // END class

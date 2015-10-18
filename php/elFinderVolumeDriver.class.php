@@ -2711,15 +2711,22 @@ abstract class elFinderVolumeDriver {
 		}
 		$is_root = ($path === $this->root);
 		if ($is_root) {
-			if (isset($this->sessionCache['rootstat'])) {
-				return $this->cache[$path] = unserialize(base64_decode($this->sessionCache['rootstat']));
+			$rootKey = md5($path);
+			if (!isset($this->sessionCache['rootstat'])) {
+				$this->sessionCache['rootstat'] = array();
+			}
+			// need $path as key for netmount/netunmount
+			if (isset($this->sessionCache['rootstat'][$rootKey])) {
+				if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
+					return $ret;
+				}
 			}
 		}
 		$ret = isset($this->cache[$path])
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
 		if ($is_root) {
-			$this->sessionCache['rootstat'] = base64_encode(serialize($ret));
+			$this->sessionCache['rootstat'][$rootKey] = elFinder::sessionDataEncode($ret);
 		}
 		return $ret;
 	}
@@ -4047,8 +4054,8 @@ abstract class elFinderVolumeDriver {
 	 */
 	protected function getArchivers($use_cache = true) {
 
-		$sessionKey = elFinder::$sessionCacheKey . ':ARCHIVERS_CACHE';
-		if ($use_cache && isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
+		$sessionKey = 'ARCHIVERS_CACHE';
+		if ($use_cache && isset($this->sessionCache[$sessionKey]) && is_array($this->sessionCache[$sessionKey])) {
 			return $_SESSION[$sessionKey];
 		}
 		
@@ -4158,7 +4165,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		$_SESSION[$sessionKey] = $arcs;
+		$this->sessionCache[$sessionKey] = $arcs;
 		return $arcs;
 	}
 
