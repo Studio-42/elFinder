@@ -50,6 +50,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Не мога да преименувам "$1".',
 			'errCopyFrom'          : 'Копирането на файлове от том "$1" не е разрешено.',
 			'errCopyTo'            : 'Копирането на файлове в том "$1" не е разрешено.',
+			'errMkOutLink'         : 'Не мога да създам връзка извън началото на ресурса.',
 			'errUpload'            : 'Грешка при качване.',
 			'errUploadFile'        : 'Не мога да кача "$1".',
 			'errUploadNoFiles'     : 'Не са намерени файлове за качване.',
@@ -57,6 +58,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadFileSize'    : 'Файла превишава максимално допустимия размер.',
 			'errUploadMime'        : 'Не е позволен тип на файла.',
 			'errUploadTransfer'    : '"$1" грешка при предаване.', 
+			'errUploadTemp'        : 'Не мога да създам временен файл за качване.',
 			'errNotReplace'        : 'Обект "$1" вече съществува на това място и не може да бъде заменен от обект от друг тип.',
 			'errReplace'           : 'Не мога да заменя "$1".',
 			'errSave'              : 'Не мога да запиша "$1".',
@@ -91,6 +93,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Не мога да създам директория на FTP: "$1"',
 			'errArchiveExec'       : 'Грешка при архивиране на файлове: "$1"',
 			'errExtractExec'       : 'Грешка при разархивиране на файлове: "$1"',
+			'errNetUnMount'        : 'Не мога да размонтирам',
+			'errConvUTF8'          : 'Не е конвертируем до UTF-8',
+			'errFolderUpload'      : 'Опитайте Google Chrome, ако искате да качите папка.',
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Създай архив',
@@ -121,6 +126,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Размер на изображение',
 			'cmdsort'      : 'Подреди',
 			'cmdnetmount'  : 'Монтирай мрежов ресурс',
+			'cmdnetunmount': 'Размонтирай',
+			'cmdplaces'    : 'To Places', // added 28.12.2014
+			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Затвори',
@@ -131,6 +139,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Не',
 			'btnYes'    : 'Да',
 			'btnMount'  : 'Монтирай',
+			'btnApprove': 'Отиди на $1 и одобри',
+			'btnUnmount': 'Размонтирай',
+			'btnConv'   : 'Конвертирай',
+			'btnCwd'    : 'Тук',
+			'btnVolume' : 'Ресурс',
+			'btnAll'    : 'Всички',
+			'btnMime'   : 'MIME тип',
+			'btnFileName':'Име на файл',
+			'btnSaveClose': 'Запази и затвори',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Отваряне на папка',
@@ -153,7 +170,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Зает съм >_<',
 			'ntfloadimg'  : 'Зареждам изображения',
 			'ntfnetmount' : 'Монтирам мрежов ресурс',
+			'ntfnetunmount': 'Размонтирам мрежов ресурс',
 			'ntfdim'      : 'Извличам размерите на изображение',
+			'ntfreaddir'  : 'Извличам информация за папка',
+			'ntfurl'      : 'Взимам URL от връзка',
+			'ntfchmod'    : 'Променям характеристики на файл',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'неизвестна',
@@ -209,6 +230,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'confirmReq'      : 'Изисква се подтвърждение',
 			'confirmRm'       : 'Сигурни ли сте, че желаете да премахнете файловете?<br/>Това действие е необратимо!',
 			'confirmRepl'     : 'Да заменя ли стария файл с новия?',
+			'confirmConvUTF8' : 'Не е в UTF-8 формат<br/>Конвертиране до UTF-8?<br/>Съдържанието става в UTF-8 формат при запазване след конверсията.',
+			'confirmNotSave'  : 'Има направени промени.<br/>Те ще бъдат загубени, ако не запишете промените.',
 			'apllyAll'        : 'Приложи за всички',
 			'name'            : 'Име',
 			'size'            : 'Размер',
@@ -282,6 +305,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'            : 'Порт',
 			'user'            : 'Потребител',
 			'pass'            : 'Парола',
+			'confirmUnmount'  : 'Ще размонтирате $1?',
+			'dropFilesBrowser': 'Пусни или вмъкни файлове от браузера',
+			'dropPasteFiles'  : 'Пусни или вмъкни файлове тук',
+			'encoding'        : 'Кодировка',
+			'locale'          : 'Локали',
+			'searchTarget'    : 'Цел: $1',
+			'searchMime'      : 'Търсене по въведен MIME тип',
+			'owner'           : 'Собственик',
+			'group'           : 'Група',
+			'other'           : 'Други',
+			'execute'         : 'Изпълнява',
+			'perm'            : 'Разрешение',
+			'mode'            : 'Поведение',
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Непознат',
@@ -332,6 +368,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'AWK изходен код',
 			'kindCSV'         : 'CSV стойности разделени със запетая',
 			'kindDOCBOOK'     : 'Docbook XML документ',
+			'kindMarkdown'    : 'Markdown текст',
 			// images
 			'kindImage'       : 'Изображение',
 			'kindBMP'         : 'BMP изображение',
