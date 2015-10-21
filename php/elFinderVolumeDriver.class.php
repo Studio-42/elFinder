@@ -160,8 +160,6 @@ abstract class elFinderVolumeDriver {
 		'treeDeep'        => 1,
 		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'URL'             => '',
-		// directory separator. required by client to show paths correctly
-		'separator'       => DIRECTORY_SEPARATOR,
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
@@ -586,7 +584,6 @@ abstract class elFinderVolumeDriver {
 		$this->options = array_merge($this->options, $opts);
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
 		$this->root = $this->_normpath($this->options['path']);
-		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
 		
 		// default file attribute
 		$this->defaults = array(
@@ -883,7 +880,6 @@ abstract class elFinderVolumeDriver {
 			'url'           => $this->URL,
 			'tmbUrl'        => $this->tmbURL,
 			'disabled'      => $this->disabled,
-			'separator'     => $this->separator,
 			'copyOverwrite' => intval($this->options['copyOverwrite']),
 			'archivers'     => array(
 				// 'create'  => array_keys($this->archivers['create']),

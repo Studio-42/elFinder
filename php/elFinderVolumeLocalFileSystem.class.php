@@ -260,7 +260,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _path($path) {
-		return $this->rootName.($path == $this->root ? '' : $this->separator.$this->_relpath($path));
+		return $this->rootName.($path == $this->root ? '' : DIRECTORY_SEPARATOR.$this->_relpath($path));
 	}
 	
 	/**
