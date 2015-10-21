@@ -3587,7 +3587,7 @@ abstract class elFinderVolumeDriver {
 				
 					self::gdImageBackground($tmp,$this->options['tmbBgColor']);
 					
-					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $orig_w, $orig_h)) {
+					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 						return false;
 					}
 		
