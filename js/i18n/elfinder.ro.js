@@ -4,7 +4,7 @@
  * @version 2014-12-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
-	elFinder.prototype.i18.en = {
+	elFinder.prototype.i18.ro = {
 		translator : 'Cristian Tabacitu &lt;hello@tabacitu.ro&gt;',
 		language   : 'Română',
 		direction  : 'ltr',
