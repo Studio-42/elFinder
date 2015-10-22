@@ -4,7 +4,7 @@
  * submit new translation via https://github.com/Studio-42/elFinder/issues
  * or make a pull request
  */
- 
+
 /**
  * XXXXX translation
  * @author Translator Name <translator@email.tld>
@@ -15,8 +15,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		translator : 'Translator name &lt;translator@email.tld&gt;',
 		language   : 'Language of translation in your language',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i',
-		fancyDateFormat : '$1 H:i',
+		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -57,13 +57,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Unable to rename "$1".',
 			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
 			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
-			'errUpload'            : 'Upload error.',
-			'errUploadFile'        : 'Unable to upload "$1".',
-			'errUploadNoFiles'     : 'No files found for upload.', 
-			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.',
-			'errUploadFileSize'    : 'File exceeds maximum allowed size.',
-			'errUploadMime'        : 'File type not allowed.', 
-			'errUploadTransfer'    : '"$1" transfer error.', 
+			'errUpload'            : 'Upload error.',  // old name - errUploadCommon
+			'errUploadFile'        : 'Unable to upload "$1".', // old name - errUpload
+			'errUploadNoFiles'     : 'No files found for upload.',
+			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.', // old name - errMaxSize
+			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
+			'errUploadMime'        : 'File type not allowed.',
+			'errUploadTransfer'    : '"$1" transfer error.',
 			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
 			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Unable to save "$1".',
@@ -77,20 +77,20 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcType'           : 'Unsupported archive type.',
 			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
 			'errCmdNoSupport'      : 'Backend does not support this command.',
-			'errReplByChild'       : 'The folder “$1” can’t be replaced by an item it contains.',
+			'errReplByChild'       : 'The folder "$1" can\'t be replaced by an item it contains.',
 			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
 			'errResize'            : 'Unable to resize "$1".',
-			'errResizeDegree'      : 'Invalid rotate degree.',
-			'errResizeRotate'      : 'Image dose not rotated.',
-			'errResizeSize'        : 'Invalid image size.',
-			'errResizeNoChange'    : 'Image size not changed.',
+			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
+			'errResizeRotate'      : 'Image dose not rotated.',  // added 7.3.2013
+			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
 			'errUsupportType'      : 'Unsupported file type.',
-			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',
-			'errNetMount'          : 'Unable to mount "$1".',
-			'errNetMountNoDriver'  : 'Unsupported protocol.',
-			'errNetMountFailed'    : 'Mount failed.',
-			'errNetMountHostReq'   : 'Host required.',
+			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
+			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
 			'errSessionExpires'    : 'Your session has expired due to inactivity.',
 			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
 			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
@@ -129,7 +129,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdsort'      : 'Sort',
 			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
 			
-			/*********************************** buttons ***********************************/ 
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
 			'btnSave'   : 'Save',
 			'btnRm'     : 'Remove',
@@ -137,7 +137,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancel',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Yes',
-			'btnMount'  : 'Mount',
+			'btnMount'  : 'Mount',  // added 18.04.2012
+			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -158,8 +159,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfresize'   : 'Resizing images',
 			'ntfsmth'     : 'Doing something',
 			'ntfloadimg'  : 'Loading image',
-			'ntfnetmount' : 'Mounting network volume',
-			'ntfdim'      : 'Acquiring image dimension',
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -196,17 +197,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thursday'    : 'Thursday',
 			'Friday'      : 'Friday',
 			'Saturday'    : 'Saturday',
-			'Sun'         : 'Sun', 
-			'Mon'         : 'Mon', 
-			'Tue'         : 'Tue', 
-			'Wed'         : 'Wed', 
-			'Thu'         : 'Thu', 
-			'Fri'         : 'Fri', 
+			'Sun'         : 'Sun',
+			'Mon'         : 'Mon',
+			'Tue'         : 'Tue',
+			'Wed'         : 'Wed',
+			'Thu'         : 'Thu',
+			'Fri'         : 'Fri',
 			'Sat'         : 'Sat',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'by name', 
-			'sortkind'          : 'by kind', 
+			'sortname'          : 'by name',
+			'sortkind'          : 'by kind',
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',
 			'sortFoldersFirst'  : 'Folders first',
@@ -233,7 +234,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
 			'places'          : 'Places',
-			'calc'            : 'Calculate', 
+			'calc'            : 'Calculate',
 			'path'            : 'Path',
 			'aliasfor'        : 'Alias for',
 			'locked'          : 'Locked',
@@ -244,7 +245,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'yes',
 			'no'              : 'no',
 			'link'            : 'Link',
-			'searcresult'     : 'Search results',  
+			'searcresult'     : 'Search results',
 			'selected'        : 'selected items',
 			'about'           : 'About',
 			'shortcuts'       : 'Shortcuts',
@@ -282,12 +283,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Rotate 90 degrees CW',
 			'rotate-ccw'      : 'Rotate 90 degrees CCW',
 			'degree'          : '°',
-			'netMountDialogTitle' : 'Mount network volume',
-			'protocol'            : 'Protocol',
-			'host'                : 'Host',
-			'port'                : 'Port',
-			'user'                : 'User',
-			'pass'                : 'Password',
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'protocol'            : 'Protocol', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'User', // added 18.04.2012
+			'pass'                : 'Password', // added 18.04.2012
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
