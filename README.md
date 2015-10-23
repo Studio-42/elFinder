@@ -104,6 +104,13 @@ For debugging and development, use the [source](#source-uncompressed). For produ
 ### How do I integrate elFinder with CKEditor/TinyMCE/elRTE/etc...?
 Check out the [wiki](https://github.com/studio-42/elFinder/wiki#howtos) for individual instructions.
 
+### The procedure of language files created or modified?
+
+You can create or modify the language file to use translation tool. Please refer to the pull request the results to the respective branch.
+ * [2.x branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.x/langman.html)
+ * [2.1 branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.1/langman.html)
+
+
 3rd party connectors
 --------------------
  * [Python](https://github.com/Studio-42/elfinder-python)
