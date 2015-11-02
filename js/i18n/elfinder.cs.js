@@ -75,7 +75,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Soubory archívu překračují maximální povolenou velikost.',
 			'errResize'            : 'Nepodařilo se změnit velikost obrázku "$1".',
 			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
-			'errResizeRotate'      : 'Image dose not rotated.',  // added 7.3.2013
+			'errResizeRotate'      : 'Unable to rotate image.',  // added 7.3.2013
 			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
 			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
 			'errUsupportType'      : 'Nepodporovaný typ souboru.',

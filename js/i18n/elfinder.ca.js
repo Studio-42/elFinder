@@ -75,7 +75,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Els fitxers de l\'arxiu excedeixen la mida màxima permesa.',
 			'errResize'            : 'No s\'ha pogut redimensionar "$1".',
 			'errResizeDegree' : 'Invalid rotate degree.',
-			'errResizeRotate' : 'Image dose not rotated.',
+			'errResizeRotate' : 'Unable to rotate image.',
 			'errResizeSize' : 'Invalid image size.',
 			'errResizeNoChange' : 'Image size not changed.',
 			'errUsupportType'      : 'El tipus de fitxer no està suportat.',

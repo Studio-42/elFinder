@@ -75,7 +75,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'فایل های آرشیو شده به حداکثر اندازه تعیین شده رسیده اند .',
 			'errResize'            : 'قادر به تغییر اندازه "$1" نمی باشد .',
 			'errResizeDegree'      : 'Invalid rotate degree.',
-			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeRotate'      : 'Unable to rotate image.',
 			'errResizeSize'        : 'Invalid image size.',
 			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'نوع فایل شما قابل پشتیبانی نمی باشد .',
