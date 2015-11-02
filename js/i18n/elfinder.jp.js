@@ -78,7 +78,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
 			'errResize'            : '"$1"をリサイズできません',
 			'errResizeDegree'      : 'イメージの回転角度が不正です',  // added 7.3.2013
-			'errResizeRotate'      : 'イメージの回転ができません',  // added 7.3.2013
+			'errResizeRotate'      : 'イメージを回転できません',  // added 7.3.2013
 			'errResizeSize'        : '指定されたイメージサイズが不正です',  // added 7.3.2013
 			'errResizeNoChange'    : 'イメージサイズなどの変更がありません',  // added 7.3.2013
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
