@@ -75,7 +75,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Arşiv dosyası izin verilen maksimum boyutun üstünde.',
 			'errResize'            : 'Boyutlandırılamadı "$1".',
 			'errResizeDegree'      : 'Invalid rotate degree.',
-			'errResizeRotate'      : 'Image dose not rotated.',
+			'errResizeRotate'      : 'Unable to rotate image.',
 			'errResizeSize'        : 'Invalid image size.',
 			'errResizeNoChange'    : 'Image size not changed.',
 			'errUsupportType'      : 'Desteklenmeyen Dosya Tipi.',
