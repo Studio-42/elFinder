@@ -98,7 +98,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'tmpPath'       => '',
 			'dirMode'       => 0755,
 			'fileMode'      => 0644,
-			'icon'          => (defined('ELFINDER_IMG_PARENT_URL')? (rtrim(ELFINDER_IMG_PARENT_URL, '/').'/') : '').'img/volume_icon_ftp.png'
+			'rootCssClass'  => 'elfinder-navbar-root-ftp'
 			
 		);
 		$this->options = array_merge($this->options, $opts); 

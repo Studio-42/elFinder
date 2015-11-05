@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1 (Nightly: 9e2bdd1) (2015-11-02)
+ * Version 2.1.0 (2.1 Nightly: 5487544) (2015-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -2771,7 +2771,7 @@ elFinder.prototype = {
 							continue;
 						}
 						
-						if (blobSlice && blobSize >= BYTES_PER_CHUNK) {
+						if (blobSlice && blobSize > BYTES_PER_CHUNK) {
 							start = 0;
 							end = BYTES_PER_CHUNK;
 							chunks = -1;
@@ -4096,7 +4096,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1 (Nightly: 9e2bdd1)';
+elFinder.prototype.version = '2.1.0 (2.1 Nightly: 5487544)';
 
 
 
@@ -6359,7 +6359,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{hash}" class="'+clFile+(fm.UA.Touch ? ' '+'elfinder-touch' : '')+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{name}">{name}</div></div>',
+				icon : '<div id="{hash}" class="'+clFile+(fm.UA.Touch ? ' '+'elfinder-touch' : '')+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on" {style}/>{marker}</div><div class="elfinder-cwd-filename" title="{nametitle}">{name}</div></div>',
 				row  : '<tr id="{hash}" class="'+clFile+(fm.UA.Touch ? ' '+'elfinder-touch' : '')+' {permsclass} {dirclass}" title="{tooltip}"><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"/>{marker}<span class="elfinder-cwd-filename">{name}</span></div></td>'+customColsBuild()+'</tr>',
 			},
 			
@@ -6377,10 +6377,11 @@ $.fn.elfindercwd = function(fm, options) {
 			replacement = {
 				name : function(f) {
 					name = fm.escape(f.name);
-					if (!list) {
-						name = name.replace(/([_.])/g, '&#8203;$1');
-					}
+					!list && (name = name.replace(/([_.])/g, '&#8203;$1'));
 					return name;
+				},
+				nametitle : function(f) {
+					return fm.escape(f.name);
 				},
 				permsclass : function(f) {
 					return fm.perms2class(f);
@@ -8945,10 +8946,16 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
-				cssclass    : function(dir) { return (fm.UA.Touch ? 'elfinder-touch ' : '')+(dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir)+' '+(dir.dirs && !dir.link ? collapsed : '') + (opts.getClass ? ' ' + opts.getClass(dir) : ''); },
+				cssclass    : function(dir) {
+					var cname = (fm.UA.Touch ? 'elfinder-touch ' : '')+(dir.phash ? '' : root)+' '+navdir+' '+fm.perms2class(dir);
+					dir.dirs && !dir.link && (cname += ' ' + collapsed);
+					opts.getClass && (cname += ' ' + opts.getClass(dir));
+					dir.csscls && (cname += ' ' + fm.escape(dir.csscls));
+					return cname;
+				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
 				symlink     : function(dir) { return dir.alias ? stpl : ''; },
-				style       : function(dir) { return dir.icon ? 'style="background-image:url(\''+dir.icon+'\')"' : ''; }
+				style       : function(dir) { return dir.icon ? 'style="background-image:url(\''+fm.escape(dir.icon)+'\')"' : ''; }
 			},
 			
 			/**

@@ -29,7 +29,7 @@ Contents
 
 Features
 --------
-
+**2.0.x**
  * All operations with files and folders on a remote server (copy, move,
    upload, create folder/file, rename, etc.)
  * High performance server backend and light client UI
@@ -53,6 +53,15 @@ Features
  * Extensibility
  * Simple client-server API based on JSON
 
+**2.1.x**
+ * Connector plugin
+     * [AutoResize](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/AutoResize/plugin.php) : Auto resize on file upload.
+     * [Normalizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Normalizer/plugin.php) : UTF-8 Normalizer of file-name and file-path etc.
+     * [Sanitizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Sanitizer/plugin.php) : Sanitizer of file-name and file-path etc.
+     * [Watermark](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Watermark/plugin.php) : Print watermark on file upload.
+ * Folder upload with Chrome
+ * Chunked file upload
+ * Support Dropbox.com&copy; (Configurable & As network volume)
 
 Requirements
 ------------
@@ -84,18 +93,20 @@ Installation
 
 Downloads
 ------------
- + [elFinder 2.0 (RC1)](https://github.com/downloads/Studio-42/elFinder/elfinder-2.0-rc1.tar.gz)
- + [elFinder 2.x (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.x.zip)
- + [elFInder 2.1 (Nightly)](http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.1.zip)
+**Stable releases**
+ + [elFinder 2.0.3](https://github.com/Studio-42/elFinder/archive/2.0.3.zip)
+ + [elFInder 2.1.0](https://github.com/Studio-42/elFinder/archive/2.1.0.zip)
+
+**Nightly builds**
+ + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
+ + [elFInder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
 
 FAQs
 ------------
 ### Which version of elFinder should I use?
-* **2.0** if you want to use the last official release (2012).
+* **2.0.x** if you want to use 2.0 with legacy connectors.
 
-* **2.x** if you want to use 2.0 with some security and bug fixes (*recommended*).
-
-* **2.1** if you want to try the experimental features being introduced in the next major release (*bleeding edge, but potentially unstable*).
+* **2.1.x** if you want to try the experimental (*bleeding edge, but connector is PHP only*).
 
 ### Should I use elFinder builds (compressed) or source (uncompressed)?
 
