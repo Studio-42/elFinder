@@ -193,6 +193,14 @@ window.elFinder = function(node, opts) {
 		 * @default 400
 		 **/
 		height = 400,
+		
+		/**
+		 * elfinder path for sound played on remove
+		 * @type String
+		 * @default ./
+		 **/
+		 
+		 soundPath = './',
 				
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -1798,7 +1806,7 @@ window.elFinder = function(node, opts) {
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
 		
-			play && play != '' && play != 'no' && $(beeper).html('<source src="./sounds/rm.wav" type="audio/wav">')[0].play()
+			play && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + '/sounds/rm.wav" type="audio/wav">')[0].play()
 		})
 		
 		;
@@ -1943,6 +1951,10 @@ window.elFinder = function(node, opts) {
 	
 	if (this.options.height) {
 		height = parseInt(this.options.height);
+	}
+	
+	if (this.options.soundPath) {
+		soundPath = this.options.soundPath;
 	}
 	
 	// update size	
