@@ -1498,7 +1498,7 @@ class elFinder {
 				}
 				
 				// write counts
-				file_put_contents($base, "\0", FILE_APPEND) === false;
+				file_put_contents($base, "\0", FILE_APPEND);
 				
 				if (filesize($base) >= $clast + 1) {
 					// Completion
