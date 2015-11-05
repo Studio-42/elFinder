@@ -104,6 +104,12 @@
 .elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 0; }
 .elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -704px; }
 
+/* root icon of each volume */
+.elfinder-tree .elfinder-navbar-root-local   .elfinder-navbar-icon { background-image:url("../img/volume_icon_local.png"); }
+.elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.png"); }
+.elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.png"); }
+.elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.png"); }
+
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
 .elfinder-droppable-active .elfinder-navbar-icon, 
