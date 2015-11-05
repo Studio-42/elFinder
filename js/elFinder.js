@@ -2757,7 +2757,7 @@ elFinder.prototype = {
 							continue;
 						}
 						
-						if (blobSlice && blobSize >= BYTES_PER_CHUNK) {
+						if (blobSlice && blobSize > BYTES_PER_CHUNK) {
 							start = 0;
 							end = BYTES_PER_CHUNK;
 							chunks = -1;
