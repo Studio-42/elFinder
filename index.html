@@ -73,12 +73,41 @@
     <script type="text/javascript">
       // elFinder init
       $().ready(function() {
+        var getLang = function() {
+            try {
+                var full_lng;
+                var loct = window.location.search;
+                var locm;
+                if (loct && (locm = loct.match(/lang=([a-zA-Z_-]+)/))) {
+                    full_lng = locm[1];
+                } else {
+                    full_lng = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
+                }
+                var lng = full_lng.substr(0,2);
+                if (lng == 'ja') lng = 'jp';
+                else if (lng == 'pt') lng = 'pt_BR';
+                else if (lng == 'zh') lng = (full_lng.substr(0,5) == 'zh-tw')? 'zh_TW' : 'zh_CN';
+
+                if (lng != 'en') {
+                    var script_tag      = document.createElement("script");
+                    script_tag.type     = "text/javascript";
+                    script_tag.src      = "js/i18n/elfinder."+lng+".js";
+                    script_tag.charset = "utf-8";
+                    $("head").append(script_tag);
+                }
+
+                return lng;
+            } catch(e) {
+                return 'en';
+            }
+        };
         var f = $('#elfinder').elfinder({
           url : 'http://hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
           urlUpload : 'http://hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
           requestType : 'POST',
           customHeaders: {'X-Requested-With' : 'XMLHttpRequest'},
           xhrFields: {withCredentials: true},
+          lang: getLang()
         }).elfinder('instance');
       });
 
