@@ -61,6 +61,9 @@ Features
      * [Watermark](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Watermark/plugin.php) : Print watermark on file upload.
  * Folder upload with Chrome
  * Chunked file upload
+ * Upload directly to the folder
+ * Creating the archive by specifying the file name
+ * Direct extraction to the current working directory (you do not want to create a folder)
  * Support Dropbox.com&copy; (Configurable & As network volume)
 
 Requirements
