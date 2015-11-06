@@ -73,6 +73,15 @@
     <script type="text/javascript">
       // elFinder init
       $().ready(function() {
+		if (typeof document.uniqueID != 'undefined') {
+			(function(){
+				var xhr = new XMLHttpRequest();
+				if (!('withCredentials' in xhr)) {
+					$('<script>').attr('src', './demo/xdr/jquery.xdr.js').appendTo('head');
+				}
+				xhr = null;
+			})();
+		}
         var getLang = function() {
             try {
                 var full_lng;
