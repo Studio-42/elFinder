@@ -2042,8 +2042,8 @@ window.elFinder = function(node, opts) {
 						data.removed && data.removed.length && self.remove(data);
 						data.added   && data.added.length   && self.add(data);
 						data.changed && data.changed.length && self.change(data);
-						if (obj.data.bind) {
-							self.trigger(obj.data.bind, data);
+						if (obj.bind) {
+							self.trigger(obj.bind, data);
 						}
 						data.sync && self.sync();
 					}
