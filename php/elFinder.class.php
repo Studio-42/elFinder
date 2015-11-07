@@ -601,7 +601,12 @@ class elFinder {
 			$volume->umount();
 		}
 		
-		return $result;
+		if (!empty($result['callback'])) {
+			$result['callback']['json'] = json_encode($result);
+			$this->callback($result['callback']);
+		} else {
+			return $result;
+		}
 	}
 	
 	/**
@@ -1823,17 +1828,13 @@ class elFinder {
 		}
 		$result['removed'] = $volume->removed();
 		
-		if (empty($args['node'])) {
-			return $result;
-		} else {
-			$out = array(
+		if (!empty($args['node'])) {
+			$result['callback'] = array(
 				'node' => $args['node'],
-				'json' => json_encode($result),
 				'bind' => 'upload'
 			);
-			$this->callback($out);
-			exit;
 		}
+		return $result;
 	}
 		
 	/**
