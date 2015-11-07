@@ -96,7 +96,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
@@ -601,7 +601,12 @@ class elFinder {
 			$volume->umount();
 		}
 		
-		return $result;
+		if (!empty($result['callback'])) {
+			$result['callback']['json'] = json_encode($result);
+			$this->callback($result['callback']);
+		} else {
+			return $result;
+		}
 	}
 	
 	/**
@@ -1822,6 +1827,13 @@ class elFinder {
 			}
 		}
 		$result['removed'] = $volume->removed();
+		
+		if (!empty($args['node'])) {
+			$result['callback'] = array(
+				'node' => $args['node'],
+				'bind' => 'upload'
+			);
+		}
 		return $result;
 	}
 		
@@ -2100,21 +2112,25 @@ class elFinder {
 			$script = '';
 			if ($node) {
 				$script .= '
-					var w = window.opener || window.parent || window
+					var w = window.opener || window.parent || window;
 					try {
 						var elf = w.document.getElementById(\''.$node.'\').elfinder;
 						if (elf) {
 							var data = '.$json.';
-							data.warning && elf.error(data.warning);
-							data.removed && data.removed.length && elf.remove(data);
-							data.added   && data.added.length   && elf.add(data);
-							data.changed && data.changed.length && elf.change(data);';
+							if (data.error) {
+								elf.error(data.error);
+							} else {
+								data.warning && elf.error(data.warning);
+								data.removed && data.removed.length && elf.remove(data);
+								data.added   && data.added.length   && elf.add(data);
+								data.changed && data.changed.length && elf.change(data);';
 				if ($bind) {
 					$script .= '
-							elf.trigger(\''.$bind.'\', data);';
+								elf.trigger(\''.$bind.'\', data);';
 				}
 				$script .= '
-							data.sync && elf.sync();
+								data.sync && elf.sync();
+							}
 						}
 					} catch(e) {
 						// for CORS
