@@ -54,6 +54,7 @@ Features
  * Simple client-server API based on JSON
 
 **2.1.x**
+ * More High performance server backend and light client UI
  * Connector plugin
      * [AutoResize](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/AutoResize/plugin.php) : Auto resize on file upload.
      * [Normalizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Normalizer/plugin.php) : UTF-8 Normalizer of file-name and file-path etc.
@@ -61,6 +62,9 @@ Features
      * [Watermark](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Watermark/plugin.php) : Print watermark on file upload.
  * Folder upload with Chrome
  * Chunked file upload
+ * Upload directly to the folder
+ * Creating the archive by specifying the file name
+ * Direct extraction to the current working directory (you do not want to create a folder)
  * Support Dropbox.com&copy; (Configurable & As network volume)
 
 Requirements

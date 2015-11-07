@@ -2100,20 +2100,25 @@ class elFinder {
 			$script = '';
 			if ($node) {
 				$script .= '
-					var w = window.opener || weindow.parent || window
-					var elf = w.document.getElementById(\''.$node.'\').elfinder;
-					if (elf) {
-						var data = '.$json.';
-						data.warning && elf.error(data.warning);
-						data.removed && data.removed.length && elf.remove(data);
-						data.added   && data.added.length   && elf.add(data);
-						data.changed && data.changed.length && elf.change(data);';
+					var w = window.opener || window.parent || window
+					try {
+						var elf = w.document.getElementById(\''.$node.'\').elfinder;
+						if (elf) {
+							var data = '.$json.';
+							data.warning && elf.error(data.warning);
+							data.removed && data.removed.length && elf.remove(data);
+							data.added   && data.added.length   && elf.add(data);
+							data.changed && data.changed.length && elf.change(data);';
 				if ($bind) {
 					$script .= '
-						elf.trigger(\''.$bind.'\', data);';
+							elf.trigger(\''.$bind.'\', data);';
 				}
 				$script .= '
-						data.sync && elf.sync();
+							data.sync && elf.sync();
+						}
+					} catch(e) {
+						// for CORS
+						w.postMessage && w.postMessage({bind:\''.$bind.'\',data:'.$json.'}, \'*\');
 					}';
 			}
 			$script .= 'window.close();';
