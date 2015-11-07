@@ -56,7 +56,16 @@ class elFinderConnector {
 			$parts = explode('&', $rawPostData);
 			foreach($parts as $part) {
 				list($key, $value) = array_pad(explode('=', $part), 2, '');
-				$src[$key] = rawurldecode($value);
+				$key = rawurldecode($key);
+				if (substr($key, -2) === '[]') {
+					$key = substr($key, 0, strlen($key) - 2);
+					if (!isset($src[$key])) {
+						$src[$key] = array();
+					}
+					$src[$key][] = rawurldecode($value);
+				} else {
+					$src[$key] = rawurldecode($value);
+				}
 			}
 			$_POST = $this->input_filter($src);
 			$_REQUEST = $this->input_filter(array_merge_recursive($src, $_REQUEST));

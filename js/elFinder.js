@@ -2031,15 +2031,21 @@ window.elFinder = function(node, opts) {
 		var res = e.originalEvent || null,
 			data;
 		if (res && self.uploadURL.indexOf(res.origin) === 0) {
-			data = res.data.data;
-			data.warning && self.error(data.warning);
-			data.removed && data.removed.length && self.remove(data);
-			data.added   && data.added.length   && self.add(data);
-			data.changed && data.changed.length && self.change(data);
-			if (res.data.bind) {
-				self.trigger(res.data.bind, data);
+			data = res.data.data || null;
+			if (data) {
+				if (data.error) {
+					self.error(data.error);
+				} else {
+					data.warning && self.error(data.warning);
+					data.removed && data.removed.length && self.remove(data);
+					data.added   && data.added.length   && self.add(data);
+					data.changed && data.changed.length && self.change(data);
+					if (res.data.bind) {
+						self.trigger(res.data.bind, data);
+					}
+					data.sync && self.sync();
+				}
 			}
-			data.sync && self.sync();
 		}
 	});
 
@@ -3033,10 +3039,11 @@ elFinder.prototype = {
 					.on('load', function() {
 						iframe.off('load')
 							.on('load', function() {
-								var data = self.parseUploadData(iframe.contents().text());
+								//var data = self.parseUploadData(iframe.contents().text());
 								
 								onload();
-								data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
+								dfrd.reject();
+								//data.error ? dfrd.reject(data.error) : dfrd.resolve(data);
 							});
 							
 							// notify dialog
@@ -3073,6 +3080,7 @@ elFinder.prototype = {
 			
 			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+(data.target || self.cwd().hash)+'"/>')
 				.append('<input type="hidden" name="html" value="1"/>')
+				.append('<input type="hidden" name="node" value="'+self.id+'"/>')
 				.append($(input).attr('name', 'upload[]'));
 			
 			$.each(self.options.onlyMimes||[], function(i, mime) {
