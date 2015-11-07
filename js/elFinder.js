@@ -2026,6 +2026,23 @@ window.elFinder = function(node, opts) {
 		});
 	})();
 
+	// bind window onmessage for CORS
+	$(window).on('message', function(e){
+		var res = e.originalEvent || null,
+			data;
+		if (res && self.uploadURL.indexOf(res.origin) === 0) {
+			data = res.data.data;
+			data.warning && self.error(data.warning);
+			data.removed && data.removed.length && self.remove(data);
+			data.added   && data.added.length   && self.add(data);
+			data.changed && data.changed.length && self.change(data);
+			if (res.data.bind) {
+				self.trigger(res.data.bind, data);
+			}
+			data.sync && self.sync();
+		}
+	});
+
 	if (self.dragUpload) {
 		node[0].addEventListener('dragenter', function(e) {
 			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
