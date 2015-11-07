@@ -2134,12 +2134,12 @@ class elFinder {
 						}
 					} catch(e) {
 						// for CORS
-						w.postMessage && w.postMessage({bind:\''.$bind.'\',data:'.$json.'}, \'*\');
+						w.postMessage && w.postMessage(JSON.stringify({bind:\''.$bind.'\',data:'.$json.'}), \'*\');
 					}';
 			}
 			$script .= 'window.close();';
 			
-			$out = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
+			$out = '<!DOCTYPE html><html><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>'.$script.'</script></head><body><a href="#" onlick="window.close();return false;">Close this window</a></body></html>';
 			
 			header('Content-Type: text/html; charset=utf-8');
 			header('Content-Length: '.strlen($out));

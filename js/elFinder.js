@@ -2029,22 +2029,27 @@ window.elFinder = function(node, opts) {
 	// bind window onmessage for CORS
 	$(window).on('message', function(e){
 		var res = e.originalEvent || null,
-			data;
+			obj, data;
 		if (res && self.uploadURL.indexOf(res.origin) === 0) {
-			data = res.data.data || null;
-			if (data) {
-				if (data.error) {
-					self.error(data.error);
-				} else {
-					data.warning && self.error(data.warning);
-					data.removed && data.removed.length && self.remove(data);
-					data.added   && data.added.length   && self.add(data);
-					data.changed && data.changed.length && self.change(data);
-					if (res.data.bind) {
-						self.trigger(res.data.bind, data);
+			try {
+				obj = JSON.parse(res.data);
+				data = obj.data || null;
+				if (data) {
+					if (data.error) {
+						self.error(data.error);
+					} else {
+						data.warning && self.error(data.warning);
+						data.removed && data.removed.length && self.remove(data);
+						data.added   && data.added.length   && self.add(data);
+						data.changed && data.changed.length && self.change(data);
+						if (obj.data.bind) {
+							self.trigger(obj.data.bind, data);
+						}
+						data.sync && self.sync();
 					}
-					data.sync && self.sync();
 				}
+			} catch (e) {
+				self.sync();
 			}
 		}
 	});
