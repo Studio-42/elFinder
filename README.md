@@ -54,6 +54,7 @@ Features
  * Simple client-server API based on JSON
 
 **2.1.x**
+ * More High performance server backend and light client UI
  * Connector plugin
      * [AutoResize](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/AutoResize/plugin.php) : Auto resize on file upload.
      * [Normalizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Normalizer/plugin.php) : UTF-8 Normalizer of file-name and file-path etc.
@@ -61,6 +62,9 @@ Features
      * [Watermark](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Watermark/plugin.php) : Print watermark on file upload.
  * Folder upload with Chrome
  * Chunked file upload
+ * Upload directly to the folder
+ * Creating the archive by specifying the file name
+ * Direct extraction to the current working directory (you do not want to create a folder)
  * Support Dropbox.com&copy; (Configurable & As network volume)
 
 Requirements
@@ -118,8 +122,8 @@ Check out the [wiki](https://github.com/studio-42/elFinder/wiki#howtos) for indi
 ### The procedure of language files created or modified?
 
 You can create or modify the language file to use translation tool. Please refer to the pull request the results to the respective branch.
- * [2.x branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.x/langman.html)
- * [2.1 branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.1/langman.html)
+ * [2.1 branch translation tool](http://studio-42.github.io/elFinder/tools/langman/#2.1)
+ * [2.0 branch translation tool](http://studio-42.github.io/elFinder/tools/langman/#2.0)
 
 
 3rd party connectors
