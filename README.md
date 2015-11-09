@@ -105,6 +105,18 @@ Downloads
  + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
  + [elFInder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
 
+Demo sites
+------------
+**2.0 rc1**
+ + http://elfinder.org/
+
+**2.0.x**
+ + http://hypweb.net/elFinder-nightly/demo/2.0/
+
+**2.1.x**
+ + http://studio-42.github.io/elFinder/ (with CORS to next)
+ + http://hypweb.net/elFinder-nightly/demo/2.1/
+
 FAQs
 ------------
 ### Which version of elFinder should I use?
@@ -122,8 +134,8 @@ Check out the [wiki](https://github.com/studio-42/elFinder/wiki#howtos) for indi
 ### The procedure of language files created or modified?
 
 You can create or modify the language file to use translation tool. Please refer to the pull request the results to the respective branch.
- * [2.x branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.x/langman.html)
- * [2.1 branch translation tool](http://hypweb.net/elFinder-nightly/demo/2.1/langman.html)
+ * [2.1 branch translation tool](http://studio-42.github.io/elFinder/tools/langman/#2.1)
+ * [2.0 branch translation tool](http://studio-42.github.io/elFinder/tools/langman/#2.0)
 
 
 3rd party connectors
