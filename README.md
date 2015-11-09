@@ -105,6 +105,18 @@ Downloads
  + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
  + [elFInder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
 
+Demo sites
+------------
+**2.0 rc1**
+ + http://elfinder.org/
+
+**2.0.x**
+ + http://hypweb.net/elFinder-nightly/demo/2.0/
+
+**2.1.x**
+ + http://studio-42.github.io/elFinder/ (with CORS to next)
+ + http://hypweb.net/elFinder-nightly/demo/2.1/
+
 FAQs
 ------------
 ### Which version of elFinder should I use?
