@@ -99,11 +99,11 @@ Downloads
 ------------
 **Stable releases**
  + [elFinder 2.0.3](https://github.com/Studio-42/elFinder/archive/2.0.3.zip)
- + [elFInder 2.1.0](https://github.com/Studio-42/elFinder/archive/2.1.0.zip)
+ + [elFinder 2.1.0](https://github.com/Studio-42/elFinder/archive/2.1.0.zip)
 
 **Nightly builds**
  + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
- + [elFInder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
+ + [elFinder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
 
 Demo sites
 ------------
