@@ -566,15 +566,22 @@ $.fn.elfindertree = function(fm, opts) {
 				.on('click', selNavdir+'.'+collapsed+' .'+arrow, function(e) {
 					var arrow = $(this),
 						link  = arrow.parent(selNavdir),
-						stree = link.next('.'+subtree);
+						stree = link.next('.'+subtree),
+						slideTH = 30, cnt;
 
 					e.stopPropagation();
 
 					if (link.hasClass(loaded)) {
 						link.toggleClass(expanded);
-						stree.slideToggle('normal', function(){
+						cnt = link.hasClass(expanded)? stree.children().length + stree.find('div.elfinder-navbar-subtree[style*=block]').children().length : stree.find('div:visible').length;
+						if (cnt > slideTH) {
+							stree.toggle();
 							fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-						});
+						} else {
+							stree.stop(true, true).slideToggle('normal', function(){
+								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+							});
+						}
 					} else {
 						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);
@@ -585,9 +592,14 @@ $.fn.elfindertree = function(fm, opts) {
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
-									stree.slideDown('normal', function(){
+									if (stree.children().length > slideTH) {
+										stree.show();
 										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-									});
+									} else {
+										stree.stop(true, true).slideDown('normal', function(){
+											fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+										});
+									}
 								} 
 								sync(true);
 							})
