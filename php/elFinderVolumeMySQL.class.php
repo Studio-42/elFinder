@@ -762,6 +762,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					fwrite($trgfp, fread($fp, 8192));
 				}
 				fclose($trgfp);
+				chmod($tmpfile, 0644);
 				
 				$sql = $id > 0
 					? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES ('.$id.', %d, "%s", LOAD_FILE("%s"), %d, %d, "%s", %d, %d)'
