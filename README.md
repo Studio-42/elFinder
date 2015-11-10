@@ -65,7 +65,10 @@ Features
  * Upload directly to the folder
  * Creating the archive by specifying the file name
  * Direct extraction to the current working directory (you do not want to create a folder)
- * Support Dropbox.com&copy; (Configurable & As network volume)
+ * Supports Dropbox.com&copy; (Configurable & As network volume)
+ * Supports custom information in info dialog
+ * Configuable columns of list view
+ * Supports custom CSS class function of tree view
 
 Requirements
 ------------
