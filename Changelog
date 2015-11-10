@@ -1,3 +1,12 @@
+2015-11-10  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.3):
+		- jQuery 1.9+ support
+		- 350+ bugs fixed since rc1 version
+		- Modify translations and some new translations
+		- Netmount volume function
+
+
 2012-04-10  Troex Nevelin  <troex@fury.scancode.ru>
 
 	* elFinder (2.0 rc1):
