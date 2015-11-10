@@ -1,0 +1,27 @@
+table {
+	width: 100%;
+}
+input.translator {
+	width: 40em;
+}
+td {
+	width: 50%;
+}
+td input {
+	width: 100%;
+	margin: 5px 0;
+}
+td input.same {
+	background-color: #ffe4e1;
+}
+tr.even {
+	background-color: #f0f8ff;
+}
+tr.odd {
+
+}
+div.makebtn,
+div.checkbtn,
+div.checkbtn input {
+	font-size: 120%;
+}
