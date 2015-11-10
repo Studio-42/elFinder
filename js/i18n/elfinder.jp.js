@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2015-10-23
+ * @version 2015-11-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -205,6 +205,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'サイズ順',
 			'sortdate'          : '日付順',
 			'sortFoldersFirst'  : 'フォルダ優先',
+
+			/********************************** new items **********************************/
+			'untitled file.txt' : '新規ファイル.txt', // added 10.11.2015
+			'untitled folder'   : '新規フォルダ',   // added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
