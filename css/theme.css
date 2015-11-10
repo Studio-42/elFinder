@@ -35,6 +35,7 @@
 .elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-filename.ui-state-hover,
 .elfinder-cwd table td.ui-state-hover,
 .elfinder-button-menu .ui-state-hover { background: #3875d7; color:#fff;}
+.elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-filename input { color: black; }
 /* disabled elfinder */
 .elfinder-disabled .elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-filename.ui-state-hover,
 .elfinder-disabled .elfinder-cwd table td.ui-state-hover { background:#dadada;}
