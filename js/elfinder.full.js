@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.1 (2015-11-10)
+ * Version 2.1.1 (2.1 Nightly: 140054e) (2015-11-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4137,7 +4137,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.1';
+elFinder.prototype.version = '2.1.1 (2.1 Nightly: 140054e)';
 
 
 
@@ -5560,7 +5560,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-10-22
+ * @version 2015-11-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -5784,6 +5784,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',
 			'sortFoldersFirst'  : 'Folders first',
+
+			/********************************** new items **********************************/
+			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
+			'untitled folder'   : 'NewFolder',   // added 10.11.2015
+			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
