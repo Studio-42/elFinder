@@ -65,7 +65,10 @@ Features
  * Upload directly to the folder
  * Creating the archive by specifying the file name
  * Direct extraction to the current working directory (you do not want to create a folder)
- * Support Dropbox.com&copy; (Configurable & As network volume)
+ * Supports Dropbox.com&copy; (Configurable & As network volume)
+ * Supports custom information in info dialog
+ * Configuable columns of list view
+ * Supports custom CSS class function of tree view
 
 Requirements
 ------------
@@ -99,7 +102,7 @@ Downloads
 ------------
 **Stable releases**
  + [elFinder 2.0.3](https://github.com/Studio-42/elFinder/archive/2.0.3.zip)
- + [elFinder 2.1.0](https://github.com/Studio-42/elFinder/archive/2.1.0.zip)
+ + [elFinder 2.1.1](https://github.com/Studio-42/elFinder/archive/2.1.1.zip)
 
 **Nightly builds**
  + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
