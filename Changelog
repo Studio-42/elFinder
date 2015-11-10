@@ -1,5 +1,25 @@
 2015-11-10  Naoki Sawada  <hypweb@gmail.com>
 
+	* elFinder (2.1.1):
+		- More High performance server backend and light client UI
+		- Connector plugin
+			- AutoResize : Auto resize on file upload.
+			- Normalizer : UTF-8 Normalizer of file-name and file-path etc.
+			- Sanitizer : Sanitizer of file-name and file-path etc.
+			- Watermark : Print watermark on file upload.
+		- Folder upload with Chrome
+		- Chunked file upload
+		- Upload directly to the folder
+		- Creating the archive by specifying the file name
+		- Direct extraction to the current working directory (you do not want to create a folder)
+		- Support Dropbox.com© (Configurable & As network volume)
+		- Supports custom information in info dialog
+		- Configuable columns of list view
+		- Supports custom CSS class function of tree view
+
+
+2015-11-10  Naoki Sawada  <hypweb@gmail.com>
+
 	* elFinder (2.0.3):
 		- jQuery 1.9+ support
 		- 350+ bugs fixed since rc1 version
