@@ -12,8 +12,9 @@ elFinder.prototype.i18 = {};
 			$('title').text($('title').text().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
 			$('#title').html($('#title').html().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
 		};
-		var init = function(branch){
+		var init = function(){
 			setTitle();
+			$("#selbr").val(branch);
 			$('#glbs').empty();
 			$('#content').empty();
 			src = {};
@@ -128,10 +129,10 @@ elFinder.prototype.i18 = {};
 
 		$('#selbr').on('change', function(e){
 			branch = $(this).find('option:selected').val();
-			init(branch);
+			init();
 			$('#lngbtn').trigger('click');
 		});
 
-		init(branch);
+		init();
 	});
 })(jQuery);
