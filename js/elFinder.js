@@ -2804,7 +2804,7 @@ elFinder.prototype = {
 
 							totalSize += blobSize;
 							chunked[chunkID] = 0;
-							while(start < blobSize) {
+							while(start <= blobSize) {
 								chunk = blob[blobSlice](start, end);
 								chunk._chunk = blob.name + '.' + ++chunks + '_' + total + '.part';
 								chunk._cid   = chunkID;
