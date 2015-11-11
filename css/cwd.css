@@ -192,6 +192,15 @@
 /* textfield inside icon */
 .elfinder-cwd input { width:100%; border:0px solid; margin:0; padding:0; }
 .elfinder-cwd-view-icons input {text-align:center; }
+.elfinder-cwd-view-icons textarea {
+	width: 100%;
+	border: 0px solid;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	overflow: hidden;
+	resize: none;
+}
 
 .elfinder-cwd-view-icons { text-align:center; }
 
