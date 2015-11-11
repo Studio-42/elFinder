@@ -26,6 +26,7 @@ elFinder.prototype.commands.rename = function() {
 			filename = '.elfinder-cwd-filename',
 			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
 			incwd    = (fm.cwd().hash == file.hash),
+			list     = fm.storage('view') == 'list',
 			dfrd     = $.Deferred()
 				.done(function(data){
 					incwd && fm.exec('open', data.added[0].hash);
@@ -53,7 +54,7 @@ elFinder.prototype.commands.rename = function() {
 				.always(function() {
 					fm.enable();
 				}),
-			input = $('<input type="text"/>')
+			input = $((list || type == 'navbar')? '<input type="text"/>' : '<textarea/>')
 				.keydown(function(e) {
 					e.stopPropagation();
 					e.stopImmediatePropagation();

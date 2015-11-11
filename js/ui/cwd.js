@@ -843,7 +843,7 @@ $.fn.elfindercwd = function(fm, options) {
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
 					e.stopPropagation();
-					if (e.target.nodeName == 'INPUT') {
+					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -874,7 +874,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
 					e.stopPropagation();
-					if (e.target.nodeName == 'INPUT') {
+					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
