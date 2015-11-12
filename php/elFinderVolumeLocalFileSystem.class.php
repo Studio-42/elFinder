@@ -821,6 +821,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					if (is_link($p) || !$this->nameAccepted($name)
 						||
 					(($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
+						$this->setError(elFinder::ERROR_SAVE, $name);
 						return true;
 					}
 					if (is_dir($p) && $this->_findSymlinks($p)) {
