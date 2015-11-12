@@ -27,6 +27,12 @@ elFinder.prototype.commands.rename = function() {
 			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
 			incwd    = (fm.cwd().hash == file.hash),
 			tarea    = (type === 'files' && fm.storage('view') != 'list'),
+			rest     = function(){
+				if (tarea) {
+					node.parent().zIndex('').css('position', '');
+					node.css('max-height', '');
+				}
+			},
 			dfrd     = $.Deferred()
 				.done(function(data){
 					incwd && fm.exec('open', data.added[0].hash);
@@ -35,6 +41,10 @@ elFinder.prototype.commands.rename = function() {
 					var parent = input.parent(),
 						name   = fm.escape(file.name);
 
+					if (tarea) {
+						name = name.replace(/([_.])/g, '&#8203;$1');
+					}
+					rest();
 					if (type === 'navbar') {
 						input.replaceWith(name);
 					} else {
@@ -52,16 +62,12 @@ elFinder.prototype.commands.rename = function() {
 					error && fm.error(error);
 				})
 				.always(function() {
-					if (tarea) {
-						node.parent().zIndex('').css('position', '');
-						node.css('max-height', '');
-					}
 					fm.enable();
 				}),
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
 				.keyup(function(){
 					if (tarea) {
-						this.style.height = 'auto';
+						this.style.height = '1px';
 						this.style.height = this.scrollHeight + 'px';
 					}
 				})
@@ -102,6 +108,7 @@ elFinder.prototype.commands.rename = function() {
 							return dfrd.reject(['errExists', name]);
 						}
 						
+						rest();
 						parent.html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
