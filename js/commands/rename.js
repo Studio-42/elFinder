@@ -26,7 +26,7 @@ elFinder.prototype.commands.rename = function() {
 			filename = '.elfinder-cwd-filename',
 			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
 			incwd    = (fm.cwd().hash == file.hash),
-			list     = fm.storage('view') == 'list',
+			tarea    = (type === 'files' && fm.storage('view') != 'list'),
 			dfrd     = $.Deferred()
 				.done(function(data){
 					incwd && fm.exec('open', data.added[0].hash);
@@ -52,9 +52,19 @@ elFinder.prototype.commands.rename = function() {
 					error && fm.error(error);
 				})
 				.always(function() {
+					if (tarea) {
+						node.parent().zIndex('').css('position', '');
+						node.css('max-height', '');
+					}
 					fm.enable();
 				}),
-			input = $((list || type == 'navbar')? '<input type="text"/>' : '<textarea/>')
+			input = $(tarea? '<textarea/>' : '<input type="text"/>')
+				.keyup(function(){
+					if (tarea) {
+						this.style.height = 'auto';
+						this.style.height = this.scrollHeight + 'px';
+					}
+				})
 				.keydown(function(e) {
 					e.stopPropagation();
 					e.stopImmediatePropagation();
@@ -131,6 +141,12 @@ elFinder.prototype.commands.rename = function() {
 		fm.one('select', function() {
 			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.blur();
 		})
+		
+		if (tarea) {
+			node.parent().zIndex((node.parent().zIndex()) + 1).css('position', 'relative');
+			node.css('max-height', 'none');
+			input.trigger('keyup');
+		}
 		
 		input.select().focus();
 		
