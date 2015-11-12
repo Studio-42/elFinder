@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.1 (2.1 Nightly: 3d955ee) (2015-11-12)
+ * Version 2.1.1 (2.1 Nightly: b3ddd45) (2015-11-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -539,7 +539,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align:center;
-	max-height:30px;
+	max-height:32px;
 	white-space:pre-wrap;
 	word-break:normal;
 	overflow:hidden;
