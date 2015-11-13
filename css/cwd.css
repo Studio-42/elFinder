@@ -241,7 +241,10 @@
 	text-align:right;
 	cursor:default;
 	border:0 solid;
-	
+}
+
+.elfinder .elfinder-cwd table td div { 
+	box-sizing: content-box;
 }
 
 .elfinder .elfinder-cwd tr.elfinder-touch td {
