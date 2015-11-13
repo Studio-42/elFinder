@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.1 (2.1 Nightly: 7bf75e3) (2015-11-12)
+ * Version 2.1.1 (2.1 Nightly: e26c37a) (2015-11-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -710,7 +710,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	text-align:right;
 	cursor:default;
 	border:0 solid;
-	
+}
+
+.elfinder .elfinder-cwd table td div { 
+	box-sizing: content-box;
 }
 
 .elfinder .elfinder-cwd tr.elfinder-touch td {
