@@ -1,14 +1,14 @@
 /**
- * English translation
- * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2014-12-19
+ * Română translation
+ * @author Cristian Tabacitu <hello@tabacitu.ro>
+ * @version 2015-11-13
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ro = {
 		translator : 'Cristian Tabacitu &lt;hello@tabacitu.ro&gt;',
 		language   : 'Română',
 		direction  : 'ltr',
-		dateFormat : 'd M Y h:i', // 13 Mai 2012 05:27
+		dateFormat : 'd M Y h:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
 
@@ -50,6 +50,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Nu am putut redenumi "$1".',
 			'errCopyFrom'          : 'Copierea fișierelor de pe volumul "$1" este interzisă.',
 			'errCopyTo'            : 'Copierea fișierelor către volumul "$1" este interzisă.',
+			'errMkOutLink'         : 'Nu am putut crea linkul în afara volumului rădăcină.', // from v2.1 added 03.10.2015
 			'errUpload'            : 'Eroare de upload.',  // old name - errUploadCommon
 			'errUploadFile'        : 'Nu am putut urca "$1".', // old name - errUpload
 			'errUploadNoFiles'     : 'Nu am găsit fișiere pentru a le urca.',
@@ -57,6 +58,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errUploadFileSize'    : 'Fișierul este prea mare.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'Acest tip de fișier nu este permis.',
 			'errUploadTransfer'    : 'Eroare la transferarea "$1".',
+			'errUploadTemp'        : 'Nu am putut crea fișierul temporar pentru upload.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Obiectul "$1" există deja în acest loc și nu poate fi înlocuit de un obiect de alt tip.', // new
 			'errReplace'           : 'Nu am putut înlocui "$1".',
 			'errSave'              : 'Nu am putut salva "$1".',
@@ -71,19 +73,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'Fișierul nu este o arhiva sau este o arhivă de un tip necunoscut.',
 			'errCmdNoSupport'      : 'Backend-ul nu suportă această comandă.',
 			'errReplByChild'       : 'Dosarul “$1” nu poate fi înlocuit de un element pe care el îl conține.',
-			'errArcSymlinks'       : 'Din motive de securitate, arhiva nu are voie să conțină symlinks sau fișiere cu nume interzise.',
+			'errArcSymlinks'       : 'Din motive de securitate, arhiva nu are voie să conțină symlinks sau fișiere cu nume interzise.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Fișierul arhivei depășește mărimea maximă permisă.',
 			'errResize'            : 'Nu am putut redimensiona "$1".',
-			'errResizeDegree'      : 'Grad de rotație nevalid.',
-			'errResizeRotate'      : 'Imaginea nu a fost rotită.',
-			'errResizeSize'        : 'Mărimea imaginii este nevalidă.',
-			'errResizeNoChange'    : 'Mărimea imaginii nu a fost schimbată.',
+			'errResizeDegree'      : 'Grad de rotație nevalid.',  // added 7.3.2013
+			'errResizeRotate'      : 'Imaginea nu a fost rotită.',  // added 7.3.2013
+			'errResizeSize'        : 'Mărimea imaginii este nevalidă.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Mărimea imaginii nu a fost schimbată.',  // added 7.3.2013
 			'errUsupportType'      : 'Tipul acesta de fișier nu este suportat.',
-			'errNotUTF8Content'    : 'Fișierul "$1" nu folosește UTF-8 și nu poate fi editat.',
-			'errNetMount'          : 'Nu am putut încărca "$1".',
-			'errNetMountNoDriver'  : 'Protocol nesuportat.',
-			'errNetMountFailed'    : 'Încărcare eșuată.',
-			'errNetMountHostReq'   : 'Gazda este necesară.',
+			'errNotUTF8Content'    : 'Fișierul "$1" nu folosește UTF-8 și nu poate fi editat.',  // added 9.11.2011
+			'errNetMount'          : 'Nu am putut încărca "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Protocol nesuportat.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Încărcare eșuată.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Gazda este necesară.', // added 18.04.2012
 			'errSessionExpires'    : 'Sesiunea a expirat datorită lipsei de activitate.',
 			'errCreatingTempDir'   : 'Nu am putut crea fișierul temporar: "$1"',
 			'errFtpDownloadFile'   : 'Nu am putut descarca fișierul de pe FTP: "$1"',
@@ -91,6 +93,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Nu am putut crea acest dosar pe FTP: "$1"',
 			'errArchiveExec'       : 'Eroare la arhivarea fișierelor: "$1"',
 			'errExtractExec'       : 'Eroare la dezarhivarea fișierelor: "$1"',
+			'errNetUnMount'        : 'Nu am putut elimina volumul', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'Nu poate fi convertit la UTF-8', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'Pentru a urca dosare încearcă Google Chrome.', // from v2.1 added 26.6.2015
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Creeaza arhivă',
@@ -120,7 +125,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Vezi',
 			'cmdresize'    : 'Redimensionează & rotește',
 			'cmdsort'      : 'Sortează',
-			'cmdnetmount'  : 'Încarcă volum din rețea',
+			'cmdnetmount'  : 'Încarcă volum din rețea', // added 18.04.2012
+			'cmdnetunmount': 'Elimină volum', // from v2.1 added 30.04.2012
+			'cmdplaces'    : 'La Locuri', // added 28.12.2014
+			'cmdchmod'     : 'Schimbă mod', // from v2.1 added 20.6.2015
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Închide',
@@ -131,6 +139,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nu',
 			'btnYes'    : 'Da',
 			'btnMount'  : 'Încarcă',  // added 18.04.2012
+			'btnApprove': 'Mergi la $1 și aprobă', // from v2.1 added 26.04.2012
+			'btnUnmount': 'Elimină volum', // from v2.1 added 30.04.2012
+			'btnConv'   : 'Convertește', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'Aici',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Volum',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Toate',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'Tipuri MIME', // from v2.1 added 22.5.2015
+			'btnFileName':'Nume fișier',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'Salvează și închide', // from v2.1 added 12.6.2015
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Deschide dosar',
@@ -153,7 +170,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Se întamplă ceva',
 			'ntfloadimg'  : 'Se încarcă imaginea',
 			'ntfnetmount' : 'Se încarcă volumul din rețea', // added 18.04.2012
+			'ntfnetunmount': 'Se elimină volumul din rețea', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Se preiau dimensiunile imaginii', // added 20.05.2013
+			'ntfreaddir'  : 'Se citesc informațiile dosarului', // from v2.1 added 01.07.2013
+			'ntfurl'      : 'Se preia URL-ul din link', // from v2.1 added 11.03.2014
+			'ntfchmod'    : 'Se schimba modul de fișier', // from v2.1 added 20.6.2015
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'necunoscută',
@@ -205,10 +226,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortdate'          : 'după dată',
 			'sortFoldersFirst'  : 'Dosarele primele',
 
+			/********************************** new items **********************************/
+			'untitled file.txt' : 'FisierNou.txt', // added 10.11.2015
+			'untitled folder'   : 'DosarNou',   // added 10.11.2015
+			'Archive'           : 'ArhivaNoua',  // from v2.1 added 10.11.2015
+
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Este necesară confirmare',
 			'confirmRm'       : 'Ești sigur că vrei să ștergi fișierele?<br/>Acțiunea este ireversibilă!',
 			'confirmRepl'     : 'Înlocuiește fișierul vechi cu cel nou?',
+			'confirmConvUTF8' : 'Nu este în UTF-8<br/>Convertim la UTF-8?<br/>Conținutul devine UTF-8 după salvarea conversiei.', // from v2.1 added 08.04.2014
+			'confirmNotSave'  : 'Au avut loc modificări.<br/>Dacă nu salvezi se vor pierde modificările.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Aplică pentru toate',
 			'name'            : 'Nume',
 			'size'            : 'Mărime',
@@ -282,6 +310,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Utilizator', // added 18.04.2012
 			'pass'                : 'Parolă', // added 18.04.2012
+			'confirmUnmount'      : 'Vrei să elimini volumul $1?',  // from v2.1 added 30.04.2012
+			'dropFilesBrowser': 'Drag&drop sau lipește din browser', // from v2.1 added 30.05.2012
+			'dropPasteFiles'  : 'Drag&drop sau lipește fișiere aici', // from v2.1 added 07.04.2014
+			'encoding'        : 'Encodare', // from v2.1 added 19.12.2014
+			'locale'          : 'Locale',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Țintă: $1',                // from v2.1 added 22.5.2015
+			'searchMime'      : 'Caută după tipul MIME', // from v2.1 added 22.5.2015
+			'owner'           : 'Owner', // from v2.1 added 20.6.2015
+			'group'           : 'Group', // from v2.1 added 20.6.2015
+			'other'           : 'Other', // from v2.1 added 20.6.2015
+			'execute'         : 'Execute', // from v2.1 added 20.6.2015
+			'perm'            : 'Permission', // from v2.1 added 20.6.2015
+			'mode'            : 'Mod', // from v2.1 added 20.6.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Necunoscut',
@@ -297,7 +338,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindMsPP'        : 'Prezentare Microsoft Powerpoint',
 			'kindOO'          : 'Document Open Office',
 			'kindAppFlash'    : 'Aplicație Flash',
-			'kindPDF'         : 'Portable Document Format (PDF)',
+			'kindPDF'         : 'Document Portabil (PDF)',
 			'kindTorrent'     : 'Fișier Bittorrent',
 			'kind7z'          : 'Arhivă 7z',
 			'kindTAR'         : 'Arhivă TAR',
@@ -326,12 +367,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindPython'      : 'Sursă Python',
 			'kindJava'        : 'Sursă Java',
 			'kindRuby'        : 'Sursă Ruby',
-			'kindPerl'        : 'Perl script',
+			'kindPerl'        : 'Script Perl',
 			'kindSQL'         : 'Sursă SQL',
 			'kindXML'         : 'Document XML',
 			'kindAWK'         : 'Sursă AWK',
 			'kindCSV'         : 'Valori separate de virgulă (CSV)',
 			'kindDOCBOOK'     : 'Document Docbook XML',
+			'kindMarkdown'    : 'Text Markdown', // added 20.7.2015
 			// images
 			'kindImage'       : 'Imagine',
 			'kindBMP'         : 'Imagine BMP',
