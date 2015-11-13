@@ -1434,7 +1434,7 @@ class elFinder {
 		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
 			$fname = $m[1];
 			$encname = md5($cid . '_' . $fname);
-			$base = $tempDir . '/ELF' . $encname;
+			$base = $tempDir . DIRECTORY_SEPARATOR . 'ELF' . $encname;
 			$clast = intval($m[3]);
 			if (is_null($tmpname)) {
 				ignore_user_abort(true);
