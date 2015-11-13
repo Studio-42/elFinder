@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.1 (2.1 Nightly: e26c37a) (2015-11-13)
+ * Version 2.1.1 (2.1 Nightly: efccca9) (2015-11-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4137,7 +4137,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.1 (2.1 Nightly: e26c37a)';
+elFinder.prototype.version = '2.1.1 (2.1 Nightly: efccca9)';
 
 
 
@@ -5424,7 +5424,7 @@ elFinder.prototype.resources = {
 						var name   = $.trim(input.val()),
 							parent = input.parent();
 
-						if (pnode.length) {
+						if (parent.length) {
 
 							if (!name) {
 								return dfrd.reject('errInvName');
@@ -5434,7 +5434,7 @@ elFinder.prototype.resources = {
 							}
 
 							rest();
-							pnode.html(fm.escape(name));
+							parent.html(fm.escape(name));
 
 							fm.lockfiles({files : [id]});
 

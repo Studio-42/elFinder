@@ -59,7 +59,20 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		}
-		$this->root = $this->getFullPath($this->root, getcwd());
+		if (!$cwd = getcwd()) {
+			return $this->setError('elFinder LocalVolumeDriver requires a result of getcwd().');
+		}
+		// detect systemRoot
+		if (!isset($this->options['systemRoot'])) {
+			if ($cwd[0] === $this->separator || $this->root[0] === $this->separator) {
+				$this->systemRoot = $this->separator;
+			} else if (preg_match('/^([a-zA-Z]:'.preg_quote($this->separator, '/').')/', $this->root, $m)) {
+				$this->systemRoot = $m[1];
+			} else if (preg_match('/^([a-zA-Z]:'.preg_quote($this->separator, '/').')/', $cwd, $m)) {
+				$this->systemRoot = $m[1];
+			}
+		}
+		$this->root = $this->getFullPath($this->root, $cwd);
 		return true;
 	}
 	
