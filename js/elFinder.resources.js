@@ -123,7 +123,7 @@ elFinder.prototype.resources = {
 						var name   = $.trim(input.val()),
 							parent = input.parent();
 
-						if (pnode.length) {
+						if (parent.length) {
 
 							if (!name) {
 								return dfrd.reject('errInvName');
@@ -133,7 +133,7 @@ elFinder.prototype.resources = {
 							}
 
 							rest();
-							pnode.html(fm.escape(name));
+							parent.html(fm.escape(name));
 
 							fm.lockfiles({files : [id]});
 
