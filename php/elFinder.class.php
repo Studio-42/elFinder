@@ -1818,7 +1818,12 @@ class elFinder {
 			}
 			
 			is_resource($fp) && fclose($fp);
-			if (! is_uploaded_file($tmpname) && @ unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);
+			if (! is_uploaded_file($tmpname)){
+				clearstatcache();
+				if (!is_file($tmpname) || @ unlink($tmpname)) {
+					unset($GLOBALS['elFinderTempFiles'][$tmpname]);
+				}
+			}
 			$result['added'][] = $file;
 		}
 		if ($GLOBALS['elFinderTempFiles']) {
