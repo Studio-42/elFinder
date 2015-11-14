@@ -364,15 +364,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					$linkreadable = !empty($ostat['isowner']);
 				}
 			}
-			$lstat = lstat($path);
 			$stat['alias'] = $this->_path($target);
 			$stat['target'] = $target;
-			$size  = sprintf('%u', $lstat['size']);
-			$stat['ts'] = $lstat['mtime'];
-		} else {
-			$size = sprintf('%u', @filesize($path));
-			$stat['ts'] = filemtime($path);
 		}
+		$size = sprintf('%u', @filesize($path));
+		$stat['ts'] = filemtime($path);
 		if ($statOwner) {
 			$fstat = stat($path);
 			$uid = $fstat['uid'];
@@ -546,24 +542,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 							$dir = false;
 							$stat['alias'] = $this->_path($target);
 							$stat['target'] = $target;
-							$size = sprintf('%u', $lstat['size']);
-							$stat['ts'] = $lstat['mtime'];
 						}
 					} else {
 						$dir = is_dir($target);
-						$lstat = lstat($fpath);
 						$stat['alias'] = $this->_path($target);
 						$stat['target'] = $target;
-						$size = sprintf('%u', $lstat['size']);
-						$stat['ts'] = $lstat['mtime'];
 						$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
 					}
 				} else {
 					$dir = $file->isDir();
-					$size = sprintf('%u', $file->getSize());
-					$stat['ts'] = $file->getMTime();
 					$stat['mime'] = $dir ? 'directory' : $this->mimetype($fpath);
 				}
+				$size = sprintf('%u', $file->getSize());
+				$stat['ts'] = $file->getMTime();
 				if (!$br) {
 					if ($statOwner && !$linkreadable) {
 						$uid = $file->getOwner();
