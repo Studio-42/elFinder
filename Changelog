@@ -1,3 +1,9 @@
+2015-xx-xx
+
+	* elFinder (2.0.4):
+		- [security-fix] vulnerability of the MIME type quarantine
+
+
 2015-11-10  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.0.3):
