@@ -17,6 +17,7 @@ elFinder.prototype.i18 = {};
 			$("#selbr").val(branch);
 			$('#glbs').empty();
 			$('#content').empty();
+			$('#step').hide();
 			src = {};
 			keys = {};
 			$.getScript('./'+branch+'/i18n/elfinder.LANG.js', function() {
@@ -43,14 +44,15 @@ elFinder.prototype.i18 = {};
 					$.getScript(filename)
 					.done(function(){
 						make = $.extend(true, {}, slng, elf.i18[lang]);
-						$('#editgh').attr('href', 'https://github.com/Studio-42/elFinder/edit/'+tgt+'/js/i18n/elfinder.'+lang+'.js');
+						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/edit/'+tgt+'/js/i18n/elfinder.'+lang+'.js');
 					})
 					.fail(function(){
 						make = $.extend(true, {}, slng);
-						$('#editgh').attr('href', 'https://github.com/Studio-42/elFinder/new/'+tgt+'/js/i18n');
+						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/new/'+tgt+'/js/i18n');
 					})
 					.always(function(){
-						$('.langname').text(lang);
+						$('span.langname').text(lang);
+						$('span.targetb').text(tgt);
 						$.each(glbs, function(k, v){
 							$('#glbs-'+v).val(make[v].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
 						});
@@ -98,6 +100,7 @@ elFinder.prototype.i18 = {};
 						var reg = new RegExp('(\''+keys[k]+'\'\\s*:\\s*\').+(\')');
 						made = made.replace(reg, function(str, p1, p2){return p1+$('#inp-'+k).val().replace(/'/g, "\\'")+p2;});
 					});
+					$('#step').show();
 					$('#made').val(made.replace(/[ \t]+([\r\n])/g, '$1'));
 				});
 				$('#content').on('change', 'input', function(){
