@@ -1,6 +1,6 @@
 2015-xx-xx
 
-	* elFinder (2.1.1):
+	* elFinder (2.1.2):
 		- [security-fix] vulnerability of the MIME type quarantine
 		- Multi-line filename editing on icon view
 		- Auto expands filename editing on list view
