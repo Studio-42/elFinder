@@ -2,7 +2,8 @@
  * German translation
  * @author JPG & Mace <dev@flying-datacenter.de>
  * @author tora60 from pragmaMx.org
- * @version 2014-12-19
+ * @author Timo-Linde <info@timo-linde.de>
+ * @version 2015-11-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.de = {
@@ -21,7 +22,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNode'              : 'Für elFinder muss das DOM Element erstellt werden.',
 			'errURL'               : 'Ungültige elFinder Konfiguration! Die URL Option ist nicht gesetzt.',
 			'errAccess'            : 'Zugriff verweigert.',
-			'errConnect'           : 'Verbindung zum Backend fehlgeschlagen',
+			'errConnect'           : 'Verbindung zum Backend fehlgeschlagen.',
 			'errAbort'             : 'Verbindung abgebrochen.',
 			'errTimeout'           : 'Zeitüberschreitung der Verbindung.',
 			'errNotFound'          : 'Backend nicht gefunden.',
@@ -33,7 +34,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errDataNotJSON'       : 'Daten nicht im JSON Format.',
 			'errDataEmpty'         : 'Daten sind leer.',
 			'errCmdReq'            : 'Backend Anfrage benötigt Befehl.',
-			'errOpen'              : 'Kann "$1" nicht öffnen',
+			'errOpen'              : 'Kann "$1" nicht öffnen.',
 			'errNotFolder'         : 'Objekt ist kein Ordner.',
 			'errNotFile'           : 'Objekt ist keine Datei.',
 			'errRead'              : 'Kann "$1" nicht öffnen.',
@@ -41,7 +42,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errPerm'              : 'Zugriff verweigert.',
 			'errLocked'            : '"$1" ist gesperrt und kann nicht umbenannt, verschoben oder gelöscht werden.',
 			'errExists'            : 'Die Datei "$1" existiert bereits.',
-			'errInvName'           : 'Ungültiger Datei Name.',
+			'errInvName'           : 'Ungültiger Dateiname.',
 			'errFolderNotFound'    : 'Ordner nicht gefunden.',
 			'errFileNotFound'      : 'Datei nicht gefunden.',
 			'errTrgFolderNotFound' : 'Zielordner "$1" nicht gefunden.',
@@ -51,13 +52,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Kann "$1" nicht umbenennen.',
 			'errCopyFrom'          : 'Kopieren von Dateien von "$1" nicht erlaubt.',
 			'errCopyTo'            : 'Kopieren von Dateien nach "$1" nicht erlaubt.',
+                        'errMkOutLink'         : 'Der Link kann nicht außerhalb der Partition führen.',
 			'errUpload'            : 'Upload Fehler.',
 			'errUploadFile'        : 'Kann "$1" nicht hochladen.',
 			'errUploadNoFiles'     : 'Keine Dateien zum Hochladen gefunden.',
 			'errUploadTotalSize'   : 'Daten überschreiten die Maximalgröße.',
-			'errUploadFileSize'    : 'Die Datei überschreitet die Maximalgröße',
+			'errUploadFileSize'    : 'Die Datei überschreitet die Maximalgröße.',
 			'errUploadMime'        : 'Dateiart nicht zulässig.',
 			'errUploadTransfer'    : '"$1" Transfer Fehler.',
+                        'errUploadTemp'        : 'Kann Temporäre Datei nicht erstellen.',
 			'errNotReplace'        : 'Das Objekt "$1" existiert bereits an dieser Stelle und kann nicht durch ein Objekt eines anderen Typs ersetzt werden.',
 			'errReplace'           : 'Kann "$1" nicht ersetzen.',
 			'errSave'              : 'Kann "$1" nicht speichern.',
@@ -66,17 +69,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errCopyInItself'      : '"$1" kann sich nicht in sich selbst kopieren.',
 			'errRm'                : 'Kann "$1" nicht entfernen.',
 			'errRmSrc'             : 'Kann Quelldatei(en) nicht entfernen.',
-			'errExtract'           : 'Kann "$1" nicht entpacken .',
+			'errExtract'           : 'Kann "$1" nicht entpacken.',
 			'errArchive'           : 'Archiv konnte nicht erstellt werden.',
 			'errArcType'           : 'Archivtyp nicht untersützt.',
-			'errNoArchive'         : 'Bei der Datei handelt es sich nicht um ein Archiv oder der Archivtyp wird nicht unterstütz.',
-			'errCmdNoSupport'      : 'Das Backend unterstütz diesen Befehl nicht.',
-			'errReplByChild'       : 'Der Ordner “$1” kann nicht durch etwas ersetzt werden, das ihn selbst enthält.',
+			'errNoArchive'         : 'Bei der Datei handelt es sich nicht um ein Archiv oder der Archivtyp wird nicht unterstützt.',
+			'errCmdNoSupport'      : 'Das Backend unterstützt diesen Befehl nicht.',
+			'errReplByChild'       : 'Der Ordner "$1" kann nicht durch etwas ersetzt werden, das ihn selbst enthält.',
 			'errArcSymlinks'       : 'Aus Sicherheitsgründen ist es verboten, ein Archiv mit symbolischen Links zu extrahieren.',
 			'errArcMaxSize'        : 'Die Archiv Dateien übersteigen die maximal erlaubte Größe.',
 			'errResize'            : 'Größe von "$1" kann nicht geändert werden.',
 			'errResizeDegree'      : 'Ungültiger Rotationswert.',
-			'errResizeRotate'      : 'Bild jonnte nicht gedreht werden.',
+			'errResizeRotate'      : 'Bild konnte nicht gedreht werden.',
 			'errResizeSize'        : 'Ungültige Bildgröße.',
 			'errResizeNoChange'    : 'Bildmaße nicht geändert.',
 			'errUsupportType'      : 'Nicht unterstützte Dateiart.',
@@ -92,6 +95,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFtpMkdir'          : 'Erstellung des Remote-Ordners auf FTP nicht möglich: "$1"',
 			'errArchiveExec'       : 'Fehler beim archivieren der Dateien: "$1"',
 			'errExtractExec'       : 'Fehler beim extrahieren der Dateien: "$1"',
+                        'errNetUnMount'        : 'Kann nicht ausgeworfen werden.',
+			'errConvUTF8'          : 'Kann nicht zu UTF-8 konvertiert werden.',
+			'errFolderUpload'      : 'Versuchen Sie es mit Google Chrome, wenn Sie einen Ordner hochladen möchten.',
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Archiv erstellen',
@@ -122,6 +128,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdresize'    : 'Größe ändern & drehen',
 			'cmdsort'      : 'Sortieren',
 			'cmdnetmount'  : 'Verbinde mit Netzwerkspeicher',
+                        'cmdnetunmount': 'Auswerfen', 
+			'cmdplaces'    : 'Orte',
+			'cmdchmod'     : 'Berechtigung ändern',
+			
 			
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Schließen',
@@ -132,6 +142,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Nein',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Verbinden',
+                        'btnApprove': 'Goto $1 & approve', 
+			'btnUnmount': 'Auswerfen',
+			'btnConv'   : 'Konvertieren',
+			'btnCwd'    : 'Arbeitspfad',
+			'btnVolume' : 'Partition',
+			'btnAll'    : 'Alle',
+			'btnMime'   : 'MIME Typ',
+			'btnFileName':'Dateiname',
+			'btnSaveClose': 'Speichern & Schließen',
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Öffne Ordner',
@@ -154,7 +173,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsmth'     : 'Bin beschäftigt',
 			'ntfloadimg'  : 'Bild laden',
 			'ntfnetmount' : 'Mit Netzwerkspeicher verbinden',
+                        'ntfnetunmount': 'Netzwerkspeicher auswerfen',
 			'ntfdim'      : 'Bildgröße erfassen',
+			'ntfreaddir'  : 'Lese Ordner Informationen',
+			'ntfurl'      : 'Hole URL von Link',
+			'ntfchmod'    : 'Ändere Datei berechtigungen',
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unbekannt',
@@ -205,10 +228,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'         : 'nach Größe',
 			'sortdate'         : 'nach Datum',
 			'sortFoldersFirst' : 'Ordner zuerst',
+                        
+                        /********************************** new items **********************************/
+			'untitled file.txt' : 'Neues Textdokument.txt', 
+			'untitled folder'   : 'Neuer Ordner',
+			'Archive'           : 'Neues Archiv',
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Bestätigung benötigt',
 			'confirmRm'       : 'Sollen die Dateien gelöscht werden?<br/>Dies kann nicht rückgängig gemacht werden!',
+                        'confirmConvUTF8' : 'Nicht in UTF-8<br/>Zu UTF-8 konvertieren?<br/>Inhalte werden zu UTF-8 konvertiert wenn Sie speichern.',
+			'confirmNotSave'  : 'Die Datei wurde geändert.<br/>Sie werden die Änderungen verlieren wenn Sie nicht speichern.',
 			'confirmRepl'     : 'Datei ersetzen?',
 			'apllyAll'        : 'Alles bestätigen',
 			'name'            : 'Name',
@@ -223,7 +253,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'unknown'         : 'unbekannt',
 			'selectall'       : 'Alle Dateien auswählen',
 			'selectfiles'     : 'Dateien auswählen',
-			'selectffile'     : 'Erste Datei auswhählen',
+			'selectffile'     : 'Erste Datei auswählen',
 			'selectlfile'     : 'Letzte Datei auswählen',
 			'viewlist'        : 'Spaltenansicht',
 			'viewicons'       : 'Symbolansicht',
@@ -283,6 +313,19 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'port'                : 'Port',
 			'user'                : 'Benutzer',
 			'pass'                : 'Passwort',
+                        'confirmUnmount'      : 'Möchten Sie "$1" auswerfen?',
+			'dropFilesBrowser': 'Sie können Dateien in den Browser ziehen', 
+			'dropPasteFiles'  : 'Lassen Sie die Dateien hier Los',
+			'encoding'        : 'Codierung', 
+			'locale'          : 'Locale', 
+			'searchTarget'    : 'Ziel: $1',
+			'searchMime'      : 'Suche nach MIME Typ',
+			'owner'           : 'Besitzer',
+			'group'           : 'Gruppe',
+			'other'           : 'Andere',
+			'execute'         : 'Ausführen',
+			'perm'            : 'Berechtigung',
+			'mode'            : 'Modus',
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
@@ -333,6 +376,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'AWK Quelltext',
 			'kindCSV'         : 'Komma getrennte Daten',
 			'kindDOCBOOK'     : 'Docbook XML Dokument',
+                        'kindMarkdown'    : 'Markdown Text',
 			// images
 			'kindImage'       : 'Bild',
 			'kindBMP'         : 'Bitmap Bild',
@@ -341,7 +385,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindPNG'         : 'PNG Bild',
 			'kindTIFF'        : 'TIFF Bild',
 			'kindTGA'         : 'TGA Bild',
-			'kindPSD'         : 'Adobe Photoshop Bild',
+			'kindPSD'         : 'Adobe Photoshop Dokument',
 			'kindXBITMAP'     : 'X Bitmap Bild',
 			'kindPXM'         : 'Pixelmator Bild',
 			// media
