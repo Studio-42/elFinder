@@ -1,14 +1,15 @@
 2015-xx-xx
 
-	* elFinder (2.1.1):
+	* elFinder (2.1.2):
 		- [security-fix] vulnerability of the MIME type quarantine
 		- Multi-line filename editing on icon view
 		- Auto expands filename editing on list view
 		- Fixed #1124, Uploading problem exactly 20MiB/30MiB/40MiB...
-		- Merged #1125, Fix file permissions for MySQL LOAD_FILE command
+		- Marged #1125, Fix file permissions for MySQL LOAD_FILE command
 		- Fixed #1127, Supported full path including the drive letter of the Windows server
-		- Marged #1131, #1132, Complete Romanian translation
+		- Marged #1131, #1132, Complete Romanian(ro) translation
 		- Fixed symbolic link file stats `mtime`, `size`
+		- Marged #1133, Complete German(de) translation
 		- Others, some minor bug fixes
 
 
