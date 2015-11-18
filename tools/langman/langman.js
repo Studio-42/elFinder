@@ -7,7 +7,13 @@ elFinder.prototype.i18 = {};
 		var elf = new elFinder();
 		var as2x = '2.1';
 		var src = {}, keys = {}, tpl, locprms, hash, branch, lang;
-		var glbs = ['translator', 'language', 'direction', 'dateFormat', 'fancyDateFormat'];
+		var glbs = {
+			'translator'      : 'Your name &lt;translator@email.tld&gt;',
+			'language'        : 'Name of this language',
+			'direction'       : '"ltr"(Left to right) or "rtl"(Right to left)',
+			'dateFormat'      : '',
+			'fancyDateFormat' : '"$1" is replaced "Today" or "Yesterday"'
+		};
 		var setTitle = function(){
 			$('title').text($('title').text().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
 			$('#title').html($('#title').html().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
@@ -21,6 +27,7 @@ elFinder.prototype.i18 = {};
 			src = {};
 			keys = {};
 			$.getScript('./'+branch+'/i18n/elfinder.LANG.js', function() {
+				var hTable;
 				$.each(elf.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE.messages, function(k, v){
 					var key = k.replace(/[ \.]/g, '_');
 					src[key] = v;
@@ -54,7 +61,13 @@ elFinder.prototype.i18 = {};
 						$('span.langname').text(lang);
 						$('span.targetb').text(tgt);
 						$.each(glbs, function(k, v){
-							$('#glbs-'+v).val(make[v].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+							var t = $('#glbs-txt-' + k);
+							if (t.length > 0) {
+								$('#glbs-' + k).data('default', make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+								t.html(make[k] + ', ');
+							} else {
+								$('#glbs-' + k).val(make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+							}
 						});
 						$.each(src, function(k, v){
 							$('#inp-'+k).val(make.messages[keys[k]])[(make.messages[keys[k]] == src[k])?'addClass':'removeClass']('same');
@@ -83,7 +96,7 @@ elFinder.prototype.i18 = {};
 					var made = tpl;
 					var language = $('#glbs-language').val();
 					var head = '/**\n * '+language+' translation\n';
-					var authors = $('#glbs-translator').val().split(',');
+					var authors = ($('#glbs-translator').data('default') || '').split(',').concat($('#glbs-translator').val().split(','));
 					$.each(authors, function(k, v){
 						head += ' * @author '+v.trim()+'\n';
 					});
@@ -93,8 +106,13 @@ elFinder.prototype.i18 = {};
 					.replace(/(elFinder\.prototype\.i18\.)REPLACE_WITH_xx_OR_xx_YY_LANG_CODE( = {)/, '$1'+lng+'$2')
 					.replace(/(\/\*\*\s+\* )XXXXX( translation)/, '$1'+language+'$2');
 					$.each(glbs, function(k, v){
-						var reg = new RegExp('(\\b'+v+'\\b\\s*:\\s*\').+(\')');
-						made = made.replace(reg, function(str, p1, p2){return p1+$('#glbs-'+v).val().replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;')+p2;});
+						var reg = new RegExp('(\\b'+k+'\\b\\s*:\\s*\').+(\')');
+						var def = $('#glbs-'+k).data('default');
+						var val = $('#glbs-'+k).val();
+						if (def) {
+							val = def + (val? ', ' + val : '');
+						}
+						made = made.replace(reg, function(str, p1, p2){return p1+val.replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;')+p2;});
 					});
 					$.each(src, function(k, v){
 						var reg = new RegExp('(\''+keys[k]+'\'\\s*:\\s*\').+(\')');
@@ -108,12 +126,18 @@ elFinder.prototype.i18 = {};
 					$(this)[($(this).val() == src[k])?'addClass':'removeClass']('same');
 				});
 
+				hTable = $('<table class="header"/>').appendTo($('#glbs'));
 				$.each(glbs, function(k, v){
-					$('#glbs').append($('<div>')).append(v+': <input id="glbs-'+v+'" class="'+v+'" type="text">');
+					var inp = '';
+					if (k === 'translator') {
+						inp = '<span id="glbs-txt-'+k+'"></span><br />';
+					}
+					inp += '<input id="glbs-'+k+'" class="'+k+'" type="text"><span class="note">'+v+'</span>';
+					$('<tr/>').append('<td class="caption">'+k+'</td><td class="input">'+inp+'</td>').appendTo(hTable);
 				});
 				$.each(src, function(k, v){
 					cl = (cl == 'even')? 'odd' : 'even';
-					tbl.append($('<tr class="'+cl+'"><td id="en-'+k+'" title="'+k+'">'+v+'</td><td id="lng-'+k+'"><input id="inp-'+k+'" class="mesinp" type="text" title="'+k+'"></input></td></tr>'));
+					tbl.append($('<tr class="'+cl+'"><td id="en-'+k+'" title="'+keys[k]+'">'+v+'</td><td id="lng-'+k+'"><input id="inp-'+k+'" class="mesinp" type="text" title="'+keys[k]+'"></input></td></tr>'));
 				});
 				$('span.branch').text(branch);
 				

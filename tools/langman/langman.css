@@ -1,13 +1,24 @@
 table {
 	width: 100%;
 }
-input.translator {
-	width: 40em;
+table.header td.input {
+	width: 100%;
 }
-td {
+table.header td.caption {
+	white-space: nowrap;
+}
+span.note {
+	color: gray;
+	font-size: 70%;
+	padding-left: 0.5em;
+}
+input.translator {
+	width: 20em;
+}
+table#content td {
 	width: 50%;
 }
-td input {
+table#content td input {
 	width: 100%;
 	margin: 5px 0;
 }
