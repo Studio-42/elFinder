@@ -19,7 +19,8 @@
  *			'Sanitizer' => array(
  *				'enable' => true,
  *				'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
- *				'replace'  => '_'    // replace to this
+ *				'replace'  => '_',    // replace to this
+ *				'lowercase'  => true    // make chars lowercase
  *			)
  *		),
  *		// each volume configure (optional)
@@ -32,7 +33,8 @@
  *					'Sanitizer' => array(
  *						'enable' => true,
  *						'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
- *						'replace'  => '_'    // replace to this
+ *						'replace'  => '_',    // replace to this
+ *						'lowercase'  => true    // make chars lowercase
  *					)
  *				)
  *			)
@@ -95,6 +97,9 @@ class elFinderPluginSanitizer
 	
 	private function sanitizeFileName($filename, $opts, $allows = array()) {
 		$targets = $allows? array_diff($opts['targets'], $allows) : $opts['targets'];
+		if ($opts['lowercase']) {
+			$filename = strtolower($filename);
+		}
 		return str_replace($targets, $opts['replace'], $filename);
   	}
 }
