@@ -121,7 +121,7 @@ elFinder.prototype.i18 = {};
 					$('#lng').val(lang);
 					$('#lngbtn').trigger('click');
 				}
-				$('#made').val('');
+				$('#made').val('Please click a button [Make it!] .');
 				
 			});
 		};
