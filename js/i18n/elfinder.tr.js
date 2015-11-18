@@ -1,11 +1,12 @@
 /**
  * Turkish translation
- * @author Abdullah ELEN <abdullahelen@msn.com>, I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
+ * @author I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
+ * @author Abdullah ELEN <abdullahelen@msn.com>
  * @version 2015-11-17
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.tr = {
-		translator : 'Abdullah ELEN &lt;abdullahelen@msn.com&gt;',
+		translator : 'I.Taskinoglu & A.Kaya &lt;alikaya@armsyazilim.com&gt;, Abdullah ELEN &lt;abdullahelen@msn.com&gt;',
 		language   : 'Türkçe',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
