@@ -11,7 +11,7 @@ elFinder.prototype.i18 = {};
 			'translator'      : 'Your name &lt;translator@email.tld&gt;',
 			'language'        : 'Name of this language',
 			'direction'       : '"ltr"(Left to right) or "rtl"(Right to left)',
-			'dateFormat'      : '',
+			'dateFormat'      : 'For example: "d.m.Y H:i", "M d, Y h:i A", "Y/m/d h:i A" etc.',
 			'fancyDateFormat' : '"$1" is replaced "Today" or "Yesterday"'
 		};
 		var setTitle = function(){
@@ -44,6 +44,7 @@ elFinder.prototype.i18 = {};
 					var make;
 					var filename = './'+branch+'/i18n/elfinder.'+lang+'.js';
 					var tgt = (branch == as2x)? '2.x' : branch;
+					var isNew = false;
 
 					$('#made').val('');
 					location.hash = '#'+branch+':'+lang;
@@ -54,19 +55,35 @@ elFinder.prototype.i18 = {};
 						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/edit/'+tgt+'/js/i18n/elfinder.'+lang+'.js');
 					})
 					.fail(function(){
+						isNew = true;
 						make = $.extend(true, {}, slng);
 						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/new/'+tgt+'/js/i18n');
+						$('#step .step-edit-or-new').html('Input "elfinder.'+lang+'.js" to new file name.');
 					})
 					.always(function(){
 						$('span.langname').text(lang);
 						$('span.targetb').text(tgt);
 						$.each(glbs, function(k, v){
 							var t = $('#glbs-txt-' + k);
-							if (t.length > 0) {
-								$('#glbs-' + k).data('default', make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
-								t.html(make[k] + ', ');
+							var val = make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+							if (!isNew && t.length > 0) {
+								$('#glbs-' + k).data('default', val);
+								t.html(make[k] + ', <br>');
 							} else {
-								$('#glbs-' + k).val(make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+								$('#glbs-' + k).data('default', '');
+								if (!isNew) {
+									$('#glbs-' + k).val(val);
+								} else {
+									if (k === 'translator' || k === 'language') {
+										$('#glbs-' + k).val('');
+									} else {
+										$('#glbs-' + k).val(val);
+									}
+								}
+								t.html('');
+							}
+							if (k === 'translator') {
+								$('#glbs-' + k).val('').attr('placeholder', slng[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
 							}
 						});
 						$.each(src, function(k, v){
@@ -98,7 +115,9 @@ elFinder.prototype.i18 = {};
 					var head = '/**\n * '+language+' translation\n';
 					var authors = ($('#glbs-translator').data('default') || '').split(',').concat($('#glbs-translator').val().split(','));
 					$.each(authors, function(k, v){
-						head += ' * @author '+v.trim()+'\n';
+						if (v.trim()) {
+							head += ' * @author '+v.trim()+'\n';
+						}
 					});
 					head += ' * @version '+year+'-'+month+'-'+day+'\n';
 					head += ' */\n';
@@ -130,7 +149,7 @@ elFinder.prototype.i18 = {};
 				$.each(glbs, function(k, v){
 					var inp = '';
 					if (k === 'translator') {
-						inp = '<span id="glbs-txt-'+k+'"></span><br />';
+						inp = '<span id="glbs-txt-'+k+'"></span>';
 					}
 					inp += '<input id="glbs-'+k+'" class="'+k+'" type="text"><span class="note">'+v+'</span>';
 					$('<tr/>').append('<td class="caption">'+k+'</td><td class="input">'+inp+'</td>').appendTo(hTable);
