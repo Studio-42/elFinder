@@ -84,8 +84,7 @@ class elFinderPluginNormalizer
 		}
 		
 		if ($path) {
-			$path_opts = array_merge($opts, array('lowercase'=>false));
-			$path = $this->normalize($path, $path_opts);
+			$path = $this->normalize($path, $opts);
 		}
 		$name = $this->normalize($name, $opts);
 		return true;
