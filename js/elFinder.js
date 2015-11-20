@@ -2425,7 +2425,8 @@ elFinder.prototype = {
 				var check = [];
 				var str = data.files[0];
 				if (data.type == 'html') {
-					var tmp = $("<html/>").append($.parseHTML(str));
+					var tmp = $("<html/>").append($.parseHTML(str)),
+						atag;
 					$('img[src]', tmp).each(function(){
 						var url, purl,
 						self = $(this),
@@ -2443,7 +2444,8 @@ elFinder.prototype = {
 							}
 						}
 					});
-					$('a[href]', tmp).each(function(){
+					atag = $('a[href]', tmp);
+					atag.each(function(){
 						var loc,
 							parseUrl = function(url) {
 							    var a = document.createElement('a');
@@ -2452,7 +2454,7 @@ elFinder.prototype = {
 							};
 						if ($(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i)) {
+							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
