@@ -10,6 +10,7 @@
 		- Marged #1131, #1132, Complete Romanian(ro) translation
 		- Fixed symbolic link file stats `mtime`, `size`
 		- Marged #1133, Complete German(de) translation
+		- Marged #1139, Complete Türkçe(tr) translation
 		- Others, some minor bug fixes
 
 

@@ -1701,15 +1701,28 @@ class elFinder {
 					
 					$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true));
 					
+					$_name = '';
 					// check is data:
 					if (substr($url, 0, 5) === 'data:') {
 						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable);
 					} else {
 						$fp = fopen($tmpfname, 'wb');
 						$data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
+						$_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
+						// Check `Content-Disposition` response header
+						if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
+							if (preg_match('/filename\*?=(?:(.+?)\'\')?"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
+								$_name = rawurldecode($m[2]);
+								if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
+									$_name = mb_convert_encoding($_name, 'UTF-8', $m[1]);
+								}
+							}
+						}
 					}
 					if ($data) {
-						$_name = isset($args['name'][$i])? $args['name'][$i] : preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
+						if (isset($args['name'][$i])) {
+							$_name = $args['name'][$i];
+						}
 						if ($_name) {
 							$_ext = '';
 							if (preg_match('/(\.[a-z0-9]{1,7})$/', $_name, $_match)) {
