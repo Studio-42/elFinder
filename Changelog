@@ -11,6 +11,7 @@
 		- Fixed symbolic link file stats `mtime`, `size`
 		- Marged #1133, Complete German(de) translation
 		- Marged #1139, Complete Türkçe(tr) translation
+		- Marged #1141, Plugin Normalizer function: make filename lowercase
 		- Others, some minor bug fixes
 
 
