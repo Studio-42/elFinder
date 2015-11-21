@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.1 (2.1 Nightly: 44cdcd2) (2015-11-20)
+ * Version 2.1.1 (2.1 Nightly: 4dd40a6) (2015-11-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -2439,7 +2439,8 @@ elFinder.prototype = {
 				var check = [];
 				var str = data.files[0];
 				if (data.type == 'html') {
-					var tmp = $("<html/>").append($.parseHTML(str));
+					var tmp = $("<html/>").append($.parseHTML(str)),
+						atag;
 					$('img[src]', tmp).each(function(){
 						var url, purl,
 						self = $(this),
@@ -2457,7 +2458,8 @@ elFinder.prototype = {
 							}
 						}
 					});
-					$('a[href]', tmp).each(function(){
+					atag = $('a[href]', tmp);
+					atag.each(function(){
 						var loc,
 							parseUrl = function(url) {
 							    var a = document.createElement('a');
@@ -2466,7 +2468,7 @@ elFinder.prototype = {
 							};
 						if ($(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i)) {
+							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
@@ -4137,7 +4139,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.1 (2.1 Nightly: 44cdcd2)';
+elFinder.prototype.version = '2.1.1 (2.1 Nightly: 4dd40a6)';
 
 
 
