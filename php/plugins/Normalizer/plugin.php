@@ -24,7 +24,8 @@
  *			'Normalizer' => array(
  *				'enable' => true,
  *				'nfc'    => true,
- *				'nfkc'   => true
+ *				'nfkc'   => true,
+ *				'lowercase'   => false
  *			)
  *		),
  *		// each volume configure (optional)
@@ -37,7 +38,8 @@
  *					'Normalizer' => array(
  *						'enable' => true,
  *						'nfc'    => true,
- *						'nfkc'   => true
+ *						'nfkc'   => true,
+ * 						'lowercase'   => false
  *					)
  *				)
  *			)
@@ -56,7 +58,8 @@ class elFinderPluginNormalizer
 		$defaults = array(
 			'enable' => true, // For control by volume driver
 			'nfc'    => true, // Canonical Decomposition followed by Canonical Composition
-			'nfkc'   => true  // Compatibility Decomposition followed by Canonical
+			'nfkc'   => true,  // Compatibility Decomposition followed by Canonical
+			'lowercase'   => false  // Make chars lowercase
 		);
 	
 		$this->opts = array_merge($defaults, $opts);
@@ -115,6 +118,9 @@ class elFinderPluginNormalizer
 				if ($opts['nfkc'])
 					$str = $normalizer->normalize($str, 'NFKC');
 			}
+		}
+		if ($opts['lowercase']) {
+			$str = strtolower($str);
 		}
 		return $str;
 	}
