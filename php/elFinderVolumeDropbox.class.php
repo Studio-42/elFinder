@@ -182,8 +182,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					// get customdata
 					$cdata = '';
 					$innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
-					$post = (strtolower($_SERVER['REQUEST_METHOD']) === 'post')? $_POST : $_GET;
-					foreach($post as $k => $v) {
+					foreach($this->ARGS as $k => $v) {
 						if (! in_array($k, $innerKeys)) {
 							$cdata .= '&' . $k . '=' . rawurlencode($v);
 						}
