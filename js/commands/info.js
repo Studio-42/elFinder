@@ -114,7 +114,7 @@ elFinder.prototype.commands.info = function() {
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
-			if (file.read) {
+			if (file.read && fm.options.disableInfoLink === false) {
 				var href,
 				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
