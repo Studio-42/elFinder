@@ -1584,7 +1584,8 @@ abstract class elFinderVolumeDriver {
 		// check MIME
 		$name = $this->_basename($path);
 		$mime = '';
-		if ($this->mimeDetect != 'internal') {
+		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
+		if ($this->mimeDetect !== 'internal') {
 			if ($tp = tmpfile()) {
 				fwrite($tp, $content);
 				$info = stream_get_meta_data($tp);
@@ -1593,10 +1594,7 @@ abstract class elFinderVolumeDriver {
 				fclose($tp);
 			}
 		}
-		if (!$mime) {
-			$mime = $this->mimetype($name);
-		}
-		if (!$this->allowPutMime($mime)) {
+		if (!$this->allowPutMime($mimeByName) || ($mime && $mime !== 'unknown' && !$this->allowPutMime($mime))) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 		
