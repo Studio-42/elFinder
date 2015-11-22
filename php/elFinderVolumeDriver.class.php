@@ -14,6 +14,14 @@
 abstract class elFinderVolumeDriver {
 	
 	/**
+	 * Request args
+	 * $_POST or $_GET values
+	 * 
+	 * @var array
+	 */
+	protected $ARGS = array();
+	
+	/**
 	 * Driver id
 	 * Must be started from letter and contains [a-z0-9]
 	 * Used as part of volume id
@@ -557,6 +565,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
+		// set ARGS
+		$this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
 		// set thumbnails path
 		$path = $this->options['tmbPath'];
 		if ($path) {
@@ -708,7 +718,7 @@ abstract class elFinderVolumeDriver {
 			$this->encoding = null;
 		}
 		
-		$argInit = ($_SERVER['REQUEST_METHOD'] === 'POST')? !empty($_POST['init']) : !empty($_GET['init']);
+		$argInit = !empty($this->ARGS['init']);
 		
 		// session cache
 		if ($argInit || ! isset($_SESSION[elFinder::$sessionCacheKey][$this->id])) {
