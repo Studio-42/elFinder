@@ -14,6 +14,8 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src="./demo/js/elfinder.min.js"></script>
     <script type="text/javascript">
+      // disable HTML quicklook plugin
+      elFinder.prototype.commands.quicklook.plugins[1] = null;
       $().ready(function() {
         if (typeof document.uniqueID != 'undefined') {
           (function(){
