@@ -123,14 +123,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetmount'  : 'עיגון כונן רשת', // added 18.04.2012
 
 			/*********************************** buttons ***********************************/
-			'btnClose'  : 'סגור',
-			'btnSave'   : 'שמור',
-			'btnRm'     : 'הסר',
-			'btnApply'  : 'החל',
-			'btnCancel' : 'בטל',
+			'btnClose'  : 'סגירה',
+			'btnSave'   : 'שמירה',
+			'btnRm'     : 'הסרה',
+			'btnApply'  : 'החלה',
+			'btnCancel' : 'ביטול',
 			'btnNo'     : 'לא',
 			'btnYes'    : 'כן',
-			'btnMount'  : 'עגן',  // added 18.04.2012
+			'btnMount'  : 'עיגון',  // added 18.04.2012
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'פתיחת תיקייה',

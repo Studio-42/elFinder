@@ -674,15 +674,6 @@ elFinder.prototype._options = {
 		files  : ['getfile', '|','open', 'quicklook', '|', 'download', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
 	},
 
-    /**
-	 * Disables Directory/File link in Info Popup.
-	 *
-	 * @type false|true
-	 * @default  false
-	 * @example
-	 *  disableInfoLink : true
-	 */
-	disableInfoLink: false,
 	/**
 	 * Debug config
 	 *
