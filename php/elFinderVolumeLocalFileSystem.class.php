@@ -743,10 +743,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$uri = isset($meta['uri'])? $meta['uri'] : '';
 		if ($uri && @is_file($uri)) {
 			fclose($fp);
-			$isCmdCopy = ($this->ARGS['cmd'] === 'paste' && empty($this->ARGS['cut']));
+			$isCmdPaste = ($this->ARGS['cmd'] === 'paste');
+			$isCmdCopy = ($isCmdPaste && empty($this->ARGS['cut']));
 			if (($isCmdCopy || !@rename($uri, $path)) && !@copy($uri, $path)) {
 				return false;
 			}
+			// re-create the source file for remove processing of paste command
+			$isCmdPaste && !$isCmdCopy && touch($uri);
 		} else {
 			if (@file_put_contents($path, $fp, LOCK_EX) === false) {
 				return false;
