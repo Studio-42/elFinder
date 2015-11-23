@@ -3326,7 +3326,11 @@ abstract class elFinderVolumeDriver {
 			
 			// MIME check
 			$stat = $this->stat($path);
-			if (!$this->allowPutMime($stat['mime'])) {
+			$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($stat['name']);
+			if ($stat['mime'] === $mimeByName) {
+				$mimeByName = '';
+			}
+			if (!$this->allowPutMime($stat['mime']) || ($mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
 				$this->remove($path, true);
 				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
 			}
