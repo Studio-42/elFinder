@@ -57,10 +57,6 @@
         // elFinder init
         var f = $('#elfinder').elfinder({
           url : 'http://hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
-          urlUpload : 'http://hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
-          requestType : 'POST',
-          customHeaders: {'X-Requested-With' : 'XMLHttpRequest'},
-          xhrFields: {withCredentials: true},
           soundPath: './demo/sounds',
           lang: getLang()
         }).elfinder('instance');
