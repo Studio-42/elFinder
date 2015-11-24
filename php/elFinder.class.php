@@ -274,6 +274,11 @@ class elFinder {
 			$sessionUseCmds = array_merge($sessionUseCmds, $opts['sessionUseCmds']);
 		}
 
+		// set self::$volumesCnt by HTTP header "X-elFinder-VolumesCntStart"
+		if (isset($_SERVER['HTTP_X_ELFINDER_VOLUMESCNTSTART']) && ($volumesCntStart = intval($_SERVER['HTTP_X_ELFINDER_VOLUMESCNTSTART']))) {
+			self::$volumesCnt = $volumesCntStart;
+		}
+		
 		$this->time  = $this->utime();
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		$this->sessionCloseEarlier = isset($opts['sessionCloseEarlier'])? (bool)$opts['sessionCloseEarlier'] : true;

@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2015-11-23)
+ * Version 2.1.2 (2.1 Nightly: b3a6713) (2015-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -447,6 +447,28 @@ window.elFinder = function(node, opts) {
 	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columnsCustomName) {
 		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
 	}
+
+	// configure for CORS
+	(function(){
+		var parseUrl = document.createElement('a'),
+			parseUploadUrl;
+		parseUrl.href = opts.url;
+		if (opts.urlUpload && (opts.urlUpload !== opts.url)) {
+			parseUploadUrl = document.createElement('a');
+			parseUploadUrl.href = opts.urlUpload;
+		}
+		if (window.location.host !== parseUrl.host || (parseUploadUrl && (window.location.host !== parseUploadUrl.host))) {
+			if (!$.isPlainObject(self.options.customHeaders)) {
+				self.options.customHeaders = {};
+			}
+			if (!$.isPlainObject(self.options.xhrFields)) {
+				self.options.xhrFields = {};
+			}
+			self.options.requestType = 'post';
+			self.options.customHeaders['X-Requested-With'] = 'XMLHttpRequest';
+			self.options.xhrFields['withCredentials'] = true;
+		}
+	})();
 
 	$.extend(this.options.contextmenu, opts.contextmenu);
 	
@@ -4139,7 +4161,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: b3a6713)';
 
 
 
