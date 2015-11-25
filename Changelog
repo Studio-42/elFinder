@@ -3,6 +3,7 @@
 	* elFinder (2.1.3):
 		- Auto configure `customHeaders`, `xhrFields` for CORS
 		- Allow set elFinder::$volumesCnt by HTTP header "X-elFinder-VolumesCntStart"
+		- Resolved #1145, Configurable keyboard shortcuts of any command
 
 
 2015-11-23  Naoki Sawada  <hypweb@gmail.com>

@@ -105,12 +105,21 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.setup = function(name, opts) {
 		var self = this,
-			fm   = this.fm, i, s;
+			fm   = this.fm, i, s, sc;
 
 		this.name      = name;
 		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name) : name, 
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
+
+		if (opts.shortcuts) {
+			if (typeof opts.shortcuts === 'function') {
+				sc = opts.shortcuts(this.fm, this.shortcuts);
+			} else if ($.isArray(opts.shortcuts)) {
+				sc = opts.shortcuts;
+			}
+			this.shortcuts = sc || [];
+		}
 
 		if (this.updateOnSelect) {
 			this._handlers.select = function() { this.update(void(0), this.value); }
