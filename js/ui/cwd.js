@@ -499,6 +499,10 @@ $.fn.elfindercwd = function(fm, options) {
 					var cwd   = fm.cwd(),
 						hash  = cwd.hash,
 						$this = $(this);
+					if (ui.helper.data('namespace') !== fm.namespace) {
+						$this.removeClass(clDropActive);
+						return false;
+					}
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (h === hash || fm.file(h).phash === hash) {
 							if (h !== hash && cwd.write) {
@@ -889,7 +893,77 @@ $.fn.elfindercwd = function(fm, options) {
 						target = list ? $this : $this.children();
 
 					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
-						target.draggable(fm.draggable);
+						target.on('mousedown', function(e) {
+							// shiftKey + drag start for HTML5 native drag function
+							if (e.shiftKey) {
+								// disable jQuery-ui selectable while trigger native drag
+								try{ cwd.selectable('destroy'); }catch(e){}
+								setTimeout(function(){
+									cwd.selectable({
+										filter     : fileSelector,
+										stop       : trigger,
+										delay      : 250,
+										selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+										unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
+									});
+								}, 10);
+							}
+							target.draggable('option', 'disabled', e.shiftKey);
+							target.attr('draggable', e.shiftKey ? 'true' : '');
+						})
+						.on('dragstart', function(e) {
+							var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
+							helper = null;
+							if (dt) {
+								var p = this.id ? $(this) : $(this).parents('[id]:first'),
+									elm   = $('<span>'),
+									url   = '',
+									durl  = '',
+									files = [],
+									icon  = function(f) {
+										var mime = f.mime, i;
+										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+										if (f.tmb && f.tmb !== 1) {
+											i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+										}
+										return i;
+									}, l;
+								p.trigger(evtSelect);
+								trigger();
+								$.each(selectedFiles, function(i, v){
+									var file = fm.file(v),
+										furl = fm.url(v);
+									if (file && file.mime !== 'directory') {
+										files.push(v);
+										$('<a>').attr('href', furl).text(furl).appendTo(elm);
+										url += furl + "\n";
+										if (!durl) {
+											durl += file.mime + ':' + file.name + ':' + furl + "\n";
+										}
+									}
+								});
+								if (url) {
+									helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+									if ((l = files.length) > 1) {
+										helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
+									}
+									dt.setDragImage(helper.get(0), 50, 47);
+									dt.effectAllowed = 'copy';
+									dt.setData('elfinderfrom', window.location.href + fm.cwd().hash);
+									dt.setData('elfinderfrom:' + dt.getData('elfinderfrom'), '');
+									dt.setData('DownloadURL', durl);
+									dt.setData('text/html', elm.html());
+									dt.setData('text/uri-list', url);
+									dt.setData('text/plain', url);
+								} else {
+									return false;
+								}
+							}
+						})
+						.on('dragend', function(e){
+							helper && helper.remove();
+						})
+						.draggable(fm.draggable);
 					}
 				})
 				// add hover class to selected file
@@ -1088,14 +1162,25 @@ $.fn.elfindercwd = function(fm, options) {
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
 		(function(){
-		var ent;
+		var ent, allow;
 		if (fm.dragUpload) {
 			wrapper[0].addEventListener('dragenter', function(e) {
-				var cwd = fm.cwd();
+				var cwd = fm.cwd(), elfFrom = null;
 				e.preventDefault();
 				e.stopPropagation();
 				ent = true;
-				cwd && cwd.write && wrapper.addClass(clDropActive);
+				allow = false;
+				try {
+					$.each(e.dataTransfer.types, function(i, v){
+						if (v.substr(0, 13) === 'elfinderfrom:') {
+							elfFrom = v.substr(13).toLowerCase();
+						}
+					});
+				} catch(e) {}
+				if (cwd && cwd.write && (!elfFrom || elfFrom !== window.location.href + cwd.hash)) {
+					wrapper.addClass(clDropActive);
+					allow = true;
+				}
 			}, false);
 
 			wrapper[0].addEventListener('dragleave', function(e) {
@@ -1111,12 +1196,15 @@ $.fn.elfindercwd = function(fm, options) {
 			wrapper[0].addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+				!allow && (e.dataTransfer.dropEffect = 'none');
 				ent = false;
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
 				wrapper.removeClass(clDropActive);
-				fm.exec('upload', {dropEvt: e});
+				if (allow) {
+					fm.exec('upload', {dropEvt: e});
+				}
 			}, false);
 		};
 		})();

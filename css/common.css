@@ -50,6 +50,11 @@
 	padding:0 0 0 25px;
 	z-index:100000;
 }
+.elfinder-drag-helper.html5-native {
+	position: absolute;
+	top: -1000px;
+	left: -1000px;
+}
 
 /* drag helper "plus" icon */
 .elfinder-drag-helper-icon-plus {
@@ -96,7 +101,8 @@
 	padding:7px 12px;
 }
 
-
-
-
+/* for html5 drag and drop */
+[draggable=true] {
+	-khtml-user-drag: element;
+}
 

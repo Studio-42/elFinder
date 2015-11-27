@@ -711,7 +711,7 @@ window.elFinder = function(node, opts) {
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
-			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false);
+			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', self.namespace);
 
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -752,6 +752,9 @@ window.elFinder = function(node, opts) {
 					c       = 'class',
 					cnt, hash, i, h;
 				
+				if (ui.helper.data('namespace') !== self.namespace) {
+					return false;
+				}
 				ui.helper.data('droped', true);
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
@@ -2093,6 +2096,9 @@ window.elFinder = function(node, opts) {
 			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
 				e.preventDefault();
 				e.stopPropagation();
+				if ($(e.target).is('[class*="elfinder"]')) {
+					e.dataTransfer.dropEffect = 'none';
+				}
 			}
 		}, false);
 		node[0].addEventListener('drop', function(e) {
