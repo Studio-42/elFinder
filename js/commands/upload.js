@@ -65,8 +65,18 @@ elFinder.prototype.commands.upload = function() {
 			e.preventDefault();
 			var file = false,
 				type = '',
+				elfFrom = null,
+				mycwd = '',
 				data = null,
 				target = e._target || null;
+			try { elfFrom = e.dataTransfer.getData('elfinderfrom'); } catch(e) {}
+			if (elfFrom) {
+				mycwd = window.location.href + fm.cwd().hash;
+				if ((!target && elfFrom === mycwd) || target === mycwd) {
+					dfrd.reject();
+					return;
+				}
+			}
 			try{
 				data = e.dataTransfer.getData('text/html');
 			} catch(e) {}
