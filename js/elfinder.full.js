@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: b3a6713) (2015-11-24)
+ * Version 2.1.2 (2.1 Nightly: beacd81) (2015-11-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -725,7 +725,7 @@ window.elFinder = function(node, opts) {
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
-			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false);
+			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', self.namespace);
 
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -766,6 +766,9 @@ window.elFinder = function(node, opts) {
 					c       = 'class',
 					cnt, hash, i, h;
 				
+				if (ui.helper.data('namespace') !== self.namespace) {
+					return false;
+				}
 				ui.helper.data('droped', true);
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
@@ -2107,6 +2110,9 @@ window.elFinder = function(node, opts) {
 			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
 				e.preventDefault();
 				e.stopPropagation();
+				if ($(e.target).is('[class*="elfinder"]')) {
+					e.dataTransfer.dropEffect = 'none';
+				}
 			}
 		}, false);
 		node[0].addEventListener('drop', function(e) {
@@ -4161,7 +4167,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: b3a6713)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: beacd81)';
 
 
 
@@ -4385,6 +4391,24 @@ elFinder.prototype._options = {
 	 * @type Object
 	 **/
 	commandsOptions : {
+		// // configure shortcuts of any command
+		// // add `shortcuts` property into each command
+		// any_command_name : {
+		// 	shortcuts : [] // for disable this command's shortcuts
+		// },
+		// any_command_name : {
+		// 	shortcuts : function(fm, shortcuts) {
+		// 		// for add `CTRL + E` for this command action
+		// 		shortcuts[0]['pattern'] += ' ctrl+e';
+		// 		return shortcuts;
+		// 	}
+		// },
+		// any_command_name : {
+		// 	shortcuts : function(fm, shortcuts) {
+		// 		// for full customize of this command's shortcuts
+		// 		return [ { pattern: 'ctrl+e ctrl+down numpad_enter' + (fm.OS != 'mac' && ' enter') } ];
+		// 	}
+		// },
 		// "getfile" command options.
 		getfile : {
 			onlyURL  : false,
@@ -5152,12 +5176,21 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.setup = function(name, opts) {
 		var self = this,
-			fm   = this.fm, i, s;
+			fm   = this.fm, i, s, sc;
 
 		this.name      = name;
 		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name) : name, 
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
+
+		if (opts.shortcuts) {
+			if (typeof opts.shortcuts === 'function') {
+				sc = opts.shortcuts(this.fm, this.shortcuts);
+			} else if ($.isArray(opts.shortcuts)) {
+				sc = opts.shortcuts;
+			}
+			this.shortcuts = sc || [];
+		}
 
 		if (this.updateOnSelect) {
 			this._handlers.select = function() { this.update(void(0), this.value); }
@@ -6827,6 +6860,10 @@ $.fn.elfindercwd = function(fm, options) {
 					var cwd   = fm.cwd(),
 						hash  = cwd.hash,
 						$this = $(this);
+					if (ui.helper.data('namespace') !== fm.namespace) {
+						$this.removeClass(clDropActive);
+						return false;
+					}
 					$.each(ui.helper.data('files'), function(i, h) {
 						if (h === hash || fm.file(h).phash === hash) {
 							if (h !== hash && cwd.write) {
@@ -7217,7 +7254,77 @@ $.fn.elfindercwd = function(fm, options) {
 						target = list ? $this : $this.children();
 
 					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
-						target.draggable(fm.draggable);
+						target.on('mousedown', function(e) {
+							// shiftKey + drag start for HTML5 native drag function
+							if (e.shiftKey) {
+								// disable jQuery-ui selectable while trigger native drag
+								try{ cwd.selectable('destroy'); }catch(e){}
+								setTimeout(function(){
+									cwd.selectable({
+										filter     : fileSelector,
+										stop       : trigger,
+										delay      : 250,
+										selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+										unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
+									});
+								}, 10);
+							}
+							target.draggable('option', 'disabled', e.shiftKey);
+							target.attr('draggable', e.shiftKey ? 'true' : '');
+						})
+						.on('dragstart', function(e) {
+							var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
+							helper = null;
+							if (dt) {
+								var p = this.id ? $(this) : $(this).parents('[id]:first'),
+									elm   = $('<span>'),
+									url   = '',
+									durl  = '',
+									files = [],
+									icon  = function(f) {
+										var mime = f.mime, i;
+										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+										if (f.tmb && f.tmb !== 1) {
+											i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+										}
+										return i;
+									}, l;
+								p.trigger(evtSelect);
+								trigger();
+								$.each(selectedFiles, function(i, v){
+									var file = fm.file(v),
+										furl = fm.url(v);
+									if (file && file.mime !== 'directory') {
+										files.push(v);
+										$('<a>').attr('href', furl).text(furl).appendTo(elm);
+										url += furl + "\n";
+										if (!durl) {
+											durl += file.mime + ':' + file.name + ':' + furl + "\n";
+										}
+									}
+								});
+								if (url) {
+									helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+									if ((l = files.length) > 1) {
+										helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
+									}
+									dt.setDragImage(helper.get(0), 50, 47);
+									dt.effectAllowed = 'copy';
+									dt.setData('elfinderfrom', window.location.href + fm.cwd().hash);
+									dt.setData('elfinderfrom:' + dt.getData('elfinderfrom'), '');
+									dt.setData('DownloadURL', durl);
+									dt.setData('text/html', elm.html());
+									dt.setData('text/uri-list', url);
+									dt.setData('text/plain', url);
+								} else {
+									return false;
+								}
+							}
+						})
+						.on('dragend', function(e){
+							helper && helper.remove();
+						})
+						.draggable(fm.draggable);
 					}
 				})
 				// add hover class to selected file
@@ -7416,14 +7523,25 @@ $.fn.elfindercwd = function(fm, options) {
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
 		(function(){
-		var ent;
+		var ent, allow;
 		if (fm.dragUpload) {
 			wrapper[0].addEventListener('dragenter', function(e) {
-				var cwd = fm.cwd();
+				var cwd = fm.cwd(), elfFrom = null;
 				e.preventDefault();
 				e.stopPropagation();
 				ent = true;
-				cwd && cwd.write && wrapper.addClass(clDropActive);
+				allow = false;
+				try {
+					$.each(e.dataTransfer.types, function(i, v){
+						if (v.substr(0, 13) === 'elfinderfrom:') {
+							elfFrom = v.substr(13).toLowerCase();
+						}
+					});
+				} catch(e) {}
+				if (cwd && cwd.write && (!elfFrom || elfFrom !== window.location.href + cwd.hash)) {
+					wrapper.addClass(clDropActive);
+					allow = true;
+				}
 			}, false);
 
 			wrapper[0].addEventListener('dragleave', function(e) {
@@ -7439,12 +7557,15 @@ $.fn.elfindercwd = function(fm, options) {
 			wrapper[0].addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+				!allow && (e.dataTransfer.dropEffect = 'none');
 				ent = false;
 			}, false);
 
 			wrapper[0].addEventListener('drop', function(e) {
 				wrapper.removeClass(clDropActive);
-				fm.exec('upload', {dropEvt: e});
+				if (allow) {
+					fm.exec('upload', {dropEvt: e});
+				}
 			}, false);
 		};
 		})();
@@ -14309,8 +14430,18 @@ elFinder.prototype.commands.upload = function() {
 			e.preventDefault();
 			var file = false,
 				type = '',
+				elfFrom = null,
+				mycwd = '',
 				data = null,
 				target = e._target || null;
+			try { elfFrom = e.dataTransfer.getData('elfinderfrom'); } catch(e) {}
+			if (elfFrom) {
+				mycwd = window.location.href + fm.cwd().hash;
+				if ((!target && elfFrom === mycwd) || target === mycwd) {
+					dfrd.reject();
+					return;
+				}
+			}
 			try{
 				data = e.dataTransfer.getData('text/html');
 			} catch(e) {}
