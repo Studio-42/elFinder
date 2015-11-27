@@ -24,6 +24,7 @@ Contents
 * [FAQs](#faqs)
 * [3rd Party Connectors](#3rd-party-connectors)
 * [3rd Party Volume Drivers](#3rd-party-volume-drivers)
+* [3rd Party Themes](#3rd-party-themes)
 * [Support](#support)
 * [Authors](#authors)
 * [License](#license)
@@ -152,6 +153,11 @@ You can create or modify the language file to use translation tool. Please refer
 3rd party Volume Drivers
 --------------------
  * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver) (for elFinder 2.1+)
+
+3rd party Themes
+--------------------
+ * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
+ * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
 
 Support
 -------
