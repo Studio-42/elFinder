@@ -95,7 +95,7 @@ class elFinder {
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
-		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false),
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
@@ -1879,10 +1879,30 @@ class elFinder {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
 		}
 		
+		$renames = array();
+		if (!empty($args['renames'])) {
+			$renames = array_flip($args['renames']);
+		}
+		
 		foreach ($targets as $target) {
 			if (($srcVolume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error($error, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				break;
+			}
+			
+			$rename = false;
+			if ($renames) {
+				$file = $srcVolume->file($target);
+				if (isset($renames[$file['name']])) {
+					$dir = $dstVolume->realpath($dst);
+					$hash = $dstVolume->getHash($dir, $file['name']);
+					if (($file = $dstVolume->rename($hash, $dstVolume->uniqueName($dir, $file['name'], '.bak'))) === false) {
+						$result['warning'] = $this->error($dstVolume->error());
+						break;
+					}
+					$result['added'][] = $file;
+					$rename = true;
+				}
 			}
 			
 			if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut)) == false) {
@@ -1890,6 +1910,9 @@ class elFinder {
 				break;
 			}
 			
+			if ($rename) {
+				$result['removed'][] = $file;
+			}
 			$result['added'][] = $file;
 		}
 		return $result;

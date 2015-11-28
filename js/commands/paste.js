@@ -115,7 +115,26 @@ elFinder.prototype.commands.paste = function() {
 								callback : function() {
 									dfrd.resolve();
 								}
-							}
+							},
+							buttons : [
+								{
+									label : 'btnBackup',
+									callback : function(all) {
+										var i;
+										if (all) {
+											i = existed.length;
+											while (ndx < i--) {
+												files[existed[i]].rename = true
+											}
+										} else {
+											files[existed[ndx]].rename = true;
+										}
+										!last && !all
+											? confirm(++ndx)
+											: paste(files);
+									}
+								}
+							]
 						})
 					},
 					valid     = function(names) {
@@ -123,7 +142,13 @@ elFinder.prototype.commands.paste = function() {
 						existed.length ? confirm(0) : paste(files);
 					},
 					paste     = function(files) {
-						var files  = $.map(files, function(file) { return !file.remove ? file : null } ),
+						var renames = [],
+							files  = $.map(files, function(file) { 
+								if (file.rename) {
+									renames.push(file.name);
+								}
+								return !file.remove ? file : null;
+							}),
 							cnt    = files.length,
 							groups = {},
 							args   = [],
@@ -137,7 +162,7 @@ elFinder.prototype.commands.paste = function() {
 						files = $.map(files, function(f) { return f.hash});
 						
 						fm.request({
-								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src},
+								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.always(function() {
