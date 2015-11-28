@@ -1029,7 +1029,7 @@ window.elFinder = function(node, opts) {
 	 * @return Integer
 	 */
 	this.returnBytes = function(val) {
-		if (val == '-1') val = 0;
+		if (val < '1') val = 0;
 		if (val) {
 			// for ex. 1mb, 1KB
 			val = val.replace(/b$/i, '');
@@ -1180,7 +1180,7 @@ window.elFinder = function(node, opts) {
 				}
 
 				if (cmd == 'open' && !!data.init) {
-					self.uplMaxSize = parseInt(self.returnBytes(response.uplMaxSize));
+					self.uplMaxSize = self.returnBytes(response.uplMaxSize);
 					self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
 				}
 
