@@ -1029,19 +1029,25 @@ window.elFinder = function(node, opts) {
 	 * @return Integer
 	 */
 	this.returnBytes = function(val) {
-		if (val < '1') val = 0;
-		if (val) {
+		var last;
+		if (isNaN(val)) {
 			// for ex. 1mb, 1KB
 			val = val.replace(/b$/i, '');
-			var last = val.charAt(val.length - 1).toLowerCase();
-			val = val.replace(/[gmk]$/i, '');
-			if (last == 'g') {
+			last = val.charAt(val.length - 1).toLowerCase();
+			val = val.replace(/[tgmk]$/i, '');
+			if (last == 't') {
+				val = val * 1024 * 1024 * 1024 * 1024;
+			} else if (last == 'g') {
 				val = val * 1024 * 1024 * 1024;
 			} else if (last == 'm') {
 				val = val * 1024 * 1024;
 			} else if (last == 'k') {
 				val = val * 1024;
 			}
+			val = isNaN(val)? 0 : parseInt(val);
+		} else {
+			val = parseInt(val);
+			if (val < 1) val = 0;
 		}
 		return val;
 	};
