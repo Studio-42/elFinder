@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-11-21
+ * @version 2015-11-28
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -148,6 +148,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
 			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Save & Close', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',

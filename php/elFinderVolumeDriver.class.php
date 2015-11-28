@@ -1017,6 +1017,20 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return target path hash
+	 * 
+	 * @param  string $path
+	 * @param  string $name
+	 * @author Naoki Sawada
+	 */
+	public function getHash($path, $name = '') {
+		if ($name !== '') {
+			$path = $this->joinPathCE($path, $name);
+		}
+		return $this->encode($path);
+	}
+	
+	/**
 	 * Return root or startPath hash
 	 *
 	 * @return string
@@ -2429,11 +2443,11 @@ abstract class elFinderVolumeDriver {
 			$name = substr($name, 0,  strlen($name)-strlen($m[0]));
 		} 
 		
-		if ($checkNum && preg_match('/('.$suffix.')(\d*)$/i', $name, $m)) {
+		if ($checkNum && preg_match('/('.preg_quote($suffix, '/').')(\d*)$/i', $name, $m)) {
 			$i    = (int)$m[2];
 			$name = substr($name, 0, strlen($name)-strlen($m[2]));
 		} else {
-			$i     = 1;
+			$i     = 0;
 			$name .= $suffix;
 		}
 		$max = $i+100000;
