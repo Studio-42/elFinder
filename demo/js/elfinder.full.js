@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: e68f08e) (2015-11-28)
+ * Version 2.1.2 (2.1 Nightly: d00b98e) (2015-11-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -1043,19 +1043,25 @@ window.elFinder = function(node, opts) {
 	 * @return Integer
 	 */
 	this.returnBytes = function(val) {
-		if (val == '-1') val = 0;
-		if (val) {
+		var last;
+		if (isNaN(val)) {
 			// for ex. 1mb, 1KB
 			val = val.replace(/b$/i, '');
-			var last = val.charAt(val.length - 1).toLowerCase();
-			val = val.replace(/[gmk]$/i, '');
-			if (last == 'g') {
+			last = val.charAt(val.length - 1).toLowerCase();
+			val = val.replace(/[tgmk]$/i, '');
+			if (last == 't') {
+				val = val * 1024 * 1024 * 1024 * 1024;
+			} else if (last == 'g') {
 				val = val * 1024 * 1024 * 1024;
 			} else if (last == 'm') {
 				val = val * 1024 * 1024;
 			} else if (last == 'k') {
 				val = val * 1024;
 			}
+			val = isNaN(val)? 0 : parseInt(val);
+		} else {
+			val = parseInt(val);
+			if (val < 1) val = 0;
 		}
 		return val;
 	};
@@ -3621,13 +3627,20 @@ elFinder.prototype = {
 	 *    reject : { // reject callback - optionally
 	 *      label : 'No',
 	 *      callback : function(applyToAll) { fm.log('No')}
-	 *   },
-	 *   all : true  // display checkbox "Apply to all"
+	 *    },
+	 *    buttons : [ // additional buttons callback - optionally
+	 *      {
+	 *        label : 'Btn1',
+	 *        callback : function(applyToAll) { fm.log('Btn1')}
+	 *      }
+	 *    ],
+	 *    all : true  // display checkbox "Apply to all"
 	 * })
 	 * @return elFinder
 	 */
 	confirm : function(opts) {
-		var complete = false,
+		var self     = this,
+			complete = false,
 			options = {
 				cssClass  : 'elfinder-dialog-confirm',
 				modal     : true,
@@ -3655,6 +3668,16 @@ elFinder.prototype = {
 				complete = true;
 				$(this).elfinderdialog('close')
 			};
+		}
+		
+		if (opts.buttons && opts.buttons.length > 0) {
+			$.each(opts.buttons, function(i, v){
+				options.buttons[self.i18n(v.label)] = function() {
+					v.callback(!!(checkbox && checkbox.prop('checked')))
+					complete = true;
+					$(this).elfinderdialog('close');
+				};
+			});
 		}
 		
 		options.buttons[this.i18n(opts.cancel.label)] = function() {
@@ -4167,7 +4190,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: e68f08e)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: d00b98e)';
 
 
 
@@ -5652,7 +5675,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-11-21
+ * @version 2015-11-28
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -5799,6 +5822,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
 			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Save & Close', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
 			
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
@@ -12101,7 +12125,26 @@ elFinder.prototype.commands.paste = function() {
 								callback : function() {
 									dfrd.resolve();
 								}
-							}
+							},
+							buttons : [
+								{
+									label : 'btnBackup',
+									callback : function(all) {
+										var i;
+										if (all) {
+											i = existed.length;
+											while (ndx < i--) {
+												files[existed[i]].rename = true
+											}
+										} else {
+											files[existed[ndx]].rename = true;
+										}
+										!last && !all
+											? confirm(++ndx)
+											: paste(files);
+									}
+								}
+							]
 						})
 					},
 					valid     = function(names) {
@@ -12109,7 +12152,13 @@ elFinder.prototype.commands.paste = function() {
 						existed.length ? confirm(0) : paste(files);
 					},
 					paste     = function(files) {
-						var files  = $.map(files, function(file) { return !file.remove ? file : null } ),
+						var renames = [],
+							files  = $.map(files, function(file) { 
+								if (file.rename) {
+									renames.push(file.name);
+								}
+								return !file.remove ? file : null;
+							}),
 							cnt    = files.length,
 							groups = {},
 							args   = [],
@@ -12123,7 +12172,7 @@ elFinder.prototype.commands.paste = function() {
 						files = $.map(files, function(f) { return f.hash});
 						
 						fm.request({
-								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src},
+								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.always(function() {
@@ -13212,7 +13261,7 @@ elFinder.prototype.commands.rename = function() {
 						}
 						
 						rest();
-						pnode.html(fm.escape(name));
+						//pnode.html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name},
@@ -13224,6 +13273,12 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
+								if (data.added && data.added[0]) {
+									var newItem = cwd.find('#'+data.added[0].hash);
+									if (newItem.length) {
+										cwd.parent().scrollTop(newItem.offset().top);
+									}
+								}
 							})
 							.always(function() {
 								fm.unlockfiles({files : [file.hash]})

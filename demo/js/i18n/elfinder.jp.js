@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2015-11-21
+ * @version 2015-11-28
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -149,6 +149,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMime'   : 'MIMEタイプ', // from v2.1 added 22.5.2015
 			'btnFileName':'ファイル名',  // from v2.1 added 22.5.2015
 			'btnSaveClose': '保存して閉じる', // from v2.1 added 12.6.2015
+			'btnBackup' : 'バックアップ', // fromv2.1 added 28.11.2015
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',
