@@ -463,8 +463,8 @@ class elFinder {
 						$id = $volume->id();
 
 						$this->volumes[$id] = $volume;
-						if ((!$this->default && !isset($opts['startRoot']) || $opts['startRoot'] === $i) && $volume->isReadable()) {
-							$this->default = $this->volumes[$id];
+						if ((!$this->default && !isset($opts['startRoot']) || (isset($opts['startRoot']) && $opts['startRoot'] === $i)) && $volume->isReadable()) {
+							$this->default = $this->volumes[$id]; 
 						}
 					} else {
 						$this->removeNetVolume($i, $volume);
@@ -2027,7 +2027,7 @@ class elFinder {
 		$chunk  = $args['chunk']? $args['chunk'] : '';
 		$cid    = $args['cid']? (int)$args['cid'] : '';
 		$mtimes = $args['mtime']? $args['mtime'] : array();
-		
+
 		$renames = $hashes = array();
 		$suffix = '~';
 		if ($args['renames'] && is_array($args['renames'])) {
