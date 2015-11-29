@@ -2857,7 +2857,7 @@ elFinder.prototype = {
 										sfiles[c][1] = [];
 									}
 								}
-								size = fm.uplMaxSize;
+								size = BYTES_PER_CHUNK;
 								fcnt = 1;
 								if (isDataType) {
 									sfiles[c][0].push(chunk);
@@ -2896,7 +2896,7 @@ elFinder.prototype = {
 						} else {
 							sfiles[c].push(blob);
 						}
-						size = BYTES_PER_CHUNK;
+						size += blobSize;
 						totalSize += blobSize;
 						fcnt++;
 					}
