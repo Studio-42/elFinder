@@ -1896,12 +1896,12 @@ class elFinder {
 				if (isset($renames[$file['name']])) {
 					$dir = $dstVolume->realpath($dst);
 					$hash = $dstVolume->getHash($dir, $file['name']);
-					if (($file = $dstVolume->rename($hash, $dstVolume->uniqueName($dir, $file['name'], '.bak'))) === false) {
-						$result['warning'] = $this->error($dstVolume->error());
+					$rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $file['name'], '.bak')));
+					if (!empty($rnres['error'])) {
+						$result['warning'] = $rnres['error'];
 						break;
 					}
-					$result['added'][] = $file;
-					$rename = true;
+					$result = array_merge_recursive($result, $rnres);
 				}
 			}
 			
@@ -1910,9 +1910,6 @@ class elFinder {
 				break;
 			}
 			
-			if ($rename) {
-				$result['removed'][] = $file;
-			}
 			$result['added'][] = $file;
 		}
 		return $result;
