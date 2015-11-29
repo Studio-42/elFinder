@@ -2740,7 +2740,7 @@ elFinder.prototype = {
 				totalSize = 0,
 				chunked = [],
 				chunkID = +new Date(),
-				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize || 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
+				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				blobSlice = false,
 				blobSize, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
@@ -2896,7 +2896,7 @@ elFinder.prototype = {
 						} else {
 							sfiles[c].push(blob);
 						}
-						size += blobSize;
+						size = BYTES_PER_CHUNK;
 						totalSize += blobSize;
 						fcnt++;
 					}
