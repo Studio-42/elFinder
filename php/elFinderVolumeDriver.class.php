@@ -1055,19 +1055,20 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return array(
-			'path'          => $this->path($hash),
-			'url'           => $this->URL,
-			'tmbUrl'        => $this->tmbURL,
-			'disabled'      => array_merge(array_unique($this->disabled)), // `array_merge` for type array of JSON
-			'separator'     => $this->separator,
-			'copyOverwrite' => intval($this->options['copyOverwrite']),
-			'uploadMaxSize' => intval($this->uploadMaxSize),
-			'archivers'     => array(
-				'create'  => $create,
-				'extract' => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
+			'path'            => $this->path($hash),
+			'url'             => $this->URL,
+			'tmbUrl'          => $this->tmbURL,
+			'disabled'        => array_merge(array_unique($this->disabled)), // `array_merge` for type array of JSON
+			'separator'       => $this->separator,
+			'copyOverwrite'   => intval($this->options['copyOverwrite']),
+			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
+			'uploadMaxSize'   => intval($this->uploadMaxSize),
+			'archivers'       => array(
+				'create'    => $create,
+				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
 				'createext' => $createext
 			),
-			'uiCmdMap' => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array()
+			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array()
 		);
 	}
 	
@@ -2435,7 +2436,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function uniqueName($dir, $name, $suffix = ' copy', $checkNum=true) {
+	public function uniqueName($dir, $name, $suffix = ' copy', $checkNum = true, $start = 1) {
 		$ext  = '';
 
 		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
@@ -2447,7 +2448,7 @@ abstract class elFinderVolumeDriver {
 			$i    = (int)$m[2];
 			$name = substr($name, 0, strlen($name)-strlen($m[2]));
 		} else {
-			$i     = 0;
+			$i     = $start;
 			$name .= $suffix;
 		}
 		$max = $i+100000;

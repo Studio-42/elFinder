@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: d00b98e) (2015-11-28)
+ * Version 2.1.2 (2.1 Nightly: d303783) (2015-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -373,7 +373,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-drag-helper .elfinder-cwd-icon { margin:0 0 0 -24px; float:left; }
 
 /* transparent overlay >_< */
-.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }
+/*.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }*/
+.elfinder-overlay { position: absolute; }
 
 /* panels under/below cwd (for search field etc) */
 .elfinder .elfinder-panel {
@@ -889,6 +890,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 /* icons */
 .elfinder-dialog-icon-open, 
+.elfinder-dialog-icon-readdir,
 .elfinder-dialog-icon-file        { background-position: 0 -225px; }
 .elfinder-dialog-icon-reload      { background-position: 0 -225px; }
 .elfinder-dialog-icon-mkdir       { background-position: 0 -64px; }
@@ -910,6 +912,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-dialog-icon-netmount,
 .elfinder-dialog-icon-netunmount,
 .elfinder-dialog-icon-chmod,
+.elfinder-dialog-icon-preupload,
 .elfinder-dialog-icon-dim         { background-position: 0 -434px; }
 
 /*********************** CONFIRM DIALOG **************************/
