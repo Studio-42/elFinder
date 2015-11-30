@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: d303783) (2015-11-30)
+ * Version 2.1.2 (2.1 Nightly: d7c3f10) (2015-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4388,7 +4388,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: d303783)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: d7c3f10)';
 
 
 
@@ -12384,8 +12384,16 @@ elFinder.prototype.commands.paste = function() {
 								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, suffix : fm.options.backupSuffix},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
+							.done(function(data) {
+								dfrd.resolve(data);
+								if (data && data.added && data.added[0]) {
+									var newItem = fm.getUI('cwd').find('#'+data.added[0].hash);
+									if (newItem.length) {
+										newItem.trigger('scrolltoview');
+									}
+								}
+							})
 							.always(function() {
-								dfrd.resolve();
 								fm.unlockfiles({files : files});
 							});
 					}
