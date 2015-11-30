@@ -1890,7 +1890,7 @@ class elFinder {
 				break;
 			}
 			
-			$rename = false;
+			$rnres = array();
 			if ($renames) {
 				$file = $srcVolume->file($target);
 				if (isset($renames[$file['name']])) {
@@ -1901,7 +1901,6 @@ class elFinder {
 						$result['warning'] = $rnres['error'];
 						break;
 					}
-					$result = array_merge_recursive($result, $rnres);
 				}
 			}
 			
@@ -1911,6 +1910,9 @@ class elFinder {
 			}
 			
 			$result['added'][] = $file;
+			if ($rnres) {
+				$result = array_merge_recursive($result, $rnres);
+			}
 		}
 		return $result;
 	}
