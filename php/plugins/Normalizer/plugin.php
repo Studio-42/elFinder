@@ -12,7 +12,7 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
- *			'mkdir.pre mkfile.pre rename.pre archive.pre' => array(
+ *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre' => array(
  *				'Plugin.Normalizer.cmdPreprocess'
  *			),
  *			'upload.presave' => array(
@@ -72,7 +72,13 @@ class elFinderPluginNormalizer
 		}
 		
 		if (isset($args['name'])) {
-			$args['name'] = $this->normalize($args['name'], $opts);
+			if (is_array($args['name'])) {
+				foreach($args['name'] as $i => $name) {
+					$args['name'][$i] = $this->normalize($name, $opts);
+				}
+			} else {
+				$args['name'] = $this->normalize($args['name'], $opts);
+			}
 		}
 		return true;
 	}

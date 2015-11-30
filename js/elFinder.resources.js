@@ -151,7 +151,7 @@ elFinder.prototype.resources = {
 									if (data.added && data.added[0]) {
 										var newItem = cwd.find('#'+data.added[0].hash);
 										if (newItem.length) {
-											cwd.parent().scrollTop(newItem.offset().top);
+											newItem.trigger('scrolltoview');
 										}
 									}
 								});

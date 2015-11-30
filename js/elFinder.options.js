@@ -651,6 +651,14 @@ elFinder.prototype._options = {
 	validName : false,
 	
 	/**
+	 * Backup name suffix.
+	 *
+	 * @type String
+	 * @default  "~"
+	 */
+	backupSuffix : '~',
+	
+	/**
 	 * Sync content interval
 	 * @todo - fix in elFinder
 	 * @type Number
