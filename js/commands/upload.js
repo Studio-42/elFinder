@@ -43,7 +43,14 @@ elFinder.prototype.commands.upload = function() {
 						dfrd.reject(error);
 					})
 					.done(function(data) {
+						var cwd = fm.getUI('cwd');
 						dfrd.resolve(data);
+						if (data && data.added && data.added[0]) {
+							var newItem = cwd.find('#'+data.added[0].hash);
+							if (newItem.length) {
+								newItem.trigger('scrolltoview');
+							}
+						}
 					});
 			},
 			upload = function(data) {

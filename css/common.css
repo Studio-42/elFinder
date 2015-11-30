@@ -92,7 +92,8 @@
 .elfinder-drag-helper .elfinder-cwd-icon { margin:0 0 0 -24px; float:left; }
 
 /* transparent overlay >_< */
-.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }
+/*.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }*/
+.elfinder-overlay { position: absolute; }
 
 /* panels under/below cwd (for search field etc) */
 .elfinder .elfinder-panel {

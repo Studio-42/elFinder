@@ -119,6 +119,7 @@
 
 /* icons */
 .elfinder-dialog-icon-open, 
+.elfinder-dialog-icon-readdir,
 .elfinder-dialog-icon-file        { background-position: 0 -225px; }
 .elfinder-dialog-icon-reload      { background-position: 0 -225px; }
 .elfinder-dialog-icon-mkdir       { background-position: 0 -64px; }
@@ -140,6 +141,7 @@
 .elfinder-dialog-icon-netmount,
 .elfinder-dialog-icon-netunmount,
 .elfinder-dialog-icon-chmod,
+.elfinder-dialog-icon-preupload,
 .elfinder-dialog-icon-dim         { background-position: 0 -434px; }
 
 /*********************** CONFIRM DIALOG **************************/
