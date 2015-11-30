@@ -95,7 +95,7 @@ class elFinder {
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
-		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false),
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'suffix' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'suffix' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
@@ -1911,8 +1911,12 @@ class elFinder {
 		}
 		
 		$renames = array();
+		$suffix = '~';
 		if (!empty($args['renames'])) {
 			$renames = array_flip($args['renames']);
+			if (is_string($args['suffix']) && ! preg_match('/[\/\\?*:|"<>]/', $args['suffix'])) {
+				$suffix = $args['suffix'];
+			}
 		}
 		
 		foreach ($targets as $target) {
@@ -1927,7 +1931,7 @@ class elFinder {
 				if (isset($renames[$file['name']])) {
 					$dir = $dstVolume->realpath($dst);
 					$hash = $dstVolume->getHash($dir, $file['name']);
-					$rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $file['name'], '.bak')));
+					$rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $file['name'], $suffix, true, 0)));
 					if (!empty($rnres['error'])) {
 						$result['warning'] = $rnres['error'];
 						break;
