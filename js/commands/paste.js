@@ -165,8 +165,16 @@ elFinder.prototype.commands.paste = function() {
 								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, suffix : fm.options.backupSuffix},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
+							.done(function(data) {
+								dfrd.resolve(data);
+								if (data && data.added && data.added[0]) {
+									var newItem = fm.getUI('cwd').find('#'+data.added[0].hash);
+									if (newItem.length) {
+										newItem.trigger('scrolltoview');
+									}
+								}
+							})
 							.always(function() {
-								dfrd.resolve();
 								fm.unlockfiles({files : files});
 							});
 					}
