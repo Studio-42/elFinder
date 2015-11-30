@@ -16,6 +16,9 @@ $.fn.elfinderuploadbutton = function(cmd) {
 						cmd.exec({input : _input.remove()[0]});
 						input.clone(true).appendTo(form);
 					} 
+				})
+				.on('dragover', function(e) {
+					e.originalEvent.dataTransfer.dropEffect = 'copy';
 				});
 
 		form.append(input.clone(true));

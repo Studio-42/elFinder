@@ -2103,9 +2103,7 @@ window.elFinder = function(node, opts) {
 			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
 				e.preventDefault();
 				e.stopPropagation();
-				if ($(e.target).is('[class*="elfinder"]')) {
-					e.dataTransfer.dropEffect = 'none';
-				}
+				e.dataTransfer.dropEffect = 'none';
 			}
 		}, false);
 		node[0].addEventListener('drop', function(e) {
@@ -4293,6 +4291,7 @@ elFinder.prototype = {
 			elm.addEventListener('dragover', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+				e.dataTransfer.dropEffect = 'copy';
 				ent = false;
 			}, false);
 
