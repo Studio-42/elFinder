@@ -2342,13 +2342,19 @@ elFinder.prototype = {
 		// check file/dir exists
 		checkExists: function(files, target, fm) {
 			var dfrd = $.Deferred(),
-				existed, names, name,
-				check = function(){
-					var renames = [], exists, i, c;
+				names, name,
+				cancel = function() {
+					var i = files.length;
+					while (--i > -1) {
+						files[i]._remove = true;
+					}
+				},
+				check = function() {
+					var renames = [], existed = [], exists = [], i, c;
 					
 					var confirm = function(ndx) {
-						var last = ndx == exists.length-1;
-						fm.confirm({
+						var last = ndx == exists.length-1,
+						opts = {
 							title  : fm.i18n('cmdupload'),
 							text   : ['errExists', exists[ndx].name, 'confirmRepl'], 
 							all    : !last,
@@ -2382,10 +2388,7 @@ elFinder.prototype = {
 							cancel : {
 								label    : 'btnCancel',
 								callback : function() {
-									var i = files.length;
-									while (--i > -1) {
-										files[i]._remove = true;
-									}
+									cancel();
 									dfrd.resolve(renames);
 								}
 							},
@@ -2408,7 +2411,11 @@ elFinder.prototype = {
 									}
 								}
 							]
-						});
+						};
+						if (fm.iframeCnt > 0) {
+							delete opts.reject;
+						}
+						fm.confirm(opts);
 					};
 					
 					names = $.map(files, function(file, i) { return file.name? {i: i, name: file.name} : null ;});
@@ -2419,35 +2426,34 @@ elFinder.prototype = {
 						notify : {type : 'preupload', cnt : 1, hideCnt : true},
 						preventFail : true
 					})
-					.always(function(data) {
-						if (data && data.name) {
-							name = data.name;
-							names = $.map(names, function(item, i) { return {i: i, name: name[i] };});
+					.done(function(data) {
+						if (data) {
+							if (data.error) {
+								cancel();
+							} else {
+								if (data.name) {
+									existed = data.name || [];
+									exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
+								}
+								if (data.list && target == fm.cwd().hash
+								&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
+									fm.sync();
+								}
+							}
 						}
-						exists = $.map(names, function(name){ return existed.indexOf(name.name) !== -1 ? name : null ;});
-						
 						if (exists.length > 0) {
 							confirm(0);
 						} else {
-							dfrd.resolve(renames);
+							dfrd.resolve([]);
 						}
+					})
+					.fail(function() {
+						cancel();
+						dfrd.resolve([]);
 					});
 				};
 			if (fm.option('uploadOverwrite') && typeof files[0] == 'object') {
-				if (target == fm.cwd().hash) {
-					existed = $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;});
-					check();
-				} else {
-					fm.request({
-						data : {cmd : 'ls', target : target},
-						notify : {type : 'readtdir', cnt : 1, hideCnt : true},
-						preventFail : true
-					})
-					.always(function(data) {
-						existed = data.list || [];
-						check();
-					});
-				}
+				check();
 				return dfrd;
 			} else {
 				return dfrd.resolve([]);
@@ -2567,7 +2573,7 @@ elFinder.prototype = {
 							items = $.map(items, function(item){
 								var i, bak, file, dfd;
 								if (item.isDirectory) {
-									i = renames.indexOf(item.name);
+									i = $.inArray(item.name, renames);
 									if (i !== -1) {
 										renames.splice(i, 1);
 										bak = fm.uniqueName(item.name + fm.options.backupSuffix , null, '');
@@ -3297,9 +3303,11 @@ elFinder.prototype = {
 							
 							form.submit();
 					}),
-				cnt, notify, notifyto, abortto
-				
-				;
+				target  = (data.target || self.cwd().hash),
+				names   = [],
+				dfds    = [],
+				renames = [],
+				cnt, notify, notifyto, abortto;
 
 			if (files && files.length) {
 				$.each(files, function(i, val) {
@@ -3307,27 +3315,52 @@ elFinder.prototype = {
 				});
 				cnt = 1;
 			} else if (input && $(input).is(':file') && $(input).val()) {
-				form.append(input);
+				if (fm.option('uploadOverwrite')) {
+					names = input.files? input.files : [{ name: $(input).val().replace(/^(?:.+[\\\/])?([^\\\/]+)$/, '$1') }];
+					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
+					dfds.push(self.uploads.checkExists(names, target, self).done(
+						function(res){
+							renames = res;
+							cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
+							if (cnt != names.length) {
+								cnt = 0;
+							}
+						}
+					));
+				}
 				cnt = input.files ? input.files.length : 1;
+				form.append(input);
 			} else {
 				return dfrd.reject();
 			}
 			
-			form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+(data.target || self.cwd().hash)+'"/>')
-				.append('<input type="hidden" name="html" value="1"/>')
-				.append('<input type="hidden" name="node" value="'+self.id+'"/>')
-				.append($(input).attr('name', 'upload[]'));
-			
-			$.each(self.options.onlyMimes||[], function(i, mime) {
-				form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
+			$.when.apply($, dfds).done(function() {
+				if (cnt < 1) {
+					return dfrd.reject();
+				}
+				form.append('<input type="hidden" name="'+(self.newAPI ? 'target' : 'current')+'" value="'+target+'"/>')
+					.append('<input type="hidden" name="html" value="1"/>')
+					.append('<input type="hidden" name="node" value="'+self.id+'"/>')
+					.append($(input).attr('name', 'upload[]'));
+				
+				if (renames.length > 0) {
+					$.each(renames, function(i, rename) {
+						form.append('<input type="hidden" name="renames[]" value="'+rename+'"/>');
+					});
+					form.append('<input type="hidden" name="suffix" value="'+fm.options.backupSuffix+'"/>');
+				}
+				
+				$.each(self.options.onlyMimes||[], function(i, mime) {
+					form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
+				});
+				
+				$.each(self.options.customData, function(key, val) {
+					form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
+				});
+				
+				form.appendTo('body');
+				iframe.appendTo('body');
 			});
-			
-			$.each(self.options.customData, function(key, val) {
-				form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
-			});
-			
-			form.appendTo('body');
-			iframe.appendTo('body');
 			
 			return dfrd;
 		}

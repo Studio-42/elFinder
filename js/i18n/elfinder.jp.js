@@ -177,7 +177,6 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'リンクURLを取得しています', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'ファイル属性を変更しています', // from v2.1 added 20.6.2015
-			'ntfreadtdir' : '対象ホルダを読み取っています', // from v2.1 added 31.11.2015
 			'ntfpreupload': 'アップロードファイル名を検証しています', // from v2.1 added 31.11.2015
 
 			/************************************ dates **********************************/

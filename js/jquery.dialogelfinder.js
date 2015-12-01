@@ -69,7 +69,6 @@ $.fn.dialogelfinder = function(opts) {
 			});
 
 			node.zIndex(zindex).css(pos).show().trigger('resize');
-			window.self.focus();
 
 			setTimeout(function() {
 				// fix resize icon position and make elfinder active
