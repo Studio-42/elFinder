@@ -10,6 +10,8 @@
 			- Make list of download url to Text editor
 			- Drag and Drop download with Chrome (Single file only)
 			- etc.
+		- Choosable "backup" at pasting of same name files
+		- Show confirm at uploading of same name file exists
 		- Others, some minor bug fixes
 
 
