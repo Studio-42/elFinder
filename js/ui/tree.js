@@ -337,8 +337,8 @@ $.fn.elfindertree = function(fm, opts) {
 					return updateTree(orphans);
 				} 
 				
-				if (!mobile) {
-					updateDroppable();
+				if (length && !mobile) {
+					updateDroppable(null, dir.hash);
 				}
 				
 			},
@@ -456,7 +456,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @return void
 			 */
-			updateDroppable = function(target) {
+			updateDroppable = function(target, dstHash) {
 				var limit = 100,
 					next;
 				target = target || tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
@@ -464,12 +464,15 @@ $.fn.elfindertree = function(fm, opts) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
 				}
-				target.droppable(droppableopts).each(function(){
-					fm.makeDirectDropUpload(this, fm.navId2Hash(this.id));
-				});
+				if (fm.isCommandEnabled('paste', dstHash)) {
+					target.droppable(droppableopts);
+				}
+				if (fm.isCommandEnabled('upload', dstHash)) {
+					target.addClass('native-droppable');
+				}
 				if (next) {
 					setTimeout(function(){
-						updateDroppable(next);
+						updateDroppable(next, dstHash);
 					}, 20);
 				}
 			},
@@ -659,8 +662,9 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		// update changed dirs
 		.change(function(e) {
-			var dirs = filter(e.data.changed),
-				l    = dirs.length,
+			var length = dirs.length,
+				dirs = filter(e.data.changed),
+				l    = length,
 				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
 			
 			while (l--) {
@@ -696,7 +700,7 @@ $.fn.elfindertree = function(fm, opts) {
 			}
 
 			sync();
-			!mobile && updateDroppable();
+			length && !mobile && updateDroppable(null, dir.hash);
 		})
 		// remove dirs
 		.remove(function(e) {

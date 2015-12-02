@@ -531,12 +531,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			makeDroppable = function() {
+				var targets = cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
 				if (fm.isCommandEnabled('paste')) {
-					setTimeout(function() {
-						cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable).each(function(){
-							fm.makeDirectDropUpload(this, this.id);
-						});
-					}, 20);
+					targets.droppable(fm.droppable);
+				}
+				if (fm.isCommandEnabled('upload')) {
+					targets.addClass('native-droppable');
 				}
 			},
 			
@@ -1167,57 +1167,10 @@ $.fn.elfindercwd = function(fm, options) {
 		// for iOS5 bug
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
-		(function(){
-		var ent, allow;
-		if (fm.dragUpload) {
-			wrapper[0].addEventListener('dragenter', function(e) {
-				var cwd = fm.cwd(), elfFrom = null;
-				e.preventDefault();
-				e.stopPropagation();
-				ent = true;
-				allow = false;
-				try {
-					$.each(e.dataTransfer.types, function(i, v){
-						if (v.substr(0, 13) === 'elfinderfrom:') {
-							elfFrom = v.substr(13).toLowerCase();
-						}
-					});
-				} catch(e) {}
-				if (cwd && cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase())) {
-					wrapper.addClass(clDropActive);
-					allow = true;
-				}
-			}, false);
-
-			wrapper[0].addEventListener('dragleave', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				if (ent) {
-					ent = false;
-				} else {
-					wrapper.removeClass(clDropActive);
-				}
-			}, false);
-
-			wrapper[0].addEventListener('dragover', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				e.dataTransfer.dropEffect = allow? 'copy' : 'none';
-				ent = false;
-			}, false);
-
-			wrapper[0].addEventListener('drop', function(e) {
-				wrapper.removeClass(clDropActive);
-				if (allow) {
-					fm.exec('upload', {dropEvt: e});
-				}
-			}, false);
-		};
-		})();
-
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
+				wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 				resize();
 			})
 			.bind('search', function(e) {

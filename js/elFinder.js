@@ -2110,11 +2110,92 @@ window.elFinder = function(node, opts) {
 			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
 				e.stopPropagation();
 				e.preventDefault();
-				if ($(e.target).is('[class*="elfinder"]')) {
-					self.error(['errUploadFile', self.i18n('items'), 'errPerm']);
-				}
 			}
 		}, false);
+
+		// add event listener for HTML5 DnD upload
+		(function() {
+			var ent   = 'native-drag-enter',
+			disable   = 'native-drag-disable',
+			c         = 'class',
+			navdir    = self.res(c, 'navdir'),
+			droppable = self.res(c, 'droppable'),
+			collapsed = self.res(c, 'navcollapse'),
+			expanded  = self.res(c, 'navexpand'),
+			dropover  = self.res(c, 'adroppable'),
+			arrow     = self.res(c, 'navarrow'),
+			clDropActive = self.res(c, 'adroppable');
+			node.on('dragenter', '.native-droppable', function(e){
+				if (e.originalEvent.dataTransfer) {
+					var $elm = $(e.currentTarget),
+						id   = e.currentTarget.id || null,
+						elfFrom;
+					if (!id) { // target is cwd
+						$elm.data(disable, false);
+						try {
+							$.each(e.originalEvent.dataTransfer.types, function(i, v){
+								if (v.substr(0, 13) === 'elfinderfrom:') {
+									elfFrom = v.substr(13).toLowerCase();
+								}
+							});
+						} catch(e) {}
+					} else {
+						if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
+							setTimeout(function() {
+								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
+							}, 500);
+						}
+					}
+					if (id || !elfFrom || elfFrom !== (window.location.href + self.cwd().hash).toLowerCase()) {
+						e.preventDefault();
+						e.stopPropagation();
+						$elm.data(ent, true);
+						$elm.addClass(clDropActive);
+					} else {
+						$elm.data(disable, true);
+					}
+				}
+			})
+			.on('dragleave', '.native-droppable', function(e){
+				if (e.originalEvent.dataTransfer) {
+					var $elm = $(e.currentTarget);
+					e.preventDefault();
+					e.stopPropagation();
+					if ($elm.data(ent)) {
+						$elm.data(ent, false);
+					} else {
+						$elm.removeClass(clDropActive);
+					}
+				}
+			})
+			.on('dragover', '.native-droppable', function(e){
+				if (e.originalEvent.dataTransfer) {
+					var $elm = $(e.currentTarget);
+					e.preventDefault();
+					e.stopPropagation();
+					e.originalEvent.dataTransfer.dropEffect = $elm.data(disable)? 'none' : 'copy';
+					$elm.data(ent, false);
+				}
+			})
+			.on('drop', '.native-droppable', function(e){
+				if (e.originalEvent.dataTransfer) {
+					var $elm = $(e.currentTarget)
+						id;
+					e.preventDefault();
+					e.stopPropagation();
+					$elm.removeClass(clDropActive);
+					if (e.currentTarget.id) {
+						id = $elm.hasClass(navdir)? self.navId2Hash(e.currentTarget.id) : e.currentTarget.id;
+					} else {
+						id = self.cwd().hash;
+					}
+					e.originalEvent._target = id;
+					self.directUploadTarget = id;
+					self.exec('upload', {dropEvt: e.originalEvent, target: id});
+					self.directUploadTarget = null;
+				}
+			});
+		})();
 	}
 	
 	// self.timeEnd('load'); 
@@ -4279,65 +4360,6 @@ elFinder.prototype = {
 	
 	navId2Hash : function(id) {
 		return typeof(id) == 'string' ? id.substr(4) : false;
-	},
-	
-	/**
-	 * Make event listener for direct upload to directory
-	 * 
-	 * @param  Object  DOM object
-	 * @param  String  Target dirctory hash
-	 * @return void
-	 */
-	makeDirectDropUpload : function(elm, hash) {
-		var self = this, ent,
-		c         = 'class',
-		$elm      = $(elm),
-		collapsed = self.res(c, 'navcollapse'),
-		expanded  = self.res(c, 'navexpand'),
-		dropover  = self.res(c, 'adroppable'),
-		arrow     = self.res(c, 'navarrow'),
-		clDropActive = self.res(c, 'adroppable');
-
-		if (self.dragUpload) {
-			elm.addEventListener('dragenter', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				ent = true;
-				$elm.addClass(clDropActive);
-				if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
-					setTimeout(function() {
-						$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-					}, 500);
-				}
-			}, false);
-
-			elm.addEventListener('dragleave', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				if (ent) {
-					ent = false;
-				} else {
-					$elm.removeClass(clDropActive);
-				}
-			}, false);
-
-			elm.addEventListener('dragover', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				e.dataTransfer.dropEffect = 'copy';
-				ent = false;
-			}, false);
-
-			elm.addEventListener('drop', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				$elm.removeClass(clDropActive);
-				e._target = hash;
-				self.directUploadTarget = hash;
-				self.exec('upload', {dropEvt: e});
-				self.directUploadTarget = null;
-			}, false);
-		}
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
