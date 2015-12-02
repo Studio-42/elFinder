@@ -531,12 +531,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			makeDroppable = function() {
+				var targets = cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
 				if (fm.isCommandEnabled('paste')) {
-					setTimeout(function() {
-						cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)').droppable(fm.droppable).each(function(){
-							fm.makeDirectDropUpload(this, this.id);
-						});
-					}, 20);
+					targets.droppable(fm.droppable);
+				}
+				if (fm.isCommandEnabled('upload')) {
+					targets.addClass('native-droppable');
 				}
 			},
 			
@@ -928,13 +928,17 @@ $.fn.elfindercwd = function(fm, options) {
 											i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
 										}
 										return i;
-									}, l;
+									}, l, geturl = [];
 								p.trigger(evtSelect);
 								trigger();
 								$.each(selectedFiles, function(i, v){
 									var file = fm.file(v),
-										furl = fm.url(v);
+										furl = file.url;
 									if (file && file.mime !== 'directory') {
+										if (furl === '1') {
+											geturl.push(v);
+											return true;
+										}
 										files.push(v);
 										$('<a>').attr('href', furl).text(furl).appendTo(elm);
 										url += furl + "\n";
@@ -946,7 +950,21 @@ $.fn.elfindercwd = function(fm, options) {
 										}
 									}
 								});
-								if (url) {
+								if (geturl.length) {
+									$.each(geturl, function(i, v){
+										var rfile = fm.file(v);
+										rfile.url = '';
+										fm.request({
+											data : {cmd : 'url', target : v},
+											notify : {type : 'url', cnt : 1},
+											preventDefault : true
+										})
+										.always(function(data) {
+											rfile.url = data.url? data.url : '1';
+										});
+									});
+									return false;
+								} else if (url) {
 									helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
 									if ((l = files.length) > 1) {
 										helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -1167,57 +1185,10 @@ $.fn.elfindercwd = function(fm, options) {
 		// for iOS5 bug
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
-		(function(){
-		var ent, allow;
-		if (fm.dragUpload) {
-			wrapper[0].addEventListener('dragenter', function(e) {
-				var cwd = fm.cwd(), elfFrom = null;
-				e.preventDefault();
-				e.stopPropagation();
-				ent = true;
-				allow = false;
-				try {
-					$.each(e.dataTransfer.types, function(i, v){
-						if (v.substr(0, 13) === 'elfinderfrom:') {
-							elfFrom = v.substr(13).toLowerCase();
-						}
-					});
-				} catch(e) {}
-				if (cwd && cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase())) {
-					wrapper.addClass(clDropActive);
-					allow = true;
-				}
-			}, false);
-
-			wrapper[0].addEventListener('dragleave', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				if (ent) {
-					ent = false;
-				} else {
-					wrapper.removeClass(clDropActive);
-				}
-			}, false);
-
-			wrapper[0].addEventListener('dragover', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				e.dataTransfer.dropEffect = allow? 'copy' : 'none';
-				ent = false;
-			}, false);
-
-			wrapper[0].addEventListener('drop', function(e) {
-				wrapper.removeClass(clDropActive);
-				if (allow) {
-					fm.exec('upload', {dropEvt: e});
-				}
-			}, false);
-		};
-		})();
-
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
+				wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 				resize();
 			})
 			.bind('search', function(e) {
