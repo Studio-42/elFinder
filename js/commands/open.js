@@ -32,7 +32,7 @@ elFinder.prototype.commands.open = function() {
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof opts == 'object')? opts.thash : false,
-			file, url, s, w, imgW, imgH, winW, winH;
+			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
 
 		if (!cnt && !thash) {
 			{
@@ -58,27 +58,52 @@ elFinder.prototype.commands.open = function() {
 			return dfrd.reject();
 		}
 		
+
+		try {
+			reg = new RegExp(fm.option('dispInlineRegex'));
+		} catch(e) {
+			reg = false;
+		}
+
 		// open files
+		link     = $('<a>').hide().appendTo($('body')),
+		html5dl  = (typeof link.get(0).download === 'string');
 		cnt = files.length;
 		while (cnt--) {
 			file = files[cnt];
+			inline = false;
 			
 			if (!file.read) {
 				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
-			if (fm.UA.Mobile) {
-				if (!(url = fm.url(/*file.thash || */file.hash))) {
-					url = fm.options.url;
-					url = url + (url.indexOf('?') === -1 ? '?' : '&')
-						+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
-						+ '&target=' + file.hash;
+			if (fm.UA.Mobile || (reg && !(inline = file.mime.match(reg)))) {
+				url = fm.options.url;
+				url = url + (url.indexOf('?') === -1 ? '?' : '&')
+					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+					+ '&target=' + file.hash;
+					
+				$.each(fm.options.customData, function(key, val) {
+					url += '&' + key + '=' + val;
+				});
+				
+				if (!inline) {
+					url += '&download=1';
 				}
-				var wnd = window.open(url);
-				if (!wnd) {
-					return dfrd.reject('errPopup');
+				
+				if (html5dl) {
+					!inline && link.attr('download', file.name);
+					link.attr('href', url)
+					.attr('target', '_blank')
+					.get(0).click();
+				} else {
+					var wnd = window.open(url);
+					if (!wnd) {
+						return dfrd.reject('errPopup');
+					}
 				}
 			} else {
+				
 				// set window size for image if set
 				imgW = winW = Math.round(2 * $(window).width() / 3);
 				imgH = winH = Math.round(2 * $(window).height() / 3);
@@ -126,8 +151,11 @@ elFinder.prototype.commands.open = function() {
 				
 				document.body.appendChild(form);
 				form.submit();
+				wnd.focus();
+				
 			}
 		}
+		link.remove();
 		return dfrd.resolve(hashes);
 	}
 
