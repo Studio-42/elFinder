@@ -130,6 +130,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			pastable = 'elfinder-navbar-wrapper-pastable',
 			
+			/**
+			 * Un-disabled cmd `upload` volume's root wrapper class
+			 * 
+			 * @type String
+			 */
+			uploadable = 'elfinder-navbar-wrapper-uploadable',
+			
 			insideNavbar = function(x) {
 				var left = navbar.offset().left;
 					
@@ -313,6 +320,9 @@ $.fn.elfindertree = function(fm, opts) {
 								if ($.inArray('paste', dir.disabled) === -1) {
 									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(pastable);
 								}
+								if ($.inArray('upload', dir.disabled) === -1) {
+									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(uploadable);
+								}
 							}
 						}
 					} else {
@@ -338,7 +348,7 @@ $.fn.elfindertree = function(fm, opts) {
 				} 
 				
 				if (length && !mobile) {
-					updateDroppable(null, dir.hash);
+					updateDroppable();
 				}
 				
 			},
@@ -456,23 +466,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @return void
 			 */
-			updateDroppable = function(target, dstHash) {
+			updateDroppable = function(target) {
 				var limit = 100,
 					next;
-				target = target || tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				if (!target) {
+					tree.find('div.'+uploadable).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
+					target = tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				}
 				if (target.length > limit) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
 				}
-				if (fm.isCommandEnabled('paste', dstHash)) {
-					target.droppable(droppableopts);
-				}
-				if (fm.isCommandEnabled('upload', dstHash)) {
-					target.addClass('native-droppable');
-				}
 				if (next) {
 					setTimeout(function(){
-						updateDroppable(next, dstHash);
+						updateDroppable(next);
 					}, 20);
 				}
 			},
@@ -700,7 +707,7 @@ $.fn.elfindertree = function(fm, opts) {
 			}
 
 			sync();
-			length && !mobile && updateDroppable(null, dir.hash);
+			length && !mobile && updateDroppable();
 		})
 		// remove dirs
 		.remove(function(e) {
