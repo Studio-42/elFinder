@@ -2129,8 +2129,10 @@ window.elFinder = function(node, opts) {
 				if (e.originalEvent.dataTransfer) {
 					var $elm = $(e.currentTarget),
 						id   = e.currentTarget.id || null,
+						cwd  = null,
 						elfFrom;
 					if (!id) { // target is cwd
+						cwd = self.cwd();
 						$elm.data(disable, false);
 						try {
 							$.each(e.originalEvent.dataTransfer.types, function(i, v){
@@ -2140,13 +2142,13 @@ window.elFinder = function(node, opts) {
 							});
 						} catch(e) {}
 					} else {
-						if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
+						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
 							setTimeout(function() {
 								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
 							}, 500);
 						}
 					}
-					if (id || !elfFrom || elfFrom !== (window.location.href + self.cwd().hash).toLowerCase()) {
+					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
 						e.preventDefault();
 						e.stopPropagation();
 						$elm.data(ent, true);

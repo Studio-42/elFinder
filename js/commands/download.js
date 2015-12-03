@@ -49,19 +49,29 @@ elFinder.prototype.commands.download = function() {
 		
 		base += base.indexOf('?') === -1 ? '?' : '&';
 		
-		var url;
+		var url,
+			link    = $('<a>').hide().appendTo($('body')),
+			html5dl = (typeof link.get(0).download === 'string');
 		for (i = 0; i < files.length; i++) {
 			url = base + 'cmd=file&target=' + files[i].hash+'&download=1'+cdata;
-			if (fm.UA.Mobile) {
-				setTimeout(function(){
-					if (! window.open(url)) {
-						fm.error('errPopup');
-					}
-				}, 100);
+			if (html5dl) {
+				link.attr('href', url)
+				.attr('download', files[i].name)
+				.attr('target', '_blank')
+				.get(0).click();
 			} else {
-				iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+				if (fm.UA.Mobile) {
+					setTimeout(function(){
+						if (! window.open(url)) {
+							fm.error('errPopup');
+						}
+					}, 100);
+				} else {
+					iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+				}
 			}
 		}
+		link.remove();
 		$(iframes)
 			.appendTo('body')
 			.ready(function() {

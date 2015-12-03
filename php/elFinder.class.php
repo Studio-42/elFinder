@@ -976,10 +976,21 @@ class elFinder {
 			$disp = 'attachment';
 			$mime = $file['mime'];
 		} else {
-			$disp  = preg_match('/^(image|text)/i', $file['mime']) || $file['mime'] == 'application/x-shockwave-flash' 
-					? 'inline' 
-					: 'attachment';
+			$dispInlineRegex = $volume->getOption('dispInlineRegex');
+			$inlineRegex = false;
+			if ($dispInlineRegex) {
+				$inlineRegex = '#' . str_replace('#', '\\#', $dispInlineRegex) . '#';
+				try {
+					preg_match($inlineRegex, '');
+				} catch(Exception $e) {
+					$inlineRegex = false;
+				}
+			}
+			if (!$inlineRegex) {
+				$inlineRegex = '#^(?:(?:image|text)|application/x-shockwave-flash$)#';
+			}
 			$mime = $file['mime'];
+			$disp  = preg_match($inlineRegex, $mime)? 'inline' : 'attachment';
 		}
 		
 		$filenameEncoded = rawurlencode($file['name']);
