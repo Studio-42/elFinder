@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 309412e) (2015-12-03)
+ * Version 2.1.2 (2.1 Nightly: 56f010d) (2015-12-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -2143,8 +2143,10 @@ window.elFinder = function(node, opts) {
 				if (e.originalEvent.dataTransfer) {
 					var $elm = $(e.currentTarget),
 						id   = e.currentTarget.id || null,
+						cwd  = null,
 						elfFrom;
 					if (!id) { // target is cwd
+						cwd = self.cwd();
 						$elm.data(disable, false);
 						try {
 							$.each(e.originalEvent.dataTransfer.types, function(i, v){
@@ -2154,13 +2156,13 @@ window.elFinder = function(node, opts) {
 							});
 						} catch(e) {}
 					} else {
-						if ($elm.is('.'+collapsed+':not(.'+expanded+')')) {
+						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
 							setTimeout(function() {
 								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
 							}, 500);
 						}
 					}
-					if (id || !elfFrom || elfFrom !== (window.location.href + self.cwd().hash).toLowerCase()) {
+					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
 						e.preventDefault();
 						e.stopPropagation();
 						$elm.data(ent, true);
@@ -4442,7 +4444,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 309412e)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 56f010d)';
 
 
 
@@ -9360,6 +9362,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			pastable = 'elfinder-navbar-wrapper-pastable',
 			
+			/**
+			 * Un-disabled cmd `upload` volume's root wrapper class
+			 * 
+			 * @type String
+			 */
+			uploadable = 'elfinder-navbar-wrapper-uploadable',
+			
 			insideNavbar = function(x) {
 				var left = navbar.offset().left;
 					
@@ -9543,6 +9552,9 @@ $.fn.elfindertree = function(fm, opts) {
 								if ($.inArray('paste', dir.disabled) === -1) {
 									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(pastable);
 								}
+								if ($.inArray('upload', dir.disabled) === -1) {
+									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(uploadable);
+								}
 							}
 						}
 					} else {
@@ -9568,7 +9580,7 @@ $.fn.elfindertree = function(fm, opts) {
 				} 
 				
 				if (length && !mobile) {
-					updateDroppable(null, dir.hash);
+					updateDroppable();
 				}
 				
 			},
@@ -9686,23 +9698,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @return void
 			 */
-			updateDroppable = function(target, dstHash) {
+			updateDroppable = function(target) {
 				var limit = 100,
 					next;
-				target = target || tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				if (!target) {
+					tree.find('div.'+uploadable).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
+					target = tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+				}
 				if (target.length > limit) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
 				}
-				if (fm.isCommandEnabled('paste', dstHash)) {
-					target.droppable(droppableopts);
-				}
-				if (fm.isCommandEnabled('upload', dstHash)) {
-					target.addClass('native-droppable');
-				}
 				if (next) {
 					setTimeout(function(){
-						updateDroppable(next, dstHash);
+						updateDroppable(next);
 					}, 20);
 				}
 			},
@@ -9930,7 +9939,7 @@ $.fn.elfindertree = function(fm, opts) {
 			}
 
 			sync();
-			length && !mobile && updateDroppable(null, dir.hash);
+			length && !mobile && updateDroppable();
 		})
 		// remove dirs
 		.remove(function(e) {
@@ -10611,19 +10620,29 @@ elFinder.prototype.commands.download = function() {
 		
 		base += base.indexOf('?') === -1 ? '?' : '&';
 		
-		var url;
+		var url,
+			link    = $('<a>').hide().appendTo($('body')),
+			html5dl = (typeof link.get(0).download === 'string');
 		for (i = 0; i < files.length; i++) {
 			url = base + 'cmd=file&target=' + files[i].hash+'&download=1'+cdata;
-			if (fm.UA.Mobile) {
-				setTimeout(function(){
-					if (! window.open(url)) {
-						fm.error('errPopup');
-					}
-				}, 100);
+			if (html5dl) {
+				link.attr('href', url)
+				.attr('download', files[i].name)
+				.attr('target', '_blank')
+				.get(0).click();
 			} else {
-				iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+				if (fm.UA.Mobile) {
+					setTimeout(function(){
+						if (! window.open(url)) {
+							fm.error('errPopup');
+						}
+					}, 100);
+				} else {
+					iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+				}
 			}
 		}
+		link.remove();
 		$(iframes)
 			.appendTo('body')
 			.ready(function() {
@@ -12144,7 +12163,7 @@ elFinder.prototype.commands.open = function() {
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof opts == 'object')? opts.thash : false,
-			file, url, s, w, imgW, imgH, winW, winH;
+			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
 
 		if (!cnt && !thash) {
 			{
@@ -12170,27 +12189,52 @@ elFinder.prototype.commands.open = function() {
 			return dfrd.reject();
 		}
 		
+
+		try {
+			reg = new RegExp(fm.option('dispInlineRegex'));
+		} catch(e) {
+			reg = false;
+		}
+
 		// open files
+		link     = $('<a>').hide().appendTo($('body')),
+		html5dl  = (typeof link.get(0).download === 'string');
 		cnt = files.length;
 		while (cnt--) {
 			file = files[cnt];
+			inline = false;
 			
 			if (!file.read) {
 				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
-			if (fm.UA.Mobile) {
-				if (!(url = fm.url(/*file.thash || */file.hash))) {
-					url = fm.options.url;
-					url = url + (url.indexOf('?') === -1 ? '?' : '&')
-						+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
-						+ '&target=' + file.hash;
+			if (fm.UA.Mobile || (reg && !(inline = file.mime.match(reg)))) {
+				url = fm.options.url;
+				url = url + (url.indexOf('?') === -1 ? '?' : '&')
+					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+					+ '&target=' + file.hash;
+					
+				$.each(fm.options.customData, function(key, val) {
+					url += '&' + key + '=' + val;
+				});
+				
+				if (!inline) {
+					url += '&download=1';
 				}
-				var wnd = window.open(url);
-				if (!wnd) {
-					return dfrd.reject('errPopup');
+				
+				if (html5dl) {
+					!inline && link.attr('download', file.name);
+					link.attr('href', url)
+					.attr('target', '_blank')
+					.get(0).click();
+				} else {
+					var wnd = window.open(url);
+					if (!wnd) {
+						return dfrd.reject('errPopup');
+					}
 				}
 			} else {
+				
 				// set window size for image if set
 				imgW = winW = Math.round(2 * $(window).width() / 3);
 				imgH = winH = Math.round(2 * $(window).height() / 3);
@@ -12238,8 +12282,11 @@ elFinder.prototype.commands.open = function() {
 				
 				document.body.appendChild(form);
 				form.submit();
+				wnd.focus();
+				
 			}
 		}
+		link.remove();
 		return dfrd.resolve(hashes);
 	}
 

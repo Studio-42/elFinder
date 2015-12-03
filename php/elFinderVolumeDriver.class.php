@@ -205,6 +205,10 @@ abstract class elFinderVolumeDriver {
 		                     'markdown:text/plain'          => 'text/x-markdown',
 		                     'css:text/x-asm'               => 'text/css'
 		                    ),
+		// MIME regex of send HTTP header "Content-Disposition: inline"
+		// '.' is allow inline of all of MIME types
+		// '$^' is not allow inline of all of MIME types
+		'dispInlineRegex' => '^(?:(?:image|text)|application/x-shockwave-flash$)',
 		// directory for thumbnails
 		'tmbPath'         => '.tmb',
 		// mode to create thumbnails dir
@@ -1063,6 +1067,7 @@ abstract class elFinderVolumeDriver {
 			'copyOverwrite'   => intval($this->options['copyOverwrite']),
 			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
 			'uploadMaxSize'   => intval($this->uploadMaxSize),
+			'dispInlineRegex' => $this->options['dispInlineRegex'],
 			'archivers'       => array(
 				'create'    => $create,
 				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
@@ -1070,6 +1075,17 @@ abstract class elFinderVolumeDriver {
 			),
 			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array()
 		);
+	}
+	
+	/**
+	 * Get option value of this volume
+	 * 
+	 * @param string $name  target option name
+	 * @return NULL|mixed   target option value
+	 * @author Naoki Sawada
+	 */
+	public function getOption($name) {
+		return isset($this->options[$name])? $this->options[$name] : null;
 	}
 	
 	/**
