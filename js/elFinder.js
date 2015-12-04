@@ -918,7 +918,7 @@ window.elFinder = function(node, opts) {
 	/**
 	 * Return file url if set
 	 * 
-	 * @param  Object  file
+	 * @param  String  file hash
 	 * @return String
 	 */
 	this.url = function(hash) {
@@ -959,6 +959,36 @@ window.elFinder = function(node, opts) {
 			params.current = file.phash;
 		}
 		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
+	}
+	
+	/**
+	 * Return file url for open in elFinder
+	 * 
+	 * @param  String  file hash
+	 * @return String
+	 */
+	this.openUrl = function(hash) {
+		var file = files[hash],
+			url  = '';
+		
+		if (!file || !file.read) {
+			return '';
+		}
+		
+		if (file.url && file.url != 1) {
+			return file.url;
+		}
+		
+		url = this.options.url;
+		url = url + (url.indexOf('?') === -1 ? '?' : '&')
+			+ (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+			+ '&target=' + file.hash;
+			
+		$.each(this.options.customData, function(key, val) {
+			url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+		});
+		
+		return url;
 	}
 	
 	/**

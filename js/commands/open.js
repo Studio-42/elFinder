@@ -78,14 +78,7 @@ elFinder.prototype.commands.open = function() {
 			}
 			
 			if (fm.UA.Mobile || (reg && !(inline = file.mime.match(reg)))) {
-				url = fm.options.url;
-				url = url + (url.indexOf('?') === -1 ? '?' : '&')
-					+ (fm.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
-					+ '&target=' + file.hash;
-					
-				$.each(fm.options.customData, function(key, val) {
-					url += '&' + key + '=' + val;
-				});
+				url = fm.openUrl(file.hash);
 				
 				if (!inline) {
 					url += '&download=1';

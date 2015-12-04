@@ -36,24 +36,12 @@ elFinder.prototype.commands.download = function() {
 		if (this.disabled()) {
 			return dfrd.reject();
 		}
-			
-		if (fm.oldAPI) {
-			fm.error('errCmdNoSupport');
-			return dfrd.reject();
-		}
-		
-		cdata = $.param(fm.options.customData || {});
-		if (cdata) {
-			cdata = '&' + cdata;
-		}
-		
-		base += base.indexOf('?') === -1 ? '?' : '&';
 		
 		var url,
 			link    = $('<a>').hide().appendTo($('body')),
 			html5dl = (typeof link.get(0).download === 'string');
 		for (i = 0; i < files.length; i++) {
-			url = base + 'cmd=file&target=' + files[i].hash+'&download=1'+cdata;
+			url = fm.openUrl(files[i].hash)+'&download=1';
 			if (html5dl) {
 				link.attr('href', url)
 				.attr('download', files[i].name)
