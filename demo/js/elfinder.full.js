@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 56f010d) (2015-12-03)
+ * Version 2.1.2 (2.1 Nightly: 8082b17) (2015-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4444,7 +4444,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 56f010d)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 8082b17)';
 
 
 
@@ -6767,6 +6767,14 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type String
 			 */
 			query = '',
+
+			selectableOption = {
+				filter     : fileSelector,
+				stop       : trigger,
+				delay      : 250,
+				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
+			},
 			
 			lastSearch = [],
 
@@ -7544,17 +7552,11 @@ $.fn.elfindercwd = function(fm, options) {
 					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
 						target.on('mousedown', function(e) {
 							// shiftKey + drag start for HTML5 native drag function
-							if (e.shiftKey) {
-								// disable jQuery-ui selectable while trigger native drag
-								try{ cwd.selectable('destroy'); }catch(e){}
+							if (e.shiftKey && !fm.UA.IE && cwd.data('selectable')) {
+								// destroy jQuery-ui selectable while trigger native drag
+								cwd.selectable('destroy').data('selectable', false);
 								setTimeout(function(){
-									cwd.selectable({
-										filter     : fileSelector,
-										stop       : trigger,
-										delay      : 250,
-										selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
-										unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
-									});
+									cwd.selectable(selectableOption).data('selectable', true);
 								}, 10);
 							}
 							target.draggable('option', 'disabled', e.shiftKey);
@@ -7563,7 +7565,7 @@ $.fn.elfindercwd = function(fm, options) {
 						.on('dragstart', function(e) {
 							var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
 							helper = null;
-							if (dt) {
+							if (dt && !fm.UA.IE) {
 								var p = this.id ? $(this) : $(this).parents('[id]:first'),
 									elm   = $('<span>'),
 									url   = '',
@@ -7614,11 +7616,13 @@ $.fn.elfindercwd = function(fm, options) {
 									});
 									return false;
 								} else if (url) {
-									helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
-									if ((l = files.length) > 1) {
-										helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
+									if (dt.setDragImage) {
+										helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+										if ((l = files.length) > 1) {
+											helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
+										}
+										dt.setDragImage(helper.get(0), 50, 47);
 									}
-									dt.setDragImage(helper.get(0), 50, 47);
 									dt.effectAllowed = 'copyLink';
 									dt.setData('DownloadURL', durl);
 									dt.setData('text/x-moz-url', murl);
@@ -7729,13 +7733,8 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				
 				// make files selectable
-				.selectable({
-					filter     : fileSelector,
-					stop       : trigger,
-					delay      : 250,
-					selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
-					unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
-				})
+				.selectable(selectableOption)
+				.data('selectable', true)
 				// prepend fake file/dir
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
