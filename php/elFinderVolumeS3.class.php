@@ -412,9 +412,6 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 **/
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
-		if ($path) {
-			@unlink($this->getTempFile($path));
-		}
 	}
 	
 	/********************  file/dir manipulations *************************/
