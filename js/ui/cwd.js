@@ -119,14 +119,6 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			query = '',
 
-			selectableOption = {
-				filter     : fileSelector,
-				stop       : trigger,
-				delay      : 250,
-				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
-				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
-			},
-			
 			lastSearch = [],
 
 			customColsBuild = function() {
@@ -405,7 +397,20 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type String
 			 **/
 			scrollEvent = 'scroll.'+fm.namespace,
-
+			
+			/**
+			 * jQuery UI selectable option
+			 * 
+			 * @type Object
+			 */
+			selectableOption = {
+				filter     : fileSelector,
+				stop       : trigger,
+				delay      : 250,
+				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
+			},
+			
 			/**
 			 * Cwd scroll event handler.
 			 * Lazy load - append to cwd not shown files
