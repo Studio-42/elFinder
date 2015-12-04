@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: ffb7985) (2015-12-04)
+ * Version 2.1.2 (2.1 Nightly: 5819c59) (2015-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4444,7 +4444,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: ffb7985)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 5819c59)';
 
 
 
@@ -6768,14 +6768,6 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			query = '',
 
-			selectableOption = {
-				filter     : fileSelector,
-				stop       : trigger,
-				delay      : 250,
-				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
-				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
-			},
-			
 			lastSearch = [],
 
 			customColsBuild = function() {
@@ -7054,7 +7046,20 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type String
 			 **/
 			scrollEvent = 'scroll.'+fm.namespace,
-
+			
+			/**
+			 * jQuery UI selectable option
+			 * 
+			 * @type Object
+			 */
+			selectableOption = {
+				filter     : fileSelector,
+				stop       : trigger,
+				delay      : 250,
+				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
+				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
+			},
+			
 			/**
 			 * Cwd scroll event handler.
 			 * Lazy load - append to cwd not shown files
