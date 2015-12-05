@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: feea637) (2015-12-05)
+ * Version 2.1.2 (2.1 Nightly: 912c94f) (2015-12-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4474,7 +4474,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: feea637)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 912c94f)';
 
 
 
@@ -6471,14 +6471,16 @@ $.fn.elfinderbutton = function(cmd) {
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var cmItem = 'elfinder-contextmenu-item',
+		var self   = $(this),
+			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
-			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
+			menu = self.addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
 				.on('mouseenter mouseleave', '.'+cmItem, function() {
 					$(this).toggleClass('ui-state-hover')
-				}),
+				})
+				.on('contextmenu', function(){return false;}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
 			clItem = cmItem + (fm.UA.Touch ? ' elfinder-touch' : ''),
@@ -6522,8 +6524,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			create = function(type, targets) {
 				var sep = false,
-				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
-				self = fm.getUI('contextmenu');
+				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0);
 
 				if (self.data('cmdMaps')) {
 					$.each(self.data('cmdMaps'), function(i, v){
@@ -6624,8 +6625,13 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.name, function() {
 								close();
 								cmd.exec(targets);
-							})
-							
+							});
+							if (cmd.extra) {
+								node.append(
+									$('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.extra.icon+' elfinder-contextmenu-extra-icon"/>')
+									.append(cmd.extra.node)
+								);
+							}
 						}
 						
 						menu.append(node)
@@ -6665,7 +6671,9 @@ $.fn.elfindercontextmenu = function(fm) {
 				menu.children().length && open(data.x, data.y);
 			})
 			.one('destroy', function() { menu.remove(); })
-			.bind('disable select', close)
+			.bind('disable select', function(){
+				self.data('mouseEvInternal') && close();
+			})
 			.getUI().click(close);
 		});
 		
@@ -10632,6 +10640,60 @@ elFinder.prototype.commands.download = function() {
 		
 		return  !this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	};
+	
+	this.fm.bind('contextmenu', function(e){
+		var fm = self.fm,
+			helper = null,
+			targets, file, link;
+		if (e.data) {
+			targets = e.data.targets || [];
+			if (targets.length === 1) {
+				if (file = fm.file(targets[0])) {
+					if (file.mime !== 'directory' && file.url != '1') {
+						link = file.url || fm.url(file.hash);
+						self.extra = {
+							icon: 'link',
+							node: $('<a/>')
+								.attr({href: link, target: '_blank', title: fm.i18n('link')})
+								.css({display: 'inline-block', width: '100%', height: '100%'})
+								.html('&nbsp;')
+								.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
+									var cm = fm.getUI('contextmenu');
+									e.stopPropagation();
+									cm.data('mouseEvInternal', true);
+									setTimeout(function(){
+										cm.data('mouseEvInternal', false);
+									}, 10);
+								})
+								.on('dragstart', function(e) {
+									var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
+									helper = null;
+									if (dt) {
+										var icon  = function(f) {
+												var mime = f.mime, i;
+												i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+												if (f.tmb && f.tmb !== 1) {
+													i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+												}
+												return i;
+											};
+										dt.effectAllowed = 'copyLink';
+										if (dt.setDragImage) {
+											helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(file)).appendTo($(document.body));
+											dt.setDragImage(helper.get(0), 50, 47);
+										}
+									}
+								})
+								.on('dragend', function(e) {
+									helper && helper.remove();
+								})
+						};
+					}
+				}
+			}
+		}
+	});
+	
 	
 	this.exec = function(hashes) {
 		var fm      = this.fm,
