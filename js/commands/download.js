@@ -28,6 +28,7 @@ elFinder.prototype.commands.download = function() {
 		var fm = self.fm,
 			helper = null,
 			targets, file, link;
+		self.extra = null;
 		if (e.data) {
 			targets = e.data.targets || [];
 			if (targets.length === 1) {
@@ -95,7 +96,7 @@ elFinder.prototype.commands.download = function() {
 			link    = $('<a>').hide().appendTo($('body')),
 			html5dl = (typeof link.get(0).download === 'string');
 		for (i = 0; i < files.length; i++) {
-			url = fm.openUrl(files[i].hash)+'&download=1';
+			url = fm.openUrl(files[i].hash, true);
 			if (html5dl) {
 				link.attr('href', url)
 				.attr('download', files[i].name)

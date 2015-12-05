@@ -965,9 +965,10 @@ window.elFinder = function(node, opts) {
 	 * Return file url for open in elFinder
 	 * 
 	 * @param  String  file hash
+	 * @param  Bool    for download link
 	 * @return String
 	 */
-	this.openUrl = function(hash) {
+	this.openUrl = function(hash, download) {
 		var file = files[hash],
 			url  = '';
 		
@@ -975,7 +976,7 @@ window.elFinder = function(node, opts) {
 			return '';
 		}
 		
-		if (file.url && file.url != 1) {
+		if (!download && file.url && file.url != 1) {
 			return file.url;
 		}
 		
@@ -983,7 +984,11 @@ window.elFinder = function(node, opts) {
 		url = url + (url.indexOf('?') === -1 ? '?' : '&')
 			+ (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
 			+ '&target=' + file.hash;
-			
+		
+		if (download) {
+			url += '&download=1';
+		}
+		
 		$.each(this.options.customData, function(key, val) {
 			url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
 		});

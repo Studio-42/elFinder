@@ -162,11 +162,13 @@ $.fn.elfindercontextmenu = function(fm) {
 								close();
 								cmd.exec(targets);
 							});
-							if (cmd.extra) {
+							if (cmd.extra && cmd.extra.node) {
 								node.append(
-									$('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.extra.icon+' elfinder-contextmenu-extra-icon"/>')
+									$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
 									.append(cmd.extra.node)
 								);
+							} else {
+								node.remove('.elfinder-contextmenu-extra-icon');
 							}
 						}
 						
