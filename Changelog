@@ -5,13 +5,15 @@
 		- Allow set elFinder::$volumesCnt by HTTP header "X-elFinder-VolumesCntStart"
 		- Resolved #1145, Configurable keyboard shortcuts of any command
 		- Force non-overwrite on URL uploading
-		- Supported Drag out function with [Shift] + Drag
+		- Supported Drag out function with [Shift] + Drag of file item (with out IE)
 			- Drag and Drop copy from elFinder(A) to elFinder(B)
 			- Make list of download url to Text editor
 			- Drag and Drop download with Chrome (Single file only)
 			- etc.
 		- Choosable "backup" at pasting of same name files
 		- Show confirm at uploading of same name file exists
+		- Show URL link icon on Download menu in contextmenu
+		        - This icon is clickable as normal link, shows context menu and drag out
 		- Others, some minor bug fixes
 
 
