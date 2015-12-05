@@ -24,6 +24,60 @@ elFinder.prototype.commands.download = function() {
 		return  !this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
 	};
 	
+	this.fm.bind('contextmenu', function(e){
+		var fm = self.fm,
+			helper = null,
+			targets, file, link;
+		if (e.data) {
+			targets = e.data.targets || [];
+			if (targets.length === 1) {
+				if (file = fm.file(targets[0])) {
+					if (file.mime !== 'directory' && file.url != '1') {
+						link = file.url || fm.url(file.hash);
+						self.extra = {
+							icon: 'link',
+							node: $('<a/>')
+								.attr({href: link, target: '_blank', title: fm.i18n('link')})
+								.css({display: 'inline-block', width: '100%', height: '100%'})
+								.html('&nbsp;')
+								.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
+									var cm = fm.getUI('contextmenu');
+									e.stopPropagation();
+									cm.data('mouseEvInternal', true);
+									setTimeout(function(){
+										cm.data('mouseEvInternal', false);
+									}, 10);
+								})
+								.on('dragstart', function(e) {
+									var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
+									helper = null;
+									if (dt) {
+										var icon  = function(f) {
+												var mime = f.mime, i;
+												i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+												if (f.tmb && f.tmb !== 1) {
+													i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+												}
+												return i;
+											};
+										dt.effectAllowed = 'copyLink';
+										if (dt.setDragImage) {
+											helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(file)).appendTo($(document.body));
+											dt.setDragImage(helper.get(0), 50, 47);
+										}
+									}
+								})
+								.on('dragend', function(e) {
+									helper && helper.remove();
+								})
+						};
+					}
+				}
+			}
+		}
+	});
+	
+	
 	this.exec = function(hashes) {
 		var fm      = this.fm,
 			base    = fm.options.url,
