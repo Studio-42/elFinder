@@ -71,18 +71,14 @@ elFinder.prototype.commands.open = function() {
 		cnt = files.length;
 		while (cnt--) {
 			file = files[cnt];
-			inline = false;
 			
 			if (!file.read) {
 				return dfrd.reject(['errOpen', file.name, 'errPerm']);
 			}
 			
-			if (fm.UA.Mobile || (reg && !(inline = file.mime.match(reg)))) {
-				url = fm.openUrl(file.hash);
-				
-				if (!inline) {
-					url += '&download=1';
-				}
+			inline = (reg && file.mime.match(reg));
+			if (fm.UA.Mobile || !inline) {
+				url = fm.openUrl(file.hash, !inline);
 				
 				if (html5dl) {
 					!inline && link.attr('download', file.name);
