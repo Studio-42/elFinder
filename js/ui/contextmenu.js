@@ -7,14 +7,16 @@
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var cmItem = 'elfinder-contextmenu-item',
+		var self   = $(this),
+			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
-			menu = $(this).addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
+			menu = self.addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
 				.on('mouseenter mouseleave', '.'+cmItem, function() {
 					$(this).toggleClass('ui-state-hover')
-				}),
+				})
+				.on('contextmenu', function(){return false;}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
 			clItem = cmItem + (fm.UA.Touch ? ' elfinder-touch' : ''),
@@ -58,8 +60,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			create = function(type, targets) {
 				var sep = false,
-				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
-				self = fm.getUI('contextmenu');
+				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0);
 
 				if (self.data('cmdMaps')) {
 					$.each(self.data('cmdMaps'), function(i, v){
@@ -160,8 +161,13 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.name, function() {
 								close();
 								cmd.exec(targets);
-							})
-							
+							});
+							if (cmd.extra) {
+								node.append(
+									$('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.extra.icon+' elfinder-contextmenu-extra-icon"/>')
+									.append(cmd.extra.node)
+								);
+							}
 						}
 						
 						menu.append(node)
@@ -201,7 +207,9 @@ $.fn.elfindercontextmenu = function(fm) {
 				menu.children().length && open(data.x, data.y);
 			})
 			.one('destroy', function() { menu.remove(); })
-			.bind('disable select', close)
+			.bind('disable select', function(){
+				self.data('mouseEvInternal') && close();
+			})
 			.getUI().click(close);
 		});
 		

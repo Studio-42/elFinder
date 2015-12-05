@@ -49,6 +49,7 @@
 .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-right:12px; }
 
 /* command/submenu icon */
+.elfinder-contextmenu-extra-icon,
 .elfinder-contextmenu-arrow,
 .elfinder-contextmenu-icon {
 	position:absolute;
@@ -59,6 +60,8 @@
 /* command icon in rtl/ltr enviroment */
 .elfinder-contextmenu-ltr .elfinder-contextmenu-icon { left:8px; }
 .elfinder-contextmenu-rtl .elfinder-contextmenu-icon { right:8px; }
+.elfinder-contextmenu-ltr .elfinder-contextmenu-extra-icon { right:8px; }
+.elfinder-contextmenu-rtl .elfinder-contextmenu-extra-icon { left:8px; }
 
 /* arrow icon */
 .elfinder-contextmenu-arrow {
