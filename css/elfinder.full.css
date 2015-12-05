@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: feea637) (2015-12-05)
+ * Version 2.1.2 (2.1 Nightly: 912c94f) (2015-12-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -441,6 +441,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-right:12px; }
 
 /* command/submenu icon */
+.elfinder-contextmenu-extra-icon,
 .elfinder-contextmenu-arrow,
 .elfinder-contextmenu-icon {
 	position:absolute;
@@ -451,6 +452,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* command icon in rtl/ltr enviroment */
 .elfinder-contextmenu-ltr .elfinder-contextmenu-icon { left:8px; }
 .elfinder-contextmenu-rtl .elfinder-contextmenu-icon { right:8px; }
+.elfinder-contextmenu-ltr .elfinder-contextmenu-extra-icon { right:8px; }
+.elfinder-contextmenu-rtl .elfinder-contextmenu-extra-icon { left:8px; }
 
 /* arrow icon */
 .elfinder-contextmenu-arrow {
@@ -1652,6 +1655,7 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-view-list { background-position: 0 -464px; }
 .elfinder-button-icon-help      { background-position: 0 -480px; }
 .elfinder-button-icon-resize    { background-position: 0 -512px; }
+.elfinder-button-icon-link      { background-position: 0 -528px; }
 .elfinder-button-icon-search    { background-position: 0 -561px; }
 .elfinder-button-icon-sort      { background-position: 0 -577px; }
 .elfinder-button-icon-rotate-r  { background-position: 0 -625px; }
