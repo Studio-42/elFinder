@@ -28,6 +28,7 @@ elFinder.prototype.commands.download = function() {
 		var fm = self.fm,
 			helper = null,
 			targets, file, link;
+		self.extra = null;
 		if (e.data) {
 			targets = e.data.targets || [];
 			if (targets.length === 1) {
