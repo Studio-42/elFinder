@@ -210,7 +210,9 @@ $.fn.elfindercontextmenu = function(fm) {
 			})
 			.one('destroy', function() { menu.remove(); })
 			.bind('disable select', function(){
-				self.data('mouseEvInternal') && close();
+				// 'mouseEvInternal' for Firefox's bug (maybe)
+				!self.data('mouseEvInternal') && close();
+				self.data('mouseEvInternal', false);
 			})
 			.getUI().click(close);
 		});

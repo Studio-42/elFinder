@@ -40,14 +40,14 @@ elFinder.prototype.commands.download = function() {
 							node: $('<a/>')
 								.attr({href: link, target: '_blank', title: fm.i18n('link')})
 								.text(file.name)
-								.css({display: 'inline-block', width: '100%', height: '100%', color: 'transparent'})
 								.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
 									var cm = fm.getUI('contextmenu');
 									e.stopPropagation();
+									// 'mouseEvInternal' for Firefox's bug (maybe)
 									cm.data('mouseEvInternal', true);
 									setTimeout(function(){
 										cm.data('mouseEvInternal', false);
-									}, 10);
+									}, 500);
 								})
 								.on('dragstart', function(e) {
 									var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
