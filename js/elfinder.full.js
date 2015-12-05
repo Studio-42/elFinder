@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 465f127) (2015-12-05)
+ * Version 2.1.2 (2.1 Nightly: 2da9822) (2015-12-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4479,7 +4479,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 465f127)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 2da9822)';
 
 
 
@@ -10663,8 +10663,8 @@ elFinder.prototype.commands.download = function() {
 							icon: 'link',
 							node: $('<a/>')
 								.attr({href: link, target: '_blank', title: fm.i18n('link')})
-								.css({display: 'inline-block', width: '100%', height: '100%'})
-								.html('&nbsp;')
+								.text(file.name)
+								.css({display: 'inline-block', width: '100%', height: '100%', color: 'transparent'})
 								.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
 									var cm = fm.getUI('contextmenu');
 									e.stopPropagation();
@@ -10689,6 +10689,10 @@ elFinder.prototype.commands.download = function() {
 										if (dt.setDragImage) {
 											helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(file)).appendTo($(document.body));
 											dt.setDragImage(helper.get(0), 50, 47);
+										}
+										if (!fm.UA.IE) {
+											dt.setData('elfinderfrom', window.location.href + file.phash);
+											dt.setData('elfinderfrom:' + dt.getData('elfinderfrom'), '');
 										}
 									}
 								})
