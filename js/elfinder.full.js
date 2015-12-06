@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: afb27df) (2015-12-06)
+ * Version 2.1.2 (2.1 Nightly: b452a67) (2015-12-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4479,7 +4479,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: afb27df)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: b452a67)';
 
 
 
@@ -9756,14 +9756,19 @@ $.fn.elfindertree = function(fm, opts) {
 			updateDroppable = function(target) {
 				var limit = 100,
 					next;
+				
 				if (!target) {
 					tree.find('div.'+uploadable).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
 					target = tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
 				}
+				
 				if (target.length > limit) {
 					next = target.slice(limit);
 					target = target.slice(0, limit);
 				}
+				
+				target.droppable(droppableopts);
+				
 				if (next) {
 					setTimeout(function(){
 						updateDroppable(next);
