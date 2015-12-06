@@ -25,13 +25,14 @@ elFinder.prototype.commands.rename = function() {
 			file     = fm.file(sel.shift()),
 			filename = '.elfinder-cwd-filename',
 			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
+			navbar   = (type === 'navbar'),
 			incwd    = (fm.cwd().hash == file.hash),
 			tarea    = (type === 'files' && fm.storage('view') != 'list'),
 			rest     = function(){
 				if (tarea) {
 					pnode.zIndex('').css('position', '');
 					node.css('max-height', '');
-				} else if (type !== 'navbar') {
+				} else if (!navbar) {
 					pnode.css('width', '');
 					pnode.parent('td').css('overflow', '');
 				}
@@ -48,7 +49,7 @@ elFinder.prototype.commands.rename = function() {
 						name = name.replace(/([_.])/g, '&#8203;$1');
 					}
 					rest();
-					if (type === 'navbar') {
+					if (navbar) {
 						input.replaceWith(name);
 					} else {
 						if (parent.length) {
@@ -117,7 +118,7 @@ elFinder.prototype.commands.rename = function() {
 						}
 						
 						rest();
-						//pnode.html(fm.escape(name));
+						navbar && pnode.html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name},
@@ -129,7 +130,7 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
-								if (data && data.added && data.added[0]) {
+								if (!navbar && data && data.added && data.added[0]) {
 									var newItem = cwd.find('#'+data.added[0].hash);
 									if (newItem.length) {
 										newItem.trigger('scrolltoview');
@@ -142,18 +143,18 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
-			node = (type === 'navbar')? $('#'+fm.navHash2Id(file.hash)).contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
+			node = navbar? $('#'+fm.navHash2Id(file.hash)).contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
 					                  : cwd.find('#'+file.hash).find(filename),
 			name = file.name.replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, ''),
 			pnode = node.parent();
 		
-		if (type === 'navbar') {
+		if (navbar) {
 			node.replaceWith(input.val(file.name));
 		} else {
 			if (tarea) {
 				pnode.zIndex((pnode.zIndex()) + 1).css('position', 'relative');
 				node.css('max-height', 'none');
-			} else if (type !== 'navbar') {
+			} else if (!navbar) {
 				colwidth = pnode.width();
 				pnode.width(colwidth - 15);
 				pnode.parent('td').css('overflow', 'visible');
