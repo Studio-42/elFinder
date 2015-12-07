@@ -55,6 +55,7 @@
 	position:absolute;
 	top:50%;
 	margin-top:-8px;
+	overflow: hidden;
 }
 
 /* command icon in rtl/ltr enviroment */
@@ -79,9 +80,8 @@
 	display: inline-block;
 	width: 100%;
 	height: 100%;
-	padding: 0;
+	padding: 20px;
 	margin: 0;
-	overflow: hidden;
 	color: transparent !important;
 	text-decoration: none;
 }
