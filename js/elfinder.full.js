@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: ed42a7a) (2015-12-06)
+ * Version 2.1.2 (2.1 Nightly: 5719ec9) (2015-12-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4479,7 +4479,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: ed42a7a)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 5719ec9)';
 
 
 
@@ -6508,7 +6508,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					scrolltop  = win.scrollTop(),
 					scrollleft = win.scrollLeft(),
 					m          = fm.UA.Touch? 10 : 0,
-					zoom       = document.body.clientWidth / window.innerWidth,
+					zoom       = !window.innerWidth? 1 : document.body.clientWidth / window.innerWidth,
 					css        = {
 						top  : ((y + m + height < wheight ? y + m : y - m - height > 0 ? y - m - height : y + m) + scrolltop) / zoom,
 						left : ((x + m + width  < wwidth  ? x + m : x - m - width) / zoom + scrollleft) / zoom,
@@ -7021,6 +7021,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			unselectAll = function() {
+				selectLock = false;
 				selectedFiles = [];
 				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
 				trigger();
@@ -7204,23 +7205,26 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type Object
 			 */
 			droppable = $.extend({}, fm.droppable, {
-				over : function(e, ui) { 
-					var cwd   = fm.cwd(),
-						hash  = cwd.hash,
-						$this = $(this);
+				over : function(e, ui) {
+					var dst = $(this), hash;
+					if (dst.data('dropover')) {
+						return;
+					}
+					dst.data('dropover', true);
 					if (ui.helper.data('namespace') !== fm.namespace) {
-						$this.removeClass(clDropActive);
+						dst.removeClass(clDropActive);
 						return false;
 					}
+					if (dst.hasClass(fm.res(c, 'cwdfile'))) {
+						hash = dst.attr('id');
+					} else {
+						hash = fm.cwd().hash;
+					}
+					dst.data('dropover', hash);
 					$.each(ui.helper.data('files'), function(i, h) {
-						if (h === hash || fm.file(h).phash === hash) {
-							if (h !== hash && cwd.write) {
-								$this.data('dropover', true);
-							}
-							if (!$this.data('dropover') || !ui.helper.hasClass('elfinder-drag-helper-plus')) {
-								$this.removeClass(clDropActive);
-							}
-							return false;
+						if (h === hash || (fm.file(h).phash === hash && !ui.helper.hasClass('elfinder-drag-helper-plus'))) {
+							dst.removeClass(clDropActive);
+							return false; // break $.each
 						}
 					});
 				},
@@ -7242,7 +7246,7 @@ $.fn.elfindercwd = function(fm, options) {
 			makeDroppable = function() {
 				var targets = cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
 				if (fm.isCommandEnabled('paste')) {
-					targets.droppable(fm.droppable);
+					targets.droppable(droppable);
 				}
 				if (fm.isCommandEnabled('upload')) {
 					targets.addClass('native-droppable');
@@ -7612,7 +7616,12 @@ $.fn.elfindercwd = function(fm, options) {
 								}, 10);
 							}
 							target.draggable('option', 'disabled', e.shiftKey);
-							target.attr('draggable', e.shiftKey ? 'true' : '');
+							if (e.shiftKey) {
+								target.attr('draggable', 'true');
+							} else {
+								target.attr('draggable', 'false')
+								      .draggable('option', 'cursorAt', {left: 50 - parseInt(target.css('margin-left')), top: 47});
+							}
 						})
 						.on('dragstart', function(e) {
 							var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
@@ -8004,13 +8013,17 @@ $.fn.elfindercwd = function(fm, options) {
 						unselectfiles : evtUnselect },
 					event  = events[e.type],
 					files  = e.data.files || [],
-					l      = files.length;
+					l      = files.length,
+					parents;
 				
+				if (l > 0) {
+					parents = fm.parents(files[0]);
+				}
 				while (l--) {
 					$('#'+files[l]).trigger(event);
 				}
 				trigger();
-				wrapper.data('dropover') && wrapper.toggleClass(clDropActive, e.type !== 'lockfiles');
+				wrapper.data('dropover') && parents.indexOf(wrapper.data('dropover')) !== -1 && wrapper.toggleClass(clDropActive, e.type !== 'lockfiles');
 			})
 			// select new files after some actions
 			.bind('mkdir mkfile duplicate upload rename archive extract paste multiupload', function(e) {
@@ -9439,25 +9452,46 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			droppableopts = $.extend(true, {}, fm.droppable, {
 				// show subfolders on dropover
-				over : function(e) { 
-					var link = $(this),
-						cl   = hover+' '+dropover;
-
+				over : function(e, ui) {
+					var dst = $(this),
+						cl  = hover+' '+dropover,
+						hash;
+					if (dst.data('dropover')) {
+						return;
+					}
+					dst.data('dropover', true);
+					if (ui.helper.data('namespace') !== fm.namespace) {
+						dst.removeClass(cl);
+						return false;
+					}
 					if (insideNavbar(e.clientX)) {
-						link.addClass(hover)
-						if (link.is('.'+collapsed+':not(.'+expanded+')')) {
-							link.data('expandTimer', setTimeout(function() {
-								link.children('.'+arrow).click();
+						dst.addClass(hover)
+						if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
+							dst.data('expandTimer', setTimeout(function() {
+								dst.children('.'+arrow).click();
 							}, 500));
 						}
+						hash = fm.navId2Hash(dst.attr('id'));
+						dst.data('dropover', hash);
+						$.each(ui.helper.data('files'), function(i, h) {
+							if (h === hash || (fm.file(h).phash === hash && !ui.helper.hasClass('elfinder-drag-helper-plus'))) {
+								dst.removeClass(cl);
+								return false; // break $.each
+							}
+						});
 					} else {
-						link.removeClass(cl);
+						dst.removeClass(cl);
 					}
 				},
 				out : function() {
-					var link = $(this);
-					link.data('expandTimer') && clearTimeout(link.data('expandTimer'));
-					link.removeClass(hover);
+					var dst = $(this);
+					dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
+					dst.removeData('dropover')
+					   .removeClass(hover+' '+dropover);
+				},
+				deactivate : function() {
+					$(this).removeData('dropover')
+					       .removeClass(hover+' '+dropover);
 				},
 				drop : function(e, ui) { insideNavbar(e.clientX) && drop.call(this, e, ui); }
 			}),
