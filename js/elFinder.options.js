@@ -641,12 +641,13 @@ elFinder.prototype._options = {
 	/**
 	 * Additional rule to valid new file name.
 	 * By default not allowed empty names or '..'
+	 * This setting does not have a sense of security.
 	 *
 	 * @type false|RegExp|function
 	 * @default  false
 	 * @example
 	 *  disable names with spaces:
-	 *  validName : /^[^\s]$/
+	 *  validName : /^[^\s]+$/,
 	 */
 	validName : false,
 	
