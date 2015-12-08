@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 5719ec9) (2015-12-07)
+ * Version 2.1.2 (2.1 Nightly: 441bbfd) (2015-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -757,6 +757,7 @@ window.elFinder = function(node, opts) {
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
 			hoverClass : this.res('class', 'adroppable'),
+			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
 				var dst     = $(this),
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
@@ -4479,7 +4480,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 5719ec9)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 441bbfd)';
 
 
 
@@ -4492,13 +4493,21 @@ elFinder.prototype.version = '2.1.2 (2.1 Nightly: 5719ec9)';
 var origin = $.ui.ddmanager.prepareOffsets;
 $.ui.ddmanager.prepareOffsets = function( t, event ) {
 	var isOutView = function(elem) {
-		var rect = elem.getBoundingClientRect();
+		if (elem.is(':hidden')) {
+			return true;
+		}
+		var rect = elem[0].getBoundingClientRect();
 		return document.elementFromPoint(rect.left, rect.top)? false : true;
 	}
 	
-	var i, m = $.ui.ddmanager.droppables[ t.options.scope ] || [];
-	for ( i = 0; i < m.length; i++ ) {
-		m[ i ].options.disabled = isOutView(m[ i ].element[ 0 ]);
+	var i, d,
+	m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
+	l = m.length;
+	for ( i = 0; i < l; i++ ) {
+		d = m[ i ];
+		if (d.options.autoDisable) {
+			d.options.disabled = isOutView(d.element);
+		}
 	}
 	
 	// call origin function
@@ -5199,12 +5208,13 @@ elFinder.prototype._options = {
 	/**
 	 * Additional rule to valid new file name.
 	 * By default not allowed empty names or '..'
+	 * This setting does not have a sense of security.
 	 *
 	 * @type false|RegExp|function
 	 * @default  false
 	 * @example
 	 *  disable names with spaces:
-	 *  validName : /^[^\s]$/
+	 *  validName : /^[^\s]+$/,
 	 */
 	validName : false,
 	
@@ -5799,15 +5809,25 @@ elFinder.prototype.resources = {
 					})
 					.blur(function() {
 						var name   = $.trim(input.val()),
-							parent = input.parent();
+							parent = input.parent(),
+							valid  = true;
 
 						if (parent.length) {
 
-							if (!name) {
-								return dfrd.reject('errInvName');
+							if (fm.options.validName && fm.options.validName.test) {
+								try {
+									valid = fm.options.validName.test(name);
+								} catch(e) {
+									valid = false;
+								}
+							}
+							if (!name || name === '..' || !valid) {
+								fm.error('errInvName');
+								return false;
 							}
 							if (fm.fileByName(name, phash)) {
-								return dfrd.reject(['errExists', name]);
+								fm.error(['errExists', name]);
+								return false;
 							}
 
 							rest();
@@ -7508,6 +7528,14 @@ $.fn.elfindercwd = function(fm, options) {
 					(list ? cwd.find('tbody') : cwd).prepend(parent);
 				}
 				
+				// set droppable
+				if (any || !fm.cwd().write) {
+					wrapper.removeClass('native-droppable')
+					       .droppable('disable');
+				} else {
+					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
+					wrapper.droppable('enable');
+				}
 			},
 			
 			/**
@@ -7682,7 +7710,7 @@ $.fn.elfindercwd = function(fm, options) {
 									return false;
 								} else if (url) {
 									if (dt.setDragImage) {
-										helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+										helper = $('<div class="elfinder-drag-helper html5-native elfinder-drag-helper-plus">').append(icon(fm.file(files[0]))).appendTo($(document.body));
 										if ((l = files.length) > 1) {
 											helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
 										}
@@ -7824,7 +7852,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
-				.droppable(droppable)
+				.droppable($.extend({}, droppable, {autoDisable: false}))
 				.on('contextmenu', function(e) {
 					e.preventDefault();
 					fm.trigger('contextmenu', {
@@ -7901,7 +7929,6 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
-				wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 				resize();
 			})
 			.bind('search', function(e) {
@@ -7993,7 +8020,6 @@ $.fn.elfindercwd = function(fm, options) {
 						target.trigger(evtSelect);
 						trigger();
 					}
-					wrapper.droppable('disable');
 				}
 				
 				cwd.selectable('disable').removeClass(clDisabled);
@@ -8002,7 +8028,6 @@ $.fn.elfindercwd = function(fm, options) {
 			// enable selectable
 			.dragstop(function() {
 				cwd.selectable('enable');
-				wrapper.droppable('enable');
 				selectLock = false;
 			})
 			.bind('lockfiles unlockfiles selectfiles unselectfiles', function(e) {
@@ -13707,7 +13732,8 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.blur(function() {
 					var name   = $.trim(input.val()),
-						parent = input.parent();
+						parent = input.parent(),
+						valid  = true;
 
 					if (pnode.length) {
 						if (input[0].setSelectionRange) {
@@ -13716,11 +13742,20 @@ elFinder.prototype.commands.rename = function() {
 						if (name == file.name) {
 							return dfrd.reject();
 						}
-						if (!name) {
-							return dfrd.reject('errInvName');
+						if (fm.options.validName && fm.options.validName.test) {
+							try {
+								valid = fm.options.validName.test(name);
+							} catch(e) {
+								valid = false;
+							}
+						}
+						if (!name || name === '..' || !valid) {
+							fm.error('errInvName');
+							return false;
 						}
 						if (fm.fileByName(name, file.phash)) {
-							return dfrd.reject(['errExists', name]);
+							fm.error(['errExists', name]);
+							return false;
 						}
 						
 						rest();
