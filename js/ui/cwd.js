@@ -994,7 +994,7 @@ $.fn.elfindercwd = function(fm, options) {
 									return false;
 								} else if (url) {
 									if (dt.setDragImage) {
-										helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+										helper = $('<div class="elfinder-drag-helper html5-native elfinder-drag-helper-plus">').append(icon(fm.file(files[0]))).appendTo($(document.body));
 										if ((l = files.length) > 1) {
 											helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
 										}
