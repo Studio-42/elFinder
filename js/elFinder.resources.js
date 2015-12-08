@@ -121,15 +121,25 @@ elFinder.prototype.resources = {
 					})
 					.blur(function() {
 						var name   = $.trim(input.val()),
-							parent = input.parent();
+							parent = input.parent(),
+							valid  = true;
 
 						if (parent.length) {
 
-							if (!name) {
-								return dfrd.reject('errInvName');
+							if (fm.options.validName && fm.options.validName.test) {
+								try {
+									valid = fm.options.validName.test(name);
+								} catch(e) {
+									valid = false;
+								}
+							}
+							if (!name || name === '..' || !valid) {
+								fm.error('errInvName');
+								return false;
 							}
 							if (fm.fileByName(name, phash)) {
-								return dfrd.reject(['errExists', name]);
+								fm.error(['errExists', name]);
+								return false;
 							}
 
 							rest();

@@ -101,7 +101,8 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.blur(function() {
 					var name   = $.trim(input.val()),
-						parent = input.parent();
+						parent = input.parent(),
+						valid  = true;
 
 					if (pnode.length) {
 						if (input[0].setSelectionRange) {
@@ -110,11 +111,20 @@ elFinder.prototype.commands.rename = function() {
 						if (name == file.name) {
 							return dfrd.reject();
 						}
-						if (!name) {
-							return dfrd.reject('errInvName');
+						if (fm.options.validName && fm.options.validName.test) {
+							try {
+								valid = fm.options.validName.test(name);
+							} catch(e) {
+								valid = false;
+							}
+						}
+						if (!name || name === '..' || !valid) {
+							fm.error('errInvName');
+							return false;
 						}
 						if (fm.fileByName(name, file.phash)) {
-							return dfrd.reject(['errExists', name]);
+							fm.error(['errExists', name]);
+							return false;
 						}
 						
 						rest();

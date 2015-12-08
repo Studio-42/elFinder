@@ -812,6 +812,14 @@ $.fn.elfindercwd = function(fm, options) {
 					(list ? cwd.find('tbody') : cwd).prepend(parent);
 				}
 				
+				// set droppable
+				if (any || !fm.cwd().write) {
+					wrapper.removeClass('native-droppable')
+					       .droppable('disable');
+				} else {
+					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
+					wrapper.droppable('enable');
+				}
 			},
 			
 			/**
@@ -986,7 +994,7 @@ $.fn.elfindercwd = function(fm, options) {
 									return false;
 								} else if (url) {
 									if (dt.setDragImage) {
-										helper = $('<div class="elfinder-drag-helper html5-native">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+										helper = $('<div class="elfinder-drag-helper html5-native elfinder-drag-helper-plus">').append(icon(fm.file(files[0]))).appendTo($(document.body));
 										if ((l = files.length) > 1) {
 											helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
 										}
@@ -1128,7 +1136,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
-				.droppable(droppable)
+				.droppable($.extend({}, droppable, {autoDisable: false}))
 				.on('contextmenu', function(e) {
 					e.preventDefault();
 					fm.trigger('contextmenu', {
@@ -1205,7 +1213,6 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
-				wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 				resize();
 			})
 			.bind('search', function(e) {
@@ -1297,7 +1304,6 @@ $.fn.elfindercwd = function(fm, options) {
 						target.trigger(evtSelect);
 						trigger();
 					}
-					wrapper.droppable('disable');
 				}
 				
 				cwd.selectable('disable').removeClass(clDisabled);
@@ -1306,7 +1312,6 @@ $.fn.elfindercwd = function(fm, options) {
 			// enable selectable
 			.dragstop(function() {
 				cwd.selectable('enable');
-				wrapper.droppable('enable');
 				selectLock = false;
 			})
 			.bind('lockfiles unlockfiles selectfiles unselectfiles', function(e) {
