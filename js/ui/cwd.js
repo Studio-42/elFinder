@@ -812,6 +812,14 @@ $.fn.elfindercwd = function(fm, options) {
 					(list ? cwd.find('tbody') : cwd).prepend(parent);
 				}
 				
+				// set droppable
+				if (any || !fm.cwd().write) {
+					wrapper.removeClass('native-droppable')
+					       .droppable('option', {'_elf_disabled': true, disabled: true});
+				} else {
+					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
+					wrapper.droppable('option', {'_elf_disabled': null, disabled: false});
+				}
 			},
 			
 			/**
@@ -1205,7 +1213,6 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.bind('open', function(e) {
 				content(e.data.files);
-				wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 				resize();
 			})
 			.bind('search', function(e) {
@@ -1297,7 +1304,6 @@ $.fn.elfindercwd = function(fm, options) {
 						target.trigger(evtSelect);
 						trigger();
 					}
-					wrapper.droppable('disable');
 				}
 				
 				cwd.selectable('disable').removeClass(clDisabled);
@@ -1306,7 +1312,6 @@ $.fn.elfindercwd = function(fm, options) {
 			// enable selectable
 			.dragstop(function() {
 				cwd.selectable('enable');
-				wrapper.droppable('enable');
 				selectLock = false;
 			})
 			.bind('lockfiles unlockfiles selectfiles unselectfiles', function(e) {
