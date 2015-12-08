@@ -15,7 +15,9 @@ $.ui.ddmanager.prepareOffsets = function( t, event ) {
 	l = m.length;
 	for ( i = 0; i < l; i++ ) {
 		d = m[ i ];
-		d.options.disabled = d.options._elf_disabled || isOutView(d.element);
+		if (d.options.autoDisable) {
+			d.options.disabled = isOutView(d.element);
+		}
 	}
 	
 	// call origin function

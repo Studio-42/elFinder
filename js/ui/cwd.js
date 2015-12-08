@@ -815,10 +815,10 @@ $.fn.elfindercwd = function(fm, options) {
 				// set droppable
 				if (any || !fm.cwd().write) {
 					wrapper.removeClass('native-droppable')
-					       .droppable('option', {'_elf_disabled': true, disabled: true});
+					       .droppable('disable');
 				} else {
 					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
-					wrapper.droppable('option', {'_elf_disabled': null, disabled: false});
+					wrapper.droppable('enable');
 				}
 			},
 			
@@ -1136,7 +1136,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
-				.droppable(droppable)
+				.droppable($.extend({}, droppable, {autoDisable: false}))
 				.on('contextmenu', function(e) {
 					e.preventDefault();
 					fm.trigger('contextmenu', {

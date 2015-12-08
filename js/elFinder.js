@@ -743,6 +743,7 @@ window.elFinder = function(node, opts) {
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
 			hoverClass : this.res('class', 'adroppable'),
+			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
 				var dst     = $(this),
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
