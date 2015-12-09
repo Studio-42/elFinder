@@ -510,12 +510,14 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			droppable = $.extend({}, fm.droppable, {
 				over : function(e, ui) {
-					var dst = $(this), hash;
+					var dst    = $(this),
+						helper = ui.helper,
+						hash;
 					if (dst.data('dropover')) {
 						return;
 					}
 					dst.data('dropover', true);
-					if (ui.helper.data('namespace') !== fm.namespace) {
+					if (helper.data('namespace') !== fm.namespace) {
 						dst.removeClass(clDropActive);
 						return false;
 					}
@@ -525,14 +527,17 @@ $.fn.elfindercwd = function(fm, options) {
 						hash = fm.cwd().hash;
 					}
 					dst.data('dropover', hash);
-					$.each(ui.helper.data('files'), function(i, h) {
-						if (h === hash || (fm.file(h).phash === hash && !ui.helper.hasClass('elfinder-drag-helper-plus'))) {
+					$.each(helper.data('files'), function(i, h) {
+						if (h === hash || (fm.file(h).phash === hash && !helper.hasClass('elfinder-drag-helper-plus'))) {
 							dst.removeClass(clDropActive);
 							return false; // break $.each
 						}
 					});
+					dst.hasClass(clDropActive) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move'));
+					setTimeout(function(){ dst.hasClass(clDropActive) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move')); }, 20);
 				},
-				out : function() {
+				out : function(e, ui) {
+					ui.helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 					$(this).removeData('dropover')
 					       .removeClass(clDropActive);
 				},
@@ -994,7 +999,7 @@ $.fn.elfindercwd = function(fm, options) {
 									return false;
 								} else if (url) {
 									if (dt.setDragImage) {
-										helper = $('<div class="elfinder-drag-helper html5-native elfinder-drag-helper-plus">').append(icon(fm.file(files[0]))).appendTo($(document.body));
+										helper = $('<div class="elfinder-drag-helper html5-native"></div>').append(icon(fm.file(files[0]))).appendTo($(document.body));
 										if ((l = files.length) > 1) {
 											helper.append(icon(fm.file(files[l-1])) + '<span class="elfinder-drag-num">'+l+'</span>');
 										}
@@ -1323,16 +1328,23 @@ $.fn.elfindercwd = function(fm, options) {
 					event  = events[e.type],
 					files  = e.data.files || [],
 					l      = files.length,
-					parents;
-				
+					helper = e.data.helper || $(),
+					parents, ctr;
+
 				if (l > 0) {
 					parents = fm.parents(files[0]);
 				}
-				while (l--) {
-					$('#'+files[l]).trigger(event);
+				if (!helper.data('locked')) {
+					while (l--) {
+						$('#'+files[l]).trigger(event);
+					}
+					trigger();
 				}
-				trigger();
-				wrapper.data('dropover') && parents.indexOf(wrapper.data('dropover')) !== -1 && wrapper.toggleClass(clDropActive, e.type !== 'lockfiles');
+				if (wrapper.data('dropover') && parents.indexOf(wrapper.data('dropover')) !== -1) {
+					ctr = e.type !== 'lockfiles';
+					helper.toggleClass('elfinder-drag-helper-plus', ctr);
+					wrapper.toggleClass(clDropActive, ctr);
+				}
 			})
 			// select new files after some actions
 			.bind('mkdir mkfile duplicate upload rename archive extract paste multiupload', function(e) {

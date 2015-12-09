@@ -662,7 +662,7 @@ window.elFinder = function(node, opts) {
 				h = targets[cnt];
 				if (files[h].locked) {
 					locked = true;
-					ui.helper.addClass('elfinder-drag-helper-plus').data('locked', true);
+					ui.helper.data('locked', true);
 					break;
 				}
 			}
@@ -670,13 +670,14 @@ window.elFinder = function(node, opts) {
 
 		},
 		drag       : function(e, ui) {
-			if (ui.helper.data('refreshPositions') && $(this).draggable('instance')) {
-				if (ui.helper.data('refreshPositions') > 0) {
+			var helper = ui.helper;
+			if (helper.data('refreshPositions') && $(this).draggable('instance')) {
+				if (helper.data('refreshPositions') > 0) {
 					$(this).draggable('option', { refreshPositions : true });
-					ui.helper.data('refreshPositions', -1);
+					helper.data('refreshPositions', -1);
 				} else {
 					$(this).draggable('option', { refreshPositions : false });
-					ui.helper.data('refreshPositions', null);
+					helper.data('refreshPositions', null);
 				}
 			}
 		},
@@ -693,7 +694,7 @@ window.elFinder = function(node, opts) {
 		},
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
-				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-plus"/></div>'),
+				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
 				icon    = function(f) {
 					var mime = f.mime, i;
 					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
@@ -722,9 +723,9 @@ window.elFinder = function(node, opts) {
 				var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
 				if (ctr !== chk) {
 					ctr = chk;
-					if (helper.is(':visible') && ! helper.data('locked') && ! helper.data('droped')) {
-						helper.toggleClass('elfinder-drag-helper-plus', ctr);
-						self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes});
+					if (helper.is(':visible') && ! helper.data('droped')) {
+						helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+						self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
 					}
 				}
 			});
@@ -750,7 +751,8 @@ window.elFinder = function(node, opts) {
 					result  = [],
 					dups    = [],
 					unlocks = [],
-					isCopy  = (e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked'))? true : false,
+					//isCopy  = (e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked'))? true : false,
+					isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus'),
 					c       = 'class',
 					cnt, hash, i, h;
 				
