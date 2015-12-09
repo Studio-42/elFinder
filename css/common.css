@@ -57,18 +57,25 @@
 }
 
 /* drag helper "plus" icon */
-.elfinder-drag-helper-icon-plus {
+.elfinder-drag-helper-icon-status {
 	position:absolute;
 	width:16px;
 	height:16px;
 	left:43px;
 	top:55px;
-	background:url('../img/toolbar.png') 0 -544px no-repeat;
-	display:none;
+	background:url('../img/toolbar.png') 0 -96px no-repeat;
+	display: block;
 }
 
 /* show "plus" icon when ctrl/shift pressed */
-.elfinder-drag-helper-plus .elfinder-drag-helper-icon-plus { display:block; }
+.elfinder-drag-helper-move .elfinder-drag-helper-icon-status {
+	background:url('../img/toolbar.png') 0 -528px no-repeat;
+	display:block;
+}
+.elfinder-drag-helper-plus .elfinder-drag-helper-icon-status {
+	background:url('../img/toolbar.png') 0 -544px no-repeat;
+	display:block;
+}
 
 /* files num in drag helper */
 .elfinder-drag-num {

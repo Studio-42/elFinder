@@ -13,6 +13,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			expanded  = fm.res(c, 'navexpand'),
 			hover     = fm.res(c, 'hover'),
 			clroot    = fm.res(c, 'treeroot'),
+			dropover  = fm.res(c, 'adroppable'),
 			tpl       = fm.res('tpl', 'navdir'),
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
@@ -210,10 +211,31 @@ $.fn.elfinderplaces = function(fm, opts) {
 					tolerance  : 'pointer',
 					accept     : '.elfinder-cwd-file-wrapper,.elfinder-tree-dir,.elfinder-cwd-file',
 					hoverClass : fm.res('class', 'adroppable'),
+					over       : function(e, ui) {
+						var helper = ui.helper,
+							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && $.inArray(h, dirs) === -1)? h : null});
+						if ($(this).data('dropover')) {
+							return;
+						}
+						$(this).data('dropover', true);
+						if (dir.length > 0) {
+							helper.addClass('elfinder-drag-helper-plus');
+						} else {
+							$(this).removeClass(dropover);
+						}
+						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+					},
+					out : function(e, ui) {
+						var helper = ui.helper;
+						$(this).removeData('dropover')
+						       .removeClass(dropover);
+						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+					},
 					drop       : function(e, ui) {
-						var resolve = true;
+						var helper  = ui.helper,
+							resolve = true;
 						
-						$.each(ui.helper.data('files'), function(i, hash) {
+						$.each(helper.data('files'), function(i, hash) {
 							var dir = fm.file(hash);
 							
 							if (dir && dir.mime == 'directory' && $.inArray(dir.hash, dirs) === -1) {
@@ -223,7 +245,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							}
 						})
 						save();
-						resolve && ui.helper.hide();
+						resolve && helper.hide();
 					}
 				})
 				// for touch device

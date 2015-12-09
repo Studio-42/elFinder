@@ -153,8 +153,9 @@ $.fn.elfindertree = function(fm, opts) {
 			droppableopts = $.extend(true, {}, fm.droppable, {
 				// show subfolders on dropover
 				over : function(e, ui) {
-					var dst = $(this),
-						cl  = hover+' '+dropover,
+					var dst    = $(this),
+						helper = ui.helper,
+						cl     = hover+' '+dropover,
 						hash;
 					if (dst.data('dropover')) {
 						return;
@@ -179,12 +180,15 @@ $.fn.elfindertree = function(fm, opts) {
 								return false; // break $.each
 							}
 						});
+						dst.hasClass(dropover) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move'));
+						setTimeout(function(){ dst.hasClass(dropover) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move')); }, 20);
 					} else {
 						dst.removeClass(cl);
 					}
 				},
-				out : function() {
+				out : function(e, ui) {
 					var dst = $(this);
+					ui.helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 					dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
 					dst.removeData('dropover')
 					   .removeClass(hover+' '+dropover);
@@ -314,7 +318,7 @@ $.fn.elfindertree = function(fm, opts) {
 				var length  = dirs.length,
 					orphans = [],
 					i = dirs.length,
-					dir, html, parent, sibling, init, atonce = {};
+					dir, html, parent, sibling, init, atonce = {}, base;
 
 				var firstVol = true; // check for netmount volume
 				while (i--) {
@@ -337,12 +341,17 @@ $.fn.elfindertree = function(fm, opts) {
 						} else {
 							parent[firstVol || dir.phash ? 'append' : 'prepend'](itemhtml(dir));
 							firstVol = false;
-							if (!dir.phash && dir.disabled) {
-								if ($.inArray('paste', dir.disabled) === -1) {
-									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(pastable);
-								}
-								if ($.inArray('upload', dir.disabled) === -1) {
-									$('#'+fm.navHash2Id(dir.hash)).parent().addClass(uploadable);
+							if (!dir.phash) {
+								base = $('#'+fm.navHash2Id(dir.hash)).parent();
+								if (!dir.disabled || dir.disabled.length < 1) {
+									base.addClass(pastable+' '+uploadable);
+								} else {
+									if ($.inArray('paste', dir.disabled) === -1) {
+										base.addClass(pastable);
+									}
+									if ($.inArray('upload', dir.disabled) === -1) {
+										base.addClass(uploadable);
+									}
 								}
 							}
 						}
@@ -758,16 +767,17 @@ $.fn.elfindertree = function(fm, opts) {
 		// lock/unlock dirs while moving
 		.bind('lockfiles unlockfiles', function(e) {
 			var lock = e.type == 'lockfiles',
-				act  = lock ? 'disable' : 'enable',
+				helperLocked = e.data.helper? e.data.helper.data('locked') : false,
+				act  = (lock && !helperLocked) ? 'disable' : 'enable',
 				dirs = $.map(e.data.files||[], function(h) {  
 					var dir = fm.file(h);
 					return dir && dir.mime == 'directory' ? h : null;
-				})
+				});
 				
 			$.each(dirs, function(i, hash) {
 				var dir = $('#'+fm.navHash2Id(hash));
 				
-				if (dir.length) {
+				if (dir.length && !helperLocked) {
 					dir.hasClass(draggable) && dir.draggable(act);
 					dir.hasClass(droppable) && dir.droppable(act);
 					dir[lock ? 'addClass' : 'removeClass'](disabled);
