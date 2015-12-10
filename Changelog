@@ -14,6 +14,7 @@
 		- Show confirm at uploading of same name file exists
 		- Show URL link icon on Download menu in contextmenu
 		        - This icon is clickable as normal link, shows context menu and drag out
+		- Added more feedback sign of jQuery DnD drag icon
 		- Others, some minor bug fixes
 
 
