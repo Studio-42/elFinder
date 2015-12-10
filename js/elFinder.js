@@ -650,7 +650,7 @@ window.elFinder = function(node, opts) {
 		distance   : 8,
 		revert     : true,
 		refreshPositions : false,
-		cursor     : 'move',
+		cursor     : 'crosshair',
 		cursorAt   : {left : 50, top : 47},
 		start      : function(e, ui) {
 			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),

@@ -45,8 +45,8 @@
 
 /* drag helper */
 .elfinder-drag-helper {
-	width:60px;
-	height:50px;
+	width:70px;
+	height:60px;
 	padding:0 0 0 25px;
 	z-index:100000;
 }
@@ -56,25 +56,24 @@
 	left: -1000px;
 }
 
-/* drag helper "plus" icon */
+/* drag helper status icon (default no-drop) */
 .elfinder-drag-helper-icon-status {
 	position:absolute;
 	width:16px;
 	height:16px;
-	left:43px;
-	top:55px;
+	left:42px;
+	top:60px;
 	background:url('../img/toolbar.png') 0 -96px no-repeat;
 	display: block;
 }
 
-/* show "plus" icon when ctrl/shift pressed */
+/* show "up-arrow" icon for move item */
 .elfinder-drag-helper-move .elfinder-drag-helper-icon-status {
-	background:url('../img/toolbar.png') 0 -720px no-repeat;
-	display:block;
+	background-position:0 -720px;
 }
+/* show "plus" icon when ctrl/shift pressed */
 .elfinder-drag-helper-plus .elfinder-drag-helper-icon-status {
-	background:url('../img/toolbar.png') 0 -544px no-repeat;
-	display:block;
+	background-position:0 -544px;
 }
 
 /* files num in drag helper */
