@@ -512,10 +512,10 @@ $.fn.elfindercwd = function(fm, options) {
 				over : function(e, ui) {
 					var dst    = $(this),
 						helper = ui.helper,
-						hash;
-					if (dst.data('dropover')) {
-						return;
-					}
+						ctr    = (e.shiftKey || e.ctrlKey || e.metaKey),
+						hash, status, inParent;
+					e.stopPropagation();
+					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
 					if (helper.data('namespace') !== fm.namespace) {
 						dst.removeClass(clDropActive);
@@ -523,21 +523,37 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					if (dst.hasClass(fm.res(c, 'cwdfile'))) {
 						hash = dst.attr('id');
+						dst.data('dropover', hash);
 					} else {
 						hash = fm.cwd().hash;
+						fm.cwd().write && dst.data('dropover', hash);
 					}
-					dst.data('dropover', hash);
-					$.each(helper.data('files'), function(i, h) {
-						if (h === hash || (fm.file(h).phash === hash && !helper.hasClass('elfinder-drag-helper-plus'))) {
-							dst.removeClass(clDropActive);
-							return false; // break $.each
+					inParent = (fm.file(helper.data('files')[0]).phash === hash);
+					if (dst.data('dropover') === hash) {
+						$.each(helper.data('files'), function(i, h) {
+							if (h === hash || (inParent && !ctr && !helper.hasClass('elfinder-drag-helper-plus'))) {
+								dst.removeClass(clDropActive);
+								return false; // break $.each
+							}
+						});
+					} else {
+						dst.removeClass(clDropActive);
+					}
+					if (helper.data('locked') || inParent) {
+						status = 'elfinder-drag-helper-plus';
+					} else {
+						status = 'elfinder-drag-helper-move';
+						if (ctr) {
+							status += ' elfinder-drag-helper-plus';
 						}
-					});
-					dst.hasClass(clDropActive) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move'));
-					setTimeout(function(){ dst.hasClass(clDropActive) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move')); }, 20);
+					}
+					dst.hasClass(clDropActive) && helper.addClass(status);
+					setTimeout(function(){ dst.hasClass(clDropActive) && helper.addClass(status); }, 20);
 				},
 				out : function(e, ui) {
-					ui.helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+					var helper = ui.helper;
+					e.stopPropagation();
+					helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
 					$(this).removeData('dropover')
 					       .removeClass(clDropActive);
 				},

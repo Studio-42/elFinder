@@ -69,7 +69,7 @@
 
 /* show "plus" icon when ctrl/shift pressed */
 .elfinder-drag-helper-move .elfinder-drag-helper-icon-status {
-	background:url('../img/toolbar.png') 0 -528px no-repeat;
+	background:url('../img/toolbar.png') 0 -720px no-repeat;
 	display:block;
 }
 .elfinder-drag-helper-plus .elfinder-drag-helper-icon-status {

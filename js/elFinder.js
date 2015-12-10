@@ -713,7 +713,7 @@ window.elFinder = function(node, opts) {
 				? self.selected() 
 				: [self.navId2Hash(element.attr('id'))];
 			
-			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', self.namespace);
+			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', self.namespace).data('dropover', 0);
 
 			if ((l = hashes.length) > 1) {
 				helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
@@ -723,7 +723,7 @@ window.elFinder = function(node, opts) {
 				var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
 				if (ctr !== chk) {
 					ctr = chk;
-					if (helper.is(':visible') && ! helper.data('droped')) {
+					if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
 						helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
 						self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
 					}
@@ -1842,9 +1842,11 @@ window.elFinder = function(node, opts) {
 		.change(function(e) {
 			$.each(e.data.changed||[], function(i, file) {
 				var hash = file.hash;
-				if ((files[hash].width && !file.width) || (files[hash].height && !file.height)) {
-					files[hash].width = undefined;
-					files[hash].height = undefined;
+				if (files[hash]) {
+					if ((files[hash].width && !file.width) || (files[hash].height && !file.height)) {
+						files[hash].width = undefined;
+						files[hash].height = undefined;
+					}
 				}
 				files[hash] = files[hash] ? $.extend(files[hash], file) : file;
 			});
