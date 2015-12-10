@@ -156,39 +156,44 @@ $.fn.elfindertree = function(fm, opts) {
 					var dst    = $(this),
 						helper = ui.helper,
 						cl     = hover+' '+dropover,
-						hash;
-					if (dst.data('dropover')) {
-						return;
-					}
+						hash, status;
+					e.stopPropagation();
+					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
 					if (ui.helper.data('namespace') !== fm.namespace) {
 						dst.removeClass(cl);
 						return false;
 					}
-					if (insideNavbar(e.clientX)) {
-						dst.addClass(hover)
-						if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
-							dst.data('expandTimer', setTimeout(function() {
-								dst.children('.'+arrow).click();
-							}, 500));
-						}
-						hash = fm.navId2Hash(dst.attr('id'));
-						dst.data('dropover', hash);
-						$.each(ui.helper.data('files'), function(i, h) {
-							if (h === hash || (fm.file(h).phash === hash && !ui.helper.hasClass('elfinder-drag-helper-plus'))) {
-								dst.removeClass(cl);
-								return false; // break $.each
-							}
-						});
-						dst.hasClass(dropover) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move'));
-						setTimeout(function(){ dst.hasClass(dropover) && helper.addClass('elfinder-drag-helper-' + (helper.data('locked')? 'plus' : 'move')); }, 20);
-					} else {
-						dst.removeClass(cl);
+					dst.addClass(hover)
+					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
+						dst.data('expandTimer', setTimeout(function() {
+							dst.children('.'+arrow).click();
+						}, 500));
 					}
+					hash = fm.navId2Hash(dst.attr('id'));
+					dst.data('dropover', hash);
+					$.each(ui.helper.data('files'), function(i, h) {
+						if (h === hash || (fm.file(h).phash === hash && !ui.helper.hasClass('elfinder-drag-helper-plus'))) {
+							dst.removeClass(cl);
+							return false; // break $.each
+						}
+					});
+					if (helper.data('locked')) {
+						status = 'elfinder-drag-helper-plus';
+					} else {
+						status = 'elfinder-drag-helper-move';
+						if (e.shiftKey || e.ctrlKey || e.metaKey) {
+							status += ' elfinder-drag-helper-plus';
+						}
+					}
+					dst.hasClass(dropover) && helper.addClass(status);
+					setTimeout(function(){ dst.hasClass(dropover) && helper.addClass(status); }, 20);
 				},
 				out : function(e, ui) {
-					var dst = $(this);
-					ui.helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+					var dst    = $(this),
+						helper = ui.helper;
+					e.stopPropagation();
+					helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
 					dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
 					dst.removeData('dropover')
 					   .removeClass(hover+' '+dropover);
@@ -704,8 +709,8 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		// update changed dirs
 		.change(function(e) {
-			var length = dirs.length,
-				dirs = filter(e.data.changed),
+			var dirs = filter(e.data.changed),
+				length = dirs.length,
 				l    = length,
 				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
 			
