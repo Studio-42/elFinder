@@ -820,7 +820,7 @@ abstract class elFinderVolumeDriver {
 		$regexp = '/text\/x\-(php|c\+\+)/';
 	
 		if (($type == 'finfo' || $type == 'auto') 
-		&& class_exists('finfo')) {
+		&& class_exists('finfo', false)) {
 			$tmpFileInfo = @explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
 		} else {
 			$tmpFileInfo = false;
@@ -4213,7 +4213,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		// Use PHP ZipArchive Class
-		if (class_exists('ZipArchive')) {
+		if (class_exists('ZipArchive', false)) {
 			if (empty($arcs['create']['application/zip'])) {
 				$arcs['create']['application/zip']  = array('cmd' => 'phpfunction', 'argc' => 'self::zipArchiveZip', 'ext' => 'zip');
 			}

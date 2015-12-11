@@ -137,21 +137,21 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		
 		if ($options['user'] === 'init') {
 
-			if (! $this->dropbox_phpFound || empty($options['consumerKey']) || empty($options['consumerSecret']) || !class_exists('PDO')) {
+			if (! $this->dropbox_phpFound || empty($options['consumerKey']) || empty($options['consumerSecret']) || !class_exists('PDO', false)) {
 				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
 			}
 			
 			if (defined('ELFINDER_DROPBOX_USE_CURL_PUT')) {
 				$this->oauth = new Dropbox_OAuth_Curl($options['consumerKey'], $options['consumerSecret']);
 			} else {
-				if (class_exists('OAuth')) {
+				if (class_exists('OAuth', false)) {
 					$this->oauth = new Dropbox_OAuth_PHP($options['consumerKey'], $options['consumerSecret']);
 				} else {
-					if (! class_exists('HTTP_OAuth_Consumer')) {
+					if (! class_exists('HTTP_OAuth_Consumer', false)) {
 						// We're going to try to load in manually
 						include 'HTTP/OAuth/Consumer.php';
 					}
-					if (class_exists('HTTP_OAuth_Consumer')) {
+					if (class_exists('HTTP_OAuth_Consumer', false)) {
 						$this->oauth = new Dropbox_OAuth_PEAR($options['consumerKey'], $options['consumerSecret']);
 					}
 				}
@@ -285,7 +285,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	protected function init() {
-		if (!class_exists('PDO')) {
+		if (!class_exists('PDO', false)) {
 			return $this->setError('PHP PDO class is require.');
 		}
 		
@@ -307,14 +307,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			if (defined('ELFINDER_DROPBOX_USE_CURL_PUT')) {
 				$this->oauth = new Dropbox_OAuth_Curl($this->options['consumerKey'], $this->options['consumerSecret']);
 			} else {
-				if (class_exists('OAuth')) {
+				if (class_exists('OAuth', false)) {
 					$this->oauth = new Dropbox_OAuth_PHP($this->options['consumerKey'], $this->options['consumerSecret']);
 				} else {
-					if (! class_exists('HTTP_OAuth_Consumer')) {
+					if (! class_exists('HTTP_OAuth_Consumer', false)) {
 						// We're going to try to load in manually
 						include 'HTTP/OAuth/Consumer.php';
 					}
-					if (class_exists('HTTP_OAuth_Consumer')) {
+					if (class_exists('HTTP_OAuth_Consumer', false)) {
 						$this->oauth = new Dropbox_OAuth_PEAR($this->options['consumerKey'], $this->options['consumerSecret']);
 					}
 				}
