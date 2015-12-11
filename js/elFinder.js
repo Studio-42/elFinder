@@ -742,7 +742,7 @@ window.elFinder = function(node, opts) {
 	this.droppable = {
 			greedy     : true,
 			tolerance  : 'pointer',
-			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
+			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file,.elfinder-cwd-filename',
 			hoverClass : this.res('class', 'adroppable'),
 			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
