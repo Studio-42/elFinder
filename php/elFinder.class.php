@@ -350,7 +350,7 @@ class elFinder {
 		foreach ($opts['roots'] as $i => $o) {
 			$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
 
-			if (class_exists($class)) {
+			if (class_exists($class, false)) {
 				$volume = new $class();
 
 				try {
@@ -739,7 +739,7 @@ class elFinder {
 		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
 		$class    = 'elfindervolume'.$driver;
 
-		if (!class_exists($class)) {
+		if (!class_exists($class, false)) {
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], self::ERROR_NETMOUNT_NO_DRIVER));
 		}
 
@@ -1390,7 +1390,7 @@ class elFinder {
 			$volume = $this->volumes[$keys[0]];
 			$extTable = array_flip(array_unique($volume->getMimeTable()));
 			
-			if (class_exists('finfo')) {
+			if (class_exists('finfo', false)) {
 				$tmpFileInfo = @explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
 			} else {
 				$tmpFileInfo = false;
