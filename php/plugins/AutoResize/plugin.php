@@ -100,7 +100,7 @@ class elFinderPluginAutoResize {
 		$width = round($srcImgInfo[0] * $zoom);
 		$height = round($srcImgInfo[1] * $zoom);
 		
-		if (class_exists('Imagick')) {
+		if (class_exists('Imagick', false)) {
 			return $this->resize_imagick($src, $width, $height, $quality);
 		} else {
 			return $this->resize_gd($src, $width, $height, $quality, $srcImgInfo);
