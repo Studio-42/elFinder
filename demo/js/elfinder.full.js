@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 6abb9b8) (2015-12-10)
+ * Version 2.1.2 (2.1 Nightly: a296384) (2015-12-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -756,7 +756,7 @@ window.elFinder = function(node, opts) {
 	this.droppable = {
 			greedy     : true,
 			tolerance  : 'pointer',
-			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file',
+			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file,.elfinder-cwd-filename',
 			hoverClass : this.res('class', 'adroppable'),
 			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
@@ -4484,7 +4484,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 6abb9b8)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: a296384)';
 
 
 
