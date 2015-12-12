@@ -965,6 +965,31 @@ window.elFinder = function(node, opts) {
 	}
 	
 	/**
+	 * Convert from relative URL to abstract URL based on current URL
+	 * 
+	 * @param  String  URL
+	 * @return String
+	 */
+	this.convAbsUrl = function(url) {
+		if (url.match(/^http/i)) {
+			return url;
+		}
+		var root = window.location.protocol + '//' + window.location.host,
+			reg  = /[^\/]+\/\.\.\//,
+			ret;
+		if (url.substr(0, 1) === '/') {
+			ret = root + url;
+		} else {
+			ret = root + window.location.pathname + url;
+		}
+		ret = ret.replace('/./', '/');
+		while(reg.test(ret)) {
+			ret = ret.replace(reg, '');
+		}
+		return ret;
+	}
+	
+	/**
 	 * Return file url for open in elFinder
 	 * 
 	 * @param  String  file hash
