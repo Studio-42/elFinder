@@ -987,6 +987,7 @@ $.fn.elfindercwd = function(fm, options) {
 											return true;
 										}
 										if (furl) {
+											furl = fm.convAbsUrl(furl);
 											files.push(v);
 											$('<a>').attr('href', furl).text(furl).appendTo(elm);
 											url += furl + "\n";
