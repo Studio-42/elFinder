@@ -982,7 +982,7 @@ $.fn.elfindercwd = function(fm, options) {
 									if (file && file.mime !== 'directory') {
 										if (!furl) {
 											furl = fm.url(file.hash);
-										} else if (furl === '1') {
+										} else if (furl == '1') {
 											geturl.push(v);
 											return true;
 										}
