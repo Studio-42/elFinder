@@ -350,7 +350,7 @@ class elFinder {
 		foreach ($opts['roots'] as $i => $o) {
 			$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
 
-			if (class_exists($class, false)) {
+			if (class_exists($class, !empty($o['autoload']))) {
 				$volume = new $class();
 
 				try {
