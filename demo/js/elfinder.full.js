@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.2 (2.1 Nightly: 7b3aeb4) (2015-12-12)
+ * Version 2.1.2 (2.1 Nightly: 86ac7e2) (2015-12-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -976,6 +976,31 @@ window.elFinder = function(node, opts) {
 			params.current = file.phash;
 		}
 		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
+	}
+	
+	/**
+	 * Convert from relative URL to abstract URL based on current URL
+	 * 
+	 * @param  String  URL
+	 * @return String
+	 */
+	this.convAbsUrl = function(url) {
+		if (url.match(/^http/i)) {
+			return url;
+		}
+		var root = window.location.protocol + '//' + window.location.host,
+			reg  = /[^\/]+\/\.\.\//,
+			ret;
+		if (url.substr(0, 1) === '/') {
+			ret = root + url;
+		} else {
+			ret = root + window.location.pathname + url;
+		}
+		ret = ret.replace('/./', '/');
+		while(reg.test(ret)) {
+			ret = ret.replace(reg, '');
+		}
+		return ret;
 	}
 	
 	/**
@@ -4484,7 +4509,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.2 (2.1 Nightly: 7b3aeb4)';
+elFinder.prototype.version = '2.1.2 (2.1 Nightly: 86ac7e2)';
 
 
 
@@ -7707,6 +7732,7 @@ $.fn.elfindercwd = function(fm, options) {
 											return true;
 										}
 										if (furl) {
+											furl = fm.convAbsUrl(furl);
 											files.push(v);
 											$('<a>').attr('href', furl).text(furl).appendTo(elm);
 											url += furl + "\n";
