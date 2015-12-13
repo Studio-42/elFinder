@@ -105,6 +105,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'dropboxUid'        => '',
 			'root'              => 'dropbox',
 			'path'              => '/',
+			'separator'         => '/',
 			'PDO_DSN'           => '', // if empty use 'sqlite:(metaCachePath|tmbPath)/elFinder_dropbox_db_(hash:dropboxUid+consumerSecret)'
 			'PDO_User'          => '',
 			'PDO_Pass'          => '',
@@ -333,7 +334,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 
 		$this->rootName = $this->options['alias'];
-		$this->options['separator'] = '/';
 
 		try {
 			$this->oauth->setToken($this->options['accessToken'], $this->options['accessTokenSecret']);
@@ -478,7 +478,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return array dropbox metadata
 	 */
 	private function getDBdat($path) {
-		if ($res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
+		if ($res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
 			return unserialize($res[0]);
 		} else {
 			return array();
@@ -495,7 +495,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function updateDBdat($path, $dat) {
 		return $this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($dat))
 				. ', isdir=' . ($dat['is_dir']? 1 : 0)
-				. ' where path='.$this->DB->quote(strtolower(dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))));
+				. ' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))));
 	}
 	/*********************************************************************/
 	/*                               FS API                              */
@@ -556,7 +556,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				
 				foreach($_info['entries'] as $entry) {
 					$key = strtolower($entry[0]);
-					$pkey = strtolower(dirname($key));
+					$pkey = strtolower($this->_dirname($key));
 					
 					$path = $this->DB->quote($pkey);
 					$fname = $this->DB->quote(strtolower(basename($key)));
@@ -929,7 +929,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dirname($path) {
-		return dirname($path);
+		return $this->_normpath(dirname($path));
 	}
 
 	/**
@@ -963,7 +963,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function _normpath($path) {
-		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		if (DIRECTORY_SEPARATOR !== '/') {
+			$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		}
 		$path = '/' . ltrim($path, '/');
 		return $path;
 	}
