@@ -713,7 +713,7 @@ abstract class elFinderVolumeDriver {
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
 		$this->root = $this->normpathCE($this->options['path']);
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
-		$this->systemRoot = isset($this->options['systemRoot']) ? $this->options['systemRoot'] : DIRECTORY_SEPARATOR;
+		$this->systemRoot = isset($this->options['systemRoot']) ? $this->options['systemRoot'] : $this->separator;
 		
 		// set server encoding
 		if (!empty($this->options['encoding']) && strtoupper($this->options['encoding']) !== 'UTF-8') {
