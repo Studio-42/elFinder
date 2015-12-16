@@ -288,7 +288,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'maintainer'      : 'viðlíkahaldari',
 			'translator'      : 'umsetari',
 			'icons'           : 'Ikonir',
-			'dontforget'      : 'and don\\'t forget to take your towel',
+			'dontforget'      : 'and don\'t forget to take your towel',
 			'shortcutsof'     : 'Snarvegir sligi frá',
 			'dropFiles'       : 'Slepp fílur her',
 			'or'              : 'ella',
