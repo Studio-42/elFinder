@@ -1,7 +1,8 @@
-201x-xx-xx  
+2015-12-16  
 
 	* elFinder (2.1.4):
 		- Fixed #1163 Dropbox driver supported windows server
+		- Fixed search problem on Windows server
 
 
 2015-12-13  Naoki Sawada  <hypweb@gmail.com>
