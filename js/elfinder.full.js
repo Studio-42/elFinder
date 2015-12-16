@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.3 (2.1 Nightly: 0eefd1a) (2015-12-13)
+ * Version 2.1.3 (2.1 Nightly: 3d84886) (2015-12-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -4509,7 +4509,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.3 (2.1 Nightly: 0eefd1a)';
+elFinder.prototype.version = '2.1.3 (2.1 Nightly: 3d84886)';
 
 
 
@@ -4519,29 +4519,31 @@ elFinder.prototype.version = '2.1.3 (2.1 Nightly: 0eefd1a)';
 
 /*** jQuery UI droppable performance tune for elFinder ***/
 (function(){
-var origin = $.ui.ddmanager.prepareOffsets;
-$.ui.ddmanager.prepareOffsets = function( t, event ) {
-	var isOutView = function(elem) {
-		if (elem.is(':hidden')) {
-			return true;
+if ($.ui && $.ui.ddmanager) {
+	var origin = $.ui.ddmanager.prepareOffsets;
+	$.ui.ddmanager.prepareOffsets = function( t, event ) {
+		var isOutView = function(elem) {
+			if (elem.is(':hidden')) {
+				return true;
+			}
+			var rect = elem[0].getBoundingClientRect();
+			return document.elementFromPoint(rect.left, rect.top)? false : true;
 		}
-		var rect = elem[0].getBoundingClientRect();
-		return document.elementFromPoint(rect.left, rect.top)? false : true;
-	}
-	
-	var i, d,
-	m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
-	l = m.length;
-	for ( i = 0; i < l; i++ ) {
-		d = m[ i ];
-		if (d.options.autoDisable) {
-			d.options.disabled = isOutView(d.element);
+		
+		var i, d,
+		m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
+		l = m.length;
+		for ( i = 0; i < l; i++ ) {
+			d = m[ i ];
+			if (d.options.autoDisable) {
+				d.options.disabled = isOutView(d.element);
+			}
 		}
-	}
-	
-	// call origin function
-	return origin( t, event );
-};
+		
+		// call origin function
+		return origin( t, event );
+	};
+}
 })();
 
 $.fn.elfinder = function(o) {
