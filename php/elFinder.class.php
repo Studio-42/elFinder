@@ -350,7 +350,7 @@ class elFinder {
 		foreach ($opts['roots'] as $i => $o) {
 			$class = 'elFinderVolume'.(isset($o['driver']) ? $o['driver'] : '');
 
-			if (class_exists($class, !empty($o['autoload']))) {
+			if (class_exists($class)) {
 				$volume = new $class();
 
 				try {
@@ -739,7 +739,7 @@ class elFinder {
 		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
 		$class    = 'elfindervolume'.$driver;
 
-		if (!class_exists($class, false)) {
+		if (!class_exists($class)) {
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], self::ERROR_NETMOUNT_NO_DRIVER));
 		}
 
