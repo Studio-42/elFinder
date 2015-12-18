@@ -43,7 +43,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open', function(){
+		fm.bind('open sync', function(){
 			var repCmds = [],
 			disabled = fm.option('disabled');
 
