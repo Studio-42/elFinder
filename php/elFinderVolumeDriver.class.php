@@ -667,9 +667,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 
-		$write = $file['write'];
-		if (!$write && !$this->options['allowChmodReadOnly']) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
+		if (!$this->options['allowChmodReadOnly']) {
+			if (!$this->attr($this->decode($hash), 'write', null, ($file['mime'] === 'directory'))) {
+				return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
+			}
 		}
 
 		$path = $this->decode($hash);
@@ -2760,7 +2761,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		$is_root = ($path === $this->root);
-		if ($is_root) {
+		if ($is_root && empty($this->ARGS['reload']) {
 			$rootKey = md5($path);
 			if (!isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
