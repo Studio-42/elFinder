@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.4 (2015-12-16)
+ * Version 2.1.4 (2.1 Nightly: 79c0fd7) (2015-12-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -1882,10 +1882,11 @@ window.elFinder = function(node, opts) {
 			$.each(e.data.changed||[], function(i, file) {
 				var hash = file.hash;
 				if (files[hash]) {
-					if ((files[hash].width && !file.width) || (files[hash].height && !file.height)) {
-						files[hash].width = undefined;
-						files[hash].height = undefined;
-					}
+					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
+						if (files[hash][v] && !file[v]) {
+							delete files[hash][v];
+						}
+					});
 				}
 				files[hash] = files[hash] ? $.extend(files[hash], file) : file;
 			});
@@ -4509,7 +4510,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.4';
+elFinder.prototype.version = '2.1.4 (2.1 Nightly: 79c0fd7)';
 
 
 
@@ -9361,7 +9362,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open', function(){
+		fm.bind('open sync', function(){
 			var repCmds = [],
 			disabled = fm.option('disabled');
 
