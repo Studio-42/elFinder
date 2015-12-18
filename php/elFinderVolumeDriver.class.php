@@ -667,9 +667,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 
-		$write = $file['write'];
-		if (!$write && !$this->options['allowChmodReadOnly']) {
-			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
+		if (!$this->options['allowChmodReadOnly']) {
+			if (!$this->attr($this->decode($hash), 'write', null, ($file['mime'] === 'directory'))) {
+				return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
+			}
 		}
 
 		$path = $this->decode($hash);
@@ -2765,10 +2766,12 @@ abstract class elFinderVolumeDriver {
 			if (!isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
 			}
-			// need $path as key for netmount/netunmount
-			if (isset($this->sessionCache['rootstat'][$rootKey])) {
-				if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
-					return $ret;
+			if (empty($this->ARGS['reload']) || empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0) {
+				// need $path as key for netmount/netunmount
+				if (isset($this->sessionCache['rootstat'][$rootKey])) {
+					if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
+						return $ret;
+					}
 				}
 			}
 		}
@@ -2958,6 +2961,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function clearcache() {
 		$this->cache = $this->dirsCache = array();
+		unset($this->sessionCache['rootstat'][md5($this->root)]);
 	}
 	
 	/**

@@ -1868,10 +1868,11 @@ window.elFinder = function(node, opts) {
 			$.each(e.data.changed||[], function(i, file) {
 				var hash = file.hash;
 				if (files[hash]) {
-					if ((files[hash].width && !file.width) || (files[hash].height && !file.height)) {
-						files[hash].width = undefined;
-						files[hash].height = undefined;
-					}
+					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
+						if (files[hash][v] && !file[v]) {
+							delete files[hash][v];
+						}
+					});
 				}
 				files[hash] = files[hash] ? $.extend(files[hash], file) : file;
 			});
