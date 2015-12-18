@@ -104,7 +104,7 @@ Installation
 Downloads
 ------------
 **Stable releases**
- + [elFinder 2.1.3](https://github.com/Studio-42/elFinder/archive/2.1.3.zip)
+ + [elFinder 2.1.4](https://github.com/Studio-42/elFinder/archive/2.1.4.zip)
  + [elFinder 2.0.4](https://github.com/Studio-42/elFinder/archive/2.0.4.zip)
 
 **Nightly builds**
