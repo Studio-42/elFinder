@@ -28,7 +28,9 @@ elFinder.prototype.commands.rm = function() {
 			files  = this.files(hashes),
 			cnt    = files.length,
 			cwd    = fm.cwd().hash,
-			goup   = false;
+			goup   = false,
+			tpl    = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
+			targets, text, f, fname, size, tmb, descs, dialog;
 
 		if (!cnt || this._disabled) {
 			return dfrd.reject();
@@ -50,17 +52,52 @@ elFinder.prototype.commands.rm = function() {
 		});
 
 		if (dfrd.state() == 'pending') {
-			files = this.hashes(hashes);
+			targets = this.hashes(hashes);
+			cnt     = files.length;
+			descs   = [];
 			
-			fm.lockfiles({files : files});
-			fm.confirm({
+			if (cnt > 1) {
+				if (!$.map(files, function(f) { return f.mime == 'directory' ? 1 : null ; }).length) {
+					size = 0;
+					$.each(files, function(h, f) { 
+						if (f.size && f.size != 'unknown') {
+							var s = parseInt(f.size);
+							if (s >= 0 && size >= 0) {
+								size += s;
+							}
+						} else {
+							size = 'unknown';
+							return false;
+						}
+					});
+					descs.push(fm.i18n('size')+': '+fm.formatSize(size));
+				}
+				text = [$(tpl.replace('{class}', 'elfinder-cwd-icon-group').replace('{title}', '<strong>' + fm.i18n('items')+ ': ' + cnt + '</strong>').replace('{desc}', descs.join('<br>')))];
+			} else {
+				f = files[0];
+				if (f.tmb) {
+					tmb = fm.option('tmbUrl')+f.tmb;
+				}
+				if (f.size) {
+					descs.push(fm.i18n('size')+': '+fm.formatSize(f.size));
+				}
+				descs.push(fm.i18n('modify')+': '+fm.formatDate(f));
+				fname = fm.escape(f.i18 || f.name).replace(/([_.])/g, '&#8203;$1');
+				text = [$(tpl.replace('{class}', fm.mime2class(f.mime)).replace('{title}', '<strong>' + fname + '</strong>').replace('{desc}', descs.join('<br>')))];
+				
+			}
+			
+			text.push('confirmRm');
+			
+			fm.lockfiles({files : targets});
+			dialog = fm.confirm({
 				title  : self.title,
-				text   : 'confirmRm',
+				text   : text,
 				accept : {
 					label    : 'btnRm',
 					callback : function() {  
 						fm.request({
-							data   : {cmd  : 'rm', targets : files}, 
+							data   : {cmd  : 'rm', targets : targets}, 
 							notify : {type : 'rm', cnt : cnt},
 							preventFail : true
 						})
@@ -72,19 +109,25 @@ elFinder.prototype.commands.rm = function() {
 							goup && fm.exec('open', goup)
 						})
 						.always(function() {
-							fm.unlockfiles({files : files});
+							fm.unlockfiles({files : targets});
 						});
 					}
 				},
 				cancel : {
 					label    : 'btnCancel',
 					callback : function() {
-						fm.unlockfiles({files : files});
-						fm.selectfiles({files : files});
+						fm.unlockfiles({files : targets});
+						fm.selectfiles({files : targets});
 						dfrd.reject();
 					}
 				}
 			});
+			// load thumbnail
+			if (tmb) {
+				$('<img/>')
+					.load(function() { dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat'); })
+					.attr('src', tmb);
+			}
 		}
 			
 		return dfrd;
