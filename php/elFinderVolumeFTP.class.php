@@ -846,6 +846,19 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _fopen($path, $mode='rb') {
+		// try ftp stream wrapper
+		if (ini_get('allow_url_fopen')) {
+			$url = 'ftp://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
+			if (strtolower($mode[0]) === 'w') {
+				$context = stream_context_create(array('ftp' => array('overwrite' => true)));
+				$fp = @fopen($url, $mode, false, $context);
+			} else {
+				$fp = @fopen($url, $mode);
+			}
+			if ($fp) {
+				return $fp;
+			}
+		}
 		
 		if ($this->tmp) {
 			$local = $this->getTempFile($path);
