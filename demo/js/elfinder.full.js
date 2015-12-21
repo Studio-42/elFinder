@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.4 (2.1 Nightly: 79c0fd7) (2015-12-18)
+ * Version 2.1.4 (2.1 Nightly: 4ac7e0d) (2015-12-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -2329,6 +2329,7 @@ elFinder.prototype = {
 			'application/x-empty'           : 'TextPlain',
 			'application/postscript'        : 'Postscript',
 			'application/vnd.ms-office'     : 'MsOffice',
+			'application/msword'            : 'MsWord',
 			'application/vnd.ms-word'       : 'MsWord',
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'MsWord',
 			'application/vnd.ms-word.document.macroEnabled.12'                        : 'MsWord',
@@ -4118,8 +4119,10 @@ elFinder.prototype = {
 	
 	/**
 	 * Return message translated onto current language
+	 * Allowed accept HTML element that was wrapped in jQuery object
+	 * To be careful to XSS vulnerability of HTML element Ex. You should use `fm.escape(file.name)`
 	 *
-	 * @param  String|Array  message[s]
+	 * @param  String|Array  message[s]|Object jQuery
 	 * @return String
 	 **/
 	i18n : function() {
@@ -4147,8 +4150,14 @@ elFinder.prototype = {
 				for (j = 0; j < m.length; j++) {
 					if (typeof m[j] == 'string') {
 						input.push(message(m[j]));
+					} else if (m[j] instanceof jQuery) {
+						// jQuery object is HTML element
+						input.push(m[j]);
 					}
 				}
+			} else if (m instanceof jQuery) {
+				// jQuery object is HTML element
+				input.push(m[j]);
 			}
 		}
 		
@@ -4158,16 +4167,21 @@ elFinder.prototype = {
 				continue;
 			}
 			m = input[i];
-			// translate message
-			m = messages[m] || self.escape(m);
-			// replace placeholders in message
-			m = m.replace(/\$(\d+)/g, function(match, placeholder) {
-				placeholder = i + parseInt(placeholder);
-				if (placeholder > 0 && input[placeholder]) {
-					ignore.push(placeholder)
-				}
-				return self.escape(input[placeholder]) || '';
-			});
+			if (typeof m == 'string') {
+				// translate message
+				m = messages[m] || self.escape(m);
+				// replace placeholders in message
+				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
+					placeholder = i + parseInt(placeholder);
+					if (placeholder > 0 && input[placeholder]) {
+						ignore.push(placeholder)
+					}
+					return self.escape(input[placeholder]) || '';
+				});
+			} else {
+				// get HTML from jQuery object
+				m = m.get(0).outerHTML;
+			}
 
 			input[i] = m;
 		}
@@ -4510,7 +4524,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.4 (2.1 Nightly: 79c0fd7)';
+elFinder.prototype.version = '2.1.4 (2.1 Nightly: 4ac7e0d)';
 
 
 
@@ -14787,7 +14801,9 @@ elFinder.prototype.commands.rm = function() {
 			files  = this.files(hashes),
 			cnt    = files.length,
 			cwd    = fm.cwd().hash,
-			goup   = false;
+			goup   = false,
+			tpl    = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
+			targets, text, f, fname, size, tmb, descs, dialog;
 
 		if (!cnt || this._disabled) {
 			return dfrd.reject();
@@ -14809,17 +14825,52 @@ elFinder.prototype.commands.rm = function() {
 		});
 
 		if (dfrd.state() == 'pending') {
-			files = this.hashes(hashes);
+			targets = this.hashes(hashes);
+			cnt     = files.length;
+			descs   = [];
 			
-			fm.lockfiles({files : files});
-			fm.confirm({
+			if (cnt > 1) {
+				if (!$.map(files, function(f) { return f.mime == 'directory' ? 1 : null ; }).length) {
+					size = 0;
+					$.each(files, function(h, f) { 
+						if (f.size && f.size != 'unknown') {
+							var s = parseInt(f.size);
+							if (s >= 0 && size >= 0) {
+								size += s;
+							}
+						} else {
+							size = 'unknown';
+							return false;
+						}
+					});
+					descs.push(fm.i18n('size')+': '+fm.formatSize(size));
+				}
+				text = [$(tpl.replace('{class}', 'elfinder-cwd-icon-group').replace('{title}', '<strong>' + fm.i18n('items')+ ': ' + cnt + '</strong>').replace('{desc}', descs.join('<br>')))];
+			} else {
+				f = files[0];
+				if (f.tmb) {
+					tmb = fm.option('tmbUrl')+f.tmb;
+				}
+				if (f.size) {
+					descs.push(fm.i18n('size')+': '+fm.formatSize(f.size));
+				}
+				descs.push(fm.i18n('modify')+': '+fm.formatDate(f));
+				fname = fm.escape(f.i18 || f.name).replace(/([_.])/g, '&#8203;$1');
+				text = [$(tpl.replace('{class}', fm.mime2class(f.mime)).replace('{title}', '<strong>' + fname + '</strong>').replace('{desc}', descs.join('<br>')))];
+				
+			}
+			
+			text.push('confirmRm');
+			
+			fm.lockfiles({files : targets});
+			dialog = fm.confirm({
 				title  : self.title,
-				text   : 'confirmRm',
+				text   : text,
 				accept : {
 					label    : 'btnRm',
 					callback : function() {  
 						fm.request({
-							data   : {cmd  : 'rm', targets : files}, 
+							data   : {cmd  : 'rm', targets : targets}, 
 							notify : {type : 'rm', cnt : cnt},
 							preventFail : true
 						})
@@ -14831,19 +14882,25 @@ elFinder.prototype.commands.rm = function() {
 							goup && fm.exec('open', goup)
 						})
 						.always(function() {
-							fm.unlockfiles({files : files});
+							fm.unlockfiles({files : targets});
 						});
 					}
 				},
 				cancel : {
 					label    : 'btnCancel',
 					callback : function() {
-						fm.unlockfiles({files : files});
-						fm.selectfiles({files : files});
+						fm.unlockfiles({files : targets});
+						fm.selectfiles({files : targets});
 						dfrd.reject();
 					}
 				}
 			});
+			// load thumbnail
+			if (tmb) {
+				$('<img/>')
+					.load(function() { dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat'); })
+					.attr('src', tmb);
+			}
 		}
 			
 		return dfrd;
