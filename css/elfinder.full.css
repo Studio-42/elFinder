@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.4 (2.1 Nightly: 79c0fd7) (2015-12-18)
+ * Version 2.1.4 (2.1 Nightly: 4ac7e0d) (2015-12-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -1041,7 +1041,30 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-rtl .dialogelfinder-drag-close { left:12px; }
 
 
+/*********************** RM CONFIRM **************************/
+.elfinder-rm-title {
+	margin-bottom: .5ex;
+}
 
+.elfinder-rm-title .elfinder-cwd-icon {
+	float:left;
+	width:48px;
+	height:48px;
+	margin-right:1em;
+}
+
+.elfinder-rm-title strong {
+	display: block;
+	/*word-wrap: break-word;*/
+	white-space: pre-wrap;
+	word-break: normal;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.elfinder-rm-title+br {
+	display: none;
+}
 /* File: /css/fonts.css */
 .elfinder-contextmenu .elfinder-contextmenu-item span { font-size:.76em; }
 
