@@ -4104,8 +4104,10 @@ elFinder.prototype = {
 	
 	/**
 	 * Return message translated onto current language
+	 * Allowed accept HTML element that was wrapped in jQuery object
+	 * To be careful to XSS vulnerability of HTML element Ex. You should use `fm.escape(file.name)`
 	 *
-	 * @param  String|Array  message[s]
+	 * @param  String|Array  message[s]|Object jQuery
 	 * @return String
 	 **/
 	i18n : function() {
@@ -4133,8 +4135,14 @@ elFinder.prototype = {
 				for (j = 0; j < m.length; j++) {
 					if (typeof m[j] == 'string') {
 						input.push(message(m[j]));
+					} else if (m[j] instanceof jQuery) {
+						// jQuery object is HTML element
+						input.push(m[j]);
 					}
 				}
+			} else if (m instanceof jQuery) {
+				// jQuery object is HTML element
+				input.push(m[j]);
 			}
 		}
 		
@@ -4144,16 +4152,21 @@ elFinder.prototype = {
 				continue;
 			}
 			m = input[i];
-			// translate message
-			m = messages[m] || self.escape(m);
-			// replace placeholders in message
-			m = m.replace(/\$(\d+)/g, function(match, placeholder) {
-				placeholder = i + parseInt(placeholder);
-				if (placeholder > 0 && input[placeholder]) {
-					ignore.push(placeholder)
-				}
-				return self.escape(input[placeholder]) || '';
-			});
+			if (typeof m == 'string') {
+				// translate message
+				m = messages[m] || self.escape(m);
+				// replace placeholders in message
+				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
+					placeholder = i + parseInt(placeholder);
+					if (placeholder > 0 && input[placeholder]) {
+						ignore.push(placeholder)
+					}
+					return self.escape(input[placeholder]) || '';
+				});
+			} else {
+				// get HTML from jQuery object
+				m = m.get(0).outerHTML;
+			}
 
 			input[i] = m;
 		}
