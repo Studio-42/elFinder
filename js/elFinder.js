@@ -2315,6 +2315,7 @@ elFinder.prototype = {
 			'application/x-empty'           : 'TextPlain',
 			'application/postscript'        : 'Postscript',
 			'application/vnd.ms-office'     : 'MsOffice',
+			'application/msword'            : 'MsWord',
 			'application/vnd.ms-word'       : 'MsWord',
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'MsWord',
 			'application/vnd.ms-word.document.macroEnabled.12'                        : 'MsWord',
