@@ -750,8 +750,7 @@ window.elFinder = function(node, opts) {
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
 					result  = [],
 					dups    = [],
-					unlocks = [],
-					//isCopy  = (e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked'))? true : false,
+					faults  = [],
 					isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus'),
 					c       = 'class',
 					cnt, hash, i, h;
@@ -759,7 +758,6 @@ window.elFinder = function(node, opts) {
 				if (ui.helper.data('namespace') !== self.namespace) {
 					return false;
 				}
-				ui.helper.data('droped', true);
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
 				} else if (dst.hasClass(self.res(c, 'navdir'))) {
@@ -776,10 +774,16 @@ window.elFinder = function(node, opts) {
 					if (h != hash && files[h].phash != hash) {
 						result.push(h);
 					} else {
-						((isCopy && h !== hash && files[hash].write)? dups : unlocks).push(h);
+						((isCopy && h !== hash && files[hash].write)? dups : faults).push(h);
 					}
 				}
-				unlocks.length && self.trigger('unlockfiles', {files: unlocks});
+				
+				if (faults.length) {
+					return false;
+				}
+				
+				ui.helper.data('droped', true);
+				
 				if (dups.length) {
 					ui.helper.hide();
 					self.exec('duplicate', dups);
