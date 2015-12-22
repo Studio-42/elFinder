@@ -2101,9 +2101,13 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
+		// name check
+		if (!$jeName = json_encode($stat['name'])) {
+			return $this->cache[$path] = array();
+		}
 		// fix name if required
 		if ($this->options['utf8fix'] && $this->options['utf8patterns'] && $this->options['utf8replace']) {
-			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($stat['name'])));
+			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], $jeName));
 		}
 		
 		
