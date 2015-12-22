@@ -2436,6 +2436,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function nameAccepted($name) {
+		if (!json_encode($name)) {
+			return false;
+		}
 		if ($this->nameValidator) {
 			if (is_callable($this->nameValidator)) {
 				$res = call_user_func($this->nameValidator, $name);
