@@ -11,13 +11,16 @@ if ($.ui && $.ui.ddmanager) {
 			return document.elementFromPoint(rect.left, rect.top)? false : true;
 		}
 		
-		var i, d,
-		m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
-		l = m.length;
-		for ( i = 0; i < l; i++ ) {
-			d = m[ i ];
-			if (d.options.autoDisable) {
-				d.options.disabled = isOutView(d.element);
+		if (event.type === 'mousedown') {
+			var i, d,
+			m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
+			l = m.length;
+			for ( i = 0; i < l; i++ ) {
+				d = m[ i ];
+				if (d.options.autoDisable && (!d.options.disabled || d.options.autoDisable > 1)) {
+					d.options.disabled = isOutView(d.element);
+					d.options.autoDisable = d.options.disabled? 2 : 1;
+				}
 			}
 		}
 		
