@@ -2825,9 +2825,13 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
+		// name check
+		if (!$jeName = json_encode($stat['name'])) {
+			return $this->cache[$path] = array();
+		}
 		// fix name if required
 		if ($this->options['utf8fix'] && $this->options['utf8patterns'] && $this->options['utf8replace']) {
-			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], json_encode($stat['name'])));
+			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], $jeName));
 		}
 		
 		
@@ -4103,9 +4107,9 @@ abstract class elFinderVolumeDriver {
 	**/
 	protected function stripos($haystack , $needle , $offset = 0) {
 		if (function_exists('mb_stripos')) {
-			return mb_stripos($haystack , $needle , $offset);
+			return mb_stripos($haystack , $needle , $offset, 'UTF-8');
 		} else if (function_exists('mb_strtolower') && function_exists('mb_strpos')) {
-			return mb_strpos(mb_strtolower($haystack), mb_strtolower($needle), $offset);
+			return mb_strpos(mb_strtolower($haystack, 'UTF-8'), mb_strtolower($needle, 'UTF-8'), $offset);
 		} 
 		return stripos($haystack , $needle , $offset);
 	}
