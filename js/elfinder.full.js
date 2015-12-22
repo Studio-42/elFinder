@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.4 (2.1 Nightly: fb6d3bd) (2015-12-22)
+ * Version 2.1.4 (2.1 Nightly: eeb4e81) (2015-12-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2015, Studio 42
@@ -764,8 +764,7 @@ window.elFinder = function(node, opts) {
 					targets = $.map(ui.helper.data('files')||[], function(h) { return h || null }),
 					result  = [],
 					dups    = [],
-					unlocks = [],
-					//isCopy  = (e.ctrlKey||e.shiftKey||e.metaKey||ui.helper.data('locked'))? true : false,
+					faults  = [],
 					isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus'),
 					c       = 'class',
 					cnt, hash, i, h;
@@ -773,7 +772,6 @@ window.elFinder = function(node, opts) {
 				if (ui.helper.data('namespace') !== self.namespace) {
 					return false;
 				}
-				ui.helper.data('droped', true);
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
 					hash = dst.attr('id');
 				} else if (dst.hasClass(self.res(c, 'navdir'))) {
@@ -790,10 +788,16 @@ window.elFinder = function(node, opts) {
 					if (h != hash && files[h].phash != hash) {
 						result.push(h);
 					} else {
-						((isCopy && h !== hash && files[hash].write)? dups : unlocks).push(h);
+						((isCopy && h !== hash && files[hash].write)? dups : faults).push(h);
 					}
 				}
-				unlocks.length && self.trigger('unlockfiles', {files: unlocks});
+				
+				if (faults.length) {
+					return false;
+				}
+				
+				ui.helper.data('droped', true);
+				
 				if (dups.length) {
 					ui.helper.hide();
 					self.exec('duplicate', dups);
@@ -4524,7 +4528,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.4 (2.1 Nightly: fb6d3bd)';
+elFinder.prototype.version = '2.1.4 (2.1 Nightly: eeb4e81)';
 
 
 
@@ -4545,13 +4549,16 @@ if ($.ui && $.ui.ddmanager) {
 			return document.elementFromPoint(rect.left, rect.top)? false : true;
 		}
 		
-		var i, d,
-		m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
-		l = m.length;
-		for ( i = 0; i < l; i++ ) {
-			d = m[ i ];
-			if (d.options.autoDisable) {
-				d.options.disabled = isOutView(d.element);
+		if (event.type === 'mousedown') {
+			var i, d,
+			m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
+			l = m.length;
+			for ( i = 0; i < l; i++ ) {
+				d = m[ i ];
+				if (d.options.autoDisable && (!d.options.disabled || d.options.autoDisable > 1)) {
+					d.options.disabled = isOutView(d.element);
+					d.options.autoDisable = d.options.disabled? 2 : 1;
+				}
 			}
 		}
 		
