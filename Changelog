@@ -4,6 +4,7 @@
 		- Fixed bug that can't in writable with `chmod`
 		- Show remove item info in confirm dialog on `rm` action
 		- Fixed #1165, MIME types maintenance (doc, dot, xlt, xla)
+		- Fixed problem if filename included character that can't be json encode
 		- And some minor bug fixes
 
 
