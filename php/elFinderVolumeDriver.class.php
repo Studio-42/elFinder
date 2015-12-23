@@ -3375,7 +3375,7 @@ abstract class elFinderVolumeDriver {
 			if ($stat['mime'] === $mimeByName) {
 				$mimeByName = '';
 			}
-			if (!$this->allowPutMime($stat['mime']) || ($mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
+			if (!$this->allowPutMime($stat['mime']) || ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
 				$this->remove($path, true);
 				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
 			}
