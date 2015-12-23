@@ -992,6 +992,19 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return is uploadable that given file name 
+	 *
+	 * @param  string  $name  file name
+	 * @param  bool    $allowUnknown
+	 * @return bool
+	 * @author Naoki Sawada
+	 **/
+	public function isUploadableByName($name, $allowUnknown = true) {
+		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
+		return (($allowUnknown && $mimeByName === 'unknown') || $this->allowPutMime($mimeByName));
+	}
+	
+	/**
 	 * Return Extention/MIME Table (elFinderVolumeDriver::$mimetypes)
 	 * 
 	 * @return array
@@ -3035,10 +3048,27 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	static protected function mimetypeInternalDetect($path) {
+		// load default MIME table file "mime.types"
+		if (!elFinderVolumeDriver::$mimetypesLoaded) {
+			elFinderVolumeDriver::$mimetypesLoaded = true;
+			$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			if (is_readable($file)) {
+				$mimecf = file($file);
+				foreach ($mimecf as $line_num => $line) {
+					if (!preg_match('/^\s*#/', $line)) {
+						$mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
+							if (!isset(elFinderVolumeDriver::$mimetypes[$mime[$i]])) {
+								elFinderVolumeDriver::$mimetypes[$mime[$i]] = $mime[0];
+							}
+						}
+					}
+				}
+			}
+		}
 		$pinfo = pathinfo($path); 
 		$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
 		return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
-		
 	}
 	
 	/**

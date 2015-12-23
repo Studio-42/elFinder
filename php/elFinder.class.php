@@ -1705,9 +1705,18 @@ class elFinder {
 		
 		if (empty($files)) {
 			if (!$args['upload'] && $args['name'] && is_array($args['name'])) {
+				$error = '';
 				$result['name'] = array();
 				foreach($args['name'] as $_i => $_name) {
+					if (!$volume->isUploadableByName($_name)) {
+						$error = $this->error(self::ERROR_UPLOAD_FILE, $_name, self::ERROR_UPLOAD_FILE_MIME);
+						break;
+					}
 					$result['name'][$_i] = preg_replace($ngReg, '_', $_name);
+				}
+				if ($error) {
+					$result['error'] = $error;
+					return $result;
 				}
 				$result = array_merge_recursive($result, $this->ls($args));
 				if (empty($result['list'])) {
