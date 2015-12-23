@@ -2601,9 +2601,10 @@ elFinder.prototype = {
 							dfrd.resolve([]);
 						}
 					})
-					.fail(function() {
+					.fail(function(error) {
 						cancel();
 						dfrd.resolve([]);
+						error && fm.error(error);
 					});
 				};
 			if (fm.option('uploadOverwrite') && typeof files[0] == 'object') {
