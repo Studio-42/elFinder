@@ -22,10 +22,11 @@
  *		// global configure (optional)
  *		'plugin' => array(
  *			'Normalizer' => array(
- *				'enable' => true,
- *				'nfc'    => true,
- *				'nfkc'   => true,
- *				'lowercase'   => false
+ *				'enable'    => true,
+ *				'nfc'       => true,
+ *				'nfkc'      => true,
+ *				'lowercase' => false,
+ * 				'convmap'   => array()
  *			)
  *		),
  *		// each volume configure (optional)
@@ -36,10 +37,11 @@
  *				'URL'    => 'http://localhost/to/files/'
  *				'plugin' => array(
  *					'Normalizer' => array(
- *						'enable' => true,
- *						'nfc'    => true,
- *						'nfkc'   => true,
- * 						'lowercase'   => false
+ *						'enable'    => true,
+ *						'nfc'       => true,
+ *						'nfkc'      => true,
+ * 						'lowercase' => false,
+ * 						'convmap'   => array()
  *					)
  *				)
  *			)
@@ -56,10 +58,11 @@ class elFinderPluginNormalizer
 	
 	public function __construct($opts) {
 		$defaults = array(
-			'enable' => true, // For control by volume driver
-			'nfc'    => true, // Canonical Decomposition followed by Canonical Composition
-			'nfkc'   => true,  // Compatibility Decomposition followed by Canonical
-			'lowercase'   => false  // Make chars lowercase
+			'enable'    => true,  // For control by volume driver
+			'nfc'       => true,  // Canonical Decomposition followed by Canonical Composition
+			'nfkc'      => true,  // Compatibility Decomposition followed by Canonical
+			'lowercase' => false, // Make chars lowercase
+			'convmap'   => array()// Convert map ('FROM' => 'TO') array
 		);
 	
 		$this->opts = array_merge($defaults, $opts);
@@ -129,6 +132,9 @@ class elFinderPluginNormalizer
 		}
 		if ($opts['lowercase']) {
 			$str = strtolower($str);
+		}
+		if ($opts['convmap'] && is_array($opts['convmap'])) {
+			$str = strtr($str, $opts['convmap']);
 		}
 		return $str;
 	}
