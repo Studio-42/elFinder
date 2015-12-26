@@ -5,6 +5,7 @@
 		- Show remove item info in confirm dialog on `rm` action
 		- Fixed #1165, MIME types maintenance (doc, dot, xlt, xla)
 		- Fixed problem if filename included character that can't be json encode
+		- Added option `convmap` to Normalizer plugin
 		- And some minor bug fixes
 
 
