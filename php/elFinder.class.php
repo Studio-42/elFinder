@@ -972,9 +972,10 @@ class elFinder {
 			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
 
+		// allow change MIME type by 'file.pre' callback functions
+		$mime = isset($args['mime'])? $args['mime'] : $file['mime'];
 		if ($download) {
 			$disp = 'attachment';
-			$mime = $file['mime'];
 		} else {
 			$dispInlineRegex = $volume->getOption('dispInlineRegex');
 			$inlineRegex = false;
@@ -989,7 +990,6 @@ class elFinder {
 			if (!$inlineRegex) {
 				$inlineRegex = '#^(?:(?:image|text)|application/x-shockwave-flash$)#';
 			}
-			$mime = $file['mime'];
 			$disp  = preg_match($inlineRegex, $mime)? 'inline' : 'attachment';
 		}
 		
