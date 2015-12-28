@@ -359,7 +359,7 @@ class elFinder {
 						$id = $volume->id();
 						
 						$this->volumes[$id] = $volume;
-						if (!$this->default && $volume->isReadable()) {
+						if ((!$this->default || $volume->root() !== $volume->defaultPath()) && $volume->isReadable()) {
 							$this->default = $this->volumes[$id]; 
 						}
 					} else {

@@ -73,6 +73,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		$this->root = $this->getFullPath($this->root, $cwd);
+		if (!empty($this->options['startPath'])) {
+			$this->options['startPath'] = $this->getFullPath($this->options['startPath'], $cwd);
+		}
 		return true;
 	}
 	
