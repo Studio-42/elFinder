@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2015-11-30
+ * @version 2015-12-30
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -326,6 +326,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : '実行', // from v2.1 added 20.6.2015
 			'perm'            : 'パーミッション', // from v2.1 added 20.6.2015
 			'mode'            : '属性', // from v2.1 added 20.6.2015
+			'emptyFolder'     : '空のフォルダ', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : '空のフォルダ\\Aアイテムを追加するにはここへドロップ', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : '空のフォルダ\\Aアイテムを追加するにはここをロングタップ', // from v2.1.6 added 30.12.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
