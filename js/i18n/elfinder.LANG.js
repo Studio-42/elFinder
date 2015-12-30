@@ -332,6 +332,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : 'Execute', // from v2.1 added 20.6.2015
 			'perm'            : 'Permission', // from v2.1 added 20.6.2015
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Folder is empty', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
