@@ -131,11 +131,11 @@ elFinder.prototype.i18 = {};
 						if (def) {
 							val = def + (val? ', ' + val : '');
 						}
-						made = made.replace(reg, function(str, p1, p2){return p1+val.replace(/\\(?=')/, '').replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;')+p2;});
+						made = made.replace(reg, function(str, p1, p2){return p1+val.replace(/\\(?=')/, '').replace('\\', '\\\\').replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;')+p2;});
 					});
 					$.each(src, function(k, v){
 						var reg = new RegExp('(\''+keys[k]+'\'\\s*:\\s*\').+(\')');
-						made = made.replace(reg, function(str, p1, p2){return p1+$('#inp-'+k).val().replace(/\\(?=')/, '').replace(/'/g, "\\'")+p2;});
+						made = made.replace(reg, function(str, p1, p2){return p1+$('#inp-'+k).val().replace(/\\(?=')/, '').replace('\\', '\\\\').replace(/'/g, "\\'")+p2;});
 					});
 					$('#step').show();
 					$('#made').val(made.replace(/[ \t]+([\r\n])/g, '$1'));
