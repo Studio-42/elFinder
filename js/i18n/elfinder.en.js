@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-11-30
+ * @version 2015-12-30
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -11,7 +11,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Error',
 			'errUnknown'           : 'Unknown error.',
@@ -129,7 +129,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
-			
+
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
 			'btnSave'   : 'Save',
@@ -149,7 +149,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Save & Close', // from v2.1 added 12.6.2015
 			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
-			
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -177,7 +177,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
-			
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
 			'Today'       : 'Today',
@@ -314,7 +314,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'pass'                : 'Password', // added 18.04.2012
 			'confirmUnmount'      : 'Are you unmount $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Drop or Paste files from browser', // from v2.1 added 30.05.2012
-			'dropPasteFiles'  : 'Drop or Paste files and URLs here', // from v2.1 added 07.04.2014
+			'dropPasteFiles'  : 'Drop or Paste files here', // from v2.1 added 07.04.2014
 			'encoding'        : 'Encoding', // from v2.1 added 19.12.2014
 			'locale'          : 'Locale',   // from v2.1 added 19.12.2014
 			'searchTarget'    : 'Target: $1',                // from v2.1 added 22.5.2015
@@ -325,6 +325,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : 'Execute', // from v2.1 added 20.6.2015
 			'perm'            : 'Permission', // from v2.1 added 20.6.2015
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Folder is empty', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
