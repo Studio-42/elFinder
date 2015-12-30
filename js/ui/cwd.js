@@ -682,6 +682,7 @@ $.fn.elfindercwd = function(fm, options) {
 					},
 					file, hash, node, ndx;
 
+				l && wrapper.removeClass('elfinder-cwd-wrapper-empty');
 				
 				while (l--) {
 					file = files[l];
@@ -738,6 +739,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				// refresh cwd if empty for a bug of browser (ex. Android Chrome 43.0.2357.93)
 				if (cwd.children().length < 1) {
+					wrapper.addClass('elfinder-cwd-wrapper-empty');
 					cwd.hide();
 					setTimeout(function(){ cwd.show(); }, 0);
 				}
@@ -814,7 +816,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				buffer = fm.sortFiles(buffer);
 		
-				wrapper.on(scrollEvent, render).trigger(scrollEvent);
+				wrapper[(!any && buffer.length < 1) ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-empty').on(scrollEvent, render).trigger(scrollEvent);
 		
 				phash = fm.cwd().phash;
 				
@@ -1218,7 +1220,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (cwdoh < wph) {
 						cwd.height(wph);
 					}
-				}, 200);
+				}, 20);
 			},
 			
 			// elfinder node
@@ -1233,6 +1235,15 @@ $.fn.elfindercwd = function(fm, options) {
 		$('body').on('touchstart touchmove touchend', function(e){});
 		
 		fm
+			.one('init', function(){
+				var style = document.createElement('style'),
+				sheet;
+				document.head.appendChild(style);
+				sheet = style.sheet;
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 0);
+				sheet.insertRule('.ui-droppable.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
+				sheet.insertRule('.ui-droppable.elfinder-cwd-wrapper-empty.ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
+			})
 			.bind('open', function(e) {
 				content(e.data.files);
 				resize();

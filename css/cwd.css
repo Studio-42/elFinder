@@ -37,6 +37,20 @@
 	outline-offset: -2px;
 }
 
+.elfinder-cwd-wrapper-empty .elfinder-cwd:after {
+	display: block;
+	position: absolute;
+	top: 40%;
+	left: 0;
+	right: 0;
+	margin-top: -2em;
+	line-height: 1.5em;
+	text-align: center;
+	white-space: pre-wrap;
+	opacity: 0.6;
+	font-weight: bold;
+}
+
 
 /************************** ICONS VIEW ********************************/
 
@@ -289,5 +303,3 @@
 /* icon in ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
-
-
