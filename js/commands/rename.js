@@ -128,7 +128,7 @@ elFinder.prototype.commands.rename = function() {
 						}
 						
 						rest();
-						navbar && pnode.html(fm.escape(name));
+						(navbar? pnode : node).html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name},
