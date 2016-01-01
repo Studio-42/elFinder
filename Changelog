@@ -1,3 +1,11 @@
+2016-01-xx
+
+	* elFinder (2.1.6):
+		- Fixed #1074 startPath for multi volumes
+		- Fixed #1172 enbug-fix of rename command
+		- And some minor bug fixes
+
+
 2015-12-26  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.5):
