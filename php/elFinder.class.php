@@ -550,6 +550,13 @@ class elFinder {
 		$this->sessionCloseEarlier && $args['sessionCloseEarlier'] && session_id() && session_write_close();
 		unset($this->sessionCloseEarlier);
 		
+		if (substr(PHP_OS,0,3) === 'WIN') {
+			// set time out
+			if (($_max_execution_time = ini_get('max_execution_time')) && $_max_execution_time < 300) {
+				@set_time_limit(300);
+			}
+		}
+		
 		$result = $this->$cmd($args);
 		
 		if (isset($result['removed'])) {
@@ -1437,139 +1444,6 @@ class elFinder {
 	}
 	
 	/**
-	 * Check chunked upload files
-	 * 
-	 * @param string $tmpname  uploaded temporary file path
-	 * @param string $chunk    uploaded chunk file name
-	 * @param string $cid      uploaded chunked file id
-	 * @param string $tempDir  temporary dirctroy path
-	 * @return array (string JoinedTemporaryFilePath, string FileName) or (empty, empty)
-	 * @author Naoki Sawada
-	 */
-	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume = null) {
-		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
-			$fname = $m[1];
-			$encname = md5($cid . '_' . $fname);
-			$base = $tempDir . DIRECTORY_SEPARATOR . 'ELF' . $encname;
-			$clast = intval($m[3]);
-			if (is_null($tmpname)) {
-				ignore_user_abort(true);
-				sleep(10); // wait 10 sec
-				// chunked file upload fail
-				foreach(glob($base . '*') as $cf) {
-					@unlink($cf);
-				}
-				ignore_user_abort(false);
-				return;
-			}
-			
-			$range = isset($_POST['range'])? trim($_POST['range']) : '';
-			if ($range && preg_match('/^(\d+),(\d+),(\d+)$/', $range, $ranges)) {
-				$start = $ranges[1];
-				$len   = $ranges[2];
-				$size  = $ranges[3];
-				$tmp = $base . '.part';
-				$csize = filesize($tmpname);
-				
-				$tmpExists = is_file($tmp);
-				if (!$tmpExists) {
-					// check upload max size
-					$uploadMaxSize = $volume->getUploadMaxSize();
-					if ($uploadMaxSize > 0 && $size > $uploadMaxSize) {
-						return array(self::ERROR_UPLOAD_FILE_SIZE, false);
-					}
-					// make temp file
-					$ok = false;
-					if ($fp = fopen($tmp, 'wb')) {
-						flock($fp, LOCK_EX);
-						$ok = ftruncate($fp, $size);
-						flock($fp, LOCK_UN);
-						fclose($fp);
-						touch($base);
-					}
-					if (!$ok) {
-						return array(self::ERROR_UPLOAD_TEMP, false);
-					}
-				} else {
-					// wait until makeing temp file (for anothor session)
-					$cnt = 100; // Time limit 10 sec
-					while(!is_file($base) && --$cnt) {
-						usleep(100000); // wait 100ms
-					}
-					if (!$cnt) {
-						return array(self::ERROR_UPLOAD_TEMP, false);
-					}
-				}
-				
-				// check size info
-				if ($len != $csize || $start + $len > $size || ($tmpExists && $size != filesize($tmp))) {
-					return array(self::ERROR_UPLOAD_TEMP, false);
-				}
-				
-				// write chunk data
-				$writelen = 0;
-				$src = fopen($tmpname, 'rb');
-				$fp = fopen($tmp, 'cb');
-				fseek($fp, $start);
-				$writelen = stream_copy_to_stream($src, $fp, $len);
-				fclose($fp);
-				fclose($src);
-				if ($writelen != $len) {
-					return array(self::ERROR_UPLOAD_TEMP, false);
-				}
-				
-				// write counts
-				file_put_contents($base, "\0", FILE_APPEND);
-				
-				if (filesize($base) >= $clast + 1) {
-					// Completion
-					unlink($base);
-					return array($tmp, $fname);
-				}
-			} else {
-				// old way
-				$part = $base . $m[2];
-				if (move_uploaded_file($tmpname, $part)) {
-					@chmod($part, 0600);
-					if ($clast < count(glob($base . '*'))) {
-						$parts = array();
-						for ($i = 0; $i <= $clast; $i++) {
-							$name = $base . '.' . $i . '_' . $clast;
-							if (is_readable($name)) {
-								$parts[] = $name;
-							} else {
-								$parts = null;
-								break;
-							}
-						}
-						if ($parts) {
-							if (!is_file($base)) {
-								touch($base);
-								if ($resfile = tempnam($tempDir, 'ELF')) {
-									$target = fopen($resfile, 'wb');
-									foreach($parts as $f) {
-										$fp = fopen($f, 'rb');
-										while (!feof($fp)) {
-											fwrite($target, fread($fp, 8192));
-										}
-										fclose($fp);
-										unlink($f);
-									}
-									fclose($target);
-									unlink($base);
-									return array($resfile, $fname);
-								}
-								unlink($base);
-							}
-						}
-					}
-				}
-			}
-		}
-		return array('', '');
-	}
-	
-	/**
 	 * Get temporary dirctroy path
 	 * 
 	 * @param  string $volumeTempPath
@@ -1581,22 +1455,19 @@ class elFinder {
 		if ($this->uploadTempPath) {
 			$testDirs[] = rtrim(realpath($this->uploadTempPath), DIRECTORY_SEPARATOR);
 		}
-		if (function_exists('sys_get_temp_dir')) {
-			$testDirs[] = sys_get_temp_dir();
-		}
 		if ($volumeTempPath) {
 			$testDirs[] = rtrim(realpath($volumeTempPath), DIRECTORY_SEPARATOR);
 		}
+		if (function_exists('sys_get_temp_dir')) {
+			$testDirs[] = sys_get_temp_dir();
+		}
 		$tempDir = '';
-		$test = DIRECTORY_SEPARATOR . microtime(true);
 		foreach($testDirs as $testDir) {
 			if (!$testDir || !is_dir($testDir)) continue;
-			$testFile = $testDir.$test;
-			if (touch($testFile)) {
-				unlink($testFile);
+			if (is_writable($testDir)) {
 				$tempDir = $testDir;
 				$gc = time() - 3600;
-				foreach(glob($tempDir . '/ELF*') as $cf) {
+				foreach(glob($tempDir . DIRECTORY_SEPARATOR .'ELF*') as $cf) {
 					if (filemtime($cf) < $gc) {
 						@unlink($cf);
 					}
@@ -1650,6 +1521,140 @@ class elFinder {
 		}
 		
 		return $result;
+	}
+	
+	/**
+	 * Check chunked upload files
+	 * 
+	 * @param string $tmpname  uploaded temporary file path
+	 * @param string $chunk    uploaded chunk file name
+	 * @param string $cid      uploaded chunked file id
+	 * @param string $tempDir  temporary dirctroy path
+	 * @return array (string JoinedTemporaryFilePath, string FileName) or (empty, empty)
+	 * @author Naoki Sawada
+	 */
+	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume = null) {
+		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
+			$fname = $m[1];
+			$encname = md5($cid . '_' . $fname);
+			$base = $tempDir . DIRECTORY_SEPARATOR . 'ELF' . $encname;
+			$clast = intval($m[3]);
+			if (is_null($tmpname)) {
+				ignore_user_abort(true);
+				sleep(10); // wait 10 sec
+				// chunked file upload fail
+				foreach(glob($base . '*') as $cf) {
+					@unlink($cf);
+				}
+				ignore_user_abort(false);
+				return;
+			}
+			
+			$range = isset($_POST['range'])? trim($_POST['range']) : '';
+			if ($range && preg_match('/^(\d+),(\d+),(\d+)$/', $range, $ranges)) {
+				$start = $ranges[1];
+				$len   = $ranges[2];
+				$size  = $ranges[3];
+				$tmp = $base . '.part';
+				$csize = filesize($tmpname);
+				
+				$tmpExists = is_file($tmp);
+				if (!$tmpExists) {
+					// check upload max size
+					$uploadMaxSize = $volume->getUploadMaxSize();
+					if ($uploadMaxSize > 0 && $size > $uploadMaxSize) {
+						return array(self::ERROR_UPLOAD_FILE_SIZE, false);
+					}
+					// make temp file
+					$ok = false;
+					if ($fp = fopen($tmp, 'wb')) {
+						flock($fp, LOCK_EX);
+						$ok = ftruncate($fp, $size);
+						flock($fp, LOCK_UN);
+						fclose($fp);
+						touch($base);
+					}
+					if (!$ok) {
+						unlink($tmp);
+						return array(self::ERROR_UPLOAD_TEMP, false);
+					}
+				} else {
+					// wait until makeing temp file (for anothor session)
+					$cnt = 1200; // Time limit 120 sec
+					while(!is_file($base) && --$cnt) {
+						usleep(100000); // wait 100ms
+					}
+					if (!$cnt) {
+						return array(self::ERROR_UPLOAD_TEMP, false);
+					}
+				}
+				
+				// check size info
+				if ($len != $csize || $start + $len > $size || ($tmpExists && $size != filesize($tmp))) {
+					return array(self::ERROR_UPLOAD_TEMP, false);
+				}
+				
+				// write chunk data
+				$writelen = 0;
+				$src = fopen($tmpname, 'rb');
+				$fp = fopen($tmp, 'cb');
+				fseek($fp, $start);
+				$writelen = stream_copy_to_stream($src, $fp, $len);
+				fclose($fp);
+				fclose($src);
+				if ($writelen != $len) {
+					return array(self::ERROR_UPLOAD_TEMP, false);
+				}
+				
+				// write counts
+				file_put_contents($base, "\0", FILE_APPEND | LOCK_EX);
+				
+				if (filesize($base) >= $clast + 1) {
+					// Completion
+					unlink($base);
+					return array($tmp, $fname);
+				}
+			} else {
+				// old way
+				$part = $base . $m[2];
+				if (move_uploaded_file($tmpname, $part)) {
+					@chmod($part, 0600);
+					if ($clast < count(glob($base . '*'))) {
+						$parts = array();
+						for ($i = 0; $i <= $clast; $i++) {
+							$name = $base . '.' . $i . '_' . $clast;
+							if (is_readable($name)) {
+								$parts[] = $name;
+							} else {
+								$parts = null;
+								break;
+							}
+						}
+						if ($parts) {
+							if (!is_file($base)) {
+								touch($base);
+								if ($resfile = tempnam($tempDir, 'ELF')) {
+									$target = fopen($resfile, 'wb');
+									foreach($parts as $f) {
+										$fp = fopen($f, 'rb');
+										while (!feof($fp)) {
+											fwrite($target, fread($fp, 8192));
+										}
+										fclose($fp);
+										unlink($f);
+									}
+									fclose($target);
+									unlink($base);
+									return array($resfile, $fname);
+								}
+								unlink($base);
+							}
+						}
+					}
+				}
+			}
+		}
+		return array('', '');
 	}
 	
 	/**
