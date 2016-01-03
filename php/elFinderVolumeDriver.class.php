@@ -2119,17 +2119,20 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function getTempPath() {
-		if (@ $this->tmpPath) {
-			return $this->tmpPath;
-		} else if (@ $this->tmp) {
-			return $this->tmp;
+		$tempPath = null;
+		if (isset($this->tmpPath) && $this->tmpPath && is_writable($this->tmpPath)) {
+			$tempPath = $this->tmpPath;
+		} else if (isset($this->tmp) && $this->tmp && is_writable($this->tmp)) {
+			$tempPath = $this->tmp;
 		} else if (function_exists('sys_get_temp_dir')) {
-			return sys_get_temp_dir();
-		} else if (@ $this->tmbPath) {
-			return $this->tmbPath;
-		} else {
-			return null;
+			$tempPath = sys_get_temp_dir();
+		} else if (isset($this->tmbPath) && $this->tmbPath && is_writable($this->tmbPath)) {
+			$tempPath = $this->tmbPath;
 		}
+		if ($tempPath && DIRECTORY_SEPARATOR !== '/') {
+			$tempPath = str_replace('/', DIRECTORY_SEPARATOR, $tempPath);
+		}
+		return $tempPath;
 	}
 	
 	/**
