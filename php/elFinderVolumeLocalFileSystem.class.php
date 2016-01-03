@@ -53,8 +53,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function init() {
 		// Normalize directory separator for windows
 		if (DIRECTORY_SEPARATOR !== '/') {
-			foreach(array('path', 'tmpPath', 'quarantine') as $key) {
-				if ($this->options[$key]) {
+			foreach(array('path', 'tmbPath', 'tmpPath', 'quarantine') as $key) {
+				if (!empty($this->options[$key])) {
 					$this->options[$key] = str_replace('/', DIRECTORY_SEPARATOR, $this->options[$key]);
 				}
 			}
