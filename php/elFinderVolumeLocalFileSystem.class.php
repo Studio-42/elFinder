@@ -99,6 +99,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		parent::configure();
 		
+		// set $this->tmp by options['tmpPath']
+		if (!empty($this->options['tmpPath'])) {
+			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'], 0755, true)) && is_writable($this->options['tmpPath'])) {
+				$this->tmp = $this->options['tmpPath'];
+			}
+		}
+		
 		// if no thumbnails url - try detect it
 		if ($root['read'] && !$this->tmbURL && $this->URL) {
 			if (strpos($this->tmbPath, $this->root) === 0) {
