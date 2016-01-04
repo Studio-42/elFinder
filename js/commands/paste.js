@@ -168,7 +168,7 @@ elFinder.prototype.commands.paste = function() {
 							.done(function(data) {
 								dfrd.resolve(data);
 								if (data && data.added && data.added[0]) {
-									var newItem = fm.getUI('cwd').find('#'+data.added[0].hash);
+									var newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
 									if (newItem.length) {
 										newItem.trigger('scrolltoview');
 									}

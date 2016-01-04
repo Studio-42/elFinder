@@ -46,7 +46,7 @@ elFinder.prototype.commands.upload = function() {
 						var cwd = fm.getUI('cwd');
 						dfrd.resolve(data);
 						if (data && data.added && data.added[0]) {
-							var newItem = cwd.find('#'+data.added[0].hash);
+							var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 							if (newItem.length) {
 								newItem.trigger('scrolltoview');
 							}

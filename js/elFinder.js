@@ -5,7 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 window.elFinder = function(node, opts) {
-	this.time('load');
+	//this.time('load');
 	
 	var self = this,
 		
@@ -499,6 +499,23 @@ window.elFinder = function(node, opts) {
 	this.id = id;
 	
 	/**
+	 * ui.nav id prefix
+	 * 
+	 * @type String
+	 */
+	this.navPrefix = 'nav' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-';
+	
+	/**
+	 * ui.cwd id prefix
+	 * 
+	 * @type String
+	 */
+	this.cwdPrefix = elFinder.prototype.uniqueid? ('cwd' + elFinder.prototype.uniqueid + '-') : '';
+	
+	// Increment elFinder.prototype.uniqueid
+	++elFinder.prototype.uniqueid;
+	
+	/**
 	 * URL to upload files
 	 *
 	 * @type String
@@ -759,7 +776,7 @@ window.elFinder = function(node, opts) {
 					return false;
 				}
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
-					hash = dst.attr('id');
+					hash = self.cwdId2Hash(dst.attr('id'));
 				} else if (dst.hasClass(self.res(c, 'navdir'))) {
 					hash = self.navId2Hash(dst.attr('id'));
 				} else {
@@ -2257,7 +2274,7 @@ window.elFinder = function(node, opts) {
 					e.stopPropagation();
 					$elm.removeClass(clDropActive);
 					if (e.currentTarget.id) {
-						id = $elm.hasClass(navdir)? self.navId2Hash(e.currentTarget.id) : e.currentTarget.id;
+						id = $elm.hasClass(navdir)? self.navId2Hash(e.currentTarget.id) : self.cwdId2Hash(e.currentTarget.id);
 					} else {
 						id = self.cwd().hash;
 					}
@@ -2280,6 +2297,8 @@ window.elFinder = function(node, opts) {
  * @type  Object
  */
 elFinder.prototype = {
+	
+	uniqueid : 0,
 	
 	res : function(type, id) {
 		return this.resources[type] && this.resources[type][id];
@@ -4442,11 +4461,19 @@ elFinder.prototype = {
 	},
 	
 	navHash2Id : function(hash) {
-		return 'nav-'+hash;
+		return this.navPrefix + hash;
 	},
 	
 	navId2Hash : function(id) {
-		return typeof(id) == 'string' ? id.substr(4) : false;
+		return typeof(id) == 'string' ? id.substr(this.navPrefix.length) : false;
+	},
+	
+	cwdHash2Id : function(hash) {
+		return this.cwdPrefix + hash;
+	},
+	
+	cwdId2Hash : function(id) {
+		return typeof(id) == 'string' ? id.substr(this.cwdPrefix.length) : false;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
