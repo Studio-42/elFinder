@@ -56,9 +56,9 @@ elFinder.prototype.commands.rename = function() {
 							input.remove();
 							parent.html(name);
 						} else {
-							cwd.find('#'+file.hash).find(filename).html(name);
+							cwd.find('#'+fm.cwdHash2Id(file.hash)).find(filename).html(name);
 							setTimeout(function() {
-								cwd.find('#'+file.hash).click();
+								cwd.find('#'+fm.cwdHash2Id(file.hash)).click();
 							}, 50);
 						}
 					}
@@ -141,7 +141,7 @@ elFinder.prototype.commands.rename = function() {
 							.done(function(data) {
 								dfrd.resolve(data);
 								if (!navbar && data && data.added && data.added[0]) {
-									var newItem = cwd.find('#'+data.added[0].hash);
+									var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 									if (newItem.length) {
 										newItem.trigger('scrolltoview');
 									}
@@ -154,7 +154,7 @@ elFinder.prototype.commands.rename = function() {
 					}
 				}),
 			node = navbar? $('#'+fm.navHash2Id(file.hash)).contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
-					                  : cwd.find('#'+file.hash).find(filename),
+					                  : cwd.find('#'+fm.cwdHash2Id(file.hash)).find(filename),
 			name = file.name.replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, ''),
 			pnode = node.parent();
 		

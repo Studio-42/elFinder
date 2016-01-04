@@ -93,7 +93,7 @@ elFinder.prototype.resources = {
 					date  : 'Today '+date.getHours()+':'+date.getMinutes()
 				},
 				data = this.data || {},
-				node = cwd.trigger('create.'+fm.namespace, file).find('#'+id),
+				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id)),
 				nnode, pnode,
 				input = $(tarea? '<textarea/>' : '<input type="text"/>')
 					.on('keyup text', function(){
@@ -159,7 +159,7 @@ elFinder.prototype.resources = {
 								.done(function(data) {
 									dfrd.resolve(data);
 									if (data.added && data.added[0]) {
-										var newItem = cwd.find('#'+data.added[0].hash);
+										var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 										if (newItem.length) {
 											newItem.trigger('scrolltoview');
 										}
