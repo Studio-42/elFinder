@@ -5,7 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 window.elFinder = function(node, opts) {
-	this.time('load');
+	//this.time('load');
 	
 	var self = this,
 		
