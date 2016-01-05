@@ -329,6 +329,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'emptyFolder'     : '空のフォルダ', // from v2.1.6 added 30.12.2015
 			'emptyFolderDrop' : '空のフォルダ\\Aアイテムを追加するにはここへドロップ', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : '空のフォルダ\\Aアイテムを追加するにはここをロングタップ', // from v2.1.6 added 30.12.2015
+			'quality'         : '品質', // from v2.1.6 added 5.1.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

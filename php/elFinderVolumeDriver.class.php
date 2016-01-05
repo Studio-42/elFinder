@@ -223,6 +223,8 @@ abstract class elFinderVolumeDriver {
 		'tmbBgColor'      => '#ffffff',
 		// image manipulations library
 		'imgLib'          => 'auto',
+		// Jpeg image saveing quality
+		'jpgQuality'      => 100,
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
 		'copyOverwrite'   => true,
 		// if true - join new and old directories content on paste
@@ -1086,6 +1088,7 @@ abstract class elFinderVolumeDriver {
 			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
 			'uploadMaxSize'   => intval($this->uploadMaxSize),
 			'dispInlineRegex' => $this->options['dispInlineRegex'],
+			'jpgQuality'      => intval($this->options['jpgQuality']),
 			'archivers'       => array(
 				'create'    => $create,
 				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
@@ -1946,13 +1949,16 @@ abstract class elFinderVolumeDriver {
 	 * @param  int      $x       X start poistion for crop
 	 * @param  int      $y       Y start poistion for crop
 	 * @param  string   $mode    action how to mainpulate image
+	 * @param  string   $bg      background color
+	 * @param  int      $degree  rotete degree
+	 * @param  int      $jpgQuality  JEPG quality (1-100)
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 * @author nao-pon
 	 * @author Troex Nevelin
 	 **/
-	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0) {
+	public function resize($hash, $width, $height, $x, $y, $mode = 'resize', $bg = '', $degree = 0, $jpgQuality = null) {
 		if ($this->commandDisabled('resize')) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
@@ -1985,23 +1991,23 @@ abstract class elFinderVolumeDriver {
 		switch($mode) {
 			
 			case 'propresize':
-				$result = $this->imgResize($work_path, $width, $height, true, true);
+				$result = $this->imgResize($work_path, $width, $height, true, true, null, $jpgQuality);
 				break;
 
 			case 'crop':
-				$result = $this->imgCrop($work_path, $width, $height, $x, $y);
+				$result = $this->imgCrop($work_path, $width, $height, $x, $y, null, $jpgQuality);
 				break;
 
 			case 'fitsquare':
-				$result = $this->imgSquareFit($work_path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']));
+				$result = $this->imgSquareFit($work_path, $width, $height, 'center', 'middle', ($bg ? $bg : $this->options['tmbBgColor']), null, $jpgQuality);
 				break;
 
 			case 'rotate':
-				$result = $this->imgRotate($work_path, $degree, ($bg ? $bg : $this->options['tmbBgColor']));
+				$result = $this->imgRotate($work_path, $degree, ($bg ? $bg : $this->options['tmbBgColor']), null, $jpgQuality);
 				break;
 
 			default:
-				$result = $this->imgResize($work_path, $width, $height, false, true);
+				$result = $this->imgResize($work_path, $width, $height, false, true, null, $jpgQuality);
 				break;
 		}
 		
@@ -3612,11 +3618,12 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool	    $keepProportions    crop image
 	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
 	 * @param  string   $destformat         image destination format
+	 * @param  int      $jpgQuality         JEPG quality (1-100)
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null) {
+	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null, $jpgQuality = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -3625,6 +3632,10 @@ abstract class elFinderVolumeDriver {
 		
 		list($size_w, $size_h) = array($width, $height);
 	
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
+		
 		if ($keepProportions == true) {
 		
 			list($orig_w, $orig_h) = array($s[0], $s[1]);
@@ -3676,7 +3687,7 @@ abstract class elFinderVolumeDriver {
 						$img->setFirstIterator();
 					}
 					$img->resizeImage($size_w, $size_h, $filter, 1);
-					$result = $img->writeImage($path);
+					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
 				}
 				
 				$img->destroy();
@@ -3686,17 +3697,17 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				$img = self::gdImageCreate($path,$s['mime']);
+				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
 				
-					self::gdImageBackground($tmp,$this->options['tmbBgColor']);
+					$this->gdImageBackground($tmp,$this->options['tmbBgColor']);
 					
 					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 						return false;
 					}
 		
-					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
+					$result = $this->gdImage($tmp, $path, $destformat, $s['mime'], $jpgQuality);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -3719,17 +3730,22 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool	    $x                  crop left offset
 	 * @param  bool	    $y                  crop top offset
 	 * @param  string   $destformat         image destination format
+	 * @param  int      $jpgQuality         JEPG quality (1-100)
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-  	protected function imgCrop($path, $width, $height, $x, $y, $destformat = null) {
+  	protected function imgCrop($path, $width, $height, $x, $y, $destformat = null, $jpgQuality = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
 
 		$result = false;
 		
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
+
 		switch ($this->imgLib) {
 			case 'imagick':
 				
@@ -3756,7 +3772,7 @@ abstract class elFinderVolumeDriver {
 					$img->setImagePage($s[0], $s[1], 0, 0);
 					$img->cropImage($width, $height, $x, $y);
 					$img->setImagePage($width, $height, 0, 0);
-					$result = $img->writeImage($path);
+					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
 				}
 				
 				$img->destroy();
@@ -3766,11 +3782,11 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				$img = self::gdImageCreate($path,$s['mime']);
+				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 					
-					self::gdImageBackground($tmp,$this->options['tmbBgColor']);
+					$this->gdImageBackground($tmp,$this->options['tmbBgColor']);
 
 					$size_w = $width;
 					$size_h = $height;
@@ -3784,7 +3800,7 @@ abstract class elFinderVolumeDriver {
 						return false;
 					}
 					
-					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
+					$result = $this->gdImage($tmp, $path, $destformat, $s['mime'], $jpgQuality);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -3808,11 +3824,12 @@ abstract class elFinderVolumeDriver {
 	 * @param  int 	    $valign             reserved
 	 * @param  string   $bgcolor            square background color in #rrggbb format
 	 * @param  string   $destformat         image destination format
+	 * @param  int      $jpgQuality         JEPG quality (1-100)
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null) {
+	protected function imgSquareFit($path, $width, $height, $align = 'center', $valign = 'middle', $bgcolor = '#0000ff', $destformat = null, $jpgQuality = null) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -3822,6 +3839,10 @@ abstract class elFinderVolumeDriver {
 		/* Coordinates for image over square aligning */
 		$y = ceil(abs($height - $s[1]) / 2); 
 		$x = ceil(abs($width - $s[0]) / 2);
+
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
 
 		switch ($this->imgLib) {
 			case 'imagick':
@@ -3856,9 +3877,8 @@ abstract class elFinderVolumeDriver {
 					$img1 = new Imagick();
 					$img1->newImage($width, $height, new ImagickPixel($bgcolor));
 					$img1->setImageColorspace($img->getImageColorspace());
-					$img1->setImageFormat($destformat != null ? $destformat : $img->getFormat());
 					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
-					$result = $img1->writeImage($path);
+					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
 				}
 				
 				$img1->destroy();
@@ -3868,17 +3888,17 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				$img = self::gdImageCreate($path,$s['mime']);
+				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 
-					self::gdImageBackground($tmp,$bgcolor);
+					$this->gdImageBackground($tmp,$bgcolor);
 
 					if (!imagecopy($tmp, $img, $x, $y, 0, 0, $s[0], $s[1])) {
 						return false;
 					}
 
-					$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
+					$result = $this->gdImage($tmp, $path, $destformat, $s['mime'], $jpgQuality);
 
 					imagedestroy($img);
 					imagedestroy($tmp);
@@ -3898,11 +3918,12 @@ abstract class elFinderVolumeDriver {
 	 * @param  int      $degree             rotete degrees
 	 * @param  string   $bgcolor            square background color in #rrggbb format
 	 * @param  string   $destformat         image destination format
+	 * @param  int      $jpgQuality         JEPG quality (1-100)
 	 * @return string|false
 	 * @author nao-pon
 	 * @author Troex Nevelin
 	 **/
-	protected function imgRotate($path, $degree, $bgcolor = '#ffffff', $destformat = null) {
+	protected function imgRotate($path, $degree, $bgcolor = '#ffffff', $destformat = null, $jpgQuality = null) {
 		if (($s = @getimagesize($path)) == false || $degree % 360 === 0) {
 			return false;
 		}
@@ -3938,6 +3959,10 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
+
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -3955,7 +3980,7 @@ abstract class elFinderVolumeDriver {
 					$result = $img->writeImages($path, true);
 				} else {
 					$img->rotateImage(new ImagickPixel($bgcolor), $degree);
-					$result = $img->writeImage($path);
+					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
 				}
 				$img->destroy();
 				return $result ? $path : false;
@@ -3963,14 +3988,14 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
-				$img = self::gdImageCreate($path,$s['mime']);
+				$img = $this->gdImageCreate($path,$s['mime']);
 
 				$degree = 360 - $degree;
 				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
 				$bgcolor = imagecolorallocate($img, $r, $g, $b);
 				$tmp = imageRotate($img, $degree, (int)$bgcolor);
 
-				$result = self::gdImage($tmp, $path, $destformat, $s['mime']);
+				$result = $this->gdImage($tmp, $path, $destformat, $s['mime'], $jpgQuality);
 
 				imageDestroy($img);
 				imageDestroy($tmp);
@@ -4078,11 +4103,72 @@ abstract class elFinderVolumeDriver {
 	 * @param string $filename The path to save the file to.
 	 * @param string $destformat The Image type to use for $filename
 	 * @param string $mime The original image mime type
+	 * @param int    $jpgQuality  JEPG quality (1-100)
 	 */
-	protected function gdImage($image, $filename, $destformat, $mime ){
+	protected function gdImage($image, $filename, $destformat, $mime, $jpgQuality = null ){
 
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
 		if ($destformat == 'jpg' || ($destformat == null && $mime == 'image/jpeg')) {
-			return imagejpeg($image, $filename, 100);
+			return imagejpeg($image, $filename, $jpgQuality);
+		}
+
+		if ($destformat == 'gif' || ($destformat == null && $mime == 'image/gif')) {
+			return imagegif($image, $filename, 7);
+		}
+
+		return imagepng($image, $filename, 7);
+	}
+
+	/**
+	 * Output imagick image to file
+	 *
+	 * @param resource $img imagick image resource
+	 * @param string $filename The path to save the file to.
+	 * @param string $destformat The Image type to use for $filename
+	 * @param int    $jpgQuality  JEPG quality (1-100)
+	 */
+	protected function imagickImage($img, $filename, $destformat, $jpgQuality = null ){
+
+		if (!$jpgQuality) {
+			$jpgQuality = $this->options['jpgQuality'];
+		}
+		
+		try {
+			if ($destformat) {
+				if ($destformat === 'gif') {
+					$img->setImageFormat('gif');
+				} else if ($destformat === 'png') {
+					$img->setImageFormat('png');
+				} else if ($destformat === 'jpg') {
+					$img->setImageFormat('jpeg');
+				}
+			}
+			if (strtoupper($img->getImageFormat()) === 'JPEG') {
+				$img->setImageCompression(imagick::COMPRESSION_JPEG);
+				$img->setImageCompressionQuality($jpgQuality);
+				try {
+					$orientation = $img->getImageOrientation();
+				} catch (ImagickException $e) {
+					$orientation = 0;
+				}
+				$img->stripImage();
+				if ($orientation) {
+					$img->setImageOrientation($orientation);
+				}
+			}
+			$result = $img->writeImage($filename);
+		} catch (Exception $e) {
+			$result = false;
+		}
+		
+		return $result;
+		
+		
+		
+		if ($destformat == 'jpg' || ($destformat == null && $mime == 'image/jpeg')) {
+			return imagejpeg($image, $filename, $jpgQuality);
 		}
 
 		if ($destformat == 'gif' || ($destformat == null && $mime == 'image/gif')) {
