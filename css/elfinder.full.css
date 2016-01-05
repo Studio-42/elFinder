@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 417f845) (2016-01-04)
+ * Version 2.1.5 (2.1 Nightly: 8726869) (2016-01-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -164,7 +164,7 @@
 .elfinder-resize-rotate-slider {
 	float: left;
 	width: 195px;
-	margin: 7px 7px 0;
+	margin: 7px;
 }
 
 /********************** COMMAND "EDIT" ****************************/
