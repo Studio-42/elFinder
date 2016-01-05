@@ -576,7 +576,7 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _save($fp, $dir, $name, $mime, $stat) {
+	protected function _save($fp, $dir, $name, $stat) {
 		return false;
 	}
 	
@@ -645,8 +645,10 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	/**
 	 * chmod implementation
 	 *
+	 * @param string $path
+	 * @param string $mode
 	 * @return bool
-	 **/
+	 */
 	protected function _chmod($path, $mode) {
 		return false;
 	}
