@@ -118,6 +118,7 @@ window.elFinder = function(node, opts) {
 			copyOverwrite : true,
 			uploadOverwrite : true,
 			uploadMaxSize : 0,
+			jpgQuality    : 100,
 			tmb           : false // old API
 		},
 		
