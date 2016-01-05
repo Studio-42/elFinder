@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 8726869) (2016-01-06)
+ * Version 2.1.5 (2.1 Nightly: 328dfb0) (2016-01-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4557,7 +4557,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1 Nightly: 8726869)';
+elFinder.prototype.version = '2.1.5 (2.1 Nightly: 328dfb0)';
 
 
 
@@ -14287,18 +14287,18 @@ elFinder.prototype.commands.resize = function() {
 							var y = parseInt(pointY.val()) * prop + imgc.offset().top;
 							var w = offsetX.val() * prop;
 							var h = offsetY.val() * prop;
-							rhandlec.data({x: x, y: y, w: w, h: h});
-							rhandlec.width(Math.round(w));
-							rhandlec.height(Math.round(h));
-							coverc.width(rhandlec.width());
-							coverc.height(rhandlec.height());
-							rhandlec.offset({left: Math.round(x), top: Math.round(y)});
+							rhandlec.data({x: x, y: y, w: w, h: h})
+								.width(Math.round(w))
+								.height(Math.round(h))
+								.offset({left: Math.round(x), top: Math.round(y)});
+							coverc.width(rhandlec.width())
+								.height(rhandlec.height());
 						},
 						resize_update : function() {
 							rhandlec.data({w: null, h: null});
 							crop.update();
-							coverc.width(rhandlec.width());
-							coverc.height(rhandlec.height());
+							coverc.width(rhandlec.width())
+								.height(rhandlec.height());
 						},
 						drag_update : function() {
 							rhandlec.data({x: null, y: null});
@@ -14420,11 +14420,15 @@ elFinder.prototype.commands.resize = function() {
 					croppable = function(destroy) {
 						if ($.fn.draggable && $.fn.resizable) {
 							if (destroy) {
-								rhandlec.filter(':ui-resizable').resizable('destroy');
-								rhandlec.filter(':ui-draggable').draggable('destroy');
+								rhandlec.filter(':ui-resizable').resizable('destroy')
+									.filter(':ui-draggable').draggable('destroy');
 								basec.hide();
 							}
 							else {
+								basec.show()
+									.width(img.width())
+									.height(img.height());
+								
 								imgc
 									.width(img.width())
 									.height(img.height());
@@ -14447,10 +14451,6 @@ elFinder.prototype.commands.resize = function() {
 										containment : imgc,
 										drag        : crop.drag_update
 									});
-								
-								basec.show()
-									.width(img.width())
-									.height(img.height());
 								
 								crop.update();
 							}
@@ -14603,7 +14603,7 @@ elFinder.prototype.commands.resize = function() {
 					'<div class="'+rpoint+' '+rpoint+'-sw"/>',
 					'<div class="'+rpoint+' '+rpoint+'-nw"/>');
 
-				preview.append(basec.css('position', 'absolute').hide().append(imgc).append(rhandlec.append(coverc)));
+				preview.append(basec.css('position', 'absolute').hide().append(imgc, rhandlec.append(coverc)));
 				
 				preview.append(imgr.hide());
 				
