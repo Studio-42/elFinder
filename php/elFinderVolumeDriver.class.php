@@ -4623,8 +4623,8 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Open file and return file pointer
 	 *
-	 * @param  string  $path  file path
-	 * @param  bool    $write open file for writing
+	 * @param  string $path file path
+	 * @param  string $mode open mode
 	 * @return resource|false
 	 * @author Dmitry (dio) Levashov
 	 **/
