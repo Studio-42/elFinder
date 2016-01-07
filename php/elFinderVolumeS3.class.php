@@ -363,12 +363,12 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 		sort($finalfiles);
 		return $finalfiles;
 	}
-	
+
 	/**
 	 * Open file and return file pointer
 	 *
 	 * @param  string  $path  file path
-	 * @param  bool    $write open file for writing
+	 * @param  string  $mode open mode
 	 * @return resource|false
 	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
@@ -487,12 +487,12 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 protected function _symlink($source, $targetDir, $name) {
 		return false;
 	 }
-	
+
 	/**
 	 * Copy file into another file (only inside one volume)
 	 *
 	 * @param  string  $source  source file path
-	 * @param  string  $target  target dir path
+	 * @param  string  $targetDir  target dir path
 	 * @param  string  $name    file name
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
@@ -506,7 +506,7 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * Return new file path or false.
 	 *
 	 * @param  string  $source  source file path
-	 * @param  string  $target  target dir path
+	 * @param  string  $targetDir  target dir path
 	 * @param  string  $name    file name
 	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
@@ -570,13 +570,14 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	 * Create new file and write into it from file pointer.
 	 * Return new file path or false on error.
 	 *
-	 * @param  resource  $fp   file pointer
-	 * @param  string    $dir  target dir path
-	 * @param  string    $name file name
+	 * @param  resource $fp file pointer
+	 * @param  string $dir target dir path
+	 * @param  string $name file name
+	 * @param  array $stat
 	 * @return bool|string
 	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _save($fp, $dir, $name, $mime, $stat) {
+	 */
+	protected function _save($fp, $dir, $name, $stat) {
 		return false;
 	}
 	
@@ -645,8 +646,10 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 	/**
 	 * chmod implementation
 	 *
+	 * @param string $path
+	 * @param string $mode
 	 * @return bool
-	 **/
+	 */
 	protected function _chmod($path, $mode) {
 		return false;
 	}
@@ -670,13 +673,17 @@ class S3SoapClient extends SoapClient {
 		$this->secretkey = $secret;
 		parent::__construct('http://s3.amazonaws.com/doc/2006-03-01/AmazonS3.wsdl');
 	}
-	
-	
+
+
 	/**
 	 * Method call wrapper which adding S3 signature and default arguments to all S3 operations
 	 *
+	 * @param string $method
+	 * @param string $arguments
+	 * @return mixed
+	 *
 	 * @author Alexey Sukhotin
-	 **/
+	 */
 	public function __call($method, $arguments) {
 		
 		/* Getting list of S3 web service functions which requires signing */
