@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 5e7696f) (2016-01-08)
+ * Version 2.1.5 (2.1 Nightly: de83e74) (2016-01-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1354,6 +1354,14 @@ window.elFinder = function(node, opts) {
 			});
 		}
 		
+		// abort pending xhr on window unload or elFinder destroy
+		self.bind('unload destroy', function(){
+			if (xhr.state() == 'pending') {
+				xhr.quiet = true;
+				xhr.abort();
+			}
+		});
+		
 		return dfrd;
 	};
 	
@@ -1819,7 +1827,7 @@ window.elFinder = function(node, opts) {
 		// run interval sync
 		if (self.options.sync > 1000) {
 			sync = function(start){
-				if (start || syncInterval) {
+				if (cwdOptions.syncMinMs && (start || syncInterval)) {
 					syncInterval = setTimeout(function() {
 						var dosync = true, hash = cwd;
 						if (cwdOptions.syncChkAsTs) {
@@ -1849,8 +1857,7 @@ window.elFinder = function(node, opts) {
 								}
 							})
 							.fail(function(error){
-								error && self.error(error)
-								sync();
+								error && self.error(error);
 							});
 						} else {
 							self.sync(cwd, true).always(function(){
@@ -2239,6 +2246,7 @@ window.elFinder = function(node, opts) {
 			if (self.ui.notify.children().length) {
 				return self.i18n('ntfsmth');
 			}
+			self.trigger('unload');
 		});
 	})();
 
@@ -4639,7 +4647,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1 Nightly: 5e7696f)';
+elFinder.prototype.version = '2.1.5 (2.1 Nightly: de83e74)';
 
 
 
