@@ -1008,7 +1008,8 @@ abstract class elFinderVolumeDriver {
 		$this->configure();
 		
 		// fix sync interval
-		$options['syncMinMs'] = max($options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($options['syncMinMs']));
+		$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
+
 
 		return $this->mounted = true;
 	}
