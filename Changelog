@@ -7,6 +7,7 @@
 		- Plugin: AutoResize New option `preserveExif`
 		- Fixed #179 JPEG quality specifiable
 		- Fixed #1176 auto-sync check with HTTP long polling/inotifywait
+		- Fixed #1181 case insensitive search problem of LocalFileSystem driver
 		- And some minor bug fixes
 
 
