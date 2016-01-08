@@ -179,7 +179,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$path = escapeshellarg($path);
 		$standby = max(1, intval($standby));
 		$cmd = $inotifywait.' '.$path.' -t '.$standby.' -e moved_to,moved_from,move,create,delete,delete_self';
-		$o = $r = '';
 		$this->procExec($cmd , $o, $r);
 		if ($r === 0) {
 			// changed
