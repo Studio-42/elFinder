@@ -1083,26 +1083,31 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		if ($this->encoding) {
-			// non UTF-8 has problem of glob() results
+			// non UTF-8 use elFinderVolumeDriver::doSearch()
 			return parent::doSearch($path, $q, $mimes);
 		}
 		
-		static $escaper;
-		if (!$escaper) {
-			$escaper = array(
-				'['  => '\\[',
-				']'  => '\\]',
-				'*'  => '\\*',
-				'?'  => '\\?'
+		$match = array();
+		try {
+			$iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator($path,
+					FilesystemIterator::KEY_AS_PATHNAME |
+					FilesystemIterator::SKIP_DOTS |
+					(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
+						RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
+				),
+				RecursiveIteratorIterator::SELF_FIRST
 			);
-		}
+			foreach ($iterator as $key => $node) {
+				$name = $node->getFilename();
+				if ($this->stripos($name, $q) !== false) {
+					$match[] = $key;
+				}
+			}
+		} catch (Exception $e) {}
 		
 		$result = array();
 		
-		$path = strtr($path, $escaper);
-		$_q = strtr($q, $escaper);
-		$dirs = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
-		$match = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*'.$_q.'*', GLOB_NOSORT);
 		if ($match) {
 			foreach($match as $p) {
 				$stat = $this->stat($p);
@@ -1128,16 +1133,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			}
 		}
-		if ($dirs) {
-			foreach($dirs as $dir) {
-				$stat = $this->stat($dir);
-				if ($stat['read'] && !isset($stat['alias'])) {
-					@set_time_limit(30);
-					$result = array_merge($result, $this->doSearch($dir, $q, $mimes));
-				}
-			}
-		}
-	
+		
 		return $result;
 	}
 	
