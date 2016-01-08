@@ -178,6 +178,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$this->rootName = $this->options['alias'];
 		$this->options['separator'] = '/';
 		
+		if (is_null($this->options['syncChkAsTs'])) {
+			$this->options['syncChkAsTs'] = true;
+		}
+		
 		return $this->connect();
 		
 	}
@@ -664,7 +668,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->convEncIn();
 		}
 		if (!$this->MLSTsupprt) {
-			if ($path === $this->root) {
+			//if ($path == $this->root && (empty($this->ARGS['reload']) || !isset($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0)) {
+			if ($path == $this->root && ! $this->isMyReload()) {
 				return array(
 					'name' => $this->root,
 					'mime' => 'directory',
