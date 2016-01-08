@@ -76,6 +76,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (!empty($this->options['startPath'])) {
 			$this->options['startPath'] = $this->getFullPath($this->options['startPath'], $cwd);
 		}
+		
+		if (is_null($this->options['syncChkAsTs'])) {
+			$this->options['syncChkAsTs'] = true;
+		}
+		if (is_null($this->options['syncCheckFunc'])) {
+			$this->options['syncCheckFunc'] = array($this, 'localFileSystemInotify');
+		}
+		
 		return true;
 	}
 	
@@ -146,6 +154,56 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					'hidden'  => true
 			);
 		}
+	}
+	
+	/**
+	 * Long pooling sync checker
+	 * This function require server command `inotifywait`
+	 * If `inotifywait` need full path, Please add `define('ELFINER_INOTIFYWAIT_PATH', '/PATH_TO/inotifywait');` into connector.php
+	 * 
+	 * @param string     $path
+	 * @param int        $standby
+	 * @param number     $compare
+	 * @return number|bool
+	 */
+	public function localFileSystemInotify($path, $standby, $compare) {
+		if (isset($this->sessionCache['localFileSystemInotify_disable'])) {
+			return false;
+		}
+		$path = realpath($path);
+		$mtime = filemtime($path);
+		if ($mtime != $compare) {
+			return $mtime;
+		}
+		$inotifywait = defined('ELFINER_INOTIFYWAIT_PATH')? ELFINER_INOTIFYWAIT_PATH : 'inotifywait';
+		$path = escapeshellarg($path);
+		$standby = max(1, intval($standby));
+		$cmd = $inotifywait.' '.$path.' -t '.$standby.' -e moved_to,moved_from,move,create,delete,delete_self';
+		$o = $r = '';
+		$this->procExec($cmd , $o, $r);
+		if ($r === 0) {
+			// changed
+			clearstatcache();
+			return filemtime($path);
+		} else if ($r === 2) {
+			// not changed (timeout)
+			return $compare;
+		}
+		// error
+		// cache to $_SESSION
+		$sessionClose = true;;
+		try {
+			$sessionStart = session_start();
+		} catch (Exception $e) {
+			$sessionClose = false;
+		}
+		if ($sessionStart) {
+			$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
+			$this->sessionCache['localFileSystemInotify_disable'] = true;
+			$sessionClose && session_write_close();
+		}
+		
+		return false;
 	}
 	
 	/*********************************************************************/

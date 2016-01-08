@@ -276,6 +276,24 @@ abstract class elFinderVolumeDriver {
 		'archivers'    => array(),
 		// plugin settings
 		'plugin'       => array(),
+		// Is support parent directory time stamp update on add|remove|rename item
+		// Default `null` is auto detection that is LocalFileSystem, FTP or Dropbox are `true`
+		'syncChkAsTs'  => null,
+		// Long pooling sync checker function for syncChkAsTs is true
+		// Calls with args (TARGET DIRCTORY PATH, STAND-BY(sec), OLD TIMESTAMP, VOLUME DRIVER INSTANCE, ELFINDER INSTANCE)
+		// This function must return the following values. Changed: New Timestamp or Same: Old Timestamp or Error: false
+		// Default `null` is try use elFinderVolumeLocalFileSystem::localFileSystemInotify() on LocalFileSystem driver
+		// another driver use elFinder stat() checker
+		'syncCheckFunc'=> null,
+		// Long polling sync stand-by time (sec)
+		'plStandby'    => 30,
+		// Sleep time (sec) for elFinder stat() checker (syncChkAsTs is true)
+		'tsPlSleep'    => 10,
+		// Sleep time (sec) for elFinder ls() checker (syncChkAsTs is false)
+		'lsPlSleep'    => 30,
+		// Client side sync interval minimum (ms)
+		// Default `null` is auto set to ('tsPlSleep' or 'lsPlSleep') * 1000
+		'syncMinMs'    => null,
 		// required to fix bug on macos
 		'utf8fix'      => false,
 		 //                           й                 ё              Й               Ё              Ø         Å
@@ -702,6 +720,24 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * stat a file or folder for elFinder cmd exec
+	 *
+	 * @param  string   $hash    file or folder hash to chmod
+	 * @return array
+	 * @author Naoki Sawada
+	 **/
+	public function fstat($hash) {
+		$path = $this->decode($hash);
+		return $this->stat($path);
+	}
+	
+	
+	public function clearstatcache() {
+		clearstatcache();
+		$this->cache = $this->dirsCache = array();
+	}
+	
+	/**
 	 * "Mount" volume.
 	 * Return true if volume available for read or write, 
 	 * false - otherwise
@@ -970,8 +1006,10 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$this->configure();
-		// echo $this->uploadMaxSize;
-		// echo $this->options['uploadMaxSize'];
+		
+		// fix sync interval
+		$options['syncMinMs'] = max($options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($options['syncMinMs']));
+
 		return $this->mounted = true;
 	}
 	
@@ -1094,7 +1132,9 @@ abstract class elFinderVolumeDriver {
 				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
 				'createext' => $createext
 			),
-			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array()
+			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array(),
+			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
+			'syncMinMs'       => intval($this->options['syncMinMs'])
 		);
 	}
 	
@@ -1244,10 +1284,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function file($hash) {
 		$path = $this->decode($hash);
+		$isRoot = ($path === $this->root);
+		
+		// for stat() cache contorol
+		//$isRoot && $this->ARGS['target'] = $hash;
 		
 		$file = $this->stat($path);
 		
-		if ($hash === $this->root()) {
+		if ($isRoot) {
 			$file['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
 			$file['disabled'] = array_merge(array_unique($this->disabled)); // `array_merge` for type array of JSON
 		}
@@ -2789,13 +2833,14 @@ abstract class elFinderVolumeDriver {
 		if ($path === false || is_null($path)) {
 			return false;
 		}
-		$is_root = ($path === $this->root);
+		$is_root = ($path == $this->root);
 		if ($is_root) {
 			$rootKey = md5($path);
 			if (!isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
 			}
-			if (empty($this->ARGS['reload']) || empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0) {
+			//if (empty($this->ARGS['reload']) || empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0) {
+			if (! $this->isMyReload()) {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {
 					if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
@@ -3167,6 +3212,26 @@ abstract class elFinderVolumeDriver {
 		foreach ($this->scandirCE($path) as $p) {
 			if (($_p = $this->closestByAttr($p, $attr, $val)) != false) {
 				return $_p;
+			}
+		}
+		return false;
+	}
+	
+	protected function isMyReload($target = '', $ARGtarget = '') {
+		if (! empty($this->ARGS['reload'])) {
+			if ($ARGtarget === '') {
+				$ARGtarget = isset($this->ARGS['target'])? $this->ARGS['target']
+					: ((isset($this->ARGS['targets']) && is_array($this->ARGS['targets']) && count($this->ARGS['targets']) === 1)?
+						$this->ARGS['targets'][0] : '');
+			}
+			if ($ARGtarget !== '') {
+				$ARGtarget = strval($ARGtarget);
+				if ($target === '') {
+					return (strpos($ARGtarget, $this->id) === 0);
+				} else {
+					$target = strval($target);
+					return ($target === $ARGtarget);
+				}
 			}
 		}
 		return false;
@@ -4709,8 +4774,8 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Open file and return file pointer
 	 *
-	 * @param  string  $path  file path
-	 * @param  bool    $write open file for writing
+	 * @param  string $path file path
+	 * @param  string $mode open mode
 	 * @return resource|false
 	 * @author Dmitry (dio) Levashov
 	 **/

@@ -83,7 +83,7 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false),
+		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false),
 		'ls'        => array('target' => true, 'mimes' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
@@ -102,7 +102,7 @@ class elFinder {
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
 		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
-		'info'      => array('targets' => true),
+		'info'      => array('targets' => true, 'compare' => false),
 		'dim'       => array('target' => true),
 		'resize'    => array('target' => true, 'width' => true, 'height' => true, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false),
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
@@ -817,6 +817,8 @@ class elFinder {
 		$volume = $this->volume($target);
 		$cwd    = $volume ? $volume->dir($target) : false;
 		$hash   = $init ? 'default folder' : '#'.$target;
+		$sleep  = 0;
+		$compare = '';
 
 		// on init request we can get invalid dir hash -
 		// dir which can not be opened now, but remembered by client,
@@ -846,6 +848,34 @@ class elFinder {
 		if (($ls = $volume->scandir($cwd['hash'])) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
+		// long polling mode
+		if ($args['compare']) {
+			$sleep = max(1, (int)$volume->getOption('lsPlSleep'));
+			$limit = max(1, (int)$volume->getOption('plStandby') / $sleep);
+			$timelimit = ini_get('max_execution_time');
+			$compare = $args['compare'];
+			do {
+				$timelimit && @ set_time_limit($timelimit + $sleep);
+				$_mtime = 0;
+				foreach($ls as $_f) {
+					$_mtime = max($_mtime, $_f['ts']);
+				}
+				$compare = strval(count($ls)).':'.strval($_mtime);
+				if ($compare !== $args['compare']) {
+					break;
+				}
+				if (--$limit) {
+					sleep($sleep);
+					$volume->clearstatcache();
+					if (($ls = $volume->scandir($cwd['hash'])) === false) {
+						break;
+					}
+				}
+			} while($limit);
+			if ($ls === false) {
+				return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
+			}
+		}
 		
 		if ($ls) {
 			if ($files) {
@@ -861,7 +891,11 @@ class elFinder {
 			'options' => $volume->options($cwd['hash']),
 			'files'   => $files
 		);
-
+		
+		if ($compare) {
+			$result['cwd']['compare'] = $compare;
+		}
+		
 		if (!empty($args['init'])) {
 			$result['api'] = $this->version;
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
@@ -2127,15 +2161,56 @@ class elFinder {
 	 **/
 	protected function info($args) {
 		$files = array();
-		
-		foreach ($args['targets'] as $hash) {
-			if (($volume = $this->volume($hash)) != false
-			&& ($info = $volume->file($hash)) != false) {
-				$files[] = $info;
+		$sleep = 0;
+		$compare = null;
+		// long polling mode
+		if ($args['compare'] && count($args['targets']) === 1) {
+			$compare = intval($args['compare']);
+			$hash = $args['targets'][0];
+			if ($volume = $this->volume($hash)) {
+				$standby = (int)$volume->getOption('plStandby');
+				$_compare = false;
+				if (($syncCheckFunc = $volume->getOption('syncCheckFunc')) && is_callable($syncCheckFunc)) {
+					$_compare = call_user_func_array($syncCheckFunc, array($volume->realpath($hash), $standby, $compare, $volume, $this));
+				}
+				if ($_compare !== false) {
+					$compare = $_compare;
+				} else {
+					$sleep = max(1, (int)$volume->getOption('tsPlSleep'));
+					$limit = max(1, $standby / $sleep) + 1;
+					$timelimit = ini_get('max_execution_time');
+					do {
+						$timelimit && @ set_time_limit($timelimit + $sleep);
+						$volume->clearstatcache();
+						if (($info = $volume->file($hash)) != false) {
+							if ($info['ts'] != $compare) {
+								$compare = $info['ts'];
+								break;
+							}
+						} else {
+							$compare = 0;
+							break;
+						}
+						if (--$limit) {
+							sleep($sleep);
+						}
+					} while($limit);
+				}
+			}
+		} else {
+			foreach ($args['targets'] as $hash) {
+				if (($volume = $this->volume($hash)) != false
+				&& ($info = $volume->file($hash)) != false) {
+					$files[] = $info;
+				}
 			}
 		}
 		
-		return array('files' => $files);
+		$result = array('files' => $files);
+		if (!is_null($compare)) {
+			$result['compare'] = strval($compare);
+		}
+		return $result;
 	}
 	
 	/**
