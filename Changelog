@@ -3,6 +3,10 @@
 	* elFinder (2.1.6):
 		- Fixed #1074 startPath for multi volumes
 		- Fixed #1172 enbug-fix of rename command
+		- Fixed #1174 support for multi-instance on the same connector
+		- Plugin: AutoResize New option `preserveExif`
+		- Fixed #179 JPEG quality specifiable
+		- Fixed #1176 auto-sync check with HTTP long polling/inotifywait
 		- And some minor bug fixes
 
 
