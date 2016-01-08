@@ -1102,7 +1102,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$path = strtr($path, $escaper);
 		$_q = strtr($q, $escaper);
 		$dirs = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+		/*Modified to perform case insensitive search
 		$match = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*'.$_q.'*', GLOB_NOSORT);
+		*/
+		$files = glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_NOSORT);
+		$match = preg_grep('/'.$_q.'/i', $files);
+		
 		if ($match) {
 			foreach($match as $p) {
 				$stat = $this->stat($p);
