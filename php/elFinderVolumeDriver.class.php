@@ -293,6 +293,7 @@ abstract class elFinderVolumeDriver {
 		'lsPlSleep'    => 30,
 		// Client side sync interval minimum (ms)
 		// Default `null` is auto set to ('tsPlSleep' or 'lsPlSleep') * 1000
+		// `0` to disable auto sync
 		'syncMinMs'    => null,
 		// required to fix bug on macos
 		'utf8fix'      => false,
@@ -1008,8 +1009,9 @@ abstract class elFinderVolumeDriver {
 		$this->configure();
 		
 		// fix sync interval
-		$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
-
+		if ($this->options['syncMinMs'] !== 0) {
+			$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
+		}
 
 		return $this->mounted = true;
 	}
