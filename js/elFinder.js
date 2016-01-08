@@ -275,6 +275,7 @@ window.elFinder = function(node, opts) {
 			}
 			self.lastDir(cwd);
 			
+			self.autoSync();
 		},
 		
 		/**
@@ -1330,7 +1331,7 @@ window.elFinder = function(node, opts) {
 		// this.transport.send(options)
 		
 		// add "open" xhr into queue
-		if (cmd == 'open') {
+		if (cmd == 'open' || cmd == 'info') {
 			queue.unshift(xhr);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
@@ -1348,7 +1349,7 @@ window.elFinder = function(node, opts) {
 	 * @param  Array  new files
 	 * @return Object
 	 */
-	this.diff = function(incoming) {
+	this.diff = function(incoming, onlydir) {
 		var raw       = {},
 			added     = [],
 			removed   = [],
@@ -1369,7 +1370,9 @@ window.elFinder = function(node, opts) {
 			
 		// find removed
 		$.each(files, function(hash, f) {
-			!raw[hash] && removed.push(hash);
+			if (!onlydir || f.phash === onlydir) {
+				!raw[hash] && removed.push(hash);
+			}
 		});
 		
 		// compare files
@@ -1414,37 +1417,61 @@ window.elFinder = function(node, opts) {
 	 * 
 	 * @return jQuery.Deferred
 	 */
-	this.sync = function() {
+	this.sync = function(onlydir, polling) {
+		this.autoSync('stop');
 		var self  = this,
+			compare = function(){
+				var c = '', cnt = 0, mtime = 0;
+				if (onlydir && polling) {
+					$.each(files, function(h, f) {
+						if (f.phash && f.phash === onlydir) {
+							++cnt;
+							mtime = Math.max(mtime, f.ts);
+						}
+						c = cnt+':'+mtime;
+					});
+				}
+				return c;
+			},
+			comp  = compare(),
 			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
 			opts1 = {
-				data           : {cmd : 'open', reload : 1, target : cwd, tree : this.ui.tree ? 1 : 0},
+				data           : {cmd : 'open', reload : 1, target : cwd, tree : (! onlydir && this.ui.tree) ? 1 : 0, compare : comp},
 				preventDefault : true
 			},
 			opts2 = {
 				data           : {cmd : 'parents', target : cwd},
 				preventDefault : true
 			};
+		
 		$.when(
 			this.request(opts1),
-			this.request(opts2)
+			onlydir? null : this.request(opts2)
 		)
 		.fail(function(error) {
 			dfrd.reject(error);
 			error && self.request({
-				data   : {cmd : 'open', target : self.lastDir(''), tree : 1, init : 1},
-				notify : {type : 'open', cnt : 1, hideCnt : true},
-				preventDefault : true
+				data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
+				notify : {type : 'open', cnt : 1, hideCnt : true}
 			});
 		})
 		.done(function(odata, pdata) {
-			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []));
+			if (odata.cwd.compare) {
+				if (comp === odata.cwd.compare) {
+					return dfrd.reject();
+				}
+			}
+			
+			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
 
 			diff.added.push(odata.cwd)
 			diff.removed.length && self.remove(diff);
 			diff.added.length   && self.add(diff);
 			diff.changed.length && self.change(diff);
 			return dfrd.resolve(diff);
+		})
+		.always(function() {
+			self.autoSync();
 		});
 		
 		return dfrd;
@@ -1675,6 +1702,9 @@ window.elFinder = function(node, opts) {
 	 * @return $.Deferred
 	 */		
 	this.exec = function(cmd, files, opts, dstHash) {
+		if (cmd === 'open') {
+			this.autoSync('stop');
+		}
 		return this._commands[cmd] && this.isCommandEnabled(cmd, dstHash) 
 			? this._commands[cmd].exec(files, opts) 
 			: $.Deferred().reject('No such command');
@@ -1755,11 +1785,70 @@ window.elFinder = function(node, opts) {
 			node.children().remove();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 			node[0].elfinder = null;
-			if (syncInterval) {
-				clearInterval(syncInterval);
-			}
+			this.autoSync('stop');
 		}
 	}
+	
+	/**
+	 * Start or stop auto sync
+	 * 
+	 * @param  String|Bool  stop
+	 * @return void
+	 */
+	this.autoSync = function(stop) {
+		var sync;
+		syncInterval && clearTimeout(syncInterval);
+		syncInterval = null;
+		if (stop) {
+			return;
+		}
+		// run interval sync
+		if (self.options.sync > 1000) {
+			sync = function(start){
+				if (start || syncInterval) {
+					syncInterval = setTimeout(function() {
+						var dosync = true, hash = cwd;
+						if (cwdOptions.syncChkAsTs) {
+							self.request({
+								data           : {cmd : 'info', targets : [hash], compare : files[hash].ts, reload : 1},
+								preventDefault : true
+							})
+							.done(function(data){
+								var ts;
+								dosync = true;
+								if (data.compare) {
+									ts = data.compare;
+									if (files[hash] && ts == files[hash].ts) {
+										dosync = false;
+									}
+								}
+								if (dosync) {
+									self.sync(hash).always(function(){
+										if (ts) {
+											// update ts for cache clear etc.
+											files[hash].ts = ts;
+										}
+										sync();
+									});
+								} else {
+									sync();
+								}
+							})
+							.fail(function(error){
+								error && self.error(error)
+								sync();
+							});
+						} else {
+							self.sync(cwd, true).always(function(){
+								sync();
+							});
+						}
+					}, Math.max(self.options.sync, cwdOptions.syncMinMs));
+				}
+			};
+			sync(true);
+		}
+	};
 	
 	/*************  init stuffs  ****************/
 	
@@ -2122,13 +2211,6 @@ window.elFinder = function(node, opts) {
 	// update ui's size after init
 	this.one('load', function() {
 		node.trigger('resize');
-		if (self.options.sync > 1000) {
-			syncInterval = setInterval(function() {
-				self.sync();
-			}, self.options.sync)
-			
-		}
-
 	});
 
 	(function(){
