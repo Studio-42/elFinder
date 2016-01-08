@@ -1340,6 +1340,14 @@ window.elFinder = function(node, opts) {
 			});
 		}
 		
+		// abort pending xhr on window unload or elFinder destroy
+		self.bind('unload destroy', function(){
+			if (xhr.state() == 'pending') {
+				xhr.quiet = true;
+				xhr.abort();
+			}
+		});
+		
 		return dfrd;
 	};
 	
@@ -2225,6 +2233,7 @@ window.elFinder = function(node, opts) {
 			if (self.ui.notify.children().length) {
 				return self.i18n('ntfsmth');
 			}
+			self.trigger('unload');
 		});
 	})();
 
