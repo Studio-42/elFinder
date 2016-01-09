@@ -298,9 +298,10 @@ window.elFinder = function(node, opts) {
 							f.i18 = i18;
 						}
 						
-						// set disabledCmds of each volume
-						if (f.volumeid && f.disabled) {
-							self.disabledCmds[f.volumeid] = f.disabled;
+						// set disabledCmds, tmbUrls for each volume
+						if (f.volumeid) {
+							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
+							self.tmbUrls[f.volumeid] = self.option('tmbUrl');
 						}
 					}
 					files[f.hash] = f;
@@ -1055,11 +1056,19 @@ window.elFinder = function(node, opts) {
 	 */
 	this.tmb = function(hash) {
 		var file = files[hash],
-			url = file && file.tmb && file.tmb != 1 ? cwdOptions['tmbUrl'] + file.tmb : '';
+			geturl = function(hash){
+				var turl = cwdOptions['tmbUrl'];
+				$.each(self.tmbUrls, function(i, u){
+					if (hash.indexOf(i) === 0) {
+						turl = self.tmbUrls[i];
+						return false;
+					}
+				});
+				return turl;
+			},
+			tmbUrl = (self.tmbUrls._search && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
+			url = file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
 		
-		if (url && (this.UA.Opera || this.UA.IE)) {
-			url += '?_=' + new Date().getTime();
-		}
 		return url;
 	}
 	
@@ -2033,6 +2042,10 @@ window.elFinder = function(node, opts) {
 		})
 		.bind('search', function(e) {
 			cache(e.data.files);
+			self.tmbUrls._search = true;
+		})
+		.bind('searchend', function() {
+			self.tmbUrls._search = false;
 		})
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
@@ -2113,6 +2126,13 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.disabledCmds = {};
+	
+	/**
+	 * tmbUrls Array of each volume
+	 * 
+	 * @type Object
+	 */
+	this.tmbUrls = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
