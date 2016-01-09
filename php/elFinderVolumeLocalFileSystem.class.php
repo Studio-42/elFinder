@@ -1,5 +1,26 @@
 <?php
 
+// Implement similar functionality in PHP 5.2 or 5.3
+// http://php.net/manual/class.recursivecallbackfilteriterator.php#110974
+if (! class_exists('RecursiveCallbackFilterIterator', false)) {
+	class RecursiveCallbackFilterIterator extends RecursiveFilterIterator {
+	   
+	    public function __construct ( RecursiveIterator $iterator, $callback ) {
+	        $this->callback = $callback;
+	        parent::__construct($iterator);
+	    }
+	   
+	    public function accept () {
+	        $callback = $this->callback;
+	        return $callback(parent::current(), parent::key(), parent::getInnerIterator());
+	    }
+	   
+	    public function getChildren () {
+	        return new self($this->getInnerIterator()->getChildren(), $this->callback);
+	    }
+	}
+}
+
 /**
  * elFinder driver for local filesystem.
  *
@@ -23,6 +44,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @var int
 	 **/
 	protected $archiveSize = 0;
+	
+	/**
+	 * Current query word on doSearch
+	 *
+	 * @var string
+	 **/
+	private $doSearchCurrentQuery = '';
 	
 	/**
 	 * Constructor
@@ -1070,7 +1098,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	}
 
 	/******************** Over write (Optimized) functions *************************/
-	
+
 	/**
 	 * Recursive files search
 	 *
@@ -1086,21 +1114,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			// non UTF-8 use elFinderVolumeDriver::doSearch()
 			return parent::doSearch($path, $q, $mimes);
 		}
-		
+
+		$this->doSearchCurrentQuery = $q;
 		$match = array();
 		try {
 			$iterator = new RecursiveIteratorIterator(
-				new RecursiveDirectoryIterator($path,
-					FilesystemIterator::KEY_AS_PATHNAME |
-					FilesystemIterator::SKIP_DOTS |
-					(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
-						RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
+				new RecursiveCallbackFilterIterator(
+					new RecursiveDirectoryIterator($path,
+						FilesystemIterator::KEY_AS_PATHNAME |
+						FilesystemIterator::SKIP_DOTS |
+						(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
+							RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
+					),
+					array($this, 'localFileSystemSearchIteratorFilter')
 				),
-				RecursiveIteratorIterator::SELF_FIRST
+				RecursiveIteratorIterator::SELF_FIRST,
+				RecursiveIteratorIterator::CATCH_GET_CHILD
 			);
 			foreach ($iterator as $key => $node) {
-				$name = $node->getFilename();
-				if ($this->stripos($name, $q) !== false) {
+				if ($node->isDir()) {
+					if ($this->stripos($node->getFilename(), $q) !== false) {
+						$match[] = $key;
+					}
+				} else {
 					$match[] = $key;
 				}
 			}
@@ -1136,5 +1172,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		return $result;
 	}
+
+	/******************** Original local functions *************************/
+
+	public function localFileSystemSearchIteratorFilter($file, $key, $iterator) {
+		if ($iterator->hasChildren()) {
+			return (bool)$this->attr($key, 'read', null, true);
+		}
+		return ($this->stripos($file->getFilename(), $this->doSearchCurrentQuery) === false)? false : true;
+	}
 	
 } // END class 
+
