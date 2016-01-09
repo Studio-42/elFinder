@@ -548,8 +548,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _subdirs($path) {
 
 		if (is_dir($path)) {
-			$path = strtr($path, array('['  => '\\[', ']'  => '\\]', '*'  => '\\*', '?'  => '\\?'));
-			return (bool)glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+			$dirItr = new ParentIterator(
+				new RecursiveDirectoryIterator($path,
+					FilesystemIterator::SKIP_DOTS |
+					(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
+						RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
+				)
+			);
+			$dirItr->rewind();
+			return $dirItr->hasChildren();
 		}
 		return false;
 	}
