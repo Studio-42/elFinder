@@ -1281,17 +1281,20 @@ window.elFinder = function(node, opts) {
 				response.debug && self.debug('backend-debug', response.debug);
 			},
 			xhr, _xhr,
-			abort = function(sync){
+			abort = function(e){
+				if (e.type == 'autosync') {
+					if (e.data.action != 'stop') return;
+				} else {
+					if (!e.data.added || !e.data.added.length) {
+						return;
+					}
+				}
 				if (xhr.state() == 'pending') {
 					xhr.quiet = true;
 					xhr.abort();
-					return true;
-				}
-				return false;
-			},
-			aboutOnUpload = function() {
-				if (about()) {
-					self.autoSync();
+					if (e.type != 'unload' && e.type != 'destroy') {
+						self.autoSync();
+					}
 				}
 			};
 
@@ -1345,10 +1348,10 @@ window.elFinder = function(node, opts) {
 		// add "open" xhr into queue
 		if (cmd == 'open' || cmd == 'info') {
 			queue.unshift(xhr);
-			self.bind('upload', aboutOnUpload);
+			self.bind(self.cmdsToAdd + ' autosync', abort);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				self.unbind('upload', aboutOnUpload);
+				self.unbind(self.cmdsToAdd + ' autosync', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
 		}
@@ -1816,13 +1819,15 @@ window.elFinder = function(node, opts) {
 	 */
 	this.autoSync = function(stop) {
 		var sync;
-		syncInterval && clearTimeout(syncInterval);
-		syncInterval = null;
-		if (stop) {
-			return;
-		}
-		// run interval sync
-		if (self.options.sync > 1000) {
+		if (self.options.sync >= 1000) {
+			syncInterval && clearTimeout(syncInterval);
+			syncInterval = null;
+			if (stop) {
+				self.trigger('autosync', {action : 'stop'});
+				return;
+			}
+			// run interval sync
+			self.trigger('autosync', {action : 'start'});
 			sync = function(start){
 				if (cwdOptions.syncMinMs && (start || syncInterval)) {
 					syncInterval = setTimeout(function() {
@@ -2575,9 +2580,6 @@ elFinder.prototype = {
 		upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
 		search  : function(data) { return data && data.files && $.isArray(data.files)}
 	},
-
-	
-
 	
 	/**
 	 * Commands costructors
@@ -2585,6 +2587,13 @@ elFinder.prototype = {
 	 * @type Object
 	 */
 	commands : {},
+	
+	/**
+	 * Commands to add the item (space delimited)
+	 * 
+	 * @type String
+	 */
+	cmdsToAdd : 'archive duplicate extract mkdir mkfile paste rm upload',
 	
 	parseUploadData : function(text) {
 		var data;

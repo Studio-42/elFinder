@@ -1254,6 +1254,7 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('search', function(e) {
 				lastSearch = e.data.files;
 				content(lastSearch, true);
+				fm.autoSync('stop');
 				resize();
 			})
 			.bind('searchend', function() {
@@ -1262,6 +1263,7 @@ $.fn.elfindercwd = function(fm, options) {
 					query = '';
 					content(fm.files());
 				}
+				fm.autoSync();
 				resize();
 			})
 			.bind('searchstart', function(e) {
