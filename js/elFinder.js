@@ -1280,8 +1280,20 @@ window.elFinder = function(node, opts) {
 				dfrd.resolve(response);
 				response.debug && self.debug('backend-debug', response.debug);
 			},
-			xhr, _xhr
-			;
+			xhr, _xhr,
+			abort = function(sync){
+				if (xhr.state() == 'pending') {
+					xhr.quiet = true;
+					xhr.abort();
+					return true;
+				}
+				return false;
+			},
+			aboutOnUpload = function() {
+				if (about()) {
+					self.autoSync();
+				}
+			};
 
 		defdone && dfrd.done(done);
 		dfrd.fail(function(error) {
@@ -1333,19 +1345,18 @@ window.elFinder = function(node, opts) {
 		// add "open" xhr into queue
 		if (cmd == 'open' || cmd == 'info') {
 			queue.unshift(xhr);
+			self.bind('upload', aboutOnUpload);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				
+				self.unbind('upload', aboutOnUpload);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
 		}
 		
 		// abort pending xhr on window unload or elFinder destroy
-		self.bind('unload destroy', function(){
-			if (xhr.state() == 'pending') {
-				xhr.quiet = true;
-				xhr.abort();
-			}
+		self.bind('unload destroy', abort);
+		dfrd.always(function() {
+			self.unbind('unload destroy', abort);
 		});
 		
 		return dfrd;
