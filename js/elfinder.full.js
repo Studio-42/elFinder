@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 925c483) (2016-01-09)
+ * Version 2.1.5 (2.1 Nightly: febb957) (2016-01-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1294,8 +1294,20 @@ window.elFinder = function(node, opts) {
 				dfrd.resolve(response);
 				response.debug && self.debug('backend-debug', response.debug);
 			},
-			xhr, _xhr
-			;
+			xhr, _xhr,
+			abort = function(sync){
+				if (xhr.state() == 'pending') {
+					xhr.quiet = true;
+					xhr.abort();
+					return true;
+				}
+				return false;
+			},
+			aboutOnUpload = function() {
+				if (about()) {
+					self.autoSync();
+				}
+			};
 
 		defdone && dfrd.done(done);
 		dfrd.fail(function(error) {
@@ -1347,19 +1359,18 @@ window.elFinder = function(node, opts) {
 		// add "open" xhr into queue
 		if (cmd == 'open' || cmd == 'info') {
 			queue.unshift(xhr);
+			self.bind('upload', aboutOnUpload);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				
+				self.unbind('upload', aboutOnUpload);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
 		}
 		
 		// abort pending xhr on window unload or elFinder destroy
-		self.bind('unload destroy', function(){
-			if (xhr.state() == 'pending') {
-				xhr.quiet = true;
-				xhr.abort();
-			}
+		self.bind('unload destroy', abort);
+		dfrd.always(function() {
+			self.unbind('unload destroy', abort);
 		});
 		
 		return dfrd;
@@ -4647,7 +4658,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1 Nightly: 925c483)';
+elFinder.prototype.version = '2.1.5 (2.1 Nightly: febb957)';
 
 
 
