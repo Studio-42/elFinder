@@ -603,7 +603,7 @@ $.fn.elfindercwd = function(fm, options) {
 							$('<img/>')
 								.load(function() { node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat"); })
 								.attr('src', tmb);
-						})(node, url+tmb);
+						})(node, fm.tmbUrls._search? fm.tmb(hash) : (url + tmb));
 					} else {
 						ret = false;
 						if ((ndx = index(hash)) != -1) {
