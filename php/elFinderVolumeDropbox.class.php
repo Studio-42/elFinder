@@ -674,7 +674,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$raw = unserialize($raw);
 				if ($stat = $this->parseRaw($raw)) {
 					$stat = $this->updateCache($raw['path'], $stat);
-					if (empty($stat['hidden'])) {
+					if (empty($stat['hidden']) && $path !== $raw['path']) {
 						$this->dirsCache[$path][] = $raw['path'];
 					}
 				}
