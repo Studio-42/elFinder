@@ -414,10 +414,10 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		if ($this->options['syncChkAsTs']) {
 			// 'tsPlSleep' minmum 5 sec
-			$options['tsPlSleep'] = max(5, $options['tsPlSleep']);
+			$this->options['tsPlSleep'] = max(5, $this->options['tsPlSleep']);
 		} else {
 			// 'lsPlSleep' minmum 10 sec
-			$options['lsPlSleep'] = max(10, $options['lsPlSleep']);
+			$this->options['lsPlSleep'] = max(10, $this->options['lsPlSleep']);
 		}
 		
 		return true;
@@ -674,7 +674,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				$raw = unserialize($raw);
 				if ($stat = $this->parseRaw($raw)) {
 					$stat = $this->updateCache($raw['path'], $stat);
-					if (empty($stat['hidden'])) {
+					if (empty($stat['hidden']) && $path !== $raw['path']) {
 						$this->dirsCache[$path][] = $raw['path'];
 					}
 				}

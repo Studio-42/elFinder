@@ -5,8 +5,8 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.reload = function() {
-	
-	var search = false;
+	var self   = this,
+		search = false;
 	
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
@@ -24,6 +24,32 @@ elFinder.prototype.commands.reload = function() {
 			search = e.type == 'search';
 		});
 	};
+	
+	this.fm.bind('contextmenu', function(e){
+		var fm = self.fm;
+		if (fm.options.sync >= 1000) {
+			var node;
+			self.extra = {
+				icon: 'accept',
+				node: $('<span/>')
+					.attr({title: fm.i18n('autoSync')})
+					.on('click', function(e){
+						var parent = node.parent();
+						e.stopPropagation();
+						e.preventDefault();
+						node.parent().toggleClass('ui-state-disabled', fm.options.syncStart);
+						fm.options.syncStart = !fm.options.syncStart;
+						fm.autoSync(fm.options.syncStart? null : 'stop');
+					})
+			};
+			node = self.extra.node;
+			node.ready(function(){
+				setTimeout(function(){
+					node.parent().toggleClass('ui-state-disabled', !fm.options.syncStart);
+				}, 10);
+			});
+		}
+	});
 	
 	this.exec = function() {
 		var fm = this.fm;

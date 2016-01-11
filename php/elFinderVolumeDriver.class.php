@@ -1289,14 +1289,14 @@ abstract class elFinderVolumeDriver {
 		$path = $this->decode($hash);
 		$isRoot = ($path === $this->root);
 		
-		// for stat() cache contorol
-		//$isRoot && $this->ARGS['target'] = $hash;
-		
 		$file = $this->stat($path);
 		
 		if ($isRoot) {
 			$file['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
 			$file['disabled'] = array_merge(array_unique($this->disabled)); // `array_merge` for type array of JSON
+			if (isset($this->options['netkey'])) {
+				$file['netkey'] = $this->options['netkey'];
+			}
 		}
 		
 		return ($file) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
@@ -2842,7 +2842,6 @@ abstract class elFinderVolumeDriver {
 			if (!isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
 			}
-			//if (empty($this->ARGS['reload']) || empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0) {
 			if (! $this->isMyReload()) {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {

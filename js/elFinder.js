@@ -1352,10 +1352,8 @@ window.elFinder = function(node, opts) {
 
 		xhr = this.transport.send(options).fail(error).done(success);
 		
-		// this.transport.send(options)
-		
 		// add "open" xhr into queue
-		if (cmd == 'open' || cmd == 'info') {
+		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
 			queue.unshift(xhr);
 			self.bind(self.cmdsToAdd + ' autosync', abort);
 			dfrd.always(function() {
@@ -1808,6 +1806,7 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.destroy = function() {
 		if (node && node[0].elfinder) {
+			this.autoSync('stop');
 			this.trigger('destroy').disable();
 			listeners = {};
 			shortcuts = {};
@@ -1816,7 +1815,6 @@ window.elFinder = function(node, opts) {
 			node.children().remove();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 			node[0].elfinder = null;
-			this.autoSync('stop');
 		}
 	}
 	
@@ -1829,16 +1827,21 @@ window.elFinder = function(node, opts) {
 	this.autoSync = function(stop) {
 		var sync;
 		if (self.options.sync >= 1000) {
-			syncInterval && clearTimeout(syncInterval);
-			syncInterval = null;
-			if (stop) {
+			if (syncInterval) {
+				clearTimeout(syncInterval);
+				syncInterval = null;
 				self.trigger('autosync', {action : 'stop'});
+			}
+			if (stop || !self.options.syncStart) {
 				return;
 			}
 			// run interval sync
-			self.trigger('autosync', {action : 'start'});
 			sync = function(start){
+				var timeout;
 				if (cwdOptions.syncMinMs && (start || syncInterval)) {
+					start && self.trigger('autosync', {action : 'start'});
+					timeout = Math.max(self.options.sync, cwdOptions.syncMinMs);
+					syncInterval && clearTimeout(syncInterval);
 					syncInterval = setTimeout(function() {
 						var dosync = true, hash = cwd;
 						if (cwdOptions.syncChkAsTs) {
@@ -1868,14 +1871,20 @@ window.elFinder = function(node, opts) {
 								}
 							})
 							.fail(function(error){
-								error && self.error(error);
+								if (error && error != 'errConnect') {
+									self.error(error);
+								} else {
+									syncInterval = setTimeout(function() {
+										sync();
+									}, timeout);
+								}
 							});
 						} else {
 							self.sync(cwd, true).always(function(){
 								sync();
 							});
 						}
-					}, Math.max(self.options.sync, cwdOptions.syncMinMs));
+					}, timeout);
 				}
 			};
 			sync(true);
