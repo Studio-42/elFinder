@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2015-12-30
+ * @version 2016-01-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -330,6 +330,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'emptyFolderDrop' : '空のフォルダ\\Aアイテムを追加するにはここへドロップ', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : '空のフォルダ\\Aアイテムを追加するにはここをロングタップ', // from v2.1.6 added 30.12.2015
 			'quality'         : '品質', // from v2.1.6 added 5.1.2016
+			'autoSync'        : '自動更新',  // from v2.1.6 added 10.1.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
