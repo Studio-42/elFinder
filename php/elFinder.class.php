@@ -271,8 +271,9 @@ class elFinder {
 			session_start();
 		} catch (Exception $e) {}
 		
+		$sessionUseCmds = array();
 		if (isset($opts['sessionUseCmds']) && is_array($opts['sessionUseCmds'])) {
-			$sessionUseCmds = array_merge($sessionUseCmds, $opts['sessionUseCmds']);
+			$sessionUseCmds = $opts['sessionUseCmds'];
 		}
 
 		// set self::$volumesCnt by HTTP header "X-elFinder-VolumesCntStart"
