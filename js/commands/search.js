@@ -31,7 +31,7 @@ elFinder.prototype.commands.search = function() {
 		var fm = this.fm;
 		
 		if (typeof(q) == 'string' && q) {
-			target = target? target : null;
+			target = target? target : '';
 			mime = mime? $.trim(mime).replace(',', ' ').split(' ') : [];
 			$.each(mime, function(){ return $.trim(this); });
 			fm.trigger('searchstart', {query : q, target : target, mimes : mime});
