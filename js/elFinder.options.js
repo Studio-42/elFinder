@@ -661,11 +661,19 @@ elFinder.prototype._options = {
 	
 	/**
 	 * Sync content interval
-	 * @todo - fix in elFinder
+	 *
 	 * @type Number
 	 * @default  0 (do not sync)
 	 */
 	sync : 0,
+	
+	/**
+	 * Sync start on load if sync value >= 1000
+	 *
+	 * @type     Bool
+	 * @default  true
+	 */
+	syncStart : true,
 	
 	/**
 	 * How many thumbnails create in one request

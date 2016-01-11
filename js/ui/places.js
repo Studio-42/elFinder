@@ -158,7 +158,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			root = wrapper.children('.'+navdir)
 				.addClass(clroot)
-				.click(function() {
+				.click(function(e) {
+					e.stopPropagation();
 					if (root.hasClass(collapsed)) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();

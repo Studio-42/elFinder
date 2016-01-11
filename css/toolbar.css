@@ -119,6 +119,7 @@
 .elfinder-button-icon-netunmount { background-position: 0 -96px; }
 .elfinder-button-icon-places    { background-position: 0 -704px; }
 .elfinder-button-icon-chmod     { background-position: 0  -48px; }
+.elfinder-button-icon-accept    { background-position: 0 -736px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }

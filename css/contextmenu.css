@@ -75,8 +75,9 @@
 .elfinder-contextmenu-ltr .elfinder-contextmenu-arrow { right:5px; }
 .elfinder-contextmenu-rtl .elfinder-contextmenu-arrow { left:5px; background-position: 0 -10px; }
 
-/* command extra icon's <a> tag */
-.elfinder-contextmenu-extra-icon a {
+/* command extra icon's <a>, <span> tag */
+.elfinder-contextmenu-extra-icon a, 
+.elfinder-contextmenu-extra-icon span {
 	display: inline-block;
 	width: 100%;
 	height: 100%;
@@ -84,6 +85,7 @@
 	margin: 0;
 	color: transparent !important;
 	text-decoration: none;
+	cursor: pointer;
 }
 
 /* disable ui border/bg image on hover */
