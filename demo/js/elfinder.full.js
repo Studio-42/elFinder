@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 136da8d) (2016-01-10)
+ * Version 2.1.5 (2.1 Nightly: 3dcc173) (2016-01-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1366,10 +1366,8 @@ window.elFinder = function(node, opts) {
 
 		xhr = this.transport.send(options).fail(error).done(success);
 		
-		// this.transport.send(options)
-		
 		// add "open" xhr into queue
-		if (cmd == 'open' || cmd == 'info') {
+		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
 			queue.unshift(xhr);
 			self.bind(self.cmdsToAdd + ' autosync', abort);
 			dfrd.always(function() {
@@ -1822,6 +1820,7 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.destroy = function() {
 		if (node && node[0].elfinder) {
+			this.autoSync('stop');
 			this.trigger('destroy').disable();
 			listeners = {};
 			shortcuts = {};
@@ -1830,7 +1829,6 @@ window.elFinder = function(node, opts) {
 			node.children().remove();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 			node[0].elfinder = null;
-			this.autoSync('stop');
 		}
 	}
 	
@@ -1843,16 +1841,21 @@ window.elFinder = function(node, opts) {
 	this.autoSync = function(stop) {
 		var sync;
 		if (self.options.sync >= 1000) {
-			syncInterval && clearTimeout(syncInterval);
-			syncInterval = null;
-			if (stop) {
+			if (syncInterval) {
+				clearTimeout(syncInterval);
+				syncInterval = null;
 				self.trigger('autosync', {action : 'stop'});
+			}
+			if (stop || !self.options.syncStart) {
 				return;
 			}
 			// run interval sync
-			self.trigger('autosync', {action : 'start'});
 			sync = function(start){
+				var timeout;
 				if (cwdOptions.syncMinMs && (start || syncInterval)) {
+					start && self.trigger('autosync', {action : 'start'});
+					timeout = Math.max(self.options.sync, cwdOptions.syncMinMs);
+					syncInterval && clearTimeout(syncInterval);
 					syncInterval = setTimeout(function() {
 						var dosync = true, hash = cwd;
 						if (cwdOptions.syncChkAsTs) {
@@ -1882,14 +1885,20 @@ window.elFinder = function(node, opts) {
 								}
 							})
 							.fail(function(error){
-								error && self.error(error);
+								if (error && error != 'errConnect') {
+									self.error(error);
+								} else {
+									syncInterval = setTimeout(function() {
+										sync();
+									}, timeout);
+								}
 							});
 						} else {
 							self.sync(cwd, true).always(function(){
 								sync();
 							});
 						}
-					}, Math.max(self.options.sync, cwdOptions.syncMinMs));
+					}, timeout);
 				}
 			};
 			sync(true);
@@ -4687,7 +4696,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1 Nightly: 136da8d)';
+elFinder.prototype.version = '2.1.5 (2.1 Nightly: 3dcc173)';
 
 
 
@@ -5440,11 +5449,19 @@ elFinder.prototype._options = {
 	
 	/**
 	 * Sync content interval
-	 * @todo - fix in elFinder
+	 *
 	 * @type Number
 	 * @default  0 (do not sync)
 	 */
 	sync : 0,
+	
+	/**
+	 * Sync start on load if sync value >= 1000
+	 *
+	 * @type     Bool
+	 * @default  true
+	 */
+	syncStart : true,
 	
 	/**
 	 * How many thumbnails create in one request
@@ -6204,7 +6221,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-12-30
+ * @version 2016-01-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6532,6 +6549,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -8976,7 +8994,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			root = wrapper.children('.'+navdir)
 				.addClass(clroot)
-				.click(function() {
+				.click(function(e) {
+					e.stopPropagation();
 					if (root.hasClass(collapsed)) {
 						places.toggleClass(expanded);
 						subtree.slideToggle();
@@ -13884,8 +13903,8 @@ elFinder.prototype.commands.quicklook.plugins = [
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.reload = function() {
-	
-	var search = false;
+	var self   = this,
+		search = false;
 	
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
@@ -13903,6 +13922,32 @@ elFinder.prototype.commands.reload = function() {
 			search = e.type == 'search';
 		});
 	};
+	
+	this.fm.bind('contextmenu', function(e){
+		var fm = self.fm;
+		if (fm.options.sync >= 1000) {
+			var node;
+			self.extra = {
+				icon: 'accept',
+				node: $('<span/>')
+					.attr({title: fm.i18n('autoSync')})
+					.on('click', function(e){
+						var parent = node.parent();
+						e.stopPropagation();
+						e.preventDefault();
+						node.parent().toggleClass('ui-state-disabled', fm.options.syncStart);
+						fm.options.syncStart = !fm.options.syncStart;
+						fm.autoSync(fm.options.syncStart? null : 'stop');
+					})
+			};
+			node = self.extra.node;
+			node.ready(function(){
+				setTimeout(function(){
+					node.parent().toggleClass('ui-state-disabled', !fm.options.syncStart);
+				}, 10);
+			});
+		}
+	});
 	
 	this.exec = function() {
 		var fm = this.fm;
