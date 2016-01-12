@@ -695,7 +695,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
 		$sth = $this->DB->prepare('select dat from '.$this->DB_TableName.' WHERE path LIKE ? AND fname LIKE ?');
-		$sth->execute(array('%'.(($path === '/')? '' : strtolower($path)), '%'.strtolower($q).'%'));
+		$sth->execute(array((($path === '/')? '' : strtolower($path)).'%', '%'.strtolower($q).'%'));
 		$res = $sth->fetchAll(PDO::FETCH_COLUMN);
 		if ($res) {
 			foreach($res as $raw) {
@@ -707,7 +707,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					if (!empty($stat['hidden']) || ($mimes && $stat['mime'] === 'directory') || !$this->mimeAccepted($stat['mime'], $mimes)) {
 						continue;
 					}
-					$result[] = $this->stat($raw['path']);
+					$stat = $this->stat($raw['path']);
+					$stat['path'] = $this->path($stat['hash']);
+					$result[] = $stat;
 				}
 			}
 		}
@@ -999,9 +1001,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function _normpath($path) {
-		if (DIRECTORY_SEPARATOR !== '/') {
-			$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
-		}
 		$path = '/' . ltrim($path, '/');
 		return $path;
 	}
@@ -1036,7 +1035,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _path($path) {
-		return $path;
+		return $this->rootName . $this->_normpath(substr($path, strlen($this->root)));
 	}
 
 	/**
