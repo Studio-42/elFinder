@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1 Nightly: 4f01328) (2016-01-11)
+ * Version 2.1.5 (2.1 Nightly: 6b02176) (2016-01-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4696,7 +4696,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1 Nightly: 4f01328)';
+elFinder.prototype.version = '2.1.5 (2.1 Nightly: 6b02176)';
 
 
 
@@ -7150,8 +7150,14 @@ $.fn.elfindercwd = function(fm, options) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
-					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
-					return f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') + '&#13;' + title : title;
+					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : ''),
+						info  = '';
+					if (query && f.path) {
+						info = fm.escape(f.path.replace(/\/[^\/]*$/, ''));
+					} else {
+						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
+					}
+					return info? info + '&#13;' + title : title;
 				}
 			},
 			
@@ -8807,26 +8813,57 @@ $.fn.elfinderpanel = function(fm) {
  **/
 $.fn.elfinderpath = function(fm) {
 	return this.each(function() {
-		var path = $(this).addClass('elfinder-path').html('&nbsp;')
+		var query  = '',
+			target = '',
+			mimes  = [],
+			path   = $(this).addClass('elfinder-path').html('&nbsp;')
 				.on('click', 'a', function(e) {
-					var hash = $(this).attr('href').substr(1);
+					var hash = $(this).attr('href').substr(5);
 
 					e.preventDefault();
-					hash != fm.cwd().hash && fm.exec('open', hash);
+					if (hash != fm.cwd().hash) {
+						if (query) {
+							fm.log(mimes.join(' '));
+							fm.exec('search', query, { target: hash, mime: mimes.join(' ') });
+						} else {
+							fm.exec('open', hash);
+						}
+					}
 				})
 				.prependTo(fm.getUI('statusbar').show())
 
 			fm.bind('open searchend parents', function() {
 				var dirs = [];
 
+				query  = '';
+				target = '';
+				mimes  = [];
+				
 				$.each(fm.parents(fm.cwd().hash), function(i, hash) {
-					dirs.push('<a href="#'+hash+'">'+fm.escape(fm.file(hash).name)+'</a>');
+					dirs.push('<a href="#elf_'+hash+'">'+fm.escape(fm.file(hash).name)+'</a>');
 				});
 
 				path.html(dirs.join(fm.option('separator')));
 			})
-			.bind('search', function() {
-				path.html(fm.i18n('searcresult'));
+			.bind('searchstart', function(e) {
+				if (e.data) {
+					query  = e.data.query || '';
+					target = e.data.target || '';
+					mimes  = e.data.mimes || []
+				}
+			})
+			.bind('search', function(e) {
+				var dirs = [],
+					html = '';
+				if (target) {
+					$.each(fm.parents(target), function(i, hash) {
+						dirs.push('<a href="#elf_'+hash+'">'+fm.escape(fm.file(hash).name)+'</a>');
+					});
+					html = dirs.join(fm.option('separator'));
+				} else {
+					html = fm.i18n('btnAll');
+				}
+				path.html(fm.i18n('searcresult') + ': ' + html);
 			});
 	});
 }
@@ -10391,10 +10428,6 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				}
 			}
-		})
-		// add/remove active class for current dir
-		.bind('search searchend', function(e) {
-			$('#'+fm.navHash2Id(fm.cwd().hash))[e.type == 'search' ? 'removeClass' : 'addClass'](active);
 		})
 		// lock/unlock dirs while moving
 		.bind('lockfiles unlockfiles', function(e) {
@@ -15185,7 +15218,11 @@ elFinder.prototype.commands.search = function() {
 	this.exec = function(q, target, mime) {
 		var fm = this.fm;
 		
-		if (typeof(q) == 'string' && q) {
+		if (typeof q == 'string' && q) {
+			if (typeof target == 'object') {
+				mime = target.mime || '';
+				target = target.target || '';
+			}
 			target = target? target : '';
 			mime = mime? $.trim(mime).replace(',', ' ').split(' ') : [];
 			$.each(mime, function(){ return $.trim(this); });
