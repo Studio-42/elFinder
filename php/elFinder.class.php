@@ -2160,7 +2160,11 @@ class elFinder {
 			}
 		}
 		
-		return array('files' => $result, 'warning' => $errors);
+		$result = array('files' => $result);
+		if ($errors) {
+			$result['warning'] = $errors;
+		}
+		return $result;
 	}
 	
 	/**
