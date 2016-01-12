@@ -257,6 +257,7 @@ class elFinder {
 	const ERROR_FTP_MKDIR 		= 'errFtpMkdir';
 	const ERROR_ARCHIVE_EXEC 	= 'errArchiveExec';
 	const ERROR_EXTRACT_EXEC 	= 'errExtractExec';
+	const ERROR_SEARCH_TIMEOUT    = 'errSearchTimeout';    // 'Timed out while searching "$1". Search result is partial.'
 
 	/**
 	 * Constructor
@@ -2145,18 +2146,21 @@ class elFinder {
 		$mimes  = !empty($args['mimes']) && is_array($args['mimes']) ? $args['mimes'] : array();
 		$target = !empty($args['target'])? $args['target'] : null;
 		$result = array();
+		$errors = array();
 
 		if ($target) {
 			if ($volume = $this->volume($target)) {
 				$result = $volume->search($q, $mimes, $target);
+				$errors = array_merge($errors, $volume->error());
 			}
 		} else {
 			foreach ($this->volumes as $volume) {
 				$result = array_merge($result, $volume->search($q, $mimes));
+				$errors = array_merge($errors, $volume->error());
 			}
 		}
 		
-		return array('files' => $result);
+		return array('files' => $result, 'warning' => $errors);
 	}
 	
 	/**
