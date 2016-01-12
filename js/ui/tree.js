@@ -765,10 +765,6 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 			}
 		})
-		// add/remove active class for current dir
-		.bind('search searchend', function(e) {
-			$('#'+fm.navHash2Id(fm.cwd().hash))[e.type == 'search' ? 'removeClass' : 'addClass'](active);
-		})
 		// lock/unlock dirs while moving
 		.bind('lockfiles unlockfiles', function(e) {
 			var lock = e.type == 'lockfiles',

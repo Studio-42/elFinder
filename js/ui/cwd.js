@@ -200,8 +200,14 @@ $.fn.elfindercwd = function(fm, options) {
 					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
-					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : '');
-					return f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') + '&#13;' + title : title;
+					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : ''),
+						info  = '';
+					if (query && f.path) {
+						info = fm.escape(f.path.replace(/\/[^\/]*$/, ''));
+					} else {
+						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
+					}
+					return info? info + '&#13;' + title : title;
 				}
 			},
 			
