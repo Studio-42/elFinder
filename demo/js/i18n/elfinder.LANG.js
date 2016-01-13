@@ -103,6 +103,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetUnMount'        : 'Unable to unmount', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -136,6 +137,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
+			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
 			
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
