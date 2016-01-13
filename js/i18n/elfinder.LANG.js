@@ -137,6 +137,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
+			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
 			
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
