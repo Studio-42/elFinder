@@ -218,11 +218,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		// error
 		// cache to $_SESSION
-		try {
-			$sessionStart = session_start();
-		} catch (Exception $e) {}
+		$sessionStart = $this->sessionRestart();
 		if ($sessionStart) {
-			$_SESSION[elFinder::$sessionCacheKey][$this->id]['localFileSystemInotify_disable'] = true;
+			$this->sessionCache['localFileSystemInotify_disable'] = true;
 			session_write_close();
 		}
 		
@@ -543,6 +541,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected function _subdirs($path) {
 
+		$dirs = false;
 		if (is_dir($path)) {
 			$dirItr = new ParentIterator(
 				new RecursiveDirectoryIterator($path,
@@ -552,9 +551,22 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				)
 			);
 			$dirItr->rewind();
-			return $dirItr->hasChildren();
+			if ($dirItr->hasChildren()) {
+				$dirs = true;
+				$name = $dirItr->getSubPathName();
+				while($name) {
+					if (!$this->attr($path . DIRECTORY_SEPARATOR . $name, 'read', null, true)) {
+						$dirs = false;
+						$dirItr->next();
+						$name = $dirItr->getSubPathName();
+						continue;
+					}
+					$dirs = true;
+					break;
+				}
+			}
 		}
-		return false;
+		return $dirs;
 	}
 	
 	/**
