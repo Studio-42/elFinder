@@ -192,6 +192,8 @@ abstract class elFinderVolumeDriver {
 		'icon'            => '',
 		// CSS Class of volume root in tree
 		'rootCssClass'    => '',
+		// Search timeout (sec)
+		'searchTimeout'   => 30,
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
@@ -569,6 +571,14 @@ abstract class elFinderVolumeDriver {
 	 * @var array
 	 */
 	protected $sessionCache;
+	
+	
+	/**
+	 * Search start time
+	 * 
+	 * @var int
+	 */
+	protected $searchStart;
 	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
@@ -2129,6 +2139,7 @@ abstract class elFinderVolumeDriver {
 				$q = '';
 			}
 		}
+		$this->searchStart = time();
 		return ($q === '' || $this->commandDisabled('search'))
 			? array()
 			: $this->doSearch(is_null($dir)? $this->root : $dir, $q, $mimes);
@@ -3302,9 +3313,22 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
-
+		
+		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
+		if ($timeout && $timeout < time()) {
+			$this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
+			return $result;
+		}
+		
 		foreach($this->scandirCE($path) as $p) {
-			@set_time_limit(30);
+			@set_time_limit($this->options['searchTimeout'] + 30);
+			
+			if ($timeout && ($this->error || $timeout < time())) {
+				!$this->error && $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
+				break;
+			}
+
+			
 			$stat = $this->stat($p);
 
 			if (!$stat) { // invalid links

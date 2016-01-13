@@ -18,7 +18,6 @@ $.fn.elfinderpath = function(fm) {
 					e.preventDefault();
 					if (hash != fm.cwd().hash) {
 						if (query) {
-							fm.log(mimes.join(' '));
 							fm.exec('search', query, { target: hash, mime: mimes.join(' ') });
 						} else {
 							fm.exec('open', hash);

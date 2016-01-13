@@ -10,6 +10,9 @@
 		- Fixed #1181 case insensitive search problem of LocalFileSystem driver
 		- Added an autosync button into contextmenu `Reload`
 		- Added new client configuration `syncStart`
+		- Search result view optimization
+		- Adddd new volume root option `searchTimeout` (default 30s)
+		- Added new crient command `opendir` - opens selected item's parent folder at search result
 		- And some minor bug fixes
 
 

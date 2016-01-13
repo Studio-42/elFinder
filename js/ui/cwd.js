@@ -1260,15 +1260,19 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('search', function(e) {
 				lastSearch = e.data.files;
 				content(lastSearch, true);
+				wrapper.addClass('elfinder-search-result');
 				fm.autoSync('stop');
 				resize();
 			})
-			.bind('searchend', function() {
+			.bind('searchend', function(e) {
 				lastSearch = [];
 				if (query) {
 					query = '';
-					content(fm.files());
+					if (!e.data && !e.data.noupdate) {
+						content(fm.files());
+					}
 				}
+				wrapper.removeClass('elfinder-search-result');
 				fm.autoSync();
 				resize();
 			})
