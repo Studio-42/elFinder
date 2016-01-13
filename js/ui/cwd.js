@@ -1268,7 +1268,7 @@ $.fn.elfindercwd = function(fm, options) {
 				lastSearch = [];
 				if (query) {
 					query = '';
-					if (!e.data && !e.data.noupdate) {
+					if (!e.data || !e.data.noupdate) {
 						content(fm.files());
 					}
 				}
