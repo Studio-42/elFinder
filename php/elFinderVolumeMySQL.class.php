@@ -309,6 +309,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		$dirs = array();
+		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
+		
 		if ($path != $this->root) {
 			$inpath = array(intval($path));
 			while($inpath) {
@@ -353,6 +355,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if (($res = $this->query($sql))) {
 			while ($row = $res->fetch_assoc()) {
+				if ($timeout && $timeout < time()) {
+					$this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
+					break;
+				}
+				
 				if (!$this->mimeAccepted($row['mime'], $mimes)) {
 					continue;
 				}
@@ -360,6 +367,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				if ($row['parent_id']) {
 					$row['phash'] = $this->encode($row['parent_id']);
 				} 
+				$row['path'] = $this->_path($id);
 
 				if ($row['mime'] == 'directory') {
 					unset($row['width']);
@@ -474,7 +482,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$dir = $this->stat($id);
 			$path .= $dir['name'].$this->separator;
 		}
-		return $path.$file['name'];
+		return $this->rootName.$this->separator.$path.$file['name'];
 	}
 	
 	/**
