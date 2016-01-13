@@ -218,9 +218,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		// error
 		// cache to $_SESSION
-		$sessionStart = @session_start();
+		$sessionStart = $this->sessionRestart();
 		if ($sessionStart) {
-			$_SESSION[elFinder::$sessionCacheKey][$this->id]['localFileSystemInotify_disable'] = true;
+			$this->sessionCache['localFileSystemInotify_disable'] = true;
 			session_write_close();
 		}
 		

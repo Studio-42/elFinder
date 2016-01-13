@@ -644,7 +644,14 @@ abstract class elFinderVolumeDriver {
 		}
 	}
 	
-	
+	protected function sessionRestart() {
+		$start = @session_start();
+		if (!isset($_SESSION[elFinder::$sessionCacheKey])) {
+			$_SESSION[elFinder::$sessionCacheKey] = array();
+		}
+		$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
+		return $start;
+	}
 	/*********************************************************************/
 	/*                              PUBLIC API                           */
 	/*********************************************************************/
@@ -2866,6 +2873,7 @@ abstract class elFinderVolumeDriver {
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
 		if ($is_root) {
+			$this->sessionRestart();
 			$this->sessionCache['rootstat'][$rootKey] = elFinder::sessionDataEncode($ret);
 		}
 		return $ret;
@@ -3052,6 +3060,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function clearcache() {
 		$this->cache = $this->dirsCache = array();
+		$this->sessionRestart();
 		unset($this->sessionCache['rootstat'][md5($this->root)]);
 	}
 	
