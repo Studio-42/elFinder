@@ -3231,6 +3231,9 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	protected function isMyReload($target = '', $ARGtarget = '') {
+		if (! empty($this->ARGS['cmd']) && $this->ARGS['cmd'] === 'parents') {
+			return true;
+		}
 		if (! empty($this->ARGS['reload'])) {
 			if ($ARGtarget === '') {
 				$ARGtarget = isset($this->ARGS['target'])? $this->ARGS['target']
