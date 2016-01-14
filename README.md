@@ -32,11 +32,11 @@ Contents
 
 Branches
 --------
--  master - Main development branch
--  2.1-src - 2.1 development branch, auto build to 2.1 on commit
--  2.0-src - 2.0 development branch, auto build to 2.0 on commit
--  2.1 - 2.1 nightly build branch
--  2.0 - 2.0 nightly build branch
+-  [master](https://github.com/Studio-42/elFinder/tree/master) - Main development branch
+-  [2.1-src](https://github.com/Studio-42/elFinder/tree/2.1-src) - 2.1 development branch, auto build to 2.1 on commit
+-  [2.0-src](https://github.com/Studio-42/elFinder/tree/2.0-src) - 2.0 development branch, auto build to 2.0 on commit
+-  [2.1](https://github.com/Studio-42/elFinder/tree/2.1) - 2.1 nightly build branch
+-  [2.0](https://github.com/Studio-42/elFinder/tree/2.0) - 2.0 nightly build branch
 
 Features
 --------
