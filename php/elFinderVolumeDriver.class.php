@@ -2875,6 +2875,7 @@ abstract class elFinderVolumeDriver {
 		if ($is_root) {
 			$this->sessionRestart();
 			$this->sessionCache['rootstat'][$rootKey] = elFinder::sessionDataEncode($ret);
+			elFinder::sessionWrite();
 		}
 		return $ret;
 	}
@@ -3062,6 +3063,7 @@ abstract class elFinderVolumeDriver {
 		$this->cache = $this->dirsCache = array();
 		$this->sessionRestart();
 		unset($this->sessionCache['rootstat'][md5($this->root)]);
+		elFinder::sessionWrite();
 	}
 	
 	/**
