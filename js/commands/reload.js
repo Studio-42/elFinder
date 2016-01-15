@@ -34,10 +34,11 @@ elFinder.prototype.commands.reload = function() {
 				node: $('<span/>')
 					.attr({title: fm.i18n('autoSync')})
 					.on('click', function(e){
-						var parent = node.parent();
 						e.stopPropagation();
 						e.preventDefault();
-						node.parent().toggleClass('ui-state-disabled', fm.options.syncStart);
+						node.parent()
+							.toggleClass('ui-state-disabled', fm.options.syncStart)
+							.parent().removeClass('ui-state-hover');
 						fm.options.syncStart = !fm.options.syncStart;
 						fm.autoSync(fm.options.syncStart? null : 'stop');
 					})
