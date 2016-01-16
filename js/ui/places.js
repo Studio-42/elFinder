@@ -98,8 +98,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 							left   = places.offset().left,
 							width  = places.width(),
 							height = places.height(),
-							x      = e.clientX,
-							y      = e.clientY;
+							x      = e.pageX,
+							y      = e.pageY;
 						
 						if (x > left && x < left+width && y > top && y < y+height) {
 							$(this).show();
@@ -203,8 +203,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 							icon     : 'rm',
 							callback : function() { remove(hash); save(); }
 						}],
-						'x'       : e.clientX,
-						'y'       : e.clientY
+						'x'       : e.pageX,
+						'y'       : e.pageY
 					})
 					
 				})
@@ -264,8 +264,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 								icon     : 'rm',
 								callback : function() { remove(hash); save(); }
 							}],
-							'x'       : e.originalEvent.touches[0].clientX,
-							'y'       : e.originalEvent.touches[0].clientY
+							'x'       : e.originalEvent.touches[0].pageX,
+							'y'       : e.originalEvent.touches[0].pageY
 						});
 					}, 500));
 				})

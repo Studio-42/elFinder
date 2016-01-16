@@ -600,8 +600,8 @@ $.fn.elfindertree = function(fm, opts) {
 						fm.trigger('contextmenu', {
 							'type'    : 'navbar',
 							'targets' : [fm.navId2Hash(p.attr('id'))],
-							'x'       : evt.touches[0].clientX,
-							'y'       : evt.touches[0].clientY
+							'x'       : evt.touches[0].pageX,
+							'y'       : evt.touches[0].pageY
 						});
 					}, 500));
 				})
@@ -665,8 +665,8 @@ $.fn.elfindertree = function(fm, opts) {
 					fm.trigger('contextmenu', {
 						'type'    : 'navbar',
 						'targets' : [fm.navId2Hash($(this).attr('id'))],
-						'x'       : e.clientX,
-						'y'       : e.clientY
+						'x'       : e.pageX,
+						'y'       : e.pageY
 					});
 				}),
 			// move tree into navbar

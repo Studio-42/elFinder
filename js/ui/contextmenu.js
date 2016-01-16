@@ -43,10 +43,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					scrolltop  = win.scrollTop(),
 					scrollleft = win.scrollLeft(),
 					m          = fm.UA.Touch? 10 : 0,
-					zoom       = !window.innerWidth? 1 : document.body.clientWidth / window.innerWidth,
 					css        = {
-						top  : ((y + m + height < wheight ? y + m : y - m - height > 0 ? y - m - height : y + m) + scrolltop) / zoom,
-						left : ((x + m + width  < wwidth  ? x + m : x - m - width) / zoom + scrollleft) / zoom,
+						top  : y - scrolltop + m + height < wheight ? y + m : (y - m - height > 0 ? y - m - height : y + m),
+						left : x - scrollleft + m + width < wwidth  ? x + m :  x - m - width,
 						'z-index' : 100 + fm.getUI('workzone').zIndex()
 					};
 

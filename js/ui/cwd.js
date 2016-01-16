@@ -926,8 +926,8 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.trigger('contextmenu', {
 									'type'    : 'files',
 									'targets' : fm.selected(),
-									'x'       : e.originalEvent.touches[0].clientX,
-									'y'       : e.originalEvent.touches[0].clientY
+									'x'       : e.originalEvent.touches[0].pageX,
+									'y'       : e.originalEvent.touches[0].pageY
 								});
 							}
 						}
@@ -1122,8 +1122,8 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.trigger('contextmenu', {
 								'type'    : 'files',
 								'targets' : fm.selected(),
-								'x'       : e.clientX,
-								'y'       : e.clientY
+								'x'       : e.pageX,
+								'y'       : e.pageY
 							});
 
 						}
@@ -1175,8 +1175,8 @@ $.fn.elfindercwd = function(fm, options) {
 					fm.trigger('contextmenu', {
 						'type'    : 'cwd',
 						'targets' : [fm.cwd().hash],
-						'x'       : e.clientX,
-						'y'       : e.clientY
+						'x'       : e.pageX,
+						'y'       : e.pageY
 					});
 					
 				})
@@ -1191,8 +1191,8 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.trigger('contextmenu', {
 							'type'    : 'cwd',
 							'targets' : [fm.cwd().hash],
-							'x'       : e.originalEvent.touches[0].clientX,
-							'y'       : e.originalEvent.touches[0].clientY
+							'x'       : e.originalEvent.touches[0].pageX,
+							'y'       : e.originalEvent.touches[0].pageY
 						});
 					}, 500));
 				})
