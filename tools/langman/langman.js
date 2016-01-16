@@ -5,7 +5,7 @@ elFinder.prototype.i18 = {};
 		var tbl = $('#content');
 		var cl = 'even';
 		var elf = new elFinder();
-		var as2x = '2.1';
+		var asMaster = '2.1';
 		var src = {}, keys = {}, tpl, locprms, hash, branch, lang;
 		var glbs = {
 			'translator'      : 'Your name &lt;translator@email.tld&gt;',
@@ -43,7 +43,7 @@ elFinder.prototype.i18 = {};
 					var slng = elf.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE;
 					var make;
 					var filename = './'+branch+'/i18n/elfinder.'+lang+'.js';
-					var tgt = (branch == as2x)? '2.x' : branch;
+					var tgt = (branch == asMaster)? 'master' : branch + '-src';
 					var isNew = false;
 
 					$('#made').val('');
