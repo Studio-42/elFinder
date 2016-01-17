@@ -3721,7 +3721,7 @@ elFinder.prototype = {
 			retval, oldval;
 
 		// new key of elFinder >= 2.1.6
-		key = window.location.path+'-elfinder-'+key+this.id;
+		key = window.location.pathname+'-elfinder-'+key+this.id;
 		
 		if (val === null) {
 			return s.removeItem(key);
