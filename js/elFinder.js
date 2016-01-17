@@ -1352,6 +1352,9 @@ window.elFinder = function(node, opts) {
 
 		xhr = this.transport.send(options).fail(error).done(success);
 		
+		// Set currrent request command name
+		self.currentReqCmd = cmd;
+		
 		// add "open" xhr into queue
 		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
 			queue.unshift(xhr);
@@ -2439,6 +2442,13 @@ elFinder.prototype = {
 	res : function(type, id) {
 		return this.resources[type] && this.resources[type][id];
 	}, 
+	
+	/**
+	 * Current request command
+	 * 
+	 * @type  String
+	 */
+	currentReqCmd : '',
 	
 	/**
 	 * Internationalization object

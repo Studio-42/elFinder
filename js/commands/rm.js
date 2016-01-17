@@ -28,7 +28,6 @@ elFinder.prototype.commands.rm = function() {
 			files  = this.files(hashes),
 			cnt    = files.length,
 			cwd    = fm.cwd().hash,
-			goup   = false,
 			tpl    = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
 			targets, text, f, fname, size, tmb, descs, dialog;
 
@@ -42,12 +41,6 @@ elFinder.prototype.commands.rm = function() {
 			}
 			if (file.locked) {
 				return !dfrd.reject(['errLocked', file.name]);
-			}
-			if (file.mime === 'directory') {
-				var parents = fm.parents(cwd);
-				if (file.hash == cwd || $.inArray(file.hash, parents)) {
-					goup = (file.phash && fm.file(file.phash).read)? file.phash : fm.root(file.hash);
-				}
 			}
 		});
 
@@ -106,7 +99,6 @@ elFinder.prototype.commands.rm = function() {
 						})
 						.done(function(data) {
 							dfrd.done(data);
-							goup && fm.exec('open', goup)
 						})
 						.always(function() {
 							fm.unlockfiles({files : targets});
