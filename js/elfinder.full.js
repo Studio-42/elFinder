@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1-src Nightly: 62ee5c1) (2016-01-17)
+ * Version 2.1.5 (2.1-src Nightly: dda1f3c) (2016-01-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1265,6 +1265,9 @@ window.elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			success = function(response) {
+				// Set currrent request command name
+				self.currentReqCmd = cmd;
+				
 				if (raw) {
 					return dfrd.resolve(response);
 				}
@@ -1365,9 +1368,6 @@ window.elFinder = function(node, opts) {
 		delete options.preventFail
 
 		xhr = this.transport.send(options).fail(error).done(success);
-		
-		// Set currrent request command name
-		self.currentReqCmd = cmd;
 		
 		// add "open" xhr into queue
 		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
@@ -4706,7 +4706,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1-src Nightly: 62ee5c1)';
+elFinder.prototype.version = '2.1.5 (2.1-src Nightly: dda1f3c)';
 
 
 
