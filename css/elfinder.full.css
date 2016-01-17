@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1-src Nightly: e9fe571) (2016-01-16)
+ * Version 2.1.5 (2.1-src Nightly: 62ee5c1) (2016-01-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1296,6 +1296,30 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 
 /* File: /css/places.css */
+/*********************************************/
+/*               PLACES STYLES               */
+/*********************************************/
+/* root extra icon */
+.elfinder-places-root-icon {
+	position: absolute;
+	top: 2px;
+	cursor: pointer;
+	display: none;
+}
+.elfinder-ltr .elfinder-places-root-icon {
+	right: 10px;
+}
+.elfinder-rtl .elfinder-places-root-icon {
+	left: 10px;
+}
+.elfinder-navbar-expanded .elfinder-places-root-icon {
+	display: inline-block;
+}
+
+/* dragging helper base */
+.elfinder-place-drag {
+    font-size: 0.8em;
+}
 
 /* File: /css/quicklook.css */
 /* quicklook window */
