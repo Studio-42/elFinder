@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1-src Nightly: ef69acf) (2016-01-17)
+ * Version 2.1.5 (2.1-src Nightly: e6517dc) (2016-01-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1300,7 +1300,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /*               PLACES STYLES               */
 /*********************************************/
 /* root extra icon */
-.elfinder-places-root-icon {
+.elfinder-navbar-root .elfinder-places-root-icon {
 	position: absolute;
 	top: 2px;
 	cursor: pointer;
