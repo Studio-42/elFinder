@@ -2,7 +2,7 @@
 /*               PLACES STYLES               */
 /*********************************************/
 /* root extra icon */
-.elfinder-places-root-icon {
+.elfinder-navbar-root .elfinder-places-root-icon {
 	position: absolute;
 	top: 2px;
 	cursor: pointer;
