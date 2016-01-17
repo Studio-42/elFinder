@@ -1251,6 +1251,9 @@ window.elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			success = function(response) {
+				// Set currrent request command name
+				self.currentReqCmd = cmd;
+				
 				if (raw) {
 					return dfrd.resolve(response);
 				}
@@ -1351,9 +1354,6 @@ window.elFinder = function(node, opts) {
 		delete options.preventFail
 
 		xhr = this.transport.send(options).fail(error).done(success);
-		
-		// Set currrent request command name
-		self.currentReqCmd = cmd;
 		
 		// add "open" xhr into queue
 		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
