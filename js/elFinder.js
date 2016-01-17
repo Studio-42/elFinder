@@ -3716,12 +3716,20 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	localStorage : function(key, val) {
-		var s = window.localStorage;
+		var s      = window.localStorage,
+			oldkey = 'elfinder-'+key+this.id, // old key of elFinder < 2.1.6
+			retval, oldval;
 
-		key = 'elfinder-'+key+this.id;
+		// new key of elFinder >= 2.1.6
+		key = window.location.path+'-elfinder-'+key+this.id;
 		
 		if (val === null) {
 			return s.removeItem(key);
+		}
+		
+		if (val === void(0) && !(retval = s.getItem(key)) && (oldval = s.getItem(oldkey))) {
+			val = oldval;
+			s.removeItem(oldkey);
 		}
 		
 		if (val !== void(0)) {
@@ -3731,9 +3739,10 @@ elFinder.prototype = {
 				s.clear();
 				s.setItem(key, val);
 			}
+			retval = s.getItem(key);
 		}
 
-		return s.getItem(key);
+		return retval;
 	},
 	
 	/**
