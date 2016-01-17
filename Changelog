@@ -13,6 +13,7 @@
 		- Search result view optimization
 		- Adddd new volume root option `searchTimeout` (default 30s)
 		- Added new crient command `opendir` - opens selected item's parent folder at search result
+		- Sortable "Places" (your favorites)
 		- And some minor bug fixes
 
 
