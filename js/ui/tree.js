@@ -660,6 +660,7 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				})
 				.on('contextmenu', selNavdir, function(e) {
+					var self = $(this);
 					e.preventDefault();
 
 					fm.trigger('contextmenu', {
@@ -667,6 +668,16 @@ $.fn.elfindertree = function(fm, opts) {
 						'targets' : [fm.navId2Hash($(this).attr('id'))],
 						'x'       : e.pageX,
 						'y'       : e.pageY
+					});
+					
+					self.addClass('ui-state-hover');
+					
+					fm.getUI('contextmenu').children().on('mouseenter', function() {
+						self.addClass('ui-state-hover');
+					});
+					
+					fm.bind('closecontextmenu', function() {
+						self.removeClass('ui-state-hover');
 					});
 				}),
 			// move tree into navbar
