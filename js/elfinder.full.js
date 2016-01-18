@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1-src Nightly: e6517dc) (2016-01-17)
+ * Version 2.1.5 (2.1-src Nightly: aaf41e6) (2016-01-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1042,8 +1042,14 @@ window.elFinder = function(node, opts) {
 			return '';
 		}
 		
-		if (!download && file.url && file.url != 1) {
-			return file.url;
+		if (!download) {
+			if (file.url) {
+				if (file.url != 1) {
+					return file.url;
+				}
+			} else if (cwdOptions.url) {
+				return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
+			}
 		}
 		
 		url = this.options.url;
@@ -4715,7 +4721,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1-src Nightly: e6517dc)';
+elFinder.prototype.version = '2.1.5 (2.1-src Nightly: aaf41e6)';
 
 
 
@@ -12960,9 +12966,8 @@ elFinder.prototype.commands.open = function() {
 			}
 			
 			inline = (reg && file.mime.match(reg));
+			url = fm.openUrl(file.hash, !inline);
 			if (fm.UA.Mobile || !inline) {
-				url = fm.openUrl(file.hash, !inline);
-				
 				if (html5dl) {
 					!inline && link.attr('download', file.name);
 					link.attr('href', url)
@@ -12999,30 +13004,35 @@ elFinder.prototype.commands.open = function() {
 				}
 				w = 'width='+winW+',height='+winH;
 	
-				var wnd = window.open('', 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+				if (url.indexOf(fm.options.url) === 0) {
+					url = '';
+				}
+				var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
 				if (!wnd) {
 					return dfrd.reject('errPopup');
 				}
 				
-				var form = document.createElement("form");
-				form.action = fm.options.url;
-				form.method = 'POST';
-				form.target = 'new_window';
-				form.style.display = 'none';
-				var params = $.extend({}, fm.options.customData, {
-					cmd: 'file',
-					target: file.hash
-				});
-				$.each(params, function(key, val)
-				{
-					var input = document.createElement("input");
-					input.name = key;
-					input.value = val;
-					form.appendChild(input);
-				});
-				
-				document.body.appendChild(form);
-				form.submit();
+				if (url === '') {
+					var form = document.createElement("form");
+					form.action = fm.options.url;
+					form.method = 'POST';
+					form.target = 'new_window';
+					form.style.display = 'none';
+					var params = $.extend({}, fm.options.customData, {
+						cmd: 'file',
+						target: file.hash
+					});
+					$.each(params, function(key, val)
+					{
+						var input = document.createElement("input");
+						input.name = key;
+						input.value = val;
+						form.appendChild(input);
+					});
+					
+					document.body.appendChild(form);
+					form.submit();
+				}
 				wnd.focus();
 				
 			}
