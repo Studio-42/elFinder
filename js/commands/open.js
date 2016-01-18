@@ -77,9 +77,8 @@ elFinder.prototype.commands.open = function() {
 			}
 			
 			inline = (reg && file.mime.match(reg));
+			url = fm.openUrl(file.hash, !inline);
 			if (fm.UA.Mobile || !inline) {
-				url = fm.openUrl(file.hash, !inline);
-				
 				if (html5dl) {
 					!inline && link.attr('download', file.name);
 					link.attr('href', url)
@@ -116,30 +115,35 @@ elFinder.prototype.commands.open = function() {
 				}
 				w = 'width='+winW+',height='+winH;
 	
-				var wnd = window.open('', 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+				if (url.indexOf(fm.options.url) === 0) {
+					url = '';
+				}
+				var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
 				if (!wnd) {
 					return dfrd.reject('errPopup');
 				}
 				
-				var form = document.createElement("form");
-				form.action = fm.options.url;
-				form.method = 'POST';
-				form.target = 'new_window';
-				form.style.display = 'none';
-				var params = $.extend({}, fm.options.customData, {
-					cmd: 'file',
-					target: file.hash
-				});
-				$.each(params, function(key, val)
-				{
-					var input = document.createElement("input");
-					input.name = key;
-					input.value = val;
-					form.appendChild(input);
-				});
-				
-				document.body.appendChild(form);
-				form.submit();
+				if (url === '') {
+					var form = document.createElement("form");
+					form.action = fm.options.url;
+					form.method = 'POST';
+					form.target = 'new_window';
+					form.style.display = 'none';
+					var params = $.extend({}, fm.options.customData, {
+						cmd: 'file',
+						target: file.hash
+					});
+					$.each(params, function(key, val)
+					{
+						var input = document.createElement("input");
+						input.name = key;
+						input.value = val;
+						form.appendChild(input);
+					});
+					
+					document.body.appendChild(form);
+					form.submit();
+				}
 				wnd.focus();
 				
 			}

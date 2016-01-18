@@ -1028,8 +1028,14 @@ window.elFinder = function(node, opts) {
 			return '';
 		}
 		
-		if (!download && file.url && file.url != 1) {
-			return file.url;
+		if (!download) {
+			if (file.url) {
+				if (file.url != 1) {
+					return file.url;
+				}
+			} else if (cwdOptions.url) {
+				return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
+			}
 		}
 		
 		url = this.options.url;
