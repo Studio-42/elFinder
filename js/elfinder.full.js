@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.5 (2.1-src Nightly: aaf41e6) (2016-01-18)
+ * Version 2.1.5 (2.1-src Nightly: 3e7fcd8) (2016-01-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4721,7 +4721,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.5 (2.1-src Nightly: aaf41e6)';
+elFinder.prototype.version = '2.1.5 (2.1-src Nightly: 3e7fcd8)';
 
 
 
@@ -6247,7 +6247,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-01-13
+ * @version 2016-01-18
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6578,6 +6578,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -6810,6 +6811,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			close = function() {
 				menu.hide().empty();
+				fm.trigger('closecontextmenu');
 			},
 			
 			create = function(type, targets) {
@@ -6938,14 +6940,16 @@ $.fn.elfindercontextmenu = function(fm) {
 				$.each(raw, function(i, data) {
 					var node;
 					
-					if (data.label && typeof data.callback == 'function') {
+					if (data === '|') {
+						menu.append('<div class="elfinder-contextmenu-separator"/>');
+					} else if (data.label && typeof data.callback == 'function') {
 						node = item(data.label, data.icon, function() {
-							close();
+							!data.remain && close();
 							data.callback();
 						});
 						menu.append(node);
 					}
-				})
+				});
 			};
 		
 		fm.one('load', function() {
@@ -8947,6 +8951,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
 			key       = 'places'+(opts.suffix? opts.suffix : ''),
+			menuTimer = null,
 			/**
 			 * Convert places dir node into dir hash
 			 *
@@ -9027,7 +9032,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			/**
 			 * Remove dir from places
 			 *
-			 * @param  String  directory id
+			 * @param  String  directory hash
 			 * @return String  removed name
 			 **/
 			remove = function(hash) {
@@ -9039,11 +9044,48 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (tgt.length) {
 						name = tgt.text();
 						tgt.parent().remove();
-						!subtree.children().length && root.removeClass(collapsed+' '+expanded);
+						if (!subtree.children().length) {
+							root.removeClass(collapsed);
+							places.removeClass(expanded);
+							subtree.slideToggle(false);
+						}
 					}
 				}
 				
 				return name;
+			},
+			/**
+			 * Move up dir on places
+			 *
+			 * @param  String  directory hash
+			 * @return void
+			 **/
+			moveup = function(hash) {
+				var self = $('#'+hash2id(hash)),
+					tgt  = self.parent(),
+					prev = tgt.prev('div'),
+					cls  = 'ui-state-hover',
+					ctm  = fm.getUI('contextmenu');
+				
+				menuTimer && clearTimeout(menuTimer);
+				
+				if (prev.length) {
+					ctm.find(':first').data('placesHash', hash);
+					self.addClass(cls);
+					tgt.insertBefore(prev);
+					prev = tgt.prev('div');
+					menuTimer = setTimeout(function() {
+						self.removeClass(cls);
+						if (ctm.find(':first').data('placesHash') === hash) {
+							ctm.hide().empty();
+						}
+					}, 1500);
+				}
+				
+				if(!prev.length) {
+					self.removeClass(cls);
+					ctm.hide().empty();
+				}
 			},
 			/**
 			 * Update dir at places
@@ -9075,7 +9117,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			clear = function() {
 				subtree.empty();
-				root.removeClass(collapsed+' '+expanded);
+				root.removeClass(collapsed);
+				places.removeClass(expanded);
+				subtree.slideToggle(false);
 			},
 			/**
 			 * Sort places dirs A-Z
@@ -9199,20 +9243,35 @@ $.fn.elfinderplaces = function(fm, opts) {
 					fm.exec('open', p.attr('id').substr(6));
 				})
 				.on('contextmenu', '.'+navdir+':not(.'+clroot+')', function(e) {
-					var hash = $(this).attr('id').substr(6);
+					var self = $(this),
+						hash = self.attr('id').substr(6);
 					
 					e.preventDefault();
-					
+
 					fm.trigger('contextmenu', {
 						raw : [{
+							label    : fm.i18n('moveUp'),
+							icon     : 'up',
+							remain   : true,
+							callback : function() { moveup(hash); save(); }
+						},'|',{
 							label    : fm.i18n('rmFromPlaces'),
 							icon     : 'rm',
 							callback : function() { remove(hash); save(); }
 						}],
 						'x'       : e.pageX,
 						'y'       : e.pageY
-					})
+					});
 					
+					self.addClass('ui-state-hover');
+					
+					fm.getUI('contextmenu').children().on('mouseenter', function() {
+						self.addClass('ui-state-hover');
+					});
+					
+					fm.bind('closecontextmenu', function() {
+						self.removeClass('ui-state-hover');
+					});
 				})
 				.droppable({
 					tolerance  : 'pointer',
@@ -10529,6 +10588,7 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				})
 				.on('contextmenu', selNavdir, function(e) {
+					var self = $(this);
 					e.preventDefault();
 
 					fm.trigger('contextmenu', {
@@ -10536,6 +10596,16 @@ $.fn.elfindertree = function(fm, opts) {
 						'targets' : [fm.navId2Hash($(this).attr('id'))],
 						'x'       : e.pageX,
 						'y'       : e.pageY
+					});
+					
+					self.addClass('ui-state-hover');
+					
+					fm.getUI('contextmenu').children().on('mouseenter', function() {
+						self.addClass('ui-state-hover');
+					});
+					
+					fm.bind('closecontextmenu', function() {
+						self.removeClass('ui-state-hover');
 					});
 				}),
 			// move tree into navbar
