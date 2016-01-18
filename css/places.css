@@ -4,7 +4,8 @@
 /* root extra icon */
 .elfinder-navbar-root .elfinder-places-root-icon {
 	position: absolute;
-	top: 2px;
+	top: 50%;
+	margin-top: -9px;
 	cursor: pointer;
 	display: none;
 }
@@ -15,10 +16,10 @@
 	left: 10px;
 }
 .elfinder-navbar-expanded .elfinder-places-root-icon {
-	display: inline-block;
+	display: block;
 }
 
 /* dragging helper base */
 .elfinder-place-drag {
-    font-size: 0.8em;
+	font-size: 0.8em;
 }

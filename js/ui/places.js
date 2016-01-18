@@ -18,6 +18,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
 			key       = 'places'+(opts.suffix? opts.suffix : ''),
+			menuTimer = null,
 			/**
 			 * Convert places dir node into dir hash
 			 *
@@ -98,7 +99,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			/**
 			 * Remove dir from places
 			 *
-			 * @param  String  directory id
+			 * @param  String  directory hash
 			 * @return String  removed name
 			 **/
 			remove = function(hash) {
@@ -110,11 +111,48 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (tgt.length) {
 						name = tgt.text();
 						tgt.parent().remove();
-						!subtree.children().length && root.removeClass(collapsed+' '+expanded);
+						if (!subtree.children().length) {
+							root.removeClass(collapsed);
+							places.removeClass(expanded);
+							subtree.slideToggle(false);
+						}
 					}
 				}
 				
 				return name;
+			},
+			/**
+			 * Move up dir on places
+			 *
+			 * @param  String  directory hash
+			 * @return void
+			 **/
+			moveup = function(hash) {
+				var self = $('#'+hash2id(hash)),
+					tgt  = self.parent(),
+					prev = tgt.prev('div'),
+					cls  = 'ui-state-hover',
+					ctm  = fm.getUI('contextmenu');
+				
+				menuTimer && clearTimeout(menuTimer);
+				
+				if (prev.length) {
+					ctm.find(':first').data('placesHash', hash);
+					self.addClass(cls);
+					tgt.insertBefore(prev);
+					prev = tgt.prev('div');
+					menuTimer = setTimeout(function() {
+						self.removeClass(cls);
+						if (ctm.find(':first').data('placesHash') === hash) {
+							ctm.hide().empty();
+						}
+					}, 1500);
+				}
+				
+				if(!prev.length) {
+					self.removeClass(cls);
+					ctm.hide().empty();
+				}
 			},
 			/**
 			 * Update dir at places
@@ -146,7 +184,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			clear = function() {
 				subtree.empty();
-				root.removeClass(collapsed+' '+expanded);
+				root.removeClass(collapsed);
+				places.removeClass(expanded);
+				subtree.slideToggle(false);
 			},
 			/**
 			 * Sort places dirs A-Z
@@ -270,20 +310,35 @@ $.fn.elfinderplaces = function(fm, opts) {
 					fm.exec('open', p.attr('id').substr(6));
 				})
 				.on('contextmenu', '.'+navdir+':not(.'+clroot+')', function(e) {
-					var hash = $(this).attr('id').substr(6);
+					var self = $(this),
+						hash = self.attr('id').substr(6);
 					
 					e.preventDefault();
-					
+
 					fm.trigger('contextmenu', {
 						raw : [{
+							label    : fm.i18n('moveUp'),
+							icon     : 'up',
+							remain   : true,
+							callback : function() { moveup(hash); save(); }
+						},'|',{
 							label    : fm.i18n('rmFromPlaces'),
 							icon     : 'rm',
 							callback : function() { remove(hash); save(); }
 						}],
 						'x'       : e.pageX,
 						'y'       : e.pageY
-					})
+					});
 					
+					self.addClass('ui-state-hover');
+					
+					fm.getUI('contextmenu').children().on('mouseenter', function() {
+						self.addClass('ui-state-hover');
+					});
+					
+					fm.bind('closecontextmenu', function() {
+						self.removeClass('ui-state-hover');
+					});
 				})
 				.droppable({
 					tolerance  : 'pointer',
