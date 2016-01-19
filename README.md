@@ -16,6 +16,7 @@ used in Mac OS X operating system.
 
 Contents
 --------
+* [Branches](#branches)
 * [Features](#features)
 * [Requirements](#requirements)
 * [Installation](#installation)
@@ -28,6 +29,14 @@ Contents
 * [Support](#support)
 * [Authors](#authors)
 * [License](#license)
+
+Branches
+--------
+-  [master](https://github.com/Studio-42/elFinder/tree/master) - Main development branch
+-  [2.1-src](https://github.com/Studio-42/elFinder/tree/2.1-src) - 2.1 development branch, auto build to 2.1 on commit
+-  [2.0-src](https://github.com/Studio-42/elFinder/tree/2.0-src) - 2.0 development branch (Security fix only), auto build to 2.0 on commit
+-  [2.1](https://github.com/Studio-42/elFinder/tree/2.1) - 2.1 nightly build branch
+-  [2.0](https://github.com/Studio-42/elFinder/tree/2.0) - 2.0 nightly build branch
 
 Features
 --------
@@ -104,12 +113,12 @@ Installation
 Downloads
 ------------
 **Stable releases**
- + [elFinder 2.1.5](https://github.com/Studio-42/elFinder/archive/2.1.5.zip)
+ + [elFinder 2.1.6](https://github.com/Studio-42/elFinder/archive/2.1.6.zip)
  + [elFinder 2.0.5](https://github.com/Studio-42/elFinder/archive/2.0.5.zip)
 
 **Nightly builds**
- + [elFinder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1-src.zip)
- + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0-src.zip)
+ + [elFinder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1.zip)
+ + [elFinder 2.0.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.0.zip)
 
 Demo sites
 ------------
