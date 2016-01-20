@@ -49,6 +49,9 @@ class elFinderVolumeS3 extends elFinderVolumeDriver {
 				$this->tmpPath = $this->options['tmpPath'];
 			}
 		}
+		if (!$this->tmpPath && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
+			$this->tmpPath = $tmp;
+		}
 		$this->mimeDetect = 'internal';
 	}
 	

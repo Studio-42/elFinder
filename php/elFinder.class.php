@@ -64,6 +64,13 @@ class elFinder {
 	protected static $base64encodeSessionData = false;
 	
 	/**
+	 * elFinder common tempraly path
+	 *
+	 * @var string
+	 **/
+	protected static $commonTempPath = '';
+	
+	/**
 	 * Session key of net mount volumes
 	 * @var string
 	 */
@@ -296,6 +303,10 @@ class elFinder {
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
+		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
+		if (!is_writable(elFinder::$commonTempPath)) {
+			elFinder::$commonTempPath = '';
+		}
 		
 		// check session cache
 		$_optsMD5 = md5(json_encode($opts['roots']));
@@ -668,7 +679,10 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
+		// try session restart
+		@session_start();
 		$_SESSION[$this->netVolumesSessionKey] = elFinder::sessionDataEncode($volumes);
+		elFinder::sessionWrite();
 	}
 
 	/**
@@ -807,7 +821,6 @@ class elFinder {
 			$this->removeNetVolume($volume);
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
 		}
-
 	}
 
 	/**
@@ -2564,4 +2577,15 @@ class elFinder {
 			session_write_close();
 		}
 	}
+	
+	/**
+	 * Retuen elFinder static variable
+	 * 
+	 * @return void
+	 */
+	public static function getStaticVar($key) {
+		return isset(elFinder::$$key)? elFinder::$$key : null;
+	}
+	
+
 } // END class
