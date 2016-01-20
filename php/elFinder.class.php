@@ -64,6 +64,13 @@ class elFinder {
 	protected static $base64encodeSessionData = false;
 	
 	/**
+	 * elFinder common tempraly path
+	 *
+	 * @var string
+	 **/
+	protected static $commonTempPath = '';
+	
+	/**
 	 * Session key of net mount volumes
 	 * @var string
 	 */
@@ -296,6 +303,10 @@ class elFinder {
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
+		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
+		if (!is_writable(elFinder::$commonTempPath)) {
+			elFinder::$commonTempPath = '';
+		}
 		
 		// check session cache
 		$_optsMD5 = md5(json_encode($opts['roots']));
