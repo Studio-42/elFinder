@@ -112,8 +112,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			'PDO_Options'       => array(),
 			'PDO_DBName'        => 'dropbox',
 			'treeDeep'          => 0,
-			'tmbPath'           => '../files/.tmb',
-			'tmbURL'            => 'files/.tmb',
+			'tmbPath'           => '',
+			'tmbURL'            => '',
 			'tmpPath'           => '',
 			'getTmbSize'        => 'large', // small: 32x32, medium or s: 64x64, large or m: 128x128, l: 640x480, xl: 1024x768
 			'metaCachePath'     => '',
@@ -365,6 +365,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		if (!$this->tmp && is_writable($this->options['tmbPath'])) {
 			$this->tmp = $this->options['tmbPath'];
 		}
+		if (!$this->tmp && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
+			$this->tmp = $tmp;
+		}
 		
 		if (!empty($this->options['metaCachePath'])) {
 			if ((is_dir($this->options['metaCachePath']) || @mkdir($this->options['metaCachePath'])) && is_writable($this->options['metaCachePath'])) {
@@ -373,11 +376,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		if (!$this->metaCache && $this->tmp) {
 			$this->metaCache = $this->tmp;
-		}
-		
-		if (!$this->tmp) {
-			$this->disabled[] = 'archive';
-			$this->disabled[] = 'extract';
 		}
 		
 		if (!$this->metaCache) {
@@ -433,10 +431,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected function configure() {
 		parent::configure();
 		
-		if (!$this->tmp) {
-			$this->disabled[] = 'archive';
-			$this->disabled[] = 'extract';
-		}
+		$this->disabled[] = 'archive';
+		$this->disabled[] = 'extract';
 	}
 	
 	/**
@@ -601,7 +597,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						$praw['client_mtime'] = date('r', $_t);
 						$_update = true;
 					}
-					if ($_t > strtotime($praw['modified'])) {
+					if (isset($praw['modified']) && $_t > strtotime($praw['modified'])) {
 						$praw['modified'] = date('r', $_t);
 						$_update = true;
 					}

@@ -141,6 +141,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$this->tmp = $this->options['tmpPath'];
 			}
 		}
+		if (!$this->tmp && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
+			$this->tmp = $tmp;
+		}
 		
 		// if no thumbnails url - try detect it
 		if ($root['read'] && !$this->tmbURL && $this->URL) {
