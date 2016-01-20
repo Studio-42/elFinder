@@ -668,7 +668,10 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
+		// try session restart
+		@session_start();
 		$_SESSION[$this->netVolumesSessionKey] = elFinder::sessionDataEncode($volumes);
+		elFinder::sessionWrite();
 	}
 
 	/**
@@ -807,7 +810,6 @@ class elFinder {
 			$this->removeNetVolume($volume);
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
 		}
-
 	}
 
 	/**
@@ -2564,4 +2566,15 @@ class elFinder {
 			session_write_close();
 		}
 	}
+	
+	/**
+	 * Retuen elFinder static variable
+	 * 
+	 * @return void
+	 */
+	public static function getStaticVar($key) {
+		return isset(elFinder::$$key)? elFinder::$$key : null;
+	}
+	
+
 } // END class
