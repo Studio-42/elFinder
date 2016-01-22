@@ -1191,7 +1191,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.unbind = function(event, callback) {
 		var l = listeners[('' + event).toLowerCase()] || [],
-			i = l.indexOf(callback);
+			i = $.inArray(callback, l);
 
 		i > -1 && l.splice(i, 1);
 		//delete callback; // need this?
