@@ -272,6 +272,8 @@ abstract class elFinderVolumeDriver {
 		),
 		// files attributes
 		'attributes'   => array(),
+		// max allowed archive files size (0 - no limit)
+		'maxArcFilesSize' => 0,
 		// Allowed archive's mimetypes to create. Leave empty for all available types.
 		'archiveMimes' => array(),
 		// Manual config for archivers. See example below. Leave empty for auto detect
@@ -1838,6 +1840,70 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return path to archive of target items
+	 * 
+	 * @param  array  $hashes
+	 * @return string archive path
+	 * @author Naoki Sawada
+	 */
+	public function zipdl($hashes) {
+		if ($this->commandDisabled('zipdl')) {
+			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		$archivers = $this->getArchivers();
+		$cmd = null;
+		if (!$archivers || empty($archivers['create'])) {
+			return false;
+		}
+		$archivers = $archivers['create'];
+		foreach(array('zip', 'tgz') as $ext) {
+			$mime = self::$mimetypes[$ext];
+			if (isset($archivers[$mime])) {
+				$cmd = $archivers[$mime];
+				break;
+			}
+		}
+		if (!$cmd) {
+			$cmd = $archivers[0];
+			$ext = $cmd['ext'];
+			$mime = elFinderVolumeDriver::mimetypeInternalDetect('file.'.$ext);
+		}
+		$res = false;
+		$dirname = $this->dirnameCE($this->realpath($hashes[0]));
+		if ($dirname === $this->root) {
+			$prefix = $this->rootName;
+		} else {
+			$prefix = $this->basenameCE($dirname);
+		}
+		if ($dir = $this->getItemsInHand($hashes)) {
+			$tmppre = (substr(PHP_OS, 0, 3) === 'WIN')? 'zdl' : 'elfzdl';
+			$pdir = dirname($dir);
+			// garbage collection
+			$ttl = 7200; // expire 2h
+			$time = time();
+			foreach(glob($pdir.DIRECTORY_SEPARATOR.$tmppre.'*') as $_file) {
+				if (filemtime($_file) + $ttl < $time) {
+					@unlink($_file);
+				}
+			}
+			$files = array_diff(scandir($dir), array('.', '..'));
+			if ($files && ($arc = tempnam($dir, $tmppre))) {
+				unlink($arc);
+				$arc = $arc.'.'.$ext;
+				$name = basename($arc);
+				if ($arc = $this->makeArchive($dir, $files, $name, $cmd)) {
+					$file = tempnam($pdir, $tmppre);
+					unlink($file);
+					$res = @rename($arc, $file);
+					$this->rmdirRecursive($dir);
+				}
+			}
+		}
+		return $res? array('path' => $file, 'ext' => $ext, 'mime' => $mime, 'prefix' => $prefix) : false;
+	}
+	
+	/**
 	 * Return file contents
 	 *
 	 * @param  string  $hash  file hash
@@ -2737,6 +2803,73 @@ abstract class elFinderVolumeDriver {
 			($stat['mime'] === 'directory')? $this->delTree($p) : $this->_unlink($p);
 		}
 		return $this->_rmdir($localpath);
+	}
+	
+	/**
+	 * Copy items to a new temporary directory on the local server
+	 * 
+	 * @param  array  $hashes  target hashes
+	 * @param  string $dir     destination directory (for recurcive)
+	 * @return string|false    saved path name
+	 * @author Naoki Sawada
+	 */
+	protected function getItemsInHand($hashes, $dir = null) {
+		static $totalSize = 0;
+		if (is_null($dir)) {
+			$totalSize = 0;
+			if (! $tmpDir = $this->getTempPath()) {
+				return false;
+			}
+			$dir = tempnam($tmpDir, 'elf');
+			if (!unlink($dir) || !mkdir($dir, 0700, true)) {
+				return false;
+			}
+			register_shutdown_function(array($this, 'rmdirRecursive'), $dir);
+		}
+		$res = true;
+		foreach ($hashes as $hash) {
+			if (($file = $this->file($hash)) == false) {
+				continue;
+			}
+			if (!$file['read']) {
+				continue;
+			}
+				
+			$target = $dir.DIRECTORY_SEPARATOR.$file['name'];
+				
+			if ($file['mime'] === 'directory') {
+				$chashes = array();
+				$_files = $this->scandir($hash);
+				foreach($_files as $_file) {
+					if ($file['read']) {
+						$chashes[] = $_file['hash'];
+					}
+				}
+				if ($chashes) {
+					mkdir($target, 0700, true);
+					$res = $this->getItemsInHand($chashes, $target);
+				}
+				if (!$res) {
+					break;
+				}
+				!empty($file['ts']) && @touch($target, $file['ts']);
+				continue;
+			}
+			$target = $dir.DIRECTORY_SEPARATOR.$file['name'];
+			$path = $this->decode($hash);
+			if ($fp = $this->fopenCE($path)) {
+				if ($tfp = fopen($target, 'wb')) {
+					$totalSize += stream_copy_to_stream($fp, $tfp);
+					fclose($tfp);
+				}
+				!empty($file['ts']) && @touch($target, $file['ts']);
+				$this->fcloseCE($fp, $path);
+			}
+			if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $totalSize) {
+				$res = $this->setError(elFinder::ERROR_ARC_MAXSIZE);
+			}
+		}
+		return $res? $dir : false;
 	}
 	
 	/*********************** file stat *********************/

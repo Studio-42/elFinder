@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: ff73705) (2016-01-20)
+ * Version 2.1.6 (2.1-src Nightly: 8e742ac) (2016-01-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1373,7 +1373,7 @@ window.elFinder = function(node, opts) {
 
 		delete options.preventFail
 
-		xhr = this.transport.send(options).fail(error).done(success);
+		dfrd.xhr = xhr = this.transport.send(options).fail(error).done(success);
 		
 		// add "open" xhr into queue
 		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
@@ -1566,7 +1566,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.unbind = function(event, callback) {
 		var l = listeners[('' + event).toLowerCase()] || [],
-			i = l.indexOf(callback);
+			i = $.inArray(callback, l);
 
 		i > -1 && l.splice(i, 1);
 		//delete callback; // need this?
@@ -1731,14 +1731,14 @@ window.elFinder = function(node, opts) {
 	this.isCommandEnabled = function(name, dstHash) {
 		var disabled;
 		if (dstHash && self.root(dstHash) !== cwd) {
+			disabled = [];
 			$.each(self.disabledCmds, function(i, v){
 				if (dstHash.indexOf(i, 0) == 0) {
 					disabled = v;
 					return false;
 				}
 			});
-		}
-		if (!disabled) {
+		} else {
 			disabled = cwdOptions.disabled;
 		}
 		return this._commands[name] ? $.inArray(name, disabled) === -1 : false;
@@ -2142,6 +2142,17 @@ window.elFinder = function(node, opts) {
 			cmd.prototype = base;
 			self._commands[name] = new cmd();
 			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+			// setup linked commands
+			if (self._commands[name].linkedCmds.length) {
+				$.each(self._commands[name].linkedCmds, function(i, n) {
+					var lcmd = self.commands[n];
+					if ($.isFunction(lcmd) && !self._commands[n]) {
+						lcmd.prototype = base;
+						self._commands[n] = new lcmd();
+						self._commands[n].setup(n, self.options.commandsOptions[n]||{});
+					}
+				});
+			}
 		}
 	});
 	
@@ -4109,7 +4120,7 @@ elFinder.prototype = {
 			msg      = this.messages['ntf'+type] ? this.i18n('ntf'+type) : this.i18n('ntfsmth'),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
-			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div></div>',
+			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div>',
 			delta    = opts.cnt,
 			size     = (typeof opts.size != 'undefined')? parseInt(opts.size) : null,
 			progress = (typeof opts.progress != 'undefined' && opts.progress >= 0) ? opts.progress : null,
@@ -4721,7 +4732,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: ff73705)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 8e742ac)';
 
 
 
@@ -5515,11 +5526,11 @@ elFinder.prototype._options = {
 	 */
 	contextmenu : {
 		// navbarfolder menu
-		navbar : ['open', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', '|', 'places', 'info', 'chmod', 'netunmount'],
+		navbar : ['open', 'download', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'sort', '|', 'info'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'opendir', 'quicklook', '|', 'download', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
+		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
 	},
 
 	/**
@@ -5681,6 +5692,14 @@ elFinder.prototype.command = function(fm) {
 	 * @type  String
 	 */
 	this.title = '';
+	
+	/**
+	 * Linked(Child) commands name
+	 * They are loaded together when tthis command is loaded.
+	 * 
+	 * @type  Array
+	 */
+	this.linkedCmds = [];
 	
 	/**
 	 * Current command state
@@ -6247,7 +6266,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-01-18
+ * @version 2016-01-23
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6425,6 +6444,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -6838,7 +6858,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 				
 				$.each(types[type]||[], function(i, name) {
-					var cmd, node, submenu, hover, _disabled;
+					var cmd, node, submenu, hover;
 					
 					if (name == '|' && sep) {
 						menu.append('<div class="elfinder-contextmenu-separator"/>');
@@ -6852,12 +6872,19 @@ $.fn.elfindercontextmenu = function(fm) {
 					cmd = fm.command(name);
 
 					if (cmd && !isCwd) {
-						_disabled = cmd._disabled;
+						cmd.__disabled = cmd._disabled;
 						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
+						$.each(cmd.linkedCmds, function(i, n) {
+							var c;
+							if (c = fm.command(n)) {
+								c.__disabled = c._disabled;
+								c._disabled = !(c.alwaysEnabled || (fm._commands[n] ? $.inArray(n, disabled) === -1 : false));
+							}
+						});
 					}
 
 					if (cmd && cmd.getstate(targets) != -1) {
-						targets._type = type;
+						//targets._type = type;
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
@@ -6932,7 +6959,15 @@ $.fn.elfindercontextmenu = function(fm) {
 						sep = true;
 					}
 					
-					cmd && !isCwd && (cmd._disabled = _disabled);
+					if (cmd && !isCwd) {
+						cmd._disabled = cmd.__disabled;
+						$.each(cmd.linkedCmds, function(i, n) {
+							var c;
+							if (c = fm.command(n)) {
+								c._disabled = c.__disabled;
+							}
+						});
+					}
 				});
 			},
 			
@@ -11321,25 +11356,38 @@ elFinder.prototype.commands.cut = function() {
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
+elFinder.prototype.commands.zipdl = function() {};
 elFinder.prototype.commands.download = function() {
 	var self   = this,
 		fm     = this.fm,
+		zipOn  = false,
 		filter = function(hashes) {
-			return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; });
+			if (!fm.isCommandEnabled('download', hashes[0])) {
+				return [];
+			}
+			zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
+			return (!zipOn)?
+					$.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; })
+					: self.files(hashes);
 		};
+	
+	this.linkedCmds = ['zipdl'];
 	
 	this.shortcuts = [{
 		pattern     : 'shift+enter'
 	}];
 	
-	this.getstate = function() {
-		var sel = this.fm.selected(),
-			cnt = sel.length;
+	this.getstate = function(sel) {
+		var sel    = (sel || []),
+			cnt    = sel.length,
+			czipdl = fm.command('zipdl');
 		
-		return  !this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1;
+		return  (!czipdl || czipdl._disabled)?
+				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
+				: (!this._disabled && cnt ? 0 : -1);
 	};
 	
-	this.fm.bind('contextmenu', function(e){
+	fm.bind('contextmenu', function(e){
 		var fm = self.fm,
 			helper = null,
 			targets, file, link,
@@ -11444,44 +11492,134 @@ elFinder.prototype.commands.download = function() {
 			cdata   = '',
 			i, url;
 			
-		if (this.disabled()) {
+		if (!files.length) {
 			return dfrd.reject();
 		}
 		
-		var url,
+		var reqDef, cancelBtn, fnAbort,
 			link    = $('<a>').hide().appendTo($('body')),
 			html5dl = (typeof link.get(0).download === 'string');
-		for (i = 0; i < files.length; i++) {
-			url = fm.openUrl(files[i].hash, true);
-			if (html5dl) {
-				link.attr('href', url)
-				.attr('download', files[i].name)
-				.attr('target', '_blank')
-				.get(0).click();
-			} else {
-				if (fm.UA.Mobile) {
-					setTimeout(function(){
-						if (! window.open(url)) {
-							fm.error('errPopup');
-						}
-					}, 100);
+		
+		if (zipOn && (files.length > 1 || files[0].mime === 'directory')) {
+			reqDef = fm.request({
+				data : {cmd : 'zipdl', targets : hashes},
+				notify : {type : 'zipdl', cnt : 1, hideCnt : true, cancel: true},
+				preventDefault : true
+			}).done(function(e) {
+				var zipdl, dialog, btn = {}, dllink, form,
+					uniq = 'dlw' + (+new Date());
+				if (e.error) {
+					fm.error(e.error);
+					dfrd.reject();
+				} else if (e.zipdl) {
+					zipdl = e.zipdl;
+					if (!html5dl && fm.UA.Mobile) {
+						url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
+						+ 'cmd=zipdl&download=1';
+						$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
+							url += '&targets%5B%5D='+encodeURIComponent(val);
+						});
+						$.each(fm.options.customData, function(key, val) {
+							url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
+						});
+						url += '&'+encodeURIComponent(zipdl.name);
+						dllink = $('<a/>')
+							.attr('href', url)
+							.attr('download', encodeURIComponent(zipdl.name))
+							.attr('target', '_blank')
+							.on('click', function() {
+								fm.trigger('download', {files : files});
+								dfrd.resolve(hashes);
+								dialog.elfinderdialog('close');
+							})
+							.append('<span class="elfinder-button-icon elfinder-button-icon-download"></span>'+fm.escape(zipdl.name));
+						btn[fm.i18n('btnCancel')] = function() {
+							dialog.elfinderdialog('close');
+						};
+						dialog = fm.dialog(dllink, {
+							title: fm.i18n('link'),
+							buttons: btn,
+							width: '200px'
+						});
+					} else {
+						form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
+						.append('<input type="hidden" name="cmd" value="zipdl"/>')
+						.append('<input type="hidden" name="download" value="1"/>');
+						$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
+							form.append('<input type="hidden" name="targets[]" value="'+fm.escape(val)+'"/>');
+						});
+						$.each(fm.options.customData, function(key, val) {
+							form.append('<input type="hidden" name="'+key+'" value="'+fm.escape(val)+'"/>');
+						});
+						form.attr('target', uniq).appendTo('body');
+						iframes = $('<iframe style="display:none" name="'+uniq+'">')
+							.appendTo('body')
+							.ready(function() {
+								form.submit().remove();
+								fm.trigger('download', {files : files});
+								dfrd.resolve(hashes);
+								setTimeout(function() {
+									iframes.remove();
+								}, fm.UA.Firefox? 20000 : 1000); // give mozilla 20 sec file to be saved
+							});
+					}
+				}
+			}).fail(function(error) {
+				error && fm.error(error);
+				dfrd.reject();
+			}).always(function() {
+				link.remove();
+				fm.ui.notify.off('click', cancelBtn, fnAbort);
+				$(document).off('keydown', fnAbort);
+			});
+			cancelBtn = 'div.elfinder-notify-zipdl div.elfinder-notify-cancel button';
+			fnAbort = function(e) {
+				if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
+					return;
+				}
+				e.preventDefault();
+				e.stopPropagation();
+				reqDef.xhr.quiet = true;
+				reqDef.xhr.abort();
+				dfrd.reject();
+			}
+			fm.ui.notify.one('click', cancelBtn, fnAbort);
+			$(document).on('keydown', fnAbort);
+			fm.trigger('download', {files : files});
+			return dfrd;
+		} else {
+			for (i = 0; i < files.length; i++) {
+				url = fm.openUrl(files[i].hash, true);
+				if (html5dl) {
+					link.attr('href', url)
+					.attr('download', encodeURIComponent(files[i].name))
+					.attr('target', '_blank')
+					.get(0).click();
 				} else {
-					iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+					if (fm.UA.Mobile) {
+						setTimeout(function(){
+							if (! window.open(url)) {
+								fm.error('errPopup');
+							}
+						}, 100);
+					} else {
+						iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+					}
 				}
 			}
+			link.remove();
+			$(iframes)
+				.appendTo('body')
+				.ready(function() {
+					setTimeout(function() {
+						$(iframes).each(function() {
+							$('#' + $(this).attr('id')).remove();
+						});
+					}, fm.UA.Firefox? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
+				});
+			fm.trigger('download', {files : files});
+			return dfrd.resolve(hashes);
 		}
-		link.remove();
-		$(iframes)
-			.appendTo('body')
-			.ready(function() {
-				setTimeout(function() {
-					$(iframes).each(function() {
-						$('#' + $(this).attr('id')).remove();
-					});
-				}, fm.UA.Firefox? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
-			});
-		fm.trigger('download', {files : files});
-		return dfrd.resolve(hashes);
 	};
 
 };

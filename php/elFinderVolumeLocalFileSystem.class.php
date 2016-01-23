@@ -64,7 +64,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['dirMode']  = 0755;            // new dirs mode
 		$this->options['fileMode'] = 0644;            // new files mode
 		$this->options['quarantine'] = '.quarantine';  // quarantine folder name - required to check archive (must be hidden)
-		$this->options['maxArcFilesSize'] = 0;        // max allowed archive files size (0 - no limit)
 		$this->options['rootCssClass'] = 'elfinder-navbar-root-local';
 	}
 	

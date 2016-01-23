@@ -110,6 +110,9 @@ Installation
  2. Rename `/php/connector.minimal.php-dist` to `/php/connector.minimal.php`
  3. Load `/elfinder.src.html` in your browser to run elFinder
 
+### Installer
+ - [Setup elFinder 2.1.x nightly with Composer](https://github.com/Studio-42/elFinder/tree/gh-pages/tools/installer/setup_with_composer)
+
 Downloads
 ------------
 **Stable releases**

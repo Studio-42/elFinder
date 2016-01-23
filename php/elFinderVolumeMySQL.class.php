@@ -402,7 +402,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dirname($path) {
-		return ($stat = $this->stat($path)) ? ($stat['phash'] ? $this->decode($stat['phash']) : $this->root) : false;
+		return ($stat = $this->stat($path)) ? (!empty($stat['phash']) ? $this->decode($stat['phash']) : $this->root) : false;
 	}
 
 	/**
