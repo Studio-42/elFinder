@@ -138,7 +138,7 @@ class elFinderConnector {
 		if (isset($data['pointer'])) {
 			$toEnd = true;
 			$fp = $data['pointer'];
-			if (elFinder::isSeekableStream($fp)) {
+			if (elFinder::isSeekableStream($fp) && (array_search('Accept-Ranges: none', headers_list()) === false)) {
 				header('Accept-Ranges: bytes');
 				$psize = null;
 				if (!empty($_SERVER['HTTP_RANGE'])) {
@@ -194,10 +194,12 @@ class elFinderConnector {
 			exit();
 		} else {
 			if (!empty($data['raw']) && !empty($data['error'])) {
-				exit($data['error']);
+				echo $data['error'];
 			} else {
-				exit(json_encode($data));
+				echo json_encode($data);
 			}
+			flush();
+			exit(0);
 		}
 		
 	}

@@ -133,6 +133,7 @@
 .elfinder-dialog-icon-download    { background-position: 0 -260px; }
 .elfinder-dialog-icon-save        { background-position: 0 -295px; }
 .elfinder-dialog-icon-rename      { background-position: 0 -330px; }
+.elfinder-dialog-icon-zipdl,
 .elfinder-dialog-icon-archive,
 .elfinder-dialog-icon-extract     { background-position: 0 -365px; }
 .elfinder-dialog-icon-search      { background-position: 0 -402px; }

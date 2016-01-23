@@ -186,6 +186,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',

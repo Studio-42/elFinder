@@ -1359,7 +1359,7 @@ window.elFinder = function(node, opts) {
 
 		delete options.preventFail
 
-		xhr = this.transport.send(options).fail(error).done(success);
+		dfrd.xhr = xhr = this.transport.send(options).fail(error).done(success);
 		
 		// add "open" xhr into queue
 		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
@@ -1717,14 +1717,14 @@ window.elFinder = function(node, opts) {
 	this.isCommandEnabled = function(name, dstHash) {
 		var disabled;
 		if (dstHash && self.root(dstHash) !== cwd) {
+			disabled = [];
 			$.each(self.disabledCmds, function(i, v){
 				if (dstHash.indexOf(i, 0) == 0) {
 					disabled = v;
 					return false;
 				}
 			});
-		}
-		if (!disabled) {
+		} else {
 			disabled = cwdOptions.disabled;
 		}
 		return this._commands[name] ? $.inArray(name, disabled) === -1 : false;
@@ -2128,6 +2128,17 @@ window.elFinder = function(node, opts) {
 			cmd.prototype = base;
 			self._commands[name] = new cmd();
 			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+			// setup linked commands
+			if (self._commands[name].linkedCmds.length) {
+				$.each(self._commands[name].linkedCmds, function(i, n) {
+					var lcmd = self.commands[n];
+					if ($.isFunction(lcmd) && !self._commands[n]) {
+						lcmd.prototype = base;
+						self._commands[n] = new lcmd();
+						self._commands[n].setup(n, self.options.commandsOptions[n]||{});
+					}
+				});
+			}
 		}
 	});
 	

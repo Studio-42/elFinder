@@ -86,7 +86,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 				
 				$.each(types[type]||[], function(i, name) {
-					var cmd, node, submenu, hover, _disabled;
+					var cmd, node, submenu, hover;
 					
 					if (name == '|' && sep) {
 						menu.append('<div class="elfinder-contextmenu-separator"/>');
@@ -100,12 +100,19 @@ $.fn.elfindercontextmenu = function(fm) {
 					cmd = fm.command(name);
 
 					if (cmd && !isCwd) {
-						_disabled = cmd._disabled;
+						cmd.__disabled = cmd._disabled;
 						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
+						$.each(cmd.linkedCmds, function(i, n) {
+							var c;
+							if (c = fm.command(n)) {
+								c.__disabled = c._disabled;
+								c._disabled = !(c.alwaysEnabled || (fm._commands[n] ? $.inArray(n, disabled) === -1 : false));
+							}
+						});
 					}
 
 					if (cmd && cmd.getstate(targets) != -1) {
-						targets._type = type;
+						//targets._type = type;
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
@@ -180,7 +187,15 @@ $.fn.elfindercontextmenu = function(fm) {
 						sep = true;
 					}
 					
-					cmd && !isCwd && (cmd._disabled = _disabled);
+					if (cmd && !isCwd) {
+						cmd._disabled = cmd.__disabled;
+						$.each(cmd.linkedCmds, function(i, n) {
+							var c;
+							if (c = fm.command(n)) {
+								c._disabled = c.__disabled;
+							}
+						});
+					}
 				});
 			},
 			

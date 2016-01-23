@@ -28,6 +28,14 @@ elFinder.prototype.command = function(fm) {
 	this.title = '';
 	
 	/**
+	 * Linked(Child) commands name
+	 * They are loaded together when tthis command is loaded.
+	 * 
+	 * @type  Array
+	 */
+	this.linkedCmds = [];
+	
+	/**
 	 * Current command state
 	 *
 	 * @example
