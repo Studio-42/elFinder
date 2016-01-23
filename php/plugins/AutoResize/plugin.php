@@ -82,12 +82,13 @@ class elFinderPluginAutoResize {
 		
 		// check target image type
 		$imgTypes = array(
-				IMAGETYPE_GIF => IMG_GIF,
-				IMAGETYPE_JPEG => IMG_JPEG,
-				IMAGETYPE_PNG => IMG_PNG,
-				IMAGETYPE_WBMP => IMG_WBMP,
+			IMAGETYPE_GIF  => IMG_GIF,
+			IMAGETYPE_JPEG => IMG_JPEG,
+			IMAGETYPE_PNG  => IMG_PNG,
+			IMAGETYPE_BMP  => IMG_WBMP,
+			IMAGETYPE_WBMP => IMG_WBMP
 		);
-		if (! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
+		if (! ($opts['targetType'] & @$imgTypes[$srcImgInfo[2]])) {
 			return false;
 		}
 		
