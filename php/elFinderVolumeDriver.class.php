@@ -3752,7 +3752,7 @@ abstract class elFinderVolumeDriver {
 			&& (!$this->tmbPath || strpos($path, $this->tmbPath) === false) // do not create thumnbnail for thumnbnail
 			&& $this->imgLib 
 			&& strpos($stat['mime'], 'image') === 0 
-			&& ($this->imgLib == 'gd' ? $stat['mime'] == 'image/jpeg' || $stat['mime'] == 'image/png' || $stat['mime'] == 'image/gif' : true);
+			&& ($this->imgLib == 'gd' ? in_array($stat['mime'], array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp')) : true);
 	}
 	
 	/**
@@ -4320,16 +4320,25 @@ abstract class elFinderVolumeDriver {
 	protected function gdImageCreate($path,$mime){
 		switch($mime){
 			case 'image/jpeg':
-			return imagecreatefromjpeg($path);
+			return @imagecreatefromjpeg($path);
 
 			case 'image/png':
-			return imagecreatefrompng($path);
+			return @imagecreatefrompng($path);
 
 			case 'image/gif':
-			return imagecreatefromgif($path);
+			return @imagecreatefromgif($path);
 
+			case 'image/x-ms-bmp':
+			if (!function_exists('imagecreatefrombmp')) {
+				include_once dirname(__FILE__).'/libs/GdBmp.php';
+			}
+			return @imagecreatefrombmp($path);
+			
 			case 'image/xbm':
-			return imagecreatefromxbm($path);
+			return @imagecreatefromxbm($path);
+			
+			case 'image/xpm':
+			return @imagecreatefromxpm($path);
 		}
 		return false;
 	}
