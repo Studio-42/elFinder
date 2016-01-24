@@ -302,6 +302,7 @@ window.elFinder = function(node, opts) {
 						if (f.volumeid) {
 							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
 							self.tmbUrls[f.volumeid] = self.option('tmbUrl');
+							self.roots[f.volumeid] = f.hash;
 						}
 					}
 					files[f.hash] = f;
@@ -851,6 +852,16 @@ window.elFinder = function(node, opts) {
 		}
 		if (dir) {
 			return dir.hash;
+		}
+		
+		$.each(self.roots, function(id, rhash) {
+			if (hash.indexOf(id) === 0) {
+				dir = rhash;
+				return false;
+			}
+		});
+		if (dir) {
+			return dir;
 		}
 		
 		while (i in files && files.hasOwnProperty(i)) {
@@ -2106,6 +2117,13 @@ window.elFinder = function(node, opts) {
 		
 	} 
 
+	/**
+	 * Root hashed
+	 * 
+	 * @type Object
+	 */
+	this.roots = {},
+	
 	/**
 	 * Loaded commands
 	 *
