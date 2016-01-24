@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 35d613d) (2016-01-24)
+ * Version 2.1.6 (2.1-src Nightly: 24da439) (2016-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1000,7 +1000,7 @@ window.elFinder = function(node, opts) {
 			return file.url;
 		}
 		
-		if (cwdOptions.url) {
+		if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
 
@@ -1060,7 +1060,7 @@ window.elFinder = function(node, opts) {
 				if (file.url != 1) {
 					return file.url;
 				}
-			} else if (cwdOptions.url) {
+			} else if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
 				return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
 			}
 		}
@@ -4752,7 +4752,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 35d613d)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 24da439)';
 
 
 
