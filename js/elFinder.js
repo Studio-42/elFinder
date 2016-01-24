@@ -986,7 +986,7 @@ window.elFinder = function(node, opts) {
 			return file.url;
 		}
 		
-		if (cwdOptions.url) {
+		if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
 			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
 
@@ -1046,7 +1046,7 @@ window.elFinder = function(node, opts) {
 				if (file.url != 1) {
 					return file.url;
 				}
-			} else if (cwdOptions.url) {
+			} else if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
 				return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
 			}
 		}
