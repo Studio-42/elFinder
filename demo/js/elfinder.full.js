@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: a1540fd) (2016-01-24)
+ * Version 2.1.6 (2.1-src Nightly: 35d613d) (2016-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -315,7 +315,10 @@ window.elFinder = function(node, opts) {
 						// set disabledCmds, tmbUrls for each volume
 						if (f.volumeid) {
 							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
-							self.tmbUrls[f.volumeid] = self.option('tmbUrl');
+							if (f.tmbUrl) {
+								self.tmbUrls[f.volumeid] = f.tmbUrl;
+							}
+							self.roots[f.volumeid] = f.hash;
 						}
 					}
 					files[f.hash] = f;
@@ -867,6 +870,16 @@ window.elFinder = function(node, opts) {
 			return dir.hash;
 		}
 		
+		$.each(self.roots, function(id, rhash) {
+			if (hash.indexOf(id) === 0) {
+				dir = rhash;
+				return false;
+			}
+		});
+		if (dir) {
+			return dir;
+		}
+		
 		while (i in files && files.hasOwnProperty(i)) {
 			dir = files[i]
 			if (!dir.phash && !dir.mime == 'directory' && dir.read) {
@@ -1077,7 +1090,7 @@ window.elFinder = function(node, opts) {
 	this.tmb = function(hash) {
 		var file = files[hash],
 			geturl = function(hash){
-				var turl = cwdOptions['tmbUrl'];
+				var turl = '';
 				$.each(self.tmbUrls, function(i, u){
 					if (hash.indexOf(i) === 0) {
 						turl = self.tmbUrls[i];
@@ -1087,7 +1100,7 @@ window.elFinder = function(node, opts) {
 				return turl;
 			},
 			tmbUrl = (self.tmbUrls._search && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
-			url = file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
+			url = tmbUrl && file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
 		
 		return url;
 	}
@@ -2120,6 +2133,13 @@ window.elFinder = function(node, opts) {
 		
 	} 
 
+	/**
+	 * Root hashed
+	 * 
+	 * @type Object
+	 */
+	this.roots = {},
+	
 	/**
 	 * Loaded commands
 	 *
@@ -4732,7 +4752,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: a1540fd)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 35d613d)';
 
 
 
@@ -11362,10 +11382,27 @@ elFinder.prototype.commands.download = function() {
 		fm     = this.fm,
 		zipOn  = false,
 		filter = function(hashes) {
-			if (!fm.isCommandEnabled('download', hashes[0])) {
-				return [];
+			var mixed  = false,
+				croot  = '';
+			
+			if (self.inMixSearch) {
+				hashes = $.map(hashes, function(h) {
+					return fm.isCommandEnabled('download', h)? h : null;
+				});
+				croot = fm.root(hashes[0]);
+				$.each(hashes, function(i, h) {
+					if (mixed = (croot !== fm.root(h))) {
+						return false;
+					}
+				});
+				zipOn = (!mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
+			} else {
+				if (!fm.isCommandEnabled('download', hashes[0])) {
+					return [];
+				}
+				zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
 			}
-			zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
+			
 			return (!zipOn)?
 					$.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; })
 					: self.files(hashes);
@@ -11378,14 +11415,27 @@ elFinder.prototype.commands.download = function() {
 	}];
 	
 	this.getstate = function(sel) {
-		var sel    = (sel || []),
+		var sel    = this.hashes(sel),
 			cnt    = sel.length,
-			czipdl = fm.command('zipdl');
+			czipdl = fm.command('zipdl'),
+			mixed  = false,
+			croot  = '';
 		
-		return  (!czipdl || czipdl._disabled)?
+		if (cnt > 0 && self.inMixSearch) {
+			croot = fm.root(sel[0]);
+			$.each(sel, function(i, h) {
+				if (mixed = (croot !== fm.root(h))) {
+					return false;
+				}
+			});
+		}
+		
+		return  (mixed || !czipdl || czipdl._disabled)?
 				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
+	
+	this.inMixSearch = false;
 	
 	fm.bind('contextmenu', function(e){
 		var fm = self.fm,
@@ -11480,11 +11530,18 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 		}
+	})
+	.bind('searchstart', function(e) {
+		self.inMixSearch = !e.data.target ? true : false;
+	})
+	.bind('searchend', function() {
+		self.inMixSearch = false;
 	});
 	
 	
 	this.exec = function(hashes) {
-		var fm      = this.fm,
+		var hashes  = this.hashes(hashes),
+			fm      = this.fm,
 			base    = fm.options.url,
 			files   = filter(hashes),
 			dfrd    = $.Deferred(),
