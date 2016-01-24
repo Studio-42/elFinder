@@ -12,10 +12,27 @@ elFinder.prototype.commands.download = function() {
 		fm     = this.fm,
 		zipOn  = false,
 		filter = function(hashes) {
-			if (!fm.isCommandEnabled('download', hashes[0])) {
-				return [];
+			var mixed  = false,
+				croot  = '';
+			
+			if (self.inMixSearch) {
+				hashes = $.map(hashes, function(h) {
+					return fm.isCommandEnabled('download', h)? h : null;
+				});
+				croot = fm.root(hashes[0]);
+				$.each(hashes, function(i, h) {
+					if (mixed = (croot !== fm.root(h))) {
+						return false;
+					}
+				});
+				zipOn = (!mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
+			} else {
+				if (!fm.isCommandEnabled('download', hashes[0])) {
+					return [];
+				}
+				zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
 			}
-			zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
+			
 			return (!zipOn)?
 					$.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; })
 					: self.files(hashes);
@@ -28,14 +45,27 @@ elFinder.prototype.commands.download = function() {
 	}];
 	
 	this.getstate = function(sel) {
-		var sel    = this.files(sel),
+		var sel    = this.hashes(sel),
 			cnt    = sel.length,
-			czipdl = fm.command('zipdl');
+			czipdl = fm.command('zipdl'),
+			mixed  = false,
+			croot  = '';
 		
-		return  (!czipdl || czipdl._disabled)?
+		if (cnt > 0 && self.inMixSearch) {
+			croot = fm.root(sel[0]);
+			$.each(sel, function(i, h) {
+				if (mixed = (croot !== fm.root(h))) {
+					return false;
+				}
+			});
+		}
+		
+		return  (mixed || !czipdl || czipdl._disabled)?
 				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
+	
+	this.inMixSearch = false;
 	
 	fm.bind('contextmenu', function(e){
 		var fm = self.fm,
@@ -130,6 +160,12 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 		}
+	})
+	.bind('searchstart', function(e) {
+		self.inMixSearch = !e.data.target ? true : false;
+	})
+	.bind('searchend', function() {
+		self.inMixSearch = false;
 	});
 	
 	
