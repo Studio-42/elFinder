@@ -301,7 +301,9 @@ window.elFinder = function(node, opts) {
 						// set disabledCmds, tmbUrls for each volume
 						if (f.volumeid) {
 							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
-							self.tmbUrls[f.volumeid] = self.option('tmbUrl');
+							if (f.tmbUrl) {
+								self.tmbUrls[f.volumeid] = f.tmbUrl;
+							}
 							self.roots[f.volumeid] = f.hash;
 						}
 					}
@@ -1074,7 +1076,7 @@ window.elFinder = function(node, opts) {
 	this.tmb = function(hash) {
 		var file = files[hash],
 			geturl = function(hash){
-				var turl = cwdOptions['tmbUrl'];
+				var turl = '';
 				$.each(self.tmbUrls, function(i, u){
 					if (hash.indexOf(i) === 0) {
 						turl = self.tmbUrls[i];
@@ -1084,7 +1086,7 @@ window.elFinder = function(node, opts) {
 				return turl;
 			},
 			tmbUrl = (self.tmbUrls._search && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
-			url = file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
+			url = tmbUrl && file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
 		
 		return url;
 	}

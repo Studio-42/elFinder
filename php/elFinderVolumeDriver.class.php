@@ -1306,16 +1306,12 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function file($hash) {
 		$path = $this->decode($hash);
-		$isRoot = ($path === $this->root);
+		$isRoot = ($path == $this->root);
 		
 		$file = $this->stat($path);
 		
 		if ($isRoot) {
-			$file['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
-			$file['disabled'] = array_merge(array_unique($this->disabled)); // `array_merge` for type array of JSON
-			if (isset($this->options['netkey'])) {
-				$file['netkey'] = $this->options['netkey'];
-			}
+			$file = array_merge($file, $this->getRootStatExtra());
 		}
 		
 		return ($file) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
@@ -3014,6 +3010,34 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Get root stat extra key values
+	 * 
+	 * @return array stat extras
+	 * @author Naoki Sawada
+	 */
+	protected function getRootStatExtra() {
+		$stat = array();
+		if ($this->rootName) {
+			$stat['name'] = $this->rootName;
+		}
+		if (! empty($this->options['icon'])) {
+			$stat['icon'] = $this->options['icon'];
+		}
+		if (! empty($this->options['rootCssClass'])) {
+			$stat['csscls'] = $this->options['rootCssClass'];
+		}
+		if (! empty($this->tmbURL)) {
+			$stat['tmbUrl'] = $this->tmbURL;
+		}
+		$stat['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
+		$stat['disabled'] = array_merge(array_unique($this->disabled)); // `array_merge` for type array of JSON
+		if (isset($this->options['netkey'])) {
+			$stat['netkey'] = $this->options['netkey'];
+		}
+		return $stat;
+	}
+	
+	/**
 	 * Put file stat in cache and return it
 	 *
 	 * @param  string  $path   file path
@@ -3032,15 +3056,7 @@ abstract class elFinderVolumeDriver {
 		$parent = '';
 		
 		if ($root) {
-			if ($this->rootName) {
-				$stat['name'] = $this->rootName;
-			}
-			if (! empty($this->options['icon'])) {
-				$stat['icon'] = $this->options['icon'];
-			}
-			if (! empty($this->options['rootCssClass'])) {
-				$stat['csscls'] = $this->options['rootCssClass'];
-			}
+			$stat = array_merge($stat, $this->getRootStatExtra());
 		} else {
 			if (!isset($stat['name']) || $stat['name'] === '') {
 				$stat['name'] = $this->basenameCE($path);
