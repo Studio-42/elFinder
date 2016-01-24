@@ -28,7 +28,7 @@ elFinder.prototype.commands.download = function() {
 	}];
 	
 	this.getstate = function(sel) {
-		var sel    = (sel || []),
+		var sel    = this.files(sel),
 			cnt    = sel.length,
 			czipdl = fm.command('zipdl');
 		
@@ -134,7 +134,8 @@ elFinder.prototype.commands.download = function() {
 	
 	
 	this.exec = function(hashes) {
-		var fm      = this.fm,
+		var hashes  = this.hashes(hashes),
+			fm      = this.fm,
 			base    = fm.options.url,
 			files   = filter(hashes),
 			dfrd    = $.Deferred(),
