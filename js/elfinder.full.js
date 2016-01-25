@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 2700893) (2016-01-25)
+ * Version 2.1.6 (2.1-src Nightly: f91ae3a) (2016-01-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4768,7 +4768,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 2700893)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: f91ae3a)';
 
 
 
@@ -5036,6 +5036,10 @@ elFinder.prototype._options = {
 		// "upload" command options.
 		upload : {
 			ui : 'uploadbutton'
+		},
+		// "download" command options.
+		download : {
+			maxRequests : 10
 		},
 		// "quicklook" command options.
 		quicklook : {
@@ -11449,6 +11453,7 @@ elFinder.prototype.commands.download = function() {
 	this.getstate = function(sel) {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
+			maxReq = this.options.maxRequests || 10,
 			czipdl = fm.command('zipdl'),
 			mixed  = false,
 			croot  = '';
@@ -11463,7 +11468,7 @@ elFinder.prototype.commands.download = function() {
 		}
 		
 		return  (mixed || !czipdl || czipdl._disabled)?
-				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
+				(!this._disabled && cnt && cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
 	
