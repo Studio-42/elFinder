@@ -99,7 +99,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					cmd = fm.command(name);
 
-					if (cmd && !isCwd) {
+					if (cmd && !isCwd && (!fm.searchStatus.state || !cmd.disableOnSearch)) {
 						cmd.__disabled = cmd._disabled;
 						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
 						$.each(cmd.linkedCmds, function(i, n) {
@@ -187,12 +187,14 @@ $.fn.elfindercontextmenu = function(fm) {
 						sep = true;
 					}
 					
-					if (cmd && !isCwd) {
+					if (cmd && typeof cmd.__disabled !== 'undefined') {
 						cmd._disabled = cmd.__disabled;
+						delete cmd.__disabled;
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
 							if (c = fm.command(n)) {
 								c._disabled = c.__disabled;
+								delete c.__disabled;
 							}
 						});
 					}

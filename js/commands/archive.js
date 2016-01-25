@@ -13,7 +13,7 @@ elFinder.prototype.commands.archive = function() {
 		
 	this.variants = [];
 	
-	this.disableOnSearch = true;
+	this.disableOnSearch = false;
 	
 	/**
 	 * Update mimes on open/reload
@@ -28,8 +28,18 @@ elFinder.prototype.commands.archive = function() {
 		self.change();
 	});
 	
-	this.getstate = function() {
-		return !this._disabled && mimes.length && (fm.selected().length || (dfrd && dfrd.state() == 'pending')) && fm.cwd().write ? 0 : -1;
+	this.getstate = function(sel) {
+		var sel = this.files(sel),
+			cnt = sel.length,
+			chk = fm.cwd().write,
+			cwdId;
+		
+		if (chk && fm.searchStatus.state > 1) {
+			cwdId = fm.cwd().volumeid;
+			chk = (cnt === $.map(sel, function(f) { return f.read && f.hash.indexOf(cwdId) === 0 ? f : null; }).length);
+		}
+		
+		return chk && !this._disabled && mimes.length && (cnt || (dfrd && dfrd.state() == 'pending')) ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, type) {

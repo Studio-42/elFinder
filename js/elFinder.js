@@ -610,6 +610,18 @@ window.elFinder = function(node, opts) {
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 
 	/**
+	 * Current search status
+	 * 
+	 * @type Object
+	 */
+	this.searchStatus = {
+		state  : 0, // 0: search ended, 1: search started, 2: in search result
+		query  : '',
+		target : '',
+		mime   : ''
+	};
+
+	/**
 	 * Method to store/fetch data
 	 *
 	 * @type Function
@@ -1085,7 +1097,7 @@ window.elFinder = function(node, opts) {
 				});
 				return turl;
 			},
-			tmbUrl = (self.tmbUrls._search && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
+			tmbUrl = (self.searchStatus.state && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
 			url = tmbUrl && file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
 		
 		return url;
@@ -2071,12 +2083,16 @@ window.elFinder = function(node, opts) {
 			}
 			
 		})
+		.bind('searchstart', function(e) {
+			$.extend(self.searchStatus, e.data);
+			self.searchStatus.state = 1;
+		})
 		.bind('search', function(e) {
+			self.searchStatus.state = 2;
 			cache(e.data.files);
-			self.tmbUrls._search = true;
 		})
 		.bind('searchend', function() {
-			self.tmbUrls._search = false;
+			self.searchStatus.state = 0;
 		})
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');

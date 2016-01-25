@@ -15,7 +15,7 @@ elFinder.prototype.commands.download = function() {
 			var mixed  = false,
 				croot  = '';
 			
-			if (self.inMixSearch) {
+			if (fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 				hashes = $.map(hashes, function(h) {
 					return fm.isCommandEnabled('download', h)? h : null;
 				});
@@ -51,7 +51,7 @@ elFinder.prototype.commands.download = function() {
 			mixed  = false,
 			croot  = '';
 		
-		if (cnt > 0 && self.inMixSearch) {
+		if (cnt > 0 && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 			croot = fm.root(sel[0]);
 			$.each(sel, function(i, h) {
 				if (mixed = (croot !== fm.root(h))) {
@@ -64,8 +64,6 @@ elFinder.prototype.commands.download = function() {
 				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
-	
-	this.inMixSearch = false;
 	
 	fm.bind('contextmenu', function(e){
 		var fm = self.fm,
@@ -160,14 +158,7 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 		}
-	})
-	.bind('searchstart', function(e) {
-		self.inMixSearch = !e.data.target ? true : false;
-	})
-	.bind('searchend', function() {
-		self.inMixSearch = false;
 	});
-	
 	
 	this.exec = function(hashes) {
 		var hashes  = this.hashes(hashes),
