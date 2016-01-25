@@ -635,14 +635,18 @@ abstract class elFinderVolumeDriver {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
 		}
 		
-		// chach archiver
+		// check archivers
 		if (empty($this->archivers['create'])) {
 			$this->disabled[] ='archive';
-			$this->disabled[] ='zipdl';
 		}
 		if (empty($this->archivers['extract'])) {
 			$this->disabled[] ='extract';
 		}
+		$_arc = $this->getArchivers();
+		if (empty($_arc['create'])) {
+			$this->disabled[] ='zipdl';
+		}
+		
 		// check 'statOwner' for command `chmod`
 		if (empty($this->options['statOwner'])) {
 			$this->disabled[] ='chmod';
