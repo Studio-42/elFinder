@@ -1866,11 +1866,22 @@ abstract class elFinderVolumeDriver {
 			$mime = elFinderVolumeDriver::mimetypeInternalDetect('file.'.$ext);
 		}
 		$res = false;
-		$dirname = $this->dirnameCE($this->realpath($hashes[0]));
-		if ($dirname === $this->root) {
+		$mixed = false;
+		$hashes = array_merge($hashes);
+		$dirname = dirname(str_replace($this->separator, DIRECTORY_SEPARATOR, $this->path($hashes[0])));
+		$cnt = count($hashes);
+		if ($cnt > 1) {
+			for($i = 1; $i < $cnt; $i++) {
+				if ($dirname !== dirname(str_replace($this->separator, DIRECTORY_SEPARATOR, $this->path($hashes[$i])))) {
+					$mixed = true;
+					break;
+				}
+			}
+		}
+		if ($mixed || $this->root == $this->dirnameCE($this->decode($hashes[0]))) {
 			$prefix = $this->rootName;
 		} else {
-			$prefix = $this->basenameCE($dirname);
+			$prefix = basename($dirname);
 		}
 		if ($dir = $this->getItemsInHand($hashes)) {
 			$tmppre = (substr(PHP_OS, 0, 3) === 'WIN')? 'zdl' : 'elfzdl';
@@ -2823,6 +2834,7 @@ abstract class elFinderVolumeDriver {
 			register_shutdown_function(array($this, 'rmdirRecursive'), $dir);
 		}
 		$res = true;
+		$files = array();
 		foreach ($hashes as $hash) {
 			if (($file = $this->file($hash)) == false) {
 				continue;
@@ -2830,9 +2842,16 @@ abstract class elFinderVolumeDriver {
 			if (!$file['read']) {
 				continue;
 			}
-				
-			$target = $dir.DIRECTORY_SEPARATOR.$file['name'];
-				
+			
+			$name = $file['name'];
+			// for call from search results
+			if (isset($files[$name])) {
+				$name = preg_replace('/^(.*?)(\..*)?$/', '$1_'.$files[$name]++.'$2', $name);
+			} else {
+				$files[$name] = 1;
+			}
+			$target = $dir.DIRECTORY_SEPARATOR.$name;
+			
 			if ($file['mime'] === 'directory') {
 				$chashes = array();
 				$_files = $this->scandir($hash);
@@ -2849,20 +2868,19 @@ abstract class elFinderVolumeDriver {
 					break;
 				}
 				!empty($file['ts']) && @touch($target, $file['ts']);
-				continue;
-			}
-			$target = $dir.DIRECTORY_SEPARATOR.$file['name'];
-			$path = $this->decode($hash);
-			if ($fp = $this->fopenCE($path)) {
-				if ($tfp = fopen($target, 'wb')) {
-					$totalSize += stream_copy_to_stream($fp, $tfp);
-					fclose($tfp);
+			} else {
+				$path = $this->decode($hash);
+				if ($fp = $this->fopenCE($path)) {
+					if ($tfp = fopen($target, 'wb')) {
+						$totalSize += stream_copy_to_stream($fp, $tfp);
+						fclose($tfp);
+					}
+					!empty($file['ts']) && @touch($target, $file['ts']);
+					$this->fcloseCE($fp, $path);
 				}
-				!empty($file['ts']) && @touch($target, $file['ts']);
-				$this->fcloseCE($fp, $path);
-			}
-			if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $totalSize) {
-				$res = $this->setError(elFinder::ERROR_ARC_MAXSIZE);
+				if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $totalSize) {
+					$res = $this->setError(elFinder::ERROR_ARC_MAXSIZE);
+				}
 			}
 		}
 		return $res? $dir : false;
