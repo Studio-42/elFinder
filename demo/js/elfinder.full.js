@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 24da439) (2016-01-24)
+ * Version 2.1.6 (2.1-src Nightly: ed838f6) (2016-01-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -624,6 +624,18 @@ window.elFinder = function(node, opts) {
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 
 	/**
+	 * Current search status
+	 * 
+	 * @type Object
+	 */
+	this.searchStatus = {
+		state  : 0, // 0: search ended, 1: search started, 2: in search result
+		query  : '',
+		target : '',
+		mime   : ''
+	};
+
+	/**
 	 * Method to store/fetch data
 	 *
 	 * @type Function
@@ -1099,7 +1111,7 @@ window.elFinder = function(node, opts) {
 				});
 				return turl;
 			},
-			tmbUrl = (self.tmbUrls._search && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
+			tmbUrl = (self.searchStatus.state && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
 			url = tmbUrl && file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
 		
 		return url;
@@ -2085,12 +2097,16 @@ window.elFinder = function(node, opts) {
 			}
 			
 		})
+		.bind('searchstart', function(e) {
+			$.extend(self.searchStatus, e.data);
+			self.searchStatus.state = 1;
+		})
 		.bind('search', function(e) {
+			self.searchStatus.state = 2;
 			cache(e.data.files);
-			self.tmbUrls._search = true;
 		})
 		.bind('searchend', function() {
-			self.tmbUrls._search = false;
+			self.searchStatus.state = 0;
 		})
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
@@ -4752,7 +4768,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 24da439)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: ed838f6)';
 
 
 
@@ -6891,7 +6907,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					cmd = fm.command(name);
 
-					if (cmd && !isCwd) {
+					if (cmd && !isCwd && (!fm.searchStatus.state || !cmd.disableOnSearch)) {
 						cmd.__disabled = cmd._disabled;
 						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
 						$.each(cmd.linkedCmds, function(i, n) {
@@ -6979,12 +6995,14 @@ $.fn.elfindercontextmenu = function(fm) {
 						sep = true;
 					}
 					
-					if (cmd && !isCwd) {
+					if (cmd && typeof cmd.__disabled !== 'undefined') {
 						cmd._disabled = cmd.__disabled;
+						delete cmd.__disabled;
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
 							if (c = fm.command(n)) {
 								c._disabled = c.__disabled;
+								delete c.__disabled;
 							}
 						});
 					}
@@ -7656,7 +7674,7 @@ $.fn.elfindercwd = function(fm, options) {
 							$('<img/>')
 								.load(function() { node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat"); })
 								.attr('src', tmb);
-						})(node, fm.tmbUrls._search? fm.tmb(hash) : (url + tmb));
+						})(node, fm.searchStatus.state? fm.tmb(hash) : (url + tmb));
 					} else {
 						ret = false;
 						if ((ndx = index(hash)) != -1) {
@@ -10899,7 +10917,7 @@ elFinder.prototype.commands.archive = function() {
 		
 	this.variants = [];
 	
-	this.disableOnSearch = true;
+	this.disableOnSearch = false;
 	
 	/**
 	 * Update mimes on open/reload
@@ -10914,8 +10932,18 @@ elFinder.prototype.commands.archive = function() {
 		self.change();
 	});
 	
-	this.getstate = function() {
-		return !this._disabled && mimes.length && (fm.selected().length || (dfrd && dfrd.state() == 'pending')) && fm.cwd().write ? 0 : -1;
+	this.getstate = function(sel) {
+		var sel = this.files(sel),
+			cnt = sel.length,
+			chk = fm.cwd().write,
+			cwdId;
+		
+		if (chk && fm.searchStatus.state > 1) {
+			cwdId = fm.cwd().volumeid;
+			chk = (cnt === $.map(sel, function(f) { return f.read && f.hash.indexOf(cwdId) === 0 ? f : null; }).length);
+		}
+		
+		return chk && !this._disabled && mimes.length && (cnt || (dfrd && dfrd.state() == 'pending')) ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, type) {
@@ -11385,7 +11413,7 @@ elFinder.prototype.commands.download = function() {
 			var mixed  = false,
 				croot  = '';
 			
-			if (self.inMixSearch) {
+			if (fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 				hashes = $.map(hashes, function(h) {
 					return fm.isCommandEnabled('download', h)? h : null;
 				});
@@ -11421,7 +11449,7 @@ elFinder.prototype.commands.download = function() {
 			mixed  = false,
 			croot  = '';
 		
-		if (cnt > 0 && self.inMixSearch) {
+		if (cnt > 0 && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 			croot = fm.root(sel[0]);
 			$.each(sel, function(i, h) {
 				if (mixed = (croot !== fm.root(h))) {
@@ -11434,8 +11462,6 @@ elFinder.prototype.commands.download = function() {
 				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
-	
-	this.inMixSearch = false;
 	
 	fm.bind('contextmenu', function(e){
 		var fm = self.fm,
@@ -11530,14 +11556,7 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 		}
-	})
-	.bind('searchstart', function(e) {
-		self.inMixSearch = !e.data.target ? true : false;
-	})
-	.bind('searchend', function() {
-		self.inMixSearch = false;
 	});
-	
 	
 	this.exec = function(hashes) {
 		var hashes  = this.hashes(hashes),
@@ -11699,7 +11718,7 @@ elFinder.prototype.commands.duplicate = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
+		return !this._disabled && cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read && f.phash === fm.cwd().hash? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -11712,7 +11731,7 @@ elFinder.prototype.commands.duplicate = function() {
 				}), 
 			args = [];
 			
-		if (!cnt || this._disabled) {
+		if (!cnt || this.getstate(hashes) === -1) {
 			return dfrd.reject();
 		}
 		
