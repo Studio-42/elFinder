@@ -177,6 +177,10 @@ elFinder.prototype._options = {
 		upload : {
 			ui : 'uploadbutton'
 		},
+		// "download" command options.
+		download : {
+			maxRequests : 10
+		},
 		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,

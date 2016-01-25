@@ -47,6 +47,7 @@ elFinder.prototype.commands.download = function() {
 	this.getstate = function(sel) {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
+			maxReq = this.options.maxRequests || 10,
 			czipdl = fm.command('zipdl'),
 			mixed  = false,
 			croot  = '';
@@ -61,7 +62,7 @@ elFinder.prototype.commands.download = function() {
 		}
 		
 		return  (mixed || !czipdl || czipdl._disabled)?
-				(!this._disabled && cnt && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
+				(!this._disabled && cnt && cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
 				: (!this._disabled && cnt ? 0 : -1);
 	};
 	
