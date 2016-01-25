@@ -635,6 +635,14 @@ abstract class elFinderVolumeDriver {
 			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
 		}
 		
+		// chach archiver
+		if (empty($this->archivers['create'])) {
+			$this->disabled[] ='archive';
+			$this->disabled[] ='zipdl';
+		}
+		if (empty($this->archivers['extract'])) {
+			$this->disabled[] ='extract';
+		}
 		// check 'statOwner' for command `chmod`
 		if (empty($this->options['statOwner'])) {
 			$this->disabled[] ='chmod';
@@ -1027,6 +1035,9 @@ abstract class elFinderVolumeDriver {
 
 		$this->configure();
 		
+		// Normarize disabled (array_merge`for type array of JSON)
+		$this->disabled = array_merge(array_unique($this->disabled));
+		
 		// fix sync interval
 		if ($this->options['syncMinMs'] !== 0) {
 			$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
@@ -1142,7 +1153,7 @@ abstract class elFinderVolumeDriver {
 			'path'            => $this->path($hash),
 			'url'             => $this->URL,
 			'tmbUrl'          => $this->tmbURL,
-			'disabled'        => array_merge(array_unique($this->disabled)), // `array_merge` for type array of JSON
+			'disabled'        => $this->disabled,
 			'separator'       => $this->separator,
 			'copyOverwrite'   => intval($this->options['copyOverwrite']),
 			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
@@ -3048,7 +3059,7 @@ abstract class elFinderVolumeDriver {
 			$stat['tmbUrl'] = $this->tmbURL;
 		}
 		$stat['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
-		$stat['disabled'] = array_merge(array_unique($this->disabled)); // `array_merge` for type array of JSON
+		$stat['disabled'] = $this->disabled;
 		if (isset($this->options['netkey'])) {
 			$stat['netkey'] = $this->options['netkey'];
 		}
