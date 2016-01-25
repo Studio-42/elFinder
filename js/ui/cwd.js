@@ -330,8 +330,12 @@ $.fn.elfindercwd = function(fm, options) {
 			selectAll = function() {
 				var phash = fm.cwd().hash;
 
-				cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect); 
-				selectedFiles = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
+				if (lastSearch.length) {
+					selectedFiles = $.map(lastSearch, function(f) { return f.hash; });
+				} else {
+					selectedFiles = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				}
 				trigger();
 			},
 			
