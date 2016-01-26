@@ -869,7 +869,7 @@ window.elFinder = function(node, opts) {
 		}
 		
 		$.each(self.roots, function(id, rhash) {
-			if (hash.indexOf(id) === 0) {
+			if (rhash.indexOf(id) === 0) {
 				dir = rhash;
 				return false;
 			}
