@@ -214,7 +214,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($r === 0) {
 			// changed
 			clearstatcache();
-			return filemtime($path);
+			$mtime = @filemtime($path); // error on busy?
+			return $mtime? $mtime : time();
 		} else if ($r === 2) {
 			// not changed (timeout)
 			return $compare;
