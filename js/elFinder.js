@@ -1201,12 +1201,14 @@ window.elFinder = function(node, opts) {
 			defdone  = !(options.preventDefault || options.preventDone),
 			// options for notify dialog
 			notify   = $.extend({}, options.notify),
+			// make cancel button
+			cancel   = !!options.cancel,
 			// do not normalize data - return as is
 			raw      = !!options.raw,
 			// sync files on request fail
 			syncOnFail = options.syncOnFail,
-			// open notify dialog timeout		
-			timeout, 
+			// open notify dialog timeout
+			timeout,
 			// request options
 			options = $.extend({
 				url      : o.url,
@@ -1359,6 +1361,9 @@ window.elFinder = function(node, opts) {
 		}
 
 		if (notify.type && notify.cnt) {
+			if (cancel) {
+				notify.cancel = dfrd;
+			}
 			timeout = setTimeout(function() {
 				self.notify(notify);
 				dfrd.always(function() {
@@ -2226,12 +2231,13 @@ window.elFinder = function(node, opts) {
 		cwd : $('<div/>').appendTo(node).elfindercwd(this, this.options.uiOptions.cwd || {}),
 		// notification dialog window
 		notify : this.dialog('', {
-			cssClass  : 'elfinder-dialog-notify',
-			position  : this.options.notifyDialog.position,
-			resizable : false,
-			autoOpen  : false,
-			title     : '&nbsp;',
-			width     : parseInt(this.options.notifyDialog.width)
+			cssClass      : 'elfinder-dialog-notify',
+			position      : this.options.notifyDialog.position,
+			resizable     : false,
+			autoOpen      : false,
+			closeOnEscape : false,
+			title         : '&nbsp;',
+			width         : parseInt(this.options.notifyDialog.width)
 		}),
 		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
 	}
@@ -3056,27 +3062,32 @@ elFinder.prototype = {
 		// upload transport using XMLHttpRequest
 		xhr : function(data, fm) { 
 			var self   = fm ? fm : this,
+				node        = self.getUI(),
 				xhr         = new XMLHttpRequest(),
 				notifyto    = null, notifyto2 = null,
 				dataChecked = data.checked,
 				isDataType  = (data.isDataType || data.type == 'data'),
 				retry       = 0,
-				cancelBtn   = 'div.elfinder-notify-upload div.elfinder-notify-cancel button',
 				dfrd   = $.Deferred()
 					.fail(function(error) {
-						var file = files.length? (isDataType? files[0][0] : files[0]) : {};
-						if (file._cid) {
-							formData = new FormData();
-							files = [{_chunkfail: true}];
-							formData.append('chunk', file._chunk);
-							formData.append('cid'  , file._cid);
-							isDataType = false;
-							send(files);
+						if (self.uploads.xhrUploading) {
+							setTimeout(function() { self.sync(); }, 5000);
+							self.uploads.xhrUploading = false;
+							var file = files.length? (isDataType? files[0][0] : files[0]) : {};
+							if (file._cid) {
+								formData = new FormData();
+								files = [{_chunkfail: true}];
+								formData.append('chunk', file._chunk);
+								formData.append('cid'  , file._cid);
+								isDataType = false;
+								send(files);
+							}
 						}
 						files = null;
 						error && self.error(error);
 					})
 					.done(function(data) {
+						self.log(data);
 						xhr = null;
 						files = null;
 						if (data) {
@@ -3089,12 +3100,13 @@ elFinder.prototype = {
 						}
 					})
 					.always(function() {
+						// unregist fnAbort function
+						node.off('uploadabort', fnAbort);
+						$(window).off('unload', fnAbort);
 						notifyto && clearTimeout(notifyto);
 						notifyto2 && clearTimeout(notifyto2);
 						dataChecked && !data.multiupload && checkNotify() && self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
 						chunkMerge && self.ui.notify.children('.elfinder-notify-chunkmerge').length && self.notify({type : 'chunkmerge', cnt : -1});
-						self.ui.notify.off('click', cancelBtn, fnAbort);
-						$(document).off('keydown', fnAbort);
 					}),
 				formData    = new FormData(),
 				target      = (data.target || self.cwd().hash),
@@ -3107,34 +3119,31 @@ elFinder.prototype = {
 				checkNotify = function() {
 					return notify = (notify || self.ui.notify.children('.elfinder-notify-upload').length);
 				},
+				fnAbort     = function() {
+					abort = true;
+					if (xhr) {
+						xhr.quiet = true;
+						xhr.abort();
+					}
+				},
 				startNotify = function(size) {
 					if (!size) size = filesize;
 					return setTimeout(function() {
 						notify = true;
-						self.notify({type : 'upload', cnt : cnt, progress : loaded - prev, size : size, cancel: true});
+						self.notify({type : 'upload', cnt : cnt, progress : loaded - prev, size : size,
+							cancel: function() {
+								node.trigger('uploadabort');
+							}
+						});
 						prev = loaded;
 					}, self.options.notifyDelay);
-				},
-				fnAbort = function(e) {
-					if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
-						return;
-					}
-					e.preventDefault();
-					e.stopPropagation();
-					abort = true;
-					xhr.abort();
-					dfrd.reject();
-					self.sync();
 				},
 				renames = (data.renames || null),
 				chunkMerge = false;
 			
-			// regist abort event
-			self.ui.notify.one('click', cancelBtn, fnAbort);
-			$(document).on('keydown', fnAbort);
-			$(window).on('unload', function(e){
-				(dfrd.state() == 'pending') && dfrd.reject();
-			});
+			// regist fnAbort function
+			node.one('uploadabort', fnAbort);
+			$(window).one('unload', fnAbort);
 			
 			!chunkMerge && (prev = loaded);
 			
@@ -3171,18 +3180,9 @@ elFinder.prototype = {
 				if (error) {
 					if (chunkMerge || retry++ > 3) {
 						var file = isDataType? files[0][0] : files[0];
-						if (file._cid) {
-							formData = new FormData();
-							files = [{_chunkfail: true}];
-							formData.append('chunk', file._chunk);
-							formData.append('cid'  , file._cid);
-							formData.append('range', file._range);
-							isDataType = false;
-							send(files);
-							return;
-						}
-						return dfrd.reject(error);
+						return dfrd.reject(file._cid? null : error);
 					} else {
+						// do retry
 						filesize = 0;
 						xhr.open('POST', self.uploadURL, true);
 						xhr.send(formData);
@@ -3298,55 +3298,54 @@ elFinder.prototype = {
 						while(files.length && sfiles.length < num) {
 							sfiles.push(files.shift());
 						}
-					}
-					if (sfiles.length) {
-						for (var i=0; i < sfiles.length; i++) {
-							if (abort) {
-								break;
-							}
-							cid = isDataType? (sfiles[i][0][0]._cid || null) : (sfiles[i][0]._cid || null);
-							if (!!failChunk[cid]) {
-								last--;
-								continue;
-							}
-							fm.exec('upload', {
-								type: data.type,
-								isDataType: isDataType,
-								files: sfiles[i],
-								checked: true,
-								target: target,
-								renames: renames,
-								multiupload: true})
-							.fail(function(error) {
-								if (cid) {	
-									failChunk[cid] = true;
+						if (sfiles.length) {
+							for (var i=0; i < sfiles.length; i++) {
+								if (abort) {
+									break;
 								}
-								//error && self.error(error);
-							})
-							.always(function(e) {
-								if (e && e.added) added = $.merge(added, e.added);
-								if (last <= ++done) {
-									fm.trigger('multiupload', {added: added});
-									notifyto && clearTimeout(notifyto);
-									if (checkNotify()) {
-										self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
+								cid = isDataType? (sfiles[i][0][0]._cid || null) : (sfiles[i][0]._cid || null);
+								if (!!failChunk[cid]) {
+									last--;
+									continue;
+								}
+								fm.exec('upload', {
+									type: data.type,
+									isDataType: isDataType,
+									files: sfiles[i],
+									checked: true,
+									target: target,
+									renames: renames,
+									multiupload: true})
+								.fail(function(error) {
+									if (cid) {	
+										failChunk[cid] = true;
 									}
-								}
-								multi(files, 1); // Next one
-							});
+								})
+								.always(function(e) {
+									if (e && e.added) added = $.merge(added, e.added);
+									if (last <= ++done) {
+										fm.trigger('multiupload', {added: added});
+										notifyto && clearTimeout(notifyto);
+										if (checkNotify()) {
+											self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
+										}
+									}
+									multi(files, 1); // Next one
+								});
+							}
 						}
-					} else {
-						self.uploads.xhrUploading = false;
+					}
+					if (sfiles.length < 1 || abort) {
 						if (abort) {
 							notifyto && clearTimeout(notifyto);
-							if (checkNotify()) {
-								self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
-							}
-							if (cid) {	
+							if (cid) {
 								failChunk[cid] = true;
 							}
+							dfrd.reject();
+						} else {
+							dfrd.resolve();
+							self.uploads.xhrUploading = false;
 						}
-						dfrd.resolve();
 					}
 				},
 				check = function(){
@@ -4133,7 +4132,7 @@ elFinder.prototype = {
 	 *    cnt : 3,
 	 *    hideCnt  : false,   // true for not show count
 	 *    progress : 10,      // progress bar percents (use cnt : 0 to update progress bar)
-	 *    cancel   : false    // show cancel button (should regist event at each caller @see this.uploads.xhr)
+	 *    cancel   : callback // callback function for cancel button
 	 * })
 	 * @return elFinder
 	 */
@@ -4142,13 +4141,19 @@ elFinder.prototype = {
 			msg      = this.messages['ntf'+type] ? this.i18n('ntf'+type) : this.i18n('ntfsmth'),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
+			button   = notify.children('div.elfinder-notify-cancel').children('button'),
 			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div>',
 			delta    = opts.cnt,
 			size     = (typeof opts.size != 'undefined')? parseInt(opts.size) : null,
 			progress = (typeof opts.progress != 'undefined' && opts.progress >= 0) ? opts.progress : null,
 			cancel   = opts.cancel,
 			clhover  = 'ui-state-hover',
-			cnt, total, prc, button;
+			close    = function() {
+				notify._esc && $(document).off('keydown', notify._esc);
+				notify.remove();
+				!ndialog.children().length && ndialog.elfinderdialog('close');
+			},
+			cnt, total, prc;
 
 		if (!type) {
 			return this;
@@ -4175,6 +4180,32 @@ elFinder.prototype = {
 		cnt = delta + parseInt(notify.data('cnt'));
 		
 		if (cnt > 0) {
+			if (cancel && button.length) {
+				if ($.isFunction(cancel) || (typeof cancel === 'object' && cancel.promise)) {
+					notify._esc = function(e) {
+						if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
+							return;
+						}
+						e.preventDefault();
+						e.stopPropagation();
+						close();
+						if (cancel.promise) {
+							if (cancel.xhr) {
+								cancel.xhr.quiet = true;
+								cancel.xhr.abort();
+							}
+							cancel.reject();
+						} else {
+							cancel(e);
+						}
+					};
+					button.on('click', function(e) {
+						notify._esc(e);
+					});
+					$(document).on('keydown', notify._esc);
+				}
+			}
+			
 			!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
 			ndialog.is(':hidden') && ndialog.elfinderdialog('open');
 			notify.data('cnt', cnt);
@@ -4200,8 +4231,7 @@ elFinder.prototype = {
 			}
 			
 		} else {
-			notify.remove();
-			!ndialog.children().length && ndialog.elfinderdialog('close');
+			close();
 		}
 		
 		return this;
