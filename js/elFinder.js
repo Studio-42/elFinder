@@ -1877,10 +1877,10 @@ window.elFinder = function(node, opts) {
 					timeout = Math.max(self.options.sync, cwdOptions.syncMinMs);
 					syncInterval && clearTimeout(syncInterval);
 					syncInterval = setTimeout(function() {
-						var dosync = true, hash = cwd;
-						if (cwdOptions.syncChkAsTs) {
+						var dosync = true, hash = cwd, cts;
+						if (cwdOptions.syncChkAsTs && (cts = files[hash].ts)) {
 							self.request({
-								data           : {cmd : 'info', targets : [hash], compare : files[hash].ts, reload : 1},
+								data           : {cmd : 'info', targets : [hash], compare : cts, reload : 1},
 								preventDefault : true
 							})
 							.done(function(data){
@@ -1888,7 +1888,7 @@ window.elFinder = function(node, opts) {
 								dosync = true;
 								if (data.compare) {
 									ts = data.compare;
-									if (files[hash] && ts == files[hash].ts) {
+									if (ts == cts) {
 										dosync = false;
 									}
 								}
