@@ -70,10 +70,20 @@ elFinder.prototype.commands.info = function() {
 			view    = tpl.main,
 			l       = '{label}',
 			v       = '{value}',
+			reqs    = [],
 			opts    = {
 				title : this.title,
 				width : 'auto',
-				close : function() { $(this).elfinderdialog('destroy'); }
+				close : function() {
+					$(this).elfinderdialog('destroy');
+					$.each(reqs, function(i, req) {
+						var xhr = (req && req.xhr)? req.xhr : null;
+						if (xhr && xhr.state() == 'pending') {
+							xhr.quiet = true;
+							xhr.abort();
+						}
+					});
+				}
 			},
 			count = [],
 			replSpinner = function(msg, name) { dialog.find('.'+spclass+'-'+name).parent().html(msg); },
@@ -119,7 +129,7 @@ elFinder.prototype.commands.info = function() {
 				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
 					content.push(row.replace(l, msg.link).replace(v, tpl.spinner.replace('{text}', msg.modify).replace('{name}', 'url')));
-					fm.request({
+					reqs.push(fm.request({
 						data : {cmd : 'url', target : file.hash},
 						preventDefault : true
 					})
@@ -132,7 +142,7 @@ elFinder.prototype.commands.info = function() {
 							var rfile = fm.file(file.hash);
 							rfile.url = data.url;
 						}
-					});
+					}));
 				} else {
 					if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
 						var loc = window.location;
@@ -151,7 +161,7 @@ elFinder.prototype.commands.info = function() {
 					content.push(row.replace(l, msg.dim).replace(v, file.width+'x'+file.height));
 				} else {
 					content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'dim')));
-					fm.request({
+					reqs.push(fm.request({
 						data : {cmd : 'dim', target : file.hash},
 						preventDefault : true
 					})
@@ -166,7 +176,7 @@ elFinder.prototype.commands.info = function() {
 							rfile.width = dim[0];
 							rfile.height = dim[1];
 						}
-					});
+					}));
 				}
 			}
 			
@@ -234,7 +244,7 @@ elFinder.prototype.commands.info = function() {
 		
 		// send request to count total size
 		if (count.length) {
-			fm.request({
+			reqs.push(fm.request({
 					data : {cmd : 'size', targets : count},
 					preventDefault : true
 				})
@@ -244,7 +254,8 @@ elFinder.prototype.commands.info = function() {
 				.done(function(data) {
 					var size = parseInt(data.size);
 					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown, 'size');
-				});
+				})
+			);
 		}
 		
 		// call custom actions
