@@ -175,14 +175,14 @@ elFinder.prototype.commands.download = function() {
 			return dfrd.reject();
 		}
 		
-		var reqDef, cancelBtn, fnAbort,
-			link    = $('<a>').hide().appendTo($('body')),
+		var link    = $('<a>').hide().appendTo($('body')),
 			html5dl = (typeof link.get(0).download === 'string');
 		
 		if (zipOn && (files.length > 1 || files[0].mime === 'directory')) {
-			reqDef = fm.request({
+			dfrd = fm.request({
 				data : {cmd : 'zipdl', targets : hashes},
-				notify : {type : 'zipdl', cnt : 1, hideCnt : true, cancel: true},
+				notify : {type : 'zipdl', cnt : 1, hideCnt : true, multi : true},
+				cancel : true,
 				preventDefault : true
 			}).done(function(e) {
 				var zipdl, dialog, btn = {}, dllink, form,
@@ -248,22 +248,7 @@ elFinder.prototype.commands.download = function() {
 				dfrd.reject();
 			}).always(function() {
 				link.remove();
-				fm.ui.notify.off('click', cancelBtn, fnAbort);
-				$(document).off('keydown', fnAbort);
 			});
-			cancelBtn = 'div.elfinder-notify-zipdl div.elfinder-notify-cancel button';
-			fnAbort = function(e) {
-				if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
-					return;
-				}
-				e.preventDefault();
-				e.stopPropagation();
-				reqDef.xhr.quiet = true;
-				reqDef.xhr.abort();
-				dfrd.reject();
-			}
-			fm.ui.notify.one('click', cancelBtn, fnAbort);
-			$(document).on('keydown', fnAbort);
 			fm.trigger('download', {files : files});
 			return dfrd;
 		} else {
