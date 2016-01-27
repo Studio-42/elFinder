@@ -28,7 +28,8 @@ elFinder.prototype.commands.search = function() {
 	 * @return $.Deferred
 	 **/
 	this.exec = function(q, target, mime) {
-		var fm = this.fm;
+		var fm = this.fm,
+			reqDef;
 		
 		if (typeof q == 'string' && q) {
 			if (typeof target == 'object') {
@@ -40,10 +41,12 @@ elFinder.prototype.commands.search = function() {
 			$.each(mime, function(){ return $.trim(this); });
 			fm.trigger('searchstart', {query : q, target : target, mimes : mime});
 			
-			return fm.request({
+			reqDef = fm.request({
 				data   : {cmd : 'search', q : q, target : target, mimes : mime},
-				notify : {type : 'search', cnt : 1, hideCnt : true}
+				notify : {type : 'search', cnt : 1, hideCnt : true},
+				cancel : true
 			});
+			return reqDef;
 		}
 		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
 		return $.Deferred().reject();

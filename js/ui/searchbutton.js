@@ -32,6 +32,8 @@ $.fn.elfindersearchbutton = function(cmd) {
 					cmd.exec(val, from, mime).done(function() {
 						result = true;
 						input.focus();
+					}).fail(function() {
+						abort();
 					});
 					
 				} else {
