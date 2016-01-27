@@ -229,10 +229,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function connect() {
-		if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+		if (!($this->connect = @ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
 			return $this->setError('Unable to connect to FTP server '.$this->options['host']);
 		}
-		if (!ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
+		if (!@ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
 			$this->umount();
 			return $this->setError('Unable to login into '.$this->options['host']);
 		}
@@ -670,13 +670,24 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->convEncIn();
 		}
 		if (!$this->MLSTsupprt) {
-			//if ($path == $this->root && (empty($this->ARGS['reload']) || !isset($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0)) {
-			if ($path == $this->root && ! $this->isMyReload()) {
-				return array(
+			if ($path == $this->root && ($path === $this->systemRoot || ! $this->isMyReload())) {
+				$res = array(
 					'name' => $this->root,
 					'mime' => 'directory',
 					'dirs' => $this->_subdirs($path)
 				);
+				if ($this->isMyReload()) {
+				 	$ts = 0;
+					foreach (ftp_rawlist($this->connect, $path) as $str) {
+						if (($stat = $this->parseRaw($str, $path))) {
+							$ts = max($ts, $stat['ts']);
+						}
+			 		}
+					if ($ts) {
+						$res['ts'] = $ts;
+					}
+				}
+				return $res;
 			}
 			$this->cacheDir($this->convEncOut($this->_dirname($path)));
 			return $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());

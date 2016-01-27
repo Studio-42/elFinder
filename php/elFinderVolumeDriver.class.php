@@ -1434,8 +1434,7 @@ abstract class elFinderVolumeDriver {
 		
 		while ($path && $path != $this->root) {
 			$path = $this->dirnameCE($path);
-			$stat = $this->stat($path);
-			if (!empty($stat['hidden']) || !$stat['read']) {
+			if (!($stat = $this->stat($path)) || !empty($stat['hidden']) || !$stat['read']) {
 				return false;
 			}
 			
