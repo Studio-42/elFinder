@@ -84,8 +84,8 @@
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align: center;
-	max-height: 2.3em;
-	line-height: 1.2;
+	max-height: 2.4em;
+	line-height: 1.2em;
 	white-space: pre-line;
 	overflow: hidden;
 	text-overflow: ellipsis;
