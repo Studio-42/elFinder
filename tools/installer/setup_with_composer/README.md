@@ -17,6 +17,8 @@ elFinder and library updates to run `php composer.phar update` in the server she
 **Directory Tree**
 ```
 .
+├── .tmp
+│   └── .htaccess
 ├── composer.json
 ├── composer.lock
 ├── composer.phar
@@ -29,6 +31,7 @@ elFinder and library updates to run `php composer.phar update` in the server she
 ├── sounds -> ./vendor/studio-42/elfinder/sounds
 ├── tree.txt
 └── vendor
+    ├── .htaccess
     ├── autoload.php
     ├── composer
     │   ├── ClassLoader.php
