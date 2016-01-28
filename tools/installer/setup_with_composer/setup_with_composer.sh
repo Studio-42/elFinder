@@ -174,7 +174,7 @@ order deny,allow
 deny from all
 EOD
 
-echo "# rm $0 #"
-rm $0
+#echo "# rm $0 #"
+#rm $0
 
 echo '# Finish!! #'
