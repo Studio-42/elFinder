@@ -86,6 +86,9 @@ elFinder.prototype.commands.upload = function() {
 			}
 			try{
 				data = e.dataTransfer.getData('text/html');
+				if (!data.match(/<(?:img|a)/i)) {
+					data = '';
+				}
 			} catch(e) {}
 			if (data) {
 				file = [ data ];
