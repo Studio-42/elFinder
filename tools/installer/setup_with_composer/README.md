@@ -3,9 +3,9 @@ Setup elFinder 2.1.x nightly with Composer
 
 Work in the server's shell. This bash script to install composer.phar and set up elFinder 2.1.x nightly into working directory on server. Directory to work should be provided an empty directory.
 
-1. Upload "[setup_with_composer.sh](https://github.com/Studio-42/elFinder/raw/gh-pages/tools/installer/setup_with_composer/setup_with_composer.sh)" to the directory in which you want to install the elFinder.
-2. Move the server shell to that directory.
-3. Start with bash setup_with_composer.sh
+1. `mkdir elfinder`
+2. `cd elfinder`.
+3. `curl -sS http://studio-42.github.io/elFinder/tools/installer/setup_with_composer/setup_with_composer.sh | bash`
 4. completion!
 
 ## Note
