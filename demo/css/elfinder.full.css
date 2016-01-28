@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 9b735b1) (2016-01-28)
+ * Version 2.1.6 (2.1-src Nightly: 69ec734) (2016-01-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -582,18 +582,24 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
-	text-align:center;
-	max-height:32px;
-	white-space:pre-wrap;
-	word-break:normal;
-	overflow:hidden;
-	text-overflow:ellipsis;
-    -o-text-overflow:ellipsis;
-	margin:3px 1px 0 1px;
-	padding:1px;
+	text-align: center;
+	max-height: 2.3em;
+	line-height: 1.2;
+	white-space: pre-line;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	margin: 3px 1px 0 1px;
+	padding: 1px;
 	-moz-border-radius: 8px; 
 	-webkit-border-radius: 8px; 
 	border-radius: 8px;
+	/* for webkit CSS3 */
+	word-break: break-word;
+	overflow-wrap: break-word;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 }
 
 /* permissions/symlink markers */
