@@ -4,6 +4,7 @@
 		- Added connector main options `commonTempPath` and `maxArcFilesSize`
 		- Fixed #353 It can download files/folders as an archve file
 		- Fixed #1195 Supported BMP in GD image resize
+		- Became possible to cancellation while searching
 		- And some minor bug fixes
 
 
