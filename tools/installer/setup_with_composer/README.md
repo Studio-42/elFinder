@@ -13,3 +13,39 @@ Work in the server's shell. This bash script to install composer.phar and set up
 You can find the "index.html / connector.php" in the installation directory. Configuration of "client / volume drive" in those files is possible.
 
 elFinder and library updates to run `php composer.phar update` in the server shell.
+
+**Directory Tree**
+```
+.
+├── composer.json
+├── composer.lock
+├── composer.phar
+├── connector.php
+├── css -> ./vendor/studio-42/elfinder/css
+├── files
+├── img -> ./vendor/studio-42/elfinder/img
+├── index.html
+├── js -> ./vendor/studio-42/elfinder/js
+├── sounds -> ./vendor/studio-42/elfinder/sounds
+├── tree.txt
+└── vendor
+    ├── autoload.php
+    ├── composer
+    │   ├── ClassLoader.php
+    │   ├── LICENSE
+    │   ├── autoload_classmap.php
+    │   ├── autoload_namespaces.php
+    │   ├── autoload_psr4.php
+    │   ├── autoload_real.php
+    │   ├── include_paths.php
+    │   └── installed.json
+    ├── dropbox-php
+    │   └── dropbox-php
+    ├── pear
+    │   ├── auth
+    │   ├── http_request2
+    │   ├── net_url2
+    │   └── pear_exception
+    └── studio-42
+        └── elfinder
+```
