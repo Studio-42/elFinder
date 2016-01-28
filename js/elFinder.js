@@ -3087,7 +3087,6 @@ elFinder.prototype = {
 						error && self.error(error);
 					})
 					.done(function(data) {
-						self.log(data);
 						xhr = null;
 						files = null;
 						if (data) {
