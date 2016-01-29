@@ -18,7 +18,7 @@
     "javascript",
     "php"
   ],
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "homepage": "https://github.com/Studio-42/elFinder",
   "ignore": [
     "**/.*",
