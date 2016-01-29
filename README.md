@@ -14,6 +14,10 @@ elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
 used in Mac OS X operating system.
 
+[![Packagist License](https://poser.pugx.org/studio-42/elfinder/license.png)](http://choosealicense.com/licenses/bsd-3-clause/)
+[![Latest Stable Version](https://poser.pugx.org/studio-42/elfinder/version.png)](https://packagist.org/packages/studio-42/elfinder)
+[![Total Downloads](https://poser.pugx.org/studio-42/elfinder/d/total.png)](https://packagist.org/packages/studio-42/elfinder)
+
 Contents
 --------
 * [Branches](#branches)
@@ -198,7 +202,7 @@ License
 elFinder is issued under a 3-clauses BSD license.
 
 <pre>
-Copyright (c) 2009-2012, Studio 42
+Copyright (c) 2009-2016, Studio 42
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
