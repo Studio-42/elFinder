@@ -13,7 +13,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			btnCls = fm.res('class', 'searchbtn'),
 			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
 			search = function() {
-				opts.slideUp();
+				opts && opts.slideUp();
 				var val = $.trim(input.val()),
 					from = !$('#' + id('SearchFromAll')).prop('checked'),
 					mime = $('#' + id('SearchMime')).prop('checked');
@@ -41,7 +41,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			},
 			abort = function() {
-				opts.slideUp();
+				opts && opts.slideUp();
 				input.val('');
 				if (result) {
 					result = false;
@@ -50,13 +50,15 @@ $.fn.elfindersearchbutton = function(cmd) {
 			},
 			input  = $('<input type="text" size="42"/>')
 				.focus(function(){
-					opts.slideDown();
+					opts && opts.slideDown();
 				})
 				.blur(function(){
-					if (!opts.data('infocus')) {
-						opts.slideUp();
-					} else {
-						opts.data('infocus', false);
+					if (opts) {
+						if (!opts.data('infocus')) {
+							opts.slideUp();
+						} else {
+							opts.data('infocus', false);
+						}
 					}
 				})
 				.appendTo(button)
@@ -74,15 +76,19 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts = $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
-				.append($('<div class="buttonset"/>')
-					.append($('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'))
-					.append($('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'))
-					.append($('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>'))
-				)
-				.append($('<div class="buttonset"/>')
-					.append($('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'))
-					.append($('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>'))
+			opts = (fm.api < 2.1)? null : $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+				.append(
+					$('<div class="buttonset"/>')
+						.append(
+							$('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'),
+							$('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'),
+							$('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>')
+						),
+					$('<div class="buttonset"/>')
+						.append(
+							$('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'),
+							$('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>')
+						)
 				)
 				.hide()
 				.zIndex(12+button.zIndex())
@@ -98,8 +104,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.click(abort);
 		
 		$(function(){
+			if (!opts) {
+				return;
+			}
 			opts.find('div.buttonset').buttonset();
-			//opts.find('div.button input').button();
 			$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
 			$('#'+id('SearchMime')).next('label').attr('title', fm.i18n('searchMime'));
 			opts.find('input')

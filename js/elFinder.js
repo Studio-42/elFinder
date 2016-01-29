@@ -212,22 +212,26 @@ window.elFinder = function(node, opts) {
 		open = function(data) {
 			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {};
 			
-			self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
-			
-			// support volume driver option `uiCmdMap`
-			if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
-				uiCmdMapPrev = JSON.stringify(self.commandMap);
-				if (Object.keys(self.commandMap).length) {
-					// for contextmenu
-					contextmenu = self.getUI('contextmenu');
-					if (!contextmenu.data('cmdMaps')) {
-						contextmenu.data('cmdMaps', {});
-					}
-					volumeid = data.cwd? data.cwd.volumeid : null;
-					if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
-						contextmenu.data('cmdMaps')[volumeid] = self.commandMap;
+			if (self.api >= 2.1) {
+				self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
+				
+				// support volume driver option `uiCmdMap`
+				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
+					uiCmdMapPrev = JSON.stringify(self.commandMap);
+					if (Object.keys(self.commandMap).length) {
+						// for contextmenu
+						contextmenu = self.getUI('contextmenu');
+						if (!contextmenu.data('cmdMaps')) {
+							contextmenu.data('cmdMaps', {});
+						}
+						volumeid = data.cwd? data.cwd.volumeid : null;
+						if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
+							contextmenu.data('cmdMaps')[volumeid] = self.commandMap;
+						}
 					}
 				}
+			} else {
+				self.options.sync = 0;
 			}
 			
 			if (data.init) {
@@ -1305,6 +1309,9 @@ window.elFinder = function(node, opts) {
 
 				if (!self.api) {
 					self.api    = response.api || 1;
+					if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
+						self.api = '2.1';
+					}
 					self.newAPI = self.api >= 2;
 					self.oldAPI = !self.newAPI;
 				}
@@ -1528,6 +1535,10 @@ window.elFinder = function(node, opts) {
 				if (comp === odata.cwd.compare) {
 					return dfrd.reject();
 				}
+			}
+			
+			if (self.api < 2.1) {
+				pdata.tree = (pdata.tree || []).concat([odata.cwd]);
 			}
 			
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
@@ -2835,7 +2846,7 @@ elFinder.prototype = {
 						error && fm.error(error);
 					});
 				};
-			if (fm.option('uploadOverwrite') && typeof files[0] == 'object') {
+			if (self.api >= 2.1 && fm.option('uploadOverwrite') && typeof files[0] == 'object') {
 				check();
 				return dfrd;
 			} else {
@@ -2933,13 +2944,15 @@ elFinder.prototype = {
 									processing--;
 								});
 							} else if (entry.isDirectory) {
-								if (processing > 0) {
-									dirctorys.push(entry);
-								} else {
-									processing = 0;
-									dirReader = entry.createReader();
-									processing++;
-									readEntries(dirReader);
+								if (self.api >= 2.1) {
+									if (processing > 0) {
+										dirctorys.push(entry);
+									} else {
+										processing = 0;
+										dirReader = entry.createReader();
+										processing++;
+										readEntries(dirReader);
+									}
 								}
 							}
 						}
@@ -3362,14 +3375,15 @@ elFinder.prototype = {
 						blob = files[i];
 						blobSize = blob.size;
 						if (blobSlice === false) {
-							if ('slice' in blob) {
-								blobSlice = 'slice';
-							} else if ('mozSlice' in blob) {
-								blobSlice = 'mozSlice';
-							} else if ('webkitSlice' in blob) {
-								blobSlice = 'webkitSlice';
-							} else {
-								blobSlice = '';
+							blobSlice = '';
+							if (self.api >= 2.1) {
+								if ('slice' in blob) {
+									blobSlice = 'slice';
+								} else if ('mozSlice' in blob) {
+									blobSlice = 'mozSlice';
+								} else if ('webkitSlice' in blob) {
+									blobSlice = 'webkitSlice';
+								}
 							}
 						}
 						
