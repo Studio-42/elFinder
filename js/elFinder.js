@@ -2846,7 +2846,7 @@ elFinder.prototype = {
 						error && fm.error(error);
 					});
 				};
-			if (self.api >= 2.1 && fm.option('uploadOverwrite') && typeof files[0] == 'object') {
+			if (fm.api >= 2.1 && fm.option('uploadOverwrite') && typeof files[0] == 'object') {
 				check();
 				return dfrd;
 			} else {
