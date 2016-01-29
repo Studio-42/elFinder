@@ -2824,13 +2824,15 @@ elFinder.prototype = {
 							if (data.error) {
 								cancel();
 							} else {
-								if (data.name) {
-									existed = data.name || [];
-									exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-								}
-								if (data.list && target == fm.cwd().hash
-								&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
-									fm.sync();
+								if (fm.option('uploadOverwrite')) {
+									if (data.name) {
+										existed = data.name || [];
+										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
+									}
+									if (data.list && target == fm.cwd().hash
+									&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
+										fm.sync();
+									}
 								}
 							}
 						}
@@ -2846,7 +2848,7 @@ elFinder.prototype = {
 						error && fm.error(error);
 					});
 				};
-			if (fm.api >= 2.1 && fm.option('uploadOverwrite') && typeof files[0] == 'object') {
+			if (fm.api >= 2.1 && typeof files[0] == 'object') {
 				check();
 				return dfrd;
 			} else {
