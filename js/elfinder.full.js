@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 54e8ab5) (2016-01-29)
+ * Version 2.1.6 (2.1-src Nightly: f990603) (2016-01-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2838,13 +2838,15 @@ elFinder.prototype = {
 							if (data.error) {
 								cancel();
 							} else {
-								if (data.name) {
-									existed = data.name || [];
-									exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-								}
-								if (data.list && target == fm.cwd().hash
-								&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
-									fm.sync();
+								if (fm.option('uploadOverwrite')) {
+									if (data.name) {
+										existed = data.name || [];
+										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
+									}
+									if (data.list && target == fm.cwd().hash
+									&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
+										fm.sync();
+									}
 								}
 							}
 						}
@@ -2860,7 +2862,7 @@ elFinder.prototype = {
 						error && fm.error(error);
 					});
 				};
-			if (fm.api >= 2.1 && fm.option('uploadOverwrite') && typeof files[0] == 'object') {
+			if (fm.api >= 2.1 && typeof files[0] == 'object') {
 				check();
 				return dfrd;
 			} else {
@@ -4811,7 +4813,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 54e8ab5)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: f990603)';
 
 
 
