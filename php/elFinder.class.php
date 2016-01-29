@@ -16,7 +16,7 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	protected $version = '2.0';
+	protected $version = '2.1';
 	
 	/**
 	 * Storages (root dirs)
