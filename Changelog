@@ -5,6 +5,7 @@
 		- Fixed #353 It can download files/folders as an archve file
 		- Fixed #1195 Supported BMP in GD image resize
 		- Became possible to cancellation while searching
+		- Supported API protocol version 2.0 for the legacy connector
 		- And some minor bug fixes
 
 
