@@ -436,8 +436,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 			dat = $.map((fm.storage(key) || '').split(','), function(hash) { return hash || null;});
 			$.each(dat, function(i, d) {
 				var dir = d.split('#')
-				dirs[dir[0]] = dir[1]? dir[1] : { hash: dir[0], name: dir[0] };
+				dirs[dir[0]] = dir[1]? dir[1] : dir[0];
 			});
+			// allow modify `dirs`
+			/**
+			 * example for preset places
+			 * 
+			 * elfinderInstance.bind('placesload', function(e, fm) {
+			 * 	//if (fm.storage(e.data.storageKey) === null) { // for first time only
+			 * 	if (!fm.storage(e.data.storageKey)) {           // for empty places
+			 * 		e.data.dirs[targetHash] = fallbackName;     // preset folder
+			 * 	}
+			 * }
+			 **/
+			fm.trigger('placesload', {dirs: dirs, storageKey: key}, true);
 			
 			hashes = Object.keys(dirs);
 			if (hashes.length) {
