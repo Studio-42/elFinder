@@ -561,6 +561,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 										updated = true;
 									}
 								}
+							} else if (exists[h] && exists[h].phash != cwd) {
+								// update permission of except cwd
+								update(exists[h]);
 							}
 						});
 						updated && save();
