@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: f990603) (2016-01-29)
+ * Version 2.1.6 (2.1-src Nightly: e259f46) (2016-02-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1060,7 +1060,7 @@ window.elFinder = function(node, opts) {
 	 * Return file url for open in elFinder
 	 * 
 	 * @param  String  file hash
-	 * @param  Bool    for download link
+	 * @param  Boolean for download link
 	 * @return String
 	 */
 	this.openUrl = function(hash, download) {
@@ -1620,28 +1620,34 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @param  String   event type
 	 * @param  Object   data to send across event
+	 * @param  Boolean  allow modify data (call by reference of data)
 	 * @return elFinder
 	 */
-	this.trigger = function(event, data) {
+	this.trigger = function(event, data, allowModify) {
 		var event    = event.toLowerCase(),
 			isopen   = (event === 'open'),
 			handlers = listeners[event] || [], i, l, jst;
 		
 		this.debug('event-'+event, data);
 		
-		if (isopen) {
+		if (isopen && !allowModify) {
 			// for performance tuning
 			jst = JSON.stringify(data);
 		}
 		if (handlers.length) {
 			event = $.Event(event);
+			if (allowModify) {
+				event.data = data;
+			}
 
 			l = handlers.length;
 			for (i = 0; i < l; i++) {
 				// only callback has argument
 				if (handlers[i].length) {
-					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-					event.data = isopen? JSON.parse(jst) : $.extend(true, {}, data);
+					if (!allowModify) {
+						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+						event.data = isopen? JSON.parse(jst) : $.extend(true, {}, data);
+					}
 				}
 
 				try {
@@ -4813,7 +4819,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: f990603)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: e259f46)';
 
 
 
@@ -9515,8 +9521,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 			dat = $.map((fm.storage(key) || '').split(','), function(hash) { return hash || null;});
 			$.each(dat, function(i, d) {
 				var dir = d.split('#')
-				dirs[dir[0]] = dir[1]? dir[1] : { hash: dir[0], name: dir[0] };
+				dirs[dir[0]] = dir[1]? dir[1] : dir[0];
 			});
+			// allow modify `dirs`
+			/**
+			 * example for preset places
+			 * 
+			 * elfinderInstance.bind('placesload', function(e, fm) {
+			 * 	//if (fm.storage(e.data.storageKey) === null) { // for first time only
+			 * 	if (!fm.storage(e.data.storageKey)) {           // for empty places
+			 * 		e.data.dirs[targetHash] = fallbackName;     // preset folder
+			 * 	}
+			 * }
+			 **/
+			fm.trigger('placesload', {dirs: dirs, storageKey: key}, true);
 			
 			hashes = Object.keys(dirs);
 			if (hashes.length) {
