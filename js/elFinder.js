@@ -1046,7 +1046,7 @@ window.elFinder = function(node, opts) {
 	 * Return file url for open in elFinder
 	 * 
 	 * @param  String  file hash
-	 * @param  Bool    for download link
+	 * @param  Boolean for download link
 	 * @return String
 	 */
 	this.openUrl = function(hash, download) {
@@ -1606,28 +1606,34 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @param  String   event type
 	 * @param  Object   data to send across event
+	 * @param  Boolean  allow modify data (call by reference of data)
 	 * @return elFinder
 	 */
-	this.trigger = function(event, data) {
+	this.trigger = function(event, data, allowModify) {
 		var event    = event.toLowerCase(),
 			isopen   = (event === 'open'),
 			handlers = listeners[event] || [], i, l, jst;
 		
 		this.debug('event-'+event, data);
 		
-		if (isopen) {
+		if (isopen && !allowModify) {
 			// for performance tuning
 			jst = JSON.stringify(data);
 		}
 		if (handlers.length) {
 			event = $.Event(event);
+			if (allowModify) {
+				event.data = data;
+			}
 
 			l = handlers.length;
 			for (i = 0; i < l; i++) {
 				// only callback has argument
 				if (handlers[i].length) {
-					// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-					event.data = isopen? JSON.parse(jst) : $.extend(true, {}, data);
+					if (!allowModify) {
+						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+						event.data = isopen? JSON.parse(jst) : $.extend(true, {}, data);
+					}
 				}
 
 				try {
