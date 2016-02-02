@@ -85,6 +85,7 @@ Features
  * Supports custom information in info dialog
  * Configuable columns of list view
  * Supports custom CSS class function of tree view
+ * For more details, see the [Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog)
 
 Requirements
 ------------
@@ -119,7 +120,7 @@ Installation
 
 Downloads
 ------------
-**Stable releases**
+**Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
  + [elFinder 2.1.6](https://github.com/Studio-42/elFinder/archive/2.1.6.zip)
  + [elFinder 2.0.5](https://github.com/Studio-42/elFinder/archive/2.0.5.zip)
 
