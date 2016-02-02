@@ -11,8 +11,7 @@ if (! class_exists('RecursiveCallbackFilterIterator', false)) {
 	    }
 	   
 	    public function accept () {
-	        $callback = $this->callback;
-	        return $callback(parent::current(), parent::key(), parent::getInnerIterator());
+	        return call_user_func($this->callback, parent::current(), parent::key(), parent::getInnerIterator());
 	    }
 	   
 	    public function getChildren () {
