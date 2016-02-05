@@ -918,7 +918,7 @@ class elFinder {
 		if ($ls) {
 			if ($files) {
 				$files = array_merge($files, $ls);
-				$files = array_unique($files, SORT_REGULAR);
+				$files = array_values(array_unique($files, SORT_REGULAR));
 			} else {
 				$files = $ls;
 			}
