@@ -174,6 +174,13 @@ class elFinderConnector {
 				}
 			} else {
 				header('Accept-Ranges: none');
+				if (!$data['info']['size'] && $data['info']['size'] !== 0) {
+					if (function_exists('header_remove')) {
+						header_remove('Content-Length');
+					} else {
+						header('Content-Length:');
+					}
+				}
 			}
 
 			// unlock session data for multiple access

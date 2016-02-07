@@ -3722,7 +3722,7 @@ abstract class elFinderVolumeDriver {
 		$stat = $this->stat($path);
 		
 		if (empty($stat)) {
-			return $this->setError(elFinder::ERROR_RM, $this->path($stat['hash']), elFinder::ERROR_FILE_NOT_FOUND);
+			return $this->setError(elFinder::ERROR_RM, $path, elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
 		$stat['realpath'] = $path;
