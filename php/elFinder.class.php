@@ -590,7 +590,14 @@ class elFinder {
 			}
 		}
 		
-		$result = $this->$cmd($args);
+		try {
+			$result = $this->$cmd($args);
+		} catch (Exception $e) {
+			$result = array(
+				'error' => htmlspecialchars($e->getMessage()),
+				'sync' => true
+			);
+		}
 		
 		if (isset($result['removed'])) {
 			foreach ($this->volumes as $volume) {
