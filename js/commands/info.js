@@ -9,6 +9,7 @@ elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
 		spclass = 'elfinder-info-spinner',
+		btnclass = 'elfinder-info-button',
 		msg = {
 			calc     : fm.i18n('calc'),
 			size     : fm.i18n('size'),
@@ -28,7 +29,8 @@ elFinder.prototype.commands.info = function() {
 			link     : fm.i18n('link'),
 			owner    : fm.i18n('owner'),
 			group    : fm.i18n('group'),
-			perm     : fm.i18n('perm')
+			perm     : fm.i18n('perm'),
+			getlink  : fm.i18n('getLink')
 		};
 		
 	this.tpl = {
@@ -128,21 +130,7 @@ elFinder.prototype.commands.info = function() {
 				var href,
 				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
-					content.push(row.replace(l, msg.link).replace(v, tpl.spinner.replace('{text}', msg.modify).replace('{name}', 'url')));
-					reqs.push(fm.request({
-						data : {cmd : 'url', target : file.hash},
-						preventDefault : true
-					})
-					.fail(function() {
-						replSpinner(name_esc, 'url');
-					})
-					.done(function(data) {
-						replSpinner('<a href="'+data.url+'" target="_blank">'+name_esc+'</a>' || name_esc, 'url');
-						if (data.url) {
-							var rfile = fm.file(file.hash);
-							rfile.url = data.url;
-						}
-					}));
+					content.push(row.replace(l, msg.link).replace(v, '<button class="'+btnclass+' '+spclass+'-url">'+msg.getlink+'</button>'));
 				} else {
 					if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
 						var loc = window.location;
@@ -234,6 +222,28 @@ elFinder.prototype.commands.info = function() {
 		
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);
+
+		if (file.url == '1') {
+			dialog.on('click', '.'+spclass+'-url', function(){
+				$(this).parent().html(tpl.spinner.replace('{text}', fm.i18n('ntfurl')).replace('{name}', 'url'));
+				fm.request({
+					data : {cmd : 'url', target : file.hash},
+					preventDefault : true
+				})
+				.fail(function() {
+					replSpinner(name_esc, 'url');
+				})
+				.done(function(data) {
+					if (data.url) {
+						replSpinner('<a href="'+data.url+'" target="_blank">'+name_esc+'</a>' || name_esc, 'url');
+						var rfile = fm.file(file.hash);
+						rfile.url = data.url;
+					} else {
+						replSpinner(name_esc, 'url');
+					}
+				});
+			});
+		}
 
 		// load thumbnail
 		if (tmb) {

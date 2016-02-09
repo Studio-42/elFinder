@@ -194,6 +194,12 @@
 
 .elfinder-netmount-tb { margin:0 auto; }
 .elfinder-netmount-tb input { border:1px solid #ccc; }
+
+button.elfinder-info-button {
+	margin: -3.5px 0;
+	cursor: pointer;
+}
+
 /*********************** UPLOAD DIALOG **************************/
 
 .elfinder-upload-dropbox {
