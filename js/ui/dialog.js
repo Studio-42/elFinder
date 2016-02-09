@@ -57,14 +57,9 @@ $.fn.elfinderdialog = function(opts) {
 					//maxHeight: opts.maxHeight? opts.maxHeight : $(window).height()-20
 				})
 				.mousedown(function(e) {
-					e.stopPropagation();
-					
-					$(document).mousedown();
-
-					if (!dialog.hasClass(clactive)) {
-						parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
-						dialog.addClass(clactive+' ui-front');
-					}
+					setTimeout(function() {
+						dialog.trigger('totop');
+					}, 10);
 				})
 				.on('open', function() {
 					var d = $(this),
@@ -118,8 +113,14 @@ $.fn.elfinderdialog = function(opts) {
 					}
 				})
 				.on('totop', function() {
-					$(this).mousedown().find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
-					$(this).data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
+					var $this = $(this);
+					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
+					dialog.addClass(clactive+' ui-front');
+
+					if (!$this.find('input,textarea').length) {
+						$this.find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
+					}
+					$this.data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 				})
 				.on('posinit', function() {
 					var css = opts.position;
@@ -131,8 +132,7 @@ $.fn.elfinderdialog = function(opts) {
 					}
 					dialog.css(css);
 				})
-				.data({modal: opts.modal}),
-				top
+				.data({modal: opts.modal})
 			;
 		
 		dialog.trigger('posinit');
@@ -154,9 +154,7 @@ $.fn.elfinderdialog = function(opts) {
 					}))
 
 		);
-			
 		
-			
 		$.each(opts.buttons, function(name, cb) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+name+'</span></button>')
 				.click($.proxy(cb, self[0]))
