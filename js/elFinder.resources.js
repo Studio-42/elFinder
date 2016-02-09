@@ -64,7 +64,7 @@ elFinder.prototype.resources = {
 				tarea= (fm.storage('view') != 'list'),
 				rest = function(){
 					if (tarea) {
-						node.zIndex('').css('position', '');
+						node.removeClass('ui-front').css('position', '');
 						nnode.css('max-height', '');
 					} else {
 						pnode.css('width', '');
@@ -178,7 +178,7 @@ elFinder.prototype.resources = {
 			nnode = node.find('.elfinder-cwd-filename');
 			pnode = nnode.parent();
 			if (tarea) {
-				node.zIndex((node.parent().zIndex()) + 1).css('position', 'relative');
+				node.css('position', 'relative').addClass('ui-front');
 				nnode.css('max-height', 'none');
 			} else {
 				colwidth = pnode.width();

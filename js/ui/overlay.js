@@ -3,7 +3,7 @@ $.fn.elfinderoverlay = function(opts) {
 	
 	this.filter(':not(.elfinder-overlay)').each(function() {
 		opts = $.extend({}, opts);
-		$(this).addClass('ui-widget-overlay elfinder-overlay')
+		$(this).addClass('ui-front ui-widget-overlay elfinder-overlay')
 			.hide()
 			.mousedown(function(e) {
 				e.preventDefault();
@@ -24,7 +24,6 @@ $.fn.elfinderoverlay = function(opts) {
 		o.data('cnt', cnt);
 
 		if (o.is(':hidden')) {
-			o.zIndex(o.parent().zIndex()+1);
 			o.show();
 			show();
 		}

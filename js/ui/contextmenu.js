@@ -11,7 +11,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
 			exIcon = 'elfinder-contextmenu-extra-icon',
-			menu = self.addClass('ui-helper-reset ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
+			menu = self.addClass('ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.appendTo('body')
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
@@ -45,14 +45,12 @@ $.fn.elfindercontextmenu = function(fm) {
 					m          = fm.UA.Touch? 10 : 0,
 					css        = {
 						top  : y - scrolltop + m + height < wheight ? y + m : (y - m - height > 0 ? y - m - height : y + m),
-						left : x - scrollleft + m + width < wwidth  ? x + m :  x - m - width,
-						'z-index' : 100 + fm.getUI('workzone').zIndex()
+						left : x - scrollleft + m + width < wwidth  ? x + m :  x - m - width
 					};
 
 				menu.css(css)
 					.show();
 				
-				css = {'z-index' : css['z-index']+10};
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
 			},
@@ -134,7 +132,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								}
 							});
 							
-							submenu = $('<div class="ui-corner-all elfinder-contextmenu-sub"/>')
+							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(){

@@ -30,7 +30,7 @@ elFinder.prototype.commands.rename = function() {
 			tarea    = (type === 'files' && fm.storage('view') != 'list'),
 			rest     = function(){
 				if (tarea) {
-					pnode.zIndex('').css('position', '');
+					pnode.removeClass('ui-front').css('position', '');
 					node.css('max-height', '');
 				} else if (!navbar) {
 					pnode.css('width', '');
@@ -162,7 +162,7 @@ elFinder.prototype.commands.rename = function() {
 			node.replaceWith(input.val(file.name));
 		} else {
 			if (tarea) {
-				pnode.zIndex((pnode.zIndex()) + 1).css('position', 'relative');
+				pnode.css('position', 'relative').addClass('ui-front');
 				node.css('max-height', 'none');
 			} else if (!navbar) {
 				colwidth = pnode.width();

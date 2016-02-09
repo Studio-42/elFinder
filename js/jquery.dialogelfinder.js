@@ -55,20 +55,10 @@ $.fn.dialogelfinder = function(opts) {
 			pos  = node.data(position) || {
 				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
 				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
-			},
-			zindex = 100;
+			};
 
 		if (node.is(':hidden')) {
-			
-			$('body').find(':visible').each(function() {
-				var $this = $(this), z;
-				
-				if (this !== node[0] && $this.css('position') == 'absolute' && (z = parseInt($this.zIndex())) > zindex) {
-					zindex = z + 1;
-				}
-			});
-
-			node.zIndex(zindex).css(pos).show().trigger('resize');
+			node.addClass('ui-front').css(pos).show().trigger('resize');
 
 			setTimeout(function() {
 				// fix resize icon position and make elfinder active
@@ -76,7 +66,7 @@ $.fn.dialogelfinder = function(opts) {
 			}, 200);
 		}
 	} else if (opts == 'close') {
-		var node = $(this);
+		var node = $(this).removeClass('ui-front');
 			
 		if (node.is(':visible')) {
 			!!node.data(destroy)

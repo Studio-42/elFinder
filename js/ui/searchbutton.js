@@ -76,7 +76,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts = (fm.api < 2.1)? null : $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.append(
 					$('<div class="buttonset"/>')
 						.append(
@@ -91,7 +91,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 						)
 				)
 				.hide()
-				.zIndex(12+button.zIndex())
 				.css('overflow', 'hidden')
 				.appendTo(button);
 		

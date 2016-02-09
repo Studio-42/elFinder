@@ -31,7 +31,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 						right: ltr ? parseInt(nav.scrollLeft() - offset) * -1 : 'auto'
 					});
 				})
-				.find('.ui-resizable-handle').zIndex(nav.zIndex() + 10);
+				.find('.ui-resizable-handle').addClass('ui-front');
 
 			if (fm.UA.Touch) {
 				var toggle = function(){

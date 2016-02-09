@@ -29,7 +29,7 @@ elFinder.prototype.commands.resize = function() {
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
 					control  = $('<div class="elfinder-resize-control"/>'),
-					preview  = $('<div class="elfinder-resize-preview"/>'),
+					preview  = $('<div class="ui-front elfinder-resize-preview"/>'),
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle"/>'),
@@ -621,7 +621,6 @@ elFinder.prototype.commands.resize = function() {
 					open           : function() {
 						var dw = dialog.width() - 20;
 						(preview.width() > dw) && preview.width(dw);
-						preview.zIndex(1+$(this).parent().zIndex());
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 						img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());

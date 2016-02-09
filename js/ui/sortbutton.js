@@ -27,10 +27,9 @@ $.fn.elfindersortbutton = function(cmd) {
 						menu.slideToggle(100);
 					}
 				}),
-			menu = $('<div class="ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(button)
-				.zIndex(12+button.zIndex())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover) })
 				.on('click', '.'+item, function(e) {
 					e.preventDefault();

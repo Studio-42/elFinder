@@ -253,7 +253,7 @@ elFinder.prototype.commands.quicklook = function() {
 
 	
 
-	this.window = $('<div class="ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
+	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
 		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
@@ -382,7 +382,7 @@ elFinder.prototype.commands.quicklook = function() {
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
-			win.appendTo('body').zIndex(100 + parent.zIndex());
+			win.appendTo('body');
 			
 			// close window on escape
 			$(document).keydown(function(e) {
