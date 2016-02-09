@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: ac108f3) (2016-02-09)
+ * Version 2.1.6 (2.1-src Nightly: 012ab9e) (2016-02-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4819,7 +4819,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: ac108f3)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 012ab9e)';
 
 
 
@@ -6347,7 +6347,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-01-23
+ * @version 2016-02-09
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6680,6 +6680,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -11595,7 +11596,7 @@ elFinder.prototype.commands.download = function() {
 					self.extra = {
 						icon: 'link',
 						node: $('<a/>')
-							.attr({href: '#', title: fm.i18n('link'), draggable: 'false'})
+							.attr({href: '#', title: fm.i18n('getLink'), draggable: 'false'})
 							.text(file.name)
 							.on('click', function(e){
 								var parent = node.parent();
@@ -11607,10 +11608,10 @@ elFinder.prototype.commands.download = function() {
 									preventDefault : true
 								})
 								.always(function(data) {
+									parent.removeClass('elfinder-button-icon-spinner');
 									if (data.url) {
 										var rfile = fm.file(file.hash);
 										rfile.url = data.url;
-										parent.removeClass('elfinder-button-icon-spinner');
 										node.replaceWith(getExtra(file).node);
 									} else {
 										parent.addClass('ui-state-disabled');
@@ -12704,6 +12705,7 @@ elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
 		spclass = 'elfinder-info-spinner',
+		btnclass = 'elfinder-info-button',
 		msg = {
 			calc     : fm.i18n('calc'),
 			size     : fm.i18n('size'),
@@ -12723,7 +12725,8 @@ elFinder.prototype.commands.info = function() {
 			link     : fm.i18n('link'),
 			owner    : fm.i18n('owner'),
 			group    : fm.i18n('group'),
-			perm     : fm.i18n('perm')
+			perm     : fm.i18n('perm'),
+			getlink  : fm.i18n('getLink')
 		};
 		
 	this.tpl = {
@@ -12823,21 +12826,7 @@ elFinder.prototype.commands.info = function() {
 				var href,
 				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
-					content.push(row.replace(l, msg.link).replace(v, tpl.spinner.replace('{text}', msg.modify).replace('{name}', 'url')));
-					reqs.push(fm.request({
-						data : {cmd : 'url', target : file.hash},
-						preventDefault : true
-					})
-					.fail(function() {
-						replSpinner(name_esc, 'url');
-					})
-					.done(function(data) {
-						replSpinner('<a href="'+data.url+'" target="_blank">'+name_esc+'</a>' || name_esc, 'url');
-						if (data.url) {
-							var rfile = fm.file(file.hash);
-							rfile.url = data.url;
-						}
-					}));
+					content.push(row.replace(l, msg.link).replace(v, '<button class="'+btnclass+' '+spclass+'-url">'+msg.getlink+'</button>'));
 				} else {
 					if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
 						var loc = window.location;
@@ -12929,6 +12918,28 @@ elFinder.prototype.commands.info = function() {
 		
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);
+
+		if (file.url == '1') {
+			dialog.on('click', '.'+spclass+'-url', function(){
+				$(this).parent().html(tpl.spinner.replace('{text}', fm.i18n('ntfurl')).replace('{name}', 'url'));
+				fm.request({
+					data : {cmd : 'url', target : file.hash},
+					preventDefault : true
+				})
+				.fail(function() {
+					replSpinner(name_esc, 'url');
+				})
+				.done(function(data) {
+					if (data.url) {
+						replSpinner('<a href="'+data.url+'" target="_blank">'+name_esc+'</a>' || name_esc, 'url');
+						var rfile = fm.file(file.hash);
+						rfile.url = data.url;
+					} else {
+						replSpinner(name_esc, 'url');
+					}
+				});
+			});
+		}
 
 		// load thumbnail
 		if (tmb) {
