@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 27a12ee) (2016-02-09)
+ * Version 2.1.6 (2.1-src Nightly: b9935d4) (2016-02-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -699,8 +699,7 @@ window.elFinder = function(node, opts) {
 	this.draggable = {
 		appendTo   : 'body',
 		addClasses : true,
-		delay      : 30,
-		distance   : 8,
+		distance   : 4,
 		revert     : true,
 		refreshPositions : false,
 		cursor     : 'crosshair',
@@ -797,6 +796,9 @@ window.elFinder = function(node, opts) {
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file,.elfinder-cwd-filename',
 			hoverClass : this.res('class', 'adroppable'),
+			classes    : { // Deprecated hoverClass jQueryUI>=1.12.0
+				'ui-droppable-hover': this.res('class', 'adroppable')
+			},
 			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
 				var dst     = $(this),
@@ -4819,7 +4821,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 27a12ee)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: b9935d4)';
 
 
 
@@ -7453,10 +7455,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			unselectAll = function() {
-				selectLock = false;
-				selectedFiles = [];
-				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
-				trigger();
+				if (selectedFiles.length) {
+					selectLock = false;
+					selectedFiles = [];
+					cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+					trigger();
+				}
 			},
 			
 			/**
@@ -7535,7 +7539,6 @@ $.fn.elfindercwd = function(fm, options) {
 			selectableOption = {
 				filter     : fileSelector,
 				stop       : trigger,
-				delay      : 250,
 				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 			},
@@ -8002,10 +8005,10 @@ $.fn.elfindercwd = function(fm, options) {
 				// fix ui.selectable bugs and add shift+click support 
 				.on('click.'+fm.namespace, fileSelector, function(e) {
 					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
-						prev = p.prevAll('.'+clSelected+':first'),
-						next = p.nextAll('.'+clSelected+':first'),
-						pl   = prev.length,
-						nl   = next.length,
+						prev,
+						next,
+						pl,
+						nl,
 						sib;
 
 					if (cwd.data('longtap')) {
@@ -8015,6 +8018,12 @@ $.fn.elfindercwd = function(fm, options) {
 
 					e.stopImmediatePropagation();
 
+					if (e.shiftKey) {
+						prev = p.prevAll('.'+clSelected+':first');
+						next = p.nextAll('.'+clSelected+':first');
+						pl   = prev.length;
+						nl   = next.length;
+					}
 					if (e.shiftKey && (pl || nl)) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
 						sib.add(p).trigger(evtSelect);
@@ -9394,6 +9403,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 					tolerance  : 'pointer',
 					accept     : '.elfinder-cwd-file-wrapper,.elfinder-tree-dir,.elfinder-cwd-file',
 					hoverClass : fm.res('class', 'adroppable'),
+					classes    : { // Deprecated hoverClass jQueryUI>=1.12.0
+						'ui-droppable-hover': fm.res('class', 'adroppable')
+					},
 					over       : function(e, ui) {
 						var helper = ui.helper,
 							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});
@@ -14895,9 +14907,9 @@ elFinder.prototype.commands.resize = function() {
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
 					uitype   = $('<div class="elfinder-resize-type"/>')
-						.append('<input type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>')
-						.append('<input type="radio" name="type" id="'+id+'-crop" value="crop" /><label for="'+id+'-crop">'+fm.i18n('crop')+'</label>')
-						.append('<input type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
+						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
+						'<input type="radio" name="type" id="'+id+'-crop" value="crop" /><label for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
+						'<input type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					type     = $('input', uitype).attr('disabled', 'disabled')
 						.change(function() {
 							var val = $('input:checked', uitype).val();
@@ -15489,7 +15501,7 @@ elFinder.prototype.commands.resize = function() {
 
 				imgr.css('cursor', 'pointer');
 				
-				uitype.buttonset();
+				uitype.controlgroup? uitype.controlgroup() : uitype.buttonset();
 				
 			},
 			
