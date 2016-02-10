@@ -157,6 +157,10 @@
 	margin: 7px;
 }
 
+.elfinder-resize-type span.ui-checkboxradio-icon {
+	display: none;
+}
+
 /********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
