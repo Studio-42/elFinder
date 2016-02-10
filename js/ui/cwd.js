@@ -352,10 +352,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			unselectAll = function() {
-				selectLock = false;
-				selectedFiles = [];
-				cwd.find('[id].'+clSelected).trigger(evtUnselect); 
-				trigger();
+				if (selectedFiles.length) {
+					selectLock = false;
+					selectedFiles = [];
+					cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+					trigger();
+				}
 			},
 			
 			/**
@@ -434,7 +436,6 @@ $.fn.elfindercwd = function(fm, options) {
 			selectableOption = {
 				filter     : fileSelector,
 				stop       : trigger,
-				delay      : 250,
 				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 			},
@@ -901,10 +902,10 @@ $.fn.elfindercwd = function(fm, options) {
 				// fix ui.selectable bugs and add shift+click support 
 				.on('click.'+fm.namespace, fileSelector, function(e) {
 					var p    = this.id ? $(this) : $(this).parents('[id]:first'), 
-						prev = p.prevAll('.'+clSelected+':first'),
-						next = p.nextAll('.'+clSelected+':first'),
-						pl   = prev.length,
-						nl   = next.length,
+						prev,
+						next,
+						pl,
+						nl,
 						sib;
 
 					if (cwd.data('longtap')) {
@@ -914,6 +915,12 @@ $.fn.elfindercwd = function(fm, options) {
 
 					e.stopImmediatePropagation();
 
+					if (e.shiftKey) {
+						prev = p.prevAll('.'+clSelected+':first');
+						next = p.nextAll('.'+clSelected+':first');
+						pl   = prev.length;
+						nl   = next.length;
+					}
 					if (e.shiftKey && (pl || nl)) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
 						sib.add(p).trigger(evtSelect);

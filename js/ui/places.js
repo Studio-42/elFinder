@@ -344,6 +344,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 					tolerance  : 'pointer',
 					accept     : '.elfinder-cwd-file-wrapper,.elfinder-tree-dir,.elfinder-cwd-file',
 					hoverClass : fm.res('class', 'adroppable'),
+					classes    : { // Deprecated hoverClass jQueryUI>=1.12.0
+						'ui-droppable-hover': fm.res('class', 'adroppable')
+					},
 					over       : function(e, ui) {
 						var helper = ui.helper,
 							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});

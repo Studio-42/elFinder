@@ -685,8 +685,7 @@ window.elFinder = function(node, opts) {
 	this.draggable = {
 		appendTo   : 'body',
 		addClasses : true,
-		delay      : 30,
-		distance   : 8,
+		distance   : 4,
 		revert     : true,
 		refreshPositions : false,
 		cursor     : 'crosshair',
@@ -783,6 +782,9 @@ window.elFinder = function(node, opts) {
 			tolerance  : 'pointer',
 			accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file,.elfinder-cwd-filename',
 			hoverClass : this.res('class', 'adroppable'),
+			classes    : { // Deprecated hoverClass jQueryUI>=1.12.0
+				'ui-droppable-hover': this.res('class', 'adroppable')
+			},
 			autoDisable: true, // elFinder original, see jquery.elfinder.js
 			drop : function(e, ui) {
 				var dst     = $(this),
