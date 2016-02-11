@@ -8,7 +8,15 @@
 		- Supported API protocol version 2.0 for the legacy connector
 		- Fixed #1206 Configurable places(favorites) (https://github.com/Studio-42/elFinder/issues/1206)
 		- Fixed #1211 Remove deprecated method jQueryUI.zIndex()
+		- Supported jQueryUI 1.12.0
+		- Fixed #1213 infinite loop in PHP connector
 		- And some minor bug fixes
+
+
+2015-0x-xx
+
+	* elFinder (2.0.6):
+		- Fixed #1213 infinite loop in PHP connector
 
 
 2016-01-19  Naoki Sawada  <hypweb@gmail.com>
@@ -40,6 +48,12 @@
 		- Fixed problem if filename included character that can't be json encode
 		- Added option `convmap` to Normalizer plugin
 		- And some minor bug fixes
+
+
+2015-12-26  Naoki Sawada  <hypweb@gmail.com>  
+
+	* elFinder (2.0.5):
+		- Fixed problem if filename included character that can't be json encode
 
 
 2015-12-16  Naoki Sawada  <hypweb@gmail.com>
