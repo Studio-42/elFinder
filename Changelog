@@ -1,3 +1,9 @@
+2015-0x-xx
+
+	* elFinder (2.0.6):
+		- Fixed #1213 infinite loop in PHP connector
+
+
 2015-12-26  Naoki Sawada  <hypweb@gmail.com>  
 
 	* elFinder (2.0.5):
