@@ -108,8 +108,8 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 
 		$this->rootparameter($this->options['alias'], $this->options['defaults']['read'], $this->options['defaults']['write'], $this->options['defaults']['locked'], $this->options['defaults']['hidden']);
 
-		if ($res = odbc_fetch_array($this->query('SELECT name FROM sys.tables'))) {
-			while ($row =  odbc_fetch_array($this->query('SELECT name FROM sys.tables'))) {
+		if ($res = $this->query('SELECT name FROM sys.tables')) {
+			while ($row =  odbc_fetch_array($res)) {
 				if ($row['name'] == $this->options['files_table']) {
 					$this->tbf = $this->options['files_table'];
 					break;
@@ -125,8 +125,6 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 
 		return true;
 	}
-
-
 
 	/**
 	 * Set tmp path
@@ -191,6 +189,13 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function query($sql) {
+	 /**
+	 * increase mssql or odbc data size limit
+	 **/
+		ini_set("mssql.textlimit","2147483647");
+		ini_set("mssql.textsize","2147483647");
+		ini_set("odbc.defaultlrl","214748364");
+
 		$this->sqlCnt++;
 		$sql = str_replace(utf8_encode('"'), "'", $sql);
 		$res = odbc_exec($this->conn, $sql);
@@ -526,8 +531,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * @return array|false
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function _stat($path) {
-		//$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, IF(ch.id, 1, 0) AS dirs
+	protected function _stat($path) {		
 		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.[read], f.write, f.locked, f.hidden, f.width, f.height, IIF(ch.id>0, 1, 0) AS dirs
 				FROM '.$this->tbf.' AS f
 				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
@@ -609,9 +613,9 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 			: @tmpfile();
 
 		if ($fp) {
-			$sql = 'SELECT convert(varchar(max),content) as content FROM '.$this->tbf.' WHERE id="'.$path.'"';
+			$sql = 'SELECT convert(varbinary(max),content) as content FROM '.$this->tbf.' WHERE id="'.$path.'"';
 			$res = $this->query($sql);
-			if ($res && ($r = odbc_fetch_array($res))) {
+			if ($res && ($r = odbc_fetch_array($res))) {				
 				fwrite($fp, base64_decode($r['content']));
 				rewind($fp);
 				return $fp;
@@ -837,7 +841,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _getContents($path) {
-		$sql = sprintf('SELECT convert(varchar(max),content) as content FROM %s WHERE id=%d', $this->tbf, $path);
+		$sql = sprintf('SELECT convert(varbinary(max),content) as content FROM %s WHERE id=%d', $this->tbf, $path);
 		$res = $this->query($sql);
 		$r = odbc_fetch_array($res);
 		return ($res) && ($r) ? base64_decode($r['content']) : false;
@@ -1035,7 +1039,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 				}
 			}
 		}
-	return;
- }
+		return;
+	}
 
 } // END class
