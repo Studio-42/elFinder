@@ -652,7 +652,7 @@ window.elFinder = function(node, opts) {
 		this.sortStickFolders = !!this.sortStickFolders
 	}
 
-	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortsRules);
+	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortRules);
 	
 	$.each(this.sortRules, function(name, method) {
 		if (typeof method != 'function') {
