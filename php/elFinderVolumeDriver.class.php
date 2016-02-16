@@ -1651,7 +1651,7 @@ abstract class elFinderVolumeDriver {
 
 		$path = $this->decode($hash);
 		$dir  = $this->dirnameCE($path);
-		$name = $this->uniqueName($dir, $this->basenameCE($path), ' '.$suffix.' ');
+		$name = $this->uniqueName($dir, $file['name'], ' '.$suffix.' ');
 
 		if (!$this->allowCreate($dir, $name, ($file['mime'] === 'directory'))) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
