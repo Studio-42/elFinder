@@ -930,7 +930,6 @@ $.fn.elfindercwd = function(fm, options) {
 						if (p.data('touching') && p.hasClass(clSelected)) {
 							p.data('touching', null);
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
-							unselectAll();
 							return;
 						} else {
 							unselectAll();
@@ -984,7 +983,12 @@ $.fn.elfindercwd = function(fm, options) {
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
 					if (e.type == 'touchmove') {
+						p.data('touching', null);
 						p.removeClass(clHover);
+					} else if (p.data('touching') && !cwd.data('longtap') && p.hasClass(clSelected)) {
+						e.preventDefault();
+						p.data('touching', null);
+						fm.dblclick({file : fm.cwdId2Hash(this.id)});
 					}
 				})
 				// attach draggable
