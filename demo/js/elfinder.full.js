@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: f86babe) (2016-02-14)
+ * Version 2.1.6 (2.1-src Nightly: 93c8501) (2016-02-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2765,7 +2765,7 @@ elFinder.prototype = {
 					}
 				},
 				check = function() {
-					var renames = [], existed = [], exists = [], i, c;
+					var renames = [], rnhashes = [], existed = [], exists = [], i, c;
 					
 					var confirm = function(ndx) {
 						var last = ndx == exists.length-1,
@@ -2778,7 +2778,7 @@ elFinder.prototype = {
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)
-										: dfrd.resolve(renames);
+										: dfrd.resolve(renames, rnhashes);
 								}
 							},
 							reject : {
@@ -2797,14 +2797,14 @@ elFinder.prototype = {
 	
 									!last && !all
 										? confirm(++ndx)
-										: dfrd.resolve(renames);
+										: dfrd.resolve(renames, rnhashes);
 								}
 							},
 							cancel : {
 								label    : 'btnCancel',
 								callback : function() {
 									cancel();
-									dfrd.resolve(renames);
+									dfrd.resolve(renames, rnhashes);
 								}
 							},
 							buttons : [
@@ -2822,7 +2822,7 @@ elFinder.prototype = {
 										}
 										!last && !all
 											? confirm(++ndx)
-											: dfrd.resolve(renames);
+											: dfrd.resolve(renames, rnhashes);
 									}
 								}
 							]
@@ -2837,7 +2837,7 @@ elFinder.prototype = {
 					
 					name = $.map(names, function(item) { return item.name;});
 					fm.request({
-						data : {cmd : 'upload', target : target, name : name , FILES : ''},
+						data : {cmd : 'ls', target : target, intersect : name},
 						notify : {type : 'preupload', cnt : 1, hideCnt : true},
 						preventFail : true
 					})
@@ -2847,13 +2847,22 @@ elFinder.prototype = {
 								cancel();
 							} else {
 								if (fm.option('uploadOverwrite')) {
-									if (data.name) {
-										existed = data.name || [];
+									if (data.list) {
+										if (typeof data.list[0] == 'string') {
+											existed = data.list || [];
+										} else {
+											existed = $.map(data.list, function(item) { 
+												rnhashes[item.name] = item.hash;
+												return item.name;
+											});
+										}
 										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-									}
-									if (data.list && target == fm.cwd().hash
-									&& data.list.length != $.map(fm.files(), function(file) { return file.phash == target ? file.name : null ;}).length) {
-										fm.sync();
+										if (target == fm.cwd().hash &&
+											$($.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } ))
+												.filter(existed).length < 1
+										) {
+											fm.sync();
+										}
 									}
 								}
 							}
@@ -2968,7 +2977,7 @@ elFinder.prototype = {
 									processing--;
 								});
 							} else if (entry.isDirectory) {
-								if (self.api >= 2.1) {
+								if (fm.api >= 2.1) {
 									if (processing > 0) {
 										dirctorys.push(entry);
 									} else {
@@ -2987,20 +2996,24 @@ elFinder.prototype = {
 					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
 				});
 				if (items.length > 0) {
-					fm.uploads.checkExists(items, target, fm).done(function(renames){
+					fm.uploads.checkExists(items, target, fm).done(function(renames, rnhashes){
 						var notifyto, dfds = [];
 						if (fm.option('uploadOverwrite')) {
 							items = $.map(items, function(item){
-								var i, bak, file, dfd;
+								var i, bak, hash, dfd;
 								if (item.isDirectory) {
 									i = $.inArray(item.name, renames);
 									if (i !== -1) {
 										renames.splice(i, 1);
 										bak = fm.uniqueName(item.name + fm.options.backupSuffix , null, '');
-										file = fm.fileByName(item.name, target);
-										fm.lockfiles({files : [file.hash]});
+										if (rnhashes[item.name]) {
+											hash = rnhashes[item.name];
+										} else {
+											hash = fm.fileByName(item.name, target).hash;
+										}
+										fm.lockfiles({files : [hash]});
 										dfd = fm.request({
-											data   : {cmd : 'rename', target : file.hash, name : bak},
+											data   : {cmd : 'rename', target : hash, name : bak},
 											notify : {type : 'rename', cnt : 1}
 										})
 										.fail(function(error) {
@@ -3008,7 +3021,7 @@ elFinder.prototype = {
 											fm.sync();
 										})
 										.always(function() {
-											fm.unlockfiles({files : [file.hash]})
+											fm.unlockfiles({files : [hash]})
 										});
 										dfds.push(dfd);
 									}
@@ -3032,7 +3045,7 @@ elFinder.prototype = {
 										} else {
 											notifyto && clearTimeout(notifyto);
 											fm.notify({type : 'readdir', cnt : -1});
-											dfrd.resolve([files, paths, renames]);
+											dfrd.resolve([files, paths, renames, rnhashes]);
 										}
 									}
 								}, 10);
@@ -3175,6 +3188,7 @@ elFinder.prototype = {
 					}, self.options.notifyDelay);
 				},
 				renames = (data.renames || null),
+				rnhashes = (data.rnhashes || null),
 				chunkMerge = false;
 			
 			// regist fnAbort function
@@ -3351,6 +3365,7 @@ elFinder.prototype = {
 									checked: true,
 									target: target,
 									renames: renames,
+									rnhashes: rnhashes,
 									multiupload: true})
 								.fail(function(error) {
 									if (cid) {	
@@ -3550,6 +3565,7 @@ elFinder.prototype = {
 				if (renames) {
 					$.each(renames, function(i, v){
 						formData.append('renames[]', v);
+						formData.append('rnhashes[]', rnhashes[v]);
 					});
 					formData.append('suffix', fm.options.backupSuffix);
 				}
@@ -3611,10 +3627,12 @@ elFinder.prototype = {
 				if (files.length > 0) {
 					if (renames == null) {
 						renames = [];
+						rnhashes = [];
 						self.uploads.checkExists(files, target, fm).done(
-							function(res){
+							function(res, res2){
 								if (fm.option('uploadOverwrite')) {
 									renames = res;
+									rnhashes = res2;
 									files = $.map(files, function(file){return !file._remove? file : null ;});
 								}
 								cnt = files.length;
@@ -3641,9 +3659,11 @@ elFinder.prototype = {
 				} else {
 					files.done(function(result){
 						renames = [];
+						rnhashes = [];
 						cnt = result[0].length;
 						if (cnt) {
 							renames = result[2];
+							rnhashes = result[3];
 							send(result[0], result[1]);
 						} else {
 							dfrd.reject(['errUploadNoFiles']);
@@ -3720,6 +3740,7 @@ elFinder.prototype = {
 				names   = [],
 				dfds    = [],
 				renames = [],
+				rnhashes = [],
 				cnt, notify, notifyto, abortto;
 
 			if (files && files.length) {
@@ -3732,8 +3753,9 @@ elFinder.prototype = {
 					names = input.files? input.files : [{ name: $(input).val().replace(/^(?:.+[\\\/])?([^\\\/]+)$/, '$1') }];
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
-						function(res){
+						function(res, res2){
 							renames = res;
+							rnhashes = res2;
 							cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
 							if (cnt != names.length) {
 								cnt = 0;
@@ -3759,6 +3781,7 @@ elFinder.prototype = {
 				if (renames.length > 0) {
 					$.each(renames, function(i, rename) {
 						form.append('<input type="hidden" name="renames[]" value="'+rename+'"/>');
+						form.append('<input type="hidden" name="rnhashes[]" value="'+rnhashes[rename]+'"/>');
 					});
 					form.append('<input type="hidden" name="suffix" value="'+fm.options.backupSuffix+'"/>');
 				}
@@ -4821,7 +4844,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: f86babe)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 93c8501)';
 
 
 
@@ -8033,7 +8056,6 @@ $.fn.elfindercwd = function(fm, options) {
 						if (p.data('touching') && p.hasClass(clSelected)) {
 							p.data('touching', null);
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
-							unselectAll();
 							return;
 						} else {
 							unselectAll();
@@ -8087,7 +8109,12 @@ $.fn.elfindercwd = function(fm, options) {
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
 					if (e.type == 'touchmove') {
+						p.data('touching', null);
 						p.removeClass(clHover);
+					} else if (p.data('touching') && !cwd.data('longtap') && p.hasClass(clSelected)) {
+						e.preventDefault();
+						p.data('touching', null);
+						fm.dblclick({file : fm.cwdId2Hash(this.id)});
 					}
 				})
 				// attach draggable
@@ -13542,6 +13569,7 @@ elFinder.prototype.commands.paste = function() {
 			paste = function(files) {
 				var dfrd      = $.Deferred(),
 					existed   = [],
+					rnhashes  = [],
 					intersect = function(files, names) {
 						var ret = [], 
 							i   = files.length;
@@ -13619,14 +13647,26 @@ elFinder.prototype.commands.paste = function() {
 						})
 					},
 					valid     = function(names) {
-						existed = intersect(files, names);
+						if (names.length) {
+							if (typeof names[0] == 'string') {
+								existed = intersect(files, names);
+							} else {
+								existed = intersect(files, $.map(names, function(item) { 
+										rnhashes[item.name] = item.hash;
+										return item.name;
+									})
+								);
+							}
+						}
 						existed.length ? confirm(0) : paste(files);
 					},
 					paste     = function(files) {
 						var renames = [],
+							hashes = [],
 							files  = $.map(files, function(file) { 
 								if (file.rename) {
 									renames.push(file.name);
+									hashes.push(rnhashes[file.name]);
 								}
 								return !file.remove ? file : null;
 							}),
@@ -13640,10 +13680,10 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						src = files[0].phash;
-						files = $.map(files, function(f) { return f.hash});
+						files = $.map(files, function(f) { return f.hash; });
 						
 						fm.request({
-								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, suffix : fm.options.backupSuffix},
+								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix},
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.done(function(data) {
@@ -13658,8 +13698,8 @@ elFinder.prototype.commands.paste = function() {
 							.always(function() {
 								fm.unlockfiles({files : files});
 							});
-					}
-					;
+					},
+					internames;
 
 				if (!fm.isCommandEnabled(self.name, dst.hash) || !files.length) {
 					return dfrd.resolve();
@@ -13673,16 +13713,16 @@ elFinder.prototype.commands.paste = function() {
 					if (!fm.option('copyOverwrite')) {
 						paste(files);
 					} else {
-
+						internames = $.map(files, function(f) { return f.name});
 						dst.hash == fm.cwd().hash
 							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
 							: fm.request({
-								data : {cmd : 'ls', target : dst.hash},
+								data : {cmd : 'ls', target : dst.hash, intersect : internames},
 								notify : {type : 'prepare', cnt : 1, hideCnt : true},
 								preventFail : true
 							})
 							.always(function(data) {
-								valid(data.list || [])
+								valid(data.list);
 							});
 					}
 				}
