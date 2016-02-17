@@ -98,7 +98,7 @@ class elFinder {
 	 **/
 	protected $commands = array(
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false),
-		'ls'        => array('target' => true, 'mimes' => false),
+		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false),
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true),
 		'tmb'       => array('targets' => true),
@@ -110,8 +110,8 @@ class elFinder {
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
-		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'suffix' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'suffix' => false),
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'rnhashes' => false, 'suffix' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
@@ -963,9 +963,10 @@ class elFinder {
 	 **/
 	protected function ls($args) {
 		$target = $args['target'];
+		$intersect = isset($args['intersect'])? $args['intersect'] : array();
 		
 		if (($volume = $this->volume($target)) == false
-		|| ($list = $volume->ls($target)) === false) {
+		|| ($list = $volume->ls($target, $intersect)) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target));
 		}
 		return array('list' => $list);
@@ -1843,6 +1844,7 @@ class elFinder {
 		$suffix = '~';
 		if ($args['renames'] && is_array($args['renames'])) {
 			$renames = array_flip($args['renames']);
+			$rnhashes = isset($args['rnhashes'])? $args['rnhashes'] : array();
 			if (is_string($args['suffix']) && ! preg_match($ngReg, $args['suffix'])) {
 				$suffix = $args['suffix'];
 			}
@@ -1873,6 +1875,8 @@ class elFinder {
 		$extTable = array_flip(array_unique($volume->getMimeTable()));
 		
 		if (empty($files)) {
+			
+			//--- This part is unnecessary code from 2.1.7 START ---//
 			if (!$args['upload'] && $args['name'] && is_array($args['name'])) {
 				$error = '';
 				$result['name'] = array();
@@ -1895,6 +1899,8 @@ class elFinder {
 				}
 				return $result;
 			}
+			//--- This part is unnessesaly code from 2.1.7 END ---//
+			
 			if (isset($args['upload']) && is_array($args['upload']) && ($tempDir = $this->getTempDir($volume->getTempPath()))) {
 				$names = array();
 				foreach($args['upload'] as $i => $url) {
@@ -2041,7 +2047,11 @@ class elFinder {
 				// file rename for backup
 				if (isset($renames[$name])) {
 					$dir = $volume->realpath($_target);
-					$hash = $volume->getHash($dir, $name);
+					if (isset($rnhashes[$renames[$name]])) {
+						$hash = $rnhashes[$renames[$name]];
+					} else {
+						$hash = $volume->getHash($dir, $name);
+					}
 					$rnres = $this->rename(array('target' => $hash, 'name' => $volume->uniqueName($dir, $name, $suffix, true, 0)));
 					if (!empty($rnres['error'])) {
 						$result['warning'] = $rnres['error'];
@@ -2109,6 +2119,7 @@ class elFinder {
 		$suffix = '~';
 		if (!empty($args['renames'])) {
 			$renames = array_flip($args['renames']);
+			$hashes = isset($args['hashes'])? $args['hashes'] : array();
 			if (is_string($args['suffix']) && ! preg_match('/[\/\\?*:|"<>]/', $args['suffix'])) {
 				$suffix = $args['suffix'];
 			}
@@ -2125,7 +2136,11 @@ class elFinder {
 				$file = $srcVolume->file($target);
 				if (isset($renames[$file['name']])) {
 					$dir = $dstVolume->realpath($dst);
-					$hash = $dstVolume->getHash($dir, $file['name']);
+					if (isset($hashes[$renames[$file['name']]])) {
+						$hash = $hashes[$renames[$file['name']]];
+					} else {
+						$hash = $dstVolume->getHash($dir, $file['name']);
+					}
 					$rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $file['name'], $suffix, true, 0)));
 					if (!empty($rnres['error'])) {
 						$result['warning'] = $rnres['error'];
