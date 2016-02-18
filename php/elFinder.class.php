@@ -111,7 +111,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'rnhashes' => false, 'suffix' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
@@ -1840,14 +1840,16 @@ class elFinder {
 		$chunk  = $args['chunk']? $args['chunk'] : '';
 		$cid    = $args['cid']? (int)$args['cid'] : '';
 		
-		$renames= array();
+		$renames = $hashes = array();
 		$suffix = '~';
 		if ($args['renames'] && is_array($args['renames'])) {
 			$renames = array_flip($args['renames']);
-			$rnhashes = isset($args['rnhashes'])? $args['rnhashes'] : array();
 			if (is_string($args['suffix']) && ! preg_match($ngReg, $args['suffix'])) {
 				$suffix = $args['suffix'];
 			}
+		}
+		if ($args['hashes'] && is_array($args['hashes'])) {
+			$hashes = array_flip($args['hashes']);
 		}
 		
 		if (!$volume) {
@@ -2047,8 +2049,8 @@ class elFinder {
 				// file rename for backup
 				if (isset($renames[$name])) {
 					$dir = $volume->realpath($_target);
-					if (isset($rnhashes[$renames[$name]])) {
-						$hash = $rnhashes[$renames[$name]];
+					if (isset($hashes[$name])) {
+						$hash = $hashes[$name];
 					} else {
 						$hash = $volume->getHash($dir, $name);
 					}
@@ -2059,7 +2061,7 @@ class elFinder {
 					}
 				}
 			}
-			if (! $_target || ($file = $volume->upload($fp, $_target, $name, $tmpname)) === false) {
+			if (! $_target || ($file = $volume->upload($fp, $_target, $name, $tmpname, $hashes)) === false) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
 				if (! is_uploaded_file($tmpname)) {
@@ -2115,14 +2117,16 @@ class elFinder {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
 		}
 		
-		$renames = array();
+		$hashes = $renames = array();
 		$suffix = '~';
 		if (!empty($args['renames'])) {
 			$renames = array_flip($args['renames']);
-			$hashes = isset($args['hashes'])? $args['hashes'] : array();
 			if (is_string($args['suffix']) && ! preg_match('/[\/\\?*:|"<>]/', $args['suffix'])) {
 				$suffix = $args['suffix'];
 			}
+		}
+		if (!empty($args['hashes'])) {
+			$hashes = array_flip($args['hashes']);
 		}
 		
 		foreach ($targets as $target) {
@@ -2136,8 +2140,8 @@ class elFinder {
 				$file = $srcVolume->file($target);
 				if (isset($renames[$file['name']])) {
 					$dir = $dstVolume->realpath($dst);
-					if (isset($hashes[$renames[$file['name']]])) {
-						$hash = $hashes[$renames[$file['name']]];
+					if (isset($hashes[$file['name']])) {
+						$hash = $hashes[$file['name']];
 					} else {
 						$hash = $dstVolume->getHash($dir, $file['name']);
 					}
@@ -2149,7 +2153,7 @@ class elFinder {
 				}
 			}
 			
-			if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut)) == false) {
+			if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut, $hashes)) == false) {
 				$result['warning'] = $this->error($dstVolume->error());
 				break;
 			}

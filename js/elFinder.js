@@ -2751,7 +2751,7 @@ elFinder.prototype = {
 					}
 				},
 				check = function() {
-					var renames = [], rnhashes = [], existed = [], exists = [], i, c;
+					var renames = [], hashes = {}, existed = [], exists = [], i, c;
 					
 					var confirm = function(ndx) {
 						var last = ndx == exists.length-1,
@@ -2764,7 +2764,7 @@ elFinder.prototype = {
 								callback : function(all) {
 									!last && !all
 										? confirm(++ndx)
-										: dfrd.resolve(renames, rnhashes);
+										: dfrd.resolve(renames, hashes);
 								}
 							},
 							reject : {
@@ -2783,14 +2783,14 @@ elFinder.prototype = {
 	
 									!last && !all
 										? confirm(++ndx)
-										: dfrd.resolve(renames, rnhashes);
+										: dfrd.resolve(renames, hashes);
 								}
 							},
 							cancel : {
 								label    : 'btnCancel',
 								callback : function() {
 									cancel();
-									dfrd.resolve(renames, rnhashes);
+									dfrd.resolve(renames, hashes);
 								}
 							},
 							buttons : [
@@ -2808,7 +2808,7 @@ elFinder.prototype = {
 										}
 										!last && !all
 											? confirm(++ndx)
-											: dfrd.resolve(renames, rnhashes);
+											: dfrd.resolve(renames, hashes);
 									}
 								}
 							]
@@ -2834,13 +2834,11 @@ elFinder.prototype = {
 							} else {
 								if (fm.option('uploadOverwrite')) {
 									if (data.list) {
-										if (typeof data.list[0] == 'string') {
+										if ($.isArray(data.list)) {
 											existed = data.list || [];
 										} else {
-											existed = $.map(data.list, function(item) { 
-												rnhashes[item.name] = item.hash;
-												return item.name;
-											});
+											existed = $.map(data.list, function(n) { return n; });
+											hashes = data.list;
 										}
 										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
 										if (target == fm.cwd().hash &&
@@ -2982,19 +2980,23 @@ elFinder.prototype = {
 					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
 				});
 				if (items.length > 0) {
-					fm.uploads.checkExists(items, target, fm).done(function(renames, rnhashes){
+					fm.uploads.checkExists(items, target, fm).done(function(renames, hashes){
 						var notifyto, dfds = [];
 						if (fm.option('uploadOverwrite')) {
 							items = $.map(items, function(item){
-								var i, bak, hash, dfd;
+								var i, bak, hash, dfd, hi;
 								if (item.isDirectory) {
 									i = $.inArray(item.name, renames);
 									if (i !== -1) {
 										renames.splice(i, 1);
 										bak = fm.uniqueName(item.name + fm.options.backupSuffix , null, '');
-										if (rnhashes[item.name]) {
-											hash = rnhashes[item.name];
-										} else {
+										$.each(hashes, function(h, name) {
+											if (item.name == name) {
+												hash = h;
+												return false;
+											}
+										});
+										if (! hash) {
 											hash = fm.fileByName(item.name, target).hash;
 										}
 										fm.lockfiles({files : [hash]});
@@ -3031,7 +3033,7 @@ elFinder.prototype = {
 										} else {
 											notifyto && clearTimeout(notifyto);
 											fm.notify({type : 'readdir', cnt : -1});
-											dfrd.resolve([files, paths, renames, rnhashes]);
+											dfrd.resolve([files, paths, renames, hashes]);
 										}
 									}
 								}, 10);
@@ -3174,7 +3176,7 @@ elFinder.prototype = {
 					}, self.options.notifyDelay);
 				},
 				renames = (data.renames || null),
-				rnhashes = (data.rnhashes || null),
+				hashes = (data.hashes || null),
 				chunkMerge = false;
 			
 			// regist fnAbort function
@@ -3351,7 +3353,7 @@ elFinder.prototype = {
 									checked: true,
 									target: target,
 									renames: renames,
-									rnhashes: rnhashes,
+									hashes: hashes,
 									multiupload: true})
 								.fail(function(error) {
 									if (cid) {	
@@ -3548,12 +3550,16 @@ elFinder.prototype = {
 
 				formData.append('cmd', 'upload');
 				formData.append(self.newAPI ? 'target' : 'current', target);
-				if (renames) {
-					$.each(renames, function(i, v){
+				if (renames && renames.length) {
+					$.each(renames, function(i, v) {
 						formData.append('renames[]', v);
-						formData.append('rnhashes[]', rnhashes[v]);
 					});
 					formData.append('suffix', fm.options.backupSuffix);
+				}
+				if (hashes) {
+					$.each(hashes, function(i, v) {
+						formData.append('hashes['+ i +']', v);
+					});
 				}
 				$.each(self.options.customData, function(key, val) {
 					formData.append(key, val);
@@ -3613,12 +3619,12 @@ elFinder.prototype = {
 				if (files.length > 0) {
 					if (renames == null) {
 						renames = [];
-						rnhashes = [];
+						hashes = {};
 						self.uploads.checkExists(files, target, fm).done(
 							function(res, res2){
 								if (fm.option('uploadOverwrite')) {
 									renames = res;
-									rnhashes = res2;
+									hashes = res2;
 									files = $.map(files, function(file){return !file._remove? file : null ;});
 								}
 								cnt = files.length;
@@ -3645,11 +3651,11 @@ elFinder.prototype = {
 				} else {
 					files.done(function(result){
 						renames = [];
-						rnhashes = [];
+						hashes = {};
 						cnt = result[0].length;
 						if (cnt) {
 							renames = result[2];
-							rnhashes = result[3];
+							hashes = result[3];
 							send(result[0], result[1]);
 						} else {
 							dfrd.reject(['errUploadNoFiles']);
@@ -3726,7 +3732,7 @@ elFinder.prototype = {
 				names   = [],
 				dfds    = [],
 				renames = [],
-				rnhashes = [],
+				hashes  = {},
 				cnt, notify, notifyto, abortto;
 
 			if (files && files.length) {
@@ -3741,7 +3747,7 @@ elFinder.prototype = {
 					dfds.push(self.uploads.checkExists(names, target, self).done(
 						function(res, res2){
 							renames = res;
-							rnhashes = res2;
+							hashes = res2;
 							cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
 							if (cnt != names.length) {
 								cnt = 0;
@@ -3766,18 +3772,22 @@ elFinder.prototype = {
 				
 				if (renames.length > 0) {
 					$.each(renames, function(i, rename) {
-						form.append('<input type="hidden" name="renames[]" value="'+rename+'"/>');
-						form.append('<input type="hidden" name="rnhashes[]" value="'+rnhashes[rename]+'"/>');
+						form.append('<input type="hidden" name="renames[]" value="'+self.escape(rename)+'"/>');
 					});
 					form.append('<input type="hidden" name="suffix" value="'+fm.options.backupSuffix+'"/>');
 				}
+				if (hashes) {
+					$.each(renames, function(i, v) {
+						form.append('<input type="hidden" name="['+i+']" value="'+self.escape(v)+'"/>');
+					});
+				}
 				
 				$.each(self.options.onlyMimes||[], function(i, mime) {
-					form.append('<input type="hidden" name="mimes[]" value="'+mime+'"/>');
+					form.append('<input type="hidden" name="mimes[]" value="'+self.escape(mime)+'"/>');
 				});
 				
 				$.each(self.options.customData, function(key, val) {
-					form.append('<input type="hidden" name="'+key+'" value="'+val+'"/>');
+					form.append('<input type="hidden" name="'+key+'" value="'+self.escape(val)+'"/>');
 				});
 				
 				form.appendTo('body');

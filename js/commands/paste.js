@@ -61,7 +61,7 @@ elFinder.prototype.commands.paste = function() {
 			paste = function(files) {
 				var dfrd      = $.Deferred(),
 					existed   = [],
-					rnhashes  = [],
+					hashes  = {},
 					intersect = function(files, names) {
 						var ret = [], 
 							i   = files.length;
@@ -139,26 +139,37 @@ elFinder.prototype.commands.paste = function() {
 						})
 					},
 					valid     = function(names) {
-						if (names.length) {
-							if (typeof names[0] == 'string') {
-								existed = intersect(files, names);
+						var exists = {};
+						if (names) {
+							if ($.isArray(names)) {
+								if (names.length) {
+									if (typeof names[0] == 'string') {
+										// elFinder <= 2.1.6 command `is` results
+										existed = intersect(files, names);
+									} else {
+										$.each(names, function(i, v) {
+											exists[v.name] = v.hash;
+										});
+										existed = intersect(files, $.map(exists, function(h, n) { return n; }));
+										$.each(files, function(i, file) {
+											if (exists[file.name]) {
+												hashes[exists[file.name]] = file.name;
+											}
+										});
+									}
+								}
 							} else {
-								existed = intersect(files, $.map(names, function(item) { 
-										rnhashes[item.name] = item.hash;
-										return item.name;
-									})
-								);
+								existed = intersect(files, $.map(names, function(n) { return n; }));
+								hashes = names;
 							}
 						}
 						existed.length ? confirm(0) : paste(files);
 					},
 					paste     = function(files) {
 						var renames = [],
-							hashes = [],
 							files  = $.map(files, function(file) { 
 								if (file.rename) {
 									renames.push(file.name);
-									hashes.push(rnhashes[file.name]);
 								}
 								return !file.remove ? file : null;
 							}),
@@ -207,7 +218,7 @@ elFinder.prototype.commands.paste = function() {
 					} else {
 						internames = $.map(files, function(f) { return f.name});
 						dst.hash == fm.cwd().hash
-							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? file.name : null }))
+							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? {hash: file.hash, name: file.name} : null }))
 							: fm.request({
 								data : {cmd : 'ls', target : dst.hash, intersect : internames},
 								notify : {type : 'prepare', cnt : 1, hideCnt : true},
