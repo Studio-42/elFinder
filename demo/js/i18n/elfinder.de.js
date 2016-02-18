@@ -326,6 +326,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : 'Ausführen',
 			'perm'            : 'Berechtigung',
 			'mode'            : 'Modus',
+			'emptyFolder'     : 'Der Ordner ist leer',
+			'emptyFolderDrop' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch Ziehen hinzu',
+			'emptyFolderLTap' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch langes Tippen hinzu',
+			'quality'         : 'Qualität',
+			'autoSync'        : 'Auto sync',
+			'moveUp'          : 'Nach oben bewegen',
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
