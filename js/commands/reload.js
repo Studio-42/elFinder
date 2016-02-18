@@ -46,7 +46,7 @@ elFinder.prototype.commands.reload = function() {
 			node = self.extra.node;
 			node.ready(function(){
 				setTimeout(function(){
-					node.parent().toggleClass('ui-state-disabled', !fm.options.syncStart);
+					node.parent().toggleClass('ui-state-disabled', !fm.options.syncStart).css('pointer-events', 'auto');
 				}, 10);
 			});
 		}
