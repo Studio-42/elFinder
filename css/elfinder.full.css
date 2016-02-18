@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 93c8501) (2016-02-17)
+ * Version 2.1.6 (2.1-src Nightly: 35f4de9) (2016-02-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -859,12 +859,14 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 /* buttons */
 .std42-dialog .ui-dialog-buttonpane {
-	border:0 solid;
-	margin:0;
-	padding:.5em .7em;
+	border: 0 solid;
+	margin: 0;
+	padding: .5em;
+	text-align: right;
 }
+.elfinder-rtl .std42-dialog .ui-dialog-buttonpane { text-align: left; }
 
-.std42-dialog .ui-dialog-buttonpane button { margin:0 0 0 .4em;	padding:0; outline:0px solid; }
+.std42-dialog .ui-dialog-buttonpane button { margin:.7em 0 0 .4em; padding: .2em; outline:0px solid; }
 .std42-dialog .ui-dialog-buttonpane button span { padding:2px 9px; }
 .std42-dialog .ui-dialog-buttonpane button span.ui-icon { padding: 2px; }
 
