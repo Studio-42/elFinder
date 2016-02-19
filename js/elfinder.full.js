@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 02f0b58) (2016-02-19)
+ * Version 2.1.6 (2.1-src Nightly: 0dd8831) (2016-02-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1540,11 +1540,15 @@ window.elFinder = function(node, opts) {
 			onlydir? null : this.request(opts2)
 		)
 		.fail(function(error) {
-			dfrd.reject(error);
-			error && self.request({
-				data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
-				notify : {type : 'open', cnt : 1, hideCnt : true}
-			});
+			if (polling) {
+				dfrd.reject(error);
+				error && self.request({
+					data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
+					notify : {type : 'open', cnt : 1, hideCnt : true}
+				});
+			} else {
+				dfrd.reject();
+			}
 		})
 		.done(function(odata, pdata) {
 			if (odata.cwd.compare) {
@@ -1602,17 +1606,23 @@ window.elFinder = function(node, opts) {
 	
 	/**
 	 * Remove event listener if exists
+	 * To un-bind to multiply events at once, separate events names by space
 	 *
-	 * @param  String    event name
+	 * @param  String    event(s) name(s)
 	 * @param  Function  callback
 	 * @return elFinder
 	 */
 	this.unbind = function(event, callback) {
-		var l = listeners[('' + event).toLowerCase()] || [],
-			i = $.inArray(callback, l);
-
-		i > -1 && l.splice(i, 1);
-		//delete callback; // need this?
+		var i, l, ci;
+		
+		event = ('' + event).toLowerCase().split(/\s+/);
+		
+		for (i = 0; i < event.length; i++) {
+			l = listeners[event[i]] || [];
+			ci = $.inArray(callback, l);
+			ci > -1 && l.splice(ci, 1);
+		}
+		
 		callback = null
 		return this;
 	};
@@ -1665,7 +1675,17 @@ window.elFinder = function(node, opts) {
 			}
 		}
 		return this;
-	}
+	};
+	
+	/**
+	 * Get event listeners
+	 *
+	 * @param  String   event type
+	 * @return Array    listed event functions
+	 */
+	this.getListeners = function(event) {
+		return event? listeners[event.toLowerCase()] : listeners;
+	};
 	
 	/**
 	 * Bind keybord shortcut to keydown event
@@ -3823,10 +3843,10 @@ elFinder.prototype = {
 	 */
 	one : function(event, callback) {
 		var self = this,
-			h    = $.proxy(callback, function(event) {
-				setTimeout(function() {self.unbind(event.type, h);}, 3);
-				return callback.apply(this, arguments);
-			});
+			h    = function(e, f) {
+				setTimeout(function() {self.unbind(event, h);}, 3);
+				return callback.apply(self.getListeners(e.type), arguments);
+			};
 		return this.bind(event, h);
 	},
 	
@@ -4854,7 +4874,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 02f0b58)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 0dd8831)';
 
 
 
@@ -7895,8 +7915,8 @@ $.fn.elfindercwd = function(fm, options) {
 				if (!fm.cwd().hash && fm.currentReqCmd !== 'open') {
 					$.each(cwdParents.reverse(), function(i, h) {
 						if (fm.files()[h]) {
-							fm.one(fm.currentReqCmd, function() {
-								fm.exec('open', h);
+							fm.one(fm.currentReqCmd, function(e, fm) {
+								!fm.cwd().hash && fm.exec('open', h);
 							});
 							return false;
 						}
