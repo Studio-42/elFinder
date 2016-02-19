@@ -62,6 +62,7 @@ elFinder.prototype.resources = {
 				cmd  = this.name,
 				cwd  = fm.getUI('cwd'),
 				tarea= (fm.storage('view') != 'list'),
+				sel = fm.selected(),
 				rest = function(){
 					if (tarea) {
 						node.removeClass('ui-front').css('position', '');
@@ -74,6 +75,10 @@ elFinder.prototype.resources = {
 				dfrd = $.Deferred()
 					.fail(function(error) {
 						rest();
+						if (sel) {
+							fm.trigger('unlockfiles', {files: sel});
+							fm.clipboard([]);
+						}
 						cwd.trigger('unselectall');
 						error && fm.error(error);
 					})
@@ -123,7 +128,8 @@ elFinder.prototype.resources = {
 					.blur(function() {
 						var name   = $.trim(input.val()),
 							parent = input.parent(),
-							valid  = true;
+							valid  = true,
+							cut;
 
 						if (parent.length) {
 
@@ -143,29 +149,41 @@ elFinder.prototype.resources = {
 								return false;
 							}
 
-							rest();
-							parent.html(fm.escape(name));
+							cut = sel? fm.exec('cut', sel) : null;
 
-							fm.lockfiles({files : [id]});
+							$.when(cut)
+							.done(function() {
+								rest();
+								parent.html(fm.escape(name));
 
-							fm.request({
-									data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
-									notify      : {type : cmd, cnt : 1},
-									preventFail : true,
-									syncOnFail  : true
-								})
-								.fail(function(error) {
-									dfrd.reject(error);
-								})
-								.done(function(data) {
-									dfrd.resolve(data);
-									if (data.added && data.added[0]) {
-										var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
-										if (newItem.length) {
-											newItem.trigger('scrolltoview');
+								fm.lockfiles({files : [id]});
+
+								fm.request({
+										data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
+										notify      : {type : cmd, cnt : 1},
+										preventFail : true,
+										syncOnFail  : true
+									})
+									.fail(function(error) {
+										dfrd.reject(error);
+									})
+									.done(function(data) {
+										dfrd.resolve(data);
+										if (data.added && data.added[0]) {
+											var dirhash = data.added[0].hash,
+												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
+											if (sel) {
+												fm.exec('paste', dirhash);
+											}
+											if (newItem.length) {
+												newItem.trigger('scrolltoview');
+											}
 										}
-									}
-								});
+									});
+							})
+							.fail(function() {
+								dfrd.reject();
+							});
 						}
 					});
 

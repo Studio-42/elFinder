@@ -1175,6 +1175,8 @@ $.fn.elfindercwd = function(fm, options) {
 
 						}
 						
+					} else {
+						unselectAll();
 					}
 					// e.preventDefault();
 					
@@ -1196,9 +1198,14 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
 						p = parent.find('.elfinder-cwd-parent'),
-						file = $(itemhtml(file)).addClass(clTmp);
+						file = $(itemhtml(file)).addClass(clTmp),
+						selected = fm.selected();
 						
-					unselectAll();
+					if (selected.length) {
+						fm.trigger('lockfiles', {files: selected});
+					} else {
+						unselectAll();
+					}
 
 					if (p.length) {
 						p.after(file);
