@@ -10,6 +10,7 @@
 		- Fixed #1211 Remove deprecated method jQueryUI.zIndex()
 		- Supported jQueryUI 1.12.0
 		- Fixed #1213 infinite loop in PHP connector
+		- Cmd:mkdir to callable "New Folder with Selected items" as "Into New Folder"
 		- And some minor bug fixes
 
 
