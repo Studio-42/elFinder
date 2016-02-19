@@ -1588,17 +1588,23 @@ window.elFinder = function(node, opts) {
 	
 	/**
 	 * Remove event listener if exists
+	 * To un-bind to multiply events at once, separate events names by space
 	 *
-	 * @param  String    event name
+	 * @param  String    event(s) name(s)
 	 * @param  Function  callback
 	 * @return elFinder
 	 */
 	this.unbind = function(event, callback) {
-		var l = listeners[('' + event).toLowerCase()] || [],
-			i = $.inArray(callback, l);
-
-		i > -1 && l.splice(i, 1);
-		//delete callback; // need this?
+		var i, l, ci;
+		
+		event = ('' + event).toLowerCase().split(/\s+/);
+		
+		for (i = 0; i < event.length; i++) {
+			l = listeners[event[i]] || [];
+			ci = $.inArray(callback, l);
+			ci > -1 && l.splice(ci, 1);
+		}
+		
 		callback = null
 		return this;
 	};
@@ -1651,7 +1657,17 @@ window.elFinder = function(node, opts) {
 			}
 		}
 		return this;
-	}
+	};
+	
+	/**
+	 * Get event listeners
+	 *
+	 * @param  String   event type
+	 * @return Array    listed event functions
+	 */
+	this.getListeners = function(event) {
+		return event? listeners[event.toLowerCase()] : listeners;
+	};
 	
 	/**
 	 * Bind keybord shortcut to keydown event
@@ -3809,10 +3825,10 @@ elFinder.prototype = {
 	 */
 	one : function(event, callback) {
 		var self = this,
-			h    = $.proxy(callback, function(event) {
-				setTimeout(function() {self.unbind(event.type, h);}, 3);
-				return callback.apply(this, arguments);
-			});
+			h    = function(e, f) {
+				setTimeout(function() {self.unbind(event, h);}, 3);
+				return callback.apply(self.getListeners(e.type), arguments);
+			};
 		return this.bind(event, h);
 	},
 	
