@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: ba09ed8) (2016-02-20)
+ * Version 2.1.6 (2.1-src Nightly: 80afdb4) (2016-02-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1540,7 +1540,7 @@ window.elFinder = function(node, opts) {
 			onlydir? null : this.request(opts2)
 		)
 		.fail(function(error) {
-			if (polling) {
+			if (! polling) {
 				dfrd.reject(error);
 				error && self.request({
 					data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
@@ -4874,7 +4874,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: ba09ed8)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 80afdb4)';
 
 
 
