@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-02-09
+ * @version 2016-02-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -113,6 +113,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
+			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'New text file',
 			'cmdopen'      : 'Open',
 			'cmdpaste'     : 'Paste',
@@ -335,6 +336,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
