@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 0dd8831) (2016-02-19)
+ * Version 2.1.6 (2.1-src Nightly: ba09ed8) (2016-02-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4874,7 +4874,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 0dd8831)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: ba09ed8)';
 
 
 
@@ -5676,7 +5676,7 @@ elFinder.prototype._options = {
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'sort', '|', 'info'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
+		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
 	},
 
 	/**
@@ -6169,6 +6169,7 @@ elFinder.prototype.resources = {
 				cmd  = this.name,
 				cwd  = fm.getUI('cwd'),
 				tarea= (fm.storage('view') != 'list'),
+				sel = fm.selected(),
 				rest = function(){
 					if (tarea) {
 						node.removeClass('ui-front').css('position', '');
@@ -6181,6 +6182,10 @@ elFinder.prototype.resources = {
 				dfrd = $.Deferred()
 					.fail(function(error) {
 						rest();
+						if (sel) {
+							fm.trigger('unlockfiles', {files: sel});
+							fm.clipboard([]);
+						}
 						cwd.trigger('unselectall');
 						error && fm.error(error);
 					})
@@ -6230,7 +6235,8 @@ elFinder.prototype.resources = {
 					.blur(function() {
 						var name   = $.trim(input.val()),
 							parent = input.parent(),
-							valid  = true;
+							valid  = true,
+							cut;
 
 						if (parent.length) {
 
@@ -6250,29 +6256,41 @@ elFinder.prototype.resources = {
 								return false;
 							}
 
-							rest();
-							parent.html(fm.escape(name));
+							cut = sel? fm.exec('cut', sel) : null;
 
-							fm.lockfiles({files : [id]});
+							$.when(cut)
+							.done(function() {
+								rest();
+								parent.html(fm.escape(name));
 
-							fm.request({
-									data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
-									notify      : {type : cmd, cnt : 1},
-									preventFail : true,
-									syncOnFail  : true
-								})
-								.fail(function(error) {
-									dfrd.reject(error);
-								})
-								.done(function(data) {
-									dfrd.resolve(data);
-									if (data.added && data.added[0]) {
-										var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
-										if (newItem.length) {
-											newItem.trigger('scrolltoview');
+								fm.lockfiles({files : [id]});
+
+								fm.request({
+										data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
+										notify      : {type : cmd, cnt : 1},
+										preventFail : true,
+										syncOnFail  : true
+									})
+									.fail(function(error) {
+										dfrd.reject(error);
+									})
+									.done(function(data) {
+										dfrd.resolve(data);
+										if (data.added && data.added[0]) {
+											var dirhash = data.added[0].hash,
+												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
+											if (sel) {
+												fm.exec('paste', dirhash);
+											}
+											if (newItem.length) {
+												newItem.trigger('scrolltoview');
+											}
 										}
-									}
-								});
+									});
+							})
+							.fail(function() {
+								dfrd.reject();
+							});
 						}
 					});
 
@@ -6402,7 +6420,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-02-09
+ * @version 2016-02-19
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6514,6 +6532,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
+			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'New text file',
 			'cmdopen'      : 'Open',
 			'cmdpaste'     : 'Paste',
@@ -6736,6 +6755,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -6970,7 +6990,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			create = function(type, targets) {
 				var sep = false,
-				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0);
+				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
+				selcnt = 0;
 
 				if (self.data('cmdMaps')) {
 					$.each(self.data('cmdMaps'), function(i, v){
@@ -6990,7 +7011,13 @@ $.fn.elfindercontextmenu = function(fm) {
 						});
 					}
 				}
-				
+
+				selcnt = fm.selected().length;
+				if (selcnt > 1) {
+					menu.append('<div class="ui-corner-top ui-widget-header elfinder-contextmenu-header"><span>'
+					 + fm.i18n('selectedItems', ''+selcnt)
+					 + '</span></div>');
+				}
 				$.each(types[type]||[], function(i, name) {
 					var cmd, node, submenu, hover;
 					
@@ -8331,6 +8358,8 @@ $.fn.elfindercwd = function(fm, options) {
 
 						}
 						
+					} else {
+						unselectAll();
 					}
 					// e.preventDefault();
 					
@@ -8352,9 +8381,14 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
 						p = parent.find('.elfinder-cwd-parent'),
-						file = $(itemhtml(file)).addClass(clTmp);
+						file = $(itemhtml(file)).addClass(clTmp),
+						selected = fm.selected();
 						
-					unselectAll();
+					if (selected.length) {
+						fm.trigger('lockfiles', {files: selected});
+					} else {
+						unselectAll();
+					}
 
 					if (p.length) {
 						p.after(file);
@@ -8881,6 +8915,26 @@ $.fn.elfinderdialog.defaults = {
 	minWidth  : 200,
 	minHeight : 110
 }
+
+/*
+ * File: /js/ui/mkdirbutton.js
+ */
+
+/**
+ * @class  elFinder toolbar button to switch mkdir mode.
+ *
+ * @author Naoki Sawada
+ **/
+$.fn.elfindermkdirbutton = function(cmd) {
+	return this.each(function() {
+		var button = $(this).elfinderbutton(cmd);
+
+		cmd.change(function() {
+			button.attr('title', cmd.value);
+		});
+	});
+}
+
 
 /*
  * File: /js/ui/navbar.js
@@ -13058,18 +13112,34 @@ elFinder.prototype.commands.info = function() {
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.mkdir = function() {
+	var fm   = this.fm,
+		self = this;
+	
+	this.value           = '';
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
 	this.prefix          = 'untitled folder';
-	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
+	this.exec            = $.proxy(fm.res('mixin', 'make'), this);
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+shift+n'
 	}];
+
+	this.options = { ui : 'mkdirbutton' };
+
+	fm.bind('select', function(e) {
+		var sel = (e.data && e.data.selected)? e.data.selected : [];
+		self.title = sel.length? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
+		self.update(void(0), self.title);
+	});
 	
-	this.getstate = function() {
-		return !this._disabled && this.fm.cwd().write ? 0 : -1;
+	this.getstate = function(sel) {
+		var cwd = fm.cwd(),
+			sel = (sel && sel[0] != cwd.hash)? this.files(sel) : [],
+			cnt = sel.length;
+
+		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt)? 0 : -1;
 	}
 
 }
