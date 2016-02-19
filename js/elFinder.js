@@ -1526,7 +1526,7 @@ window.elFinder = function(node, opts) {
 			onlydir? null : this.request(opts2)
 		)
 		.fail(function(error) {
-			if (polling) {
+			if (! polling) {
 				dfrd.reject(error);
 				error && self.request({
 					data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
