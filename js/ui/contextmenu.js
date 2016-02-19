@@ -62,7 +62,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			create = function(type, targets) {
 				var sep = false,
-				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0);
+				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
+				selcnt = 0;
 
 				if (self.data('cmdMaps')) {
 					$.each(self.data('cmdMaps'), function(i, v){
@@ -82,7 +83,13 @@ $.fn.elfindercontextmenu = function(fm) {
 						});
 					}
 				}
-				
+
+				selcnt = fm.selected().length;
+				if (selcnt > 1) {
+					menu.append('<div class="ui-corner-top ui-widget-header elfinder-contextmenu-header"><span>'
+					 + fm.i18n('selectedItems', ''+selcnt)
+					 + '</span></div>');
+				}
 				$.each(types[type]||[], function(i, name) {
 					var cmd, node, submenu, hover;
 					

@@ -16,6 +16,17 @@
 .elfinder-contextmenu-rtl .elfinder-contextmenu-sub { margin-right:-5px; }
 
 /* menu item */
+.elfinder-contextmenu-header {
+	margin-top: -4px;
+	padding: 0 .5em .2ex;
+	border: none;
+	text-align: center;
+}
+.elfinder-contextmenu-header span {
+	font-weight: normal;
+	font-size: 0.8em;
+	font-weight: bolder;
+}
 .elfinder-contextmenu-item {
 	position:relative;
 	display:block;
