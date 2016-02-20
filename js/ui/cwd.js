@@ -1161,7 +1161,6 @@ $.fn.elfindercwd = function(fm, options) {
 						e.preventDefault();
 						if (!file.hasClass(clDisabled) && !file.data('touching')) {
 							if (!file.hasClass(clSelected)) {
-								// cwd.trigger('unselectall');
 								unselectAll();
 								file.trigger(evtSelect);
 								trigger();
@@ -1175,12 +1174,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 						}
 						
-					} else {
-						unselectAll();
 					}
-					// e.preventDefault();
-					
-					
 				})
 				// unselect all on cwd click
 				.on('click.'+fm.namespace, function(e) {
@@ -1190,10 +1184,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 				})
-				
-				// make files selectable
-				.selectable(selectableOption)
-				.data('selectable', true)
 				// prepend fake file/dir
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
@@ -1293,9 +1283,15 @@ $.fn.elfindercwd = function(fm, options) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
 
-		
-		// for iOS5 bug
-		$('body').on('touchstart touchmove touchend', function(e){});
+		if (mobile) {
+			// for iOS5 bug
+			$('body').on('touchstart touchmove touchend', function(e){});
+		} else {
+			// make files selectable
+			cwd
+				.selectable(selectableOption)
+				.data('selectable', true);
+		}
 		
 		fm
 			.one('init', function(){
