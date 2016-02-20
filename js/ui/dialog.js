@@ -37,6 +37,7 @@ $.fn.elfinderdialog = function(opts) {
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
+			btnWidth   = 0,
 			platformWin = (window.navigator.platform.indexOf('Win') != -1),
 			
 			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  '+cldialog+' '+opts.cssClass+'"/>')
@@ -188,9 +189,23 @@ $.fn.elfinderdialog = function(opts) {
 			} else {
 				buttonset.prepend(button);
 			}
-		})
+		});
+		
+		if (buttonset.children().length) {
+			dialog.append(buttonpane);
 			
-		buttonset.children().length && dialog.append(buttonpane);
+			dialog.show();
+			buttonpane.find('button').each(function(i, btn) {
+				btnWidth += $(btn).outerWidth(true);
+			});
+			dialog.hide();
+			btnWidth += 20;
+			
+			if (dialog.width() < btnWidth) {
+				dialog.width(btnWidth);
+			}
+		}
+		
 		if (opts.resizable && $.fn.resizable) {
 			dialog.resizable({
 					minWidth   : opts.minWidth,

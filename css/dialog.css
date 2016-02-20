@@ -149,11 +149,16 @@
 
 /*********************** CONFIRM DIALOG **************************/
 
-.elfinder-dialog-confirm-applyall {	padding-top:3px; }
+.elfinder-dialog-confirm-applyall {
+	padding: 0 1em;
+	margin: 0;
+}
+.elfinder-ltr .elfinder-dialog-confirm-applyall { text-align: left; }
+.elfinder-rtl .elfinder-dialog-confirm-applyall { text-align: right; }
 
 .elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
 
-
+.elfinder-dialog-confirm .ui-dialog-buttonset { width: auto; }
 
 /*********************** FILE INFO DIALOG **************************/
 
