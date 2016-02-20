@@ -45,8 +45,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					mw         = fm.UA.Touch? 30 : 0,
 					mh         = fm.UA.Touch? 20 : 0,
 					css        = {
-						top  : y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh),
-						left : x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width
+						top  : Math.max(0, y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh)),
+						left : Math.max(0, x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width)
 					};
 
 				menu.css(css)
