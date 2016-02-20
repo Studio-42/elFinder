@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 5dd5617) (2016-02-20)
+ * Version 2.1.6 (2.1-src Nightly: 811128c) (2016-02-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4404,21 +4404,11 @@ elFinder.prototype = {
 		};
 		
 		if (opts.all) {
-			if (opts.reject) {
-				options.width = 370;
-			}
 			options.create = function() {
+				var base = $('<div class="elfinder-dialog-confirm-applyall"/>');
 				checkbox = $('<input type="checkbox" />');
-				$(this).next().children().before($('<label>'+apply+'</label>').prepend(checkbox));
-			}
-			
-			options.open = function() {
-				var pane = $(this).next(),
-					width = parseInt(pane.children(':first').outerWidth() + pane.children(':last').outerWidth());
-
-				if (width > parseInt(pane.width())) {
-					$(this).closest('.elfinder-dialog').width(width+30);
-				}
+				$(this).next().find('.ui-dialog-buttonset')
+					.prepend(base.append($('<label>'+apply+'</label>').prepend(checkbox)));
 			}
 		}
 		
@@ -4874,7 +4864,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 5dd5617)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 811128c)';
 
 
 
@@ -8729,6 +8719,7 @@ $.fn.elfinderdialog = function(opts) {
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
+			btnWidth   = 0,
 			platformWin = (window.navigator.platform.indexOf('Win') != -1),
 			
 			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  '+cldialog+' '+opts.cssClass+'"/>')
@@ -8880,9 +8871,23 @@ $.fn.elfinderdialog = function(opts) {
 			} else {
 				buttonset.prepend(button);
 			}
-		})
+		});
+		
+		if (buttonset.children().length) {
+			dialog.append(buttonpane);
 			
-		buttonset.children().length && dialog.append(buttonpane);
+			dialog.show();
+			buttonpane.find('button').each(function(i, btn) {
+				btnWidth += $(btn).outerWidth(true);
+			});
+			dialog.hide();
+			btnWidth += 20;
+			
+			if (dialog.width() < btnWidth) {
+				dialog.width(btnWidth);
+			}
+		}
+		
 		if (opts.resizable && $.fn.resizable) {
 			dialog.resizable({
 					minWidth   : opts.minWidth,
