@@ -103,9 +103,12 @@
 /* icon in drag helper */
 .elfinder-drag-helper .elfinder-cwd-icon { margin:0 0 0 -24px; float:left; }
 
-/* transparent overlay >_< */
-/*.elfinder-overlay { opacity: 0; filter:Alpha(Opacity=0); }*/
-.elfinder-overlay { position: absolute; }
+/* transparent overlay */
+.elfinder-overlay {
+	position: absolute;
+	opacity: .2;
+	filter: Alpha(Opacity=20);
+}
 
 /* panels under/below cwd (for search field etc) */
 .elfinder .elfinder-panel {
