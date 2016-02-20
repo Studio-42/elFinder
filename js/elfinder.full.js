@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 80afdb4) (2016-02-20)
+ * Version 2.1.6 (2.1-src Nightly: 5dd5617) (2016-02-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4874,7 +4874,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 80afdb4)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 5dd5617)';
 
 
 
@@ -6970,10 +6970,11 @@ $.fn.elfindercontextmenu = function(fm) {
 					wheight    = win.height(),
 					scrolltop  = win.scrollTop(),
 					scrollleft = win.scrollLeft(),
-					m          = fm.UA.Touch? 10 : 0,
+					mw         = fm.UA.Touch? 30 : 0,
+					mh         = fm.UA.Touch? 20 : 0,
 					css        = {
-						top  : y - scrolltop + m + height < wheight ? y + m : (y - m - height > 0 ? y - m - height : y + m),
-						left : x - scrollleft + m + width < wwidth  ? x + m :  x - m - width
+						top  : y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh),
+						left : x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width
 					};
 
 				menu.css(css)
@@ -7151,9 +7152,13 @@ $.fn.elfindercontextmenu = function(fm) {
 			};
 		
 		fm.one('load', function() {
+			var uiCwd = fm.getUI('cwd');
 			fm.bind('contextmenu', function(e) {
 				var data = e.data;
 
+				if (!data.type || data.type !== 'files') {
+					uiCwd.trigger('unselectall');
+				}
 				close();
 
 				if (data.type && data.targets) {
@@ -8344,7 +8349,6 @@ $.fn.elfindercwd = function(fm, options) {
 						e.preventDefault();
 						if (!file.hasClass(clDisabled) && !file.data('touching')) {
 							if (!file.hasClass(clSelected)) {
-								// cwd.trigger('unselectall');
 								unselectAll();
 								file.trigger(evtSelect);
 								trigger();
@@ -8358,12 +8362,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 						}
 						
-					} else {
-						unselectAll();
 					}
-					// e.preventDefault();
-					
-					
 				})
 				// unselect all on cwd click
 				.on('click.'+fm.namespace, function(e) {
@@ -8373,10 +8372,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 				})
-				
-				// make files selectable
-				.selectable(selectableOption)
-				.data('selectable', true)
 				// prepend fake file/dir
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
@@ -8476,9 +8471,15 @@ $.fn.elfindercwd = function(fm, options) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
 
-		
-		// for iOS5 bug
-		$('body').on('touchstart touchmove touchend', function(e){});
+		if (mobile) {
+			// for iOS5 bug
+			$('body').on('touchstart touchmove touchend', function(e){});
+		} else {
+			// make files selectable
+			cwd
+				.selectable(selectableOption)
+				.data('selectable', true);
+		}
 		
 		fm
 			.one('init', function(){
