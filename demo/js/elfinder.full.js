@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 811128c) (2016-02-20)
+ * Version 2.1.6 (2.1-src Nightly: 7300359) (2016-02-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4864,7 +4864,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 811128c)';
+elFinder.prototype.version = '2.1.6 (2.1-src Nightly: 7300359)';
 
 
 
@@ -6963,8 +6963,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					mw         = fm.UA.Touch? 30 : 0,
 					mh         = fm.UA.Touch? 20 : 0,
 					css        = {
-						top  : y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh),
-						left : x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width
+						top  : Math.max(0, y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh)),
+						left : Math.max(0, x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width)
 					};
 
 				menu.css(css)
