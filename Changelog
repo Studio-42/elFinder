@@ -1,4 +1,4 @@
-2016-0x-xx  
+2016-02-21  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.7):
 		- Added connector main options `commonTempPath` and `maxArcFilesSize`
@@ -11,10 +11,14 @@
 		- Supported jQueryUI 1.12.0
 		- Fixed #1213 infinite loop in PHP connector
 		- Cmd:mkdir to callable "New Folder with Selected items" as "Into New Folder"
+		- Supported nao-pon/flysystem-google-drive with barryvdh/elfinder-flysystem-driver
+			- barryvdh/elfinder-flysystem-driver (https://github.com/barryvdh/elfinder-flysystem-driver)
+			- nao-pon/flysystem-google-drive (https://github.com/nao-pon/flysystem-google-drive)
+		- UX improvement of in Touch devices
 		- And some minor bug fixes
 
 
-2015-0x-xx
+2015-02-21  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.0.6):
 		- Fixed #1213 infinite loop in PHP connector
