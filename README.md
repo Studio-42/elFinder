@@ -1,6 +1,5 @@
 elFinder
 ========
-
 <pre>
       _ ______ _           _           
      | |  ____(_)         | |          
@@ -13,6 +12,11 @@ elFinder
 elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
 used in Mac OS X operating system.
+
+[![Download now!](http://studio-42.github.io/elFinder/images/download-icon.png)](https://github.com/Studio-42/elFinder/releases)
+[![Packagist License](https://poser.pugx.org/studio-42/elfinder/license.png)](http://choosealicense.com/licenses/bsd-3-clause/)
+[![Latest Stable Version](https://poser.pugx.org/studio-42/elfinder/version.png)](https://packagist.org/packages/studio-42/elfinder)
+[![Total Downloads](https://poser.pugx.org/studio-42/elfinder/d/total.png)](https://packagist.org/packages/studio-42/elfinder)
 
 Contents
 --------
@@ -81,6 +85,7 @@ Features
  * Supports custom information in info dialog
  * Configuable columns of list view
  * Supports custom CSS class function of tree view
+ * For more details, see the [Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog)
 
 Requirements
 ------------
@@ -110,11 +115,14 @@ Installation
  2. Rename `/php/connector.minimal.php-dist` to `/php/connector.minimal.php`
  3. Load `/elfinder.src.html` in your browser to run elFinder
 
+### Installer
+ - [Setup elFinder 2.1.x nightly with Composer](https://github.com/Studio-42/elFinder/tree/gh-pages/tools/installer/setup_with_composer)
+
 Downloads
 ------------
-**Stable releases**
+**Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
  + [elFinder 2.1.6](https://github.com/Studio-42/elFinder/archive/2.1.6.zip)
- + [elFinder 2.0.5](https://github.com/Studio-42/elFinder/archive/2.0.5.zip)
+ + [elFinder 2.0.6](https://github.com/Studio-42/elFinder/archive/2.0.6.zip)
 
 **Nightly builds**
  + [elFinder 2.1.x (Nightly)](https://github.com/Studio-42/elFinder/archive/2.1.zip)
@@ -195,7 +203,7 @@ License
 elFinder is issued under a 3-clauses BSD license.
 
 <pre>
-Copyright (c) 2009-2012, Studio 42
+Copyright (c) 2009-2016, Studio 42
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
