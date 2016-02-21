@@ -853,8 +853,11 @@ $.fn.elfindercwd = function(fm, options) {
 				cwd.css('height', 'auto');
 				bottomMarker.hide();
 
-				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
-				wrapper._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
+				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')
+					._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
+				if (fm.UA.iOS) {
+					wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
+				}
 
 				list && cwd.html('<table><thead><tr class="ui-state-default'+(fm.UA.Touch? ' elfinder-touch' : '')+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr></thead><tbody/></table>');
 		

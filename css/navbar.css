@@ -12,17 +12,6 @@
 	overflow:auto;
 	display:none;
 	position:relative;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
-	-webkit-tap-highlight-color:rgba(0,0,0,0);
-/*	border:1px solid #111;*/
-	-webkit-touch-callout:none;
-	user-select:          none;
-	-webkit-user-select:  none;
-	-moz-user-select:     none;
-	-khtml-user-select:   none;
 }
 
 

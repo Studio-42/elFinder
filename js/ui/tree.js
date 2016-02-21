@@ -695,6 +695,10 @@ $.fn.elfindertree = function(fm, opts) {
 
 			data.init && tree.empty();
 
+			if (fm.UA.iOS) {
+				navbar.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
+			}
+
 			if (dirs.length) {
 				if (!contextmenu.data('cmdMaps')) {
 					contextmenu.data('cmdMaps', {});
