@@ -52,13 +52,20 @@ $.fn.elfindercontextmenu = function(fm) {
 				menu.css(css)
 					.show();
 				
+				//alert(navigator.platform);
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
+				if (fm.UA.iOS) {
+					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'auto');
+				}
 			},
 			
 			close = function() {
 				menu.hide().empty();
 				fm.trigger('closecontextmenu');
+				if (fm.UA.iOS) {
+					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'touch');
+				}
 			},
 			
 			create = function(type, targets) {

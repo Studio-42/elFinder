@@ -64,17 +64,21 @@ elFinder.prototype.resources = {
 				tarea= (fm.storage('view') != 'list'),
 				sel = fm.selected(),
 				rest = function(){
+					if (!overlay.is(':hidden')) {
+						overlay.addClass('ui-front')
+							.elfinderoverlay('hide')
+							.off('click', cancel);
+					}
+					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
-						node.removeClass('ui-front').css('position', '');
 						nnode.css('max-height', '');
 					} else {
-						pnode.css('width', '');
-						pnode.parent('td').css('overflow', '');
+						pnode.css('width', '')
+							.parent('td').css('overflow', '');
 					}
 				}, colwidth,
 				dfrd = $.Deferred()
 					.fail(function(error) {
-						rest();
 						if (sel) {
 							fm.trigger('unlockfiles', {files: sel});
 							fm.clipboard([]);
@@ -83,6 +87,7 @@ elFinder.prototype.resources = {
 						error && fm.error(error);
 					})
 					.always(function() {
+						rest();
 						input.remove();
 						node.remove();
 						fm.enable();
@@ -101,6 +106,11 @@ elFinder.prototype.resources = {
 				data = this.data || {},
 				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id)),
 				nnode, pnode,
+				overlay = fm.getUI().children('.elfinder-overlay'),
+				cancel = function(e) { 
+					e.stopPropagation();
+					dfrd.reject();
+				},
 				input = $(tarea? '<textarea/>' : '<input type="text"/>')
 					.on('keyup text', function(){
 						if (tarea) {
@@ -195,15 +205,21 @@ elFinder.prototype.resources = {
 			fm.disable();
 			nnode = node.find('.elfinder-cwd-filename');
 			pnode = nnode.parent();
+			node.css('position', 'relative').addClass('ui-front');
 			if (tarea) {
-				node.css('position', 'relative').addClass('ui-front');
 				nnode.css('max-height', 'none');
 			} else {
 				colwidth = pnode.width();
-				pnode.width(colwidth - 15);
-				pnode.parent('td').css('overflow', 'visible');
+				pnode.width(colwidth - 15)
+					.parent('td').css('overflow', 'visible');
 			}
 			nnode.empty('').append(input.val(file.name));
+			
+			if (fm.UA.Mobile) {
+				overlay.on('click', cancel)
+					.removeClass('ui-front').elfinderoverlay('show');
+			}
+			
 			input.trigger('keyup');
 			input.select().focus();
 			input[0].setSelectionRange && input[0].setSelectionRange(0, file.name.replace(/\..+$/, '').length);
