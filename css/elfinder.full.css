@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.6 (2.1-src Nightly: 7300359) (2016-02-20)
+ * Version 2.1.6 (2.1-src Nightly: 3a77dcb) (2016-02-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -296,6 +296,21 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
+/* for disable select of Touch devices */
+.elfinder *:not(input):not(textarea):not(select):not([contenteditable=true]),
+.elfinder-contextmenu *:not(input):not(textarea):not(select):not([contenteditable=true]) {
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	/*-webkit-touch-callout:none;*/
+	-webkit-user-select:  none;
+	-moz-user-select:     none;
+	-khtml-user-select:   none;
+	user-select:          none;
+}
+
+.elfinder .overflow-scrolling-touch {
+	-webkit-overflow-scrolling: touch;
+}
+
 /* right to left enviroment */
 .elfinder-rtl { text-align:right; direction:rtl; }
 
@@ -542,16 +557,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	margin:0;
 	-ms-touch-action: auto;
 	touch-action: auto;
-	-moz-user-select: -moz-none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
-	-webkit-tap-highlight-color:rgba(0,0,0,0);
-	-webkit-touch-callout:none;
-	user-select:          none;
-	-webkit-user-select:  none;
-	-moz-user-select:     none;
-	-khtml-user-select:   none;
 }
 
 /* container active on dropenter */
@@ -1173,17 +1178,6 @@ button.elfinder-info-button {
 	overflow:auto;
 	display:none;
 	position:relative;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
-	-webkit-tap-highlight-color:rgba(0,0,0,0);
-/*	border:1px solid #111;*/
-	-webkit-touch-callout:none;
-	user-select:          none;
-	-webkit-user-select:  none;
-	-moz-user-select:     none;
-	-khtml-user-select:   none;
 }
 
 
@@ -1647,12 +1641,6 @@ embed.elfinder-quicklook-preview-audio {
 	border-right:0 solid transparent;
 	border-bottom:0 solid transparent;
 	border-left:0 solid transparent;
-	
-	-webkit-touch-callout:none;
-	user-select:          none;
-	-webkit-user-select:  none;
-	-moz-user-select:     none;
-	-khtml-user-select:   none;
 }
 
 .elfinder-statusbar a { text-decoration:none; }
