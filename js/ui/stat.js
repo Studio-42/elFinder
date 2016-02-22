@@ -14,8 +14,8 @@ $.fn.elfinderstat = function(fm) {
 					e.preventDefault();
 					fm.exec('opendir', [ hash ]);
 				}),
-			titlesize  = fm.i18n('size').toLowerCase(),
-			titleitems = fm.i18n('items').toLowerCase(),
+			titlesize  = fm.i18n('size'),
+			titleitems = fm.i18n('items'),
 			titlesel   = fm.i18n('selected'),
 			setstat    = function(files, cwd) {
 				var c = 0, 
