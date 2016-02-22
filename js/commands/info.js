@@ -223,7 +223,7 @@ elFinder.prototype.commands.info = function() {
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);
 
-		if (file.url == '1') {
+		if (file && file.url == '1') {
 			dialog.on('click', '.'+spclass+'-url', function(){
 				$(this).parent().html(tpl.spinner.replace('{text}', fm.i18n('ntfurl')).replace('{name}', 'url'));
 				fm.request({
