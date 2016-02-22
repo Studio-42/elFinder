@@ -188,14 +188,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * @return misc
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function query($sql) {
-	 /**
-	 * increase mssql or odbc data size limit
-	 **/
-		ini_set("mssql.textlimit","2147483647");
-		ini_set("mssql.textsize","2147483647");
-		ini_set("odbc.defaultlrl","214748364");
-
+	protected function query($sql) {	 
 		$this->sqlCnt++;
 		$sql = str_replace(utf8_encode('"'), "'", $sql);
 		$res = odbc_exec($this->conn, $sql);
@@ -613,8 +606,14 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 			: @tmpfile();
 
 		if ($fp) {
-			$sql = 'SELECT convert(varbinary(max),content) as content FROM '.$this->tbf.' WHERE id="'.$path.'"';
+			$sql = "SET TEXTSIZE 2147483647 ";   // increase mssql or odbc data size limit
+			$sql .= 'SELECT convert(varbinary(max),content) as content FROM '.$this->tbf.' WHERE id="'.$path.'"';			
+			
 			$res = $this->query($sql);
+			
+			odbc_binmode($res, ODBC_BINMODE_RETURN);   //long binary handling
+			odbc_longreadlen($res,100000000);		   //increase mssql or odbc data size 100 Megabytes
+			
 			if ($res && ($r = odbc_fetch_array($res))) {				
 				fwrite($fp, base64_decode($r['content']));
 				rewind($fp);
@@ -841,8 +840,14 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _getContents($path) {
-		$sql = sprintf('SELECT convert(varbinary(max),content) as content FROM %s WHERE id=%d', $this->tbf, $path);
+		$sql = "SET TEXTSIZE 2147483647 ";   // increase mssql or odbc data size limit
+		$sql .= sprintf('SELECT convert(varbinary(max),content) as content FROM %s WHERE id=%d', $this->tbf, $path);
+				
 		$res = $this->query($sql);
+		
+		odbc_binmode($res, ODBC_BINMODE_RETURN);   //long binary handling
+		odbc_longreadlen($res,100000000);		   //increase mssql or odbc data size 100 Megabytes
+		
 		$r = odbc_fetch_array($res);
 		return ($res) && ($r) ? base64_decode($r['content']) : false;
 	}
@@ -986,11 +991,11 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 					if(count(preg_split($pattern, $str, -1, PREG_SPLIT_NO_EMPTY))==0){
 						$foldername = preg_split($pattern, $a['pattern'], -1, PREG_SPLIT_NO_EMPTY)[0];
 
-						$a['read']	 ==true?$read="1":$read="2";
-						$a['write']	 ==true?$write="1":$write="2";
-						$a['locked'] ==true?$locked="1":$locked="2";
-						$a['hidden'] ==true?$hidden="1":$hidden="2";
-						$a['filelock'] ==true?$filelock="1":$filelock="2";
+						$a['read']	 ==true?$read="1":$read="0";
+						$a['write']	 ==true?$write="1":$write="0";
+						$a['locked'] ==true?$locked="1":$locked="0";
+						$a['hidden'] ==true?$hidden="1":$hidden="0";
+						$a['filelock'] ==true?$filelock="1":$filelock="0";
 
 						$sql = 'UPDATE elfinder_file set [read] = "'.$read.'", write = "'.$write.'", locked = "'.$locked.'", hidden = "'.$hidden.'" where name ="'.$foldername.'" and mime ="directory"';
 						$res = $this->query($sql);
@@ -1025,10 +1030,10 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 					$row['id']!==NULL?$id=$row['id']:$id="0";
 					$row['parent_id']!==NULL?$parent_id=$row['id']:$parent_id="0";
 
-					$a['read'] ==true?$read="1":$read="2";
-					$a['write'] ==true?$write="1":$write="2";
-					$a['locked'] ==true?$locked="1":$locked="2";
-					$a['hidden'] ==true?$hidden="1":$hidden="2";
+					$a['read'] ==true?$read="1":$read="0";
+					$a['write'] ==true?$write="1":$write="0";
+					$a['locked'] ==true?$locked="1":$locked="0";
+					$a['hidden'] ==true?$hidden="1":$hidden="0";
 
 					$filename = explode("/^",$a['pattern'])[1];
 					$filename = preg_split($pattern, $filename, -1, PREG_SPLIT_NO_EMPTY);
@@ -1043,3 +1048,5 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	}
 
 } // END class
+
+
