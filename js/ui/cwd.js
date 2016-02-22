@@ -1335,6 +1335,7 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('sortchange', function() {
 				content(query ? lastSearch : fm.files(), !!query);
+				resize();
 			})
 			.bind('viewchange', function() {
 				var sel = fm.selected(),
