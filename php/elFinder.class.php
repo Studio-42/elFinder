@@ -896,7 +896,11 @@ class elFinder {
 		// long polling mode
 		if ($args['compare']) {
 			$sleep = max(1, (int)$volume->getOption('lsPlSleep'));
-			$limit = max(1, (int)$volume->getOption('plStandby') / $sleep) + 1;
+			$standby = (int)$volume->getOption('plStandby');
+			if ($standby > 0 && $sleep > $standby) {
+				$standby = $sleep;
+			}
+			$limit = max(0, floor($standby / $sleep)) + 1;
 			$timelimit = ini_get('max_execution_time');
 			$compare = $args['compare'];
 			do {
