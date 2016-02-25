@@ -300,7 +300,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
-		if (! interface_exists('elFinderSessionAbstarct')) {
+		if (! interface_exists('elFinderSessionInterface')) {
 			include_once dirname(__FILE__).'/elFinderSessionInterface.php';
 		}
 		
