@@ -40,8 +40,16 @@ class elFinder {
 	public static $locale = '';
 	
 	/**
+	 * elFinder session wrapper object
+	 * 
+	 * @var elFinderSessionInterface
+	 */
+	protected $session;
+	
+	/**
 	 * elFinder global sessionCacheKey
 	 * 
+	 * @deprecated
 	 * @var string
 	 */
 	public static $sessionCacheKey = '';
@@ -49,6 +57,7 @@ class elFinder {
 	/**
 	 * Is session closed
 	 * 
+	 * @deprecated
 	 * @var bool
 	 */
 	private static $sessionClosed = false;
@@ -72,6 +81,8 @@ class elFinder {
 	
 	/**
 	 * Session key of net mount volumes
+	 *
+	 * @deprecated
 	 * @var string
 	 */
 	protected $netVolumesSessionKey = '';
@@ -289,8 +300,28 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function __construct($opts) {
+		if (! interface_exists('elFinderSessionAbstarct')) {
+			include_once dirname(__FILE__).'/elFinderSessionInterface.php';
+		}
+		
+		// session handler
+		if (!empty($opts['session']) && $opts['session'] instanceof elFinderSessionInterface) {
+			$this->session = $opts['session'];
+		} else {
+			$sessionOpts = array(
+				'base64encode' => !empty($opts['base64encodeSessionData']),
+				'keys' => array(
+					'default'   => !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches',
+					'netvolume' => !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes'
+				)
+			);
+			if (! class_exists('elFinderSession')) {
+				include_once dirname(__FILE__) . '/elFinderSession.php';
+			}
+			$this->session = new elFinderSession($sessionOpts);
+		}
 		// try session start | restart
-		@session_start();
+		$this->session->start();
 		
 		$sessionUseCmds = array();
 		if (isset($opts['sessionUseCmds']) && is_array($opts['sessionUseCmds'])) {
@@ -308,23 +339,22 @@ class elFinder {
 		$this->sessionUseCmds = array_flip($sessionUseCmds);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
-		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
-		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
 		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
 		if (!is_writable(elFinder::$commonTempPath)) {
 			elFinder::$commonTempPath = '';
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
 		
+		// deprecated settings
+		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
+		self::$sessionCacheKey = !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches';
+		
 		// check session cache
 		$_optsMD5 = md5(json_encode($opts['roots']));
-		if (! isset($_SESSION[self::$sessionCacheKey]) || $_SESSION[self::$sessionCacheKey]['_optsMD5'] !== $_optsMD5) {
-			$_SESSION[self::$sessionCacheKey] = array(
-				'_optsMD5' => $_optsMD5
-			);
+		if ($this->session->get('_optsMD5') !== $_optsMD5) {
+			$this->session->set('_optsMD5', $_optsMD5);
 		}
-		self::$base64encodeSessionData = !empty($opts['base64encodeSessionData']);
 		
 		// setlocale and global locale regists to elFinder::locale
 		self::$locale = !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8';
@@ -385,6 +415,8 @@ class elFinder {
 					if ($this->maxArcFilesSize && (empty($o['maxArcFilesSize']) || $this->maxArcFilesSize < $o['maxArcFilesSize'])) {
 						$o['maxArcFilesSize'] = $this->maxArcFilesSize;
 					}
+					// pass session handler
+					$volume->setSession($this->session);
 					if ($volume->mount($o)) {
 						// unique volume id (ends on "_") - used as prefix to files hash
 						$id = $volume->id();
@@ -408,6 +440,15 @@ class elFinder {
 
 		// if at least one readable volume - ii desu >_<
 		$this->loaded = !empty($this->default);
+	}
+	
+	/**
+	 * Return elFinder session wrapper instance
+	 *
+	 * @return  object  elFinderSessionInterface
+	 **/
+	public function getSession() {
+		return $this->session;
 	}
 	
 	/**
@@ -527,17 +568,17 @@ class elFinder {
 
 	private function session_expires() {
 		
-		if (!isset($_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'])) {
-			$_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] = time();
+		if (! $last = $this->session->get(':LAST_ACTIVITY')) {
+			$this->session->set(':LAST_ACTIVITY', time());
 			return false;
 		}
 
-		if ( ($this->timeout > 0) && (time() - $_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] > $this->timeout) ) {
+		if ( ($this->timeout > 0) && (time() - $last > $this->timeout) ) {
 			return true;
 		}
 
-		$_SESSION[self::$sessionCacheKey . ':LAST_ACTIVITY'] = time();
-		return false;	
+		$this->session->set(':LAST_ACTIVITY', time());
+		return false;
 	}
 	
 	/**
@@ -578,8 +619,9 @@ class elFinder {
 		}
 		
 		// unlock session data for multiple access
-		if ($this->sessionCloseEarlier && $args['sessionCloseEarlier'] && session_id()) {
-			session_write_close();
+		if ($this->sessionCloseEarlier && $args['sessionCloseEarlier']) {
+			$this->session->close();
+			// deprecated property
 			elFinder::$sessionClosed = true;
 		}
 		
@@ -682,10 +724,8 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function getNetVolumes() {
-		if (isset($_SESSION[$this->netVolumesSessionKey])) {
-			if ($data = elFinder::sessionDataDecode($_SESSION[$this->netVolumesSessionKey], 'array')) {
-				return $data;
-			}
+		if ($data = $this->session->get('netvolume', array())) {
+			return $data;
 		}
 		return array();
 	}
@@ -698,10 +738,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function saveNetVolumes($volumes) {
-		// try session restart
-		@session_start();
-		$_SESSION[$this->netVolumesSessionKey] = elFinder::sessionDataEncode($volumes);
-		elFinder::sessionWrite();
+		$this->session->set('netvolume', $volumes);
 	}
 
 	/**
@@ -765,9 +802,6 @@ class elFinder {
 	}
 	
 	protected function netmount($args) {
-		// try session restart
-		@session_start();
-		
 		$options  = array();
 		$protocol = $args['protocol'];
 		
@@ -813,6 +847,9 @@ class elFinder {
 		}
 
 		$volume = new $class();
+		
+		// pass session handler
+		$volume->setSession($this->session);
 		
 		if (method_exists($volume, 'netmountPrepare')) {
 			$options = $volume->netmountPrepare($options);
@@ -2647,6 +2684,7 @@ class elFinder {
 	/**
 	 * serialize and base64_encode of session data (If needed)
 	 * 
+	 * @deprecated
 	 * @param  mixed $var  target variable
 	 * @author Naoki Sawada
 	 */
@@ -2660,6 +2698,7 @@ class elFinder {
 	/**
 	 * base64_decode and unserialize of session data  (If needed)
 	 * 
+	 * @deprecated
 	 * @param  mixed $var      target variable
 	 * @param  bool  $checkIs  data type for check (array|string|object|int)
 	 * @author Naoki Sawada
@@ -2697,12 +2736,11 @@ class elFinder {
 	/**
 	 * Call session_write_close() if session is restarted
 	 * 
+	 * @deprecated
 	 * @return void
 	 */
 	public static function sessionWrite() {
-		if (elFinder::$sessionClosed) {
-			session_write_close();
-		}
+		$this->session->close();
 	}
 	
 	/**
