@@ -896,7 +896,11 @@ class elFinder {
 		// long polling mode
 		if ($args['compare']) {
 			$sleep = max(1, (int)$volume->getOption('lsPlSleep'));
-			$limit = max(1, (int)$volume->getOption('plStandby') / $sleep) + 1;
+			$standby = (int)$volume->getOption('plStandby');
+			if ($standby > 0 && $sleep > $standby) {
+				$standby = $sleep;
+			}
+			$limit = max(0, floor($standby / $sleep)) + 1;
 			$timelimit = ini_get('max_execution_time');
 			$compare = $args['compare'];
 			do {
@@ -1937,7 +1941,7 @@ class elFinder {
 						$_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
 						// Check `Content-Disposition` response header
 						if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
-							if (preg_match('/filename\*?=(?:(.+?)\'\')?"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
+							if (preg_match('/filename\*?=(?:([a-zA-Z0-9_-]+?)\'\')?"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
 								$_name = rawurldecode($m[2]);
 								if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
 									$_name = mb_convert_encoding($_name, 'UTF-8', $m[1]);

@@ -171,8 +171,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		if (!$this->quarantine) {
-			$this->archivers['extract'] = array();
-			$this->disabled[] = 'extract';
+			if (!$this->tmp) {
+				$this->archivers['extract'] = array();
+				$this->disabled[] = 'extract';
+			} else {
+				$this->quarantine = $this->tmp;
+			}
 		}
 		
 		if ($this->options['quarantine']) {
