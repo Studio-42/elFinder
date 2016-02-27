@@ -5081,7 +5081,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
 	 * @param  string  $name    file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _copy($source, $targetDir, $name);
