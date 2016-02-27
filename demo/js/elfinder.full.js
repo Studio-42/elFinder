@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.7 (2.1-src Nightly: 0ac3247) (2016-02-22)
+ * Version 2.1.7 (2.1-src Nightly: b52857e) (2016-02-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4865,7 +4865,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.7 (2.1-src Nightly: 0ac3247)';
+elFinder.prototype.version = '2.1.7 (2.1-src Nightly: b52857e)';
 
 
 
@@ -15602,7 +15602,7 @@ elFinder.prototype.commands.resize = function() {
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
-					src     = fm.url(file.hash)
+					src     = fm.openUrl(file.hash)
 					;
 				
 				imgr.mousedown( rotate.start );
