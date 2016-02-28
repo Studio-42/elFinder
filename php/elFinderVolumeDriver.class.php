@@ -568,12 +568,18 @@ abstract class elFinderVolumeDriver {
 	protected $subdirsCache = array();
 	
 	/**
-	 * Reference of $_SESSION[elFinder::$sessionCacheKey][$this->id]
+	 * This volume session cache
 	 * 
 	 * @var array
 	 */
 	protected $sessionCache;
 	
+	/**
+	 * elFinder session wrapper object
+	 * 
+	 * @var elFinderSessionInterface
+	 */
+	protected $session;
 	
 	/**
 	 * Search start time
@@ -658,14 +664,14 @@ abstract class elFinderVolumeDriver {
 		}
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	protected function sessionRestart() {
-		$start = @session_start();
-		if (!isset($_SESSION[elFinder::$sessionCacheKey])) {
-			$_SESSION[elFinder::$sessionCacheKey] = array();
-		}
-		$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
-		return $start;
+		$this->sessionCache = $this->session->start()->get($this->id, array());
+		return true;
 	}
+	
 	/*********************************************************************/
 	/*                              PUBLIC API                           */
 	/*********************************************************************/
@@ -689,7 +695,16 @@ abstract class elFinderVolumeDriver {
 	public function id() {
 		return $this->id;
 	}
-		
+	
+	/**
+	 * Assign elFinder session wrapper object
+	 * 
+	 * @param  $session  elFinderSessionInterface
+	 */
+	public function setSession($session) {
+		$this->session = $session;
+	}
+	
 	/**
 	 * Return debug info for client
 	 *
@@ -780,7 +795,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mount(array $opts) {
 		if (!isset($opts['path']) || $opts['path'] === '') {
-			return $this->setError('Path undefined.');;
+			return $this->setError('Path undefined.');
+		}
+		
+		if (! $this->session) {
+			return $this->setError('Session wrapper dose not set. Need to `$volume->setSession(elFinderSessionInterface);` before mount.');
+		}
+		if (! ($this->session instanceof elFinderSessionInterface)) {
+			return $this->setError('Session wrapper instance must be "elFinderSessionInterface".');
 		}
 		
 		$this->options = array_merge($this->options, $opts);
@@ -799,10 +821,10 @@ abstract class elFinderVolumeDriver {
 		$argInit = !empty($this->ARGS['init']);
 		
 		// session cache
-		if ($argInit || ! isset($_SESSION[elFinder::$sessionCacheKey][$this->id])) {
-			$_SESSION[elFinder::$sessionCacheKey][$this->id] = array();
+		if ($argInit) {
+			$this->session->set($this->id, array());
 		}
-		$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
+		$this->sessionCache = $this->session->get($this->id, array());
 		
 		// default file attribute
 		$this->defaults = array(
@@ -900,15 +922,15 @@ abstract class elFinderVolumeDriver {
 			$tmpFileInfo = false;
 		}
 	
+		$type = 'internal';
 		if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
 			$type = 'finfo';
 			$this->finfo = finfo_open(FILEINFO_MIME);
-		} elseif (($type == 'mime_content_type' || $type == 'auto') 
-		&& function_exists('mime_content_type')
-		&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
-			$type = 'mime_content_type';
-		} else {
-			$type = 'internal';
+		} elseif (($type == 'mime_content_type' || $type == 'auto') && function_exists('mime_content_type')) {
+			$_mimetypes = explode(';', mime_content_type(__FILE__));
+			if (preg_match($regexp, array_shift($_mimetypes))) {
+				$type = 'mime_content_type';
+			}
 		}
 		$this->mimeDetect = $type;
 
@@ -3039,7 +3061,7 @@ abstract class elFinderVolumeDriver {
 			if (! $this->isMyReload()) {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {
-					if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
+					if ($ret = $this->sessionCache['rootstat'][$rootKey]) {
 						return $ret;
 					}
 				}
@@ -3049,9 +3071,8 @@ abstract class elFinderVolumeDriver {
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
 		if ($is_root) {
-			$this->sessionRestart();
-			$this->sessionCache['rootstat'][$rootKey] = elFinder::sessionDataEncode($ret);
-			elFinder::sessionWrite();
+			$this->sessionCache['rootstat'][$rootKey] = $ret;
+			$this->session->set($this->id, $this->sessionCache);
 		}
 		return $ret;
 	}
@@ -3257,9 +3278,8 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function clearcache() {
 		$this->cache = $this->dirsCache = array();
-		$this->sessionRestart();
 		unset($this->sessionCache['rootstat'][md5($this->root)]);
-		elFinder::sessionWrite();
+		$this->session->set($this->id, $this->sessionCache);
 	}
 	
 	/**
@@ -4673,6 +4693,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$this->sessionCache[$sessionKey] = $arcs;
+		$this->session->set($this->id, $this->sessionCache);
 		return $arcs;
 	}
 

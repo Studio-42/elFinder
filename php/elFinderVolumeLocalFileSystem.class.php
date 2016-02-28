@@ -225,12 +225,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		// error
 		// cache to $_SESSION
-		$sessionStart = $this->sessionRestart();
-		if ($sessionStart) {
-			$this->sessionCache['localFileSystemInotify_disable'] = true;
-			elFinder::sessionWrite();
-		}
-		
+		$this->sessionCache['localFileSystemInotify_disable'] = true;
+		$this->session->set($this->id, $this->sessionCache, true);
 		return false;
 	}
 	
@@ -550,27 +546,32 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		$dirs = false;
 		if (is_dir($path)) {
-			$dirItr = new ParentIterator(
-				new RecursiveDirectoryIterator($path,
-					FilesystemIterator::SKIP_DOTS |
-					(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
-						RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
-				)
-			);
-			$dirItr->rewind();
-			if ($dirItr->hasChildren()) {
-				$dirs = true;
-				$name = $dirItr->getSubPathName();
-				while($name) {
-					if (!$this->attr($path . DIRECTORY_SEPARATOR . $name, 'read', null, true)) {
-						$dirs = false;
-						$dirItr->next();
-						$name = $dirItr->getSubPathName();
-						continue;
-					}
+			if (class_exists('FilesystemIterator', false)) {
+				$dirItr = new ParentIterator(
+					new RecursiveDirectoryIterator($path,
+						FilesystemIterator::SKIP_DOTS |
+						(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
+							RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
+					)
+				);
+				$dirItr->rewind();
+				if ($dirItr->hasChildren()) {
 					$dirs = true;
-					break;
+					$name = $dirItr->getSubPathName();
+					while($name) {
+						if (!$this->attr($path . DIRECTORY_SEPARATOR . $name, 'read', null, true)) {
+							$dirs = false;
+							$dirItr->next();
+							$name = $dirItr->getSubPathName();
+							continue;
+						}
+						$dirs = true;
+						break;
+					}
 				}
+			} else {
+				$path = strtr($path, array('['  => '\\[', ']'  => '\\]', '*'  => '\\*', '?'  => '\\?'));
+				return (bool)glob(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
 			}
 		}
 		return $dirs;
@@ -1132,7 +1133,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function doSearch($path, $q, $mimes) {
-		if ($this->encoding) {
+		if ($this->encoding || ! class_exists('FilesystemIterator', false)) {
 			// non UTF-8 use elFinderVolumeDriver::doSearch()
 			return parent::doSearch($path, $q, $mimes);
 		}
