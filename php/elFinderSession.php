@@ -10,7 +10,7 @@
 
 class elFinderSession implements elFinderSessionInterface
 {
-	private $started = false;
+	protected $started = false;
 	
 	protected $keys = array();
 	
