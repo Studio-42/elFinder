@@ -4685,10 +4685,10 @@ abstract class elFinderVolumeDriver {
 		// Use PHP ZipArchive Class
 		if (class_exists('ZipArchive', false)) {
 			if (empty($arcs['create']['application/zip'])) {
-				$arcs['create']['application/zip']  = array('cmd' => 'phpfunction', 'argc' => 'self::zipArchiveZip', 'ext' => 'zip');
+				$arcs['create']['application/zip']  = array('cmd' => 'phpfunction', 'argc' => array('self', 'zipArchiveZip'), 'ext' => 'zip');
 			}
 			if (empty($arcs['extract']['application/zip'])) {
-				$arcs['extract']['application/zip'] = array('cmd' => 'phpfunction', 'argc' => 'self::zipArchiveUnzip', 'ext' => 'zip');
+				$arcs['extract']['application/zip'] = array('cmd' => 'phpfunction', 'argc' => array('self', 'zipArchiveUnzip'), 'ext' => 'zip');
 			}
 		}
 		
