@@ -212,7 +212,11 @@ elFinder.prototype.commands.edit = function() {
 				opts.buttons[fm.i18n('btnSaveClose')] = savecl;
 				opts.buttons[fm.i18n('btnCancel')]    = cancel;
 				
-				fm.dialog(ta, opts).attr('id', id);
+				fm.dialog(ta, opts)
+					.attr('id', id)
+					.on('click dblclick mousedown mouseup contextmenu keydown keyup keypress', function(e) {
+						e.stopPropagation();
+					});
 				return dfrd.promise();
 		},
 		
