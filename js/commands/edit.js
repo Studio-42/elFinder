@@ -214,7 +214,7 @@ elFinder.prototype.commands.edit = function() {
 				
 				fm.dialog(ta, opts)
 					.attr('id', id)
-					.on('click dblclick mousedown mouseup contextmenu keydown keyup keypress', function(e) {
+					.on('keydown keyup keypress', function(e) {
 						e.stopPropagation();
 					});
 				return dfrd.promise();

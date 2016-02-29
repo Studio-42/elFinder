@@ -2412,31 +2412,36 @@ window.elFinder = function(node, opts) {
 	});
 
 	if (self.dragUpload) {
-		node[0].addEventListener('dragenter', function(e) {
-			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
-				e.preventDefault();
-				e.stopPropagation();
+		(function(){
+			var isin = function(e) {
+				return (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT' && $(e.target).closest('div.ui-dialog-content').length === 0);
 			}
-		}, false);
-		node[0].addEventListener('dragleave', function(e) {
-			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
-				e.preventDefault();
-				e.stopPropagation();
-			}
-		}, false);
-		node[0].addEventListener('dragover', function(e) {
-			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
-				e.preventDefault();
-				e.stopPropagation();
-				e.dataTransfer.dropEffect = 'none';
-			}
-		}, false);
-		node[0].addEventListener('drop', function(e) {
-			if (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT') {
-				e.stopPropagation();
-				e.preventDefault();
-			}
-		}, false);
+			node[0].addEventListener('dragenter', function(e) {
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}, false);
+			node[0].addEventListener('dragleave', function(e) {
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}, false);
+			node[0].addEventListener('dragover', function(e) {
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+					e.dataTransfer.dropEffect = 'none';
+				}
+			}, false);
+			node[0].addEventListener('drop', function(e) {
+				if (isin(e)) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+			}, false);
+		})();
 
 		// add event listener for HTML5 DnD upload
 		(function() {
