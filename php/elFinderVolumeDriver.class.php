@@ -1111,6 +1111,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function getMimeTable() {
+		// load mime.types
+		! elFinderVolumeDriver::$mimetypesLoaded && elFinderVolumeDriver::mimetypeInternalDetect();
 		return elFinderVolumeDriver::$mimetypes;
 	}
 	
@@ -3336,13 +3338,13 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Detect file mimetype using "internal" method
+	 * Detect file mimetype using "internal" method or Loading mime.types with $path = ''
 	 *
 	 * @param  string  $path  file path
-	 * @return string
+	 * @return string|void
 	 * @author Dmitry (dio) Levashov
 	 **/
-	static protected function mimetypeInternalDetect($path) {
+	static protected function mimetypeInternalDetect($path = '') {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
 			elFinderVolumeDriver::$mimetypesLoaded = true;
@@ -3361,9 +3363,11 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
-		$pinfo = pathinfo($path); 
-		$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-		return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
+		if ($path) {
+			$pinfo = pathinfo($path); 
+			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+			return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
+		}
 	}
 	
 	/**
