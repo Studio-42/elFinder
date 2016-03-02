@@ -170,7 +170,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.cwdHash2Id(f.hash);
 				},
 				name : function(f) {
-					name = fm.escape(f.name);
+					var name = fm.escape(f.name);
 					!list && (name = name.replace(/([_.])/g, '&#8203;$1'));
 					return name;
 				},
