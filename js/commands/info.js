@@ -108,7 +108,7 @@ elFinder.prototype.commands.info = function() {
 			file  = files[0];
 			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', fm.mime2kind(file));
+			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', '<span title="'+fm.escape(file.mime)+'">'+fm.mime2kind(file)+'</span>');
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
