@@ -3343,7 +3343,7 @@ abstract class elFinderVolumeDriver {
 	 * Detect file mimetype using "internal" method or Loading mime.types with $path = ''
 	 *
 	 * @param  string  $path  file path
-	 * @return string|void
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	static protected function mimetypeInternalDetect($path = '') {
@@ -3370,11 +3370,12 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
+		$ext = '';
 		if ($path) {
 			$pinfo = pathinfo($path); 
 			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-			return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
 		}
+		return ($ext && isset(elFinderVolumeDriver::$mimetypes[$ext])) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
 	}
 	
 	/**
