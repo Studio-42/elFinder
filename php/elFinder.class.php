@@ -40,6 +40,13 @@ class elFinder {
 	public static $locale = '';
 	
 	/**
+	 * elFinderVolumeDriver default mime.type file path
+	 * 
+	 * @var string
+	 */
+	public static $defaultMimefile = '';
+	
+	/**
 	 * elFinder session wrapper object
 	 * 
 	 * @var elFinderSessionInterface
@@ -361,6 +368,9 @@ class elFinder {
 		if (false === @setlocale(LC_ALL, self::$locale)) {
 			self::$locale = setlocale(LC_ALL, '');
 		}
+
+		// set defaultMimefile
+		elFinder::$defaultMimefile = (isset($opts['defaultMimefile']) ? $opts['defaultMimefile'] : '');
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
