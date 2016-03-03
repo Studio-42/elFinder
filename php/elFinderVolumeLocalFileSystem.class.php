@@ -64,6 +64,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['fileMode'] = 0644;            // new files mode
 		$this->options['quarantine'] = '.quarantine';  // quarantine folder name - required to check archive (must be hidden)
 		$this->options['rootCssClass'] = 'elfinder-navbar-root-local';
+		$this->options['followSymLinks'] = true;
 	}
 	
 	/*********************************************************************/
@@ -443,6 +444,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$stat['isowner'] = false;
 		$linkreadable = false;
 		if ($path != $this->root && is_link($path)) {
+			if (! $this->options['followSymLinks']) {
+				return array();
+			}
 			if (!($target = $this->readlink($path))
 			|| $target == $path) {
 				if (is_null($target)) {
@@ -629,6 +633,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$cache = array();
 		$statOwner = (!empty($this->options['statOwner']));
 		$dirItr = array();
+		$followSymLinks = $this->options['followSymLinks'];
 		try {
 			$dirItr = new DirectoryIterator($path);
 		} catch (UnexpectedValueException $e) {}
@@ -646,6 +651,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$stat['isowner'] = false;
 				$linkreadable = false;
 				if ($file->isLink()) {
+					if (! $followSymLinks) { continue; }
 					if (!($target = $this->readlink($fpath))
 					|| $target == $fpath) {
 						if (is_null($target)) {

@@ -5,6 +5,13 @@
  * @author Dmitry (dio) Levashov
  **/
 
+/* input textarea */
+.elfinder input,
+.elfinder textarea {
+	color: #000;
+	background-color: #FFF;
+}
+
 /* dialogs */
 .std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; background-clip: content-box; }
 
@@ -49,9 +56,4 @@
 /* contextmenu */
 .elfinder-contextmenu .ui-state-hover { background: #3875d7; color:#fff; }
 .elfinder-contextmenu .ui-state-hover .elfinder-contextmenu-arrow { background-image:url('../img/arrows-active.png'); }
-
-
-
-
-
 

@@ -943,6 +943,8 @@ abstract class elFinderVolumeDriver {
 			$file = false;
 			if (!empty($this->options['mimefile']) && file_exists($this->options['mimefile'])) {
 				$file = $this->options['mimefile'];
+			} elseif (elFinder::$defaultMimefile && file_exists(elFinder::$defaultMimefile)) {
+				$file = elFinder::$defaultMimefile;
 			} elseif (file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types')) {
 				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
 			} elseif (file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types')) {
@@ -3341,14 +3343,19 @@ abstract class elFinderVolumeDriver {
 	 * Detect file mimetype using "internal" method or Loading mime.types with $path = ''
 	 *
 	 * @param  string  $path  file path
-	 * @return string|void
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	static protected function mimetypeInternalDetect($path = '') {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
 			elFinderVolumeDriver::$mimetypesLoaded = true;
-			$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			if (elFinder::$defaultMimefile) {
+				$file = elFinder::$defaultMimefile;
+			}
+			if (! is_readable($file)) {
+				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			}
 			if (is_readable($file)) {
 				$mimecf = file($file);
 				foreach ($mimecf as $line_num => $line) {
@@ -3363,11 +3370,12 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
+		$ext = '';
 		if ($path) {
 			$pinfo = pathinfo($path); 
 			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-			return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
 		}
+		return ($ext && isset(elFinderVolumeDriver::$mimetypes[$ext])) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
 	}
 	
 	/**
