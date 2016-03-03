@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.7 (2.1-src Nightly: 9a9e264) (2016-03-02)
+ * Version 2.1.7 (2.1-src Nightly: a09f94b) (2016-03-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4870,7 +4870,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.7 (2.1-src Nightly: 9a9e264)';
+elFinder.prototype.version = '2.1.7 (2.1-src Nightly: a09f94b)';
 
 
 
@@ -12977,7 +12977,7 @@ elFinder.prototype.commands.info = function() {
 			file  = files[0];
 			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', fm.mime2kind(file));
+			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', '<span title="'+fm.escape(file.mime)+'">'+fm.mime2kind(file)+'</span>');
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
