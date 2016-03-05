@@ -174,7 +174,7 @@ class elFinderConnector {
 				}
 			} else {
 				header('Accept-Ranges: none');
-				if (isset($data['info']) && (!$data['info']['size'] && $data['info']['size'] !== 0)) {
+				if (isset($data['info']) && ! $data['info']['size']) {
 					if (function_exists('header_remove')) {
 						header_remove('Content-Length');
 					} else {
