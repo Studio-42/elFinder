@@ -1,10 +1,10 @@
-2016-0x-xx  
+2016-03-07  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.8):
 		- Added a new volume driver `MsSQL`
 		- Fixed #1226 problem of sort by clicking on cloumn headers
 		- Fixed #1229 bug of selection after sorting in list view
-		- Replaceable session handling wrapper
+		- Replaceable session handling wrapper (elFinderSessionInterface)
 		- Added Connector main config `defaultMimefile` ()
 		- update mime.types
 		- Added LocalFileSystem volume root config `followSymLinks` (defailt true)
