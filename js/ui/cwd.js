@@ -170,7 +170,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.cwdHash2Id(f.hash);
 				},
 				name : function(f) {
-					name = fm.escape(f.name);
+					var name = fm.escape(f.name);
 					!list && (name = name.replace(/([_.])/g, '&#8203;$1'));
 					return name;
 				},
@@ -436,6 +436,7 @@ $.fn.elfindercwd = function(fm, options) {
 			selectableOption = {
 				filter     : fileSelector,
 				stop       : trigger,
+				delay      : 250,
 				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 			},
@@ -1334,6 +1335,7 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('sortchange', function() {
 				content(query ? lastSearch : fm.files(), !!query);
+				resize();
 			})
 			.bind('viewchange', function() {
 				var sel = fm.selected(),

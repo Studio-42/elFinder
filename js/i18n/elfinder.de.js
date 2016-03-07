@@ -10,8 +10,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, osworx.net',
 		language   : 'Deutsch',
 		direction  : 'ltr',
-		dateFormat : 'd. M Y h:i', // 13. Mai 2012 05:27
-		fancyDateFormat : '$1 h:i', // will produce smth like: Today 12:25 PM
+		dateFormat : 'd. M Y H:i', // 13. Mai 2012 15:27
+		fancyDateFormat : '$1 H:i', // will produce smth like: Heute 13:25
 		messages   : {
 			
 			/********************************** errors **********************************/
@@ -315,7 +315,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'pass'                : 'Passwort',
                         'confirmUnmount'      : 'Möchten Sie "$1" auswerfen?',
 			'dropFilesBrowser': 'Sie können Dateien in den Browser ziehen', 
-			'dropPasteFiles'  : 'Lassen Sie die Dateien hier Los',
+			'dropPasteFiles'  : 'Lassen Sie die Dateien hier los',
 			'encoding'        : 'Codierung', 
 			'locale'          : 'Locale', 
 			'searchTarget'    : 'Ziel: $1',

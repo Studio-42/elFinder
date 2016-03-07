@@ -108,7 +108,7 @@ elFinder.prototype.commands.info = function() {
 			file  = files[0];
 			
 			view  = view.replace('{class}', fm.mime2class(file.mime));
-			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', fm.mime2kind(file));
+			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', '<span title="'+fm.escape(file.mime)+'">'+fm.mime2kind(file)+'</span>');
 
 			if (file.tmb) {
 				tmb = fm.option('tmbUrl')+file.tmb;
@@ -223,7 +223,7 @@ elFinder.prototype.commands.info = function() {
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);
 
-		if (file.url == '1') {
+		if (file && file.url == '1') {
 			dialog.on('click', '.'+spclass+'-url', function(){
 				$(this).parent().html(tpl.spinner.replace('{text}', fm.i18n('ntfurl')).replace('{name}', 'url'));
 				fm.request({

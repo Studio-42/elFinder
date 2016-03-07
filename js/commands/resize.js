@@ -536,7 +536,7 @@ elFinder.prototype.commands.resize = function() {
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
-					src     = fm.url(file.hash)
+					src     = fm.openUrl(file.hash)
 					;
 				
 				imgr.mousedown( rotate.start );

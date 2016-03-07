@@ -568,12 +568,18 @@ abstract class elFinderVolumeDriver {
 	protected $subdirsCache = array();
 	
 	/**
-	 * Reference of $_SESSION[elFinder::$sessionCacheKey][$this->id]
+	 * This volume session cache
 	 * 
 	 * @var array
 	 */
 	protected $sessionCache;
 	
+	/**
+	 * elFinder session wrapper object
+	 * 
+	 * @var elFinderSessionInterface
+	 */
+	protected $session;
 	
 	/**
 	 * Search start time
@@ -658,14 +664,14 @@ abstract class elFinderVolumeDriver {
 		}
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	protected function sessionRestart() {
-		$start = @session_start();
-		if (!isset($_SESSION[elFinder::$sessionCacheKey])) {
-			$_SESSION[elFinder::$sessionCacheKey] = array();
-		}
-		$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
-		return $start;
+		$this->sessionCache = $this->session->start()->get($this->id, array());
+		return true;
 	}
+	
 	/*********************************************************************/
 	/*                              PUBLIC API                           */
 	/*********************************************************************/
@@ -689,7 +695,16 @@ abstract class elFinderVolumeDriver {
 	public function id() {
 		return $this->id;
 	}
-		
+	
+	/**
+	 * Assign elFinder session wrapper object
+	 * 
+	 * @param  $session  elFinderSessionInterface
+	 */
+	public function setSession($session) {
+		$this->session = $session;
+	}
+	
 	/**
 	 * Return debug info for client
 	 *
@@ -780,7 +795,14 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function mount(array $opts) {
 		if (!isset($opts['path']) || $opts['path'] === '') {
-			return $this->setError('Path undefined.');;
+			return $this->setError('Path undefined.');
+		}
+		
+		if (! $this->session) {
+			return $this->setError('Session wrapper dose not set. Need to `$volume->setSession(elFinderSessionInterface);` before mount.');
+		}
+		if (! ($this->session instanceof elFinderSessionInterface)) {
+			return $this->setError('Session wrapper instance must be "elFinderSessionInterface".');
 		}
 		
 		$this->options = array_merge($this->options, $opts);
@@ -799,10 +821,10 @@ abstract class elFinderVolumeDriver {
 		$argInit = !empty($this->ARGS['init']);
 		
 		// session cache
-		if ($argInit || ! isset($_SESSION[elFinder::$sessionCacheKey][$this->id])) {
-			$_SESSION[elFinder::$sessionCacheKey][$this->id] = array();
+		if ($argInit) {
+			$this->session->set($this->id, array());
 		}
-		$this->sessionCache = &$_SESSION[elFinder::$sessionCacheKey][$this->id];
+		$this->sessionCache = $this->session->get($this->id, array());
 		
 		// default file attribute
 		$this->defaults = array(
@@ -900,15 +922,15 @@ abstract class elFinderVolumeDriver {
 			$tmpFileInfo = false;
 		}
 	
+		$type = 'internal';
 		if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
 			$type = 'finfo';
 			$this->finfo = finfo_open(FILEINFO_MIME);
-		} elseif (($type == 'mime_content_type' || $type == 'auto') 
-		&& function_exists('mime_content_type')
-		&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
-			$type = 'mime_content_type';
-		} else {
-			$type = 'internal';
+		} elseif (($type == 'mime_content_type' || $type == 'auto') && function_exists('mime_content_type')) {
+			$_mimetypes = explode(';', mime_content_type(__FILE__));
+			if (preg_match($regexp, array_shift($_mimetypes))) {
+				$type = 'mime_content_type';
+			}
 		}
 		$this->mimeDetect = $type;
 
@@ -921,6 +943,8 @@ abstract class elFinderVolumeDriver {
 			$file = false;
 			if (!empty($this->options['mimefile']) && file_exists($this->options['mimefile'])) {
 				$file = $this->options['mimefile'];
+			} elseif (elFinder::$defaultMimefile && file_exists(elFinder::$defaultMimefile)) {
+				$file = elFinder::$defaultMimefile;
 			} elseif (file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types')) {
 				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
 			} elseif (file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types')) {
@@ -1089,6 +1113,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function getMimeTable() {
+		// load mime.types
+		! elFinderVolumeDriver::$mimetypesLoaded && elFinderVolumeDriver::mimetypeInternalDetect();
 		return elFinderVolumeDriver::$mimetypes;
 	}
 	
@@ -3039,7 +3065,7 @@ abstract class elFinderVolumeDriver {
 			if (! $this->isMyReload()) {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {
-					if ($ret = elFinder::sessionDataDecode($this->sessionCache['rootstat'][$rootKey], 'array')) {
+					if ($ret = $this->sessionCache['rootstat'][$rootKey]) {
 						return $ret;
 					}
 				}
@@ -3049,9 +3075,8 @@ abstract class elFinderVolumeDriver {
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
 		if ($is_root) {
-			$this->sessionRestart();
-			$this->sessionCache['rootstat'][$rootKey] = elFinder::sessionDataEncode($ret);
-			elFinder::sessionWrite();
+			$this->sessionCache['rootstat'][$rootKey] = $ret;
+			$this->session->set($this->id, $this->sessionCache);
 		}
 		return $ret;
 	}
@@ -3257,9 +3282,8 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function clearcache() {
 		$this->cache = $this->dirsCache = array();
-		$this->sessionRestart();
 		unset($this->sessionCache['rootstat'][md5($this->root)]);
-		elFinder::sessionWrite();
+		$this->session->set($this->id, $this->sessionCache);
 	}
 	
 	/**
@@ -3316,17 +3340,22 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Detect file mimetype using "internal" method
+	 * Detect file mimetype using "internal" method or Loading mime.types with $path = ''
 	 *
 	 * @param  string  $path  file path
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	static protected function mimetypeInternalDetect($path) {
+	static protected function mimetypeInternalDetect($path = '') {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
 			elFinderVolumeDriver::$mimetypesLoaded = true;
-			$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			if (elFinder::$defaultMimefile) {
+				$file = elFinder::$defaultMimefile;
+			}
+			if (! is_readable($file)) {
+				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			}
 			if (is_readable($file)) {
 				$mimecf = file($file);
 				foreach ($mimecf as $line_num => $line) {
@@ -3341,9 +3370,12 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
-		$pinfo = pathinfo($path); 
-		$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
-		return isset(elFinderVolumeDriver::$mimetypes[$ext]) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
+		$ext = '';
+		if ($path) {
+			$pinfo = pathinfo($path); 
+			$ext   = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
+		}
+		return ($ext && isset(elFinderVolumeDriver::$mimetypes[$ext])) ? elFinderVolumeDriver::$mimetypes[$ext] : 'unknown';
 	}
 	
 	/**
@@ -4665,14 +4697,15 @@ abstract class elFinderVolumeDriver {
 		// Use PHP ZipArchive Class
 		if (class_exists('ZipArchive', false)) {
 			if (empty($arcs['create']['application/zip'])) {
-				$arcs['create']['application/zip']  = array('cmd' => 'phpfunction', 'argc' => 'self::zipArchiveZip', 'ext' => 'zip');
+				$arcs['create']['application/zip']  = array('cmd' => 'phpfunction', 'argc' => array('self', 'zipArchiveZip'), 'ext' => 'zip');
 			}
 			if (empty($arcs['extract']['application/zip'])) {
-				$arcs['extract']['application/zip'] = array('cmd' => 'phpfunction', 'argc' => 'self::zipArchiveUnzip', 'ext' => 'zip');
+				$arcs['extract']['application/zip'] = array('cmd' => 'phpfunction', 'argc' => array('self', 'zipArchiveUnzip'), 'ext' => 'zip');
 			}
 		}
 		
 		$this->sessionCache[$sessionKey] = $arcs;
+		$this->session->set($this->id, $this->sessionCache);
 		return $arcs;
 	}
 
@@ -5081,7 +5114,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  string  $source  source file path
 	 * @param  string  $target  target dir path
 	 * @param  string  $name    file name
-	 * @return bool
+	 * @return string|bool
 	 * @author Dmitry (dio) Levashov
 	 **/
 	abstract protected function _copy($source, $targetDir, $name);

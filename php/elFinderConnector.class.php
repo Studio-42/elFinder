@@ -174,7 +174,7 @@ class elFinderConnector {
 				}
 			} else {
 				header('Accept-Ranges: none');
-				if (!$data['info']['size'] && $data['info']['size'] !== 0) {
+				if (isset($data['info']) && ! $data['info']['size']) {
 					if (function_exists('header_remove')) {
 						header_remove('Content-Length');
 					} else {
@@ -184,7 +184,7 @@ class elFinderConnector {
 			}
 
 			// unlock session data for multiple access
-			session_id() && session_write_close();
+			$this->elFinder->getSession()->close();
 			// client disconnect should abort
 			ignore_user_abort(false);
 
