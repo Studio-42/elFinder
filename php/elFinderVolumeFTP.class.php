@@ -247,7 +247,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		// switch off extended passive mode - may be usefull for some servers
 		@ftp_exec($this->connect, 'epsv4 off' );
 		// enter passive mode if required
-		ftp_pasv($this->connect, $this->options['mode'] == 'passive');
+		$pasv = ($this->options['mode'] == 'passive');
+		if (! ftp_pasv($this->connect, $pasv)) {
+			if ($pasv) {
+				$this->options['mode'] = 'active';
+			}
+		}
 
 		// enter root folder
 		if (! @ftp_chdir($this->connect, $this->root) 
@@ -865,7 +870,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _fopen($path, $mode='rb') {
 		// try ftp stream wrapper
-		if (ini_get('allow_url_fopen')) {
+		if ($this->options['mode'] == 'passive' && ini_get('allow_url_fopen')) {
 			$url = 'ftp://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
 			if (strtolower($mode[0]) === 'w') {
 				$context = stream_context_create(array('ftp' => array('overwrite' => true)));
