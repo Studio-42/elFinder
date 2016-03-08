@@ -233,6 +233,9 @@
 	opacity: .6; 
 	filter:Alpha(Opacity=60);
 }
+.elfinder-button-search .ui-checkboxradio-icon {
+	display: none;
+}
 
 /* search/close icons */
 .elfinder-ltr .elfinder-button-search .ui-icon-search { left:0;}
