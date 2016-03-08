@@ -1607,11 +1607,10 @@ class elFinder {
 	 * @author Naoki Sawada
 	 */
 	protected function detectFileExtension($path) {
-		static $type, $finfo, $extTable;
+		static $type, $finfo;
 		if (!$type) {
 			$keys = array_keys($this->volumes);
 			$volume = $this->volumes[$keys[0]];
-			$extTable = array_flip(array_unique($volume->getMimeTable()));
 			
 			if (class_exists('finfo', false)) {
 				$tmpFileInfo = @explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
@@ -1655,8 +1654,9 @@ class elFinder {
 				$mime = 'application/zip';
 			}
 		}
-		
-		return ($mime && isset($extTable[$mime]))? ('.' . $extTable[$mime]) : '';
+
+		$ext = $mime? $volume->getExtentionByMime($mime) : '';
+		return $ext? ('.' . $ext) : '';
 	}
 	
 	/**
