@@ -948,20 +948,18 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		
 		if (is_dir($path)) {
-			foreach (scandir($path) as $name) {
-				if ($name != '.' && $name != '..') {
-					$p = $path.DIRECTORY_SEPARATOR.$name;
-					if (is_link($p) || !$this->nameAccepted($name)
-						||
-					(($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
-						$this->setError(elFinder::ERROR_SAVE, $name);
-						return true;
-					}
-					if (is_dir($p) && $this->_findSymlinks($p)) {
-						return true;
-					} elseif (is_file($p)) {
-						$this->archiveSize += sprintf('%u', filesize($p));
-					}
+			foreach (self::localScandir($path) as $name) {
+				$p = $path.DIRECTORY_SEPARATOR.$name;
+				if (is_link($p) || !$this->nameAccepted($name)
+					||
+				(($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
+					$this->setError(elFinder::ERROR_SAVE, $name);
+					return true;
+				}
+				if (is_dir($p) && $this->_findSymlinks($p)) {
+					return true;
+				} elseif (is_file($p)) {
+					$this->archiveSize += sprintf('%u', filesize($p));
 				}
 			}
 		} else {
@@ -1006,12 +1004,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$this->unpackArchive($archive, $arc);
 			
 			// get files list
-			$ls = array();
-			foreach (scandir($dir) as $i => $name) {
-				if ($name != '.' && $name != '..') {
-					$ls[] = $name;
-				}
-			}
+			$ls = self::localScandir($dir);
 			
 			// no files - extract error ?
 			if (empty($ls)) {

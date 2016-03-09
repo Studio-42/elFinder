@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.8 (2.1-src Nightly: 82a4d04) (2016-03-07)
+ * Version 2.1.8 (2.1-src Nightly: ba69d61) (2016-03-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4870,7 +4870,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.8 (2.1-src Nightly: 82a4d04)';
+elFinder.prototype.version = '2.1.8 (2.1-src Nightly: ba69d61)';
 
 
 
@@ -14443,7 +14443,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
-		var mimes   = ['image/jpeg', 'image/png', 'image/gif'],
+		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'],
 			preview = ql.preview;
 		
 		// what kind of images we can display
