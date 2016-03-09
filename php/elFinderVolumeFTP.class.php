@@ -695,7 +695,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				return $res;
 			}
 			$this->cacheDir($this->convEncOut($this->_dirname($path)));
-			return $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());
+			$stat = $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());
+			if (! $this->mounted) {
+				// dispose incomplete cache made by calling `stat` by 'startPath' option
+				$this->cache = array();
+			}
+			return $stat;
 		}
 		$raw = ftp_raw($this->connect, 'MLST ' . $path);
 		if (is_array($raw) && count($raw) > 1 && substr(trim($raw[0]), 0, 1) == 2) {
