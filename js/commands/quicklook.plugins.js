@@ -7,7 +7,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
-		var mimes   = ['image/jpeg', 'image/png', 'image/gif'],
+		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'],
 			preview = ql.preview;
 		
 		// what kind of images we can display
