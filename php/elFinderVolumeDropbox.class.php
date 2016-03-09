@@ -1430,17 +1430,15 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			return true;
 		}
 		if (is_dir($path)) {
-			foreach (scandir($path) as $name) {
-				if ($name != '.' && $name != '..') {
-					$p = $path.DIRECTORY_SEPARATOR.$name;
-					if (is_link($p)) {
-						return true;
-					}
-					if (is_dir($p) && $this->_findSymlinks($p)) {
-						return true;
-					} elseif (is_file($p)) {
-						$this->archiveSize += filesize($p);
-					}
+			foreach (self::localScandir($path) as $name) {
+				$p = $path.DIRECTORY_SEPARATOR.$name;
+				if (is_link($p)) {
+					return true;
+				}
+				if (is_dir($p) && $this->_findSymlinks($p)) {
+					return true;
+				} elseif (is_file($p)) {
+					$this->archiveSize += filesize($p);
 				}
 			}
 		} else {

@@ -1971,7 +1971,7 @@ abstract class elFinderVolumeDriver {
 					@unlink($_file);
 				}
 			}
-			$files = array_diff(scandir($dir), array('.', '..'));
+			$files = self::localScandir($dir);
 			if ($files && ($arc = tempnam($dir, $tmppre))) {
 				unlink($arc);
 				$arc = $arc.'.'.$ext;
@@ -4823,18 +4823,24 @@ abstract class elFinderVolumeDriver {
 	public function rmdirRecursive($dir) {
 		if (!is_link($dir) && is_dir($dir)) {
 			@chmod($dir, 0777);
-			foreach (array_diff(scandir($dir), array('.', '..')) as $file) {
-				@set_time_limit(30);
-				$path = $dir . DIRECTORY_SEPARATOR . $file;
-				if (!is_link($dir) && is_dir($path)) {
-					$this->rmdirRecursive($path);
-				} else {
-					@chmod($path, 0666);
-					@unlink($path);
+			if ($handle = opendir($dir)) {
+				while (false !== ($file = readdir($handle))) {
+					if ($file === '.' || $file === '..') {
+						continue;
+					}
+					@set_time_limit(30);
+					$path = $dir . DIRECTORY_SEPARATOR . $file;
+					if (!is_link($dir) && is_dir($path)) {
+						$this->rmdirRecursive($path);
+					} else {
+						@chmod($path, 0666);
+						@unlink($path);
+					}
 				}
+				closedir($handle);
 			}
 			return @rmdir($dir);
-		} else if (is_file($dir) || is_link($dir)) {
+		} elseif (is_file($dir) || is_link($dir)) {
 			@chmod($dir, 0666);
 			return @unlink($dir);
 		}
@@ -4897,6 +4903,30 @@ abstract class elFinderVolumeDriver {
 			chdir($cwd);
 		}
 		$remove && unlink($path);
+	}
+	
+	/**
+	 * Return files of target directory that is dotfiles excludes.
+	 *
+	 * @param  string  $dir   target directory path
+	 * @return array
+	 * @author Naoki Sawada
+	 **/
+	protected static function localScandir($dir) {
+		// PHP function scandir() is not work well in specific environment. I dont know why.
+		// ref. https://github.com/Studio-42/elFinder/issues/1248
+		$files = array();
+		if ($dh = opendir($dir)) {
+			while (false !== ($file = readdir($dh))) {
+				if ($file !== '.' && $file !== '..') {
+					$files[] = $file;
+				}
+			}
+			closedir($dh);
+		} else {
+			$this->setError('Can not open local directory.');
+		}
+		return $files;
 	}
 	
 	/**
