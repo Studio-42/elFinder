@@ -866,8 +866,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		$meta = stream_get_meta_data($fp);
 		$uri = isset($meta['uri'])? $meta['uri'] : '';
-		if ($uri && @is_file($uri)) {
-			fclose($fp);
+		if ($uri && ! preg_match('#^[a-zA-Z0-9]+://#', $uri)) {
+			@fclose($fp);
 			$isCmdPaste = ($this->ARGS['cmd'] === 'paste');
 			$isCmdCopy = ($isCmdPaste && empty($this->ARGS['cut']));
 			if (($isCmdCopy || !@rename($uri, $path)) && !@copy($uri, $path)) {
