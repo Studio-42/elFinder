@@ -3372,10 +3372,8 @@ abstract class elFinderVolumeDriver {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
 			elFinderVolumeDriver::$mimetypesLoaded = true;
-			if (elFinder::$defaultMimefile) {
-				$file = elFinder::$defaultMimefile;
-			}
-			if (! is_readable($path)) {
+			$file = elFinder::$defaultMimefile;
+			if ($file === '' || ! is_readable($file)) {
 				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
 			}
 			if (is_readable($file)) {
