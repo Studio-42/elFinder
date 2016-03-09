@@ -3375,7 +3375,7 @@ abstract class elFinderVolumeDriver {
 			if (elFinder::$defaultMimefile) {
 				$file = elFinder::$defaultMimefile;
 			}
-			if (! is_readable($file)) {
+			if (! is_readable($path)) {
 				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
 			}
 			if (is_readable($file)) {
