@@ -4406,6 +4406,11 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {
 
+		if (! function_exists('proc_open')) {
+			$return_var = -1;
+			return $return_var;
+		}
+		
 		$descriptorspec = array(
 			0 => array("pipe", "r"),  // stdin
 			1 => array("pipe", "w"),  // stdout
@@ -4428,7 +4433,8 @@ abstract class elFinderVolumeDriver {
 			fclose($pipes[2]);
 			$return_var = proc_close($process);
 
-
+		} else {
+			$return_var = -1;
 		}
 		
 		return $return_var;
