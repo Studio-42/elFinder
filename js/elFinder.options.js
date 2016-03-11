@@ -184,7 +184,10 @@ elFinder.prototype._options = {
 		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,
-			jplayer  : 'extensions/jplayer'
+			jplayer  : 'extensions/jplayer',
+			// MIME types to use Google Docs online viewer
+			// Example ['application/pdf', 'image/tiff', 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+			googleDocsMimes : []
 		},
 		// "quicklook" command options.
 		edit : {

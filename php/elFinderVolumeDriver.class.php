@@ -3372,10 +3372,8 @@ abstract class elFinderVolumeDriver {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
 			elFinderVolumeDriver::$mimetypesLoaded = true;
-			if (elFinder::$defaultMimefile) {
-				$file = elFinder::$defaultMimefile;
-			}
-			if (! is_readable($file)) {
+			$file = elFinder::$defaultMimefile;
+			if ($file === '' || ! is_readable($file)) {
 				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
 			}
 			if (is_readable($file)) {
@@ -4408,6 +4406,11 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {
 
+		if (! function_exists('proc_open')) {
+			$return_var = -1;
+			return $return_var;
+		}
+		
 		$descriptorspec = array(
 			0 => array("pipe", "r"),  // stdin
 			1 => array("pipe", "w"),  // stdout
@@ -4430,7 +4433,8 @@ abstract class elFinderVolumeDriver {
 			fclose($pipes[2]);
 			$return_var = proc_close($process);
 
-
+		} else {
+			$return_var = -1;
 		}
 		
 		return $return_var;
