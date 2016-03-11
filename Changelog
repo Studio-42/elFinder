@@ -1,3 +1,27 @@
+2016-03-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.9):
+		- Fixed enbug of 2.1.6-2.1.7 PHP error undefind valiable/array to string conversion
+		- The function to make thumbnail supports more image types when Imagick enabled
+		- Correction of the problem that Archive / Extract function don't work well under some environment
+		- Added a quicklook plugin that is the Google docs online viewer
+			- Default is disabled. Set `commandsOptions.quicklook.googleDocsMimes` to enable this plugin.
+			```javascript
+			commandsOptions : {
+				// "quicklook" command options.
+				quicklook : {
+					autoplay : true,
+					jplayer  : 'extensions/jplayer',
+					// MIME types to use Google Docs online viewer
+					// Example array value
+					// ['application/pdf', 'image/tiff', 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+					googleDocsMimes : []
+				}
+			}
+			```
+		- And some minor bug fixes
+
+
 2016-03-07  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.8):
