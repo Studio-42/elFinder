@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.8 (2.1-src Nightly: 7fee72a) (2016-03-10)
+ * Version 2.1.8 (2.1-src Nightly: 307720b) (2016-03-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2174,25 +2174,28 @@ window.elFinder = function(node, opts) {
 	this.history = new this.history(this);
 	
 	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
-	if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
-		this.bind('dblclick', function(e) {
-			e.preventDefault();
-			self.exec('getfile').fail(function() {
-				self.exec('open');
+	if (this.commands.getfile) {
+		if (typeof(this.options.getFileCallback) == 'function') {
+			this.bind('dblclick', function(e) {
+				e.preventDefault();
+				self.exec('getfile').fail(function() {
+					self.exec('open');
+				});
 			});
-		});
-		this.shortcut({
-			pattern     : 'enter',
-			description : this.i18n('cmdgetfile'),
-			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
-		})
-		.shortcut({
-			pattern     : 'ctrl+enter',
-			description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
-			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
-		});
-		
-	} 
+			this.shortcut({
+				pattern     : 'enter',
+				description : this.i18n('cmdgetfile'),
+				callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
+			})
+			.shortcut({
+				pattern     : 'ctrl+enter',
+				description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
+				callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
+			});
+		} else {
+			delete this.commands.getfile;
+		}
+	}
 
 	/**
 	 * Root hashed
@@ -4870,7 +4873,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.8 (2.1-src Nightly: 7fee72a)';
+elFinder.prototype.version = '2.1.8 (2.1-src Nightly: 307720b)';
 
 
 
@@ -5146,7 +5149,10 @@ elFinder.prototype._options = {
 		// "quicklook" command options.
 		quicklook : {
 			autoplay : true,
-			jplayer  : 'extensions/jplayer'
+			jplayer  : 'extensions/jplayer',
+			// MIME types to use Google Docs online viewer
+			// Example ['application/pdf', 'image/tiff', 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+			googleDocsMimes : []
 		},
 		// "quicklook" command options.
 		edit : {
@@ -14766,8 +14772,69 @@ elFinder.prototype.commands.quicklook.plugins = [
 			}
 		});
 		
-	}
+	},
 	
+	/**
+	 * Any supported files preview plugin using Google docs online viewer
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var fm      = ql.fm,
+			mimes   = ql.options.googleDocsMimes || [],
+			preview = ql.preview;
+			
+		preview.bind('update', function(e) {
+			var win  = ql.window,
+				file = e.file, node, loading;
+			
+			if ($.inArray(file.mime, mimes) !== -1) {
+				if (file.url == '1') {
+					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
+					.on('click', function() {
+						$(this).html('<span class="elfinder-info-spinner">');
+						fm.request({
+							data : {cmd : 'url', target : file.hash},
+							preventDefault : true
+						})
+						.always(function() {
+							$(this).html('');
+						})
+						.done(function(data) {
+							var rfile = fm.file(file.hash);
+							ql.value.url = rfile.url = data.url || '';
+							if (ql.value.url) {
+								preview.trigger($.Event('update', {file : ql.value}));
+							}
+						});
+					});
+				}
+				if (file.url !== '' && file.url != '1') {
+					e.stopImmediatePropagation();
+					preview.one('change', function() {
+						loading.remove();
+						node.off('load').remove();
+					});
+					
+					loading = $('<div class="elfinder-quicklook-info-data"> Now loading...<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					
+					node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
+						.css('background-color', 'transparent')
+						.appendTo(preview)
+						.on('load', function() {
+							ql.hideinfo();
+							loading.remove();
+							$(this).css('background-color', '#fff').show();
+						})
+						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.url(file.hash)));
+
+					var test;
+				}
+			}
+			
+		});
+	}
+
 ]
 
 /*
