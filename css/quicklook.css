@@ -35,6 +35,10 @@
 /* hide preview border in fullscreen mode */
 .elfinder-quicklook-fullscreen .elfinder-quicklook-preview { border:0 solid ;}
 
+.elfinder-quicklook-fullscreen iframe {
+	height: 99%;
+}
+
 /* quicklook titlebar */
 .elfinder-quicklook-titlebar {
 	text-align:center;
@@ -216,7 +220,8 @@ pre.elfinder-quicklook-preview-text {
 
 /* html/pdf preview */
 .elfinder-quicklook-preview-html,
-.elfinder-quicklook-preview-pdf {
+.elfinder-quicklook-preview-pdf,
+.elfinder-quicklook-preview-iframe {
 	width:100%;
 	height:100%;
 	background:#fff;

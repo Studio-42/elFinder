@@ -2160,25 +2160,28 @@ window.elFinder = function(node, opts) {
 	this.history = new this.history(this);
 	
 	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
-	if (typeof(this.options.getFileCallback) == 'function' && this.commands.getfile) {
-		this.bind('dblclick', function(e) {
-			e.preventDefault();
-			self.exec('getfile').fail(function() {
-				self.exec('open');
+	if (this.commands.getfile) {
+		if (typeof(this.options.getFileCallback) == 'function') {
+			this.bind('dblclick', function(e) {
+				e.preventDefault();
+				self.exec('getfile').fail(function() {
+					self.exec('open');
+				});
 			});
-		});
-		this.shortcut({
-			pattern     : 'enter',
-			description : this.i18n('cmdgetfile'),
-			callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
-		})
-		.shortcut({
-			pattern     : 'ctrl+enter',
-			description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
-			callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
-		});
-		
-	} 
+			this.shortcut({
+				pattern     : 'enter',
+				description : this.i18n('cmdgetfile'),
+				callback    : function() { self.exec('getfile').fail(function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }) }
+			})
+			.shortcut({
+				pattern     : 'ctrl+enter',
+				description : this.i18n(this.OS == 'mac' ? 'cmdrename' : 'cmdopen'),
+				callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
+			});
+		} else {
+			delete this.commands.getfile;
+		}
+	}
 
 	/**
 	 * Root hashed
