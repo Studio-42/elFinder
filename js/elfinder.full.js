@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2016-03-11)
+ * Version 2.1.9 (2.1-src Nightly: 4c73fbe) (2016-03-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4873,7 +4873,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 4c73fbe)';
 
 
 
@@ -8781,7 +8781,7 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.mousedown(function(e) {
 					setTimeout(function() {
-						dialog.trigger('totop');
+						dialog.is(':visible') && dialog.trigger('totop');
 					}, 10);
 				})
 				.on('open', function() {

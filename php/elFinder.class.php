@@ -1948,6 +1948,8 @@ class elFinder {
 				if (empty($result['list'])) {
 					$result['name'] = array();
 				} else {
+					// It is using the old(<=2.1.6) JavaScript in the new(>2.1.6) back-end?
+					unset($result['list']['exists'], $result['list']['hashes']);
 					$result['name'] = array_merge(array_intersect($result['name'], $result['list']));
 				}
 				return $result;
