@@ -93,23 +93,35 @@ class elFinderConnector {
 		}
 		
 		// collect required arguments to exec command
+		$hasFiles = false;
 		foreach ($this->elFinder->commandArgsList($cmd) as $name => $req) {
-			$arg = $name == 'FILES' 
-				? $_FILES 
-				: (isset($src[$name]) ? $src[$name] : '');
-				
-			if (!is_array($arg)) {
-				$arg = trim($arg);
+			if ($name === 'FILES') {
+				if (isset($_FILES)) {
+					$hasFiles = true;
+				} elseif ($req) {
+					$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_INV_PARAMS, $cmd)));
+				}
+			} else {
+				$arg = isset($src[$name])? $src[$name] : '';
+			
+				if (!is_array($arg)) {
+					$arg = trim($arg);
+				}
+				if ($req && $arg === '') {
+					$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_INV_PARAMS, $cmd)));
+				}
+				$args[$name] = $arg;
 			}
-			if ($req && (!isset($arg) || $arg === '')) {
-				$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_INV_PARAMS, $cmd)));
-			}
-			$args[$name] = $arg;
 		}
 		
 		$args['debug'] = isset($src['debug']) ? !!$src['debug'] : false;
 		
-		$this->output($this->elFinder->exec($cmd, $this->input_filter($args)));
+		$args = $this->input_filter($args);
+		if ($hasFiles) {
+			$args['FILES'] = $_FILES;
+		}
+		
+		$this->output($this->elFinder->exec($cmd, $args));
 	}
 	
 	/**
