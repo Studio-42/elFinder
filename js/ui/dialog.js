@@ -59,7 +59,7 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.mousedown(function(e) {
 					setTimeout(function() {
-						dialog.trigger('totop');
+						dialog.is(':visible') && dialog.trigger('totop');
 					}, 10);
 				})
 				.on('open', function() {
