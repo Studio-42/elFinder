@@ -343,12 +343,12 @@
 		.on('click', function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
-		.mouseenter(function () {
-			$(this).css({opacity: 1.0});	// animate seems to mess this up
-		})
-		.mouseleave(function () {
-			$(this).css({opacity: 0.0})
-		})
+			.mouseenter(function () {
+				$(this).css({opacity: 1.0});	// animate seems to mess this up
+			})
+			.mouseleave(function () {
+				$(this).css({opacity: 0.0})
+			})
 			.append(
 				title,
 				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
