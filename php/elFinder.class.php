@@ -975,7 +975,7 @@ class elFinder {
 		
 		if ($ls) {
 			if ($files) {
-				$files = $files + $ls;
+				$files = array_merge($files, $ls);
 			} else {
 				$files = $ls;
 			}
