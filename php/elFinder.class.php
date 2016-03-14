@@ -936,7 +936,7 @@ class elFinder {
 			}
 		}
 
-		// get current working directory files list and add to $files if not exists in it
+		// get current working directory files list
 		if (($ls = $volume->scandir($cwd['hash'])) === false) {
 			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
 		}
@@ -975,8 +975,7 @@ class elFinder {
 		
 		if ($ls) {
 			if ($files) {
-				$files = array_merge($files, $ls);
-				$files = array_values(array_unique($files, SORT_REGULAR));
+				$files = $files + $ls;
 			} else {
 				$files = $ls;
 			}
