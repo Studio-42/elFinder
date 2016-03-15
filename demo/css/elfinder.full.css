@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: a902328) (2016-03-14)
+ * Version 2.1.9 (2.1-src Nightly: 015bf3e) (2016-03-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -650,6 +650,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 /* "opened folder" icon on dragover */
 .elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
+.elfinder-cwd .elfinder-droppable-active {
+	outline: 2px solid #8cafed;
+	outline-offset: -2px;
+}
 
 /* mimetypes icons */
 .elfinder-cwd-icon-directory         { background-position:0 -50px; }
