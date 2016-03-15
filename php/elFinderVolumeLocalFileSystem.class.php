@@ -62,9 +62,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['alias']    = '';              // alias to replace root dir name
 		$this->options['dirMode']  = 0755;            // new dirs mode
 		$this->options['fileMode'] = 0644;            // new files mode
-		$this->options['quarantine'] = '.quarantine';  // quarantine folder name - required to check archive (must be hidden)
+		$this->options['quarantine'] = '.quarantine'; // quarantine folder name - required to check archive (must be hidden)
 		$this->options['rootCssClass'] = 'elfinder-navbar-root-local';
 		$this->options['followSymLinks'] = true;
+		$this->options['detectDirIcon'] = '';         // file name that is detected as a folder icon e.g. '.diricon.png'
 	}
 	
 	/*********************************************************************/
@@ -473,7 +474,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
 		}
 		
-		$dir = is_dir($path);
+		if ($dir = is_dir($path) && $this->options['detectDirIcon']) {
+			$favicon = $path . DIRECTORY_SEPARATOR . $this->options['detectDirIcon'];
+			if ($this->URL && file_exists($favicon)) {
+				$stat['icon'] = $this->URL . str_replace(DIRECTORY_SEPARATOR, '/', substr($favicon, strlen($this->root) + 1));
+			}
+		}
 		
 		if (!isset($stat['mime'])) {
 			$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
@@ -675,7 +681,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 						$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
 					}
 				} else {
-					$dir = $file->isDir();
+					if ($dir = $file->isDir() && $this->options['detectDirIcon']) {
+						$path = $file->getPathname();
+						$favicon = $path . DIRECTORY_SEPARATOR . $this->options['detectDirIcon'];
+						if ($this->URL && file_exists($favicon)) {
+							$stat['icon'] = $this->URL . str_replace(DIRECTORY_SEPARATOR, '/', substr($favicon, strlen($this->root) + 1));
+						}
+					}
 					$stat['mime'] = $dir ? 'directory' : $this->mimetype($fpath);
 				}
 				$size = sprintf('%u', $file->getSize());
