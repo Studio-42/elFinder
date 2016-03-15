@@ -251,7 +251,7 @@ $.fn.elfindertree = function(fm, opts) {
 				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
 				symlink     : function(dir) { return dir.alias ? stpl : ''; },
-				style       : function(dir) { return dir.icon ? 'style="background-image:url(\''+fm.escape(dir.icon)+'\')"' : ''; }
+				style       : function(dir) { return dir.icon ? 'style="background:url(\''+fm.escape(dir.icon)+'\') 0 0 no-repeat;background-size:contain;"' : ''; }
 			},
 			
 			/**

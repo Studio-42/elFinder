@@ -112,6 +112,10 @@
 
 /* "opened folder" icon on dragover */
 .elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
+.elfinder-cwd .elfinder-droppable-active {
+	outline: 2px solid #8cafed;
+	outline-offset: -2px;
+}
 
 /* mimetypes icons */
 .elfinder-cwd-icon-directory         { background-position:0 -50px; }
