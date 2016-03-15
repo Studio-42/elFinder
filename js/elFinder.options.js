@@ -423,12 +423,13 @@ elFinder.prototype._options = {
 			// ,
 			// /**
 			//  * Add CSS class name to navbar directories (optional)
-			//  * see: https://github.com/Studio-42/elFinder/pull/1061
+			//  * see: https://github.com/Studio-42/elFinder/pull/1061,
+			//  *      https://github.com/Studio-42/elFinder/issues/1231
 			//  * 
 			//  * @type Function
 			//  */
 			// getClass: function(dir) {
-			// 	// ex. This adds the directory's name (lowercase) with prefix as a CSS class
+			// 	// e.g. This adds the directory's name (lowercase) with prefix as a CSS class
 			// 	return 'elfinder-tree-' + dir.name.replace(/[ "]/g, '').toLowerCase();
 			// }
 		},
@@ -444,7 +445,7 @@ elFinder.prototype._options = {
 			// file info columns displayed
 			listView : {
 				// name is always displayed, cols are ordered
-				// ex. ['perm', 'date', 'size', 'kind', 'owner', 'group', 'mode']
+				// e.g. ['perm', 'date', 'size', 'kind', 'owner', 'group', 'mode']
 				// mode: 'mode'(by `fileModeStyle` setting), 'modestr'(rwxr-xr-x) , 'modeoct'(755), 'modeboth'(rwxr-xr-x (755))
 				// 'owner', 'group' and 'mode', It's necessary set volume driver option "statOwner" to `true`
 				columns : ['perm', 'date', 'size', 'kind'],
@@ -457,6 +458,18 @@ elFinder.prototype._options = {
 				columnsCustomName : {}
 									
 			}
+			// ,
+			// /**
+			//  * Add CSS class name to cwd directories (optional)
+			//  * see: https://github.com/Studio-42/elFinder/pull/1061,
+			//  *      https://github.com/Studio-42/elFinder/issues/1231
+			//  * 
+			//  * @type Function
+			//  */
+			// getClass: function(file) {
+			// 	// e.g. This adds the directory's name (lowercase) with prefix as a CSS class
+			// 	return 'elfinder-cwd-' + file.name.replace(/[ "]/g, '').toLowerCase();
+			// }
 		}
 	},
 
