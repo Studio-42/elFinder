@@ -1157,7 +1157,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					new RecursiveDirectoryIterator($path,
 						FilesystemIterator::KEY_AS_PATHNAME |
 						FilesystemIterator::SKIP_DOTS |
-						(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
+						((defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS') && $this->options['followSymLinks'])?
 							RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
 					),
 					array($this, 'localFileSystemSearchIteratorFilter')
