@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 5d8f608) (2016-03-15)
+ * Version 2.1.9 (2.1-src Nightly: 79e86d0) (2016-03-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -576,6 +576,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	text-align: center;
 	white-space: pre-wrap;
 	opacity: 0.6;
+	filter: Alpha(Opacity=60);
 	font-weight: bold;
 }
 
@@ -823,11 +824,15 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* premissions/symlink marker */
 .elfinder-cwd-view-list .elfinder-perms, 
 .elfinder-cwd-view-list .elfinder-lock,
-.elfinder-cwd-view-list .elfinder-symlink { top:50%; margin-top:-6px; }
+.elfinder-cwd-view-list .elfinder-symlink {
+	margin-top:-6px;
+	opacity: .6;
+	filter:Alpha(Opacity=60);
+}
 /* markers in ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-perms   { left:7px;  }
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-lock    { left:9px; top:0px; }
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-perms   { left:8px; bottom:-4px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-lock    { left:10px; top:0px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px; bottom:-4px; }
 
 /* file icon */
 .elfinder-cwd-view-list td .elfinder-cwd-icon {
@@ -841,6 +846,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* icon in ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
+
 /* File: /css/dialog.css */
 /*********************************************/
 /*                DIALOGS STYLES             */
@@ -1296,17 +1302,22 @@ button.elfinder-info-button {
 .elfinder-ltr .elfinder-navbar-spinner { left:0;  margin-left:-2px; }
 .elfinder-rtl .elfinder-navbar-spinner { right:0; margin-right:-2px; }
 
+/* marker */
+.elfinder-navbar .elfinder-perms,
+.elfinder-navbar .elfinder-lock,
+.elfinder-navbar .elfinder-symlink { opacity: .6; filter:Alpha(Opacity=60); }
+
 /* permissions marker */
-.elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
+.elfinder-navbar .elfinder-perms { bottom:-1px; margin-top:-8px; }
 
 /* locked marker */
 .elfinder-navbar .elfinder-lock { top:-2px; }
 
 /* permissions/symlink markers ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
-.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 18px; }
-.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  18px; }
-.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 18px; }
+.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  20px; }
+.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 20px; }
+.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  20px; }
+.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 20px; }
 .elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
@@ -1330,11 +1341,6 @@ button.elfinder-info-button {
 .elfinder-places.elfinder-droppable-active {
 	/*border:1px solid #8cafed;*/
 }
-
-
-
-
-
 
 
 /* File: /css/places.css */
