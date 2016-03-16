@@ -45,13 +45,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $archiveSize = 0;
 	
 	/**
-	 * Current query word on doSearch
-	 *
-	 * @var string
-	 **/
-	private $doSearchCurrentQuery = '';
-	
-	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -1149,7 +1142,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return parent::doSearch($path, $q, $mimes);
 		}
 
-		$this->doSearchCurrentQuery = $q;
 		$match = array();
 		try {
 			$iterator = new RecursiveIteratorIterator(
@@ -1210,10 +1202,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/******************** Original local functions *************************/
 
 	public function localFileSystemSearchIteratorFilter($file, $key, $iterator) {
+		$name = $file->getFilename();
+		if ($this->doSearchCurrentQuery['excludes']) {
+			foreach($this->doSearchCurrentQuery['excludes'] as $exclude) {
+				if ($this->stripos($name, $exclude) !== false) {
+					return false;
+				}
+			}
+		}
 		if ($iterator->hasChildren()) {
+			if ($this->options['searchExDirReg'] && preg_match($this->options['searchExDirReg'], $key)) {
+				return false;
+			}
 			return (bool)$this->attr($key, 'read', null, true);
 		}
-		return ($this->stripos($file->getFilename(), $this->doSearchCurrentQuery) === false)? false : true;
+		return ($this->stripos($name, $this->doSearchCurrentQuery['q']) === false)? false : true;
 	}
 	
 } // END class 
