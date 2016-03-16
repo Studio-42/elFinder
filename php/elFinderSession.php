@@ -38,8 +38,12 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function start()
 	{
-		@session_start();
-		$this->started = session_id()? true : false;
+		if (session_id()) {
+			$this->started = true;
+		} else {
+			@session_start();
+			$this->started = session_id() ? true : false;
+		}
 		
 		return $this;
 	}
