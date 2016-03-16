@@ -38,6 +38,7 @@
 	text-align: center;
 	white-space: pre-wrap;
 	opacity: 0.6;
+	filter: Alpha(Opacity=60);
 	font-weight: bold;
 }
 
@@ -285,11 +286,15 @@
 /* premissions/symlink marker */
 .elfinder-cwd-view-list .elfinder-perms, 
 .elfinder-cwd-view-list .elfinder-lock,
-.elfinder-cwd-view-list .elfinder-symlink { top:50%; margin-top:-6px; }
+.elfinder-cwd-view-list .elfinder-symlink {
+	margin-top:-6px;
+	opacity: .6;
+	filter:Alpha(Opacity=60);
+}
 /* markers in ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-perms   { left:7px;  }
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-lock    { left:9px; top:0px; }
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-perms   { left:8px; bottom:-4px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-lock    { left:10px; top:0px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-symlink { left:-7px; bottom:-4px; }
 
 /* file icon */
 .elfinder-cwd-view-list td .elfinder-cwd-icon {
