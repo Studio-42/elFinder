@@ -194,6 +194,8 @@ abstract class elFinderVolumeDriver {
 		'rootCssClass'    => '',
 		// Search timeout (sec)
 		'searchTimeout'   => 30,
+		// Search exclusion directory regex pattern (require demiliter e.g. '#/path/to/exclude_directory#i')
+		'searchExDirReg'  => '',
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
@@ -588,6 +590,13 @@ abstract class elFinderVolumeDriver {
 	 * @var int
 	 */
 	protected $searchStart;
+	
+	/**
+	 * Current query word on doSearch
+	 *
+	 * @var string
+	 **/
+	protected $doSearchCurrentQuery = array();
 	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
@@ -2297,6 +2306,38 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		$this->searchStart = time();
+		
+		$qs = preg_split('/"([^"]+)"| +/', $q, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+		$query = $excludes = array();
+		foreach($qs as $_q) {
+			$_q = trim($_q);
+			if ($_q !== '') {
+				if ($_q[0] === '-') {
+					if (isset($_q[1])) {
+						$excludes[] = substr($_q, 1);
+					}
+				} else {
+					$query[] = $_q;
+				}
+			}
+		}
+		if (! $query) {
+			$q = '';
+		} else {
+			$q = join(' ', $query);
+			$this->doSearchCurrentQuery = array(
+				'q' => $q,
+				'excludes' => $excludes
+			);
+		}
+		
+		// valided regex $this->options['searchExDirReg']
+		if ($this->options['searchExDirReg']) {
+			if (false === @preg_match($this->options['searchExDirReg'], '')) {
+				$this->options['searchExDirReg'] = '';
+			}
+		}
+		
 		return ($q === '' || $this->commandDisabled('search'))
 			? array()
 			: $this->doSearch(is_null($dir)? $this->root : $dir, $q, $mimes);
@@ -3603,6 +3644,14 @@ abstract class elFinderVolumeDriver {
 			
 			$name = $stat['name'];
 
+			if ($this->doSearchCurrentQuery['excludes']) {
+				foreach($this->doSearchCurrentQuery['excludes'] as $exclude) {
+					if ($this->stripos($name, $exclude) !== false) {
+						continue 2;
+					}
+				}
+			}
+
 			if ((!$mimes || $stat['mime'] !== 'directory') && $this->stripos($name, $q) !== false) {
 				$stat['path'] = $this->path($stat['hash']);
 				if ($this->URL && !isset($stat['url'])) {
@@ -3616,7 +3665,9 @@ abstract class elFinderVolumeDriver {
 				$result[] = $stat;
 			}
 			if ($stat['mime'] == 'directory' && $stat['read'] && !isset($stat['alias'])) {
-				$result = array_merge($result, $this->doSearch($p, $q, $mimes));
+				if (! $this->options['searchExDirReg'] || ! preg_match($this->options['searchExDirReg'], $p)) {
+					$result = array_merge($result, $this->doSearch($p, $q, $mimes));
+				}
 			}
 		}
 		
