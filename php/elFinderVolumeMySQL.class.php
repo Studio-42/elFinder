@@ -315,7 +315,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
 		
 		if ($path != $this->root) {
-			$inpath = array(intval($path));
+			$dirs = $inpath = array(intval($path));
 			while($inpath) {
 				$in = '('.join(',', $inpath).')';
 				$inpath = array();
