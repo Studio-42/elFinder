@@ -38,12 +38,16 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function start()
 	{
-		if (session_id()) {
-			$this->started = true;
+		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+			if (session_status() !== PHP_SESSION_ACTIVE) {
+				session_start();
+			}
 		} else {
-			@session_start();
-			$this->started = session_id() ? true : false;
+			set_error_handler(array($this, 'session_start_error'),  E_NOTICE);
+			session_start();
+			restore_error_handler();
 		}
+		$this->started = session_id()? true : false;
 		
 		return $this;
 	}
@@ -200,4 +204,6 @@ class elFinderSession implements elFinderSessionInterface
 		}
 		return $data;
 	}
+
+	protected function session_start_error($errno , $errstr) {}
 }
