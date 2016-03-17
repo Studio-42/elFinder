@@ -54,7 +54,6 @@ elFinder.prototype.commands.rename = function() {
 					if (tarea) {
 						name = name.replace(/([_.])/g, '&#8203;$1');
 					}
-					//rest();
 					if (navbar) {
 						input.replaceWith(name);
 					} else {
@@ -89,7 +88,6 @@ elFinder.prototype.commands.rename = function() {
 					}
 				})
 				.keydown(function(e) {
-					e.stopPropagation();
 					e.stopImmediatePropagation();
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
@@ -127,11 +125,11 @@ elFinder.prototype.commands.rename = function() {
 							}
 						}
 						if (!name || name === '..' || !valid) {
-							fm.error('errInvName');
+							fm.error('errInvName', {modal: true, close: select});
 							return false;
 						}
 						if (fm.fileByName(name, file.phash)) {
-							fm.error(['errExists', name]);
+							fm.error(['errExists', name], {modal: true, close: select});
 							return false;
 						}
 						
@@ -161,9 +159,17 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
+			select = function() {
+				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+				if (fm.UA.Mobile) {
+					overlay.on('click', cancel)
+						.removeClass('ui-front').elfinderoverlay('show');
+				}
+				input.select().focus();
+				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
+			},
 			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
 					: target.find(filename),
-			name = file.name.replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, ''),
 			pnode = node.parent(),
 			overlay = fm.getUI().children('.elfinder-overlay'),
 			cancel = function(e) { 
@@ -184,10 +190,6 @@ elFinder.prototype.commands.rename = function() {
 			}
 			node.empty().append(input.val(file.name));
 		}
-		if (fm.UA.Mobile) {
-			overlay.on('click', cancel)
-				.removeClass('ui-front').elfinderoverlay('show');
-		}
 		
 		if (cnt > 1 || this.getstate([file.hash]) < 0) {
 			return dfrd.reject();
@@ -207,9 +209,7 @@ elFinder.prototype.commands.rename = function() {
 		
 		input.trigger('keyup');
 		
-		input.select().focus();
-		
-		input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
+		select();
 		
 		return dfrd;
 	};

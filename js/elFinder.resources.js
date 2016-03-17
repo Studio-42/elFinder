@@ -108,6 +108,8 @@ elFinder.prototype.resources = {
 				nnode, pnode,
 				overlay = fm.getUI().children('.elfinder-overlay'),
 				cancel = function(e) { 
+					input.remove();
+					node.remove();
 					e.stopPropagation();
 					dfrd.reject();
 				},
@@ -125,7 +127,6 @@ elFinder.prototype.resources = {
 					})
 					.keydown(function(e) {
 						e.stopImmediatePropagation();
-
 						if (e.keyCode == $.ui.keyCode.ESCAPE) {
 							dfrd.reject();
 						} else if (e.keyCode == $.ui.keyCode.ENTER) {
@@ -151,11 +152,11 @@ elFinder.prototype.resources = {
 								}
 							}
 							if (!name || name === '..' || !valid) {
-								fm.error('errInvName');
+								fm.error('errInvName', {modal: true, close: select});
 								return false;
 							}
 							if (fm.fileByName(name, phash)) {
-								fm.error(['errExists', name]);
+								fm.error(['errExists', name], {modal: true, close: select});
 								return false;
 							}
 
@@ -195,14 +196,21 @@ elFinder.prototype.resources = {
 								dfrd.reject();
 							});
 						}
-					});
-
+					}),
+				select = function() {
+					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+					if (fm.UA.Mobile) {
+						overlay.on('click', cancel)
+							.removeClass('ui-front').elfinderoverlay('show');
+					}
+					input.select().focus();
+					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
+				};
 
 			if (this.disabled() || !node.length) {
 				return dfrd.reject();
 			}
 
-			fm.disable();
 			nnode = node.find('.elfinder-cwd-filename');
 			pnode = nnode.parent();
 			node.css('position', 'relative').addClass('ui-front');
@@ -215,21 +223,11 @@ elFinder.prototype.resources = {
 			}
 			nnode.empty('').append(input.val(file.name));
 			
-			if (fm.UA.Mobile) {
-				overlay.on('click', cancel)
-					.removeClass('ui-front').elfinderoverlay('show');
-			}
-			
 			input.trigger('keyup');
-			input.select().focus();
-			input[0].setSelectionRange && input[0].setSelectionRange(0, file.name.replace(/\..+$/, '').length);
+			select();
 
 			return dfrd;
 
-
-
 		}
-		
 	}
 }
-

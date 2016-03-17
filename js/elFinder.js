@@ -2033,10 +2033,11 @@ window.elFinder = function(node, opts) {
 	 * @return elFinder
 	 **/
 	this.error = function() {
-		var arg = arguments[0];
+		var arg = arguments[0],
+			opts = arguments[1] || null;
 		return arguments.length == 1 && typeof(arg) == 'function'
 			? self.bind('error', arg)
-			: self.trigger('error', {error : arg});
+			: self.trigger('error', {error : arg, opts : opts});
 	}
 	
 	// create bind/trigger aliases for build-in events
@@ -2077,8 +2078,12 @@ window.elFinder = function(node, opts) {
 					destroyOnClose : true,
 					buttons   : {}
 			};
-
+			
 			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
+
+			if (e.data.opts && $.isPlainObject(e.data.opts)) {
+				$.extend(opts, e.data.opts);
+			}
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
