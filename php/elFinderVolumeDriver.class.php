@@ -2123,6 +2123,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
+		if ($name !== '' && !$this->nameAccepted($name)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME);
+		}
+
 		$archiver = isset($this->archivers['create'][$mime])
 			? $this->archivers['create'][$mime]
 			: false;
