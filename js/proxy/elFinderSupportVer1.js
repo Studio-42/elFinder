@@ -154,9 +154,10 @@ window.elFinderSupportVer1 = function(upload) {
 	
 	this.normalize = function(cmd, data) {
 		var self = this,
+			fm   = this.fm,
 			files = {}, 
 			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
-			phash;
+			phash, diff, isCwd;
 
 		if ((cmd == 'tmb' || cmd == 'get')) {
 			return data;
@@ -182,11 +183,13 @@ window.elFinderSupportVer1 = function(upload) {
 		
 		if (cmd == 'put') {
 
-			phash = this.fm.file(data.target.hash).phash;
+			phash = fm.file(data.target.hash).phash;
 			return {changed : [this.normalizeFile(data.target, phash)]};
 		}
 		
 		phash = data.cwd.hash;
+
+		isCwd = (phash == fm.cwd().hash);
 		
 		if (data.tree) {
 			$.each(this.normalizeTree(data.tree), function(i, file) {
@@ -206,7 +209,7 @@ window.elFinderSupportVer1 = function(upload) {
 		});
 		
 		if (!data.tree) {
-			$.each(this.fm.files(), function(hash, file) {
+			$.each(fm.files(), function(hash, file) {
 				if (!files[hash] && file.phash != phash && file.mime == 'directory') {
 					files[hash] = file;
 				}
@@ -223,14 +226,14 @@ window.elFinderSupportVer1 = function(upload) {
 				};
 		}
 		
-		
+		diff = isCwd? fm.diff($.map(files, filter)) : {added: $.map(files, filter)};
 		
 		return $.extend({
 			current : data.cwd.hash,
 			error   : data.error,
 			warning : data.warning,
 			options : {tmb : !!data.tmb}
-		}, this.fm.diff($.map(files, filter)));
+		}, diff);
 		
 	}
 	
