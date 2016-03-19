@@ -109,6 +109,10 @@ window.elFinderSupportVer1 = function(upload) {
 				return dfrd.resolve({error : fm.res('error', 'cmdsupport')});
 				break;
 				
+			case 'file':
+				opts.data.cmd = 'open';
+				opts.data.current = fm.file(opts.data.target).phash;
+				break;
 		}
 		// cmd = opts.data.cmd
 		
@@ -130,8 +134,6 @@ window.elFinderSupportVer1 = function(upload) {
 			})
 			
 		return dfrd;
-		
-		return $.ajax(opts);
 	}
 	
 	// fix old connectors errors messages as possible
