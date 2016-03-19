@@ -284,7 +284,7 @@ window.elFinderSupportVer1 = function(upload) {
 				locked : !phash ? true : file.rm === void(0) ? false : !file.rm
 			};
 		
-		if (file.mime == 'application/x-empty') {
+		if (file.mime == 'application/x-empty' || file.mime == 'inode/x-empty') {
 			info.mime = 'text/plain';
 		}
 		if (file.linkTo) {
