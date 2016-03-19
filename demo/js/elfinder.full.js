@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 6fce215) (2016-03-17)
+ * Version 2.1.9 (2.1-src Nightly: 0df9f09) (2016-03-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1179,6 +1179,9 @@ window.elFinder = function(node, opts) {
 	this.returnBytes = function(val) {
 		var last;
 		if (isNaN(val)) {
+			if (! val) {
+				val = '';
+			}
 			// for ex. 1mb, 1KB
 			val = val.replace(/b$/i, '');
 			last = val.charAt(val.length - 1).toLowerCase();
@@ -4878,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 6fce215)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 0df9f09)';
 
 
 
@@ -11247,7 +11250,7 @@ elFinder.prototype.commands.archive = function() {
 		}
 
 		self.mime   = mime;
-		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + '.' + fm.option('archivers')['createext'][mime];
+		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + (fm.option('archivers')['createext']? '.' + fm.option('archivers')['createext'][mime] : '');
 		self.data   = {targets : self.hashes(hashes), type : mime};
 		makeDfrd = $.proxy(fm.res('mixin', 'make'), self)();
 		dfrd.reject();
@@ -11685,7 +11688,8 @@ elFinder.prototype.commands.download = function() {
 		zipOn  = false,
 		filter = function(hashes) {
 			var mixed  = false,
-				croot  = '';
+				croot  = '',
+				api21  = (fm.api > 2);
 			
 			if (fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 				hashes = $.map(hashes, function(h) {
@@ -11697,12 +11701,12 @@ elFinder.prototype.commands.download = function() {
 						return false;
 					}
 				});
-				zipOn = (!mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
+				zipOn = (api21 && !mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
 			} else {
 				if (!fm.isCommandEnabled('download', hashes[0])) {
 					return [];
 				}
-				zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
+				zipOn = (api21 && fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
 			}
 			
 			return (!zipOn)?
@@ -11720,7 +11724,7 @@ elFinder.prototype.commands.download = function() {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
 			maxReq = this.options.maxRequests || 10,
-			czipdl = fm.command('zipdl'),
+			czipdl = (fm.api > 2)? fm.command('zipdl') : null,
 			mixed  = false,
 			croot  = '';
 		
@@ -12388,7 +12392,11 @@ elFinder.prototype.commands.extract = function() {
 	// Update mimes list on open/reload
 	fm.bind('open reload', function() {
 		mimes = fm.option('archivers')['extract'] || [];
-		self.variants = [['makedir', fm.i18n('cmdmkdir')], ['intohere', fm.i18n('btnCwd')]];
+		if (fm.api > 2) {
+			self.variants = [['makedir', fm.i18n('cmdmkdir')], ['intohere', fm.i18n('btnCwd')]];
+		} else {
+			self.variants = [['intohere', fm.i18n('btnCwd')]];
+		}
 		self.change();
 	});
 	
