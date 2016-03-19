@@ -104,7 +104,12 @@ elFinder.prototype.resources = {
 					date  : 'Today '+date.getHours()+':'+date.getMinutes()
 				},
 				data = this.data || {},
-				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id)),
+				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id))
+					.on('unselect.'+fm.namespace, function() {
+						setTimeout(function() {
+							input && input.blur();
+						}, 50);
+					}),
 				nnode, pnode,
 				overlay = fm.getUI().children('.elfinder-overlay'),
 				cancel = function(e) { 
