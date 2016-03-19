@@ -317,7 +317,7 @@ window.elFinderSupportVer1 = function(upload) {
 	this.normalizeOptions = function(data) {
 		var opts = {
 				path          : data.cwd.rel,
-				disabled      : data.disabled || [],
+				disabled      : $.merge((data.disabled || []), [ 'search', 'netmount', 'zipdl' ]),
 				tmb           : !!data.tmb,
 				copyOverwrite : true
 			};
