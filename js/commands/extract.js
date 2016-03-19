@@ -22,7 +22,11 @@ elFinder.prototype.commands.extract = function() {
 	// Update mimes list on open/reload
 	fm.bind('open reload', function() {
 		mimes = fm.option('archivers')['extract'] || [];
-		self.variants = [['makedir', fm.i18n('cmdmkdir')], ['intohere', fm.i18n('btnCwd')]];
+		if (fm.api > 2) {
+			self.variants = [['makedir', fm.i18n('cmdmkdir')], ['intohere', fm.i18n('btnCwd')]];
+		} else {
+			self.variants = [['intohere', fm.i18n('btnCwd')]];
+		}
 		self.change();
 	});
 	
