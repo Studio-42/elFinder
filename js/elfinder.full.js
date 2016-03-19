@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 13cbe4a) (2016-03-19)
+ * Version 2.1.9 (2.1-src Nightly: e1275f5) (2016-03-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 13cbe4a)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: e1275f5)';
 
 
 
@@ -6234,7 +6234,12 @@ elFinder.prototype.resources = {
 					date  : 'Today '+date.getHours()+':'+date.getMinutes()
 				},
 				data = this.data || {},
-				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id)),
+				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id))
+					.on('unselect.'+fm.namespace, function() {
+						setTimeout(function() {
+							input && input.blur();
+						}, 50);
+					}),
 				nnode, pnode,
 				overlay = fm.getUI().children('.elfinder-overlay'),
 				cancel = function(e) { 
