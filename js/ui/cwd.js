@@ -1466,7 +1466,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				unselectAll();
 
-				$.each(e.data.added || [], function(i, file) { 
+				$.each((e.data.added || []).concat(e.data.changed || []), function(i, file) { 
 					file && file.phash == phash && selectFile(file.hash);
 				});
 				trigger();
