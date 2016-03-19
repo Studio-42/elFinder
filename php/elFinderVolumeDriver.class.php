@@ -1812,9 +1812,13 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		
+		$stat = $this->stat($path);
+		// Try get URL
+		if (empty($stat['url']) && ($url = $this->getContentUrl($stat['hash']))) {
+			$stat['url'] = $url;
+		}
 
-		return $this->stat($path);
+		return $stat;
 	}
 	
 	/**
@@ -2372,10 +2376,21 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function getContentUrl($hash, $options = array()) {
-		if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
+		if (($file = $this->file($hash)) == false || (isset($file['url']) && $file['url'] == 1)) {
 			return false;
 		}
-		return $file['url'];
+		if (empty($file['url'])) {
+			if ($this->URL) {
+				$path = str_replace($this->separator, '/', substr($this->decode($hash), strlen($this->root) + 1));
+				if ($this->encoding) {
+					$path = str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+				}
+				return $this->URL . $path;
+			}
+			return false;
+		} else {
+			return $file['url'];
+		}
 	}
 	
 	/**
