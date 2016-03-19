@@ -1165,6 +1165,9 @@ window.elFinder = function(node, opts) {
 	this.returnBytes = function(val) {
 		var last;
 		if (isNaN(val)) {
+			if (! val) {
+				val = '';
+			}
 			// for ex. 1mb, 1KB
 			val = val.replace(/b$/i, '');
 			last = val.charAt(val.length - 1).toLowerCase();

@@ -69,7 +69,7 @@ elFinder.prototype.commands.archive = function() {
 		}
 
 		self.mime   = mime;
-		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + '.' + fm.option('archivers')['createext'][mime];
+		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + (fm.option('archivers')['createext']? '.' + fm.option('archivers')['createext'][mime] : '');
 		self.data   = {targets : self.hashes(hashes), type : mime};
 		makeDfrd = $.proxy(fm.res('mixin', 'make'), self)();
 		dfrd.reject();
