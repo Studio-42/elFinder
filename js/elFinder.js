@@ -1792,7 +1792,7 @@ window.elFinder = function(node, opts) {
 		if (dstHash && self.root(dstHash) !== cwd) {
 			disabled = [];
 			$.each(self.disabledCmds, function(i, v){
-				if (dstHash.indexOf(i, 0) == 0) {
+				if (dstHash.indexOf(i) === 0) {
 					disabled = v;
 					return false;
 				}

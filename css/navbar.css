@@ -98,6 +98,7 @@
 .elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.png"); }
 .elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.png"); }
 .elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.png"); }
+.elfinder-tree .elfinder-navbar-root-googledrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_googledrive.png"); }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 

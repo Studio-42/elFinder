@@ -201,6 +201,7 @@
 
 .elfinder-netmount-tb { margin:0 auto; }
 .elfinder-netmount-tb input { border:1px solid #ccc; }
+.elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
 button.elfinder-info-button {
 	margin: -3.5px 0;

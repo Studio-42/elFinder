@@ -140,8 +140,36 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function remove($key)
 	{
-		$session =& $this->getSessionRef($key);
-		unset($session);
+		$closed = false;
+		if (! $this->started) {
+			$closed = true;
+			$this->start();
+		}
+
+		list($cat, $name) = array_pad(explode('.', $key, 2), 2, null);
+		if (is_null($name)) {
+			if (! isset($this->keys[$cat])) {
+				$name = $cat;
+				$cat = 'default';
+			}
+		}
+		if (isset($this->keys[$cat])) {
+			$cat = $this->keys[$cat];
+		} else {
+			$name = $cat . '.' . $name;
+			$cat = $this->keys['default'];
+		}
+		if (is_null($name)) {
+			unset($_SESSION[$cat]);
+		} else {
+			if (isset($_SESSION[$cat]) && is_array($_SESSION[$cat])) {
+				unset($_SESSION[$cat][$name]);
+			}
+		}
+
+		if ($closed) {
+			$this->close();
+		}
 		
 		return $this;
 	}

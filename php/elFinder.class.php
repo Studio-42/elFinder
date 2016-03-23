@@ -876,6 +876,10 @@ class elFinder {
 			if (! $key = @ $volume->netMountKey) {
 				$key = md5($protocol . '-' . join('-', $options));
 			}
+			if (isset($netVolumes[$key])) {
+				$volume->umount();
+				return array('error' => $this->error(self::ERROR_EXISTS, isset($options['alias'])? $options['alias'] : $options['path']));
+			}
 			$options['driver'] = $driver;
 			$options['netkey'] = $key;
 			$netVolumes[$key]  = $options;
