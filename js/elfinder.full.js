@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 5b8a61e) (2016-03-20)
+ * Version 2.1.9 (2.1-src Nightly: 7b38c65) (2016-03-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1806,7 +1806,7 @@ window.elFinder = function(node, opts) {
 		if (dstHash && self.root(dstHash) !== cwd) {
 			disabled = [];
 			$.each(self.disabledCmds, function(i, v){
-				if (dstHash.indexOf(i, 0) == 0) {
+				if (dstHash.indexOf(i) === 0) {
 					disabled = v;
 					return false;
 				}
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 5b8a61e)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 7b38c65)';
 
 
 
@@ -5319,6 +5319,60 @@ elFinder.prototype._options = {
 						self.inputs.user.val("done");
 						self.inputs.pass.val("done");
 					}
+				}
+			},
+			googledrive: {
+				inputs: {
+					offline  : $('<input type="checkbox"/>').on('change', function() {
+						$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+					}),
+					host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
+					path     : $('<input type="text" value="root"/>'),
+					user     : $('<input type="hidden"/>'),
+					pass     : $('<input type="hidden"/>')
+				},
+				select: function(fm, ev, data){
+					var f = this.inputs,
+						data = data || null;
+					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
+						f.path.parent().prev().html(fm.i18n('FolderID'));
+						f.offline.attr('title', fm.i18n('offlineAccess'));
+						$(f.host[0]).empty().addClass('elfinder-info-spinner')
+							.parent().find('span.elfinder-button-icon').remove();
+						fm.request({
+							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: f.offline.prop('checked')? 1:0, pass: f.host[1].value}},
+							preventDefault : true
+						}).done(function(data){
+							$(f.host[0]).removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
+						}).fail(function(){});
+					} else {
+						f.offline.parent().parent()[f.user.val()? 'hide':'show']();
+					}
+				},
+				done: function(fm, data){
+					var f = this.inputs;
+					if (data.mode == 'makebtn') {
+						$(f.host[0]).removeClass('elfinder-info-spinner');
+						f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
+						$(f.host[1]).val('');
+						f.user.val('');
+						f.pass.val('');
+						f.offline.parent().parent().show();
+					} else {
+						$(f.host[0]).html('Google.com&nbsp;').removeClass('elfinder-info-spinner');
+						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
+							.on('click', function() {
+								$(f.host[1]).val('revoke');
+								$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+							}));
+						$(f.host[1]).val('googledrive');
+						f.user.val('done');
+						f.pass.val('done');
+						f.offline.parent().parent().hide();
+					}
+				},
+				fail: function(fm, err){
+					$(this.inputs.user).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
 				}
 			}
 		},
@@ -13301,12 +13355,12 @@ elFinder.prototype.commands.netmount = function() {
 			o = self.options,
 			create = function() {
 				var inputs = {
-						protocol : $('<select/>').change(function(){
+						protocol : $('<select/>').change(function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
 							content.find('.elfinder-netmount-tr-'+protocol).show();
 							if (typeof o[protocol].select == 'function') {
-								o[protocol].select(fm);
+								o[protocol].select(fm, e, data);
 							}
 						})
 					},
@@ -13316,7 +13370,7 @@ elFinder.prototype.commands.netmount = function() {
 						modal          : true,
 						destroyOnClose : true,
 						close          : function() { 
-							delete self.dialog; 
+							//delete self.dialog; 
 							dfrd.state() == 'pending' && dfrd.reject();
 						},
 						buttons        : {}
@@ -13346,8 +13400,9 @@ elFinder.prototype.commands.netmount = function() {
 				content.find('.elfinder-netmount-tr').hide();
 
 				opts.buttons[fm.i18n('btnMount')] = function() {
-					var protocol = inputs.protocol.val();
-					var data = {cmd : 'netmount', protocol: protocol};
+					var protocol = inputs.protocol.val(),
+						data = {cmd : 'netmount', protocol: protocol},
+						cur = o[protocol];
 					$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
 						var val;
 						if (typeof input.val == 'function') {
@@ -13369,9 +13424,15 @@ elFinder.prototype.commands.netmount = function() {
 							data.added && data.added.length && fm.exec('open', data.added[0].hash);
 							dfrd.resolve();
 						})
-						.fail(function(error) { dfrd.reject(error); });
+						.fail(function(error) {
+							//self.dialog.elfinderdialog('open');
+							if (cur.fail && typeof cur.fail == 'function') {
+								cur.fail(fm, error);
+							}
+							dfrd.reject(error);
+						});
 
-					self.dialog.elfinderdialog('close');	
+					self.dialog.elfinderdialog('close');
 				};
 
 				opts.buttons[fm.i18n('btnCancel')] = function() {
@@ -13387,21 +13448,24 @@ elFinder.prototype.commands.netmount = function() {
 			}
 			;
 		
-		fm.bind('netmount', function(e) {
-			var d = e.data || null;
-			if (d && d.protocol) {
-				if (o[d.protocol] && typeof o[d.protocol].done == 'function') {
-					o[d.protocol].done(fm, d);
-				}
-			}
-		});
-
 		if (!self.dialog) {
 			self.dialog = create();
+		} else {
+			self.dialog.elfinderdialog('open');
 		}
 
 		return dfrd.promise();
 	}
+
+	self.fm.bind('netmount', function(e) {
+		var d = e.data || null,
+			o = self.options;
+		if (d && d.protocol) {
+			if (o[d.protocol] && typeof o[d.protocol].done == 'function') {
+				o[d.protocol].done(self.fm, d);
+			}
+		}
+	});
 
 }
 

@@ -885,7 +885,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				return false;
 			}
 		}
-
+		
+		if (is_link($path)) {
+			unlink($path);
+			return $this->setError(elFinder::ERROR_SAVE, $name);
+		}
+		
 		@chmod($path, $this->options['fileMode']);
 		clearstatcache();
 		return $path;
