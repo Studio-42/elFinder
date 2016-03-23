@@ -347,6 +347,60 @@ elFinder.prototype._options = {
 						self.inputs.pass.val("done");
 					}
 				}
+			},
+			googledrive: {
+				inputs: {
+					offline  : $('<input type="checkbox"/>').on('change', function() {
+						$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+					}),
+					host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
+					path     : $('<input type="text" value="root"/>'),
+					user     : $('<input type="hidden"/>'),
+					pass     : $('<input type="hidden"/>')
+				},
+				select: function(fm, ev, data){
+					var f = this.inputs,
+						data = data || null;
+					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
+						f.path.parent().prev().html(fm.i18n('FolderID'));
+						f.offline.attr('title', fm.i18n('offlineAccess'));
+						$(f.host[0]).empty().addClass('elfinder-info-spinner')
+							.parent().find('span.elfinder-button-icon').remove();
+						fm.request({
+							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: f.offline.prop('checked')? 1:0, pass: f.host[1].value}},
+							preventDefault : true
+						}).done(function(data){
+							$(f.host[0]).removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
+						}).fail(function(){});
+					} else {
+						f.offline.parent().parent()[f.user.val()? 'hide':'show']();
+					}
+				},
+				done: function(fm, data){
+					var f = this.inputs;
+					if (data.mode == 'makebtn') {
+						$(f.host[0]).removeClass('elfinder-info-spinner');
+						f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
+						$(f.host[1]).val('');
+						f.user.val('');
+						f.pass.val('');
+						f.offline.parent().parent().show();
+					} else {
+						$(f.host[0]).html('Google.com&nbsp;').removeClass('elfinder-info-spinner');
+						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
+							.on('click', function() {
+								$(f.host[1]).val('revoke');
+								$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+							}));
+						$(f.host[1]).val('googledrive');
+						f.user.val('done');
+						f.pass.val('done');
+						f.offline.parent().parent().hide();
+					}
+				},
+				fail: function(fm, err){
+					$(this.inputs.user).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+				}
 			}
 		},
 

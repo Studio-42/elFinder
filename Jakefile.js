@@ -49,6 +49,7 @@ var dirmode = 0755,
 				path.join(src, 'php', 'elFinderSessionInterface.php')
 			]
 			.concat(grep(path.join(src, 'php'), '\\.class\.php$')),
+			.concat(grep(path.join(src, 'php'), 'Netmount\.php$')),
 		'misc':
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
