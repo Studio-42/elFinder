@@ -377,29 +377,43 @@ elFinder.prototype._options = {
 					}
 				},
 				done: function(fm, data){
-					var f = this.inputs;
+					var f = this.inputs, p = this.protocol;
 					if (data.mode == 'makebtn') {
 						$(f.host[0]).removeClass('elfinder-info-spinner');
 						f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 						$(f.host[1]).val('');
+						f.path.val('root').next().remove();
 						f.user.val('');
 						f.pass.val('');
 						f.offline.parent().parent().show();
 					} else {
 						$(f.host[0]).html('Google.com&nbsp;').removeClass('elfinder-info-spinner');
+						if (data.reset) {
+							p.trigger('change', 'reset');
+							return;
+						}
 						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
 							.on('click', function() {
 								$(f.host[1]).val('revoke');
-								$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+								p.trigger('change', 'reset');
 							}));
 						$(f.host[1]).val('googledrive');
+						if (data.folders) {
+							f.path.after(
+								$('<div/>').append(
+									$('<select style="max-width:200px;">').append(
+										$($.map(data.folders, function(n,i){return '<option value="'+i+'">'+fm.escape(n)+'</option>'}).join(''))
+									).on('change', function(){f.path.val($(this).val());})
+								)
+							);
+						}
 						f.user.val('done');
 						f.pass.val('done');
 						f.offline.parent().parent().hide();
 					}
 				},
 				fail: function(fm, err){
-					$(this.inputs.user).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+					this.protocol.trigger('change', 'reset');
 				}
 			}
 		},
