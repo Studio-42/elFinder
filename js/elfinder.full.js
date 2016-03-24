@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 7b38c65) (2016-03-23)
+ * Version 2.1.9 (2.1-src Nightly: be8b86c) (2016-03-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 7b38c65)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: be8b86c)';
 
 
 
@@ -5350,29 +5350,43 @@ elFinder.prototype._options = {
 					}
 				},
 				done: function(fm, data){
-					var f = this.inputs;
+					var f = this.inputs, p = this.protocol;
 					if (data.mode == 'makebtn') {
 						$(f.host[0]).removeClass('elfinder-info-spinner');
 						f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 						$(f.host[1]).val('');
+						f.path.val('root').next().remove();
 						f.user.val('');
 						f.pass.val('');
 						f.offline.parent().parent().show();
 					} else {
 						$(f.host[0]).html('Google.com&nbsp;').removeClass('elfinder-info-spinner');
+						if (data.reset) {
+							p.trigger('change', 'reset');
+							return;
+						}
 						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
 							.on('click', function() {
 								$(f.host[1]).val('revoke');
-								$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+								p.trigger('change', 'reset');
 							}));
 						$(f.host[1]).val('googledrive');
+						if (data.folders) {
+							f.path.after(
+								$('<div/>').append(
+									$('<select style="max-width:200px;">').append(
+										$($.map(data.folders, function(n,i){return '<option value="'+i+'">'+fm.escape(n)+'</option>'}).join(''))
+									).on('change', function(){f.path.val($(this).val());})
+								)
+							);
+						}
 						f.user.val('done');
 						f.pass.val('done');
 						f.offline.parent().parent().hide();
 					}
 				},
 				fail: function(fm, err){
-					$(this.inputs.user).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+					this.protocol.trigger('change', 'reset');
 				}
 			}
 		},
@@ -6522,7 +6536,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-02-19
+ * @version 2016-03-24
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6618,6 +6632,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 3.24.2016
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -13393,6 +13408,7 @@ elFinder.prototype.commands.netmount = function() {
 							hidden.append(input);
 						}
 					});
+					o[protocol].protocol = inputs.protocol;
 				});
 				
 				content.append(hidden);
