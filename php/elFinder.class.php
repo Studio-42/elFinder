@@ -818,7 +818,7 @@ class elFinder {
 		if ($protocol === 'netunmount') {
 			$key = $args['host'];
 			$netVolumes = $this->getNetVolumes();
-			if ($netVolumes[$key]) {
+			if (isset($netVolumes[$key])) {
 				$res = true;
 				$volume = $this->volume($args['user']);
 				if (method_exists($volume, 'netunmount')) {
