@@ -1897,7 +1897,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		// copy/move inside current volume
-		if ($volume == $this) {
+		if ($volume === $this) { //  changing == operand to === fixes issue #1285 - Paul Canning 24/03/2016
 			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->inpathCE($destination, $source)) {
