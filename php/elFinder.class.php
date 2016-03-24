@@ -271,7 +271,7 @@ class elFinder {
 	const ERROR_UPLOAD_FILE_MIME  = 'errUploadMime';       // 'File type not allowed.'
 	const ERROR_UPLOAD_TRANSFER   = 'errUploadTransfer';   // '"$1" transfer error.'
 	const ERROR_UPLOAD_TEMP       = 'errUploadTemp';       // 'Unable to make temporary file for upload.'
-	// const ERROR_ACCESS_DENIED     = 'errAccess';
+	const ERROR_ACCESS_DENIED     = 'errAccess';
 	const ERROR_NOT_REPLACE       = 'errNotReplace';       // Object "$1" already exists at this location and can not be replaced with object of another type.
 	const ERROR_SAVE              = 'errSave';
 	const ERROR_EXTRACT           = 'errExtract';
@@ -298,6 +298,7 @@ class elFinder {
 	const ERROR_ARCHIVE_EXEC 	= 'errArchiveExec';
 	const ERROR_EXTRACT_EXEC 	= 'errExtractExec';
 	const ERROR_SEARCH_TIMEOUT    = 'errSearchTimeout';    // 'Timed out while searching "$1". Search result is partial.'
+	const ERROR_REAUTH_REQUIRE  = 'errReauthRequire';  // 'Re-authorization is required.'
 
 	/**
 	 * Constructor

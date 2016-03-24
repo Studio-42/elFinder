@@ -67,6 +67,7 @@ elFinder.prototype.commands.netmount = function() {
 							hidden.append(input);
 						}
 					});
+					o[protocol].protocol = inputs.protocol;
 				});
 				
 				content.append(hidden);
