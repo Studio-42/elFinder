@@ -111,7 +111,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
                     unset($options['access_token']);
                     if ($options['user'] !== 'init') {
                         $this->session->set('GoogleDriveAuthParams', $options);
-                        return array('exit' => true, 'error' => elFinder::ERROR_ACCESS_DENIED);
+                        return array('exit' => true, 'error' => elFinder::ERROR_REAUTH_REQUIRE);
                     }
                 }
 
