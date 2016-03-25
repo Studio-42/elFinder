@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 6198643) (2016-03-25)
+ * Version 2.1.9 (2.1-src Nightly: 176b336) (2016-03-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 6198643)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 176b336)';
 
 
 
@@ -5332,21 +5332,24 @@ elFinder.prototype._options = {
 					pass     : $('<input type="hidden"/>')
 				},
 				select: function(fm, ev, data){
-					var f = this.inputs,
+					var f = this.inputs, oline = f.offline,
 						data = data || null;
 					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
-						f.path.parent().prev().html(fm.i18n('FolderID'));
-						f.offline.attr('title', fm.i18n('offlineAccess'));
+						f.path.parent().prev().html(fm.i18n('folderId'));
+						oline.attr('title', fm.i18n('offlineAccess'));
+						if (oline.parent().children().length === 1) {
+							oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
+						}
 						$(f.host[0]).empty().addClass('elfinder-info-spinner')
 							.parent().find('span.elfinder-button-icon').remove();
 						fm.request({
-							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: f.offline.prop('checked')? 1:0, pass: f.host[1].value}},
+							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
 							preventDefault : true
 						}).done(function(data){
 							$(f.host[0]).removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
 						}).fail(function(){});
 					} else {
-						f.offline.parent().parent()[f.user.val()? 'hide':'show']();
+						oline.parent().parent()[f.user.val()? 'hide':'show']();
 					}
 				},
 				done: function(fm, data){
@@ -6536,7 +6539,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-03-24
+ * @version 2016-03-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6873,6 +6876,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
