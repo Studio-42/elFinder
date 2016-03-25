@@ -238,6 +238,11 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
         if (file_exists($cache) && is_writeable($cache)) {
             unlink($cache);
         }
+        if ($tmbs = glob($this->tmbPath . DIRECTORY_SEPARATOR . $this->netMountKey . '*')) {
+            foreach($tmbs as $file) {
+                unlink($file);
+            }
+        }
         return true;
     }
 
@@ -326,4 +331,12 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
         list($url) = explode('?', $url);
         return $url;
     }
+
+    /**
+     * @inheritdoc
+     */
+	protected function tmbname($stat) {
+		return $this->netMountKey.substr(substr($stat['hash'], strlen($this->id)), -38).$stat['ts'].'.png';
+	}
+
 }
