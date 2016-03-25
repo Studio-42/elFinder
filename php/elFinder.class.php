@@ -437,11 +437,11 @@ class elFinder {
 							$this->default = $this->volumes[$id]; 
 						}
 					} else {
-						$this->removeNetVolume($i);
+						$this->removeNetVolume($i, $volume);
 						$this->mountErrors[] = 'Driver "'.$class.'" : '.implode(' ', $volume->error());
 					}
 				} catch (Exception $e) {
-					$this->removeNetVolume($i);
+					$this->removeNetVolume($i, $volume);
 					$this->mountErrors[] = 'Driver "'.$class.'" : '.$e->getMessage();
 				}
 			} else {
@@ -755,14 +755,23 @@ class elFinder {
 	/**
 	 * Remove netmount volume
 	 * 
-	 * @param string $key  netvolume key
+	 * @param string $key     netvolume key
+	 * @param object $volume  volume driver instance
 	 */
-	protected function removeNetVolume($key) {
+	protected function removeNetVolume($key, $volume) {
 		$netVolumes = $this->getNetVolumes();
-		if (is_string($key) && isset($netVolumes[$key])) {
-			unset($netVolumes[$key]);
-			$this->saveNetVolumes($netVolumes);
+		$res = true;
+		if (is_object($volume) && method_exists($volume, 'netunmount')) {
+			$res = $volume->netunmount($netVolumes, $key);
 		}
+		if ($res) {
+			if (is_string($key) && isset($netVolumes[$key])) {
+				unset($netVolumes[$key]);
+				$this->saveNetVolumes($netVolumes);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -817,21 +826,12 @@ class elFinder {
 		$protocol = $args['protocol'];
 		
 		if ($protocol === 'netunmount') {
-			$key = $args['host'];
-			$netVolumes = $this->getNetVolumes();
-			if (isset($netVolumes[$key])) {
-				$res = true;
-				$volume = $this->volume($args['user']);
-				if (method_exists($volume, 'netunmount')) {
-					$res = $volume->netunmount($netVolumes, $key);
-				}
-				if ($res) {
-					unset($netVolumes[$key]);
-					$this->saveNetVolumes($netVolumes);
+			if (! empty($args['user']) && $volume = $this->volume($args['user'])) {
+				if ($this->removeNetVolume($args['host'], $volume)) {
 					return array('sync' => true);
 				}
 			}
-			return array('error' => $this->error(self::ERROR_NETUNMOUNT));
+			return array('sync' => true, 'error' => $this->error(self::ERROR_NETUNMOUNT));
 		}
 		
 		$driver   = isset(self::$netDrivers[$protocol]) ? self::$netDrivers[$protocol] : '';
@@ -889,7 +889,7 @@ class elFinder {
 			$rootstat['netkey'] = $key;
 			return array('added' => array($rootstat));
 		} else {
-			$this->removeNetVolume($volume);
+			$this->removeNetVolume(null, $volume);
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));
 		}
 	}
