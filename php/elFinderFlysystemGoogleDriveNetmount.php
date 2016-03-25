@@ -71,6 +71,10 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             $options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
         }
         
+        if (! isset($options['pass'])) {
+            $options['pass'] = '';
+        }
+        
         try {
             $client = new \Google_Client();
             $client->setClientId($options['client_id']);
@@ -85,11 +89,10 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
 
             $options = array_merge($this->session->get('GoogleDriveAuthParams', []), $options);
             
-            if (! empty($options['access_token'])) {
-                $aToken = $options['access_token'];
-            } else {
-                $aToken = $this->session->get('GoogleDriveTokens', []);
+            if (! isset($options['access_token'])) {
+                $options['access_token'] = $this->session->get('GoogleDriveTokens', []);
             }
+            $aToken = $options['access_token'];
             $this->session->remove('GoogleDriveTokens');
 
             $rootObj = $service = null;
@@ -117,7 +120,6 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
 
             }
 
-            
             if ($options['user'] === 'init') {
                 if (empty($options['url'])) {
                     $options['url'] = $this->getConnectorUrl();
@@ -139,7 +141,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
                     $html .= '<script>
                         $("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "googledrive", mode: "makebtn"});
                     </script>';
-                    if (empty($options['pass'])) {
+                    if (empty($options['pass']) && $options['host'] !== '1') {
                         $options['pass'] = 'return';
                         $this->session->set('GoogleDriveAuthParams', $options);
                         return array('exit' => true, 'body' => $html);
@@ -192,12 +194,16 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             }
         }
         
+        if (! $aToken) {
+            return array('exit' => true, 'error' => elFinder::ERROR_REAUTH_REQUIRE);
+        }
+        
         if ($options['path'] === '/') {
             $options['path'] = 'root';
         }
         
         try {
-            $client->setAccessToken($options['access_token']);
+            $client->setAccessToken($aToken);
             $service = new \Google_Service_Drive($client);
             $file = $service->files->get($options['path']);
             $options['alias'] = sprintf($this->options['gdAlias'], $file->getName());
