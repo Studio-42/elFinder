@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 176b336) (2016-03-25)
+ * Version 2.1.9 (2.1-src Nightly: 0891463) (2016-03-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 176b336)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 0891463)';
 
 
 
@@ -5335,9 +5335,9 @@ elFinder.prototype._options = {
 					var f = this.inputs, oline = f.offline,
 						data = data || null;
 					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
-						f.path.parent().prev().html(fm.i18n('folderId'));
-						oline.attr('title', fm.i18n('offlineAccess'));
 						if (oline.parent().children().length === 1) {
+							f.path.parent().prev().html(fm.i18n('folderId'));
+							oline.attr('title', fm.i18n('offlineAccess'));
 							oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 						}
 						$(f.host[0]).empty().addClass('elfinder-info-spinner')
@@ -5368,9 +5368,9 @@ elFinder.prototype._options = {
 							p.trigger('change', 'reset');
 							return;
 						}
-						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
+						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('reAuth')+'">')
 							.on('click', function() {
-								$(f.host[1]).val('revoke');
+								$(f.host[1]).val('reauth');
 								p.trigger('change', 'reset');
 							}));
 						$(f.host[1]).val('googledrive');
@@ -6878,6 +6878,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
 			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
 			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
