@@ -359,21 +359,24 @@ elFinder.prototype._options = {
 					pass     : $('<input type="hidden"/>')
 				},
 				select: function(fm, ev, data){
-					var f = this.inputs,
+					var f = this.inputs, oline = f.offline,
 						data = data || null;
 					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
-						f.path.parent().prev().html(fm.i18n('FolderID'));
-						f.offline.attr('title', fm.i18n('offlineAccess'));
+						f.path.parent().prev().html(fm.i18n('folderId'));
+						oline.attr('title', fm.i18n('offlineAccess'));
+						if (oline.parent().children().length === 1) {
+							oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
+						}
 						$(f.host[0]).empty().addClass('elfinder-info-spinner')
 							.parent().find('span.elfinder-button-icon').remove();
 						fm.request({
-							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: f.offline.prop('checked')? 1:0, pass: f.host[1].value}},
+							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
 							preventDefault : true
 						}).done(function(data){
 							$(f.host[0]).removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
 						}).fail(function(){});
 					} else {
-						f.offline.parent().parent()[f.user.val()? 'hide':'show']();
+						oline.parent().parent()[f.user.val()? 'hide':'show']();
 					}
 				},
 				done: function(fm, data){
