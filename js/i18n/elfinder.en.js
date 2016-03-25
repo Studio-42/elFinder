@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-03-24
+ * @version 2016-03-25
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -338,6 +338,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
