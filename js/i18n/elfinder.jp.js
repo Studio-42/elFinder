@@ -341,6 +341,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectedItems'   : '選択アイテム ($1)', // from v2.1.7 added 2.19.2016
 			'folderId'        : 'フォルダID', // from v2.1.10 added 3.25.2016
 			'offlineAccess'   : 'オフライン アクセスを可能にする', // from v2.1.10 added 3.25.2016
+			'reAuth'          : '再認証する', // from v2.1.10 added 3.25.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
