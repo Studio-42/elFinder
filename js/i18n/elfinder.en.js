@@ -340,6 +340,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
 			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
 			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

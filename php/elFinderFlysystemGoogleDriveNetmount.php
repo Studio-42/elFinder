@@ -80,7 +80,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             $client->setClientId($options['client_id']);
             $client->setClientSecret($options['client_secret']);
 
-            if ($options['pass'] === 'revoke') {
+            if ($options['pass'] === 'reauth') {
                 $options['pass'] = '';
                 $this->session->set('GoogleDriveAuthParams', [])->set('GoogleDriveTokens', []);
             } else if ($options['pass'] === 'googledrive') {

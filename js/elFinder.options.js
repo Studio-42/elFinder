@@ -362,9 +362,9 @@ elFinder.prototype._options = {
 					var f = this.inputs, oline = f.offline,
 						data = data || null;
 					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
-						f.path.parent().prev().html(fm.i18n('folderId'));
-						oline.attr('title', fm.i18n('offlineAccess'));
 						if (oline.parent().children().length === 1) {
+							f.path.parent().prev().html(fm.i18n('folderId'));
+							oline.attr('title', fm.i18n('offlineAccess'));
 							oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 						}
 						$(f.host[0]).empty().addClass('elfinder-info-spinner')
@@ -395,9 +395,9 @@ elFinder.prototype._options = {
 							p.trigger('change', 'reset');
 							return;
 						}
-						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('revoke')+'">')
+						$(f.host[0]).parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('reAuth')+'">')
 							.on('click', function() {
-								$(f.host[1]).val('revoke');
+								$(f.host[1]).val('reauth');
 								p.trigger('change', 'reset');
 							}));
 						$(f.host[1]).val('googledrive');
