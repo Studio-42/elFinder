@@ -91,9 +91,9 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             
             if (! isset($options['access_token'])) {
                 $options['access_token'] = $this->session->get('GoogleDriveTokens', []);
+                $this->session->remove('GoogleDriveTokens');
             }
             $aToken = $options['access_token'];
-            $this->session->remove('GoogleDriveTokens');
 
             $rootObj = $service = null;
             if ($aToken) {
@@ -203,8 +203,6 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
         }
         
         try {
-            $client->setAccessToken($aToken);
-            $service = new \Google_Service_Drive($client);
             $file = $service->files->get($options['path']);
             $options['alias'] = sprintf($this->options['gdAlias'], $file->getName());
         } catch (Google_Service_Exception $e) {
