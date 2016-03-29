@@ -1,3 +1,15 @@
+2016-0x-xx  
+
+	* elFinder (2.1.10):
+		- Fixed #1061, #1231 Supported controllable folder icons
+		- Fixed #1240 LocalFileSystem search files it was still follow symlinks
+		- Added new volume root option `searchExDirReg` for exclusion serach
+		- Return file.url in result on file upload for 3rd party uploader
+		- Supported elFinder API version 1
+		- Added a new volume driver FlysystemGoogleDriveNetmount that based on flysystem-google-drive
+		- And some minor bug fixes
+
+
 2016-03-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.9):
