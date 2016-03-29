@@ -92,10 +92,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Cem (DiscoFever)
 	 **/
 	public function __construct() {
-		
-		//ini_set('memory_limit', '128M');
-		@ include_once 'Dropbox/autoload.php';
-		$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
+
+		if (@include_once '/usr/share/php5-pear/Dropbox/autoload.php') {
+			// check with pear
+			$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
+		} else {
+			// check with composer
+			$this->dropbox_phpFound = class_exists('Dropbox_API');
+		}
 		
 		$opts = array(
 			'consumerKey'       => '',

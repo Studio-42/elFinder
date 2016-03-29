@@ -467,7 +467,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
 		}
 		
-		if ($dir = is_dir($path) && $this->options['detectDirIcon']) {
+		if (($dir = is_dir($path)) && $this->options['detectDirIcon']) {
 			$favicon = $path . DIRECTORY_SEPARATOR . $this->options['detectDirIcon'];
 			if ($this->URL && file_exists($favicon)) {
 				$stat['icon'] = $this->URL . str_replace(DIRECTORY_SEPARATOR, '/', substr($favicon, strlen($this->root) + 1));
