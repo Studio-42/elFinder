@@ -304,6 +304,7 @@ elFinder.prototype._options = {
 		
 		netmount: {
 			ftp: {
+				name : 'FTP',
 				inputs: {
 					host     : $('<input type="text"/>'),
 					port     : $('<input type="text" placeholder="21"/>'),
@@ -315,6 +316,7 @@ elFinder.prototype._options = {
 				}
 			},
 			dropbox: {
+				name : 'Dropbox.com',
 				inputs: {
 					host     : $('<span><span class="elfinder-info-spinner"/></span></span><input type="hidden"/>'),
 					path     : $('<input type="text" value="/"/>'),
@@ -349,6 +351,7 @@ elFinder.prototype._options = {
 				}
 			},
 			googledrive: {
+				name : 'GoogleDrive',
 				inputs: {
 					offline  : $('<input type="checkbox"/>').on('change', function() {
 						$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');

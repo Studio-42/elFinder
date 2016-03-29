@@ -56,7 +56,7 @@ elFinder.prototype.commands.netmount = function() {
 				content.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
 
 				$.each(self.drivers, function(i, protocol) {
-					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(protocol)+'</option>');
+					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(o[protocol].name || protocol)+'</option>');
 					$.each(o[protocol].inputs, function(name, input) {
 						input.attr('name', name);
 						if (input.attr('type') != 'hidden') {
