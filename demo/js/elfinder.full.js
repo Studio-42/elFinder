@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: b910ac3) (2016-03-28)
+ * Version 2.1.9 (2.1-src Nightly: 94c7586) (2016-03-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: b910ac3)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 94c7586)';
 
 
 
@@ -12889,7 +12889,7 @@ elFinder.prototype.commands.help = function() {
 		help = function() {
 			// help tab
 			html.push('<div id="help" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
-			html.push('<a href="http://elfinder.org/forum/" target="_blank" class="elfinder-dont-panic"><span>DON\'T PANIC</span></a>');
+			html.push('<a href="https://github.com/Studio-42/elFinder/wiki" target="_blank" class="elfinder-dont-panic"><span>DON\'T PANIC</span></a>');
 			html.push('</div>');
 			// end help
 		},
