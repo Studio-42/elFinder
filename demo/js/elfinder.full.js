@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 94c7586) (2016-03-29)
+ * Version 2.1.9 (2.1-src Nightly: 8beb561) (2016-03-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 94c7586)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 8beb561)';
 
 
 
@@ -5277,6 +5277,7 @@ elFinder.prototype._options = {
 		
 		netmount: {
 			ftp: {
+				name : 'FTP',
 				inputs: {
 					host     : $('<input type="text"/>'),
 					port     : $('<input type="text" placeholder="21"/>'),
@@ -5288,6 +5289,7 @@ elFinder.prototype._options = {
 				}
 			},
 			dropbox: {
+				name : 'Dropbox.com',
 				inputs: {
 					host     : $('<span><span class="elfinder-info-spinner"/></span></span><input type="hidden"/>'),
 					path     : $('<input type="text" value="/"/>'),
@@ -5322,6 +5324,7 @@ elFinder.prototype._options = {
 				}
 			},
 			googledrive: {
+				name : 'GoogleDrive',
 				inputs: {
 					offline  : $('<input type="checkbox"/>').on('change', function() {
 						$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
@@ -13403,7 +13406,7 @@ elFinder.prototype.commands.netmount = function() {
 				content.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
 
 				$.each(self.drivers, function(i, protocol) {
-					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(protocol)+'</option>');
+					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(o[protocol].name || protocol)+'</option>');
 					$.each(o[protocol].inputs, function(name, input) {
 						input.attr('name', name);
 						if (input.attr('type') != 'hidden') {
