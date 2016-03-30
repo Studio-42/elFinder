@@ -3140,7 +3140,7 @@ abstract class elFinderVolumeDriver {
 		}
 		$is_root = ($path == $this->root);
 		if ($is_root) {
-			$rootKey = md5($path);
+			$rootKey = md5($path.(isset($this->options['alias'])? $this->options['alias'] : ''));
 			if (!isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
 			}
