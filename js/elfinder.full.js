@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 8beb561) (2016-03-29)
+ * Version 2.1.9 (2.1-src Nightly: 3a1fde0) (2016-03-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 8beb561)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: 3a1fde0)';
 
 
 
@@ -13533,6 +13533,9 @@ elFinder.prototype.commands.netunmount = function() {
 				accept : {
 					label    : 'btnUnmount',
 					callback : function() {  
+						var chDrive = (fm.root() == drive.hash),
+							base = $('#'+fm.navHash2Id(drive.hash)).parent(),
+							navTo = (base.next().length? base.next() : base.prev()).find('.elfinder-navbar-root');
 						fm.request({
 							data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : drive.hash, pass : 'dum'}, 
 							notify : {type : 'netunmount', cnt : 1, hideCnt : true},
@@ -13542,17 +13545,20 @@ elFinder.prototype.commands.netunmount = function() {
 							dfrd.reject(error);
 						})
 						.done(function(data) {
-							var chDrive = (fm.root() == drive.hash);
-							data.removed = [ drive.hash ];
-							fm.remove(data);
+							var open = fm.root();
 							if (chDrive) {
-								var files = fm.files();
-								for (var i in files) {
-									if (fm.file(i).mime == 'directory') {
-										fm.exec('open', i);
-										break;
+								if (navTo.length) {
+									open = fm.navId2Hash(navTo[0].id);
+								} else {
+									var files = fm.files();
+									for (var i in files) {
+										if (fm.file(i).mime == 'directory') {
+											open = i;
+											break;
+										}
 									}
 								}
+								fm.exec('open', open);
 							}
 							dfrd.resolve();
 						});
