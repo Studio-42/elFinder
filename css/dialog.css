@@ -207,6 +207,7 @@
 }
 
 .elfinder-netmount-tb { margin:0 auto; }
+.elfinder-netmount-tb select,
 .elfinder-netmount-tb input { border:1px solid #ccc; }
 .elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
