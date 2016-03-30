@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: 36bc702) (2016-03-30)
+ * Version 2.1.9 (2.1-src Nightly: de1e56b) (2016-03-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1057,6 +1057,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 
 .elfinder-netmount-tb { margin:0 auto; }
+.elfinder-netmount-tb select,
 .elfinder-netmount-tb input { border:1px solid #ccc; }
 .elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
