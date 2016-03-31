@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: f4dd965) (2016-03-31)
+ * Version 2.1.9 (2.1-src Nightly: ba88075) (2016-03-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.9 (2.1-src Nightly: f4dd965)';
+elFinder.prototype.version = '2.1.9 (2.1-src Nightly: ba88075)';
 
 
 
@@ -5378,7 +5378,7 @@ elFinder.prototype._options = {
 							}));
 						$(f.host[1]).val('googledrive');
 						if (data.folders) {
-							f.path.after(
+							f.path.next().remove().end().after(
 								$('<div/>').append(
 									$('<select class="ui-corner-all" style="max-width:200px;">').append(
 										$($.map(data.folders, function(n,i){return '<option value="'+i+'">'+fm.escape(n)+'</option>'}).join(''))
@@ -5392,7 +5392,6 @@ elFinder.prototype._options = {
 					}
 				},
 				fail: function(fm, err){
-					this.inputs.path.val('root').next().remove();
 					this.protocol.trigger('change', 'reset');
 				}
 			}
