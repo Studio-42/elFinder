@@ -407,7 +407,7 @@ elFinder.prototype._options = {
 						if (data.folders) {
 							f.path.after(
 								$('<div/>').append(
-									$('<select style="max-width:200px;">').append(
+									$('<select class="ui-corner-all" style="max-width:200px;">').append(
 										$($.map(data.folders, function(n,i){return '<option value="'+i+'">'+fm.escape(n)+'</option>'}).join(''))
 									).on('change', function(){f.path.val($(this).val());})
 								)
@@ -419,6 +419,7 @@ elFinder.prototype._options = {
 					}
 				},
 				fail: function(fm, err){
+					this.inputs.path.val('root').next().remove();
 					this.protocol.trigger('change', 'reset');
 				}
 			}
