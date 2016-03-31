@@ -411,7 +411,15 @@ class elFinder {
 		}
 
 		// check for net volumes stored in session
-		foreach ($this->getNetVolumes() as $key => $root) {
+		$netVolumes = $this->getNetVolumes();
+		foreach ($netVolumes as $key => $root) {
+			if (! isset($root['id'])) {
+				// given fixed unique id
+				if (! $root['id'] = $this->getNetVolumeUniqueId($netVolumes)) {
+					$this->mountErrors[] = 'Netmount Driver "'.$root['driver'].'" : Could\'t given volume id.';
+					continue;
+				}
+			}
 			$opts['roots'][$key] = $root;
 		}
 
@@ -876,22 +884,8 @@ class elFinder {
 		
 		if (! isset($options['id'])) {
 			// given fixed unique id
-			$pfx = 'nm';
-			$ids = array();
-			foreach($netVolumes as $vOps) {
-				if (isset($vOps['id']) && strpos($vOps['id'], $pfx) === 0) {
-					$ids[$vOps['id']] = true;
-				}
-			}
-			if (! $ids) {
-				$options['id'] = $pfx.'1';
-			} else {
-				$i = 0;
-				while(isset($ids[$pfx.++$i]) && $i < 10000);
-				$options['id'] = $pfx.$i;
-				if (isset($ids[$options['id']])) {
-					return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], 'Could\'t given volume id.'));
-				}
+			if (! $options['id'] = $this->getNetVolumeUniqueId($netVolumes)) {
+				return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], 'Could\'t given volume id.'));
 			}
 		}
 		
@@ -2654,6 +2648,37 @@ class elFinder {
 		return (double)$time[1] + (double)$time[0];
 	}
 	
+	/**
+	 * Return Network mount volume unique ID
+	 *
+	 * @param  array   $netVolumes  Saved netvolumes array
+	 * @param  string  $prefix      Id prefix
+	 * @return string|false
+	 * @author Naoki Sawada
+	 **/
+	protected function getNetVolumeUniqueId($netVolumes = null, $prefix = 'nm') {
+		$id = false;
+		if (is_null($netVolumes)) {
+			$netVolumes = $this->getNetVolumes();
+		}
+		$ids = array();
+		foreach($netVolumes as $vOps) {
+			if (isset($vOps['id']) && strpos($vOps['id'], $prefix) === 0) {
+				$ids[$vOps['id']] = true;
+			}
+		}
+		if (! $ids) {
+			$id = $prefix.'1';
+		} else {
+			$i = 0;
+			while(isset($ids[$prefix.++$i]) && $i < 10000);
+			$id = $prefix.$i;
+			if (isset($ids[$id])) {
+				$id = false;
+			}
+		}
+		return $id;
+	}
 	
 	/***************************************************************************/
 	/*                           static  utils                                 */
