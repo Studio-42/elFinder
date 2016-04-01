@@ -195,7 +195,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.mime2class(f.mime);
 				},
 				size : function(f) {
-					return fm.formatSize(f.size);
+					return (f.mime === 'directory' && !f.size)? '-' : fm.formatSize(f.size);
 				},
 				date : function(f) {
 					return fm.formatDate(f);
