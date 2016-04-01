@@ -58,6 +58,7 @@ var dirmode = 0755,
 				path.join(src, 'composer.json'),
 				path.join(src, 'elfinder.html')
 			]
+			.concat(grep(path.join(src, 'js', 'extras'), '\\.js$'))
 	};
 
 // plugins files
@@ -100,7 +101,7 @@ function copyFile(from, to, overwrite) {
 	console.log('\t' + from);
 	var srcs = fs.createReadStream(from);
 	var dsts = fs.createWriteStream(to);
-	return util.pump(srcs, dsts);
+	return srcs.pipe(dsts);
 }
 
 function getComment() {
@@ -135,7 +136,7 @@ desc('pre build task');
 task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
-	var dir = ['css', 'js', 'img', 'sounds', path.join('js', 'i18n'), path.join('js', 'proxy'), 'php', 'files'];
+	var dir = ['css', 'js', 'img', 'sounds', path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'), 'php', 'files'];
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
 		for (var i in plugins) {

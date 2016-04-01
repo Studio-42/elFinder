@@ -385,8 +385,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 							$(this).css('background-color', '#fff').show();
 						})
 						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.url(file.hash)));
-
-					var test;
 				}
 			}
 			
