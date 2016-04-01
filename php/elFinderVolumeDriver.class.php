@@ -2464,6 +2464,55 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Image file utility
+	 * 
+	 * @param string $mode     'resize', 'rotate', 'propresize', 'crop', 'fitsquare'
+	 * @param string $src      Image file local path
+	 * @param array  $options  excute options
+	 * @return bool
+	 * @author Naoki Sawada
+	 */
+	public function imageUtil($mode, $src, $options = array()) {
+		if (! isset($options['jpgQuality'])) {
+			$options['jpgQuality'] = intval($this->options['jpgQuality']);
+		}
+		if (! isset($options['bgcolor'])) {
+			$options['bgcolor'] = '#ffffff';
+		}
+		switch($mode) {
+			case 'rotate':
+				if (empty($options['degree'])) {
+					return true;
+				}
+				return (bool)$this->imgRotate($src, $options['degree'], $options['bgcolor'], null, $options['jpgQuality']);
+			
+			case 'resize':
+			case 'propresize':
+			case 'crop':
+			case 'fitsquare':
+				if (empty($options['width']) || empty($options['height'])) {
+					return false;
+				}
+			
+			case 'resize':
+				return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, null, $options['jpgQuality']);
+			
+			case 'propresize':
+				return (bool)$this->imgResize($src, $options['width'], $options['height'], true, true, null, $options['jpgQuality']);
+			
+			case 'crop':
+				if (isset($options['x']) && isset($options['y'])) {
+					return (bool)$this->imgCrop($src, $options['width'], $options['height'], $options['x'], $options['y'], null, $options['jpgQuality']);
+				}
+			
+			case 'fitsquare':
+				return (bool)$this->imgSquareFit($src, $options['width'], $options['height'], 'center', 'middle', $options['bgcolor'], null, $options['jpgQuality']);
+			
+		}
+		return false;
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  array  error 
@@ -4380,6 +4429,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function imgRotate($path, $degree, $bgcolor = '#ffffff', $destformat = null, $jpgQuality = null) {
+		debug($path, $degree);
 		if (($s = @getimagesize($path)) == false || $degree % 360 === 0) {
 			return false;
 		}
