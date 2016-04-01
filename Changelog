@@ -7,6 +7,7 @@
 		- Return file.url in result on file upload for 3rd party uploader
 		- Supported elFinder API version 1
 		- Added a new volume driver FlysystemGoogleDriveNetmount that based on flysystem-google-drive
+		- Added a new connector plugin "AutoRotate"
 		- And some minor bug fixes
 
 
