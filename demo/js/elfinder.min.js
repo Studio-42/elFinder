@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.9 (2.1-src Nightly: ba88075) (2016-03-31)
+ * Version 2.1.9 (2.1-src Nightly: ba88075) (2016-04-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
