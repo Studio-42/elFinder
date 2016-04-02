@@ -93,7 +93,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	public function __construct() {
 
-		if (@include_once '/usr/share/php5-pear/Dropbox/autoload.php') {
+		if (@include_once 'Dropbox/autoload.php') {
 			// check with pear
 			$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
 		} else {
