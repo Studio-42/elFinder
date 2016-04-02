@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
+    <meta name="description" content="elFinder - file manager from Web" />
+    <title>elFinder 2.1.x - file manager for web</title>
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:bold&amp;v1" />
+    <link rel="stylesheet" type="text/css" href="./stylesheets/default.css" />
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="./demo/css/elfinder.min.css" />
+    <link rel="stylesheet" type="text/css" href="./demo/css/theme.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js" ></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="./demo/js/elfinder.min.js"></script>
+    <script src="./demo/js/extras/quicklook.googledocs.js"></script>
+    <script src="./demo/js/elfinderBasicAuth.js"></script>
+    <script type="text/javascript">
+      (function($){
+        var rootPath = './demo',
+          start = function(lng) {
+            // disable HTML quicklook plugin
+            elFinder.prototype.commands.quicklook.plugins[1] = null;
+
+            $().ready(function() {
+              // Documentation for client options:
+              // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
+              // elFinder init
+              $('#elfinder').elfinder({
+                url : 'http://hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
+                soundPath: './demo/sounds',
+                sync: 5000,
+                ui  : ['toolbar', 'places', 'tree', 'path', 'stat'],
+                commandsOptions : {
+                  quicklook : {
+                    googleDocsMimes : ['application/pdf', 'image/tiff', 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+                  }
+                },
+                lang: lng
+              });
+            });
+          },
+          loct = window.location.search,
+          full_lng, locm, lng, xhr, xdr;
+
+        // load jquery.xdr.js for old IE
+        if (typeof document.uniqueID != 'undefined') {
+          var xhr = new XMLHttpRequest();
+          if (!('withCredentials' in xhr)) {
+              xdr = rootPath+'/xdr/jquery.xdr.js';
+          }
+          xhr = null;
+        }
+
+        // detect language
+        if (loct && (locm = loct.match(/lang=([a-zA-Z_-]+)/))) {
+          full_lng = locm[1];
+        } else {
+          full_lng = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
+        }
+        lng = full_lng.substr(0,2);
+        if (lng == 'ja') lng = 'jp';
+        else if (lng == 'pt') lng = 'pt_BR';
+        else if (lng == 'ug') lng = 'ug_CN';
+        else if (lng == 'zh') lng = (full_lng.substr(0,5) == 'zh-tw')? 'zh_TW' : 'zh_CN';
+
+        // start elFinder
+        $.when(
+          (lng !== 'en')?
+            $.ajax({
+              url : rootPath+'/js/i18n/elfinder.'+lng+'.js',
+              cache : true,
+              dataType : 'script'
+            }) : null,
+          xdr?
+            $.ajax({
+              url : xdr,
+              cache : true,
+              dataType : 'script'
+            }) : null
+        )
+        .done(function() {
+          start(lng);
+        })
+        .fail(function() {
+          start('en');
+        });
+      })(jQuery);
+
+      // Google Analytics
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-8689655-16']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header clearfix">
+        <div class="logo">
+          <a href="./"><img src="./images/elfinder-logo.png" alt="elFinder logo" /></a>
+          <h1><a href="./">elFinder <span>file manager for web</span></a></h1>
+        </div>
+
+        <div class="download">
+          <a href="https://github.com/Studio-42/elFinder/archive/2.0.6.zip" class="download-button" onclick="_gaq.push(['_trackEvent', 'Github', 'Download']);">Download<br/><span>Version 2.0.6</span></a>
+          <a href="https://github.com/Studio-42/elFinder/archive/2.1.10.zip" class="download-button" onclick="_gaq.push(['_trackEvent', 'Github', 'Download']);">Download<br/><span>Version 2.1.10</span></a>
+        </div>
+
+        <div class="menu">
+          <ul>
+            <li><a href="https://github.com/Studio-42/elFinder" onclick="_gaq.push(['_trackEvent', 'Github', 'Code']);">Code</a></li>
+            <li><a href="https://github.com/Studio-42/elFinder/issues" onclick="_gaq.push(['_trackEvent', 'Github', 'Issues']);">Issues</a></li>
+            <li><a href="https://github.com/Studio-42/elFinder/wiki" onclick="_gaq.push(['_trackEvent', 'Github', 'Wiki']);">Wiki</a></li>
+            <!--<li><a href="./forum/">Forum</a></li>-->
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="content">
+        <!-- <div class="message warning"><p>This demo will not work in Internet Explorer and Opera</p></div> -->
+
+        <h2 class="text-center">elFinder 2.1.x, please <a href="https://github.com/Studio-42/elFinder/issues">report bugs here</a> or <a href="./tools/langman">send your translation</a>.</h2>
+
+        <div id="elfinder"></div>
+
+        <div class="footer">
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+          <input type="hidden" name="cmd" value="_donations">
+          <input type="hidden" name="business" value="troex@fury.scancode.ru">
+          <input type="hidden" name="lc" value="US">
+          <input type="hidden" name="item_name" value="elRTE &amp; elFinder team">
+          <input type="hidden" name="no_note" value="0">
+          <input type="hidden" name="currency_code" value="USD">
+          <input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+          <input onclick="_gaq.push(['_trackEvent', 'PayPal', 'Donate']);" type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+          <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+          </form>
+        </div>
+
+      </div>
+
+      <div class="footer">
+        <img src="./images/vintage.png" alt="" /><br/>
+        <a href="http://www.std42.ru">Studio 42</a>
+      </div>
+    </div>
+    <a href="https://github.com/Studio-42/elFinder" onclick="_gaq.push(['_trackEvent', 'Github', 'Fork me']);"><img style="position: absolute; top: 0; left: 0; border: 0;" src="./images/forkme-white.png" alt="Fork me on GitHub"></a>
+  </body>
+</html>
