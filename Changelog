@@ -1,3 +1,9 @@
+2016-0x-xx  
+
+	* elFinder (2.1.11):
+		- Added Archive(zip|gzip|tar) quicklook preview plugin
+
+
 2016-04-02  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.10):

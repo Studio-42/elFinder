@@ -212,6 +212,21 @@
 	overflow:auto;
 }
 
+/* archive files preview wrapper */
+.elfinder-quicklook-preview-archive-wrapper {
+	width: 100%;
+	height:100%;
+	background:#fff;
+	color:#222;
+	font-size: 1.5ex;
+	overflow:auto;
+}
+
+/* archive files preview header */
+.elfinder-quicklook-preview-archive-wrapper strong {
+	padding: 0 5px;
+}
+
 /* text preview */
 pre.elfinder-quicklook-preview-text {
 	margin:0;
