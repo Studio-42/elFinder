@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: 8243683) (2016-04-02)
+ * Version 2.1.10 (2.1-src Nightly: 52e7303) (2016-04-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1593,6 +1593,21 @@ button.elfinder-info-button {
 	background:#fff;
 	color:#222;
 	overflow:auto;
+}
+
+/* archive files preview wrapper */
+.elfinder-quicklook-preview-archive-wrapper {
+	width: 100%;
+	height:100%;
+	background:#fff;
+	color:#222;
+	font-size: 1.5ex;
+	overflow:auto;
+}
+
+/* archive files preview header */
+.elfinder-quicklook-preview-archive-wrapper strong {
+	padding: 0 5px;
 }
 
 /* text preview */
