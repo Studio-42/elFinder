@@ -415,7 +415,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open('GET', fm.openUrl(file.hash), true);
+					xhr.open('GET', fm.openUrl(file.hash, fm.xhrFields.withCredentials || false), true);
 					xhr.responseType = 'arraybuffer';
 					// set request headers
 					if (fm.customHeaders) {
@@ -423,7 +423,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 							xhr.setRequestHeader(key, this);
 						});
 					}
-					
 					// set xhrFields
 					if (fm.xhrFields) {
 						$.each(fm.xhrFields, function(key) {
