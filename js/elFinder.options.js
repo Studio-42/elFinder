@@ -721,7 +721,7 @@ elFinder.prototype._options = {
 	 * @type Number
 	 * @default  50
 	 */
-	showFiles : 30,
+	showFiles : 50,
 	
 	/**
 	 * Lazy load config.
