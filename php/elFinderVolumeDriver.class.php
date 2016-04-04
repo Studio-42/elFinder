@@ -208,7 +208,8 @@ abstract class elFinderVolumeDriver {
 		                     'md:text/plain'                => 'text/x-markdown',
 		                     'markdown:text/plain'          => 'text/x-markdown',
 		                     'css:text/x-asm'               => 'text/css',
-		                     'ico:image/vnd.microsoft.icon' => 'image/x-icon'
+		                     'ico:image/vnd.microsoft.icon' => 'image/x-icon',
+		                     'csv:text/plain'               => 'text/csv'
 		                    ),
 		// MIME regex of send HTTP header "Content-Disposition: inline"
 		// '.' is allow inline of all of MIME types
@@ -482,7 +483,7 @@ abstract class elFinderVolumeDriver {
 		'cpp'   => 'text/x-c++src',
 		'hh'    => 'text/x-c++hdr',
 		'log'   => 'text/plain',
-		'csv'   => 'text/x-comma-separated-values',
+		'csv'   => 'text/csv',
 		'md'    => 'text/x-markdown',
 		'markdown' => 'text/x-markdown',
 		// images
