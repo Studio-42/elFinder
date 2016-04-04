@@ -290,4 +290,4 @@ elFinder.prototype.commands.paste = function() {
 		});
 	}
 
-}
+};

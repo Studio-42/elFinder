@@ -285,6 +285,4 @@ elFinder.prototype.command = function(fm) {
 			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null })
 			: fm.selectedFiles();
 	}
-}
-
-
+};

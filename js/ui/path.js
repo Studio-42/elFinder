@@ -60,4 +60,4 @@ $.fn.elfinderpath = function(fm) {
 				path.html(fm.i18n('searcresult') + ': ' + html);
 			});
 	});
-}
+};

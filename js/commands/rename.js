@@ -220,4 +220,4 @@ elFinder.prototype.commands.rename = function() {
 		return dfrd;
 	};
 
-}
+};

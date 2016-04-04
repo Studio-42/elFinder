@@ -16,4 +16,4 @@ $.fn.elfinderviewbutton = function(cmd) {
 			button.attr('title', cmd.fm.i18n(icons ? 'viewlist' : 'viewicons'));
 		});
 	});
-}
+};

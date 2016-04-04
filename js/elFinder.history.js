@@ -109,4 +109,4 @@ elFinder.prototype.history = function(fm) {
 	})
 	.reload(fm.options.reloadClearHistory && reset);
 	
-}
+};

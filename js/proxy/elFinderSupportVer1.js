@@ -340,4 +340,4 @@ window.elFinderSupportVer1 = function(upload) {
 	}
 	
 	
-}
+};

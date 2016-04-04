@@ -1506,4 +1506,4 @@ $.fn.elfindercwd = function(fm, options) {
 	// fm.timeEnd('cwdLoad')
 	
 	return this;
-}
+};

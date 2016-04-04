@@ -73,4 +73,4 @@ $.fn.elfinderstat = function(fm) {
 
 		;
 	})
-}
+};

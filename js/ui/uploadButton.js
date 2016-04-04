@@ -28,4 +28,4 @@ $.fn.elfinderuploadbutton = function(cmd) {
 		})
 		.change();
 	});
-}
+};

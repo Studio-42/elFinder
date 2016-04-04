@@ -241,4 +241,4 @@ elFinder.prototype.resources = {
 
 		}
 	}
-}
+};

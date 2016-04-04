@@ -259,4 +259,4 @@ $.fn.elfindercontextmenu = function(fm) {
 		
 	});
 	
-}
+};

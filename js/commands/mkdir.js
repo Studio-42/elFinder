@@ -36,4 +36,4 @@ elFinder.prototype.commands.mkdir = function() {
 		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt)? 0 : -1;
 	}
 
-}
+};
