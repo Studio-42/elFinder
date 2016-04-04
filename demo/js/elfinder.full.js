@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: 23f90c5) (2016-04-04)
+ * Version 2.1.10 (2.1-src Nightly: f702996) (2016-04-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 23f90c5)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: f702996)';
 
 
 
@@ -5694,7 +5694,7 @@ elFinder.prototype._options = {
 	 * @type Number
 	 * @default  50
 	 */
-	showFiles : 30,
+	showFiles : 50,
 	
 	/**
 	 * Lazy load config.
@@ -14576,6 +14576,8 @@ elFinder.prototype.commands.quicklook = function() {
  */
 
 
+(function(){
+
 elFinder.prototype.commands.quicklook.plugins = [
 	
 	/**
@@ -14942,11 +14944,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 						if (this.readyState === 4 && this.response) {
 							setTimeout(function() {
 								if (file.mime === 'application/zip') {
-									unzip = new Zlib.Unzip(new Uint8Array(xhr.response));
+									unzip = new elFinder.Zlib.Unzip(new Uint8Array(xhr.response));
 									filenames = unzip.getFilenames();
 								} else {
 									if (file.mime === 'application/x-gzip') {
-										unzip = new Zlib.Gunzip(new Uint8Array(xhr.response));
+										unzip = new elFinder.Zlib.Gunzip(new Uint8Array(xhr.response));
 										tar = unzip.decompress();
 									} else {
 										tar = new Uint8Array(xhr.response);
@@ -15132,6 +15134,8 @@ G.prototype.B=function(){var e,c=this.a;u?this.z?(e=new Uint8Array(c),e.set(this
 $.prototype.g=function(){for(var e=this.input.length;this.c<e;){var c=new B,d=q,b=q,a=q,f=q,g=q,k=q,m=q,p=q,t=q,h=this.input,l=this.c;c.u=h[l++];c.v=h[l++];(31!==c.u||139!==c.v)&&n(Error("invalid file signature:"+c.u+","+c.v));c.p=h[l++];switch(c.p){case 8:break;default:n(Error("unknown compression method: "+c.p))}c.h=h[l++];p=h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24;c.I=new Date(1E3*p);c.O=h[l++];c.N=h[l++];0<(c.h&4)&&(c.J=h[l++]|h[l++]<<8,l+=c.J);if(0<(c.h&8)){m=[];for(k=0;0<(g=h[l++]);)m[k++]=String.fromCharCode(g);
 c.name=m.join("")}if(0<(c.h&16)){m=[];for(k=0;0<(g=h[l++]);)m[k++]=String.fromCharCode(g);c.K=m.join("")}0<(c.h&2)&&(c.C=x(h,0,l)&65535,c.C!==(h[l++]|h[l++]<<8)&&n(Error("invalid header crc16")));d=h[h.length-4]|h[h.length-3]<<8|h[h.length-2]<<16|h[h.length-1]<<24;h.length-l-4-4<512*d&&(f=d);b=new G(h,{index:l,bufferSize:f});c.data=a=b.g();l=b.c;c.L=t=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;x(a,q,q)!==t&&n(Error("invalid CRC-32 checksum: 0x"+x(a,q,q).toString(16)+" / 0x"+t.toString(16)));c.M=
 d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Error("invalid input size: "+(a.length&4294967295)+" / "+d));this.m.push(c);this.c=l}this.s=!0;var y=this.m,s,M,S=0,T=0,C;s=0;for(M=y.length;s<M;++s)T+=y[s].data.length;if(u){C=new Uint8Array(T);for(s=0;s<M;++s)C.set(y[s].data,S),S+=y[s].data.length}else{C=[];for(s=0;s<M;++s)C[s]=y[s].data;C=Array.prototype.concat.apply([],C)}return C};r("Zlib.Gunzip",$);r("Zlib.Gunzip.prototype.decompress",$.prototype.g);r("Zlib.Gunzip.prototype.getMembers",$.prototype.G);}).call(this);
+
+}).bind(elFinder)();
 
 
 /*
