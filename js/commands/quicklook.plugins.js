@@ -415,8 +415,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open("GET", fm.openUrl(file.hash), true);
-					xhr.responseType = "arraybuffer";
+					xhr.open('GET', fm.openUrl(file.hash), true);
+					xhr.responseType = 'arraybuffer';
+					// set request headers
+					if (fm.customHeaders) {
+						$.each(fm.customHeaders, function(key) {
+							xhr.setRequestHeader(key, this);
+						});
+					}
+					
+					// set xhrFields
+					if (fm.xhrFields) {
+						$.each(fm.xhrFields, function(key) {
+							if (key in xhr) {
+								xhr[key] = this;
+							}
+						});
+					}
 					xhr.send();
 				}
 			});
