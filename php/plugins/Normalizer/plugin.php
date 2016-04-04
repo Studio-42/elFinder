@@ -130,11 +130,15 @@ class elFinderPluginNormalizer
 				}
 			}
 		}
-		if ($opts['lowercase']) {
-			$str = strtolower($str);
-		}
 		if ($opts['convmap'] && is_array($opts['convmap'])) {
 			$str = strtr($str, $opts['convmap']);
+		}
+		if ($opts['lowercase']) {
+			if (function_exists('mb_strtolower')) {
+				$str = mb_strtolower($str, 'UTF-8');
+			} else {
+				$str = strtolower($str);
+			}
 		}
 		return $str;
 	}
