@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: 52e7303) (2016-04-04)
+ * Version 2.1.10 (2.1-src Nightly: c31f7c8) (2016-04-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4881,7 +4881,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 52e7303)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: c31f7c8)';
 
 
 
@@ -14991,8 +14991,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open("GET", fm.openUrl(file.hash), true);
-					xhr.responseType = "arraybuffer";
+					xhr.open('GET', fm.openUrl(file.hash), true);
+					xhr.responseType = 'arraybuffer';
+					// set request headers
+					if (fm.customHeaders) {
+						$.each(fm.customHeaders, function(key) {
+							xhr.setRequestHeader(key, this);
+						});
+					}
+					
+					// set xhrFields
+					if (fm.xhrFields) {
+						$.each(fm.xhrFields, function(key) {
+							if (key in xhr) {
+								xhr[key] = this;
+							}
+						});
+					}
 					xhr.send();
 				}
 			});
