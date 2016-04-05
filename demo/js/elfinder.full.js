@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: 12033d1) (2016-04-04)
+ * Version 2.1.10 (2.1-src Nightly: 528fead) (2016-04-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2879,6 +2879,7 @@ elFinder.prototype = {
 						preventFail : true
 					})
 					.done(function(data) {
+						var existedArr;
 						if (data) {
 							if (data.error) {
 								cancel();
@@ -2888,7 +2889,19 @@ elFinder.prototype = {
 										if ($.isArray(data.list)) {
 											existed = data.list || [];
 										} else {
-											existed = $.map(data.list, function(n) { return n; });
+											existedArr = [];
+											existed = $.map(data.list, function(n) {
+												if (typeof n === 'string') {
+													return n;
+												} else {
+													// support to >=2.1.11 plugin Normalizer, Sanitizer
+													existedArr = existedArr.concat(n);
+													return null;
+												}
+											});
+											if (existedArr.length) {
+												existed = existed.concat(existedArr);
+											}
 											hashes = data.list;
 										}
 										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
@@ -4881,7 +4894,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 12033d1)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 528fead)';
 
 
 
@@ -4951,7 +4964,7 @@ $.fn.elfinder = function(o) {
 		}
 		
 	})
-}
+};
 
 $.fn.getElFinder = function() {
 	var instance;
@@ -4964,7 +4977,7 @@ $.fn.getElFinder = function() {
 	});
 	
 	return instance;
-}
+};
 
 
 /*
@@ -5783,7 +5796,7 @@ elFinder.prototype._options = {
 	 */
 	// debug : true
 	debug : ['error', 'warning', 'event-destroy']
-}
+};
 
 
 /*
@@ -5901,7 +5914,8 @@ elFinder.prototype.history = function(fm) {
 	})
 	.reload(fm.options.reloadClearHistory && reset);
 	
-}
+};
+
 
 /*
  * File: /js/elFinder.command.js
@@ -6194,9 +6208,7 @@ elFinder.prototype.command = function(fm) {
 			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null })
 			: fm.selectedFiles();
 	}
-}
-
-
+};
 
 
 /*
@@ -6353,7 +6365,7 @@ elFinder.prototype.resources = {
 							valid  = true,
 							cut;
 
-						if (parent.length) {
+						if (!inError && parent.length) {
 
 							if (fm.options.validName && fm.options.validName.test) {
 								try {
@@ -6445,7 +6457,7 @@ elFinder.prototype.resources = {
 
 		}
 	}
-}
+};
 
 
 /*
@@ -6532,7 +6544,6 @@ $.fn.dialogelfinder = function(opts) {
 
 	return this;
 };
-
 
 
 /*
@@ -7046,7 +7057,7 @@ $.fn.elfinderbutton = function(cmd) {
 		})
 		.change();
 	});
-}
+};
 
 
 /*
@@ -7313,7 +7324,7 @@ $.fn.elfindercontextmenu = function(fm) {
 		
 	});
 	
-}
+};
 
 
 /*
@@ -8827,7 +8838,7 @@ $.fn.elfindercwd = function(fm, options) {
 	// fm.timeEnd('cwdLoad')
 	
 	return this;
-}
+};
 
 
 /*
@@ -9056,7 +9067,7 @@ $.fn.elfinderdialog = function(opts) {
 	});
 	
 	return this;
-}
+};
 
 $.fn.elfinderdialog.defaults = {
 	cssClass  : '',
@@ -9073,7 +9084,8 @@ $.fn.elfinderdialog.defaults = {
 	height    : 'auto',
 	minWidth  : 200,
 	minHeight : 110
-}
+};
+
 
 /*
  * File: /js/ui/mkdirbutton.js
@@ -9092,7 +9104,7 @@ $.fn.elfindermkdirbutton = function(cmd) {
 			button.attr('title', cmd.value);
 		});
 	});
-}
+};
 
 
 /*
@@ -9237,7 +9249,8 @@ $.fn.elfinderoverlay = function(opts) {
 	}
 	
 	return this;
-}
+};
+
 
 /*
  * File: /js/ui/panel.js
@@ -9258,7 +9271,8 @@ $.fn.elfinderpanel = function(fm) {
 			})
 		})
 	})
-}
+};
+
 
 /*
  * File: /js/ui/path.js
@@ -9325,7 +9339,8 @@ $.fn.elfinderpath = function(fm) {
 				path.html(fm.i18n('searcresult') + ': ' + html);
 			});
 	});
-}
+};
+
 
 /*
  * File: /js/ui/places.js
@@ -9912,7 +9927,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 		})
 		
 	});
-}
+};
 
 
 /*
@@ -10086,6 +10101,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 	});
 };
 
+
 /*
  * File: /js/ui/sortbutton.js
  */
@@ -10174,9 +10190,7 @@ $.fn.elfindersortbutton = function(cmd) {
 
 	});
 	
-}
-
-
+};
 
 
 /*
@@ -10257,7 +10271,7 @@ $.fn.elfinderstat = function(fm) {
 
 		;
 	})
-}
+};
 
 
 /*
@@ -10347,7 +10361,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 	});
 	
 	return this;
-}
+};
+
 
 /*
  * File: /js/ui/tree.js
@@ -11161,7 +11176,7 @@ $.fn.elfindertree = function(fm, opts) {
 	});
 	
 	return this;
-}
+};
 
 
 /*
@@ -11197,7 +11212,7 @@ $.fn.elfinderuploadbutton = function(cmd) {
 		})
 		.change();
 	});
-}
+};
 
 
 /*
@@ -11221,7 +11236,8 @@ $.fn.elfinderviewbutton = function(cmd) {
 			button.attr('title', cmd.fm.i18n(icons ? 'viewlist' : 'viewicons'));
 		});
 	});
-}
+};
+
 
 /*
  * File: /js/ui/workzone.js
@@ -11254,9 +11270,7 @@ $.fn.elfinderworkzone = function(fm) {
 			});
 	});
 	return this;
-}
-
-
+};
 
 
 /*
@@ -11340,7 +11354,8 @@ elFinder.prototype.commands.archive = function() {
 		return makeDfrd;
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/back.js
@@ -11367,7 +11382,8 @@ elFinder.prototype.commands.back = function() {
 		return this.fm.history.back();
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/chmod.js
@@ -11706,7 +11722,8 @@ elFinder.prototype.commands.copy = function() {
 		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes)));
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/cut.js
@@ -11751,7 +11768,8 @@ elFinder.prototype.commands.cut = function() {
 		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/download.js
@@ -12047,6 +12065,7 @@ elFinder.prototype.commands.download = function() {
 
 };
 
+
 /*
  * File: /js/commands/duplicate.js
  */
@@ -12099,7 +12118,8 @@ elFinder.prototype.commands.duplicate = function() {
 		
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/edit.js
@@ -12448,6 +12468,7 @@ elFinder.prototype.commands.edit = function() {
 
 };
 
+
 /*
  * File: /js/commands/extract.js
  */
@@ -12650,7 +12671,8 @@ elFinder.prototype.commands.extract = function() {
 		return dfrd;
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/forward.js
@@ -12677,7 +12699,8 @@ elFinder.prototype.commands.forward = function() {
 		return this.fm.history.forward();
 	}
 	
-}
+};
+
 
 /*
  * File: /js/commands/getfile.js
@@ -12802,7 +12825,8 @@ elFinder.prototype.commands.getfile = function() {
 		return dfrd.resolve(result(files));
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/help.js
@@ -12986,7 +13010,8 @@ elFinder.prototype.commands.home = function() {
 	}
 	
 
-}
+};
+
 
 /*
  * File: /js/commands/info.js
@@ -13318,7 +13343,7 @@ elFinder.prototype.commands.mkdir = function() {
 		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt)? 0 : -1;
 	}
 
-}
+};
 
 
 /*
@@ -13342,7 +13367,7 @@ elFinder.prototype.commands.mkfile = function() {
 		return !this._disabled && this.fm.cwd().write ? 0 : -1;
 	}
 
-}
+};
 
 
 /*
@@ -13734,7 +13759,8 @@ elFinder.prototype.commands.open = function() {
 		return dfrd.resolve(hashes);
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/opendir.js
@@ -13793,7 +13819,7 @@ elFinder.prototype.commands.opendir = function() {
 		return dfrd;
 	}
 
-}
+};
 
 
 /*
@@ -13940,7 +13966,7 @@ elFinder.prototype.commands.paste = function() {
 						})
 					},
 					valid     = function(names) {
-						var exists = {};
+						var exists = {}, existedArr;
 						if (names) {
 							if ($.isArray(names)) {
 								if (names.length) {
@@ -13960,7 +13986,20 @@ elFinder.prototype.commands.paste = function() {
 									}
 								}
 							} else {
-								existed = intersect(files, $.map(names, function(n) { return n; }));
+								existedArr = [];
+								existed = $.map(names, function(n) {
+									if (typeof n === 'string') {
+										return n;
+									} else {
+										// support to >=2.1.11 plugin Normalizer, Sanitizer
+										existedArr = existedArr.concat(n);
+										return null;
+									}
+								});
+								if (existedArr.length) {
+									existed = existed.concat(existedArr);
+								}
+								existed = intersect(files, existed);
 								hashes = names;
 							}
 						}
@@ -14091,7 +14130,8 @@ elFinder.prototype.commands.paste = function() {
 		});
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/places.js
@@ -14128,6 +14168,7 @@ elFinder.prototype.commands.places = function() {
 	});
 
 };
+
 
 /*
  * File: /js/commands/quicklook.js
@@ -14568,7 +14609,6 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 
 };
-
 
 
 /*
@@ -15216,6 +15256,7 @@ elFinder.prototype.commands.reload = function() {
 
 };
 
+
 /*
  * File: /js/commands/rename.js
  */
@@ -15294,6 +15335,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.always(function() {
 					rest();
+					fm.unbind('resize', resize);
 					fm.enable();
 				}),
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
@@ -15313,6 +15355,7 @@ elFinder.prototype.commands.rename = function() {
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
+						e.preventDefault();
 						input.blur();
 					}
 				})
@@ -15331,7 +15374,7 @@ elFinder.prototype.commands.rename = function() {
 						parent = input.parent(),
 						valid  = true;
 
-					if (pnode.length) {
+					if (!inError && pnode.length) {
 						if (input[0].setSelectionRange) {
 							input[0].setSelectionRange(0, 0)
 						}
@@ -15402,12 +15445,16 @@ elFinder.prototype.commands.rename = function() {
 					dfrd.reject();
 				}
 			},
+			resize = function() {
+				target.trigger('scrolltoview');
+			},
 			inError = false;
 		
 		pnode.addClass('ui-front').css('position', 'relative');
 		if (navbar) {
 			node.replaceWith(input.val(file.name));
 		} else {
+			fm.bind('resize', resize);
 			if (tarea) {
 				node.css('max-height', 'none');
 			} else if (!navbar) {
@@ -15441,7 +15488,7 @@ elFinder.prototype.commands.rename = function() {
 		return dfrd;
 	};
 
-}
+};
 
 
 /*
@@ -16421,7 +16468,8 @@ elFinder.prototype.commands.rm = function() {
 		return dfrd;
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/search.js
@@ -16480,7 +16528,8 @@ elFinder.prototype.commands.search = function() {
 		return $.Deferred().reject();
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/sort.js
@@ -16568,6 +16617,7 @@ elFinder.prototype.commands.sort = function() {
 
 };
 
+
 /*
  * File: /js/commands/up.js
  */
@@ -16594,7 +16644,8 @@ elFinder.prototype.commands.up = function() {
 		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
 	}
 
-}
+};
+
 
 /*
  * File: /js/commands/upload.js
@@ -16859,6 +16910,7 @@ elFinder.prototype.commands.upload = function() {
 
 };
 
+
 /*
  * File: /js/commands/view.js
  */
@@ -16886,5 +16938,6 @@ elFinder.prototype.commands.view = function() {
 		this.update(void(0), value);
 	}
 
-}
+};
+
 })(jQuery);
