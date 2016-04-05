@@ -221,7 +221,7 @@ $.fn.elfinderdialog = function(opts) {
 	});
 	
 	return this;
-}
+};
 
 $.fn.elfinderdialog.defaults = {
 	cssClass  : '',
@@ -238,4 +238,4 @@ $.fn.elfinderdialog.defaults = {
 	height    : 'auto',
 	minWidth  : 200,
 	minHeight : 110
-}
+};

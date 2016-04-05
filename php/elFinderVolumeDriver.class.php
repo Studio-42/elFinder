@@ -1441,7 +1441,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		$list = array('exists' => array(), 'hashes' => array());
+		$list = array();
 		$path = $this->decode($hash);
 		
 		$check = array();

@@ -139,7 +139,7 @@ elFinder.prototype.commands.paste = function() {
 						})
 					},
 					valid     = function(names) {
-						var exists = {};
+						var exists = {}, existedArr;
 						if (names) {
 							if ($.isArray(names)) {
 								if (names.length) {
@@ -159,7 +159,20 @@ elFinder.prototype.commands.paste = function() {
 									}
 								}
 							} else {
-								existed = intersect(files, $.map(names, function(n) { return n; }));
+								existedArr = [];
+								existed = $.map(names, function(n) {
+									if (typeof n === 'string') {
+										return n;
+									} else {
+										// support to >=2.1.11 plugin Normalizer, Sanitizer
+										existedArr = existedArr.concat(n);
+										return null;
+									}
+								});
+								if (existedArr.length) {
+									existed = existed.concat(existedArr);
+								}
+								existed = intersect(files, existed);
 								hashes = names;
 							}
 						}
@@ -290,4 +303,4 @@ elFinder.prototype.commands.paste = function() {
 		});
 	}
 
-}
+};

@@ -434,4 +434,3 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 
 };
-

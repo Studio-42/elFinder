@@ -197,4 +197,4 @@ elFinder.prototype.commands.extract = function() {
 		return dfrd;
 	}
 
-}
+};

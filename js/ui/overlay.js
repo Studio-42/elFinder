@@ -43,4 +43,4 @@ $.fn.elfinderoverlay = function(opts) {
 	}
 	
 	return this;
-}
+};

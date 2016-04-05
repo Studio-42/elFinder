@@ -47,4 +47,4 @@ elFinder.prototype.commands.duplicate = function() {
 		
 	}
 
-}
+};

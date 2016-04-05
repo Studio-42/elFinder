@@ -810,4 +810,4 @@ elFinder.prototype._options = {
 	 */
 	// debug : true
 	debug : ['error', 'warning', 'event-destroy']
-}
+};

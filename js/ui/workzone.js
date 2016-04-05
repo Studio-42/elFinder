@@ -26,6 +26,4 @@ $.fn.elfinderworkzone = function(fm) {
 			});
 	});
 	return this;
-}
-
-
+};

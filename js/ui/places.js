@@ -580,4 +580,4 @@ $.fn.elfinderplaces = function(fm, opts) {
 		})
 		
 	});
-}
+};

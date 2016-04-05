@@ -73,4 +73,4 @@ $.fn.elfinderbutton = function(cmd) {
 		})
 		.change();
 	});
-}
+};

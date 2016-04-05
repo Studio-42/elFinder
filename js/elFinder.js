@@ -2865,6 +2865,7 @@ elFinder.prototype = {
 						preventFail : true
 					})
 					.done(function(data) {
+						var existedArr;
 						if (data) {
 							if (data.error) {
 								cancel();
@@ -2874,7 +2875,19 @@ elFinder.prototype = {
 										if ($.isArray(data.list)) {
 											existed = data.list || [];
 										} else {
-											existed = $.map(data.list, function(n) { return n; });
+											existedArr = [];
+											existed = $.map(data.list, function(n) {
+												if (typeof n === 'string') {
+													return n;
+												} else {
+													// support to >=2.1.11 plugin Normalizer, Sanitizer
+													existedArr = existedArr.concat(n);
+													return null;
+												}
+											});
+											if (existedArr.length) {
+												existed = existed.concat(existedArr);
+											}
 											hashes = data.list;
 										}
 										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});

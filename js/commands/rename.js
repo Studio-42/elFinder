@@ -73,6 +73,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.always(function() {
 					rest();
+					fm.unbind('resize', resize);
 					fm.enable();
 				}),
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
@@ -92,6 +93,7 @@ elFinder.prototype.commands.rename = function() {
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
+						e.preventDefault();
 						input.blur();
 					}
 				})
@@ -110,7 +112,7 @@ elFinder.prototype.commands.rename = function() {
 						parent = input.parent(),
 						valid  = true;
 
-					if (pnode.length) {
+					if (!inError && pnode.length) {
 						if (input[0].setSelectionRange) {
 							input[0].setSelectionRange(0, 0)
 						}
@@ -181,12 +183,16 @@ elFinder.prototype.commands.rename = function() {
 					dfrd.reject();
 				}
 			},
+			resize = function() {
+				target.trigger('scrolltoview');
+			},
 			inError = false;
 		
 		pnode.addClass('ui-front').css('position', 'relative');
 		if (navbar) {
 			node.replaceWith(input.val(file.name));
 		} else {
+			fm.bind('resize', resize);
 			if (tarea) {
 				node.css('max-height', 'none');
 			} else if (!navbar) {
@@ -220,4 +226,4 @@ elFinder.prototype.commands.rename = function() {
 		return dfrd;
 	};
 
-}
+};
