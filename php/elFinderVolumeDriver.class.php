@@ -2158,17 +2158,17 @@ abstract class elFinderVolumeDriver {
 		
 		foreach ($hashes as $hash) {
 			if (($file = $this->file($hash)) == false) {
-				return $this->error(elFinder::ERROR_FILE_NOT_FOUND, '#'+$hash);
+				return $this->setError(elFinder::ERROR_FILE_NOT_FOUND, '#'+$hash);
 			}
 			if (!$file['read']) {
-				return $this->error(elFinder::ERROR_PERM_DENIED);
+				return $this->setError(elFinder::ERROR_PERM_DENIED);
 			}
 			$path = $this->decode($hash);
 			if (!isset($dir)) {
 				$dir = $this->dirnameCE($path);
 				$stat = $this->stat($dir);
 				if (!$stat['write']) {
-					return $this->error(elFinder::ERROR_PERM_DENIED);
+					return $this->setError(elFinder::ERROR_PERM_DENIED);
 				}
 			}
 			
