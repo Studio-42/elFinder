@@ -739,7 +739,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 **/
 	protected function _rmdir($path) {
 		$sql = sprintf('DELETE FROM %s WHERE id=%d AND mime!="directory"', $this->tbf, $path);
-		$res = $this->query($qry);
+		$res = $this->query($sql);
 		return $res && odbc_num_rows($res);
 	}
 
