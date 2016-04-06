@@ -5049,7 +5049,7 @@ abstract class elFinderVolumeDriver {
 			}
 			closedir($dh);
 		} else {
-			$this->setError('Can not open local directory.');
+			throw new Exception('Can not open local directory.');
 		}
 		return $files;
 	}
