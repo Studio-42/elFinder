@@ -92,9 +92,10 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					var dialogs = parent.find('.elfinder-dialog:visible');
+					var dialogs = parent.find('.elfinder-dialog:visible'),
+						modals = $.map(dialogs, function(d) { return d.data('modal')? true : null; });
 					
-					$(this).data('modal') && overlay.elfinderoverlay('hide');
+					(! modals.length || ! dialogs.length) && overlay.elfinderoverlay('hide');
 					
 					// get focus to next dialog
 					if (dialogs.length) {
@@ -104,7 +105,6 @@ $.fn.elfinderdialog = function(opts) {
 						setTimeout(function() {
 							parent.mousedown().click();
 						}, 10);
-						
 					}
 					
 					if (typeof(opts.close) == 'function') {
