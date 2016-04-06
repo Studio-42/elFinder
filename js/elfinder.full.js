@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: a5f7061) (2016-04-07)
+ * Version 2.1.10 (2.1-src Nightly: 51961fb) (2016-04-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4894,7 +4894,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: a5f7061)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 51961fb)';
 
 
 
@@ -8938,9 +8938,10 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					var dialogs = parent.find('.elfinder-dialog:visible');
+					var dialogs = parent.find('.elfinder-dialog:visible'),
+						modals = $.map(dialogs, function(d) { return d.data('modal')? true : null; });
 					
-					$(this).data('modal') && overlay.elfinderoverlay('hide');
+					(! modals.length || ! dialogs.length) && overlay.elfinderoverlay('hide');
 					
 					// get focus to next dialog
 					if (dialogs.length) {
@@ -8950,7 +8951,6 @@ $.fn.elfinderdialog = function(opts) {
 						setTimeout(function() {
 							parent.mousedown().click();
 						}, 10);
-						
 					}
 					
 					if (typeof(opts.close) == 'function') {
