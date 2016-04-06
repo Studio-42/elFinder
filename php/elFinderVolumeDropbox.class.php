@@ -1429,7 +1429,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _unpack($path, $arc) {
 		die('Not yet implemented. (_unpack)');
-		return false;
 	}
 
 	/**
@@ -1441,26 +1440,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _findSymlinks($path) {
 		die('Not yet implemented. (_findSymlinks)');
-		if (is_link($path)) {
-			return true;
-		}
-		if (is_dir($path)) {
-			foreach (self::localScandir($path) as $name) {
-				$p = $path.DIRECTORY_SEPARATOR.$name;
-				if (is_link($p)) {
-					return true;
-				}
-				if (is_dir($p) && $this->_findSymlinks($p)) {
-					return true;
-				} elseif (is_file($p)) {
-					$this->archiveSize += filesize($p);
-				}
-			}
-		} else {
-			$this->archiveSize += filesize($path);
-		}
-
-		return false;
 	}
 
 	/**
@@ -1490,7 +1469,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _archive($dir, $files, $name, $arc) {
 		die('Not yet implemented. (_archive)');
-		return false;
 	}
 
 } // END class

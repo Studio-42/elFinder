@@ -4713,18 +4713,6 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		return $result;
-		
-		
-		
-		if ($destformat == 'jpg' || ($destformat == null && $mime == 'image/jpeg')) {
-			return imagejpeg($image, $filename, $jpgQuality);
-		}
-
-		if ($destformat == 'gif' || ($destformat == null && $mime == 'image/gif')) {
-			return imagegif($image, $filename, 7);
-		}
-
-		return imagepng($image, $filename, 7);
 	}
 
 	/**
