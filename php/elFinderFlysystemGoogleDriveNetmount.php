@@ -296,8 +296,9 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             $filesystem = new Filesystem($googleDrive);
         }
 
-        $opts['driver'] = 'Flysystem';
+        $opts['driver'] = 'Flysystem' . (class_exists('elFinderVolumeFlysystemExt')? 'Ext' : '');
         $opts['filesystem'] = $filesystem;
+        $opts['checkSubfolders'] = true;
         if (! isset($opts['alias'])) {
             $opts['alias'] = 'GoogleDrive';
         }
