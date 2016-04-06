@@ -54,8 +54,3 @@ if (count($diff)) {
 } else {
 	echo "OK";
 }
-
-
-
-
-?>
