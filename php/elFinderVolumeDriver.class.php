@@ -476,7 +476,7 @@ abstract class elFinderVolumeDriver {
 		'rb'    => 'text/x-ruby',
 		'sh'    => 'text/x-shellscript',
 		'pl'    => 'text/x-perl',
-		'xml'   => 'text/xml',
+		//'xml'   => 'text/xml',
 		'sql'   => 'text/x-sql',
 		'c'     => 'text/x-csrc',
 		'h'     => 'text/x-chdr',
@@ -496,7 +496,7 @@ abstract class elFinderVolumeDriver {
 		'tiff'  => 'image/tiff',
 		'tga'   => 'image/x-targa',
 		'psd'   => 'image/vnd.adobe.photoshop',
-		'ai'    => 'image/vnd.adobe.photoshop',
+		//'ai'    => 'image/vnd.adobe.photoshop',
 		'xbm'   => 'image/xbm',
 		'pxm'   => 'image/pxm',
 		//audio
