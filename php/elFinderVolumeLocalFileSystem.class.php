@@ -1092,6 +1092,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			return (is_array($result) || file_exists($result)) ? $result : false;
 		}
+        //TODO: Add return statement here
 	}
 	
 	/**

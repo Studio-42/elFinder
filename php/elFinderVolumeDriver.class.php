@@ -2745,6 +2745,7 @@ abstract class elFinderVolumeDriver {
 			// append volume id to make hash unique
 			return $this->id.$hash;
 		}
+        //TODO: Add return statement here
 	}
 	
 	/**
@@ -2766,6 +2767,7 @@ abstract class elFinderVolumeDriver {
 			// append ROOT to path after it was cut in encode
 			return $this->abspathCE($path);//$this->root.($path == DIRECTORY_SEPARATOR ? '' : DIRECTORY_SEPARATOR.$path); 
 		}
+        //TODO: Add return statement here
 	}
 	
 	/**
