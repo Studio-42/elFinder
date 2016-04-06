@@ -970,7 +970,6 @@ class elFinder {
 			}
 			$limit = max(0, floor($standby / $sleep)) + 1;
 			$timelimit = ini_get('max_execution_time');
-			$compare = $args['compare'];
 			do {
 				$timelimit && @ set_time_limit($timelimit + $sleep);
 				$_mtime = 0;
