@@ -429,9 +429,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 
 	/**
-	 * Configure after successfull mount.
+	 * Configure after successful mount.
 	 *
-	 * @return void
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
@@ -444,7 +444,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	/**
 	 * Check DB for delta cache
 	 * 
-	 * @return void
+	 * @return bool
 	 */
 	private function checkDB() {
 		$res = $this->query('SELECT * FROM sqlite_master WHERE type=\'table\' AND name=\''.$this->DB_TableName.'\'');
@@ -664,7 +664,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * Cache dir contents
 	 *
 	 * @param  string  $path  dir path
-	 * @return void
+	 * @return string
 	 * @author Dmitry Levashov
 	 **/
 	protected function cacheDir($path) {
@@ -1399,7 +1399,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	/**
 	 * Detect available archivers
 	 *
-	 * @return void
+	 * @return array
 	 **/
 	protected function _checkArchivers() {
 		// die('Not yet implemented. (_checkArchivers)');

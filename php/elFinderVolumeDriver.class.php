@@ -5088,7 +5088,7 @@ abstract class elFinderVolumeDriver {
 	 * @param  string        $dir      target dir
 	 * @param  array         $files    files names list
 	 * @param  string|object $zipPath  Zip archive name
-	 * @return void
+	 * @return bool
 	 * @author Naoki Sawada
 	 */
 	protected static function zipArchiveZip($dir, $files, $zipPath) {
