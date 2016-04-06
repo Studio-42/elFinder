@@ -755,6 +755,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$path = $this->decode($hash);
+		$write = $file['write'];
 
 		if ($this->convEncOut(!$this->_chmod($this->convEncIn($path), $mode))) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED, $file['name']);
@@ -5049,7 +5050,7 @@ abstract class elFinderVolumeDriver {
 			}
 			closedir($dh);
 		} else {
-			$this->setError('Can not open local directory.');
+			throw new Exception('Can not open local directory.');
 		}
 		return $files;
 	}
