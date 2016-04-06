@@ -99,7 +99,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		}
 
 
-		$this->conn = odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$database;", $this->options['user'], $this->options['pass']);
+		$this->conn = odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$this->options['db'];", $this->options['user'], $this->options['pass']);
 
 		if (odbc_errormsg($this->conn)) {
 			return false;
