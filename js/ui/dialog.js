@@ -221,7 +221,7 @@ $.fn.elfinderdialog = function(opts) {
 $.fn.elfinderdialog.defaults = {
 	cssClass  : '',
 	title     : '',
-	modal     : true,
+	modal     : false,
 	resizable : true,
 	autoOpen  : true,
 	closeOnEscape : true,
