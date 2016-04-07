@@ -36,7 +36,7 @@ $.fn.elfinderoverlay = function(opts) {
 		
 		o.data('cnt', cnt);
 			
-		if (cnt == 0 && o.is(':visible')) {
+		if (cnt <= 0 && o.is(':visible')) {
 			o.hide();
 			hide();        
 		}
