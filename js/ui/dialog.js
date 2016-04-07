@@ -53,9 +53,7 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.css({
 					width  : opts.width,
-					height : opts.height//,
-					//maxWidth: opts.maxWidth? opts.maxWidth : $(window).width()-10,
-					//maxHeight: opts.maxHeight? opts.maxHeight : $(window).height()-20
+					height : opts.height
 				})
 				.mousedown(function(e) {
 					setTimeout(function() {
@@ -89,39 +87,36 @@ $.fn.elfinderdialog = function(opts) {
 					
 					dialog.trigger('totop');
 					
+					dialog.data('modal') && overlay.elfinderoverlay('show');
+					
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					var dialogs = parent.find('.elfinder-dialog:visible'),
-						modals = $.map(dialogs, function(d) { return d.data('modal')? true : null; });
-					
-					(! modals.length || ! dialogs.length) && overlay.elfinderoverlay('hide');
-					
+					var dialogs = parent.find('.elfinder-dialog:visible');
+
+					dialog.data('modal') && overlay.elfinderoverlay('hide');
 					// get focus to next dialog
 					if (dialogs.length) {
 						dialogs.find(':last').trigger('totop');
 					} else {
 						// return focus to parent
-						setTimeout(function() {
-							parent.mousedown().click();
-						}, 10);
+						parent.mousedown().click();
 					}
-					
 					if (typeof(opts.close) == 'function') {
-						$.proxy(opts.close, self[0])();
+						setTimeout(function() {
+							$.proxy(opts.close, self[0])();
+						}, 10);
 					} else if (opts.destroyOnClose) {
 						dialog.hide().remove();
 					}
 				})
 				.on('totop', function() {
-					var $this = $(this);
 					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
 					dialog.addClass(clactive+' ui-front');
 
-					if (!$this.find('input,textarea').length) {
-						$this.find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
+					if (!dialog.find('input,textarea').length) {
+						dialog.find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
 					}
-					$this.data('modal') && overlay.is(':hidden') && overlay.elfinderoverlay('show');
 				})
 				.on('posinit', function() {
 					var css = opts.position;
@@ -226,7 +221,7 @@ $.fn.elfinderdialog = function(opts) {
 $.fn.elfinderdialog.defaults = {
 	cssClass  : '',
 	title     : '',
-	modal     : false,
+	modal     : true,
 	resizable : true,
 	autoOpen  : true,
 	closeOnEscape : true,
