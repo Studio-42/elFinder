@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: 075a38f) (2016-04-07)
+ * Version 2.1.10 (2.1-src Nightly: f1863e0) (2016-04-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4894,7 +4894,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: 075a38f)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: f1863e0)';
 
 
 
@@ -9067,7 +9067,7 @@ $.fn.elfinderdialog = function(opts) {
 $.fn.elfinderdialog.defaults = {
 	cssClass  : '',
 	title     : '',
-	modal     : true,
+	modal     : false,
 	resizable : true,
 	autoOpen  : true,
 	closeOnEscape : true,
