@@ -1143,11 +1143,11 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				if (is_dir($p) && $this->_findSymlinks($p)) {
 					return true;
 				} elseif (is_file($p)) {
-					$this->archiveSize = sprintf('%u', filesize($p));
+					$this->archiveSize += sprintf('%u', filesize($p));
 				}
 			}
 		} else {
-			$this->archiveSize = sprintf('%u', filesize($path));
+			$this->archiveSize += sprintf('%u', filesize($path));
 		}
 		
 		return false;
