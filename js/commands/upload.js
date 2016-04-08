@@ -60,9 +60,14 @@ elFinder.prototype.commands.upload = function() {
 				}
 				fmUpload(data);
 			},
-			dfrd = $.Deferred(),
+			dfrd = $.Deferred().always(function() {
+				//setTimeout(function() {
+				//	fm.autoSync();
+				//}, 1000);
+			}),
 			dialog, input, button, dropbox, pastebox, dropUpload, paste;
 		
+		//fm.autoSync('stop');
 		if (this.getstate(check) < 0) {
 			return dfrd.reject();
 		}
@@ -75,33 +80,40 @@ elFinder.prototype.commands.upload = function() {
 				elfFrom = null,
 				mycwd = '',
 				data = null,
-				target = e._target || null;
-			try { elfFrom = e.dataTransfer.getData('elfinderfrom'); } catch(e) {}
-			if (elfFrom) {
-				mycwd = window.location.href + fm.cwd().hash;
-				if ((!target && elfFrom === mycwd) || target === mycwd) {
-					dfrd.reject();
-					return;
+				target = e._target || null,
+				trf = e.dataTransfer || null,
+				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '';
+			
+			if (trf) {
+				try {
+					elfFrom = trf.getData('elfinderfrom');
+					if (elfFrom) {
+						mycwd = window.location.href + fm.cwd().hash;
+						if ((!target && elfFrom === mycwd) || target === mycwd) {
+							dfrd.reject();
+							return;
+						}
+					}
+				} catch(e) {}
+				
+				if (kind === 'file' && (trf.items[0].getAsEntry || trf.items[0].webkitGetAsEntry)) {
+					file = trf;
+					type = 'data';
+				} else if (kind !== 'string' && trf.files && trf.files.length && $.inArray('Text', trf.types) === -1) {
+					file = trf.files;
+					type = 'files';
+				} else {
+					try {
+						if ((data = trf.getData('text/html')) && data.match(/<(?:img|a)/i)) {
+							file = [ data ];
+							type = 'html';
+						}
+					} catch(e) {}
+					if (! file && (data = trf.getData('text'))) {
+						file = [ data ];
+						type = 'text';
+					}
 				}
-			}
-			try{
-				data = e.dataTransfer.getData('text/html');
-				if (!data.match(/<(?:img|a)/i)) {
-					data = '';
-				}
-			} catch(e) {}
-			if (data) {
-				file = [ data ];
-				type = 'html';
-			} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
-				file = e.dataTransfer;
-				type = 'data';
-			} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
-				file = e.dataTransfer.files;
-				type = 'files';
-			} else if (data = e.dataTransfer.getData('text')) {
-				file = [ data ];
-				type = 'text';
 			}
 			if (file) {
 				fmUpload({files : file, type : type, target : target});
