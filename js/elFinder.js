@@ -2865,7 +2865,7 @@ elFinder.prototype = {
 						preventFail : true
 					})
 					.done(function(data) {
-						var existedArr;
+						var existedArr, cwdItems;
 						if (data) {
 							if (data.error) {
 								cancel();
@@ -2890,12 +2890,16 @@ elFinder.prototype = {
 											}
 											hashes = data.list;
 										}
-										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-										if (target == fm.cwd().hash &&
-											$($.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } ))
-												.filter(existed).length < 1
-										) {
-											fm.sync();
+										exists = $.map(names, function(name){
+											return $.inArray(name.name, existed) !== -1 ? name : null ;
+										});
+										if (existed.length && target == fm.cwd().hash) {
+											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
+											if ($.map(existed, function(n) { 
+												return cwdItems.indexOf(n) === -1? true : null;
+											}).length){
+												fm.sync();
+											}
 										}
 									}
 								}
