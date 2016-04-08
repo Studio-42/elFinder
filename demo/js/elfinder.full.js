@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.10 (2.1-src Nightly: f1863e0) (2016-04-07)
+ * Version 2.1.10 (2.1-src Nightly: b980570) (2016-04-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2879,7 +2879,7 @@ elFinder.prototype = {
 						preventFail : true
 					})
 					.done(function(data) {
-						var existedArr;
+						var existedArr, cwdItems;
 						if (data) {
 							if (data.error) {
 								cancel();
@@ -2904,12 +2904,16 @@ elFinder.prototype = {
 											}
 											hashes = data.list;
 										}
-										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-										if (target == fm.cwd().hash &&
-											$($.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } ))
-												.filter(existed).length < 1
-										) {
-											fm.sync();
+										exists = $.map(names, function(name){
+											return $.inArray(name.name, existed) !== -1 ? name : null ;
+										});
+										if (existed.length && target == fm.cwd().hash) {
+											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
+											if ($.map(existed, function(n) { 
+												return cwdItems.indexOf(n) === -1? true : null;
+											}).length){
+												fm.sync();
+											}
 										}
 									}
 								}
@@ -4894,7 +4898,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.10 (2.1-src Nightly: f1863e0)';
+elFinder.prototype.version = '2.1.10 (2.1-src Nightly: b980570)';
 
 
 
@@ -16707,9 +16711,14 @@ elFinder.prototype.commands.upload = function() {
 				}
 				fmUpload(data);
 			},
-			dfrd = $.Deferred(),
+			dfrd = $.Deferred().always(function() {
+				//setTimeout(function() {
+				//	fm.autoSync();
+				//}, 1000);
+			}),
 			dialog, input, button, dropbox, pastebox, dropUpload, paste;
 		
+		//fm.autoSync('stop');
 		if (this.getstate(check) < 0) {
 			return dfrd.reject();
 		}
@@ -16722,33 +16731,40 @@ elFinder.prototype.commands.upload = function() {
 				elfFrom = null,
 				mycwd = '',
 				data = null,
-				target = e._target || null;
-			try { elfFrom = e.dataTransfer.getData('elfinderfrom'); } catch(e) {}
-			if (elfFrom) {
-				mycwd = window.location.href + fm.cwd().hash;
-				if ((!target && elfFrom === mycwd) || target === mycwd) {
-					dfrd.reject();
-					return;
+				target = e._target || null,
+				trf = e.dataTransfer || null,
+				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '';
+			
+			if (trf) {
+				try {
+					elfFrom = trf.getData('elfinderfrom');
+					if (elfFrom) {
+						mycwd = window.location.href + fm.cwd().hash;
+						if ((!target && elfFrom === mycwd) || target === mycwd) {
+							dfrd.reject();
+							return;
+						}
+					}
+				} catch(e) {}
+				
+				if (kind === 'file' && (trf.items[0].getAsEntry || trf.items[0].webkitGetAsEntry)) {
+					file = trf;
+					type = 'data';
+				} else if (kind !== 'string' && trf.files && trf.files.length && $.inArray('Text', trf.types) === -1) {
+					file = trf.files;
+					type = 'files';
+				} else {
+					try {
+						if ((data = trf.getData('text/html')) && data.match(/<(?:img|a)/i)) {
+							file = [ data ];
+							type = 'html';
+						}
+					} catch(e) {}
+					if (! file && (data = trf.getData('text'))) {
+						file = [ data ];
+						type = 'text';
+					}
 				}
-			}
-			try{
-				data = e.dataTransfer.getData('text/html');
-				if (!data.match(/<(?:img|a)/i)) {
-					data = '';
-				}
-			} catch(e) {}
-			if (data) {
-				file = [ data ];
-				type = 'html';
-			} else if (e.dataTransfer && e.dataTransfer.items &&  e.dataTransfer.items.length) {
-				file = e.dataTransfer;
-				type = 'data';
-			} else if (e.dataTransfer && e.dataTransfer.files &&  e.dataTransfer.files.length) {
-				file = e.dataTransfer.files;
-				type = 'files';
-			} else if (data = e.dataTransfer.getData('text')) {
-				file = [ data ];
-				type = 'text';
 			}
 			if (file) {
 				fmUpload({files : file, type : type, target : target});
