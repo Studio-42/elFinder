@@ -2824,7 +2824,9 @@ class elFinder {
 	 * @return void
 	 */
 	public static function sessionWrite() {
-		$this->session->close();
+		if (session_id()) {
+			session_write_close();
+		}
 	}
 
     /**
