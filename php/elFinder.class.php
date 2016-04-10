@@ -123,7 +123,7 @@ class elFinder {
 		'file'      => array('target' => true, 'download' => false),
 		'zipdl'     => array('targets' => true, 'download' => false),
 		'size'      => array('targets' => true),
-		'mkdir'     => array('target' => true, 'name' => true),
+		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
 		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
@@ -1300,14 +1300,37 @@ class elFinder {
 	protected function mkdir($args) {
 		$target = $args['target'];
 		$name   = $args['name'];
+		$dirs   = $args['dirs'];
+		if ($name === '' && !$dirs) {
+			return array('error' => $this->error(self::ERROR_INV_PARAMS, 'mkdir'));
+		}
 		
 		if (($volume = $this->volume($target)) == false) {
 			return array('error' => $this->error(self::ERROR_MKDIR, $name, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target));
 		}
-
-		return ($dir = $volume->mkdir($target, $name)) == false
-			? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
-			: array('added' => array($dir));
+		if ($dirs) {
+			sort($dirs);
+			$reset = null;
+			$mkdirs = array();
+			foreach($dirs as $dir) {
+				$tgt =& $mkdirs;
+				$_names = explode('/', trim($dir, '/'));
+				foreach($_names as $_key => $_name) {
+					if (! isset($tgt[$_name])) {
+						$tgt[$_name] = array();
+					}
+					$tgt =& $tgt[$_name];
+				}
+				$tgt =& $reset;
+			}
+			return ($res = $this->ensureDirsRecursively($volume, $target, $mkdirs)) === false
+				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
+				: array('added' => $res['stats'], 'hashes' => $res['hashes']);
+		} else {
+			return ($dir = $volume->mkdir($target, $name)) == false
+				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
+				: array('added' => array($dir));
+		}
 	}
 	
 	/**
@@ -2077,7 +2100,8 @@ class elFinder {
 				return array_merge(array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES)), $header);
 			}
 		}
-		
+
+		$addedDirs = array();
 		foreach ($files['name'] as $i => $name) {
 			if (($error = $files['error'][$i]) > 0) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER);
@@ -2132,8 +2156,17 @@ class elFinder {
 				break;
 			}
 			$rnres = array();
-			if ($path) {
-				$_target = $volume->getUploadTaget($target, $path, $result);
+			if ($path && $path !== $target) {
+				if ($dir = $volume->dir($path)) {
+					$_target = $path;
+					if (! isset($addedDirs[$path])) {
+						$addedDirs[$path] = true;
+						$result['added'][] =$dir;
+					}
+				} else {
+					$result['error'] = $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, 'hash@'.$path);
+					break;
+				}
 			} else {
 				$_target = $target;
 				// file rename for backup
@@ -2695,6 +2728,37 @@ class elFinder {
 			}
 		}
 		return $id;
+	}
+	
+	/**
+	 * Ensure directories recursively
+	 *
+	 * @param  object  $volume  Volume object
+	 * @param  string  $target  Target hash
+	 * @param  string  $dirs    Array of directory tree to ensure
+	 * @param  string  $path    Relative path form target hash
+	 * @return array|false      array('stats' => array([stat of maked directory]), 'hashes' => array('[path]' => '[hash]'))
+	 * @author Naoki Sawada
+	 **/
+	protected function ensureDirsRecursively($volume, $target, $dirs, $path = '') {
+		$res = array('stats' => array(), 'hashes' => array());
+		foreach($dirs as $name => $sub) {
+			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($dir = $volume->mkdir($target, $name))) {
+				$_path = $path . '/' . $name;
+				$res['stats'][] = $dir;
+				$res['hashes'][$_path] = $dir['hash'];
+				if (count($sub)) {
+					if ($subRes = $this->ensureDirsRecursively($volume, $dir['hash'], $sub, $_path)) {
+						$res = array_merge_recursive($res, $subRes);
+					} else {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
+		}
+		return $res;
 	}
 	
 	/***************************************************************************/
