@@ -59,9 +59,10 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
      * Prepare
      * Call from elFinder::netmout() before volume->mount()
      *
+     * @param $options
      * @return Array
      * @author Naoki Sawada
-     **/
+     */
     public function netmountPrepare($options)
     {
         if (empty($options['client_id']) && defined('ELFINDER_GOOGLEDRIVE_CLIENTID')) {
@@ -226,9 +227,11 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
     /**
      * process of on netunmount
      * Drop table `dropbox` & rm thumbs
-     * 
-     * @param array $options
-     * @return boolean
+     *
+     * @param $netVolumes
+     * @param $key
+     * @return bool
+     * @internal param array $options
      */
     public function netunmount($netVolumes, $key)
     {
@@ -246,12 +249,13 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
 
     /**
      * "Mount" volume.
-     * Return true if volume available for read or write, 
+     * Return true if volume available for read or write,
      * false - otherwise
      *
+     * @param array $opts
      * @return bool
      * @author Naoki Sawada
-     **/
+     */
     public function mount(array $opts)
     {
         $creds = null;
