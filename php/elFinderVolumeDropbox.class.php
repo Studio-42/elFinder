@@ -82,15 +82,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private $DB_TableName = '';
 	
 	private $tmbPrefix = '';
-	
-	/**
-	 * Constructor
-	 * Extend options with required fields
-	 *
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 * @author Cem (DiscoFever)
-	 **/
+
+    /**
+     * Constructor
+     * Extend options with required fields
+     *
+     * @author Dmitry (dio) Levashov
+     * @author Cem (DiscoFever)
+     */
 	public function __construct() {
 
 		if (@include_once 'Dropbox/autoload.php') {
@@ -129,13 +128,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->options['mimeDetect'] = 'internal';
 	}
 
-	/**
-	 * Prepare
-	 * Call from elFinder::netmout() before volume->mount()
-	 *
-	 * @return Array
-	 * @author Naoki Sawada
-	 **/
+    /**
+     * Prepare
+     * Call from elFinder::netmout() before volume->mount()
+     *
+     * @param $options
+     * @return Array
+     * @author Naoki Sawada
+     */
 	public function netmountPrepare($options) {
 		if (empty($options['consumerKey']) && defined('ELFINDER_DROPBOX_CONSUMERKEY')) $options['consumerKey'] = ELFINDER_DROPBOX_CONSUMERKEY;
 		if (empty($options['consumerSecret']) && defined('ELFINDER_DROPBOX_CONSUMERSECRET')) $options['consumerSecret'] = ELFINDER_DROPBOX_CONSUMERSECRET;
@@ -234,14 +234,16 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		unset($options['user'], $options['pass']);
 		return $options;
 	}
-	
-	/**
-	 * process of on netunmount
-	 * Drop table `dropbox` & rm thumbs
-	 * 
-	 * @param array $options
-	 * @return boolean
-	 */
+
+    /**
+     * process of on netunmount
+     * Drop table `dropbox` & rm thumbs
+     *
+     * @param $netVolumes
+     * @param $key
+     * @return bool
+     * @internal param array $options
+     */
 	public function netunmount($netVolumes, $key) {
 		$count = 0;
 		$dropboxUid = '';
@@ -427,9 +429,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 
 
 	/**
-	 * Configure after successfull mount.
+	 * Configure after successful mount.
 	 *
-	 * @return void
+	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
@@ -442,7 +444,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	/**
 	 * Check DB for delta cache
 	 * 
-	 * @return void
+	 * @return bool
 	 */
 	private function checkDB() {
 		$res = $this->query('SELECT * FROM sqlite_master WHERE type=\'table\' AND name=\''.$this->DB_TableName.'\'');
@@ -662,7 +664,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * Cache dir contents
 	 *
 	 * @param  string  $path  dir path
-	 * @return void
+	 * @return string
 	 * @author Dmitry Levashov
 	 **/
 	protected function cacheDir($path) {
@@ -742,16 +744,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		? $this->_joinPath($dst, $name)
 		: $this->setError(elFinder::ERROR_COPY, $this->_path($src));
 	}
-	
-	/**
-	* Remove file/ recursive remove dir
-	*
-	* @param  string  $path   file path
-	* @param  bool    $force  try to remove even if file locked
-	* @return bool
-	* @author Dmitry (dio) Levashov
-	* @author Naoki Sawada
-	**/
+
+    /**
+     * Remove file/ recursive remove dir
+     *
+     * @param  string $path file path
+     * @param  bool $force try to remove even if file locked
+     * @param bool $recursive
+     * @return bool
+     * @author Dmitry (dio) Levashov
+     * @author Naoki Sawada
+     */
 	protected function remove($path, $force = false, $recursive = false) {
 		$stat = $this->stat($path);
 		$stat['realpath'] = $path;
@@ -779,16 +782,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->removed[] = $stat;
 		return true;
 	}
-	
-	/**
-	* Create thumnbnail and return it's URL on success
-	*
-	* @param  string  $path  file path
-	* @param  string  $mime  file mime type
-	* @return string|false
-	* @author Dmitry (dio) Levashov
-	* @author Naoki Sawada
-	**/
+
+    /**
+     * Create thumnbnail and return it's URL on success
+     *
+     * @param  string $path file path
+     * @param $stat
+     * @return false|string
+     * @internal param string $mime file mime type
+     * @author Dmitry (dio) Levashov
+     * @author Naoki Sawada
+     */
 	protected function createTmb($path, $stat) {
 		if (!$stat || !$this->canCreateTmb($path, $stat)) {
 			return false;
@@ -1143,14 +1147,15 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			: $this->cacheDir($path);
 	}
 
-	/**
-	 * Open file and return file pointer
-	 *
-	 * @param  string  $path  file path
-	 * @param  bool    $write open file for writing
-	 * @return resource|false
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Open file and return file pointer
+     *
+     * @param  string $path file path
+     * @param string $mode
+     * @return false|resource
+     * @internal param bool $write open file for writing
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _fopen($path, $mode='rb') {
 
 		if (($mode == 'rb' || $mode == 'r')) {
@@ -1185,13 +1190,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return false;
 	}
 
-	/**
-	 * Close opened file
-	 *
-	 * @param  resource  $fp  file pointer
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Close opened file
+     *
+     * @param  resource $fp file pointer
+     * @param string $path
+     * @return bool
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
@@ -1236,14 +1242,15 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $this->_filePutContents($path.'/'.$name, '');
 	}
 
-	/**
-	 * Create symlink. FTP driver does not support symlinks.
-	 *
-	 * @param  string  $target  link target
-	 * @param  string  $path    symlink path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Create symlink. FTP driver does not support symlinks.
+     *
+     * @param  string $target link target
+     * @param  string $path symlink path
+     * @param string $name
+     * @return bool
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _symlink($target, $path, $name) {
 		return false;
 	}
@@ -1268,16 +1275,17 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return true;
 	}
 
-	/**
-	 * Move file into another parent dir.
-	 * Return new file path or false.
-	 *
-	 * @param  string  $source  source file path
-	 * @param  string  $target  target dir path
-	 * @param  string  $name    file name
-	 * @return string|bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Move file into another parent dir.
+     * Return new file path or false.
+     *
+     * @param  string $source source file path
+     * @param $targetDir
+     * @param  string $name file name
+     * @return bool|string
+     * @internal param string $target target dir path
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _move($source, $targetDir, $name) {
 		$target = $this->_normpath($targetDir.'/'.$name);
 		try {
@@ -1317,17 +1325,18 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		return $this->_unlink($path);
 	}
 
-	/**
-	 * Create new file and write into it from file pointer.
-	 * Return new file path or false on error.
-	 *
-	 * @param  resource  $fp   file pointer
-	 * @param  string    $dir  target dir path
-	 * @param  string    $name file name
-	 * @param  array     $stat file stat (required by some virtual fs)
-	 * @return bool|string
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Create new file and write into it from file pointer.
+     * Return new file path or false on error.
+     *
+     * @param  resource $fp file pointer
+     * @param string $path
+     * @param  string $name file name
+     * @param  array $stat file stat (required by some virtual fs)
+     * @return bool|string
+     * @internal param string $dir target dir path
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _save($fp, $path, $name, $stat) {
 		if ($name) $path .= '/'.$name;
 		$path = $this->_normpath($path);
@@ -1390,18 +1399,20 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	/**
 	 * Detect available archivers
 	 *
-	 * @return void
+	 * @return array
 	 **/
 	protected function _checkArchivers() {
 		// die('Not yet implemented. (_checkArchivers)');
 		return array();
 	}
 
-	/**
-	 * chmod implementation
-	 *
-	 * @return bool
-	 **/
+    /**
+     * chmod implementation
+     *
+     * @param string $path
+     * @param string $mode
+     * @return bool
+     */
 	protected function _chmod($path, $mode) {
 		return false;
 	}
@@ -1418,7 +1429,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _unpack($path, $arc) {
 		die('Not yet implemented. (_unpack)');
-		return false;
 	}
 
 	/**
@@ -1430,26 +1440,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _findSymlinks($path) {
 		die('Not yet implemented. (_findSymlinks)');
-		if (is_link($path)) {
-			return true;
-		}
-		if (is_dir($path)) {
-			foreach (self::localScandir($path) as $name) {
-				$p = $path.DIRECTORY_SEPARATOR.$name;
-				if (is_link($p)) {
-					return true;
-				}
-				if (is_dir($p) && $this->_findSymlinks($p)) {
-					return true;
-				} elseif (is_file($p)) {
-					$this->archiveSize += filesize($p);
-				}
-			}
-		} else {
-			$this->archiveSize += filesize($path);
-		}
-
-		return false;
 	}
 
 	/**
@@ -1479,7 +1469,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function _archive($dir, $files, $name, $arc) {
 		die('Not yet implemented. (_archive)');
-		return false;
 	}
 
 } // END class

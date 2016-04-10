@@ -53,13 +53,12 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 **/
 	protected $dbError = '';
 
-	/**
-	 * Constructor
-	 * Extend options with required fields
-	 *
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Constructor
+     * Extend options with required fields
+     *
+     * @author Dmitry (dio) Levashov
+     */
 	public function __construct() {
 		$opts = array(
 			'host'			=> 'localhost',
@@ -100,7 +99,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		}
 
 
-		$this->conn = odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$database;", $this->options['user'], $this->options['pass']);
+		$this->conn = odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$this->options['db'];", $this->options['user'], $this->options['pass']);
 
 		if (odbc_errormsg($this->conn)) {
 			return false;
@@ -222,7 +221,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 * Cache dir contents
 	 *
 	 * @param  string  $path  dir path
-	 * @return void
+	 * @return string
 	 * @author Dmitry Levashov
 	 **/
 	protected function cacheDir($path) {
@@ -626,13 +625,14 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		return false;
 	}
 
-	/**
-	 * Close opened file
-	 *
-	 * @param  resource	 $fp  file pointer
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Close opened file
+     *
+     * @param  resource $fp file pointer
+     * @param string $path
+     * @return bool
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _fclose($fp, $path='') {
 		@fclose($fp);
 		if ($path) {
@@ -666,14 +666,15 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		return $this->make($path, $name, 'text/plain') ? $this->_joinPath($path, $name) : false;
 	}
 
-	/**
-	 * Create symlink. FTP driver does not support symlinks.
-	 *
-	 * @param  string  $target	link target
-	 * @param  string  $path	symlink path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Create symlink. FTP driver does not support symlinks.
+     *
+     * @param  string $target link target
+     * @param  string $path symlink path
+     * @param string $name
+     * @return bool
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _symlink($target, $path, $name) {
 		return false;
 	}
@@ -698,16 +699,17 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		return $this->query($sql);
 	}
 
-	/**
-	 * Move file into another parent dir.
-	 * Return new file path or false.
-	 *
-	 * @param  string  $source	source file path
-	 * @param  string  $target	target dir path
-	 * @param  string  $name	file name
-	 * @return string|bool
-	 * @author Dmitry (dio) Levashov
-	 **/
+    /**
+     * Move file into another parent dir.
+     * Return new file path or false.
+     *
+     * @param  string $source source file path
+     * @param $targetDir
+     * @param  string $name file name
+     * @return bool|string
+     * @internal param string $target target dir path
+     * @author Dmitry (dio) Levashov
+     */
 	protected function _move($source, $targetDir, $name) {
 		$sql = 'UPDATE %s SET parent_id=%d, name="%s" WHERE id=%d';
 		$sql = sprintf($sql, $this->tbf, $targetDir, addslashes($name), $source);
@@ -737,16 +739,17 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 **/
 	protected function _rmdir($path) {
 		$sql = sprintf('DELETE FROM %s WHERE id=%d AND mime!="directory"', $this->tbf, $path);
-		$res = $this->query($qry);
+		$res = $this->query($sql);
 		return $res && odbc_num_rows($res);
 	}
 
-	/**
-	 * undocumented function
-	 *
-	 * @return void
-	 * @author Dmitry Levashov
-	 **/
+    /**
+     * undocumented function
+     *
+     * @param $path
+     * @param $fp
+     * @author Dmitry Levashov
+     */
 	protected function _setContent($path, $fp) {
 		rewind($fp);
 		$fstat = fstat($fp);
@@ -874,11 +877,13 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		return;
 	}
 
-	/**
-	 * chmod implementation
-	 *
-	 * @return bool
-	 **/
+    /**
+     * chmod implementation
+     *
+     * @param string $path
+     * @param string $mode
+     * @return bool
+     */
 	protected function _chmod($path, $mode) {
 		return false;
 	}
@@ -935,12 +940,17 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		return false;
 	}
 
-	/**
-	 * Update MsSQL database	 *
-	 * @param  update root name with alias
-	 * @param  update read, write, locked, hidden permission
-	 * @author Raja Sharma
-	 **/
+    /**
+     * Update MsSQL database     *
+     * @param $alias
+     * @param $read
+     * @param $write
+     * @param $locked
+     * @param $hidden
+     * @internal param root $update name with alias
+     * @internal param read $update , write, locked, hidden permission
+     * @author Raja Sharma
+     */
 	protected function rootparameter($alias, $read, $write, $locked, $hidden) {
 		if($alias == ""){
 			$sql = 'UPDATE elfinder_file set name = "DATABASE" where id=1';
