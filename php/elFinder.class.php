@@ -2823,7 +2823,7 @@ class elFinder {
 	 * @deprecated
 	 * @return void
 	 */
-	public function sessionWrite() {
+	public static function sessionWrite() {
 		$this->session->close();
 	}
 
