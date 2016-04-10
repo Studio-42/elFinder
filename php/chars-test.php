@@ -6,7 +6,6 @@ header('Content-Type: text/html; charset=utf-8');
 echo 'белая собака';
 echo strToLower('белая собака');
 
-exit();
 $orig = 'ёЁйЙØÅŻ';
 echo $orig.'<br>';
 $path = '../../../files/tmp/';
@@ -55,8 +54,3 @@ if (count($diff)) {
 } else {
 	echo "OK";
 }
-
-
-
-
-?>
