@@ -2865,6 +2865,7 @@ elFinder.prototype = {
 						preventFail : true
 					})
 					.done(function(data) {
+						var existedArr, cwdItems;
 						if (data) {
 							if (data.error) {
 								cancel();
@@ -2874,15 +2875,31 @@ elFinder.prototype = {
 										if ($.isArray(data.list)) {
 											existed = data.list || [];
 										} else {
-											existed = $.map(data.list, function(n) { return n; });
+											existedArr = [];
+											existed = $.map(data.list, function(n) {
+												if (typeof n === 'string') {
+													return n;
+												} else {
+													// support to >=2.1.11 plugin Normalizer, Sanitizer
+													existedArr = existedArr.concat(n);
+													return null;
+												}
+											});
+											if (existedArr.length) {
+												existed = existed.concat(existedArr);
+											}
 											hashes = data.list;
 										}
-										exists = $.map(names, function(name){ return $.inArray(name.name, existed) !== -1 ? name : null ;});
-										if (target == fm.cwd().hash &&
-											$($.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } ))
-												.filter(existed).length < 1
-										) {
-											fm.sync();
+										exists = $.map(names, function(name){
+											return $.inArray(name.name, existed) !== -1 ? name : null ;
+										});
+										if (existed.length && target == fm.cwd().hash) {
+											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
+											if ($.map(existed, function(n) { 
+												return cwdItems.indexOf(n) === -1? true : null;
+											}).length){
+												fm.sync();
+											}
 										}
 									}
 								}
@@ -2920,93 +2937,58 @@ elFinder.prototype = {
 				entries = [],
 				processing = 0,
 				items,
+				mkdirs = [],
 				
 				readEntries = function(dirReader) {
 					var toArray = function(list) {
 						return Array.prototype.slice.call(list || []);
 					};
-					var readFile = function(fileEntry, callback) {
-						var dfrd = $.Deferred();
-						if (typeof fileEntry == 'undefined') {
-							dfrd.reject('empty');
-						} else if (fileEntry.isFile) {
-							fileEntry.file(function (file) {
-								dfrd.resolve(file);
-							}, function(e){
-								dfrd.reject();
-							});
-						} else {
-							dfrd.reject('dirctory');
-						}
-						return dfrd.promise();
-					};
-			
-					dirReader.readEntries(function (results) {
-						if (!results.length) {
-							var len = entries.length - 1;
-							var read = function(i) {
-								readFile(entries[i]).done(function(file){
-									if (! (fm.OS == 'win' && file.name.match(/^(?:desktop\.ini|thumbs\.db)$/i))
-											&&
-										! (fm.OS == 'mac' && file.name.match(/^\.ds_store$/i))) {
-										paths.push(entries[i].fullPath);
-										files.push(file);
-									}
-								}).fail(function(e){
-									if (e == 'dirctory') {
-										// dirctory
-										dirctorys.push(entries[i]);
-									} else if (e == 'empty') {
-										// dirctory is empty
-									} else {
-										// why fail?
-									}
-								}).always(function(){
-									processing--;
-									if (i < len) {
-										processing++;
-										read(++i);
-									}
-								});
-							};
-							processing++;
-							read(0);
-							processing--;
-						} else {
-							entries = entries.concat(toArray(results));
-							readEntries(dirReader);
-						}
-					});
 				},
 				
-				doScan = function(items, isEntry) {
-					var dirReader, entry;
-					entries = [];
+				doScan = function(items) {
+					var dirReader, entry,
+					entries = [],
+					toArray = function(list) {
+						return Array.prototype.slice.call(list || [], 0);
+					};
 					var length = items.length;
 					for (var i = 0; i < length; i++) {
-						if (! isEntry) {
-							entry = !!items[i].getAsEntry? items[i].getAsEntry() : items[i].webkitGetAsEntry();
-						} else {
-							entry = items[i];
-						}
+						entry = items[i];
 						if (entry) {
 							if (entry.isFile) {
 								processing++;
 								entry.file(function (file) {
-									paths.push('');
-									files.push(file);
+									if (! (fm.OS == 'win' && file.name.match(/^(?:desktop\.ini|thumbs\.db)$/i))
+											&&
+										! (fm.OS == 'mac' && file.name.match(/^\.ds_store$/i))) {
+										paths.push(entry.fullPath || '');
+										files.push(file);
+									}
 									processing--;
 								});
 							} else if (entry.isDirectory) {
 								if (fm.api >= 2.1) {
-									if (processing > 0) {
-										dirctorys.push(entry);
-									} else {
-										processing = 0;
-										dirReader = entry.createReader();
-										processing++;
-										readEntries(dirReader);
-									}
+									processing++;
+									mkdirs.push(entry.fullPath);
+									dirReader = entry.createReader();
+									var entries = [];
+									// Call the reader.readEntries() until no more results are returned.
+									var readEntries = function() {
+										 dirReader.readEntries (function(results) {
+											if (!results.length) {
+												for (var i = 0; i < entries.length; i++) {
+													doScan([entries[i]]);
+												}
+												processing--;
+											} else {
+												entries = entries.concat(toArray(results));
+												readEntries();
+											}
+										}, function(){
+											processing--;
+										});
+									};
+									readEntries(); // Start reading dirs.
 								}
 							}
 						}
@@ -3059,19 +3041,14 @@ elFinder.prototype = {
 								notifyto = setTimeout(function() {
 									fm.notify({type : 'readdir', cnt : 1, hideCnt: true});
 								}, fm.options.notifyDelay);
-								doScan(items, true);
+								doScan(items);
 								setTimeout(function wait() {
 									if (processing > 0) {
 										setTimeout(wait, 10);
 									} else {
-										if (dirctorys.length > 0) {
-											doScan([dirctorys.shift()], true);
-											setTimeout(wait, 10);
-										} else {
-											notifyto && clearTimeout(notifyto);
-											fm.notify({type : 'readdir', cnt : -1});
-											dfrd.resolve([files, paths, renames, hashes]);
-										}
+										notifyto && clearTimeout(notifyto);
+										fm.notify({type : 'readdir', cnt : -1});
+										dfrd.resolve([files, paths, renames, hashes, mkdirs]);
 									}
 								}, 10);
 							} else {
@@ -3142,6 +3119,7 @@ elFinder.prototype = {
 				notifyto    = null, notifyto2 = null,
 				dataChecked = data.checked,
 				isDataType  = (data.isDataType || data.type == 'data'),
+				multiMax    = 3,
 				retry       = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -3427,7 +3405,7 @@ elFinder.prototype = {
 				check = function(){
 					if (!self.uploads.xhrUploading) {
 						self.uploads.xhrUploading = true;
-						multi(sfiles, 3); // Max connection: 3
+						multi(sfiles, multiMax); // Max connection: 3
 					} else {
 						setTimeout(function(){ check(); }, 100);
 					}
@@ -3686,11 +3664,48 @@ elFinder.prototype = {
 				if (dataChecked) {
 					send(files[0], files[1]);
 				} else {
-					files.done(function(result){
+					files.done(function(result) { // result: [files, paths, renames, hashes, mkdirs]
 						renames = [];
-						hashes = {};
 						cnt = result[0].length;
 						if (cnt) {
+							if (result[4] && result[4].length) {
+								// ensure directories
+								fm.request({
+									data   : {cmd : 'mkdir', target : target, dirs : result[4]},
+									notify : {type : 'mkdir', cnt : result[4].length}
+								})
+								.fail(function(error) {
+									error = error || ['errUnknown'];
+									if (error[0] === 'errCmdParams') {
+										multiMax = 1;
+									} else {
+										multiMax = 0;
+										dfrd.reject(error);
+									}
+								})
+								.done(function(data) {
+									if (data.hashes) {
+										result[1] = $.map(result[1], function(p) {
+											p = p.replace(/\/[^\/]*$/, '');
+											if (p === '') {
+												return target;
+											} else {
+												return data.hashes[p];
+											}
+										});
+									}
+								})
+								.always(function(data) {
+									if (multiMax) {
+										renames = result[2];
+										hashes = result[3];
+										send(result[0], result[1]);
+									}
+								});
+								return;
+							} else {
+								result[1] = $.map(result[1], function() { return target; });
+							}
 							renames = result[2];
 							hashes = result[3];
 							send(result[0], result[1]);

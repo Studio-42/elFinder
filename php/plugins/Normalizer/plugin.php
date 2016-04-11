@@ -12,8 +12,11 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
- *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre' => array(
+ *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *				'Plugin.Normalizer.cmdPreprocess'
+ *			),
+ *			'ls' => array(
+ *				'Plugin.Normalizer.cmdPostprocess'
  *			),
  *			'upload.presave' => array(
  *				'Plugin.Normalizer.onUpLoadPreSave'
@@ -55,6 +58,11 @@
 class elFinderPluginNormalizer
 {
 	private $opts = array();
+	private $replaced = array();
+	private $keyMap = array(
+		'ls' => 'intersect',
+		'upload' => 'renames'
+	);
 	
 	public function __construct($opts) {
 		$defaults = array(
@@ -73,17 +81,36 @@ class elFinderPluginNormalizer
 		if (! $opts['enable']) {
 			return false;
 		}
+		$this->replaced[$cmd] = array();
+		$key = (isset($this->keyMap[$cmd]))? $this->keyMap[$cmd] : 'name';
 		
-		if (isset($args['name'])) {
-			if (is_array($args['name'])) {
-				foreach($args['name'] as $i => $name) {
-					$args['name'][$i] = $this->normalize($name, $opts);
+		if (isset($args[$key])) {
+			if (is_array($args[$key])) {
+				foreach($args[$key] as $i => $name) {
+					$this->replaced[$cmd][$name] = $args[$key][$i] = $this->normalize($name, $opts);
 				}
 			} else {
-				$args['name'] = $this->normalize($args['name'], $opts);
+				$name = $args[$key];
+				$this->replaced[$cmd][$name] = $args[$key] = $this->normalize($name, $opts);
 			}
 		}
 		return true;
+	}
+	
+	public function cmdPostprocess($cmd, &$result, $args, $elfinder) {
+		if ($cmd === 'ls') {
+			if (! empty($result['list']) && ! empty($this->replaced['ls'])) {
+				foreach($result['list'] as $hash => $name) {
+					if ($keys = array_keys($this->replaced['ls'], $name)) {
+						if (count($keys) === 1) {
+							$result['list'][$hash] = $keys[0];
+						} else {
+							$result['list'][$hash] = $keys;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
@@ -130,11 +157,15 @@ class elFinderPluginNormalizer
 				}
 			}
 		}
-		if ($opts['lowercase']) {
-			$str = strtolower($str);
-		}
 		if ($opts['convmap'] && is_array($opts['convmap'])) {
 			$str = strtr($str, $opts['convmap']);
+		}
+		if ($opts['lowercase']) {
+			if (function_exists('mb_strtolower')) {
+				$str = mb_strtolower($str, 'UTF-8');
+			} else {
+				$str = strtolower($str);
+			}
 		}
 		return $str;
 	}

@@ -20,4 +20,4 @@ elFinder.prototype.commands.home = function() {
 	}
 	
 
-}
+};

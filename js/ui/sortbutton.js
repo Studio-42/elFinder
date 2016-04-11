@@ -83,6 +83,4 @@ $.fn.elfindersortbutton = function(cmd) {
 
 	});
 	
-}
-
-
+};

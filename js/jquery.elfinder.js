@@ -60,7 +60,7 @@ $.fn.elfinder = function(o) {
 		}
 		
 	})
-}
+};
 
 $.fn.getElFinder = function() {
 	var instance;
@@ -73,4 +73,4 @@ $.fn.getElFinder = function() {
 	});
 	
 	return instance;
-}
+};

@@ -125,4 +125,4 @@ elFinder.prototype.commands.rm = function() {
 		return dfrd;
 	}
 
-}
+};

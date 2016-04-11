@@ -22,4 +22,4 @@ elFinder.prototype.commands.view = function() {
 		this.update(void(0), value);
 	}
 
-}
+};

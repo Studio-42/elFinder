@@ -807,4 +807,4 @@ $.fn.elfindertree = function(fm, opts) {
 	});
 	
 	return this;
-}
+};

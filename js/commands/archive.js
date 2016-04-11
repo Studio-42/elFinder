@@ -76,4 +76,4 @@ elFinder.prototype.commands.archive = function() {
 		return makeDfrd;
 	}
 
-}
+};

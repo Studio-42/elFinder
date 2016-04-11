@@ -52,4 +52,4 @@ elFinder.prototype.commands.opendir = function() {
 		return dfrd;
 	}
 
-}
+};

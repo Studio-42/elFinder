@@ -149,7 +149,7 @@ elFinder.prototype.resources = {
 							valid  = true,
 							cut;
 
-						if (parent.length) {
+						if (!inError && parent.length) {
 
 							if (fm.options.validName && fm.options.validName.test) {
 								try {
@@ -241,4 +241,4 @@ elFinder.prototype.resources = {
 
 		}
 	}
-}
+};

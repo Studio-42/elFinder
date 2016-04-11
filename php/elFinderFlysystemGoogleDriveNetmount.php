@@ -18,7 +18,7 @@ if (! class_exists('elFinderVolumeFlysystemGoogleDriveCache', false)) {
     }
 }
 
-class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysystemDriver\Driver
+class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysystemDriverExt\Driver
 {
 
     public function __construct()
@@ -59,9 +59,10 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
      * Prepare
      * Call from elFinder::netmout() before volume->mount()
      *
+     * @param $options
      * @return Array
      * @author Naoki Sawada
-     **/
+     */
     public function netmountPrepare($options)
     {
         if (empty($options['client_id']) && defined('ELFINDER_GOOGLEDRIVE_CLIENTID')) {
@@ -226,9 +227,11 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
     /**
      * process of on netunmount
      * Drop table `dropbox` & rm thumbs
-     * 
-     * @param array $options
-     * @return boolean
+     *
+     * @param $netVolumes
+     * @param $key
+     * @return bool
+     * @internal param array $options
      */
     public function netunmount($netVolumes, $key)
     {
@@ -246,12 +249,13 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
 
     /**
      * "Mount" volume.
-     * Return true if volume available for read or write, 
+     * Return true if volume available for read or write,
      * false - otherwise
      *
+     * @param array $opts
      * @return bool
      * @author Naoki Sawada
-     **/
+     */
     public function mount(array $opts)
     {
         $creds = null;
@@ -296,8 +300,9 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             $filesystem = new Filesystem($googleDrive);
         }
 
-        $opts['driver'] = 'Flysystem';
+        $opts['driver'] = 'FlysystemExt';
         $opts['filesystem'] = $filesystem;
+        $opts['checkSubfolders'] = true;
         if (! isset($opts['alias'])) {
             $opts['alias'] = 'GoogleDrive';
         }

@@ -433,5 +433,4 @@ elFinder.prototype.commands.quicklook = function() {
 		this.info.stop(true).hide();
 	}
 
-}
-
+};

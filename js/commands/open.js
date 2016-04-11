@@ -152,4 +152,4 @@ elFinder.prototype.commands.open = function() {
 		return dfrd.resolve(hashes);
 	}
 
-}
+};
