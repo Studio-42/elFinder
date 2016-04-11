@@ -49,7 +49,8 @@ var dirmode = 0755,
 				path.join(src, 'php', 'elFinderSessionInterface.php')
 			]
 			.concat(grep(path.join(src, 'php'), '\\.class\.php$'))
-			.concat(grep(path.join(src, 'php'), 'Netmount\.php$')),
+			.concat(grep(path.join(src, 'php'), 'Netmount\.php$'))
+			.concat(grep(path.join(src, 'php', 'libs'), '\.php$')),
 		'misc':
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
@@ -136,7 +137,7 @@ desc('pre build task');
 task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
-	var dir = ['css', 'js', 'img', 'sounds', path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'), 'php', 'files'];
+	var dir = ['css', 'js', 'img', 'sounds', path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'), 'php', path.join('php', 'libs'), 'files'];
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
 		for (var i in plugins) {
