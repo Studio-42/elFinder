@@ -1,8 +1,9 @@
-2016-0x-xx  
+2016-04-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.11):
 		- Added Archive(zip|gzip|tar) quicklook preview plugin
 		- DnD upload supports Microsoft Edge
+		- Fixed problem which directory is not detected in the LocalFileSystem driver (Bug of 2.1.10)
 		- And some minor bug fixes
 
 
