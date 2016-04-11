@@ -18,7 +18,7 @@ if (! class_exists('elFinderVolumeFlysystemGoogleDriveCache', false)) {
     }
 }
 
-class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysystemDriver\Driver
+class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysystemDriverExt\Driver
 {
 
     public function __construct()
@@ -300,7 +300,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Barryvdh\elFinderFlysy
             $filesystem = new Filesystem($googleDrive);
         }
 
-        $opts['driver'] = 'Flysystem' . (class_exists('elFinderVolumeFlysystemExt')? 'Ext' : '');
+        $opts['driver'] = 'FlysystemExt';
         $opts['filesystem'] = $filesystem;
         $opts['checkSubfolders'] = true;
         if (! isset($opts['alias'])) {

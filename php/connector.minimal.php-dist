@@ -35,7 +35,7 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeLocalFileSyste
 
 // // Required for Google Drive network mount
 // // Installation by composer
-// // `composer require nao-pon/flysystem-google-drive:~1.1 google/apiclient:~2.0@rc barryvdh/elfinder-flysystem-driver`
+// // `composer require nao-pon/flysystem-google-drive:~1.1 google/apiclient:~2.0@rc nao-pon/elfinder-flysystem-driver-ext`
 // // composer autoload
 // require 'vendor/autoload.php';
 // // Enable network mount
