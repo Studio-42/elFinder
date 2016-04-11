@@ -97,7 +97,7 @@ Requirements
 
 ### Server
  * Any web server
- * PHP 5.2+ (for thumbnails - mogrify utility or GD/Imagick module)
+ * PHP 5.2+ (Recommend PHP 5.4 or higher) And for thumbnails - GD/Imagick module require
 
 Installation
 ------------
@@ -122,7 +122,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.10](https://github.com/Studio-42/elFinder/archive/2.1.10.zip)
+ + [elFinder 2.1.11](https://github.com/Studio-42/elFinder/archive/2.1.11.zip)
  + [elFinder 2.0.6](https://github.com/Studio-42/elFinder/archive/2.0.6.zip)
 
 **Nightly builds**
@@ -142,9 +142,9 @@ Demo sites
 FAQs
 ------------
 ### Which version of elFinder should I use?
-* **2.0.x** if you want to use 2.0 with legacy connectors.
+* **2.0.x** if you do not need 2.1 of the advanced features.
 
-* **2.1.x** if you want to try the experimental (*bleeding edge, but connector is PHP only*).
+* **2.1.x** if you want to try the experimental (*bleeding edge, but API 2.1 connector is PHP only*). It is also available from the connector on the API 1.x and 2.0.
 
 ### Should I use elFinder builds (compressed) or source (uncompressed)?
 
@@ -162,10 +162,11 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party connectors
 --------------------
+ * [ASP.NET](https://github.com/leniel/elFinder.Net)
+ * [Java Servlet](https://github.com/trustsystems/elfinder-java-connector)
  * [Python](https://github.com/Studio-42/elfinder-python)
- * [Django](https://github.com/mikery/django-elfinder)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
- * [Java Servlet](https://github.com/Studio-42/elfinder-servlet)
+ * [Django](https://github.com/mikery/django-elfinder)
  * [Laravel](https://github.com/barryvdh/laravel-elfinder)
 
 3rd party Volume Drivers
@@ -176,6 +177,7 @@ You can create or modify the language file to use translation tool. Please refer
 --------------------
  * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
  * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
+ * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/elfinder-bootstrap-theme)
 
 Support
 -------
@@ -183,7 +185,6 @@ Support
  * [Homepage](http://elfinder.org)
  * [Wiki](https://github.com/Studio-42/elFinder/wiki)
  * [Issues](https://github.com/Studio-42/elFinder/issues)
- * [Forum](http://elfinder.org/forum/)
  * <dev@std42.ru>
 
 
