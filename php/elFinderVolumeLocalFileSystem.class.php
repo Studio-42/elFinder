@@ -673,7 +673,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 						$stat['mime'] = $dir ? 'directory' : $this->mimetype($stat['alias']);
 					}
 				} else {
-					if ($dir = $file->isDir() && $this->options['detectDirIcon']) {
+					if (($dir = $file->isDir()) && $this->options['detectDirIcon']) {
 						$path = $file->getPathname();
 						$favicon = $path . DIRECTORY_SEPARATOR . $this->options['detectDirIcon'];
 						if ($this->URL && file_exists($favicon)) {
