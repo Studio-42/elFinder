@@ -615,6 +615,13 @@ window.elFinder = function(node, opts) {
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
 
 	/**
+	 * elFinder node z-index (auto detect on elFinder load)
+	 *
+	 * @type null | Number
+	 **/
+	this.zIndex;
+
+	/**
 	 * Current search status
 	 * 
 	 * @type Object
@@ -2367,6 +2374,20 @@ window.elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
+			// detect elFinder node z-index
+			var ni = node.css('z-index');
+			if (ni && ni !== 'auto' && ni !== 'inherit') {
+				self.zIndex = ni;
+			} else {
+				node.parents().each(function(i, n) {
+					var z = $(n).css('z-index');
+					if (z && z !== 'auto' && z !== 'inherit') {
+						self.zIndex = z;
+						return false;
+					}
+				});
+			}
+			
 			self.load().debug('api', self.api);
 			data = $.extend(true, {}, data);
 			open(data);

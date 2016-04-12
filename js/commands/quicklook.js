@@ -382,6 +382,10 @@ elFinder.prototype.commands.quicklook = function() {
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
+			if (fm.zIndex) {
+				win.css('z-index', fm.zIndex + 1);
+			}
+			
 			win.appendTo('body');
 			
 			// close window on escape
