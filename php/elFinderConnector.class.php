@@ -105,7 +105,7 @@ class elFinderConnector {
 			} else {
 				$arg = isset($src[$name])? $src[$name] : '';
 			
-				if (!is_array($arg)) {
+				if (!is_array($arg) && $req !== '') {
 					$arg = trim($arg);
 				}
 				if ($req && $arg === '') {
