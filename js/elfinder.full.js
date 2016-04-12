@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2016-04-11)
+ * Version 2.1.11 (2.1-src Nightly: d3490d7) (2016-04-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -627,6 +627,13 @@ window.elFinder = function(node, opts) {
 	 * @type String
 	 **/
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+' '+this.options.cssClass;
+
+	/**
+	 * elFinder node z-index (auto detect on elFinder load)
+	 *
+	 * @type null | Number
+	 **/
+	this.zIndex;
 
 	/**
 	 * Current search status
@@ -2381,6 +2388,20 @@ window.elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
+			// detect elFinder node z-index
+			var ni = node.css('z-index');
+			if (ni && ni !== 'auto' && ni !== 'inherit') {
+				self.zIndex = ni;
+			} else {
+				node.parents().each(function(i, n) {
+					var z = $(n).css('z-index');
+					if (z && z !== 'auto' && z !== 'inherit') {
+						self.zIndex = z;
+						return false;
+					}
+				});
+			}
+			
 			self.load().debug('api', self.api);
 			data = $.extend(true, {}, data);
 			open(data);
@@ -4896,7 +4917,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d3490d7)';
 
 
 
@@ -7080,7 +7101,6 @@ $.fn.elfindercontextmenu = function(fm) {
 			exIcon = 'elfinder-contextmenu-extra-icon',
 			menu = self.addClass('ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
-				.appendTo('body')
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
 					$(this).toggleClass('ui-state-hover', e.type === 'mouseenter');
 				})
@@ -7098,28 +7118,27 @@ $.fn.elfindercontextmenu = function(fm) {
 						e.stopPropagation();
 						e.preventDefault();
 						callback();
-					})
+					});
 			},
-			
+			base,
 			open = function(x, y) {
-				var win        = $(window),
-					width      = menu.outerWidth(),
+				var width      = menu.outerWidth(),
 					height     = menu.outerHeight(),
-					wwidth     = win.width(),
-					wheight    = win.height(),
-					scrolltop  = win.scrollTop(),
-					scrollleft = win.scrollLeft(),
-					mw         = fm.UA.Touch? 30 : 0,
-					mh         = fm.UA.Touch? 20 : 0,
+					bpos       = base.offset(),
+					bwidth     = base.width(),
+					bheight    = base.height(),
+					mw         = fm.UA.Mobile? 30 : 2,
+					mh         = fm.UA.Mobile? 20 : 2,
+					body       = $('body'),
+					x          = x - (bpos? bpos.left : 0) + body.scrollLeft(),
+					y          = y - (bpos? bpos.top : 0) + body.scrollTop(),
 					css        = {
-						top  : Math.max(0, y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh)),
-						left : Math.max(0, x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width)
+						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - mh - height),
+						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width)
 					};
 
-				menu.css(css)
-					.show();
+				menu.css(css).show();
 				
-				//alert(navigator.platform);
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
 				if (fm.UA.iOS) {
@@ -7192,7 +7211,6 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 
 					if (cmd && cmd.getstate(targets) != -1) {
-						//targets._type = type;
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
@@ -7217,30 +7235,44 @@ $.fn.elfindercontextmenu = function(fm) {
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
-							hover = function(){
-									var win    = $(window),
-									baseleft   = $(node).offset().left,
-									basetop    = $(node).offset().top,
-									basewidth  = $(node).outerWidth(),
+							hover = function(show){
+								var nodeOffset = node.offset(),
+									baseleft   = nodeOffset.left,
+									basetop    = nodeOffset.top,
+									basewidth  = node.outerWidth(),
 									width      = submenu.outerWidth(),
 									height     = submenu.outerHeight(),
-									wwidth     = win.scrollLeft() + win.width(),
-									wheight    = win.scrollTop() + win.height(),
-									margin     = 5, x, y, over;
+									baseOffset = base.offset(),
+									wwidth     = baseOffset.left + base.width(),
+									wheight    = baseOffset.top + base.height(),
+									x, y, over;
 
-									over = (baseleft + basewidth + width + margin) - wwidth;
-									x = (over > 0)? basewidth - over : basewidth;
-									over = (basetop + 5 + height + margin) - wheight;
-									y = (over > 0)? 5 - over : 5;
+								over = (baseleft + basewidth + width) - wwidth;
+								x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
+								over = (basetop + 5 + height) - wheight;
+								y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
 
-									var css = {
-										left : x,
-										top : y
-									};
-									submenu.css(css).toggle();
+								submenu.css({ left : x, top : y }).toggle(show);
 							};
 							
-							node.addClass('elfinder-contextmenu-group').hover(function(){ hover(); });
+							node.addClass('elfinder-contextmenu-group').hover(function(e){
+								if (fm.UA.Mobile) {
+									hover(e.type === 'mouseenter');
+								} else {
+									if (e.type === 'mouseleave') {
+										node.data('timer', setTimeout(function() {
+											node.data('timer', null);
+											hover(false);
+										}, 250));
+									} else {
+										if (node.data('timer')) {
+											clearTimeout(node.data('timer'));
+											node.data('timer', null);
+										}
+										hover(true);
+									}
+								}
+							});
 							
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
@@ -7299,6 +7331,7 @@ $.fn.elfindercontextmenu = function(fm) {
 		
 		fm.one('load', function() {
 			var uiCwd = fm.getUI('cwd');
+			base = fm.getUI();
 			fm.bind('contextmenu', function(e) {
 				var data = e.data;
 
@@ -14554,6 +14587,10 @@ elFinder.prototype.commands.quicklook = function() {
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
+			if (fm.zIndex) {
+				win.css('z-index', fm.zIndex + 1);
+			}
+			
 			win.appendTo('body');
 			
 			// close window on escape
