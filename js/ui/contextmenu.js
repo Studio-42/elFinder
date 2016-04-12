@@ -45,7 +45,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					x          = x - (bpos? bpos.left : 0) + body.scrollLeft(),
 					y          = y - (bpos? bpos.top : 0) + body.scrollTop(),
 					css        = {
-						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - mh - height),
+						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
 						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width)
 					};
 
