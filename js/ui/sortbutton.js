@@ -58,7 +58,7 @@ $.fn.elfindersortbutton = function(cmd) {
 				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
 				stick : fm.sortStickFolders
 			});
-		})
+		});
 		
 		$('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)

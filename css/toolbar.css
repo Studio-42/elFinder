@@ -161,8 +161,8 @@
 }
 
 .elfinder-button-menu-item-selected .ui-icon { display:block; }
-.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-n { display:none; }
-.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-n { display:none; }
 
 /* hack for upload button */
 .elfinder-button form {

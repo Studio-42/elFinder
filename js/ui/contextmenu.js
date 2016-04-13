@@ -225,6 +225,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
+									variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
 									$('<div class="'+clItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
 								);
 							});
