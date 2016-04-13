@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d52cc33) (2016-04-13)
+ * Version 2.1.11 (2.1-src Nightly: 2884681) (2016-04-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -433,7 +433,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	background:#fff;
 	color:#555;
 	padding:4px 0;
-	/*font-size: .96em;*/
 }
 
 /* submenu */
@@ -466,10 +465,17 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width:16px;
 	height:16px;
 	position:absolute;
-	left:2px;
+	left:auto;
+	right:auto;
 	top:50%;
 	margin-top:-8px;
 	display:none;
+}
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
+	left: 2px;;
+}
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item .ui-icon {
+	right: 2px;;
 }
 .elfinder .elfinder-contextmenu-item.elfinder-touch {
 	padding:12px 30px;
@@ -1868,8 +1874,8 @@ embed.elfinder-quicklook-preview-audio {
 }
 
 .elfinder-button-menu-item-selected .ui-icon { display:block; }
-.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-n { display:none; }
-.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-n { display:none; }
 
 /* hack for upload button */
 .elfinder-button form {

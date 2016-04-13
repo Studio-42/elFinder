@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d52cc33) (2016-04-13)
+ * Version 2.1.11 (2.1-src Nightly: 2884681) (2016-04-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4917,7 +4917,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d52cc33)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 2884681)';
 
 
 
@@ -7269,6 +7269,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){
+								submenu.css({ left: 'auto', right: 'auto' });
 								var nodeOffset = node.offset(),
 									baseleft   = nodeOffset.left,
 									basetop    = nodeOffset.top,
@@ -7282,10 +7283,13 @@ $.fn.elfindercontextmenu = function(fm) {
 
 								over = (baseleft + basewidth + width) - wwidth;
 								x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
+								if (subpos === 'right' && baseleft < width) {
+									x = fm.UA.Mobile? 30 - basewidth : basewidth - (width - baseleft);
+								}
 								over = (basetop + 5 + height) - wheight;
 								y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
 
-								submenu.css({ left : x, top : y }).toggle(show);
+								submenu.css({ top : y }).css(subpos, x).toggle(show);
 							};
 							
 							node.addClass('elfinder-contextmenu-group').hover(function(e){
@@ -7309,6 +7313,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
+									variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
 									$('<div class="'+clItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
 								);
 							});
@@ -10228,7 +10233,7 @@ $.fn.elfindersortbutton = function(cmd) {
 				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
 				stick : fm.sortStickFolders
 			});
-		})
+		});
 		
 		$('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
@@ -16627,9 +16632,18 @@ elFinder.prototype.commands.sort = function() {
 					type  : name,
 					order : name == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
 				};
-			var arr = name == fm.sortType ? (sort.order == 'asc'? 'n' : 's') : '';
+			var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
 			self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
 		});
+		self.variants.push('|');
+		self.variants.push([
+			{
+				type  : fm.sortType,
+				order : fm.sortOrder,
+				stick : !fm.sortStickFolders
+			},
+			(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
+		]);
 	});
 	
 	fm.bind('open sortchange viewchange search searchend', function() {
