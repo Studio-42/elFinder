@@ -7,7 +7,6 @@
 	background:#fff;
 	color:#555;
 	padding:4px 0;
-	/*font-size: .96em;*/
 }
 
 /* submenu */
@@ -40,10 +39,17 @@
 	width:16px;
 	height:16px;
 	position:absolute;
-	left:2px;
+	left:auto;
+	right:auto;
 	top:50%;
 	margin-top:-8px;
 	display:none;
+}
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
+	left: 2px;;
+}
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item .ui-icon {
+	right: 2px;;
 }
 .elfinder .elfinder-contextmenu-item.elfinder-touch {
 	padding:12px 30px;
