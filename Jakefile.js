@@ -37,7 +37,7 @@ var dirmode = 0755,
 		'images':	grep(path.join(src, 'img'), '\\.png|\\.gif'),
 
 		'sounds':	grep(path.join(src, 'sounds'), '\\.wav'),
-		
+
 		'i18n': grep(path.join(src, 'js', 'i18n'), '\\.js', 'elfinder.en.js'),
 
 		'php':
@@ -48,9 +48,9 @@ var dirmode = 0755,
 				path.join(src, 'php', 'elFinderSession.php'),
 				path.join(src, 'php', 'elFinderSessionInterface.php')
 			]
-			.concat(grep(path.join(src, 'php'), '\\.class\.php$'))
-			.concat(grep(path.join(src, 'php'), 'Netmount\.php$'))
-			.concat(grep(path.join(src, 'php', 'libs'), '\.php$')),
+			.concat(grep(path.join(src, 'php'), '\\.class\\.php$'))
+			.concat(grep(path.join(src, 'php'), 'Netmount\\.php$'))
+			.concat(grep(path.join(src, 'php', 'libs'), '\\.php$')),
 		'misc':
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
@@ -176,7 +176,7 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var css_optimized = csso.justDoIt(fs.readFileSync('css/elfinder.full.css').toString());
+	var css_optimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString());
 	fs.writeFileSync(this.name, getComment() + css_optimized);
 });
 
@@ -245,16 +245,21 @@ task('misc', function(){
 desc('clean build dir');
 task('clean', function(){
 	console.log('cleaning the floor');
-	uf = ['js/elfinder.full.js', 'js/elfinder.min.js', 'css/elfinder.full.css', 'css/elfinder.min.css'];
+	uf = [path.join('js', 'elfinder.full.js'), path.join('js', 'elfinder.min.js'),
+		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css')];
 	// clean images, sounds, js/i18n and php only if we are not in src
 	if (src != path.resolve()) {
 		uf = uf
+			.concat(path.join('css', 'theme.css'))
 			.concat(grep('img', '\\.png|\\.gif'))
 			.concat(grep('sounds', '\\.wav'))
 			.concat(grep(path.join('js', 'i18n')))
-			.concat(path.join('css', 'theme.css'))
-			.concat(grep('php'))
-			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', path.join('files', 'readme.txt')]);
+			.concat(grep(path.join('js', 'extras')))
+			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', path.join('files', 'readme.txt')])
+			.concat(grep('php', '\\.php|\\.sql'))
+			.concat(path.join('php', 'mime.types'))
+			.concat(grep(path.join('php', 'libs')));
+		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
 	}
 	for (f in uf) {
 		var file = uf[f];
@@ -267,7 +272,12 @@ task('clean', function(){
 	// 	fs.unlinkSync('elfinder.html');
 	// }
 	if (src != path.resolve()) {
-		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'sounds', 'php', 'files'];
+		var ud = [
+			'css', 'img', 'sounds', 'files',
+			path.join('js', 'proxy'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
+			path.join('php', 'libs'), path.join('php', 'libs')]
+			.concat(grep(path.join('php', 'plugins')))
+			.concat([path.join('php', 'plugins'), 'php']);
 		for (d in ud) {
 			var dir = ud[d];
 			if (fs.existsSync(dir)) {
