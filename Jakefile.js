@@ -2,7 +2,7 @@
  * This is build file for elFinder 2.x
  * Build tool:    https://github.com/mde/jake
  * JS compressor: https://github.com/mishoo/UglifyJS/
- * CSS optimizer: https://github.com/afelix/csso
+ * CSS optimizer: https://github.com/css/csso
  */
 
 // if Jake fails to detect need libraries try running before: export NODE_PATH=`npm root`
@@ -176,7 +176,7 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var css_optimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString());
+	var css_optimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
 	fs.writeFileSync(this.name, getComment() + css_optimized);
 });
 
