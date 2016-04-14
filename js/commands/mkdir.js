@@ -14,14 +14,23 @@ elFinder.prototype.commands.mkdir = function() {
 	this.updateOnSelect  = false;
 	this.mime            = 'directory';
 	this.prefix          = 'untitled folder';
-	this.exec            = $.proxy(fm.res('mixin', 'make'), this);
+	this.exec            = function(contextSel) {
+		if (! contextSel && ! this.options.intoNewFolderToolbtn) {
+			fm.getUI('cwd').trigger('unselectall');
+		}
+		return $.proxy(fm.res('mixin', 'make'), self)();
+	}
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+shift+n'
 	}];
 
-	this.options = { ui : 'mkdirbutton' };
-
+	this.init = function() {
+		if (this.options.intoNewFolderToolbtn) {
+			this.options.ui = 'mkdirbutton';
+		}
+	}
+	
 	fm.bind('select', function(e) {
 		var sel = (e.data && e.data.selected)? e.data.selected : [];
 		self.title = sel.length? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
