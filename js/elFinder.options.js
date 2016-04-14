@@ -301,7 +301,10 @@ elFinder.prototype._options = {
 				// }
 			}
 		},
-		
+		mkdir: {
+			// Enable automatic switching function ["New Folder" / "Into New Folder"] of toolbar buttton
+			intoNewFolderToolbtn: false,
+		},
 		netmount: {
 			ftp: {
 				name : 'FTP',
