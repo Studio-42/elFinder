@@ -659,11 +659,15 @@ class elFinder {
 			);
 		}
 		
-		if (isset($result['removed'])) {
-			foreach ($this->volumes as $volume) {
+		foreach ($this->volumes as $volume) {
+			if (isset($result['removed'])) {
 				$result['removed'] = array_merge($result['removed'], $volume->removed());
-				$volume->resetRemoved();
 			}
+			if (isset($result['added'])) {
+				$result['added'] = array_merge($result['added'], $volume->added());
+				debug($result);
+			}
+			$volume->resetResultStat();
 		}
 		
 		// call handlers for this command
@@ -2281,8 +2285,14 @@ class elFinder {
 				$result['warning'] = $this->error($dstVolume->error());
 				break;
 			}
-			
-			$result['added'][] = $file;
+
+			$dirChange = ! empty($file['dirChange']);
+			unset($file['dirChange']);
+			if ($dirChange) {
+				$result['changed'][] = $file;
+			} else {
+				$result['added'][] = $file;
+			}
 			if ($rnres) {
 				$result = array_merge_recursive($result, $rnres);
 			}
@@ -2687,10 +2697,12 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function filter($files) {
+		$exists = array();
 		foreach ($files as $i => $file) {
-			if (!empty($file['hidden']) || !$this->default->mimeAccepted($file['mime'])) {
+			if (isset($exists[$file['hash']]) || !empty($file['hidden']) || !$this->default->mimeAccepted($file['mime'])) {
 				unset($files[$i]);
 			}
+			$exists[$file['hash']] = true;
 		}
 		return array_merge($files, array());
 	}
