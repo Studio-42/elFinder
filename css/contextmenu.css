@@ -51,7 +51,7 @@
 .elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item .ui-icon {
 	right: 2px;;
 }
-.elfinder .elfinder-contextmenu-item.elfinder-touch {
+.elfinder-touch .elfinder-contextmenu-item {
 	padding:12px 30px;
 }
 
