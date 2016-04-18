@@ -362,6 +362,8 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect); 
 					trigger();
+				} else {
+					fm.select({selected: []});
 				}
 			},
 			

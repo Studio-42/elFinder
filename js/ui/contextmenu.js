@@ -122,6 +122,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						});
 					}
 				}
+				if (type === 'navbar') {
+					fm.select({selected: targets});
+				}
 
 				selcnt = fm.selected().length;
 				if (selcnt > 1) {
@@ -166,6 +169,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								setTimeout(function(){node.data('touching', false);}, 50);
 							})
 							.on('click touchend', '.'+smItem, function(e){
+								var opts;
 								e.stopPropagation();
 								if (node.data('touching')) {
 									node.data('touching', false);
@@ -173,7 +177,11 @@ $.fn.elfindercontextmenu = function(fm) {
 									e.preventDefault();
 								} else if (e.type == 'click') {
 									menu.hide();
-									cmd.exec(targets, $(this).data('exec'));
+									opts = $(this).data('exec');
+									if ($.isPlainObject(opts)) {
+										opts._currentType = type;
+									}
+									cmd.exec(targets, opts);
 								}
 							});
 							
@@ -233,7 +241,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						} else {
 							node = item(cmd.title, cmd.name, function() {
 								close();
-								cmd.exec(targets);
+								cmd.exec(targets, {_currentType: type});
 							});
 							if (cmd.extra && cmd.extra.node) {
 								node.append(
