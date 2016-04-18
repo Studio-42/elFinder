@@ -22,7 +22,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			} 
 		});
 			
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file = e.file,
 				img;
 
@@ -38,7 +38,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						// sometimes cant get image height 0_o
 						setTimeout(function() {
 							var prop = (img.width()/img.height()).toFixed(2);
-							preview.bind('changesize', function() {
+							preview.on('changesize', function() {
 								var pw = parseInt(preview.width()),
 									ph = parseInt(preview.height()),
 									w, h;
@@ -77,7 +77,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			fm      = ql.fm;
 			
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file = e.file, jqxhr;
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
@@ -114,7 +114,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview;
 				
 			
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file = e.file,
 				mime = file.mime,
 				jqxhr;
@@ -162,13 +162,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		}
 
-		active && preview.bind('update', function(e) {
+		active && preview.on('update', function(e) {
 			var file = e.file, node;
 			
 			if (file.mime == mime) {
 				e.stopImmediatePropagation();
 				preview.one('change', function() {
-					node.unbind('load').remove();
+					node.off('load').remove();
 				});
 				
 				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
@@ -205,7 +205,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		active && preview.bind('update', function(e) {
+		active && preview.on('update', function(e) {
 			var file = e.file,
 				node;
 				
@@ -241,7 +241,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 
@@ -252,7 +252,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.appendTo(preview);
 				autoplay && node[0].play();
 			}
-		}).bind('change', function() {
+		}).on('change', function() {
 			if (node && node.parent().length) {
 				node[0].pause();
 				node.remove();
@@ -279,7 +279,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node;
 
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file = e.file,
 				type = mimes[file.mime];
 				
@@ -291,7 +291,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				autoplay && node[0].play();
 				
 			}
-		}).bind('change', function() {
+		}).on('change', function() {
 			if (node && node.parent().length) {
 				node[0].pause();
 				node.remove();
@@ -316,7 +316,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		});
 		
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var file  = e.file,
 				mime  = file.mime,
 				video;
@@ -327,7 +327,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
 					.appendTo(preview);
 			}
-		}).bind('change', function() {
+		}).on('change', function() {
 			if (node && node.parent().length) {
 				node.remove();
 				node= null;
@@ -347,7 +347,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			fm      = ql.fm;
 
 		if (typeof Uint8Array !== 'undefined') {
-			preview.bind('update', function(e) {
+			preview.on('update', function(e) {
 				var file = e.file,
 					doc, xhr, loading;
 
@@ -450,7 +450,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			mimes   = ql.options.googleDocsMimes || [],
 			preview = ql.preview;
 			
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var win  = ql.window,
 				file = e.file, node, loading;
 			
