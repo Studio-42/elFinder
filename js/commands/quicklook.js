@@ -271,7 +271,7 @@ elFinder.prototype.commands.quicklook = function() {
 				file = self.value,
 				node;
 
-			if (self.closed() && file && (node = cwd.find('#'+fm.cwdHash2Id(file.hash))).length) {
+			if (self.closed() && file && (node = $('#'+fm.cwdHash2Id(file.hash))).length) {
 				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
@@ -426,7 +426,10 @@ elFinder.prototype.commands.quicklook = function() {
 	}
 	
 	this.getstate = function() {
-		return this.fm.selected().length == 1 ? state == opened ? 1 : 0 : -1;
+		var fm  = this.fm,
+			sel = fm.selected(),
+			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
+		return chk? state == opened ? 1 : 0 : -1;
 	}
 	
 	this.exec = function() {
