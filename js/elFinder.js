@@ -2381,7 +2381,7 @@ window.elFinder = function(node, opts) {
 			} else {
 				node.parents().each(function(i, n) {
 					var z = $(n).css('z-index');
-					if (z && z !== 'auto' && z !== 'inherit') {
+					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
 						self.zIndex = z;
 						return false;
 					}
