@@ -144,6 +144,9 @@
 	padding:5px 19px;
 	position:relative;
 }
+.elfinder-touch .elfinder-button-menu-item {
+	padding: 12px 19px
+}
 
 /* fix hover ui class */
 .elfinder-button-menu .ui-state-hover { border:0 solid; }

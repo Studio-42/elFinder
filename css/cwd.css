@@ -262,11 +262,11 @@
 	box-sizing: content-box;
 }
 
-.elfinder .elfinder-cwd tr.elfinder-touch td {
+.elfinder-touch .elfinder-cwd tr td {
 	padding: 10px 12px;
 }
 
-.elfinder .elfinder-cwd tr.elfinder-cwd-file.elfinder-touch td {
+.elfinder-touch .elfinder-cwd tr.elfinder-cwd-file td {
 	padding: 13px 12px;
 }
 

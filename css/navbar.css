@@ -40,7 +40,7 @@
 	border:1px solid transparent;
 	cursor:default;
 }
-.elfinder-navbar-dir.elfinder-touch {
+.elfinder-touch .elfinder-navbar-dir {
 	padding: 12px 12px;
 }
 
