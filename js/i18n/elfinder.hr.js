@@ -5,7 +5,7 @@
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.hr = {
 		translator : '',
-		language   : 'hr',
+		language   : 'Croatian',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y. H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
@@ -330,8 +330,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'perm'            : 'Dozvole', // from v2.1 added 20.6.2015
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
 			'emptyFolder'     : 'Mapa je prazna', // from v2.1.6 added 30.12.2015
-			'emptyFolderDrop' : 'Mapa je prazna\\Dovuci dokumente koje želiš dodati', // from v2.1.6 added 30.12.2015
-			'emptyFolderLTap' : 'Mapa je prazna\\Pritisni dugo za dodavanje dokumenata', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Mapa je prazna\\A Dovuci dokumente koje želiš dodati', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Mapa je prazna\\A Pritisni dugo za dodavanje dokumenata', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Kvaliteta', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Gore',  // from v2.1.6 added 18.1.2016
