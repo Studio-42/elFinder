@@ -129,9 +129,12 @@ elFinder.prototype.commands.quicklook = function() {
 		 * @type jQuery
 		 **/
 		cwd, 
+		navdrag = false,
+		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
 		title   = $('<div class="elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
 		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
+		cover   = $('<div class="elfinder-quicklook-cover"/>'),
 		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
 			.mousedown(function(e) {
 				var win     = self.window,
@@ -142,9 +145,11 @@ elFinder.prototype.commands.quicklook = function() {
 				e.stopPropagation();
 				
 				if (full) {
-					win.css(win.data('position')).off('mousemove touchstart');
+					win.css(win.data('position'));
 					$window.off(scroll).trigger(self.resize).off(self.resize);
-					navbar.off('mouseenter touchstart').off('mousemove');
+					navbar.off('mouseenter');
+					cover.data('tm') && clearTimeout(cover.data('tm'));
+					cover.hide().off(coverEv);
 				} else {
 					win.data('position', {
 						left   : win.css('left'), 
@@ -168,20 +173,37 @@ elFinder.prototype.commands.quicklook = function() {
 					})
 					.trigger(scroll)
 					.trigger(self.resize);
+
+					cover.on(coverEv, function(e) {
+						if (! navdrag) {
+							e.stopPropagation();
+							if (e.type === 'mousemove' || e.type === 'touchstart') {
+								navbar.stop(true, true).show().delay(3000).fadeOut('slow');
+							}
+							if (cover.is(':visible')) {
+								cover.hide();
+								cover.data('tm', setTimeout(function() {
+									cover.show();
+								}, 3000));
+							}
+						}
+					}).show().trigger('mousemove');
 					
-					win.on('mousemove touchstart', function(e) {
-						navbar.stop(true, true).show().delay(3000).fadeOut('slow');
-					})
-					.mousemove();
-					
-					navbar.on('mouseenter touchstart', function() {
+					navbar.on('mouseenter', function() {
 						navbar.stop(true, true).show();
-					})
-					.mousemove(function(e) {
-						e.stopPropagation();
 					});
 				}
-				navbar.attr('style', '').draggable(full ? 'destroy' : {});
+				if (! fm.UA.Mobile) {
+					navbar.attr('style', '').draggable(full ? 'destroy' : {
+						start: function() {
+							cover.show();
+							navdrag = true;
+						},
+						stop: function() {
+							navdrag = false;
+						}
+					});
+				}
 				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
@@ -189,6 +211,8 @@ elFinder.prototype.commands.quicklook = function() {
 					collection = collection.add(parent);
 				};
 				$.fn.resizable && !fm.UA.Touch && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+
+				win.trigger('viewchange');
 			}),
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
@@ -210,7 +234,6 @@ elFinder.prototype.commands.quicklook = function() {
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
 			info.html('');
-
 		})
 		// update info/icon
 		.on('update', function(e) {
@@ -245,6 +268,11 @@ elFinder.prototype.commands.quicklook = function() {
 						.attr('src', (tmb = fm.tmb(file.hash)));
 				}
 				self.info.delay(100).fadeIn(10);
+				setTimeout(function() {
+					if (fm.UA.Mobile || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
+						cover.trigger('mousemove');
+					}
+				}, 100);
 			} else { 
 				e.stopImmediatePropagation();
 			}
@@ -257,14 +285,17 @@ elFinder.prototype.commands.quicklook = function() {
 		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
-				.append(title)
-				.append($('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
+			.append(
+				title,
+				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
 					e.stopPropagation();
 					self.window.trigger('close');
-				}))
-		)
-		.append(this.preview.add(navbar))
-		.append(self.info.hide())
+				})),
+				this.preview,
+				self.info.hide(),
+				cover.hide(),
+				navbar
+			)
 		.draggable({handle : 'div.elfinder-quicklook-titlebar'})
 		.on('open', function(e) {
 			var win  = self.window, 
@@ -275,11 +306,14 @@ elFinder.prototype.commands.quicklook = function() {
 				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
+				cover.data('tm') && clearTimeout(cover.data('tm'));
+				cover.hide();
 				win.css(closedCss(node))
 					.show()
 					.animate(openedCss(), 550, function() {
 						state = opened;
 						self.update(1, self.value);
+						navbar.stop(true, true).show();
 					});
 			}
 		})

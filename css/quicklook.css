@@ -35,8 +35,16 @@
 /* hide preview border in fullscreen mode */
 .elfinder-quicklook-fullscreen .elfinder-quicklook-preview { border:0 solid ;}
 
-.elfinder-quicklook-fullscreen iframe {
-	height: 99%;
+/*.elfinder-quicklook-fullscreen iframe {
+	height: 100%;
+}*/
+
+.elfinder-quicklook-cover {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	position: absolute;
 }
 
 /* quicklook titlebar */
@@ -150,6 +158,8 @@
 	padding:5px;
 	border:1px solid #eee;
 	background:#000;
+	opacity: 0.4;
+	filter: Alpha(Opacity=40);
 }
 
 /* show close icon in fullscreen mode */

@@ -212,7 +212,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (file.mime == mime) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
-				preview.append((node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+fm.url(file.hash)+'" quality="high" type="application/x-shockwave-flash" />')));
+				node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+fm.url(file.hash)+'" quality="high" type="application/x-shockwave-flash" wmode="transparent" />')
+					.appendTo(preview);
 			}
 		});
 	},
@@ -239,7 +240,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'audio/x-mp4'   : 'm4a',
 				'audio/ogg'     : 'ogg'
 			},
-			node;
+			node,
+			win  = ql.window,
+			navi = win.find('.elfinder-quicklook-navbar');
 
 		preview.on('update', function(e) {
 			var file = e.file,
@@ -251,9 +254,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></audio>')
 					.appendTo(preview);
 				autoplay && node[0].play();
+				
+				win.on('viewchange.audio', function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				});
+				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
+				win.off('viewchange.audio');
+				navi.css('bottom', '');
 				node[0].pause();
 				node.remove();
 				node= null;
@@ -277,7 +287,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'application/ogg' : 'ogg',
 				'video/webm'      : 'webm'
 			},
-			node;
+			node,
+			win  = ql.window,
+			navi = win.find('.elfinder-quicklook-navbar');
 
 		preview.on('update', function(e) {
 			var file = e.file,
@@ -290,9 +302,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></video>').appendTo(preview);
 				autoplay && node[0].play();
 				
+				win.on('viewchange.video', function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				});
+				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
+				win.off('viewchange.video');
+				navi.css('bottom', '');
 				node[0].pause();
 				node.remove();
 				node= null;
@@ -308,7 +326,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		var preview = ql.preview,
 			mimes   = [],
-			node;
+			node,
+			win  = ql.window,
+			navi = win.find('.elfinder-quicklook-navbar');
 			
 		$.each(navigator.plugins, function(i, plugins) {
 			$.each(plugins, function(i, plugin) {
@@ -326,9 +346,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 				(video = mime.indexOf('video/') === 0) && ql.hideinfo();
 				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
 					.appendTo(preview);
+				
+				win.on('viewchange.embed', function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				});
+				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
+				win.off('viewchange.embed');
+				navi.css('bottom', '');
 				node.remove();
 				node= null;
 			}
