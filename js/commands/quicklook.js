@@ -129,9 +129,12 @@ elFinder.prototype.commands.quicklook = function() {
 		 * @type jQuery
 		 **/
 		cwd, 
+		navdrag = false,
+		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
 		title   = $('<div class="elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
 		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
+		cover   = $('<div class="elfinder-quicklook-cover"/>'),
 		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
 			.mousedown(function(e) {
 				var win     = self.window,
@@ -142,9 +145,11 @@ elFinder.prototype.commands.quicklook = function() {
 				e.stopPropagation();
 				
 				if (full) {
-					win.css(win.data('position')).unbind('mousemove');
-					$window.unbind(scroll).trigger(self.resize).unbind(self.resize);
-					navbar.unbind('mouseenter').unbind('mousemove');
+					win.css(win.data('position'));
+					$window.off(scroll).trigger(self.resize).off(self.resize);
+					navbar.off('mouseenter');
+					cover.data('tm') && clearTimeout(cover.data('tm'));
+					cover.hide().off(coverEv);
 				} else {
 					win.data('position', {
 						left   : win.css('left'), 
@@ -157,31 +162,48 @@ elFinder.prototype.commands.quicklook = function() {
 						height : '100%'
 					});
 
-					$(window).bind(scroll, function() {
+					$(window).on(scroll, function() {
 						win.css({
 							left   : parseInt($(window).scrollLeft())+'px',
 							top    : parseInt($(window).scrollTop()) +'px'
 						})
 					})
-					.bind(self.resize, function(e) {
+					.on(self.resize, function(e) {
 						self.preview.trigger('changesize');
 					})
 					.trigger(scroll)
 					.trigger(self.resize);
+
+					cover.on(coverEv, function(e) {
+						if (! navdrag) {
+							e.stopPropagation();
+							if (e.type === 'mousemove' || e.type === 'touchstart') {
+								navbar.stop(true, true).show().delay(3000).fadeOut('slow');
+							}
+							if (cover.is(':visible')) {
+								cover.hide();
+								cover.data('tm', setTimeout(function() {
+									cover.show();
+								}, 3000));
+							}
+						}
+					}).show().trigger('mousemove');
 					
-					win.bind('mousemove', function(e) {
-						navbar.stop(true, true).show().delay(3000).fadeOut('slow');
-					})
-					.mousemove();
-					
-					navbar.mouseenter(function() {
+					navbar.on('mouseenter', function() {
 						navbar.stop(true, true).show();
-					})
-					.mousemove(function(e) {
-						e.stopPropagation();
 					});
 				}
-				navbar.attr('style', '').draggable(full ? 'destroy' : {});
+				if (! fm.UA.Mobile) {
+					navbar.attr('style', '').draggable(full ? 'destroy' : {
+						start: function() {
+							cover.show();
+							navdrag = true;
+						},
+						stop: function() {
+							navdrag = false;
+						}
+					});
+				}
 				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
@@ -189,6 +211,8 @@ elFinder.prototype.commands.quicklook = function() {
 					collection = collection.add(parent);
 				};
 				$.fn.resizable && !fm.UA.Touch && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+
+				win.trigger('viewchange');
 			}),
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
@@ -206,14 +230,13 @@ elFinder.prototype.commands.quicklook = function() {
 		
 	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
 		// clean info/icon
-		.bind('change', function(e) {
+		.on('change', function(e) {
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
 			info.html('');
-
 		})
 		// update info/icon
-		.bind('update', function(e) {
+		.on('update', function(e) {
 			var fm      = self.fm,
 				preview = self.preview,
 				file    = e.file,
@@ -223,7 +246,7 @@ elFinder.prototype.commands.quicklook = function() {
 			if (file) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
-				self.preview.unbind('changesize').trigger('change').children().remove();
+				self.preview.off('changesize').trigger('change').children().remove();
 				title.html(fm.escape(file.name));
 				
 				info.html(
@@ -245,6 +268,11 @@ elFinder.prototype.commands.quicklook = function() {
 						.attr('src', (tmb = fm.tmb(file.hash)));
 				}
 				self.info.delay(100).fadeIn(10);
+				setTimeout(function() {
+					if (fm.UA.Mobile || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
+						cover.trigger('mousemove');
+					}
+				}, 100);
 			} else { 
 				e.stopImmediatePropagation();
 			}
@@ -257,16 +285,19 @@ elFinder.prototype.commands.quicklook = function() {
 		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
-				.append(title)
-				.append($('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
+			.append(
+				title,
+				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
 					e.stopPropagation();
 					self.window.trigger('close');
-				}))
-		)
-		.append(this.preview.add(navbar))
-		.append(self.info.hide())
+				})),
+				this.preview,
+				self.info.hide(),
+				cover.hide(),
+				navbar
+			)
 		.draggable({handle : 'div.elfinder-quicklook-titlebar'})
-		.bind('open', function(e) {
+		.on('open', function(e) {
 			var win  = self.window, 
 				file = self.value,
 				node;
@@ -275,15 +306,18 @@ elFinder.prototype.commands.quicklook = function() {
 				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
+				cover.data('tm') && clearTimeout(cover.data('tm'));
+				cover.hide();
 				win.css(closedCss(node))
 					.show()
 					.animate(openedCss(), 550, function() {
 						state = opened;
 						self.update(1, self.value);
+						navbar.stop(true, true).show();
 					});
 			}
 		})
-		.bind('close', function(e) {
+		.on('close', function(e) {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
@@ -418,7 +452,7 @@ elFinder.prototype.commands.quicklook = function() {
 				}
 			});
 			
-			preview.bind('update', function() {
+			preview.on('update', function() {
 				self.info.show();
 			});
 		});
