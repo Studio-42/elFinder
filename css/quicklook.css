@@ -220,6 +220,7 @@
 	background:#fff;
 	color:#222;
 	overflow:auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* archive files preview wrapper */
@@ -230,6 +231,7 @@
 	color:#222;
 	font-size: 1.5ex;
 	overflow:auto;
+	-webkit-overflow-scrolling: touch
 }
 
 /* archive files preview header */
