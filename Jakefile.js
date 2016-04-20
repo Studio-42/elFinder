@@ -112,6 +112,7 @@ function getVersion() {
 }
 
 function buildComment() {
+	var d = new Date();
 	var buildDate = d.getFullYear() + '-' +
 		(d.getMonth() >= 9 ? '' : '0') + (d.getMonth() + 1) + '-' +
 		(d.getDate() >= 10 ? '' : '0') + d.getDate();
