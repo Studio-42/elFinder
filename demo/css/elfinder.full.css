@@ -1,10 +1,10 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 0f8f7d8) (2016-04-19)
+ * Version 2.1.11 (2.1-src Nightly: 44afe75) (2016-04-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
- * Licensed under a 3 clauses BSD license
+ * Licensed under a 3-clauses BSD license
  */
 
 /* File: /css/commands.css */
@@ -1608,6 +1608,7 @@ button.elfinder-info-button {
 	background:#fff;
 	color:#222;
 	overflow:auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* archive files preview wrapper */
@@ -1618,6 +1619,7 @@ button.elfinder-info-button {
 	color:#222;
 	font-size: 1.5ex;
 	overflow:auto;
+	-webkit-overflow-scrolling: touch
 }
 
 /* archive files preview header */
