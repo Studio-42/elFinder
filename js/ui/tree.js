@@ -490,7 +490,7 @@ $.fn.elfindertree = function(fm, opts) {
 							dirs = $.merge(dirs, filter(data.tree));
 							updateTree(dirs);
 							updateArrows(dirs, loaded);
-							cwdhash == cwd.hash && sync(noCwd);
+							cwdhash == cwd.hash && fm.visible() && sync(noCwd);
 						})
 						.always(function(data) {
 							if (link) {

@@ -242,11 +242,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node,
 			win  = ql.window,
-			navi = win.find('.elfinder-quicklook-navbar');
+			navi = ql.navbar;
 
 		preview.on('update', function(e) {
 			var file = e.file,
-				type = mimes[file.mime];
+				type = mimes[file.mime],
+				setNavi = function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				};
 
 			if (ql.support.audio[type]) {
 				e.stopImmediatePropagation();
@@ -255,15 +258,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.appendTo(preview);
 				autoplay && node[0].play();
 				
-				win.on('viewchange.audio', function() {
-					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
-				});
-				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				win.on('viewchange.audio', setNavi);
+				setNavi();
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
 				win.off('viewchange.audio');
-				navi.css('bottom', '');
 				node[0].pause();
 				node.remove();
 				node= null;
@@ -289,11 +289,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			node,
 			win  = ql.window,
-			navi = win.find('.elfinder-quicklook-navbar');
+			navi = ql.navbar;
 
 		preview.on('update', function(e) {
 			var file = e.file,
-				type = mimes[file.mime];
+				type = mimes[file.mime],
+				setNavi = function() {
+					if (ql.fm.UA.iOS) {
+						if (win.hasClass('elfinder-quicklook-fullscreen')) {
+							preview.css('height', '-webkit-calc(100% - 50px)');
+							navi._show();
+						} else {
+							preview.css('height', '');
+						}
+					} else {
+						navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+					}
+				};
 				
 			if (ql.support.video[type]) {
 				e.stopImmediatePropagation();
@@ -301,16 +313,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></video>').appendTo(preview);
 				autoplay && node[0].play();
-				
-				win.on('viewchange.video', function() {
-					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
-				});
-				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+
+				win.on('viewchange.video', setNavi);
+				setNavi();
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
 				win.off('viewchange.video');
-				navi.css('bottom', '');
 				node[0].pause();
 				node.remove();
 				node= null;
@@ -328,7 +337,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			mimes   = [],
 			node,
 			win  = ql.window,
-			navi = win.find('.elfinder-quicklook-navbar');
+			navi = ql.navbar;
 			
 		$.each(navigator.plugins, function(i, plugins) {
 			$.each(plugins, function(i, plugin) {
@@ -339,7 +348,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var file  = e.file,
 				mime  = file.mime,
-				video;
+				video,
+				setNavi = function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				};
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
@@ -347,15 +359,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
 					.appendTo(preview);
 				
-				win.on('viewchange.embed', function() {
-					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
-				});
-				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				win.on('viewchange.embed', setNavi);
+				setNavi();
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
 				win.off('viewchange.embed');
-				navi.css('bottom', '');
 				node.remove();
 				node= null;
 			}

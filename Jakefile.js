@@ -105,21 +105,25 @@ function copyFile(from, to, overwrite) {
 	return srcs.pipe(dsts);
 }
 
-function getComment() {
+function getVersion() {
 	var ver = fs.readFileSync(path.join(src, 'js', 'elFinder.version.js')).toString();
-	ver = ver.match(/= '(.+)';/);
+	ver = ver.match(/elFinder.prototype.version = '(.+)';/);
+	return ver[1];
+}
+
+function buildComment() {
 	var d = new Date();
-	var bd = d.getFullYear() + '-' +
+	var buildDate = d.getFullYear() + '-' +
 		(d.getMonth() >= 9 ? '' : '0') + (d.getMonth() + 1) + '-' +
 		(d.getDate() >= 10 ? '' : '0') + d.getDate();
 	var comment =
 		'/*!\n' +
 		' * elFinder - file manager for web\n' +
-		' * Version ' + ver[1] + ' (' + bd + ')\n' +
+		' * Version ' + getVersion() + ' (' + buildDate + ')\n' +
 		' * http://elfinder.org\n' +
 		' * \n' +
 		' * Copyright 2009-' + d.getFullYear() + ', Studio 42\n' +
-		' * Licensed under a 3 clauses BSD license\n' +
+		' * Licensed under a 3-clauses BSD license\n' +
 		' */\n';
 	return comment;
 }
@@ -170,14 +174,14 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 		data += '\n/* File: ' + file.replace(src, '') + ' */\n';
 		data += fs.readFileSync(file);
 	}
-	fs.writeFileSync(this.name, getComment() + data);
+	fs.writeFileSync(this.name, buildComment() + data);
 });
 
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var css_optimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
-	fs.writeFileSync(this.name, getComment() + css_optimized);
+	var cssOptimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
+	fs.writeFileSync(this.name, buildComment() + cssOptimized);
 });
 
 // JS
@@ -195,7 +199,7 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 		data = data.replace(strict, '');
 	}
 	data = '(function($) {\n' + data + '\n})(jQuery);'; // add closure
-	fs.writeFileSync(this.name, getComment() + data);
+	fs.writeFileSync(this.name, buildComment() + data);
 });
 
 desc('uglify elfinder.min.js');
@@ -212,7 +216,7 @@ file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	} else {
 		result = ugjs.minify('js/elfinder.full.js').code;
 	}
-	fs.writeFileSync(this.name, getComment() + result);
+	fs.writeFileSync(this.name, buildComment() + result);
 });
 
 // IMG + SOUNDS + I18N + PHP
@@ -290,12 +294,9 @@ task('clean', function(){
 
 desc('get current build version from git');
 task('version', function(){
-	jake.exec(['git describe --tags > .version'], function(){
-		version = fs.readFileSync('.version').toString().replace(/\n$/, '');
-		fs.unlinkSync('.version');
-		console.log('Version: ' + version);
-		complete();
-	});
+	version = getVersion();
+	console.log('Version: ' + version);
+	complete();
 }, {async: true});
 
 desc('create package task');
