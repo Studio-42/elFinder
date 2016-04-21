@@ -665,7 +665,6 @@ class elFinder {
 			}
 			if (isset($result['added'])) {
 				$result['added'] = array_merge($result['added'], $volume->added());
-				debug($result);
 			}
 			$volume->resetResultStat();
 		}
