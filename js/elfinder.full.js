@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 44afe75) (2016-04-21)
+ * Version 2.1.11 (2.1-src Nightly: 14337c3) (2016-04-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4918,7 +4918,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 44afe75)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 14337c3)';
 
 
 
@@ -11402,7 +11402,7 @@ elFinder.prototype.commands.archive = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			chk = (cnt && sel[0].phash && fm.file(sel[0].phash).write),
+			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {
