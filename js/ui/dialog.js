@@ -92,23 +92,27 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					var dialogs = parent.find('.elfinder-dialog:visible');
+					setTimeout(function() {
+						var dialogs;
 
-					dialog.data('modal') && overlay.elfinderoverlay('hide');
-					// get focus to next dialog
-					if (dialogs.length) {
-						dialogs.find(':last').trigger('totop');
-					} else {
-						// return focus to parent
-						parent.mousedown().click();
-					}
-					if (typeof(opts.close) == 'function') {
-						setTimeout(function() {
+						dialog.data('modal') && overlay.elfinderoverlay('hide');
+
+						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
-						}, 10);
-					} else if (opts.destroyOnClose) {
-						dialog.hide().remove();
-					}
+						} else if (opts.destroyOnClose) {
+							dialog.hide().remove();
+						}
+						
+						// get focus to next dialog
+						dialogs = parent.find('.elfinder-dialog:visible');
+						if (dialogs.length) {
+							dialogs.find(':last').trigger('totop');
+						} else {
+							// return focus to parent
+							parent.mousedown().click();
+						}
+
+					}, 10);
 				})
 				.on('totop', function() {
 					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
