@@ -303,6 +303,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
      * @author Dmitry Levashov
      */
 	protected function parseRaw($raw, $base, $nameOnly = false) {
+		static $now;
+		static $lastyear;
+
+		if (! $now) {
+			$now = time();
+			$lastyear = date('Y') - 1;
+		}
+
 		$info = preg_split("/\s+/", $raw, 9);
 		$stat = array();
 
@@ -346,8 +354,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['ts'] = $info[5];
 		} else {
 			$stat['ts'] = strtotime($info[5].' '.$info[6].' '.$info[7]);
+			if ($stat['ts'] && $stat['ts'] > $now && strpos($info[7], ':') !== false) {
+				$stat['ts'] = strtotime($info[5].' '.$info[6].' '.$lastyear.' '.$info[7]);
+			}
 			if (empty($stat['ts'])) {
 				$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$info[7]);
+				if ($stat['ts'] && $stat['ts'] > $now && strpos($info[7], ':') !== false) {
+					$stat['ts'] = strtotime($info[6].' '.$info[5].' '.$lastyear.' '.$info[7]);
+				}
 			}
 		}
 		
