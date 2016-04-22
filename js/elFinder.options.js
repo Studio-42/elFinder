@@ -173,7 +173,7 @@ elFinder.prototype._options = {
 			// action after callback (""/"close"/"destroy")
 			oncomplete : '',
 			// get image sizes before callback call
-			getImgSize : true
+			getImgSize : false
 		},
 		// "upload" command options.
 		upload : {
