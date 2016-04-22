@@ -177,7 +177,7 @@ You can create or modify the language file to use translation tool. Please refer
 --------------------
  * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
  * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
- * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/elfinder-bootstrap-theme)
+ * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/LibreICONS/tree/master/themes/elFinder)
 
 Support
 -------
