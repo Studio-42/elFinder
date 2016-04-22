@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: a2ada1a) (2016-04-22)
+ * Version 2.1.11 (2.1-src Nightly: d934deb) (2016-04-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4918,7 +4918,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: a2ada1a)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d934deb)';
 
 
 
@@ -5181,7 +5181,9 @@ elFinder.prototype._options = {
 			// allow to return filers info
 			folders  : false,
 			// action after callback (""/"close"/"destroy")
-			oncomplete : ''
+			oncomplete : '',
+			// get image sizes before callback call
+			getImgSize : true
 		},
 		// "upload" command options.
 		upload : {
@@ -9024,23 +9026,27 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					var dialogs = parent.find('.elfinder-dialog:visible');
+					setTimeout(function() {
+						var dialogs;
 
-					dialog.data('modal') && overlay.elfinderoverlay('hide');
-					// get focus to next dialog
-					if (dialogs.length) {
-						dialogs.find(':last').trigger('totop');
-					} else {
-						// return focus to parent
-						parent.mousedown().click();
-					}
-					if (typeof(opts.close) == 'function') {
-						setTimeout(function() {
+						dialog.data('modal') && overlay.elfinderoverlay('hide');
+
+						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
-						}, 10);
-					} else if (opts.destroyOnClose) {
-						dialog.hide().remove();
-					}
+						} else if (opts.destroyOnClose) {
+							dialog.hide().remove();
+						}
+						
+						// get focus to next dialog
+						dialogs = parent.find('.elfinder-dialog:visible');
+						if (dialogs.length) {
+							dialogs.find(':last').trigger('totop');
+						} else {
+							// return focus to parent
+							parent.mousedown().click();
+						}
+
+					}, 10);
 				})
 				.on('totop', function() {
 					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
@@ -9323,9 +9329,9 @@ $.fn.elfinderoverlay = function(opts) {
 		
 		o.data('cnt', cnt);
 			
-		if (cnt <= 0 && o.is(':visible')) {
+		if (cnt <= 0) {
 			o.hide();
-			hide();        
+			hide();
 		}
 	}
 	
@@ -12900,7 +12906,7 @@ elFinder.prototype.commands.getfile = function() {
 					dim = file.dim.split('x');
 					file.width = dim[0];
 					file.height = dim[1];
-				} else if (file.mime.indexOf('image') !== -1) {
+				} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
 					req.push(fm.request({
 						data : {cmd : 'dim', target : file.hash},
 						notify : {type : 'dim', cnt : 1, hideCnt : true},
