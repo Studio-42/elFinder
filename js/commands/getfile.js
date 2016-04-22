@@ -90,7 +90,7 @@ elFinder.prototype.commands.getfile = function() {
 					dim = file.dim.split('x');
 					file.width = dim[0];
 					file.height = dim[1];
-				} else if (file.mime.indexOf('image') !== -1) {
+				} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
 					req.push(fm.request({
 						data : {cmd : 'dim', target : file.hash},
 						notify : {type : 'dim', cnt : 1, hideCnt : true},
