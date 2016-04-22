@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d934deb) (2016-04-22)
+ * Version 2.1.11 (2.1-src Nightly: bc098d7) (2016-04-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4918,7 +4918,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d934deb)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: bc098d7)';
 
 
 
@@ -5183,7 +5183,7 @@ elFinder.prototype._options = {
 			// action after callback (""/"close"/"destroy")
 			oncomplete : '',
 			// get image sizes before callback call
-			getImgSize : true
+			getImgSize : false
 		},
 		// "upload" command options.
 		upload : {
