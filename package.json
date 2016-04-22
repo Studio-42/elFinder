@@ -1,0 +1,32 @@
+{
+  "name": "elFinder",
+  "description": "File manager for web",
+  "main": "Jakefile.js",
+  "scripts": {
+    "build": "mkdir -p ./build && jake -C ./build elfinder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Studio-42/elFinder.git"
+  },
+  "keywords": [
+    "file",
+    "manager",
+    "jquery",
+    "jqueryui",
+    "frontend",
+    "client-side",
+    "browser"
+  ],
+  "author": "Studio 42",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/Studio-42/elFinder/issues"
+  },
+  "homepage": "http://studio-42.github.io/elFinder/",
+  "devDependencies": {
+    "csso": "<2.0.0",
+    "jake": "~8.0.12",
+    "uglify-js": "~2.6.2"
+  }
+}
