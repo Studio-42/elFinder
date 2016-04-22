@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: bc098d7) (2016-04-22)
+ * Version 2.1.11 (2.1-src Nightly: 88d22ee) (2016-04-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -408,6 +408,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: absolute;
 	opacity: .2;
 	filter: Alpha(Opacity=20);
+	display: none;
 }
 
 /* panels under/below cwd (for search field etc) */
