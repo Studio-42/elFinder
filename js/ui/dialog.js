@@ -13,6 +13,7 @@ $.fn.elfinderdialog = function(opts) {
 				dialog.trigger('open');
 			});
 		} else if (opts == 'close') {
+			dialog.stop(true);
 			dialog.css('display') != 'none' && dialog.hide().trigger('close');
 		} else if (opts == 'destroy') {
 			dialog.hide().remove();
@@ -92,27 +93,24 @@ $.fn.elfinderdialog = function(opts) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 				})
 				.on('close', function() {
-					setTimeout(function() {
-						var dialogs;
+					var dialogs;
 
-						dialog.data('modal') && overlay.elfinderoverlay('hide');
+					dialog.data('modal') && overlay.elfinderoverlay('hide');
 
-						if (typeof(opts.close) == 'function') {
-							$.proxy(opts.close, self[0])();
-						} else if (opts.destroyOnClose) {
-							dialog.hide().remove();
-						}
-						
-						// get focus to next dialog
-						dialogs = parent.find('.elfinder-dialog:visible');
-						if (dialogs.length) {
-							dialogs.find(':last').trigger('totop');
-						} else {
-							// return focus to parent
-							parent.mousedown().click();
-						}
-
-					}, 10);
+					if (typeof(opts.close) == 'function') {
+						$.proxy(opts.close, self[0])();
+					} else if (opts.destroyOnClose) {
+						dialog.hide().remove();
+					}
+					
+					// get focus to next dialog
+					dialogs = parent.find('.elfinder-dialog:visible');
+					if (dialogs.length) {
+						dialogs.find(':last').trigger('totop');
+					} else {
+						// return focus to parent
+						parent.mousedown().click();
+					}
 				})
 				.on('totop', function() {
 					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
