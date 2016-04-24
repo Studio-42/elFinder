@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 96001fb) (2016-04-24)
+ * Version 2.1.11 (2.1-src Nightly: 24e5ef6) (2016-04-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4918,7 +4918,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 96001fb)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 24e5ef6)';
 
 
 
@@ -14440,6 +14440,7 @@ elFinder.prototype.commands.quicklook = function() {
 					$window = $(window);
 					
 				e.stopPropagation();
+				e.preventDefault();
 				
 				if (full) {
 					win.css(win.data('position'));
@@ -14477,7 +14478,7 @@ elFinder.prototype.commands.quicklook = function() {
 							if (e.type === 'mousemove' || e.type === 'touchstart') {
 								navShow();
 								navtm = setTimeout(function() {
-									if (e.type === 'touchstart' || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
+									if (fm.UA.Mobile || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
 										navbar.fadeOut('slow', function() {
 											cover.show();
 										});
@@ -14545,11 +14546,11 @@ elFinder.prototype.commands.quicklook = function() {
 		},
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); }))
+			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }))
 			.append(fsicon)
-			.append($('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); }))
+			.append($('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }))
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); }))
+			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
 		navStyle = '';
 
