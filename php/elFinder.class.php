@@ -671,8 +671,9 @@ class elFinder {
 		
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
+			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd] as $handler) {
-				if (call_user_func_array($handler,array($cmd,&$result,$args,$this))) {
+				if (call_user_func_array($handler,array($cmd, &$result, $args, $this, $volume))) {
 					// handler return true to force sync client after command completed
 					$result['sync'] = true;
 				}

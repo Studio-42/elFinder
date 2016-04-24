@@ -1198,6 +1198,21 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return path of target hash
+	 *
+	 * @param  string $hash
+	 * @author Naoki Sawada
+	 * @return string | false
+	 */
+	public function getPath($hash) {
+		$path = $this->decode($hash);
+		if ($this->stat($path)) {
+			return $path;
+		}
+		return false;
+	}
+	
+	/**
 	 * Return root or startPath hash
 	 *
 	 * @return string
