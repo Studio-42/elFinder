@@ -130,6 +130,7 @@ elFinder.prototype.commands.quicklook = function() {
 		 **/
 		cwd, 
 		navdrag = false,
+		navmove = false,
 		navtm   = null,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
 		title   = $('<div class="elfinder-quicklook-title"/>'),
@@ -137,7 +138,11 @@ elFinder.prototype.commands.quicklook = function() {
 		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
 		cover   = $('<div class="ui-front elfinder-quicklook-cover"/>'),
 		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
-			.mousedown(function(e) {
+			.on('click touchstart', function(e) {
+				if (navmove) {
+					return;
+				}
+				
 				var win     = self.window,
 					full    = win.hasClass(fullscreen),
 					scroll  = 'scroll.'+fm.namespace,
@@ -150,6 +155,7 @@ elFinder.prototype.commands.quicklook = function() {
 					$window.off(scroll).trigger(self.resize).off(self.resize);
 					navbar.off('mouseenter mouseleave');
 					cover.off(coverEv);
+					navStyle = '';
 					navShow();
 				} else {
 					win.data('position', {
@@ -180,9 +186,11 @@ elFinder.prototype.commands.quicklook = function() {
 							if (e.type === 'mousemove' || e.type === 'touchstart') {
 								navShow();
 								navtm = setTimeout(function() {
-									navbar.fadeOut('slow', function() {
-										cover.show();
-									});
+									if (e.type === 'touchstart' || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
+										navbar.fadeOut('slow', function() {
+											cover.show();
+										});
+									}
 								}, 3000);
 							}
 							if (cover.is(':visible')) {
@@ -195,10 +203,12 @@ elFinder.prototype.commands.quicklook = function() {
 					}).show().trigger('mousemove');
 					
 					navbar.on('mouseenter mouseleave', function(e) {
-						if (e.type === 'mouseenter') {
-							navShow();
-						} else {
-							cover.trigger('mousemove');
+						if (! navdrag) {
+							if (e.type === 'mouseenter') {
+								navShow();
+							} else {
+								cover.trigger('mousemove');
+							}
 						}
 					});
 				}
@@ -207,12 +217,17 @@ elFinder.prototype.commands.quicklook = function() {
 				} else {
 					navbar.attr('style', navStyle).draggable(full ? 'destroy' : {
 						start: function() {
-							cover.show();
 							navdrag = true;
+							navmove = true;
+							cover.show();
+							navShow();
 						},
 						stop: function() {
 							navdrag = false;
 							navStyle = self.navbar.attr('style');
+							setTimeout(function() {
+								navmove = false;
+							}, 20);
 						}
 					});
 				}
@@ -239,11 +254,11 @@ elFinder.prototype.commands.quicklook = function() {
 		},
 			
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').click(function(e) { navtrigger(37); }))
+			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); }))
 			.append(fsicon)
-			.append($('<div class="'+navicon+' '+navicon+'-next"/>').click(function(e) { navtrigger(39); }))
+			.append($('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); }))
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-close"/>').click(function(e) { self.window.trigger('close'); }))
+			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); }))
 		,
 		navStyle = '';
 
@@ -297,9 +312,7 @@ elFinder.prototype.commands.quicklook = function() {
 				}
 				self.info.delay(100).fadeIn(10);
 				if (self.window.hasClass(fullscreen)) {
-					if (fm.UA.Mobile || navbar.parent().find('.elfinder-quicklook-navbar:hover').length < 1) {
-						cover.trigger('mousemove');
-					}
+					cover.trigger('mousemove');
 				}
 			} else { 
 				e.stopImmediatePropagation();
@@ -360,7 +373,7 @@ elFinder.prototype.commands.quicklook = function() {
 				
 			if (self.opened()) {
 				state = animated;
-				win.hasClass(fullscreen) && fsicon.mousedown();
+				win.hasClass(fullscreen) && fsicon.click();
 				node.length
 					? win.animate(closedCss(node), 500, close)
 					: close();
