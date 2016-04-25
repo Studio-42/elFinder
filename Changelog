@@ -6,6 +6,7 @@
 		- Correction of the context menu (Mobile devices, Right-to-Left Language etc.)
 		- Correction of Quicklook (Supported 'video/quicktime', improvement of IFRAME, For Mobile devices etc)
 		- Fixed #1272 Correct detection of timestamp on FTP volume
+		- Fixed #1315 Implement function for `copyJoin` of the volume root option
 		- And some minor bug fixes
 
 
