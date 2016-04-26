@@ -204,13 +204,16 @@ abstract class elFinderVolumeDriver {
 		'mimefile'        => '',
 		// mime type normalize map : Array '[ext]:[detected mime type]' => '[normalized mime]'
 		'mimeMap'         => array(
-		                     'md:application/x-genesis-rom' => 'text/x-markdown',
-		                     'md:text/plain'                => 'text/x-markdown',
-		                     'markdown:text/plain'          => 'text/x-markdown',
-		                     'css:text/x-asm'               => 'text/css',
-		                     'ico:image/vnd.microsoft.icon' => 'image/x-icon',
-		                     'csv:text/plain'               => 'text/csv'
-		                    ),
+				'md:application/x-genesis-rom' => 'text/x-markdown',
+				'md:text/plain'                => 'text/x-markdown',
+				'markdown:text/plain'          => 'text/x-markdown',
+				'css:text/x-asm'               => 'text/css',
+				'ico:image/vnd.microsoft.icon' => 'image/x-icon',
+				'csv:text/plain'               => 'text/csv',
+				'm4a:video/mp4'                => 'audio/mp4',
+				'oga:application/ogg'          => 'audio/ogg',
+				'ogv:application/ogg'          => 'video/ogg'
+		 	),
 		// MIME regex of send HTTP header "Content-Disposition: inline"
 		// '.' is allow inline of all of MIME types
 		// '$^' is not allow inline of all of MIME types
@@ -504,7 +507,7 @@ abstract class elFinderVolumeDriver {
 		'mid'   => 'audio/midi',
 		'ogg'   => 'audio/ogg',
 		'oga'   => 'audio/ogg',
-		'm4a'   => 'audio/x-m4a',
+		'm4a'   => 'audio/mp4',
 		'wav'   => 'audio/wav',
 		'wma'   => 'audio/x-ms-wma',
 		// video
