@@ -400,7 +400,7 @@ elFinder.prototype.commands.quicklook = function() {
 		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
 		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
-	}
+	};
 	
 	this.shortcuts = [{
 		pattern     : 'space'
@@ -411,15 +411,14 @@ elFinder.prototype.commands.quicklook = function() {
 			ogg : support('audio/ogg; codecs="vorbis"'),
 			mp3 : support('audio/mpeg;'),
 			wav : support('audio/wav; codecs="1"'),
-			m4a : support('audio/x-m4a;') || support('audio/aac;')
+			m4a : support('audio/mp4;') || support('audio/x-m4a;') || support('audio/aac;')
 		},
 		video : {
 			ogg  : support('video/ogg; codecs="theora"'),
 			webm : support('video/webm; codecs="vp8, vorbis"'),
 			mp4  : support('video/mp4; codecs="avc1.42E01E"') || support('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') 
 		}
-	}
-	
+	};
 	
 	/**
 	 * Return true if quickLoock window is visible and not animated
@@ -428,7 +427,7 @@ elFinder.prototype.commands.quicklook = function() {
 	 **/
 	this.closed = function() {
 		return state == closed;
-	}
+	};
 	
 	/**
 	 * Return true if quickLoock window is hidden
@@ -437,7 +436,7 @@ elFinder.prototype.commands.quicklook = function() {
 	 **/
 	this.opened = function() {
 		return state == opened;
-	}
+	};
 	
 	/**
 	 * Init command.
@@ -499,21 +498,29 @@ elFinder.prototype.commands.quicklook = function() {
 			});
 		});
 		
-	}
+		fm.bind('open',function() {
+			// set current volume dispInlineRegex
+			try {
+				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+			} catch(e) {
+				self.dispInlineRegex = /.*/;
+			}
+		});
+	};
 	
 	this.getstate = function() {
 		var fm  = this.fm,
 			sel = fm.selected(),
 			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
 		return chk? state == opened ? 1 : 0 : -1;
-	}
+	};
 	
 	this.exec = function() {
 		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
-	}
+	};
 
 	this.hideinfo = function() {
 		this.info.stop(true, true).hide();
-	}
+	};
 
 };

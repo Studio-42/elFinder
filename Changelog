@@ -1,3 +1,15 @@
+2016-04-11  
+
+	* elFinder (2.1.12):
+		- Fixed #1321 Not trim white spaces on editing the text file
+		- Fixed #1320 Supported operation in the modal dialog
+		- Correction of the context menu (Mobile devices, Right-to-Left Language etc.)
+		- Correction of Quicklook (Supported 'video/quicktime', improvement of IFRAME, For Mobile devices etc)
+		- Fixed #1272 Correct detection of timestamp on FTP volume
+		- Fixed #1315 Implement function for `copyJoin` of the volume root option
+		- And some minor bug fixes
+
+
 2016-04-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.11):
