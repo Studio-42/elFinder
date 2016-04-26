@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 45299f9) (2016-04-25)
+ * Version 2.1.11 (2.1-src Nightly: 340d03a) (2016-04-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4918,7 +4918,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 45299f9)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 340d03a)';
 
 
 
@@ -6582,7 +6582,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-03-25
+ * @version 2016-04-26
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -6922,6 +6922,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
 			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
 			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -14691,7 +14692,7 @@ elFinder.prototype.commands.quicklook = function() {
 		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
 		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
-	}
+	};
 	
 	this.shortcuts = [{
 		pattern     : 'space'
@@ -14702,15 +14703,14 @@ elFinder.prototype.commands.quicklook = function() {
 			ogg : support('audio/ogg; codecs="vorbis"'),
 			mp3 : support('audio/mpeg;'),
 			wav : support('audio/wav; codecs="1"'),
-			m4a : support('audio/x-m4a;') || support('audio/aac;')
+			m4a : support('audio/mp4;') || support('audio/x-m4a;') || support('audio/aac;')
 		},
 		video : {
 			ogg  : support('video/ogg; codecs="theora"'),
 			webm : support('video/webm; codecs="vp8, vorbis"'),
 			mp4  : support('video/mp4; codecs="avc1.42E01E"') || support('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') 
 		}
-	}
-	
+	};
 	
 	/**
 	 * Return true if quickLoock window is visible and not animated
@@ -14719,7 +14719,7 @@ elFinder.prototype.commands.quicklook = function() {
 	 **/
 	this.closed = function() {
 		return state == closed;
-	}
+	};
 	
 	/**
 	 * Return true if quickLoock window is hidden
@@ -14728,7 +14728,7 @@ elFinder.prototype.commands.quicklook = function() {
 	 **/
 	this.opened = function() {
 		return state == opened;
-	}
+	};
 	
 	/**
 	 * Init command.
@@ -14790,22 +14790,30 @@ elFinder.prototype.commands.quicklook = function() {
 			});
 		});
 		
-	}
+		fm.bind('open',function() {
+			// set current volume dispInlineRegex
+			try {
+				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+			} catch(e) {
+				self.dispInlineRegex = /.*/;
+			}
+		});
+	};
 	
 	this.getstate = function() {
 		var fm  = this.fm,
 			sel = fm.selected(),
 			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
 		return chk? state == opened ? 1 : 0 : -1;
-	}
+	};
 	
 	this.exec = function() {
 		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
-	}
+	};
 
 	this.hideinfo = function() {
 		this.info.stop(true, true).hide();
-	}
+	};
 
 };
 
@@ -14825,7 +14833,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
-		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'],
+		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
 			preview = ql.preview;
 		
 		// what kind of images we can display
@@ -14838,12 +14846,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 		});
 			
 		preview.on('update', function(e) {
-			var file = e.file,
-				img;
+			var fm   = ql.fm,
+				file = e.file,
+				img, loading;
 
-			if ($.inArray(file.mime, mimes) !== -1) {
+			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				img = $('<img/>')
 					.hide()
@@ -14870,11 +14881,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 							})
 							.trigger('changesize');
 							
+							loading.remove();
 							// hide info/icon
 							ql.hideinfo();
 							//show image
 							img.fadeIn(100);
 						}, 1)
+					})
+					.error(function() {
+						loading.remove();
 					})
 					.attr('src', ql.fm.openUrl(file.hash));
 			}
@@ -14893,10 +14908,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 			fm      = ql.fm;
 			
 		preview.on('update', function(e) {
-			var file = e.file, jqxhr;
+			var file = e.file, jqxhr, loading;
 			
-			if ($.inArray(file.mime, mimes) !== -1) {
+			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
@@ -14913,6 +14930,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 					doc.open();
 					doc.write(data.content);
 					doc.close();
+				})
+				.always(function() {
+					loading.remove();
 				});
 			}
 		})
@@ -14932,11 +14952,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var file = e.file,
 				mime = file.mime,
-				jqxhr;
+				jqxhr, loading;
 			
 			if (mime.indexOf('text/') === 0 || $.inArray(mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 				
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
 					jqxhr.state() == 'pending' && jqxhr.reject();
@@ -14949,6 +14971,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				.done(function(data) {
 					ql.hideinfo();
 					$('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text">'+fm.escape(data.content)+'</pre></div>').appendTo(preview);
+				})
+				.always(function() {
+					loading.remove();
 				});
 			}
 		});
@@ -14980,7 +15005,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		active && preview.on('update', function(e) {
 			var file = e.file, node;
 			
-			if (file.mime == mime) {
+			if (ql.dispInlineRegex.test(file.mime) && file.mime == mime) {
 				e.stopImmediatePropagation();
 				preview.one('change', function() {
 					node.off('load').remove();
@@ -15024,7 +15049,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var file = e.file,
 				node;
 				
-			if (file.mime == mime) {
+			if (ql.dispInlineRegex.test(file.mime) && file.mime == mime) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
 				node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+fm.url(file.hash)+'" quality="high" type="application/x-shockwave-flash" wmode="transparent" />')
@@ -15206,7 +15231,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> Now loading...<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
@@ -15333,7 +15358,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						node.off('load').remove();
 					});
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> Now loading...<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
 						.css('background-color', 'transparent')
