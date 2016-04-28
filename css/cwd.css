@@ -111,6 +111,19 @@
 	background-clip: padding-box;
 }
 
+/* thumbnail image */
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl {
+	background-position: center center;
+	background-repeat: no-repeat;
+	-moz-background-size: contain;
+	background-size: contain;
+}
+/* thumbnail self */
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl.elfinder-cwd-bgself {
+	-moz-background-size: cover;
+	background-size: cover;
+}
+
 /* "opened folder" icon on dragover */
 .elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
 .elfinder-cwd .elfinder-droppable-active {

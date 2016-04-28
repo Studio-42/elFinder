@@ -232,6 +232,8 @@ abstract class elFinderVolumeDriver {
 		'tmbBgColor'      => '#ffffff',
 		// image manipulations library
 		'imgLib'          => 'auto',
+		// Fallback self image to thumbnail (nothing imgLib)
+		'tmbFbSelf'       => true,
 		// Jpeg image saveing quality
 		'jpgQuality'      => 100,
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
@@ -1041,7 +1043,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$this->tmbURL   = !empty($this->options['tmbURL']) ? $this->options['tmbURL'] : '';
-		if ($this->tmbURL && preg_match("|[^/?&=]$|", $this->tmbURL)) {
+		if ($this->tmbURL && $this->tmbURL !== 'self' && preg_match("|[^/?&=]$|", $this->tmbURL)) {
 			$this->tmbURL .= '/';
 		}
 		
@@ -1243,7 +1245,7 @@ abstract class elFinderVolumeDriver {
 		return array(
 			'path'            => $this->path($hash),
 			'url'             => $this->URL,
-			'tmbUrl'          => $this->tmbURL,
+			'tmbUrl'          => (! $this->imgLib && $this->options['tmbFbSelf'])? 'self' : $this->tmbURL,
 			'disabled'        => $this->disabled,
 			'separator'       => $this->separator,
 			'copyOverwrite'   => intval($this->options['copyOverwrite']),
@@ -4993,16 +4995,23 @@ abstract class elFinderVolumeDriver {
 		$separator = $this->separator;
 		$systemroot = $this->systemRoot;
 
-		$sepquoted = preg_quote($separator, '#');
-
-		// normalize `/../`
-		$normreg = '#('.$sepquoted.')[^'.$sepquoted.']+'.$sepquoted.'\.\.'.$sepquoted.'#';
-		while(preg_match($normreg, $path)) {
-			$path = preg_replace($normreg, '$1', $path);
+		if ($base[0] === $separator && strpos($base, 0, strlen($systemroot)) !== $systemroot) {
+			$base = $systemroot . substr($base, 1);
 		}
 		
 		// 'Here'
 		if ($path === '' || $path === '.' . $separator) return $base;
+		
+		$sepquoted = preg_quote($separator, '#');
+
+		if (substr($path, 0, 3) === '..' . $separator) {
+			$path = $base . $separator . $path;
+		}
+		// normalize `/../`
+		$normreg = '#('.$sepquoted.')[^'.$sepquoted.']+'.$sepquoted.'\.\.'.$sepquoted.'#'; // '#(/)[^\/]+/\.\./#'
+		while(preg_match($normreg, $path)) {
+			$path = preg_replace($normreg, '$1', $path, 1);
+		}
 		
 		// Absolute path
 		if ($path[0] === $separator || strpos($path, $systemroot) === 0) {
@@ -5012,26 +5021,13 @@ abstract class elFinderVolumeDriver {
 		$preg_separator = '#' . $sepquoted . '#';
 		
 		// Relative path from 'Here'
-		if (substr($path, 0, 2) === '.' . $separator || $path[0] !== '.' || substr($path, 0, 3) !== '..' . $separator) {
+		if (substr($path, 0, 2) === '.' . $separator || $path[0] !== '.') {
 			$arrn = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
 			if ($arrn[0] !== '.') {
 				array_unshift($arrn, '.');
 			}
 			$arrn[0] = $base;
 			return join($separator, $arrn);
-		}
-		
-		// Relative path from dirname()
-		if (substr($path, 0, 3) === '../') {
-			$arrn = preg_split($preg_separator, $path, -1, PREG_SPLIT_NO_EMPTY);
-			$arrp = preg_split($preg_separator, $base, -1, PREG_SPLIT_NO_EMPTY);
-		
-			while (! empty($arrn) && $arrn[0] === '..') {
-				array_shift($arrn);
-				array_pop($arrp);
-			}
-			$path = ! empty($arrp) ? $systemroot . join($separator, array_merge($arrp, $arrn)) :
-				(! empty($arrn) ? $systemroot . join($separator, $arrn) : $systemroot);
 		}
 		
 		return $path;

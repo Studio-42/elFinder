@@ -301,15 +301,15 @@ elFinder.prototype.commands.quicklook = function() {
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 
-				if (file.tmb) {
+				if (tmb = fm.tmb(file)) {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
 						.load(function() {
-							icon.css('background', 'url("'+tmb+'") center center no-repeat');
+							icon.addClass(tmb.class).css('background-image', "url('"+tmb.url+"')");
 							$(this).remove();
 						})
-						.attr('src', (tmb = fm.tmb(file.hash)));
+						.attr('src', tmb.url);
 				}
 				self.info.delay(100).fadeIn(10);
 				if (self.window.hasClass(fullscreen)) {

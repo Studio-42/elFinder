@@ -742,10 +742,10 @@ window.elFinder = function(node, opts) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
 				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
 				icon    = function(f) {
-					var mime = f.mime, i;
+					var mime = f.mime, i, tmb = self.tmb(f);
 					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
-					if (f.tmb && f.tmb !== 1) {
-						i = $(i).css('background', "url('"+self.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+					if (tmb) {
+						i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 					}
 					return i;
 				},
@@ -1096,12 +1096,11 @@ window.elFinder = function(node, opts) {
 	/**
 	 * Return thumbnail url
 	 * 
-	 * @param  String  file hash
+	 * @param  Object  file object
 	 * @return String
 	 */
-	this.tmb = function(hash) {
-		var file = files[hash],
-			geturl = function(hash){
+	this.tmb = function(file) {
+		var geturl = function(hash){
 				var turl = '';
 				$.each(self.tmbUrls, function(i, u){
 					if (hash.indexOf(i) === 0) {
@@ -1111,10 +1110,23 @@ window.elFinder = function(node, opts) {
 				});
 				return turl;
 			},
-			tmbUrl = (self.searchStatus.state && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(hash) : cwdOptions['tmbUrl'],
-			url = tmbUrl && file && file.tmb && file.tmb != 1 ? tmbUrl + file.tmb : '';
+			tmbUrl = (self.searchStatus.state && hash.indexOf(self.cwd().volumeid) !== 0)? geturl(file.hash) : cwdOptions['tmbUrl'],
+			cls    = 'elfinder-cwd-bgurl',
+			url    = '';
+
+		if ($.isPlainObject(file)) {
+			if (tmbUrl === 'self' && file.mime.indexOf('image/') === 0) {
+				url = self.openUrl(file.hash);
+				cls += ' elfinder-cwd-bgself';
+			} else if (tmbUrl && file && file.tmb && file.tmb != 1) {
+				url = tmbUrl + file.tmb;
+			}
+			if (url) {
+				return { url: url, class: cls };
+			}
+		}
 		
-		return url;
+		return false;
 	}
 	
 	/**
