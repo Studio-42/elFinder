@@ -250,6 +250,8 @@ abstract class elFinderVolumeDriver {
 		'uploadOrder'     => array('deny', 'allow'),
 		// maximum upload file size. NOTE - this is size for every uploaded files
 		'uploadMaxSize'   => 0,
+		// maximum number of chunked upload connection. `-1` to disable chunked upload
+		'uploadMaxConn'   => 3,
 		// files dates format
 		'dateFormat'      => 'j M Y H:i',
 		// files time format
@@ -1251,6 +1253,7 @@ abstract class elFinderVolumeDriver {
 			'copyOverwrite'   => intval($this->options['copyOverwrite']),
 			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
 			'uploadMaxSize'   => intval($this->uploadMaxSize),
+			'uploadMaxConn'   => intval($this->options['uploadMaxConn']),
 			'dispInlineRegex' => $this->options['dispInlineRegex'],
 			'jpgQuality'      => intval($this->options['jpgQuality']),
 			'archivers'       => array(
