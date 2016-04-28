@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 340d03a) (2016-04-26)
+ * Version 2.1.11 (2.1-src Nightly: d0f8295) (2016-04-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -279,8 +279,47 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	top:45px;
 }
 
+.elfinder-help-debug {
+	height:300px;
+	padding:1em;
+	margin:.5em 0;
+	overflow:auto;
+}
 
+.elfinder-help-debug fieldset {
+	margin-bottom: 10px;
+	border-color: #778899;
+	border-radius: 10px;
+}
 
+.elfinder-help-debug legend {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #2e8b57;
+}
+
+.elfinder-help-debug dl {
+	margin: 0;
+}
+
+.elfinder-help-debug dt {
+  color: #778899;
+}
+
+.elfinder-help-debug dt:before {
+	content: "[";
+}
+.elfinder-help-debug dt:after {
+	content: "]";
+}
+
+.elfinder-help-debug dd {
+	margin-left: 1em;
+}
+
+.elfinder-help-debug dd span {
+  /*font-size: 1.2em;*/
+}
 
 /* File: /css/common.css */
 /*********************************************/
@@ -653,6 +692,19 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	-moz-background-clip: padding; 
 	-webkit-background-clip: padding-box; 
 	background-clip: padding-box;
+}
+
+/* thumbnail image */
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl {
+	background-position: center center;
+	background-repeat: no-repeat;
+	-moz-background-size: contain;
+	background-size: contain;
+}
+/* thumbnail self */
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl.elfinder-cwd-bgself {
+	-moz-background-size: cover;
+	background-size: cover;
 }
 
 /* "opened folder" icon on dragover */
