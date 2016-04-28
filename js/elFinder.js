@@ -3153,7 +3153,8 @@ elFinder.prototype = {
 				notifyto    = null, notifyto2 = null,
 				dataChecked = data.checked,
 				isDataType  = (data.isDataType || data.type == 'data'),
-				multiMax    = 3,
+				chunkEnable = (self.option('uploadMaxConn') != -1),
+				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn'))),
 				retry       = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -3377,7 +3378,7 @@ elFinder.prototype = {
 				chunked = [],
 				chunkID = new Date().getTime(),
 				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
-				blobSlice = false,
+				blobSlice = chunkEnable? false : '',
 				blobSize, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
 					var sfiles = [], cid;
