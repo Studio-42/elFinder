@@ -19,7 +19,7 @@ elFinder.prototype.commands.help = function() {
 		prim    = 'ui-priority-primary',
 		sec     = 'ui-priority-secondary',
 		lic     = 'elfinder-help-license',
-		tab     = '<li class="ui-state-default ui-corner-top"><a href="#{id}">{title}</a></li>',
+		tab     = '<li class="ui-state-default ui-corner-top elfinder-help-tab-{id}"><a href="#'+fm.namespace+'-help-{id}">{title}</a></li>',
 		html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
 				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
 		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
@@ -27,7 +27,7 @@ elFinder.prototype.commands.help = function() {
 		
 		
 		about = function() {
-			html.push('<div id="about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
+			html.push('<div id="'+fm.namespace+'-help-about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
 			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': <span id="apiver"></span></div>');
@@ -63,7 +63,7 @@ elFinder.prototype.commands.help = function() {
 		shortcuts = function() {
 			var sh = fm.shortcuts();
 			// shortcuts tab
-			html.push('<div id="shortcuts" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
+			html.push('<div id="'+fm.namespace+'-help-shortcuts" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
 			
 			if (sh.length) {
 				html.push('<div class="ui-widget-content elfinder-help-shortcuts">');
@@ -82,10 +82,41 @@ elFinder.prototype.commands.help = function() {
 		},
 		help = function() {
 			// help tab
-			html.push('<div id="help" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
+			html.push('<div id="'+fm.namespace+'-help-help" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
 			html.push('<a href="https://github.com/Studio-42/elFinder/wiki" target="_blank" class="elfinder-dont-panic"><span>DON\'T PANIC</span></a>');
 			html.push('</div>');
 			// end help
+		},
+		debug = function() {
+			// debug tab
+			html.push('<div id="'+fm.namespace+'-help-debug" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
+			html.push('<div class="ui-widget-content elfinder-help-debug"></div>');
+			html.push('</div>');
+			// end debug
+		},
+		debugRender = function() {
+			var render = function(elm, obj) {
+				$.each(obj, function(k, v) {
+					elm.append($('<dt/>').text(k));
+					if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
+						elm.append( $('<dd/>').append(render($('<dl/>'), v)));
+					} else {
+						elm.append($('<dd/>').append($('<span/>').text((typeof v === 'object')? '[]' : (v? v : '""'))));
+					}
+				});
+				return elm;
+			},
+			target = content.find('#'+fm.namespace+'-help-debug').find('div:first').empty(),
+			info;
+			
+			if (self.debug.options) {
+				info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), self.debug.options));
+				target.append(info);
+			}
+			if (self.debug.debug) {
+				info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), self.debug.debug));
+				target.append(info);
+			}
 		},
 		content = '';
 	
@@ -98,11 +129,11 @@ elFinder.prototype.commands.help = function() {
 		description : this.title
 	}];
 	
-	setTimeout(function() {
-		var parts = self.options.view || ['about', 'shortcuts', 'help'];
+	fm.one('load', function() {
+		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'];
 		
 		$.each(parts, function(i, title) {
-			html.push(tab[r](/\{id\}/, title)[r](/\{title\}/, fm.i18n(title)));
+			html.push(tab[r](/\{id\}/g, title)[r](/\{title\}/, fm.i18n(title)));
 		});
 		
 		html.push('</ul>');
@@ -110,6 +141,7 @@ elFinder.prototype.commands.help = function() {
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
 		$.inArray('help', parts) !== -1 && help();
+		$.inArray('debug', parts) !== -1 && debug();
 		
 		html.push('</div>');
 		content = $(html.join(''));
@@ -132,8 +164,22 @@ elFinder.prototype.commands.help = function() {
 				
 			})
 			.filter(':first').click();
-		
-	}, 200);
+
+		self.debug = {};
+
+		fm.bind('open', function(e) {
+			var tabDebug = content.find('.elfinder-help-tab-debug');
+			if (e.data && e.data.debug) {
+				tabDebug.show();
+				self.debug = { options : e.data.options, debug : e.data.debug };
+				if (self.dialog && self.dialog.is(':visible')) {
+					debugRender();
+				}
+			} else {
+				tabDebug.hide();
+			}
+		});
+	});
 	
 	this.getstate = function() {
 		return 0;
@@ -144,7 +190,9 @@ elFinder.prototype.commands.help = function() {
 			content.find('#apiver').text(this.fm.api);
 			this.dialog = this.fm.dialog(content, {title : this.title, width : 530, autoOpen : false, destroyOnClose : false});
 		}
-		
+
+		debugRender();
+
 		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	};
 

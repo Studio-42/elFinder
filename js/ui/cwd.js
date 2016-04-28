@@ -460,6 +460,7 @@ $.fn.elfindercwd = function(fm, options) {
 						dirs  = false,
 						ltmb  = [],
 						atmb  = {},
+						stmb  = (fm.option('tmbUrl') === 'self'),
 						last  = buffer._last || cwd.find('[id]:last'),
 						top   = !last.length,
 						place = buffer._place || (list ? cwd.children('table').children('tbody') : cwd),
@@ -492,7 +493,7 @@ $.fn.elfindercwd = function(fm, options) {
 								if (f.mime == 'directory') {
 									dirs = true;
 								}
-								if (f.tmb) {
+								if (f.tmb || (stmb && f.mime.indexOf('image/') === 0)) {
 									f.tmb === 1 ? ltmb.push(f.hash) : (atmb[f.hash] = f.tmb);
 								}
 								clipCuts[f.hash] && locks.push(f.hash);
@@ -634,12 +635,11 @@ $.fn.elfindercwd = function(fm, options) {
 					var node = $('#'+fm.cwdHash2Id(hash));
 
 					if (node.length) {
-
 						(function(node, tmb) {
 							$('<img/>')
-								.load(function() { node.find('.elfinder-cwd-icon').css('background', "url('"+tmb+"') center center no-repeat"); })
-								.attr('src', tmb);
-						})(node, fm.searchStatus.state? fm.tmb(hash) : (url + tmb));
+								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+								.attr('src', tmb.url);
+						})(node, fm.tmb(fm.file(hash)));
 					} else {
 						ret = false;
 						if ((ndx = index(hash)) != -1) {
@@ -1036,10 +1036,10 @@ $.fn.elfindercwd = function(fm, options) {
 									murl  = null,
 									files = [],
 									icon  = function(f) {
-										var mime = f.mime, i;
+										var mime = f.mime, i, tmb = fm.tmb(f);
 										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
-										if (f.tmb && f.tmb !== 1) {
-											i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+										if (tmb) {
+											i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
 										return i;
 									}, l, geturl = [];
