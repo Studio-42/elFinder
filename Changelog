@@ -7,6 +7,10 @@
 		- Correction of Quicklook (Supported 'video/quicktime', improvement of IFRAME, For Mobile devices etc)
 		- Fixed #1272 Correct detection of timestamp on FTP volume
 		- Fixed #1315 Implement function for `copyJoin` of the volume root option
+		- Fixed #1344 Use self image as thumbnail when without `imgLib`
+		- Fixed #1342 Bugfix of method `getFullPath` that was problems relative path can not be resolved
+		- Added a volume root option `uploadMaxConn`
+			- Maximum number of chunked upload connection. `-1` to disable chunked upload.
 		- And some minor bug fixes
 
 
