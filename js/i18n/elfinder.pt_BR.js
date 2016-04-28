@@ -2,11 +2,12 @@
  * Português translation
  * @author Leandro Carvalho <contato@leandrowebdev.net>
  * @author Wesley Osorio<wesleyfosorio@hotmail.com>
- * @version 2016-04-08
+ * @author Fernando H. Bandeira <fernando.bandeira94@gmail.com>
+ * @version 2016-04-28
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pt_BR = {
-		translator : 'Leandro Carvalho &lt;contato@leandrowebdev.net&gt;, Wesley Osorio&lt;wesleyfosorio@hotmail.com&gt;',
+		translator : 'Leandro Carvalho &lt;contato@leandrowebdev.net&gt;, Wesley Osorio&lt;wesleyfosorio@hotmail.com&gt;, Fernando H. Bandeira &lt;fernando.bandeira94@gmail.com&gt;',
 		language   : 'Português',
 		direction  : 'ltr',
 		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
@@ -17,7 +18,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'error'                : 'Erro',
 			'errUnknown'           : 'Erro desconhecido.',
 			'errUnknownCmd'        : 'Comando desconhecido.',
-			'errJqui'              : 'Configuração inválida do JQuery UI. Verifique os componentes selectable, draggable e droppable incluídos.',
+			'errJqui'              : 'Configuração inválida do JQuery UI. Verifique se os componentes selectable, draggable e droppable estão incluídos.',
 			'errNode'              : 'elFinder requer um elemento DOM para ser criado.',
 			'errURL'               : 'Configuração inválida do elFinder! Você deve setar a opção da URL.',
 			'errAccess'            : 'Acesso negado.',
@@ -45,7 +46,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errFolderNotFound'    : 'Pasta não encontrada.',
 			'errFileNotFound'      : 'Arquivo não encontrado.',
 			'errTrgFolderNotFound' : 'Pasta de destino "$1" não encontrada.',
-			'errPopup'             : 'Navegador impediu abertura da janela popup, Para abrir o arquivo desabilite está  opção no navegador.',
+			'errPopup'             : 'O seu navegador está bloqueando popup\'s. Para abrir o arquivo, altere esta opção no seu Navegador.',
 			'errMkdir'             : 'Incapaz de criar a pasta "$1".',
 			'errMkfile'            : 'Incapaz de criar o arquivo "$1".',
 			'errRename'            : 'Incapaz de renomear "$1".',
@@ -71,7 +72,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errExtract'           : 'Incapaz de extrair os arquivos de "$1".',
 			'errArchive'           : 'Incapaz de criar o arquivo.',
 			'errArcType'           : 'Tipo de arquivo não suportado.',
-			'errNoArchive'         : 'Arquivo inválido ou é um tipo sem suporte.',
+			'errNoArchive'         : 'Arquivo inválido ou é de um tipo não suportado.',
 			'errCmdNoSupport'      : 'Backend não suporta este comando.',
 			'errReplByChild'       : 'A pasta “$1” não pode ser substituída por um item que contém.',
 			'errArcSymlinks'       : 'Por razões de segurança, negada a permissão para descompactar arquivos que contenham links ou arquivos com nomes não permitidos.', // edited 24.06.2012
@@ -80,24 +81,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResizeDegree'      : 'Grau de rotação inválido.',  // added 7.3.2013
 			'errResizeRotate'      : 'Incapaz de rotacionar a imagem.',  // added 7.3.2013
 			'errResizeSize'        : 'Tamanho inválido de imagem.',  // added 7.3.2013
-			'errResizeNoChange'    : 'Tamanho de imagem não alterado.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Tamanho da imagem não alterado.',  // added 7.3.2013
 			'errUsupportType'      : 'Tipo de arquivo não suportado.',
 			'errNotUTF8Content'    : 'Arquivo "$1" não está em UTF-8 e não pode ser editado.',  // added 9.11.2011
 			'errNetMount'          : 'Incapaz de montar montagem "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Protocolo não suportado.',     // added 17.04.2012
-			'errNetMountFailed'    : 'Monagem falhou.',         // added 17.04.2012
+			'errNetMountFailed'    : 'Montagem falhou.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Servidor requerido.', // added 18.04.2012
-			'errSessionExpires'    : 'Sua sessão expirou por inatividade',
+			'errSessionExpires'    : 'Sua sessão expirou por inatividade.',
 			'errCreatingTempDir'   : 'Não foi possível criar um diretório temporário: "$1"',
 			'errFtpDownloadFile'   : 'Não foi possível fazer o download do arquivo do FTP: "$1"',
 			'errFtpUploadFile'     : 'Não foi possível fazer o upload do arquivo para o FTP: "$1"',
 			'errFtpMkdir'          : 'Não foi possível criar um diretório remoto no FTP: "$1"',
-			'errArchiveExec'       : 'Erro no arquivamento: "$1"',
+			'errArchiveExec'       : 'Erro ao arquivar os arquivos: "$1"',
 			'errExtractExec'       : 'Erro na extração dos arquivos: "$1"',
 			'errNetUnMount'        : 'Incapaz de desmontar', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Não conversivel para UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Tente utilizar o Google Chrome, se você deseja enviar a pasta.', // from v2.1 added 26.6.2015
-			'errSearchTimeout'     : 'Timed out enquanto busca "$1". O resultado da pesquisa é parcial.', // from v2.1 added 12.1.2016
+			'errFolderUpload'      : 'Tente utilizar o Google Chrome, se você deseja enviar uma pasta.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Tempo limite atingido para a busca "$1". O resultado da pesquisa é parcial.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Re-autorização é necessária.', // from v2.1.10 added 3.24.2016
 
 			/******************************* commands names ********************************/
@@ -127,7 +128,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdup'        : 'Ir para o diretório pai',
 			'cmdupload'    : 'Fazer upload de arquivo',
 			'cmdview'      : 'Vizualizar',
-			'cmdresize'    : 'Redimencionar & Rodar',
+			'cmdresize'    : 'Redimencionar & Rotacionar',
 			'cmdsort'      : 'Ordenar',
 			'cmdnetmount'  : 'Montar unidade de rede', // added 18.04.2012
 			'cmdnetunmount': 'Desmontar', // from v2.1 added 30.04.2012
@@ -156,7 +157,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
 
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'Abrir Pasta',
+			'ntfopen'     : 'Abrir pasta',
 			'ntffile'     : 'Abrir arquivo',
 			'ntfreload'   : 'Recarregar conteudo da pasta',
 			'ntfmkdir'    : 'Criar diretório',
@@ -164,13 +165,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfrm'       : 'Deletar arquivos',
 			'ntfcopy'     : 'Copiar arquivos',
 			'ntfmove'     : 'Mover arquivos',
-			'ntfprepare'  : 'Preparando para copiar',
+			'ntfprepare'  : 'Preparando para copiar arquivos',
 			'ntfrename'   : 'Renomear arquivos',
-			'ntfupload'   : 'Subindo arquivos',
+			'ntfupload'   : 'Subindo os arquivos',
 			'ntfdownload' : 'Baixando os arquivos',
 			'ntfsave'     : 'Salvando os arquivos',
 			'ntfarchive'  : 'Criando os arquivos',
-			'ntfextract'  : 'Extraindo arquivos',
+			'ntfextract'  : 'Extraindo arquivos compactados',
 			'ntfsearch'   : 'Procurando arquivos',
 			'ntfresize'   : 'Redimensionando imagens',
 			'ntfsmth'     : 'Fazendo alguma coisa',
@@ -241,7 +242,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmação requerida',
-			'confirmRm'       : 'Você tem certeza que quer remover os arquivos?<br />Isto não pode ser desfeito!',
+			'confirmRm'       : 'Você tem certeza que deseja remover os arquivos?<br />Isto não pode ser desfeito!',
 			'confirmRepl'     : 'Substituir arquivo velho com este novo?',
 			'confirmConvUTF8' : 'Não está em UTF-8<br/>Converter para UTF-8?<br/>Conteúdo se torna UTF-8 após salvar as conversões.', // from v2.1 added 08.04.2014
 			'confirmNotSave'  : 'Isto foi modificado.<br/>Você vai perder seu trabalho caso não salve as mudanças.', // from v2.1 added 15.7.2015
@@ -274,7 +275,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'sim',
 			'no'              : 'não',
 			'link'            : 'Link',
-			'searcresult'     : 'resultados da pesquisa',
+			'searcresult'     : 'Resultados da pesquisa',
 			'selected'        : 'itens selecionados',
 			'about'           : 'Sobre',
 			'shortcuts'       : 'Atalhos',
@@ -294,7 +295,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'maintainer'      : 'Mantenedor',
 			'translator'      : 'Tradutor',
 			'icons'           : 'Ícones',
-			'dontforget'      : 'e não se esqueça de levar sua toalha',
+			'dontforget'      : 'e não se esqueça de levar a sua toalha',
 			'shortcutsof'     : 'Atalhos desabilitados',
 			'dropFiles'       : 'Solte os arquivos aqui',
 			'or'              : 'ou',
@@ -332,16 +333,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'perm'            : 'Permissão', // from v2.1 added 20.6.2015
 			'mode'            : 'Modo', // from v2.1 added 20.6.2015
 			'emptyFolder'     : 'Pasta vazia', // from v2.1.6 added 30.12.2015
-			'emptyFolderDrop' : 'Pasta vazia\\Arraste itens para os adicionar', // from v2.1.6 added 30.12.2015
-			'emptyFolderLTap' : 'Pasta vazia\\De um toque longo para adicionar itens', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Pasta vazia\\A Arraste itens para os adicionar', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Pasta vazia\\A De um toque longo para adicionar itens', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Qualidade', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Auto sincronização',  // from v2.1.6 added 10.1.2016
-			'moveUp'          : 'Mover acima',  // from v2.1.6 added 18.1.2016
+			'moveUp'          : 'Mover para cima',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Obter link', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Itens selecionados ($1)', // from v2.1.7 added 2.19.2016
-			'folderId'        : 'ID pasta', // from v2.1.10 added 3.25.2016
+			'folderId'        : 'ID da pasta', // from v2.1.10 added 3.25.2016
 			'offlineAccess'   : 'Permitir acesso offline', // from v2.1.10 added 3.25.2016
 			'reAuth'          : 'Se autenticar novamente', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Desconhecio',
