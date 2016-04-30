@@ -93,22 +93,18 @@ class elFinderPluginAutoResize {
 		}
 		
 		if ($srcImgInfo[0] > $opts['maxWidth'] || $srcImgInfo[1] > $opts['maxHeight']) {
-			return $this->resize($src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality'], $opts['preserveExif']);
+			return $this->resize($volume, $src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality'], $opts['preserveExif']);
 		}
 		
 		return false;
 	}
 	
-	private function resize($src, $srcImgInfo, $maxWidth, $maxHeight, $quality, $preserveExif) {
+	private function resize($volume, $src, $srcImgInfo, $maxWidth, $maxHeight, $jpgQuality, $preserveExif) {
 		$zoom = min(($maxWidth/$srcImgInfo[0]),($maxHeight/$srcImgInfo[1]));
 		$width = round($srcImgInfo[0] * $zoom);
 		$height = round($srcImgInfo[1] * $zoom);
 		
-		if (class_exists('Imagick', false)) {
-			return $this->resize_imagick($src, $width, $height, $quality, $preserveExif);
-		} else {
-			return $this->resize_gd($src, $width, $height, $quality, $srcImgInfo);
-		}
+		return $volume->imageUtil('resize', $src, compact('width', 'height', 'jpgQuality', 'preserveExif'));
 	}
 	
 	private function resize_gd($src, $width, $height, $quality, $srcImgInfo) {
