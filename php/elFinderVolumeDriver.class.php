@@ -102,7 +102,7 @@ abstract class elFinderVolumeDriver {
 	
 	/**
 	 * Image manipulation lib name
-	 * auto|imagick|mogtify|gd
+	 * auto|imagick|gd|convert
 	 *
 	 * @var string
 	 **/
@@ -664,8 +664,16 @@ abstract class elFinderVolumeDriver {
 
 		if (($type == 'imagick' || $type == 'auto') && extension_loaded('imagick')) {
 			$this->imgLib = 'imagick';
+		} else if (($type == 'gd' || $type == 'auto') && function_exists('gd_info')) {
+			$this->imgLib = 'gd';
 		} else {
-			$this->imgLib = function_exists('gd_info') ? 'gd' : '';
+			$convertCache = 'imgLibConvert';
+			if (($convertCmd = $this->session->get($convertCache, false)) !== false) {
+				$this->imgLib = $convertCmd;
+			} else {
+				$this->imgLib = ($this->procExec('convert -version') === 0)? 'convert' : '';
+				$this->session->set($convertCache, $this->imgLib);
+			}
 		}
 		
 		// check archivers
@@ -4232,7 +4240,8 @@ abstract class elFinderVolumeDriver {
 			unlink($tmb);
 			return false;
 		}
-		
+
+		//clearstatcache();
 		return $name;
 	}
 
@@ -4343,6 +4352,34 @@ abstract class elFinderVolumeDriver {
 
 				break;
 
+			case 'convert':
+				$filter = ($destformat === 'png' /* createTmb */)? '-filter Box' : '-filter Lanczos';
+				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
+					$jpgQuality = ' -quality ' . $jpgQuality;
+				} else {
+					$jpgQuality = '';
+				}
+				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
+					$dstPath = $path . '.' . $destformat;
+				} else {
+					$dstPath = $path;
+				}
+				$quotedPath = escapeshellarg($path);
+				$quotedDitPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s %s -resize %dx%d %s %s', $jpgQuality, $filter, $size_w, $size_h, $quotedPath, $quotedDitPath);
+				
+				$result = false;
+				if ($this->procExec($cmd) === 0) {
+					$result = true;
+					if ($path !== $dstPath) {
+						unlink($path);
+						rename($dstPath, $path);
+					}
+				}
+				return $result ? $path : false;
+
+				break;
+
 			case 'gd':
 				$img = $this->gdImageCreate($path,$s['mime']);
 
@@ -4436,6 +4473,33 @@ abstract class elFinderVolumeDriver {
 				
 				$img->clear();
 
+				return $result ? $path : false;
+
+				break;
+
+			case 'convert':
+				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
+					$jpgQuality = ' -quality ' . $jpgQuality;
+				} else {
+					$jpgQuality = '';
+				}
+				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
+					$dstPath = $path . '.' . $destformat;
+				} else {
+					$dstPath = $path;
+				}
+				$quotedPath = escapeshellarg($path);
+				$quotedDitPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s -crop %dx%d+%d+%d %s %s', $jpgQuality, $width, $height, $x, $y, $quotedPath, $quotedDitPath);
+				
+				$result = false;
+				if ($this->procExec($cmd) === 0) {
+					$result = true;
+					if ($path !== $dstPath) {
+						unlink($path);
+						rename($dstPath, $path);
+					}
+				}
 				return $result ? $path : false;
 
 				break;
@@ -4561,6 +4625,36 @@ abstract class elFinderVolumeDriver {
 
 				break;
 
+			case 'convert':
+				if ($bgcolor === 'transparent') {
+					$bgcolor = 'rgba(255, 255, 255, 0.0)';
+				}
+				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
+					$jpgQuality = ' -quality ' . $jpgQuality;
+				} else {
+					$jpgQuality = '';
+				}
+				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
+					$dstPath = $path . '.' . $destformat;
+				} else {
+					$dstPath = $path;
+				}
+				$quotedPath = escapeshellarg($path);
+				$quotedDitPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert -size %dx%d "xc:%s" png:- | convert%s png:- %s -geometry +%d+%d -compose over -composite %s', $width, $height, $bgcolor, $jpgQuality, $quotedPath, $x, $y, $quotedDitPath);
+				
+				$result = false;
+				if ($this->procExec($cmd) === 0) {
+					$result = true;
+					if ($path !== $dstPath) {
+						unlink($path);
+						rename($dstPath, $path);
+					}
+				}
+				return $result ? $path : false;
+
+				break;
+
 			case 'gd':
 				$img = $this->gdImageCreate($path,$s['mime']);
 
@@ -4664,6 +4758,36 @@ abstract class elFinderVolumeDriver {
 					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
 				}
 				$img->clear();
+				return $result ? $path : false;
+
+				break;
+
+			case 'convert':
+				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
+					$jpgQuality = ' -quality ' . $jpgQuality;
+				} else {
+					$jpgQuality = '';
+				}
+				if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
+					$bgcolor = 'rgba(255, 255, 255, 0.0)';
+				}
+				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
+					$dstPath = $path . '.' . $destformat;
+				} else {
+					$dstPath = $path;
+				}
+				$quotedPath = escapeshellarg($path);
+				$quotedDitPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s -background "%s" -rotate %d %s %s', $jpgQuality, $bgcolor, $degree, $quotedPath, $quotedDitPath);
+				
+				$result = false;
+				if ($this->procExec($cmd) === 0) {
+					$result = true;
+					if ($path !== $dstPath) {
+						unlink($path);
+						rename($dstPath, $path);
+					}
+				}
 				return $result ? $path : false;
 
 				break;
