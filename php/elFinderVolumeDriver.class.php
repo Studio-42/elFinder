@@ -229,7 +229,9 @@ abstract class elFinderVolumeDriver {
 		// thumbnails crop (true - crop, false - scale image to fit thumbnail size)
 		'tmbCrop'         => true,
 		// thumbnails background color (hex #rrggbb or 'transparent')
-		'tmbBgColor'      => '#ffffff',
+		'tmbBgColor'      => 'transparent',
+		// image rotate fallback background color (hex #rrggbb)
+		'bgColorFb'       => '#ffffff',
 		// image manipulations library
 		'imgLib'          => 'auto',
 		// Fallback self image to thumbnail (nothing imgLib)
@@ -2322,7 +2324,7 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'rotate':
-				$result = $this->imgRotate($work_path, $degree, ($bg ? $bg : $this->options['tmbBgColor']), null, $jpgQuality);
+				$result = $this->imgRotate($work_path, $degree, ($bg ? $bg : $this->options['bgColorFb']), null, $jpgQuality);
 				break;
 
 			default:
@@ -2573,7 +2575,7 @@ abstract class elFinderVolumeDriver {
 				if (empty($options['degree'])) {
 					return true;
 				}
-				return (bool)$this->imgRotate($src, $options['degree'], $options['bgcolor'], null, $options['jpgQuality']);
+				return (bool)$this->imgRotate($src, $options['degree'], $options['bgColorFb'], null, $options['jpgQuality']);
 			
 			case 'resize':
 			case 'propresize':
@@ -2584,10 +2586,10 @@ abstract class elFinderVolumeDriver {
 				}
 			
 			case 'resize':
-				return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, null, $options['jpgQuality']);
+				return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, null, $options['jpgQuality'], $options);
 			
 			case 'propresize':
-				return (bool)$this->imgResize($src, $options['width'], $options['height'], true, true, null, $options['jpgQuality']);
+				return (bool)$this->imgResize($src, $options['width'], $options['height'], true, true, null, $options['jpgQuality'], $options);
 			
 			case 'crop':
 				if (isset($options['x']) && isset($options['y'])) {
@@ -4173,9 +4175,13 @@ abstract class elFinderVolumeDriver {
 		
 		if (($this->imgLib === 'imagick' && ! $imagickTest) || ($s = @getimagesize($tmb)) === false) {
 			if ($this->imgLib === 'imagick') {
+				$bgcolor = $this->options['tmbBgColor'];
+				if ($bgcolor === 'transparent') {
+					$bgcolor = 'rgba(255, 255, 255, 0.0)';
+				}
 				try {
 					$imagick = new imagick();
-					$imagick->setBackgroundColor(new ImagickPixel($this->options['tmbBgColor']));
+					$imagick->setBackgroundColor(new ImagickPixel($bgcolor));
 					$imagick->readImage($this->getExtentionByMime($stat['mime'], ':') . $tmb);
 					$imagick->setImageFormat('png');
 					$imagick->writeImage($tmb);
@@ -4240,11 +4246,12 @@ abstract class elFinderVolumeDriver {
 	 * @param  bool	    $resizeByBiggerSide resize image based on bigger side if true
 	 * @param  string   $destformat         image destination format
 	 * @param  int      $jpgQuality         JEPG quality (1-100)
+	 * @param  array    $options            Other extra options
 	 * @return string|false
 	 * @author Dmitry (dio) Levashov
 	 * @author Alexey Sukhotin
 	 **/
-	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null, $jpgQuality = null) {
+	protected function imgResize($path, $width, $height, $keepProportions = false, $resizeByBiggerSide = true, $destformat = null, $jpgQuality = null, $options = array()) {
 		if (($s = @getimagesize($path)) == false) {
 			return false;
 		}
@@ -4307,8 +4314,27 @@ abstract class elFinderVolumeDriver {
 					if ($ani) {
 						$img->setFirstIterator();
 					}
-					$img->resizeImage($size_w, $size_h, $filter, 1);
-					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
+					if (strtoupper($img->getImageFormat()) === 'JPEG') {
+						$img->setImageCompression(imagick::COMPRESSION_JPEG);
+						$img->setImageCompressionQuality($jpgQuality);
+						if (isset($options['preserveExif']) && ! $options['preserveExif']) {
+							try {
+								$orientation = $img->getImageOrientation();
+							} catch (ImagickException $e) {
+								$orientation = 0;
+							}
+							$img->stripImage();
+							if ($orientation) {
+								$img->setImageOrientation($orientation);
+							}
+						}
+					}
+					$img->resizeImage($size_w, $size_h, $filter, true);
+					if ($destformat) {
+						$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
+					} else {
+						$result = $img->writeImage($path);
+					}
 				}
 				
 				$img->clear();
@@ -4320,9 +4346,21 @@ abstract class elFinderVolumeDriver {
 			case 'gd':
 				$img = $this->gdImageCreate($path,$s['mime']);
 
-				if ($img &&  false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
+				if ($img && false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
 				
-					$this->gdImageBackground($tmp,$this->options['tmbBgColor']);
+					$bgNum = false;
+					if ($s[2] === IMAGETYPE_GIF && (! $destformat || $destformat === 'gif')) {
+						$bgIdx = imagecolortransparent($img);
+						if ($bgIdx !== -1) {
+							$c = imagecolorsforindex($img, $bgIdx);
+							$bgNum = imagecolorallocate($tmp, $c['red'], $c['green'], $c['blue']);
+							imagefill($tmp, 0, 0, $bgNum);
+							imagecolortransparent($tmp, $bgNum);
+						}
+					}
+					if ($bgNum === false) {
+						$this->gdImageBackground($tmp, 'transparent');
+					}
 					
 					if (!imagecopyresampled($tmp, $img, 0, 0, 0, 0, $size_w, $size_h, $s[0], $s[1])) {
 						return false;
@@ -4405,9 +4443,21 @@ abstract class elFinderVolumeDriver {
 			case 'gd':
 				$img = $this->gdImageCreate($path,$s['mime']);
 
-				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
+				if ($img && false != ($tmp = imagecreatetruecolor($width, $height))) {
 					
-					$this->gdImageBackground($tmp,$this->options['tmbBgColor']);
+					$bgNum = false;
+					if ($s[2] === IMAGETYPE_GIF && (! $destformat || $destformat === 'gif')) {
+						$bgIdx = imagecolortransparent($img);
+						if ($bgIdx !== -1) {
+							$c = imagecolorsforindex($img, $bgIdx);
+							$bgNum = imagecolorallocate($tmp, $c['red'], $c['green'], $c['blue']);
+							imagefill($tmp, 0, 0, $bgNum);
+							imagecolortransparent($tmp, $bgNum);
+						}
+					}
+					if ($bgNum === false) {
+						$this->gdImageBackground($tmp, 'transparent');
+					}
 
 					$size_w = $width;
 					$size_h = $height;
@@ -4473,6 +4523,9 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 				
+				if ($bgcolor === 'transparent') {
+					$bgcolor = 'rgba(255, 255, 255, 0.0)';
+				}
 				$ani = ($img->getNumberImages() > 1);
 				if ($ani && is_null($destformat)) {
 					$img1 = new Imagick();
@@ -4592,6 +4645,9 @@ abstract class elFinderVolumeDriver {
 					return false;
 				}
 
+				if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
+					$bgcolor = 'rgba(255, 255, 255, 0.0)';
+				}
 				if ($img->getNumberImages() > 1) {
 					$img = $img->coalesceImages();
 					do {
@@ -4612,9 +4668,37 @@ abstract class elFinderVolumeDriver {
 				$img = $this->gdImageCreate($path,$s['mime']);
 
 				$degree = 360 - $degree;
-				list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
-				$bgcolor = imagecolorallocate($img, $r, $g, $b);
-				$tmp = imageRotate($img, $degree, (int)$bgcolor);
+				
+				$bgNum = -1;
+				$bgIdx = false;
+				if ($s[2] === IMAGETYPE_GIF) {
+					$bgIdx = imagecolortransparent($img);
+					if ($bgIdx !== -1) {
+						$c = imagecolorsforindex($img, $bgIdx);
+						$w = imagesx($img);
+						$h = imagesy($img);
+						$newImg = imagecreatetruecolor($w, $h);
+						imagepalettecopy($newImg, $img);
+						$bgNum = imagecolorallocate($newImg, $c['red'], $c['green'], $c['blue']);
+						imagefill($newImg, 0, 0, $bgNum);
+						imagecolortransparent($newImg, $bgNum);
+						imagecopy($newImg, $img, 0, 0, 0, 0, $w, $h);
+						imagedestroy($img);
+						$img = $newImg;
+						$newImg = null;
+					}
+				} else if ($s[2] === IMAGETYPE_PNG) {
+					$bgNum = imagecolorallocatealpha($img, 255, 255, 255, 127);
+				}
+				if ($bgNum === -1) {
+					list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
+					$bgNum = imagecolorallocate($img, $r, $g, $b);
+				}
+				
+				$tmp = imageRotate($img, $degree, $bgNum);
+				if ($bgIdx !== -1) {
+					imagecolortransparent($tmp, $bgNum);
+				}
 
 				$result = $this->gdImage($tmp, $path, $destformat, $s['mime'], $jpgQuality);
 
@@ -4744,18 +4828,34 @@ abstract class elFinderVolumeDriver {
      */
 	protected function gdImage($image, $filename, $destformat, $mime, $jpgQuality = null ){
 
-		if (!$jpgQuality) {
+		if (! $jpgQuality) {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
-		if ($destformat == 'jpg' || ($destformat == null && $mime == 'image/jpeg')) {
-			return imagejpeg($image, $filename, $jpgQuality);
+		if ($destformat) {
+			switch ($destformat) {
+				case 'jpg':
+					$mime = 'image/jpeg';
+					break;
+				case 'gif':
+					$mime = 'image/gif';
+					break;
+				case 'png':
+				default:
+					$mime = 'image/png';
+					break;
+			}
 		}
-
-		if ($destformat == 'gif' || ($destformat == null && $mime == 'image/gif')) {
-			return imagegif($image, $filename, 7);
+		switch ($mime) {
+			case 'image/gif':
+				return imagegif($image, $filename);
+			case 'image/jpeg':
+				return imagejpeg($image, $filename, $jpgQuality);
+			case 'image/wbmp':
+				return imagewbmp($image, $filename);
+			case 'image/png':
+			default:
+				return imagepng($image, $filename);
 		}
-
-		return imagepng($image, $filename, 7);
 	}
 
     /**
@@ -4811,17 +4911,15 @@ abstract class elFinderVolumeDriver {
 	 * @param string $bgcolor background color in #rrggbb format
 	 */
 	protected function gdImageBackground($image, $bgcolor){
-
-		if( $bgcolor == 'transparent' ){
-			imagesavealpha($image,true);
-			$bgcolor1 = imagecolorallocatealpha($image, 255, 255, 255, 127);
-
-		}else{
+	
+		if ($bgcolor === 'transparent'){
+			imagealphablending($image, false);
+			imagesavealpha($image, true);
+		} else {
 			list($r, $g, $b) = sscanf($bgcolor, "#%02x%02x%02x");
 			$bgcolor1 = imagecolorallocate($image, $r, $g, $b);
+			imagefill($image, 0, 0, $bgcolor1);
 		}
-
-		imagefill($image, 0, 0, $bgcolor1);
 	}
 
 	/*********************** misc *************************/
