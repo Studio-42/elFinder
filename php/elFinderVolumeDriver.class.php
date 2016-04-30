@@ -4232,7 +4232,11 @@ abstract class elFinderVolumeDriver {
 			}
 		
 			if ($result) {
-				$result = $this->imgSquareFit($result, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+				if ($s = @getimagesize($tmb)) {
+					if ($s[0] !== $tmbSize || $s[1] !== $tmbSize) {
+						$result = $this->imgSquareFit($result, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png' );
+					}
+				}
 			}
 		}
 		
