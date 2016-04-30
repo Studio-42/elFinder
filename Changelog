@@ -11,6 +11,9 @@
 		- Fixed #1342 Bugfix of method `getFullPath` that was problems relative path can not be resolved
 		- Added a volume root option `uploadMaxConn`
 			- Maximum number of chunked upload connection. `-1` to disable chunked upload.
+		- Changed default value of volume root option `tmbBgColor` to 'transparent'
+		- Added a volume root option `bgColorFb`
+			- Image rotate fallback background color (defalt: #ffffff). Uses this color if it can not specify to transparent.
 		- And some minor bug fixes
 
 
