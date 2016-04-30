@@ -4566,7 +4566,11 @@ abstract class elFinderVolumeDriver {
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
 
-					$this->gdImageBackground($tmp,$bgcolor);
+					$this->gdImageBackground($tmp, $bgcolor);
+					if ($bgcolor === 'transparent' && ($destformat === 'png' || $s[2] === IMAGETYPE_PNG)) {
+						$bgNum = imagecolorallocatealpha($tmp, 255, 255, 255, 127);
+						imagefill($tmp, 0, 0, $bgNum);
+					}
 
 					if (!imagecopy($tmp, $img, $x, $y, 0, 0, $s[0], $s[1])) {
 						return false;
