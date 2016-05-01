@@ -658,13 +658,14 @@ abstract class elFinderVolumeDriver {
 		}
 
 		// set image manipulation library
-		$type = preg_match('/^(imagick|gd|auto)$/i', $this->options['imgLib'])
+		$type = preg_match('/^(imagick|gd|convert|auto)$/i', $this->options['imgLib'])
 			? strtolower($this->options['imgLib'])
 			: 'auto';
 
-		if (($type == 'imagick' || $type == 'auto') && extension_loaded('imagick')) {
+		$imgLibFallback = extension_loaded('imagick')? 'imagick' : (function_exists('gd_info')? 'gd' : '');
+		if (($type === 'imagick' || $type === 'auto') && extension_loaded('imagick')) {
 			$this->imgLib = 'imagick';
-		} else if (($type == 'gd' || $type == 'auto') && function_exists('gd_info')) {
+		} else if (($type === 'gd' || $type === 'auto') && function_exists('gd_info')) {
 			$this->imgLib = 'gd';
 		} else {
 			$convertCache = 'imgLibConvert';
@@ -674,6 +675,10 @@ abstract class elFinderVolumeDriver {
 				$this->imgLib = ($this->procExec('convert -version') === 0)? 'convert' : '';
 				$this->session->set($convertCache, $this->imgLib);
 			}
+		}
+		if ($type !== 'auto' && $this->imgLib === '') {
+			// fallback
+			$this->imgLib = extension_loaded('imagick')? 'imagick' : (function_exists('gd_info')? 'gd' : '');
 		}
 		
 		// check archivers
@@ -2311,7 +2316,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
-		if ($this->imgLib != 'imagick') {
+		if ($this->imgLib !== 'imagick' && $this->imgLib !== 'convert') {
 			if (elFinder::isAnimationGif($work_path)) {
 				return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
 			}
@@ -4357,6 +4362,20 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
+				$ani = false;
+				$cmd = 'identify ' . escapeshellarg($path);
+				if ($this->procExec($cmd, $o) === 0) {
+					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
+				}
+				$coalesce = $deconstruct = $index = '';
+				if ($ani) {
+					if (is_null($destformat)) {
+						$coalesce = ' -coalesce';
+						$deconstruct = ' -deconstruct';
+					} else {
+						$index = '[0]';
+					}
+				}
 				$filter = ($destformat === 'png' /* createTmb */)? '-filter Box' : '-filter Lanczos';
 				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
 					$jpgQuality = ' -quality ' . $jpgQuality;
@@ -4368,9 +4387,10 @@ abstract class elFinderVolumeDriver {
 				} else {
 					$dstPath = $path;
 				}
-				$quotedPath = escapeshellarg($path);
-				$quotedDitPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s %s -resize %dx%d %s %s', $jpgQuality, $filter, $size_w, $size_h, $quotedPath, $quotedDitPath);
+				$strip = (isset($options['preserveExif']) && ! $options['preserveExif'])? ' -strip' : '';
+				$quotedPath = escapeshellarg($path . $index);
+				$quotedDstPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s%s +repage %s -resize %dx%d +repage%s %s %s', $coalesce, $jpgQuality, $filter, $size_w, $size_h, $deconstruct, $quotedPath, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -4482,6 +4502,19 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
+				$cmd = 'identify ' . escapeshellarg($path);
+				if ($this->procExec($cmd, $o) === 0) {
+					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
+				}
+				$coalesce = $deconstruct = $index = '';
+				if ($ani) {
+					if (is_null($destformat)) {
+						$coalesce = ' -coalesce';
+						$deconstruct = ' -deconstruct';
+					} else {
+						$index = '[0]';
+					}
+				}
 				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
 					$jpgQuality = ' -quality ' . $jpgQuality;
 				} else {
@@ -4492,9 +4525,9 @@ abstract class elFinderVolumeDriver {
 				} else {
 					$dstPath = $path;
 				}
-				$quotedPath = escapeshellarg($path);
-				$quotedDitPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s -crop %dx%d+%d+%d %s %s', $jpgQuality, $width, $height, $x, $y, $quotedPath, $quotedDitPath);
+				$quotedPath = escapeshellarg($path . $index);
+				$quotedDstPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s%s +repage -crop %dx%d+%d+%d +repage %s %s %s', $coalesce, $jpgQuality, $width, $height, $x, $y, $deconstruct, $quotedPath, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -4630,6 +4663,19 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
+				$cmd = 'identify ' . escapeshellarg($path);
+				if ($this->procExec($cmd, $o) === 0) {
+					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
+				}
+				$coalesce = $deconstruct = $index = '';
+				if ($ani) {
+					if (is_null($destformat)) {
+						$coalesce = ' -coalesce';
+						$deconstruct = ' -deconstruct';
+					} else {
+						$index = '[0]';
+					}
+				}
 				if ($bgcolor === 'transparent') {
 					$bgcolor = 'rgba(255, 255, 255, 0.0)';
 				}
@@ -4643,9 +4689,9 @@ abstract class elFinderVolumeDriver {
 				} else {
 					$dstPath = $path;
 				}
-				$quotedPath = escapeshellarg($path);
-				$quotedDitPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert -size %dx%d "xc:%s" png:- | convert%s png:- %s -geometry +%d+%d -compose over -composite %s', $width, $height, $bgcolor, $jpgQuality, $quotedPath, $x, $y, $quotedDitPath);
+				$quotedPath = escapeshellarg($path . $index);
+				$quotedDstPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert -size %dx%d "xc:%s" png:- | convert%s%s png:- +repage %s -geometry +%d+%d +repage -compose over -composite%s %s', $width, $height, $bgcolor, $coalesce, $jpgQuality, $quotedPath, $x, $y, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -4767,6 +4813,19 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
+				$cmd = 'identify ' . escapeshellarg($path);
+				if ($this->procExec($cmd, $o) === 0) {
+					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
+				}
+				$coalesce = $deconstruct = $index = '';
+				if ($ani) {
+					if (is_null($destformat)) {
+						$coalesce = ' -coalesce';
+						$deconstruct = ' -deconstruct';
+					} else {
+						$index = '[0]';
+					}
+				}
 				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
 					$jpgQuality = ' -quality ' . $jpgQuality;
 				} else {
@@ -4780,9 +4839,9 @@ abstract class elFinderVolumeDriver {
 				} else {
 					$dstPath = $path;
 				}
-				$quotedPath = escapeshellarg($path);
-				$quotedDitPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s -background "%s" -rotate %d %s %s', $jpgQuality, $bgcolor, $degree, $quotedPath, $quotedDitPath);
+				$quotedPath = escapeshellarg($path . $index);
+				$quotedDstPath = escapeshellarg($dstPath);
+				$cmd = sprintf('convert%s%s +repage -background "%s" -rotate %d +repage%s %s %s', $coalesce, $jpgQuality, $bgcolor, $degree, $deconstruct, $quotedPath, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
