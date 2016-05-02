@@ -1173,6 +1173,12 @@ abstract class elFinderVolumeDriver {
 		
 		if (is_null($extTable)) {
 			$extTable = array_flip(array_unique($this->getMimeTable()));
+			foreach(array_keys($this->options['mimeMap']) as $pair) {
+				list($ext, $_mime) = explode(':', $pair);
+				if (! isset($extTable[$_mime])) {
+					$extTable[$_mime] = $ext;
+				}
+			}
 		}
 		
 		if ($mime && isset($extTable[$mime])) {
@@ -4362,43 +4368,15 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
-				$ani = false;
-				$cmd = 'identify ' . escapeshellarg($path);
-				if ($this->procExec($cmd, $o) === 0) {
-					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
-				}
-				$coalesce = $deconstruct = $index = '';
-				if ($ani) {
-					if (is_null($destformat)) {
-						$coalesce = ' -coalesce';
-						$deconstruct = ' -deconstruct';
-					} else {
-						$index = '[0]';
-					}
-				}
+				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
 				$filter = ($destformat === 'png' /* createTmb */)? '-filter Box' : '-filter Lanczos';
-				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
-					$jpgQuality = ' -quality ' . $jpgQuality;
-				} else {
-					$jpgQuality = '';
-				}
-				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
-					$dstPath = $path . '.' . $destformat;
-				} else {
-					$dstPath = $path;
-				}
 				$strip = (isset($options['preserveExif']) && ! $options['preserveExif'])? ' -strip' : '';
-				$quotedPath = escapeshellarg($path . $index);
-				$quotedDstPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s%s +repage %s -resize %dx%d +repage%s %s %s', $coalesce, $jpgQuality, $filter, $size_w, $size_h, $deconstruct, $quotedPath, $quotedDstPath);
+				//$cmd = sprintf('convert%s%s +repage %s -resize %dx%d +repage%s %s %s', $coalesce, $jpgQuality, $filter, $size_w, $size_h, $deconstruct, $quotedPath, $quotedDstPath);
+				$cmd = sprintf('convert %s%s%s %s -geometry %dx%d! %s %s', $quotedPath, $coalesce, $jpgQuality, $filter, $size_w, $size_h, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
 					$result = true;
-					if ($path !== $dstPath) {
-						unlink($path);
-						rename($dstPath, $path);
-					}
 				}
 				return $result ? $path : false;
 
@@ -4502,40 +4480,12 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
-				$cmd = 'identify ' . escapeshellarg($path);
-				if ($this->procExec($cmd, $o) === 0) {
-					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
-				}
-				$coalesce = $deconstruct = $index = '';
-				if ($ani) {
-					if (is_null($destformat)) {
-						$coalesce = ' -coalesce';
-						$deconstruct = ' -deconstruct';
-					} else {
-						$index = '[0]';
-					}
-				}
-				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
-					$jpgQuality = ' -quality ' . $jpgQuality;
-				} else {
-					$jpgQuality = '';
-				}
-				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
-					$dstPath = $path . '.' . $destformat;
-				} else {
-					$dstPath = $path;
-				}
-				$quotedPath = escapeshellarg($path . $index);
-				$quotedDstPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s%s +repage -crop %dx%d+%d+%d +repage %s %s %s', $coalesce, $jpgQuality, $width, $height, $x, $y, $deconstruct, $quotedPath, $quotedDstPath);
+				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
+				$cmd = sprintf('convert %s%s%s -crop %dx%d+%d+%d%s %s', $quotedPath, $coalesce, $jpgQuality, $width, $height, $x, $y, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
 					$result = true;
-					if ($path !== $dstPath) {
-						unlink($path);
-						rename($dstPath, $path);
-					}
 				}
 				return $result ? $path : false;
 
@@ -4663,43 +4613,15 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
-				$cmd = 'identify ' . escapeshellarg($path);
-				if ($this->procExec($cmd, $o) === 0) {
-					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
-				}
-				$coalesce = $deconstruct = $index = '';
-				if ($ani) {
-					if (is_null($destformat)) {
-						$coalesce = ' -coalesce';
-						$deconstruct = ' -deconstruct';
-					} else {
-						$index = '[0]';
-					}
-				}
+				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
 				if ($bgcolor === 'transparent') {
 					$bgcolor = 'rgba(255, 255, 255, 0.0)';
 				}
-				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
-					$jpgQuality = ' -quality ' . $jpgQuality;
-				} else {
-					$jpgQuality = '';
-				}
-				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
-					$dstPath = $path . '.' . $destformat;
-				} else {
-					$dstPath = $path;
-				}
-				$quotedPath = escapeshellarg($path . $index);
-				$quotedDstPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert -size %dx%d "xc:%s" png:- | convert%s%s png:- +repage %s -geometry +%d+%d +repage -compose over -composite%s %s', $width, $height, $bgcolor, $coalesce, $jpgQuality, $quotedPath, $x, $y, $deconstruct, $quotedDstPath);
+				$cmd = sprintf('convert -size %dx%d "xc:%s" png:- | convert%s%s png:-  %s -geometry +%d+%d -compose over -composite%s %s', $width, $height, $bgcolor, $coalesce, $jpgQuality, $quotedPath, $x, $y, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
 					$result = true;
-					if ($path !== $dstPath) {
-						unlink($path);
-						rename($dstPath, $path);
-					}
 				}
 				return $result ? $path : false;
 
@@ -4813,43 +4735,15 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'convert':
-				$cmd = 'identify ' . escapeshellarg($path);
-				if ($this->procExec($cmd, $o) === 0) {
-					$ani = (count(preg_split('/(?:\r\n|\n|\r)/', trim($o))) > 1);
-				}
-				$coalesce = $deconstruct = $index = '';
-				if ($ani) {
-					if (is_null($destformat)) {
-						$coalesce = ' -coalesce';
-						$deconstruct = ' -deconstruct';
-					} else {
-						$index = '[0]';
-					}
-				}
-				if ($s[2] === IMAGETYPE_JPEG || $s[2] === IMAGETYPE_JPEG2000) {
-					$jpgQuality = ' -quality ' . $jpgQuality;
-				} else {
-					$jpgQuality = '';
-				}
+				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
 				if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
 					$bgcolor = 'rgba(255, 255, 255, 0.0)';
 				}
-				if ($destformat && substr($path, (strlen($destformat)*-1)) !== $destformat) {
-					$dstPath = $path . '.' . $destformat;
-				} else {
-					$dstPath = $path;
-				}
-				$quotedPath = escapeshellarg($path . $index);
-				$quotedDstPath = escapeshellarg($dstPath);
-				$cmd = sprintf('convert%s%s +repage -background "%s" -rotate %d +repage%s %s %s', $coalesce, $jpgQuality, $bgcolor, $degree, $deconstruct, $quotedPath, $quotedDstPath);
+				$cmd = sprintf('convert %s%s%s -background "%s" -rotate %d%s %s', $quotedPath, $coalesce, $jpgQuality, $bgcolor, $degree, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
 					$result = true;
-					if ($path !== $dstPath) {
-						unlink($path);
-						rename($dstPath, $path);
-					}
 				}
 				return $result ? $path : false;
 
@@ -5111,6 +5005,61 @@ abstract class elFinderVolumeDriver {
 			$bgcolor1 = imagecolorallocate($image, $r, $g, $b);
 			imagefill($image, 0, 0, $bgcolor1);
 		}
+	}
+
+	/**
+	 * Prepare variables for exec convert of ImageMagick
+	 *
+	 * @param  string  $path
+	 * @param  string  $destformat
+	 * @param  int     $jpgQuality
+	 * @param  array   $imageSize
+	 * @return array
+	 */
+	protected function imageMagickConvertPrepare($path, $destformat, $jpgQuality, $imageSize = null) {
+		if (is_null($imageSize)) {
+			$imageSize = @getimagesize($path);
+		}
+		if (!$imageSize) {
+			return array();
+		}
+		$srcType = $this->getExtentionByMime($imageSize['mime'], ':');
+		$ani = false;
+		$cmd = 'identify ' . escapeshellarg($srcType . $path);
+		if ($this->procExec($cmd, $o) === 0) {
+			$ani = preg_split('/(?:\r\n|\n|\r)/', trim($o));
+			if (count($ani) < 2) {
+				$ani = false;
+			}
+		}
+		$coalesce = $index = '';
+		$deconstruct = ' +repage';
+		if ($ani) {
+			if (is_null($destformat)) {
+				$coalesce = ' -coalesce -repage 0x0';
+				$deconstruct = ' +repage -deconstruct -layers optimize';
+			} else {
+				$index = '[0]';
+				if ($srcType === 'ico:') {
+					foreach($ani as $_i => $_info) {
+						if (preg_match('/ (\d+)x(\d+) /', $_info, $m)) {
+							if ($m[1] == $imageSize[0] && $m[2] == $imageSize[1]) {
+								$index = '[' . $_i . ']';
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		if ($imageSize[2] === IMAGETYPE_JPEG || $imageSize[2] === IMAGETYPE_JPEG2000) {
+			$jpgQuality = ' -quality ' . $jpgQuality;
+		} else {
+			$jpgQuality = '';
+		}
+		$quotedPath = escapeshellarg($srcType . $path . $index);
+		$quotedDstPath = escapeshellarg(($destformat? ($destformat . ':') : $srcType) . $path);
+		return compact('ani', 'index', 'coalesce', 'deconstruct', 'jpgQuality', 'quotedPath', 'quotedDstPath');
 	}
 
 	/*********************** misc *************************/
