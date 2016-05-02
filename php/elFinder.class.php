@@ -2839,6 +2839,16 @@ class elFinder {
 		return $metadata['seekable'];
 	}
 
+	/**
+	 * Rewind stream resource
+	 * 
+	 * @param resource $resource
+	 * @return void
+	 */
+	public static function rewind($resource) {
+		self::isSeekableStream($resource) && rewind($resource);
+	}
+
     /**
      * serialize and base64_encode of session data (If needed)
      *
