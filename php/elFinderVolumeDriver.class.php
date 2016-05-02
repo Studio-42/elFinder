@@ -878,7 +878,7 @@ abstract class elFinderVolumeDriver {
 
 		// root attributes
 		$this->attributes[] = array(
-			'pattern' => '~^'.preg_quote(DIRECTORY_SEPARATOR).'$~',
+			'pattern' => '~^'.preg_quote($this->separator).'$~',
 			'locked'  => true,
 			'hidden'  => false
 		);
@@ -2826,7 +2826,7 @@ abstract class elFinderVolumeDriver {
 			$p = $this->relpathCE($path);
 			// if reqesting root dir $path will be empty, then assign '/' as we cannot leave it blank for crypt
 			if ($p === '')	{
-				$p = DIRECTORY_SEPARATOR;
+				$p = $this->separator;
 			}
 
 			// TODO crypt path and return hash
@@ -2859,7 +2859,7 @@ abstract class elFinderVolumeDriver {
 			// TODO uncrypt hash and return path
 			$path = $this->uncrypt($h); 
 			// append ROOT to path after it was cut in encode
-			return $this->abspathCE($path);//$this->root.($path == DIRECTORY_SEPARATOR ? '' : DIRECTORY_SEPARATOR.$path); 
+			return $this->abspathCE($path);//$this->root.($path === $this->separator ? '' : $this->separator.$path); 
 		}
         //TODO: Add return statement here
 	}
