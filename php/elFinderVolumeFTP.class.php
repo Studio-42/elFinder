@@ -95,6 +95,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'owner'         => true,
 			'tmbPath'       => '',
 			'tmpPath'       => '',
+			'separator'     => '/',
 			'dirMode'       => 0755,
 			'fileMode'      => 0644,
 			'rootCssClass'  => 'elfinder-navbar-root-ftp'
@@ -519,10 +520,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 *
 	 * @param  string  $path  file path
 	 * @return string
-	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
 	 **/
 	protected function _dirname($path) {
-		return dirname($path);
+		$parts = explode($this->separator, trim($path, $this->separator));
+		array_pop($parts);
+		return $this->separator .  join($this->separator, $parts);
 	}
 
 	/**
@@ -530,10 +533,11 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 *
 	 * @param  string  $path  file path
 	 * @return string
-	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
 	 **/
 	protected function _basename($path) {
-		return basename($path);
+		$parts = explode($this->separator, trim($path, $this->separator));
+		return array_pop($parts);
 	}
 
 	/**
