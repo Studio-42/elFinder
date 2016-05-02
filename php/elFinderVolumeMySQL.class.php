@@ -738,7 +738,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
      * @author Dmitry Levashov
      */
 	protected function _setContent($path, $fp) {
-		rewind($fp);
+		elFinder::rewind($fp);
 		$fstat = fstat($fp);
 		$size = $fstat['size'];
 		
@@ -764,7 +764,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$h = !empty($stat['height']) ? $stat['height'] : 0;
 		
 		$id = $this->_joinPath($dir, $name);
-		rewind($fp);
+		elFinder::rewind($fp);
 		$stat = fstat($fp);
 		$size = $stat['size'];
 		
@@ -794,7 +794,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 
 		
 		$content = '';
-		rewind($fp);
+		elFinder::rewind($fp);
 		while (!feof($fp)) {
 			$content .= fread($fp, 8192);
 		}

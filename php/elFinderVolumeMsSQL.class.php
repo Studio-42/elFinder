@@ -751,7 +751,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
      * @author Dmitry Levashov
      */
 	protected function _setContent($path, $fp) {
-		rewind($fp);
+		elFinder::rewind($fp);
 		$fstat = fstat($fp);
 		$size = $fstat['size'];
 
@@ -778,7 +778,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 		$h = !empty($stat['height']) ? $stat['height'] : 0;
 
 		$id = $this->_joinPath($dir, $name);
-		rewind($fp);
+		elFinder::rewind($fp);
 		$stat = fstat($fp);
 		$size = $stat['size'];
 		if (($tmpfile = tempnam($this->tmpPath, $this->id))) {
@@ -812,7 +812,7 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 
 
 		$content = '';
-		rewind($fp);
+		elFinder::rewind($fp);
 		while (!feof($fp)) {
 			$content .= fread($fp, 8192);
 		}
