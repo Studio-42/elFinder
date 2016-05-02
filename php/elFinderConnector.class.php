@@ -183,7 +183,7 @@ class elFinderConnector {
 					}
 				}
 				if (is_null($psize)){
-					rewind($fp);
+					elFinder::rewind($fp);
 				}
 			} else {
 				header('Accept-Ranges: none');
