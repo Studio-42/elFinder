@@ -4312,6 +4312,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
+		@set_time_limit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				
@@ -4330,7 +4331,6 @@ abstract class elFinderVolumeDriver {
 				if ($ani && is_null($destformat)) {
 					$img = $img->coalesceImages();
 					do {
-						@set_time_limit((int)ini_get('max_execution_time'));
 						$img->resizeImage($size_w, $size_h, $filter, 1);
 					} while ($img->nextImage());
 					$img = $img->optimizeImageLayers();
@@ -4445,6 +4445,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
+		@set_time_limit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				
@@ -4458,7 +4459,6 @@ abstract class elFinderVolumeDriver {
 				if ($ani && is_null($destformat)) {
 					$img = $img->coalesceImages();
 					do {
-						@set_time_limit((int)ini_get('max_execution_time'));
 						$img->setImagePage($s[0], $s[1], 0, 0);
 						$img->cropImage($width, $height, $x, $y);
 						$img->setImagePage($width, $height, 0, 0);
@@ -4568,6 +4568,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
+		@set_time_limit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -4585,7 +4586,6 @@ abstract class elFinderVolumeDriver {
 					$img1->setFormat('gif');
 					$img = $img->coalesceImages();
 					do {
-						@set_time_limit((int)ini_get('max_execution_time'));
 						$gif = new Imagick();
 						$gif->newImage($width, $height, new ImagickPixel($bgcolor));
 						$gif->setImageColorspace($img->getImageColorspace());
@@ -4710,6 +4710,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
+		@set_time_limit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -4724,7 +4725,6 @@ abstract class elFinderVolumeDriver {
 				if ($img->getNumberImages() > 1) {
 					$img = $img->coalesceImages();
 					do {
-						@set_time_limit((int)ini_get('max_execution_time'));
 						$img->rotateImage(new ImagickPixel($bgcolor), $degree);
 					} while ($img->nextImage());
 					$img = $img->optimizeImageLayers();
