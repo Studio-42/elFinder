@@ -4603,7 +4603,7 @@ abstract class elFinderVolumeDriver {
 					$img1->newImage($width, $height, new ImagickPixel($bgcolor));
 					$img1->setImageColorspace($img->getImageColorspace());
 					$img1->compositeImage( $img, imagick::COMPOSITE_OVER, $x, $y );
-					$result = $this->imagickImage($img, $path, $destformat, $jpgQuality);
+					$result = $this->imagickImage($img1, $path, $destformat, $jpgQuality);
 				}
 				
 				$img1->clear();
