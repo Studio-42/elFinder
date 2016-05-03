@@ -90,6 +90,11 @@ Features
 
 Requirements
 ------------
+### jQuery / jQuery UI
+ * jQuery 1.8.0+
+ * jQuery UI 1.9.0+
+
+**However, we recommend newest version.**
 
 ### Client
  * Modern browser. elFinder was tested in Firefox 12, Internet Explorer 8+,
