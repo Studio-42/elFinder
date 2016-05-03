@@ -247,7 +247,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 						return array('exit' => true, 'body' => '{msg:errAccess}');
 					}
 					
-					$this->session->set('elFinderGoogleDriveAuthTokens', $tokens);
 					$html = '<input id="elf-volumedriver-googledrive-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
 					$html .= '<script>
 						$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "googledrive", mode: "makebtn"});
@@ -592,16 +591,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 * @return array googledrive metadata
 	 */
 	private function getDBdat($path) {		
-		$res = $this->chkDBdat($path);
-		
-		$itemId = $res['id'];
-		
+				
 		if($path == '/'){		
 			$root = ['mimeType'=>self::DIRMIME];
 			return $root;
 		}
 		
-		elseif($path !=='/' && $res['id'] !== null){			
+		$res = $this->chkDBdat($path);		
+		$itemId = $res['id'];
+		if($path !=='/' && $res['id'] !== null){			
 				$opts = [ 
 					'fields' => self::FETCHFIELDS_GET						
 				];
@@ -670,9 +668,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 * @author Dmitry Levashov
 	 **/
 	protected function cacheDir($path) {	
-				
-		$path = $this->chkDBdat($path)['path'];
-								
+		if($path !== '/'){		
+			$path = $this->chkDBdat($path)['path'];
+		}						
 		$path == '/' || $path =='root' ? $itemId= 'root' : $itemId = basename($path);
 		
         $opts = [                  
