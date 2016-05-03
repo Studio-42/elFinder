@@ -177,7 +177,8 @@ elFinder.prototype._options = {
 		},
 		// "upload" command options.
 		upload : {
-			ui : 'uploadbutton'
+			// Open system OS upload dialog: 'button' OR Open elFinder upload dialog: 'uploadbutton'
+			ui : 'button'
 		},
 		// "download" command options.
 		download : {
