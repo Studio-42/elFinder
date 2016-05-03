@@ -234,7 +234,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 						$client->setClientId($options['client_id']);
 						$client->setClientSecret($options['client_secret']);
 						$client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');						
-						$client->setScopes(array('https://www.googleapis.com/auth/userinfo.profile  https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata'));
+						$client->setScopes([Google_Service_Oauth2::USERINFO_PROFILE , Google_Service_Drive::DRIVE]);
 						
 						$client->setAccessType('offline');
 						$client->setApprovalPrompt('force');						
@@ -474,13 +474,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			  return array();
 			}
 		  } while ($pageToken);
-		  return $result;
-						
-		//if($file = $this->oauth->files->listFiles($sql)){
-//			return $file;
-//		}else{
-//			return array();
-//		}
+		  
+		  return $result;		
 	}
 	
 		 
@@ -491,7 +486,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 * @return true|string error message
 	 */
 	private function refreshGoogleDriveToken($refresh = true) {
-	 
+	 	if (empty($options['client_id']) || empty($options['client_secret'])){
+				$options['client_id'] 	  = ELFINDER_GOOGLEDRIVE_CLIENTID;
+				$options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
+		}
+		
 		try {
 			$client = new Google_Client();
 			$client->setClientId($options['client_id']);
