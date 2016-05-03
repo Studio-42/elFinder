@@ -74,3 +74,16 @@ $.fn.getElFinder = function() {
 	
 	return instance;
 };
+
+$.fn.elfUiWidgetInstance = function(name) {
+	try {
+		return this[name]('instance');
+	} catch(e) {
+		// fallback for jQuery UI < 1.11
+		var data = this.data('ui-' + name);
+		if (data && typeof data === 'object' && data.widgetFullName === 'ui-' + name) {
+			return data;
+		}
+		return null;
+	}
+}
