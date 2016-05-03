@@ -717,7 +717,7 @@ window.elFinder = function(node, opts) {
 		},
 		drag       : function(e, ui) {
 			var helper = ui.helper;
-			if (helper.data('refreshPositions') && $(this).draggable('instance')) {
+			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
 				if (helper.data('refreshPositions') > 0) {
 					$(this).draggable('option', { refreshPositions : true });
 					helper.data('refreshPositions', -1);
@@ -729,7 +729,7 @@ window.elFinder = function(node, opts) {
 		},
 		stop       : function(e, ui) {
 			var files;
-			$(this).draggable('instance') && $(this).draggable('option', { refreshPositions : false });
+			$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
 			self.draggingUiHelper = null;
 			self.trigger('focus').trigger('dragstop');
 			if (! ui.helper.data('droped')) {
