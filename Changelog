@@ -14,6 +14,9 @@
 		- Changed default value of volume root option `tmbBgColor` to 'transparent'
 		- Added a volume root option `bgColorFb`
 			- Image rotate fallback background color (defalt: #ffffff). Uses this color if it can not specify to transparent.
+		- Fixed #935 Supports `'convert'`(imagemagick) as `imgLib`
+		- Fixed #1363 Bugfix of FTP connect from windows localhost to remote server
+		- Fixed #1367 Bugfix of backward compatible to jQuery UI < 1.11
 		- And some minor bug fixes
 
 
