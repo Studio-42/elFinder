@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: ca4b5c0) (2016-05-03)
+ * Version 2.1.11 (2.1-src Nightly: 8269b9d) (2016-05-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -731,7 +731,7 @@ window.elFinder = function(node, opts) {
 		},
 		drag       : function(e, ui) {
 			var helper = ui.helper;
-			if (helper.data('refreshPositions') && $(this).draggable('instance')) {
+			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
 				if (helper.data('refreshPositions') > 0) {
 					$(this).draggable('option', { refreshPositions : true });
 					helper.data('refreshPositions', -1);
@@ -743,7 +743,7 @@ window.elFinder = function(node, opts) {
 		},
 		stop       : function(e, ui) {
 			var files;
-			$(this).draggable('instance') && $(this).draggable('option', { refreshPositions : false });
+			$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
 			self.draggingUiHelper = null;
 			self.trigger('focus').trigger('dragstop');
 			if (! ui.helper.data('droped')) {
@@ -4931,7 +4931,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: ca4b5c0)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 8269b9d)';
 
 
 
@@ -5015,6 +5015,19 @@ $.fn.getElFinder = function() {
 	
 	return instance;
 };
+
+$.fn.elfUiWidgetInstance = function(name) {
+	try {
+		return this[name]('instance');
+	} catch(e) {
+		// fallback for jQuery UI < 1.11
+		var data = this.data('ui-' + name);
+		if (data && typeof data === 'object' && data.widgetFullName === 'ui-' + name) {
+			return data;
+		}
+		return null;
+	}
+}
 
 
 /*
