@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d30be5c) (2016-05-03)
+ * Version 2.1.11 (2.1-src Nightly: 56c1550) (2016-05-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4931,7 +4931,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d30be5c)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 56c1550)';
 
 
 
@@ -5213,7 +5213,8 @@ elFinder.prototype._options = {
 		},
 		// "upload" command options.
 		upload : {
-			ui : 'uploadbutton'
+			// Open system OS upload dialog: 'button' OR Open elFinder upload dialog: 'uploadbutton'
+			ui : 'button'
 		},
 		// "download" command options.
 		download : {
