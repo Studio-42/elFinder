@@ -97,7 +97,7 @@ Requirements
 
 ### Server
  * Any web server
- * PHP 5.2+ (Recommend PHP 5.4 or higher) And for thumbnails - GD/Imagick module require
+ * PHP 5.2+ (Recommend PHP 5.4 or higher) And for thumbnails - GD / Imagick module / convert(imagemagick) require
 
 Installation
 ------------
