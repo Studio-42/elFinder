@@ -2578,7 +2578,14 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeTop, toolbar, toolbarH;
+			var lastX, lastY, nodeTop, toolbar, toolbarH,
+				moveOn  = function(e) {
+					e.preventDefault();
+				},
+				moveOff = function() {
+					$(document).off('touchmove', moveOn);
+				};
+
 			node.on('touchstart touchmove touchend', function(e) {
 				var x = e.originalEvent.touches[0].pageX,
 					y = e.originalEvent.touches[0].pageY;
@@ -2589,16 +2596,19 @@ window.elFinder = function(node, opts) {
 					lastX = x;
 					nodeTop = node.offset().top;
 					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
-						e.preventDefault();
 						lastY = y;
+						$(document).on('touchmove', moveOn);
+						setTimeout(function() {
+							moveOff();
+						}, 500);
 					} else {
 						lastY = false;
 					}
 				} else if (e.type === 'touchend') {
 					lastX = false;
 					lastY = false;
+					moveOff();
 				} else {
-					lastY && e.preventDefault();
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						self.getUI('navbar').stop()[(lastX > x)? 'hide' : 'show']('fast');
 						lastX = false;
@@ -2611,6 +2621,7 @@ window.elFinder = function(node, opts) {
 								var wz = node.children('.elfinder-workzone');
 								wz.height(wz.height() + $(this).outerHeight(true) * (mode === 'show'? -1 : 1));
 								self.trigger('resize');
+								moveOff();
 							});
 						}
 						lastY = false;
