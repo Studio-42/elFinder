@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 56c1550) (2016-05-03)
+ * Version 2.1.11 (2.1-src Nightly: 915b071) (2016-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2588,6 +2588,51 @@ window.elFinder = function(node, opts) {
 			});
 		})();
 	}
+
+	// Swipe on the touch devices to show/hide of toolbar or navbar
+	if (self.UA.Touch) {
+		(function() {
+			var lastX, lastY, nodeTop, toolbar, toolbarH;
+			node.on('touchstart touchmove touchend', function(e) {
+				var x = e.originalEvent.touches[0].pageX,
+					y = e.originalEvent.touches[0].pageY;
+
+				toolbar = self.getUI('toolbar');
+				if (e.type === 'touchstart') {
+					toolbarH = toolbar.height();
+					lastX = x;
+					nodeTop = node.offset().top;
+					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+						e.preventDefault();
+						lastY = y;
+					} else {
+						lastY = false;
+					}
+				} else if (e.type === 'touchend') {
+					lastX = false;
+					lastY = false;
+				} else {
+					lastY && e.preventDefault();
+					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
+						self.getUI('navbar').stop()[(lastX > x)? 'hide' : 'show']('fast');
+						lastX = false;
+					}
+					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
+						var mode = (lastY > y)? 'hide' : 'show';
+						
+						if (toolbar.is(mode === 'show' ? ':hidden' : ':visible')) {
+							toolbar.stop()[mode]('fast', function() {
+								var wz = node.children('.elfinder-workzone');
+								wz.height(wz.height() + $(this).outerHeight(true) * (mode === 'show'? -1 : 1));
+								self.trigger('resize');
+							});
+						}
+						lastY = false;
+					}
+				}
+			});
+		})();
+	}
 	
 	// self.timeEnd('load'); 
 
@@ -4931,7 +4976,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 56c1550)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 915b071)';
 
 
 
@@ -8402,7 +8447,6 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
-					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
@@ -8433,7 +8477,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
-					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
@@ -8686,6 +8729,9 @@ $.fn.elfindercwd = function(fm, options) {
 					var p = $(this);
 					cwd.data('longtap', null);
 					p.data('touching', true);
+					if (e.target !== this) {
+						return;
+					}
 					p.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
@@ -9233,17 +9279,17 @@ $.fn.elfindernavbar = function(fm, opts) {
 
 	this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).addClass('ui-state-default elfinder-navbar'),
-			parent = nav.parent()
-				.resize(function() {
-					nav.height(wz.height() - delta);
-				}),
+			parent = nav.parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
 			handle;
 
+		fm.bind('resize', function() {
+			nav.height(wz.height() - delta);
+		});
 		
-		if ($.fn.resizable) {
+		if ($.fn.resizable && ! fm.UA.Mobile) {
 			handle = nav.resizable({
 					handles : ltr ? 'e' : 'w',
 					minWidth : opts.minWidth || 150,
@@ -9262,51 +9308,26 @@ $.fn.elfindernavbar = function(fm, opts) {
 				})
 				.find('.ui-resizable-handle').addClass('ui-front');
 
-			if (fm.UA.Touch) {
-				var toggle = function(){
-					if (handle.data('closed')) {
-						handle.data('closed', false).css({backgroundColor: 'transparent'});
-						nav.css({width: handle.data('width')}).trigger('resize');
-					} else {
-						handle.data('closed', true).css({backgroundColor: 'inherit'});
-						nav.css({width: 8});
-					}
-					handle.data({startX: null, endX: null});
-				};
-				handle.data({closed: false, width: nav.width()})
-				.on('touchstart', function(e){
-					handle.data('startX', e.originalEvent.touches[0].pageX);
-				})
-				.on('touchmove', function(e){
-					var x = e.originalEvent.touches[0].pageX;
-					var sx = handle.data('startX');
-					var open = ltr? (sx && sx < x) : (sx > x);
-					var close = ltr? (sx > x) : (sx && sx < x);
-					(open || close) && toggle();
-				})
-				.on('touchend', function(e){
-					handle.data('startX') && toggle();
-				});
-				if (fm.UA.Mobile) {
-					handle.data('defWidth', nav.width());
-					$(window).on('resize', function(e){
-						var hw = nav.parent().width() / 2;
-						if (handle.data('defWidth') > hw) {
-							nav.width(hw);
-						} else {
-							nav.width(handle.data('defWidth'));
-						}
-						handle.data('width', nav.width());
-					});
-				}
-			}
-
 			fm.one('open', function() {
 				setTimeout(function() {
 					nav.trigger('resize');
 				}, 150);
 			});
 		}
+
+		if (fm.UA.Mobile) {
+			nav.data('defWidth', nav.width());
+			$(window).on('resize', function(e){
+				var hw = nav.parent().width() / 2;
+				if (nav.data('defWidth') > hw) {
+					nav.width(hw);
+				} else {
+					nav.width(nav.data('defWidth'));
+				}
+				nav.data('width', nav.width());
+			});
+		}
+
 	});
 	
 	return this;
@@ -11083,7 +11104,6 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', selNavdir, function(e) {
-					e.stopPropagation();
 					var evt = e.originalEvent,
 					p = $(this)
 					.addClass(hover)
@@ -11100,7 +11120,6 @@ $.fn.elfindertree = function(fm, opts) {
 					}, 500));
 				})
 				.on('touchmove touchend', selNavdir, function(e) {
-					e.stopPropagation();
 					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);
