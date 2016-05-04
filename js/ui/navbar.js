@@ -7,17 +7,17 @@ $.fn.elfindernavbar = function(fm, opts) {
 
 	this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).addClass('ui-state-default elfinder-navbar'),
-			parent = nav.parent()
-				.resize(function() {
-					nav.height(wz.height() - delta);
-				}),
+			parent = nav.parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
 			handle;
 
+		fm.bind('resize', function() {
+			nav.height(wz.height() - delta);
+		});
 		
-		if ($.fn.resizable) {
+		if ($.fn.resizable && ! fm.UA.Mobile) {
 			handle = nav.resizable({
 					handles : ltr ? 'e' : 'w',
 					minWidth : opts.minWidth || 150,
@@ -36,51 +36,26 @@ $.fn.elfindernavbar = function(fm, opts) {
 				})
 				.find('.ui-resizable-handle').addClass('ui-front');
 
-			if (fm.UA.Touch) {
-				var toggle = function(){
-					if (handle.data('closed')) {
-						handle.data('closed', false).css({backgroundColor: 'transparent'});
-						nav.css({width: handle.data('width')}).trigger('resize');
-					} else {
-						handle.data('closed', true).css({backgroundColor: 'inherit'});
-						nav.css({width: 8});
-					}
-					handle.data({startX: null, endX: null});
-				};
-				handle.data({closed: false, width: nav.width()})
-				.on('touchstart', function(e){
-					handle.data('startX', e.originalEvent.touches[0].pageX);
-				})
-				.on('touchmove', function(e){
-					var x = e.originalEvent.touches[0].pageX;
-					var sx = handle.data('startX');
-					var open = ltr? (sx && sx < x) : (sx > x);
-					var close = ltr? (sx > x) : (sx && sx < x);
-					(open || close) && toggle();
-				})
-				.on('touchend', function(e){
-					handle.data('startX') && toggle();
-				});
-				if (fm.UA.Mobile) {
-					handle.data('defWidth', nav.width());
-					$(window).on('resize', function(e){
-						var hw = nav.parent().width() / 2;
-						if (handle.data('defWidth') > hw) {
-							nav.width(hw);
-						} else {
-							nav.width(handle.data('defWidth'));
-						}
-						handle.data('width', nav.width());
-					});
-				}
-			}
-
 			fm.one('open', function() {
 				setTimeout(function() {
 					nav.trigger('resize');
 				}, 150);
 			});
 		}
+
+		if (fm.UA.Mobile) {
+			nav.data('defWidth', nav.width());
+			$(window).on('resize', function(e){
+				var hw = nav.parent().width() / 2;
+				if (nav.data('defWidth') > hw) {
+					nav.width(hw);
+				} else {
+					nav.width(nav.data('defWidth'));
+				}
+				nav.data('width', nav.width());
+			});
+		}
+
 	});
 	
 	return this;

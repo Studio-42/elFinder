@@ -2574,6 +2574,51 @@ window.elFinder = function(node, opts) {
 			});
 		})();
 	}
+
+	// Swipe on the touch devices to show/hide of toolbar or navbar
+	if (self.UA.Touch) {
+		(function() {
+			var lastX, lastY, nodeTop, toolbar, toolbarH;
+			node.on('touchstart touchmove touchend', function(e) {
+				var x = e.originalEvent.touches[0].pageX,
+					y = e.originalEvent.touches[0].pageY;
+
+				toolbar = self.getUI('toolbar');
+				if (e.type === 'touchstart') {
+					toolbarH = toolbar.height();
+					lastX = x;
+					nodeTop = node.offset().top;
+					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+						e.preventDefault();
+						lastY = y;
+					} else {
+						lastY = false;
+					}
+				} else if (e.type === 'touchend') {
+					lastX = false;
+					lastY = false;
+				} else {
+					lastY && e.preventDefault();
+					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
+						self.getUI('navbar').stop()[(lastX > x)? 'hide' : 'show']('fast');
+						lastX = false;
+					}
+					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
+						var mode = (lastY > y)? 'hide' : 'show';
+						
+						if (toolbar.is(mode === 'show' ? ':hidden' : ':visible')) {
+							toolbar.stop()[mode]('fast', function() {
+								var wz = node.children('.elfinder-workzone');
+								wz.height(wz.height() + $(this).outerHeight(true) * (mode === 'show'? -1 : 1));
+								self.trigger('resize');
+							});
+						}
+						lastY = false;
+					}
+				}
+			});
+		})();
+	}
 	
 	// self.timeEnd('load'); 
 
