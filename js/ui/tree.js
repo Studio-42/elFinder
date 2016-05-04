@@ -601,7 +601,6 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', selNavdir, function(e) {
-					e.stopPropagation();
 					var evt = e.originalEvent,
 					p = $(this)
 					.addClass(hover)
@@ -618,7 +617,6 @@ $.fn.elfindertree = function(fm, opts) {
 					}, 500));
 				})
 				.on('touchmove touchend', selNavdir, function(e) {
-					e.stopPropagation();
 					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);

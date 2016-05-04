@@ -956,7 +956,6 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
-					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
@@ -987,7 +986,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
-					e.stopPropagation();
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
@@ -1240,6 +1238,9 @@ $.fn.elfindercwd = function(fm, options) {
 					var p = $(this);
 					cwd.data('longtap', null);
 					p.data('touching', true);
+					if (e.target !== this) {
+						return;
+					}
 					p.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
