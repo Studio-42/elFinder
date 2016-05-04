@@ -2588,7 +2588,8 @@ window.elFinder = function(node, opts) {
 
 			node.on('touchstart touchmove touchend', function(e) {
 				var x = e.originalEvent.touches[0].pageX,
-					y = e.originalEvent.touches[0].pageY;
+					y = e.originalEvent.touches[0].pageY,
+					testX;
 
 				toolbar = self.getUI('toolbar');
 				if (e.type === 'touchstart') {
@@ -2610,7 +2611,8 @@ window.elFinder = function(node, opts) {
 					moveOff();
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
-						self.getUI('navbar').stop()[(lastX > x)? 'hide' : 'show']('fast');
+						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
+						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast');
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
