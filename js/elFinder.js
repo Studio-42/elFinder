@@ -2142,7 +2142,7 @@ window.elFinder = function(node, opts) {
 				rm      = function(hash) {
 					var file = files[hash];
 					if (file) {
-						if (file.mime == 'directory' && file.dirs) {
+						if (file.mime === 'directory') {
 							$.each(files, function(h, f) {
 								f.phash == hash && rm(h);
 							});
