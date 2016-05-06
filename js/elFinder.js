@@ -745,7 +745,7 @@ window.elFinder = function(node, opts) {
 					var mime = f.mime, i, tmb = self.tmb(f);
 					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
 					if (tmb) {
-						i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+						i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 					}
 					return i;
 				},
@@ -1122,7 +1122,7 @@ window.elFinder = function(node, opts) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
-				return { url: url, class: cls };
+				return { url: url, className: cls };
 			}
 		}
 		
@@ -2142,7 +2142,7 @@ window.elFinder = function(node, opts) {
 				rm      = function(hash) {
 					var file = files[hash];
 					if (file) {
-						if (file.mime == 'directory' && file.dirs) {
+						if (file.mime === 'directory') {
 							$.each(files, function(h, f) {
 								f.phash == hash && rm(h);
 							});
@@ -2612,7 +2612,9 @@ window.elFinder = function(node, opts) {
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast');
+						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast', function() {
+							self.getUI('cwd').trigger('resize');
+						});
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
