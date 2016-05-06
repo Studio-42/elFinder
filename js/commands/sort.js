@@ -58,7 +58,9 @@ elFinder.prototype.commands.sort = function() {
 						}
 						$(td).on('click', function(e){
 							e.stopPropagation();
-							self.exec([], sort);
+							if (! fm.getUI('cwd').data('longtap')) {
+								self.exec([], sort);
+							}
 						})
 						.hover(function() {
 							$(this).addClass('ui-state-hover');

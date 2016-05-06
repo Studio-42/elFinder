@@ -920,8 +920,14 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}, 500));
 				},
-				touchmove : function(e) {
+				touchend : function(e) {
 					clearTimeout($(this).data('tmlongtap'));
+				},
+				click : function(e) {
+					if (cwd.data('longtap')) {
+						e.preventDefault();
+						e.stopPropagation();
+					}
 				}
 			},
 			
@@ -966,8 +972,9 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.find('thead').append(
 						$('<tr class="ui-state-default'+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
-						.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
-						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
+						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
+						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, 'td', wrapperContextMenu.touchend)
+						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
 					);
 				}
 		
@@ -1327,7 +1334,8 @@ $.fn.elfindercwd = function(fm, options) {
 				.droppable($.extend({}, droppable, {autoDisable: false}))
 				.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 				.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
-				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
+				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
+				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('mousedown', function(){wrapper._mousedown = true;})
 				.on('mouseup', function(){wrapper._mousedown = false;}),
 			
