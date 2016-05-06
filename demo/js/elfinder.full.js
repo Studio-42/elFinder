@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 411806a) (2016-05-06)
+ * Version 2.1.11 (2.1-src Nightly: da989af) (2016-05-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4991,7 +4991,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 411806a)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: da989af)';
 
 
 
@@ -8056,12 +8056,13 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// To fixed table header colmun
 			fixTableHeader = function() {
-				var cnt, base, table, thead, tbody, htr, btr, htd, btd, hdelta, delta;
+				var cnt, base, table, thead, tbody, htr, btr, htd, btd, init, delta;
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
 				if (btr.length) {
 					table = tbody.parent();
 					if (! tableHeader) {
+						init = true;
 						tbody.addClass('elfinder-cwd-fixheader');
 						thead = cwd.find('thead').attr('id', fm.namespace+'-cwd-thead');
 						htr = thead.children('tr:first');
@@ -8086,19 +8087,19 @@ $.fn.elfindercwd = function(fm, options) {
 						htr = thead.children('tr:first');
 					}
 					
-					if (Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
+					if (init || Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
 						cnt = options.listView.columns.length + 1;
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
 							btd = btr.children('td:eq('+i+')');
 							delta = (htd.outerWidth() - htd.width()) - (btd.outerWidth() - btd.width());
-							htd.width(btd.width() - delta);
+							htd.css('width', (btd.width() - delta) + 'px');
 						}
 					}
 					
 					tableHeader.data('widthTimer') && clearTimeout(tableHeader.data('widthTimer'));
 					tableHeader.data('widthTimer', setTimeout(function() {
-						tableHeader.css(wrapper.position()).width(cwd.outerWidth());
+						tableHeader.css(wrapper.position()).css('width', cwd.outerWidth() + 'px');
 					}, 10));
 				}
 			},
