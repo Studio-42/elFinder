@@ -580,7 +580,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					
 					if (Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
-						fm.log([btr.outerWidth(),htr.outerWidth()]);
 						cnt = options.listView.columns.length + 1;
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
@@ -693,7 +692,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (node.length) {
 						(function(node, tmb) {
 							$('<img/>')
-								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 								.attr('src', tmb.url);
 						})(node, fm.tmb(fm.file(hash)));
 					} else {
@@ -1139,7 +1138,7 @@ $.fn.elfindercwd = function(fm, options) {
 										var mime = f.mime, i, tmb = fm.tmb(f);
 										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
 										if (tmb) {
-											i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
 										return i;
 									}, l, geturl = [];

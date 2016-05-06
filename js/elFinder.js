@@ -745,7 +745,7 @@ window.elFinder = function(node, opts) {
 					var mime = f.mime, i, tmb = self.tmb(f);
 					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
 					if (tmb) {
-						i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+						i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 					}
 					return i;
 				},
@@ -1122,7 +1122,7 @@ window.elFinder = function(node, opts) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
-				return { url: url, class: cls };
+				return { url: url, className: cls };
 			}
 		}
 		
