@@ -2612,7 +2612,9 @@ window.elFinder = function(node, opts) {
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast');
+						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast', function() {
+							self.getUI('cwd').trigger('resize');
+						});
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {

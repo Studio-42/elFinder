@@ -535,8 +535,9 @@ elFinder.prototype._options = {
 				//		date : 'Last modification',
 				// 		kind : 'Mime type'
 				// }
-				columnsCustomName : {}
-									
+				columnsCustomName : {},
+				// fixed list header colmun
+				fixedHeader : true
 			}
 			// ,
 			// /**
