@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d8f10e2) (2016-05-04)
+ * Version 2.1.11 (2.1-src Nightly: 411806a) (2016-05-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -759,7 +759,7 @@ window.elFinder = function(node, opts) {
 					var mime = f.mime, i, tmb = self.tmb(f);
 					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
 					if (tmb) {
-						i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+						i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 					}
 					return i;
 				},
@@ -1136,7 +1136,7 @@ window.elFinder = function(node, opts) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
-				return { url: url, class: cls };
+				return { url: url, className: cls };
 			}
 		}
 		
@@ -2156,7 +2156,7 @@ window.elFinder = function(node, opts) {
 				rm      = function(hash) {
 					var file = files[hash];
 					if (file) {
-						if (file.mime == 'directory' && file.dirs) {
+						if (file.mime === 'directory') {
 							$.each(files, function(h, f) {
 								f.phash == hash && rm(h);
 							});
@@ -2626,7 +2626,9 @@ window.elFinder = function(node, opts) {
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast');
+						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast', function() {
+							self.getUI('cwd').trigger('resize');
+						});
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
@@ -4989,7 +4991,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d8f10e2)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 411806a)';
 
 
 
@@ -5629,8 +5631,9 @@ elFinder.prototype._options = {
 				//		date : 'Last modification',
 				// 		kind : 'Mime type'
 				// }
-				columnsCustomName : {}
-									
+				columnsCustomName : {},
+				// fixed list header colmun
+				fixedHeader : true
 			}
 			// ,
 			// /**
@@ -7641,7 +7644,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 			customColsBuild = function() {
 				var customCols = '';
-				var columns = fm.options.uiOptions.cwd.listView.columns;
+				var columns = options.listView.columns;
 				for (var i = 0; i < columns.length; i++) {
 					customCols += '<td>{' + columns[i] + '}</td>';
 				}
@@ -8019,6 +8022,9 @@ $.fn.elfindercwd = function(fm, options) {
 					// cache last
 					buffer._last = last;
 
+					// fixed table header
+					list && options.listView.fixedHeader && fixTableHeader();
+
 					// load/attach thumbnails
 					attachThumbnails(atmb);
 					ltmb.length && loadThumbnails(ltmb);
@@ -8043,6 +8049,58 @@ $.fn.elfindercwd = function(fm, options) {
 				buffer._timer = setTimeout(function(){
 					go();
 				}, 100);
+			},
+			
+			// fixed table header jQuery object
+			tableHeader = null,
+			
+			// To fixed table header colmun
+			fixTableHeader = function() {
+				var cnt, base, table, thead, tbody, htr, btr, htd, btd, hdelta, delta;
+				tbody = cwd.find('tbody');
+				btr = tbody.children('tr:first');
+				if (btr.length) {
+					table = tbody.parent();
+					if (! tableHeader) {
+						tbody.addClass('elfinder-cwd-fixheader');
+						thead = cwd.find('thead').attr('id', fm.namespace+'-cwd-thead');
+						htr = thead.children('tr:first');
+						table.css('padding-top', htr.outerHeight());
+						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
+						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
+							.css(wrapper.position())
+							.append(base);
+						wrapper.after(tableHeader)
+							.on('scroll.fixheader resize.fixheader', function(e) {
+								var left = wrapper.scrollLeft() * -1;
+								if (base.css('left') !== left) {
+									base.css('left', left);
+								}
+								if (e.type === 'resize') {
+									e.stopPropagation();
+									fixTableHeader();
+								}
+							});
+					} else {
+						thead = $('#'+fm.namespace+'-cwd-thead');
+						htr = thead.children('tr:first');
+					}
+					
+					if (Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
+						cnt = options.listView.columns.length + 1;
+						for (var i = 0; i < cnt; i++) {
+							htd = htr.children('td:eq('+i+')');
+							btd = btr.children('td:eq('+i+')');
+							delta = (htd.outerWidth() - htd.width()) - (btd.outerWidth() - btd.width());
+							htd.width(btd.width() - delta);
+						}
+					}
+					
+					tableHeader.data('widthTimer') && clearTimeout(tableHeader.data('widthTimer'));
+					tableHeader.data('widthTimer', setTimeout(function() {
+						tableHeader.css(wrapper.position()).width(cwd.outerWidth());
+					}, 10));
+				}
 			},
 			
 			/**
@@ -8141,7 +8199,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (node.length) {
 						(function(node, tmb) {
 							$('<img/>')
-								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 								.attr('src', tmb.url);
 						})(node, fm.tmb(fm.file(hash)));
 					} else {
@@ -8315,8 +8373,8 @@ $.fn.elfindercwd = function(fm, options) {
 			customColsNameBuild = function() {
 				var name = '',
 				customColsName = '',
-				columns = fm.options.uiOptions.cwd.listView.columns,
-				names = $.extend({}, msg, fm.options.uiOptions.cwd.listView.columnsCustomName);
+				columns = options.listView.columns,
+				names = $.extend({}, msg, options.listView.columnsCustomName);
 				for (var i = 0; i < columns.length; i++) {
 					if (typeof names[columns[i]] !== 'undefined') {
 						name = names[columns[i]];
@@ -8340,6 +8398,39 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 			},
 			
+			wrapperContextMenu = {
+				contextmenu : function(e) {
+					e.preventDefault();
+					fm.trigger('contextmenu', {
+						'type'    : 'cwd',
+						'targets' : [fm.cwd().hash],
+						'x'       : e.pageX,
+						'y'       : e.pageY
+					});
+				},
+				touchstart : function(e) {
+					var p = $(this);
+					cwd.data('longtap', null);
+					p.data('touching', true);
+					if (e.target !== this) {
+						return;
+					}
+					p.data('tmlongtap', setTimeout(function(){
+						// long tap
+						cwd.data('longtap', true);
+						fm.trigger('contextmenu', {
+							'type'    : 'cwd',
+							'targets' : [fm.cwd().hash],
+							'x'       : e.originalEvent.touches[0].pageX,
+							'y'       : e.originalEvent.touches[0].pageY
+						});
+					}, 500));
+				},
+				touchmove : function(e) {
+					clearTimeout($(this).data('tmlongtap'));
+				}
+			},
+			
 			/**
 			 * Update directory content
 			 *
@@ -8359,6 +8450,11 @@ $.fn.elfindercwd = function(fm, options) {
 				} catch (e) {
 					cwd.html('');
 				}
+				if (tableHeader) {
+					wrapper.off('scroll.fixheader resize.fixheader');
+					tableHeader.remove();
+					tableHeader = null;
+				}
 
 				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
 					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
@@ -8371,7 +8467,15 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
 				}
 
-				list && cwd.html('<table><thead><tr class="ui-state-default'+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr></thead><tbody/></table>');
+				if (list) {
+					cwd.html('<table><thead/><tbody/></table>');
+					cwd.find('thead').append(
+						$('<tr class="ui-state-default'+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
+						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
+						.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
+						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
+					);
+				}
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
 				
@@ -8541,7 +8645,7 @@ $.fn.elfindercwd = function(fm, options) {
 										var mime = f.mime, i, tmb = fm.tmb(f);
 										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
 										if (tmb) {
-											i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
 										return i;
 									}, l, geturl = [];
@@ -8727,38 +8831,9 @@ $.fn.elfindercwd = function(fm, options) {
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
 				.droppable($.extend({}, droppable, {autoDisable: false}))
-				.on('contextmenu', function(e) {
-					e.preventDefault();
-					fm.trigger('contextmenu', {
-						'type'    : 'cwd',
-						'targets' : [fm.cwd().hash],
-						'x'       : e.pageX,
-						'y'       : e.pageY
-					});
-					
-				})
-				// for touch device
-				.on('touchstart.'+fm.namespace, function(e) {
-					var p = $(this);
-					cwd.data('longtap', null);
-					p.data('touching', true);
-					if (e.target !== this) {
-						return;
-					}
-					p.data('tmlongtap', setTimeout(function(){
-						// long tap
-						cwd.data('longtap', true);
-						fm.trigger('contextmenu', {
-							'type'    : 'cwd',
-							'targets' : [fm.cwd().hash],
-							'x'       : e.originalEvent.touches[0].pageX,
-							'y'       : e.originalEvent.touches[0].pageY
-						});
-					}, 500));
-				})
-				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, function(e) {
-					clearTimeout($(this).data('tmlongtap'));
-				})
+				.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
+				.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
+				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
 				.on('mousedown', function(){wrapper._mousedown = true;})
 				.on('mouseup', function(){wrapper._mousedown = false;}),
 			
@@ -8790,6 +8865,8 @@ $.fn.elfindercwd = function(fm, options) {
 						cwd.height(wph);
 					}
 				}, 20);
+				
+				list && options.listView.fixedHeader && fixTableHeader();
 			},
 			
 			// elfinder node
@@ -9308,7 +9385,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					minWidth : opts.minWidth || 150,
 					maxWidth : opts.maxWidth || 500
 				})
-				.on('resize scroll', function() {
+				.on('resize scroll', function(e) {
 					clearTimeout($(this).data('posinit'));
 					$(this).data('posinit', setTimeout(function() {
 						var offset = (fm.UA.Opera && nav.scrollLeft())? 20 : 2;
@@ -9317,6 +9394,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 							left : ltr ? 'auto' : parseInt(nav.scrollLeft() + offset),
 							right: ltr ? parseInt(nav.scrollLeft() - offset) * -1 : 'auto'
 						});
+						if (e.type === 'resize') {
+							fm.getUI('cwd').trigger('resize');
+						}
 					}, 50));
 				})
 				.find('.ui-resizable-handle').addClass('ui-front');
@@ -11821,7 +11901,7 @@ elFinder.prototype.commands.chmod = function() {
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
-				.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+				.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 				.attr('src', tmb.url);
 		}
 
@@ -12036,7 +12116,7 @@ elFinder.prototype.commands.download = function() {
 										var mime = f.mime, i, tmb = fm.tmb(f);
 										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
 										if (tmb) {
-											i = $(i).addClass(tmb.class).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
 										return i;
 									};
@@ -13477,7 +13557,7 @@ elFinder.prototype.commands.info = function() {
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
-				.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+				.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 				.attr('src', tmb.url);
 		}
 		
@@ -14701,7 +14781,7 @@ elFinder.prototype.commands.quicklook = function() {
 						.hide()
 						.appendTo(self.preview)
 						.load(function() {
-							icon.addClass(tmb.class).css('background-image', "url('"+tmb.url+"')");
+							icon.addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
 							$(this).remove();
 						})
 						.attr('src', tmb.url);
@@ -14925,8 +15005,6 @@ elFinder.prototype.commands.quicklook = function() {
  * File: /js/commands/quicklook.plugins.js
  */
 
-
-(function(){
 
 elFinder.prototype.commands.quicklook.plugins = [
 	
@@ -15325,7 +15403,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			fm      = ql.fm;
 
-		if (typeof Uint8Array !== 'undefined') {
+		if (typeof Uint8Array !== 'undefined' && elFinder.Zlib) {
 			preview.on('update', function(e) {
 				var file = e.file,
 					doc, xhr, loading;
@@ -15480,6 +15558,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 ];
 
+try {
+(function(){
+
 /** @license zlib.js 2012 - imaya [ https://github.com/imaya/zlib.js ] The MIT License */(function() {'use strict';function m(a){throw a;}var q=void 0,u,aa=this;function v(a,b){var c=a.split("."),d=aa;!(c[0]in d)&&d.execScript&&d.execScript("var "+c[0]);for(var f;c.length&&(f=c.shift());)!c.length&&b!==q?d[f]=b:d=d[f]?d[f]:d[f]={}};var w="undefined"!==typeof Uint8Array&&"undefined"!==typeof Uint16Array&&"undefined"!==typeof Uint32Array&&"undefined"!==typeof DataView;new (w?Uint8Array:Array)(256);var x;for(x=0;256>x;++x)for(var y=x,ba=7,y=y>>>1;y;y>>>=1)--ba;var z=[0,1996959894,3993919788,2567524794,124634137,1886057615,3915621685,2657392035,249268274,2044508324,3772115230,2547177864,162941995,2125561021,3887607047,2428444049,498536548,1789927666,4089016648,2227061214,450548861,1843258603,4107580753,2211677639,325883990,1684777152,4251122042,2321926636,335633487,1661365465,4195302755,2366115317,997073096,1281953886,3579855332,2724688242,1006888145,1258607687,3524101629,2768942443,901097722,1119000684,3686517206,2898065728,853044451,1172266101,3705015759,
 2882616665,651767980,1373503546,3369554304,3218104598,565507253,1454621731,3485111705,3099436303,671266974,1594198024,3322730930,2970347812,795835527,1483230225,3244367275,3060149565,1994146192,31158534,2563907772,4023717930,1907459465,112637215,2680153253,3904427059,2013776290,251722036,2517215374,3775830040,2137656763,141376813,2439277719,3865271297,1802195444,476864866,2238001368,4066508878,1812370925,453092731,2181625025,4111451223,1706088902,314042704,2344532202,4240017532,1658658271,366619977,
 2362670323,4224994405,1303535960,984961486,2747007092,3569037538,1256170817,1037604311,2765210733,3554079995,1131014506,879679996,2909243462,3663771856,1141124467,855842277,2852801631,3708648649,1342533948,654459306,3188396048,3373015174,1466479909,544179635,3110523913,3462522015,1591671054,702138776,2966460450,3352799412,1504918807,783551873,3082640443,3233442989,3988292384,2596254646,62317068,1957810842,3939845945,2647816111,81470997,1943803523,3814918930,2489596804,225274430,2053790376,3826175755,
@@ -15541,6 +15622,7 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
 
 }).bind(elFinder)();
 
+} catch(e) {};
 
 /*
  * File: /js/commands/reload.js
@@ -16827,7 +16909,7 @@ elFinder.prototype.commands.rm = function() {
 			// load thumbnail
 			if (tmb) {
 				$('<img/>')
-					.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.class).css('background-image', "url('"+tmb.url+"')"); })
+					.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 					.attr('src', tmb.url);
 			}
 		}
