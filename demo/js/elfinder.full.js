@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: da989af) (2016-05-06)
+ * Version 2.1.11 (2.1-src Nightly: aa37daa) (2016-05-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4991,7 +4991,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: da989af)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: aa37daa)';
 
 
 
@@ -8427,8 +8427,14 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}, 500));
 				},
-				touchmove : function(e) {
+				touchend : function(e) {
 					clearTimeout($(this).data('tmlongtap'));
+				},
+				click : function(e) {
+					if (cwd.data('longtap')) {
+						e.preventDefault();
+						e.stopPropagation();
+					}
 				}
 			},
 			
@@ -8473,8 +8479,9 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.find('thead').append(
 						$('<tr class="ui-state-default'+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
-						.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
-						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
+						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
+						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, 'td', wrapperContextMenu.touchend)
+						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
 					);
 				}
 		
@@ -8834,7 +8841,8 @@ $.fn.elfindercwd = function(fm, options) {
 				.droppable($.extend({}, droppable, {autoDisable: false}))
 				.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 				.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
-				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchmove)
+				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
+				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('mousedown', function(){wrapper._mousedown = true;})
 				.on('mouseup', function(){wrapper._mousedown = false;}),
 			
@@ -17044,7 +17052,9 @@ elFinder.prototype.commands.sort = function() {
 						}
 						$(td).on('click', function(e){
 							e.stopPropagation();
-							self.exec([], sort);
+							if (! fm.getUI('cwd').data('longtap')) {
+								self.exec([], sort);
+							}
 						})
 						.hover(function() {
 							$(this).addClass('ui-state-hover');
