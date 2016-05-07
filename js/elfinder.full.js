@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 6fbc6ad) (2016-05-08)
+ * Version 2.1.11 (2.1-src Nightly: aa87a42) (2016-05-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5025,7 +5025,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 6fbc6ad)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: aa87a42)';
 
 
 
@@ -7303,8 +7303,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					mw         = fm.UA.Mobile? 40 : 2,
 					mh         = fm.UA.Mobile? 20 : 2,
 					body       = $('body'),
-					x          = x - (bpos? bpos.left : 0) + body.scrollLeft(),
-					y          = y - (bpos? bpos.top : 0) + body.scrollTop(),
+					x          = x - (bpos? bpos.left : 0),
+					y          = y - (bpos? bpos.top : 0),
 					css        = {
 						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
 						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width),
