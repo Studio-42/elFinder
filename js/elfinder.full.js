@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: aa37daa) (2016-05-06)
+ * Version 2.1.11 (2.1-src Nightly: 7af7eae) (2016-05-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2592,7 +2592,7 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeTop, toolbar, toolbarH,
+			var lastX, lastY, nodeOffset, nodeTop, toolbar, toolbarH, navbar,
 				moveOn  = function(e) {
 					e.preventDefault();
 				},
@@ -2601,15 +2601,29 @@ window.elFinder = function(node, opts) {
 				};
 
 			node.on('touchstart touchmove touchend', function(e) {
-				var x = e.originalEvent.touches[0].pageX,
-					y = e.originalEvent.touches[0].pageY,
+				var x = (e.originalEvent.touches[0] || {}).pageX,
+					y = (e.originalEvent.touches[0] || {}).pageY,
 					testX;
 
+				if (x === null || y === null) {
+					return;
+				}
+				
+				navbar = self.getUI('navbar');
 				toolbar = self.getUI('toolbar');
 				if (e.type === 'touchstart') {
+					nodeOffset = node.offset();
+					lastX = false;
+					if (navbar.is(':hidden')) {
+						if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+							lastX = x;
+						}
+					} else {
+						lastX = x;
+					}
+					self.log(node.width() + nodeOffset.left - x);
 					toolbarH = toolbar.height();
-					lastX = x;
-					nodeTop = node.offset().top;
+					nodeTop = nodeOffset.top;
 					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
 						lastY = y;
 						$(document).on('touchmove', moveOn);
@@ -2626,21 +2640,17 @@ window.elFinder = function(node, opts) {
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast', function() {
+						self.getUI('navbar').stop(true, true)[testX? 'hide' : 'show']('fast', function() {
 							self.getUI('cwd').trigger('resize');
 						});
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
-						var mode = (lastY > y)? 'hide' : 'show';
+						var mode = (lastY > y)? 'slideUp' : 'slideDown';
 						
-						if (toolbar.is(mode === 'show' ? ':hidden' : ':visible')) {
-							toolbar.stop()[mode]('fast', function() {
-								var wz = node.children('.elfinder-workzone');
-								wz.height(wz.height() + $(this).outerHeight(true) * (mode === 'show'? -1 : 1));
-								self.trigger('resize');
-								moveOff();
-							});
+						if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
+							toolbar.stop(true, true).trigger('toggle', {duration: 100});
+							moveOff();
 						}
 						lastY = false;
 					}
@@ -4991,7 +5001,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: aa37daa)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 7af7eae)';
 
 
 
@@ -5586,7 +5596,12 @@ elFinder.prototype._options = {
 			['extract', 'archive'],
 			['search'],
 			['view', 'sort'],
-			['help']
+			['help'],
+			// extra options
+			{
+				// auto hide on initial open
+				autoHideUA: ['Mobile']
+			}
 		],
 		// directories tree options
 		tree : {
@@ -10523,7 +10538,20 @@ $.fn.elfindertoolbar = function(fm, opts) {
 	this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
-			panels   = opts || [],
+			options  = {
+				// default options
+				autoHideUA: ['Mobile']
+			},
+			filter   = function(opts) {
+				return $.map(opts, function(v) {
+					if ($.isPlainObject(v)) {
+						options = $.extend(options, v);
+						return null;
+					}
+					return [v];
+				});
+			},
+			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button;
@@ -10594,7 +10622,38 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 
 		});
+		
+		fm.one('open', function() {
+			if (options.autoHideUA) {
+				if ($.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
+					setTimeout(function() {
+						self.stop(true, true).trigger('toggle', {duration: 500});
+					}, 500);
+				}
+			}
+		});
+		self.on('toggle', function(e, data) {
+			var wz    = fm.getUI('workzone'),
+				show  = self.is(':hidden'),
+				wzh   = wz.height(),
+				h     = self.height(),
+				tbh   = self.outerHeight(true),
+				delta = tbh - h,
+				opt   = $.extend({
+					step: function(now) {
+						wz.height(wzh + (show? (now + delta) * -1 : h - now));
+						fm.trigger('resize');
+					},
+					always: function() {
+						wz.height(wzh + (show? self.outerHeight(true) * -1 : tbh));
+						fm.trigger('resize');
+					}
+				}, data);
+			self.animate({height : 'toggle'}, opt);
+		});
 	});
+	
+
 	
 	return this;
 };
@@ -14635,6 +14694,7 @@ elFinder.prototype.commands.quicklook = function() {
 				e.stopPropagation();
 				e.preventDefault();
 				
+				win.toggleClass(fullscreen);
 				if (full) {
 					win.css(win.data('position'));
 					$window.off(scroll).trigger(self.resize).off(self.resize);
@@ -14647,20 +14707,12 @@ elFinder.prototype.commands.quicklook = function() {
 						left   : win.css('left'), 
 						top    : win.css('top'), 
 						width  : win.width(), 
-						height : win.height()
+						height : win.height(),
+						display: 'block'
 					})
-					.css({
-						width  : '100%',
-						height : '100%'
-					});
+					.removeAttr('style');
 
-					$(window).on(scroll, function() {
-						win.css({
-							left   : parseInt($(window).scrollLeft())+'px',
-							top    : parseInt($(window).scrollTop()) +'px'
-						})
-					})
-					.on(self.resize, function(e) {
+					$(window).on(self.resize, function(e) {
 						self.preview.trigger('changesize');
 					})
 					.trigger(scroll)
@@ -14697,6 +14749,9 @@ elFinder.prototype.commands.quicklook = function() {
 						}
 					});
 				}
+				if (fm.zIndex) {
+					win.css('z-index', fm.zIndex + 1);
+				}
 				if (fm.UA.Mobile) {
 					navbar.attr('style', navStyle);
 				} else {
@@ -14716,7 +14771,6 @@ elFinder.prototype.commands.quicklook = function() {
 						}
 					});
 				}
-				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
 				if(parent.is('.ui-resizable')) {
@@ -14808,6 +14862,7 @@ elFinder.prototype.commands.quicklook = function() {
 	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
+		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
