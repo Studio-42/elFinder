@@ -563,6 +563,7 @@ $.fn.elfindercwd = function(fm, options) {
 						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
 							.css(wrapper.position())
+							.css('height', table.css('padding-top'))
 							.append(base);
 						wrapper.after(tableHeader)
 							.on('scroll.fixheader resize.fixheader', function(e) {
