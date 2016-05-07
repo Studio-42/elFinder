@@ -151,6 +151,7 @@ elFinder.prototype.commands.quicklook = function() {
 				e.stopPropagation();
 				e.preventDefault();
 				
+				win.toggleClass(fullscreen);
 				if (full) {
 					win.css(win.data('position'));
 					$window.off(scroll).trigger(self.resize).off(self.resize);
@@ -163,20 +164,12 @@ elFinder.prototype.commands.quicklook = function() {
 						left   : win.css('left'), 
 						top    : win.css('top'), 
 						width  : win.width(), 
-						height : win.height()
+						height : win.height(),
+						display: 'block'
 					})
-					.css({
-						width  : '100%',
-						height : '100%'
-					});
+					.removeAttr('style');
 
-					$(window).on(scroll, function() {
-						win.css({
-							left   : parseInt($(window).scrollLeft())+'px',
-							top    : parseInt($(window).scrollTop()) +'px'
-						})
-					})
-					.on(self.resize, function(e) {
+					$(window).on(self.resize, function(e) {
 						self.preview.trigger('changesize');
 					})
 					.trigger(scroll)
@@ -213,6 +206,9 @@ elFinder.prototype.commands.quicklook = function() {
 						}
 					});
 				}
+				if (fm.zIndex) {
+					win.css('z-index', fm.zIndex + 1);
+				}
 				if (fm.UA.Mobile) {
 					navbar.attr('style', navStyle);
 				} else {
@@ -232,7 +228,6 @@ elFinder.prototype.commands.quicklook = function() {
 						}
 					});
 				}
-				win.toggleClass(fullscreen);
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
 				if(parent.is('.ui-resizable')) {
@@ -324,6 +319,7 @@ elFinder.prototype.commands.quicklook = function() {
 	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
+		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.click(function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')

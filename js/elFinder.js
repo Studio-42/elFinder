@@ -2578,7 +2578,7 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeTop, toolbar, toolbarH,
+			var lastX, lastY, nodeOffset, nodeTop, toolbar, toolbarH, navbar,
 				moveOn  = function(e) {
 					e.preventDefault();
 				},
@@ -2587,15 +2587,29 @@ window.elFinder = function(node, opts) {
 				};
 
 			node.on('touchstart touchmove touchend', function(e) {
-				var x = e.originalEvent.touches[0].pageX,
-					y = e.originalEvent.touches[0].pageY,
+				var x = (e.originalEvent.touches[0] || {}).pageX,
+					y = (e.originalEvent.touches[0] || {}).pageY,
 					testX;
 
+				if (x === null || y === null) {
+					return;
+				}
+				
+				navbar = self.getUI('navbar');
 				toolbar = self.getUI('toolbar');
 				if (e.type === 'touchstart') {
+					nodeOffset = node.offset();
+					lastX = false;
+					if (navbar.is(':hidden')) {
+						if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+							lastX = x;
+						}
+					} else {
+						lastX = x;
+					}
+					self.log(node.width() + nodeOffset.left - x);
 					toolbarH = toolbar.height();
-					lastX = x;
-					nodeTop = node.offset().top;
+					nodeTop = nodeOffset.top;
 					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
 						lastY = y;
 						$(document).on('touchmove', moveOn);
@@ -2612,21 +2626,17 @@ window.elFinder = function(node, opts) {
 				} else {
 					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
 						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop()[testX? 'hide' : 'show']('fast', function() {
+						self.getUI('navbar').stop(true, true)[testX? 'hide' : 'show']('fast', function() {
 							self.getUI('cwd').trigger('resize');
 						});
 						lastX = false;
 					}
 					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
-						var mode = (lastY > y)? 'hide' : 'show';
+						var mode = (lastY > y)? 'slideUp' : 'slideDown';
 						
-						if (toolbar.is(mode === 'show' ? ':hidden' : ':visible')) {
-							toolbar.stop()[mode]('fast', function() {
-								var wz = node.children('.elfinder-workzone');
-								wz.height(wz.height() + $(this).outerHeight(true) * (mode === 'show'? -1 : 1));
-								self.trigger('resize');
-								moveOff();
-							});
+						if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
+							toolbar.stop(true, true).trigger('toggle', {duration: 100});
+							moveOff();
 						}
 						lastY = false;
 					}
