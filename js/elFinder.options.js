@@ -490,7 +490,12 @@ elFinder.prototype._options = {
 			['extract', 'archive'],
 			['search'],
 			['view', 'sort'],
-			['help']
+			['help'],
+			// extra options
+			{
+				// auto hide on initial open
+				autoHideUA: ['Mobile']
+			}
 		],
 		// directories tree options
 		tree : {

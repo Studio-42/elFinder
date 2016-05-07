@@ -36,6 +36,10 @@
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
 }
+.elfinder-touch .elfinder-button {
+	width:24px;
+	height:24px;
+}
 
 .elfinder .ui-icon-search { cursor:pointer;}
 
@@ -68,6 +72,10 @@
 	width:0;
 }
 
+.elfinder-touch .elfinder-toolbar-button-separator {
+	height:32px;
+}
+
 /* change icon opacity^ not button */
 .elfinder .elfinder-button.ui-state-disabled { opacity:1; filter:Alpha(Opacity=100);}
 .elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
@@ -81,6 +89,10 @@
 	height:16px;
 	display:block;
 	background:url('../img/toolbar.png')  no-repeat;
+}
+
+.elfinder-touch .elfinder-button-icon {
+	zoom: 1.5;
 }
 
 /* buttons icons */
@@ -135,6 +147,10 @@
 	left:0;
 	top:25px;
 	padding:3px 0;
+}
+
+.elfinder-touch .elfinder-button-menu {
+	top:35px;
 }
 
 /* menu item */
@@ -225,6 +241,10 @@
 	outline:0px solid;
 }
 
+.elfinder-touch .elfinder-button-search input {
+	height:32px;
+	line-height: 32px;
+}
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
 
 /* icons */

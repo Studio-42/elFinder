@@ -8,7 +8,20 @@ $.fn.elfindertoolbar = function(fm, opts) {
 	this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
-			panels   = opts || [],
+			options  = {
+				// default options
+				autoHideUA: ['Mobile']
+			},
+			filter   = function(opts) {
+				return $.map(opts, function(v) {
+					if ($.isPlainObject(v)) {
+						options = $.extend(options, v);
+						return null;
+					}
+					return [v];
+				});
+			},
+			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button;
@@ -79,7 +92,38 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 
 		});
+		
+		fm.one('open', function() {
+			if (options.autoHideUA) {
+				if ($.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
+					setTimeout(function() {
+						self.stop(true, true).trigger('toggle', {duration: 500});
+					}, 500);
+				}
+			}
+		});
+		self.on('toggle', function(e, data) {
+			var wz    = fm.getUI('workzone'),
+				show  = self.is(':hidden'),
+				wzh   = wz.height(),
+				h     = self.height(),
+				tbh   = self.outerHeight(true),
+				delta = tbh - h,
+				opt   = $.extend({
+					step: function(now) {
+						wz.height(wzh + (show? (now + delta) * -1 : h - now));
+						fm.trigger('resize');
+					},
+					always: function() {
+						wz.height(wzh + (show? self.outerHeight(true) * -1 : tbh));
+						fm.trigger('resize');
+					}
+				}, data);
+			self.animate({height : 'toggle'}, opt);
+		});
 	});
+	
+
 	
 	return this;
 };
