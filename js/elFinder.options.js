@@ -816,6 +816,15 @@ elFinder.prototype._options = {
 	},
 
 	/**
+	 * elFinder node enable always
+	 * This value will set to `true` if <body> has elFinder node only
+	 * 
+	 * @type     Bool
+	 * @default  false
+	 */
+	enableAlways : false,
+
+	/**
 	 * Debug config
 	 *
 	 * @type Array|Boolean
