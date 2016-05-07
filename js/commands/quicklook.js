@@ -502,6 +502,10 @@ elFinder.prototype.commands.quicklook = function() {
 				self.dispInlineRegex = /.*/;
 			}
 		});
+		
+		fm.bind('destroy', function() {
+			self.window.remove();
+		});
 	};
 	
 	this.getstate = function() {
