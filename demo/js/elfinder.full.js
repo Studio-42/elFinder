@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 7af7eae) (2016-05-07)
+ * Version 2.1.11 (2.1-src Nightly: 76d641f) (2016-05-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -458,6 +458,11 @@ window.elFinder = function(node, opts) {
 	}
 	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columnsCustomName) {
 		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+	}
+
+	this.log($('body').children().length);
+	if (! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
+		this.options.enableAlways = true;
 	}
 
 	// configure for CORS
@@ -2097,9 +2102,11 @@ window.elFinder = function(node, opts) {
 			}
 		})
 		.disable(function() {
-			prevEnabled = enabled;
-			enabled = false;
-			node.addClass('elfinder-disabled');
+			if (! self.options.enableAlways) {
+				prevEnabled = enabled;
+				enabled = false;
+				node.addClass('elfinder-disabled');
+			}
 		})
 		.open(function() {
 			selected = [];
@@ -5001,7 +5008,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 7af7eae)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 76d641f)';
 
 
 
@@ -5920,6 +5927,15 @@ elFinder.prototype._options = {
 		// current directory file menu
 		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
 	},
+
+	/**
+	 * elFinder node enable always
+	 * This value will set to `true` if <body> has elFinder node only
+	 * 
+	 * @type     Bool
+	 * @default  false
+	 */
+	enableAlways : false,
 
 	/**
 	 * Debug config
