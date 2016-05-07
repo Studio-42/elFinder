@@ -563,6 +563,7 @@ $.fn.elfindercwd = function(fm, options) {
 						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
 							.css(wrapper.position())
+							.css('height', table.css('padding-top'))
 							.append(base);
 						wrapper.after(tableHeader)
 							.on('scroll.fixheader resize.fixheader', function(e) {
@@ -1114,7 +1115,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this), helper = null,
 						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 
-					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
+					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable) && !target.hasClass(clDisabled)) {
 						target.on('mousedown', function(e) {
 							// shiftKey + drag start for HTML5 native drag function
 							if (e.shiftKey && !fm.UA.IE && cwd.data('selectable')) {
