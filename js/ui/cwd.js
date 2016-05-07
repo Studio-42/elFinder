@@ -1114,7 +1114,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this), helper = null,
 						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 
-					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable+' '+clDisabled)) {
+					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable) && !target.hasClass(clDisabled)) {
 						target.on('mousedown', function(e) {
 							// shiftKey + drag start for HTML5 native drag function
 							if (e.shiftKey && !fm.UA.IE && cwd.data('selectable')) {
