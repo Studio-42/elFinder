@@ -446,7 +446,6 @@ window.elFinder = function(node, opts) {
 		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
 	}
 
-	this.log($('body').children().length);
 	if (! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
 	}
@@ -2088,11 +2087,9 @@ window.elFinder = function(node, opts) {
 			}
 		})
 		.disable(function() {
-			if (! self.options.enableAlways) {
-				prevEnabled = enabled;
-				enabled = false;
-				node.addClass('elfinder-disabled');
-			}
+			prevEnabled = enabled;
+			enabled = false;
+			node.addClass('elfinder-disabled');
 		})
 		.open(function() {
 			selected = [];
@@ -2462,6 +2459,13 @@ window.elFinder = function(node, opts) {
 			}
 		}
 	});
+
+	// elFinder enable always
+	if (self.options.enableAlways) {
+		$(window).on('focus.' + self.namespace, function(e){
+			self.enable();
+		});
+	}
 
 	if (self.dragUpload) {
 		(function(){
