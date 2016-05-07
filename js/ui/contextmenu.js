@@ -72,8 +72,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					mw         = fm.UA.Mobile? 40 : 2,
 					mh         = fm.UA.Mobile? 20 : 2,
 					body       = $('body'),
-					x          = x - (bpos? bpos.left : 0) + body.scrollLeft(),
-					y          = y - (bpos? bpos.top : 0) + body.scrollTop(),
+					x          = x - (bpos? bpos.left : 0),
+					y          = y - (bpos? bpos.top : 0),
 					css        = {
 						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
 						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width),
