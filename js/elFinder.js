@@ -2635,7 +2635,6 @@ window.elFinder = function(node, opts) {
 					} else {
 						lastX = x;
 					}
-					self.log(node.width() + nodeOffset.left - x);
 					toolbarH = toolbar.height();
 					nodeTop = nodeOffset.top;
 					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
