@@ -234,8 +234,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 						$client->setClientId($options['client_id']);
 						$client->setClientSecret($options['client_secret']);
 						$client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');						
-						$client->setScopes([Google_Service_Oauth2::USERINFO_PROFILE , Google_Service_Drive::DRIVE]);
-						
+						//$client->setScopes([Google_Service_Oauth2::USERINFO_PROFILE , Google_Service_Drive::DRIVE]);
+						$client->setScopes([Google_Service_Drive::DRIVE]);
 						$client->setAccessType('offline');
 						$client->setApprovalPrompt('force');						
 					
@@ -258,11 +258,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 					
 				$client = new Google_Client();											   			
     			$client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));						
-				$oauth2 = new Google_Service_Oauth2($client);
-				$userid = $oauth2->userinfo->get();
+				//$oauth2 = new Google_Service_Oauth2($client);
+				//$userid = $oauth2->userinfo->get();
 				$oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');				
 																
-				$this->session->set('elFinderGoogledriveTokens', array($userid['id'], $oauth_token));
+				//$this->session->set('elFinderGoogledriveTokens', array($userid['id'], $oauth_token));
+				$this->session->set('elFinderGoogledriveTokens', array(rand(1000000000,9999999999), $oauth_token));
 				
 				$out = array(
 					'node' => 'elfinder',
