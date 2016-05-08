@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 95fa964) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: c19e1b4) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2649,7 +2649,6 @@ window.elFinder = function(node, opts) {
 					} else {
 						lastX = x;
 					}
-					self.log(node.width() + nodeOffset.left - x);
 					toolbarH = toolbar.height();
 					nodeTop = nodeOffset.top;
 					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
@@ -5029,7 +5028,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 95fa964)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: c19e1b4)';
 
 
 
@@ -8471,26 +8470,31 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				},
 				touchstart : function(e) {
-					var p = $(this);
 					cwd.data('longtap', null);
-					wrapper.data('touching', true);
+					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target !== this) {
 						return;
 					}
-					p.data('tmlongtap', setTimeout(function(){
+					cwd.data('tmlongtap', setTimeout(function(){
 						// long tap
 						cwd.data('longtap', true);
 						fm.trigger('contextmenu', {
 							'type'    : 'cwd',
 							'targets' : [fm.cwd().hash],
-							'x'       : e.originalEvent.touches[0].pageX,
-							'y'       : e.originalEvent.touches[0].pageY
+							'x'       : wrapper.data('touching').x,
+							'y'       : wrapper.data('touching').y
 						});
 					}, 500));
 				},
 				touchend : function(e) {
-					(e.type === 'touchmove') && wrapper.data('touching', null);
-					clearTimeout($(this).data('tmlongtap'));
+					if (e.type === 'touchmove') {
+						if (! wrapper.data('touching') ||
+								( Math.abs(wrapper.data('touching').x - e.originalEvent.touches[0].pageX)
+								+ Math.abs(wrapper.data('touching').y - e.originalEvent.touches[0].pageY)) > 4) {
+							wrapper.data('touching', null);
+						}
+					}
+					clearTimeout(cwd.data('tmlongtap'));
 				},
 				click : function(e) {
 					if (cwd.data('longtap')) {
@@ -8649,7 +8653,7 @@ $.fn.elfindercwd = function(fm, options) {
 						tgt = $(e.target),
 						sel;
 					
-					wrapper.data('touching', true);
+					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
 						e.preventDefault();
 						setTimeout(function() {
