@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: aa87a42) (2016-05-08)
+ * Version 2.1.11 (2.1-src Nightly: a25d1df) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -193,8 +193,9 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	right: 0;
 	margin: auto 0px auto auto;
 }
-
-
+.elfinder-rtl div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	margin: auto auto auto 0px;
+}
 /********************** COMMAND "HELP" ****************************/
 /* help dialog */
 .elfinder-help { margin-bottom:.5em; }
@@ -625,8 +626,59 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	font-weight: bold;
 }
 
+.elfinder-cwd-file .elfinder-cwd-select {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 30px;
+	height: 30px;
+	background-color: transparent;
+	opacity: .4;
+	filter:Alpha(Opacity=40);
+}
+.elfinder-cwd-file .elfinder-cwd-select.ui-state-hover {
+	background-color: transparent;
+}
+.elfinder-cwd-file.ui-selected .elfinder-cwd-select {
+	opacity: .8;
+	filter:Alpha(Opacity=80);
+}
+.elfinder-rtl .elfinder-cwd-file .elfinder-cwd-select {
+	left: auto;
+	right: 0px;
+}
+
+.elfinder .elfinder-cwd-selectall {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: 0px;
+	opacity: .8;
+	filter:Alpha(Opacity=80);
+}
 
 /************************** ICONS VIEW ********************************/
+
+.elfinder-ltr .elfinder-workzone .elfinder-cwd-selectall {
+	text-align: right;
+	right: 18px;
+	left: auto;
+}
+
+.elfinder-rtl .elfinder-workzone .elfinder-cwd-selectall {
+	text-align: left;
+	right: auto;
+	left: 18px;
+}
+
+.elfinder-ltr.elfinder-mobile .elfinder-workzone .elfinder-cwd-selectall {
+	right: 0px;
+}
+
+.elfinder-rtl.elfinder-mobile .elfinder-workzone .elfinder-cwd-selectall {
+	left: 0px;
+}
+
 
 /* file container */
 .elfinder-cwd-view-icons .elfinder-cwd-file {
@@ -636,8 +688,18 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	cursor:default;
 	border:none;
 /*	overflow:hidden;*/
-/*	position:relative;*/
+	position:relative;
 }
+
+/*.elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-select {
+	top: 0px;
+	left: 0px;
+}*/
+
+/*.elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-select {
+	left: auto;
+	right: 7px;
+}*/
 
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 12px 0; }
@@ -801,7 +863,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-cwd-icon-group             { background-position:0 -1300px;}
 
 /* textfield inside icon */
-.elfinder-cwd input { width:100%; border:0px solid; margin:0; padding:0; }
+.elfinder-cwd input:text { width:100%; border:0px solid; margin:0; padding:0; }
 .elfinder-cwd-view-icons input {text-align:center; }
 .elfinder-cwd-view-icons textarea {
 	width: 100%;
@@ -844,11 +906,36 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: relative;
 }
 
+.elfinder-ltr .elfinder-cwd thead .elfinder-cwd-selectall {
+	text-align: left;
+	right: auto;
+	left: 0px;
+	padding-top: 3px;
+}
+
+.elfinder-rtl .elfinder-cwd thead .elfinder-cwd-selectall {
+	text-align: right;
+	right: 0px;
+	left: auto;
+	padding-top: 3px;
+}
+
+.elfinder-touch .elfinder-cwd thead .elfinder-cwd-selectall {
+	padding-top: 5px;
+}
+
 .elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-top:0 solid; border-right:0 solid; }
 
 .elfinder .elfinder-cwd table thead td {
 	padding: 4px 14px;
 }
+.elfinder-ltr .elfinder-cwd table thead td:first-child {
+	padding: 4px 14px 4px 22px;
+}
+.elfinder-rtl .elfinder-cwd table thead td:first-child {
+	padding: 4px 22px 4px 14px;
+}
+
 .elfinder .elfinder-cwd table thead td.ui-state-active {
 	background: #ebf1f6;
 	background: -moz-linear-gradient(top,  #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
@@ -869,8 +956,21 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	border:0 solid;
 }
 
+.elfinder .elfinder-cwd table tbody td:first-child {
+	position: relative
+}
+
 .elfinder .elfinder-cwd table td div { 
 	box-sizing: content-box;
+}
+
+tr.elfinder-cwd-file td .elfinder-cwd-select {
+	width: 24px;
+	padding-top: 6px;
+}
+
+.elfinder-touch tr.elfinder-cwd-file td .elfinder-cwd-select {
+	padding-top: 12px;
 }
 
 .elfinder-touch .elfinder-cwd tr td {
@@ -895,8 +995,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* filename container */
 .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { width:97%; position:relative; }
 /* filename container in ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { padding-left:23px;  }
-.elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { padding-right:23px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { margin-left: 8px; }
+.elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { margin-right: 8px; }
+.elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-filename { padding-left:23px;  }
+.elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-filename { padding-right:23px; }
 
 /* premissions/symlink marker */
 .elfinder-cwd-view-list .elfinder-perms, 
