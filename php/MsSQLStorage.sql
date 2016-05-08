@@ -36,25 +36,25 @@ CREATE TABLE [dbo].[elfinder_file](
 
 SET ANSI_PADDING OFF
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__mtime__7E6CC918]  DEFAULT ((0)) FOR [mtime]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__mtime]  DEFAULT ((0)) FOR [mtime]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__size__7E6CC920]  DEFAULT ((0)) FOR [size]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__size]  DEFAULT ((0)) FOR [size]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__mime__7F60ED59]  DEFAULT ('unknown') FOR [mime]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__mime]  DEFAULT ('unknown') FOR [mime]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__read__00551192]  DEFAULT ('1') FOR [read]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__read]  DEFAULT ('1') FOR [read]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder___write__014935CB]  DEFAULT ('1') FOR [write]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__write]  DEFAULT ('1') FOR [write]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder___locked__023D5A04]  DEFAULT ('0') FOR [locked]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__locked]  DEFAULT ('0') FOR [locked]
 
 
-ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder___hidden__03317E3D]  DEFAULT ('0') FOR [hidden]
+ALTER TABLE [dbo].[elfinder_file] ADD  CONSTRAINT [DF__elfinder_f__hidden]  DEFAULT ('0') FOR [hidden]
 
 
 INSERT INTO elfinder_file 
