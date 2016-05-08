@@ -52,9 +52,7 @@
 	opacity: .4;
 	filter:Alpha(Opacity=40);
 }
-.elfinder-cwd-file .elfinder-cwd-select.ui-state-hover {
-	background-color: transparent;
-}
+
 .elfinder-cwd-file.ui-selected .elfinder-cwd-select {
 	opacity: .8;
 	filter:Alpha(Opacity=80);
@@ -95,6 +93,9 @@
 	left: 0px;
 }
 
+.elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-select.ui-state-hover {
+	background-color: transparent;
+}
 
 /* file container */
 .elfinder-cwd-view-icons .elfinder-cwd-file {
@@ -382,7 +383,7 @@
 
 tr.elfinder-cwd-file td .elfinder-cwd-select {
 	width: 24px;
-	padding-top: 6px;
+	padding-top: 3px;
 }
 
 .elfinder-touch tr.elfinder-cwd-file td .elfinder-cwd-select {
