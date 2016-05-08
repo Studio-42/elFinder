@@ -616,7 +616,11 @@ window.elFinder = function(node, opts) {
 	 *
 	 * @type String
 	 **/
-	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'+(this.direction == 'rtl' ? 'rtl' : 'ltr')+(this.UA.Touch? ' elfinder-touch' : '')+' '+this.options.cssClass;
+	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'
+			+(this.direction == 'rtl' ? 'rtl' : 'ltr')
+			+(this.UA.Touch? ' elfinder-touch' : '')
+			+(this.UA.Mobile? ' elfinder-mobile' : '')
+			+' '+this.options.cssClass;
 
 	/**
 	 * elFinder node z-index (auto detect on elFinder load)
@@ -4439,7 +4443,7 @@ elFinder.prototype = {
 					button.on('click', function(e) {
 						notify._esc(e);
 					});
-					$(document).on('keydown.' + namespace, notify._esc);
+					$(document).on('keydown.' + this.namespace, notify._esc);
 				}
 			}
 			
