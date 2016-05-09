@@ -364,7 +364,8 @@ $.fn.elfindercwd = function(fm, options) {
 				if (selectedFiles.length) {
 					selectLock = false;
 					selectedFiles = [];
-					cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+					cwd.find('[id].'+clSelected).trigger(evtUnselect);
+					cwd.find('input:checkbox').prop('checked', false);
 					trigger();
 				} else {
 					fm.select({selected: []});
@@ -664,6 +665,10 @@ $.fn.elfindercwd = function(fm, options) {
 				deactivate : function() {
 					$(this).removeData('dropover')
 					       .removeClass(clDropActive);
+				},
+				drop : function(e, ui) {
+					unselectAll();
+					fm.droppable.drop.call(this, e, ui);
 				}
 			}),
 			
@@ -1297,7 +1302,7 @@ $.fn.elfindercwd = function(fm, options) {
 						child  = $this.children(),
 						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
-					child.removeClass(clHover+' '+clSelected).find('input:checkbox').prop('checked', false);
+					child.removeClass(clHover+' '+clSelected).find('input:checkbox')/*.prop('checked', false)*/;
 					
 					$this.hasClass(clDroppable) && $this.droppable('disable');
 					target.hasClass(clDraggable) && target.draggable('disable');
