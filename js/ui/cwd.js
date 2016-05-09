@@ -918,19 +918,18 @@ $.fn.elfindercwd = function(fm, options) {
 				touchstart : function(e) {
 					cwd.data('longtap', null);
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
-					if (e.target !== this) {
-						return;
+					if (e.target === this || e.target === cwd.get(0)) {
+						cwd.data('tmlongtap', setTimeout(function(){
+							// long tap
+							cwd.data('longtap', true);
+							fm.trigger('contextmenu', {
+								'type'    : 'cwd',
+								'targets' : [fm.cwd().hash],
+								'x'       : wrapper.data('touching').x,
+								'y'       : wrapper.data('touching').y
+							});
+						}, 500));
 					}
-					cwd.data('tmlongtap', setTimeout(function(){
-						// long tap
-						cwd.data('longtap', true);
-						fm.trigger('contextmenu', {
-							'type'    : 'cwd',
-							'targets' : [fm.cwd().hash],
-							'x'       : wrapper.data('touching').x,
-							'y'       : wrapper.data('touching').y
-						});
-					}, 500));
 				},
 				touchend : function(e) {
 					if (e.type === 'touchmove') {
