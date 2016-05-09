@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 0a63851) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: 3d7cdef) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5042,7 +5042,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 0a63851)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 3d7cdef)';
 
 
 
@@ -8492,19 +8492,18 @@ $.fn.elfindercwd = function(fm, options) {
 				touchstart : function(e) {
 					cwd.data('longtap', null);
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
-					if (e.target !== this) {
-						return;
+					if (e.target === this || e.target === cwd.get(0)) {
+						cwd.data('tmlongtap', setTimeout(function(){
+							// long tap
+							cwd.data('longtap', true);
+							fm.trigger('contextmenu', {
+								'type'    : 'cwd',
+								'targets' : [fm.cwd().hash],
+								'x'       : wrapper.data('touching').x,
+								'y'       : wrapper.data('touching').y
+							});
+						}, 500));
 					}
-					cwd.data('tmlongtap', setTimeout(function(){
-						// long tap
-						cwd.data('longtap', true);
-						fm.trigger('contextmenu', {
-							'type'    : 'cwd',
-							'targets' : [fm.cwd().hash],
-							'x'       : wrapper.data('touching').x,
-							'y'       : wrapper.data('touching').y
-						});
-					}, 500));
 				},
 				touchend : function(e) {
 					if (e.type === 'touchmove') {
