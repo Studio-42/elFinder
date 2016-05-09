@@ -160,9 +160,10 @@ $.fn.elfindertree = function(fm, opts) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (ui.helper.data('namespace') !== fm.namespace) {
+					if (ui.helper.data('namespace') !== fm.namespace || ! insideNavbar(e.clientX) || ! fm.insideWorkzone(e.clientX, e.clientY)) {
 						dst.removeClass(cl);
-						return false;
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					dst.addClass(hover)
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
@@ -202,7 +203,9 @@ $.fn.elfindertree = function(fm, opts) {
 					$(this).removeData('dropover')
 					       .removeClass(hover+' '+dropover);
 				},
-				drop : function(e, ui) { insideNavbar(e.clientX) && drop.call(this, e, ui); }
+				drop : function(e, ui) {
+					insideNavbar(e.clientX) && drop.call(this, e, ui);
+				}
 			}),
 			
 			spinner = $(fm.res('tpl', 'navspinner')),
