@@ -1112,7 +1112,6 @@ $.fn.elfindercwd = function(fm, options) {
 							if (wrapper.data('touching')) {
 								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
 								trigger();
-								wrapper.data('touching', null);
 							}
 						}, 150);
 						return;
