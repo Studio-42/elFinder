@@ -1048,9 +1048,16 @@ $.fn.elfindercwd = function(fm, options) {
 
 					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
 						e.stopPropagation();
-						p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
-						trigger();
-						return;
+						e.preventDefault();
+						if (! wrapper.data('touching')) {
+							p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
+							trigger();
+						}
+						setTimeout(function() {
+							tgt.prop('checked', p.hasClass(clSelected));
+						}, 10);
+						
+						return false;
 					}
 					
 					if (cwd.data('longtap')) {
@@ -1096,7 +1103,6 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
-						e.preventDefault();
 						setTimeout(function() {
 							if (wrapper.data('touching')) {
 								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
