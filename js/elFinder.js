@@ -812,7 +812,7 @@ window.elFinder = function(node, opts) {
 					c       = 'class',
 					cnt, hash, i, h;
 				
-				if (ui.helper.data('namespace') !== namespace) {
+				if (ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.clientX, e.clientY)) {
 					return false;
 				}
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
@@ -2003,6 +2003,19 @@ window.elFinder = function(node, opts) {
 			sync(true);
 		}
 	};
+	
+	this.insideWorkzone = function(x, y, margin) {
+		var rectangle = this.getUI('workzone').data('rectangle');
+		
+		margin = margin || 1;
+		if (x < rectangle.left + margin
+		|| x > rectangle.left + rectangle.width + margin
+		|| y < rectangle.top + margin
+		|| y > rectangle.top + rectangle.height + margin) {
+			return false;
+		}
+		return true;
+	}
 	
 	/*************  init stuffs  ****************/
 	

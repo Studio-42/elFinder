@@ -620,9 +620,10 @@ $.fn.elfindercwd = function(fm, options) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (helper.data('namespace') !== fm.namespace) {
+					if (helper.data('namespace') !== fm.namespace || ! fm.insideWorkzone(e.clientX, e.clientY)) {
 						dst.removeClass(clDropActive);
-						return false;
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					if (dst.hasClass(fm.res(c, 'cwdfile'))) {
 						hash = fm.cwdId2Hash(dst.attr('id'));
@@ -1513,6 +1514,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize(true);
 				bottomMarkerShow(place, place.find('[id]').length);
+				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
 			})
 			.bind('add', function() {
 				resize();
@@ -1567,6 +1569,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;
 
+				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
 				if (target.hasClass(fileSelector.substr(1))) {
 					
 					if (!target.hasClass(clSelected)) {
