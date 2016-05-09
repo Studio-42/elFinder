@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 8eb308d) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: 0a63851) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5042,7 +5042,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 8eb308d)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 0a63851)';
 
 
 
@@ -10081,20 +10081,23 @@ $.fn.elfinderplaces = function(fm, opts) {
 							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});
 						e.stopPropagation();
 						helper.data('dropover', helper.data('dropover') + 1);
-						if (dir.length > 0) {
-							helper.addClass('elfinder-drag-helper-plus');
-						} else {
-							$(this).removeClass(dropover);
+						if (fm.insideWorkzone(e.clientX, e.clientY)) {
+							if (dir.length > 0) {
+								helper.addClass('elfinder-drag-helper-plus');
+								fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+							} else {
+								$(this).removeClass(dropover);
+							}
 						}
-						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
 					},
 					out : function(e, ui) {
-						var helper = ui.helper;
+						var helper = ui.helper,
+							ctr    = (e.shiftKey||e.ctrlKey||e.metaKey);
 						e.stopPropagation();
-						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
+						helper.toggleClass('elfinder-drag-helper-move elfinder-drag-helper-plus', helper.data('locked')? true : ctr).data('dropover', Math.max(helper.data('dropover') - 1, 0));
 						$(this).removeData('dropover')
 						       .removeClass(dropover);
-						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+						fm.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : helper.data('files'), helper: helper});
 					},
 					drop       : function(e, ui) {
 						var helper  = ui.helper,
