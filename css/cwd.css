@@ -382,12 +382,12 @@
 }
 
 tr.elfinder-cwd-file td .elfinder-cwd-select {
-	width: 24px;
+	width: 40px;
 	padding-top: 3px;
 }
 
 .elfinder-touch tr.elfinder-cwd-file td .elfinder-cwd-select {
-	padding-top: 12px;
+	padding-top: 10px;
 }
 
 .elfinder-touch .elfinder-cwd tr td {

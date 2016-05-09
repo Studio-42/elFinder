@@ -745,6 +745,7 @@ window.elFinder = function(node, opts) {
 				self.trigger('unlockfiles', {files : files});
 				self.trigger('selectfiles', {files : files});
 			}
+			self.enable();
 		},
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
