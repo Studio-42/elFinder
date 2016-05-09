@@ -543,7 +543,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 							$(this).css('background-color', '#fff').show();
 						})
-						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.url(file.hash)));
+						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
 				}
 			}
 			
