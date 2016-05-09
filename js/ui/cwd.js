@@ -1290,7 +1290,7 @@ $.fn.elfindercwd = function(fm, options) {
 						child  = $this.children(),
 						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
-					child.removeClass(clHover+' '+clSelected);
+					child.removeClass(clHover+' '+clSelected).find('input:checkbox').prop('checked', false);
 					
 					$this.hasClass(clDroppable) && $this.droppable('disable');
 					target.hasClass(clDraggable) && target.draggable('disable');
