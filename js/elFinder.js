@@ -813,7 +813,7 @@ window.elFinder = function(node, opts) {
 					c       = 'class',
 					cnt, hash, i, h;
 				
-				if (ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.clientX, e.clientY)) {
+				if (ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.pageX, e.pageY)) {
 					return false;
 				}
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
@@ -2005,6 +2005,13 @@ window.elFinder = function(node, opts) {
 		}
 	};
 	
+	/**
+	 * Return bool is inside work zone of specific point
+	 * 
+	 * @param  Number event.pageX
+	 * @param  Number event.pageY
+	 * @return Bool
+	 */
 	this.insideWorkzone = function(x, y, margin) {
 		var rectangle = this.getUI('workzone').data('rectangle');
 		

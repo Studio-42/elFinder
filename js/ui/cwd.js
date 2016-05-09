@@ -621,7 +621,7 @@ $.fn.elfindercwd = function(fm, options) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (helper.data('namespace') !== fm.namespace || ! fm.insideWorkzone(e.clientX, e.clientY)) {
+					if (helper.data('namespace') !== fm.namespace || ! fm.insideWorkzone(e.pageX, e.pageY)) {
 						dst.removeClass(clDropActive);
 						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
@@ -1523,7 +1523,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize(true);
 				bottomMarkerShow(place, place.find('[id]').length);
-				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
+				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
 			})
 			.bind('add', function() {
 				resize();
@@ -1578,7 +1578,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;
 
-				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
+				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
 				if (target.hasClass(fileSelector.substr(1))) {
 					
 					if (!target.hasClass(clSelected)) {

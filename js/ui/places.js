@@ -352,7 +352,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});
 						e.stopPropagation();
 						helper.data('dropover', helper.data('dropover') + 1);
-						if (fm.insideWorkzone(e.clientX, e.clientY)) {
+						if (fm.insideWorkzone(e.pageX, e.pageY)) {
 							if (dir.length > 0) {
 								helper.addClass('elfinder-drag-helper-plus');
 								fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});

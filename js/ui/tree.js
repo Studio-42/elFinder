@@ -160,7 +160,7 @@ $.fn.elfindertree = function(fm, opts) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (ui.helper.data('namespace') !== fm.namespace || ! insideNavbar(e.clientX) || ! fm.insideWorkzone(e.clientX, e.clientY)) {
+					if (ui.helper.data('namespace') !== fm.namespace || ! insideNavbar(e.clientX) || ! fm.insideWorkzone(e.pageX, e.pageY)) {
 						dst.removeClass(cl);
 						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
