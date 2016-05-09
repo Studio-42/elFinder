@@ -1288,7 +1288,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.on(evtDisable, fileSelector, function() {
 					var $this  = $(this).removeClass(clHover+' '+clSelected).addClass(clDisabled), 
 						child  = $this.children(),
-						target = (list ? $this : child);
+						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
 					child.removeClass(clHover+' '+clSelected);
 					
@@ -1298,7 +1298,7 @@ $.fn.elfindercwd = function(fm, options) {
 				// if any files was not removed/moved - unlock its
 				.on(evtEnable, fileSelector, function() {
 					var $this  = $(this).removeClass(clDisabled), 
-						target = list ? $this : $this.children();
+						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 					
 					$this.hasClass(clDroppable) && $this.droppable('enable');	
 					target.hasClass(clDraggable) && target.draggable('enable');
