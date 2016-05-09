@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 7806019) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: 8eb308d) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -759,6 +759,7 @@ window.elFinder = function(node, opts) {
 				self.trigger('unlockfiles', {files : files});
 				self.trigger('selectfiles', {files : files});
 			}
+			self.enable();
 		},
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -5041,7 +5042,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 7806019)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 8eb308d)';
 
 
 
@@ -7937,7 +7938,8 @@ $.fn.elfindercwd = function(fm, options) {
 				if (selectedFiles.length) {
 					selectLock = false;
 					selectedFiles = [];
-					cwd.find('[id].'+clSelected).trigger(evtUnselect); 
+					cwd.find('[id].'+clSelected).trigger(evtUnselect);
+					cwd.find('input:checkbox').prop('checked', false);
 					trigger();
 				} else {
 					fm.select({selected: []});
@@ -8237,6 +8239,10 @@ $.fn.elfindercwd = function(fm, options) {
 				deactivate : function() {
 					$(this).removeData('dropover')
 					       .removeClass(clDropActive);
+				},
+				drop : function(e, ui) {
+					unselectAll();
+					fm.droppable.drop.call(this, e, ui);
 				}
 			}),
 			
@@ -8680,7 +8686,6 @@ $.fn.elfindercwd = function(fm, options) {
 							if (wrapper.data('touching')) {
 								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
 								trigger();
-								wrapper.data('touching', null);
 							}
 						}, 150);
 						return;
@@ -8870,7 +8875,7 @@ $.fn.elfindercwd = function(fm, options) {
 						child  = $this.children(),
 						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
-					child.removeClass(clHover+' '+clSelected).find('input:checkbox').prop('checked', false);
+					child.removeClass(clHover+' '+clSelected).find('input:checkbox')/*.prop('checked', false)*/;
 					
 					$this.hasClass(clDroppable) && $this.droppable('disable');
 					target.hasClass(clDraggable) && target.draggable('disable');
