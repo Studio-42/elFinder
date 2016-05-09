@@ -1276,6 +1276,10 @@ $.fn.elfindercwd = function(fm, options) {
 						ndx = $.inArray(id, selectedFiles);
 						if (ndx !== -1) {
 							selectedFiles.splice(ndx, 1);
+							if (cwd.hasClass('elfinder-cwd-allselected')) {
+								selectAllCheckbox.children('input').prop('checked', false);
+								cwd.removeClass('elfinder-cwd-allselected');
+							}
 						}
 					}
 					
