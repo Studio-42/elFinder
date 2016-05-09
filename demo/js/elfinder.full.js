@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: c19e1b4) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: 7806019) (2016-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -826,7 +826,7 @@ window.elFinder = function(node, opts) {
 					c       = 'class',
 					cnt, hash, i, h;
 				
-				if (ui.helper.data('namespace') !== namespace) {
+				if (ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.clientX, e.clientY)) {
 					return false;
 				}
 				if (dst.hasClass(self.res(c, 'cwdfile'))) {
@@ -2017,6 +2017,19 @@ window.elFinder = function(node, opts) {
 			sync(true);
 		}
 	};
+	
+	this.insideWorkzone = function(x, y, margin) {
+		var rectangle = this.getUI('workzone').data('rectangle');
+		
+		margin = margin || 1;
+		if (x < rectangle.left + margin
+		|| x > rectangle.left + rectangle.width + margin
+		|| y < rectangle.top + margin
+		|| y > rectangle.top + rectangle.height + margin) {
+			return false;
+		}
+		return true;
+	}
 	
 	/*************  init stuffs  ****************/
 	
@@ -5028,7 +5041,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: c19e1b4)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 7806019)';
 
 
 
@@ -8180,9 +8193,10 @@ $.fn.elfindercwd = function(fm, options) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (helper.data('namespace') !== fm.namespace) {
+					if (helper.data('namespace') !== fm.namespace || ! fm.insideWorkzone(e.clientX, e.clientY)) {
 						dst.removeClass(clDropActive);
-						return false;
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					if (dst.hasClass(fm.res(c, 'cwdfile'))) {
 						hash = fm.cwdId2Hash(dst.attr('id'));
@@ -8607,9 +8621,16 @@ $.fn.elfindercwd = function(fm, options) {
 
 					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
 						e.stopPropagation();
-						p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
-						trigger();
-						return;
+						e.preventDefault();
+						if (! wrapper.data('touching')) {
+							p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
+							trigger();
+						}
+						setTimeout(function() {
+							tgt.prop('checked', p.hasClass(clSelected));
+						}, 10);
+						
+						return false;
 					}
 					
 					if (cwd.data('longtap')) {
@@ -8655,7 +8676,6 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
-						e.preventDefault();
 						setTimeout(function() {
 							if (wrapper.data('touching')) {
 								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
@@ -8836,6 +8856,10 @@ $.fn.elfindercwd = function(fm, options) {
 						ndx = $.inArray(id, selectedFiles);
 						if (ndx !== -1) {
 							selectedFiles.splice(ndx, 1);
+							if (cwd.hasClass('elfinder-cwd-allselected')) {
+								selectAllCheckbox.children('input').prop('checked', false);
+								cwd.removeClass('elfinder-cwd-allselected');
+							}
 						}
 					}
 					
@@ -8844,9 +8868,9 @@ $.fn.elfindercwd = function(fm, options) {
 				.on(evtDisable, fileSelector, function() {
 					var $this  = $(this).removeClass(clHover+' '+clSelected).addClass(clDisabled), 
 						child  = $this.children(),
-						target = (list ? $this : child);
+						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
-					child.removeClass(clHover+' '+clSelected);
+					child.removeClass(clHover+' '+clSelected).find('input:checkbox').prop('checked', false);
 					
 					$this.hasClass(clDroppable) && $this.droppable('disable');
 					target.hasClass(clDraggable) && target.draggable('disable');
@@ -8854,7 +8878,7 @@ $.fn.elfindercwd = function(fm, options) {
 				// if any files was not removed/moved - unlock its
 				.on(evtEnable, fileSelector, function() {
 					var $this  = $(this).removeClass(clDisabled), 
-						target = list ? $this : $this.children();
+						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 					
 					$this.hasClass(clDroppable) && $this.droppable('enable');	
 					target.hasClass(clDraggable) && target.draggable('enable');
@@ -9069,6 +9093,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize(true);
 				bottomMarkerShow(place, place.find('[id]').length);
+				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
 			})
 			.bind('add', function() {
 				resize();
@@ -9123,6 +9148,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var target = $(e.data.target),
 					oe     = e.data.originalEvent;
 
+				wz.data('rectangle', $.extend({width: wz.width(), height: wz.height()}, wz.offset()));
 				if (target.hasClass(fileSelector.substr(1))) {
 					
 					if (!target.hasClass(clSelected)) {
@@ -10924,9 +10950,10 @@ $.fn.elfindertree = function(fm, opts) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (ui.helper.data('namespace') !== fm.namespace) {
+					if (ui.helper.data('namespace') !== fm.namespace || ! insideNavbar(e.clientX) || ! fm.insideWorkzone(e.clientX, e.clientY)) {
 						dst.removeClass(cl);
-						return false;
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					dst.addClass(hover)
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
@@ -10966,7 +10993,9 @@ $.fn.elfindertree = function(fm, opts) {
 					$(this).removeData('dropover')
 					       .removeClass(hover+' '+dropover);
 				},
-				drop : function(e, ui) { insideNavbar(e.clientX) && drop.call(this, e, ui); }
+				drop : function(e, ui) {
+					insideNavbar(e.clientX) && drop.call(this, e, ui);
+				}
 			}),
 			
 			spinner = $(fm.res('tpl', 'navspinner')),
@@ -15717,7 +15746,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 							$(this).css('background-color', '#fff').show();
 						})
-						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.url(file.hash)));
+						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
 				}
 			}
 			
