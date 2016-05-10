@@ -129,7 +129,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
@@ -1955,6 +1955,7 @@ class elFinder {
 		$paths  = $args['upload_path']? $args['upload_path'] : array();
 		$chunk  = $args['chunk']? $args['chunk'] : '';
 		$cid    = $args['cid']? (int)$args['cid'] : '';
+		$mtimes = $args['mtime']? $args['mtime'] : array();
 		
 		$renames = $hashes = array();
 		$suffix = '~';
@@ -2116,6 +2117,7 @@ class elFinder {
 			
 			$tmpname = $files['tmp_name'][$i];
 			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
+			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
 			if ($name === 'blob') {
 				if ($chunk) {
 					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
@@ -2129,6 +2131,7 @@ class elFinder {
 							} else if ($name) {
 								$result['_chunkmerged'] = basename($tmpname);
 								$result['_name'] = $name;
+								$result['_mtime'] = $mtime;
 							}
 						}
 					} else {
@@ -2149,6 +2152,10 @@ class elFinder {
 				foreach($this->listeners['upload.presave'] as $handler) {
 					call_user_func_array($handler, array(&$path, &$name, $tmpname, $this, $volume));
 				}
+			}
+			
+			if ($mtime) {
+				touch($tmpname, $mtime);
 			}
 			
 			if (($fp = fopen($tmpname, 'rb')) == false) {

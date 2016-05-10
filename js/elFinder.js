@@ -3407,7 +3407,7 @@ elFinder.prototype = {
 				// chunked upload commit
 				if (res._chunkmerged) {
 					formData = new FormData();
-					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name}];
+					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name, _mtime: res._mtime}];
 					chunkMerge = true;
 					notifyto2 = setTimeout(function() {
 						self.notify({type : 'chunkmerge', cnt : 1});
@@ -3740,6 +3740,7 @@ elFinder.prototype = {
 					if (file._chunkmerged) {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
+						formData.append('mtime[]', file._mtime);
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
@@ -3752,6 +3753,7 @@ elFinder.prototype = {
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
 						}
+						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
 				});
 				
