@@ -527,6 +527,9 @@ elFinder.prototype._options = {
 			// display parent folder with ".." name :)
 			oldSchool : false,
 			
+			// fm.UA types array to show item select checkboxes e.g. ['All'] or ['Mobile'] etc. default: ['Touch']
+			showSelectCheckboxUA : ['Touch'],
+			
 			// file info columns displayed
 			listView : {
 				// name is always displayed, cols are ordered
