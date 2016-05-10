@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: dd77521) (2016-05-09)
+ * Version 2.1.11 (2.1-src Nightly: af37f80) (2016-05-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3036,7 +3036,7 @@ elFinder.prototype = {
 							if (data.error) {
 								cancel();
 							} else {
-								if (fm.option('uploadOverwrite')) {
+								if (fm.option('uploadOverwrite') && ! fm.UA.iOS) {
 									if (data.list) {
 										if ($.isArray(data.list)) {
 											existed = data.list || [];
@@ -3167,7 +3167,7 @@ elFinder.prototype = {
 				if (items.length > 0) {
 					fm.uploads.checkExists(items, target, fm).done(function(renames, hashes){
 						var notifyto, dfds = [];
-						if (fm.option('uploadOverwrite')) {
+						if (fm.option('uploadOverwrite') && ! fm.UA.iOS) {
 							items = $.map(items, function(item){
 								var i, bak, hash, dfd, hi;
 								if (item.isDirectory) {
@@ -3767,6 +3767,9 @@ elFinder.prototype = {
 							formData.append('range', file._range);
 						}
 					}
+					if (fm.UA.iOS) {
+						formData.append('overwrite', 0);
+					}
 				});
 				
 				if (isDataType) {
@@ -3804,7 +3807,7 @@ elFinder.prototype = {
 						hashes = {};
 						self.uploads.checkExists(files, target, fm).done(
 							function(res, res2){
-								if (fm.option('uploadOverwrite')) {
+								if (fm.option('uploadOverwrite') && ! fm.UA.iOS) {
 									renames = res;
 									hashes = res2;
 									files = $.map(files, function(file){return !file._remove? file : null ;});
@@ -3960,7 +3963,7 @@ elFinder.prototype = {
 				});
 				cnt = 1;
 			} else if (input && $(input).is(':file') && $(input).val()) {
-				if (fm.option('uploadOverwrite')) {
+				if (fm.option('uploadOverwrite') && ! fm.UA.iOS) {
 					names = input.files? input.files : [{ name: $(input).val().replace(/^(?:.+[\\\/])?([^\\\/]+)$/, '$1') }];
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
@@ -5049,7 +5052,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: dd77521)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: af37f80)';
 
 
 
@@ -5680,6 +5683,9 @@ elFinder.prototype._options = {
 		cwd : {
 			// display parent folder with ".." name :)
 			oldSchool : false,
+			
+			// fm.UA types array to show item select checkboxes e.g. ['All'] or ['Mobile'] etc. default: ['Touch']
+			showSelectCheckboxUA : ['Touch'],
 			
 			// file info columns displayed
 			listView : {
@@ -7724,6 +7730,8 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				return customCols;
 			},
+			
+			selectCheckbox = ($.map(options.showSelectCheckboxUA, function(t) {return (fm.UA[t] || t.match(/^all$/i))? true : null;}).length)? '<div class="elfinder-cwd-select"><input type="checkbox"></div>' : '',
 
 			/**
 			 * File templates
@@ -7731,8 +7739,8 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @type Object
 			 **/
 			templates = {
-				icon : '<div id="{id}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on"{style}/>{marker}</div><div class="elfinder-cwd-filename" title="{nametitle}">{name}</div><div class="elfinder-cwd-select"><input type="checkbox"></div></div>',
-				row  : '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div><div class="elfinder-cwd-select"><input type="checkbox"></div></td>'+customColsBuild()+'</tr>',
+				icon : '<div id="{id}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on"{style}/>{marker}</div><div class="elfinder-cwd-filename" title="{nametitle}">{name}</div>'+selectCheckbox+'</div>',
+				row  : '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div>'+selectCheckbox+'</td>'+customColsBuild()+'</tr>',
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -7923,7 +7931,7 @@ $.fn.elfindercwd = function(fm, options) {
 			selectAll = function() {
 				var phash = fm.cwd().hash;
 
-				selectAllCheckbox.find('input').prop('checked', true);
+				selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
 				cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
 				if (lastSearch.length) {
 					selectedFiles = $.map(lastSearch, function(f) { return f.hash; });
@@ -7931,7 +7939,7 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
 				}
 				trigger();
-				selectAllCheckbox.data('pending', false);
+				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.addClass('elfinder-cwd-allselected');
 			},
 			
@@ -7941,17 +7949,17 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			unselectAll = function() {
-				selectAllCheckbox.find('input').prop('checked', false);
+				selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
 				if (selectedFiles.length) {
 					selectLock = false;
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
-					cwd.find('input:checkbox').prop('checked', false);
+					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
 					trigger();
 				} else {
 					fm.select({selected: []});
 				}
-				selectAllCheckbox.data('pending', false);
+				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
 			},
 			
@@ -8631,7 +8639,7 @@ $.fn.elfindercwd = function(fm, options) {
 						nl,
 						sib;
 
-					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
+					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
 						e.stopPropagation();
 						e.preventDefault();
 						if (! wrapper.data('touching')) {
@@ -8687,7 +8695,7 @@ $.fn.elfindercwd = function(fm, options) {
 						sel;
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
-					if (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select')) {
+					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
 						setTimeout(function() {
 							if (wrapper.data('touching')) {
 								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
@@ -8868,7 +8876,7 @@ $.fn.elfindercwd = function(fm, options) {
 						if (ndx !== -1) {
 							selectedFiles.splice(ndx, 1);
 							if (cwd.hasClass('elfinder-cwd-allselected')) {
-								selectAllCheckbox.children('input').prop('checked', false);
+								selectCheckbox && selectAllCheckbox.children('input').prop('checked', false);
 								cwd.removeClass('elfinder-cwd-allselected');
 							}
 						}
@@ -8881,7 +8889,7 @@ $.fn.elfindercwd = function(fm, options) {
 						child  = $this.children(),
 						target = (list ? $this : child.find('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename'));
 					
-					child.removeClass(clHover+' '+clSelected).find('input:checkbox')/*.prop('checked', false)*/;
+					child.removeClass(clHover+' '+clSelected);
 					
 					$this.hasClass(clDroppable) && $this.droppable('disable');
 					target.hasClass(clDraggable) && target.draggable('disable');
@@ -8973,7 +8981,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.css({position: 'absolute', width: '1px', height: '1px'})
 				.hide(),
 			
-			selectAllCheckbox = $('<div class="elfinder-cwd-selectall"><input type="checkbox"/></div>')
+			selectAllCheckbox = selectCheckbox? $('<div class="elfinder-cwd-selectall"><input type="checkbox"/></div>')
 				.attr('title', fm.i18n('selectall'))
 				.on('touchstart mousedown click', function(e) {
 					e.stopPropagation();
@@ -8993,7 +9001,7 @@ $.fn.elfindercwd = function(fm, options) {
 							selectAll();
 						}, 10);
 					}
-				}),
+				}) : $(),
 			
 			restm = null,
 			resize = function(init) {

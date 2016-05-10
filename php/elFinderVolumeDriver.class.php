@@ -2589,6 +2589,9 @@ abstract class elFinderVolumeDriver {
 		if (! isset($options['bgcolor'])) {
 			$options['bgcolor'] = '#ffffff';
 		}
+		if (! isset($options['bgColorFb'])) {
+			$options['bgColorFb'] = $this->options['bgColorFb'];
+		}
 		switch($mode) {
 			case 'rotate':
 				if (empty($options['degree'])) {
