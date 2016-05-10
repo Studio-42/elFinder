@@ -469,7 +469,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			  $result = array_merge($result, $files->getFiles());
 			  $pageToken = $files->getNextPageToken();
 			} catch (Exception $e) {
-			  return $e->getMessage();
+			  //return $e->getMessage();
 			  $pageToken = NULL;
 			  return array();
 			}
@@ -521,8 +521,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 				
 		if($path == '/'){
 			return '/';
-		}		
-		$this->refreshGoogleDriveToken();		
+		}
 		//$files = new Google_Service_Drive_DriveFile();
 		
 		$path== '/' || $path=='root' || $temppath[0]== '' || $temppath[0]== '/'? $itemId= 'root' : $itemId = basename($path);
@@ -558,7 +557,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 
 	private function chkDBdat($path){		
 		$files = new Google_Service_Drive_DriveFile();
-		$this->refreshGoogleDriveToken();
+		//$this->refreshGoogleDriveToken();
 		if($path == '/'){
 			return '/';
 		}else{
@@ -1426,7 +1425,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			//Insert or Update a file
 			$files = new Google_Service_Drive_DriveFile();
 			
-			if($res['id'] !== null){
+			if(!empty($res) && empty($name) && empty($stat)){
 			// First retrieve the file from the API.
 			$itemId = basename($path);			  			
 			$name = $res['name']; 
@@ -1442,7 +1441,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 				  'uploadType' => 'multipart'
 				  ));
 				  				  
-			}else {
+			}elseif(empty($res) && !empty($name) && !empty($stat)) {
 			
 			$name == '' ? $name = basename($path) : $name = $name;
 			$files->setName($name);
@@ -1465,7 +1464,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			return $this->setError('GoogleDrive error: '.$e->getMessage());
 		}
 		
-		basename(dirname($path)) == '' ? $path = '/'.$file['id'] : $path = dirname($path).'/'.$file['id'];
+		//basename(dirname($path)) == '' ? $path = '/'.$file['id'] : $path = dirname($path).'/'.$file['id'];
 		return $path;
 	}
 
