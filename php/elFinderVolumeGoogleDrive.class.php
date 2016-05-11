@@ -557,7 +557,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 
 	private function chkDBdat($path){		
 		$files = new Google_Service_Drive_DriveFile();
-		//$this->refreshGoogleDriveToken();
+		
 		if($path == '/'){
 			return '/';
 		}else{
@@ -591,7 +591,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 * @return array googledrive metadata
 	 */
 	private function getDBdat($path) {		
-				
+		$this->refreshGoogleDriveToken();		
 		if($path == '/'){		
 			$root = ['mimeType'=>self::DIRMIME];
 			return $root;
@@ -639,7 +639,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		$stat = array();
 
 		$stat['rev']		= isset($raw['id']) ? $raw['id'] : 'root';		
-		$stat['name']		= $raw['name'];
+		$stat['name']		= isset($raw['name']) ? $raw['name'] : '';
 		$stat['mime']		= $raw['mimeType'] == self::DIRMIME ? 'directory' : 
 							  ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);					
 		$stat['size']		= $raw['mimeType'] == self::DIRMIME ? 0 : (int)$raw['size'];
