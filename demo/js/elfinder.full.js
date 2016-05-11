@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: af37f80) (2016-05-10)
+ * Version 2.1.11 (2.1-src Nightly: 2e19a78) (2016-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2641,7 +2641,9 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeOffset, nodeTop, toolbar, toolbarH, navbar,
+			var lastX, lastY, nodeOffset, nodeTop, toolbarH,
+				navbar = self.getUI('navbar'),
+				toolbar = self.getUI('toolbar'),
 				moveOn  = function(e) {
 					e.preventDefault();
 				},
@@ -2652,55 +2654,62 @@ window.elFinder = function(node, opts) {
 			node.on('touchstart touchmove touchend', function(e) {
 				var x = (e.originalEvent.touches[0] || {}).pageX,
 					y = (e.originalEvent.touches[0] || {}).pageY,
-					testX;
+					navbarMode;
 
 				if (x === null || y === null) {
 					return;
 				}
 				
-				navbar = self.getUI('navbar');
-				toolbar = self.getUI('toolbar');
 				if (e.type === 'touchstart') {
 					nodeOffset = node.offset();
-					lastX = false;
-					if (navbar.is(':hidden')) {
-						if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+					if (navbar) {
+						lastX = false;
+						if (navbar.is(':hidden')) {
+							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+								lastX = x;
+							}
+						} else {
 							lastX = x;
 						}
-					} else {
-						lastX = x;
 					}
-					toolbarH = toolbar.height();
-					nodeTop = nodeOffset.top;
-					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
-						lastY = y;
-						$(document).on('touchmove.' + namespace, moveOn);
-						setTimeout(function() {
-							moveOff();
-						}, 500);
-					} else {
-						lastY = false;
+					if (toolbar) {
+						toolbarH = toolbar.height();
+						nodeTop = nodeOffset.top;
+						if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+							lastY = y;
+							$(document).on('touchmove.' + namespace, moveOn);
+							setTimeout(function() {
+								moveOff();
+							}, 500);
+						} else {
+							lastY = false;
+						}
 					}
 				} else if (e.type === 'touchend') {
 					lastX = false;
 					lastY = false;
 					moveOff();
 				} else {
-					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
-						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop(true, true)[testX? 'hide' : 'show']('fast', function() {
-							self.getUI('cwd').trigger('resize');
-						});
-						lastX = false;
-					}
-					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
-						var mode = (lastY > y)? 'slideUp' : 'slideDown';
-						
-						if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
-							toolbar.stop(true, true).trigger('toggle', {duration: 100});
-							moveOff();
+					if (navbar) {
+						if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
+							navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
+							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
+								self.trigger('navbar' + navbarMode);
+								self.getUI('cwd').trigger('resize');
+							});
+							lastX = false;
 						}
-						lastY = false;
+					}
+					if (toolbar) {
+						if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
+							var mode = (lastY > y)? 'slideUp' : 'slideDown';
+							
+							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
+								toolbar.stop(true, true).trigger('toggle', {duration: 100});
+								moveOff();
+							}
+							lastY = false;
+						}
 					}
 				}
 			});
@@ -5052,7 +5061,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: af37f80)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 2e19a78)';
 
 
 
@@ -9686,12 +9695,15 @@ $.fn.elfinderpath = function(fm) {
 		var query  = '',
 			target = '',
 			mimes  = [],
+			place  = 'statusbar',
+			clHover= fm.res('class', 'hover'),
+			prefix = 'path' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-',
 			path   = $(this).addClass('elfinder-path').html('&nbsp;')
-				.on('click', 'a', function(e) {
-					var hash = $(this).attr('href').substr(5);
-
+				.on('mousedown', 'span.elfinder-path-dir', function(e) {
+					var hash = $(this).attr('id').substr(prefix.length);
 					e.preventDefault();
 					if (hash != fm.cwd().hash) {
+						$(this).addClass(clHover);
 						if (query) {
 							fm.exec('search', query, { target: hash, mime: mimes.join(' ') });
 						} else {
@@ -9699,7 +9711,54 @@ $.fn.elfinderpath = function(fm) {
 						}
 					}
 				})
-				.prependTo(fm.getUI('statusbar').show())
+				.prependTo(fm.getUI('statusbar').show()),
+			render = function(cwd) {
+				var dirs = [];
+				$.each(fm.parents(cwd), function(i, hash) {
+					var c = (cwd === hash)? 'elfinder-path-dir elfinder-path-cwd' : 'elfinder-path-dir',
+						name = fm.escape(fm.file(hash).name);
+					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+name+'">'+name+'</span>');
+				});
+				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
+			},
+			open = function() {
+				var prev;
+				path.children('span.elfinder-path-dir').attr('style', '');
+				prev = fm.direction === 'ltr'? $('#'+prefix + fm.cwd().hash).prevAll('span.elfinder-path-dir:first') : $();
+				path.scrollLeft(prev.length? prev.position().left : 0);
+			},
+			fit = function() {
+				var dirs = path.children('span.elfinder-path-dir'),
+					cnt  = dirs.length,
+					m, bg = 0, ids;
+				
+				if (place === 'workzone' || cnt < 2) {
+					dirs.attr('style', '');
+					return;
+				}
+				dirs.css({maxWidth: (100/cnt)+'%', display: 'inline-block'});
+				m = path.width() - 9;
+				path.children('span.elfinder-path-other').each(function() {
+					m -= $(this).width();
+				});
+				ids = [];
+				dirs.each(function(i) {
+					var dir = $(this),
+						w   = dir.width();
+					m -= w;
+					if (w < this.scrollWidth) {
+						ids.push(i);
+					}
+				});
+				if (m > 0) {
+					m = m / ids.length;
+					$.each(ids, function(i, k) {
+						var d = $(dirs[k]);
+						d.css('max-width', d.width() + m);
+					});
+				}
+				dirs.last().attr('style', '');
+			};
 
 			fm.bind('open searchend parents', function() {
 				var dirs = [];
@@ -9708,11 +9767,8 @@ $.fn.elfinderpath = function(fm) {
 				target = '';
 				mimes  = [];
 				
-				$.each(fm.parents(fm.cwd().hash), function(i, hash) {
-					dirs.push('<a href="#elf_'+hash+'">'+fm.escape(fm.file(hash).name)+'</a>');
-				});
-
-				path.html(dirs.join(fm.option('separator')));
+				path.html(render(fm.cwd().hash));
+				fit();
 			})
 			.bind('searchstart', function(e) {
 				if (e.data) {
@@ -9725,15 +9781,32 @@ $.fn.elfinderpath = function(fm) {
 				var dirs = [],
 					html = '';
 				if (target) {
-					$.each(fm.parents(target), function(i, hash) {
-						dirs.push('<a href="#elf_'+hash+'">'+fm.escape(fm.file(hash).name)+'</a>');
-					});
-					html = dirs.join(fm.option('separator'));
+					html = render(target);
 				} else {
 					html = fm.i18n('btnAll');
 				}
-				path.html(fm.i18n('searcresult') + ': ' + html);
-			});
+				path.html('<span class="elfinder-path-other">'+fm.i18n('searcresult') + ': </span>' + html);
+				fit();
+			})
+			// on swipe to navbar show/hide
+			.bind('navbarshow navbarhide', function(e) {
+				var wz = fm.getUI('workzone'),
+					c  = 'ui-widget-header ui-helper-clearfix';
+				if (e.type === 'navbarshow') {
+					wz.height(wz.height() + path.outerHeight());
+					path.removeClass(c).prependTo(fm.getUI('statusbar'));
+					place = 'statusbar';
+					fm.unbind('open', open);
+				} else {
+					path.addClass(c).insertBefore(wz);
+					wz.height(wz.height() - path.outerHeight());
+					place = 'workzone';
+					open();
+					fm.bind('open', open);
+				}
+				fm.trigger('resize');
+			})
+			.bind('resize', fit);
 	});
 };
 

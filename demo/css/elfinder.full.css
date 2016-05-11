@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: af37f80) (2016-05-10)
+ * Version 2.1.11 (2.1-src Nightly: 2e19a78) (2016-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1900,7 +1900,17 @@ embed.elfinder-quicklook-preview-audio {
 	border-left:0 solid transparent;
 }
 
-.elfinder-statusbar a { text-decoration:none; }
+.elfinder-statusbar span {
+	cursor: pointer;
+	/*display: inline-block;*/
+	vertical-align: bottom;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+}
+.elfinder-statusbar span.ui-state-hover,
+.elfinder-statusbar span.ui-state-active { border: none; }
+.elfinder-statusbar span.elfinder-path-cwd { cursor: default; }
 
 
 
@@ -1910,10 +1920,30 @@ embed.elfinder-quicklook-preview-audio {
 	white-space:nowrap;
 	overflow:hidden;
 	text-overflow:ellipsis;
-    -o-text-overflow:ellipsis;
+	-o-text-overflow:ellipsis;
 }
 .elfinder-ltr .elfinder-path { float:left;  }
 .elfinder-rtl .elfinder-path { float:right; }
+
+/* path in workzone (case of swipe to navbar close) */
+.elfinder>.elfinder-path {
+	font-size: .75em;
+	font-weight: normal;
+	float: none;
+	max-width: none;
+	overflow-x: scroll;
+	text-overflow: initial;
+	-o-text-overflow: initial;
+}
+.elfinder>.elfinder-path span {
+	display: inline-block;
+	padding: 5px 3px;
+}
+.elfinder>.elfinder-path span.elfinder-path-cwd {
+	font-weight: bold;
+}
+.elfinder>.elfinder-path span.ui-state-hover,
+.elfinder>.elfinder-path span.ui-state-active { border: none; }
 
 /* total/selected size in statusbar */
 .elfinder-stat-size { white-space:nowrap; }
