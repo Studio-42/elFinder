@@ -2627,7 +2627,9 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeOffset, nodeTop, toolbar, toolbarH, navbar,
+			var lastX, lastY, nodeOffset, nodeTop, toolbarH,
+				navbar = self.getUI('navbar'),
+				toolbar = self.getUI('toolbar'),
 				moveOn  = function(e) {
 					e.preventDefault();
 				},
@@ -2638,55 +2640,62 @@ window.elFinder = function(node, opts) {
 			node.on('touchstart touchmove touchend', function(e) {
 				var x = (e.originalEvent.touches[0] || {}).pageX,
 					y = (e.originalEvent.touches[0] || {}).pageY,
-					testX;
+					navbarMode;
 
 				if (x === null || y === null) {
 					return;
 				}
 				
-				navbar = self.getUI('navbar');
-				toolbar = self.getUI('toolbar');
 				if (e.type === 'touchstart') {
 					nodeOffset = node.offset();
-					lastX = false;
-					if (navbar.is(':hidden')) {
-						if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+					if (navbar) {
+						lastX = false;
+						if (navbar.is(':hidden')) {
+							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+								lastX = x;
+							}
+						} else {
 							lastX = x;
 						}
-					} else {
-						lastX = x;
 					}
-					toolbarH = toolbar.height();
-					nodeTop = nodeOffset.top;
-					if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
-						lastY = y;
-						$(document).on('touchmove.' + namespace, moveOn);
-						setTimeout(function() {
-							moveOff();
-						}, 500);
-					} else {
-						lastY = false;
+					if (toolbar) {
+						toolbarH = toolbar.height();
+						nodeTop = nodeOffset.top;
+						if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+							lastY = y;
+							$(document).on('touchmove.' + namespace, moveOn);
+							setTimeout(function() {
+								moveOff();
+							}, 500);
+						} else {
+							lastY = false;
+						}
 					}
 				} else if (e.type === 'touchend') {
 					lastX = false;
 					lastY = false;
 					moveOff();
 				} else {
-					if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
-						testX = self.direction === 'ltr'? (lastX > x) : (lastX < x);
-						self.getUI('navbar').stop(true, true)[testX? 'hide' : 'show']('fast', function() {
-							self.getUI('cwd').trigger('resize');
-						});
-						lastX = false;
-					}
-					if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
-						var mode = (lastY > y)? 'slideUp' : 'slideDown';
-						
-						if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
-							toolbar.stop(true, true).trigger('toggle', {duration: 100});
-							moveOff();
+					if (navbar) {
+						if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
+							navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
+							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
+								self.trigger('navbar' + navbarMode);
+								self.getUI('cwd').trigger('resize');
+							});
+							lastX = false;
 						}
-						lastY = false;
+					}
+					if (toolbar) {
+						if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
+							var mode = (lastY > y)? 'slideUp' : 'slideDown';
+							
+							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
+								toolbar.stop(true, true).trigger('toggle', {duration: 100});
+								moveOff();
+							}
+							lastY = false;
+						}
 					}
 				}
 			});
