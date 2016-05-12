@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 2e19a78) (2016-05-12)
+ * Version 2.1.11 (2.1-src Nightly: ea781ce) (2016-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3430,7 +3430,7 @@ elFinder.prototype = {
 				// chunked upload commit
 				if (res._chunkmerged) {
 					formData = new FormData();
-					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name}];
+					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name, _mtime: res._mtime}];
 					chunkMerge = true;
 					notifyto2 = setTimeout(function() {
 						self.notify({type : 'chunkmerge', cnt : 1});
@@ -3763,6 +3763,7 @@ elFinder.prototype = {
 					if (file._chunkmerged) {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
+						formData.append('mtime[]', file._mtime);
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
@@ -3775,6 +3776,7 @@ elFinder.prototype = {
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
 						}
+						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
 					if (fm.UA.iOS) {
 						formData.append('overwrite', 0);
@@ -5061,7 +5063,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 2e19a78)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: ea781ce)';
 
 
 
@@ -9721,7 +9723,7 @@ $.fn.elfinderpath = function(fm) {
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
 			},
-			open = function() {
+			toWorkzone = function() {
 				var prev;
 				path.children('span.elfinder-path-dir').attr('style', '');
 				prev = fm.direction === 'ltr'? $('#'+prefix + fm.cwd().hash).prevAll('span.elfinder-path-dir:first') : $();
@@ -9736,6 +9738,7 @@ $.fn.elfinderpath = function(fm) {
 					dirs.attr('style', '');
 					return;
 				}
+				path.width(path.css('max-width'));
 				dirs.css({maxWidth: (100/cnt)+'%', display: 'inline-block'});
 				m = path.width() - 9;
 				path.children('span.elfinder-path-other').each(function() {
@@ -9750,14 +9753,19 @@ $.fn.elfinderpath = function(fm) {
 						ids.push(i);
 					}
 				});
-				if (m > 0) {
-					m = m / ids.length;
-					$.each(ids, function(i, k) {
-						var d = $(dirs[k]);
-						d.css('max-width', d.width() + m);
-					});
+				path.width('');
+				if (ids.length) {
+					if (m > 0) {
+						m = m / ids.length;
+						$.each(ids, function(i, k) {
+							var d = $(dirs[k]);
+							d.css('max-width', d.width() + m);
+						});
+					}
+					dirs.last().attr('style', '');
+				} else {
+					dirs.attr('style', '');
 				}
-				dirs.last().attr('style', '');
 			};
 
 			fm.bind('open searchend parents', function() {
@@ -9796,13 +9804,13 @@ $.fn.elfinderpath = function(fm) {
 					wz.height(wz.height() + path.outerHeight());
 					path.removeClass(c).prependTo(fm.getUI('statusbar'));
 					place = 'statusbar';
-					fm.unbind('open', open);
+					fm.unbind('open', toWorkzone);
 				} else {
 					path.addClass(c).insertBefore(wz);
 					wz.height(wz.height() - path.outerHeight());
 					place = 'workzone';
-					open();
-					fm.bind('open', open);
+					toWorkzone();
+					fm.bind('open', toWorkzone);
 				}
 				fm.trigger('resize');
 			})
@@ -11474,7 +11482,7 @@ $.fn.elfindertree = function(fm, opts) {
 						return;
 					}
 					
-					fm.trigger('searchend', { noupdate: true });
+					fm.searchStatus.state && fm.trigger('searchend', { noupdate: true });
 				
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
