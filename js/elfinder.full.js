@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: ea781ce) (2016-05-12)
+ * Version 2.1.11 (2.1-src Nightly: e355626) (2016-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2690,9 +2690,9 @@ window.elFinder = function(node, opts) {
 					lastY = false;
 					moveOff();
 				} else {
-					if (navbar) {
-						if (lastX !== false && Math.abs(lastX - x) > Math.min(200, (node.width() * .5))) {
-							navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
+					if (navbar && lastX !== false) {
+						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
+						if (Math.abs(lastX - x) > Math.min((navbarMode === 'hide'? 200 : 45), (node.width() * .5))) {
 							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
 								self.trigger('navbar' + navbarMode);
 								self.getUI('cwd').trigger('resize');
@@ -2700,8 +2700,8 @@ window.elFinder = function(node, opts) {
 							lastX = false;
 						}
 					}
-					if (toolbar) {
-						if (lastY !== false && Math.abs(lastY - y) > toolbarH / 3) {
+					if (toolbar && lastY !== false ) {
+						if (Math.abs(lastY - y) > toolbarH / 3) {
 							var mode = (lastY > y)? 'slideUp' : 'slideDown';
 							
 							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
@@ -5063,7 +5063,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: ea781ce)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: e355626)';
 
 
 
