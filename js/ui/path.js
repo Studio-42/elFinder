@@ -37,7 +37,7 @@ $.fn.elfinderpath = function(fm) {
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
 			},
-			open = function() {
+			toWorkzone = function() {
 				var prev;
 				path.children('span.elfinder-path-dir').attr('style', '');
 				prev = fm.direction === 'ltr'? $('#'+prefix + fm.cwd().hash).prevAll('span.elfinder-path-dir:first') : $();
@@ -52,6 +52,7 @@ $.fn.elfinderpath = function(fm) {
 					dirs.attr('style', '');
 					return;
 				}
+				path.width(path.css('max-width'));
 				dirs.css({maxWidth: (100/cnt)+'%', display: 'inline-block'});
 				m = path.width() - 9;
 				path.children('span.elfinder-path-other').each(function() {
@@ -66,14 +67,19 @@ $.fn.elfinderpath = function(fm) {
 						ids.push(i);
 					}
 				});
-				if (m > 0) {
-					m = m / ids.length;
-					$.each(ids, function(i, k) {
-						var d = $(dirs[k]);
-						d.css('max-width', d.width() + m);
-					});
+				path.width('');
+				if (ids.length) {
+					if (m > 0) {
+						m = m / ids.length;
+						$.each(ids, function(i, k) {
+							var d = $(dirs[k]);
+							d.css('max-width', d.width() + m);
+						});
+					}
+					dirs.last().attr('style', '');
+				} else {
+					dirs.attr('style', '');
 				}
-				dirs.last().attr('style', '');
 			};
 
 			fm.bind('open searchend parents', function() {
@@ -112,13 +118,13 @@ $.fn.elfinderpath = function(fm) {
 					wz.height(wz.height() + path.outerHeight());
 					path.removeClass(c).prependTo(fm.getUI('statusbar'));
 					place = 'statusbar';
-					fm.unbind('open', open);
+					fm.unbind('open', toWorkzone);
 				} else {
 					path.addClass(c).insertBefore(wz);
 					wz.height(wz.height() - path.outerHeight());
 					place = 'workzone';
-					open();
-					fm.bind('open', open);
+					toWorkzone();
+					fm.bind('open', toWorkzone);
 				}
 				fm.trigger('resize');
 			})
