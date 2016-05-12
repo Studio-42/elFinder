@@ -571,6 +571,7 @@ $.fn.elfindercwd = function(fm, options) {
 						table.css('padding-top', htr.outerHeight());
 						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
+							.removeClass('ui-droppable native-droppable elfinder-cwd-wrapper-empty')
 							.css(wrapper.position())
 							.css('height', table.css('padding-top'))
 							.append(base);
