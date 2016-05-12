@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d4618e4) (2016-05-13)
+ * Version 2.1.11 (2.1-src Nightly: 5c46934) (2016-05-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5063,7 +5063,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d4618e4)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 5c46934)';
 
 
 
@@ -8123,7 +8123,7 @@ $.fn.elfindercwd = function(fm, options) {
 					buffer._last = last;
 
 					// fixed table header
-					list && options.listView.fixedHeader && fixTableHeader();
+					list && fixTableHeader();
 
 					// load/attach thumbnails
 					attachThumbnails(atmb);
@@ -8156,6 +8156,9 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// To fixed table header colmun
 			fixTableHeader = function() {
+				if (! options.listView.fixedHeader) {
+					return;
+				}
 				var cnt, base, table, thead, tbody, htr, btr, htd, btd, init, delta;
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
@@ -9040,7 +9043,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				}, 20);
 				
-				list && options.listView.fixedHeader && fixTableHeader();
+				list && fixTableHeader();
 			},
 			
 			// elfinder node
@@ -9059,6 +9062,8 @@ $.fn.elfindercwd = function(fm, options) {
 				.selectable(selectableOption)
 				.data('selectable', true);
 		}
+		
+		selectCheckbox && cwd.addClass('elfinder-has-checkbox');
 		
 		fm
 			.one('init', function(){

@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d4618e4) (2016-05-13)
+ * Version 2.1.11 (2.1-src Nightly: 5c46934) (2016-05-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -930,10 +930,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder .elfinder-cwd table thead td {
 	padding: 4px 14px;
 }
-.elfinder-ltr .elfinder-cwd table thead td:first-child {
+.elfinder-ltr .elfinder-cwd.elfinder-has-checkbox table thead td:first-child {
 	padding: 4px 14px 4px 22px;
 }
-.elfinder-rtl .elfinder-cwd table thead td:first-child {
+.elfinder-rtl .elfinder-cwd.elfinder-has-checkbox table thead td:first-child {
 	padding: 4px 22px 4px 14px;
 }
 
@@ -996,8 +996,8 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* filename container */
 .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { width:97%; position:relative; }
 /* filename container in ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { margin-left: 8px; }
-.elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-file-wrapper { margin-right: 8px; }
+.elfinder-ltr .elfinder-cwd-view-list.elfinder-has-checkbox .elfinder-cwd-file-wrapper { margin-left: 8px; }
+.elfinder-rtl .elfinder-cwd-view-list.elfinder-has-checkbox .elfinder-cwd-file-wrapper { margin-right: 8px; }
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-filename { padding-left:23px;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-filename { padding-right:23px; }
 
