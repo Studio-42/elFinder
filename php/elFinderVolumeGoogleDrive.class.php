@@ -454,7 +454,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 */
 	private function query($sql) {		
 		//$files = new Google_Service_Drive_DriveFile();
-		
+		$this->refreshGoogleDriveToken();
 		$result = array();
   		$pageToken = NULL;		
 		
@@ -590,8 +590,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 	 * @param string $path
 	 * @return array googledrive metadata
 	 */
-	private function getDBdat($path) {		
-		$this->refreshGoogleDriveToken();		
+	private function getDBdat($path) {
 		if($path == '/'){		
 			$root = ['mimeType'=>self::DIRMIME];
 			return $root;
