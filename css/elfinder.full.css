@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 2e19a78) (2016-05-12)
+ * Version 2.1.11 (2.1-src Nightly: ea781ce) (2016-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -513,10 +513,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	display:none;
 }
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
-	left: 2px;;
+	left: 2px;
 }
 .elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item .ui-icon {
-	right: 2px;;
+	right: 2px;
 }
 .elfinder-touch .elfinder-contextmenu-item {
 	padding:12px 38px;
@@ -1907,6 +1907,8 @@ embed.elfinder-quicklook-preview-audio {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
+	text-overflow: "..";
+	-o-text-overflow: "..";
 }
 .elfinder-statusbar span.ui-state-hover,
 .elfinder-statusbar span.ui-state-active { border: none; }
@@ -1992,8 +1994,8 @@ embed.elfinder-quicklook-preview-audio {
 	box-sizing: content-box;
 }
 .elfinder-touch .elfinder-button {
-	width:24px;
-	height:24px;
+	width:20px;
+	height:20px;
 }
 
 .elfinder .ui-icon-search { cursor:pointer;}
@@ -2028,7 +2030,7 @@ embed.elfinder-quicklook-preview-audio {
 }
 
 .elfinder-touch .elfinder-toolbar-button-separator {
-	height:32px;
+	height:20px;
 }
 
 /* change icon opacity^ not button */
@@ -2047,7 +2049,9 @@ embed.elfinder-quicklook-preview-audio {
 }
 
 .elfinder-touch .elfinder-button-icon {
-	zoom: 1.5;
+	zoom: 1.25;
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.25);
 }
 
 /* buttons icons */
@@ -2197,8 +2201,8 @@ embed.elfinder-quicklook-preview-audio {
 }
 
 .elfinder-touch .elfinder-button-search input {
-	height:32px;
-	line-height: 32px;
+	height:28px;
+	line-height: 28px;
 }
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
 

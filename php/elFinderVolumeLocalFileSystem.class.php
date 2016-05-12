@@ -58,6 +58,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['rootCssClass'] = 'elfinder-navbar-root-local';
 		$this->options['followSymLinks'] = true;
 		$this->options['detectDirIcon'] = '';         // file name that is detected as a folder icon e.g. '.diricon.png'
+		$this->options['keepTimestamp'] = array('copy', 'move'); // keep timestamp at inner filesystem allowed 'copy', 'move' and 'upload'
 	}
 	
 	/*********************************************************************/
@@ -182,6 +183,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					'hidden'  => true
 			);
 		}
+		
+		if ($this->options['keepTimestamp']) {
+			$this->options['keepTimestamp'] = array_flip($this->options['keepTimestamp']);
+		}
 	}
 	
 	/**
@@ -199,7 +204,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return false;
 		}
 		$path = realpath($path);
-		$mtime = filemtime($path);
+		$mtime = @filemtime($path);
+		if (! $mtime) {
+			return false;
+		}
 		if ($mtime != $compare) {
 			return $mtime;
 		}
@@ -808,8 +816,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _copy($source, $targetDir, $name) {
-		$ret = copy($source, $this->_joinPath($targetDir, $name));
-		$ret && clearstatcache();
+		$mtime = @filemtime($source);
+		$target = $this->_joinPath($targetDir, $name);
+		if ($ret = copy($source, $target)) {
+			isset($this->options['keepTimestamp']['copy']) && $mtime && touch($target, $mtime);
+			clearstatcache();
+		}
 		return $ret;
 	}
 
@@ -825,9 +837,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
      * @author Dmitry (dio) Levashov
      */
 	protected function _move($source, $targetDir, $name) {
+		$mtime = @filemtime($source);
 		$target = $this->_joinPath($targetDir, $name);
-		$ret = @rename($source, $target) ? $target : false;
-		$ret && clearstatcache();
+		if ($ret = @rename($source, $target) ? $target : false) {
+			isset($this->options['keepTimestamp']['move']) && $mtime && touch($target, $mtime);
+			clearstatcache();
+		}
 		return $ret;
 	}
 		
@@ -875,10 +890,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$uri = isset($meta['uri'])? $meta['uri'] : '';
 		if ($uri && ! preg_match('#^[a-zA-Z0-9]+://#', $uri)) {
 			@fclose($fp);
+			$mtime = @filemtime($uri);
 			$isCmdPaste = ($this->ARGS['cmd'] === 'paste');
 			$isCmdCopy = ($isCmdPaste && empty($this->ARGS['cut']));
 			if (($isCmdCopy || !@rename($uri, $path)) && !@copy($uri, $path)) {
 				return false;
+			}
+			// keep timestamp on upload
+			if ($mtime && $this->ARGS['cmd'] === 'upload' && isset($this->options['keepTimestamp']['upload'])) {
+				touch($path, $mtime);
 			}
 			// re-create the source file for remove processing of paste command
 			$isCmdPaste && !$isCmdCopy && touch($uri);
