@@ -21,6 +21,8 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
+	text-overflow: "..";
+	-o-text-overflow: "..";
 }
 .elfinder-statusbar span.ui-state-hover,
 .elfinder-statusbar span.ui-state-active { border: none; }

@@ -37,8 +37,8 @@
 	box-sizing: content-box;
 }
 .elfinder-touch .elfinder-button {
-	width:24px;
-	height:24px;
+	width:20px;
+	height:20px;
 }
 
 .elfinder .ui-icon-search { cursor:pointer;}
@@ -73,7 +73,7 @@
 }
 
 .elfinder-touch .elfinder-toolbar-button-separator {
-	height:32px;
+	height:20px;
 }
 
 /* change icon opacity^ not button */
@@ -92,7 +92,9 @@
 }
 
 .elfinder-touch .elfinder-button-icon {
-	zoom: 1.5;
+	zoom: 1.25;
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.25);
 }
 
 /* buttons icons */
@@ -242,8 +244,8 @@
 }
 
 .elfinder-touch .elfinder-button-search input {
-	height:32px;
-	line-height: 32px;
+	height:28px;
+	line-height: 28px;
 }
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
 
