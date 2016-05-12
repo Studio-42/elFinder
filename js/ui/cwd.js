@@ -525,7 +525,7 @@ $.fn.elfindercwd = function(fm, options) {
 					buffer._last = last;
 
 					// fixed table header
-					list && options.listView.fixedHeader && fixTableHeader();
+					list && fixTableHeader();
 
 					// load/attach thumbnails
 					attachThumbnails(atmb);
@@ -558,6 +558,9 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// To fixed table header colmun
 			fixTableHeader = function() {
+				if (! options.listView.fixedHeader) {
+					return;
+				}
 				var cnt, base, table, thead, tbody, htr, btr, htd, btd, init, delta;
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
@@ -1442,7 +1445,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				}, 20);
 				
-				list && options.listView.fixedHeader && fixTableHeader();
+				list && fixTableHeader();
 			},
 			
 			// elfinder node
@@ -1461,6 +1464,8 @@ $.fn.elfindercwd = function(fm, options) {
 				.selectable(selectableOption)
 				.data('selectable', true);
 		}
+		
+		selectCheckbox && cwd.addClass('elfinder-has-checkbox');
 		
 		fm
 			.one('init', function(){
