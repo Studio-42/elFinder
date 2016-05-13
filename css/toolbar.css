@@ -84,14 +84,11 @@
 .elfinder-rtl .elfinder-buttonset { float:right; }
 
 /* icon inside button */
-.elfinder .elfinder-button-icon {
-	background-image: url(../img/toolbar.png);
-}
 .elfinder-button-icon {
 	width:16px;
 	height:16px;
 	display:block;
-	background-repeat: none;
+	background:url('../img/toolbar.png')  no-repeat;
 }
 
 .elfinder-touch .elfinder-button-icon {
