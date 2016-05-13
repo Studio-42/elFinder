@@ -129,7 +129,7 @@ elFinder.prototype.commands.download = function() {
 						node: $('<a/>')
 							.attr({href: '#', title: fm.i18n('getLink'), draggable: 'false'})
 							.text(file.name)
-							.on('click', function(e){
+							.on('click touchstart', function(e){
 								var parent = node.parent();
 								e.stopPropagation();
 								e.preventDefault();
