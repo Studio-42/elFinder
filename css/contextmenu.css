@@ -113,3 +113,8 @@
 	border-top:1px solid #ccc;
 	margin:0 1px;
 }
+
+/* for CSS style priority to ui-state-disabled - "background-image: none" */
+.elfinder .elfinder-button-icon.ui-state-disabled {
+	background-image: url('../img/toolbar.png') !important;
+}
