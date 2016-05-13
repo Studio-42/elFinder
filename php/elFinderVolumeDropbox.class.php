@@ -92,12 +92,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
      */
 	public function __construct() {
 
-		if (@include_once 'Dropbox/autoload.php') {
+		// check with composer
+		$this->dropbox_phpFound = class_exists('Dropbox_API');
+		
+		if (! $this->dropbox_phpFound) {
 			// check with pear
-			$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
-		} else {
-			// check with composer
-			$this->dropbox_phpFound = class_exists('Dropbox_API');
+			if (include_once 'Dropbox/autoload.php') {
+				$this->dropbox_phpFound = in_array('Dropbox_autoload', spl_autoload_functions());
+			}
 		}
 		
 		$opts = array(
@@ -251,7 +253,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$dropboxUid = $netVolumes[$key]['dropboxUid'];
 		}
 		foreach($netVolumes as $volume) {
-			if (@$volume['host'] === 'dropbox' && @$volume['dropboxUid'] === $dropboxUid) {
+			if ($volume['host'] === 'dropbox' && $volume['dropboxUid'] === $dropboxUid) {
 				$count++;
 			}
 		}
@@ -364,7 +366,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$this->tmbPrefix = 'dropbox'.base_convert($this->dropboxUid, 10, 32);
 
 		if (!empty($this->options['tmpPath'])) {
-			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
+			if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
 				$this->tmp = $this->options['tmpPath'];
 			}
 		}
@@ -376,7 +378,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		
 		if (!empty($this->options['metaCachePath'])) {
-			if ((is_dir($this->options['metaCachePath']) || @mkdir($this->options['metaCachePath'])) && is_writable($this->options['metaCachePath'])) {
+			if ((is_dir($this->options['metaCachePath']) || mkdir($this->options['metaCachePath'])) && is_writable($this->options['metaCachePath'])) {
 				$this->metaCache = $this->options['metaCachePath'];
 			}
 		}
@@ -554,7 +556,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			$ptimes = array();
 			$now = time();
 			do {
-				@ ini_set('max_execution_time', 120);
+				 ini_set('max_execution_time', 120);
 				$_info = $this->dropbox->delta($cursor);
 				if (! empty($_info['reset'])) {
 					$this->DB->exec('TRUNCATE table '.$this->DB_TableName);
@@ -1120,14 +1122,14 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		}
 		$ret = '';
 		if ($work = $this->getWorkFile($path)) {
-			if ($size = @getimagesize($work)) {
+			if ($size = getimagesize($work)) {
 				$cache['width'] = $size[0];
 				$cache['height'] = $size[1];
 				$this->updateDBdat($path, $cache);
 				$ret = $size[0].'x'.$size[1];
 			}
 		}
-		is_file($work) && @unlink($work);
+		is_file($work) && unlink($work);
 		return $ret;
 	}
 
@@ -1182,7 +1184,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			
 			if ($local = $this->getTempFile($path)) {
 				if (file_put_contents($local, $contents, LOCK_EX) !== false) {
-					return @fopen($local, $mode);
+					return fopen($local, $mode);
 				}
 			}
 		}
@@ -1199,9 +1201,9 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
      * @author Dmitry (dio) Levashov
      */
 	protected function _fclose($fp, $path='') {
-		@fclose($fp);
+		fclose($fp);
 		if ($path) {
-			@unlink($this->getTempFile($path));
+			unlink($this->getTempFile($path));
 		}
 	}
 
@@ -1384,13 +1386,13 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$res = false;
 
 		if ($local = $this->getTempFile($path)) {
-			if (@file_put_contents($local, $content, LOCK_EX) !== false
-			&& ($fp = @fopen($local, 'rb'))) {
+			if (file_put_contents($local, $content, LOCK_EX) !== false
+			&& ($fp = fopen($local, 'rb'))) {
 				clearstatcache();
 				$res = $this->_save($fp, $path, '', array());
-				@fclose($fp);
+				fclose($fp);
 			}
-			file_exists($local) && @unlink($local);
+			file_exists($local) && unlink($local);
 		}
 
 		return $res;

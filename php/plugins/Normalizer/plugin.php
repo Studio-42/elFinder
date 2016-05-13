@@ -146,7 +146,7 @@ class elFinderPluginNormalizer
 					$str = Normalizer::normalize($str, Normalizer::FORM_KC);
 			} else {
 				if (! class_exists('I18N_UnicodeNormalizer', false)) {
-					@ include_once 'I18N/UnicodeNormalizer.php';
+					 include_once 'I18N/UnicodeNormalizer.php';
 				}
 				if (class_exists('I18N_UnicodeNormalizer', false)) {
 					$normalizer = new I18N_UnicodeNormalizer();
