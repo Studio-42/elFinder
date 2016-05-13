@@ -114,9 +114,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
      * @author Naoki Sawada
      */
 	public function netmountPrepare($options) {
-		if (!empty($_REQUEST['encoding']) && @iconv('UTF-8', $_REQUEST['encoding'], '') !== false) {
+		if (!empty($_REQUEST['encoding']) && iconv('UTF-8', $_REQUEST['encoding'], '') !== false) {
 			$options['encoding'] = $_REQUEST['encoding'];
-			if (!empty($_REQUEST['locale']) && @setlocale(LC_ALL, $_REQUEST['locale'])) {
+			if (!empty($_REQUEST['locale']) && setlocale(LC_ALL, $_REQUEST['locale'])) {
 				setlocale(LC_ALL, elFinder::$locale);
 				$options['locale'] = $_REQUEST['locale'];
 			}
@@ -197,7 +197,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		parent::configure();
 		
 		if (!empty($this->options['tmpPath'])) {
-			if ((is_dir($this->options['tmpPath']) || @mkdir($this->options['tmpPath'], 0755, true)) && is_writable($this->options['tmpPath'])) {
+			if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'], 0755, true)) && is_writable($this->options['tmpPath'])) {
 				$this->tmp = $this->options['tmpPath'];
 			}
 		}
@@ -230,23 +230,23 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function connect() {
-		if (!($this->connect = @ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+		if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
 			return $this->setError('Unable to connect to FTP server '.$this->options['host']);
 		}
-		if (!@ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
+		if (!ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
 			$this->umount();
 			return $this->setError('Unable to login into '.$this->options['host']);
 		}
 		
 		// try switch utf8 mode
 		if ($this->encoding) {
-			@ftp_exec($this->connect, 'OPTS UTF8 OFF');
+			ftp_raw($this->connect, 'OPTS UTF8 OFF');
 		} else {
-			@ftp_exec($this->connect, 'OPTS UTF8 ON' );
+			ftp_raw($this->connect, 'OPTS UTF8 ON' );
 		}
 		
 		// switch off extended passive mode - may be usefull for some servers
-		@ftp_exec($this->connect, 'epsv4 off' );
+		ftp_raw($this->connect, 'epsv4 off' );
 		// enter passive mode if required
 		$pasv = ($this->options['mode'] == 'passive');
 		if (! ftp_pasv($this->connect, $pasv)) {
@@ -256,8 +256,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 
 		// enter root folder
-		if (! @ftp_chdir($this->connect, $this->root) 
-		|| $this->root != @ftp_pwd($this->connect)) {
+		if (! ftp_chdir($this->connect, $this->root) 
+		|| $this->root != ftp_pwd($this->connect)) {
 			$this->umount();
 			return $this->setError('Unable to open root folder.');
 		}
@@ -290,7 +290,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function umount() {
-		$this->connect && @ftp_close($this->connect);
+		$this->connect && ftp_close($this->connect);
 	}
 
 
@@ -901,9 +901,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$url = 'ftp://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
 			if (strtolower($mode[0]) === 'w') {
 				$context = stream_context_create(array('ftp' => array('overwrite' => true)));
-				$fp = @fopen($url, $mode, false, $context);
+				$fp = fopen($url, $mode, false, $context);
 			} else {
-				$fp = @fopen($url, $mode);
+				$fp = fopen($url, $mode);
 			}
 			if ($fp) {
 				return $fp;
@@ -912,14 +912,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		if ($this->tmp) {
 			$local = $this->getTempFile($path);
-			$fp = @fopen($local, 'wb');
+			$fp = fopen($local, 'wb');
 			if (ftp_fget($this->connect, $fp, $path, FTP_BINARY)) {
 				fclose($fp);
 				$fp = fopen($local, $mode);
 				return $fp;
 			}
-			@fclose($fp);
-			is_file($local) && @unlink($local);
+			fclose($fp);
+			is_file($local) && unlink($local);
 		}
 		
 		return false;
@@ -934,9 +934,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
      * @author Dmitry (dio) Levashov
      */
 	protected function _fclose($fp, $path='') {
-		@fclose($fp);
+		fclose($fp);
 		if ($path) {
-			@unlink($this->getTempFile($path));
+			unlink($this->getTempFile($path));
 		}
 	}
 	
@@ -956,7 +956,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			return false;
 		} 
 		
-		$this->options['dirMode'] && @ftp_chmod($this->connect, $this->options['dirMode'], $path);
+		$this->options['dirMode'] && ftp_chmod($this->connect, $this->options['dirMode'], $path);
 		return $path;
 	}
 	
@@ -973,7 +973,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$path = $this->_joinPath($path, $name);
 			$local = $this->getTempFile();
 			$res = touch($local) && ftp_put($this->connect, $path, $local, FTP_ASCII);
-			@unlink($local);
+			unlink($local);
 			return $res ? $path : false;
 		}
 		return false;
@@ -1012,7 +1012,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			&& ftp_put($this->connect, $target, $local, $this->ftpMode($target))) {
 				$res = $target;
 			}
-			@unlink($local);
+			unlink($local);
 		}
 		
 		return $res;
@@ -1107,13 +1107,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		if ($this->tmp) {
 			$local = $this->getTempFile();
 			
-			if (@file_put_contents($local, $content, LOCK_EX) !== false
-			&& ($fp = @fopen($local, 'rb'))) {
+			if (file_put_contents($local, $content, LOCK_EX) !== false
+			&& ($fp = fopen($local, 'rb'))) {
 				clearstatcache();
 				$res  = ftp_fput($this->connect, $path, $fp, $this->ftpMode($path));
-				@fclose($fp);
+				fclose($fp);
 			}
-			file_exists($local) && @unlink($local);
+			file_exists($local) && unlink($local);
 		}
 
 		return $res;
@@ -1138,7 +1138,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
      */
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
-		return @ftp_chmod($this->connect, $modeOct, $path);
+		return ftp_chmod($this->connect, $modeOct, $path);
 	}
 
 	/**

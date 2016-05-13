@@ -134,7 +134,7 @@ class elFinderConnector {
 	 **/
 	protected function output(array $data) {
 		// clear output buffer
-		while(ob_get_level() && @ob_end_clean()){}
+		while(ob_get_level() && ob_end_clean()){}
 		
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
@@ -216,6 +216,9 @@ class elFinderConnector {
 			if (!empty($data['raw']) && !empty($data['error'])) {
 				echo $data['error'];
 			} else {
+				if (isset($data['debug']) && isset($data['debug']['phpErrors'])) {
+					$data['debug']['phpErrors'] = array_merge($data['debug']['phpErrors'], elFinder::$phpErrors);
+				}
 				echo json_encode($data);
 			}
 			flush();

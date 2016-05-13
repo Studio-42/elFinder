@@ -63,7 +63,7 @@ class elFinderPluginAutoRotate {
 			return false;
 		}
 		
-		$srcImgInfo = @getimagesize($src);
+		$srcImgInfo = getimagesize($src);
 		if ($srcImgInfo === false) {
 			return false;
 		}
@@ -81,7 +81,7 @@ class elFinderPluginAutoRotate {
 			return false;
 		}
 		$degree = 0;
-		$exif = @exif_read_data($src);
+		$exif = exif_read_data($src);
 		if($exif && !empty($exif['Orientation'])) {
 			switch($exif['Orientation']) {
 				case 8:
