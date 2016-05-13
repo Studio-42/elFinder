@@ -136,8 +136,8 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 
 		if (($tmp = $this->options['tmpPath'])) {
 			if (!file_exists($tmp)) {
-				if (@mkdir($tmp)) {
-					@chmod($tmp, $this->options['tmbPathMode']);
+				if (mkdir($tmp)) {
+					chmod($tmp, $this->options['tmbPathMode']);
 				}
 			}
 
@@ -601,8 +601,8 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 	 **/
 	protected function _fopen($path, $mode='rb') {
 		$fp = $this->tmbPath
-			? @fopen($this->getTempFile($path), 'w+')
-			: @tmpfile();
+			? fopen($this->getTempFile($path), 'w+')
+			: tmpfile();
 
 		if ($fp) {
 			$sql = "SET TEXTSIZE 2147483647 ";   // increase mssql or odbc data size limit
@@ -634,9 +634,9 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
      * @author Dmitry (dio) Levashov
      */
 	protected function _fclose($fp, $path='') {
-		@fclose($fp);
+		fclose($fp);
 		if ($path) {
-			@unlink($this->getTempFile($path));
+			unlink($this->getTempFile($path));
 		}
 	}
 

@@ -222,7 +222,7 @@ class elFinderSession implements elFinderSessionInterface
 		if ($this->base64encode) {
 			if (is_string($data)) {
 				if (($data = base64_decode($data)) !== false) {
-					$data = @unserialize($data);
+					$data = unserialize($data);
 				} else {
 					$data = null;
 				}
