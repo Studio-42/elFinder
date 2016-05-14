@@ -368,10 +368,10 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
 					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
-					trigger();
 				} else {
 					fm.select({selected: []});
 				}
+				trigger();
 				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
 			},
@@ -1272,12 +1272,20 @@ $.fn.elfindercwd = function(fm, options) {
 				// add hover class to selected file
 				.on(evtSelect, fileSelector, function(e) {
 					var $this = $(this), 
-						id    = fm.cwdId2Hash($this.attr('id'));
+						id    = fm.cwdId2Hash($this.attr('id')),
+						phash;
 					
 					if (!selectLock && !$this.hasClass(clDisabled)) {
 						$this.addClass(clSelected).children().addClass(clHover).find('input:checkbox').prop('checked', true);;
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
+						}
+						if (selectCheckbox && selectCheckbox && ! selectAllCheckbox.find('input').prop('checked')) {
+							phash = fm.cwd().hash;
+							if (selectedFiles.length === (lastSearch.length? lastSearch : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;})).length) {
+								selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
+								cwd.addClass('elfinder-cwd-allselected');
+							}
 						}
 					}
 				})
