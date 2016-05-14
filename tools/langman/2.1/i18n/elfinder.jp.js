@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-04-26
+ * @version 2016-05-14
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -343,6 +343,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'offlineAccess'   : 'オフライン アクセスを可能にする', // from v2.1.10 added 3.25.2016
 			'reAuth'          : '再認証する', // from v2.1.10 added 3.25.2016
 			'nowLoading'      : '読み込んでいます...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : '複数ファイルオープン', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': '$1 個のファイルを開こうとしています。このままブラウザで開きますか？', // from v2.1.12 added 5.14.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
