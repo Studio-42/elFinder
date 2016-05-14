@@ -2638,6 +2638,10 @@ window.elFinder = function(node, opts) {
 				};
 
 			node.on('touchstart touchmove touchend', function(e) {
+				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+					return;
+				}
+
 				var x = (e.originalEvent.touches[0] || {}).pageX,
 					y = (e.originalEvent.touches[0] || {}).pageY,
 					navbarMode;

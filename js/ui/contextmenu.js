@@ -37,7 +37,10 @@ $.fn.elfindercontextmenu = function(fm) {
 				var evTouchStart = 'touchstart.contextmenuAutoToggle';
 				menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 				if (menu.is(':visible')) {
-					menu.on('touchstart', function() {
+					menu.on('touchstart', function(e) {
+						if (e.originalEvent.touches.length > 1) {
+							return;
+						}
 						menu.stop().show();
 						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
@@ -45,6 +48,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						cwd.find('.elfinder-cwd-file').off(evTouchStart);
 						cwd.find('.elfinder-cwd-file.ui-selected')
 						.one(evTouchStart, function(e) {
+							if (e.originalEvent.touches.length > 1) {
+								return;
+							}
 							var tgt = $(e.target);
 							if (menu.first().length && !tgt.is('input:checkbox') && !tgt.hasClass('elfinder-cwd-select')) {
 								open(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);

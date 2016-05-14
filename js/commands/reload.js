@@ -33,6 +33,9 @@ elFinder.prototype.commands.reload = function() {
 				node: $('<span/>')
 					.attr({title: fm.i18n('autoSync')})
 					.on('click touchstart', function(e){
+						if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+							return;
+						}
 						e.stopPropagation();
 						e.preventDefault();
 						$(this).parent()

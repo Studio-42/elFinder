@@ -922,18 +922,23 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				},
 				touchstart : function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					cwd.data('longtap', null);
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target === this || e.target === cwd.get(0)) {
 						cwd.data('tmlongtap', setTimeout(function(){
-							// long tap
-							cwd.data('longtap', true);
-							fm.trigger('contextmenu', {
-								'type'    : 'cwd',
-								'targets' : [fm.cwd().hash],
-								'x'       : wrapper.data('touching').x,
-								'y'       : wrapper.data('touching').y
-							});
+							//if (wrapper.data('touching')) {
+								// long tap
+								cwd.data('longtap', true);
+								fm.trigger('contextmenu', {
+									'type'    : 'cwd',
+									'targets' : [fm.cwd().hash],
+									'x'       : wrapper.data('touching').x,
+									'y'       : wrapper.data('touching').y
+								});
+							//}
 						}, 500));
 					}
 				},
@@ -1107,6 +1112,9 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var p   = this.id ? $(this) : $(this).parents('[id]:first'),
 						tgt = $(e.target),
 						sel;
