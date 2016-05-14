@@ -2638,6 +2638,10 @@ window.elFinder = function(node, opts) {
 				};
 
 			node.on('touchstart touchmove touchend', function(e) {
+				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+					return;
+				}
+
 				var x = (e.originalEvent.touches[0] || {}).pageX,
 					y = (e.originalEvent.touches[0] || {}).pageY,
 					navbarMode;
@@ -4563,14 +4567,14 @@ elFinder.prototype = {
 		options.buttons[this.i18n(opts.accept.label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 			complete = true;
-			$(this).elfinderdialog('close')
+			$(this).elfinderdialog('close');
 		};
 		
 		if (opts.reject) {
 			options.buttons[this.i18n(opts.reject.label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
-				$(this).elfinderdialog('close')
+				$(this).elfinderdialog('close');
 			};
 		}
 		
@@ -4585,7 +4589,7 @@ elFinder.prototype = {
 		}
 		
 		options.buttons[this.i18n(opts.cancel.label)] = function() {
-			$(this).elfinderdialog('close')
+			$(this).elfinderdialog('close');
 		};
 		
 		if (opts.all) {

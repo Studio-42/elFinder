@@ -604,6 +604,9 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', selNavdir, function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var evt = e.originalEvent,
 					p = $(this)
 					.addClass(hover)

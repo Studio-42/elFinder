@@ -58,98 +58,129 @@ elFinder.prototype.commands.open = function() {
 			return dfrd.reject();
 		}
 		
-
-		try {
-			reg = new RegExp(fm.option('dispInlineRegex'));
-		} catch(e) {
-			reg = false;
-		}
-
-		// open files
-		link     = $('<a>').hide().appendTo($('body')),
-		html5dl  = (typeof link.get(0).download === 'string');
-		cnt = files.length;
-		while (cnt--) {
-			file = files[cnt];
-			
-			if (!file.read) {
-				return dfrd.reject(['errOpen', file.name, 'errPerm']);
+		var doOpen = function() {
+			try {
+				reg = new RegExp(fm.option('dispInlineRegex'));
+			} catch(e) {
+				reg = false;
 			}
-			
-			inline = (reg && file.mime.match(reg));
-			url = fm.openUrl(file.hash, !inline);
-			if (fm.UA.Mobile || !inline) {
-				if (html5dl) {
-					!inline && link.attr('download', file.name);
-					link.attr('href', url)
-					.attr('target', '_blank')
-					.get(0).click();
+	
+			// open files
+			link     = $('<a>').hide().appendTo($('body')),
+			html5dl  = (typeof link.get(0).download === 'string');
+			cnt = files.length;
+			while (cnt--) {
+				file = files[cnt];
+				
+				if (!file.read) {
+					return dfrd.reject(['errOpen', file.name, 'errPerm']);
+				}
+				
+				inline = (reg && file.mime.match(reg));
+				url = fm.openUrl(file.hash, !inline);
+				if (fm.UA.Mobile || !inline) {
+					if (html5dl) {
+						!inline && link.attr('download', file.name);
+						link.attr('href', url)
+						.attr('target', '_blank')
+						.get(0).click();
+					} else {
+						var wnd = window.open(url);
+						if (!wnd) {
+							return dfrd.reject('errPopup');
+						}
+					}
 				} else {
-					var wnd = window.open(url);
+					
+					// set window size for image if set
+					imgW = winW = Math.round(2 * $(window).width() / 3);
+					imgH = winH = Math.round(2 * $(window).height() / 3);
+					if (parseInt(file.width) && parseInt(file.height)) {
+						imgW = parseInt(file.width);
+						imgH = parseInt(file.height);
+					} else if (file.dim) {
+						s = file.dim.split('x');
+						imgW = parseInt(s[0]);
+						imgH = parseInt(s[1]);
+					}
+					if (winW >= imgW && winH >= imgH) {
+						winW = imgW;
+						winH = imgH;
+					} else {
+						if ((imgW - winW) > (imgH - winH)) {
+							winH = Math.round(imgH * (winW / imgW));
+						} else {
+							winW = Math.round(imgW * (winH / imgH));
+						}
+					}
+					w = 'width='+winW+',height='+winH;
+		
+					if (url.indexOf(fm.options.url) === 0) {
+						url = '';
+					}
+					var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
 					if (!wnd) {
 						return dfrd.reject('errPopup');
 					}
-				}
-			} else {
-				
-				// set window size for image if set
-				imgW = winW = Math.round(2 * $(window).width() / 3);
-				imgH = winH = Math.round(2 * $(window).height() / 3);
-				if (parseInt(file.width) && parseInt(file.height)) {
-					imgW = parseInt(file.width);
-					imgH = parseInt(file.height);
-				} else if (file.dim) {
-					s = file.dim.split('x');
-					imgW = parseInt(s[0]);
-					imgH = parseInt(s[1]);
-				}
-				if (winW >= imgW && winH >= imgH) {
-					winW = imgW;
-					winH = imgH;
-				} else {
-					if ((imgW - winW) > (imgH - winH)) {
-						winH = Math.round(imgH * (winW / imgW));
-					} else {
-						winW = Math.round(imgW * (winH / imgH));
-					}
-				}
-				w = 'width='+winW+',height='+winH;
-	
-				if (url.indexOf(fm.options.url) === 0) {
-					url = '';
-				}
-				var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
-				if (!wnd) {
-					return dfrd.reject('errPopup');
-				}
-				
-				if (url === '') {
-					var form = document.createElement("form");
-					form.action = fm.options.url;
-					form.method = 'POST';
-					form.target = 'new_window';
-					form.style.display = 'none';
-					var params = $.extend({}, fm.options.customData, {
-						cmd: 'file',
-						target: file.hash
-					});
-					$.each(params, function(key, val)
-					{
-						var input = document.createElement("input");
-						input.name = key;
-						input.value = val;
-						form.appendChild(input);
-					});
 					
-					document.body.appendChild(form);
-					form.submit();
+					if (url === '') {
+						var form = document.createElement("form");
+						form.action = fm.options.url;
+						form.method = 'POST';
+						form.target = 'new_window';
+						form.style.display = 'none';
+						var params = $.extend({}, fm.options.customData, {
+							cmd: 'file',
+							target: file.hash
+						});
+						$.each(params, function(key, val)
+						{
+							var input = document.createElement("input");
+							input.name = key;
+							input.value = val;
+							form.appendChild(input);
+						});
+						
+						document.body.appendChild(form);
+						form.submit();
+					}
+					wnd.focus();
+					
 				}
-				wnd.focus();
-				
 			}
+			link.remove();
+			return dfrd.resolve(hashes);
 		}
-		link.remove();
-		return dfrd.resolve(hashes);
+		
+		if (cnt > 1) {
+			fm.confirm({
+				title: 'openMulti',
+				text : ['openMultiConfirm', cnt + ''],
+				accept : {
+					label : 'cmdopen',
+					callback : function() { doOpen(); }
+				},
+				cancel : {
+					label : 'btnCancel',
+					callback : function() { 
+						dfrd.reject();
+					}
+				},
+				buttons : (fm.command('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
+					{
+						label : 'cmddownload',
+						callback : function() {
+							fm.exec('download', hashes);
+							dfrd.reject();
+						}
+					}
+				] : []
+			});
+		} else {
+			doOpen();
+		}
+		
+		return dfrd;
 	}
 
 };

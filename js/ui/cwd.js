@@ -368,10 +368,10 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
 					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
-					trigger();
 				} else {
 					fm.select({selected: []});
 				}
+				trigger();
 				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
 			},
@@ -922,18 +922,23 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				},
 				touchstart : function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					cwd.data('longtap', null);
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target === this || e.target === cwd.get(0)) {
 						cwd.data('tmlongtap', setTimeout(function(){
-							// long tap
-							cwd.data('longtap', true);
-							fm.trigger('contextmenu', {
-								'type'    : 'cwd',
-								'targets' : [fm.cwd().hash],
-								'x'       : wrapper.data('touching').x,
-								'y'       : wrapper.data('touching').y
-							});
+							//if (wrapper.data('touching')) {
+								// long tap
+								cwd.data('longtap', true);
+								fm.trigger('contextmenu', {
+									'type'    : 'cwd',
+									'targets' : [fm.cwd().hash],
+									'x'       : wrapper.data('touching').x,
+									'y'       : wrapper.data('touching').y
+								});
+							//}
 						}, 500));
 					}
 				},
@@ -1107,6 +1112,9 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var p   = this.id ? $(this) : $(this).parents('[id]:first'),
 						tgt = $(e.target),
 						sel;
@@ -1272,12 +1280,20 @@ $.fn.elfindercwd = function(fm, options) {
 				// add hover class to selected file
 				.on(evtSelect, fileSelector, function(e) {
 					var $this = $(this), 
-						id    = fm.cwdId2Hash($this.attr('id'));
+						id    = fm.cwdId2Hash($this.attr('id')),
+						phash;
 					
 					if (!selectLock && !$this.hasClass(clDisabled)) {
 						$this.addClass(clSelected).children().addClass(clHover).find('input:checkbox').prop('checked', true);;
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
+						}
+						if (selectCheckbox && selectCheckbox && ! selectAllCheckbox.find('input').prop('checked')) {
+							phash = fm.cwd().hash;
+							if (selectedFiles.length === (lastSearch.length? lastSearch : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;})).length) {
+								selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
+								cwd.addClass('elfinder-cwd-allselected');
+							}
 						}
 					}
 				})

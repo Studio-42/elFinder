@@ -389,6 +389,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var hash = $(this).attr('id').substr(6),
 					p = $(this)
 					.addClass(hover)

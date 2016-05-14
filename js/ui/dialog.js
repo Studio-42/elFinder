@@ -108,8 +108,10 @@ $.fn.elfinderdialog = function(opts) {
 					if (dialogs.length) {
 						dialogs.find(':last').trigger('totop');
 					} else {
-						// return focus to parent
-						parent.mousedown().click();
+						setTimeout(function() {
+							// return focus to parent
+							parent.mousedown().click();
+						}, 20);
 					}
 				})
 				.on('totop', function() {
