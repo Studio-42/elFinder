@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 67c5d07) (2016-05-13)
+ * Version 2.1.11 (2.1-src Nightly: 0b127e3) (2016-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2652,6 +2652,10 @@ window.elFinder = function(node, opts) {
 				};
 
 			node.on('touchstart touchmove touchend', function(e) {
+				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+					return;
+				}
+
 				var x = (e.originalEvent.touches[0] || {}).pageX,
 					y = (e.originalEvent.touches[0] || {}).pageY,
 					navbarMode;
@@ -4577,14 +4581,14 @@ elFinder.prototype = {
 		options.buttons[this.i18n(opts.accept.label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')))
 			complete = true;
-			$(this).elfinderdialog('close')
+			$(this).elfinderdialog('close');
 		};
 		
 		if (opts.reject) {
 			options.buttons[this.i18n(opts.reject.label)] = function() {
 				opts.reject.callback(!!(checkbox && checkbox.prop('checked')))
 				complete = true;
-				$(this).elfinderdialog('close')
+				$(this).elfinderdialog('close');
 			};
 		}
 		
@@ -4599,7 +4603,7 @@ elFinder.prototype = {
 		}
 		
 		options.buttons[this.i18n(opts.cancel.label)] = function() {
-			$(this).elfinderdialog('close')
+			$(this).elfinderdialog('close');
 		};
 		
 		if (opts.all) {
@@ -5063,7 +5067,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 67c5d07)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 0b127e3)';
 
 
 
@@ -6759,7 +6763,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-04-26
+ * @version 2016-05-14
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -7100,6 +7104,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
 			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
 			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -7309,7 +7315,10 @@ $.fn.elfindercontextmenu = function(fm) {
 				var evTouchStart = 'touchstart.contextmenuAutoToggle';
 				menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 				if (menu.is(':visible')) {
-					menu.on('touchstart', function() {
+					menu.on('touchstart', function(e) {
+						if (e.originalEvent.touches.length > 1) {
+							return;
+						}
 						menu.stop().show();
 						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
@@ -7317,6 +7326,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						cwd.find('.elfinder-cwd-file').off(evTouchStart);
 						cwd.find('.elfinder-cwd-file.ui-selected')
 						.one(evTouchStart, function(e) {
+							if (e.originalEvent.touches.length > 1) {
+								return;
+							}
 							var tgt = $(e.target);
 							if (menu.first().length && !tgt.is('input:checkbox') && !tgt.hasClass('elfinder-cwd-select')) {
 								open(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
@@ -7517,10 +7529,9 @@ $.fn.elfindercontextmenu = function(fm) {
 								cmd.exec(targets, {_currentType: type});
 							});
 							if (cmd.extra && cmd.extra.node) {
-								node.append(
-									$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
-									.append(cmd.extra.node)
-								);
+								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
+									.append(cmd.extra.node).appendTo(node);
+								$(cmd.extra.node).trigger('ready');
 							} else {
 								node.remove('.elfinder-contextmenu-extra-icon');
 							}
@@ -7966,10 +7977,10 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
 					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
-					trigger();
 				} else {
 					fm.select({selected: []});
 				}
+				trigger();
 				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
 			},
@@ -8520,18 +8531,23 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				},
 				touchstart : function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					cwd.data('longtap', null);
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target === this || e.target === cwd.get(0)) {
 						cwd.data('tmlongtap', setTimeout(function(){
-							// long tap
-							cwd.data('longtap', true);
-							fm.trigger('contextmenu', {
-								'type'    : 'cwd',
-								'targets' : [fm.cwd().hash],
-								'x'       : wrapper.data('touching').x,
-								'y'       : wrapper.data('touching').y
-							});
+							//if (wrapper.data('touching')) {
+								// long tap
+								cwd.data('longtap', true);
+								fm.trigger('contextmenu', {
+									'type'    : 'cwd',
+									'targets' : [fm.cwd().hash],
+									'x'       : wrapper.data('touching').x,
+									'y'       : wrapper.data('touching').y
+								});
+							//}
 						}, 500));
 					}
 				},
@@ -8705,6 +8721,9 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// for touch device
 				.on('touchstart.'+fm.namespace, fileSelector, function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var p   = this.id ? $(this) : $(this).parents('[id]:first'),
 						tgt = $(e.target),
 						sel;
@@ -8870,12 +8889,20 @@ $.fn.elfindercwd = function(fm, options) {
 				// add hover class to selected file
 				.on(evtSelect, fileSelector, function(e) {
 					var $this = $(this), 
-						id    = fm.cwdId2Hash($this.attr('id'));
+						id    = fm.cwdId2Hash($this.attr('id')),
+						phash;
 					
 					if (!selectLock && !$this.hasClass(clDisabled)) {
 						$this.addClass(clSelected).children().addClass(clHover).find('input:checkbox').prop('checked', true);;
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
+						}
+						if (selectCheckbox && selectCheckbox && ! selectAllCheckbox.find('input').prop('checked')) {
+							phash = fm.cwd().hash;
+							if (selectedFiles.length === (lastSearch.length? lastSearch : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;})).length) {
+								selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
+								cwd.addClass('elfinder-cwd-allselected');
+							}
 						}
 					}
 				})
@@ -9392,8 +9419,10 @@ $.fn.elfinderdialog = function(opts) {
 					if (dialogs.length) {
 						dialogs.find(':last').trigger('totop');
 					} else {
-						// return focus to parent
-						parent.mousedown().click();
+						setTimeout(function() {
+							// return focus to parent
+							parent.mousedown().click();
+						}, 20);
 					}
 				})
 				.on('totop', function() {
@@ -10219,6 +10248,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var hash = $(this).attr('id').substr(6),
 					p = $(this)
 					.addClass(hover)
@@ -11503,6 +11535,9 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', selNavdir, function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var evt = e.originalEvent,
 					p = $(this)
 					.addClass(hover)
@@ -12456,7 +12491,10 @@ elFinder.prototype.commands.download = function() {
 						node: $('<a/>')
 							.attr({href: '#', title: fm.i18n('getLink'), draggable: 'false'})
 							.text(file.name)
-							.on('click', function(e){
+							.on('click touchstart', function(e){
+								if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+									return;
+								}
 								var parent = node.parent();
 								e.stopPropagation();
 								e.preventDefault();
@@ -14271,98 +14309,129 @@ elFinder.prototype.commands.open = function() {
 			return dfrd.reject();
 		}
 		
-
-		try {
-			reg = new RegExp(fm.option('dispInlineRegex'));
-		} catch(e) {
-			reg = false;
-		}
-
-		// open files
-		link     = $('<a>').hide().appendTo($('body')),
-		html5dl  = (typeof link.get(0).download === 'string');
-		cnt = files.length;
-		while (cnt--) {
-			file = files[cnt];
-			
-			if (!file.read) {
-				return dfrd.reject(['errOpen', file.name, 'errPerm']);
+		var doOpen = function() {
+			try {
+				reg = new RegExp(fm.option('dispInlineRegex'));
+			} catch(e) {
+				reg = false;
 			}
-			
-			inline = (reg && file.mime.match(reg));
-			url = fm.openUrl(file.hash, !inline);
-			if (fm.UA.Mobile || !inline) {
-				if (html5dl) {
-					!inline && link.attr('download', file.name);
-					link.attr('href', url)
-					.attr('target', '_blank')
-					.get(0).click();
+	
+			// open files
+			link     = $('<a>').hide().appendTo($('body')),
+			html5dl  = (typeof link.get(0).download === 'string');
+			cnt = files.length;
+			while (cnt--) {
+				file = files[cnt];
+				
+				if (!file.read) {
+					return dfrd.reject(['errOpen', file.name, 'errPerm']);
+				}
+				
+				inline = (reg && file.mime.match(reg));
+				url = fm.openUrl(file.hash, !inline);
+				if (fm.UA.Mobile || !inline) {
+					if (html5dl) {
+						!inline && link.attr('download', file.name);
+						link.attr('href', url)
+						.attr('target', '_blank')
+						.get(0).click();
+					} else {
+						var wnd = window.open(url);
+						if (!wnd) {
+							return dfrd.reject('errPopup');
+						}
+					}
 				} else {
-					var wnd = window.open(url);
+					
+					// set window size for image if set
+					imgW = winW = Math.round(2 * $(window).width() / 3);
+					imgH = winH = Math.round(2 * $(window).height() / 3);
+					if (parseInt(file.width) && parseInt(file.height)) {
+						imgW = parseInt(file.width);
+						imgH = parseInt(file.height);
+					} else if (file.dim) {
+						s = file.dim.split('x');
+						imgW = parseInt(s[0]);
+						imgH = parseInt(s[1]);
+					}
+					if (winW >= imgW && winH >= imgH) {
+						winW = imgW;
+						winH = imgH;
+					} else {
+						if ((imgW - winW) > (imgH - winH)) {
+							winH = Math.round(imgH * (winW / imgW));
+						} else {
+							winW = Math.round(imgW * (winH / imgH));
+						}
+					}
+					w = 'width='+winW+',height='+winH;
+		
+					if (url.indexOf(fm.options.url) === 0) {
+						url = '';
+					}
+					var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
 					if (!wnd) {
 						return dfrd.reject('errPopup');
 					}
-				}
-			} else {
-				
-				// set window size for image if set
-				imgW = winW = Math.round(2 * $(window).width() / 3);
-				imgH = winH = Math.round(2 * $(window).height() / 3);
-				if (parseInt(file.width) && parseInt(file.height)) {
-					imgW = parseInt(file.width);
-					imgH = parseInt(file.height);
-				} else if (file.dim) {
-					s = file.dim.split('x');
-					imgW = parseInt(s[0]);
-					imgH = parseInt(s[1]);
-				}
-				if (winW >= imgW && winH >= imgH) {
-					winW = imgW;
-					winH = imgH;
-				} else {
-					if ((imgW - winW) > (imgH - winH)) {
-						winH = Math.round(imgH * (winW / imgW));
-					} else {
-						winW = Math.round(imgW * (winH / imgH));
-					}
-				}
-				w = 'width='+winW+',height='+winH;
-	
-				if (url.indexOf(fm.options.url) === 0) {
-					url = '';
-				}
-				var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
-				if (!wnd) {
-					return dfrd.reject('errPopup');
-				}
-				
-				if (url === '') {
-					var form = document.createElement("form");
-					form.action = fm.options.url;
-					form.method = 'POST';
-					form.target = 'new_window';
-					form.style.display = 'none';
-					var params = $.extend({}, fm.options.customData, {
-						cmd: 'file',
-						target: file.hash
-					});
-					$.each(params, function(key, val)
-					{
-						var input = document.createElement("input");
-						input.name = key;
-						input.value = val;
-						form.appendChild(input);
-					});
 					
-					document.body.appendChild(form);
-					form.submit();
+					if (url === '') {
+						var form = document.createElement("form");
+						form.action = fm.options.url;
+						form.method = 'POST';
+						form.target = 'new_window';
+						form.style.display = 'none';
+						var params = $.extend({}, fm.options.customData, {
+							cmd: 'file',
+							target: file.hash
+						});
+						$.each(params, function(key, val)
+						{
+							var input = document.createElement("input");
+							input.name = key;
+							input.value = val;
+							form.appendChild(input);
+						});
+						
+						document.body.appendChild(form);
+						form.submit();
+					}
+					wnd.focus();
+					
 				}
-				wnd.focus();
-				
 			}
+			link.remove();
+			return dfrd.resolve(hashes);
 		}
-		link.remove();
-		return dfrd.resolve(hashes);
+		
+		if (cnt > 1) {
+			fm.confirm({
+				title: 'openMulti',
+				text : ['openMultiConfirm', cnt + ''],
+				accept : {
+					label : 'cmdopen',
+					callback : function() { doOpen(); }
+				},
+				cancel : {
+					label : 'btnCancel',
+					callback : function() { 
+						dfrd.reject();
+					}
+				},
+				buttons : (fm.command('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
+					{
+						label : 'cmddownload',
+						callback : function() {
+							fm.exec('download', hashes);
+							dfrd.reject();
+						}
+					}
+				] : []
+			});
+		} else {
+			doOpen();
+		}
+		
+		return dfrd;
 	}
 
 };
@@ -15964,27 +16033,25 @@ elFinder.prototype.commands.reload = function() {
 	this.fm.bind('contextmenu', function(e){
 		var fm = self.fm;
 		if (fm.options.sync >= 1000) {
-			var node;
 			self.extra = {
 				icon: 'accept',
 				node: $('<span/>')
 					.attr({title: fm.i18n('autoSync')})
-					.on('click', function(e){
+					.on('click touchstart', function(e){
+						if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+							return;
+						}
 						e.stopPropagation();
 						e.preventDefault();
-						node.parent()
+						$(this).parent()
 							.toggleClass('ui-state-disabled', fm.options.syncStart)
 							.parent().removeClass('ui-state-hover');
 						fm.options.syncStart = !fm.options.syncStart;
 						fm.autoSync(fm.options.syncStart? null : 'stop');
+					}).on('ready', function(){
+						$(this).parent().toggleClass('ui-state-disabled', !fm.options.syncStart).css('pointer-events', 'auto');
 					})
 			};
-			node = self.extra.node;
-			node.ready(function(){
-				setTimeout(function(){
-					node.parent().toggleClass('ui-state-disabled', !fm.options.syncStart).css('pointer-events', 'auto');
-				}, 10);
-			});
 		}
 	});
 	
