@@ -17,6 +17,18 @@
 		- Fixed #935 Supports `'convert'`(imagemagick) as `imgLib`
 		- Fixed #1363 Bugfix of FTP connect from windows localhost to remote server
 		- Fixed #1367 Bugfix of backward compatible to jQuery UI < 1.11
+		- Mobile devices friendly
+			- Swipe to navbar/toolbar show/hide on touch devices
+			- Hide toolbar on mobile devices at initial view
+			- A little bigger icons
+			- Added item select checkboxes
+			- Path breadcrumbs move to top of workzone when hide navbar
+			- UX enhancements
+		- Fixed #1311 CWD list table with fixed fixed header
+		- UI path apply text-ellipsis in each holder name
+		- Fixed #1370 implemented function keep timestamp into LocalFileSystem volume driver
+		- Added PHP error handler and removed all `@` error-control operator
+		- Fixed #1391 take care 32bit system of chunked file uploading arg `cid`
 		- And some minor bug fixes
 
 
