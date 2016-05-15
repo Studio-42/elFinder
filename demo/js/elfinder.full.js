@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 0b127e3) (2016-05-14)
+ * Version 2.1.11 (2.1-src Nightly: b8a97b9) (2016-05-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3521,7 +3521,7 @@ elFinder.prototype = {
 				maxFileSize,
 				totalSize = 0,
 				chunked = [],
-				chunkID = new Date().getTime(),
+				chunkID = new Date().getTime().toString().substr(-9), // for take care of the 32bit backend system
 				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				blobSlice = chunkEnable? false : '',
 				blobSize, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
@@ -5067,7 +5067,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 0b127e3)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: b8a97b9)';
 
 
 
