@@ -404,10 +404,11 @@ $.fn.elfindercwd = function(fm, options) {
 				var ftop    = o.position().top,
 					fheight = o.outerHeight(true),
 					wtop    = wrapper.scrollTop(),
-					wheight = wrapper.innerHeight();
+					wheight = wrapper.get(0).clientHeight,
+					thheight = tableHeader? tableHeader.outerHeight(true) : 0;
 
-				if (ftop + fheight > wtop + wheight) {
-					wrapper.scrollTop(parseInt(ftop + fheight - wheight));
+				if (ftop + thheight + fheight > wtop + wheight) {
+					wrapper.scrollTop(parseInt(ftop + thheight + fheight - wheight));
 				} else if (ftop < wtop) {
 					wrapper.scrollTop(ftop);
 				}
@@ -561,7 +562,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (! options.listView.fixedHeader) {
 					return;
 				}
-				var cnt, base, table, thead, tbody, htr, btr, htd, btd, init, delta;
+				var cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
 				if (btr.length) {
@@ -571,12 +572,13 @@ $.fn.elfindercwd = function(fm, options) {
 						tbody.addClass('elfinder-cwd-fixheader');
 						thead = cwd.find('thead').attr('id', fm.namespace+'-cwd-thead');
 						htr = thead.children('tr:first');
-						table.css('padding-top', htr.outerHeight());
+						hheight = htr.outerHeight(true);
+						cwd.css('margin-top', hheight - parseInt(table.css('padding-top')));
 						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
 							.removeClass('ui-droppable native-droppable elfinder-cwd-wrapper-empty')
 							.css(wrapper.position())
-							.css('height', table.css('padding-top'))
+							.css('height', hheight)
 							.append(base);
 						wrapper.after(tableHeader)
 							.on('scroll.fixheader resize.fixheader', function(e) {
@@ -989,8 +991,9 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 
 				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'));
-				cwd.css('height', 'auto');
+					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+					.attr('style', '')
+					.css('height', 'auto');
 				bottomMarker.hide();
 
 				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')
@@ -1454,7 +1457,7 @@ $.fn.elfindercwd = function(fm, options) {
 					var wph, cwdoh;
 					// fix cwd height if it less then wrapper
 					cwd.css('height', 'auto');
-					wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')),
+					wph = wrapper[0].clientHeight - parseInt(wrapper.css('padding-top')) - parseInt(wrapper.css('padding-bottom')) - parseInt(cwd.css('margin-top')),
 					cwdoh = cwd.outerHeight(true);
 					if (cwdoh < wph) {
 						cwd.height(wph);
