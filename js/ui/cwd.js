@@ -1380,11 +1380,12 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('create.'+fm.namespace, function(e, file) {
 					var parent = list ? cwd.find('tbody') : cwd,
 						p = parent.find('.elfinder-cwd-parent'),
+						lock = file.move || false,
 						file = $(itemhtml(file)).addClass(clTmp),
 						selected = fm.selected();
 						
 					if (selected.length) {
-						fm.trigger('lockfiles', {files: selected});
+						lock && fm.trigger('lockfiles', {files: selected});
 					} else {
 						unselectAll();
 					}
