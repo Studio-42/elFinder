@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: bea1368) (2016-05-15)
+ * Version 2.1.11 (2.1-src Nightly: 9a2dee8) (2016-05-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -659,6 +659,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	filter:Alpha(Opacity=80);
 }
 
+.elfinder .elfinder-workzone.elfinder-cwd-wrapper-empty .elfinder-cwd-selectall {
+	display: none;
+}
+
 /************************** ICONS VIEW ********************************/
 
 .elfinder-ltr .elfinder-workzone .elfinder-cwd-selectall {
@@ -868,7 +872,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-cwd-icon-group             { background-position:0 -1300px;}
 
 /* textfield inside icon */
-.elfinder-cwd input:text { width:100%; border:0px solid; margin:0; padding:0; }
+.elfinder-cwd-filename input { width:100%; border:none; margin:0; padding:0; }
 .elfinder-cwd-view-icons input {text-align:center; }
 .elfinder-cwd-view-icons textarea {
 	width: 100%;
@@ -1031,6 +1035,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
 
+/* empty message */
+.elfinder-cwd-wrapper-empty .elfinder-cwd-view-list.elfinder-cwd:after {
+	margin-top: 0;
+}
 /* File: /css/dialog.css */
 /*********************************************/
 /*                DIALOGS STYLES             */
