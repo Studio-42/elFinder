@@ -71,6 +71,10 @@
 	filter:Alpha(Opacity=80);
 }
 
+.elfinder .elfinder-workzone.elfinder-cwd-wrapper-empty .elfinder-cwd-selectall {
+	display: none;
+}
+
 /************************** ICONS VIEW ********************************/
 
 .elfinder-ltr .elfinder-workzone .elfinder-cwd-selectall {
@@ -280,7 +284,7 @@
 .elfinder-cwd-icon-group             { background-position:0 -1300px;}
 
 /* textfield inside icon */
-.elfinder-cwd input:text { width:100%; border:0px solid; margin:0; padding:0; }
+.elfinder-cwd-filename input { width:100%; border:none; margin:0; padding:0; }
 .elfinder-cwd-view-icons input {text-align:center; }
 .elfinder-cwd-view-icons textarea {
 	width: 100%;
@@ -442,3 +446,8 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* icon in ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
+
+/* empty message */
+.elfinder-cwd-wrapper-empty .elfinder-cwd-view-list.elfinder-cwd:after {
+	margin-top: 0;
+}

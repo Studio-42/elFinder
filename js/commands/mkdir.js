@@ -18,6 +18,7 @@ elFinder.prototype.commands.mkdir = function() {
 		if (! contextSel && ! this.options.intoNewFolderToolbtn) {
 			fm.getUI('cwd').trigger('unselectall');
 		}
+		this.move = fm.selected().length? true : false;
 		return $.proxy(fm.res('mixin', 'make'), self)();
 	}
 	

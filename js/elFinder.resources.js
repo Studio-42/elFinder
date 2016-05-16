@@ -60,9 +60,12 @@ elFinder.prototype.resources = {
 		make : function() {
 			var fm   = this.fm,
 				cmd  = this.name,
+				wz   = fm.getUI('workzone'),
 				cwd  = fm.getUI('cwd'),
 				tarea= (fm.storage('view') != 'list'),
-				sel = fm.selected(),
+				sel  = fm.selected(),
+				move = this.move || false,
+				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
 				rest = function(){
 					if (!overlay.is(':hidden')) {
 						overlay.addClass('ui-front')
@@ -79,11 +82,12 @@ elFinder.prototype.resources = {
 				}, colwidth,
 				dfrd = $.Deferred()
 					.fail(function(error) {
+						empty && wz.addClass('elfinder-cwd-wrapper-empty');
 						if (sel) {
-							fm.trigger('unlockfiles', {files: sel});
+							move && fm.trigger('unlockfiles', {files: sel});
 							fm.clipboard([]);
+							fm.trigger('selectfiles', { files: sel })
 						}
-						cwd.trigger('unselectall');
 						error && fm.error(error);
 					})
 					.always(function() {
@@ -101,7 +105,8 @@ elFinder.prototype.resources = {
 					mime  : this.mime,
 					read  : true,
 					write : true,
-					date  : 'Today '+date.getHours()+':'+date.getMinutes()
+					date  : 'Today '+date.getHours()+':'+date.getMinutes(),
+					move  : move
 				},
 				data = this.data || {},
 				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id))
@@ -169,7 +174,7 @@ elFinder.prototype.resources = {
 								return false;
 							}
 
-							cut = sel? fm.exec('cut', sel) : null;
+							cut = (sel && move)? fm.exec('cut', sel) : null;
 
 							$.when(cut)
 							.done(function() {
@@ -192,8 +197,10 @@ elFinder.prototype.resources = {
 										if (data.added && data.added[0]) {
 											var dirhash = data.added[0].hash,
 												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
-											if (sel) {
-												fm.exec('paste', dirhash);
+											if (sel && move) {
+												fm.exec('paste', dirhash).done(function() {
+													fm.trigger('selectfiles', { files: [dirhash] });
+												});
 											}
 											if (newItem.length) {
 												newItem.trigger('scrolltoview');
@@ -222,6 +229,7 @@ elFinder.prototype.resources = {
 				return dfrd.reject();
 			}
 
+			empty && wz.removeClass('elfinder-cwd-wrapper-empty');
 			nnode = node.find('.elfinder-cwd-filename');
 			pnode = nnode.parent();
 			node.css('position', 'relative').addClass('ui-front');
