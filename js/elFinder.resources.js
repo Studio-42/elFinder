@@ -60,10 +60,12 @@ elFinder.prototype.resources = {
 		make : function() {
 			var fm   = this.fm,
 				cmd  = this.name,
+				wz   = fm.getUI('workzone'),
 				cwd  = fm.getUI('cwd'),
 				tarea= (fm.storage('view') != 'list'),
 				sel  = fm.selected(),
 				move = this.move || false,
+				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
 				rest = function(){
 					if (!overlay.is(':hidden')) {
 						overlay.addClass('ui-front')
@@ -80,6 +82,7 @@ elFinder.prototype.resources = {
 				}, colwidth,
 				dfrd = $.Deferred()
 					.fail(function(error) {
+						empty && wz.addClass('elfinder-cwd-wrapper-empty');
 						if (sel) {
 							move && fm.trigger('unlockfiles', {files: sel});
 							fm.clipboard([]);
@@ -226,6 +229,7 @@ elFinder.prototype.resources = {
 				return dfrd.reject();
 			}
 
+			empty && wz.removeClass('elfinder-cwd-wrapper-empty');
 			nnode = node.find('.elfinder-cwd-filename');
 			pnode = nnode.parent();
 			node.css('position', 'relative').addClass('ui-front');

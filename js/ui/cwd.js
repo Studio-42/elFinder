@@ -576,7 +576,7 @@ $.fn.elfindercwd = function(fm, options) {
 						cwd.css('margin-top', hheight - parseInt(table.css('padding-top')));
 						base = $('<div/>').addClass(cwd.attr('class')).append($('<table/>').append(thead));
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
-							.removeClass('ui-droppable native-droppable elfinder-cwd-wrapper-empty')
+							.removeClass('ui-droppable native-droppable')
 							.css(wrapper.position())
 							.css('height', hheight)
 							.append(base);
@@ -798,7 +798,7 @@ $.fn.elfindercwd = function(fm, options) {
 					},
 					file, hash, node, ndx;
 
-				l && wrapper.removeClass('elfinder-cwd-wrapper-empty');
+				l && wz.removeClass('elfinder-cwd-wrapper-empty');
 				
 				while (l--) {
 					file = files[l];
@@ -864,13 +864,6 @@ $.fn.elfindercwd = function(fm, options) {
 					} else if ((ndx = index(hash)) != -1) {
 						buffer.splice(ndx, 1);
 					}
-				}
-				
-				// refresh cwd if empty for a bug of browser (ex. Android Chrome 43.0.2357.93)
-				if (cwd.children().length < 1) {
-					wrapper.addClass('elfinder-cwd-wrapper-empty');
-					cwd.hide();
-					setTimeout(function(){ cwd.show(); }, 0);
 				}
 			},
 			
@@ -969,11 +962,14 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			content = function(files, any) {
-				var phash = fm.cwd().hash; 
+				var phash = fm.cwd().hash,
+					emptyMethod;
 
 				cwdParents = fm.parents(phash);
 
 				unselectAll();
+				
+				wz.append(selectAllCheckbox);
 				
 				try {
 					// to avoid problem with draggable
@@ -981,8 +977,6 @@ $.fn.elfindercwd = function(fm, options) {
 				} catch (e) {
 					cwd.html('');
 				}
-				
-				wz.append(selectAllCheckbox);
 				
 				if (tableHeader) {
 					wrapper.off('scroll.fixheader resize.fixheader');
@@ -1017,7 +1011,8 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				buffer = fm.sortFiles(buffer);
 		
-				wrapper[(!any && buffer.length < 1) ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-empty').on(scrollEvent, render).trigger(scrollEvent);
+				wz[(buffer.length < 1) ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-empty');
+				wrapper.on(scrollEvent, render).trigger(scrollEvent);
 		
 				phash = fm.cwd().phash;
 				
@@ -1494,8 +1489,9 @@ $.fn.elfindercwd = function(fm, options) {
 				document.head.appendChild(style);
 				sheet = style.sheet;
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 0);
-				sheet.insertRule('.ui-droppable.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
-				sheet.insertRule('.ui-droppable.elfinder-cwd-wrapper-empty.ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
 			})
 			.bind('open', function(e) {
 				content(e.data.files);
@@ -1504,19 +1500,19 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('search', function(e) {
 				lastSearch = e.data.files;
 				content(lastSearch, true);
-				wrapper.addClass('elfinder-search-result');
+				wz.addClass('elfinder-search-result');
 				fm.autoSync('stop');
 				resize();
 			})
 			.bind('searchend', function(e) {
 				lastSearch = [];
+				wz.removeClass('elfinder-search-result elfinder-cwd-wrapper-empty');
 				if (query) {
 					query = '';
 					if (!e.data || !e.data.noupdate) {
 						content(fm.files());
 					}
 				}
-				wrapper.removeClass('elfinder-search-result');
 				fm.autoSync();
 				resize();
 			})
@@ -1600,6 +1596,10 @@ $.fn.elfindercwd = function(fm, options) {
 			.remove(function(e) {
 				remove(e.data.removed || []);
 				trigger();
+				if (buffer.length < 1 && (list ? cwd.find('tbody') : cwd).children().length < 1) {
+					wz.addClass('elfinder-cwd-wrapper-empty');
+					selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
+				}
 			})
 			// select dragged file if no selected, disable selectable
 			.dragstart(function(e) {
