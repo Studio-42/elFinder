@@ -29,6 +29,7 @@
 		- Fixed #1370 implemented function keep timestamp into LocalFileSystem volume driver
 		- Added PHP error handler and removed all `@` error-control operator
 		- Fixed #1391 take care 32bit system of chunked file uploading arg `cid`
+		- Fixed #1393 Added PHP class auto loader
 		- And some minor bug fixes
 
 
