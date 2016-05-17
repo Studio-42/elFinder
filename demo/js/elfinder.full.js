@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 9a2dee8) (2016-05-16)
+ * Version 2.1.11 (2.1-src Nightly: 8b0beba) (2016-05-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5067,7 +5067,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 9a2dee8)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 8b0beba)';
 
 
 
@@ -10588,7 +10588,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 		toolbar.on('load', function(){
 			var parent = button.parent();
 			if (parent.length) {
-				toolbar.children('.'+btnCls).remove();
 				toolbar.prepend(button.show());
 				parent.remove();
 				// position icons for ie7
@@ -10626,7 +10625,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.shortcut({
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
-				callback    : function() { input.select().focus(); }
+				callback    : function() { 
+					toolbar.find('.'+btnCls+' input:text').select().focus();
+				}
 			});
 
 	});
