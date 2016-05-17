@@ -122,7 +122,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 		toolbar.on('load', function(){
 			var parent = button.parent();
 			if (parent.length) {
-				toolbar.children('.'+btnCls).remove();
 				toolbar.prepend(button.show());
 				parent.remove();
 				// position icons for ie7
@@ -160,7 +159,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.shortcut({
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
-				callback    : function() { input.select().focus(); }
+				callback    : function() { 
+					toolbar.find('.'+btnCls+' input:text').select().focus();
+				}
 			});
 
 	});
