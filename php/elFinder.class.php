@@ -815,10 +815,15 @@ class elFinder {
 	protected function getPluginInstance($name, $opts = array()) {
 		$key = strtolower($name);
 		if (! isset($this->plugins[$key])) {
-			$p_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . 'plugin.php';
-			if (is_file($p_file)) {
-				require_once $p_file;
-				$class = 'elFinderPlugin' . $name;
+			$class = 'elFinderPlugin' . $name;
+			// to try auto load
+			if (! class_exists($class)) {
+				$p_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . 'plugin.php';
+				if (is_file($p_file)) {
+					include_once $p_file;
+				}
+			}
+			if (class_exists($class, false)) {
 				$this->plugins[$key] = new $class($opts);
 			} else {
 				$this->plugins[$key] = false;
