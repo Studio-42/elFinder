@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 8b0beba) (2016-05-17)
+ * Version 2.1.11 (2.1-src Nightly: eaa2028) (2016-05-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2649,7 +2649,8 @@ window.elFinder = function(node, opts) {
 				},
 				moveOff = function() {
 					$(document).off('touchmove', moveOn);
-				};
+				},
+				handleW, handleH = 50;
 
 			node.on('touchstart touchmove touchend', function(e) {
 				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
@@ -2669,17 +2670,18 @@ window.elFinder = function(node, opts) {
 					if (navbar) {
 						lastX = false;
 						if (navbar.is(':hidden')) {
-							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < handleW) {
 								lastX = x;
 							}
 						} else {
+							handleW = Math.max(50, node.width() / 10);
 							lastX = x;
 						}
 					}
 					if (toolbar) {
 						toolbarH = toolbar.height();
 						nodeTop = nodeOffset.top;
-						if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+						if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
 							lastY = y;
 							$(document).on('touchmove.' + namespace, moveOn);
 							setTimeout(function() {
@@ -2698,7 +2700,7 @@ window.elFinder = function(node, opts) {
 						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
 						if (Math.abs(lastX - x) > Math.min((navbarMode === 'hide'? 200 : 45), (node.width() * .5))) {
 							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
-								self.trigger('navbar' + navbarMode);
+								self.trigger('navbar' + navbarMode, {handleW: handleW});
 								self.getUI('cwd').trigger('resize');
 							});
 							lastX = false;
@@ -2709,7 +2711,7 @@ window.elFinder = function(node, opts) {
 							var mode = (lastY > y)? 'slideUp' : 'slideDown';
 							
 							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
-								toolbar.stop(true, true).trigger('toggle', {duration: 100});
+								toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
 								moveOff();
 							}
 							lastY = false;
@@ -5067,7 +5069,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 8b0beba)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: eaa2028)';
 
 
 
@@ -6673,6 +6675,12 @@ elFinder.prototype.resources = {
 
 			return dfrd;
 
+		}
+	},
+	blink: function(elm, mode) {
+		mode = mode || 'slowonce';
+		if (mode === 'slowonce') {
+			elm.stop(true, true).delay(250).fadeIn(750).delay(500).fadeOut(3500);
 		}
 	}
 };
@@ -9601,11 +9609,30 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle;
+			handle, swipeHandle;
 
 		fm.bind('resize', function() {
 			nav.height(wz.height() - delta);
 		});
+		
+		if (fm.UA.Touch) {
+			fm.bind('load', function() {
+				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
+				if (swipeHandle.css('pointer-events') !== 'none') {
+					swipeHandle.remove();
+					swipeHandle = null;
+				}
+			})
+			.bind('navbarshow', function() {
+				swipeHandle && swipeHandle.stop(true, true).hide();
+			})
+			.bind('navbarhide', function(e) {
+				if (swipeHandle) {
+					swipeHandle.width(e.data.handleW? e.data.handleW : '');
+					fm.resources.blink(swipeHandle, 'slowonce');
+				}
+			});
+		}
 		
 		if ($.fn.resizable && ! fm.UA.Mobile) {
 			handle = nav.resizable({
@@ -10835,7 +10862,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
-			l, i, cmd, panel, button;
+			l, i, cmd, panel, button, swipeHandle;
 		
 		self.prev().length && self.parent().prepend(this);
 
@@ -10901,10 +10928,15 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}
 				});
 			}
-
-		});
-		
-		fm.one('open', function() {
+		})
+		.bind('load', function() {
+			swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').appendTo(fm.getUI());
+			if (swipeHandle.css('pointer-events') !== 'none') {
+				swipeHandle.remove();
+				swipeHandle = null;
+			}
+		})
+		.one('open', function() {
 			if (options.autoHideUA) {
 				if ($.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
 					setTimeout(function() {
@@ -10915,19 +10947,27 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		});
 		self.on('toggle', function(e, data) {
 			var wz    = fm.getUI('workzone'),
-				show  = self.is(':hidden'),
+				toshow= self.is(':hidden'),
 				wzh   = wz.height(),
 				h     = self.height(),
 				tbh   = self.outerHeight(true),
 				delta = tbh - h,
 				opt   = $.extend({
 					step: function(now) {
-						wz.height(wzh + (show? (now + delta) * -1 : h - now));
+						wz.height(wzh + (toshow? (now + delta) * -1 : h - now));
 						fm.trigger('resize');
 					},
 					always: function() {
-						wz.height(wzh + (show? self.outerHeight(true) * -1 : tbh));
+						wz.height(wzh + (toshow? self.outerHeight(true) * -1 : tbh));
 						fm.trigger('resize');
+						if (swipeHandle) {
+							if (toshow) {
+								swipeHandle.stop(true, true).hide();
+							} else {
+								swipeHandle.height(data.handleH? data.handleH : '');
+								fm.resources.blink(swipeHandle, 'slowonce');
+							}
+						}
 					}
 				}, data);
 			self.animate({height : 'toggle'}, opt);
