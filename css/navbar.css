@@ -167,3 +167,30 @@
 	/*border:1px solid #8cafed;*/
 }
 
+/* navbar swipe handle */
+.elfinder-navbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	width: 50px;
+	display: none;
+	pointer-events: none;
+}
+.elfinder-ltr .elfinder-navbar-swipe-handle {
+	left: 0px;
+	background: linear-gradient(to right,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
+.elfinder-rtl .elfinder-navbar-swipe-handle {
+	right: 0px;
+	background: linear-gradient(to left,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}

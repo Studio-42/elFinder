@@ -2635,7 +2635,8 @@ window.elFinder = function(node, opts) {
 				},
 				moveOff = function() {
 					$(document).off('touchmove', moveOn);
-				};
+				},
+				handleW, handleH = 50;
 
 			node.on('touchstart touchmove touchend', function(e) {
 				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
@@ -2655,17 +2656,18 @@ window.elFinder = function(node, opts) {
 					if (navbar) {
 						lastX = false;
 						if (navbar.is(':hidden')) {
-							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < 50) {
+							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < handleW) {
 								lastX = x;
 							}
 						} else {
+							handleW = Math.max(50, node.width() / 10);
 							lastX = x;
 						}
 					}
 					if (toolbar) {
 						toolbarH = toolbar.height();
 						nodeTop = nodeOffset.top;
-						if (y - nodeTop < ((toolbar.is(':hidden')? 20 : toolbarH) + 30)) {
+						if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
 							lastY = y;
 							$(document).on('touchmove.' + namespace, moveOn);
 							setTimeout(function() {
@@ -2684,7 +2686,7 @@ window.elFinder = function(node, opts) {
 						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
 						if (Math.abs(lastX - x) > Math.min((navbarMode === 'hide'? 200 : 45), (node.width() * .5))) {
 							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
-								self.trigger('navbar' + navbarMode);
+								self.trigger('navbar' + navbarMode, {handleW: handleW});
 								self.getUI('cwd').trigger('resize');
 							});
 							lastX = false;
@@ -2695,7 +2697,7 @@ window.elFinder = function(node, opts) {
 							var mode = (lastY > y)? 'slideUp' : 'slideDown';
 							
 							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
-								toolbar.stop(true, true).trigger('toggle', {duration: 100});
+								toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
 								moveOff();
 							}
 							lastY = false;

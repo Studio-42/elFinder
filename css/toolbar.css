@@ -268,8 +268,20 @@
 .elfinder-ltr .elfinder-button-search .ui-icon-close { right:0;}
 .elfinder-rtl .elfinder-button-search .ui-icon-close { left:0;}
 
-
-
-
-
+/* toolbar swipe handle */
+.elfinder-toolbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 50px;
+	width: 100%;
+	display: none;
+	pointer-events: none;
+	background: linear-gradient(to bottom,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 2px,
+		rgba(216,223,230,0.3) 5px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
 

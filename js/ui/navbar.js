@@ -11,11 +11,30 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle;
+			handle, swipeHandle;
 
 		fm.bind('resize', function() {
 			nav.height(wz.height() - delta);
 		});
+		
+		if (fm.UA.Touch) {
+			fm.bind('load', function() {
+				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
+				if (swipeHandle.css('pointer-events') !== 'none') {
+					swipeHandle.remove();
+					swipeHandle = null;
+				}
+			})
+			.bind('navbarshow', function() {
+				swipeHandle && swipeHandle.stop(true, true).hide();
+			})
+			.bind('navbarhide', function(e) {
+				if (swipeHandle) {
+					swipeHandle.width(e.data.handleW? e.data.handleW : '');
+					fm.resources.blink(swipeHandle, 'slowonce');
+				}
+			});
+		}
 		
 		if ($.fn.resizable && ! fm.UA.Mobile) {
 			handle = nav.resizable({
