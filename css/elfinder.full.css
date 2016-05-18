@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 8b0beba) (2016-05-17)
+ * Version 2.1.11 (2.1-src Nightly: eaa2028) (2016-05-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1545,7 +1545,33 @@ button.elfinder-info-button {
 	/*border:1px solid #8cafed;*/
 }
 
-
+/* navbar swipe handle */
+.elfinder-navbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	width: 50px;
+	display: none;
+	pointer-events: none;
+}
+.elfinder-ltr .elfinder-navbar-swipe-handle {
+	left: 0px;
+	background: linear-gradient(to right,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
+.elfinder-rtl .elfinder-navbar-swipe-handle {
+	right: 0px;
+	background: linear-gradient(to left,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
 /* File: /css/places.css */
 /*********************************************/
 /*               PLACES STYLES               */
@@ -2237,8 +2263,20 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-ltr .elfinder-button-search .ui-icon-close { right:0;}
 .elfinder-rtl .elfinder-button-search .ui-icon-close { left:0;}
 
-
-
-
-
+/* toolbar swipe handle */
+.elfinder-toolbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 50px;
+	width: 100%;
+	display: none;
+	pointer-events: none;
+	background: linear-gradient(to bottom,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 2px,
+		rgba(216,223,230,0.3) 5px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
 
