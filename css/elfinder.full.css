@@ -2118,6 +2118,7 @@ embed.elfinder-quicklook-preview-audio {
 	left:0;
 	top:25px;
 	padding:3px 0;
+	z-index:1;
 }
 
 .elfinder-touch .elfinder-button-menu {
