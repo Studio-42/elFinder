@@ -248,5 +248,11 @@ elFinder.prototype.resources = {
 			return dfrd;
 
 		}
+	},
+	blink: function(elm, mode) {
+		mode = mode || 'slowonce';
+		if (mode === 'slowonce') {
+			elm.stop(true, true).delay(250).fadeIn(750).delay(500).fadeOut(3500);
+		}
 	}
 };

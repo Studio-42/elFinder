@@ -24,7 +24,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
-			l, i, cmd, panel, button;
+			l, i, cmd, panel, button, swipeHandle;
 		
 		self.prev().length && self.parent().prepend(this);
 
@@ -90,10 +90,15 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}
 				});
 			}
-
-		});
-		
-		fm.one('open', function() {
+		})
+		.bind('load', function() {
+			swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').appendTo(fm.getUI());
+			if (swipeHandle.css('pointer-events') !== 'none') {
+				swipeHandle.remove();
+				swipeHandle = null;
+			}
+		})
+		.one('open', function() {
 			if (options.autoHideUA) {
 				if ($.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
 					setTimeout(function() {
@@ -104,19 +109,27 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		});
 		self.on('toggle', function(e, data) {
 			var wz    = fm.getUI('workzone'),
-				show  = self.is(':hidden'),
+				toshow= self.is(':hidden'),
 				wzh   = wz.height(),
 				h     = self.height(),
 				tbh   = self.outerHeight(true),
 				delta = tbh - h,
 				opt   = $.extend({
 					step: function(now) {
-						wz.height(wzh + (show? (now + delta) * -1 : h - now));
+						wz.height(wzh + (toshow? (now + delta) * -1 : h - now));
 						fm.trigger('resize');
 					},
 					always: function() {
-						wz.height(wzh + (show? self.outerHeight(true) * -1 : tbh));
+						wz.height(wzh + (toshow? self.outerHeight(true) * -1 : tbh));
 						fm.trigger('resize');
+						if (swipeHandle) {
+							if (toshow) {
+								swipeHandle.stop(true, true).hide();
+							} else {
+								swipeHandle.height(data.handleH? data.handleH : '');
+								fm.resources.blink(swipeHandle, 'slowonce');
+							}
+						}
 					}
 				}, data);
 			self.animate({height : 'toggle'}, opt);
