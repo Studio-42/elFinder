@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: eaa2028) (2016-05-18)
+ * Version 2.1.11 (2.1-src Nightly: 189f5ed) (2016-05-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1966,7 +1966,11 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-rtl .elfinder-path { float:right; }
 
 /* path in workzone (case of swipe to navbar close) */
-.elfinder>.elfinder-path {
+.elfinder-workzone-path {
+	position: relative;
+}
+.elfinder-workzone-path .elfinder-path {
+	position: relative;
 	font-size: .75em;
 	font-weight: normal;
 	float: none;
@@ -1975,16 +1979,37 @@ embed.elfinder-quicklook-preview-audio {
 	text-overflow: initial;
 	-o-text-overflow: initial;
 }
-.elfinder>.elfinder-path span {
+.elfinder-ltr .elfinder-workzone-path .elfinder-path {
+	margin-left: 24px;
+}
+.elfinder-rtl .elfinder-workzone-path .elfinder-path {
+	margin-right: 24px;
+}
+.elfinder-workzone-path .elfinder-path span {
 	display: inline-block;
 	padding: 5px 3px;
 }
-.elfinder>.elfinder-path span.elfinder-path-cwd {
+.elfinder-workzone-path .elfinder-path span.elfinder-path-cwd {
 	font-weight: bold;
 }
-.elfinder>.elfinder-path span.ui-state-hover,
-.elfinder>.elfinder-path span.ui-state-active { border: none; }
+.elfinder-workzone-path .elfinder-path span.ui-state-hover,
+.elfinder-workzone-path .elfinder-path span.ui-state-active { border: none; }
 
+.elfinder-workzone-path .elfinder-path-roots {
+	position: absolute;
+	top: 0;
+	width: 24px;
+	height: 20px;
+	padding: 2px;
+    border: none;
+    overflow: hidden;
+}
+.elfinder-ltr .elfinder-workzone-path .elfinder-path-roots {
+	left: 0;
+}
+.elfinder-rtl .elfinder-workzone-path .elfinder-path-roots {
+	right: 0;
+}
 /* total/selected size in statusbar */
 .elfinder-stat-size { white-space:nowrap; }
 .elfinder-ltr .elfinder-stat-size { float:right; }
@@ -2131,6 +2156,7 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-chmod     { background-position: 0  -48px; }
 .elfinder-button-icon-accept    { background-position: 0 -736px; }
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
+.elfinder-button-icon-menu      { background-position: 0 -752px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }

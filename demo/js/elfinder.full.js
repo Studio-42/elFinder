@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: eaa2028) (2016-05-18)
+ * Version 2.1.11 (2.1-src Nightly: 189f5ed) (2016-05-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2184,11 +2184,15 @@ window.elFinder = function(node, opts) {
 		})
 		.remove(function(e) {
 			var removed = e.data.removed||[],
-				l       = removed.length, 
+				l       = removed.length,
+				roots   = {},
 				rm      = function(hash) {
-					var file = files[hash];
+					var file = files[hash], i;
 					if (file) {
 						if (file.mime === 'directory') {
+							if (roots[hash]) {
+								delete self.roots[roots[hash]];
+							}
 							$.each(files, function(h, f) {
 								f.phash == hash && rm(h);
 							});
@@ -2197,6 +2201,9 @@ window.elFinder = function(node, opts) {
 					}
 				};
 		
+			$.each(self.roots, function(k, v) {
+				roots[v] = k;
+			});
 			while (l--) {
 				rm(removed[l]);
 			}
@@ -2653,15 +2660,19 @@ window.elFinder = function(node, opts) {
 				handleW, handleH = 50;
 
 			node.on('touchstart touchmove touchend', function(e) {
-				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+				if (e.type === 'touchend') {
+					lastX = false;
+					lastY = false;
+					moveOff();
 					return;
 				}
-
-				var x = (e.originalEvent.touches[0] || {}).pageX,
-					y = (e.originalEvent.touches[0] || {}).pageY,
+				
+				var touches = e.originalEvent.touches || [{}],
+					x = touches[0].pageX || null,
+					y = touches[0].pageY || null,
 					navbarMode;
-
-				if (x === null || y === null) {
+				
+				if (x === null || y === null || (e.type === 'touchstart' && touches.length > 1)) {
 					return;
 				}
 				
@@ -2691,10 +2702,6 @@ window.elFinder = function(node, opts) {
 							lastY = false;
 						}
 					}
-				} else if (e.type === 'touchend') {
-					lastX = false;
-					lastY = false;
-					moveOff();
 				} else {
 					if (navbar && lastX !== false) {
 						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
@@ -5069,7 +5076,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: eaa2028)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 189f5ed)';
 
 
 
@@ -9775,6 +9782,7 @@ $.fn.elfinderpath = function(fm) {
 			place  = 'statusbar',
 			clHover= fm.res('class', 'hover'),
 			prefix = 'path' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-',
+			wzbase = $('<div class="ui-widget-header ui-helper-clearfix elfinder-workzone-path"/>'),
 			path   = $(this).addClass('elfinder-path').html('&nbsp;')
 				.on('mousedown', 'span.elfinder-path-dir', function(e) {
 					var hash = $(this).attr('id').substr(prefix.length);
@@ -9789,6 +9797,29 @@ $.fn.elfinderpath = function(fm) {
 					}
 				})
 				.prependTo(fm.getUI('statusbar').show()),
+			roots = $('<div class="elfinder-path-roots"/>').on('click', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				
+				var roots = $.map(fm.roots, function(h) { return fm.file(h)}),
+				raw = [];
+
+				$.each(roots, function(i, f) {
+					if (fm.root(fm.cwd().hash) !== f.hash) {
+						raw.push({
+							label    : f.name,
+							icon     : 'home',
+							remain   : true,
+							callback : function() { fm.exec('open', f.hash); }
+						});
+					}
+				});
+				fm.trigger('contextmenu', {
+					raw: raw,
+					x: e.pageX,
+					y: e.pageY
+				});
+			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" />').appendTo(wzbase),
 			render = function(cwd) {
 				var dirs = [];
 				$.each(fm.parents(cwd), function(i, hash) {
@@ -9851,6 +9882,13 @@ $.fn.elfinderpath = function(fm) {
 				mimes  = [];
 				
 				path.html(render(fm.cwd().hash));
+				if (Object.keys(fm.roots).length > 1) {
+					path.css('margin', '');
+					roots.show();
+				} else {
+					path.css('margin', 0);
+					roots.hide();
+				}
 				fit();
 			})
 			.bind('searchstart', function(e) {
@@ -9873,16 +9911,16 @@ $.fn.elfinderpath = function(fm) {
 			})
 			// on swipe to navbar show/hide
 			.bind('navbarshow navbarhide', function(e) {
-				var wz = fm.getUI('workzone'),
-					c  = 'ui-widget-header ui-helper-clearfix';
+				var wz = fm.getUI('workzone');
 				if (e.type === 'navbarshow') {
-					wz.height(wz.height() + path.outerHeight());
-					path.removeClass(c).prependTo(fm.getUI('statusbar'));
+					wz.height(wz.height() + wzbase.outerHeight());
+					path.prependTo(fm.getUI('statusbar'));
+					wzbase.detach();
 					place = 'statusbar';
 					fm.unbind('open', toWorkzone);
 				} else {
-					path.addClass(c).insertBefore(wz);
-					wz.height(wz.height() - path.outerHeight());
+					wzbase.append(path).insertBefore(wz);
+					wz.height(wz.height() - wzbase.outerHeight());
 					place = 'workzone';
 					toWorkzone();
 					fm.bind('open', toWorkzone);
@@ -10888,7 +10926,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 			}
 			
-			self.children().length? self.show() : self.hide();
+			(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
 			self.trigger('load');
 		};
 		
@@ -10970,7 +11008,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						}
 					}
 				}, data);
-			self.animate({height : 'toggle'}, opt);
+			self.data('swipeClose', ! toshow).animate({height : 'toggle'}, opt);
 		});
 	});
 	
