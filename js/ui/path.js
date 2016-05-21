@@ -14,6 +14,7 @@ $.fn.elfinderpath = function(fm) {
 			place  = 'statusbar',
 			clHover= fm.res('class', 'hover'),
 			prefix = 'path' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-',
+			wzbase = $('<div class="ui-widget-header ui-helper-clearfix elfinder-workzone-path"/>'),
 			path   = $(this).addClass('elfinder-path').html('&nbsp;')
 				.on('mousedown', 'span.elfinder-path-dir', function(e) {
 					var hash = $(this).attr('id').substr(prefix.length);
@@ -28,6 +29,29 @@ $.fn.elfinderpath = function(fm) {
 					}
 				})
 				.prependTo(fm.getUI('statusbar').show()),
+			roots = $('<div class="elfinder-path-roots"/>').on('click', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				
+				var roots = $.map(fm.roots, function(h) { return fm.file(h)}),
+				raw = [];
+
+				$.each(roots, function(i, f) {
+					if (fm.root(fm.cwd().hash) !== f.hash) {
+						raw.push({
+							label    : f.name,
+							icon     : 'home',
+							remain   : true,
+							callback : function() { fm.exec('open', f.hash); }
+						});
+					}
+				});
+				fm.trigger('contextmenu', {
+					raw: raw,
+					x: e.pageX,
+					y: e.pageY
+				});
+			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" />').appendTo(wzbase),
 			render = function(cwd) {
 				var dirs = [];
 				$.each(fm.parents(cwd), function(i, hash) {
@@ -90,6 +114,13 @@ $.fn.elfinderpath = function(fm) {
 				mimes  = [];
 				
 				path.html(render(fm.cwd().hash));
+				if (Object.keys(fm.roots).length > 1) {
+					path.css('margin', '');
+					roots.show();
+				} else {
+					path.css('margin', 0);
+					roots.hide();
+				}
 				fit();
 			})
 			.bind('searchstart', function(e) {
@@ -112,16 +143,16 @@ $.fn.elfinderpath = function(fm) {
 			})
 			// on swipe to navbar show/hide
 			.bind('navbarshow navbarhide', function(e) {
-				var wz = fm.getUI('workzone'),
-					c  = 'ui-widget-header ui-helper-clearfix';
+				var wz = fm.getUI('workzone');
 				if (e.type === 'navbarshow') {
-					wz.height(wz.height() + path.outerHeight());
-					path.removeClass(c).prependTo(fm.getUI('statusbar'));
+					wz.height(wz.height() + wzbase.outerHeight());
+					path.prependTo(fm.getUI('statusbar'));
+					wzbase.detach();
 					place = 'statusbar';
 					fm.unbind('open', toWorkzone);
 				} else {
-					path.addClass(c).insertBefore(wz);
-					wz.height(wz.height() - path.outerHeight());
+					wzbase.append(path).insertBefore(wz);
+					wz.height(wz.height() - wzbase.outerHeight());
 					place = 'workzone';
 					toWorkzone();
 					fm.bind('open', toWorkzone);
