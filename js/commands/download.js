@@ -12,31 +12,31 @@ elFinder.prototype.commands.download = function() {
 		fm     = this.fm,
 		zipOn  = false,
 		filter = function(hashes) {
-			var mixed  = false,
-				croot  = '',
-				api21  = (fm.api > 2);
+			var czipdl = (fm.api > 2)? fm.command('zipdl') : null,
+				mixed  = false,
+				croot  = '';
 			
-			if (fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
-				hashes = $.map(hashes, function(h) {
-					return fm.isCommandEnabled('download', h)? h : null;
-				});
+			if (czipdl !== null && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 				croot = fm.root(hashes[0]);
 				$.each(hashes, function(i, h) {
 					if (mixed = (croot !== fm.root(h))) {
 						return false;
 					}
 				});
-				zipOn = (api21 && !mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
+			}
+			zipOn = (! mixed && czipdl !== null && fm.isCommandEnabled('zipdl', hashes[0]));
+
+			if (mixed) {
+				hashes = $.map(hashes, function(h) {
+					return fm.isCommandEnabled('download', h)? h : null;
+				});
 			} else {
 				if (!fm.isCommandEnabled('download', hashes[0])) {
 					return [];
 				}
-				zipOn = (api21 && fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
 			}
 			
-			return (!zipOn)?
-					$.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; })
-					: self.files(hashes);
+			return $.map(self.files(hashes), function(f) { return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f; });
 		};
 	
 	this.linkedCmds = ['zipdl'];
@@ -53,18 +53,12 @@ elFinder.prototype.commands.download = function() {
 			mixed  = false,
 			croot  = '';
 		
-		if (cnt > 0 && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
-			croot = fm.root(sel[0]);
-			$.each(sel, function(i, h) {
-				if (mixed = (croot !== fm.root(h))) {
-					return false;
-				}
-			});
+		if (cnt < 1) {
+			return -1;
 		}
+		cnt = filter(sel).length;
 		
-		return  (mixed || !czipdl || czipdl._disabled)?
-				(!this._disabled && cnt && cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
-				: (!this._disabled && cnt ? 0 : -1);
+		return  (cnt && (zipOn || (cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1))) ? 0 : -1);
 	};
 	
 	fm.bind('contextmenu', function(e){
