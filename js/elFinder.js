@@ -2170,11 +2170,15 @@ window.elFinder = function(node, opts) {
 		})
 		.remove(function(e) {
 			var removed = e.data.removed||[],
-				l       = removed.length, 
+				l       = removed.length,
+				roots   = {},
 				rm      = function(hash) {
-					var file = files[hash];
+					var file = files[hash], i;
 					if (file) {
 						if (file.mime === 'directory') {
+							if (roots[hash]) {
+								delete self.roots[roots[hash]];
+							}
 							$.each(files, function(h, f) {
 								f.phash == hash && rm(h);
 							});
@@ -2183,6 +2187,9 @@ window.elFinder = function(node, opts) {
 					}
 				};
 		
+			$.each(self.roots, function(k, v) {
+				roots[v] = k;
+			});
 			while (l--) {
 				rm(removed[l]);
 			}
@@ -2639,15 +2646,19 @@ window.elFinder = function(node, opts) {
 				handleW, handleH = 50;
 
 			node.on('touchstart touchmove touchend', function(e) {
-				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+				if (e.type === 'touchend') {
+					lastX = false;
+					lastY = false;
+					moveOff();
 					return;
 				}
-
-				var x = (e.originalEvent.touches[0] || {}).pageX,
-					y = (e.originalEvent.touches[0] || {}).pageY,
+				
+				var touches = e.originalEvent.touches || [{}],
+					x = touches[0].pageX || null,
+					y = touches[0].pageY || null,
 					navbarMode;
-
-				if (x === null || y === null) {
+				
+				if (x === null || y === null || (e.type === 'touchstart' && touches.length > 1)) {
 					return;
 				}
 				
@@ -2677,10 +2688,6 @@ window.elFinder = function(node, opts) {
 							lastY = false;
 						}
 					}
-				} else if (e.type === 'touchend') {
-					lastX = false;
-					lastY = false;
-					moveOff();
 				} else {
 					if (navbar && lastX !== false) {
 						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';

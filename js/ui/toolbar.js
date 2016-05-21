@@ -50,7 +50,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 			}
 			
-			self.children().length? self.show() : self.hide();
+			(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
 			self.trigger('load');
 		};
 		
@@ -132,7 +132,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						}
 					}
 				}, data);
-			self.animate({height : 'toggle'}, opt);
+			self.data('swipeClose', ! toshow).animate({height : 'toggle'}, opt);
 		});
 	});
 	
