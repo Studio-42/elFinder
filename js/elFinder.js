@@ -882,7 +882,7 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.root = function(hash) {
-		var dir = files[hash || cwd], i;
+		var dir = files[(hash || cwd)], i;
 		
 		while (dir && dir.phash) {
 			dir = files[dir.phash]
@@ -892,7 +892,7 @@ window.elFinder = function(node, opts) {
 		}
 		
 		$.each(self.roots, function(id, rhash) {
-			if (rhash.indexOf(id) === 0) {
+			if (hash.indexOf(id) === 0) {
 				dir = rhash;
 				return false;
 			}
@@ -1816,8 +1816,9 @@ window.elFinder = function(node, opts) {
 	 * @return Boolean
 	 */
 	this.isCommandEnabled = function(name, dstHash) {
-		var disabled;
-		if (dstHash && self.root(dstHash) !== cwd) {
+		var disabled,
+			cvid = self.cwd().volumeid || '';
+		if (cvid && dstHash && dstHash.indexOf(cvid) !== 0) {
 			disabled = [];
 			$.each(self.disabledCmds, function(i, v){
 				if (dstHash.indexOf(i) === 0) {
