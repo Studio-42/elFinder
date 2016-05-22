@@ -706,25 +706,73 @@ window.elFinder = function(node, opts) {
 		refreshPositions : false,
 		cursor     : 'crosshair',
 		cursorAt   : {left : 50, top : 47},
+		scroll     : false,
 		start      : function(e, ui) {
-			var targets = $.map(ui.helper.data('files')||[], function(h) { return h || null ;}),
-			locked = false,
-			cnt, h;
-			self.draggingUiHelper = ui.helper;
+			var helper   = ui.helper,
+				targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
+				locked   = false,
+				navbar   = self.getUI('navbar'),
+				cwd      = self.getUI('cwd').parent(),
+				autoScr  = {
+					navbarUp   : function() {
+						navbar.scrollTop(Math.max(0, navbar.scrollTop() - helper.data('autoScrVal')));
+					},
+					navbarDown : function() {
+						navbar.scrollTop(navbar.scrollTop() + helper.data('autoScrVal'));
+					},
+					cwdUp     : function() {
+						cwd.scrollTop(Math.max(0, cwd.scrollTop() - helper.data('autoScrVal')));
+					},
+					cwdDown   : function() {
+						cwd.scrollTop(cwd.scrollTop() + helper.data('autoScrVal'));
+					}
+				},
+				cnt, h, wz, cwdOffset, wzOffset;
+			
+			self.draggingUiHelper = helper;
 			cnt = targets.length;
 			while (cnt--) {
 				h = targets[cnt];
 				if (files[h].locked) {
 					locked = true;
-					ui.helper.data('locked', true);
+					helper.data('locked', true);
 					break;
 				}
 			}
 			!locked && self.trigger('lockfiles', {files : targets});
 
+			cwdOffset = cwd.offset();
+			wz = self.getUI('workzone');
+			wzOffset = wz.offset();
+			helper.data('wzpos', {
+				ltr : self.direction === 'ltr',
+				cwdEdge : (self.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width(),
+				wzTop : wzOffset.top,
+				wzBottom : wzOffset.top + wz.height()
+			});
+			helper.data('autoScrTm', setInterval(function() {
+				if (helper.data('autoScr')) {
+					autoScr[helper.data('autoScr')]();
+				}
+			}, 50));
 		},
 		drag       : function(e, ui) {
-			var helper = ui.helper;
+			var helper = ui.helper,
+				wzpos  = helper.data('wzpos'),
+				autoUp;
+			
+			if ((autoUp = wzpos.wzTop > e.pageY) || wzpos.wzBottom < e.pageY) {
+				if (wzpos.cwdEdge > e.pageX) {
+					helper.data('autoScr', (wzpos.ltr? 'navbar' : 'cwd') + (autoUp? 'Up' : 'Down'));
+				} else {
+					helper.data('autoScr', (wzpos.ltr? 'cwd' : 'navbar') + (autoUp? 'Up' : 'Down'));
+				}
+				helper.data('autoScrVal', Math.pow((autoUp? wzpos.wzTop - e.pageY : e.pageY - wzpos.wzBottom), 1.3));
+			} else {
+				if (helper.data('autoScr')) {
+					helper.data('refreshPositions', 1).data('autoScr', null);
+				}
+			}
 			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
 				if (helper.data('refreshPositions') > 0) {
 					$(this).draggable('option', { refreshPositions : true });
@@ -736,16 +784,20 @@ window.elFinder = function(node, opts) {
 			}
 		},
 		stop       : function(e, ui) {
-			var files;
+			var helper = ui.helper,
+				files;
+			
 			$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
 			self.draggingUiHelper = null;
 			self.trigger('focus').trigger('dragstop');
-			if (! ui.helper.data('droped')) {
-				files = $.map(ui.helper.data('files')||[], function(h) { return h || null ;});
+			if (! helper.data('droped')) {
+				files = $.map(helper.data('files')||[], function(h) { return h || null ;});
 				self.trigger('unlockfiles', {files : files});
 				self.trigger('selectfiles', {files : files});
 			}
 			self.enable();
+			
+			helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
 		},
 		helper     : function(e, ui) {
 			var element = this.id ? $(this) : $(this).parents('[id]:first'),
@@ -882,7 +934,8 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.root = function(hash) {
-		var dir = files[(hash || cwd)], i;
+		hash = hash || cwd;
+		var dir = files[hash], i;
 		
 		while (dir && dir.phash) {
 			dir = files[dir.phash]
