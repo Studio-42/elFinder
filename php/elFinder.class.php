@@ -393,8 +393,13 @@ class elFinder {
 					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map($_getcmd, explode(' ', $cmd))));
 				}
 				if ($doRegist) {
-					if (! is_array($handlers) || is_object($handlers[0])) {
+					// for backward compatibility
+					if (! is_array($handlers)) {
 						$handlers = array($handlers);
+					} else {
+						if (count($handlers) === 2 && is_object($handlers[0])) {
+							$handlers = array($handlers);
+						}
 					}
 					foreach($handlers as $handler) {
 						if ($handler) {
