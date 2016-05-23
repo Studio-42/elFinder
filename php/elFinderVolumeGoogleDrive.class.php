@@ -464,7 +464,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		}
 		do {
 			try {
-			  $parameters = array();
 			  if ($pageToken) {
 				$parameters['pageToken'] = $pageToken;
 			  }
