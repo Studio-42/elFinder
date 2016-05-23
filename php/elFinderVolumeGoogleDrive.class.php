@@ -457,21 +457,23 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		$this->refreshGoogleDriveToken();
 		$result = array();
   		$pageToken = NULL;		
+		$parameters = array();
 		
+		if(!empty($sql)){	
+			$parameters = $sql;
+		}
 		do {
 			try {
 			  $parameters = array();
 			  if ($pageToken) {
 				$parameters['pageToken'] = $pageToken;
 			  }
-			  $files = $this->oauth->files->listFiles($sql);
+			  $files = $this->oauth->files->listFiles($parameters);
 		
 			  $result = array_merge($result, $files->getFiles());
 			  $pageToken = $files->getNextPageToken();
 			} catch (Exception $e) {
-			  //return $e->getMessage();
 			  $pageToken = NULL;
-			  return array();
 			}
 		  } while ($pageToken);
 		  
