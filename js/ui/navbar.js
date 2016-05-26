@@ -24,16 +24,35 @@ $.fn.elfindernavbar = function(fm, opts) {
 					swipeHandle.remove();
 					swipeHandle = null;
 				}
-			})
-			.bind('navbarshow', function() {
-				swipeHandle && swipeHandle.stop(true, true).hide();
-			})
-			.bind('navbarhide', function(e) {
-				if (swipeHandle) {
-					swipeHandle.width(e.data.handleW? e.data.handleW : '');
-					fm.resources.blink(swipeHandle, 'slowonce');
-				}
 			});
+			
+			nav.on('navshow navhide', function(e, data) {
+				var mode     = (e.type === 'navshow')? 'show' : 'hide',
+					duration = (data && data.duration)? data.duration : 'fast',
+					handleW = (data && data.handleW)? data.handleW : Math.max(50, fm.getUI().width() / 10);
+				nav.stop(true, true)[mode](duration, function() {
+					if (mode === 'show') {
+						swipeHandle && swipeHandle.stop(true, true).hide();
+					} else {
+						if (swipeHandle) {
+							swipeHandle.width(handleW? handleW : '');
+							fm.resources.blink(swipeHandle, 'slowonce');
+						}
+					}
+					fm.trigger('navbar'+ mode);
+					fm.getUI('cwd').trigger('resize');
+				});
+			});
+			
+			if (opts.autoHideUA && opts.autoHideUA.length > 0) {
+				fm.one('open', function() {
+					if ($.map(opts.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
+						setTimeout(function() {
+							nav.trigger('navhide', {duration: 'slow'});
+						}, 500);
+					}
+				});
+			}
 		}
 		
 		if ($.fn.resizable && ! fm.UA.Mobile) {
