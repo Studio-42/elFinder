@@ -404,8 +404,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		}
 		
 		$this->options['root'] == '' ?  $this->options['root']= 'GoogleDrive.com' : $this->options['root'];
+		
 		if (empty($this->options['alias'])) {
-			$this->options['alias'] = ($this->options['path'] === '/')? $this->options['root'] : 'GoogleDrive/'.$this->options['childpath'];
+			$this->options['alias'] = ($this->options['path'] === '/') || ($this->options['path'] === 'root')? $this->options['root'] : 'GoogleDrive/'.$this->getPathtoName($this->options['childpath']);
+			
 		}
 
 		$this->rootName = $this->options['alias'];
@@ -532,7 +534,23 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			}
 		 return true;
 	 }
-
+	
+	/**
+	 * Get dat(googledrive metadata) from GoogleDrive
+	 * 
+	 * @param string $path
+	 * @return array googledrive metadata
+	 */
+	private function getPathtoName($path) {				
+			$opts = [ 
+				'fields' => self::FETCHFIELDS_GET						
+			];
+			
+		$res = $this->oauth->files->get($path,$opts);
+		return $res['name'];
+			
+	}
+	
 	/**
 	 * Get child directory real path with mount
 	 * 
