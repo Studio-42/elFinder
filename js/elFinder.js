@@ -2721,6 +2721,9 @@ window.elFinder = function(node, opts) {
 					if (navbar) {
 						lastX = false;
 						if (navbar.is(':hidden')) {
+							if (! handleW) {
+								handleW = Math.max(50, node.width() / 10)
+							}
 							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < handleW) {
 								lastX = x;
 							}
@@ -2744,12 +2747,9 @@ window.elFinder = function(node, opts) {
 					}
 				} else {
 					if (navbar && lastX !== false) {
-						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'hide' : 'show';
-						if (Math.abs(lastX - x) > Math.min((navbarMode === 'hide'? 200 : 45), (node.width() * .5))) {
-							self.getUI('navbar').stop(true, true)[navbarMode]('fast', function() {
-								self.trigger('navbar' + navbarMode, {handleW: handleW});
-								self.getUI('cwd').trigger('resize');
-							});
+						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'navhide' : 'navshow';
+						if (Math.abs(lastX - x) > Math.min((navbarMode === 'navhide'? 200 : 45), (node.width() * .5))) {
+							self.getUI('navbar').trigger(navbarMode, {handleW: handleW});
 							lastX = false;
 						}
 					}
