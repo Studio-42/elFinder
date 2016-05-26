@@ -157,7 +157,7 @@ $.fn.elfinderpath = function(fm) {
 					toWorkzone();
 					fm.bind('open', toWorkzone);
 				}
-				fm.trigger('resize');
+				setTimeout(function() { fm.trigger('resize'); }, 0);
 			})
 			.bind('resize', fit);
 	});
