@@ -176,7 +176,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 					return $e->getMessage();
 			}
   		}
-    
+    	
+		if ($options['pass'] === 'reauth') {
+			$options['pass'] = '';
+			$this->session->remove('elFinderGoogledriveTokens');
+			$this->session->remove('elFinderGoogleDriveAuthTokens');
+		} else if ($options['pass'] === 'googledrive') {
+			$options['pass'] = '';
+		}
+		
 		if ($options['user'] === 'init') {
 		
 			if (empty($options['client_id']) || empty($options['client_secret'])) {
@@ -192,7 +200,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
 			}
 			
-			if ($options['pass'] === 'init') {
+			if (empty($_GET['code'])) {
 				$html = '';
 				
 				if ($this->session->get('elFinderGoogledriveTokens')!==null) {
@@ -236,8 +244,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 						$client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');						
 						//$client->setScopes([Google_Service_Oauth2::USERINFO_PROFILE , Google_Service_Drive::DRIVE]);
 						$client->setScopes([Google_Service_Drive::DRIVE]);
-						$client->setAccessType('offline');
-						$client->setApprovalPrompt('force');						
+						if (! empty($options['offline'])) {
+                        	$client->setApprovalPrompt('force');
+                        	$client->setAccessType('offline');
+                    	}						
 					
 						$service = new Google_Service_Drive($client);
     					$this->oauth = $client->createAuthUrl();
@@ -257,17 +267,27 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			} else {
 					
 				$client = new Google_Client();											   			
-    			$client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));						
-				//$oauth2 = new Google_Service_Oauth2($client);
-				//$userid = $oauth2->userinfo->get();
-				$oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');				
-																
-				//$this->session->set('elFinderGoogledriveTokens', array($userid['id'], $oauth_token));
+    			$client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));				
+				$oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');								
 				$this->session->set('elFinderGoogledriveTokens', array(rand(1000000000,9999999999), $oauth_token));
 				
+				$service = new Google_Service_Drive($client);
+				$folders = [];
+                    foreach($service->files->listFiles([
+                        'pageSize' => 1000,
+                        'q' => 'trashed = false and mimeType = "application/vnd.google-apps.folder"'
+                    ]) as $f) {
+                        $folders[$f->getId()] = $f->getName();
+                    }
+					
+				natcasesort($folders);
+				$folders = ['root' => 'root'] + $folders;               
+				$folders = json_encode($folders);				
+				$options['pass'] = 'return';
+					
 				$out = array(
 					'node' => 'elfinder',
-					'json' => '{"protocol": "googledrive", "mode": "done"}',
+					'json' => '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.'}',
 					'bind' => 'netmount'
 				);
 				
@@ -374,7 +394,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		}
 				
 		// normalize root path
-		if($this->options['path'] == '/'){		
+		if($this->options['path'] == '/' || $this->options['path'] == 'root'){
+			$this->options['path'] = '/';		
 			$this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 		}else{
 			$this->options['childpath'] = $this->options['path'];	
@@ -384,7 +405,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		
 		$this->options['root'] == '' ?  $this->options['root']= 'GoogleDrive.com' : $this->options['root'];
 		if (empty($this->options['alias'])) {
-			$this->options['alias'] = ($this->options['path'] === '/')? $this->options['root'] : 'GoogleDrive'.$this->options['childpath'];
+			$this->options['alias'] = ($this->options['path'] === '/')? $this->options['root'] : 'GoogleDrive/'.$this->options['childpath'];
 		}
 
 		$this->rootName = $this->options['alias'];
