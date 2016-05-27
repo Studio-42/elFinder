@@ -412,6 +412,7 @@ $.fn.elfindercwd = function(fm, options) {
 				} else if (ftop < wtop) {
 					wrapper.scrollTop(ftop);
 				}
+				list && wrapper.scrollLeft(0);
 			},
 			
 			/**
@@ -1410,7 +1411,7 @@ $.fn.elfindercwd = function(fm, options) {
 						parent.prepend(file);
 					}
 					
-					cwd.parent().scrollTop(0);
+					cwd.parent().scrollTop(0).scrollLeft(0);
 				})
 				// unselect all selected files
 				.on('unselectall', unselectAll)
