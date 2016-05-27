@@ -603,6 +603,7 @@ $.fn.elfindercwd = function(fm, options) {
 						if (fm.direction === 'rtl') {
 							tableHeader.css('right', (fm.getUI().width() - wrapper.width()) + 'px');
 						}
+						setPos();
 						wrapper.after(tableHeader)
 							.on('scroll.fixheader resize.fixheader', function(e) {
 								setPos();
@@ -632,7 +633,6 @@ $.fn.elfindercwd = function(fm, options) {
 							tableHeader.css('right', (fm.getUI().width() - wrapper.width()) + 'px');
 						}
 						tableHeader.css(wrapper.position()).css('width', cwd.outerWidth() + 'px');
-						setPos();
 					}, 10));
 				}
 			},
