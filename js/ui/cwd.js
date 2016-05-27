@@ -567,7 +567,22 @@ $.fn.elfindercwd = function(fm, options) {
 				if (! options.listView.fixedHeader) {
 					return;
 				}
-				var cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
+				var setPos = function() {
+					var val, pos;
+					
+					if (fm.direction === 'ltr') {
+						val = wrapper.scrollLeft() * -1;
+						pos = 'left';
+					} else {
+						val = wrapper.scrollLeft();
+						pos = 'right';
+					}
+					if (base.css(pos) !== val) {
+						base.css(pos, val);
+					}
+				},
+				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
+				
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
 				if (btr.length) {
@@ -590,18 +605,7 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 						wrapper.after(tableHeader)
 							.on('scroll.fixheader resize.fixheader', function(e) {
-								var val, pos;
-								
-								if (fm.direction === 'ltr') {
-									val = wrapper.scrollLeft() * -1;
-									pos = 'left';
-								} else {
-									val = wrapper.scrollLeft();
-									pos = 'right';
-								}
-								if (base.css(pos) !== val) {
-									base.css(pos, val);
-								}
+								setPos();
 								if (e.type === 'resize') {
 									e.stopPropagation();
 									fixTableHeader();
@@ -628,6 +632,7 @@ $.fn.elfindercwd = function(fm, options) {
 							tableHeader.css('right', (fm.getUI().width() - wrapper.width()) + 'px');
 						}
 						tableHeader.css(wrapper.position()).css('width', cwd.outerWidth() + 'px');
+						setPos();
 					}, 10));
 				}
 			},
@@ -1411,7 +1416,7 @@ $.fn.elfindercwd = function(fm, options) {
 						parent.prepend(file);
 					}
 					
-					cwd.parent().scrollTop(0).scrollLeft(0);
+					wrapper.scrollTop(0).scrollLeft(0);
 				})
 				// unselect all selected files
 				.on('unselectall', unselectAll)
@@ -1540,7 +1545,9 @@ $.fn.elfindercwd = function(fm, options) {
 				query = e.data.query;
 			})
 			.bind('sortchange', function() {
+				var lastScrollLeft = wrapper.scrollLeft();
 				content(query ? lastSearch : fm.files(), !!query);
+				wrapper.scrollLeft(lastScrollLeft);
 				resize();
 			})
 			.bind('viewchange', function() {
