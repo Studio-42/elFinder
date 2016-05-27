@@ -3167,8 +3167,7 @@ abstract class elFinderVolumeDriver {
 						$chashes[] = $_file['hash'];
 					}
 				}
-				if ($chashes) {
-					mkdir($target, 0700, true);
+				if (($res = mkdir($target, 0700, true)) && $chashes) {
 					$res = $this->getItemsInHand($chashes, $target);
 				}
 				if (!$res) {
