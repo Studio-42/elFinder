@@ -98,12 +98,19 @@ class elFinderVolumeMsSQL extends elFinderVolumeDriver {
 			return false;
 		}
 
-
-		$this->conn = odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$this->options['db'];", $this->options['user'], $this->options['pass']);
-
-		if (odbc_errormsg($this->conn)) {
+		$this->conn = @odbc_pconnect("DRIVER={SQL Server};Server=".$this->options['host'].";ExtendedAnsiSQL=1;Database=".$this->options['db'].";UID=".$this->options['user'].";PWD=".$this->options['pass'],"","");   // odbc_pcconnect php >=5.6
+		
+		if (!$this->conn){
+		$this->conn = @odbc_connect("DRIVER={SQL Server};Server=".$this->options['host'].";ExtendedAnsiSQL=1;Database=".$this->options['db'].";UID=".$this->options['user'].";PWD=".$this->options['pass'],"","");   // odbc_pcconnect php >=5.6
+		}
+		if (!$this->conn){
+		$this->conn = @odbc_connect("Driver={SQL Server};Server=".$this->options['host'].";Database=$this->options['db'];", $this->options['user'], $this->options['pass']);   //odbc_connect php <=5.4
+		}
+		
+		if (!$this->conn) {
 			return false;
 		}
+		
 
 		$this->rootparameter($this->options['alias'], $this->options['defaults']['read'], $this->options['defaults']['write'], $this->options['defaults']['locked'], $this->options['defaults']['hidden']);
 
