@@ -22,7 +22,6 @@ function elFinderAutoloader($name) {
 		'elFinderVolumeLocalFileSystem' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeLocalFileSystem.class.php',
 		'elFinderVolumeMsSQL' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeMsSQL.class.php',
 		'elFinderVolumeMySQL' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeMySQL.class.php',
-		'elFinderVolumeS3' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeS3.class.php',
 	);
 	if (isset($map[$name])) {
 		return include_once($map[$name]);
