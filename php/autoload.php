@@ -20,7 +20,6 @@ function elFinderAutoloader($name) {
 		'elFinderVolumeFlysystemGoogleDriveCache' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
 		'elFinderVolumeFlysystemGoogleDriveNetmount' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
 		'elFinderVolumeLocalFileSystem' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeLocalFileSystem.class.php',
-		'elFinderVolumeMsSQL' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeMsSQL.class.php',
 		'elFinderVolumeMySQL' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeMySQL.class.php',
 	);
 	if (isset($map[$name])) {
