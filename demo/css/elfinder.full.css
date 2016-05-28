@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 07ae2ab) (2016-05-28)
+ * Version 2.1.11 (2.1-src Nightly: ca8ceb4) (2016-05-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -391,10 +391,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 /* drag helper */
 .elfinder-drag-helper {
+	top: 0px;
+	left: 0px;
 	width:70px;
 	height:60px;
 	padding:0 0 0 25px;
 	z-index:100000;
+	will-change: left, top;
 }
 .elfinder-drag-helper.html5-native {
 	position: absolute;
