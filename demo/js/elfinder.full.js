@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: d1fd62d) (2016-05-28)
+ * Version 2.1.11 (2.1-src Nightly: 509dd76) (2016-05-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4878,8 +4878,8 @@ elFinder.prototype = {
 					case 'G': return h;
 					case 'g': return g;
 					case 'h': return g > 9 ? g : '0'+g;
-					case 'a': return h > 12 ? 'pm' : 'am';
-					case 'A': return h > 12 ? 'PM' : 'AM';
+					case 'a': return h >= 12 ? 'pm' : 'am';
+					case 'A': return h >= 12 ? 'PM' : 'AM';
 					case 'i': return i > 9 ? i : '0'+i;
 					case 's': return s > 9 ? s : '0'+s;
 				}
@@ -5130,7 +5130,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: d1fd62d)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 509dd76)';
 
 
 
