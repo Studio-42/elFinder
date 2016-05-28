@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 509dd76) (2016-05-28)
+ * Version 2.1.11 (2.1-src Nightly: 07ae2ab) (2016-05-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -789,10 +789,10 @@ window.elFinder = function(node, opts) {
 			}
 			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
 				if (helper.data('refreshPositions') > 0) {
-					$(this).draggable('option', { refreshPositions : true });
+					$(this).draggable('option', { refreshPositions : true, elfRefresh : true });
 					helper.data('refreshPositions', -1);
 				} else {
-					$(this).draggable('option', { refreshPositions : false });
+					$(this).draggable('option', { refreshPositions : false, elfRefresh : false });
 					helper.data('refreshPositions', null);
 				}
 			}
@@ -5130,7 +5130,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 509dd76)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 07ae2ab)';
 
 
 
@@ -5151,7 +5151,7 @@ if ($.ui && $.ui.ddmanager) {
 			return document.elementFromPoint(rect.left, rect.top)? false : true;
 		}
 		
-		if (event.type === 'mousedown') {
+		if (event.type === 'mousedown' || t.options.elfRefresh) {
 			var i, d,
 			m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
 			l = m.length;
