@@ -4864,8 +4864,8 @@ elFinder.prototype = {
 					case 'G': return h;
 					case 'g': return g;
 					case 'h': return g > 9 ? g : '0'+g;
-					case 'a': return h > 12 ? 'pm' : 'am';
-					case 'A': return h > 12 ? 'PM' : 'AM';
+					case 'a': return h >= 12 ? 'pm' : 'am';
+					case 'A': return h >= 12 ? 'PM' : 'AM';
 					case 'i': return i > 9 ? i : '0'+i;
 					case 's': return s > 9 ? s : '0'+s;
 				}
