@@ -775,10 +775,10 @@ window.elFinder = function(node, opts) {
 			}
 			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
 				if (helper.data('refreshPositions') > 0) {
-					$(this).draggable('option', { refreshPositions : true });
+					$(this).draggable('option', { refreshPositions : true, elfRefresh : true });
 					helper.data('refreshPositions', -1);
 				} else {
-					$(this).draggable('option', { refreshPositions : false });
+					$(this).draggable('option', { refreshPositions : false, elfRefresh : false });
 					helper.data('refreshPositions', null);
 				}
 			}

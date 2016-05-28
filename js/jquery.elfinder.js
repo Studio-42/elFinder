@@ -11,7 +11,7 @@ if ($.ui && $.ui.ddmanager) {
 			return document.elementFromPoint(rect.left, rect.top)? false : true;
 		}
 		
-		if (event.type === 'mousedown') {
+		if (event.type === 'mousedown' || t.options.elfRefresh) {
 			var i, d,
 			m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
 			l = m.length;
