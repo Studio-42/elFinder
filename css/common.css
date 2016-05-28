@@ -66,10 +66,13 @@
 
 /* drag helper */
 .elfinder-drag-helper {
+	top: 0px;
+	left: 0px;
 	width:70px;
 	height:60px;
 	padding:0 0 0 25px;
 	z-index:100000;
+	will-change: left, top;
 }
 .elfinder-drag-helper.html5-native {
 	position: absolute;
