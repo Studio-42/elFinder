@@ -529,6 +529,28 @@ elFinder.prototype.commands.resize = function() {
 							dfrd.reject(error);
 						})
 						.done(function() {
+							var reload = function(url) {
+								var ifm;
+								try {
+									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
+										.attr('src', url)
+										.one('load', function() {
+											this.contentDocument.location.reload(true);
+											ifm.one('load', function() {
+												ifm.remove();
+											});
+										})
+										.appendTo('body');
+								} catch(e) {
+									ifm && ifm.remove();
+								}
+							},
+							url = fm.url(file.hash);
+							
+							reload(src);
+							if (url !== src) {
+								reload(url);
+							}
 							dfrd.resolve();
 						});
 						
