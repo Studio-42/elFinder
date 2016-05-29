@@ -212,9 +212,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return $mtime;
 		}
 		$inotifywait = defined('ELFINER_INOTIFYWAIT_PATH')? ELFINER_INOTIFYWAIT_PATH : 'inotifywait';
-		$path = escapeshellarg($path);
 		$standby = max(1, intval($standby));
-		$cmd = $inotifywait.' '.$path.' -t '.$standby.' -e moved_to,moved_from,move,close_write,delete,delete_self';
+		$cmd = $inotifywait.' '.escapeshellarg($path).' -t '.$standby.' -e moved_to,moved_from,move,close_write,delete,delete_self';
 		$this->procExec($cmd , $o, $r);
 		if ($r === 0) {
 			// changed
