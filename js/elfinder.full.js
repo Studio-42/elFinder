@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 6796bb2) (2016-05-29)
+ * Version 2.1.11 (2.1-src Nightly: 622ec73) (2016-05-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5130,7 +5130,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 6796bb2)';
+elFinder.prototype.version = '2.1.11 (2.1-src Nightly: 622ec73)';
 
 
 
@@ -5169,6 +5169,191 @@ if ($.ui && $.ui.ddmanager) {
 	};
 }
 })();
+
+/*!
+ * jQuery UI Touch Punch 0.2.3
+ *
+ * Copyright 2011–2014, Dave Furfero
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * Depends:
+ *	jquery.ui.widget.js
+ *	jquery.ui.mouse.js
+ */
+(function ($) {
+
+  // Detect touch support
+  $.support.touch = 'ontouchend' in document;
+
+  // Ignore browsers without touch support
+  if (!$.support.touch) {
+	return;
+  }
+
+  var mouseProto = $.ui.mouse.prototype,
+	  _mouseInit = mouseProto._mouseInit,
+	  _mouseDestroy = mouseProto._mouseDestroy,
+	  touchHandled;
+
+  /**
+   * Simulate a mouse event based on a corresponding touch event
+   * @param {Object} event A touch event
+   * @param {String} simulatedType The corresponding mouse event
+   */
+  function simulateMouseEvent (event, simulatedType) {
+
+	// Ignore multi-touch events
+	if (event.originalEvent.touches.length > 1) {
+	  return;
+	}
+
+	event.preventDefault();
+
+	var touch = event.originalEvent.changedTouches[0],
+		simulatedEvent = document.createEvent('MouseEvents');
+	
+	// Initialize the simulated mouse event using the touch event's coordinates
+	simulatedEvent.initMouseEvent(
+	  simulatedType,	// type
+	  true,				// bubbles					  
+	  true,				// cancelable				  
+	  window,			// view						  
+	  1,				// detail					  
+	  touch.screenX,	// screenX					  
+	  touch.screenY,	// screenY					  
+	  touch.clientX,	// clientX					  
+	  touch.clientY,	// clientY					  
+	  false,			// ctrlKey					  
+	  false,			// altKey					  
+	  false,			// shiftKey					  
+	  false,			// metaKey					  
+	  0,				// button					  
+	  null				// relatedTarget			  
+	);
+
+	// Dispatch the simulated event to the target element
+	event.target.dispatchEvent(simulatedEvent);
+  }
+
+  /**
+   * Handle the jQuery UI widget's touchstart events
+   * @param {Object} event The widget element's touchstart event
+   */
+  mouseProto._touchStart = function (event) {
+
+	var self = this;
+
+	// Ignore the event if another widget is already being handled
+	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0])) {
+	  return;
+	}
+
+	// Set the flag to prevent other widgets from inheriting the touch event
+	touchHandled = true;
+
+	// Track movement to determine if interaction was a click
+	self._touchMoved = false;
+
+	// Simulate the mouseover event
+	simulateMouseEvent(event, 'mouseover');
+
+	// Simulate the mousemove event
+	simulateMouseEvent(event, 'mousemove');
+
+	// Simulate the mousedown event
+	simulateMouseEvent(event, 'mousedown');
+  };
+
+  /**
+   * Handle the jQuery UI widget's touchmove events
+   * @param {Object} event The document's touchmove event
+   */
+  mouseProto._touchMove = function (event) {
+
+	// Ignore event if not handled
+	if (!touchHandled) {
+	  return;
+	}
+
+	// Interaction was not a click
+	this._touchMoved = true;
+
+	// Simulate the mousemove event
+	simulateMouseEvent(event, 'mousemove');
+  };
+
+  /**
+   * Handle the jQuery UI widget's touchend events
+   * @param {Object} event The document's touchend event
+   */
+  mouseProto._touchEnd = function (event) {
+
+	// Ignore event if not handled
+	if (!touchHandled) {
+	  return;
+	}
+
+	// Simulate the mouseup event
+	simulateMouseEvent(event, 'mouseup');
+
+	// Simulate the mouseout event
+	simulateMouseEvent(event, 'mouseout');
+
+	// If the touch interaction did not move, it should trigger a click
+	if (!this._touchMoved) {
+
+	  // Simulate the click event
+	  simulateMouseEvent(event, 'click');
+	}
+
+	// Unset the flag to allow other widgets to inherit the touch event
+	touchHandled = false;
+  };
+
+  /**
+   * A duck punch of the $.ui.mouse _mouseInit method to support touch events.
+   * This method extends the widget with bound touch event handlers that
+   * translate touch events to mouse events and pass them to the widget's
+   * original mouse event handling methods.
+   */
+  mouseProto._mouseInit = function () {
+	
+	var self = this;
+
+	if (self.element.hasClass('touch-punch')) {
+		// Delegate the touch handlers to the widget's element
+		self.element.bind({
+		  touchstart: $.proxy(self, '_touchStart'),
+		  touchmove: $.proxy(self, '_touchMove'),
+		  touchend: $.proxy(self, '_touchEnd')
+		});
+	}
+
+	// Call the original $.ui.mouse init method
+	_mouseInit.call(self);
+  };
+
+  /**
+   * Remove the touch event handlers
+   */
+  mouseProto._mouseDestroy = function () {
+	
+	var self = this;
+
+	if (self.element.hasClass('touch-punch')) {
+		// Delegate the touch handlers to the widget's element
+		self.element.unbind({
+		  touchstart: $.proxy(self, '_touchStart'),
+		  touchmove: $.proxy(self, '_touchMove'),
+		  touchend: $.proxy(self, '_touchEnd')
+		});
+	}
+
+	// Call the original $.ui.mouse destroy method
+	_mouseDestroy.call(self);
+  };
+
+})(jQuery);
 
 $.fn.elfinder = function(o) {
 	
@@ -16541,8 +16726,8 @@ elFinder.prototype.commands.resize = function() {
 					control  = $('<div class="elfinder-resize-control"/>'),
 					preview  = $('<div class="ui-front elfinder-resize-preview"/>'),
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
-					rhandle  = $('<div class="elfinder-resize-handle"/>'),
-					rhandlec = $('<div class="elfinder-resize-handle"/>'),
+					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
+					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
 					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
@@ -16662,6 +16847,14 @@ elFinder.prototype.commands.resize = function() {
 					rdegree = 0,
 					img     = $('<img/>')
 						.load(function() {
+							var r_scale, inputFirst,
+								imgRatio = img.height() / img.width();
+							
+							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
+								preview.height(preview.width() * imgRatio);
+								pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+							}
+							
 							spinner.remove();
 							
 							owidth  = img.width();
@@ -16673,12 +16866,12 @@ elFinder.prototype.commands.resize = function() {
 							width.val(owidth);
 							height.val(oheight);
 							
-							var r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
+							r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
 							rwidth = owidth * r_scale;
 							rheight = oheight * r_scale;
 							
 							type.button('enable');
-							control.find('input,select').removeAttr('disabled')
+							inputFirst = control.find('input,select').removeAttr('disabled')
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
 
@@ -16724,8 +16917,9 @@ elFinder.prototype.commands.resize = function() {
 										e.preventDefault();
 									}
 								})
-								.filter(':first').focus();
+								.filter(':first');
 								
+							!fm.UA.Mobile && inputFirst.focus();
 							resizable();
 							
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
@@ -17158,8 +17352,10 @@ elFinder.prototype.commands.resize = function() {
 					destroyOnClose : true,
 					buttons        : buttons,
 					open           : function() {
-						var dw = dialog.width() - 20;
+						var dw   = dialog.width() - 20,
+							winH = $(window).height() - 20;
 						(preview.width() > dw) && preview.width(dw);
+						(preview.height() > winH) && preview.height(winH);
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 						img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
