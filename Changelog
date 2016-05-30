@@ -1,4 +1,4 @@
-2016-0x-xx  
+2016-05-30  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.12):
 		- Fixed #1321 Not trim white spaces on editing the text file
