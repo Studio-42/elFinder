@@ -127,7 +127,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.11](https://github.com/Studio-42/elFinder/archive/2.1.11.zip)
+ + [elFinder 2.1.12](https://github.com/Studio-42/elFinder/archive/2.1.12.zip)
  + [elFinder 2.0.6](https://github.com/Studio-42/elFinder/archive/2.0.6.zip)
 
 **Nightly builds**
