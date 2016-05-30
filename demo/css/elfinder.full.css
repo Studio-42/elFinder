@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.11 (2.1-src Nightly: 6796bb2) (2016-05-29)
+ * Version 2.1.11 (2.1-src Nightly: 622ec73) (2016-05-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -134,14 +134,62 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+	height:100%;
+	width:10px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+	width:100%;
+	height:10px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { margin-right: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w { margin-left: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { margin-bottom: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {  margin-top: -7px; }
+
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	width: 10px;
+	height: 10px;
+}
 .elfinder-dialog .elfinder-dialog-resize .ui-resizable-se { 
 	background:transparent; 
 	bottom:0; 
 	right:0; 
 	margin-right:-7px;
 	margin-bottom:-7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw {
+	margin-left: -7px;
+	margin-bottom: -7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne {
+	margin-right:-7px;
+	margin-top:-7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	margin-left: -7px;
+	margin-top: -7px;
+}
+
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+	height: 20px;
+}
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+	width: 20px;
+}
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	width: 30px;
+	height: 30px;
 }
 
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
