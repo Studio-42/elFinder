@@ -23,6 +23,7 @@
 			- A little bigger icons
 			- Added item select checkboxes
 			- Path breadcrumbs move to top of workzone when hide navbar
+			- To enable resizing/cropping by touch events
 			- UX enhancements
 		- Fixed #1311 CWD list table with fixed fixed header
 		- UI path apply text-ellipsis in each holder name

@@ -158,8 +158,13 @@ elFinder.prototype.commands.resize = function() {
 							
 							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
 								preview.height(preview.width() * imgRatio);
-								pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 							}
+							
+							if (preview.height() > img.height() + 20) {
+								preview.height(img.height() + 20);
+							}
+							
+							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 							
 							spinner.remove();
 							
