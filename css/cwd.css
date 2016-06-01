@@ -178,17 +178,33 @@
 }
 
 /* thumbnail image */
-.elfinder-cwd-icon-image.elfinder-cwd-bgurl {
+.elfinder-cwd-icon.elfinder-cwd-bgurl {
 	background-position: center center;
 	background-repeat: no-repeat;
 	-moz-background-size: contain;
 	background-size: contain;
 }
 /* thumbnail self */
-.elfinder-cwd-icon-image.elfinder-cwd-bgurl.elfinder-cwd-bgself {
+.elfinder-cwd-icon.elfinder-cwd-bgurl.elfinder-cwd-bgself {
 	-moz-background-size: cover;
 	background-size: cover;
 }
+/* thumbnail image video overlay */
+.elfinder-cwd-icon.elfinder-cwd-icon-video.elfinder-cwd-bgurl:after {
+	content: ' ';
+	position: relative;
+	display: inline-block;
+	top: 28px;
+	left: -22px;
+	width: 21px;
+	height: 28px;
+	background: url('../img/icons-big.png') 0 0 no-repeat;
+	background-position: 0 -373px;
+	background-size: auto !important;
+	opacity: .6;
+	filter:Alpha(Opacity=60);
+}
+
 
 /* "opened folder" icon on dragover */
 .elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon { background-position: 0 -100px; }
@@ -446,6 +462,11 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* icon in ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
+
+/* thumbnail image video overlay */
+.elfinder-cwd-view-list .elfinder-cwd-icon.elfinder-cwd-icon-video.elfinder-cwd-bgurl:after {
+	content: none;
+}
 
 /* empty message */
 .elfinder-cwd-wrapper-empty .elfinder-cwd-view-list.elfinder-cwd:after {
