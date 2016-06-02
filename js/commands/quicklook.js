@@ -249,10 +249,12 @@ elFinder.prototype.commands.quicklook = function() {
 			cover.hide();
 		},
 			
+		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }),
+		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }),
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }))
+			.append(prev)
 			.append(fsicon)
-			.append($('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }))
+			.append(next)
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
@@ -282,11 +284,19 @@ elFinder.prototype.commands.quicklook = function() {
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb;
 
-			if (file) {
+			if (file && self.window.data('hash') !== file.hash) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
 				self.preview.off('changesize').trigger('change').children().remove();
 				title.html(fm.escape(file.name));
+				
+				prev.css('visibility', '');
+				next.css('visibility', '');
+				if (file.hash === fm.cwdId2Hash(cwd.find('[id]:first').attr('id'))) {
+					prev.css('visibility', 'hidden');
+				} else if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
+					next.css('visibility', 'hidden');
+				}
 				
 				info.html(
 						tpl.replace(/\{value\}/, fm.escape(file.name))
