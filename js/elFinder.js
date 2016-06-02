@@ -2300,7 +2300,7 @@ window.elFinder = function(node, opts) {
 				callback    : function() { self.exec(self.OS == 'mac' ? 'rename' : 'open') }
 			});
 		} else {
-			delete this.commands.getfile;
+			this.options.getFileCallback = null;
 		}
 	}
 
@@ -2323,7 +2323,12 @@ window.elFinder = function(node, opts) {
 	}
 	// check required commands
 	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'quicklook', 'getfile', 'help'], function(i, cmd) {
-		$.inArray(cmd, self.options.commands) === -1 && self.options.commands.push(cmd);
+		var idx = $.inArray(cmd, self.options.commands);
+		if (cmd === 'getfile' && ! self.options.getFileCallback) {
+			idx !== -1 && self.options.commands.splice(idx, 1);
+			return true;
+		}
+		idx === -1 && self.options.commands.push(cmd);
 	});
 
 	// load commands
