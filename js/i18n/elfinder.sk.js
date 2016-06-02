@@ -1,11 +1,11 @@
 /**
  * Slovak translation
- * @author RobiNN <admin@robonetwork.cf>
+ * @author Jakub Ďuraš <jkblmr@gmail.com>, RobiNN <admin@robonetwork.cf>
  * @version 2016-6-2
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sk = {
-		translator : 'RobiNN &lt;admin@robonetwork.cf&gt;',
+		translator : 'Jakub Ďuraš &lt;jkblmr@gmail.com&gt;, RobiNN &lt;admin@robonetwork.cf&gt;',
 		language   : 'slovenčina',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i',
