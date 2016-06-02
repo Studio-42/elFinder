@@ -1103,8 +1103,6 @@ $.fn.elfindercwd = function(fm, options) {
 						return;
 					}
 
-					e.stopImmediatePropagation();
-
 					if (e.shiftKey) {
 						prev = p.prevAll('.'+clSelected+':first');
 						next = p.nextAll('.'+clSelected+':first');
@@ -1390,11 +1388,9 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// unselect all on cwd click
 				.on('click.'+fm.namespace, function(e) {
-					if (cwd.data('longtap')) {
-						e.stopPropagation();
-						return;
+					if (e.target === this) {
+						!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 					}
-					!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 				})
 				// prepend fake file/dir
 				.on('create.'+fm.namespace, function(e, file) {
