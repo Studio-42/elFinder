@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2015-11-10
+ * @version 2016-05-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -11,7 +11,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Error',
 			'errUnknown'           : 'Unknown error.',
@@ -96,6 +96,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetUnMount'        : 'Unable to unmount', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 3.24.2016
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -112,6 +114,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
+			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'New text file',
 			'cmdopen'      : 'Open',
 			'cmdpaste'     : 'Paste',
@@ -129,7 +132,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
-			
+			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
+
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
 			'btnSave'   : 'Save',
@@ -148,7 +152,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
 			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Save & Close', // from v2.1 added 12.6.2015
-			
+			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
@@ -175,7 +180,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfreaddir'  : 'Reading folder infomation', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
-			
+			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
 			'Today'       : 'Today',
@@ -323,6 +330,21 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : 'Execute', // from v2.1 added 20.6.2015
 			'perm'            : 'Permission', // from v2.1 added 20.6.2015
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Folder is empty', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'Search results is empty', // from v2.1.12 added 5.16.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
