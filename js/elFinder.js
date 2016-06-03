@@ -1973,6 +1973,8 @@ window.elFinder = function(node, opts) {
 			this.options.syncStart = false;
 			this.autoSync('stop');
 			this.trigger('destroy').disable();
+			clipboard = [];
+			selected = [];
 			listeners = {};
 			shortcuts = {};
 			$(window).off('.' + namespace);
@@ -2518,9 +2520,22 @@ window.elFinder = function(node, opts) {
 				self.trigger('resize', {width : node.width(), height : node.height()});
 			}, 200);
 		})
-		.on('beforeunload.' + namespace,function(){
-			if (self.ui.notify.children().length) {
-				return self.i18n('ntfsmth');
+		.on('beforeunload.' + namespace,function(e){
+			var msg, cnt;
+			if (node.is(':visible')) {
+				if (self.ui.notify.children().length && $.inArray('hasNotifyDialog', self.options.windowCloseConfirm) !== -1) {
+					msg = self.i18n('ntfsmth');
+				} else if (node.find('.'+self.res('class', 'editing')).length && $.inArray('editingFile', self.options.windowCloseConfirm) !== -1) {
+					msg = self.i18n('editingFile');
+				} else if ((cnt = Object.keys(self.selected()).length) && $.inArray('hasSelectedItem', self.options.windowCloseConfirm) !== -1) {
+					msg = self.i18n('hasSelected', ''+cnt);
+				} else if ((cnt = Object.keys(self.clipboard()).length) && $.inArray('hasClipboardData', self.options.windowCloseConfirm) !== -1) {
+					msg = self.i18n('hasClipboard', ''+cnt);
+				}
+				if (msg) {
+					e.returnValue = msg;
+				}
+				return msg;
 			}
 			self.trigger('unload');
 		});
