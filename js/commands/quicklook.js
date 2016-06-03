@@ -294,7 +294,8 @@ elFinder.prototype.commands.quicklook = function() {
 				next.css('visibility', '');
 				if (file.hash === fm.cwdId2Hash(cwd.find('[id]:first').attr('id'))) {
 					prev.css('visibility', 'hidden');
-				} else if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
+				}
+				if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
 					next.css('visibility', 'hidden');
 				}
 				
