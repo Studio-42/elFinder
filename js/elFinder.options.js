@@ -830,6 +830,16 @@ elFinder.prototype._options = {
 	enableAlways : false,
 
 	/**
+	 * Show window close confirm dialog
+	 * Value is which state to show
+	 * 'hasNotifyDialog', 'editingFile', 'hasSelectedItem' and 'hasClipboardData'
+	 * 
+	 * @type     Array
+	 * @default  ['hasNotifyDialog', 'editingFile']
+	 */
+	windowCloseConfirm : ['hasNotifyDialog', 'editingFile'],
+
+	/**
 	 * Debug config
 	 *
 	 * @type Array|Boolean

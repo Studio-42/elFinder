@@ -352,6 +352,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : 'Search results is empty', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'You are editing a file.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
