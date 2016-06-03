@@ -264,7 +264,7 @@ task('clean', function(){
 			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', path.join('files', 'readme.txt')])
 			.concat(grep('php', '\\.php|\\.sql'))
 			.concat(path.join('php', 'mime.types'))
-			.concat(grep(path.join('php', 'libs'))
+			.concat(grep(path.join('php', 'libs')))
 			.concat(grep(path.join('php', 'resources')));
 		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
 	}
