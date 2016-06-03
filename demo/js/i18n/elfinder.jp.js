@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-05-16
+ * @version 2016-06-03
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -346,6 +346,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'openMulti'       : '複数ファイルオープン', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': '$1 個のファイルを開こうとしています。このままブラウザで開きますか？', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : '検索対象に該当するアイテムはありません', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'ファイルを編集中です', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : '$1 個のアイテムを選択中です', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています', // from v2.1.13 added 6.3.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
