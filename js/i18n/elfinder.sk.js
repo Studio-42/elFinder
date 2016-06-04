@@ -1,7 +1,8 @@
 /**
  * Slovak translation
- * @author Jakub Ďuraš <jkblmr@gmail.com>, RobiNN <admin@robonetwork.cf>
- * @version 2016-6-2
+ * @author Jakub Ďuraš <jkblmr@gmail.com>
+ * @author RobiNN <admin@robonetwork.cf>
+ * @version 2016-6-3
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sk = {
@@ -345,6 +346,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'openMulti'       : 'Otvorenie viacerých súborov', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'Pokúšate sa otvoriť súbor $1. Naozaj ho chcete otvoriť v prehliadači?', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : 'Výsledky vyhľadávania su prázdne', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Upravujete súbor.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Vybrali ste $1 položky.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'Máte $1 položky v schránke.', // from v2.1.13 added 6.3.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
@@ -385,7 +389,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindCHeader'     : 'C header zdrojový kód',
 			'kindCPP'         : 'C++ zdrojový kód',
 			'kindCPPHeader'   : 'C++ header zdrojový kód',
-			'kindShell'       : 'Unix shell script',
+			'kindShell'       : 'Unix shell skript',
 			'kindPython'      : 'Python zdrojový kód',
 			'kindJava'        : 'Java zdrojový kód',
 			'kindRuby'        : 'Ruby zdrojový kód',
