@@ -1388,7 +1388,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// unselect all on cwd click
 				.on('click.'+fm.namespace, function(e) {
-					if (e.target === this) {
+					if (e.target === this && ! cwd.data('longtap')) {
 						!e.shiftKey && !e.ctrlKey && !e.metaKey && unselectAll();
 					}
 				})
