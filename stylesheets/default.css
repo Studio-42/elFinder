@@ -12,7 +12,10 @@ body {
 img { border:0; }
 h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 
-.wrap { width: 90%; margin: 0 auto; }
+.wrap { width: 100%; margin: 0 auto; }
+@media screen and (min-width:640px) { 
+  .wrap { width: 90%;}
+}
 
 .header { margin: 20px 0 20px 0; }
   .header .logo img {
