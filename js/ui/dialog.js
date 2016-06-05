@@ -124,13 +124,13 @@ $.fn.elfinderdialog = function(opts) {
 				})
 				.on('posinit', function() {
 					var css = opts.position;
-					if (!css) {
+					if (! css && ! dialog.data('resizing')) {
 						css = {
 							top  : Math.max(0, parseInt((parent.height() - dialog.outerHeight())/2 - 42))+'px',
 							left : Math.max(0, parseInt((parent.width() - dialog.outerWidth())/2))+'px'
 						};
 					}
-					dialog.css(css);
+					css && dialog.css(css);
 				})
 				.data({modal: opts.modal})
 			;
@@ -209,7 +209,9 @@ $.fn.elfinderdialog = function(opts) {
 			dialog.resizable({
 					minWidth   : opts.minWidth,
 					minHeight  : opts.minHeight,
-					alsoResize : this
+					alsoResize : this,
+					start      : function() { dialog.data('resizing', true); },
+					stop       : function() { dialog.data('resizing', false); }
 				});
 		} 
 			
