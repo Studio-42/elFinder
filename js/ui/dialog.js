@@ -210,8 +210,17 @@ $.fn.elfinderdialog = function(opts) {
 					minWidth   : opts.minWidth,
 					minHeight  : opts.minHeight,
 					alsoResize : this,
-					start      : function() { dialog.data('resizing', true); },
-					stop       : function() { dialog.data('resizing', false); }
+					start      : function() {
+						if (dialog.data('resizing') !== true && dialog.data('resizing')) {
+							clearTimeout(dialog.data('resizing'));
+						}
+						dialog.data('resizing', true);
+					},
+					stop       : function() {
+						dialog.data('resizing', setTimeout(function() {
+							dialog.data('resizing', false);
+						}, 200));
+					}
 				});
 		} 
 			
