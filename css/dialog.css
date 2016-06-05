@@ -25,6 +25,13 @@
 	padding:.2em 1em;
 }
 
+/* resize handle for touch devices */
+.elfinder-touch .std42-dialog.ui-dialog .ui-resizable-se {
+	width: 12px;
+	height: 12px;
+	zoom: 1.5;
+}
+
 .std42-dialog .ui-dialog-titlebar-close,
 .std42-dialog .ui-dialog-titlebar-close:hover { padding:1px; }
 

@@ -14,7 +14,7 @@
 	padding:30px 0 40px 0;
 }
 
-.elfinder-quicklook .ui-resizable-se { 
+.elfinder-quicklook .ui-resizable-se {
 	width:14px;
 	height:14px;
 	right:5px;
@@ -46,7 +46,8 @@
 	display:block;
 }
 /* hide titlebar in fullscreen mode */
-.elfinder-quicklook-fullscreen .elfinder-quicklook-titlebar { display:none; }
+.elfinder-quicklook-fullscreen .elfinder-quicklook-titlebar,
+.elfinder-quicklook-fullscreen.elfinder-quicklook .ui-resizable-handle { display:none; }
 
 /* hide preview border in fullscreen mode */
 .elfinder-quicklook-fullscreen .elfinder-quicklook-preview { border:0 solid ;}
