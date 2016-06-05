@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 5b64aa3) (2016-06-04)
+ * Version 2.1.12 (2.1-src Nightly: 3caf897) (2016-06-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5150,7 +5150,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 5b64aa3)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 3caf897)';
 
 
 
@@ -9678,7 +9678,7 @@ $.fn.elfinderdialog = function(opts) {
 			btnWidth   = 0,
 			platformWin = (window.navigator.platform.indexOf('Win') != -1),
 			
-			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog  '+cldialog+' '+opts.cssClass+'"/>')
+			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog touch-punch '+cldialog+' '+opts.cssClass+'"/>')
 				.hide()
 				.append(self)
 				.appendTo(parent)
@@ -15587,7 +15587,7 @@ elFinder.prototype.commands.quicklook = function() {
 
 	
 
-	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook" style="position:absolute"/>')
+	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.click(function(e) { e.stopPropagation();  })
 		.append(
@@ -15733,7 +15733,7 @@ elFinder.prototype.commands.quicklook = function() {
 				e.keyCode == 27 && self.opened() && win.trigger('close')
 			})
 			
-			if ($.fn.resizable && !fm.UA.Touch) {
+			if ($.fn.resizable/* && !fm.UA.Touch*/) {
 				win.resizable({ 
 					handles   : 'se', 
 					minWidth  : 350, 
