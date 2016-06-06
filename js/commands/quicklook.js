@@ -379,6 +379,7 @@ elFinder.prototype.commands.quicklook = function() {
 					
 				};
 				
+			win.data('hash', '');
 			if (self.opened()) {
 				state = animated;
 				win.hasClass(fullscreen) && fsicon.click();
