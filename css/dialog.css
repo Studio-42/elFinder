@@ -30,6 +30,10 @@
 	width: 12px;
 	height: 12px;
 	zoom: 1.5;
+	right: -7px;
+	bottom: -7px;
+	margin: 3px 7px 7px 3px;
+	background-position: -64px -224px;
 }
 
 .std42-dialog .ui-dialog-titlebar-close,
