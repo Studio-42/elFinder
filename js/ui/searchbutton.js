@@ -76,23 +76,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
-				.append(
-					$('<div class="buttonset"/>')
-						.append(
-							$('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'),
-							$('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'),
-							$('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>')
-						),
-					$('<div class="buttonset"/>')
-						.append(
-							$('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'),
-							$('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>')
-						)
-				)
-				.hide()
-				.css('overflow', 'hidden')
-				.appendTo(button);
+			opts;
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
@@ -101,22 +85,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
 			.click(abort);
-		
-		$(function(){
-			if (!opts) {
-				return;
-			}
-			opts.find('div.buttonset').buttonset();
-			$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
-			$('#'+id('SearchMime')).next('label').attr('title', fm.i18n('searchMime'));
-			opts.find('input')
-			.on('mousedown', function(){
-				opts.data('infocus', true);
-			})
-			.on('click', function(){
-				$.trim(input.val()) && search();
-			});
-		});
 		
 		// wait when button will be added to DOM
 		toolbar.on('load', function(){
@@ -137,6 +105,38 @@ $.fn.elfindersearchbutton = function(cmd) {
 		});
 		
 		fm
+			.one('open', function() {
+				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+					.append(
+						$('<div class="buttonset"/>')
+							.append(
+								$('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'),
+								$('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'),
+								$('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>')
+							),
+						$('<div class="buttonset"/>')
+							.append(
+								$('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'),
+								$('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>')
+							)
+					)
+					.hide()
+					.css('overflow', 'hidden')
+					.appendTo(button);
+				if (opts) {
+					opts.find('div.buttonset').buttonset();
+					$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
+					$('#'+id('SearchMime')).next('label').attr('title', fm.i18n('searchMime'));
+					opts.on('mousedown', 'div.buttonset', function(e){
+							e.stopPropagation();
+							opts.data('infocus', true);
+						})
+						.on('click', 'input', function(e) {
+							e.stopPropagation();
+							$.trim(input.val()) && search();
+						});
+				}
+			})
 			.select(function() {
 				input.blur();
 			})
@@ -160,7 +160,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
 				callback    : function() { 
-					toolbar.find('.'+btnCls+' input:text').select().focus();
+					input.select().focus();
 				}
 			});
 
