@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: a5904fe) (2016-06-06)
+ * Version 2.1.12 (2.1-src Nightly: 2532343) (2016-06-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2363,7 +2363,7 @@ embed.elfinder-quicklook-preview-audio {
 	position:absolute;
 	height:18px;
 	top: 50%;
-	margin:-9px 4px 0 4px;
+	margin:-8px 4px 0 4px;
 	opacity: .6; 
 	filter:Alpha(Opacity=60);
 }
