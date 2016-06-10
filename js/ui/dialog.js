@@ -50,6 +50,7 @@ $.fn.elfinderdialog = function(opts) {
 					containment : 'document',
 					stop : function(e, ui){
 						dialog.css({height : opts.height});
+						self.data('draged', true);
 					}
 				})
 				.css({

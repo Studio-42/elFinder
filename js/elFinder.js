@@ -1913,7 +1913,7 @@ window.elFinder = function(node, opts) {
 	this.dialog = function(content, options) {
 		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options);
 		this.bind('resize', function(){
-			dialog.elfinderdialog('posInit');
+			! dialog.data('draged') && dialog.elfinderdialog('posInit');
 		});
 		return dialog;
 	}
