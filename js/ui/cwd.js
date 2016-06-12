@@ -1474,7 +1474,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (list) {
 						cwd.find('table').css('table-layout', '')
 							.find('td').css('width', '');
-						fixTableHeader();
+						fixTableHeader({fitWidth: true});
 						fm.storage('cwdColWidth', colWidth = null);
 					}
 				}),
