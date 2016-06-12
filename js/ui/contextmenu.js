@@ -196,27 +196,31 @@ $.fn.elfindercontextmenu = function(fm) {
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){
-								submenu.css({ left: 'auto', right: 'auto' });
-								var nodeOffset = node.offset(),
-									baseleft   = nodeOffset.left,
-									basetop    = nodeOffset.top,
-									basewidth  = node.outerWidth(),
-									width      = submenu.outerWidth(),
-									height     = submenu.outerHeight(),
-									baseOffset = base.offset(),
-									wwidth     = baseOffset.left + base.width(),
-									wheight    = baseOffset.top + base.height(),
-									x, y, over;
-
-								over = (baseleft + basewidth + width) - wwidth;
-								x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
-								if (subpos === 'right' && baseleft < width) {
-									x = fm.UA.Mobile? 30 - basewidth : basewidth - (width - baseleft);
+								if (! show) {
+									submenu.hide();
+								} else {
+									submenu.css({ left: 'auto', right: 'auto' });
+									var nodeOffset = node.offset(),
+										baseleft   = nodeOffset.left,
+										basetop    = nodeOffset.top,
+										basewidth  = node.outerWidth(),
+										width      = submenu.outerWidth(),
+										height     = submenu.outerHeight(),
+										baseOffset = base.offset(),
+										wwidth     = baseOffset.left + base.width(),
+										wheight    = baseOffset.top + base.height(),
+										x, y, over;
+	
+									over = (baseleft + basewidth + width) - wwidth;
+									x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
+									if (subpos === 'right' && baseleft < width) {
+										x = fm.UA.Mobile? 30 - basewidth : basewidth - (width - baseleft);
+									}
+									over = (basetop + 5 + height) - wheight;
+									y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
+	
+									submenu.css({ top : y }).css(subpos, x).show();
 								}
-								over = (basetop + 5 + height) - wheight;
-								y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
-
-								submenu.css({ top : y }).css(subpos, x).toggle(show);
 							};
 							
 							node.addClass('elfinder-contextmenu-group').hover(function(e){

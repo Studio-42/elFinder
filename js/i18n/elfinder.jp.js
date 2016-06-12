@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-06-03
+ * @version 2016-06-12
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -134,7 +134,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdplaces'    : 'お気に入りへ', // added 28.12.2014
 			'cmdchmod'     : '属性変更', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'フォルダを開く', // from v2.1 added 13.1.2016
-
+			'cmdcolwidth'  : '列幅リセット', // from v2.1.13 added 12.06.2016
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
 			'btnSave'   : '保存',

@@ -139,12 +139,16 @@ $.fn.elfindercwd = function(fm, options) {
 				var customCols = '';
 				var columns = options.listView.columns;
 				for (var i = 0; i < columns.length; i++) {
-					customCols += '<td>{' + columns[i] + '}</td>';
+					customCols += '<td class="elfinder-col-'+columns[i]+'">{' + columns[i] + '}</td>';
 				}
 				return customCols;
 			},
 			
 			selectCheckbox = ($.map(options.showSelectCheckboxUA, function(t) {return (fm.UA[t] || t.match(/^all$/i))? true : null;}).length)? '<div class="elfinder-cwd-select"><input type="checkbox"></div>' : '',
+
+			colResizing = false,
+			
+			colWidth = null,
 
 			/**
 			 * File templates
@@ -153,7 +157,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			templates = {
 				icon : '<div id="{id}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on"{style}/>{marker}</div><div class="elfinder-cwd-filename" title="{nametitle}">{name}</div>'+selectCheckbox+'</div>',
-				row  : '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div>'+selectCheckbox+'</td>'+customColsBuild()+'</tr>',
+				row  : '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td class="elfinder-col-name"><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div>'+selectCheckbox+'</td>'+customColsBuild()+'</tr>',
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -552,7 +556,16 @@ $.fn.elfindercwd = function(fm, options) {
 				// stop while scrolling
 				bufferExt.timer && clearTimeout(bufferExt.timer);
 				// first time to go()
-				!bufferExt.timer && go();
+				if (!bufferExt.timer) {
+					go();
+					if (list && colWidth) {
+						cwd.find('table').css('table-layout', 'fixed');
+						$.each(colWidth, function(k, w) {
+							cwd.find('td.elfinder-col-'+k+':first').width(w);
+						});
+						fixTableHeader({fitWidth: true});
+					}
+				}
 				// regist next go()
 				bufferExt.timer = setTimeout(function(){
 					go();
@@ -563,7 +576,7 @@ $.fn.elfindercwd = function(fm, options) {
 			tableHeader = null,
 			
 			// To fixed table header colmun
-			fixTableHeader = function() {
+			fixTableHeader = function(opts) {
 				if (! options.listView.fixedHeader) {
 					return;
 				}
@@ -581,6 +594,7 @@ $.fn.elfindercwd = function(fm, options) {
 						base.css(pos, val);
 					}
 				},
+				opts = opts || {},
 				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
 				
 				tbody = cwd.find('tbody');
@@ -617,7 +631,7 @@ $.fn.elfindercwd = function(fm, options) {
 						htr = thead.children('tr:first');
 					}
 					
-					if (init || Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
+					if (init || opts.fitWidth || Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
 						cnt = options.listView.columns.length + 1;
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
@@ -1028,6 +1042,42 @@ $.fn.elfindercwd = function(fm, options) {
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
 						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, 'td', wrapperContextMenu.touchend)
 						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
+						.find('td').addClass('touch-punch').resizable({
+							handles: fm.direction === 'ltr'? 'e' : 'w',
+							start: function(e, ui) {
+								var target = cwd.find('td.elfinder-col-'
+									+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
+									+ ':first');
+								
+								ui.element
+									.data('resizeTarget', target)
+									.data('targetWidth', target.width());
+								colResizing = true;
+								if (cwd.find('table').css('table-layout') !== 'fixed') {
+									cwd.find('tbody tr:first td').each(function() {
+										$(this).width($(this).width());
+									});
+									cwd.find('table').css('table-layout', 'fixed');
+								}
+							},
+							resize: function(e, ui) {
+								ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
+							},
+							stop : function() {
+								colResizing = false;
+								fixTableHeader({fitWidth: true});
+								if (! colWidth) {
+									colWidth = {};
+								}
+								cwd.find('tbody tr:first td').each(function() {
+									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
+									colWidth[name] = $(this).width();
+								});
+								fm.storage('cwdColWidth', JSON.stringify(colWidth));
+							}
+						})
+						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical')
+						.end().end()
 					).find('td:first').append(selectAllCheckbox);
 				}
 		
@@ -1419,6 +1469,14 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('selectfile', function(e, id) {
 					$('#'+fm.cwdHash2Id(id)).trigger(evtSelect);
 					trigger();
+				})
+				.on('colwidth', function() {
+					if (list) {
+						cwd.find('table').css('table-layout', '')
+							.find('td').css('width', '');
+						fixTableHeader();
+						fm.storage('cwdColWidth', colWidth = null);
+					}
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
@@ -1481,7 +1539,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				}, 20);
 				
-				list && fixTableHeader();
+				list && ! colResizing && fixTableHeader();
 			},
 			
 			// elfinder node
@@ -1491,6 +1549,12 @@ $.fn.elfindercwd = function(fm, options) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
 
+		try {
+			colWidth = fm.storage('cwdColWidth')? JSON.parse(fm.storage('cwdColWidth')) : null;
+		} catch(e) {
+			colWidth = null;
+		}
+		
 		if (mobile) {
 			// for iOS5 bug
 			$('body').on('touchstart touchmove touchend', function(e){});
