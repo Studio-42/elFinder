@@ -468,6 +468,21 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	content: none;
 }
 
+/* table header resize handle */
+.elfinder-cwd-view-list thead td .ui-resizable-handle {
+	height: 100%;
+	top: 3px;
+}
+.elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-handle {
+	top: 8px;
+}
+.elfinder-cwd-view-list thead td .ui-resizable-e {
+	right: -7px;
+}
+.elfinder-cwd-view-list thead td .ui-resizable-w {
+	left: -7px;
+}
+
 /* empty message */
 .elfinder-cwd-wrapper-empty .elfinder-cwd-view-list.elfinder-cwd:after {
 	margin-top: 0;
