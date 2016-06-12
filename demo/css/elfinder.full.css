@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: a71dea7) (2016-06-10)
+ * Version 2.1.12 (2.1-src Nightly: a5904b5) (2016-06-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -236,10 +236,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td {
 }
 div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: absolute;
-	top: 0.4em;
+	top: 4px;
 	left: 0;
 	right: 0;
 	margin: auto 0px auto auto;
+}
+.elfinder-touch div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	top: 7px;
 }
 .elfinder-rtl div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	margin: auto auto auto 0px;
@@ -1105,6 +1108,21 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* thumbnail image video overlay */
 .elfinder-cwd-view-list .elfinder-cwd-icon.elfinder-cwd-icon-video.elfinder-cwd-bgurl:after {
 	content: none;
+}
+
+/* table header resize handle */
+.elfinder-cwd-view-list thead td .ui-resizable-handle {
+	height: 100%;
+	top: 3px;
+}
+.elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-handle {
+	top: 8px;
+}
+.elfinder-cwd-view-list thead td .ui-resizable-e {
+	right: -7px;
+}
+.elfinder-cwd-view-list thead td .ui-resizable-w {
+	left: -7px;
 }
 
 /* empty message */
@@ -2245,6 +2263,7 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-accept    { background-position: 0 -736px; }
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-menu      { background-position: 0 -752px; }
+.elfinder-button-icon-colwidth  { background-position: 0 -768px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
