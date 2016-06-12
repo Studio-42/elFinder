@@ -226,10 +226,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td {
 }
 div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: absolute;
-	top: 0.4em;
+	top: 4px;
 	left: 0;
 	right: 0;
 	margin: auto 0px auto auto;
+}
+.elfinder-touch div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	top: 7px;
 }
 .elfinder-rtl div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	margin: auto auto auto 0px;
