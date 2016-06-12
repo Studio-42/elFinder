@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: a5904b5) (2016-06-12)
+ * Version 2.1.12 (2.1-src Nightly: 9d02c1e) (2016-06-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5152,7 +5152,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: a5904b5)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 9d02c1e)';
 
 
 
@@ -12772,6 +12772,30 @@ elFinder.prototype.commands.chmod = function() {
 	};
 };
 
+
+/*
+ * File: /js/commands/colwidth.js
+ */
+
+/**
+ * @class  elFinder command "colwidth"
+ * CWD list table columns width to auto
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.colwidth = function() {
+	this.alwaysEnabled = true;
+	this.updateOnSelect = false;
+	
+	this.getstate = function() {
+		return this.fm.getUI('cwd').find('table').css('table-layout') === 'fixed' ? 0 : -1;
+	}
+	
+	this.exec = function() {
+		this.fm.getUI('cwd').trigger('colwidth');
+	}
+	
+};
 
 /*
  * File: /js/commands/copy.js
