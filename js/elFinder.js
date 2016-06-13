@@ -4344,9 +4344,10 @@ elFinder.prototype = {
 			return date1 == date2 ? 0 : date1 > date2 ? 1 : -1
 		},
 		perm : function(file1, file2) { 
-			var v1 = (file1.write? 'w' : 'a') + (file1.read? 'r' : 'a'),
-				v2 = (file2.write? 'w' : 'a') + (file2.read? 'r' : 'a');
-			return elFinder.prototype.naturalCompare(v1, v2);
+			var val = function(file) { return (file.write? 2 : 0) + (file.read? 1 : 0); },
+				v1  = val(file1),
+				v2  = val(file2);
+			return v1 > v2 ? 1 : -1;
 		},
 		mode : function(file1, file2) { 
 			var v1 = file1.mode || (file1.perm || ''),
