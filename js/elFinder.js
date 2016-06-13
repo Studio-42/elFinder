@@ -4347,7 +4347,7 @@ elFinder.prototype = {
 			var val = function(file) { return (file.write? 2 : 0) + (file.read? 1 : 0); },
 				v1  = val(file1),
 				v2  = val(file2);
-			return v1 > v2 ? 1 : -1;
+			return elFinder.prototype.naturalCompare(v1, v2);
 		},
 		mode : function(file1, file2) { 
 			var v1 = file1.mode || (file1.perm || ''),
