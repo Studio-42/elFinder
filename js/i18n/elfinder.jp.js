@@ -233,6 +233,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'サイズ順',
 			'sortdate'          : '日付順',
 			'sortFoldersFirst'  : 'フォルダ優先',
+			'sortperm'          : '権限順',      // from v2.1.13 added 13.06.2016
+			'sortmode'          : '属性順',      // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'オーナー順',  // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'グループ順',  // from v2.1.13 added 13.06.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : '新規ファイル.txt', // added 10.11.2015

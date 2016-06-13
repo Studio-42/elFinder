@@ -366,15 +366,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			}
 		}
 		
-		$stat['owner'] = '';
 		if ($this->options['statOwner']) {
 			$stat['owner'] = $info[2];
 			$stat['group'] = $info[3];
 			$stat['perm']  = substr($info[0], 1);
 			$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
 		}
+		$owner = isset($stat['owner'])? $stat['owner'] : '';
 		
-		$perm = $this->parsePermissions($info[0], $stat['owner']);
+		$perm = $this->parsePermissions($info[0], $owner);
 		$stat['name']  = $name;
 		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
