@@ -272,6 +272,7 @@ window.elFinder = function(node, opts) {
 				});
 			}
 
+			self.sorters = [];
 			cwd = data.cwd.hash;
 			cache(data.files);
 			if (!files[cwd]) {
@@ -289,7 +290,8 @@ window.elFinder = function(node, opts) {
 		 * @return void
 		 **/
 		cache = function(data) {
-			var l = data.length, f, i;
+			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
+				l = data.length, f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
@@ -310,6 +312,13 @@ window.elFinder = function(node, opts) {
 							}
 							self.roots[f.volumeid] = f.hash;
 						}
+					}
+					if (! self.sorters.length && f.phash === cwd) {
+						$.each(self.sortRules, function(key) {
+							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+								self.sorters.push(key);
+							}
+						});
 					}
 					files[f.hash] = f;
 				} 
@@ -4333,8 +4342,35 @@ elFinder.prototype = {
 				date2 = file2.ts || file2.date;
 
 			return date1 == date2 ? 0 : date1 > date2 ? 1 : -1
+		},
+		perm : function(file1, file2) { 
+			var v1 = (file1.write? 'w' : 'a') + (file1.read? 'r' : 'a'),
+				v2 = (file2.write? 'w' : 'a') + (file2.read? 'r' : 'a');
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		mode : function(file1, file2) { 
+			var v1 = file1.mode || (file1.perm || ''),
+				v2 = file2.mode || (file2.perm || '');
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		owner : function(file1, file2) { 
+			var v1 = file1.owner || '',
+				v2 = file2.owner || '';
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		group : function(file1, file2) { 
+			var v1 = file1.group || '',
+				v2 = file2.group || '';
+			return elFinder.prototype.naturalCompare(v1, v2);
 		}
 	},
+	
+	/**
+	 * Valid sort rule names
+	 * 
+	 * @type Array
+	 */
+	sorters : [],
 	
 	/**
 	 * Compare strings for natural sort
