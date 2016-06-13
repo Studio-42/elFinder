@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 7a261b0) (2016-06-12)
+ * Version 2.1.12 (2.1-src Nightly: f0a36b7) (2016-06-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -286,6 +286,7 @@ window.elFinder = function(node, opts) {
 				});
 			}
 
+			self.sorters = [];
 			cwd = data.cwd.hash;
 			cache(data.files);
 			if (!files[cwd]) {
@@ -303,7 +304,8 @@ window.elFinder = function(node, opts) {
 		 * @return void
 		 **/
 		cache = function(data) {
-			var l = data.length, f, i;
+			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
+				l = data.length, f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
@@ -324,6 +326,13 @@ window.elFinder = function(node, opts) {
 							}
 							self.roots[f.volumeid] = f.hash;
 						}
+					}
+					if (! self.sorters.length && f.phash === cwd) {
+						$.each(self.sortRules, function(key) {
+							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+								self.sorters.push(key);
+							}
+						});
 					}
 					files[f.hash] = f;
 				} 
@@ -4347,8 +4356,35 @@ elFinder.prototype = {
 				date2 = file2.ts || file2.date;
 
 			return date1 == date2 ? 0 : date1 > date2 ? 1 : -1
+		},
+		perm : function(file1, file2) { 
+			var v1 = (file1.write? 'w' : 'a') + (file1.read? 'r' : 'a'),
+				v2 = (file2.write? 'w' : 'a') + (file2.read? 'r' : 'a');
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		mode : function(file1, file2) { 
+			var v1 = file1.mode || (file1.perm || ''),
+				v2 = file2.mode || (file2.perm || '');
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		owner : function(file1, file2) { 
+			var v1 = file1.owner || '',
+				v2 = file2.owner || '';
+			return elFinder.prototype.naturalCompare(v1, v2);
+		},
+		group : function(file1, file2) { 
+			var v1 = file1.group || '',
+				v2 = file2.group || '';
+			return elFinder.prototype.naturalCompare(v1, v2);
 		}
 	},
+	
+	/**
+	 * Valid sort rule names
+	 * 
+	 * @type Array
+	 */
+	sorters : [],
 	
 	/**
 	 * Compare strings for natural sort
@@ -5152,7 +5188,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 7a261b0)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: f0a36b7)';
 
 
 
@@ -6019,7 +6055,7 @@ elFinder.prototype._options = {
 
 	/**
 	 * Custom files sort rules.
-	 * All default rules (name/size/kind/date) set in elFinder._sortRules
+	 * All default rules (name/size/kind/date/perm/mode/owner/group) set in elFinder._sortRules
 	 *
 	 * @type {Object}
 	 * @example
@@ -7293,6 +7329,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'by size',
 			'sortdate'          : 'by date',
 			'sortFoldersFirst'  : 'Folders first',
+			'sortperm'          : 'by permission', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
@@ -17979,8 +18019,9 @@ elFinder.prototype.commands.sort = function() {
 					type  : name,
 					order : name == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
 				};
-			var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-			self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
+			if ($.inArray(name, fm.sorters) !== -1) {
+				var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
+				self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
 		});
 		self.variants.push('|');
 		self.variants.push([
@@ -17991,9 +18032,15 @@ elFinder.prototype.commands.sort = function() {
 			},
 			(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 		]);
-	});
-	
-	fm.bind('open sortchange viewchange search searchend', function() {
+	})
+	.bind('open', function() {
+		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
+			var tgt = $(this),
+				rel = tgt.attr('rel');
+			tgt.toggle(! rel || $.inArray(rel, fm.sorters) !== -1);
+		});
+	})
+	.bind('open sortchange viewchange search searchend', function() {
 		timer && clearTimeout(timer);
 		timer = setTimeout(function(){
 			var cols = $(fm.cwd).find('div.elfinder-cwd-wrapper-list table');
