@@ -8,7 +8,6 @@
  */
 elFinder.prototype.commands.chmod = function() {
 	this.updateOnSelect = false;
-	var self = this;
 	var fm  = this.fm,
 	level = {
 		0 : 'owner',
@@ -50,7 +49,7 @@ elFinder.prototype.commands.chmod = function() {
 		if (sel.length == 0) {
 			sel = [ fm.cwd().hash ];
 		}
-		return !this._disabled && self.checkstate(this.files(sel)) ? 0 : -1;
+		return !this._disabled && this.checkstate(this.files(sel)) ? 0 : -1;
 	};
 	
 	this.checkstate = function(sel) {
