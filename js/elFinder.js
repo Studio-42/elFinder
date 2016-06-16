@@ -4143,7 +4143,7 @@ elFinder.prototype = {
 	localStorage : function(key, val) {
 		var s      = window.localStorage,
 			oldkey = 'elfinder-'+key+this.id, // old key of elFinder < 2.1.6
-			retval, oldval;
+			retval, oldval,t;
 
 		// new key of elFinder >= 2.1.6
 		key = window.location.pathname+'-elfinder-'+key+this.id;
@@ -4158,6 +4158,10 @@ elFinder.prototype = {
 		}
 		
 		if (val !== void(0)) {
+			t = typeof val;
+			if (t !== 'string' && t !== 'number') {
+				val = JSON.stringify(val);
+			}
 			try {
 				s.setItem(key, val);
 			} catch (e) {
@@ -4167,6 +4171,11 @@ elFinder.prototype = {
 			retval = s.getItem(key);
 		}
 
+		if (retval && retval.substr(0,1) === '{') {
+			try {
+				return JSON.parse(retval);
+			} catch(e) {}
+		}
 		return retval;
 	},
 	
@@ -4178,7 +4187,7 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	cookie : function(name, value) {
-		var d, o, c, i;
+		var d, o, c, i, retval, t;
 
 		name = 'elfinder-'+name+this.id;
 
@@ -4189,7 +4198,13 @@ elFinder.prototype = {
 				for (i=0; i<c.length; i++) {
 					c[i] = $.trim(c[i]);
 					if (c[i].substring(0, name.length) == name) {
-						return decodeURIComponent(c[i].substring(name.length));
+						retval = decodeURIComponent(c[i].substring(name.length));
+						if (retval.substr(0,1) === '{') {
+							try {
+								return JSON.parse(retval);
+							} catch(e) {}
+						}
+						return retval;
 					}
 				}
 			}
@@ -4200,6 +4215,11 @@ elFinder.prototype = {
 		if (value === null) {
 			value = '';
 			o.expires = -1;
+		} else {
+			t = typeof value;
+			if (t !== 'string' && t !== 'number') {
+				value = JSON.stringify(value);
+			}
 		}
 		if (typeof(o.expires) == 'number') {
 			d = new Date();
