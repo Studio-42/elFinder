@@ -1091,7 +1091,7 @@ $.fn.elfindercwd = function(fm, options) {
 									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
 									colWidth[name] = $(this).width();
 								});
-								fm.storage('cwdColWidth', JSON.stringify(colWidth));
+								fm.storage('cwdColWidth', colWidth);
 							}
 						})
 						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical')
@@ -1569,7 +1569,7 @@ $.fn.elfindercwd = function(fm, options) {
 			;
 
 		try {
-			colWidth = fm.storage('cwdColWidth')? JSON.parse(fm.storage('cwdColWidth')) : null;
+			colWidth = fm.storage('cwdColWidth')? fm.storage('cwdColWidth') : null;
 		} catch(e) {
 			colWidth = null;
 		}

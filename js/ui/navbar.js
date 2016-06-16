@@ -11,13 +11,19 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle, swipeHandle;
+			handle, swipeHandle, autoHide;
 
 		fm.bind('resize', function() {
 			nav.height(wz.height() - delta);
 		});
 		
 		if (fm.UA.Touch) {
+			autoHide = fm.storage('autoHide') || {};
+			if (typeof autoHide.navbar === 'undefined') {
+				autoHide.navbar = (opts.autoHideUA && opts.autoHideUA.length > 0 && $.map(opts.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length);
+				fm.storage('autoHide', autoHide);
+			}
+			
 			fm.bind('load', function() {
 				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
 				if (swipeHandle.css('pointer-events') !== 'none') {
@@ -42,15 +48,15 @@ $.fn.elfindernavbar = function(fm, opts) {
 					fm.trigger('navbar'+ mode);
 					fm.getUI('cwd').trigger('resize');
 				});
+				autoHide.navbar = (mode !== 'show');
+				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {navbar: autoHide.navbar}));
 			});
 			
-			if (opts.autoHideUA && opts.autoHideUA.length > 0) {
+			if (autoHide.navbar) {
 				fm.one('open', function() {
-					if ($.map(opts.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
-						setTimeout(function() {
-							nav.trigger('navhide', {duration: 'slow'});
-						}, 500);
-					}
+					setTimeout(function() {
+						nav.trigger('navhide', {duration: 'slow'});
+					}, 500);
 				});
 			}
 		}

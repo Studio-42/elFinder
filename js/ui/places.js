@@ -40,17 +40,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return void
 			 **/
 			save      = function() {
-				var hashes = [], data = [];
+				var hashes = [], data = {};
 				
 				hashes = $.map(subtree.children().find('[id]'), function(n) {
 					return id2hash(n.id);
 				});
-				$.each(hashes.reverse(), function(i, h) {
-					data.push(h + '#' + dirs[h].name);
-				});
+				if (hashes.length) {
+					$.each(hashes.reverse(), function(i, h) {
+						data[h] = dirs[h];
+					});
+				} else {
+					data = null;
+				}
 				
-				
-				fm.storage(key, data.join(','));
+				fm.storage(key, data);
 			},
 			/**
 			 * Return node for given dir object
@@ -61,8 +64,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
 						.replace(/\{name\}/, fm.escape(dir? dir.name : hash))
-						.replace(/\{cssclass\}/, dir? fm.perms2class(dir) : '')
-						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write))? ptpl : '')
+						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
+						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
 						.replace(/\{symlink\}/, '')
 						.replace(/\{style\}/, ''));
@@ -86,9 +89,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				
 				node = create(dir, hash);
-				if (dir.notfound) {
-					node.addClass('ui-state-disabled');
-				}
 				
 				dirs[hash] = dir;
 				subtree.prepend(node);
@@ -167,9 +167,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 					node = create(dir, hash);
 
 				if (tgt.length > 0) {
-					if (dir.notfound) {
-						node.addClass('ui-state-disabled');
-					}
 					tgt.parent().replaceWith(node);
 					dirs[hash] = dir;
 					return true
@@ -307,7 +304,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						e.stopPropagation();
 						return;
 					}
-					fm.exec('open', p.attr('id').substr(6));
+					! p.hasClass('elfinder-na') && fm.exec('open', p.attr('id').substr(6));
 				})
 				.on('contextmenu', '.'+navdir+':not(.'+clroot+')', function(e) {
 					var self = $(this),
@@ -442,11 +439,17 @@ $.fn.elfinderplaces = function(fm, opts) {
 			places.show().parent().show();
 
 			dirs = {};
-			dat = $.map((fm.storage(key) || '').split(','), function(hash) { return hash || null;});
-			$.each(dat, function(i, d) {
-				var dir = d.split('#')
-				dirs[dir[0]] = dir[1]? dir[1] : dir[0];
-			});
+			dat = fm.storage(key);
+			if (typeof dat === 'string') {
+				// old data type elFinder <= 2.1.12
+				dat = $.map(dat.split(','), function(hash) { return hash || null;});
+				$.each(dat, function(i, d) {
+					var dir = d.split('#')
+					dirs[dir[0]] = dir[1]? dir[1] : dir[0];
+				});
+			} else if ($.isPlainObject(dat)) {
+				dirs = dat;
+			}
 			// allow modify `dirs`
 			/**
 			 * example for preset places
@@ -475,7 +478,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						exists[hash] = f;
 					});
 					$.each(dirs, function(h, f) {
-						add(exists[h] || { hash: h, name: f, mime: 'directory', notfound: true });
+						add(exists[h] || $.extend({notfound: true}, f));
 					});
 					if (fm.storage('placesState') > 0) {
 						root.click();
@@ -538,7 +541,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				changed && save();
 			})
-			.bind('sync', function() {
+			.bind('sync netmount', function(e) {
 				var hashes = Object.keys(dirs);
 				if (hashes.length) {
 					root.prepend(spinner);
@@ -561,12 +564,12 @@ $.fn.elfinderplaces = function(fm, opts) {
 						});
 						$.each(dirs, function(h, f) {
 							if (!f.notfound != !!exists[h]) {
-								if (f.phash === cwd || (exists[h] && exists[h].mime !== 'directory')) {
+								if ((f.phash === cwd && e.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
 									}
 								} else {
-									if (update(exists[h] || { hash: h, name: f.name, mime: 'directory', notfound: true })) {
+									if (update(exists[h] || $.extend({notfound: true}, f))) {
 										updated = true;
 									}
 								}
