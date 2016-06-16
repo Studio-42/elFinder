@@ -54,7 +54,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
-			l, i, cmd, panel, button, swipeHandle;
+			l, i, cmd, panel, button, swipeHandle, autoHide;
 		
 		self.prev().length && self.parent().prepend(this);
 		
@@ -102,6 +102,11 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		});
 		
 		if (fm.UA.Touch) {
+			autoHide = fm.storage('autoHide') || {};
+			if (typeof autoHide.toolbar === 'undefined') {
+				autoHide.toolbar = (options.autoHideUA && options.autoHideUA.length > 0 && $.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length);
+				fm.storage('autoHide', autoHide);
+			}
 			fm.bind('load', function() {
 				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').appendTo(fm.getUI());
 				if (swipeHandle.css('pointer-events') !== 'none') {
@@ -110,12 +115,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 			})
 			.one('open', function() {
-				if (options.autoHideUA && options.autoHideUA.length > 0) {
-					if ($.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length) {
-						setTimeout(function() {
-							self.stop(true, true).trigger('toggle', {duration: 500});
-						}, 500);
-					}
+				if (autoHide.toolbar) {
+					setTimeout(function() {
+						self.stop(true, true).trigger('toggle', {duration: 500});
+					}, 500);
 				}
 			});
 			
@@ -145,6 +148,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						}
 					}, data);
 				self.data('swipeClose', ! toshow).animate({height : 'toggle'}, opt);
+				autoHide.toolbar = !toshow;
+				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
 			});
 		}
 	});
