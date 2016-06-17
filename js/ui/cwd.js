@@ -135,13 +135,33 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			cwdParents = [],
 
+			/**
+			 * Custom columns name and order
+			 *
+			 * @type Array
+			 */
+			customCols = [],
+
+			/**
+			 * Custom columns builder
+			 *
+			 * @type Function
+			 */
 			customColsBuild = function() {
-				var customCols = '';
-				var columns = options.listView.columns;
-				for (var i = 0; i < columns.length; i++) {
-					customCols += '<td class="elfinder-col-'+columns[i]+'">{' + columns[i] + '}</td>';
+				var cols = '';
+				for (var i = 0; i < customCols.length; i++) {
+					cols += '<td class="elfinder-col-'+customCols[i]+'">{' + customCols[i] + '}</td>';
 				}
-				return customCols;
+				return cols;
+			},
+
+			/**
+			 * Make template.row from customCols
+			 *
+			 * @type Function
+			 */
+			makeTemplateRow = function() {
+				return '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td class="elfinder-col-name"><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div>'+selectCheckbox+'</td>'+customColsBuild()+'</tr>';
 			},
 			
 			selectCheckbox = ($.map(options.showSelectCheckboxUA, function(t) {return (fm.UA[t] || t.match(/^all$/i))? true : null;}).length)? '<div class="elfinder-cwd-select"><input type="checkbox"></div>' : '',
@@ -157,7 +177,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			templates = {
 				icon : '<div id="{id}" class="'+clFile+' {permsclass} {dirclass} ui-corner-all" title="{tooltip}"><div class="elfinder-cwd-file-wrapper ui-corner-all"><div class="elfinder-cwd-icon {mime} ui-corner-all" unselectable="on"{style}/>{marker}</div><div class="elfinder-cwd-filename" title="{nametitle}">{name}</div>'+selectCheckbox+'</div>',
-				row  : '<tr id="{id}" class="'+clFile+' {permsclass} {dirclass}" title="{tooltip}"{css}><td class="elfinder-col-name"><div class="elfinder-cwd-file-wrapper"><span class="elfinder-cwd-icon {mime}"{style}/>{marker}<span class="elfinder-cwd-filename">{name}</span></div>'+selectCheckbox+'</td>'+customColsBuild()+'</tr>',
+				row  : '',
 			},
 			
 			permsTpl = fm.res('tpl', 'perms'),
@@ -629,7 +649,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					
 					if (init || opts.fitWidth || Math.abs(btr.outerWidth() - htr.outerWidth()) > 2) {
-						cnt = options.listView.columns.length + 1;
+						cnt = customCols.length + 1;
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
 							btd = btr.children('td:eq('+i+')');
@@ -652,15 +672,16 @@ $.fn.elfindercwd = function(fm, options) {
 			setColwidth = function() {
 				if (list && colWidth) {
 					var cl = 'elfinder-cwd-colwidth',
-					firster = cwd.find('tr[id]:first'),
+					first = cwd.find('tr[id]:first'),
 					former;
-					if (! firster.hasClass(cl)) {
+					if (! first.hasClass(cl)) {
 						former = cwd.find('tr.'+cl);
 						former.removeClass(cl).find('td').css('width', '');
-						firster.addClass(cl);
+						first.addClass(cl);
 						cwd.find('table:first').css('table-layout', 'fixed');
-						$.each(colWidth, function(k, w) {
-							firster.find('td.elfinder-col-'+k).width(w);
+						$.each($.merge(['name'], customCols), function(i, k) {
+							var w = colWidth[k] || first.find('td.elfinder-col-'+k).width();
+							first.find('td.elfinder-col-'+k).width(w);
 						});
 					}
 				}
@@ -937,15 +958,14 @@ $.fn.elfindercwd = function(fm, options) {
 			customColsNameBuild = function() {
 				var name = '',
 				customColsName = '',
-				columns = options.listView.columns,
 				names = $.extend({}, msg, options.listView.columnsCustomName);
-				for (var i = 0; i < columns.length; i++) {
-					if (typeof names[columns[i]] !== 'undefined') {
-						name = names[columns[i]];
+				for (var i = 0; i < customCols.length; i++) {
+					if (typeof names[customCols[i]] !== 'undefined') {
+						name = names[customCols[i]];
 					} else {
-						name = fm.i18n(columns[i]);
+						name = fm.i18n(customCols[i]);
 					}
-					customColsName +='<td class="elfinder-cwd-view-th-'+columns[i]+'">'+name+'</td>';
+					customColsName +='<td class="elfinder-cwd-view-th-'+customCols[i]+' sortable-item">'+name+'</td>';
 				}
 				return customColsName;
 			},
@@ -1055,11 +1075,34 @@ $.fn.elfindercwd = function(fm, options) {
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
 					cwd.find('thead').append(
-						$('<tr class="ui-state-default'+'"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
+						$('<tr class="ui-state-default touch-punch touch-punch-keep-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
-						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, 'td', wrapperContextMenu.touchend)
+						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
 						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
+						.sortable({
+							axis: 'x',
+							distance: 8,
+							items: '> .sortable-item',
+							tolerance: 'pointer',
+							start: function(e, ui) {
+								ui.placeholder
+									.width(ui.helper.removeClass('ui-state-hover').width())
+									.removeClass('ui-state-active')
+									.addClass('ui-state-hover')
+									.css('visibility', 'visible');
+							},
+							update: function(e, ui){
+								customCols = $.map($(this).children(), function(n) {
+									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
+									return (name === 'name')? null : name;
+								});
+								fm.storage('cwdCols', customCols);
+								templates.row = makeTemplateRow();
+								list = false;
+								fm.trigger('viewchange');
+							}
+						})
 						.find('td').addClass('touch-punch').resizable({
 							handles: fm.direction === 'ltr'? 'e' : 'w',
 							start: function(e, ui) {
@@ -1084,9 +1127,7 @@ $.fn.elfindercwd = function(fm, options) {
 							stop : function() {
 								colResizing = false;
 								fixTableHeader({fitWidth: true});
-								if (! colWidth) {
-									colWidth = {};
-								}
+								colWidth = {};
 								cwd.find('tbody tr:first td').each(function() {
 									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
 									colWidth[name] = $(this).width();
@@ -1573,6 +1614,21 @@ $.fn.elfindercwd = function(fm, options) {
 		} catch(e) {
 			colWidth = null;
 		}
+		
+		// setup costomCols
+		if (customCols = fm.storage('cwdCols')) {
+			$.each(options.listView.columns, function(i, n) {
+				if (customCols.indexOf(n) === -1) {
+					customCols.push(n);
+				}
+			});
+			customCols = $.map(customCols, function(n) {
+				return (options.listView.columns.indexOf(n) !== -1)? n : null;
+			});
+		} else {
+			customCols = options.listView.columns;
+		}
+		templates.row = makeTemplateRow();
 		
 		if (mobile) {
 			// for iOS5 bug
