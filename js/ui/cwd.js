@@ -1168,7 +1168,8 @@ $.fn.elfindercwd = function(fm, options) {
 				// set droppable
 				if (any || !fm.cwd().write) {
 					wrapper.removeClass('native-droppable')
-					       .droppable('disable');
+					       .droppable('disable')
+					       .removeClass('ui-state-disabled'); // for old jQueryUI see https://bugs.jqueryui.com/ticket/5974
 				} else {
 					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 					wrapper.droppable('enable');
