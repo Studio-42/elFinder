@@ -4171,7 +4171,7 @@ elFinder.prototype = {
 			retval = s.getItem(key);
 		}
 
-		if (retval && retval.substr(0,1) === '{') {
+		if (retval && (retval.substr(0,1) === '{' || retval.substr(0,1) === '[')) {
 			try {
 				return JSON.parse(retval);
 			} catch(e) {}
@@ -4199,7 +4199,7 @@ elFinder.prototype = {
 					c[i] = $.trim(c[i]);
 					if (c[i].substring(0, name.length) == name) {
 						retval = decodeURIComponent(c[i].substring(name.length));
-						if (retval.substr(0,1) === '{') {
+						if (retval.substr(0,1) === '{' || retval.substr(0,1) === '[') {
 							try {
 								return JSON.parse(retval);
 							} catch(e) {}

@@ -474,13 +474,20 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	top: 3px;
 }
 .elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-handle {
-	top: 8px;
+	top: -5px;
+	margin: 10px;
 }
 .elfinder-cwd-view-list thead td .ui-resizable-e {
 	right: -7px;
 }
 .elfinder-cwd-view-list thead td .ui-resizable-w {
 	left: -7px;
+}
+.elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-e {
+	right: -16px;
+}
+.elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-w {
+	left: -16px;
 }
 
 /* empty message */
