@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 72b7769) (2016-06-17)
+ * Version 2.1.12 (2.1-src Nightly: 012f530) (2016-06-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5209,7 +5209,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 72b7769)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 012f530)';
 
 
 
@@ -9147,7 +9147,8 @@ $.fn.elfindercwd = function(fm, options) {
 				// set droppable
 				if (any || !fm.cwd().write) {
 					wrapper.removeClass('native-droppable')
-					       .droppable('disable');
+					       .droppable('disable')
+					       .removeClass('ui-state-disabled'); // for old jQueryUI see https://bugs.jqueryui.com/ticket/5974
 				} else {
 					wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
 					wrapper.droppable('enable');
@@ -15768,9 +15769,13 @@ elFinder.prototype.commands.quicklook = function() {
 			}),
 		
 		navShow = function() {
-			navtm && clearTimeout(navtm);
-			navbar.stop(true, true).show();
-			coverHide();
+			if (self.window.hasClass(fullscreen)) {
+				navtm && clearTimeout(navtm);
+				// if use `show()` it make infinite loop with old jQuery (jQuery/jQuery UI: 1.8.0/1.9.0)
+				// see #1478 https://github.com/Studio-42/elFinder/issues/1478
+				navbar.stop(true, true).css('display', 'block');
+				coverHide();
+			}
 		},
 		
 		coverHide = function() {
