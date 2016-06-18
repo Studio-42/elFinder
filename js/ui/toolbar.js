@@ -107,18 +107,18 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				autoHide.toolbar = (options.autoHideUA && options.autoHideUA.length > 0 && $.map(options.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length);
 				fm.storage('autoHide', autoHide);
 			}
+			
+			if (autoHide.toolbar) {
+				fm.one('init', function() {
+					fm.uiAutoHide.push(function(){ self.stop(true, true).trigger('toggle', { duration: 500, init: true }); });
+				});
+			}
+			
 			fm.bind('load', function() {
 				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').appendTo(fm.getUI());
 				if (swipeHandle.css('pointer-events') !== 'none') {
 					swipeHandle.remove();
 					swipeHandle = null;
-				}
-			})
-			.one('open', function() {
-				if (autoHide.toolbar) {
-					setTimeout(function() {
-						self.stop(true, true).trigger('toggle', {duration: 500});
-					}, 500);
 				}
 			});
 			
@@ -145,6 +145,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 									fm.resources.blink(swipeHandle, 'slowonce');
 								}
 							}
+							data.init && fm.trigger('uiautohide');
 						}
 					}, data);
 				self.data('swipeClose', ! toshow).animate({height : 'toggle'}, opt);

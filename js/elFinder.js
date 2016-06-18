@@ -2422,6 +2422,30 @@ window.elFinder = function(node, opts) {
 		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
 	};
 	
+	/**
+	 * UI Auto Hide Functions
+	 * Each auto hide function mast be call to `fm.trigger('uiautohide')` at end of process
+	 *
+	 * @type Array
+	 **/
+	this.uiAutoHide = [];
+	
+	// trigger `uiautohide`
+	this.one('open', function() {
+		if (self.uiAutoHide.length) {
+			setTimeout(function() {
+				self.trigger('uiautohide');
+			}, 500);
+		}
+	});
+	
+	// Auto Hide Functions sequential processing start
+	this.bind('uiautohide', function() {
+		if (self.uiAutoHide.length) {
+			self.uiAutoHide.shift()();
+		}
+	});
+	
 	// load required ui
 	$.each(this.options.ui || [], function(i, ui) {
 		var name = 'elfinder'+ui,
