@@ -1093,6 +1093,7 @@ $.fn.elfindercwd = function(fm, options) {
 									.css('visibility', 'visible');
 							},
 							update: function(e, ui){
+								var lastScrollLeft = wrapper.scrollLeft();
 								customCols = $.map($(this).children(), function(n) {
 									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
 									return (name === 'name')? null : name;
@@ -1101,6 +1102,7 @@ $.fn.elfindercwd = function(fm, options) {
 								templates.row = makeTemplateRow();
 								list = false;
 								fm.trigger('viewchange');
+								wrapper.scrollLeft(lastScrollLeft);
 							}
 						})
 						.find('td').addClass('touch-punch').resizable({
