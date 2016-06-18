@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 8eefadd) (2016-06-18)
+ * Version 2.1.12 (2.1-src Nightly: 117c16c) (2016-06-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5209,7 +5209,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 8eefadd)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 117c16c)';
 
 
 
@@ -9072,6 +9072,7 @@ $.fn.elfindercwd = function(fm, options) {
 									.css('visibility', 'visible');
 							},
 							update: function(e, ui){
+								var lastScrollLeft = wrapper.scrollLeft();
 								customCols = $.map($(this).children(), function(n) {
 									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
 									return (name === 'name')? null : name;
@@ -9080,6 +9081,7 @@ $.fn.elfindercwd = function(fm, options) {
 								templates.row = makeTemplateRow();
 								list = false;
 								fm.trigger('viewchange');
+								wrapper.scrollLeft(lastScrollLeft);
 							}
 						})
 						.find('td').addClass('touch-punch').resizable({
