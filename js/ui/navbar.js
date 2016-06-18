@@ -24,6 +24,12 @@ $.fn.elfindernavbar = function(fm, opts) {
 				fm.storage('autoHide', autoHide);
 			}
 			
+			if (autoHide.navbar) {
+				fm.one('init', function() {
+					fm.uiAutoHide.push(function(){ nav.stop(true, true).trigger('navhide', { duration: 'slow', init: true }); });
+				});
+			}
+			
 			fm.bind('load', function() {
 				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
 				if (swipeHandle.css('pointer-events') !== 'none') {
@@ -47,18 +53,11 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}
 					fm.trigger('navbar'+ mode);
 					fm.getUI('cwd').trigger('resize');
+					data.init && fm.trigger('uiautohide');
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {navbar: autoHide.navbar}));
 			});
-			
-			if (autoHide.navbar) {
-				fm.one('open', function() {
-					setTimeout(function() {
-						nav.trigger('navhide', {duration: 'slow'});
-					}, 500);
-				});
-			}
 		}
 		
 		if ($.fn.resizable && ! fm.UA.Mobile) {
