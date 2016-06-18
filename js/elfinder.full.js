@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 012f530) (2016-06-18)
+ * Version 2.1.12 (2.1-src Nightly: 8eefadd) (2016-06-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1203,7 +1203,7 @@ window.elFinder = function(node, opts) {
 			if (tmbUrl === 'self' && file.mime.indexOf('image/') === 0) {
 				url = self.openUrl(file.hash);
 				cls += ' elfinder-cwd-bgself';
-			} else if (tmbUrl && file && file.tmb && file.tmb != 1) {
+			} else if ((self.oldAPI || tmbUrl) && file && file.tmb && file.tmb != 1) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
@@ -5209,7 +5209,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 012f530)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 8eefadd)';
 
 
 
