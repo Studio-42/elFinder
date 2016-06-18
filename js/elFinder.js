@@ -1189,7 +1189,7 @@ window.elFinder = function(node, opts) {
 			if (tmbUrl === 'self' && file.mime.indexOf('image/') === 0) {
 				url = self.openUrl(file.hash);
 				cls += ' elfinder-cwd-bgself';
-			} else if (tmbUrl && file && file.tmb && file.tmb != 1) {
+			} else if ((self.oldAPI || tmbUrl) && file && file.tmb && file.tmb != 1) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
