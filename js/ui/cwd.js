@@ -1089,7 +1089,6 @@ $.fn.elfindercwd = function(fm, options) {
 							axis: 'x',
 							distance: 8,
 							items: '> .sortable-item',
-							tolerance: 'pointer',
 							start: function(e, ui) {
 								ui.placeholder
 									.width(ui.helper.removeClass('ui-state-hover').width())
