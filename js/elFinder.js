@@ -627,7 +627,7 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'
 			+(this.direction == 'rtl' ? 'rtl' : 'ltr')
-			+(this.UA.Touch? ' elfinder-touch' : '')
+			+(this.UA.Touch? (' elfinder-touch' + (this.options.resizable ? ' touch-punch' : '')) : '')
 			+(this.UA.Mobile? ' elfinder-mobile' : '')
 			+' '+this.options.cssClass;
 
@@ -2465,7 +2465,6 @@ window.elFinder = function(node, opts) {
 	
 	// make node resizable
 	this.options.resizable 
-	&& !this.UA.Touch 
 	&& $.fn.resizable 
 	&& node.resizable({
 		handles   : 'se',
