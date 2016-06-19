@@ -1039,7 +1039,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			content = function(files, any) {
 				var phash = fm.cwd().hash,
-					emptyMethod;
+					emptyMethod, thtr;
 
 				cwdParents = fm.parents(phash);
 
@@ -1074,13 +1074,18 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
+					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>');
 					cwd.find('thead').append(
-						$('<tr class="ui-state-default touch-punch touch-punch-keep-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
+						thtr
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
 						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
 						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
-						.sortable({
+					).find('td:first').append(selectAllCheckbox);
+
+					if ($.fn.sortable) {
+						thtr.addClass('touch-punch touch-punch-keep-default')
+							.sortable({
 							axis: 'x',
 							distance: 8,
 							items: '> .sortable-item',
@@ -1104,8 +1109,11 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.trigger('viewchange');
 								wrapper.scrollLeft(lastScrollLeft);
 							}
-						})
-						.find('td').addClass('touch-punch').resizable({
+						});
+					}
+
+					if ($.fn.resizable) {
+						thtr.find('td').addClass('touch-punch').resizable({
 							handles: fm.direction === 'ltr'? 'e' : 'w',
 							start: function(e, ui) {
 								var target = cwd.find('td.elfinder-col-'
@@ -1137,9 +1145,8 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.storage('cwdColWidth', colWidth);
 							}
 						})
-						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical')
-						.end().end()
-					).find('td:first').append(selectAllCheckbox);
+						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
+					}
 				}
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });

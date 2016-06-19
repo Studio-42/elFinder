@@ -255,37 +255,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 *
 			 * @type jQuery
 			 **/
-			subtree = wrapper.children('.'+fm.res(c, 'navsubtree'))
-				.sortable({
-					appendTo : 'body',
-					revert   : false,
-					helper   : function(e) {
-						var dir = $(e.target).parent();
-							
-						dir.children().removeClass('ui-state-hover');
-						
-						return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
-								.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
-
-					},
-					stop     : function(e, ui) {
-						var target = $(ui.item[0]),
-							top    = places.offset().top,
-							left   = places.offset().left,
-							width  = places.width(),
-							height = places.height(),
-							x      = e.pageX,
-							y      = e.pageY;
-						
-						if (!(x > left && x < left+width && y > top && y < y+height)) {
-							remove(id2hash(target.children(':first').attr('id')));
-							save();
-						}
-					},
-					update   : function(e, ui) {
-						save();
-					}
-				}),
+			subtree = wrapper.children('.'+fm.res(c, 'navsubtree')),
+			
 			/**
 			 * Main places container
 			 *
@@ -413,6 +384,39 @@ $.fn.elfinderplaces = function(fm, opts) {
 						$(this).removeClass(hover);
 					}
 				});
+
+		if ($.fn.sortable) {
+			subtree.sortable({
+				appendTo : 'body',
+				revert   : false,
+				helper   : function(e) {
+					var dir = $(e.target).parent();
+						
+					dir.children().removeClass('ui-state-hover');
+					
+					return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
+							.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
+
+				},
+				stop     : function(e, ui) {
+					var target = $(ui.item[0]),
+						top    = places.offset().top,
+						left   = places.offset().left,
+						width  = places.width(),
+						height = places.height(),
+						x      = e.pageX,
+						y      = e.pageY;
+					
+					if (!(x > left && x < left+width && y > top && y < y+height)) {
+						remove(id2hash(target.children(':first').attr('id')));
+						save();
+					}
+				},
+				update   : function(e, ui) {
+					save();
+				}
+			});
+		}
 
 		// "on regist" for command exec
 		$(this).on('regist', function(e, files){
