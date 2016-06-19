@@ -386,7 +386,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 				});
 
 		if ($.fn.sortable) {
-			subtree.sortable({
+			subtree.addClass('touch-punch touch-punch-keep-default')
+				.sortable({
 				appendTo : 'body',
 				revert   : false,
 				helper   : function(e) {
