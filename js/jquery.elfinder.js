@@ -53,7 +53,8 @@ if ($.ui && $.ui.ddmanager) {
   var mouseProto = $.ui.mouse.prototype,
 	  _mouseInit = mouseProto._mouseInit,
 	  _mouseDestroy = mouseProto._mouseDestroy,
-	  touchHandled;
+	  touchHandled,
+	  posX, posY;
 
   /**
    * Simulate a mouse event based on a corresponding touch event
@@ -110,6 +111,10 @@ if ($.ui && $.ui.ddmanager) {
 	  return;
 	}
 
+	// Track element position to avoid "false" move
+	posX = event.originalEvent.changedTouches[0].screenX.toFixed(0);
+	posY = event.originalEvent.changedTouches[0].screenY.toFixed(0);
+
 	// Set the flag to prevent other widgets from inheriting the touch event
 	touchHandled = true;
 
@@ -135,6 +140,14 @@ if ($.ui && $.ui.ddmanager) {
 	// Ignore event if not handled
 	if (!touchHandled) {
 	  return;
+	}
+
+	// Ignore if it's a "false" move (position not changed)
+	var x = event.originalEvent.changedTouches[0].screenX.toFixed(0);
+	var y = event.originalEvent.changedTouches[0].screenY.toFixed(0);
+	// Ignore if it's a "false" move (position not changed)
+	if (Math.abs(posX - x) <= 2 && Math.abs(posY - y) <= 2) {
+		return;
 	}
 
 	// Interaction was not a click
