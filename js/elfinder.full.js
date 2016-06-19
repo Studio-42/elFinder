@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 420ae5e) (2016-06-19)
+ * Version 2.1.12 (2.1-src Nightly: 50e8f79) (2016-06-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -641,7 +641,7 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.cssClass = 'ui-helper-reset ui-helper-clearfix ui-widget ui-widget-content ui-corner-all elfinder elfinder-'
 			+(this.direction == 'rtl' ? 'rtl' : 'ltr')
-			+(this.UA.Touch? ' elfinder-touch' : '')
+			+(this.UA.Touch? (' elfinder-touch' + (this.options.resizable ? ' touch-punch' : '')) : '')
 			+(this.UA.Mobile? ' elfinder-mobile' : '')
 			+' '+this.options.cssClass;
 
@@ -2479,7 +2479,6 @@ window.elFinder = function(node, opts) {
 	
 	// make node resizable
 	this.options.resizable 
-	&& !this.UA.Touch 
 	&& $.fn.resizable 
 	&& node.resizable({
 		handles   : 'se',
@@ -5233,7 +5232,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 420ae5e)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 50e8f79)';
 
 
 
@@ -9042,7 +9041,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			content = function(files, any) {
 				var phash = fm.cwd().hash,
-					emptyMethod;
+					emptyMethod, thtr;
 
 				cwdParents = fm.parents(phash);
 
@@ -9077,13 +9076,18 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
+					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>');
 					cwd.find('thead').append(
-						$('<tr class="ui-state-default touch-punch touch-punch-keep-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>')
+						thtr
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
 						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
 						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
-						.sortable({
+					).find('td:first').append(selectAllCheckbox);
+
+					if ($.fn.sortable) {
+						thtr.addClass('touch-punch touch-punch-keep-default')
+							.sortable({
 							axis: 'x',
 							distance: 8,
 							items: '> .sortable-item',
@@ -9107,8 +9111,11 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.trigger('viewchange');
 								wrapper.scrollLeft(lastScrollLeft);
 							}
-						})
-						.find('td').addClass('touch-punch').resizable({
+						});
+					}
+
+					if ($.fn.resizable) {
+						thtr.find('td').addClass('touch-punch').resizable({
 							handles: fm.direction === 'ltr'? 'e' : 'w',
 							start: function(e, ui) {
 								var target = cwd.find('td.elfinder-col-'
@@ -9140,9 +9147,8 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.storage('cwdColWidth', colWidth);
 							}
 						})
-						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical')
-						.end().end()
-					).find('td:first').append(selectAllCheckbox);
+						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
+					}
 				}
 		
 				buffer = $.map(files, function(f) { return any || f.phash == phash ? f : null; });
@@ -10773,37 +10779,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 *
 			 * @type jQuery
 			 **/
-			subtree = wrapper.children('.'+fm.res(c, 'navsubtree'))
-				.sortable({
-					appendTo : 'body',
-					revert   : false,
-					helper   : function(e) {
-						var dir = $(e.target).parent();
-							
-						dir.children().removeClass('ui-state-hover');
-						
-						return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
-								.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
-
-					},
-					stop     : function(e, ui) {
-						var target = $(ui.item[0]),
-							top    = places.offset().top,
-							left   = places.offset().left,
-							width  = places.width(),
-							height = places.height(),
-							x      = e.pageX,
-							y      = e.pageY;
-						
-						if (!(x > left && x < left+width && y > top && y < y+height)) {
-							remove(id2hash(target.children(':first').attr('id')));
-							save();
-						}
-					},
-					update   : function(e, ui) {
-						save();
-					}
-				}),
+			subtree = wrapper.children('.'+fm.res(c, 'navsubtree')),
+			
 			/**
 			 * Main places container
 			 *
@@ -10931,6 +10908,39 @@ $.fn.elfinderplaces = function(fm, opts) {
 						$(this).removeClass(hover);
 					}
 				});
+
+		if ($.fn.sortable) {
+			subtree.sortable({
+				appendTo : 'body',
+				revert   : false,
+				helper   : function(e) {
+					var dir = $(e.target).parent();
+						
+					dir.children().removeClass('ui-state-hover');
+					
+					return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
+							.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
+
+				},
+				stop     : function(e, ui) {
+					var target = $(ui.item[0]),
+						top    = places.offset().top,
+						left   = places.offset().left,
+						width  = places.width(),
+						height = places.height(),
+						x      = e.pageX,
+						y      = e.pageY;
+					
+					if (!(x > left && x < left+width && y > top && y < y+height)) {
+						remove(id2hash(target.children(':first').attr('id')));
+						save();
+					}
+				},
+				update   : function(e, ui) {
+					save();
+				}
+			});
+		}
 
 		// "on regist" for command exec
 		$(this).on('regist', function(e, files){
@@ -15793,10 +15803,10 @@ elFinder.prototype.commands.quicklook = function() {
 				}
 				$(this).toggleClass(navicon+'-fullscreen-off');
 				var collection = win;
-				if(parent.is('.ui-resizable')) {
+				if (parent.is('.ui-resizable')) {
 					collection = collection.add(parent);
 				};
-				$.fn.resizable && !fm.UA.Touch && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
 			}),
@@ -16043,7 +16053,7 @@ elFinder.prototype.commands.quicklook = function() {
 				e.keyCode == 27 && self.opened() && win.trigger('close')
 			})
 			
-			if ($.fn.resizable/* && !fm.UA.Touch*/) {
+			if ($.fn.resizable) {
 				win.resizable({ 
 					handles   : 'se', 
 					minWidth  : 350, 
