@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: ea9e063) (2016-06-19)
+ * Version 2.1.12 (2.1-src Nightly: bae1846) (2016-06-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5232,7 +5232,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: ea9e063)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: bae1846)';
 
 
 
@@ -6086,7 +6086,7 @@ elFinder.prototype._options = {
 				// fixed list header colmun
 				fixedHeader : true
 			}
-			// ,
+
 			// /**
 			//  * Add CSS class name to cwd directories (optional)
 			//  * see: https://github.com/Studio-42/elFinder/pull/1061,
@@ -6094,10 +6094,31 @@ elFinder.prototype._options = {
 			//  * 
 			//  * @type Function
 			//  */
+			// ,
 			// getClass: function(file) {
 			// 	// e.g. This adds the directory's name (lowercase) with prefix as a CSS class
 			// 	return 'elfinder-cwd-' + file.name.replace(/[ "]/g, '').toLowerCase();
-			// }
+			//}
+			
+			//,
+			//// Template placeholders replacement rules for overwrite. see ui/cwd.js replacement
+			//replacement : {
+			//	tooltip : function(f, fm) {
+			//		var list = fm.viewType == 'list', // current view type
+			//			query = fm.searchStatus.state == 2, // is in search results
+			//			title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : ''),
+			//			info  = '';
+			//		if (query && f.path) {
+			//			info = fm.escape(f.path.replace(/\/[^\/]*$/, ''));
+			//		} else {
+			//			info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
+			//		}
+			//		if (list) {
+			//			info += (info? '&#13;' : '') + fm.escape(f.name);
+			//		}
+			//		return info? info + '&#13;' + title : title;
+			//	}
+			//}
 		}
 	},
 
@@ -6206,7 +6227,7 @@ elFinder.prototype._options = {
 	 * elFinder height
 	 *
 	 * @type Number
-	 * @default  "auto"
+	 * @default  400
 	 */
 	height : 400,
 	
@@ -8267,6 +8288,9 @@ $.fn.elfindercwd = function(fm, options) {
 					} else {
 						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
 					}
+					if (list) {
+						info += (info? '&#13;' : '') + fm.escape(f.name);
+					}
 					return info? info + '&#13;' + title : title;
 				}
 			},
@@ -8280,7 +8304,7 @@ $.fn.elfindercwd = function(fm, options) {
 			itemhtml = function(f) {
 				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
-							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
+							return replacement[e] ? replacement[e](f, fm) : (f[e] ? f[e] : ''); 
 						});
 			},
 			
@@ -9633,6 +9657,9 @@ $.fn.elfindercwd = function(fm, options) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
 
+		// setup by options
+		replacement = $.extend(replacement, options.replacement || {});
+		
 		try {
 			colWidth = fm.storage('cwdColWidth')? fm.storage('cwdColWidth') : null;
 		} catch(e) {
@@ -9716,6 +9743,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				if (l != list) {
 					list = l;
+					fm.viewType = list? 'list' : 'icons';
 					content(query ? lastSearch : fm.files(), !!query);
 
 					if (allsel) {
