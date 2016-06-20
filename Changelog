@@ -1,3 +1,26 @@
+2016-06-xx  
+
+	* elFinder (2.1.13):
+		- [ui:cwd] Fixed #1433 create a thumbnail of the video file with ffmpeg
+		- [js:core] Fixed #1435 bug of getFileCallback on multi instances
+		- [ui:cwd] Fixed #1440 bug that not become disabled on multi instance
+		- [cmd:quicklook] Fixed #1441 hide the prev/next button on first/last item
+		- [js:core] Fixed #1439 show window close confirm dialog while editing file
+		- [ui:cwd] Fixed #1450 missing contextmenu on touch up on iOS devices
+		- [js] Fixed #1455 duplicate registration of command change event
+		- [ui:cwd] Fixed #1461 resizable table column width
+		- [cmd:sort] Fixed #1464 to enable more sort options
+		- [cmd:chmod] Fixed #1465 remove unnecessary `this` reference
+		- [ui:toolbar,navbar] Fixed #1473 memorize state of open/close by swipe
+		- [ui:cwd] Fixed #1475 make custom column sortable on list view
+		- [cmd:quicklook] Fixed #1478 preview broken with old jQuery
+		- [js:core] Fixed #1480 broken compatibility with protocol API v1
+		- [cmd:opendir] Fixed #1481 broken in elFinder 2.1.12
+		- [ui:cwd] Fixed #1479 can't be moved to the right edge at column sort
+		- [ui:cwd] Fixed #1485 add an option of template placeholders replacement rules
+		- And some minor bug fixes
+
+
 2016-05-30  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.12):
