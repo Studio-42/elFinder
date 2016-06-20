@@ -690,7 +690,7 @@ elFinder.prototype._options = {
 	 * elFinder height
 	 *
 	 * @type Number
-	 * @default  "auto"
+	 * @default  400
 	 */
 	height : 400,
 	
