@@ -252,6 +252,9 @@ $.fn.elfindercwd = function(fm, options) {
 					} else {
 						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
 					}
+					if (list) {
+						info += (info? '&#13;' : '') + fm.escape(f.name);
+					}
 					return info? info + '&#13;' + title : title;
 				}
 			},
@@ -265,7 +268,7 @@ $.fn.elfindercwd = function(fm, options) {
 			itemhtml = function(f) {
 				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z]+)\}/g, function(s, e) { 
-							return replacement[e] ? replacement[e](f) : (f[e] ? f[e] : ''); 
+							return replacement[e] ? replacement[e](f, fm) : (f[e] ? f[e] : ''); 
 						});
 			},
 			
@@ -1618,6 +1621,9 @@ $.fn.elfindercwd = function(fm, options) {
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
 			;
 
+		// setup by options
+		replacement = $.extend(replacement, options.replacement || {});
+		
 		try {
 			colWidth = fm.storage('cwdColWidth')? fm.storage('cwdColWidth') : null;
 		} catch(e) {
@@ -1701,6 +1707,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				if (l != list) {
 					list = l;
+					fm.viewType = list? 'list' : 'icons';
 					content(query ? lastSearch : fm.files(), !!query);
 
 					if (allsel) {
