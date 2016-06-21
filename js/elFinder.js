@@ -1438,7 +1438,7 @@ window.elFinder = function(node, opts) {
 			abort = function(e){
 				if (e.type == 'autosync') {
 					if (e.data.action != 'stop') return;
-				} else {
+				} else if (e.type != 'unload' && e.type != 'destroy') {
 					if (!e.data.added || !e.data.added.length) {
 						return;
 					}
@@ -2574,8 +2574,8 @@ window.elFinder = function(node, opts) {
 				}
 				if (msg) {
 					e.returnValue = msg;
+					return msg;
 				}
-				return msg;
 			}
 			self.trigger('unload');
 		});
