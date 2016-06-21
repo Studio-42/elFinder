@@ -3191,7 +3191,7 @@ abstract class elFinderVolumeDriver {
 	 */
 	protected function delTree($localpath) {
 		foreach ($this->_scandir($localpath) as $p) {
-			set_time_limit(30);
+			elFinder::extendTimeLimit();
 			$stat = $this->stat($this->convEncOut($p));
 			$this->convEncIn();
 			($stat['mime'] === 'directory')? $this->delTree($p) : $this->_unlink($p);
@@ -3895,7 +3895,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		foreach($this->scandirCE($path) as $p) {
-			set_time_limit($this->options['searchTimeout'] + 30);
+			elFinder::extendTimeLimit($this->options['searchTimeout'] + 30);
 			
 			if ($timeout && ($this->error || $timeout < time())) {
 				!$this->error && $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
@@ -4053,6 +4053,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function copyFrom($volume, $src, $destination, $name) {
+		
+		elFinder::extendTimeLimit();
 		
 		if (($source = $volume->file($src)) == false) {
 			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
@@ -4434,7 +4436,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
-		set_time_limit(300);
+		elFinder::extendTimeLimit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				
@@ -4567,7 +4569,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
-		set_time_limit(300);
+		elFinder::extendTimeLimit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				
@@ -4690,7 +4692,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
-		set_time_limit(300);
+		elFinder::extendTimeLimit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -4832,7 +4834,7 @@ abstract class elFinderVolumeDriver {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 
-		set_time_limit(300);
+		elFinder::extendTimeLimit(300);
 		switch ($this->imgLib) {
 			case 'imagick':
 				try {
@@ -4983,7 +4985,7 @@ abstract class elFinderVolumeDriver {
 	protected function rmTmb($stat) {
 		if ($stat['mime'] === 'directory') {
 			foreach ($this->scandirCE($this->decode($stat['hash'])) as $p) {
-				set_time_limit(30);
+				elFinder::extendTimeLimit(30);
 				$name = $this->basenameCE($p);
 				$name != '.' && $name != '..' && $this->rmTmb($this->stat($p));
 			}
@@ -5415,7 +5417,7 @@ abstract class elFinderVolumeDriver {
 					if ($file === '.' || $file === '..') {
 						continue;
 					}
-					set_time_limit(30);
+					elFinder::extendTimeLimit(30);
 					$path = $dir . DIRECTORY_SEPARATOR . $file;
 					if (!is_link($dir) && is_dir($path)) {
 						$this->rmdirRecursive($path);
