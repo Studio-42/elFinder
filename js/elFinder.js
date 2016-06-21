@@ -1370,7 +1370,13 @@ window.elFinder = function(node, opts) {
 						} else if (xhr.status == 404) {
 							error = ['errConnect', 'errNotFound'];
 						} else {
-							error = 'errConnect';
+							if (this.type.toUpperCase() === 'GET' && xhr.status == 414) {
+								// retry by POST method
+								options.type = 'post';
+								dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
+								return;
+							}
+							error = ['errConnect', 'HTTP error ' + xhr.status];
 						} 
 				}
 				
@@ -1432,7 +1438,7 @@ window.elFinder = function(node, opts) {
 			abort = function(e){
 				if (e.type == 'autosync') {
 					if (e.data.action != 'stop') return;
-				} else {
+				} else if (e.type != 'unload' && e.type != 'destroy') {
 					if (!e.data.added || !e.data.added.length) {
 						return;
 					}
@@ -2568,8 +2574,8 @@ window.elFinder = function(node, opts) {
 				}
 				if (msg) {
 					e.returnValue = msg;
+					return msg;
 				}
-				return msg;
 			}
 			self.trigger('unload');
 		});
