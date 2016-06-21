@@ -665,9 +665,7 @@ class elFinder {
 		
 		if (substr(PHP_OS,0,3) === 'WIN') {
 			// set time out
-			if (($_max_execution_time = ini_get('max_execution_time')) && $_max_execution_time < 300) {
-				set_time_limit(300);
-			}
+			elFinder::extendTimeLimit(300);
 		}
 		
 		try {
@@ -1001,9 +999,8 @@ class elFinder {
 				$standby = $sleep;
 			}
 			$limit = max(0, floor($standby / $sleep)) + 1;
-			$timelimit = ini_get('max_execution_time');
 			do {
-				$timelimit && set_time_limit($timelimit + $sleep);
+				elFinder::extendTimeLimit(30 + $sleep);
 				$_mtime = 0;
 				foreach($ls as $_f) {
 					$_mtime = max($_mtime, $_f['ts']);
@@ -2504,9 +2501,8 @@ class elFinder {
 				} else {
 					$sleep = max(1, (int)$volume->getOption('tsPlSleep'));
 					$limit = max(1, $standby / $sleep) + 1;
-					$timelimit = ini_get('max_execution_time');
 					do {
-						$timelimit && set_time_limit($timelimit + $sleep);
+						elFinder::extendTimeLimit(30 + $sleep);
 						$volume->clearstatcache();
 						if (($info = $volume->file($hash)) != false) {
 							if ($info['ts'] != $compare) {
@@ -2999,5 +2995,21 @@ class elFinder {
 		return isset(elFinder::$$key)? elFinder::$$key : null;
 	}
 	
+	/**
+	 * Extend PHP execution time limit
+	 * 
+	 * @param Int $time
+	 * @return void
+	 */
+	public static function extendTimeLimit($time = null) {
+		static $defLimit = null;
+		if (is_null($defLimit)) {
+			$defLimit = ini_get('max_execution_time');
+		}
+		if ($defLimit != 0) {
+			$time = is_null($time)? $defLimit : max($defLimit, $time);
+			set_time_limit($time);
+		}
+	}
 
 } // END class
