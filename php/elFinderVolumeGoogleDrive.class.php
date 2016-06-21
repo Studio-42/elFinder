@@ -119,13 +119,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             'rootCssClass'      => 'elfinder-navbar-root-googledrive'
         );
         $this->options = array_merge($this->options, $opts);
-        $this->options['mimeDetect'] = 'internal';
-		
-		if (empty($this->options['googleApiClient']) && defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) {
-            $this->options['googleApiClient'] = ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
-			include_once($this->options['googleApiClient']);		
-        }			
-				
+        $this->options['mimeDetect'] = 'internal';				
     }
 
 
@@ -144,6 +138,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         }
         if (empty($options['client_secret']) && defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET')) {
             $options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
+        }
+		if (empty($options['googleApiClient']) && defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) {
+            $options['googleApiClient'] = ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
+			include_once($options['googleApiClient']);				
         }		
                   
         if (isset($_GET['code'])) {
@@ -278,7 +276,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             list($options['googledriveUid'], $options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');
         }
         unset($options['user'], $options['pass']);
-            
+        $this->session->remove('elFinderGoogleDriveAuthTokens');
+		$this->session->remove('elFinderGoogledriveTokens');  
+		 
         return $options;
     }
     
@@ -308,9 +308,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         }
         
         $this->options['alias'] = '';
-        $this->session->remove('elFinderGoogleDriveAuthTokens');
-        $this->session->remove('elFinderGoogledriveTokens');            
-        
+                
         return true;
     }
     
@@ -357,7 +355,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             if ($this->options['googleApiClient'] && ! class_exists('Google_Client')) {
                 include_once($this->options['googleApiClient']);
             }
-            if (! class_exists('Google_Client', false)) {
+            if (! class_exists('Google_Client', true)) {
                 return $this->setError('Class Google_Client not found.');
             }
             
@@ -400,10 +398,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         $this->tmbPrefix = 'googledrive'.base_convert($this->googledriveUid, 10, 32);
         
         if (!empty($this->options['tmpPath'])) {
-            if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
-                $this->tmp = $this->options['tmpPath'];
-            }
+            if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath']))
+			{
+                $this->tmp = $this->options['tmpPath'];				
+			}
         }
+		
         if (!$this->tmp && is_writable($this->options['tmbPath'])) {
             $this->tmp = $this->options['tmbPath'];
         }
@@ -477,12 +477,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      */
     private function refreshGoogleDriveToken($client)
     {
-        try {
-            $client->setAccessToken($this->options['accessToken']);
-            
+        try {                        
             if ($client->isAccessTokenExpired()) {
                 $refresh_token = array_merge($access_token, $client->fetchAccessTokenWithRefreshToken());
                 $client->setAccessToken($refresh_token);
+				$this->options['accessToken'] = $refresh_token;
                 $this->service = new Google_Service_Drive($client);
             }
         } catch (Exception $e) {
