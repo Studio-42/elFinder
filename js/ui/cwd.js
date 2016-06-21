@@ -418,6 +418,14 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			trigger = function() {
+				var phash;
+				if (selectCheckbox && ! selectAllCheckbox.find('input').prop('checked')) {
+					phash = fm.cwd().hash;
+					if (selectedFiles.length === (lastSearch.length? lastSearch : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;})).length) {
+						selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
+						cwd.addClass('elfinder-cwd-allselected');
+					}
+				}
 				fm.trigger('select', {selected : selectedFiles});
 			},
 			
@@ -1045,8 +1053,6 @@ $.fn.elfindercwd = function(fm, options) {
 					emptyMethod, thtr;
 
 				cwdParents = fm.parents(phash);
-
-				unselectAll();
 				
 				wz.append(selectAllCheckbox);
 				
@@ -1430,13 +1436,6 @@ $.fn.elfindercwd = function(fm, options) {
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
 						}
-						if (selectCheckbox && selectCheckbox && ! selectAllCheckbox.find('input').prop('checked')) {
-							phash = fm.cwd().hash;
-							if (selectedFiles.length === (lastSearch.length? lastSearch : $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;})).length) {
-								selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
-								cwd.addClass('elfinder-cwd-allselected');
-							}
-						}
 					}
 				})
 				// remove hover class from unselected file
@@ -1669,6 +1668,7 @@ $.fn.elfindercwd = function(fm, options) {
 				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
 			})
 			.bind('open', function(e) {
+				unselectAll();
 				content(e.data.files);
 				resize();
 			})
@@ -1685,6 +1685,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (query) {
 					query = '';
 					if (!e.data || !e.data.noupdate) {
+						unselectAll();
 						content(fm.files());
 					}
 				}
@@ -1692,17 +1693,19 @@ $.fn.elfindercwd = function(fm, options) {
 				resize();
 			})
 			.bind('searchstart', function(e) {
+				unselectAll();
 				query = e.data.query;
 			})
 			.bind('sortchange', function() {
 				var lastScrollLeft = wrapper.scrollLeft();
+				
 				content(query ? lastSearch : fm.files(), !!query);
 				wrapper.scrollLeft(lastScrollLeft);
+				selectedFiles.length && trigger();
 				resize();
 			})
 			.bind('viewchange', function() {
-				var sel = fm.selected(),
-					l   = fm.storage('view') == 'list',
+				var l      = fm.storage('view') == 'list',
 					allsel = cwd.hasClass('elfinder-cwd-allselected');
 				
 				if (l != list) {
@@ -1714,10 +1717,7 @@ $.fn.elfindercwd = function(fm, options) {
 						cwd.addClass('elfinder-cwd-allselected');
 						selectAllCheckbox.find('input').prop('checked', true);
 					}
-					$.each(sel, function(i, h) {
-						selectFile(h);
-					});
-					trigger();
+					selectedFiles.length && trigger();
 				}
 				resize();
 			})
