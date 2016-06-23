@@ -492,15 +492,13 @@ $.fn.elfindertree = function(fm, opts) {
 							preventFail : true
 						})
 						.done(function(data) {
-							fm.lazy(function() {
-								if (fm.api < 2.1) {
-									data.tree = data.tree.concat([cwd]);
-								}
-								dirs = $.merge(dirs, filter(data.tree));
-								updateTree(dirs);
-								updateArrows(dirs, loaded);
-								cwdhash == cwd.hash && fm.visible() && sync(noCwd);
-							});
+							if (fm.api < 2.1) {
+								data.tree = data.tree.concat([cwd]);
+							}
+							dirs = $.merge(dirs, filter(data.tree));
+							updateTree(dirs);
+							updateArrows(dirs, loaded);
+							cwdhash == cwd.hash && fm.visible() && sync(noCwd);
 						})
 						.always(function(data) {
 							if (link) {
@@ -663,22 +661,20 @@ $.fn.elfindertree = function(fm, opts) {
 
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
-								fm.lazy(function() {
-									updateTree(filter(data.tree)); 
-									
-									if (stree.children().length) {
-										link.addClass(collapsed+' '+expanded);
-										if (stree.children().length > slideTH) {
-											stree.show();
+								updateTree(filter(data.tree)); 
+								
+								if (stree.children().length) {
+									link.addClass(collapsed+' '+expanded);
+									if (stree.children().length > slideTH) {
+										stree.show();
+										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+									} else {
+										stree.stop(true, true).slideDown('normal', function(){
 											fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-										} else {
-											stree.stop(true, true).slideDown('normal', function(){
-												fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-											});
-										}
-									} 
-									sync(true);
-								});
+										});
+									}
+								} 
+								sync(true);
 							})
 							.always(function(data) {
 								spinner.remove();
@@ -750,10 +746,8 @@ $.fn.elfindertree = function(fm, opts) {
 			var dirs = filter(e.data.added);
 
 			if (dirs.length) {
-				fm.lazy(function() {
-					updateTree(dirs);
-					updateArrows(dirs, collapsed);
-				});
+				updateTree(dirs);
+				updateArrows(dirs, collapsed);
 			}
 		})
 		// update changed dirs
