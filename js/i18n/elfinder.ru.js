@@ -144,7 +144,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
 			'btnMount'  : 'Подключить',  // added 18.04.2012
-			'btnApprove': 'Перейти в $1 & применить', // from v2.1 added 26.04.2012
+			'btnApprove': 'Перейти в $1 и применить', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Отключить', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Конвертировать', // from v2.1 added 08.04.2014
 			'btnCwd'    : 'Здесь',      // from v2.1 added 22.5.2015
