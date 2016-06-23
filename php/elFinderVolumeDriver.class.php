@@ -3717,6 +3717,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function countSize($path) {
+		
+		elFinder::extendTimeLimit();
+		
 		$stat = $this->stat($path);
 
 		if (empty($stat) || !$stat['read'] || !empty($stat['hidden'])) {
@@ -3958,6 +3961,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function copy($src, $dst, $name) {
+		
+		elFinder::extendTimeLimit();
+		
 		$srcStat = $this->stat($src);
 		$this->clearcache();
 		
