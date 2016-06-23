@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: c98297e) (2016-06-21)
+ * Version 2.1.12 (2.1-src Nightly: e1e79a1) (2016-06-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -385,6 +385,22 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	display:block;
 	font-size: 18px;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
+}
+
+/* in lazy execution status */
+.elfinder.elfinder-processing * {
+	cursor: progress !important
+}
+.elfinder.elfinder-processing.elfinder-touch .elfinder-workzone:after {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 3px;
+	content: '';
+	left: 0;
+	background-image: url(../img/progress.gif);
+	opacity: .6;
+	pointer-events: none;
 }
 
 /* for disable select of Touch devices */
