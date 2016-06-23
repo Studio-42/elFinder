@@ -244,7 +244,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                 }
                 
                 return array('exit' => true, 'body' => $html);
-            } else {
+            
+			} else {
+			
                 $client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));
                 $oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');
                 $this->session->set('elFinderGoogledriveTokens', array(rand(1000000000, 9999999999), $oauth_token));
@@ -275,9 +277,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         if ($this->session->get('elFinderGoogledriveTokens')) {
             list($options['googledriveUid'], $options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');
         }
-        unset($options['user'], $options['pass']);
-        $this->session->remove('elFinderGoogleDriveAuthTokens');
-		$this->session->remove('elFinderGoogledriveTokens');  
+        unset($options['user'], $options['pass']);        
 		 
         return $options;
     }
@@ -308,7 +308,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         }
         
         $this->options['alias'] = '';
-                
+        $this->session->remove('elFinderGoogleDriveAuthTokens');
+		$this->session->remove('elFinderGoogledriveTokens'); 
+		         
         return true;
     }
     
@@ -355,7 +357,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             if ($this->options['googleApiClient'] && ! class_exists('Google_Client')) {
                 include_once($this->options['googleApiClient']);
             }
-            if (! class_exists('Google_Client', true)) {
+            if (!class_exists('Google_Client')) {
                 return $this->setError('Class Google_Client not found.');
             }
             
@@ -477,8 +479,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      */
     private function refreshGoogleDriveToken($client)
     {
-        try {                        
+        try { 
+			$client->setAccessToken($this->options['accessToken']);                       
             if ($client->isAccessTokenExpired()) {
+				$client->setClientId($this->options['client_id']);
+        		$client->setClientSecret($this->options['client_secret']);		
+				$access_token = $this->options['accessToken'];					
+				$client->setAccessToken($access_token);	
                 $refresh_token = array_merge($access_token, $client->fetchAccessTokenWithRefreshToken());
                 $client->setAccessToken($refresh_token);
 				$this->options['accessToken'] = $refresh_token;
