@@ -883,38 +883,36 @@ $.fn.elfindercwd = function(fm, options) {
 
 				l && wz.removeClass('elfinder-cwd-wrapper-empty');
 				
-				fm.lazy(function() {
-					while (l--) {
-						file = files[l];
-						hash = file.hash;
-						
-						if ($('#'+fm.cwdHash2Id(hash)).length) {
-							continue;
-						}
-						
-						if ((node = findNode(file)) && node.length) {
-							node.before(itemhtml(file)); 
-						} else if ((ndx = findIndex(file)) >= 0) {
-							buffer.splice(ndx, 0, file);
-						} else {
-							place.append(itemhtml(file));
-						}
-						
-						if ($('#'+fm.cwdHash2Id(hash)).length) {
-							if (file.mime == 'directory') {
-								dirs = true;
-							} else if (file.tmb) {
-								file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb);
-							}
-						}
+				while (l--) {
+					file = files[l];
+					hash = file.hash;
+					
+					if ($('#'+fm.cwdHash2Id(hash)).length) {
+						continue;
 					}
 					
-					setColwidth();
-					bottomMarkerShow(place);
-					attachThumbnails(atmb);
-					ltmb.length && loadThumbnails(ltmb);
-					dirs && !mobile && makeDroppable();
-				});
+					if ((node = findNode(file)) && node.length) {
+						node.before(itemhtml(file)); 
+					} else if ((ndx = findIndex(file)) >= 0) {
+						buffer.splice(ndx, 0, file);
+					} else {
+						place.append(itemhtml(file));
+					}
+					
+					if ($('#'+fm.cwdHash2Id(hash)).length) {
+						if (file.mime == 'directory') {
+							dirs = true;
+						} else if (file.tmb) {
+							file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb);
+						}
+					}
+				}
+				
+				setColwidth();
+				bottomMarkerShow(place);
+				attachThumbnails(atmb);
+				ltmb.length && loadThumbnails(ltmb);
+				dirs && !mobile && makeDroppable();
 			},
 			
 			/**

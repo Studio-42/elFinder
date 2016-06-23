@@ -1348,22 +1348,20 @@ window.elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			done = function(data) {
-				self.lazy(function() {
-					data.warning && self.error(data.warning);
-					
-					cmd == 'open' && open($.extend(true, {}, data));
-	
-					// fire some event to update cache/ui
-					data.removed && data.removed.length && self.remove(data);
-					data.added   && data.added.length   && self.add(data);
-					data.changed && data.changed.length && self.change(data);
-					
-					// fire event with command name
-					self.trigger(cmd, data);
-					
-					// force update content
-					data.sync && self.sync();
-				});
+				data.warning && self.error(data.warning);
+				
+				cmd == 'open' && open($.extend(true, {}, data));
+
+				// fire some event to update cache/ui
+				data.removed && data.removed.length && self.remove(data);
+				data.added   && data.added.length   && self.add(data);
+				data.changed && data.changed.length && self.change(data);
+				
+				// fire event with command name
+				self.trigger(cmd, data);
+				
+				// force update content
+				data.sync && self.sync();
 			},
 			/**
 			 * Request error handler. Reject dfrd with correct error message.
@@ -1428,32 +1426,34 @@ window.elFinder = function(node, opts) {
 					return dfrd.reject('errResponse', xhr);
 				}
 
-				response = self.normalize(response);
+				self.lazy(function() {
+					response = self.normalize(response);
 
-				if (!self.api) {
-					self.api    = response.api || 1;
-					if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
-						self.api = '2.1';
+					if (!self.api) {
+						self.api    = response.api || 1;
+						if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
+							self.api = '2.1';
+						}
+						self.newAPI = self.api >= 2;
+						self.oldAPI = !self.newAPI;
 					}
-					self.newAPI = self.api >= 2;
-					self.oldAPI = !self.newAPI;
-				}
-				
-				if (response.options) {
-					cwdOptions = $.extend({}, cwdOptions, response.options);
-				}
+					
+					if (response.options) {
+						cwdOptions = $.extend({}, cwdOptions, response.options);
+					}
 
-				if (response.netDrivers) {
-					self.netDrivers = response.netDrivers;
-				}
+					if (response.netDrivers) {
+						self.netDrivers = response.netDrivers;
+					}
 
-				if (cmd == 'open' && !!data.init) {
-					self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-					self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
-				}
+					if (cmd == 'open' && !!data.init) {
+						self.uplMaxSize = self.returnBytes(response.uplMaxSize);
+						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
+					}
 
-				dfrd.resolve(response);
-				response.debug && self.debug('backend-debug', response.debug);
+					dfrd.resolve(response);
+					response.debug && self.debug('backend-debug', response.debug);
+				});
 			},
 			xhr, _xhr,
 			abort = function(e){
@@ -2604,26 +2604,24 @@ window.elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
-			self.lazy(function() {
-				// detect elFinder node z-index
-				var ni = node.css('z-index');
-				if (ni && ni !== 'auto' && ni !== 'inherit') {
-					self.zIndex = ni;
-				} else {
-					node.parents().each(function(i, n) {
-						var z = $(n).css('z-index');
-						if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
-							self.zIndex = z;
-							return false;
-						}
-					});
-				}
-				
-				self.load().debug('api', self.api);
-				data = $.extend(true, {}, data);
-				open(data);
-				self.trigger('open', data);
-			});
+			// detect elFinder node z-index
+			var ni = node.css('z-index');
+			if (ni && ni !== 'auto' && ni !== 'inherit') {
+				self.zIndex = ni;
+			} else {
+				node.parents().each(function(i, n) {
+					var z = $(n).css('z-index');
+					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
+						self.zIndex = z;
+						return false;
+					}
+				});
+			}
+			
+			self.load().debug('api', self.api);
+			data = $.extend(true, {}, data);
+			open(data);
+			self.trigger('open', data);
 		});
 	
 	// update ui's size after init
