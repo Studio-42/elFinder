@@ -174,6 +174,13 @@ window.elFinder = function(node, opts) {
 		queue = [],
 		
 		/**
+		 * Queue for only cwd requests e.g. `tmb`
+		 *
+		 * @type Array
+		 **/
+		cwdQueue = [],
+		
+		/**
 		 * Commands prototype
 		 *
 		 * @type Object
@@ -517,6 +524,15 @@ window.elFinder = function(node, opts) {
 	 * @default {}
 	 */
 	this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
+
+	/**
+	 * command names for into queue for only cwd requests
+	 * these commands aborts before `open` request
+	 *
+	 * @type Array
+	 * @default ['tmb']
+	 */
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb'];
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -1499,6 +1515,12 @@ window.elFinder = function(node, opts) {
 					_xhr.abort();
 				}
 			}
+			while ((_xhr = cwdQueue.pop())) {
+				if (_xhr.state() == 'pending') {
+					_xhr.quiet = true;
+					_xhr.abort();
+				}
+			}
 		}
 
 		delete options.preventFail
@@ -1513,6 +1535,15 @@ window.elFinder = function(node, opts) {
 				var ndx = $.inArray(xhr, queue);
 				self.unbind(self.cmdsToAdd + ' autosync', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
+			});
+		}
+		
+		// add only cwd xhr into queue
+		if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
+			cwdQueue.unshift(xhr);
+			dfrd.always(function() {
+				var ndx = $.inArray(xhr, cwdQueue);
+				ndx !== -1 && cwdQueue.splice(ndx, 1);
 			});
 		}
 		
