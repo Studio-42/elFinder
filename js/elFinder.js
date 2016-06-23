@@ -174,6 +174,13 @@ window.elFinder = function(node, opts) {
 		queue = [],
 		
 		/**
+		 * Queue for only cwd requests e.g. `tmb`
+		 *
+		 * @type Array
+		 **/
+		cwdQueue = [],
+		
+		/**
 		 * Commands prototype
 		 *
 		 * @type Object
@@ -291,7 +298,9 @@ window.elFinder = function(node, opts) {
 		 **/
 		cache = function(data) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
-				l = data.length, f, i;
+				sorterChk = (self.sorters.length === 0),
+				l         = data.length,
+				f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
@@ -313,12 +322,13 @@ window.elFinder = function(node, opts) {
 							self.roots[f.volumeid] = f.hash;
 						}
 					}
-					if (! self.sorters.length && f.phash === cwd) {
+					if (sorterChk && f.phash === cwd) {
 						$.each(self.sortRules, function(key) {
 							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
 								self.sorters.push(key);
 							}
 						});
+						sorterChk = false;
 					}
 					files[f.hash] = f;
 				} 
@@ -514,6 +524,15 @@ window.elFinder = function(node, opts) {
 	 * @default {}
 	 */
 	this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
+
+	/**
+	 * command names for into queue for only cwd requests
+	 * these commands aborts before `open` request
+	 *
+	 * @type Array
+	 * @default ['tmb']
+	 */
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb'];
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -1329,20 +1348,22 @@ window.elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			done = function(data) {
-				data.warning && self.error(data.warning);
-				
-				cmd == 'open' && open($.extend(true, {}, data));
-
-				// fire some event to update cache/ui
-				data.removed && data.removed.length && self.remove(data);
-				data.added   && data.added.length   && self.add(data);
-				data.changed && data.changed.length && self.change(data);
-				
-				// fire event with command name
-				self.trigger(cmd, data);
-				
-				// force update content
-				data.sync && self.sync();
+				self.lazy(function() {
+					data.warning && self.error(data.warning);
+					
+					cmd == 'open' && open($.extend(true, {}, data));
+	
+					// fire some event to update cache/ui
+					data.removed && data.removed.length && self.remove(data);
+					data.added   && data.added.length   && self.add(data);
+					data.changed && data.changed.length && self.change(data);
+					
+					// fire event with command name
+					self.trigger(cmd, data);
+					
+					// force update content
+					data.sync && self.sync();
+				});
 			},
 			/**
 			 * Request error handler. Reject dfrd with correct error message.
@@ -1494,6 +1515,12 @@ window.elFinder = function(node, opts) {
 					_xhr.abort();
 				}
 			}
+			while ((_xhr = cwdQueue.pop())) {
+				if (_xhr.state() == 'pending') {
+					_xhr.quiet = true;
+					_xhr.abort();
+				}
+			}
 		}
 
 		delete options.preventFail
@@ -1508,6 +1535,15 @@ window.elFinder = function(node, opts) {
 				var ndx = $.inArray(xhr, queue);
 				self.unbind(self.cmdsToAdd + ' autosync', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
+			});
+		}
+		
+		// add only cwd xhr into queue
+		if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
+			cwdQueue.unshift(xhr);
+			dfrd.always(function() {
+				var ndx = $.inArray(xhr, cwdQueue);
+				ndx !== -1 && cwdQueue.splice(ndx, 1);
 			});
 		}
 		
@@ -1977,6 +2013,47 @@ window.elFinder = function(node, opts) {
 		this.disable().trigger('hide');
 		node.hide();
 	};
+	
+	/**
+	 * Lazy execution function
+	 * 
+	 * @param  Object  function
+	 * @param  Number  delay
+	 * @return Object  jQuery.Deferred
+	 */
+	this.lazy = function(func, delay) {
+		var busy = function(state) {
+				var cnt = node.data('lazycnt');
+				if (state) {
+					if (! cnt) {
+						node.data('lazycnt', 1);
+						node.addClass('elfinder-processing');
+					} else {
+						node.data('lazycnt', ++cnt);
+					}
+				} else {
+					if (cnt && cnt > 1) {
+						node.data('lazycnt', --cnt);
+					} else {
+						node.data('lazycnt', 0);
+						node.removeClass('elfinder-processing');
+					}
+				}
+			},
+			dfd  = $.Deferred();
+		
+		delay = delay || 0;
+		busy(true);
+		
+		// for node re-paint
+		node.outerHeight();
+		
+		setTimeout(function() {
+			func.call(dfd);
+			busy(false);
+		}, delay);
+		return dfd;
+	}
 	
 	/**
 	 * Destroy this elFinder instance
@@ -2527,24 +2604,26 @@ window.elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
-			// detect elFinder node z-index
-			var ni = node.css('z-index');
-			if (ni && ni !== 'auto' && ni !== 'inherit') {
-				self.zIndex = ni;
-			} else {
-				node.parents().each(function(i, n) {
-					var z = $(n).css('z-index');
-					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
-						self.zIndex = z;
-						return false;
-					}
-				});
-			}
-			
-			self.load().debug('api', self.api);
-			data = $.extend(true, {}, data);
-			open(data);
-			self.trigger('open', data);
+			self.lazy(function() {
+				// detect elFinder node z-index
+				var ni = node.css('z-index');
+				if (ni && ni !== 'auto' && ni !== 'inherit') {
+					self.zIndex = ni;
+				} else {
+					node.parents().each(function(i, n) {
+						var z = $(n).css('z-index');
+						if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
+							self.zIndex = z;
+							return false;
+						}
+					});
+				}
+				
+				self.load().debug('api', self.api);
+				data = $.extend(true, {}, data);
+				open(data);
+				self.trigger('open', data);
+			});
 		});
 	
 	// update ui's size after init
