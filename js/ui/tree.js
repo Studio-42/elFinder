@@ -382,7 +382,10 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 				
 				if (orphans.length && orphans.length < length) {
-					return updateTree(orphans);
+					fm.lazy(function() {
+						updateTree(orphans);
+					});
+					return;
 				} 
 				
 				if (length && !mobile) {
@@ -472,8 +475,10 @@ $.fn.elfindertree = function(fm, opts) {
 						if (dir && dir.phash) {
 							link = $('#'+fm.navHash2Id(dir.phash));
 							if (link.length && link.hasClass(loaded)) {
-								updateTree([dir]);
-								sync(noCwd);
+								fm.lazy(function() {
+									updateTree([dir]);
+									sync(noCwd);
+								});
 								return;
 							}
 						}
@@ -487,13 +492,15 @@ $.fn.elfindertree = function(fm, opts) {
 							preventFail : true
 						})
 						.done(function(data) {
-							if (fm.api < 2.1) {
-								data.tree = data.tree.concat([cwd]);
-							}
-							dirs = $.merge(dirs, filter(data.tree));
-							updateTree(dirs);
-							updateArrows(dirs, loaded);
-							cwdhash == cwd.hash && fm.visible() && sync(noCwd);
+							fm.lazy(function() {
+								if (fm.api < 2.1) {
+									data.tree = data.tree.concat([cwd]);
+								}
+								dirs = $.merge(dirs, filter(data.tree));
+								updateTree(dirs);
+								updateArrows(dirs, loaded);
+								cwdhash == cwd.hash && fm.visible() && sync(noCwd);
+							});
 						})
 						.always(function(data) {
 							if (link) {
@@ -639,35 +646,39 @@ $.fn.elfindertree = function(fm, opts) {
 
 					if (link.hasClass(loaded)) {
 						link.toggleClass(expanded);
-						cnt = link.hasClass(expanded)? stree.children().length + stree.find('div.elfinder-navbar-subtree[style*=block]').children().length : stree.find('div:visible').length;
-						if (cnt > slideTH) {
-							stree.toggle();
-							fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-						} else {
-							stree.stop(true, true).slideToggle('normal', function(){
+						fm.lazy(function() {
+							cnt = link.hasClass(expanded)? stree.children().length + stree.find('div.elfinder-navbar-subtree[style*=block]').children().length : stree.find('div:visible').length;
+							if (cnt > slideTH) {
+								stree.toggle();
 								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-							});
-						}
+							} else {
+								stree.stop(true, true).slideToggle('normal', function(){
+									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+								});
+							}
+						});
 					} else {
 						spinner.insertBefore(arrow);
 						link.removeClass(collapsed);
 
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
-								updateTree(filter(data.tree)); 
-								
-								if (stree.children().length) {
-									link.addClass(collapsed+' '+expanded);
-									if (stree.children().length > slideTH) {
-										stree.show();
-										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-									} else {
-										stree.stop(true, true).slideDown('normal', function(){
+								fm.lazy(function() {
+									updateTree(filter(data.tree)); 
+									
+									if (stree.children().length) {
+										link.addClass(collapsed+' '+expanded);
+										if (stree.children().length > slideTH) {
+											stree.show();
 											fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
-										});
-									}
-								} 
-								sync(true);
+										} else {
+											stree.stop(true, true).slideDown('normal', function(){
+												fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+											});
+										}
+									} 
+									sync(true);
+								});
 							})
 							.always(function(data) {
 								spinner.remove();
@@ -716,18 +727,20 @@ $.fn.elfindertree = function(fm, opts) {
 			}
 
 			if (dirs.length) {
-				if (!contextmenu.data('cmdMaps')) {
-					contextmenu.data('cmdMaps', {});
-				}
-				updateTree(dirs);
-				updateArrows(dirs, loaded);
-				// support volume driver option `uiCmdMap`
-				$.each(dirs, function(k, v){
-					if (v.volumeid) {
-						if (v.uiCmdMap && Object.keys(v.uiCmdMap).length && !contextmenu.data('cmdMaps')[v.volumeid]) {
-							contextmenu.data('cmdMaps')[v.volumeid] = v.uiCmdMap;
-						}
+				fm.lazy(function() {
+					if (!contextmenu.data('cmdMaps')) {
+						contextmenu.data('cmdMaps', {});
 					}
+					updateTree(dirs);
+					updateArrows(dirs, loaded);
+					// support volume driver option `uiCmdMap`
+					$.each(dirs, function(k, v){
+						if (v.volumeid) {
+							if (v.uiCmdMap && Object.keys(v.uiCmdMap).length && !contextmenu.data('cmdMaps')[v.volumeid]) {
+								contextmenu.data('cmdMaps')[v.volumeid] = v.uiCmdMap;
+							}
+						}
+					});
 				});
 			} 
 			sync(false, dirs);
@@ -737,8 +750,10 @@ $.fn.elfindertree = function(fm, opts) {
 			var dirs = filter(e.data.added);
 
 			if (dirs.length) {
-				updateTree(dirs);
-				updateArrows(dirs, collapsed);
+				fm.lazy(function() {
+					updateTree(dirs);
+					updateArrows(dirs, collapsed);
+				});
 			}
 		})
 		// update changed dirs
