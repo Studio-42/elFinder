@@ -480,16 +480,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     private function refreshGoogleDriveToken($client)
     {
         try { 
-			$client->setAccessToken($this->options['accessToken']);                       
+            $client->setAccessToken($this->options['accessToken']);                       
             if ($client->isAccessTokenExpired()) {
-				$client->setClientId($this->options['client_id']);
-        		$client->setClientSecret($this->options['client_secret']);		
-				$access_token = $this->options['accessToken'];					
-				$client->setAccessToken($access_token);	
-                $refresh_token = array_merge($access_token, $client->fetchAccessTokenWithRefreshToken());
-                $client->setAccessToken($refresh_token);
-				$this->options['accessToken'] = $refresh_token;
-                $this->service = new Google_Service_Drive($client);
+            	$client->setClientId($this->options['client_id']);
+            	$client->setClientSecret($this->options['client_secret']);																
+            	$refresh_token = $client->fetchAccessTokenWithRefreshToken();
+            	$client->setAccessToken($refresh_token);
+           	$this->options['accessToken'] = $refresh_token;
+            	$this->service = new Google_Service_Drive($client);
             }
         } catch (Exception $e) {
             return $e->getMessage();
