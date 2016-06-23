@@ -573,7 +573,10 @@ $.fn.elfindercwd = function(fm, options) {
 					proc = true;
 					// scroll top on dir load to avoid scroll after page reload
 					wrapper.scrollTop(0);
-					fm.lazy(go).done(function() {proc = false;});
+					fm.lazy(function() {
+						go();
+						proc = false;
+					});
 					if (list && colWidth) {
 						setColwidth();
 						fixTableHeader({fitWidth: true});
@@ -585,7 +588,8 @@ $.fn.elfindercwd = function(fm, options) {
 							proc = true;
 							fm.lazy(function() {
 								go(chk);
-							}).done(function() {proc = false;});
+								proc = false;;
+							});
 						}
 					}, 100);
 				}
@@ -879,36 +883,38 @@ $.fn.elfindercwd = function(fm, options) {
 
 				l && wz.removeClass('elfinder-cwd-wrapper-empty');
 				
-				while (l--) {
-					file = files[l];
-					hash = file.hash;
-					
-					if ($('#'+fm.cwdHash2Id(hash)).length) {
-						continue;
-					}
-					
-					if ((node = findNode(file)) && node.length) {
-						node.before(itemhtml(file)); 
-					} else if ((ndx = findIndex(file)) >= 0) {
-						buffer.splice(ndx, 0, file);
-					} else {
-						place.append(itemhtml(file));
-					}
-					
-					if ($('#'+fm.cwdHash2Id(hash)).length) {
-						if (file.mime == 'directory') {
-							dirs = true;
-						} else if (file.tmb) {
-							file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb);
+				fm.lazy(function() {
+					while (l--) {
+						file = files[l];
+						hash = file.hash;
+						
+						if ($('#'+fm.cwdHash2Id(hash)).length) {
+							continue;
+						}
+						
+						if ((node = findNode(file)) && node.length) {
+							node.before(itemhtml(file)); 
+						} else if ((ndx = findIndex(file)) >= 0) {
+							buffer.splice(ndx, 0, file);
+						} else {
+							place.append(itemhtml(file));
+						}
+						
+						if ($('#'+fm.cwdHash2Id(hash)).length) {
+							if (file.mime == 'directory') {
+								dirs = true;
+							} else if (file.tmb) {
+								file.tmb === 1 ? ltmb.push(hash) : (atmb[hash] = file.tmb);
+							}
 						}
 					}
-				}
-				
-				setColwidth();
-				bottomMarkerShow(place);
-				attachThumbnails(atmb);
-				ltmb.length && loadThumbnails(ltmb);
-				dirs && !mobile && makeDroppable();
+					
+					setColwidth();
+					bottomMarkerShow(place);
+					attachThumbnails(atmb);
+					ltmb.length && loadThumbnails(ltmb);
+					dirs && !mobile && makeDroppable();
+				});
 			},
 			
 			/**
