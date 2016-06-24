@@ -87,6 +87,13 @@ class elFinder {
 	protected static $commonTempPath = '';
 	
 	/**
+	 * Additional volume root options for network mounting volume
+	 * 
+	 * @var array
+	 */
+	protected $optionsNetVolumes = array();
+	
+	/**
 	 * Session key of net mount volumes
 	 *
 	 * @deprecated
@@ -362,6 +369,7 @@ class elFinder {
 			elFinder::$commonTempPath = '';
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
+		$this->optionsNetVolumes = is_array($opts['optionsNetVolumes'])? $opts['optionsNetVolumes'] : array();
 		
 		// deprecated settings
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
@@ -917,6 +925,14 @@ class elFinder {
 			if (! $options['id'] = $this->getNetVolumeUniqueId($netVolumes)) {
 				return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], 'Could\'t given volume id.'));
 			}
+		}
+		
+		// load additional volume root options
+		if (! empty($this->optionsNetVolumes['*'])) {
+			$options = array_merge($options, $this->optionsNetVolumes['*']);
+		}
+		if (! empty($this->optionsNetVolumes[$protocol])) {
+			$options = array_merge($options, $this->optionsNetVolumes[$protocol]);
 		}
 		
 		if ($volume->mount($options)) {
