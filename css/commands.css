@@ -199,10 +199,11 @@
 
 .elfinder-resize-row .elfinder-buttonset { float:right; }
 
-.elfinder-resize-rotate-slider {
+.std42-dialog .elfinder-resize-rotate-slider {
 	float: left;
 	width: 195px;
 	margin: 7px;
+	background-color: white;
 }
 
 .elfinder-resize-type span.ui-checkboxradio-icon {
