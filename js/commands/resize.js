@@ -152,7 +152,7 @@ elFinder.prototype.commands.resize = function() {
 					rheight = 0,
 					rdegree = 0,
 					img     = $('<img/>')
-						.load(function() {
+						.on('load', function() {
 							var r_scale, inputFirst,
 								imgRatio = img.height() / img.width();
 							
@@ -236,7 +236,7 @@ elFinder.prototype.commands.resize = function() {
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
 						})
-						.error(function() {
+						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
 					basec = $('<div/>'),

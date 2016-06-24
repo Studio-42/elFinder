@@ -34,7 +34,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
-					.load(function() {
+					.on('load', function() {
 						// timeout - because of strange safari bug - 
 						// sometimes cant get image height 0_o
 						setTimeout(function() {
@@ -63,7 +63,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							img.fadeIn(100);
 						}, 1)
 					})
-					.error(function() {
+					.on('error', function() {
 						loading.remove();
 					})
 					.attr('src', ql.fm.openUrl(file.hash));
@@ -189,7 +189,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
 					.hide()
 					.appendTo(preview)
-					.load(function() { 
+					.on('load', function() { 
 						ql.hideinfo();
 						node.show(); 
 					})
