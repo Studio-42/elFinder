@@ -335,6 +335,18 @@
 	overflow: hidden;
 }
 
+.elfinder-cwd-wrapper-list.elfinder-cwd-fixheader:before {
+	content: '';
+	position: absolute;
+	width: 100%;
+	top: 0;
+	height: 3px;
+	background-color: white;
+}
+.elfinder-droppable-active + .elfinder-cwd-wrapper-list.elfinder-cwd-fixheader:before {
+	background-color: #8cafed;
+}
+
 .elfinder .elfinder-workzone div.elfinder-cwd-fixheader table {
 	table-layout: fixed;
 }
