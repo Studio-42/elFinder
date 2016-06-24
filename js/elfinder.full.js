@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: fe8818e) (2016-06-24)
+ * Version 2.1.12 (2.1-src Nightly: 9015248) (2016-06-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: fe8818e)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 9015248)';
 
 
 
@@ -8924,7 +8924,7 @@ $.fn.elfindercwd = function(fm, options) {
 						file.tmb = tmb;
 						(function(node, tmb) {
 							$('<img/>')
-								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+								.on('load', function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 								.attr('src', tmb.url);
 						})(node, fm.tmb(file));
 					} else {
@@ -14763,7 +14763,7 @@ elFinder.prototype.commands.info = function() {
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
-				.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+				.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 				.attr('src', tmb.url);
 		}
 		
@@ -16028,7 +16028,7 @@ elFinder.prototype.commands.quicklook = function() {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
-						.load(function() {
+						.on('load', function() {
 							icon.addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
 							$(this).remove();
 						})
@@ -16294,7 +16294,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
-					.load(function() {
+					.on('load', function() {
 						// timeout - because of strange safari bug - 
 						// sometimes cant get image height 0_o
 						setTimeout(function() {
@@ -16323,7 +16323,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							img.fadeIn(100);
 						}, 1)
 					})
-					.error(function() {
+					.on('error', function() {
 						loading.remove();
 					})
 					.attr('src', ql.fm.openUrl(file.hash));
@@ -16449,7 +16449,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
 					.hide()
 					.appendTo(preview)
-					.load(function() { 
+					.on('load', function() { 
 						ql.hideinfo();
 						node.show(); 
 					})
@@ -17347,7 +17347,7 @@ elFinder.prototype.commands.resize = function() {
 					rheight = 0,
 					rdegree = 0,
 					img     = $('<img/>')
-						.load(function() {
+						.on('load', function() {
 							var r_scale, inputFirst,
 								imgRatio = img.height() / img.width();
 							
@@ -17431,7 +17431,7 @@ elFinder.prototype.commands.resize = function() {
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
 						})
-						.error(function() {
+						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
 					basec = $('<div/>'),
@@ -18199,7 +18199,7 @@ elFinder.prototype.commands.rm = function() {
 			// load thumbnail
 			if (tmb) {
 				$('<img/>')
-					.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+					.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 					.attr('src', tmb.url);
 			}
 		}
