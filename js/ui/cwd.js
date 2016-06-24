@@ -805,7 +805,7 @@ $.fn.elfindercwd = function(fm, options) {
 						file.tmb = tmb;
 						(function(node, tmb) {
 							$('<img/>')
-								.load(function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+								.on('load', function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 								.attr('src', tmb.url);
 						})(node, fm.tmb(file));
 					} else {

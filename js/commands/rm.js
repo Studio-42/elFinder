@@ -119,7 +119,7 @@ elFinder.prototype.commands.rm = function() {
 			// load thumbnail
 			if (tmb) {
 				$('<img/>')
-					.load(function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+					.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
 					.attr('src', tmb.url);
 			}
 		}

@@ -315,7 +315,7 @@ elFinder.prototype.commands.quicklook = function() {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
-						.load(function() {
+						.on('load', function() {
 							icon.addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
 							$(this).remove();
 						})
