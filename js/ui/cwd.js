@@ -548,7 +548,7 @@ $.fn.elfindercwd = function(fm, options) {
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
 						
 						// fixed table header
-						list && fixTableHeader();
+						list && fixTableHeader({fitWidth: ! colWidth});
 						
 						// load/attach thumbnails
 						attachThumbnails(atmb);
@@ -618,7 +618,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				},
 				opts = opts || {},
-				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
+				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, htw, btw, init;
 				
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
@@ -659,8 +659,16 @@ $.fn.elfindercwd = function(fm, options) {
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
 							btd = btr.children('td:eq('+i+')');
-							delta = (htd.outerWidth() - htd.width()) - (btd.outerWidth() - btd.width());
-							htd.css('width', (btd.width() - delta) + 'px');
+							htw = htd.width();
+							btw = btd.width();
+							if (typeof htd.data('delta') === 'undefined') {
+								htd.data('delta', (htd.outerWidth() - htw) - (btd.outerWidth() - btw));
+							}
+							btw -= htd.data('delta');
+							if (htw === btw) {
+								break;
+							}
+							htd.css('width', btw + 'px');
 						}
 					}
 					
