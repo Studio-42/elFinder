@@ -252,6 +252,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                 $this->session->set('elFinderGoogledriveTokens', array(rand(1000000000, 9999999999), $oauth_token));
                 
                 $service = new Google_Service_Drive($client);
+				$rootObj = $service->files->get('root');
                 $folders = [];
                 foreach ($service->files->listFiles([
                         'pageSize' => 1000,
@@ -261,7 +262,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                 }
                     
                 natcasesort($folders);
-                $folders = ['root' => 'My Drive'] + $folders;
+                $folders = ['root' => $rootObj->getName()] + $folders;
                 $folders = json_encode($folders);
                 $options['pass'] = 'return';
                     
