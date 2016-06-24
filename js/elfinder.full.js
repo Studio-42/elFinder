@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 88e369b) (2016-06-23)
+ * Version 2.1.12 (2.1-src Nightly: fe8818e) (2016-06-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 88e369b)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: fe8818e)';
 
 
 
@@ -8667,7 +8667,7 @@ $.fn.elfindercwd = function(fm, options) {
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
 						
 						// fixed table header
-						list && fixTableHeader();
+						list && fixTableHeader({fitWidth: ! colWidth});
 						
 						// load/attach thumbnails
 						attachThumbnails(atmb);
@@ -8737,7 +8737,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				},
 				opts = opts || {},
-				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, init, delta;
+				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, htw, btw, init;
 				
 				tbody = cwd.find('tbody');
 				btr = tbody.children('tr:first');
@@ -8778,8 +8778,16 @@ $.fn.elfindercwd = function(fm, options) {
 						for (var i = 0; i < cnt; i++) {
 							htd = htr.children('td:eq('+i+')');
 							btd = btr.children('td:eq('+i+')');
-							delta = (htd.outerWidth() - htd.width()) - (btd.outerWidth() - btd.width());
-							htd.css('width', (btd.width() - delta) + 'px');
+							htw = htd.width();
+							btw = btd.width();
+							if (typeof htd.data('delta') === 'undefined') {
+								htd.data('delta', (htd.outerWidth() - htw) - (btd.outerWidth() - btw));
+							}
+							btw -= htd.data('delta');
+							if (htw === btw) {
+								break;
+							}
+							htd.css('width', btw + 'px');
 						}
 					}
 					
