@@ -8,7 +8,7 @@ try {
 		var fm      = ql.fm,
 			preview = ql.preview;
 			
-		preview.bind('update', function(e) {
+		preview.on('update', function(e) {
 			var win  = ql.window,
 				file = e.file, node, loading;
 			
