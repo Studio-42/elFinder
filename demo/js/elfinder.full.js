@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 1e2b15d) (2016-06-24)
+ * Version 2.1.12 (2.1-src Nightly: 69cb676) (2016-06-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 1e2b15d)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 69cb676)';
 
 
 
@@ -17220,7 +17220,11 @@ elFinder.prototype.commands.resize = function() {
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
-					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
+					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>')
+						.on('touchmove', function(e) {
+							e.stopPropagation();
+							e.preventDefault();
+						}),
 					input    = '<input type="text" size="5"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
@@ -17322,6 +17326,7 @@ elFinder.prototype.commands.resize = function() {
 							rotate.update();
 						}),
 					uidegslider = $('<div class="elfinder-resize-rotate-slider"/>')
+						.addClass('touch-punch')
 						.slider({
 							min: 0,
 							max: 360,
