@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 69cb676) (2016-06-24)
+ * Version 2.1.12 (2.1-src Nightly: 8f6dee9) (2016-06-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -209,10 +209,11 @@
 
 .elfinder-resize-row .elfinder-buttonset { float:right; }
 
-.elfinder-resize-rotate-slider {
+.std42-dialog .elfinder-resize-rotate-slider {
 	float: left;
 	width: 195px;
 	margin: 7px;
+	background-color: white;
 }
 
 .elfinder-resize-type span.ui-checkboxradio-icon {
