@@ -575,12 +575,12 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.scrollTop(0);
 					fm.lazy(function() {
 						go();
+						if (list && colWidth) {
+							setColwidth();
+							fixTableHeader({fitWidth: true});
+						}
 						proc = false;
 					});
-					if (list && colWidth) {
-						setColwidth();
-						fixTableHeader({fitWidth: true});
-					}
 				} else if (! proc) {
 					// regist next go()
 					bufferExt.timer = setTimeout(function() {
