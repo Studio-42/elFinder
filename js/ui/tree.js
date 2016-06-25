@@ -382,9 +382,7 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 				
 				if (orphans.length && orphans.length < length) {
-					fm.lazy(function() {
-						updateTree(orphans);
-					});
+					updateTree(orphans);
 					return;
 				} 
 				
