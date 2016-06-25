@@ -1165,18 +1165,19 @@ $.fn.elfindercwd = function(fm, options) {
 							},
 							update: function(e, ui){
 								var target = $(ui.item[0]).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', ''),
-									prev, done,
-									customCols = $.map($(this).children(), function(n) {
-										var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
-										if (! done) {
-											if (target === name) {
-												done = true;
-											} else {
-												prev = name;
-											}
+									prev, done;
+								customCols = $.map($(this).children(), function(n) {
+									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
+									if (! done) {
+										if (target === name) {
+											done = true;
+										} else {
+											prev = name;
 										}
-										return (name === 'name')? null : name;
-									});
+									}
+									return (name === 'name')? null : name;
+								});
+								templates.row = makeTemplateRow();
 								fm.storage('cwdCols', customCols);
 								prev = '.elfinder-col-'+prev+':first';
 								target = '.elfinder-col-'+target+':first';
