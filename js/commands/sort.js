@@ -64,9 +64,11 @@ elFinder.prototype.commands.sort = function() {
 							$('<span class="ui-icon ui-icon-triangle-1-'+arr+'"/>').appendTo(td);
 						}
 						$(td).on('click', function(e){
-							e.stopPropagation();
-							if (! fm.getUI('cwd').data('longtap')) {
-								self.exec([], sort);
+							if (! $(this).data('dragging')) {
+								e.stopPropagation();
+								if (! fm.getUI('cwd').data('longtap')) {
+									self.exec([], sort);
+								}
 							}
 						})
 						.hover(function() {
