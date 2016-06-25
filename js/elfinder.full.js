@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 4c174d2) (2016-06-26)
+ * Version 2.1.12 (2.1-src Nightly: a3d1761) (2016-06-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 4c174d2)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: a3d1761)';
 
 
 
@@ -9284,18 +9284,19 @@ $.fn.elfindercwd = function(fm, options) {
 							},
 							update: function(e, ui){
 								var target = $(ui.item[0]).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', ''),
-									prev, done,
-									customCols = $.map($(this).children(), function(n) {
-										var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
-										if (! done) {
-											if (target === name) {
-												done = true;
-											} else {
-												prev = name;
-											}
+									prev, done;
+								customCols = $.map($(this).children(), function(n) {
+									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
+									if (! done) {
+										if (target === name) {
+											done = true;
+										} else {
+											prev = name;
 										}
-										return (name === 'name')? null : name;
-									});
+									}
+									return (name === 'name')? null : name;
+								});
+								templates.row = makeTemplateRow();
 								fm.storage('cwdCols', customCols);
 								prev = '.elfinder-col-'+prev+':first';
 								target = '.elfinder-col-'+target+':first';
