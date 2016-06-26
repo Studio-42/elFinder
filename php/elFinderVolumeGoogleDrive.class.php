@@ -75,14 +75,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      * @var string
      **/
     public $netMountKey = '';
-        
+    
     /**
-     * Gdrive download host, replaces 'drive.google.com' of shares URL
-     * 
+     * Thumbnail prefix
+     *
      * @var string
-     */
-    private $googledrive_dlhost = 'drive.google.com';
-        
+     **/
     private $tmbPrefix = '';
     
     
