@@ -590,8 +590,12 @@ $.fn.elfindercwd = function(fm, options) {
 						locks.length && fm.trigger('lockfiles', {files: locks});
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
 						
-						// fixed table header
-						list && fixTableHeader({fitWidth: ! colWidth});
+						if (list) {
+							// show thead
+							cwd.find('thead').show();
+							// fixed table header
+							fixTableHeader({fitWidth: ! colWidth});
+						}
 						
 						// load/attach thumbnails
 						attachThumbnails(atmb);
@@ -1141,7 +1145,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
 					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>');
-					cwd.find('thead').append(
+					cwd.find('thead').hide().append(
 						thtr
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)

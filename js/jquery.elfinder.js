@@ -183,6 +183,7 @@ if ($.ui && $.ui.ddmanager) {
 
 	// Unset the flag to allow other widgets to inherit the touch event
 	touchHandled = false;
+	this._touchMoved = false;
   };
 
   /**
