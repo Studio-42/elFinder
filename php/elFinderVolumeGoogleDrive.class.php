@@ -55,13 +55,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,size,imageMediaMetadata(height,width),webContentLink,thumbnailLink';
     
     /**
-     * Last API error message
-     *
-     * @var string
-     **/
-    protected $apiError = '';
-
-    /**
      * Directory for tmp files
      * If not set driver will try to use tmbDir as tmpDir
      *
