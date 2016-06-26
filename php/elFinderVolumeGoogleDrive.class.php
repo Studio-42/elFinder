@@ -75,14 +75,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      * @var string
      **/
     public $netMountKey = '';
-    
-    /**
-     * drive.google.com uid
-     *
-     * @var string
-     **/
-    protected $googledriveUid = '';
-    
+        
     /**
      * Gdrive download host, replaces 'drive.google.com' of shares URL
      * 
@@ -104,12 +97,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     public function __construct()
     {		
         $opts = array(
-            'client_id'           => '',
-            'client_secret'        => '',
-            'accessToken'       => '',
-            'googledriveUid'    => '',
-            'root'                => 'GoogleDrive.com',
-            'googleApiClient'    => '',
+            'client_id'         => '',
+            'client_secret'     => '',
+            'accessToken'       => '',            
+            'root'              => 'GoogleDrive.com',
+            'googleApiClient'   => '',
             'path'              => '/',
             'separator'         => '/',
             'tmbPath'           => '',
@@ -221,7 +213,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 					// Get google drive object for mount				
 					$client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));
 					$oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');
-					$this->session->set('elFinderGoogledriveTokens', array(1, $oauth_token));
+					$this->session->set('elFinderGoogledriveTokens', array($oauth_token));
 					
 					$service = new Google_Service_Drive($client);
 					$rootObj = $service->files->get('root');
@@ -248,7 +240,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		}
 	
         if ($this->session->get('elFinderGoogledriveTokens')) {
-            list($options['googledriveUid'], $options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');
+            list($options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');			
         }
         unset($options['user'], $options['pass']);        
 		 
@@ -264,28 +256,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      */
     public function netunmount($netVolumes, $key)
     {
-        $count = 0;
-        $googledriveUid = '';
-        if (isset($netVolumes[$key])) {
-            $googledriveUid = $netVolumes[$key]['googledriveUid'];
-        }
-        foreach ($netVolumes as $volume) {
-            if ($volume['host'] === 'googledrive' && $volume['googledriveUid'] === $googledriveUid) {
-                $count++;
-            }
-        }
-        if ($count === 1) {
-            foreach (glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png') as $tmb) {
-                unlink($tmb);
+        if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png')) {
+            foreach ($tmbs as $file) {
+                unlink($file);
             }
         }
         
-        $this->options['alias'] = '';
-        $this->session->remove('elFinderGoogleDriveAuthTokens');
-		$this->session->remove('elFinderGoogledriveTokens'); 
-		         
-        return true;
-    }
+		return true;
+	}
     
     /**
      * Get script url
@@ -318,8 +296,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function init()
     {
-        if (!$this->options['googledriveUid']
-        ||  !$this->options['accessToken']) {
+        if (!$this->options['accessToken']) {
             return $this->setError('Required options undefined.');
         }
         
@@ -368,9 +345,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         }
 
         $this->rootName = $this->options['alias'];
-                
-        $this->googledriveUid = $this->options['googledriveUid'];
-        $this->tmbPrefix = 'googledrive'.base_convert($this->googledriveUid, 10, 32);
+               
+        $this->tmbPrefix = 'googledrive'.base_convert($this->root, 10, 32);
         
         if (!empty($this->options['tmpPath'])) {
             if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath']))
@@ -1595,8 +1571,4 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         die('Not yet implemented. (_archive)');
     }
 } // END class
-
-
-
-
 
