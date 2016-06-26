@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: a3d1761) (2016-06-26)
+ * Version 2.1.12 (2.1-src Nightly: 9423ec3) (2016-06-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: a3d1761)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 9423ec3)';
 
 
 
@@ -5508,6 +5508,7 @@ if ($.ui && $.ui.ddmanager) {
 
 	// Unset the flag to allow other widgets to inherit the touch event
 	touchHandled = false;
+	this._touchMoved = false;
   };
 
   /**
@@ -8709,8 +8710,12 @@ $.fn.elfindercwd = function(fm, options) {
 						locks.length && fm.trigger('lockfiles', {files: locks});
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
 						
-						// fixed table header
-						list && fixTableHeader({fitWidth: ! colWidth});
+						if (list) {
+							// show thead
+							cwd.find('thead').show();
+							// fixed table header
+							fixTableHeader({fitWidth: ! colWidth});
+						}
 						
 						// load/attach thumbnails
 						attachThumbnails(atmb);
@@ -9260,7 +9265,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
 					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>');
-					cwd.find('thead').append(
+					cwd.find('thead').hide().append(
 						thtr
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
