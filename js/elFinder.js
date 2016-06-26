@@ -1661,7 +1661,7 @@ window.elFinder = function(node, opts) {
 			this.request(opts1),
 			onlydir? null : this.request(opts2)
 		)
-		.fail(function(error) {
+		.fail(function(error, xhr) {
 			if (! polling) {
 				dfrd.reject(error);
 				error && self.request({
@@ -1669,7 +1669,7 @@ window.elFinder = function(node, opts) {
 					notify : {type : 'open', cnt : 1, hideCnt : true}
 				});
 			} else {
-				dfrd.reject();
+				dfrd.reject((error && xhr.status != 0)? error : void 0);
 			}
 		})
 		.done(function(odata, pdata) {
@@ -2132,8 +2132,8 @@ window.elFinder = function(node, opts) {
 									sync();
 								}
 							})
-							.fail(function(error){
-								if (error && error != 'errConnect') {
+							.fail(function(error, xhr){
+								if (error && xhr.status != 0) {
 									self.error(error);
 								} else {
 									syncInterval = setTimeout(function() {
