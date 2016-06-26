@@ -142,139 +142,111 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 		if (empty($options['googleApiClient']) && defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) {
             $options['googleApiClient'] = ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
 			include_once($options['googleApiClient']);				
-        }		
-                  
-        if (isset($_GET['code'])) {
-            try {
-                $client = new Google_Client();
-                            
-                $client->setClientId($options['client_id']);
-                $client->setClientSecret($options['client_secret']);
-                $client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');
-                                                
-                $oauth_token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
-                                
-                if (!empty($oauth_token)) {
-                    $this->session->set('elFinderGoogleDriveAuthTokens', $oauth_token);
-                    $options['user'] ='init';
-                    $options['pass'] ='return';
-                }
-            } catch (Exception $e) {
-                return $e->getMessage();
-            }
         }
-        
-        if ($options['pass'] === 'reauth') {
-            $options['pass'] = '';
-            $this->session->remove('elFinderGoogledriveTokens');
-            $this->session->remove('elFinderGoogleDriveAuthTokens');
-        } elseif ($options['pass'] === 'googledrive') {
-            $options['pass'] = '';
+		
+		if ($options['pass'] === 'reauth') {
+			$options['user'] = 'init';
+			$options['pass'] = '';
+			$this->session->remove('elFinderGoogledriveTokens');
+			$this->session->remove('elFinderGoogleDriveAuthTokens');       
         }
-        
-        if ($options['user'] === 'init') {
-            if (empty($options['client_id']) || empty($options['client_secret'])) {
-                return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
-            }
-            
-            try {
-                $client = new Google_Client();
-            } catch (Exception $e) {
-                return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
-            }
-            
-            if (empty($_GET['code'])) {
-                $html = '';
-                
-                if ($this->session->get('elFinderGoogledriveTokens')!==null) {
-                    // token check
-                    try {
-                        list($options['googledriveUid'], $options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');
-                                                
-                        $script = '<script>
-							$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "googledrive", mode: "done"});
-						</script>';
-                        $html = $script;
-                    } catch (Exception $e) {
-                        $this->session->remove('elFinderGoogledriveTokens');
-                        $this->session->remove('elFinderGoogleDriveAuthTokens');
-                    }
-                }
-                
-                if (! $html) {
-                    // get customdata					
-                    $cdata = '';
-                    $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
-                    $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
-                    foreach ($this->ARGS as $k => $v) {
-                        if (! in_array($k, $innerKeys)) {
-                            $cdata .= '&' . $k . '=' . rawurlencode($v);
-                        }
-                    }
-                    
-                    if (!empty($options['url']) && strpos($options['url'], 'http') !== 0) {
-                        $options['url'] = $this->getConnectorUrl();
-                    }
-                    $callback  = $options['url']
-                      .'?cmd=netmount&protocol=googledrive&host=googledrive.com&user=init&pass=return&node='.$options['id'].$cdata;
-                                        
-                    try {
-                        // Get your credentials from the console
-                        $client->setClientId($options['client_id']);
-                        $client->setClientSecret($options['client_secret']);
-                        $client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');
-                        //$client->setScopes([Google_Service_Oauth2::USERINFO_PROFILE , Google_Service_Drive::DRIVE]);
-                        $client->setScopes([Google_Service_Drive::DRIVE]);
-                        if (! empty($options['offline'])) {
-                            $client->setApprovalPrompt('force');
-                            $client->setAccessType('offline');
-                        }
-                    
-                        $service = new Google_Service_Drive($client);
-                        $url = $client->createAuthUrl();
-                        $url .= '&oauth_callback='.rawurlencode($callback);
-                    } catch (Exception $e) {
-                        return array('exit' => true, 'body' => '{msg:errAccess}');
-                    }
-                    
-                    $html = '<input id="elf-volumedriver-googledrive-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
-                    $html .= '<script>
-						$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "googledrive", mode: "makebtn"});
-					</script>';
-                }
-                
-                return array('exit' => true, 'body' => $html);
-            
-			} else {
+		try {
+			if (empty($options['client_id']) || empty($options['client_secret'])) {
+				return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
+			}
 			
-                $client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));
-                $oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');
-                $this->session->set('elFinderGoogledriveTokens', array(rand(1000000000, 9999999999), $oauth_token));
-                
-                $service = new Google_Service_Drive($client);
-				$rootObj = $service->files->get('root');
-                $folders = [];
-                foreach ($service->files->listFiles([
-                        'pageSize' => 1000,
-                        'q' => 'trashed = false and mimeType = "application/vnd.google-apps.folder"'
-                    ]) as $f) {
-                    $folders[$f->getId()] = $f->getName();
-                }
-                    
-                natcasesort($folders);
-                $folders = ['root' => $rootObj->getName()] + $folders;
-                $folders = json_encode($folders);
-                $options['pass'] = 'return';
-                    
-                $out = array(
-                    'node' => 'elfinder',
-                    'json' => '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.'}',
-                    'bind' => 'netmount'
-                );
-                
-                return array('exit' => 'callback', 'out' => $out);
-            }
-        }
+			$client = new Google_Client();
+			$client->setClientId($options['client_id']);
+			$client->setClientSecret($options['client_secret']);
+			
+			if (isset($_GET['code'])) {
+				try {
+					$client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');
+					$oauth_token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+					if (!empty($oauth_token)) {
+						$this->session->set('elFinderGoogleDriveAuthTokens', $oauth_token);								
+						$out = array(
+								'node' => 'elfinder',
+								'json' => '{"protocol": "googledrive", "mode": "done", "reset": 1}',
+								'bind' => 'netmount'
+						);						
+						return array('exit' => 'callback', 'out' => $out);					
+					}
+				} catch (Exception $e) {
+					return $e->getMessage();
+				}
+			}
+		
+			if ($options['user'] === 'init') {		
+				if (empty($_GET['code']) && empty($this->session->get('elFinderGoogleDriveAuthTokens'))) {		   
+					$cdata = '';
+					$innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
+					$this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
+					foreach ($this->ARGS as $k => $v) {
+						if (! in_array($k, $innerKeys)) {
+							$cdata .= '&' . $k . '=' . rawurlencode($v);
+						}
+					}
+					if (!empty($options['url']) && strpos($options['url'], 'http') !== 0) {
+						$options['url'] = $this->getConnectorUrl();
+					}
+					$callback  = $options['url']
+						.'?cmd=netmount&protocol=googledrive&host=googledrive.com&user=init&pass=return&node='.$options['id'].$cdata;
+				  
+				  try {
+						// Get your credentials from the console											
+						$client->setRedirectUri($this->getConnectorUrl().'?cmd=netmount&protocol=googledrive&host=1');						
+						$client->setScopes([Google_Service_Drive::DRIVE]);
+						if (! empty($options['offline'])) {
+							$client->setApprovalPrompt('force');
+							$client->setAccessType('offline');
+						}
+						
+						$service = new Google_Service_Drive($client);
+						$url = $client->createAuthUrl();
+						$url .= '&oauth_callback='.rawurlencode($callback);
+					} catch (Exception $e) {
+						return array('exit' => true, 'body' => '{msg:errAccess}');
+					}
+						
+					$html = '<input id="elf-volumedriver-googledrive-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\''.$url.'\')">';
+					$html .= '<script>
+							$("#'.$options['id'].'").elfinder("instance").trigger("netmount", {protocol: "googledrive", mode: "makebtn"});
+						</script>';				
+						
+					return array('exit' => true, 'body' => $html); 
+									
+				}
+				else{							
+					// Get google drive object for mount				
+					$client->setAccessToken($this->session->get('elFinderGoogleDriveAuthTokens'));
+					$oauth_token = $this->session->get('elFinderGoogleDriveAuthTokens');
+					$this->session->set('elFinderGoogledriveTokens', array(1, $oauth_token));
+					
+					$service = new Google_Service_Drive($client);
+					$rootObj = $service->files->get('root');
+					$folders = [];
+					foreach ($service->files->listFiles([
+							'pageSize' => 1000,
+							'q' => 'trashed = false and mimeType = "application/vnd.google-apps.folder"'
+							]) as $f) {
+							$folders[$f->getId()] = $f->getName();
+					}
+					natcasesort($folders);
+					$folders = ['root' => $rootObj->getName()] + $folders;
+					$folders = json_encode($folders);
+					$json = '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.'}';
+					$html = 'Google.com';
+					$html .= '<script>
+							$("#'.$options['id'].'").elfinder("instance").trigger("netmount", '.$json.');
+							</script>'; 
+					return array('exit' => true, 'body' => $html);
+				}			
+			}
+		} catch (Exception $e) {
+			return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
+		}
+	
         if ($this->session->get('elFinderGoogledriveTokens')) {
             list($options['googledriveUid'], $options['accessToken']) = $this->session->get('elFinderGoogledriveTokens');
         }
@@ -1623,5 +1595,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         die('Not yet implemented. (_archive)');
     }
 } // END class
+
+
+
 
 
