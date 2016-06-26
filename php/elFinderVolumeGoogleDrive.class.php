@@ -1460,7 +1460,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
-                
+        $path = $this->_normpath(dirname($path).'/'.$file->getId());        
         return $path;
     }
 
