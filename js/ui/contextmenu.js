@@ -170,7 +170,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (!cmd.variants.length) {
 								return;
 							}
-							node = item(cmd.title, cmd.name, function(){})
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){})
 							.on('touchend', function(e){
 								node.data('touching', true);
 								setTimeout(function(){node.data('touching', false);}, 50);
@@ -250,7 +250,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							});
 								
 						} else {
-							node = item(cmd.title, cmd.name, function() {
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								close();
 								cmd.exec(targets, {_currentType: type});
 							});
