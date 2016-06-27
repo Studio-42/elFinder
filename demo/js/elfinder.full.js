@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 0c92d07) (2016-06-26)
+ * Version 2.1.12 (2.1-src Nightly: 6cd618b) (2016-06-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5315,7 +5315,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 0c92d07)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 6cd618b)';
 
 
 
@@ -6457,7 +6457,7 @@ elFinder.prototype._options = {
 		// navbarfolder menu
 		navbar : ['open', 'download', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
-		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'sort', 'colwidth', '|', 'info'],
+		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'view', 'sort', 'colwidth', '|', 'info'],
 		// current directory file menu
 		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod']
 	},
@@ -6635,6 +6635,14 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.name = '';
 	
+	/**
+	 * Command icon class name with out 'elfinder-button-icon-'
+	 * Use this.name if it is empty
+	 *
+	 * @type  String
+	 */
+	this.className = '';
+
 	/**
 	 * Short command description
 	 *
@@ -7722,7 +7730,7 @@ $.fn.elfinderbutton = function(cmd) {
 			menu,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-'+cmd.name+'"/>')
+				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>')
 				.hover(function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
 				.click(function(e) { 
 					if (!button.hasClass(disabled)) {
@@ -7955,7 +7963,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (!cmd.variants.length) {
 								return;
 							}
-							node = item(cmd.title, cmd.name, function(){})
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){})
 							.on('touchend', function(e){
 								node.data('touching', true);
 								setTimeout(function(){node.data('touching', false);}, 50);
@@ -8035,7 +8043,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							});
 								
 						} else {
-							node = item(cmd.title, cmd.name, function() {
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								close();
 								cmd.exec(targets, {_currentType: type});
 							});
@@ -12711,7 +12719,9 @@ $.fn.elfinderviewbutton = function(cmd) {
 			var icons = cmd.value == 'icons';
 
 			icon.toggleClass('elfinder-button-icon-view-list', icons);
-			button.attr('title', cmd.fm.i18n(icons ? 'viewlist' : 'viewicons'));
+			cmd.className = icons? 'view-list' : '';
+			cmd.title = cmd.fm.i18n(icons ? 'viewlist' : 'viewicons');
+			button.attr('title', cmd.title);
 		});
 	});
 };
