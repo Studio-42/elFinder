@@ -21,6 +21,14 @@ elFinder.prototype.command = function(fm) {
 	this.name = '';
 	
 	/**
+	 * Command icon class name with out 'elfinder-button-icon-'
+	 * Use this.name if it is empty
+	 *
+	 * @type  String
+	 */
+	this.className = '';
+
+	/**
 	 * Short command description
 	 *
 	 * @type  String
