@@ -1459,7 +1459,7 @@ window.elFinder = function(node, opts) {
 			abort = function(e){
 				if (e.type == 'autosync') {
 					if (e.data.action != 'stop') return;
-				} else if (e.type != 'unload' && e.type != 'destroy') {
+				} else if (e.type != 'unload' && e.type != 'destroy' && e.type != 'openxhrabort') {
 					if (!e.data.added || !e.data.added.length) {
 						return;
 					}
@@ -1482,7 +1482,7 @@ window.elFinder = function(node, opts) {
 		
 		if (!cmd) {
 			return dfrd.reject('errCmdReq');
-		}	
+		}
 
 		if (syncOnFail) {
 			dfrd.fail(function(error) {
@@ -1523,23 +1523,27 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
+		// trigger abort autoSync for commands to add the item
+		if ($.inArray(cmd, (self.cmdsToAdd + ' autosync').split(' ')) !== -1) {
+			self.trigger('openxhrabort');
+		}
+
 		delete options.preventFail
 
 		dfrd.xhr = xhr = this.transport.send(options).fail(error).done(success);
 		
-		// add "open" xhr into queue
-		if (cmd == 'open' || (cmd == 'info' && data.compare)) {
+		if (data.compare && (cmd == 'open' || cmd == 'info')) {
+			// add autoSync xhr into queue
 			queue.unshift(xhr);
-			self.bind(self.cmdsToAdd + ' autosync', abort);
+			// bind abort()
+			self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				self.unbind(self.cmdsToAdd + ' autosync', abort);
+				self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
-		}
-		
-		// add only cwd xhr into queue
-		if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
+		} else if (cmd === 'open' || $.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
+			// add "open" xhr, only cwd xhr into queue
 			cwdQueue.unshift(xhr);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, cwdQueue);
