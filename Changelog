@@ -18,6 +18,8 @@
 		- [cmd:opendir] Fixed #1481 broken in elFinder 2.1.12
 		- [ui:cwd] Fixed #1479 can't be moved to the right edge at column sort
 		- [ui:cwd] Fixed #1485 add an option of template placeholders replacement rules
+		- [php:core] Fixed #1490 configurable root options of the network mounting volume
+		- [js] Fixed #1491 jQuery 3.0 supports
 		- And some minor bug fixes
 
 
