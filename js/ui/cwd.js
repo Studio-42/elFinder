@@ -1681,7 +1681,7 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.data('scrollTimer', setTimeout(function() {
 						wrapper.removeData('scrollTimer');
 						wrapper.trigger(scrollEvent);
-					}, 20));
+					}, 50));
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
