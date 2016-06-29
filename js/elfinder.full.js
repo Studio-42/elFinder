@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: bd15aee) (2016-06-29)
+ * Version 2.1.12 (2.1-src Nightly: 4c542cf) (2016-06-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5334,7 +5334,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: bd15aee)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 4c542cf)';
 
 
 
@@ -9256,6 +9256,11 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.row = bufferExt.hpi * col;
 					}
 					bottomMarker.css({top: (bufferExt.hpi * buffer.length + ph) + 'px'}).show();
+					if (wrapper.height() > ph) {
+						// show more items
+						wrapper.trigger(scrollEvent);
+					}
+
 				}
 			},
 			
@@ -9824,11 +9829,10 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
-					wrapper.data('scrollTimer') && clearTimeout(wrapper.data('scrollTimer'));
-					wrapper.data('scrollTimer', setTimeout(function() {
-						wrapper.removeData('scrollTimer');
+					bufferExt.scrollTimer && clearTimeout(bufferExt.scrollTimer);
+					bufferExt.scrollTimer = setTimeout(function() {
 						wrapper.trigger(scrollEvent);
-					}, 20));
+					}, 50);
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
@@ -9999,7 +10003,9 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('resize', function() {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize(true);
-				bottomMarkerShow(place, place.find('[id]').length);
+				if (bufferExt.hpi) {
+					bottomMarkerShow(place, place.find('[id]').length);
+				}
 				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
 			})
 			.bind('add', function() {
@@ -18849,7 +18855,8 @@ elFinder.prototype.commands.upload = function() {
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.view = function() {
-	this.value          = this.fm.viewType;
+	var fm = this.fm;
+	this.value          = fm.viewType;
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 
@@ -18860,9 +18867,13 @@ elFinder.prototype.commands.view = function() {
 	}
 	
 	this.exec = function() {
-		var value = this.fm.storage('view', this.value == 'list' ? 'icons' : 'list');
-		this.fm.viewchange();
-		this.update(void(0), value);
+		var self  = this,
+			value = fm.storage('view', this.value == 'list' ? 'icons' : 'list');
+		return fm.lazy(function() {
+			fm.viewchange();
+			self.update(void(0), value);
+			this.resolve();
+		});
 	}
 
 };
