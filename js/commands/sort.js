@@ -95,8 +95,10 @@ elFinder.prototype.commands.sort = function() {
 				stick : fm.sortStickFolders
 			}, sortopt);
 
-		this.fm.setSort(sort.type, sort.order, sort.stick);
-		return $.Deferred().resolve();
+		return fm.lazy(function() {
+			fm.setSort(sort.type, sort.order, sort.stick);
+			this.resolve();
+		});
 	};
 
 };
