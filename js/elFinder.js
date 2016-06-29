@@ -1306,27 +1306,29 @@ window.elFinder = function(node, opts) {
 	 * @todo
 	 * @return $.Deferred
 	 */
-	this.request = function(options) { 
+	this.request = function(opts) { 
 		var self     = this,
 			o        = this.options,
 			dfrd     = $.Deferred(),
 			// request data
-			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
+			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
 			isOpen   = (cmd === 'open'),
 			// call default fail callback (display error dialog) ?
-			deffail  = !(options.preventDefault || options.preventFail),
+			deffail  = !(opts.preventDefault || opts.preventFail),
 			// call default success callback ?
-			defdone  = !(options.preventDefault || options.preventDone),
+			defdone  = !(opts.preventDefault || opts.preventDone),
 			// options for notify dialog
-			notify   = $.extend({}, options.notify),
+			notify   = $.extend({}, opts.notify),
 			// make cancel button
-			cancel   = !!options.cancel,
+			cancel   = !!opts.cancel,
 			// do not normalize data - return as is
-			raw      = !!options.raw,
+			raw      = !!opts.raw,
 			// sync files on request fail
-			syncOnFail = options.syncOnFail,
+			syncOnFail = opts.syncOnFail,
+			// use lazy()
+			lazy     = !!opts.lazy,
 			// open notify dialog timeout
 			timeout,
 			// request options
@@ -1340,7 +1342,7 @@ window.elFinder = function(node, opts) {
 				data     : data,
 				headers  : this.customHeaders,
 				xhrFields: this.xhrFields
-			}, options.options || {}),
+			}, opts.options || {}),
 			/**
 			 * Default success handler. 
 			 * Call default data handlers and fire event with command name.
@@ -1426,8 +1428,8 @@ window.elFinder = function(node, opts) {
 				} else if (!self.validResponse(cmd, response)) {
 					return dfrd.reject('errResponse', xhr);
 				}
-
-				self.lazy(function() {
+				
+				var resolve = function() {
 					response = self.normalize(response);
 
 					if (!self.api) {
@@ -1454,7 +1456,9 @@ window.elFinder = function(node, opts) {
 
 					dfrd.resolve(response);
 					response.debug && self.debug('backend-debug', response.debug);
-				});
+				};
+				
+				lazy? self.lazy(resolve) : resolve();
 			},
 			xhr, _xhr,
 			abort = function(e){
@@ -5242,8 +5246,8 @@ elFinder.prototype = {
 		return typeof(id) == 'string' ? id.substr(this.cwdPrefix.length) : false;
 	},
 	
-	isInWindow : function(elem) {
-		if (elem.is(':hidden')) {
+	isInWindow : function(elem, nochkHide) {
+		if (! nochkHide && elem.is(':hidden')) {
 			return false;
 		}
 		var rect = elem[0].getBoundingClientRect();
