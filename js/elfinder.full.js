@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 4c542cf) (2016-06-29)
+ * Version 2.1.12 (2.1-src Nightly: 085893e) (2016-06-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5334,7 +5334,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 4c542cf)';
+elFinder.prototype.version = '2.1.12 (2.1-src Nightly: 085893e)';
 
 
 
@@ -8707,7 +8707,7 @@ $.fn.elfindercwd = function(fm, options) {
 							dirs  = false,
 							atmb  = {},
 							stmb  = (fm.option('tmbUrl') === 'self'),
-							files, locks;
+							files, locks, $place, selected;
 						
 						files = buffer.splice(0, fm.options.showFiles + (over || 0) / (bufferExt.hpi || 1));
 						bufferExt.renderd += files.length;
@@ -8730,8 +8730,26 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 							return null;
 						});
+
+						// html into created document fragment
+						$place = $(document.createDocumentFragment()).append(html.join(''));
 						
-						place.append(html.join(''));
+						// make directory droppable
+						dirs && !mobile && makeDroppable($place);
+						
+						// check selected items
+						selected = [];
+						if (selectedFiles.length) {
+							$place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
+								$.inArray(fm.cwdId2Hash(this.id), selectedFiles) !== -1 && selected.push($(this));
+							});
+						}
+						
+						// append to cwd
+						place.append($place);
+						
+						// trigger select
+						selected.length && $.each(selected, function(i, n) { n.trigger(evtSelect); });
 						
 						locks.length && fm.trigger('lockfiles', {files: locks});
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
@@ -8750,17 +8768,6 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 							$.extend(bufferExt.attachTmbs, atmb);
 							attachThumbnails();
-						}
-						
-						// make directory droppable
-						dirs && !mobile && makeDroppable();
-						
-						if (selectedFiles.length) {
-							place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
-								var id = fm.cwdId2Hash(this.id);
-								
-								$.inArray(id, selectedFiles) !== -1 && $(this).trigger(evtSelect);
-							});
 						}
 					};
 				
@@ -8972,8 +8979,8 @@ $.fn.elfindercwd = function(fm, options) {
 			 *
 			 * @return void
 			 */
-			makeDroppable = function() {
-				var targets = cwd.find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
+			makeDroppable = function(place) {
+				var targets = (place || cwd).find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
 				if (fm.isCommandEnabled('paste')) {
 					targets.droppable(droppable);
 				}
