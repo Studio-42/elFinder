@@ -1306,26 +1306,29 @@ window.elFinder = function(node, opts) {
 	 * @todo
 	 * @return $.Deferred
 	 */
-	this.request = function(options) { 
+	this.request = function(opts) { 
 		var self     = this,
 			o        = this.options,
 			dfrd     = $.Deferred(),
 			// request data
-			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, options.data || options),
+			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
+			isOpen   = (cmd === 'open'),
 			// call default fail callback (display error dialog) ?
-			deffail  = !(options.preventDefault || options.preventFail),
+			deffail  = !(opts.preventDefault || opts.preventFail),
 			// call default success callback ?
-			defdone  = !(options.preventDefault || options.preventDone),
+			defdone  = !(opts.preventDefault || opts.preventDone),
 			// options for notify dialog
-			notify   = $.extend({}, options.notify),
+			notify   = $.extend({}, opts.notify),
 			// make cancel button
-			cancel   = !!options.cancel,
+			cancel   = !!opts.cancel,
 			// do not normalize data - return as is
-			raw      = !!options.raw,
+			raw      = !!opts.raw,
 			// sync files on request fail
-			syncOnFail = options.syncOnFail,
+			syncOnFail = opts.syncOnFail,
+			// use lazy()
+			lazy     = !!opts.lazy,
 			// open notify dialog timeout
 			timeout,
 			// request options
@@ -1339,7 +1342,7 @@ window.elFinder = function(node, opts) {
 				data     : data,
 				headers  : this.customHeaders,
 				xhrFields: this.xhrFields
-			}, options.options || {}),
+			}, opts.options || {}),
 			/**
 			 * Default success handler. 
 			 * Call default data handlers and fire event with command name.
@@ -1350,7 +1353,7 @@ window.elFinder = function(node, opts) {
 			done = function(data) {
 				data.warning && self.error(data.warning);
 				
-				cmd == 'open' && open($.extend(true, {}, data));
+				isOpen && open($.extend(true, {}, data));
 
 				// fire some event to update cache/ui
 				data.removed && data.removed.length && self.remove(data);
@@ -1389,7 +1392,7 @@ window.elFinder = function(node, opts) {
 						} else if (xhr.status == 404) {
 							error = ['errConnect', 'errNotFound'];
 						} else {
-							if (this.type.toUpperCase() === 'GET' && xhr.status == 414) {
+							if (xhr.status == 414 && options.type === 'get') {
 								// retry by POST method
 								options.type = 'post';
 								dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
@@ -1425,8 +1428,8 @@ window.elFinder = function(node, opts) {
 				} else if (!self.validResponse(cmd, response)) {
 					return dfrd.reject('errResponse', xhr);
 				}
-
-				self.lazy(function() {
+				
+				var resolve = function() {
 					response = self.normalize(response);
 
 					if (!self.api) {
@@ -1446,14 +1449,16 @@ window.elFinder = function(node, opts) {
 						self.netDrivers = response.netDrivers;
 					}
 
-					if (cmd == 'open' && !!data.init) {
+					if (isOpen && !!data.init) {
 						self.uplMaxSize = self.returnBytes(response.uplMaxSize);
 						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
 					}
 
 					dfrd.resolve(response);
 					response.debug && self.debug('backend-debug', response.debug);
-				});
+				};
+				
+				lazy? self.lazy(resolve) : resolve();
 			},
 			xhr, _xhr,
 			abort = function(e){
@@ -1508,17 +1513,19 @@ window.elFinder = function(node, opts) {
 		}
 		
 		// quiet abort not completed "open" requests
-		if (cmd == 'open') {
+		if (isOpen) {
 			while ((_xhr = queue.pop())) {
 				if (_xhr.state() == 'pending') {
 					_xhr.quiet = true;
 					_xhr.abort();
 				}
 			}
-			while ((_xhr = cwdQueue.pop())) {
-				if (_xhr.state() == 'pending') {
-					_xhr.quiet = true;
-					_xhr.abort();
+			if (cwd !== data.target) {
+				while ((_xhr = cwdQueue.pop())) {
+					if (_xhr.state() == 'pending') {
+						_xhr.quiet = true;
+						_xhr.abort();
+					}
 				}
 			}
 		}
@@ -1532,17 +1539,17 @@ window.elFinder = function(node, opts) {
 
 		dfrd.xhr = xhr = this.transport.send(options).fail(error).done(success);
 		
-		if (data.compare && (cmd == 'open' || cmd == 'info')) {
+		if (isOpen || (data.compare && cmd === 'info')) {
 			// add autoSync xhr into queue
 			queue.unshift(xhr);
 			// bind abort()
-			self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+			! isOpen && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+				! isOpen && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
-		} else if (cmd === 'open' || $.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
+		} else if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
 			// add "open" xhr, only cwd xhr into queue
 			cwdQueue.unshift(xhr);
 			dfrd.always(function() {
@@ -5237,6 +5244,14 @@ elFinder.prototype = {
 	
 	cwdId2Hash : function(id) {
 		return typeof(id) == 'string' ? id.substr(this.cwdPrefix.length) : false;
+	},
+	
+	isInWindow : function(elem, nochkHide) {
+		if (! nochkHide && elem.is(':hidden')) {
+			return false;
+		}
+		var rect = elem[0].getBoundingClientRect();
+		return document.elementFromPoint(rect.left, rect.top)? true : false;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
