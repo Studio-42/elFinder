@@ -1677,11 +1677,10 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
-					wrapper.data('scrollTimer') && clearTimeout(wrapper.data('scrollTimer'));
-					wrapper.data('scrollTimer', setTimeout(function() {
-						wrapper.removeData('scrollTimer');
+					bufferExt.scrollTimer && clearTimeout(bufferExt.scrollTimer);
+					bufferExt.scrollTimer = setTimeout(function() {
 						wrapper.trigger(scrollEvent);
-					}, 50));
+					}, 50);
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
