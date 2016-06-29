@@ -1109,6 +1109,11 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.row = bufferExt.hpi * col;
 					}
 					bottomMarker.css({top: (bufferExt.hpi * buffer.length + ph) + 'px'}).show();
+					if (wrapper.height() > ph) {
+						// show more items
+						wrapper.trigger(scrollEvent);
+					}
+
 				}
 			},
 			
@@ -1677,11 +1682,10 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
-					wrapper.data('scrollTimer') && clearTimeout(wrapper.data('scrollTimer'));
-					wrapper.data('scrollTimer', setTimeout(function() {
-						wrapper.removeData('scrollTimer');
+					bufferExt.scrollTimer && clearTimeout(bufferExt.scrollTimer);
+					bufferExt.scrollTimer = setTimeout(function() {
 						wrapper.trigger(scrollEvent);
-					}, 20));
+					}, 50);
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
@@ -1852,7 +1856,9 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('resize', function() {
 				var place = list ? cwd.find('tbody') : cwd;
 				resize(true);
-				bottomMarkerShow(place, place.find('[id]').length);
+				if (bufferExt.hpi) {
+					bottomMarkerShow(place, place.find('[id]').length);
+				}
 				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
 			})
 			.bind('add', function() {
