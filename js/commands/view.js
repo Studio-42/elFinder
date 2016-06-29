@@ -6,7 +6,8 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.view = function() {
-	this.value          = this.fm.viewType;
+	var fm = this.fm;
+	this.value          = fm.viewType;
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 
@@ -17,9 +18,13 @@ elFinder.prototype.commands.view = function() {
 	}
 	
 	this.exec = function() {
-		var value = this.fm.storage('view', this.value == 'list' ? 'icons' : 'list');
-		this.fm.viewchange();
-		this.update(void(0), value);
+		var self  = this,
+			value = fm.storage('view', this.value == 'list' ? 'icons' : 'list');
+		return fm.lazy(function() {
+			fm.viewchange();
+			self.update(void(0), value);
+			this.resolve();
+		});
 	}
 
 };
