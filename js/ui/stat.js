@@ -27,7 +27,10 @@ $.fn.elfinderstat = function(fm) {
 						s += parseInt(file.size)||0;
 					}
 				})
-				size.html(titleitems+': '+c+', '+titlesize+': '+fm.formatSize(s));
+				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': '+fm.formatSize(s));
+			},
+			setIncsearchStat = function(data) {
+				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
 			},
 			search = false;
 
@@ -70,7 +73,12 @@ $.fn.elfinderstat = function(fm) {
 
 			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
 		})
-
+		.bind('incsearch', function(e) {
+			setIncsearchStat(e.data);
+		})
+		.bind('incsearchend', function() {
+			setIncsearchStat();
+		})
 		;
 	})
 };
