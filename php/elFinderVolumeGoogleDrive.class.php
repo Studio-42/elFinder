@@ -1291,7 +1291,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             
             $file = $this->service->files->copy(basename($source), $files, ['fields' => self::FETCHFIELDS_GET]);
             $itemId = $file->id;
-                                
+            
+            if($this->publish($itemId) == false){
+		$this->unPublish($itemId);
+	    }                    
             return $itemId;
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
@@ -1427,7 +1430,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
-        $path = $this->_normpath(dirname($path).'/'.$file->getId());        
+        $path = $this->_normpath(dirname($path).'/'.$file->getId());
+        $this->publish($path);
         return $path;
     }
 
@@ -1483,6 +1487,72 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         return $res;
     }
 
+	/**
+	* Publish permissions specified path item
+	*
+	* @param string $path
+	*            
+	* @return bool
+	*/
+	protected function publish($path)
+	{		
+		$opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];
+		
+		if ($file = $this->service->files->get(basename($path), $opts)) {		
+			$permissions = $file->getPermissions();
+			foreach ($permissions as $permission) {
+				if ($permission->type === 'anyone' && $permission->role === 'reader') {
+					return true;
+					break;
+				}
+			}
+            try {				
+                $permission = new Google_Service_Drive_Permission();
+				$permission->setType('anyone');
+				$permission->setRole('reader');
+                if ($this->service->permissions->create($file->getId(),$permission)) {								
+                    return true;
+                }
+            } catch (Exception $e) {				
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+	/**
+	 * unPublish permissions specified path
+	 *
+	 * @param string $path
+	 *            
+	 * @return bool
+	 */
+	protected function unPublish($path)
+	{
+		$opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];
+		if ($file = $this->service->files->get(basename($path), $opts)) {
+			$permissions = $file->getPermissions();
+			try {
+				foreach ($permissions as $permission) {
+					if ($permission->type === 'anyone' && $permission->role === 'reader') {
+						$this->service->permissions->delete($file->getId(), $permission->getId());
+						return true;
+						break;
+					}
+				}            
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+        
+        return false;	
+	}
+	
     /**
      * Detect available archivers
      *
