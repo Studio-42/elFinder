@@ -45,14 +45,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      *
      * @var string
      */
-    const FETCHFIELDS_LIST = 'files(id,name,mimeType,modifiedTime,parents,size,imageMediaMetadata(height,width),webContentLink,thumbnailLink),nextPageToken';
+    const FETCHFIELDS_LIST = 'files(id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),webContentLink,thumbnailLink),nextPageToken';
     
     /**
      * Fetch fields for get
      *
      * @var string
      */
-    const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,size,imageMediaMetadata(height,width),webContentLink,thumbnailLink';
+    const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),webContentLink,thumbnailLink';
     
     /**
      * Directory for tmp files
@@ -1293,8 +1293,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             $itemId = $file->id;
             
             if($this->publish($itemId) == false){
-		$this->unPublish($itemId);
-	    }                    
+				$this->unPublish($itemId);
+			}                   
             return $itemId;
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
