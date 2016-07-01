@@ -603,11 +603,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         $stat['ts']            = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
         $stat['dirs']        = $raw['mimeType'] == self::DIRMIME ? 1 : 0;
         
-        if (!empty($raw['webContentLink']) && (explode('/', $raw['mimeType'])[0] =='image' || explode('/', $raw['mimeType'])[0] =='video')) {
-            $stat['url'] = str_replace('export=download', 'e=media', $raw['webContentLink']);
-        } else {
-            $stat['url'] = '1';
-        }
+        if($url = $raw->getWebContentLink()){			
+			$stat['url'] = str_replace('export=download', 'export=media', $url);
+		}else {
+			$stat['url'] = '1';
+		}
         
         if ($raw['mimeType'] !== self::DIRMIME) {
             isset($raw->getImageMediaMetadata()['width']) ? $stat['width'] = $raw->getImageMediaMetadata()['width'] : $stat['width'] = 0;
