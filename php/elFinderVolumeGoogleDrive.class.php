@@ -901,7 +901,75 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             return false;
         }
     }
-    
+
+	/**
+	* Publish permissions specified path item
+	*
+	* @param string $path
+	*            
+	* @return bool
+	*/
+	protected function publish($path)
+	{		
+		$opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];
+		
+		if ($file = $this->service->files->get(basename($path), $opts)) {		
+			$permissions = $file->getPermissions();
+			foreach ($permissions as $permission) {
+				if ($permission->type === 'anyone' && $permission->role === 'reader') {
+					return true;
+					break;
+				}
+			}
+            try {				
+                $permission = new Google_Service_Drive_Permission(array(
+					'type' => 'anyone',
+					'role' => 'reader',
+					'withLink' => true
+					));
+                if ($this->service->permissions->create($file->getId(),$permission)) {								
+                    return true;
+                }
+            } catch (Exception $e) {				
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+	/**
+	 * unPublish permissions specified path
+	 *
+	 * @param string $path
+	 *            
+	 * @return bool
+	 */
+	protected function unPublish($path)
+	{
+		$opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];
+		if ($file = $this->service->files->get(basename($path), $opts)) {
+			$permissions = $file->getPermissions();
+			try {
+				foreach ($permissions as $permission) {
+					if ($permission->type === 'anyone' && $permission->role === 'reader') {
+						$this->service->permissions->delete($file->getId(), $permission->getId());
+						return true;
+						break;
+					}
+				}            
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+        
+        return false;	
+	}
+	
     /**
     * Return content URL
     *
@@ -1488,73 +1556,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         return $res;
     }
 
-	/**
-	* Publish permissions specified path item
-	*
-	* @param string $path
-	*            
-	* @return bool
-	*/
-	protected function publish($path)
-	{		
-		$opts = [
-				'fields' => self::FETCHFIELDS_GET
-				];
-		
-		if ($file = $this->service->files->get(basename($path), $opts)) {		
-			$permissions = $file->getPermissions();
-			foreach ($permissions as $permission) {
-				if ($permission->type === 'anyone' && $permission->role === 'reader') {
-					return true;
-					break;
-				}
-			}
-            try {				
-                $permission = new Google_Service_Drive_Permission(array(
-					'type' => 'anyone',
-					'role' => 'reader',
-					'withLink' => true
-					));
-                if ($this->service->permissions->create($file->getId(),$permission)) {								
-                    return true;
-                }
-            } catch (Exception $e) {				
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-	/**
-	 * unPublish permissions specified path
-	 *
-	 * @param string $path
-	 *            
-	 * @return bool
-	 */
-	protected function unPublish($path)
-	{
-		$opts = [
-				'fields' => self::FETCHFIELDS_GET
-				];
-		if ($file = $this->service->files->get(basename($path), $opts)) {
-			$permissions = $file->getPermissions();
-			try {
-				foreach ($permissions as $permission) {
-					if ($permission->type === 'anyone' && $permission->role === 'reader') {
-						$this->service->permissions->delete($file->getId(), $permission->getId());
-						return true;
-						break;
-					}
-				}            
-            } catch (Exception $e) {
-                return false;
-            }
-        }
-        
-        return false;	
-	}
 	
     /**
      * Detect available archivers
