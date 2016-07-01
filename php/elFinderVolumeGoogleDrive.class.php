@@ -1509,9 +1509,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 				}
 			}
             try {				
-                $permission = new Google_Service_Drive_Permission();
-				$permission->setType('anyone');
-				$permission->setRole('reader');
+                $permission = new Google_Service_Drive_Permission(array(
+					'type' => 'anyone',
+					'role' => 'reader',
+					'withLink' => true
+					));
                 if ($this->service->permissions->create($file->getId(),$permission)) {								
                     return true;
                 }
