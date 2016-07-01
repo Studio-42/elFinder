@@ -7,7 +7,28 @@
  **/
 elFinder.prototype.commands.sort = function() {
 	var self  = this,
-	fm    = self.fm;
+		fm    = self.fm,
+		setVar = function() {
+			self.variants = [];
+			$.each(fm.sortRules, function(name, value) {
+				var sort = {
+						type  : name,
+						order : name == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
+					};
+				if ($.inArray(name, fm.sorters) !== -1) {
+					var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
+					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
+			});
+			self.variants.push('|');
+			self.variants.push([
+				{
+					type  : fm.sortType,
+					order : fm.sortOrder,
+					stick : !fm.sortStickFolders
+				},
+				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
+			]);
+		};
 	
 	/**
 	 * Command options
@@ -16,28 +37,9 @@ elFinder.prototype.commands.sort = function() {
 	 */
 	this.options = {ui : 'sortbutton'};
 	
-	fm.bind('open sortchange', function() {
-		self.variants = [];
-		$.each(fm.sortRules, function(name, value) {
-			var sort = {
-					type  : name,
-					order : name == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
-				};
-			if ($.inArray(name, fm.sorters) !== -1) {
-				var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-				self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
-		});
-		self.variants.push('|');
-		self.variants.push([
-			{
-				type  : fm.sortType,
-				order : fm.sortOrder,
-				stick : !fm.sortStickFolders
-			},
-			(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
-		]);
-	})
+	fm.bind('open sortchange', setVar)
 	.bind('open', function() {
+		fm.unbind('add', setVar).one('add', setVar)
 		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
 			var tgt = $(this),
 				rel = tgt.attr('rel');
