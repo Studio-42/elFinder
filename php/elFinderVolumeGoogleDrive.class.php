@@ -913,17 +913,20 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     {
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);
-            
-            //$files = new Google_Service_Drive_DriveFile();						
-            $itemId = basename($path);
-            $res = $this->service->files->get($itemId, [
-                'fields' => 'id,webContentLink'
-                //'alt' 	 => 'media'		
-            ]);
-            
-            $url = str_replace('export=download', 'e=media', $res->webContentLink);
-
-            return $url;
+                        
+			if ($this->publish($path)) {
+				$itemId = basename($path);
+				$opts = [
+                    'fields' => self::FETCHFIELDS_GET
+                ];
+				$res = $this->service->files->get($itemId, $opts);
+				if ($url = $res->getWebContentLink()) {
+					return str_replace('export=download', 'export=media', $url);					
+				}
+				if ($url = $res->getWebViewLink()) {
+					return $url;
+				}				
+			}
         }
         return $file['url'];
     }
@@ -1291,10 +1294,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             
             $file = $this->service->files->copy(basename($source), $files, ['fields' => self::FETCHFIELDS_GET]);
             $itemId = $file->id;
-            
-            if($this->publish($itemId) == false){
-				$this->unPublish($itemId);
-			}                   
+                             
             return $itemId;
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
@@ -1431,7 +1431,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
         $path = $this->_normpath(dirname($path).'/'.$file->getId());
-        $this->publish($path);
+        
         return $path;
     }
 
