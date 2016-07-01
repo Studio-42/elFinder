@@ -889,13 +889,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         $itemId = basename($path);
         
         try {
-            $res = $this->service->files->get($itemId, [
-                'fields' => 'id,thumbnailLink'    // contents with thumbnailLink
-                //'alt' 	 => 'media'			  // contents with file media		
+            $contents = $this->service->files->get($itemId, [
+                //'fields' => 'id,thumbnailLink'    // contents with thumbnailLink
+                'alt' 	 => 'media'			  // contents with file media		
             ]);
-                                    
-            return file_get_contents($res->thumbnailLink);  // contents with thumbnailLink			
-            //return $res;  // contents with file media	
+            $contents = (string) $contents->getBody(); // contents with file media
+            return $contents;  // contents with file media
+            //return file_get_contents($contents->thumbnailLink);  // contents with thumbnailLink			
+            	
         } catch (Exception $e) {
             return false;
         }
