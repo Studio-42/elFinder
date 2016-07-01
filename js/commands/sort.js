@@ -7,8 +7,7 @@
  **/
 elFinder.prototype.commands.sort = function() {
 	var self  = this,
-	fm    = self.fm,
-	timer;
+	fm    = self.fm;
 	
 	/**
 	 * Command options
@@ -45,42 +44,39 @@ elFinder.prototype.commands.sort = function() {
 			tgt.toggle(! rel || $.inArray(rel, fm.sorters) !== -1);
 		});
 	})
-	.bind('open sortchange viewchange search searchend', function() {
-		timer && clearTimeout(timer);
-		timer = setTimeout(function(){
-			var cols = $(fm.cwd).find('div.elfinder-cwd-wrapper-list table');
-			if (cols.length) {
-				$.each(fm.sortRules, function(name, value) {
-					var td = cols.find('thead tr td.elfinder-cwd-view-th-'+name);
-					if (td.length) {
-						var current = ( name == fm.sortType),
-						sort = {
-							type  : name,
-							order : current ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
-						},arr;
-						if (current) {
-							td.addClass('ui-state-active');
-							arr = fm.sortOrder == 'asc' ? 'n' : 's';
-							$('<span class="ui-icon ui-icon-triangle-1-'+arr+'"/>').appendTo(td);
-						}
-						$(td).on('click', function(e){
-							if (! $(this).data('dragging')) {
-								e.stopPropagation();
-								if (! fm.getUI('cwd').data('longtap')) {
-									self.exec([], sort);
-								}
-							}
-						})
-						.hover(function() {
-							$(this).addClass('ui-state-hover');
-						},function() {
-							$(this).removeClass('ui-state-hover');
-						});
+	.bind('cwdrender', function() {
+		var cols = $(fm.cwd).find('div.elfinder-cwd-wrapper-list table');
+		if (cols.length) {
+			$.each(fm.sortRules, function(name, value) {
+				var td = cols.find('thead tr td.elfinder-cwd-view-th-'+name);
+				if (td.length) {
+					var current = ( name == fm.sortType),
+					sort = {
+						type  : name,
+						order : current ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
+					},arr;
+					if (current) {
+						td.addClass('ui-state-active');
+						arr = fm.sortOrder == 'asc' ? 'n' : 's';
+						$('<span class="ui-icon ui-icon-triangle-1-'+arr+'"/>').appendTo(td);
 					}
-					
-				});
-			}
-		}, 100);
+					$(td).on('click', function(e){
+						if (! $(this).data('dragging')) {
+							e.stopPropagation();
+							if (! fm.getUI('cwd').data('longtap')) {
+								self.exec([], sort);
+							}
+						}
+					})
+					.hover(function() {
+						$(this).addClass('ui-state-hover');
+					},function() {
+						$(this).removeClass('ui-state-hover');
+					});
+				}
+				
+			});
+		}
 	});
 	
 	this.getstate = function() {
