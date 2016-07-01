@@ -4445,25 +4445,7 @@ elFinder.prototype = {
 	
 	_sortRules : {
 		name : function(file1, file2) {
-			var n1 = file1.name.toLowerCase(),
-			    n2 = file2.name.toLowerCase(),
-			    e1 = '',
-			    e2 = '',
-			    so = elFinder.prototype.naturalCompare,
-			    m, ret;
-			if (m = n1.match(/^(.+)(\.[0-9a-z.]+)$/)) {
-				n1 = m[1];
-				e1 = m[2];
-			}
-			if (m = n2.match(/^(.+)(\.[0-9a-z.]+)$/)) {
-				n2 = m[1];
-				e2 = m[2];
-			}
-			ret = so(n1, n2);
-			if (ret == 0 && (e1 || e2) && e1 != e2) {
-				ret = so(e1, e2);
-			}
-			return ret;
+			return elFinder.prototype.naturalCompare(file1.name, file2.name);
 		},
 		size : function(file1, file2) { 
 			var size1 = parseInt(file1.size) || 0,
@@ -4643,7 +4625,7 @@ elFinder.prototype = {
 		
 		res = asc ? sort(file1, file2) : sort(file2, file1);
 		
-		return type != 'name' && res == 0
+		return type !== 'name' && res === 0
 			? res = asc ? rules.name(file1, file2) : rules.name(file2, file1)
 			: res;
 	},
