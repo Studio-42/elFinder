@@ -1840,7 +1840,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (query || incHashes) {
 					query = '';
 					if (incHashes) {
-						fm.trigger('incsearchend');
+						fm.trigger('incsearchend', e.data);
 					}
 					if (!e.data || !e.data.noupdate) {
 						query && unselectAll();
@@ -1875,11 +1875,13 @@ $.fn.elfindercwd = function(fm, options) {
 					resize();
 				});
 			})
-			.bind('incsearchend', function() {
+			.bind('incsearchend', function(e) {
 				fm.searchStatus.ininc = false;
 				incHashes = void 0;
 				wz.removeClass('elfinder-search-result');
-				content();
+				if (!e.data || !e.data.noupdate) {
+					content();
+				}
 				fm.autoSync();
 			})
 			.bind('sortchange', function() {
