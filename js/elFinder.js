@@ -1977,9 +1977,14 @@ window.elFinder = function(node, opts) {
 	 * @return jQuery
 	 */
 	this.dialog = function(content, options) {
-		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options);
-		this.bind('resize', function(){
-			! dialog.data('draged') && dialog.elfinderdialog('posInit');
+		var self = this,
+			dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options),
+			resize = function(){
+				! dialog.data('draged') && dialog.is(':visible') && dialog.elfinderdialog('posInit');
+			};
+		this.bind('resize', resize);
+		dialog.closest('.ui-dialog').on('remove', function() {
+			self.unbind('resize', resize);
 		});
 		return dialog;
 	};
