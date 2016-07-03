@@ -15,8 +15,7 @@
 	border:1px solid #aaa;
 	float:right;
 	position:relative;
-	overflow:auto;
-/*	z-index:100;*/
+	overflow:hidden;
 }
 
 .elfinder-resize-handle { position:relative;}
