@@ -994,29 +994,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         }
         return $file['url'];
     }
-    
-    /**
-     * Get HTTP request response header string
-     * 
-     * @param string $url target URL
-     * @return string
-     * @author Naoki Sawada
-     */
-    private function getHttpResponseHeader($url)
-    {
-        $res = '';
-        if (function_exists('curl_exec')) {
-            $c = curl_init();
-            curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($c, CURLOPT_CUSTOMREQUEST, 'HEAD');
-            curl_setopt($c, CURLOPT_HEADER, 1);
-            curl_setopt($c, CURLOPT_NOBODY, true);
-            curl_setopt($c, CURLOPT_URL, $url);
-            $res = curl_exec($c);
-        }
-        return $res;
-    }
-    
+   
     /*********************** paths/urls *************************/
 
     /**
