@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 085893e) (2016-06-29)
+ * Version 2.1.12 (2.1-src Nightly: 8401174) (2016-07-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -15,7 +15,7 @@
 /********************** COMMAND "RESIZE" ****************************/
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
-.elfinder-resize-control { padding-top:3em; }
+.elfinder-resize-control { float: left; }
 .elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
 .elfinder-resize-preview {
 	width:400px;
@@ -977,6 +977,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /************************************  LIST VIEW ************************************/
 
 /*.elfinder-cwd-view-list { padding:0 0 4px 0; }*/
+
+.elfinder-cwd-wrapper.elfinder-cwd-fixheader .elfinder-cwd::after {
+	display: none;
+}
 
 .elfinder-cwd table { 
 	width: 100%;
