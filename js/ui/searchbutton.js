@@ -13,6 +13,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			btnCls = fm.res('class', 'searchbtn'),
 			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
 			search = function() {
+				input.data('inctm') && clearTimeout(input.data('inctm'));
 				opts && opts.slideUp();
 				var val = $.trim(input.val()),
 					from = !$('#' + id('SearchFromAll')).prop('checked'),
@@ -41,18 +42,23 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			},
 			abort = function() {
-				opts && opts.slideUp();
-				input.val('');
-				if (result) {
+				input.data('inctm') && clearTimeout(input.data('inctm'));
+				input.val('').blur();
+				if (result || incVal) {
 					result = false;
-					fm.trigger('searchend');
+					incVal = '';
+					fm.lazy(function() {
+						fm.trigger('searchend');
+					});
 				}
 			},
-			input  = $('<input type="text" size="42"/>')
-				.focus(function(){
+			incVal = '',
+			input  = $('<input type="text" size="42" title="'+fm.i18n('incSearchOnly')+'"/>')
+				.on('focus', function() {
+					incVal = '';
 					opts && opts.slideDown();
 				})
-				.blur(function(){
+				.on('blur', function(){
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp();
@@ -63,10 +69,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 				})
 				.appendTo(button)
 				// to avoid fm shortcuts on arrows
-				.keypress(function(e) {
+				.on('keypress', function(e) {
 					e.stopPropagation();
 				})
-				.keydown(function(e) {
+				.on('keydown', function(e) {
 					e.stopPropagation();
 					
 					e.keyCode == 13 && search();
@@ -75,7 +81,16 @@ $.fn.elfindersearchbutton = function(cmd) {
 						e.preventDefault();
 						abort();
 					}
-				}),
+				})
+				.on('keyup', function() {
+					input.data('inctm') && clearTimeout(input.data('inctm'));
+					input.data('inctm', setTimeout(function() {
+						var val = input.val();
+						(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+						incVal = val;
+					}, 500));
+				})
+				,
 			opts;
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')

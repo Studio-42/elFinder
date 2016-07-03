@@ -20,6 +20,8 @@
 		- [ui:cwd] Fixed #1485 add an option of template placeholders replacement rules
 		- [php:core] Fixed #1490 configurable root options of the network mounting volume
 		- [js] Fixed #1491 jQuery 3.0 supports
+		- [cmd:search] Fixed #1499 incremental search from current view items
+		- [cmd;resize] Fixed #1498 img-edit dialog layout disordered when resizing window
 		- And some minor bug fixes
 
 
