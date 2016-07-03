@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.12 (2.1-src Nightly: 8401174) (2016-07-03)
+ * Version 2.1.12 (2.1-src Nightly: 2191bcc) (2016-07-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -25,8 +25,7 @@
 	border:1px solid #aaa;
 	float:right;
 	position:relative;
-	overflow:auto;
-/*	z-index:100;*/
+	overflow:hidden;
 }
 
 .elfinder-resize-handle { position:relative;}
