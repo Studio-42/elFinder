@@ -245,6 +245,14 @@ elFinder.prototype._options = {
 				// }
 			]
 		},
+		search : {
+			// Incremental search from the current view
+			incsearch : {
+				enable : true, // is enable true or false
+				minlen : 1,    // minimum number of characters
+				wait   : 500   // wait milliseconds
+			}
+		},
 		// "info" command options.
 		info : {
 			nullUrlDirLinkSelf : true,

@@ -8,6 +8,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 	return this.each(function() {
 		var result = false,
 			fm     = cmd.fm,
+			isopts = cmd.options.incsearch || { enable: false },
 			id     = function(name){return fm.namespace + name},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
@@ -53,7 +54,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			},
 			incVal = '',
-			input  = $('<input type="text" size="42" title="'+fm.i18n('incSearchOnly')+'"/>')
+			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
 					incVal = '';
 					opts && opts.slideDown();
@@ -81,17 +82,25 @@ $.fn.elfindersearchbutton = function(cmd) {
 						e.preventDefault();
 						abort();
 					}
-				})
+				}),
+			opts;
+		
+		if (isopts.enable) {
+			isopts.minlen = isopts.minlen || 2;
+			isopts.wait = isopts.wait || 500;
+			input
+				.attr('title', fm.i18n('incSearchOnly'))
 				.on('keyup', function() {
 					input.data('inctm') && clearTimeout(input.data('inctm'));
 					input.data('inctm', setTimeout(function() {
 						var val = input.val();
-						(incVal !== val) && fm.trigger('incsearchstart', { query: val });
-						incVal = val;
-					}, 500));
-				})
-				,
-			opts;
+						if (val.length === 0 || val.length >= isopts.minlen) {
+							(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+							incVal = val;
+						}
+					}, isopts.wait));
+				});
+		}
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
