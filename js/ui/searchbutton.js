@@ -90,16 +90,45 @@ $.fn.elfindersearchbutton = function(cmd) {
 			isopts.wait = isopts.wait || 500;
 			input
 				.attr('title', fm.i18n('incSearchOnly'))
-				.on('keyup', function() {
-					input.data('inctm') && clearTimeout(input.data('inctm'));
-					input.data('inctm', setTimeout(function() {
-						var val = input.val();
-						if (val.length === 0 || val.length >= isopts.minlen) {
-							(incVal !== val) && fm.trigger('incsearchstart', { query: val });
-							incVal = val;
-						}
-					}, isopts.wait));
+				.on('compositionstart', function() {
+					input.data('composing', true);
+				})
+				.on('compositionend', function() {
+					input.removeData('composing');
+					input.trigger('input'); // for IE, edge
+				})
+				.on('input', function() {
+					if (! input.data('composing')) {
+						input.data('inctm') && clearTimeout(input.data('inctm'));
+						input.data('inctm', setTimeout(function() {
+							var val = input.val();
+							if (val.length === 0 || val.length >= isopts.minlen) {
+								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+								incVal = val;
+							}
+						}, isopts.wait));
+					}
 				});
+			
+			if (fm.UA.ltIE8) {
+				input.on('keydown', function(e) {
+						if (e.keyCode === 229) {
+							input.data('imetm') && clearTimeout(input.data('imetm'));
+							input.data('composing', true);
+							input.data('imetm', setTimeout(function() {
+								input.removeData('composing');
+							}, 100));
+						}
+					})
+					.on('keyup', function(e) {
+						input.data('imetm') && clearTimeout(input.data('imetm'));
+						if (input.data('composing')) {
+							e.keyCode === 13 && input.trigger('compositionend');
+						} else {
+							input.trigger('input');
+						}
+					});
+			}
 		}
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
