@@ -8,6 +8,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 	return this.each(function() {
 		var result = false,
 			fm     = cmd.fm,
+			isopts = cmd.options.incsearch || { enable: false },
 			id     = function(name){return fm.namespace + name},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
@@ -53,7 +54,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			},
 			incVal = '',
-			input  = $('<input type="text" size="42" title="'+fm.i18n('incSearchOnly')+'"/>')
+			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
 					incVal = '';
 					opts && opts.slideDown();
@@ -81,17 +82,54 @@ $.fn.elfindersearchbutton = function(cmd) {
 						e.preventDefault();
 						abort();
 					}
-				})
-				.on('keyup', function() {
-					input.data('inctm') && clearTimeout(input.data('inctm'));
-					input.data('inctm', setTimeout(function() {
-						var val = input.val();
-						(incVal !== val) && fm.trigger('incsearchstart', { query: val });
-						incVal = val;
-					}, 500));
-				})
-				,
+				}),
 			opts;
+		
+		if (isopts.enable) {
+			isopts.minlen = isopts.minlen || 2;
+			isopts.wait = isopts.wait || 500;
+			input
+				.attr('title', fm.i18n('incSearchOnly'))
+				.on('compositionstart', function() {
+					input.data('composing', true);
+				})
+				.on('compositionend', function() {
+					input.removeData('composing');
+					input.trigger('input'); // for IE, edge
+				})
+				.on('input', function() {
+					if (! input.data('composing')) {
+						input.data('inctm') && clearTimeout(input.data('inctm'));
+						input.data('inctm', setTimeout(function() {
+							var val = input.val();
+							if (val.length === 0 || val.length >= isopts.minlen) {
+								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+								incVal = val;
+							}
+						}, isopts.wait));
+					}
+				});
+			
+			if (fm.UA.ltIE8) {
+				input.on('keydown', function(e) {
+						if (e.keyCode === 229) {
+							input.data('imetm') && clearTimeout(input.data('imetm'));
+							input.data('composing', true);
+							input.data('imetm', setTimeout(function() {
+								input.removeData('composing');
+							}, 100));
+						}
+					})
+					.on('keyup', function(e) {
+						input.data('imetm') && clearTimeout(input.data('imetm'));
+						if (input.data('composing')) {
+							e.keyCode === 13 && input.trigger('compositionend');
+						} else {
+							input.trigger('input');
+						}
+					});
+			}
+		}
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
