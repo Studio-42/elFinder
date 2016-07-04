@@ -989,26 +989,28 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     * @author Naoki Sawada
     **/
     public function getContentUrl($hash, $options = array())
-    {
+	{
+	
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);
-                        
+                 
 			if ($this->publish($path)) {
 				$itemId = basename($path);
 				$opts = [
                     'fields' => self::FETCHFIELDS_GET
                 ];
-				$res = $this->service->files->get($itemId, $opts);
+				$res = $this->service->files->get($itemId, $opts);				
+               								
 				if ($url = $res->getWebContentLink()) {
 					return str_replace('export=download', 'export=media', $url);					
 				}
 				if ($url = $res->getWebViewLink()) {
 					return $url;
-				}				
+				}                							
 			}
-        }
-        return $file['url'];
-    }
+		}
+		return $file['url'];
+	}
    
     /*********************** paths/urls *************************/
 
