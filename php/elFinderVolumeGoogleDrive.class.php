@@ -602,7 +602,23 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         $stat['size']        = $raw['mimeType'] == self::DIRMIME ? 0 : (int)$raw['size'];
         $stat['ts']            = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
         $stat['dirs']        = $raw['mimeType'] == self::DIRMIME ? 1 : 0;
-        $stat['url'] = '1';
+        
+        if(isset($raw['id'])){				
+			$permission = new Google_Service_Drive_Permission(array(
+				'type' => 'anyone',
+				'role' => 'reader',
+				'withLink' => true
+				));
+			if ($this->service->permissions->create($raw->getId(),$permission)) {								
+				if ($url = $raw->getWebContentLink()) {
+					$stat['url'] = str_replace('export=download', 'export=media', $url);					
+				}else{
+					$stat['url'] = '1';
+				}		
+			}else{
+			$stat['url'] = '1';
+			}			
+		}
 	
         if ($raw['mimeType'] !== self::DIRMIME) {
             isset($raw->getImageMediaMetadata()['width']) ? $stat['width'] = $raw->getImageMediaMetadata()['width'] : $stat['width'] = 0;
