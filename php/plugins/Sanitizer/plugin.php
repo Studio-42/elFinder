@@ -76,10 +76,11 @@ class elFinderPluginSanitizer
 		if (isset($args[$key])) {
 			if (is_array($args[$key])) {
 				foreach($args[$key] as $i => $name) {
-					$args[$key][$i] = $this->sanitizeFileName($name, $opts);
+					$this->replaced[$cmd][$name] = $args[$key][$i] = $this->sanitizeFileName($name, $opts);
 				}
 			} else {
-				$args[$key] = $this->sanitizeFileName($args[$key], $opts);
+				$name = $args[$key];
+				$this->replaced[$cmd][$name] = $args[$key] = $this->sanitizeFileName($name, $opts);
 			}
 		}
 		return true;
