@@ -27,13 +27,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     protected $service = null;
     
     /**
-     * GoogleDrive object
-     *
-     * @var googledrive
-     **/
-    protected $googledrive = null;
-    
-    /**
      * MIME tyoe of directory
      *
      * @var string
