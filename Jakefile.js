@@ -183,7 +183,7 @@ desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
 	var cssOptimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
-	fs.writeFileSync(this.name, buildComment() + cssOptimized);
+	fs.writeFileSync(this.name, cssOptimized);
 });
 
 // JS
