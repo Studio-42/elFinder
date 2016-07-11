@@ -2,7 +2,7 @@
  * This is build file for elFinder 2.x
  * Build tool:    https://github.com/mde/jake
  * JS compressor: https://github.com/mishoo/UglifyJS/
- * CSS optimizer: https://github.com/afelix/csso
+ * CSS optimizer: https://github.com/css/csso
  */
 
 // if Jake fails to detect need libraries try running before: export NODE_PATH=`npm root`
@@ -37,7 +37,7 @@ var dirmode = 0755,
 		'images':	grep(path.join(src, 'img'), '\\.png|\\.gif'),
 
 		'sounds':	grep(path.join(src, 'sounds'), '\\.wav'),
-		
+
 		'i18n': grep(path.join(src, 'js', 'i18n'), '\\.js', 'elfinder.en.js'),
 
 		'php':
@@ -46,7 +46,7 @@ var dirmode = 0755,
 				path.join(src, 'php', 'mime.types'),
 				path.join(src, 'php', 'MySQLStorage.sql')
 			]
-			.concat(grep(path.join(src, 'php'), '\\.class\.php$')),
+			.concat(grep(path.join(src, 'php'), '\\.class\\.php$')),
 		'misc':
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
@@ -97,24 +97,28 @@ function copyFile(from, to, overwrite) {
 	console.log('\t' + from);
 	var srcs = fs.createReadStream(from);
 	var dsts = fs.createWriteStream(to);
-	return util.pump(srcs, dsts);
+	return srcs.pipe(dsts);
 }
 
-function getComment() {
+function getVersion() {
 	var ver = fs.readFileSync(path.join(src, 'js', 'elFinder.version.js')).toString();
-	ver = ver.match(/= '(.+)';/);
+	ver = ver.match(/elFinder.prototype.version = '(.+)';/);
+	return ver[1];
+}
+
+function buildComment() {
 	var d = new Date();
-	var bd = d.getFullYear() + '-' +
+	var buildDate = d.getFullYear() + '-' +
 		(d.getMonth() >= 9 ? '' : '0') + (d.getMonth() + 1) + '-' +
 		(d.getDate() >= 10 ? '' : '0') + d.getDate();
 	var comment =
 		'/*!\n' +
 		' * elFinder - file manager for web\n' +
-		' * Version ' + ver[1] + ' (' + bd + ')\n' +
+		' * Version ' + getVersion() + ' (' + buildDate + ')\n' +
 		' * http://elfinder.org\n' +
 		' * \n' +
 		' * Copyright 2009-' + d.getFullYear() + ', Studio 42\n' +
-		' * Licensed under a 3 clauses BSD license\n' +
+		' * Licensed under a 3-clauses BSD license\n' +
 		' */\n';
 	return comment;
 }
@@ -165,14 +169,14 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 		data += '\n/* File: ' + file.replace(src, '') + ' */\n';
 		data += fs.readFileSync(file);
 	}
-	fs.writeFileSync(this.name, getComment() + data);
+	fs.writeFileSync(this.name, buildComment() + data);
 });
 
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var css_optimized = csso.justDoIt(fs.readFileSync('css/elfinder.full.css').toString());
-	fs.writeFileSync(this.name, getComment() + css_optimized);
+	var cssOptimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
+	fs.writeFileSync(this.name, cssOptimized);
 });
 
 // JS
@@ -190,7 +194,7 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 		data = data.replace(strict, '');
 	}
 	data = '(function($) {\n' + data + '\n})(jQuery);'; // add closure
-	fs.writeFileSync(this.name, getComment() + data);
+	fs.writeFileSync(this.name, buildComment() + data);
 });
 
 desc('uglify elfinder.min.js');
@@ -207,7 +211,7 @@ file({'js/elfinder.min.js': ['js/elfinder.full.js']}, function () {
 	} else {
 		result = ugjs.minify('js/elfinder.full.js').code;
 	}
-	fs.writeFileSync(this.name, getComment() + result);
+	fs.writeFileSync(this.name, buildComment() + result);
 });
 
 // IMG + SOUNDS + I18N + PHP
@@ -240,16 +244,19 @@ task('misc', function(){
 desc('clean build dir');
 task('clean', function(){
 	console.log('cleaning the floor');
-	uf = ['js/elfinder.full.js', 'js/elfinder.min.js', 'css/elfinder.full.css', 'css/elfinder.min.css'];
+	uf = [path.join('js', 'elfinder.full.js'), path.join('js', 'elfinder.min.js'),
+		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css')];
 	// clean images, sounds, js/i18n and php only if we are not in src
 	if (src != path.resolve()) {
 		uf = uf
+			.concat(path.join('css', 'theme.css'))
 			.concat(grep('img', '\\.png|\\.gif'))
 			.concat(grep('sounds', '\\.wav'))
 			.concat(grep(path.join('js', 'i18n')))
-			.concat(path.join('css', 'theme.css'))
-			.concat(grep('php'))
-			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', path.join('files', 'readme.txt')]);
+			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', path.join('files', 'readme.txt')])
+			.concat(grep('php', '\\.php|\\.sql'))
+			.concat(path.join('php', 'mime.types'));
+		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
 	}
 	for (f in uf) {
 		var file = uf[f];
@@ -262,7 +269,11 @@ task('clean', function(){
 	// 	fs.unlinkSync('elfinder.html');
 	// }
 	if (src != path.resolve()) {
-		var ud = ['css', path.join('js', 'proxy'), path.join('js', 'i18n'), 'js', 'img', 'sounds', 'php', 'files'];
+		var ud = [
+			'css', 'img', 'sounds', 'files',
+			path.join('js', 'proxy'), path.join('js', 'i18n'), 'js']
+			.concat(grep(path.join('php', 'plugins')))
+			.concat([path.join('php', 'plugins'), 'php']);
 		for (d in ud) {
 			var dir = ud[d];
 			if (fs.existsSync(dir)) {
@@ -275,12 +286,9 @@ task('clean', function(){
 
 desc('get current build version from git');
 task('version', function(){
-	jake.exec(['git describe --tags > .version'], function(){
-		version = fs.readFileSync('.version').toString().replace(/\n$/, '');
-		fs.unlinkSync('.version');
-		console.log('Version: ' + version);
-		complete();
-	});
+	version = getVersion();
+	console.log('Version: ' + version);
+	complete();
 }, {async: true});
 
 desc('create package task');
