@@ -784,6 +784,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$cwd = getcwd();
 		chdir($dir);
 		
+		foreach($files as $i => $file) {
+			$files[$i] = '.'.DIRECTORY_SEPARATOR.$file;
+		}
 		$files = array_map('escapeshellarg', $files);
 		
 		$cmd = $arc['cmd'].' '.$arc['argc'].' '.escapeshellarg($name).' '.implode(' ', $files);
