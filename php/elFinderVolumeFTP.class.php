@@ -1095,15 +1095,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$file_names_string = "";
 		foreach (scandir($tmpDir) as $filename) {
-			if ('.' == $filename) {
+			if ('.' === $filename || '..' === $filename) {
 				continue;
 			}
-			if ('..' == $filename) {
-				continue;
-			}
-			$file_names_string = $file_names_string . '"' . $filename . '" ';
+			$filename = escapeshellarg('.'.DIRECTORY_SEPARATOR.$filename);
+			$file_names_string .= $filename . ' ';
 		}
-		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' "' . $name . '" ' . $file_names_string);
+		$command = escapeshellcmd($arc['cmd'] . ' ' . $arc['argc'] . ' ' . escapeshellarg($name) . ' ' . $file_names_string);
 		
 		$descriptorspec = array(
 			0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
