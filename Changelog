@@ -1,3 +1,9 @@
+2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.7):
+		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
+
+
 2015-02-21  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.0.6):
