@@ -1,14 +1,15 @@
 /**
- * Italian translation
- * @author Alberto Tocci <alberto.tocci@gmail.com>
- * @version 2014-12-19
+ * Italiano translation
+ * @author Alberto Tocci (alberto.tocci@gmail.com)
+ * @author Claudio Nicora (nicorac@yahoo.com)
+ * @version 2016-07-11
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.it = {
-		translator : 'Alberto Tocci (alberto.tocci@gmail.com)',
+		translator : 'Alberto Tocci (alberto.tocci@gmail.com), Claudio Nicora (nicorac@yahoo.com)',
 		language   : 'Italiano',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i',
+		dateFormat : 'd/m/Y H:i',
 		fancyDateFormat : '$1 H:i',
 		messages   : {
 
@@ -21,7 +22,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errURL'               : 'Configurazione non valida.Il parametro URL non è settato.',
 			'errAccess'            : 'Accesso non consentito.',
 			'errConnect'           : 'Impossibile collegarsi al backend.',
-			'errAbort'             : 'Connessione terminata.',
+			'errAbort'             : 'Connessione annullata.',
 			'errTimeout'           : 'Timeout di connessione.',
 			'errNotFound'          : 'Backend non trovato.',
 			'errResponse'          : 'Risposta non valida dal backend.',
@@ -31,7 +32,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errCmdParams'         : 'Parametri non validi per il comando "$1".',
 			'errDataNotJSON'       : 'I dati non sono nel formato JSON.',
 			'errDataEmpty'         : 'Stringa vuota.',
-			'errCmdReq'            : 'Backend request requires command name.',
+			'errCmdReq'            : 'La richiesta al backend richiede il nome del comando.',
 			'errOpen'              : 'Impossibile aprire "$1".',
 			'errNotFolder'         : 'L\'oggetto non è una cartella..',
 			'errNotFile'           : 'L\'oggetto non è un file.',
@@ -50,50 +51,57 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRename'            : 'Impossibile rinominare "$1".',
 			'errCopyFrom'          : 'Non è possibile copiare file da "$1".',
 			'errCopyTo'            : 'Non è possibile copiare file in "$1".',
+			'errMkOutLink'         : 'Impossibile creare un link all\'esterno della radice del volume.', // from v2.1 added 03.10.2015
 			'errUpload'            : 'Errore di Caricamento.',  // old name - errUploadCommon
 			'errUploadFile'        : 'Impossibile Caricare "$1".', // old name - errUpload
 			'errUploadNoFiles'     : 'Non sono stati specificati file da caricare.',
 			'errUploadTotalSize'   : 'La dimensione totale dei file supera il limite massimo consentito.', // old name - errMaxSize
 			'errUploadFileSize'    : 'Le dimensioni del file superano il massimo consentito.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'FileType non consentito.',
-			'errUploadTransfer'    : 'Trasferimento errato del file "$1".', 
-			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
-			'errReplace'           : 'Unable to replace "$1".',
+			'errUploadTransfer'    : 'Trasferimento errato del file "$1".',
+			'errUploadTemp'        : 'Impossibile creare il file temporaneo per l\'upload.', // from v2.1 added 26.09.2015
+			'errNotReplace'        : 'L\'oggetto "$1" esiste già in questa cartella e non può essere sostituito con un oggetto di un tipo differente.', // new
+			'errReplace'           : 'Impossibile sostituire "$1".',
 			'errSave'              : 'Impossibile salvare "$1".',
 			'errCopy'              : 'Impossibile copiare "$1".',
 			'errMove'              : 'Impossibile spostare "$1".',
 			'errCopyInItself'      : 'Sorgente e destinazione risultato essere uguali.',
 			'errRm'                : 'Impossibile rimuovere "$1".',
-			'errRmSrc'             : 'Unable remove source file(s).',
+			'errRmSrc'             : 'Impossibile eliminare i file origine.',
 			'errExtract'           : 'Impossibile estrarre file da "$1".',
 			'errArchive'           : 'Impossibile creare archivio.',
 			'errArcType'           : 'Tipo di archivio non supportato.',
 			'errNoArchive'         : 'Il file non è un archivio o contiene file non supportati.',
 			'errCmdNoSupport'      : 'Il Backend non supporta questo comando.',
 			'errReplByChild'       : 'La cartella $1 non può essere sostituita da un oggetto in essa contenuto.',
-			'errArcSymlinks'       : 'Per questioni di sicurezza non è possibile estrarre archivi che contengono collegamenti..',
+			'errArcSymlinks'       : 'Per questioni di sicurezza non è possibile estrarre archivi che contengono collegamenti..', // edited 24.06.2012
 			'errArcMaxSize'        : 'La dimensione dell\'archivio supera le massime dimensioni consentite.',
 			'errResize'            : 'Impossibile ridimensionare "$1".',
-			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
-			'errResizeRotate'      : 'Unable to rotate image.',  // added 7.3.2013
-			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
-			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
-			'errUsupportType'      : 'FileType non supportato.',
-			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
-			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
-			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
-			'errSessionExpires'    : 'Your session has expired due to inactivity.',
-			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
-			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
-			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
-			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
-			'errArchiveExec'       : 'Error while archiving files: "$1"',
-			'errExtractExec'       : 'Error while extracting files: "$1"',
+			'errResizeDegree'      : 'Angolo di rotazione non valido.',  // added 7.3.2013
+			'errResizeRotate'      : 'Impossibile ruotare l\'immagine.',  // added 7.3.2013
+			'errResizeSize'        : 'Dimensione dell\'immagine non valida.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Dimensione dell\'immagine non modificata.',  // added 7.3.2013
+			'errUsupportType'      : 'Tipo di file non supportato.',
+			'errNotUTF8Content'    : 'Il file "$1" non è nel formato UTF-8 e non può essere modificato.',  // added 9.11.2011
+			'errNetMount'          : 'Impossibile montare "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Protocollo non supportato.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Mount fallito.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Necessario host.', // added 18.04.2012
+			'errSessionExpires'    : 'La sessione è scaduta a causa di inattività.',
+			'errCreatingTempDir'   : 'Impossibile creare la cartella temporanea: "$1"',
+			'errFtpDownloadFile'   : 'Impossibile scaricare il file tramite FTP: "$1"',
+			'errFtpUploadFile'     : 'Impossibile caricare il file tramite FTP: "$1"',
+			'errFtpMkdir'          : 'Impossibile creare la cartella remota tramite FTP: "$1"',
+			'errArchiveExec'       : 'Errore durante l\'archiviazione dei file: "$1"',
+			'errExtractExec'       : 'Errore durante l\'estrazione dei file: "$1"',
+			'errNetUnMount'        : 'Impossibile smontare', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'Non convertibile nel formato UTF-8', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'Per uploadare l0intera cartella usare Google Chrome.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Timeout durante la ricerca di "$1". I risultati della ricerca sono parziali.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'E\' necessaria la riautorizzazione.', // from v2.1.10 added 3.24.2016
 
 			/******************************* commands names ********************************/
-			'cmdarchive'   : 'Crea Archivio',
+			'cmdarchive'   : 'Crea archivio',
 			'cmdback'      : 'Indietro',
 			'cmdcopy'      : 'Copia',
 			'cmdcut'       : 'Taglia',
@@ -107,6 +115,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Informazioni',
 			'cmdmkdir'     : 'Nuova cartella',
+			'cmdmkdirin'   : 'In una nuova cartella', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Nuovo file di testo',
 			'cmdopen'      : 'Apri',
 			'cmdpaste'     : 'Incolla',
@@ -120,9 +129,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Visualizza',
 			'cmdresize'    : 'Ridimensiona Immagine',
 			'cmdsort'      : 'Ordina',
-			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
+			'cmdnetmount'  : 'Monta disco di rete', // added 18.04.2012
+			'cmdnetunmount': 'Smonta', // from v2.1 added 30.04.2012
+			'cmdplaces'    : 'To Places', // added 28.12.2014
+			'cmdchmod'     : 'Cambia modalità', // from v2.1 added 20.6.2015
+			'cmdopendir'   : 'Apri una cartella', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Reimposta dimensione colonne', // from v2.1.13 added 12.06.2016
 
-			/*********************************** buttons ***********************************/ 
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Chiudi',
 			'btnSave'   : 'Salva',
 			'btnRm'     : 'Rimuovi',
@@ -130,8 +144,18 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Cancella',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Si',
-			'btnMount'  : 'Mount',  // added 18.04.2012
-			
+			'btnMount'  : 'Monta',  // added 18.04.2012
+			'btnApprove': 'Vai a $1 & approva', // from v2.1 added 26.04.2012
+			'btnUnmount': 'Smonta', // from v2.1 added 30.04.2012
+			'btnConv'   : 'Converti', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'Qui',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Disco',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Tutti',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
+			'btnFileName':'Nome file',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'Salva & Chiudi', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Apri cartella',
 			'ntffile'     : 'Apri file',
@@ -149,11 +173,17 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfarchive'  : 'Creazione archivio in corso',
 			'ntfextract'  : 'Estrazione file dall\'archivio in corso',
 			'ntfsearch'   : 'Ricerca files in corso',
-			'ntfresize'   : 'Resizing images',
+			'ntfresize'   : 'Ridimensionamento immagini',
 			'ntfsmth'     : 'Operazione in corso. Attendere...',
 			'ntfloadimg'  : 'Caricamento immagine in corso',
-			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
-			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
+			'ntfnetmount' : 'Montaggio disco di rete', // added 18.04.2012
+			'ntfnetunmount': 'Smontaggio disco di rete', // from v2.1 added 30.04.2012
+			'ntfdim'      : 'Lettura dimensioni immagine', // added 20.05.2013
+			'ntfreaddir'  : 'Lettura informazioni cartella', // from v2.1 added 01.07.2013
+			'ntfurl'      : 'Lettura URL del collegamento', // from v2.1 added 11.03.2014
+			'ntfchmod'    : 'Modifica della modalità del file', // from v2.1 added 20.6.2015
+			'ntfpreupload': 'Verifica del nome del file caricato', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Creazione del file da scaricare', // from v2.1.7 added 23.1.2016
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'sconosciuto',
@@ -171,44 +201,55 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'msOct'       : 'Ott',
 			'msNov'       : 'Nov',
 			'msDec'       : 'Dic',
-			'January'     : 'January',
-			'February'    : 'February',
-			'March'       : 'March',
-			'April'       : 'April',
-			'May'         : 'May',
-			'June'        : 'June',
-			'July'        : 'July',
-			'August'      : 'August',
-			'September'   : 'September',
-			'October'     : 'October',
-			'November'    : 'November',
-			'December'    : 'December',
-			'Sunday'      : 'Sunday',
-			'Monday'      : 'Monday',
-			'Tuesday'     : 'Tuesday',
-			'Wednesday'   : 'Wednesday',
-			'Thursday'    : 'Thursday',
-			'Friday'      : 'Friday',
-			'Saturday'    : 'Saturday',
-			'Sun'         : 'Sun', 
-			'Mon'         : 'Mon', 
-			'Tue'         : 'Tue', 
-			'Wed'         : 'Wed', 
-			'Thu'         : 'Thu', 
-			'Fri'         : 'Fri', 
-			'Sat'         : 'Sat',
+			'January'     : 'Gennaio',
+			'February'    : 'Febbraio',
+			'March'       : 'Marzo',
+			'April'       : 'Aprile',
+			'May'         : 'Maggio',
+			'June'        : 'Giugno',
+			'July'        : 'Luglio',
+			'August'      : 'Agosto',
+			'September'   : 'Settembre',
+			'October'     : 'Ottobre',
+			'November'    : 'Novembre',
+			'December'    : 'Dicembre',
+			'Sunday'      : 'Domenica',
+			'Monday'      : 'Lunedì',
+			'Tuesday'     : 'Martedì',
+			'Wednesday'   : 'Mercoledì',
+			'Thursday'    : 'Giovedì',
+			'Friday'      : 'Venerdì',
+			'Saturday'    : 'Sabato',
+			'Sun'         : 'Dom',
+			'Mon'         : 'Lun',
+			'Tue'         : 'Mar',
+			'Wed'         : 'Mer',
+			'Thu'         : 'Gio',
+			'Fri'         : 'Ven',
+			'Sat'         : 'Sab',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'per nome', 
-			'sortkind'          : 'per tipo', 
+			'sortname'          : 'per nome',
+			'sortkind'          : 'per tipo',
 			'sortsize'          : 'per dimensione',
 			'sortdate'          : 'per data',
 			'sortFoldersFirst'  : 'cartelle in testa',
+			'sortperm'          : 'per permessi', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'per modalità',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'per possessore',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'per gruppo',      // from v2.1.13 added 13.06.2016
+
+			/********************************** new items **********************************/
+			'untitled file.txt' : 'NuovoFile.txt', // added 10.11.2015
+			'untitled folder'   : 'NuovaCartella',   // added 10.11.2015
+			'Archive'           : 'NuovoArchivio',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Conferma richiesta',
 			'confirmRm'       : 'Sei sicuro di voler rimuovere i file?<br />L\'operazione non è reversibile!',
 			'confirmRepl'     : 'Sostituire i file ?',
+			'confirmConvUTF8' : 'Non in formato UTF-8<br/>Convertire in UTF-8?<br/>Il contenuto diventerà UTF-8 salvando dopo la conversione.', // from v2.1 added 08.04.2014
+			'confirmNotSave'  : 'Il contenuto è stato modificato.<br/>Le modifiche andranno perse se non si salveranno.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Applica a tutti',
 			'name'            : 'Nome',
 			'size'            : 'Dimensione',
@@ -227,7 +268,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'viewlist'        : 'Visualizza Elenco',
 			'viewicons'       : 'Visualizza Icone',
 			'places'          : 'Places',
-			'calc'            : 'Calcola', 
+			'calc'            : 'Calcola',
 			'path'            : 'Percorso',
 			'aliasfor'        : 'Alias per',
 			'locked'          : 'Bloccato',
@@ -238,11 +279,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'si',
 			'no'              : 'no',
 			'link'            : 'Collegamento',
-			'searcresult'     : 'Risultati ricerca',  
+			'searcresult'     : 'Risultati ricerca',
 			'selected'        : 'oggetti selezionati',
-			'about'           : 'About',
+			'about'           : 'Informazioni',
 			'shortcuts'       : 'Scorciatoie',
-			'help'            : 'Help',
+			'help'            : 'Aiuto',
 			'webfm'           : 'Web file manager',
 			'ver'             : 'Versione',
 			'protocolver'     : 'versione protocollo',
@@ -255,7 +296,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'chiefdev'        : 'sviluppatore capo',
 			'developer'       : 'sviluppatore',
 			'contributor'     : 'collaboratore',
-			'maintainer'      : 'maintainer',
+			'maintainer'      : 'manutentore',
 			'translator'      : 'traduttore',
 			'icons'           : 'Icone',
 			'dontforget'      : 'e non dimenticate di portare l\'asciugamano',
@@ -276,12 +317,44 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Ruota di 90° in senso orario',
 			'rotate-ccw'      : 'Ruota di 90° in senso antiorario',
 			'degree'          : 'Gradi',
-			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
-			'protocol'            : 'Protocol', // added 18.04.2012
+			'netMountDialogTitle' : 'Monta disco di rete', // added 18.04.2012
+			'protocol'            : 'Protocollo', // added 18.04.2012
 			'host'                : 'Host', // added 18.04.2012
-			'port'                : 'Port', // added 18.04.2012
-			'user'                : 'User', // added 18.04.2012
+			'port'                : 'Porta', // added 18.04.2012
+			'user'                : 'Utente', // added 18.04.2012
 			'pass'                : 'Password', // added 18.04.2012
+			'confirmUnmount'      : 'Vuoi smontare $1?',  // from v2.1 added 30.04.2012
+			'dropFilesBrowser': 'Rilascia o incolla dal browser', // from v2.1 added 30.05.2012
+			'dropPasteFiles'  : 'Rilascia o incolla files e indirizzi URL qui', // from v2.1 added 07.04.2014
+			'encoding'        : 'Codifica', // from v2.1 added 19.12.2014
+			'locale'          : 'Lingua',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Destinazione: $1',                // from v2.1 added 22.5.2015
+			'searchMime'      : 'Cerca per MIME Type', // from v2.1 added 22.5.2015
+			'owner'           : 'Possessore', // from v2.1 added 20.6.2015
+			'group'           : 'Gruppo', // from v2.1 added 20.6.2015
+			'other'           : 'Altri', // from v2.1 added 20.6.2015
+			'execute'         : 'Esegui', // from v2.1 added 20.6.2015
+			'perm'            : 'Permessi', // from v2.1 added 20.6.2015
+			'mode'            : 'Modalità', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'La cartella è vuota', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'La cartella è vuota\\A Trascina e rilascia per aggiungere elementi', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'La cartella è vuota\\A Premi a lungo per aggiungere elementi', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Qualità', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Sincr. automatica',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Sposta in alto',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Mostra URL link', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Elementi selezionati ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'ID cartella', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Permetti accesso non in linea', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'Per ri-autenticarsi', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Caricamento...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Apri più files', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'Stai cercando di aprire $1 files. Sei sicuro di volerli aprire nel browser?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'Nessun risultato soddisfa i criteri di ricerca', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Il file è in modifica.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : '$1 elementi sono selezionati.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : '$1 elementi negli appunti.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'La ricerca incrementale è solo dalla vista corrente.', // from v2.1.13 added 6.30.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Sconosciuto',
@@ -332,6 +405,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'File AWK',
 			'kindCSV'         : 'File CSV (Comma separated values)',
 			'kindDOCBOOK'     : 'File Docbook XML',
+			'kindMarkdown'    : 'Testo markdown', // added 20.7.2015
 			// images
 			'kindImage'       : 'Immagine',
 			'kindBMP'         : 'Immagine BMP',
@@ -364,4 +438,3 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	};
 }
-
