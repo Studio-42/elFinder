@@ -1,4 +1,4 @@
-2016-06-xx  
+2016-07-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.13):
 		- [ui:cwd] Fixed #1433 create a thumbnail of the video file with ffmpeg
@@ -22,7 +22,16 @@
 		- [js] Fixed #1491 jQuery 3.0 supports
 		- [cmd:search] Fixed #1499 incremental search from current view items
 		- [cmd;resize] Fixed #1498 img-edit dialog layout disordered when resizing window
+		- [VD:abstract] Fixed #1505 configurable duplicate's suffix, unique numbe format
+		- [VD:abstract] Fixed #1507 add a volume option `dirUrlOwn`
+		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
 		- And some minor bug fixes
+
+
+2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.7):
+		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
 
 
 2016-05-30  Naoki Sawada  <hypweb@gmail.com>
