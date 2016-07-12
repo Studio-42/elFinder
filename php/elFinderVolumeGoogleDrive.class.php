@@ -507,7 +507,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         //$files = new Google_Service_Drive_DriveFile();
 
         if ($path == $this->root) {
-            return $this->root;
+            $this->root == '/' ? $itemId = 'root' : $itemId = basename($this->root);
+			$opts = [
+				'fields' => self::FETCHFIELDS_GET
+			];            
+			return $this->service->files->get($itemId, $opts);
         } else {
             empty(basename(dirname($path))) ? $HasPath ='/' : $HasPath = trim($this->getHasPath($path));
             basename(dirname($path)) == '' ? $itemId = 'root' : $itemId = basename(dirname($HasPath));
@@ -544,8 +548,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     private function getDBdat($path)
     {
         if ($path == $this->root) {
-            $root = ['mimeType'=>self::DIRMIME];
-            return $root;
+            $this->root == '/' ? $itemId = 'root' : $itemId = basename($this->root);
+			$opts = [
+				'fields' => self::FETCHFIELDS_GET
+			];            
+			return $this->service->files->get($itemId, $opts);
         }
         
         $itemId = basename($this->chkDBdat($path)['path']);
@@ -595,7 +602,17 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
         $stat['size']        = $raw['mimeType'] == self::DIRMIME ? 0 : (int)$raw['size'];
         $stat['ts']            = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
         $stat['dirs']        = $raw['mimeType'] == self::DIRMIME ? 1 : 0;
-        $stat['url'] = '1';
+        
+        if($permissions = $raw->getPermissions()){		
+			foreach ($permissions as $permission) {
+				if ($permission->type === 'anyone' && $permission->role === 'reader') {					
+					$stat['url'] = str_replace('export=download', 'export=media', $raw->getWebContentLink());				
+					break;
+				}else{
+					$stat['url'] = '1';
+				}
+			}
+		}
 	
         if ($raw['mimeType'] !== self::DIRMIME) {
             isset($raw->getImageMediaMetadata()['width']) ? $stat['width'] = $raw->getImageMediaMetadata()['width'] : $stat['width'] = 0;
