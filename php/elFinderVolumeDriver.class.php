@@ -1435,12 +1435,18 @@ abstract class elFinderVolumeDriver {
 	 * Return file real path if file exists
 	 *
 	 * @param  string  $hash  file hash
+	 * @param  boolean  $forcePath  Return path if file not exist
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 **/
-	public function realpath($hash) {
-		$path = $this->decode($hash);
-		return $this->stat($path) ? $path : false;
+	public function realpath($hash, $forcePath=false) {
+		$path=$this->decode($hash);
+		if (!$forcePath){
+			return $this->stat($path) ? $path : false;
+		}
+		else{
+			return $path;
+		}
 	}
 	
 	/**
