@@ -12,30 +12,31 @@ elFinder.prototype.commands.download = function() {
 		fm     = this.fm,
 		zipOn  = false,
 		filter = function(hashes) {
-			var mixed  = false,
+			var czipdl = (fm.api > 2)? fm.command('zipdl') : null,
+				mixed  = false,
 				croot  = '';
 			
-			if (fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
-				hashes = $.map(hashes, function(h) {
-					return fm.isCommandEnabled('download', h)? h : null;
-				});
+			if (czipdl !== null && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
 				croot = fm.root(hashes[0]);
 				$.each(hashes, function(i, h) {
 					if (mixed = (croot !== fm.root(h))) {
 						return false;
 					}
 				});
-				zipOn = (!mixed && fm.command('zipdl') && fm.isCommandEnabled('zipdl', croot));
+			}
+			zipOn = (! mixed && czipdl !== null && fm.isCommandEnabled('zipdl', hashes[0]));
+
+			if (mixed) {
+				hashes = $.map(hashes, function(h) {
+					return fm.isCommandEnabled('download', h)? h : null;
+				});
 			} else {
 				if (!fm.isCommandEnabled('download', hashes[0])) {
 					return [];
 				}
-				zipOn = (fm.command('zipdl') && fm.isCommandEnabled('zipdl', hashes[0]));
 			}
 			
-			return (!zipOn)?
-					$.map(self.files(hashes), function(f) { return f.mime == 'directory' ? null : f; })
-					: self.files(hashes);
+			return $.map(self.files(hashes), function(f) { return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f; });
 		};
 	
 	this.linkedCmds = ['zipdl'];
@@ -48,22 +49,16 @@ elFinder.prototype.commands.download = function() {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
 			maxReq = this.options.maxRequests || 10,
-			czipdl = fm.command('zipdl'),
+			czipdl = (fm.api > 2)? fm.command('zipdl') : null,
 			mixed  = false,
 			croot  = '';
 		
-		if (cnt > 0 && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
-			croot = fm.root(sel[0]);
-			$.each(sel, function(i, h) {
-				if (mixed = (croot !== fm.root(h))) {
-					return false;
-				}
-			});
+		if (cnt < 1) {
+			return -1;
 		}
+		cnt = filter(sel).length;
 		
-		return  (mixed || !czipdl || czipdl._disabled)?
-				(!this._disabled && cnt && cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1) && cnt == filter(sel).length ? 0 : -1)
-				: (!this._disabled && cnt ? 0 : -1);
+		return  (cnt && (zipOn || (cnt <= maxReq && ((!fm.UA.IE && !fm.UA.Mobile) || cnt == 1))) ? 0 : -1);
 	};
 	
 	fm.bind('contextmenu', function(e){
@@ -91,10 +86,10 @@ elFinder.prototype.commands.download = function() {
 							helper = null;
 							if (dt) {
 								var icon  = function(f) {
-										var mime = f.mime, i;
+										var mime = f.mime, i, tmb = fm.tmb(f);
 										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
-										if (f.tmb && f.tmb !== 1) {
-											i = $(i).css('background', "url('"+fm.option('tmbUrl')+f.tmb+"') center center no-repeat").get(0).outerHTML;
+										if (tmb) {
+											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
 										return i;
 									};
@@ -128,7 +123,10 @@ elFinder.prototype.commands.download = function() {
 						node: $('<a/>')
 							.attr({href: '#', title: fm.i18n('getLink'), draggable: 'false'})
 							.text(file.name)
-							.on('click', function(e){
+							.on('click touchstart', function(e){
+								if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+									return;
+								}
 								var parent = node.parent();
 								e.stopPropagation();
 								e.preventDefault();

@@ -39,7 +39,7 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content) {
 
 			var dfrd = $.Deferred(),
-				ta   = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
+				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
 				old  = ta.val(),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);

@@ -14,7 +14,19 @@
 	border-left:0 solid transparent;
 }
 
-.elfinder-statusbar a { text-decoration:none; }
+.elfinder-statusbar span {
+	cursor: pointer;
+	/*display: inline-block;*/
+	vertical-align: bottom;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	text-overflow: "..";
+	-o-text-overflow: "..";
+}
+.elfinder-statusbar span.ui-state-hover,
+.elfinder-statusbar span.ui-state-active { border: none; }
+.elfinder-statusbar span.elfinder-path-cwd { cursor: default; }
 
 
 
@@ -24,11 +36,56 @@
 	white-space:nowrap;
 	overflow:hidden;
 	text-overflow:ellipsis;
-    -o-text-overflow:ellipsis;
+	-o-text-overflow:ellipsis;
 }
 .elfinder-ltr .elfinder-path { float:left;  }
 .elfinder-rtl .elfinder-path { float:right; }
 
+/* path in workzone (case of swipe to navbar close) */
+.elfinder-workzone-path {
+	position: relative;
+}
+.elfinder-workzone-path .elfinder-path {
+	position: relative;
+	font-size: .75em;
+	font-weight: normal;
+	float: none;
+	max-width: none;
+	overflow-x: scroll;
+	text-overflow: initial;
+	-o-text-overflow: initial;
+}
+.elfinder-ltr .elfinder-workzone-path .elfinder-path {
+	margin-left: 24px;
+}
+.elfinder-rtl .elfinder-workzone-path .elfinder-path {
+	margin-right: 24px;
+}
+.elfinder-workzone-path .elfinder-path span {
+	display: inline-block;
+	padding: 5px 3px;
+}
+.elfinder-workzone-path .elfinder-path span.elfinder-path-cwd {
+	font-weight: bold;
+}
+.elfinder-workzone-path .elfinder-path span.ui-state-hover,
+.elfinder-workzone-path .elfinder-path span.ui-state-active { border: none; }
+
+.elfinder-workzone-path .elfinder-path-roots {
+	position: absolute;
+	top: 0;
+	width: 24px;
+	height: 20px;
+	padding: 2px;
+    border: none;
+    overflow: hidden;
+}
+.elfinder-ltr .elfinder-workzone-path .elfinder-path-roots {
+	left: 0;
+}
+.elfinder-rtl .elfinder-workzone-path .elfinder-path-roots {
+	right: 0;
+}
 /* total/selected size in statusbar */
 .elfinder-stat-size { white-space:nowrap; }
 .elfinder-ltr .elfinder-stat-size { float:right; }

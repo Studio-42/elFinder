@@ -20,4 +20,4 @@ elFinder.prototype.commands.back = function() {
 		return this.fm.history.back();
 	}
 
-}
+};

@@ -31,7 +31,7 @@ elFinder.prototype.commands.archive = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			chk = fm.cwd().write,
+			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {
@@ -46,9 +46,9 @@ elFinder.prototype.commands.archive = function() {
 		var files = this.files(hashes),
 			cnt   = files.length,
 			mime  = type || mimes[0],
-			cwd   = fm.cwd(),
+			cwd   = fm.file(files[0].phash) || null,
 			error = ['errArchive', 'errPerm', 'errCreatingTempDir', 'errFtpDownloadFile', 'errFtpUploadFile', 'errFtpMkdir', 'errArchiveExec', 'errExtractExec', 'errRm'],
-			i, makeDfrd;
+			i, open;
 
 		dfrd = $.Deferred().fail(function(error) {
 			error && fm.error(error);
@@ -69,11 +69,21 @@ elFinder.prototype.commands.archive = function() {
 		}
 
 		self.mime   = mime;
-		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + '.' + fm.option('archivers')['createext'][mime];
+		self.prefix = ((cnt > 1)? 'Archive' : files[0].name) + (fm.option('archivers')['createext']? '.' + fm.option('archivers')['createext'][mime] : '');
 		self.data   = {targets : self.hashes(hashes), type : mime};
-		makeDfrd = $.proxy(fm.res('mixin', 'make'), self)();
-		dfrd.reject();
-		return makeDfrd;
+		
+		if (fm.cwd().hash !== cwd.hash) {
+			open = fm.exec('open', cwd.hash);
+		} else {
+			open = null;
+		}
+		
+		$.when(open).done(function() {
+			fm.selectfiles({files : hashes});
+			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+		});
+		
+		return dfrd;
 	}
 
-}
+};

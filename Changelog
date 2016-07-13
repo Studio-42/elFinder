@@ -1,3 +1,98 @@
+2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.13):
+		- [ui:cwd] Fixed #1433 create a thumbnail of the video file with ffmpeg
+		- [js:core] Fixed #1435 bug of getFileCallback on multi instances
+		- [ui:cwd] Fixed #1440 bug that not become disabled on multi instance
+		- [cmd:quicklook] Fixed #1441 hide the prev/next button on first/last item
+		- [js:core] Fixed #1439 show window close confirm dialog while editing file
+		- [ui:cwd] Fixed #1450 missing contextmenu on touch up on iOS devices
+		- [js] Fixed #1455 duplicate registration of command change event
+		- [ui:cwd] Fixed #1461 resizable table column width
+		- [cmd:sort] Fixed #1464 to enable more sort options
+		- [cmd:chmod] Fixed #1465 remove unnecessary `this` reference
+		- [ui:toolbar,navbar] Fixed #1473 memorize state of open/close by swipe
+		- [ui:cwd] Fixed #1475 make custom column sortable on list view
+		- [cmd:quicklook] Fixed #1478 preview broken with old jQuery
+		- [js:core] Fixed #1480 broken compatibility with protocol API v1
+		- [cmd:opendir] Fixed #1481 broken in elFinder 2.1.12
+		- [ui:cwd] Fixed #1479 can't be moved to the right edge at column sort
+		- [ui:cwd] Fixed #1485 add an option of template placeholders replacement rules
+		- [php:core] Fixed #1490 configurable root options of the network mounting volume
+		- [js] Fixed #1491 jQuery 3.0 supports
+		- [cmd:search] Fixed #1499 incremental search from current view items
+		- [cmd;resize] Fixed #1498 img-edit dialog layout disordered when resizing window
+		- [VD:abstract] Fixed #1505 configurable duplicate's suffix, unique numbe format
+		- [VD:abstract] Fixed #1507 add a volume option `dirUrlOwn`
+		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
+		- And some minor bug fixes
+
+
+2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.7):
+		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
+
+
+2016-05-30  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.12):
+		- Fixed #1321 Not trim white spaces on editing the text file
+		- Fixed #1320 Supported operation in the modal dialog
+		- Correction of the context menu (Mobile devices, Right-to-Left Language etc.)
+		- Correction of Quicklook (Supported 'video/quicktime', improvement of IFRAME, For Mobile devices etc)
+		- Fixed #1272 Correct detection of timestamp on FTP volume
+		- Fixed #1315 Implement function for `copyJoin` of the volume root option
+		- Fixed #1344 Use self image as thumbnail when without `imgLib`
+		- Fixed #1342 Bugfix of method `getFullPath` that was problems relative path can not be resolved
+		- Added a volume root option `uploadMaxConn`
+			- Maximum number of chunked upload connection. `-1` to disable chunked upload.
+		- Changed default value of volume root option `tmbBgColor` to 'transparent'
+		- Added a volume root option `bgColorFb`
+			- Image rotate fallback background color (defalt: #ffffff). Uses this color if it can not specify to transparent.
+		- Fixed #935 Supports `'convert'`(imagemagick) as `imgLib`
+		- Fixed #1363 Bugfix of FTP connect from windows localhost to remote server
+		- Fixed #1367 Bugfix of backward compatible to jQuery UI < 1.11
+		- Mobile devices friendly
+			- Swipe to navbar/toolbar show/hide on touch devices
+			- Hide toolbar on mobile devices at initial view
+			- A little bigger icons
+			- Added item select checkboxes
+			- Path breadcrumbs move to top of workzone when hide navbar
+			- To enable resizing/cropping by touch events
+			- UX enhancements
+		- Fixed #1311 CWD list table with fixed fixed header
+		- UI path apply text-ellipsis in each holder name
+		- Fixed #1370 implemented function keep timestamp into LocalFileSystem volume driver
+		- Added PHP error handler and removed all `@` error-control operator
+		- Fixed #1391 take care 32bit system of chunked file uploading arg `cid`
+		- Fixed #1393 Added PHP class auto loader
+		- Fixed #1412 Enable auto scroll when navbar/cwd drag over
+		- And some minor bug fixes
+
+
+2016-04-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.11):
+		- Added Archive(zip|gzip|tar) quicklook preview plugin
+		- DnD upload supports Microsoft Edge
+		- Fixed problem which directory is not detected in the LocalFileSystem driver (Bug of 2.1.10)
+		- And some minor bug fixes
+
+
+2016-04-02  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.10):
+		- Fixed #1061, #1231 Supported controllable folder icons
+		- Fixed #1240 LocalFileSystem search files it was still follow symlinks
+		- Added new volume root option `searchExDirReg` for exclusion serach
+		- Return file.url in result on file upload for 3rd party uploader
+		- Supported elFinder API version 1
+		- Added a new volume driver FlysystemGoogleDriveNetmount that based on flysystem-google-drive
+		- Added a new connector plugin "AutoRotate"
+		- And some minor bug fixes
+
+
 2016-03-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.9):

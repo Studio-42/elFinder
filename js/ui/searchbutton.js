@@ -8,11 +8,13 @@ $.fn.elfindersearchbutton = function(cmd) {
 	return this.each(function() {
 		var result = false,
 			fm     = cmd.fm,
+			isopts = cmd.options.incsearch || { enable: false },
 			id     = function(name){return fm.namespace + name},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
 			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
 			search = function() {
+				input.data('inctm') && clearTimeout(input.data('inctm'));
 				opts && opts.slideUp();
 				var val = $.trim(input.val()),
 					from = !$('#' + id('SearchFromAll')).prop('checked'),
@@ -41,18 +43,23 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			},
 			abort = function() {
-				opts && opts.slideUp();
-				input.val('');
-				if (result) {
+				input.data('inctm') && clearTimeout(input.data('inctm'));
+				input.val('').blur();
+				if (result || incVal) {
 					result = false;
-					fm.trigger('searchend');
+					incVal = '';
+					fm.lazy(function() {
+						fm.trigger('searchend');
+					});
 				}
 			},
+			incVal = '',
 			input  = $('<input type="text" size="42"/>')
-				.focus(function(){
+				.on('focus', function() {
+					incVal = '';
 					opts && opts.slideDown();
 				})
-				.blur(function(){
+				.on('blur', function(){
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp();
@@ -63,10 +70,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 				})
 				.appendTo(button)
 				// to avoid fm shortcuts on arrows
-				.keypress(function(e) {
+				.on('keypress', function(e) {
 					e.stopPropagation();
 				})
-				.keydown(function(e) {
+				.on('keydown', function(e) {
 					e.stopPropagation();
 					
 					e.keyCode == 13 && search();
@@ -76,23 +83,53 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
-				.append(
-					$('<div class="buttonset"/>')
-						.append(
-							$('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'),
-							$('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'),
-							$('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>')
-						),
-					$('<div class="buttonset"/>')
-						.append(
-							$('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'),
-							$('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>')
-						)
-				)
-				.hide()
-				.css('overflow', 'hidden')
-				.appendTo(button);
+			opts;
+		
+		if (isopts.enable) {
+			isopts.minlen = isopts.minlen || 2;
+			isopts.wait = isopts.wait || 500;
+			input
+				.attr('title', fm.i18n('incSearchOnly'))
+				.on('compositionstart', function() {
+					input.data('composing', true);
+				})
+				.on('compositionend', function() {
+					input.removeData('composing');
+					input.trigger('input'); // for IE, edge
+				})
+				.on('input', function() {
+					if (! input.data('composing')) {
+						input.data('inctm') && clearTimeout(input.data('inctm'));
+						input.data('inctm', setTimeout(function() {
+							var val = input.val();
+							if (val.length === 0 || val.length >= isopts.minlen) {
+								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+								incVal = val;
+							}
+						}, isopts.wait));
+					}
+				});
+			
+			if (fm.UA.ltIE8) {
+				input.on('keydown', function(e) {
+						if (e.keyCode === 229) {
+							input.data('imetm') && clearTimeout(input.data('imetm'));
+							input.data('composing', true);
+							input.data('imetm', setTimeout(function() {
+								input.removeData('composing');
+							}, 100));
+						}
+					})
+					.on('keyup', function(e) {
+						input.data('imetm') && clearTimeout(input.data('imetm'));
+						if (input.data('composing')) {
+							e.keyCode === 13 && input.trigger('compositionend');
+						} else {
+							input.trigger('input');
+						}
+					});
+			}
+		}
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
@@ -102,27 +139,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.appendTo(button)
 			.click(abort);
 		
-		$(function(){
-			if (!opts) {
-				return;
-			}
-			opts.find('div.buttonset').buttonset();
-			$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
-			$('#'+id('SearchMime')).next('label').attr('title', fm.i18n('searchMime'));
-			opts.find('input')
-			.on('mousedown', function(){
-				opts.data('infocus', true);
-			})
-			.on('click', function(){
-				$.trim(input.val()) && search();
-			});
-		});
-		
 		// wait when button will be added to DOM
 		toolbar.on('load', function(){
 			var parent = button.parent();
 			if (parent.length) {
-				toolbar.children('.'+btnCls).remove();
 				toolbar.prepend(button.show());
 				parent.remove();
 				// position icons for ie7
@@ -138,6 +158,38 @@ $.fn.elfindersearchbutton = function(cmd) {
 		});
 		
 		fm
+			.one('open', function() {
+				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+					.append(
+						$('<div class="buttonset"/>')
+							.append(
+								$('<input id="'+id('SearchFromCwd')+'" name="serchfrom" type="radio" checked="checked"/><label for="'+id('SearchFromCwd')+'">'+fm.i18n('btnCwd')+'</label>'),
+								$('<input id="'+id('SearchFromVol')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromVol')+'">'+fm.i18n('btnVolume')+'</label>'),
+								$('<input id="'+id('SearchFromAll')+'" name="serchfrom" type="radio"/><label for="'+id('SearchFromAll')+'">'+fm.i18n('btnAll')+'</label>')
+							),
+						$('<div class="buttonset"/>')
+							.append(
+								$('<input id="'+id('SearchName')+'" name="serchcol" type="radio" checked="checked"/><label for="'+id('SearchName')+'">'+fm.i18n('btnFileName')+'</label>'),
+								$('<input id="'+id('SearchMime')+'" name="serchcol" type="radio"/><label for="'+id('SearchMime')+'">'+fm.i18n('btnMime')+'</label>')
+							)
+					)
+					.hide()
+					.css('overflow', 'hidden')
+					.appendTo(button);
+				if (opts) {
+					opts.find('div.buttonset').buttonset();
+					$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
+					$('#'+id('SearchMime')).next('label').attr('title', fm.i18n('searchMime'));
+					opts.on('mousedown', 'div.buttonset', function(e){
+							e.stopPropagation();
+							opts.data('infocus', true);
+						})
+						.on('click', 'input', function(e) {
+							e.stopPropagation();
+							$.trim(input.val()) && search();
+						});
+				}
+			})
 			.select(function() {
 				input.blur();
 			})
@@ -160,7 +212,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 			.shortcut({
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
-				callback    : function() { input.select().focus(); }
+				callback    : function() { 
+					input.select().focus();
+				}
 			});
 
 	});

@@ -21,6 +21,14 @@ elFinder.prototype.command = function(fm) {
 	this.name = '';
 	
 	/**
+	 * Command icon class name with out 'elfinder-button-icon-'
+	 * Use this.name if it is empty
+	 *
+	 * @type  String
+	 */
+	this.className = '';
+
+	/**
 	 * Short command description
 	 *
 	 * @type  String
@@ -285,6 +293,4 @@ elFinder.prototype.command = function(fm) {
 			? $.map($.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null })
 			: fm.selectedFiles();
 	}
-}
-
-
+};

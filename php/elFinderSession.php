@@ -38,7 +38,15 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function start()
 	{
-		@session_start();
+		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+			if (session_status() !== PHP_SESSION_ACTIVE) {
+				session_start();
+			}
+		} else {
+			set_error_handler(array($this, 'session_start_error'),  E_NOTICE);
+			session_start();
+			restore_error_handler();
+		}
 		$this->started = session_id()? true : false;
 		
 		return $this;
@@ -132,8 +140,36 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function remove($key)
 	{
-		$session =& $this->getSessionRef($key);
-		unset($session);
+		$closed = false;
+		if (! $this->started) {
+			$closed = true;
+			$this->start();
+		}
+
+		list($cat, $name) = array_pad(explode('.', $key, 2), 2, null);
+		if (is_null($name)) {
+			if (! isset($this->keys[$cat])) {
+				$name = $cat;
+				$cat = 'default';
+			}
+		}
+		if (isset($this->keys[$cat])) {
+			$cat = $this->keys[$cat];
+		} else {
+			$name = $cat . '.' . $name;
+			$cat = $this->keys['default'];
+		}
+		if (is_null($name)) {
+			unset($_SESSION[$cat]);
+		} else {
+			if (isset($_SESSION[$cat]) && is_array($_SESSION[$cat])) {
+				unset($_SESSION[$cat][$name]);
+			}
+		}
+
+		if ($closed) {
+			$this->close();
+		}
 		
 		return $this;
 	}
@@ -186,7 +222,7 @@ class elFinderSession implements elFinderSessionInterface
 		if ($this->base64encode) {
 			if (is_string($data)) {
 				if (($data = base64_decode($data)) !== false) {
-					$data = @unserialize($data);
+					$data = unserialize($data);
 				} else {
 					$data = null;
 				}
@@ -196,4 +232,6 @@ class elFinderSession implements elFinderSessionInterface
 		}
 		return $data;
 	}
+
+	protected function session_start_error($errno , $errstr) {}
 }

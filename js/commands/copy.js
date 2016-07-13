@@ -35,4 +35,4 @@ elFinder.prototype.commands.copy = function() {
 		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes)));
 	}
 
-}
+};

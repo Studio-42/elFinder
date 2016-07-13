@@ -25,6 +25,17 @@
 	padding:.2em 1em;
 }
 
+/* resize handle for touch devices */
+.elfinder-touch .std42-dialog.ui-dialog .ui-resizable-se {
+	width: 12px;
+	height: 12px;
+	zoom: 1.5;
+	right: -7px;
+	bottom: -7px;
+	margin: 3px 7px 7px 3px;
+	background-position: -64px -224px;
+}
+
 .std42-dialog .ui-dialog-titlebar-close,
 .std42-dialog .ui-dialog-titlebar-close:hover { padding:1px; }
 
@@ -34,6 +45,13 @@
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
+}
+.std42-dialog .ui-dialog-content,
+.std42-dialog .ui-dialog-content * {
+	-webkit-user-select:  auto !important;
+	-moz-user-select:     text !important;
+	-khtml-user-select:   text !important;
+	user-select:          text !important;
 }
 
 /* buttons */
@@ -145,6 +163,7 @@
 .elfinder-dialog-icon-netunmount,
 .elfinder-dialog-icon-chmod,
 .elfinder-dialog-icon-preupload,
+.elfinder-dialog-icon-url,
 .elfinder-dialog-icon-dim         { background-position: 0 -434px; }
 
 /*********************** CONFIRM DIALOG **************************/
@@ -200,7 +219,9 @@
 }
 
 .elfinder-netmount-tb { margin:0 auto; }
+.elfinder-netmount-tb select,
 .elfinder-netmount-tb input { border:1px solid #ccc; }
+.elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
 button.elfinder-info-button {
 	margin: -3.5px 0;

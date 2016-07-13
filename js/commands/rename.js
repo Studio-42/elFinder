@@ -17,17 +17,18 @@ elFinder.prototype.commands.rename = function() {
 		return !this._disabled && sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
 	};
 	
-	this.exec = function(hashes) {
+	this.exec = function(hashes, opts) {
 		var fm       = this.fm,
 			cwd      = fm.getUI('cwd'),
 			sel      = hashes || (fm.selected().length? fm.selected() : false) || [fm.cwd().hash],
 			cnt      = sel.length,
 			file     = fm.file(sel.shift()),
 			filename = '.elfinder-cwd-filename',
-			type     = (hashes && hashes._type)? hashes._type : (fm.selected().length? 'files' : 'navbar'),
+			opts     = opts || {},
+			incwd    = (fm.cwd().hash == file.hash),
+			type     = opts._currentType? opts._currentType : (incwd? 'navbar' : 'files'),
 			navbar   = (type === 'navbar'),
 			target   = $('#'+fm[navbar? 'navHash2Id' : 'cwdHash2Id'](file.hash)),
-			incwd    = (fm.cwd().hash == file.hash),
 			tarea    = (type === 'files' && fm.storage('view') != 'list'),
 			rest     = function(){
 				if (!overlay.is(':hidden')) {
@@ -54,7 +55,6 @@ elFinder.prototype.commands.rename = function() {
 					if (tarea) {
 						name = name.replace(/([_.])/g, '&#8203;$1');
 					}
-					//rest();
 					if (navbar) {
 						input.replaceWith(name);
 					} else {
@@ -74,6 +74,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.always(function() {
 					rest();
+					fm.unbind('resize', resize);
 					fm.enable();
 				}),
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
@@ -89,11 +90,11 @@ elFinder.prototype.commands.rename = function() {
 					}
 				})
 				.keydown(function(e) {
-					e.stopPropagation();
 					e.stopImmediatePropagation();
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
+						e.preventDefault();
 						input.blur();
 					}
 				})
@@ -112,7 +113,7 @@ elFinder.prototype.commands.rename = function() {
 						parent = input.parent(),
 						valid  = true;
 
-					if (pnode.length) {
+					if (!inError && pnode.length) {
 						if (input[0].setSelectionRange) {
 							input[0].setSelectionRange(0, 0)
 						}
@@ -127,11 +128,13 @@ elFinder.prototype.commands.rename = function() {
 							}
 						}
 						if (!name || name === '..' || !valid) {
-							fm.error('errInvName');
+							inError = true;
+							fm.error('errInvName', {modal: true, close: select});
 							return false;
 						}
 						if (fm.fileByName(name, file.phash)) {
-							fm.error(['errExists', name]);
+							inError = true;
+							fm.error(['errExists', name], {modal: true, close: select});
 							return false;
 						}
 						
@@ -161,17 +164,33 @@ elFinder.prototype.commands.rename = function() {
 						
 					}
 				}),
+			select = function() {
+				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+				inError = false;
+				if (fm.UA.Mobile) {
+					overlay.on('click', cancel)
+						.removeClass('ui-front').elfinderoverlay('show');
+				}
+				input.select().focus();
+				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
+			},
 			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
 					: target.find(filename),
-			name = file.name.replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, ''),
 			pnode = node.parent(),
 			overlay = fm.getUI().children('.elfinder-overlay'),
 			cancel = function(e) { 
-				e.stopPropagation();
-				dfrd.reject();
-			};
+				if (! inError) {
+					e.stopPropagation();
+					dfrd.reject();
+				}
+			},
+			resize = function() {
+				target.trigger('scrolltoview');
+			},
+			inError = false;
 		
 		pnode.addClass('ui-front').css('position', 'relative');
+		fm.bind('resize', resize);
 		if (navbar) {
 			node.replaceWith(input.val(file.name));
 		} else {
@@ -183,10 +202,6 @@ elFinder.prototype.commands.rename = function() {
 					.parent('td').css('overflow', 'visible');
 			}
 			node.empty().append(input.val(file.name));
-		}
-		if (fm.UA.Mobile) {
-			overlay.on('click', cancel)
-				.removeClass('ui-front').elfinderoverlay('show');
 		}
 		
 		if (cnt > 1 || this.getstate([file.hash]) < 0) {
@@ -207,11 +222,9 @@ elFinder.prototype.commands.rename = function() {
 		
 		input.trigger('keyup');
 		
-		input.select().focus();
-		
-		input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
+		select();
 		
 		return dfrd;
 	};
 
-}
+};

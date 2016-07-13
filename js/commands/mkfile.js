@@ -16,4 +16,4 @@ elFinder.prototype.commands.mkfile = function() {
 		return !this._disabled && this.fm.cwd().write ? 0 : -1;
 	}
 
-}
+};

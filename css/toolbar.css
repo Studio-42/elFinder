@@ -36,6 +36,10 @@
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
 }
+.elfinder-touch .elfinder-button {
+	width:20px;
+	height:20px;
+}
 
 .elfinder .ui-icon-search { cursor:pointer;}
 
@@ -68,6 +72,10 @@
 	width:0;
 }
 
+.elfinder-touch .elfinder-toolbar-button-separator {
+	height:20px;
+}
+
 /* change icon opacity^ not button */
 .elfinder .elfinder-button.ui-state-disabled { opacity:1; filter:Alpha(Opacity=100);}
 .elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
@@ -81,6 +89,12 @@
 	height:16px;
 	display:block;
 	background:url('../img/toolbar.png')  no-repeat;
+}
+
+.elfinder-touch .elfinder-button-icon {
+	zoom: 1.25;
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.25);
 }
 
 /* buttons icons */
@@ -122,6 +136,8 @@
 .elfinder-button-icon-chmod     { background-position: 0  -48px; }
 .elfinder-button-icon-accept    { background-position: 0 -736px; }
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
+.elfinder-button-icon-menu      { background-position: 0 -752px; }
+.elfinder-button-icon-colwidth  { background-position: 0 -768px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
@@ -137,12 +153,19 @@
 	padding:3px 0;
 }
 
+.elfinder-touch .elfinder-button-menu {
+	top:35px;
+}
+
 /* menu item */
 .elfinder-button-menu-item {
 	white-space:nowrap;
 	cursor:default;
 	padding:5px 19px;
 	position:relative;
+}
+.elfinder-touch .elfinder-button-menu-item {
+	padding: 12px 19px
 }
 
 /* fix hover ui class */
@@ -161,8 +184,8 @@
 }
 
 .elfinder-button-menu-item-selected .ui-icon { display:block; }
-.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-n { display:none; }
-.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-asc .ui-icon-arrowthick-1-s { display:none; }
+.elfinder-button-menu-item-selected-desc .ui-icon-arrowthick-1-n { display:none; }
 
 /* hack for upload button */
 .elfinder-button form {
@@ -222,6 +245,10 @@
 	outline:0px solid;
 }
 
+.elfinder-touch .elfinder-button-search input {
+	height:28px;
+	line-height: 28px;
+}
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
 
 /* icons */
@@ -229,7 +256,7 @@
 	position:absolute;
 	height:18px;
 	top: 50%;
-	margin:-9px 4px 0 4px;
+	margin:-8px 4px 0 4px;
 	opacity: .6; 
 	filter:Alpha(Opacity=60);
 }
@@ -243,8 +270,20 @@
 .elfinder-ltr .elfinder-button-search .ui-icon-close { right:0;}
 .elfinder-rtl .elfinder-button-search .ui-icon-close { left:0;}
 
-
-
-
-
+/* toolbar swipe handle */
+.elfinder-toolbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 50px;
+	width: 100%;
+	display: none;
+	pointer-events: none;
+	background: linear-gradient(to bottom,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 2px,
+		rgba(216,223,230,0.3) 5px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
 

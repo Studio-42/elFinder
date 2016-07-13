@@ -13,4 +13,4 @@ $.fn.elfinderpanel = function(fm) {
 			})
 		})
 	})
-}
+};

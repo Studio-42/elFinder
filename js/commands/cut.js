@@ -38,4 +38,4 @@ elFinder.prototype.commands.cut = function() {
 		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(fm.clipboard(this.hashes(hashes), true));
 	}
 
-}
+};

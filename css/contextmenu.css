@@ -1,6 +1,6 @@
 /* menu and submenu */
-.elfinder-contextmenu,
-.elfinder-contextmenu-sub {
+.elfinder .elfinder-contextmenu,
+.elfinder .elfinder-contextmenu-sub {
 	display:none;
 	position:absolute;
 	border:1px solid #aaa;
@@ -10,24 +10,24 @@
 }
 
 /* submenu */
-.elfinder-contextmenu-sub { top:5px; }
+.elfinder .elfinder-contextmenu-sub { top:5px; }
 /* submenu in rtl/ltr enviroment */
-.elfinder-contextmenu-ltr .elfinder-contextmenu-sub { margin-left:-5px; }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-sub { margin-right:-5px; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-sub { margin-left:-5px; }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-sub { margin-right:-5px; }
 
 /* menu item */
-.elfinder-contextmenu-header {
+.elfinder .elfinder-contextmenu-header {
 	margin-top: -4px;
 	padding: 0 .5em .2ex;
 	border: none;
 	text-align: center;
 }
-.elfinder-contextmenu-header span {
+.elfinder .elfinder-contextmenu-header span {
 	font-weight: normal;
 	font-size: 0.8em;
 	font-weight: bolder;
 }
-.elfinder-contextmenu-item {
+.elfinder .elfinder-contextmenu-item {
 	position:relative;
 	display:block;
 	padding:4px 30px;
@@ -35,34 +35,39 @@
 	white-space:nowrap;
 	cursor:default;
 }
-.elfinder-contextmenu-item .ui-icon {
+.elfinder .elfinder-contextmenu-item .ui-icon {
 	width:16px;
 	height:16px;
 	position:absolute;
-	left:2px;
+	left:auto;
+	right:auto;
 	top:50%;
 	margin-top:-8px;
 	display:none;
 }
-.elfinder-contextmenu-item.elfinder-touch {
-	padding:12px 30px;
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
+	left: 2px;
+}
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item .ui-icon {
+	right: 2px;
+}
+.elfinder-touch .elfinder-contextmenu-item {
+	padding:12px 38px;
 }
 
 /* text in item */
-.elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }
-
-
+.elfinder .elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }
 
 /* submenu item in rtl/ltr enviroment */
-.elfinder-contextmenu-ltr .elfinder-contextmenu-item { text-align:left; }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-item { text-align:right; }
-.elfinder-contextmenu-ltr .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-left:12px;  }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-right:12px; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item { text-align:left; }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item { text-align:right; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-left:12px;  }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-right:12px; }
 
 /* command/submenu icon */
-.elfinder-contextmenu-extra-icon,
-.elfinder-contextmenu-arrow,
-.elfinder-contextmenu-icon {
+.elfinder .elfinder-contextmenu-extra-icon,
+.elfinder .elfinder-contextmenu-arrow,
+.elfinder .elfinder-contextmenu-icon {
 	position:absolute;
 	top:50%;
 	margin-top:-8px;
@@ -70,25 +75,25 @@
 }
 
 /* command icon in rtl/ltr enviroment */
-.elfinder-contextmenu-ltr .elfinder-contextmenu-icon { left:8px; }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-icon { right:8px; }
-.elfinder-contextmenu-ltr .elfinder-contextmenu-extra-icon { right:8px; }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-extra-icon { left:8px; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-icon { left:8px; }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-icon { right:8px; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-extra-icon { right:8px; }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-extra-icon { left:8px; }
 
 /* arrow icon */
-.elfinder-contextmenu-arrow {
+.elfinder .elfinder-contextmenu-arrow {
 	width:16px;
 	height:16px;
 	background:url('../img/arrows-normal.png') 5px 4px no-repeat;
 }
 
 /* arrow icon in rtl/ltr enviroment */
-.elfinder-contextmenu-ltr .elfinder-contextmenu-arrow { right:5px; }
-.elfinder-contextmenu-rtl .elfinder-contextmenu-arrow { left:5px; background-position: 0 -10px; }
+.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-arrow { right:5px; }
+.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-arrow { left:5px; background-position: 0 -10px; }
 
 /* command extra icon's <a>, <span> tag */
-.elfinder-contextmenu-extra-icon a, 
-.elfinder-contextmenu-extra-icon span {
+.elfinder .elfinder-contextmenu-extra-icon a, 
+.elfinder .elfinder-contextmenu-extra-icon span {
 	display: inline-block;
 	width: 100%;
 	height: 100%;
@@ -100,11 +105,16 @@
 }
 
 /* disable ui border/bg image on hover */
-.elfinder-contextmenu .ui-state-hover { border:0 solid; background-image:none;}
+.elfinder .elfinder-contextmenu .ui-state-hover { border:0 solid; background-image:none;}
 
 /* separator */
-.elfinder-contextmenu-separator {
+.elfinder .elfinder-contextmenu-separator {
 	height:0px;
 	border-top:1px solid #ccc;
 	margin:0 1px;
+}
+
+/* for CSS style priority to ui-state-disabled - "background-image: none" */
+.elfinder .elfinder-button-icon.ui-state-disabled {
+	background-image: url('../img/toolbar.png') !important;
 }

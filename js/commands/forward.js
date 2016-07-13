@@ -19,4 +19,4 @@ elFinder.prototype.commands.forward = function() {
 		return this.fm.history.forward();
 	}
 	
-}
+};

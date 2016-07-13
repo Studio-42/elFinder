@@ -40,7 +40,7 @@
 	border:1px solid transparent;
 	cursor:default;
 }
-.elfinder-navbar-dir.elfinder-touch {
+.elfinder-touch .elfinder-navbar-dir {
 	padding: 12px 12px;
 }
 
@@ -98,6 +98,7 @@
 .elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.png"); }
 .elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.png"); }
 .elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.png"); }
+.elfinder-tree .elfinder-navbar-root-googledrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_googledrive.png"); }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
@@ -126,17 +127,22 @@
 .elfinder-ltr .elfinder-navbar-spinner { left:0;  margin-left:-2px; }
 .elfinder-rtl .elfinder-navbar-spinner { right:0; margin-right:-2px; }
 
+/* marker */
+.elfinder-navbar .elfinder-perms,
+.elfinder-navbar .elfinder-lock,
+.elfinder-navbar .elfinder-symlink { opacity: .6; filter:Alpha(Opacity=60); }
+
 /* permissions marker */
-.elfinder-navbar .elfinder-perms { top:50%; margin-top:-8px; }
+.elfinder-navbar .elfinder-perms { bottom:-1px; margin-top:-8px; }
 
 /* locked marker */
 .elfinder-navbar .elfinder-lock { top:-2px; }
 
 /* permissions/symlink markers ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  18px; }
-.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 18px; }
-.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  18px; }
-.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 18px; }
+.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  20px; }
+.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 20px; }
+.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  20px; }
+.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 20px; }
 .elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
 .elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
 
@@ -161,8 +167,30 @@
 	/*border:1px solid #8cafed;*/
 }
 
-
-
-
-
-
+/* navbar swipe handle */
+.elfinder-navbar-swipe-handle {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	width: 50px;
+	display: none;
+	pointer-events: none;
+}
+.elfinder-ltr .elfinder-navbar-swipe-handle {
+	left: 0px;
+	background: linear-gradient(to right,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}
+.elfinder-rtl .elfinder-navbar-swipe-handle {
+	right: 0px;
+	background: linear-gradient(to left,
+		rgba(221,228,235,1) 0,
+		rgba(221,228,235,0.8) 5px,
+		rgba(216,223,230,0.3) 8px,
+		rgba(0,0,0,0.1) 95%,
+		rgba(0,0,0,0) 100%);
+}

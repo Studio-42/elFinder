@@ -11,6 +11,22 @@
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
+/* in lazy execution status */
+.elfinder.elfinder-processing * {
+	cursor: progress !important
+}
+.elfinder.elfinder-processing.elfinder-touch .elfinder-workzone:after {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 3px;
+	content: '';
+	left: 0;
+	background-image: url(../img/progress.gif);
+	opacity: .6;
+	pointer-events: none;
+}
+
 /* for disable select of Touch devices */
 .elfinder *:not(input):not(textarea):not(select):not([contenteditable=true]),
 .elfinder-contextmenu *:not(input):not(textarea):not(select):not([contenteditable=true]) {
@@ -66,10 +82,13 @@
 
 /* drag helper */
 .elfinder-drag-helper {
+	top: 0px;
+	left: 0px;
 	width:70px;
 	height:60px;
 	padding:0 0 0 25px;
 	z-index:100000;
+	will-change: left, top;
 }
 .elfinder-drag-helper.html5-native {
 	position: absolute;
@@ -123,6 +142,7 @@
 	position: absolute;
 	opacity: .2;
 	filter: Alpha(Opacity=20);
+	display: none;
 }
 
 /* panels under/below cwd (for search field etc) */

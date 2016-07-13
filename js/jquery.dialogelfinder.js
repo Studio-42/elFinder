@@ -79,4 +79,3 @@ $.fn.dialogelfinder = function(opts) {
 
 	return this;
 };
-

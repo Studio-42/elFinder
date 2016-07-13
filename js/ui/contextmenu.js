@@ -13,7 +13,6 @@ $.fn.elfindercontextmenu = function(fm) {
 			exIcon = 'elfinder-contextmenu-extra-icon',
 			menu = self.addClass('ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
-				.appendTo('body')
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
 					$(this).toggleClass('ui-state-hover', e.type === 'mouseenter');
 				})
@@ -23,41 +22,80 @@ $.fn.elfindercontextmenu = function(fm) {
 				.on('contextmenu', function(){return false;}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
-			clItem = cmItem + (fm.UA.Touch ? ' elfinder-touch' : ''),
-			tpl     = '<div class="'+clItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
+			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
 			item = function(label, icon, callback) {
 				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
 					.click(function(e) {
 						e.stopPropagation();
 						e.preventDefault();
 						callback();
+					});
+			},
+			base, cwd,
+
+			autoToggle = function() {
+				var evTouchStart = 'touchstart.contextmenuAutoToggle';
+				menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
+				if (menu.is(':visible')) {
+					menu.on('touchstart', function(e) {
+						if (e.originalEvent.touches.length > 1) {
+							return;
+						}
+						menu.stop().show();
+						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
+					.data('hideTm', setTimeout(function() {
+						cwd.find('.elfinder-cwd-file').off(evTouchStart);
+						cwd.find('.elfinder-cwd-file.ui-selected')
+						.one(evTouchStart, function(e) {
+							if (e.originalEvent.touches.length > 1) {
+								return;
+							}
+							var tgt = $(e.target);
+							if (menu.first().length && !tgt.is('input:checkbox') && !tgt.hasClass('elfinder-cwd-select')) {
+								open(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
+								return false;
+							}
+							cwd.find('.elfinder-cwd-file').off(evTouchStart);
+						})
+						.one('unselect.'+fm.namespace, function() {
+							cwd.find('.elfinder-cwd-file').off(evTouchStart);
+						});
+						menu.fadeOut({
+							duration: 300,
+							fail: function() {
+								menu.css('opacity', '1').show();
+							}
+						});
+					}, 4500));
+				}
 			},
 			
 			open = function(x, y) {
-				var win        = $(window),
-					width      = menu.outerWidth(),
+				var width      = menu.outerWidth(),
 					height     = menu.outerHeight(),
-					wwidth     = win.width(),
-					wheight    = win.height(),
-					scrolltop  = win.scrollTop(),
-					scrollleft = win.scrollLeft(),
-					mw         = fm.UA.Touch? 30 : 0,
-					mh         = fm.UA.Touch? 20 : 0,
+					bpos       = base.offset(),
+					bwidth     = base.width(),
+					bheight    = base.height(),
+					mw         = fm.UA.Mobile? 40 : 2,
+					mh         = fm.UA.Mobile? 20 : 2,
+					body       = $('body'),
+					x          = x - (bpos? bpos.left : 0),
+					y          = y - (bpos? bpos.top : 0),
 					css        = {
-						top  : Math.max(0, y - scrolltop + mh + height < wheight ? y + mh : (y - mh - height > 0 ? y - mh - height : y + mh)),
-						left : Math.max(0, x - scrollleft + mw + width < wwidth  ? x + mw :  x - mw - width)
+						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
+						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width),
+						opacity : '1'
 					};
 
-				menu.css(css)
-					.show();
+				menu.stop().css(css).show();
 				
-				//alert(navigator.platform);
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
 				if (fm.UA.iOS) {
 					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'auto');
 				}
+				fm.UA.Mobile && autoToggle();
 			},
 			
 			close = function() {
@@ -90,6 +128,9 @@ $.fn.elfindercontextmenu = function(fm) {
 							}
 						});
 					}
+				}
+				if (type === 'navbar') {
+					fm.select({selected: targets});
 				}
 
 				selcnt = fm.selected().length;
@@ -125,17 +166,17 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 
 					if (cmd && cmd.getstate(targets) != -1) {
-						//targets._type = type;
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
 							}
-							node = item(cmd.title, cmd.name, function(){})
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){})
 							.on('touchend', function(e){
 								node.data('touching', true);
 								setTimeout(function(){node.data('touching', false);}, 50);
 							})
 							.on('click touchend', '.'+smItem, function(e){
+								var opts;
 								e.stopPropagation();
 								if (node.data('touching')) {
 									node.data('touching', false);
@@ -143,54 +184,80 @@ $.fn.elfindercontextmenu = function(fm) {
 									e.preventDefault();
 								} else if (e.type == 'click') {
 									menu.hide();
-									cmd.exec(targets, $(this).data('exec'));
+									opts = $(this).data('exec');
+									if ($.isPlainObject(opts)) {
+										opts._currentType = type;
+									}
+									cmd.exec(targets, opts);
 								}
 							});
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
-							hover = function(){
-									var win    = $(window),
-									baseleft   = $(node).offset().left,
-									basetop    = $(node).offset().top,
-									basewidth  = $(node).outerWidth(),
-									width      = submenu.outerWidth(),
-									height     = submenu.outerHeight(),
-									wwidth     = win.scrollLeft() + win.width(),
-									wheight    = win.scrollTop() + win.height(),
-									margin     = 5, x, y, over;
-
-									over = (baseleft + basewidth + width + margin) - wwidth;
-									x = (over > 0)? basewidth - over : basewidth;
-									over = (basetop + 5 + height + margin) - wheight;
-									y = (over > 0)? 5 - over : 5;
-
-									var css = {
-										left : x,
-										top : y
-									};
-									submenu.css(css).toggle();
+							hover = function(show){
+								if (! show) {
+									submenu.hide();
+								} else {
+									submenu.css({ left: 'auto', right: 'auto' });
+									var nodeOffset = node.offset(),
+										baseleft   = nodeOffset.left,
+										basetop    = nodeOffset.top,
+										basewidth  = node.outerWidth(),
+										width      = submenu.outerWidth(),
+										height     = submenu.outerHeight(),
+										baseOffset = base.offset(),
+										wwidth     = baseOffset.left + base.width(),
+										wheight    = baseOffset.top + base.height(),
+										x, y, over;
+	
+									over = (baseleft + basewidth + width) - wwidth;
+									x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
+									if (subpos === 'right' && baseleft < width) {
+										x = fm.UA.Mobile? 30 - basewidth : basewidth - (width - baseleft);
+									}
+									over = (basetop + 5 + height) - wheight;
+									y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
+	
+									submenu.css({ top : y }).css(subpos, x).show();
+								}
 							};
 							
-							node.addClass('elfinder-contextmenu-group').hover(function(){ hover(); });
+							node.addClass('elfinder-contextmenu-group').hover(function(e){
+								if (fm.UA.Mobile) {
+									hover(e.type === 'mouseenter');
+								} else {
+									if (e.type === 'mouseleave') {
+										node.data('timer', setTimeout(function() {
+											node.data('timer', null);
+											hover(false);
+										}, 250));
+									} else {
+										if (node.data('timer')) {
+											clearTimeout(node.data('timer'));
+											node.data('timer', null);
+										}
+										hover(true);
+									}
+								}
+							});
 							
 							$.each(cmd.variants, function(i, variant) {
 								submenu.append(
-									$('<div class="'+clItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
+									variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
+									$('<div class="'+cmItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
 								);
 							});
 								
 						} else {
-							node = item(cmd.title, cmd.name, function() {
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								close();
-								cmd.exec(targets);
+								cmd.exec(targets, {_currentType: type});
 							});
 							if (cmd.extra && cmd.extra.node) {
-								node.append(
-									$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
-									.append(cmd.extra.node)
-								);
+								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
+									.append(cmd.extra.node).appendTo(node);
+								$(cmd.extra.node).trigger('ready');
 							} else {
 								node.remove('.elfinder-contextmenu-extra-icon');
 							}
@@ -231,12 +298,13 @@ $.fn.elfindercontextmenu = function(fm) {
 			};
 		
 		fm.one('load', function() {
-			var uiCwd = fm.getUI('cwd');
+			base = fm.getUI();
+			cwd = fm.getUI('cwd');
 			fm.bind('contextmenu', function(e) {
 				var data = e.data;
 
 				if (!data.type || data.type !== 'files') {
-					uiCwd.trigger('unselectall');
+					cwd.trigger('unselectall');
 				}
 				close();
 
@@ -259,4 +327,4 @@ $.fn.elfindercontextmenu = function(fm) {
 		
 	});
 	
-}
+};

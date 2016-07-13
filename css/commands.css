@@ -5,7 +5,7 @@
 /********************** COMMAND "RESIZE" ****************************/
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
-.elfinder-resize-control { padding-top:3em; }
+.elfinder-resize-control { float: left; }
 .elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
 .elfinder-resize-preview {
 	width:400px;
@@ -15,8 +15,7 @@
 	border:1px solid #aaa;
 	float:right;
 	position:relative;
-	overflow:auto;
-/*	z-index:100;*/
+	overflow:hidden;
 }
 
 .elfinder-resize-handle { position:relative;}
@@ -124,14 +123,62 @@
 	margin-top:-8px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { height:100%; width:10px; }
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { width:100%; height:10px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+	height:100%;
+	width:10px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+	width:100%;
+	height:10px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e { margin-right: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w { margin-left: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s { margin-bottom: -7px; }
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {  margin-top: -7px; }
+
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	width: 10px;
+	height: 10px;
+}
 .elfinder-dialog .elfinder-dialog-resize .ui-resizable-se { 
 	background:transparent; 
 	bottom:0; 
 	right:0; 
 	margin-right:-7px;
 	margin-bottom:-7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw {
+	margin-left: -7px;
+	margin-bottom: -7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne {
+	margin-right:-7px;
+	margin-top:-7px;
+}
+.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	margin-left: -7px;
+	margin-top: -7px;
+}
+
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+	height: 20px;
+}
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+	width: 20px;
+}
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+	width: 30px;
+	height: 30px;
 }
 
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
@@ -151,10 +198,11 @@
 
 .elfinder-resize-row .elfinder-buttonset { float:right; }
 
-.elfinder-resize-rotate-slider {
+.std42-dialog .ui-widget-content .elfinder-resize-rotate-slider {
 	float: left;
 	width: 195px;
 	margin: 7px;
+	background-color: #fafafa;
 }
 
 .elfinder-resize-type span.ui-checkboxradio-icon {
@@ -178,13 +226,17 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td {
 }
 div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: absolute;
-	top: 0.4em;
+	top: 4px;
 	left: 0;
 	right: 0;
 	margin: auto 0px auto auto;
 }
-
-
+.elfinder-touch div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	top: 7px;
+}
+.elfinder-rtl div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
+	margin: auto auto auto 0px;
+}
 /********************** COMMAND "HELP" ****************************/
 /* help dialog */
 .elfinder-help { margin-bottom:.5em; }
@@ -269,5 +321,44 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	top:45px;
 }
 
+.elfinder-help-debug {
+	height:300px;
+	padding:1em;
+	margin:.5em 0;
+	overflow:auto;
+}
 
+.elfinder-help-debug fieldset {
+	margin-bottom: 10px;
+	border-color: #778899;
+	border-radius: 10px;
+}
 
+.elfinder-help-debug legend {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #2e8b57;
+}
+
+.elfinder-help-debug dl {
+	margin: 0;
+}
+
+.elfinder-help-debug dt {
+  color: #778899;
+}
+
+.elfinder-help-debug dt:before {
+	content: "[";
+}
+.elfinder-help-debug dt:after {
+	content: "]";
+}
+
+.elfinder-help-debug dd {
+	margin-left: 1em;
+}
+
+.elfinder-help-debug dd span {
+  /*font-size: 1.2em;*/
+}

@@ -8,7 +8,6 @@
  */
 elFinder.prototype.commands.chmod = function() {
 	this.updateOnSelect = false;
-	var self = this;
 	var fm  = this.fm,
 	level = {
 		0 : 'owner',
@@ -50,7 +49,7 @@ elFinder.prototype.commands.chmod = function() {
 		if (sel.length == 0) {
 			sel = [ fm.cwd().hash ];
 		}
-		return !this._disabled && self.checkstate(this.files(sel)) ? 0 : -1;
+		return !this._disabled && this.checkstate(this.files(sel)) ? 0 : -1;
 	};
 	
 	this.checkstate = function(sel) {
@@ -251,9 +250,7 @@ elFinder.prototype.commands.chmod = function() {
 			title = tpl.groupTitle.replace('{items}', fm.i18n('items')).replace('{num}', cnt);
 		} else {
 			title = tpl.itemTitle.replace('{name}', file.name).replace('{kind}', fm.mime2kind(file));
-			if (file.tmb) {
-				tmb = fm.option('tmbUrl')+file.tmb;
-			}
+			tmb = fm.tmb(file);
 		}
 
 		dataTable = makeDataTable(makeperm(files), files.length == 1? files[0] : {});
@@ -266,8 +263,8 @@ elFinder.prototype.commands.chmod = function() {
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
-				.on('load', function() { dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat'); })
-				.attr('src', tmb);
+				.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+				.attr('src', tmb.url);
 		}
 
 		$('#' + id + '-table-perm :checkbox').on('click', function(){setperm('perm');});

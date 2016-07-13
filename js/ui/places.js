@@ -40,17 +40,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return void
 			 **/
 			save      = function() {
-				var hashes = [], data = [];
+				var hashes = [], data = {};
 				
 				hashes = $.map(subtree.children().find('[id]'), function(n) {
 					return id2hash(n.id);
 				});
-				$.each(hashes.reverse(), function(i, h) {
-					data.push(h + '#' + dirs[h].name);
-				});
+				if (hashes.length) {
+					$.each(hashes.reverse(), function(i, h) {
+						data[h] = dirs[h];
+					});
+				} else {
+					data = null;
+				}
 				
-				
-				fm.storage(key, data.join(','));
+				fm.storage(key, data);
 			},
 			/**
 			 * Return node for given dir object
@@ -61,8 +64,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
 						.replace(/\{name\}/, fm.escape(dir? dir.name : hash))
-						.replace(/\{cssclass\}/, dir? (fm.UA.Touch ? 'elfinder-touch ' : '')+fm.perms2class(dir) : '')
-						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write))? ptpl : '')
+						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
+						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
 						.replace(/\{symlink\}/, '')
 						.replace(/\{style\}/, ''));
@@ -86,9 +89,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				
 				node = create(dir, hash);
-				if (dir.notfound) {
-					node.addClass('ui-state-disabled');
-				}
 				
 				dirs[hash] = dir;
 				subtree.prepend(node);
@@ -167,9 +167,6 @@ $.fn.elfinderplaces = function(fm, opts) {
 					node = create(dir, hash);
 
 				if (tgt.length > 0) {
-					if (dir.notfound) {
-						node.addClass('ui-state-disabled');
-					}
 					tgt.parent().replaceWith(node);
 					dirs[hash] = dir;
 					return true
@@ -258,37 +255,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 *
 			 * @type jQuery
 			 **/
-			subtree = wrapper.children('.'+fm.res(c, 'navsubtree'))
-				.sortable({
-					appendTo : 'body',
-					revert   : false,
-					helper   : function(e) {
-						var dir = $(e.target).parent();
-							
-						dir.children().removeClass('ui-state-hover');
-						
-						return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
-								.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
-
-					},
-					stop     : function(e, ui) {
-						var target = $(ui.item[0]),
-							top    = places.offset().top,
-							left   = places.offset().left,
-							width  = places.width(),
-							height = places.height(),
-							x      = e.pageX,
-							y      = e.pageY;
-						
-						if (!(x > left && x < left+width && y > top && y < y+height)) {
-							remove(id2hash(target.children(':first').attr('id')));
-							save();
-						}
-					},
-					update   : function(e, ui) {
-						save();
-					}
-				}),
+			subtree = wrapper.children('.'+fm.res(c, 'navsubtree')),
+			
 			/**
 			 * Main places container
 			 *
@@ -307,7 +275,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						e.stopPropagation();
 						return;
 					}
-					fm.exec('open', p.attr('id').substr(6));
+					! p.hasClass('elfinder-na') && fm.exec('open', p.attr('id').substr(6));
 				})
 				.on('contextmenu', '.'+navdir+':not(.'+clroot+')', function(e) {
 					var self = $(this),
@@ -352,20 +320,23 @@ $.fn.elfinderplaces = function(fm, opts) {
 							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});
 						e.stopPropagation();
 						helper.data('dropover', helper.data('dropover') + 1);
-						if (dir.length > 0) {
-							helper.addClass('elfinder-drag-helper-plus');
-						} else {
-							$(this).removeClass(dropover);
+						if (fm.insideWorkzone(e.pageX, e.pageY)) {
+							if (dir.length > 0) {
+								helper.addClass('elfinder-drag-helper-plus');
+								fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+							} else {
+								$(this).removeClass(dropover);
+							}
 						}
-						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
 					},
 					out : function(e, ui) {
-						var helper = ui.helper;
+						var helper = ui.helper,
+							ctr    = (e.shiftKey||e.ctrlKey||e.metaKey);
 						e.stopPropagation();
-						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
+						helper.toggleClass('elfinder-drag-helper-move elfinder-drag-helper-plus', helper.data('locked')? true : ctr).data('dropover', Math.max(helper.data('dropover') - 1, 0));
 						$(this).removeData('dropover')
 						       .removeClass(dropover);
-						fm.trigger('unlockfiles', {files : helper.data('files'), helper: helper});
+						fm.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : helper.data('files'), helper: helper});
 					},
 					drop       : function(e, ui) {
 						var helper  = ui.helper,
@@ -386,6 +357,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 				})
 				// for touch device
 				.on('touchstart', '.'+navdir+':not(.'+clroot+')', function(e) {
+					if (e.originalEvent.touches.length > 1) {
+						return;
+					}
 					var hash = $(this).attr('id').substr(6),
 					p = $(this)
 					.addClass(hover)
@@ -410,6 +384,40 @@ $.fn.elfinderplaces = function(fm, opts) {
 						$(this).removeClass(hover);
 					}
 				});
+
+		if ($.fn.sortable) {
+			subtree.addClass('touch-punch')
+			.sortable({
+				appendTo : fm.getUI(),
+				revert   : false,
+				helper   : function(e) {
+					var dir = $(e.target).parent();
+						
+					dir.children().removeClass('ui-state-hover');
+					
+					return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
+							.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
+
+				},
+				stop     : function(e, ui) {
+					var target = $(ui.item[0]),
+						top    = places.offset().top,
+						left   = places.offset().left,
+						width  = places.width(),
+						height = places.height(),
+						x      = e.pageX,
+						y      = e.pageY;
+					
+					if (!(x > left && x < left+width && y > top && y < y+height)) {
+						remove(id2hash(target.children(':first').attr('id')));
+						save();
+					}
+				},
+				update   : function(e, ui) {
+					save();
+				}
+			});
+		}
 
 		// "on regist" for command exec
 		$(this).on('regist', function(e, files){
@@ -436,11 +444,17 @@ $.fn.elfinderplaces = function(fm, opts) {
 			places.show().parent().show();
 
 			dirs = {};
-			dat = $.map((fm.storage(key) || '').split(','), function(hash) { return hash || null;});
-			$.each(dat, function(i, d) {
-				var dir = d.split('#')
-				dirs[dir[0]] = dir[1]? dir[1] : dir[0];
-			});
+			dat = fm.storage(key);
+			if (typeof dat === 'string') {
+				// old data type elFinder <= 2.1.12
+				dat = $.map(dat.split(','), function(hash) { return hash || null;});
+				$.each(dat, function(i, d) {
+					var dir = d.split('#')
+					dirs[dir[0]] = dir[1]? dir[1] : dir[0];
+				});
+			} else if ($.isPlainObject(dat)) {
+				dirs = dat;
+			}
 			// allow modify `dirs`
 			/**
 			 * example for preset places
@@ -469,7 +483,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						exists[hash] = f;
 					});
 					$.each(dirs, function(h, f) {
-						add(exists[h] || { hash: h, name: f, mime: 'directory', notfound: true });
+						add(exists[h] || $.extend({notfound: true}, f));
 					});
 					if (fm.storage('placesState') > 0) {
 						root.click();
@@ -532,7 +546,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				changed && save();
 			})
-			.bind('sync', function() {
+			.bind('sync netmount', function(e) {
 				var hashes = Object.keys(dirs);
 				if (hashes.length) {
 					root.prepend(spinner);
@@ -555,12 +569,12 @@ $.fn.elfinderplaces = function(fm, opts) {
 						});
 						$.each(dirs, function(h, f) {
 							if (!f.notfound != !!exists[h]) {
-								if (f.phash === cwd || (exists[h] && exists[h].mime !== 'directory')) {
+								if ((f.phash === cwd && e.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
 									}
 								} else {
-									if (update(exists[h] || { hash: h, name: f.name, mime: 'directory', notfound: true })) {
+									if (update(exists[h] || $.extend({notfound: true}, f))) {
 										updated = true;
 									}
 								}
@@ -580,4 +594,4 @@ $.fn.elfinderplaces = function(fm, opts) {
 		})
 		
 	});
-}
+};

@@ -21,4 +21,4 @@ elFinder.prototype.commands.up = function() {
 		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
 	}
 
-}
+};

@@ -21,18 +21,24 @@ elFinder.prototype.commands.resize = function() {
 		var fm    = this.fm,
 			files = this.files(hashes),
 			dfrd  = $.Deferred(),
+			api2  = (fm.api > 1),
+			dialogWidth = 650,
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
-					dialog   = $('<div class="elfinder-dialog-resize"/>'),
+					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
 					input    = '<input type="text" size="5"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
 					control  = $('<div class="elfinder-resize-control"/>'),
-					preview  = $('<div class="ui-front elfinder-resize-preview"/>'),
+					preview  = $('<div class="ui-front elfinder-resize-preview"/>')
+						.on('touchmove', function(e) {
+							e.stopPropagation();
+							e.preventDefault();
+						}),
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
-					rhandle  = $('<div class="elfinder-resize-handle"/>'),
-					rhandlec = $('<div class="elfinder-resize-handle"/>'),
+					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
+					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
 					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
@@ -53,8 +59,8 @@ elFinder.prototype.commands.resize = function() {
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
 					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
-						'<input type="radio" name="type" id="'+id+'-crop" value="crop" /><label for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
-						'<input type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
+						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
+						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					type     = $('input', uitype).attr('disabled', 'disabled')
 						.change(function() {
 							var val = $('input:checked', uitype).val();
@@ -113,7 +119,7 @@ elFinder.prototype.commands.resize = function() {
 					pointY  = $(input).change(function(){crop.updateView();}),
 					offsetX = $(input).change(function(){crop.updateView();}),
 					offsetY = $(input).change(function(){crop.updateView();}),
-					quality = isJpeg?
+					quality = isJpeg && api2?
 						$(input).val(fm.option('jpgQuality'))
 							.addClass('quality')
 							.on('blur', function(){
@@ -126,6 +132,7 @@ elFinder.prototype.commands.resize = function() {
 							rotate.update();
 						}),
 					uidegslider = $('<div class="elfinder-resize-rotate-slider"/>')
+						.addClass('touch-punch')
 						.slider({
 							min: 0,
 							max: 360,
@@ -150,25 +157,65 @@ elFinder.prototype.commands.resize = function() {
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
+					setuprimg = function() {
+						var r_scale;
+						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
+						rwidth = owidth * r_scale;
+						rheight = oheight * r_scale;
+						imgr.width(rwidth)
+							.height(rheight)
+							.css('margin-top', (pheight-rheight)/2 + 'px')
+							.css('margin-left', (pwidth-rwidth)/2 + 'px');
+					},
+					setupimg = function() {
+
+						resize.updateView(owidth, oheight);
+
+						setuprimg();
+
+						basec
+							.width(img.width())
+							.height(img.height());
+						imgc
+							.width(img.width())
+							.height(img.height());
+						coverc
+							.width(img.width())
+							.height(img.height());
+						rhandlec
+							.width(imgc.width())
+							.height(imgc.height())
+							.offset(imgc.offset());
+					},
 					img     = $('<img/>')
-						.load(function() {
+						.on('load', function() {
+							var r_scale, inputFirst,
+								imgRatio = img.height() / img.width();
+							
+							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
+								preview.height(preview.width() * imgRatio);
+							}
+							
+							if (preview.height() > img.height() + 20) {
+								preview.height(img.height() + 20);
+							}
+							
+							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+							
 							spinner.remove();
 							
 							owidth  = img.width();
 							oheight = img.height();
 							ratio   = owidth/oheight;
-							resize.updateView(owidth, oheight);
 
 							rhandle.append(img.show()).show();
 							width.val(owidth);
 							height.val(oheight);
-							
-							var r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
-							rwidth = owidth * r_scale;
-							rheight = oheight * r_scale;
+
+							setupimg();
 							
 							type.button('enable');
-							control.find('input,select').removeAttr('disabled')
+							inputFirst = control.find('input,select').removeAttr('disabled')
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
 
@@ -214,14 +261,15 @@ elFinder.prototype.commands.resize = function() {
 										e.preventDefault();
 									}
 								})
-								.filter(':first').focus();
+								.filter(':first');
 								
+							!fm.UA.Mobile && inputFirst.focus();
 							resizable();
 							
 							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
 							
 						})
-						.error(function() {
+						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
 					basec = $('<div/>'),
@@ -412,6 +460,7 @@ elFinder.prototype.commands.resize = function() {
 									resize      : resize.update,
 									stop        : resize.fixHeight
 								});
+								dinit();
 							}
 						}
 					},
@@ -423,22 +472,9 @@ elFinder.prototype.commands.resize = function() {
 								basec.hide();
 							}
 							else {
-								basec.show()
-									.width(img.width())
-									.height(img.height());
-								
-								imgc
-									.width(img.width())
-									.height(img.height());
-								
-								coverc
-									.width(img.width())
-									.height(img.height());
+								basec.show();
 								
 								rhandlec
-									.width(imgc.width())
-									.height(imgc.height())
-									.offset(imgc.offset())
 									.resizable({
 										containment : basec,
 										resize      : crop.resize_update,
@@ -450,6 +486,7 @@ elFinder.prototype.commands.resize = function() {
 										drag        : crop.drag_update
 									});
 								
+								dinit();
 								crop.update();
 							}
 						}
@@ -460,11 +497,8 @@ elFinder.prototype.commands.resize = function() {
 								imgr.hide();
 							}
 							else {
-								imgr.show()
-									.width(rwidth)
-									.height(rheight)
-									.css('margin-top', (pheight-rheight)/2 + 'px')
-									.css('margin-left', (pwidth-rwidth)/2 + 'px');
+								imgr.show();
+								dinit();
 
 							}
 						}
@@ -472,8 +506,6 @@ elFinder.prototype.commands.resize = function() {
 					save = function() {
 						var w, h, x, y, d, q;
 						var mode = $('input:checked', uitype).val();
-						
-						//width.add(height).change(); // may be unnecessary
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
@@ -528,6 +560,28 @@ elFinder.prototype.commands.resize = function() {
 							dfrd.reject(error);
 						})
 						.done(function() {
+							var reload = function(url) {
+								var ifm;
+								try {
+									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
+										.attr('src', url)
+										.one('load', function() {
+											this.contentDocument.location.reload(true);
+											ifm.one('load', function() {
+												ifm.remove();
+											});
+										})
+										.appendTo('body');
+								} catch(e) {
+									ifm && ifm.remove();
+								}
+							},
+							url = fm.url(file.hash);
+							
+							reload(src);
+							if (url !== src) {
+								reload(url);
+							}
 							dfrd.resolve();
 						});
 						
@@ -536,8 +590,48 @@ elFinder.prototype.commands.resize = function() {
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
-					src     = fm.openUrl(file.hash)
-					;
+					src     = fm.openUrl(file.hash),
+					dinit   = function() {
+						var dw,
+							winH  = $(window).height(),
+							winW  = $(window).width(),
+							ctrW  = dialog.find('div.elfinder-resize-control').width(),
+							prvW  = preview.width(),
+							baseW = base.width();
+						
+						base.width(Math.min(dialogWidth, winW - 30));
+						preview.attr('style', '');
+						if (owidth && oheight) {
+							pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
+							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+							resize.updateView(owidth, oheight);
+						}
+						prvW  = preview.width(),
+						
+						dw = dialog.width() - 20;
+						if (prvW > dw) {
+							preview.width(dw);
+						} else if ((dw - prvW) < ctrW) {
+							if (winW > winH) {
+								preview.width(dw - ctrW - 20);
+							} else {
+								preview.css({ float: 'none', marginLeft: 'auto', marginRight: 'auto'});
+							}
+						}
+						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
+						winH -= 30;
+						(preview.height() > winH) && preview.height(winH);
+						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+						if (owidth && oheight) {
+							setupimg();
+						}
+						if (img.height() && preview.height() > img.height() + 20) {
+							preview.height(img.height() + 20);
+							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+							setuprimg();
+						}
+					},
+					base;
 				
 				imgr.mousedown( rotate.start );
 				$(document).mouseup( rotate.stop );
@@ -549,33 +643,38 @@ elFinder.prototype.commands.resize = function() {
 					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
 					$(row).append($(label).text(fm.i18n('scale')), uiprop)
 				);
-				
-				uicrop.append(
-					$(row).append($(label).text('X'), pointX),
-					$(row).append($(label).text('Y')).append(pointY),
-					$(row).append($(label).text(fm.i18n('width')), offsetX),
-					$(row).append($(label).text(fm.i18n('height')), offsetY),
-					(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
-				);
-				
-				uirotate.append(
-					$(row).append(
-						$(label).text(fm.i18n('rotate')),
-						degree,
-						$('<span/>').text(fm.i18n('degree')),
-						$(uibuttonset).append(uideg270, $(uiseparator), uideg90)
-					),
-					$(row).css('height', '20px').append(uidegslider),
-					(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
-				);
 
+				if (api2) {
+					uicrop.append(
+						$(row).append($(label).text('X'), pointX),
+						$(row).append($(label).text('Y')).append(pointY),
+						$(row).append($(label).text(fm.i18n('width')), offsetX),
+						$(row).append($(label).text(fm.i18n('height')), offsetY),
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+					);
+					
+					uirotate.append(
+						$(row).append(
+							$(label).text(fm.i18n('rotate')),
+							degree,
+							$('<span/>').text(fm.i18n('degree')),
+							$(uibuttonset).append(uideg270, $(uiseparator), uideg90)
+						),
+						$(row).css('height', '20px').append(uidegslider),
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+					);
+				}
 				
 				dialog.append(uitype).on('resize', function(e){
 					e.stopPropagation();
 				});
 
-				control.append($(row), uiresize, uicrop.hide(), uirotate.hide())
-					.find('input,select').attr('disabled', 'disabled');
+				if (api2) {
+					control.append($(row), uiresize, uicrop.hide(), uirotate.hide());
+				} else {
+					control.append($(row), uiresize);
+				}
+				control.find('input,select').attr('disabled', 'disabled');
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
 					'<div class="'+hline+' '+hline+'-bottom"/>',
@@ -587,23 +686,25 @@ elFinder.prototype.commands.resize = function() {
 					
 				preview.append(spinner).append(rhandle.hide()).append(img.hide());
 
-				rhandlec.css('position', 'absolute')
-					.append('<div class="'+hline+' '+hline+'-top"/>',
-					'<div class="'+hline+' '+hline+'-bottom"/>',
-					'<div class="'+vline+' '+vline+'-left"/>',
-					'<div class="'+vline+' '+vline+'-right"/>',
-					'<div class="'+rpoint+' '+rpoint+'-n"/>',
-					'<div class="'+rpoint+' '+rpoint+'-e"/>',
-					'<div class="'+rpoint+' '+rpoint+'-s"/>',
-					'<div class="'+rpoint+' '+rpoint+'-w"/>',
-					'<div class="'+rpoint+' '+rpoint+'-ne"/>',
-					'<div class="'+rpoint+' '+rpoint+'-se"/>',
-					'<div class="'+rpoint+' '+rpoint+'-sw"/>',
-					'<div class="'+rpoint+' '+rpoint+'-nw"/>');
+				if (api2) {
+					rhandlec.css('position', 'absolute')
+						.append('<div class="'+hline+' '+hline+'-top"/>',
+						'<div class="'+hline+' '+hline+'-bottom"/>',
+						'<div class="'+vline+' '+vline+'-left"/>',
+						'<div class="'+vline+' '+vline+'-right"/>',
+						'<div class="'+rpoint+' '+rpoint+'-n"/>',
+						'<div class="'+rpoint+' '+rpoint+'-e"/>',
+						'<div class="'+rpoint+' '+rpoint+'-s"/>',
+						'<div class="'+rpoint+' '+rpoint+'-w"/>',
+						'<div class="'+rpoint+' '+rpoint+'-ne"/>',
+						'<div class="'+rpoint+' '+rpoint+'-se"/>',
+						'<div class="'+rpoint+' '+rpoint+'-sw"/>',
+						'<div class="'+rpoint+' '+rpoint+'-nw"/>');
 
-				preview.append(basec.css('position', 'absolute').hide().append(imgc, rhandlec.append(coverc)));
-				
-				preview.append(imgr.hide());
+					preview.append(basec.css('position', 'absolute').hide().append(imgc, rhandlec.append(coverc)));
+					
+					preview.append(imgr.hide());
+				}
 				
 				preview.css('overflow', 'hidden');
 				
@@ -612,22 +713,22 @@ elFinder.prototype.commands.resize = function() {
 				buttons[fm.i18n('btnApply')] = save;
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
-				fm.dialog(dialog, {
+				base = fm.dialog(dialog, {
 					title          : fm.escape(file.name),
-					width          : 650,
+					width          : dialogWidth,
 					resizable      : false,
-					destroyOnClose : true,
 					buttons        : buttons,
 					open           : function() {
-						var dw = dialog.width() - 20;
-						(preview.width() > dw) && preview.width(dw);
-						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
-						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+						fm.bind('resize', dinit);
 						img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
 						imgc.attr('src', img.attr('src'));
 						imgr.attr('src', img.attr('src'));
+					},
+					close          : function() {
+						fm.unbind('resize', dinit);
+						$(this).hide().remove();
 					}
-				}).attr('id', id);
+				}).attr('id', id).parent();
 				
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {
@@ -645,9 +746,13 @@ elFinder.prototype.commands.resize = function() {
 				});
 
 				imgr.css('cursor', 'pointer');
+
+				if (! api2) {
+					uitype.find('.api2').remove();
+				}
 				
 				uitype.controlgroup? uitype.controlgroup() : uitype.buttonset();
-				
+
 			},
 			
 			id, dialog

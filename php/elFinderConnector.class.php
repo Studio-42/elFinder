@@ -26,14 +26,15 @@ class elFinderConnector {
 	 * @var string
 	 **/
 	protected $header = 'Content-Type: application/json';
-	
-	
-	/**
-	 * Constructor
-	 *
-	 * @return void
-	 * @author Dmitry (dio) Levashov
-	 **/
+
+
+    /**
+     * Constructor
+     *
+     * @param $elFinder
+     * @param bool $debug
+     * @author Dmitry (dio) Levashov
+     */
 	public function __construct($elFinder, $debug=false) {
 		
 		$this->elFinder = $elFinder;
@@ -104,7 +105,7 @@ class elFinderConnector {
 			} else {
 				$arg = isset($src[$name])? $src[$name] : '';
 			
-				if (!is_array($arg)) {
+				if (!is_array($arg) && $req !== '') {
 					$arg = trim($arg);
 				}
 				if ($req && $arg === '') {
@@ -133,7 +134,7 @@ class elFinderConnector {
 	 **/
 	protected function output(array $data) {
 		// clear output buffer
-		while(ob_get_level() && @ob_end_clean()){}
+		while(ob_get_level() && ob_end_clean()){}
 		
 		$header = isset($data['header']) ? $data['header'] : $this->header;
 		unset($data['header']);
@@ -182,7 +183,7 @@ class elFinderConnector {
 					}
 				}
 				if (is_null($psize)){
-					rewind($fp);
+					elFinder::rewind($fp);
 				}
 			} else {
 				header('Accept-Ranges: none');
@@ -215,6 +216,9 @@ class elFinderConnector {
 			if (!empty($data['raw']) && !empty($data['error'])) {
 				echo $data['error'];
 			} else {
+				if (isset($data['debug']) && isset($data['debug']['phpErrors'])) {
+					$data['debug']['phpErrors'] = array_merge($data['debug']['phpErrors'], elFinder::$phpErrors);
+				}
 				echo json_encode($data);
 			}
 			flush();

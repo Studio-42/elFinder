@@ -52,4 +52,4 @@ elFinder.prototype.commands.search = function() {
 		return $.Deferred().reject();
 	}
 
-}
+};

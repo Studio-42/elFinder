@@ -1,10 +1,10 @@
 <?php
 /**
  * Copyright (c) 2011, oov. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -24,20 +24,20 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * bmp ファイルを GD で使えるように
- * 
+ *
  * 使用例:
  *   //ファイルから読み込む場合はGDでPNGなどを読み込むのと同じような方法で可
  *   $image = imagecreatefrombmp("test.bmp");
  *   imagedestroy($image);
- * 
+ *
  *   //文字列から読み込む場合は以下の方法で可
  *   $image = GdBmp::loadFromString(file_get_contents("test.bmp"));
  *   //自動判定されるので破損ファイルでなければこれでも上手くいく
  *   //$image = imagecreatefrombmp(file_get_contents("test.bmp"));
  *   imagedestroy($image);
- * 
+ *
  *   //その他任意のストリームからの読み込みも可能
  *   $stream = fopen("http://127.0.0.1/test.bmp");
  *   $image = GdBmp::loadFromStream($stream);
@@ -45,7 +45,7 @@
  *   //$image = imagecreatefrombmp($stream);
  *   fclose($stream);
  *   imagedestroy($image);
- * 
+ *
  * 対応フォーマット
  *   1bit
  *   4bit
@@ -61,7 +61,9 @@
  *
  * 以下のものは非対応
  *   BITMAPV4HEADER と BITMAPV5HEADER に含まれる色空間に関する様々な機能
- **/
+ * @param $filename_or_stream_or_binary
+ * @return bool|resource
+ */
 
 function imagecreatefrombmp($filename_or_stream_or_binary){
 	return elFinderLibGdBmp::load($filename_or_stream_or_binary);

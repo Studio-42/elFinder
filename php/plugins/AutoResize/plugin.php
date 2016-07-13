@@ -75,7 +75,7 @@ class elFinderPluginAutoResize {
 			return false;
 		}
 		
-		$srcImgInfo = @getimagesize($src);
+		$srcImgInfo = getimagesize($src);
 		if ($srcImgInfo === false) {
 			return false;
 		}
@@ -88,55 +88,51 @@ class elFinderPluginAutoResize {
 			IMAGETYPE_BMP  => IMG_WBMP,
 			IMAGETYPE_WBMP => IMG_WBMP
 		);
-		if (! ($opts['targetType'] & @$imgTypes[$srcImgInfo[2]])) {
+		if (! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
 			return false;
 		}
 		
 		if ($srcImgInfo[0] > $opts['maxWidth'] || $srcImgInfo[1] > $opts['maxHeight']) {
-			return $this->resize($src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality'], $opts['preserveExif']);
+			return $this->resize($volume, $src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality'], $opts['preserveExif']);
 		}
 		
 		return false;
 	}
 	
-	private function resize($src, $srcImgInfo, $maxWidth, $maxHeight, $quality, $preserveExif) {
+	private function resize($volume, $src, $srcImgInfo, $maxWidth, $maxHeight, $jpgQuality, $preserveExif) {
 		$zoom = min(($maxWidth/$srcImgInfo[0]),($maxHeight/$srcImgInfo[1]));
 		$width = round($srcImgInfo[0] * $zoom);
 		$height = round($srcImgInfo[1] * $zoom);
 		
-		if (class_exists('Imagick', false)) {
-			return $this->resize_imagick($src, $width, $height, $quality, $preserveExif);
-		} else {
-			return $this->resize_gd($src, $width, $height, $quality, $srcImgInfo);
-		}
+		return $volume->imageUtil('resize', $src, compact('width', 'height', 'jpgQuality', 'preserveExif'));
 	}
 	
 	private function resize_gd($src, $width, $height, $quality, $srcImgInfo) {
 		switch ($srcImgInfo['mime']) {
 			case 'image/gif':
-				if (@imagetypes() & IMG_GIF) {
-					$oSrcImg = @imagecreatefromgif($src);
+				if (imagetypes() & IMG_GIF) {
+					$oSrcImg = imagecreatefromgif($src);
 				} else {
 					$ermsg = 'GIF images are not supported';
 				}
 				break;
 			case 'image/jpeg':
-				if (@imagetypes() & IMG_JPG) {
-					$oSrcImg = @imagecreatefromjpeg($src) ;
+				if (imagetypes() & IMG_JPG) {
+					$oSrcImg = imagecreatefromjpeg($src) ;
 				} else {
 					$ermsg = 'JPEG images are not supported';
 				}
 				break;
 			case 'image/png':
-				if (@imagetypes() & IMG_PNG) {
-					$oSrcImg = @imagecreatefrompng($src) ;
+				if (imagetypes() & IMG_PNG) {
+					$oSrcImg = imagecreatefrompng($src) ;
 				} else {
 					$ermsg = 'PNG images are not supported';
 				}
 				break;
 			case 'image/wbmp':
-				if (@imagetypes() & IMG_WBMP) {
-					$oSrcImg = @imagecreatefromwbmp($src);
+				if (imagetypes() & IMG_WBMP) {
+					$oSrcImg = imagecreatefromwbmp($src);
 				} else {
 					$ermsg = 'WBMP images are not supported';
 				}

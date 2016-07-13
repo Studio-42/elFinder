@@ -12,4 +12,4 @@ $.fn.elfindermkdirbutton = function(cmd) {
 			button.attr('title', cmd.value);
 		});
 	});
-}
+};

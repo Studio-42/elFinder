@@ -110,9 +110,7 @@ elFinder.prototype.commands.info = function() {
 			view  = view.replace('{class}', fm.mime2class(file.mime));
 			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', '<span title="'+fm.escape(file.mime)+'">'+fm.mime2kind(file)+'</span>');
 
-			if (file.tmb) {
-				tmb = fm.option('tmbUrl')+file.tmb;
-			}
+			tmb = fm.tmb(file);
 			
 			if (!file.read) {
 				size = msg.unknown;
@@ -248,8 +246,8 @@ elFinder.prototype.commands.info = function() {
 		// load thumbnail
 		if (tmb) {
 			$('<img/>')
-				.load(function() { dialog.find('.elfinder-cwd-icon').css('background', 'url("'+tmb+'") center center no-repeat'); })
-				.attr('src', tmb);
+				.on('load', function() { dialog.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+				.attr('src', tmb.url);
 		}
 		
 		// send request to count total size

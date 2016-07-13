@@ -29,10 +29,9 @@
     },
     "suggest": {
         "dropbox-php/dropbox-php": "elFinder Volume driver `Dropbox` require `dropbox-php/dropbox-php`.",
-        "pear/auth": "dropbox-php require `pear/auth` or `PHP OAuth extension`.",
-        "pear/http_request2": "dropbox-php require `pear/http_request2` or `PHP OAuth extension`.",
-        "pear/net_url2": "dropbox-php require `pear/net_url2` or `PHP OAuth extension`.",
-        "barryvdh/elfinder-flysystem-driver": "VolumeDriver for elFinder to use Flysystem as a root."
+        "pear/http_oauth": "dropbox-php require `pear/http_oauth` or `PHP OAuth extension`.",
+        "barryvdh/elfinder-flysystem-driver": "VolumeDriver for elFinder to use Flysystem as a root.",
+        "nao-pon/flysystem-google-drive": "require in GoogleDrive network volume mounting."
     },
     "autoload": {
         "classmap": ["php"]
