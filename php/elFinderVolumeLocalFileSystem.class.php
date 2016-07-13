@@ -184,7 +184,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			);
 		}
 		
-		if ($this->options['keepTimestamp']) {
+		if (! empty($this->options['keepTimestamp'])) {
 			$this->options['keepTimestamp'] = array_flip($this->options['keepTimestamp']);
 		}
 	}
