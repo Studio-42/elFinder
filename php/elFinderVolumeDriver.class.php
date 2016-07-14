@@ -960,6 +960,10 @@ abstract class elFinderVolumeDriver {
 		$this->uploadDeny = isset($this->options['uploadDeny']) && is_array($this->options['uploadDeny'])
 			? $this->options['uploadDeny']
 			: array();
+		
+		$this->options['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))
+			? $this->options['uiCmdMap']
+			: array();
 
 		if (is_string($this->options['uploadOrder'])) { // telephat_mode on, compatibility with 1.x
 			$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
@@ -1315,8 +1319,8 @@ abstract class elFinderVolumeDriver {
 				$createext[$m] = $v['ext'];
 			}
 		}
-		return array(
-			'path'            => $this->path($hash),
+		$opts = array(
+			'path'            => $hash? $this->path($hash) : '',
 			'url'             => $this->URL,
 			'tmbUrl'          => (! $this->imgLib && $this->options['tmbFbSelf'])? 'self' : $this->tmbURL,
 			'disabled'        => $this->disabled,
@@ -1325,6 +1329,11 @@ abstract class elFinderVolumeDriver {
 			'uploadOverwrite' => intval($this->options['uploadOverwrite']),
 			'uploadMaxSize'   => intval($this->uploadMaxSize),
 			'uploadMaxConn'   => intval($this->options['uploadMaxConn']),
+			'uploadMime'      => array(
+				'firstOrder' => $this->uploadOrder[0],
+				'allow'      => $this->uploadAllow,
+				'deny'       => $this->uploadDeny
+			),
 			'dispInlineRegex' => $this->options['dispInlineRegex'],
 			'jpgQuality'      => intval($this->options['jpgQuality']),
 			'archivers'       => array(
@@ -1332,10 +1341,20 @@ abstract class elFinderVolumeDriver {
 				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
 				'createext' => $createext
 			),
-			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array(),
+			'uiCmdMap'        => $this->options['uiCmdMap'],
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
 			'syncMinMs'       => intval($this->options['syncMinMs'])
 		);
+		if (! empty($this->options['icon'])) {
+			$opts['icon'] = $this->options['icon'];
+		}
+		if (! empty($this->options['rootCssClass'])) {
+			$opts['csscls'] = $this->options['rootCssClass'];
+		}
+		if (isset($this->options['netkey'])) {
+			$opts['netkey'] = $this->options['netkey'];
+		}
+		return $opts;
 	}
 	
 	/**
@@ -3433,20 +3452,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->rootName) {
 			$stat['name'] = $this->rootName;
 		}
-		if (! empty($this->options['icon'])) {
-			$stat['icon'] = $this->options['icon'];
-		}
-		if (! empty($this->options['rootCssClass'])) {
-			$stat['csscls'] = $this->options['rootCssClass'];
-		}
-		if (! empty($this->tmbURL)) {
-			$stat['tmbUrl'] = $this->tmbURL;
-		}
-		$stat['uiCmdMap'] = (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array();
-		$stat['disabled'] = $this->disabled;
-		if (isset($this->options['netkey'])) {
-			$stat['netkey'] = $this->options['netkey'];
-		}
+		$stat['options'] = $this->options('');
 		return $stat;
 	}
 	
