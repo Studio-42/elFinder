@@ -1278,18 +1278,16 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return path of target hash
+	 * Return decoded path of target hash
+	 * This method do not check the stat of target
+	 * Use method `realpath()` to do check of the stat of target
 	 *
 	 * @param  string $hash
 	 * @author Naoki Sawada
-	 * @return string | false
+	 * @return string
 	 */
 	public function getPath($hash) {
-		$path = $this->decode($hash);
-		if ($this->stat($path)) {
-			return $path;
-		}
-		return false;
+		return $this->decode($hash);
 	}
 	
 	/**
@@ -1435,7 +1433,7 @@ abstract class elFinderVolumeDriver {
 	 * Return file real path if file exists
 	 *
 	 * @param  string  $hash  file hash
-	 * @return string
+	 * @return string | false
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function realpath($hash) {
