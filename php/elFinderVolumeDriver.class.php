@@ -997,7 +997,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
-			? $this->options['disabled']
+			? array_values(array_diff($this->options['disabled'], array('open'))) // 'open' is required
 			: array();
 		
 		$this->cryptLib   = $this->options['cryptLib'];
