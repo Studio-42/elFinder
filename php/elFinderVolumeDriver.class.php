@@ -1345,14 +1345,17 @@ abstract class elFinderVolumeDriver {
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
 			'syncMinMs'       => intval($this->options['syncMinMs'])
 		);
-		if (! empty($this->options['icon'])) {
-			$opts['icon'] = $this->options['icon'];
-		}
-		if (! empty($this->options['rootCssClass'])) {
-			$opts['csscls'] = $this->options['rootCssClass'];
-		}
-		if (isset($this->options['netkey'])) {
-			$opts['netkey'] = $this->options['netkey'];
+		if ($hash === null) {
+			// call from getRootStatExtra()
+			if (! empty($this->options['icon'])) {
+				$opts['icon'] = $this->options['icon'];
+			}
+			if (! empty($this->options['rootCssClass'])) {
+				$opts['csscls'] = $this->options['rootCssClass'];
+			}
+			if (isset($this->options['netkey'])) {
+				$opts['netkey'] = $this->options['netkey'];
+			}
 		}
 		return $opts;
 	}
@@ -3452,7 +3455,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->rootName) {
 			$stat['name'] = $this->rootName;
 		}
-		$stat['options'] = $this->options('');
+		$stat['options'] = $this->options(null);
 		return $stat;
 	}
 	
