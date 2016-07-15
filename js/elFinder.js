@@ -1734,6 +1734,8 @@ window.elFinder = function(node, opts) {
 				}
 			}
 			
+			pdata = pdata || {};
+			
 			if (self.api < 2.1) {
 				pdata.tree = (pdata.tree || []).concat([odata.cwd]);
 			}
