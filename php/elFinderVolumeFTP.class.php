@@ -76,13 +76,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 */
 	private $cacheDirTarget = '';
 
-    /**
-     * Constructor
-     * Extend options with required fields
-     *
-     * @author Dmitry (dio) Levashov
-     * @author Cem (DiscoFever)
-     */
+	/**
+	 * Constructor
+	 * Extend options with required fields
+	 *
+	 * @author Dmitry (dio) Levashov
+	 * @author Cem (DiscoFever)
+	 */
 	public function __construct() {
 		$opts = array(
 			'host'          => 'localhost',
@@ -105,14 +105,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		$this->options['mimeDetect'] = 'internal';
 	}
 
-    /**
-     * Prepare
-     * Call from elFinder::netmout() before volume->mount()
-     *
-     * @param $options
-     * @return Array
-     * @author Naoki Sawada
-     */
+	/**
+	 * Prepare
+	 * Call from elFinder::netmout() before volume->mount()
+	 *
+	 * @param $options
+	 * @return Array
+	 * @author Naoki Sawada
+	 */
 	public function netmountPrepare($options) {
 		if (!empty($_REQUEST['encoding']) && iconv('UTF-8', $_REQUEST['encoding'], '') !== false) {
 			$options['encoding'] = $_REQUEST['encoding'];
@@ -294,15 +294,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 
 
-    /**
-     * Parse line from ftp_rawlist() output and return file stat (array)
-     *
-     * @param  string $raw line from ftp_rawlist() output
-     * @param $base
-     * @param bool $nameOnly
-     * @return array
-     * @author Dmitry Levashov
-     */
+	/**
+	 * Parse line from ftp_rawlist() output and return file stat (array)
+	 *
+	 * @param  string $raw line from ftp_rawlist() output
+	 * @param $base
+	 * @param bool $nameOnly
+	 * @return array
+	 * @author Dmitry Levashov
+	 */
 	protected function parseRaw($raw, $base, $nameOnly = false) {
 		static $now;
 		static $lastyear;
@@ -409,14 +409,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return $info;
 	}
 
-    /**
-     * Parse permissions string. Return array(read => true/false, write => true/false)
-     *
-     * @param  string $perm permissions string
-     * @param string $user
-     * @return string
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Parse permissions string. Return array(read => true/false, write => true/false)
+	 *
+	 * @param  string $perm permissions string
+	 * @param string $user
+	 * @return string
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function parsePermissions($perm, $user = '') {
 		$res   = array();
 		$parts = array();
@@ -886,15 +886,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
  		return $files;
 	}
 
-    /**
-     * Open file and return file pointer
-     *
-     * @param  string $path file path
-     * @param string $mode
-     * @return false|resource
-     * @internal param bool $write open file for writing
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Open file and return file pointer
+	 *
+	 * @param  string $path file path
+	 * @param string $mode
+	 * @return false|resource
+	 * @internal param bool $write open file for writing
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _fopen($path, $mode='rb') {
 		// try ftp stream wrapper
 		if ($this->options['mode'] == 'passive' && ini_get('allow_url_fopen')) {
@@ -925,14 +925,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return false;
 	}
 
-    /**
-     * Close opened file
-     *
-     * @param  resource $fp file pointer
-     * @param string $path
-     * @return bool
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Close opened file
+	 *
+	 * @param  resource $fp file pointer
+	 * @param string $path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _fclose($fp, $path='') {
 		fclose($fp);
 		if ($path) {
@@ -979,15 +979,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return false;
 	}
 
-    /**
-     * Create symlink. FTP driver does not support symlinks.
-     *
-     * @param  string $target link target
-     * @param  string $path symlink path
-     * @param string $name
-     * @return bool
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Create symlink. FTP driver does not support symlinks.
+	 *
+	 * @param  string $target link target
+	 * @param  string $path symlink path
+	 * @param string $name
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _symlink($target, $path, $name) {
 		return false;
 	}
@@ -1018,17 +1018,17 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return $res;
 	}
 
-    /**
-     * Move file into another parent dir.
-     * Return new file path or false.
-     *
-     * @param  string $source source file path
-     * @param $targetDir
-     * @param  string $name file name
-     * @return bool|string
-     * @internal param string $target target dir path
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Move file into another parent dir.
+	 * Return new file path or false.
+	 *
+	 * @param  string $source source file path
+	 * @param $targetDir
+	 * @param  string $name file name
+	 * @return bool|string
+	 * @internal param string $target target dir path
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _move($source, $targetDir, $name) {
 		$target = $this->_joinPath($targetDir, $name);
 		return ftp_rename($this->connect, $source, $target) ? $target : false;
@@ -1129,13 +1129,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return;
 	}
 
-    /**
-     * chmod availability
-     *
-     * @param string $path
-     * @param string $mode
-     * @return bool
-     */
+	/**
+	 * chmod availability
+	 *
+	 * @param string $path
+	 * @param string $mode
+	 * @return bool
+	 */
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
 		return ftp_chmod($this->connect, $modeOct, $path);
@@ -1485,18 +1485,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		return $success;
 	}
 
-    /**
-     * Returns array of strings containing all files and folders in the specified local directory.
-     * @param $dir
-     * @param $omitSymlinks
-     * @param string $prefix
-     * @return array array of files and folders names relative to the $path
-     * or an empty array if the directory $path is empty,
-     * <br />
-     * false if $path is not a directory or does not exist.
-     * @throws Exception
-     * @internal param string $path path to directory to scan.
-     */
+	/**
+	 * Returns array of strings containing all files and folders in the specified local directory.
+	 * @param $dir
+	 * @param $omitSymlinks
+	 * @param string $prefix
+	 * @return array array of files and folders names relative to the $path
+	 * or an empty array if the directory $path is empty,
+	 * <br />
+	 * false if $path is not a directory or does not exist.
+	 * @throws Exception
+	 * @internal param string $path path to directory to scan.
+	 */
 	private static function listFilesInDirectory($dir, $omitSymlinks, $prefix = '')
 	{
 		if (!is_dir($dir)) {
