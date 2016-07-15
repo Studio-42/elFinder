@@ -44,12 +44,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 **/
 	protected $archiveSize = 0;
 
-    /**
-     * Constructor
-     * Extend options with required fields
-     *
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Constructor
+	 * Extend options with required fields
+	 *
+	 * @author Dmitry (dio) Levashov
+	 */
 	public function __construct() {
 		$this->options['alias']    = '';              // alias to replace root dir name
 		$this->options['dirMode']  = 0755;            // new dirs mode
@@ -735,27 +735,27 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $files;
 	}
 
-    /**
-     * Open file and return file pointer
-     *
-     * @param  string $path file path
-     * @param string $mode
-     * @return false|resource
-     * @internal param bool $write open file for writing
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Open file and return file pointer
+	 *
+	 * @param  string $path file path
+	 * @param string $mode
+	 * @return false|resource
+	 * @internal param bool $write open file for writing
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _fopen($path, $mode='rb') {
 		return fopen($path, $mode);
 	}
 
-    /**
-     * Close opened file
-     *
-     * @param  resource $fp file pointer
-     * @param string $path
-     * @return bool
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Close opened file
+	 *
+	 * @param  resource $fp file pointer
+	 * @param string $path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _fclose($fp, $path='') {
 		return fclose($fp);
 	}
@@ -834,17 +834,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $ret;
 	}
 
-    /**
-     * Move file into another parent dir.
-     * Return new file path or false.
-     *
-     * @param  string $source source file path
-     * @param $targetDir
-     * @param  string $name file name
-     * @return bool|string
-     * @internal param string $target target dir path
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Move file into another parent dir.
+	 * Return new file path or false.
+	 *
+	 * @param  string $source source file path
+	 * @param $targetDir
+	 * @param  string $name file name
+	 * @return bool|string
+	 * @internal param string $target target dir path
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function _move($source, $targetDir, $name) {
 		$mtime = filemtime($source);
 		$target = $this->_joinPath($targetDir, $name);
@@ -964,13 +964,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return;
 	}
 
-    /**
-     * chmod availability
-     *
-     * @param string $path
-     * @param string $mode
-     * @return bool
-     */
+	/**
+	 * chmod availability
+	 *
+	 * @param string $path
+	 * @param string $mode
+	 * @return bool
+	 */
 	protected function _chmod($path, $mode) {
 		$modeOct = is_string($mode) ? octdec($mode) : octdec(sprintf("%04o",$mode));
 		$ret = chmod($path, $modeOct);
@@ -1121,7 +1121,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			return (is_array($result) || file_exists($result)) ? $result : false;
 		}
-        //TODO: Add return statement here
+	    //TODO: Add return statement here
 	}
 	
 	/**
@@ -1238,12 +1238,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $result;
 	}
 
-    /******************** Original local functions ************************
-     * @param $file
-     * @param $key
-     * @param $iterator
-     * @return bool
-     */
+	/******************** Original local functions ************************
+	 * @param $file
+	 * @param $key
+	 * @param $iterator
+	 * @return bool
+	 */
 
 	public function localFileSystemSearchIteratorFilter($file, $key, $iterator) {
 		$name = $file->getFilename();

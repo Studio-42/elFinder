@@ -314,12 +314,12 @@ class elFinder {
 	const ERROR_SEARCH_TIMEOUT    = 'errSearchTimeout';    // 'Timed out while searching "$1". Search result is partial.'
 	const ERROR_REAUTH_REQUIRE  = 'errReauthRequire';  // 'Re-authorization is required.'
 
-    /**
-     * Constructor
-     *
-     * @param  array  elFinder and roots configurations
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Constructor
+	 *
+	 * @param  array  elFinder and roots configurations
+	 * @author Dmitry (dio) Levashov
+	 */
 	public function __construct($opts) {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
@@ -751,7 +751,7 @@ class elFinder {
 		} else {
 			return $result;
 		}
-        //TODO: Add return statement here
+	    //TODO: Add return statement here
 	}
 	
 	/**
@@ -792,13 +792,13 @@ class elFinder {
 		$this->session->set('netvolume', $volumes);
 	}
 
-    /**
-     * Remove netmount volume
-     *
-     * @param string $key netvolume key
-     * @param object $volume volume driver instance
-     * @return bool
-     */
+	/**
+	 * Remove netmount volume
+	 *
+	 * @param string $key netvolume key
+	 * @param object $volume volume driver instance
+	 * @return bool
+	 */
 	protected function removeNetVolume($key, $volume) {
 		$netVolumes = $this->getNetVolumes();
 		$res = true;
@@ -1843,17 +1843,17 @@ class elFinder {
 		return $result;
 	}
 
-    /**
-     * Check chunked upload files
-     *
-     * @param string $tmpname uploaded temporary file path
-     * @param string $chunk uploaded chunk file name
-     * @param string $cid uploaded chunked file id
-     * @param string $tempDir temporary dirctroy path
-     * @param null $volume
-     * @return array or (empty, empty)
-     * @author Naoki Sawada
-     */
+	/**
+	 * Check chunked upload files
+	 *
+	 * @param string $tmpname uploaded temporary file path
+	 * @param string $chunk uploaded chunk file name
+	 * @param string $cid uploaded chunked file id
+	 * @param string $tempDir temporary dirctroy path
+	 * @param null $volume
+	 * @return array or (empty, empty)
+	 * @author Naoki Sawada
+	 */
 	private function checkChunkedFile($tmpname, $chunk, $cid, $tempDir, $volume = null) {
 		if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
 			$fname = $m[1];
@@ -2390,13 +2390,13 @@ class elFinder {
 		return array('content' => $content);
 	}
 
-    /**
-     * Save content into text file
-     *
-     * @param $args
-     * @return array
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Save content into text file
+	 *
+	 * @param $args
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 */
 	protected function put($args) {
 		$target = $args['target'];
 		
@@ -2935,14 +2935,14 @@ class elFinder {
 		self::isSeekableStream($resource) && rewind($resource);
 	}
 
-    /**
-     * serialize and base64_encode of session data (If needed)
-     *
-     * @deprecated
-     * @param  mixed $var target variable
-     * @author Naoki Sawada
-     * @return mixed|string
-     */
+	/**
+	 * serialize and base64_encode of session data (If needed)
+	 *
+	 * @deprecated
+	 * @param  mixed $var target variable
+	 * @author Naoki Sawada
+	 * @return mixed|string
+	 */
 	public static function sessionDataEncode($var) {
 		if (self::$base64encodeSessionData) {
 			$var = base64_encode(serialize($var));
@@ -2950,15 +2950,15 @@ class elFinder {
 		return $var;
 	}
 
-    /**
-     * base64_decode and unserialize of session data  (If needed)
-     *
-     * @deprecated
-     * @param  mixed $var target variable
-     * @param  bool $checkIs data type for check (array|string|object|int)
-     * @author Naoki Sawada
-     * @return bool|mixed
-     */
+	/**
+	 * base64_decode and unserialize of session data  (If needed)
+	 *
+	 * @deprecated
+	 * @param  mixed $var target variable
+	 * @param  bool $checkIs data type for check (array|string|object|int)
+	 * @author Naoki Sawada
+	 * @return bool|mixed
+	 */
 	public static function sessionDataDecode(&$var, $checkIs = null) {
 		if (self::$base64encodeSessionData) {
 			$data = unserialize(base64_decode($var));
@@ -3001,12 +3001,12 @@ class elFinder {
 		}
 	}
 
-    /**
-     * Return elFinder static variable
-     *
-     * @param $key
-     * @return mixed|null
-     */
+	/**
+	 * Return elFinder static variable
+	 *
+	 * @param $key
+	 * @return mixed|null
+	 */
 	public static function getStaticVar($key) {
 		return isset(elFinder::$$key)? elFinder::$$key : null;
 	}
