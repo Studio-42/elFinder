@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 86d89d9) (2016-07-14)
+ * Version 2.1.13 (2.1-src Nightly: 2c0cd6a) (2016-07-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3939,7 +3939,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! mimeCheck(blob.type)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime'));
+							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
 							cnt--;
 							total--;
 							continue;
@@ -5434,7 +5434,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 86d89d9)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 2c0cd6a)';
 
 
 
