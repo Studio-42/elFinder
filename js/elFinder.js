@@ -3925,7 +3925,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! mimeCheck(blob.type)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime'));
+							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
 							cnt--;
 							total--;
 							continue;
