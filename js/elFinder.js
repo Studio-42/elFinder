@@ -123,15 +123,6 @@ window.elFinder = function(node, opts) {
 		},
 		
 		/**
-		 * cwd options of each volume
-		 * key: volumeid
-		 * val: options object
-		 * 
-		 * @type Object
-		 */
-		volOptions = {},
-		
-		/**
 		 * Files/dirs cache
 		 *
 		 * @type Object
@@ -320,27 +311,6 @@ window.elFinder = function(node, opts) {
 
 						if (name != i18) {
 							f.i18 = i18;
-						}
-						
-						// set options, disabledCmds, tmbUrls for each volume
-						if (f.volumeid) {
-							// from v2.1.14
-							if (f.options) {
-								// set volOptions
-								volOptions[f.volumeid] = f.options;
-								
-								// set disabledCmds
-								if (f.options.disabled) {
-									self.disabledCmds[f.volumeid] = f.options.disabled;
-								}
-							}
-							// for compat <= v2.1.13
-							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
-							
-							if (f.tmbUrl) {
-								self.tmbUrls[f.volumeid] = f.tmbUrl;
-							}
-							self.roots[f.volumeid] = f.hash;
 						}
 					}
 					if (sorterChk && f.phash === cwd) {
@@ -1040,7 +1010,7 @@ window.elFinder = function(node, opts) {
 	this.option = function(name, target) {
 		if (target && cwd !== target) {
 			var res = '';
-			$.each(volOptions, function(id, opt) {
+			$.each(self.volOptions, function(id, opt) {
 				if (target.indexOf(id) === 0) {
 					res = opt[name] || '';
 					return false;
@@ -1231,17 +1201,7 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.tmb = function(file) {
-		var geturl = function(hash){
-				var turl = '';
-				$.each(self.tmbUrls, function(i, u){
-					if (hash.indexOf(i) === 0) {
-						turl = self.tmbUrls[i];
-						return false;
-					}
-				});
-				return turl;
-			},
-			tmbUrl = (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0)? geturl(file.hash) : cwdOptions['tmbUrl'],
+		var tmbUrl = (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0)? self.option('tmbUrl', file.hash) : cwdOptions['tmbUrl'],
 			cls    = 'elfinder-cwd-bgurl',
 			url    = '';
 
@@ -1484,9 +1444,6 @@ window.elFinder = function(node, opts) {
 					
 					if (response.options) {
 						cwdOptions = $.extend({}, cwdOptions, response.options);
-						if (response.cwd && response.cwd.volumeid) {
-							volOptions[response.cwd.volumeid] = cwdOptions;
-						}
 					}
 
 					if (response.netDrivers) {
@@ -1984,13 +1941,10 @@ window.elFinder = function(node, opts) {
 		var disabled,
 			cvid = self.cwd().volumeid || '';
 		if (cvid && dstHash && dstHash.indexOf(cvid) !== 0) {
-			disabled = [];
-			$.each(self.disabledCmds, function(i, v){
-				if (dstHash.indexOf(i) === 0) {
-					disabled = v;
-					return false;
-				}
-			});
+			disabled = self.option('disabled', dstHash);
+			if (! disabled) {
+				disabled = [];
+			}
 		} else {
 			disabled = cwdOptions.disabled;
 		}
@@ -2525,18 +2479,13 @@ window.elFinder = function(node, opts) {
 	this.commandMap = {};
 	
 	/**
-	 * Disabled commands Array of each volume
+	 * cwd options of each volume
+	 * key: volumeid
+	 * val: options object
 	 * 
 	 * @type Object
 	 */
-	this.disabledCmds = {};
-	
-	/**
-	 * tmbUrls Array of each volume
-	 * 
-	 * @type Object
-	 */
-	this.tmbUrls = {};
+	this.volOptions = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -4515,14 +4464,31 @@ elFinder.prototype = {
 				if (file.mime == 'application/x-empty') {
 					file.mime = 'text/plain';
 				}
-				if (file.volumeid && file.options) {
-					// set immediate properties
-					$.each(self.optionProperties, function(i, k) {
-						if (file.options[k]) {
-							file[k] = file.options[k];
+				// set options, tmbUrls for each volume
+				if (file.volumeid) {
+					// from v2.1.14
+					if (file.options) {
+						// set volOptions
+						self.volOptions[file.volumeid] = file.options;
+						
+						// set immediate properties
+						$.each(self.optionProperties, function(i, k) {
+							if (file.options[k]) {
+								file[k] = file.options[k];
+							}
+						});
+					} else {
+						// for compat <= v2.1.13
+						if (file.disabled) {
+							self.volOptions[file.volumeid].disabled = file.disabled;
 						}
-					});
+						if (file.tmbUrl) {
+							self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
+						}
+					}
+					self.roots[file.volumeid] = file.hash;
 				}
+				
 				return file;
 			}
 			return null;

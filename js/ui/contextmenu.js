@@ -120,13 +120,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 				}
 				if (!isCwd) {
-					if (fm.disabledCmds) {
-						$.each(fm.disabledCmds, function(i, v){
-							if (targets[0].indexOf(i, 0) == 0) {
-								disabled = v;
-								return false;
-							}
-						});
+					disabled = fm.option('disabled', targets[0]);
+					if (! disabled) {
+						disabled = [];
 					}
 				}
 				if (type === 'navbar') {
