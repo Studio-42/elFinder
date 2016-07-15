@@ -28,13 +28,13 @@ class elFinderConnector {
 	protected $header = 'Content-Type: application/json';
 
 
-    /**
-     * Constructor
-     *
-     * @param $elFinder
-     * @param bool $debug
-     * @author Dmitry (dio) Levashov
-     */
+	/**
+	 * Constructor
+	 *
+	 * @param $elFinder
+	 * @param bool $debug
+	 * @author Dmitry (dio) Levashov
+	 */
 	public function __construct($elFinder, $debug=false) {
 		
 		$this->elFinder = $elFinder;
