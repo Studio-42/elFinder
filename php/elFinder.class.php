@@ -2789,7 +2789,7 @@ class elFinder {
 			}
 			$exists[$file['hash']] = true;
 		}
-		return array_merge($files, array());
+		return array_values($files);
 	}
 	
 	protected function utime() {

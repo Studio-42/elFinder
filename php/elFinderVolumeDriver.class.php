@@ -1162,7 +1162,7 @@ abstract class elFinderVolumeDriver {
 		$this->configure();
 		
 		// Normarize disabled (array_merge`for type array of JSON)
-		$this->disabled = array_merge(array_unique($this->disabled));
+		$this->disabled = array_values(array_unique($this->disabled));
 		
 		// fix sync interval
 		if ($this->options['syncMinMs'] !== 0) {
@@ -2145,7 +2145,7 @@ abstract class elFinderVolumeDriver {
 		}
 		$res = false;
 		$mixed = false;
-		$hashes = array_merge($hashes);
+		$hashes = array_values($hashes);
 		$dirname = dirname(str_replace($this->separator, DIRECTORY_SEPARATOR, $this->path($hashes[0])));
 		$cnt = count($hashes);
 		if ($cnt > 1) {
