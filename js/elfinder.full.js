@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 2c0cd6a) (2016-07-15)
+ * Version 2.1.13 (2.1-src Nightly: f307b78) (2016-07-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -135,13 +135,6 @@ window.elFinder = function(node, opts) {
 			jpgQuality    : 100,
 			tmb           : false // old API
 		},
-		
-		/**
-		 * Volume option to set the properties of the root Stat
-		 * 
-		 * @type Array
-		 */
-		optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey'],
 		
 		/**
 		 * cwd options of each volume
@@ -354,13 +347,6 @@ window.elFinder = function(node, opts) {
 								if (f.options.disabled) {
 									self.disabledCmds[f.volumeid] = f.options.disabled;
 								}
-								
-								// set direct properties
-								$.each(optionProperties, function(i, k) {
-									if (f.options[k]) {
-										f[k] = f.options[k];
-									}
-								});
 							}
 							// for compat <= v2.1.13
 							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
@@ -494,6 +480,13 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.options = $.extend(true, {}, this._options, opts||{});
+	
+	/**
+	 * Volume option to set the properties of the root Stat
+	 * 
+	 * @type Array
+	 */
+	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey'];
 	
 	if (opts.ui) {
 		this.options.ui = opts.ui;
@@ -1655,14 +1648,6 @@ window.elFinder = function(node, opts) {
 			
 		$.each(incoming, function(i, f) {
 			raw[f.hash] = f;
-			if (f.volumeid && f.options) {
-				// set direct properties
-				$.each(optionProperties, function(i, k) {
-					if (f.options[k]) {
-						f[k] = f.options[k];
-					}
-				});
-			}
 		});
 			
 		// find removed
@@ -1766,6 +1751,10 @@ window.elFinder = function(node, opts) {
 			if (self.api < 2.1) {
 				pdata.tree = (pdata.tree || []).concat([odata.cwd]);
 			}
+			
+			// data normalize
+			odata = self.normalize(odata);
+			pdata = self.normalize(pdata);
 			
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
 
@@ -4531,11 +4520,20 @@ elFinder.prototype = {
 	 * @return Object
 	 */
 	normalize : function(data) {
-		var filter = function(file) { 
+		var self   = this,
+			filter = function(file) { 
 		
 			if (file && file.hash && file.name && file.mime) {
 				if (file.mime == 'application/x-empty') {
 					file.mime = 'text/plain';
+				}
+				if (file.volumeid && file.options) {
+					// set immediate properties
+					$.each(self.optionProperties, function(i, k) {
+						if (file.options[k]) {
+							file[k] = file.options[k];
+						}
+					});
 				}
 				return file;
 			}
@@ -5434,7 +5432,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 2c0cd6a)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: f307b78)';
 
 
 
