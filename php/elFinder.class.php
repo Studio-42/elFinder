@@ -948,7 +948,6 @@ class elFinder {
 			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
 			$rootstat = $volume->file($volume->root());
-			$rootstat['netkey'] = $key;
 			return array('added' => array($rootstat));
 		} else {
 			$this->removeNetVolume(null, $volume);
