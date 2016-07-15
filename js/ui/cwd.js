@@ -279,7 +279,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			itemhtml = function(f) {
 				return templates[list ? 'row' : 'icon']
-						.replace(/\{([a-z]+)\}/g, function(s, e) { 
+						.replace(/\{([a-z0-9_]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f, fm) : (f[e] ? f[e] : ''); 
 						});
 			},

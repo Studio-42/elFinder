@@ -84,7 +84,7 @@ elFinder.prototype.command = function(fm) {
 	this._handlers = {
 		enable  : function() { this.update(void(0), this.value); },
 		disable : function() { this.update(-1, this.value); },
-		'open reload load'    : function() { 
+		'open reload load sync'    : function() { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
 			this.update(void(0), this.value)
 			this.change(); 
