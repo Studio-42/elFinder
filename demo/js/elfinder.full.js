@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: d7b0a7e) (2016-07-15)
+ * Version 2.1.13 (2.1-src Nightly: 542a323) (2016-07-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -135,15 +135,6 @@ window.elFinder = function(node, opts) {
 			jpgQuality    : 100,
 			tmb           : false // old API
 		},
-		
-		/**
-		 * cwd options of each volume
-		 * key: volumeid
-		 * val: options object
-		 * 
-		 * @type Object
-		 */
-		volOptions = {},
 		
 		/**
 		 * Files/dirs cache
@@ -334,27 +325,6 @@ window.elFinder = function(node, opts) {
 
 						if (name != i18) {
 							f.i18 = i18;
-						}
-						
-						// set options, disabledCmds, tmbUrls for each volume
-						if (f.volumeid) {
-							// from v2.1.14
-							if (f.options) {
-								// set volOptions
-								volOptions[f.volumeid] = f.options;
-								
-								// set disabledCmds
-								if (f.options.disabled) {
-									self.disabledCmds[f.volumeid] = f.options.disabled;
-								}
-							}
-							// for compat <= v2.1.13
-							f.disabled && (self.disabledCmds[f.volumeid] = f.disabled);
-							
-							if (f.tmbUrl) {
-								self.tmbUrls[f.volumeid] = f.tmbUrl;
-							}
-							self.roots[f.volumeid] = f.hash;
 						}
 					}
 					if (sorterChk && f.phash === cwd) {
@@ -1054,7 +1024,7 @@ window.elFinder = function(node, opts) {
 	this.option = function(name, target) {
 		if (target && cwd !== target) {
 			var res = '';
-			$.each(volOptions, function(id, opt) {
+			$.each(self.volOptions, function(id, opt) {
 				if (target.indexOf(id) === 0) {
 					res = opt[name] || '';
 					return false;
@@ -1245,17 +1215,7 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.tmb = function(file) {
-		var geturl = function(hash){
-				var turl = '';
-				$.each(self.tmbUrls, function(i, u){
-					if (hash.indexOf(i) === 0) {
-						turl = self.tmbUrls[i];
-						return false;
-					}
-				});
-				return turl;
-			},
-			tmbUrl = (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0)? geturl(file.hash) : cwdOptions['tmbUrl'],
+		var tmbUrl = (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0)? self.option('tmbUrl', file.hash) : cwdOptions['tmbUrl'],
 			cls    = 'elfinder-cwd-bgurl',
 			url    = '';
 
@@ -1498,9 +1458,6 @@ window.elFinder = function(node, opts) {
 					
 					if (response.options) {
 						cwdOptions = $.extend({}, cwdOptions, response.options);
-						if (response.cwd && response.cwd.volumeid) {
-							volOptions[response.cwd.volumeid] = cwdOptions;
-						}
 					}
 
 					if (response.netDrivers) {
@@ -1998,13 +1955,10 @@ window.elFinder = function(node, opts) {
 		var disabled,
 			cvid = self.cwd().volumeid || '';
 		if (cvid && dstHash && dstHash.indexOf(cvid) !== 0) {
-			disabled = [];
-			$.each(self.disabledCmds, function(i, v){
-				if (dstHash.indexOf(i) === 0) {
-					disabled = v;
-					return false;
-				}
-			});
+			disabled = self.option('disabled', dstHash);
+			if (! disabled) {
+				disabled = [];
+			}
 		} else {
 			disabled = cwdOptions.disabled;
 		}
@@ -2539,18 +2493,13 @@ window.elFinder = function(node, opts) {
 	this.commandMap = {};
 	
 	/**
-	 * Disabled commands Array of each volume
+	 * cwd options of each volume
+	 * key: volumeid
+	 * val: options object
 	 * 
 	 * @type Object
 	 */
-	this.disabledCmds = {};
-	
-	/**
-	 * tmbUrls Array of each volume
-	 * 
-	 * @type Object
-	 */
-	this.tmbUrls = {};
+	this.volOptions = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -4529,14 +4478,31 @@ elFinder.prototype = {
 				if (file.mime == 'application/x-empty') {
 					file.mime = 'text/plain';
 				}
-				if (file.volumeid && file.options) {
-					// set immediate properties
-					$.each(self.optionProperties, function(i, k) {
-						if (file.options[k]) {
-							file[k] = file.options[k];
+				// set options, tmbUrls for each volume
+				if (file.volumeid) {
+					// from v2.1.14
+					if (file.options) {
+						// set volOptions
+						self.volOptions[file.volumeid] = file.options;
+						
+						// set immediate properties
+						$.each(self.optionProperties, function(i, k) {
+							if (file.options[k]) {
+								file[k] = file.options[k];
+							}
+						});
+					} else {
+						// for compat <= v2.1.13
+						if (file.disabled) {
+							self.volOptions[file.volumeid].disabled = file.disabled;
 						}
-					});
+						if (file.tmbUrl) {
+							self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
+						}
+					}
+					self.roots[file.volumeid] = file.hash;
 				}
+				
 				return file;
 			}
 			return null;
@@ -5434,7 +5400,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: d7b0a7e)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 542a323)';
 
 
 
@@ -6286,6 +6252,7 @@ elFinder.prototype._options = {
 				// e.g. ['perm', 'date', 'size', 'kind', 'owner', 'group', 'mode']
 				// mode: 'mode'(by `fileModeStyle` setting), 'modestr'(rwxr-xr-x) , 'modeoct'(755), 'modeboth'(rwxr-xr-x (755))
 				// 'owner', 'group' and 'mode', It's necessary set volume driver option "statOwner" to `true`
+				// for custom, characters that can be used in the name is `a-z0-9_`
 				columns : ['perm', 'date', 'size', 'kind'],
 				// override this if you want custom columns name
 				// example
@@ -6826,7 +6793,7 @@ elFinder.prototype.command = function(fm) {
 	this._handlers = {
 		enable  : function() { this.update(void(0), this.value); },
 		disable : function() { this.update(-1, this.value); },
-		'open reload load'    : function() { 
+		'open reload load sync'    : function() { 
 			this._disabled = !(this.alwaysEnabled || this.fm.isCommandEnabled(this.name));
 			this.update(void(0), this.value)
 			this.change(); 
@@ -8041,13 +8008,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 				}
 				if (!isCwd) {
-					if (fm.disabledCmds) {
-						$.each(fm.disabledCmds, function(i, v){
-							if (targets[0].indexOf(i, 0) == 0) {
-								disabled = v;
-								return false;
-							}
-						});
+					disabled = fm.option('disabled', targets[0]);
+					if (! disabled) {
+						disabled = [];
 					}
 				}
 				if (type === 'navbar') {
@@ -8535,7 +8498,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			itemhtml = function(f) {
 				return templates[list ? 'row' : 'icon']
-						.replace(/\{([a-z]+)\}/g, function(s, e) { 
+						.replace(/\{([a-z0-9_]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f, fm) : (f[e] ? f[e] : ''); 
 						});
 			},
