@@ -879,7 +879,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function tmbname($stat)
     {
-        return $this->tmbPrefix.$stat['rev'].'.png';
+        return $this->tmbPrefix.$stat['rev'].$stat['ts'].'.png';
     }
     
     /**
