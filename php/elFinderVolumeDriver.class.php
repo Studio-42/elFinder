@@ -969,7 +969,7 @@ abstract class elFinderVolumeDriver {
 			$parts = explode(',', isset($this->options['uploadOrder']) ? $this->options['uploadOrder'] : 'deny,allow');
 			$this->uploadOrder = array(trim($parts[0]), trim($parts[1]));
 		} else { // telephat_mode off
-			$this->uploadOrder = $this->options['uploadOrder'];
+			$this->uploadOrder = ! empty($this->options['uploadOrder'])? $this->options['uploadOrder'] : array('deny', 'allow');
 		}
 			
 		if (!empty($this->options['uploadMaxSize'])) {
@@ -1330,7 +1330,7 @@ abstract class elFinderVolumeDriver {
 			'uploadMaxSize'   => intval($this->uploadMaxSize),
 			'uploadMaxConn'   => intval($this->options['uploadMaxConn']),
 			'uploadMime'      => array(
-				'firstOrder' => $this->uploadOrder[0],
+				'firstOrder' => isset($this->uploadOrder[0])? $this->uploadOrder[0] : 'deny',
 				'allow'      => $this->uploadAllow,
 				'deny'       => $this->uploadDeny
 			),
@@ -1341,7 +1341,7 @@ abstract class elFinderVolumeDriver {
 				'extract'   => isset($this->archivers['extract']) && is_array($this->archivers['extract']) ? array_keys($this->archivers['extract']) : array(),
 				'createext' => $createext
 			),
-			'uiCmdMap'        => $this->options['uiCmdMap'],
+			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? array_values($this->options['uiCmdMap']) : array(),
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
 			'syncMinMs'       => intval($this->options['syncMinMs'])
 		);
