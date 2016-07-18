@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 80fede5) (2016-07-18)
+ * Version 2.1.13 (2.1-src Nightly: c28c0a7) (2016-07-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4033,7 +4033,7 @@ elFinder.prototype = {
 							var errors = ['errAbort'];
 							// ff bug while send zero sized file
 							// for safari - send directory
-							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === 0? f : null;}).length) {
+							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
 								errors.push('errFolderUpload');
 							}
 							dfrd.reject(errors);
@@ -5409,7 +5409,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 80fede5)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: c28c0a7)';
 
 
 
