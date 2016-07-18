@@ -221,7 +221,6 @@ elFinder.prototype.commands.paste = function() {
 					return dfrd.resolve();
 				}
 				
-					
 				if (fm.oldAPI) {
 					paste(files);
 				} else {
@@ -260,7 +259,7 @@ elFinder.prototype.commands.paste = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([error, files[0].name, 'errPerm']);
+				return !dfrd.reject([error, file.name, 'errPerm']);
 			}
 			
 			if (cut && file.locked) {
@@ -269,6 +268,10 @@ elFinder.prototype.commands.paste = function() {
 			
 			if ($.inArray(file.hash, parents) !== -1) {
 				return !dfrd.reject(['errCopyInItself', file.name]);
+			}
+			
+			if (file.mime && file.mime !== 'directory' && ! fm.uploadMimeCheck(file.mime, dst.hash)) {
+				return !dfrd.reject([error, file.name, 'errUploadMime']);
 			}
 			
 			fparents = fm.parents(file.hash);
