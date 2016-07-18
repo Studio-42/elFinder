@@ -3795,44 +3795,6 @@ elFinder.prototype = {
 					} else {
 						setTimeout(function(){ check(); }, 100);
 					}
-				},
-				mimeCheck = function(mime) {
-					var res   = true, // default is allow
-						mimeChecker = fm.option('uploadMime', target),
-						allow,
-						deny,
-						check = function(checker) {
-							var ret = false;
-							if (typeof checker === 'string' && checker.toLowerCase() === 'all') {
-								ret = true;
-							} else if ($.isArray(checker) && checker.length) {
-								$.each(checker, function(i, v) {
-									v = v.toLowerCase();
-									if (v === 'all' || mime.indexOf(v) === 0) {
-										ret = true;
-										return false;
-									}
-								});
-							}
-							return ret;
-						};
-					if (mime && $.isPlainObject(mimeChecker)) {
-						mime = mime.toLowerCase();
-						allow = check(mimeChecker.allow);
-						deny = check(mimeChecker.deny);
-						if (mimeChecker.firstOrder === 'allow') {
-							res = false; // default is deny
-							if (! deny && allow === true) { // match only allow
-								res = true;
-							}
-						} else {
-							res = true; // default is allow
-							if (deny === true && ! allow) { // match only deny
-								res = false;
-							}
-						}
-					}
-					return res;
 				};
 
 				if (! dataChecked && (isDataType || data.type == 'files')) {
@@ -3864,7 +3826,7 @@ elFinder.prototype = {
 						}
 						
 						// file mime check
-						if (blob.type && ! mimeCheck(blob.type)) {
+						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
 							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
 							cnt--;
 							total--;
@@ -5294,6 +5256,53 @@ elFinder.prototype = {
 		} else {
 			return oct;
 		}
+	},
+	
+	/**
+	 * Return boolean that uploadable MIME type into target folder
+	 * 
+	 * @param  String  mime    MIME type
+	 * @param  String  target  target folder hash
+	 * @return Bool
+	 */
+	uploadMimeCheck : function(mime, target) {
+		target = target || this.cwd().hash;
+		var res   = true, // default is allow
+			mimeChecker = this.option('uploadMime', target),
+			allow,
+			deny,
+			check = function(checker) {
+				var ret = false;
+				if (typeof checker === 'string' && checker.toLowerCase() === 'all') {
+					ret = true;
+				} else if ($.isArray(checker) && checker.length) {
+					$.each(checker, function(i, v) {
+						v = v.toLowerCase();
+						if (v === 'all' || mime.indexOf(v) === 0) {
+							ret = true;
+							return false;
+						}
+					});
+				}
+				return ret;
+			};
+		if (mime && $.isPlainObject(mimeChecker)) {
+			mime = mime.toLowerCase();
+			allow = check(mimeChecker.allow);
+			deny = check(mimeChecker.deny);
+			if (mimeChecker.firstOrder === 'allow') {
+				res = false; // default is deny
+				if (! deny && allow === true) { // match only allow
+					res = true;
+				}
+			} else {
+				res = true; // default is allow
+				if (deny === true && ! allow) { // match only deny
+					res = false;
+				}
+			}
+		}
+		return res;
 	},
 	
 	navHash2Id : function(hash) {
