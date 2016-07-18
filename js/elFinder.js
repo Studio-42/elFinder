@@ -4019,7 +4019,7 @@ elFinder.prototype = {
 							var errors = ['errAbort'];
 							// ff bug while send zero sized file
 							// for safari - send directory
-							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === 0? f : null;}).length) {
+							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
 								errors.push('errFolderUpload');
 							}
 							dfrd.reject(errors);
