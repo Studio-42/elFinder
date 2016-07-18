@@ -357,7 +357,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasClipboard'    : 'Masz $1 pozycji w schowku.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Wyszukiwanie przyrostowe jest tylko w bieżącym widoku.', // from v2.1.13 added 6.30.2016
 
-			/********************************** mimetypes **********************************/
+			/********************************** mimetypes *********************************/
 			'kindUnknown'     : 'Nieznany',
 			'kindFolder'      : 'Katalog',
 			'kindAlias'       : 'Alias',
