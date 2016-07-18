@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 4ecc3b1) (2016-07-16)
+ * Version 2.1.13 (2.1-src Nightly: 80fede5) (2016-07-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3809,44 +3809,6 @@ elFinder.prototype = {
 					} else {
 						setTimeout(function(){ check(); }, 100);
 					}
-				},
-				mimeCheck = function(mime) {
-					var res   = true, // default is allow
-						mimeChecker = fm.option('uploadMime', target),
-						allow,
-						deny,
-						check = function(checker) {
-							var ret = false;
-							if (typeof checker === 'string' && checker.toLowerCase() === 'all') {
-								ret = true;
-							} else if ($.isArray(checker) && checker.length) {
-								$.each(checker, function(i, v) {
-									v = v.toLowerCase();
-									if (v === 'all' || mime.indexOf(v) === 0) {
-										ret = true;
-										return false;
-									}
-								});
-							}
-							return ret;
-						};
-					if (mime && $.isPlainObject(mimeChecker)) {
-						mime = mime.toLowerCase();
-						allow = check(mimeChecker.allow);
-						deny = check(mimeChecker.deny);
-						if (mimeChecker.firstOrder === 'allow') {
-							res = false; // default is deny
-							if (! deny && allow === true) { // match only allow
-								res = true;
-							}
-						} else {
-							res = true; // default is allow
-							if (deny === true && ! allow) { // match only deny
-								res = false;
-							}
-						}
-					}
-					return res;
 				};
 
 				if (! dataChecked && (isDataType || data.type == 'files')) {
@@ -3878,7 +3840,7 @@ elFinder.prototype = {
 						}
 						
 						// file mime check
-						if (blob.type && ! mimeCheck(blob.type)) {
+						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
 							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
 							cnt--;
 							total--;
@@ -5310,6 +5272,53 @@ elFinder.prototype = {
 		}
 	},
 	
+	/**
+	 * Return boolean that uploadable MIME type into target folder
+	 * 
+	 * @param  String  mime    MIME type
+	 * @param  String  target  target folder hash
+	 * @return Bool
+	 */
+	uploadMimeCheck : function(mime, target) {
+		target = target || this.cwd().hash;
+		var res   = true, // default is allow
+			mimeChecker = this.option('uploadMime', target),
+			allow,
+			deny,
+			check = function(checker) {
+				var ret = false;
+				if (typeof checker === 'string' && checker.toLowerCase() === 'all') {
+					ret = true;
+				} else if ($.isArray(checker) && checker.length) {
+					$.each(checker, function(i, v) {
+						v = v.toLowerCase();
+						if (v === 'all' || mime.indexOf(v) === 0) {
+							ret = true;
+							return false;
+						}
+					});
+				}
+				return ret;
+			};
+		if (mime && $.isPlainObject(mimeChecker)) {
+			mime = mime.toLowerCase();
+			allow = check(mimeChecker.allow);
+			deny = check(mimeChecker.deny);
+			if (mimeChecker.firstOrder === 'allow') {
+				res = false; // default is deny
+				if (! deny && allow === true) { // match only allow
+					res = true;
+				}
+			} else {
+				res = true; // default is allow
+				if (deny === true && ! allow) { // match only deny
+					res = false;
+				}
+			}
+		}
+		return res;
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
@@ -5400,7 +5409,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 4ecc3b1)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 80fede5)';
 
 
 
@@ -15928,7 +15937,6 @@ elFinder.prototype.commands.paste = function() {
 					return dfrd.resolve();
 				}
 				
-					
 				if (fm.oldAPI) {
 					paste(files);
 				} else {
@@ -15967,7 +15975,7 @@ elFinder.prototype.commands.paste = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([error, files[0].name, 'errPerm']);
+				return !dfrd.reject([error, file.name, 'errPerm']);
 			}
 			
 			if (cut && file.locked) {
@@ -15976,6 +15984,10 @@ elFinder.prototype.commands.paste = function() {
 			
 			if ($.inArray(file.hash, parents) !== -1) {
 				return !dfrd.reject(['errCopyInItself', file.name]);
+			}
+			
+			if (file.mime && file.mime !== 'directory' && ! fm.uploadMimeCheck(file.mime, dst.hash)) {
+				return !dfrd.reject([error, file.name, 'errUploadMime']);
 			}
 			
 			fparents = fm.parents(file.hash);
