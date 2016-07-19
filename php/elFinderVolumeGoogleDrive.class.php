@@ -688,7 +688,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 
 		foreach ($res as $raw) {
 			if ($raw->getMimeType() == self::DIRMIME)  {
-				$result = array_merge($result, $this->doSearch($path.'/'.$raw->id, $q, $mimes));									
+				$result = array_merge($result, $this->doSearch($path.$raw->id, $q, $mimes));									
 			}
 			else
 			{				   
@@ -702,14 +702,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 					continue;
 				}						
 				if ($stat = $this->parseRaw($raw)) {
-					if (!isset($this->cache[$path.'/'.$raw->id])) {
-						$stat = $this->updateCache($path.'/'.$raw->id, $stat);
+					if (!isset($this->cache[$path.$raw->id])) {
+						$stat = $this->updateCache($path.$raw->id, $stat);
 					}
 					if (!empty($stat['hidden']) || ($mimes && $stat['mime'] === 'directory') || !$this->mimeAccepted($stat['mime'], $mimes)) {
 						continue;
 					}
 
-				$stat = $this->stat($path.'/'.$raw->id);
+				$stat = $this->stat($path.$raw->id);
 				$stat['path'] = $this->path($stat['hash']);
 				$result[] = $stat;
 				}
