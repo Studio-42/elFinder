@@ -673,7 +673,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     protected function doSearch($path, $q, $mimes)
     {
         $path == '/' || $path =='root' ? $itemId= 'root' : $itemId= basename($path); 		   
-    	empty($mimes) ? $mimeType = parent::$mimetypes[strtolower($q)] : $mimeType = strtolower($mimes[0]);
+    	empty($mimes) ? $mimeType = parent::$mimetypes[strtolower($q)] :
+			$mimeType = parent::$mimetypes[strtolower(explode("/",$mimes[0])[1])];
+		
 		$path = $this->_normpath($path.'/');		
 		$result = [];
 					
