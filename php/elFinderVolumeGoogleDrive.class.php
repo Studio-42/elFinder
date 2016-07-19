@@ -672,58 +672,52 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     **/
     protected function doSearch($path, $q, $mimes)
     {
-        $result = array();
-        $path == '/' || $path =='root' ? $itemId= 'root' :    $itemId= basename($path);
-                
-        $mimeType = parent::$mimetypes[strtolower($q)];
-    
-        if (substr($q, 0, 1)== '*' || $mimeType !== null) {
-            $mimeType == '' ? $mimeType= parent::$mimetypes[pathinfo(strtolower($q), PATHINFO_EXTENSION)] : $mimeType = $mimeType;
-            $path == '/' ? $q = sprintf('trashed=false and mimeType = "%s"', $mimeType) : $q = sprintf('trashed=false and "%s" in parents and mimeType = "%s"', $itemId, $mimeType);
-            
-            $opts = [
-                'fields' => self::FETCHFIELDS_LIST,
-                'pageSize' => 1000,
-                'spaces' => 'drive',
-                'q' => $q
-                ];
-        } else {
-            $path == '/' ? $q = sprintf('trashed=false and name = "%s"', strtolower($q)) : $q = sprintf('trashed=false and "%s" in parents and name = "%s"', $itemId, strtolower($q));
-            $opts = [
-                'fields' => self::FETCHFIELDS_LIST,
-                'pageSize' => 1000,
-                'spaces' => 'drive',
-                'q' => $q
-                ];
-        }
-        
-        $res = $this->query($opts);
-                    
-        $timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
-        $path == '/' || $path =='root' ? $mountPath = '/' : $mountPath = $path.'/';
-        
-        if ($res) {
-            foreach ($res as $raw) {
-                if ($timeout && $timeout < time()) {
-                    $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
-                    break;
-                }
-                                
-                if ($stat = $this->parseRaw($raw)) {
-                    if (!isset($this->cache[$mountPath.$raw->id])) {
-                        $stat = $this->updateCache($mountPath.$raw->id, $stat);
-                    }
-                    if (!empty($stat['hidden']) || ($mimes && $stat['mime'] === 'directory') || !$this->mimeAccepted($stat['mime'], $mimes)) {
-                        continue;
-                    }
-                    $stat = $this->stat($mountPath.$raw->id);
-                    $stat['path'] = $this->path($stat['hash']);
-                    $result[] = $stat;
-                }
-            }
-        }
-        
-        return $result;
+        $path == '/' || $path =='root' ? $itemId= 'root' : $itemId= basename($path); 		   
+    	empty($mimes) ? $mimeType = parent::$mimetypes[strtolower($q)] : $mimeType = strtolower($mimes[0]);
+		$path = $this->_normpath($path.'/');		
+		$result = [];
+					
+		$opts = [
+			'fields' => self::FETCHFIELDS_LIST,
+			'pageSize' => 1000,
+			'spaces' => 'drive',
+			'q' => sprintf('trashed=false and "%s" in parents', $itemId)
+		];
+		
+		$res = $this->query($opts); 
+
+		foreach ($res as $raw) {
+			if ($raw->getMimeType() == self::DIRMIME)  {
+				$result = array_merge($result, $this->doSearch($path.'/'.$raw->id, $q, $mimes));									
+			}
+			else
+			{				   
+				$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
+			
+				if ($timeout && $timeout < time()) {
+					$this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
+					break;
+				}
+				if ((!empty($mimeType) && $raw->mimeType !== $mimeType) || (empty($mimeType) && strcasecmp($raw->name,$q))){ 
+					continue;
+				}						
+				if ($stat = $this->parseRaw($raw)) {
+					if (!isset($this->cache[$path.'/'.$raw->id])) {
+						$stat = $this->updateCache($path.'/'.$raw->id, $stat);
+					}
+					if (!empty($stat['hidden']) || ($mimes && $stat['mime'] === 'directory') || !$this->mimeAccepted($stat['mime'], $mimes)) {
+						continue;
+					}
+
+				$stat = $this->stat($path.'/'.$raw->id);
+				$stat['path'] = $this->path($stat['hash']);
+				$result[] = $stat;
+				}
+				
+			}
+		}
+		
+		return $result;
     }
     
     /**
