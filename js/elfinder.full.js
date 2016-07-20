@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 9d35184) (2016-07-18)
+ * Version 2.1.13 (2.1-src Nightly: f1aa20e) (2016-07-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -319,14 +319,6 @@ window.elFinder = function(node, opts) {
 			for (i = 0; i < l; i++) {
 				f = data[i];
 				if (f.name && f.hash && f.mime) {
-					if (!f.phash) {
-						var name = 'volume_'+f.name,
-							i18 = self.i18n(name);
-
-						if (name != i18) {
-							f.i18 = i18;
-						}
-					}
 					if (sorterChk && f.phash === cwd) {
 						$.each(self.sortRules, function(key) {
 							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
@@ -4436,39 +4428,70 @@ elFinder.prototype = {
 		var self   = this,
 			filter = function(file) { 
 		
-			if (file && file.hash && file.name && file.mime) {
-				if (file.mime == 'application/x-empty') {
-					file.mime = 'text/plain';
-				}
-				// set options, tmbUrls for each volume
-				if (file.volumeid) {
-					// from v2.1.14
-					if (file.options) {
-						// set volOptions
-						self.volOptions[file.volumeid] = file.options;
-						
-						// set immediate properties
-						$.each(self.optionProperties, function(i, k) {
-							if (file.options[k]) {
-								file[k] = file.options[k];
+				if (file && file.hash && file.name && file.mime) {
+					if (file.mime == 'application/x-empty') {
+						file.mime = 'text/plain';
+					}
+					
+					if (! file.phash || file.mime === 'directory') {
+						// set options, tmbUrls for each volume
+						if (file.volumeid) {
+							// from v2.1.14
+							if (file.options) {
+								// set volOptions
+								self.volOptions[file.volumeid] = file.options;
+								
+								// set immediate properties
+								$.each(self.optionProperties, function(i, k) {
+									if (file.options[k]) {
+										file[k] = file.options[k];
+									}
+								});
+							} else {
+								// for compat <= v2.1.13
+								if (file.disabled) {
+									self.volOptions[file.volumeid].disabled = file.disabled;
+								}
+								if (file.tmbUrl) {
+									self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
+								}
 							}
-						});
-					} else {
-						// for compat <= v2.1.13
-						if (file.disabled) {
-							self.volOptions[file.volumeid].disabled = file.disabled;
+							if (! file.phash) {
+								self.roots[file.volumeid] = file.hash;
+							}
+							
+							if (prevId !== file.volumeid) {
+								prevId = file.volumeid;
+								i18nFolderName = self.option('i18nFolderName', file.volumeid);
+							}
 						}
-						if (file.tmbUrl) {
-							self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
+						
+						// volume root i18n name
+						if (! file.i18 && ! file.phash) {
+							name = 'volume_' + file.name,
+							i18 = self.i18n(false, name);
+	
+							if (name !== i18) {
+								file.i18 = i18;
+							}
+						}
+						
+						// i18nFolderName
+						if (i18nFolderName && ! file.i18) {
+							name = 'folder_' + file.name,
+							i18 = self.i18n(false, name);
+	
+							if (name !== i18) {
+								file.i18 = i18;
+							}
 						}
 					}
-					self.roots[file.volumeid] = file.hash;
+					
+					return file;
 				}
-				
-				return file;
-			}
-			return null;
-		};
+				return null;
+			},
+			name, i18, i18nFolderName, prevId;
 		
 
 		if (data.files) {
@@ -4961,9 +4984,13 @@ elFinder.prototype = {
 				}
 				return m;
 			},
-			i, j, m;
-			
-		for (i = 0; i< arguments.length; i++) {
+			i, j, m, escFunc, start = 0;
+		
+		if (arguments.length && arguments[0] === false) {
+			escFunc = function(m){ return m; };
+			start = 1;
+		}
+		for (i = start; i< arguments.length; i++) {
 			m = arguments[i];
 			
 			if (typeof m == 'string') {
@@ -4991,14 +5018,14 @@ elFinder.prototype = {
 			m = input[i];
 			if (typeof m == 'string') {
 				// translate message
-				m = messages[m] || self.escape(m);
+				m = messages[m] || (escFunc? escFunc(m) : self.escape(m));
 				// replace placeholders in message
 				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
 					placeholder = i + parseInt(placeholder);
 					if (placeholder > 0 && input[placeholder]) {
 						ignore.push(placeholder)
 					}
-					return self.escape(input[placeholder]) || '';
+					return escFunc? escFunc(input[placeholder]) : self.escape(input[placeholder]);
 				});
 			} else {
 				// get HTML from jQuery object
@@ -5409,7 +5436,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 9d35184)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: f1aa20e)';
 
 
 
@@ -8436,12 +8463,12 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.cwdHash2Id(f.hash);
 				},
 				name : function(f) {
-					var name = fm.escape(f.name);
+					var name = fm.escape(f.i18 || f.name);
 					!list && (name = name.replace(/([_.])/g, '&#8203;$1'));
 					return name;
 				},
 				nametitle : function(f) {
-					return fm.escape(f.name);
+					return fm.escape(f.i18 || f.name);
 				},
 				permsclass : function(f) {
 					return fm.perms2class(f);
@@ -8493,7 +8520,7 @@ $.fn.elfindercwd = function(fm, options) {
 						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
 					}
 					if (list) {
-						info += (info? '&#13;' : '') + fm.escape(f.name);
+						info += (info? '&#13;' : '') + fm.escape(f.i18 || f.name);
 					}
 					return info? info + '&#13;' + title : title;
 				}
@@ -10816,7 +10843,7 @@ $.fn.elfinderpath = function(fm) {
 				$.each(roots, function(i, f) {
 					if (fm.root(fm.cwd().hash) !== f.hash) {
 						raw.push({
-							label    : f.name,
+							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
 							remain   : true,
 							callback : function() { fm.exec('open', f.hash); }
@@ -10833,7 +10860,8 @@ $.fn.elfinderpath = function(fm) {
 				var dirs = [];
 				$.each(fm.parents(cwd), function(i, hash) {
 					var c = (cwd === hash)? 'elfinder-path-dir elfinder-path-cwd' : 'elfinder-path-dir',
-						name = fm.escape(fm.file(hash).name);
+						f = fm.file(hash),
+						name = fm.escape(f.i18 || f.name);
 					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+name+'">'+name+'</span>');
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
@@ -12428,7 +12456,7 @@ $.fn.elfindertree = function(fm, opts) {
 					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
 					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& compare(dir.name, info.name) < 0) {
+					&& compare(dir.i18 || dir.name, info.i18 || info.name) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -12517,7 +12545,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 * 
 			 */
 			compare = function(dir1, dir2) {
-				return fm.naturalCompare(dir1.name, dir2.name);
+				return fm.naturalCompare(dir1.i18 || dir1.name, dir2.i18 || dir2.name);
 			},
 
 			/**
@@ -17364,7 +17392,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.fail(function(error) {
 					var parent = input.parent(),
-						name   = fm.escape(file.name);
+						name   = fm.escape(file.i18 || file.name);
 
 					if (tarea) {
 						name = name.replace(/([_.])/g, '&#8203;$1');
