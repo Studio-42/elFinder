@@ -208,12 +208,12 @@ $.fn.elfindercwd = function(fm, options) {
 					return fm.cwdHash2Id(f.hash);
 				},
 				name : function(f) {
-					var name = fm.escape(f.name);
+					var name = fm.escape(f.i18 || f.name);
 					!list && (name = name.replace(/([_.])/g, '&#8203;$1'));
 					return name;
 				},
 				nametitle : function(f) {
-					return fm.escape(f.name);
+					return fm.escape(f.i18 || f.name);
 				},
 				permsclass : function(f) {
 					return fm.perms2class(f);
@@ -265,7 +265,7 @@ $.fn.elfindercwd = function(fm, options) {
 						info = f.tooltip? fm.escape(f.tooltip).replace(/\r/g, '&#13;') : '';
 					}
 					if (list) {
-						info += (info? '&#13;' : '') + fm.escape(f.name);
+						info += (info? '&#13;' : '') + fm.escape(f.i18 || f.name);
 					}
 					return info? info + '&#13;' + title : title;
 				}

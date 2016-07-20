@@ -39,7 +39,7 @@ $.fn.elfinderpath = function(fm) {
 				$.each(roots, function(i, f) {
 					if (fm.root(fm.cwd().hash) !== f.hash) {
 						raw.push({
-							label    : f.name,
+							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
 							remain   : true,
 							callback : function() { fm.exec('open', f.hash); }
@@ -56,7 +56,8 @@ $.fn.elfinderpath = function(fm) {
 				var dirs = [];
 				$.each(fm.parents(cwd), function(i, hash) {
 					var c = (cwd === hash)? 'elfinder-path-dir elfinder-path-cwd' : 'elfinder-path-dir',
-						name = fm.escape(fm.file(hash).name);
+						f = fm.file(hash),
+						name = fm.escape(f.i18 || f.name);
 					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+name+'">'+name+'</span>');
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');

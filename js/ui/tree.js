@@ -308,7 +308,7 @@ $.fn.elfindertree = function(fm, opts) {
 					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
 					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& compare(dir.name, info.name) < 0) {
+					&& compare(dir.i18 || dir.name, info.i18 || info.name) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -397,7 +397,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 * 
 			 */
 			compare = function(dir1, dir2) {
-				return fm.naturalCompare(dir1.name, dir2.name);
+				return fm.naturalCompare(dir1.i18 || dir1.name, dir2.i18 || dir2.name);
 			},
 
 			/**
