@@ -22,6 +22,32 @@
         var rootPath = './demo',
           start = function(lng) {
             $().ready(function() {
+              var i18nFolderMsgs = {
+                'en': {
+                  'volume_Demo': 'For Demo',
+                  'folder_BasicAuthExample': 'Basic Auth Example',
+                  'folder_Downloads': 'Downloads',
+                  'folder_Images': 'Images',
+                  'folder_LargeVideos': 'Videos',
+                  'folder_MIME-types': 'MIME types',
+                  'folder_Tips': 'Tips',
+                  'folder_Welcome': 'Welcome(Multilingual)',
+                  'folder_a_lot_sample': 'Plenty Items',
+                  'folder_setup_with_composer': 'Setup with composer'
+                },
+                'jp': {
+                  'volume_Demo': 'デモ用',
+                  'folder_BasicAuthExample': 'Basic認証サンプル',
+                  'folder_Downloads': 'ダウンロード',
+                  'folder_Images': '画像',
+                  'folder_LargeVideos': '動画',
+                  'folder_MIME-types': 'MIMEタイプ',
+                  'folder_Tips': 'ヒント',
+                  'folder_Welcome': 'ようこそ(多言語)',
+                  'folder_a_lot_sample': '多量サンプル',
+                  'folder_setup_with_composer': 'composerでセットアップ'
+                }
+              };
               // Documentation for client options:
               // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
               // elFinder init
@@ -33,6 +59,11 @@
                 commandsOptions : {
                   quicklook : {
                     googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+                  }
+                },
+                handlers : {
+                  init : function(e, fm) {
+                    $.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
                   }
                 },
                 lang: lng
