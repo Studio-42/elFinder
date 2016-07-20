@@ -201,6 +201,8 @@ abstract class elFinderVolumeDriver {
 		'icon'            => '',
 		// CSS Class of volume root in tree
 		'rootCssClass'    => '',
+		// enable i18n folder name that convert name to elFinderInstance.messages['folder_'+name]
+		'i18nFolderName'  => false,
 		// Search timeout (sec)
 		'searchTimeout'   => 30,
 		// Search exclusion directory regex pattern (require demiliter e.g. '#/path/to/exclude_directory#i')
@@ -1343,7 +1345,8 @@ abstract class elFinderVolumeDriver {
 			),
 			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? array_values($this->options['uiCmdMap']) : array(),
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
-			'syncMinMs'       => intval($this->options['syncMinMs'])
+			'syncMinMs'       => intval($this->options['syncMinMs']),
+			'i18nFolderName'  => intval($this->options['i18nFolderName'])
 		);
 		if ($hash === null) {
 			// call from getRootStatExtra()

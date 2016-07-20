@@ -302,6 +302,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysyst
 
         $opts['driver'] = 'FlysystemExt';
         $opts['filesystem'] = $filesystem;
+        $opts['separator'] = '/';
         $opts['checkSubfolders'] = true;
         if (! isset($opts['alias'])) {
             $opts['alias'] = 'GoogleDrive';

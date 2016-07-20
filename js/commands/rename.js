@@ -50,7 +50,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.fail(function(error) {
 					var parent = input.parent(),
-						name   = fm.escape(file.name);
+						name   = fm.escape(file.i18 || file.name);
 
 					if (tarea) {
 						name = name.replace(/([_.])/g, '&#8203;$1');
