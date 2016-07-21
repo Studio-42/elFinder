@@ -42,7 +42,11 @@ $.fn.elfinderpath = function(fm) {
 							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
 							remain   : true,
-							callback : function() { fm.exec('open', f.hash); }
+							callback : function() { fm.exec('open', f.hash); },
+							options  : {
+								iconClass : f.csscls || '',
+								iconImg   : f.icon   || ''
+							}
 						});
 					}
 				});

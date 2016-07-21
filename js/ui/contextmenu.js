@@ -22,9 +22,20 @@ $.fn.elfindercontextmenu = function(fm) {
 				.on('contextmenu', function(){return false;}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
-			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
-			item = function(label, icon, callback) {
-				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
+			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
+			item = function(label, icon, callback, opts) {
+				var style = '',
+					iconClass = '';
+				if (opts) {
+					if (opts.iconClass) {
+						iconClass = opts.iconClass;
+						icon = '';
+					}
+					if (opts.iconImg) {
+						style = ' style="background:url(\''+fm.escape(opts.iconImg)+'\') 0 0 no-repeat;background-size:contain;"';
+					}
+				}
+				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : (iconClass? iconClass : '')).replace('{label}', label).replace('{style}', style))
 					.click(function(e) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -287,7 +298,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						node = item(data.label, data.icon, function() {
 							!data.remain && close();
 							data.callback();
-						});
+						}, data.options || null);
 						menu.append(node);
 					}
 				});
