@@ -935,7 +935,7 @@ window.elFinder = function(node, opts) {
 	 * @return Boolean
 	 **/
 	this.enabled = function() {
-		return node.is(':visible') && enabled;
+		return enabled && this.visible();
 	};
 	
 	/**
@@ -944,7 +944,7 @@ window.elFinder = function(node, opts) {
 	 * @return Boolean
 	 **/
 	this.visible = function() {
-		return node.is(':visible');
+		return node[0].elfinder && node.is(':visible');
 	};
 	
 	/**
