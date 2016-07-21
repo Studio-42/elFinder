@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: f1aa20e) (2016-07-20)
+ * Version 2.1.13 (2.1-src Nightly: 6d1b32e) (2016-07-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5436,7 +5436,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: f1aa20e)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 6d1b32e)';
 
 
 
@@ -7946,9 +7946,20 @@ $.fn.elfindercontextmenu = function(fm) {
 				.on('contextmenu', function(){return false;}),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
-			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"/><span>{label}</span></div>',
-			item = function(label, icon, callback) {
-				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : '').replace('{label}', label))
+			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
+			item = function(label, icon, callback, opts) {
+				var style = '',
+					iconClass = '';
+				if (opts) {
+					if (opts.iconClass) {
+						iconClass = opts.iconClass;
+						icon = '';
+					}
+					if (opts.iconImg) {
+						style = ' style="background:url(\''+fm.escape(opts.iconImg)+'\') 0 0 no-repeat;background-size:contain;"';
+					}
+				}
+				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : (iconClass? iconClass : '')).replace('{label}', label).replace('{style}', style))
 					.click(function(e) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -8211,7 +8222,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						node = item(data.label, data.icon, function() {
 							!data.remain && close();
 							data.callback();
-						});
+						}, data.options || null);
 						menu.append(node);
 					}
 				});
@@ -10846,7 +10857,11 @@ $.fn.elfinderpath = function(fm) {
 							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
 							remain   : true,
-							callback : function() { fm.exec('open', f.hash); }
+							callback : function() { fm.exec('open', f.hash); },
+							options  : {
+								iconClass : f.csscls || '',
+								iconImg   : f.icon   || ''
+							}
 						});
 					}
 				});
