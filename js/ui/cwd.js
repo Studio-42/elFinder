@@ -561,14 +561,18 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
 					chk,
 					phash,
-					proc  = false,
-					go    = function(over){
+					proc    = false,
+					// created document fragment for jQuery >= 1.12, 2.2, 3.0
+					// see Studio-42/elFinder#1544 @ github
+					docFlag = $.htmlPrefilter? true : false,
+					tempDom = docFlag? $(document.createDocumentFragment()) : $('<div/>'),
+					go      = function(over){
 						var over  = over || null,
 							html  = [],
 							dirs  = false,
 							atmb  = {},
 							stmb  = (fm.option('tmbUrl') === 'self'),
-							files, locks, $place, selected;
+							files, locks, selected;
 						
 						files = buffer.splice(0, fm.options.showFiles + (over || 0) / (bufferExt.hpi || 1));
 						bufferExt.renderd += files.length;
@@ -592,22 +596,22 @@ $.fn.elfindercwd = function(fm, options) {
 							return null;
 						});
 
-						// html into created document fragment
-						$place = $(document.createDocumentFragment()).append(html.join(''));
+						// html into temp node
+						tempDom.empty().append(html.join(''));
 						
 						// make directory droppable
-						dirs && !mobile && makeDroppable($place);
+						dirs && !mobile && makeDroppable(tempDom);
 						
 						// check selected items
 						selected = [];
 						if (selectedFiles.length) {
-							$place.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
+							tempDom.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').each(function() {
 								$.inArray(fm.cwdId2Hash(this.id), selectedFiles) !== -1 && selected.push($(this));
 							});
 						}
 						
 						// append to cwd
-						place.append($place);
+						place.append(docFlag? tempDom : tempDom.children());
 						
 						// trigger select
 						selected.length && $.each(selected, function(i, n) { n.trigger(evtSelect); });
@@ -980,7 +984,6 @@ $.fn.elfindercwd = function(fm, options) {
 				var place    = list ? cwd.find('tbody') : cwd,
 					l        = files.length, 
 					atmb     = {},
-					dirs     = false,
 					findNode = function(file) {
 						var pointer = cwd.find('[id]:first'), file2;
 
@@ -1002,7 +1005,11 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 						return l || -1;
 					},
-					file, hash, node, ndx;
+					// created document fragment for jQuery >= 1.12, 2.2, 3.0
+					// see Studio-42/elFinder#1544 @ github
+					docFlag = $.htmlPrefilter? true : false,
+					tempDom = docFlag? $(document.createDocumentFragment()) : $('<div/>'),
+					file, hash, node, nodes, ndx;
 
 				l && wz.removeClass('elfinder-cwd-wrapper-empty');
 				
@@ -1014,18 +1021,24 @@ $.fn.elfindercwd = function(fm, options) {
 						continue;
 					}
 					
-					if ((node = findNode(file)) && node.length) {
-						node.before(itemhtml(file)); 
-					} else if ((ndx = findIndex(file)) >= 0) {
+					if ((node = findNode(file)) && ! node.length) {
+						node = null;
+					}
+					if (! node && (ndx = findIndex(file)) >= 0) {
 						buffer.splice(ndx, 0, file);
 					} else {
-						place.append(itemhtml(file));
+						tempDom.empty().append(itemhtml(file));
+						(file.mime === 'directory') && !mobile && makeDroppable(tempDom);
+						nodes = docFlag? tempDom : tempDom.children();
+						if (node) {
+							node.before(nodes);
+						} else {
+							place.append(nodes);
+						}
 					}
 					
 					if ($('#'+fm.cwdHash2Id(hash)).length) {
-						if (file.mime == 'directory') {
-							dirs = true;
-						} else if (file.tmb) {
+						if (file.mime !== 'directory' && file.tmb) {
 							atmb[hash] = file.tmb;
 						}
 					}
@@ -1047,7 +1060,6 @@ $.fn.elfindercwd = function(fm, options) {
 					$.extend(bufferExt.attachTmbs, atmb);
 					attachThumbnails();
 				}
-				dirs && !mobile && makeDroppable();
 			},
 			
 			/**
