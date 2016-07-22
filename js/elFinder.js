@@ -922,6 +922,7 @@ window.elFinder = function(node, opts) {
 				ui.helper.hide();
 				self.clipboard(result, !isCopy);
 				self.exec('paste', hash, void 0, hash).always(function(){
+					self.clipboard([]);
 					self.trigger('unlockfiles', {files : targets});
 				});
 				self.trigger('drop', {files : targets});
