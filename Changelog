@@ -1,3 +1,15 @@
+2016-07-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.14):
+		- [js:core,VD:abstract] Fixed #1525 do MIME check before file upload
+		- [API] Accept the root options data as an attribute `options` of the root stat
+		- [ui:cwd] Fixed #1532 can not use the `_` in custom column name
+		- [js:command] Fixed #1533 update the cmd status at `sync`
+		- [core] Fixed #1012 support i18n folder name
+		- [ui:cwd] Fixed #1544 jQuery backward compatibility (fix DnD problem)
+		- And some minor bug fixes
+
+
 2016-07-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.13):
