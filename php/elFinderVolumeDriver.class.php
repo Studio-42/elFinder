@@ -1787,6 +1787,11 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
+		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
+		if ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
+		}
+		
 		if (($dir = $this->dir($dst)) == false) {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
@@ -1824,7 +1829,7 @@ abstract class elFinderVolumeDriver {
 		
 		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
 		if ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
 		}
 		
 		if (!($file = $this->file($hash))) {
