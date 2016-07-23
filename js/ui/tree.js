@@ -733,9 +733,11 @@ $.fn.elfindertree = function(fm, opts) {
 							}
 						}
 					});
+					sync(false, dirs);
 				});
-			} 
-			sync(false, dirs);
+			} else {
+				sync(false, dirs);
+			}
 		})
 		// add new dirs
 		.add(function(e) {

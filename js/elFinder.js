@@ -1564,10 +1564,12 @@ window.elFinder = function(node, opts) {
 	/**
 	 * Compare current files cache with new files and return diff
 	 * 
-	 * @param  Array  new files
+	 * @param  Array   new files
+	 * @param  String  target folder hash
+	 * @param  Array   exclude properties to compare
 	 * @return Object
 	 */
-	this.diff = function(incoming, onlydir) {
+	this.diff = function(incoming, onlydir, excludeProps) {
 		var raw       = {},
 			added     = [],
 			removed   = [],
@@ -1601,9 +1603,11 @@ window.elFinder = function(node, opts) {
 				added.push(file);
 			} else {
 				$.each(file, function(prop) {
-					if (file[prop] != origin[prop]) {
-						changed.push(file)
-						return false;
+					if (! excludeProps || $.inArray(prop, excludeProps) === -1) {
+						if (file[prop] != origin[prop]) {
+							changed.push(file)
+							return false;
+						}
 					}
 				});
 			}
