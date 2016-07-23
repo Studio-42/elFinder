@@ -13,7 +13,7 @@ elFinder.prototype.commands.getfile = function() {
 			var o = self.options;
 
 			files = $.map(files, function(file) {
-				return file.mime != 'directory' || o.folders ? file : null;
+				return (file.mime != 'directory' || o.folders) && file.read ? file : null;
 			});
 
 			return o.multiple || files.length == 1 ? files : [];

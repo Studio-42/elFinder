@@ -31,7 +31,7 @@ elFinder.prototype.commands.archive = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write),
+			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true }).length),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {

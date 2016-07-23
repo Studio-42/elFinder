@@ -22,8 +22,8 @@ elFinder.prototype.commands.open = function() {
 			cnt = sel.length;
 		
 		return cnt == 1 
-			? 0 
-			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1) : -1
+			? (sel[0].read? 0 : -1) 
+			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file}).length == cnt ? 0 : -1) : -1
 	}
 	
 	this.exec = function(hashes, opts) {
