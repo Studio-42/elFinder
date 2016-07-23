@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: cc5770c) (2016-07-23)
+ * Version 2.1.13 (2.1-src Nightly: 714715e) (2016-07-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5441,7 +5441,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: cc5770c)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 714715e)';
 
 
 
@@ -13145,7 +13145,7 @@ elFinder.prototype.commands.archive = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write),
+			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true }).length),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {
@@ -13654,7 +13654,7 @@ elFinder.prototype.commands.download = function() {
 	var self   = this,
 		fm     = this.fm,
 		zipOn  = false,
-		filter = function(hashes) {
+		filter = function(hashes, inExec) {
 			var czipdl = (fm.api > 2)? fm.command('zipdl') : null,
 				mixed  = false,
 				croot  = '';
@@ -13679,7 +13679,10 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 			
-			return $.map(self.files(hashes), function(f) { return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f; });
+			return $.map(self.files(hashes), function(f) { 
+				inExec && ! f.read && $('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
+				return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f;
+			});
 		};
 	
 	this.linkedCmds = ['zipdl'];
@@ -13806,7 +13809,7 @@ elFinder.prototype.commands.download = function() {
 		var hashes  = this.hashes(hashes),
 			fm      = this.fm,
 			base    = fm.options.url,
-			files   = filter(hashes),
+			files   = filter(hashes, true),
 			dfrd    = $.Deferred(),
 			iframes = '',
 			cdata   = '',
@@ -14584,7 +14587,7 @@ elFinder.prototype.commands.getfile = function() {
 			var o = self.options;
 
 			files = $.map(files, function(file) {
-				return file.mime != 'directory' || o.folders ? file : null;
+				return (file.mime != 'directory' || o.folders) && file.read ? file : null;
 			});
 
 			return o.multiple || files.length == 1 ? files : [];
@@ -15549,8 +15552,8 @@ elFinder.prototype.commands.open = function() {
 			cnt = sel.length;
 		
 		return cnt == 1 
-			? 0 
-			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1) : -1
+			? (sel[0].read? 0 : -1) 
+			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file}).length == cnt ? 0 : -1) : -1
 	}
 	
 	this.exec = function(hashes, opts) {
@@ -16440,7 +16443,7 @@ elFinder.prototype.commands.quicklook = function() {
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 
-				if (tmb = fm.tmb(file)) {
+				if (file.read && (tmb = fm.tmb(file))) {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
