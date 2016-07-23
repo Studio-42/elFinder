@@ -11,7 +11,7 @@ elFinder.prototype.commands.download = function() {
 	var self   = this,
 		fm     = this.fm,
 		zipOn  = false,
-		filter = function(hashes) {
+		filter = function(hashes, inExec) {
 			var czipdl = (fm.api > 2)? fm.command('zipdl') : null,
 				mixed  = false,
 				croot  = '';
@@ -36,7 +36,10 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 			
-			return $.map(self.files(hashes), function(f) { return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f; });
+			return $.map(self.files(hashes), function(f) { 
+				inExec && ! f.read && $('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
+				return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f;
+			});
 		};
 	
 	this.linkedCmds = ['zipdl'];
@@ -163,7 +166,7 @@ elFinder.prototype.commands.download = function() {
 		var hashes  = this.hashes(hashes),
 			fm      = this.fm,
 			base    = fm.options.url,
-			files   = filter(hashes),
+			files   = filter(hashes, true),
 			dfrd    = $.Deferred(),
 			iframes = '',
 			cdata   = '',

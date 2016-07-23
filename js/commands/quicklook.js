@@ -311,7 +311,7 @@ elFinder.prototype.commands.quicklook = function() {
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
 
-				if (tmb = fm.tmb(file)) {
+				if (file.read && (tmb = fm.tmb(file))) {
 					$('<img/>')
 						.hide()
 						.appendTo(self.preview)
