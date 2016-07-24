@@ -1435,17 +1435,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
             $path .= '/'.$name;
         }
         $path = $this->_normpath($path);
-        $res = $this->chkDBdat($path);
         
         try {
             //Insert or Update a file
             $files = new Google_Service_Drive_DriveFile();
             
-            if (!empty($res)) {
+            if (!empty($stat['rev'])) {
                 // First retrieve the file from the API.
-                $itemId = $res['id'];
-                $name = $res['name'];
-                $mimeType = $res['mimeType'];
+                $itemId = $stat['rev'];
+                $name = $stat['name'];
+                $mimeType = $stat['mimeType'];
                 $files->setName($name);
                 $files->setDescription('');
                 $files->setMimeType($mimeType);
@@ -1456,9 +1455,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                       'mimeType' => $mimeType,
                       'uploadType' => 'multipart'
                       ));
-            } elseif (empty($res)) {
+            } elseif (empty($stat['rev'])) {
                 $name == '' ? $name = basename($path) : $name = $name;
-                array_merge($uploadname, $name);
                 $files->setName($name);
                 $files->setDescription('');
                 $stat['mime'] == '' ? $mimeType= parent::$mimetypes[pathinfo(basename($path), PATHINFO_EXTENSION)] : $mimeType= $stat['mime'];
