@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.13 (2.1-src Nightly: 714715e) (2016-07-23)
+ * Version 2.1.13 (2.1-src Nightly: 4e8b1e3) (2016-07-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5441,7 +5441,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 714715e)';
+elFinder.prototype.version = '2.1.13 (2.1-src Nightly: 4e8b1e3)';
 
 
 
@@ -16283,16 +16283,17 @@ elFinder.prototype.commands.quicklook = function() {
 				e.stopPropagation();
 				e.preventDefault();
 				
-				win.toggleClass(fullscreen);
 				if (full) {
-					win.css(win.data('position'));
+					navStyle = '';
+					navShow();
+					win.toggleClass(fullscreen)
+					.css(win.data('position'));
 					$window.off(scroll).trigger(self.resize).off(self.resize);
 					navbar.off('mouseenter mouseleave');
 					cover.off(coverEv);
-					navStyle = '';
-					navShow();
 				} else {
-					win.data('position', {
+					win.toggleClass(fullscreen)
+					.data('position', {
 						left   : win.css('left'), 
 						top    : win.css('top'), 
 						width  : win.width(), 
@@ -16373,6 +16374,7 @@ elFinder.prototype.commands.quicklook = function() {
 		navShow = function() {
 			if (self.window.hasClass(fullscreen)) {
 				navtm && clearTimeout(navtm);
+				navtm = null;
 				// if use `show()` it make infinite loop with old jQuery (jQuery/jQuery UI: 1.8.0/1.9.0)
 				// see #1478 https://github.com/Studio-42/elFinder/issues/1478
 				navbar.stop(true, true).css('display', 'block');
@@ -16382,6 +16384,7 @@ elFinder.prototype.commands.quicklook = function() {
 		
 		coverHide = function() {
 			cover.data('tm') && clearTimeout(cover.data('tm'));
+			cover.removeData('tm');
 			cover.hide();
 		},
 			
