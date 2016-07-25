@@ -102,7 +102,15 @@ window.elFinderSupportVer1 = function(upload) {
 				opts.data.current = opts.data.target;
 				break;
 			case 'paste':
-				opts.data.current = opts.data.dst
+				opts.data.current = opts.data.dst;
+				if (! opts.data.tree) {
+					$.each(opts.data.targets, function(i, h) {
+						if (fm.file(h) && fm.file(h).mime === 'directory') {
+							opts.data.tree = '1';
+							return false;
+						}
+					});
+				}
 				break;
 				
 			case 'size':
