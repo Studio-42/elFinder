@@ -1392,7 +1392,7 @@ window.elFinder = function(node, opts) {
 								dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
 								return;
 							}
-							error = ['errConnect', 'HTTP error ' + xhr.status];
+							error = xhr.quiet ? '' : ['errConnect', 'HTTP error ' + xhr.status];
 						} 
 				}
 				
