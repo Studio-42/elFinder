@@ -480,63 +480,22 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                         $itemId = $itemId.'/'.$raw->id;
                         break;
                     } elseif ($i == sizeof($file)) {
-                        $itemId = $itemId.'/'.$tpath;
+                        //$itemId = $itemId.'/'.$tpath;
+                        return false;
                         break;
                     }
                     $i++;
                 }
             } else {
-                $itemId = $itemId.'/'.$tpath;
+                //$itemId = $itemId.'/'.$tpath;
+                return false;
             }
         }
         
         substr($itemId, 0, 4) == 'root' ? $path = $this->_normpath(substr($itemId, 4, strlen($itemId)-4)) : $path = $itemId;
+        $this->options['path'] = $path;
        
         return $path;
-    }
-    
-    /**
-     * Get dat(googledrive metadata) from GoogleDrive
-     * 
-     * @param string $path with id
-     * @return array googledrive metadata
-     */
-     
-    private function chkDBdat($path)
-    {
-        //$files = new Google_Service_Drive_DriveFile();
-
-        if ($path == $this->root) {
-            $this->root == '/' ? $itemId = 'root' : $itemId = basename($this->root);
-			$opts = [
-				'fields' => self::FETCHFIELDS_GET
-			];            
-			return $this->service->files->get($itemId, $opts);
-        } else {
-            empty(basename(dirname($path))) ? $HasPath ='/' : $HasPath = trim($this->getHasPath($path));
-            basename(dirname($path)) == '' ? $itemId = 'root' : $itemId = basename(dirname($HasPath));
-                
-            $opts = [
-                'fields'    => 'files(id,name,mimeType)',
-                'pageSize'    => 1000,
-                'spaces'    => 'drive',
-                'q'        => sprintf('trashed=false and "%s" in parents', $itemId)
-            ];
-        
-            //$file = $this->service->files->listFiles($opts);
-            $file = $this->query($opts);
-            
-            foreach ($file as $raw) {
-                if ($raw->name == basename($path) || $raw->id == basename($path)) {
-                    basename(dirname($path)) == '' ? $path = '/'.$raw->id : $path = dirname($HasPath).'/'.$raw->id;
-                    $res = array('path'=>$path, 'id'=>$raw->id, 'name'=>$raw->name, 'mimeType'=>$raw->mimeType);
-                    return $res;
-                    break;
-                }
-            }
-        
-            return false;
-        }
     }
          
     /**
@@ -555,7 +514,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			return $this->service->files->get($itemId, $opts);
         }
         
-        $itemId = basename($this->chkDBdat($path)['path']);
+        $itemId = basename($path);
         
         if (!empty($itemId)) {
             $opts = [
@@ -632,9 +591,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function cacheDir($path)
     {
-        $path == '/' ? $HasPath= 'root' : ($path == $this->root ? $HasPath = basename($this->root) :
-                                           $HasPath = $this->chkDBdat($path)['path']);
-            
+        $path == '/' ? $HasPath= 'root' : $HasPath = $this->options['path'];
+        
         $opts = [
             'fields' => self::FETCHFIELDS_LIST,
             'pageSize' => 1000,
@@ -1132,6 +1090,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function _stat($path)
     {
+        if($path !== '/'){
+			$path = $this->getHasPath($path);
+		}
         if ($raw = $this->getDBdat($path)) {
             return $this->parseRaw($raw);
         }
