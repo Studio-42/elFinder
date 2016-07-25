@@ -1,4 +1,4 @@
-2016-07-xx  Naoki Sawada  <hypweb@gmail.com>
+2016-07-25  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.14):
 		- [js:core,VD:abstract] Fixed #1525 do MIME check before file upload
@@ -7,6 +7,7 @@
 		- [js:command] Fixed #1533 update the cmd status at `sync`
 		- [core] Fixed #1012 support i18n folder name
 		- [ui:cwd] Fixed #1544 jQuery backward compatibility (fix DnD problem)
+		- [proxy:APIv1] Fixed #178 correction of command `paste`
 		- And some minor bug fixes
 
 
