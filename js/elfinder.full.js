@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2016-07-25)
+ * Version 2.1.14 (2.1-src Nightly: 498d591) (2016-07-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1406,7 +1406,7 @@ window.elFinder = function(node, opts) {
 								dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
 								return;
 							}
-							error = ['errConnect', 'HTTP error ' + xhr.status];
+							error = xhr.quiet ? '' : ['errConnect', 'HTTP error ' + xhr.status];
 						} 
 				}
 				
@@ -5441,7 +5441,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 498d591)';
 
 
 
