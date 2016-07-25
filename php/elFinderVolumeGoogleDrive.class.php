@@ -736,8 +736,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     protected function copy($src, $dst, $name)
     {
         $this->clearcache();
-        
-        if ($this->chkDBdat($src)['mimeType'] == self::DIRMIME) {
+        $opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];       
+		$res = $this->service->files->get(basename($src), $opts);
+        if ($res['mimeType'] == self::DIRMIME) {
             $itemId = basename($this->_mkdir($dst, $name));
             $path = $this->_joinPath($dst, $itemId);
             $opts = [
