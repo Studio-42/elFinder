@@ -2437,23 +2437,27 @@ window.elFinder = function(node, opts) {
 	if (!$.isArray(this.options.commands)) {
 		this.options.commands = [];
 	}
-	// check required commands
-	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'quicklook', 'getfile', 'help'], function(i, cmd) {
-		var idx = $.inArray(cmd, self.options.commands);
-		if (cmd === 'getfile' && ! self.options.getFileCallback) {
-			idx !== -1 && self.options.commands.splice(idx, 1);
-			return true;
-		}
-		idx === -1 && self.options.commands.push(cmd);
-	});
-
+	
 	// load commands
-	$.each(this.options.commands, function(i, name) {
-		var cmd = self.commands[name];
-		if ($.isFunction(cmd) && !self._commands[name]) {
-			cmd.prototype = base;
+	$.each(this.commands, function(name, cmd) {
+		var extendsCmd, opts;
+		if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
+			extendsCmd = cmd.prototype.extendsCmd || '';
+			if (extendsCmd) {
+				if ($.isFunction(self.commands[extendsCmd])) {
+					cmd.prototype = $.extend({}, base, new self.commands[extendsCmd](), cmd.prototype);
+				} else {
+					return true;
+				}
+			} else {
+				cmd.prototype = $.extend({}, base, cmd.prototype);
+			}
 			self._commands[name] = new cmd();
-			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+			opts = self.options.commandsOptions[name] || {};
+			if (extendsCmd && self.options.commandsOptions[extendsCmd]) {
+				opts = $.extend(true, {}, self.options.commandsOptions[extendsCmd], opts);
+			}
+			self._commands[name].setup(name, opts);
 			// setup linked commands
 			if (self._commands[name].linkedCmds.length) {
 				$.each(self._commands[name].linkedCmds, function(i, n) {
@@ -3278,7 +3282,7 @@ elFinder.prototype = {
 										if (existed.length && target == fm.cwd().hash) {
 											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
 											if ($.map(existed, function(n) { 
-												return cwdItems.indexOf(n) === -1? true : null;
+												return $.inArray(n, cwdItems) === -1? true : null;
 											}).length){
 												fm.sync();
 											}

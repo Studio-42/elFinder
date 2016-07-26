@@ -5,7 +5,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.up = function() {
+(elFinder.prototype.commands.up = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	
@@ -21,4 +21,4 @@ elFinder.prototype.commands.up = function() {
 		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command

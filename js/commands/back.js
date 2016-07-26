@@ -5,7 +5,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.back = function() {
+(elFinder.prototype.commands.back = function() {
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.shortcuts      = [{
@@ -20,4 +20,4 @@ elFinder.prototype.commands.back = function() {
 		return this.fm.history.back();
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command

@@ -5,7 +5,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.help = function() {
+(elFinder.prototype.commands.help = function() {
 	var fm   = this.fm,
 		self = this,
 		linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
@@ -196,4 +196,4 @@ elFinder.prototype.commands.help = function() {
 		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command
