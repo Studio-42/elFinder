@@ -1,11 +1,11 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "quicklook"
  * Fast preview for some files types
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.quicklook = function() {
+(elFinder.prototype.commands.quicklook = function() {
 	var self       = this,
 		fm         = self.fm,
 		/**
@@ -542,4 +542,4 @@ elFinder.prototype.commands.quicklook = function() {
 		this.info.stop(true, true).hide();
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command

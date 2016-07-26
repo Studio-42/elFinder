@@ -1,11 +1,11 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "open"
  * Enter folder or open files in new windows
  *
  * @author Dmitry (dio) Levashov
  **/  
-elFinder.prototype.commands.open = function() {
+(elFinder.prototype.commands.open = function() {
 	this.alwaysEnabled = true;
 	
 	this._handlers = {
@@ -183,4 +183,4 @@ elFinder.prototype.commands.open = function() {
 		return dfrd;
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command

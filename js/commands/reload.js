@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.reload = function() {
+(elFinder.prototype.commands.reload = function() {
 	var self   = this,
 		search = false;
 	
@@ -68,4 +68,4 @@ elFinder.prototype.commands.reload = function() {
 		}
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command

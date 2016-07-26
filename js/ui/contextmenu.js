@@ -270,6 +270,10 @@ $.fn.elfindercontextmenu = function(fm) {
 							}
 						}
 						
+						if (cmd.extendsCmd) {
+							node.children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd);
+						}
+						
 						menu.append(node)
 						sep = true;
 					}

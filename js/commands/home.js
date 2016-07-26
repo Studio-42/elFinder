@@ -1,5 +1,5 @@
 
-elFinder.prototype.commands.home = function() {
+(elFinder.prototype.commands.home = function() {
 	this.title = 'Home';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -20,4 +20,4 @@ elFinder.prototype.commands.home = function() {
 	}
 	
 
-};
+}).prototype = { forceLoad : true }; // this is required command

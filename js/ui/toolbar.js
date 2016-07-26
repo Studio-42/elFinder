@@ -61,43 +61,48 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		render();
 		
 		fm.bind('open sync', function(){
-			var repCmds = [],
-			disabled = fm.option('disabled');
+			var disabled = fm.option('disabled'),
+				doRender;
 
 			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
+				doRender = true;
 			}
 			dispre = disabled.concat().sort();
 
-			if (uiCmdMapPrev !== JSON.stringify(fm.commandMap)) {
+			if (doRender || uiCmdMapPrev !== JSON.stringify(fm.commandMap)) {
 				uiCmdMapPrev = JSON.stringify(fm.commandMap);
+				if (! doRender) {
+					// reset toolbar
+					$.each($('div.elfinder-button'), function(){
+						var origin = $(this).data('origin');
+						if (origin) {
+							$(this).after(origin).detach();
+						}
+					});
+				}
 				if (Object.keys(fm.commandMap).length) {
 					$.each(fm.commandMap, function(from, to){
 						var cmd = fm._commands[to],
-						button = cmd? 'elfinder'+cmd.options.ui : null;
+							button = cmd? 'elfinder'+cmd.options.ui : null,
+							btn;
 						if (button && $.fn[button]) {
-							repCmds.push(from);
-							var btn = $('div.elfinder-buttonset div.elfinder-button').has('span.elfinder-button-icon-'+from);
-							if (btn.length && !btn.next().has('span.elfinder-button-icon-'+to).length) {
+							btn = buttons[from];
+							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
+									if (cmd.extendsCmd) {
+										buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
+									};
 								}
 								if (buttons[to]) {
-									btn.after(buttons[to].data('origin', from));
-									btn.hide();
+									btn.after(buttons[to]);
+									buttons[to].data('origin', btn.detach());
 								}
 							}
 						}
 					});
 				}
-				// reset toolbar
-				$.each($('div.elfinder-button'), function(){
-					var origin = $(this).data('origin');
-					if (origin && $.inArray(origin, repCmds) == -1) {
-						$('span.elfinder-button-icon-' + origin).parent().show();
-						$(this).detach();
-					}
-				});
 			}
 		});
 		

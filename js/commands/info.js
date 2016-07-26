@@ -5,7 +5,7 @@
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
-elFinder.prototype.commands.info = function() {
+(elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
 		spclass = 'elfinder-info-spinner',
@@ -279,4 +279,4 @@ elFinder.prototype.commands.info = function() {
 
 	};
 	
-};
+}).prototype = { forceLoad : true }; // this is required command
