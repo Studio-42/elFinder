@@ -514,7 +514,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			return $this->service->files->get($itemId, $opts);
         }
         
-        $itemId = basename($path);
+        $itemId = basename($this->getHasPath($path));
         
         if (!empty($itemId)) {
             $opts = [
@@ -1090,9 +1090,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function _stat($path)
     {
-        if($path !== '/'){
-			$path = $this->getHasPath($path);
-		}
         if ($raw = $this->getDBdat($path)) {
             return $this->parseRaw($raw);
         }
