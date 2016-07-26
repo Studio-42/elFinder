@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 506c889) (2016-07-25)
+ * Version 2.1.14 (2.1-src Nightly: 307b1b9) (2016-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2451,23 +2451,27 @@ window.elFinder = function(node, opts) {
 	if (!$.isArray(this.options.commands)) {
 		this.options.commands = [];
 	}
-	// check required commands
-	$.each(['open', 'reload', 'back', 'forward', 'up', 'home', 'info', 'quicklook', 'getfile', 'help'], function(i, cmd) {
-		var idx = $.inArray(cmd, self.options.commands);
-		if (cmd === 'getfile' && ! self.options.getFileCallback) {
-			idx !== -1 && self.options.commands.splice(idx, 1);
-			return true;
-		}
-		idx === -1 && self.options.commands.push(cmd);
-	});
-
+	
 	// load commands
-	$.each(this.options.commands, function(i, name) {
-		var cmd = self.commands[name];
-		if ($.isFunction(cmd) && !self._commands[name]) {
-			cmd.prototype = base;
+	$.each(this.commands, function(name, cmd) {
+		var extendsCmd, opts;
+		if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
+			extendsCmd = cmd.prototype.extendsCmd || '';
+			if (extendsCmd) {
+				if ($.isFunction(self.commands[extendsCmd])) {
+					cmd.prototype = $.extend({}, base, new self.commands[extendsCmd](), cmd.prototype);
+				} else {
+					return true;
+				}
+			} else {
+				cmd.prototype = $.extend({}, base, cmd.prototype);
+			}
 			self._commands[name] = new cmd();
-			self._commands[name].setup(name, self.options.commandsOptions[name]||{});
+			opts = self.options.commandsOptions[name] || {};
+			if (extendsCmd && self.options.commandsOptions[extendsCmd]) {
+				opts = $.extend(true, {}, self.options.commandsOptions[extendsCmd], opts);
+			}
+			self._commands[name].setup(name, opts);
 			// setup linked commands
 			if (self._commands[name].linkedCmds.length) {
 				$.each(self._commands[name].linkedCmds, function(i, n) {
@@ -3292,7 +3296,7 @@ elFinder.prototype = {
 										if (existed.length && target == fm.cwd().hash) {
 											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
 											if ($.map(existed, function(n) { 
-												return cwdItems.indexOf(n) === -1? true : null;
+												return $.inArray(n, cwdItems) === -1? true : null;
 											}).length){
 												fm.sync();
 											}
@@ -5441,7 +5445,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 506c889)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 307b1b9)';
 
 
 
@@ -6874,7 +6878,8 @@ elFinder.prototype.command = function(fm) {
 			fm   = this.fm, i, s, sc;
 
 		this.name      = name;
-		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name) : name, 
+		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name)
+		               : ((this.extendsCmd && fm.messages['cmd'+this.extendsCmd]) ? fm.i18n('cmd'+this.extendsCmd) : name), 
 		this.options   = $.extend({}, this.options, opts);
 		this.listeners = [];
 
@@ -8197,6 +8202,10 @@ $.fn.elfindercontextmenu = function(fm) {
 							} else {
 								node.remove('.elfinder-contextmenu-extra-icon');
 							}
+						}
+						
+						if (cmd.extendsCmd) {
+							node.children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd);
 						}
 						
 						menu.append(node)
@@ -12075,43 +12084,48 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		render();
 		
 		fm.bind('open sync', function(){
-			var repCmds = [],
-			disabled = fm.option('disabled');
+			var disabled = fm.option('disabled'),
+				doRender;
 
 			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
+				doRender = true;
 			}
 			dispre = disabled.concat().sort();
 
-			if (uiCmdMapPrev !== JSON.stringify(fm.commandMap)) {
+			if (doRender || uiCmdMapPrev !== JSON.stringify(fm.commandMap)) {
 				uiCmdMapPrev = JSON.stringify(fm.commandMap);
+				if (! doRender) {
+					// reset toolbar
+					$.each($('div.elfinder-button'), function(){
+						var origin = $(this).data('origin');
+						if (origin) {
+							$(this).after(origin).detach();
+						}
+					});
+				}
 				if (Object.keys(fm.commandMap).length) {
 					$.each(fm.commandMap, function(from, to){
 						var cmd = fm._commands[to],
-						button = cmd? 'elfinder'+cmd.options.ui : null;
+							button = cmd? 'elfinder'+cmd.options.ui : null,
+							btn;
 						if (button && $.fn[button]) {
-							repCmds.push(from);
-							var btn = $('div.elfinder-buttonset div.elfinder-button').has('span.elfinder-button-icon-'+from);
-							if (btn.length && !btn.next().has('span.elfinder-button-icon-'+to).length) {
+							btn = buttons[from];
+							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
+									if (cmd.extendsCmd) {
+										buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
+									};
 								}
 								if (buttons[to]) {
-									btn.after(buttons[to].data('origin', from));
-									btn.hide();
+									btn.after(buttons[to]);
+									buttons[to].data('origin', btn.detach());
 								}
 							}
 						}
 					});
 				}
-				// reset toolbar
-				$.each($('div.elfinder-button'), function(){
-					var origin = $(this).data('origin');
-					if (origin && $.inArray(origin, repCmds) == -1) {
-						$('span.elfinder-button-icon-' + origin).parent().show();
-						$(this).detach();
-					}
-				});
 			}
 		});
 		
@@ -13213,7 +13227,7 @@ elFinder.prototype.commands.archive = function() {
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.back = function() {
+(elFinder.prototype.commands.back = function() {
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	this.shortcuts      = [{
@@ -13228,7 +13242,7 @@ elFinder.prototype.commands.back = function() {
 		return this.fm.history.back();
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -14551,7 +14565,7 @@ elFinder.prototype.commands.extract = function() {
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.forward = function() {
+(elFinder.prototype.commands.forward = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
 	this.shortcuts = [{
@@ -14566,7 +14580,7 @@ elFinder.prototype.commands.forward = function() {
 		return this.fm.history.forward();
 	}
 	
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -14580,7 +14594,7 @@ elFinder.prototype.commands.forward = function() {
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
-elFinder.prototype.commands.getfile = function() {
+(elFinder.prototype.commands.getfile = function() {
 	var self   = this,
 		fm     = this.fm,
 		filter = function(files) {
@@ -14692,7 +14706,7 @@ elFinder.prototype.commands.getfile = function() {
 		return dfrd.resolve(result(files));
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -14705,7 +14719,7 @@ elFinder.prototype.commands.getfile = function() {
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.help = function() {
+(elFinder.prototype.commands.help = function() {
 	var fm   = this.fm,
 		self = this,
 		linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
@@ -14896,7 +14910,7 @@ elFinder.prototype.commands.help = function() {
 		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -14904,7 +14918,7 @@ elFinder.prototype.commands.help = function() {
  */
 
 
-elFinder.prototype.commands.home = function() {
+(elFinder.prototype.commands.home = function() {
 	this.title = 'Home';
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -14925,7 +14939,7 @@ elFinder.prototype.commands.home = function() {
 	}
 	
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -14938,7 +14952,7 @@ elFinder.prototype.commands.home = function() {
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
-elFinder.prototype.commands.info = function() {
+(elFinder.prototype.commands.info = function() {
 	var m   = 'msg',
 		fm  = this.fm,
 		spclass = 'elfinder-info-spinner',
@@ -15212,7 +15226,7 @@ elFinder.prototype.commands.info = function() {
 
 	};
 	
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -15535,7 +15549,7 @@ elFinder.prototype.commands.netunmount = function() {
  *
  * @author Dmitry (dio) Levashov
  **/  
-elFinder.prototype.commands.open = function() {
+(elFinder.prototype.commands.open = function() {
 	this.alwaysEnabled = true;
 	
 	this._handlers = {
@@ -15713,7 +15727,7 @@ elFinder.prototype.commands.open = function() {
 		return dfrd;
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -16137,7 +16151,7 @@ elFinder.prototype.commands.places = function() {
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.quicklook = function() {
+(elFinder.prototype.commands.quicklook = function() {
 	var self       = this,
 		fm         = self.fm,
 		/**
@@ -16674,7 +16688,7 @@ elFinder.prototype.commands.quicklook = function() {
 		this.info.stop(true, true).hide();
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -17310,7 +17324,7 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.reload = function() {
+(elFinder.prototype.commands.reload = function() {
 	var self   = this,
 		search = false;
 	
@@ -17374,7 +17388,7 @@ elFinder.prototype.commands.reload = function() {
 		}
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
@@ -18864,7 +18878,7 @@ elFinder.prototype.commands.sort = function() {
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.up = function() {
+(elFinder.prototype.commands.up = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	
@@ -18880,7 +18894,7 @@ elFinder.prototype.commands.up = function() {
 		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
