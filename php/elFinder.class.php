@@ -936,7 +936,7 @@ class elFinder {
 		}
 		
 		if (! $key =  $volume->netMountKey) {
-			$key = md5($protocol . '-' . join('-', $options));
+			$key = md5($protocol . '-' . serialize($options));
 		}
 		$options['netkey'] = $key;
 		
