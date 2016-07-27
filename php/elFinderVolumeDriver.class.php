@@ -14,6 +14,13 @@
 abstract class elFinderVolumeDriver {
 	
 	/**
+	 * Net mount key
+	 *
+	 * @var string
+	 **/
+	public $netMountKey = '';
+	
+	/**
 	 * Request args
 	 * $_POST or $_GET values
 	 * 
