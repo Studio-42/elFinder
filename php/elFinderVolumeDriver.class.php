@@ -3501,9 +3501,11 @@ abstract class elFinderVolumeDriver {
 			if (!isset($stat['name']) || $stat['name'] === '') {
 				$stat['name'] = $this->basenameCE($path);
 			}
-			$parent = $this->dirnameCE($path);
 			if (empty($stat['phash'])) {
+				$parent = $this->dirnameCE($path);
 				$stat['phash'] = $this->encode($parent);
+			} else {
+				$parent = $this->getPath($stat['phash']);
 			}
 		}
 		
