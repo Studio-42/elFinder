@@ -881,7 +881,7 @@ abstract class elFinderVolumeDriver {
 	
 	public function clearstatcache() {
 		clearstatcache();
-		$this->cache = $this->dirsCache = $this->subdirsCache = array();
+		$this->clearcache();
 	}
 
 	/**
