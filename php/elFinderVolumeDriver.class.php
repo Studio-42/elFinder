@@ -638,6 +638,13 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $doSearchCurrentQuery = array();
 	
+	/**
+	 * Is root modified (for clear root stat cache)
+	 * 
+	 * @var bool
+	 */
+	protected $rootModified = false;
+	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
 	/*********************************************************************/
@@ -840,6 +847,9 @@ abstract class elFinderVolumeDriver {
 		}
 
 		$this->clearcache();
+		if ($path == $this->root) {
+			$this->rootModified = true;
+		}
 
 		if ($file = $this->stat($path)) {
 			$files = array($file);
@@ -871,7 +881,7 @@ abstract class elFinderVolumeDriver {
 	
 	public function clearstatcache() {
 		clearstatcache();
-		$this->cache = $this->dirsCache = array();
+		$this->cache = $this->dirsCache = $this->subdirsCache = array();
 	}
 
 	/**
@@ -3491,8 +3501,8 @@ abstract class elFinderVolumeDriver {
 			if (!isset($stat['name']) || $stat['name'] === '') {
 				$stat['name'] = $this->basenameCE($path);
 			}
+			$parent = $this->dirnameCE($path);
 			if (empty($stat['phash'])) {
-				$parent = $this->dirnameCE($path);
 				$stat['phash'] = $this->encode($parent);
 			}
 		}
@@ -3531,8 +3541,7 @@ abstract class elFinderVolumeDriver {
 		} else {
 			// lock when parent directory is not writable
 			if (!isset($stat['locked'])) {
-				$parent = $this->dirnameCE($path);
-				$pstat = isset($this->cache[$parent])? $this->cache[$parent] : array();
+				$pstat = $this->stat($parent);
 				if (isset($pstat['write']) && !$pstat['write']) {
 					$stat['locked'] = true;
 				}
@@ -3638,9 +3647,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function clearcache() {
-		$this->cache = $this->dirsCache = array();
-		unset($this->sessionCache['rootstat'][md5($this->root)]);
-		$this->session->set($this->id, $this->sessionCache);
+		$this->cache = $this->dirsCache = $this->subdirsCache = array();
 	}
 
 	/**
@@ -3829,7 +3836,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	protected function isMyReload($target = '', $ARGtarget = '') {
-		if (! empty($this->ARGS['cmd']) && $this->ARGS['cmd'] === 'parents') {
+		if ($this->rootModified || (! empty($this->ARGS['cmd']) && $this->ARGS['cmd'] === 'parents')) {
 			return true;
 		}
 		if (! empty($this->ARGS['reload'])) {
@@ -4411,7 +4418,6 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 
-		//clearstatcache();
 		return $name;
 	}
 

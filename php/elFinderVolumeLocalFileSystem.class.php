@@ -646,6 +646,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected function _scandir($path) {
 		$files = array();
 		$cache = array();
+		$dirWritable = is_writable($path);
 		$statOwner = (!empty($this->options['statOwner']));
 		$dirItr = array();
 		$followSymLinks = $this->options['followSymLinks'];
@@ -712,6 +713,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					//logical rights first
 					$stat['read'] = ($linkreadable || $file->isReadable())? null : false;
 					$stat['write'] = $file->isWritable()? null : false;
+					$stat['locked'] = $dirWritable? null : true;
 					
 					if (is_null($stat['read'])) {
 						$stat['size'] = $dir ? 0 : $size;
