@@ -4489,6 +4489,9 @@ elFinder.prototype = {
 			name, i18, i18nFolderName, prevId;
 		
 
+		if (data.cwd) {
+			data.cwd = filter(data.cwd);
+		}
 		if (data.files) {
 			data.files = $.map(data.files, filter);
 		} 
