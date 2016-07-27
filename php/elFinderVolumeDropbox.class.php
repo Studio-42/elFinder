@@ -57,13 +57,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	protected $tmp = '';
 	
 	/**
-	 * Net mount key
-	 *
-	 * @var string
-	 **/
-	public $netMountKey = '';
-	
-	/**
 	 * Dropbox.com uid
 	 *
 	 * @var string
