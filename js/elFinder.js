@@ -3242,6 +3242,12 @@ elFinder.prototype = {
 						fm.confirm(opts);
 					};
 					
+					if (! fm.file(target).read) {
+						// for dropbox type
+						dfrd.resolve([]);
+						return;
+					}
+					
 					names = $.map(files, function(file, i) { return file.name? {i: i, name: file.name} : null ;});
 					
 					name = $.map(names, function(item) { return item.name;});
