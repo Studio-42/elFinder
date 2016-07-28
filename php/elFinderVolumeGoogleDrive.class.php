@@ -48,6 +48,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),webContentLink,webViewLink';
     
     /**
+	 * hasCache by folders
+	 *
+	 * @var array
+	 **/
+	protected $HasdirsCache = array();
+	
+    /**
      * Directory for tmp files
      * If not set driver will try to use tmbDir as tmpDir
      *
@@ -446,59 +453,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     }
     
     /**
-     * Get child directory real path with mount
-     * 
-     * @return realpath|string error message
-     */
-    private function getHasPath($path)
-    {
-        $temppath = explode('/', $path);
-        array_shift($temppath);
-		
-		if($this->root !== '/'){
-			array_shift($temppath);
-		}
-                
-        //$files = new Google_Service_Drive_DriveFile();
-        $this->root == '/' ? $itemId = 'root' : $itemId = $this->root;
-        
-        foreach ($temppath as $tpath) {
-            $opts = [
-                'fields'    => 'files(id,name)',
-                //'orderBy'	=> 'folder,name',								
-                'pageSize'  => 1000,
-                'spaces'    => 'drive',
-                'q'         => sprintf('trashed=false and "%s" in parents', basename($itemId))
-            ];
-        
-        //$file = $this->service->files->listFiles($opts);
-        $file = $this->query($opts);
-            $i=1;
-            if ($file) {
-                foreach ($file as $raw) {
-                    if ($raw->name == $tpath || $raw->id ==$tpath) {
-                        $itemId = $itemId.'/'.$raw->id;
-                        break;
-                    } elseif ($i == sizeof($file)) {
-                        //$itemId = $itemId.'/'.$tpath;
-                        return false;
-                        break;
-                    }
-                    $i++;
-                }
-            } else {
-                //$itemId = $itemId.'/'.$tpath;
-                return false;
-            }
-        }
-        
-        substr($itemId, 0, 4) == 'root' ? $path = $this->_normpath(substr($itemId, 4, strlen($itemId)-4)) : $path = $itemId;
-        $this->options['path'] = $path;
-       
-        return $path;
-    }
-         
-    /**
      * Get dat(googledrive metadata) from GoogleDrive
      * 
      * @param string $path
@@ -514,18 +468,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			return $this->service->files->get($itemId, $opts);
         }
         
-        $itemId = basename($this->getHasPath($path));
-        
-        if (!empty($itemId)) {
-            $opts = [
-                    'fields' => self::FETCHFIELDS_GET
-                ];
-            //$files = new Google_Service_Drive_DriveFile();									
-            $res = $this->service->files->get($itemId, $opts);
-            return $res;
-        } else {
-            return array();
-        }
+        empty($this->HasdirsCache[$path]) ? $itemId = $path : $itemId = $this->HasdirsCache[$path][0];
+
+		try{
+			$opts = [
+				'fields' => self::FETCHFIELDS_GET
+				];
+			return $this->service->files->get(basename($itemId), $opts);
+		} catch (Exception $e) {
+			return array();
+		}
     }
     
 
@@ -591,7 +543,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function cacheDir($path)
     {
-        $path == '/' ? $HasPath= 'root' : $HasPath = $this->options['path'];
+        $path == '/' ? $HasPath= 'root' : (empty($this->HasdirsCache[$path]) ? $HasPath = $path : $HasPath = $this->HasdirsCache[$path][0]);
         
         $opts = [
             'fields' => self::FETCHFIELDS_LIST,
@@ -611,6 +563,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                     $stat = $this->updateCache($mountPath.$raw->id, $stat);
                     if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
                         $this->dirsCache[$path][] = $mountPath.$raw->id;
+                        $this->HasdirsCache[$this->_normpath($path.'/'.$raw->name)][] = $this->_normpath($path.'/'.$raw->id);
                     }
                 }
             }
