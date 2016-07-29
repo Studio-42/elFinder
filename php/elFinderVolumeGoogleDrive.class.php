@@ -468,13 +468,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			return $this->service->files->get($itemId, $opts);
         }
         
-        empty($this->HasdirsCache[$path]) ? $itemId = $path : $itemId = $this->HasdirsCache[$path][0];
+        empty($this->HasdirsCache[$path]) ? $HasPath = $path : $HasPath = $this->HasdirsCache[$path][0];
+        $itemId = basename($HasPath);
 
 		try{
 			$opts = [
 				'fields' => self::FETCHFIELDS_GET
 				];
-			return $this->service->files->get(basename($itemId), $opts);
+			return $this->service->files->get($itemId, $opts);
 		} catch (Exception $e) {
 			return array();
 		}
@@ -563,7 +564,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                     $stat = $this->updateCache($mountPath.$raw->id, $stat);
                     if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
                         $this->dirsCache[$path][] = $mountPath.$raw->id;
-                        $this->HasdirsCache[$this->_normpath($path.'/'.$raw->name)][] = $this->_normpath($this->HasdirsCache[$path][0].'/'.$raw->id);
+                        $this->HasdirsCache[$this->_normpath($path.'/'.$raw->name)][] = $mountPath.$raw->id;
                     }
                 }
             }
