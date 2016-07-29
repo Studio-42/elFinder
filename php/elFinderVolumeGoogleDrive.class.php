@@ -563,7 +563,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                     $stat = $this->updateCache($mountPath.$raw->id, $stat);
                     if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
                         $this->dirsCache[$path][] = $mountPath.$raw->id;
-                        $this->HasdirsCache[$this->_normpath($path.'/'.$raw->name)][] = $this->_normpath($path.'/'.$raw->id);
+                        $this->HasdirsCache[$this->_normpath($path.'/'.$raw->name)][] = $this->_normpath($this->HasdirsCache[$path][0].'/'.$raw->id);
                     }
                 }
             }
