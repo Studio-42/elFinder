@@ -245,11 +245,15 @@
 	outline:0px solid;
 }
 
+.elfinder-button-search input::-ms-clear {
+	display: none;
+}
 .elfinder-touch .elfinder-button-search input {
 	height:28px;
 	line-height: 28px;
 }
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
+
 
 /* icons */
 .elfinder-button-search .ui-icon {

@@ -120,7 +120,7 @@ class elFinderPluginWatermark {
 			IMAGETYPE_BMP  => IMG_WBMP,
 			IMAGETYPE_WBMP => IMG_WBMP
 		);
-		if (! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
+		if (! isset($imgTypes[$srcImgInfo[2]]) || ! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
 			return false;
 		}
 		
