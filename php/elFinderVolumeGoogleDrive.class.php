@@ -1345,56 +1345,73 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      * @author Dmitry (dio) Levashov
      **/
     protected function _save($fp, $path, $name, $stat)
-    {
-        if ($name) {
-            $path .= '/'.$name;
-        }
-        $path = $this->_normpath($path);
-        
-        try {
-            //Insert or Update a file
-            $files = new Google_Service_Drive_DriveFile();
-            
-            if (!empty($stat['rev'])) {
-                // First retrieve the file from the API.
-                $itemId = $stat['rev'];
-                $name = $stat['name'];
-                $mimeType = $stat['mimeType'];
-                $files->setName($name);
-                $files->setDescription('');
-                $files->setMimeType($mimeType);
-                // Send the request to the API for updation contents.
-                $data= stream_get_contents($fp);
-                $file = $this->service->files->update($itemId, $files, array(
-                      'data' => strlen($data) == 0 ? ' ' : $data,
-                      'mimeType' => $mimeType,
-                      'uploadType' => 'multipart'
-                      ));
-            } elseif (empty($stat['rev'])) {
-                $name == '' ? $name = basename($path) : $name = $name;
-                $files->setName($name);
-                $files->setDescription('');
-                $stat['mime'] == '' ? $mimeType= parent::$mimetypes[pathinfo(basename($path), PATHINFO_EXTENSION)] : $mimeType= $stat['mime'];
-                $files->setMimeType($mimeType);
-                            
-                //Set the Folder Parent			
-                basename(dirname($path)) == '' ? $parentId = 'root' : $parentId = basename(dirname($path));
-                
-                $files->setParents(array($parentId));
-                
-                $data= stream_get_contents($fp);
-                $file = $this->service->files->create($files, array(
-                      'data' => strlen($data) == 0 ? ' ' : $data,
-                      'mimeType' => $mimeType,
-                      'uploadType' => 'media'
-                ));
-            }
-        } catch (Exception $e) {
-            return $this->setError('GoogleDrive error: '.$e->getMessage());
-        }
-        $path = $this->_normpath(dirname($path).'/'.$file->getId());
-        
-        return $path;
+	{ 
+		if ($name) {
+			$path .= '/'.$name;
+		}
+		
+		$path = $this->_normpath($path);
+		
+		empty(basename(dirname($path))) ? $itemId ='root' : $itemId = basename(dirname($path));
+		isset($stat['name']) ? $name = $stat['name'] : $name = basename($path);
+		$opts = [
+				'fields'	=> self::FETCHFIELDS_LIST,
+				'pageSize'	=> 1000,
+				'spaces'	=> 'drive',
+				'q'			=> sprintf('trashed=false and name="%s" and "%s" in parents', $name, $itemId)
+            ];
+		
+		$res = $this->query($opts);
+		
+		try {
+			$files = new Google_Service_Drive_DriveFile();
+
+			if (!empty($res)) {
+				//Update a file
+				if(empty($stat['rev'])){
+					return $this->_normpath(dirname($path).'/'.$stat['rev']);				
+				}
+							
+				$itemId		= $stat['rev'];
+				$name		= $stat['name'];
+				$mimeType	= $stat['mime'];				
+				
+				$files->setName($name);
+				$files->setDescription('');
+				$files->setMimeType($mimeType);
+				// Send the request to the API for updation contents.
+				$data= stream_get_contents($fp);
+				$file = $this->service->files->update($itemId, $files, array(
+						'data' => strlen($data) == 0 ? ' ' : $data,
+						'mimeType' => $mimeType,
+						'uploadType' => 'multipart'
+						));
+			} elseif(empty($res)) {
+				//Insert or Create a file
+				$name == '' ? $name = basename($path) : $name = $name;
+				$files->setName($name);
+				$files->setDescription('');
+				$stat['mime'] == '' ? $mimeType= parent::$mimetypes[pathinfo(basename($path), PATHINFO_EXTENSION)] : $mimeType= $stat['mime'];
+				$files->setMimeType($mimeType);
+
+				//Set the Folder Parent			
+				basename(dirname($path)) == '' ? $parentId = 'root' : $parentId = basename(dirname($path));
+
+				$files->setParents(array($parentId));
+				// Send the request to the API for new file contents.
+				$data= stream_get_contents($fp);
+				$file = $this->service->files->create($files, array(
+						'data' => strlen($data) == 0 ? ' ' : $data,
+						'mimeType' => $mimeType,
+						'uploadType' => 'media'
+						));
+			}
+		} catch (Exception $e) {
+			return $this->setError('GoogleDrive error: '.$e->getMessage());
+		}
+		$path = $this->_normpath(dirname($path).'/'.$file->getId());
+
+		return $path;
     }
 
     /**
