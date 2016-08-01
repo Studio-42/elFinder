@@ -654,13 +654,27 @@ class elFinder {
 				$this->volumes[$id]->setMimesFilter($args['mimes']);
 			}
 		}
-
+		
+		// detect destination dirHash and volume
+		$dstVolume = false;
+		$dst = ! empty($args['target'])? $args['target'] : (! empty($args['dst'])? $args['dst'] : '');
+		if ($dst) {
+			$dstVolume = $this->volume($dst);
+		} else if (isset($args['targets']) && is_array($args['targets']) && isset($args['targets'][0])) {
+			$dst = $args['targets'][0];
+			$dstVolume = $this->volume($dst);
+			if (($_stat = $dstVolume->file($dst)) && ! empty($_stat['phash'])) {
+				$dst = $_stat['phash'];
+			} else {
+				$dst = '';
+			}
+		}
+		
 		// call pre handlers for this command
 		$args['sessionCloseEarlier'] = isset($this->sessionUseCmds[$cmd])? false : $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
-			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
-				call_user_func_array($handler, array($cmd, &$args, $this, $volume));
+				call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
 			}
 		}
 		
@@ -685,21 +699,42 @@ class elFinder {
 			);
 		}
 		
+		// check change dstDir
+		$changeDst = false;
+		if ($dst && $dstVolume && (! empty($result['added']) || ! empty($result['removed']))) {
+			$changeDst = true;
+		}
+		
 		foreach ($this->volumes as $volume) {
 			if (isset($result['removed'])) {
 				$result['removed'] = array_merge($result['removed'], $volume->removed());
+				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
+					$changeDst = true;
+				}
 			}
 			if (isset($result['added'])) {
 				$result['added'] = array_merge($result['added'], $volume->added());
+				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
+					$changeDst = true;
+				}
 			}
 			$volume->resetResultStat();
 		}
 		
+		// dstDir is changed
+		if ($changeDst) {
+			if ($dstDir = $dstVolume->dir($dst)) {
+				if (! isset($result['changed'])) {
+					$result['changed'] = array();
+				}
+				$result['changed'][] = $dstDir;
+			}
+		}
+		
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
-			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd] as $handler) {
-				if (call_user_func_array($handler,array($cmd, &$result, $args, $this, $volume))) {
+				if (call_user_func_array($handler,array($cmd, &$result, $args, $this, $dstVolume))) {
 					// handler return true to force sync client after command completed
 					$result['sync'] = true;
 				}
@@ -2282,7 +2317,7 @@ class elFinder {
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$cut     = !empty($args['cut']);
 		$error   = $cut ? self::ERROR_MOVE : self::ERROR_COPY;
-		$result  = array('added' => array(), 'removed' => array());
+		$result  = array('changed' => array(), 'added' => array(), 'removed' => array());
 		
 		if (($dstVolume = $this->volume($dst)) == false) {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
