@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-06-30
+ * @version 2016-08-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -237,6 +237,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortmode'          : '属性順',      // from v2.1.13 added 13.06.2016
 			'sortowner'         : 'オーナー順',  // from v2.1.13 added 13.06.2016
 			'sortgroup'         : 'グループ順',  // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'ツリービューも',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : '新規ファイル.txt', // added 10.11.2015
