@@ -641,6 +641,14 @@ elFinder.prototype._options = {
 	sortStickFolders : true,
 	
 	/**
+	 * Sort also applies to the treeview
+	 *
+	 * @type {Boolean}
+	 * @default false
+	 */
+	sortAlsoTreeview : false,
+	
+	/**
 	 * If true - elFinder will formating dates itself, 
 	 * otherwise - backend date will be used.
 	 *

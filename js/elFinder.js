@@ -680,11 +680,17 @@ window.elFinder = function(node, opts) {
 	this.sortOrder = this.storage('sortOrder') || this.options.sortOrder || 'asc';
 
 	this.sortStickFolders = this.storage('sortStickFolders');
-
 	if (this.sortStickFolders === null) {
 		this.sortStickFolders = !!this.options.sortStickFolders;
 	} else {
 		this.sortStickFolders = !!this.sortStickFolders
+	}
+
+	this.sortAlsoTreeview = this.storage('sortAlsoTreeview');
+	if (this.sortAlsoTreeview === null) {
+		this.sortAlsoTreeview = !!this.options.sortAlsoTreeview;
+	} else {
+		this.sortAlsoTreeview = !!this.sortAlsoTreeview
 	}
 
 	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortRules);
@@ -4523,10 +4529,11 @@ elFinder.prototype = {
 	 * @param {String} sort order
 	 * @param {Boolean} show folder first
 	 */
-	setSort : function(type, order, stickFolders) {
+	setSort : function(type, order, stickFolders, alsoTreeview) {
 		this.storage('sortType', (this.sortType = this.sortRules[type] ? type : 'name'));
 		this.storage('sortOrder', (this.sortOrder = /asc|desc/.test(order) ? order : 'asc'));
 		this.storage('sortStickFolders', (this.sortStickFolders = !!stickFolders) ? 1 : '');
+		this.storage('sortAlsoTreeview', (this.sortAlsoTreeview = !!alsoTreeview) ? 1 : '');
 		this.trigger('sortchange');
 	},
 	
