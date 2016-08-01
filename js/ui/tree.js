@@ -301,14 +301,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			findSibling = function(subtree, dir) {
 				var node = subtree.children(':first'),
-					info, compare;
+					info;
 
-				compare = fm.naturalCompare;
 				while (node.length) {
 					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
 					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& compare(dir.i18 || dir.name, info.i18 || info.name) < 0) {
+					&& compare(dir, info) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -397,7 +396,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 * 
 			 */
 			compare = function(dir1, dir2) {
-				return fm.naturalCompare(dir1.i18 || dir1.name, dir2.i18 || dir2.name);
+				if (! fm.sortAlsoTreeview) {
+					return fm.sortRules.name(dir1, dir2);
+				} else {
+					var asc   = fm.sortOrder == 'asc',
+						type  = fm.sortType,
+						rules = fm.sortRules,
+						res;
+					
+					res = asc? rules[fm.sortType](dir1, dir2) : rules[fm.sortType](dir2, dir1);
+					
+					return type !== 'name' && res === 0
+						? res = asc ? rules.name(dir1, dir2) : rules.name(dir2, dir1)
+						: res;
+				}
 			},
 
 			/**
@@ -703,9 +715,9 @@ $.fn.elfindertree = function(fm, opts) {
 					autoScroll($(this).attr('id'));
 				}),
 			// move tree into navbar
-			navbar = fm.getUI('navbar').append(tree).show()
-				
-			;
+			navbar = fm.getUI('navbar').append(tree).show(),
+			
+			prevSortTreeview = fm.sortAlsoTreeview;
 
 		fm.open(function(e) {
 			var data = e.data,
@@ -769,7 +781,7 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 						
 						if (reqParent[0] !== realParent[0] || realSibling.get(0) !== reqSibling.get(0)) {
-							reqSibling.length ? reqSibling.before(node) : reqParent.append(node);
+							reqSibling.length ? reqSibling.before(node.parent()) : reqParent.append(node.parent());
 						}
 					}
 					isExpanded = node.hasClass(expanded);
@@ -825,6 +837,17 @@ $.fn.elfindertree = function(fm, opts) {
 					dir[lock ? 'addClass' : 'removeClass'](disabled);
 				}
 			});
+		})
+		.bind('sortchange', function() {
+			if (fm.sortAlsoTreeview || prevSortTreeview !== fm.sortAlsoTreeview) {
+				var dirs = filter(fm.files());
+				
+				prevSortTreeview = fm.sortAlsoTreeview;
+				
+				tree.empty();
+				updateTree(dirs);
+				sync();
+			}
 		});
 
 	});

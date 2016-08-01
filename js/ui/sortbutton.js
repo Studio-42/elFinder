@@ -37,11 +37,12 @@ $.fn.elfindersortbutton = function(cmd) {
 					hide();
 				}),
 			update = function() {
-				menu.children(':not(:last)').removeClass(selected+' '+asc+' '+desc)
+				menu.children('[rel]').removeClass(selected+' '+asc+' '+desc)
 					.filter('[rel="'+fm.sortType+'"]')
 					.addClass(selected+' '+(fm.sortOrder == 'asc' ? asc : desc));
 
-				menu.children(':last').toggleClass(selected, fm.sortStickFolders);
+				menu.children('.elfinder-sort-stick').toggleClass(selected, fm.sortStickFolders);
+				menu.children('.elfinder-sort-tree').toggleClass(selected, fm.sortAlsoTreeview);
 			},
 			hide = function() { menu.hide(); };
 			
@@ -56,15 +57,24 @@ $.fn.elfindersortbutton = function(cmd) {
 			cmd.exec([], {
 				type  : type, 
 				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
-				stick : fm.sortStickFolders
+				stick : fm.sortStickFolders,
+				tree  : fm.sortAlsoTreeview
 			});
 		});
 		
-		$('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
+		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
 			.click(function() {
-				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders});
-			});		
+				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
+			});
+
+		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
+			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
+				.appendTo(menu)
+				.click(function() {
+					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
+				});
+		}
 		
 		fm.bind('disable select', hide).getUI().click(hide);
 			

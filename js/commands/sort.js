@@ -24,10 +24,23 @@ elFinder.prototype.commands.sort = function() {
 				{
 					type  : fm.sortType,
 					order : fm.sortOrder,
-					stick : !fm.sortStickFolders
+					stick : !fm.sortStickFolders,
+					tree  : fm.sortAlsoTreeview
 				},
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
+			if (fm.ui.tree) {
+				self.variants.push('|');
+				self.variants.push([
+					{
+						type  : fm.sortType,
+						order : fm.sortOrder,
+						stick : fm.sortStickFolders,
+						tree  : !fm.sortAlsoTreeview
+					},
+					(fm.sortAlsoTreeview? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortAlsoTreeview')
+				]);
+			}
 		};
 	
 	/**
@@ -90,11 +103,12 @@ elFinder.prototype.commands.sort = function() {
 			sort = $.extend({
 				type  : fm.sortType,
 				order : fm.sortOrder,
-				stick : fm.sortStickFolders
+				stick : fm.sortStickFolders,
+				tree  : fm.sortAlsoTreeview
 			}, sortopt);
 
 		return fm.lazy(function() {
-			fm.setSort(sort.type, sort.order, sort.stick);
+			fm.setSort(sort.type, sort.order, sort.stick, sort.tree);
 			this.resolve();
 		});
 	};

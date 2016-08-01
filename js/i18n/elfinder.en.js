@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-06-30
+ * @version 2016-08-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -237,6 +237,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
 			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
 			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
