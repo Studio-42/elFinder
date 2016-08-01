@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 4904f98) (2016-07-30)
+ * Version 2.1.14 (2.1-src Nightly: cf26b44) (2016-08-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -694,11 +694,17 @@ window.elFinder = function(node, opts) {
 	this.sortOrder = this.storage('sortOrder') || this.options.sortOrder || 'asc';
 
 	this.sortStickFolders = this.storage('sortStickFolders');
-
 	if (this.sortStickFolders === null) {
 		this.sortStickFolders = !!this.options.sortStickFolders;
 	} else {
 		this.sortStickFolders = !!this.sortStickFolders
+	}
+
+	this.sortAlsoTreeview = this.storage('sortAlsoTreeview');
+	if (this.sortAlsoTreeview === null) {
+		this.sortAlsoTreeview = !!this.options.sortAlsoTreeview;
+	} else {
+		this.sortAlsoTreeview = !!this.sortAlsoTreeview
 	}
 
 	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortRules);
@@ -4537,10 +4543,11 @@ elFinder.prototype = {
 	 * @param {String} sort order
 	 * @param {Boolean} show folder first
 	 */
-	setSort : function(type, order, stickFolders) {
+	setSort : function(type, order, stickFolders, alsoTreeview) {
 		this.storage('sortType', (this.sortType = this.sortRules[type] ? type : 'name'));
 		this.storage('sortOrder', (this.sortOrder = /asc|desc/.test(order) ? order : 'asc'));
 		this.storage('sortStickFolders', (this.sortStickFolders = !!stickFolders) ? 1 : '');
+		this.storage('sortAlsoTreeview', (this.sortAlsoTreeview = !!alsoTreeview) ? 1 : '');
 		this.trigger('sortchange');
 	},
 	
@@ -5454,7 +5461,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 4904f98)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: cf26b44)';
 
 
 
@@ -6399,6 +6406,14 @@ elFinder.prototype._options = {
 	 * @default true
 	 */
 	sortStickFolders : true,
+	
+	/**
+	 * Sort also applies to the treeview
+	 *
+	 * @type {Boolean}
+	 * @default false
+	 */
+	sortAlsoTreeview : false,
 	
 	/**
 	 * If true - elFinder will formating dates itself, 
@@ -7418,7 +7433,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-06-30
+ * @version 2016-08-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -7654,6 +7669,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
 			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
 			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
@@ -11889,11 +11905,12 @@ $.fn.elfindersortbutton = function(cmd) {
 					hide();
 				}),
 			update = function() {
-				menu.children(':not(:last)').removeClass(selected+' '+asc+' '+desc)
+				menu.children('[rel]').removeClass(selected+' '+asc+' '+desc)
 					.filter('[rel="'+fm.sortType+'"]')
 					.addClass(selected+' '+(fm.sortOrder == 'asc' ? asc : desc));
 
-				menu.children(':last').toggleClass(selected, fm.sortStickFolders);
+				menu.children('.elfinder-sort-stick').toggleClass(selected, fm.sortStickFolders);
+				menu.children('.elfinder-sort-tree').toggleClass(selected, fm.sortAlsoTreeview);
 			},
 			hide = function() { menu.hide(); };
 			
@@ -11908,15 +11925,24 @@ $.fn.elfindersortbutton = function(cmd) {
 			cmd.exec([], {
 				type  : type, 
 				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
-				stick : fm.sortStickFolders
+				stick : fm.sortStickFolders,
+				tree  : fm.sortAlsoTreeview
 			});
 		});
 		
-		$('<div class="'+item+' '+item+'-separated"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
+		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
 			.click(function() {
-				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders});
-			});		
+				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
+			});
+
+		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
+			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
+				.appendTo(menu)
+				.click(function() {
+					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
+				});
+		}
 		
 		fm.bind('disable select', hide).getUI().click(hide);
 			
@@ -12504,14 +12530,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			findSibling = function(subtree, dir) {
 				var node = subtree.children(':first'),
-					info, compare;
+					info;
 
-				compare = fm.naturalCompare;
 				while (node.length) {
 					info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')));
 					
 					if ((info = fm.file(fm.navId2Hash(node.children('[id]').attr('id')))) 
-					&& compare(dir.i18 || dir.name, info.i18 || info.name) < 0) {
+					&& compare(dir, info) < 0) {
 						return node;
 					}
 					node = node.next();
@@ -12600,7 +12625,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 * 
 			 */
 			compare = function(dir1, dir2) {
-				return fm.naturalCompare(dir1.i18 || dir1.name, dir2.i18 || dir2.name);
+				if (! fm.sortAlsoTreeview) {
+					return fm.sortRules.name(dir1, dir2);
+				} else {
+					var asc   = fm.sortOrder == 'asc',
+						type  = fm.sortType,
+						rules = fm.sortRules,
+						res;
+					
+					res = asc? rules[fm.sortType](dir1, dir2) : rules[fm.sortType](dir2, dir1);
+					
+					return type !== 'name' && res === 0
+						? res = asc ? rules.name(dir1, dir2) : rules.name(dir2, dir1)
+						: res;
+				}
 			},
 
 			/**
@@ -12906,9 +12944,9 @@ $.fn.elfindertree = function(fm, opts) {
 					autoScroll($(this).attr('id'));
 				}),
 			// move tree into navbar
-			navbar = fm.getUI('navbar').append(tree).show()
-				
-			;
+			navbar = fm.getUI('navbar').append(tree).show(),
+			
+			prevSortTreeview = fm.sortAlsoTreeview;
 
 		fm.open(function(e) {
 			var data = e.data,
@@ -12972,7 +13010,7 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 						
 						if (reqParent[0] !== realParent[0] || realSibling.get(0) !== reqSibling.get(0)) {
-							reqSibling.length ? reqSibling.before(node) : reqParent.append(node);
+							reqSibling.length ? reqSibling.before(node.parent()) : reqParent.append(node.parent());
 						}
 					}
 					isExpanded = node.hasClass(expanded);
@@ -13028,6 +13066,17 @@ $.fn.elfindertree = function(fm, opts) {
 					dir[lock ? 'addClass' : 'removeClass'](disabled);
 				}
 			});
+		})
+		.bind('sortchange', function() {
+			if (fm.sortAlsoTreeview || prevSortTreeview !== fm.sortAlsoTreeview) {
+				var dirs = filter(fm.files());
+				
+				prevSortTreeview = fm.sortAlsoTreeview;
+				
+				tree.empty();
+				updateTree(dirs);
+				sync();
+			}
 		});
 
 	});
@@ -18799,10 +18848,23 @@ elFinder.prototype.commands.sort = function() {
 				{
 					type  : fm.sortType,
 					order : fm.sortOrder,
-					stick : !fm.sortStickFolders
+					stick : !fm.sortStickFolders,
+					tree  : fm.sortAlsoTreeview
 				},
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
+			if (fm.ui.tree) {
+				self.variants.push('|');
+				self.variants.push([
+					{
+						type  : fm.sortType,
+						order : fm.sortOrder,
+						stick : fm.sortStickFolders,
+						tree  : !fm.sortAlsoTreeview
+					},
+					(fm.sortAlsoTreeview? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortAlsoTreeview')
+				]);
+			}
 		};
 	
 	/**
@@ -18865,11 +18927,12 @@ elFinder.prototype.commands.sort = function() {
 			sort = $.extend({
 				type  : fm.sortType,
 				order : fm.sortOrder,
-				stick : fm.sortStickFolders
+				stick : fm.sortStickFolders,
+				tree  : fm.sortAlsoTreeview
 			}, sortopt);
 
 		return fm.lazy(function() {
-			fm.setSort(sort.type, sort.order, sort.stick);
+			fm.setSort(sort.type, sort.order, sort.stick, sort.tree);
 			this.resolve();
 		});
 	};
