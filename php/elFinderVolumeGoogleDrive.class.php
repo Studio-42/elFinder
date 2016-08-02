@@ -1369,7 +1369,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
 			if (!empty($res)) {
 				//Update a file
 				if(empty($stat['rev'])){
-					return $this->_normpath(dirname($path).'/'.$stat['rev']);				
+					return $this->_normpath(dirname($path).'/'.$res[0]['id']);				
 				}
 							
 				$itemId		= $stat['rev'];
