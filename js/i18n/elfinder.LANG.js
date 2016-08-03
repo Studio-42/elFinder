@@ -362,6 +362,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
