@@ -388,39 +388,6 @@ window.elFinder = function(node, opts) {
 	 * @type Array
 	 **/
 	this.netDrivers = [];
-	/**
-	 * User os. Required to bind native shortcuts for open/rename
-	 *
-	 * @type String
-	 **/
-	this.OS = navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'other';
-	
-	/**
-	 * User browser UA.
-	 * jQuery.browser: version deprecated: 1.3, removed: 1.9
-	 *
-	 * @type Object
-	 **/
-	this.UA = (function(){
-		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
-		return {
-			// Browser IE <= IE 6
-			ltIE6:typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
-			// Browser IE <= IE 7
-			ltIE7:typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
-			// Browser IE <= IE 8
-			ltIE8:typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
-			IE:document.uniqueID,
-			Firefox:window.sidebar,
-			Opera:window.opera,
-			Webkit:webkit,
-			Chrome:webkit && window.chrome,
-			Safari:webkit && !window.chrome,
-			Mobile:typeof window.orientation != "undefined",
-			Touch:typeof window.ontouchstart != "undefined",
-			iOS: navigator.platform.match(/^iP(?:[ao]d|hone)/)
-		};
-	})();
 	
 	/**
 	 * Configuration options
@@ -1789,14 +1756,17 @@ window.elFinder = function(node, opts) {
 			// for performance tuning
 			jst = JSON.stringify(data);
 		}
-		if (handlers.length) {
+		if (l = handlers.length) {
 			event = $.Event(event);
 			if (allowModify) {
 				event.data = data;
 			}
 
-			l = handlers.length;
 			for (i = 0; i < l; i++) {
+				if (! handlers[i]) {
+					// probably un-binded this handler
+					continue;
+				}
 				// only callback has argument
 				if (handlers[i].length) {
 					if (!allowModify) {
@@ -1983,7 +1953,7 @@ window.elFinder = function(node, opts) {
 	 * @return jQuery
 	 */
 	this.dialog = function(content, options) {
-		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options),
+		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options, this),
 			dnode  = dialog.closest('.ui-dialog'),
 			resize = function(){
 				! dialog.data('draged') && dialog.is(':visible') && dialog.elfinderdialog('posInit');
@@ -2200,6 +2170,165 @@ window.elFinder = function(node, opts) {
 		}
 		return true;
 	};
+	
+	// Closure for togglefullscreen
+	(function() {
+		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
+		
+		if (self.UA.Fullscreen) {
+			// native full screen mode
+			
+			fullElm = function() {
+				return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
+			};
+			
+			exitFull = function() {
+				if (document.exitFullscreen) {
+					return document.exitFullscreen();
+				} else if (document.webkitExitFullscreen) {
+					return document.webkitExitFullscreen();
+				} else if (document.mozCancelFullScreen) {
+					return document.mozCancelFullScreen();
+				} else if (document.msExitFullscreen) {
+					return document.msExitFullscreen();
+				}
+			};
+			
+			toFull = function(elem) {
+				if (elem.requestFullscreen) {
+					return elem.requestFullscreen();
+				} else if (elem.webkitRequestFullscreen) {
+					return elem.webkitRequestFullscreen();
+				} else if (elem.mozRequestFullScreen) {
+					return elem.mozRequestFullScreen();
+				} else if (elem.msRequestFullscreen) {
+					return elem.msRequestFullscreen();
+				}
+				return false;
+			};
+			
+			$(document).on('fullscreenchange.' + namespace + ' webkitfullscreenchange.' + namespace + ' mozfullscreenchange.' + namespace + ' MSFullscreenChange.' + namespace, function(e){
+				var elm = fullElm();
+				
+				resizeTm && clearTimeout(resizeTm);
+				if (elm === null) {
+					$(window).off('resize.' + namespace, resize);
+					if (orgStyle) {
+						elm = orgStyle.elm;
+						restoreStyle(elm);
+						$(elm).trigger('resize', {fullscreen: 'off'});
+					}
+				} else {
+					$(elm).addClass('elfinder-fullscreen').attr('style', 'width:100%; height:100%;').trigger('resize', {fullscreen: 'on'});
+					$(window).on('resize.' + namespace, resize);
+				}
+			});
+			
+		} else {
+			// DOM full screen mode
+			
+			fullElm = function() {
+				var full;
+				if (node.hasClass('elfinder-fullscreen')) {
+					return node.get(0);
+				} else {
+					full = node.find('.elfinder-fullscreen');
+					if (full.length) {
+						return full.get(0);
+					}
+				}
+				return null;
+			};
+			
+			exitFull = function() {
+				var elm;
+				
+				$(window).off('resize.' + namespace, resize);
+				
+				if (orgStyle) {
+					elm = orgStyle.elm;
+					restoreStyle(elm);
+					$(elm).trigger('resize', {fullscreen: 'off'});
+				}
+			};
+			
+			toFull = function(elem) {
+				$(elem).css({
+					width: '100%',
+					height: '100%',
+					top: 0,
+					left: 0,
+					display: 'block',
+					position: 'fixed'
+				})
+				.addClass('elfinder-fullscreen')
+				.trigger('resize', {fullscreen: 'on'});
+				
+				$(window).on('resize.' + namespace, resize);
+				
+				return true;
+			};
+			
+		}
+		
+		restoreStyle = function(elem) {
+			if (orgStyle && orgStyle.elm == elem) {
+				$(elem).removeClass('elfinder-fullscreen').attr('style', orgStyle.style);
+				orgStyle = null;
+			}
+		};
+		
+		resize = function(e) {
+			var elm;
+			if (e.target === window) {
+				resizeTm && clearTimeout(resizeTm);
+				resizeTm = setTimeout(function() {
+					if (elm = fullElm()) {
+						$(elm).trigger('resize', {fullscreen: 'on'});
+					}
+				}, 100);
+			}
+		};
+		
+		/**
+		 * Toggle Full Scrren Mode
+		 * 
+		 * @param  Object node
+		 * @param  Bool   full
+		 * @return Object | Null  DOM node object of current full scrren
+		 */
+		self.toggleFullscreen = function(node, full) {
+			var elm = $(node).get(0),
+				curElm = null;
+			
+			curElm = fullElm();
+			if (curElm) {
+				if (curElm == elm) {
+					if (full === true) {
+						return curElm;
+					}
+				} else {
+					if (full === false) {
+						return curElm;
+					}
+				}
+				exitFull();
+				return null;
+			} else {
+				if (full === false) {
+					return null;
+				}
+			}
+			
+			orgStyle = {elm: elm, style: $(elm).attr('style')};
+			if (toFull(elm) !== false) {
+				return elm;
+			} else {
+				orgStyle = null;
+				return null;
+			}
+		};
+	})();
 	
 	/*************  init stuffs  ****************/
 	
@@ -2658,11 +2787,13 @@ window.elFinder = function(node, opts) {
 
 	(function(){
 		var tm;
-		$(window).on('resize.' + namespace, function(){
-			tm && clearTimeout(tm);
-			tm = setTimeout(function() {
-				self.trigger('resize', {width : node.width(), height : node.height()});
-			}, 200);
+		$(window).on('resize.' + namespace, function(e){
+			if (e.target === this) {
+				tm && clearTimeout(tm);
+				tm = setTimeout(function() {
+					self.trigger('resize', {width : node.width(), height : node.height()});
+				}, 200);
+			}
 		})
 		.on('beforeunload.' + namespace,function(e){
 			var msg, cnt;
@@ -2949,6 +3080,41 @@ elFinder.prototype = {
 	res : function(type, id) {
 		return this.resources[type] && this.resources[type][id];
 	}, 
+
+	/**
+	 * User os. Required to bind native shortcuts for open/rename
+	 *
+	 * @type String
+	 **/
+	OS : navigator.userAgent.indexOf('Mac') !== -1 ? 'mac' : navigator.userAgent.indexOf('Win') !== -1  ? 'win' : 'other',
+	
+	/**
+	 * User browser UA.
+	 * jQuery.browser: version deprecated: 1.3, removed: 1.9
+	 *
+	 * @type Object
+	 **/
+	UA : (function(){
+		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
+		return {
+			// Browser IE <= IE 6
+			ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
+			// Browser IE <= IE 7
+			ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
+			// Browser IE <= IE 8
+			ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
+			IE      : document.uniqueID,
+			Firefox : window.sidebar,
+			Opera   : window.opera,
+			Webkit  : webkit,
+			Chrome  : webkit && window.chrome,
+			Safari  : webkit && !window.chrome,
+			Mobile  : typeof window.orientation != "undefined",
+			Touch   : typeof window.ontouchstart != "undefined",
+			iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
+			Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined')
+		};
+	})(),
 	
 	/**
 	 * Current request command
@@ -4539,7 +4705,7 @@ elFinder.prototype = {
 	
 	_sortRules : {
 		name : function(file1, file2) {
-			return elFinder.prototype.naturalCompare(file1.name, file2.name);
+			return elFinder.prototype.naturalCompare(file1.i18 || file1.name, file2.i18 || file2.name);
 		},
 		size : function(file1, file2) { 
 			var size1 = parseInt(file1.size) || 0,

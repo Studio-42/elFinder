@@ -149,9 +149,8 @@ $.fn.elfindercontextmenu = function(fm) {
 				$.each(types[type]||[], function(i, name) {
 					var cmd, node, submenu, hover;
 					
-					if (name == '|' && sep) {
-						menu.append('<div class="elfinder-contextmenu-separator"/>');
-						sep = false;
+					if (name == '|') {
+						sep = true;
 						return;
 					}
 					
@@ -274,8 +273,11 @@ $.fn.elfindercontextmenu = function(fm) {
 							node.children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd);
 						}
 						
-						menu.append(node)
-						sep = true;
+						if (sep) {
+							menu.append('<div class="elfinder-contextmenu-separator"/>');
+						}
+						menu.append(node);
+						sep = false;
 					}
 					
 					if (cmd && typeof cmd.__disabled !== 'undefined') {

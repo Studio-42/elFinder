@@ -138,6 +138,8 @@
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-menu      { background-position: 0 -752px; }
 .elfinder-button-icon-colwidth  { background-position: 0 -768px; }
+.elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
+.elfinder-button-icon-unfullscreen{ background-position: 0 -800px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
