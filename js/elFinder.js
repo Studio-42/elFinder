@@ -4705,7 +4705,7 @@ elFinder.prototype = {
 	
 	_sortRules : {
 		name : function(file1, file2) {
-			return elFinder.prototype.naturalCompare(file1.name, file2.name);
+			return elFinder.prototype.naturalCompare(file1.i18 || file1.name, file2.i18 || file2.name);
 		},
 		size : function(file1, file2) { 
 			var size1 = parseInt(file1.size) || 0,
