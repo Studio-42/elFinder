@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: cf26b44) (2016-08-01)
+ * Version 2.1.14 (2.1-src Nightly: 742005b) (2016-08-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -222,12 +222,21 @@
 /********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
-	width:99%;
+	width:100%;
 	height:99%;
 	margin:0;
 	padding:2px;
 	border:1px solid #ccc;
+	box-sizing: border-box;
 }
+.elfinder-touch .elfinder-file-edit {
+	font-size: 16px;
+}
+/* bottom margen for softkeyboard on fullscreen mode */
+.elfinder-touch .elfinder-fullscreen .elfinder-file-edit {
+	margin-bottom: 20em;
+}
+
 
 /********************** COMMAND "SORT" ****************************/
 /* for list table header sort triangle icon */
@@ -1204,6 +1213,15 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	padding:.2em 1em;
 }
 
+.std42-dialog .ui-dialog-titlebar .ui-widget-header {
+	border : none;
+	cursor: pointer;
+}
+
+.ui-dialog .ui-dialog-titlebar-close.elfinder-titlebar-full {
+	right: 2em;
+}
+
 /* resize handle for touch devices */
 .elfinder-touch .std42-dialog.ui-dialog .ui-resizable-se {
 	width: 12px;
@@ -1224,6 +1242,7 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
+	box-sizing: border-box;
 }
 .std42-dialog .ui-dialog-content,
 .std42-dialog .ui-dialog-content * {
@@ -2311,6 +2330,8 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-menu      { background-position: 0 -752px; }
 .elfinder-button-icon-colwidth  { background-position: 0 -768px; }
+.elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
+.elfinder-button-icon-unfullscreen{ background-position: 0 -800px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
