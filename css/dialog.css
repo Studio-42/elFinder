@@ -25,6 +25,15 @@
 	padding:.2em 1em;
 }
 
+.std42-dialog .ui-dialog-titlebar .ui-widget-header {
+	border : none;
+	cursor: pointer;
+}
+
+.ui-dialog .ui-dialog-titlebar-close.elfinder-titlebar-full {
+	right: 2em;
+}
+
 /* resize handle for touch devices */
 .elfinder-touch .std42-dialog.ui-dialog .ui-resizable-se {
 	width: 12px;
@@ -45,6 +54,7 @@
 /* content */
 .std42-dialog .ui-dialog-content {
 	padding:.3em .5em;
+	box-sizing: border-box;
 }
 .std42-dialog .ui-dialog-content,
 .std42-dialog .ui-dialog-content * {
