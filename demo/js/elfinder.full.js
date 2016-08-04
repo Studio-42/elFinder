@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 802a678) (2016-08-04)
+ * Version 2.1.14 (2.1-src Nightly: b521236) (2016-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5634,7 +5634,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 802a678)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: b521236)';
 
 
 
@@ -6402,6 +6402,14 @@ elFinder.prototype._options = {
 	
 	/**
 	 * Hash of default directory path to open
+	 * 
+	 * If you want to find the hash in Javascript
+	 * can be obtained with the following code. (In the case of a standard hashing method)
+	 * 
+	 * var volumeId = 'l1_'; // volume id
+	 * var path = 'path/to/target'; // without root path
+	 * //var path = 'path\\to\\target'; // use \ on windows server
+	 * var hash = volumeId + btoa(path).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '.').replace(/\.+$/, '');
 	 * 
 	 * @type String
 	 * @default ""
@@ -10881,6 +10889,8 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 			var fullscreen = cmd.value;
 			icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
 			button.attr('title', fullscreen? cmd.fm.i18n('reinstate') : cmd.fm.i18n('cmdfullscreen'));
+			cmd.className = fullscreen? 'unfullscreen' : '';
+			cmd.title = cmd.fm.i18n(fullscreen ? 'reinstate' : 'cmdfullscreen');
 		});
 	});
 };
