@@ -2175,7 +2175,7 @@ window.elFinder = function(node, opts) {
 	(function() {
 		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
 		
-		if (false && self.UA.Fullscreen) {
+		if (self.UA.Fullscreen) {
 			// native full screen mode
 			
 			fullElm = function() {
