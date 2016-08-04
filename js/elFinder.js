@@ -2573,6 +2573,10 @@ window.elFinder = function(node, opts) {
 		this.options.commands = [];
 	}
 	
+	if ($.inArray('*', this.options.commands) !== -1) {
+		this.options.commands = Object.keys(this.commands);
+	}
+	
 	// load commands
 	$.each(this.commands, function(name, cmd) {
 		var extendsCmd, opts;
