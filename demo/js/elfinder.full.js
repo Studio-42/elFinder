@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: ee4fb50) (2016-08-04)
+ * Version 2.1.14 (2.1-src Nightly: ca15b4c) (2016-08-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2222,11 +2222,12 @@ window.elFinder = function(node, opts) {
 			};
 			
 			$(document).on('fullscreenchange.' + namespace + ' webkitfullscreenchange.' + namespace + ' mozfullscreenchange.' + namespace + ' MSFullscreenChange.' + namespace, function(e){
-				var elm = fullElm();
+				var elm = fullElm(),
+					win = $(window);
 				
 				resizeTm && clearTimeout(resizeTm);
 				if (elm === null) {
-					$(window).off('resize.' + namespace, resize);
+					win.off('resize.' + namespace, resize);
 					if (orgStyle) {
 						elm = orgStyle.elm;
 						restoreStyle(elm);
@@ -2236,8 +2237,9 @@ window.elFinder = function(node, opts) {
 					$(elm).addClass('elfinder-fullscreen')
 						.attr('style', 'width:100%; height:100%; margin:0; padding:0;')
 						.trigger('resize', {fullscreen: 'on'});
-					$(window).on('resize.' + namespace, resize);
+					win.on('resize.' + namespace, resize);
 				}
+				win.trigger('resize');
 			});
 			
 		} else {
@@ -5641,7 +5643,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ee4fb50)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ca15b4c)';
 
 
 
