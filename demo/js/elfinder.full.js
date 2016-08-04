@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: b521236) (2016-08-04)
+ * Version 2.1.14 (2.1-src Nightly: 9a7a724) (2016-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -705,7 +705,7 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.draggable = {
-		appendTo   : 'body',
+		appendTo   : node,
 		addClasses : true,
 		distance   : 4,
 		revert     : true,
@@ -2727,6 +2727,9 @@ window.elFinder = function(node, opts) {
 	this.options.resizable 
 	&& $.fn.resizable 
 	&& node.resizable({
+		resize    : function(e, ui) {
+			self.resize(ui.size.width, ui.size.height);
+		},
 		handles   : 'se',
 		minWidth  : 300,
 		minHeight : 200
@@ -5634,7 +5637,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: b521236)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 9a7a724)';
 
 
 
@@ -11019,7 +11022,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 		} else {
 			if (fm.UA.Mobile) {
 				nav.data('defWidth', nav.width());
-				$(window).on('resize', function(e){
+				$(window).on('resize.' + fm.namespace, function(e){
 					setWidth = nav.parent().width() / 2;
 					if (nav.data('defWidth') > setWidth) {
 						nav.width(setWidth);
