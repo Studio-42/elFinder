@@ -118,9 +118,10 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			create = function(type, targets) {
-				var sep = false,
-				cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
-				selcnt = 0;
+				var sep    = false,
+					insSep = false,
+					cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
+					selcnt = 0;
 
 				if (self.data('cmdMaps')) {
 					$.each(self.data('cmdMaps'), function(i, v){
@@ -149,8 +150,10 @@ $.fn.elfindercontextmenu = function(fm) {
 				$.each(types[type]||[], function(i, name) {
 					var cmd, node, submenu, hover;
 					
-					if (name == '|') {
-						sep = true;
+					if (name === '|') {
+						if (sep) {
+							insSep = true;
+						}
 						return;
 					}
 					
@@ -273,11 +276,12 @@ $.fn.elfindercontextmenu = function(fm) {
 							node.children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd);
 						}
 						
-						if (sep) {
+						if (insSep) {
 							menu.append('<div class="elfinder-contextmenu-separator"/>');
 						}
 						menu.append(node);
-						sep = false;
+						sep = true;
+						insSep = false;
 					}
 					
 					if (cmd && typeof cmd.__disabled !== 'undefined') {
