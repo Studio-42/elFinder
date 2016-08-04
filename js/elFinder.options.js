@@ -127,17 +127,19 @@ elFinder.prototype._options = {
 	cssClass : '',
 
 	/**
-	 * Active commands list
+	 * Active commands list. '*' means all of the commands that have been load.
 	 * If some required commands will be missed here, elFinder will add its
 	 *
 	 * @type Array
 	 */
-	commands : [
-		'open', 'opendir', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 
-		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
-		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help',
-		'resize', 'sort', 'netmount', 'netunmount', 'places', 'chmod', 'colwidth', 'fullscreen'
-	],
+	commands : ['*'],
+	// Available commands list
+	//commands : [
+	//	'archive', 'back', 'chmod', 'colwidth', 'copy', 'cut', 'download', 'duplicate',
+	//	'edit', 'extract', 'forward', 'fullscreen', 'getfile', 'help', 'home', 'info',
+	//	'mkdir', 'mkfile', 'netmount', 'netunmount', 'open', 'opendir', 'paste', 'places',
+	//	'quicklook', 'reload', 'rename', 'resize', 'rm', 'search', 'sort', 'up', 'upload', 'view'
+	//],
 	
 	/**
 	 * Commands options.
