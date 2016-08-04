@@ -23,6 +23,8 @@
 /* disabled elfinder */
 .elfinder-disabled .elfinder-navbar .ui-state-active { background: #dadada; border-color:#aaa; color:#fff; }
 
+/* workzone */
+.elfinder-workzone { background:#fff; }
 
 /* current directory */
 /* selected file in "icons" view */

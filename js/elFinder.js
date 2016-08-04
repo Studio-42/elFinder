@@ -2219,7 +2219,9 @@ window.elFinder = function(node, opts) {
 						$(elm).trigger('resize', {fullscreen: 'off'});
 					}
 				} else {
-					$(elm).addClass('elfinder-fullscreen').attr('style', 'width:100%; height:100%;').trigger('resize', {fullscreen: 'on'});
+					$(elm).addClass('elfinder-fullscreen')
+						.attr('style', 'width:100%; height:100%; margin:0; padding:0;')
+						.trigger('resize', {fullscreen: 'on'});
 					$(window).on('resize.' + namespace, resize);
 				}
 			});
@@ -2258,6 +2260,8 @@ window.elFinder = function(node, opts) {
 				$(elem).css({
 					width: '100%',
 					height: '100%',
+					margin: 0,
+					padding: 0,
 					top: 0,
 					left: 0,
 					display: 'block',
