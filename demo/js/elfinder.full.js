@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: bc076cc) (2016-08-04)
+ * Version 2.1.14 (2.1-src Nightly: c8ef246) (2016-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2189,7 +2189,7 @@ window.elFinder = function(node, opts) {
 	(function() {
 		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
 		
-		if (self.UA.Fullscreen) {
+		if (false && self.UA.Fullscreen) {
 			// native full screen mode
 			
 			fullElm = function() {
@@ -2264,6 +2264,8 @@ window.elFinder = function(node, opts) {
 					restoreStyle(elm);
 					$(elm).trigger('resize', {fullscreen: 'off'});
 				}
+				
+				$(window).trigger('resize');
 			};
 			
 			toFull = function(elem) {
@@ -2273,12 +2275,13 @@ window.elFinder = function(node, opts) {
 					top: 0,
 					left: 0,
 					display: 'block',
-					position: 'fixed'
+					position: 'fixed',
+					zIndex: Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000)
 				})
 				.addClass('elfinder-fullscreen')
 				.trigger('resize', {fullscreen: 'on'});
 				
-				$(window).on('resize.' + namespace, resize);
+				$(window).on('resize.' + namespace, resize).trigger('resize');
 				
 				return true;
 			};
@@ -2810,7 +2813,7 @@ window.elFinder = function(node, opts) {
 				tm && clearTimeout(tm);
 				tm = setTimeout(function() {
 					self.trigger('resize', {width : node.width(), height : node.height()});
-				}, 200);
+				}, 100);
 			}
 		})
 		.on('beforeunload.' + namespace,function(e){
@@ -5631,7 +5634,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: bc076cc)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c8ef246)';
 
 
 
@@ -16635,8 +16638,8 @@ elFinder.prototype.commands.places = function() {
 				
 				var win     = self.window,
 					full    = win.hasClass(fullscreen),
-					scroll  = 'scroll.'+fm.namespace,
-					$window = $(window);
+					$window = $(window),
+					resize  = function() { self.preview.trigger('changesize'); };
 					
 				e.stopPropagation();
 				e.preventDefault();
@@ -16646,7 +16649,7 @@ elFinder.prototype.commands.places = function() {
 					navShow();
 					win.toggleClass(fullscreen)
 					.css(win.data('position'));
-					$window.off(scroll).trigger(self.resize).off(self.resize);
+					$window.trigger(self.resize).off(self.resize, resize);
 					navbar.off('mouseenter mouseleave');
 					cover.off(coverEv);
 				} else {
@@ -16660,10 +16663,7 @@ elFinder.prototype.commands.places = function() {
 					})
 					.removeAttr('style');
 
-					$(window).on(self.resize, function(e) {
-						self.preview.trigger('changesize');
-					})
-					.trigger(scroll)
+					$(window).on(self.resize, resize)
 					.trigger(self.resize);
 
 					cover.on(coverEv, function(e) {
