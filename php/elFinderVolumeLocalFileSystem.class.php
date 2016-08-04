@@ -759,7 +759,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function _fclose($fp, $path='') {
-		return fclose($fp);
+		return (is_resource($fp) && fclose($fp));
 	}
 	
 	/********************  file/dir manipulations *************************/
