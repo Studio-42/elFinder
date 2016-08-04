@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 742005b) (2016-08-03)
+ * Version 2.1.14 (2.1-src Nightly: bc076cc) (2016-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2585,6 +2585,10 @@ window.elFinder = function(node, opts) {
 	
 	if (!$.isArray(this.options.commands)) {
 		this.options.commands = [];
+	}
+	
+	if ($.inArray('*', this.options.commands) !== -1) {
+		this.options.commands = Object.keys(this.commands);
 	}
 	
 	// load commands
@@ -5627,7 +5631,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 742005b)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: bc076cc)';
 
 
 
@@ -6060,17 +6064,19 @@ elFinder.prototype._options = {
 	cssClass : '',
 
 	/**
-	 * Active commands list
+	 * Active commands list. '*' means all of the commands that have been load.
 	 * If some required commands will be missed here, elFinder will add its
 	 *
 	 * @type Array
 	 */
-	commands : [
-		'open', 'opendir', 'reload', 'home', 'up', 'back', 'forward', 'getfile', 'quicklook', 
-		'download', 'rm', 'duplicate', 'rename', 'mkdir', 'mkfile', 'upload', 'copy', 
-		'cut', 'paste', 'edit', 'extract', 'archive', 'search', 'info', 'view', 'help',
-		'resize', 'sort', 'netmount', 'netunmount', 'places', 'chmod', 'colwidth', 'fullscreen'
-	],
+	commands : ['*'],
+	// Available commands list
+	//commands : [
+	//	'archive', 'back', 'chmod', 'colwidth', 'copy', 'cut', 'download', 'duplicate',
+	//	'edit', 'extract', 'forward', 'fullscreen', 'getfile', 'help', 'home', 'info',
+	//	'mkdir', 'mkfile', 'netmount', 'netunmount', 'open', 'opendir', 'paste', 'places',
+	//	'quicklook', 'reload', 'rename', 'resize', 'rm', 'search', 'sort', 'up', 'upload', 'view'
+	//],
 	
 	/**
 	 * Commands options.
