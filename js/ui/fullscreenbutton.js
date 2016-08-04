@@ -13,6 +13,8 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 			var fullscreen = cmd.value;
 			icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
 			button.attr('title', fullscreen? cmd.fm.i18n('reinstate') : cmd.fm.i18n('cmdfullscreen'));
+			cmd.className = fullscreen? 'unfullscreen' : '';
+			cmd.title = cmd.fm.i18n(fullscreen ? 'reinstate' : 'cmdfullscreen');
 		});
 	});
 };

@@ -463,6 +463,14 @@ elFinder.prototype._options = {
 	/**
 	 * Hash of default directory path to open
 	 * 
+	 * If you want to find the hash in Javascript
+	 * can be obtained with the following code. (In the case of a standard hashing method)
+	 * 
+	 * var volumeId = 'l1_'; // volume id
+	 * var path = 'path/to/target'; // without root path
+	 * //var path = 'path\\to\\target'; // use \ on windows server
+	 * var hash = volumeId + btoa(path).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '.').replace(/\.+$/, '');
+	 * 
 	 * @type String
 	 * @default ""
 	 */
