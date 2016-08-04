@@ -2175,7 +2175,7 @@ window.elFinder = function(node, opts) {
 	(function() {
 		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
 		
-		if (self.UA.Fullscreen) {
+		if (false && self.UA.Fullscreen) {
 			// native full screen mode
 			
 			fullElm = function() {
@@ -2250,6 +2250,8 @@ window.elFinder = function(node, opts) {
 					restoreStyle(elm);
 					$(elm).trigger('resize', {fullscreen: 'off'});
 				}
+				
+				$(window).trigger('resize');
 			};
 			
 			toFull = function(elem) {
@@ -2259,12 +2261,13 @@ window.elFinder = function(node, opts) {
 					top: 0,
 					left: 0,
 					display: 'block',
-					position: 'fixed'
+					position: 'fixed',
+					zIndex: Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000)
 				})
 				.addClass('elfinder-fullscreen')
 				.trigger('resize', {fullscreen: 'on'});
 				
-				$(window).on('resize.' + namespace, resize);
+				$(window).on('resize.' + namespace, resize).trigger('resize');
 				
 				return true;
 			};
@@ -2796,7 +2799,7 @@ window.elFinder = function(node, opts) {
 				tm && clearTimeout(tm);
 				tm = setTimeout(function() {
 					self.trigger('resize', {width : node.width(), height : node.height()});
-				}, 200);
+				}, 100);
 			}
 		})
 		.on('beforeunload.' + namespace,function(e){

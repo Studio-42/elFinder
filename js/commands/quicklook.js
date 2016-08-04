@@ -149,8 +149,8 @@
 				
 				var win     = self.window,
 					full    = win.hasClass(fullscreen),
-					scroll  = 'scroll.'+fm.namespace,
-					$window = $(window);
+					$window = $(window),
+					resize  = function() { self.preview.trigger('changesize'); };
 					
 				e.stopPropagation();
 				e.preventDefault();
@@ -160,7 +160,7 @@
 					navShow();
 					win.toggleClass(fullscreen)
 					.css(win.data('position'));
-					$window.off(scroll).trigger(self.resize).off(self.resize);
+					$window.trigger(self.resize).off(self.resize, resize);
 					navbar.off('mouseenter mouseleave');
 					cover.off(coverEv);
 				} else {
@@ -174,10 +174,7 @@
 					})
 					.removeAttr('style');
 
-					$(window).on(self.resize, function(e) {
-						self.preview.trigger('changesize');
-					})
-					.trigger(scroll)
+					$(window).on(self.resize, resize)
 					.trigger(self.resize);
 
 					cover.on(coverEv, function(e) {
