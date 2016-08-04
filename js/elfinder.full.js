@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: c8ef246) (2016-08-04)
+ * Version 2.1.14 (2.1-src Nightly: 802a678) (2016-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2189,7 +2189,7 @@ window.elFinder = function(node, opts) {
 	(function() {
 		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
 		
-		if (false && self.UA.Fullscreen) {
+		if (self.UA.Fullscreen) {
 			// native full screen mode
 			
 			fullElm = function() {
@@ -5634,7 +5634,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c8ef246)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 802a678)';
 
 
 
