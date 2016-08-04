@@ -97,7 +97,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 		} else {
 			if (fm.UA.Mobile) {
 				nav.data('defWidth', nav.width());
-				$(window).on('resize', function(e){
+				$(window).on('resize.' + fm.namespace, function(e){
 					setWidth = nav.parent().width() / 2;
 					if (nav.data('defWidth') > setWidth) {
 						nav.width(setWidth);

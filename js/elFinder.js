@@ -691,7 +691,7 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.draggable = {
-		appendTo   : 'body',
+		appendTo   : node,
 		addClasses : true,
 		distance   : 4,
 		revert     : true,
@@ -2713,6 +2713,9 @@ window.elFinder = function(node, opts) {
 	this.options.resizable 
 	&& $.fn.resizable 
 	&& node.resizable({
+		resize    : function(e, ui) {
+			self.resize(ui.size.width, ui.size.height);
+		},
 		handles   : 'se',
 		minWidth  : 300,
 		minHeight : 200
