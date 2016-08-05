@@ -3035,7 +3035,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function nameAccepted($name) {
-		if (!json_encode($name)) {
+		if (json_encode($name)===false) {
 			return false;
 		}
 		if ($this->nameValidator) {
