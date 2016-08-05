@@ -2208,7 +2208,7 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
-		var orgStyle, resizeTm, fullElm, exitFull, toFull,
+		var orgStyle, bodyOvf, resizeTm, fullElm, exitFull, toFull,
 			cls = 'elfinder-fullscreen',
 			clsN = 'elfinder-fullscreen-native',
 			checkDialog = function() {
@@ -2279,6 +2279,10 @@ window.elFinder = function(node, opts) {
 					var elm;
 					
 					$(window).off('resize.' + namespace, resize);
+					if (bodyOvf !== void(0)) {
+						$('body').css('overflow', bodyOvf);
+					}
+					bodyOvf = void(0);
 					
 					if (orgStyle) {
 						elm = orgStyle.elm;
@@ -2290,9 +2294,12 @@ window.elFinder = function(node, opts) {
 				},
 				
 				toFull: function(elem) {
+					bodyOvf = $('body').css('overflow') || '';
+					$('body').css('overflow', 'hidden');
+					
 					$(elem).css(self.getMaximizeCss())
-					.addClass(cls)
-					.trigger('resize', {fullscreen: 'on'});
+						.addClass(cls)
+						.trigger('resize', {fullscreen: 'on'});
 					
 					checkDialog();
 					
@@ -2393,15 +2400,19 @@ window.elFinder = function(node, opts) {
 		},
 		exitMax = function(elm) {
 			$(window).off('resize.' + namespace, resize);
+			$('body').css('overflow', elm.data('bodyOvf'));
 			elm.removeClass(cls)
 				.attr('style', elm.data('orgStyle'))
+				.removeData('bodyOvf')
 				.removeData('orgStyle');
 			elm.trigger('resize', {maximize: 'off'});
 		},
 		toMax = function(elm) {
-			elm.data('orgStyle', elm.attr('style'))
+			elm.data('bodyOvf', $('body').css('overflow') || '')
+				.data('orgStyle', elm.attr('style'))
 				.addClass(cls)
 				.css(self.getMaximizeCss());
+			$('body').css('overflow', 'hidden');
 			$(window).on('resize.' + namespace, {elm: elm}, resize).trigger('resize');
 		};
 		
