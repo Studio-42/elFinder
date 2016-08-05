@@ -2173,7 +2173,23 @@ window.elFinder = function(node, opts) {
 	
 	// Closure for togglefullscreen
 	(function() {
-		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize;
+		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize,
+			checkDialog = function() {
+				var t = 0,
+					l = 0;
+				$.each(node.children('.ui-dialog'), function(i, d) {
+					$d = $(d);
+					var pos = $d.position();
+					if (pos.top < 0) {
+						$d.css('top', t);
+						t += 20;
+					}
+					if (pos.left < 0) {
+						$d.css('left', l);
+						l += 20;
+					}
+				});
+			};
 		
 		if (self.UA.Fullscreen) {
 			// native full screen mode
@@ -2224,6 +2240,7 @@ window.elFinder = function(node, opts) {
 						.attr('style', 'width:100%; height:100%; margin:0; padding:0;')
 						.trigger('resize', {fullscreen: 'on'});
 					win.on('resize.' + namespace, resize);
+					checkDialog();
 				}
 				win.trigger('resize');
 			});
@@ -2273,6 +2290,8 @@ window.elFinder = function(node, opts) {
 				.addClass('elfinder-fullscreen')
 				.trigger('resize', {fullscreen: 'on'});
 				
+				checkDialog();
+				
 				$(window).on('resize.' + namespace, resize).trigger('resize');
 				
 				return true;
@@ -2306,8 +2325,8 @@ window.elFinder = function(node, opts) {
 		 * @param  Bool   full
 		 * @return Object | Null  DOM node object of current full scrren
 		 */
-		self.toggleFullscreen = function(node, full) {
-			var elm = $(node).get(0),
+		self.toggleFullscreen = function(target, full) {
+			var elm = $(target).get(0),
 				curElm = null;
 			
 			curElm = fullElm();
