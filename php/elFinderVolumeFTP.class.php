@@ -688,20 +688,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		} else {
 			$this->convEncIn();
 		}
-		if (!$this->MLSTsupprt) {
-			if ($path == $this->root && ($path === $this->systemRoot || ! $this->isMyReload())) {
+		if (! $this->MLSTsupprt) {
+			if ($path === $this->root) {
 				$res = array(
 					'name' => $this->root,
 					'mime' => 'directory',
 					'dirs' => $this->_subdirs($path)
 				);
 				if ($this->isMyReload()) {
-				 	$ts = 0;
+					$ts = 0;
 					foreach (ftp_rawlist($this->connect, $path) as $str) {
 						if (($stat = $this->parseRaw($str, $path))) {
 							$ts = max($ts, $stat['ts']);
 						}
-			 		}
+					}
 					if ($ts) {
 						$res['ts'] = $ts;
 					}
