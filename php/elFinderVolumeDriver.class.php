@@ -1853,7 +1853,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
 		
-		if ($name == $file['name']) {
+		if ($name === $file['name']) {
 			return $file;
 		}
 		

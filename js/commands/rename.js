@@ -89,7 +89,7 @@ elFinder.prototype.commands.rename = function() {
 						}
 					}
 				})
-				.keydown(function(e) {
+				.on('keydown', function(e) {
 					e.stopImmediatePropagation();
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
@@ -98,22 +98,22 @@ elFinder.prototype.commands.rename = function() {
 						input.blur();
 					}
 				})
-				.mousedown(function(e) {
+				.on('mousedown click dblclick', function(e) {
+					// click for touch device
 					e.stopPropagation();
+					if (e.type === 'dblclick') {
+						e.preventDefault();
+					}
 				})
-				.click(function(e) { // for touch device
-					e.stopPropagation();
-				})
-				.dblclick(function(e) {
-					e.stopPropagation();
-					e.preventDefault();
-				})
-				.blur(function() {
+				.on('blur', function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent(),
 						valid  = true;
 
 					if (!inError && pnode.length) {
+						
+						input.off('blur');
+						
 						if (input[0].setSelectionRange) {
 							input[0].setSelectionRange(0, 0)
 						}
@@ -139,7 +139,8 @@ elFinder.prototype.commands.rename = function() {
 						}
 						
 						rest();
-						(navbar? pnode : node).html(fm.escape(name));
+						
+						(navbar? input : node).html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name},
@@ -147,7 +148,9 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.fail(function(error) {
 								dfrd.reject();
-								fm.sync();
+								if (! error || ! $.isArray(error) || error[0] !== 'errRename') {
+									fm.sync();
+								}
 							})
 							.done(function(data) {
 								dfrd.resolve(data);
