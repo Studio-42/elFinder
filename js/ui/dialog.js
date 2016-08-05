@@ -26,8 +26,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 	
 	opts = $.extend({}, $.fn.elfinderdialog.defaults, opts);
 	
-	if (opts.allowFull && ! fm) {
-		opts.allowFull = false;
+	if (opts.allowMaximize && ! fm) {
+		opts.allowMaximize = false;
 	}
 	
 	this.filter(':not(.ui-dialog-content)').each(function() {
@@ -101,8 +101,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.on('close', function() {
 					var dialogs;
 					
-					if (opts.allowFull) {
-						fm.toggleFullscreen(dialog, false);
+					if (opts.allowMaximize) {
+						fm.toggleMaximize(dialog, false);
 					}
 					
 					dialog.data('modal') && overlay.elfinderoverlay('hide');
@@ -163,11 +163,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 				}))
 		);
 		
-		if (opts.allowFull) {
+		if (opts.allowMaximize) {
 			dialog.on('resize', function(e, data) {
 				var full;
-				if (data && data.fullscreen) {
-					full = (data.fullscreen === 'on');
+				if (data && data.maximize) {
+					full = (data.maximize === 'on');
 					titlebar.find('.elfinder-titlebar-full span.ui-icon').toggleClass('ui-icon-minusthick', full);
 					if (full) {
 						try {
@@ -188,7 +188,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			});
 			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon  ui-icon-arrowthick-2-se-nw"/></span>')
 				.mousedown(function(e) {
-					fm.toggleFullscreen(dialog);
+					fm.toggleMaximize(dialog);
 				})
 			);
 		}

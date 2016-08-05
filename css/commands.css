@@ -223,8 +223,9 @@
 	font-size: 16px;
 }
 /* bottom margen for softkeyboard on fullscreen mode */
-.elfinder-touch .elfinder-fullscreen .elfinder-file-edit {
-	margin-bottom: 20em;
+.elfinder-touch.elfinder-fullscreen-native textarea.elfinder-file-edit {
+	padding-bottom: 20em;
+	margin-bottom: -20em;
 }
 
 
