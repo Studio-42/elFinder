@@ -1641,7 +1641,7 @@ window.elFinder = function(node, opts) {
 		
 		$.when(
 			this.request(opts1),
-			onlydir? null : this.request(opts2)
+			onlydir || cwd === this.root()? null : this.request(opts2)
 		)
 		.fail(function(error, xhr) {
 			if (! polling) {
