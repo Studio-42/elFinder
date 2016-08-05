@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: fd7dce2) (2016-08-05)
+ * Version 2.1.14 (2.1-src Nightly: 2de9482) (2016-08-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2222,7 +2222,7 @@ window.elFinder = function(node, opts) {
 			}
 		}
 
-		var orgStyle, resizeTm, fullElm, exitFull, toFull,
+		var orgStyle, bodyOvf, resizeTm, fullElm, exitFull, toFull,
 			cls = 'elfinder-fullscreen',
 			clsN = 'elfinder-fullscreen-native',
 			checkDialog = function() {
@@ -2293,6 +2293,10 @@ window.elFinder = function(node, opts) {
 					var elm;
 					
 					$(window).off('resize.' + namespace, resize);
+					if (bodyOvf !== void(0)) {
+						$('body').css('overflow', bodyOvf);
+					}
+					bodyOvf = void(0);
 					
 					if (orgStyle) {
 						elm = orgStyle.elm;
@@ -2304,9 +2308,12 @@ window.elFinder = function(node, opts) {
 				},
 				
 				toFull: function(elem) {
+					bodyOvf = $('body').css('overflow') || '';
+					$('body').css('overflow', 'hidden');
+					
 					$(elem).css(self.getMaximizeCss())
-					.addClass(cls)
-					.trigger('resize', {fullscreen: 'on'});
+						.addClass(cls)
+						.trigger('resize', {fullscreen: 'on'});
 					
 					checkDialog();
 					
@@ -2407,15 +2414,19 @@ window.elFinder = function(node, opts) {
 		},
 		exitMax = function(elm) {
 			$(window).off('resize.' + namespace, resize);
+			$('body').css('overflow', elm.data('bodyOvf'));
 			elm.removeClass(cls)
 				.attr('style', elm.data('orgStyle'))
+				.removeData('bodyOvf')
 				.removeData('orgStyle');
 			elm.trigger('resize', {maximize: 'off'});
 		},
 		toMax = function(elm) {
-			elm.data('orgStyle', elm.attr('style'))
+			elm.data('bodyOvf', $('body').css('overflow') || '')
+				.data('orgStyle', elm.attr('style'))
 				.addClass(cls)
 				.css(self.getMaximizeCss());
+			$('body').css('overflow', 'hidden');
 			$(window).on('resize.' + namespace, {elm: elm}, resize).trigger('resize');
 		};
 		
@@ -5734,7 +5745,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: fd7dce2)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2de9482)';
 
 
 
@@ -17943,7 +17954,7 @@ elFinder.prototype.commands.rename = function() {
 						}
 					}
 				})
-				.keydown(function(e) {
+				.on('keydown', function(e) {
 					e.stopImmediatePropagation();
 					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						dfrd.reject();
@@ -17952,22 +17963,22 @@ elFinder.prototype.commands.rename = function() {
 						input.blur();
 					}
 				})
-				.mousedown(function(e) {
+				.on('mousedown click dblclick', function(e) {
+					// click for touch device
 					e.stopPropagation();
+					if (e.type === 'dblclick') {
+						e.preventDefault();
+					}
 				})
-				.click(function(e) { // for touch device
-					e.stopPropagation();
-				})
-				.dblclick(function(e) {
-					e.stopPropagation();
-					e.preventDefault();
-				})
-				.blur(function() {
+				.on('blur', function() {
 					var name   = $.trim(input.val()),
 						parent = input.parent(),
 						valid  = true;
 
 					if (!inError && pnode.length) {
+						
+						input.off('blur');
+						
 						if (input[0].setSelectionRange) {
 							input[0].setSelectionRange(0, 0)
 						}
@@ -17993,7 +18004,8 @@ elFinder.prototype.commands.rename = function() {
 						}
 						
 						rest();
-						(navbar? pnode : node).html(fm.escape(name));
+						
+						(navbar? input : node).html(fm.escape(name));
 						fm.lockfiles({files : [file.hash]});
 						fm.request({
 								data   : {cmd : 'rename', target : file.hash, name : name},
@@ -18001,7 +18013,9 @@ elFinder.prototype.commands.rename = function() {
 							})
 							.fail(function(error) {
 								dfrd.reject();
-								fm.sync();
+								if (! error || ! $.isArray(error) || error[0] !== 'errRename') {
+									fm.sync();
+								}
 							})
 							.done(function(data) {
 								dfrd.resolve(data);

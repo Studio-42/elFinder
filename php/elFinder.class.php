@@ -2187,7 +2187,7 @@ class elFinder {
 			}
 			
 			$tmpname = $files['tmp_name'][$i];
-			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
+			$path = ($paths && isset($paths[$i]))? $paths[$i] : '';
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
 			if ($name === 'blob') {
 				if ($chunk) {
@@ -2239,7 +2239,7 @@ class elFinder {
 				break;
 			}
 			$rnres = array();
-			if ($path && $path !== $target) {
+			if ($path !== '' && $path !== $target) {
 				if ($dir = $volume->dir($path)) {
 					$_target = $path;
 					if (! isset($addedDirs[$path])) {
@@ -2874,6 +2874,7 @@ class elFinder {
 	protected function ensureDirsRecursively($volume, $target, $dirs, $path = '') {
 		$res = array('stats' => array(), 'hashes' => array());
 		foreach($dirs as $name => $sub) {
+			$name = (string)$name;
 			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($dir = $volume->mkdir($target, $name))) {
 				$_path = $path . '/' . $name;
 				$res['stats'][] = $dir;
