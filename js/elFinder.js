@@ -2171,15 +2171,37 @@ window.elFinder = function(node, opts) {
 		return true;
 	};
 	
+	/**
+	 * Return css object for maximize
+	 * 
+	 * @return Object
+	 */
+	this.getMaximizeCss = function() {
+		return {
+			width   : '100%',
+			height  : '100%',
+			margin  : 0,
+			padding : 0,
+			top     : 0,
+			left    : 0,
+			display : 'block',
+			position: 'fixed',
+			zIndex  : Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000)
+		};
+	};
+	
 	// Closure for togglefullscreen
 	(function() {
 		var orgStyle, resizeTm, fullElm, exitFull, toFull, restoreStyle, resize,
+			cls = 'elfinder-fullscreen',
+			clsN = 'elfinder-fullscreen-native',
 			checkDialog = function() {
 				var t = 0,
 					l = 0;
 				$.each(node.children('.ui-dialog'), function(i, d) {
-					$d = $(d);
-					var pos = $d.position();
+					var $d = $(d),
+						pos = $d.position();
+					
 					if (pos.top < 0) {
 						$d.css('top', t);
 						t += 20;
@@ -2236,7 +2258,7 @@ window.elFinder = function(node, opts) {
 						$(elm).trigger('resize', {fullscreen: 'off'});
 					}
 				} else {
-					$(elm).addClass('elfinder-fullscreen')
+					$(elm).addClass(cls + ' ' + clsN)
 						.attr('style', 'width:100%; height:100%; margin:0; padding:0;')
 						.trigger('resize', {fullscreen: 'on'});
 					win.on('resize.' + namespace, resize);
@@ -2246,14 +2268,14 @@ window.elFinder = function(node, opts) {
 			});
 			
 		} else {
-			// DOM full screen mode
+			// node element maximize mode
 			
 			fullElm = function() {
 				var full;
-				if (node.hasClass('elfinder-fullscreen')) {
+				if (node.hasClass(cls)) {
 					return node.get(0);
 				} else {
-					full = node.find('.elfinder-fullscreen');
+					full = node.find('.' + cls);
 					if (full.length) {
 						return full.get(0);
 					}
@@ -2276,18 +2298,8 @@ window.elFinder = function(node, opts) {
 			};
 			
 			toFull = function(elem) {
-				$(elem).css({
-					width: '100%',
-					height: '100%',
-					margin: 0,
-					padding: 0,
-					top: 0,
-					left: 0,
-					display: 'block',
-					position: 'fixed',
-					zIndex: Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000)
-				})
-				.addClass('elfinder-fullscreen')
+				$(elem).css(self.getMaximizeCss())
+				.addClass(cls)
 				.trigger('resize', {fullscreen: 'on'});
 				
 				checkDialog();
@@ -2301,7 +2313,7 @@ window.elFinder = function(node, opts) {
 		
 		restoreStyle = function(elem) {
 			if (orgStyle && orgStyle.elm == elem) {
-				$(elem).removeClass('elfinder-fullscreen').attr('style', orgStyle.style);
+				$(elem).removeClass(cls + ' ' + clsN).attr('style', orgStyle.style);
 				orgStyle = null;
 			}
 		};
@@ -2321,7 +2333,7 @@ window.elFinder = function(node, opts) {
 		/**
 		 * Toggle Full Scrren Mode
 		 * 
-		 * @param  Object node
+		 * @param  Object target
 		 * @param  Bool   full
 		 * @return Object | Null  DOM node object of current full scrren
 		 */
@@ -2354,6 +2366,53 @@ window.elFinder = function(node, opts) {
 			} else {
 				orgStyle = null;
 				return null;
+			}
+		};
+	})();
+	
+	// Closure for toggleMaximize
+	(function(){
+		var cls = 'elfinder-maximized',
+		resize = function(e) {
+			if (e.target === window && e.data && e.data.elm) {
+				e.data.elm.trigger('resize', {maximize: 'on'});
+			}
+		},
+		exitMax = function(elm) {
+			$(window).off('resize.' + namespace, resize);
+			elm.removeClass(cls)
+				.attr('style', elm.data('orgStyle'))
+				.removeData('orgStyle');
+			elm.trigger('resize', {maximize: 'off'});
+		},
+		toMax = function(elm) {
+			elm.data('orgStyle', elm.attr('style'))
+				.addClass(cls)
+				.css(self.getMaximizeCss());
+			$(window).on('resize.' + namespace, {elm: elm}, resize).trigger('resize');
+		};
+		
+		/**
+		 * Toggle Maximize target node
+		 * 
+		 * @param  Object target
+		 * @param  Bool   max
+		 * @return void
+		 */
+		self.toggleMaximize = function(target, max) {
+			var elm = $(target),
+				maximized = elm.hasClass(cls);
+			
+			if (maximized) {
+				if (max === true) {
+					return;
+				}
+				exitMax(elm);
+			} else {
+				if (max === false) {
+					return;
+				}
+				toMax(elm);
 			}
 		};
 	})();
