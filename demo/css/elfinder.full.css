@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: ca15b4c) (2016-08-05)
+ * Version 2.1.14 (2.1-src Nightly: fd7dce2) (2016-08-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -233,8 +233,9 @@
 	font-size: 16px;
 }
 /* bottom margen for softkeyboard on fullscreen mode */
-.elfinder-touch .elfinder-fullscreen .elfinder-file-edit {
-	margin-bottom: 20em;
+.elfinder-touch.elfinder-fullscreen-native textarea.elfinder-file-edit {
+	padding-bottom: 20em;
+	margin-bottom: -20em;
 }
 
 
