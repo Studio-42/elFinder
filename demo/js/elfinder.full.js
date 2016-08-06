@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: ba87cb7) (2016-08-06)
+ * Version 2.1.14 (2.1-src Nightly: 994f363) (2016-08-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5745,7 +5745,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ba87cb7)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 994f363)';
 
 
 
@@ -10482,7 +10482,7 @@ $.fn.elfindercwd = function(fm, options) {
 						var regex = new RegExp(incquery.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i');
 						incHashes = $.map(cwdHashes, function(hash) {
 							var file = fm.file(hash);
-							return (file && file.name.match(regex))? file.hash : null;
+							return (file && (file.name.match(regex) || (file.i18 && file.i18.match(regex))))? file.hash : null;
 						});
 						fm.trigger('incsearch', { hashes: incHashes, query: incquery })
 							.searchStatus.ininc = true;
