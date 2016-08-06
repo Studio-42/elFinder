@@ -734,7 +734,7 @@ $.fn.elfindercwd = function(fm, options) {
 								htd.data('delta', (htd.outerWidth() - htw) - (btd.outerWidth() - btw));
 							}
 							btw -= htd.data('delta');
-							if (htw === btw) {
+							if (! init && ! opts.fitWidth && htw === btw) {
 								break;
 							}
 							htd.css('width', btw + 'px');
