@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 93f70bf) (2016-08-07)
+ * Version 2.1.14 (2.1-src Nightly: cb4fb67) (2016-08-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5749,7 +5749,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 93f70bf)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: cb4fb67)';
 
 
 
@@ -8286,16 +8286,16 @@ $.fn.elfindercontextmenu = function(fm) {
 					setTimeout(function() {
 						menu.removeData('draged');
 					}, 100);
+				})
+				.draggable({
+					distance: 8,
+					start: function() {
+						menu.find('.ui-state-hover').removeClass('ui-state-hover');
+					},
+					stop: function() {
+						menu.data('draged', true);
+					}
 				}),
-			drgOpts = {
-				distance: 8,
-				start: function() {
-					menu.find('.ui-state-hover').removeClass('ui-state-hover');
-				},
-				stop: function() {
-					menu.data('draged', true);
-				}
-			},
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
 			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
@@ -8375,7 +8375,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						opacity : '1'
 					};
 
-				menu.stop().css(css).show().draggable(drgOpts);
+				menu.stop().attr('style', '').css(css).show();
 				
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
@@ -8387,7 +8387,6 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			close = function() {
 				menu.hide().empty().removeData('submenuKeep');
-				menu.draggable('instance') && menu.draggable('destroy');
 				fm.trigger('closecontextmenu');
 				if (fm.UA.iOS) {
 					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'touch');
