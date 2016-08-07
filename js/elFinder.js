@@ -2393,9 +2393,13 @@ window.elFinder = function(node, opts) {
 	// Closure for toggleMaximize
 	(function(){
 		var cls = 'elfinder-maximized',
+		resizeTm,
 		resize = function(e) {
 			if (e.target === window && e.data && e.data.elm) {
-				e.data.elm.trigger('resize', {maximize: 'on'});
+				resizeTm && clearTimeout(resizeTm);
+				resizeTm = setTimeout(function() {
+					e.data.elm.trigger('resize', {maximize: 'on'});
+				}, 100);
 			}
 		},
 		exitMax = function(elm) {
