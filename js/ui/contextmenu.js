@@ -115,7 +115,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						opacity : '1'
 					};
 
-				menu.stop().css(css).show();
+				menu.stop().attr('style', '').css(css).show();
 				
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
