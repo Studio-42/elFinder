@@ -62,7 +62,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					width  : opts.width,
 					height : opts.height
 				})
-				.mousedown(function(e) {
+				.on('mousedown', function(e) {
 					setTimeout(function() {
 						dialog.is(':visible') && dialog.trigger('totop');
 					}, 10);
@@ -157,7 +157,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		}
 		dialog.prepend(
 			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></span>')
-				.mousedown(function(e) {
+				.on('mousedown', function(e) {
 					e.preventDefault();
 					self.elfinderdialog('close');
 				}))
@@ -187,7 +187,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				}
 			});
 			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon  ui-icon-arrowthick-2-se-nw"/></span>')
-				.mousedown(function(e) {
+				.on('mousedown', function(e) {
 					fm.toggleMaximize(dialog);
 				})
 			);
@@ -195,17 +195,17 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		$.each(opts.buttons, function(name, cb) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+name+'</span></button>')
-				.click($.proxy(cb, self[0]))
-				.hover(function(e) { 
+				.on('click', $.proxy(cb, self[0]))
+				.on('mouseenter mouseleave', function(e) { 
 					if (opts.btnHoverFocus) {
 						$(this)[e.type == 'mouseenter' ? 'focus' : 'blur']();
 					} else {
 						$(this).toggleClass(clhover, e.type == 'mouseenter');
 					}
 				})
-				.focus(function() { $(this).addClass(clhover) })
-				.blur(function() { $(this).removeClass(clhover) })
-				.keydown(function(e) { 
+				.on('focus', function() { $(this).addClass(clhover) })
+				.on('blur', function() { $(this).removeClass(clhover) })
+				.on('keydown', function(e) { 
 					var next;
 					e.stopPropagation();
 					if (e.keyCode == $.ui.keyCode.ENTER) {
