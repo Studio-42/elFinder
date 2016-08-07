@@ -51,6 +51,7 @@ elFinder.prototype.commands.edit = function() {
 						dfrd.reject();
 						ta.elfinderdialog('close');
 					};
+					fm.toggleMaximize($(this).closest('.ui-dialog'), false);
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					if (rtrim(old) !== rtrim(ta.val())) {
 						old = ta.val();
