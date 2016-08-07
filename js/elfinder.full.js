@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: cb4fb67) (2016-08-07)
+ * Version 2.1.14 (2.1-src Nightly: 2cb6e5a) (2016-08-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5749,7 +5749,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: cb4fb67)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2cb6e5a)';
 
 
 
@@ -8272,6 +8272,12 @@ $.fn.elfindercontextmenu = function(fm) {
 			exIcon = 'elfinder-contextmenu-extra-icon',
 			menu = $(this).addClass('touch-punch ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
+				.on('touchstart', function(e) {
+					menu.data('touching', true);
+				})
+				.on('touchend', function(e) {
+					menu.removeData('touching');
+				})
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
 					$(this).toggleClass('ui-state-hover', (e.type === 'mouseenter' || (! menu.data('draged') && menu.data('submenuKeep'))));
 					if (menu.data('draged') && menu.data('submenuKeep')) {
@@ -8290,7 +8296,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				.draggable({
 					distance: 8,
 					start: function() {
-						menu.find('.ui-state-hover').removeClass('ui-state-hover');
+						menu.data('touching') && menu.find('.ui-state-hover').removeClass('ui-state-hover');
 					},
 					stop: function() {
 						menu.data('draged', true);
