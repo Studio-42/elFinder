@@ -339,7 +339,7 @@
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
-		.click(function(e) { e.stopPropagation();  })
+		.on('click', function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
