@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 78b4c78) (2016-08-08)
+ * Version 2.1.14 (2.1-src Nightly: 3e23aa8) (2016-08-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5749,7 +5749,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 78b4c78)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3e23aa8)';
 
 
 
@@ -16990,7 +16990,7 @@ elFinder.prototype.commands.places = function() {
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
-		.click(function(e) { e.stopPropagation();  })
+		.on('click', function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(

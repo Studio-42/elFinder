@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <admin@robonetwork.cf>
- * @version 2016-6-3
+ * @version 2016-8-8
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sk = {
@@ -40,8 +40,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errWrite'             : 'Nie je možné písať do súboru "$1".',
 			'errPerm'              : 'Nepovolený prístup.',
 			'errLocked'            : '"$1" je uzamknutý, a nemôže byť premenovaný, presunutý alebo odstránený.',
-			'errExists'            : 'Súbor s menom "$1" už existuje.',
-			'errInvName'           : 'Nesprávne meno súboru.',
+			'errExists'            : 'Súbor s názvom "$1" už existuje.',
+			'errInvName'           : 'Nesprávný názov súboru.',
 			'errFolderNotFound'    : 'Priečinok nenájdený.',
 			'errFileNotFound'      : 'Súbor nenájdený.',
 			'errTrgFolderNotFound' : 'Zvolený priečinok "$1" nenájdený.',
@@ -134,7 +134,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdplaces'    : 'Na umiestnenie', // added 28.12.2014
 			'cmdchmod'     : 'Zmeniť režim', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'Otvoriť priečinok', // from v2.1 added 13.1.2016
-			
+			'cmdcolwidth'  : 'Resetovať šírku stĺpca', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
+
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavrieť',
 			'btnSave'   : 'Uložiť',
@@ -171,9 +173,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsave'     : 'Uloženie súborov',
 			'ntfarchive'  : 'Vytváranie archívu',
 			'ntfextract'  : 'Extrahovanie súborov z archívu',
-			'ntfsearch'   : 'Prehľadávanie súborov',
+			'ntfsearch'   : 'Vyhľadávanie súborov',
 			'ntfresize'   : 'Zmena veľkosti obrázkov',
-			'ntfsmth'     : 'Nejaká činnosť',
+			'ntfsmth'     : 'Počkajte prosím...',
 			'ntfloadimg'  : 'Načítavanie obrázka',
 			'ntfnetmount' : 'Pripájanie sieťového média', // added 18.04.2012
 			'ntfnetunmount': 'Odpájanie sieťového média', // from v2.1 added 30.04.2012
@@ -233,6 +235,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'sortsize'          : 'podľa veľkosti',
 			'sortdate'          : 'podľa dátumu',
 			'sortFoldersFirst'  : 'Najskôr Priečinky',
+			'sortperm'          : 'podľa povolenia', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'podľa módu', // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'podľa majiteľa', // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'podľa skupiny', // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Tiež stromove zobrazenie', // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'Nový textový súbor.txt', // added 10.11.2015
@@ -349,6 +356,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'editingFile'     : 'Upravujete súbor.', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : 'Vybrali ste $1 položky.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'Máte $1 položky v schránke.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Prírastkové hľadanie je iba z aktuálneho zobrazenia.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Obnoviť', // from v2.1.15 added 3.8.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
