@@ -215,7 +215,7 @@ elFinder.prototype.commands.resize = function() {
 							setupimg();
 							
 							type.button('enable');
-							inputFirst = control.find('input,select').removeAttr('disabled')
+							inputFirst = control.find('input,select').prop('disabled', false)
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
 
