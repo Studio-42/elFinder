@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 2cb6e5a) (2016-08-07)
+ * Version 2.1.14 (2.1-src Nightly: 78b4c78) (2016-08-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3451,7 +3451,7 @@ elFinder.prototype = {
 		}
 		
 		try {
-			data = $.parseJSON(text);
+			data = JSON.parse(text);
 		} catch (e) {
 			return {error : ['errResponse', 'errDataNotJSON']};
 		}
@@ -5749,7 +5749,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2cb6e5a)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 78b4c78)';
 
 
 
@@ -18355,7 +18355,7 @@ elFinder.prototype.commands.resize = function() {
 							setupimg();
 							
 							type.button('enable');
-							inputFirst = control.find('input,select').removeAttr('disabled')
+							inputFirst = control.find('input,select').prop('disabled', false)
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
 
