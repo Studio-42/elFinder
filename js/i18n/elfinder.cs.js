@@ -387,7 +387,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindOTF'         : 'Open Type font',
 			'kindRPM'         : 'RPM balíček',
 			// texts
-      'kindText'        : 'Textový dokument',
+                        'kindText'        : 'Textový dokument',
 			'kindTextPlain'   : 'Čistý text',
 			'kindPHP'         : 'PHP zdrojový kód',
 			'kindCSS'         : 'Kaskádové styly',
