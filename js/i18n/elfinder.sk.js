@@ -173,9 +173,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsave'     : 'Uloženie súborov',
 			'ntfarchive'  : 'Vytváranie archívu',
 			'ntfextract'  : 'Extrahovanie súborov z archívu',
-			'ntfsearch'   : 'Prehľadávanie súborov',
+			'ntfsearch'   : 'Vyhľadávanie súborov',
 			'ntfresize'   : 'Zmena veľkosti obrázkov',
-			'ntfsmth'     : 'Nejaká činnosť',
+			'ntfsmth'     : 'Počkajte prosím...',
 			'ntfloadimg'  : 'Načítavanie obrázka',
 			'ntfnetmount' : 'Pripájanie sieťového média', // added 18.04.2012
 			'ntfnetunmount': 'Odpájanie sieťového média', // from v2.1 added 30.04.2012
