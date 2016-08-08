@@ -3437,7 +3437,7 @@ elFinder.prototype = {
 		}
 		
 		try {
-			data = $.parseJSON(text);
+			data = JSON.parse(text);
 		} catch (e) {
 			return {error : ['errResponse', 'errDataNotJSON']};
 		}
