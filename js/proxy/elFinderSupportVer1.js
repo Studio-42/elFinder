@@ -328,6 +328,7 @@ window.elFinderSupportVer1 = function(upload) {
 				name   : file.name,
 				mime   : mime,
 				date   : file.date || this.fm.formatDate(file),
+				ts     : file.ts,
 				size   : size,
 				read   : file.read,
 				write  : file.write,
