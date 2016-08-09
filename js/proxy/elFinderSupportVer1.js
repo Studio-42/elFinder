@@ -11,7 +11,16 @@
  * @author Dmitry (dio) Levashov
  **/
 window.elFinderSupportVer1 = function(upload) {
-	var self = this;
+	var self = this,
+		dateObj, today, yesterday,
+		getDateString = function(date) {
+			return date.replace('Today', today).replace('Yesterday', yesterday);
+		};
+	
+	dateObj = new Date();
+	today = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + dateObj.getDate();
+	dateObj = new Date(Date.now() - 86400000);
+	yesterday = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + dateObj.getDate();
 	
 	this.upload = upload || 'auto';
 	
@@ -176,7 +185,7 @@ window.elFinderSupportVer1 = function(upload) {
 			},
 			getTreeDiff = function(files) {
 				var dirs = getDirs(files);
-				treeDiff = fm.diff(dirs, null, ['date']);
+				treeDiff = fm.diff(dirs, null, ['date', 'ts']);
 				if (treeDiff.added.length) {
 					treeDiff.added = getDirs(treeDiff.added);
 				}
@@ -236,10 +245,18 @@ window.elFinderSupportVer1 = function(upload) {
 		}
 		
 		$.each(data.cdc||[], function(i, file) {
-			var hash = file.hash;
+			var hash = file.hash,
+				mcts;
 
 			if (files[hash]) {
-				files[hash].date   = file.date;
+				if (file.date) {
+					mcts = Date.parse(getDateString(file.date));
+					if (mcts && !isNaN(mcts)) {
+						files[hash].ts = Math.floor(mcts / 1000);
+					} else {
+						files[hash].date = file.date || fm.formatDate(file);
+					}
+				}
 				files[hash].locked = file.hash == phash ? true : file.rm === void(0) ? false : !file.rm;
 			} else {
 				files[hash] = self.normalizeFile(file, phash, data.tmb);
@@ -321,22 +338,32 @@ window.elFinderSupportVer1 = function(upload) {
 	this.normalizeFile = function(file, phash, tmb) {
 		var mime = file.mime || 'directory',
 			size = mime == 'directory' && !file.linkTo ? 0 : file.size,
+			mcts = file.date? Date.parse(getDateString(file.date)) : void 0,
 			info = {
 				url    : file.url,
 				hash   : file.hash,
 				phash  : phash,
 				name   : file.name,
 				mime   : mime,
-				date   : file.date || this.fm.formatDate(file),
+				ts     : file.ts,
 				size   : size,
 				read   : file.read,
 				write  : file.write,
 				locked : !phash ? true : file.rm === void(0) ? false : !file.rm
 			};
 		
+		if (! info.ts) {
+			if (mcts && !isNaN(mcts)) {
+				info.ts = Math.floor(mcts / 1000);
+			} else {
+				info.date = file.date || this.fm.formatDate(file);
+			}
+		}
+		
 		if (file.mime == 'application/x-empty' || file.mime == 'inode/x-empty') {
 			info.mime = 'text/plain';
 		}
+		
 		if (file.linkTo) {
 			info.alias = file.linkTo;
 		}
