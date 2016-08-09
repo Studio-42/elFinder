@@ -263,7 +263,7 @@
 			.append(prev)
 			.append(fsicon)
 			.append(next)
-			.append('<div class="elfinder-quicklook-navbar-separator"/>')
+			.append('<div class="elfinder-quicklook-navbar-separator" style="display:none"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
 		navStyle = '';
@@ -338,6 +338,7 @@
 	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
+		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.on('click', function(e) { e.stopPropagation();  })
 		.append(

@@ -10,7 +10,6 @@
 	border-top:0 solid;
 	border-bottom:0 solid;
 	overflow:auto;
-	display:none;
 	position:relative;
 }
 
@@ -105,9 +104,6 @@
 .elfinder-droppable-active .elfinder-navbar-icon, 
 .ui-state-hover            .elfinder-navbar-icon { background-position:0 -32px; }
 
-/* subdirs tree */
-.elfinder-navbar-subtree { display:none; }
-
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar-subtree { margin-left:12px; }
 .elfinder-rtl .elfinder-navbar-subtree { margin-right:12px; }
@@ -173,7 +169,6 @@
 	top: 0px;
 	height: 100%;
 	width: 50px;
-	display: none;
 	pointer-events: none;
 }
 .elfinder-ltr .elfinder-navbar-swipe-handle {
