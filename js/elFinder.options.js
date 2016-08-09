@@ -177,6 +177,13 @@ elFinder.prototype._options = {
 			// get image sizes before callback call
 			getImgSize : false
 		},
+		open : {
+			// HTTP method that request to the connector when item URL is not valid URL.
+			// If you set to "get" will be displayed request parameter in the browser's location field
+			// so if you want to conceal its parameters should be given "post".
+			// Nevertheless, please specify "get" if you want to enable the partial request by HTTP Range header.
+			method : 'post'
+		},
 		// "upload" command options.
 		upload : {
 			// Open system OS upload dialog: 'button' OR Open elFinder upload dialog: 'uploadbutton'

@@ -32,6 +32,7 @@
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof opts == 'object')? opts.thash : false,
+			opts  = this.options,
 			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
 
 		if (!cnt && !thash) {
@@ -126,7 +127,7 @@
 					if (url === '') {
 						var form = document.createElement("form");
 						form.action = fm.options.url;
-						form.method = 'POST';
+						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
 						form.target = 'new_window';
 						form.style.display = 'none';
 						var params = $.extend({}, fm.options.customData, {
