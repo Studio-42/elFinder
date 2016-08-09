@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 3e23aa8) (2016-08-08)
+ * Version 2.1.14 (2.1-src Nightly: 4baa69d) (2016-08-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5749,7 +5749,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3e23aa8)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 4baa69d)';
 
 
 
@@ -6231,6 +6231,13 @@ elFinder.prototype._options = {
 			oncomplete : '',
 			// get image sizes before callback call
 			getImgSize : false
+		},
+		open : {
+			// HTTP method that request to the connector when item URL is not valid URL.
+			// If you set to "get" will be displayed request parameter in the browser's location field
+			// so if you want to conceal its parameters should be given "post".
+			// Nevertheless, please specify "get" if you want to enable the partial request by HTTP Range header.
+			method : 'post'
 		},
 		// "upload" command options.
 		upload : {
@@ -7414,8 +7421,8 @@ elFinder.prototype.resources = {
 		symlink    : '<span class="elfinder-symlink"/>',
 		navicon    : '<span class="elfinder-nav-icon"/>',
 		navspinner : '<span class="elfinder-navbar-spinner"/>',
-		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>',
-		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree"/></div>'
+		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>',
+		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
 		
 	},
 	
@@ -8464,6 +8471,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){});
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
+								.hide()
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){
@@ -11079,7 +11087,7 @@ $.fn.elfindermkdirbutton = function(cmd) {
 $.fn.elfindernavbar = function(fm, opts) {
 
 	this.not('.elfinder-navbar').each(function() {
-		var nav    = $(this).addClass('ui-state-default elfinder-navbar'),
+		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
 			parent = nav.parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
@@ -11104,7 +11112,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			}
 			
 			fm.bind('load', function() {
-				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
+				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').hide().appendTo(wz);
 				if (swipeHandle.css('pointer-events') !== 'none') {
 					swipeHandle.remove();
 					swipeHandle = null;
@@ -11504,7 +11512,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
-						.replace(/\{name\}/, fm.escape(dir? dir.name : hash))
+						.replace(/\{name\}/, fm.escape(dir? dir.i18 || dir.name : hash))
 						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
@@ -11534,6 +11542,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				dirs[hash] = dir;
 				subtree.prepend(node);
 				root.addClass(collapsed);
+				sortBtn.toggle(subtree.children().length > 1);
 				
 				return true;
 			},
@@ -11544,7 +11553,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return String  removed name
 			 **/
 			remove = function(hash) {
-				var name = null, tgt;
+				var name = null, tgt, cnt;
 
 				if (dirs[hash]) {
 					delete dirs[hash];
@@ -11552,7 +11561,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (tgt.length) {
 						name = tgt.text();
 						tgt.parent().remove();
-						if (!subtree.children().length) {
+						cnt = subtree.children().length;
+						sortBtn.toggle(cnt > 1);
+						if (! cnt) {
 							root.removeClass(collapsed);
 							places.removeClass(expanded);
 							subtree.slideToggle(false);
@@ -11642,7 +11653,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (subtree.children().length) {
 						$.each(subtree.children(), function() {
 							var current =  $(this);
-							if (dir.name.localeCompare(current.children('.'+navdir).text()) < 0) {
+							if ((dir.i18 || dir.name).localeCompare(current.children('.'+navdir).text()) < 0) {
 								ret = !node.insertBefore(current);
 								return ret;
 							}
@@ -11655,6 +11666,15 @@ $.fn.elfinderplaces = function(fm, opts) {
 				});
 				save();
 			},
+			// sort button
+			sortBtn = $('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"/>')
+				.hide()
+				.on('click', function(e) {
+					e.stopPropagation();
+					subtree.empty();
+					sort();
+				}
+			),
 			/**
 			 * Node - wrapper for places root
 			 *
@@ -11681,16 +11701,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						fm.storage('placesState', places.hasClass(expanded)? 1 : 0);
 					}
 				})
-				.append(
-					// sort button
-					$('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"/>')
-						.on('click', function(e) {
-							e.stopPropagation();
-							subtree.empty();
-							sort();
-						}
-					)
-				),
+				.append(sortBtn),
 			/**
 			 * Container for dirs
 			 *
@@ -12579,7 +12590,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 			
 			fm.bind('load', function() {
-				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').appendTo(fm.getUI());
+				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').hide().appendTo(fm.getUI());
 				if (swipeHandle.css('pointer-events') !== 'none') {
 					swipeHandle.remove();
 					swipeHandle = null;
@@ -16081,6 +16092,7 @@ elFinder.prototype.commands.netunmount = function() {
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof opts == 'object')? opts.thash : false,
+			opts  = this.options,
 			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
 
 		if (!cnt && !thash) {
@@ -16175,7 +16187,7 @@ elFinder.prototype.commands.netunmount = function() {
 					if (url === '') {
 						var form = document.createElement("form");
 						form.action = fm.options.url;
-						form.method = 'POST';
+						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
 						form.target = 'new_window';
 						form.style.display = 'none';
 						var params = $.extend({}, fm.options.customData, {
@@ -16989,6 +17001,7 @@ elFinder.prototype.commands.places = function() {
 	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
+		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.on('click', function(e) { e.stopPropagation();  })
 		.append(
