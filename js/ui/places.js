@@ -63,7 +63,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
-						.replace(/\{name\}/, fm.escape(dir? dir.name : hash))
+						.replace(/\{name\}/, fm.escape(dir? dir.i18 || dir.name : hash))
 						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
@@ -204,7 +204,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (subtree.children().length) {
 						$.each(subtree.children(), function() {
 							var current =  $(this);
-							if (dir.name.localeCompare(current.children('.'+navdir).text()) < 0) {
+							if ((dir.i18 || dir.name).localeCompare(current.children('.'+navdir).text()) < 0) {
 								ret = !node.insertBefore(current);
 								return ret;
 							}
