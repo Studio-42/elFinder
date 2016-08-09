@@ -229,6 +229,7 @@
 /* close icon */
 .elfinder-quicklook-navbar-icon-close {
 	background-position:0 -128px;
+	display:none;
 }
 
 /* icons separator */
@@ -237,6 +238,7 @@
 	height:32px;
 	float:left;
 	border-left:1px solid #fff;
+	display:none;
 }
 
 /* text files preview wrapper */
