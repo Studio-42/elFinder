@@ -1,12 +1,13 @@
 /* menu and submenu */
 .elfinder .elfinder-contextmenu,
 .elfinder .elfinder-contextmenu-sub {
-	display:none;
 	position:absolute;
 	border:1px solid #aaa;
 	background:#fff;
 	color:#555;
 	padding:4px 0;
+	top: 0;
+	left: 0;
 }
 
 /* submenu */
@@ -43,7 +44,6 @@
 	right:auto;
 	top:50%;
 	margin-top:-8px;
-	display:none;
 }
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
 	left: 2px;

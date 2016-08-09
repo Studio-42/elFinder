@@ -6,7 +6,7 @@
 $.fn.elfindernavbar = function(fm, opts) {
 
 	this.not('.elfinder-navbar').each(function() {
-		var nav    = $(this).addClass('ui-state-default elfinder-navbar'),
+		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
 			parent = nav.parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
@@ -31,7 +31,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			}
 			
 			fm.bind('load', function() {
-				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').appendTo(wz);
+				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').hide().appendTo(wz);
 				if (swipeHandle.css('pointer-events') !== 'none') {
 					swipeHandle.remove();
 					swipeHandle = null;

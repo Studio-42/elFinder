@@ -63,7 +63,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
-						.replace(/\{name\}/, fm.escape(dir? dir.name : hash))
+						.replace(/\{name\}/, fm.escape(dir? dir.i18 || dir.name : hash))
 						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
@@ -93,6 +93,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				dirs[hash] = dir;
 				subtree.prepend(node);
 				root.addClass(collapsed);
+				sortBtn.toggle(subtree.children().length > 1);
 				
 				return true;
 			},
@@ -103,7 +104,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return String  removed name
 			 **/
 			remove = function(hash) {
-				var name = null, tgt;
+				var name = null, tgt, cnt;
 
 				if (dirs[hash]) {
 					delete dirs[hash];
@@ -111,7 +112,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (tgt.length) {
 						name = tgt.text();
 						tgt.parent().remove();
-						if (!subtree.children().length) {
+						cnt = subtree.children().length;
+						sortBtn.toggle(cnt > 1);
+						if (! cnt) {
 							root.removeClass(collapsed);
 							places.removeClass(expanded);
 							subtree.slideToggle(false);
@@ -201,7 +204,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					if (subtree.children().length) {
 						$.each(subtree.children(), function() {
 							var current =  $(this);
-							if (dir.name.localeCompare(current.children('.'+navdir).text()) < 0) {
+							if ((dir.i18 || dir.name).localeCompare(current.children('.'+navdir).text()) < 0) {
 								ret = !node.insertBefore(current);
 								return ret;
 							}
@@ -214,6 +217,15 @@ $.fn.elfinderplaces = function(fm, opts) {
 				});
 				save();
 			},
+			// sort button
+			sortBtn = $('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"/>')
+				.hide()
+				.on('click', function(e) {
+					e.stopPropagation();
+					subtree.empty();
+					sort();
+				}
+			),
 			/**
 			 * Node - wrapper for places root
 			 *
@@ -240,16 +252,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						fm.storage('placesState', places.hasClass(expanded)? 1 : 0);
 					}
 				})
-				.append(
-					// sort button
-					$('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"/>')
-						.on('click', function(e) {
-							e.stopPropagation();
-							subtree.empty();
-							sort();
-						}
-					)
-				),
+				.append(sortBtn),
 			/**
 			 * Container for dirs
 			 *

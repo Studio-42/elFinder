@@ -204,6 +204,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){});
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
+								.hide()
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){

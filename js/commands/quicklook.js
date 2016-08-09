@@ -338,6 +338,7 @@
 	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
+		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.on('click', function(e) { e.stopPropagation();  })
 		.append(

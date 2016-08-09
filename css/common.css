@@ -142,7 +142,6 @@
 	position: absolute;
 	opacity: .2;
 	filter: Alpha(Opacity=20);
-	display: none;
 }
 
 /* panels under/below cwd (for search field etc) */

@@ -2,7 +2,6 @@
 .elfinder-quicklook {
 	position:absolute;
 	background:url("../img/quicklook-bg.png");
-	display:none;
 	overflow:hidden;
 	border-radius:7px;
 	-moz-border-radius:7px;
@@ -310,16 +309,3 @@ embed.elfinder-quicklook-preview-audio {
 	width:100%;
 	height:100%;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
