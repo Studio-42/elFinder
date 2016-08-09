@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 3e23aa8) (2016-08-08)
+ * Version 2.1.14 (2.1-src Nightly: 4baa69d) (2016-08-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -528,7 +528,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	position: absolute;
 	opacity: .2;
 	filter: Alpha(Opacity=20);
-	display: none;
 }
 
 /* panels under/below cwd (for search field etc) */
@@ -548,12 +547,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* menu and submenu */
 .elfinder .elfinder-contextmenu,
 .elfinder .elfinder-contextmenu-sub {
-	display:none;
 	position:absolute;
 	border:1px solid #aaa;
 	background:#fff;
 	color:#555;
 	padding:4px 0;
+	top: 0;
+	left: 0;
 }
 
 /* submenu */
@@ -590,7 +590,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	right:auto;
 	top:50%;
 	margin-top:-8px;
-	display:none;
 }
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item .ui-icon {
 	left: 2px;
@@ -1556,7 +1555,6 @@ button.elfinder-info-button {
 	border-top:0 solid;
 	border-bottom:0 solid;
 	overflow:auto;
-	display:none;
 	position:relative;
 }
 
@@ -1651,9 +1649,6 @@ button.elfinder-info-button {
 .elfinder-droppable-active .elfinder-navbar-icon, 
 .ui-state-hover            .elfinder-navbar-icon { background-position:0 -32px; }
 
-/* subdirs tree */
-.elfinder-navbar-subtree { display:none; }
-
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar-subtree { margin-left:12px; }
 .elfinder-rtl .elfinder-navbar-subtree { margin-right:12px; }
@@ -1719,7 +1714,6 @@ button.elfinder-info-button {
 	top: 0px;
 	height: 100%;
 	width: 50px;
-	display: none;
 	pointer-events: none;
 }
 .elfinder-ltr .elfinder-navbar-swipe-handle {
@@ -1750,7 +1744,6 @@ button.elfinder-info-button {
 	top: 50%;
 	margin-top: -9px;
 	cursor: pointer;
-	display: none;
 }
 .elfinder-ltr .elfinder-places-root-icon {
 	right: 10px;
@@ -1772,7 +1765,6 @@ button.elfinder-info-button {
 .elfinder-quicklook {
 	position:absolute;
 	background:url("../img/quicklook-bg.png");
-	display:none;
 	overflow:hidden;
 	border-radius:7px;
 	-moz-border-radius:7px;
@@ -2080,19 +2072,6 @@ embed.elfinder-quicklook-preview-audio {
 	width:100%;
 	height:100%;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* File: /css/statusbar.css */
 /******************************************************************/
@@ -2476,7 +2455,6 @@ embed.elfinder-quicklook-preview-audio {
 	left: 0px;
 	height: 50px;
 	width: 100%;
-	display: none;
 	pointer-events: none;
 	background: linear-gradient(to bottom,
 		rgba(221,228,235,1) 0,
