@@ -692,153 +692,137 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.draggingUiHelper = null;
 	
-	/**
-	 * Base draggable options
-	 *
-	 * @type Object
-	 **/
-	this.draggable = {
-		appendTo   : node,
-		addClasses : true,
-		distance   : 4,
-		revert     : true,
-		refreshPositions : false,
-		cursor     : 'crosshair',
-		cursorAt   : {left : 50, top : 47},
-		scroll     : false,
-		start      : function(e, ui) {
-			var helper   = ui.helper,
-				targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
-				locked   = false,
-				navbar   = self.getUI('navbar'),
-				cwd      = self.getUI('cwd').parent(),
-				autoScr  = {
-					navbarUp   : function() {
-						navbar.scrollTop(Math.max(0, navbar.scrollTop() - helper.data('autoScrVal')));
-					},
-					navbarDown : function() {
-						navbar.scrollTop(navbar.scrollTop() + helper.data('autoScrVal'));
-					},
-					cwdUp     : function() {
-						cwd.scrollTop(Math.max(0, cwd.scrollTop() - helper.data('autoScrVal')));
-					},
-					cwdDown   : function() {
-						cwd.scrollTop(cwd.scrollTop() + helper.data('autoScrVal'));
-					}
-				},
-				cnt, h, wz, cwdOffset, wzOffset;
-			
-			self.draggingUiHelper = helper;
-			cnt = targets.length;
-			while (cnt--) {
-				h = targets[cnt];
-				if (files[h].locked) {
-					locked = true;
-					helper.data('locked', true);
-					break;
-				}
-			}
-			!locked && self.trigger('lockfiles', {files : targets});
+	// draggable closure
+	(function() {
+		var ltr, wzRect, wzBottom;
 
-			cwdOffset = cwd.offset();
-			wz = self.getUI('workzone');
-			wzOffset = wz.offset();
-			helper.data('wzpos', {
-				ltr : self.direction === 'ltr',
-				cwdEdge : (self.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width(),
-				wzTop : wzOffset.top,
-				wzBottom : wzOffset.top + wz.height()
-			});
-			helper.data('autoScrTm', setInterval(function() {
-				if (helper.data('autoScr')) {
-					autoScr[helper.data('autoScr')]();
-				}
-			}, 50));
-		},
-		drag       : function(e, ui) {
-			var helper = ui.helper,
-				wzpos  = helper.data('wzpos'),
-				autoUp;
-			
-			if ((autoUp = wzpos.wzTop > e.pageY) || wzpos.wzBottom < e.pageY) {
-				if (wzpos.cwdEdge > e.pageX) {
-					helper.data('autoScr', (wzpos.ltr? 'navbar' : 'cwd') + (autoUp? 'Up' : 'Down'));
-				} else {
-					helper.data('autoScr', (wzpos.ltr? 'cwd' : 'navbar') + (autoUp? 'Up' : 'Down'));
-				}
-				helper.data('autoScrVal', Math.pow((autoUp? wzpos.wzTop - e.pageY : e.pageY - wzpos.wzBottom), 1.3));
-			} else {
-				if (helper.data('autoScr')) {
-					helper.data('refreshPositions', 1).data('autoScr', null);
-				}
-			}
-			if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
-				if (helper.data('refreshPositions') > 0) {
-					$(this).draggable('option', { refreshPositions : true, elfRefresh : true });
-					helper.data('refreshPositions', -1);
-				} else {
-					$(this).draggable('option', { refreshPositions : false, elfRefresh : false });
-					helper.data('refreshPositions', null);
-				}
-			}
-		},
-		stop       : function(e, ui) {
-			var helper = ui.helper,
-				files;
-			
-			$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
-			self.draggingUiHelper = null;
-			self.trigger('focus').trigger('dragstop');
-			if (! helper.data('droped')) {
-				files = $.map(helper.data('files')||[], function(h) { return h || null ;});
-				self.trigger('unlockfiles', {files : files});
-				self.trigger('selectfiles', {files : files});
-			}
-			self.enable();
-			
-			helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
-		},
-		helper     : function(e, ui) {
-			var element = this.id ? $(this) : $(this).parents('[id]:first'),
-				helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
-				icon    = function(f) {
-					var mime = f.mime, i, tmb = self.tmb(f);
-					i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
-					if (tmb) {
-						i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
-					}
-					return i;
-				},
-				hashes, l, ctr;
-			
-			self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
-			
-			self.trigger('dragstart', {target : element[0], originalEvent : e});
-			
-			hashes = element.hasClass(self.res('class', 'cwdfile')) 
-				? self.selected() 
-				: [self.navId2Hash(element.attr('id'))];
-			
-			helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', namespace).data('dropover', 0);
-
-			if ((l = hashes.length) > 1) {
-				helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
-			}
-			
-			$(document).on(keydown + ' keyup.' + namespace, function(e){
-				var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
-				if (ctr !== chk) {
-					ctr = chk;
-					if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
-						helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
-						self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+		/**
+		 * Base draggable options
+		 *
+		 * @type Object
+		 **/
+		self.draggable = {
+			appendTo   : node,
+			addClasses : true,
+			distance   : 4,
+			revert     : true,
+			refreshPositions : false,
+			cursor     : 'crosshair',
+			cursorAt   : {left : 50, top : 47},
+			scroll     : false,
+			start      : function(e, ui) {
+				var helper   = ui.helper,
+					targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
+					locked   = false,
+					cnt, h;
+				
+				// set var for drag()
+				ltr = (self.direction === 'ltr');
+				wzRect = self.getUI('workzone').data('rectangle');
+				wzBottom = wzRect.top + wzRect.height;
+				
+				self.draggingUiHelper = helper;
+				cnt = targets.length;
+				while (cnt--) {
+					h = targets[cnt];
+					if (files[h].locked) {
+						locked = true;
+						helper.data('locked', true);
+						break;
 					}
 				}
-			});
-			
-			return helper;
-		}
-	};
+				!locked && self.trigger('lockfiles', {files : targets});
+	
+				helper.data('autoScrTm', setInterval(function() {
+					if (helper.data('autoScr')) {
+						self.autoScroll[helper.data('autoScr')](helper.data('autoScrVal'));
+					}
+				}, 50));
+			},
+			drag       : function(e, ui) {
+				var helper = ui.helper,
+					autoUp;
+				
+				if ((autoUp = wzRect.top > e.pageY) || wzBottom < e.pageY) {
+					if (wzRect.cwdEdge > e.pageX) {
+						helper.data('autoScr', (ltr? 'navbar' : 'cwd') + (autoUp? 'Up' : 'Down'));
+					} else {
+						helper.data('autoScr', (ltr? 'cwd' : 'navbar') + (autoUp? 'Up' : 'Down'));
+					}
+					helper.data('autoScrVal', Math.pow((autoUp? wzRect.top - e.pageY : e.pageY - wzBottom), 1.3));
+				} else {
+					if (helper.data('autoScr')) {
+						helper.data('refreshPositions', 1).data('autoScr', null);
+					}
+				}
+				if (helper.data('refreshPositions') && $(this).elfUiWidgetInstance('draggable')) {
+					if (helper.data('refreshPositions') > 0) {
+						$(this).draggable('option', { refreshPositions : true, elfRefresh : true });
+						helper.data('refreshPositions', -1);
+					} else {
+						$(this).draggable('option', { refreshPositions : false, elfRefresh : false });
+						helper.data('refreshPositions', null);
+					}
+				}
+			},
+			stop       : function(e, ui) {
+				var helper = ui.helper,
+					files;
+				
+				$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
+				self.draggingUiHelper = null;
+				self.trigger('focus').trigger('dragstop');
+				if (! helper.data('droped')) {
+					files = $.map(helper.data('files')||[], function(h) { return h || null ;});
+					self.trigger('unlockfiles', {files : files});
+					self.trigger('selectfiles', {files : files});
+				}
+				self.enable();
+				
+				helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
+			},
+			helper     : function(e, ui) {
+				var element = this.id ? $(this) : $(this).parents('[id]:first'),
+					helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
+					icon    = function(f) {
+						var mime = f.mime, i, tmb = self.tmb(f);
+						i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
+						if (tmb) {
+							i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+						}
+						return i;
+					},
+					hashes, l, ctr;
+				
+				self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
+				
+				self.trigger('dragstart', {target : element[0], originalEvent : e});
+				
+				hashes = element.hasClass(self.res('class', 'cwdfile')) 
+					? self.selected() 
+					: [self.navId2Hash(element.attr('id'))];
+				
+				helper.append(icon(files[hashes[0]])).data('files', hashes).data('locked', false).data('droped', false).data('namespace', namespace).data('dropover', 0);
+	
+				if ((l = hashes.length) > 1) {
+					helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
+				}
+				
+				$(document).on(keydown + ' keyup.' + namespace, function(e){
+					var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
+					if (ctr !== chk) {
+						ctr = chk;
+						if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
+							helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+							self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+						}
+					}
+				});
+				
+				return helper;
+			}
+		};
+	})();
 	
 	/**
 	 * Base droppable options
@@ -2980,6 +2964,26 @@ window.elFinder = function(node, opts) {
 		});
 	}
 
+	(function() {
+		var navbar = self.getUI('navbar'),
+			cwd    = self.getUI('cwd').parent();
+		
+		self.autoScroll = {
+			navbarUp   : function(v) {
+				navbar.scrollTop(Math.max(0, navbar.scrollTop() - v));
+			},
+			navbarDown : function(v) {
+				navbar.scrollTop(navbar.scrollTop() + v);
+			},
+			cwdUp     : function(v) {
+				cwd.scrollTop(Math.max(0, cwd.scrollTop() - v));
+			},
+			cwdDown   : function(v) {
+				cwd.scrollTop(cwd.scrollTop() + v);
+			}
+		};
+	})();
+
 	if (self.dragUpload) {
 		// add event listener for HTML5 DnD upload
 		(function() {
@@ -2997,26 +3001,10 @@ window.elFinder = function(node, opts) {
 			arrow     = self.res(c, 'navarrow'),
 			clDropActive = self.res(c, 'adroppable'),
 			wz        = self.getUI('workzone'),
-			navbar    = self.getUI('navbar'),
-			cwd       = self.getUI('cwd').parent(),
 			ltr       = (self.direction === 'ltr'),
 			clearTm   = function() {
 				autoScrTm && clearTimeout(autoScrTm);
 				autoScrTm = null;
-			},
-			autoScr  = {
-				navbarUp   : function(v) {
-					navbar.scrollTop(Math.max(0, navbar.scrollTop() - v));
-				},
-				navbarDown : function(v) {
-					navbar.scrollTop(navbar.scrollTop() + v);
-				},
-				cwdUp     : function(v) {
-					cwd.scrollTop(Math.max(0, cwd.scrollTop() - v));
-				},
-				cwdDown   : function(v) {
-					cwd.scrollTop(cwd.scrollTop() + v);
-				}
 			},
 			wzRect, autoScrFn, autoScrTm;
 			
@@ -3051,7 +3039,7 @@ window.elFinder = function(node, opts) {
 								} else {
 									fn = (ltr? 'cwd' : 'navbar') + (autoUp? 'Up' : 'Down');
 								}
-								autoScr[fn](Math.pow((autoUp? wzRect.top - e.pageY : e.pageY - wzBottom), 1.3));
+								self.autoScroll[fn](Math.pow((autoUp? wzRect.top - e.pageY : e.pageY - wzBottom), 1.3));
 							}
 							autoScrTm = null;
 						}, 20);
