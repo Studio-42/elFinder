@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 2d8025b) (2016-08-09)
+ * Version 2.1.14 (2.1-src Nightly: 28408f1) (2016-08-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -340,7 +340,8 @@ window.elFinder = function(node, opts) {
 		 */
 		execShortcut = function(e) {
 			var code    = e.keyCode,
-				ctrlKey = !!(e.ctrlKey || e.metaKey);
+				ctrlKey = !!(e.ctrlKey || e.metaKey),
+				ddm;
 
 			if (enabled) {
 
@@ -362,9 +363,15 @@ window.elFinder = function(node, opts) {
 					e.preventDefault();
 				}
 				
-				// cancel copy or cut by [Esc] key
-				if (code == 27 && self.clipboard().length) {
-					self.clipboard([]);
+				// cancel any actions by [Esc] key
+				if (code == 27) {
+					// copy or cut 
+					self.clipboard().length && self.clipboard([]);
+					// dragging
+					if ($.ui.ddmanager) {
+						ddm = $.ui.ddmanager.current;
+						ddm && ddm.cancel();
+					}
 				}
 
 			}
@@ -2988,50 +2995,12 @@ window.elFinder = function(node, opts) {
 	}
 
 	if (self.dragUpload) {
-		(function(){
+		// add event listener for HTML5 DnD upload
+		(function() {
 			var isin = function(e) {
 				return (e.target.nodeName !== 'TEXTAREA' && e.target.nodeName !== 'INPUT' && $(e.target).closest('div.ui-dialog-content').length === 0);
 			},
-			enter = function(e) {
-				if (isin(e)) {
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			},
-			leave = function(e) {
-				if (isin(e)) {
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			},
-			over = function(e) {
-				if (isin(e)) {
-					e.preventDefault();
-					e.stopPropagation();
-					e.dataTransfer.dropEffect = 'none';
-				}
-			},
-			drop =function(e) {
-				if (isin(e)) {
-					e.stopPropagation();
-					e.preventDefault();
-				}
-			};
-			node[0].addEventListener('dragenter', enter, false);
-			node[0].addEventListener('dragleave', leave, false);
-			node[0].addEventListener('dragover', over, false);
-			node[0].addEventListener('drop', drop, false);
-			self.bind('destroy', function() {
-				node[0].removeEventListener('dragenter', enter, false);
-				node[0].removeEventListener('dragleave', leave, false);
-				node[0].removeEventListener('dragover', over, false);
-				node[0].removeEventListener('drop', drop, false);
-			});
-		})();
-
-		// add event listener for HTML5 DnD upload
-		(function() {
-			var ent   = 'native-drag-enter',
+			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
@@ -3040,7 +3009,79 @@ window.elFinder = function(node, opts) {
 			expanded  = self.res(c, 'navexpand'),
 			dropover  = self.res(c, 'adroppable'),
 			arrow     = self.res(c, 'navarrow'),
-			clDropActive = self.res(c, 'adroppable');
+			clDropActive = self.res(c, 'adroppable'),
+			wz        = self.getUI('workzone'),
+			navbar    = self.getUI('navbar'),
+			cwd       = self.getUI('cwd').parent(),
+			ltr       = (self.direction === 'ltr'),
+			clearTm   = function() {
+				autoScrTm && clearTimeout(autoScrTm);
+				autoScrTm = null;
+			},
+			autoScr  = {
+				navbarUp   : function(v) {
+					navbar.scrollTop(Math.max(0, navbar.scrollTop() - v));
+				},
+				navbarDown : function(v) {
+					navbar.scrollTop(navbar.scrollTop() + v);
+				},
+				cwdUp     : function(v) {
+					cwd.scrollTop(Math.max(0, cwd.scrollTop() - v));
+				},
+				cwdDown   : function(v) {
+					cwd.scrollTop(cwd.scrollTop() + v);
+				}
+			},
+			wzRect, autoScrFn, autoScrTm;
+			
+			node.on('dragenter', function(e) {
+				clearTm();
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+					wzRect = wz.data('rectangle');
+				}
+			})
+			.on('dragleave', function(e) {
+				clearTm();
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			})
+			.on('dragover', function(e) {
+				var autoUp;
+				if (isin(e)) {
+					e.preventDefault();
+					e.stopPropagation();
+					e.originalEvent.dataTransfer.dropEffect = 'none';
+					if (! autoScrTm) {
+						autoScrTm = setTimeout(function() {
+							var wzBottom = wzRect.top + wzRect.height,
+								fn;
+							if ((autoUp = e.pageY < wzRect.top) || e.pageY > wzBottom ) {
+								if (wzRect.cwdEdge > e.pageX) {
+									fn = (ltr? 'navbar' : 'cwd') + (autoUp? 'Up' : 'Down');
+								} else {
+									fn = (ltr? 'cwd' : 'navbar') + (autoUp? 'Up' : 'Down');
+								}
+								autoScr[fn](Math.pow((autoUp? wzRect.top - e.pageY : e.pageY - wzBottom), 1.3));
+							}
+							autoScrTm = null;
+						}, 20);
+					}
+				} else {
+					clearTm();
+				}
+			})
+			.on('drop', function(e) {
+				clearTm();
+				if (isin(e)) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+			});
+			
 			node.on('dragenter', '.native-droppable', function(e){
 				if (e.originalEvent.dataTransfer) {
 					var $elm = $(e.currentTarget),
@@ -5749,7 +5790,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2d8025b)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 28408f1)';
 
 
 
@@ -7684,8 +7725,13 @@ $.fn.dialogelfinder = function(opts) {
 				.css('position', 'absolute')
 				.hide()
 				.appendTo('body')
-				.draggable({ handle : '.dialogelfinder-drag',
-					     containment : 'window' })
+				.draggable({
+					handle : '.dialogelfinder-drag',
+					containment : 'window',
+					stop : function() {
+						elfinder.trigger('resize');
+					}
+				})
 				.elfinder(opts)
 				.prepend(toolbar),
 			elfinder = node.elfinder('instance');
@@ -8374,12 +8420,12 @@ $.fn.elfindercontextmenu = function(fm) {
 			open = function(x, y) {
 				var width      = menu.outerWidth(),
 					height     = menu.outerHeight(),
+					bstyle     = base.attr('style'),
 					bpos       = base.offset(),
 					bwidth     = base.width(),
 					bheight    = base.height(),
 					mw         = fm.UA.Mobile? 40 : 2,
 					mh         = fm.UA.Mobile? 20 : 2,
-					body       = $('body'),
 					x          = x - (bpos? bpos.left : 0),
 					y          = y - (bpos? bpos.top : 0),
 					css        = {
@@ -8388,7 +8434,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						opacity : '1'
 					};
 
+				base.width(bwidth);
 				menu.stop().attr('style', '').css(css).show();
+				base.attr('style', bstyle);
 				
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
@@ -8478,6 +8526,8 @@ $.fn.elfindercontextmenu = function(fm) {
 								if (! show) {
 									submenu.hide();
 								} else {
+									var bstyle = base.attr('style');
+									base.width(base.width());
 									submenu.css({ left: 'auto', right: 'auto' });
 									var nodeOffset = node.offset(),
 										baseleft   = nodeOffset.left,
@@ -8500,6 +8550,7 @@ $.fn.elfindercontextmenu = function(fm) {
 	
 									menu.find('.elfinder-contextmenu-sub:visible').hide().parent().removeClass('ui-state-hover');
 									submenu.css({ top : y }).css(subpos, x).show();
+									base.attr('style', bstyle);
 								}
 							};
 							
@@ -10576,12 +10627,22 @@ $.fn.elfindercwd = function(fm, options) {
 				resize();
 			})
 			.bind('resize', function() {
-				var place = list ? cwd.find('tbody') : cwd;
+				var place = list ? cwd.find('tbody') : cwd,
+					cwdOffset;
 				resize(true);
 				if (bufferExt.hpi) {
 					bottomMarkerShow(place, place.find('[id]').length);
 				}
-				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
+				
+				cwdOffset = cwd.offset();
+				wz.data('rectangle', $.extend(
+					{
+						width: wz.width(),
+						height: wz.height(),
+						cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width()
+					},
+					wz.offset())
+				);
 			})
 			.bind('changeclipboard', function(e) {
 				clipCuts = {};
@@ -11092,7 +11153,14 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle, swipeHandle, autoHide, setWidth;
+			handle, swipeHandle, autoHide, setWidth,
+			setWzRect = function() {
+				var cwd = fm.getUI('cwd'),
+					wz  = fm.getUI('workzone'),
+					wzRect = wz.data('rectangle'),
+					cwdOffset = cwd.offset();
+				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
+			};
 
 		fm.bind('resize', function() {
 			nav.height(wz.height() - delta);
@@ -11132,6 +11200,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 							fm.resources.blink(swipeHandle, 'slowonce');
 						}
 					}
+					setWzRect();
 					fm.trigger('navbar'+ mode);
 					fm.getUI('cwd').trigger('resize');
 					data.init && fm.trigger('uiautohide');
@@ -11148,6 +11217,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					maxWidth : opts.maxWidth || 500,
 					stop : function(e, ui) {
 						fm.storage('navbarWidth', ui.size.width);
+						setWzRect();
 					}
 				})
 				.on('resize scroll', function(e) {
