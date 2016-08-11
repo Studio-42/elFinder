@@ -1924,12 +1924,22 @@ $.fn.elfindercwd = function(fm, options) {
 				resize();
 			})
 			.bind('resize', function() {
-				var place = list ? cwd.find('tbody') : cwd;
+				var place = list ? cwd.find('tbody') : cwd,
+					cwdOffset;
 				resize(true);
 				if (bufferExt.hpi) {
 					bottomMarkerShow(place, place.find('[id]').length);
 				}
-				wz.data('rectangle', $.extend({}, {width: wz.width(), height: wz.height()}, wz.offset()));
+				
+				cwdOffset = cwd.offset();
+				wz.data('rectangle', $.extend(
+					{
+						width: wz.width(),
+						height: wz.height(),
+						cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width()
+					},
+					wz.offset())
+				);
 			})
 			.bind('changeclipboard', function(e) {
 				clipCuts = {};

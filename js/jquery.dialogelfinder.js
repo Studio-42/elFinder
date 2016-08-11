@@ -33,8 +33,13 @@ $.fn.dialogelfinder = function(opts) {
 				.css('position', 'absolute')
 				.hide()
 				.appendTo('body')
-				.draggable({ handle : '.dialogelfinder-drag',
-					     containment : 'window' })
+				.draggable({
+					handle : '.dialogelfinder-drag',
+					containment : 'window',
+					stop : function() {
+						elfinder.trigger('resize');
+					}
+				})
 				.elfinder(opts)
 				.prepend(toolbar),
 			elfinder = node.elfinder('instance');
