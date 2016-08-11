@@ -107,12 +107,12 @@ $.fn.elfindercontextmenu = function(fm) {
 			open = function(x, y) {
 				var width      = menu.outerWidth(),
 					height     = menu.outerHeight(),
+					bstyle     = base.attr('style'),
 					bpos       = base.offset(),
 					bwidth     = base.width(),
 					bheight    = base.height(),
 					mw         = fm.UA.Mobile? 40 : 2,
 					mh         = fm.UA.Mobile? 20 : 2,
-					body       = $('body'),
 					x          = x - (bpos? bpos.left : 0),
 					y          = y - (bpos? bpos.top : 0),
 					css        = {
@@ -121,7 +121,9 @@ $.fn.elfindercontextmenu = function(fm) {
 						opacity : '1'
 					};
 
+				base.width(bwidth);
 				menu.stop().attr('style', '').css(css).show();
+				base.attr('style', bstyle);
 				
 				css[subpos] = parseInt(menu.width());
 				menu.find('.elfinder-contextmenu-sub').css(css);
@@ -211,6 +213,8 @@ $.fn.elfindercontextmenu = function(fm) {
 								if (! show) {
 									submenu.hide();
 								} else {
+									var bstyle = base.attr('style');
+									base.width(base.width());
 									submenu.css({ left: 'auto', right: 'auto' });
 									var nodeOffset = node.offset(),
 										baseleft   = nodeOffset.left,
@@ -233,6 +237,7 @@ $.fn.elfindercontextmenu = function(fm) {
 	
 									menu.find('.elfinder-contextmenu-sub:visible').hide().parent().removeClass('ui-state-hover');
 									submenu.css({ top : y }).css(subpos, x).show();
+									base.attr('style', bstyle);
 								}
 							};
 							

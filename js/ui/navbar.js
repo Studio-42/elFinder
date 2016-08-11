@@ -11,7 +11,14 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle, swipeHandle, autoHide, setWidth;
+			handle, swipeHandle, autoHide, setWidth,
+			setWzRect = function() {
+				var cwd = fm.getUI('cwd'),
+					wz  = fm.getUI('workzone'),
+					wzRect = wz.data('rectangle'),
+					cwdOffset = cwd.offset();
+				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
+			};
 
 		fm.bind('resize', function() {
 			nav.height(wz.height() - delta);
@@ -51,6 +58,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 							fm.resources.blink(swipeHandle, 'slowonce');
 						}
 					}
+					setWzRect();
 					fm.trigger('navbar'+ mode);
 					fm.getUI('cwd').trigger('resize');
 					data.init && fm.trigger('uiautohide');
@@ -67,6 +75,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					maxWidth : opts.maxWidth || 500,
 					stop : function(e, ui) {
 						fm.storage('navbarWidth', ui.size.width);
+						setWzRect();
 					}
 				})
 				.on('resize scroll', function(e) {
