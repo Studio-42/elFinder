@@ -326,7 +326,8 @@ window.elFinder = function(node, opts) {
 		 */
 		execShortcut = function(e) {
 			var code    = e.keyCode,
-				ctrlKey = !!(e.ctrlKey || e.metaKey);
+				ctrlKey = !!(e.ctrlKey || e.metaKey),
+				ddm;
 
 			if (enabled) {
 
@@ -348,9 +349,15 @@ window.elFinder = function(node, opts) {
 					e.preventDefault();
 				}
 				
-				// cancel copy or cut by [Esc] key
-				if (code == 27 && self.clipboard().length) {
-					self.clipboard([]);
+				// cancel any actions by [Esc] key
+				if (code == 27) {
+					// copy or cut 
+					self.clipboard().length && self.clipboard([]);
+					// dragging
+					if ($.ui.ddmanager) {
+						ddm = $.ui.ddmanager.current;
+						ddm && ddm.cancel();
+					}
 				}
 
 			}
