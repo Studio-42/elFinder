@@ -694,7 +694,7 @@ window.elFinder = function(node, opts) {
 	
 	// draggable closure
 	(function() {
-		var ltr, wzRect, wzBottom;
+		var ltr, wzRect, wzBottom, nodeStyle;
 
 		/**
 		 * Base draggable options
@@ -715,6 +715,10 @@ window.elFinder = function(node, opts) {
 					targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
 					locked   = false,
 					cnt, h;
+				
+				// fix node size
+				nodeStyle = node.attr('style');
+				node.width(node.width()).height(node.height());
 				
 				// set var for drag()
 				ltr = (self.direction === 'ltr');
@@ -778,6 +782,9 @@ window.elFinder = function(node, opts) {
 					self.trigger('selectfiles', {files : files});
 				}
 				self.enable();
+				
+				// restore node style
+				node.attr('style', nodeStyle);
 				
 				helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
 			},
