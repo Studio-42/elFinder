@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 4badd6a) (2016-08-12)
+ * Version 2.1.14 (2.1-src Nightly: 250fb3d) (2016-08-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2226,7 +2226,7 @@ window.elFinder = function(node, opts) {
 			checkDialog = function() {
 				var t = 0,
 					l = 0;
-				$.each(node.children('.ui-dialog'), function(i, d) {
+				$.each(node.children('.ui-dialog,.ui-draggable'), function(i, d) {
 					var $d = $(d),
 						pos = $d.position();
 					
@@ -5785,7 +5785,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 4badd6a)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 250fb3d)';
 
 
 
