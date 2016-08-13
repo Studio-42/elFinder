@@ -235,8 +235,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 									
 				}
 				else{						
-								
-					$result = $this->query('me/skydrive', $root = false, $recursive = false);
+					$this->onedrive = $this->session->get('elFinderOneDriveAuthTokens');			
+					$result = $this->query('me/skydrive', $fetch_self = false, $recursive = true);
 					$folders = [];					
 					
 					foreach ($result as $res) {				
@@ -655,7 +655,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 			foreach ($this->_createCurl($url) as $file) {
 				if($file->type == 'folder'){				
 					$result[] = $file;
-					$result = array_merge($result, $this->query($file->id, $root = false, $recursive = true));			        		
+					$result = array_merge($result, $this->query($file->id, $fetch_self = false, $recursive = true));			        		
 				}else{
 					$result[] = $file;
 				}			 											
