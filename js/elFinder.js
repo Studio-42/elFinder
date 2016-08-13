@@ -2212,7 +2212,7 @@ window.elFinder = function(node, opts) {
 			checkDialog = function() {
 				var t = 0,
 					l = 0;
-				$.each(node.children('.ui-dialog'), function(i, d) {
+				$.each(node.children('.ui-dialog,.ui-draggable'), function(i, d) {
 					var $d = $(d),
 						pos = $d.position();
 					

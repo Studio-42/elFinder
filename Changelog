@@ -1,3 +1,28 @@
+2016-0x-xx  
+
+	* elFinder (2.1.15):
+		- [VD:abstract] Fixed #1550 option `uiCmdMap` dose not work on 2.1.14
+		- [VD:abstract] Fixed #1553 root stat not refresh when do chmod of root
+		- [php:core] fix make netkey problem - support multiple array options
+		- [js:core] Fixed #1554 can not unmount netvolume when done auto sync
+		- [js:core] Fixed #1555 can not upload to unreadable folder
+		- [php:core] parent dir sets to changed when upload, paste, rm, mkfile, mkdir etc
+		- [js:core] Fixed #1560 to possible to apply sort mode in tree in navbar
+		- [js:ui,cmd:fullscreen] Fixed #1563 add ui command "fullscrren"
+		- [cmd:edit] Fixed #1561 add to fullscreen button
+		- [js:core] Fixed #1562 sort with i18 name if exist
+		- [js:options] ui option `commands` accepts "*" as all of commands
+		- [VD:LocalFileSystem] Fixed #1565 dose not support volume option `searchTimeout`
+		- [VD:FTP] Fixed #1571 cause infinite loop during auto-sync of the volume root
+		- [php:core] Fixed #1572 unable to DnD upload the folder named "0"
+		- [VD:abstract] Fixed #1575 can not rename "0" to "00", "000"...
+		- [cmd:rename] Fixed #1573 input text stay in there at rename error in tree view
+		- [ui:cwd] Fixed #1576 reset the column width may not applied to the header
+		- [ui:conttextmenu] Fixed #1578 to the contextmenu draggable
+		- [php,cmd:open] Fixed #1586 RFC7233 violation, add `commandsOptions.open.method`
+		- [ui:navbar,cwd] Fixed #1590 auto scroll on HTML5 native dragging
+		- And some minor bug fixes
+
 2016-07-25  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.14):
