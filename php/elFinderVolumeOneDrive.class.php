@@ -89,9 +89,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
             'OneDriveApiClient'   => '',
             'path'              => '/',
             'separator'         => '/',
-            'tmbPath'           => '../files/.tmb',
-			'tmbURL'            => dirname($_SERVER['PHP_SELF']) . '/../files/.tmb',
-			'tmpPath'           => '../files/.tmp',	
+            'tmbPath'           => '',
+            'tmbURL'            => '',
+            'tmpPath'           => '',	
             'acceptedName'      => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
             'rootCssClass'      => 'elfinder-navbar-root-onedrive'
         );
@@ -444,7 +444,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER    => true,
-            CURLOPT_POST           => 1,
+            CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => $fields,
 
             CURLOPT_HTTPHEADER => array(
@@ -517,7 +517,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_FOLLOWLOCATION => true,
 					CURLOPT_AUTOREFERER    => true,
-					CURLOPT_POST           => 1, // i am sending post data
+					CURLOPT_POST           => true, // i am sending post data
 					CURLOPT_POSTFIELDS     => 'client_id=' . urlencode($this->options['client_id'])
 						. '&client_secret=' . urlencode($this->options['client_secret'])
 						. '&grant_type=refresh_token'
