@@ -718,7 +718,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
     {		
         $stat = array();
 	
-		$stat['rev']	= $raw->id;
+		$stat['rev']	= isset($raw->id) ? $raw->id : 'root';
         $stat['name']	= $raw->name;
         $stat['mime']	= $raw->type =='folder' ? 'directory' : parent::$mimetypes[pathinfo($raw->name, PATHINFO_EXTENSION)];		
         $stat['size']	= $raw->type =='folder' ? 0 : (int)$raw->size;
