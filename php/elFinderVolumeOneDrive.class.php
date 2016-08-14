@@ -1596,11 +1596,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 				}
 			}
             //Create or Update a file            				
-			$content = stream_get_contents($fp);                
-			$content =  strlen($content) == 0 ? ' ' : $content; 
 			
-			if (is_resource($content)) {
-				$stream = $content;
+			if (is_resource($fp)) {
+				$stream = $fp;
 			} else {
 				$options = array(
 					'stream_back_end' => 'php://temp',
@@ -1612,7 +1610,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 					throw new \Exception('fopen() failed');
 				}
 	
-				if (false === fwrite($stream, $content)) {
+				if (false === fwrite($stream, $fp)) {
 					fclose($stream);
 					throw new \Exception('fwrite() failed');
 				}
@@ -1648,7 +1646,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 			//create or update File in the Target
 			$file = json_decode(curl_exec($curl));			
 			
-			if (!is_resource($content)) {
+			if (!is_resource($fp)) {
 				fclose($stream);
 			}
 				
