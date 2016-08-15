@@ -357,12 +357,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
         $this->options['root'] == '' ?  $this->options['root']= 'OneDrive.com' : $this->options['root'];
         
         if (empty($this->options['alias'])) {
-		    $this->options['alias'] = ($this->options['path'] === '/') || ($this->options['path'] === 'root')? $this->options['root'] : $this->getPathtoName($this->options['path']).'@OneDrive';
-        }
+			$this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
+									  $this->query(basename($this->options['path']), $fetch_self = true)->name.'@OneDrive';
+		}
 
         $this->rootName = $this->options['alias'];
                
-        $this->tmbPrefix = 'onedrive'.base_convert($this->root, 10, 32);
+        $this->tmbPrefix = 'onedrive'.base_convert($this->netMountKey, 10, 32);
         
         if (!empty($this->options['tmpPath'])) {
             if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath']))
@@ -558,24 +559,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 			return $e->getMessage();
 		}
         return true;
-    }
-    
-    /**
-     * Get dat(onedrive metadata) from OneDrive
-     * 
-     * @param string $path
-     * @return array onedrive metadata
-     */
-    private function getPathtoName($path)
-    {
-		try { 
-        	$itemId = basename($path);                 
-			$res  = $this->query($itemId, $fetch_self = true);
-		
-        	return $res->name;
-		} catch (Exception $e) {
-            return $e->getMessage();
-        }
     }
     
 	/**
