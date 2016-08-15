@@ -1553,32 +1553,29 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
             $path .= '/'.$name;
         }
         $path = $this->_normpath($path);
+        
+        empty(basename(dirname($path))) ? $parentId ='me/skydrive' : $parentId = basename(dirname($path));
+		isset($stat['name']) ? $name = $stat['name'] : $name = basename($path);
 
-        try {
-			if(empty($name) && empty($stat) & strpos(basename($path),'file') !== false && strpos(basename($path),'!') !== false){
-				$file = $this->query(basename($path), $fetch_self = true);				
-				$itemId = $file->id;
-				$name = $file->name;
-				$parentId = $file->parent_id;		
-			}elseif(!empty($stat['rev'])){
-				$itemId = $stat['rev'];
-				$name = $stat['name'];
-				$parentId = 'folder.'.explode(".",$stat['rev'])[1];
-			}elseif(empty($name) && empty($stat) && strpos(basename($path),'file') == false && strpos(basename($path),'!') == false){	
-				$name = basename($path);			
-				basename(dirname($path)) == '' ? $parentId = 'me/skydrive' : $parentId = basename(dirname($path));
-			}elseif(!empty($name) && !empty($stat)){
-				$name = $name;			
-				basename(dirname($path)) == '' ? $parentId = 'me/skydrive' : $parentId = basename(dirname($path));
-				$res = $this->query($parentId);
-				foreach($res as $f){		
-					if($f->name == $name){					
-						return $path.'/'.$f->id();
+		$file_exists = false;
+		if(empty($stat['rev']) && empty($stat['pid'])){		
+			$file = $this->query($parentId);		
+			if($file){
+				foreach($file as $f){
+					if($f->name == $name){
+						$file_exists = true;
 						break;
 					}
 				}
 			}
-            //Create or Update a file            				
+		}
+
+        try {
+		
+            //Create or Update a file
+            if($file_exists && empty($stat['rev'])){				
+				return $this->_normpath(dirname($path).'/'.$f->id);				
+			}
 			
 			if (is_resource($fp)) {
 				$stream = $fp;
