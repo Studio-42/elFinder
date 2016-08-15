@@ -700,8 +700,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
     protected function parseRaw($raw)
     {		
         $stat = array();
-	
-		$stat['rev']	= isset($raw->id) ? $raw->id : 'root';
+        
+        $stat['rev']	= isset($raw->id) ? $raw->id : 'root';
+        $stat['pid']	= isset($raw->parent_id) ? $raw->parent_id : 'me/skydrive';	
         $stat['name']	= $raw->name;
         $stat['mime']	= $raw->type =='folder' ? 'directory' : parent::$mimetypes[pathinfo($raw->name, PATHINFO_EXTENSION)];		
         $stat['size']	= $raw->type =='folder' ? 0 : (int)$raw->size;
