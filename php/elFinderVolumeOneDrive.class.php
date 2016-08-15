@@ -1558,13 +1558,14 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
         empty(basename(dirname($path))) ? $parentId ='me/skydrive' : $parentId = basename(dirname($path));
 		isset($stat['name']) ? $name = $stat['name'] : $name = basename($path);
 
-		$file_exists = false;
+		$file_exists = '';
 		if(empty($stat['rev']) && empty($stat['pid'])){		
 			$file = $this->query($parentId);		
 			if($file){
 				foreach($file as $f){
-					if($f->name == $name){
-						$file_exists = true;
+					if($f->name == $name || $f->id == basename($path)){
+						$name = $f->name;
+						$file_exists = 'true';
 						break;
 					}
 				}
@@ -1574,7 +1575,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
         try {
 		
             //Create or Update a file
-            if($file_exists && empty($stat['rev'])){				
+            if($file_exists == 'true'  && !empty($stat) && empty($stat['rev'])){				
 				return $this->_normpath(dirname($path).'/'.$f->id);				
 			}
 			
