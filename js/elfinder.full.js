@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 250fb3d) (2016-08-13)
+ * Version 2.1.14 (2.1-src Nightly: 143d760) (2016-08-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5785,7 +5785,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 250fb3d)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 143d760)';
 
 
 
@@ -18240,6 +18240,7 @@ elFinder.prototype.commands.resize = function() {
 			dfrd  = $.Deferred(),
 			api2  = (fm.api > 1),
 			dialogWidth = 650,
+			fmnode = fm.getUI(),
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
@@ -18836,8 +18837,16 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
-						winH -= 30;
-						(preview.height() > winH) && preview.height(winH);
+						if (fmnode.hasClass('elfinder-fullscreen')) {
+							if (base.height() > winH) {
+								winH -= 2;
+								preview.height(winH - base.height() + preview.height());
+								base.css('top', 0 - fmnode.offset().top);
+							}
+						} else {
+							winH -= 30;
+							(preview.height() > winH) && preview.height(winH);
+						}
 						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 						if (owidth && oheight) {
 							setupimg();
