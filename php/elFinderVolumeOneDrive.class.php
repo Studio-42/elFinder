@@ -453,8 +453,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
             ),
 
             // SSL options.
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_URL            => $url,
         ));
 
@@ -525,8 +525,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 						. '&refresh_token=' . urlencode($onedrive->token->data->refresh_token),
 								
 					// SSL options.
-					CURLOPT_SSL_VERIFYHOST => false,
-					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_SSL_VERIFYHOST => true,
+					CURLOPT_SSL_VERIFYPEER => true,
 					CURLOPT_URL            => $url,
 				));
 		
@@ -575,7 +575,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER    => true,
-            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYHOST => true,
             CURLOPT_SSL_VERIFYPEER => true,
         );
 
@@ -596,7 +596,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
 		curl_setopt($curl, CURLOPT_FAILONERROR, true); 
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); 
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); 
-		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false); 
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true); 
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 		   
 		if($contents){
