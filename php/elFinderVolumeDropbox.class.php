@@ -486,7 +486,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @return array dropbox metadata
 	 */
 	private function getDBdat($path) {
-		if ($res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))).' limit 1')) {
+		if ($res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower($this->_basename($path))).' limit 1')) {
 			return unserialize($res[0]);
 		} else {
 			return array();
@@ -503,7 +503,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	private function updateDBdat($path, $dat) {
 		return $this->query('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($dat))
 				. ', isdir=' . ($dat['is_dir']? 1 : 0)
-				. ' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower(basename($path))));
+				. ' where path='.$this->DB->quote(strtolower($this->_dirname($path))).' and fname='.$this->DB->quote(strtolower($this->_basename($path))));
 	}
 	/*********************************************************************/
 	/*                               FS API                              */
@@ -569,7 +569,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 					$pkey = strtolower($this->_dirname($key));
 					
 					$path = $this->DB->quote($pkey);
-					$fname = $this->DB->quote(strtolower(basename($key)));
+					$fname = $this->DB->quote(strtolower($this->_basename($key)));
 					$where = 'where path='.$path.' and fname='.$fname;
 					
 					if (empty($entry[1])) {
@@ -603,7 +603,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						$_update = true;
 					}
 					if ($_update) {
-						$pwhere = 'where path='.$this->DB->quote(strtolower($this->_dirname($_p))).' and fname='.$this->DB->quote(strtolower(basename($_p)));
+						$pwhere = 'where path='.$this->DB->quote(strtolower($this->_dirname($_p))).' and fname='.$this->DB->quote(strtolower($this->_basename($_p)));
 						$this->DB->exec('update '.$this->DB_TableName.' set dat='.$this->DB->quote(serialize($praw)).' '.$pwhere);
 					}
 				}
@@ -634,7 +634,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 		$stat = array();
 
 		$stat['rev']   = isset($raw['rev'])? $raw['rev'] : 'root';
-		$stat['name']  = basename($raw['path']);
+		$stat['name']  = $this->_basename($raw['path']);
 		$stat['mime']  = $raw['is_dir']? 'directory' : $raw['mime_type'];
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $raw['bytes'];
 		$stat['ts']    = isset($raw['client_mtime'])? strtotime($raw['client_mtime']) :
@@ -973,7 +973,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _dirname($path) {
-		return $this->_normpath(dirname($path));
+		return $this->_normpath(substr($path, 0, strrpos($path, '/')));
 	}
 
 	/**
@@ -984,7 +984,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _basename($path) {
-		return basename($path);
+		return substr($path, strrpos($path, '/') + 1);
 	}
 
 	/**
