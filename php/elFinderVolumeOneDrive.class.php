@@ -707,7 +707,12 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
         $stat['mime']	= $raw->type =='folder' ? 'directory' : parent::$mimetypes[pathinfo($raw->name, PATHINFO_EXTENSION)];		
         $stat['size']	= $raw->type =='folder' ? 0 : (int)$raw->size;
         $stat['ts']		= $raw->updated_time !== null ? strtotime($raw->updated_time) : $_SERVER['REQUEST_TIME'];
-        $stat['dirs']	= $raw->type =='folder' ? 1 : 0;
+        $stat['dirs']	= 0;
+        
+        if($raw->type == 'folder') {
+			$stat['dirs'] = (int)$this->_subdirs($stat['rev']);			
+		}
+		
         $stat['url']	= '1';
 	    
 		if ($raw->type !=='folder') {
@@ -1154,7 +1159,24 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
      **/
     protected function _subdirs($path)
     {
-        return ($stat = $this->stat($path)) && isset($stat['dirs']) ? $stat['dirs'] : false;
+        if($path == '/'){
+			$items = 'me/skydrive';		
+		}else{
+			$itemId = basename($path);
+		}        
+
+		$url = self::API_URL . $path .'/files?filter=folders'
+							. '&access_token=' . urlencode($this->onedrive->token->data->access_token);
+
+		$res = $this->_createCurl($url);
+		
+		if($res){
+			return true;
+		}else {
+			return false;
+		}
+		
+        //return ($stat = $this->stat($path)) && isset($stat['dirs']) ? $stat['dirs'] : false;
     }
 
     /**
