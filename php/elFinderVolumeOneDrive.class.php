@@ -1160,9 +1160,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver {
     protected function _subdirs($path)
     {
         if($path == '/'){
-			$items = 'me/skydrive';		
+			$path = 'me/skydrive';		
 		}else{
-			$itemId = basename($path);
+			$path = basename($path);
 		}        
 
 		$url = self::API_URL . $path .'/files?filter=folders'
