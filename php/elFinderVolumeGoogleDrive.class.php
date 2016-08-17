@@ -513,7 +513,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
                               ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
         $stat['size']        = $raw['mimeType'] == self::DIRMIME ? 0 : (int)$raw['size'];
         $stat['ts']            = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
-        $stat['dirs']        = $raw['mimeType'] == self::DIRMIME ? 1 : 0;
+        $stat['dirs']        = 0;
+        
+        if($raw['mimeType'] == self::DIRMIME){
+        	$stat['dirs'] = (int)$this->_subdirs($stat['rev']);
+		}
         
         if($permissions = $raw->getPermissions()){		
 			foreach ($permissions as $permission) {
@@ -1059,7 +1063,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
      **/
     protected function _subdirs($path)
     {
-        return ($stat = $this->stat($path)) && isset($stat['dirs']) ? $stat['dirs'] : false;
+        $opts = [
+				'fields'	=> self::FETCHFIELDS_LIST,
+				'pageSize'	=> 1000,
+				'spaces'	=> 'drive',
+				'q'			=> sprintf('trashed=false and mimeType="%s" and "%s" in parents', self::DIRMIME, basename($path))
+			];
+
+		$res = $this->query($opts);	
+			
+		if($res){
+			return true;
+		}else {
+			return false;
+		}
+        //return ($stat = $this->stat($path)) && isset($stat['dirs']) ? $stat['dirs'] : false;
     }
 
     /**
