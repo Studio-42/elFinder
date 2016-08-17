@@ -1347,34 +1347,43 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver {
     protected function _save($fp, $path, $name, $stat)
 	{ 
 		if ($name) {
-			$path .= '/'.$name;
+			$path .= '/'.$name;			
 		}
-		
+
 		$path = $this->_normpath($path);
-		
-		empty(basename(dirname($path))) ? $itemId ='root' : $itemId = basename(dirname($path));
-		isset($stat['name']) ? $name = $stat['name'] : $name = basename($path);
-		$opts = [
+
+		if(!empty($stat) && empty($stat['rev'])){
+			empty(basename(dirname($path))) ? $itemId ='root' : $itemId = basename(dirname($path));
+			$opts = [
 				'fields'	=> self::FETCHFIELDS_LIST,
 				'pageSize'	=> 1000,
 				'spaces'	=> 'drive',
 				'q'			=> sprintf('trashed=false and name="%s" and "%s" in parents', $name, $itemId)
-            ];
-		
-		$res = $this->query($opts);
+			];
+
+			$res = $this->query($opts)[0];			
+		}else {		
+			$itemId = basename($path);
+			$opts = [
+					'fields' => self::FETCHFIELDS_GET
+					];
+			if(empty(parent::$mimetypes[pathinfo($itemId, PATHINFO_EXTENSION)])){
+				$res = $this->service->files->get($itemId, $opts);
+			}			
+		}
 		
 		try {
 			$files = new Google_Service_Drive_DriveFile();
 
 			if (!empty($res)) {
 				//Update a file
-				if(empty($stat['rev'])){
-					return $this->_normpath(dirname($path).'/'.$res[0]['id']);				
+				$itemId = $res['id'];
+				$name = $res['name'];
+				$mimeType = $res['mimeType'];
+				
+				if(!empty($stat) && empty($stat['rev'])){
+					return $this->_normpath(dirname($path).'/'.$itemId);				
 				}
-							
-				$itemId		= $stat['rev'];
-				$name		= $stat['name'];
-				$mimeType	= $stat['mime'];				
 				
 				$files->setName($name);
 				$files->setDescription('');
