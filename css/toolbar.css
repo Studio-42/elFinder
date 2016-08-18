@@ -102,6 +102,7 @@
 .elfinder-button-icon-back      { background-position: 0 -112px; }
 .elfinder-button-icon-forward   { background-position: 0 -128px; }
 .elfinder-button-icon-up        { background-position: 0 -144px; }
+.elfinder-button-icon-dir       { background-position: 0  -16px; }
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-reload    { background-position: 0 -160px; }
 .elfinder-button-icon-open      { background-position: 0 -176px; } 
