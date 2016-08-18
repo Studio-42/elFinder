@@ -10,6 +10,15 @@ $.fn.elfindercontextmenu = function(fm) {
 		var cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
 			exIcon = 'elfinder-contextmenu-extra-icon',
+			dragOpt = {
+				distance: 8,
+				start: function() {
+					menu.data('touching') && menu.find('.ui-state-hover').removeClass('ui-state-hover');
+				},
+				stop: function() {
+					menu.data('draged', true);
+				}
+			},
 			menu = $(this).addClass('touch-punch ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.on('touchstart', function(e) {
@@ -33,15 +42,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						menu.removeData('draged');
 					}, 100);
 				})
-				.draggable({
-					distance: 8,
-					start: function() {
-						menu.data('touching') && menu.find('.ui-state-hover').removeClass('ui-state-hover');
-					},
-					stop: function() {
-						menu.data('draged', true);
-					}
-				}),
+				.draggable(dragOpt),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
 			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
@@ -104,7 +105,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 			},
 			
-			open = function(x, y) {
+			open = function(x, y, css) {
 				var width      = menu.outerWidth(),
 					height     = menu.outerHeight(),
 					bstyle     = base.attr('style'),
@@ -115,14 +116,14 @@ $.fn.elfindercontextmenu = function(fm) {
 					mh         = fm.UA.Mobile? 20 : 2,
 					x          = x - (bpos? bpos.left : 0),
 					y          = y - (bpos? bpos.top : 0),
-					css        = {
+					css        = $.extend(css || {}, {
 						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
 						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width),
 						opacity : '1'
-					};
+					});
 
 				base.width(bwidth);
-				menu.stop().attr('style', '').css(css).show();
+				menu.stop().removeAttr('style').css(css).show();
 				base.attr('style', bstyle);
 				
 				css[subpos] = parseInt(menu.width());
@@ -134,7 +135,14 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			close = function() {
-				menu.hide().empty().removeData('submenuKeep');
+				menu.removeAttr('style').hide().empty().removeData('submenuKeep');
+				if (! menu.draggable('instance')) {
+					menu.addClass('touch-punch').draggable(dragOpt);
+				}
+				if (menu.data('prevNode')) {
+					menu.data('prevNode').after(menu);
+					menu.removeData('prevNode');
+				}
 				fm.trigger('closecontextmenu');
 				if (fm.UA.iOS) {
 					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'touch');
@@ -356,7 +364,9 @@ $.fn.elfindercontextmenu = function(fm) {
 			base = fm.getUI();
 			cwd = fm.getUI('cwd');
 			fm.bind('contextmenu', function(e) {
-				var data = e.data;
+				var data = e.data,
+					css = {},
+					prevNode;
 
 				if (!data.type || data.type !== 'files') {
 					cwd.trigger('unselectall');
@@ -369,7 +379,18 @@ $.fn.elfindercontextmenu = function(fm) {
 					createFromRaw(data.raw);
 				}
 
-				menu.children().length && open(data.x, data.y);
+				if (menu.children().length) {
+					prevNode = data.prevNode || null;
+					if (prevNode) {
+						menu.data('prevNode', menu.prev());
+						prevNode.after(menu);
+					}
+					if (data.fitHeight) {
+						css = {maxHeight: Math.min(fm.getUI().height(), $(window).height()), overflowY: 'auto'};
+						menu.removeClass('touch-punch').draggable('destroy');
+					}
+					open(data.x, data.y, css);
+				}
 			})
 			.one('destroy', function() { menu.remove(); })
 			.bind('disable select', function(){
