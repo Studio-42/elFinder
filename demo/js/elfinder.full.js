@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 44129ea) (2016-08-18)
+ * Version 2.1.14 (2.1-src Nightly: 41636d0) (2016-08-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5785,7 +5785,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 44129ea)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 41636d0)';
 
 
 
@@ -5902,7 +5902,7 @@ if ($.ui && $.ui.ddmanager) {
 	var self = this;
 
 	// Ignore the event if another widget is already being handled
-	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0])) {
+	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0]) || ! $(event.currentTarget).hasClass('touch-punch')) {
 	  return;
 	}
 
