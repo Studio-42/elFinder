@@ -64,7 +64,7 @@ if ($.ui && $.ui.ddmanager) {
   function simulateMouseEvent (event, simulatedType) {
 
 	// Ignore multi-touch events
-	if (event.originalEvent.touches.length > 1 || ! $(event.currentTarget).hasClass('touch-punch')) {
+	if (event.originalEvent.touches.length > 1) {
 	  return;
 	}
 
@@ -107,7 +107,7 @@ if ($.ui && $.ui.ddmanager) {
 	var self = this;
 
 	// Ignore the event if another widget is already being handled
-	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0]) || ! $(event.currentTarget).hasClass('touch-punch')) {
+	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0])) {
 	  return;
 	}
 
