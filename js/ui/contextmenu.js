@@ -45,11 +45,15 @@ $.fn.elfindercontextmenu = function(fm) {
 				.draggable(dragOpt),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
 			types = $.extend({}, fm.options.contextmenu),
-			tpl     = '<div class="'+cmItem+'"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
+			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
 			item = function(label, icon, callback, opts) {
-				var style = '',
+				var className = '',
+					style = '',
 					iconClass = '';
 				if (opts) {
+					if (opts.className) {
+						className = ' ' + opts.className;
+					}
 					if (opts.iconClass) {
 						iconClass = opts.iconClass;
 						icon = '';
@@ -58,7 +62,10 @@ $.fn.elfindercontextmenu = function(fm) {
 						style = ' style="background:url(\''+fm.escape(opts.iconImg)+'\') 0 0 no-repeat;background-size:contain;"';
 					}
 				}
-				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : (iconClass? iconClass : '')).replace('{label}', label).replace('{style}', style))
+				return $(tpl.replace('{icon}', icon ? 'elfinder-button-icon-'+icon : (iconClass? iconClass : ''))
+						.replace('{label}', label)
+						.replace('{style}', style)
+						.replace('{className}', className))
 					.click(function(e) {
 						e.stopPropagation();
 						e.preventDefault();
