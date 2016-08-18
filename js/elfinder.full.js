@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 41636d0) (2016-08-18)
+ * Version 2.1.14 (2.1-src Nightly: 4763d58) (2016-08-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5785,7 +5785,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 41636d0)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 4763d58)';
 
 
 
@@ -5859,7 +5859,7 @@ if ($.ui && $.ui.ddmanager) {
   function simulateMouseEvent (event, simulatedType) {
 
 	// Ignore multi-touch events
-	if (event.originalEvent.touches.length > 1 || ! $(event.currentTarget).hasClass('touch-punch')) {
+	if (event.originalEvent.touches.length > 1) {
 	  return;
 	}
 
@@ -5902,7 +5902,7 @@ if ($.ui && $.ui.ddmanager) {
 	var self = this;
 
 	// Ignore the event if another widget is already being handled
-	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0]) || ! $(event.currentTarget).hasClass('touch-punch')) {
+	if (touchHandled || !self._mouseCapture(event.originalEvent.changedTouches[0])) {
 	  return;
 	}
 
@@ -8445,7 +8445,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			close = function() {
 				menu.removeAttr('style').hide().empty().removeData('submenuKeep');
 				if (! menu.draggable('instance')) {
-					menu.addClass('touch-punch').draggable(dragOpt);
+					menu.draggable(dragOpt);
 				}
 				if (menu.data('prevNode')) {
 					menu.data('prevNode').after(menu);
@@ -8695,7 +8695,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					if (data.fitHeight) {
 						css = {maxHeight: Math.min(fm.getUI().height(), $(window).height()), overflowY: 'auto'};
-						menu.removeClass('touch-punch').draggable('destroy');
+						menu.draggable('destroy');
 					}
 					open(data.x, data.y, css);
 				}
