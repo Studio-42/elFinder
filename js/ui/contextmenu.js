@@ -137,7 +137,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			close = function() {
 				menu.removeAttr('style').hide().empty().removeData('submenuKeep');
 				if (! menu.draggable('instance')) {
-					menu.addClass('touch-punch').draggable(dragOpt);
+					menu.draggable(dragOpt);
 				}
 				if (menu.data('prevNode')) {
 					menu.data('prevNode').after(menu);
@@ -387,7 +387,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					if (data.fitHeight) {
 						css = {maxHeight: Math.min(fm.getUI().height(), $(window).height()), overflowY: 'auto'};
-						menu.removeClass('touch-punch').draggable('destroy');
+						menu.draggable('destroy');
 					}
 					open(data.x, data.y, css);
 				}
