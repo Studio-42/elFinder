@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 1870423) (2016-08-19)
+ * Version 2.1.14 (2.1-src Nightly: 57edb09) (2016-08-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5785,7 +5785,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 1870423)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 57edb09)';
 
 
 
@@ -19588,6 +19588,7 @@ elFinder.prototype.commands.upload = function() {
 				return tgts;
 			},
 			targets = getTargets(),
+			targetDir = fm.file(targets[0]),
 			check  = !targets && data && data.target? [ data.target ] : targets,
 			fmUpload = function(data) {
 				fm.upload(data)
@@ -19612,8 +19613,55 @@ elFinder.prototype.commands.upload = function() {
 				}
 				fmUpload(data);
 			},
+			getSelector = function() {
+				var hash = targetDir.hash,
+					dirs = $.map(fm.files(), function(f) {
+						return (f.mime === 'directory' && f.write && f.phash && f.phash === hash)? f : null; 
+					});
+				
+				if (! dirs.length) {
+					return $();
+				}
+				
+				return $('<div class="elfinder-upload-dirselect" title="' + fm.i18n('folders') + '"/>')
+				.on('click', function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+					dirs = fm.sortFiles(dirs);
+					var cwd    = fm.cwd(),
+						base   = dialog.closest('div.ui-dialog'),
+						getRaw = function(f, icon) {
+							return {
+								label    : fm.escape(f.i18 || f.name),
+								icon     : icon,
+								remain   : false,
+								callback : function() {
+									var title = base.children('.ui-dialog-titlebar:first').children('span.elfinder-upload-target');
+									targets = [ f.hash ];
+									title.html(' - ' + fm.escape(f.i18 || f.name));
+								},
+								options  : {
+									className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
+									iconClass : f.csscls || '',
+									iconImg   : f.icon   || ''
+								}
+							}
+						},
+						raw = [ getRaw(targetDir, 'opendir'), '|' ];
+					$.each(dirs, function(i, f) {
+						raw.push(getRaw(f, 'dir'));
+					});
+					fm.trigger('contextmenu', {
+						raw: raw,
+						x: e.pageX,
+						y: e.pageY,
+						prevNode: base,
+						fitHeight: true
+					});
+				}).append('<span class="elfinder-button-icon elfinder-button-icon-dir" />');
+			},
 			dfrd = $.Deferred(),
-			dialog, input, button, dropbox, pastebox, dropUpload, paste, targetDir, dirs;
+			dialog, input, button, dropbox, pastebox, dropUpload, paste, dirs, spinner;
 		
 		if (this.getstate(check) < 0) {
 			return dfrd.reject();
@@ -19753,46 +19801,21 @@ elFinder.prototype.commands.upload = function() {
 				pastebox.removeClass(hover);
 			});
 		
-		dirs = $.map(fm.files(), function(f) {
-			return (f.mime === 'directory' && f.write && f.phash && f.phash === cwdHash)? f : null; 
-		});
-		if (dirs.length) {
-			$('<div class="elfinder-upload-dirselect" title="' + fm.i18n('folders') + '"/>')
-			.on('click', function(e) {
-				e.stopPropagation();
-				e.preventDefault();
-				dirs = fm.sortFiles(dirs);
-				var cwd    = fm.cwd(),
-					base   = dialog.closest('div.ui-dialog'),
-					getRaw = function(f, icon) {
-						return {
-							label    : fm.escape(f.i18 || f.name),
-							icon     : icon,
-							remain   : false,
-							callback : function() {
-								var title = base.children('.ui-dialog-titlebar:first').children('span.elfinder-upload-target');
-								targets = [ f.hash ];
-								title.html(' - ' + fm.escape(f.i18 || f.name));
-							},
-							options  : {
-								className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
-								iconClass : f.csscls || '',
-								iconImg   : f.icon   || ''
-							}
-						}
-					},
-					raw = [ getRaw(cwd, 'opendir'), '|' ];
-				$.each(dirs, function(i, f) {
-					raw.push(getRaw(f, 'dir'));
-				});
-				fm.trigger('contextmenu', {
-					raw: raw,
-					x: e.pageX,
-					y: e.pageY,
-					prevNode: base,
-					fitHeight: true
-				});
-			}).append('<span class="elfinder-button-icon elfinder-button-icon-dir" />').appendTo(dialog);
+		if (targetDir.dirs) {
+			if (targetDir.hash === cwdHash || $('#'+fm.navHash2Id(targetDir.hash)).hasClass('elfinder-subtree-loaded')) {
+				getSelector().appendTo(dialog);
+			} else {
+				spinner = $('<div class="elfinder-upload-dirselect" title="' + fm.i18n('nowLoading') + '"/>')
+					.append('<span class="elfinder-button-icon elfinder-button-icon-spinner" />')
+					.appendTo(dialog);
+				fm.request({cmd : 'tree', target : targetDir.hash})
+					.done(function() { 
+						spinner.replaceWith(getSelector());
+					})
+					.fail(function() {
+						spinner.remove();
+					});
+			}
 		}
 		
 		if (fm.dragUpload) {
@@ -19847,7 +19870,6 @@ elFinder.prototype.commands.upload = function() {
 			
 		}
 		
-		targetDir = targets? fm.file(targets[0]) : null;
 		fm.dialog(dialog, {
 			title          : this.title + '<span class="elfinder-upload-target">' + (targetDir? ' - ' + fm.escape(targetDir.i18 || targetDir.name) : '') + '</span>',
 			modal          : true,
