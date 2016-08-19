@@ -36,6 +36,9 @@
 	white-space:nowrap;
 	cursor:default;
 }
+.elfinder .elfinder-contextmenu-item.ui-state-active {
+	border: none;
+}
 .elfinder .elfinder-contextmenu-item .ui-icon {
 	width:16px;
 	height:16px;

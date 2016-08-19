@@ -236,6 +236,7 @@ elFinder.prototype.commands.upload = function() {
 								title.html(' - ' + fm.escape(f.i18 || f.name));
 							},
 							options  : {
+								className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
 								iconClass : f.csscls || '',
 								iconImg   : f.icon   || ''
 							}
