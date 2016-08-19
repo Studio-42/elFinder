@@ -56,6 +56,7 @@
 .std42-dialog .elfinder-help, .std42-dialog .elfinder-help .ui-widget-content { background:#fff;}
 
 /* contextmenu */
+.elfinder-contextmenu .ui-state-active { background: #6293df; color:#fff; }
 .elfinder-contextmenu .ui-state-hover { background: #3875d7; color:#fff; }
 .elfinder-contextmenu .ui-state-hover .elfinder-contextmenu-arrow { background-image:url('../img/arrows-active.png'); }
 
