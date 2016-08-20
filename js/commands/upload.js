@@ -49,8 +49,8 @@ elFinder.prototype.commands.upload = function() {
 				return tgts;
 			},
 			targets = getTargets(),
-			targetDir = fm.file(targets[0]),
 			check  = !targets && data && data.target? [ data.target ] : targets,
+			targetDir = check? fm.file(check[0]) : fm.cwd(),
 			fmUpload = function(data) {
 				fm.upload(data)
 					.fail(function(error) {
