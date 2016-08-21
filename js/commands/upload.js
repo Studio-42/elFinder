@@ -57,12 +57,25 @@ elFinder.prototype.commands.upload = function() {
 						dfrd.reject(error);
 					})
 					.done(function(data) {
-						var cwd = fm.getUI('cwd');
+						var cwd = fm.getUI('cwd'),
+							node;
 						dfrd.resolve(data);
 						if (data && data.added && data.added[0]) {
 							var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 							if (newItem.length) {
 								newItem.trigger('scrolltoview');
+							} else {
+								if (targetDir.hash !== cwdHash) {
+									node = $('<div/>').append(
+										$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
+										.on('mouseenter mouseleave', function(e) { 
+											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+										}).on('click', function() {
+											fm.exec('open', targetDir.hash);
+										})
+									);
+								}
+								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}
 						}
 					});

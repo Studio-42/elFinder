@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-08-03
+ * @version 2016-08-21
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -136,6 +136,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdopendir'   : 'フォルダを開く', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : '列幅リセット', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'フルスクリーン', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : '移動', // from v2.1.15 added 21.08.2016
 			
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
@@ -358,6 +359,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : '逐次検索は現在のビューからのみです', // from v2.1.13 added 6.30.2016
 			'reinstate'       : '元に戻す', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 完了', // from v2.1.15 added 21.8.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
