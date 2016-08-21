@@ -39,13 +39,26 @@
 			tmb   = fm.option('tmbUrl'),
 			dfrd  = $.Deferred()
 				.done(function(data) {
-					fm.trigger('getfile', {files : data});
-					self.callback(data, fm);
+					var res,
+						done = function() {
+							if (opts.oncomplete == 'close') {
+								fm.hide();
+							} else if (opts.oncomplete == 'destroy') {
+								fm.destroy();
+							}
+						};
 					
-					if (opts.oncomplete == 'close') {
-						fm.hide();
-					} else if (opts.oncomplete == 'destroy') {
-						fm.destroy();
+					fm.trigger('getfile', {files : data});
+					
+					res = self.callback(data, fm);
+					
+					if (typeof res === 'object' && typeof res.done === 'function') {
+						res.done(done)
+						.fail(function(error) {
+							error && fm.error(error);
+						});
+					} else {
+						done();
 					}
 				}),
 			result = function(file) {
