@@ -79,8 +79,10 @@ elFinder.prototype.commands.archive = function() {
 		}
 		
 		$.when(open).done(function() {
-			fm.selectfiles({files : hashes});
-			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			fm.one('cwdrender', function() {
+				fm.selectfiles({files : hashes});
+				dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			});
 		});
 		
 		return dfrd;
