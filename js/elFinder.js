@@ -2081,7 +2081,7 @@ window.elFinder = function(node, opts) {
 			$(window).off('.' + namespace);
 			$(document).add(node).off('.' + namespace);
 			self.trigger = function() { }
-			beeper.remove();
+			$(beeper).remove();
 			node.children().remove();
 			node.off();
 			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
