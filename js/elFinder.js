@@ -1053,7 +1053,8 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.url = function(hash) {
-		var file = files[hash];
+		var file = files[hash],
+			baseUrl;
 		
 		if (!file || !file.read) {
 			return '';
@@ -1077,8 +1078,10 @@ window.elFinder = function(node, opts) {
 			return file.url;
 		}
 		
-		if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
-			return cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
+		baseUrl = (file.hash.indexOf(self.cwd().volumeid) === 0)? cwdOptions.url : this.option('url', file.hash);
+		
+		if (baseUrl) {
+			return baseUrl + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
 
 		var params = $.extend({}, this.customData, {
