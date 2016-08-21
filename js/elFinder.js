@@ -1966,6 +1966,16 @@ window.elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Create and return toast.
+	 *
+	 * @param  Object  toast options - see ui/toast.js
+	 * @return jQuery
+	 */
+	this.toast = function(options) {
+		return $('<div class="ui-front"/>').appendTo(this.ui.toast).elfindertoast(options || {}, this);
+	};
+	
+	/**
 	 * Return UI widget or node
 	 *
 	 * @param  String  ui name
@@ -2775,7 +2785,8 @@ window.elFinder = function(node, opts) {
 			title         : '&nbsp;',
 			width         : parseInt(this.options.notifyDialog.width)
 		}),
-		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
+		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node),
+		toast : $('<div class="elfinder-toast"/>').appendTo(node)
 	};
 	
 	/**

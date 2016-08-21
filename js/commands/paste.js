@@ -203,11 +203,24 @@ elFinder.prototype.commands.paste = function() {
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.done(function(data) {
+								var newItem, node;
 								dfrd.resolve(data);
 								if (data && data.added && data.added[0]) {
-									var newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+									newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
 									if (newItem.length) {
 										newItem.trigger('scrolltoview');
+									} else {
+										if (dst.hash !== fm.cwd().hash) {
+											node = $('<div/>').append(
+												$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
+												.on('mouseenter mouseleave', function(e) { 
+													$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+												}).on('click', function() {
+													fm.exec('open', dst.hash);
+												})
+											);
+										}
+										fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + (cut ? 'move' : 'copy'))]), extNode: node});
 									}
 								}
 							})
