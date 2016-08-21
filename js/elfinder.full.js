@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 57edb09) (2016-08-19)
+ * Version 2.1.14 (2.1-src Nightly: ffbeffb) (2016-08-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1980,6 +1980,16 @@ window.elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Create and return toast.
+	 *
+	 * @param  Object  toast options - see ui/toast.js
+	 * @return jQuery
+	 */
+	this.toast = function(options) {
+		return $('<div class="ui-front"/>').appendTo(this.ui.toast).elfindertoast(options || {}, this);
+	};
+	
+	/**
 	 * Return UI widget or node
 	 *
 	 * @param  String  ui name
@@ -2789,7 +2799,8 @@ window.elFinder = function(node, opts) {
 			title         : '&nbsp;',
 			width         : parseInt(this.options.notifyDialog.width)
 		}),
-		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node)
+		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node),
+		toast : $('<div class="elfinder-toast"/>').appendTo(node)
 	};
 	
 	/**
@@ -5785,7 +5796,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 57edb09)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ffbeffb)';
 
 
 
@@ -7498,7 +7509,7 @@ elFinder.prototype.resources = {
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
 						nnode.css('max-height', '');
-					} else {
+					} else if (pnode) {
 						pnode.css('width', '')
 							.parent('td').css('overflow', '');
 					}
@@ -7780,7 +7791,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-08-03
+ * @version 2016-08-21
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -7914,6 +7925,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Full Screen', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -8136,6 +8148,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
 			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -12558,6 +12571,66 @@ $.fn.elfinderstat = function(fm) {
 
 
 /*
+ * File: /js/ui/toast.js
+ */
+
+/**
+ * @class  elFinder toast
+ * 
+ * This was created inspired by the toastr. Thanks to developers of toastr.
+ * CodeSeven/toastr: http://johnpapa.net <https://github.com/CodeSeven/toastr>
+ *
+ * @author Naoki Sawada
+ **/
+$.fn.elfindertoast = function(opts, fm) {
+	var defOpts = {
+		mode: 'success',
+		msg: '',
+		showMethod: 'fadeIn', //fadeIn, slideDown, and show are built into jQuery
+		showDuration: 300,
+		showEasing: 'swing', //swing and linear are built into jQuery
+		onShown: undefined,
+		hideMethod: 'fadeOut',
+		hideDuration: 1000,
+		hideEasing: 'swing',
+		onHidden: undefined,
+		timeOut: 3000,
+		extNode: undefined
+	};
+	return this.each(function() {
+		var self = $(this);
+		opts = $.extend({}, defOpts, opts || {});
+		self.on('click', function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			self.remove();
+		}).hide().addClass('toast-' + opts.mode).append($('<div class="elfinder-toast-msg"/>').html(opts.msg));
+		if (opts.extNode) {
+			self.append(opts.extNode);
+		}
+		self[opts.showMethod]({
+			duration: opts.showDuration,
+			easing: opts.showEasing,
+			complete: function() {
+				opts.onShown && opts.onShown();
+				if (opts.timeOut) {
+					setTimeout(function() {
+						self[opts.hideMethod]({
+							duration: opts.hideDuration,
+							easing: opts.hideEasing,
+							complete: function() {
+								opts.onHidden && opts.onHidden();
+								self.remove();
+							}
+						});
+					}, opts.timeOut);
+				}
+			}
+		});
+	});
+};
+
+/*
  * File: /js/ui/toolbar.js
  */
 
@@ -13769,8 +13842,10 @@ elFinder.prototype.commands.archive = function() {
 		}
 		
 		$.when(open).done(function() {
-			fm.selectfiles({files : hashes});
-			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			fm.one('cwdrender', function() {
+				fm.selectfiles({files : hashes});
+				dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			});
 		});
 		
 		return dfrd;
@@ -16200,7 +16275,8 @@ elFinder.prototype.commands.netunmount = function() {
 				: fm.request({
 						data   : {cmd  : 'open', target : thash || file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
-						syncOnFail : true
+						syncOnFail : true,
+						lazy : false
 					});
 		}
 		
@@ -16607,11 +16683,24 @@ elFinder.prototype.commands.paste = function() {
 								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
 							})
 							.done(function(data) {
+								var newItem, node;
 								dfrd.resolve(data);
 								if (data && data.added && data.added[0]) {
-									var newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+									newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
 									if (newItem.length) {
 										newItem.trigger('scrolltoview');
+									} else {
+										if (dst.hash !== fm.cwd().hash) {
+											node = $('<div/>').append(
+												$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
+												.on('mouseenter mouseleave', function(e) { 
+													$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+												}).on('click', function() {
+													fm.exec('open', dst.hash);
+												})
+											);
+										}
+										fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + (cut ? 'move' : 'copy'))]), extNode: node});
 									}
 								}
 							})
@@ -19588,20 +19677,33 @@ elFinder.prototype.commands.upload = function() {
 				return tgts;
 			},
 			targets = getTargets(),
-			targetDir = fm.file(targets[0]),
 			check  = !targets && data && data.target? [ data.target ] : targets,
+			targetDir = check? fm.file(check[0]) : fm.cwd(),
 			fmUpload = function(data) {
 				fm.upload(data)
 					.fail(function(error) {
 						dfrd.reject(error);
 					})
 					.done(function(data) {
-						var cwd = fm.getUI('cwd');
+						var cwd = fm.getUI('cwd'),
+							node;
 						dfrd.resolve(data);
 						if (data && data.added && data.added[0]) {
 							var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 							if (newItem.length) {
 								newItem.trigger('scrolltoview');
+							} else {
+								if (targetDir.hash !== cwdHash) {
+									node = $('<div/>').append(
+										$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
+										.on('mouseenter mouseleave', function(e) { 
+											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+										}).on('click', function() {
+											fm.exec('open', targetDir.hash);
+										})
+									);
+								}
+								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}
 						}
 					});
