@@ -73,17 +73,16 @@ elFinder.prototype.commands.archive = function() {
 		self.data   = {targets : self.hashes(hashes), type : mime};
 		
 		if (fm.cwd().hash !== cwd.hash) {
-			open = fm.exec('open', cwd.hash);
-		} else {
-			open = null;
-		}
-		
-		$.when(open).done(function() {
-			fm.one('cwdrender', function() {
-				fm.selectfiles({files : hashes});
-				dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			open = fm.exec('open', cwd.hash).done(function() {
+				fm.one('cwdrender', function() {
+					fm.selectfiles({files : hashes});
+					dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+				});
 			});
-		});
+		} else {
+			fm.selectfiles({files : hashes});
+			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+		}
 		
 		return dfrd;
 	}

@@ -4988,8 +4988,24 @@ abstract class elFinderVolumeDriver {
 	 */
 	protected function procExec($command , array &$output = null, &$return_var = -1, array &$error_output = null) {
 
-		if (! function_exists('proc_open')) {
+		static $allowed = null;
+		
+		if ($allowed === null) {
+			if ($allowed = function_exists('proc_open')) {
+				if ($disabled = ini_get('disable_functions')) {
+					$funcs = array_map('trim', explode(',', $disabled));
+					$allowed = ! in_array('proc_open', $funcs);
+				}
+			}
+		}
+		
+		if (! $allowed) {
 			$return_var = -1;
+			return $return_var;
+		}
+		
+		if (! $command) {
+			$return_var = 0;
 			return $return_var;
 		}
 		
@@ -5297,7 +5313,7 @@ abstract class elFinderVolumeDriver {
 			'extract' => array()
 		);
 		
-		if (function_exists('proc_open')) {
+		if ($this->procExec('') === 0) {
 		
 			$this->procExec('tar --version', $o, $ctar);
 			
