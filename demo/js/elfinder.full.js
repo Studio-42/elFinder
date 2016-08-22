@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: fe91e85) (2016-08-21)
+ * Version 2.1.14 (2.1-src Nightly: 6905be5) (2016-08-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5799,7 +5799,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: fe91e85)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 6905be5)';
 
 
 
@@ -13839,17 +13839,16 @@ elFinder.prototype.commands.archive = function() {
 		self.data   = {targets : self.hashes(hashes), type : mime};
 		
 		if (fm.cwd().hash !== cwd.hash) {
-			open = fm.exec('open', cwd.hash);
-		} else {
-			open = null;
-		}
-		
-		$.when(open).done(function() {
-			fm.one('cwdrender', function() {
-				fm.selectfiles({files : hashes});
-				dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			open = fm.exec('open', cwd.hash).done(function() {
+				fm.one('cwdrender', function() {
+					fm.selectfiles({files : hashes});
+					dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+				});
 			});
-		});
+		} else {
+			fm.selectfiles({files : hashes});
+			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+		}
 		
 		return dfrd;
 	}
