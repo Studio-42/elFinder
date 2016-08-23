@@ -124,6 +124,13 @@ $.fn.elfindertree = function(fm, opts) {
 			droppable = fm.res(c, 'droppable'),
 			
 			/**
+			 * root wrapper class
+			 * 
+			 * @type String
+			 */
+			wrapperRoot = 'elfinder-navbar-wrapper-root',
+
+			/**
 			 * Un-disabled cmd `paste` volume's root wrapper class
 			 * 
 			 * @type String
@@ -324,8 +331,9 @@ $.fn.elfindertree = function(fm, opts) {
 			updateTree = function(dirs) {
 				var length  = dirs.length,
 					orphans = [],
-					i = dirs.length,
-					dir, html, parent, sibling, init, atonce = {}, base;
+					i = length,
+					tgts = $(),
+					dir, html, parent, sibling, init, atonce = {}, base, node;
 
 				var firstVol = true; // check for netmount volume
 				while (i--) {
@@ -343,13 +351,16 @@ $.fn.elfindertree = function(fm, opts) {
 								}
 								atonce[dir.phash].push(dir);
 							} else {
-								sibling.before(itemhtml(dir));
+								node = itemhtml(dir);
+								sibling.before(node);
+								! mobile && (tgts = tgts.add(node));
 							}
 						} else {
-							parent[firstVol || dir.phash ? 'append' : 'prepend'](itemhtml(dir));
+							node = itemhtml(dir);
+							parent[firstVol || dir.phash ? 'append' : 'prepend'](node);
 							firstVol = false;
 							if (!dir.phash) {
-								base = $('#'+fm.navHash2Id(dir.hash)).parent();
+								base = $('#'+fm.navHash2Id(dir.hash)).parent().addClass(wrapperRoot);
 								if (!dir.disabled || dir.disabled.length < 1) {
 									base.addClass(pastable+' '+uploadable);
 								} else {
@@ -361,6 +372,7 @@ $.fn.elfindertree = function(fm, opts) {
 									}
 								}
 							}
+							! mobile && updateDroppable(null, base);
 						}
 					} else {
 						orphans.push(dir);
@@ -377,6 +389,7 @@ $.fn.elfindertree = function(fm, opts) {
 							html.push(itemhtml(d));
 						});
 						parent.append(html.join(''));
+						! mobile && fm.lazy(function() { updateDroppable(null, parent); });
 					});
 				}
 				
@@ -385,9 +398,7 @@ $.fn.elfindertree = function(fm, opts) {
 					return;
 				} 
 				
-				if (length && !mobile) {
-					updateDroppable();
-				}
+				! mobile && tgts.length && fm.lazy(function() { updateDroppable(tgts); });
 				
 			},
 			
@@ -526,13 +537,19 @@ $.fn.elfindertree = function(fm, opts) {
 			 *
 			 * @return void
 			 */
-			updateDroppable = function(target) {
+			updateDroppable = function(target, node) {
 				var limit = 100,
 					next;
 				
 				if (!target) {
-					tree.find('div.'+uploadable).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
-					target = tree.find('div.'+pastable).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+					if (!node || node.closest('div.'+wrapperRoot).hasClass(uploadable)) {
+						(node || tree.find('div.'+uploadable)).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
+					}
+					if (!node || node.closest('div.'+wrapperRoot).hasClass(pastable)) {
+						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+					} else {
+						target = $();
+					}
 				}
 				
 				if (target.length > limit) {
@@ -543,7 +560,7 @@ $.fn.elfindertree = function(fm, opts) {
 				target.droppable(droppableopts);
 				
 				if (next) {
-					setTimeout(function(){
+					fm.lazy(function() {
 						updateDroppable(next);
 					}, 20);
 				}
@@ -765,11 +782,13 @@ $.fn.elfindertree = function(fm, opts) {
 			var dirs = filter(e.data.changed),
 				length = dirs.length,
 				l    = length,
-				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
+				tgts = $(),
+				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded, parent;
 			
 			while (l--) {
 				dir = dirs[l];
 				if ((node = $('#'+fm.navHash2Id(dir.hash))).length) {
+					parent = node.parent();
 					if (dir.phash) {
 						realParent  = node.closest('.'+subtree);
 						reqParent   = findSubtree(dir.phash);
@@ -781,13 +800,14 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 						
 						if (reqParent[0] !== realParent[0] || realSibling.get(0) !== reqSibling.get(0)) {
-							reqSibling.length ? reqSibling.before(node.parent()) : reqParent.append(node.parent());
+							reqSibling.length ? reqSibling.before(parent) : reqParent.append(parent);
 						}
 					}
 					isExpanded = node.hasClass(expanded);
 					isLoaded   = node.hasClass(loaded);
 					tmp        = $(itemhtml(dir));
 					node.replaceWith(tmp.children(selNavdir));
+					! mobile && updateDroppable(null, parent);
 					
 					if (dir.dirs 
 					&& (isExpanded || isLoaded) 
@@ -796,11 +816,11 @@ $.fn.elfindertree = function(fm, opts) {
 						isExpanded && node.addClass(expanded);
 						isLoaded && node.addClass(loaded);
 					}
+					
 				}
 			}
 
 			sync();
-			length && !mobile && updateDroppable();
 		})
 		// remove dirs
 		.remove(function(e) {

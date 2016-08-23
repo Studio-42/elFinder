@@ -77,6 +77,67 @@ elFinder.prototype.commands.rename = function() {
 					fm.unbind('resize', resize);
 					fm.enable();
 				}),
+			blur = function() {
+				var name   = $.trim(input.val()),
+				parent = input.parent(),
+				valid  = true;
+
+				if (!inError && pnode.length) {
+					
+					input.off('blur');
+					
+					if (input[0].setSelectionRange) {
+						input[0].setSelectionRange(0, 0)
+					}
+					if (name == file.name) {
+						return dfrd.reject();
+					}
+					if (fm.options.validName && fm.options.validName.test) {
+						try {
+							valid = fm.options.validName.test(name);
+						} catch(e) {
+							valid = false;
+						}
+					}
+					if (!name || name === '..' || !valid) {
+						inError = true;
+						fm.error('errInvName', {modal: true, close: select});
+						return false;
+					}
+					if (fm.fileByName(name, file.phash)) {
+						inError = true;
+						fm.error(['errExists', name], {modal: true, close: select});
+						return false;
+					}
+					
+					rest();
+					
+					(navbar? input : node).html(fm.escape(name));
+					fm.lockfiles({files : [file.hash]});
+					fm.request({
+							data   : {cmd : 'rename', target : file.hash, name : name},
+							notify : {type : 'rename', cnt : 1}
+						})
+						.fail(function(error) {
+							dfrd.reject();
+							if (! error || ! $.isArray(error) || error[0] !== 'errRename') {
+								fm.sync();
+							}
+						})
+						.done(function(data) {
+							dfrd.resolve(data);
+							if (!navbar && data && data.added && data.added[0]) {
+								var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
+								if (newItem.length) {
+									newItem.trigger('scrolltoview');
+								}
+							}
+						})
+						.always(function() {
+							fm.unlockfiles({files : [file.hash]})
+						});
+				}
+			},
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
 				.on('keyup text', function(){
 					if (tarea) {
@@ -105,71 +166,13 @@ elFinder.prototype.commands.rename = function() {
 						e.preventDefault();
 					}
 				})
-				.on('blur', function() {
-					var name   = $.trim(input.val()),
-						parent = input.parent(),
-						valid  = true;
-
-					if (!inError && pnode.length) {
-						
-						input.off('blur');
-						
-						if (input[0].setSelectionRange) {
-							input[0].setSelectionRange(0, 0)
-						}
-						if (name == file.name) {
-							return dfrd.reject();
-						}
-						if (fm.options.validName && fm.options.validName.test) {
-							try {
-								valid = fm.options.validName.test(name);
-							} catch(e) {
-								valid = false;
-							}
-						}
-						if (!name || name === '..' || !valid) {
-							inError = true;
-							fm.error('errInvName', {modal: true, close: select});
-							return false;
-						}
-						if (fm.fileByName(name, file.phash)) {
-							inError = true;
-							fm.error(['errExists', name], {modal: true, close: select});
-							return false;
-						}
-						
-						rest();
-						
-						(navbar? input : node).html(fm.escape(name));
-						fm.lockfiles({files : [file.hash]});
-						fm.request({
-								data   : {cmd : 'rename', target : file.hash, name : name},
-								notify : {type : 'rename', cnt : 1}
-							})
-							.fail(function(error) {
-								dfrd.reject();
-								if (! error || ! $.isArray(error) || error[0] !== 'errRename') {
-									fm.sync();
-								}
-							})
-							.done(function(data) {
-								dfrd.resolve(data);
-								if (!navbar && data && data.added && data.added[0]) {
-									var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
-									if (newItem.length) {
-										newItem.trigger('scrolltoview');
-									}
-								}
-							})
-							.always(function() {
-								fm.unlockfiles({files : [file.hash]})
-							});
-						
-					}
-				}),
+				.on('blur', blur),
 			select = function() {
 				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-				inError = false;
+				if (inError) {
+					inError = false;
+					input.on('blur', blur);
+				}
 				if (fm.UA.Mobile) {
 					overlay.on('click', cancel)
 						.removeClass('ui-front').elfinderoverlay('show');

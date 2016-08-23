@@ -16,6 +16,7 @@
 	top: 12px;
 	right: 12px;
 	max-width: 90%;
+	cursor: default;
 }
 
 .elfinder .elfinder-toast > div {
