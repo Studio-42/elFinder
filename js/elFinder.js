@@ -217,7 +217,10 @@ window.elFinder = function(node, opts) {
 		uiCmdMapPrev = '',
 		
 		open = function(data) {
-			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {};
+			// NOTES: Do not touch data object
+		
+			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
+				rmClass, hashes, calc, gc, collapsed, prevcwd;
 			
 			if (self.api >= 2.1) {
 				self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
@@ -247,11 +250,19 @@ window.elFinder = function(node, opts) {
 			} else {
 				// remove only files from prev cwd
 				// and collapsed directory (included 100+ directories) to empty for perfomance tune in DnD
-				$.each(Object.keys(files), function(n, i) {
+				prevcwd = cwd;
+				rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
+				collapsed = self.res('class', 'navcollapse');
+				hashes = Object.keys(files);
+				calc = function(n, i) {
+					if (!files[i]) {
+						return true;
+					}
+					
 					var isDir = (files[i].mime === 'directory'),
 						phash = files[i].phash,
-						collapsed = self.res('class', 'navcollapse'),
 						pnav;
+					
 					if (
 						(!isDir
 							|| emptyDirs[phash]
@@ -260,30 +271,47 @@ window.elFinder = function(node, opts) {
 								&& $('#'+self.navHash2Id(phash)).next('.elfinder-navbar-subtree').children().length > 100
 							)
 						)
-						&& (isDir || phash === cwd)
+						&& (isDir || phash === prevcwd)
 						&& $.inArray(i, remember) === -1
 					) {
 						if (isDir && !emptyDirs[phash]) {
 							emptyDirs[phash] = true;
+							$('#'+self.navHash2Id(phash))
+							 .removeClass(rmClass)
+							 .next('.elfinder-navbar-subtree').empty();
 						}
 						delete files[i];
 					} else if (isDir) {
 						stayDirs[phash] = true;
 					}
+				};
+				gc = function() {
+					if (hashes.length) {
+						$.each(hashes.splice(0, 100), calc);
+						if (hashes.length) {
+							setTimeout(gc, 20);
+						}
+					}
+				};
+				
+				self.trigger('filesgc').one('filesgc', function() {
+					hashes = [];
 				});
-				$.each(Object.keys(emptyDirs), function(n, i) {
-					var rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
-					$('#'+self.navHash2Id(i))
-					 .removeClass(rmClass)
-					 .next('.elfinder-navbar-subtree').empty();
+				
+				self.one('opendone', function() {
+					if (! node.data('lazycnt')) {
+						gc();
+					} else {
+						self.one('lazydone', gc);
+					}
 				});
 			}
 
 			self.sorters = [];
 			cwd = data.cwd.hash;
-			cache(data.files);
+			cache(JSON.parse(JSON.stringify(data.files)));
 			if (!files[cwd]) {
-				cache([data.cwd]);
+				cache([JSON.parse(JSON.stringify(data.cwd))]);
 			}
 			self.lastDir(cwd);
 			
@@ -1321,18 +1349,27 @@ window.elFinder = function(node, opts) {
 			done = function(data) {
 				data.warning && self.error(data.warning);
 				
-				isOpen && open($.extend(true, {}, data));
+				isOpen && open(data);
 
-				// fire some event to update cache/ui
-				data.removed && data.removed.length && self.remove(data);
-				data.added   && data.added.length   && self.add(data);
-				data.changed && data.changed.length && self.change(data);
-				
-				// fire event with command name
-				self.trigger(cmd, data);
-				
-				// force update content
-				data.sync && self.sync();
+				self.lazy(function() {
+					// fire some event to update cache/ui
+					data.removed && data.removed.length && self.remove(data);
+					data.added   && data.added.length   && self.add(data);
+					data.changed && data.changed.length && self.change(data);
+				}).then(function() {
+					// fire event with command name
+					return self.lazy(function() {
+						self.trigger(cmd, data);
+					});
+				}).then(function() {
+					// fire event with command name + 'done'
+					return self.lazy(function() {
+						self.trigger(cmd + 'done');
+					});
+				}).then(function() {
+					// force update content
+					data.sync && self.sync();
+				});
 			},
 			/**
 			 * Request error handler. Reject dfrd with correct error message.
@@ -1500,6 +1537,12 @@ window.elFinder = function(node, opts) {
 
 		// trigger abort autoSync for commands to add the item
 		if ($.inArray(cmd, (self.cmdsToAdd + ' autosync').split(' ')) !== -1) {
+			if (cmd !== 'autosync') {
+				self.autoSync('stop');
+				dfrd.always(function() {
+					self.autoSync();
+				});
+			}
 			self.trigger('openxhrabort');
 		}
 
@@ -2046,6 +2089,7 @@ window.elFinder = function(node, opts) {
 					} else {
 						node.data('lazycnt', 0);
 						node.removeClass('elfinder-processing');
+						self.trigger('lazydone');
 					}
 				}
 			},
@@ -2054,13 +2098,11 @@ window.elFinder = function(node, opts) {
 		delay = delay || 0;
 		busy(true);
 		
-		// for node re-paint
-		node.outerHeight();
-		
 		setTimeout(function() {
-			func.call(dfd);
+			dfd.resolve(func.call(dfd));
 			busy(false);
 		}, delay);
+		
 		return dfd;
 	}
 	
