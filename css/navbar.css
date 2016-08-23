@@ -59,6 +59,18 @@
 	background-repeat:no-repeat;
 /*	border:1px solid #111;*/
 }
+.elfinder-touch .elfinder-navbar-arrow {
+	zoom: 1.3;
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.3);
+	margin-bottom: 8px;
+}
+.elfinder-ltr.elfinder-touch .elfinder-navbar-arrow {
+    margin-right: 20px;
+}
+.elfinder-rtl.elfinder-touch .elfinder-navbar-arrow {
+    margin-left: 20px;
+}
 
 .ui-state-active .elfinder-navbar-arrow { background-image:url("../img/arrows-active.png"); }
 
