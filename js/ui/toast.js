@@ -16,7 +16,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		showEasing: 'swing', //swing and linear are built into jQuery
 		onShown: undefined,
 		hideMethod: 'fadeOut',
-		hideDuration: 1000,
+		hideDuration: 1500,
 		hideEasing: 'swing',
 		onHidden: undefined,
 		timeOut: 3000,

@@ -24,7 +24,7 @@
 	pointer-events: auto;
 	overflow: hidden;
 	margin: 0 0 6px;
-	padding: 8px 8px 8px 50px;
+	padding: 8px 16px 8px 50px;
 	-moz-border-radius: 3px 3px 3px 3px;
 	-webkit-border-radius: 3px 3px 3px 3px;
 	border-radius: 3px 3px 3px 3px;
@@ -58,11 +58,15 @@
 }
 
 
+.elfinder .elfinder-toast > div button.ui-button {
+	background-image: none;
+	margin-top: 8px;
+	padding: .5em .8em;
+}
+
 .elfinder .elfinder-toast > .toast-success button.ui-button {
 	background-color: green;
-	background-image: none;
 	color: #FFF;
-	margin-top: 8px;
 }
 
 .elfinder .elfinder-toast > .toast-success button.ui-button.ui-state-hover {
