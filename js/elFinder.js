@@ -4269,6 +4269,9 @@ elFinder.prototype = {
 								total--;
 							} else {
 								total += chunks;
+								size = 0;
+								fcnt = 1;
+								c++;
 							}
 							continue;
 						}
