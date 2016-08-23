@@ -547,6 +547,8 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 					if (!node || node.closest('div.'+wrapperRoot).hasClass(pastable)) {
 						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+					} else {
+						target = $();
 					}
 				}
 				
@@ -781,11 +783,12 @@ $.fn.elfindertree = function(fm, opts) {
 				length = dirs.length,
 				l    = length,
 				tgts = $(),
-				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded;
+				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded, parent;
 			
 			while (l--) {
 				dir = dirs[l];
 				if ((node = $('#'+fm.navHash2Id(dir.hash))).length) {
+					parent = node.parent();
 					if (dir.phash) {
 						realParent  = node.closest('.'+subtree);
 						reqParent   = findSubtree(dir.phash);
@@ -797,14 +800,14 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 						
 						if (reqParent[0] !== realParent[0] || realSibling.get(0) !== reqSibling.get(0)) {
-							reqSibling.length ? reqSibling.before(node.parent()) : reqParent.append(node.parent());
+							reqSibling.length ? reqSibling.before(parent) : reqParent.append(parent);
 						}
 					}
 					isExpanded = node.hasClass(expanded);
 					isLoaded   = node.hasClass(loaded);
 					tmp        = $(itemhtml(dir));
 					node.replaceWith(tmp.children(selNavdir));
-					! mobile && (tgts = tgts.add(node));
+					! mobile && updateDroppable(null, parent);
 					
 					if (dir.dirs 
 					&& (isExpanded || isLoaded) 
@@ -813,11 +816,11 @@ $.fn.elfindertree = function(fm, opts) {
 						isExpanded && node.addClass(expanded);
 						isLoaded && node.addClass(loaded);
 					}
+					
 				}
 			}
 
 			sync();
-			! mobile && tgts.length && fm.lazy(function(){ updateDroppable(tgts); });
 		})
 		// remove dirs
 		.remove(function(e) {
