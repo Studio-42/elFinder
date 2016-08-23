@@ -143,8 +143,14 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			close = function() {
 				menu.removeAttr('style').hide().empty().removeData('submenuKeep');
-				if (! menu.draggable('instance')) {
-					menu.draggable(dragOpt);
+				try {
+					if (! menu.draggable('instance')) {
+						menu.draggable(dragOpt);
+					}
+				} catch(e) {
+					if (! menu.hasClass('ui-draggable')) {
+						menu.draggable(dragOpt);
+					}
 				}
 				if (menu.data('prevNode')) {
 					menu.data('prevNode').after(menu);
@@ -394,7 +400,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					if (data.fitHeight) {
 						css = {maxHeight: Math.min(fm.getUI().height(), $(window).height()), overflowY: 'auto'};
-						menu.draggable('destroy');
+						menu.draggable('destroy').removeClass('ui-draggable');
 					}
 					open(data.x, data.y, css);
 				}

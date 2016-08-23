@@ -284,7 +284,9 @@ elFinder.prototype.commands.upload = function() {
 					.appendTo(dialog);
 				fm.request({cmd : 'tree', target : targetDir.hash})
 					.done(function() { 
-						spinner.replaceWith(getSelector());
+						fm.one('treedone', function() {
+							spinner.replaceWith(getSelector());
+						});
 					})
 					.fail(function() {
 						spinner.remove();
