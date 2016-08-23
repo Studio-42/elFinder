@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 6d6efdd) (2016-08-23)
+ * Version 2.1.14 (2.1-src Nightly: 8ae6871) (2016-08-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5844,7 +5844,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 6d6efdd)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 8ae6871)';
 
 
 
@@ -12639,7 +12639,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		showEasing: 'swing', //swing and linear are built into jQuery
 		onShown: undefined,
 		hideMethod: 'fadeOut',
-		hideDuration: 1000,
+		hideDuration: 1500,
 		hideEasing: 'swing',
 		onHidden: undefined,
 		timeOut: 3000,
