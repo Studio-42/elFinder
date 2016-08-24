@@ -148,7 +148,8 @@ class elFinder {
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
-		'chmod'     => array('targets' => true, 'mode' => true)
+		'chmod'     => array('targets' => true, 'mode' => true),
+		'undorm'    => array('targets' => true),
 	);
 	
 	/**
@@ -275,6 +276,7 @@ class elFinder {
 	const ERROR_COPY_ITSELF       = 'errCopyInItself';
 	const ERROR_REPLACE           = 'errReplace';          // 'Unable to replace "$1".'
 	const ERROR_RM                = 'errRm';               // 'Unable to remove "$1".'
+	const ERROR_UNDORM            = 'errUndoRm';           // 'Unable to restore "$1".'
 	const ERROR_RM_SRC            = 'errRmSrc';            // 'Unable remove source file(s)'
 	const ERROR_MKOUTLINK         = 'errMkOutLink';        // 'Unable to create a link to outside the volume root.'
 	const ERROR_UPLOAD            = 'errUpload';           // 'Upload error.'
@@ -654,27 +656,13 @@ class elFinder {
 				$this->volumes[$id]->setMimesFilter($args['mimes']);
 			}
 		}
-		
-		// detect destination dirHash and volume
-		$dstVolume = false;
-		$dst = ! empty($args['target'])? $args['target'] : (! empty($args['dst'])? $args['dst'] : '');
-		if ($dst) {
-			$dstVolume = $this->volume($dst);
-		} else if (isset($args['targets']) && is_array($args['targets']) && isset($args['targets'][0])) {
-			$dst = $args['targets'][0];
-			$dstVolume = $this->volume($dst);
-			if (($_stat = $dstVolume->file($dst)) && ! empty($_stat['phash'])) {
-				$dst = $_stat['phash'];
-			} else {
-				$dst = '';
-			}
-		}
-		
+
 		// call pre handlers for this command
 		$args['sessionCloseEarlier'] = isset($this->sessionUseCmds[$cmd])? false : $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
+			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
-				call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
+				call_user_func_array($handler, array($cmd, &$args, $this, $volume));
 			}
 		}
 		
@@ -699,42 +687,21 @@ class elFinder {
 			);
 		}
 		
-		// check change dstDir
-		$changeDst = false;
-		if ($dst && $dstVolume && (! empty($result['added']) || ! empty($result['removed']))) {
-			$changeDst = true;
-		}
-		
 		foreach ($this->volumes as $volume) {
 			if (isset($result['removed'])) {
 				$result['removed'] = array_merge($result['removed'], $volume->removed());
-				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
-					$changeDst = true;
-				}
 			}
 			if (isset($result['added'])) {
 				$result['added'] = array_merge($result['added'], $volume->added());
-				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
-					$changeDst = true;
-				}
 			}
 			$volume->resetResultStat();
 		}
 		
-		// dstDir is changed
-		if ($changeDst) {
-			if ($dstDir = $dstVolume->dir($dst)) {
-				if (! isset($result['changed'])) {
-					$result['changed'] = array();
-				}
-				$result['changed'][] = $dstDir;
-			}
-		}
-		
 		// call handlers for this command
 		if (!empty($this->listeners[$cmd])) {
+			$volume = isset($args['target'])? $this->volume($args['target']) : false;
 			foreach ($this->listeners[$cmd] as $handler) {
-				if (call_user_func_array($handler,array($cmd, &$result, $args, $this, $dstVolume))) {
+				if (call_user_func_array($handler,array($cmd, &$result, $args, $this, $volume))) {
 					// handler return true to force sync client after command completed
 					$result['sync'] = true;
 				}
@@ -1506,6 +1473,31 @@ class elFinder {
 	}
 
 	/**
+	 * Remove dirs/files
+	 *
+	 * @param array  command arguments
+	 * @return array
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected function undorm($args) {
+		$targets = is_array($args['targets']) ? $args['targets'] : array();
+		$result  = array('removed' => array());
+
+		foreach ($targets as $target) {
+			if (($volume = $this->volume($target)) == false) {
+				$result['warning'] = $this->error(self::ERROR_UNDORM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
+				return $result;
+			}
+			if (!$volume->undorm($target)) {
+				$result['warning'] = $this->error($volume->error());
+				return $result;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	* Get remote contents
 	*
 	* @param  string   $url     target url
@@ -2187,7 +2179,7 @@ class elFinder {
 			}
 			
 			$tmpname = $files['tmp_name'][$i];
-			$path = ($paths && isset($paths[$i]))? $paths[$i] : '';
+			$path = ($paths && !empty($paths[$i]))? $paths[$i] : '';
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
 			if ($name === 'blob') {
 				if ($chunk) {
@@ -2239,7 +2231,7 @@ class elFinder {
 				break;
 			}
 			$rnres = array();
-			if ($path !== '' && $path !== $target) {
+			if ($path && $path !== $target) {
 				if ($dir = $volume->dir($path)) {
 					$_target = $path;
 					if (! isset($addedDirs[$path])) {
@@ -2310,14 +2302,16 @@ class elFinder {
 	 *
 	 * @param  array  command arguments
 	 * @return array
-	 * @author Dmitry (dio) Levashov
+	 * @author Dmitry (dio) Levashov, dvpweb
 	 **/
 	protected function paste($args) {
 		$dst     = $args['dst'];
+		// dvpweb - Détection destination corbeille...
+		$isRecycledBin = substr($dst, 0, 3) == 'm1_';
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$cut     = !empty($args['cut']);
 		$error   = $cut ? self::ERROR_MOVE : self::ERROR_COPY;
-		$result  = array('changed' => array(), 'added' => array(), 'removed' => array());
+		$result  = array('added' => array(), 'removed' => array());
 		
 		if (($dstVolume = $this->volume($dst)) == false) {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
@@ -2358,12 +2352,26 @@ class elFinder {
 					}
 				}
 			}
-			
-			if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut, $hashes)) == false) {
-				$result['warning'] = $this->error($dstVolume->error());
-				break;
+			// dvpweb - Suppression du fichier / dossier source uniquement si déplacement vers la corbeille
+			if ($isRecycledBin) {
+				if ($srcVolume->rm($target) == false) {
+					$result['warning'] = $this->error($dstVolume->error());
+					break;
+				}
+			} else {
+				// dvpweb - Déplacement depuis corbeille (restauration)...
+				if (substr($target, 0, 3) == 'm1_') {
+					if ($srcVolume->undorm($target) == false) {
+						$result['warning'] = $this->error($dstVolume->error());
+						break;
+					}
+				} else
+				// Sinon, cas normal...
+				if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut, $hashes)) == false) {
+					$result['warning'] = $this->error($dstVolume->error());
+					break;
+				}
 			}
-
 			$dirChange = ! empty($file['dirChange']);
 			unset($file['dirChange']);
 			if ($dirChange) {
@@ -2874,7 +2882,6 @@ class elFinder {
 	protected function ensureDirsRecursively($volume, $target, $dirs, $path = '') {
 		$res = array('stats' => array(), 'hashes' => array());
 		foreach($dirs as $name => $sub) {
-			$name = (string)$name;
 			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($dir = $volume->mkdir($target, $name))) {
 				$_path = $path . '/' . $name;
 				$res['stats'][] = $dir;

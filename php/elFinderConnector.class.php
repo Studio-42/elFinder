@@ -27,13 +27,7 @@ class elFinderConnector {
 	 **/
 	protected $header = 'Content-Type: application/json';
 
-	/**
-	 * HTTP request method
-	 * 
-	 * @var string
-	 */
-	protected $reqMethod = '';
-	
+
 	/**
 	 * Constructor
 	 *
@@ -42,9 +36,8 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function __construct($elFinder, $debug=false) {
-		
+
 		$this->elFinder = $elFinder;
-		$this->reqMethod = strtoupper($_SERVER["REQUEST_METHOD"]);
 		if ($debug) {
 			$this->header = 'Content-Type: text/html; charset=utf-8';
 		}
@@ -57,8 +50,8 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function run() {
-		$isPost = $this->reqMethod === 'POST';
-		$src    = $isPost ? $_POST : $_GET;
+		$isPost = $_SERVER["REQUEST_METHOD"] == 'POST';
+		$src    = $_SERVER["REQUEST_METHOD"] == 'POST' ? $_POST : $_GET;
 		if ($isPost && !$src && $rawPostData = @file_get_contents('php://input')) {
 			// for support IE XDomainRequest()
 			$parts = explode('&', $rawPostData);
@@ -128,8 +121,8 @@ class elFinderConnector {
 		if ($hasFiles) {
 			$args['FILES'] = $_FILES;
 		}
-		
-		$this->output($this->elFinder->exec($cmd, $args));
+		$res = $this->elFinder->exec($cmd, $args);
+		$this->output($res);
 	}
 	
 	/**
@@ -158,9 +151,7 @@ class elFinderConnector {
 		if (isset($data['pointer'])) {
 			$toEnd = true;
 			$fp = $data['pointer'];
-			if (($this->reqMethod === 'GET' || $this->reqMethod === 'HEAD')
-					&& elFinder::isSeekableStream($fp)
-					&& (array_search('Accept-Ranges: none', headers_list()) === false)) {
+			if (elFinder::isSeekableStream($fp) && (array_search('Accept-Ranges: none', headers_list()) === false)) {
 				header('Accept-Ranges: bytes');
 				$psize = null;
 				if (!empty($_SERVER['HTTP_RANGE'])) {
@@ -210,16 +201,13 @@ class elFinderConnector {
 			// client disconnect should abort
 			ignore_user_abort(false);
 
-			if ($reqMethod !== 'HEAD') {
-				if ($toEnd) {
-					fpassthru($fp);
-				} else {
-					$out = fopen('php://output', 'wb');
-					stream_copy_to_stream($fp, $out, $psize);
-					fclose($out);
-				}
+			if ($toEnd) {
+				fpassthru($fp);
+			} else {
+				$out = fopen('php://output', 'wb');
+				stream_copy_to_stream($fp, $out, $psize);
+				fclose($out);
 			}
-			
 			if (!empty($data['volume'])) {
 				$data['volume']->close($data['pointer'], $data['info']['hash']);
 			}
