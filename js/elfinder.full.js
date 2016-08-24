@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 67d9a63) (2016-08-24)
+ * Version 2.1.14 (2.1-src Nightly: 9de90fc) (2016-08-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5844,7 +5844,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 67d9a63)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 9de90fc)';
 
 
 
@@ -16811,7 +16811,11 @@ elFinder.prototype.commands.paste = function() {
 													.on('mouseenter mouseleave', function(e) { 
 														$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 													}).on('click', function() {
-														fm.exec('open', dst.hash);
+														fm.exec('open', dst.hash).done(function() {
+															fm.one('opendone', function() {
+																fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+															});
+														});
 													})
 												);
 											}
@@ -19818,7 +19822,11 @@ elFinder.prototype.commands.upload = function() {
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
-											fm.exec('open', targets[0]);
+											fm.exec('open', targets[0]).done(function() {
+												fm.one('opendone', function() {
+													fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+												});
+											});
 										})
 									);
 								}
