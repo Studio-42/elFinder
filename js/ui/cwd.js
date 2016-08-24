@@ -658,7 +658,7 @@ $.fn.elfindercwd = function(fm, options) {
 						proc = true;
 						fm.lazy(function() {
 							go(chk);
-							proc = false;;
+							proc = false;
 						});
 					}
 				}
@@ -1089,6 +1089,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if ((n = $('#'+fm.cwdHash2Id(hash))).length) {
 						try {
 							n.remove();
+							--bufferExt.renderd;
 						} catch(e) {
 							fm.debug('error', e);
 						}
@@ -1987,11 +1988,15 @@ $.fn.elfindercwd = function(fm, options) {
 				trigger();
 			})
 			.remove(function(e) {
+				var place = list ? cwd.find('tbody') : cwd;
 				remove(e.data.removed || []);
 				trigger();
-				if (buffer.length < 1 && (list ? cwd.find('tbody') : cwd).children().length < 1) {
+				if (buffer.length < 1 && place.children().length < 1) {
 					wz.addClass('elfinder-cwd-wrapper-empty');
 					selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
+				} else {
+					bottomMarkerShow(place);
+					wrapper.trigger(scrollEvent);
 				}
 			})
 			// select dragged file if no selected, disable selectable
