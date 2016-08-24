@@ -238,23 +238,23 @@ $.fn.elfindercontextmenu = function(fm) {
 									base.width(base.width());
 									submenu.css({ left: 'auto', right: 'auto' });
 									var nodeOffset = node.offset(),
-										baseleft   = nodeOffset.left,
-										basetop    = nodeOffset.top,
-										basewidth  = node.outerWidth(),
-										width      = submenu.outerWidth(),
-										height     = submenu.outerHeight(),
+										nodeleft   = nodeOffset.left,
+										nodetop    = nodeOffset.top,
+										nodewidth  = node.outerWidth(),
+										width      = submenu.outerWidth(true),
+										height     = submenu.outerHeight(true),
 										baseOffset = base.offset(),
 										wwidth     = baseOffset.left + base.width(),
 										wheight    = baseOffset.top + base.height(),
 										x, y, over;
 	
-									over = (baseleft + basewidth + width) - wwidth;
-									x = (baseleft > width && over > 0)? (fm.UA.Mobile? 10 - width : basewidth - over) : basewidth;
-									if (subpos === 'right' && baseleft < width) {
-										x = fm.UA.Mobile? 30 - basewidth : basewidth - (width - baseleft);
+									over = (nodeleft + nodewidth + width) - wwidth;
+									x = (nodeleft > width && over > 0)? (fm.UA.Mobile? 10 - width : nodewidth - over) : nodewidth;
+									if (subpos === 'right' && nodeleft < width) {
+										x = fm.UA.Mobile? 30 - nodewidth : nodewidth - (width - nodeleft);
 									}
-									over = (basetop + 5 + height) - wheight;
-									y = (over > 0 && basetop < wheight)? 10 - over : (over > 0? 30 - height : 5);
+									over = (nodetop + 5 + height) - wheight;
+									y = (over > 0 && nodetop < wheight)? 5 - over : (over > 0? 30 - height : 5);
 	
 									menu.find('.elfinder-contextmenu-sub:visible').hide().parent().removeClass('ui-state-hover');
 									submenu.css({ top : y }).css(subpos, x).show();
