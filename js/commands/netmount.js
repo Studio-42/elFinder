@@ -96,7 +96,11 @@ elFinder.prototype.commands.netmount = function() {
 
 					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 						.done(function(data) {
-							data.added && data.added.length && fm.exec('open', data.added[0].hash);
+							if (data.added && data.added.length) {
+								fm.one('netmountdone', function() {
+									fm.exec('open', data.added[0].hash);
+								});
+							}
 							dfrd.resolve();
 						})
 						.fail(function(error) {
