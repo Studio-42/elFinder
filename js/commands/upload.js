@@ -71,7 +71,11 @@ elFinder.prototype.commands.upload = function() {
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
-											fm.exec('open', targets[0]);
+											fm.exec('open', targets[0]).done(function() {
+												fm.one('opendone', function() {
+													fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+												});
+											});
 										})
 									);
 								}
