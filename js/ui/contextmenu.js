@@ -142,23 +142,25 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			close = function() {
-				menu.removeAttr('style').hide().empty().removeData('submenuKeep');
-				try {
-					if (! menu.draggable('instance')) {
-						menu.draggable(dragOpt);
+				if (menu.is(':visible') || menu.children().length) {
+					menu.removeAttr('style').hide().empty().removeData('submenuKeep');
+					try {
+						if (! menu.draggable('instance')) {
+							menu.draggable(dragOpt);
+						}
+					} catch(e) {
+						if (! menu.hasClass('ui-draggable')) {
+							menu.draggable(dragOpt);
+						}
 					}
-				} catch(e) {
-					if (! menu.hasClass('ui-draggable')) {
-						menu.draggable(dragOpt);
+					if (menu.data('prevNode')) {
+						menu.data('prevNode').after(menu);
+						menu.removeData('prevNode');
 					}
-				}
-				if (menu.data('prevNode')) {
-					menu.data('prevNode').after(menu);
-					menu.removeData('prevNode');
-				}
-				fm.trigger('closecontextmenu');
-				if (fm.UA.iOS) {
-					$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'touch');
+					fm.trigger('closecontextmenu');
+					if (fm.UA.iOS) {
+						$('div.elfinder div.overflow-scrolling-touch').css('-webkit-overflow-scrolling', 'touch');
+					}
 				}
 			},
 			
@@ -280,6 +282,7 @@ $.fn.elfindercontextmenu = function(fm) {
 										if ($.isPlainObject(opts)) {
 											opts._currentType = type;
 										}
+										close();
 										cmd.exec(targets, opts);
 									}
 								})

@@ -69,10 +69,6 @@
 			req = [], 
 			i, file, dim;
 
-		if (this.getstate(hashes) == -1) {
-			return dfrd.reject();
-		}
-			
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (file.mime == 'directory' && !opts.folders) {

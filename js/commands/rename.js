@@ -210,7 +210,7 @@ elFinder.prototype.commands.rename = function() {
 			node.empty().append(input.val(file.name));
 		}
 		
-		if (cnt > 1 || this.getstate([file.hash]) < 0) {
+		if (cnt > 1) {
 			return dfrd.reject();
 		}
 		

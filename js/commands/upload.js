@@ -71,7 +71,7 @@ elFinder.prototype.commands.upload = function() {
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
-											fm.exec('open', targetDir.hash);
+											fm.exec('open', targets[0]);
 										})
 									);
 								}
@@ -136,10 +136,6 @@ elFinder.prototype.commands.upload = function() {
 			},
 			dfrd = $.Deferred(),
 			dialog, input, button, dropbox, pastebox, dropUpload, paste, dirs, spinner;
-		
-		if (this.getstate(check) < 0) {
-			return dfrd.reject();
-		}
 		
 		dropUpload = function(e) {
 			e.stopPropagation();
