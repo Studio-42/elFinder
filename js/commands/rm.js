@@ -31,7 +31,7 @@ elFinder.prototype.commands.rm = function() {
 			tpl    = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
 			targets, text, f, fname, size, tmb, descs, dialog;
 
-		if (!cnt || this._disabled) {
+		if (! cnt) {
 			return dfrd.reject();
 		}
 		

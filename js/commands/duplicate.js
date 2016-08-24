@@ -26,7 +26,7 @@ elFinder.prototype.commands.duplicate = function() {
 				}), 
 			args = [];
 			
-		if (!cnt || this.getstate(hashes) === -1) {
+		if (! cnt) {
 			return dfrd.reject();
 		}
 		

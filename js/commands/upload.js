@@ -137,10 +137,6 @@ elFinder.prototype.commands.upload = function() {
 			dfrd = $.Deferred(),
 			dialog, input, button, dropbox, pastebox, dropUpload, paste, dirs, spinner;
 		
-		if (this.getstate(check) < 0) {
-			return dfrd.reject();
-		}
-		
 		dropUpload = function(e) {
 			e.stopPropagation();
 			e.preventDefault();

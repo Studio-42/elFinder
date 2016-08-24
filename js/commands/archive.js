@@ -54,7 +54,7 @@ elFinder.prototype.commands.archive = function() {
 			error && fm.error(error);
 		});
 
-		if (!(this.enabled() && cnt && mimes.length && $.inArray(mime, mimes) !== -1)) {
+		if (! (cnt && mimes.length && $.inArray(mime, mimes) !== -1)) {
 			return dfrd.reject();
 		}
 		
