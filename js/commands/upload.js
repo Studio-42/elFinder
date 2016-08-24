@@ -71,7 +71,7 @@ elFinder.prototype.commands.upload = function() {
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
-											fm.exec('open', targetDir.hash);
+											fm.exec('open', targets[0]);
 										})
 									);
 								}
