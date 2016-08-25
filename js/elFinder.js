@@ -1325,6 +1325,8 @@ window.elFinder = function(node, opts) {
 			syncOnFail = opts.syncOnFail,
 			// use lazy()
 			lazy     = !!opts.lazy,
+			// prepare function before done()
+			prepare  = opts.prepare,
 			// open notify dialog timeout
 			timeout,
 			// request options
@@ -1459,6 +1461,10 @@ window.elFinder = function(node, opts) {
 						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
 					}
 
+					if (typeof prepare === 'function') {
+						prepare(response);
+					}
+					
 					dfrd.resolve(response);
 					response.debug && self.debug('backend-debug', response.debug);
 				};
