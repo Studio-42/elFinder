@@ -37,6 +37,7 @@ $.fn.dialogelfinder = function(opts) {
 					handle : '.dialogelfinder-drag',
 					containment : 'window',
 					stop : function() {
+						node.trigger('resize');
 						elfinder.trigger('resize');
 					}
 				})
