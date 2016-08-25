@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 9de90fc) (2016-08-24)
+ * Version 2.1.14 (2.1-src Nightly: 3f3d305) (2016-08-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5844,7 +5844,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 9de90fc)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3f3d305)';
 
 
 
@@ -7783,6 +7783,7 @@ $.fn.dialogelfinder = function(opts) {
 					handle : '.dialogelfinder-drag',
 					containment : 'window',
 					stop : function() {
+						node.trigger('resize');
 						elfinder.trigger('resize');
 					}
 				})
@@ -9300,6 +9301,8 @@ $.fn.elfindercwd = function(fm, options) {
 				filter     : fileSelector,
 				stop       : trigger,
 				delay      : 250,
+				appendTo   : 'body',
+				autoRefresh: false,
 				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 			},
@@ -9430,6 +9433,8 @@ $.fn.elfindercwd = function(fm, options) {
 							$.extend(bufferExt.attachTmbs, atmb);
 							attachThumbnails();
 						}
+						
+						wrapper.trigger(scrollEvent);
 					};
 				
 				if (! bufferExt.renderd) {
@@ -9939,11 +9944,6 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.row = bufferExt.hpi * col;
 					}
 					bottomMarker.css({top: (bufferExt.hpi * buffer.length + ph) + 'px'}).show();
-					if (wrapper.height() > ph) {
-						// show more items
-						wrapper.trigger(scrollEvent);
-					}
-
 				}
 			},
 			
@@ -10605,11 +10605,6 @@ $.fn.elfindercwd = function(fm, options) {
 		if (mobile) {
 			// for iOS5 bug
 			$('body').on('touchstart touchmove touchend', function(e){});
-		} else {
-			// make files selectable
-			cwd
-				.selectable(selectableOption)
-				.data('selectable', true);
 		}
 		
 		selectCheckbox && cwd.addClass('elfinder-has-checkbox');
@@ -10617,13 +10612,42 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.one('init', function(){
 				var style = document.createElement('style'),
-				sheet;
+				sheet, selRefresh, node, base, resizeTm;
 				document.head.appendChild(style);
 				sheet = style.sheet;
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 0);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
+				if (! mobile) {
+					// make files selectable
+					cwd.selectable(selectableOption)
+						.data('selectable', true);
+					selRefresh = function() {
+						resizeTm && clearTimeout(resizeTm);
+						resizeTm = setTimeout(function() {
+							cwd.selectable('refresh');
+						}, 50);
+					};
+					wrapper.on(scrollEvent, selRefresh);
+					base = $('<div style="position:absolute"/>');
+					node = fm.getUI();
+					node.on('resize', function(e, data) {
+						var offset;
+						if (data && data.fullscreen) {
+							offset = node.offset();
+							if (data.fullscreen === 'on') {
+								base.css({top:offset.top * -1 , left:offset.left * -1 }).appendTo(node);
+								selectableOption.appendTo = base;
+							} else {
+								base.detach();
+								selectableOption.appendTo = 'body';
+							}
+							cwd.selectable('option', {appendTo : selectableOption.appendTo});
+						}
+						selRefresh();
+					});
+				}
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
@@ -18519,27 +18543,28 @@ elFinder.prototype.commands.resize = function() {
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
-					type     = $('input', uitype).attr('disabled', 'disabled')
+					mode     = 'resize',
+					type     = uitype.find('input').prop('disabled', true)
 						.change(function() {
-							var val = $('input:checked', uitype).val();
+							mode = $(this).val();
 							
 							resetView();
 							resizable(true);
 							croppable(true);
 							rotateable(true);
 							
-							if (val == 'resize') {
+							if (mode == 'resize') {
 								uiresize.show();
 								uirotate.hide();
 								uicrop.hide();
 								resizable();
 							}
-							else if (val == 'crop') {
+							else if (mode == 'crop') {
 								uirotate.hide();
 								uiresize.hide();
 								uicrop.show();
 								croppable();
-							} else if (val == 'rotate') {
+							} else if (mode == 'rotate') {
 								uiresize.hide();
 								uicrop.hide();
 								uirotate.show();
@@ -18963,7 +18988,6 @@ elFinder.prototype.commands.resize = function() {
 					},
 					save = function() {
 						var w, h, x, y, d, q;
-						var mode = $('input:checked', uitype).val();
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
@@ -19024,10 +19048,14 @@ elFinder.prototype.commands.resize = function() {
 									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
 										.attr('src', url)
 										.one('load', function() {
-											this.contentDocument.location.reload(true);
-											ifm.one('load', function() {
+											if (this.contentDocument) {
+												this.contentDocument.location.reload(true);
+												ifm.one('load', function() {
+													ifm.remove();
+												});
+											} else {
 												ifm.remove();
-											});
+											}
 										})
 										.appendTo('body');
 								} catch(e) {
@@ -19140,7 +19168,7 @@ elFinder.prototype.commands.resize = function() {
 				} else {
 					control.append($(row), uiresize);
 				}
-				control.find('input,select').attr('disabled', 'disabled');
+				control.find('input,select').prop('disabled', true);
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
 					'<div class="'+hline+' '+hline+'-bottom"/>',
