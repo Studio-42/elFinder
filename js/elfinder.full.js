@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 6a194b6) (2016-08-25)
+ * Version 2.1.14 (2.1-src Nightly: a431f29) (2016-08-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5850,7 +5850,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 6a194b6)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: a431f29)';
 
 
 
@@ -17569,7 +17569,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var fm   = ql.fm,
 				file = e.file,
-				img, loading;
+				url, img, loading, m;
 
 			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
 				// this is our file - stop event propagation
@@ -17577,6 +17577,18 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
+				url = fm.openUrl(file.hash);
+				if (url.indexOf('?') === -1) {
+					url += '?_=';
+				} else {
+					if (m = url.match(/[\?&](_+)=/)) {
+						url += '&' + '_'.repeat(m[1].length + 1) + '=';
+					} else {
+						url += '&_=';
+					}
+				}
+				url += (file.ts || +new Date);
+				
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
@@ -17612,7 +17624,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.on('error', function() {
 						loading.remove();
 					})
-					.attr('src', ql.fm.openUrl(file.hash));
+					.attr('src', url);
 			}
 			
 		});
