@@ -44,7 +44,7 @@ window.elFinder = function(node, opts) {
 		 *
 		 * @type String
 		 **/
-		namespace = 'elfinder-'+(id || Math.random().toString().substr(2, 7)),
+		namespace = 'elfinder-' + (id ? id : Math.random().toString().substr(2, 7)),
 		
 		/**
 		 * Mousedown event
@@ -2037,7 +2037,13 @@ window.elFinder = function(node, opts) {
 		return this.ui[ui] || node;
 	};
 	
-	this.command = function(name) {
+	/**
+	 * Return elFinder.command instance or instances array
+	 *
+	 * @param  String  command name
+	 * @return Object | Array
+	 */
+	this.getCommand = function(name) {
 		return name === void(0) ? this._commands : this._commands[name];
 	};
 	
@@ -2127,13 +2133,14 @@ window.elFinder = function(node, opts) {
 			listeners = {};
 			shortcuts = {};
 			$(window).off('.' + namespace);
-			$(document).add(node).off('.' + namespace);
-			self.trigger = function() { }
-			$(beeper).remove();
-			node.children().remove();
+			$(document).off('.' + namespace);
+			self.trigger = function(){}
 			node.off();
-			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
+			node.removeData();
+			node.empty();
 			node[0].elfinder = null;
+			$(beeper).remove();
+			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
 		}
 	};
 	
@@ -2753,7 +2760,8 @@ window.elFinder = function(node, opts) {
 	
 	// load commands
 	$.each(this.commands, function(name, cmd) {
-		var extendsCmd, opts;
+		var proto = $.extend({}, cmd.prototype),
+			extendsCmd, opts;
 		if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
 			extendsCmd = cmd.prototype.extendsCmd || '';
 			if (extendsCmd) {
@@ -2766,6 +2774,7 @@ window.elFinder = function(node, opts) {
 				cmd.prototype = $.extend({}, base, cmd.prototype);
 			}
 			self._commands[name] = new cmd();
+			cmd.prototype = proto;
 			opts = self.options.commandsOptions[name] || {};
 			if (extendsCmd && self.options.commandsOptions[extendsCmd]) {
 				opts = $.extend(true, {}, self.options.commandsOptions[extendsCmd], opts);

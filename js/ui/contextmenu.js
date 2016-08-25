@@ -207,14 +207,14 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (cmdMap[name]) {
 						name = cmdMap[name];
 					}
-					cmd = fm.command(name);
+					cmd = fm.getCommand(name);
 
 					if (cmd && !isCwd && (!fm.searchStatus.state || !cmd.disableOnSearch)) {
 						cmd.__disabled = cmd._disabled;
 						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
-							if (c = fm.command(n)) {
+							if (c = fm.getCommand(n)) {
 								c.__disabled = c._disabled;
 								c._disabled = !(c.alwaysEnabled || (fm._commands[n] ? $.inArray(n, disabled) === -1 : false));
 							}
@@ -349,7 +349,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						delete cmd.__disabled;
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
-							if (c = fm.command(n)) {
+							if (c = fm.getCommand(n)) {
 								c._disabled = c.__disabled;
 								delete c.__disabled;
 							}

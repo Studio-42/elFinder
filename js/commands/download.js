@@ -12,7 +12,7 @@ elFinder.prototype.commands.download = function() {
 		fm     = this.fm,
 		zipOn  = false,
 		filter = function(hashes, inExec) {
-			var czipdl = (fm.api > 2)? fm.command('zipdl') : null,
+			var czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
 				mixed  = false,
 				croot  = '';
 			
@@ -52,7 +52,7 @@ elFinder.prototype.commands.download = function() {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
 			maxReq = this.options.maxRequests || 10,
-			czipdl = (fm.api > 2)? fm.command('zipdl') : null,
+			czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
 			mixed  = false,
 			croot  = '';
 		

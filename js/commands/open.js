@@ -168,7 +168,7 @@
 						dfrd.reject();
 					}
 				},
-				buttons : (fm.command('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
+				buttons : (fm.getCommand('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
 					{
 						label : 'cmddownload',
 						callback : function() {
