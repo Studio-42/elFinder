@@ -62,27 +62,28 @@ elFinder.prototype.commands.resize = function() {
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
-					type     = $('input', uitype).attr('disabled', 'disabled')
+					mode     = 'resize',
+					type     = uitype.find('input').prop('disabled', true)
 						.change(function() {
-							var val = $('input:checked', uitype).val();
+							mode = $(this).val();
 							
 							resetView();
 							resizable(true);
 							croppable(true);
 							rotateable(true);
 							
-							if (val == 'resize') {
+							if (mode == 'resize') {
 								uiresize.show();
 								uirotate.hide();
 								uicrop.hide();
 								resizable();
 							}
-							else if (val == 'crop') {
+							else if (mode == 'crop') {
 								uirotate.hide();
 								uiresize.hide();
 								uicrop.show();
 								croppable();
-							} else if (val == 'rotate') {
+							} else if (mode == 'rotate') {
 								uiresize.hide();
 								uicrop.hide();
 								uirotate.show();
@@ -506,7 +507,6 @@ elFinder.prototype.commands.resize = function() {
 					},
 					save = function() {
 						var w, h, x, y, d, q;
-						var mode = $('input:checked', uitype).val();
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
@@ -567,10 +567,14 @@ elFinder.prototype.commands.resize = function() {
 									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
 										.attr('src', url)
 										.one('load', function() {
-											this.contentDocument.location.reload(true);
-											ifm.one('load', function() {
+											if (this.contentDocument) {
+												this.contentDocument.location.reload(true);
+												ifm.one('load', function() {
+													ifm.remove();
+												});
+											} else {
 												ifm.remove();
-											});
+											}
 										})
 										.appendTo('body');
 								} catch(e) {
@@ -683,7 +687,7 @@ elFinder.prototype.commands.resize = function() {
 				} else {
 					control.append($(row), uiresize);
 				}
-				control.find('input,select').attr('disabled', 'disabled');
+				control.find('input,select').prop('disabled', true);
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
 					'<div class="'+hline+' '+hline+'-bottom"/>',

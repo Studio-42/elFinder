@@ -504,6 +504,8 @@ $.fn.elfindercwd = function(fm, options) {
 				filter     : fileSelector,
 				stop       : trigger,
 				delay      : 250,
+				appendTo   : 'body',
+				autoRefresh: false,
 				selected   : function(e, ui) { $(ui.selected).trigger(evtSelect); },
 				unselected : function(e, ui) { $(ui.unselected).trigger(evtUnselect); }
 			},
@@ -634,6 +636,8 @@ $.fn.elfindercwd = function(fm, options) {
 							$.extend(bufferExt.attachTmbs, atmb);
 							attachThumbnails();
 						}
+						
+						wrapper.trigger(scrollEvent);
 					};
 				
 				if (! bufferExt.renderd) {
@@ -1143,11 +1147,6 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.row = bufferExt.hpi * col;
 					}
 					bottomMarker.css({top: (bufferExt.hpi * buffer.length + ph) + 'px'}).show();
-					if (wrapper.height() > ph) {
-						// show more items
-						wrapper.trigger(scrollEvent);
-					}
-
 				}
 			},
 			
@@ -1809,11 +1808,6 @@ $.fn.elfindercwd = function(fm, options) {
 		if (mobile) {
 			// for iOS5 bug
 			$('body').on('touchstart touchmove touchend', function(e){});
-		} else {
-			// make files selectable
-			cwd
-				.selectable(selectableOption)
-				.data('selectable', true);
 		}
 		
 		selectCheckbox && cwd.addClass('elfinder-has-checkbox');
@@ -1821,13 +1815,42 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.one('init', function(){
 				var style = document.createElement('style'),
-				sheet;
+				sheet, selRefresh, node, base, resizeTm;
 				document.head.appendChild(style);
 				sheet = style.sheet;
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 0);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
+				if (! mobile) {
+					// make files selectable
+					cwd.selectable(selectableOption)
+						.data('selectable', true);
+					selRefresh = function() {
+						resizeTm && clearTimeout(resizeTm);
+						resizeTm = setTimeout(function() {
+							cwd.selectable('refresh');
+						}, 50);
+					};
+					wrapper.on(scrollEvent, selRefresh);
+					base = $('<div style="position:absolute"/>');
+					node = fm.getUI();
+					node.on('resize', function(e, data) {
+						var offset;
+						if (data && data.fullscreen) {
+							offset = node.offset();
+							if (data.fullscreen === 'on') {
+								base.css({top:offset.top * -1 , left:offset.left * -1 }).appendTo(node);
+								selectableOption.appendTo = base;
+							} else {
+								base.detach();
+								selectableOption.appendTo = 'body';
+							}
+							cwd.selectable('option', {appendTo : selectableOption.appendTo});
+						}
+						selRefresh();
+					});
+				}
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
