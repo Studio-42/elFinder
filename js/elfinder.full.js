@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 3f3d305) (2016-08-25)
+ * Version 2.1.14 (2.1-src Nightly: 6a194b6) (2016-08-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1339,6 +1339,8 @@ window.elFinder = function(node, opts) {
 			syncOnFail = opts.syncOnFail,
 			// use lazy()
 			lazy     = !!opts.lazy,
+			// prepare function before done()
+			prepare  = opts.prepare,
 			// open notify dialog timeout
 			timeout,
 			// request options
@@ -1473,6 +1475,10 @@ window.elFinder = function(node, opts) {
 						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
 					}
 
+					if (typeof prepare === 'function') {
+						prepare(response);
+					}
+					
 					dfrd.resolve(response);
 					response.debug && self.debug('backend-debug', response.debug);
 				};
@@ -5844,7 +5850,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3f3d305)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 6a194b6)';
 
 
 
@@ -19036,7 +19042,15 @@ elFinder.prototype.commands.resize = function() {
 								quality: q,
 								mode   : mode
 							},
-							notify : {type : 'resize', cnt : 1}
+							notify : {type : 'resize', cnt : 1},
+							prepare : function(data) {
+								if (data && data.changed && data.changed.length && data.changed[0].tmb) {
+									data.changed[0].tmb = 1;
+								}
+								if (data && data.added && data.added.length && data.added[0].tmb) {
+									data.added[0].tmb = 1;
+								}
+							}
 						})
 						.fail(function(error) {
 							dfrd.reject(error);

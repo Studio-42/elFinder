@@ -2624,14 +2624,9 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_RESIZE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 
-		if  ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree, $quality)) {
-			if (isset($file['tmb']) && $file['tmb'] != '1') {
-				$file['tmb'] = '1';
-			}
-			return array('changed' => array($file));
-		} else {
-			return array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
-		}
+		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree, $quality))
+			? array('changed' => array($file))
+			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
 	}
 	
 	/**
