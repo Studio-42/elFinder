@@ -24,6 +24,7 @@ elFinder.prototype.commands.resize = function() {
 			api2  = (fm.api > 1),
 			dialogWidth = 650,
 			fmnode = fm.getUI(),
+			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
@@ -42,20 +43,9 @@ elFinder.prototype.commands.resize = function() {
 					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
-					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
-					uibutton    = '<div class="ui-state-default elfinder-button"/>',
-					uiseparator = '<span class="ui-widget-content elfinder-toolbar-button-separator"/>',
-					uirotate    = $('<div class="elfinder-resize-rotate"/>'),
-					uideg270    = $(uibutton).attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')
-						.click(function(){
-							rdegree = rdegree - 90;
-							rotate.update(rdegree);
-						})),
-					uideg90     = $(uibutton).attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')
-						.click(function(){
-							rdegree = rdegree + 90;
-							rotate.update(rdegree);
-						})),
+					uirotate = $('<div class="elfinder-resize-rotate"/>'),
+					uideg270 = $('<button/>').attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')),
+					uideg90  = $('<button/>').attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')),
 					uiprop   = $('<span />'),
 					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
 					uitype   = $('<div class="elfinder-resize-type"/>')
@@ -63,7 +53,7 @@ elFinder.prototype.commands.resize = function() {
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					mode     = 'resize',
-					type     = uitype.find('input').prop('disabled', true)
+					type     = uitype[ctrgrup]()[ctrgrup]('disable').find('input')
 						.change(function() {
 							mode = $(this).val();
 							
@@ -216,7 +206,7 @@ elFinder.prototype.commands.resize = function() {
 
 							setupimg();
 							
-							type.button('enable');
+							uitype[ctrgrup]('enable');
 							inputFirst = control.find('input,select').prop('disabled', false)
 								.filter(':text').keydown(function(e) {
 									var c = e.keyCode, i;
@@ -679,11 +669,19 @@ elFinder.prototype.commands.resize = function() {
 							$(label).text(fm.i18n('rotate')),
 							degree,
 							$('<span/>').text(fm.i18n('degree')),
-							$(uibuttonset).append(uideg270, $(uiseparator), uideg90)
+							$('<div/>').append(uideg270, uideg90)[ctrgrup]()
 						),
 						$(row).css('height', '20px').append(uidegslider),
 						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
 					);
+					uideg270.on('click', function() {
+						rdegree = rdegree - 90;
+						rotate.update(rdegree);
+					});
+					uideg90.on('click', function(){
+						rdegree = rdegree + 90;
+						rotate.update(rdegree);
+					});
 				}
 				
 				dialog.append(uitype).on('resize', function(e){
@@ -695,7 +693,6 @@ elFinder.prototype.commands.resize = function() {
 				} else {
 					control.append($(row), uiresize);
 				}
-				control.find('input,select').prop('disabled', true);
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
 					'<div class="'+hline+' '+hline+'-bottom"/>',
@@ -772,7 +769,9 @@ elFinder.prototype.commands.resize = function() {
 					uitype.find('.api2').remove();
 				}
 				
-				uitype.controlgroup? uitype.controlgroup() : uitype.buttonset();
+				//uitype[ctrgrup]()[ctrgrup]('disable');
+				
+				control.find('input,select').prop('disabled', true);
 
 			},
 			
