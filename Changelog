@@ -1,6 +1,7 @@
 2016-0x-xx  
 
 	* elFinder (2.1.15):
+		- [js:command] inheritable elFinder.command object rel. #1545
 		- [VD:abstract] Fixed #1550 option `uiCmdMap` dose not work on 2.1.14
 		- [VD:abstract] Fixed #1553 root stat not refresh when do chmod of root
 		- [php:core] fix make netkey problem - support multiple array options
@@ -21,6 +22,14 @@
 		- [ui:conttextmenu] Fixed #1578 to the contextmenu draggable
 		- [php,cmd:open] Fixed #1586 RFC7233 violation, add `commandsOptions.open.method`
 		- [ui:navbar,cwd] Fixed #1590 auto scroll on HTML5 native dragging
+		- [VD:Dropbox] Fixed #1596 correction of `basename`, `dirname` on the windows server
+		- [cmd:upload] Fixed #1600 add target folder selector into upload dialog
+		- [ui] Fixed #1609 toast notification on complete of upload/paste into any folder
+		- [cmd:getfile] Fixed #1610 getFileCallback to supports the jQuery.Deferred
+		- [cmd:rename] Fixed #1613 correction of error handling
+		- [js:core] Fixed #1614 correction of upload mixed chunks and normal file
+		- [ui:cwd] Fixed #1615 break the lazy rendering when it delete items
+		- [ui:tree] Fixed #1617 other volumes cmds doesn't work when it disabled in cwd
 		- And some minor bug fixes
 
 2016-07-25  Naoki Sawada  <hypweb@gmail.com>
