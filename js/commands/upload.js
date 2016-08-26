@@ -49,8 +49,8 @@ elFinder.prototype.commands.upload = function() {
 				return tgts;
 			},
 			targets = getTargets(),
-			check  = !targets && data && data.target? [ data.target ] : targets,
-			targetDir = check? fm.file(check[0]) : fm.cwd(),
+			check = !targets && data && data.target? data.target : targets[0],
+			targetDir = check? fm.file(check) : fm.cwd(),
 			fmUpload = function(data) {
 				fm.upload(data)
 					.fail(function(error) {
@@ -71,7 +71,7 @@ elFinder.prototype.commands.upload = function() {
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
-											fm.exec('open', targets[0]).done(function() {
+											fm.exec('open', check).done(function() {
 												fm.one('opendone', function() {
 													fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 												});
