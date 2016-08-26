@@ -1778,8 +1778,9 @@ $.fn.elfindercwd = function(fm, options) {
 			parent = $(this).parent().resize(resize),
 			
 			// workzone node 
-			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker))
-			;
+			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker)),
+			
+			winScrTm;
 
 		// setup by options
 		replacement = $.extend(replacement, options.replacement || {});
@@ -1811,6 +1812,13 @@ $.fn.elfindercwd = function(fm, options) {
 		}
 		
 		selectCheckbox && cwd.addClass('elfinder-has-checkbox');
+		
+		$(window).on('scroll.'+fm.namespace, function() {
+			winScrTm && clearTimeout(winScrTm);
+			winScrTm = setTimeout(function() {
+				wrapper.trigger(scrollEvent);
+			}, 50);
+		});
 		
 		fm
 			.one('init', function(){
