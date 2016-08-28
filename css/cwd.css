@@ -177,6 +177,58 @@
 	background-clip: padding-box;
 }
 
+/* volume icon of root in folder */
+.elfinder-navbar-root-local .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-local.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-local td .elfinder-cwd-icon {
+	background-image:url("../img/volume_icon_local.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-local.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
+.elfinder-cwd-icon.elfinder-navbar-root-ftp,
+.elfinder-cwd .elfinder-navbar-root-ftp.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-ftp td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_ftp.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-ftp.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
+.elfinder-cwd-icon.elfinder-navbar-root-sql,
+.elfinder-cwd .elfinder-navbar-root-sql.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-sql td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_sql.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-sql.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
+.elfinder-cwd-icon.elfinder-navbar-root-dropbox,
+.elfinder-cwd .elfinder-navbar-root-dropbox.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-dropbox td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_dropbox.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-dropbox.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
+.elfinder-cwd-icon.elfinder-navbar-root-googledrive,
+.elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-googledrive td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_googledrive.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
+
 /* thumbnail image */
 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	background-position: center center;
