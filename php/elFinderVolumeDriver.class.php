@@ -190,6 +190,8 @@ abstract class elFinderVolumeDriver {
 		'id'              => '',
 		// root directory path
 		'path'            => '',
+		// Folder hash value on elFinder to be the parent of this volume
+		'phash'           => '',
 		// open this path on initial request instead of root path
 		'startPath'       => '',
 		// how many subdirs levels return per request
