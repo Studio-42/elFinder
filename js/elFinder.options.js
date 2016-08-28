@@ -64,6 +64,14 @@ elFinder.prototype._options = {
 	dragUploadAllow : 'auto',
 	
 	/**
+	 * Confirmation dialog displayed at the time of overwriting upload
+	 * 
+	 * @type Boolean
+	 * @default true
+	 */
+	overwriteUploadConfirm : true,
+	
+	/**
 	 * Max size of chunked data of file upload
 	 * 
 	 * @type Number

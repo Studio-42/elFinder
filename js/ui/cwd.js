@@ -223,6 +223,8 @@ $.fn.elfindercwd = function(fm, options) {
 				},
 				dirclass : function(f) {
 					var cName = f.mime == 'directory' ? 'directory' : '';
+					f.isroot && (cName += ' isroot');
+					f.csscls && (cName += ' ' + fm.escape(f.csscls));
 					options.getClass && (cName += ' ' + options.getClass(f));
 					return cName;
 				},
@@ -849,13 +851,39 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			makeDroppable = function(place) {
-				var targets = (place || cwd).find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
+				place = place? place : (list ? cwd.find('tbody') : cwd);
+				var targets = place.children('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
+
 				if (fm.isCommandEnabled('paste')) {
 					targets.droppable(droppable);
 				}
 				if (fm.isCommandEnabled('upload')) {
 					targets.addClass('native-droppable');
 				}
+				
+				place.children('.isroot').each(function(i, n) {
+					var $n   = $(n),
+						hash = fm.cwdId2Hash(n.id);
+					
+					if (fm.isCommandEnabled('paste', hash)) {
+						if (! $n.hasClass(clDroppable+',elfinder-na,elfinder-ro')) {
+							$n.droppable(droppable);
+						}
+					} else {
+						if ($n.hasClass(clDroppable)) {
+							$n.droppable('destroy');
+						}
+					}
+					if (fm.isCommandEnabled('upload', hash)) {
+						if (! $n.hasClass('native-droppable,elfinder-na,elfinder-ro')) {
+							$n.addClass('native-droppable');
+						}
+					} else {
+						if ($n.hasClass('native-droppable')) {
+							$n.removeClass('native-droppable');
+						}
+					}
+				});
 			},
 			
 			/**
