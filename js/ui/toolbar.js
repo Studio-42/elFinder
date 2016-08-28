@@ -48,7 +48,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				
 				(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
-				self.trigger('load');
+				fm.trigger('toolbarload');
 			},
 			buttons = {},
 			panels   = filter(opts || []),
