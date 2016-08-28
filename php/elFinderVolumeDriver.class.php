@@ -3454,6 +3454,10 @@ abstract class elFinderVolumeDriver {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {
 					if ($ret = $this->sessionCache['rootstat'][$rootKey]) {
+						if (isset($this->options['phash'])) {
+							$ret['isroot'] = 1;
+							$ret['phash'] = $this->options['phash'];
+						}
 						return $ret;
 					}
 				}
@@ -3466,6 +3470,10 @@ abstract class elFinderVolumeDriver {
 			$this->rootModified = false;
 			$this->sessionCache['rootstat'][$rootKey] = $ret;
 			$this->session->set($this->id, $this->sessionCache);
+			if (isset($this->options['phash'])) {
+				$ret['isroot'] = 1;
+				$ret['phash'] = $this->options['phash'];
+			}
 		}
 		return $ret;
 	}
