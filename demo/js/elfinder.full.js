@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 277a339) (2016-08-28)
+ * Version 2.1.14 (2.1-src Nightly: 3d58ac0) (2016-08-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3714,7 +3714,7 @@ elFinder.prototype = {
 							if (data.error) {
 								cancel();
 							} else {
-								if (fm.option('uploadOverwrite', target) && ! fm.UA.iOS) {
+								if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
 									if (data.list) {
 										if ($.isArray(data.list)) {
 											existed = data.list || [];
@@ -3845,7 +3845,7 @@ elFinder.prototype = {
 				if (items.length > 0) {
 					fm.uploads.checkExists(items, target, fm).done(function(renames, hashes){
 						var notifyto, dfds = [];
-						if (fm.option('uploadOverwrite', target) && ! fm.UA.iOS) {
+						if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
 							items = $.map(items, function(item){
 								var i, bak, hash, dfd, hi;
 								if (item.isDirectory) {
@@ -4501,7 +4501,7 @@ elFinder.prototype = {
 						hashes = {};
 						self.uploads.checkExists(files, target, fm).done(
 							function(res, res2){
-								if (fm.option('uploadOverwrite', target) && ! fm.UA.iOS) {
+								if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
 									renames = res;
 									hashes = res2;
 									files = $.map(files, function(file){return !file._remove? file : null ;});
@@ -4657,7 +4657,7 @@ elFinder.prototype = {
 				});
 				cnt = 1;
 			} else if (input && $(input).is(':file') && $(input).val()) {
-				if (fm.option('uploadOverwrite', target) && ! fm.UA.iOS) {
+				if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
 					names = input.files? input.files : [{ name: $(input).val().replace(/^(?:.+[\\\/])?([^\\\/]+)$/, '$1') }];
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
@@ -5896,7 +5896,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 277a339)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3d58ac0)';
 
 
 
@@ -6264,6 +6264,14 @@ elFinder.prototype._options = {
 	 * @default  'auto'
 	 */
 	dragUploadAllow : 'auto',
+	
+	/**
+	 * Confirmation dialog displayed at the time of overwriting upload
+	 * 
+	 * @type Boolean
+	 * @default true
+	 */
+	overwriteUploadConfirm : true,
 	
 	/**
 	 * Max size of chunked data of file upload
@@ -9072,6 +9080,8 @@ $.fn.elfindercwd = function(fm, options) {
 				},
 				dirclass : function(f) {
 					var cName = f.mime == 'directory' ? 'directory' : '';
+					f.isroot && (cName += ' isroot');
+					f.csscls && (cName += ' ' + fm.escape(f.csscls));
 					options.getClass && (cName += ' ' + options.getClass(f));
 					return cName;
 				},
@@ -9698,13 +9708,39 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			makeDroppable = function(place) {
-				var targets = (place || cwd).find('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
+				place = place? place : (list ? cwd.find('tbody') : cwd);
+				var targets = place.children('.directory:not(.'+clDroppable+',.elfinder-na,.elfinder-ro)');
+
 				if (fm.isCommandEnabled('paste')) {
 					targets.droppable(droppable);
 				}
 				if (fm.isCommandEnabled('upload')) {
 					targets.addClass('native-droppable');
 				}
+				
+				place.children('.isroot').each(function(i, n) {
+					var $n   = $(n),
+						hash = fm.cwdId2Hash(n.id);
+					
+					if (fm.isCommandEnabled('paste', hash)) {
+						if (! $n.hasClass(clDroppable+',elfinder-na,elfinder-ro')) {
+							$n.droppable(droppable);
+						}
+					} else {
+						if ($n.hasClass(clDroppable)) {
+							$n.droppable('destroy');
+						}
+					}
+					if (fm.isCommandEnabled('upload', hash)) {
+						if (! $n.hasClass('native-droppable,elfinder-na,elfinder-ro')) {
+							$n.addClass('native-droppable');
+						}
+					} else {
+						if ($n.hasClass('native-droppable')) {
+							$n.removeClass('native-droppable');
+						}
+					}
+				});
 			},
 			
 			/**
