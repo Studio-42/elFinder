@@ -210,6 +210,13 @@ window.elFinder = function(node, opts) {
 		 **/
 		soundPath = './sounds/',
 				
+		/**
+		 * leaf roots cache
+		 * 
+		 * @type Object
+		 */
+		leafRoots = {},
+		
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -341,6 +348,18 @@ window.elFinder = function(node, opts) {
 						});
 						sorterChk = false;
 					}
+					
+					// make or update of leaf roots cache
+					if (f.isroot && f.phash) {
+						if (! leafRoots[f.phash]) {
+							leafRoots[f.phash] = [ f.hash ];
+						} else {
+							if ($.inArray(f.hash, leafRoots[f.phash]) === -1) {
+								leafRoots[f.phash].push(f.hash);
+							}
+						}
+					}
+					
 					files[f.hash] = f;
 				} 
 			}
@@ -954,14 +973,7 @@ window.elFinder = function(node, opts) {
 	 */
 	this.root = function(hash) {
 		hash = hash || cwd;
-		var dir = files[hash], i;
-		
-		while (dir && dir.phash) {
-			dir = files[dir.phash]
-		}
-		if (dir) {
-			return dir.hash;
-		}
+		var dir, i;
 		
 		$.each(self.roots, function(id, rhash) {
 			if (hash.indexOf(id) === 0) {
@@ -971,6 +983,14 @@ window.elFinder = function(node, opts) {
 		});
 		if (dir) {
 			return dir;
+		}
+		
+		dir = files[hash];
+		while (dir && dir.phash && ! dir.isroot) {
+			dir = files[dir.phash]
+		}
+		if (dir) {
+			return dir.hash;
 		}
 		
 		while (i in files && files.hasOwnProperty(i)) {
@@ -1056,7 +1076,7 @@ window.elFinder = function(node, opts) {
 			
 		while (hash && (file = files[hash]) && file.hash) {
 			path.unshift(i18 && file.i18 ? file.i18 : file.name);
-			hash = file.phash;
+			hash = file.isroot? null : file.phash;
 		}
 			
 		return path;
@@ -1437,6 +1457,23 @@ window.elFinder = function(node, opts) {
 				}
 				
 				var resolve = function() {
+					var pushLeafRoots = function(name) {
+						if (leafRoots[data.target] && response[name]) {
+							$.each(leafRoots[data.target], function(i, h) {
+								var root;
+								if (root = self.file(h)) {
+									response[name].push(root);
+								}
+							});
+						}
+					};
+					
+					if (isOpen) {
+						pushLeafRoots('files');
+					} else if (cmd === 'tree') {
+						pushLeafRoots('tree');
+					}
+					
 					response = self.normalize(response);
 
 					if (!self.api) {
@@ -1614,7 +1651,7 @@ window.elFinder = function(node, opts) {
 		// find removed
 		$.each(files, function(hash, f) {
 			if (!onlydir || f.phash === onlydir) {
-				!raw[hash] && removed.push(hash);
+				!raw[hash] && (! f.isroot || ! f.phash) && removed.push(hash);
 			}
 		});
 		
@@ -4861,7 +4898,7 @@ elFinder.prototype = {
 									self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
 								}
 							}
-							if (! file.phash) {
+							if (! file.phash || file.isroot) {
 								self.roots[file.volumeid] = file.hash;
 							}
 							
