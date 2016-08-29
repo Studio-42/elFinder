@@ -23,6 +23,7 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 	 */
 	public function __construct() {
 		$this->options = array(
+			'type' => 'group',
 			'path' => '/',
 			'disabled' => array(
 				'archive',
@@ -114,11 +115,11 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 	protected function _stat($path) {
 		if ($path === '/') {
 			return array(
-				'size' => 0,
-				'ts' => time(),
-				'mime' => 'directory',
-				'read' => true,
-				'write' => false,
+				'size'   => 0,
+				'ts'     => time(),
+				'mime'   => 'directory',
+				'read'   => true,
+				'write'  => false,
 				'locked' => true,
 				'hidden' => false
 			);
