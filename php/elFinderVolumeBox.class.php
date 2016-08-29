@@ -1555,7 +1555,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 
 			$url = self::UPLOAD_URL . '/files/content?'. json_encode($data)
             		. '&access_token=' . urlencode($this->box->token->data->access_token);
-			debug($url);
+			
         	$curl  = $this->_prepareCurl();
         	$stats = fstat($stream);
 						
