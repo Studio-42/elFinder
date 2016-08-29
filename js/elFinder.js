@@ -5609,6 +5609,11 @@ elFinder.prototype = {
 		} else if (!o.write) {
 			c = 'elfinder-ro';
 		}
+		
+		if (o.type) {
+			c += ' elfinder-' + this.escape(o.type);
+		}
+		
 		return c;
 	},
 	
