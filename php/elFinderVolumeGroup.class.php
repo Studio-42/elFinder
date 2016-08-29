@@ -22,19 +22,24 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 	 * Extend options with required fields
 	 */
 	public function __construct() {
-		$this->options['path'] = '/';
-	}
-	
-	/*********************************************************************/
-	/*                            INITIALIZATION                         */
-	/*********************************************************************/
-	
-	/**
-	 * {@inheritDoc}
-	 **/
-	protected function init() {
-		$this->options['path'] = '/';
-		return true;
+		$this->options = array(
+			'path' => '/',
+			'disabled' => array(
+				'archive',
+				'cut',
+				'duplicate',
+				'edit',
+				'extract',
+				'getfile',
+				'mkdir',
+				'mkfile',
+				'paste',
+				'rename',
+				'resize',
+				'rm',
+				'upload'
+			)
+		);
 	}
 	
 	/*********************************************************************/
