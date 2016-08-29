@@ -188,6 +188,8 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $options = array(
 		'id'              => '',
+		// driver type it uses volume root's CSS class name. e.g. 'group' -> Adds 'elfinder-group' to CSS class name.
+		'type'            => '',
 		// root directory path
 		'path'            => '',
 		// Folder hash value on elFinder to be the parent of this volume
@@ -3559,6 +3561,9 @@ abstract class elFinderVolumeDriver {
 		$stat['write'] = intval($this->attr($path, 'write', isset($stat['write']) ? !!$stat['write'] : null, $isDir));
 		if ($root) {
 			$stat['locked'] = 1;
+			if ($this->options['type'] !== '') {
+				$stat['type'] = $this->options['type'];
+			}
 		} else {
 			// lock when parent directory is not writable
 			if (!isset($stat['locked'])) {
