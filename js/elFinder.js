@@ -1503,7 +1503,7 @@ window.elFinder = function(node, opts) {
 					}
 					
 					dfrd.resolve(response);
-					response.debug && self.debug('backend-debug', response.debug);
+					response.debug && self.debug('backend-debug', response);
 				};
 				
 				lazy? self.lazy(resolve) : resolve();
@@ -3981,6 +3981,7 @@ elFinder.prototype = {
 							data.changed && self.change(data);
 		 					self.trigger('upload', data);
 							data.sync && self.sync();
+							data.debug && fm.debug('backend-debug', data);
 						}
 					})
 					.always(function() {
@@ -5829,6 +5830,11 @@ elFinder.prototype = {
 		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
+		
+		if (type === 'backend-debug') {
+			this.trigger('backenddebug', m);
+		}
+		
 		return this;
 	},
 	time : function(l) { window.console && window.console.time && window.console.time(l); },
