@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2016-07-09
+ * @version 2016-08-30
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pl = {
@@ -41,7 +41,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errWrite'             : 'Nie można zapisać do "$1".',
 			'errPerm'              : 'Brak uprawnień.',
 			'errLocked'            : '"$1" jest zablokowany i nie może zostać zmieniony, przeniesiony lub usunięty.',
-			'errExists'            : 'Plik o nazwie "$1" już istnieje.',
+			'errExists'            : 'Plik "$1" już istnieje.',
 			'errInvName'           : 'Nieprawidłowa nazwa pliku.',
 			'errFolderNotFound'    : 'Katalog nie został znaleziony.',
 			'errFileNotFound'      : 'Plik nie został znaleziony.',
@@ -130,12 +130,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Widok',
 			'cmdresize'    : 'Zmień rozmiar obrazu',
 			'cmdsort'      : 'Sortuj',
-			'cmdnetmount'  : 'Zamontuj album sieciowy', // added 18.04.2012
+			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
 			'cmdnetunmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'Do Miejsc', // added 28.12.2014
 			'cmdchmod'     : 'Zmiana trybu', // from v2.1 added 20.6.2015
-			'cmdopendir'   : 'Otwieranie katalogu', // from v2.1 added 13.1.2016
-			'cmdcolwidth'  : 'Zresetuj szerokość kolumny', // from v2.1.13 added 12.06.2016
+			'cmdopendir'   : 'Otwórz katalog', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
+			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -145,12 +146,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Anuluj',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Tak',
-			'btnMount'  : 'Montuj',  // added 18.04.2012
+			'btnMount'  : 'Montaż',  // added 18.04.2012
 			'btnApprove': 'Idź do $1 & zatwierdź', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Konwertuj', // from v2.1 added 08.04.2014
 			'btnCwd'    : 'Tutaj',      // from v2.1 added 22.5.2015
-			'btnVolume' : 'Album',    // from v2.1 added 22.5.2015
+			'btnVolume' : 'Volume',    // from v2.1 added 22.5.2015
 			'btnAll'    : 'Wszystko',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'Typ MIME', // from v2.1 added 22.5.2015
 			'btnFileName':'Nazwa pliku',  // from v2.1 added 22.5.2015
@@ -177,12 +178,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfresize'   : 'Zmiana rozmiaru obrazów',
 			'ntfsmth'     : 'Robienie czegoś >_<',
 			'ntfloadimg'  : 'Ładowanie obrazu',
-			'ntfnetmount' : 'Montaż albumu sieciowego', // added 18.04.2012
-			'ntfnetunmount': 'Demontaż albumu sieciowego', // from v2.1 added 30.04.2012
+			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
+			'ntfnetunmount': 'Unmounting network volume', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Pozyskiwanie wymiaru obrazu', // added 20.05.2013
 			'ntfreaddir'  : 'Odczytywanie informacji katalogu', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Pobieranie URL linku', // from v2.1 added 11.03.2014
-			'ntfchmod'    : 'Zmiana trybu pliku', // from v2.1 added 20.6.2015
+			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Weryfikacja nazwy przesłanego pliku', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Tworzenie pliku do pobrania', // from v2.1.7 added 23.1.2016
 
@@ -190,18 +191,18 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'dateUnknown' : 'nieznana',
 			'Today'       : 'Dzisiaj',
 			'Yesterday'   : 'Wczoraj',
-			'msJan'       : 'Sty',
-			'msFeb'       : 'Lut',
-			'msMar'       : 'Mar',
-			'msApr'       : 'Kwi',
-			'msMay'       : 'Maj',
-			'msJun'       : 'Cze',
-			'msJul'       : 'Lip',
-			'msAug'       : 'Sie',
-			'msSep'       : 'Wrz',
-			'msOct'       : 'Paź',
-			'msNov'       : 'Lis',
-			'msDec'       : 'Gru',
+			'msJan'       : 'sty',
+			'msFeb'       : 'lut',
+			'msMar'       : 'mar',
+			'msApr'       : 'kwi',
+			'msMay'       : 'maj',
+			'msJun'       : 'cze',
+			'msJul'       : 'lip',
+			'msAug'       : 'sie',
+			'msSep'       : 'wrz',
+			'msOct'       : 'paź',
+			'msNov'       : 'lis',
+			'msDec'       : 'gru',
 			'January'     : 'Styczeń',
 			'February'    : 'Luty',
 			'March'       : 'Marzec',
@@ -214,31 +215,32 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'October'     : 'Październik',
 			'November'    : 'Listopad',
 			'December'    : 'Grudzień',
-			'Sunday'      : 'Niedziela',
-			'Monday'      : 'Poniedziałek',
-			'Tuesday'     : 'Wtorek',
-			'Wednesday'   : 'Środa',
-			'Thursday'    : 'Czwartek',
-			'Friday'      : 'Piątek',
-			'Saturday'    : 'Sobota',
-			'Sun'         : 'Nie',
-			'Mon'         : 'Pon',
-			'Tue'         : 'Wto',
-			'Wed'         : 'Śro',
-			'Thu'         : 'Czw',
-			'Fri'         : 'Pią',
-			'Sat'         : 'Sob',
+			'Sunday'      : 'niedziela',
+			'Monday'      : 'poniedziałek',
+			'Tuesday'     : 'wtorek',
+			'Wednesday'   : 'środa',
+			'Thursday'    : 'czwartek',
+			'Friday'      : 'piątek',
+			'Saturday'    : 'sobota',
+			'Sun'         : 'nie',
+			'Mon'         : 'pon',
+			'Tue'         : 'wto',
+			'Wed'         : 'śro',
+			'Thu'         : 'czw',
+			'Fri'         : 'pią',
+			'Sat'         : 'sob',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'w/g nazwy',
-			'sortkind'          : 'w/g typu',
-			'sortsize'          : 'w/g rozmiaru',
-			'sortdate'          : 'w/g daty',
-			'sortFoldersFirst'  : 'Katalogi pierwsze',
-			'sortperm'          : 'w/g uprawnień', // from v2.1.13 added 13.06.2016
-			'sortmode'          : 'w/g trybu',       // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'w/g właściciela',      // from v2.1.13 added 13.06.2016
-			'sortgroup'         : 'w/g grup',      // from v2.1.13 added 13.06.2016
+			'sortname'          : 'po nazwie',
+			'sortkind'          : 'po typie',
+			'sortsize'          : 'po rozmiarze',
+			'sortdate'          : 'po dacie',
+			'sortFoldersFirst'  : 'katalogi pierwsze',
+			'sortperm'          : 'by permission', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
@@ -269,14 +271,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'viewlist'        : 'Widok listy',
 			'viewicons'       : 'Widok ikon',
 			'places'          : 'Ulubione',
-			'calc'            : 'Obliczanie',
+			'calc'            : 'Oblicz',
 			'path'            : 'Ścieżka',
 			'aliasfor'        : 'Alias do',
 			'locked'          : 'Zablokowany',
 			'dim'             : 'Wymiary',
 			'files'           : 'Pliki',
 			'folders'         : 'katalog',
-			'items'           : 'Element(ów)',
+			'items'           : 'Elementy',
 			'yes'             : 'tak',
 			'no'              : 'nie',
 			'link'            : 'Odnośnik',
@@ -293,7 +295,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'github'          : 'Obserwuj rozwój projektu na Github',
 			'twitter'         : 'Śledź nas na Twitterze',
 			'facebook'        : 'Dołącz do nas na Facebooku',
-			'team'            : 'Zespół',
+			'team'            : 'Autorzy',
 			'chiefdev'        : 'główny programista',
 			'developer'       : 'programista',
 			'contributor'     : 'współautor',
@@ -318,7 +320,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Obróć 90° w lewo',
 			'rotate-ccw'      : 'Obróć 90° w prawo',
 			'degree'          : '°',
-			'netMountDialogTitle' : 'Montaż albumu sieciowego', // added 18.04.2012
+			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
 			'protocol'            : 'Protokół', // added 18.04.2012
 			'host'                : 'Host', // added 18.04.2012
 			'port'                : 'Port', // added 18.04.2012
@@ -352,12 +354,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'openMulti'       : 'Otwieranie wielu plików', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'Próbujesz otworzyć $1 plików. Czy na pewno chcesz, aby otworzyć w przeglądarce?', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : 'Wyniki wyszukiwania jest pusty', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'Edytujesz plik.', // from v2.1.13 added 6.3.2016
-			'hasSelected'     : 'Wybrałeś $1 pozycji.', // from v2.1.13 added 6.3.2016
-			'hasClipboard'    : 'Masz $1 pozycji w schowku.', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : 'Wyszukiwanie przyrostowe jest tylko w bieżącym widoku.', // from v2.1.13 added 6.30.2016
+			'editingFile'     : 'You are editing a file.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 
-			/********************************** mimetypes *********************************/
+			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
 			'kindFolder'      : 'Katalog',
 			'kindAlias'       : 'Alias',
@@ -380,7 +384,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindXZ'          : 'Archiwum XZ',
 			'kindZIP'         : 'Archiwum ZIP',
 			'kindRAR'         : 'Archiwum RAR',
-			'kindJAR'         : 'Plik Java JAR',
+			'kindJAR'         : 'Java JAR file',
 			'kindTTF'         : 'Czcionka TrueType',
 			'kindOTF'         : 'Czcionka OpenType',
 			'kindRPM'         : 'Pakiet RPM',
@@ -406,7 +410,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'Kod źródłowy AWK',
 			'kindCSV'         : 'Tekst rozdzielany przecinkami CSV',
 			'kindDOCBOOK'     : 'Dokument Docbook XML',
-			'kindMarkdown'    : 'Tekst promocji', // added 20.7.2015
+			'kindMarkdown'    : 'Markdown text', // added 20.7.2015
 			// images
 			'kindImage'       : 'Obraz',
 			'kindBMP'         : 'Obraz BMP',
