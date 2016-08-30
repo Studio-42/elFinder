@@ -167,7 +167,7 @@
 
 		self.debug = {};
 
-		fm.bind('open', function(e) {
+		fm.bind('backenddebug', function(e) {
 			var tabDebug = content.find('.elfinder-help-tab-debug');
 			if (e.data && e.data.debug) {
 				tabDebug.show();
