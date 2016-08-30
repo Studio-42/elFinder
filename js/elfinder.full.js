@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 445ec2a) (2016-08-29)
+ * Version 2.1.14 (2.1-src Nightly: adfc1b0) (2016-08-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1517,7 +1517,7 @@ window.elFinder = function(node, opts) {
 					}
 					
 					dfrd.resolve(response);
-					response.debug && self.debug('backend-debug', response.debug);
+					response.debug && self.debug('backend-debug', response);
 				};
 				
 				lazy? self.lazy(resolve) : resolve();
@@ -3995,6 +3995,7 @@ elFinder.prototype = {
 							data.changed && self.change(data);
 		 					self.trigger('upload', data);
 							data.sync && self.sync();
+							data.debug && fm.debug('backend-debug', data);
 						}
 					})
 					.always(function() {
@@ -5843,6 +5844,11 @@ elFinder.prototype = {
 		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
+		
+		if (type === 'backend-debug') {
+			this.trigger('backenddebug', m);
+		}
+		
 		return this;
 	},
 	time : function(l) { window.console && window.console.time && window.console.time(l); },
@@ -5901,7 +5907,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 445ec2a)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: adfc1b0)';
 
 
 
@@ -10226,7 +10232,8 @@ $.fn.elfindercwd = function(fm, options) {
 					bufferExt = {
 						renderd: 0,
 						attachTmbs: {},
-						getTmbs: []
+						getTmbs: [],
+						lazyOpts: { tm : 0 }
 					};
 					
 					wz[(buffer.length < 1) ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-empty');
@@ -10607,10 +10614,17 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
-					bufferExt.scrollTimer && clearTimeout(bufferExt.scrollTimer);
-					bufferExt.scrollTimer = setTimeout(function() {
+					bufferExt.seltm && clearTimeout(bufferExt.seltm);
+					bufferExt.scrtm && clearTimeout(bufferExt.scrtm);
+					if (bufferExt.scrtm && Math.abs((bufferExt.scrolltop || 0) - (bufferExt.scrolltop = $(this).scrollTop())) < 2) {
+						bufferExt.scrtm = 0;
 						wrapper.trigger(scrollEvent);
-					}, 50);
+					} else {
+						bufferExt.scrtm = setTimeout(function() {
+							bufferExt.scrtm = 0;
+							wrapper.trigger(scrollEvent);
+						}, 100);
+					}
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
@@ -10725,12 +10739,17 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.selectable(selectableOption)
 						.data('selectable', true);
 					selRefresh = function() {
-						resizeTm && clearTimeout(resizeTm);
-						resizeTm = setTimeout(function() {
-							cwd.selectable('refresh');
-						}, 50);
+						bufferExt.seltm && clearTimeout(bufferExt.seltm);
+						bufferExt.seltm = 0;
+						cwd.selectable('enable').selectable('refresh');
 					};
-					wrapper.on(scrollEvent, selRefresh);
+					wrapper.on(scrollEvent, function() {
+						cwd.off('mousedown', selRefresh).one('mousedown', selRefresh);
+						bufferExt.seltm = setTimeout(function() {
+							cwd.off('mousedown', selRefresh);
+							selRefresh();
+						}, 2000);
+					});
 					base = $('<div style="position:absolute"/>');
 					node = fm.getUI();
 					node.on('resize', function(e, data) {
@@ -15878,7 +15897,7 @@ elFinder.prototype.commands.fullscreen = function() {
 
 		self.debug = {};
 
-		fm.bind('open', function(e) {
+		fm.bind('backenddebug', function(e) {
 			var tabDebug = content.find('.elfinder-help-tab-debug');
 			if (e.data && e.data.debug) {
 				tabDebug.show();
