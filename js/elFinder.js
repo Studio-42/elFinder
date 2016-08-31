@@ -1412,6 +1412,12 @@ window.elFinder = function(node, opts) {
 						break;
 					case 'parsererror': 
 						error = ['errResponse', 'errDataNotJSON'];
+						if (xhr.responseText) {
+							self.debug('backend-debug', { debug: {phpErrors: [ xhr.responseText] }});
+							if (! cwd) {
+								xhr.responseText && error.push(xhr.responseText);
+							}
+						}
 						break;
 					default:
 						if (xhr.status == 403) {
