@@ -587,7 +587,7 @@ $.fn.elfindertree = function(fm, opts) {
 								delete cwd.isroot;
 								delete cwd.phash;
 							}
-							dirs = $.merge(dirs, treeDirs);
+							dirs = JSON.parse(JSON.stringify($.merge(dirs, treeDirs)));
 							updateTree(dirs);
 							updateArrows(dirs, loaded);
 							
@@ -765,7 +765,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
-								updateTree(filter(data.tree)); 
+								updateTree(JSON.parse(JSON.stringify(filter(data.tree)))); 
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
