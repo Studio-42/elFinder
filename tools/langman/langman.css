@@ -37,3 +37,6 @@ div.checkbtn input,
 div.checkbtn select {
 	font-size: 120%;
 }
+div.makebtn button {
+	font-size: 110%;
+}
