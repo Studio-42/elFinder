@@ -146,7 +146,7 @@
 				if (navmove) {
 					return;
 				}
-				
+
 				var win     = self.window,
 					full    = win.hasClass(fullscreen),
 					$window = $(window),
@@ -154,7 +154,7 @@
 					
 				e.stopPropagation();
 				e.preventDefault();
-				
+
 				if (full) {
 					navStyle = '';
 					navShow();
@@ -197,7 +197,7 @@
 							}
 						}
 					}).show().trigger('mousemove');
-					
+
 					navbar.on('mouseenter mouseleave', function(e) {
 						if (! navdrag) {
 							if (e.type === 'mouseenter') {
@@ -239,7 +239,7 @@
 
 				win.trigger('viewchange');
 			}),
-		
+
 		navShow = function() {
 			if (self.window.hasClass(fullscreen)) {
 				navtm && clearTimeout(navtm);
@@ -250,13 +250,13 @@
 				coverHide();
 			}
 		},
-		
+
 		coverHide = function() {
 			cover.data('tm') && clearTimeout(cover.data('tm'));
 			cover.removeData('tm');
 			cover.hide();
 		},
-			
+
 		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }),
 		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }),
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
@@ -306,7 +306,7 @@
 				if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
 					next.css('visibility', 'hidden');
 				}
-				
+
 				info.html(
 						tpl.replace(/\{value\}/, fm.escape(file.name))
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
@@ -329,7 +329,7 @@
 				if (self.window.hasClass(fullscreen)) {
 					cover.trigger('mousemove');
 				}
-			} else { 
+			} else {
 				e.stopImmediatePropagation();
 			}
 		});
@@ -343,6 +343,12 @@
 		.on('click', function(e) { e.stopPropagation();  })
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
+			.mouseenter(function () {
+				$(this).css({opacity: 1.0});	// animate seems to mess this up
+			})
+			.mouseleave(function () {
+				$(this).css({opacity: 0.0})
+			})
 			.append(
 				title,
 				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
@@ -477,7 +483,7 @@
 			if (fm.zIndex) {
 				win.css('z-index', fm.zIndex + 1);
 			}
-			
+
 			win.appendTo(parent);
 			
 			// close window on escape
@@ -523,7 +529,7 @@
 				self.dispInlineRegex = /.*/;
 			}
 		});
-		
+
 		fm.bind('destroy', function() {
 			self.window.remove();
 		});

@@ -10,6 +10,11 @@
 	right:auto;
 }
 
+/* position getting overwritten as relative by jquery-ui 1.10 */
+.std42-dialog.elfinder-dialog {
+	position:absolute;
+}
+
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
 	border-left:0 solid transparent;
@@ -99,11 +104,11 @@
 
 /*********************** ERROR DIALOG **************************/
 
-.elfinder-dialog-error .ui-dialog-content,
-.elfinder-dialog-confirm .ui-dialog-content { padding-left: 56px; min-height:35px; }
+.ui-dialog.elfinder-dialog-error .ui-dialog-content,
+.ui-dialog.elfinder-dialog-confirm .ui-dialog-content { padding-left: 56px; min-height:35px; }
 
-.elfinder-rtl .elfinder-dialog-error .ui-dialog-content,
-.elfinder-rtl .elfinder-dialog-confirm .ui-dialog-content { padding-left:0; padding-right: 56px; }
+.elfinder-rtl .ui-dialog.elfinder-dialog-error .ui-dialog-content,
+.elfinder-rtl .ui-dialog.elfinder-dialog-confirm .ui-dialog-content { padding-left:0; padding-right: 56px; }
 
 /*********************** NOTIFY DIALOG **************************/
 
