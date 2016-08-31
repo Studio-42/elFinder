@@ -986,13 +986,20 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
             $path = $this->decode($hash);                 
 			
 			$itemId = basename($path);
-			$file  = $this->query($itemId,$fetch_self =true);
-			$url = self::API_URL . '/files/' . $itemId . '/content'
+			$params['shared_link']['access'] = 'open'; //open|company|collaborators
+						
+			$url = self::API_URL . '/files/' . $itemId
             		. '?access_token=' . urlencode($this->box->token->data->access_token);
+					
+			$curl = $this->_prepareCurl();			
+			curl_setopt($curl, CURLOPT_URL, $url);		
+			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
+			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
+			$res = json_decode(curl_exec($curl));
+			curl_close($curl);
 			
-			$res = $this->_createCurl($url, true);
-			if($res) {						
-				return $res;					
+			if($res->shared_link->url) {						
+				return $res->shared_link->url;					
 			}
 			             							
 		}
