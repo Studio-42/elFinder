@@ -98,10 +98,14 @@
 			var render = function(elm, obj) {
 				$.each(obj, function(k, v) {
 					elm.append($('<dt/>').text(k));
-					if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
+					if (typeof v === 'undefined') {
+						elm.append($('<dd/>').append($('<span/>').text('undfined')));
+					} else if (typeof v === 'object' && !v) {
+						elm.append($('<dd/>').append($('<span/>').text('null')));
+					} else if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
 						elm.append( $('<dd/>').append(render($('<dl/>'), v)));
 					} else {
-						elm.append($('<dd/>').append($('<span/>').text((typeof v === 'object')? '[]' : (v? v : '""'))));
+						elm.append($('<dd/>').append($('<span/>').text((v && typeof v === 'object')? '[]' : (v? v : '""'))));
 					}
 				});
 				return elm;
