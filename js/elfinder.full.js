@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: adfc1b0) (2016-08-30)
+ * Version 2.1.14 (2.1-src Nightly: 8380d01) (2016-08-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -330,9 +330,9 @@ window.elFinder = function(node, opts) {
 
 			self.sorters = [];
 			cwd = data.cwd.hash;
-			cache(JSON.parse(JSON.stringify(data.files)));
+			cache(data.files);
 			if (!files[cwd]) {
-				cache([JSON.parse(JSON.stringify(data.cwd))]);
+				cache([data.cwd]);
 			}
 			self.lastDir(cwd);
 			
@@ -1457,6 +1457,7 @@ window.elFinder = function(node, opts) {
 				self.currentReqCmd = cmd;
 				
 				if (raw) {
+					response && response.debug && self.debug('backend-debug', response);
 					return dfrd.resolve(response);
 				}
 				
@@ -2690,7 +2691,7 @@ window.elFinder = function(node, opts) {
 			})
 		})
 		.add(function(e) {
-			cache(e.data.added||[]);
+			cache(e.data.added || []);
 		})
 		.change(function(e) {
 			$.each(e.data.changed||[], function(i, file) {
@@ -2738,7 +2739,7 @@ window.elFinder = function(node, opts) {
 		})
 		.bind('search', function(e) {
 			self.searchStatus.state = 2;
-			cache(e.data.files);
+			cache(e.data.files || []);
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
@@ -3017,7 +3018,6 @@ window.elFinder = function(node, opts) {
 			}
 			
 			self.load().debug('api', self.api);
-			data = $.extend(true, {}, data);
 			open(data);
 			self.trigger('open', data);
 		});
@@ -5907,7 +5907,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: adfc1b0)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 8380d01)';
 
 
 
@@ -13619,7 +13619,7 @@ $.fn.elfindertree = function(fm, opts) {
 								delete cwd.isroot;
 								delete cwd.phash;
 							}
-							dirs = $.merge(dirs, treeDirs);
+							dirs = JSON.parse(JSON.stringify($.merge(dirs, treeDirs)));
 							updateTree(dirs);
 							updateArrows(dirs, loaded);
 							
@@ -13797,7 +13797,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
-								updateTree(filter(data.tree)); 
+								updateTree(JSON.parse(JSON.stringify(filter(data.tree)))); 
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
@@ -15760,7 +15760,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push('<div id="'+fm.namespace+'-help-about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
-			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': <span id="apiver"></span></div>');
+			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+', '+fm.i18n('protocolver')+': <span class="apiver"></span></div>');
 			html.push('<div class="'+sec+'">jQuery/jQuery UI: '+$().jquery+'/'+$.ui.version+'</div>');
 
 			html.push(sep);
@@ -15820,7 +15820,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		debug = function() {
 			// debug tab
 			html.push('<div id="'+fm.namespace+'-help-debug" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
-			html.push('<div class="ui-widget-content elfinder-help-debug"></div>');
+			html.push('<div class="ui-widget-content elfinder-help-debug"><ul></ul></div>');
 			html.push('</div>');
 			// end debug
 		},
@@ -15836,19 +15836,37 @@ elFinder.prototype.commands.fullscreen = function() {
 				});
 				return elm;
 			},
-			target = content.find('#'+fm.namespace+'-help-debug').find('div:first').empty(),
+			cnt = debugUL.children('li').length,
+			targetL, target, tabId,
 			info;
 			
-			if (self.debug.options) {
-				info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), self.debug.options));
-				target.append(info);
-			}
-			if (self.debug.debug) {
-				info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), self.debug.debug));
-				target.append(info);
+			if (self.debug.options || self.debug.debug) {
+				if (cnt >= 5) {
+					debugUL.children('li:last').remove();
+					debugDIV.children('div:last').remove();
+				}
+				
+				tabId = fm.namespace + '-help-debug-' + (+new Date());
+				targetL = $('<li/>').html('<a href="#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
+				target = $('<div id="'+tabId+'"/>');
+				
+				if (self.debug.debug) {
+					info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), self.debug.debug));
+					target.append(info);
+				}
+				if (self.debug.options) {
+					info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), self.debug.options));
+					target.append(info);
+				}
+				
+				debugUL.after(target);
+				
+				debugDIV.tabs('refresh');
+				debugUL.find('a:first').click();
 			}
 		},
-		content = '';
+		content = '',
+		debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -15889,26 +15907,32 @@ elFinder.prototype.commands.fullscreen = function() {
 				
 				if (!link.hasClass('ui-tabs-selected')) {
 					link.parent().addClass('ui-tabs-selected ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
-					content.find('.ui-tabs-panel').hide().filter(link.attr('href')).show();
+					content.children('.ui-tabs-panel').hide().filter(link.attr('href')).show();
 				}
 				
 			})
 			.filter(':first').click();
+		
+		// debug
+		debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
+		debugUL = debugDIV.children('ul:first');
 
 		self.debug = {};
 
 		fm.bind('backenddebug', function(e) {
 			var tabDebug = content.find('.elfinder-help-tab-debug');
+			// CAUTION: DO NOT TOUCH `e.data`
 			if (e.data && e.data.debug) {
 				tabDebug.show();
-				self.debug = { options : e.data.options, debug : e.data.debug };
-				if (self.dialog && self.dialog.is(':visible')) {
+				self.debug = { options : e.data.options, debug : $.extend({ cmd : fm.currentReqCmd }, e.data.debug) };
+				if (self.dialog/* && self.dialog.is(':visible')*/) {
 					debugRender();
 				}
-			} else {
-				tabDebug.hide();
 			}
 		});
+
+		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
+		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false});
 	});
 	
 	this.getstate = function() {
@@ -15916,13 +15940,6 @@ elFinder.prototype.commands.fullscreen = function() {
 	};
 	
 	this.exec = function() {
-		if (!this.dialog) {
-			content.find('#apiver').text(this.fm.api);
-			this.dialog = this.fm.dialog(content, {title : this.title, width : 530, autoOpen : false, destroyOnClose : false});
-		}
-
-		debugRender();
-
 		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	};
 
