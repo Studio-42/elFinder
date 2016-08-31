@@ -998,10 +998,23 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 			$res = json_decode(curl_exec($curl));
 			curl_close($curl);
 			
-			if($res->shared_link->url) {						
-				return $res->shared_link->url;					
+			$fExtension = pathinfo($res->name, PATHINFO_EXTENSION);	
+			$fType = explode('/',parent::$mimetypes[strtolower($fExtension)])[0];
+			
+			if($res->shared_link->url && ($fType == 'image' || $fType == 'video')) {
+				if($fExtension == 'jpg' && $fType == 'image'){
+					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/image_2048_'.$fExtension.'/1.'.$fExtension.'?shared_name='.basename($res->shared_link->url);
+					return $url;					
+				}elseif($fExtension !== 'jpg' && $fType == 'image') {										
+					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/image_2048/1.'.$fExtension.'?shared_name='.basename($res->shared_link->url);			
+					return $url;
+				}elseif($fType == 'video'){				
+					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/video_480.'.$fExtension.'?shared_name='.basename($res->shared_link->url);
+					return $url;						
+				}				
+			}elseif($res->shared_link->url) {						
+				return $res->shared_link->url;			
 			}
-			             							
 		}
 		
 		return $file['url'];
