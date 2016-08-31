@@ -140,7 +140,7 @@
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
-	this.state = 0;
+	this.state = -1;
 	
 	this.shortcuts = [{
 		pattern     : 'f1',
@@ -203,6 +203,8 @@
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
 		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false});
+		
+		self.state = 0;
 	});
 	
 	this.getstate = function() {
