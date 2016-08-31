@@ -3,11 +3,12 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
+ * @author Bogusław Zięba <bobi@poczta.fm>
  * @version 2016-08-30
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
 		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
@@ -130,13 +131,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Widok',
 			'cmdresize'    : 'Zmień rozmiar obrazu',
 			'cmdsort'      : 'Sortuj',
-			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
+			'cmdnetmount'  : 'Zamontuj wolumin sieciowy', // added 18.04.2012
 			'cmdnetunmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'Do Miejsc', // added 28.12.2014
 			'cmdchmod'     : 'Zmiana trybu', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'Otwórz katalog', // from v2.1 added 13.1.2016
-			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
-			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
+			'cmdcolwidth'  : 'Resetuj szerokość kolumny', // from v2.1.13 added 12.06.2016
+			'cmdmove'      : 'Przenieś', // from v2.1.15 added 21.08.2016
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -151,7 +152,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnUnmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Konwertuj', // from v2.1 added 08.04.2014
 			'btnCwd'    : 'Tutaj',      // from v2.1 added 22.5.2015
-			'btnVolume' : 'Volume',    // from v2.1 added 22.5.2015
+			'btnVolume' : 'Wolumin',    // from v2.1 added 22.5.2015
 			'btnAll'    : 'Wszystko',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'Typ MIME', // from v2.1 added 22.5.2015
 			'btnFileName':'Nazwa pliku',  // from v2.1 added 22.5.2015
@@ -178,12 +179,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfresize'   : 'Zmiana rozmiaru obrazów',
 			'ntfsmth'     : 'Robienie czegoś >_<',
 			'ntfloadimg'  : 'Ładowanie obrazu',
-			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
-			'ntfnetunmount': 'Unmounting network volume', // from v2.1 added 30.04.2012
+			'ntfnetmount' : 'Zamontuj wolumin sieciowy', // added 18.04.2012
+			'ntfnetunmount': 'Odłączanie woluminu sieciowego', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Pozyskiwanie wymiaru obrazu', // added 20.05.2013
 			'ntfreaddir'  : 'Odczytywanie informacji katalogu', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Pobieranie URL linku', // from v2.1 added 11.03.2014
-			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
+			'ntfchmod'    : 'Zmiana trybu pliku', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Weryfikacja nazwy przesłanego pliku', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Tworzenie pliku do pobrania', // from v2.1.7 added 23.1.2016
 
@@ -231,16 +232,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Sat'         : 'sob',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'po nazwie',
-			'sortkind'          : 'po typie',
-			'sortsize'          : 'po rozmiarze',
-			'sortdate'          : 'po dacie',
+			'sortname'          : 'wg/nazwy',
+			'sortkind'          : 'wg/typu',
+			'sortsize'          : 'wg/rozmiaru',
+			'sortdate'          : 'wg/daty',
 			'sortFoldersFirst'  : 'katalogi pierwsze',
-			'sortperm'          : 'by permission', // from v2.1.13 added 13.06.2016
-			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
-			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
-			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
+			'sortperm'          : 'wg/uprawnień', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'wg/trybu',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'wg/właściciela',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'wg/grup',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Również podglądu drzewa',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
@@ -320,7 +321,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Obróć 90° w lewo',
 			'rotate-ccw'      : 'Obróć 90° w prawo',
 			'degree'          : '°',
-			'netMountDialogTitle' : 'Mount network volume', // added 18.04.2012
+			'netMountDialogTitle' : 'Montaż woluminu sieciowego', // added 18.04.2012
 			'protocol'            : 'Protokół', // added 18.04.2012
 			'host'                : 'Host', // added 18.04.2012
 			'port'                : 'Port', // added 18.04.2012
@@ -353,13 +354,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'nowLoading'      : 'Teraz ładuję...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : 'Otwieranie wielu plików', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'Próbujesz otworzyć $1 plików. Czy na pewno chcesz, aby otworzyć w przeglądarce?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'Wyniki wyszukiwania jest pusty', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'You are editing a file.', // from v2.1.13 added 6.3.2016
-			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
-			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
-			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
+			'emptySearch'     : 'Wynik wyszukiwania jest pusty', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Edytujesz plik.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Masz wybranych $1 pozycji.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'Masz $1 pozycji w schowku.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Wyszukiwanie przyrostowe jest wyłącznie z bieżącego widoku.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Stan uprzedni', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 zakończony(e)', // from v2.1.15 added 21.8.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
@@ -384,7 +385,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindXZ'          : 'Archiwum XZ',
 			'kindZIP'         : 'Archiwum ZIP',
 			'kindRAR'         : 'Archiwum RAR',
-			'kindJAR'         : 'Java JAR file',
+			'kindJAR'         : 'Plik Java JAR',
 			'kindTTF'         : 'Czcionka TrueType',
 			'kindOTF'         : 'Czcionka OpenType',
 			'kindRPM'         : 'Pakiet RPM',
@@ -410,7 +411,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'Kod źródłowy AWK',
 			'kindCSV'         : 'Tekst rozdzielany przecinkami CSV',
 			'kindDOCBOOK'     : 'Dokument Docbook XML',
-			'kindMarkdown'    : 'Markdown text', // added 20.7.2015
+			'kindMarkdown'    : 'Tekst promocyjny', // added 20.7.2015
 			// images
 			'kindImage'       : 'Obraz',
 			'kindBMP'         : 'Obraz BMP',
