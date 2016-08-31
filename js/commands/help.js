@@ -98,10 +98,14 @@
 			var render = function(elm, obj) {
 				$.each(obj, function(k, v) {
 					elm.append($('<dt/>').text(k));
-					if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
+					if (typeof v === 'undefined') {
+						elm.append($('<dd/>').append($('<span/>').text('undfined')));
+					} else if (typeof v === 'object' && !v) {
+						elm.append($('<dd/>').append($('<span/>').text('null')));
+					} else if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
 						elm.append( $('<dd/>').append(render($('<dl/>'), v)));
 					} else {
-						elm.append($('<dd/>').append($('<span/>').text((typeof v === 'object')? '[]' : (v? v : '""'))));
+						elm.append($('<dd/>').append($('<span/>').text((v && typeof v === 'object')? '[]' : (v? v : '""'))));
 					}
 				});
 				return elm;
@@ -140,7 +144,7 @@
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
-	this.state = 0;
+	this.state = -1;
 	
 	this.shortcuts = [{
 		pattern     : 'f1',
@@ -203,6 +207,8 @@
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
 		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false});
+		
+		self.state = 0;
 	});
 	
 	this.getstate = function() {
