@@ -316,9 +316,9 @@ window.elFinder = function(node, opts) {
 
 			self.sorters = [];
 			cwd = data.cwd.hash;
-			cache(JSON.parse(JSON.stringify(data.files)));
+			cache(data.files);
 			if (!files[cwd]) {
-				cache([JSON.parse(JSON.stringify(data.cwd))]);
+				cache([data.cwd]);
 			}
 			self.lastDir(cwd);
 			
@@ -1443,6 +1443,7 @@ window.elFinder = function(node, opts) {
 				self.currentReqCmd = cmd;
 				
 				if (raw) {
+					response && response.debug && self.debug('backend-debug', response);
 					return dfrd.resolve(response);
 				}
 				
@@ -2676,7 +2677,7 @@ window.elFinder = function(node, opts) {
 			})
 		})
 		.add(function(e) {
-			cache(e.data.added||[]);
+			cache(e.data.added || []);
 		})
 		.change(function(e) {
 			$.each(e.data.changed||[], function(i, file) {
@@ -2724,7 +2725,7 @@ window.elFinder = function(node, opts) {
 		})
 		.bind('search', function(e) {
 			self.searchStatus.state = 2;
-			cache(e.data.files);
+			cache(e.data.files || []);
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
@@ -3003,7 +3004,6 @@ window.elFinder = function(node, opts) {
 			}
 			
 			self.load().debug('api', self.api);
-			data = $.extend(true, {}, data);
 			open(data);
 			self.trigger('open', data);
 		});
