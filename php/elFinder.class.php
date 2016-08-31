@@ -323,6 +323,13 @@ class elFinder {
 	public function __construct($opts) {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
+		
+		// setup debug mode
+		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
+		if ($this->debug) {
+			error_reporting(-1);
+			ini_set('diaplay_errors', '1');
+		}
 
 		if (! interface_exists('elFinderSessionInterface')) {
 			include_once dirname(__FILE__).'/elFinderSessionInterface.php';
@@ -358,7 +365,6 @@ class elFinder {
 		}
 		
 		$this->time  = $this->utime();
-		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		$this->sessionCloseEarlier = isset($opts['sessionCloseEarlier'])? (bool)$opts['sessionCloseEarlier'] : true;
 		$this->sessionUseCmds = array_flip($sessionUseCmds);
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
