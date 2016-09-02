@@ -698,9 +698,15 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 		if($raw->type == 'folder') {
 			$stat['dirs'] = (int)$this->_subdirs($stat['rev']);			
 		}
-		
-        $stat['url']	= '1';
-	   
+	
+	if($raw->type == 'file' && !empty($raw->shared_link->url) && $raw->shared_link->access == 'open') {
+        	if($url = $this->getSharedWebContentLink($raw)) {
+				$stat['url'] = $url;
+			}
+		}else {
+			$stat['url']	= '1';
+		}	
+        
         return $stat;
     }
 
@@ -969,7 +975,39 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
             return false;
         }
     }
-
+    
+    /**
+    * Return content URL
+    *    
+    * @param array $raw data
+    * @return array
+    * @author Naoki Sawada
+    **/
+	protected function getSharedWebContentLink($raw)
+	{
+		$fExtension = pathinfo($raw->name, PATHINFO_EXTENSION);	
+		$fType = explode('/',parent::$mimetypes[strtolower($fExtension)])[0];
+		
+		if($raw->shared_link->url && ($fType == 'image' || $fType == 'video' || $fType == 'audio')) {
+			if($fExtension == 'jpg' && $fType == 'image'){
+				$url = 'https://app.box.com/representation/file_version_'.$raw->file_version->id.'/image_2048_'.$fExtension.'/1.'.$fExtension.'?shared_name='.basename($raw->shared_link->url);
+				return $url;					
+			}elseif($fExtension !== 'jpg' && $fType == 'image') {										
+				$url = 'https://app.box.com/representation/file_version_'.$raw->file_version->id.'/image_2048/1.'.$fExtension.'?shared_name='.basename($raw->shared_link->url);			
+				return $url;
+			}elseif($fType == 'video'){				
+				$url = 'https://app.box.com/representation/file_version_'.$raw->file_version->id.'/video_480.'.$fExtension.'?shared_name='.basename($raw->shared_link->url);
+				return $url;						
+			}elseif($fType == 'audio'){				
+				$url = 'https://app.box.com/index.php?rm=preview_stream&amp&file_version_'.$raw->file_version->id.'/audio/mpeg:'.$raw->name.'&shared_name='.basename($raw->shared_link->url);
+				return $url;						
+			}
+							
+		}elseif($raw->shared_link->download_url) {						
+			return $raw->shared_link->download_url;			
+		}
+		return false;
+	}
 	
     /**
     * Return content URL
@@ -998,22 +1036,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 			$res = json_decode(curl_exec($curl));
 			curl_close($curl);
 			
-			$fExtension = pathinfo($res->name, PATHINFO_EXTENSION);	
-			$fType = explode('/',parent::$mimetypes[strtolower($fExtension)])[0];
-			
-			if($res->shared_link->url && ($fType == 'image' || $fType == 'video')) {
-				if($fExtension == 'jpg' && $fType == 'image'){
-					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/image_2048_'.$fExtension.'/1.'.$fExtension.'?shared_name='.basename($res->shared_link->url);
-					return $url;					
-				}elseif($fExtension !== 'jpg' && $fType == 'image') {										
-					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/image_2048/1.'.$fExtension.'?shared_name='.basename($res->shared_link->url);			
-					return $url;
-				}elseif($fType == 'video'){				
-					$url = 'https://app.box.com/representation/file_version_'.$res->file_version->id.'/video_480.'.$fExtension.'?shared_name='.basename($res->shared_link->url);
-					return $url;						
-				}				
-			}elseif($res->shared_link->url) {						
-				return $res->shared_link->url;			
+			if($url = $this->getSharedWebContentLink($curl)) {
+				return $url;
 			}
 		}
 		
