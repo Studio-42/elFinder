@@ -333,15 +333,17 @@ $.fn.elfindertree = function(fm, opts) {
 					orphans = [],
 					i = length,
 					tgts = $(),
+					done = {},
 					dir, html, parent, sibling, init, atonce = {}, base, node;
 
 				var firstVol = true; // check for netmount volume
 				while (i--) {
 					dir = dirs[i];
 
-					if ($('#'+fm.navHash2Id(dir.hash)).length) {
+					if (done[dir.hash] || $('#'+fm.navHash2Id(dir.hash)).length) {
 						continue;
 					}
+					done[dir.hash] = true;
 					
 					if ((parent = findSubtree(dir.phash)).length) {
 						if (dir.phash && ((init = !parent.children().length) || (sibling = findSibling(parent, dir)).length)) {
@@ -462,11 +464,40 @@ $.fn.elfindertree = function(fm, opts) {
 					noCwd   = noCwd || false,
 					dirs    = dirs || [],
 					reqCmd  = 'parents',
-					req2    = null,
-					req2Cmd = '',
+					reqs    = [],
 					getCmd  = function(target) {
 						var pnode = fm.file(target);
 						return (pnode && (pnode.isroot || ! pnode.phash))? 'tree' : 'parents';
+					},
+					setReqs = function(target) {
+						var proot = fm.root(target),
+							cmd;
+						
+						if (proot && (proot = fm.file(proot)) && proot.phash && proot.phash.indexOf(proot.volumeid) !== 0) {
+							cmd = getCmd(proot.phash);
+							if (cmd === 'parents') {
+								reqs.push(fm.request({
+									data : {
+										cmd    : 'tree',
+										target : proot.phash
+									},
+									preventFail : true
+								}).done(function() {
+									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
+								}));
+							}
+							reqs.push(fm.request({
+								data : {
+									cmd    : cmd,
+									target : proot.phash
+								},
+								preventFail : true
+							}).done(function() {
+								if (cmd === 'tree') {
+									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
+								}
+							}));
+						}
 					},
 					rootNode, dir, link, subs, subsLen, cnt, proot;
 				
@@ -503,7 +534,6 @@ $.fn.elfindertree = function(fm, opts) {
 						if (dir && dir.phash && ! dir.isroot) {
 							link = $('#'+fm.navHash2Id(dir.phash));
 							if (link.length && link.hasClass(loaded)) {
-								fm.log(dir);
 								fm.lazy(function() {
 									updateTree([dir]);
 									sync(noCwd);
@@ -513,74 +543,52 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 						if (! noCwd) {
 							if (cwd.isroot && cwd.phash) {
-								cwdhash = cwd.phash;
-								if (getCmd(cwdhash) === 'tree') {
+								if (getCmd(cwd.phash) === 'tree') {
 									reqCmd = 'tree';
 								} else {
 									reqCmd = 'parents';
-									proot = fm.root(cwdhash);
-									if (proot && (proot = fm.file(proot)) && proot.phash && proot.phash.indexOf(proot.volumeid) !== 0) {
-										req2Cmd = getCmd(proot.phash);
-										req2 = fm.request({
-											data : {
-												cmd : req2Cmd,
-												target : proot.phash
-											},
-											preventFail : true
-										}).done(function() {
-											if (req2Cmd === 'tree') {
-												$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-											}
-										});
-									}
+									setReqs(cwdhash);
 								}
+								cwdhash = cwd.phash;
 							} else {
 								if (cwd.phash) {
-									proot = fm.root(cwd.phash);
-									if (proot && (proot = fm.file(proot)) && proot.phash && proot.phash.indexOf(proot.volumeid) !== 0) {
-										req2Cmd = getCmd(proot.phash);
-										req2 = fm.request({
-											data : {
-												cmd : req2Cmd,
-												target : proot.phash
-											},
-											preventFail : true
-										}).done(function() {
-											if (req2Cmd === 'tree') {
-												$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-											}
-										});
-									}
+									setReqs(cwd.phash);
 								}
 							}
 						}
+
+						reqs.push(fm.request({
+							data : {cmd : reqCmd, target : cwdhash},
+							preventFail : true
+						}).done(function() {
+							if (reqCmd === 'tree') {
+								$('#'+fm.navHash2Id(cwdhash)).addClass(loaded);
+							}
+						}));
+
 						link  = cwd.root? $('#'+fm.navHash2Id(cwd.root)) : null;
 						if (link) {
 							spinner.insertBefore(link.children('.'+arrow));
 							link.removeClass(collapsed);
 						}
-						$.when(
-							fm.request({
-								data : {cmd : reqCmd, target : cwdhash},
-								preventFail : true
-							}).done(function() {
-								if (reqCmd === 'tree') {
-									$('#'+fm.navHash2Id(cwdhash)).addClass(loaded);
-								}
-							}),
-							req2
-						)
-						.done(function(data, tree) {
-							var treeDirs;
+						$.when.apply($, reqs)
+						.done(function(data) {
+							var treeDirs, argLen, i;
 							if (! data) {
 								data = { tree : [] };
 							}
 							if (fm.api < 2.1) {
 								data.tree.push(cwd);
 							}
-							if (tree && tree.tree) {
-								data.tree.push.apply(data.tree, tree.tree);
+							argLen = arguments.length;
+							if (argLen > 1) {
+								for(i = 1; i < argLen; i++) {
+									if (arguments[i].tree && arguments[i].tree.length) {
+										data.tree.push.apply(data.tree, arguments[i].tree);
+									}
+								}
 							}
+							
 							treeDirs = filter(data.tree);
 							if (cwd.isroot && cwd.hash === cwdhash && ! treeDirs.length) {
 								// root's phash was not found
