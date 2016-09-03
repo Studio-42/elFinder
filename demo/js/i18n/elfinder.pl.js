@@ -4,7 +4,7 @@
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2016-08-31
+ * @version 2016-09-04
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.pl = {
@@ -131,7 +131,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Widok',
 			'cmdresize'    : 'Zmień rozmiar obrazu',
 			'cmdsort'      : 'Sortuj',
-			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
+			'cmdnetmount'  : 'Zamontuj wolumin sieciowy', // added 18.04.2012
 			'cmdnetunmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'Do Miejsc', // added 28.12.2014
 			'cmdchmod'     : 'Zmiana trybu', // from v2.1 added 20.6.2015
@@ -179,7 +179,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfresize'   : 'Zmiana rozmiaru obrazów',
 			'ntfsmth'     : 'Robienie czegoś >_<',
 			'ntfloadimg'  : 'Ładowanie obrazu',
-			'ntfnetmount' : 'Zamontuj wolumin sieciowy', // added 18.04.2012
+			'ntfnetmount' : 'Montaż woluminu sieciowego', // added 18.04.2012
 			'ntfnetunmount': 'Odłączanie woluminu sieciowego', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Pozyskiwanie wymiaru obrazu', // added 20.05.2013
 			'ntfreaddir'  : 'Odczytywanie informacji katalogu', // from v2.1 added 01.07.2013
