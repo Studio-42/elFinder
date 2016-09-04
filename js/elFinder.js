@@ -210,13 +210,6 @@ window.elFinder = function(node, opts) {
 		 **/
 		soundPath = './sounds/',
 				
-		/**
-		 * leaf roots cache
-		 * 
-		 * @type Object
-		 */
-		leafRoots = {},
-		
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -353,11 +346,11 @@ window.elFinder = function(node, opts) {
 					
 					// make or update of leaf roots cache
 					if (f.isroot && f.phash) {
-						if (! leafRoots[f.phash]) {
-							leafRoots[f.phash] = [ f.hash ];
+						if (! self.leafRoots[f.phash]) {
+							self.leafRoots[f.phash] = [ f.hash ];
 						} else {
-							if ($.inArray(f.hash, leafRoots[f.phash]) === -1) {
-								leafRoots[f.phash].push(f.hash);
+							if ($.inArray(f.hash, self.leafRoots[f.phash]) === -1) {
+								self.leafRoots[f.phash].push(f.hash);
 							}
 						}
 					}
@@ -1467,8 +1460,8 @@ window.elFinder = function(node, opts) {
 				
 				var resolve = function() {
 					var pushLeafRoots = function(name) {
-						if (leafRoots[data.target] && response[name]) {
-							$.each(leafRoots[data.target], function(i, h) {
+						if (self.leafRoots[data.target] && response[name]) {
+							$.each(self.leafRoots[data.target], function(i, h) {
 								var root;
 								if (root = self.file(h)) {
 									response[name].push(root);
@@ -2830,6 +2823,13 @@ window.elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.roots = {};
+	
+	/**
+	 * leaf roots
+	 * 
+	 * @type Object
+	 */
+	this.leafRoots = {};
 	
 	/**
 	 * Loaded commands
