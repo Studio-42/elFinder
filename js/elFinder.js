@@ -278,7 +278,7 @@ window.elFinder = function(node, opts) {
 								&& $('#'+self.navHash2Id(phash)).next('.elfinder-navbar-subtree').children().length > 100
 							)
 						)
-						&& (isDir || phash === prevcwd)
+						&& (isDir || phash !== cwd)
 						&& $.inArray(i, remember) === -1
 					) {
 						if (isDir && !emptyDirs[phash]) {
@@ -306,10 +306,12 @@ window.elFinder = function(node, opts) {
 				});
 				
 				self.one('opendone', function() {
-					if (! node.data('lazycnt')) {
-						gc();
-					} else {
-						self.one('lazydone', gc);
+					if (prevcwd !== cwd) {
+						if (! node.data('lazycnt')) {
+							gc();
+						} else {
+							self.one('lazydone', gc);
+						}
 					}
 				});
 			}
