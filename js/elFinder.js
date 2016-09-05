@@ -3245,19 +3245,18 @@ window.elFinder = function(node, opts) {
 								}
 							});
 						} catch(e) {}
-					} else {
-						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							$elm.data(tm) && clearTimeout($elm.data(tm));
-							$elm.data(tm, setTimeout(function() {
-								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500));
-						}
 					}
 					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
 						e.preventDefault();
 						e.stopPropagation();
 						$elm.data(ent, true);
 						$elm.addClass(clDropActive);
+						if (!cwd && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
+							$elm.data(tm) && clearTimeout($elm.data(tm));
+							$elm.data(tm, setTimeout(function() {
+								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
+							}, 500));
+						}
 					} else {
 						$elm.data(disable, true);
 					}
@@ -3268,9 +3267,9 @@ window.elFinder = function(node, opts) {
 					var $elm = $(e.currentTarget);
 					e.preventDefault();
 					e.stopPropagation();
+					$elm.data(tm) && clearTimeout($elm.data(tm));
+					$elm.removeData(tm)
 					if ($elm.data(ent)) {
-						$elm.data(tm) && clearTimeout($elm.data(tm));
-						$elm.removeData(tm)
 						$elm.data(ent, false);
 					} else {
 						$elm.removeClass(clDropActive);
