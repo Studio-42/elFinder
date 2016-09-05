@@ -353,6 +353,9 @@ window.elFinder = function(node, opts) {
 								self.leafRoots[f.phash].push(f.hash);
 							}
 						}
+						if (files[f.phash] && ! files[f.phash].dirs) {
+							files[f.phash].dirs = 1;
+						}
 					}
 					
 					files[f.hash] = f;
@@ -4985,6 +4988,11 @@ elFinder.prototype = {
 							if (name !== i18) {
 								file.i18 = i18;
 							}
+						}
+						
+						// has leaf root to `dirs: 1`
+						if (! file.dirs && self.leafRoots[file.hash]) {
+							file.dirs = 1;
 						}
 					}
 					

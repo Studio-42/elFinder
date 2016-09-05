@@ -469,37 +469,39 @@ $.fn.elfindertree = function(fm, opts) {
 						var pnode = fm.file(target);
 						return (pnode && (pnode.isroot || ! pnode.phash))? 'tree' : 'parents';
 					},
-					setReqs = function(target) {
-						var proot = fm.root(target),
-							cmd;
-						
-						if (proot && (proot = fm.file(proot)) && proot.phash && proot.phash.indexOf(proot.volumeid) !== 0) {
-							cmd = getCmd(proot.phash);
-							if (cmd === 'parents') {
-								reqs.push(fm.request({
-									data : {
-										cmd    : 'tree',
-										target : proot.phash
-									},
-									preventFail : true
-								}).done(function() {
-									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-								}));
-							}
+					reqPush = function(cmd, target) {
+						if (! registed[cmd + target]) {
+							registed[cmd + target] = true;
 							reqs.push(fm.request({
 								data : {
 									cmd    : cmd,
-									target : proot.phash
+									target : target
 								},
 								preventFail : true
 							}).done(function() {
-								if (cmd === 'tree') {
-									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-								}
+								$('#'+fm.navHash2Id(cmd === 'tree'? target : fm.root(target))).addClass(loaded);
 							}));
 						}
 					},
-					rootNode, dir, link, subs, subsLen, cnt, proot;
+					setReqs = function(target) {
+						var proot = fm.root(target),
+							phash, cmd, reqTarget;
+						
+						while (proot) {
+							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && phash.indexOf(proot.volumeid) !== 0) {
+								cmd = getCmd(phash);
+								if (cmd === 'parents') {
+									reqPush('tree', phash);
+								}
+								reqPush(cmd, phash);
+								proot = fm.root(phash);
+							} else {
+								proot = null;
+							}
+						}
+					},
+					registed = {},
+					rootNode, dir, link, subs, subsLen, cnt;
 				
 				if (openRoot) {
 					rootNode = $('#'+fm.navHash2Id(fm.root()));
@@ -547,24 +549,19 @@ $.fn.elfindertree = function(fm, opts) {
 									reqCmd = 'tree';
 								} else {
 									reqCmd = 'parents';
-									setReqs(cwdhash);
 								}
+								setReqs(cwdhash);
 								cwdhash = cwd.phash;
 							} else {
 								if (cwd.phash) {
 									setReqs(cwd.phash);
+								} else {
+									reqCmd = null;
 								}
 							}
 						}
 
-						reqs.push(fm.request({
-							data : {cmd : reqCmd, target : cwdhash},
-							preventFail : true
-						}).done(function() {
-							if (reqCmd === 'tree') {
-								$('#'+fm.navHash2Id(cwdhash)).addClass(loaded);
-							}
-						}));
+						reqCmd && reqPush(reqCmd, cwdhash);
 
 						link  = cwd.root? $('#'+fm.navHash2Id(cwd.root)) : null;
 						if (link) {
