@@ -964,24 +964,28 @@ window.elFinder = function(node, opts) {
 	/**
 	 * Return root dir hash for current working directory
 	 * 
+	 * @param  String   target hash
+	 * @param  Boolean  include fake parent (optional)
 	 * @return String
 	 */
-	this.root = function(hash) {
+	this.root = function(hash, fake) {
 		hash = hash || cwd;
 		var dir, i;
 		
-		$.each(self.roots, function(id, rhash) {
-			if (hash.indexOf(id) === 0) {
-				dir = rhash;
-				return false;
+		if (! fake) {
+			$.each(self.roots, function(id, rhash) {
+				if (hash.indexOf(id) === 0) {
+					dir = rhash;
+					return false;
+				}
+			});
+			if (dir) {
+				return dir;
 			}
-		});
-		if (dir) {
-			return dir;
 		}
 		
 		dir = files[hash];
-		while (dir && dir.phash && ! dir.isroot) {
+		while (dir && dir.phash && (fake || ! dir.isroot)) {
 			dir = files[dir.phash]
 		}
 		if (dir) {

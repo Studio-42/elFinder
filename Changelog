@@ -30,6 +30,10 @@
 		- [js:core] Fixed #1614 correction of upload mixed chunks and normal file
 		- [ui:cwd] Fixed #1615 break the lazy rendering when it delete items
 		- [ui:tree] Fixed #1617 other volumes cmds doesn't work when it disabled in cwd
+		- [core] Fixed #1622 added an option `phash` to the volume roots for implement feature of volume group
+		- [ui:toolbar] Fixed #1619 use fm.trigger('toolbarload') instead toolbar.tigger('load')
+		- [js:options] Fixed #1624 add a new option `overwriteUploadConfirm`
+		- [cmd:search] Fixed #1635 support parallel requests for multi volumes 
 		- And some minor bug fixes
 
 2016-07-25  Naoki Sawada  <hypweb@gmail.com>
