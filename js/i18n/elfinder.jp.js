@@ -54,7 +54,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMkOutLink'         : 'ボリュームルート外へのリンクを作成することはできません', // from v2.1 added 03.10.2015
 			'errUpload'            : 'アップロードエラー',  // old name - errUploadCommon
 			'errUploadFile'        : '"$1"がアップロードできません', // old name - errUpload
-			'errUploadNoFiles'     : 'アップロードされたファイルがありません',
+			'errUploadNoFiles'     : 'アップロードされたファイルはありません',
 			'errUploadTotalSize'   : 'データが許容サイズを超えています', // old name - errMaxSize
 			'errUploadFileSize'    : 'ファイルが許容サイズを超えています', //  old name - errFileMaxSize
 			'errUploadMime'        : '許可されていないファイル形式です',
@@ -80,7 +80,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResizeDegree'      : 'イメージの回転角度が不正です',  // added 7.3.2013
 			'errResizeRotate'      : 'イメージを回転できません',  // added 7.3.2013
 			'errResizeSize'        : '指定されたイメージサイズが不正です',  // added 7.3.2013
-			'errResizeNoChange'    : 'イメージサイズなどの変更がありません',  // added 7.3.2013
+			'errResizeNoChange'    : 'イメージサイズなどの変更点がありません',  // added 7.3.2013
 			'errUsupportType'      : 'このファイルタイプはサポートされません',
 			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
 			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
@@ -357,7 +357,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'editingFile'     : 'ファイルを編集中です', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : '$1 個のアイテムを選択中です', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : '逐次検索は現在のビューからのみです', // from v2.1.13 added 6.30.2016
+			'incSearchOnly'   : '逐次検索対象は現在のビューのみです', // from v2.1.13 added 6.30.2016
 			'reinstate'       : '元に戻す', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 完了', // from v2.1.15 added 21.8.2016
 
