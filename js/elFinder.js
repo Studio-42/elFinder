@@ -3299,9 +3299,7 @@ window.elFinder = function(node, opts) {
 						id = self.cwd().hash;
 					}
 					e.originalEvent._target = id;
-					self.directUploadTarget = id;
-					self.exec('upload', {dropEvt: e.originalEvent, target: id});
-					self.directUploadTarget = null;
+					self.exec('upload', {dropEvt: e.originalEvent, target: id}, void 0, id);
 				}
 			});
 		})();

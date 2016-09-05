@@ -25,7 +25,7 @@ elFinder.prototype.commands.upload = function() {
 	 **/
 	this.getstate = function(sel) {
 		var fm = this.fm, f,
-		sel = fm.directUploadTarget? [fm.directUploadTarget] : (sel || [fm.cwd().hash]);
+		sel = (sel || [fm.cwd().hash]);
 		if (!this._disabled && sel.length == 1) {
 			f = fm.file(sel[0]);
 		}
