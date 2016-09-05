@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 1442da9) (2016-09-04)
+ * Version 2.1.14 (2.1-src Nightly: e781ae0) (2016-09-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5957,7 +5957,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 1442da9)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: e781ae0)';
 
 
 
@@ -12589,7 +12589,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 							)
 					)
 					.hide()
-					.css('overflow', 'hidden')
 					.appendTo(button);
 				if (opts) {
 					opts.find('div.buttonset').buttonset();
@@ -19287,7 +19286,7 @@ elFinder.prototype.commands.resize = function() {
 								return fm.error('Invalid rotate degree');
 							}
 							if (d == 0 || d == 360) {
-								return fm.error('Image dose not rotated');
+								return fm.error('errResizeNoChange');
 							}
 						}
 						q = quality? parseInt(quality.val()) : 0;
@@ -19299,7 +19298,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 							
 							if (w == owidth && h == oheight) {
-								return fm.error('Image size not changed');
+								return fm.error('errResizeNoChange');
 							}
 
 						}
