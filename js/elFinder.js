@@ -353,6 +353,9 @@ window.elFinder = function(node, opts) {
 								self.leafRoots[f.phash].push(f.hash);
 							}
 						}
+						if (files[f.phash] && ! files[f.phash].dirs) {
+							files[f.phash].dirs = 1;
+						}
 					}
 					
 					files[f.hash] = f;
@@ -3161,6 +3164,7 @@ window.elFinder = function(node, opts) {
 			},
 			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
+			tm        = 'native-drag-timer',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
 			droppable = self.res(c, 'droppable'),
@@ -3241,18 +3245,18 @@ window.elFinder = function(node, opts) {
 								}
 							});
 						} catch(e) {}
-					} else {
-						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							setTimeout(function() {
-								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500);
-						}
 					}
 					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
 						e.preventDefault();
 						e.stopPropagation();
 						$elm.data(ent, true);
 						$elm.addClass(clDropActive);
+						if (!cwd && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
+							$elm.data(tm) && clearTimeout($elm.data(tm));
+							$elm.data(tm, setTimeout(function() {
+								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
+							}, 500));
+						}
 					} else {
 						$elm.data(disable, true);
 					}
@@ -3263,6 +3267,8 @@ window.elFinder = function(node, opts) {
 					var $elm = $(e.currentTarget);
 					e.preventDefault();
 					e.stopPropagation();
+					$elm.data(tm) && clearTimeout($elm.data(tm));
+					$elm.removeData(tm)
 					if ($elm.data(ent)) {
 						$elm.data(ent, false);
 					} else {
@@ -3292,9 +3298,7 @@ window.elFinder = function(node, opts) {
 						id = self.cwd().hash;
 					}
 					e.originalEvent._target = id;
-					self.directUploadTarget = id;
-					self.exec('upload', {dropEvt: e.originalEvent, target: id});
-					self.directUploadTarget = null;
+					self.exec('upload', {dropEvt: e.originalEvent, target: id}, void 0, id);
 				}
 			});
 		})();
@@ -4981,6 +4985,11 @@ elFinder.prototype = {
 							if (name !== i18) {
 								file.i18 = i18;
 							}
+						}
+						
+						// has leaf root to `dirs: 1`
+						if (! file.dirs && self.leafRoots[file.hash]) {
+							file.dirs = 1;
 						}
 					}
 					

@@ -119,7 +119,8 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 				'read'   => true,
 				'write'  => false,
 				'locked' => true,
-				'hidden' => false
+				'hidden' => false,
+				'dirs'   => 0
 			);
 		}
 		return false;
