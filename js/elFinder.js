@@ -3161,6 +3161,7 @@ window.elFinder = function(node, opts) {
 			},
 			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
+			tm        = 'native-drag-timer',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
 			droppable = self.res(c, 'droppable'),
@@ -3243,9 +3244,10 @@ window.elFinder = function(node, opts) {
 						} catch(e) {}
 					} else {
 						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							setTimeout(function() {
+							$elm.data(tm) && clearTimeout($elm.data(tm));
+							$elm.data(tm, setTimeout(function() {
 								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500);
+							}, 500));
 						}
 					}
 					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
@@ -3264,6 +3266,8 @@ window.elFinder = function(node, opts) {
 					e.preventDefault();
 					e.stopPropagation();
 					if ($elm.data(ent)) {
+						$elm.data(tm) && clearTimeout($elm.data(tm));
+						$elm.removeData(tm)
 						$elm.data(ent, false);
 					} else {
 						$elm.removeClass(clDropActive);
