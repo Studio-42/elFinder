@@ -1195,7 +1195,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 			$itemId = basename($path);
 		}        
 		
-		$res = $this->query($itemId);
+		$path = '/folders/'.$itemId.'/items?limit=1&offset=0&fields='.self::FETCHFIELDS;
+
+		$url = self::API_URL . $path
+					. '&access_token=' . urlencode($this->box->token->data->access_token);
+
+		$res = $this->_createCurl($url);
+		
 		if($res[0]->type == 'folder'){
 			return true;		
 		}
