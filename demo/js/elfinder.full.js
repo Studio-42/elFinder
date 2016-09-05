@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: e181ab7) (2016-09-05)
+ * Version 2.1.14 (2.1-src Nightly: c1ec5bf) (2016-09-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -366,6 +366,9 @@ window.elFinder = function(node, opts) {
 							if ($.inArray(f.hash, self.leafRoots[f.phash]) === -1) {
 								self.leafRoots[f.phash].push(f.hash);
 							}
+						}
+						if (files[f.phash] && ! files[f.phash].dirs) {
+							files[f.phash].dirs = 1;
 						}
 					}
 					
@@ -3175,6 +3178,7 @@ window.elFinder = function(node, opts) {
 			},
 			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
+			tm        = 'native-drag-timer',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
 			droppable = self.res(c, 'droppable'),
@@ -3255,18 +3259,18 @@ window.elFinder = function(node, opts) {
 								}
 							});
 						} catch(e) {}
-					} else {
-						if (!$elm.data(ent) && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							setTimeout(function() {
-								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500);
-						}
 					}
 					if (!cwd || (cwd.write && (!elfFrom || elfFrom !== (window.location.href + cwd.hash).toLowerCase()))) {
 						e.preventDefault();
 						e.stopPropagation();
 						$elm.data(ent, true);
 						$elm.addClass(clDropActive);
+						if (!cwd && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
+							$elm.data(tm) && clearTimeout($elm.data(tm));
+							$elm.data(tm, setTimeout(function() {
+								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
+							}, 500));
+						}
 					} else {
 						$elm.data(disable, true);
 					}
@@ -3277,6 +3281,8 @@ window.elFinder = function(node, opts) {
 					var $elm = $(e.currentTarget);
 					e.preventDefault();
 					e.stopPropagation();
+					$elm.data(tm) && clearTimeout($elm.data(tm));
+					$elm.removeData(tm)
 					if ($elm.data(ent)) {
 						$elm.data(ent, false);
 					} else {
@@ -3306,9 +3312,7 @@ window.elFinder = function(node, opts) {
 						id = self.cwd().hash;
 					}
 					e.originalEvent._target = id;
-					self.directUploadTarget = id;
-					self.exec('upload', {dropEvt: e.originalEvent, target: id});
-					self.directUploadTarget = null;
+					self.exec('upload', {dropEvt: e.originalEvent, target: id}, void 0, id);
 				}
 			});
 		})();
@@ -4996,6 +5000,11 @@ elFinder.prototype = {
 								file.i18 = i18;
 							}
 						}
+						
+						// has leaf root to `dirs: 1`
+						if (! file.dirs && self.leafRoots[file.hash]) {
+							file.dirs = 1;
+						}
 					}
 					
 					return file;
@@ -5961,7 +5970,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: e181ab7)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c1ec5bf)';
 
 
 
@@ -13554,37 +13563,39 @@ $.fn.elfindertree = function(fm, opts) {
 						var pnode = fm.file(target);
 						return (pnode && (pnode.isroot || ! pnode.phash))? 'tree' : 'parents';
 					},
-					setReqs = function(target) {
-						var proot = fm.root(target),
-							cmd;
-						
-						if (proot && (proot = fm.file(proot)) && proot.phash && proot.phash.indexOf(proot.volumeid) !== 0) {
-							cmd = getCmd(proot.phash);
-							if (cmd === 'parents') {
-								reqs.push(fm.request({
-									data : {
-										cmd    : 'tree',
-										target : proot.phash
-									},
-									preventFail : true
-								}).done(function() {
-									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-								}));
-							}
+					reqPush = function(cmd, target) {
+						if (! registed[cmd + target]) {
+							registed[cmd + target] = true;
 							reqs.push(fm.request({
 								data : {
 									cmd    : cmd,
-									target : proot.phash
+									target : target
 								},
 								preventFail : true
 							}).done(function() {
-								if (cmd === 'tree') {
-									$('#'+fm.navHash2Id(proot.phash)).addClass(loaded);
-								}
+								$('#'+fm.navHash2Id(cmd === 'tree'? target : fm.root(target))).addClass(loaded);
 							}));
 						}
 					},
-					rootNode, dir, link, subs, subsLen, cnt, proot;
+					setReqs = function(target) {
+						var proot = fm.root(target),
+							phash, cmd, reqTarget;
+						
+						while (proot) {
+							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && phash.indexOf(proot.volumeid) !== 0) {
+								cmd = getCmd(phash);
+								if (cmd === 'parents') {
+									reqPush('tree', phash);
+								}
+								reqPush(cmd, phash);
+								proot = fm.root(phash);
+							} else {
+								proot = null;
+							}
+						}
+					},
+					registed = {},
+					rootNode, dir, link, subs, subsLen, cnt;
 				
 				if (openRoot) {
 					rootNode = $('#'+fm.navHash2Id(fm.root()));
@@ -13632,24 +13643,19 @@ $.fn.elfindertree = function(fm, opts) {
 									reqCmd = 'tree';
 								} else {
 									reqCmd = 'parents';
-									setReqs(cwdhash);
 								}
+								setReqs(cwdhash);
 								cwdhash = cwd.phash;
 							} else {
 								if (cwd.phash) {
 									setReqs(cwd.phash);
+								} else {
+									reqCmd = null;
 								}
 							}
 						}
 
-						reqs.push(fm.request({
-							data : {cmd : reqCmd, target : cwdhash},
-							preventFail : true
-						}).done(function() {
-							if (reqCmd === 'tree') {
-								$('#'+fm.navHash2Id(cwdhash)).addClass(loaded);
-							}
-						}));
+						reqCmd && reqPush(reqCmd, cwdhash);
 
 						link  = cwd.root? $('#'+fm.navHash2Id(cwd.root)) : null;
 						if (link) {
@@ -20166,7 +20172,7 @@ elFinder.prototype.commands.upload = function() {
 	 **/
 	this.getstate = function(sel) {
 		var fm = this.fm, f,
-		sel = fm.directUploadTarget? [fm.directUploadTarget] : (sel || [fm.cwd().hash]);
+		sel = (sel || [fm.cwd().hash]);
 		if (!this._disabled && sel.length == 1) {
 			f = fm.file(sel[0]);
 		}
