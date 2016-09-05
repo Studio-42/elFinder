@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: c1ec5bf) (2016-09-06)
+ * Version 2.1.14 (2.1-src Nightly: 0db5b20) (2016-09-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5970,7 +5970,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c1ec5bf)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 0db5b20)';
 
 
 
@@ -16514,7 +16514,16 @@ elFinder.prototype.commands.netmount = function() {
 
 					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 						.done(function(data) {
+							var pdir;
 							if (data.added && data.added.length) {
+								if (data.added[0].phash) {
+									if (pdir = fm.file(data.added[0].phash)) {
+										if (! pdir.dirs) {
+											pdir.dirs = 1;
+											fm.change({ changed: [ pdir ] });
+										}
+									}
+								}
 								fm.one('netmountdone', function() {
 									fm.exec('open', data.added[0].hash);
 								});
