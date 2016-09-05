@@ -1538,20 +1538,21 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
     protected function _save($fp, $path, $name, $stat)
     {	
         if ($name) {
-            $path .= '/'.$name;
-        }
-        $path = $this->_normpath($path);
+			$path .= '/'.$name;
+		}
+		$path = $this->_normpath($path);
         
-        empty(basename(dirname($path))) ? $parentId ='0' : $parentId = basename(dirname($path));
+		empty(basename(dirname($path))) ? $parentId ='0' : $parentId = basename(dirname($path));
 		isset($stat['name']) ? $name = $stat['name'] : $name = basename($path);
 
 		$file_exists = '';
 		if(empty($stat['rev']) && empty($stat['pid'])){		
-			$file = $this->query($parentId);		
+			$file =  $this->query($parentId);			
 			if($file){
 				foreach($file as $f){
 					if($f->name == $name || $f->id == basename($path)){
 						$name = $f->name;
+						$itemId = $f->id;						
 						$file_exists = 'true';
 						break;
 					}
@@ -1559,76 +1560,87 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 			}
 		}
 
-        try {
-		
-            //Create or Update a file
-            if($file_exists == 'true'  && !empty($stat) && empty($stat['rev'])){				
+		try {		
+			//Create or Update a file
+			if($file_exists == 'true'  && !empty($stat) && empty($stat['rev'])){					
 				return $this->_normpath(dirname($path).'/'.$f->id);				
-			}
+			}			
 			
-			if (is_resource($fp)) {
-				$stream = $fp;
-			} else {
+			$tmpHandle = tmpfile();
+			$metaDatas = stream_get_meta_data($fp);
+			$tmpFilePath = $metaDatas['uri'];
+			fclose($tmpHandle);
+						
+			if(!$file_exists && empty($stat['rev']) && empty($stat['pid'])) {
+				//upload or create new file in destination target					
+				$properties = array('name' => $name, 'parent' => array('id' => $parentId));			
+				$mimeType = parent::$mimetypes[pathinfo($name, PATHINFO_EXTENSION)];
+							
+				$curl = $this->_prepareCurl();
+						
+				$cfile = new CURLFile($tmpFilePath, $mimeType);
+				$params = array('attributes' => json_encode($properties),'file' => $cfile);
+	
+				$url = self::UPLOAD_URL . '/files/content'
+						. '?access_token=' . urlencode($this->box->token->data->access_token);
+				
+				$curl  = $this->_prepareCurl();
+				$stats = fstat($stream);
+							
 				$options = array(
-					'stream_back_end' => 'php://temp',
+					CURLOPT_URL			=> $url,				
+					CURLOPT_POST		=> true,
+					CURLOPT_POSTFIELDS	=> $params,				
 				);
 	
-				$stream = fopen($options['stream_back_end'], 'rw+b');
-					
-				if (false === $stream) {
-					throw new \Exception('fopen() failed');
-				}
+				curl_setopt_array($curl, $options);
+				
+				//create or update File in the Target
+				$file = json_decode(curl_exec($curl));			
+			
+			}else {
+				//update existing file in destination target				
+				$itemId = isset($stat['rev']) ? $stat['rev'] : $f->id;
+				$parentId = isset($stat['pid']) ? $stat['pid'] : $f->parent->id;
+				$name = isset($stat['name']) ? $stat['name'] : $f->name;
+				
+				$properties = array('name' => $name);
+				$mimeType = parent::$mimetypes[pathinfo($name, PATHINFO_EXTENSION)];
+								
+				$curl = $this->_prepareCurl();	
 	
-				if (false === fwrite($stream, $fp)) {
-					fclose($stream);
-					throw new \Exception('fwrite() failed');
-				}
-	
-				if (!rewind($stream)) {
-					fclose($stream);
-					throw new \Exception('rewind() failed');
-				}
-			}
-			
-			//rename or move file or folder in destination target				
-			$properties = array('name' => $name, 'parent' => array('id' => $parentId));			
-			
-			$data = (object) $properties;			
-			
-			$curl = $this->_prepareCurl();	
-
-			$url = self::UPLOAD_URL . '/files/content?'. json_encode($data)
-            		. '&access_token=' . urlencode($this->box->token->data->access_token);
-			
-        	$curl  = $this->_prepareCurl();
-        	$stats = fstat($stream);
+				$url = self::UPLOAD_URL . '/files/'.$itemId.'/content'
+						. '?access_token=' . urlencode($this->box->token->data->access_token);
 						
-			$options = array(
-				CURLOPT_URL        => $url,				
-				CURLOPT_POST=> true,
-				CURLOPT_POSTFIELDS => $params,
-				CURLOPT_POSTFIELDS => $properties,
-				CURLOPT_INFILE     => $stream,
-				CURLOPT_INFILESIZE => $stats[7], // Size
-			);
-
-        	curl_setopt_array($curl, $options);
-			
-			//create or update File in the Target
-			$file = json_decode(curl_exec($curl));			
-			
+				$cfile = new CURLFile($tmpFilePath, $mimeType);
+				$params = array('attributes' => json_encode($properties),'file' => $cfile);
+									
+				$curl  = $this->_prepareCurl();
+				
+				$options = array(
+					CURLOPT_URL			=> $url,				
+					CURLOPT_POST		=> true,
+					CURLOPT_POSTFIELDS	=> $params,				
+				);
+				
+				curl_setopt_array($curl, $options);
+				
+				//update File
+				$file = json_decode(curl_exec($curl));	
+				
+			}
 			if (!is_resource($fp)) {
-				fclose($stream);
+				fclose($fp);
 			}
 				
             
            
-        } catch (Exception $e) {
-            return $this->setError('Box error: '.$e->getMessage());
-        }
-        $path = $this->_normpath(dirname($path).'/'.$file->id);
+		} catch (Exception $e) {
+			return $this->setError('Box error: '.$e->getMessage());
+		}
+		$path = $this->_normpath(dirname($path).'/'.$file->entries[0]->id);
         
-        return $path;
+		return $path;
     }
 
     /**
