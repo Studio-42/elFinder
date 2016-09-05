@@ -174,7 +174,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 							)
 					)
 					.hide()
-					.css('overflow', 'hidden')
 					.appendTo(button);
 				if (opts) {
 					opts.find('div.buttonset').buttonset();
