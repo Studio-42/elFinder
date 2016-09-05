@@ -817,25 +817,27 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
     protected function copy($src, $dst, $name)
     {
         $this->clearcache();
-        
-        if (explode(".",basename($src))[0] == 'folder') {
-            $itemId = basename($this->_mkdir($dst, $name));
-            $path = $this->_joinPath($dst, $itemId);
-                            
-            $res = $this->query(basename($src));
-            foreach ($res as $raw) {                
+
+		$res = $this->query(basename($src), $fetch_self = true);
+
+		if ($res->type == 'folder') {
+			$itemId = basename($this->_mkdir($dst, $name));
+			$path = $this->_joinPath($dst, $itemId);
+
+			$res = $this->query(basename($src));
+			foreach ($res as $raw) {                
 				$raw->type =='folder' ? $this->copy($src.'/'.$raw->id, $path, $raw->name) : $this->_copy($src.'/'.$raw->id, $path, $raw->name);
-            }
-            
-            return $itemId
-            ? $this->_joinPath($dst, $itemId)
-            : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
-        } else {
-            $itemId = $this->_copy($src, $dst, $name);
-            return $itemId
-            ? $this->_joinPath($dst, $itemId)
-            : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
-        }
+			}
+
+			return $itemId
+			? $this->_joinPath($dst, $itemId)
+			: $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+		} else {
+			$itemId = $this->_copy($src, $dst, $name);
+			return $itemId
+			? $this->_joinPath($dst, $itemId)
+			: $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+		}
     }
     
     /**
@@ -1386,40 +1388,33 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
     protected function _copy($source, $targetDir, $name)
     {
         $path = $this->_normpath($targetDir.'/'.$name);
-        
-        try {                                                
-            //Set the Parent id			
-            $targetDir == '/' ? $parentId = '0' : $parentId = basename($targetDir);
-            $properties = array('destination'=>$parentId);
+
+		try {                                                
+			//Set the Parent id			
+			$targetDir == '/' ? $parentId = '0' : $parentId = basename($targetDir);            
+			$properties = array('name' => $name, 'parent' => array('id' => $parentId));
+			$data = (object) $properties;
 			
-			$url  = self::API_URL . basename($source);
-        	$data = (object) $properties;
-			
+			$url  = self::API_URL . '/files/'. basename($source). '/copy'
+						. '?access_token=' . urlencode($this->box->token->data->access_token);
+        				
         	$curl = $this->_prepareCurl();           
-            
+
 			curl_setopt_array($curl, array(
-				CURLOPT_URL           => $url,
-				CURLOPT_CUSTOMREQUEST => 'COPY',
-	
-				CURLOPT_HTTPHEADER    => array(
-					// The data is sent as JSON as per Box documentation.
-					'Content-Type: application/json',
-	
-					'Authorization: Bearer ' . $this->box->token->data->access_token,
-				),
-	
-				CURLOPT_POSTFIELDS    => json_encode($data),
+				CURLOPT_URL			=> $url,				
+				CURLOPT_POST		=> true,		
+				CURLOPT_POSTFIELDS	=> json_encode($data),
 			));
 			
-			//copy File or Folder in the Parent
+			//copy File in the Parent
 			$result = json_decode(curl_exec($curl));
 			
 			return $result->id;
 			
-        } catch (Exception $e) {
-            return $this->setError('Box error: '.$e->getMessage());
-        }
-        return true;
+		} catch (Exception $e) {
+			return $this->setError('Box error: '.$e->getMessage());
+		}
+		return true;
     }
 
     /**
