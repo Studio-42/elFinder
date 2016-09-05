@@ -514,7 +514,7 @@ elFinder.prototype.commands.resize = function() {
 								return fm.error('Invalid rotate degree');
 							}
 							if (d == 0 || d == 360) {
-								return fm.error('Image dose not rotated');
+								return fm.error('errResizeNoChange');
 							}
 						}
 						q = quality? parseInt(quality.val()) : 0;
@@ -526,7 +526,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 							
 							if (w == owidth && h == oheight) {
-								return fm.error('Image size not changed');
+								return fm.error('errResizeNoChange');
 							}
 
 						}
