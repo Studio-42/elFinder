@@ -96,7 +96,16 @@ elFinder.prototype.commands.netmount = function() {
 
 					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 						.done(function(data) {
+							var pdir;
 							if (data.added && data.added.length) {
+								if (data.added[0].phash) {
+									if (pdir = fm.file(data.added[0].phash)) {
+										if (! pdir.dirs) {
+											pdir.dirs = 1;
+											fm.change({ changed: [ pdir ] });
+										}
+									}
+								}
 								fm.one('netmountdone', function() {
 									fm.exec('open', data.added[0].hash);
 								});
