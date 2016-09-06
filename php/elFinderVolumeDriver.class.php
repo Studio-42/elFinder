@@ -188,6 +188,8 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected $options = array(
 		'id'              => '',
+		// revision id of root directory that uses for caching control of root stat
+		'rootRev'         => '',
 		// driver type it uses volume root's CSS class name. e.g. 'group' -> Adds 'elfinder-group' to CSS class name.
 		'type'            => '',
 		// root directory path
@@ -3459,11 +3461,13 @@ abstract class elFinderVolumeDriver {
 				// need $path as key for netmount/netunmount
 				if (isset($this->sessionCache['rootstat'][$rootKey])) {
 					if ($ret = $this->sessionCache['rootstat'][$rootKey]) {
-						if (isset($this->options['phash'])) {
-							$ret['isroot'] = 1;
-							$ret['phash'] = $this->options['phash'];
+						if ($this->options['rootRev'] === $ret['rootRev']) {
+							if (isset($this->options['phash'])) {
+								$ret['isroot'] = 1;
+								$ret['phash'] = $this->options['phash'];
+							}
+							return $ret;
 						}
-						return $ret;
 					}
 				}
 			}
@@ -3494,6 +3498,7 @@ abstract class elFinderVolumeDriver {
 		if ($this->rootName) {
 			$stat['name'] = $this->rootName;
 		}
+		$stat['rootRev'] = $this->options['rootRev'];
 		$stat['options'] = $this->options(null);
 		return $stat;
 	}

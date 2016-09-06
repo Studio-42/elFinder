@@ -14,7 +14,7 @@ elFinder.prototype.commands.rm = function() {
 	this.getstate = function(sel) {
 		var fm = this.fm;
 		sel = sel || fm.selected();
-		return !this._disabled && sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && f.phash && !f.locked ? h : null }).length == sel.length
+		return !this._disabled && sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
@@ -36,7 +36,7 @@ elFinder.prototype.commands.rm = function() {
 		}
 		
 		$.each(files, function(i, file) {
-			if (!file.phash) {
+			if (fm.isRoot(file)) {
 				return !dfrd.reject(['errRm', file.name, 'errPerm']);
 			}
 			if (file.locked) {

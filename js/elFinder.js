@@ -970,6 +970,16 @@ window.elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Return file is root?
+	 * 
+	 * @param  Object  target file object
+	 * @return Boolean
+	 */
+	this.isRoot = function(file) {
+		return (file.isroot || ! file.phash)? true : false;
+	}
+	
+	/**
 	 * Return root dir hash for current working directory
 	 * 
 	 * @param  String   target hash
@@ -1678,7 +1688,7 @@ window.elFinder = function(node, opts) {
 			} else {
 				$.each(file, function(prop) {
 					if (! excludeProps || $.inArray(prop, excludeProps) === -1) {
-						if (file[prop] != origin[prop]) {
+						if (file[prop] !== origin[prop]) {
 							changed.push(file)
 							return false;
 						}
@@ -1745,7 +1755,7 @@ window.elFinder = function(node, opts) {
 				while(phash) {
 					if (pdir = self.file(phash)) {
 						if (phash.indexOf(curId) !== 0) {
-							if (! pdir.isroot || pdir.phash) {
+							if (! self.isRoot(pdir)) {
 								parents.push( {target: phash, cmd: 'tree'} );
 							}
 							parents.push( {target: phash, cmd: 'parents'} );
@@ -4962,7 +4972,7 @@ elFinder.prototype = {
 									self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
 								}
 							}
-							if (! file.phash || file.isroot) {
+							if (self.isRoot(file)) {
 								self.roots[file.volumeid] = file.hash;
 							}
 							
@@ -4973,7 +4983,7 @@ elFinder.prototype = {
 						}
 						
 						// volume root i18n name
-						if (! file.i18 && ! file.phash) {
+						if (! file.i18 && self.isRoot(file)) {
 							name = 'volume_' + file.name,
 							i18 = self.i18n(false, name);
 	

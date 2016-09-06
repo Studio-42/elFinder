@@ -43,7 +43,7 @@ elFinder.prototype.commands.mkdir = function() {
 			sel = (sel && sel[0] != cwd.hash)? this.files(sel) : [],
 			cnt = sel.length;
 
-		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt)? 0 : -1;
+		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f)? f : null  }).length == cnt)? 0 : -1;
 	}
 
 };
