@@ -92,6 +92,111 @@
 			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash; }).join('-'),
 			dialog = fm.getUI().find('#'+id),
 			customActions = [],
+			getSize = function(targets) {
+				var getLeafRoots = function(file) {
+						var targets = [];
+						if (file.mime === 'directory') {
+							$.each(fm.leafRoots, function(hash, roots) {
+								var phash;
+								if (hash === file.hash) {
+									targets.push.apply(targets, roots);
+								} else {
+									phash = (fm.file(hash) || {}).phash;
+									while(phash) {
+										if (phash === file.hash) {
+											targets.push.apply(targets, roots);
+										}
+										phash = (fm.file(phash) || {}).phash;
+									}
+								}
+							});
+						}
+						return targets;
+					},
+					checkPhash = function(hash) {
+						var dfd = $.Deferred(),
+							dir = fm.file(hash),
+							target = dir? dir.phash : hash;
+						if (target && ! fm.file(target)) {
+							fm.request({
+								data : {
+									cmd    : 'parents',
+									target : target
+								},
+								preventFail : true
+							}).done(function() {
+								fm.one('parentsdone', function() {
+									dfd.resolve();
+								});
+							}).fail(function() {
+								dfd.resolve();
+							});
+						} else {
+							dfd.resolve();
+						}
+						return dfd;
+					},
+					cache = function() {
+						var dfd = $.Deferred(),
+							cnt = Object.keys(fm.leafRoots).length;
+						
+						if (cnt > 0) {
+							$.each(fm.leafRoots, function(hash) {
+								checkPhash(hash).done(function() {
+									--cnt;
+									if (cnt < 1) {
+										dfd.resolve();
+									}
+								});
+							});
+						} else {
+							dfd.resolve();
+						}
+						return dfd;
+					};
+				
+				fm.autoSync('stop');
+				cache().done(function() {
+					var files = [], grps = {}, dfds = [];
+					
+					$.each(targets, function() {
+						files.push.apply(files, getLeafRoots(fm.file(this)));
+					});
+					targets.push.apply(targets, files);
+					
+					$.each(targets, function() {
+						var root = fm.root(this);
+						if (! grps[root]) {
+							grps[root] = [ this ];
+						} else {
+							grps[root].push(this);
+						}
+					});
+					
+					$.each(grps, function() {
+						dfds.push(fm.request({
+							data : {cmd : 'size', targets : this},
+							preventDefault : true
+						}));
+					});
+					reqs.push.apply(reqs, dfds);
+					
+					$.when.apply($, dfds).fail(function() {
+						replSpinner(msg.unknown, 'size');
+					}).done(function() {
+						var size = 0,
+							argLen = arguments.length,
+							i;
+						
+						for (i = 0; i < argLen; i++) {
+							size += parseInt(arguments[i].size);
+						}
+						replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown, 'size');
+					});
+					
+					fm.autoSync();
+				});
+			},
 			size, tmb, file, title, dcnt;
 			
 		if (!cnt) {
@@ -252,18 +357,7 @@
 		
 		// send request to count total size
 		if (count.length) {
-			reqs.push(fm.request({
-					data : {cmd : 'size', targets : count},
-					preventDefault : true
-				})
-				.fail(function() {
-					replSpinner(msg.unknown, 'size');
-				})
-				.done(function(data) {
-					var size = parseInt(data.size);
-					replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown, 'size');
-				})
-			);
+			getSize(count);
 		}
 		
 		// call custom actions
