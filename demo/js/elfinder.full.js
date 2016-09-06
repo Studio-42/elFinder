@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 3b1a2da) (2016-09-06)
+ * Version 2.1.14 (2.1-src Nightly: ce7b137) (2016-09-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5014,7 +5014,7 @@ elFinder.prototype = {
 							// set ts
 							$.each(self.leafRoots[file.hash], function() {
 								var f = self.file(this);
-								if (f.ts && (file.ts || 0) < f.ts) {
+								if (f && f.ts && (file.ts || 0) < f.ts) {
 									file.ts = f.ts;
 								}
 							});
@@ -5984,7 +5984,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 3b1a2da)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ce7b137)';
 
 
 
@@ -9850,12 +9850,14 @@ $.fn.elfindercwd = function(fm, options) {
 							if (fm.isInWindow(node, true)) {
 								if (tmb != '1') {
 									file = fm.file(hash);
-									if (file.tmb == '1') {
+									if (file.tmb !== tmb) {
 										file.tmb = tmb;
 									}
 									(function(node, tmb) {
 										$('<img/>')
-											.on('load', function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+											.on('load', function() {
+												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
+											})
 											.attr('src', tmb.url);
 									})(node, fm.tmb(file));
 								} else {
@@ -9879,7 +9881,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (bufferExt.getTmbs.length) {
 					loadThumbnails();
 				}
-				if (Object.keys(bufferExt.attachTmbs).length < 1) {
+				if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
 					wrapper.off(scrollEvent, attachThumbnails);
 					fm.unbind('resize', attachThumbnails);
 				}
@@ -10141,16 +10143,14 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target === this || e.target === cwd.get(0)) {
 						cwd.data('tmlongtap', setTimeout(function(){
-							//if (wrapper.data('touching')) {
-								// long tap
-								cwd.data('longtap', true);
-								fm.trigger('contextmenu', {
-									'type'    : 'cwd',
-									'targets' : [fm.cwd().hash],
-									'x'       : wrapper.data('touching').x,
-									'y'       : wrapper.data('touching').y
-								});
-							//}
+							// long tap
+							cwd.data('longtap', true);
+							fm.trigger('contextmenu', {
+								'type'    : 'cwd',
+								'targets' : [fm.cwd().hash],
+								'x'       : wrapper.data('touching').x,
+								'y'       : wrapper.data('touching').y
+							});
 						}, 500));
 					}
 				},
@@ -15860,7 +15860,11 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('contributor')));
 			html.push(atpl[r](author, 'Naoki Sawada &lt;hypweb@gmail.com&gt;')[r](work, fm.i18n('contributor')));
 			
-			fm.i18[fm.lang].translator && html.push(atpl[r](author, fm.i18[fm.lang].translator)[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
+			if (fm.i18[fm.lang].translator) {
+				$.each(fm.i18[fm.lang].translator.split(', '), function() {
+					html.push(atpl[r](author, this.trim())[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
+				});	
+			}
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
