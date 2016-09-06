@@ -353,8 +353,13 @@ window.elFinder = function(node, opts) {
 								self.leafRoots[f.phash].push(f.hash);
 							}
 						}
-						if (files[f.phash] && ! files[f.phash].dirs) {
-							files[f.phash].dirs = 1;
+						if (files[f.phash]) {
+							if (! files[f.phash].dirs) {
+								files[f.phash].dirs = 1;
+							}
+							if (f.ts && (files[f.phash].ts || 0) < f.ts) {
+								files[f.phash].ts = f.ts;
+							}
 						}
 					}
 					
@@ -4987,9 +4992,18 @@ elFinder.prototype = {
 							}
 						}
 						
-						// has leaf root to `dirs: 1`
-						if (! file.dirs && self.leafRoots[file.hash]) {
-							file.dirs = 1;
+						if (self.leafRoots[file.hash]) {
+							// has leaf root to `dirs: 1`
+							if (! file.dirs) {
+								file.dirs = 1;
+							}
+							// set ts
+							$.each(self.leafRoots[file.hash], function() {
+								var f = self.file(this);
+								if (f.ts && (file.ts || 0) < f.ts) {
+									file.ts = f.ts;
+								}
+							});
 						}
 					}
 					
