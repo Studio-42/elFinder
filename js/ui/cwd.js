@@ -905,12 +905,14 @@ $.fn.elfindercwd = function(fm, options) {
 							if (fm.isInWindow(node, true)) {
 								if (tmb != '1') {
 									file = fm.file(hash);
-									if (file.tmb == '1') {
+									if (file.tmb !== tmb) {
 										file.tmb = tmb;
 									}
 									(function(node, tmb) {
 										$('<img/>')
-											.on('load', function() { node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')"); })
+											.on('load', function() {
+												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
+											})
 											.attr('src', tmb.url);
 									})(node, fm.tmb(file));
 								} else {
@@ -934,7 +936,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (bufferExt.getTmbs.length) {
 					loadThumbnails();
 				}
-				if (Object.keys(bufferExt.attachTmbs).length < 1) {
+				if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
 					wrapper.off(scrollEvent, attachThumbnails);
 					fm.unbind('resize', attachThumbnails);
 				}
@@ -1196,16 +1198,14 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (e.target === this || e.target === cwd.get(0)) {
 						cwd.data('tmlongtap', setTimeout(function(){
-							//if (wrapper.data('touching')) {
-								// long tap
-								cwd.data('longtap', true);
-								fm.trigger('contextmenu', {
-									'type'    : 'cwd',
-									'targets' : [fm.cwd().hash],
-									'x'       : wrapper.data('touching').x,
-									'y'       : wrapper.data('touching').y
-								});
-							//}
+							// long tap
+							cwd.data('longtap', true);
+							fm.trigger('contextmenu', {
+								'type'    : 'cwd',
+								'targets' : [fm.cwd().hash],
+								'x'       : wrapper.data('touching').x,
+								'y'       : wrapper.data('touching').y
+							});
 						}, 500));
 					}
 				},
