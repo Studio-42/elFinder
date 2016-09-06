@@ -5000,7 +5000,7 @@ elFinder.prototype = {
 							// set ts
 							$.each(self.leafRoots[file.hash], function() {
 								var f = self.file(this);
-								if (f.ts && (file.ts || 0) < f.ts) {
+								if (f && f.ts && (file.ts || 0) < f.ts) {
 									file.ts = f.ts;
 								}
 							});
