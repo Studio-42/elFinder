@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: ce7b137) (2016-09-06)
+ * Version 2.1.14 (2.1-src Nightly: 2b79fbc) (2016-09-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -984,6 +984,16 @@ window.elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Return file is root?
+	 * 
+	 * @param  Object  target file object
+	 * @return Boolean
+	 */
+	this.isRoot = function(file) {
+		return (file.isroot || ! file.phash)? true : false;
+	}
+	
+	/**
 	 * Return root dir hash for current working directory
 	 * 
 	 * @param  String   target hash
@@ -1692,7 +1702,7 @@ window.elFinder = function(node, opts) {
 			} else {
 				$.each(file, function(prop) {
 					if (! excludeProps || $.inArray(prop, excludeProps) === -1) {
-						if (file[prop] != origin[prop]) {
+						if (file[prop] !== origin[prop]) {
 							changed.push(file)
 							return false;
 						}
@@ -1759,7 +1769,7 @@ window.elFinder = function(node, opts) {
 				while(phash) {
 					if (pdir = self.file(phash)) {
 						if (phash.indexOf(curId) !== 0) {
-							if (! pdir.isroot || pdir.phash) {
+							if (! self.isRoot(pdir)) {
 								parents.push( {target: phash, cmd: 'tree'} );
 							}
 							parents.push( {target: phash, cmd: 'parents'} );
@@ -4976,7 +4986,7 @@ elFinder.prototype = {
 									self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
 								}
 							}
-							if (! file.phash || file.isroot) {
+							if (self.isRoot(file)) {
 								self.roots[file.volumeid] = file.hash;
 							}
 							
@@ -4987,7 +4997,7 @@ elFinder.prototype = {
 						}
 						
 						// volume root i18n name
-						if (! file.i18 && ! file.phash) {
+						if (! file.i18 && self.isRoot(file)) {
 							name = 'volume_' + file.name,
 							i18 = self.i18n(false, name);
 	
@@ -5984,7 +5994,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: ce7b137)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2b79fbc)';
 
 
 
@@ -9201,7 +9211,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return f.perm? fm.formatFileMode(f.perm, 'both') : '';
 				},
 				marker : function(f) {
-					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
+					return (f.alias || f.mime === 'symlink-broken' || (f.isroot && f.phash)? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
 					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : ''),
@@ -13368,7 +13378,7 @@ $.fn.elfindertree = function(fm, opts) {
 					return cname;
 				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
-				symlink     : function(dir) { return dir.alias ? stpl : ''; },
+				symlink     : function(dir) { return dir.alias || dir.mime === 'symlink-broken' || (dir.isroot && dir.phash)? stpl : ''; },
 				style       : function(dir) { return dir.icon ? 'style="background:url(\''+fm.escape(dir.icon)+'\') 0 0 no-repeat;background-size:contain;"' : ''; }
 			},
 			
@@ -14200,7 +14210,7 @@ elFinder.prototype.commands.archive = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			chk = (cnt && sel[0].phash && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true }).length),
+			chk = (cnt && ! fm.isRoot(sel[0]) && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true }).length),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {
@@ -14626,7 +14636,7 @@ elFinder.prototype.commands.copy = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && $.map(sel, function(f) { return f.phash && f.read ? f : null  }).length == cnt ? 0 : -1;
+		return !this._disabled && cnt && $.map(sel, function(f) { return f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -14637,7 +14647,7 @@ elFinder.prototype.commands.copy = function() {
 				});
 
 		$.each(this.files(hashes), function(i, file) {
-			if (!(file.read && file.phash)) {
+			if (! file.read) {
 				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 		});
@@ -14660,6 +14670,7 @@ elFinder.prototype.commands.copy = function() {
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.cut = function() {
+	var fm = this.fm;
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+x shift+insert'
@@ -14669,18 +14680,17 @@ elFinder.prototype.commands.cut = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return !this._disabled && cnt && $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt ? 0 : -1;
+		return !this._disabled && cnt && $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f) ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var fm     = this.fm,
-			dfrd   = $.Deferred()
+		var dfrd = $.Deferred()
 				.fail(function(error) {
 					fm.error(error);
 				});
 
 		$.each(this.files(hashes), function(i, file) {
-			if (!(file.read && file.phash) ) {
+			if (!(file.read && ! file.locked && ! fm.isRoot(file)) ) {
 				return !dfrd.reject(['errCopy', file.name, 'errPerm']);
 			}
 			if (file.locked) {
@@ -15007,7 +15017,7 @@ elFinder.prototype.commands.duplicate = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && fm.cwd().write && $.map(sel, function(f) { return f.phash && f.read && f.phash === fm.cwd().hash? f : null  }).length == cnt ? 0 : -1;
+		return !this._disabled && cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -16495,7 +16505,7 @@ elFinder.prototype.commands.mkdir = function() {
 			sel = (sel && sel[0] != cwd.hash)? this.files(sel) : [],
 			cnt = sel.length;
 
-		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.phash && f.read && !f.locked ? f : null  }).length == cnt)? 0 : -1;
+		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f)? f : null  }).length == cnt)? 0 : -1;
 	}
 
 };
@@ -19877,7 +19887,7 @@ elFinder.prototype.commands.rm = function() {
 	this.getstate = function(sel) {
 		var fm = this.fm;
 		sel = sel || fm.selected();
-		return !this._disabled && sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && f.phash && !f.locked ? h : null }).length == sel.length
+		return !this._disabled && sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
@@ -19899,7 +19909,7 @@ elFinder.prototype.commands.rm = function() {
 		}
 		
 		$.each(files, function(i, file) {
-			if (!file.phash) {
+			if (fm.isRoot(file)) {
 				return !dfrd.reject(['errRm', file.name, 'errPerm']);
 			}
 			if (file.locked) {
