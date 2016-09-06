@@ -24,6 +24,7 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 	public function __construct() {
 		$this->options['type'] = 'group';
 		$this->options['path'] = '/';
+		$this->options['dirUrlOwn'] = true;
 		$this->options['disabled'] = array(
 			'archive',
 			'cut',
