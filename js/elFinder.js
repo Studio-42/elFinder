@@ -1440,9 +1440,9 @@ window.elFinder = function(node, opts) {
 						break;
 					default:
 						if (xhr.status == 403) {
-							error = ['errConnect', 'errAccess'];
+							error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
 						} else if (xhr.status == 404) {
-							error = ['errConnect', 'errNotFound'];
+							error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
 						} else {
 							if (xhr.status == 414 && options.type === 'get') {
 								// retry by POST method
