@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 2b79fbc) (2016-09-07)
+ * Version 2.1.14 (2.1-src Nightly: b6d77cb) (2016-09-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3193,12 +3193,9 @@ window.elFinder = function(node, opts) {
 			},
 			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
-			tm        = 'native-drag-timer',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
 			droppable = self.res(c, 'droppable'),
-			collapsed = self.res(c, 'navcollapse'),
-			expanded  = self.res(c, 'navexpand'),
 			dropover  = self.res(c, 'adroppable'),
 			arrow     = self.res(c, 'navarrow'),
 			clDropActive = self.res(c, 'adroppable'),
@@ -3280,12 +3277,6 @@ window.elFinder = function(node, opts) {
 						e.stopPropagation();
 						$elm.data(ent, true);
 						$elm.addClass(clDropActive);
-						if (!cwd && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							$elm.data(tm) && clearTimeout($elm.data(tm));
-							$elm.data(tm, setTimeout(function() {
-								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500));
-						}
 					} else {
 						$elm.data(disable, true);
 					}
@@ -3296,8 +3287,6 @@ window.elFinder = function(node, opts) {
 					var $elm = $(e.currentTarget);
 					e.preventDefault();
 					e.stopPropagation();
-					$elm.data(tm) && clearTimeout($elm.data(tm));
-					$elm.removeData(tm)
 					if ($elm.data(ent)) {
 						$elm.data(ent, false);
 					} else {
@@ -5994,7 +5983,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2b79fbc)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: b6d77cb)';
 
 
 
@@ -9211,7 +9200,7 @@ $.fn.elfindercwd = function(fm, options) {
 					return f.perm? fm.formatFileMode(f.perm, 'both') : '';
 				},
 				marker : function(f) {
-					return (f.alias || f.mime === 'symlink-broken' || (f.isroot && f.phash)? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
+					return (f.alias || f.mime == 'symlink-broken' ? symlinkTpl : '')+(!f.read || !f.write ? permsTpl : '')+(f.locked ? lockTpl : '');
 				},
 				tooltip : function(f) {
 					var title = fm.formatDate(f) + (f.size > 0 ? ' ('+fm.formatSize(f.size)+')' : ''),
@@ -13290,11 +13279,16 @@ $.fn.elfindertree = function(fm, opts) {
 						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
 					}
-					dst.addClass(hover)
+					dst.addClass(hover);
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 						dst.data('expandTimer', setTimeout(function() {
-							dst.children('.'+arrow).click();
+							dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
 						}, 500));
+					}
+					if (dst.is('.elfinder-ro,.elfinder-na')) {
+						dst.removeClass(dropover);
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					hash = fm.navId2Hash(dst.attr('id'));
 					dst.data('dropover', hash);
@@ -13378,7 +13372,7 @@ $.fn.elfindertree = function(fm, opts) {
 					return cname;
 				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
-				symlink     : function(dir) { return dir.alias || dir.mime === 'symlink-broken' || (dir.isroot && dir.phash)? stpl : ''; },
+				symlink     : function(dir) { return dir.alias ? stpl : ''; },
 				style       : function(dir) { return dir.icon ? 'style="background:url(\''+fm.escape(dir.icon)+'\') 0 0 no-repeat;background-size:contain;"' : ''; }
 			},
 			
@@ -13746,7 +13740,8 @@ $.fn.elfindertree = function(fm, opts) {
 						(node || tree.find('div.'+uploadable)).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
 					}
 					if (!node || node.closest('div.'+wrapperRoot).hasClass(pastable)) {
-						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+						//target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+')');
 					} else {
 						target = $();
 					}
@@ -13808,9 +13803,25 @@ $.fn.elfindertree = function(fm, opts) {
 						link.toggleClass(hover, enter);
 					}
 				})
-				// add/remove dropover css class
-				.on('dropover dropout drop', selNavdir, function(e) {
-					$(this)[e.type == 'dropover' ? 'addClass' : 'removeClass'](dropover+' '+hover);
+				// native drag enter
+				.on('dragenter', selNavdir, function(e) {
+					if (e.originalEvent.dataTransfer) {
+						var dst = $(this);
+						dst.addClass(hover);
+						if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
+							dst.data('expandTimer', setTimeout(function() {
+								dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
+							}, 500));
+						}
+					}
+				})
+				// native drag leave
+				.on('dragleave', selNavdir, function(e) {
+					if (e.originalEvent.dataTransfer) {
+						var dst = $(this);
+						dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
+						dst.removeClass(hover);
+					}
 				})
 				// open dir or open subfolders in tree
 				.on('click', selNavdir, function(e) {
