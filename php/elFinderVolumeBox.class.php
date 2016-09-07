@@ -1038,7 +1038,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
 			$res = json_decode(curl_exec($curl));
 			curl_close($curl);
 			
-			if($url = $this->getSharedWebContentLink($curl)) {
+			if($url = $this->getSharedWebContentLink($res)) {
 				return $url;
 			}
 		}
