@@ -172,11 +172,16 @@ $.fn.elfindertree = function(fm, opts) {
 						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
 					}
-					dst.addClass(hover)
+					dst.addClass(hover);
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 						dst.data('expandTimer', setTimeout(function() {
-							dst.children('.'+arrow).click();
+							dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
 						}, 500));
+					}
+					if (dst.is('.elfinder-ro,.elfinder-na')) {
+						dst.removeClass(dropover);
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						return;
 					}
 					hash = fm.navId2Hash(dst.attr('id'));
 					dst.data('dropover', hash);
@@ -260,7 +265,7 @@ $.fn.elfindertree = function(fm, opts) {
 					return cname;
 				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
-				symlink     : function(dir) { return dir.alias || dir.mime === 'symlink-broken' || (dir.isroot && dir.phash)? stpl : ''; },
+				symlink     : function(dir) { return dir.alias ? stpl : ''; },
 				style       : function(dir) { return dir.icon ? 'style="background:url(\''+fm.escape(dir.icon)+'\') 0 0 no-repeat;background-size:contain;"' : ''; }
 			},
 			
@@ -628,7 +633,8 @@ $.fn.elfindertree = function(fm, opts) {
 						(node || tree.find('div.'+uploadable)).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
 					}
 					if (!node || node.closest('div.'+wrapperRoot).hasClass(pastable)) {
-						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+						//target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
+						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+')');
 					} else {
 						target = $();
 					}
@@ -690,9 +696,25 @@ $.fn.elfindertree = function(fm, opts) {
 						link.toggleClass(hover, enter);
 					}
 				})
-				// add/remove dropover css class
-				.on('dropover dropout drop', selNavdir, function(e) {
-					$(this)[e.type == 'dropover' ? 'addClass' : 'removeClass'](dropover+' '+hover);
+				// native drag enter
+				.on('dragenter', selNavdir, function(e) {
+					if (e.originalEvent.dataTransfer) {
+						var dst = $(this);
+						dst.addClass(hover);
+						if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
+							dst.data('expandTimer', setTimeout(function() {
+								dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
+							}, 500));
+						}
+					}
+				})
+				// native drag leave
+				.on('dragleave', selNavdir, function(e) {
+					if (e.originalEvent.dataTransfer) {
+						var dst = $(this);
+						dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
+						dst.removeClass(hover);
+					}
 				})
 				// open dir or open subfolders in tree
 				.on('click', selNavdir, function(e) {
