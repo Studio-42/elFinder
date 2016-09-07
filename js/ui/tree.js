@@ -260,7 +260,7 @@ $.fn.elfindertree = function(fm, opts) {
 					return cname;
 				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
-				symlink     : function(dir) { return dir.alias || dir.mime === 'symlink-broken' || (dir.isroot && dir.phash)? stpl : ''; },
+				symlink     : function(dir) { return dir.alias ? stpl : ''; },
 				style       : function(dir) { return dir.icon ? 'style="background:url(\''+fm.escape(dir.icon)+'\') 0 0 no-repeat;background-size:contain;"' : ''; }
 			},
 			
