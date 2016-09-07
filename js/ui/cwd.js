@@ -1521,11 +1521,11 @@ $.fn.elfindercwd = function(fm, options) {
 									cwd.selectable(selectableOption).data('selectable', true);
 								}, 10);
 							}
-							target.draggable('option', 'disabled', e.shiftKey);
+							target.draggable('option', 'disabled', e.shiftKey).removeClass('ui-state-disabled');
 							if (e.shiftKey) {
 								target.attr('draggable', 'true');
 							} else {
-								target.attr('draggable', 'false')
+								target.removeAttr('draggable')
 								      .draggable('option', 'cursorAt', {left: 50 - parseInt($(e.currentTarget).css('margin-left')), top: 47});
 							}
 						})

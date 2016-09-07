@@ -2,6 +2,11 @@
 /*            COMMON ELFINDER STUFFS         */
 /*********************************************/
 
+/* for old jQuery UI */
+.ui-front {
+    z-index: 100;
+}
+
 /* common container */
 .elfinder {
 	padding: 0;

@@ -753,7 +753,7 @@ window.elFinder = function(node, opts) {
 		 **/
 		self.draggable = {
 			appendTo   : node,
-			addClasses : true,
+			addClasses : false,
 			distance   : 4,
 			revert     : true,
 			refreshPositions : false,
@@ -3290,7 +3290,7 @@ window.elFinder = function(node, opts) {
 				}
 			})
 			.on('drop', '.native-droppable', function(e){
-				if (e.originalEvent.dataTransfer) {
+				if (e.originalEvent && e.originalEvent.dataTransfer) {
 					var $elm = $(e.currentTarget)
 						id;
 					e.preventDefault();
