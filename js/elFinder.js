@@ -406,7 +406,7 @@ window.elFinder = function(node, opts) {
 					// dragging
 					if ($.ui.ddmanager) {
 						ddm = $.ui.ddmanager.current;
-						ddm && ddm.cancel();
+						ddm && ddm.helper && ddm.cancel();
 					}
 				}
 
@@ -744,7 +744,8 @@ window.elFinder = function(node, opts) {
 	
 	// draggable closure
 	(function() {
-		var ltr, wzRect, wzBottom, nodeStyle;
+		var ltr, wzRect, wzBottom, nodeStyle,
+			keyEvt = keydown + 'draggable' + ' keyup.' + namespace + 'draggable';
 
 		/**
 		 * Base draggable options
@@ -753,7 +754,7 @@ window.elFinder = function(node, opts) {
 		 **/
 		self.draggable = {
 			appendTo   : node,
-			addClasses : true,
+			addClasses : false,
 			distance   : 4,
 			revert     : true,
 			refreshPositions : false,
@@ -823,6 +824,7 @@ window.elFinder = function(node, opts) {
 				var helper = ui.helper,
 					files;
 				
+				$(document).off(keyEvt);
 				$(this).elfUiWidgetInstance('draggable') && $(this).draggable('option', { refreshPositions : false });
 				self.draggingUiHelper = null;
 				self.trigger('focus').trigger('dragstop');
@@ -865,7 +867,7 @@ window.elFinder = function(node, opts) {
 					helper.append(icon(files[hashes[l-1]]) + '<span class="elfinder-drag-num">'+l+'</span>');
 				}
 				
-				$(document).on(keydown + ' keyup.' + namespace, function(e){
+				$(document).on(keyEvt, function(e){
 					var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
 					if (ctr !== chk) {
 						ctr = chk;
@@ -905,7 +907,7 @@ window.elFinder = function(node, opts) {
 				c       = 'class',
 				cnt, hash, i, h;
 			
-			if (ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.pageX, e.pageY)) {
+			if (typeof e.button === 'undefined' || ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.pageX, e.pageY)) {
 				return false;
 			}
 			if (dst.hasClass(self.res(c, 'cwdfile'))) {
@@ -3290,7 +3292,7 @@ window.elFinder = function(node, opts) {
 				}
 			})
 			.on('drop', '.native-droppable', function(e){
-				if (e.originalEvent.dataTransfer) {
+				if (e.originalEvent && e.originalEvent.dataTransfer) {
 					var $elm = $(e.currentTarget)
 						id;
 					e.preventDefault();
