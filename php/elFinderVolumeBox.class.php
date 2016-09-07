@@ -44,7 +44,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver {
      *
      * @var string
      */
-    const FETCHFIELDS = 'type,id,name,created_at,modified_at,description,size,parent,permissions';
+    const FETCHFIELDS = 'type,id,name,created_at,modified_at,description,size,parent,permissions,file_version,shared_link';
 	
 	/**
      * Box.com service object
