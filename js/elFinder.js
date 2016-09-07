@@ -3179,12 +3179,9 @@ window.elFinder = function(node, opts) {
 			},
 			ent       = 'native-drag-enter',
 			disable   = 'native-drag-disable',
-			tm        = 'native-drag-timer',
 			c         = 'class',
 			navdir    = self.res(c, 'navdir'),
 			droppable = self.res(c, 'droppable'),
-			collapsed = self.res(c, 'navcollapse'),
-			expanded  = self.res(c, 'navexpand'),
 			dropover  = self.res(c, 'adroppable'),
 			arrow     = self.res(c, 'navarrow'),
 			clDropActive = self.res(c, 'adroppable'),
@@ -3266,12 +3263,6 @@ window.elFinder = function(node, opts) {
 						e.stopPropagation();
 						$elm.data(ent, true);
 						$elm.addClass(clDropActive);
-						if (!cwd && $elm.hasClass(navdir) && $elm.is('.'+collapsed+':not(.'+expanded+')')) {
-							$elm.data(tm) && clearTimeout($elm.data(tm));
-							$elm.data(tm, setTimeout(function() {
-								$elm.is('.'+collapsed+'.'+dropover) && $elm.children('.'+arrow).click();
-							}, 500));
-						}
 					} else {
 						$elm.data(disable, true);
 					}
@@ -3282,8 +3273,6 @@ window.elFinder = function(node, opts) {
 					var $elm = $(e.currentTarget);
 					e.preventDefault();
 					e.stopPropagation();
-					$elm.data(tm) && clearTimeout($elm.data(tm));
-					$elm.removeData(tm)
 					if ($elm.data(ent)) {
 						$elm.data(ent, false);
 					} else {
