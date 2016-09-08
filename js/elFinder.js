@@ -387,7 +387,7 @@ window.elFinder = function(node, opts) {
 					&& shortcut.shiftKey == e.shiftKey 
 					&& shortcut.ctrlKey  == ctrlKey 
 					&& shortcut.altKey   == e.altKey) {
-						e.preventDefault()
+						e.preventDefault();
 						e.stopPropagation();
 						shortcut.callback(e, self);
 						self.debug('shortcut-exec', i+' : '+shortcut.description);
@@ -400,7 +400,7 @@ window.elFinder = function(node, opts) {
 				}
 				
 				// cancel any actions by [Esc] key
-				if (code == 27) {
+				if (e.type === 'keydown' && code == 27) {
 					// copy or cut 
 					self.clipboard().length && self.clipboard([]);
 					// dragging
@@ -408,6 +408,8 @@ window.elFinder = function(node, opts) {
 						ddm = $.ui.ddmanager.current;
 						ddm && ddm.helper && ddm.cancel();
 					}
+					// button menus
+					node.find('.ui-widget.elfinder-button-menu').hide();
 				}
 
 			}
