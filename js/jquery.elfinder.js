@@ -1,32 +1,40 @@
 /*** jQuery UI droppable performance tune for elFinder ***/
 (function(){
-if ($.ui && $.ui.ddmanager) {
-	var origin = $.ui.ddmanager.prepareOffsets;
-	$.ui.ddmanager.prepareOffsets = function( t, event ) {
-		var isOutView = function(elem) {
-			if (elem.is(':hidden')) {
-				return true;
+if ($.ui) {
+	if ($.ui.ddmanager) {
+		var origin = $.ui.ddmanager.prepareOffsets;
+		$.ui.ddmanager.prepareOffsets = function( t, event ) {
+			var isOutView = function(elem) {
+				if (elem.is(':hidden')) {
+					return true;
+				}
+				var rect = elem[0].getBoundingClientRect();
+				return document.elementFromPoint(rect.left, rect.top)? false : true;
 			}
-			var rect = elem[0].getBoundingClientRect();
-			return document.elementFromPoint(rect.left, rect.top)? false : true;
-		}
-		
-		if (event.type === 'mousedown' || t.options.elfRefresh) {
-			var i, d,
-			m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
-			l = m.length;
-			for ( i = 0; i < l; i++ ) {
-				d = m[ i ];
-				if (d.options.autoDisable && (!d.options.disabled || d.options.autoDisable > 1)) {
-					d.options.disabled = isOutView(d.element);
-					d.options.autoDisable = d.options.disabled? 2 : 1;
+			
+			if (event.type === 'mousedown' || t.options.elfRefresh) {
+				var i, d,
+				m = $.ui.ddmanager.droppables[ t.options.scope ] || [],
+				l = m.length;
+				for ( i = 0; i < l; i++ ) {
+					d = m[ i ];
+					if (d.options.autoDisable && (!d.options.disabled || d.options.autoDisable > 1)) {
+						d.options.disabled = isOutView(d.element);
+						d.options.autoDisable = d.options.disabled? 2 : 1;
+					}
 				}
 			}
-		}
-		
-		// call origin function
-		return origin( t, event );
-	};
+			
+			// call origin function
+			return origin( t, event );
+		};
+	}
+	if (! $.ui.keyCode.F10) {
+		$.ui.keyCode.F10 = navigator.userAgent.indexOf('Mac') !== -1 ? 109 : 121;
+	}
+	if (! $.ui.keyCode.RIGHTOPTION) {
+		$.ui.keyCode.RIGHTOPTION = navigator.userAgent.indexOf('Mac') !== -1 ? 61 : 93;
+	}
 }
 })();
 

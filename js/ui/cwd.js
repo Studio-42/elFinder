@@ -1856,6 +1856,14 @@ $.fn.elfindercwd = function(fm, options) {
 			}, 50);
 		});
 		
+		$(document).on('keydown.'+fm.namespace, function(e) {
+			if (e.keyCode == $.ui.keyCode.ESCAPE) {
+				if (! fm.getUI().find('.ui-widget:visible').length) {
+					unselectAll();
+				}
+			}
+		});
+		
 		fm
 			.one('init', function(){
 				var style = document.createElement('style'),

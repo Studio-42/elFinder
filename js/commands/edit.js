@@ -183,7 +183,7 @@ elFinder.prototype.commands.edit = function() {
 							value, start;
 						
 						e.stopPropagation();
-						if (code == 9) {
+						if (code == $.ui.keyCode.TAB) {
 							e.preventDefault();
 							// insert tab on tab press
 							if (this.setSelectionRange) {
@@ -197,11 +197,11 @@ elFinder.prototype.commands.edit = function() {
 						
 						if (e.ctrlKey || e.metaKey) {
 							// close on ctrl+w/q
-							if (code == 81 || code == 87) {
+							if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
 								e.preventDefault();
 								cancel();
 							}
-							if (code == 83) {
+							if (code == 'S'.charCodeAt(0)) {
 								e.preventDefault();
 								save();
 							}

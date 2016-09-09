@@ -482,7 +482,7 @@
 			
 			// close window on escape
 			$(document).keydown(function(e) {
-				e.keyCode == 27 && self.opened() && win.trigger('close')
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && win.trigger('close')
 			})
 			
 			if ($.fn.resizable) {

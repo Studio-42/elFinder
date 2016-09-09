@@ -395,14 +395,16 @@ window.elFinder = function(node, opts) {
 				});
 				
 				// prevent tab out of elfinder
-				if (code == 9 && !$(e.target).is(':input')) {
+				if (code == $.ui.keyCode.TAB && !$(e.target).is(':input')) {
 					e.preventDefault();
 				}
 				
 				// cancel any actions by [Esc] key
-				if (e.type === 'keydown' && code == 27) {
+				if (e.type === 'keydown' && code == $.ui.keyCode.ESCAPE) {
 					// copy or cut 
-					self.clipboard().length && self.clipboard([]);
+					if (! node.find('.ui-widget:visible').length) {
+						self.clipboard().length && self.clipboard([]);
+					}
 					// dragging
 					if ($.ui.ddmanager) {
 						ddm = $.ui.ddmanager.current;
@@ -1982,7 +1984,7 @@ window.elFinder = function(node, opts) {
 				parts   = pattern.split('+');
 				code    = (code = parts.pop()).length == 1 
 					? code > 0 ? code : code.charCodeAt(0) 
-					: $.ui.keyCode[code];
+					: (code > 0 ? code : $.ui.keyCode[code]);
 
 				if (code && !shortcuts[pattern]) {
 					shortcuts[pattern] = {
