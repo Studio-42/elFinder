@@ -4657,7 +4657,7 @@ elFinder.prototype = {
 						self.trigger('upload', data);
 						data.sync && self.sync();
 					}),
-				name = 'iframe-'+namespace+(++self.iframeCnt),
+				name = 'iframe-'+fm.namespace+(++self.iframeCnt),
 				form = $('<form action="'+self.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
 				msie = this.UA.IE,
 				// clear timeouts, close notification dialog, remove form/iframe
