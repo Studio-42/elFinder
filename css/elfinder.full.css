@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: 7b67eb1) (2016-09-08)
+ * Version 2.1.14 (2.1-src Nightly: c558e41) (2016-09-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -126,6 +126,8 @@
 .elfinder-resize-row { margin-bottom:7px; position:relative;}
 
 .elfinder-resize-label { float:left; width:80px; padding-top: 3px; }
+
+.elfinder-resize-checkbox-label { border: 1px solid transparent; }
 
 .elfinder-resize-reset {
 	width:16px;
@@ -585,6 +587,11 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* for html5 drag and drop */
 [draggable=true] {
 	-khtml-user-drag: element;
+}
+
+/* for place holder to content editable elements */ 
+.elfinder [contentEditable=true]:empty:not(:focus):before {
+	content:attr(data-ph);
 }
 
 
