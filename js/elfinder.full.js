@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: fca40e8) (2016-09-10)
+ * Version 2.1.14 (2.1-src Nightly: e516af5) (2016-09-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5989,7 +5989,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: fca40e8)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: e516af5)';
 
 
 
@@ -8001,7 +8001,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-09-09
+ * @version 2016-09-10
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -8360,6 +8360,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Page turning', // from v2.1.15 added 9.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -9797,6 +9798,7 @@ $.fn.elfindercwd = function(fm, options) {
 						colWidth && setColwidth();
 						fixTableHeader({fitWidth: true});
 					}
+					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
 					proc = false;
 				} else if (! proc) {
@@ -11164,6 +11166,8 @@ $.fn.elfindercwd = function(fm, options) {
 					},
 					wz.offset())
 				);
+				
+				bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 			})
 			.bind('changeclipboard', function(e) {
 				clipCuts = {};
@@ -11322,6 +11326,33 @@ $.fn.elfindercwd = function(fm, options) {
 					unselectAll();
 					scrollToView(cwd.find('[id]:last').trigger(evtSelect)) ;
 					trigger();
+				}
+			})
+			.shortcut({
+				pattern     : 'page_up',
+				description : 'pageTurning',
+				callback    : function(e) {
+					if (bufferExt.itemH) {
+						wrapper.scrollTop(
+							Math.round(
+								wrapper.scrollTop()
+								- (Math.floor((wrapper.height() + (list? bufferExt.itemH * -1 : 16)) / bufferExt.itemH)) * bufferExt.itemH
+							)
+						);
+					}
+				}
+			}).shortcut({
+				pattern     : 'page_down',
+				description : 'pageTurning',
+				callback    : function(e) { 
+					if (bufferExt.itemH) {
+						wrapper.scrollTop(
+							Math.round(
+								wrapper.scrollTop()
+								+ (Math.floor((wrapper.height() + (list? bufferExt.itemH * -1 : 16)) / bufferExt.itemH)) * bufferExt.itemH
+							)
+						);
+					}
 				}
 			});
 		
@@ -14578,7 +14609,20 @@ elFinder.prototype.commands.archive = function() {
 			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
 		}
 		
-		return dfrd;
+		return dfrd.done(function(data) {
+			var newItem;
+			if (data && data.added && data.added[0]) {
+				fm.one('archivedone', function() {
+					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+					if (newItem.length) {
+						newItem.trigger('scrolltoview');
+					} else {
+						fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+						fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdarchive')])});
+					}
+				});
+			}
+		});
 	}
 
 };
@@ -15362,6 +15406,19 @@ elFinder.prototype.commands.duplicate = function() {
 		return fm.request({
 			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
 			notify : {type : 'copy', cnt : cnt}
+		}).done(function(data) {
+			var newItem;
+			if (data && data.added && data.added[0]) {
+				fm.one('duplicatedone', function() {
+					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+					if (newItem.length) {
+						newItem.trigger('scrolltoview');
+					} else {
+						fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+						fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdduplicate')])});
+					}
+				});
+			}
 		});
 		
 	}
