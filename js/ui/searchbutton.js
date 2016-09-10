@@ -76,9 +76,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 				.on('keydown', function(e) {
 					e.stopPropagation();
 					
-					e.keyCode == 13 && search();
+					e.keyCode == $.ui.keyCode.ENTER && search();
 					
-					if (e.keyCode== 27) {
+					if (e.keyCode == $.ui.keyCode.ESCAPE) {
 						e.preventDefault();
 						abort();
 					}
@@ -123,7 +123,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					.on('keyup', function(e) {
 						input.data('imetm') && clearTimeout(input.data('imetm'));
 						if (input.data('composing')) {
-							e.keyCode === 13 && input.trigger('compositionend');
+							e.keyCode === $.ui.keyCode.ENTER && input.trigger('compositionend');
 						} else {
 							input.trigger('input');
 						}

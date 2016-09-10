@@ -164,3 +164,8 @@
 	-khtml-user-drag: element;
 }
 
+/* for place holder to content editable elements */ 
+.elfinder [contentEditable=true]:empty:not(:focus):before {
+	content:attr(data-ph);
+}
+

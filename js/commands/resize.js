@@ -47,7 +47,7 @@ elFinder.prototype.commands.resize = function() {
 					uideg270 = $('<button/>').attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')),
 					uideg90  = $('<button/>').attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')),
 					uiprop   = $('<span />'),
-					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
+					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset elfinder-tabstop"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
 					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
@@ -123,8 +123,7 @@ elFinder.prototype.commands.resize = function() {
 						.change(function() {
 							rotate.update();
 						}),
-					uidegslider = $('<div class="elfinder-resize-rotate-slider"/>')
-						.addClass('touch-punch')
+					uidegslider = $('<div class="elfinder-resize-rotate-slider touch-punch"/>')
 						.slider({
 							min: 0,
 							max: 360,
@@ -138,7 +137,17 @@ elFinder.prototype.commands.resize = function() {
 							slide: function(event, ui) {
 								rotate.update(ui.value, false);
 							}
-						}),
+						}).find('.ui-slider-handle')
+							.addClass('elfinder-tabstop')
+							.off('keydown')
+							.on('keydown', function(e) {
+								if (e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.RIGHT) {
+									e.stopPropagation();
+									e.preventDefault();
+									rotate.update(Number(degree.val()) + (e.keyCode == $.ui.keyCode.RIGHT? 1 : -1), false);
+								}
+							})
+						.end(),
 					ratio   = 1,
 					prop    = 1,
 					owidth  = 0,
@@ -208,30 +217,10 @@ elFinder.prototype.commands.resize = function() {
 							
 							uitype[ctrgrup]('enable');
 							inputFirst = control.find('input,select').prop('disabled', false)
-								.filter(':text').keydown(function(e) {
-									var c = e.keyCode, i;
-
-									e.stopPropagation();
-								
-									if ((c >= 37 && c <= 40) 
-									|| c == $.ui.keyCode.BACKSPACE 
-									|| c == $.ui.keyCode.DELETE 
-									|| (c == 65 && (e.ctrlKey||e.metaKey))
-									|| c == 27) {
-										return;
-									}
-								
-									if (c == 9) {
-										i = $(this).parent()[e.shiftKey ? 'prevAll' : 'nextAll']('div.elfinder-resize-row').children(':text');
-
-										if (i.length) {
-											i[0].focus();
-										} else {
-											$(this).parent().parent().find(':text:' + (e.shiftKey ? 'last' : 'first')).focus();
-										}
-									}
-								
-									if (c == 13) {
+								.filter(':text').on('keydown', function(e) {
+									if (e.keyCode == $.ui.keyCode.ENTER) {
+										e.stopPropagation();
+										e.preventDefault();
 										fm.confirm({
 											title  : $('input:checked', uitype).val(),
 											text   : 'confirmReq',
@@ -243,15 +232,19 @@ elFinder.prototype.commands.resize = function() {
 											},
 											cancel : {
 												label    : 'btnCancel',
-												callback : function(){}
+												callback : function(){
+													$(this).focus();
+												}
 											}
 										});
 										return;
 									}
-								
-									if (!((c >= 48 && c <= 57) || (c >= 96 && c <= 105))) {
-										e.preventDefault();
-									}
+								})
+								.on('keyup', function() {
+									var $this = $(this);
+									setTimeout(function() {
+										$this.val($this.val().replace(/[^0-9]/g, ''));
+									}, 10);
 								})
 								.filter(':first');
 								
@@ -650,7 +643,7 @@ elFinder.prototype.commands.resize = function() {
 				uiresize.append(
 					$(row).append($(label).text(fm.i18n('width')), width, reset),
 					$(row).append($(label).text(fm.i18n('height')), height),
-					$(row).append($('<label/>').text(fm.i18n('aspectRatio')).prepend(constr)),
+					$(row).append($('<label class="elfinder-resize-checkbox-label"/>').text(fm.i18n('aspectRatio')).prepend(constr)),
 					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
 					$(row).append($(label).text(fm.i18n('scale')), uiprop)
 				);
@@ -730,6 +723,8 @@ elFinder.prototype.commands.resize = function() {
 				
 				buttons[fm.i18n('btnApply')] = save;
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
+				
+				dialog.find('input,button').addClass('elfinder-tabstop');
 				
 				base = fm.dialog(dialog, {
 					title          : fm.escape(file.name),

@@ -387,7 +387,7 @@ window.elFinder = function(node, opts) {
 					&& shortcut.shiftKey == e.shiftKey 
 					&& shortcut.ctrlKey  == ctrlKey 
 					&& shortcut.altKey   == e.altKey) {
-						e.preventDefault()
+						e.preventDefault();
 						e.stopPropagation();
 						shortcut.callback(e, self);
 						self.debug('shortcut-exec', i+' : '+shortcut.description);
@@ -395,19 +395,23 @@ window.elFinder = function(node, opts) {
 				});
 				
 				// prevent tab out of elfinder
-				if (code == 9 && !$(e.target).is(':input')) {
+				if (code == $.ui.keyCode.TAB && !$(e.target).is(':input')) {
 					e.preventDefault();
 				}
 				
 				// cancel any actions by [Esc] key
-				if (code == 27) {
+				if (e.type === 'keydown' && code == $.ui.keyCode.ESCAPE) {
 					// copy or cut 
-					self.clipboard().length && self.clipboard([]);
+					if (! node.find('.ui-widget:visible').length) {
+						self.clipboard().length && self.clipboard([]);
+					}
 					// dragging
 					if ($.ui.ddmanager) {
 						ddm = $.ui.ddmanager.current;
 						ddm && ddm.helper && ddm.cancel();
 					}
+					// button menus
+					node.find('.ui-widget.elfinder-button-menu').hide();
 				}
 
 			}
@@ -1440,9 +1444,9 @@ window.elFinder = function(node, opts) {
 						break;
 					default:
 						if (xhr.status == 403) {
-							error = ['errConnect', 'errAccess'];
+							error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
 						} else if (xhr.status == 404) {
-							error = ['errConnect', 'errNotFound'];
+							error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
 						} else {
 							if (xhr.status == 414 && options.type === 'get') {
 								// retry by POST method
@@ -1980,7 +1984,7 @@ window.elFinder = function(node, opts) {
 				parts   = pattern.split('+');
 				code    = (code = parts.pop()).length == 1 
 					? code > 0 ? code : code.charCodeAt(0) 
-					: $.ui.keyCode[code];
+					: (code > 0 ? code : $.ui.keyCode[code]);
 
 				if (code && !shortcuts[pattern]) {
 					shortcuts[pattern] = {
@@ -4653,7 +4657,7 @@ elFinder.prototype = {
 						self.trigger('upload', data);
 						data.sync && self.sync();
 					}),
-				name = 'iframe-'+namespace+(++self.iframeCnt),
+				name = 'iframe-'+fm.namespace+(++self.iframeCnt),
 				form = $('<form action="'+self.uploadURL+'" method="post" enctype="multipart/form-data" encoding="multipart/form-data" target="'+name+'" style="display:none"><input type="hidden" name="cmd" value="upload" /></form>'),
 				msie = this.UA.IE,
 				// clear timeouts, close notification dialog, remove form/iframe

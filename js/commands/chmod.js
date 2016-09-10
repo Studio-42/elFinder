@@ -271,7 +271,7 @@ elFinder.prototype.commands.chmod = function() {
 		$('#' + id + '-perm').on('keydown', function(e) {
 			var c = e.keyCode;
 			e.stopPropagation();
-			if (c == 13) {
+			if (c == $.ui.keyCode.ENTER) {
 				save();
 				return;
 			}
