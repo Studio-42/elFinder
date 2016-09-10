@@ -60,3 +60,9 @@
 .elfinder-contextmenu .ui-state-hover { background: #3875d7; color:#fff; }
 .elfinder-contextmenu .ui-state-hover .elfinder-contextmenu-arrow { background-image:url('../img/arrows-active.png'); }
 
+/* dialog */
+.elfinder .ui-dialog input:text.ui-state-hover,
+.elfinder .ui-dialog textarea.ui-state-hover {
+	background-image: none;
+	background-color: inherit;
+}

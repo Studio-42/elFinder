@@ -67,7 +67,7 @@ elFinder.prototype.commands.upload = function() {
 							} else {
 								if (targetDir.hash !== cwdHash) {
 									node = $('<div/>').append(
-										$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
+										$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'+fm.i18n('cmdopendir')+'</span></button>')
 										.on('mouseenter mouseleave', function(e) { 
 											$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 										}).on('click', function() {
@@ -101,12 +101,13 @@ elFinder.prototype.commands.upload = function() {
 					return $();
 				}
 				
-				return $('<div class="elfinder-upload-dirselect" title="' + fm.i18n('folders') + '"/>')
+				return $('<div class="elfinder-upload-dirselect elfinder-tabstop" title="' + fm.i18n('folders') + '"/>')
 				.on('click', function(e) {
 					e.stopPropagation();
 					e.preventDefault();
 					dirs = fm.sortFiles(dirs);
-					var cwd    = fm.cwd(),
+					var $this  = $(this),
+						cwd    = fm.cwd(),
 						base   = dialog.closest('div.ui-dialog'),
 						getRaw = function(f, icon) {
 							return {
@@ -117,6 +118,7 @@ elFinder.prototype.commands.upload = function() {
 									var title = base.children('.ui-dialog-titlebar:first').children('span.elfinder-upload-target');
 									targets = [ f.hash ];
 									title.html(' - ' + fm.escape(f.i18 || f.name));
+									$this.focus();
 								},
 								options  : {
 									className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
@@ -129,17 +131,18 @@ elFinder.prototype.commands.upload = function() {
 					$.each(dirs, function(i, f) {
 						raw.push(getRaw(f, 'dir'));
 					});
+					$this.blur();
 					fm.trigger('contextmenu', {
 						raw: raw,
-						x: e.pageX,
-						y: e.pageY,
+						x: e.pageX || $(this).offset().left,
+						y: e.pageY || $(this).offset().top,
 						prevNode: base,
 						fitHeight: true
 					});
 				}).append('<span class="elfinder-button-icon elfinder-button-icon-dir" />');
 			},
 			dfrd = $.Deferred(),
-			dialog, input, button, dropbox, pastebox, dropUpload, paste, dirs, spinner;
+			dialog, input, button, dropbox, pastebox, dropUpload, paste, dirs, spinner, uidialog;
 		
 		dropUpload = function(e) {
 			e.stopPropagation();
@@ -249,8 +252,15 @@ elFinder.prototype.commands.upload = function() {
 				e.originalEvent.dataTransfer.dropEffect = 'copy';
 			});
 
-		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+fm.i18n('selectForUpload')+'</span></div>')
+		button = $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only elfinder-tabstop elfinder-focus"><span class="ui-button-text">'+fm.i18n('selectForUpload')+'</span></div>')
 			.append($('<form/>').append(input))
+			.on('click', function(e) {
+				if (e.target === this) {
+					e.stopPropagation();
+					e.preventDefault();
+					input.click();
+				}
+			})
 			.hover(function() {
 				button.toggleClass(hover)
 			});
@@ -286,6 +296,7 @@ elFinder.prototype.commands.upload = function() {
 					.done(function() { 
 						fm.one('treedone', function() {
 							spinner.replaceWith(getSelector());
+							uidialog.elfinderdialog('tabstopsInit');
 						});
 					})
 					.fail(function() {
@@ -295,7 +306,7 @@ elFinder.prototype.commands.upload = function() {
 		}
 		
 		if (fm.dragUpload) {
-			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable="true">'+fm.i18n('dropPasteFiles')+'</div>')
+			dropbox = $('<div class="ui-corner-all elfinder-upload-dropbox elfinder-tabstop" contenteditable="true" data-ph="'+fm.i18n('dropPasteFiles')+'"></div>')
 				.on('paste', function(e){
 					paste(e);
 				})
@@ -346,7 +357,7 @@ elFinder.prototype.commands.upload = function() {
 			
 		}
 		
-		fm.dialog(dialog, {
+		uidialog = fm.dialog(dialog, {
 			title          : this.title + '<span class="elfinder-upload-target">' + (targetDir? ' - ' + fm.escape(targetDir.i18 || targetDir.name) : '') + '</span>',
 			modal          : true,
 			resizable      : false,

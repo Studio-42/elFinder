@@ -117,6 +117,8 @@
 
 .elfinder-resize-label { float:left; width:80px; padding-top: 3px; }
 
+.elfinder-resize-checkbox-label { border: 1px solid transparent; }
+
 .elfinder-resize-reset {
 	width:16px;
 	height:16px;
