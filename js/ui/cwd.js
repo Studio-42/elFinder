@@ -663,6 +663,7 @@ $.fn.elfindercwd = function(fm, options) {
 						colWidth && setColwidth();
 						fixTableHeader({fitWidth: true});
 					}
+					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
 					proc = false;
 				} else if (! proc) {
@@ -2030,6 +2031,8 @@ $.fn.elfindercwd = function(fm, options) {
 					},
 					wz.offset())
 				);
+				
+				bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 			})
 			.bind('changeclipboard', function(e) {
 				clipCuts = {};
@@ -2188,6 +2191,33 @@ $.fn.elfindercwd = function(fm, options) {
 					unselectAll();
 					scrollToView(cwd.find('[id]:last').trigger(evtSelect)) ;
 					trigger();
+				}
+			})
+			.shortcut({
+				pattern     : 'page_up',
+				description : 'pageTurning',
+				callback    : function(e) {
+					if (bufferExt.itemH) {
+						wrapper.scrollTop(
+							Math.round(
+								wrapper.scrollTop()
+								- (Math.floor((wrapper.height() + (list? bufferExt.itemH * -1 : 16)) / bufferExt.itemH)) * bufferExt.itemH
+							)
+						);
+					}
+				}
+			}).shortcut({
+				pattern     : 'page_down',
+				description : 'pageTurning',
+				callback    : function(e) { 
+					if (bufferExt.itemH) {
+						wrapper.scrollTop(
+							Math.round(
+								wrapper.scrollTop()
+								+ (Math.floor((wrapper.height() + (list? bufferExt.itemH * -1 : 16)) / bufferExt.itemH)) * bufferExt.itemH
+							)
+						);
+					}
 				}
 			});
 		

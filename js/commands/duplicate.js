@@ -43,6 +43,19 @@ elFinder.prototype.commands.duplicate = function() {
 		return fm.request({
 			data   : {cmd : 'duplicate', targets : this.hashes(hashes)},
 			notify : {type : 'copy', cnt : cnt}
+		}).done(function(data) {
+			var newItem;
+			if (data && data.added && data.added[0]) {
+				fm.one('duplicatedone', function() {
+					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+					if (newItem.length) {
+						newItem.trigger('scrolltoview');
+					} else {
+						fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+						fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdduplicate')])});
+					}
+				});
+			}
 		});
 		
 	}
