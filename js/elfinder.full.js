@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: e516af5) (2016-09-11)
+ * Version 2.1.14 (2.1-src Nightly: c0a9c4e) (2016-09-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5989,7 +5989,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: e516af5)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c0a9c4e)';
 
 
 
@@ -7842,12 +7842,20 @@ elFinder.prototype.resources = {
 											var dirhash = data.added[0].hash,
 												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
 											if (sel && move) {
-												fm.exec('paste', dirhash).done(function() {
-													fm.trigger('selectfiles', { files: [dirhash] });
+												fm.one(cmd+'done', function() {
+													fm.exec('paste', dirhash);
 												});
 											}
-											if (newItem.length) {
-												newItem.trigger('scrolltoview');
+											if (data && data.added && data.added[0]) {
+												fm.one(cmd+'done', function() {
+													newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+													if (newItem.length) {
+														newItem.trigger('scrolltoview');
+													} else {
+														fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+														fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)])});
+													}
+												});
 											}
 										}
 									});
@@ -14609,20 +14617,7 @@ elFinder.prototype.commands.archive = function() {
 			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
 		}
 		
-		return dfrd.done(function(data) {
-			var newItem;
-			if (data && data.added && data.added[0]) {
-				fm.one('archivedone', function() {
-					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
-					if (newItem.length) {
-						newItem.trigger('scrolltoview');
-					} else {
-						fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
-						fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdarchive')])});
-					}
-				});
-			}
-		});
+		return dfrd;
 	}
 
 };
