@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: c558e41) (2016-09-10)
+ * Version 2.1.14 (2.1-src Nightly: fca40e8) (2016-09-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5989,7 +5989,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c558e41)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: fca40e8)';
 
 
 
@@ -11254,10 +11254,22 @@ $.fn.elfindercwd = function(fm, options) {
 					files  = e.data.files || [],
 					l      = files.length,
 					helper = e.data.helper || $(),
-					parents, ctr;
+					parents, ctr, add, sels;
 
 				if (l > 0) {
 					parents = fm.parents(files[0]);
+				}
+				if (event === evtSelect || event === evtUnselect) {
+					add  = (event === evtSelect),
+					sels = selectedFiles.concat();
+					$.each(files, function() {
+						var idx = $.inArray(this, sels);
+						if (idx === -1) {
+							add && selectedFiles.push(this)
+						} else {
+							! add && selectedFiles.splice(idx,1);
+						}
+					});
 				}
 				if (!helper.data('locked')) {
 					while (l--) {
@@ -17574,6 +17586,8 @@ elFinder.prototype.commands.paste = function() {
 														});
 													})
 												);
+											} else {
+												fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 											}
 											fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + (cut ? 'move' : 'copy'))]), extNode: node});
 										}
@@ -20574,7 +20588,13 @@ elFinder.prototype.commands.sort = function() {
 	}
 	
 	this.exec = function() {
-		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash) : $.Deferred().reject();
+		var fm = this.fm,
+			cwdhash = fm.cwd().hash;
+		return this.fm.cwd().phash ? this.fm.exec('open', this.fm.cwd().phash).done(function() {
+			fm.one('opendone', function() {
+				fm.selectfiles({files : [cwdhash]});
+			});
+		}) : $.Deferred().reject();
 	}
 
 }).prototype = { forceLoad : true }; // this is required command
@@ -20663,6 +20683,8 @@ elFinder.prototype.commands.upload = function() {
 											});
 										})
 									);
+								} else {
+									fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 								}
 								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}
