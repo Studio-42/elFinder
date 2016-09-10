@@ -78,6 +78,8 @@ elFinder.prototype.commands.upload = function() {
 											});
 										})
 									);
+								} else {
+									fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 								}
 								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}

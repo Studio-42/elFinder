@@ -2120,10 +2120,22 @@ $.fn.elfindercwd = function(fm, options) {
 					files  = e.data.files || [],
 					l      = files.length,
 					helper = e.data.helper || $(),
-					parents, ctr;
+					parents, ctr, add, sels;
 
 				if (l > 0) {
 					parents = fm.parents(files[0]);
+				}
+				if (event === evtSelect || event === evtUnselect) {
+					add  = (event === evtSelect),
+					sels = selectedFiles.concat();
+					$.each(files, function() {
+						var idx = $.inArray(this, sels);
+						if (idx === -1) {
+							add && selectedFiles.push(this)
+						} else {
+							! add && selectedFiles.splice(idx,1);
+						}
+					});
 				}
 				if (!helper.data('locked')) {
 					while (l--) {
