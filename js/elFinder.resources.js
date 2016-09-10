@@ -200,12 +200,20 @@ elFinder.prototype.resources = {
 											var dirhash = data.added[0].hash,
 												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
 											if (sel && move) {
-												fm.exec('paste', dirhash).done(function() {
-													fm.trigger('selectfiles', { files: [dirhash] });
+												fm.one(cmd+'done', function() {
+													fm.exec('paste', dirhash);
 												});
 											}
-											if (newItem.length) {
-												newItem.trigger('scrolltoview');
+											if (data && data.added && data.added[0]) {
+												fm.one(cmd+'done', function() {
+													newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+													if (newItem.length) {
+														newItem.trigger('scrolltoview');
+													} else {
+														fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+														fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)])});
+													}
+												});
 											}
 										}
 									});

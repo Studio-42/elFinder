@@ -84,20 +84,7 @@ elFinder.prototype.commands.archive = function() {
 			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
 		}
 		
-		return dfrd.done(function(data) {
-			var newItem;
-			if (data && data.added && data.added[0]) {
-				fm.one('archivedone', function() {
-					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
-					if (newItem.length) {
-						newItem.trigger('scrolltoview');
-					} else {
-						fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
-						fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdarchive')])});
-					}
-				});
-			}
-		});
+		return dfrd;
 	}
 
 };
