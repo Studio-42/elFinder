@@ -360,7 +360,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				
 				if (n && n.length && !n.hasClass('elfinder-cwd-parent')) {
-					if (append) {
+					if (s && append) {
 						// append new files to selected
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
 					} else {
@@ -625,7 +625,10 @@ $.fn.elfindercwd = function(fm, options) {
 						place.append(docFlag? tempDom : tempDom.children());
 						
 						// trigger select
-						selected.length && $.each(selected, function(i, n) { n.trigger(evtSelect); });
+						if (selected.length) {
+							$.each(selected, function(i, n) { n.trigger(evtSelect); });
+							trigger();
+						}
 						
 						locks.length && fm.trigger('lockfiles', {files: locks});
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
