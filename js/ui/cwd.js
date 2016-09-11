@@ -2134,12 +2134,12 @@ $.fn.elfindercwd = function(fm, options) {
 				if (event === evtSelect || event === evtUnselect) {
 					add  = (event === evtSelect),
 					sels = selectedFiles.concat();
-					$.each(files, function() {
-						var idx = $.inArray(this, sels);
+					$.each(files, function(i, hash) {
+						var idx = $.inArray(hash, sels);
 						if (idx === -1) {
-							add && selectedFiles.push(this)
+							add && selectedFiles.push(hash);
 						} else {
-							! add && selectedFiles.splice(idx,1);
+							! add && selectedFiles.splice(idx, 1);
 						}
 					});
 				}
