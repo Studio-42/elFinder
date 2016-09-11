@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.14 (2.1-src Nightly: c0a9c4e) (2016-09-11)
+ * Version 2.1.14 (2.1-src Nightly: 2d17a98) (2016-09-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5989,7 +5989,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.14 (2.1-src Nightly: c0a9c4e)';
+elFinder.prototype.version = '2.1.14 (2.1-src Nightly: 2d17a98)';
 
 
 
@@ -9503,7 +9503,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				
 				if (n && n.length && !n.hasClass('elfinder-cwd-parent')) {
-					if (append) {
+					if (s && append) {
 						// append new files to selected
 						n = s.add(s[prev ? 'prevUntil' : 'nextUntil']('#'+n.attr('id'))).add(n);
 					} else {
@@ -9768,7 +9768,10 @@ $.fn.elfindercwd = function(fm, options) {
 						place.append(docFlag? tempDom : tempDom.children());
 						
 						// trigger select
-						selected.length && $.each(selected, function(i, n) { n.trigger(evtSelect); });
+						if (selected.length) {
+							$.each(selected, function(i, n) { n.trigger(evtSelect); });
+							trigger();
+						}
 						
 						locks.length && fm.trigger('lockfiles', {files: locks});
 						!bufferExt.hpi && bottomMarkerShow(place, files.length);
