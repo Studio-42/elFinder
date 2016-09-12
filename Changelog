@@ -1,4 +1,4 @@
-2016-0x-xx  
+2016-09-12  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.15):
 		- [js:command] inheritable elFinder.command object rel. #1545
@@ -33,7 +33,10 @@
 		- [core] Fixed #1622 added an option `phash` to the volume roots for implement feature of volume group
 		- [ui:toolbar] Fixed #1619 use fm.trigger('toolbarload') instead toolbar.tigger('load')
 		- [js:options] Fixed #1624 add a new option `overwriteUploadConfirm`
-		- [cmd:search] Fixed #1635 support parallel requests for multi volumes 
+		- [cmd:search] Fixed #1635 support parallel requests for multi volumes
+		- [contextmenu] Fixed #1645 to enable the operation of the keyboard
+		- [ui:cwd] Fixed #1646 selected targets by ctrl+shift are wrong
+		- [ui:dialog] Fixed #1647 controlling tabstop by `elfinder-tabstop` css class name
 		- And some minor bug fixes
 
 2016-07-25  Naoki Sawada  <hypweb@gmail.com>
