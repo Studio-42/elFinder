@@ -56,12 +56,12 @@
 	padding:.3em .5em;
 	box-sizing: border-box;
 }
-.std42-dialog .ui-dialog-content,
-.std42-dialog .ui-dialog-content * {
-	-webkit-user-select:  auto !important;
-	-moz-user-select:     text !important;
-	-khtml-user-select:   text !important;
-	user-select:          text !important;
+.elfinder .std42-dialog .ui-dialog-content,
+.elfinder .std42-dialog .ui-dialog-content * {
+	-webkit-user-select:  auto;
+	-moz-user-select:     text;
+	-khtml-user-select:   text;
+	user-select:          text;
 }
 
 /* buttons */
