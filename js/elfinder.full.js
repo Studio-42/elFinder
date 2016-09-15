@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2016-09-12)
+ * Version 2.1.15 (2.1-src Nightly: 51d43d2) (2016-09-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5989,7 +5989,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 51d43d2)';
 
 
 
@@ -15758,10 +15758,6 @@ elFinder.prototype.commands.edit = function() {
 			list  = [],
 			file;
 
-		if (this.disabled()) {
-			return $.Deferred().reject();
-		}
-
 		while ((file = files.shift())) {
 			list.push(edit(file));
 		}
@@ -16485,7 +16481,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		};
 		
 	this.tpl = {
-		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
+		main       : '<div class="ui-helper-clearfix elfinder-info-title {dirclass}"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
@@ -16663,7 +16659,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		if (cnt == 1) {
 			file  = files[0];
 			
-			view  = view.replace('{class}', fm.mime2class(file.mime));
+			view  = view.replace('{dirclass}', file.csscls? fm.escape(file.csscls) : '').replace('{class}', fm.mime2class(file.mime));
 			title = tpl.itemTitle.replace('{name}', fm.escape(file.i18 || file.name)).replace('{kind}', '<span title="'+fm.escape(file.mime)+'">'+fm.mime2kind(file)+'</span>');
 
 			tmb = fm.tmb(file);
