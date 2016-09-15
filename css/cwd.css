@@ -228,6 +228,16 @@
 .elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon {
 	background-position:1px -1px;
 }
+.elfinder-navbar-root-network .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-network td .elfinder-cwd-icon  {
+	background-image:url("../img/toolbar.png");
+	background-position: 0 86%;
+	background-size: cover;
+}
+.elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
 
 /* thumbnail image */
 .elfinder-cwd-icon.elfinder-cwd-bgurl {

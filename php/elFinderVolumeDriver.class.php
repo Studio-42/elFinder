@@ -3283,6 +3283,7 @@ abstract class elFinderVolumeDriver {
 			}
 			register_shutdown_function(array($this, 'rmdirRecursive'), $dir);
 		}
+		elFinder::extendTimeLimit();
 		$res = true;
 		$files = array();
 		foreach ($hashes as $hash) {

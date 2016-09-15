@@ -329,10 +329,6 @@ elFinder.prototype.commands.edit = function() {
 			list  = [],
 			file;
 
-		if (this.disabled()) {
-			return $.Deferred().reject();
-		}
-
 		while ((file = files.shift())) {
 			list.push(edit(file));
 		}
