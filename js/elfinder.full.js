@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: db8a772) (2016-09-15)
+ * Version 2.1.15 (2.1-src Nightly: f0a9763) (2016-09-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5602,13 +5602,22 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2kind : function(f) {
-		var mime = typeof(f) == 'object' ? f.mime : f, kind;
+		var isObj = typeof(f) == 'object' ? true : false,
+			mime  = isObj ? f.mime : f,
+			kind;
 		
-		if (f.alias && f.mime != 'symlink-broken') {
-			kind = 'Alias';
-		} else if (this.kinds[mime]) {
-			kind = this.kinds[mime];
-		} else {
+		if (isObj) {
+			if (f.alias && mime != 'symlink-broken') {
+				kind = 'Alias';
+			} else if (this.kinds[mime]) {
+				if (mime === 'directory' && (! f.phash || f.isroot)) {
+					kind = 'Root';
+				} else {
+					kind = this.kinds[mime];
+				}
+			}
+		}
+		if (! kind) {
 			if (mime.indexOf('text') === 0) {
 				kind = 'Text';
 			} else if (mime.indexOf('image') === 0) {
@@ -5989,7 +5998,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: db8a772)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: f0a9763)';
 
 
 
@@ -8009,7 +8018,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-09-10
+ * @version 2016-09-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -8369,9 +8378,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Page turning', // from v2.1.15 added 9.10.2016
+			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
+			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Folder',
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Broken alias',
@@ -11201,6 +11212,7 @@ $.fn.elfindercwd = function(fm, options) {
 						;
 				add(files);
 				list && resize();
+				wrapper.trigger(scrollEvent);
 			})
 			.change(function(e) {
 				var phash = fm.cwd().hash,
@@ -12246,7 +12258,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			create    = function(dir, hash) {
 				return $(tpl.replace(/\{id\}/, hash2id(dir? dir.hash : hash))
 						.replace(/\{name\}/, fm.escape(dir? dir.i18 || dir.name : hash))
-						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '')) : '')
+						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '') + (dir.csscls? ' '+dir.csscls : '')) : '')
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
 						.replace(/\{symlink\}/, '')
@@ -16470,6 +16482,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			kind     : fm.i18n('kind'),
 			files    : fm.i18n('files'),
 			folders  : fm.i18n('folders'),
+			roots    : fm.i18n('volumeRoots'),
 			items    : fm.i18n('items'),
 			yes      : fm.i18n('yes'),
 			no       : fm.i18n('no'),
@@ -16644,7 +16657,7 @@ elFinder.prototype.commands.fullscreen = function() {
 					fm.autoSync();
 				});
 			},
-			size, tmb, file, title, dcnt;
+			size, tmb, file, title, dcnt, rdcnt;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -16761,7 +16774,9 @@ elFinder.prototype.commands.fullscreen = function() {
 				content.push(row.replace(l, msg.kind).replace(v, msg.files));
 				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
-				content.push(row.replace(l, msg.kind).replace(v, dcnt == cnt ? msg.folders : msg.folders+' '+dcnt+', '+msg.files+' '+(cnt-dcnt)));
+				rdcnt = $.map(files, function(f) { return f.mime === 'directory' && (! f.phash || f.isroot)? 1 : null ; }).length;
+				dcnt -= rdcnt;
+				content.push(row.replace(l, msg.kind).replace(v, (rdcnt === cnt || dcnt === cnt)? msg[rdcnt? 'roots' : 'folders'] : $.map({roots: rdcnt, folders: dcnt, files: cnt - rdcnt - dcnt}, function(c, t) { return c? msg[t]+' '+c : null}).join(', ')));
 				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'size')));
 				count = $.map(files, function(f) { return f.hash; });
 				
