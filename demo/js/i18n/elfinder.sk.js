@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <admin@robonetwork.cf>
- * @version 2016-8-8
+ * @version 2016-9-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sk = {
@@ -136,6 +136,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdopendir'   : 'Otvoriť priečinok', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : 'Resetovať šírku stĺpca', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Posúvať', // from v2.1.15 added 21.08.2016
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavrieť',
@@ -358,9 +359,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasClipboard'    : 'Máte $1 položky v schránke.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Prírastkové hľadanie je iba z aktuálneho zobrazenia.', // from v2.1.13 added 6.30.2016
 			'reinstate'       : 'Obnoviť', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 kompletné', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Kontextové menu', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Otáčanie stránky', // from v2.1.15 added 9.10.2016
+			'volumeRoots'     : 'Korene média', // from v2.1.16 added 16.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
+			'kindRoot'        : 'Koreň média', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Priečinok',
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Porušený alias',
