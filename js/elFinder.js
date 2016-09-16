@@ -5588,13 +5588,22 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2kind : function(f) {
-		var mime = typeof(f) == 'object' ? f.mime : f, kind;
+		var isObj = typeof(f) == 'object' ? true : false,
+			mime  = isObj ? f.mime : f,
+			kind;
 		
-		if (f.alias && f.mime != 'symlink-broken') {
-			kind = 'Alias';
-		} else if (this.kinds[mime]) {
-			kind = this.kinds[mime];
-		} else {
+		if (isObj) {
+			if (f.alias && mime != 'symlink-broken') {
+				kind = 'Alias';
+			} else if (this.kinds[mime]) {
+				if (mime === 'directory' && (! f.phash || f.isroot)) {
+					kind = 'Root';
+				} else {
+					kind = this.kinds[mime];
+				}
+			}
+		}
+		if (! kind) {
 			if (mime.indexOf('text') === 0) {
 				kind = 'Text';
 			} else if (mime.indexOf('image') === 0) {
