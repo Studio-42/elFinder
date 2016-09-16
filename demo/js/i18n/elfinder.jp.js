@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-09-10
+ * @version 2016-09-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -362,9 +362,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'complete'        : '$1 完了', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'コンテキストメニュー', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'ページめくり', // from v2.1.15 added 9.10.2016
+			'volumeRoots'     : 'ボリュームルート', // from v2.1.16 added 16.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
+			'kindRoot'        : 'ボリュームルート', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'フォルダー',
 			'kindAlias'       : '別名',
 			'kindAliasBroken' : '宛先不明の別名',
