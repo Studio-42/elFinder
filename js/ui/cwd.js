@@ -2058,6 +2058,7 @@ $.fn.elfindercwd = function(fm, options) {
 						;
 				add(files);
 				list && resize();
+				wrapper.trigger(scrollEvent);
 			})
 			.change(function(e) {
 				var phash = fm.cwd().hash,
