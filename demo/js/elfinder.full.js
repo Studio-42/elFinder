@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: f0a9763) (2016-09-16)
+ * Version 2.1.15 (2.1-src Nightly: c701172) (2016-09-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1196,7 +1196,7 @@ window.elFinder = function(node, opts) {
 		if (url.substr(0, 1) === '/') {
 			ret = root + url;
 		} else {
-			ret = root + window.location.pathname + url;
+			ret = root + window.location.pathname.replace(/\/[^\/]+$/, '/') + url;
 		}
 		ret = ret.replace('/./', '/');
 		while(reg.test(ret)) {
@@ -5998,7 +5998,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: f0a9763)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: c701172)';
 
 
 
