@@ -1182,7 +1182,7 @@ window.elFinder = function(node, opts) {
 		if (url.substr(0, 1) === '/') {
 			ret = root + url;
 		} else {
-			ret = root + window.location.pathname + url;
+			ret = root + window.location.pathname.replace(/\/[^\/]+$/, '/') + url;
 		}
 		ret = ret.replace('/./', '/');
 		while(reg.test(ret)) {
