@@ -2,7 +2,7 @@
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @author RobiNN <admin@robonetwork.cf>
- * @version 2016-8-8
+ * @version 2016-9-16
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.cs = {
@@ -136,6 +136,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdopendir'   : 'Otevření složky', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : 'Obnovení šířku sloupce', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Posouvat', // from v2.1.15 added 21.08.2016
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavřít',
@@ -358,9 +359,14 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'hasClipboard'    : 'Máte $1 položky v schránce.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Inkrementální hledání je pouze z aktuálního zobrazení.', // from v2.1.13 added 6.30.2016
 			'reinstate'       : 'Obnovit', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 kompletní', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Kontextové menu', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Otáčení stránky', // from v2.1.15 added 9.10.2016
+			'volumeRoots'     : 'Kořeny média', // from v2.1.16 added 16.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
+			'kindRoot'        : 'Kořen média', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Složka',
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Zlomený alias',
