@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 016cb32) (2016-09-16)
+ * Version 2.1.15 (2.1-src Nightly: 966b388) (2016-09-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2701,7 +2701,7 @@ window.elFinder = function(node, opts) {
 			opts = arguments[1] || null;
 		return arguments.length == 1 && typeof(arg) == 'function'
 			? self.bind('error', arg)
-			: self.trigger('error', {error : arg, opts : opts});
+			: (arg === true? this : self.trigger('error', {error : arg, opts : opts}));
 	};
 	
 	// create bind/trigger aliases for build-in events
@@ -4179,7 +4179,7 @@ elFinder.prototype = {
 				
 				res._multiupload = data.multiupload? true : false;
 				if (res.error) {
-					if (res._chunkfailure) {
+					if (res._chunkfailure || res._multiupload) {
 						abort = true;
 						self.uploads.xhrUploading = false;
 						notifyto && clearTimeout(notifyto);
@@ -5998,7 +5998,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 016cb32)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 966b388)';
 
 
 
