@@ -676,11 +676,22 @@ class elFinder {
 			}
 		}
 		
+		$result = null;
+		
 		// call pre handlers for this command
 		$args['sessionCloseEarlier'] = isset($this->sessionUseCmds[$cmd])? false : $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
+			$_break = false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
-				call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
+				$_res = call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
+				if (is_array($_res)) {
+					if (isset($_res['preventexec'])) {
+						$result = (! empty($_res['results']) && is_array($_res['results']))? $_res['results'] : array(
+							'error' => true
+						);
+						break;
+					}
+				}
 			}
 		}
 		
@@ -696,13 +707,15 @@ class elFinder {
 			elFinder::extendTimeLimit(300);
 		}
 		
-		try {
-			$result = $this->$cmd($args);
-		} catch (Exception $e) {
-			$result = array(
-				'error' => htmlspecialchars($e->getMessage()),
-				'sync' => true
-			);
+		if (! is_array($result)) {
+			try {
+				$result = $this->$cmd($args);
+			} catch (Exception $e) {
+				$result = array(
+					'error' => htmlspecialchars($e->getMessage()),
+					'sync' => true
+				);
+			}
 		}
 		
 		// check change dstDir
