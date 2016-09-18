@@ -2687,7 +2687,7 @@ window.elFinder = function(node, opts) {
 			opts = arguments[1] || null;
 		return arguments.length == 1 && typeof(arg) == 'function'
 			? self.bind('error', arg)
-			: self.trigger('error', {error : arg, opts : opts});
+			: (arg === true? this : self.trigger('error', {error : arg, opts : opts}));
 	};
 	
 	// create bind/trigger aliases for build-in events
