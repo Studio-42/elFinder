@@ -685,7 +685,7 @@ class elFinder {
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
 				$_res = call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
 				if (is_array($_res)) {
-					if (isset($_res['preventexec'])) {
+					if (! empty($_res['preventexec'])) {
 						$result = (! empty($_res['results']) && is_array($_res['results']))? $_res['results'] : array(
 							'error' => true
 						);
