@@ -5609,15 +5609,14 @@ elFinder.prototype = {
 			mime  = isObj ? f.mime : f,
 			kind;
 		
-		if (isObj) {
-			if (f.alias && mime != 'symlink-broken') {
-				kind = 'Alias';
-			} else if (this.kinds[mime]) {
-				if (mime === 'directory' && (! f.phash || f.isroot)) {
-					kind = 'Root';
-				} else {
-					kind = this.kinds[mime];
-				}
+
+		if (isObj && f.alias && mime != 'symlink-broken') {
+			kind = 'Alias';
+		} else if (this.kinds[mime]) {
+			if (isObj && mime === 'directory' && (! f.phash || f.isroot)) {
+				kind = 'Root';
+			} else {
+				kind = this.kinds[mime];
 			}
 		}
 		if (! kind) {
