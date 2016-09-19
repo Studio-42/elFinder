@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 7139e61) (2016-09-19)
+ * Version 2.1.15 (2.1-src Nightly: 86c319d) (2016-09-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6014,7 +6014,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 7139e61)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 86c319d)';
 
 
 
@@ -11455,6 +11455,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 				tabstops = dialog.find('.'+cltabstop);
 				if (tabstops.length) {
 					tabstops.attr('tabindex', '-1');
+					if (! tabstops.filter('.'+cl1stfocus).length) {
+						buttonset.children('.'+cltabstop+':'+(platformWin? 'first' : 'last')).addClass(cl1stfocus);
+					}
 				}
 			},
 			tabstopNext = function(cur) {
@@ -11605,17 +11608,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					$(this).removeClass(clhover).parent('label').removeClass(clhover);
 					this.id && $(this).parent().find('label[for='+this.id+']').removeClass(clhover);
 				})
-				/*.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
-					var $this = $(this);
-					if (opts.btnHoverFocus) {
-						$this[e.type == 'mouseenter' || $this.is('input:text,textarea,select')? 'focus' : 'blur']();
-						if (e.type == 'mouseleave' && ! $this.is('input:text,textarea,select')) {
-							!fm.Mobile && tabstops.filter('input:text:visible:first').focus();
-						}
-					} else {
-						$this.toggleClass(clhover, e.type == 'mouseenter');
-					}
-				})*/
 				.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
 					var $this = $(this);
 					if (opts.btnHoverFocus) {
