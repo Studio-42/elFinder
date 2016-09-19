@@ -556,7 +556,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			.getUI().click(close);
 		})
 		.shortcut({
-			pattern     : 'RIGHTOPTION SHIFT+F10',
+			pattern     : fm.OS === 'mac' ? 'ctrl+m' : 'contextmenu shift+f10',
 			description : 'contextmenu',
 			callback    : function(e) {
 				e.stopPropagation();
