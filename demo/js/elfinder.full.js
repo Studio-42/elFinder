@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: b45d59f) (2016-09-19)
+ * Version 2.1.15 (2.1-src Nightly: 03ea0e3) (2016-09-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -709,7 +709,16 @@ window.elFinder = function(node, opts) {
 	 **/
 	this.storage = (function() {
 		try {
-			return 'localStorage' in window && window['localStorage'] !== null ? self.localStorage : self.cookie;
+			if ('localStorage' in window && window['localStorage'] !== null) {
+				if (self.UA.Safari) {
+					// check for Mac/iOS safari private browsing mode
+					window.localStorage.setItem('elfstoragecheck', 1);
+					window.localStorage.removeItem('elfstoragecheck');
+				}
+				return self.localStorage;
+			} else {
+				return self.cookie;
+			}
 		} catch (e) {
 			return self.cookie;
 		}
@@ -2659,7 +2668,11 @@ window.elFinder = function(node, opts) {
 		'F6' : 117,
 		'F7' : 118,
 		'F8' : 119,
-		'F9' : 120
+		'F9' : 120,
+		'F10' : 121,
+		'F11' : 122,
+		'F12' : 123,
+		'CONTEXTMENU' : 93
 	});
 	
 	this.dragUpload = false;
@@ -3443,7 +3456,7 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && typeof window.orientation == "undefined";
+		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style;
 		return {
 			// Browser IE <= IE 6
 			ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
@@ -4833,8 +4846,12 @@ elFinder.prototype = {
 			try {
 				s.setItem(key, val);
 			} catch (e) {
-				s.clear();
-				s.setItem(key, val);
+				try {
+					s.clear();
+					s.setItem(key, val);
+				} catch (e) {
+					self.debug('error', e.toString());
+				}
 			}
 			retval = s.getItem(key);
 		}
@@ -5998,7 +6015,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: b45d59f)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 03ea0e3)';
 
 
 
@@ -6036,12 +6053,6 @@ if ($.ui) {
 			// call origin function
 			return origin( t, event );
 		};
-	}
-	if (! $.ui.keyCode.F10) {
-		$.ui.keyCode.F10 = navigator.userAgent.indexOf('Mac') !== -1 ? 109 : 121;
-	}
-	if (! $.ui.keyCode.RIGHTOPTION) {
-		$.ui.keyCode.RIGHTOPTION = navigator.userAgent.indexOf('Mac') !== -1 ? 61 : 93;
 	}
 }
 })();
@@ -9108,7 +9119,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			.getUI().click(close);
 		})
 		.shortcut({
-			pattern     : 'RIGHTOPTION SHIFT+F10',
+			pattern     : fm.OS === 'mac' ? 'ctrl+m' : 'contextmenu shift+f10',
 			description : 'contextmenu',
 			callback    : function(e) {
 				e.stopPropagation();
