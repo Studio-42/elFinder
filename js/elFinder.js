@@ -2654,7 +2654,11 @@ window.elFinder = function(node, opts) {
 		'F6' : 117,
 		'F7' : 118,
 		'F8' : 119,
-		'F9' : 120
+		'F9' : 120,
+		'F10' : 121,
+		'F11' : 122,
+		'F12' : 123,
+		'CONTEXTMENU' : 93
 	});
 	
 	this.dragUpload = false;

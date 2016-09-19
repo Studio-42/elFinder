@@ -29,12 +29,6 @@ if ($.ui) {
 			return origin( t, event );
 		};
 	}
-	if (! $.ui.keyCode.F10) {
-		$.ui.keyCode.F10 = navigator.userAgent.indexOf('Mac') !== -1 ? 109 : 121;
-	}
-	if (! $.ui.keyCode.RIGHTOPTION) {
-		$.ui.keyCode.RIGHTOPTION = navigator.userAgent.indexOf('Mac') !== -1 ? 61 : 93;
-	}
 }
 })();
 
