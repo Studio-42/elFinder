@@ -51,7 +51,7 @@
 			
 			if (fm.i18[fm.lang].translator) {
 				$.each(fm.i18[fm.lang].translator.split(', '), function() {
-					html.push(atpl[r](author, this.trim())[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
+					html.push(atpl[r](author, $.trim(this))[r](work, fm.i18n('translator')+' ('+fm.i18[fm.lang].language+')'));
 				});	
 			}
 			
