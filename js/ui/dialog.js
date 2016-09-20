@@ -139,7 +139,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
-					! fm.UA.Mobile && tabstopNext().focus();
+					fm && ! fm.UA.Mobile && tabstopNext().focus();
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keyup.'+id, function(e) {
