@@ -686,9 +686,16 @@ class elFinder {
 				$_res = call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
 				if (is_array($_res)) {
 					if (! empty($_res['preventexec'])) {
-						$result = (! empty($_res['results']) && is_array($_res['results']))? $_res['results'] : array(
-							'error' => true
-						);
+						$result = array('error' => true);
+						if ($cmd === 'upload' & ! empty($args['node'])) {
+							$result['callback'] = array(
+								'node' => $args['node'],
+								'bind' => $cmd
+							);
+						}
+						if (! empty($_res['results']) && is_array($_res['results'])) {
+							$result = array_merge($result, $_res['results']);
+						}
 						break;
 					}
 				}
@@ -2688,6 +2695,13 @@ class elFinder {
 		if ($done || ! $this->callbackWindowURL) {
 			$script = '';
 			if ($node) {
+				if ($bind) {
+					$trigger = 'elf.trigger(\''.$bind.'\', data);';
+					$triggerdone = 'elf.trigger(\''.$bind.'done\');';
+					$triggerfail = 'elf.trigger(\''.$bind.'fail\', data);';
+				} else {
+					$trigger = $triggerdone = $triggerfail = '';
+				}
 				$script .= '
 					var w = window.opener || window.parent || window;
 					try {
@@ -2695,17 +2709,15 @@ class elFinder {
 						if (elf) {
 							var data = '.$json.';
 							if (data.error) {
+								'.$triggerfail.'
 								elf.error(data.error);
 							} else {
 								data.warning && elf.error(data.warning);
 								data.removed && data.removed.length && elf.remove(data);
 								data.added   && data.added.length   && elf.add(data);
-								data.changed && data.changed.length && elf.change(data);';
-				if ($bind) {
-					$script .= '
-								elf.trigger(\''.$bind.'\', data);';
-				}
-				$script .= '
+								data.changed && data.changed.length && elf.change(data);
+								'.$trigger.'
+								'.$triggerdone.'
 								data.sync && elf.sync();
 							}
 						}
