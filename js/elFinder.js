@@ -4102,6 +4102,7 @@ elFinder.prototype = {
 							}
 						});
 						prev = loaded;
+						self.ui.notify.children('.elfinder-notify-upload').children('.elfinder-notify-cancel').show();
 					}, self.options.notifyDelay);
 				},
 				renames = (data.renames || null),
@@ -4170,6 +4171,7 @@ elFinder.prototype = {
 					formData = new FormData();
 					var _file = [{_chunkmerged: res._chunkmerged, _name: res._name, _mtime: res._mtime}];
 					chunkMerge = true;
+					node.off('uploadabort', fnAbort);
 					notifyto2 = setTimeout(function() {
 						self.notify({type : 'chunkmerge', cnt : 1});
 					}, self.options.notifyDelay);
@@ -4299,7 +4301,11 @@ elFinder.prototype = {
 											self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
 										}
 									}
-									multi(files, 1); // Next one
+									if (files.length) {
+										multi(files, 1); // Next one
+									} else {
+										self.ui.notify.children('.elfinder-notify-upload').children('.elfinder-notify-cancel').hide();
+									}
 								});
 							}
 						}
