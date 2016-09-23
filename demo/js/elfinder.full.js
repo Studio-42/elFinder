@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: f196359) (2016-09-21)
+ * Version 2.1.15 (2.1-src Nightly: e2a2f34) (2016-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1646,10 +1646,10 @@ window.elFinder = function(node, opts) {
 			// add autoSync xhr into queue
 			queue.unshift(xhr);
 			// bind abort()
-			! isOpen && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+			data.compare && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				! isOpen && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+				data.compare && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
 		} else if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
@@ -6006,7 +6006,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: f196359)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: e2a2f34)';
 
 
 
