@@ -140,10 +140,6 @@ Demo sites
  + http://studio-42.github.io/elFinder/ (with CORS)
  + http://hypweb.net/elFinder-nightly/demo/2.1/
 
-**2.0**
- + http://elfinder.org/ (rc1)
- + http://hypweb.net/elFinder-nightly/demo/2.0/ (2.0.x Nightly)
-
 FAQs
 ------------
 ### Which version of elFinder should I use?
