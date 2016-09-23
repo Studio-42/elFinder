@@ -1632,10 +1632,10 @@ window.elFinder = function(node, opts) {
 			// add autoSync xhr into queue
 			queue.unshift(xhr);
 			// bind abort()
-			! isOpen && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+			data.compare && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 			dfrd.always(function() {
 				var ndx = $.inArray(xhr, queue);
-				! isOpen && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+				data.compare && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
 				ndx !== -1 && queue.splice(ndx, 1);
 			});
 		} else if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
