@@ -891,10 +891,27 @@ abstract class elFinderVolumeDriver {
 		return $this->stat($path);
 	}
 	
-	
+	/**
+	 * Clear PHP stat cache & all of inner stat caches
+	 * 
+	 */
 	public function clearstatcache() {
 		clearstatcache();
 		$this->clearcache();
+	}
+	
+	/**
+	 * Clear inner stat caches for target hash
+	 * 
+	 * @param string $hash
+	 */
+	public function clearcaches($hash = null) {
+		if ($hash === null) {
+			$this->clearcache();
+		} else {
+			$path = $this->decode($hash);
+			unset($this->cache[$path], $this->dirsCache[$path], $this->subdirsCache[$path]);
+		}
 	}
 
 	/**
