@@ -4278,13 +4278,14 @@ elFinder.prototype = {
 				blobSlice = chunkEnable? false : '',
 				blobSize, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
-					var sfiles = [], cid, sfilesLen = 0;
+					var sfiles = [], cid, sfilesLen = 0, cancelChk;
 					if (!abort) {
 						while(files.length && sfiles.length < num) {
 							sfiles.push(files.shift());
 						}
 						sfilesLen = sfiles.length;
 						if (sfilesLen) {
+							cancelChk = sfilesLen;
 							for (var i=0; i < sfilesLen; i++) {
 								if (abort) {
 									break;
@@ -4293,10 +4294,6 @@ elFinder.prototype = {
 								if (!!failChunk[cid]) {
 									last--;
 									continue;
-								}
-								if (sfilesLen - 1 === i && ! files.length) {
-									cancelBtn = false;
-									cancelToggle(false);
 								}
 								fm.exec('upload', {
 									type: data.type,
@@ -4321,7 +4318,14 @@ elFinder.prototype = {
 											self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
 										}
 									}
-									files.length && multi(files, 1); // Next one
+									if (files.length) {
+										multi(files, 1); // Next one
+									} else {
+										if (--cancelChk <= 1) {
+											cancelBtn = false;
+											cancelToggle(false);
+										}
+									}
 								});
 							}
 						}
