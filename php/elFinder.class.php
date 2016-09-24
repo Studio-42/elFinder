@@ -1768,7 +1768,7 @@ class elFinder {
 	 * @author Naoki Sawada
 	 */
 	protected function detectFileExtension($path) {
-		static $type, $finfo;
+		static $type, $finfo, $volume;
 		if (!$type) {
 			$keys = array_keys($this->volumes);
 			$volume = $this->volumes[$keys[0]];
