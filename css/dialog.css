@@ -30,8 +30,11 @@
 	cursor: pointer;
 }
 
-.ui-dialog .ui-dialog-titlebar-close.elfinder-titlebar-full {
-	right: 2em;
+.std42-dialog .ui-dialog-titlebar .ui-widget-header.ui-dialog-titlebar-close {
+	position: relative;
+	float: right;
+	top: 10px;
+	right: -10px;
 }
 
 /* resize handle for touch devices */
