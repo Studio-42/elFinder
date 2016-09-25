@@ -47,7 +47,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			cl1stfocus = 'elfinder-focus',
 			id         = parseInt(Math.random()*1000000),
 			overlay    = parent.children('.elfinder-overlay'),
-			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">'+opts.title+'</div>'),
+			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="elfinder-dialog-title">'+opts.title+'</span></div>'),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
@@ -265,41 +265,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		dialog.trigger('posinit');
 
-		dialog.prepend(
-			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></span>')
-				.on('mousedown', function(e) {
-					e.preventDefault();
-					self.elfinderdialog('close');
-				}))
-		);
-		
-		if (opts.allowMinimize) {
-			titlebar.append($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
-				.on('mousedown', function(e) {
-					var $this = $(this),
-						base = titlebar.parent(),
-						pos;
-					
-					if (typeof $this.data('style') !== 'undefined') {
-						pos = base.position();
-						base.attr('style', $this.data('style')).css(pos);
-						$this.removeData('style').children('span.ui-icon').removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick');
-						titlebar.children('.elfinder-titlebar-full').show();
-						base.children('.ui-widget-content').slideDown('fast', function() {
-							dialog.trigger('resize', { minimize: false });
-						});
-					} else {
-						$this.data('style', base.attr('style') || '');
-						$this.children('span.ui-icon').removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick');
-						titlebar.children('.elfinder-titlebar-full').hide();
-						base.children('.ui-widget-content').slideUp('fast', function() {
-							base.width('auto').height('auto');
-							dialog.trigger('resize', { minimize: true });
-						});
-					}
-				})
-			);
-		}
+		dialog.prepend(titlebar);
 		
 		if (opts.allowMaximize) {
 			dialog.on('resize', function(e, data) {
@@ -326,13 +292,48 @@ $.fn.elfinderdialog = function(opts, fm) {
 					titlebar.children('.elfinder-titlebar-minimize')[full? 'hide' : 'show']();
 				}
 			});
-			titlebar.append($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon ui-icon-arrowthick-2-se-nw"/></span>')
+			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon ui-icon-arrowthick-2-se-nw"/></span>')
 				.on('mousedown', function(e) {
 					fm.toggleMaximize(dialog);
 				})
 			);
 		}
 		
+		if (opts.allowMinimize) {
+			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
+				.on('mousedown', function(e) {
+					var $this = $(this),
+						base = titlebar.parent(),
+						pos;
+					
+					if (typeof $this.data('style') !== 'undefined') {
+						pos = base.position();
+						base.attr('style', $this.data('style')).css(pos);
+						$this.removeData('style').children('span.ui-icon').removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick');
+						titlebar.children('.elfinder-titlebar-full').show();
+						base.children('.ui-widget-content').slideDown('fast', function() {
+							dialog.trigger('resize', { minimize: false });
+						});
+					} else {
+						$this.data('style', base.attr('style') || '');
+						$this.children('span.ui-icon').removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick');
+						titlebar.children('.elfinder-titlebar-full').hide();
+						base.children('.ui-widget-content').slideUp('fast', function() {
+							base.css({ maxWidth: base.width(), overFlow: 'hidden'}).width('auto').height('auto');
+							dialog.trigger('resize', { minimize: true });
+						});
+					}
+				})
+			);
+		}
+		
+		titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></span>')
+			.on('mousedown', function(e) {
+				e.preventDefault();
+				self.elfinderdialog('close');
+			})
+		);
+			
 		$.each(opts.buttons, function(name, cb) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only '+cltabstop+'"><span class="ui-button-text">'+name+'</span></button>')
 				.on('click', $.proxy(cb, self[0]));
