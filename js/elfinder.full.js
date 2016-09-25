@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 5df58df) (2016-09-25)
+ * Version 2.1.15 (2.1-src Nightly: 3f1cac6) (2016-09-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6032,7 +6032,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 5df58df)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 3f1cac6)';
 
 
 
@@ -11447,6 +11447,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 	
 	opts = $.extend({}, $.fn.elfinderdialog.defaults, opts);
 	
+	if (opts.allowMinimize) {
+		if (opts.allowMinimize === 'auto') {
+			opts.allowMinimize = this.find('textarea,input').length? true : false; 
+		}
+	}
 	if (opts.allowMaximize && ! fm) {
 		opts.allowMaximize = false;
 	}
@@ -11617,6 +11622,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					css && dialog.css(css);
 				})
+				.on('resize', function(e, data) {
+					if (typeof(opts.resize) === 'function') {
+						$.proxy(opts.resize, self[0])(e, data);
+					}
+				})
 				.on('tabstopsInit', tabstopsInit)
 				.on('focus', '.'+cltabstop, function() {
 					$(this).addClass(clhover).parent('label').addClass(clhover);
@@ -11683,30 +11693,60 @@ $.fn.elfinderdialog = function(opts, fm) {
 				}))
 		);
 		
+		if (opts.allowMinimize) {
+			titlebar.append($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
+				.on('mousedown', function(e) {
+					var $this = $(this),
+						base = titlebar.parent(),
+						pos;
+					
+					if (typeof $this.data('style') !== 'undefined') {
+						pos = base.position();
+						base.attr('style', $this.data('style')).css(pos);
+						$this.removeData('style').children('span.ui-icon').removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick');
+						titlebar.children('.elfinder-titlebar-full').show();
+						base.children('.ui-widget-content').slideDown('fast', function() {
+							dialog.trigger('resize', { minimize: false });
+						});
+					} else {
+						$this.data('style', base.attr('style') || '');
+						$this.children('span.ui-icon').removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick');
+						titlebar.children('.elfinder-titlebar-full').hide();
+						base.children('.ui-widget-content').slideUp('fast', function() {
+							base.width('auto').height('auto');
+							dialog.trigger('resize', { minimize: true });
+						});
+					}
+				})
+			);
+		}
+		
 		if (opts.allowMaximize) {
 			dialog.on('resize', function(e, data) {
-				var full;
+				var full, elm;
 				if (data && data.maximize) {
+					elm = titlebar.find('.elfinder-titlebar-full');
 					full = (data.maximize === 'on');
-					titlebar.find('.elfinder-titlebar-full span.ui-icon').toggleClass('ui-icon-minusthick', full);
+					elm.children('span.ui-icon').toggleClass('ui-icon-minusthick', full);
 					if (full) {
 						try {
 							dialog.resizable('disable').draggable('disable');
 						} catch(e) {}
-						if (typeof self.data('style') === 'undefined') {
-							self.data('style', self.attr('style') || '');
+						if (typeof elm.data('style') === 'undefined') {
+							elm.data('style', self.attr('style') || '');
 						}
 						self.css('width', '100%').css('height', dialog.height() - dialog.children('.ui-dialog-titlebar').outerHeight(true) - buttonpane.outerHeight(true));
 					} else {
-						self.attr('style', self.data('style'));
-						self.removeData('style');
+						self.attr('style', elm.data('style'));
+						elm.removeData('style');
 						try {
 							dialog.resizable('enable').draggable('enable');
 						} catch(e) {}
 					}
+					titlebar.children('.elfinder-titlebar-minimize')[full? 'hide' : 'show']();
 				}
 			});
-			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon  ui-icon-arrowthick-2-se-nw"/></span>')
+			titlebar.append($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon ui-icon-arrowthick-2-se-nw"/></span>')
 				.on('mousedown', function(e) {
 					fm.toggleMaximize(dialog);
 				})
@@ -11782,7 +11822,9 @@ $.fn.elfinderdialog.defaults = {
 	width     : 320,
 	height    : 'auto',
 	minWidth  : 200,
-	minHeight : 110
+	minHeight : 110,
+	allowMinimize : 'auto',
+	allowMaximize : false
 };
 
 
@@ -14411,7 +14453,7 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 			}
 
-			sync();
+			sync(true);
 		})
 		// remove dirs
 		.remove(function(e) {
@@ -19358,7 +19400,7 @@ elFinder.prototype.commands.resize = function() {
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
 					control  = $('<div class="elfinder-resize-control"/>'),
-					preview  = $('<div class="ui-front elfinder-resize-preview"/>')
+					preview  = $('<div class="elfinder-resize-preview"/>')
 						.on('touchmove', function(e) {
 							e.stopPropagation();
 							e.preventDefault();
@@ -20065,6 +20107,11 @@ elFinder.prototype.commands.resize = function() {
 					close          : function() {
 						fm.unbind('resize', dinit);
 						$(this).hide().remove();
+					},
+					resize         : function(e, data) {
+						if (data && data.minimize === false) {
+							type.filter(':checked').trigger('change');
+						}
 					}
 				}).attr('id', id).parent();
 				

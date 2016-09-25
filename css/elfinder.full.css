@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 5df58df) (2016-09-25)
+ * Version 2.1.15 (2.1-src Nightly: 3f1cac6) (2016-09-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1335,8 +1335,11 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	cursor: pointer;
 }
 
-.ui-dialog .ui-dialog-titlebar-close.elfinder-titlebar-full {
-	right: 2em;
+.std42-dialog .ui-dialog-titlebar .ui-widget-header.ui-dialog-titlebar-close {
+	position: relative;
+	float: right;
+	top: 10px;
+	right: -10px;
 }
 
 /* resize handle for touch devices */
