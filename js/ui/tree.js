@@ -926,7 +926,7 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 			}
 
-			sync();
+			sync(true);
 		})
 		// remove dirs
 		.remove(function(e) {
