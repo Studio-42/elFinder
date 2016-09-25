@@ -30,11 +30,22 @@
 	cursor: pointer;
 }
 
+.std42-dialog .ui-dialog-titlebar span.elfinder-dialog-title {
+	display: inline-block;
+	max-width: 100%;
+	overflow: hidden;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
 .std42-dialog .ui-dialog-titlebar .ui-widget-header.ui-dialog-titlebar-close {
 	position: relative;
 	float: right;
 	top: 10px;
 	right: -10px;
+	margin-left: 2px;
+	background-color: transparent;
+	background-image: none;
 }
 
 /* resize handle for touch devices */
