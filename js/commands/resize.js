@@ -740,6 +740,11 @@ elFinder.prototype.commands.resize = function() {
 					close          : function() {
 						fm.unbind('resize', dinit);
 						$(this).hide().remove();
+					},
+					resize         : function(e, data) {
+						if (data && data.minimize === false) {
+							type.filter(':checked').trigger('change');
+						}
 					}
 				}).attr('id', id).parent();
 				
