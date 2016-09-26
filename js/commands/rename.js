@@ -183,7 +183,7 @@ elFinder.prototype.commands.rename = function() {
 			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
 					: target.find(filename),
 			pnode = node.parent(),
-			overlay = fm.getUI().children('.elfinder-overlay'),
+			overlay = fm.getUI('overlay'),
 			cancel = function(e) { 
 				if (! inError) {
 					e.stopPropagation();
