@@ -9,6 +9,14 @@
 	left:auto;
 	right:auto;
 }
+.std42-dialog.elfinder-dialog-minimized {
+	overFlow: hidden;
+	position: relative;
+	float: left;
+}
+.elfinder-rtl .std42-dialog.elfinder-dialog-minimized {
+	float: right;
+}
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
@@ -24,6 +32,13 @@
 	font-weight:normal;
 	padding:.2em 1em;
 }
+.std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar {
+	padding: 0 .5em;
+	height: 20px;
+}
+.std42-dialog.ui-draggable-disabled .ui-dialog-titlebar {
+	cursor: default;
+}
 
 .std42-dialog .ui-dialog-titlebar .ui-widget-header {
 	border : none;
@@ -32,10 +47,15 @@
 
 .std42-dialog .ui-dialog-titlebar span.elfinder-dialog-title {
 	display: inline-block;
-	max-width: 100%;
 	overflow: hidden;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+	max-width: 100%;
+}
+.std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar span.elfinder-dialog-title {
+	max-width: -webkit-calc(100% - 24px);
+	max-width: -moz-calc(100% - 24px);
+	max-width: calc(100% - 24px);
 }
 
 .std42-dialog .ui-dialog-titlebar .ui-widget-header.ui-dialog-titlebar-close {
@@ -49,7 +69,7 @@
 }
 
 /* resize handle for touch devices */
-.elfinder-touch .std42-dialog.ui-dialog .ui-resizable-se {
+.elfinder-touch .std42-dialog.ui-dialog:not(ui-resizable-disabled) .ui-resizable-se {
 	width: 12px;
 	height: 12px;
 	zoom: 1.5;

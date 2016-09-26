@@ -190,8 +190,11 @@ elFinder.prototype.commands.resize = function() {
 					},
 					img     = $('<img/>')
 						.on('load', function() {
+							owidth  = img[0].width;
+							oheight = img[0].height;
+
 							var r_scale, inputFirst,
-								imgRatio = img.height() / img.width();
+								imgRatio = oheight / owidth;
 							
 							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
 								preview.height(preview.width() * imgRatio);
@@ -205,8 +208,6 @@ elFinder.prototype.commands.resize = function() {
 							
 							spinner.remove();
 							
-							owidth  = img.width();
-							oheight = img.height();
 							ratio   = owidth/oheight;
 
 							rhandle.append(img.show()).show();
@@ -588,6 +589,9 @@ elFinder.prototype.commands.resize = function() {
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
 					dinit   = function() {
+						if (base.hasClass('elfinder-dialog-minimized')) {
+							return;
+						}
 						var dw,
 							winH  = $(window).height(),
 							winW  = $(window).width(),
@@ -739,11 +743,11 @@ elFinder.prototype.commands.resize = function() {
 					},
 					close          : function() {
 						fm.unbind('resize', dinit);
-						$(this).hide().remove();
+						$(this).elfinderdialog('destroy');
 					},
 					resize         : function(e, data) {
 						if (data && data.minimize === false) {
-							type.filter(':checked').trigger('change');
+							dinit();
 						}
 					}
 				}).attr('id', id).parent();

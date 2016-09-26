@@ -118,7 +118,7 @@ elFinder.prototype.resources = {
 						}, 50);
 					}),
 				nnode, pnode,
-				overlay = fm.getUI().children('.elfinder-overlay'),
+				overlay = fm.getUI('overlay'),
 				cancel = function(e) { 
 					if (! inError) {
 						input.remove();
