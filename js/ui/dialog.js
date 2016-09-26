@@ -32,7 +32,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			opts.allowMinimize = this.find('textarea,input').length? true : false; 
 		}
 	}
-	if (opts.allowMaximize && ! fm) {
+	if (opts.allowMaximize) {
 		opts.allowMaximize = false;
 	}
 	
@@ -110,7 +110,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('mousedown', function(e) {
 					setTimeout(function() {
-						dialog.is(':visible') && dialog.trigger('totop');
+						dialog.is(':visible:not(.elfinder-dialog-minimized)') && dialog.trigger('totop');
 					}, 10);
 				})
 				.on('open', function() {
@@ -120,8 +120,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					maxWinWidth && d.css({width: maxWinWidth, left: '5px'});
 
 					if (!dialog.hasClass(clnotify)) {
-						
-						parent.find('.'+cldialog+':visible').not('.'+clnotify).each(function() {
+						parent.children('.'+cldialog+':visible:not(.'+clnotify+')').each(function() {
 							var d     = $(this),
 								top   = parseInt(d.css('top')),
 								left  = parseInt(d.css('left')),
@@ -138,13 +137,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 						});
 					} 
 					
-					dialog.trigger('totop');
-					
 					dialog.data('modal') && overlay.elfinderoverlay('show');
+					
+					dialog.trigger('totop');
 					
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
-					fm && ! fm.UA.Mobile && tabstopNext().focus();
+					fm.UA.Mobile && tabstopNext().focus();
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keyup.'+id, function(e) {
@@ -174,9 +173,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					// get focus to next dialog
-					dialogs = parent.find('.elfinder-dialog:visible');
+					dialogs = parent.children('.'+cldialog+':visible');
 					if (dialogs.length) {
-						dialogs.find(':last').trigger('totop');
+						dialogs.filter(':last').trigger('totop');
 					} else {
 						setTimeout(function() {
 							// return focus to parent
@@ -185,12 +184,15 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				})
 				.on('totop', function() {
-					parent.find('.'+cldialog+':visible').removeClass(clactive+' ui-front');
+					if (dialog.hasClass('elfinder-dialog-minimized')) {
+						titlebar.children('.elfinder-titlebar-minimize').trigger('mousedown');
+					}
+					
+					fm.toFront(dialog);
+					parent.children('.'+cldialog).removeClass(clactive+' ui-front');
 					dialog.addClass(clactive+' ui-front');
 
-					if (!dialog.find('input,textarea').length) {
-						dialog.find('.ui-button:'+(platformWin? 'first':'last')).focus().end().find(':text:first').focus();
-					}
+					! fm.UA.Mobile && tabstopNext().focus();
 				})
 				.on('posinit', function() {
 					var css = opts.position;
@@ -263,6 +265,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.data({modal: opts.modal})
 			;
 		
+		if (! fm) {
+			fm = parent.elfinder('instance');
+		}
+		
 		dialog.trigger('posinit');
 
 		dialog.prepend(titlebar);
@@ -276,7 +282,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					elm.children('span.ui-icon').toggleClass('ui-icon-minusthick', full);
 					if (full) {
 						try {
-							dialog.resizable('disable').draggable('disable');
+							dialog.hasClass('ui-draggable') && dialog.draggable('disable');
+							dialog.hasClass('ui-resizable') && dialog.resizable('disable');
 						} catch(e) {}
 						if (typeof elm.data('style') === 'undefined') {
 							elm.data('style', self.attr('style') || '');
@@ -286,7 +293,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 						self.attr('style', elm.data('style'));
 						elm.removeData('style');
 						try {
-							dialog.resizable('enable').draggable('enable');
+							dialog.hasClass('ui-draggable') && dialog.draggable('enable');
+							dialog.hasClass('ui-resizable') && dialog.resizable('enable');
 						} catch(e) {}
 					}
 					titlebar.children('.elfinder-titlebar-minimize')[full? 'hide' : 'show']();
@@ -294,6 +302,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 			});
 			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon ui-icon-arrowthick-2-se-nw"/></span>')
 				.on('mousedown', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
 					fm.toggleMaximize(dialog);
 				})
 			);
@@ -303,24 +313,44 @@ $.fn.elfinderdialog = function(opts, fm) {
 			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
 				.on('mousedown', function(e) {
 					var $this = $(this),
-						base = titlebar.parent(),
-						pos;
+						pos, w;
 					
+					e.preventDefault();
+					e.stopPropagation();
 					if (typeof $this.data('style') !== 'undefined') {
-						pos = base.position();
-						base.attr('style', $this.data('style')).css(pos);
-						$this.removeData('style').children('span.ui-icon').removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick');
+						parent.append(dialog);
+						dialog.attr('style', $this.data('style'))
+							.removeClass('elfinder-dialog-minimized')
+							.off('mousedown.minimize');
+						$this.removeData('style').show();
 						titlebar.children('.elfinder-titlebar-full').show();
-						base.children('.ui-widget-content').slideDown('fast', function() {
-							dialog.trigger('resize', { minimize: false });
+						dialog.children('.ui-widget-content').slideDown('fast', function() {
+							if (this === dialog.children('.ui-widget-content:first').get(0)) {
+								try {
+									dialog.hasClass('ui-draggable') && dialog.draggable('enable');
+									dialog.hasClass('ui-resizable') && dialog.resizable('enable');
+								} catch(e) {}
+								dialog.trigger('resize', { minimize: false });
+							}
 						});
 					} else {
-						$this.data('style', base.attr('style') || '');
-						$this.children('span.ui-icon').removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick');
+						try {
+							dialog.hasClass('ui-draggable') && dialog.draggable('disable');
+							dialog.hasClass('ui-resizable') && dialog.resizable('disable');
+						} catch(e) {}
+						$this.data('style', dialog.attr('style') || '').hide();
 						titlebar.children('.elfinder-titlebar-full').hide();
-						base.children('.ui-widget-content').slideUp('fast', function() {
-							base.css({ maxWidth: base.width(), overFlow: 'hidden'}).width('auto').height('auto');
-							dialog.trigger('resize', { minimize: true });
+						w = dialog.width();
+						dialog.children('.ui-widget-content').slideUp('fast', function() {
+							if (this === dialog.children('.ui-widget-content:first').get(0)) {
+								dialog.attr('style', '').css({ maxWidth: w})
+									.addClass('elfinder-dialog-minimized')
+									.one('mousedown.minimize', function(e) {
+										$this.trigger('mousedown');
+									})
+									.appendTo(fm.getUI('bottomtray'));
+								dialog.trigger('resize', { minimize: true });
+							}
 						});
 					}
 				})
@@ -330,6 +360,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></span>')
 			.on('mousedown', function(e) {
 				e.preventDefault();
+				e.stopPropagation();
 				self.elfinderdialog('close');
 			})
 		);

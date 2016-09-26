@@ -2352,6 +2352,19 @@ window.elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Target ui node move to last of children of elFinder node fot to show front
+	 * 
+	 * @param  Object  target    Target jQuery node object
+	 */
+	this.toFront = function(target) {
+		var lastnode = node.children(':last');
+		target = $(target);
+		if (lastnode.get(0) !== target.get(0)) {
+			lastnode.after(target);
+		}
+	};
+	
+	/**
 	 * Return css object for maximize
 	 * 
 	 * @return Object
@@ -2971,7 +2984,8 @@ window.elFinder = function(node, opts) {
 			width         : parseInt(this.options.notifyDialog.width)
 		}),
 		statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node),
-		toast : $('<div class="elfinder-toast"/>').appendTo(node)
+		toast : $('<div class="elfinder-toast"/>').appendTo(node),
+		bottomtray : $('<div class="elfinder-bottomtray">').appendTo(node)
 	};
 	
 	/**
