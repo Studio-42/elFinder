@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: d2fca6a) (2016-09-27)
+ * Version 2.1.15 (2.1-src Nightly: 63fb951) (2016-09-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6046,7 +6046,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: d2fca6a)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 63fb951)';
 
 
 
@@ -11440,7 +11440,8 @@ $.fn.elfindercwd = function(fm, options) {
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderdialog = function(opts, fm) {
-	var dialog, elfNode;
+	var platformWin = (window.navigator.platform.indexOf('Win') != -1),
+		dialog, elfNode;
 	
 	if (fm && fm.ui) {
 		elfNode = fm.getUI();
@@ -11474,10 +11475,14 @@ $.fn.elfinderdialog = function(opts, fm) {
 	
 	opts = $.extend({}, $.fn.elfinderdialog.defaults, opts);
 	
-	if (opts.allowMinimize) {
-		if (opts.allowMinimize === 'auto') {
-			opts.allowMinimize = this.find('textarea,input').length? true : false; 
-		}
+	if (opts.allowMinimize && opts.allowMinimize === 'auto') {
+		opts.allowMinimize = this.find('textarea,input').length? true : false; 
+	}
+	if (opts.headerBtnPos && opts.headerBtnPos === 'auto') {
+		opts.headerBtnPos = platformWin? 'right' : 'left';
+	}
+	if (opts.headerBtnOrder && opts.headerBtnOrder === 'auto') {
+		opts.headerBtnOrder = platformWin? 'close:maximize:minimize' : 'close:minimize:maximize';
 	}
 	
 	this.filter(':not(.ui-dialog-content)').each(function() {
@@ -11494,7 +11499,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
 			btnWidth   = 0,
-			platformWin = (window.navigator.platform.indexOf('Win') != -1),
 			tabstops   = $(),
 			tabstopsInit = function() {
 				tabstops = dialog.find('.'+cltabstop);
@@ -11533,7 +11537,118 @@ $.fn.elfinderdialog = function(opts, fm) {
 				});
 				return node;
 			},
-			
+			makeHeaderBtn = function() {
+				$.each(opts.headerBtnOrder.split(':').reverse(), function(i, v) {
+					headerBtns[v] && headerBtns[v]();
+				})
+				if (platformWin) {
+					titlebar.children('.elfinder-titlebar-button').addClass('elfinder-titlebar-button-right');
+				}
+			},
+			headerBtns = {
+				close: function() {
+					titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button"><span class="ui-icon ui-icon-closethick"/></span>')
+						.on('mousedown', function(e) {
+							e.preventDefault();
+							e.stopPropagation();
+							self.elfinderdialog('close');
+						})
+					);
+				},
+				maximize: function() {
+					if (opts.allowMaximize) {
+						dialog.on('resize', function(e, data) {
+							var full, elm;
+							if (data && data.maximize) {
+								elm = titlebar.find('.elfinder-titlebar-full');
+								full = (data.maximize === 'on');
+								elm.children('span.ui-icon')
+									.toggleClass('ui-icon-plusthick', ! full)
+									.toggleClass('ui-icon-arrowreturnthick-1-s', full);
+								if (full) {
+									try {
+										dialog.hasClass('ui-draggable') && dialog.draggable('disable');
+										dialog.hasClass('ui-resizable') && dialog.resizable('disable');
+									} catch(e) {}
+									if (typeof elm.data('style') === 'undefined') {
+										elm.data('style', self.attr('style') || '');
+									}
+									self.css('width', '100%').css('height', dialog.height() - dialog.children('.ui-dialog-titlebar').outerHeight(true) - buttonpane.outerHeight(true));
+								} else {
+									self.attr('style', elm.data('style'));
+									elm.removeData('style');
+									try {
+										dialog.hasClass('ui-draggable') && dialog.draggable('enable');
+										dialog.hasClass('ui-resizable') && dialog.resizable('enable');
+									} catch(e) {}
+								}
+							}
+						});
+						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
+							.on('mousedown', function(e) {
+								e.preventDefault();
+								e.stopPropagation();
+								fm.toggleMaximize(dialog);
+							})
+						);
+					}
+					
+				},
+				minimize: function() {
+					if (opts.allowMinimize) {
+						titlebar.on('dblclick', function(e) {
+								$(this).children('.elfinder-titlebar-minimize').trigger('mousedown');
+							})
+							.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
+							.on('mousedown', function(e) {
+								var $this = $(this),
+									pos, w;
+								
+								e.preventDefault();
+								e.stopPropagation();
+								if (typeof $this.data('style') !== 'undefined') {
+									elfNode.append(dialog);
+									dialog.attr('style', $this.data('style'))
+										.removeClass('elfinder-dialog-minimized')
+										.off('mousedown.minimize');
+									$this.removeData('style').show();
+									titlebar.children('.elfinder-titlebar-full').show();
+									dialog.children('.ui-widget-content').slideDown('fast', function() {
+										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											if (! dialog.hasClass('elfinder-maximized')) {
+												try {
+													dialog.hasClass('ui-draggable') && dialog.draggable('enable');
+													dialog.hasClass('ui-resizable') && dialog.resizable('enable');
+												} catch(e) {}
+											}
+											dialog.trigger('resize', { minimize: false });
+										}
+									});
+								} else {
+									try {
+										dialog.hasClass('ui-draggable') && dialog.draggable('disable');
+										dialog.hasClass('ui-resizable') && dialog.resizable('disable');
+									} catch(e) {}
+									$this.data('style', dialog.attr('style') || '').hide();
+									titlebar.children('.elfinder-titlebar-full').hide();
+									w = dialog.width();
+									dialog.children('.ui-widget-content').slideUp('fast', function() {
+										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											dialog.attr('style', '').css({ maxWidth: w})
+												.addClass('elfinder-dialog-minimized')
+												.one('mousedown.minimize', function(e) {
+													$this.trigger('mousedown');
+												})
+												.appendTo(fm.getUI('bottomtray'));
+											dialog.trigger('resize', { minimize: true });
+										}
+									});
+								}
+							})
+						);
+					}
+				}
+			},
 			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog touch-punch '+cldialog+' '+opts.cssClass+'"/>')
 				.hide()
 				.append(self)
@@ -11710,99 +11825,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 		dialog.trigger('posinit');
 
 		dialog.prepend(titlebar);
+
+		makeHeaderBtn();
 		
-		if (opts.allowMaximize) {
-			dialog.on('resize', function(e, data) {
-				var full, elm;
-				if (data && data.maximize) {
-					elm = titlebar.find('.elfinder-titlebar-full');
-					full = (data.maximize === 'on');
-					elm.children('span.ui-icon').toggleClass('ui-icon-minusthick', full);
-					if (full) {
-						try {
-							dialog.hasClass('ui-draggable') && dialog.draggable('disable');
-							dialog.hasClass('ui-resizable') && dialog.resizable('disable');
-						} catch(e) {}
-						if (typeof elm.data('style') === 'undefined') {
-							elm.data('style', self.attr('style') || '');
-						}
-						self.css('width', '100%').css('height', dialog.height() - dialog.children('.ui-dialog-titlebar').outerHeight(true) - buttonpane.outerHeight(true));
-					} else {
-						self.attr('style', elm.data('style'));
-						elm.removeData('style');
-						try {
-							dialog.hasClass('ui-draggable') && dialog.draggable('enable');
-							dialog.hasClass('ui-resizable') && dialog.resizable('enable');
-						} catch(e) {}
-					}
-					titlebar.children('.elfinder-titlebar-minimize')[full? 'hide' : 'show']();
-				}
-			});
-			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-full"><span class="ui-icon ui-icon-arrowthick-2-se-nw"/></span>')
-				.on('mousedown', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-					fm.toggleMaximize(dialog);
-				})
-			);
-		}
-		
-		if (opts.allowMinimize) {
-			titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
-				.on('mousedown', function(e) {
-					var $this = $(this),
-						pos, w;
-					
-					e.preventDefault();
-					e.stopPropagation();
-					if (typeof $this.data('style') !== 'undefined') {
-						elfNode.append(dialog);
-						dialog.attr('style', $this.data('style'))
-							.removeClass('elfinder-dialog-minimized')
-							.off('mousedown.minimize');
-						$this.removeData('style').show();
-						titlebar.children('.elfinder-titlebar-full').show();
-						dialog.children('.ui-widget-content').slideDown('fast', function() {
-							if (this === dialog.children('.ui-widget-content:first').get(0)) {
-								try {
-									dialog.hasClass('ui-draggable') && dialog.draggable('enable');
-									dialog.hasClass('ui-resizable') && dialog.resizable('enable');
-								} catch(e) {}
-								dialog.trigger('resize', { minimize: false });
-							}
-						});
-					} else {
-						try {
-							dialog.hasClass('ui-draggable') && dialog.draggable('disable');
-							dialog.hasClass('ui-resizable') && dialog.resizable('disable');
-						} catch(e) {}
-						$this.data('style', dialog.attr('style') || '').hide();
-						titlebar.children('.elfinder-titlebar-full').hide();
-						w = dialog.width();
-						dialog.children('.ui-widget-content').slideUp('fast', function() {
-							if (this === dialog.children('.ui-widget-content:first').get(0)) {
-								dialog.attr('style', '').css({ maxWidth: w})
-									.addClass('elfinder-dialog-minimized')
-									.one('mousedown.minimize', function(e) {
-										$this.trigger('mousedown');
-									})
-									.appendTo(fm.getUI('bottomtray'));
-								dialog.trigger('resize', { minimize: true });
-							}
-						});
-					}
-				})
-			);
-		}
-		
-		titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all"><span class="ui-icon ui-icon-closethick"/></span>')
-			.on('mousedown', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				self.elfinderdialog('close');
-			})
-		);
-			
 		$.each(opts.buttons, function(name, cb) {
 			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only '+cltabstop+'"><span class="ui-button-text">'+name+'</span></button>')
 				.on('click', $.proxy(cb, self[0]));
@@ -11874,7 +11899,9 @@ $.fn.elfinderdialog.defaults = {
 	minWidth  : 200,
 	minHeight : 110,
 	allowMinimize : 'auto',
-	allowMaximize : false
+	allowMaximize : false,
+	headerBtnPos : 'auto',
+	headerBtnOrder : 'auto'
 };
 
 
