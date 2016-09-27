@@ -44,9 +44,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 			opts.allowMinimize = this.find('textarea,input').length? true : false; 
 		}
 	}
-	if (opts.allowMaximize) {
-		opts.allowMaximize = false;
-	}
 	
 	this.filter(':not(.ui-dialog-content)').each(function() {
 		var self       = $(this).addClass('ui-dialog-content ui-widget-content'),
