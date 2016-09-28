@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: a9753d8) (2016-09-28)
+ * Version 2.1.15 (2.1-src Nightly: 04230b6) (2016-09-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1396,10 +1396,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	background-image: none;
 }
 .elfinder-touch .std42-dialog:not(.elfinder-dialog-minimized) .ui-dialog-titlebar .elfinder-titlebar-button {
-	transform: scale(1.2);
-	zoom: 1.2;
-	margin-left: 4px;
-	margin-right: 4px;
+	transform: scale(1.1);
+	zoom: 1.1;
+	margin-left: 5px;
+	margin-right: 5px;
 }
 .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button.elfinder-titlebar-button-right {
 	float: right;
@@ -1411,11 +1411,15 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	height: 17px;
 	border-width: 1px;
 	border-color: transparent;
-	opacity: .8;
-	filter:Alpha(Opacity=80);
+	opacity: .7;
+	filter:Alpha(Opacity=70);
 	-moz-border-radius: 8px; 
 	-webkit-border-radius: 8px; 
 	border-radius: 8px;
+}
+.std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar .elfinder-titlebar-button .ui-icon {
+	opacity: 1;
+	filter:Alpha(Opacity=100);	
 }
 .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
 .elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon {
