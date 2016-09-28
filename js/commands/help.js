@@ -156,7 +156,8 @@
 	}];
 	
 	fm.one('load', function() {
-		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'];
+		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
+			tabDebug;
 		
 		$.each(parts, function(i, title) {
 			html.push(tab[r](/\{id\}/g, title)[r](/\{title\}/, fm.i18n(title)));
@@ -192,13 +193,13 @@
 			.filter(':first').click();
 		
 		// debug
+		tabDebug = content.find('.elfinder-help-tab-debug').hide();
 		debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
 		debugUL = debugDIV.children('ul:first');
 
 		self.debug = {};
 
 		fm.bind('backenddebug', function(e) {
-			var tabDebug = content.find('.elfinder-help-tab-debug');
 			// CAUTION: DO NOT TOUCH `e.data`
 			if (e.data && e.data.debug) {
 				tabDebug.show();
