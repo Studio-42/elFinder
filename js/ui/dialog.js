@@ -50,6 +50,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 		opts.headerBtnOrder = platformWin? 'close:maximize:minimize' : 'close:minimize:maximize';
 	}
 	
+	if (opts.modal && opts.allowMinimize) {
+		opts.allowMinimize = false;
+	}
+	
 	this.filter(':not(.ui-dialog-content)').each(function() {
 		var self       = $(this).addClass('ui-dialog-content ui-widget-content'),
 			clactive   = 'elfinder-dialog-active',
