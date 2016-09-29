@@ -231,9 +231,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 					height : opts.height
 				})
 				.on('mousedown', function(e) {
-					setTimeout(function() {
-						dialog.is(':visible:not(.elfinder-dialog-minimized)') && dialog.trigger('totop');
-					}, 10);
+					if (! dialog.hasClass('ui-front')) {
+						setTimeout(function() {
+							dialog.is(':visible:not(.elfinder-dialog-minimized)') && dialog.trigger('totop');
+						}, 10);
+					}
 				})
 				.on('open', function() {
 					var d           = $(this),
