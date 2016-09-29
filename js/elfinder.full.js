@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 1618dc1) (2016-09-29)
+ * Version 2.1.15 (2.1-src Nightly: 330b75d) (2016-09-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2091,7 +2091,7 @@ window.elFinder = function(node, opts) {
 	this.isCommandEnabled = function(name, dstHash) {
 		var disabled,
 			cvid = self.cwd().volumeid || '';
-		if (cvid && dstHash && dstHash.indexOf(cvid) !== 0) {
+		if (dstHash && (! cvid || dstHash.indexOf(cvid) !== 0)) {
 			disabled = self.option('disabled', dstHash);
 			if (! disabled) {
 				disabled = [];
@@ -6046,7 +6046,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 1618dc1)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 330b75d)';
 
 
 
@@ -11666,9 +11666,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 					height : opts.height
 				})
 				.on('mousedown', function(e) {
-					setTimeout(function() {
-						dialog.is(':visible:not(.elfinder-dialog-minimized)') && dialog.trigger('totop');
-					}, 10);
+					if (! dialog.hasClass('ui-front')) {
+						setTimeout(function() {
+							dialog.is(':visible:not(.elfinder-dialog-minimized)') && dialog.trigger('totop');
+						}, 10);
+					}
 				})
 				.on('open', function() {
 					var d           = $(this),
@@ -19465,8 +19467,97 @@ elFinder.prototype.commands.resize = function() {
 		return !this._disabled && sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	};
 	
+	this.resizeRequest = function(data, file, dfrd) {
+		var fm   = this.fm,
+			file = file || fm.file(data.target),
+			src  = file? fm.openUrl(file.hash) : null,
+			enabled = fm.isCommandEnabled('resize', data.target);
+		
+		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
+			return fm.request({
+				data : $.extend(data, {
+					cmd : 'resize'
+				}),
+				notify : {type : 'resize', cnt : 1},
+				prepare : function(data) {
+					if (data) {
+						if (data.changed && data.changed.length && data.changed[0].tmb) {
+							data.changed[0].tmb = 1;
+							if (! file) {
+								file = data.changed[0];
+								src  = fm.openUrl(file.hash);
+							}
+						}
+						if (data.added && data.added.length && data.added[0].tmb) {
+							data.added[0].tmb = 1;
+							if (! file) {
+								file = data.added[0];
+								src  = fm.openUrl(file.hash);
+							}
+						}
+					}
+				}
+			})
+			.fail(function(error) {
+				if (dfrd) {
+					dfrd.reject(error);
+				}
+			})
+			.done(function() {
+				var reload = function(url) {
+					var ifm;
+					try {
+						ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
+							.attr('src', url)
+							.one('load', function() {
+								if (this.contentDocument) {
+									this.contentDocument.location.reload(true);
+									ifm.one('load', function() {
+										ifm.remove();
+									});
+								} else {
+									ifm.remove();
+								}
+							})
+							.appendTo('body');
+					} catch(e) {
+						ifm && ifm.remove();
+					}
+				},
+				url = fm.url(file.hash);
+				
+				reload(src);
+				if (url !== src) {
+					reload(url);
+				}
+				
+				dfrd && dfrd.resolve();
+			});
+		} else {
+			var error;
+			
+			if (file) {
+				if (file.mime.indexOf('image/') === -1) {
+					error = ['errResize', file.name, 'errUsupportType'];
+				} else {
+					error = ['errResize', file.name, 'errPerm'];
+				}
+			} else {
+				error = ['errResize', data.target, 'errPerm'];
+			}
+			
+			if (dfrd) {
+				dfrd.reject(error);
+			} else {
+				fm.error(error);
+			}
+			return $.Deferred().reject(error);
+		}
+	}
+	
 	this.exec = function(hashes) {
-		var fm    = this.fm,
+		var self  = this,
+			fm    = this.fm,
 			files = this.files(hashes),
 			dfrd  = $.Deferred(),
 			api2  = (fm.api > 1),
@@ -19975,61 +20066,16 @@ elFinder.prototype.commands.resize = function() {
 						
 						dialog.elfinderdialog('close');
 						
-						fm.request({
-							data : {
-								cmd    : 'resize',
-								target : file.hash,
-								width  : w,
-								height : h,
-								x      : x,
-								y      : y,
-								degree : d,
-								quality: q,
-								mode   : mode
-							},
-							notify : {type : 'resize', cnt : 1},
-							prepare : function(data) {
-								if (data && data.changed && data.changed.length && data.changed[0].tmb) {
-									data.changed[0].tmb = 1;
-								}
-								if (data && data.added && data.added.length && data.added[0].tmb) {
-									data.added[0].tmb = 1;
-								}
-							}
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						})
-						.done(function() {
-							var reload = function(url) {
-								var ifm;
-								try {
-									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
-										.attr('src', url)
-										.one('load', function() {
-											if (this.contentDocument) {
-												this.contentDocument.location.reload(true);
-												ifm.one('load', function() {
-													ifm.remove();
-												});
-											} else {
-												ifm.remove();
-											}
-										})
-										.appendTo('body');
-								} catch(e) {
-									ifm && ifm.remove();
-								}
-							},
-							url = fm.url(file.hash);
-							
-							reload(src);
-							if (url !== src) {
-								reload(url);
-							}
-							dfrd.resolve();
-						});
-						
+						self.resizeRequest({
+							target : file.hash,
+							width  : w,
+							height : h,
+							x      : x,
+							y      : y,
+							degree : d,
+							quality: q,
+							mode   : mode
+						}, file, dfrd);
 					},
 					buttons = {},
 					hline   = 'elfinder-resize-handle-hline',
