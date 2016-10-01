@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 81c564f) (2016-10-02)
+ * Version 2.1.15 (2.1-src Nightly: 5a8bcd9) (2016-10-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6055,7 +6055,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 81c564f)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 5a8bcd9)';
 
 
 
@@ -19783,7 +19783,7 @@ elFinder.prototype.commands.resize = function() {
 						.on('blur', function() {
 							setbg($(this).val());
 						}),
-					pallet  = $('<div>').on('click', 'span', function() {
+					pallet  = $('<div class="elfinder-resize-pallet">').on('click', 'span', function() {
 						setbg($(this).css('backgroundColor'));
 					}),
 					ratio   = 1,
