@@ -314,7 +314,7 @@ elFinder.prototype.commands.resize = function() {
 						.on('blur', function() {
 							setbg($(this).val());
 						}),
-					pallet  = $('<div>').on('click', 'span', function() {
+					pallet  = $('<div class="elfinder-resize-pallet">').on('click', 'span', function() {
 						setbg($(this).css('backgroundColor'));
 					}),
 					ratio   = 1,
