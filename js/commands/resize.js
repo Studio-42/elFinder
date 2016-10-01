@@ -252,7 +252,7 @@ elFinder.prototype.commands.resize = function() {
 						var mx, my, n, color, r, g, b, h, s, l;
 
 						// gets an array position of the pixel from the cursor position
-						n = e.offsetX + e.offsetY * (imgr.width() - 1);
+						n = Math.round(e.offsetX + e.offsetY * (imgr.width() - 1));
 
 						color = pickc[n];
 						if (!color) return;
@@ -288,8 +288,8 @@ elFinder.prototype.commands.resize = function() {
 					},
 					picker = $('<button>').text(fm.i18n('colorPicker'))
 					.on('click', function() { 
-						imgr.on('mousemove.picker click.picker touchmove.picker', pick).addClass('elfinder-resize-picking');
-						pallet.on('mousemove.picker click.picker touchmove.picker', 'span', palpick).addClass('elfinder-resize-picking');
+						imgr.on('mousemove.picker click.picker', pick).addClass('elfinder-resize-picking');
+						pallet.on('mousemove.picker click.picker', 'span', palpick).addClass('elfinder-resize-picking');
 					})
 					.button({
 						icons: {
