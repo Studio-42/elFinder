@@ -243,7 +243,7 @@ $.fn.elfinder = function(o) {
 		
 		var cmd = typeof(o) == 'string' ? o : '';
 		if (!this.elfinder) {
-			new elFinder(this, typeof(o) == 'object' ? o : {})
+			new elFinder(this, typeof(o) == 'object' ? o : {});
 		}
 		
 		switch(cmd) {
@@ -289,4 +289,4 @@ $.fn.elfUiWidgetInstance = function(name) {
 		}
 		return null;
 	}
-}
+};
