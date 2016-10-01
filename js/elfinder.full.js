@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: f845b1f) (2016-09-29)
+ * Version 2.1.15 (2.1-src Nightly: 8e96f65) (2016-10-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6046,7 +6046,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: f845b1f)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 8e96f65)';
 
 
 
@@ -6299,7 +6299,7 @@ $.fn.elfinder = function(o) {
 		
 		var cmd = typeof(o) == 'string' ? o : '';
 		if (!this.elfinder) {
-			new elFinder(this, typeof(o) == 'object' ? o : {})
+			new elFinder(this, typeof(o) == 'object' ? o : {});
 		}
 		
 		switch(cmd) {
@@ -6345,7 +6345,7 @@ $.fn.elfUiWidgetInstance = function(name) {
 		}
 		return null;
 	}
-}
+};
 
 
 /*
@@ -8060,7 +8060,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-09-16
+ * @version 2016-10-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -8419,8 +8419,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
-			'pageTurning'     : 'Page turning', // from v2.1.15 added 9.10.2016
-			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.10.2016
+			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Background color', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Color picker', // from v2.1.16 added 1.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -12041,6 +12044,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}
 				})
 				.on('resize scroll', function(e) {
+					if (! ltr && e.type === 'resize') {
+						nav.css('left', 0);
+					}
 					clearTimeout($(this).data('posinit'));
 					$(this).data('posinit', setTimeout(function() {
 						var offset = (fm.UA.Opera && nav.scrollLeft())? 20 : 2;
@@ -19590,7 +19596,16 @@ elFinder.prototype.commands.resize = function() {
 					uideg270 = $('<button/>').attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')),
 					uideg90  = $('<button/>').attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')),
 					uiprop   = $('<span />'),
-					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset elfinder-tabstop"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
+					reset    = $('<button class="elfinder-resize-reset">').text(fm.i18n('reset'))
+						.on('click', function() {
+							resetView();
+						})
+						.button({
+							icons: {
+								primary: 'ui-icon-arrowrefresh-1-n'
+							},
+							text: false
+						}),
 					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
@@ -19691,6 +19706,77 @@ elFinder.prototype.commands.resize = function() {
 								}
 							})
 						.end(),
+					pickctx,
+					pickc = [],
+					pick = function(e) {
+						var mx, my, n, color, r, g, b, h, s, l;
+
+						// gets an array position of the pixel from the cursor position
+						n = e.offsetX + e.offsetY * (imgr.width() - 1);
+
+						color = pickc[n];
+						if (!color) return;
+
+						r = color[0]; g = color[1]; b = color[2];
+						h = color[3]; s = color[4]; l = color[5];
+
+						setbg(r, g, b, (e.type === 'click'));
+					},
+					palpick = function(e) {
+						setbg($(this).css('backgroundColor'), '', '', (e.type === 'click'));
+					},
+					setbg = function(r, g, b, off) {
+						var s, m, cc;
+						if (typeof r === 'string') {
+							g = '';
+							if (r && (s = $('<span>').css('backgroundColor', r).css('backgroundColor')) && (m = s.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i))) {
+								r = Number(m[1]);
+								g = Number(m[2]);
+								b = Number(m[3]);
+							}
+						}
+						cc = (g === '')? r : '#' + getColorCode(r, g, b);
+						bg.val(cc).css({ backgroundColor: cc, backgroundImage: 'none', color: (r+g+b < 384? '#fff' : '#000') });
+						preview.css('backgroundColor', cc);
+						if (off) {
+							imgr.off('.picker').removeClass('elfinder-resize-picking');
+							pallet.off('.picker').removeClass('elfinder-resize-picking');
+						}
+					},
+					getColorCode = function(r, g, b) {
+						return $.map([r,g,b], function(c){return ('0'+parseInt(c).toString(16)).slice(-2);}).join('');
+					},
+					picker = $('<button>').text(fm.i18n('colorPicker'))
+					.on('click', function() { 
+						imgr.on('mousemove.picker click.picker touchmove.picker', pick).addClass('elfinder-resize-picking');
+						pallet.on('mousemove.picker click.picker touchmove.picker', 'span', palpick).addClass('elfinder-resize-picking');
+					})
+					.button({
+						icons: {
+							primary: 'ui-icon-pin-s'
+						},
+						text: false
+					}),
+					reseter = $('<button>').text(fm.i18n('reset'))
+						.on('click', function() { 
+							setbg('', '', '', true);
+						})
+						.button({
+							icons: {
+								primary: 'ui-icon-arrowrefresh-1-n'
+							},
+							text: false
+						}),
+					bg = $('<input class="elfinder-resize-bg" type="text">')
+						.on('focus', function() {
+							$(this).attr('style', '');
+						})
+						.on('blur', function() {
+							setbg($(this).val());
+						}),
+					pallet  = $('<div>').on('click', 'span', function() {
+						setbg($(this).css('backgroundColor'));
+					}),
 					ratio   = 1,
 					prop    = 1,
 					owidth  = 0,
@@ -19710,6 +19796,9 @@ elFinder.prototype.commands.resize = function() {
 							.height(rheight)
 							.css('margin-top', (pheight-rheight)/2 + 'px')
 							.css('margin-left', (pwidth-rwidth)/2 + 'px');
+						if (imgr.is(':visible')) {
+							preview.css('backgroundColor', bg.val());
+						}
 					},
 					setupimg = function() {
 
@@ -19731,10 +19820,98 @@ elFinder.prototype.commands.resize = function() {
 							.height(imgc.height())
 							.offset(imgc.offset());
 					},
+					setupPicker = function() {
+						var canv, n, w, h, r, g, b, s, l, hsl, hue,
+							data, scale, tx1, tx2, ty1, ty2, rgb,
+							domi = {},
+							domic = [],
+							domiv,
+							rgbToHsl = function (r, g, b) {
+								var h, s, l,
+									max = Math.max(Math.max(r, g), b),
+									min = Math.min(Math.min(r, g), b);
+	
+								// Hue, 0 ~ 359
+								if (max === min) {
+									h = 0;
+								} else if (r === max) {
+									h = ((g - b) / (max - min) * 60 + 360) % 360;
+								} else if (g === max) {
+									h = (b - r) / (max - min) * 60 + 120;
+								} else if (b === max) {
+									h = (r - g) / (max - min) * 60 + 240;
+								}
+								// Saturation, 0 ~ 1
+								s = (max - min) / max;
+								// Lightness, 0 ~ 1
+								l = (r *  0.3 + g * 0.59 + b * 0.11) / 255;
+	
+								return [h, s, l, 'hsl'];
+							};
+	
+						try {
+							canv = document.createElement('canvas');
+							pickctx = canv.getContext('2d');
+							canv.width = imgr.width();
+							canv.height = imgr.height();
+							scale = canv.width / owidth;
+							pickctx.scale(scale, scale);
+							pickctx.drawImage(imgr.get(0), 0, 0);
+		
+							w = canv.width;
+							h = canv.height;
+							data = pickctx.getImageData(0, 0, w, h).data;
+		
+							// Range to detect the dominant color
+							tx1 = w * .1;
+							tx2 = w * .9;
+							ty1 = h * .1;
+							ty2 = h * .9;
+		
+							for (var y = 0; y < h - 1; y++) {
+								for (var x = 0; x < w - 1; x++) {
+									n = x * 4 + y * w * 4;
+									// RGB
+									r = data[n]; g = data[n + 1]; b = data[n + 2];
+									// HSL
+									hsl = rgbToHsl(r, g, b);
+									hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
+									pickc.push([r, g, b, hue, s, l]);
+									// detect the dominant color
+									if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
+										rgb = r + ',' + g + ',' + b;
+										if (! domi[rgb]) {
+											domi[rgb] = 1;
+										} else {
+											++domi[rgb];
+										}
+									}
+								}
+							}
+		
+							$.each(domi, function(c, v) {
+								domic.push({c: c, v: v});
+							});
+							$.each(domic.sort(function(a, b) {
+								return (a.v > b.v)? -1 : 1;
+							}), function() {
+								if (this.v < 2 || pallet.data('domic') > 9) {
+									return false;
+								}
+								pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
+								pallet.data('domic', (pallet.data('domic') || 0) + 1);
+							});
+						} catch(e) {
+							picker.hide();
+							pallet.hide();
+						}
+					},
 					img     = $('<img/>')
 						.on('load', function() {
-							owidth  = img[0].width;
-							oheight = img[0].height;
+							owidth  = img.get(0).width || img.width();
+							oheight = img.get(0).height || img.height();
+							
+							dMinBtn.show();
 
 							var r_scale, inputFirst,
 								imgRatio = oheight / owidth;
@@ -19786,17 +19963,17 @@ elFinder.prototype.commands.resize = function() {
 								})
 								.on('keyup', function() {
 									var $this = $(this);
-									setTimeout(function() {
-										$this.val($this.val().replace(/[^0-9]/g, ''));
-									}, 10);
+									if (! $this.hasClass('elfinder-resize-bg')) {
+										setTimeout(function() {
+											$this.val($this.val().replace(/[^0-9]/g, ''));
+										}, 10);
+									}
 								})
 								.filter(':first');
 								
 							!fm.UA.Mobile && inputFirst.focus();
 							resizable();
-							
-							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
-							
+							setupPicker();
 						})
 						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
@@ -19804,7 +19981,7 @@ elFinder.prototype.commands.resize = function() {
 					basec = $('<div/>'),
 					imgc = $('<img/>'),
 					coverc = $('<div/>'),
-					imgr = $('<img/>'),
+					imgr = $('<img class="elfinder-resize-imgrotate" />'),
 					round = function(v) {
 						return isJpeg? Math.round(v/8)*8 : Math.round(v);
 					},
@@ -20033,7 +20210,7 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					save = function() {
-						var w, h, x, y, d, q;
+						var w, h, x, y, d, q, b = '';
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
@@ -20053,6 +20230,7 @@ elFinder.prototype.commands.resize = function() {
 							if (d == 0 || d == 360) {
 								return fm.error('errResizeNoChange');
 							}
+							b = bg.val();
 						}
 						q = quality? parseInt(quality.val()) : 0;
 						
@@ -20078,6 +20256,7 @@ elFinder.prototype.commands.resize = function() {
 							y      : y,
 							degree : d,
 							quality: q,
+							bg     : b,
 							mode   : mode
 						}, file, dfrd);
 					},
@@ -20137,7 +20316,7 @@ elFinder.prototype.commands.resize = function() {
 							setuprimg();
 						}
 					},
-					base;
+					dMinBtn, base;
 				
 				imgr.mousedown( rotate.start );
 				$(document).mouseup( rotate.stop );
@@ -20167,7 +20346,9 @@ elFinder.prototype.commands.resize = function() {
 							$('<div/>').append(uideg270, uideg90)[ctrgrup]()
 						),
 						$(row).css('height', '20px').append(uidegslider),
-						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $()),
+						$(row).append($(label).text(fm.i18n('bgcolor')), bg, picker, reseter),
+						$(row).css('height', '20px').append(pallet)
 					);
 					uideg270.on('click', function() {
 						rdegree = rdegree - 90;
@@ -20234,6 +20415,7 @@ elFinder.prototype.commands.resize = function() {
 					resizable      : false,
 					buttons        : buttons,
 					open           : function() {
+						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
 						img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
 						imgc.attr('src', img.attr('src'));
@@ -20255,8 +20437,6 @@ elFinder.prototype.commands.resize = function() {
 					$('.elfinder-dialog').css('filter', '');
 				}
 				
-				reset.css('left', width.position().left + width.width() + 12);
-				
 				coverc.css({ 'opacity': 0.2, 'background-color': '#fff', 'position': 'absolute'}),
 				rhandlec.css('cursor', 'move');
 				rhandlec.find('.elfinder-resize-handle-point').css({
@@ -20265,13 +20445,9 @@ elFinder.prototype.commands.resize = function() {
 					'border-color':'#000'
 				});
 
-				imgr.css('cursor', 'pointer');
-
 				if (! api2) {
 					uitype.find('.api2').remove();
 				}
-				
-				//uitype[ctrgrup]()[ctrgrup]('disable');
 				
 				control.find('input,select').prop('disabled', true);
 
