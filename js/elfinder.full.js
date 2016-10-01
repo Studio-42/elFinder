@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: bb72a6e) (2016-10-01)
+ * Version 2.1.15 (2.1-src Nightly: 81c564f) (2016-10-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6055,7 +6055,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: bb72a6e)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 81c564f)';
 
 
 
@@ -19715,15 +19715,15 @@ elFinder.prototype.commands.resize = function() {
 								}
 							})
 						.end(),
+					pickcanv,
 					pickctx,
-					pickc = [],
+					pickc = {},
 					pick = function(e) {
-						var mx, my, n, color, r, g, b, h, s, l;
+						var color, r, g, b, h, s, l;
 
-						// gets an array position of the pixel from the cursor position
-						n = e.offsetX + e.offsetY * (imgr.width() - 1);
-
-						color = pickc[n];
+						try {
+							color = pickc[Math.round(e.offsetX)][Math.round(e.offsetY)];
+						} catch(e) {}
 						if (!color) return;
 
 						r = color[0]; g = color[1]; b = color[2];
@@ -19757,8 +19757,8 @@ elFinder.prototype.commands.resize = function() {
 					},
 					picker = $('<button>').text(fm.i18n('colorPicker'))
 					.on('click', function() { 
-						imgr.on('mousemove.picker click.picker touchmove.picker', pick).addClass('elfinder-resize-picking');
-						pallet.on('mousemove.picker click.picker touchmove.picker', 'span', palpick).addClass('elfinder-resize-picking');
+						imgr.on('mousemove.picker click.picker', pick).addClass('elfinder-resize-picking');
+						pallet.on('mousemove.picker click.picker', 'span', palpick).addClass('elfinder-resize-picking');
 					})
 					.button({
 						icons: {
@@ -19799,14 +19799,19 @@ elFinder.prototype.commands.resize = function() {
 					setuprimg = function() {
 						var r_scale;
 						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
-						rwidth = owidth * r_scale;
-						rheight = oheight * r_scale;
+						rwidth = Math.ceil(owidth * r_scale);
+						rheight = Math.ceil(oheight * r_scale);
 						imgr.width(rwidth)
 							.height(rheight)
 							.css('margin-top', (pheight-rheight)/2 + 'px')
 							.css('margin-left', (pwidth-rwidth)/2 + 'px');
 						if (imgr.is(':visible')) {
 							preview.css('backgroundColor', bg.val());
+							setTimeout(function() {
+								if (pickcanv && pickcanv.width !== rwidth) {
+									setColorData();
+								}
+							}, 0);
 						}
 					},
 					setupimg = function() {
@@ -19829,8 +19834,8 @@ elFinder.prototype.commands.resize = function() {
 							.height(imgc.height())
 							.offset(imgc.offset());
 					},
-					setupPicker = function() {
-						var canv, n, w, h, r, g, b, s, l, hsl, hue,
+					setColorData = function() {
+						var n, w, h, r, g, b, s, l, hsl, hue,
 							data, scale, tx1, tx2, ty1, ty2, rgb,
 							domi = {},
 							domic = [],
@@ -19857,18 +19862,13 @@ elFinder.prototype.commands.resize = function() {
 	
 								return [h, s, l, 'hsl'];
 							};
-	
 						try {
-							canv = document.createElement('canvas');
-							pickctx = canv.getContext('2d');
-							canv.width = imgr.width();
-							canv.height = imgr.height();
-							scale = canv.width / owidth;
+							w = pickcanv.width = imgr.width();
+							h = pickcanv.height = imgr.height();
+							scale = w / owidth;
 							pickctx.scale(scale, scale);
 							pickctx.drawImage(imgr.get(0), 0, 0);
 		
-							w = canv.width;
-							h = canv.height;
 							data = pickctx.getImageData(0, 0, w, h).data;
 		
 							// Range to detect the dominant color
@@ -19885,7 +19885,11 @@ elFinder.prototype.commands.resize = function() {
 									// HSL
 									hsl = rgbToHsl(r, g, b);
 									hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
-									pickc.push([r, g, b, hue, s, l]);
+									if (! pickc[x]) {
+										pickc[x] = {};
+									}
+									// set pickc
+									pickc[x][y] = [r, g, b, hue, s, l];
 									// detect the dominant color
 									if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
 										rgb = r + ',' + g + ',' + b;
@@ -19901,6 +19905,7 @@ elFinder.prototype.commands.resize = function() {
 							$.each(domi, function(c, v) {
 								domic.push({c: c, v: v});
 							});
+							pallet.empty();
 							$.each(domic.sort(function(a, b) {
 								return (a.v > b.v)? -1 : 1;
 							}), function() {
@@ -19910,6 +19915,15 @@ elFinder.prototype.commands.resize = function() {
 								pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
 								pallet.data('domic', (pallet.data('domic') || 0) + 1);
 							});
+						} catch(e) {
+							picker.hide();
+							pallet.hide();
+						}
+					},
+					setupPicker = function() {
+						try {
+							pickcanv = document.createElement('canvas');
+							pickctx = pickcanv.getContext('2d');
 						} catch(e) {
 							picker.hide();
 							pallet.hide();
@@ -19943,6 +19957,7 @@ elFinder.prototype.commands.resize = function() {
 							width.val(owidth);
 							height.val(oheight);
 
+							setupPicker();
 							setupimg();
 							
 							uitype[ctrgrup]('enable');
@@ -19982,7 +19997,6 @@ elFinder.prototype.commands.resize = function() {
 								
 							!fm.UA.Mobile && inputFirst.focus();
 							resizable();
-							setupPicker();
 						})
 						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
