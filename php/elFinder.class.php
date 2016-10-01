@@ -144,7 +144,7 @@ class elFinder {
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
 		'info'      => array('targets' => true, 'compare' => false),
 		'dim'       => array('target' => true),
-		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false),
+		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false),
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
@@ -2642,7 +2642,7 @@ class elFinder {
 		$x      = (int)$args['x'];
 		$y      = (int)$args['y'];
 		$mode   = $args['mode'];
-		$bg     = null;
+		$bg     = $args['bg'];
 		$degree = (int)$args['degree'];
 		$quality= (int)$args['quality'];
 		
