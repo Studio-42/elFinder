@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-09-16
+ * @version 2016-10-01
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -360,8 +360,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
-			'pageTurning'     : 'Page turning', // from v2.1.15 added 9.10.2016
-			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.10.2016
+			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Background color', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Color picker', // from v2.1.16 added 1.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
