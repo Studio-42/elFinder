@@ -446,7 +446,7 @@ elFinder.prototype.commands.resize = function() {
 							pallet.hide();
 						}
 					},
-					img     = $('<img/>')
+					img     = $('<img crossorigin="anonymous"/>')
 						.on('load', function() {
 							owidth  = img.get(0).width || img.width();
 							oheight = img.get(0).height || img.height();
