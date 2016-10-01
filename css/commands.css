@@ -12,7 +12,8 @@
 	width: 5em;
 	direction: ltr;
 }
-.elfinder-dialog-resize .elfinder-resize-imgrotate {
+.elfinder-dialog-resize .elfinder-resize-imgrotate,
+.elfinder-dialog-resize .elfinder-resize-pallet {
 	cursor: pointer;
 }
 .elfinder-dialog-resize .elfinder-resize-picking {
