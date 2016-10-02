@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 35fbe47) (2016-10-02)
+ * Version 2.1.15 (2.1-src Nightly: a440ae6) (2016-10-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -209,7 +209,12 @@
 	width: 30px;
 	height: 30px;
 }
-
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-preview .ui-resizable-se {
+	width: 30px;
+	height: 30px;
+	zoom: 1;
+	margin: 0;
+}
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
 	position:absolute;
 	top:50%;
