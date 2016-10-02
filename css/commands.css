@@ -219,8 +219,12 @@
 	float:right;
 }
 
-.elfinder-dialog-resize button.ui-button  {
-	padding: 6px 9px;
+.elfinder-dialog-resize .elfinder-resize-degree input,
+.elfinder-dialog-resize .elfinder-resize-quality input {
+	width: 2.5em;
+}
+.elfinder-dialog-resize .elfinder-resize-degree button.ui-button {
+	padding: 6px 8px;
 }
 .elfinder-dialog-resize button.ui-button span {
 	padding: 0;
