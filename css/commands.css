@@ -125,7 +125,7 @@
 	background:url(../img/progress.gif) center bottom repeat-x;
 }
 
-.elfinder-resize-row { margin-bottom:7px; position:relative;}
+.elfinder-resize-row { margin-bottom:9px; position:relative;}
 
 .elfinder-resize-label { float:left; width:80px; padding-top: 3px; }
 
@@ -231,7 +231,6 @@
 }
 
 .ui-widget-content .elfinder-dialog-resize .elfinder-resize-rotate-slider {
-	float: left;
 	width: 195px;
 	margin: 10px 7px;
 	background-color: #fafafa;
