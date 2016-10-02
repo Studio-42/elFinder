@@ -366,89 +366,91 @@ elFinder.prototype.commands.resize = function() {
 							.offset(imgc.offset());
 					},
 					setColorData = function() {
-						var n, w, h, r, g, b, s, l, hsl, hue,
-							data, scale, tx1, tx2, ty1, ty2, rgb,
-							domi = {},
-							domic = [],
-							domiv,
-							rgbToHsl = function (r, g, b) {
-								var h, s, l,
-									max = Math.max(Math.max(r, g), b),
-									min = Math.min(Math.min(r, g), b);
-	
-								// Hue, 0 ~ 359
-								if (max === min) {
-									h = 0;
-								} else if (r === max) {
-									h = ((g - b) / (max - min) * 60 + 360) % 360;
-								} else if (g === max) {
-									h = (b - r) / (max - min) * 60 + 120;
-								} else if (b === max) {
-									h = (r - g) / (max - min) * 60 + 240;
-								}
-								// Saturation, 0 ~ 1
-								s = (max - min) / max;
-								// Lightness, 0 ~ 1
-								l = (r *  0.3 + g * 0.59 + b * 0.11) / 255;
-	
-								return [h, s, l, 'hsl'];
-							};
-						try {
-							w = pickcanv.width = imgr.width();
-							h = pickcanv.height = imgr.height();
-							scale = w / owidth;
-							pickctx.scale(scale, scale);
-							pickctx.drawImage(imgr.get(0), 0, 0);
+						if (pickctx) {
+							var n, w, h, r, g, b, s, l, hsl, hue,
+								data, scale, tx1, tx2, ty1, ty2, rgb,
+								domi = {},
+								domic = [],
+								domiv,
+								rgbToHsl = function (r, g, b) {
+									var h, s, l,
+										max = Math.max(Math.max(r, g), b),
+										min = Math.min(Math.min(r, g), b);
 		
-							data = pickctx.getImageData(0, 0, w, h).data;
-		
-							// Range to detect the dominant color
-							tx1 = w * .1;
-							tx2 = w * .9;
-							ty1 = h * .1;
-							ty2 = h * .9;
-		
-							for (var y = 0; y < h - 1; y++) {
-								for (var x = 0; x < w - 1; x++) {
-									n = x * 4 + y * w * 4;
-									// RGB
-									r = data[n]; g = data[n + 1]; b = data[n + 2];
-									// HSL
-									hsl = rgbToHsl(r, g, b);
-									hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
-									if (! pickc[x]) {
-										pickc[x] = {};
+									// Hue, 0 ~ 359
+									if (max === min) {
+										h = 0;
+									} else if (r === max) {
+										h = ((g - b) / (max - min) * 60 + 360) % 360;
+									} else if (g === max) {
+										h = (b - r) / (max - min) * 60 + 120;
+									} else if (b === max) {
+										h = (r - g) / (max - min) * 60 + 240;
 									}
-									// set pickc
-									pickc[x][y] = [r, g, b, hue, s, l];
-									// detect the dominant color
-									if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
-										rgb = r + ',' + g + ',' + b;
-										if (! domi[rgb]) {
-											domi[rgb] = 1;
-										} else {
-											++domi[rgb];
+									// Saturation, 0 ~ 1
+									s = (max - min) / max;
+									// Lightness, 0 ~ 1
+									l = (r *  0.3 + g * 0.59 + b * 0.11) / 255;
+		
+									return [h, s, l, 'hsl'];
+								};
+							try {
+								w = pickcanv.width = imgr.width();
+								h = pickcanv.height = imgr.height();
+								scale = w / owidth;
+								pickctx.scale(scale, scale);
+								pickctx.drawImage(imgr.get(0), 0, 0);
+			
+								data = pickctx.getImageData(0, 0, w, h).data;
+			
+								// Range to detect the dominant color
+								tx1 = w * .1;
+								tx2 = w * .9;
+								ty1 = h * .1;
+								ty2 = h * .9;
+			
+								for (var y = 0; y < h - 1; y++) {
+									for (var x = 0; x < w - 1; x++) {
+										n = x * 4 + y * w * 4;
+										// RGB
+										r = data[n]; g = data[n + 1]; b = data[n + 2];
+										// HSL
+										hsl = rgbToHsl(r, g, b);
+										hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
+										if (! pickc[x]) {
+											pickc[x] = {};
+										}
+										// set pickc
+										pickc[x][y] = [r, g, b, hue, s, l];
+										// detect the dominant color
+										if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
+											rgb = r + ',' + g + ',' + b;
+											if (! domi[rgb]) {
+												domi[rgb] = 1;
+											} else {
+												++domi[rgb];
+											}
 										}
 									}
 								}
+			
+								$.each(domi, function(c, v) {
+									domic.push({c: c, v: v});
+								});
+								pallet.empty();
+								$.each(domic.sort(function(a, b) {
+									return (a.v > b.v)? -1 : 1;
+								}), function() {
+									if (this.v < 2 || pallet.data('domic') > 9) {
+										return false;
+									}
+									pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
+									pallet.data('domic', (pallet.data('domic') || 0) + 1);
+								});
+							} catch(e) {
+								picker.hide();
+								pallet.hide();
 							}
-		
-							$.each(domi, function(c, v) {
-								domic.push({c: c, v: v});
-							});
-							pallet.empty();
-							$.each(domic.sort(function(a, b) {
-								return (a.v > b.v)? -1 : 1;
-							}), function() {
-								if (this.v < 2 || pallet.data('domic') > 9) {
-									return false;
-								}
-								pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
-								pallet.data('domic', (pallet.data('domic') || 0) + 1);
-							});
-						} catch(e) {
-							picker.hide();
-							pallet.hide();
 						}
 					},
 					setupPicker = function() {
