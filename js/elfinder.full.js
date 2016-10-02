@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: d891599) (2016-10-02)
+ * Version 2.1.15 (2.1-src Nightly: 35fbe47) (2016-10-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6055,7 +6055,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: d891599)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 35fbe47)';
 
 
 
@@ -19840,7 +19840,7 @@ elFinder.prototype.commands.resize = function() {
 								data, scale, tx1, tx2, ty1, ty2, rgb,
 								domi = {},
 								domic = [],
-								domiv,
+								domiv, palc,
 								rgbToHsl = function (r, g, b) {
 									var h, s, l,
 										max = Math.max(Math.max(r, g), b),
@@ -19902,20 +19902,22 @@ elFinder.prototype.commands.resize = function() {
 										}
 									}
 								}
-			
-								$.each(domi, function(c, v) {
-									domic.push({c: c, v: v});
-								});
-								pallet.empty();
-								$.each(domic.sort(function(a, b) {
-									return (a.v > b.v)? -1 : 1;
-								}), function() {
-									if (this.v < 2 || pallet.data('domic') > 9) {
-										return false;
-									}
-									pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
-									pallet.data('domic', (pallet.data('domic') || 0) + 1);
-								});
+								
+								if (! pallet.children(':first').length) {
+									palc = 1;
+									$.each(domi, function(c, v) {
+										domic.push({c: c, v: v});
+									});
+									$.each(domic.sort(function(a, b) {
+										return (a.v > b.v)? -1 : 1;
+									}), function() {
+										if (this.v < 2 || palc > 10) {
+											return false;
+										}
+										pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
+										++palc;
+									});
+								}
 							} catch(e) {
 								picker.hide();
 								pallet.hide();
