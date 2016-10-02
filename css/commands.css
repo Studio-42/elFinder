@@ -199,7 +199,12 @@
 	width: 30px;
 	height: 30px;
 }
-
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-preview .ui-resizable-se {
+	width: 30px;
+	height: 30px;
+	zoom: 1;
+	margin: 0;
+}
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
 	position:absolute;
 	top:50%;
