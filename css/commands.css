@@ -23,6 +23,10 @@
 .elfinder-dialog-resize .elfinder-resize-picking {
 	cursor: crosshair;
 }
+.elfinder-dialog-resize .elfinder-resize-grid8 + button {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
 .elfinder-resize-preview {
 	width:400px;
 	height:400px;

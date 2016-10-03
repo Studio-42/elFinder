@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-10-01
+ * @version 2016-10-04
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -365,6 +365,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Background color', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Color picker', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
