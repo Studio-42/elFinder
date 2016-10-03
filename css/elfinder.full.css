@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: f9d9f9d) (2016-10-03)
+ * Version 2.1.15 (2.1-src Nightly: 80f00d1) (2016-10-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -32,6 +32,10 @@
 }
 .elfinder-dialog-resize .elfinder-resize-picking {
 	cursor: crosshair;
+}
+.elfinder-dialog-resize .elfinder-resize-grid8 + button {
+	padding-top: 2px;
+	padding-bottom: 2px;
 }
 .elfinder-resize-preview {
 	width:400px;
@@ -1852,16 +1856,24 @@ button.elfinder-info-button {
 	background-repeat:no-repeat;
 /*	border:1px solid #111;*/
 }
+.elfinder-ltr .elfinder-navbar-arrow {
+	left: 0;
+}
+.elfinder-ltr .elfinder-navbar-arrow {
+	right:0;
+}
 .elfinder-touch .elfinder-navbar-arrow {
-	zoom: 1.3;
+	zoom: 1.4;
 	-moz-transform-origin: top left;
-	-moz-transform: scale(1.3);
-	margin-bottom: 8px;
+	-moz-transform: scale(1.4);
+	margin-bottom: 7px;
 }
 .elfinder-ltr.elfinder-touch .elfinder-navbar-arrow {
+    left: -3px;
     margin-right: 20px;
 }
 .elfinder-rtl.elfinder-touch .elfinder-navbar-arrow {
+    right: -3px;
     margin-left: 20px;
 }
 
@@ -1871,8 +1883,8 @@ button.elfinder-info-button {
 .elfinder-navbar-collapsed .elfinder-navbar-arrow { display:block; }
 
 /* arrow ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 4px; left:0; }
-.elfinder-rtl .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 -10px; right:0;  }
+.elfinder-ltr .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 4px;}
+.elfinder-rtl .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 -10px; }
 .elfinder-ltr .elfinder-navbar-expanded  .elfinder-navbar-arrow,
 .elfinder-rtl .elfinder-navbar-expanded  .elfinder-navbar-arrow { background-position:0 -21px; }
 
