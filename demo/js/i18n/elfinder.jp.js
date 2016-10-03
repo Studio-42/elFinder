@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-10-01
+ * @version 2016-10-04
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -366,6 +366,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'reset'           : 'リセット', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : '背景色', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'カラーピッカー', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8pxグリッド', // from v2.1.16 added 4.10.2016
+			'enabled'         : '有効', // from v2.1.16 added 4.10.2016
+			'disabled'        : '無効', // from v2.1.16 added 4.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
