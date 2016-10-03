@@ -168,12 +168,14 @@ elFinder.prototype.commands.resize = function() {
 								uirotate.hide();
 								uicrop.hide();
 								resizable();
+								isJpeg && grid8px.insertAfter(uiresize.find('.elfinder-resize-grid8'));
 							}
 							else if (mode == 'crop') {
 								uirotate.hide();
 								uiresize.hide();
 								uicrop.show();
 								croppable();
+								isJpeg && grid8px.insertAfter(uicrop.find('.elfinder-resize-grid8'));
 							} else if (mode == 'rotate') {
 								uiresize.hide();
 								uicrop.hide();
@@ -324,6 +326,7 @@ elFinder.prototype.commands.resize = function() {
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
+					grid8   = true,
 					constr  = $('<button>').html(fm.i18n('aspectRatio'))
 						.on('click', function() {
 							cratio = ! cratio;
@@ -331,8 +334,6 @@ elFinder.prototype.commands.resize = function() {
 								icons : { primary: cratio? 'ui-icon-locked' : 'ui-icon-unlocked'}
 							});
 							resize.fixHeight();
-							//resizable(true);
-							//resizable();
 							rhandle.resizable('option', 'aspectRatio', cratio).data('uiResizable')._aspectRatio = cratio;
 						})
 						.button({
@@ -355,6 +356,25 @@ elFinder.prototype.commands.resize = function() {
 							},
 							text: false
 						}),
+					grid8px = $('<button>').html(fm.i18n(grid8? 'enabled' : 'disabled')).toggleClass('ui-state-active', grid8)
+						.on('click', function() {
+							grid8 = ! grid8;
+							grid8px.html(fm.i18n(grid8? 'enabled' : 'disabled')).toggleClass('ui-state-active', grid8);
+							if (grid8) {
+								width.val(round(width.val()));
+								height.val(round(height.val()));
+								offsetX.val(round(offsetX.val()));
+								offsetY.val(round(offsetY.val()));
+								pointX.val(round(pointX.val()));
+								pointY.val(round(pointY.val()));
+								if (uiresize.is(':visible')) {
+									resize.updateView(width.val(), height.val());
+								} else if (uicrop.is(':visible')) {
+									crop.updateView();
+								}
+							}
+						})
+						.button(),
 					setuprimg = function() {
 						var r_scale;
 						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
@@ -560,7 +580,7 @@ elFinder.prototype.commands.resize = function() {
 					coverc = $('<div/>'),
 					imgr = $('<img class="elfinder-resize-imgrotate" />'),
 					round = function(v) {
-						return isJpeg? Math.round(v/8)*8 : Math.round(v);
+						return isJpeg && grid8? Math.round(v/8)*8 : Math.round(v);
 					},
 					resetView = function() {
 						width.val(owidth);
@@ -613,8 +633,8 @@ elFinder.prototype.commands.resize = function() {
 						update : function() {
 							offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop));
 							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop));
-							pointX.val(Math.round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
-							pointY.val(Math.round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
+							pointX.val(round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
+							pointY.val(round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
 						},
 						updateView : function(change) {
 							if (cratioc) {
@@ -637,7 +657,7 @@ elFinder.prototype.commands.resize = function() {
 								.height(rhandlec.height());
 						},
 						resize_update : function() {
-							rhandlec.data({w: null, h: null});
+							rhandlec.data({x: null, y: null, w: null, h: null});
 							crop.update();
 							coverc.width(rhandlec.width())
 								.height(rhandlec.height());
@@ -921,6 +941,7 @@ elFinder.prototype.commands.resize = function() {
 					$(row).append($(label).text(fm.i18n('width')), width),
 					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
 					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
+					(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8'), grid8px) : $()),
 					$(row).append($(label).text(fm.i18n('scale')), uiprop)
 				);
 
@@ -930,7 +951,8 @@ elFinder.prototype.commands.resize = function() {
 						$(row).append($(label).text('Y')).append(pointY),
 						$(row).append($(label).text(fm.i18n('width')), offsetX),
 						$(row).append($(label).text(fm.i18n('height')), offsetY, $('<div class="elfinder-resize-whctrls">').append(constrc, reset.clone(true))),
-						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $()),
+						(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8')) : $())
 					);
 					
 					uirotate.append(
