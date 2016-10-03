@@ -121,7 +121,10 @@ elFinder.prototype.commands.resize = function() {
 					input    = '<input type="text" size="5"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
-					control  = $('<div class="elfinder-resize-control"/>'),
+					control  = $('<div class="elfinder-resize-control"/>')
+						.on('focus', 'input[type=text]', function() {
+							$(this).select();
+						}),
 					preview  = $('<div class="elfinder-resize-preview"/>')
 						.on('touchmove', function(e) {
 							e.stopPropagation();
@@ -178,13 +181,6 @@ elFinder.prototype.commands.resize = function() {
 								rotateable();
 							}
 						}),
-					constr  = $('<input type="checkbox" checked="checked"/>')
-						.change(function() {
-							cratio = !!constr.prop('checked');
-							resize.fixHeight();
-							resizable(true);
-							resizable();
-						}),
 					width   = $(input)
 						.change(function() {
 							var w = parseInt(width.val()),
@@ -207,8 +203,8 @@ elFinder.prototype.commands.resize = function() {
 						}),
 					pointX  = $(input).change(function(){crop.updateView();}),
 					pointY  = $(input).change(function(){crop.updateView();}),
-					offsetX = $(input).change(function(){crop.updateView();}),
-					offsetY = $(input).change(function(){crop.updateView();}),
+					offsetX = $(input).change(function(){crop.updateView('w');}),
+					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
 						$(input).val(fm.option('jpgQuality'))
 							.addClass('quality')
@@ -322,11 +318,43 @@ elFinder.prototype.commands.resize = function() {
 					owidth  = 0,
 					oheight = 0,
 					cratio  = true,
+					cratioc = false,
 					pwidth  = 0,
 					pheight = 0,
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
+					constr  = $('<button>').html(fm.i18n('aspectRatio'))
+						.on('click', function() {
+							cratio = ! cratio;
+							constr.button('option', {
+								icons : { primary: cratio? 'ui-icon-locked' : 'ui-icon-unlocked'}
+							});
+							resize.fixHeight();
+							//resizable(true);
+							//resizable();
+							rhandle.resizable('option', 'aspectRatio', cratio).data('uiResizable')._aspectRatio = cratio;
+						})
+						.button({
+							icons : {
+								primary: cratio? 'ui-icon-locked' : 'ui-icon-unlocked'
+							},
+							text: false
+						}),
+					constrc = $('<button>').html(fm.i18n('aspectRatio'))
+						.on('click', function() {
+							cratioc = ! cratioc;
+							constrc.button('option', {
+								icons : { primary: cratioc? 'ui-icon-locked' : 'ui-icon-unlocked'}
+							});
+							rhandlec.resizable('option', 'aspectRatio', cratioc).data('uiResizable')._aspectRatio = cratioc;
+						})
+						.button({
+							icons : {
+								primary: cratioc? 'ui-icon-locked' : 'ui-icon-unlocked'
+							},
+							text: false
+						}),
 					setuprimg = function() {
 						var r_scale;
 						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
@@ -346,24 +374,15 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					setupimg = function() {
-
 						resize.updateView(owidth, oheight);
-
 						setuprimg();
-
 						basec
 							.width(img.width())
 							.height(img.height());
 						imgc
 							.width(img.width())
 							.height(img.height());
-						coverc
-							.width(img.width())
-							.height(img.height());
-						rhandlec
-							.width(imgc.width())
-							.height(imgc.height())
-							.offset(imgc.offset());
+						crop.updateView();
 					},
 					setColorData = function() {
 						if (pickctx) {
@@ -547,6 +566,11 @@ elFinder.prototype.commands.resize = function() {
 						width.val(owidth);
 						height.val(oheight);
 						resize.updateView(owidth, oheight);
+						pointX.val(0);
+						pointY.val(0);
+						offsetX.val(owidth);
+						offsetY.val(oheight);
+						crop.updateView();
 					},
 					resize = {
 						update : function() {
@@ -592,7 +616,15 @@ elFinder.prototype.commands.resize = function() {
 							pointX.val(Math.round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
 							pointY.val(Math.round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
 						},
-						updateView : function() {
+						updateView : function(change) {
+							if (cratioc) {
+								var r = coverc.width() / coverc.height();
+								if (change === 'w') {
+									offsetY.val(Math.round(parseInt(offsetX.val()) / r));
+								} else if (change === 'h') {
+									offsetX.val(Math.round(parseInt(offsetY.val()) * r));
+								}
+							}
 							var x = parseInt(pointX.val()) * prop + imgc.offset().left;
 							var y = parseInt(pointY.val()) * prop + imgc.offset().top;
 							var w = offsetX.val() * prop;
@@ -741,6 +773,7 @@ elFinder.prototype.commands.resize = function() {
 								rhandlec
 									.resizable({
 										containment : basec,
+										aspectRatio : cratioc,
 										resize      : crop.resize_update,
 										handles     : 'all'
 									})
@@ -885,9 +918,8 @@ elFinder.prototype.commands.resize = function() {
 				$(document).mouseup( rotate.stop );
 					
 				uiresize.append(
-					$(row).append($(label).text(fm.i18n('width')), width, reset),
-					$(row).append($(label).text(fm.i18n('height')), height),
-					$(row).append($('<label class="elfinder-resize-checkbox-label"/>').text(fm.i18n('aspectRatio')).prepend(constr)),
+					$(row).append($(label).text(fm.i18n('width')), width),
+					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
 					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
 					$(row).append($(label).text(fm.i18n('scale')), uiprop)
 				);
@@ -897,7 +929,7 @@ elFinder.prototype.commands.resize = function() {
 						$(row).append($(label).text('X'), pointX),
 						$(row).append($(label).text('Y')).append(pointY),
 						$(row).append($(label).text(fm.i18n('width')), offsetX),
-						$(row).append($(label).text(fm.i18n('height')), offsetY),
+						$(row).append($(label).text(fm.i18n('height')), offsetY, $('<div class="elfinder-resize-whctrls">').append(constrc, reset.clone(true))),
 						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
 					);
 					

@@ -6,7 +6,11 @@
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
 .elfinder-resize-control { float: left; }
-.elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
+.elfinder-resize-control input[type=text] {
+	border:1px solid #aaa;
+	text-align: right;
+	width: 4em;
+}
 .elfinder-resize-control input.elfinder-resize-bg { 
 	text-align: center;
 	width: 5em;
@@ -131,15 +135,14 @@
 
 .elfinder-resize-checkbox-label { border: 1px solid transparent; }
 
-.elfinder-resize-reset {
-	position:absolute;
-	margin-top: 8px;
+.elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	margin: -20px 5px 0 5px;
 }
-.elfinder-ltr .elfinder-resize-reset {
-	margin-left: 10px;
+.elfinder-ltr .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	float: right;
 }
-.elfinder-rtl .elfinder-resize-reset {
-	margin-right: 10px;
+.elfinder-rtl .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	float: left;
 }
 
 .elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
