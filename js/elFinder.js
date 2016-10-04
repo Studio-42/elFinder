@@ -5018,6 +5018,7 @@ elFinder.prototype = {
 								});
 							} else {
 								// for compat <= v2.1.13
+								self.volOptions[file.volumeid] = {};
 								if (file.disabled) {
 									self.volOptions[file.volumeid].disabled = file.disabled;
 								}
