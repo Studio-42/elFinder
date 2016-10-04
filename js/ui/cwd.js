@@ -1961,6 +1961,7 @@ $.fn.elfindercwd = function(fm, options) {
 				query = e.data.query;
 			})
 			.bind('incsearchstart', function(e) {
+				selectedFiles = [];
 				fm.lazy(function() {
 					// incremental search
 					var incquery = e.data.query || '';
