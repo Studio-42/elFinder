@@ -579,8 +579,13 @@ elFinder.prototype.commands.resize = function() {
 					imgc = $('<img/>'),
 					coverc = $('<div/>'),
 					imgr = $('<img class="elfinder-resize-imgrotate" />'),
-					round = function(v) {
-						return isJpeg && grid8? Math.round(v/8)*8 : Math.round(v);
+					round = function(v, max) {
+						v = grid8? Math.round(v/8)*8 : Math.round(v);
+						v = Math.max(0, v);
+						if (max && v > max) {
+							v = grid8? v - 8 : max;
+						}
+						return v;
 					},
 					resetView = function() {
 						width.val(owidth);
@@ -623,7 +628,7 @@ elFinder.prototype.commands.resize = function() {
 							var w, h;
 							if (cratio) {
 								w = width.val();
-								h = Math.round(w/ratio);
+								h = round(w/ratio);
 								resize.updateView(w, h);
 								height.val(h);
 							}
@@ -631,10 +636,10 @@ elFinder.prototype.commands.resize = function() {
 					},
 					crop = {
 						update : function() {
-							offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop));
-							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop));
-							pointX.val(round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
-							pointY.val(round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
+							pointX.val(round(((rhandlec.data('x')||rhandlec.position().left))/prop, owidth));
+							pointY.val(round(((rhandlec.data('y')||rhandlec.position().top))/prop, oheight));
+							offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop, owidth - pointX.val()));
+							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
 						},
 						updateView : function(change) {
 							if (cratioc) {
@@ -645,25 +650,24 @@ elFinder.prototype.commands.resize = function() {
 									offsetX.val(Math.round(parseInt(offsetY.val()) * r));
 								}
 							}
-							var x = parseInt(pointX.val()) * prop + imgc.offset().left;
-							var y = parseInt(pointY.val()) * prop + imgc.offset().top;
-							var w = offsetX.val() * prop;
-							var h = offsetY.val() * prop;
+							var x = Math.round(parseInt(pointX.val()) * prop);
+							var y = Math.round(parseInt(pointY.val()) * prop);
+							var w = Math.round(parseInt(offsetX.val()) * prop);
+							var h = Math.round(parseInt(offsetY.val()) * prop);
 							rhandlec.data({x: x, y: y, w: w, h: h})
-								.width(Math.round(w))
-								.height(Math.round(h))
-								.offset({left: Math.round(x), top: Math.round(y)});
-							coverc.width(rhandlec.width())
-								.height(rhandlec.height());
+								.width(w)
+								.height(h)
+								.css({left: x, top: y});
+							coverc.width(w)
+								.height(h);
 						},
-						resize_update : function() {
-							rhandlec.data({x: null, y: null, w: null, h: null});
+						resize_update : function(e, ui) {
+							rhandlec.data({x: ui.position.left, y: ui.position.top, w: ui.size.width, h: ui.size.height});
 							crop.update();
-							coverc.width(rhandlec.width())
-								.height(rhandlec.height());
+							crop.updateView();
 						},
-						drag_update : function() {
-							rhandlec.data({x: null, y: null});
+						drag_update : function(e, ui) {
+							rhandlec.data({x: ui.position.left, y: ui.position.top});
 							crop.update();
 						}
 					},
@@ -800,7 +804,8 @@ elFinder.prototype.commands.resize = function() {
 									.draggable({
 										handle      : coverc,
 										containment : imgc,
-										drag        : crop.drag_update
+										drag        : crop.drag_update,
+										stop        : crop.updateView
 									});
 								
 								dinit();
