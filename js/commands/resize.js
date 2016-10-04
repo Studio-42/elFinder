@@ -384,13 +384,18 @@ elFinder.prototype.commands.resize = function() {
 							.height(rheight)
 							.css('margin-top', (pheight-rheight)/2 + 'px')
 							.css('margin-left', (pwidth-rwidth)/2 + 'px');
-						if (imgr.is(':visible')) {
-							preview.css('backgroundColor', bg.val());
-							setTimeout(function() {
-								if (pickcanv && pickcanv.width !== rwidth) {
-									setColorData();
-								}
-							}, 0);
+						if (imgr.is(':visible') && bg.is(':visible')) {
+							if (file.mime !== 'image/png') {
+								preview.css('backgroundColor', bg.val());
+								setTimeout(function() {
+									if (pickcanv && pickcanv.width !== rwidth) {
+										setColorData();
+									}
+								}, 0);
+							} else {
+								bg.parent().hide();
+								pallet.hide()
+							}
 						}
 					},
 					setupimg = function() {
@@ -406,7 +411,7 @@ elFinder.prototype.commands.resize = function() {
 					},
 					setColorData = function() {
 						if (pickctx) {
-							var n, w, h, r, g, b, s, l, hsl, hue,
+							var n, w, h, r, g, b, a, s, l, hsl, hue,
 								data, scale, tx1, tx2, ty1, ty2, rgb,
 								domi = {},
 								domic = [],
@@ -433,6 +438,8 @@ elFinder.prototype.commands.resize = function() {
 		
 									return [h, s, l, 'hsl'];
 								};
+							
+							calc:
 							try {
 								w = pickcanv.width = imgr.width();
 								h = pickcanv.height = imgr.height();
@@ -452,7 +459,13 @@ elFinder.prototype.commands.resize = function() {
 									for (var x = 0; x < w - 1; x++) {
 										n = x * 4 + y * w * 4;
 										// RGB
-										r = data[n]; g = data[n + 1]; b = data[n + 2];
+										r = data[n]; g = data[n + 1]; b = data[n + 2]; a = data[n + 3];
+										// check alpha ch
+										if (a !== 255) {
+											bg.parent().hide();
+											pallet.hide();
+											break calc;
+										}
 										// HSL
 										hsl = rgbToHsl(r, g, b);
 										hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
