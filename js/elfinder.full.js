@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 349806e) (2016-10-04)
+ * Version 2.1.15 (2.1-src Nightly: 723e7b6) (2016-10-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4094,6 +4094,7 @@ elFinder.prototype = {
 						self.uploads.xhrUploading = false;
 						files = null;
 						if (data) {
+							self.currentReqCmd = 'upload';
 							data.warning && self.error(data.warning);
 							data.removed && self.remove(data);
 							data.added   && self.add(data);
@@ -6056,7 +6057,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 349806e)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 723e7b6)';
 
 
 
@@ -21279,7 +21280,7 @@ elFinder.prototype.commands.upload = function() {
 								icon     : icon,
 								remain   : false,
 								callback : function() {
-									var title = base.children('.ui-dialog-titlebar:first').children('span.elfinder-upload-target');
+									var title = base.children('.ui-dialog-titlebar:first').find('span.elfinder-upload-target');
 									targets = [ f.hash ];
 									title.html(' - ' + fm.escape(f.i18 || f.name));
 									$this.focus();
