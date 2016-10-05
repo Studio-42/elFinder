@@ -4080,6 +4080,7 @@ elFinder.prototype = {
 						self.uploads.xhrUploading = false;
 						files = null;
 						if (data) {
+							self.currentReqCmd = 'upload';
 							data.warning && self.error(data.warning);
 							data.removed && self.remove(data);
 							data.added   && self.add(data);
