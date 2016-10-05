@@ -117,7 +117,7 @@ elFinder.prototype.commands.upload = function() {
 								icon     : icon,
 								remain   : false,
 								callback : function() {
-									var title = base.children('.ui-dialog-titlebar:first').children('span.elfinder-upload-target');
+									var title = base.children('.ui-dialog-titlebar:first').find('span.elfinder-upload-target');
 									targets = [ f.hash ];
 									title.html(' - ' + fm.escape(f.i18 || f.name));
 									$this.focus();
