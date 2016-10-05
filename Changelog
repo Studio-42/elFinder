@@ -1,3 +1,23 @@
+2016-10-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.16):
+		- [cmd:info] Fixed #1652 add CSS class name `file.csscls` to icon
+		- [ui:cwd] Fixed #1653 JQUI.selectable does not work on items that has been added
+		- [js:core,cmd:info] Fixed #1652 add the item type `Volume Root`
+		- [js:core] Fixed #1656 wrong result `fm.convAbsUrl()` with location basename
+		- [php:core] Fixed #1658 to allow cancel cmd exec by [cmd].pre callback
+		- [js:code] Fixed #1659 not work in Mac/iOS safari private browsing mode
+		- [js:core] Fixed #1662 `[cmd]fail` event is fired at fail cmd execution
+		- [php:core] Fixed #1669 Fatal error in `detectFileExtension()` when URL upload
+		- [ui:dialog] Fixed #1670 add the minimize button into the editing dialog
+		- [ui:navbar] Fixed #1684 rtl right-panel resize bug
+		- [cmd:resize] Fixed #1685 to enable specify bgcolor in the image rotation
+		- [cmd:resize] Fixed #1686 add "Aspect ratio" button into crop panel
+		- [cmd:resize] add button "8px Grid" Enabled/Disabled for JPEG image
+		- [js:core] Fixed #1689 initialized to an undefined property
+		- And some minor bug fixes
+
+
 2016-09-12  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.15):
