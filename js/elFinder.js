@@ -5016,19 +5016,17 @@ elFinder.prototype = {
 								
 								targetOptions = self.volOptions[vid];
 								
-								if (! data.cwd || data.cwd.hash !== file.hash) {
-									if (file.options) {
-										// >= v.2.1.14 has file.options
-										targetOptions = $.extend(targetOptions, file.options);
-									}
-									
-									// for compat <= v2.1.13
-									if (file.disabled) {
-										targetOptions.disabled = file.disabled;
-									}
-									if (file.tmbUrl) {
-										targetOptions.tmbUrl = file.tmbUrl;
-									}
+								if (file.options) {
+									// >= v.2.1.14 has file.options
+									targetOptions = $.extend(targetOptions, file.options);
+								}
+								
+								// for compat <= v2.1.13
+								if (file.disabled) {
+									targetOptions.disabled = file.disabled;
+								}
+								if (file.tmbUrl) {
+									targetOptions.tmbUrl = file.tmbUrl;
 								}
 								
 								// set immediate properties
