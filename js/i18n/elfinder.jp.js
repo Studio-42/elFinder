@@ -353,7 +353,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'nowLoading'      : '読み込んでいます...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : '複数ファイルオープン', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': '$1 個のファイルを開こうとしています。このままブラウザで開きますか？', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : '検索対象に該当するアイテムはありません', // from v2.1.12 added 5.16.2016
+			'emptySearch'     : '検索対象に該当するアイテムはありません。', // from v2.1.12 added 5.16.2016
 			'editingFile'     : 'ファイルを編集中です', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : '$1 個のアイテムを選択中です', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています', // from v2.1.13 added 6.3.2016
@@ -369,6 +369,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'8pxgrid'         : '8pxグリッド', // from v2.1.16 added 4.10.2016
 			'enabled'         : '有効', // from v2.1.16 added 4.10.2016
 			'disabled'        : '無効', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : '現在のビュー内に該当するアイテムはありません。\\A[Enter]キーで検索対象を拡げます。', // from v2.1.16 added 5.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
