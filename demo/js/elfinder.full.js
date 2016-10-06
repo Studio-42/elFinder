@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: df87163) (2016-10-06)
+ * Version 2.1.15 (2.1-src Nightly: c1c58b5) (2016-10-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6069,7 +6069,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: df87163)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: c1c58b5)';
 
 
 
@@ -8434,7 +8434,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'Search results is empty', // from v2.1.12 added 5.16.2016
+			'emptySearch'     : 'Search results is empty in search target.', // from v2.1.12 added 5.16.2016
 			'editingFile'     : 'It is editing a file.', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
@@ -8450,6 +8450,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -10472,7 +10473,10 @@ $.fn.elfindercwd = function(fm, options) {
 			content = function() {
 				var phash, emptyMethod, thtr;
 
-				wz.append(selectAllCheckbox);
+				wz.append(selectAllCheckbox).removeClass('elfinder-cwd-wrapper-empty elfinder-search-result elfinder-incsearch-result');
+				if (fm.searchStatus.state > 1 || fm.searchStatus.ininc) {
+					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-incsearch-result' : ''));
+				}
 				
 				try {
 					// to avoid problem with draggable
@@ -11113,6 +11117,7 @@ $.fn.elfindercwd = function(fm, options) {
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', 3);
 				if (! mobile) {
 					// make files selectable
 					cwd.selectable(selectableOption)
@@ -11162,13 +11167,14 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('search', function(e) {
 				cwdHashes = $.map(e.data.files, function(f) { return f.hash; });
 				incHashes = void 0;
+				fm.searchStatus.ininc = false;
 				content();
-				wz.addClass('elfinder-search-result');
+				//wz.addClass('elfinder-search-result');
 				fm.autoSync('stop');
 				resize();
 			})
 			.bind('searchend', function(e) {
-				wz.removeClass('elfinder-search-result elfinder-cwd-wrapper-empty');
+				//wz.removeClass('elfinder-search-result elfinder-cwd-wrapper-empty');
 				if (query || incHashes) {
 					query = '';
 					if (incHashes) {
@@ -11200,7 +11206,6 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.trigger('incsearch', { hashes: incHashes, query: incquery })
 							.searchStatus.ininc = true;
 						content();
-						wz.addClass('elfinder-search-result');
 						fm.autoSync('stop');
 					} else {
 						fm.trigger('incsearchend');
@@ -11211,7 +11216,6 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('incsearchend', function(e) {
 				fm.searchStatus.ininc = false;
 				incHashes = void 0;
-				wz.removeClass('elfinder-search-result');
 				if (!e.data || !e.data.noupdate) {
 					content();
 				}
@@ -13085,6 +13089,13 @@ $.fn.elfindersearchbutton = function(cmd) {
 							if (val.length === 0 || val.length >= isopts.minlen) {
 								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
 								incVal = val;
+								if (val === '' && fm.searchStatus.state > 1 && fm.searchStatus.query) {
+									setTimeout(function() {
+										if (input.val() === '' && fm.searchStatus.state > 1) {
+											input.val(fm.searchStatus.query);
+										}
+									}, isopts.wait * 2)
+								} 
 							}
 						}, isopts.wait));
 					}
