@@ -4997,7 +4997,8 @@ elFinder.prototype = {
 	normalize : function(data) {
 		var self   = this,
 			filter = function(file) { 
-		
+				var vid, targetOptions;
+				
 				if (file && file.hash && file.name && file.mime) {
 					if (file.mime == 'application/x-empty') {
 						file.mime = 'text/plain';
@@ -5006,34 +5007,42 @@ elFinder.prototype = {
 					if (! file.phash || file.mime === 'directory') {
 						// set options, tmbUrls for each volume
 						if (file.volumeid) {
-							// from v2.1.14
-							if (file.options) {
-								// set volOptions
-								self.volOptions[file.volumeid] = file.options;
+							vid = file.volumeid;
+							
+							if (self.isRoot(file)) {
+								if (! self.volOptions[vid]) {
+									self.volOptions[vid] = {};
+								}
+								
+								targetOptions = self.volOptions[vid];
+								
+								if (! data.cwd || data.cwd.hash !== file.hash) {
+									if (file.options) {
+										// >= v.2.1.14 has file.options
+										targetOptions = $.extend(targetOptions, file.options);
+									}
+									
+									// for compat <= v2.1.13
+									if (file.disabled) {
+										targetOptions.disabled = file.disabled;
+									}
+									if (file.tmbUrl) {
+										targetOptions.tmbUrl = file.tmbUrl;
+									}
+								}
 								
 								// set immediate properties
 								$.each(self.optionProperties, function(i, k) {
-									if (file.options[k]) {
-										file[k] = file.options[k];
+									if (targetOptions[k]) {
+										file[k] = targetOptions[k];
 									}
 								});
-							} else {
-								// for compat <= v2.1.13
-								self.volOptions[file.volumeid] = {};
-								if (file.disabled) {
-									self.volOptions[file.volumeid].disabled = file.disabled;
-								}
-								if (file.tmbUrl) {
-									self.volOptions[file.volumeid].tmbUrl = file.tmbUrl;
-								}
-							}
-							if (self.isRoot(file)) {
-								self.roots[file.volumeid] = file.hash;
+								self.roots[vid] = file.hash;
 							}
 							
-							if (prevId !== file.volumeid) {
-								prevId = file.volumeid;
-								i18nFolderName = self.option('i18nFolderName', file.volumeid);
+							if (prevId !== vid) {
+								prevId = vid;
+								i18nFolderName = self.option('i18nFolderName', vid);
 							}
 						}
 						
@@ -5080,6 +5089,9 @@ elFinder.prototype = {
 		
 
 		if (data.cwd) {
+			if (data.cwd.volumeid && data.options && Object.keys(data.options).length) {
+				self.volOptions[data.cwd.volumeid] = data.options;
+			}
 			data.cwd = filter(data.cwd);
 		}
 		if (data.files) {
