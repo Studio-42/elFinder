@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 3af9cd9) (2016-10-06)
+ * Version 2.1.15 (2.1-src Nightly: 2df8f75) (2016-10-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6067,7 +6067,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 3af9cd9)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 2df8f75)';
 
 
 
@@ -18970,35 +18970,40 @@ elFinder.prototype.commands.quicklook.plugins = [
 						var filenames = [], header, unzip, tar, tarlen, offset, h, name, prefix, size, dbs, toStr;
 						if (this.readyState === 4 && this.response) {
 							setTimeout(function() {
-								if (file.mime === 'application/zip') {
-									unzip = new elFinder.Zlib.Unzip(new Uint8Array(xhr.response));
-									filenames = unzip.getFilenames();
-								} else {
-									if (file.mime === 'application/x-gzip') {
-										unzip = new elFinder.Zlib.Gunzip(new Uint8Array(xhr.response));
-										tar = unzip.decompress();
+								try {
+									if (file.mime === 'application/zip') {
+										unzip = new elFinder.Zlib.Unzip(new Uint8Array(xhr.response));
+										filenames = unzip.getFilenames();
 									} else {
-										tar = new Uint8Array(xhr.response);
-									}
-									tarlen = tar.length;
-									offset = 0;
-									toStr = function(arr) {
-										return String.fromCharCode.apply(null, arr).replace(/\0+$/, '');
-									};
-									while (offset < tarlen && tar[offset] !== 0) {
-										h = tar.subarray(offset, offset + 512);
-										name = toStr(h.subarray(0, 100));
-										if (prefix = toStr(h.subarray(345, 500))) {
-											name = prefix + name;
+										if (file.mime === 'application/x-gzip') {
+											unzip = new elFinder.Zlib.Gunzip(new Uint8Array(xhr.response));
+											tar = unzip.decompress();
+										} else {
+											tar = new Uint8Array(xhr.response);
 										}
-										size = parseInt(toStr(h.subarray(124, 136)), 8);
-										dbs = Math.ceil(size / 512) * 512;
-										if (name === '././@LongLink') {
-											name = toStr(tar.subarray(offset + 512, offset + 512 + dbs));
+										tarlen = tar.length;
+										offset = 0;
+										toStr = function(arr) {
+											return String.fromCharCode.apply(null, arr).replace(/\0+$/, '');
+										};
+										while (offset < tarlen && tar[offset] !== 0) {
+											h = tar.subarray(offset, offset + 512);
+											name = toStr(h.subarray(0, 100));
+											if (prefix = toStr(h.subarray(345, 500))) {
+												name = prefix + name;
+											}
+											size = parseInt(toStr(h.subarray(124, 136)), 8);
+											dbs = Math.ceil(size / 512) * 512;
+											if (name === '././@LongLink') {
+												name = toStr(tar.subarray(offset + 512, offset + 512 + dbs));
+											}
+											(name !== 'pax_global_header') && filenames.push(name);
+											offset = offset + 512 + dbs;
 										}
-										(name !== 'pax_global_header') && filenames.push(name);
-										offset = offset + 512 + dbs;
 									}
+								} catch (e) {
+									loading.remove();
+									fm.debug('error', e);
 								}
 								if (filenames && filenames.length) {
 									filenames = $.map(filenames, function(str) {
