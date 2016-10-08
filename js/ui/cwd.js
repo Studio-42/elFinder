@@ -646,7 +646,7 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 							}
 							$.extend(bufferExt.attachTmbs, atmb);
-							attachThumbnails();
+							attachThumbnails(atmb);
 						}
 						
 						wrapper.trigger(scrollEvent);
@@ -938,7 +938,10 @@ $.fn.elfindercwd = function(fm, options) {
 					$.extend(bufferExt.attachTmbs, image);
 					$.each(image, chk);
 				} else {
-					$.each(bufferExt.attachTmbs, chk);
+					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
+					bufferExt.attachThumbTm = setTimeout(function() {
+						$.each(bufferExt.attachTmbs, chk);
+					}, 0);
 				}
 				
 				$.each(done, function(i, h) {
