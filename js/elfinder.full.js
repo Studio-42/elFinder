@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 2df8f75) (2016-10-07)
+ * Version 2.1.15 (2.1-src Nightly: 2fa5816) (2016-10-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6067,7 +6067,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 2df8f75)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 2fa5816)';
 
 
 
@@ -9871,7 +9871,7 @@ $.fn.elfindercwd = function(fm, options) {
 								fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 							}
 							$.extend(bufferExt.attachTmbs, atmb);
-							attachThumbnails();
+							attachThumbnails(atmb);
 						}
 						
 						wrapper.trigger(scrollEvent);
@@ -10163,7 +10163,10 @@ $.fn.elfindercwd = function(fm, options) {
 					$.extend(bufferExt.attachTmbs, image);
 					$.each(image, chk);
 				} else {
-					$.each(bufferExt.attachTmbs, chk);
+					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
+					bufferExt.attachThumbTm = setTimeout(function() {
+						$.each(bufferExt.attachTmbs, chk);
+					}, 0);
 				}
 				
 				$.each(done, function(i, h) {
