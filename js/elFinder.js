@@ -3353,7 +3353,7 @@ window.elFinder = function(node, opts) {
 	// Swipe on the touch devices to show/hide of toolbar or navbar
 	if (self.UA.Touch) {
 		(function() {
-			var lastX, lastY, nodeOffset, nodeTop, toolbarH,
+			var lastX, lastY, nodeOffset, nodeWidth, nodeTop, navbarW, toolbarH,
 				navbar = self.getUI('navbar'),
 				toolbar = self.getUI('toolbar'),
 				moveOn  = function(e) {
@@ -3375,7 +3375,8 @@ window.elFinder = function(node, opts) {
 				var touches = e.originalEvent.touches || [{}],
 					x = touches[0].pageX || null,
 					y = touches[0].pageY || null,
-					navbarMode;
+					ltr = (self.direction === 'ltr'),
+					navbarMode, treeWidth, swipeX, moveX;
 				
 				if (x === null || y === null || (e.type === 'touchstart' && touches.length > 1)) {
 					return;
@@ -3383,18 +3384,30 @@ window.elFinder = function(node, opts) {
 				
 				if (e.type === 'touchstart') {
 					nodeOffset = node.offset();
+					nodeWidth = node.width();
 					if (navbar) {
 						lastX = false;
 						if (navbar.is(':hidden')) {
 							if (! handleW) {
-								handleW = Math.max(50, node.width() / 10)
+								handleW = Math.max(50, nodeWidth / 10)
 							}
-							if ((self.direction === 'ltr'? (x - nodeOffset.left) : (node.width() + nodeOffset.left - x)) < handleW) {
+							if ((ltr? (x - nodeOffset.left) : (nodeWidth + nodeOffset.left - x)) < handleW) {
 								lastX = x;
 							}
 						} else {
-							handleW = Math.max(50, node.width() / 10);
-							lastX = x;
+							navbarW = navbar.width();
+							treeWidth = Math.max.apply(Math, $.map(navbar.children('.elfinder-tree'), function(c){return $(c).width();}));
+							if (ltr) {
+								swipeX = (x < nodeOffset.left + navbarW && treeWidth - navbar.scrollLeft() - 5 <= navbarW);
+							} else {
+								swipeX = (x > nodeOffset.left + nodeWidth - navbarW && navbar.scrollLeft() <= 0);
+							}
+							if (swipeX) {
+								handleW = Math.max(50, nodeWidth / 10);
+								lastX = x;
+							} else {
+								lastX = false;
+							}
 						}
 					}
 					if (toolbar) {
@@ -3412,8 +3425,14 @@ window.elFinder = function(node, opts) {
 					}
 				} else {
 					if (navbar && lastX !== false) {
-						navbarMode = (self.direction === 'ltr'? (lastX > x) : (lastX < x))? 'navhide' : 'navshow';
-						if (Math.abs(lastX - x) > Math.min((navbarMode === 'navhide'? 200 : 45), (node.width() * .5))) {
+						navbarMode = (ltr? (lastX > x) : (lastX < x))? 'navhide' : 'navshow';
+						moveX = Math.abs(lastX - x);
+						if (navbarMode === 'navhide' && moveX > navbarW * .6
+							|| (moveX > (navbarMode === 'navhide'? navbarW / 3 : 45)
+								&& (navbarMode === 'navshow'
+									|| (ltr? x < nodeOffset.left + 20 : x > nodeOffset.left + nodeWidth - 20)
+								))
+						) {
 							self.getUI('navbar').trigger(navbarMode, {handleW: handleW});
 							lastX = false;
 						}
