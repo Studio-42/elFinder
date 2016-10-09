@@ -694,6 +694,7 @@ window.elFinder = function(node, opts) {
 		query  : '',
 		target : '',
 		mime   : '',
+		mixed  : false, // in multi volumes search
 		ininc  : false // in incremental search
 	};
 
@@ -2831,6 +2832,7 @@ window.elFinder = function(node, opts) {
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
+			self.searchStatus.mixed = false;
 		})
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');

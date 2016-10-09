@@ -78,6 +78,8 @@ elFinder.prototype.commands.search = function() {
 				}
 			}
 			
+			fm.searchStatus.mixed = (reqDef.length > 1);
+			
 			return $.when.apply($, reqDef).done(function(data) {
 				var argLen = arguments.length,
 					i;
