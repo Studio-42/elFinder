@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.15 (2.1-src Nightly: 03a71ac) (2016-10-09)
+ * Version 2.1.15 (2.1-src Nightly: b80fbf6) (2016-10-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -708,6 +708,7 @@ window.elFinder = function(node, opts) {
 		query  : '',
 		target : '',
 		mime   : '',
+		mixed  : false, // in multi volumes search
 		ininc  : false // in incremental search
 	};
 
@@ -2845,6 +2846,7 @@ window.elFinder = function(node, opts) {
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
+			self.searchStatus.mixed = false;
 		})
 		.bind('rm', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
@@ -6086,7 +6088,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.15 (2.1-src Nightly: 03a71ac)';
+elFinder.prototype.version = '2.1.15 (2.1-src Nightly: b80fbf6)';
 
 
 
@@ -18285,7 +18287,7 @@ elFinder.prototype.commands.places = function() {
 		
 	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
 		// clean info/icon
-		.on('change', function(e) {
+		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
 			self.preview.attr('style', '')
@@ -18513,6 +18515,17 @@ elFinder.prototype.commands.places = function() {
 				}
 			});
 			
+			preview.on('update', function(data) {
+				if (fm.searchStatus.mixed && fm.searchStatus.state > 1) {
+					// set current volume dispInlineRegex
+					try {
+						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', data.file.hash));
+					} catch(e) {
+						self.dispInlineRegex = /.*/;
+					}
+				}
+			});
+
 			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
 				if (typeof(plugin) == 'function') {
 					new plugin(self)
@@ -21008,6 +21021,8 @@ elFinder.prototype.commands.search = function() {
 					});
 				}
 			}
+			
+			fm.searchStatus.mixed = (reqDef.length > 1);
 			
 			return $.when.apply($, reqDef).done(function(data) {
 				var argLen = arguments.length,
