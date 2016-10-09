@@ -276,7 +276,7 @@
 		
 	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
 		// clean info/icon
-		.on('change', function(e) {
+		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
 			self.preview.attr('style', '')
@@ -504,6 +504,17 @@
 				}
 			});
 			
+			preview.on('update', function(data) {
+				if (fm.searchStatus.mixed && fm.searchStatus.state > 1) {
+					// set current volume dispInlineRegex
+					try {
+						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', data.file.hash));
+					} catch(e) {
+						self.dispInlineRegex = /.*/;
+					}
+				}
+			});
+
 			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
 				if (typeof(plugin) == 'function') {
 					new plugin(self)
