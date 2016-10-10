@@ -3402,7 +3402,7 @@ window.elFinder = function(node, opts) {
 							if (ltr) {
 								swipeX = (x < nodeOffset.left + navbarW && treeWidth - navbar.scrollLeft() - 5 <= navbarW);
 							} else {
-								swipeX = (x > nodeOffset.left + nodeWidth - navbarW && navbar.scrollLeft() <= 0);
+								swipeX = (x > nodeOffset.left + nodeWidth - navbarW && treeWidth + navbar.scrollLeft() - 5 <= navbarW);
 							}
 							if (swipeX) {
 								handleW = Math.max(50, nodeWidth / 10);
