@@ -15,6 +15,8 @@
 		- [cmd:resize] Fixed #1686 add "Aspect ratio" button into crop panel
 		- [cmd:resize] add button "8px Grid" Enabled/Disabled for JPEG image
 		- [js:core] Fixed #1689 initialized to an undefined property
+		- [js:core] Fixed #1692 optimize function of swipe to close navbar
+		- [cmd:quicklook] Fixed #1693 `dispInlineRegex` doesn't reflect in multi volume searching
 		- And some minor bug fixes
 
 
