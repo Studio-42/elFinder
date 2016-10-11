@@ -955,7 +955,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _dirname($path)
     {
-        $path =  !is_array($path) ? trim(addslashes($path)) : '';
         return $this->_normpath(dirname($path));
     }
 
