@@ -169,7 +169,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                             $cdata .= '&'.$k.'='.rawurlencode($v);
                         }
                     }
-                    if (!empty($options['url']) && strpos($options['url'], 'http') !== 0) {
+                    if (empty($options['url'])) {
                         $options['url'] = $this->getConnectorUrl();
                     }
                     $callback = $options['url']
