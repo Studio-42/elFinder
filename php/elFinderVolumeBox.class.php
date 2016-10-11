@@ -207,7 +207,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 } else {
                     $this->box = $this->session->get('elFinderBoxAuthTokens');
 
-                    $result = $this->query('0', $fetch_self = false, $recursive = true);
+                    $result = $this->query('0', $fetch_self = false, $recursive = false);
                     $folders = [];
 
                     foreach ($result as $res) {
