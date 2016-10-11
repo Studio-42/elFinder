@@ -1230,11 +1230,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         $url = self::API_URL.$path
                     .'&access_token='.urlencode($this->box->token->data->access_token);
 
-        $res = $this->_createCurl($url);
-
-        if ($res[0]->type == 'folder') {
-            return true;
-        }
+        if($res = $this->_createCurl($url)){
+		if ($res[0]->type == 'folder') {
+			return true;
+		}
+	}
 
         return false;
     }
