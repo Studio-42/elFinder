@@ -127,7 +127,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.15](https://github.com/Studio-42/elFinder/archive/2.1.15.zip)
+ + [elFinder 2.1.16](https://github.com/Studio-42/elFinder/archive/2.1.16.zip)
  + [elFinder 2.0.7](https://github.com/Studio-42/elFinder/archive/2.0.7.zip)
 
 **Nightly builds**
@@ -139,10 +139,6 @@ Demo sites
 **2.1.x Nightly**
  + http://studio-42.github.io/elFinder/ (with CORS)
  + http://hypweb.net/elFinder-nightly/demo/2.1/
-
-**2.0**
- + http://elfinder.org/ (rc1)
- + http://hypweb.net/elFinder-nightly/demo/2.0/ (2.0.x Nightly)
 
 FAQs
 ------------
