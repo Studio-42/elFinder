@@ -4348,7 +4348,7 @@ elFinder.prototype = {
 									target: target,
 									renames: renames,
 									hashes: hashes,
-									multiupload: true})
+									multiupload: true}, void 0, target)
 								.fail(function(error) {
 									if (cid) {	
 										failChunk[cid] = true;
