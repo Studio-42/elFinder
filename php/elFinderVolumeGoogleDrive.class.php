@@ -170,7 +170,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                             $cdata .= '&'.$k.'='.rawurlencode($v);
                         }
                     }
-                    if (!empty($options['url']) && strpos($options['url'], 'http') !== 0) {
+                    if (empty($options['url'])) {
                         $options['url'] = $this->getConnectorUrl();
                     }
                     $callback = $options['url']
@@ -921,12 +921,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);
 
+
             if ($this->publish($path)) {
                 $itemId = basename($path);
                 $opts = [
                     'fields' => self::FETCHFIELDS_GET,
                 ];
                 $res = $this->service->files->get($itemId, $opts);
+
 
                 if ($url = $res->getWebContentLink()) {
                     return str_replace('export=download', 'export=media', $url);
@@ -953,6 +955,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _dirname($path)
     {
+        $path =  !is_array($path) ? trim(addslashes($path)) : '';
         return $this->_normpath(dirname($path));
     }
 
