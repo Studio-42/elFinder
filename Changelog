@@ -1,4 +1,4 @@
-2016-10-xx  Naoki Sawada  <hypweb@gmail.com>
+2016-10-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.16):
 		- [cmd:info] Fixed #1652 add CSS class name `file.csscls` to icon
