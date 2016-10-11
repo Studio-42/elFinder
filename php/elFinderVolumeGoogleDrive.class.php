@@ -1450,7 +1450,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 'q' => sprintf('trashed=false and name="%s" and "%s" in parents', $name, $itemId),
             ];
 
-            $res = $this->query($opts)[0];
+            !empty($this->query($opts)) ? $res = $this->query($opts)[0] : $res = '';
         } else {
             $itemId = basename($path);
             $opts = [
@@ -1489,7 +1489,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $name == '' ? $name = basename($path) : $name = $name;
                 $files->setName($name);
                 $files->setDescription('');
-                $stat['mime'] == '' ? $mimeType = parent::$mimetypes[pathinfo(basename($path), PATHINFO_EXTENSION)] : $mimeType = $stat['mime'];
+                if(!array_key_exists('mime', $stat)){
+					$mimeType = parent::$mimetypes[pathinfo(basename($path), PATHINFO_EXTENSION)];
+				}else {
+					$mimeType = $stat['mime'];
+				}
                 $files->setMimeType($mimeType);
 
                 //Set the Folder Parent         
