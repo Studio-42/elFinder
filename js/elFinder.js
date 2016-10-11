@@ -4350,6 +4350,10 @@ elFinder.prototype = {
 									hashes: hashes,
 									multiupload: true}, void 0, target)
 								.fail(function(error) {
+									if (error && error === 'No such command') {
+										abort = true;
+										fm.error(['errUpload', 'errPerm']);
+									}
 									if (cid) {	
 										failChunk[cid] = true;
 									}
