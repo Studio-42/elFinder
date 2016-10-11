@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 1646812) (2016-10-11)
+ * Version 2.1.16 (2.1-src Nightly: 7da6dc9) (2016-10-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4364,6 +4364,10 @@ elFinder.prototype = {
 									hashes: hashes,
 									multiupload: true}, void 0, target)
 								.fail(function(error) {
+									if (error && error === 'No such command') {
+										abort = true;
+										fm.error(['errUpload', 'errPerm']);
+									}
 									if (cid) {	
 										failChunk[cid] = true;
 									}
@@ -6088,7 +6092,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 1646812)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 7da6dc9)';
 
 
 
