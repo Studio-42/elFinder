@@ -528,7 +528,7 @@ elFinder.prototype._options = {
 			// extra options
 			{
 				// also displays the text label on the button (true / false)
-				displayTextLabel: true,
+				displayTextLabel: false,
 				// auto hide on initial open
 				autoHideUA: ['Mobile']
 			}
