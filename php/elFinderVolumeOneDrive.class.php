@@ -227,7 +227,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     return array('exit' => true, 'body' => $html);
                 } else {
                     $this->onedrive = $this->session->get('elFinderOneDriveAuthTokens');
-                    $result = $this->query('me/skydrive', $fetch_self = false, $recursive = true);
+                    $result = $this->query('me/skydrive', $fetch_self = false, $recursive = false);
                     $folders = [];
 
                     foreach ($result as $res) {
@@ -443,7 +443,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             ),
 
             // SSL options.
-            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_URL => $url,
         ));
@@ -515,7 +515,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         .'&refresh_token='.urlencode($onedrive->token->data->refresh_token),
 
                     // SSL options.
-                    CURLOPT_SSL_VERIFYHOST => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
                     CURLOPT_SSL_VERIFYPEER => true,
                     CURLOPT_URL => $url,
                 ));
@@ -566,7 +566,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
-            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_SSL_VERIFYPEER => true,
         );
 
@@ -588,7 +588,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 
         if ($contents) {
@@ -987,7 +987,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             .'?access_token='.urlencode($this->onedrive->token->data->access_token);
 
             $contents = $this->_createCurl($url, $contents = true);
-            rewind($contents);
+            //rewind($contents);
 
             return $contents;
         } catch (Exception $e) {
