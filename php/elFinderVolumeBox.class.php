@@ -428,7 +428,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             ),
 
             // SSL options.
-            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_URL => $url,
         ));
@@ -499,7 +499,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         .'&refresh_token='.urlencode($box->token->data->refresh_token),
 
                     // SSL options.
-                    CURLOPT_SSL_VERIFYHOST => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
                     CURLOPT_SSL_VERIFYPEER => true,
                     CURLOPT_URL => $url,
                 ));
@@ -550,7 +550,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
-            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_SSL_VERIFYPEER => true,
         );
 
@@ -572,7 +572,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 
         if ($contents) {
