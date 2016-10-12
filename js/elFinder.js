@@ -4139,6 +4139,9 @@ elFinder.prototype = {
 						xhr.quiet = true;
 						xhr.abort();
 					}
+					if (checkNotify()) {
+						self.notify({type : 'upload', cnt : notifyElm.children('.elfinder-notify-upload').data('cnt') * -1, progress : 0, size : 0});
+					}
 				},
 				cancelToggle = function(show) {
 					notifyElm.children('.elfinder-notify-upload').children('.elfinder-notify-cancel')[show? 'show':'hide']();
@@ -4175,6 +4178,7 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
+				node.trigger('uploadabort');
 				dfrd.reject('errConnect');
 			}, false);
 			
@@ -4202,6 +4206,7 @@ elFinder.prototype = {
 				
 				if (error) {
 					if (chunkMerge || retry++ > 3) {
+						node.trigger('uploadabort');
 						var file = isDataType? files[0][0] : files[0];
 						return dfrd.reject(file._cid? null : error);
 					} else {
@@ -4623,6 +4628,7 @@ elFinder.prototype = {
 						if (abort) {
 							dfrd.reject();
 						} else {
+							node.trigger('uploadabort');
 							var errors = ['errAbort'];
 							// ff bug while send zero sized file
 							// for safari - send directory
