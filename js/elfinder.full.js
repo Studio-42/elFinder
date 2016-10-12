@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 7da6dc9) (2016-10-11)
+ * Version 2.1.16 (2.1-src Nightly: eabd354) (2016-10-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4153,6 +4153,9 @@ elFinder.prototype = {
 						xhr.quiet = true;
 						xhr.abort();
 					}
+					if (checkNotify()) {
+						self.notify({type : 'upload', cnt : notifyElm.children('.elfinder-notify-upload').data('cnt') * -1, progress : 0, size : 0});
+					}
 				},
 				cancelToggle = function(show) {
 					notifyElm.children('.elfinder-notify-upload').children('.elfinder-notify-cancel')[show? 'show':'hide']();
@@ -4189,6 +4192,7 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
+				node.trigger('uploadabort');
 				dfrd.reject('errConnect');
 			}, false);
 			
@@ -4216,6 +4220,7 @@ elFinder.prototype = {
 				
 				if (error) {
 					if (chunkMerge || retry++ > 3) {
+						node.trigger('uploadabort');
 						var file = isDataType? files[0][0] : files[0];
 						return dfrd.reject(file._cid? null : error);
 					} else {
@@ -4637,6 +4642,7 @@ elFinder.prototype = {
 						if (abort) {
 							dfrd.reject();
 						} else {
+							node.trigger('uploadabort');
 							var errors = ['errAbort'];
 							// ff bug while send zero sized file
 							// for safari - send directory
@@ -6092,7 +6098,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 7da6dc9)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: eabd354)';
 
 
 
@@ -6927,6 +6933,8 @@ elFinder.prototype._options = {
 			['fullscreen'],
 			// extra options
 			{
+				// also displays the text label on the button (true / false)
+				displayTextLabel: true,
 				// auto hide on initial open
 				autoHideUA: ['Mobile']
 			}
@@ -8582,9 +8590,10 @@ $.fn.elfinderbutton = function(cmd) {
 			item     = 'elfinder-button-menu-item',
 			selected = 'elfinder-button-menu-item-selected',
 			menu,
+			text     = $('<span class="elfinder-button-text">'+cmd.title+'</span>'),
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>')
+				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>', text)
 				.hover(function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
 				.click(function(e) { 
 					if (!button.hasClass(disabled)) {
@@ -8603,6 +8612,8 @@ $.fn.elfinderbutton = function(cmd) {
 				menu.hide();
 			};
 			
+		text.hide();
+		
 		// if command has variants create menu
 		if ($.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
@@ -13254,9 +13265,10 @@ $.fn.elfindersortbutton = function(cmd) {
 			selected = item+'-selected',
 			asc      = selected+'-asc',
 			desc     = selected+'-desc',
+			text     = $('<span class="elfinder-button-text">'+cmd.title+'</span>'),
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>')
+				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
 				.hover(function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
 				.click(function(e) {
 					if (!button.hasClass(disabled)) {
@@ -13284,7 +13296,8 @@ $.fn.elfindersortbutton = function(cmd) {
 			},
 			hide = function() { menu.hide(); };
 			
-			
+		text.hide();
+		
 		$.each(fm.sortRules, function(name, value) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
@@ -13518,6 +13531,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
 			options  = {
 				// default options
+				displayTextLabel: false,
 				autoHideUA: ['Mobile']
 			},
 			filter   = function(opts) {
@@ -13545,7 +13559,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[name] && $.fn[button]) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
-								buttons[name] && panel.prepend(buttons[name]);
+								if (buttons[name]) {
+									options.displayTextLabel && buttons[name].find('.elfinder-button-text').show();
+									panel.prepend(buttons[name]);
+								}
 							}
 						}
 						
@@ -13599,9 +13616,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
-									if (cmd.extendsCmd) {
-										buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
-									};
+									if (buttons[to]) {
+										options.displayTextLabel && buttons[to].find('.elfinder-button-text').show();
+										if (cmd.extendsCmd) {
+											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
+										};
+									}
 								}
 								if (buttons[to]) {
 									btn.after(buttons[to]);
@@ -21382,7 +21402,8 @@ elFinder.prototype.commands.upload = function() {
 				data = null,
 				target = e._target || null,
 				trf = e.dataTransfer || null,
-				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '';
+				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '',
+				errors;
 			
 			if (trf) {
 				try {
@@ -21418,6 +21439,11 @@ elFinder.prototype.commands.upload = function() {
 			if (file) {
 				fmUpload({files : file, type : type, target : target});
 			} else {
+				errors = ['errUploadNoFiles'];
+				if (kind !== 'string') {
+					errors.push('errFolderUpload');
+				}
+				fm.error(errors);
 				dfrd.reject();
 			}
 		};
