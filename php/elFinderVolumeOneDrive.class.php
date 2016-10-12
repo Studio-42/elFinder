@@ -1728,7 +1728,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
             $contents = $this->_createCurl($url, $contents = true);
 
-            rewind($contents);
+            //rewind($contents);
         } catch (Exception $e) {
             return $this->setError('OneDrive error: '.$e->getMessage());
         }
