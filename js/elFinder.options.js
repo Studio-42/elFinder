@@ -527,6 +527,8 @@ elFinder.prototype._options = {
 			['fullscreen'],
 			// extra options
 			{
+				// also displays the text label on the button (true / false)
+				displayTextLabel: true,
 				// auto hide on initial open
 				autoHideUA: ['Mobile']
 			}

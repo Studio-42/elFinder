@@ -10,6 +10,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
 			options  = {
 				// default options
+				displayTextLabel: false,
 				autoHideUA: ['Mobile']
 			},
 			filter   = function(opts) {
@@ -37,7 +38,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[name] && $.fn[button]) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
-								buttons[name] && panel.prepend(buttons[name]);
+								if (buttons[name]) {
+									options.displayTextLabel && buttons[name].find('.elfinder-button-text').show();
+									panel.prepend(buttons[name]);
+								}
 							}
 						}
 						
@@ -91,9 +95,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
-									if (cmd.extendsCmd) {
-										buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
-									};
+									if (buttons[to]) {
+										options.displayTextLabel && buttons[to].find('.elfinder-button-text').show();
+										if (cmd.extendsCmd) {
+											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
+										};
+									}
 								}
 								if (buttons[to]) {
 									btn.after(buttons[to]);

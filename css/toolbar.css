@@ -24,7 +24,7 @@
 
 /* button */
 .elfinder .elfinder-button {
-	width:16px;
+	/*width:16px;*/
 	height:16px;
 	margin:0;
 	padding:4px;
@@ -35,6 +35,7 @@
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
+	line-height: 1;
 }
 .elfinder-touch .elfinder-button {
 	width:20px;
@@ -78,7 +79,8 @@
 
 /* change icon opacity^ not button */
 .elfinder .elfinder-button.ui-state-disabled { opacity:1; filter:Alpha(Opacity=100);}
-.elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
+.elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon,
+.elfinder .elfinder-button.ui-state-disabled .elfinder-button-text { opacity:.4; filter:Alpha(Opacity=40);}
 
 /* rtl enviroment */
 .elfinder-rtl .elfinder-buttonset { float:right; }
@@ -87,8 +89,16 @@
 .elfinder-button-icon {
 	width:16px;
 	height:16px;
-	display:block;
+	/*display:block;*/
+	display:inline-block;
 	background:url('../img/toolbar.png')  no-repeat;
+}
+.elfinder-button-text {
+	position: relative;
+	display: inline-block;
+	top: -3px;
+	margin: 0 2px;
+	font-size: 12px;
 }
 
 .elfinder-touch .elfinder-button-icon {
