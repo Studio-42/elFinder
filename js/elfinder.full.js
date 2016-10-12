@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: eabd354) (2016-10-13)
+ * Version 2.1.16 (2.1-src Nightly: 5d6a8db) (2016-10-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6098,7 +6098,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: eabd354)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 5d6a8db)';
 
 
 
@@ -6934,7 +6934,7 @@ elFinder.prototype._options = {
 			// extra options
 			{
 				// also displays the text label on the button (true / false)
-				displayTextLabel: true,
+				displayTextLabel: false,
 				// auto hide on initial open
 				autoHideUA: ['Mobile']
 			}
