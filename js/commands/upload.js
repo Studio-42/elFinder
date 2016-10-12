@@ -156,7 +156,8 @@ elFinder.prototype.commands.upload = function() {
 				data = null,
 				target = e._target || null,
 				trf = e.dataTransfer || null,
-				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '';
+				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '',
+				errors;
 			
 			if (trf) {
 				try {
@@ -192,6 +193,11 @@ elFinder.prototype.commands.upload = function() {
 			if (file) {
 				fmUpload({files : file, type : type, target : target});
 			} else {
+				errors = ['errUploadNoFiles'];
+				if (kind !== 'string') {
+					errors.push('errFolderUpload');
+				}
+				fm.error(errors);
 				dfrd.reject();
 			}
 		};
