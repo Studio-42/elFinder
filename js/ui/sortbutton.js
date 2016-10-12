@@ -16,9 +16,10 @@ $.fn.elfindersortbutton = function(cmd) {
 			selected = item+'-selected',
 			asc      = selected+'-asc',
 			desc     = selected+'-desc',
+			text     = $('<span class="elfinder-button-text">'+cmd.title+'</span>'),
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>')
+				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
 				.hover(function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
 				.click(function(e) {
 					if (!button.hasClass(disabled)) {
@@ -46,7 +47,8 @@ $.fn.elfindersortbutton = function(cmd) {
 			},
 			hide = function() { menu.hide(); };
 			
-			
+		text.hide();
+		
 		$.each(fm.sortRules, function(name, value) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
