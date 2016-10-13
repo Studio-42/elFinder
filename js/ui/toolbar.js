@@ -61,8 +61,65 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button, swipeHandle, autoHide;
 		
+		// correction of options.displayTextLabel
 		options.displayTextLabel = (options.displayTextLabel && (! options.labelExcludeUA || ! options.labelExcludeUA.length || ! $.map(options.labelExcludeUA, function(v){ return fm.UA[v]? true : null; }).length));
 		
+		// add contextmenu
+		self.data('hasLabel', options.displayTextLabel)
+			.on('contextmenu', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				fm.trigger('contextmenu', {
+					raw: [{
+						label    : fm.i18n('textLabel'),
+						icon     : 'accept',
+						callback : function() {
+							var node = fm.getUI(),
+								nodeSize = {width : node.width(), height : node.height()},
+								hasLabel = self.data('hasLabel');
+							
+							self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
+							fm.resize(nodeSize.width, nodeSize.height);
+						}
+					}],
+					x: e.pageX,
+					y: e.pageY
+				});
+			}).on('touchstart', function(e) {
+				if (e.originalEvent.touches.length > 1) {
+					return;
+				}
+				self.data('tmlongtap') && clearTimeout(self.data('tmlongtap'));
+				self.removeData('longtap')
+					.data('tmlongtap', setTimeout(function() {
+						self.data('longtap', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY})
+							.removeData('longtapTm')
+							.trigger({
+								type: 'contextmenu',
+								pageX: self.data('longtap').x,
+								pageY: self.data('longtap').y
+							});
+					}, 500));
+			}).on('touchmove touchend', function(e) {
+				if (self.data('tmlongtap')) {
+					if (e.type === 'touchend' ||
+							( Math.abs(self.data('longtap').x - e.originalEvent.touches[0].pageX)
+							+ Math.abs(self.data('longtap').y - e.originalEvent.touches[0].pageY)) > 4)
+					clearTimeout(self.data('tmlongtap'));
+					self.removeData('longtapTm');
+				}
+			}).on('click', function(e) {
+				if (self.data('tmlongtap')) {
+					e.stopImmediatePropagation();
+					e.preventDefault();
+				}
+			}).on('touchend click', '.elfinder-button', function(e) {
+				if (self.data('longtap')) {
+					e.stopImmediatePropagation();
+					e.preventDefault();
+				}
+			});
+
 		self.prev().length && self.parent().prepend(this);
 		
 		render();
@@ -114,29 +171,6 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					});
 				}
 			}
-		});
-		
-		// add contextmenu
-		self.data('hasLabel', options.displayTextLabel)
-			.on('contextmenu', function(e) {
-			e.stopPropagation();
-			e.preventDefault();
-			fm.trigger('contextmenu', {
-				raw: [{
-					label    : fm.i18n('textLabel'),
-					icon     : 'accept',
-					callback : function() {
-						var node = fm.getUI(),
-							nodeSize = {width : node.width(), height : node.height()},
-							hasLabel = self.data('hasLabel');
-						
-						self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
-						fm.resize(nodeSize.width, nodeSize.height);
-					}
-				}],
-				x: e.pageX,
-				y: e.pageY
-			});
 		});
 		
 		if (fm.UA.Touch) {
